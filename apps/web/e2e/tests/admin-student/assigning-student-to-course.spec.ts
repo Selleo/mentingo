@@ -30,7 +30,7 @@ const PRIVATE_COURSE = {
   titleTestId: "Advanced English: Mastering Complex Language Skills",
   heading: "Advanced English: Mastering",
   admin: { email: "admin@example.com", password: "password" },
-  student: { email: "student@example.com", password: "password" },
+  student: { email: "student@example.com", password: "password", email2: "student2@example.com" },
 };
 
 const SEQUENCE_USERS = {
@@ -439,7 +439,7 @@ const enrollStudentToPrivateCourse = async (page: Page) => {
   await page.locator(".h-min > button:nth-child(2)").click();
   await page.getByText(PRIVATE_COURSE.heading).click();
   await page.getByRole("tab", { name: "Enrolled students" }).click();
-  await page.getByRole("cell", { name: PRIVATE_COURSE.student.email }).click();
+  await page.getByRole("cell", { name: PRIVATE_COURSE.student.email2 }).click();
   await page.getByRole("button", { name: "Enroll", exact: true }).click();
   await page.getByRole("button", { name: "Enroll selected", exact: true }).click();
   await page.getByRole("button", { name: "Save" }).click();
@@ -447,7 +447,7 @@ const enrollStudentToPrivateCourse = async (page: Page) => {
 };
 
 const expectCourseVisibleForPrivateStudent = async (page: Page) => {
-  await login(page, PRIVATE_COURSE.student.email, PRIVATE_COURSE.student.password);
+  await login(page, PRIVATE_COURSE.student.email2, PRIVATE_COURSE.student.password);
   await expect(page.getByTestId(PRIVATE_COURSE.titleTestId)).toBeVisible();
   await page.getByTestId(PRIVATE_COURSE.titleTestId).click();
   await expect(page.getByRole("heading", { name: PRIVATE_COURSE.heading })).toBeVisible();
