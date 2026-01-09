@@ -282,7 +282,9 @@ const logoutAdmin = async (page: Page) => {
 };
 
 const logoutStudent = async (page: Page) => {
-  await page.getByRole("button", { name: "test Student profile test" }).click();
+  await page
+    .getByRole("button", { name: /test Student profile test|Avatar for email@example.com/i })
+    .click();
   await page.getByRole("menuitem", { name: "Logout" }).locator("div").click();
 };
 

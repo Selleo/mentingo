@@ -62,7 +62,7 @@ const createNewPasswordAndLoginAsStudent = async (page: Page) => {
   await page.goto("/auth/login");
 
   await page.goto("http://localhost:8025/");
-  await page.getByText("noreply@mentingo.com janekk@").first().click();
+  await page.getByText("noreply@lms.selleo.app janekk").first().click();
   const page2Promise = page.waitForEvent("popup");
   await page
     .locator("#preview-html")

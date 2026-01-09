@@ -690,7 +690,8 @@ const buildQuiz = async (page: Page) => {
   await page.getByLabel("Multiple choice").getByText("Multiple choice").click();
   await page.locator('input[name="questions\\.2\\.options\\.0\\.optionText"]').fill("dark");
   await page.locator('input[name="questions\\.2\\.options\\.1\\.optionText"]').fill("light");
-  await page.getByText("Correct").nth(3).click();
+  await page.locator("#isCorrect").nth(3).click();
+
   await page
     .locator("li")
     .filter({ hasText: "*OptionsClick to replaceor" })
