@@ -276,10 +276,15 @@ test.describe("Course settings flow", () => {
       await page.getByRole("link", { name: /Settings|Ustawienia/i }).click();
       await page.waitForURL("/settings");
       await page
-        .getByText(/LanguageEnglish|LanguagePolish|JęzykPolski/)
+        .getByText(/LanguageEnglish|JęzykPolski/)
         .getByRole("combobox")
         .click();
-      await page.getByLabel("English").getByText("English").click();
+
+      await page
+        .getByLabel("English")
+        .getByText("English")
+        .or(page.getByRole("option", { name: "Angielski" }))
+        .click();
       await page.getByLabel("Go to homepage").click();
 
       await navigateToPage(
