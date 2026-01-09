@@ -67,6 +67,8 @@ export const InsertExternalResourceDialog = ({ open, onClose, editor }: LinkDial
     if (url) {
       if (type === EXTERNAL_RESOURCE_TYPE.VIDEO) {
         editor.chain().focus().setVideoEmbed({ src: url, sourceType: "external" }).run();
+      } else if (type === EXTERNAL_RESOURCE_TYPE.PRESENTATION) {
+        editor.chain().focus().setPresentationEmbed({ src: url, sourceType: "external" }).run();
       } else {
         editor
           .chain()

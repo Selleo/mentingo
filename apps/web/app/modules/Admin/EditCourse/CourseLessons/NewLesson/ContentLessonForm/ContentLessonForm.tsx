@@ -68,6 +68,7 @@ const ContentLessonForm = ({
     if (!file || !lessonToEdit?.id) return;
 
     const isVideo = ALLOWED_VIDEO_FILE_TYPES.includes(file.type);
+    const isPresentation = ALLOWED_PRESENTATION_FILE_TYPES.includes(file.type);
 
     await uploadFile(
       {
@@ -84,6 +85,11 @@ const ContentLessonForm = ({
 
           if (isVideo) {
             chain?.setVideoEmbed({ src: resourceUrl, sourceType: "internal" }).run();
+            return;
+          }
+
+          if (isPresentation) {
+            chain?.setPresentationEmbed({ src: resourceUrl, sourceType: "internal" }).run();
             return;
           }
 

@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { cn } from "~/lib/utils";
 import { baseUrl } from "~/utils/baseUrl";
 
+import { detectPresentationProvider } from "./extensions/utils/presentation";
 import { detectVideoProvider, extractUrlFromClipboard } from "./extensions/utils/video";
 import { editorPlugins } from "./plugins";
 import { defaultClasses } from "./styles";
@@ -61,9 +62,21 @@ const Editor = ({
         if (!pastedUrl) return false;
 
         const isInternal = pastedUrl.startsWith(baseUrl);
-        const provider = detectVideoProvider(pastedUrl);
+        const videoProvider = detectVideoProvider(pastedUrl);
+        const presentationProvider = detectPresentationProvider(pastedUrl);
 
-        if (!isInternal && provider === "unknown") return false;
+        if (!isInternal && videoProvider === "unknown" && presentationProvider === "unknown") {
+          return false;
+        }
+
+        if (presentationProvider !== "unknown") {
+          editor
+            ?.chain()
+            .focus()
+            .setPresentationEmbed({ src: pastedUrl, sourceType: "external" })
+            .run();
+          return true;
+        }
 
         editor
           ?.chain()

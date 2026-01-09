@@ -7,7 +7,10 @@ import { TaskList } from "@tiptap/extension-task-list";
 import { StarterKit } from "@tiptap/starter-kit";
 
 import { Iframe } from "~/components/RichText/extensions/iframe";
-import { PresentationNode } from "~/components/RichText/extensions/presentation";
+import {
+  PresentationEmbedEditor,
+  PresentationEmbedViewer,
+} from "~/components/RichText/extensions/presentation";
 import { VideoEmbedEditor, VideoEmbedViewer } from "~/components/RichText/extensions/video";
 
 const HeadingWithId = Heading.extend({
@@ -73,8 +76,7 @@ const basePlugins = [
     },
   }),
   Iframe,
-  PresentationNode,
 ];
 
-export const editorPlugins = [...basePlugins, VideoEmbedEditor];
-export const viewerPlugins = [...basePlugins, VideoEmbedViewer];
+export const editorPlugins = [...basePlugins, PresentationEmbedEditor, VideoEmbedEditor];
+export const viewerPlugins = [...basePlugins, PresentationEmbedViewer, VideoEmbedViewer];
