@@ -1,11 +1,10 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { and, eq, ilike, inArray, sql } from "drizzle-orm";
 import { difference } from "lodash";
+import slugify from "slugify";
 
 import { DatabasePg } from "src/common";
 import { courses, courseSlugs } from "src/storage/schema";
-
-let slugify: typeof import("@sindresorhus/slugify").default | null = null;
 
 @Injectable()
 export class CourseSlugService {
@@ -92,12 +91,8 @@ export class CourseSlugService {
       return courseId;
     }
 
-    if (!slugify) {
-      slugify = (await import("@sindresorhus/slugify")).default;
-    }
-
     const db = dbInstance || this.db;
-    const baseSlug = slugify(title, { lowercase: true, separator: "-" });
+    const baseSlug = slugify(title, { lower: true, replacement: "-" });
 
     const [existingBase] = await db
       .select({ courseId: courseSlugs.courseId })
