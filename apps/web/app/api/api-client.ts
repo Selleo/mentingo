@@ -23,17 +23,15 @@ const baseURL = (() => {
   const processEnvApiUrl =
     get(typeof process !== "undefined" ? process.env : {}, "VITE_API_URL") || undefined;
 
+  const resolvedApiUrl = importEnvApiUrl || windowEnvApiUrl || processEnvApiUrl;
+
   return match({
     importEnvMode,
-    windowEnvApiUrl,
-    importEnvApiUrl,
-    processEnvApiUrl,
+    resolvedApiUrl,
   })
     .with({ importEnvMode: "test" }, () => "http://localhost:3000")
-    .with({ processEnvApiUrl: P.string }, () => processEnvApiUrl)
-    .with({ windowEnvApiUrl: P.string }, () => windowEnvApiUrl)
-    .with({ importEnvApiUrl: P.string }, () => importEnvApiUrl)
-    .otherwise(() => "http://localhost:5173");
+    .with({ resolvedApiUrl: P.string }, () => resolvedApiUrl)
+    .otherwise(() => undefined);
 })();
 
 export const ApiClient = new API({
