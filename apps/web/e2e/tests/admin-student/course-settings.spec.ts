@@ -14,7 +14,9 @@ import { ASSIGNING_STUDENT_TO_GROUP_PAGE_UI } from "./data/assigning-student-dat
 import { COURSE_SETTINGS_UI } from "./data/course-settings-data";
 
 const allowUnregisteredUsersToBrowseCourses = async (page: Page) => {
-  await page.getByRole("button", { name: "Test Admin profile Test Admin" }).click();
+  await page
+    .getByRole("button", { name: /Test Admin profile Test Admin|Avatar for email@example.com/i })
+    .click();
   await page.getByRole("link", { name: /settings/i }).click();
 
   await page
@@ -238,7 +240,9 @@ test.describe("Course settings flow", () => {
     browser,
   }) => {
     await page.goto("/courses");
-    await page.getByRole("button", { name: "Avatar for email@example.com" }).click();
+    await page
+      .getByRole("button", { name: /Avatar for email@example.com|Test Admin profile Test Admin/i })
+      .click();
     await page.getByRole("link", { name: "Settings" }).click();
     await page.getByRole("combobox").click();
     await page.getByLabel("English").getByText("English").click();

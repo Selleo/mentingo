@@ -77,7 +77,9 @@ const publishAndEnroll = async (page: Page) => {
 };
 
 const logout = async (page: Page) => {
-  await page.getByRole("button", { name: "Test Admin profile Test Admin" }).click();
+  await page
+    .getByRole("button", { name: /Test Admin profile Test Admin|Avatar for email@example.com/i })
+    .click();
   await page.getByRole("menuitem", { name: "Logout" }).locator("div").click();
 };
 
@@ -98,6 +100,13 @@ const openCourseAsStudent = async (page: Page) => {
   await page.getByTestId(COURSE.chapterTitle).click();
   await page.getByRole("link", { name: TEXT.notStartedLesson }).click();
 
+  await page.waitForURL(/course\/[\w-]+\/lesson\/[\w-]+/);
+  await page.waitForResponse(
+    (response) =>
+      response.url().includes("/api/lesson") &&
+      response.request().method() === "GET" &&
+      response.status() === 200,
+  );
   const courseProgress = page.getByText("Course progress: 1/");
   await courseProgress.waitFor({ state: "visible", timeout: 10000 });
   await expect(courseProgress).toHaveText("Course progress: 1/1");

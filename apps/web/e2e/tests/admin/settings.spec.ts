@@ -192,6 +192,7 @@ test.describe("Admin settings", () => {
     await page.getByRole("button", { name: "Test Admin profile Test Admin" }).click();
     await page.getByRole("menuitem", { name: "Logout" }).locator("div").click();
     await page.goto("/courses");
+    await page.waitForURL("/courses");
     await expect(page.getByRole("heading", { name: "Available Courses" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Login" })).toBeVisible();
   });
