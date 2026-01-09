@@ -1,6 +1,8 @@
 import { Node, mergeAttributes } from "@tiptap/core";
 import { NodeViewWrapper, ReactNodeViewRenderer } from "@tiptap/react";
-import { Download } from "lucide-react";
+import { Download, X } from "lucide-react";
+
+import { Button } from "~/components/ui/button";
 
 import type { NodeConfig } from "@tiptap/core";
 import type { NodeViewProps } from "@tiptap/react";
@@ -34,23 +36,44 @@ const getDownloadableFileDataAttributes = (attrs: DownloadableFileAttrs) => ({
   "data-name": attrs.name ?? "",
 });
 
-const DownloadableFileEditorView = ({ node }: NodeViewProps) => {
+const DownloadableFileEditorView = ({ node, editor, getPos }: NodeViewProps) => {
   const attrs = normalizeDownloadableFileAttrs(node.attrs);
   if (!attrs.src) return null;
 
+  const handleRemove = () => {
+    const pos = getPos();
+
+    editor
+      .chain()
+      .focus()
+      .deleteRange({ from: pos, to: pos + node.nodeSize })
+      .run();
+  };
+
   return (
     <NodeViewWrapper className="downloadable-file-node">
-      <a
-        {...getDownloadableFileDataAttributes(attrs)}
-        href={attrs.src}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex max-w-full items-center gap-2 rounded-md border border-dashed border-neutral-300 bg-neutral-50 px-3 py-2 text-sm text-neutral-900"
-        contentEditable={false}
-      >
-        <Download className="size-4 text-neutral-700" aria-hidden />
-        <span className="truncate">{attrs.name ?? attrs.src}</span>
-      </a>
+      <div className="inline-flex max-w-full items-center gap-2 rounded-md border border-dashed border-neutral-300 bg-neutral-50 px-3 py-2 text-sm text-neutral-900">
+        <a
+          {...getDownloadableFileDataAttributes(attrs)}
+          href={attrs.src}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex min-w-0 items-center gap-2"
+          contentEditable={false}
+        >
+          <Download className="size-4 text-neutral-700" aria-hidden />
+          <span className="truncate">{attrs.name ?? attrs.src}</span>
+        </a>
+        <Button
+          type="button"
+          onClick={handleRemove}
+          aria-label="Remove downloadable file embed"
+          size="xs"
+          variant="ghost"
+        >
+          <X className="size-3.5" aria-hidden />
+        </Button>
+      </div>
     </NodeViewWrapper>
   );
 };

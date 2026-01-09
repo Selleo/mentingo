@@ -1,7 +1,8 @@
 import { Node, mergeAttributes } from "@tiptap/core";
 import { NodeViewWrapper, ReactNodeViewRenderer } from "@tiptap/react";
-import { Video as VideoIcon } from "lucide-react";
+import { Video as VideoIcon, X } from "lucide-react";
 
+import { Button } from "~/components/ui/button";
 import { Video } from "~/components/VideoPlayer/Video";
 
 import {
@@ -37,24 +38,45 @@ const getVideoDataAttributes = (attrs: VideoEmbedAttrs) => ({
   "data-src": attrs.src ?? "",
 });
 
-const VideoEditorView = ({ node }: NodeViewProps) => {
+const VideoEditorView = ({ node, editor, getPos }: NodeViewProps) => {
   const attrs = normalizeVideoEmbedAttributes(node.attrs);
 
   if (!attrs.src) return null;
 
+  const handleRemove = () => {
+    const pos = getPos();
+
+    editor
+      .chain()
+      .focus()
+      .deleteRange({ from: pos, to: pos + node.nodeSize })
+      .run();
+  };
+
   return (
     <NodeViewWrapper className="video-node">
-      <a
-        {...getVideoDataAttributes(attrs)}
-        href={attrs.src}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex max-w-full items-center gap-2 rounded border border-dashed border-neutral-300 px-3 py-2 text-sm text-primary-700 underline"
-        contentEditable={false}
-      >
-        <VideoIcon className="size-4 text-primary-700" aria-hidden />
-        <span className="truncate">{attrs.src}</span>
-      </a>
+      <div className="inline-flex max-w-full items-center gap-2 rounded border border-dashed border-neutral-300 bg-neutral-50 px-3 py-2 text-sm text-primary-700">
+        <a
+          {...getVideoDataAttributes(attrs)}
+          href={attrs.src}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex min-w-0 items-center gap-2 underline"
+          contentEditable={false}
+        >
+          <VideoIcon className="size-4 text-primary-700" aria-hidden />
+          <span className="truncate">{attrs.src}</span>
+        </a>
+        <Button
+          type="button"
+          onClick={handleRemove}
+          aria-label="Remove video embed"
+          size="xs"
+          variant="ghost"
+        >
+          <X className="size-3.5" aria-hidden />
+        </Button>
+      </div>
     </NodeViewWrapper>
   );
 };
