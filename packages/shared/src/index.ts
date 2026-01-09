@@ -7,6 +7,7 @@ export * from "./constants/articlesTypes";
 export * from "./constants/courseEnrollment";
 export * from "./constants/fileTypes";
 export * from "./constants/languages";
+export * from "./constants/loginPageDocuments";
 export * from "./constants/newsSettings";
 export * from "./constants/qaSettings";
 export * from "./constants/theme";

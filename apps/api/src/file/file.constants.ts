@@ -57,12 +57,14 @@ export const ENTITY_TYPES = {
   USER: "user",
   CATEGORY: "category",
   ANNOUNCEMENT: "announcement",
+  GLOBAL_SETTINGS: "global_settings",
 } as const;
 
 export type EntityType = (typeof ENTITY_TYPES)[keyof typeof ENTITY_TYPES];
 export const RESOURCE_CATEGORIES = {
   NEWS: "news",
   ARTICLES: "articles",
+  GLOBAL_SETTINGS: "global_settings",
 } as const;
 
 export type ResourceCategory = (typeof RESOURCE_CATEGORIES)[keyof typeof RESOURCE_CATEGORIES];

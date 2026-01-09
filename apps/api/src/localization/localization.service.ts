@@ -113,6 +113,10 @@ export class LocalizationService {
     `;
   }
 
+  getFirstValue(fieldColumn: AnyPgColumn) {
+    return sql<string>`(SELECT value FROM jsonb_each_text(${fieldColumn}) LIMIT 1)`;
+  }
+
   /**
    * Updates localizable fields in an entity by setting JSONB field values for the specified language
    * @param localizableFields Array of field names that should be localized

@@ -17,7 +17,10 @@ export const settingsToJSONBuildObject = (settingsObject: Record<string, any>): 
 
       case "object":
         if (Array.isArray(value)) {
-          return sql`${JSON.stringify(value)}::jsonb`;
+          return sql`jsonb_build_array(${sql.join(
+            value.map((v) => convertValueWithType(v)),
+            sql`, `,
+          )})`;
         } else {
           return settingsToJSONBuildObject(value);
         }

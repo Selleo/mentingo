@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useSearchParams } from "@remix-run/react";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -8,6 +8,7 @@ import { z } from "zod";
 import { version } from "~/../version.json";
 import { useLoginUser } from "~/api/mutations/useLoginUser";
 import { useGlobalSettingsSuspense } from "~/api/queries/useGlobalSettings";
+import useLoginPageFiles from "~/api/queries/useLoginPageFiles";
 import { useSSOEnabled } from "~/api/queries/useSSOEnabled";
 import { FormCheckbox } from "~/components/Form/FormCheckbox";
 import { PlatformLogo } from "~/components/PlatformLogo";
@@ -15,12 +16,15 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { Separator } from "~/components/ui/separator";
 import { toast } from "~/components/ui/use-toast";
 import { cn } from "~/lib/utils";
+import { UploadFilesToLoginPagePreviewDialog } from "~/modules/Dashboard/Settings/components/admin/UploadFilesToLoginPagePreviewDialog";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import { SocialLogin } from "./components";
 
+import type { LoginPageResource } from "../Dashboard/Settings/components/admin/UploadFilesToLoginPageItem";
 import type { MetaFunction } from "@remix-run/react";
 import type { LoginBody } from "~/api/generated-api";
 
@@ -37,6 +41,11 @@ export default function LoginPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const error = searchParams.get("error");
 
+  const { data: loginPageFiles } = useLoginPageFiles();
+
+  const [previewResource, setPreviewResource] = useState<LoginPageResource | null>(null);
+  const [isPreviewDialogOpen, setIsPreviewDialogOpen] = useState(false);
+
   useEffect(() => {
     if (error) {
       toast({
@@ -50,6 +59,16 @@ export default function LoginPage() {
   const { t } = useTranslation();
 
   const { data: ssoEnabled } = useSSOEnabled();
+
+  const handlePreviewClick = (resource: LoginPageResource) => {
+    setPreviewResource(resource);
+    setIsPreviewDialogOpen(true);
+  };
+
+  const handleClosePreviewDialog = () => {
+    setIsPreviewDialogOpen(false);
+    setPreviewResource(null);
+  };
 
   const isGoogleOAuthEnabled =
     (ssoEnabled?.data.google ?? import.meta.env.VITE_GOOGLE_OAUTH_ENABLED) === "true";
@@ -81,6 +100,8 @@ export default function LoginPage() {
     () => isGoogleOAuthEnabled || isMicrosoftOAuthEnabled || isSlackOAuthEnabled,
     [isGoogleOAuthEnabled, isMicrosoftOAuthEnabled, isSlackOAuthEnabled],
   );
+
+  const loginResources = loginPageFiles?.resources ?? [];
 
   const onSubmit = (data: LoginBody) => {
     if (isSSOEnforced && isAnyProviderEnabled) return;
@@ -174,11 +195,37 @@ export default function LoginPage() {
               </Link>
             </div>
           )}
+
+          {loginResources.length > 0 && (
+            <div className="mt-4 flex flex-wrap items-center justify-center text-sm text-neutral-400">
+              {loginResources.map((resource, index) => (
+                <div key={resource.id} className="flex items-center">
+                  {index > 0 && loginResources.length > 1 && (
+                    <Separator orientation="vertical" className="mx-2 h-4 bg-neutral-300" />
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => handlePreviewClick(resource)}
+                    className="text-sm truncate underline"
+                  >
+                    {resource.name}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
           <p className="bottom-4 mt-4 text-center text-sm text-neutral-300">
             {t("common.other.appVersion", { version })}
           </p>
         </CardContent>
       </Card>
+      <UploadFilesToLoginPagePreviewDialog
+        open={isPreviewDialogOpen}
+        resourceName={previewResource?.name ?? t("loginFilesUpload.unnamedFile")}
+        resourceUrl={previewResource?.resourceUrl ?? ""}
+        onClose={handleClosePreviewDialog}
+      />
     </>
   );
 }

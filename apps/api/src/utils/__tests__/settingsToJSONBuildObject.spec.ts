@@ -42,11 +42,11 @@ describe("settingsToJSONBuildObject", () => {
     });
   });
 
-  it("returned object values should be json strings if input object values are arrays", () => {
+  it("returned object values should be json arrays if input object values are arrays", () => {
     const object = { a: [null, "test"] };
     expect(settingsToJSONBuildObject(object).toQuery(toQueryConfig)).toStrictEqual({
-      sql: "json_build_object($0::text, $1::jsonb)",
-      params: ["a", JSON.stringify([null, "test"])],
+      sql: "json_build_object($0::text, jsonb_build_array(NULL, $1::text))",
+      params: ["a", "test"],
     });
   });
 
@@ -61,8 +61,8 @@ describe("settingsToJSONBuildObject", () => {
   it("should handle empty arrays", () => {
     const object = { a: [] };
     expect(settingsToJSONBuildObject(object).toQuery(toQueryConfig)).toStrictEqual({
-      sql: "json_build_object($0::text, $1::jsonb)",
-      params: ["a", JSON.stringify([])],
+      sql: "json_build_object($0::text, jsonb_build_array())",
+      params: ["a"],
     });
   });
 });

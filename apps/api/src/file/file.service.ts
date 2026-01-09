@@ -22,8 +22,10 @@ import { DatabasePg } from "src/common";
 import { buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelpers";
 import { uploadKey, videoKey } from "src/file/utils/bunnyCacheKeys";
 import { isEmptyObject, normalizeCellValue, normalizeHeader } from "src/file/utils/excel.utils";
+import getChecksum from "src/file/utils/getChecksum";
 import { S3Service } from "src/s3/s3.service";
 import { resources, resourceEntity, lessons } from "src/storage/schema";
+import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import {
   MAX_FILE_SIZE,
@@ -365,6 +367,8 @@ export class FileService {
   ) {
     const resourceFolder = options?.folderIncludesResource ? folder : `${resource}/${folder}`;
 
+    const checksum = getChecksum(file);
+
     const { fileKey } = await this.uploadFile(file, resourceFolder, undefined, {
       allowedTypes: [
         ...ALLOWED_PDF_FILE_TYPES,
@@ -384,10 +388,11 @@ export class FileService {
           description: buildJsonbFieldWithMultipleEntries(description || {}),
           reference: fileKey,
           contentType: file.mimetype,
-          metadata: {
+          metadata: settingsToJSONBuildObject({
             originalFilename: file.originalname,
             size: file.size,
-          },
+            checksum,
+          }),
           uploadedBy: currentUser?.userId || null,
         })
         .returning();
