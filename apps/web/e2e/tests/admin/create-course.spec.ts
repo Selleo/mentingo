@@ -824,7 +824,7 @@ const studentCompletesCourse = async (page: Page) => {
   await page.getByPlaceholder("user@example.com").fill(TEST_DATA.student.email);
   await page.getByLabel("Password").fill(TEST_DATA.student.password);
   await page.getByRole("button", { name: "Login" }).click();
-  await page.getByRole("link", { name: "Courses", exact: true }).click();
+  await page.getByRole("button", { name: "Courses" }).getByRole("link").click();
   await page.getByTestId("title").click();
   await expect(page.getByRole("tab", { name: "Statistics" })).toBeHidden();
   await page.getByTestId("chapter 1").click();

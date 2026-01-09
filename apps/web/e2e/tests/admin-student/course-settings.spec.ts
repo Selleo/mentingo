@@ -245,7 +245,7 @@ test.describe("Course settings flow", () => {
       .click();
     await page.getByRole("link", { name: "Settings" }).click();
     await page.waitForURL("/settings");
-    await page.getByRole("combobox").click();
+    await page.getByText("LanguageEnglish").getByRole("combobox").click();
     await page.getByLabel("English").getByText("English").click();
     await page.getByLabel("Go to homepage").click();
 
