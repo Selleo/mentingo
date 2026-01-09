@@ -21,7 +21,6 @@ export const ALLOWED_PRESENTATION_FILE_TYPES = [
   "application/vnd.ms-powerpoint",
   "application/vnd.openxmlformats-officedocument.presentationml.presentation",
   "application/vnd.oasis.opendocument.presentation",
-  "application/pdf",
 ];
 
 export const ALLOWED_EXCEL_FILE_TYPES = [

@@ -55,4 +55,4 @@ export const articleVariantClasses = {
 };
 
 export const newsVariantClasses = articleVariantClasses;
-export const contentVariantClasses = articleVariantClasses;
+export const contentVariantClasses = defaultClasses;

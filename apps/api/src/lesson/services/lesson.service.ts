@@ -505,6 +505,17 @@ export class LessonService {
     }" data-external="${externalAttr}" aria-label="${resource.title ?? ""}"></div>`;
   }
 
+  private buildDownloadableFileTag(resource: {
+    fileUrl: string;
+    title?: string;
+    description?: string;
+    fileName?: string;
+  }) {
+    const name = resource.title || resource.fileName || resource.description || resource.fileUrl;
+
+    return `<div data-node-type="downloadable-file" data-src="${resource.fileUrl}" data-name="${name}"></div>`;
+  }
+
   injectResourcesIntoContent(
     content: string | null,
     resources: Array<{
@@ -580,14 +591,13 @@ export class LessonService {
       }
 
       increment("file");
-
-      anchor.attr("href", matchingResource.fileUrl);
-      anchor.attr("download", matchingResource.fileName ?? "");
-      anchor.attr("target", "_blank");
-      anchor.attr("rel", "noopener noreferrer");
-      anchor.text(
-        matchingResource.title || matchingResource.fileName || matchingResource.description || "",
-      );
+      const downloadable = this.buildDownloadableFileTag(matchingResource);
+      if (parent.is("p")) {
+        anchor.remove();
+        parent.after(downloadable);
+      } else {
+        anchor.replaceWith(downloadable);
+      }
     });
 
     return { html: $.html($("body").children()), contentCount };

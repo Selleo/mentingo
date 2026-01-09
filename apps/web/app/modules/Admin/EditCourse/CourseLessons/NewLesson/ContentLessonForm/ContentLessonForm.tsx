@@ -69,6 +69,10 @@ const ContentLessonForm = ({
 
     const isVideo = ALLOWED_VIDEO_FILE_TYPES.includes(file.type);
     const isPresentation = ALLOWED_PRESENTATION_FILE_TYPES.includes(file.type);
+    const isDocument =
+      ALLOWED_EXCEL_FILE_TYPES.includes(file.type) ||
+      ALLOWED_WORD_FILE_TYPES.includes(file.type) ||
+      ALLOWED_PDF_FILE_TYPES.includes(file.type);
 
     await uploadFile(
       {
@@ -90,6 +94,16 @@ const ContentLessonForm = ({
 
           if (isPresentation) {
             chain?.setPresentationEmbed({ src: resourceUrl, sourceType: "internal" }).run();
+            return;
+          }
+
+          if (isDocument) {
+            chain
+              ?.setDownloadableFile({
+                src: resourceUrl,
+                name: file.name,
+              })
+              .run();
             return;
           }
 

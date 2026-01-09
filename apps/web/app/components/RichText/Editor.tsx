@@ -3,7 +3,6 @@ import { EditorContent, useEditor, type Editor as TiptapEditor } from "@tiptap/r
 import { useEffect } from "react";
 
 import { cn } from "~/lib/utils";
-import { baseUrl } from "~/utils/baseUrl";
 
 import { detectPresentationProvider } from "./extensions/utils/presentation";
 import { detectVideoProvider, extractUrlFromClipboard } from "./extensions/utils/video";
@@ -61,11 +60,10 @@ const Editor = ({
         const pastedUrl = extractUrlFromClipboard(event);
         if (!pastedUrl) return false;
 
-        const isInternal = pastedUrl.startsWith(baseUrl);
         const videoProvider = detectVideoProvider(pastedUrl);
         const presentationProvider = detectPresentationProvider(pastedUrl);
 
-        if (!isInternal && videoProvider === "unknown" && presentationProvider === "unknown") {
+        if (videoProvider === "unknown" && presentationProvider === "unknown") {
           return false;
         }
 
@@ -78,11 +76,7 @@ const Editor = ({
           return true;
         }
 
-        editor
-          ?.chain()
-          .focus()
-          .setVideoEmbed({ src: pastedUrl, sourceType: isInternal ? "internal" : "external" })
-          .run();
+        editor?.chain().focus().setVideoEmbed({ src: pastedUrl, sourceType: "external" }).run();
         return true;
       },
       attributes: {

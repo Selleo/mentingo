@@ -6,6 +6,10 @@ import { TaskItem } from "@tiptap/extension-task-item";
 import { TaskList } from "@tiptap/extension-task-list";
 import { StarterKit } from "@tiptap/starter-kit";
 
+import {
+  DownloadableFileEmbedEditor,
+  DownloadableFileEmbedViewer,
+} from "~/components/RichText/extensions/downloadableFile";
 import { Iframe } from "~/components/RichText/extensions/iframe";
 import {
   PresentationEmbedEditor,
@@ -78,5 +82,15 @@ const basePlugins = [
   Iframe,
 ];
 
-export const editorPlugins = [...basePlugins, PresentationEmbedEditor, VideoEmbedEditor];
-export const viewerPlugins = [...basePlugins, PresentationEmbedViewer, VideoEmbedViewer];
+export const editorPlugins = [
+  ...basePlugins,
+  DownloadableFileEmbedEditor,
+  PresentationEmbedEditor,
+  VideoEmbedEditor,
+];
+export const viewerPlugins = [
+  ...basePlugins,
+  DownloadableFileEmbedViewer,
+  PresentationEmbedViewer,
+  VideoEmbedViewer,
+];
