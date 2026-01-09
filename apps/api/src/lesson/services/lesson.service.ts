@@ -422,8 +422,8 @@ export class LessonService {
 
     const tags = $("a").toArray();
 
-    const tagsWithImages = tags.filter(
-      (tag) => $(tag).attr("href")?.includes("/api/lesson/lesson-image"),
+    const tagsWithImages = tags.filter((tag) =>
+      $(tag).attr("href")?.includes("/api/lesson/lesson-image"),
     );
 
     tagsWithImages.forEach((tag) => {

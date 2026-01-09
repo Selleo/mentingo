@@ -8,6 +8,7 @@ import { GoogleOAuthGuard } from "src/common/guards/google-oauth.guard";
 import { MicrosoftOAuthGuard } from "src/common/guards/microsoft-oauth.guard";
 import { FileModule } from "src/file/files.module";
 import { GroupModule } from "src/group/group.module";
+import { LocalizationModule } from "src/localization/localization.module";
 import { S3Service } from "src/s3/s3.service";
 import { SettingsService } from "src/settings/settings.service";
 import { StatisticsModule } from "src/statistics/statistics.module";
@@ -25,7 +26,15 @@ import { MicrosoftStrategy } from "./strategy/microsoft.strategy";
 import { TokenService } from "./token.service";
 
 @Module({
-  imports: [PassportModule, EmailModule, StatisticsModule, UserModule, FileModule, GroupModule],
+  imports: [
+    PassportModule,
+    EmailModule,
+    StatisticsModule,
+    UserModule,
+    FileModule,
+    GroupModule,
+    LocalizationModule,
+  ],
   controllers: [AuthController],
   providers: [
     AuthService,

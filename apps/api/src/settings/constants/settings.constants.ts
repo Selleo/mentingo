@@ -36,6 +36,7 @@ export const DEFAULT_GLOBAL_SETTINGS = {
   userEmailTriggers: DEFAULT_EMAIL_TRIGGERS,
   primaryColor: null,
   contrastColor: null,
+  loginPageFiles: [],
 };
 
 export const DEFAULT_STUDENT_SETTINGS = {

@@ -856,6 +856,83 @@
         }
       }
     },
+    "/api/settings/admin/login-page-files": {
+      "patch": {
+        "operationId": "SettingsController_updateLoginPageFiles",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "file",
+                  "name"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/settings/login-page-files": {
+      "get": {
+        "operationId": "SettingsController_getLoginPageFiles",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetLoginPageFilesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/login-page-files/{id}": {
+      "delete": {
+        "operationId": "SettingsController_deleteLoginPageFile",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/file": {
       "post": {
         "operationId": "FileController_uploadFile",
@@ -7992,6 +8069,12 @@
                     "type": "null"
                   }
                 ]
+              },
+              "loginPageFiles": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
               }
             },
             "required": [
@@ -8013,7 +8096,8 @@
               "newsEnabled",
               "unregisteredUserArticlesAccessibility",
               "articlesEnabled",
-              "ageLimit"
+              "ageLimit",
+              "loginPageFiles"
             ]
           }
         },
@@ -8489,6 +8573,12 @@
                     "type": "null"
                   }
                 ]
+              },
+              "loginPageFiles": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
               }
             },
             "required": [
@@ -8510,7 +8600,8 @@
               "newsEnabled",
               "unregisteredUserArticlesAccessibility",
               "articlesEnabled",
-              "ageLimit"
+              "ageLimit",
+              "loginPageFiles"
             ]
           }
         },
@@ -8719,6 +8810,12 @@
                     "type": "null"
                   }
                 ]
+              },
+              "loginPageFiles": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
               }
             },
             "required": [
@@ -8740,7 +8837,8 @@
               "newsEnabled",
               "unregisteredUserArticlesAccessibility",
               "articlesEnabled",
-              "ageLimit"
+              "ageLimit",
+              "loginPageFiles"
             ]
           }
         },
@@ -9062,6 +9160,12 @@
                     "type": "null"
                   }
                 ]
+              },
+              "loginPageFiles": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
               }
             },
             "required": [
@@ -9083,7 +9187,8 @@
               "newsEnabled",
               "unregisteredUserArticlesAccessibility",
               "articlesEnabled",
-              "ageLimit"
+              "ageLimit",
+              "loginPageFiles"
             ]
           }
         },
@@ -9379,6 +9484,37 @@
         },
         "required": [
           "ageLimit"
+        ]
+      },
+      "GetLoginPageFilesResponse": {
+        "type": "object",
+        "properties": {
+          "resources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "resourceUrl": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "resourceUrl"
+              ]
+            }
+          }
+        },
+        "required": [
+          "resources"
         ]
       },
       "FileUploadResponse": {
