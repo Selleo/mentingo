@@ -818,6 +818,15 @@ const publishAndEnroll = async (page: Page) => {
   }
 };
 
+const waitForStudentLessonProgress = async (page: Page) => {
+  await page.waitForResponse(
+    (response) =>
+      response.url().includes("api/studentLessonProgress") &&
+      response.request().method() === "POST" &&
+      response.status() === 201,
+  );
+};
+
 const studentCompletesCourse = async (page: Page) => {
   await page.getByRole("button", { name: "Avatar for email@example.com" }).click();
   await page.getByRole("menuitem", { name: "Logout" }).locator("div").click();
@@ -835,10 +844,12 @@ const studentCompletesCourse = async (page: Page) => {
       .filter({ hasText: /^contentheader$/ })
       .nth(1),
   ).toBeVisible();
+  await waitForStudentLessonProgress(page);
   await page.getByTestId("next-lesson-button").click();
   await page.getByRole("link", { name: "presentation title" }).click();
   await expect(page.getByText("presentation title").first()).toBeVisible();
   await page.getByTestId("next-lesson-button").click();
+  await waitForStudentLessonProgress(page);
   await expect(page.getByText("Cars quiz").first()).toBeVisible();
   await expect(page.locator("div").filter({ hasText: /^Lesson 4\/6 – Quiz$/ })).toBeVisible();
   await page.locator("label").filter({ hasText: "2" }).nth(1).click();
@@ -848,6 +859,7 @@ const studentCompletesCourse = async (page: Page) => {
   await page.getByTestId("detailed-response").fill("free text");
   await page.getByTestId("brief-response").fill("short answer");
   await page.getByRole("button", { name: "Submit" }).click();
+  await waitForStudentLessonProgress(page);
   await page.getByTestId("next-lesson-button").click();
   await expect(page.getByText("Lesson 5/6 – Ai MentorBeta")).toBeVisible();
   await expect(page.getByText(TEST_DATA.lessons.aiMentor).first()).toBeVisible();
