@@ -691,13 +691,9 @@ const buildQuiz = async (page: Page) => {
   await page.locator('input[name="questions\\.2\\.options\\.0\\.optionText"]').fill("dark");
   await page.locator('input[name="questions\\.2\\.options\\.1\\.optionText"]').fill("light");
   await page.locator("#isCorrect").nth(3).click();
+  const isChecked = await page.locator("#isCorrect").nth(3).isChecked();
+  expect(isChecked).toBeTruthy();
 
-  await page
-    .locator("li")
-    .filter({ hasText: "*OptionsClick to replaceor" })
-    .locator("label")
-    .nth(3)
-    .click();
   await page.getByRole("button", { name: "Add question" }).click();
   await page.getByRole("button", { name: "Fill in the blanks" }).click();
   await page.locator('input[name="questions\\.3\\.title"]').click();

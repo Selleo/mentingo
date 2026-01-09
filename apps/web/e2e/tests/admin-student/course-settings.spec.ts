@@ -244,6 +244,7 @@ test.describe("Course settings flow", () => {
       .getByRole("button", { name: /Avatar for email@example.com|Test Admin profile Test Admin/i })
       .click();
     await page.getByRole("link", { name: "Settings" }).click();
+    await page.waitForURL("/settings");
     await page.getByRole("combobox").click();
     await page.getByLabel("English").getByText("English").click();
     await page.getByLabel("Go to homepage").click();

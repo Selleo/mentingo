@@ -453,7 +453,7 @@ const expectCourseVisibleForPrivateStudent = async (page: Page) => {
   await expect(page.getByRole("heading", { name: PRIVATE_COURSE.heading })).toBeVisible();
 };
 
-test.describe("Assigning students to course flow", () => {
+test.describe.serial("Assigning students to course flow", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
   });

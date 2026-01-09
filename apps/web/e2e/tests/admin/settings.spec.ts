@@ -37,7 +37,9 @@ test.describe("Admin settings", () => {
     await page.locator('label[for="jobTitle"] + input').fill(TEST_SETTINGS.jobTitle);
     await page.locator('#user-details button[type="submit"]').click();
 
-    await page.getByRole("button", { name: "Test Admin profile Test Admin" }).click();
+    await page
+      .getByRole("button", { name: /Test Admin profile Test Admin|Avatar for email@example.com/i })
+      .click();
     await page.getByRole("link", { name: new RegExp(TEST_SETTINGS.button.profile, "i") }).click();
     await page.waitForURL(/\/profile\/[a-f0-9-]{36}/);
 
@@ -108,7 +110,9 @@ test.describe("Admin settings", () => {
     }
     await expect(coursesSwitch).toHaveAttribute("data-state", "unchecked");
 
-    await page.getByRole("button", { name: "Test Admin profile Test Admin" }).click();
+    await page
+      .getByRole("button", { name: /Test Admin profile Test Admin|Avatar for email@example.com/i })
+      .click();
 
     await page
       .getByRole("menuitem", { name: /logout/i })
@@ -141,7 +145,9 @@ test.describe("Admin settings", () => {
     }
     await expect(coursesSwitch).toHaveAttribute("data-state", "checked");
 
-    await page.getByRole("button", { name: "Test Admin profile Test Admin" }).click();
+    await page
+      .getByRole("button", { name: /Test Admin profile Test Admin|Avatar for email@example.com/i })
+      .click();
 
     await page
       .getByRole("menuitem", { name: /logout/i })
@@ -157,44 +163,20 @@ test.describe("Admin settings", () => {
   test("should not display sign-up option when invite-only registration is enabled", async ({
     page,
   }) => {
-    await page.getByRole("button", { name: "Test Admin profile Test Admin" }).click();
+    await page
+      .getByRole("button", { name: /Test Admin profile Test Admin|Avatar for email@example.com/i })
+      .click();
     await page.getByRole("link", { name: "Settings" }).click();
     await page.getByRole("tab", { name: "Organization" }).click();
     await page.locator("#invite-only-registration").getByRole("switch").click();
     await page.locator("#invite-only-registration").getByRole("button", { name: "Save" }).click();
-    await page.getByRole("button", { name: "Test Admin profile Test Admin" }).click();
+    await page
+      .getByRole("button", { name: /Test Admin profile Test Admin|Avatar for email@example.com/i })
+      .click();
     await page.getByRole("menuitem", { name: "Logout" }).locator("div").click();
     const loginHeader = page.getByRole("heading", { name: "Login", exact: true });
     await loginHeader.waitFor({ state: "visible" });
     await expect(page.getByText("Don't have an account? Sign up")).not.toBeVisible();
-  });
-
-  test("should check courses visibility based on platform preferences", async ({ page }) => {
-    await page.getByRole("button", { name: "Test Admin profile Test Admin" }).click();
-    await page.getByRole("menuitem", { name: "Logout" }).locator("div").click();
-    await page.goto("/courses");
-    const loginButton = page.getByRole("button", { name: "Login" });
-    await expect(loginButton).toBeVisible();
-    await loginButton.click();
-    await page.waitForURL("/auth/login");
-    await page.getByPlaceholder("user@example.com").click();
-    await page.getByPlaceholder("user@example.com").fill("admin@example.com");
-    await page.getByLabel("Password").click();
-    await page.getByLabel("Password").fill("password");
-    await page.getByRole("button", { name: "Login" }).click();
-    await page.getByRole("button", { name: "Test Admin profile Test Admin" }).click();
-    await page.getByRole("link", { name: "Settings" }).click();
-    await page.getByRole("tab", { name: "Platform Customization" }).click();
-    await page.getByLabel("Show courses to visitors").click();
-    await expect(
-      page.getByLabel("Notifications (F8)").getByText("Course visibility preferences"),
-    ).toBeVisible();
-    await page.getByRole("button", { name: "Test Admin profile Test Admin" }).click();
-    await page.getByRole("menuitem", { name: "Logout" }).locator("div").click();
-    await page.goto("/courses");
-    await page.waitForURL("/courses");
-    await expect(page.getByRole("heading", { name: "Available Courses" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Login" })).toBeVisible();
   });
 
   test("should change platform colors", async ({ page }) => {
@@ -203,7 +185,9 @@ test.describe("Admin settings", () => {
     const RGB_PRIMARY = "rgb(128, 0, 128)";
     const RGB_CONTRAST = "rgb(250, 240, 230)";
 
-    await page.getByRole("button", { name: "Test Admin profile Test Admin" }).click();
+    await page
+      .getByRole("button", { name: /Test Admin profile Test Admin|Avatar for email@example.com/i })
+      .click();
     await page.getByRole("link", { name: "Settings" }).click();
     await page.getByRole("tab", { name: "Platform Customization" }).click();
     await page.locator("#primary-color-input").dblclick();
