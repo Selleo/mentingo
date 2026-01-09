@@ -849,7 +849,6 @@ const studentCompletesCourse = async (page: Page) => {
   await page.getByRole("link", { name: "presentation title" }).click();
   await expect(page.getByText("presentation title").first()).toBeVisible();
   await page.getByTestId("next-lesson-button").click();
-  await waitForStudentLessonProgress(page);
   await expect(page.getByText("Cars quiz").first()).toBeVisible();
   await expect(page.locator("div").filter({ hasText: /^Lesson 4\/6 – Quiz$/ })).toBeVisible();
   await page.locator("label").filter({ hasText: "2" }).nth(1).click();
