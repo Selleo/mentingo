@@ -2088,6 +2088,35 @@
       }
     }
   },
+  "loginFilesUpload": {
+    "header": "Login page files",
+    "subHeader": "Add up to {{count}} files and name each one.",
+    "emptyState": "No files added yet.",
+    "selectedFile": "Selected file",
+    "unnamedFile": "Unnamed file",
+    "deleteDialog": {
+      "title": "Remove file?",
+      "description": "This will remove \"{{name}}\" from the login page.",
+      "confirm": "Delete file"
+    },
+    "previewDialog": {
+      "subtitle": "Login page file preview",
+      "loading": "Loading preview...",
+      "error": "We couldn't load a preview for this file."
+    },
+    "fileName": {
+      "label": "Name",
+      "placeholder": "Enter name"
+    },
+    "toast": {
+      "invalidFileType": "Invalid file type. Please upload a valid file.",
+      "successfullyUploadedFile": "File uploaded successfully",
+      "maxResourceCount": "Max resource count reached ({{count}})",
+      "resourceNotFound": "Resource not found",
+      "successfullyDeletedFile": "File deleted successfully"
+    },
+    "addButton": "Add new file"
+  },
   "richTextEditor": {
     "placeholder": {
       "lineHint": "Paste a YouTube/Vimeo/Canva link, add Google Docs, or upload a file."
