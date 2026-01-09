@@ -2669,7 +2669,6 @@
             "required": true,
             "in": "query",
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },
@@ -11971,6 +11970,9 @@
                       "type": "null"
                     }
                   ]
+                },
+                "slug": {
+                  "type": "string"
                 }
               },
               "required": [
@@ -11986,7 +11988,8 @@
                 "priceInCents",
                 "currency",
                 "completedChapterCount",
-                "dueDate"
+                "dueDate",
+                "slug"
               ]
             }
           },
@@ -12237,6 +12240,9 @@
                       "type": "null"
                     }
                   ]
+                },
+                "slug": {
+                  "type": "string"
                 }
               },
               "required": [
@@ -12252,7 +12258,8 @@
                 "priceInCents",
                 "currency",
                 "completedChapterCount",
-                "dueDate"
+                "dueDate",
+                "slug"
               ]
             }
           },
@@ -12407,6 +12414,9 @@
                       "type": "null"
                     }
                   ]
+                },
+                "slug": {
+                  "type": "string"
                 }
               },
               "required": [
@@ -12424,7 +12434,8 @@
                 "priceInCents",
                 "currency",
                 "completedChapterCount",
-                "dueDate"
+                "dueDate",
+                "slug"
               ]
             }
           }

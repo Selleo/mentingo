@@ -16,6 +16,7 @@ import { StatisticsModule } from "src/statistics/statistics.module";
 import { StripeModule } from "src/stripe/stripe.module";
 import { UserModule } from "src/user/user.module";
 
+import { CourseSlugService } from "./course-slug.service";
 import { CourseController } from "./course.controller";
 import { CourseCron } from "./course.cron";
 import { CourseService } from "./course.service";
@@ -37,7 +38,7 @@ import { CourseService } from "./course.service";
     forwardRef(() => UserModule),
   ],
   controllers: [CourseController],
-  providers: [CourseService, CourseHandler, LocalizationService, CourseCron],
-  exports: [CourseService],
+  providers: [CourseService, CourseSlugService, CourseHandler, LocalizationService, CourseCron],
+  exports: [CourseService, CourseSlugService],
 })
 export class CourseModule {}

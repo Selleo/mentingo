@@ -163,6 +163,25 @@ export const courses = pgTable("courses", {
 });
 export const coursesSettingsHelpers = coursesSettings.getHelpers(courses.settings);
 
+export const courseSlugs = pgTable(
+  "course_slugs",
+  {
+    ...id,
+    ...timestamps,
+    slug: text("slug").notNull().unique(),
+    courseId: uuid("course_id")
+      .references(() => courses.id, { onDelete: "cascade" })
+      .notNull(),
+    lang: text("lang").notNull(),
+  },
+  (table) => ({
+    courseIdLangUnique: uniqueIndex("course_slugs_course_id_lang_unique").on(
+      table.courseId,
+      table.lang,
+    ),
+  }),
+);
+
 export const chapters = pgTable("chapters", {
   ...id,
   ...timestamps,

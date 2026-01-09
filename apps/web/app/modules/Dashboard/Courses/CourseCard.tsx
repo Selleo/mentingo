@@ -16,7 +16,7 @@ import { CourseCardTitle } from "./CourseCardTitle";
 
 import type { GetAvailableCoursesResponse } from "~/api/generated-api";
 
-export type CourseCardProps = GetAvailableCoursesResponse["data"][number];
+export type CourseCardProps = GetAvailableCoursesResponse["data"][number] & { slug?: string };
 
 const CourseCard = ({
   author,
@@ -34,6 +34,7 @@ const CourseCard = ({
   priceInCents,
   title,
   dueDate,
+  slug,
 }: CourseCardProps) => {
   const { pathname } = useLocation();
   const { t } = useTranslation();
@@ -44,7 +45,7 @@ const CourseCard = ({
   return (
     <Link
       data-testid={title}
-      to={isScormCreatePage ? "#" : `/course/${id}`}
+      to={isScormCreatePage ? "#" : `/course/${slug || id}`}
       className={cn(
         "flex h-auto w-full max-w-[320px] flex-col overflow-hidden rounded-lg border bg-white transition hover:shadow-primary lg:bg-none",
         {

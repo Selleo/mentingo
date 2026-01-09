@@ -33,6 +33,7 @@ export const studentCourseSchema = Type.Object({
   completedChapterCount: Type.Number(),
   enrolled: Type.Optional(Type.Boolean()),
   dueDate: Type.Union([Type.String(), Type.Null()]),
+  slug: Type.String(),
 });
 
 export const coursesForContentCreatorSchema = Type.Object({
