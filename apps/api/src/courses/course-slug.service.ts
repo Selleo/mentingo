@@ -1,4 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { and, eq, ilike, inArray, sql } from "drizzle-orm";
 import { difference } from "lodash";
 import slugify from "slugify";
@@ -46,13 +47,17 @@ export class CourseSlugService {
     });
   }
 
-  async getCoursesSlugs(lang: string, courseIds: string[]): Promise<Map<string, string>> {
+  async getCoursesSlugs(
+    lang: string | undefined,
+    courseIds: string[],
+  ): Promise<Map<string, string>> {
+    const resolvedLang = lang || SUPPORTED_LANGUAGES.EN;
     const result = new Map<string, string>();
     if (!courseIds.length) return result;
     const courseSlugsData = await this.db
       .select({ courseId: courseSlugs.courseId, slug: courseSlugs.slug })
       .from(courseSlugs)
-      .where(and(inArray(courseSlugs.courseId, courseIds), eq(courseSlugs.lang, lang)));
+      .where(and(inArray(courseSlugs.courseId, courseIds), eq(courseSlugs.lang, resolvedLang)));
 
     for (const { courseId, slug } of courseSlugsData) {
       result.set(courseId, slug);
@@ -62,7 +67,7 @@ export class CourseSlugService {
 
     const regeneratedSlugs = await this.regenerateCoursesSlugs(missingIds);
     for (const { courseId, lang: slugLang, slug } of regeneratedSlugs) {
-      if (slugLang !== lang) continue;
+      if (slugLang !== resolvedLang) continue;
       result.set(courseId, slug);
     }
 
@@ -92,7 +97,11 @@ export class CourseSlugService {
     }
 
     const db = dbInstance || this.db;
-    const baseSlug = slugify(title, { lower: true, replacement: "-" });
+    const baseSlug = slugify(title, {
+      remove: /[*+~.()'"!:@_\[]\{}|#%\^&><\?`]/g,
+      lower: true,
+      replacement: "-",
+    });
 
     const [existingBase] = await db
       .select({ courseId: courseSlugs.courseId })
