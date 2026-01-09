@@ -6,7 +6,6 @@ import { useAuthStore } from "~/modules/Auth/authStore";
 
 import { API } from "./generated-api";
 
-
 export const requestManager = {
   controller: new AbortController(),
 
@@ -17,11 +16,12 @@ export const requestManager = {
 };
 
 const baseURL = (() => {
-  const importEnvMode = get(import.meta.env, "MODE") || null;
+  const importEnvMode = get(import.meta.env, "MODE") || undefined;
   const windowEnvApiUrl =
-    get(typeof window !== "undefined" ? window : {}, "ENV.VITE_API_URL") || null;
-  const importEnvApiUrl = import.meta.env.VITE_API_URL || null;
-  const processEnvApiUrl = get(process.env, "VITE_API_URL") || null;
+    get(typeof window !== "undefined" ? window : {}, "ENV.VITE_API_URL") || undefined;
+  const importEnvApiUrl = import.meta.env.VITE_API_URL || undefined;
+  const processEnvApiUrl =
+    get(typeof process !== "undefined" ? process.env : {}, "VITE_API_URL") || undefined;
 
   return match({
     importEnvMode,
@@ -33,8 +33,8 @@ const baseURL = (() => {
     .with({ processEnvApiUrl: P.string }, () => processEnvApiUrl)
     .with({ windowEnvApiUrl: P.string }, () => windowEnvApiUrl)
     .with({ importEnvApiUrl: P.string }, () => importEnvApiUrl)
-    .otherwise(() => null);
-})() as string;
+    .otherwise(() => "http://localhost:5173");
+})();
 
 export const ApiClient = new API({
   baseURL,
