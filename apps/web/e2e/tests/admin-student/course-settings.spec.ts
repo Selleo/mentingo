@@ -268,6 +268,17 @@ test.describe("Course settings flow", () => {
         ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.data.password,
       );
 
+      await page
+        .getByRole("button", {
+          name: /Avatar for email@example.com|Test Admin profile Test Admin/i,
+        })
+        .click();
+      await page.getByRole("link", { name: "Settings" }).click();
+      await page.waitForURL("/settings");
+      await page.getByText("LanguageEnglish").getByRole("combobox").click();
+      await page.getByLabel("English").getByText("English").click();
+      await page.getByLabel("Go to homepage").click();
+
       await navigateToPage(
         page,
         ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.button.browseCourses,
@@ -303,7 +314,7 @@ test.describe("Course settings flow", () => {
         ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.thirdCourseToAssign,
       );
 
-      const signupHeader = newPage.getByRole("button", { name: "Login" });
+      const signupHeader = newPage.getByRole("heading", { name: "Sign Up" });
 
       await expect(signupHeader).toBeVisible();
     });
