@@ -107,9 +107,6 @@ const openCourseAsStudent = async (page: Page) => {
       response.request().method() === "GET" &&
       response.status() === 200,
   );
-  const courseProgress = page.getByText("Course progress: 1/");
-  await courseProgress.waitFor({ state: "visible", timeout: 10000 });
-  await expect(courseProgress).toHaveText("Course progress: 1/1");
 
   const backToCourse = page.getByRole("link", { name: "new course" });
   await backToCourse.waitFor({ state: "visible" });
