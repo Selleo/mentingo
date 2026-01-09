@@ -67,6 +67,8 @@ const ContentLessonForm = ({
   const handleFileUpload = async (file?: File, editor?: TiptapEditor | null) => {
     if (!file || !lessonToEdit?.id) return;
 
+    const isVideo = ALLOWED_VIDEO_FILE_TYPES.includes(file.type);
+
     await uploadFile(
       {
         file,
@@ -78,11 +80,14 @@ const ContentLessonForm = ({
       {
         onSuccess: (data) => {
           const resourceUrl = `${baseUrl}/api/lesson/lesson-resource/${data.data.resourceId}`;
-          editor
-            ?.chain()
-            .insertContent("<br />")
-            .insertContent(`<a href="${resourceUrl}">${resourceUrl}</a>`)
-            .run();
+          const chain = editor?.chain().insertContent("<br />");
+
+          if (isVideo) {
+            chain?.setVideoEmbed({ src: resourceUrl, sourceType: "internal" }).run();
+            return;
+          }
+
+          chain?.insertContent(`<a href="${resourceUrl}">${resourceUrl}</a>`).run();
         },
       },
     );

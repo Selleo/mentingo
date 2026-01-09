@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import { cn } from "~/lib/utils";
 
-import { plugins } from "./plugins";
+import { viewerPlugins } from "./plugins";
 import {
   newsVariantClasses,
   articleVariantClasses,
@@ -73,7 +73,7 @@ const Viewer = ({ content, style, className, variant = "default", onVideoEnded }
 
   const extensions = useMemo(
     () =>
-      plugins.map((extension) =>
+      viewerPlugins.map((extension) =>
         extension.name === "video"
           ? extension.configure({ onVideoEnded: handleVideoEnded })
           : extension,

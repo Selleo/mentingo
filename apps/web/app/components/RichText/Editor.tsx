@@ -3,8 +3,10 @@ import { EditorContent, useEditor, type Editor as TiptapEditor } from "@tiptap/r
 import { useEffect } from "react";
 
 import { cn } from "~/lib/utils";
+import { baseUrl } from "~/utils/baseUrl";
 
-import { plugins } from "./plugins";
+import { detectVideoProvider, extractUrlFromClipboard } from "./extensions/utils/video";
+import { editorPlugins } from "./plugins";
 import { defaultClasses } from "./styles";
 import EditorToolbar from "./toolbar/EditorToolbar";
 
@@ -32,24 +34,44 @@ const Editor = ({
   acceptedFileTypes = ALLOWED_LESSON_IMAGE_FILE_TYPES,
 }: EditorProps) => {
   const editor = useEditor({
-    extensions: [...plugins],
+    extensions: [...editorPlugins],
     content: content,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
     },
-    onPaste: async (e) => {
-      const file = e.clipboardData?.files[0];
-      e.preventDefault();
-
-      await onUpload?.(file, editor);
-    },
     onDrop: async (e) => {
       const file = e.dataTransfer?.files[0];
-      e.preventDefault();
+      if (!file) return false;
 
+      e.preventDefault();
       await onUpload?.(file, editor);
+      return true;
     },
     editorProps: {
+      handlePaste: (_view, event) => {
+        const file = event.clipboardData?.files[0];
+
+        if (file) {
+          event.preventDefault();
+          void onUpload?.(file, editor);
+          return true;
+        }
+
+        const pastedUrl = extractUrlFromClipboard(event);
+        if (!pastedUrl) return false;
+
+        const isInternal = pastedUrl.startsWith(baseUrl);
+        const provider = detectVideoProvider(pastedUrl);
+
+        if (!isInternal && provider === "unknown") return false;
+
+        editor
+          ?.chain()
+          .focus()
+          .setVideoEmbed({ src: pastedUrl, sourceType: isInternal ? "internal" : "external" })
+          .run();
+        return true;
+      },
       attributes: {
         class: "prose prose-xs sm:prose dark:prose-invert focus:outline-none max-w-full p-4",
       },

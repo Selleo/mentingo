@@ -8,7 +8,7 @@ import { StarterKit } from "@tiptap/starter-kit";
 
 import { Iframe } from "~/components/RichText/extensions/iframe";
 import { PresentationNode } from "~/components/RichText/extensions/presentation";
-import { VideoNode } from "~/components/RichText/extensions/video";
+import { VideoEmbedEditor, VideoEmbedViewer } from "~/components/RichText/extensions/video";
 
 const HeadingWithId = Heading.extend({
   name: "heading",
@@ -40,7 +40,7 @@ const LinkWithDownload = Link.extend({
   },
 });
 
-export const plugins = [
+const basePlugins = [
   StarterKit.configure({
     heading: false,
   }),
@@ -74,5 +74,7 @@ export const plugins = [
   }),
   Iframe,
   PresentationNode,
-  VideoNode,
 ];
+
+export const editorPlugins = [...basePlugins, VideoEmbedEditor];
+export const viewerPlugins = [...basePlugins, VideoEmbedViewer];

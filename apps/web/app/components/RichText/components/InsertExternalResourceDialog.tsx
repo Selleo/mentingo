@@ -65,14 +65,20 @@ export const InsertExternalResourceDialog = ({ open, onClose, editor }: LinkDial
 
   const onSubmit = ({ url, type }: InsertExternalResourceFormValues) => {
     if (url) {
-      editor
-        .chain()
-        .focus()
-        .insertContent(`<a href="${url}" data-type="${type}">${url}</a>`)
-        .run();
+      if (type === EXTERNAL_RESOURCE_TYPE.VIDEO) {
+        editor.chain().focus().setVideoEmbed({ src: url, sourceType: "external" }).run();
+      } else {
+        editor
+          .chain()
+          .focus()
+          .insertContent(`<a href="${url}" data-type="${type}">${url}</a>`)
+          .run();
+      }
     }
     onClose();
   };
+
+  const handleFormSubmit = handleSubmit(onSubmit);
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -80,7 +86,14 @@ export const InsertExternalResourceDialog = ({ open, onClose, editor }: LinkDial
         <DialogTitle className="mb-2">
           {t("richTextEditor.toolbar.externalResource.title")}
         </DialogTitle>
-        <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+        <form
+          className="space-y-4"
+          onSubmit={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            handleFormSubmit(event);
+          }}
+        >
           <div className="space-y-1">
             <FormField
               name="type"
