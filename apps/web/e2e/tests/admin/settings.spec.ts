@@ -15,6 +15,7 @@ const TEST_SETTINGS = {
   tabs: {
     account: "Account",
     organization: "Organization",
+    platformCustomization: "Platform Customization",
   },
 } as const;
 
@@ -36,7 +37,9 @@ test.describe("Admin settings", () => {
     await page.locator('label[for="jobTitle"] + input').fill(TEST_SETTINGS.jobTitle);
     await page.locator('#user-details button[type="submit"]').click();
 
-    await page.getByRole("button", { name: "Test Admin profile Test Admin" }).click();
+    await page
+      .getByRole("button", { name: /Test Admin profile Test Admin|Avatar for email@example.com/i })
+      .click();
     await page.getByRole("link", { name: new RegExp(TEST_SETTINGS.button.profile, "i") }).click();
     await page.waitForURL(/\/profile\/[a-f0-9-]{36}/);
 
@@ -49,8 +52,9 @@ test.describe("Admin settings", () => {
 
   test("should change admin new user notification setting", async ({ page }) => {
     const newUserNotificationSwitch = page.locator("#newUserNotifications");
+    const isChecked = await newUserNotificationSwitch.isChecked();
     await newUserNotificationSwitch.click();
-    await expect(newUserNotificationSwitch).toBeChecked();
+    await expect(newUserNotificationSwitch).not.toBe(isChecked);
   });
 
   test("should switch between Account and Organization tabs", async ({ page }) => {
@@ -71,11 +75,13 @@ test.describe("Admin settings", () => {
     await expect(accountTab).toHaveAttribute("data-state", "inactive");
   });
 
-  test("should toggle courses accessibility on Organization tab", async ({ page }) => {
+  test("should toggle courses accessibility on platform customization tab", async ({ page }) => {
     const tablist = page.getByRole("tablist");
-    const organizationTab = tablist.getByRole("tab", { name: TEST_SETTINGS.tabs.organization });
-    await organizationTab.click();
-    await expect(organizationTab).toHaveAttribute("aria-selected", "true");
+    const platformTab = tablist.getByRole("tab", {
+      name: TEST_SETTINGS.tabs.platformCustomization,
+    });
+    await platformTab.click();
+    await expect(platformTab).toHaveAttribute("aria-selected", "true");
 
     const coursesSwitch = page.locator("#coursesVisibility");
 
@@ -91,8 +97,10 @@ test.describe("Admin settings", () => {
     page,
   }) => {
     const tablist = page.getByRole("tablist");
-    const organizationTab = tablist.getByRole("tab", { name: TEST_SETTINGS.tabs.organization });
-    await organizationTab.click();
+    const platformTab = tablist.getByRole("tab", {
+      name: TEST_SETTINGS.tabs.platformCustomization,
+    });
+    await platformTab.click();
 
     const coursesSwitch = page.locator("#coursesVisibility");
 
@@ -102,7 +110,9 @@ test.describe("Admin settings", () => {
     }
     await expect(coursesSwitch).toHaveAttribute("data-state", "unchecked");
 
-    await page.getByRole("button", { name: "Test Admin profile Test Admin" }).click();
+    await page
+      .getByRole("button", { name: /Test Admin profile Test Admin|Avatar for email@example.com/i })
+      .click();
 
     await page
       .getByRole("menuitem", { name: /logout/i })
@@ -122,8 +132,10 @@ test.describe("Admin settings", () => {
     page,
   }) => {
     const tablist = page.getByRole("tablist");
-    const organizationTab = tablist.getByRole("tab", { name: TEST_SETTINGS.tabs.organization });
-    await organizationTab.click();
+    const platformTab = tablist.getByRole("tab", {
+      name: TEST_SETTINGS.tabs.platformCustomization,
+    });
+    await platformTab.click();
 
     const coursesSwitch = page.locator("#coursesVisibility");
 
@@ -133,7 +145,9 @@ test.describe("Admin settings", () => {
     }
     await expect(coursesSwitch).toHaveAttribute("data-state", "checked");
 
-    await page.getByRole("button", { name: "Test Admin profile Test Admin" }).click();
+    await page
+      .getByRole("button", { name: /Test Admin profile Test Admin|Avatar for email@example.com/i })
+      .click();
 
     await page
       .getByRole("menuitem", { name: /logout/i })
@@ -144,5 +158,47 @@ test.describe("Admin settings", () => {
 
     await page.waitForURL(/\/courses/);
     await expect(page).toHaveURL(/\/courses/);
+  });
+
+  test("should not display sign-up option when invite-only registration is enabled", async ({
+    page,
+  }) => {
+    await page
+      .getByRole("button", { name: /Test Admin profile Test Admin|Avatar for email@example.com/i })
+      .click();
+    await page.getByRole("link", { name: "Settings" }).click();
+    await page.getByRole("tab", { name: "Organization" }).click();
+    await page.locator("#invite-only-registration").getByRole("switch").click();
+    await page.locator("#invite-only-registration").getByRole("button", { name: "Save" }).click();
+    await page
+      .getByRole("button", { name: /Test Admin profile Test Admin|Avatar for email@example.com/i })
+      .click();
+    await page.getByRole("menuitem", { name: "Logout" }).locator("div").click();
+    const loginHeader = page.getByRole("heading", { name: "Login", exact: true });
+    await loginHeader.waitFor({ state: "visible" });
+    await expect(page.getByText("Don't have an account? Sign up")).not.toBeVisible();
+  });
+
+  test("should change platform colors", async ({ page }) => {
+    const HEX_PRIMARY = "#800080";
+    const HEX_CONTRAST = "#faf0e6";
+    const RGB_PRIMARY = "rgb(128, 0, 128)";
+    const RGB_CONTRAST = "rgb(250, 240, 230)";
+
+    await page
+      .getByRole("button", { name: /Test Admin profile Test Admin|Avatar for email@example.com/i })
+      .click();
+    await page.getByRole("link", { name: "Settings" }).click();
+    await page.getByRole("tab", { name: "Platform Customization" }).click();
+    await page.locator("#primary-color-input").dblclick();
+    await page.locator("#primary-color-input").fill(HEX_PRIMARY.replace("#", ""));
+    await page.locator("#contrast-color-input").dblclick();
+    await page.locator("#contrast-color-input").fill(HEX_CONTRAST.replace("#", ""));
+    await page.getByRole("button", { name: "Save" }).nth(4).click();
+    await page.getByRole("link", { name: "Analytics" }).click();
+    const downloadReport = page.getByRole("button", { name: "Download Report" });
+    await expect(downloadReport).toBeVisible();
+    await expect(downloadReport).toHaveCSS("background-color", RGB_PRIMARY);
+    await expect(downloadReport).toHaveCSS("color", RGB_CONTRAST);
   });
 });

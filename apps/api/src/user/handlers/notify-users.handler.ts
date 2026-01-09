@@ -104,7 +104,9 @@ export class NotifyUsersHandler implements IEventHandler {
     const { userInvite } = event;
     const { email, creatorId, token, userId } = userInvite;
 
-    const url = `${process.env.CORS_ORIGIN}/auth/create-new-password?createToken=${token}&email=${email}`;
+    const url = `${
+      process.env.CI ? "http://localhost:5173" : process.env.CORS_ORIGIN
+    }/auth/create-new-password?createToken=${token}&email=${email}`;
 
     const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(userId);
     const { firstName, lastName } = await this.userService.getUserById(creatorId);

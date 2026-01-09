@@ -3,8 +3,7 @@ import { test, expect } from "@playwright/test";
 const TEST_NAVIGATION = {
   button: {
     createNew: "create new",
-    dashboard: "dashboard",
-    myCourses: "Courses",
+    courses: "Courses",
     browseCourses: "browse courses",
     categories: "categories",
     users: "users",
@@ -27,16 +26,10 @@ test.describe("Admin navigation", () => {
   });
   test("should check admin navigation", async ({ page }) => {
     await page
-      .getByRole("button", { name: new RegExp(TEST_NAVIGATION.button.dashboard, "i") })
-      .click();
-    await page.waitForURL("");
-    const welcomeText = page.locator("p").filter({ hasText: TEST_NAVIGATION.header.welcomeBack });
-    await expect(welcomeText).toHaveText(new RegExp(TEST_NAVIGATION.header.welcomeBack, "i"));
-
-    await page
-      .getByRole("button", { name: new RegExp(TEST_NAVIGATION.button.myCourses, "i") })
+      .getByRole("button", { name: new RegExp(TEST_NAVIGATION.button.courses, "i") })
       .click();
     await page.waitForURL("/courses");
+
     await page.locator(".h-min > button:nth-child(2)").click();
     await page
       .getByRole("button", { name: new RegExp(TEST_NAVIGATION.button.createNew, "i") })

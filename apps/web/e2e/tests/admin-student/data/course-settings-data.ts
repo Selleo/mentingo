@@ -9,6 +9,7 @@ export const COURSE_SETTINGS_UI = {
     continueLearning: "continue learning",
     settings: "settings",
     organization: "organization",
+    platformCustomization: "Platform Customization",
     curriculum: "curriculum",
     showCoursesToVisitors: "Show courses to visitors",
     playChapter: "play chapter",
