@@ -273,9 +273,12 @@ test.describe("Course settings flow", () => {
           name: /Avatar for email@example.com|Test Admin profile Test Admin/i,
         })
         .click();
-      await page.getByRole("link", { name: "Settings" }).click();
+      await page.getByRole("link", { name: /Settings|Ustawienia/i }).click();
       await page.waitForURL("/settings");
-      await page.getByText("LanguageEnglish").getByRole("combobox").click();
+      await page
+        .getByText(/LanguageEnglish|LanguagePolish|JęzykPolski/)
+        .getByRole("combobox")
+        .click();
       await page.getByLabel("English").getByText("English").click();
       await page.getByLabel("Go to homepage").click();
 
