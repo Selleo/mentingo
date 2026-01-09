@@ -30,7 +30,7 @@ const PRIVATE_COURSE = {
   titleTestId: "Advanced English: Mastering Complex Language Skills",
   heading: "Advanced English: Mastering",
   admin: { email: "admin@example.com", password: "password" },
-  student: { email: "student@example.com", password: "password", email2: "student2@example.com" },
+  student: { email: "student@example.com", password: "password", email2: "student0@example.com" },
 };
 
 const SEQUENCE_USERS = {
@@ -277,7 +277,9 @@ export const login = async (page: Page, email: string, password: string) => {
 };
 
 const logoutAdmin = async (page: Page) => {
-  await page.getByRole("button", { name: "Test Admin profile Test Admin" }).click();
+  await page
+    .getByRole("button", { name: /Test Admin profile Test Admin|Avatar for email@example.com/i })
+    .click();
   await page.getByRole("menuitem", { name: "Logout" }).locator("div").click();
 };
 
@@ -429,7 +431,7 @@ const setCourseAsPrivate = async (page: Page) => {
 };
 
 const expectCourseHiddenForPrivateStudent = async (page: Page) => {
-  await login(page, PRIVATE_COURSE.student.email, PRIVATE_COURSE.student.password);
+  await login(page, PRIVATE_COURSE.student.email2, PRIVATE_COURSE.student.password);
   await expect(page.getByTestId(PRIVATE_COURSE.titleTestId)).toBeHidden();
   await logoutStudent(page);
 };
