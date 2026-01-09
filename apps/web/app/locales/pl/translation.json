@@ -755,6 +755,10 @@
         "success": "Import zakończony pomyślnie.\nZaimportowano {{ importedUsersAmount }} użytkowników.\nPominieto {{ skippedUsersAmount }} istniejących użytkowników."
       }
     },
+    "toast": {
+      "cannotUpdateOwnRole": "Administrator nie może zmienić własnej roli",
+      "noUserSelected": "Nie wybrano żadnego użytkownika"
+    },
     "other": {
       "selected": "Wybrany"
     },

@@ -771,6 +771,10 @@
     "other": {
       "selected": "Selected"
     },
+    "toast": {
+      "cannotUpdateOwnRole": "Administrator cannot change their own role",
+      "noUserSelected": "No user selected"
+    },
     "import": {
       "toast": {
         "success": "Import completed successfully.\nImported {{ importedUsersAmount }} users.\nSkipped {{ skippedUsersAmount }} existing users."

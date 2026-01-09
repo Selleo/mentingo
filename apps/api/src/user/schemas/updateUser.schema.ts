@@ -36,6 +36,12 @@ export const bulkAssignUsersGroupsSchema = Type.Array(
   }),
 );
 
+export const bulkUpdateUsersRolesSchema = Type.Object({
+  userIds: Type.Array(Type.String()),
+  role: Type.Enum(USER_ROLES),
+});
+
+export type BulkUpdateUsersRolesBody = Static<typeof bulkUpdateUsersRolesSchema>;
 export type BulkAssignUserGroups = Static<typeof bulkAssignUsersGroupsSchema>;
 export type UpdateUserProfileBody = Static<typeof updateUserProfileSchema>;
 export type UpsertUserDetailsBody = Static<typeof upsertUserDetailsSchema>;

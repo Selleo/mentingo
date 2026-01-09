@@ -78,6 +78,7 @@ import type {
   UpsertUserDetailsBody,
   BulkAssignUserGroups,
   UpdateUserBody,
+  BulkUpdateUsersRolesBody,
 } from "./schemas/updateUser.schema";
 import type { UserDetailsResponse, UserDetailsWithAvatarKey } from "./schemas/user.schema";
 import type { UserActivityLogSnapshot } from "src/activity-logs/types";
@@ -949,6 +950,21 @@ export class UserService {
       .returning();
 
     return updatedOnboarding;
+  }
+
+  async updateUsersRoles(data: BulkUpdateUsersRolesBody, currentUser: CurrentUser) {
+    if (data.userIds.includes(currentUser.userId)) {
+      throw new BadRequestException("adminUsersView.toast.cannotUpdateOwnRole");
+    }
+
+    if (!data.userIds.length) {
+      throw new BadRequestException("adminUsersView.toast.noUserSelected");
+    }
+
+    await this.db
+      .update(users)
+      .set({ role: data.role })
+      .where(and(inArray(users.id, data.userIds), isNull(users.deletedAt)));
   }
 
   private async deflateStatisticsForCourseDeletedUser(userId: UUIDType, trx: DatabasePg = this.db) {

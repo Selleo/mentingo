@@ -59,6 +59,8 @@ import {
   upsertUserDetailsSchema,
   BulkAssignUserGroups,
   bulkAssignUsersGroupsSchema,
+  bulkUpdateUsersRolesSchema,
+  BulkUpdateUsersRolesBody,
 } from "./schemas/updateUser.schema";
 import {
   type AllUsersResponse,
@@ -314,6 +316,18 @@ export class UserController {
     const archivedUsers = await this.usersService.bulkArchiveUsers(body.userIds);
 
     return new BaseResponse(archivedUsers);
+  }
+
+  @Patch("bulk/roles")
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    request: [{ type: "body", schema: bulkUpdateUsersRolesSchema }],
+  })
+  async bulkUpdateUsersRoles(
+    @Body() data: BulkUpdateUsersRolesBody,
+    @CurrentUser() currentUser: CurrentUserType,
+  ) {
+    return this.usersService.updateUsersRoles(data, currentUser);
   }
 
   @Post()

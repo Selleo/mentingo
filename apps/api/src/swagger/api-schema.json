@@ -1538,6 +1538,27 @@
         }
       }
     },
+    "/api/user/bulk/roles": {
+      "patch": {
+        "operationId": "UserController_bulkUpdateUsersRoles",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkUpdateUsersRolesBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/user/import": {
       "post": {
         "operationId": "UserController_importUsers",
@@ -10873,6 +10894,37 @@
         },
         "required": [
           "data"
+        ]
+      },
+      "BulkUpdateUsersRolesBody": {
+        "type": "object",
+        "properties": {
+          "userIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "role": {
+            "anyOf": [
+              {
+                "const": "admin",
+                "type": "string"
+              },
+              {
+                "const": "student",
+                "type": "string"
+              },
+              {
+                "const": "content_creator",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "required": [
+          "userIds",
+          "role"
         ]
       },
       "CreateUserBody": {
