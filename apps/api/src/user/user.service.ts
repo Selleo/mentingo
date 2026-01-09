@@ -603,7 +603,9 @@ export class UserService {
 
     if (!creator) {
       const createPasswordEmail = new CreatePasswordReminderEmail({
-        createPasswordLink: `${process.env.CORS_ORIGIN}/auth/create-new-password?createToken=${token}&email=${createdUser.email}`,
+        createPasswordLink: `${
+          process.env.CI ? "http://localhost:5173" : process.env.CORS_ORIGIN
+        }/auth/create-new-password?createToken=${token}&email=${createdUser.email}`,
         ...defaultEmailSettings,
       });
 

@@ -159,7 +159,9 @@ test.describe("Certificates flow", () => {
     await openCourseAsStudent(page);
     await verifyCourseProgressAndDownload(page);
 
-    await page.getByRole("button", { name: "Avatar for email@example.com" }).click();
+    await page
+      .getByRole("button", { name: /Avatar for email@example.com|test Student profile test/i })
+      .click();
     await page.getByRole("link", { name: "Profile" }).click();
     await expect(page.getByRole("button", { name: COURSE.title })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Certificates" })).toBeVisible();
