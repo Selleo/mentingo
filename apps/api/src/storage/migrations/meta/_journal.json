@@ -526,6 +526,13 @@
       "when": 1766149078133,
       "tag": "0074_add_articles_global_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 75,
+      "version": "7",
+      "when": 1767970728734,
+      "tag": "0075_add_course_slugs",
+      "breakpoints": true
     }
   ]
 }

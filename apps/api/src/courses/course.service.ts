@@ -78,6 +78,7 @@ import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 import { getSortOptions } from "../common/helpers/getSortOptions";
 
 import { LESSON_SEQUENCE_ENABLED } from "./constants";
+import { CourseSlugService } from "./course-slug.service";
 import {
   COURSE_ENROLLMENT_SCOPES,
   CourseSortFields,
@@ -152,6 +153,7 @@ export class CourseService {
     private readonly adminLessonService: AdminLessonService,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
     private readonly emailService: EmailService,
+    private readonly courseSlugService: CourseSlugService,
   ) {}
 
   async getAllCourses(query: CoursesQuery): Promise<{
@@ -330,14 +332,20 @@ export class CourseService {
 
       const dataWithS3SignedUrls = await Promise.all(
         data.map(async (item) => {
-          if (!item.thumbnailUrl) return item;
+          if (!item.thumbnailUrl) {
+            return item;
+          }
 
           try {
             const signedUrl = await this.fileService.getFileUrl(item.thumbnailUrl);
             const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
               item.authorAvatarUrl,
             );
-            return { ...item, thumbnailUrl: signedUrl, authorAvatarUrl: authorAvatarSignedUrl };
+            return {
+              ...item,
+              thumbnailUrl: signedUrl,
+              authorAvatarUrl: authorAvatarSignedUrl,
+            };
           } catch (error) {
             console.error(`Failed to get signed URL for ${item.thumbnailUrl}:`, error);
             return item;
@@ -345,8 +353,16 @@ export class CourseService {
         }),
       );
 
+      const courseIds = dataWithS3SignedUrls.map((item) => item.id);
+      const slugsMap = await this.courseSlugService.getCoursesSlugs(language || "en", courseIds);
+
+      const dataWithSlugs = dataWithS3SignedUrls.map((item) => ({
+        ...item,
+        slug: slugsMap.get(item.id) || item.id,
+      }));
+
       return {
-        data: dataWithS3SignedUrls,
+        data: dataWithSlugs,
         pagination: {
           totalItems: totalItems || 0,
           page,
@@ -584,9 +600,8 @@ export class CourseService {
             const { authorAvatarUrl, ...itemWithoutReferences } = item;
 
             const signedUrl = await this.fileService.getFileUrl(item.thumbnailUrl);
-            const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
-              authorAvatarUrl,
-            );
+            const authorAvatarSignedUrl =
+              await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
 
             return {
               ...itemWithoutReferences,
@@ -600,8 +615,16 @@ export class CourseService {
         }),
       );
 
+      const courseIds = dataWithS3SignedUrls.map((item) => item.id);
+      const slugsMap = await this.courseSlugService.getCoursesSlugs(language || "en", courseIds);
+
+      const dataWithSlugs = dataWithS3SignedUrls.map((item) => ({
+        ...item,
+        slug: slugsMap.get(item.id) || item.id,
+      }));
+
       return {
-        data: dataWithS3SignedUrls,
+        data: dataWithSlugs,
         pagination: {
           totalItems: totalItems || 0,
           page,
@@ -612,10 +635,11 @@ export class CourseService {
   }
 
   async getCourse(
-    id: UUIDType,
+    idOrSlug: UUIDType | string,
     userId: UUIDType,
     language: SupportedLanguages,
   ): Promise<CommonShowCourse> {
+    const id = await this.courseSlugService.getCourseIdBySlug(idOrSlug);
     const [course] = await this.db
       .select({
         id: courses.id,
@@ -1038,13 +1062,15 @@ export class CourseService {
         courses.title,
       );
 
+    const courseIds = contentCreatorCourses.map((course) => course.id);
+    const slugsMap = await this.courseSlugService.getCoursesSlugs(language, courseIds);
+
     return await Promise.all(
       contentCreatorCourses.map(async (course) => {
         const { authorAvatarUrl, ...courseWithoutReferences } = course;
 
-        const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
-          authorAvatarUrl,
-        );
+        const authorAvatarSignedUrl =
+          await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
 
         return {
           ...courseWithoutReferences,
@@ -1052,6 +1078,7 @@ export class CourseService {
             ? await this.fileService.getFileUrl(course.thumbnailUrl)
             : course.thumbnailUrl,
           authorAvatarUrl: authorAvatarSignedUrl,
+          slug: slugsMap.get(course.id) || course.id,
         };
       }),
     );
@@ -1413,6 +1440,10 @@ export class CourseService {
           updatedCourseSnapshot: updatedSnapshot,
         };
       });
+
+    if (updateCourseBody.title) {
+      await this.courseSlugService.regenerateCoursesSlugs([id]);
+    }
 
     if (this.areCourseSnapshotsEqual(previousCourseSnapshot, updatedCourseSnapshot)) {
       return updatedCourse;

@@ -1055,6 +1055,7 @@ export interface GetStudentCoursesResponse {
     completedChapterCount: number;
     enrolled?: boolean;
     dueDate: string | null;
+    slug: string;
   }[];
   pagination: {
     totalItems: number;
@@ -1112,6 +1113,7 @@ export interface GetAvailableCoursesResponse {
     completedChapterCount: number;
     enrolled?: boolean;
     dueDate: string | null;
+    slug: string;
   }[];
   pagination: {
     totalItems: number;
@@ -1146,6 +1148,7 @@ export interface GetContentCreatorCoursesResponse {
     completedChapterCount: number;
     enrolled?: boolean;
     dueDate: string | null;
+    slug: string;
   }[];
 }
 
@@ -5187,7 +5190,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     courseControllerGetCourse: (
       query: {
-        /** @format uuid */
         id: string;
         /** @default "en" */
         language?: "en" | "pl";

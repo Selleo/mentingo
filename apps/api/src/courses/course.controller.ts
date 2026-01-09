@@ -300,17 +300,17 @@ export class CourseController {
   @Get()
   @Validate({
     request: [
-      { type: "query", name: "id", schema: UUIDSchema, required: true },
+      { type: "query", name: "id", schema: Type.String(), required: true },
       { type: "query", name: "language", schema: supportedLanguagesSchema },
     ],
     response: baseResponse(commonShowCourseSchema),
   })
   async getCourse(
-    @Query("id") id: UUIDType,
+    @Query("id") idOrSlug: string,
     @Query("language") language: SupportedLanguages,
     @CurrentUser("userId") currentUserId: UUIDType,
   ): Promise<BaseResponse<CommonShowCourse>> {
-    return new BaseResponse(await this.courseService.getCourse(id, currentUserId, language));
+    return new BaseResponse(await this.courseService.getCourse(idOrSlug, currentUserId, language));
   }
 
   @Get("beta-course-by-id")

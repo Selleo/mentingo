@@ -17,6 +17,7 @@ import type { GetAvailableCoursesResponse } from "~/api/generated-api";
 
 export type CourseCardProps = GetAvailableCoursesResponse["data"][number] & {
   isFirst?: boolean;
+  slug?: string;
 };
 
 const CourseCard = ({
@@ -35,6 +36,7 @@ const CourseCard = ({
   priceInCents,
   title,
   isFirst = false,
+  slug,
 }: CourseCardProps) => {
   const { isAdmin } = useUserRole();
   const { pathname } = useLocation();
@@ -43,7 +45,7 @@ const CourseCard = ({
 
   return (
     <Link
-      to={isScormCreatePage ? "#" : `/course/${id}`}
+      to={isScormCreatePage ? "#" : `/course/${slug || id}`}
       id={isFirst ? "available-courses" : undefined}
       data-testid={title}
       className={cn(
