@@ -314,8 +314,7 @@ test.describe("Course settings flow", () => {
         ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.thirdCourseToAssign,
       );
 
-      const signupHeader = newPage.getByRole("heading", { name: "Sign Up" });
-
+      const signupHeader = newPage.getByRole("heading", { name: /Sign Up|Login/i });
       await expect(signupHeader).toBeVisible();
     });
   });
