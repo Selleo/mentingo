@@ -45,18 +45,18 @@ This project uses **Uncloud** for automated PR preview deployments. When a pull 
 
 Configure these in GitHub repository settings under **Settings -> Secrets and variables -> Actions -> Repository secrets**:
 
-| Secret Name          | Description                                   | Example Format                      |
-| -------------------- | --------------------------------------------- | ----------------------------------- |
-| `UNCLOUD_CONNECT`    | SSH connection string to Uncloud host         | `user@host.example.com`             |
-| `UNCLOUD_SSH_KEY`    | Private SSH key for authentication            | `-----BEGIN EC PRIVATE KEY-----...` |
+| Secret Name       | Description                           | Example Format                      |
+| ----------------- | ------------------------------------- | ----------------------------------- |
+| `UNCLOUD_CONNECT` | SSH connection string to Uncloud host | `user@host.example.com`             |
+| `UNCLOUD_SSH_KEY` | Private SSH key for authentication    | `-----BEGIN EC PRIVATE KEY-----...` |
 
 ### Required Variables
 
 Configure these in GitHub repository settings under **Settings -> Secrets and variables -> Actions -> Repository variables**:
 
-| Variable Name            | Description                            | Example                |
-| ------------------------ | -------------------------------------- | ---------------------- |
-| `UNCLOUD_PREVIEW_DOMAIN` | Base domain for preview environments   | `preview.example.com`  |
+| Variable Name            | Description                          | Example               |
+| ------------------------ | ------------------------------------ | --------------------- |
+| `UNCLOUD_PREVIEW_DOMAIN` | Base domain for preview environments | `preview.example.com` |
 
 ### Generated Resources
 
@@ -70,13 +70,13 @@ For each PR, the system creates such services:
 
 The `docker-compose.preview.tpl.yml` template is _docker-compose-like_ file used by Uncloud ([more info about this format](https://uncloud.run/docs/compose-file-reference/support-matrix)). It uses these variables (substituted via `envsubst`):
 
-| Variable                    | Purpose                                        |
-| --------------------------- | ---------------------------------------------- |
-| `${PR_ID}`                  | Unique identifier for PR                       |
-| `${VERSION_TAG}`            | Image tag based on git commit                  |
-| `${PREVIEW_WEB_DOMAIN}`     | Web application domain                         |
-| `${PREVIEW_API_DOMAIN}`     | API backend domain                             |
-| `${PREVIEW_MAILHOG_DOMAIN}` | Mailhog interface domain                       |
+| Variable                    | Purpose                       |
+| --------------------------- | ----------------------------- |
+| `${PR_ID}`                  | Unique identifier for PR      |
+| `${VERSION_TAG}`            | Image tag based on git commit |
+| `${PREVIEW_WEB_DOMAIN}`     | Web application domain        |
+| `${PREVIEW_API_DOMAIN}`     | API backend domain            |
+| `${PREVIEW_MAILHOG_DOMAIN}` | Mailhog interface domain      |
 
 ...and all environment variables needed by the services to run.
 
@@ -265,8 +265,7 @@ envsubst < "docker-compose.preview.tpl.yml" > "docker-compose.pr.yml"
 uc --connect "ssh+cli://${UNCLOUD_CONNECT}" deploy -f docker-compose.pr.yml -y
 ```
 
-> [!TIP]
-> `ssh+cli://` it's the most bulletproof way to connect to the Uncloud host.
+> [!TIP] > `ssh+cli://` it's the most bulletproof way to connect to the Uncloud host.
 
 ## How It Works
 

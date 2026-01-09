@@ -784,6 +784,11 @@ export interface ArchiveBulkUsersResponse {
   };
 }
 
+export interface BulkUpdateUsersRolesBody {
+  userIds: string[];
+  role: "admin" | "student" | "content_creator";
+}
+
 export interface CreateUserBody {
   /** @format email */
   email: string;
@@ -4778,6 +4783,24 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name UserControllerBulkUpdateUsersRoles
+     * @request PATCH:/api/user/bulk/roles
+     */
+    userControllerBulkUpdateUsersRoles: (
+      data: BulkUpdateUsersRolesBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/user/bulk/roles`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name UserControllerImportUsers
      * @request POST:/api/user/import
      */
@@ -5532,6 +5555,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         userId?: string;
         /** @format uuid */
         groupId?: string;
+        search?: string;
         page?: number;
         perPage?: number;
         sort?: "studentName" | "totalSeconds" | "-studentName" | "-totalSeconds";
