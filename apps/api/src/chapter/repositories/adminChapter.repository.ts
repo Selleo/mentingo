@@ -178,16 +178,20 @@ export class AdminChapterRepository {
         lessonResources: sql<LessonResource[]>`
             ARRAY(
               SELECT json_build_object(
-                'id', lr.id,
-                'type', lr.type,
-                'source', lr.source,
-                'isExternal', lr.is_external,
-                'allowFullscreen', lr.allow_fullscreen,
-                'lessonId', lr.lesson_id
+                'id', r.id,
+                'fileUrl', r.reference,
+                'contentType', r.content_type,
+                'title', COALESCE(r.title->>${language}::text, ''),
+                'description', COALESCE(r.description->>${language}::text, ''),
+                'fileName', r.metadata->>'originalFilename',
+                'allowFullscreen', (r.metadata->>'allowFullscreen')::boolean
               )
-              FROM lesson_resources lr
-              WHERE lr.lesson_id = lessons.id
-              ORDER BY lr.created_at
+              FROM resources r
+              INNER JOIN resource_entity re ON re.resource_id = r.id
+              WHERE re.entity_id = lessons.id
+                AND re.entity_type = 'lesson'
+                AND r.archived = false
+              ORDER BY r.created_at
             )
       `,
       })

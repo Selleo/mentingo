@@ -11,6 +11,7 @@ export type StoredVideoUpload = {
   filename: string;
   sizeBytes: number;
   lastModified: number;
+  resourceId?: string;
 };
 
 type VideoUploadResumeState = {

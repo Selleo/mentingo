@@ -1,39 +1,30 @@
 import { EditorContent, useEditor } from "@tiptap/react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import { cn } from "~/lib/utils";
 
-import { plugins } from "./plugins";
+import { viewerPlugins } from "./plugins";
 import {
   newsVariantClasses,
   articleVariantClasses,
   defaultClasses,
-  lessonVariantClasses,
+  contentVariantClasses,
 } from "./styles";
 
 type ViewerProps = {
   content: string;
   style?: "default" | "prose";
   className?: string;
-  variant?: "default" | "lesson" | "article" | "news";
+  variant?: "default" | "article" | "news" | "content";
+  onVideoEnded?: () => void;
 };
 
-const Viewer = ({ content, style, className, variant = "default" }: ViewerProps) => {
+const Viewer = ({ content, style, className, variant = "default", onVideoEnded }: ViewerProps) => {
   const variantStyles = {
     default: {
       wrapper: "",
       editor: [],
       content: "",
-    },
-    lesson: {
-      wrapper: "",
-      editor: [
-        lessonVariantClasses.h2,
-        lessonVariantClasses.p,
-        lessonVariantClasses.layout,
-        lessonVariantClasses.ol,
-        lessonVariantClasses.ul,
-      ],
-      content: "prose max-w-none dark:prose-invert",
     },
     article: {
       wrapper: articleVariantClasses.wrapper,
@@ -44,6 +35,11 @@ const Viewer = ({ content, style, className, variant = "default" }: ViewerProps)
       wrapper: newsVariantClasses.wrapper,
       editor: [newsVariantClasses.layout],
       content: ["prose prose-neutral max-w-none", newsVariantClasses.links].join(" "),
+    },
+    content: {
+      wrapper: contentVariantClasses.wrapper,
+      editor: [contentVariantClasses.layout],
+      content: ["prose prose-neutral max-w-none", contentVariantClasses.links].join(" "),
     },
   } as const;
 
@@ -65,10 +61,30 @@ const Viewer = ({ content, style, className, variant = "default" }: ViewerProps)
     selectedVariant.editor,
   );
 
+  const onVideoEndedRef = useRef<(() => void) | undefined>();
+
+  useEffect(() => {
+    onVideoEndedRef.current = onVideoEnded;
+  }, [onVideoEnded]);
+
+  const handleVideoEnded = useCallback(() => {
+    onVideoEndedRef.current?.();
+  }, []);
+
+  const extensions = useMemo(
+    () =>
+      viewerPlugins.map((extension) =>
+        extension.name === "video"
+          ? extension.configure({ onVideoEnded: handleVideoEnded })
+          : extension,
+      ),
+    [handleVideoEnded],
+  );
+
   const editor = useEditor(
     {
-      extensions: [...plugins],
-      content: content,
+      extensions,
+      content,
       editable: false,
       editorProps: {
         attributes: {

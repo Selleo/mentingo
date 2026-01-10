@@ -13,10 +13,12 @@ import {
   CheckSquare,
   Link2,
   UploadCloudIcon,
+  ExternalLink,
 } from "lucide-react";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { InsertExternalResourceDialog } from "~/components/RichText/components/InsertExternalResourceDialog";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { ToggleGroup, Toolbar } from "~/components/ui/toolbar";
@@ -49,6 +51,7 @@ const EditorToolbar = ({
   const fileUploadRef = useRef<HTMLInputElement | null>(null);
 
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
+  const [isExternalResourceDialogOpen, setIsExternalResourceDialogOpen] = useState(false);
 
   const handleToggle = (action: () => void) => (event: React.MouseEvent) => {
     event.preventDefault();
@@ -61,6 +64,10 @@ const EditorToolbar = ({
     } else {
       setIsLinkDialogOpen(true);
     }
+  });
+
+  const handleExternalResource = handleToggle(() => {
+    setIsExternalResourceDialogOpen(true);
   });
 
   const handleUploadToggle = handleToggle(() => {
@@ -101,6 +108,23 @@ const EditorToolbar = ({
             </TooltipTrigger>
             <TooltipContent>{t("richTextEditor.toolbar.link.tooltip")}</TooltipContent>
           </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger>
+              <Button
+                size="sm"
+                className={cn("bg-transparent text-black", {
+                  "bg-primary-100": editor.isActive("externalResource"),
+                  "hover:bg-primary-100": !editor.isActive("externalResource"),
+                })}
+                onClick={handleExternalResource}
+              >
+                <ExternalLink className="size-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{t("richTextEditor.toolbar.externalResource.tooltip")}</TooltipContent>
+          </Tooltip>
+
           {allowFiles && (
             <Tooltip>
               <TooltipTrigger>
@@ -271,6 +295,12 @@ const EditorToolbar = ({
       <InsertLinkDialog
         open={isLinkDialogOpen}
         onClose={() => setIsLinkDialogOpen(false)}
+        editor={editor}
+      />
+
+      <InsertExternalResourceDialog
+        open={isExternalResourceDialogOpen}
+        onClose={() => setIsExternalResourceDialogOpen(false)}
         editor={editor}
       />
     </Toolbar>

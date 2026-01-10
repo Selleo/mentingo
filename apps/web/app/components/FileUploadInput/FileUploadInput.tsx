@@ -4,12 +4,9 @@ import { match } from "ts-pattern";
 
 import { FileUploadLoading } from "~/components/FileUploadInput/FileUploadLoading";
 import { cn } from "~/lib/utils";
-import { ContentTypes } from "~/modules/Admin/EditCourse/EditCourse.types";
 
 import EmptyStateUpload from "./EmptyStateUpload";
-import { PresentationPreview } from "./PresentationPreview";
 import { SpreadsheetPreview } from "./SpreadsheetPreview";
-import { VideoPreview } from "./VideoPreview";
 
 type FileUploadInputProps = {
   handleFileUpload: (file: File) => Promise<void>;
@@ -23,16 +20,6 @@ type FileUploadInputProps = {
 };
 
 const ACCEPTED_TYPE_FORMATS: Record<string, Record<string, string[]>> = {
-  [ContentTypes.VIDEO_LESSON_FORM]: {
-    "video/mp4": [".mp4"],
-    "video/x-msvideo": [".avi"],
-    "video/quicktime": [".mov"],
-  },
-  [ContentTypes.PRESENTATION_FORM]: {
-    "application/vnd.openxmlformats-officedocument.presentationml.presentation": [".pptx"],
-    "application/vnd.ms-powerpoint": [".ppt"],
-    "application/vnd.oasis.opendocument.presentation": [".odp"],
-  },
   ["Image"]: {
     "image/svg+xml": [".svg"],
     "image/png": [".png"],
@@ -48,11 +35,9 @@ const FileUploadInput = ({
   handleFileUpload,
   handleFileDelete,
   isUploading,
-  isProcessing,
   contentTypeToDisplay,
   url,
   className,
-  onVideoSelected,
 }: FileUploadInputProps) => {
   const acceptedTypes = ACCEPTED_TYPE_FORMATS[contentTypeToDisplay] || {};
 
@@ -77,12 +62,6 @@ const FileUploadInput = ({
   const handleFileChange = async (file?: File) => {
     if (file) {
       setFile(file);
-      if (contentTypeToDisplay === ContentTypes.VIDEO_LESSON_FORM) {
-        const videoURL = URL.createObjectURL(file);
-        setVideoPreview(videoURL);
-
-        onVideoSelected?.();
-      }
       handleFileUpload(file);
     }
   };
@@ -91,22 +70,6 @@ const FileUploadInput = ({
     if (isUploading) return <FileUploadLoading />;
 
     return match(contentTypeToDisplay)
-      .with(ContentTypes.VIDEO_LESSON_FORM, () => {
-        return (
-          <VideoPreview
-            videoPreview={videoPreview}
-            isProcessing={isProcessing}
-            handleFileDelete={handleFileDelete}
-            setFile={setFile}
-            setVideoPreview={setVideoPreview}
-          />
-        );
-      })
-      .with(ContentTypes.PRESENTATION_FORM, () => {
-        return (
-          <PresentationPreview setFile={setFile} setVideoPreview={setVideoPreview} url={url} />
-        );
-      })
       .with("Spreadsheet", () => {
         return (
           <SpreadsheetPreview
@@ -125,7 +88,7 @@ const FileUploadInput = ({
   if (!videoPreview && !file) {
     return (
       <div {...getRootProps()} className="max-w-[440px]">
-        <EmptyStateUpload contentTypeToDisplay={contentTypeToDisplay} className={className} />
+        <EmptyStateUpload className={className} />
         <input {...getInputProps()} className="sr-only" />
       </div>
     );

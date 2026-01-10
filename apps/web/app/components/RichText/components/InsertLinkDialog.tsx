@@ -1,4 +1,6 @@
-import { useState, useEffect } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
@@ -25,44 +27,37 @@ const insertUrlSchema = (t: typeof i18n.t) =>
     text: z.string().min(1, t("richTextEditor.toolbar.link.dialog.linkTextRequired")),
   });
 
+type InsertLinkFormValues = z.infer<ReturnType<typeof insertUrlSchema>>;
+
 export const InsertLinkDialog = ({ open, onClose, editor }: LinkDialogProps) => {
   const { t } = useTranslation();
-
-  const [url, setUrl] = useState("");
-  const [text, setText] = useState("");
-  const [errors, setErrors] = useState({
-    url: "",
-    text: "",
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<InsertLinkFormValues>({
+    resolver: zodResolver(insertUrlSchema(t)),
+    defaultValues: {
+      url: "",
+      text: "",
+    },
   });
 
   useEffect(() => {
     if (open) {
-      setUrl(editor.getAttributes("link")?.href || "");
-      setText(
-        editor.state.doc.textBetween(editor.state.selection.from, editor.state.selection.to, " "),
-      );
-      setErrors({
-        url: "",
-        text: "",
+      reset({
+        url: editor.getAttributes("link")?.href || "",
+        text: editor.state.doc.textBetween(
+          editor.state.selection.from,
+          editor.state.selection.to,
+          " ",
+        ),
       });
     }
-  }, [open, editor]);
+  }, [open, editor, reset]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const parseResult = insertUrlSchema(t).safeParse({ url, text });
-
-    if (!parseResult.success) {
-      const fieldErrors = parseResult.error.flatten().fieldErrors;
-      setErrors({
-        url: fieldErrors.url?.[0] || "",
-        text: fieldErrors.text?.[0] || "",
-      });
-
-      return;
-    }
-
+  const onSubmit = ({ url, text }: InsertLinkFormValues) => {
     const { from, to } = editor.state.selection;
 
     if (text && editor.state.doc.textBetween(from, to, " ") !== text) {
@@ -84,38 +79,45 @@ export const InsertLinkDialog = ({ open, onClose, editor }: LinkDialogProps) => 
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
         <DialogTitle className="mb-2">{t("richTextEditor.toolbar.link.dialog.title")}</DialogTitle>
-        <div className="space-y-1">
-          <Label htmlFor="link-url">{t("richTextEditor.toolbar.link.dialog.urlLabel")}</Label>
-          <Input
-            id="link-url"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder="https://example.com"
-          />
-          {errors.url && <span className="text-xs text-red-500">{errors.url}</span>}
-        </div>
-        <div className="space-y-1">
-          <Label htmlFor="link-text">{t("richTextEditor.toolbar.link.dialog.linkTextLabel")}</Label>
-          <Input
-            id="link-text"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder={t("richTextEditor.toolbar.link.dialog.linkTextPlaceholder")}
-          />
-          {errors.text && <span className="text-xs text-red-500">{errors.text}</span>}
-        </div>
-        <DialogFooter>
-          <Button size="sm" onClick={handleSubmit}>
-            {t("common.button.save")}
-          </Button>
-          <Button
-            size="sm"
-            className="border border-red-500 bg-transparent text-red-500 hover:bg-red-100"
-            onClick={onClose}
-          >
-            {t("common.button.cancel")}
-          </Button>
-        </DialogFooter>
+        <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+          <div className="space-y-1">
+            <Label htmlFor="link-url">{t("richTextEditor.toolbar.link.dialog.urlLabel")}</Label>
+            <Input
+              id="link-url"
+              placeholder="https://example.com"
+              {...register("url")}
+            />
+            {errors.url?.message && (
+              <span className="text-xs text-red-500">{errors.url.message}</span>
+            )}
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="link-text">
+              {t("richTextEditor.toolbar.link.dialog.linkTextLabel")}
+            </Label>
+            <Input
+              id="link-text"
+              placeholder={t("richTextEditor.toolbar.link.dialog.linkTextPlaceholder")}
+              {...register("text")}
+            />
+            {errors.text?.message && (
+              <span className="text-xs text-red-500">{errors.text.message}</span>
+            )}
+          </div>
+          <DialogFooter>
+            <Button size="sm" type="submit">
+              {t("common.button.save")}
+            </Button>
+            <Button
+              size="sm"
+              type="button"
+              className="border border-red-500 bg-transparent text-red-500 hover:bg-red-100"
+              onClick={onClose}
+            >
+              {t("common.button.cancel")}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

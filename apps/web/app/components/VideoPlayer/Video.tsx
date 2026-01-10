@@ -3,20 +3,24 @@ import { useEffect, useRef } from "react";
 import { useVideoPlayer } from "./VideoPlayerContext";
 
 type Props = {
-  url: string | null;
+  src?: string | null;
+  url?: string | null;
+  isExternal?: boolean;
   isExternalUrl?: boolean;
   onVideoEnded?: () => void;
 };
 
-export function Video({ url, isExternalUrl = false, onVideoEnded }: Props) {
+export function Video({ src, url, isExternal, isExternalUrl = false, onVideoEnded }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const { setVideo, setPlaceholderElement } = useVideoPlayer();
+  const resolvedUrl = src ?? url ?? null;
+  const resolvedExternal = isExternal ?? isExternalUrl;
 
   useEffect(() => {
-    if (!url) return;
+    if (!resolvedUrl) return;
 
-    setVideo(url, isExternalUrl, onVideoEnded);
-  }, [url, isExternalUrl, onVideoEnded, setVideo]);
+    setVideo(resolvedUrl, resolvedExternal, onVideoEnded);
+  }, [resolvedUrl, resolvedExternal, onVideoEnded, setVideo]);
 
   useEffect(() => {
     setPlaceholderElement(ref.current);

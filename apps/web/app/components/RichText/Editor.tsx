@@ -2,9 +2,12 @@ import { ALLOWED_LESSON_IMAGE_FILE_TYPES } from "@repo/shared";
 import { EditorContent, useEditor, type Editor as TiptapEditor } from "@tiptap/react";
 import { useEffect } from "react";
 
+import { Progress } from "~/components/ui/progress";
 import { cn } from "~/lib/utils";
 
-import { plugins } from "./plugins";
+import { detectPresentationProvider } from "./extensions/utils/presentation";
+import { detectVideoProvider, extractUrlFromClipboard } from "./extensions/utils/video";
+import { editorPlugins } from "./plugins";
 import { defaultClasses } from "./styles";
 import EditorToolbar from "./toolbar/EditorToolbar";
 
@@ -12,6 +15,8 @@ type EditorProps = {
   content?: string;
   onChange: (value: string) => void;
   onUpload?: (file?: File, editor?: TiptapEditor | null) => Promise<void>;
+  onCtrlSave?: (editor: TiptapEditor | null) => void;
+  uploadProgress?: number | null;
   placeholder?: string;
   id?: string;
   parentClassName?: string;
@@ -25,6 +30,8 @@ const Editor = ({
   placeholder,
   onChange,
   onUpload,
+  onCtrlSave,
+  uploadProgress,
   id,
   parentClassName,
   lessonId,
@@ -32,24 +39,59 @@ const Editor = ({
   acceptedFileTypes = ALLOWED_LESSON_IMAGE_FILE_TYPES,
 }: EditorProps) => {
   const editor = useEditor({
-    extensions: [...plugins],
+    extensions: [...editorPlugins],
     content: content,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
     },
-    onPaste: async (e) => {
-      const file = e.clipboardData?.files[0];
-      e.preventDefault();
-
-      await onUpload?.(file, editor);
-    },
     onDrop: async (e) => {
       const file = e.dataTransfer?.files[0];
-      e.preventDefault();
+      if (!file) return false;
 
+      e.preventDefault();
       await onUpload?.(file, editor);
+      return true;
     },
     editorProps: {
+      handleKeyDown: (_view, event) => {
+        if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "s") {
+          event.preventDefault();
+          onCtrlSave?.(editor);
+          return true;
+        }
+        return false;
+      },
+      handlePaste: (_view, event) => {
+        const file = event.clipboardData?.files[0];
+
+        if (file) {
+          event.preventDefault();
+          void onUpload?.(file, editor);
+          return true;
+        }
+
+        const pastedUrl = extractUrlFromClipboard(event);
+        if (!pastedUrl) return false;
+
+        const videoProvider = detectVideoProvider(pastedUrl);
+        const presentationProvider = detectPresentationProvider(pastedUrl);
+
+        if (videoProvider === "unknown" && presentationProvider === "unknown") {
+          return false;
+        }
+
+        if (presentationProvider !== "unknown") {
+          editor
+            ?.chain()
+            .focus()
+            .setPresentationEmbed({ src: pastedUrl, sourceType: "external" })
+            .run();
+          return true;
+        }
+
+        editor?.chain().focus().setVideoEmbed({ src: pastedUrl, sourceType: "external" }).run();
+        return true;
+      },
       attributes: {
         class: "prose prose-xs sm:prose dark:prose-invert focus:outline-none max-w-full p-4",
       },
@@ -85,6 +127,11 @@ const Editor = ({
         acceptedFileTypes={acceptedFileTypes}
         onUpload={onUpload}
       />
+      {uploadProgress && (
+        <div className="border-t border-neutral-200 relative">
+          <Progress value={uploadProgress} className="h-3 rounded-none" />
+        </div>
+      )}
       <EditorContent id={id} editor={editor} placeholder={placeholder} className={editorClasses} />
     </div>
   );

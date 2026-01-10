@@ -8,16 +8,16 @@ import { ApiClient } from "../../api-client";
 import type { AxiosError } from "axios";
 import type { BetaCreateLessonBody } from "~/api/generated-api";
 
-type CreateTextBlockOptions = {
+type CreateContentOptions = {
   data: BetaCreateLessonBody;
 };
 
-export function useCreateTextLesson() {
+export function useCreateContentLesson() {
   const { toast } = useToast();
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (options: CreateTextBlockOptions) => {
+    mutationFn: async (options: CreateContentOptions) => {
       const response = await ApiClient.api.lessonControllerBetaCreateLesson(options.data);
 
       return response.data;
@@ -25,7 +25,7 @@ export function useCreateTextLesson() {
     onSuccess: () => {
       toast({
         variant: "default",
-        description: t("adminCourseView.curriculum.lesson.toast.textLessonCreatedSuccessfully"),
+        description: t("adminCourseView.curriculum.lesson.toast.contentLessonCreatedSuccessfully"),
       });
     },
     onError: (error: AxiosError) => {

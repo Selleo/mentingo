@@ -2050,10 +2050,7 @@ export class CourseService {
     return await Promise.all(
       lessons.map(async (lesson) => {
         const updatedLesson = { ...lesson };
-        if (
-          lesson.fileS3Key &&
-          (lesson.type === LESSON_TYPES.VIDEO || lesson.type === LESSON_TYPES.PRESENTATION)
-        ) {
+        if (lesson.fileS3Key && lesson.type === LESSON_TYPES.CONTENT) {
           if (!lesson.fileS3Key.startsWith("https://")) {
             try {
               const signedUrl = await this.fileService.getFileUrl(lesson.fileS3Key);

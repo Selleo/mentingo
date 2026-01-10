@@ -1,16 +1,12 @@
 export const LessonTypes = {
-  presentation: "Presentation",
-  text: "Text",
-  video: "Video",
+  content: "Content",
   quiz: "Quiz",
   ai_mentor: "AI Mentor",
   embed: "Embed",
 } as const;
 
 export const LessonTypesIcons = {
-  presentation: "Presentation",
-  text: "Text",
-  video: "Video",
+  content: "Content",
   quiz: "Quiz",
   ai_mentor: "AiMentor",
   embed: "Embed",
