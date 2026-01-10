@@ -1,6 +1,6 @@
 import { Node, mergeAttributes } from "@tiptap/core";
 import { NodeViewWrapper, ReactNodeViewRenderer } from "@tiptap/react";
-import { Presentation as PresentationIcon, X } from "lucide-react";
+import { GripVertical, Presentation as PresentationIcon, X } from "lucide-react";
 
 import Presentation from "~/components/Presentation/Presentation";
 import { Button } from "~/components/ui/button";
@@ -55,6 +55,16 @@ const PresentationEditorView = ({ node, editor, getPos }: NodeViewProps) => {
   return (
     <NodeViewWrapper className="presentation-node">
       <div className="inline-flex max-w-full items-center gap-2 rounded border border-dashed border-neutral-300 bg-neutral-50 px-3 py-2 text-sm text-primary-700">
+        <Button
+          type="button"
+          size="xs"
+          variant="ghost"
+          className="rounded-full text-neutral-500 hover:bg-neutral-200"
+          aria-label="Drag presentation embed"
+          data-drag-handle
+        >
+          <GripVertical className="size-4" aria-hidden />
+        </Button>
         <a
           {...getPresentationDataAttributes(attrs)}
           href={attrs.src}

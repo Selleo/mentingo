@@ -1,6 +1,6 @@
 import { Node, mergeAttributes } from "@tiptap/core";
 import { NodeViewWrapper, ReactNodeViewRenderer } from "@tiptap/react";
-import { Video as VideoIcon, X } from "lucide-react";
+import { GripVertical, Video as VideoIcon, X } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
 import { Video } from "~/components/VideoPlayer/Video";
@@ -56,6 +56,16 @@ const VideoEditorView = ({ node, editor, getPos }: NodeViewProps) => {
   return (
     <NodeViewWrapper className="video-node">
       <div className="inline-flex max-w-full items-center gap-2 rounded border border-dashed border-neutral-300 bg-neutral-50 px-3 py-2 text-sm text-primary-700">
+        <Button
+          type="button"
+          size="xs"
+          variant="ghost"
+          className="rounded-full text-neutral-500 hover:bg-neutral-200"
+          aria-label="Drag video embed"
+          data-drag-handle
+        >
+          <GripVertical className="size-4" aria-hidden />
+        </Button>
         <a
           {...getVideoDataAttributes(attrs)}
           href={attrs.src}
