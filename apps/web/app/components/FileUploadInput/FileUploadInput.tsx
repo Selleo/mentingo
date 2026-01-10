@@ -35,7 +35,6 @@ const FileUploadInput = ({
   handleFileUpload,
   handleFileDelete,
   isUploading,
-  isProcessing,
   contentTypeToDisplay,
   url,
   className,
@@ -89,7 +88,7 @@ const FileUploadInput = ({
   if (!videoPreview && !file) {
     return (
       <div {...getRootProps()} className="max-w-[440px]">
-        <EmptyStateUpload contentTypeToDisplay={contentTypeToDisplay} className={className} />
+        <EmptyStateUpload className={className} />
         <input {...getInputProps()} className="sr-only" />
       </div>
     );

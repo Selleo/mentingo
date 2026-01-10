@@ -178,6 +178,7 @@ export const LessonContent = ({
     lesson.type,
     markLessonAsCompleted,
     language,
+    lesson.hasVideo,
   ]);
 
   useEffect(() => {

@@ -1,5 +1,4 @@
 import { memo } from "react";
-import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 
 import Viewer from "~/components/RichText/Viever";
