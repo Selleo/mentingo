@@ -14,6 +14,7 @@ type EditorProps = {
   content?: string;
   onChange: (value: string) => void;
   onUpload?: (file?: File, editor?: TiptapEditor | null) => Promise<void>;
+  onCtrlSave?: (editor: TiptapEditor | null) => void;
   placeholder?: string;
   id?: string;
   parentClassName?: string;
@@ -27,6 +28,7 @@ const Editor = ({
   placeholder,
   onChange,
   onUpload,
+  onCtrlSave,
   id,
   parentClassName,
   lessonId,
@@ -48,6 +50,14 @@ const Editor = ({
       return true;
     },
     editorProps: {
+      handleKeyDown: (_view, event) => {
+        if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "s") {
+          event.preventDefault();
+          onCtrlSave?.(editor);
+          return true;
+        }
+        return false;
+      },
       handlePaste: (_view, event) => {
         const file = event.clipboardData?.files[0];
 

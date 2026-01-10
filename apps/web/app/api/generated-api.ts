@@ -518,6 +518,8 @@ export interface InitVideoUploadResponse {
   tusEndpoint: string;
   tusHeaders: object;
   expiresAt: string;
+  /** @format uuid */
+  resourceId?: string;
 }
 
 export type GetVideoUploadStatusResponse = {

@@ -8,7 +8,9 @@ import {
 } from "@repo/shared";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import * as tus from "tus-js-client";
 
+import { useInitVideoUpload } from "~/api/mutations/admin/useInitVideoUpload";
 import { useLessonFileUpload } from "~/api/mutations/admin/useLessonFileUpload";
 import { FormTextField } from "~/components/Form/FormTextField";
 import { Icon } from "~/components/Icon";
@@ -16,8 +18,10 @@ import Editor from "~/components/RichText/Editor";
 import { Button } from "~/components/ui/button";
 import { Form, FormControl, FormField, FormItem } from "~/components/ui/form";
 import { Label } from "~/components/ui/label";
+import { useToast } from "~/components/ui/use-toast";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
 import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/compontents/MissingTranslationsAlert";
+import { useVideoUploadResumeStore } from "~/modules/common/store/useVideoUploadResumeStore";
 import { baseUrl } from "~/utils/baseUrl";
 
 import { ContentTypes, DeleteContentType } from "../../../EditCourse.types";
@@ -51,10 +55,13 @@ const ContentLessonForm = ({
     language,
   });
   const { t } = useTranslation();
+  const { toast } = useToast();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const { mutateAsync: initVideoUpload } = useInitVideoUpload();
   const { mutateAsync: uploadFile } = useLessonFileUpload();
+  const { getUploadForFile, saveUpload, clearUpload } = useVideoUploadResumeStore();
 
   const onCloseModal = () => {
     setIsModalOpen(false);
@@ -62,6 +69,90 @@ const ContentLessonForm = ({
 
   const onClickDelete = () => {
     setIsModalOpen(true);
+  };
+
+  const normalizeTusHeaders = (headers: object): Record<string, string> =>
+    Object.fromEntries(Object.entries(headers).map(([key, value]) => [key, String(value)]));
+
+  const buildFileFingerprint = (file: File) => `${file.name}:${file.size}:${file.lastModified}`;
+
+  const handleVideoTusUpload = async (file: File, editor?: TiptapEditor | null) => {
+    const existingUpload = getUploadForFile(file);
+    const session =
+      existingUpload ??
+      (await initVideoUpload({
+        filename: file.name,
+        sizeBytes: file.size,
+        mimeType: file.type,
+        title: file.name,
+        resource: "lesson-content",
+        lessonId: lessonToEdit?.id,
+      }));
+
+    const tusHeaders = normalizeTusHeaders(session.tusHeaders);
+    const tusFingerprint = `bunny-tus:${session.uploadId}:${buildFileFingerprint(file)}`;
+
+    saveUpload({
+      uploadId: session.uploadId,
+      bunnyGuid: session.bunnyGuid,
+      fileKey: session.fileKey,
+      tusEndpoint: session.tusEndpoint,
+      tusHeaders,
+      expiresAt: session.expiresAt,
+      filename: file.name,
+      sizeBytes: file.size,
+      lastModified: file.lastModified,
+      resourceId: session.resourceId,
+    });
+
+    await new Promise<void>((resolve, reject) => {
+      toast({
+        description: t("uploadFile.toast.videoUploading"),
+        duration: Number.POSITIVE_INFINITY,
+        variant: "loading",
+      });
+
+      const upload = new tus.Upload(file, {
+        endpoint: session.tusEndpoint,
+        headers: tusHeaders,
+        metadata: {
+          filename: file.name,
+          filetype: file.type,
+        },
+        retryDelays: [0, 1000, 3000, 5000, 10000],
+        fingerprint: async () => tusFingerprint,
+        removeFingerprintOnSuccess: true,
+        onError: (error) => {
+          clearUpload(session.uploadId);
+          reject(error);
+        },
+        onSuccess: () => {
+          clearUpload(session.uploadId);
+          toast({
+            description: t("uploadFile.toast.videoUploadedProcessing"),
+            duration: Number.POSITIVE_INFINITY,
+            variant: "success",
+          });
+          resolve();
+        },
+      });
+
+      upload.findPreviousUploads().then((previousUploads) => {
+        if (previousUploads.length > 0) {
+          upload.resumeFromPreviousUpload(previousUploads[0]);
+        }
+        upload.start();
+      });
+    });
+
+    if (!session.resourceId) return;
+
+    const resourceUrl = `${baseUrl}/api/lesson/lesson-resource/${session.resourceId}`;
+    editor
+      ?.chain()
+      .insertContent("<br />")
+      .setVideoEmbed({ src: resourceUrl, sourceType: "internal" })
+      .run();
   };
 
   const handleFileUpload = async (file?: File, editor?: TiptapEditor | null) => {
@@ -73,6 +164,19 @@ const ContentLessonForm = ({
       ALLOWED_EXCEL_FILE_TYPES.includes(file.type) ||
       ALLOWED_WORD_FILE_TYPES.includes(file.type) ||
       ALLOWED_PDF_FILE_TYPES.includes(file.type);
+
+    if (isVideo) {
+      try {
+        await handleVideoTusUpload(file, editor);
+      } catch (error) {
+        console.error("Error uploading video:", error);
+        toast({
+          description: t("uploadFile.toast.videoFailed"),
+          variant: "destructive",
+        });
+      }
+      return;
+    }
 
     await uploadFile(
       {
@@ -86,11 +190,6 @@ const ContentLessonForm = ({
         onSuccess: (data) => {
           const resourceUrl = `${baseUrl}/api/lesson/lesson-resource/${data.data.resourceId}`;
           const chain = editor?.chain().insertContent("<br />");
-
-          if (isVideo) {
-            chain?.setVideoEmbed({ src: resourceUrl, sourceType: "internal" }).run();
-            return;
-          }
 
           if (isPresentation) {
             chain?.setPresentationEmbed({ src: resourceUrl, sourceType: "internal" }).run();
@@ -177,6 +276,7 @@ const ContentLessonForm = ({
                       ...ALLOWED_PRESENTATION_FILE_TYPES,
                     ]}
                     onUpload={handleFileUpload}
+                    onCtrlSave={() => form.handleSubmit(onSubmit)()}
                     {...field}
                   />
                 </FormControl>

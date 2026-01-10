@@ -28,6 +28,7 @@ import { resources, resourceEntity } from "src/storage/schema";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import {
+  ENTITY_TYPES,
   MAX_FILE_SIZE,
   ALLOWED_EXCEL_MIME_TYPES,
   ALLOWED_EXCEL_MIME_TYPES_MAP,
@@ -225,6 +226,23 @@ export class FileService {
       throw error;
     }
 
+    let resourceId: UUIDType | undefined;
+
+    if (resource === "lesson-content" && lessonId) {
+      const resourceResult = await this.createResourceForEntity(
+        placeholderKey,
+        mimeType,
+        lessonId,
+        ENTITY_TYPES.LESSON,
+        RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+        {
+          originalFilename: filename,
+          size: sizeBytes,
+        },
+      );
+      resourceId = resourceResult.resourceId;
+    }
+
     const { tusEndpoint, tusHeaders, expiresAt } =
       await this.bunnyStreamService.getTusUploadConfig(guid);
 
@@ -235,6 +253,7 @@ export class FileService {
       tusEndpoint,
       tusHeaders,
       expiresAt,
+      resourceId,
     };
   }
 
