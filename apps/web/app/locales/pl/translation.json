@@ -2078,6 +2078,9 @@
     "placeholder": {
       "lineHint": "Wklej link YouTube/Vimeo/Canva, dodaj Google Docs lub wgraj plik."
     },
+    "upload": {
+      "videoProgress": "Przesyłanie wideo..."
+    },
     "toolbar": {
       "format": {
         "placeholder": "Wybierz format",

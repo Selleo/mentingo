@@ -58,6 +58,8 @@ const ContentLessonForm = ({
   const { toast } = useToast();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isVideoUploading, setIsVideoUploading] = useState(false);
+  const [videoUploadProgress, setVideoUploadProgress] = useState<number | null>(null);
 
   const { mutateAsync: initVideoUpload } = useInitVideoUpload();
   const { mutateAsync: uploadFile } = useLessonFileUpload();
@@ -105,45 +107,58 @@ const ContentLessonForm = ({
       resourceId: session.resourceId,
     });
 
-    await new Promise<void>((resolve, reject) => {
-      toast({
-        description: t("uploadFile.toast.videoUploading"),
-        duration: Number.POSITIVE_INFINITY,
-        variant: "loading",
-      });
+    setIsVideoUploading(true);
+    setVideoUploadProgress(0);
 
-      const upload = new tus.Upload(file, {
-        endpoint: session.tusEndpoint,
-        headers: tusHeaders,
-        metadata: {
-          filename: file.name,
-          filetype: file.type,
-        },
-        retryDelays: [0, 1000, 3000, 5000, 10000],
-        fingerprint: async () => tusFingerprint,
-        removeFingerprintOnSuccess: true,
-        onError: (error) => {
-          clearUpload(session.uploadId);
-          reject(error);
-        },
-        onSuccess: () => {
-          clearUpload(session.uploadId);
-          toast({
-            description: t("uploadFile.toast.videoUploadedProcessing"),
-            duration: Number.POSITIVE_INFINITY,
-            variant: "success",
-          });
-          resolve();
-        },
-      });
+    try {
+      await new Promise<void>((resolve, reject) => {
+        toast({
+          description: t("uploadFile.toast.videoUploading"),
+          duration: Number.POSITIVE_INFINITY,
+          variant: "loading",
+        });
 
-      upload.findPreviousUploads().then((previousUploads) => {
-        if (previousUploads.length > 0) {
-          upload.resumeFromPreviousUpload(previousUploads[0]);
-        }
-        upload.start();
+        const upload = new tus.Upload(file, {
+          endpoint: session.tusEndpoint,
+          headers: tusHeaders,
+          metadata: {
+            filename: file.name,
+            filetype: file.type,
+          },
+          retryDelays: [0, 1000, 3000, 5000, 10000],
+          fingerprint: async () => tusFingerprint,
+          removeFingerprintOnSuccess: true,
+          onProgress: (bytesUploaded, bytesTotal) => {
+            if (bytesTotal === 0) return;
+            const progress = Math.round((bytesUploaded / bytesTotal) * 100);
+            setVideoUploadProgress(progress);
+          },
+          onError: (error) => {
+            clearUpload(session.uploadId);
+            reject(error);
+          },
+          onSuccess: () => {
+            clearUpload(session.uploadId);
+            toast({
+              description: t("uploadFile.toast.videoUploadedProcessing"),
+              duration: Number.POSITIVE_INFINITY,
+              variant: "success",
+            });
+            resolve();
+          },
+        });
+
+        upload.findPreviousUploads().then((previousUploads) => {
+          if (previousUploads.length > 0) {
+            upload.resumeFromPreviousUpload(previousUploads[0]);
+          }
+          upload.start();
+        });
       });
-    });
+    } finally {
+      setIsVideoUploading(false);
+      setVideoUploadProgress(null);
+    }
 
     if (!session.resourceId) return;
 
@@ -276,6 +291,7 @@ const ContentLessonForm = ({
                       ...ALLOWED_PRESENTATION_FILE_TYPES,
                     ]}
                     onUpload={handleFileUpload}
+                    uploadProgress={isVideoUploading ? (videoUploadProgress ?? 0) : null}
                     onCtrlSave={() => form.handleSubmit(onSubmit)()}
                     {...field}
                   />

@@ -2,6 +2,7 @@ import { ALLOWED_LESSON_IMAGE_FILE_TYPES } from "@repo/shared";
 import { EditorContent, useEditor, type Editor as TiptapEditor } from "@tiptap/react";
 import { useEffect } from "react";
 
+import { Progress } from "~/components/ui/progress";
 import { cn } from "~/lib/utils";
 
 import { detectPresentationProvider } from "./extensions/utils/presentation";
@@ -15,6 +16,7 @@ type EditorProps = {
   onChange: (value: string) => void;
   onUpload?: (file?: File, editor?: TiptapEditor | null) => Promise<void>;
   onCtrlSave?: (editor: TiptapEditor | null) => void;
+  uploadProgress?: number | null;
   placeholder?: string;
   id?: string;
   parentClassName?: string;
@@ -29,6 +31,7 @@ const Editor = ({
   onChange,
   onUpload,
   onCtrlSave,
+  uploadProgress,
   id,
   parentClassName,
   lessonId,
@@ -124,6 +127,11 @@ const Editor = ({
         acceptedFileTypes={acceptedFileTypes}
         onUpload={onUpload}
       />
+      {uploadProgress && (
+        <div className="border-t border-neutral-200 relative">
+          <Progress value={uploadProgress} className="h-3 rounded-none" />
+        </div>
+      )}
       <EditorContent id={id} editor={editor} placeholder={placeholder} className={editorClasses} />
     </div>
   );

@@ -2059,6 +2059,9 @@
     "placeholder": {
       "lineHint": "Paste a YouTube/Vimeo/Canva link, add Google Docs, or upload a file."
     },
+    "upload": {
+      "videoProgress": "Uploading video..."
+    },
     "toolbar": {
       "format": {
         "placeholder": "Select format",
