@@ -2075,6 +2075,9 @@
     }
   },
   "richTextEditor": {
+    "placeholder": {
+      "lineHint": "Wklej link YouTube/Vimeo/Canva, dodaj Google Docs lub wgraj plik."
+    },
     "toolbar": {
       "format": {
         "placeholder": "Wybierz format",

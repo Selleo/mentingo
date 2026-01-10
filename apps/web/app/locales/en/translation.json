@@ -2056,6 +2056,9 @@
     }
   },
   "richTextEditor": {
+    "placeholder": {
+      "lineHint": "Paste a YouTube/Vimeo/Canva link, add Google Docs, or upload a file."
+    },
     "toolbar": {
       "format": {
         "placeholder": "Select format",

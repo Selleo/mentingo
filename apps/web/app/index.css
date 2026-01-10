@@ -26,6 +26,14 @@ html {
   box-shadow: none;
 }
 
+.ProseMirror p.is-empty::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--neutral-400);
+  pointer-events: none;
+  height: 0;
+}
+
 @layer base {
   :root {
     --color-black: #121521;

@@ -2,10 +2,12 @@ import { mergeAttributes } from "@tiptap/core";
 import { Heading } from "@tiptap/extension-heading";
 import { Image } from "@tiptap/extension-image";
 import { Link } from "@tiptap/extension-link";
+import { Placeholder } from "@tiptap/extension-placeholder";
 import { TaskItem } from "@tiptap/extension-task-item";
 import { TaskList } from "@tiptap/extension-task-list";
 import { StarterKit } from "@tiptap/starter-kit";
 
+import i18n from "i18n";
 import {
   DownloadableFileEmbedEditor,
   DownloadableFileEmbedViewer,
@@ -84,6 +86,12 @@ const basePlugins = [
 
 export const editorPlugins = [
   ...basePlugins,
+  Placeholder.configure({
+    includeChildren: true,
+    showOnlyCurrent: true,
+    placeholder: ({ node }) =>
+      node.type.name === "paragraph" ? i18n.t("richTextEditor.placeholder.lineHint") : "",
+  }),
   DownloadableFileEmbedEditor,
   PresentationEmbedEditor,
   VideoEmbedEditor,
