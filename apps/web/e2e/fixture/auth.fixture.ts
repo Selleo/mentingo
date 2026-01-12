@@ -17,6 +17,7 @@ export class AuthFixture {
 
   async login(email: string, password: string) {
     await this.page.goto("/auth/login");
+    await this.page.waitForURL("/auth/login");
     await this.emailInput.fill(email);
     await this.passwordInput.fill(password);
     await this.loginButton.click();

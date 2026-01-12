@@ -365,8 +365,30 @@ const expectIndividualEnrollment = async (page: Page) => {
   await expect(page.getByRole("cell", { name: "Individually enrolled" })).toBeVisible();
 };
 
+const changeLanguageToEn = async (page: Page) => {
+  await page
+    .getByRole("button", {
+      name: /Avatar for email@example.com|Test Admin profile Test Admin/i,
+    })
+    .click();
+  await page.getByRole("link", { name: /Settings|Ustawienia/i }).click();
+  await page.waitForURL("/settings");
+  await page
+    .getByText(/LanguageEnglish|JęzykPolski/)
+    .getByRole("combobox")
+    .click();
+
+  await page
+    .getByLabel("English")
+    .getByText("English")
+    .or(page.getByRole("option", { name: "Angielski" }))
+    .click();
+  await page.getByLabel("Go to homepage").click();
+};
+
 const studentSeesCourse = async (page: Page) => {
   await login(page, USERS.student.email, USERS.student.password);
+  await changeLanguageToEn(page);
   await page.getByRole("button", { name: "Courses" }).getByRole("link").click();
   await expect(page.getByTestId(COURSE.title)).toBeVisible();
   await page.getByTestId(COURSE.title).click();

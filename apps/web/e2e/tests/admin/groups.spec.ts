@@ -56,8 +56,6 @@ const deleteAndAssert = async (page: Page, name: string) => {
     exact: true,
   });
 
-  await page.waitForLoadState("networkidle");
-
   await expect(newCell).toHaveCount(0, { timeout: 15000 });
 };
 
