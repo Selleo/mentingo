@@ -12,9 +12,9 @@ import {
 } from "~/api/queries/useCurrentThreadMessages";
 import { queryClient } from "~/api/queryClient";
 import { Icon } from "~/components/Icon";
+import { LoaderWithTextSequence } from "~/components/LoaderWithTextSequence";
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
-import Loader from "~/modules/common/Loader/Loader";
 import ChatLoader from "~/modules/Courses/Lesson/AiMentorLesson/components/ChatLoader";
 import ChatMessage from "~/modules/Courses/Lesson/AiMentorLesson/components/ChatMessage";
 import { LessonForm } from "~/modules/Courses/Lesson/AiMentorLesson/components/LessonForm";
@@ -121,7 +121,7 @@ const AiMentorLesson = ({ lesson, lessonLoading, isPreviewMode = false }: AiMent
         />
       )}
 
-      {lessonLoading && <Loader />}
+      {lessonLoading && <LoaderWithTextSequence preset="aiMentor" />}
       <div
         ref={messagesContainerRef}
         className="flex w-full grow max-w-full relative flex-col gap-y-4 overflow-y-scroll"

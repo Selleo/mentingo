@@ -39,6 +39,16 @@
     "error": {
       "somethingWentWrong": "Oops! Something went wrong."
     },
+    "loader": {
+      "textSequence": {
+        "aiMentor": {
+          "warmingUp": "Warming up AI mentor...",
+          "preparingSimulation": "Preparing simulation for you...",
+          "buildingContext": "Building scenario context...",
+          "takingLonger": "This is taking longer than usual..."
+        }
+      }
+    },
     "other": {
       "active": "Active",
       "archived": "Archived",
