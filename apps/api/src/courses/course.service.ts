@@ -71,6 +71,7 @@ import {
   studentLessonProgress,
   users,
   courseStudentsStats,
+  news,
 } from "src/storage/schema";
 import { StripeService } from "src/stripe/stripe.service";
 import { USER_ROLES } from "src/user/schemas/userRoles";
@@ -141,6 +142,8 @@ import type * as schema from "src/storage/schema";
 import type { UserRole } from "src/user/schemas/userRoles";
 import type { ProgressStatus } from "src/utils/types/progress.type";
 import type Stripe from "stripe";
+import { getCourseTsVector, getLessonTsVector } from "src/courses/utils/courses.utils";
+import { log } from "handlebars";
 
 @Injectable()
 export class CourseService {
@@ -184,6 +187,14 @@ export class CourseService {
       conditions.push(eq(courses.authorId, currentUserId));
     }
 
+    const searchTerm = filters.searchQuery?.trim();
+    const unifiedVector = sql`${getLessonTsVector()} || ${getCourseTsVector()}`;
+    const tsQuery = sql`websearch_to_tsquery('english', ${searchTerm})`;
+
+    if (filters.searchQuery) {
+      conditions.push(sql`${unifiedVector} @@ ${tsQuery}`);
+    }
+
     const queryDB = this.db
       .select({
         id: courses.id,
@@ -225,7 +236,12 @@ export class CourseService {
         courses.availableLocales,
         courses.baseLanguage,
       )
-      .orderBy(sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)));
+      .orderBy(
+        sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)),
+        ...(filters.searchQuery ? [sql`ts_rank(${unifiedVector}, ${tsQuery}) DESC`] : []),
+      );
+
+    console.log(queryDB);
 
     const dynamicQuery = queryDB.$dynamic();
     const paginatedQuery = addPagination(dynamicQuery, page, perPage);
@@ -592,8 +608,9 @@ export class CourseService {
             const { authorAvatarUrl, ...itemWithoutReferences } = item;
 
             const signedUrl = await this.fileService.getFileUrl(item.thumbnailUrl);
-            const authorAvatarSignedUrl =
-              await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
+            const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
+              authorAvatarUrl,
+            );
 
             return {
               ...itemWithoutReferences,
@@ -1049,8 +1066,9 @@ export class CourseService {
       contentCreatorCourses.map(async (course) => {
         const { authorAvatarUrl, ...courseWithoutReferences } = course;
 
-        const authorAvatarSignedUrl =
-          await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
+        const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
+          authorAvatarUrl,
+        );
 
         return {
           ...courseWithoutReferences,
@@ -2142,16 +2160,6 @@ export class CourseService {
         sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
           courses.description
         }) AS t(k, v) WHERE v ILIKE ${`%${filters.description}%`})`,
-      );
-    }
-
-    if (filters.searchQuery) {
-      conditions.push(
-        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
-          courses.title
-        }) AS t(k, v) WHERE v ILIKE ${`%${filters.searchQuery}%`}) OR EXISTS (SELECT 1 FROM jsonb_each_text(${
-          courses.description
-        }) AS t(k, v) WHERE v ILIKE ${`%${filters.searchQuery}%`})`,
       );
     }
 
@@ -3402,8 +3410,9 @@ export class CourseService {
     earlyReturn = false,
   ): CourseTranslationType[] {
     const dataToUpdate: CourseTranslationType[] = [];
-    type Candidate =
-      ReturnType<typeof this.translationCandidates> extends Generator<infer T> ? T : never;
+    type Candidate = ReturnType<typeof this.translationCandidates> extends Generator<infer T>
+      ? T
+      : never;
 
     const pushMissing = ({ id, hasValue, baseValue, field, idColumn }: Candidate) => {
       if (hasValue || !id) return false;

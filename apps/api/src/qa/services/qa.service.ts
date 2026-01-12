@@ -24,6 +24,8 @@ export class QAService {
   ) {}
 
   async createQA(data: CreateQABody, currentUser: CurrentUser) {
+    await this.checkAccess(currentUser.userId);
+
     const [qa] = await this.qaRepository.createQA(data, { createdBy: currentUser.userId });
 
     this.eventBus.publish(
@@ -35,7 +37,9 @@ export class QAService {
     );
   }
 
-  async getQA(qaId: UUIDType, language: SupportedLanguages) {
+  async getQA(qaId: UUIDType, language: SupportedLanguages, userId: UUIDType) {
+    await this.checkAccess(userId);
+
     return this.qaRepository.getQA(qaId, language);
   }
 
@@ -46,6 +50,8 @@ export class QAService {
   }
 
   async createLanguage(qaId: UUIDType, language: SupportedLanguages, currentUser: CurrentUser) {
+    await this.checkAccess(currentUser.userId);
+
     const qa = await this.qaRepository.getQA(qaId, language);
 
     if (!qa) throw new NotFoundException({ message: "qaView.toast.notFound" });
@@ -76,6 +82,8 @@ export class QAService {
     language: SupportedLanguages,
     currentUser: CurrentUser,
   ) {
+    await this.checkAccess(currentUser.userId);
+
     const qa = await this.qaRepository.getQA(qaId, language);
 
     if (!(data.title || data.description))
@@ -100,6 +108,8 @@ export class QAService {
   }
 
   async deleteQA(qaId: UUIDType, currentUser: CurrentUser) {
+    await this.checkAccess(currentUser.userId);
+
     const { baseLanguage } = await this.localizationService.getBaseLanguage(ENTITY_TYPE.QA, qaId);
 
     const qa = await this.qaRepository.getQA(qaId, baseLanguage);
@@ -118,6 +128,8 @@ export class QAService {
   }
 
   async deleteLanguage(qaId: UUIDType, language: SupportedLanguages, currentUser: CurrentUser) {
+    await this.checkAccess(currentUser.userId);
+
     const qa = await this.qaRepository.getQA(qaId, language);
 
     if (!qa) throw new BadRequestException({ message: "qaView.toast.notFound" });

@@ -28,6 +28,7 @@ import type { InferSelectModel } from "drizzle-orm";
 import type { NewsActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
+import { SettingsService } from "src/settings/settings.service";
 
 // News uses a custom pagination: first page shows up to 7 items, following pages up to 9.
 const FIRST_PAGE_SIZE = 7;
@@ -43,9 +44,12 @@ export class NewsService {
     private readonly localizationService: LocalizationService,
     private readonly fileService: FileService,
     private readonly eventBus: EventBus,
+    private readonly settingsService: SettingsService,
   ) {}
 
   async createNews(createNewsBody: CreateNews, currentUser: CurrentUser) {
+    await this.checkAccess(currentUser?.userId);
+
     const { language } = createNewsBody;
 
     const [createdNews] = await this.db
@@ -83,6 +87,8 @@ export class NewsService {
     currentUser?: CurrentUser,
     coverFile?: Express.Multer.File,
   ) {
+    await this.checkAccess(currentUser?.userId);
+
     const { language, ...updateNewsData } = updateNewsBody;
 
     const existingNews = await this.validateNewsExists(newsId, language);
@@ -150,11 +156,12 @@ export class NewsService {
     currentUser?: CurrentUser,
     searchQuery?: string,
   ) {
+    await this.checkAccess(currentUser?.userId);
+
     const pagination = this.getPaginationForNews(page);
 
     const conditions = this.getVisibleNewsConditions(requestedLanguage, currentUser);
 
-    // Full-text search setup
     const isSearching = searchQuery && searchQuery.trim().length >= 3;
     const searchTerm = isSearching ? searchQuery.trim() : null;
     const newsTsVector = sql`(
@@ -163,8 +170,9 @@ export class NewsService {
       setweight(jsonb_to_tsvector('english', COALESCE(${news.content}, '{}'::jsonb), '["string"]'), 'C')
     )`;
 
+    const tsQuery = sql`websearch_to_tsquery('english', ${searchTerm})`;
+
     if (isSearching && searchTerm) {
-      const tsQuery = sql`websearch_to_tsquery('english', ${searchTerm})`;
       conditions.push(sql`${newsTsVector} @@ ${tsQuery}`);
     }
 
@@ -183,7 +191,7 @@ export class NewsService {
       .where(and(...conditions))
       .orderBy(
         isSearching && searchTerm
-          ? sql`ts_rank(${newsTsVector}, websearch_to_tsquery('english', ${searchTerm})) DESC`
+          ? sql`ts_rank(${newsTsVector}, ${tsQuery}`
           : sql`${news.publishedAt} DESC`,
       )
       .limit(pagination.perPage)
@@ -206,7 +214,9 @@ export class NewsService {
     };
   }
 
-  async getDraftNewsList(requestedLanguage: SupportedLanguages, page = 1) {
+  async getDraftNewsList(requestedLanguage: SupportedLanguages, page = 1, currentUser?: CurrentUser) {
+    await this.checkAccess(currentUser?.userId);
+
     const pagination = this.getPaginationForNews(page);
 
     const newsList = await this.db
@@ -259,6 +269,8 @@ export class NewsService {
     language: SupportedLanguages,
     currentUser?: CurrentUser,
   ) {
+    await this.checkAccess(currentUser?.userId);
+
     const existingNews = await this.validateNewsExists(newsId, language);
 
     const previousSnapshot = await this.buildNewsActivitySnapshot(newsId, language);
@@ -306,6 +318,8 @@ export class NewsService {
   }
 
   async deleteNews(newsId: UUIDType, currentUser?: CurrentUser) {
+    await this.checkAccess(currentUser?.userId);
+
     const existingNews = await this.validateNewsExists(newsId, undefined, false);
 
     if (existingNews.archived) return { id: existingNews.id };
@@ -341,6 +355,8 @@ export class NewsService {
     requestedLanguage: SupportedLanguages,
     currentUser?: CurrentUser,
   ) {
+    await this.checkAccess(currentUser?.userId);
+
     const isAdminLike =
       currentUser?.role === USER_ROLES.ADMIN || currentUser?.role === USER_ROLES.CONTENT_CREATOR;
 
@@ -430,6 +446,8 @@ export class NewsService {
     createNewsBody: CreateNews,
     currentUser?: CurrentUser,
   ) {
+    await this.checkAccess(currentUser?.userId);
+
     const { language } = createNewsBody;
 
     const existingNews = await this.validateNewsExists(newsId, language, false);
@@ -478,6 +496,8 @@ export class NewsService {
     description: string,
     currentUser?: CurrentUser,
   ) {
+    await this.checkAccess(currentUser?.userId);
+
     const fileTitle = {
       [language]: title,
     };
@@ -512,6 +532,8 @@ export class NewsService {
     description: string,
     currentUser?: CurrentUser,
   ) {
+    await this.checkAccess(currentUser?.userId);
+
     if (!file || !file.mimetype.startsWith("image/"))
       throw new BadRequestException("adminNewsView.toast.invalidCoverType");
 
@@ -597,7 +619,9 @@ export class NewsService {
     newsId: UUIDType,
     language: SupportedLanguages,
     content: string,
+    currentUser: CurrentUser
   ): Promise<string> {
+    await this.checkAccess(currentUser?.userId);
     await this.validateNewsExists(newsId, language);
 
     const resources = await this.getNewsResources(newsId, language);
@@ -890,5 +914,16 @@ export class NewsService {
     const title = titleMap[language];
 
     return typeof title === "string" ? title : undefined;
+  }
+
+  private async checkAccess(currentUserId?: UUIDType) {
+    const { newsEnabled, unregisteredUserNewsAccessibility } =
+      await this.settingsService.getGlobalSettings();
+
+    const hasAccess = Boolean(newsEnabled && (currentUserId || unregisteredUserNewsAccessibility));
+
+    if (!hasAccess) {
+      throw new BadRequestException({ message: "common.toast.noAccess" });
+    }
   }
 }

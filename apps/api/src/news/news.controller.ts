@@ -61,8 +61,9 @@ export class NewsController {
   async getDraftNewsList(
     @Query("language") language: SupportedLanguages,
     @Query("page") page = 1,
+    @CurrentUser() currentUser: CurrentUserType
   ): Promise<PaginatedResponse<GetNewsResponse[]>> {
-    const newsList = await this.newsService.getDraftNewsList(language, page);
+    const newsList = await this.newsService.getDraftNewsList(language, page, currentUser);
 
     return new PaginatedResponse(newsList);
   }
@@ -75,9 +76,10 @@ export class NewsController {
   @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   async generateNewsPreview(
     @Body() body: { newsId: UUIDType; language: SupportedLanguages; content: string },
+    @CurrentUser() currentUser: CurrentUserType
   ): Promise<BaseResponse<{ parsedContent: string }>> {
     const { newsId, language, content } = body;
-    const previewContent = await this.newsService.generateNewsPreview(newsId, language, content);
+    const previewContent = await this.newsService.generateNewsPreview(newsId, language, content, currentUser);
 
     return new BaseResponse({ parsedContent: previewContent });
   }

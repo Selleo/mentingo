@@ -45,6 +45,7 @@ import type {
 } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
+import { SettingsService } from "src/settings/settings.service";
 
 type StoredArticleResource = Awaited<ReturnType<FileService["getResourcesForEntity"]>>[number];
 type ResourceMetadata = StoredArticleResource["metadata"] & { originalFilename?: unknown };
@@ -56,6 +57,7 @@ export class ArticlesService {
     private readonly fileService: FileService,
     private readonly articlesRepository: ArticlesRepository,
     private readonly eventBus: EventBus,
+    private readonly settingsService: SettingsService,
     @Inject("DB") private readonly db: DatabasePg,
   ) {}
 
@@ -63,6 +65,8 @@ export class ArticlesService {
     createArticleSectionBody: CreateArticleSection,
     currentUser: CurrentUser,
   ) {
+    await this.checkAccess(currentUser.userId);
+
     const { language } = createArticleSectionBody;
 
     const [section] = await this.articlesRepository.createArticleSection(
@@ -92,7 +96,10 @@ export class ArticlesService {
   async getArticleSection(
     sectionId: UUIDType,
     requestedLanguage: SupportedLanguages,
+    currentUser: CurrentUser
   ): Promise<GetArticleSectionResponse> {
+    await this.checkAccess(currentUser.userId);
+
     const [section] = await this.articlesRepository.getArticleSectionDetails(
       sectionId,
       requestedLanguage,
@@ -108,6 +115,8 @@ export class ArticlesService {
     updateArticleSectionBody: UpdateArticleSection,
     currentUser: CurrentUser,
   ) {
+    await this.checkAccess(currentUser.userId);
+
     const { language, title } = updateArticleSectionBody;
 
     await this.validateArticleSectionExists(sectionId, language);
@@ -145,6 +154,8 @@ export class ArticlesService {
     body: CreateArticleSection,
     currentUser: CurrentUser,
   ) {
+    await this.checkAccess(currentUser.userId);
+
     const { language } = body;
 
     const existingSection = await this.validateArticleSectionExists(sectionId, language, false);
@@ -187,6 +198,8 @@ export class ArticlesService {
     language: SupportedLanguages,
     currentUser: CurrentUser,
   ) {
+    await this.checkAccess(currentUser.userId);
+
     const existingSection = await this.validateArticleSectionExists(sectionId, language);
 
     const previousSnapshot = await this.buildArticleSectionActivitySnapshot(sectionId, language);
@@ -227,6 +240,8 @@ export class ArticlesService {
   }
 
   async deleteArticleSection(sectionId: UUIDType, currentUser: CurrentUser) {
+    await this.checkAccess(currentUser.userId);
+
     const existingSection = await this.validateArticleSectionExists(sectionId, undefined, false);
 
     const assignedArticlesCount = await this.articlesRepository.countArticlesInSection(sectionId);
@@ -250,6 +265,8 @@ export class ArticlesService {
   }
 
   async createArticle(createArticleBody: CreateArticle, currentUser: CurrentUser) {
+    await this.checkAccess(currentUser.userId);
+
     const { language, sectionId } = createArticleBody;
 
     await this.validateArticleSectionExists(sectionId, undefined, false);
@@ -286,7 +303,9 @@ export class ArticlesService {
     currentUser?: CurrentUser,
     coverFile?: Express.Multer.File,
   ) {
-    await this.validateAccess(articleId, currentUser);
+    await this.checkAccess(currentUser?.userId);
+
+    await this.checkEditAccess(articleId, currentUser);
 
     const { language, ...updateArticleData } = updateArticleBody;
 
@@ -339,6 +358,8 @@ export class ArticlesService {
     currentUser?: CurrentUser,
     searchQuery?: string,
   ) {
+    await this.checkAccess(currentUser?.userId);
+
     const conditions = this.articlesRepository.getVisibleArticleConditions(
       requestedLanguage,
       currentUser,
@@ -356,7 +377,8 @@ export class ArticlesService {
     language: SupportedLanguages,
     currentUser: CurrentUser,
   ) {
-    await this.validateAccess(articleId, currentUser);
+    await this.checkAccess(currentUser.userId);
+    await this.checkEditAccess(articleId, currentUser);
 
     const existingArticle = await this.validateArticleExists(articleId, language);
 
@@ -398,7 +420,8 @@ export class ArticlesService {
   }
 
   async deleteArticle(articleId: UUIDType, currentUser?: CurrentUser) {
-    await this.validateAccess(articleId, currentUser);
+    await this.checkAccess(currentUser?.userId);
+    await this.checkEditAccess(articleId, currentUser);
 
     const existingArticle = await this.validateArticleExists(articleId, undefined, false);
 
@@ -430,6 +453,8 @@ export class ArticlesService {
     isDraftMode = false,
     currentUser?: CurrentUser,
   ) {
+    await this.checkAccess(currentUser?.userId);
+
     const isAdminLike =
       currentUser?.role === USER_ROLES.ADMIN || currentUser?.role === USER_ROLES.CONTENT_CREATOR;
 
@@ -479,6 +504,8 @@ export class ArticlesService {
     isDraftMode = false,
     currentUser?: CurrentUser,
   ): Promise<GetArticleTocResponse> {
+    await this.checkAccess(currentUser?.userId);
+    
     const conditions = this.articlesRepository.getVisibleArticleConditions(
       requestedLanguage,
       currentUser,
@@ -530,7 +557,7 @@ export class ArticlesService {
     createArticleBody: CreateLanguageArticle,
     currentUser: CurrentUser,
   ) {
-    await this.validateAccess(articleId, currentUser);
+    await this.checkEditAccess(articleId, currentUser);
 
     const { language } = createArticleBody;
 
@@ -576,7 +603,7 @@ export class ArticlesService {
     description: string,
     currentUser?: CurrentUser,
   ) {
-    await this.validateAccess(articleId, currentUser);
+    await this.checkEditAccess(articleId, currentUser);
 
     const fileTitle = {
       [language]: title,
@@ -612,7 +639,7 @@ export class ArticlesService {
     description: string,
     currentUser?: CurrentUser,
   ) {
-    await this.validateAccess(articleId, currentUser);
+    await this.checkEditAccess(articleId, currentUser);
 
     if (!file || !file.mimetype.startsWith("image/"))
       throw new BadRequestException("adminArticleView.toast.invalidCoverType");
@@ -856,7 +883,7 @@ export class ArticlesService {
     return segments.join("/");
   }
 
-  private async validateAccess(articleId: UUIDType, currentUser?: CurrentUser) {
+  private async checkEditAccess(articleId: UUIDType, currentUser?: CurrentUser) {
     const [article] = await this.articlesRepository.getArticleAuthorId(articleId);
 
     if (
@@ -992,5 +1019,16 @@ export class ArticlesService {
     const title = titleMap[language];
 
     return typeof title === "string" ? title : undefined;
+  }
+
+  private async checkAccess(currentUserId?: UUIDType) {
+    const { articlesEnabled, unregisteredUserArticlesAccessibility } =
+      await this.settingsService.getGlobalSettings();
+
+    const hasAccess = Boolean(articlesEnabled && (currentUserId || unregisteredUserArticlesAccessibility));
+
+    if (!hasAccess) {
+      throw new BadRequestException({ message: "common.toast.noAccess" });
+    }
   }
 }

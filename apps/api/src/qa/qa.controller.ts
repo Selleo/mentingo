@@ -50,8 +50,9 @@ export class QAController {
   async getQA(
     @Param("qaId") qaId: UUIDType,
     @Query("language") language: SupportedLanguages,
+    @CurrentUser("userId") userId: UUIDType
   ): Promise<QAResponseBody> {
-    return this.qaService.getQA(qaId, language);
+    return this.qaService.getQA(qaId, language, userId);
   }
 
   @Public()

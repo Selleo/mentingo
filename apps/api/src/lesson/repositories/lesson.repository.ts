@@ -3,6 +3,7 @@ import { COURSE_ENROLLMENT } from "@repo/shared";
 import { and, desc, eq, getTableColumns, type SQL, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
+import { getCourseTsVector, getLessonTsVector } from "src/courses/utils/courses.utils";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import {
@@ -11,7 +12,6 @@ import {
   chapters,
   courses,
   lessons,
-  questionAnswerOptions,
   questions,
   quizAttempts,
   studentCourses,
@@ -373,7 +373,6 @@ export class LessonRepository {
       eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
     ];
 
-    // Simple filters (non-search)
     if (filters.title) {
       conditions.push(
         sql`EXISTS (SELECT 1 FROM jsonb_each_text(${lessons.title}) AS t(k, v) 
@@ -396,49 +395,14 @@ export class LessonRepository {
       }
     }
 
-    // Full-text search across all lesson content
     if (filters.searchQuery) {
       const searchTerm = filters.searchQuery.trim();
 
-      // Define tsvector expressions matching our functional GIN indexes
-      const lessonTsVector = sql`(
-        setweight(jsonb_to_tsvector('english', ${lessons.title}, '["string"]'), 'A') ||
-        setweight(jsonb_to_tsvector('english', COALESCE(${lessons.description}, '{}'::jsonb), '["string"]'), 'B')
-      )`;
-
       const tsQuery = sql`websearch_to_tsquery('english', ${searchTerm})`;
+      const unifiedVector = sql`${getLessonTsVector()} || ${getCourseTsVector()}`;
 
-      // Search across lessons, questions, and answer options
-      // Returns lessons where ANY of these match:
-      // 1. Lesson title/description
-      // 2. Question title/description/solution
-      // 3. Answer option text
-      // 4. Lesson resource content
-      conditions.push(sql`(
-        ${lessonTsVector} @@ ${tsQuery}
-        OR EXISTS (
-          SELECT 1 FROM ${questions} q
-          WHERE q.lesson_id = ${lessons.id}
-          AND (
-            setweight(jsonb_to_tsvector('english', q.title, '["string"]'), 'A') ||
-            setweight(jsonb_to_tsvector('english', COALESCE(q.description, '{}'::jsonb), '["string"]'), 'B') ||
-            setweight(jsonb_to_tsvector('english', COALESCE(q.solution_explanation, '{}'::jsonb), '["string"]'), 'C')
-          ) @@ ${tsQuery}
-        )
-        OR EXISTS (
-          SELECT 1 FROM ${questions} q
-          INNER JOIN ${questionAnswerOptions} qao ON qao.question_id = q.id
-          WHERE q.lesson_id = ${lessons.id}
-          AND jsonb_to_tsvector('english', qao.option_text, '["string"]') @@ ${tsQuery}
-        )
-        OR EXISTS (
-          SELECT 1 FROM ${lessonResources} lr
-          WHERE lr.lesson_id = ${lessons.id}
-          AND to_tsvector('english', regexp_replace(regexp_replace(COALESCE(lr.source, ''), '<[^>]+>', '', 'g'), '&[^;]+;', '', 'g')) @@ ${tsQuery}
-        )
-      )`);
+      conditions.push(sql`${unifiedVector} @@ ${tsQuery}`);
 
-      // Execute query with ranking
       return this.db
         .select({
           id: lessons.id,
@@ -452,7 +416,6 @@ export class LessonRepository {
           chapterId: chapters.id,
           chapterTitle: this.localizationService.getLocalizedSqlField(chapters.title, language),
           chapterDisplayOrder: sql<number>`${chapters.displayOrder}`,
-          searchRank: sql<number>`ts_rank(${lessonTsVector}, ${tsQuery})`,
         })
         .from(lessons)
         .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
@@ -467,13 +430,12 @@ export class LessonRepository {
         )
         .where(and(...conditions))
         .orderBy(
-          desc(sql`ts_rank(${lessonTsVector}, ${tsQuery})`),
+          desc(sql`ts_rank(${unifiedVector}, ${tsQuery})`),
           chapters.displayOrder,
           lessons.displayOrder,
         );
     }
 
-    // Fallback without full-text search
     return this.db
       .select({
         id: lessons.id,

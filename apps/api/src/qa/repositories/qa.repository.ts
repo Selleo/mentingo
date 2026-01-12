@@ -63,7 +63,6 @@ export class QARepository {
   async getAllQA(language?: SupportedLanguages, searchQuery?: string) {
     const conditions: ReturnType<typeof sql>[] = [];
 
-    // Full-text search setup
     const isSearching = searchQuery && searchQuery.trim().length >= 3;
     const searchTerm = isSearching ? searchQuery.trim() : null;
     const qaTsVector = sql`(
@@ -71,8 +70,9 @@ export class QARepository {
       setweight(jsonb_to_tsvector('english', COALESCE(${questionsAndAnswers.description}, '{}'::jsonb), '["string"]'), 'B')
     )`;
 
+    const tsQuery = sql`websearch_to_tsquery('english', ${searchTerm})`;
+
     if (isSearching && searchTerm) {
-      const tsQuery = sql`websearch_to_tsquery('english', ${searchTerm})`;
       conditions.push(sql`${qaTsVector} @@ ${tsQuery}`);
     }
 
@@ -96,7 +96,7 @@ export class QARepository {
       .where(conditions.length > 0 ? and(...conditions) : undefined)
       .orderBy(
         isSearching && searchTerm
-          ? sql`ts_rank(${qaTsVector}, websearch_to_tsquery('english', ${searchTerm})) DESC`
+          ? sql`ts_rank(${qaTsVector}, ${tsQuery}) DESC`
           : sql`${questionsAndAnswers.createdAt} DESC`,
       );
   }

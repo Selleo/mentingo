@@ -151,7 +151,6 @@ export class ArticlesRepository {
   ) {
     const searchConditions = [...conditions];
 
-    // Full-text search setup
     const isSearching = searchQuery && searchQuery.trim().length >= 3;
     const searchTerm = isSearching ? searchQuery.trim() : null;
     const articlesTsVector = sql`(
@@ -160,8 +159,9 @@ export class ArticlesRepository {
       setweight(jsonb_to_tsvector('english', COALESCE(${articles.content}, '{}'::jsonb), '["string"]'), 'C')
     )`;
 
+    const tsQuery = sql`websearch_to_tsquery('english', ${searchTerm})`;
+
     if (isSearching && searchTerm) {
-      const tsQuery = sql`websearch_to_tsquery('english', ${searchTerm})`;
       searchConditions.push(sql`${articlesTsVector} @@ ${tsQuery}`);
     }
 
@@ -177,7 +177,7 @@ export class ArticlesRepository {
       .where(and(...searchConditions))
       .orderBy(
         isSearching && searchTerm
-          ? sql`ts_rank(${articlesTsVector}, websearch_to_tsquery('english', ${searchTerm})) DESC`
+          ? sql`ts_rank(${articlesTsVector}, ${tsQuery} DESC`
           : desc(articles.publishedAt),
       );
   }

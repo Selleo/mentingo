@@ -80,12 +80,12 @@ export class ArticlesController {
     @Body() createArticleSectionBody: CreateArticleSection,
     @CurrentUser() currentUser: CurrentUserType,
   ) {
-    const createdNews = await this.articlesService.createArticleSection(
+    const createdArticle = await this.articlesService.createArticleSection(
       createArticleSectionBody,
       currentUser,
     );
 
-    return new BaseResponse(createdNews);
+    return new BaseResponse(createdArticle);
   }
 
   @Get("section/:id")
@@ -100,8 +100,10 @@ export class ArticlesController {
   async getArticleSection(
     @Param("id") id: UUIDType,
     @Query("language") language: SupportedLanguages,
+    @CurrentUser() currentUser: CurrentUserType
   ) {
-    const section = await this.articlesService.getArticleSection(id, language);
+    const section = await this.articlesService.getArticleSection(id, language, currentUser);
+
     return new BaseResponse(section);
   }
 
