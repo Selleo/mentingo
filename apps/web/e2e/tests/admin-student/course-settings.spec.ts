@@ -234,7 +234,9 @@ test.describe("Course settings flow", () => {
 
         await newPage.goto("/courses");
 
-        await newPage.waitForLoadState("networkidle");
+        const availableCourses = page.getByRole("heading", { name: "Available Courses" });
+        await availableCourses.waitFor({ state: "visible" });
+        await expect(availableCourses).toBeVisible();
 
         await enterCourse(newPage, ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.courseToAssign);
 

@@ -498,12 +498,27 @@ const expectCourseVisibleForPrivateStudent = async (page: Page) => {
   await expect(page.getByRole("heading", { name: PRIVATE_COURSE.heading })).toBeVisible();
 };
 
+const unenrollStudentFromCourse = async (page: Page) => {
+  await page.locator(".h-min > button:nth-child(2)").click();
+  await page.getByText(PRIVATE_COURSE.heading).click();
+  await page.getByRole("tab", { name: "Enrolled students" }).click();
+  const studentCell = page.getByRole("cell", { name: PRIVATE_COURSE.student.email2 });
+  await studentCell.waitFor({ state: "visible" });
+  await studentCell.click();
+  await page.getByRole("button", { name: "Enroll", exact: true }).click();
+  await page.getByRole("button", { name: "Unenroll selected" }).click();
+  await page.getByRole("button", { name: "Save" }).click();
+};
+
 test.describe.serial("Assigning students to course flow", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
   });
 
   test("should set course as private and verify student course visibility", async ({ page }) => {
+    // Unenroll student from private course before running this test to ensure a clean state
+    await unenrollStudentFromCourse(page);
+
     await setCourseAsPrivate(page);
     await expectCourseHiddenForPrivateStudent(page);
     await enrollStudentToPrivateCourse(page);
