@@ -188,15 +188,15 @@ test.describe("Course settings flow", () => {
         }),
       );
 
-      await enterCourse(page, ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.thirdCourseToAssign);
+      await enterCourse(page, ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.courseToAssign);
 
       await expect(
-        page.getByRole("heading", { name: COURSE_SETTINGS_UI.header.chapterTitle2 }),
+        page.getByRole("heading", { name: COURSE_SETTINGS_UI.header.courseTitle }),
       ).toBeVisible();
 
-      await page.getByTestId(COURSE_SETTINGS_UI.header.chapterTitle3).click();
+      await page.getByTestId(COURSE_SETTINGS_UI.header.chapterTitle4).click();
 
-      await page.getByRole("button", { name: "Repeat lessons" }).click();
+      await page.getByRole("button", { name: /Repeat lessons|Play chapter/i }).click();
 
       const nextLessonButton = page.getByTestId(
         new RegExp(COURSE_SETTINGS_UI.button.nextLesson, "i"),
@@ -205,7 +205,9 @@ test.describe("Course settings flow", () => {
 
       await test.step("unregistered user tries to access free chapter", async () => {
         const newPage = page;
-        await page.getByRole("button", { name: "test Student profile test" }).click();
+        await page
+          .getByRole("button", { name: /test Student profile test|Avatar for email@example.com/i })
+          .click();
         await page
           .getByRole("menuitem", { name: /logout/i })
           .locator("div")
@@ -217,17 +219,15 @@ test.describe("Course settings flow", () => {
 
         await newPage.waitForLoadState("networkidle");
 
-        await enterCourse(newPage, ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.thirdCourseToAssign);
+        await enterCourse(newPage, ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.courseToAssign);
 
         await newPage.waitForURL(
           /course\/[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/i,
         );
 
-        await page.getByText(COURSE_SETTINGS_UI.header.chapterTitle3, { exact: true }).click();
+        await page.getByText(COURSE_SETTINGS_UI.header.chapterTitle4, { exact: true }).click();
 
-        await newPage
-          .getByRole("button", { name: new RegExp(COURSE_SETTINGS_UI.button.playChapter, "i") })
-          .click();
+        await newPage.getByRole("button", { name: /Repeat lessons|Play chapter/i }).click();
 
         const header = newPage.getByRole("heading", { name: new RegExp("Login") });
         await expect(header).toBeVisible();
