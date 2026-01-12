@@ -26,6 +26,7 @@ class CourseActions {
 
   async openCourse(): Promise<void> {
     await this.page.getByRole("main").getByRole("button").nth(2).click();
+    await expect(this.page.getByRole("heading", { name: "Manage Courses" })).toBeVisible();
     await this.page.getByText(TEST_COURSE.name).click();
     const combinedRegex = new RegExp(
       [URL_PATTERNS.course.source, URL_PATTERNS.course2.source].join("|"),

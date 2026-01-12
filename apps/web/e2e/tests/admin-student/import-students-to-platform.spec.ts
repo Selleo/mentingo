@@ -54,7 +54,9 @@ const verifySuccessAndGroup = async (page: Page) => {
 };
 
 const logoutAdmin = async (page: Page) => {
-  await page.getByRole("button", { name: "Test Admin profile Test Admin" }).click();
+  await page
+    .getByRole("button", { name: /Test Admin profile Test Admin|Avatar for email@example.com/i })
+    .click();
   await page.getByRole("menuitem", { name: "Logout" }).locator("div").click();
 };
 

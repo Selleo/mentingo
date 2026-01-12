@@ -129,7 +129,13 @@ test.describe("Course settings flow", () => {
         page,
         ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.courseToAssign,
       );
-      await enrollAllStudents(page);
+      const notEnrolledStudents = page.getByRole("cell", { name: /Not enrolled/i });
+      if ((await notEnrolledStudents.count()) > 0) {
+        await notEnrolledStudents.first().click();
+        await page.getByRole("button", { name: "Enroll", exact: true }).click();
+        await page.getByRole("button", { name: "Enroll selected", exact: true }).click();
+        await page.getByRole("button", { name: "Save" }).click();
+      }
       await setCourseStatus(page, COURSE_SETTINGS_UI.button.draft);
     });
 
@@ -149,8 +155,19 @@ test.describe("Course settings flow", () => {
   test("should set first chapter as freemium and check if a student can access it and check if an unregistered user must log in", async ({
     page,
   }) => {
-    await test.step("admin sets course as freemium", async () => {
+    await test.step("admin sets course as freemium and published", async () => {
       await selectCourse(page, ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.courseToAssign);
+
+      await page.getByRole("tab", { name: "Status" }).click();
+      await page.getByLabel("Published").click();
+      await page.getByRole("button", { name: "Save" }).click();
+
+      await expect(
+        page
+          .getByRole("status", { includeHidden: true })
+          .getByText("Course updated successfully", { exact: true }),
+      ).toBeVisible();
+
       await page.getByRole("tab", { name: COURSE_SETTINGS_UI.button.curriculum }).click();
       const freemiumToggle = page.locator("#freemiumToggle").first();
 

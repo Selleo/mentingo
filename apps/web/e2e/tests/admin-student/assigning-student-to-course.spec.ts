@@ -186,6 +186,7 @@ const studentInitialSequenceView = async (page: Page) => {
   const lesson3 = page.getByRole("link", { name: `${SEQUENCE_COURSE.lessons.lesson3} Text` });
   await lesson3.waitFor({ state: "visible" });
   await Promise.all([
+    lesson3.click({ force: true }),
     page.waitForResponse(
       (res) =>
         res.url().includes("/api/lesson") &&
@@ -193,7 +194,6 @@ const studentInitialSequenceView = async (page: Page) => {
         res.status() === 200,
       { timeout: 30000 },
     ),
-    lesson3.click({ force: true }),
   ]);
   await page.waitForLoadState("networkidle");
   await expect(page.getByText(SEQUENCE_COURSE.lessons.lesson3).first()).toBeVisible();
@@ -507,7 +507,11 @@ test.describe.serial("Assigning students to course flow", () => {
     });
 
     await test.step("student verifies enrollment", async () => {
-      await page.getByRole("button", { name: "Test Admin profile Test Admin" }).click();
+      await page
+        .getByRole("button", {
+          name: /Test Admin profile Test Admin|Avatar for email@example.com/i,
+        })
+        .click();
       await page.getByRole("menuitem", { name: "Logout" }).locator("div").click();
       await page.waitForURL("/auth/login");
 
