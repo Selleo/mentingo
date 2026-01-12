@@ -1,8 +1,9 @@
-import { useParams } from "@remix-run/react";
-import { ACCESS_GUARD } from "@repo/shared";
-import { useMemo } from "react";
+import { redirect, useNavigate, useParams } from "@remix-run/react";
+import { ACCESS_GUARD, SUPPORTED_LANGUAGES } from "@repo/shared";
+import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
+import { ApiClient } from "~/api/api-client";
 import { useCourse, useCurrentUser } from "~/api/queries";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
@@ -19,13 +20,56 @@ import { ChapterListOverview } from "./components/ChapterListOverview";
 import { CourseAdminStatistics } from "./CourseAdminStatistics/CourseAdminStatistics";
 import CourseCertificate from "./CourseCertificate";
 
+import type { SupportedLanguages } from "@repo/shared";
+
+export const clientLoader = async ({
+  params,
+  request,
+}: {
+  params: { id?: string };
+  request: Request;
+}) => {
+  const idOrSlug = params.id || "";
+  if (!idOrSlug) return null;
+
+  const url = new URL(request.url);
+  const language =
+    (url.searchParams.get("language") as SupportedLanguages) || SUPPORTED_LANGUAGES.EN;
+
+  const lookupResponse = await ApiClient.api.courseControllerLookupCourse({
+    id: idOrSlug,
+    language,
+  });
+
+  const { status, slug } = lookupResponse.data.data;
+
+  if (status === "redirect" && slug) {
+    const redirectUrl = new URL(`/course/${slug}`, request.url);
+    throw redirect(`${redirectUrl.pathname}${redirectUrl.search ?? ""}`, 302);
+  }
+
+  return null;
+};
+
 export default function CourseViewPage() {
   const { t } = useTranslation();
   const { id = "" } = useParams();
+  const navigate = useNavigate();
 
   const { language } = useLanguageStore();
 
   const { data: course } = useCourse(id, language);
+
+  useEffect(() => {
+    const shouldCorrectUrl = course?.slug && course.slug !== id;
+
+    if (!shouldCorrectUrl) return;
+
+    const url = new URL(window.location.href);
+    url.pathname = `/course/${course.slug}`;
+    navigate(`${url.pathname}${url.search ?? ""}`, { replace: true });
+  }, [course?.slug, id, navigate]);
+
   const { isStudent } = useUserRole();
   const { data: currentUser } = useCurrentUser();
 

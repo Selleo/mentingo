@@ -29,6 +29,7 @@ import {
   sql,
 } from "drizzle-orm";
 import { camelCase, isEmpty, isEqual, pickBy } from "lodash";
+import { match } from "ts-pattern";
 
 import { AiService } from "src/ai/services/ai.service";
 import { AdminChapterRepository } from "src/chapter/repositories/adminChapter.repository";
@@ -99,6 +100,7 @@ import type {
   EnrolledCourseGroupsPayload,
   LessonSequenceEnabledResponse,
 } from "./schemas/course.schema";
+import type { CourseLookupResponse } from "./schemas/courseLookupResponse.schema";
 import type {
   CourseEnrollmentScope,
   CoursesFilterSchema,
@@ -639,7 +641,14 @@ export class CourseService {
     userId: UUIDType,
     language: SupportedLanguages,
   ): Promise<CommonShowCourse> {
-    const id = await this.courseSlugService.getCourseIdBySlug(idOrSlug);
+    const { courseId: id, slug: currentSlug } = match(
+      await this.courseSlugService.getCourseIdBySlug(idOrSlug, language),
+    )
+      .with({ type: "notFound" }, () => {
+        throw new NotFoundException("Course not found");
+      })
+      .otherwise((value) => value);
+
     const [course] = await this.db
       .select({
         id: courses.id,
@@ -808,7 +817,74 @@ export class CourseService {
       ...course,
       thumbnailUrl,
       chapters: courseChapterList,
+      slug: currentSlug,
     };
+  }
+
+  async lookupCourse(
+    idOrSlug: string,
+    language: SupportedLanguages,
+    userId?: UUIDType,
+  ): Promise<CourseLookupResponse> {
+    const lookupResult = await this.courseSlugService.getCourseIdBySlug(idOrSlug, language);
+
+    if (lookupResult.type === "notFound") {
+      throw new NotFoundException("Course not found");
+    }
+
+    const courseId = lookupResult.courseId;
+
+    const [course] = await this.db
+      .select({
+        id: courses.id,
+        status: courses.status,
+        authorId: courses.authorId,
+        enrolled:
+          userId !== undefined
+            ? sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN TRUE ELSE FALSE END`
+            : sql<boolean>`FALSE`,
+      })
+      .from(courses)
+      .leftJoin(
+        studentCourses,
+        userId !== undefined
+          ? and(eq(studentCourses.courseId, courses.id), eq(studentCourses.studentId, userId))
+          : sql`FALSE`,
+      )
+      .where(eq(courses.id, courseId))
+      .limit(1);
+
+    if (!course) {
+      throw new NotFoundException("Course not found");
+    }
+
+    const isEnrolled = !!course.enrolled;
+    const NON_PUBLIC_STATUSES = ["draft", "private"];
+
+    if (userId !== undefined) {
+      if (
+        userId !== course.authorId &&
+        NON_PUBLIC_STATUSES.includes(course.status) &&
+        !isEnrolled
+      ) {
+        throw new NotFoundException("Course not found");
+      }
+    } else {
+      if (NON_PUBLIC_STATUSES.includes(course.status)) {
+        throw new NotFoundException("Course not found");
+      }
+    }
+
+    return match(lookupResult)
+      .with({ type: "redirect" }, (value) => ({
+        status: "redirect" as const,
+        slug: value.slug,
+      }))
+      .with({ type: "found" }, { type: "uuid" }, (value) => ({
+        status: "found" as const,
+        slug: value.slug,
+      }))
+      .exhaustive();
   }
 
   async getBetaCourseById(
@@ -1240,6 +1316,7 @@ export class CourseService {
       const [newCourse] = await trx
         .insert(courses)
         .values({
+          shortId: "",
           title: buildJsonbField(createCourseBody.language, createCourseBody.title),
           description: buildJsonbField(createCourseBody.language, createCourseBody.description),
           baseLanguage: createCourseBody.language,

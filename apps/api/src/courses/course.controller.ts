@@ -79,6 +79,10 @@ import { GroupsFilterSchema } from "src/group/group.types";
 import { LearningTimeService, learningTimeStatisticsSchema } from "src/learning-time";
 import { USER_ROLES, UserRole } from "src/user/schemas/userRoles";
 
+import {
+  courseLookupResponseSchema,
+  type CourseLookupResponse,
+} from "./schemas/courseLookupResponse.schema";
 import { coursesSettingsSchema } from "./schemas/coursesSettings.schema";
 import {
   CreateCoursesEnrollment,
@@ -310,7 +314,27 @@ export class CourseController {
     @Query("language") language: SupportedLanguages,
     @CurrentUser("userId") currentUserId: UUIDType,
   ): Promise<BaseResponse<CommonShowCourse>> {
-    return new BaseResponse(await this.courseService.getCourse(idOrSlug, currentUserId, language));
+    const course = await this.courseService.getCourse(idOrSlug, currentUserId, language);
+    return new BaseResponse(course);
+  }
+
+  @Public()
+  @Get("lookup")
+  @Validate({
+    request: [
+      { type: "query", name: "id", schema: Type.String(), required: true },
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
+    ],
+    response: baseResponse(courseLookupResponseSchema),
+  })
+  async lookupCourse(
+    @Query("id") idOrSlug: string,
+    @Query("language") language: SupportedLanguages,
+    @CurrentUser("userId") currentUserId?: UUIDType,
+  ): Promise<BaseResponse<CourseLookupResponse>> {
+    const result = await this.courseService.lookupCourse(idOrSlug, language, currentUserId);
+
+    return new BaseResponse(result);
   }
 
   @Get("beta-course-by-id")

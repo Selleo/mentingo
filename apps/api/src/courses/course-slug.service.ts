@@ -1,11 +1,20 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { SUPPORTED_LANGUAGES } from "@repo/shared";
-import { and, eq, ilike, inArray, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, max, sql } from "drizzle-orm";
 import { difference } from "lodash";
 import slugify from "slugify";
+import { validate as uuidValidate } from "uuid";
 
 import { DatabasePg } from "src/common";
 import { courses, courseSlugs } from "src/storage/schema";
+
+export type CourseSlugResult =
+  | { type: "found"; courseId: string; slug: string }
+  | { type: "redirect"; courseId: string; slug: string }
+  | { type: "notFound" }
+  | { type: "uuid"; courseId: string; slug: string };
+
+const SLUG_MATCH = /^([a-z0-9]{5})-([^ ]+)$/;
 
 @Injectable()
 export class CourseSlugService {
@@ -14,37 +23,44 @@ export class CourseSlugService {
   async regenerateCoursesSlugs(courseIds: string[]) {
     if (!courseIds.length) return [];
 
-    const result: Array<{ courseId: string; lang: string; slug: string }> = [];
+    const result: Array<{ courseId: string; lang: string; slug: string; courseShortId: string }> =
+      [];
     const coursesWithTitles = await this.db
-      .select({ id: courses.id, title: courses.title })
+      .select({ id: courses.id, courseShortId: courses.shortId, title: courses.title })
       .from(courses)
       .where(inArray(courses.id, courseIds));
 
-    return await this.db.transaction(async (trx) => {
-      for (const course of coursesWithTitles) {
-        if (!course.title || typeof course.title !== "object" || course.title === null) continue;
+    for (const course of coursesWithTitles) {
+      if (!course.title || typeof course.title !== "object" || course.title === null) continue;
 
-        for (const [lang, title] of Object.entries(course.title)) {
-          if (!title || typeof title !== "string" || title === null) continue;
+      for (const [lang, title] of Object.entries(course.title)) {
+        if (!title || typeof title !== "string" || title === null) continue;
 
-          const slug = await this.generateUniqueCourseSlug(course.id, title, trx);
+        const slug = this.createSlugFromText(title);
 
-          await trx
-            .insert(courseSlugs)
-            .values({ courseId: course.id, lang, slug })
-            .onConflictDoUpdate({
-              target: [courseSlugs.courseId, courseSlugs.lang],
-              set: {
-                slug: sql.raw(`excluded.${courseSlugs.slug.name}`),
-              },
-            });
-
-          result.push({ courseId: course.id, lang, slug });
-        }
+        result.push({
+          courseId: course.id,
+          lang,
+          slug,
+          courseShortId: course.courseShortId,
+        });
       }
+    }
 
-      return result;
-    });
+    await this.db
+      .insert(courseSlugs)
+      .values(result)
+      .onConflictDoUpdate({
+        target: [courseSlugs.courseShortId, courseSlugs.lang, courseSlugs.slug],
+        set: {
+          updatedAt: sql`CURRENT_TIMESTAMP`,
+        },
+      });
+
+    return result.map((entry) => ({
+      ...entry,
+      slug: this.generateSlug(entry.courseShortId, entry.slug),
+    }));
   }
 
   async getCoursesSlugs(
@@ -54,83 +70,130 @@ export class CourseSlugService {
     const resolvedLang = lang || SUPPORTED_LANGUAGES.EN;
     const result = new Map<string, string>();
     if (!courseIds.length) return result;
-    const courseSlugsData = await this.db
-      .select({ courseId: courseSlugs.courseId, slug: courseSlugs.slug })
-      .from(courseSlugs)
-      .where(and(inArray(courseSlugs.courseId, courseIds), eq(courseSlugs.lang, resolvedLang)));
 
-    for (const { courseId, slug } of courseSlugsData) {
-      result.set(courseId, slug);
+    const latestSlugSubquery = this.db
+      .select({
+        courseShortId: courseSlugs.courseShortId,
+        maxUpdatedAt: max(courseSlugs.updatedAt).as("maxUpdatedAt"),
+      })
+      .from(courseSlugs)
+      .where(eq(courseSlugs.lang, resolvedLang))
+      .groupBy(courseSlugs.courseShortId)
+      .as("latest_slug");
+
+    const latestSlugs = await this.db
+      .select({
+        courseId: courses.id,
+        courseShortId: courses.shortId,
+        slug: courseSlugs.slug,
+        createdAt: courseSlugs.createdAt,
+      })
+      .from(courses)
+      .leftJoin(latestSlugSubquery, eq(latestSlugSubquery.courseShortId, courses.shortId))
+      .leftJoin(
+        courseSlugs,
+        and(
+          eq(courseSlugs.courseShortId, latestSlugSubquery.courseShortId),
+          eq(courseSlugs.updatedAt, latestSlugSubquery.maxUpdatedAt),
+          eq(courseSlugs.lang, resolvedLang),
+        ),
+      )
+      .where(inArray(courses.id, courseIds));
+
+    for (const slug of latestSlugs) {
+      if (!slug.slug) continue;
+      result.set(slug.courseId, this.generateSlug(slug.courseShortId, slug.slug));
     }
 
-    const missingIds = difference(courseIds, Array.from(result.keys()));
+    const idsToRegenerate = difference(
+      courseIds,
+      latestSlugs.filter((x) => !!x.slug).map((s) => s.courseId),
+    );
 
-    const regeneratedSlugs = await this.regenerateCoursesSlugs(missingIds);
+    const regeneratedSlugs = await this.regenerateCoursesSlugs(idsToRegenerate);
     for (const { courseId, lang: slugLang, slug } of regeneratedSlugs) {
       if (slugLang !== resolvedLang) continue;
       result.set(courseId, slug);
     }
 
-    const notRegeneratedIds = difference(courseIds, Array.from(result.keys()));
-    for (const courseId of notRegeneratedIds) {
-      result.set(courseId, courseId);
-    }
-
     return result;
   }
 
-  async getCourseIdBySlug(slug: string): Promise<string> {
-    const [courseId] = await this.db
-      .select({ courseId: courseSlugs.courseId })
-      .from(courseSlugs)
-      .where(eq(courseSlugs.slug, slug));
-    return courseId?.courseId || slug;
-  }
+  async getCourseIdBySlug(idOrSlug: string, language: string): Promise<CourseSlugResult> {
+    if (uuidValidate(idOrSlug)) {
+      const slugs = await this.getCoursesSlugs(language, [idOrSlug]);
 
-  private async generateUniqueCourseSlug(
-    courseId: string,
-    title: unknown,
-    dbInstance?: DatabasePg,
-  ): Promise<string> {
-    if (!title || typeof title !== "string") {
-      return courseId;
+      if (!slugs.size) {
+        return { type: "notFound" };
+      }
+
+      const latestSlug = slugs.get(idOrSlug)!;
+
+      return { type: "uuid", courseId: idOrSlug, slug: latestSlug };
     }
 
-    const db = dbInstance || this.db;
-    const baseSlug = slugify(title, {
-      remove: /[*+~.()'"!:@_\[]\{}|#%\^&><\?`]/g,
+    const slugParts = this.parseSlug(idOrSlug);
+
+    if (!slugParts) {
+      return { type: "notFound" };
+    }
+
+    const { shortId, baseSlug } = slugParts;
+
+    const [requestedSlug] = await this.db
+      .select({ slug: courseSlugs.slug, courseId: courses.id })
+      .from(courseSlugs)
+      .leftJoin(courses, eq(courses.shortId, courseSlugs.courseShortId))
+      .where(
+        and(
+          eq(courseSlugs.slug, baseSlug),
+          eq(courseSlugs.lang, language),
+          eq(courses.shortId, shortId),
+        ),
+      )
+      .limit(1);
+
+    if (!requestedSlug || !requestedSlug.courseId) {
+      return { type: "notFound" };
+    }
+
+    const [newestSlug] = await this.db
+      .select({ slug: courseSlugs.slug, courseId: courses.id })
+      .from(courseSlugs)
+      .leftJoin(courses, eq(courses.shortId, courseSlugs.courseShortId))
+      .where(and(eq(courseSlugs.courseShortId, shortId), eq(courseSlugs.lang, language)))
+      .orderBy(desc(courseSlugs.updatedAt))
+      .limit(1);
+
+    return newestSlug.slug === baseSlug
+      ? {
+          type: "found",
+          courseId: requestedSlug.courseId,
+          slug: this.generateSlug(shortId, requestedSlug.slug),
+        }
+      : {
+          type: "redirect",
+          courseId: requestedSlug.courseId,
+          slug: this.generateSlug(shortId, newestSlug.slug),
+        };
+  }
+
+  private createSlugFromText(text: string): string {
+    return slugify(text, {
+      remove: /[*+~.()'"!:@_\[\]{}|#%^&><?`]/g,
       lower: true,
       replacement: "-",
     });
+  }
 
-    const [existingBase] = await db
-      .select({ courseId: courseSlugs.courseId })
-      .from(courseSlugs)
-      .where(eq(courseSlugs.slug, baseSlug))
-      .limit(1);
+  private parseSlug(slug?: string | null) {
+    if (!slug || typeof slug !== "string") return null;
+    const match = slug.match(SLUG_MATCH);
+    if (!match) return null;
+    return { shortId: match[1], baseSlug: match[2] };
+  }
 
-    if (!existingBase || existingBase.courseId === courseId) {
-      return baseSlug;
-    }
-
-    const baseSlugLength = baseSlug.length;
-    const matchingSlugs = await db
-      .select({
-        suffix: sql<string>`SUBSTRING(${courseSlugs.slug} FROM ${baseSlugLength + 2})`.as("suffix"),
-      })
-      .from(courseSlugs)
-      .where(ilike(courseSlugs.slug, `${baseSlug}-%`));
-
-    const numbers = matchingSlugs
-      .map(({ suffix }) => {
-        const num = parseInt(suffix, 10);
-        return Number.isNaN(num) ? null : num;
-      })
-      .filter((num): num is number => num !== null);
-
-    const maxNumber = numbers.length > 0 ? Math.max(...numbers) : 0;
-    const nextNumber = maxNumber + 1;
-
-    return `${baseSlug}-${nextNumber}`;
+  private generateSlug(shortId: string, baseSlug: string) {
+    return `${shortId}-${baseSlug}`;
   }
 }

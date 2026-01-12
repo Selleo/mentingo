@@ -1,5 +1,5 @@
 {
-  "id": "32d9ba82-f7b6-4f9c-864d-3bcfac265ba1",
+  "id": "157450ec-a1d4-4426-9b74-6bef7cfafda2",
   "prevId": "1eb4e161-3d53-4dcb-be6d-caf00572ba75",
   "version": "7",
   "dialect": "postgresql",
@@ -1052,9 +1052,9 @@
           "primaryKey": false,
           "notNull": true
         },
-        "course_id": {
-          "name": "course_id",
-          "type": "uuid",
+        "course_short_id": {
+          "name": "course_short_id",
+          "type": "varchar(5)",
           "primaryKey": false,
           "notNull": true
         },
@@ -1066,17 +1066,23 @@
         }
       },
       "indexes": {
-        "course_slugs_course_id_lang_unique": {
-          "name": "course_slugs_course_id_lang_unique",
+        "course_slug_course_short_id_lang_slug_unique_idx": {
+          "name": "course_slug_course_short_id_lang_slug_unique_idx",
           "columns": [
             {
-              "expression": "course_id",
+              "expression": "course_short_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
             },
             {
               "expression": "lang",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "slug",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1089,30 +1095,22 @@
         }
       },
       "foreignKeys": {
-        "course_slugs_course_id_courses_id_fk": {
-          "name": "course_slugs_course_id_courses_id_fk",
+        "course_slugs_course_short_id_courses_short_id_fk": {
+          "name": "course_slugs_course_short_id_courses_short_id_fk",
           "tableFrom": "course_slugs",
           "tableTo": "courses",
           "columnsFrom": [
-            "course_id"
+            "course_short_id"
           ],
           "columnsTo": [
-            "id"
+            "short_id"
           ],
           "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "course_slugs_slug_unique": {
-          "name": "course_slugs_slug_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
-        }
-      }
+      "uniqueConstraints": {}
     },
     "public.course_students_stats": {
       "name": "course_students_stats",
@@ -1223,6 +1221,12 @@
           "primaryKey": true,
           "notNull": true,
           "default": "gen_random_uuid()"
+        },
+        "short_id": {
+          "name": "short_id",
+          "type": "varchar(5)",
+          "primaryKey": false,
+          "notNull": true
         },
         "created_at": {
           "name": "created_at",
@@ -1377,7 +1381,15 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {
+        "courses_short_id_unique": {
+          "name": "courses_short_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "short_id"
+          ]
+        }
+      }
     },
     "public.courses_summary_stats": {
       "name": "courses_summary_stats",

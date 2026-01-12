@@ -136,6 +136,7 @@ export const coursesStatusEnum = pgEnum("status", ["draft", "published", "privat
 const coursesSettings = safeJsonb("settings", coursesSettingsSchema);
 export const courses = pgTable("courses", {
   ...id,
+  shortId: varchar("short_id", { length: 5 }).notNull().unique(),
   ...timestamps,
   title: jsonb("title").default({}).notNull(),
   description: jsonb("description").default({}).notNull(),
@@ -168,17 +169,16 @@ export const courseSlugs = pgTable(
   {
     ...id,
     ...timestamps,
-    slug: text("slug").notNull().unique(),
-    courseId: uuid("course_id")
-      .references(() => courses.id, { onDelete: "cascade" })
+    slug: text("slug").notNull(),
+    courseShortId: varchar("course_short_id", { length: 5 })
+      .references(() => courses.shortId, { onDelete: "cascade", onUpdate: "cascade" })
       .notNull(),
     lang: text("lang").notNull(),
   },
   (table) => ({
-    courseIdLangUnique: uniqueIndex("course_slugs_course_id_lang_unique").on(
-      table.courseId,
-      table.lang,
-    ),
+    courseSlugCourseShortIdLangSlugUniqueIdx: uniqueIndex(
+      "course_slug_course_short_id_lang_slug_unique_idx",
+    ).on(table.courseShortId, table.lang, table.slug),
   }),
 );
 
