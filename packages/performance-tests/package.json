@@ -1,0 +1,28 @@
+{
+  "name": "@mentingo/performance-tests",
+  "version": "1.0.0",
+  "description": "K6 performance testing suite for Mentingo API - simulating concurrent users",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:load": "set -a && source .env && set +a && k6 run src/scenarios/load-test.js",
+    "test:stress": "set -a && source .env && set +a && k6 run src/scenarios/stress-test.js",
+    "test:spike": "set -a && source .env && set +a && k6 run src/scenarios/spike-test.js",
+    "test:soak": "set -a && source .env && set +a && k6 run src/scenarios/soak-test.js",
+    "test:load:dashboard": "set -a && source .env && set +a && K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=1s k6 run src/scenarios/load-test.js",
+    "test:mixed": "set -a && source .env && set +a && k6 run src/tests/mixed-workload.test.js",
+    "test:load:cloud": "set -a && source .env && set +a && k6 cloud --env ENVIRONMENT=$ENVIRONMENT --env API_BASE_URL=$API_BASE_URL --env TEST_USER_EMAIL=$TEST_USER_EMAIL --env TEST_USER_PASSWORD=$TEST_USER_PASSWORD --env TEST_ADMIN_EMAIL=$TEST_ADMIN_EMAIL --env TEST_ADMIN_PASSWORD=$TEST_ADMIN_PASSWORD --env TEST_CREATOR_EMAIL=$TEST_CREATOR_EMAIL --env TEST_CREATOR_PASSWORD=$TEST_CREATOR_PASSWORD --env SEEDED_USER_PASSWORD=$SEEDED_USER_PASSWORD --env SEEDED_STUDENT_COUNT=$SEEDED_STUDENT_COUNT --env SEEDED_ADMIN_COUNT=$SEEDED_ADMIN_COUNT --env SEEDED_CREATOR_COUNT=$SEEDED_CREATOR_COUNT src/scenarios/load-test.js",
+    "test:stress:cloud": "set -a && source .env && set +a && k6 cloud --env ENVIRONMENT=$ENVIRONMENT --env API_BASE_URL=$API_BASE_URL --env TEST_USER_EMAIL=$TEST_USER_EMAIL --env TEST_USER_PASSWORD=$TEST_USER_PASSWORD --env TEST_ADMIN_EMAIL=$TEST_ADMIN_EMAIL --env TEST_ADMIN_PASSWORD=$TEST_ADMIN_PASSWORD --env TEST_CREATOR_EMAIL=$TEST_CREATOR_EMAIL --env TEST_CREATOR_PASSWORD=$TEST_CREATOR_PASSWORD --env SEEDED_USER_PASSWORD=$SEEDED_USER_PASSWORD --env SEEDED_STUDENT_COUNT=$SEEDED_STUDENT_COUNT --env SEEDED_ADMIN_COUNT=$SEEDED_ADMIN_COUNT --env SEEDED_CREATOR_COUNT=$SEEDED_CREATOR_COUNT src/scenarios/stress-test.js",
+    "test:spike:cloud": "set -a && source .env && set +a && k6 cloud --env ENVIRONMENT=$ENVIRONMENT --env API_BASE_URL=$API_BASE_URL --env TEST_USER_EMAIL=$TEST_USER_EMAIL --env TEST_USER_PASSWORD=$TEST_USER_PASSWORD --env TEST_ADMIN_EMAIL=$TEST_ADMIN_EMAIL --env TEST_ADMIN_PASSWORD=$TEST_ADMIN_PASSWORD --env TEST_CREATOR_EMAIL=$TEST_CREATOR_EMAIL --env TEST_CREATOR_PASSWORD=$TEST_CREATOR_PASSWORD --env SEEDED_USER_PASSWORD=$SEEDED_USER_PASSWORD --env SEEDED_STUDENT_COUNT=$SEEDED_STUDENT_COUNT --env SEEDED_ADMIN_COUNT=$SEEDED_ADMIN_COUNT --env SEEDED_CREATOR_COUNT=$SEEDED_CREATOR_COUNT src/scenarios/spike-test.js",
+    "test:soak:cloud": "set -a && source .env && set +a && k6 cloud --env ENVIRONMENT=$ENVIRONMENT --env API_BASE_URL=$API_BASE_URL --env TEST_USER_EMAIL=$TEST_USER_EMAIL --env TEST_USER_PASSWORD=$TEST_USER_PASSWORD --env TEST_ADMIN_EMAIL=$TEST_ADMIN_EMAIL --env TEST_ADMIN_PASSWORD=$TEST_ADMIN_PASSWORD --env TEST_CREATOR_EMAIL=$TEST_CREATOR_EMAIL --env TEST_CREATOR_PASSWORD=$TEST_CREATOR_PASSWORD --env SEEDED_USER_PASSWORD=$SEEDED_USER_PASSWORD --env SEEDED_STUDENT_COUNT=$SEEDED_STUDENT_COUNT --env SEEDED_ADMIN_COUNT=$SEEDED_ADMIN_COUNT --env SEEDED_CREATOR_COUNT=$SEEDED_CREATOR_COUNT src/scenarios/soak-test.js",
+    "test:mixed:cloud": "set -a && source .env && set +a && k6 cloud --env ENVIRONMENT=$ENVIRONMENT --env API_BASE_URL=$API_BASE_URL --env TEST_USER_EMAIL=$TEST_USER_EMAIL --env TEST_USER_PASSWORD=$TEST_USER_PASSWORD --env TEST_ADMIN_EMAIL=$TEST_ADMIN_EMAIL --env TEST_ADMIN_PASSWORD=$TEST_ADMIN_PASSWORD --env TEST_CREATOR_EMAIL=$TEST_CREATOR_EMAIL --env TEST_CREATOR_PASSWORD=$TEST_CREATOR_PASSWORD --env SEEDED_USER_PASSWORD=$SEEDED_USER_PASSWORD --env SEEDED_STUDENT_COUNT=$SEEDED_STUDENT_COUNT --env SEEDED_ADMIN_COUNT=$SEEDED_ADMIN_COUNT --env SEEDED_CREATOR_COUNT=$SEEDED_CREATOR_COUNT src/tests/mixed-workload.test.js"
+  },
+  "keywords": [
+    "k6",
+    "performance-testing",
+    "load-testing",
+    "mentingo"
+  ],
+  "author": "",
+  "license": "MIT"
+}
