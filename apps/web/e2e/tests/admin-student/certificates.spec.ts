@@ -70,7 +70,7 @@ const publishAndEnroll = async (page: Page) => {
   await page.getByRole("button", { name: "Published Students can" }).click();
   await page.getByRole("button", { name: "Save" }).click();
   await page.getByRole("tab", { name: "Enrolled students" }).click();
-  await page.getByRole("cell", { name: "Student", exact: true }).nth(2).click();
+  await page.getByText(USERS.student.email).click();
   await page.getByRole("button", { name: "Enroll", exact: true }).click();
   await page.getByRole("button", { name: "Enroll selected", exact: true }).click();
   await page.getByRole("button", { name: "Save" }).click();
@@ -103,11 +103,11 @@ const openCourseAsStudent = async (page: Page) => {
   await page.waitForURL(/course\/[\w-]+\/lesson\/[\w-]+/);
   await page.waitForResponse(
     (response) =>
-      response.url().includes("/api/lesson") &&
+      response.url().includes("/api/lesson/") &&
       response.request().method() === "GET" &&
       response.status() === 200,
+    { timeout: 30000 },
   );
-  await page.waitForTimeout(1000);
 
   const backToCourse = page.getByRole("link", { name: "new course" });
   await backToCourse.waitFor({ state: "visible" });
@@ -115,8 +115,15 @@ const openCourseAsStudent = async (page: Page) => {
 };
 
 const verifyCourseProgressAndDownload = async (page: Page) => {
+  await page.waitForResponse(
+    (response) =>
+      response.url().includes("/api/course") &&
+      response.request().method() === "GET" &&
+      response.status() === 200,
+    { timeout: 30000 },
+  );
   const progressHeading = page.getByRole("heading", { name: TEXT.progressHeading });
-  await progressHeading.waitFor({ state: "visible" });
+  await progressHeading.waitFor({ state: "visible", timeout: 10000 });
   await expect(page.locator("svg").filter({ hasText: "/1" })).toBeVisible();
   await expect(
     page.getByRole("main").locator("div").filter({ hasText: TEXT.congratsSnippet }).nth(4),

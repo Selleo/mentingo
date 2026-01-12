@@ -185,10 +185,18 @@ const studentInitialSequenceView = async (page: Page) => {
   }
   const lesson3 = page.getByRole("link", { name: `${SEQUENCE_COURSE.lessons.lesson3} Text` });
   await lesson3.waitFor({ state: "visible" });
-  const previousUrl = page.url();
-  await lesson3.click({ force: true });
+  await Promise.all([
+    page.waitForResponse(
+      (res) =>
+        res.url().includes("/api/lesson") &&
+        res.request().method() === "GET" &&
+        res.status() === 200,
+      { timeout: 30000 },
+    ),
+    lesson3.click({ force: true }),
+  ]);
   await page.waitForLoadState("networkidle");
-  await page.waitForURL((url) => url.toString() !== previousUrl, { timeout: 10000 });
+  await expect(page.getByText(SEQUENCE_COURSE.lessons.lesson3).first()).toBeVisible();
   await logoutStudent(page);
 };
 
