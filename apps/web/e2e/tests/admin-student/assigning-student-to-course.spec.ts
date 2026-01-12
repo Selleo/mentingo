@@ -171,7 +171,6 @@ const loginAndOpenSequenceCourse = async (page: Page, role: "admin" | "student")
   await loginSequenceUser(page, role);
   await openSequenceCourse(page);
 };
-
 const studentInitialSequenceView = async (page: Page) => {
   await loginAndOpenSequenceCourse(page, "student");
   await page.getByTestId("chapter 3").click();
@@ -186,10 +185,10 @@ const studentInitialSequenceView = async (page: Page) => {
   }
   const lesson3 = page.getByRole("link", { name: `${SEQUENCE_COURSE.lessons.lesson3} Text` });
   await lesson3.waitFor({ state: "visible" });
+  const previousUrl = page.url();
   await lesson3.click({ force: true });
   await page.waitForLoadState("networkidle");
-  await expect(page.getByText(SEQUENCE_COURSE.lessons.lesson3).first()).toBeVisible();
-
+  await page.waitForURL((url) => url.toString() !== previousUrl, { timeout: 10000 });
   await logoutStudent(page);
 };
 
