@@ -186,10 +186,13 @@ const studentInitialSequenceView = async (page: Page) => {
   }
   const lesson3 = page.getByRole("link", { name: `${SEQUENCE_COURSE.lessons.lesson3} Text` });
   await lesson3.waitFor({ state: "visible" });
-  await expect(lesson3).toBeVisible();
   await lesson3.click({ force: true });
+  await page.waitForRequest((request) =>
+    /api\/lesson\/[a-f0-9-]+(\?|&)language=en(&|&)studentId=[a-f0-9-]+/.test(request.url()),
+  );
   await page.waitForLoadState("networkidle");
   await expect(page.getByText(SEQUENCE_COURSE.lessons.lesson3).first()).toBeVisible();
+
   await logoutStudent(page);
 };
 
