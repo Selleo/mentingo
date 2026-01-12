@@ -23,6 +23,7 @@ FROM lesson_resources lr JOIN resource_data rd ON rd.lesson_id = lr.lesson_id;
 INSERT INTO resource_entity (created_at, updated_at, resource_id, entity_id, entity_type, relationship_type)
 SELECT r.created_at, r.updated_at, r.id, (r.metadata->>'lessonId')::uuid, 'lesson', 'attachment'
 FROM resources r
-WHERE r.metadata ? 'lessonId' = TRUE;
+WHERE r.metadata ? 'lessonId' = TRUE
+ON CONFLICT (resource_id, entity_id, entity_type, relationship_type) DO NOTHING;
 
 DELETE FROM lesson_resources;

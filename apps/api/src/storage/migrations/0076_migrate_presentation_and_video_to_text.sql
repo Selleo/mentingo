@@ -17,8 +17,8 @@ WHERE l.type IN ('presentation', 'video');
 INSERT INTO resource_entity (created_at, updated_at, resource_id, entity_id, entity_type, relationship_type)
 SELECT r.created_at, r.updated_at, r.id, (r.metadata->>'lessonId')::uuid, 'lesson', 'attachment'
 FROM resources r
-WHERE r.metadata ? 'lessonId';
-
+WHERE r.metadata ? 'lessonId'
+ON CONFLICT (resource_id, entity_id, entity_type, relationship_type) DO NOTHING;
 
 WITH resource_data AS (
     SELECT l.id AS lesson_id, c.base_language AS base_language
