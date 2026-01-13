@@ -501,6 +501,9 @@ const expectCourseHiddenForPrivateStudent = async (page: Page) => {
 const enrollStudentToPrivateCourse = async (page: Page) => {
   await login(page, PRIVATE_COURSE.admin.email, PRIVATE_COURSE.admin.password);
   await page.locator(".h-min > button:nth-child(2)").click();
+  await page
+    .getByRole("button", { name: new RegExp("create new", "i") })
+    .waitFor({ state: "visible" });
   await page.getByText(PRIVATE_COURSE.heading).click();
   await page.getByRole("tab", { name: "Enrolled students" }).click();
   await page.getByRole("cell", { name: PRIVATE_COURSE.student.email2 }).click();
@@ -519,6 +522,9 @@ const expectCourseVisibleForPrivateStudent = async (page: Page) => {
 
 const unenrollStudentFromCourse = async (page: Page) => {
   await page.locator(".h-min > button:nth-child(2)").click();
+  await page
+    .getByRole("button", { name: new RegExp("create new", "i") })
+    .waitFor({ state: "visible" });
   await page.getByText(PRIVATE_COURSE.heading).click();
   await page.getByRole("tab", { name: "Enrolled students" }).click();
   const studentCell = page.getByRole("cell", { name: PRIVATE_COURSE.student.email2 });
