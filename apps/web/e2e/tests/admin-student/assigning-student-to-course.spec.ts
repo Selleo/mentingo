@@ -314,6 +314,15 @@ const logoutStudent = async (page: Page) => {
 const createGroup = async (page: Page) => {
   await page.getByRole("button", { name: "Manage" }).nth(1).click();
   await page.getByRole("link", { name: "Groups" }).click();
+
+  await page.getByRole("button", { name: "Group name" }).waitFor({ state: "visible" });
+  const selectRowCell = page.getByRole("cell", { name: "Select row" }).first();
+  if (await selectRowCell.isVisible()) {
+    await page.getByLabel("Select all").click();
+    await page.getByRole("button", { name: "Delete selected" }).nth(1).click();
+    await page.getByRole("button", { name: "Delete" }).click();
+  }
+
   await page.getByRole("button", { name: "Create new" }).click();
   await page.getByTestId("groupName").fill(GROUP.name);
   await page.getByRole("button", { name: "Publish" }).click();
@@ -405,7 +414,10 @@ const unenrollStudent = async (page: Page) => {
   await login(page, USERS.admin.email, USERS.admin.password);
   await page.getByRole("button", { name: "Courses" }).getByRole("link").click();
   await page.getByTestId(COURSE.title).click();
-  await page.getByRole("button", { name: "Edit Course" }).click();
+  const editCourseButton = page.getByRole("button", { name: "Edit Course" });
+  await editCourseButton.waitFor({ state: "visible", timeout: 15000 });
+  await expect(editCourseButton).toBeVisible();
+  await editCourseButton.click();
   await page.getByRole("tab", { name: "Enrolled students" }).click();
   await page.getByText("student0@example.com").click();
   await page.getByRole("button", { name: "Enroll", exact: true }).click();
