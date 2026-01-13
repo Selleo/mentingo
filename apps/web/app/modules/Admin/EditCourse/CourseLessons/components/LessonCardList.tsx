@@ -4,12 +4,14 @@ import { useTranslation } from "react-i18next";
 
 import { useChangeLessonDisplayOrder } from "~/api/mutations/admin/changeLessonDisplayOrder";
 import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
+import { getCourseQueryKey } from "~/api/queries/useCourse";
 import { queryClient } from "~/api/queryClient";
 import { Icon } from "~/components/Icon";
 import { SortableList } from "~/components/SortableList/SortableList";
 import { useLeaveModal } from "~/context/LeaveModalContext";
 import LessonCard from "~/modules/Admin/EditCourse/CourseLessons/components/LessonCard";
 import { ContentTypes } from "~/modules/Admin/EditCourse/EditCourse.types";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import type { Sortable } from "~/components/SortableList/SortableList";
 import type { Lesson } from "~/modules/Admin/EditCourse/EditCourse.types";
@@ -33,6 +35,8 @@ export const LessonCardList = ({
   const [pendingLesson, setPendingLesson] = useState<Lesson | null>(null);
   const [lessonsList, setLessonsList] = useState<Sortable<Lesson>[]>(lessons);
   const { t } = useTranslation();
+
+  const { language } = useLanguageStore();
 
   useEffect(() => {
     setLessonsList(lessons);
@@ -90,8 +94,9 @@ export const LessonCardList = ({
       });
 
       await queryClient.invalidateQueries({ queryKey: [COURSE_QUERY_KEY, { id: courseId }] });
+      await queryClient.invalidateQueries({ queryKey: getCourseQueryKey(courseId!, language) });
     },
-    [courseId, mutateLessonDisplayOrder],
+    [courseId, mutateLessonDisplayOrder, language],
   );
 
   useEffect(() => {
