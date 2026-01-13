@@ -5,7 +5,6 @@ export * from "./constants/allowedAge";
 export * from "./constants/articlesSettings";
 export * from "./constants/articlesTypes";
 export * from "./constants/courseEnrollment";
-export * from "./constants/externalResourceTypes";
 export * from "./constants/fileTypes";
 export * from "./constants/languages";
 export * from "./constants/newsSettings";

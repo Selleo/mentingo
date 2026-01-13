@@ -21,7 +21,7 @@ import { useUploadArticleFile } from "~/api/mutations/useUploadArticleFile";
 import { useArticle } from "~/api/queries";
 import { FormTextField } from "~/components/Form/FormTextField";
 import { PageWrapper } from "~/components/PageWrapper";
-import Editor from "~/components/RichText/Editor";
+import { BaseEditor } from "~/components/RichText/Editor";
 import Viewer from "~/components/RichText/Viever";
 import { Button } from "~/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "~/components/ui/form";
@@ -324,7 +324,7 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
                       <TabsContent value="editor">
                         <FormControl>
                           <div className="flex flex-col gap-y-1.5">
-                            <Editor
+                            <BaseEditor
                               id="content"
                               content={field.value}
                               allowFiles

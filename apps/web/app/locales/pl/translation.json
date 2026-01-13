@@ -1275,10 +1275,10 @@
           "updateAiMentorAvatarDescription": "Prześlij nowe zdjęcie dla AI Mentora lub usuń obecne.",
           "updateAiMentorAvatar": "Zaktualizuj avatar AI Mentora",
           "selectQuestionType": "Wybierz typ pytania",
-          "contentLessonDescription": "Ten typ pozwala tworzyć lekcje tekstowe za pomocą edytora tekstu sformatowanego. Możesz także importować i osadzać prezentacje, filmy i obrazy.",
-          "quizLessonDescription": "Ten typ pozwala na tworzenie quizów w ramach kursu z różnymi rodzajami pytań.",
-          "aiMentorLessonDescription": "Stwórz interaktywne lekcje AI, gdzie studenci mogą współpracować z wirtualnym mentorem.",
-          "embedLessonDescription": "Ten typ pozwala na osadzenie zewnętrznej treści za pomocą iframe.",
+          "contentLessonDescription": "Tekst z multimediami (obrazki, wideo, prezentacje).",
+          "quizLessonDescription": "Zestaw pytań do sprawdzenia wiedzy.",
+          "aiMentorLessonDescription": "Interaktywna rozmowa z wirtualnym mentorem AI.",
+          "embedLessonDescription": "Zewnętrzna zawartość (np. formularz Google, prezentacja Canva lub transmisja live z YouTube).",
           "fillInTheBlanksDescription": "To pytanie zawiera zdanie, a studenci będą musieli przeciągnąć i upuścić słowo w odpowiednie miejsce.",
           "gapFillDescription": "To pytanie będzie miało zdanie z brakującymi słowami, które studenci muszą wpisać.",
           "fillInTheBlanksSentenceTip": "Napisz zdanie i przeciągnij słowa do niego.",
@@ -2105,13 +2105,6 @@
       "upload": {
         "uploadFailed": "Nie udało się przesłać pliku",
         "tooltip": "Prześlij: Pozwala przesłać plik"
-      },
-      "externalResource": {
-        "tooltip": "Zasób zewnętrzny: Dodaj wideo lub prezentację za pomocą adresu URL",
-        "title": "Wstaw zasób zewnętrzny",
-        "selectType": "Wybierz typ treści",
-        "presentation": "Prezentacja",
-        "video": "Wideo"
       }
     }
   },

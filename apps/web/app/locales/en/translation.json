@@ -1282,12 +1282,12 @@
           "detailedResponse": "Free text",
           "scale1_5": "Scale 1 to 5",
           "selectQuestionType": "Select question type",
-          "contentLessonDescription": "This type allows you to create text-based lessons using a rich text editor. You can also import and embed presentations, videos, and images.",
-          "quizLessonDescription": "This type allows you to build quizzes for your chapter using different types of questions.",
-          "aiMentorLessonDescription": "Create interactive AI-powered lessons where students can engage with a virtual mentor.",
+          "contentLessonDescription": "Text with multimedia (images, videos, presentations).",
+          "quizLessonDescription": "A set of questions to check knowledge.",
+          "aiMentorLessonDescription": "Interactive conversation with a virtual AI mentor.",
           "fillInTheBlanksDescription": "This question contains a sentence; students must drag and drop the correct word into the blank.",
           "gapFillDescription": "This question will have sentence with missing words that students need to type in.",
-          "embedLessonDescription": "This type allows you to embed content from external platforms using iframe code.",
+          "embedLessonDescription": "External resource (e.g. Google Form, Canva presentation, or YouTube live stream).",
           "fillInTheBlanksSentenceTip": "Write a sentence and drop words in to it.",
           "fillInTheBlanksWordTip": "Create and drop the word into sentence.",
           "leaveContentHeader": "Are you sure you want to leave this question editor?",
@@ -2086,13 +2086,6 @@
       "upload": {
         "uploadFailed": "File upload failed",
         "tooltip": "Upload: Allows you to upload file"
-      },
-      "externalResource": {
-        "tooltip": "External resource: Add a video or presentation using a URL",
-        "title": "Insert external resource",
-        "selectType": "Select content type",
-        "presentation": "Presentation",
-        "video": "Video"
       }
     }
   },
