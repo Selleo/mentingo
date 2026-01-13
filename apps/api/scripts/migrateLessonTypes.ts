@@ -1,4 +1,10 @@
-import { ALLOWED_PRESENTATION_FILE_TYPES, ALLOWED_VIDEO_FILE_TYPES } from "@repo/shared";
+/* eslint-disable no-console */
+
+import {
+  ALLOWED_PRESENTATION_FILE_TYPES,
+  ALLOWED_VIDEO_FILE_TYPES,
+  SUPPORTED_LANGUAGES,
+} from "@repo/shared";
 import dotenv from "dotenv";
 import { and, eq, getTableColumns, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
@@ -16,33 +22,50 @@ import type { DatabasePg } from "src/common";
 
 dotenv.config({ path: ".env" });
 
-const allowedVideoExtensions = ["mp4", "mov", "webm", "ogg", "avi", "wmv", "quicktime"];
-const allowedPresentationExtensions = ["ppt", "pptx", "odp"];
-const allowedVideoContentTypes = [
-  ...ALLOWED_VIDEO_FILE_TYPES,
-  ...ALLOWED_VIDEO_FILE_TYPES.map((type) => type.split("/")[1]).filter(Boolean),
-  ...allowedVideoExtensions,
-];
-const allowedPresentationContentTypes = [
-  ...ALLOWED_PRESENTATION_FILE_TYPES,
-  ...allowedPresentationExtensions,
-];
-const normalizedVideoContentTypes = allowedVideoContentTypes.map((type) => type.toLowerCase());
-const normalizedPresentationContentTypes = allowedPresentationContentTypes.map((type) =>
-  type.toLowerCase(),
-);
+const INTERNAL_RESOURCE_BLOCK = {
+  presentation: (src: string) =>
+    `<div data-node-type="presentation" data-source-type="internal" data-provider="self" data-src="${src}"></div>`,
+  video: (src: string) =>
+    `<div data-node-type="video" data-source-type="internal" data-provider="self" data-src="${src}"></div>`,
+  download: (src: string, name: string) =>
+    `<div data-node-type="downloadable-file" data-src="${src}" data-name="${name}"></div>`,
+} as const;
 
-const presentationReferenceRegex = /docs\.google\.com\/.*presentation|canva\.com\/.*design/i;
+const EXTERNAL_RESOURCE_BLOCK = {
+  googleSlides: (src: string) =>
+    `<div data-node-type="presentation" data-source-type="external" data-provider="google" data-src="${src}"></div>`,
+  canva: (src: string) =>
+    `<div data-node-type="presentation" data-source-type="external" data-provider="canva" data-src="${src}"></div>`,
+  youtube: (src: string) =>
+    `<div data-node-type="video" data-source-type="external" data-provider="youtube" data-src="${src}"></div>`,
+  vimeo: (src: string) =>
+    `<div data-node-type="video" data-source-type="external" data-provider="vimeo" data-src="${src}"></div>`,
+} as const;
 
-const normalizeContentType = (contentType: string | null | undefined) =>
-  typeof contentType === "string" ? contentType.toLowerCase() : "";
+const MESSAGE_BLOCK = {
+  unsupportedExternalPresentation:
+    "<p>External presentation URL is not supported. Please upload the file and replace this block.</p>",
+  unsupportedExternalVideo:
+    "<p>External video URL is not supported. Please upload the file and replace this block.</p>",
+} as const;
 
-const isExternalReference = (reference: string | null | undefined) =>
-  !!reference && /^https?:\/\//i.test(reference);
+const ALLOWED_VIDEO_EXTENSIONS = ["mp4", "mov", "webm", "ogg", "avi", "wmv", "quicktime"] as const;
+const ALLOWED_PRESENTATION_EXTENSIONS = ["ppt", "pptx", "odp"] as const;
+
+const PRESENTATION_REFERENCE_REGEX = /docs\.google\.com\/.*presentation|canva\.com\/.*design/i;
+
+const RESOURCE_REFERENCE_WHERE_REGEX =
+  "(youtube\\.com|youtu\\.be|vimeo\\.com|docs\\.google\\.com/.*/presentation|canva\\.com/.*/design)";
+
+const normalizeString = (value: string | null | undefined) =>
+  typeof value === "string" ? value.toLowerCase() : "";
+
+const isExternalUrl = (reference: string | null | undefined) =>
+  typeof reference === "string" && /^https?:\/\//i.test(reference);
 
 const isPresentationReference = (reference: string | null | undefined) =>
   typeof reference === "string" &&
-  (/(\.pptx|\.ppt)(\?|#|$)/i.test(reference) || presentationReferenceRegex.test(reference));
+  (/(\.pptx|\.ppt)(\?|#|$)/i.test(reference) || PRESENTATION_REFERENCE_REGEX.test(reference));
 
 const buildSqlInClause = (values: string[]) =>
   sql`(${sql.join(
@@ -50,76 +73,139 @@ const buildSqlInClause = (values: string[]) =>
     sql`, `,
   )})`;
 
-const buildEmbedHtml = ({
-  isVideo,
-  isPresentation,
-  isExternal,
-  reference,
-  resourceUrl,
-  fileName,
-}: {
-  isVideo: boolean;
-  isPresentation: boolean;
+const getOriginalFilename = (metadata: unknown): string | null => {
+  const record = metadata as Record<string, unknown> | null;
+  return typeof record?.originalFilename === "string" ? record.originalFilename : null;
+};
+
+const allowedVideoContentTypes = [
+  ...ALLOWED_VIDEO_FILE_TYPES,
+  ...ALLOWED_VIDEO_FILE_TYPES.map((type) => type.split("/")[1]).filter(Boolean),
+  ...ALLOWED_VIDEO_EXTENSIONS,
+].map((t) => t.toLowerCase());
+
+const allowedPresentationContentTypes = [
+  ...ALLOWED_PRESENTATION_FILE_TYPES,
+  ...ALLOWED_PRESENTATION_EXTENSIONS,
+].map((t) => t.toLowerCase());
+
+type ResourceKind = "video" | "presentation" | "other";
+type Provider = "self" | "youtube" | "vimeo" | "google" | "canva" | "unsupported-external";
+
+type ResourceClassification = {
+  kind: ResourceKind;
   isExternal: boolean;
+  provider: Provider;
+};
+
+function classifyResource(input: {
+  reference: string | null;
+  contentType: string | null;
+}): ResourceClassification {
+  const reference = input.reference ?? "";
+  const contentType = normalizeString(input.contentType);
+  const external = isExternalUrl(input.reference);
+
+  const isVideo =
+    contentType.startsWith("video/") || allowedVideoContentTypes.includes(contentType);
+
+  const isPresentation =
+    allowedPresentationContentTypes.includes(contentType) ||
+    isPresentationReference(input.reference);
+
+  if (isPresentation) {
+    if (!external) return { kind: "presentation", isExternal: false, provider: "self" };
+    if (/docs\.google\.com\/.*presentation/i.test(reference))
+      return { kind: "presentation", isExternal: true, provider: "google" };
+    if (/canva\.com\/.*design/i.test(reference))
+      return { kind: "presentation", isExternal: true, provider: "canva" };
+    return { kind: "presentation", isExternal: true, provider: "unsupported-external" };
+  }
+
+  if (isVideo) {
+    if (!external) return { kind: "video", isExternal: false, provider: "self" };
+    if (/youtube\.com|youtu\.be/i.test(reference))
+      return { kind: "video", isExternal: true, provider: "youtube" };
+    if (/vimeo\.com/i.test(reference))
+      return { kind: "video", isExternal: true, provider: "vimeo" };
+    return { kind: "video", isExternal: true, provider: "unsupported-external" };
+  }
+
+  return {
+    kind: "other",
+    isExternal: external,
+    provider: external ? "unsupported-external" : "self",
+  };
+}
+
+function buildEmbedHtml(params: {
+  classification: ResourceClassification;
   reference: string | null;
   resourceUrl: string;
   fileName: string | null;
-}) =>
-  match({ isVideo, isPresentation, isExternal })
-    .with(
-      { isPresentation: true, isExternal: false },
-      () =>
-        `<div data-node-type="presentation" data-source-type="internal" data-provider="self" data-src="${resourceUrl}"></div>`,
+}): string {
+  const { classification, reference, resourceUrl, fileName } = params;
+
+  return match(classification)
+    .with({ kind: "presentation", isExternal: false }, () =>
+      INTERNAL_RESOURCE_BLOCK.presentation(resourceUrl),
     )
-    .with({ isPresentation: true, isExternal: true }, () =>
-      match(reference ?? "")
-        .when(
-          (value) => /docs\.google\.com\/.*presentation/i.test(value),
-          (value) =>
-            `<div data-node-type="presentation" data-source-type="external" data-provider="google" data-src="${value}"></div>`,
-        )
-        .when(
-          (value) => /canva\.com\/.*design/i.test(value),
-          (value) =>
-            `<div data-node-type="presentation" data-source-type="external" data-provider="canva" data-src="${value}"></div>`,
-        )
-        .otherwise(
-          () =>
-            '<div data-error="unsupported">External presentation URL is not supported. Please upload the file and replace this block.</div>',
-        ),
+    .with({ kind: "presentation", isExternal: true, provider: "google" }, () =>
+      EXTERNAL_RESOURCE_BLOCK.googleSlides(reference ?? ""),
+    )
+    .with({ kind: "presentation", isExternal: true, provider: "canva" }, () =>
+      EXTERNAL_RESOURCE_BLOCK.canva(reference ?? ""),
     )
     .with(
-      { isVideo: true, isExternal: false },
-      () =>
-        `<div data-node-type="video" data-source-type="internal" data-provider="self" data-src="${resourceUrl}"></div>`,
+      { kind: "presentation", isExternal: true },
+      () => MESSAGE_BLOCK.unsupportedExternalPresentation,
     )
-    .with({ isVideo: true, isExternal: true }, () =>
-      match(reference ?? "")
-        .when(
-          (value) => /youtube\.com|youtu\.be/i.test(value),
-          (value) =>
-            `<div data-node-type="video" data-source-type="external" data-provider="youtube" data-src="${value}"></div>`,
-        )
-        .when(
-          (value) => /vimeo\.com/i.test(value),
-          (value) =>
-            `<div data-node-type="video" data-source-type="external" data-provider="vimeo" data-src="${value}"></div>`,
-        )
-        .otherwise(
-          () =>
-            "<p>External video URL is not supported. Please upload the file and replace this block.</p>",
-        ),
+    .with({ kind: "video", isExternal: false }, () => INTERNAL_RESOURCE_BLOCK.video(resourceUrl))
+    .with({ kind: "video", isExternal: true, provider: "youtube" }, () =>
+      EXTERNAL_RESOURCE_BLOCK.youtube(reference ?? ""),
     )
-    .otherwise(
-      () =>
-        `<div data-node-type="downloadable-file" data-src="${resourceUrl}" data-name="${
-          fileName ?? ""
-        }"></div>`,
-    );
+    .with({ kind: "video", isExternal: true, provider: "vimeo" }, () =>
+      EXTERNAL_RESOURCE_BLOCK.vimeo(reference ?? ""),
+    )
+    .with({ kind: "video", isExternal: true }, () => MESSAGE_BLOCK.unsupportedExternalVideo)
+    .otherwise(() => INTERNAL_RESOURCE_BLOCK.download(resourceUrl, fileName ?? ""));
+}
+
+function getLanguagesToUpdate(input: {
+  baseLanguage: SupportedLanguages;
+  availableLanguages: SupportedLanguages[] | null | undefined;
+}): SupportedLanguages[] {
+  const available = Array.isArray(input.availableLanguages) ? input.availableLanguages : [];
+  const candidates = Array.from(
+    new Set([input.baseLanguage, ...available].filter(Boolean)),
+  ) as SupportedLanguages[];
+  return candidates.length ? candidates : Object.values(SUPPORTED_LANGUAGES);
+}
+
+function descriptionAlreadyContainsResource(params: {
+  description: string;
+  resourceUrl: string;
+  resourceId: string;
+  reference: string | null;
+}): boolean {
+  const { description, resourceUrl, resourceId, reference } = params;
+  return (
+    description.includes(resourceUrl) ||
+    description.includes(resourceId) ||
+    (!!reference && description.includes(reference))
+  );
+}
+
+function mergeDescription(existingDescription: string, embedHtml: string): string {
+  return existingDescription
+    ? `<p>${existingDescription}</p><p></p>${embedHtml}`
+    : `<p></p>${embedHtml}`;
+}
 
 async function runMigration() {
   const yargs = await import("yargs");
   const { hideBin } = await import("yargs/helpers");
+
   const argv = await yargs
     .default(hideBin(process.argv))
     .option("url", {
@@ -137,6 +223,7 @@ async function runMigration() {
     .select({
       ...getTableColumns(lessons),
       baseLanguage: sql<SupportedLanguages>`${courses.baseLanguage}`,
+      availableLanguages: sql<SupportedLanguages[]>`${courses.availableLocales}`,
       resourceId: resources.id,
       resourceReference: resources.reference,
       resourceContentType: resources.contentType,
@@ -157,84 +244,78 @@ async function runMigration() {
       and(
         eq(lessons.type, LESSON_TYPES.CONTENT),
         sql`(
-          lower(${resources.contentType}) in ${buildSqlInClause(normalizedVideoContentTypes)}
-          OR lower(${resources.contentType}) in ${buildSqlInClause(
-            normalizedPresentationContentTypes,
-          )}
+          lower(${resources.contentType}) in ${buildSqlInClause(allowedVideoContentTypes)}
+          OR lower(${resources.contentType}) in ${buildSqlInClause(allowedPresentationContentTypes)}
           OR ${resources.contentType} = 'embed'
-          OR ${
-            resources.reference
-          } ~* '(youtube\\.com|youtu\\.be|vimeo\\.com|docs\\.google\\.com/.*/presentation|canva\\.com/.*/design)'
+          OR ${resources.reference} ~* ${RESOURCE_REFERENCE_WHERE_REGEX}
         )`,
       ),
     );
 
   await Promise.all(
     existingLessons.map(async (lesson) => {
-      const { resourceReference: reference, resourceContentType: contentType, resourceId } = lesson;
+      const {
+        resourceId,
+        resourceReference: reference,
+        resourceContentType: contentType,
+        resourceMetadata: metadata,
+      } = lesson;
 
       const resourceUrl = `${argv.url}/api/lesson/lesson-resource/${resourceId}`;
+      const fileName = getOriginalFilename(metadata);
 
-      const metadata = lesson.resourceMetadata as Record<string, unknown> | null;
-      const fileName =
-        typeof metadata?.originalFilename === "string" ? metadata.originalFilename : null;
+      const classification = classifyResource({ reference, contentType });
 
-      const normalizedContentType = normalizeContentType(contentType);
-
-      const isExternal = isExternalReference(reference);
-
-      const isVideo =
-        normalizedContentType.startsWith("video/") ||
-        normalizedVideoContentTypes.includes(normalizedContentType);
-
-      const isPresentation =
-        normalizedPresentationContentTypes.includes(normalizedContentType) ||
-        isPresentationReference(reference);
-
-      const html = buildEmbedHtml({
-        isVideo,
-        isPresentation,
-        isExternal,
+      const embedHtml = buildEmbedHtml({
+        classification,
         reference,
         resourceUrl,
         fileName,
       });
 
-      const existingDescription = (() => {
-        const description = lesson.description as Record<string, string> | null;
-        return description?.[lesson.baseLanguage] ?? "";
-      })();
+      const description = (lesson.description ?? {}) as Partial<Record<SupportedLanguages, string>>;
 
-      const mergedDescription = existingDescription
-        ? `<p>${existingDescription}</p><p></p>${html}`
-        : html;
+      const languagesToUpdate = getLanguagesToUpdate({
+        baseLanguage: lesson.baseLanguage,
+        availableLanguages: lesson.availableLanguages,
+      });
 
-      if (
-        existingDescription.includes(String(lesson.resourceId)) ||
-        (reference && existingDescription.includes(reference))
-      ) {
-        console.log("Skipping lesson (already contains resource):", lesson.id);
-        return;
+      for (const lang of languagesToUpdate) {
+        const existingDescription = description[lang] || "";
+
+        if (
+          descriptionAlreadyContainsResource({
+            description: existingDescription,
+            resourceUrl,
+            resourceId,
+            reference,
+          })
+        ) {
+          console.log(
+            `Skipping lesson for language ${lang} (already contains resource):`,
+            lesson.id,
+          );
+          continue;
+        }
+
+        await db
+          .update(lessons)
+          .set({
+            description: sql`
+              jsonb_set(
+                COALESCE(${lessons.description}, '{}'),
+                ARRAY[${lang}::text],
+                to_jsonb(${sql`${mergeDescription(existingDescription, embedHtml)}::text`}),
+                true
+              )
+            `,
+          })
+          .where(eq(lessons.id, lesson.id));
       }
-
-      await db
-        .update(lessons)
-        .set({
-          description: sql`
-            jsonb_set(
-              COALESCE(${lessons.description}, '{}'::jsonb),
-              ARRAY[${lesson.baseLanguage}::text],
-              to_jsonb(${sql`${mergedDescription}::text`}),
-              true
-            )
-          `,
-        })
-        .where(eq(lessons.id, lesson.id));
     }),
   );
 
   console.log(`Successfully migrated ${existingLessons.length} lesson(s) of type CONTENT`);
-
   await pg.end();
 }
 
