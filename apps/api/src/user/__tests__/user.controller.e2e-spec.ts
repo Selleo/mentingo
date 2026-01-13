@@ -3,6 +3,7 @@ import request from "supertest";
 
 import { AuthService } from "src/auth/auth.service";
 import { GroupService } from "src/group/group.service";
+import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
@@ -343,6 +344,91 @@ describe("UsersController (e2e)", () => {
           { userId: firstUser.id, groups: [updateData.id] },
           { userId: secondUser.id, groups: [updateData.id] },
         ])
+        .expect(403);
+    });
+  });
+
+  describe("PATCH /user/bulk/roles", () => {
+    it("should update roles for multiple users", async () => {
+      const firstUser = await authService.register({
+        email: "bulk-roles-1@example.com",
+        password: testPassword,
+        firstName: "Bulk",
+        lastName: "UserOne",
+        language: "en",
+      });
+
+      const secondUser = await authService.register({
+        email: "bulk-roles-2@example.com",
+        password: testPassword,
+        firstName: "Bulk",
+        lastName: "UserTwo",
+        language: "en",
+      });
+
+      await request(app.getHttpServer())
+        .patch("/api/user/bulk/roles")
+        .set("Cookie", testCookies)
+        .send({ userIds: [firstUser.id, secondUser.id], role: USER_ROLES.CONTENT_CREATOR })
+        .expect(200);
+
+      const firstResponse = await request(app.getHttpServer())
+        .get(`/api/user?id=${firstUser.id}`)
+        .set("Cookie", testCookies)
+        .expect(200);
+
+      const secondResponse = await request(app.getHttpServer())
+        .get(`/api/user?id=${secondUser.id}`)
+        .set("Cookie", testCookies)
+        .expect(200);
+
+      expect(firstResponse.body.data.role).toBe(USER_ROLES.CONTENT_CREATOR);
+      expect(secondResponse.body.data.role).toBe(USER_ROLES.CONTENT_CREATOR);
+    });
+
+    it("should return 400 when no users are provided", async () => {
+      const response = await request(app.getHttpServer())
+        .patch("/api/user/bulk/roles")
+        .set("Cookie", testCookies)
+        .send({ userIds: [], role: USER_ROLES.ADMIN })
+        .expect(400);
+
+      expect(response.body.message).toBe("adminUsersView.toast.noUserSelected");
+    });
+
+    it("should return 400 when attempting to update own role", async () => {
+      const response = await request(app.getHttpServer())
+        .patch("/api/user/bulk/roles")
+        .set("Cookie", testCookies)
+        .send({ userIds: [testUser.id], role: USER_ROLES.STUDENT })
+        .expect(400);
+
+      expect(response.body.message).toBe("adminUsersView.toast.cannotUpdateOwnRole");
+    });
+
+    it("should return forbidden 403 for non-admins", async () => {
+      const regularUser = await authService.register({
+        email: "bulk-roles-regular@example.com",
+        password: testPassword,
+        firstName: "Regular",
+        lastName: "User",
+        language: "en",
+      });
+
+      const loginResponse = await request(app.getHttpServer())
+        .post("/api/auth/login")
+        .send({
+          email: regularUser.email,
+          password: testPassword,
+        })
+        .expect(201);
+
+      const cookies = loginResponse.headers["set-cookie"];
+
+      await request(app.getHttpServer())
+        .patch("/api/user/bulk/roles")
+        .set("Cookie", cookies)
+        .send({ userIds: [regularUser.id], role: USER_ROLES.ADMIN })
         .expect(403);
     });
   });
