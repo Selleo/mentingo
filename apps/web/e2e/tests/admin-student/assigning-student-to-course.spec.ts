@@ -179,22 +179,15 @@ const studentInitialSequenceView = async (page: Page) => {
   ).toBeVisible();
   await page.getByRole("link", { name: `${SEQUENCE_COURSE.lessons.lesson4} Text Not` }).click();
   await expect(page.getByText(SEQUENCE_COURSE.lessons.lesson4).first()).toBeVisible();
-  const chapter2 = page.getByRole("button", { name: /chapter 2/i });
-  if ((await chapter2.getAttribute("data-state")) !== "open") {
-    await chapter2.click();
-  }
-  const lesson3 = page.getByRole("link", { name: `${SEQUENCE_COURSE.lessons.lesson3} Text` });
-  await lesson3.waitFor({ state: "visible" });
-  await Promise.all([
-    lesson3.click({ force: true }),
-    page.waitForResponse(
-      (res) =>
-        res.url().includes("/api/lesson") &&
-        res.request().method() === "GET" &&
-        res.status() === 200,
-      { timeout: 30000 },
-    ),
-  ]);
+  await page.getByRole("main").getByRole("button").first().click();
+  await page.getByText("test lesson v3").first().waitFor({ state: "visible" });
+  await page.getByText("test lesson v3").nth(1).waitFor({ state: "visible" });
+  expect(await page.getByText("test lesson v3").count()).toBe(2);
+  await page.waitForResponse(
+    (res) =>
+      res.url().includes("/api/lesson") && res.request().method() === "GET" && res.status() === 200,
+    { timeout: 30000 },
+  );
   await page.waitForLoadState("networkidle");
   await expect(page.getByText(SEQUENCE_COURSE.lessons.lesson3).first()).toBeVisible();
   await logoutStudent(page);
