@@ -14,7 +14,7 @@ import {
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes, ApiResponse } from "@nestjs/swagger";
-import { SupportedLanguages } from "@repo/shared";
+import { SUPPORTED_LANGUAGES, SupportedLanguages } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Response } from "express";
 import { Validate } from "nestjs-typebox";
@@ -323,7 +323,7 @@ export class LessonController {
         },
         language: {
           type: "string",
-          enum: ["en", "pl"],
+          enum: Object.values(SUPPORTED_LANGUAGES),
         },
         title: {
           type: "string",

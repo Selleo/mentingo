@@ -6,6 +6,7 @@ import { useToast } from "~/components/ui/use-toast";
 
 import type { SupportedLanguages } from "@repo/shared";
 import type { AxiosError } from "axios";
+import type { ApiErrorResponse } from "~/api/types";
 
 export type LessonFileUploadOptions = {
   lessonId: string;
@@ -38,7 +39,8 @@ export function useLessonFileUpload() {
       return response.data;
     },
     onError: (error: AxiosError) => {
-      const apiResponseData = error.response?.data as { message: string };
+      const apiResponseData = error.response?.data as ApiErrorResponse;
+
       toast({
         description: t(apiResponseData.message),
         variant: "destructive",

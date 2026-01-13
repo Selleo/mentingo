@@ -43,3 +43,15 @@ export function buildJsonbFieldWithMultipleEntries(entries: Partial<Record<strin
 
   return sql`jsonb_build_object(${sql.join(pairs, sql`, `)})`;
 }
+
+/**
+ * Builds a SQL IN clause for the given array of string values.
+ * Example output: ('value1', 'value2', 'value3')
+ * @param values - An array of string values to include in the IN clause.
+ * @returns A SQL fragment representing the IN clause.
+ */
+export const buildSqlInClause = (values: string[]) =>
+  sql`(${sql.join(
+    values.map((value) => sql`${value}`),
+    sql`, `,
+  )})`;

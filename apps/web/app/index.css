@@ -1,6 +1,8 @@
 @import url("https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap");
 @import url("https://use.typekit.net/qqt7bjl.css");
 
+@import url("./styles/overrides.css");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -19,21 +21,6 @@ body {
 /* Smooth scrolling for better UX */
 html {
   scroll-behavior: smooth;
-}
-
-/* Tiptap ProseMirror editor styles */
-.ProseMirror:focus {
-  outline: none;
-  box-shadow: none;
-}
-
-.ProseMirror p.is-editor-empty:first-child::before,
-.ProseMirror p.is-empty::before {
-  content: attr(data-placeholder);
-  float: left;
-  color: var(--neutral-400);
-  pointer-events: none;
-  height: 0;
 }
 
 @layer base {

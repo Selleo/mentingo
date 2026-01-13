@@ -653,8 +653,6 @@ test.describe.serial("Course management", () => {
       NEW_COURSE.chapter.editedTitle,
     );
     await createCourseActions.editContentLesson(page);
-    // await createCourseActions.editPresentationLesson(page);
-    // await createCourseActions.editVideoLesson(page);
     await createCourseActions.editQuizTitle(page);
   });
 

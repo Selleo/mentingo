@@ -4,6 +4,7 @@ import { and, eq, getTableColumns, gte, lte, sql } from "drizzle-orm";
 import { DatabasePg, type UUIDType } from "src/common";
 import { setJsonbField } from "src/common/helpers/sqlHelpers";
 import { LocalizationService } from "src/localization/localization.service";
+import { ENTITY_TYPE } from "src/localization/localization.types";
 import {
   aiMentorLessons,
   chapters,
@@ -189,7 +190,7 @@ export class AdminChapterRepository {
               FROM resources r
               INNER JOIN resource_entity re ON re.resource_id = r.id
               WHERE re.entity_id = lessons.id
-                AND re.entity_type = 'lesson'
+                AND re.entity_type = ${ENTITY_TYPE.LESSON}
                 AND r.archived = false
               ORDER BY r.created_at
             )

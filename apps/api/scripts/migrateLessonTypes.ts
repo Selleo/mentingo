@@ -1,16 +1,13 @@
 /* eslint-disable no-console */
 
-import {
-  ALLOWED_PRESENTATION_FILE_TYPES,
-  ALLOWED_VIDEO_FILE_TYPES,
-  SUPPORTED_LANGUAGES,
-} from "@repo/shared";
+import { ALLOWED_PRESENTATION_FILE_TYPES, ALLOWED_VIDEO_FILE_TYPES } from "@repo/shared";
 import dotenv from "dotenv";
 import { and, eq, getTableColumns, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { match } from "ts-pattern";
 
+import { buildSqlInClause, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import { chapters, courses, lessons, resourceEntity, resources } from "src/storage/schema";
@@ -65,13 +62,7 @@ const isExternalUrl = (reference: string | null | undefined) =>
 
 const isPresentationReference = (reference: string | null | undefined) =>
   typeof reference === "string" &&
-  (/(\.pptx|\.ppt)(\?|#|$)/i.test(reference) || PRESENTATION_REFERENCE_REGEX.test(reference));
-
-const buildSqlInClause = (values: string[]) =>
-  sql`(${sql.join(
-    values.map((value) => sql`${value}`),
-    sql`, `,
-  )})`;
+  (/(\.pptx|\.ppt|\.odp)(\?|#|$)/i.test(reference) || PRESENTATION_REFERENCE_REGEX.test(reference));
 
 const getOriginalFilename = (metadata: unknown): string | null => {
   const record = metadata as Record<string, unknown> | null;
@@ -171,17 +162,6 @@ function buildEmbedHtml(params: {
     .otherwise(() => INTERNAL_RESOURCE_BLOCK.download(resourceUrl, fileName ?? ""));
 }
 
-function getLanguagesToUpdate(input: {
-  baseLanguage: SupportedLanguages;
-  availableLanguages: SupportedLanguages[] | null | undefined;
-}): SupportedLanguages[] {
-  const available = Array.isArray(input.availableLanguages) ? input.availableLanguages : [];
-  const candidates = Array.from(
-    new Set([input.baseLanguage, ...available].filter(Boolean)),
-  ) as SupportedLanguages[];
-  return candidates.length ? candidates : Object.values(SUPPORTED_LANGUAGES);
-}
-
 function descriptionAlreadyContainsResource(params: {
   description: string;
   resourceUrl: string;
@@ -275,12 +255,7 @@ async function runMigration() {
 
       const description = (lesson.description ?? {}) as Partial<Record<SupportedLanguages, string>>;
 
-      const languagesToUpdate = getLanguagesToUpdate({
-        baseLanguage: lesson.baseLanguage,
-        availableLanguages: lesson.availableLanguages,
-      });
-
-      for (const lang of languagesToUpdate) {
+      for (const lang of lesson.availableLanguages) {
         const existingDescription = description[lang] || "";
 
         if (
@@ -301,14 +276,12 @@ async function runMigration() {
         await db
           .update(lessons)
           .set({
-            description: sql`
-              jsonb_set(
-                COALESCE(${lessons.description}, '{}'),
-                ARRAY[${lang}::text],
-                to_jsonb(${sql`${mergeDescription(existingDescription, embedHtml)}::text`}),
-                true
-              )
-            `,
+            description: setJsonbField(
+              lessons.description,
+              lang,
+              mergeDescription(existingDescription, embedHtml),
+              true,
+            ),
           })
           .where(eq(lessons.id, lesson.id));
       }

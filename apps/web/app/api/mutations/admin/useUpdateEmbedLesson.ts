@@ -8,20 +8,17 @@ import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../../api-client";
 
+import type { SupportedLanguages } from "@repo/shared";
+import type { AxiosError } from "axios";
+import type { EmbedLessonResource } from "~/api/types";
+
 type UpdateEmbedLessonBody = {
   title: string;
   type: "embed";
   lessonId: string;
   language: SupportedLanguages;
-  resources: Array<{
-    id?: string;
-    fileUrl: string;
-    allowFullscreen?: boolean;
-  }>;
+  resources: EmbedLessonResource[];
 };
-import type { SupportedLanguages } from "@repo/shared";
-import type { AxiosError } from "axios";
-
 type UpdateEmbedLessonOptions = {
   data: UpdateEmbedLessonBody;
   lessonId: string;

@@ -10,6 +10,7 @@ import {
   type Chapter,
   ContentTypes,
   type Lesson,
+  LessonType,
 } from "~/modules/Admin/EditCourse/EditCourse.types";
 
 import { contentLessonFormSchema } from "../validators/useContentLessonFormSchema";
@@ -42,7 +43,7 @@ export const useContentLessonForm = ({
     defaultValues: {
       title: lessonToEdit?.title || "",
       description: lessonToEdit?.description || "",
-      type: lessonToEdit?.type || "content",
+      type: lessonToEdit?.type || LessonType.CONTENT,
     },
   });
 
@@ -53,7 +54,7 @@ export const useContentLessonForm = ({
       reset({
         title: lessonToEdit.title,
         description: lessonToEdit?.description,
-        type: "content",
+        type: LessonType.CONTENT,
       });
     }
   }, [lessonToEdit, reset]);

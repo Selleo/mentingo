@@ -1,0 +1,14 @@
+/* Tiptap ProseMirror editor styles */
+.ProseMirror:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before,
+.ProseMirror p.is-empty::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--neutral-400);
+  pointer-events: none;
+  height: 0;
+}

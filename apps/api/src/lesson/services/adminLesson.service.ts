@@ -43,7 +43,7 @@ import type {
   CreateEmbedLessonBody,
   UpdateEmbedLessonBody,
 } from "../lesson.schema";
-import type { LessonTypes } from "../lesson.type";
+import type { EmbedLessonResourceType, LessonTypes } from "../lesson.type";
 import type { SupportedLanguages } from "@repo/shared";
 import type { LessonActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
@@ -832,29 +832,40 @@ export class AdminLessonService {
       if (resourceIdsToDelete.length > 0)
         await this.adminLessonRepository.deleteLessonResourcesByIds(resourceIdsToDelete);
 
-      const resourcesToUpdate = data.resources
-        .filter((resource) => resource.id)
-        .map((resource) => ({
-          id: resource.id as UUIDType,
-          reference: resource.fileUrl,
-          contentType: "text/html",
-          metadata: {
-            allowFullscreen: resource.allowFullscreen ?? false,
-          },
-        }));
+      const resourcesToUpdate = data.resources.reduce((acc, resource) => {
+        if (resource.id && existingResourcesIds.includes(resource.id)) {
+          acc.push({
+            id: resource.id,
+            reference: resource.fileUrl,
+            contentType: "text/html",
+            metadata: {
+              allowFullscreen: resource.allowFullscreen ?? false,
+            },
+          });
+        }
+
+        return acc;
+      }, [] as EmbedLessonResourceType[]);
 
       if (resourcesToUpdate.length > 0)
         await this.adminLessonRepository.updateLessonResources(resourcesToUpdate);
 
-      const resourcesToCreate = data.resources
-        .filter((resource) => !resource.id)
-        .map((resource) => ({
-          reference: resource.fileUrl,
-          contentType: "text/html",
-          metadata: {
-            allowFullscreen: resource.allowFullscreen ?? false,
-          },
-        }));
+      const resourcesToCreate = data.resources.reduce(
+        (acc, resource) => {
+          if (!resource.id) {
+            acc.push({
+              reference: resource.fileUrl,
+              contentType: "text/html",
+              metadata: {
+                allowFullscreen: resource.allowFullscreen ?? false,
+              },
+            });
+          }
+
+          return acc;
+        },
+        [] as Omit<EmbedLessonResourceType, "id">[],
+      );
 
       if (resourcesToCreate.length > 0)
         await this.adminLessonRepository.createLessonResources(lessonId, resourcesToCreate);
