@@ -368,6 +368,8 @@ export const CourseEnrolled = (): ReactElement => {
     setRowSelection({});
   }, [page, perPage, searchParams.keyword, searchParams.groups]);
 
+  console.log({ enrolledGroups });
+
   return (
     <div className="flex flex-col">
       <div className="flex items-center justify-between gap-2">
