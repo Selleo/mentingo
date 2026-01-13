@@ -20,6 +20,7 @@ export const videoInitResponseSchema = Type.Object({
   tusEndpoint: Type.String(),
   tusHeaders: Type.Record(Type.String(), Type.String()),
   expiresAt: Type.String(),
+  resourceId: Type.Optional(UUIDSchema),
 });
 
 export type VideoInitBody = Static<typeof videoInitSchema>;

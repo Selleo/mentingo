@@ -101,6 +101,7 @@ const EditorToolbar = ({
             </TooltipTrigger>
             <TooltipContent>{t("richTextEditor.toolbar.link.tooltip")}</TooltipContent>
           </Tooltip>
+
           {allowFiles && (
             <Tooltip>
               <TooltipTrigger>

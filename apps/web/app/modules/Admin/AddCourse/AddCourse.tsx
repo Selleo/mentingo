@@ -7,7 +7,7 @@ import { useCategoriesSuspense } from "~/api/queries/useCategories";
 import SplashScreenImage from "~/assets/svgs/splash-screen-image.svg";
 import ImageUploadInput from "~/components/FileUploadInput/ImageUploadInput";
 import { Icon } from "~/components/Icon";
-import Editor from "~/components/RichText/Editor";
+import { BaseEditor } from "~/components/RichText/Editor";
 import { Button } from "~/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
@@ -222,7 +222,7 @@ const AddCourse = () => {
                     <span className="text-red-500">*</span>{" "}
                     {t("adminCourseView.settings.field.description")}
                   </Label>
-                  <Editor id="description" {...field} />
+                  <BaseEditor id="description" {...field} />
                   <FormMessage />
                 </FormItem>
               )}

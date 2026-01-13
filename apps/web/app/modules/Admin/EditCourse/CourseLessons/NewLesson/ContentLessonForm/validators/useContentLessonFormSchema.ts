@@ -4,7 +4,7 @@ import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 
 import type i18next from "i18next";
 
-export const textLessonFormSchema = (t: typeof i18next.t) =>
+export const contentLessonFormSchema = (t: typeof i18next.t) =>
   z.object({
     title: z
       .string()
@@ -22,4 +22,4 @@ export const textLessonFormSchema = (t: typeof i18next.t) =>
     type: z.nativeEnum(LessonType),
   });
 
-export type TextLessonFormValues = z.infer<ReturnType<typeof textLessonFormSchema>>;
+export type ContentLessonFormValues = z.infer<ReturnType<typeof contentLessonFormSchema>>;

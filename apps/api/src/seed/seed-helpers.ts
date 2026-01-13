@@ -18,7 +18,6 @@ import { StripeService } from "src/stripe/stripe.service";
 
 import type { DatabasePg, UUIDType } from "../common";
 import type { NiceCourseData } from "../utils/types/test-types";
-import type { LessonTypes } from "src/lesson/lesson.type";
 
 export async function createNiceCourses(
   creatorUserIds: UUIDType[],
@@ -132,13 +131,8 @@ export async function createNiceCourses(
             description: sql`json_build_object('en', ${lessonData.description ?? ""}::text)`,
             type: lessonData.type,
             displayOrder: index + 1,
-            fileS3Key: getFileUrl(lessonData.type),
-            fileType:
-              lessonData.type === LESSON_TYPES.PRESENTATION
-                ? "pptx"
-                : lessonData.type === LESSON_TYPES.VIDEO
-                  ? "mp4"
-                  : null,
+            fileS3Key: null,
+            fileType: null,
             thresholdScore: lessonData.type === LESSON_TYPES.QUIZ ? 0 : null,
             chapterId: chapter.id,
             createdAt: createdAt,
@@ -232,33 +226,4 @@ export async function seedTruncateAllTables(db: DatabasePg): Promise<void> {
 
     await tx.execute(sql`SET CONSTRAINTS ALL IMMEDIATE`);
   });
-}
-
-const external_video_urls = [
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4",
-];
-
-const external_presentation_urls = [
-  "https://res.cloudinary.com/dinpapxzv/raw/upload/v1727104719/presentation_gp0o3d.pptx",
-];
-
-function getFileUrl(lessonType: LessonTypes) {
-  if (lessonType === LESSON_TYPES.VIDEO) {
-    return faker.helpers.arrayElement(external_video_urls);
-  } else if (lessonType === LESSON_TYPES.PRESENTATION) {
-    return faker.helpers.arrayElement(external_presentation_urls);
-  }
-  return null;
 }

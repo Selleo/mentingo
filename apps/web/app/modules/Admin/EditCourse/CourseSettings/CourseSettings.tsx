@@ -6,7 +6,7 @@ import { useCategoriesSuspense } from "~/api/queries/useCategories";
 import ImageUploadInput from "~/components/FileUploadInput/ImageUploadInput";
 import { FormTextField } from "~/components/Form/FormTextField";
 import { Icon } from "~/components/Icon";
-import Editor from "~/components/RichText/Editor";
+import { BaseEditor } from "~/components/RichText/Editor";
 import { Button } from "~/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "~/components/ui/form";
 import { Label } from "~/components/ui/label";
@@ -171,7 +171,7 @@ const CourseSettings = ({
                   )}
                 />
               </div>
-              <Editor
+              <BaseEditor
                 id="description"
                 content={description}
                 onChange={(value) =>

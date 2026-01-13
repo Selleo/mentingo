@@ -645,7 +645,7 @@
       "mappedTypes": {
         "video": "Wideo",
         "presentation": "Prezentacja",
-        "text": "Tekst",
+        "content": "Treść",
         "quiz": "Quiz",
         "aiMentor": "AI Mentor",
         "embed": "Osadzenie"
@@ -1029,7 +1029,8 @@
       "cannotModifyQuestionsInNonBaseLanguage": "Nie można modyfikować pytań w języku innym niż bazowy.",
       "noMissingTranslations": "Brak brakujących tłumaczeń",
       "mismatchContentLength": "Liczba tłumaczeń nie jest równa liczbie wygenerowanych tłumaczeń",
-      "translationsGeneratedSuccessfully": "Tłumaczenia wygenerowane pomyślnie"
+      "translationsGeneratedSuccessfully": "Tłumaczenia wygenerowane pomyślnie",
+      "maxOneVideoUploaded": "Nie możesz przesłać więcej niż 1 wideo."
     },
     "settings": {
       "breadcrumbs": {
@@ -1106,9 +1107,7 @@
         "resources": "Zasoby",
         "removeContentQuestionBody": "To usunie pytanie z quizu",
         "removeContentBody": "To usunie wszystkie dane, w tym przesłane media.",
-        "removeVideoLesson": "Czy na pewno chcesz usunąć tę lekcję wideo z rozdziału?",
-        "removePresentationLesson": "Czy na pewno chcesz usunąć tę lekcję prezentacyjną z rozdziału?",
-        "removeTextLesson": "Czy na pewno chcesz usunąć tę lekcję tekstową z rozdziału?",
+        "removeContentLesson": "Czy na pewno chcesz usunąć tę lekcję z rozdziału?",
         "removeQuizLesson": "Czy na pewno chcesz usunąć tę lekcję quizową z rozdziału?",
         "removeAiMentorLesson": "Czy na pewno chcesz usunąć tę lekcję AI Mentora z rozdziału?",
         "removeEmbedLesson": "Czy na pewno chcesz usunąć tę lekcję z osadzeniem z rozdziału?",
@@ -1198,14 +1197,14 @@
           "unexpectedError": "Wystąpił nieoczekiwany błąd.",
           "lessonCreatedSuccessfully": "Lekcja utworzona pomyślnie",
           "fileLessonCreatedSuccessfully": "Plik utworzony pomyślnie",
-          "textLessonCreatedSuccessfully": "Lekcja tekstowa utworzona pomyślnie",
+          "contentLessonCreatedSuccessfully": "Lekcja utworzona pomyślnie",
           "quizLessonCreatedSuccessfully": "Quiz utworzony pomyślnie",
           "aiMentorLessonCreatedSuccessfully": "Lekcja AI Mentora utworzona pomyślnie",
           "aiMentorLessonUpdatedSuccessfully": "Lekcja AI Mentora zaktualizowana pomyślnie",
           "aiMentorLessonFileAddedSuccessfully": "Pliki lekcji AI Mentora zostały pomyślnie przesłane",
           "aiMentorLessonFileDeletedSuccessfully": "Pliki lekcji AI Mentora zostały pomyślnie usunięte",
           "lessonUpdatedSuccessfully": "Lekcja zaktualizowana pomyślnie",
-          "textLessonUpdatedSuccessfully": "Lekcja tekstowa zaktualizowany pomyślnie",
+          "contentLessonUpdatedSuccessfully": "Lekcja zaktualizowana pomyślnie",
           "fileLessonUpdatedSuccessfully": "Plik zaktualizowany pomyślnie",
           "questionOptionsUpdatedSuccessfully": "Opcje pytania zostały pomyślnie zaktualizowane",
           "embedLessonCreatedSuccessfully": "Lekcja z osadzeniem została pomyślnie utworzona",
@@ -1257,8 +1256,7 @@
         "other": {
           "lessonNumber": "Liczba lekcji",
           "chooseType": "Wybierz typ",
-          "text": "Tekst",
-          "video": "Wideo",
+          "content": "Treść",
           "quiz": "Quiz",
           "aiMentor": "AI Mentor",
           "embed": "Osadzenie",
@@ -1266,7 +1264,6 @@
           "true": "Prawda",
           "false": "Fałsz",
           "option": "Opcja",
-          "presentation": "Prezentacja",
           "singleChoice": "Pojedynczy wybór",
           "dropOrClick": "Upuść obraz tutaj lub kliknij, aby przesłać",
           "allowedFormats": "PNG, JPG lub SVG",
@@ -1282,12 +1279,10 @@
           "updateAiMentorAvatarDescription": "Prześlij nowe zdjęcie dla AI Mentora lub usuń obecne.",
           "updateAiMentorAvatar": "Zaktualizuj avatar AI Mentora",
           "selectQuestionType": "Wybierz typ pytania",
-          "textLessonDescription": "Ten typ pozwala na tworzenie treści tekstowych za pomocą edytora tekstu.",
-          "videoLessonDescription": "Wybierz ten typ, jeśli chcesz umieścić pliki wideo, takie jak MP4.",
-          "presentationLessonDescription": "Wybierz ten typ, jeśli chcesz umieścić pliki prezentacji, takie jak PPTX.",
-          "quizLessonDescription": "Ten typ pozwala na tworzenie quizów w ramach kursu z różnymi rodzajami pytań.",
-          "aiMentorLessonDescription": "Stwórz interaktywne lekcje AI, gdzie studenci mogą współpracować z wirtualnym mentorem.",
-          "embedLessonDescription": "Ten typ pozwala na osadzenie zewnętrznej treści za pomocą iframe.",
+          "contentLessonDescription": "Tekst z multimediami (obrazki, wideo, prezentacje).",
+          "quizLessonDescription": "Zestaw pytań do sprawdzenia wiedzy.",
+          "aiMentorLessonDescription": "Interaktywna rozmowa z wirtualnym mentorem AI.",
+          "embedLessonDescription": "Zewnętrzna zawartość (np. formularz Google, prezentacja Canva lub transmisja live z YouTube).",
           "fillInTheBlanksDescription": "To pytanie zawiera zdanie, a studenci będą musieli przeciągnąć i upuścić słowo w odpowiednie miejsce.",
           "gapFillDescription": "To pytanie będzie miało zdanie z brakującymi słowami, które studenci muszą wpisać.",
           "fillInTheBlanksSentenceTip": "Napisz zdanie i przeciągnij słowa do niego.",
@@ -2084,6 +2079,12 @@
     }
   },
   "richTextEditor": {
+    "placeholder": {
+      "lineHint": "Wklej link YouTube/Vimeo/Canva, dodaj Google Docs lub wgraj plik."
+    },
+    "upload": {
+      "videoProgress": "Przesyłanie wideo..."
+    },
     "toolbar": {
       "format": {
         "placeholder": "Wybierz format",

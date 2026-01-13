@@ -1,7 +1,12 @@
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
 
+import { appendResourceLinkToDescription, getRandomPresentationUrl } from "./seed-resource-links";
+
 import type { NiceCourseData } from "../utils/types/test-types";
+
+const withPresentationLink = (description?: string) =>
+  appendResourceLinkToDescription(description, getRandomPresentationUrl(), "Open the presentation");
 
 export const e2eCourses: NiceCourseData[] = [
   {
@@ -19,7 +24,7 @@ export const e2eCourses: NiceCourseData[] = [
         isFreemium: false,
         lessons: [
           {
-            type: LESSON_TYPES.TEXT,
+            type: LESSON_TYPES.CONTENT,
             title: "An introduction to end-to-end testing, its benefits, and tools.",
             description: `
               <h2>Understanding End-to-End (E2E) Testing</h2>
@@ -44,9 +49,11 @@ export const e2eCourses: NiceCourseData[] = [
             `,
           },
           {
-            type: LESSON_TYPES.PRESENTATION,
+            type: LESSON_TYPES.CONTENT,
             title: "Best Practices for E2E Testing",
-            description: "Slides detailing E2E testing strategies and common pitfalls.",
+            description: withPresentationLink(
+              "Slides detailing E2E testing strategies and common pitfalls.",
+            ),
           },
           {
             type: LESSON_TYPES.QUIZ,

@@ -13,7 +13,7 @@ const goToCoursePage = async (page: Page) => {
   await page.getByText("E2E Test: Automated Course for Full-Stack Development").click();
 };
 
-const navigateTroughTextLesson = async (page: Page, nextButton: Locator) => {
+const navigateThroughContentLesson = async (page: Page, nextButton: Locator) => {
   const mainHeading = page.getByRole("heading", {
     name: "Understanding End-to-End (E2E) Testing",
   });
@@ -62,11 +62,7 @@ const navigateTroughTextLesson = async (page: Page, nextButton: Locator) => {
   await page.waitForLoadState("domcontentloaded");
 };
 
-const navigateTroughPresentationLesson = async (page: Page, nextButton: Locator) => {
-  await nextButton.click();
-};
-
-const navigateTroughQuiz = async (page: Page, nextButton: Locator) => {
+const navigateThroughQuiz = async (page: Page, nextButton: Locator) => {
   const submitButton = page.getByRole("button", { name: "Submit" });
 
   if (await submitButton.isDisabled()) {
@@ -210,14 +206,14 @@ test.describe("complete course workflow", () => {
 
       const lessonType = await page.getByTestId("lesson-type").textContent();
 
-      if (lessonType === "Text") {
-        await navigateTroughTextLesson(page, nextButton);
+      if (lessonType === "Content") {
+        await navigateThroughContentLesson(page, nextButton);
       }
-      if (lessonType === "Presentation") {
-        await navigateTroughPresentationLesson(page, nextButton);
+      if (lessonType === "Presentation" || lessonType === "Video") {
+        test.skip(true, "Presentation/video lessons are deprecated in content lessons.");
       }
       if (lessonType === "Quiz") {
-        await navigateTroughQuiz(page, nextButton);
+        await navigateThroughQuiz(page, nextButton);
       }
     }
 

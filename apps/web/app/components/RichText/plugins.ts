@@ -2,11 +2,22 @@ import { mergeAttributes } from "@tiptap/core";
 import { Heading } from "@tiptap/extension-heading";
 import { Image } from "@tiptap/extension-image";
 import { Link } from "@tiptap/extension-link";
+import { Placeholder } from "@tiptap/extension-placeholder";
 import { TaskItem } from "@tiptap/extension-task-item";
 import { TaskList } from "@tiptap/extension-task-list";
 import { StarterKit } from "@tiptap/starter-kit";
 
+import i18n from "i18n";
+import {
+  DownloadableFileEmbedEditor,
+  DownloadableFileEmbedViewer,
+} from "~/components/RichText/extensions/downloadableFile";
 import { Iframe } from "~/components/RichText/extensions/iframe";
+import {
+  PresentationEmbedEditor,
+  PresentationEmbedViewer,
+} from "~/components/RichText/extensions/presentation";
+import { VideoEmbedEditor, VideoEmbedViewer } from "~/components/RichText/extensions/video";
 
 const HeadingWithId = Heading.extend({
   name: "heading",
@@ -38,7 +49,7 @@ const LinkWithDownload = Link.extend({
   },
 });
 
-export const plugins = [
+const basePlugins = [
   StarterKit.configure({
     heading: false,
   }),
@@ -71,4 +82,26 @@ export const plugins = [
     },
   }),
   Iframe,
+];
+
+export const baseEditorPlugins = [...basePlugins];
+
+export const lessonEditorPlugins = [
+  ...basePlugins,
+  Placeholder.configure({
+    includeChildren: true,
+    showOnlyCurrent: true,
+    placeholder: ({ node }) =>
+      node.type.name === "paragraph" ? i18n.t("richTextEditor.placeholder.lineHint") : "",
+  }),
+  DownloadableFileEmbedEditor,
+  PresentationEmbedEditor,
+  VideoEmbedEditor,
+];
+
+export const viewerPlugins = [
+  ...basePlugins,
+  DownloadableFileEmbedViewer,
+  PresentationEmbedViewer,
+  VideoEmbedViewer,
 ];

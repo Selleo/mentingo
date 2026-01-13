@@ -8,7 +8,14 @@ import { useToast } from "~/components/ui/use-toast";
 import { ApiClient } from "../../api-client";
 
 import type { AxiosError } from "axios";
-import type { CreateEmbedLessonBody } from "~/api/generated-api";
+import type { EmbedLessonResource } from "~/api/types";
+
+type CreateEmbedLessonBody = {
+  title: string;
+  type: "embed";
+  chapterId: string;
+  resources: EmbedLessonResource[];
+};
 
 type CreateLessonOptions = {
   data: CreateEmbedLessonBody;
@@ -35,6 +42,7 @@ export function useCreateEmbedLesson() {
     },
     onError: (error: AxiosError) => {
       const apiResponseData = error.response?.data as { message: string; count: number };
+
       toast({
         description: t(apiResponseData.message, { count: apiResponseData.count }),
         variant: "destructive",
