@@ -1,4 +1,10 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  ForbiddenException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
 import { ARTICLE_STATUS, type SupportedLanguages } from "@repo/shared";
 import { load as loadHtml } from "cheerio";
@@ -1025,12 +1031,14 @@ export class ArticlesService {
     const { articlesEnabled, unregisteredUserArticlesAccessibility } =
       await this.settingsService.getGlobalSettings();
 
+    console.log(articlesEnabled, unregisteredUserArticlesAccessibility);
+
     const hasAccess = Boolean(
       articlesEnabled && (currentUserId || unregisteredUserArticlesAccessibility),
     );
 
     if (!hasAccess) {
-      throw new BadRequestException({ message: "common.toast.noAccess" });
+      throw new ForbiddenException({ message: "common.toast.noAccess" });
     }
   }
 }

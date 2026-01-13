@@ -1,6 +1,10 @@
+import { isNull } from "drizzle-orm";
 import request from "supertest";
 
+import { DEFAULT_GLOBAL_SETTINGS } from "src/settings/constants/settings.constants";
+import { settings } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
+import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import {
@@ -30,6 +34,19 @@ describe("ArticlesController (e2e)", () => {
     });
   };
 
+  const seedGlobalSettings = async (overrides: Partial<typeof DEFAULT_GLOBAL_SETTINGS> = {}) => {
+    await settingsFactory.create();
+    await db
+      .update(settings)
+      .set({
+        settings: settingsToJSONBuildObject({
+          ...DEFAULT_GLOBAL_SETTINGS,
+          ...overrides,
+        }),
+      })
+      .where(isNull(settings.userId));
+  };
+
   beforeAll(async () => {
     const { app: testApp } = await createE2ETest();
     app = testApp;
@@ -41,7 +58,10 @@ describe("ArticlesController (e2e)", () => {
   });
 
   beforeEach(async () => {
-    await settingsFactory.create({ userId: null });
+    await seedGlobalSettings({
+      articlesEnabled: true,
+      unregisteredUserArticlesAccessibility: true,
+    });
   });
 
   afterEach(async () => {
