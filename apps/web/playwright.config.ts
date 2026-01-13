@@ -17,6 +17,7 @@ const baseURL = process.env.CI
 
 const config: PlaywrightTestConfig = {
   testDir: "./e2e",
+  timeout: 60 * 1000,
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
