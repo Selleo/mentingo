@@ -183,11 +183,16 @@ function mergeDescription(existingDescription: string, embedHtml: string): strin
 }
 
 async function runMigration() {
-  const yargs = await import("yargs");
-  const { hideBin } = await import("yargs/helpers");
+  // Dynamically import yargs to avoid issues with ESM/CJS when the app is built
+  const yargsModule = await (0, eval)("import('yargs')");
+  const helpersModule = await (0, eval)("import('yargs/helpers')");
 
-  const argv = await yargs
-    .default(hideBin(process.argv))
+  const yargsFactory =
+    typeof yargsModule.default === "function" ? yargsModule.default : yargsModule;
+
+  const hideBin = helpersModule.hideBin ?? helpersModule.default?.hideBin;
+
+  const argv = await yargsFactory(hideBin(process.argv))
     .option("url", {
       alias: "u",
       description: "Instance URL",
