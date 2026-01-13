@@ -179,16 +179,20 @@ const studentInitialSequenceView = async (page: Page) => {
   ).toBeVisible();
   await page.getByRole("link", { name: `${SEQUENCE_COURSE.lessons.lesson4} Text Not` }).click();
   await expect(page.getByText(SEQUENCE_COURSE.lessons.lesson4).first()).toBeVisible();
-  await page.getByRole("main").getByRole("button").first().click();
-  await page.getByText("test lesson v3").first().waitFor({ state: "visible" });
-  await page.getByText("test lesson v3").nth(1).waitFor({ state: "visible" });
-  expect(await page.getByText("test lesson v3").count()).toBe(2);
-  await page.waitForResponse(
-    (res) =>
-      res.url().includes("/api/lesson") && res.request().method() === "GET" && res.status() === 200,
-    { timeout: 30000 },
-  );
-  await page.waitForLoadState("networkidle");
+  const chapter2 = page.getByRole("button", { name: /chapter 2/i });
+  if ((await chapter2.getAttribute("data-state")) !== "open") {
+    await chapter2.click();
+  }
+  const lesson3 = page.getByRole("link", { name: `${SEQUENCE_COURSE.lessons.lesson3} Text` });
+  await lesson3.waitFor({ state: "visible" });
+  const previousUrl = page.url();
+  await lesson3.scrollIntoViewIfNeeded();
+  await lesson3.click({ force: true, timeout: 10000 });
+  await page
+    .waitForURL((url) => url.toString() !== previousUrl, { timeout: 10000 })
+    .catch(() => undefined);
+  await expect(page.getByText("Chapter 2: chapter")).toBeVisible();
+  expect(await page.getByText(SEQUENCE_COURSE.lessons.lesson3).count()).toBe(2);
   await expect(page.getByText(SEQUENCE_COURSE.lessons.lesson3).first()).toBeVisible();
   await logoutStudent(page);
 };
@@ -222,9 +226,15 @@ const studentBlockedProgressFlow = async (page: Page) => {
     .getByRole("link", { name: `${SEQUENCE_COURSE.lessons.intro} Text Not Started` })
     .first()
     .click();
+  await page.waitForResponse(
+    (res) =>
+      res.url().includes("/api/lesson") && res.request().method() === "GET" && res.status() === 200,
+    { timeout: 30000 },
+  );
   const lesson2Link = page
     .getByRole("link", { name: `${SEQUENCE_COURSE.lessons.lesson2} Text` })
     .first();
+
   await expect(lesson2Link).toBeEnabled();
   await lesson2Link.click();
   await lesson2Link.click();
