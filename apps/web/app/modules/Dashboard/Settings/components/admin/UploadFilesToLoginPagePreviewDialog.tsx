@@ -11,11 +11,6 @@ interface UploadFilesToLoginPagePreviewDialogProps {
   onClose: () => void;
 }
 
-const getPdfViewerUrl = (resourceUrl: string) => {
-  const encodedUrl = encodeURIComponent(resourceUrl);
-  return `https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodedUrl}#pagemode=none`;
-};
-
 export const UploadFilesToLoginPagePreviewDialog = ({
   open,
   resourceName,
@@ -46,7 +41,7 @@ export const UploadFilesToLoginPagePreviewDialog = ({
             <div className="flex size-full rounded-md bg-white shadow-sm">
               <iframe
                 title={resourceName}
-                src={getPdfViewerUrl(resourceUrl)}
+                src={`${resourceUrl}#toolbar=0`}
                 className="size-full rounded border-0"
               />
             </div>
