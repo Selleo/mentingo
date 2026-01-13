@@ -436,7 +436,7 @@ const expectCourseHiddenForStudent = async (page: Page) => {
 const enrollGroupToCourse = async (page: Page) => {
   await login(page, USERS.admin.email, USERS.admin.password);
   await page.getByRole("button", { name: "Courses" }).getByRole("link").click();
-  await page.getByTestId(COURSE.title).click();
+  await page.getByTestId(COURSE.title).last().click();
   await page.getByRole("button", { name: "Edit Course" }).click();
   await page.getByRole("tab", { name: "Enrolled students" }).click();
   await page.getByText(USERS.student.email).click();
@@ -452,7 +452,7 @@ const enrollGroupToCourse = async (page: Page) => {
 const studentSeesCourseByGroup = async (page: Page) => {
   await login(page, USERS.student.email, USERS.student.password);
   await page.getByRole("button", { name: "Courses" }).getByRole("link").click();
-  await page.getByTestId(COURSE.title).click();
+  await page.getByTestId(COURSE.title).last().click();
   await expect(page.getByRole("heading", { name: COURSE.title })).toBeVisible();
   await logoutStudent(page);
 };
@@ -460,7 +460,7 @@ const studentSeesCourseByGroup = async (page: Page) => {
 const unenrollGroup = async (page: Page) => {
   await login(page, USERS.admin.email, USERS.admin.password);
   await page.getByRole("button", { name: "Courses" }).getByRole("link").click();
-  await page.getByTestId(COURSE.title).click();
+  await page.getByTestId(COURSE.title).last().click();
   await page.getByRole("button", { name: "Edit Course" }).click();
   await page.getByRole("tab", { name: "Enrolled students" }).click();
   await page.getByText("student0@example.com").click();
