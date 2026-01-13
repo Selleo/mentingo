@@ -15,6 +15,7 @@ import {
 } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { LocalizationService } from "src/localization/localization.service";
+import { SettingsService } from "src/settings/settings.service";
 import { news, users } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
@@ -28,7 +29,6 @@ import type { InferSelectModel } from "drizzle-orm";
 import type { NewsActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
-import { SettingsService } from "src/settings/settings.service";
 
 // News uses a custom pagination: first page shows up to 7 items, following pages up to 9.
 const FIRST_PAGE_SIZE = 7;
@@ -191,7 +191,7 @@ export class NewsService {
       .where(and(...conditions))
       .orderBy(
         isSearching && searchTerm
-          ? sql`ts_rank(${newsTsVector}, ${tsQuery}`
+          ? sql`ts_rank(${newsTsVector}, ${tsQuery})`
           : sql`${news.publishedAt} DESC`,
       )
       .limit(pagination.perPage)
@@ -214,7 +214,11 @@ export class NewsService {
     };
   }
 
-  async getDraftNewsList(requestedLanguage: SupportedLanguages, page = 1, currentUser?: CurrentUser) {
+  async getDraftNewsList(
+    requestedLanguage: SupportedLanguages,
+    page = 1,
+    currentUser?: CurrentUser,
+  ) {
     await this.checkAccess(currentUser?.userId);
 
     const pagination = this.getPaginationForNews(page);
@@ -619,7 +623,7 @@ export class NewsService {
     newsId: UUIDType,
     language: SupportedLanguages,
     content: string,
-    currentUser: CurrentUser
+    currentUser: CurrentUser,
   ): Promise<string> {
     await this.checkAccess(currentUser?.userId);
     await this.validateNewsExists(newsId, language);

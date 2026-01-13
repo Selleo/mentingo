@@ -177,7 +177,7 @@ export class ArticlesRepository {
       .where(and(...searchConditions))
       .orderBy(
         isSearching && searchTerm
-          ? sql`ts_rank(${articlesTsVector}, ${tsQuery} DESC`
+          ? sql`ts_rank(${articlesTsVector}, ${tsQuery}) DESC`
           : desc(articles.publishedAt),
       );
   }

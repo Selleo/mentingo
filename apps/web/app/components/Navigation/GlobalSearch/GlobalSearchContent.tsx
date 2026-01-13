@@ -13,7 +13,7 @@ import type {
   GetAnnouncementsForUserResponse,
   GetArticlesResponse,
   GetAvailableCoursesResponse,
-  GetEnrolledLessonsResponse,
+  GetLessonsResponse,
   GetNewsListResponse,
   GetStudentCoursesResponse,
   GetUsersResponse,
@@ -78,9 +78,9 @@ export type GlobalSearchItem =
     }
   | {
       resultType: "lessons";
-      resultData: GetEnrolledLessonsResponse["data"];
+      resultData: GetLessonsResponse["data"];
       Component: (props: {
-        item: GetEnrolledLessonsResponse["data"][number];
+        item: GetLessonsResponse["data"][number];
         onSelect: () => void;
       }) => JSX.Element;
     }

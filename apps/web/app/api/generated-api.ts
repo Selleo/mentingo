@@ -1846,7 +1846,7 @@ export interface UpdateFreemiumStatusResponse {
   };
 }
 
-export interface GetEnrolledLessonsResponse {
+export interface GetLessonsResponse {
   data: {
     /** @format uuid */
     id: string;
@@ -5960,10 +5960,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name LessonControllerGetEnrolledLessons
-     * @request GET:/api/lesson/student-lessons
+     * @name LessonControllerGetLessons
+     * @request GET:/api/lesson/all
      */
-    lessonControllerGetEnrolledLessons: (
+    lessonControllerGetLessons: (
       query?: {
         title?: string;
         description?: string;
@@ -5974,8 +5974,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       },
       params: RequestParams = {},
     ) =>
-      this.request<GetEnrolledLessonsResponse, any>({
-        path: `/api/lesson/student-lessons`,
+      this.request<GetLessonsResponse, any>({
+        path: `/api/lesson/all`,
         method: "GET",
         query: query,
         format: "json",

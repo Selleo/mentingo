@@ -39,6 +39,7 @@ import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterCondi
 import { buildJsonbField, deleteJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { UpdateHasCertificateEvent } from "src/courses/events/updateHasCertificate.event";
+import { getCourseTsVector } from "src/courses/utils/courses.utils";
 import { EnvService } from "src/env/services/env.service";
 import { CreateCourseEvent, UpdateCourseEvent, EnrollCourseEvent } from "src/events";
 import { UsersAssignedToCourseEvent } from "src/events/user/user-assigned-to-course.event";
@@ -142,8 +143,6 @@ import type * as schema from "src/storage/schema";
 import type { UserRole } from "src/user/schemas/userRoles";
 import type { ProgressStatus } from "src/utils/types/progress.type";
 import type Stripe from "stripe";
-import { getCourseTsVector, getLessonTsVector } from "src/courses/utils/courses.utils";
-import { log } from "handlebars";
 
 @Injectable()
 export class CourseService {
@@ -182,17 +181,10 @@ export class CourseService {
     const { sortOrder, sortedField } = getSortOptions(sort);
 
     const conditions = this.getFiltersConditions(filters, false);
+    const orderConditions = this.getOrderConditions(filters);
 
     if (currentUserRole === USER_ROLES.CONTENT_CREATOR && currentUserId) {
       conditions.push(eq(courses.authorId, currentUserId));
-    }
-
-    const searchTerm = filters.searchQuery?.trim();
-    const unifiedVector = sql`${getLessonTsVector()} || ${getCourseTsVector()}`;
-    const tsQuery = sql`websearch_to_tsquery('english', ${searchTerm})`;
-
-    if (filters.searchQuery) {
-      conditions.push(sql`${unifiedVector} @@ ${tsQuery}`);
     }
 
     const queryDB = this.db
@@ -237,11 +229,9 @@ export class CourseService {
         courses.baseLanguage,
       )
       .orderBy(
+        ...orderConditions,
         sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)),
-        ...(filters.searchQuery ? [sql`ts_rank(${unifiedVector}, ${tsQuery}) DESC`] : []),
       );
-
-    console.log(queryDB);
 
     const dynamicQuery = queryDB.$dynamic();
     const paginatedQuery = addPagination(dynamicQuery, page, perPage);
@@ -305,6 +295,8 @@ export class CourseService {
       ];
       conditions.push(...this.getFiltersConditions(filters, false));
 
+      const orderConditions = this.getOrderConditions(filters);
+
       const queryDB = trx
         .select(this.getSelectField(language))
         .from(studentCourses)
@@ -339,7 +331,10 @@ export class CourseService {
           courses.baseLanguage,
           groupCourses.dueDate,
         )
-        .orderBy(sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)));
+        .orderBy(
+          ...orderConditions,
+          sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)),
+        );
 
       const dynamicQuery = queryDB.$dynamic();
       const paginatedQuery = addPagination(dynamicQuery, page, perPage);
@@ -521,6 +516,8 @@ export class CourseService {
       const conditions = [eq(courses.status, "published")];
       conditions.push(...this.getFiltersConditions(filters));
 
+      const orderConditions = this.getOrderConditions(filters);
+
       if (availableCourseIds.length > 0) {
         conditions.push(inArray(courses.id, availableCourseIds));
       }
@@ -590,7 +587,10 @@ export class CourseService {
           courses.baseLanguage,
           groupCourses.dueDate,
         )
-        .orderBy(sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)));
+        .orderBy(
+          ...orderConditions,
+          sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)),
+        );
 
       const dynamicQuery = queryDB.$dynamic();
       const paginatedQuery = addPagination(dynamicQuery, page, perPage);
@@ -608,9 +608,8 @@ export class CourseService {
             const { authorAvatarUrl, ...itemWithoutReferences } = item;
 
             const signedUrl = await this.fileService.getFileUrl(item.thumbnailUrl);
-            const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
-              authorAvatarUrl,
-            );
+            const authorAvatarSignedUrl =
+              await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
 
             return {
               ...itemWithoutReferences,
@@ -1066,9 +1065,8 @@ export class CourseService {
       contentCreatorCourses.map(async (course) => {
         const { authorAvatarUrl, ...courseWithoutReferences } = course;
 
-        const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
-          authorAvatarUrl,
-        );
+        const authorAvatarSignedUrl =
+          await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
 
         return {
           ...courseWithoutReferences,
@@ -2144,6 +2142,21 @@ export class CourseService {
     };
   }
 
+  private getOrderConditions(filters: CoursesFilterSchema) {
+    const orderConditions = [];
+
+    if (filters.searchQuery) {
+      const searchTerm = filters.searchQuery?.trim();
+
+      const tsQuery = sql`websearch_to_tsquery('english', ${searchTerm})`;
+      const tsVector = getCourseTsVector();
+
+      orderConditions.push(sql`ts_rank(${tsVector}, ${tsQuery}) DESC`);
+    }
+
+    return orderConditions;
+  }
+
   private getFiltersConditions(filters: CoursesFilterSchema, publishedOnly = true) {
     const conditions = [];
 
@@ -2161,6 +2174,15 @@ export class CourseService {
           courses.description
         }) AS t(k, v) WHERE v ILIKE ${`%${filters.description}%`})`,
       );
+    }
+
+    if (filters.searchQuery) {
+      const searchTerm = filters.searchQuery?.trim();
+
+      const tsQuery = sql`websearch_to_tsquery('english', ${searchTerm})`;
+      const tsVector = getCourseTsVector();
+
+      conditions.push(sql`${tsVector} @@ ${tsQuery}`);
     }
 
     if (filters.category) {
@@ -3410,9 +3432,8 @@ export class CourseService {
     earlyReturn = false,
   ): CourseTranslationType[] {
     const dataToUpdate: CourseTranslationType[] = [];
-    type Candidate = ReturnType<typeof this.translationCandidates> extends Generator<infer T>
-      ? T
-      : never;
+    type Candidate =
+      ReturnType<typeof this.translationCandidates> extends Generator<infer T> ? T : never;
 
     const pushMissing = ({ id, hasValue, baseValue, field, idColumn }: Candidate) => {
       if (hasValue || !id) return false;

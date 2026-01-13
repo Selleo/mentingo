@@ -23,6 +23,7 @@ import {
 } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { LocalizationService } from "src/localization/localization.service";
+import { SettingsService } from "src/settings/settings.service";
 import { articles, articleSections } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
@@ -45,7 +46,6 @@ import type {
 } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
-import { SettingsService } from "src/settings/settings.service";
 
 type StoredArticleResource = Awaited<ReturnType<FileService["getResourcesForEntity"]>>[number];
 type ResourceMetadata = StoredArticleResource["metadata"] & { originalFilename?: unknown };
@@ -96,7 +96,7 @@ export class ArticlesService {
   async getArticleSection(
     sectionId: UUIDType,
     requestedLanguage: SupportedLanguages,
-    currentUser: CurrentUser
+    currentUser: CurrentUser,
   ): Promise<GetArticleSectionResponse> {
     await this.checkAccess(currentUser.userId);
 
@@ -505,7 +505,7 @@ export class ArticlesService {
     currentUser?: CurrentUser,
   ): Promise<GetArticleTocResponse> {
     await this.checkAccess(currentUser?.userId);
-    
+
     const conditions = this.articlesRepository.getVisibleArticleConditions(
       requestedLanguage,
       currentUser,
@@ -1025,7 +1025,9 @@ export class ArticlesService {
     const { articlesEnabled, unregisteredUserArticlesAccessibility } =
       await this.settingsService.getGlobalSettings();
 
-    const hasAccess = Boolean(articlesEnabled && (currentUserId || unregisteredUserArticlesAccessibility));
+    const hasAccess = Boolean(
+      articlesEnabled && (currentUserId || unregisteredUserArticlesAccessibility),
+    );
 
     if (!hasAccess) {
       throw new BadRequestException({ message: "common.toast.noAccess" });

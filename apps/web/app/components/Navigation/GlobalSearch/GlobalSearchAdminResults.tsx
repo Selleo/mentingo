@@ -1,11 +1,17 @@
 import { useQueries } from "@tanstack/react-query";
 
-import { allCoursesQueryOptions, categoriesQueryOptions, usersQueryOptions } from "~/api/queries";
+import {
+  allCoursesQueryOptions,
+  categoriesQueryOptions,
+  lessonsQueryOptions,
+  usersQueryOptions,
+} from "~/api/queries";
 import { groupsQueryOptions } from "~/api/queries/admin/useGroups";
 import { qaSearchQueryOptions } from "~/api/queries/useAllQA";
 import { announcementsForUserOptions } from "~/api/queries/useAnnouncementsForUser";
 import { articlesSearchQueryOptions } from "~/api/queries/useArticlesSearch";
 import { newsSearchQueryOptions } from "~/api/queries/useNewsList";
+import { LessonEntry } from "~/components/Navigation/GlobalSearch/LessonEntry";
 import { useUserRole } from "~/hooks/useUserRole";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
@@ -40,6 +46,10 @@ export const GlobalSearchAdminResults = ({
     queries: [
       allCoursesQueryOptions({ searchQuery: debouncedSearch }),
       usersQueryOptions({ keyword: debouncedSearch }, { enabled: isAllowed }),
+      lessonsQueryOptions(
+        { searchQuery: debouncedSearch },
+        { enabled: debouncedSearch.length >= 3 },
+      ),
       categoriesQueryOptions({ title: debouncedSearch }, { enabled: isAllowed }),
       groupsQueryOptions({ name: debouncedSearch }, { enabled: isAllowed }),
       announcementsForUserOptions({ title: debouncedSearch }, { enabled: isAllowed }),
@@ -60,6 +70,7 @@ export const GlobalSearchAdminResults = ({
       const [
         courses,
         users,
+        lessons,
         categories,
         groups,
         announcements,
@@ -71,6 +82,7 @@ export const GlobalSearchAdminResults = ({
       const coursesData = courses?.data;
       const usersData = users?.data?.data;
       const categoriesData = categories?.data;
+      const lessonData = lessons?.data;
       const groupsData = groups?.data;
       const announcementsData = announcements?.data;
       const newsData = newsResults?.data;
@@ -82,6 +94,11 @@ export const GlobalSearchAdminResults = ({
           resultType: "allCourses",
           resultData: coursesData ?? [],
           Component: CourseEntry,
+        },
+        {
+          resultType: "lessons",
+          resultData: lessonData ?? [],
+          Component: LessonEntry,
         },
         {
           resultType: "users",

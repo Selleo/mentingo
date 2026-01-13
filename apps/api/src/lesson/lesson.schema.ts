@@ -299,7 +299,7 @@ export const updateEmbedLessonSchema = Type.Object({
   language: supportedLanguagesSchema,
 });
 
-export const enrolledLessonsFiltersSchema = Type.Object({
+export const lessonsFilterSchema = Type.Object({
   title: Type.Optional(Type.String()),
   description: Type.Optional(Type.String()),
   searchQuery: Type.Optional(Type.String()),
@@ -312,7 +312,7 @@ export const enrolledLessonSchema = Type.Object({
   type: Type.Enum(LESSON_TYPES),
   description: Type.Union([Type.String(), Type.Null()]),
   displayOrder: Type.Number(),
-  lessonCompleted: Type.Boolean(),
+  lessonCompleted: Type.Optional(Type.Boolean()),
   courseId: UUIDSchema,
   courseTitle: Type.String(),
   chapterId: UUIDSchema,
@@ -346,5 +346,5 @@ export type FullAnswer = Static<typeof fullAnswerSchema>;
 export type LessonResource = Static<typeof lessonResourceSchema>;
 export type CreateEmbedLessonBody = Static<typeof createEmbedLessonSchema>;
 export type UpdateEmbedLessonBody = Static<typeof updateEmbedLessonSchema>;
-export type EnrolledLessonsFilters = Static<typeof enrolledLessonsFiltersSchema>;
+export type LessonsFilters = Static<typeof lessonsFilterSchema>;
 export type EnrolledLesson = Static<typeof enrolledLessonSchema>;

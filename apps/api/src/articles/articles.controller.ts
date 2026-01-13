@@ -100,7 +100,7 @@ export class ArticlesController {
   async getArticleSection(
     @Param("id") id: UUIDType,
     @Query("language") language: SupportedLanguages,
-    @CurrentUser() currentUser: CurrentUserType
+    @CurrentUser() currentUser: CurrentUserType,
   ) {
     const section = await this.articlesService.getArticleSection(id, language, currentUser);
 

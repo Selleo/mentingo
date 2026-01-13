@@ -1,6 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { COURSE_ENROLLMENT } from "@repo/shared";
 import { and, desc, eq, getTableColumns, type SQL, sql } from "drizzle-orm";
+import { match } from "ts-pattern";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import { getCourseTsVector, getLessonTsVector } from "src/courses/utils/courses.utils";
@@ -21,11 +22,17 @@ import {
   resources,
   coursesSettingsHelpers,
 } from "src/storage/schema";
+import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import type { LessonTypes } from "../lesson.type";
 import type { SupportedLanguages } from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import type { AdminQuestionBody, EnrolledLessonsFilters } from "src/lesson/lesson.schema";
+import type { CurrentUser } from "src/common/types/current-user.type";
+import type {
+  AdminQuestionBody,
+  LessonsFilters,
+  LessonResourceType,
+} from "src/lesson/lesson.schema";
 import type * as schema from "src/storage/schema";
 
 export type EnrolledLessonWithSearch = {
@@ -34,7 +41,7 @@ export type EnrolledLessonWithSearch = {
   type: LessonTypes;
   description: string | null;
   displayOrder: number;
-  lessonCompleted: boolean;
+  lessonCompleted?: boolean;
   courseId: UUIDType;
   courseTitle: string;
   chapterId: UUIDType;
@@ -363,22 +370,38 @@ export class LessonRepository {
     return resource;
   }
 
-  async getEnrolledLessons(
-    userId: UUIDType,
-    filters: EnrolledLessonsFilters,
+  /**
+   * This method returns lessons available for each role
+   * - Student - Only lessons that the student is enrolled to
+   * - Content Creator - Only lessons that the content creator authors
+   * - Admin - All lessons
+   */
+  async getLessonsByRole(
+    currentUser: CurrentUser,
+    filters: LessonsFilters,
     language: SupportedLanguages,
   ): Promise<EnrolledLessonWithSearch[]> {
-    const conditions: SQL[] = [
-      eq(studentCourses.studentId, userId),
-      eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
-    ];
+    const conditions: SQL[] = [];
 
-    if (filters.title) {
-      conditions.push(
-        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${lessons.title}) AS t(k, v) 
+    match(currentUser?.role)
+      .with(USER_ROLES.STUDENT, () => {
+        conditions.push(
+          eq(studentCourses.studentId, currentUser?.userId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+        );
+      })
+      .with(USER_ROLES.CONTENT_CREATOR, () =>
+        conditions.push(eq(courses.authorId, currentUser?.userId)),
+      )
+      .otherwise(() => null);
+
+    if (currentUser?.role)
+      if (filters.title) {
+        conditions.push(
+          sql`EXISTS (SELECT 1 FROM jsonb_each_text(${lessons.title}) AS t(k, v) 
              WHERE v ILIKE ${`%${filters.title}%`})`,
-      );
-    }
+        );
+      }
 
     if (filters.description) {
       conditions.push(
@@ -416,21 +439,35 @@ export class LessonRepository {
           chapterId: chapters.id,
           chapterTitle: this.localizationService.getLocalizedSqlField(chapters.title, language),
           chapterDisplayOrder: sql<number>`${chapters.displayOrder}`,
+          searchRank: sql<number>`ts_rank(${unifiedVector}, ${tsQuery})`,
         })
         .from(lessons)
         .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
         .innerJoin(courses, eq(courses.id, chapters.courseId))
-        .innerJoin(studentCourses, eq(studentCourses.courseId, courses.id))
+        .leftJoin(studentCourses, eq(studentCourses.courseId, courses.id))
         .leftJoin(
           studentLessonProgress,
           and(
             eq(studentLessonProgress.lessonId, lessons.id),
-            eq(studentLessonProgress.studentId, userId),
+            eq(studentLessonProgress.studentId, currentUser.userId),
           ),
         )
         .where(and(...conditions))
+        .groupBy(
+          lessons.id,
+          courses.id,
+          chapters.id,
+          lessons.type,
+          lessons.displayOrder,
+          studentLessonProgress.completedAt,
+          courses.title,
+          chapters.title,
+          chapters.displayOrder,
+          lessons.description,
+        )
         .orderBy(
           desc(sql`ts_rank(${unifiedVector}, ${tsQuery})`),
+          lessons.id,
           chapters.displayOrder,
           lessons.displayOrder,
         );
@@ -453,16 +490,28 @@ export class LessonRepository {
       .from(lessons)
       .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
       .innerJoin(courses, eq(courses.id, chapters.courseId))
-      .innerJoin(studentCourses, eq(studentCourses.courseId, courses.id))
+      .leftJoin(studentCourses, eq(studentCourses.courseId, courses.id))
       .leftJoin(
         studentLessonProgress,
         and(
           eq(studentLessonProgress.lessonId, lessons.id),
-          eq(studentLessonProgress.studentId, userId),
+          eq(studentLessonProgress.studentId, currentUser.userId),
         ),
       )
       .where(and(...conditions))
-      .orderBy(chapters.displayOrder, lessons.displayOrder);
+      .groupBy(
+        lessons.id,
+        courses.id,
+        chapters.id,
+        lessons.type,
+        lessons.displayOrder,
+        studentLessonProgress.completedAt,
+        courses.title,
+        chapters.title,
+        chapters.displayOrder,
+        lessons.description,
+      )
+      .orderBy(lessons.id, chapters.displayOrder, lessons.displayOrder);
   }
 
   async getLessonProgress(lessonId: UUIDType, userId: UUIDType, conditions?: SQL[]) {

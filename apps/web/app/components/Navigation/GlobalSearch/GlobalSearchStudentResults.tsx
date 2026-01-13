@@ -1,7 +1,6 @@
 import { useQueries } from "@tanstack/react-query";
 
-import { studentLessonsQueryOptions } from "~/api/queries";
-import { qaSearchQueryOptions } from "~/api/queries/useAllQA";
+import { lessonsQueryOptions } from "~/api/queries";
 import { announcementsForUserOptions } from "~/api/queries/useAnnouncementsForUser";
 import { articlesSearchQueryOptions } from "~/api/queries/useArticlesSearch";
 import { availableCoursesQueryOptions } from "~/api/queries/useAvailableCourses";
@@ -16,7 +15,6 @@ import { GlobalSearchContent } from "./GlobalSearchContent";
 import { LessonEntry } from "./LessonEntry";
 import { MyCourseEntry } from "./MyCourseEntry";
 import { NewsEntry } from "./NewsEntry";
-import { QAEntry } from "./QAEntry";
 
 import type { GlobalSearchItem } from "./GlobalSearchContent";
 
@@ -47,7 +45,7 @@ export const GlobalSearchStudentResults = ({
         { search: debouncedSearch },
         { enabled: debouncedSearch.length >= 3 },
       ),
-      studentLessonsQueryOptions(
+      lessonsQueryOptions(
         { searchQuery: debouncedSearch },
         { enabled: debouncedSearch.length >= 3 },
       ),
@@ -59,28 +57,22 @@ export const GlobalSearchStudentResults = ({
         { searchQuery: debouncedSearch, language },
         { enabled: debouncedSearch.length >= 3 },
       ),
-      qaSearchQueryOptions(
-        { searchQuery: debouncedSearch, language },
-        { enabled: debouncedSearch.length >= 3 },
-      ),
     ],
     combine: (results) => {
       const [
         studentCourses,
         availableCourses,
         announcements,
-        studentLessons,
+        lessons,
         newsResults,
         articlesResults,
-        qaResults,
       ] = results;
       const studentCoursesData = studentCourses?.data;
       const availableCoursesData = availableCourses?.data;
       const announcementsData = announcements?.data;
-      const studentLessonsData = studentLessons?.data;
+      const lessonData = lessons?.data;
       const newsData = newsResults?.data;
       const articlesData = articlesResults?.data;
-      const qaData = qaResults?.data;
 
       const mapped: GlobalSearchItem[] = [
         {
@@ -100,7 +92,7 @@ export const GlobalSearchStudentResults = ({
         },
         {
           resultType: "lessons",
-          resultData: studentLessonsData ?? [],
+          resultData: lessonData ?? [],
           Component: LessonEntry,
         },
         {
@@ -112,11 +104,6 @@ export const GlobalSearchStudentResults = ({
           resultType: "articles",
           resultData: articlesData ?? [],
           Component: ArticleEntry,
-        },
-        {
-          resultType: "qa",
-          resultData: qaData ?? [],
-          Component: QAEntry,
         },
       ];
 
