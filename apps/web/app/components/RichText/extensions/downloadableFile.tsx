@@ -89,19 +89,20 @@ const DownloadableFileEditorView = ({ node, editor, getPos }: NodeViewProps) => 
 };
 
 const DownloadableFileViewerView = ({ node }: NodeViewProps) => {
-  const attrs = normalizeDownloadableFileAttrs(node.attrs);
-  if (!attrs.src) return null;
+  const attributes = normalizeDownloadableFileAttrs(node.attrs);
+
+  if (!attributes.src) return null;
 
   return (
     <NodeViewWrapper className="downloadable-file-node">
       <a
-        {...getDownloadableFileDataAttributes(attrs)}
-        href={attrs.src}
-        download={attrs.name ?? undefined}
+        {...getDownloadableFileDataAttributes(attributes)}
+        href={attributes.src}
+        download={attributes.name ?? undefined}
         className="flex w-full items-center gap-3 rounded-lg border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-900 shadow-sm transition hover:border-neutral-300"
       >
         <Download className="size-4" />
-        <span className="truncate">{attrs.name ?? attrs.src}</span>
+        <span className="truncate">{attributes.name ?? attributes.src}</span>
       </a>
     </NodeViewWrapper>
   );
@@ -137,29 +138,18 @@ const baseDownloadableFileNodeConfig: NodeConfig = {
           return normalizeDownloadableFileAttrs({ src, name });
         },
       },
-      {
-        tag: "a[download][href]",
-        getAttrs: (el) => {
-          const element = el as HTMLAnchorElement;
-          const src = element.getAttribute("href");
-          if (!src) return false;
-          return normalizeDownloadableFileAttrs({
-            src,
-            name: element.textContent?.trim() ?? null,
-          });
-        },
-      },
     ];
   },
 
   renderHTML({ HTMLAttributes }) {
     const { src, name, ...rest } = HTMLAttributes as Record<string, unknown>;
-    const normalized = normalizeDownloadableFileAttrs({
+
+    const normalizedAttributes = normalizeDownloadableFileAttrs({
       src: typeof src === "string" ? src : null,
       name: typeof name === "string" ? name : null,
     });
 
-    return ["div", mergeAttributes(getDownloadableFileDataAttributes(normalized), rest)];
+    return ["div", mergeAttributes(getDownloadableFileDataAttributes(normalizedAttributes), rest)];
   },
 
   addCommands() {
@@ -167,12 +157,13 @@ const baseDownloadableFileNodeConfig: NodeConfig = {
       setDownloadableFile:
         (attrs) =>
         ({ commands }) => {
-          const normalized = normalizeDownloadableFileAttrs(attrs);
-          if (!normalized.src) return false;
+          const normalizedAttributes = normalizeDownloadableFileAttrs(attrs);
+
+          if (!normalizedAttributes.src) return false;
 
           return commands.insertContent({
             type: this.name,
-            attrs: normalized,
+            attrs: normalizedAttributes,
           });
         },
     };

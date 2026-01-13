@@ -143,18 +143,6 @@ const baseVideoNodeConfig: NodeConfig = {
           return getVideoEmbedAttrsFromElement(el as HTMLElement);
         },
       },
-      {
-        tag: 'div[data-type="video"]',
-        getAttrs: (el) => {
-          return getVideoEmbedAttrsFromElement(el as HTMLElement);
-        },
-      },
-      {
-        tag: "video",
-        getAttrs: (el) => {
-          return getVideoEmbedAttrsFromElement(el as HTMLElement);
-        },
-      },
     ];
   },
 

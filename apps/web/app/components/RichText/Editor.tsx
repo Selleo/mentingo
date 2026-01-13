@@ -1,13 +1,13 @@
 import { ALLOWED_LESSON_IMAGE_FILE_TYPES } from "@repo/shared";
 import { EditorContent, useEditor, type Editor as TiptapEditor } from "@tiptap/react";
-import { useEffect } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import { Progress } from "~/components/ui/progress";
 import { cn } from "~/lib/utils";
 
 import { detectPresentationProvider } from "./extensions/utils/presentation";
 import { detectVideoProvider, extractUrlFromClipboard } from "./extensions/utils/video";
-import { editorPlugins } from "./plugins";
+import { baseEditorPlugins, lessonEditorPlugins } from "./plugins";
 import { defaultClasses } from "./styles";
 import EditorToolbar from "./toolbar/EditorToolbar";
 
@@ -23,6 +23,7 @@ type EditorProps = {
   lessonId?: string;
   allowFiles?: boolean;
   acceptedFileTypes?: string[];
+  variant?: "base" | "lesson";
 };
 
 const Editor = ({
@@ -37,66 +38,95 @@ const Editor = ({
   lessonId,
   allowFiles = false,
   acceptedFileTypes = ALLOWED_LESSON_IMAGE_FILE_TYPES,
+  variant = "lesson",
 }: EditorProps) => {
+  const editorRef = useRef<TiptapEditor | null>(null);
+
+  const extensions = useMemo(
+    () => (variant === "base" ? baseEditorPlugins : lessonEditorPlugins),
+    [variant],
+  );
+
+  const handleDrop = useCallback(
+    async (event: DragEvent) => {
+      const activeEditor = editorRef.current;
+      const file = event.dataTransfer?.files[0];
+      if (!file) return false;
+
+      event.preventDefault();
+      await onUpload?.(file, activeEditor);
+      return true;
+    },
+    [onUpload],
+  );
+
+  const handlePaste = useCallback(
+    (event: ClipboardEvent) => {
+      const activeEditor = editorRef.current;
+      const file = event.clipboardData?.files[0];
+
+      if (file) {
+        event.preventDefault();
+        void onUpload?.(file, activeEditor);
+        return true;
+      }
+
+      const pastedUrl = extractUrlFromClipboard(event);
+      if (!pastedUrl) return false;
+
+      const videoProvider = detectVideoProvider(pastedUrl);
+      const presentationProvider = detectPresentationProvider(pastedUrl);
+
+      if (videoProvider === "unknown" && presentationProvider === "unknown") {
+        return false;
+      }
+
+      if (presentationProvider !== "unknown") {
+        activeEditor
+          ?.chain()
+          .focus()
+          .setPresentationEmbed({ src: pastedUrl, sourceType: "external" })
+          .run();
+        return true;
+      }
+
+      activeEditor?.chain().focus().setVideoEmbed({ src: pastedUrl, sourceType: "external" }).run();
+      return true;
+    },
+    [onUpload],
+  );
+
+  const handleKeyDown = useCallback(
+    (_view: unknown, event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "s") {
+        event.preventDefault();
+        onCtrlSave?.(editorRef.current);
+        return true;
+      }
+      return false;
+    },
+    [onCtrlSave],
+  );
+
   const editor = useEditor({
-    extensions: [...editorPlugins],
+    extensions,
     content: content,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
     },
-    onDrop: async (e) => {
-      const file = e.dataTransfer?.files[0];
-      if (!file) return false;
-
-      e.preventDefault();
-      await onUpload?.(file, editor);
-      return true;
-    },
+    onDrop: handleDrop,
     editorProps: {
-      handleKeyDown: (_view, event) => {
-        if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "s") {
-          event.preventDefault();
-          onCtrlSave?.(editor);
-          return true;
-        }
-        return false;
-      },
-      handlePaste: (_view, event) => {
-        const file = event.clipboardData?.files[0];
-
-        if (file) {
-          event.preventDefault();
-          void onUpload?.(file, editor);
-          return true;
-        }
-
-        const pastedUrl = extractUrlFromClipboard(event);
-        if (!pastedUrl) return false;
-
-        const videoProvider = detectVideoProvider(pastedUrl);
-        const presentationProvider = detectPresentationProvider(pastedUrl);
-
-        if (videoProvider === "unknown" && presentationProvider === "unknown") {
-          return false;
-        }
-
-        if (presentationProvider !== "unknown") {
-          editor
-            ?.chain()
-            .focus()
-            .setPresentationEmbed({ src: pastedUrl, sourceType: "external" })
-            .run();
-          return true;
-        }
-
-        editor?.chain().focus().setVideoEmbed({ src: pastedUrl, sourceType: "external" }).run();
-        return true;
-      },
+      handleKeyDown,
+      handlePaste: (_view, event) => handlePaste(event),
       attributes: {
         class: "prose prose-xs sm:prose dark:prose-invert focus:outline-none max-w-full p-4",
       },
     },
   });
+
+  useEffect(() => {
+    editorRef.current = editor;
+  }, [editor]);
 
   useEffect(() => {
     if (editor && content !== editor.getHTML()) {
@@ -136,5 +166,13 @@ const Editor = ({
     </div>
   );
 };
+
+export const BaseEditor = (props: Omit<EditorProps, "variant">) => (
+  <Editor {...props} variant="base" />
+);
+
+export const LessonEditor = (props: Omit<EditorProps, "variant">) => (
+  <Editor {...props} variant="lesson" />
+);
 
 export default Editor;

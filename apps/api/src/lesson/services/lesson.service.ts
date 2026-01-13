@@ -459,61 +459,15 @@ export class LessonService {
     return `<img src="${resource.fileUrl}" alt="${resource.title ?? ""}" />`;
   }
 
-  private buildVideoTag(resource: { fileUrl: string; title?: string }) {
-    const isExternal = this.isExternalVideoUrl(resource.fileUrl);
-    const externalAttr = isExternal ? "true" : "false";
-
-    return `<div data-type="video" data-url="${
-      resource.fileUrl
-    }" data-external="${externalAttr}" aria-label="${resource.title ?? ""}"></div>`;
-  }
-
-  private isPresentationResource(resource: {
+  private isImageResource(resource: {
     contentType: string | null;
     fileUrl: string;
     fileName?: string;
   }) {
-    if (
-      resource.contentType ===
-      "application/vnd.openxmlformats-officedocument.presentationml.presentation"
-    )
+    if ((resource.contentType ?? "").startsWith("image/")) return true;
+    if (resource.fileName && /\.(png|jpe?g|gif|webp|svg|bmp|tiff)(\?|#|$)/i.test(resource.fileName))
       return true;
-
-    if (resource.fileName && /\.(pptx|ppt)(\?|#|$)/i.test(resource.fileName)) return true;
-
-    return /\.(pptx|ppt)(\?|#|$)/i.test(resource.fileUrl);
-  }
-
-  private isExternalPresentationUrl(fileUrl: string) {
-    if (!fileUrl) return false;
-    if (fileUrl.includes("/api/lesson/lesson-resource/")) return false;
-    if (fileUrl.includes("/api/lesson/lesson-image/")) return false;
-    return !/\.(pptx|ppt)(\?|#|$)/i.test(fileUrl);
-  }
-
-  private isExternalVideoUrl(fileUrl: string) {
-    if (!fileUrl) return false;
-    return !fileUrl.includes("iframe.mediadelivery.net/embed/");
-  }
-
-  private buildPresentationTag(resource: { fileUrl: string; title?: string }) {
-    const isExternal = this.isExternalPresentationUrl(resource.fileUrl);
-    const externalAttr = isExternal ? "true" : "false";
-
-    return `<div data-type="presentation" data-url="${
-      resource.fileUrl
-    }" data-external="${externalAttr}" aria-label="${resource.title ?? ""}"></div>`;
-  }
-
-  private buildDownloadableFileTag(resource: {
-    fileUrl: string;
-    title?: string;
-    description?: string;
-    fileName?: string;
-  }) {
-    const name = resource.title || resource.fileName || resource.description || resource.fileUrl;
-
-    return `<div data-node-type="downloadable-file" data-src="${resource.fileUrl}" data-name="${name}"></div>`;
+    return /\.(png|jpe?g|gif|webp|svg|bmp|tiff)(\?|#|$)/i.test(resource.fileUrl);
   }
 
   injectResourcesIntoContent(
@@ -538,6 +492,16 @@ export class LessonService {
     const $ = loadHtml(content);
     const resourceMap = new Map(resources.map((resource) => [resource.id, resource]));
 
+    $("[data-node-type]").each((_, element) => {
+      const nodeType = $(element).attr("data-node-type");
+
+      if (!nodeType) return;
+
+      if (nodeType === "video") increment("video");
+      if (nodeType === "presentation") increment("presentation");
+      if (nodeType === "downloadable-file") increment("file");
+    });
+
     $("a").each((_, element) => {
       const anchor = $(element);
       const href = anchor.attr("href") || "";
@@ -551,7 +515,7 @@ export class LessonService {
 
       const parent = anchor.parent();
 
-      if ((matchingResource.contentType ?? "").startsWith("image/")) {
+      if (this.isImageResource(matchingResource)) {
         const imgTag = this.buildImageTag(matchingResource);
         if (parent.is("p")) {
           anchor.remove();
@@ -564,40 +528,7 @@ export class LessonService {
         return;
       }
 
-      if ((matchingResource.contentType ?? "").startsWith("video/")) {
-        const iframe = this.buildVideoTag(matchingResource);
-        if (parent.is("p")) {
-          anchor.remove();
-          parent.after(iframe);
-        } else {
-          anchor.replaceWith(iframe);
-        }
-
-        increment("video");
-        return;
-      }
-
-      if (this.isPresentationResource(matchingResource)) {
-        const presentation = this.buildPresentationTag(matchingResource);
-        if (parent.is("p")) {
-          anchor.remove();
-          parent.after(presentation);
-        } else {
-          anchor.replaceWith(presentation);
-        }
-
-        increment("presentation");
-        return;
-      }
-
-      increment("file");
-      const downloadable = this.buildDownloadableFileTag(matchingResource);
-      if (parent.is("p")) {
-        anchor.remove();
-        parent.after(downloadable);
-      } else {
-        anchor.replaceWith(downloadable);
-      }
+      return;
     });
 
     return { html: $.html($("body").children()), contentCount };

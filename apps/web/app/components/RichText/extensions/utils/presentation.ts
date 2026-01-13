@@ -1,3 +1,5 @@
+import { match } from "ts-pattern";
+
 export const PRESENTATION_NODE_TYPE = "presentation" as const;
 
 export type PresentationSourceType = "internal" | "external";
@@ -28,7 +30,9 @@ const extractGooglePresentationId = (url: URL): string | null => {
   if (!url.hostname.includes("google")) return null;
 
   const parts = url.pathname.split("/").filter(Boolean);
+
   const presentationIndex = parts.findIndex((part) => part === "presentation");
+
   if (presentationIndex === -1) return null;
 
   const idIndex = parts.findIndex((part) => part === "d");
@@ -44,15 +48,21 @@ export const detectPresentationProvider = (src: string): PresentationProvider =>
   const url = tryParseUrl(src);
   if (!url) return "unknown";
 
-  if (url.hostname === "docs.google.com" && url.pathname.includes("/presentation/")) {
-    return "google";
-  }
+  const host = url.hostname.toLowerCase();
+  const path = url.pathname.toLowerCase();
 
-  if (url.hostname.endsWith("canva.com") && url.pathname.includes("/design/")) {
-    return "canva";
-  }
-
-  return "unknown";
+  return match({ host, path })
+    .when(
+      ({ host: currentHost, path: currentPath }) =>
+        currentHost === "docs.google.com" && currentPath.includes("/presentation/"),
+      () => "google" as const,
+    )
+    .when(
+      ({ host: currentHost, path: currentPath }) =>
+        currentHost.endsWith("canva.com") && currentPath.includes("/design/"),
+      () => "canva" as const,
+    )
+    .otherwise(() => "unknown");
 };
 
 export const canonicalizeExternalPresentationUrl = (
@@ -60,27 +70,31 @@ export const canonicalizeExternalPresentationUrl = (
   provider?: PresentationProvider,
 ): string => {
   const url = tryParseUrl(src);
+
   if (!url) return src;
 
   const resolvedProvider = provider ?? detectPresentationProvider(src);
 
-  if (resolvedProvider === "google") {
-    const id = extractGooglePresentationId(url);
-    if (id) return `https://docs.google.com/presentation/d/${id}`;
-  }
+  return match(resolvedProvider)
+    .with("google", () => {
+      const id = extractGooglePresentationId(url);
+      return id ? `https://docs.google.com/presentation/d/${id}` : url.toString();
+    })
+    .with("canva", () => {
+      const cleanedUrl = new URL(url.toString());
 
-  if (resolvedProvider === "canva") {
-    const cleaned = new URL(url.toString());
-    cleaned.search = "";
-    if (!cleaned.pathname.includes("/view")) {
-      const basePath = cleaned.pathname.replace(/\/(edit|view).*$/, "");
-      cleaned.pathname = basePath.replace(/\/$/, "") + "/view";
-    }
-    cleaned.searchParams.set("embed", "");
-    return cleaned.toString();
-  }
+      cleanedUrl.search = "";
 
-  return url.toString();
+      if (!cleanedUrl.pathname.includes("/view")) {
+        const basePath = cleanedUrl.pathname.replace(/\/(edit|view).*$/, "");
+        cleanedUrl.pathname = basePath.replace(/\/$/, "") + "/view";
+      }
+
+      cleanedUrl.searchParams.set("embed", "");
+
+      return cleanedUrl.toString();
+    })
+    .otherwise(() => url.toString());
 };
 
 type PresentationEmbedAttrsInput = {
@@ -92,14 +106,20 @@ type PresentationEmbedAttrsInput = {
 export const normalizePresentationEmbedAttributes = (
   attrs: PresentationEmbedAttrsInput,
 ): PresentationEmbedAttrs => {
-  const rawSrc = typeof attrs.src === "string" ? attrs.src.trim() : "";
-  const sourceType = isPresentationSourceType(attrs.sourceType) ? attrs.sourceType : "external";
-  const detectedProvider = sourceType === "internal" ? "self" : detectPresentationProvider(rawSrc);
-  const provider = isPresentationProvider(attrs.provider) ? attrs.provider : detectedProvider;
+  const src = typeof attrs.src === "string" ? attrs.src.trim() : "";
+
+  const sourceType: PresentationSourceType = match(attrs.sourceType)
+    .when(isPresentationSourceType, (value) => value)
+    .otherwise(() => "external");
+
+  const detectedProvider = sourceType === "internal" ? "self" : detectPresentationProvider(src);
+
+  const provider = match(attrs.provider)
+    .when(isPresentationProvider, (value) => value)
+    .otherwise(() => detectedProvider);
+
   const finalSrc =
-    sourceType === "external" && rawSrc
-      ? canonicalizeExternalPresentationUrl(rawSrc, provider)
-      : rawSrc;
+    sourceType === "external" && src ? canonicalizeExternalPresentationUrl(src, provider) : src;
 
   return {
     src: finalSrc || null,
@@ -111,34 +131,24 @@ export const normalizePresentationEmbedAttributes = (
 export const getPresentationEmbedAttrsFromElement = (
   element: HTMLElement,
 ): PresentationEmbedAttrs | false => {
-  const nodeType =
-    element.getAttribute("data-node-type") ?? element.getAttribute("data-type") ?? null;
+  const nodeType = element.getAttribute("data-node-type") ?? null;
 
-  if (nodeType && nodeType !== PRESENTATION_NODE_TYPE) return false;
+  if (nodeType !== PRESENTATION_NODE_TYPE) return false;
 
-  const src =
-    element.getAttribute("data-src") ??
-    element.getAttribute("data-url") ??
-    element.getAttribute("href") ??
-    element.getAttribute("src");
+  const src = element.getAttribute("data-src");
 
   if (!src) return false;
 
   const sourceTypeAttr = element.getAttribute("data-source-type");
   const providerAttr = element.getAttribute("data-provider");
-  const legacyExternal = element.getAttribute("data-external");
 
-  const sourceType = isPresentationSourceType(sourceTypeAttr)
-    ? sourceTypeAttr
-    : legacyExternal === "true"
-      ? "external"
-      : "internal";
+  const sourceType: PresentationSourceType = match(sourceTypeAttr)
+    .when(isPresentationSourceType, (value) => value)
+    .otherwise(() => "external");
 
-  const provider = isPresentationProvider(providerAttr)
-    ? providerAttr
-    : sourceType === "internal"
-      ? "self"
-      : detectPresentationProvider(src);
+  const provider = match(providerAttr)
+    .when(isPresentationProvider, (value) => value)
+    .otherwise(() => (sourceType === "internal" ? "self" : detectPresentationProvider(src)));
 
   return normalizePresentationEmbedAttributes({
     src,

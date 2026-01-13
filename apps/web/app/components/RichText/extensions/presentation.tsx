@@ -38,9 +38,9 @@ const getPresentationDataAttributes = (attrs: PresentationEmbedAttrs) => ({
 });
 
 const PresentationEditorView = ({ node, editor, getPos }: NodeViewProps) => {
-  const attrs = normalizePresentationEmbedAttributes(node.attrs);
+  const attributes = normalizePresentationEmbedAttributes(node.attrs);
 
-  if (!attrs.src) return null;
+  if (!attributes.src) return null;
 
   const handleRemove = () => {
     const pos = getPos();
@@ -66,15 +66,15 @@ const PresentationEditorView = ({ node, editor, getPos }: NodeViewProps) => {
           <GripVertical className="size-4" aria-hidden />
         </Button>
         <a
-          {...getPresentationDataAttributes(attrs)}
-          href={attrs.src}
+          {...getPresentationDataAttributes(attributes)}
+          href={attributes.src}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex min-w-0 items-center gap-2 underline"
           contentEditable={false}
         >
           <PresentationIcon className="size-4 text-primary-700" aria-hidden />
-          <span className="truncate">{attrs.src}</span>
+          <span className="truncate">{attributes.src}</span>
         </a>
         <Button
           type="button"
@@ -137,26 +137,19 @@ const basePresentationNodeConfig: NodeConfig = {
         tag: 'a[data-node-type="presentation"]',
         getAttrs: (el) => getPresentationEmbedAttrsFromElement(el as HTMLElement),
       },
-      {
-        tag: 'div[data-type="presentation"]',
-        getAttrs: (el) => getPresentationEmbedAttrsFromElement(el as HTMLElement),
-      },
-      {
-        tag: "iframe",
-        getAttrs: (el) => getPresentationEmbedAttrsFromElement(el as HTMLElement),
-      },
     ];
   },
 
   renderHTML({ HTMLAttributes }) {
     const { src, sourceType, provider, ...rest } = HTMLAttributes as Record<string, unknown>;
-    const normalized = normalizePresentationEmbedAttributes({
+
+    const normalizedAttributes = normalizePresentationEmbedAttributes({
       src: typeof src === "string" ? src : null,
       sourceType: sourceType as PresentationSourceType,
       provider: provider as PresentationProvider,
     });
 
-    return ["div", mergeAttributes(getPresentationDataAttributes(normalized), rest)];
+    return ["div", mergeAttributes(getPresentationDataAttributes(normalizedAttributes), rest)];
   },
 
   addCommands() {
@@ -164,12 +157,13 @@ const basePresentationNodeConfig: NodeConfig = {
       setPresentationEmbed:
         (attrs) =>
         ({ commands }) => {
-          const normalized = normalizePresentationEmbedAttributes(attrs);
-          if (!normalized.src) return false;
+          const normalizedAttributes = normalizePresentationEmbedAttributes(attrs);
+
+          if (!normalizedAttributes.src) return false;
 
           return commands.insertContent({
             type: this.name,
-            attrs: normalized,
+            attrs: normalizedAttributes,
           });
         },
     };

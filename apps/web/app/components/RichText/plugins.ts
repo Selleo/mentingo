@@ -84,7 +84,9 @@ const basePlugins = [
   Iframe,
 ];
 
-export const editorPlugins = [
+export const baseEditorPlugins = [...basePlugins];
+
+export const lessonEditorPlugins = [
   ...basePlugins,
   Placeholder.configure({
     includeChildren: true,
@@ -96,6 +98,7 @@ export const editorPlugins = [
   PresentationEmbedEditor,
   VideoEmbedEditor,
 ];
+
 export const viewerPlugins = [
   ...basePlugins,
   DownloadableFileEmbedViewer,

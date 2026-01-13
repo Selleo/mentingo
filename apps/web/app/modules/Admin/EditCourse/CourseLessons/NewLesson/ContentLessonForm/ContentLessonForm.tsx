@@ -14,7 +14,7 @@ import { useInitVideoUpload } from "~/api/mutations/admin/useInitVideoUpload";
 import { useLessonFileUpload } from "~/api/mutations/admin/useLessonFileUpload";
 import { FormTextField } from "~/components/Form/FormTextField";
 import { Icon } from "~/components/Icon";
-import Editor from "~/components/RichText/Editor";
+import { LessonEditor } from "~/components/RichText/Editor";
 import { Button } from "~/components/ui/button";
 import { Form, FormControl, FormField, FormItem } from "~/components/ui/form";
 import { Label } from "~/components/ui/label";
@@ -277,7 +277,7 @@ const ContentLessonForm = ({
                   {t("adminCourseView.curriculum.lesson.field.description")}
                 </Label>
                 <FormControl>
-                  <Editor
+                  <LessonEditor
                     id="description"
                     content={field.value}
                     lessonId={lessonToEdit?.id}
