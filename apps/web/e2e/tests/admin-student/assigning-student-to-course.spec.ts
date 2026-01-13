@@ -326,7 +326,7 @@ const createGroup = async (page: Page) => {
   await page.getByRole("button", { name: "Create new" }).click();
   await page.getByTestId("groupName").fill(GROUP.name);
   await page.getByRole("button", { name: "Publish" }).click();
-  await expect(page.getByRole("cell", { name: GROUP.name })).toBeVisible();
+  await expect(page.getByRole("cell", { name: GROUP.name }).first()).toBeVisible();
 };
 
 const assignGroupToStudent = async (page: Page) => {
@@ -334,7 +334,7 @@ const assignGroupToStudent = async (page: Page) => {
   await page.getByTestId(USERS.student.email).click();
   await page.getByRole("button", { name: "Edit" }).click();
   await page.getByRole("button", { name: "Change group" }).click();
-  const groupOption = page.getByRole("option", { name: GROUP.name });
+  const groupOption = page.getByRole("option", { name: GROUP.name }).first();
   await groupOption.click();
   await expect(groupOption).toHaveAttribute("aria-selected", "true");
   await page.getByRole("heading", { name: "Modify groups (1)" }).click();
@@ -442,7 +442,7 @@ const enrollGroupToCourse = async (page: Page) => {
   await page.getByText(USERS.student.email).click();
   await page.getByRole("button", { name: "Enroll groups" }).click();
   await page.getByRole("button", { name: "Enroll groups", exact: true }).click();
-  await page.getByLabel("Enroll groups to course").getByText(GROUP.name).click();
+  await page.getByLabel("Enroll groups to course").getByText(GROUP.name).first().click();
   await page.getByLabel(IDS.groupSelect).click();
   await page.getByRole("button", { name: "Enroll groups" }).click();
   await expect(page.getByRole("cell", { name: "Enrolled by group" })).toBeVisible();
@@ -466,7 +466,7 @@ const unenrollGroup = async (page: Page) => {
   await page.getByText("student0@example.com").click();
   await page.getByRole("button", { name: "Enroll groups" }).click();
   await page.getByRole("button", { name: "Unenroll groups" }).click();
-  await page.getByText(`${GROUP.name}Enrolled`, { exact: true }).click();
+  await page.getByText(`${GROUP.name}Enrolled`, { exact: true }).first().click();
   await page.getByLabel(IDS.groupSelect).click();
   await page.getByRole("button", { name: "Unenroll selected" }).click();
   await logoutAdmin(page);
@@ -602,20 +602,30 @@ test.describe.serial("Assigning students to course flow", () => {
   test("should assign student/group to course and student/group sees enrollment", async ({
     page,
   }) => {
-    await createGroup(page);
-    await assignGroupToStudent(page);
-    await createCourse(page);
-    await publishCourse(page);
-    await enrollStudentIndividually(page);
-    await expectIndividualEnrollment(page);
-    await logoutAdmin(page);
+    await test.step("setup group and course", async () => {
+      await createGroup(page);
+      await assignGroupToStudent(page);
+      await createCourse(page);
+      await publishCourse(page);
+    });
 
-    await studentSeesCourse(page);
-    await unenrollStudent(page);
-    await expectCourseHiddenForStudent(page);
-    await enrollGroupToCourse(page);
-    await studentSeesCourseByGroup(page);
-    await unenrollGroup(page);
+    await test.step("enroll student individually and verify", async () => {
+      await enrollStudentIndividually(page);
+      await expectIndividualEnrollment(page);
+      await logoutAdmin(page);
+    });
+
+    await test.step("student sees course individually then gets unenrolled", async () => {
+      await studentSeesCourse(page);
+      await unenrollStudent(page);
+      await expectCourseHiddenForStudent(page);
+    });
+
+    await test.step("enroll group and verify", async () => {
+      await enrollGroupToCourse(page);
+      await studentSeesCourseByGroup(page);
+      await unenrollGroup(page);
+    });
   });
 
   test("should check if enforcing lesson sequence works", async ({ page }) => {
