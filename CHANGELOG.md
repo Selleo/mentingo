@@ -1,3 +1,41 @@
+<a name="v4.0.0"></a>
+
+## [v4.0.0] - 13.01.2026
+
+### Features:
+
+- allow creating lessons that combine video, presentations, files, and text ([#1158](https://github.com/Selleo/mentingo/issues/1158))
+
+- allow admins to update user roles in bulk ([#1182](https://github.com/Selleo/mentingo/issues/1182))
+
+- include generator metadata for better platform identification ([#1174](https://github.com/Selleo/mentingo/issues/1174))
+
+- introduce active user count analytics ([#1140](https://github.com/Selleo/mentingo/issues/1140))
+
+- make course statistics easier to analyze with filters ([#1133](https://github.com/Selleo/mentingo/issues/1133))
+
+- add insight into students’ last completed lesson in course statistics ([#1165](https://github.com/Selleo/mentingo/issues/1165))
+
+### Bug Fixes:
+
+- ensure deployed applications function correctly ([#1179](https://github.com/Selleo/mentingo/issues/1179))
+
+- show correct and incorrect true/false answers based on student responses ([#1173](https://github.com/Selleo/mentingo/issues/1173))
+
+- improve mandatory course enrollment and group re-enrollment behavior ([#1171](https://github.com/Selleo/mentingo/issues/1171))
+
+### Chores:
+
+- enable branch preview environments for easier testing ([#1150](https://github.com/Selleo/mentingo/issues/1150))
+
+- improve email layout with adjusted spacing ([#1175](https://github.com/Selleo/mentingo/issues/1175))
+
+- improve navigation and progress overview for students ([#1168](https://github.com/Selleo/mentingo/issues/1168))
+
+### Code Refactoring:
+
+- make group enrollment easier to manage ([#1177](https://github.com/Selleo/mentingo/issues/1177))
+
 <a name="v3.26.0"></a>
 
 ## [v3.26.0] - 07.01.2026
@@ -9,6 +47,10 @@
 ### Chores:
 
 - refine report generation based on feedback ([#1167](https://github.com/Selleo/mentingo/issues/1167))
+
+### Documentation:
+
+- update changelog for version v3.26.0
 
 <a name="v3.25.0"></a>
 
@@ -80,30 +122,6 @@
 
 - enhance enrolled students table with improved sorting and pagination ([#1074](https://github.com/Selleo/mentingo/issues/1074))
 
-### Bug Fixes:
-
-- correct translations and group enrollment for users in multiple groups ([#1084](https://github.com/Selleo/mentingo/issues/1084))
-
-- improve AI mentor lesson evaluation ([#1070](https://github.com/Selleo/mentingo/issues/1070))
-
-### Chores:
-
-- add license check action
-
-### Code Refactoring:
-
-- replaced exceljs lib
-
-### Documentation:
-
-- update changelog for version v3.24.0
-
-<a name="v3.23.0"></a>
-
-## [v3.23.0] - 11.12.2025
-
-### Features:
-
 - enable multi-language user interface support for courses ([#1062](https://github.com/Selleo/mentingo/issues/1062))
 
 - allow admins to unenroll groups from courses ([#1065](https://github.com/Selleo/mentingo/issues/1065))
@@ -121,6 +139,10 @@
 - allow admin to enforce sequential lesson progression for students ([#981](https://github.com/Selleo/mentingo/issues/981))
 
 ### Bug Fixes:
+
+- correct translations and group enrollment for users in multiple groups ([#1084](https://github.com/Selleo/mentingo/issues/1084))
+
+- improve AI mentor lesson evaluation ([#1070](https://github.com/Selleo/mentingo/issues/1070))
 
 - handle unenrollment properly for students assigned to multiple groups ([#1069](https://github.com/Selleo/mentingo/issues/1069))
 
@@ -152,7 +174,23 @@
 
 ### Chores:
 
+- add license check action
+
 - clean up dependencies by removing intro.js ([#1063](https://github.com/Selleo/mentingo/issues/1063))
+
+### Code Refactoring:
+
+- replaced exceljs lib
+
+### Documentation:
+
+- update changelog for version v3.24.0
+
+- update changelog for version v3.23.0
+
+<a name="v3.23.0"></a>
+
+## [v3.23.0] - 11.12.2025
 
 ### Documentation:
 
@@ -838,27 +876,11 @@
 
 - implement admin notifications about finished course ([#630](https://github.com/Selleo/mentingo/issues/630))
 
-### Bug Fixes:
-
-- archiving user and change default filter to archived user ([#643](https://github.com/Selleo/mentingo/issues/643))
-
-### Documentation:
-
-- update changelog for version v3.4.0
-
-<a name="v3.3.0"></a>
-
-## [v3.3.0] - 16.09.2025
-
-### Features:
-
 - generate certificates ([#538](https://github.com/Selleo/mentingo/issues/538))
 
 ### Bug Fixes:
 
-- failing api tests and api e2e tests
-
-- mfa after sso login
+- archiving user and change default filter to archived user ([#643](https://github.com/Selleo/mentingo/issues/643))
 
 - add fetch depth of 0 to deploy ([#645](https://github.com/Selleo/mentingo/issues/645))
 
@@ -866,7 +888,7 @@
 
 ### Documentation:
 
-- update changelog for version v3.3.0
+- update changelog for version v3.4.0
 
 - update changelog for version learn-v2025.09.12
 
@@ -2230,7 +2252,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.26.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.0.0...HEAD
+[v4.0.0]: https://github.com/Selleo/mentingo/compare/v3.26.0...v4.0.0
 [v3.26.0]: https://github.com/Selleo/mentingo/compare/v3.25.0...v3.26.0
 [v3.25.0]: https://github.com/Selleo/mentingo/compare/v3.24.0...v3.25.0
 [v3.24.0]: https://github.com/Selleo/mentingo/compare/v3.23.0...v3.24.0
@@ -2257,8 +2280,7 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 [v3.7.0]: https://github.com/Selleo/mentingo/compare/v3.6.0...v3.7.0
 [v3.6.0]: https://github.com/Selleo/mentingo/compare/v3.5.0...v3.6.0
 [v3.5.0]: https://github.com/Selleo/mentingo/compare/v3.4.0...v3.5.0
-[v3.4.0]: https://github.com/Selleo/mentingo/compare/v3.3.0...v3.4.0
-[v3.3.0]: https://github.com/Selleo/mentingo/compare/v3.2.1...v3.3.0
+[v3.4.0]: https://github.com/Selleo/mentingo/compare/v3.2.1...v3.4.0
 [v3.2.1]: https://github.com/Selleo/mentingo/compare/v3.2.0...v3.2.1
 [v3.2.0]: https://github.com/Selleo/mentingo/compare/v3.1.0...v3.2.0
 [v3.1.0]: https://github.com/Selleo/mentingo/compare/v3.0.6...v3.1.0
