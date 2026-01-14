@@ -95,10 +95,6 @@ const PromotionCodes = () => {
 
   const breadcrumbs = [
     {
-      title: t("adminPromotionCodesView.breadcrumbs.dashboard"),
-      href: "/",
-    },
-    {
       title: t("adminPromotionCodesView.breadcrumbs.promotionCodes"),
       href: "/admin/promotion-codes",
     },

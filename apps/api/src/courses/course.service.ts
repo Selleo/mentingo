@@ -16,6 +16,7 @@ import {
   between,
   count,
   countDistinct,
+  desc,
   eq,
   getTableColumns,
   ilike,
@@ -43,6 +44,7 @@ import { EnvService } from "src/env/services/env.service";
 import { CreateCourseEvent, UpdateCourseEvent, EnrollCourseEvent } from "src/events";
 import { UsersAssignedToCourseEvent } from "src/events/user/user-assigned-to-course.event";
 import { FileService } from "src/file/file.service";
+import { LearningTimeRepository } from "src/learning-time";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { LessonRepository } from "src/lesson/repositories/lesson.repository";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
@@ -60,6 +62,7 @@ import {
   coursesSummaryStats,
   groups,
   groupUsers,
+  lessonLearningTime,
   lessons,
   questionAnswerOptions,
   questions,
@@ -95,6 +98,7 @@ import type {
   AllStudentCoursesResponse,
   CourseAverageQuizScorePerQuiz,
   CourseAverageQuizScoresResponse,
+  CourseStatisticsQueryBody,
   CourseStatisticsResponse,
   CourseStatusDistribution,
   EnrolledCourseGroupsPayload,
@@ -153,6 +157,7 @@ export class CourseService {
     private readonly eventBus: EventBus,
     private readonly aiService: AiService,
     private readonly adminLessonService: AdminLessonService,
+    private readonly learningTimeRepository: LearningTimeRepository,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
     private readonly emailService: EmailService,
     private readonly courseSlugService: CourseSlugService,
@@ -1670,7 +1675,8 @@ export class CourseService {
     userId?: UUIDType,
     currentUserRole?: UserRole,
   ) {
-    const groupIds = groupsToEnroll.map((groupId) => groupId.id);
+    const groupIds = groupsToEnroll.map((group) => group.id);
+    const groupInfoById = new Map(groupsToEnroll.map((group) => [group.id, group]));
 
     const [course] = await this.db.select().from(courses).where(eq(courses.id, courseId));
     if (!course) throw new NotFoundException(`Course ${courseId} not found`);
@@ -1682,66 +1688,23 @@ export class CourseService {
       throw new ForbiddenException("You don't have permission to enroll groups to this course");
     }
 
-    const groupUsersList = await this.db
-      .select({ ...getTableColumns(groupUsers), role: users.role })
-      .from(groupUsers)
-      .innerJoin(users, eq(groupUsers.userId, users.id))
-      .where(inArray(groupUsers.groupId, groupIds));
-
-    await this.db
-      .select({ groupId: groupCourses.groupId })
-      .from(groupCourses)
-      .where(and(eq(groupCourses.courseId, courseId), inArray(groupCourses.groupId, groupIds)));
-
-    let existingStudentIds: string[] = [];
     let newStudentIds: string[] = [];
-    if (groupUsersList.length > 0) {
-      const existingEnrollments = await this.db
-        .select({
-          userId: users.id,
-          groupId: groupUsers.groupId,
-        })
-        .from(users)
-        .leftJoin(studentCourses, eq(users.id, studentCourses.studentId))
-        .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
-        .where(
-          and(
-            eq(studentCourses.courseId, courseId),
-            inArray(
-              studentCourses.studentId,
-              groupUsersList.map((gu) => gu.userId),
-            ),
-          ),
-        );
-
-      existingStudentIds = existingEnrollments.map((e) => e.userId);
-      newStudentIds = groupUsersList
-        .filter(
-          ({ role, userId }) => !existingStudentIds.includes(userId) && role === USER_ROLES.STUDENT,
-        )
-        .map((gu) => gu.userId);
-    }
-
-    const userIdToGroupId = new Map<string, string>();
-    for (const groupId of groupIds) {
-      const usersInGroup = groupUsersList.filter((gu) => gu.groupId === groupId);
-      usersInGroup.forEach((gu) => {
-        userIdToGroupId.set(gu.userId, groupId);
-      });
-    }
 
     await this.db.transaction(async (trx) => {
+      const groupIdsArray = sql`ARRAY[${sql.join(
+        groupIds.map((groupId) => sql`${groupId}::uuid`),
+        sql`, `,
+      )}]`;
+
       const groupCoursesValues = groupIds.map((groupId) => {
-        const isMandatory =
-          groupsToEnroll.find((group) => group.id === groupId)?.isMandatory ?? false;
-        const dueDateRaw = groupsToEnroll.find((group) => group.id === groupId)?.dueDate;
-        const dueDate = dueDateRaw ? new Date(dueDateRaw) : null;
+        const { isMandatory, dueDate } = groupInfoById.get(groupId) || {};
+
         return {
           groupId,
           courseId,
           enrolledBy: userId || null,
-          isMandatory,
-          dueDate,
+          isMandatory: isMandatory ?? false,
+          dueDate: dueDate ? new Date(dueDate) : null,
         };
       });
 
@@ -1757,31 +1720,43 @@ export class CourseService {
           },
         });
 
-      if (newStudentIds.length > 0) {
-        const studentCoursesValues = newStudentIds.map((studentId) => ({
-          studentId,
-          courseId,
-          enrolledByGroupId: userIdToGroupId.get(studentId) || null,
-          status: COURSE_ENROLLMENT.ENROLLED,
-        }));
+      const groupOrder = sql<number>`array_position(${groupIdsArray}, ${groupUsers.groupId})`;
 
-        const uniqueCoursesValues = Array.from(
-          new Map(
-            studentCoursesValues.map((student) => [
-              `${student.studentId}-${student.courseId}`,
-              {
-                studentId: student.studentId,
-                courseId: student.courseId,
-                enrolledByGroupId: student.enrolledByGroupId,
-                status: student.status,
-              },
-            ]),
-          ).values(),
-        );
+      const eligibleStudents = await trx
+        .selectDistinctOn([groupUsers.userId], {
+          studentId: groupUsers.userId,
+          groupId: groupUsers.groupId,
+        })
+        .from(groupUsers)
+        .innerJoin(users, eq(users.id, groupUsers.userId))
+        .leftJoin(
+          studentCourses,
+          and(
+            eq(studentCourses.studentId, groupUsers.userId),
+            eq(studentCourses.courseId, courseId),
+            eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+          ),
+        )
+        .where(
+          and(
+            inArray(groupUsers.groupId, groupIds),
+            eq(users.role, USER_ROLES.STUDENT),
+            isNull(studentCourses.id),
+          ),
+        )
+        .orderBy(groupUsers.userId, desc(groupOrder));
 
-        await trx
+      if (eligibleStudents.length) {
+        const insertedStudents = await trx
           .insert(studentCourses)
-          .values(uniqueCoursesValues)
+          .values(
+            eligibleStudents.map(({ studentId, groupId }) => ({
+              studentId,
+              courseId,
+              enrolledByGroupId: groupId,
+              status: COURSE_ENROLLMENT.ENROLLED,
+            })),
+          )
           .onConflictDoUpdate({
             target: [studentCourses.courseId, studentCourses.studentId],
             set: {
@@ -1789,7 +1764,10 @@ export class CourseService {
               status: sql`EXCLUDED.status`,
               enrolledByGroupId: sql`EXCLUDED.enrolled_by_group_id`,
             },
-          });
+          })
+          .returning({ studentId: studentCourses.studentId });
+
+        newStudentIds = insertedStudents.map((student) => student.studentId);
 
         await Promise.all(
           newStudentIds.map(async (studentId) => {
@@ -2182,10 +2160,7 @@ export class CourseService {
     return await Promise.all(
       lessons.map(async (lesson) => {
         const updatedLesson = { ...lesson };
-        if (
-          lesson.fileS3Key &&
-          (lesson.type === LESSON_TYPES.VIDEO || lesson.type === LESSON_TYPES.PRESENTATION)
-        ) {
+        if (lesson.fileS3Key && lesson.type === LESSON_TYPES.CONTENT) {
           if (!lesson.fileS3Key.startsWith("https://")) {
             try {
               const signedUrl = await this.fileService.getFileUrl(lesson.fileS3Key);
@@ -2360,7 +2335,12 @@ export class CourseService {
     return availableCourses.map(({ courseId }) => courseId);
   }
 
-  async getCourseStatistics(id: UUIDType): Promise<CourseStatisticsResponse> {
+  async getCourseStatistics(
+    id: UUIDType,
+    query: CourseStatisticsQueryBody,
+  ): Promise<CourseStatisticsResponse> {
+    const userIds = await this.getUserIdsByGroup(query.groupId);
+
     const [courseStats] = await this.db
       .select({
         enrolledCount: sql<number>`COUNT(DISTINCT ${studentCourses.studentId})::int`,
@@ -2393,6 +2373,7 @@ export class CourseService {
             JOIN ${chapters} AS ch ON l.chapter_id = ch.id
             JOIN ${studentCourses} AS sc ON slp.student_id = sc.student_id AND ch.course_id = sc.course_id
             WHERE ch.course_id = ${id} AND sc.status = ${COURSE_ENROLLMENT.ENROLLED}
+            ${userIds.length ? sql`AND sc.student_id IN ${userIds}` : sql``}
           ) AS stats
         ),
         0
@@ -2405,6 +2386,7 @@ export class CourseService {
                 COUNT(*) AS count
               FROM ${studentCourses} AS sc
               WHERE sc.course_id = ${id} AND sc.status = ${COURSE_ENROLLMENT.ENROLLED}
+              ${userIds.length ? sql`AND sc.student_id IN ${userIds}` : sql``}
               GROUP BY sc.progress
             ) AS progress_counts
           ),
@@ -2417,53 +2399,90 @@ export class CourseService {
         and(
           eq(coursesSummaryStats.courseId, id),
           eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+          ...(userIds.length ? [inArray(studentCourses.studentId, userIds)] : []),
         ),
       );
 
-    return courseStats;
+    const courseLearningTime = await this.learningTimeRepository.getCourseTotalLearningTime(
+      id,
+      userIds.length ? [inArray(lessonLearningTime.userId, userIds)] : [],
+    );
+    return { ...courseStats, averageSeconds: courseLearningTime.averageSeconds };
   }
 
   async getAverageQuizScoreForCourse(
     courseId: UUIDType,
+    query: CourseStatisticsQueryBody,
     language: SupportedLanguages,
   ): Promise<CourseAverageQuizScoresResponse> {
+    const conditions = await this.getStatisticsConditions(query);
+
     const [averageScorePerQuiz] = await this.db
       .select({
         averageScoresPerQuiz: sql<CourseAverageQuizScorePerQuiz[]>`COALESCE(
-          (
-            SELECT jsonb_agg(jsonb_build_object('quizId', subquery.quiz_id, 'name', subquery.quiz_name, 'averageScore', subquery.average_score, 'finishedCount', subquery.finished_count, 'lessonOrder', subquery.lesson_order))
-            FROM (
-              SELECT
-                lessons.id AS quiz_id,
-                ${this.localizationService.getLocalizedSqlField(
-                  lessons.title,
-                  language,
-                  courses,
-                  "co",
-                )} AS quiz_name,
-                lessons.display_order AS lesson_order,
-                ROUND(AVG(slp.quiz_score), 0) AS average_score,
-                COUNT(DISTINCT slp.student_id) AS finished_count
-              FROM ${lessons}
-              JOIN ${studentLessonProgress} slp ON lessons.id = slp.lesson_id
-              JOIN ${chapters} c ON lessons.chapter_id = c.id
-              JOIN ${studentCourses} sc ON slp.student_id = sc.student_id AND sc.course_id = c.course_id
-              JOIN ${courses} co ON co.id = c.course_id
-              WHERE c.course_id = ${courseId} AND lessons.type = 'quiz' AND slp.completed_at IS NOT NULL AND slp.quiz_score IS NOT NULL AND sc.status = ${
-                COURSE_ENROLLMENT.ENROLLED
-              }
-              GROUP BY lessons.id, lessons.title, lessons.display_order, co.available_locales, co.base_language
-            ) AS subquery
-          ),
-          '[]'::jsonb
-        )`,
+        (
+          SELECT jsonb_agg(jsonb_build_object('quizId', subquery.quiz_id, 'name', subquery.quiz_name, 'averageScore', subquery.average_score, 'finishedCount', subquery.finished_count, 'lessonOrder', subquery.lesson_order))
+          FROM (
+            SELECT
+              ${lessons.id} AS quiz_id,
+              ${this.localizationService.getLocalizedSqlField(
+                lessons.title,
+                language,
+                courses,
+              )} AS quiz_name,
+              ${lessons.displayOrder} AS lesson_order,
+              ROUND(AVG(${studentLessonProgress.quizScore}), 0) AS average_score,
+              COUNT(DISTINCT ${studentLessonProgress.studentId}) AS finished_count
+            FROM ${lessons}
+            JOIN ${studentLessonProgress} ON ${lessons.id} = ${studentLessonProgress.lessonId}
+            JOIN ${chapters} ON ${lessons.chapterId} = ${chapters.id}
+            JOIN ${studentCourses} ON ${studentLessonProgress.studentId} = ${
+              studentCourses.studentId
+            } AND ${studentCourses.courseId} = ${chapters.courseId}
+            JOIN ${courses} ON ${courses.id} = ${chapters.courseId}
+            WHERE ${chapters.courseId} = ${courseId}
+              AND ${lessons.type} = 'quiz'
+              AND ${studentLessonProgress.completedAt} IS NOT NULL
+              AND ${studentLessonProgress.quizScore} IS NOT NULL
+              AND ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED}
+              AND ${conditions.length ? sql`${and(...conditions)}` : true}
+            GROUP BY ${lessons.id}, ${lessons.title}, ${lessons.displayOrder}, ${
+              courses.availableLocales
+            }, ${courses.baseLanguage}
+          ) AS subquery
+        ),
+        '[]'::jsonb
+      )`,
       })
       .from(studentLessonProgress)
       .leftJoin(chapters, eq(studentLessonProgress.chapterId, chapters.id))
       .leftJoin(courses, eq(chapters.courseId, courses.id))
-      .where(eq(courses.id, courseId));
+      .leftJoin(studentCourses, eq(courses.id, studentCourses.courseId))
+      .where(and(eq(courses.id, courseId)));
 
     return averageScorePerQuiz;
+  }
+
+  private async getStatisticsConditions(
+    query: CourseStatisticsQueryBody,
+    source: AnyPgColumn = studentCourses.studentId,
+  ) {
+    const conditions = [];
+
+    if (query.groupId) {
+      const availableIds = await this.getUserIdsByGroup(query.groupId);
+
+      if (availableIds.length > 0) {
+        conditions.push(inArray(source, availableIds));
+      }
+    }
+
+    return conditions;
+  }
+
+  private async getUserIdsByGroup(groupId?: UUIDType) {
+    if (!groupId) return [];
+    return (await this.learningTimeRepository.getStudentsByGroup(groupId)).map(({ id }) => id);
   }
 
   async getStudentsProgress(query: CourseStudentProgressionQuery) {
@@ -2474,6 +2493,7 @@ export class CourseService {
       page = 1,
       searchQuery = "",
       language,
+      groupId,
     } = query;
 
     const { sortOrder, sortedField } = getSortOptions(sort);
@@ -2483,17 +2503,16 @@ export class CourseService {
       lastActivityExpression,
       completedLessonsCountExpression,
       groupNameExpression,
+      lastCompletedLessonName,
     } = await this.getStudentCourseStatisticsExpressions(courseId, language);
 
     const conditions = [
       eq(studentCourses.courseId, courseId),
-      or(
-        ilike(users.firstName, `%${searchQuery}%`),
-        ilike(users.lastName, `%${searchQuery}%`),
-        ilike(groups.name, `%${searchQuery}%`),
-      ),
+      this.getSearchQueryConditions(searchQuery),
       eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
     ];
+
+    conditions.push(...(await this.getStatisticsConditions({ groupId })));
 
     const studentsProgress = await this.db
       .select({
@@ -2503,6 +2522,7 @@ export class CourseService {
         groups: groupNameExpression,
         completedLessonsCount: completedLessonsCountExpression,
         lastActivity: lastActivityExpression,
+        lastCompletedLessonName: lastCompletedLessonName,
       })
       .from(studentCourses)
       .leftJoin(users, eq(studentCourses.studentId, users.id))
@@ -2557,7 +2577,12 @@ export class CourseService {
       quizId = "",
       sort = CourseStudentQuizResultsSortFields.studentName,
       language,
+      searchQuery = "",
+      groupId,
     } = query;
+
+    const { lastAttemptExpression, studentNameExpression, quizNameExpression } =
+      await this.getStudentCourseStatisticsExpressions(courseId, language);
 
     const conditions = [
       eq(studentCourses.courseId, courseId),
@@ -2565,14 +2590,15 @@ export class CourseService {
       isNotNull(studentLessonProgress.attempts),
       eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
       eq(chapters.courseId, courseId),
+      or(
+        sql`${quizNameExpression} ILIKE ${`%${searchQuery}%`}`,
+        this.getSearchQueryConditions(searchQuery),
+      ),
     ];
 
     if (quizId) conditions.push(eq(lessons.id, quizId));
 
     const { sortOrder, sortedField } = getSortOptions(sort);
-
-    const { lastAttemptExpression, studentNameExpression, quizNameExpression } =
-      await this.getStudentCourseStatisticsExpressions(courseId, language);
 
     const order = sortOrder(
       await this.getCourseStatisticsColumnToSortBy(
@@ -2581,6 +2607,8 @@ export class CourseService {
         language,
       ),
     );
+
+    conditions.push(...(await this.getStatisticsConditions({ groupId })));
 
     const quizResults = await this.db
       .select({
@@ -2598,6 +2626,8 @@ export class CourseService {
       .leftJoin(studentLessonProgress, eq(studentLessonProgress.studentId, users.id))
       .leftJoin(lessons, eq(studentLessonProgress.lessonId, lessons.id))
       .leftJoin(chapters, eq(lessons.chapterId, chapters.id))
+      .leftJoin(groupUsers, eq(groupUsers.userId, studentLessonProgress.studentId))
+      .leftJoin(groups, eq(groupUsers.groupId, groups.id))
       .where(and(...conditions))
       .orderBy(order)
       .limit(perPage)
@@ -2609,6 +2639,9 @@ export class CourseService {
       .leftJoin(studentCourses, eq(studentLessonProgress.studentId, studentCourses.studentId))
       .leftJoin(lessons, eq(studentLessonProgress.lessonId, lessons.id))
       .leftJoin(chapters, eq(lessons.chapterId, chapters.id))
+      .leftJoin(users, eq(studentCourses.studentId, users.id))
+      .leftJoin(groupUsers, eq(groupUsers.userId, studentLessonProgress.studentId))
+      .leftJoin(groups, eq(groupUsers.groupId, groups.id))
       .where(and(...conditions));
 
     const allStudentsResults = await Promise.all(
@@ -2636,9 +2669,16 @@ export class CourseService {
       page = 1,
       perPage = DEFAULT_PAGE_SIZE,
       lessonId = "",
+      searchQuery = "",
       sort = CourseStudentQuizResultsSortFields.studentName,
       language,
+      groupId,
     } = query;
+
+    const lessonNameExpression = this.localizationService.getLocalizedSqlField(
+      lessons.title,
+      language,
+    );
 
     const conditions = [
       eq(studentCourses.courseId, courseId),
@@ -2646,6 +2686,10 @@ export class CourseService {
       eq(studentLessonProgress.id, aiMentorStudentLessonProgress.studentLessonProgressId),
       eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
       eq(chapters.courseId, courseId),
+      or(
+        this.getSearchQueryConditions(searchQuery),
+        sql`${lessonNameExpression} ILIKE ${`%${searchQuery}%`}`,
+      ),
     ];
 
     if (lessonId) conditions.push(eq(lessons.id, lessonId));
@@ -2665,19 +2709,23 @@ export class CourseService {
       ),
     );
 
+    conditions.push(...(await this.getStatisticsConditions({ groupId })));
+
     const quizResults = await this.db
       .select({
         studentId: sql<UUIDType>`${users.id}`,
         studentName: studentNameExpression,
         studentAvatarKey: users.avatarReference,
         lessonId: sql<UUIDType>`${lessons.id}`,
-        lessonName: this.localizationService.getLocalizedSqlField(lessons.title, language),
+        lessonName: lessonNameExpression,
         score: sql<number>`${aiMentorStudentLessonProgress.percentage}`,
         lastSession: sql<string>`TO_CHAR(${aiMentorStudentLessonProgress.updatedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
       })
       .from(studentCourses)
       .innerJoin(courses, eq(courses.id, studentCourses.courseId))
       .leftJoin(users, eq(studentCourses.studentId, users.id))
+      .leftJoin(groupUsers, eq(groupUsers.userId, users.id))
+      .leftJoin(groups, eq(groupUsers.groupId, groups.id))
       .leftJoin(studentLessonProgress, eq(studentLessonProgress.studentId, users.id))
       .leftJoin(
         aiMentorStudentLessonProgress,
@@ -2698,8 +2746,12 @@ export class CourseService {
         eq(aiMentorStudentLessonProgress.studentLessonProgressId, studentLessonProgress.id),
       )
       .leftJoin(studentCourses, eq(studentLessonProgress.studentId, studentCourses.studentId))
+      .leftJoin(users, eq(studentCourses.studentId, users.id))
+      .leftJoin(groupUsers, eq(groupUsers.userId, users.id))
+      .leftJoin(groups, eq(groupUsers.groupId, groups.id))
       .leftJoin(lessons, eq(studentLessonProgress.lessonId, lessons.id))
       .leftJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .leftJoin(courses, eq(chapters.courseId, courses.id))
       .where(and(...conditions));
 
     const allStudentsResults = await Promise.all(
@@ -2736,6 +2788,7 @@ export class CourseService {
       groupNameExpression,
       lastActivityExpression,
       completedLessonsCountExpression,
+      lastCompletedLessonName,
     } = await this.getStudentCourseStatisticsExpressions(courseId, language);
 
     switch (sort) {
@@ -2761,6 +2814,8 @@ export class CourseService {
         return aiMentorStudentLessonProgress.percentage;
       case CourseStudentAiMentorResultsSortFields.lastSession:
         return aiMentorStudentLessonProgress.updatedAt;
+      case CourseStudentAiMentorResultsSortFields.lastCompletedLessonName:
+        return lastCompletedLessonName;
       default:
         return studentNameExpression;
     }
@@ -2822,6 +2877,24 @@ export class CourseService {
             AND lessons.type = 'quiz'
         )`;
 
+    const lastCompletedLessonName = sql<string>`(
+          SELECT ${this.localizationService.getLocalizedSqlField(
+            lessons.title,
+            language,
+            courses,
+            "c",
+          )}
+          FROM ${studentLessonProgress} slp
+          JOIN ${lessons} ON slp.lesson_id = lessons.id
+          JOIN ${chapters} ch ON lessons.chapter_id = ch.id
+          JOIN ${courses} c ON c.id = ch.course_id
+          WHERE slp.student_id = ${users.id}
+            AND ch.course_id = ${courseId}
+            AND slp.completed_at IS NOT NULL
+          ORDER BY slp.completed_at DESC
+          LIMIT 1
+        )`;
+
     return {
       studentNameExpression,
       lastActivityExpression,
@@ -2829,6 +2902,7 @@ export class CourseService {
       groupNameExpression,
       lastAttemptExpression,
       quizNameExpression,
+      lastCompletedLessonName,
     };
   }
 
@@ -3718,5 +3792,13 @@ export class CourseService {
     });
 
     return { flat, grouped, withContext };
+  }
+
+  private getSearchQueryConditions(searchQuery: string) {
+    return or(
+      ilike(users.firstName, `%${searchQuery}%`),
+      ilike(users.lastName, `%${searchQuery}%`),
+      ilike(groups.name, `%${searchQuery}%`),
+    );
   }
 }

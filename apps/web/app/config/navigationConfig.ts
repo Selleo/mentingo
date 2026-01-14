@@ -45,14 +45,19 @@ export const getNavigationConfig = (
       isExpandable: false,
       items: [
         {
-          label: t("navigationSideBar.dashboard"),
-          path: "",
-          iconName: "Dashboard",
-        },
-        {
           label: t("navigationSideBar.courses"),
           path: "courses",
           iconName: "Course",
+        },
+        {
+          label: t("navigationSideBar.analytics"),
+          path: "admin/analytics",
+          iconName: "ChartNoAxes",
+        },
+        {
+          label: t("navigationSideBar.progress"),
+          path: "progress",
+          iconName: "Target",
         },
       ],
     },

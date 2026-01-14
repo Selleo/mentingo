@@ -82,7 +82,7 @@ export default function CourseOverview({ course }: CourseOverviewProps) {
             <Viewer
               content={description}
               className="body-base mt-2 text-neutral-900"
-              variant="lesson"
+              variant="content"
             />
           </div>
         </div>

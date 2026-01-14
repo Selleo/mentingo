@@ -54,6 +54,7 @@ export const getCourseStatisticsSchema = Type.Object({
   completionPercentage: Type.Number(),
   averageCompletionPercentage: Type.Number(),
   courseStatusDistribution: courseStatusDistributionSchema,
+  averageSeconds: Type.Number(),
 });
 
 export const getLessonSequenceEnabledSchema = Type.Object({
@@ -87,6 +88,7 @@ export const studentCourseProgressionSchema = Type.Object({
   ]),
   completedLessonsCount: Type.Number(),
   lastActivity: Type.Union([Type.String(), Type.Null()]),
+  lastCompletedLessonName: Type.Union([Type.String(), Type.Null()]),
 });
 
 export const studentQuizResultSchema = Type.Object({
@@ -110,6 +112,10 @@ export const studentAiMentorResultSchema = Type.Object({
   lastSession: Type.String(),
 });
 
+export const courseStatisticsQuerySchema = Type.Object({
+  groupId: Type.Optional(UUIDSchema),
+});
+
 export const supportedLanguagesSchema = Type.Enum(SUPPORTED_LANGUAGES, { default: "en" });
 export const enrolledCourseGroupsPayload = Type.Object({
   groups: Type.Array(
@@ -128,6 +134,8 @@ export const allStudentAiMentorResultsSchema = Type.Array(studentAiMentorResultS
 export const allCoursesSchema = Type.Array(courseSchema);
 export const allStudentCoursesSchema = Type.Array(studentCourseSchema);
 export const allCoursesForContentCreatorSchema = Type.Array(coursesForContentCreatorSchema);
+
+export type CourseStatisticsQueryBody = Static<typeof courseStatisticsQuerySchema>;
 
 export type AllCoursesResponse = Static<typeof allCoursesSchema>;
 export type AllStudentCoursesResponse = Static<typeof allStudentCoursesSchema>;

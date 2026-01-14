@@ -3,21 +3,22 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
-import { useCreateBetaTextLesson } from "~/api/mutations/admin/useBetaCreateTextLesson";
+import { useCreateBetaContentLesson } from "~/api/mutations/admin/useBetaCreateContentLesson";
 import { useDeleteLesson } from "~/api/mutations/admin/useDeleteLesson";
-import { useUpdateTextLesson } from "~/api/mutations/admin/useUpdateTextLesson";
+import { useUpdateContentLesson } from "~/api/mutations/admin/useUpdateContentLesson";
 import {
   type Chapter,
   ContentTypes,
   type Lesson,
+  LessonType,
 } from "~/modules/Admin/EditCourse/EditCourse.types";
 
-import { textLessonFormSchema } from "../validators/useTextLessonFormSchema";
+import { contentLessonFormSchema } from "../validators/useContentLessonFormSchema";
 
-import type { TextLessonFormValues } from "../validators/useTextLessonFormSchema";
+import type { ContentLessonFormValues } from "../validators/useContentLessonFormSchema";
 import type { SupportedLanguages } from "@repo/shared";
 
-type TextLessonFormProps = {
+type ContentLessonFormProps = {
   chapterToEdit: Chapter | null;
   lessonToEdit: Lesson | null;
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
@@ -25,24 +26,24 @@ type TextLessonFormProps = {
   language: SupportedLanguages;
 };
 
-export const useTextLessonForm = ({
+export const useContentLessonForm = ({
   chapterToEdit,
   lessonToEdit,
   setContentTypeToDisplay,
   setOpenChapter,
   language,
-}: TextLessonFormProps) => {
-  const { mutateAsync: createTextBlock } = useCreateBetaTextLesson();
-  const { mutateAsync: updateTextBlockItem } = useUpdateTextLesson();
+}: ContentLessonFormProps) => {
+  const { mutateAsync: createContentLesson } = useCreateBetaContentLesson();
+  const { mutateAsync: updateTextBlockItem } = useUpdateContentLesson();
   const { mutateAsync: deleteLesson } = useDeleteLesson();
   const { t } = useTranslation();
 
-  const form = useForm<TextLessonFormValues>({
-    resolver: zodResolver(textLessonFormSchema(t)),
+  const form = useForm<ContentLessonFormValues>({
+    resolver: zodResolver(contentLessonFormSchema(t)),
     defaultValues: {
       title: lessonToEdit?.title || "",
       description: lessonToEdit?.description || "",
-      type: lessonToEdit?.type || "text",
+      type: lessonToEdit?.type || LessonType.CONTENT,
     },
   });
 
@@ -53,12 +54,12 @@ export const useTextLessonForm = ({
       reset({
         title: lessonToEdit.title,
         description: lessonToEdit?.description,
-        type: "text",
+        type: LessonType.CONTENT,
       });
     }
   }, [lessonToEdit, reset]);
 
-  const onSubmit = async (values: TextLessonFormValues) => {
+  const onSubmit = async (values: ContentLessonFormValues) => {
     if (!chapterToEdit) return;
 
     try {
@@ -71,7 +72,7 @@ export const useTextLessonForm = ({
           lessonId: lessonToEdit.id,
         });
       } else {
-        await createTextBlock({
+        await createContentLesson({
           data: {
             ...values,
             chapterId: chapterToEdit.id,

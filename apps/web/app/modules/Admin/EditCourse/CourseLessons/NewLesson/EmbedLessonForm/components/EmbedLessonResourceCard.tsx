@@ -38,7 +38,7 @@ export const EmbedLessonResourceCard = ({
     >
       <FormTextField
         className="grow"
-        name={`resources.${resourceIndex}.source`}
+        name={`resources.${resourceIndex}.fileUrl`}
         control={form.control}
         label={t("adminCourseView.curriculum.lesson.field.sourceUrl")}
         placeholder={t("adminCourseView.curriculum.lesson.placeholder.sourceUrl")}

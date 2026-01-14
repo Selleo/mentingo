@@ -15,6 +15,7 @@ import { useTranslation } from "react-i18next";
 import { useBulkArchiveUsers } from "~/api/mutations/admin/useBulkArchiveUsers";
 import { useBulkDeleteUsers } from "~/api/mutations/admin/useBulkDeleteUsers";
 import { useBulkUpdateUsersGroups } from "~/api/mutations/admin/useBulkUpdateUsersGroups";
+import { useBulkUpdateUsersRoles } from "~/api/mutations/admin/useBulkUpdateUsersRoles";
 import { useGroupsQuerySuspense } from "~/api/queries/admin/useGroups";
 import { useAllUsersSuspense, usersQueryOptions } from "~/api/queries/useUsers";
 import { queryClient } from "~/api/queryClient";
@@ -95,6 +96,7 @@ const Users = () => {
   const { mutateAsync: deleteUsers } = useBulkDeleteUsers();
   const { mutateAsync: updateUsersGroups } = useBulkUpdateUsersGroups();
   const { mutateAsync: archiveUsers } = useBulkArchiveUsers();
+  const { mutateAsync: updateUsersRoles } = useBulkUpdateUsersRoles();
 
   const { t } = useTranslation();
 
@@ -352,12 +354,22 @@ const Users = () => {
     [selectedUsers, table, updateUsersGroups],
   );
 
+  const handleUsersRoles = useCallback(() => {
+    updateUsersRoles({
+      userIds: selectedUsers.map(({ userId }) => userId),
+      role: selectedValue as UserRole,
+    }).then(() => {
+      table.resetRowSelection();
+      setShowEditModal(null);
+    });
+  }, [selectedUsers, selectedValue, table, updateUsersRoles]);
+
   const handleRowClick = (userId: string) => {
     navigate(userId);
   };
 
   const editMutation: Record<string, (payload?: BulkAssignUsersToGroupBody) => void> = {
-    role: () => {},
+    role: handleUsersRoles,
     group: handleUsersGroups,
     delete: () => handleDeleteUsers(),
     archive: () => handleArchiveUsers(),
@@ -368,10 +380,6 @@ const Users = () => {
   return (
     <PageWrapper
       breadcrumbs={[
-        {
-          title: t("adminUsersView.breadcrumbs.dashboard"),
-          href: "/",
-        },
         {
           title: t("adminUsersView.breadcrumbs.users"),
           href: "/admin/users",

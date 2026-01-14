@@ -156,6 +156,9 @@
     "close": "Zamknij",
     "profile": "Profil",
     "dashboard": "Panel główny",
+    "statistics": "Statystyki",
+    "analytics": "Analityka",
+    "progress": "Postępy",
     "courses": "Kursy",
     "content": "Treści",
     "findInApplication": "Znajdź w aplikacji",
@@ -275,7 +278,6 @@
     },
     "noCompanyInformationAvailable": "Brak informacji o dostawcy",
     "breadcrumbs": {
-      "dashboard": "Panel główny",
       "providerInformation": "Informacje o dostawcy"
     }
   },
@@ -439,9 +441,6 @@
       "confirm": "Potwierdź",
       "deleteProfilePicture": "Usuń zdjęcie profilowe"
     },
-    "breadcrumbs": {
-      "dashboard": "Panel główny"
-    },
     "field": {
       "firstName": "Imię",
       "firstNamePlaceholder": "Wprowadź swoje imię",
@@ -593,7 +592,6 @@
       "createdAt": "Utworzono"
     },
     "breadcrumbs": {
-      "dashboard": "Panel główny",
       "promotionCodes": "Kody promocyjne",
       "createNew": "Utwórz nowy",
       "update": "Edytuj",
@@ -647,7 +645,7 @@
       "mappedTypes": {
         "video": "Wideo",
         "presentation": "Prezentacja",
-        "text": "Tekst",
+        "content": "Treść",
         "quiz": "Quiz",
         "aiMentor": "AI Mentor",
         "embed": "Osadzenie"
@@ -701,7 +699,6 @@
       "deleteCategoryFailed": "Nie udało się usunąć kategorii"
     },
     "breadcrumbs": {
-      "dashboard": "Panel główny",
       "categories": "Kategorie",
       "createNew": "Utwórz nową kategorię",
       "back": "Wstecz"
@@ -757,6 +754,10 @@
       "toast": {
         "success": "Import zakończony pomyślnie.\nZaimportowano {{ importedUsersAmount }} użytkowników.\nPominieto {{ skippedUsersAmount }} istniejących użytkowników."
       }
+    },
+    "toast": {
+      "cannotUpdateOwnRole": "Administrator nie może zmienić własnej roli",
+      "noUserSelected": "Nie wybrano żadnego użytkownika"
     },
     "other": {
       "selected": "Wybrany"
@@ -818,7 +819,6 @@
       }
     },
     "breadcrumbs": {
-      "dashboard": "Panel główny",
       "users": "Użytkownicy",
       "createNew": "Utwórz nowego użytkownika",
       "back": "Wstecz",
@@ -971,7 +971,6 @@
       "submit": "Usuń"
     },
     "breadcrumbs": {
-      "dashboard": "Panel główny",
       "groups": "Grupy",
       "createNew": "Utwórz nową",
       "editGroup": "Edytuj grupę",
@@ -996,6 +995,7 @@
   },
   "adminCourseView": {
     "mandatoryCourse": "Kurs obowiązkowy",
+    "mandatoryCourseTooltip": "Oznacz kurs jako obowiązkowy dla tej grupy. Wymagane jest wskazanie daty, do której uczestnicy muszą ukończyć kurs. Po upływie terminu administrator otrzyma powiadomienie e-mail z listą osób, które nie ukończyły kursu.",
     "deadline": "Termin wykonania",
     "selectDate": "Wybierz datę",
     "deadlineRequired": "Termin wykonania jest wymagany dla obowiązkowego kursu",
@@ -1029,7 +1029,8 @@
       "cannotModifyQuestionsInNonBaseLanguage": "Nie można modyfikować pytań w języku innym niż bazowy.",
       "noMissingTranslations": "Brak brakujących tłumaczeń",
       "mismatchContentLength": "Liczba tłumaczeń nie jest równa liczbie wygenerowanych tłumaczeń",
-      "translationsGeneratedSuccessfully": "Tłumaczenia wygenerowane pomyślnie"
+      "translationsGeneratedSuccessfully": "Tłumaczenia wygenerowane pomyślnie",
+      "maxOneVideoUploaded": "Nie możesz przesłać więcej niż 1 wideo."
     },
     "settings": {
       "breadcrumbs": {
@@ -1106,9 +1107,7 @@
         "resources": "Zasoby",
         "removeContentQuestionBody": "To usunie pytanie z quizu",
         "removeContentBody": "To usunie wszystkie dane, w tym przesłane media.",
-        "removeVideoLesson": "Czy na pewno chcesz usunąć tę lekcję wideo z rozdziału?",
-        "removePresentationLesson": "Czy na pewno chcesz usunąć tę lekcję prezentacyjną z rozdziału?",
-        "removeTextLesson": "Czy na pewno chcesz usunąć tę lekcję tekstową z rozdziału?",
+        "removeContentLesson": "Czy na pewno chcesz usunąć tę lekcję z rozdziału?",
         "removeQuizLesson": "Czy na pewno chcesz usunąć tę lekcję quizową z rozdziału?",
         "removeAiMentorLesson": "Czy na pewno chcesz usunąć tę lekcję AI Mentora z rozdziału?",
         "removeEmbedLesson": "Czy na pewno chcesz usunąć tę lekcję z osadzeniem z rozdziału?",
@@ -1198,14 +1197,14 @@
           "unexpectedError": "Wystąpił nieoczekiwany błąd.",
           "lessonCreatedSuccessfully": "Lekcja utworzona pomyślnie",
           "fileLessonCreatedSuccessfully": "Plik utworzony pomyślnie",
-          "textLessonCreatedSuccessfully": "Lekcja tekstowa utworzona pomyślnie",
+          "contentLessonCreatedSuccessfully": "Lekcja utworzona pomyślnie",
           "quizLessonCreatedSuccessfully": "Quiz utworzony pomyślnie",
           "aiMentorLessonCreatedSuccessfully": "Lekcja AI Mentora utworzona pomyślnie",
           "aiMentorLessonUpdatedSuccessfully": "Lekcja AI Mentora zaktualizowana pomyślnie",
           "aiMentorLessonFileAddedSuccessfully": "Pliki lekcji AI Mentora zostały pomyślnie przesłane",
           "aiMentorLessonFileDeletedSuccessfully": "Pliki lekcji AI Mentora zostały pomyślnie usunięte",
           "lessonUpdatedSuccessfully": "Lekcja zaktualizowana pomyślnie",
-          "textLessonUpdatedSuccessfully": "Lekcja tekstowa zaktualizowany pomyślnie",
+          "contentLessonUpdatedSuccessfully": "Lekcja zaktualizowana pomyślnie",
           "fileLessonUpdatedSuccessfully": "Plik zaktualizowany pomyślnie",
           "questionOptionsUpdatedSuccessfully": "Opcje pytania zostały pomyślnie zaktualizowane",
           "embedLessonCreatedSuccessfully": "Lekcja z osadzeniem została pomyślnie utworzona",
@@ -1257,8 +1256,7 @@
         "other": {
           "lessonNumber": "Liczba lekcji",
           "chooseType": "Wybierz typ",
-          "text": "Tekst",
-          "video": "Wideo",
+          "content": "Treść",
           "quiz": "Quiz",
           "aiMentor": "AI Mentor",
           "embed": "Osadzenie",
@@ -1266,7 +1264,6 @@
           "true": "Prawda",
           "false": "Fałsz",
           "option": "Opcja",
-          "presentation": "Prezentacja",
           "singleChoice": "Pojedynczy wybór",
           "dropOrClick": "Upuść obraz tutaj lub kliknij, aby przesłać",
           "allowedFormats": "PNG, JPG lub SVG",
@@ -1282,12 +1279,10 @@
           "updateAiMentorAvatarDescription": "Prześlij nowe zdjęcie dla AI Mentora lub usuń obecne.",
           "updateAiMentorAvatar": "Zaktualizuj avatar AI Mentora",
           "selectQuestionType": "Wybierz typ pytania",
-          "textLessonDescription": "Ten typ pozwala na tworzenie treści tekstowych za pomocą edytora tekstu.",
-          "videoLessonDescription": "Wybierz ten typ, jeśli chcesz umieścić pliki wideo, takie jak MP4.",
-          "presentationLessonDescription": "Wybierz ten typ, jeśli chcesz umieścić pliki prezentacji, takie jak PPTX.",
-          "quizLessonDescription": "Ten typ pozwala na tworzenie quizów w ramach kursu z różnymi rodzajami pytań.",
-          "aiMentorLessonDescription": "Stwórz interaktywne lekcje AI, gdzie studenci mogą współpracować z wirtualnym mentorem.",
-          "embedLessonDescription": "Ten typ pozwala na osadzenie zewnętrznej treści za pomocą iframe.",
+          "contentLessonDescription": "Tekst z multimediami (obrazki, wideo, prezentacje).",
+          "quizLessonDescription": "Zestaw pytań do sprawdzenia wiedzy.",
+          "aiMentorLessonDescription": "Interaktywna rozmowa z wirtualnym mentorem AI.",
+          "embedLessonDescription": "Zewnętrzna zawartość (np. formularz Google, prezentacja Canva lub transmisja live z YouTube).",
           "fillInTheBlanksDescription": "To pytanie zawiera zdanie, a studenci będą musieli przeciągnąć i upuścić słowo w odpowiednie miejsce.",
           "gapFillDescription": "To pytanie będzie miało zdanie z brakującymi słowami, które studenci muszą wpisać.",
           "fillInTheBlanksSentenceTip": "Napisz zdanie i przeciągnij słowa do niego.",
@@ -1418,7 +1413,6 @@
       "successResponse": "studentów zostało zapisanych do kursu."
     },
     "breadcrumbs": {
-      "dashboard": "Panel główny",
       "courses": "Kursy",
       "back": "Wstecz"
     },
@@ -1433,20 +1427,23 @@
       "tabs": {
         "progress": "Postępy",
         "quizResults": "Wyniki quizów",
-        "aiMentorResults": "Wyniki AI Mentora"
+        "aiMentorResults": "Wyniki AI Mentora",
+        "learningTime": "Czas nauki"
       },
       "field": {
         "studentName": "Uczeń",
         "groupName": "Grupa",
         "completedLessonsCount": "Ukończone lekcje",
         "lastActivity": "Ostatnia aktywność",
+        "lastCompletedLesson": "Ostatnio ukończona lekcja",
         "quizName": "Quiz",
         "quizScore": "Wynik",
         "attempts": "Próby",
         "lastAttempt": "Ostatnia próba",
         "lessonName": "Lekcja",
         "lastSession": "Ostatnia sesja",
-        "score": "Wynik"
+        "score": "Wynik",
+        "totalTime": "Całkowity czas"
       },
       "overview": {
         "enrolledCount": "Łącznie zapisanych",
@@ -1463,8 +1460,8 @@
         "completedBy_many": "Ukończyło {{count}} studentów",
         "courseStatusDistribution": "Rozkład statusów kursów",
         "courseStatusDistributionTooltip": "Pokazuje, ilu użytkowników ukończyło, rozpoczęło lub nie rozpoczęło kursu.",
-        "totalLearningTime": "Całkowity czas nauki",
-        "totalLearningTimeTooltip": "Całkowity czas spędzony przez wszystkich użytkowników na tym kursie.",
+        "averageLearningTime": "Średni czas nauki",
+        "averageLearningTimeTooltip": "Średni czas spędzony przez wszystkich użytkowników na tym kursie.",
         "activeStudents": "Aktywni studenci",
         "activeStudentsTooltip": "Liczba studentów, którzy wzięli udział w kursie."
       },
@@ -1472,6 +1469,9 @@
         "noUsers": "Brak zapisanych",
         "enrolled": "użytkowników",
         "noGroups": "Brak grup"
+      },
+      "groupFilter": {
+        "placeholder": "Wszystkie grupy"
       }
     },
     "createLanguage": {
@@ -1570,7 +1570,6 @@
       "successfullyEnrolledToCourse": "Pomyślnie zapisano na kurs"
     },
     "breadcrumbs": {
-      "dashboard": "Panel główny",
       "courses": "Kursy"
     },
     "button": {
@@ -1794,7 +1793,6 @@
       "platformCustomization": "Dostosowanie Platformy"
     },
     "breadcrumbs": {
-      "dashboard": "Panel główny",
       "settings": "Ustawienia"
     },
     "toast": {
@@ -1948,7 +1946,6 @@
   },
   "announcements": {
     "breadcrumbs": {
-      "dashboard": "Panel główny",
       "announcements": "Ogłoszenia",
       "createAnnouncement": "Utwórz ogłoszenie"
     },
@@ -2082,6 +2079,12 @@
     }
   },
   "richTextEditor": {
+    "placeholder": {
+      "lineHint": "Wklej link YouTube/Vimeo/Canva, dodaj Google Docs lub wgraj plik."
+    },
+    "upload": {
+      "videoProgress": "Przesyłanie wideo..."
+    },
     "toolbar": {
       "format": {
         "placeholder": "Wybierz format",
@@ -2139,7 +2142,9 @@
     "createNewCourse": "Utwórz nowy kurs",
     "admin": "Administrator",
     "qa": "Q&A",
-    "createQA": "Utwórz nowe Q&A"
+    "createQA": "Utwórz nowe Q&A",
+    "analytics": "Analityka",
+    "progress": "Postępy"
   },
   "lessonPreview": {
     "breadcrumbs": {

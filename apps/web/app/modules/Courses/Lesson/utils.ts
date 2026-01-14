@@ -77,15 +77,17 @@ const prepareAnswers = (
 ): Record<string, string> | Record<string, Record<string, string>> => {
   return questions.reduce(
     (result, question) => {
-      if (QuestionType.TRUE_OR_FALSE) {
+      if (question.type === QuestionType.TRUE_OR_FALSE) {
         result[question.id] =
           question?.options?.reduce(
             (optionMap, option) => {
-              optionMap[option.id ?? "0"] = option.isStudentAnswer ? `${option.id}` : "";
+              optionMap[option.id ?? "0"] = option.studentAnswer ?? "";
               return optionMap;
             },
             {} as Record<string, string>,
           ) || {};
+
+        return result;
       }
 
       if (question.type === QuestionType.FILL_IN_THE_BLANKS_TEXT) {

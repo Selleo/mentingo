@@ -26,8 +26,11 @@ export const TrueOrFalse = ({ question, isCompleted }: TrueOrFalseProps) => {
       questionType="trueOrFalseQuestion"
       questionNumber={question.displayOrder ?? 0}
     >
-      {question.options?.map(
-        ({ optionText, id, isCorrect, studentAnswer = false, isStudentAnswer }, index) => (
+      {question.options?.map(({ optionText, id, studentAnswer, isStudentAnswer }, index) => {
+        const isAnswered = studentAnswer === "true" || studentAnswer === "false";
+        const isCorrectAnswer = Boolean(isStudentAnswer);
+
+        return (
           <div
             key={index}
             className={cn(
@@ -35,12 +38,9 @@ export const TrueOrFalse = ({ question, isCompleted }: TrueOrFalseProps) => {
               {
                 "border-neutral-400 bg-neutral-100": isQuizFeedbackRedacted && isQuizSubmitted,
                 "border-success-700 bg-success-50":
-                  !isQuizFeedbackRedacted && isCorrect && isStudentAnswer,
+                  !isQuizFeedbackRedacted && isCompleted && isCorrectAnswer,
                 "border-error-700 bg-error-50":
-                  !isQuizFeedbackRedacted &&
-                  ((!isCorrect && isStudentAnswer && isCompleted) ||
-                    (!isCorrect && !isStudentAnswer && isCompleted) ||
-                    (isCorrect && !isStudentAnswer && isCompleted)),
+                  !isQuizFeedbackRedacted && isCompleted && isAnswered && !isCorrectAnswer,
                 "has-[input:checked]:bg-primary-50 [&]:has-[input:checked]:border-primary-500":
                   !isCompleted,
                 "pointer-events-none": isCompleted,
@@ -77,8 +77,8 @@ export const TrueOrFalse = ({ question, isCompleted }: TrueOrFalseProps) => {
               </label>
             </div>
           </div>
-        ),
-      )}
+        );
+      })}
     </QuestionCard>
   );
 };

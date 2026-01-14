@@ -4,7 +4,6 @@ import path from "path";
 import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import AdmZip from "adm-zip";
 import { JSDOM } from "jsdom";
-import { match } from "ts-pattern";
 import xml2js from "xml2js";
 
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
@@ -481,13 +480,8 @@ export class ScormService {
     });
   }
 
-  private determineLessonType(href: string): string {
-    const extension = path.extname(href).toLowerCase();
-
-    return match(extension)
-      .with(".mp4", ".webm", () => LESSON_TYPES.VIDEO)
-      .with(".pptx", ".ppt", () => LESSON_TYPES.PRESENTATION)
-      .otherwise(() => LESSON_TYPES.TEXT);
+  private determineLessonType(): string {
+    return LESSON_TYPES.CONTENT;
   }
 
   /**

@@ -14,7 +14,7 @@ import {
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes, ApiResponse } from "@nestjs/swagger";
-import { SupportedLanguages } from "@repo/shared";
+import { SUPPORTED_LANGUAGES, SupportedLanguages } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Response } from "express";
 import { Validate } from "nestjs-typebox";
@@ -321,22 +321,59 @@ export class LessonController {
           type: "string",
           format: "binary",
         },
+        language: {
+          type: "string",
+          enum: Object.values(SUPPORTED_LANGUAGES),
+        },
+        title: {
+          type: "string",
+        },
+        description: {
+          type: "string",
+        },
       },
-      required: ["lessonId", "file"],
+      required: ["lessonId", "file", "language", "title", "description"],
     },
   })
   @ApiResponse({
     status: 201,
     description: "File uploaded successfully",
-    type: String,
+    schema: {
+      type: "object",
+      properties: {
+        success: { type: "boolean" },
+        data: {
+          type: "object",
+          properties: {
+            resourceId: { type: "string" },
+          },
+          required: ["resourceId"],
+        },
+        message: { type: "string" },
+      },
+      required: ["success", "data", "message"],
+    },
   })
-  async uploadImageToLesson(
+  async uploadFileToLesson(
     @Body("lessonId") lessonId: UUIDType,
     @CurrentUser("userId") userId: UUIDType,
     @CurrentUser("role") role: UserRole,
     @UploadedFile() file: Express.Multer.File,
+    @Body("language") language: SupportedLanguages,
+    @Body("title") title: string,
+    @Body("description") description: string,
   ) {
-    return this.adminLessonsService.uploadFileToLesson(lessonId, userId, role, file);
+    const fileData = await this.adminLessonsService.uploadFileToLesson(
+      lessonId,
+      userId,
+      role,
+      file,
+      language,
+      title,
+      description,
+    );
+
+    return new BaseResponse(fileData);
   }
 
   @Delete("delete-student-quiz-answers")
@@ -420,7 +457,20 @@ export class LessonController {
     @CurrentUser("role") role: UserRole,
     @Res() res: Response,
   ) {
-    return this.lessonService.getLessonImage(res, userId, role, resourceId);
+    return this.lessonService.getLessonResource(res, userId, role, resourceId);
+  }
+
+  @Get("lesson-resource/:resourceId")
+  @Validate({
+    request: [{ type: "param", schema: UUIDSchema, name: "resourceId" }],
+  })
+  async getLessonResource(
+    @Param("resourceId") resourceId: UUIDType,
+    @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser("role") role: UserRole,
+    @Res() res: Response,
+  ) {
+    return this.lessonService.getLessonResource(res, userId, role, resourceId);
   }
 
   @Post("ai-mentor/avatar")

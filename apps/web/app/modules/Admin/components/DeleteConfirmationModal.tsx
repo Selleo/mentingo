@@ -29,11 +29,9 @@ const DeleteConfirmationModal = ({
   const { t } = useTranslation();
   const getDialogTitleText = (): string => {
     return match(contentType)
-      .with(DeleteContentType.VIDEO, () => t("adminCourseView.curriculum.other.removeVideoLesson"))
-      .with(DeleteContentType.PRESENTATION, () =>
-        t("adminCourseView.curriculum.other.removePresentationLesson"),
+      .with(DeleteContentType.CONTENT, () =>
+        t("adminCourseView.curriculum.other.removeContentLesson"),
       )
-      .with(DeleteContentType.TEXT, () => t("adminCourseView.curriculum.other.removeTextLesson"))
       .with(DeleteContentType.QUIZ, () => t("adminCourseView.curriculum.other.removeQuizLesson"))
       .with(DeleteContentType.AI_MENTOR, () =>
         t("adminCourseView.curriculum.other.removeAiMentorLesson"),

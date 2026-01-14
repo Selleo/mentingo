@@ -1,18 +1,21 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { eq, getTableColumns, gte, inArray, lte, sql } from "drizzle-orm";
+import { and, eq, getTableColumns, gte, inArray, lte, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import { buildJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { LocalizationService } from "src/localization/localization.service";
+import { ENTITY_TYPE } from "src/localization/localization.types";
 import {
   aiMentorLessons,
   chapters,
   courses,
-  lessonResources,
   lessons,
   questionAnswerOptions,
   questions,
+  resourceEntity,
+  resources,
 } from "src/storage/schema";
+import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import { LESSON_TYPES } from "../lesson.type";
 
@@ -21,17 +24,13 @@ import type {
   AdminQuestionBody,
   CreateAiMentorLessonBody,
   CreateLessonBody,
-  CreateLessonResourceBody,
   CreateQuizLessonBody,
-  LessonResourceType,
   UpdateLessonBody,
   UpdateQuizLessonBody,
 } from "../lesson.schema";
 import type { AiMentorType, SupportedLanguages } from "@repo/shared";
-import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { LessonActivityLogOption, LessonActivityLogQuestion } from "src/activity-logs/types";
 import type { QuestionType } from "src/questions/schema/question.types";
-import type * as schema from "src/storage/schema";
 
 @Injectable()
 export class AdminLessonRepository {
@@ -96,7 +95,7 @@ export class AdminLessonRepository {
   async getQuestionsWithOptions(
     lessonId: UUIDType,
     language: SupportedLanguages,
-    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+    dbInstance: DatabasePg = this.db,
   ): Promise<
     Array<
       LessonActivityLogQuestion & {
@@ -173,7 +172,7 @@ export class AdminLessonRepository {
   async updateQuizLessonWithQuestionsAndOptions(
     id: UUIDType,
     data: UpdateQuizLessonBody,
-    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+    dbInstance: DatabasePg = this.db,
   ) {
     return dbInstance
       .update(lessons)
@@ -193,7 +192,7 @@ export class AdminLessonRepository {
     data: CreateQuizLessonBody,
     displayOrder: number,
     language: SupportedLanguages,
-    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+    dbInstance: DatabasePg = this.db,
   ) {
     const [lesson] = await dbInstance
       .insert(lessons)
@@ -220,7 +219,7 @@ export class AdminLessonRepository {
     data: CreateAiMentorLessonBody,
     displayOrder: number,
     language: SupportedLanguages,
-    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+    dbInstance: DatabasePg = this.db,
   ) {
     const [lesson] = await dbInstance
       .insert(lessons)
@@ -243,7 +242,7 @@ export class AdminLessonRepository {
   async updateAiMentorLesson(
     id: UUIDType,
     data: UpdateLessonBody,
-    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+    dbInstance: DatabasePg = this.db,
   ) {
     return dbInstance
       .update(lessons)
@@ -268,7 +267,7 @@ export class AdminLessonRepository {
       type: AiMentorType;
       name?: string;
     },
-    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+    dbInstance: DatabasePg = this.db,
   ) {
     return dbInstance
       .update(aiMentorLessons)
@@ -284,7 +283,7 @@ export class AdminLessonRepository {
       type: AiMentorType;
       name?: string;
     },
-    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+    dbInstance: DatabasePg = this.db,
   ) {
     return dbInstance.insert(aiMentorLessons).values(data).returning();
   }
@@ -300,14 +299,11 @@ export class AdminLessonRepository {
     return result.maxOrder;
   }
 
-  async removeLesson(lessonId: UUIDType, dbInstance: PostgresJsDatabase<typeof schema> = this.db) {
+  async removeLesson(lessonId: UUIDType, dbInstance: DatabasePg = this.db) {
     return dbInstance.delete(lessons).where(eq(lessons.id, lessonId)).returning();
   }
 
-  async updateLessonCountForChapter(
-    chapterId: UUIDType,
-    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
-  ) {
+  async updateLessonCountForChapter(chapterId: UUIDType, dbInstance: DatabasePg = this.db) {
     return dbInstance.execute(sql`
       UPDATE ${chapters}
       SET lesson_count = (
@@ -319,10 +315,7 @@ export class AdminLessonRepository {
     `);
   }
 
-  async updateLessonDisplayOrderAfterRemove(
-    chapterId: UUIDType,
-    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
-  ) {
+  async updateLessonDisplayOrderAfterRemove(chapterId: UUIDType, dbInstance: DatabasePg = this.db) {
     return dbInstance.execute(sql`
         WITH ranked_chapters AS (
           SELECT id, row_number() OVER (ORDER BY display_order) AS new_display_order
@@ -364,7 +357,7 @@ export class AdminLessonRepository {
       .where(eq(lessons.chapterId, chapterId));
   }
 
-  async getExistingQuestions(lessonId: UUIDType, trx: PostgresJsDatabase<typeof schema>) {
+  async getExistingQuestions(lessonId: UUIDType, trx: DatabasePg) {
     return trx
       .select({
         id: questions.id,
@@ -375,7 +368,7 @@ export class AdminLessonRepository {
       .where(eq(questions.lessonId, lessonId));
   }
 
-  async getExistingOptions(questionId: UUIDType, trx: PostgresJsDatabase<typeof schema>) {
+  async getExistingOptions(questionId: UUIDType, trx: DatabasePg) {
     const existingOptions = await trx
       .select({
         id: questionAnswerOptions.id,
@@ -390,11 +383,7 @@ export class AdminLessonRepository {
     return { existingOptions };
   }
 
-  async updateOption(
-    optionId: UUIDType,
-    optionData: AdminOptionBody,
-    trx: PostgresJsDatabase<typeof schema>,
-  ) {
+  async updateOption(optionId: UUIDType, optionData: AdminOptionBody, trx: DatabasePg) {
     return trx
       .update(questionAnswerOptions)
       .set({
@@ -414,11 +403,7 @@ export class AdminLessonRepository {
       .returning();
   }
 
-  async insertOption(
-    questionId: UUIDType,
-    optionData: AdminOptionBody,
-    trx: PostgresJsDatabase<typeof schema>,
-  ) {
+  async insertOption(questionId: UUIDType, optionData: AdminOptionBody, trx: DatabasePg) {
     return trx
       .insert(questionAnswerOptions)
       .values({
@@ -430,18 +415,15 @@ export class AdminLessonRepository {
       .returning();
   }
 
-  async deleteOptions(optionIds: UUIDType[], trx: PostgresJsDatabase<typeof schema>) {
+  async deleteOptions(optionIds: UUIDType[], trx: DatabasePg) {
     await trx.delete(questionAnswerOptions).where(inArray(questionAnswerOptions.id, optionIds));
   }
 
-  async deleteQuestions(questionsToDelete: UUIDType[], trx: PostgresJsDatabase<typeof schema>) {
+  async deleteQuestions(questionsToDelete: UUIDType[], trx: DatabasePg) {
     await trx.delete(questions).where(inArray(questions.id, questionsToDelete));
   }
 
-  async deleteQuestionOptions(
-    questionsToDelete: UUIDType[],
-    trx: PostgresJsDatabase<typeof schema>,
-  ) {
+  async deleteQuestionOptions(questionsToDelete: UUIDType[], trx: DatabasePg) {
     await trx
       .delete(questionAnswerOptions)
       .where(inArray(questionAnswerOptions.questionId, questionsToDelete));
@@ -451,7 +433,7 @@ export class AdminLessonRepository {
     questionData: AdminQuestionBody,
     lessonId: UUIDType,
     authorId: UUIDType,
-    trx: PostgresJsDatabase<typeof schema>,
+    trx: DatabasePg,
     questionId?: UUIDType,
   ): Promise<UUIDType> {
     const [result] = await trx
@@ -483,58 +465,131 @@ export class AdminLessonRepository {
     return result.id;
   }
 
-  async getLessonResourcesForLesson(lessonId: UUIDType) {
+  async getLessonResourcesForLesson(lessonId: UUIDType, language?: SupportedLanguages) {
+    const resourceSelect = language
+      ? {
+          ...getTableColumns(resources),
+          title: this.localizationService.getFieldByLanguage(resources.title, language),
+          description: this.localizationService.getFieldByLanguage(resources.description, language),
+        }
+      : getTableColumns(resources);
+
     return this.db
       .select({
-        ...getTableColumns(lessonResources),
-        type: sql<LessonResourceType>`${lessonResources.type}`,
+        ...resourceSelect,
       })
-      .from(lessonResources)
-      .where(eq(lessonResources.lessonId, lessonId))
-      .orderBy(lessonResources.displayOrder);
+      .from(resourceEntity)
+      .innerJoin(resources, eq(resources.id, resourceEntity.resourceId))
+      .where(
+        and(
+          eq(resourceEntity.entityId, lessonId),
+          eq(resourceEntity.entityType, ENTITY_TYPE.LESSON),
+          eq(resources.archived, false),
+        ),
+      )
+      .orderBy(resources.createdAt);
   }
 
-  createLessonResources = async (data: CreateLessonResourceBody[]) => {
-    return this.db.insert(lessonResources).values(data).returning();
-  };
-
-  async deleteLessonResources(lessonId: UUIDType, trx?: PostgresJsDatabase<typeof schema>) {
-    const dbInstance = trx ?? this.db;
-
-    const [result] = await dbInstance
-      .delete(lessonResources)
-      .where(eq(lessonResources.lessonId, lessonId))
-      .returning();
-
-    return result.lessonId;
-  }
-
-  async deleteLessonResourcesByIds(ids: UUIDType[], trx?: PostgresJsDatabase<typeof schema>) {
-    const dbInstance = trx ?? this.db;
-
-    return dbInstance.delete(lessonResources).where(inArray(lessonResources.id, ids)).returning();
-  }
-
-  async upsertLessonResources(
-    data: CreateLessonResourceBody[],
-    trx?: PostgresJsDatabase<typeof schema>,
+  async createLessonResources(
+    lessonId: UUIDType,
+    data: Array<{
+      reference: string;
+      contentType?: string;
+      metadata?: Record<string, unknown>;
+      uploadedById?: UUIDType | null;
+    }>,
+    trx?: DatabasePg,
   ) {
     const dbInstance = trx ?? this.db;
 
+    return dbInstance.transaction(async (tx) => {
+      const insertedResources = await tx
+        .insert(resources)
+        .values(
+          data.map((resource) => ({
+            reference: resource.reference,
+            contentType: resource.contentType ?? "text/html",
+            metadata: settingsToJSONBuildObject(resource.metadata ?? {}),
+            uploadedBy: resource.uploadedById ?? null,
+          })),
+        )
+        .returning();
+
+      if (!insertedResources.length) return [];
+
+      await tx.insert(resourceEntity).values(
+        insertedResources.map((inserted) => ({
+          resourceId: inserted.id,
+          entityId: lessonId,
+          entityType: ENTITY_TYPE.LESSON,
+        })),
+      );
+
+      return insertedResources;
+    });
+  }
+
+  async updateLessonResources(
+    data: Array<{
+      id: UUIDType;
+      reference: string;
+      contentType?: string;
+      metadata?: Record<string, unknown>;
+    }>,
+    trx?: DatabasePg,
+  ) {
+    const dbInstance = trx ?? this.db;
+
+    return Promise.all(
+      data.map((resource) =>
+        dbInstance
+          .update(resources)
+          .set({
+            reference: resource.reference,
+            contentType: resource.contentType ?? "text/html",
+            metadata: settingsToJSONBuildObject(resource.metadata ?? {}),
+          })
+          .where(eq(resources.id, resource.id))
+          .returning(),
+      ),
+    );
+  }
+
+  async deleteLessonResourcesByIds(resourceIds: UUIDType[], trx?: DatabasePg) {
+    if (!resourceIds.length) return [];
+    const dbInstance = trx ?? this.db;
+
     return dbInstance
-      .insert(lessonResources)
-      .values(data)
-      .onConflictDoUpdate({
-        target: lessonResources.id,
-        set: {
-          lessonId: sql`EXCLUDED.lesson_id`,
-          type: sql`EXCLUDED.type`,
-          source: sql`EXCLUDED.source`,
-          isExternal: sql`EXCLUDED.is_external`,
-          allowFullscreen: sql`EXCLUDED.allow_fullscreen`,
-          displayOrder: sql`EXCLUDED.display_order`,
-        },
-      })
+      .update(resources)
+      .set({ archived: true })
+      .where(inArray(resources.id, resourceIds))
+      .returning();
+  }
+
+  async deleteLessonResources(lessonId: UUIDType, trx?: DatabasePg) {
+    const dbInstance = trx ?? this.db;
+    const resourceIds = await dbInstance
+      .select({ id: resources.id })
+      .from(resourceEntity)
+      .innerJoin(resources, eq(resources.id, resourceEntity.resourceId))
+      .where(
+        and(
+          eq(resourceEntity.entityId, lessonId),
+          eq(resourceEntity.entityType, ENTITY_TYPE.LESSON),
+        ),
+      );
+
+    if (!resourceIds.length) return [];
+
+    return dbInstance
+      .update(resources)
+      .set({ archived: true })
+      .where(
+        inArray(
+          resources.id,
+          resourceIds.map((item) => item.id),
+        ),
+      )
       .returning();
   }
 

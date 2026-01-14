@@ -276,7 +276,7 @@ export class StudentLessonProgressService {
 
     if (
       accessCourseLessonWithDetails.lessonType === LESSON_TYPES.QUIZ ||
-      accessCourseLessonWithDetails.lessonType === LESSON_TYPES.VIDEO ||
+      accessCourseLessonWithDetails.lessonType === LESSON_TYPES.CONTENT ||
       accessCourseLessonWithDetails.lessonType === LESSON_TYPES.AI_MENTOR
     ) {
       await dbInstance

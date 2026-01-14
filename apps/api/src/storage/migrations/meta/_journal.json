@@ -530,8 +530,22 @@
     {
       "idx": 75,
       "version": "7",
-      "when": 1768241123400,
-      "tag": "0075_add_course_slugs",
+      "when": 1766501031903,
+      "tag": "0075_migrate_lesson_resources_to_resources",
+      "breakpoints": true
+    },
+    {
+      "idx": 76,
+      "version": "7",
+      "when": 1766501075557,
+      "tag": "0076_migrate_presentation_and_video_to_text",
+      "breakpoints": true
+    },
+    {
+      "idx": 77,
+      "version": "7",
+      "when": 1767040447457,
+      "tag": "0077_drop_lesson_resources",
       "breakpoints": true
     }
   ]

@@ -17,7 +17,7 @@ import { usePreviewNews, useUpdateNews, useUploadNewsFile } from "../../api/muta
 import { useNews } from "../../api/queries";
 import { FormTextField } from "../../components/Form/FormTextField";
 import { PageWrapper } from "../../components/PageWrapper";
-import Editor from "../../components/RichText/Editor";
+import { BaseEditor } from "../../components/RichText/Editor";
 import Viewer from "../../components/RichText/Viever";
 import { Button } from "../../components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "../../components/ui/form";
@@ -89,7 +89,6 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
   const [previewContent, setPreviewContent] = useState("");
   const pageTitle = isEdit ? t("newsView.edit") : t("newsView.create");
   const breadcrumbs = [
-    { title: t("navigationSideBar.dashboard"), href: "/" },
     { title: t("navigationSideBar.news"), href: "/news" },
     { title: pageTitle, href: isEdit && id ? `/news/${id}` : "/news/add" },
   ];
@@ -377,7 +376,7 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
                       <TabsContent value="editor">
                         <FormControl>
                           <div className="flex flex-col gap-y-1.5">
-                            <Editor
+                            <BaseEditor
                               id="content"
                               content={field.value}
                               allowFiles

@@ -7,6 +7,7 @@ import { GROUPS_QUERY_KEY } from "~/api/queries/admin/useGroups";
 import { GROUPS_BY_COURSE_QUERY_KEY } from "~/api/queries/admin/useGroupsByCourse";
 import { ENROLLED_USERS_QUERY_KEY } from "~/api/queries/admin/useUsersEnrolled";
 import { queryClient } from "~/api/queryClient";
+import { invalidateCourseStatisticsQueries } from "~/api/utils/courseStatisticsUtils";
 import { useToast } from "~/components/ui/use-toast";
 
 import type { EnrollGroupsToCourseBody } from "~/api/generated-api";
@@ -31,6 +32,8 @@ export function useBulkGroupCourseEnroll(courseId = "") {
       await queryClient.invalidateQueries({ queryKey: [ENROLLED_USERS_QUERY_KEY] });
       await queryClient.invalidateQueries({ queryKey: [GROUPS_BY_COURSE_QUERY_KEY, courseId] });
       await queryClient.invalidateQueries({ queryKey: [GROUPS_QUERY_KEY] });
+
+      await invalidateCourseStatisticsQueries();
     },
 
     onError: (error) => {

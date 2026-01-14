@@ -59,7 +59,6 @@ export default function CreateQAPage() {
   return (
     <PageWrapper
       breadcrumbs={[
-        { title: t("announcements.breadcrumbs.dashboard"), href: "/" },
         { title: t("navigationSideBar.qa"), href: "/qa" },
         { title: t("qaView.button.createNew"), href: "/qa/new" },
       ]}

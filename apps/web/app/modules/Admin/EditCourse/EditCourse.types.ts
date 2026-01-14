@@ -3,10 +3,6 @@ import type { AiMentorType } from "@repo/shared";
 
 export type NavigationTab = "Settings" | "Curriculum" | "Pricing" | "Status";
 
-export const LessonResourceType = {
-  EMBED: "embed",
-} as const;
-
 type AiMentor = {
   id: string;
   lessonId: string;
@@ -18,13 +14,12 @@ type AiMentor = {
 
 export interface LessonResource {
   id: string;
-  createdAt: string;
-  updatedAt: string;
-  source: string;
-  isExternal: boolean;
-  displayOrder: number;
-  allowFullscreen: boolean;
-  type: (typeof LessonResourceType)[keyof typeof LessonResourceType];
+  fileUrl: string;
+  contentType?: string;
+  title?: string;
+  description?: string;
+  fileName?: string;
+  allowFullscreen?: boolean;
 }
 export interface Lesson {
   updatedAt: string;
@@ -63,20 +58,16 @@ export const ContentTypes = {
   EMPTY: "EMPTY",
   CHAPTER_FORM: "CHAPTER_FORM",
   SELECT_LESSON_TYPE: "SELECT_LESSON_TYPE",
-  TEXT_LESSON_FORM: "TEXT_LESSON_FORM",
-  VIDEO_LESSON_FORM: "VIDEO_LESSON_FORM",
-  PRESENTATION_FORM: "PRESENTATION_FORM",
+  CONTENT_LESSON_FORM: "CONTENT_LESSON_FORM",
   QUIZ_FORM: "QUIZ_FORM",
   AI_MENTOR_FORM: "AI_MENTOR_FORM",
   EMBED_FORM: "EMBED_FORM",
 };
 
-export type LessonIcons = "Text" | "Video" | "Presentation" | "Quiz" | "AiMentor" | "Embed";
+export type LessonIcons = "Content" | "Quiz" | "AiMentor" | "Embed";
 
 export const LessonType = {
-  VIDEO: "video",
-  TEXT: "text",
-  PRESENTATION: "presentation",
+  CONTENT: "content",
   QUIZ: "quiz",
   AI_MENTOR: "ai_mentor",
   EMBED: "embed",

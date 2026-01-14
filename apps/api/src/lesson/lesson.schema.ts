@@ -1,12 +1,10 @@
 import { AI_MENTOR_TYPE, SUPPORTED_LANGUAGES } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
-import { createInsertSchema } from "drizzle-typebox";
 
 import { THREAD_STATUS } from "src/ai/utils/ai.type";
 import { UUIDSchema } from "src/common";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
-import { lessonResources } from "src/storage/schema";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
 import { LESSON_TYPES } from "./lesson.type";
@@ -79,18 +77,14 @@ export const aiMentorLessonSchema = Type.Object({
   avatarReference: Type.Union([Type.String(), Type.Null()]),
 });
 
-export const lessonResourceType = Type.Union([Type.Literal("embed", Type.Literal("text"))]);
-
 export const lessonResourceSchema = Type.Object({
   id: UUIDSchema,
-  source: Type.String(),
-  isExternal: Type.Boolean(),
-  allowFullscreen: Type.Boolean(),
-  type: lessonResourceType,
-  lessonId: UUIDSchema,
-  displayOrder: Type.Number(),
-  createdAt: Type.String(),
-  updatedAt: Type.String(),
+  fileUrl: Type.String(),
+  contentType: Type.String(),
+  title: Type.Optional(Type.String()),
+  description: Type.Optional(Type.String()),
+  fileName: Type.Optional(Type.String()),
+  allowFullscreen: Type.Optional(Type.Boolean()),
 });
 
 export const adminLessonSchema = Type.Object({
@@ -187,6 +181,8 @@ export const lessonShowSchema = Type.Object({
   status: Type.Optional(Type.Enum(THREAD_STATUS)),
   threadId: Type.Optional(UUIDSchema),
   lessonResources: Type.Optional(Type.Array(lessonResourceSchema)),
+  hasOnlyVideo: Type.Optional(Type.Boolean()),
+  hasVideo: Type.Optional(Type.Boolean()),
   isQuizFeedbackRedacted: Type.Optional(Type.Boolean()),
   aiMentorDetails: Type.Optional(
     Type.Union([
@@ -238,6 +234,8 @@ export const lessonForChapterSchema = Type.Array(
   }),
 );
 
+export const createLessonResourcesBody = Type.Object({});
+
 export const onlyAnswerIdSAnswerSchema = Type.Object({
   answerId: UUIDSchema,
 });
@@ -280,19 +278,23 @@ export const nextLessonSchema = Type.Union([
   Type.Null(),
 ]);
 
-const createLessonResourceSchema = createInsertSchema(lessonResources);
+const lessonResourceInputSchema = Type.Object({
+  id: Type.Optional(UUIDSchema),
+  fileUrl: Type.String(),
+  allowFullscreen: Type.Optional(Type.Boolean()),
+});
 
 export const createEmbedLessonSchema = Type.Object({
   title: Type.String(),
-  type: lessonResourceType,
+  type: Type.Enum(LESSON_TYPES),
   chapterId: UUIDSchema,
-  resources: Type.Array(Type.Omit(createLessonResourceSchema, ["lessonId"])),
+  resources: Type.Array(lessonResourceInputSchema),
 });
 
 export const updateEmbedLessonSchema = Type.Object({
   title: Type.String(),
-  type: lessonResourceType,
-  resources: Type.Array(Type.Omit(createLessonResourceSchema, ["lessonId"])),
+  type: Type.Enum(LESSON_TYPES),
+  resources: Type.Array(lessonResourceInputSchema),
   lessonId: UUIDSchema,
   language: supportedLanguagesSchema,
 });
@@ -340,10 +342,8 @@ export type StudentQuestionAnswer = Static<typeof studentQuestionAnswersSchema>;
 export type OnlyAnswerIdAsnwer = Static<typeof onlyAnswerIdSAnswerSchema>;
 export type OnlyValueAnswer = Static<typeof onlyValueAnswerSchema>;
 export type FullAnswer = Static<typeof fullAnswerSchema>;
-export type LessonResourceType = Static<typeof lessonResourceType>;
 export type LessonResource = Static<typeof lessonResourceSchema>;
 export type CreateEmbedLessonBody = Static<typeof createEmbedLessonSchema>;
-export type CreateLessonResourceBody = Static<typeof createLessonResourceSchema>;
 export type UpdateEmbedLessonBody = Static<typeof updateEmbedLessonSchema>;
 export type EnrolledLessonsFilters = Static<typeof enrolledLessonsFiltersSchema>;
 export type EnrolledLesson = Static<typeof enrolledLessonSchema>;

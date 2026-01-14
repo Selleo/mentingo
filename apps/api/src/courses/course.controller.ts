@@ -76,7 +76,13 @@ import {
   studentsWithEnrolmentValidation,
 } from "src/courses/validations/validations";
 import { GroupsFilterSchema } from "src/group/group.types";
-import { LearningTimeService, learningTimeStatisticsSchema } from "src/learning-time";
+import {
+  LearningTimeService,
+  learningTimeStatisticsFilterOptionsSchema,
+  learningTimeStatisticsSchema,
+  learningTimeStatisticsSortOptions,
+  LearningTimeStatisticsSortOptions,
+} from "src/learning-time";
 import { USER_ROLES, UserRole } from "src/user/schemas/userRoles";
 
 import {
@@ -649,12 +655,18 @@ export class CourseController {
   @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   @Validate({
     response: baseResponse(getCourseStatisticsSchema),
-    request: [{ type: "param", name: "courseId", schema: UUIDSchema }],
+    request: [
+      { type: "param", name: "courseId", schema: UUIDSchema },
+      { type: "query", name: "groupId", schema: UUIDSchema },
+    ],
   })
   async getCourseStatistics(
     @Param("courseId") courseId: UUIDType,
+    @Query("groupId") groupId: UUIDType,
   ): Promise<BaseResponse<CourseStatisticsResponse>> {
-    const data = await this.courseService.getCourseStatistics(courseId);
+    const query = { groupId };
+
+    const data = await this.courseService.getCourseStatistics(courseId, query);
 
     return new BaseResponse(data);
   }
@@ -662,11 +674,40 @@ export class CourseController {
   @Get(":courseId/statistics/learning-time")
   @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   @Validate({
-    response: baseResponse(learningTimeStatisticsSchema),
+    response: paginatedResponse(learningTimeStatisticsSchema),
+    request: [
+      { type: "param", name: "courseId", schema: UUIDSchema },
+      { type: "query", name: "userId", schema: UUIDSchema },
+      { type: "query", name: "groupId", schema: UUIDSchema },
+      { type: "query", name: "search", schema: Type.String() },
+      { type: "query", name: "page", schema: Type.Number() },
+      { type: "query", name: "perPage", schema: Type.Number() },
+      { type: "query", name: "sort", schema: learningTimeStatisticsSortOptions },
+    ],
+  })
+  async getCourseLearningTimeStatistics(
+    @Param("courseId") courseId: UUIDType,
+    @Query("userId") userId: UUIDType,
+    @Query("groupId") groupId: UUIDType,
+    @Query("search") searchQuery: string,
+    @Query("page") page: number,
+    @Query("perPage") perPage: number,
+    @Query("sort") sort: LearningTimeStatisticsSortOptions,
+  ) {
+    const query = { userId, groupId, page, perPage, sort, searchQuery };
+    const data = await this.learningTimeService.getLearningTimeStatistics(courseId, query);
+
+    return new PaginatedResponse(data);
+  }
+
+  @Get(":courseId/statistics/learning-time-filter-options")
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @Validate({
+    response: baseResponse(learningTimeStatisticsFilterOptionsSchema),
     request: [{ type: "param", name: "courseId", schema: UUIDSchema }],
   })
-  async getCourseLearningTimeStatistics(@Param("courseId") courseId: UUIDType) {
-    const data = await this.learningTimeService.getLearningTimeStatistics(courseId);
+  async getCourseLearningStatisticsFilterOptions(@Param("courseId") courseId: UUIDType) {
+    const data = await this.learningTimeService.getFilterOptions(courseId);
 
     return new BaseResponse(data);
   }
@@ -676,16 +717,21 @@ export class CourseController {
   @Validate({
     request: [
       { type: "param", name: "courseId", schema: UUIDSchema },
+      { type: "query", name: "groupId", schema: UUIDSchema },
       { type: "query", name: "language", schema: supportedLanguagesSchema },
     ],
     response: baseResponse(courseAverageQuizScoresSchema),
   })
   async getAverageQuizScores(
     @Param("courseId") courseId: UUIDType,
+    @Query("groupId") groupId: UUIDType,
     @Query("language") language: SupportedLanguages,
   ) {
+    const query = { groupId };
+
     const averageQuizScores = await this.courseService.getAverageQuizScoreForCourse(
       courseId,
+      query,
       language,
     );
 
@@ -700,6 +746,7 @@ export class CourseController {
       { type: "query", name: "page", schema: Type.Number() },
       { type: "query", name: "perPage", schema: Type.Number() },
       { type: "query", name: "search", schema: Type.String() },
+      { type: "query", name: "groupId", schema: UUIDSchema },
       {
         type: "query",
         name: "sort",
@@ -714,6 +761,7 @@ export class CourseController {
     @Query("page") page: number,
     @Query("perPage") perPage: number,
     @Query("search") searchQuery: string,
+    @Query("groupId") groupId: UUIDType,
     @Query("sort") sort: SortCourseStudentProgressionOptions,
     @Query("language") language: SupportedLanguages,
   ): Promise<PaginatedResponse<AllStudentCourseProgressionResponse>> {
@@ -724,6 +772,7 @@ export class CourseController {
       searchQuery,
       sort,
       language,
+      groupId,
     };
 
     const studentsProgression = await this.courseService.getStudentsProgress(query);
@@ -739,6 +788,8 @@ export class CourseController {
       { type: "query", name: "page", schema: Type.Number() },
       { type: "query", name: "perPage", schema: Type.Number() },
       { type: "query", name: "quizId", schema: Type.String() },
+      { type: "query", name: "groupId", schema: UUIDSchema },
+      { type: "query", name: "search", schema: Type.String() },
       {
         type: "query",
         name: "sort",
@@ -753,6 +804,8 @@ export class CourseController {
     @Query("page") page: number,
     @Query("perPage") perPage: number,
     @Query("quizId") quizId: string,
+    @Query("groupId") groupId: UUIDType,
+    @Query("search") searchQuery: string,
     @Query("sort") sort: SortCourseStudentQuizResultsOptions,
     @Query("language") language: SupportedLanguages,
   ): Promise<PaginatedResponse<AllStudentQuizResultsResponse>> {
@@ -763,6 +816,8 @@ export class CourseController {
       quizId,
       sort,
       language,
+      groupId,
+      searchQuery,
     };
 
     const studentQuizResults = await this.courseService.getStudentsQuizResults(query);
@@ -778,6 +833,8 @@ export class CourseController {
       { type: "query", name: "page", schema: Type.Number() },
       { type: "query", name: "perPage", schema: Type.Number() },
       { type: "query", name: "lessonId", schema: Type.String() },
+      { type: "query", name: "groupId", schema: UUIDSchema },
+      { type: "query", name: "search", schema: Type.String() },
       {
         type: "query",
         name: "sort",
@@ -792,6 +849,8 @@ export class CourseController {
     @Query("page") page: number,
     @Query("perPage") perPage: number,
     @Query("lessonId") lessonId: string,
+    @Query("groupId") groupId: UUIDType,
+    @Query("search") searchQuery: string,
     @Query("sort") sort: SortCourseStudentAiMentorResultsOptions,
     @Query("language") language: SupportedLanguages,
   ): Promise<PaginatedResponse<AllStudentAiMentorResultsResponse>> {
@@ -802,6 +861,8 @@ export class CourseController {
       lessonId,
       sort,
       language,
+      groupId,
+      searchQuery,
     };
 
     const studentQuizResults = await this.courseService.getStudentsAiMentorResults(query);

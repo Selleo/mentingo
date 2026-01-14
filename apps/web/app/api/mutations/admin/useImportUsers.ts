@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { ApiClient } from "~/api/api-client";
 import { usersQueryOptions } from "~/api/queries";
 import { ENROLLED_USERS_QUERY_KEY } from "~/api/queries/admin/useUsersEnrolled";
+import { invalidateCourseStatisticsQueries } from "~/api/utils/courseStatisticsUtils";
 import { useToast } from "~/components/ui/use-toast";
 
 import type { AxiosError } from "axios";
@@ -25,7 +26,7 @@ export const useImportUsers = (searchParams?: UsersParams) => {
 
       return response.data;
     },
-    onSuccess: ({ data }) => {
+    onSuccess: async ({ data }) => {
       const { importedUsersAmount, skippedUsersAmount } = data;
 
       toast({
@@ -36,8 +37,10 @@ export const useImportUsers = (searchParams?: UsersParams) => {
         }),
       });
 
-      queryClient.invalidateQueries(usersQueryOptions(searchParams));
-      queryClient.invalidateQueries({ queryKey: [ENROLLED_USERS_QUERY_KEY] });
+      await queryClient.invalidateQueries(usersQueryOptions(searchParams));
+      await queryClient.invalidateQueries({ queryKey: [ENROLLED_USERS_QUERY_KEY] });
+
+      await invalidateCourseStatisticsQueries();
     },
     onError: (error: AxiosError) => {
       const apiResponseData = error.response?.data as { message: string };

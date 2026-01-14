@@ -10,7 +10,7 @@ import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
 import { queryClient } from "~/api/queryClient";
 import { FormTextField } from "~/components/Form/FormTextField";
 import { Icon } from "~/components/Icon";
-import Editor from "~/components/RichText/Editor";
+import { BaseEditor } from "~/components/RichText/Editor";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import {
@@ -404,7 +404,7 @@ const AiMentorLessonForm = ({
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
-                          <Editor
+                          <BaseEditor
                             content={field.value}
                             placeholder={t(
                               "adminCourseView.curriculum.lesson.placeholder.aiMentorInstructions",
@@ -452,7 +452,7 @@ const AiMentorLessonForm = ({
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
-                          <Editor
+                          <BaseEditor
                             content={field.value}
                             placeholder={t(
                               "adminCourseView.curriculum.lesson.placeholder.completionConditions",

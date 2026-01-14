@@ -3,6 +3,7 @@ import { AxiosError } from "axios";
 import { useTranslation } from "react-i18next";
 
 import { currentUserQueryOptions, useCurrentUserSuspense } from "~/api/queries";
+import { invalidateCourseStatisticsQueries } from "~/api/utils/courseStatisticsUtils";
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../api-client";
@@ -30,8 +31,11 @@ export function useUpdateUser() {
 
       return response.data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries(currentUserQueryOptions);
+    onSuccess: async () => {
+      await queryClient.invalidateQueries(currentUserQueryOptions);
+
+      await invalidateCourseStatisticsQueries();
+
       toast({ description: t("changeUserInformationView.toast.userUpdatedSuccessfully") });
     },
     onError: (error) => {
