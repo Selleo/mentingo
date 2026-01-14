@@ -3,7 +3,6 @@ import { faker } from "@faker-js/faker";
 const externalVideoUrls = [
   "https://vimeo.com/76979871",
   "https://vimeo.com/22439234",
-  "https://vimeo.com/148751763",
   "https://vimeo.com/327303298",
 ];
 
