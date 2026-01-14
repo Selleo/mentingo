@@ -15,6 +15,7 @@ allowedLicenses:
   - Zlib
   - MPL-2.0
   - Unlicense
+  - CC0-1.0
 allowedPackages:
   - thirty-two@1.0.2 #MIT
   - require-like@0.1.2 # MIT
@@ -24,3 +25,7 @@ allowedPackages:
   - css-value@0.0.1 # MIT on npm, but missing LICENSE file
   - "@browserbasehq/sdk@2.6.0" # Apache-2.0
   - combine-errors@3.0.3 # MIT https://github.com/matthewmueller/combine-errors (missing LICENSE file, but said in README)
+  - "@img/sharp-libvips-linux-x64@1.2.4" # LGPL-3.0-or-later - sublib of sharp - not modified - not embedded in software
+  - "@img/sharp-libvips-linuxmusl-x64@1.2.4" # LGPL-3.0-or-later - sublib of sharp - not modified itself - not embedded in software
+  - caniuse-lite@1.0.30001684 # CC-BY-4.0
+  - spdx-exceptions@2.5.0 # CC-BY-3.0
