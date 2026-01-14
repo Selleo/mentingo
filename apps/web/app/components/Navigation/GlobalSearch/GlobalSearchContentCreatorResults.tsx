@@ -1,6 +1,7 @@
 import { useQueries } from "@tanstack/react-query";
 
 import { lessonsQueryOptions } from "~/api/queries";
+import { qaSearchQueryOptions } from "~/api/queries/useAllQA";
 import { announcementsForUserOptions } from "~/api/queries/useAnnouncementsForUser";
 import { articlesSearchQueryOptions } from "~/api/queries/useArticlesSearch";
 import { availableCoursesQueryOptions } from "~/api/queries/useAvailableCourses";
@@ -15,6 +16,7 @@ import { ArticleEntry } from "./ArticleEntry";
 import { CourseEntry } from "./CourseEntry";
 import { GlobalSearchContent } from "./GlobalSearchContent";
 import { NewsEntry } from "./NewsEntry";
+import { QAEntry } from "./QAEntry";
 
 import type { GlobalSearchItem } from "./GlobalSearchContent";
 
@@ -57,6 +59,10 @@ export const GlobalSearchContentCreatorResults = ({
         { searchQuery: debouncedSearch, language },
         { enabled: debouncedSearch.length >= 3 },
       ),
+      qaSearchQueryOptions(
+        { searchQuery: debouncedSearch, language },
+        { enabled: debouncedSearch.length >= 3 },
+      ),
     ],
     combine: (results) => {
       const [
@@ -66,6 +72,7 @@ export const GlobalSearchContentCreatorResults = ({
         announcements,
         newsResults,
         articlesResults,
+        qaResults,
       ] = results;
       const studentCoursesData = studentCourses?.data;
       const availableCoursesData = availableCourses?.data;
@@ -73,6 +80,7 @@ export const GlobalSearchContentCreatorResults = ({
       const newsData = newsResults?.data;
       const articlesData = articlesResults?.data;
       const lessonData = lessons?.data;
+      const qaData = qaResults?.data;
 
       const mapped: GlobalSearchItem[] = [
         {
@@ -105,6 +113,11 @@ export const GlobalSearchContentCreatorResults = ({
           resultType: "articles",
           resultData: articlesData ?? [],
           Component: ArticleEntry,
+        },
+        {
+          resultType: "qa",
+          resultData: qaData ?? [],
+          Component: QAEntry,
         },
       ];
 

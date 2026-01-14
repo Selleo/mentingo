@@ -1,4 +1,4 @@
-import { Link } from "@remix-run/react";
+import { Link, createSearchParams } from "@remix-run/react";
 import { HelpCircle } from "lucide-react";
 
 import type { GetAllQAResponse } from "~/api/generated-api";
@@ -12,7 +12,7 @@ export const QAEntry = ({
 }) => {
   return (
     <Link
-      to={`/qa/${item.id}`}
+      to={{ pathname: "/qa", search: `?${createSearchParams({ qaId: item.id })}` }}
       onClick={onSelect}
       className="group focus:outline-none focus-visible:outline-none"
     >
