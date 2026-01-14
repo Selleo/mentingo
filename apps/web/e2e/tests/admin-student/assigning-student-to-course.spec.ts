@@ -171,6 +171,45 @@ const loginAndOpenSequenceCourse = async (page: Page, role: "admin" | "student")
   await loginSequenceUser(page, role);
   await openSequenceCourse(page);
 };
+
+const ensureAccordionOpen = async (button: Locator) => {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const state = await button.getAttribute("data-state");
+    if (state === "open") return;
+    await button.scrollIntoViewIfNeeded();
+    await button.click({ timeout: 5000 });
+    try {
+      await expect(button).toHaveAttribute("data-state", "open", { timeout: 2000 });
+      return;
+    } catch {
+      // retry
+    }
+  }
+  await expect(button).toHaveAttribute("data-state", "open");
+};
+
+const clickLessonWithRetry = async (page: Page, chapterButton: Locator, lessonLink: Locator) => {
+  const previousUrl = page.url();
+
+  for (let attempt = 0; attempt < 3; attempt++) {
+    await ensureAccordionOpen(chapterButton);
+    await lessonLink.scrollIntoViewIfNeeded();
+    await expect(lessonLink).toBeVisible({ timeout: 5000 });
+
+    await lessonLink.click({ force: true, timeout: 8000 });
+    const urlWait = page.waitForURL((url) => url.toString() !== previousUrl, { timeout: 8000 });
+    const navigated = await urlWait.then(
+      () => true,
+      () => false,
+    );
+
+    if (navigated) return;
+    await page.waitForTimeout(300);
+  }
+
+  await expect(page).toHaveURL(/course\/.*\/lesson\/.*/);
+};
+
 const studentInitialSequenceView = async (page: Page) => {
   await loginAndOpenSequenceCourse(page, "student");
   await page.getByTestId("chapter 3").click();
@@ -180,20 +219,19 @@ const studentInitialSequenceView = async (page: Page) => {
   await page.getByRole("link", { name: `${SEQUENCE_COURSE.lessons.lesson4} Text Not` }).click();
   await expect(page.getByText(SEQUENCE_COURSE.lessons.lesson4).first()).toBeVisible();
   const chapter2 = page.getByRole("button", { name: /chapter 2/i });
-  if ((await chapter2.getAttribute("data-state")) !== "open") {
-    await chapter2.click();
-  }
+  await ensureAccordionOpen(chapter2);
   const lesson3 = page.getByRole("link", { name: `${SEQUENCE_COURSE.lessons.lesson3} Text` });
   await lesson3.waitFor({ state: "visible" });
-  const previousUrl = page.url();
-  await lesson3.scrollIntoViewIfNeeded();
-  await lesson3.click({ force: true, timeout: 10000 });
-  await page
-    .waitForURL((url) => url.toString() !== previousUrl, { timeout: 10000 })
-    .catch(() => undefined);
-  await expect(page.getByText("Chapter 2: chapter")).toBeVisible();
+  const lesson3Href = await lesson3.getAttribute("href");
+  expect(lesson3Href && lesson3Href !== "#").toBeTruthy();
+  await clickLessonWithRetry(page, chapter2, lesson3);
+  await page.waitForLoadState("domcontentloaded");
+  await page.getByText("test lesson v3").first().waitFor({ state: "visible" });
+  await page.getByText("test lesson v3").nth(1).waitFor({ state: "visible" });
   expect(await page.getByText(SEQUENCE_COURSE.lessons.lesson3).count()).toBe(2);
-  await expect(page.getByText(SEQUENCE_COURSE.lessons.lesson3).first()).toBeVisible();
+  await expect(page.getByText(SEQUENCE_COURSE.lessons.lesson3).first()).toBeVisible({
+    timeout: 10000,
+  });
   await logoutStudent(page);
 };
 
@@ -236,8 +274,14 @@ const studentBlockedProgressFlow = async (page: Page) => {
     .first();
 
   await expect(lesson2Link).toBeEnabled();
-  await lesson2Link.click();
-  await lesson2Link.click();
+  const lesson2Href = await lesson2Link.getAttribute("href");
+  expect(lesson2Href && lesson2Href !== "#").toBeTruthy();
+
+  await clickLessonWithRetry(page, page.getByRole("button", { name: /chapter 1/i }), lesson2Link);
+
+  await page.waitForLoadState("domcontentloaded");
+  await page.getByText(SEQUENCE_COURSE.lessons.lesson2).first().waitFor({ state: "visible" });
+  await page.getByText(SEQUENCE_COURSE.lessons.lesson2).nth(1).waitFor({ state: "visible" });
   await logoutStudent(page);
 };
 
