@@ -454,6 +454,7 @@ const enrollGroupToCourse = async (page: Page) => {
 
 const studentSeesCourseByGroup = async (page: Page) => {
   await login(page, USERS.student.email, USERS.student.password);
+  await changeLanguageToEn(page);
   await page.getByRole("button", { name: "Courses" }).getByRole("link").click();
   await page.getByTestId(COURSE.title).last().click();
   await expect(page.getByRole("heading", { name: COURSE.title })).toBeVisible();
