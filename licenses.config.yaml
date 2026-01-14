@@ -28,4 +28,5 @@ allowedPackages:
   - "@img/sharp-libvips-linux-x64@1.2.4" # LGPL-3.0-or-later - sublib of sharp - not modified - not embedded in software
   - "@img/sharp-libvips-linuxmusl-x64@1.2.4" # LGPL-3.0-or-later - sublib of sharp - not modified itself - not embedded in software
   - caniuse-lite@1.0.30001684 # CC-BY-4.0
+  - "@promptbook/utils@0.69.5" # CC-BY-4.0
   - spdx-exceptions@2.5.0 # CC-BY-3.0
