@@ -1013,6 +1013,7 @@
       "generateMissingTranslationsDescription": "Czy na pewno chcesz wygenerować brakujące tłumaczenia? Ta akcja może zająć kilka chwil."
     },
     "toast": {
+      "candidateNotAvailable": "Nie można przenieść własności kursu na tego użytkownika",
       "createCourseSuccessfully": "Kurs utworzony pomyślnie",
       "courseUpdatedSuccessfully": "Kurs zaktualizowany pomyślnie",
       "certificateUpdatedSuccessfully": "Certyfikat zaktualizowany pomyślnie",
@@ -1030,7 +1031,8 @@
       "noMissingTranslations": "Brak brakujących tłumaczeń",
       "mismatchContentLength": "Liczba tłumaczeń nie jest równa liczbie wygenerowanych tłumaczeń",
       "translationsGeneratedSuccessfully": "Tłumaczenia wygenerowane pomyślnie",
-      "maxOneVideoUploaded": "Nie możesz przesłać więcej niż 1 wideo."
+      "maxOneVideoUploaded": "Nie możesz przesłać więcej niż 1 wideo.",
+      "successfullyTransferredCourseOwnership": "Własność kursu została pomyślnie przeniesiona"
     },
     "settings": {
       "breadcrumbs": {
@@ -1091,7 +1093,20 @@
       "header": "Utwórz nowy kurs",
       "subHeader": "Podaj szczegóły, aby utworzyć nowy kurs. Będziesz miał więcej opcji dostosowania później.",
       "editHeader": "Podstawowe ustawienia",
-      "editSubHeader": "Wypełnij dane, aby utworzyć nowy kurs."
+      "editSubHeader": "Wypełnij dane, aby utworzyć nowy kurs.",
+      "transferOwnership": {
+        "title": "Przekaż własność",
+        "description": "Przekaż ten kurs innemu użytkownikowi. Zostanie nowym właścicielem i będzie miał pełną kontrolę nad kursem.",
+        "label": "Wybierz nowego właściciela",
+        "placeholder": "Wybierz użytkownika...",
+        "button": "Przekaż",
+        "dialog": {
+          "title": "Potwierdź przekazanie",
+          "description": "Zamierzasz przekazać ten kurs użytkownikowi {{user}}. Tego działania nie można cofnąć.",
+          "confirm": "Potwierdź przekazanie",
+          "cancel": "Anuluj"
+        }
+      }
     },
     "curriculum": {
       "emptyState": {

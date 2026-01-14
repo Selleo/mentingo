@@ -1030,6 +1030,7 @@
       "generateMissingTranslationsDescription": "Are you sure you want to generate missing translations? This action may take a few moments."
     },
     "toast": {
+      "candidateNotAvailable": "Course ownership cannot be transferred to this user",
       "createCourseSuccessfully": "Course created successfully",
       "courseUpdatedSuccessfully": "Course updated successfully",
       "certificateUpdatedSuccessfully": "Certificate updated successfully",
@@ -1045,7 +1046,8 @@
       "noMissingTranslations": "No missing translations",
       "mismatchContentLength": "The number of translations does not match the number of generated translations",
       "translationsGeneratedSuccessfully": "Translations generated successfully",
-      "maxOneVideoUploaded": "You cannot upload more than 1 video."
+      "maxOneVideoUploaded": "You cannot upload more than 1 video.",
+      "successfullyTransferredCourseOwnership": "Course ownership transferred successfully"
     },
     "settings": {
       "breadcrumbs": {
@@ -1106,7 +1108,20 @@
       "header": "Create new course",
       "subHeader": "Provide the details to set up a new course. You’ll have more options to customize it later.",
       "editHeader": "Basic settings",
-      "editSubHeader": "Fill in the details to create a new course."
+      "editSubHeader": "Fill in the details to create a new course.",
+      "transferOwnership": {
+        "title": "Transfer ownership",
+        "description": "Transfer this course to another user. They will become the new owner and have full control over the course.",
+        "label": "Select new owner",
+        "placeholder": "Choose a user...",
+        "button": "Transfer",
+        "dialog": {
+          "title": "Confirm transfer",
+          "description": "You are about to transfer this course to {{user}}. This action cannot be undone.",
+          "confirm": "Confirm transfer",
+          "cancel": "Cancel"
+        }
+      }
     },
     "curriculum": {
       "emptyState": {

@@ -1591,6 +1591,30 @@ export interface GetCourseStudentsAiMentorResultsResponse {
   appliedFilters?: object;
 }
 
+export interface TransferCourseOwnershipBody {
+  /** @format uuid */
+  courseId: string;
+  /** @format uuid */
+  userId: string;
+}
+
+export interface GetCourseOwnershipResponse {
+  data: {
+    currentAuthor: {
+      /** @format uuid */
+      id: string;
+      name: string;
+      email: string;
+    };
+    possibleCandidates: {
+      /** @format uuid */
+      id: string;
+      name: string;
+      email: string;
+    }[];
+  };
+}
+
 export interface GetChapterWithLessonResponse {
   data: {
     /** @format uuid */
@@ -5770,6 +5794,38 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/course/generate-translations/${courseId}`,
         method: "POST",
         query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerTransferCourseOwnership
+     * @request POST:/api/course/course-ownership/transfer
+     */
+    courseControllerTransferCourseOwnership: (
+      data: TransferCourseOwnershipBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/course/course-ownership/transfer`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerGetCourseOwnership
+     * @request GET:/api/course/course-ownership/{courseId}
+     */
+    courseControllerGetCourseOwnership: (courseId: string, params: RequestParams = {}) =>
+      this.request<GetCourseOwnershipResponse, any>({
+        path: `/api/course/course-ownership/${courseId}`,
+        method: "GET",
+        format: "json",
         ...params,
       }),
 

@@ -70,6 +70,7 @@ import {
   studentCourses,
   studentLessonProgress,
   users,
+  courseStudentsStats,
 } from "src/storage/schema";
 import { StripeService } from "src/stripe/stripe.service";
 import { USER_ROLES } from "src/user/schemas/userRoles";
@@ -96,11 +97,13 @@ import type {
   AllStudentCoursesResponse,
   CourseAverageQuizScorePerQuiz,
   CourseAverageQuizScoresResponse,
+  CourseOwnershipBody,
   CourseStatisticsQueryBody,
   CourseStatisticsResponse,
   CourseStatusDistribution,
   EnrolledCourseGroupsPayload,
   LessonSequenceEnabledResponse,
+  TransferCourseOwnershipRequestBody,
 } from "./schemas/course.schema";
 import type {
   CourseEnrollmentScope,
@@ -3199,6 +3202,76 @@ export class CourseService {
           })
           .where(eq(currData.idColumn, currData.id));
       }
+    });
+  }
+
+  async getCourseOwnership(courseId: UUIDType, currentUser: CurrentUser) {
+    await this.adminLessonService.validateAccess(
+      ENTITY_TYPE.COURSE,
+      currentUser.role,
+      currentUser.userId,
+      courseId,
+    );
+
+    const [courseOwnership] = await this.db
+      .select({
+        currentAuthor: sql<CourseOwnershipBody>`
+              json_build_object(
+                'id', ${users.id},
+                'name', ${users.firstName} || ' ' || ${users.lastName},
+                'email', ${users.email}
+              )
+            `,
+        possibleCandidates: sql<CourseOwnershipBody[]>`
+              COALESCE(
+                (
+                  SELECT json_agg(json_build_object(
+                    'id', ${users.id},
+                    'name', ${users.firstName} || ' ' || ${users.lastName},
+                    'email', ${users.email}
+                  ))
+                  FROM ${users}
+                  WHERE ${users.role} IN (${USER_ROLES.ADMIN}, ${USER_ROLES.CONTENT_CREATOR})
+                    AND ${users.id} <> ${courses.authorId}
+                ),
+                '[]'::json
+              )
+            `,
+      })
+      .from(courses)
+      .innerJoin(users, eq(courses.authorId, users.id))
+      .where(eq(courses.id, courseId))
+      .limit(1);
+
+    return courseOwnership;
+  }
+
+  async transferCourseOwnership(
+    data: TransferCourseOwnershipRequestBody,
+    currentUser: CurrentUser,
+  ) {
+    const { userId, courseId } = data;
+
+    const courseOwnership = await this.getCourseOwnership(courseId, currentUser);
+
+    const candidate = courseOwnership.possibleCandidates.find(
+      (candidate) => candidate.id === userId,
+    );
+    if (!candidate) {
+      throw new BadRequestException("adminCourseView.toast.candidateNotAvailable");
+    }
+
+    await this.db.transaction(async (trx) => {
+      await trx.update(courses).set({ authorId: userId }).where(eq(courses.id, courseId));
+
+      await trx
+        .update(coursesSummaryStats)
+        .set({ authorId: userId })
+        .where(eq(coursesSummaryStats.courseId, courseId));
+      await trx
+        .update(courseStudentsStats)
+        .set({ authorId: userId })
+        .where(eq(courseStudentsStats.courseId, courseId));
     });
   }
 

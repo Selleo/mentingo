@@ -3,6 +3,7 @@ import { AxiosError } from "axios";
 import { useTranslation } from "react-i18next";
 
 import { ApiClient } from "~/api/api-client";
+import { COURSE_OWNERSHIP_CANDIDATES_QUERY_KEY } from "~/api/queries/admin/useCourseOwnershipCandidates";
 import { queryClient } from "~/api/queryClient";
 import { useToast } from "~/components/ui/use-toast";
 
@@ -21,6 +22,9 @@ export function useCreateUser() {
       const response = await ApiClient.api.userControllerCreateUser(options.data);
 
       await queryClient.invalidateQueries({ queryKey: ["users"] });
+      await queryClient.invalidateQueries({
+        queryKey: [COURSE_OWNERSHIP_CANDIDATES_QUERY_KEY],
+      });
 
       return response.data;
     },

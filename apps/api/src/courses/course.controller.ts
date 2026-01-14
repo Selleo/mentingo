@@ -45,6 +45,9 @@ import {
   getLessonSequenceEnabledSchema,
   supportedLanguagesSchema,
   EnrolledCourseGroupsPayload,
+  transferCourseOwnershipRequestSchema,
+  TransferCourseOwnershipRequestBody,
+  courseOwnershipCandidatesResponseSchema,
 } from "src/courses/schemas/course.schema";
 import {
   COURSE_ENROLLMENT_SCOPES,
@@ -102,6 +105,7 @@ import type {
   AllStudentQuizResultsResponse,
   CourseStatisticsResponse,
   LessonSequenceEnabledResponse,
+  CourseOwnershipCandidatesResponseBody,
 } from "src/courses/schemas/course.schema";
 import type {
   CoursesFilterSchema,
@@ -898,5 +902,30 @@ export class CourseController {
     @CurrentUser() currentUser: CurrentUserType,
   ) {
     return this.courseService.generateMissingTranslations(courseId, language, currentUser);
+  }
+
+  @Post("course-ownership/transfer")
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @Validate({
+    request: [{ type: "body", schema: transferCourseOwnershipRequestSchema }],
+  })
+  async transferCourseOwnership(
+    @Body() transferData: TransferCourseOwnershipRequestBody,
+    @CurrentUser() currentUser: CurrentUserType,
+  ) {
+    return this.courseService.transferCourseOwnership(transferData, currentUser);
+  }
+
+  @Get("course-ownership/:courseId")
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @Validate({
+    request: [{ type: "param", name: "courseId", schema: UUIDSchema }],
+    response: baseResponse(courseOwnershipCandidatesResponseSchema),
+  })
+  async getCourseOwnership(
+    @Param("courseId") courseId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<CourseOwnershipCandidatesResponseBody>> {
+    return new BaseResponse(await this.courseService.getCourseOwnership(courseId, currentUser));
   }
 }
