@@ -33,6 +33,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS courses_set_short_id_trigger ON courses;
+
 CREATE TRIGGER courses_set_short_id_trigger
   BEFORE INSERT ON courses
   FOR EACH ROW
