@@ -1,12 +1,6 @@
 import { sql } from "drizzle-orm";
 
-import {
-  courses,
-  lessonResources,
-  lessons,
-  questionAnswerOptions,
-  questions,
-} from "src/storage/schema";
+import { courses, lessons, questionAnswerOptions, questions } from "src/storage/schema";
 
 export function getCourseTsVector() {
   return sql`
@@ -43,23 +37,6 @@ export function getLessonTsVector() {
           )
         FROM ${questions} q
         WHERE q.lesson_id = ${lessons.id}
-      ), ''::text)::tsvector ||
-      COALESCE((
-        SELECT
-          string_agg(
-            to_tsvector(
-              'english',
-              regexp_replace(
-                regexp_replace(COALESCE(lr.source, ''), '<[^>]+>', '', 'g'),
-                '&[^;]+;',
-                '',
-                'g'
-              )
-            )::text,
-            ' '
-          )
-        FROM ${lessonResources} lr
-        WHERE lr.lesson_id = ${lessons.id}
       ), ''::text)::tsvector
     )
   `;

@@ -28,11 +28,7 @@ import type { LessonTypes } from "../lesson.type";
 import type { SupportedLanguages } from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { CurrentUser } from "src/common/types/current-user.type";
-import type {
-  AdminQuestionBody,
-  LessonsFilters,
-  LessonResourceType,
-} from "src/lesson/lesson.schema";
+import type { AdminQuestionBody, LessonsFilters } from "src/lesson/lesson.schema";
 import type * as schema from "src/storage/schema";
 
 export type EnrolledLessonWithSearch = {

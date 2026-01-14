@@ -25,11 +25,6 @@ CREATE INDEX IF NOT EXISTS question_answer_options_search_idx ON question_answer
     jsonb_to_tsvector('english', option_text, '["string"]')
     );
 
--- Lesson resources: search source content (HTML stripped)
-CREATE INDEX IF NOT EXISTS lesson_resources_search_idx ON lesson_resources USING GIN (
-    to_tsvector('english', regexp_replace(regexp_replace(COALESCE(source, ''), '<[^>]+>', '', 'g'), '&[^;]+;', '', 'g'))
-    );
-
 -- News: search title, summary, and content (JSONB fields)
 CREATE INDEX IF NOT EXISTS news_search_idx ON news USING GIN (
     (
