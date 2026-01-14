@@ -7,8 +7,17 @@ CREATE TABLE IF NOT EXISTS "course_slugs" (
 	"lang" text NOT NULL
 );
 --> statement-breakpoint
-ALTER TABLE "courses" ADD COLUMN "short_id" varchar(5);--> statement-breakpoint
-ALTER TABLE "courses" ADD CONSTRAINT "courses_short_id_unique" UNIQUE("short_id");--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "courses" ADD COLUMN "short_id" varchar(5);
+EXCEPTION
+ WHEN duplicate_column THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "courses" ADD CONSTRAINT "courses_short_id_unique" UNIQUE("short_id");
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;--> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "course_slugs" ADD CONSTRAINT "course_slugs_course_short_id_courses_short_id_fk" FOREIGN KEY ("course_short_id") REFERENCES "public"."courses"("short_id") ON DELETE cascade ON UPDATE cascade;
 EXCEPTION
