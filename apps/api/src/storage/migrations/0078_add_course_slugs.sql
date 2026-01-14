@@ -14,9 +14,11 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "courses" ADD CONSTRAINT "courses_short_id_unique" UNIQUE("short_id");
-EXCEPTION
- WHEN duplicate_object THEN null;
+ IF NOT EXISTS (
+   SELECT 1 FROM pg_constraint WHERE conname = 'courses_short_id_unique'
+ ) THEN
+   ALTER TABLE "courses" ADD CONSTRAINT "courses_short_id_unique" UNIQUE("short_id");
+ END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "course_slugs" ADD CONSTRAINT "course_slugs_course_short_id_courses_short_id_fk" FOREIGN KEY ("course_short_id") REFERENCES "public"."courses"("short_id") ON DELETE cascade ON UPDATE cascade;
