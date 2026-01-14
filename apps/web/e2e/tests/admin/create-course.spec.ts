@@ -565,7 +565,7 @@ export class CreateCourseActions {
 //   // Text lesson
 //   await page.getByRole("button", { name: "Add lesson" }).first().click();
 //   const textLessonType = page.getByLabel(
-//     "Choose adminCourseView.curriculum.lesson.other.text lesson type",
+//     "Choose adminCourseView.curriculum.lesson.other.content lesson type",
 //   );
 //   await expect(textLessonType).toBeVisible();
 //   await textLessonType.click();

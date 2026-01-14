@@ -207,7 +207,14 @@ test.describe("complete course workflow", () => {
       const lessonType = await page.getByTestId("lesson-type").textContent();
 
       if (lessonType === "Content") {
-        await navigateThroughContentLesson(page, nextButton);
+        const isSecondContentLesson = i === 2;
+        if (isSecondContentLesson) {
+          const mainHeading = page.getByText("Best Practices for E2E Testing").first();
+          await expect(mainHeading).toBeVisible();
+          await nextButton.click();
+        } else {
+          await navigateThroughContentLesson(page, nextButton);
+        }
       }
       if (lessonType === "Presentation" || lessonType === "Video") {
         test.skip(true, "Presentation/video lessons are deprecated in content lessons.");

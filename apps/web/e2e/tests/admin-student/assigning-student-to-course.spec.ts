@@ -92,7 +92,7 @@ const addTextLesson = async (
   await createHeading.waitFor({ state: "hidden" });
   await expect(createHeading).not.toBeVisible();
   await clickAddLessonButton(page, addButtonIndex);
-  await waitAndSelectTextLessonType(page);
+  await waitAndSelectContentLessonType(page);
   await fillWithWait(page.getByPlaceholder("Provide lesson title..."), title);
 
   if (description) {
@@ -214,13 +214,13 @@ const studentInitialSequenceView = async (page: Page) => {
   await loginAndOpenSequenceCourse(page, "student");
   await page.getByTestId("chapter 3").click();
   await expect(
-    page.getByRole("link", { name: `${SEQUENCE_COURSE.lessons.lesson4} Text Not` }),
+    page.getByRole("link", { name: `${SEQUENCE_COURSE.lessons.lesson4} Content Not` }),
   ).toBeVisible();
-  await page.getByRole("link", { name: `${SEQUENCE_COURSE.lessons.lesson4} Text Not` }).click();
+  await page.getByRole("link", { name: `${SEQUENCE_COURSE.lessons.lesson4} Content Not` }).click();
   await expect(page.getByText(SEQUENCE_COURSE.lessons.lesson4).first()).toBeVisible();
   const chapter2 = page.getByRole("button", { name: /chapter 2/i });
   await ensureAccordionOpen(chapter2);
-  const lesson3 = page.getByRole("link", { name: `${SEQUENCE_COURSE.lessons.lesson3} Text` });
+  const lesson3 = page.getByRole("link", { name: `${SEQUENCE_COURSE.lessons.lesson3} Content` });
   await lesson3.waitFor({ state: "visible" });
   const lesson3Href = await lesson3.getAttribute("href");
   expect(lesson3Href && lesson3Href !== "#").toBeTruthy();
@@ -247,21 +247,27 @@ const studentBlockedProgressFlow = async (page: Page) => {
   await loginAndOpenSequenceCourse(page, "student");
   await page.getByTestId("chapter 1").click();
   await expect(
-    page.getByRole("button", { name: `${SEQUENCE_COURSE.lessons.lesson2} Text Blocked` }).first(),
+    page
+      .getByRole("button", { name: `${SEQUENCE_COURSE.lessons.lesson2} Content Blocked` })
+      .first(),
   ).toBeVisible();
   await page.getByTestId("chapter 3").click();
   await expect(
-    page.getByRole("link", { name: `${SEQUENCE_COURSE.lessons.intro} Text Not Started` }).first(),
+    page
+      .getByRole("link", { name: `${SEQUENCE_COURSE.lessons.intro} Content Not Started` })
+      .first(),
   ).toBeVisible();
   await page
-    .getByRole("button", { name: `${SEQUENCE_COURSE.lessons.lesson2} Text Blocked` })
+    .getByRole("button", { name: `${SEQUENCE_COURSE.lessons.lesson2} Content Blocked` })
     .first()
     .click();
   await expect(
-    page.getByRole("link", { name: `${SEQUENCE_COURSE.lessons.intro} Text Not Started` }).first(),
+    page
+      .getByRole("link", { name: `${SEQUENCE_COURSE.lessons.intro} Content Not Started` })
+      .first(),
   ).toBeVisible();
   await page
-    .getByRole("link", { name: `${SEQUENCE_COURSE.lessons.intro} Text Not Started` })
+    .getByRole("link", { name: `${SEQUENCE_COURSE.lessons.intro} Content Not Started` })
     .first()
     .click();
   await page.waitForResponse(
@@ -270,7 +276,7 @@ const studentBlockedProgressFlow = async (page: Page) => {
     { timeout: 30000 },
   );
   const lesson2Link = page
-    .getByRole("link", { name: `${SEQUENCE_COURSE.lessons.lesson2} Text` })
+    .getByRole("link", { name: `${SEQUENCE_COURSE.lessons.lesson2} Content` })
     .first();
 
   await expect(lesson2Link).toBeEnabled();
@@ -315,28 +321,28 @@ const studentCompletesFinalLessons = async (page: Page) => {
   await page.getByTestId("chapter 4").click();
   await expect(page.getByRole("link", { name: "quiz (1) Quiz Not Started" })).toBeVisible();
   await expect(
-    page.getByRole("button", { name: `${SEQUENCE_COURSE.lessons.lesson5} Text Blocked` }),
+    page.getByRole("button", { name: `${SEQUENCE_COURSE.lessons.lesson5} Content Blocked` }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Continue learning" }).click();
-  await page.getByRole("link", { name: `${SEQUENCE_COURSE.lessons.lesson5} Text` }).click();
+  await page.getByRole("link", { name: `${SEQUENCE_COURSE.lessons.lesson5} Content` }).click();
   await expect(page.getByText("Lesson 1/2 – Quiz")).toBeVisible();
   await page.locator("label").nth(1).click();
   await page.getByRole("button", { name: "Submit" }).click();
   await expect(
-    page.getByRole("link", { name: `${SEQUENCE_COURSE.lessons.lesson5} Text` }),
+    page.getByRole("link", { name: `${SEQUENCE_COURSE.lessons.lesson5} Content` }),
   ).toBeVisible();
-  await page.getByRole("link", { name: `${SEQUENCE_COURSE.lessons.lesson5} Text` }).click();
+  await page.getByRole("link", { name: `${SEQUENCE_COURSE.lessons.lesson5} Content` }).click();
   await expect(page.getByText(SEQUENCE_COURSE.lessons.lesson5).first()).toBeVisible();
 };
 
-const waitAndSelectTextLessonType = async (page: Page) => {
-  const textLessonType = page.getByLabel(
-    "Choose adminCourseView.curriculum.lesson.other.text lesson type",
+const waitAndSelectContentLessonType = async (page: Page) => {
+  const contentLessonType = page.getByLabel(
+    "Choose adminCourseView.curriculum.lesson.other.content lesson type",
   );
-  await textLessonType.waitFor({ state: "visible" });
-  await expect(textLessonType).toBeVisible();
-  await textLessonType.click();
-  return textLessonType;
+  await contentLessonType.waitFor({ state: "visible" });
+  await expect(contentLessonType).toBeVisible();
+  await contentLessonType.click();
+  return contentLessonType;
 };
 
 export const login = async (page: Page, email: string, password: string) => {

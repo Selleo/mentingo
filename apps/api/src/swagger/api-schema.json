@@ -4532,7 +4532,7 @@
     },
     "/api/lesson/upload-files-to-lesson": {
       "post": {
-        "operationId": "LessonController_uploadImageToLesson",
+        "operationId": "LessonController_uploadFileToLesson",
         "parameters": [],
         "requestBody": {
           "required": true,
@@ -4548,11 +4548,27 @@
                   "file": {
                     "type": "string",
                     "format": "binary"
+                  },
+                  "language": {
+                    "type": "string",
+                    "enum": [
+                      "en",
+                      "pl"
+                    ]
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
                   }
                 },
                 "required": [
                   "lessonId",
-                  "file"
+                  "file",
+                  "language",
+                  "title",
+                  "description"
                 ]
               }
             }
@@ -4564,7 +4580,31 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "string"
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "resourceId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "resourceId"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data",
+                    "message"
+                  ]
                 }
               }
             }
@@ -4666,6 +4706,27 @@
     "/api/lesson/lesson-image/{resourceId}": {
       "get": {
         "operationId": "LessonController_getLessonImage",
+        "parameters": [
+          {
+            "name": "resourceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/lesson/lesson-resource/{resourceId}": {
+      "get": {
+        "operationId": "LessonController_getLessonResource",
         "parameters": [
           {
             "name": "resourceId",
@@ -9670,6 +9731,10 @@
           },
           "expiresAt": {
             "type": "string"
+          },
+          "resourceId": {
+            "format": "uuid",
+            "type": "string"
           }
         },
         "required": [
@@ -12535,15 +12600,7 @@
                           "type": {
                             "anyOf": [
                               {
-                                "const": "text",
-                                "type": "string"
-                              },
-                              {
-                                "const": "presentation",
-                                "type": "string"
-                              },
-                              {
-                                "const": "video",
+                                "const": "content",
                                 "type": "string"
                               },
                               {
@@ -12605,43 +12662,29 @@
                                   "format": "uuid",
                                   "type": "string"
                                 },
-                                "source": {
+                                "fileUrl": {
                                   "type": "string"
                                 },
-                                "isExternal": {
-                                  "type": "boolean"
+                                "contentType": {
+                                  "type": "string"
+                                },
+                                "title": {
+                                  "type": "string"
+                                },
+                                "description": {
+                                  "type": "string"
+                                },
+                                "fileName": {
+                                  "type": "string"
                                 },
                                 "allowFullscreen": {
                                   "type": "boolean"
-                                },
-                                "type": {
-                                  "const": "embed",
-                                  "type": "string"
-                                },
-                                "lessonId": {
-                                  "format": "uuid",
-                                  "type": "string"
-                                },
-                                "displayOrder": {
-                                  "type": "number"
-                                },
-                                "createdAt": {
-                                  "type": "string"
-                                },
-                                "updatedAt": {
-                                  "type": "string"
                                 }
                               },
                               "required": [
                                 "id",
-                                "source",
-                                "isExternal",
-                                "allowFullscreen",
-                                "type",
-                                "lessonId",
-                                "displayOrder",
-                                "createdAt",
-                                "updatedAt"
+                                "fileUrl",
+                                "contentType"
                               ]
                             }
                           }
@@ -12893,15 +12936,7 @@
                           "type": {
                             "anyOf": [
                               {
-                                "const": "text",
-                                "type": "string"
-                              },
-                              {
-                                "const": "presentation",
-                                "type": "string"
-                              },
-                              {
-                                "const": "video",
+                                "const": "content",
                                 "type": "string"
                               },
                               {
@@ -14425,15 +14460,7 @@
                     "type": {
                       "anyOf": [
                         {
-                          "const": "text",
-                          "type": "string"
-                        },
-                        {
-                          "const": "presentation",
-                          "type": "string"
-                        },
-                        {
-                          "const": "video",
+                          "const": "content",
                           "type": "string"
                         },
                         {
@@ -14495,43 +14522,29 @@
                             "format": "uuid",
                             "type": "string"
                           },
-                          "source": {
+                          "fileUrl": {
                             "type": "string"
                           },
-                          "isExternal": {
-                            "type": "boolean"
+                          "contentType": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "fileName": {
+                            "type": "string"
                           },
                           "allowFullscreen": {
                             "type": "boolean"
-                          },
-                          "type": {
-                            "const": "embed",
-                            "type": "string"
-                          },
-                          "lessonId": {
-                            "format": "uuid",
-                            "type": "string"
-                          },
-                          "displayOrder": {
-                            "type": "number"
-                          },
-                          "createdAt": {
-                            "type": "string"
-                          },
-                          "updatedAt": {
-                            "type": "string"
                           }
                         },
                         "required": [
                           "id",
-                          "source",
-                          "isExternal",
-                          "allowFullscreen",
-                          "type",
-                          "lessonId",
-                          "displayOrder",
-                          "createdAt",
-                          "updatedAt"
+                          "fileUrl",
+                          "contentType"
                         ]
                       }
                     }
@@ -14628,15 +14641,7 @@
                     "type": {
                       "anyOf": [
                         {
-                          "const": "text",
-                          "type": "string"
-                        },
-                        {
-                          "const": "presentation",
-                          "type": "string"
-                        },
-                        {
-                          "const": "video",
+                          "const": "content",
                           "type": "string"
                         },
                         {
@@ -15055,15 +15060,7 @@
                         "type": {
                           "anyOf": [
                             {
-                              "const": "text",
-                              "type": "string"
-                            },
-                            {
-                              "const": "presentation",
-                              "type": "string"
-                            },
-                            {
-                              "const": "video",
+                              "const": "content",
                               "type": "string"
                             },
                             {
@@ -15570,15 +15567,7 @@
                 "type": {
                   "anyOf": [
                     {
-                      "const": "text",
-                      "type": "string"
-                    },
-                    {
-                      "const": "presentation",
-                      "type": "string"
-                    },
-                    {
-                      "const": "video",
+                      "const": "content",
                       "type": "string"
                     },
                     {
@@ -15665,15 +15654,7 @@
               "type": {
                 "anyOf": [
                   {
-                    "const": "text",
-                    "type": "string"
-                  },
-                  {
-                    "const": "presentation",
-                    "type": "string"
-                  },
-                  {
-                    "const": "video",
+                    "const": "content",
                     "type": "string"
                   },
                   {
@@ -16087,45 +16068,37 @@
                       "format": "uuid",
                       "type": "string"
                     },
-                    "source": {
+                    "fileUrl": {
                       "type": "string"
                     },
-                    "isExternal": {
-                      "type": "boolean"
+                    "contentType": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "fileName": {
+                      "type": "string"
                     },
                     "allowFullscreen": {
                       "type": "boolean"
-                    },
-                    "type": {
-                      "const": "embed",
-                      "type": "string"
-                    },
-                    "lessonId": {
-                      "format": "uuid",
-                      "type": "string"
-                    },
-                    "displayOrder": {
-                      "type": "number"
-                    },
-                    "createdAt": {
-                      "type": "string"
-                    },
-                    "updatedAt": {
-                      "type": "string"
                     }
                   },
                   "required": [
                     "id",
-                    "source",
-                    "isExternal",
-                    "allowFullscreen",
-                    "type",
-                    "lessonId",
-                    "displayOrder",
-                    "createdAt",
-                    "updatedAt"
+                    "fileUrl",
+                    "contentType"
                   ]
                 }
+              },
+              "hasOnlyVideo": {
+                "type": "boolean"
+              },
+              "hasVideo": {
+                "type": "boolean"
               },
               "isQuizFeedbackRedacted": {
                 "type": "boolean"
@@ -16255,15 +16228,7 @@
               "type": {
                 "anyOf": [
                   {
-                    "const": "text",
-                    "type": "string"
-                  },
-                  {
-                    "const": "presentation",
-                    "type": "string"
-                  },
-                  {
-                    "const": "video",
+                    "const": "content",
                     "type": "string"
                   },
                   {
@@ -17946,15 +17911,7 @@
                   "type": {
                     "anyOf": [
                       {
-                        "const": "text",
-                        "type": "string"
-                      },
-                      {
-                        "const": "presentation",
-                        "type": "string"
-                      },
-                      {
-                        "const": "video",
+                        "const": "content",
                         "type": "string"
                       },
                       {
@@ -18488,8 +18445,24 @@
             "type": "string"
           },
           "type": {
-            "const": "embed",
-            "type": "string"
+            "anyOf": [
+              {
+                "const": "content",
+                "type": "string"
+              },
+              {
+                "const": "quiz",
+                "type": "string"
+              },
+              {
+                "const": "ai_mentor",
+                "type": "string"
+              },
+              {
+                "const": "embed",
+                "type": "string"
+              }
+            ]
           },
           "chapterId": {
             "format": "uuid",
@@ -18501,34 +18474,18 @@
               "type": "object",
               "properties": {
                 "id": {
+                  "format": "uuid",
                   "type": "string"
                 },
-                "createdAt": {
+                "fileUrl": {
                   "type": "string"
-                },
-                "updatedAt": {
-                  "type": "string"
-                },
-                "source": {
-                  "type": "string",
-                  "maxLength": 1000
-                },
-                "isExternal": {
-                  "type": "boolean"
-                },
-                "displayOrder": {
-                  "type": "number"
                 },
                 "allowFullscreen": {
                   "type": "boolean"
-                },
-                "type": {
-                  "type": "string",
-                  "maxLength": 50
                 }
               },
               "required": [
-                "source"
+                "fileUrl"
               ]
             }
           }
@@ -18566,8 +18523,24 @@
             "type": "string"
           },
           "type": {
-            "const": "embed",
-            "type": "string"
+            "anyOf": [
+              {
+                "const": "content",
+                "type": "string"
+              },
+              {
+                "const": "quiz",
+                "type": "string"
+              },
+              {
+                "const": "ai_mentor",
+                "type": "string"
+              },
+              {
+                "const": "embed",
+                "type": "string"
+              }
+            ]
           },
           "resources": {
             "type": "array",
@@ -18575,34 +18548,18 @@
               "type": "object",
               "properties": {
                 "id": {
+                  "format": "uuid",
                   "type": "string"
                 },
-                "createdAt": {
+                "fileUrl": {
                   "type": "string"
-                },
-                "updatedAt": {
-                  "type": "string"
-                },
-                "source": {
-                  "type": "string",
-                  "maxLength": 1000
-                },
-                "isExternal": {
-                  "type": "boolean"
-                },
-                "displayOrder": {
-                  "type": "number"
                 },
                 "allowFullscreen": {
                   "type": "boolean"
-                },
-                "type": {
-                  "type": "string",
-                  "maxLength": 50
                 }
               },
               "required": [
-                "source"
+                "fileUrl"
               ]
             }
           },

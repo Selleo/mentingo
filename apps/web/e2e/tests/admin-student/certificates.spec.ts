@@ -26,7 +26,7 @@ const TEXT = {
   certEn: "CERTIFICATE OF COURSE",
   certPl: "CERTYFIKAT UKOŃCZENIA KURSU",
   languageToggle: "Language Toggle",
-  notStartedLesson: "title Text Not Started",
+  notStartedLesson: "title Content Not Started",
 };
 
 const goToCourses = async (page: Page) => {
@@ -53,7 +53,9 @@ const addChapterWithLesson = async (page: Page) => {
   await page.getByRole("button", { name: "Save" }).click();
 
   await page.getByRole("button", { name: "Add lesson" }).click();
-  await page.getByLabel("Choose adminCourseView.curriculum.lesson.other.text lesson type").click();
+  await page
+    .getByLabel("Choose adminCourseView.curriculum.lesson.other.content lesson type")
+    .click();
   await page.getByPlaceholder("Provide lesson title...").fill(COURSE.lessonTitle);
   await page.locator("#description div").fill(COURSE.lessonDescription);
   await page.getByRole("button", { name: "Save" }).click();
