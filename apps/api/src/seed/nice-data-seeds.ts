@@ -877,4 +877,73 @@ export const niceCourses: NiceCourseData[] = [
       },
     ],
   },
+  {
+    title: "Fake test to certificate",
+    description:
+      "A short, fast course designed to complete quickly and unlock a certificate. Includes a brief overview and a short quiz.",
+    status: "published",
+    priceInCents: 0,
+    category: "Quick Start",
+    language: "en",
+    thumbnailS3Key: faker.image.urlPicsumPhotos(),
+    hasCertificate: true,
+    chapters: [
+      {
+        title: "Quick Completion",
+        isFreemium: true,
+        lessons: [
+          {
+            type: LESSON_TYPES.CONTENT,
+            title: "Fast Track Overview",
+            description: withPresentationLink(`
+              <p><strong>Duration:</strong> 5-10 minutes<br><strong>Level:</strong> Beginner</p>
+              <p></p>
+              <h2>Goal</h2>
+              <p>Complete a short lesson and a quick quiz to verify access to certificates.</p>
+              <p></p>
+              <h2>Watch</h2>
+              <p></p>
+              <h2>Slides</h2>
+              <p></p>
+              <h2>Checklist</h2>
+              <ul>
+                <li><p>Read the overview.</p></li>
+                <li><p>Watch the short video.</p></li>
+                <li><p>Open the slides.</p></li>
+              </ul>
+            `),
+          },
+          {
+            type: LESSON_TYPES.QUIZ,
+            title: "Fast Completion Quiz",
+            description: "A quick check to finish the course.",
+            questions: [
+              {
+                type: QUESTION_TYPE.SINGLE_CHOICE,
+                title: "What should you do to complete this course?",
+                options: [
+                  {
+                    optionText: "Finish the lesson and pass the quiz",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "Skip all content",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "Submit a project",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
 ];
