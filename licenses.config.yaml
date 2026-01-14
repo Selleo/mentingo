@@ -13,7 +13,6 @@ allowedLicenses:
   - 0BSD
   - Python-2.0
   - Zlib
-  - LGPL-3.0-or-later
   - MPL-2.0
   - Unlicense
 allowedPackages:
