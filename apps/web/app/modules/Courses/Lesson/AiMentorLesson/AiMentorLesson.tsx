@@ -38,10 +38,11 @@ const AiMentorLesson = ({ lesson, lessonLoading, isPreviewMode = false }: AiMent
   );
   const { mutateAsync: retakeLesson } = useRetakeLesson(lesson.id, courseId);
 
-  const { data: currentThreadMessages } = useCurrentThreadMessages({
-    isThreadLoading: lessonLoading,
-    threadId: lesson.threadId,
-  });
+  const { data: currentThreadMessages, isLoading: isCurrentThreadMessagesLoading } =
+    useCurrentThreadMessages({
+      isThreadLoading: lessonLoading,
+      threadId: lesson.threadId,
+    });
 
   const [showRetakeModal, setShowRetakeModal] = useState(false);
 
@@ -121,7 +122,9 @@ const AiMentorLesson = ({ lesson, lessonLoading, isPreviewMode = false }: AiMent
         />
       )}
 
-      {lessonLoading && <LoaderWithTextSequence preset="aiMentor" />}
+      {lessonLoading || isCurrentThreadMessagesLoading ? (
+        <LoaderWithTextSequence preset="aiMentor" />
+      ) : null}
       <div
         ref={messagesContainerRef}
         className="flex w-full grow max-w-full relative flex-col gap-y-4 overflow-y-scroll"
