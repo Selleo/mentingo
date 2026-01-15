@@ -27,7 +27,10 @@ export const CourseChapterLesson = ({ lesson }: CourseChapterLessonProps) => {
     >
       <Icon name={LessonTypesIcons[lesson.type]} className="size-6 text-accent-foreground" />
       <div className="flex w-full flex-col justify-center">
-        <p className="body-sm-md text-neutral-950 break-all overflow-x-hidden text-left">
+        <p
+          className="body-sm-md text-neutral-950 break-all overflow-x-hidden text-left"
+          data-testid="lesson-title"
+        >
           {lesson.title}{" "}
           <span className="text-neutral-800">
             {lesson.quizQuestionCount ? `(${lesson.quizQuestionCount})` : null}
