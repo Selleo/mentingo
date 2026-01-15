@@ -20,6 +20,12 @@
     "test:api": "pnpm run --filter=api test",
     "test:web:e2e": "pnpm run --filter=web test:e2e",
     "test:api:e2e": "pnpm run --filter=api test:e2e",
+    "perf:load": "pnpm --filter @mentingo/performance-tests test:load",
+    "perf:stress": "pnpm --filter @mentingo/performance-tests test:stress",
+    "perf:spike": "pnpm --filter @mentingo/performance-tests test:spike",
+    "perf:soak": "pnpm --filter @mentingo/performance-tests test:soak",
+    "perf:mixed": "pnpm --filter @mentingo/performance-tests test:mixed",
+    "perf:load:dashboard": "pnpm --filter @mentingo/performance-tests test:load:dashboard",
     "start:debug": "pnpm run --filter=api start:debug",
     "prepare": "husky",
     "gpush": "git push --no-verify"

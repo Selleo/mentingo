@@ -1,0 +1,19 @@
+# Environment files
+.env
+
+# k6 outputs
+results/
+*.log
+
+# Node modules (if any dependencies are added)
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

@@ -977,6 +977,8 @@ importers:
         specifier: ^5.4.5
         version: 5.4.5
 
+  packages/performance-tests: {}
+
   packages/prompts:
     devDependencies:
       '@sinclair/typebox':
