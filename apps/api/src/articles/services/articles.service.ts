@@ -1031,8 +1031,6 @@ export class ArticlesService {
     const { articlesEnabled, unregisteredUserArticlesAccessibility } =
       await this.settingsService.getGlobalSettings();
 
-    console.log(articlesEnabled, unregisteredUserArticlesAccessibility);
-
     const hasAccess = Boolean(
       articlesEnabled && (currentUserId || unregisteredUserArticlesAccessibility),
     );
