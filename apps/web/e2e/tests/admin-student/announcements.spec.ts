@@ -22,7 +22,7 @@ const createGroupAndAssignStudent = async (page: Page) => {
   await page.getByRole("button", { name: "Create new" }).click();
   await page.getByTestId("groupName").fill(GROUP_NAME);
   await page.getByRole("button", { name: "Publish" }).click();
-  await expect(page.getByRole("cell", { name: GROUP_NAME })).toBeVisible();
+  await expect(page.getByRole("cell", { name: GROUP_NAME, exact: true }).first()).toBeVisible();
 
   await page.getByRole("link", { name: "Users" }).click();
   await page.getByTestId(USERS.student.email).click();
@@ -50,7 +50,9 @@ const createAnnouncementAsAdmin = async (page: Page) => {
 
 const logoutAndLogin = async (page: Page, email: string, password: string) => {
   await page
-    .getByRole("button", { name: /Avatar for email@example.com|Test Admin profile Test Admin/i })
+    .getByRole("button", {
+      name: /Avatar for email@example.com|Test Admin profile Test Admin|test Student profile test/i,
+    })
     .click();
   await page.getByRole("menuitem", { name: "Logout" }).locator("div").click();
   await page.getByPlaceholder("user@example.com").fill(email);

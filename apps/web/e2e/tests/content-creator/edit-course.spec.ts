@@ -1,12 +1,13 @@
 import { test, expect } from "@playwright/test";
 
-const TEST_EDIT_COURSE = {
+export const TEST_EDIT_COURSE = {
   button: {
     save: "save",
   },
   label: {
     title: "Title",
   },
+  chapterName: "Edited chapter",
 } as const;
 
 test.describe("Content creator edit course", () => {
@@ -39,11 +40,11 @@ test.describe("Content creator edit course", () => {
 
     await chapterList.first().click();
 
-    await page.getByLabel(TEST_EDIT_COURSE.label.title).fill("Edited chapter");
+    await page.getByLabel(TEST_EDIT_COURSE.label.title).fill(TEST_EDIT_COURSE.chapterName);
     await page.getByRole("button", { name: new RegExp(TEST_EDIT_COURSE.button.save, "i") }).click();
 
     await page
-      .getByRole("heading", { name: "Edited chapter", level: 3 })
+      .getByRole("heading", { name: TEST_EDIT_COURSE.chapterName, level: 3 })
       .waitFor({ state: "visible" });
 
     await expect(
@@ -53,6 +54,6 @@ test.describe("Content creator edit course", () => {
     ).toBeVisible();
 
     const chapterTitle = await page.locator("ul li h3").first().innerText();
-    expect(chapterTitle).toBe("Edited chapter");
+    expect(chapterTitle).toBe(TEST_EDIT_COURSE.chapterName);
   });
 });
