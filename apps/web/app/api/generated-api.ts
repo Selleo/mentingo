@@ -1854,7 +1854,7 @@ export interface GetLessonsResponse {
     type: "content" | "quiz" | "ai_mentor" | "embed";
     description: string | null;
     displayOrder: number;
-    lessonCompleted: boolean;
+    lessonCompleted?: boolean;
     /** @format uuid */
     courseId: string;
     courseTitle: string;
