@@ -71,7 +71,9 @@ test.describe("Drag and drop", () => {
     await expect(page.getByRole("link", { name: "Preview" })).toBeVisible();
     await page.getByRole("link", { name: "Preview" }).click();
     await assertLessonOrderInPreview(page);
-    await page.getByRole("button", { name: "Avatar for email@example.com" }).click();
+    await page
+      .getByRole("button", { name: /Avatar for email@example.com|Test Admin profile Test Admin/i })
+      .click();
     await page.getByRole("menuitem", { name: "Logout" }).locator("div").click();
     await page.getByPlaceholder("user@example.com").click();
     await page.getByPlaceholder("user@example.com").fill("student@example.com");
