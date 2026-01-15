@@ -14,6 +14,7 @@ const expectedLastLessons = [
   LESSON_TITLES.applications,
   "AI Quiz: Primary Goal of AI in Business",
 ];
+const EDITED_CHAPTER_NAME = "Edited chapter";
 
 const openCourseEdit = async (page: Page) => {
   await page.getByTestId(COURSE_TITLE).click();
@@ -33,7 +34,7 @@ const confirmOrderChangeToast = async (page: Page) => {
 };
 
 const assertLessonOrderInPreview = async (page: Page) => {
-  const chapterButton = page.getByTestId(CHAPTER_TITLE);
+  const chapterButton = page.getByTestId(new RegExp(`${CHAPTER_TITLE}|${EDITED_CHAPTER_NAME}`));
   await chapterButton.waitFor({ state: "visible" });
   await chapterButton.click();
 
