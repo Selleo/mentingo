@@ -2,8 +2,8 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useUploadFile } from "~/api/mutations/admin/useUploadFile";
-import { useCourseOwnershipCandidates } from "~/api/queries/admin/useCourseOwnershipCandidates";
 import { useCategoriesSuspense } from "~/api/queries/useCategories";
+import { useUserDetails } from "~/api/queries/useUserDetails";
 import ImageUploadInput from "~/components/FileUploadInput/ImageUploadInput";
 import { FormTextField } from "~/components/Form/FormTextField";
 import { Icon } from "~/components/Icon";
@@ -19,7 +19,6 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/compontents/MissingTranslationsAlert";
-import TransferOwnership from "~/modules/Admin/EditCourse/CourseSettings/components/TransferOwnership";
 import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
 import {
@@ -37,6 +36,7 @@ import type { SupportedLanguages } from "@repo/shared";
 
 type CourseSettingsProps = {
   courseId: string;
+  authorId: string;
   title?: string;
   description?: string;
   categoryId?: string;
@@ -48,6 +48,7 @@ type CourseSettingsProps = {
 
 const CourseSettings = ({
   courseId,
+  authorId,
   title,
   description,
   categoryId,
@@ -66,14 +67,13 @@ const CourseSettings = ({
     courseLanguage,
     courseId: courseId || "",
   });
-  const { data: courseOwnershipCandidates } = useCourseOwnershipCandidates({
-    enabled: courseId.length > 0,
-    id: courseId,
-  });
 
   const { data: categories } = useCategoriesSuspense();
   const [isUploading, setIsUploading] = useState(false);
   const { mutateAsync: uploadFile } = useUploadFile();
+
+  const { data: userDetails } = useUserDetails(authorId);
+
   const isFormValid = form.formState.isDirty;
 
   const [displayThumbnailUrl, setDisplayThumbnailUrl] = useState<string | undefined>(
@@ -237,13 +237,6 @@ const CourseSettings = ({
               </form>
             </Form>
           </div>
-
-          {courseId && (
-            <TransferOwnership
-              courseId={courseId}
-              candidates={courseOwnershipCandidates?.possibleCandidates}
-            />
-          )}
         </div>
       </div>
       <div className="w-full max-w-[480px]">
@@ -252,6 +245,11 @@ const CourseSettings = ({
           title={watchedTitle}
           description={watchedDescription}
           category={categoryName}
+          data={{
+            username: `${userDetails?.firstName} ${userDetails?.lastName}`,
+            email: `${userDetails?.contactEmail}`,
+            profilePictureUrl: userDetails?.profilePictureUrl,
+          }}
         />
       </div>
     </div>

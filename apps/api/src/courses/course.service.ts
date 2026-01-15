@@ -3205,13 +3205,8 @@ export class CourseService {
     });
   }
 
-  async getCourseOwnership(courseId: UUIDType, currentUser: CurrentUser) {
-    await this.adminLessonService.validateAccess(
-      ENTITY_TYPE.COURSE,
-      currentUser.role,
-      currentUser.userId,
-      courseId,
-    );
+  async getCourseOwnership(courseId: UUIDType) {
+    await this.getCourseExists(courseId);
 
     const [courseOwnership] = await this.db
       .select({
@@ -3246,13 +3241,12 @@ export class CourseService {
     return courseOwnership;
   }
 
-  async transferCourseOwnership(
-    data: TransferCourseOwnershipRequestBody,
-    currentUser: CurrentUser,
-  ) {
+  async transferCourseOwnership(data: TransferCourseOwnershipRequestBody) {
     const { userId, courseId } = data;
 
-    const courseOwnership = await this.getCourseOwnership(courseId, currentUser);
+    await this.getCourseExists(courseId);
+
+    const courseOwnership = await this.getCourseOwnership(courseId);
 
     const candidate = courseOwnership.possibleCandidates.find(
       (candidate) => candidate.id === userId,
@@ -3763,5 +3757,13 @@ export class CourseService {
       ilike(users.lastName, `%${searchQuery}%`),
       ilike(groups.name, `%${searchQuery}%`),
     );
+  }
+
+  private async getCourseExists(courseId: UUIDType) {
+    const [courseExists] = await this.db.select().from(courses).where(eq(courses.id, courseId));
+
+    if (!courseExists) throw new NotFoundException("adminCourseView.toast.courseNotFound");
+
+    return courseExists;
   }
 }

@@ -1013,6 +1013,7 @@
       "generateMissingTranslationsDescription": "Czy na pewno chcesz wygenerować brakujące tłumaczenia? Ta akcja może zająć kilka chwil."
     },
     "toast": {
+      "courseNotFound": "Nie znaleziono kursu",
       "candidateNotAvailable": "Nie można przenieść własności kursu na tego użytkownika",
       "createCourseSuccessfully": "Kurs utworzony pomyślnie",
       "courseUpdatedSuccessfully": "Kurs zaktualizowany pomyślnie",

@@ -1030,6 +1030,7 @@
       "generateMissingTranslationsDescription": "Are you sure you want to generate missing translations? This action may take a few moments."
     },
     "toast": {
+      "courseNotFound": "Course not found",
       "candidateNotAvailable": "Course ownership cannot be transferred to this user",
       "createCourseSuccessfully": "Course created successfully",
       "courseUpdatedSuccessfully": "Course updated successfully",

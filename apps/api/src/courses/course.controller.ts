@@ -905,27 +905,23 @@ export class CourseController {
   }
 
   @Post("course-ownership/transfer")
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @Roles(USER_ROLES.ADMIN)
   @Validate({
     request: [{ type: "body", schema: transferCourseOwnershipRequestSchema }],
   })
-  async transferCourseOwnership(
-    @Body() transferData: TransferCourseOwnershipRequestBody,
-    @CurrentUser() currentUser: CurrentUserType,
-  ) {
-    return this.courseService.transferCourseOwnership(transferData, currentUser);
+  async transferCourseOwnership(@Body() transferData: TransferCourseOwnershipRequestBody) {
+    return this.courseService.transferCourseOwnership(transferData);
   }
 
   @Get("course-ownership/:courseId")
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @Roles(USER_ROLES.ADMIN)
   @Validate({
     request: [{ type: "param", name: "courseId", schema: UUIDSchema }],
     response: baseResponse(courseOwnershipCandidatesResponseSchema),
   })
   async getCourseOwnership(
     @Param("courseId") courseId: UUIDType,
-    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<CourseOwnershipCandidatesResponseBody>> {
-    return new BaseResponse(await this.courseService.getCourseOwnership(courseId, currentUser));
+    return new BaseResponse(await this.courseService.getCourseOwnership(courseId));
   }
 }
