@@ -40,6 +40,16 @@
     "error": {
       "somethingWentWrong": "Ups! Coś poszło nie tak."
     },
+    "loader": {
+      "textSequence": {
+        "aiMentor": {
+          "warmingUp": "Rozgrzewam AI mentora...",
+          "preparingSimulation": "Przygotowuję dla Ciebie symulację...",
+          "buildingContext": "Buduję kontekst scenariusza...",
+          "takingLonger": "To trwa dłużej niż zwykle..."
+        }
+      }
+    },
     "other": {
       "active": "Aktywny",
       "archived": "Zarchiwizowany",
