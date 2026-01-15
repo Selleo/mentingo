@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-export const TEST_EDIT_COURSE = {
+const TEST_EDIT_COURSE = {
   button: {
     save: "save",
   },
