@@ -56,7 +56,7 @@ const LessonCard = ({ item, onClickLessonCard, dragTrigger, selectedLesson }: Le
       <div className="flex min-w-0 items-start gap-x-2">
         <Icon name={getIcon as IconName} className="size-6 shrink-0 text-primary-700" />
         <hgroup className="min-w-0">
-          <p className="text-l break-words" title={item.title}>
+          <p className="text-l break-words" title={item.title} data-testid="lesson-title">
             {item.type === LessonType.QUIZ ? (
               <>
                 {item.title}{" "}

@@ -28,7 +28,7 @@ const createGroupAndAssignStudent = async (page: Page) => {
   await page.getByTestId(USERS.student.email).click();
   await page.getByRole("button", { name: "Edit" }).click();
   await page.getByRole("button", { name: "Change group" }).click();
-  await page.getByRole("option", { name: GROUP_NAME }).click();
+  await page.getByRole("option", { name: GROUP_NAME, exact: true }).click();
   await page.getByRole("heading", { name: "Modify groups (1)" }).click();
   await page.getByRole("button", { name: "Save" }).click();
   await page.getByRole("button", { name: "Confirm" }).click();
@@ -49,7 +49,9 @@ const createAnnouncementAsAdmin = async (page: Page) => {
 };
 
 const logoutAndLogin = async (page: Page, email: string, password: string) => {
-  await page.getByRole("button", { name: /Avatar for email@example.com/i }).click();
+  await page
+    .getByRole("button", { name: /Avatar for email@example.com|Test Admin profile Test Admin/i })
+    .click();
   await page.getByRole("menuitem", { name: "Logout" }).locator("div").click();
   await page.getByPlaceholder("user@example.com").fill(email);
   await page.getByLabel("Password").fill(password);
