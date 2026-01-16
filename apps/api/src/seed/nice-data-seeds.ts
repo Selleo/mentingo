@@ -4,27 +4,15 @@ import * as dotenv from "dotenv";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
 
-import {
-  appendResourceLinkToDescription,
-  getRandomPresentationUrl,
-  getRandomVideoUrl,
-} from "./seed-resource-links";
-
 import type { NiceCourseData } from "src/utils/types/test-types";
 
 dotenv.config({ path: "./.env" });
 
-const withVideoLink = (description?: string) =>
-  appendResourceLinkToDescription(description, getRandomVideoUrl());
-
-const withPresentationLink = (description?: string) =>
-  appendResourceLinkToDescription(description, getRandomPresentationUrl());
-
 export const niceCourses: NiceCourseData[] = [
   {
-    title: "Data Science Foundations: From Data to Decisions",
+    title: "Fake test to certificate",
     description:
-      "Build a practical foundation in data science by learning how data is collected, cleaned, analyzed, and communicated. You will explore real-world use cases, practice reading visualizations, and learn how to choose the right approach for common analytical questions.",
+      "Fake test to certificate Fake test to certificate Fake test to certificate Fake test to certificate Fake test to certificate",
     status: "published",
     priceInCents: 0,
     category: "Data Science",
@@ -33,218 +21,44 @@ export const niceCourses: NiceCourseData[] = [
     hasCertificate: true,
     chapters: [
       {
-        title: "The Data Science Workflow",
-        isFreemium: true,
+        title: "Understanding Data and Its Importance",
+        isFreemium: false,
         lessons: [
           {
             type: LESSON_TYPES.CONTENT,
             title: "What is Data Science?",
-            description: withPresentationLink(
-              withVideoLink(`
-              <p><strong>Duration:</strong> 45-60 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Learning Goals</h2>
-              <ul>
-                <li><p>Define data science and how it differs from data analytics.</p></li>
-                <li><p>Identify the core steps of a data science workflow.</p></li>
-                <li><p>Connect data science methods to real-world problems.</p></li>
-              </ul>
-              <p></p>
-              <h2>Core Idea</h2>
-              <p><strong>Data Science</strong> combines statistics, computing, and domain knowledge to turn raw data into insights and predictions.</p>
-              <p></p>
-              <h2>Watch</h2>
-              <p></p>
-              <h2>Key Steps</h2>
-              <ol>
-                <li><p>Collect and understand the data.</p></li>
-                <li><p>Clean and prepare the data.</p></li>
-                <li><p>Explore patterns and build models.</p></li>
-                <li><p>Communicate results and decisions.</p></li>
-              </ol>
-              <p></p>
-              <h2>Slides</h2>
-              <p></p>
-              <h2>Quick Activity</h2>
-              <p>Pick a product you use daily and answer:</p>
-              <ul>
-                <li><p>What data could it collect?</p></li>
-                <li><p>What decision could be improved with that data?</p></li>
-              </ul>
-            `),
-            ),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Framing a Data Question",
-            description: `
-              <p><strong>Duration:</strong> 30-40 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Why It Matters</h2>
-              <p>Good analysis starts with a clear question. A vague goal like "increase retention" becomes actionable when you define who, what, and when.</p>
-              <p></p>
-              <h2>From Goal to Question</h2>
-              <ol>
-                <li><p>State the business goal in one sentence.</p></li>
-                <li><p>Define a measurable metric (for example, repeat purchases).</p></li>
-                <li><p>Set a time window and target audience.</p></li>
-              </ol>
-              <p></p>
-              <h2>Examples</h2>
-              <ul>
-                <li><p>Goal: improve onboarding.</p></li>
-                <li><p>Question: which steps correlate with users who return after 7 days?</p></li>
-              </ul>
-              <p></p>
-              <h2>Practice</h2>
-              <p>Write your own question using the template:</p>
-              <p><strong>Which</strong> [user group] <strong>does</strong> [action] <strong>within</strong> [time window]?</p>
-            `,
+            description:
+              "Data science is an interdisciplinary field that uses scientific methods, processes, algorithms, and systems to extract knowledge and insights from structured and unstructured data. In this lesson, you'll learn about the fundamental concepts of data science, including data collection, cleaning, analysis, and interpretation. We'll explore how data science combines statistics, computer science, and domain expertise to solve complex problems and make data-driven decisions in various industries.",
           },
           {
             type: LESSON_TYPES.QUIZ,
-            title: "Workflow Check",
-            description: "Check your understanding of the core data science workflow.",
+            title: "Data Science Basics Quiz",
+            description: "Test your understanding of fundamental data science concepts.",
             questions: [
               {
                 type: QUESTION_TYPE.SINGLE_CHOICE,
-                title: "Which step typically comes before modeling?",
+                title: "Which of the following is NOT a typical step in the data science process?",
                 options: [
-                  { optionText: "Data preparation", isCorrect: true, language: "en" },
-                  { optionText: "Deployment", isCorrect: false, language: "en" },
-                  { optionText: "Storytelling", isCorrect: false, language: "en" },
-                  { optionText: "Monitoring", isCorrect: false, language: "en" },
-                ],
-                language: "en",
-              },
-              {
-                type: QUESTION_TYPE.MULTIPLE_CHOICE,
-                title: "Which are valid data science outcomes? (Select all that apply)",
-                options: [
-                  { optionText: "Forecasting demand", isCorrect: true, language: "en" },
-                  { optionText: "Personalized recommendations", isCorrect: true, language: "en" },
-                  { optionText: "Manual data entry", isCorrect: false, language: "en" },
-                  { optionText: "Fraud detection", isCorrect: true, language: "en" },
-                ],
-                language: "en",
-              },
-            ],
-          },
-        ],
-      },
-      {
-        title: "Working with Data",
-        isFreemium: false,
-        lessons: [
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Data Types and Data Quality",
-            description: `
-              <p><strong>Duration:</strong> 35-45 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Data Types</h2>
-              <ul>
-                <li><p><strong>Structured:</strong> tables, rows, and columns.</p></li>
-                <li><p><strong>Semi-structured:</strong> JSON logs and events.</p></li>
-                <li><p><strong>Unstructured:</strong> text, images, audio.</p></li>
-              </ul>
-              <p></p>
-              <h2>Quality Checks</h2>
-              <ul>
-                <li><p>Completeness: missing values and nulls.</p></li>
-                <li><p>Consistency: the same format across sources.</p></li>
-                <li><p>Validity: values match rules (for example, ages are positive).</p></li>
-              </ul>
-              <p></p>
-              <h2>Case Example</h2>
-              <p>A churn model trained on inconsistent date formats often underperforms. Quality checks prevent hidden errors early.</p>
-            `,
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Data Cleaning Techniques",
-            description: withPresentationLink(`
-              <p><strong>Duration:</strong> 30-40 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Common Fixes</h2>
-              <ul>
-                <li><p>Handle missing values with imputation or removal.</p></li>
-                <li><p>Normalize ranges for comparable scales.</p></li>
-                <li><p>Deduplicate records and standardize categories.</p></li>
-              </ul>
-              <p></p>
-              <h2>Slides</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.QUIZ,
-            title: "Data Quality Quiz",
-            questions: [
-              {
-                type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
-                title: "Fill blanks with the correct word.",
-                description:
-                  "Removing duplicates improves [word], while standardizing formats improves [word].",
-                solutionExplanation:
-                  "<p>Removing duplicates improves <strong>accuracy</strong>, while standardizing formats improves <strong>consistency</strong>.</p>",
-                options: [
-                  { optionText: "accuracy", isCorrect: true, language: "en" },
-                  { optionText: "consistency", isCorrect: true, language: "en" },
-                  { optionText: "latency", isCorrect: false, language: "en" },
-                ],
-                language: "en",
-              },
-            ],
-          },
-        ],
-      },
-      {
-        title: "Modeling Basics",
-        isFreemium: false,
-        lessons: [
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Supervised vs Unsupervised Learning",
-            description: `
-              <p><strong>Duration:</strong> 35-45 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Supervised Learning</h2>
-              <p>Uses labeled examples to learn a mapping from inputs to outputs. Typical tasks include classification and regression.</p>
-              <p></p>
-              <h2>Unsupervised Learning</h2>
-              <p>Finds structure in data without labels. Common tasks include clustering and dimensionality reduction.</p>
-              <p></p>
-              <h2>How to Choose</h2>
-              <ul>
-                <li><p>If you have labels and a clear target, choose supervised.</p></li>
-                <li><p>If you need to discover patterns, choose unsupervised.</p></li>
-              </ul>
-            `,
-          },
-          {
-            type: LESSON_TYPES.AI_MENTOR,
-            title: "Model Selection Coach",
-            aiMentorInstructions:
-              "Help the learner decide which model type fits a given problem. Ask about the goal, available labels, and required output.",
-            completionConditions:
-              "Learner can explain the difference between supervised and unsupervised learning and select a model type for a simple scenario.",
-          },
-          {
-            type: LESSON_TYPES.QUIZ,
-            title: "Modeling Basics Quiz",
-            questions: [
-              {
-                type: QUESTION_TYPE.SINGLE_CHOICE,
-                title: "Which task is typically supervised learning?",
-                options: [
-                  { optionText: "Predicting house prices", isCorrect: true, language: "en" },
                   {
-                    optionText: "Grouping customers by behavior",
+                    optionText: "Data collection",
                     isCorrect: false,
                     language: "en",
                   },
-                  { optionText: "Finding anomalies", isCorrect: false, language: "en" },
-                  { optionText: "Dimensionality reduction", isCorrect: false, language: "en" },
+                  {
+                    optionText: "Data cleaning",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "Data analysis",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "Data destruction",
+                    isCorrect: true,
+                    language: "en",
+                  },
                 ],
                 language: "en",
               },
@@ -255,9 +69,9 @@ export const niceCourses: NiceCourseData[] = [
     ],
   },
   {
-    title: "Web Development Essentials: Build Your First Site",
+    title: "Introduction to Web Development: Building Your First Website",
     description:
-      "Learn the fundamentals of building modern web pages with HTML, CSS, and JavaScript. You will create a simple, responsive site and practice common patterns used across real projects.",
+      "In this beginner-friendly course, you will learn the basics of web development. We will guide you through creating a simple website from scratch using HTML, CSS, and a bit of JavaScript. No prior experience is needed—just a willingness to learn! By the end of the course, you’ll have built your own website and gained essential skills for further web development projects.",
     status: "published",
     priceInCents: 9900,
     category: "Web Development",
@@ -265,163 +79,779 @@ export const niceCourses: NiceCourseData[] = [
     thumbnailS3Key: faker.image.urlPicsumPhotos(),
     chapters: [
       {
-        title: "HTML and Semantics",
-        isFreemium: true,
-        lessons: [
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "HTML Structure and Semantics",
-            description: `
-              <p><strong>Duration:</strong> 35-45 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Why Semantics Matter</h2>
-              <p>Semantic tags help browsers, search engines, and assistive technology understand your content.</p>
-              <p></p>
-              <h2>Core Elements</h2>
-              <ul>
-                <li><p><strong>header</strong> for top-level context.</p></li>
-                <li><p><strong>nav</strong> for navigation links.</p></li>
-                <li><p><strong>main</strong> for the primary content.</p></li>
-                <li><p><strong>footer</strong> for supporting information.</p></li>
-              </ul>
-              <p></p>
-              <h2>Practice</h2>
-              <p>Outline a simple blog page using semantic sections before writing any CSS.</p>
-            `,
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Semantic HTML Presentation",
-            description: withPresentationLink(`
-              <p><strong>Duration:</strong> 20-30 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Slides</h2>
-              <p>See before and after examples that improve accessibility and search indexing.</p>
-            `),
-          },
-          {
-            type: LESSON_TYPES.QUIZ,
-            title: "HTML Semantics Quiz",
-            questions: [
-              {
-                type: QUESTION_TYPE.SINGLE_CHOICE,
-                title: "Which tag best represents site navigation?",
-                options: [
-                  { optionText: "<nav>", isCorrect: true, language: "en" },
-                  { optionText: "<header>", isCorrect: false, language: "en" },
-                  { optionText: "<section>", isCorrect: false, language: "en" },
-                  { optionText: "<main>", isCorrect: false, language: "en" },
-                ],
-                language: "en",
-              },
-            ],
-          },
-        ],
-      },
-      {
-        title: "CSS Layout and Design",
+        title: "HTML Basics: Building the Structure of Your Website",
         isFreemium: false,
         lessons: [
           {
             type: LESSON_TYPES.CONTENT,
-            title: "Box Model and Spacing",
-            description: `
-              <p><strong>Duration:</strong> 30-40 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>The Box Model</h2>
-              <p>Every element is a rectangle with content, padding, border, and margin. Layout issues often come from misunderstood box sizing.</p>
-              <p></p>
-              <h2>Spacing Guidelines</h2>
-              <ul>
-                <li><p>Use padding to create space inside a component.</p></li>
-                <li><p>Use margin to separate components from each other.</p></li>
-                <li><p>Prefer consistent spacing scales (4, 8, 16, 24).</p></li>
-              </ul>
-              <p></p>
-              <h2>Practice</h2>
-              <p>Inspect a card component and adjust spacing until it feels balanced.</p>
-            `,
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Flexbox and Grid Video",
-            description: withVideoLink(`
-              <p><strong>Duration:</strong> 25-35 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>When to Use Each</h2>
-              <ul>
-                <li><p>Flexbox for one-dimensional layouts.</p></li>
-                <li><p>Grid for two-dimensional layouts.</p></li>
-              </ul>
-              <p></p>
-              <h2>Watch</h2>
-            `),
+            title: "Introduction to HTML",
+            description:
+              "HTML (HyperText Markup Language) is the standard language used to create the structure of web pages. In this lesson, you'll explore basic HTML elements and how they are used to build the framework of a website.",
           },
           {
             type: LESSON_TYPES.QUIZ,
-            title: "CSS Layout Quiz",
+            title: "HTML Quiz: Importance of HTML",
+            description: "Why is HTML considered the backbone of any website?",
             questions: [
               {
-                type: QUESTION_TYPE.MULTIPLE_CHOICE,
-                title: "Which properties belong to the box model? (Select all that apply)",
-                options: [
-                  { optionText: "margin", isCorrect: true, language: "en" },
-                  { optionText: "padding", isCorrect: true, language: "en" },
-                  { optionText: "border", isCorrect: true, language: "en" },
-                  { optionText: "opacity", isCorrect: false, language: "en" },
-                ],
+                type: QUESTION_TYPE.BRIEF_RESPONSE,
+                title: "Why is HTML considered the backbone of any website?",
+                description: "Explain its role in web development.",
                 language: "en",
               },
             ],
-          },
-        ],
-      },
-      {
-        title: "JavaScript Foundations",
-        isFreemium: false,
-        lessons: [
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Variables, Types, and Functions",
-            description: `
-              <p><strong>Duration:</strong> 35-45 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Core Concepts</h2>
-              <ul>
-                <li><p>Variables store values you can reuse.</p></li>
-                <li><p>Types describe the kind of data (string, number, boolean).</p></li>
-                <li><p>Functions package logic into reusable blocks.</p></li>
-              </ul>
-              <p></p>
-              <h2>Example</h2>
-              <p>Create a function that converts minutes to seconds and returns the result.</p>
-              <p></p>
-              <h2>Practice</h2>
-              <p>Write three variables with different types and log them to the console.</p>
-            `,
           },
           {
             type: LESSON_TYPES.AI_MENTOR,
-            title: "JavaScript Practice Coach",
+            title: "HTML Basics",
             aiMentorInstructions:
-              "Guide the learner through writing simple functions and choosing appropriate data types. Ask for examples and correct common mistakes.",
+              "Guide the learner through the basics of HTML structure, including elements, tags, and their roles in building a web page. Encourage questions and provide examples for each concept.",
             completionConditions:
-              "Learner can write a function that accepts inputs, returns a value, and uses basic types.",
+              "Learner can identify and explain the purpose of basic HTML elements and successfully create a simple HTML page structure.",
           },
           {
             type: LESSON_TYPES.QUIZ,
-            title: "JavaScript Basics Quiz",
+            title: "CSS and Layout Quiz",
+            description:
+              "Test your knowledge of CSS concepts, including layout techniques and styling properties.",
             questions: [
               {
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
                 title: "Fill blanks with the correct word.",
-                description: "A [word] stores data, while a [word] performs an action.",
+                description:
+                  "In CSS, [word] is used to style the layout, while [word] is used to change colors.",
                 solutionExplanation:
-                  "<p>A <strong>variable</strong> stores data, while a <strong>function</strong> performs an action.</p>",
+                  "<p>In CSS, <strong>flexbox</strong> is used to style the layout, while <strong>color properties</strong> are used to change colors.</p>",
                 options: [
-                  { optionText: "variable", isCorrect: true, language: "en" },
-                  { optionText: "function", isCorrect: true, language: "en" },
-                  { optionText: "selector", isCorrect: false, language: "en" },
+                  {
+                    optionText: "flexbox",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "color properties",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "grid",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "flex",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+              {
+                type: QUESTION_TYPE.MULTIPLE_CHOICE,
+                title: "Which CSS property is used to set the background color of an element?",
+                options: [
+                  {
+                    optionText: "background-color",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "color",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "border-color",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "box-shadow",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+            ],
+          },
+          {
+            type: LESSON_TYPES.CONTENT,
+            title: "HTML Hyperlinks Presentation",
+            description:
+              "Learn the basics of web development with HTML! Master the structure and tags needed to build professional websites from scratch.",
+          },
+          {
+            type: LESSON_TYPES.QUIZ,
+            title: "HTML Tag Quiz",
+            questions: [
+              {
+                type: QUESTION_TYPE.SINGLE_CHOICE,
+                title: "Which HTML tag is used to create a hyperlink?",
+                options: [
+                  {
+                    optionText: "<a>",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "<link>",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "<button>",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "<input>",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+              {
+                type: QUESTION_TYPE.SINGLE_CHOICE,
+                title: "Which HTML tag is used to define a table row?",
+                options: [
+                  {
+                    optionText: "<tr>",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "<td>",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "<table>",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "<th>",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "HTML Basics: Test Your Knowledge",
+        isFreemium: false,
+        lessons: [
+          {
+            type: LESSON_TYPES.QUIZ,
+            title: "HTML Basics: Test Your Knowledge",
+            description:
+              "This lesson is designed to test your understanding of basic HTML concepts. You'll encounter a mix of multiple-choice and single-answer questions to evaluate your knowledge of HTML structure and common elements.",
+            questions: [
+              {
+                type: QUESTION_TYPE.SINGLE_CHOICE,
+                title: "Which of the following HTML tags is used to create an image?",
+                options: [
+                  {
+                    optionText: "<img>",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "<picture>",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "<video>",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "<audio>",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+              {
+                type: QUESTION_TYPE.MULTIPLE_CHOICE,
+                title:
+                  "Which of the following are valid HTML elements for structuring content? (Select all that apply)",
+                options: [
+                  {
+                    optionText: "<html>",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "<head>",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "<body>",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "<title>",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "<h1>",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "<p>",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+              {
+                type: QUESTION_TYPE.SINGLE_CHOICE,
+                title: "Which HTML tag is used to create a hyperlink?",
+                options: [
+                  {
+                    optionText: "<a>",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "<link>",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "<button>",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "<input>",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+              {
+                type: QUESTION_TYPE.MULTIPLE_CHOICE,
+                title:
+                  "Which of the following attributes are commonly used with the <img> tag? (Select all that apply)",
+                options: [
+                  {
+                    optionText: "alt",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "src",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "width",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "height",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "srcset",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+              {
+                type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
+                title: "Fill blanks with the correct word.",
+                description:
+                  "CSS is used to style [word], while JavaScript is used to add [word] to web pages.",
+                solutionExplanation:
+                  "<p>CSS is used to style <strong>HTML</strong>, while JavaScript is used to add <strong>interactivity</strong> to web pages.</p>",
+                options: [
+                  {
+                    optionText: "HTML",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "interactivity",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "styles",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "functions",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "content",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "elements",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "animations",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+              {
+                type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
+                title: "Fill blanks with the correct word.",
+                description:
+                  "In CSS, [word] is used to style the layout, while [word] is used to change colors.",
+                solutionExplanation:
+                  "<p>In CSS, <strong>flexbox</strong> is used to style the layout, while <strong>color properties</strong> are used to change colors.</p>",
+                options: [
+                  {
+                    optionText: "flexbox",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "color properties",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+              {
+                type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
+                title: "Fill blanks with the correct word.",
+                description:
+                  "In JavaScript, [word] are used to store data, while [word] are used to perform actions.",
+                solutionExplanation:
+                  "<p>In JavaScript, <strong>variables</strong> are used to store data, while <strong>functions</strong> are used to perform actions.</p>",
+                options: [
+                  {
+                    optionText: "variables",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "functions",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "CSS Fundamentals: Put Your Skills to the Test",
+        isFreemium: true,
+        lessons: [
+          {
+            type: LESSON_TYPES.QUIZ,
+            title: "CSS Fundamentals: Put Your Skills to the Test",
+            description:
+              "This lesson is a comprehensive quiz to evaluate your understanding of CSS fundamentals. You'll face a variety of question types covering selectors, properties, and layout techniques.",
+            questions: [
+              {
+                type: QUESTION_TYPE.SINGLE_CHOICE,
+                title: "Which CSS property is used to change the text color of an element?",
+                options: [
+                  {
+                    optionText: "color",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "text-color",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "font-color",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "text-style",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+              {
+                type: QUESTION_TYPE.MULTIPLE_CHOICE,
+                title: "Which of the following are valid CSS selectors? (Select all that apply)",
+                options: [
+                  {
+                    optionText: ".class-name",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "#id-name",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "element",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "[attribute]",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "$variable",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+              {
+                type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
+                title: "Fill blanks with the correct word.",
+                description:
+                  "The CSS [word] property is used for creating flexible box layouts, while [word] is used for creating grid layouts.",
+                solutionExplanation:
+                  "<p>The CSS <strong>flexbox</strong> property is used for creating flexible box layouts, while <strong>color properties</strong> are used for creating grid layouts.</p>",
+                options: [
+                  {
+                    optionText: "flexbox",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "color properties",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "grid",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "flex",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+              {
+                type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
+                title: "Fill blanks with the correct word.",
+                description:
+                  "To center an element horizontally, you can use 'margin: [word] [word];'.",
+                solutionExplanation:
+                  "<p>To center an element horizontally, you can use 'margin: <strong>0 auto</strong>;'.</p>",
+                options: [
+                  {
+                    optionText: "0",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "auto",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "HTML Basics: Building the Structure of Your Website",
+        isFreemium: false,
+        lessons: [
+          {
+            type: LESSON_TYPES.CONTENT,
+            title: "Introduction to HTML",
+            description:
+              "HTML (HyperText Markup Language) is the standard language used to create the structure of web pages. In this lesson, you'll explore basic HTML elements and how they are used to build the framework of a website.",
+          },
+          {
+            type: LESSON_TYPES.QUIZ,
+            title: "HTML Quiz: Importance of HTML",
+            description: "",
+            questions: [
+              {
+                type: QUESTION_TYPE.BRIEF_RESPONSE,
+                title:
+                  "Why is HTML considered the backbone of any website? Explain its role in web development.",
+                language: "en",
+              },
+            ],
+          },
+          {
+            type: LESSON_TYPES.QUIZ,
+            title: "CSS and Layout Quiz",
+            questions: [
+              {
+                type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
+                title: "Fill blanks with the correct word.",
+                description:
+                  "In CSS, [word] is used to style the layout, while [word] is used to change colors.",
+                solutionExplanation:
+                  "<p>In CSS, <strong>flexbox</strong> is used to style the layout, while <strong>color properties</strong> are used to change colors.</p>",
+                options: [
+                  {
+                    optionText: "flexbox",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "color properties",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "grid",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "flex",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+              {
+                type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
+                title: "Fill blanks with the correct word.",
+                description:
+                  "The [word] property is used to set the spacing between lines of text, and the [word] property is used to set the spacing outside an element.",
+                solutionExplanation:
+                  "<p>In CSS, the <strong>line-height</strong> property is used to set the spacing between lines of text, while the <strong>margin</strong> property is used to set the spacing outside an element.</p>",
+                options: [
+                  {
+                    optionText: "line-height",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "margin",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "padding",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "letter-spacing",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+
+  {
+    title: "Mobile App Development: Creating Your First Android App",
+    description:
+      "Dive into the world of mobile app development with this beginner-friendly course. You'll learn the fundamentals of Android app development using Java and Android Studio. By the end of the course, you'll have created your own simple Android app and gained essential skills for future mobile development projects.",
+    status: "published",
+    priceInCents: 0,
+    category: "Mobile Development",
+    language: "en",
+    thumbnailS3Key: faker.image.urlPicsumPhotos(),
+    chapters: [
+      {
+        title: "Java Basics: Building Blocks of Android Development",
+        isFreemium: false,
+        lessons: [
+          {
+            type: LESSON_TYPES.CONTENT,
+            title: "Introduction to Java for Android",
+            description:
+              "Java is the primary language used for Android app development. In this lesson, you'll learn about Java syntax, data types, and object-oriented programming principles that form the foundation of Android development.",
+          },
+          {
+            type: LESSON_TYPES.QUIZ,
+            title: "Explain why Java is the preferred language for Android development",
+            description: "",
+            questions: [
+              {
+                type: QUESTION_TYPE.BRIEF_RESPONSE,
+                title: "Explain why Java is the preferred language for Android development.",
+                description: "",
+                language: "en",
+              },
+            ],
+          },
+          {
+            type: LESSON_TYPES.QUIZ,
+            title: "Test your knowledge",
+            questions: [
+              {
+                type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
+                title: "Fill blanks with the correct word.",
+                description:
+                  "In Java, [word] are used to define the blueprint of objects, while [word] are instances.",
+                solutionExplanation:
+                  "<p>In Java, <strong>classes</strong> are used to define the blueprint of objects, while <strong>objects</strong> are instances of these blueprints.</p>",
+                options: [
+                  {
+                    optionText: "classes",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "objects",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+            ],
+          },
+          {
+            type: LESSON_TYPES.QUIZ,
+            title: "Test your knowledge",
+            questions: [
+              {
+                type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
+                title: "Fill blanks with the correct word.",
+                description:
+                  "In Android dev, [word] are used to define the user interface, while [word] handle user interactions.",
+                solutionExplanation:
+                  "<p>In Android development, <strong>layouts</strong> are used to define the user interface, while <strong>activities</strong> handle user interactions and app logic.</p>",
+                options: [
+                  {
+                    optionText: "layouts",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "activities",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+            ],
+          },
+          {
+            type: LESSON_TYPES.CONTENT,
+            title: "Java OOP Concepts Presentation",
+            description: "Explore Object-Oriented Programming principles in Java.",
+          },
+          {
+            type: LESSON_TYPES.QUIZ,
+            title: "Which keyword is used to create a new instance of a class in Java?",
+            description: "",
+            questions: [
+              {
+                type: QUESTION_TYPE.SINGLE_CHOICE,
+                title: "Which keyword is used to create a new instance of a class in Java?",
+                options: [
+                  {
+                    optionText: "new",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "create",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "instance",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "object",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "Android Development Basics: Test Your Knowledge",
+        isFreemium: false,
+        lessons: [
+          {
+            type: LESSON_TYPES.QUIZ,
+            title: "Which of the following is the entry point of an Android application?",
+            description: "",
+            questions: [
+              {
+                type: QUESTION_TYPE.SINGLE_CHOICE,
+                title: "Which of the following is the entry point of an Android application?",
+                options: [
+                  {
+                    optionText: "Activity",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "Service",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "BroadcastReceiver",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "ContentProvider",
+                    isCorrect: false,
+                    language: "en",
+                  },
                 ],
                 language: "en",
               },
@@ -432,9 +862,9 @@ export const niceCourses: NiceCourseData[] = [
     ],
   },
   {
-    title: "Kotlin and Android: Build a Simple App",
+    title: "Kotlin for Beginners: Modern Android Development",
     description:
-      "Learn Kotlin fundamentals and how Android apps are structured. You will create a basic app layout and connect logic to user interactions.",
+      "Explore Kotlin, the modern and preferred language for Android development. This beginner-friendly course introduces Kotlin fundamentals and guides you through creating a basic Android app using Kotlin and Android Studio.",
     status: "published",
     priceInCents: 0,
     category: "Mobile Development",
@@ -443,51 +873,32 @@ export const niceCourses: NiceCourseData[] = [
     hasCertificate: true,
     chapters: [
       {
-        title: "Kotlin Fundamentals",
-        isFreemium: true,
+        title: "Getting Started with Kotlin Programming",
+        isFreemium: false,
         lessons: [
           {
             type: LESSON_TYPES.CONTENT,
-            title: "Kotlin Syntax and Types",
-            description: `
-              <p><strong>Duration:</strong> 30-40 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Why Kotlin</h2>
-              <p>Kotlin is concise, null-safe, and fully interoperable with Java, which makes it a strong default for Android development.</p>
-              <p></p>
-              <h2>Key Language Features</h2>
-              <ul>
-                <li><p>Type inference and readable syntax.</p></li>
-                <li><p>Null safety to reduce runtime crashes.</p></li>
-                <li><p>Data classes for compact models.</p></li>
-              </ul>
-              <p></p>
-              <h2>Practice</h2>
-              <p>Declare a list of tasks and write a function that prints each item.</p>
-            `,
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Kotlin Basics Video",
-            description: withVideoLink(`
-              <p><strong>Duration:</strong> 20-30 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Watch</h2>
-              <p>Follow along as we build a small Kotlin script and review common syntax patterns.</p>
-            `),
+            title: "Introduction to Kotlin for Android",
+            description:
+              "Kotlin is a modern, concise language used for Android development. In this lesson, you'll learn about Kotlin syntax and basic concepts for creating Android apps.",
           },
           {
             type: LESSON_TYPES.QUIZ,
-            title: "Kotlin Basics Quiz",
+            title: "Which keyword is used to declare a variable in Kotlin?",
+            description: "",
             questions: [
               {
                 type: QUESTION_TYPE.SINGLE_CHOICE,
-                title: "Which keyword declares a read-only variable in Kotlin?",
+                title: "Which keyword is used to declare a variable in Kotlin?",
                 options: [
-                  { optionText: "val", isCorrect: true, language: "en" },
-                  { optionText: "var", isCorrect: false, language: "en" },
+                  { optionText: "var", isCorrect: true, language: "en" },
+                  { optionText: "val", isCorrect: false, language: "en" },
                   { optionText: "let", isCorrect: false, language: "en" },
-                  { optionText: "const", isCorrect: false, language: "en" },
+                  {
+                    optionText: "data",
+                    isCorrect: false,
+                    language: "en",
+                  },
                 ],
                 language: "en",
               },
@@ -496,51 +907,34 @@ export const niceCourses: NiceCourseData[] = [
         ],
       },
       {
-        title: "Android App Structure",
+        title: "Building Your First App with Kotlin",
         isFreemium: false,
         lessons: [
           {
             type: LESSON_TYPES.CONTENT,
-            title: "Activities, Views, and Layouts",
-            description: `
-              <p><strong>Duration:</strong> 30-40 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Building Blocks</h2>
-              <ul>
-                <li><p><strong>Activity</strong> is a screen with UI and logic.</p></li>
-                <li><p><strong>Layout</strong> describes how views are arranged.</p></li>
-                <li><p><strong>View</strong> is a button, text, image, or input.</p></li>
-              </ul>
-              <p></p>
-              <h2>Example Flow</h2>
-              <p>Open the app, load the activity, and inflate the XML layout to render the UI.</p>
-              <p></p>
-              <h2>Practice</h2>
-              <p>Sketch a simple login screen and list the views you would use.</p>
-            `,
+            title: "Setting Up Your Android Studio Environment",
+            description:
+              "Learn how to configure Android Studio for Kotlin development and create your first Android project.",
           },
           {
             type: LESSON_TYPES.CONTENT,
-            title: "Android Project Tour",
-            description: withPresentationLink(`
-              <p><strong>Duration:</strong> 20-30 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Slides</h2>
-              <p>Explore the AndroidManifest, Gradle files, and resource folders.</p>
-            `),
+            title: "Creating a Simple Kotlin App",
+            description: "A step-by-step guide to building your first Android app using Kotlin.",
           },
           {
             type: LESSON_TYPES.QUIZ,
-            title: "Android Structure Quiz",
+            title: "Test your knowledge",
             questions: [
               {
-                type: QUESTION_TYPE.SINGLE_CHOICE,
-                title: "Which file defines the app's entry point?",
+                type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
+                title: "Fill blanks with the correct word.",
+                description:
+                  "In Kotlin, [word] are immutable variables, while [word] are mutable variables.",
+                solutionExplanation:
+                  "<p>In Kotlin, <strong>val</strong> are immutable variables, while <strong>var</strong> are mutable variables.</p>",
                 options: [
-                  { optionText: "AndroidManifest.xml", isCorrect: true, language: "en" },
-                  { optionText: "build.gradle", isCorrect: false, language: "en" },
-                  { optionText: "styles.xml", isCorrect: false, language: "en" },
-                  { optionText: "settings.gradle", isCorrect: false, language: "en" },
+                  { optionText: "val", isCorrect: true, language: "en" },
+                  { optionText: "var", isCorrect: true, language: "en" },
                 ],
                 language: "en",
               },
@@ -551,9 +945,9 @@ export const niceCourses: NiceCourseData[] = [
     ],
   },
   {
-    title: "Mathematics Foundations: Core Skills for Everyday Use",
+    title: "Mathematics for Beginners: Building a Strong Foundation",
     description:
-      "Strengthen your math skills with focused lessons on arithmetic, geometry, and algebra. Each unit includes practice questions and short activities.",
+      "Learn essential math concepts with this beginner-friendly course. Covering fundamental topics like arithmetic, geometry, and algebra, this course is designed to make math accessible and enjoyable. By the end, you'll have a solid understanding of foundational math skills needed for advanced learning.",
     status: "published",
     priceInCents: 0,
     category: "Mathematics",
@@ -561,164 +955,240 @@ export const niceCourses: NiceCourseData[] = [
     thumbnailS3Key: faker.image.urlPicsumPhotos(),
     chapters: [
       {
-        title: "Arithmetic Essentials",
-        isFreemium: true,
-        lessons: [
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Numbers and Operations",
-            description: `
-              <p><strong>Duration:</strong> 30-40 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>What You Will Practice</h2>
-              <ul>
-                <li><p>Add, subtract, multiply, and divide whole numbers.</p></li>
-                <li><p>Work with decimals and simple fractions.</p></li>
-                <li><p>Estimate results to catch mistakes.</p></li>
-              </ul>
-              <p></p>
-              <h2>Example</h2>
-              <p>If a recipe calls for 1.5 cups and you double it, you need 3 cups.</p>
-            `,
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Arithmetic Practice Video",
-            description: withVideoLink(`
-              <p><strong>Duration:</strong> 15-25 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Watch</h2>
-              <p>Follow step-by-step examples on budgeting, discounts, and unit conversions.</p>
-            `),
-          },
-          {
-            type: LESSON_TYPES.QUIZ,
-            title: "Arithmetic Quiz",
-            questions: [
-              {
-                type: QUESTION_TYPE.SINGLE_CHOICE,
-                title: "What is 15% of 200?",
-                options: [
-                  { optionText: "30", isCorrect: true, language: "en" },
-                  { optionText: "20", isCorrect: false, language: "en" },
-                  { optionText: "25", isCorrect: false, language: "en" },
-                  { optionText: "35", isCorrect: false, language: "en" },
-                ],
-                language: "en",
-              },
-            ],
-          },
-        ],
-      },
-      {
-        title: "Geometry Basics",
+        title: "Arithmetic Essentials: Numbers and Operations",
         isFreemium: false,
         lessons: [
           {
             type: LESSON_TYPES.CONTENT,
-            title: "Shapes, Area, and Perimeter",
-            description: `
-              <p><strong>Duration:</strong> 30-40 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Core Formulas</h2>
-              <ul>
-                <li><p>Rectangle area = length x width.</p></li>
-                <li><p>Triangle area = (base x height) / 2.</p></li>
-                <li><p>Circle area = pi x r x r.</p></li>
-              </ul>
-              <p></p>
-              <h2>Practice</h2>
-              <p>Measure a table or notebook and calculate its area and perimeter.</p>
-            `,
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Geometry Slides",
-            description: withPresentationLink(`
-              <p><strong>Duration:</strong> 20-30 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Slides</h2>
-              <p>Review worked examples and quick reference formulas.</p>
-            `),
+            title: "Introduction to Arithmetic",
+            description:
+              "Arithmetic is the foundation of mathematics. In this lesson, you'll learn about numbers, basic operations, and their properties.",
           },
           {
             type: LESSON_TYPES.QUIZ,
-            title: "Geometry Quiz",
+            title: "Why is arithmetic considered the foundation of mathematics? ",
+            description: "",
             questions: [
               {
-                type: QUESTION_TYPE.SINGLE_CHOICE,
-                title: "What is the area of a rectangle with length 8 and width 5?",
-                options: [
-                  { optionText: "40", isCorrect: true, language: "en" },
-                  { optionText: "13", isCorrect: false, language: "en" },
-                  { optionText: "26", isCorrect: false, language: "en" },
-                  { optionText: "18", isCorrect: false, language: "en" },
-                ],
+                type: QUESTION_TYPE.BRIEF_RESPONSE,
+                title:
+                  "Why is arithmetic fundamental in math? Give a real-life example of its use.",
                 language: "en",
               },
             ],
           },
-        ],
-      },
-      {
-        title: "Algebra Essentials",
-        isFreemium: false,
-        lessons: [
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Variables and Expressions",
-            description: `
-              <p><strong>Duration:</strong> 30-40 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Key Ideas</h2>
-              <ul>
-                <li><p>Variables stand for unknown values.</p></li>
-                <li><p>Expressions combine numbers, variables, and operators.</p></li>
-                <li><p>Equations set two expressions equal to solve for a variable.</p></li>
-              </ul>
-              <p></p>
-              <h2>Example</h2>
-              <p>If x + 3 = 9, then x = 6.</p>
-            `,
-          },
           {
             type: LESSON_TYPES.QUIZ,
-            title: "Algebra Quiz",
+            title: "Math is the study of numbers, shapes, and quantities.",
             questions: [
               {
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
                 title: "Fill blanks with the correct word.",
                 description:
-                  "In algebra, [word] represent unknown values, while [word] combine numbers and symbols.",
+                  "In arithmetic, [word] is the result of addition, while [word] is the result of subtraction.",
                 solutionExplanation:
-                  "<p>In algebra, <strong>variables</strong> represent unknown values, while <strong>expressions</strong> combine numbers and symbols.</p>",
+                  "<p>In arithmetic, <strong>sum</strong> is the result of addition, while <strong>difference</strong> is the result of subtraction.</p>",
                 options: [
-                  { optionText: "variables", isCorrect: true, language: "en" },
-                  { optionText: "expressions", isCorrect: true, language: "en" },
-                  { optionText: "integers", isCorrect: false, language: "en" },
+                  { optionText: "sum", isCorrect: true, language: "en" },
+                  {
+                    optionText: "difference",
+                    isCorrect: true,
+                    language: "en",
+                  },
                 ],
                 language: "en",
               },
             ],
           },
+        ],
+      },
+      {
+        title: "Geometry Basics: Shapes and Measurements",
+        isFreemium: false,
+        lessons: [
           {
             type: LESSON_TYPES.CONTENT,
-            title: "Solving Simple Equations",
-            description: withVideoLink(`
-              <p><strong>Duration:</strong> 20-30 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Watch</h2>
-              <p>Follow a step-by-step walkthrough of solving one-variable equations.</p>
-            `),
+            title: "Understanding Geometry",
+            description:
+              "Geometry involves the study of shapes, sizes, and the properties of space. In this lesson, you'll learn about basic geometric figures and their properties.",
+          },
+          {
+            type: LESSON_TYPES.CONTENT,
+            title: "Geometric Shapes Presentation",
+            description:
+              "Explore various geometric shapes, their formulas for area and perimeter, and their real-life applications.",
+          },
+          {
+            type: LESSON_TYPES.QUIZ,
+            title: "Which formula is used to calculate the area of a rectangle?",
+            description: "",
+            questions: [
+              {
+                type: QUESTION_TYPE.SINGLE_CHOICE,
+                title: "Which formula is used to calculate the area of a rectangle?",
+                options: [
+                  {
+                    optionText: "length × width",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "length + width",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "length × height",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "2 × (length + width)",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "Algebra Introduction: Solving for the Unknown",
+        isFreemium: false,
+        lessons: [
+          {
+            type: LESSON_TYPES.CONTENT,
+            title: "Getting Started with Algebra",
+            description:
+              "Algebra helps us solve problems by finding unknown values. In this lesson, you'll learn about variables, expressions, and simple equations.",
+          },
+          {
+            type: LESSON_TYPES.QUIZ,
+            title: "Test your knowledge",
+            questions: [
+              {
+                type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
+                title: "Fill blanks with the correct word.",
+                description:
+                  "In algebra, [word] represent unknown values, while [word] are mathematical phrases",
+                solutionExplanation:
+                  "<p>In algebra, <strong>variables</strong> represent unknown values, while <strong>expressions</strong> are mathematical phrases that combine numbers and variables.</p>",
+                options: [
+                  {
+                    optionText: "variables",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "expressions",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "Mathematics Basics Quiz: Test Your Knowledge",
+        isFreemium: false,
+        lessons: [
+          {
+            type: LESSON_TYPES.QUIZ,
+            title: "Mathematics Basics Quiz: Test Your Knowledge",
+            description:
+              "Evaluate your understanding of arithmetic, geometry, and algebra with this comprehensive quiz.",
+            questions: [
+              {
+                type: QUESTION_TYPE.SINGLE_CHOICE,
+                title: "Which of the following is an example of a geometric shape?",
+                options: [
+                  {
+                    optionText: "Triangle",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "Variable",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "Equation",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  { optionText: "Sum", isCorrect: false, language: "en" },
+                ],
+                language: "en",
+              },
+              {
+                type: QUESTION_TYPE.MULTIPLE_CHOICE,
+                title: "Which operations are included in basic arithmetic? (Select all that apply)",
+                options: [
+                  {
+                    optionText: "Addition",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "Subtraction",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "Multiplication",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "Division",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "Integration",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+              {
+                type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
+                title: "Fill blanks with the correct word.",
+                description:
+                  "In algebra, [word] are used to represent unknowns, while [word] can be solved to find their values.",
+                solutionExplanation:
+                  "<p>In algebra, <strong>variables</strong> are used to represent unknowns, while <strong>equations</strong> can be solved to find their values.</p>",
+                options: [
+                  {
+                    optionText: "variables",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "equations",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+            ],
           },
         ],
       },
     ],
   },
   {
-    title: "English Communication Basics",
+    title: "English Basics: Building a Strong Foundation",
     description:
-      "Improve everyday English with practical lessons on grammar, vocabulary, and speaking. The course focuses on clear sentences, common word choices, and confidence in conversation.",
+      "Learn the fundamentals of English with this beginner-friendly course. From grammar to vocabulary, you'll gain the essential skills needed for effective communication in English. By the end of the course, you'll be equipped with the confidence to navigate everyday conversations and writing tasks with ease.",
     status: "published",
     priceInCents: 0,
     category: "Language Learning",
@@ -727,49 +1197,46 @@ export const niceCourses: NiceCourseData[] = [
     hasCertificate: true,
     chapters: [
       {
-        title: "Grammar Essentials",
-        isFreemium: true,
+        title: "Mastering Basic Grammar Rules",
+        isFreemium: false,
         lessons: [
           {
             type: LESSON_TYPES.CONTENT,
-            title: "Parts of Speech",
-            description: `
-              <p><strong>Duration:</strong> 30-40 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Core Parts of Speech</h2>
-              <ul>
-                <li><p><strong>Nouns</strong> name people, places, or things.</p></li>
-                <li><p><strong>Verbs</strong> show actions or states.</p></li>
-                <li><p><strong>Adjectives</strong> describe nouns.</p></li>
-                <li><p><strong>Adverbs</strong> modify verbs or adjectives.</p></li>
-              </ul>
-              <p></p>
-              <h2>Practice</h2>
-              <p>Write a sentence and label each word by its part of speech.</p>
-            `,
+            title: "Introduction to English Grammar",
+            description:
+              "Learn the essential grammar rules that form the backbone of English communication, covering nouns, verbs, adjectives, and more.",
           },
           {
             type: LESSON_TYPES.CONTENT,
-            title: "Grammar Video Guide",
-            description: withVideoLink(`
-              <p><strong>Duration:</strong> 15-25 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Watch</h2>
-              <p>Review sentence structure and common grammar mistakes.</p>
-            `),
+            title: "Sentence Structure Basics",
+            description:
+              "Explore how sentences are structured, including subject-verb agreement and word order in affirmative, negative, and question forms.",
           },
           {
             type: LESSON_TYPES.QUIZ,
-            title: "Grammar Quiz",
+            title: "Explain the difference between a noun and a verb in a sentence.",
+            description: "Explain the difference between a noun and a verb in a sentence.",
             questions: [
               {
-                type: QUESTION_TYPE.SINGLE_CHOICE,
-                title: "Which word is a verb in the sentence: 'They run every morning'?",
+                type: QUESTION_TYPE.BRIEF_RESPONSE,
+                title: "Explain the difference between a noun and a verb in a sentence.",
+                description: "Explain its role in sentence construction.",
+                language: "en",
+              },
+            ],
+          },
+          {
+            type: LESSON_TYPES.QUIZ,
+            title: "Test your knowledge",
+            questions: [
+              {
+                type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
+                title: "Fill blanks with the correct word.",
+                description: "Fill in the blanks: 'She [word] to the store yesterday.'",
+                solutionExplanation: "<p>She <strong>went</strong> to the store yesterday.</p>",
                 options: [
-                  { optionText: "run", isCorrect: true, language: "en" },
-                  { optionText: "they", isCorrect: false, language: "en" },
-                  { optionText: "every", isCorrect: false, language: "en" },
-                  { optionText: "morning", isCorrect: false, language: "en" },
+                  { optionText: "went", isCorrect: true, language: "en" },
+                  { optionText: "go", isCorrect: false, language: "en" },
                 ],
                 language: "en",
               },
@@ -778,96 +1245,237 @@ export const niceCourses: NiceCourseData[] = [
         ],
       },
       {
-        title: "Vocabulary Building",
+        title: "Building Vocabulary for Beginners",
         isFreemium: false,
         lessons: [
           {
             type: LESSON_TYPES.CONTENT,
-            title: "Everyday Words and Phrases",
-            description: `
-              <p><strong>Duration:</strong> 25-35 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Common Topics</h2>
-              <ul>
-                <li><p>Work: schedule, meeting, deadline.</p></li>
-                <li><p>Travel: ticket, station, platform.</p></li>
-                <li><p>Daily life: grocery, receipt, appointment.</p></li>
-              </ul>
-              <p></p>
-              <h2>Practice</h2>
-              <p>Write three sentences using new vocabulary words.</p>
-            `,
+            title: "Common English Words and Phrases",
+            description:
+              "A beginner-friendly list of common English words and phrases you can use in daily conversations.",
           },
           {
             type: LESSON_TYPES.CONTENT,
-            title: "Vocabulary Presentation",
-            description: withPresentationLink(`
-              <p><strong>Duration:</strong> 20-30 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Slides</h2>
-              <p>Explore synonyms, antonyms, and common collocations.</p>
-            `),
+            title: "Synonyms and Antonyms",
+            description:
+              "Learn about the importance of synonyms and antonyms in expanding your vocabulary and making your speech more varied.",
+          },
+          {
+            type: LESSON_TYPES.CONTENT,
+            title: "English Vocabulary Expansion Presentation",
+            description: "A comprehensive slide presentation on expanding your vocabulary.",
           },
           {
             type: LESSON_TYPES.QUIZ,
-            title: "Vocabulary Quiz",
+            title: "Which word is the synonym of 'happy'?",
+            description: "Choose the correct synonym for 'happy'.",
             questions: [
               {
                 type: QUESTION_TYPE.SINGLE_CHOICE,
-                title: "Which word is a synonym for 'quick'?",
+                title: "Which word is the synonym of 'happy'?",
                 options: [
-                  { optionText: "fast", isCorrect: true, language: "en" },
-                  { optionText: "slow", isCorrect: false, language: "en" },
-                  { optionText: "heavy", isCorrect: false, language: "en" },
-                  { optionText: "late", isCorrect: false, language: "en" },
+                  {
+                    optionText: "Joyful",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  { optionText: "Sad", isCorrect: false, language: "en" },
+                  {
+                    optionText: "Angry",
+                    isCorrect: false,
+                    language: "en",
+                  },
                 ],
                 language: "en",
               },
             ],
           },
-        ],
-      },
-      {
-        title: "Speaking and Listening",
-        isFreemium: false,
-        lessons: [
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Clear Pronunciation",
-            description: `
-              <p><strong>Duration:</strong> 25-35 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Pronunciation Basics</h2>
-              <ul>
-                <li><p>Use word stress to emphasize meaning.</p></li>
-                <li><p>Practice vowel sounds and final consonants.</p></li>
-                <li><p>Slow down to improve clarity.</p></li>
-              </ul>
-              <p></p>
-              <h2>Practice</h2>
-              <p>Record yourself reading a short paragraph and listen for unclear words.</p>
-            `,
-          },
-          {
-            type: LESSON_TYPES.AI_MENTOR,
-            title: "Conversation Coach",
-            aiMentorInstructions:
-              "Practice short dialogues and help the learner form clear, polite responses. Encourage repetition and correction.",
-            completionConditions:
-              "Learner can respond to common prompts using complete sentences and appropriate vocabulary.",
-          },
           {
             type: LESSON_TYPES.QUIZ,
-            title: "Pronunciation Check",
+            title: "Test your knowledge",
             questions: [
               {
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_TEXT,
-                title: "Fill in the blank with the correct word.",
-                description: "I [word] to the store every Saturday.",
-                solutionExplanation: "I <strong>go</strong> to the store every Saturday.",
+                title: "Fill in the blanks with the correct word.",
+                description: "I [word] to the park every day.",
+                solutionExplanation: "I <strong>go</strong> to the park every day.",
                 options: [
                   { optionText: "go", isCorrect: true, language: "en" },
-                  { optionText: "went", isCorrect: false, language: "en" },
+                  {
+                    optionText: "went",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "Mastering Pronunciation and Accent",
+        isFreemium: false,
+        lessons: [
+          {
+            type: LESSON_TYPES.CONTENT,
+            title: "Essential Pronunciation Tips",
+            description:
+              "Learn how to pronounce English words correctly and improve your accent with practical tips and exercises.",
+          },
+          {
+            type: LESSON_TYPES.CONTENT,
+            title: "Common Pronunciation Mistakes",
+            description:
+              "Identify and work on common pronunciation challenges for non-native English speakers.",
+          },
+          {
+            type: LESSON_TYPES.QUIZ,
+            title:
+              "Which of the following sounds is most commonly mispronounced by non-native English speakers?",
+            description: "Choose the sound that is most commonly mispronounced.",
+            questions: [
+              {
+                type: QUESTION_TYPE.SINGLE_CHOICE,
+                title:
+                  "Which of the following sounds is most commonly mispronounced by non-native English speakers?",
+                options: [
+                  { optionText: "Th", isCorrect: true, language: "en" },
+                  { optionText: "S", isCorrect: false, language: "en" },
+                  { optionText: "K", isCorrect: false, language: "en" },
+                ],
+                language: "en",
+              },
+            ],
+          },
+          {
+            type: LESSON_TYPES.QUIZ,
+            title: "Choose the correct verb form.",
+            questions: [
+              {
+                type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
+                title: "Fill blanks with the correct word.",
+                description: "I love [word] (swimming/swim).",
+                solutionExplanation: "I love <strong>swimming</strong> (swimming/swim).",
+                options: [
+                  {
+                    optionText: "swimming",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "swim",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "swam",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "English Basics Quiz",
+        isFreemium: false,
+        lessons: [
+          {
+            type: LESSON_TYPES.QUIZ,
+            title:
+              "Which part of speech is the word 'quickly' in the sentence 'She ran quickly to the store'?",
+            description: "Choose the correct part of speech.",
+            questions: [
+              {
+                type: QUESTION_TYPE.SINGLE_CHOICE,
+                title:
+                  "Which part of speech is the word 'quickly' in the sentence 'She ran quickly to the store'?",
+                options: [
+                  {
+                    optionText: "Adverb",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "Verb",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "Adjective",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+            ],
+          },
+          {
+            type: LESSON_TYPES.QUIZ,
+            title: "Fill in the blank with the correct verb.",
+            questions: [
+              {
+                type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
+                title: "Fill blanks with the correct word.",
+                description: "She [word] to the park every day.",
+                solutionExplanation: "She <strong>went</strong> to the park every day.",
+                options: [
+                  { optionText: "goes", isCorrect: true, language: "en" },
+                  {
+                    optionText: "went",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+            ],
+          },
+          {
+            type: LESSON_TYPES.QUIZ,
+            title: "What is the plural form of 'child'?",
+            description: "Choose the correct plural form of 'child'.",
+            questions: [
+              {
+                type: QUESTION_TYPE.SINGLE_CHOICE,
+                title: "What is the plural form of 'child'?",
+                options: [
+                  {
+                    optionText: "Children",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "Childs",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+            ],
+          },
+          {
+            type: LESSON_TYPES.QUIZ,
+            title: "Which of these words is a conjunction?",
+            description: "Choose the correct conjunction.",
+            questions: [
+              {
+                type: QUESTION_TYPE.SINGLE_CHOICE,
+                title: "Which of these words is a conjunction?",
+                options: [
+                  { optionText: "And", isCorrect: true, language: "en" },
+                  { optionText: "Run", isCorrect: false, language: "en" },
+                  {
+                    optionText: "Quickly",
+                    isCorrect: false,
+                    language: "en",
+                  },
                 ],
                 language: "en",
               },
@@ -878,1556 +1486,772 @@ export const niceCourses: NiceCourseData[] = [
     ],
   },
   {
-    title: "Fake test to certificate",
+    title: "Advanced English: Mastering Complex Language Skills",
     description:
-      "A short, fast course designed to complete quickly and unlock a certificate. Includes a brief overview and a short quiz.",
+      "Take your English proficiency to the next level with this advanced course. Dive deep into advanced grammar structures, vocabulary, idiomatic expressions, and perfect your writing and speaking skills. By the end of this course, you'll have the tools to express yourself with clarity, sophistication, and confidence.",
     status: "published",
     priceInCents: 0,
-    category: "Quick Start",
+    category: "Language Learning",
     language: "en",
     thumbnailS3Key: faker.image.urlPicsumPhotos(),
     hasCertificate: true,
     chapters: [
       {
-        title: "Quick Completion",
-        isFreemium: true,
+        title: "Elevate Your Writing: Advanced Clause Strategies",
+        isFreemium: false,
         lessons: [
           {
-            type: LESSON_TYPES.CONTENT,
-            title: "Fast Track Overview",
-            description: withPresentationLink(`
-              <p><strong>Duration:</strong> 5-10 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Goal</h2>
-              <p>Complete a short lesson and a quick quiz to verify access to certificates.</p>
-              <p></p>
-              <h2>Watch</h2>
-              <p></p>
-              <h2>Slides</h2>
-              <p></p>
-              <h2>Checklist</h2>
-              <ul>
-                <li><p>Read the overview.</p></li>
-                <li><p>Watch the short video.</p></li>
-                <li><p>Open the slides.</p></li>
-              </ul>
-            `),
-          },
-          {
             type: LESSON_TYPES.QUIZ,
-            title: "Fast Completion Quiz",
-            description: "A quick check to finish the course.",
+            title: "Using Adverbial Clauses to Improve Sentence Fluency",
+            description:
+              "Understand how adverbial clauses function to show time, reason, contrast, and condition in sentences.",
             questions: [
               {
                 type: QUESTION_TYPE.SINGLE_CHOICE,
-                title: "What should you do to complete this course?",
+                title: "What does an adverbial clause typically express in a sentence?",
                 options: [
                   {
-                    optionText: "Finish the lesson and pass the quiz",
+                    optionText: "Time, reason, contrast, or condition",
                     isCorrect: true,
                     language: "en",
                   },
                   {
-                    optionText: "Skip all content",
+                    optionText: "The subject of the sentence",
                     isCorrect: false,
                     language: "en",
                   },
                   {
-                    optionText: "Submit a project",
+                    optionText: "Additional information about nouns",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "The main action in a sentence",
                     isCorrect: false,
                     language: "en",
                   },
                 ],
                 language: "en",
               },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    title: "Digital Marketing Launchpad",
-    description:
-      "Learn how to plan, launch, and measure digital campaigns across common channels. Build practical skills in audience research, messaging, and performance tracking.",
-    status: "published",
-    priceInCents: 0,
-    category: "Marketing",
-    language: "en",
-    thumbnailS3Key: faker.image.urlPicsumPhotos(),
-    chapters: [
-      {
-        title: "Market Research and Positioning",
-        isFreemium: false,
-        lessons: [
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Audience and Personas",
-            description: withPresentationLink(
-              withVideoLink(`
-              <p><strong>Duration:</strong> 30-40 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Goal</h2>
-              <p>Define who you serve, what they need, and how they decide.</p>
-              <p></p>
-              <h2>Persona Basics</h2>
-              <ul>
-                <li><p>Demographics and context.</p></li>
-                <li><p>Jobs-to-be-done and pain points.</p></li>
-                <li><p>Decision triggers and objections.</p></li>
-              </ul>
-              <p></p>
-              <h2>Watch</h2>
-              <p></p>
-              <h2>Slides</h2>
-              <p></p>
-              <h2>Activity</h2>
-              <p>Write one persona with a clear goal and two objections.</p>
-            `),
-            ),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Competitive Analysis",
-            description: withPresentationLink(`
-              <p><strong>Duration:</strong> 25-35 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>What to Compare</h2>
-              <ul>
-                <li><p>Positioning and pricing.</p></li>
-                <li><p>Channel mix and ad messaging.</p></li>
-                <li><p>Customer reviews and claims.</p></li>
-              </ul>
-              <p></p>
-              <h2>Slides</h2>
-              <p>Use a simple matrix to list strengths and gaps.</p>
-            `),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Value Proposition and Messaging",
-            description: withVideoLink(`
-              <p><strong>Duration:</strong> 25-35 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Core Message</h2>
-              <p>A strong value proposition explains who it is for, the primary benefit, and why it is credible.</p>
-              <p></p>
-              <h2>Watch</h2>
-              <p></p>
-              <h2>Practice</h2>
-              <p>Write one headline and one supporting sentence for your product.</p>
-            `),
-          },
-          {
-            type: LESSON_TYPES.QUIZ,
-            title: "Positioning Quiz",
-            description: "Check your understanding of personas and value propositions.",
-            questions: [
               {
-                type: QUESTION_TYPE.SINGLE_CHOICE,
-                title: "Which element belongs in a persona?",
-                options: [
-                  { optionText: "Goals and pain points", isCorrect: true, language: "en" },
-                  { optionText: "Company revenue", isCorrect: false, language: "en" },
-                  { optionText: "Engineering roadmap", isCorrect: false, language: "en" },
-                  { optionText: "Internal org chart", isCorrect: false, language: "en" },
-                ],
-                language: "en",
-              },
-            ],
-          },
-          {
-            type: LESSON_TYPES.AI_MENTOR,
-            title: "Positioning Coach",
-            aiMentorInstructions:
-              "Help the learner refine a value proposition. Ask for the audience, benefit, and proof, then provide feedback.",
-            completionConditions:
-              "Learner produces a concise value proposition with a clear audience and benefit.",
-          },
-        ],
-      },
-      {
-        title: "Channels and Campaigns",
-        isFreemium: false,
-        lessons: [
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Channel Basics",
-            description: withPresentationLink(`
-              <p><strong>Duration:</strong> 30-40 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Common Channels</h2>
-              <ul>
-                <li><p>Search, social, email, and partnerships.</p></li>
-                <li><p>When each channel works best.</p></li>
-                <li><p>Typical goals and costs.</p></li>
-              </ul>
-              <p></p>
-              <h2>Slides</h2>
-              <p>Compare strengths across channels.</p>
-            `),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Email Campaign Structure",
-            description: withVideoLink(`
-              <p><strong>Duration:</strong> 20-30 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Structure</h2>
-              <ul>
-                <li><p>Subject line, opening, CTA, and follow-up.</p></li>
-                <li><p>Segmenting by audience intent.</p></li>
-              </ul>
-              <p></p>
-              <h2>Watch</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Social Media Ads",
-            description: withPresentationLink(`
-              <p><strong>Duration:</strong> 25-35 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Creative Essentials</h2>
-              <ul>
-                <li><p>One message per ad.</p></li>
-                <li><p>Strong visual hierarchy.</p></li>
-                <li><p>Clear CTA aligned to intent.</p></li>
-              </ul>
-              <p></p>
-              <h2>Slides</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Landing Page Fundamentals",
-            description: withVideoLink(`
-              <p><strong>Duration:</strong> 25-35 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Structure</h2>
-              <ul>
-                <li><p>Headline, proof, benefits, and CTA.</p></li>
-                <li><p>Remove distractions from the page.</p></li>
-              </ul>
-              <p></p>
-              <h2>Watch</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.QUIZ,
-            title: "Channels Quiz",
-            description: "Identify which channel fits the goal.",
-            questions: [
-              {
-                type: QUESTION_TYPE.SINGLE_CHOICE,
-                title: "Which channel is best for nurturing existing leads?",
-                options: [
-                  { optionText: "Email", isCorrect: true, language: "en" },
-                  { optionText: "Out-of-home", isCorrect: false, language: "en" },
-                  { optionText: "Direct mail", isCorrect: false, language: "en" },
-                  { optionText: "Cold calling", isCorrect: false, language: "en" },
-                ],
-                language: "en",
-              },
-            ],
-          },
-        ],
-      },
-      {
-        title: "Measurement and Optimization",
-        isFreemium: false,
-        lessons: [
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Key Metrics and KPIs",
-            description: withPresentationLink(`
-              <p><strong>Duration:</strong> 25-35 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Core Metrics</h2>
-              <ul>
-                <li><p>CAC, LTV, conversion rate, and ROAS.</p></li>
-                <li><p>Track the full funnel, not just clicks.</p></li>
-              </ul>
-              <p></p>
-              <h2>Slides</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "A/B Testing Basics",
-            description: withVideoLink(`
-              <p><strong>Duration:</strong> 20-30 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>What to Test</h2>
-              <ul>
-                <li><p>Headlines, CTA copy, and layout.</p></li>
-                <li><p>One change at a time.</p></li>
-              </ul>
-              <p></p>
-              <h2>Watch</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Marketing Dashboards",
-            description: withPresentationLink(`
-              <p><strong>Duration:</strong> 20-30 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Dashboard Goals</h2>
-              <ul>
-                <li><p>Daily health metrics.</p></li>
-                <li><p>Weekly progress toward goals.</p></li>
-                <li><p>Clear alert thresholds.</p></li>
-              </ul>
-              <p></p>
-              <h2>Slides</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.QUIZ,
-            title: "Measurement Quiz",
-            description: "Confirm understanding of basic marketing metrics.",
-            questions: [
-              {
-                type: QUESTION_TYPE.SINGLE_CHOICE,
-                title: "What does ROAS measure?",
-                options: [
-                  { optionText: "Revenue per ad spend", isCorrect: true, language: "en" },
-                  { optionText: "Clicks per email", isCorrect: false, language: "en" },
-                  { optionText: "Sessions per day", isCorrect: false, language: "en" },
-                  { optionText: "Cost per lead", isCorrect: false, language: "en" },
-                ],
-                language: "en",
-              },
-            ],
-          },
-          {
-            type: LESSON_TYPES.AI_MENTOR,
-            title: "Optimization Coach",
-            aiMentorInstructions:
-              "Help the learner interpret a simple campaign report and identify one optimization.",
-            completionConditions:
-              "Learner can explain one metric change and propose a reasonable test.",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    title: "Product Management Fundamentals",
-    description:
-      "Learn how to define product strategy, prioritize roadmaps, and align teams around outcomes. Build skills for discovery, delivery, and measurement.",
-    status: "published",
-    priceInCents: 0,
-    category: "Product Management",
-    language: "en",
-    thumbnailS3Key: faker.image.urlPicsumPhotos(),
-    chapters: [
-      {
-        title: "Product Strategy and Vision",
-        isFreemium: false,
-        lessons: [
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Product Vision",
-            description: withPresentationLink(
-              withVideoLink(`
-              <p><strong>Duration:</strong> 30-40 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Vision Statement</h2>
-              <p>Define the change your product will create and who it serves.</p>
-              <p></p>
-              <h2>Vision Elements</h2>
-              <ul>
-                <li><p>Target audience and problem.</p></li>
-                <li><p>Long-term impact.</p></li>
-                <li><p>Guiding principles.</p></li>
-              </ul>
-              <p></p>
-              <h2>Watch</h2>
-              <p></p>
-              <h2>Slides</h2>
-              <p></p>
-              <h2>Activity</h2>
-              <p>Draft a one-sentence product vision.</p>
-            `),
-            ),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Outcome-Based Goals",
-            description: withPresentationLink(`
-              <p><strong>Duration:</strong> 25-35 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Outcomes vs Outputs</h2>
-              <p>Outcomes describe user or business change, not a feature list.</p>
-              <p></p>
-              <h2>Slides</h2>
-              <p>Define one outcome and its leading indicators.</p>
-            `),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Market and Customer Research",
-            description: withVideoLink(`
-              <p><strong>Duration:</strong> 25-35 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Discovery Inputs</h2>
-              <ul>
-                <li><p>Interviews, surveys, and analytics.</p></li>
-                <li><p>Support tickets and sales notes.</p></li>
-              </ul>
-              <p></p>
-              <h2>Watch</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.QUIZ,
-            title: "Strategy Quiz",
-            description: "Check your understanding of vision and outcomes.",
-            questions: [
-              {
-                type: QUESTION_TYPE.SINGLE_CHOICE,
-                title: "Which is an outcome?",
-                options: [
-                  { optionText: "Increase activation by 10%", isCorrect: true, language: "en" },
-                  { optionText: "Add a new dashboard", isCorrect: false, language: "en" },
-                  { optionText: "Ship a new widget", isCorrect: false, language: "en" },
-                  { optionText: "Refactor the API", isCorrect: false, language: "en" },
-                ],
-                language: "en",
-              },
-            ],
-          },
-          {
-            type: LESSON_TYPES.AI_MENTOR,
-            title: "Vision Coach",
-            aiMentorInstructions:
-              "Guide the learner to refine a vision statement and connect it to measurable outcomes.",
-            completionConditions:
-              "Learner produces a clear vision and at least one measurable outcome.",
-          },
-        ],
-      },
-      {
-        title: "Prioritization and Roadmaps",
-        isFreemium: false,
-        lessons: [
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Prioritization Frameworks",
-            description: withPresentationLink(`
-              <p><strong>Duration:</strong> 30-40 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Popular Frameworks</h2>
-              <ul>
-                <li><p>RICE, MoSCoW, and WSJF.</p></li>
-                <li><p>Balance impact, effort, and risk.</p></li>
-              </ul>
-              <p></p>
-              <h2>Slides</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Roadmap Types",
-            description: withVideoLink(`
-              <p><strong>Duration:</strong> 20-30 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Roadmap Styles</h2>
-              <ul>
-                <li><p>Theme-based roadmaps.</p></li>
-                <li><p>Outcome-based roadmaps.</p></li>
-                <li><p>Release schedules.</p></li>
-              </ul>
-              <p></p>
-              <h2>Watch</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Stakeholder Alignment",
-            description: withPresentationLink(`
-              <p><strong>Duration:</strong> 20-30 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Alignment Tips</h2>
-              <ul>
-                <li><p>Share tradeoffs early.</p></li>
-                <li><p>Use data to explain choices.</p></li>
-                <li><p>Document decisions and rationale.</p></li>
-              </ul>
-              <p></p>
-              <h2>Slides</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.QUIZ,
-            title: "Prioritization Quiz",
-            description: "Practice choosing tradeoffs.",
-            questions: [
-              {
-                type: QUESTION_TYPE.SINGLE_CHOICE,
-                title: "Which input most affects RICE scoring?",
-                options: [
-                  { optionText: "Reach", isCorrect: true, language: "en" },
-                  { optionText: "Logo color", isCorrect: false, language: "en" },
-                  { optionText: "Team size", isCorrect: false, language: "en" },
-                  { optionText: "Office location", isCorrect: false, language: "en" },
-                ],
-                language: "en",
-              },
-            ],
-          },
-          {
-            type: LESSON_TYPES.AI_MENTOR,
-            title: "Roadmap Coach",
-            aiMentorInstructions:
-              "Help the learner rank a small set of features using a simple framework.",
-            completionConditions: "Learner provides a ranked list with a short justification.",
-          },
-        ],
-      },
-      {
-        title: "Delivery and Measurement",
-        isFreemium: false,
-        lessons: [
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "MVP Scoping",
-            description: withPresentationLink(`
-              <p><strong>Duration:</strong> 20-30 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Define the MVP</h2>
-              <p>Identify the smallest set of features that validates the core hypothesis.</p>
-              <p></p>
-              <h2>Slides</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Launch Planning",
-            description: withVideoLink(`
-              <p><strong>Duration:</strong> 20-30 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Launch Checklist</h2>
-              <ul>
-                <li><p>Readiness, documentation, and support.</p></li>
-                <li><p>Rollout and communication plan.</p></li>
-              </ul>
-              <p></p>
-              <h2>Watch</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Measuring Success",
-            description: withPresentationLink(`
-              <p><strong>Duration:</strong> 20-30 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Measurement Plan</h2>
-              <ul>
-                <li><p>Define leading and lagging indicators.</p></li>
-                <li><p>Set a baseline and review cadence.</p></li>
-              </ul>
-              <p></p>
-              <h2>Slides</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.QUIZ,
-            title: "Delivery Quiz",
-            questions: [
-              {
-                type: QUESTION_TYPE.SINGLE_CHOICE,
-                title: "What is the MVP focused on?",
-                options: [
-                  { optionText: "Testing a core hypothesis", isCorrect: true, language: "en" },
-                  { optionText: "Shipping every feature", isCorrect: false, language: "en" },
-                  { optionText: "A full redesign", isCorrect: false, language: "en" },
-                  { optionText: "Marketing only", isCorrect: false, language: "en" },
-                ],
-                language: "en",
-              },
-            ],
-          },
-          {
-            type: LESSON_TYPES.AI_MENTOR,
-            title: "Launch Coach",
-            aiMentorInstructions:
-              "Ask the learner for a launch goal, then help build a simple checklist.",
-            completionConditions:
-              "Learner produces a checklist with at least three concrete launch tasks.",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    title: "UX Design Essentials",
-    description:
-      "Build core UX skills for research, interaction design, and usability testing. Learn how to design flows that are clear, accessible, and delightful.",
-    status: "published",
-    priceInCents: 0,
-    category: "Design",
-    language: "en",
-    thumbnailS3Key: faker.image.urlPicsumPhotos(),
-    chapters: [
-      {
-        title: "User Research Fundamentals",
-        isFreemium: false,
-        lessons: [
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Research Planning",
-            description: withPresentationLink(
-              withVideoLink(`
-              <p><strong>Duration:</strong> 25-35 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Define the Problem</h2>
-              <p>Start with a clear question and decide which method fits best.</p>
-              <p></p>
-              <h2>Methods</h2>
-              <ul>
-                <li><p>Interviews and surveys.</p></li>
-                <li><p>Observation and diary studies.</p></li>
-              </ul>
-              <p></p>
-              <h2>Watch</h2>
-              <p></p>
-              <h2>Slides</h2>
-            `),
-            ),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Interview Skills",
-            description: withVideoLink(`
-              <p><strong>Duration:</strong> 20-30 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Interview Tips</h2>
-              <ul>
-                <li><p>Ask open-ended questions.</p></li>
-                <li><p>Listen more than you talk.</p></li>
-                <li><p>Probe for concrete examples.</p></li>
-              </ul>
-              <p></p>
-              <h2>Watch</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Synthesis and Insights",
-            description: withPresentationLink(`
-              <p><strong>Duration:</strong> 20-30 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Turn Notes into Insights</h2>
-              <ul>
-                <li><p>Cluster quotes into themes.</p></li>
-                <li><p>Highlight pain points and needs.</p></li>
-              </ul>
-              <p></p>
-              <h2>Slides</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.QUIZ,
-            title: "Research Quiz",
-            questions: [
-              {
-                type: QUESTION_TYPE.SINGLE_CHOICE,
-                title: "What is a good interview question?",
+                type: QUESTION_TYPE.MULTIPLE_CHOICE,
+                title: "Which of the following are examples of adverbial clause markers?",
                 options: [
                   {
-                    optionText: "Tell me about the last time you...",
+                    optionText: "Although",
                     isCorrect: true,
                     language: "en",
                   },
-                  { optionText: "Do you like our design?", isCorrect: false, language: "en" },
-                  { optionText: "Would you pay $20?", isCorrect: false, language: "en" },
-                  { optionText: "Our app is great, right?", isCorrect: false, language: "en" },
-                ],
-                language: "en",
-              },
-            ],
-          },
-          {
-            type: LESSON_TYPES.AI_MENTOR,
-            title: "Research Coach",
-            aiMentorInstructions:
-              "Help the learner refine a research question and propose a suitable method.",
-            completionConditions:
-              "Learner drafts one research question and picks an appropriate method.",
-          },
-        ],
-      },
-      {
-        title: "Interaction Design",
-        isFreemium: false,
-        lessons: [
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "User Flows",
-            description: withPresentationLink(`
-              <p><strong>Duration:</strong> 25-35 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Flow Mapping</h2>
-              <p>Map the steps users take to achieve a goal and remove friction.</p>
-              <p></p>
-              <h2>Slides</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Wireframes and Layout",
-            description: withVideoLink(`
-              <p><strong>Duration:</strong> 25-35 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Wireframe Basics</h2>
-              <ul>
-                <li><p>Focus on structure, not visuals.</p></li>
-                <li><p>Use reusable patterns.</p></li>
-              </ul>
-              <p></p>
-              <h2>Watch</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Accessibility Essentials",
-            description: withPresentationLink(`
-              <p><strong>Duration:</strong> 20-30 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Core Principles</h2>
-              <ul>
-                <li><p>Color contrast and readable type.</p></li>
-                <li><p>Keyboard navigation.</p></li>
-                <li><p>Clear focus states.</p></li>
-              </ul>
-              <p></p>
-              <h2>Slides</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.QUIZ,
-            title: "Interaction Quiz",
-            questions: [
-              {
-                type: QUESTION_TYPE.SINGLE_CHOICE,
-                title: "What is the goal of a wireframe?",
-                options: [
-                  { optionText: "Define structure and layout", isCorrect: true, language: "en" },
-                  { optionText: "Finalize colors", isCorrect: false, language: "en" },
-                  { optionText: "Write production code", isCorrect: false, language: "en" },
-                  { optionText: "Choose fonts", isCorrect: false, language: "en" },
-                ],
-                language: "en",
-              },
-            ],
-          },
-          {
-            type: LESSON_TYPES.AI_MENTOR,
-            title: "Flow Coach",
-            aiMentorInstructions:
-              "Ask the learner to describe a user goal and help outline the flow steps.",
-            completionConditions: "Learner provides a clear start-to-finish flow with key steps.",
-          },
-        ],
-      },
-      {
-        title: "Usability Testing",
-        isFreemium: false,
-        lessons: [
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Test Planning",
-            description: withPresentationLink(`
-              <p><strong>Duration:</strong> 20-30 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Plan the Test</h2>
-              <ul>
-                <li><p>Define tasks and success criteria.</p></li>
-                <li><p>Recruit the right users.</p></li>
-              </ul>
-              <p></p>
-              <h2>Slides</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Moderation Tips",
-            description: withVideoLink(`
-              <p><strong>Duration:</strong> 20-30 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Moderation</h2>
-              <p>Stay neutral, let the user struggle, and ask clarifying questions after.</p>
-              <p></p>
-              <h2>Watch</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Reporting Results",
-            description: withPresentationLink(`
-              <p><strong>Duration:</strong> 20-30 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Report Structure</h2>
-              <ul>
-                <li><p>Top findings and impact.</p></li>
-                <li><p>Evidence and quotes.</p></li>
-                <li><p>Suggested fixes.</p></li>
-              </ul>
-              <p></p>
-              <h2>Slides</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.QUIZ,
-            title: "Usability Quiz",
-            questions: [
-              {
-                type: QUESTION_TYPE.SINGLE_CHOICE,
-                title: "What should a usability task include?",
-                options: [
-                  { optionText: "A clear goal", isCorrect: true, language: "en" },
-                  { optionText: "A design critique", isCorrect: false, language: "en" },
-                  { optionText: "A logo selection", isCorrect: false, language: "en" },
-                  { optionText: "An animation demo", isCorrect: false, language: "en" },
-                ],
-                language: "en",
-              },
-            ],
-          },
-          {
-            type: LESSON_TYPES.AI_MENTOR,
-            title: "Testing Coach",
-            aiMentorInstructions: "Help the learner write one usability task and success criteria.",
-            completionConditions: "Learner produces a task statement with clear success criteria.",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    title: "Personal Finance Basics",
-    description:
-      "Build essential money skills: budgeting, saving, debt management, and investing. Learn practical steps to improve financial health.",
-    status: "published",
-    priceInCents: 0,
-    category: "Finance",
-    language: "en",
-    thumbnailS3Key: faker.image.urlPicsumPhotos(),
-    chapters: [
-      {
-        title: "Budgeting and Cash Flow",
-        isFreemium: false,
-        lessons: [
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Budget Basics",
-            description: withPresentationLink(
-              withVideoLink(`
-              <p><strong>Duration:</strong> 25-35 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Core Idea</h2>
-              <p>A budget is a plan for where your money goes, not a restriction.</p>
-              <p></p>
-              <h2>Categories</h2>
-              <ul>
-                <li><p>Needs, wants, and savings.</p></li>
-                <li><p>Fixed vs variable expenses.</p></li>
-              </ul>
-              <p></p>
-              <h2>Watch</h2>
-              <p></p>
-              <h2>Slides</h2>
-            `),
-            ),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Tracking Expenses",
-            description: withPresentationLink(`
-              <p><strong>Duration:</strong> 20-30 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Tracking Methods</h2>
-              <ul>
-                <li><p>Spreadsheets and apps.</p></li>
-                <li><p>Weekly check-ins.</p></li>
-              </ul>
-              <p></p>
-              <h2>Slides</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Building an Emergency Fund",
-            description: withVideoLink(`
-              <p><strong>Duration:</strong> 20-30 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Emergency Fund</h2>
-              <p>Aim for 3-6 months of core expenses to cover unexpected events.</p>
-              <p></p>
-              <h2>Watch</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.QUIZ,
-            title: "Budgeting Quiz",
-            questions: [
-              {
-                type: QUESTION_TYPE.SINGLE_CHOICE,
-                title: "Which expense is typically a need?",
-                options: [
-                  { optionText: "Rent", isCorrect: true, language: "en" },
-                  { optionText: "Streaming services", isCorrect: false, language: "en" },
-                  { optionText: "Dining out", isCorrect: false, language: "en" },
-                  { optionText: "Concert tickets", isCorrect: false, language: "en" },
-                ],
-                language: "en",
-              },
-            ],
-          },
-          {
-            type: LESSON_TYPES.AI_MENTOR,
-            title: "Budget Coach",
-            aiMentorInstructions:
-              "Help the learner build a simple monthly budget with needs, wants, and savings.",
-            completionConditions:
-              "Learner creates a budget outline with three categories and targets.",
-          },
-        ],
-      },
-      {
-        title: "Debt and Credit",
-        isFreemium: false,
-        lessons: [
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Understanding Credit Scores",
-            description: withPresentationLink(`
-              <p><strong>Duration:</strong> 20-30 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Credit Score Basics</h2>
-              <ul>
-                <li><p>Payment history and utilization.</p></li>
-                <li><p>Length of credit history.</p></li>
-              </ul>
-              <p></p>
-              <h2>Slides</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Debt Paydown Strategies",
-            description: withVideoLink(`
-              <p><strong>Duration:</strong> 20-30 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Strategies</h2>
-              <ul>
-                <li><p>Snowball: smallest balance first.</p></li>
-                <li><p>Avalanche: highest interest first.</p></li>
-              </ul>
-              <p></p>
-              <h2>Watch</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Avoiding Common Credit Mistakes",
-            description: withPresentationLink(`
-              <p><strong>Duration:</strong> 20-30 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Mistakes to Avoid</h2>
-              <ul>
-                <li><p>Missing payments.</p></li>
-                <li><p>Maxing out credit cards.</p></li>
-              </ul>
-              <p></p>
-              <h2>Slides</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.QUIZ,
-            title: "Credit Quiz",
-            questions: [
-              {
-                type: QUESTION_TYPE.SINGLE_CHOICE,
-                title: "Which factor most impacts a credit score?",
-                options: [
-                  { optionText: "Payment history", isCorrect: true, language: "en" },
-                  { optionText: "Favorite bank", isCorrect: false, language: "en" },
-                  { optionText: "Employer size", isCorrect: false, language: "en" },
-                  { optionText: "Number of checking accounts", isCorrect: false, language: "en" },
-                ],
-                language: "en",
-              },
-            ],
-          },
-          {
-            type: LESSON_TYPES.AI_MENTOR,
-            title: "Debt Strategy Coach",
-            aiMentorInstructions:
-              "Ask the learner about their debts and help choose between snowball and avalanche.",
-            completionConditions: "Learner selects a payoff strategy and lists first two steps.",
-          },
-        ],
-      },
-      {
-        title: "Saving and Investing",
-        isFreemium: false,
-        lessons: [
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Saving Goals",
-            description: withPresentationLink(`
-              <p><strong>Duration:</strong> 20-30 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Goal Setting</h2>
-              <ul>
-                <li><p>Short-term, mid-term, and long-term goals.</p></li>
-                <li><p>Automate savings where possible.</p></li>
-              </ul>
-              <p></p>
-              <h2>Slides</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Investing Basics",
-            description: withVideoLink(`
-              <p><strong>Duration:</strong> 25-35 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Core Concepts</h2>
-              <ul>
-                <li><p>Risk, return, and diversification.</p></li>
-                <li><p>Index funds and long-term growth.</p></li>
-              </ul>
-              <p></p>
-              <h2>Watch</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Retirement Accounts",
-            description: withPresentationLink(`
-              <p><strong>Duration:</strong> 20-30 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Account Types</h2>
-              <ul>
-                <li><p>Employer plans and individual accounts.</p></li>
-                <li><p>Tax advantages and matching.</p></li>
-              </ul>
-              <p></p>
-              <h2>Slides</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.QUIZ,
-            title: "Investing Quiz",
-            questions: [
-              {
-                type: QUESTION_TYPE.SINGLE_CHOICE,
-                title: "What does diversification reduce?",
-                options: [
-                  { optionText: "Risk", isCorrect: true, language: "en" },
-                  { optionText: "Time", isCorrect: false, language: "en" },
-                  { optionText: "Income", isCorrect: false, language: "en" },
-                  { optionText: "Savings", isCorrect: false, language: "en" },
-                ],
-                language: "en",
-              },
-            ],
-          },
-          {
-            type: LESSON_TYPES.AI_MENTOR,
-            title: "Savings Coach",
-            aiMentorInstructions: "Help the learner pick a savings goal and a monthly target.",
-            completionConditions: "Learner sets one goal with a realistic monthly savings amount.",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    title: "Cybersecurity Awareness",
-    description:
-      "Understand the most common security threats and how to protect yourself and your organization. Learn safe habits and incident response basics.",
-    status: "published",
-    priceInCents: 0,
-    category: "Cybersecurity",
-    language: "en",
-    thumbnailS3Key: faker.image.urlPicsumPhotos(),
-    chapters: [
-      {
-        title: "Threats and Risks",
-        isFreemium: false,
-        lessons: [
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Common Threats",
-            description: withPresentationLink(
-              withVideoLink(`
-              <p><strong>Duration:</strong> 20-30 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Top Threats</h2>
-              <ul>
-                <li><p>Phishing and social engineering.</p></li>
-                <li><p>Malware and ransomware.</p></li>
-                <li><p>Password reuse.</p></li>
-              </ul>
-              <p></p>
-              <h2>Watch</h2>
-              <p></p>
-              <h2>Slides</h2>
-            `),
-            ),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Phishing Red Flags",
-            description: withVideoLink(`
-              <p><strong>Duration:</strong> 15-25 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Red Flags</h2>
-              <ul>
-                <li><p>Urgency and threats.</p></li>
-                <li><p>Suspicious links and attachments.</p></li>
-                <li><p>Unexpected requests for credentials.</p></li>
-              </ul>
-              <p></p>
-              <h2>Watch</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Safe Browsing",
-            description: withPresentationLink(`
-              <p><strong>Duration:</strong> 15-25 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Safe Habits</h2>
-              <ul>
-                <li><p>Keep software up to date.</p></li>
-                <li><p>Use trusted networks.</p></li>
-                <li><p>Verify URLs before logging in.</p></li>
-              </ul>
-              <p></p>
-              <h2>Slides</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.QUIZ,
-            title: "Threats Quiz",
-            questions: [
-              {
-                type: QUESTION_TYPE.SINGLE_CHOICE,
-                title: "Which is a phishing sign?",
-                options: [
-                  { optionText: "Unexpected urgency", isCorrect: true, language: "en" },
-                  { optionText: "A known sender", isCorrect: false, language: "en" },
-                  { optionText: "A secure URL", isCorrect: false, language: "en" },
-                  { optionText: "A normal invoice", isCorrect: false, language: "en" },
-                ],
-                language: "en",
-              },
-            ],
-          },
-          {
-            type: LESSON_TYPES.AI_MENTOR,
-            title: "Threat Awareness Coach",
-            aiMentorInstructions:
-              "Present a short scenario and ask the learner to identify risks and safe actions.",
-            completionConditions:
-              "Learner identifies at least two risks and suggests safe responses.",
-          },
-        ],
-      },
-      {
-        title: "Protecting Accounts",
-        isFreemium: false,
-        lessons: [
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Password Hygiene",
-            description: withPresentationLink(`
-              <p><strong>Duration:</strong> 15-25 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Best Practices</h2>
-              <ul>
-                <li><p>Use long, unique passwords.</p></li>
-                <li><p>Enable multi-factor authentication.</p></li>
-                <li><p>Use a password manager.</p></li>
-              </ul>
-              <p></p>
-              <h2>Slides</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Multi-Factor Authentication",
-            description: withVideoLink(`
-              <p><strong>Duration:</strong> 15-25 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Why MFA Works</h2>
-              <p>It adds a second barrier even if a password is compromised.</p>
-              <p></p>
-              <h2>Watch</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Device Security",
-            description: withPresentationLink(`
-              <p><strong>Duration:</strong> 15-25 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Device Safety</h2>
-              <ul>
-                <li><p>Lock screens and auto-updates.</p></li>
-                <li><p>Encrypt storage.</p></li>
-              </ul>
-              <p></p>
-              <h2>Slides</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.QUIZ,
-            title: "Account Security Quiz",
-            questions: [
-              {
-                type: QUESTION_TYPE.SINGLE_CHOICE,
-                title: "Which action improves account security most?",
-                options: [
-                  { optionText: "Enable MFA", isCorrect: true, language: "en" },
-                  { optionText: "Reuse passwords", isCorrect: false, language: "en" },
-                  { optionText: "Turn off updates", isCorrect: false, language: "en" },
-                  { optionText: "Share credentials", isCorrect: false, language: "en" },
-                ],
-                language: "en",
-              },
-            ],
-          },
-          {
-            type: LESSON_TYPES.AI_MENTOR,
-            title: "Security Setup Coach",
-            aiMentorInstructions:
-              "Help the learner list three actions to secure their accounts today.",
-            completionConditions: "Learner provides three concrete security actions.",
-          },
-        ],
-      },
-      {
-        title: "Incident Response",
-        isFreemium: false,
-        lessons: [
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Recognizing Incidents",
-            description: withPresentationLink(`
-              <p><strong>Duration:</strong> 15-25 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Signs of Trouble</h2>
-              <ul>
-                <li><p>Unexpected logins or password resets.</p></li>
-                <li><p>Unusual device behavior.</p></li>
-              </ul>
-              <p></p>
-              <h2>Slides</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Immediate Actions",
-            description: withVideoLink(`
-              <p><strong>Duration:</strong> 15-25 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>First Steps</h2>
-              <ul>
-                <li><p>Report to the right team.</p></li>
-                <li><p>Change credentials.</p></li>
-                <li><p>Preserve evidence.</p></li>
-              </ul>
-              <p></p>
-              <h2>Watch</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Post-Incident Review",
-            description: withPresentationLink(`
-              <p><strong>Duration:</strong> 15-25 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Review Process</h2>
-              <ul>
-                <li><p>Document what happened.</p></li>
-                <li><p>Improve controls and training.</p></li>
-              </ul>
-              <p></p>
-              <h2>Slides</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.QUIZ,
-            title: "Incident Response Quiz",
-            questions: [
-              {
-                type: QUESTION_TYPE.SINGLE_CHOICE,
-                title: "What should you do first after a suspected breach?",
-                options: [
                   {
-                    optionText: "Report it through the proper channel",
+                    optionText: "However",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "Despite",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "Because",
                     isCorrect: true,
                     language: "en",
                   },
-                  { optionText: "Delete evidence", isCorrect: false, language: "en" },
-                  { optionText: "Ignore it", isCorrect: false, language: "en" },
-                  { optionText: "Post on social media", isCorrect: false, language: "en" },
+                ],
+                language: "en",
+              },
+              {
+                type: QUESTION_TYPE.BRIEF_RESPONSE,
+                title: "Provide an example of a sentence using an adverbial clause of reason.",
+                language: "en",
+              },
+              {
+                type: QUESTION_TYPE.DETAILED_RESPONSE,
+                title:
+                  "Explain the role of adverbial clauses in improving sentence complexity and fluency. Provide examples to support your explanation.",
+                language: "en",
+              },
+              {
+                type: QUESTION_TYPE.TRUE_OR_FALSE,
+                title: "Determine whether the sentence is correct or incorrect:",
+                options: [
+                  {
+                    optionText: "Adverbial clauses are used to modify nouns.",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText:
+                      "Adverbial clauses provide information about the verb, adjective, or another adverb.",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "Noun clauses can modify adjectives and adverbs.",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText:
+                      "Relative clauses are used to introduce more detail about the noun they modify.",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText:
+                      "A sentence can have multiple adverbial clauses with different functions.",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText:
+                      "A noun clause can act as a subject, object, or complement in a sentence.",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+              {
+                type: QUESTION_TYPE.FILL_IN_THE_BLANKS_TEXT,
+                title: "Fill blanks with the correct word.",
+                description:
+                  "The book was [word] by the author to explain complex [word] concepts.",
+                solutionExplanation:
+                  "The book was <strong>written</strong> by the author to explain complex <strong>grammatical</strong> concepts.",
+                options: [
+                  {
+                    optionText: "written",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "grammatical",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+              {
+                type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
+                title: "Fill blanks with the correct word.",
+                description:
+                  "The [word] of the study focused on the effects of [word] in [word] language acquisition.",
+                solutionExplanation:
+                  "The <strong>focus</strong> of the study focused on the effects of <strong>context</strong> in <strong>second</strong> language acquisition.",
+                options: [
+                  {
+                    optionText: "focus",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "context",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "second",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "method",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "learning",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "primary",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+              {
+                type: QUESTION_TYPE.PHOTO_QUESTION_SINGLE_CHOICE,
+                title: "Which sentence correctly uses an adverbial clause?",
+                description:
+                  "Look at the image below. Which sentence correctly uses an adverbial clause?",
+                photoS3Key:
+                  process.env.NODE_ENV === "production"
+                    ? "course/c862d10e-b0fc-460d-a317-9a234cab62f6.png"
+                    : "course/ae6c4e46-a445-4621-ab3e-fc3f66296910.png",
+                options: [
+                  {
+                    optionText: "She went to the park after she finished her homework.",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "The book was on the table.",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "I like reading books because it's relaxing.",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "He plays basketball every weekend.",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+              {
+                type: QUESTION_TYPE.PHOTO_QUESTION_MULTIPLE_CHOICE,
+                title: "Select the sentence that depict examples of relative clauses.",
+                description:
+                  "Look at the image below. Select all the sentences that depict examples of relative clauses.",
+                photoS3Key:
+                  process.env.NODE_ENV === "production"
+                    ? "course/ac0a916c-fae9-410e-8b98-50fe9dfeb9a9.png"
+                    : "course/7635f98b-03c4-4065-bfbb-e518b3124a1b.png",
+                options: [
+                  {
+                    optionText: "The man who is wearing a red shirt is my brother.",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "She enjoys playing the piano every evening.",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "This is the book that changed my life.",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "They are playing outside in the yard.",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "Advanced Grammar: Perfecting Sentence Structures",
+        isFreemium: false,
+        lessons: [
+          {
+            type: LESSON_TYPES.CONTENT,
+            title: "Complex Sentences and Their Use",
+            description:
+              "Learn how to form and use complex sentences to convey more detailed thoughts and ideas effectively.",
+          },
+          {
+            type: LESSON_TYPES.CONTENT,
+            title: "Relative Clauses and Modifiers",
+            description:
+              "A deep dive into relative clauses and modifiers, which help to add extra information to sentences.",
+          },
+          {
+            type: LESSON_TYPES.QUIZ,
+            title: "Difference between a relative clause and a noun clause",
+            description: "Explain the difference between relative and noun clauses.",
+            questions: [
+              {
+                type: QUESTION_TYPE.SINGLE_CHOICE,
+                title: "What is the difference between a relative clause and a noun clause?",
+                options: [
+                  {
+                    optionText: "Relative clauses are used to modify nouns",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "Relative clauses are used to introduce new information",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "Noun clauses are used to modify nouns",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "Noun clauses are used to introduce new information",
+                    isCorrect: false,
+                    language: "en",
+                  },
                 ],
                 language: "en",
               },
             ],
           },
           {
-            type: LESSON_TYPES.AI_MENTOR,
-            title: "Incident Coach",
-            aiMentorInstructions:
-              "Ask the learner to describe an incident scenario and guide a response checklist.",
-            completionConditions: "Learner lists at least three immediate response steps.",
+            type: LESSON_TYPES.QUIZ,
+            title: "Test your knowledge",
+            questions: [
+              {
+                type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
+                title: "Fill blanks with the correct word.",
+                description: "The book [word] I borrowed yesterday was fascinating.",
+                solutionExplanation:
+                  "The book <strong>that</strong> I borrowed yesterday was fascinating.",
+                options: [
+                  { optionText: "that", isCorrect: true, language: "en" },
+                  { optionText: "who", isCorrect: false, language: "en" },
+                ],
+                language: "en",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "Vocabulary Expansion: Academic and Formal English",
+        isFreemium: false,
+        lessons: [
+          {
+            type: LESSON_TYPES.CONTENT,
+            title: "Academic Vocabulary and Its Application",
+            description:
+              "Master vocabulary words commonly used in academic papers, essays, and formal discussions.",
+          },
+          {
+            type: LESSON_TYPES.CONTENT,
+            title: "Using Formal Language in Communication",
+            description:
+              "Learn how to adjust your language for formal situations, such as presentations or professional meetings.",
+          },
+          {
+            type: LESSON_TYPES.CONTENT,
+            title: "Academic Vocabulary List",
+            description:
+              "Download this list of academic vocabulary and explore their meanings and usage in context.",
+          },
+          {
+            type: LESSON_TYPES.QUIZ,
+            title: "Which word is an example of academic vocabulary?",
+            description: "Select the correct academic word.",
+            questions: [
+              {
+                type: QUESTION_TYPE.SINGLE_CHOICE,
+                title: "Which word is an example of academic vocabulary?",
+                options: [
+                  {
+                    optionText: "Analyze",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  { optionText: "Run", isCorrect: false, language: "en" },
+                  {
+                    optionText: "Quick",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+            ],
+          },
+          {
+            type: LESSON_TYPES.QUIZ,
+            title: "Test your knowledge",
+            questions: [
+              {
+                type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
+                title: "Fill blanks with the correct word.",
+                description: "The results [word] the hypothesis.",
+                solutionExplanation: "The results <strong>support</strong> the hypothesis.",
+                options: [
+                  {
+                    optionText: "support",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "supported",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "supports",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "Mastering Idiomatic Expressions",
+        isFreemium: false,
+        lessons: [
+          {
+            type: LESSON_TYPES.CONTENT,
+            title: "Understanding Idioms in Context",
+            description:
+              "Learn how idiomatic expressions are used in everyday conversations to sound more natural and fluent.",
+          },
+          {
+            type: LESSON_TYPES.CONTENT,
+            title: "Common Idioms and Their Meanings",
+            description:
+              "A list of frequently used idioms, their meanings, and examples of how to use them.",
+          },
+          {
+            type: LESSON_TYPES.QUIZ,
+            title: "What does the idiom 'break the ice' mean?",
+            questions: [
+              {
+                type: QUESTION_TYPE.SINGLE_CHOICE,
+                title: "What does the idiom 'break the ice' mean?",
+                description: "Explain the meaning of the idiom 'break the ice'.",
+                options: [
+                  {
+                    optionText: "A way to start a conversation.",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "A way to end a conversation.",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "A way to make a person feel better.",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "An idiom for a person who is not interested in a conversation.",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+              {
+                type: QUESTION_TYPE.MULTIPLE_CHOICE,
+                title: "Which of the following is an example of a break the ice expression?",
+                description: "Choose the correct example of a break the ice expression.",
+                options: [
+                  {
+                    optionText: "I'm not interested in talking to you anymore.",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "I don't want to talk to you anymore.",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "I'm not interested anymore in talking to you.",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "You're not interested in talking to me anymore.",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+              {
+                type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
+                title: "Fill in the blanks with the correct word.",
+                description:
+                  "The break the ice expression is used to [word] a person who is not interested in a conversation.",
+                solutionExplanation:
+                  "The break the ice expression is used to <strong>make</strong> a person feel better.",
+                options: [
+                  {
+                    optionText: "make",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "feel",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "start",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "end",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+            ],
+          },
+          {
+            type: LESSON_TYPES.QUIZ,
+            title: "Fill in the blank with the correct idiom.",
+            questions: [
+              {
+                type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
+                title: "Fill blanks with the correct word.",
+                description: "She was [word] when she heard the good news.",
+                solutionExplanation:
+                  "She was <strong>over the moon</strong> when she heard the good news.",
+                options: [
+                  {
+                    optionText: "over the moon",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "over the mooning",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "over the mooned",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+            ],
           },
         ],
       },
     ],
   },
   {
-    title: "Project Leadership Essentials",
+    title: "Artificial Intelligence in Business: Fundamentals",
     description:
-      "Learn how to plan projects, lead teams, and communicate progress. Build skills in scope, risk, and delivery.",
+      "This beginner-friendly course introduces the basics of AI in business. Learn about key concepts, terminologies, and how AI is applied to improve efficiency, automate processes, and enhance decision-making in various industries. By the end, you'll understand AI's potential to transform your business.",
     status: "published",
-    priceInCents: 0,
-    category: "Leadership",
+    priceInCents: 12900,
+    category: "Artificial Intelligence",
     language: "en",
     thumbnailS3Key: faker.image.urlPicsumPhotos(),
     chapters: [
       {
-        title: "Planning and Scope",
+        title: "Understanding AI Basics",
         isFreemium: false,
         lessons: [
           {
             type: LESSON_TYPES.CONTENT,
-            title: "Project Scope",
-            description: withPresentationLink(
-              withVideoLink(`
-              <p><strong>Duration:</strong> 25-35 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Scope Definition</h2>
-              <p>Clarify what is in scope, out of scope, and the success criteria.</p>
-              <p></p>
-              <h2>Watch</h2>
-              <p></p>
-              <h2>Slides</h2>
-            `),
-            ),
+            title: "Key Concepts and Terminologies in AI",
+            description:
+              '<p>Artificial Intelligence (AI) refers to the simulation of human intelligence in machines programmed to think, learn, and make decisions. Below are some key concepts and terminologies essential to understanding AI:</p><ul><li><strong>Machine Learning (ML):</strong> A subset of AI focused on creating algorithms that allow computers to learn from and make predictions based on data. Example: A recommendation system suggesting movies based on your viewing history.</li><li><strong>Neural Networks:</strong> Inspired by the human brain, these are algorithms designed to recognize patterns and process data in layers, enabling tasks like image and speech recognition.</li><li><strong>Natural Language Processing (NLP):</strong> This involves teaching machines to understand, interpret, and generate human language. Example: Virtual assistants like Alexa or Siri.</li><li><strong>Computer Vision:</strong> A field of AI that enables computers to interpret and process visual data, such as images and videos. Example: Facial recognition technology.</li><li><strong>Deep Learning:</strong> A more complex subset of ML that uses large neural networks to analyze massive amounts of data and solve intricate problems, such as self-driving cars.</li><li><strong>Supervised vs. Unsupervised Learning:</strong><br>- <strong>Supervised Learning:</strong> The AI is trained on labeled data (e.g., images labeled as "cat" or "dog").<br>- <strong>Unsupervised Learning:</strong> The AI identifies patterns in unlabeled data without explicit instructions.</li><li><strong>Big Data:</strong> The large volume of structured and unstructured data generated by businesses and devices, which is essential for training AI models.</li><li><strong>Automation:</strong> AI is often used to automate repetitive tasks, freeing up human resources for more complex activities.</li><li><strong>Ethics in AI:</strong> As AI becomes more powerful, ensuring its ethical use (e.g., avoiding bias in decision-making) is critical for building trust.</li></ul><h3>Why These Concepts Matter</h3><p>Understanding these basic AI terms is the first step toward recognizing how AI can be applied in business. Each concept represents a building block of AI\'s potential to transform industries by increasing efficiency, improving decision-making, and creating innovative solutions.</p>',
           },
           {
             type: LESSON_TYPES.CONTENT,
-            title: "Milestones and Timelines",
-            description: withPresentationLink(`
-              <p><strong>Duration:</strong> 20-30 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Timeline Basics</h2>
-              <ul>
-                <li><p>Define phases and key deliverables.</p></li>
-                <li><p>Estimate time and dependencies.</p></li>
-              </ul>
-              <p></p>
-              <h2>Slides</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Resource Planning",
-            description: withVideoLink(`
-              <p><strong>Duration:</strong> 20-30 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Resources</h2>
-              <p>Align people, tools, and budget to the plan.</p>
-              <p></p>
-              <h2>Watch</h2>
-            `),
+            title: "AI Applications Across Industries",
+            description:
+              "A presentation exploring real-world AI applications in sectors like healthcare, finance, and retail.",
           },
           {
             type: LESSON_TYPES.QUIZ,
-            title: "Planning Quiz",
+            title: "AI Quiz: Primary Goal of AI in Business",
+            description:
+              "Test your understanding of the fundamental goal of AI in business applications.",
             questions: [
               {
                 type: QUESTION_TYPE.SINGLE_CHOICE,
-                title: "What should a scope statement include?",
+                title: "What is the primary goal of AI in business?",
                 options: [
                   {
-                    optionText: "In-scope and out-of-scope items",
+                    optionText: "Replace human workers",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "Automate repetitive tasks",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "Improve decision-making",
                     isCorrect: true,
                     language: "en",
                   },
-                  { optionText: "Only tasks", isCorrect: false, language: "en" },
-                  { optionText: "Only budget", isCorrect: false, language: "en" },
-                  { optionText: "Only team names", isCorrect: false, language: "en" },
+                  {
+                    optionText: "Eliminate operational costs",
+                    isCorrect: false,
+                    language: "en",
+                  },
                 ],
                 language: "en",
               },
             ],
-          },
-          {
-            type: LESSON_TYPES.AI_MENTOR,
-            title: "Planning Coach",
-            aiMentorInstructions:
-              "Help the learner outline scope, milestones, and risks for a simple project.",
-            completionConditions: "Learner provides a short scope statement and three milestones.",
-          },
-        ],
-      },
-      {
-        title: "Team Leadership",
-        isFreemium: false,
-        lessons: [
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Roles and Responsibilities",
-            description: withPresentationLink(`
-              <p><strong>Duration:</strong> 20-30 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Role Clarity</h2>
-              <ul>
-                <li><p>Define ownership and decision rights.</p></li>
-                <li><p>Use a RACI or similar model.</p></li>
-              </ul>
-              <p></p>
-              <h2>Slides</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Communication Cadence",
-            description: withVideoLink(`
-              <p><strong>Duration:</strong> 20-30 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Cadence</h2>
-              <ul>
-                <li><p>Weekly updates and demos.</p></li>
-                <li><p>Clear decisions and notes.</p></li>
-              </ul>
-              <p></p>
-              <h2>Watch</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Managing Conflict",
-            description: withPresentationLink(`
-              <p><strong>Duration:</strong> 20-30 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Conflict Handling</h2>
-              <ul>
-                <li><p>Focus on facts, not opinions.</p></li>
-                <li><p>Surface tradeoffs early.</p></li>
-              </ul>
-              <p></p>
-              <h2>Slides</h2>
-            `),
           },
           {
             type: LESSON_TYPES.QUIZ,
-            title: "Leadership Quiz",
+            title: "AI Quiz: Applications of AI",
+            description: "Identify common AI applications in various business domains.",
             questions: [
               {
-                type: QUESTION_TYPE.SINGLE_CHOICE,
-                title: "What is the goal of a RACI?",
+                type: QUESTION_TYPE.MULTIPLE_CHOICE,
+                title:
+                  "Which of the following are applications of AI in business? (Select all that apply)",
                 options: [
-                  { optionText: "Clarify responsibility", isCorrect: true, language: "en" },
-                  { optionText: "Set salary bands", isCorrect: false, language: "en" },
-                  { optionText: "Choose tools", isCorrect: false, language: "en" },
-                  { optionText: "Track bugs", isCorrect: false, language: "en" },
+                  {
+                    optionText: "Customer service chatbots",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "Predictive analytics",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "Supply chain optimization",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "Space exploration tools",
+                    isCorrect: false,
+                    language: "en",
+                  },
                 ],
                 language: "en",
               },
             ],
-          },
-          {
-            type: LESSON_TYPES.AI_MENTOR,
-            title: "Team Coach",
-            aiMentorInstructions:
-              "Ask the learner to describe a team challenge and guide a resolution plan.",
-            completionConditions: "Learner provides a clear resolution approach and next steps.",
-          },
-        ],
-      },
-      {
-        title: "Risk and Delivery",
-        isFreemium: false,
-        lessons: [
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Risk Identification",
-            description: withPresentationLink(`
-              <p><strong>Duration:</strong> 20-30 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Risk Categories</h2>
-              <ul>
-                <li><p>Scope, schedule, and technical risks.</p></li>
-                <li><p>People and dependency risks.</p></li>
-              </ul>
-              <p></p>
-              <h2>Slides</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Status Reporting",
-            description: withVideoLink(`
-              <p><strong>Duration:</strong> 20-30 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Status Updates</h2>
-              <p>Use a simple format: progress, risks, next steps.</p>
-              <p></p>
-              <h2>Watch</h2>
-            `),
-          },
-          {
-            type: LESSON_TYPES.CONTENT,
-            title: "Delivery Retrospectives",
-            description: withPresentationLink(`
-              <p><strong>Duration:</strong> 20-30 minutes<br><strong>Level:</strong> Beginner</p>
-              <p></p>
-              <h2>Retro Outcomes</h2>
-              <ul>
-                <li><p>What worked well.</p></li>
-                <li><p>What to improve next time.</p></li>
-              </ul>
-              <p></p>
-              <h2>Slides</h2>
-            `),
           },
           {
             type: LESSON_TYPES.QUIZ,
-            title: "Delivery Quiz",
+            title: "AI Quiz: Can AI Function Without Data?",
+            description: "Test your understanding of AI's reliance on data.",
             questions: [
               {
-                type: QUESTION_TYPE.SINGLE_CHOICE,
-                title: "Which is a standard status update element?",
+                type: QUESTION_TYPE.TRUE_OR_FALSE,
+                title: "AI can function without any data input from humans.",
                 options: [
-                  { optionText: "Risks", isCorrect: true, language: "en" },
-                  { optionText: "Favorite movie", isCorrect: false, language: "en" },
-                  { optionText: "Personal goals", isCorrect: false, language: "en" },
-                  { optionText: "Team hobbies", isCorrect: false, language: "en" },
+                  {
+                    optionText: "True",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "False",
+                    isCorrect: true,
+                    language: "en",
+                  },
                 ],
                 language: "en",
               },
             ],
           },
           {
-            type: LESSON_TYPES.AI_MENTOR,
-            title: "Delivery Coach",
-            aiMentorInstructions:
-              "Help the learner draft a short status update with progress and risks.",
-            completionConditions:
-              "Learner writes a concise update with at least one risk and next step.",
+            type: LESSON_TYPES.QUIZ,
+            title: "Photo Identification: AI Solutions",
+            description: "Identify the AI-driven solution from the provided images.",
+            questions: [
+              {
+                type: QUESTION_TYPE.PHOTO_QUESTION_SINGLE_CHOICE,
+                title: "Which image represents an AI-driven chatbot?",
+                options: [
+                  {
+                    optionText: "Image 1 (Chatbot Interface)",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "Image 2 (Calculator)",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "Image 3 (Spreadsheet)",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+            ],
+          },
+          {
+            type: LESSON_TYPES.QUIZ,
+            title: "AI Fill in the Blanks",
+            questions: [
+              {
+                type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
+                title: "Fill blanks with the correct word.",
+                description:
+                  "Complete the blanks: Artificial [word] refers to the ability of machines to mimic [word] intelligence.",
+                solutionExplanation:
+                  "Complete the blanks: Artificial <strong>intelligence</strong> refers to the ability of machines to mimic <strong>human</strong> intelligence.",
+                options: [
+                  {
+                    optionText: "Intelligence",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "Automation",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "Learning",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                  {
+                    optionText: "Human",
+                    isCorrect: true,
+                    language: "en",
+                  },
+                  {
+                    optionText: "Animal",
+                    isCorrect: false,
+                    language: "en",
+                  },
+                ],
+                language: "en",
+              },
+            ],
+          },
+          {
+            type: LESSON_TYPES.QUIZ,
+            title: "Brief Response: Why Businesses Adopt AI",
+            description: "Explain in one sentence why businesses adopt AI.",
+            questions: [
+              {
+                type: QUESTION_TYPE.BRIEF_RESPONSE,
+                title: "In one sentence, explain why businesses are adopting AI.",
+                language: "en",
+              },
+            ],
+          },
+          {
+            type: LESSON_TYPES.QUIZ,
+            title: "Detailed Response: AI's Role in an Industry",
+            description: "Describe how AI can improve decision-making in a specific industry.",
+            questions: [
+              {
+                type: QUESTION_TYPE.DETAILED_RESPONSE,
+                title:
+                  "Describe how AI can improve decision-making in a specific industry of your choice.",
+                language: "en",
+              },
+            ],
           },
         ],
       },
