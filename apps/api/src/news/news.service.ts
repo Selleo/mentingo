@@ -7,6 +7,7 @@ import { match } from "ts-pattern";
 
 import { DatabasePg } from "src/common";
 import { buildJsonbField, deleteJsonbField } from "src/common/helpers/sqlHelpers";
+import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
 import { CreateNewsEvent, DeleteNewsEvent, UpdateNewsEvent } from "src/events";
 import {
   ENTITY_TYPES,
@@ -170,7 +171,7 @@ export class NewsService {
       setweight(jsonb_to_tsvector('english', COALESCE(${news.content}, '{}'::jsonb), '["string"]'), 'C')
     )`;
 
-    const tsQuery = sql`websearch_to_tsquery('english', ${searchTerm})`;
+    const tsQuery = sql`to_tsquery('english', ${normalizeSearchTerm(searchTerm ?? "")})`;
 
     if (isSearching && searchTerm) {
       conditions.push(sql`${newsTsVector} @@ ${tsQuery}`);

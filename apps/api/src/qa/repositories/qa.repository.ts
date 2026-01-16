@@ -3,6 +3,7 @@ import { and, eq, getTableColumns, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { buildJsonbField, deleteJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
+import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
 import { LocalizationService } from "src/localization/localization.service";
 import { questionsAndAnswers } from "src/storage/schema";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
@@ -70,7 +71,7 @@ export class QARepository {
       setweight(jsonb_to_tsvector('english', COALESCE(${questionsAndAnswers.description}, '{}'::jsonb), '["string"]'), 'B')
     )`;
 
-    const tsQuery = sql`websearch_to_tsquery('english', ${searchTerm})`;
+    const tsQuery = sql`to_tsquery('english', ${normalizeSearchTerm(searchTerm ?? "")})`;
 
     if (isSearching && searchTerm) {
       conditions.push(sql`${qaTsVector} @@ ${tsQuery}`);

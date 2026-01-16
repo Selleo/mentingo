@@ -3967,6 +3967,54 @@
         }
       }
     },
+    "/api/course/course-ownership/transfer": {
+      "post": {
+        "operationId": "CourseController_transferCourseOwnership",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransferCourseOwnershipBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/course/course-ownership/{courseId}": {
+      "get": {
+        "operationId": "CourseController_getCourseOwnership",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCourseOwnershipResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/chapter": {
       "get": {
         "operationId": "ChapterController_getChapterWithLesson",
@@ -14453,6 +14501,83 @@
           "pagination"
         ]
       },
+      "TransferCourseOwnershipBody": {
+        "type": "object",
+        "properties": {
+          "courseId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "userId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "courseId",
+          "userId"
+        ]
+      },
+      "GetCourseOwnershipResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "currentAuthor": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "name",
+                  "email"
+                ]
+              },
+              "possibleCandidates": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "email"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "currentAuthor",
+              "possibleCandidates"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "GetChapterWithLessonResponse": {
         "type": "object",
         "properties": {
@@ -15639,6 +15764,9 @@
                   "type": "string"
                 },
                 "chapterDisplayOrder": {
+                  "type": "number"
+                },
+                "searchRank": {
                   "type": "number"
                 }
               },

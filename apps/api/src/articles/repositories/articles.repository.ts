@@ -5,6 +5,7 @@ import { and, asc, desc, eq, getTableColumns, gt, isNull, lt, ne, not, sql } fro
 import { baseArticleTitle } from "src/articles/constants";
 import { DatabasePg } from "src/common";
 import { deleteJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
+import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
 import { LocalizationService } from "src/localization/localization.service";
 import { articles, articleSections, users } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
@@ -159,7 +160,7 @@ export class ArticlesRepository {
       setweight(jsonb_to_tsvector('english', COALESCE(${articles.content}, '{}'::jsonb), '["string"]'), 'C')
     )`;
 
-    const tsQuery = sql`websearch_to_tsquery('english', ${searchTerm})`;
+    const tsQuery = sql`to_tsquery('english', ${normalizeSearchTerm(searchTerm ?? "")})`;
 
     if (isSearching && searchTerm) {
       searchConditions.push(sql`${articlesTsVector} @@ ${tsQuery}`);

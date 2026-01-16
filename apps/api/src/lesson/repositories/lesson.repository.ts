@@ -4,6 +4,7 @@ import { and, desc, eq, getTableColumns, type SQL, sql } from "drizzle-orm";
 import { match } from "ts-pattern";
 
 import { DatabasePg, type UUIDType } from "src/common";
+import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
 import { getCourseTsVector, getLessonTsVector } from "src/courses/utils/courses.utils";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
@@ -417,7 +418,7 @@ export class LessonRepository {
     if (filters.searchQuery) {
       const searchTerm = filters.searchQuery.trim();
 
-      const tsQuery = sql`websearch_to_tsquery('english', ${searchTerm})`;
+      const tsQuery = sql`to_tsquery('english', ${normalizeSearchTerm(searchTerm)})`;
       const unifiedVector = sql`${getLessonTsVector()} || ${getCourseTsVector()}`;
 
       conditions.push(sql`${unifiedVector} @@ ${tsQuery}`);
