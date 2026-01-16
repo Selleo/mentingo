@@ -29,7 +29,7 @@ import { isQuizAccessAllowed } from "src/utils/isQuizAccessAllowed";
 import { LESSON_TYPES } from "../lesson.type";
 import { LessonRepository } from "../repositories/lesson.repository";
 
-import type { LessonResourceMetadata } from "../lesson-resource.types";
+import type { LessonResourceMetadata, ResourceWithUrlError } from "../lesson-resource.types";
 import type {
   AnswerQuestionBody,
   LessonsFilters,
@@ -106,6 +106,7 @@ export class LessonService {
       const mappedResources = lessonResources.map((resource) => ({
         id: resource.id,
         fileUrl: resource.fileUrl,
+        fileUrlError: Boolean((resource as ResourceWithUrlError).fileUrlError),
         contentType: resource.contentType,
         title: typeof resource.title === "string" ? resource.title : undefined,
         description: typeof resource.description === "string" ? resource.description : undefined,
@@ -167,6 +168,7 @@ export class LessonService {
         return {
           id: resource.id,
           fileUrl: resource.fileUrl,
+          fileUrlError: Boolean((resource as ResourceWithUrlError).fileUrlError),
           contentType: resource.contentType,
           title: typeof resource.title === "string" ? resource.title : undefined,
           description: typeof resource.description === "string" ? resource.description : undefined,
@@ -476,6 +478,7 @@ export class LessonService {
     resources: Array<{
       id: UUIDType;
       fileUrl: string;
+      fileUrlError?: boolean;
       contentType: string | null;
       title?: string;
       description?: string;
@@ -493,12 +496,29 @@ export class LessonService {
     const $ = loadHtml(content);
     const resourceMap = new Map(resources.map((resource) => [resource.id, resource]));
 
+    const extractResourceId = (src: string | null | undefined) => {
+      if (!src) return null;
+      const match = src.match(/lesson-resource\/([0-9a-fA-F-]{36})/);
+      return match?.[1] ?? null;
+    };
+
     $("[data-node-type]").each((_, element) => {
       const nodeType = $(element).attr("data-node-type");
 
       if (!nodeType) return;
 
-      if (nodeType === "video") increment("video");
+      if (nodeType === "video") {
+        increment("video");
+        const src = $(element).attr("data-src");
+        const resourceId = extractResourceId(src);
+        const resource = resourceId ? resourceMap.get(resourceId as UUIDType) : null;
+
+        if (resource?.fileUrlError) {
+          $(element).attr("data-error", "true");
+        } else {
+          $(element).removeAttr("data-error");
+        }
+      }
       if (nodeType === "presentation") increment("presentation");
       if (nodeType === "downloadable-file") increment("file");
     });

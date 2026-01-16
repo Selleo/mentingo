@@ -11,6 +11,7 @@ import {
 import { EventBus } from "@nestjs/cqrs";
 import { BaseEmailTemplate } from "@repo/email-templates";
 import { COURSE_ENROLLMENT, SUPPORTED_LANGUAGES } from "@repo/shared";
+import { load as loadHtml } from "cheerio";
 import {
   and,
   between,
@@ -2069,50 +2070,149 @@ export class CourseService {
   }
 
   private async addS3SignedUrlsToLessonsAndQuestions(lessons: AdminLessonWithContentSchema[]) {
+    const bunnyAvailable = await this.fileService.isBunnyConfigured();
+
     return await Promise.all(
-      lessons.map(async (lesson) => {
-        const updatedLesson = { ...lesson };
-        if (lesson.fileS3Key && lesson.type === LESSON_TYPES.CONTENT) {
-          if (!lesson.fileS3Key.startsWith("https://")) {
-            try {
-              const signedUrl = await this.fileService.getFileUrl(lesson.fileS3Key);
-              return { ...updatedLesson, fileS3SignedUrl: signedUrl };
-            } catch (error) {
-              console.error(`Failed to get signed URL for ${lesson.fileS3Key}:`, error);
-            }
+      lessons.map(async (lesson) => this.decorateLessonWithUrlsAndErrors(lesson, bunnyAvailable)),
+    );
+  }
+
+  private async decorateLessonWithUrlsAndErrors(
+    lesson: AdminLessonWithContentSchema,
+    bunnyAvailable: boolean,
+  ) {
+    let updatedLesson = this.normalizeLessonVideoEmbeds(lesson, bunnyAvailable);
+
+    updatedLesson = await this.attachLessonFileSignedUrl(updatedLesson, bunnyAvailable);
+    updatedLesson = await this.attachAiMentorAvatarUrl(updatedLesson);
+    updatedLesson = await this.attachQuestionSignedUrls(updatedLesson);
+
+    return updatedLesson;
+  }
+
+  private normalizeLessonVideoEmbeds(
+    lesson: AdminLessonWithContentSchema,
+    bunnyAvailable: boolean,
+  ) {
+    const updatedLesson = { ...lesson };
+
+    if (updatedLesson.type !== LESSON_TYPES.CONTENT || !updatedLesson.description) {
+      return updatedLesson;
+    }
+
+    if (!bunnyAvailable && updatedLesson.lessonResources?.length) {
+      const updatedDescription = this.markVideoEmbedsWithErrors(
+        updatedLesson.description,
+        updatedLesson.lessonResources,
+      );
+
+      if (updatedDescription) {
+        updatedLesson.description = updatedDescription;
+      }
+    }
+
+    if (bunnyAvailable) {
+      const cleanedDescription = this.clearVideoEmbedErrors(updatedLesson.description);
+      if (cleanedDescription) {
+        updatedLesson.description = cleanedDescription;
+      }
+    }
+
+    return updatedLesson;
+  }
+
+  private async attachLessonFileSignedUrl(
+    lesson: AdminLessonWithContentSchema,
+    bunnyAvailable: boolean,
+  ) {
+    if (!lesson.fileS3Key || lesson.type !== LESSON_TYPES.CONTENT) {
+      return lesson;
+    }
+
+    if (lesson.fileS3Key.startsWith("bunny-") && !bunnyAvailable) {
+      return lesson;
+    }
+
+    if (lesson.fileS3Key.startsWith("https://")) {
+      return lesson;
+    }
+
+    try {
+      const signedUrl = await this.fileService.getFileUrl(lesson.fileS3Key);
+      return { ...lesson, fileS3SignedUrl: signedUrl };
+    } catch (error) {
+      return lesson;
+    }
+  }
+
+  private async attachAiMentorAvatarUrl(lesson: AdminLessonWithContentSchema) {
+    if (lesson.type !== LESSON_TYPES.AI_MENTOR || !lesson.aiMentor?.avatarReference) {
+      return lesson;
+    }
+
+    const signedUrl = await this.fileService.getFileUrl(lesson.aiMentor.avatarReference);
+    return { ...lesson, avatarReferenceUrl: signedUrl };
+  }
+
+  private async attachQuestionSignedUrls(lesson: AdminLessonWithContentSchema) {
+    if (!lesson.questions || !Array.isArray(lesson.questions)) {
+      return lesson;
+    }
+
+    const questions = await Promise.all(
+      lesson.questions.map(async (question) => {
+        if (question.photoS3Key && !question.photoS3Key.startsWith("https://")) {
+          try {
+            const signedUrl = await this.fileService.getFileUrl(question.photoS3Key);
+            return { ...question, photoS3SingedUrl: signedUrl };
+          } catch (error) {
+            console.error(
+              `Failed to get signed URL for question thumbnail ${question.photoS3Key}:`,
+              error,
+            );
           }
         }
-
-        if (lesson.type === LESSON_TYPES.AI_MENTOR && lesson.aiMentor?.avatarReference) {
-          const signedUrl = await this.fileService.getFileUrl(lesson.aiMentor.avatarReference);
-
-          return { ...updatedLesson, avatarReferenceUrl: signedUrl };
-        }
-
-        if (lesson.questions && Array.isArray(lesson.questions)) {
-          updatedLesson.questions = await Promise.all(
-            lesson.questions.map(async (question) => {
-              if (question.photoS3Key) {
-                if (!question.photoS3Key.startsWith("https://")) {
-                  try {
-                    const signedUrl = await this.fileService.getFileUrl(question.photoS3Key);
-                    return { ...question, photoS3SingedUrl: signedUrl };
-                  } catch (error) {
-                    console.error(
-                      `Failed to get signed URL for question thumbnail ${question.photoS3Key}:`,
-                      error,
-                    );
-                  }
-                }
-              }
-              return question;
-            }),
-          );
-        }
-
-        return updatedLesson;
+        return question;
       }),
     );
+
+    return { ...lesson, questions };
+  }
+
+  private markVideoEmbedsWithErrors(
+    content: string,
+    resources: Array<{ id: string; fileUrl?: string | null }>,
+  ) {
+    const $ = loadHtml(content);
+    const resourceMap = new Map(resources.map((resource) => [resource.id, resource]));
+
+    $("[data-node-type='video']").each((_, element) => {
+      const src = $(element).attr("data-src");
+      if (!src) return;
+
+      const resourceIdMatch = src.match(/lesson-resource\/([0-9a-fA-F-]{36})/);
+      const resourceId = resourceIdMatch?.[1];
+      if (!resourceId) return;
+
+      const resource = resourceMap.get(resourceId);
+      if (!resource?.fileUrl) return;
+
+      if (resource.fileUrl.startsWith("bunny-")) {
+        $(element).attr("data-error", "true");
+      }
+    });
+
+    return $.html($("body").children());
+  }
+
+  private clearVideoEmbedErrors(content: string) {
+    const $ = loadHtml(content);
+
+    $("[data-node-type='video']").each((_, element) => {
+      $(element).removeAttr("data-error");
+    });
+
+    return $.html($("body").children());
   }
 
   private getSelectField(language: SupportedLanguages) {

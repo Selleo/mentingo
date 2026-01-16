@@ -1,8 +1,10 @@
 import "dotenv/config";
 import { NestFactory } from "@nestjs/core";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import { DEFAULT_TUS_CHUNK_SIZE } from "@repo/shared";
 import * as Sentry from "@sentry/node";
 import { nodeProfilingIntegration } from "@sentry/profiling-node";
+import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import { patchNestJsSwagger, applyFormats } from "nestjs-typebox";
 
@@ -44,6 +46,13 @@ async function bootstrap() {
     origin: process.env.CORS_ORIGIN,
     credentials: true,
   });
+  app.use(
+    "/api/file/videos/tus",
+    bodyParser.raw({
+      type: "application/offset+octet-stream",
+      limit: DEFAULT_TUS_CHUNK_SIZE,
+    }),
+  );
 
   const config = new DocumentBuilder()
     .setTitle("Guidebook API")

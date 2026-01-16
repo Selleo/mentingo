@@ -1,6 +1,7 @@
 import { Node, mergeAttributes } from "@tiptap/core";
 import { NodeViewWrapper, ReactNodeViewRenderer } from "@tiptap/react";
 import { GripVertical, Presentation as PresentationIcon, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import Presentation from "~/components/Presentation/Presentation";
 import { Button } from "~/components/ui/button";
@@ -38,6 +39,7 @@ const getPresentationDataAttributes = (attrs: PresentationEmbedAttrs) => ({
 });
 
 const PresentationEditorView = ({ node, editor, getPos }: NodeViewProps) => {
+  const { t } = useTranslation();
   const attributes = normalizePresentationEmbedAttributes(node.attrs);
 
   if (!attributes.src) return null;
@@ -60,7 +62,7 @@ const PresentationEditorView = ({ node, editor, getPos }: NodeViewProps) => {
           size="xs"
           variant="ghost"
           className="rounded-full text-neutral-500 hover:bg-neutral-200"
-          aria-label="Drag presentation embed"
+          aria-label={t("richText.presentation.ariaLabel.drag")}
           data-drag-handle
         >
           <GripVertical className="size-4" aria-hidden />
@@ -79,7 +81,7 @@ const PresentationEditorView = ({ node, editor, getPos }: NodeViewProps) => {
         <Button
           type="button"
           onClick={handleRemove}
-          aria-label="Remove presentation embed"
+          aria-label={t("richText.presentation.ariaLabel.remove")}
           size="xs"
           variant="ghost"
         >

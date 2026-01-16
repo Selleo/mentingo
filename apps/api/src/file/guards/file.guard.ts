@@ -1,7 +1,37 @@
 import { BadRequestException } from "@nestjs/common";
 import { Jimp } from "jimp";
+import { loadEsm } from "load-esm";
 
 import { EXTENSION_TO_MIME_TYPE_MAP } from "../file.constants";
+
+import type { FileTypeResult } from "file-type";
+
+type FromBufferFn = (buffer: Buffer) => Promise<FileTypeResult | undefined>;
+
+let fileTypeFromBufferFn: FromBufferFn | null = null;
+
+const getFileTypeFromBuffer = async (buffer: Buffer) => {
+  if (!buffer || buffer.length === 0) return undefined;
+
+  if (!fileTypeFromBufferFn) {
+    try {
+      const module = (await loadEsm<typeof import("file-type")>(
+        "file-type",
+      )) as typeof import("file-type") & {
+        default?: { fromBuffer?: FromBufferFn };
+        fromBuffer?: FromBufferFn;
+      };
+
+      fileTypeFromBufferFn = module.fromBuffer ?? module.default?.fromBuffer ?? null;
+    } catch {
+      return undefined;
+    }
+  }
+
+  if (!fileTypeFromBufferFn) return undefined;
+
+  return fileTypeFromBufferFn(buffer);
+};
 
 export type FileValidationOptions = {
   allowedTypes: readonly string[];
@@ -15,8 +45,9 @@ export type FileValidationOptions = {
 
 export class FileGuard {
   static async validateFile(file: Express.Multer.File, options: FileValidationOptions) {
-    const type = this.validateType(file, options.allowedTypes);
+    const type = await this.validateType(file, options.allowedTypes);
     const size = this.validateSize(file, options.maxSize);
+
     let resolution = null;
     let aspectRatio = null;
 
@@ -31,8 +62,28 @@ export class FileGuard {
     return { type, size, resolution, aspectRatio };
   }
 
-  private static validateType(file: Express.Multer.File, allowedTypes: readonly string[]) {
+  static async validateMagicBytes(buffer: Buffer, allowedTypes: readonly string[]) {
+    const detectedType = (await getFileTypeFromBuffer(buffer))?.mime;
+
+    if (!detectedType || !allowedTypes.includes(detectedType)) {
+      throw new BadRequestException(
+        `File type ${
+          detectedType || "unknown"
+        } is not allowed. Allowed types are: ${allowedTypes.join(", ")}`,
+      );
+    }
+
+    return detectedType;
+  }
+
+  private static async validateType(file: Express.Multer.File, allowedTypes: readonly string[]) {
     let type: string | undefined = file.mimetype;
+
+    const detectedType = file.buffer ? (await getFileTypeFromBuffer(file.buffer))?.mime : undefined;
+
+    if (detectedType) {
+      type = detectedType;
+    }
 
     // For video files, also check extension if MIME type is generic
     if (type === "application/octet-stream" || !type) {

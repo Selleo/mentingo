@@ -3,8 +3,9 @@ import { persist } from "zustand/middleware";
 
 export type StoredVideoUpload = {
   uploadId: string;
-  bunnyGuid: string;
+  bunnyGuid?: string;
   fileKey: string;
+  provider?: "bunny" | "s3";
   tusEndpoint: string;
   tusHeaders: Record<string, string>;
   expiresAt: string;
