@@ -136,6 +136,7 @@ export const coursesStatusEnum = pgEnum("status", ["draft", "published", "privat
 const coursesSettings = safeJsonb("settings", coursesSettingsSchema);
 export const courses = pgTable("courses", {
   ...id,
+  shortId: varchar("short_id", { length: 5 }).notNull().unique(),
   ...timestamps,
   title: jsonb("title").default({}).notNull(),
   description: jsonb("description").default({}).notNull(),
@@ -162,6 +163,24 @@ export const courses = pgTable("courses", {
     .default(sql`ARRAY['en']::text[]`),
 });
 export const coursesSettingsHelpers = coursesSettings.getHelpers(courses.settings);
+
+export const courseSlugs = pgTable(
+  "course_slugs",
+  {
+    ...id,
+    ...timestamps,
+    slug: text("slug").notNull(),
+    courseShortId: varchar("course_short_id", { length: 5 })
+      .references(() => courses.shortId, { onDelete: "cascade", onUpdate: "cascade" })
+      .notNull(),
+    lang: text("lang").notNull(),
+  },
+  (table) => ({
+    courseSlugCourseShortIdLangSlugUniqueIdx: uniqueIndex(
+      "course_slug_course_short_id_lang_slug_unique_idx",
+    ).on(table.courseShortId, table.lang, table.slug),
+  }),
+);
 
 export const chapters = pgTable("chapters", {
   ...id,

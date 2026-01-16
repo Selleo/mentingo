@@ -60,6 +60,7 @@ export const SCORM_CONFIG = [
       return (
         <CourseCard
           id={"scorm-card"}
+          slug={""}
           title={title || t("adminScorm.other.untitled")}
           thumbnailUrl={thumbnailUrl ?? ""}
           description={description || t("adminScorm.other.noDescription")}
