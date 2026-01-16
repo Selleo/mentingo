@@ -2107,6 +2107,35 @@
       }
     }
   },
+  "loginFilesUpload": {
+    "header": "Pliki strony logowania",
+    "subHeader": "Dodaj maksymalnie {{count}} pliki i nadaj każdemu nazwę.",
+    "emptyState": "Brak dodanych plików.",
+    "selectedFile": "Wybrany plik",
+    "unnamedFile": "Plik bez nazwy",
+    "deleteDialog": {
+      "title": "Usunąć plik?",
+      "description": "Spowoduje to usunięcie „{{name}}” ze strony logowania.",
+      "confirm": "Usuń plik"
+    },
+    "previewDialog": {
+      "subtitle": "Podgląd pliku strony logowania",
+      "loading": "Ładowanie podglądu...",
+      "error": "Nie udało się wczytać podglądu tego pliku."
+    },
+    "fileName": {
+      "label": "Nazwa",
+      "placeholder": "Wpisz nazwę"
+    },
+    "addButton": "Dodaj nowy plik",
+    "toast": {
+      "invalidFileType": "Nieprawidłowy typ pliku. Wybierz poprawny plik.",
+      "successfullyUploadedFile": "Plik został pomyślnie przesłany",
+      "maxResourceCount": "Osiągnięto maksymalną liczbę zasobów ({{count}})",
+      "resourceNotFound": "Nie znaleziono zasobu",
+      "successfullyDeletedFile": "Plik został pomyślnie usunięty"
+    }
+  },
   "richTextEditor": {
     "placeholder": {
       "lineHint": "Wklej link YouTube/Vimeo/Canva, dodaj Google Docs lub wgraj plik."

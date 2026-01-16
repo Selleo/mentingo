@@ -187,6 +187,7 @@ export interface GetPublicGlobalSettingsResponse {
     unregisteredUserArticlesAccessibility: boolean;
     articlesEnabled: boolean;
     ageLimit: 13 | 16 | null;
+    loginPageFiles: string[];
   };
 }
 
@@ -294,6 +295,7 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     unregisteredUserArticlesAccessibility: boolean;
     articlesEnabled: boolean;
     ageLimit: 13 | 16 | null;
+    loginPageFiles: string[];
   };
 }
 
@@ -334,6 +336,7 @@ export interface UpdateEnforceSSOResponse {
     unregisteredUserArticlesAccessibility: boolean;
     articlesEnabled: boolean;
     ageLimit: 13 | 16 | null;
+    loginPageFiles: string[];
   };
 }
 
@@ -405,6 +408,7 @@ export interface UpdateColorSchemaResponse {
     unregisteredUserArticlesAccessibility: boolean;
     articlesEnabled: boolean;
     ageLimit: 13 | 16 | null;
+    loginPageFiles: string[];
   };
 }
 
@@ -488,6 +492,15 @@ export interface UpdateConfigWarningDismissedResponse {
 
 export interface UpdateAgeLimitBody {
   ageLimit: 13 | 16 | null;
+}
+
+export interface GetLoginPageFilesResponse {
+  resources: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    resourceUrl: string;
+  }[];
 }
 
 export interface FileUploadResponse {
@@ -4378,6 +4391,58 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "PATCH",
         body: data,
         type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateLoginPageFiles
+     * @request PATCH:/api/settings/admin/login-page-files
+     */
+    settingsControllerUpdateLoginPageFiles: (
+      data: {
+        /** @format binary */
+        file: File;
+        /** @format uuid */
+        id?: string;
+        /** @minLength 1 */
+        name: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/settings/admin/login-page-files`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.FormData,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerGetLoginPageFiles
+     * @request GET:/api/settings/login-page-files
+     */
+    settingsControllerGetLoginPageFiles: (params: RequestParams = {}) =>
+      this.request<GetLoginPageFilesResponse, any>({
+        path: `/api/settings/login-page-files`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerDeleteLoginPageFile
+     * @request DELETE:/api/settings/login-page-files/{id}
+     */
+    settingsControllerDeleteLoginPageFile: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/settings/login-page-files/${id}`,
+        method: "DELETE",
         ...params,
       }),
 

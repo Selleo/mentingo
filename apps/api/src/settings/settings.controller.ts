@@ -8,6 +8,7 @@ import {
   UseInterceptors,
   UploadedFile,
   Param,
+  Delete,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes } from "@nestjs/swagger";
@@ -22,7 +23,7 @@ import {
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
-import { UUIDType, baseResponse, BaseResponse } from "src/common";
+import { UUIDType, baseResponse, BaseResponse, UUIDSchema } from "src/common";
 import { FILE_SIZE_BASE } from "src/common/constants";
 import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
@@ -39,7 +40,9 @@ import {
   adminSettingsJSONContentSchema,
   companyInformationJSONSchema,
   globalSettingsJSONSchema,
+  loginPageResourceResponseSchema,
   settingsJSONContentSchema,
+  UploadFilesToLoginPageBody,
   userSettingsJSONContentSchema,
 } from "./schemas/settings.schema";
 import {
@@ -456,5 +459,46 @@ export class SettingsController {
     );
 
     return new BaseResponse(updatedGlobalSettings);
+  }
+
+  @Patch("admin/login-page-files")
+  @Roles(USER_ROLES.ADMIN)
+  @UseInterceptors(FileInterceptor("file"))
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({
+    schema: {
+      type: "object",
+      properties: {
+        file: { type: "string", format: "binary" },
+        id: { type: "string", format: "uuid" },
+        name: { type: "string", minLength: 1 },
+      },
+      required: ["file", "name"],
+    },
+  })
+  async updateLoginPageFiles(
+    @Body() uploadedData: UploadFilesToLoginPageBody,
+    @UploadedFile() file: Express.Multer.File,
+    @CurrentUser() currentUser: CurrentUserType,
+  ) {
+    return this.settingsService.uploadLoginPageFile(uploadedData, file, currentUser);
+  }
+
+  @Public()
+  @Get("login-page-files")
+  @Validate({
+    response: loginPageResourceResponseSchema,
+  })
+  async getLoginPageFiles() {
+    return this.settingsService.getLoginPageFiles();
+  }
+
+  @Delete("login-page-files/:id")
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    request: [{ type: "param", name: "id", schema: UUIDSchema }],
+  })
+  async deleteLoginPageFile(@Param("id") id: UUIDType) {
+    return this.settingsService.deleteLoginPageFile(id);
   }
 }

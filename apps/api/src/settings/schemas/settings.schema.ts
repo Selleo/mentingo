@@ -1,6 +1,7 @@
 import { ALLOWED_AGE_LIMITS } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
+import { UUIDSchema } from "src/common";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { ALLOWED_CURRENCIES } from "../constants/settings.constants";
@@ -46,6 +47,7 @@ export const globalSettingsJSONSchema = Type.Object({
   unregisteredUserArticlesAccessibility: Type.Boolean(),
   articlesEnabled: Type.Boolean(),
   ageLimit: Type.Union(ALLOWED_AGE_LIMITS.map((age) => (!age ? Type.Null() : Type.Literal(age)))),
+  loginPageFiles: Type.Array(Type.String()),
 });
 
 export const studentSettingsJSONContentSchema = Type.Object({
@@ -70,6 +72,24 @@ export const userSettingsJSONContentSchema = Type.Union([
   studentSettingsJSONContentSchema,
   adminSettingsJSONContentSchema,
 ]);
+
+export const uploadFilesToLoginPageSchema = Type.Object({
+  name: Type.String({ minLength: 1 }),
+});
+
+export const loginPageResourceResponseSchema = Type.Object({
+  resources: Type.Array(
+    Type.Object({
+      id: UUIDSchema,
+      name: Type.String(),
+      resourceUrl: Type.String(),
+    }),
+  ),
+});
+
+export type LoginPageResourceResponseBody = Static<typeof loginPageResourceResponseSchema>;
+
+export type UploadFilesToLoginPageBody = Static<typeof uploadFilesToLoginPageSchema>;
 
 export type SettingsJSONContentSchema = Static<typeof settingsJSONContentSchema>;
 export type StudentSettingsJSONContentSchema = Static<typeof studentSettingsJSONContentSchema>;
