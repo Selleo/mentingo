@@ -1,8 +1,24 @@
 import { randomUUID } from "crypto";
 import { Readable } from "stream";
 
-import { Inject, BadRequestException, ConflictException, Injectable } from "@nestjs/common";
-import { ALLOWED_VIDEO_FILE_TYPES, VIDEO_UPLOAD_STATUS } from "@repo/shared";
+import {
+  Inject,
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from "@nestjs/common";
+import {
+  ALLOWED_EXCEL_FILE_TYPES,
+  ALLOWED_LESSON_IMAGE_FILE_TYPES,
+  ALLOWED_PDF_FILE_TYPES,
+  ALLOWED_PRESENTATION_FILE_TYPES,
+  ALLOWED_VIDEO_FILE_TYPES,
+  ALLOWED_WORD_FILE_TYPES,
+  VIDEO_PROVIDERS,
+  VIDEO_UPLOAD_STATUS,
+} from "@repo/shared";
 import { TypeCompiler } from "@sinclair/typebox/compiler";
 import { CacheManagerStore } from "cache-manager";
 import { parse } from "csv-parse";
@@ -17,7 +33,7 @@ import { uploadKey, videoKey } from "src/file/utils/bunnyCacheKeys";
 import { isEmptyObject, normalizeCellValue, normalizeHeader } from "src/file/utils/excel.utils";
 import getChecksum from "src/file/utils/getChecksum";
 import { S3Service } from "src/s3/s3.service";
-import { resources, resourceEntity } from "src/storage/schema";
+import { lessons, resources, resourceEntity } from "src/storage/schema";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import {
@@ -26,6 +42,9 @@ import {
   RESOURCE_RELATIONSHIP_TYPES,
   MAX_VIDEO_SIZE,
 } from "./file.constants";
+import { FileGuard } from "./guards/file.guard";
+import { BunnyVideoProvider } from "./providers/bunny-video.provider";
+import { S3VideoProvider } from "./providers/s3-video.provider";
 import { VideoProcessingStateService } from "./video-processing-state.service";
 import { VideoUploadNotificationGateway } from "./video-upload-notification.gateway";
 import { VideoUploadQueueService } from "./video-upload-queue.service";
@@ -41,11 +60,15 @@ import type { CurrentUser } from "src/common/types/current-user.type";
 
 @Injectable()
 export class FileService {
+  private readonly logger = new Logger(FileService.name);
+
   constructor(
     private readonly s3Service: S3Service,
     private readonly bunnyStreamService: BunnyStreamService,
     private readonly videoUploadQueueService: VideoUploadQueueService,
     private readonly videoProcessingStateService: VideoProcessingStateService,
+    private readonly bunnyVideoProvider: BunnyVideoProvider,
+    private readonly s3VideoProvider: S3VideoProvider,
     @Inject("DB") private readonly db: DatabasePg,
     @Inject("CACHE_MANAGER") private readonly cache: CacheManagerStore,
     private readonly notificationGateway: VideoUploadNotificationGateway,
@@ -60,6 +83,14 @@ export class FileService {
       return this.bunnyStreamService.getUrl(videoId);
     }
     return await this.s3Service.getSignedUrl(fileKey);
+  }
+
+  async isBunnyConfigured(): Promise<boolean> {
+    try {
+      return await this.bunnyStreamService.isConfigured();
+    } catch {
+      return false;
+    }
   }
 
   async getFileBuffer(fileKey: string): Promise<Buffer | null> {
@@ -156,6 +187,19 @@ export class FileService {
     }
   }
 
+  private async resolveVideoProvider() {
+    if (await this.bunnyVideoProvider.isAvailable()) {
+      return this.bunnyVideoProvider;
+    }
+
+    if (await this.s3VideoProvider.isAvailable()) {
+      this.logger.warn("Bunny configuration missing, falling back to S3 for video uploads.");
+      return this.s3VideoProvider;
+    }
+
+    throw new InternalServerErrorException("Video storage is not configured.");
+  }
+
   async initVideoUpload(data: VideoInitBody, currentUserId?: UUIDType) {
     const { filename, sizeBytes, mimeType, title, resource = "lesson", lessonId } = data;
 
@@ -178,30 +222,48 @@ export class FileService {
       currentUserId,
     );
 
-    let guid: string;
+    const provider = await this.resolveVideoProvider();
+    let providerResponse: Awaited<ReturnType<typeof provider.initVideoUpload>>;
 
     try {
-      const response = await this.bunnyStreamService.createVideo(title || filename);
-      guid = response.guid;
-      await this.videoProcessingStateService.registerVideoId({
-        uploadId,
-        bunnyVideoId: guid,
-        placeholderKey,
+      providerResponse = await provider.initVideoUpload({
+        filename,
+        title,
+        mimeType,
+        resource,
       });
-
-      if (lessonId) {
-        await this.videoProcessingStateService.associateWithLesson(uploadId, lessonId);
-      }
     } catch (error) {
       await this.videoProcessingStateService.markFailed(uploadId, placeholderKey, error?.message);
       throw error;
+    }
+
+    await this.videoProcessingStateService.updateState(uploadId, {
+      fileKey: providerResponse.fileKey,
+      provider: providerResponse.provider,
+      bunnyVideoId: providerResponse.bunnyGuid,
+      multipartUploadId: providerResponse.multipartUploadId,
+      partSize: providerResponse.partSize,
+    });
+
+    if (providerResponse.bunnyGuid) {
+      await this.videoProcessingStateService.registerVideoId({
+        uploadId,
+        bunnyVideoId: providerResponse.bunnyGuid,
+        placeholderKey,
+        fileKey: providerResponse.fileKey,
+        provider: providerResponse.provider,
+      });
+    }
+
+    if (lessonId) {
+      await this.videoProcessingStateService.associateWithLesson(uploadId, lessonId);
     }
 
     let resourceId: UUIDType | undefined;
 
     if (resource === "lesson-content" && lessonId) {
       const resourceResult = await this.createResourceForEntity(
-        placeholderKey,
+        providerResponse.fileKey,
         mimeType,
         lessonId,
         ENTITY_TYPES.LESSON,
@@ -214,16 +276,23 @@ export class FileService {
       resourceId = resourceResult.resourceId;
     }
 
-    const { tusEndpoint, tusHeaders, expiresAt } =
-      await this.bunnyStreamService.getTusUploadConfig(guid);
+    if (lessonId) {
+      await this.db
+        .update(lessons)
+        .set({ fileS3Key: providerResponse.fileKey, fileType })
+        .where(eq(lessons.id, lessonId));
+    }
 
     return {
       uploadId,
-      bunnyGuid: guid,
-      fileKey: placeholderKey,
-      tusEndpoint,
-      tusHeaders,
-      expiresAt,
+      provider: providerResponse.provider,
+      bunnyGuid: providerResponse.bunnyGuid,
+      fileKey: providerResponse.fileKey,
+      tusEndpoint: providerResponse.tusEndpoint,
+      tusHeaders: providerResponse.tusHeaders,
+      expiresAt: providerResponse.expiresAt,
+      multipartUploadId: providerResponse.multipartUploadId,
+      partSize: providerResponse.partSize,
       resourceId,
     };
   }
@@ -515,10 +584,14 @@ export class FileService {
       .where(and(...conditions));
 
     return Promise.all(
-      results.map(async (resource) => ({
-        ...resource,
-        fileUrl: await this.getFileUrl(resource.reference),
-      })),
+      results.map(async (resource) => {
+        try {
+          const fileUrl = await this.getFileUrl(resource.reference);
+          return { ...resource, fileUrl };
+        } catch (error) {
+          return { ...resource, fileUrl: resource.reference, fileUrlError: true };
+        }
+      }),
     );
   }
 
@@ -538,6 +611,77 @@ export class FileService {
 
   async associateUploadWithLesson(uploadId: string, lessonId: string) {
     await this.videoProcessingStateService.associateWithLesson(uploadId, lessonId);
+  }
+
+  async initS3MultipartUpload(uploadId: string) {
+    const state = await this.videoProcessingStateService.getState(uploadId);
+
+    if (!state || state.provider !== VIDEO_PROVIDERS.S3 || !state.fileKey) {
+      throw new BadRequestException("S3 multipart upload not initialized");
+    }
+
+    if (!state.multipartUploadId) {
+      throw new BadRequestException("Missing multipart upload ID");
+    }
+
+    return {
+      multipartUploadId: state.multipartUploadId,
+      fileKey: state.fileKey,
+      partSize: state.partSize,
+    };
+  }
+
+  async signS3MultipartPart(uploadId: string, partNumber: number) {
+    const state = await this.videoProcessingStateService.getState(uploadId);
+
+    if (!state || state.provider !== VIDEO_PROVIDERS.S3 || !state.fileKey) {
+      throw new BadRequestException("S3 multipart upload not initialized");
+    }
+
+    if (!state.multipartUploadId) {
+      throw new BadRequestException("Missing multipart upload ID");
+    }
+
+    const url = await this.s3Service.getPresignedUploadPartUrl(
+      state.fileKey,
+      state.multipartUploadId,
+      partNumber,
+    );
+
+    return { url };
+  }
+
+  async completeS3MultipartUpload(
+    uploadId: string,
+    parts: Array<{ etag: string; partNumber: number }>,
+  ) {
+    const state = await this.videoProcessingStateService.getState(uploadId);
+
+    if (!state || state.provider !== VIDEO_PROVIDERS.S3 || !state.fileKey) {
+      throw new BadRequestException("S3 multipart upload not initialized");
+    }
+
+    if (!state.multipartUploadId) {
+      throw new BadRequestException("Missing multipart upload ID");
+    }
+
+    await this.s3Service.completeMultipartUpload(
+      state.fileKey,
+      state.multipartUploadId,
+      parts.map((part) => ({ ETag: part.etag, PartNumber: part.partNumber })),
+    );
+
+    const fileUrl = await this.getFileUrl(state.fileKey);
+    await this.videoProcessingStateService.markUploaded({
+      uploadId,
+      fileKey: state.fileKey,
+      fileUrl,
+      placeholderKey: state.placeholderKey,
+      fileType: state.fileType,
+      provider: VIDEO_PROVIDERS.S3,
+    });
+
+    return { success: true };
   }
 
   async handleBunnyWebhook(payload: BunnyWebhookBody & Record<string, unknown>) {
@@ -579,14 +723,7 @@ export class FileService {
       throw new BadRequestException("No uploadId found in cache for videoId");
     }
 
-    const state = await this.videoProcessingStateService.markProcessed(videoId, fileUrl);
-
-    if (state?.placeholderKey) {
-      await this.db
-        .update(resources)
-        .set({ reference: fileKey })
-        .where(eq(resources.reference, state.placeholderKey));
-    }
+    await this.videoProcessingStateService.markProcessed(videoId, fileUrl);
 
     return { success: true };
   }

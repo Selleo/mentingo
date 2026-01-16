@@ -526,22 +526,68 @@ export interface InitVideoUploadBody {
 export interface InitVideoUploadResponse {
   /** @format uuid */
   uploadId: string;
-  bunnyGuid: string;
+  provider: "bunny" | "s3";
   fileKey: string;
-  tusEndpoint: string;
-  tusHeaders: object;
-  expiresAt: string;
+  bunnyGuid?: string;
+  tusEndpoint?: string;
+  tusHeaders?: object;
+  expiresAt?: string;
+  multipartUploadId?: string;
+  /** @min 1 */
+  partSize?: number;
   /** @format uuid */
   resourceId?: string;
+}
+
+export interface InitS3MultipartUploadBody {
+  /** @format uuid */
+  uploadId: string;
+}
+
+export interface InitS3MultipartUploadResponse {
+  multipartUploadId: string;
+  fileKey: string;
+  /** @min 1 */
+  partSize?: number;
+}
+
+export interface SignS3MultipartPartBody {
+  /** @format uuid */
+  uploadId: string;
+  /** @min 1 */
+  partNumber: number;
+}
+
+export interface SignS3MultipartPartResponse {
+  url: string;
+}
+
+export interface CompleteS3MultipartUploadBody {
+  /** @format uuid */
+  uploadId: string;
+  parts: {
+    /** @minLength 1 */
+    etag: string;
+    /** @min 1 */
+    partNumber: number;
+  }[];
+}
+
+export interface CompleteS3MultipartUploadResponse {
+  success: boolean;
 }
 
 export type GetVideoUploadStatusResponse = {
   uploadId: string;
   placeholderKey: string;
   status: "queued" | "uploaded" | "processed" | "failed";
+  provider?: "bunny" | "s3";
   fileKey?: string;
   fileUrl?: string;
   bunnyVideoId?: string;
+  multipartUploadId?: string;
+  /** @min 1 */
+  partSize?: number;
   fileType?: string;
   lessonId?: string;
   error?: string;
@@ -4501,6 +4547,63 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     fileControllerInitVideoUpload: (data: InitVideoUploadBody, params: RequestParams = {}) =>
       this.request<InitVideoUploadResponse, any>({
         path: `/api/file/videos/init`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerInitS3MultipartUpload
+     * @request POST:/api/file/videos/s3/multipart/init
+     */
+    fileControllerInitS3MultipartUpload: (
+      data: InitS3MultipartUploadBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<InitS3MultipartUploadResponse, any>({
+        path: `/api/file/videos/s3/multipart/init`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerSignS3MultipartPart
+     * @request POST:/api/file/videos/s3/multipart/sign
+     */
+    fileControllerSignS3MultipartPart: (
+      data: SignS3MultipartPartBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<SignS3MultipartPartResponse, any>({
+        path: `/api/file/videos/s3/multipart/sign`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerCompleteS3MultipartUpload
+     * @request POST:/api/file/videos/s3/multipart/complete
+     */
+    fileControllerCompleteS3MultipartUpload: (
+      data: CompleteS3MultipartUploadBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CompleteS3MultipartUploadResponse, any>({
+        path: `/api/file/videos/s3/multipart/complete`,
         method: "POST",
         body: data,
         type: ContentType.Json,

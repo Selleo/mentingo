@@ -1021,6 +1021,87 @@
         }
       }
     },
+    "/api/file/videos/s3/multipart/init": {
+      "post": {
+        "operationId": "FileController_initS3MultipartUpload",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InitS3MultipartUploadBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitS3MultipartUploadResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/file/videos/s3/multipart/sign": {
+      "post": {
+        "operationId": "FileController_signS3MultipartPart",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignS3MultipartPartBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignS3MultipartPartResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/file/videos/s3/multipart/complete": {
+      "post": {
+        "operationId": "FileController_completeS3MultipartUpload",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompleteS3MultipartUploadBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompleteS3MultipartUploadResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/file/videos/{id}": {
       "get": {
         "operationId": "FileController_getVideoUploadStatus",
@@ -9920,10 +10001,22 @@
             "format": "uuid",
             "type": "string"
           },
-          "bunnyGuid": {
-            "type": "string"
+          "provider": {
+            "anyOf": [
+              {
+                "const": "bunny",
+                "type": "string"
+              },
+              {
+                "const": "s3",
+                "type": "string"
+              }
+            ]
           },
           "fileKey": {
+            "type": "string"
+          },
+          "bunnyGuid": {
             "type": "string"
           },
           "tusEndpoint": {
@@ -9940,6 +10033,13 @@
           "expiresAt": {
             "type": "string"
           },
+          "multipartUploadId": {
+            "type": "string"
+          },
+          "partSize": {
+            "minimum": 1,
+            "type": "integer"
+          },
           "resourceId": {
             "format": "uuid",
             "type": "string"
@@ -9947,11 +10047,111 @@
         },
         "required": [
           "uploadId",
-          "bunnyGuid",
-          "fileKey",
-          "tusEndpoint",
-          "tusHeaders",
-          "expiresAt"
+          "provider",
+          "fileKey"
+        ]
+      },
+      "InitS3MultipartUploadBody": {
+        "type": "object",
+        "properties": {
+          "uploadId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "uploadId"
+        ]
+      },
+      "InitS3MultipartUploadResponse": {
+        "type": "object",
+        "properties": {
+          "multipartUploadId": {
+            "type": "string"
+          },
+          "fileKey": {
+            "type": "string"
+          },
+          "partSize": {
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "multipartUploadId",
+          "fileKey"
+        ]
+      },
+      "SignS3MultipartPartBody": {
+        "type": "object",
+        "properties": {
+          "uploadId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "partNumber": {
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "uploadId",
+          "partNumber"
+        ]
+      },
+      "SignS3MultipartPartResponse": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ]
+      },
+      "CompleteS3MultipartUploadBody": {
+        "type": "object",
+        "properties": {
+          "uploadId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "parts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "etag": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "partNumber": {
+                  "minimum": 1,
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "etag",
+                "partNumber"
+              ]
+            }
+          }
+        },
+        "required": [
+          "uploadId",
+          "parts"
+        ]
+      },
+      "CompleteS3MultipartUploadResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "success"
         ]
       },
       "GetVideoUploadStatusResponse": {
@@ -9985,6 +10185,18 @@
                   }
                 ]
               },
+              "provider": {
+                "anyOf": [
+                  {
+                    "const": "bunny",
+                    "type": "string"
+                  },
+                  {
+                    "const": "s3",
+                    "type": "string"
+                  }
+                ]
+              },
               "fileKey": {
                 "type": "string"
               },
@@ -9993,6 +10205,13 @@
               },
               "bunnyVideoId": {
                 "type": "string"
+              },
+              "multipartUploadId": {
+                "type": "string"
+              },
+              "partSize": {
+                "minimum": 1,
+                "type": "integer"
               },
               "fileType": {
                 "type": "string"

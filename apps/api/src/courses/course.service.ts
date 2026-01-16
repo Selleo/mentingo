@@ -11,6 +11,7 @@ import {
 import { EventBus } from "@nestjs/cqrs";
 import { BaseEmailTemplate } from "@repo/email-templates";
 import { COURSE_ENROLLMENT, SUPPORTED_LANGUAGES } from "@repo/shared";
+import { load as loadHtml } from "cheerio";
 import {
   and,
   between,
@@ -2069,10 +2070,37 @@ export class CourseService {
   }
 
   private async addS3SignedUrlsToLessonsAndQuestions(lessons: AdminLessonWithContentSchema[]) {
+    const bunnyAvailable = await this.fileService.isBunnyConfigured();
+
     return await Promise.all(
       lessons.map(async (lesson) => {
         const updatedLesson = { ...lesson };
+
+        if (updatedLesson.type === LESSON_TYPES.CONTENT && updatedLesson.description) {
+          if (!bunnyAvailable && updatedLesson.lessonResources?.length) {
+            const updatedDescription = this.markVideoEmbedsWithErrors(
+              updatedLesson.description,
+              updatedLesson.lessonResources,
+            );
+
+            if (updatedDescription) {
+              updatedLesson.description = updatedDescription;
+            }
+          }
+
+          if (bunnyAvailable) {
+            const cleanedDescription = this.clearVideoEmbedErrors(updatedLesson.description);
+            if (cleanedDescription) {
+              updatedLesson.description = cleanedDescription;
+            }
+          }
+        }
+
         if (lesson.fileS3Key && lesson.type === LESSON_TYPES.CONTENT) {
+          if (lesson.fileS3Key.startsWith("bunny-") && !bunnyAvailable) {
+            return updatedLesson;
+          }
+
           if (!lesson.fileS3Key.startsWith("https://")) {
             try {
               const signedUrl = await this.fileService.getFileUrl(lesson.fileS3Key);
@@ -2113,6 +2141,42 @@ export class CourseService {
         return updatedLesson;
       }),
     );
+  }
+
+  private markVideoEmbedsWithErrors(
+    content: string,
+    resources: Array<{ id: string; fileUrl?: string | null }>,
+  ) {
+    const $ = loadHtml(content);
+    const resourceMap = new Map(resources.map((resource) => [resource.id, resource]));
+
+    $("[data-node-type='video']").each((_, element) => {
+      const src = $(element).attr("data-src");
+      if (!src) return;
+
+      const resourceIdMatch = src.match(/lesson-resource\/([0-9a-fA-F-]{36})/);
+      const resourceId = resourceIdMatch?.[1];
+      if (!resourceId) return;
+
+      const resource = resourceMap.get(resourceId);
+      if (!resource?.fileUrl) return;
+
+      if (resource.fileUrl.startsWith("bunny-")) {
+        $(element).attr("data-error", "true");
+      }
+    });
+
+    return $.html($("body").children());
+  }
+
+  private clearVideoEmbedErrors(content: string) {
+    const $ = loadHtml(content);
+
+    $("[data-node-type='video']").each((_, element) => {
+      $(element).removeAttr("data-error");
+    });
+
+    return $.html($("body").children());
   }
 
   private getSelectField(language: SupportedLanguages) {

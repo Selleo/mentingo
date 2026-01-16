@@ -31,6 +31,20 @@ import {
   FileUploadResponse,
 } from "./schemas/file.schema";
 import {
+  s3MultipartCompleteResponseSchema,
+  s3MultipartCompleteSchema,
+  s3MultipartInitResponseSchema,
+  s3MultipartInitSchema,
+  s3MultipartSignResponseSchema,
+  s3MultipartSignSchema,
+  type S3MultipartCompleteBody,
+  type S3MultipartCompleteResponse,
+  type S3MultipartInitBody,
+  type S3MultipartInitResponse,
+  type S3MultipartSignBody,
+  type S3MultipartSignResponse,
+} from "./schemas/s3-multipart.schema";
+import {
   videoInitResponseSchema,
   videoInitSchema,
   type VideoInitBody,
@@ -101,6 +115,42 @@ export class FileController {
     @CurrentUser("userId") userId?: UUIDType,
   ): Promise<VideoInitResponse> {
     return this.fileService.initVideoUpload(payload, userId);
+  }
+
+  @Roles(...Object.values(USER_ROLES))
+  @Post("videos/s3/multipart/init")
+  @Validate({
+    request: [{ type: "body", schema: s3MultipartInitSchema }],
+    response: s3MultipartInitResponseSchema,
+  })
+  async initS3MultipartUpload(
+    @Body() payload: S3MultipartInitBody,
+  ): Promise<S3MultipartInitResponse> {
+    return this.fileService.initS3MultipartUpload(payload.uploadId);
+  }
+
+  @Roles(...Object.values(USER_ROLES))
+  @Post("videos/s3/multipart/sign")
+  @Validate({
+    request: [{ type: "body", schema: s3MultipartSignSchema }],
+    response: s3MultipartSignResponseSchema,
+  })
+  async signS3MultipartPart(
+    @Body() payload: S3MultipartSignBody,
+  ): Promise<S3MultipartSignResponse> {
+    return this.fileService.signS3MultipartPart(payload.uploadId, payload.partNumber);
+  }
+
+  @Roles(...Object.values(USER_ROLES))
+  @Post("videos/s3/multipart/complete")
+  @Validate({
+    request: [{ type: "body", schema: s3MultipartCompleteSchema }],
+    response: s3MultipartCompleteResponseSchema,
+  })
+  async completeS3MultipartUpload(
+    @Body() payload: S3MultipartCompleteBody,
+  ): Promise<S3MultipartCompleteResponse> {
+    return this.fileService.completeS3MultipartUpload(payload.uploadId, payload.parts);
   }
 
   @Roles(...Object.values(USER_ROLES))

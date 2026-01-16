@@ -9,6 +9,7 @@ export type VideoEmbedAttrs = {
   src: string | null;
   sourceType: VideoSourceType;
   provider: VideoProvider;
+  hasError: boolean;
 };
 
 const isVideoSourceType = (value: string | null | undefined): value is VideoSourceType =>
@@ -117,10 +118,17 @@ type VideoEmbedAttrsInput = {
   src?: string | null;
   sourceType?: string | null;
   provider?: string | null;
+  hasError?: boolean | string | null;
 };
 
 export const normalizeVideoEmbedAttributes = (attrs: VideoEmbedAttrsInput): VideoEmbedAttrs => {
   const src = typeof attrs.src === "string" ? attrs.src.trim() : "";
+  const hasError =
+    typeof attrs.hasError === "boolean"
+      ? attrs.hasError
+      : typeof attrs.hasError === "string"
+        ? attrs.hasError === "true"
+        : false;
 
   const sourceType: VideoSourceType = match(attrs.sourceType)
     .when(isVideoSourceType, (value) => value)
@@ -138,6 +146,7 @@ export const normalizeVideoEmbedAttributes = (attrs: VideoEmbedAttrsInput): Vide
     src: finalSrc || null,
     sourceType,
     provider,
+    hasError,
   };
 };
 
@@ -152,6 +161,7 @@ export const getVideoEmbedAttrsFromElement = (element: HTMLElement): VideoEmbedA
 
   const sourceTypeAttr = element.getAttribute("data-source-type");
   const providerAttr = element.getAttribute("data-provider");
+  const errorAttr = element.getAttribute("data-error");
 
   const sourceType: VideoSourceType = match(sourceTypeAttr)
     .when(isVideoSourceType, (value) => value)
@@ -165,5 +175,6 @@ export const getVideoEmbedAttrsFromElement = (element: HTMLElement): VideoEmbedA
     src,
     sourceType,
     provider,
+    hasError: errorAttr,
   });
 };

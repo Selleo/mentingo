@@ -33,7 +33,7 @@ import { LESSON_TYPES } from "../lesson.type";
 import { AdminLessonRepository } from "../repositories/adminLesson.repository";
 import { LessonRepository } from "../repositories/lesson.repository";
 
-import type { LessonResourceMetadata } from "../lesson-resource.types";
+import type { LessonResourceMetadata, ResourceWithUrlError } from "../lesson-resource.types";
 import type {
   CreateAiMentorLessonBody,
   CreateLessonBody,
@@ -1011,6 +1011,7 @@ export class AdminLessonService {
         return {
           id: resource.id,
           fileUrl: resource.fileUrl,
+          fileUrlError: Boolean((resource as ResourceWithUrlError).fileUrlError),
           contentType: resource.contentType,
           title: typeof resource.title === "string" ? resource.title : undefined,
           description: typeof resource.description === "string" ? resource.description : undefined,
