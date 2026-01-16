@@ -14,18 +14,21 @@ const getFileTypeFromBuffer = async (buffer: Buffer) => {
   if (!buffer || buffer.length === 0) return undefined;
 
   if (!fileTypeFromBufferFn) {
-    const module = (await loadEsm<typeof import("file-type")>(
-      "file-type",
-    )) as typeof import("file-type") & {
-      default?: { fromBuffer?: FromBufferFn };
-    };
+    try {
+      const module = (await loadEsm<typeof import("file-type")>(
+        "file-type",
+      )) as typeof import("file-type") & {
+        default?: { fromBuffer?: FromBufferFn };
+        fromBuffer?: FromBufferFn;
+      };
 
-    fileTypeFromBufferFn = module.default?.fromBuffer ?? null;
+      fileTypeFromBufferFn = module.fromBuffer ?? module.default?.fromBuffer ?? null;
+    } catch {
+      return undefined;
+    }
   }
 
-  if (!fileTypeFromBufferFn) {
-    throw new BadRequestException("File type detection is unavailable");
-  }
+  if (!fileTypeFromBufferFn) return undefined;
 
   return fileTypeFromBufferFn(buffer);
 };
