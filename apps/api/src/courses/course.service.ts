@@ -2073,74 +2073,110 @@ export class CourseService {
     const bunnyAvailable = await this.fileService.isBunnyConfigured();
 
     return await Promise.all(
-      lessons.map(async (lesson) => {
-        const updatedLesson = { ...lesson };
+      lessons.map(async (lesson) => this.decorateLessonWithUrlsAndErrors(lesson, bunnyAvailable)),
+    );
+  }
 
-        if (updatedLesson.type === LESSON_TYPES.CONTENT && updatedLesson.description) {
-          if (!bunnyAvailable && updatedLesson.lessonResources?.length) {
-            const updatedDescription = this.markVideoEmbedsWithErrors(
-              updatedLesson.description,
-              updatedLesson.lessonResources,
+  private async decorateLessonWithUrlsAndErrors(
+    lesson: AdminLessonWithContentSchema,
+    bunnyAvailable: boolean,
+  ) {
+    let updatedLesson = this.normalizeLessonVideoEmbeds(lesson, bunnyAvailable);
+
+    updatedLesson = await this.attachLessonFileSignedUrl(updatedLesson, bunnyAvailable);
+    updatedLesson = await this.attachAiMentorAvatarUrl(updatedLesson);
+    updatedLesson = await this.attachQuestionSignedUrls(updatedLesson);
+
+    return updatedLesson;
+  }
+
+  private normalizeLessonVideoEmbeds(
+    lesson: AdminLessonWithContentSchema,
+    bunnyAvailable: boolean,
+  ) {
+    const updatedLesson = { ...lesson };
+
+    if (updatedLesson.type !== LESSON_TYPES.CONTENT || !updatedLesson.description) {
+      return updatedLesson;
+    }
+
+    if (!bunnyAvailable && updatedLesson.lessonResources?.length) {
+      const updatedDescription = this.markVideoEmbedsWithErrors(
+        updatedLesson.description,
+        updatedLesson.lessonResources,
+      );
+
+      if (updatedDescription) {
+        updatedLesson.description = updatedDescription;
+      }
+    }
+
+    if (bunnyAvailable) {
+      const cleanedDescription = this.clearVideoEmbedErrors(updatedLesson.description);
+      if (cleanedDescription) {
+        updatedLesson.description = cleanedDescription;
+      }
+    }
+
+    return updatedLesson;
+  }
+
+  private async attachLessonFileSignedUrl(
+    lesson: AdminLessonWithContentSchema,
+    bunnyAvailable: boolean,
+  ) {
+    if (!lesson.fileS3Key || lesson.type !== LESSON_TYPES.CONTENT) {
+      return lesson;
+    }
+
+    if (lesson.fileS3Key.startsWith("bunny-") && !bunnyAvailable) {
+      return lesson;
+    }
+
+    if (lesson.fileS3Key.startsWith("https://")) {
+      return lesson;
+    }
+
+    try {
+      const signedUrl = await this.fileService.getFileUrl(lesson.fileS3Key);
+      return { ...lesson, fileS3SignedUrl: signedUrl };
+    } catch (error) {
+      return lesson;
+    }
+  }
+
+  private async attachAiMentorAvatarUrl(lesson: AdminLessonWithContentSchema) {
+    if (lesson.type !== LESSON_TYPES.AI_MENTOR || !lesson.aiMentor?.avatarReference) {
+      return lesson;
+    }
+
+    const signedUrl = await this.fileService.getFileUrl(lesson.aiMentor.avatarReference);
+    return { ...lesson, avatarReferenceUrl: signedUrl };
+  }
+
+  private async attachQuestionSignedUrls(lesson: AdminLessonWithContentSchema) {
+    if (!lesson.questions || !Array.isArray(lesson.questions)) {
+      return lesson;
+    }
+
+    const questions = await Promise.all(
+      lesson.questions.map(async (question) => {
+        if (question.photoS3Key && !question.photoS3Key.startsWith("https://")) {
+          try {
+            const signedUrl = await this.fileService.getFileUrl(question.photoS3Key);
+            return { ...question, photoS3SingedUrl: signedUrl };
+          } catch (error) {
+            console.error(
+              `Failed to get signed URL for question thumbnail ${question.photoS3Key}:`,
+              error,
             );
-
-            if (updatedDescription) {
-              updatedLesson.description = updatedDescription;
-            }
-          }
-
-          if (bunnyAvailable) {
-            const cleanedDescription = this.clearVideoEmbedErrors(updatedLesson.description);
-            if (cleanedDescription) {
-              updatedLesson.description = cleanedDescription;
-            }
           }
         }
-
-        if (lesson.fileS3Key && lesson.type === LESSON_TYPES.CONTENT) {
-          if (lesson.fileS3Key.startsWith("bunny-") && !bunnyAvailable) {
-            return updatedLesson;
-          }
-
-          if (!lesson.fileS3Key.startsWith("https://")) {
-            try {
-              const signedUrl = await this.fileService.getFileUrl(lesson.fileS3Key);
-              return { ...updatedLesson, fileS3SignedUrl: signedUrl };
-            } catch (error) {
-              console.error(`Failed to get signed URL for ${lesson.fileS3Key}:`, error);
-            }
-          }
-        }
-
-        if (lesson.type === LESSON_TYPES.AI_MENTOR && lesson.aiMentor?.avatarReference) {
-          const signedUrl = await this.fileService.getFileUrl(lesson.aiMentor.avatarReference);
-
-          return { ...updatedLesson, avatarReferenceUrl: signedUrl };
-        }
-
-        if (lesson.questions && Array.isArray(lesson.questions)) {
-          updatedLesson.questions = await Promise.all(
-            lesson.questions.map(async (question) => {
-              if (question.photoS3Key) {
-                if (!question.photoS3Key.startsWith("https://")) {
-                  try {
-                    const signedUrl = await this.fileService.getFileUrl(question.photoS3Key);
-                    return { ...question, photoS3SingedUrl: signedUrl };
-                  } catch (error) {
-                    console.error(
-                      `Failed to get signed URL for question thumbnail ${question.photoS3Key}:`,
-                      error,
-                    );
-                  }
-                }
-              }
-              return question;
-            }),
-          );
-        }
-
-        return updatedLesson;
+        return question;
       }),
     );
+
+    return { ...lesson, questions };
   }
 
   private markVideoEmbedsWithErrors(

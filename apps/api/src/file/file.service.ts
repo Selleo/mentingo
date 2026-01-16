@@ -53,6 +53,11 @@ import type { ResourceRelationshipType, EntityType, ResourceCategory } from "./f
 import type { BunnyWebhookBody } from "./schemas/bunny-webhook.schema";
 import type { VideoInitBody } from "./schemas/video-init.schema";
 import type { VideoUploadState } from "./video-processing-state.service";
+import type {
+  VideoProviderInitPayload,
+  VideoProviderInitResult,
+  VideoStorageProvider,
+} from "./video-storage-provider";
 import type { SupportedLanguages } from "@repo/shared";
 import type { Static, TSchema } from "@sinclair/typebox";
 import type { UUIDType } from "src/common";
@@ -200,43 +205,47 @@ export class FileService {
     throw new InternalServerErrorException("Video storage is not configured.");
   }
 
-  async initVideoUpload(data: VideoInitBody, currentUserId?: UUIDType) {
-    const { filename, sizeBytes, mimeType, title, resource = "lesson", lessonId } = data;
-
-    if (!ALLOWED_VIDEO_FILE_TYPES.includes(mimeType)) {
-      throw new BadRequestException("Invalid video mime type");
-    }
-
-    if (sizeBytes > MAX_VIDEO_SIZE) {
-      throw new BadRequestException("Video file exceeds maximum allowed size");
-    }
-
+  private buildVideoUploadContext(resource: string, filename?: string) {
     const uploadId = randomUUID();
     const placeholderKey = `processing-${resource}-${uploadId}`;
     const fileType = filename?.split(".").pop();
 
+    return { uploadId, placeholderKey, fileType };
+  }
+
+  private async initializeVideoUploadState(
+    uploadId: string,
+    placeholderKey: string,
+    fileType: string | undefined,
+    currentUserId?: UUIDType,
+  ) {
     await this.videoProcessingStateService.initializeState(
       uploadId,
       placeholderKey,
       fileType,
       currentUserId,
     );
+  }
 
-    const provider = await this.resolveVideoProvider();
-    let providerResponse: Awaited<ReturnType<typeof provider.initVideoUpload>>;
-
+  private async initProviderUpload(
+    provider: VideoStorageProvider,
+    payload: VideoProviderInitPayload,
+    uploadId: string,
+    placeholderKey: string,
+  ) {
     try {
-      providerResponse = await provider.initVideoUpload({
-        filename,
-        title,
-        mimeType,
-        resource,
-      });
+      return await provider.initVideoUpload(payload);
     } catch (error) {
       await this.videoProcessingStateService.markFailed(uploadId, placeholderKey, error?.message);
       throw error;
     }
+  }
 
+  private async registerProviderUpload(
+    uploadId: string,
+    placeholderKey: string,
+    providerResponse: VideoProviderInitResult,
+  ) {
     await this.videoProcessingStateService.updateState(uploadId, {
       fileKey: providerResponse.fileKey,
       provider: providerResponse.provider,
@@ -254,34 +263,92 @@ export class FileService {
         provider: providerResponse.provider,
       });
     }
+  }
+
+  private async createLessonContentResourceIfNeeded(params: {
+    resource: string;
+    lessonId?: string;
+    fileKey: string;
+    mimeType: string;
+    filename: string;
+    sizeBytes: number;
+  }) {
+    const { resource, lessonId, fileKey, mimeType, filename, sizeBytes } = params;
+
+    if (resource !== "lesson-content" || !lessonId) return undefined;
+
+    const resourceResult = await this.createResourceForEntity(
+      fileKey,
+      mimeType,
+      lessonId,
+      ENTITY_TYPES.LESSON,
+      RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+      {
+        originalFilename: filename,
+        size: sizeBytes,
+      },
+    );
+
+    return resourceResult.resourceId;
+  }
+
+  private async updateLessonVideoFile(
+    lessonId: string | undefined,
+    fileKey: string,
+    fileType: string | undefined,
+  ) {
+    if (!lessonId) return;
+
+    await this.db
+      .update(lessons)
+      .set({ fileS3Key: fileKey, fileType })
+      .where(eq(lessons.id, lessonId));
+  }
+
+  async initVideoUpload(data: VideoInitBody, currentUserId?: UUIDType) {
+    const { filename, sizeBytes, mimeType, title, resource = "lesson", lessonId } = data;
+
+    if (!ALLOWED_VIDEO_FILE_TYPES.includes(mimeType)) {
+      throw new BadRequestException("Invalid video mime type");
+    }
+
+    if (sizeBytes > MAX_VIDEO_SIZE) {
+      throw new BadRequestException("Video file exceeds maximum allowed size");
+    }
+
+    const { uploadId, placeholderKey, fileType } = this.buildVideoUploadContext(resource, filename);
+
+    await this.initializeVideoUploadState(uploadId, placeholderKey, fileType, currentUserId);
+
+    const provider = await this.resolveVideoProvider();
+    const providerResponse = await this.initProviderUpload(
+      provider,
+      {
+        filename,
+        title,
+        mimeType,
+        resource,
+      },
+      uploadId,
+      placeholderKey,
+    );
+
+    await this.registerProviderUpload(uploadId, placeholderKey, providerResponse);
 
     if (lessonId) {
       await this.videoProcessingStateService.associateWithLesson(uploadId, lessonId);
     }
 
-    let resourceId: UUIDType | undefined;
+    const resourceId = await this.createLessonContentResourceIfNeeded({
+      resource,
+      lessonId,
+      fileKey: providerResponse.fileKey,
+      mimeType,
+      filename,
+      sizeBytes,
+    });
 
-    if (resource === "lesson-content" && lessonId) {
-      const resourceResult = await this.createResourceForEntity(
-        providerResponse.fileKey,
-        mimeType,
-        lessonId,
-        ENTITY_TYPES.LESSON,
-        RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
-        {
-          originalFilename: filename,
-          size: sizeBytes,
-        },
-      );
-      resourceId = resourceResult.resourceId;
-    }
-
-    if (lessonId) {
-      await this.db
-        .update(lessons)
-        .set({ fileS3Key: providerResponse.fileKey, fileType })
-        .where(eq(lessons.id, lessonId));
-    }
+    await this.updateLessonVideoFile(lessonId, providerResponse.fileKey, fileType);
 
     return {
       uploadId,
