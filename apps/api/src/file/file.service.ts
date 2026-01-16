@@ -16,7 +16,6 @@ import {
   ALLOWED_PRESENTATION_FILE_TYPES,
   ALLOWED_VIDEO_FILE_TYPES,
   ALLOWED_WORD_FILE_TYPES,
-  VIDEO_PROVIDERS,
   VIDEO_UPLOAD_STATUS,
 } from "@repo/shared";
 import { TypeCompiler } from "@sinclair/typebox/compiler";
@@ -678,77 +677,6 @@ export class FileService {
 
   async associateUploadWithLesson(uploadId: string, lessonId: string) {
     await this.videoProcessingStateService.associateWithLesson(uploadId, lessonId);
-  }
-
-  async initS3MultipartUpload(uploadId: string) {
-    const state = await this.videoProcessingStateService.getState(uploadId);
-
-    if (!state || state.provider !== VIDEO_PROVIDERS.S3 || !state.fileKey) {
-      throw new BadRequestException("S3 multipart upload not initialized");
-    }
-
-    if (!state.multipartUploadId) {
-      throw new BadRequestException("Missing multipart upload ID");
-    }
-
-    return {
-      multipartUploadId: state.multipartUploadId,
-      fileKey: state.fileKey,
-      partSize: state.partSize,
-    };
-  }
-
-  async signS3MultipartPart(uploadId: string, partNumber: number) {
-    const state = await this.videoProcessingStateService.getState(uploadId);
-
-    if (!state || state.provider !== VIDEO_PROVIDERS.S3 || !state.fileKey) {
-      throw new BadRequestException("S3 multipart upload not initialized");
-    }
-
-    if (!state.multipartUploadId) {
-      throw new BadRequestException("Missing multipart upload ID");
-    }
-
-    const url = await this.s3Service.getPresignedUploadPartUrl(
-      state.fileKey,
-      state.multipartUploadId,
-      partNumber,
-    );
-
-    return { url };
-  }
-
-  async completeS3MultipartUpload(
-    uploadId: string,
-    parts: Array<{ etag: string; partNumber: number }>,
-  ) {
-    const state = await this.videoProcessingStateService.getState(uploadId);
-
-    if (!state || state.provider !== VIDEO_PROVIDERS.S3 || !state.fileKey) {
-      throw new BadRequestException("S3 multipart upload not initialized");
-    }
-
-    if (!state.multipartUploadId) {
-      throw new BadRequestException("Missing multipart upload ID");
-    }
-
-    await this.s3Service.completeMultipartUpload(
-      state.fileKey,
-      state.multipartUploadId,
-      parts.map((part) => ({ ETag: part.etag, PartNumber: part.partNumber })),
-    );
-
-    const fileUrl = await this.getFileUrl(state.fileKey);
-    await this.videoProcessingStateService.markUploaded({
-      uploadId,
-      fileKey: state.fileKey,
-      fileUrl,
-      placeholderKey: state.placeholderKey,
-      fileType: state.fileType,
-      provider: VIDEO_PROVIDERS.S3,
-    });
-
-    return { success: true };
   }
 
   async handleBunnyWebhook(payload: BunnyWebhookBody & Record<string, unknown>) {

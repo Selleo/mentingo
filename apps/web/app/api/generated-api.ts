@@ -539,44 +539,6 @@ export interface InitVideoUploadResponse {
   resourceId?: string;
 }
 
-export interface InitS3MultipartUploadBody {
-  /** @format uuid */
-  uploadId: string;
-}
-
-export interface InitS3MultipartUploadResponse {
-  multipartUploadId: string;
-  fileKey: string;
-  /** @min 1 */
-  partSize?: number;
-}
-
-export interface SignS3MultipartPartBody {
-  /** @format uuid */
-  uploadId: string;
-  /** @min 1 */
-  partNumber: number;
-}
-
-export interface SignS3MultipartPartResponse {
-  url: string;
-}
-
-export interface CompleteS3MultipartUploadBody {
-  /** @format uuid */
-  uploadId: string;
-  parts: {
-    /** @minLength 1 */
-    etag: string;
-    /** @min 1 */
-    partNumber: number;
-  }[];
-}
-
-export interface CompleteS3MultipartUploadResponse {
-  success: boolean;
-}
-
 export type GetVideoUploadStatusResponse = {
   uploadId: string;
   placeholderKey: string;
@@ -4557,57 +4519,65 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name FileControllerInitS3MultipartUpload
-     * @request POST:/api/file/videos/s3/multipart/init
+     * @name FileControllerTusOptionsBase
+     * @request OPTIONS:/api/file/videos/tus
      */
-    fileControllerInitS3MultipartUpload: (
-      data: InitS3MultipartUploadBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<InitS3MultipartUploadResponse, any>({
-        path: `/api/file/videos/s3/multipart/init`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
+    fileControllerTusOptionsBase: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/file/videos/tus`,
+        method: "OPTIONS",
         ...params,
       }),
 
     /**
      * No description
      *
-     * @name FileControllerSignS3MultipartPart
-     * @request POST:/api/file/videos/s3/multipart/sign
+     * @name FileControllerCreateTusUpload
+     * @request POST:/api/file/videos/tus
      */
-    fileControllerSignS3MultipartPart: (
-      data: SignS3MultipartPartBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<SignS3MultipartPartResponse, any>({
-        path: `/api/file/videos/s3/multipart/sign`,
+    fileControllerCreateTusUpload: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/file/videos/tus`,
         method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
         ...params,
       }),
 
     /**
      * No description
      *
-     * @name FileControllerCompleteS3MultipartUpload
-     * @request POST:/api/file/videos/s3/multipart/complete
+     * @name FileControllerTusOptionsUpload
+     * @request OPTIONS:/api/file/videos/tus/{id}
      */
-    fileControllerCompleteS3MultipartUpload: (
-      data: CompleteS3MultipartUploadBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<CompleteS3MultipartUploadResponse, any>({
-        path: `/api/file/videos/s3/multipart/complete`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
+    fileControllerTusOptionsUpload: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/file/videos/tus/${id}`,
+        method: "OPTIONS",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerGetTusUpload
+     * @request HEAD:/api/file/videos/tus/{id}
+     */
+    fileControllerGetTusUpload: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/file/videos/tus/${id}`,
+        method: "HEAD",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerPatchTusUpload
+     * @request PATCH:/api/file/videos/tus/{id}
+     */
+    fileControllerPatchTusUpload: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/file/videos/tus/${id}`,
+        method: "PATCH",
         ...params,
       }),
 

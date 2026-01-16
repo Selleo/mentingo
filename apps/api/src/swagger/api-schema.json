@@ -1021,83 +1021,69 @@
         }
       }
     },
-    "/api/file/videos/s3/multipart/init": {
-      "post": {
-        "operationId": "FileController_initS3MultipartUpload",
+    "/api/file/videos/tus": {
+      "options": {
+        "operationId": "FileController_tusOptionsBase",
         "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/InitS3MultipartUploadBody"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InitS3MultipartUploadResponse"
-                }
-              }
-            }
+            "description": ""
+          }
+        }
+      },
+      "post": {
+        "operationId": "FileController_createTusUpload",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
           }
         }
       }
     },
-    "/api/file/videos/s3/multipart/sign": {
-      "post": {
-        "operationId": "FileController_signS3MultipartPart",
+    "/api/file/videos/tus/{id}": {
+      "options": {
+        "operationId": "FileController_tusOptionsUpload",
         "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SignS3MultipartPartBody"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SignS3MultipartPartResponse"
-                }
-              }
-            }
+            "description": ""
           }
         }
-      }
-    },
-    "/api/file/videos/s3/multipart/complete": {
-      "post": {
-        "operationId": "FileController_completeS3MultipartUpload",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CompleteS3MultipartUploadBody"
-              }
+      },
+      "head": {
+        "operationId": "FileController_getTusUpload",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
             }
           }
-        },
+        ],
         "responses": {
           "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CompleteS3MultipartUploadResponse"
-                }
-              }
+            "description": ""
+          }
+        }
+      },
+      "patch": {
+        "operationId": "FileController_patchTusUpload",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
             }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
           }
         }
       }
@@ -10049,109 +10035,6 @@
           "uploadId",
           "provider",
           "fileKey"
-        ]
-      },
-      "InitS3MultipartUploadBody": {
-        "type": "object",
-        "properties": {
-          "uploadId": {
-            "format": "uuid",
-            "type": "string"
-          }
-        },
-        "required": [
-          "uploadId"
-        ]
-      },
-      "InitS3MultipartUploadResponse": {
-        "type": "object",
-        "properties": {
-          "multipartUploadId": {
-            "type": "string"
-          },
-          "fileKey": {
-            "type": "string"
-          },
-          "partSize": {
-            "minimum": 1,
-            "type": "integer"
-          }
-        },
-        "required": [
-          "multipartUploadId",
-          "fileKey"
-        ]
-      },
-      "SignS3MultipartPartBody": {
-        "type": "object",
-        "properties": {
-          "uploadId": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "partNumber": {
-            "minimum": 1,
-            "type": "integer"
-          }
-        },
-        "required": [
-          "uploadId",
-          "partNumber"
-        ]
-      },
-      "SignS3MultipartPartResponse": {
-        "type": "object",
-        "properties": {
-          "url": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "url"
-        ]
-      },
-      "CompleteS3MultipartUploadBody": {
-        "type": "object",
-        "properties": {
-          "uploadId": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "parts": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "etag": {
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "partNumber": {
-                  "minimum": 1,
-                  "type": "integer"
-                }
-              },
-              "required": [
-                "etag",
-                "partNumber"
-              ]
-            }
-          }
-        },
-        "required": [
-          "uploadId",
-          "parts"
-        ]
-      },
-      "CompleteS3MultipartUploadResponse": {
-        "type": "object",
-        "properties": {
-          "success": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "success"
         ]
       },
       "GetVideoUploadStatusResponse": {
