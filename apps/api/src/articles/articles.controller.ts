@@ -80,12 +80,12 @@ export class ArticlesController {
     @Body() createArticleSectionBody: CreateArticleSection,
     @CurrentUser() currentUser: CurrentUserType,
   ) {
-    const createdNews = await this.articlesService.createArticleSection(
+    const createdArticle = await this.articlesService.createArticleSection(
       createArticleSectionBody,
       currentUser,
     );
 
-    return new BaseResponse(createdNews);
+    return new BaseResponse(createdArticle);
   }
 
   @Get("section/:id")
@@ -100,8 +100,10 @@ export class ArticlesController {
   async getArticleSection(
     @Param("id") id: UUIDType,
     @Query("language") language: SupportedLanguages,
+    @CurrentUser() currentUser: CurrentUserType,
   ) {
-    const section = await this.articlesService.getArticleSection(id, language);
+    const section = await this.articlesService.getArticleSection(id, language, currentUser);
+
     return new BaseResponse(section);
   }
 
@@ -235,14 +237,18 @@ export class ArticlesController {
   @Public()
   @Get()
   @Validate({
-    request: [{ type: "query", name: "language", schema: supportedLanguagesSchema }],
+    request: [
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
+      { type: "query", name: "searchQuery", schema: Type.Optional(Type.String()) },
+    ],
     response: getArticlesResponseSchema,
   })
   async getArticles(
     @Query("language") language: SupportedLanguages,
+    @Query("searchQuery") searchQuery?: string,
     @CurrentUser() currentUser?: CurrentUserType,
   ): Promise<GetArticlesResponse> {
-    return this.articlesService.getArticles(language, currentUser);
+    return this.articlesService.getArticles(language, currentUser, searchQuery);
   }
 
   @Post("article")

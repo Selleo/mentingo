@@ -5,6 +5,7 @@ import { and, asc, desc, eq, getTableColumns, gt, isNull, lt, ne, not, sql } fro
 import { baseArticleTitle } from "src/articles/constants";
 import { DatabasePg } from "src/common";
 import { deleteJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
+import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
 import { LocalizationService } from "src/localization/localization.service";
 import { articles, articleSections, users } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
@@ -144,7 +145,27 @@ export class ArticlesRepository {
       });
   }
 
-  async getArticles(requestedLanguage: SupportedLanguages, conditions: SQL<unknown>[]) {
+  async getArticles(
+    requestedLanguage: SupportedLanguages,
+    conditions: SQL<unknown>[],
+    searchQuery?: string,
+  ) {
+    const searchConditions = [...conditions];
+
+    const isSearching = searchQuery && searchQuery.trim().length >= 3;
+    const searchTerm = isSearching ? searchQuery.trim() : null;
+    const articlesTsVector = sql`(
+      setweight(jsonb_to_tsvector('english', ${articles.title}, '["string"]'), 'A') ||
+      setweight(jsonb_to_tsvector('english', COALESCE(${articles.summary}, '{}'::jsonb), '["string"]'), 'B') ||
+      setweight(jsonb_to_tsvector('english', COALESCE(${articles.content}, '{}'::jsonb), '["string"]'), 'C')
+    )`;
+
+    const tsQuery = sql`to_tsquery('english', ${normalizeSearchTerm(searchTerm ?? "")})`;
+
+    if (isSearching && searchTerm) {
+      searchConditions.push(sql`${articlesTsVector} @@ ${tsQuery}`);
+    }
+
     return this.db
       .select({
         ...getTableColumns(articles),
@@ -154,8 +175,12 @@ export class ArticlesRepository {
       .from(articles)
       .innerJoin(articleSections, eq(articleSections.id, articles.articleSectionId))
       .leftJoin(users, eq(users.id, articles.authorId))
-      .where(and(...conditions))
-      .orderBy(desc(articles.publishedAt));
+      .where(and(...searchConditions))
+      .orderBy(
+        isSearching && searchTerm
+          ? sql`ts_rank(${articlesTsVector}, ${tsQuery}) DESC`
+          : desc(articles.publishedAt),
+      );
   }
 
   async getDraftArticles(requestedLanguage: SupportedLanguages) {

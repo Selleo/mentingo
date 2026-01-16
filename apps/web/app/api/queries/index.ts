@@ -13,11 +13,7 @@ export {
   useStudentCourses,
   useStudentCoursesSuspense,
 } from "./useStudentCourses";
-export {
-  studentLessonsQueryOptions,
-  useStudentLessons,
-  useStudentLessonsSuspense,
-} from "./useStudentLessons";
+export { lessonsQueryOptions, useLessons, useLessonsSuspense } from "./useLessons";
 export { useAllUsers, useAllUsersSuspense, usersQueryOptions } from "./useUsers";
 export { useStatistics } from "./useStatistics";
 export { useCompanyInformation } from "./useCompanyInformation";

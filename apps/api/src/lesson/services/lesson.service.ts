@@ -32,15 +32,16 @@ import { LessonRepository } from "../repositories/lesson.repository";
 import type { LessonResourceMetadata } from "../lesson-resource.types";
 import type {
   AnswerQuestionBody,
-  EnrolledLesson,
-  EnrolledLessonsFilters,
+  LessonsFilters,
   LessonShow,
   QuestionBody,
   QuestionDetails,
 } from "../lesson.schema";
+import type { EnrolledLessonWithSearch } from "../repositories/lesson.repository";
 import type { SupportedLanguages } from "@repo/shared";
 import type { Response } from "express";
 import type { UUIDType } from "src/common";
+import type { CurrentUser } from "src/common/types/current-user.type";
 
 @Injectable()
 export class LessonService {
@@ -440,12 +441,12 @@ export class LessonService {
     return res.redirect(fileUrl);
   }
 
-  async getEnrolledLessons(
-    userId: UUIDType,
-    filters: EnrolledLessonsFilters,
+  async getLessons(
+    currentUser: CurrentUser,
+    filters: LessonsFilters,
     language: SupportedLanguages,
-  ): Promise<EnrolledLesson[]> {
-    return await this.lessonRepository.getEnrolledLessons(userId, filters, language);
+  ): Promise<EnrolledLessonWithSearch[]> {
+    return this.lessonRepository.getLessonsByRole(currentUser, filters, language);
   }
 
   extractOriginalFilename(metadata: unknown) {

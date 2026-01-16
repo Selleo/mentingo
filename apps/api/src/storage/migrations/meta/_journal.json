@@ -547,6 +547,13 @@
       "when": 1767040447457,
       "tag": "0077_drop_lesson_resources",
       "breakpoints": true
+    },
+    {
+      "idx": 78,
+      "version": "7",
+      "when": 1768403653906,
+      "tag": "0078_add_fulltext_search_indexes",
+      "breakpoints": true
     }
   ]
 }

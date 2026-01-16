@@ -1846,7 +1846,7 @@ export interface UpdateFreemiumStatusResponse {
   };
 }
 
-export interface GetEnrolledLessonsResponse {
+export interface GetLessonsResponse {
   data: {
     /** @format uuid */
     id: string;
@@ -1854,7 +1854,7 @@ export interface GetEnrolledLessonsResponse {
     type: "content" | "quiz" | "ai_mentor" | "embed";
     description: string | null;
     displayOrder: number;
-    lessonCompleted: boolean;
+    lessonCompleted?: boolean;
     /** @format uuid */
     courseId: string;
     courseTitle: string;
@@ -1862,6 +1862,7 @@ export interface GetEnrolledLessonsResponse {
     chapterId: string;
     chapterTitle: string;
     chapterDisplayOrder: number;
+    searchRank?: number;
   }[];
 }
 
@@ -5959,10 +5960,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name LessonControllerGetEnrolledLessons
-     * @request GET:/api/lesson/student-lessons
+     * @name LessonControllerGetLessons
+     * @request GET:/api/lesson/all
      */
-    lessonControllerGetEnrolledLessons: (
+    lessonControllerGetLessons: (
       query?: {
         title?: string;
         description?: string;
@@ -5973,8 +5974,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       },
       params: RequestParams = {},
     ) =>
-      this.request<GetEnrolledLessonsResponse, any>({
-        path: `/api/lesson/student-lessons`,
+      this.request<GetLessonsResponse, any>({
+        path: `/api/lesson/all`,
         method: "GET",
         query: query,
         format: "json",
@@ -7234,6 +7235,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         /** @default "en" */
         language?: "en" | "pl";
+        searchQuery?: string;
       },
       params: RequestParams = {},
     ) =>
@@ -7427,6 +7429,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         /** @default "en" */
         language?: "en" | "pl";
+        searchQuery?: string;
         /** @min 1 */
         page?: number;
       },
@@ -7729,6 +7732,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         /** @default "en" */
         language?: "en" | "pl";
+        searchQuery?: string;
       },
       params: RequestParams = {},
     ) =>

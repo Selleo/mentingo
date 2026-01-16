@@ -7,6 +7,7 @@ import { match } from "ts-pattern";
 
 import { DatabasePg } from "src/common";
 import { buildJsonbField, deleteJsonbField } from "src/common/helpers/sqlHelpers";
+import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
 import { CreateNewsEvent, DeleteNewsEvent, UpdateNewsEvent } from "src/events";
 import {
   ENTITY_TYPES,
@@ -15,6 +16,7 @@ import {
 } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { LocalizationService } from "src/localization/localization.service";
+import { SettingsService } from "src/settings/settings.service";
 import { news, users } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
@@ -43,9 +45,12 @@ export class NewsService {
     private readonly localizationService: LocalizationService,
     private readonly fileService: FileService,
     private readonly eventBus: EventBus,
+    private readonly settingsService: SettingsService,
   ) {}
 
   async createNews(createNewsBody: CreateNews, currentUser: CurrentUser) {
+    await this.checkAccess(currentUser?.userId);
+
     const { language } = createNewsBody;
 
     const [createdNews] = await this.db
@@ -83,6 +88,8 @@ export class NewsService {
     currentUser?: CurrentUser,
     coverFile?: Express.Multer.File,
   ) {
+    await this.checkAccess(currentUser?.userId);
+
     const { language, ...updateNewsData } = updateNewsBody;
 
     const existingNews = await this.validateNewsExists(newsId, language);
@@ -144,10 +151,31 @@ export class NewsService {
     return { page: currentPage, perPage, offset };
   }
 
-  async getNewsList(requestedLanguage: SupportedLanguages, page = 1, currentUser?: CurrentUser) {
+  async getNewsList(
+    requestedLanguage: SupportedLanguages,
+    page = 1,
+    currentUser?: CurrentUser,
+    searchQuery?: string,
+  ) {
+    await this.checkAccess(currentUser?.userId);
+
     const pagination = this.getPaginationForNews(page);
 
     const conditions = this.getVisibleNewsConditions(requestedLanguage, currentUser);
+
+    const isSearching = searchQuery && searchQuery.trim().length >= 3;
+    const searchTerm = isSearching ? searchQuery.trim() : null;
+    const newsTsVector = sql`(
+      setweight(jsonb_to_tsvector('english', ${news.title}, '["string"]'), 'A') ||
+      setweight(jsonb_to_tsvector('english', COALESCE(${news.summary}, '{}'::jsonb), '["string"]'), 'B') ||
+      setweight(jsonb_to_tsvector('english', COALESCE(${news.content}, '{}'::jsonb), '["string"]'), 'C')
+    )`;
+
+    const tsQuery = sql`to_tsquery('english', ${normalizeSearchTerm(searchTerm ?? "")})`;
+
+    if (isSearching && searchTerm) {
+      conditions.push(sql`${newsTsVector} @@ ${tsQuery}`);
+    }
 
     const newsList = await this.db
       .select({
@@ -162,7 +190,11 @@ export class NewsService {
       .from(news)
       .leftJoin(users, eq(users.id, news.authorId))
       .where(and(...conditions))
-      .orderBy(sql`${news.publishedAt} DESC`)
+      .orderBy(
+        isSearching && searchTerm
+          ? sql`ts_rank(${newsTsVector}, ${tsQuery})`
+          : sql`${news.publishedAt} DESC`,
+      )
       .limit(pagination.perPage)
       .offset(pagination.offset);
 
@@ -183,7 +215,13 @@ export class NewsService {
     };
   }
 
-  async getDraftNewsList(requestedLanguage: SupportedLanguages, page = 1) {
+  async getDraftNewsList(
+    requestedLanguage: SupportedLanguages,
+    page = 1,
+    currentUser?: CurrentUser,
+  ) {
+    await this.checkAccess(currentUser?.userId);
+
     const pagination = this.getPaginationForNews(page);
 
     const newsList = await this.db
@@ -236,6 +274,8 @@ export class NewsService {
     language: SupportedLanguages,
     currentUser?: CurrentUser,
   ) {
+    await this.checkAccess(currentUser?.userId);
+
     const existingNews = await this.validateNewsExists(newsId, language);
 
     const previousSnapshot = await this.buildNewsActivitySnapshot(newsId, language);
@@ -283,6 +323,8 @@ export class NewsService {
   }
 
   async deleteNews(newsId: UUIDType, currentUser?: CurrentUser) {
+    await this.checkAccess(currentUser?.userId);
+
     const existingNews = await this.validateNewsExists(newsId, undefined, false);
 
     if (existingNews.archived) return { id: existingNews.id };
@@ -318,6 +360,8 @@ export class NewsService {
     requestedLanguage: SupportedLanguages,
     currentUser?: CurrentUser,
   ) {
+    await this.checkAccess(currentUser?.userId);
+
     const isAdminLike =
       currentUser?.role === USER_ROLES.ADMIN || currentUser?.role === USER_ROLES.CONTENT_CREATOR;
 
@@ -407,6 +451,8 @@ export class NewsService {
     createNewsBody: CreateNews,
     currentUser?: CurrentUser,
   ) {
+    await this.checkAccess(currentUser?.userId);
+
     const { language } = createNewsBody;
 
     const existingNews = await this.validateNewsExists(newsId, language, false);
@@ -455,6 +501,8 @@ export class NewsService {
     description: string,
     currentUser?: CurrentUser,
   ) {
+    await this.checkAccess(currentUser?.userId);
+
     const fileTitle = {
       [language]: title,
     };
@@ -489,6 +537,8 @@ export class NewsService {
     description: string,
     currentUser?: CurrentUser,
   ) {
+    await this.checkAccess(currentUser?.userId);
+
     if (!file || !file.mimetype.startsWith("image/"))
       throw new BadRequestException("adminNewsView.toast.invalidCoverType");
 
@@ -574,7 +624,9 @@ export class NewsService {
     newsId: UUIDType,
     language: SupportedLanguages,
     content: string,
+    currentUser: CurrentUser,
   ): Promise<string> {
+    await this.checkAccess(currentUser?.userId);
     await this.validateNewsExists(newsId, language);
 
     const resources = await this.getNewsResources(newsId, language);
@@ -867,5 +919,16 @@ export class NewsService {
     const title = titleMap[language];
 
     return typeof title === "string" ? title : undefined;
+  }
+
+  private async checkAccess(currentUserId?: UUIDType) {
+    const { newsEnabled, unregisteredUserNewsAccessibility } =
+      await this.settingsService.getGlobalSettings();
+
+    const hasAccess = Boolean(newsEnabled && (currentUserId || unregisteredUserNewsAccessibility));
+
+    if (!hasAccess) {
+      throw new BadRequestException({ message: "common.toast.noAccess" });
+    }
   }
 }

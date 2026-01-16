@@ -1,6 +1,6 @@
-import { Link } from "@remix-run/react";
+import { Link, useSearchParams } from "@remix-run/react";
 import { ACCESS_GUARD } from "@repo/shared";
-import { useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import useAllQA from "~/api/queries/useAllQA";
@@ -27,6 +27,25 @@ export default function QAPage() {
   const { language } = useLanguageStore();
 
   const { data: QA } = useAllQA(language);
+  const [searchParams] = useSearchParams();
+  const [openItem, setOpenItem] = useState<string | undefined>(undefined);
+  const focusedQaId = searchParams.get("qaId") ?? undefined;
+
+  useEffect(() => {
+    if (!focusedQaId) return;
+    if (!QA?.some((item) => item.id === focusedQaId)) return;
+
+    setOpenItem(focusedQaId);
+  }, [focusedQaId, QA]);
+
+  useEffect(() => {
+    if (!openItem) return;
+
+    const target = document.getElementById(`qa-${openItem}`);
+    if (!target) return;
+
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [openItem]);
 
   const filteredQA = useMemo(() => {
     if (isAdmin) return QA;
@@ -60,7 +79,13 @@ export default function QAPage() {
             </div>
             {filteredQA && filteredQA.length > 0 && (
               <div className="rounded-2xl bg-white border-border border overflow-hidden">
-                <Accordion type="single" collapsible className="w-full">
+                <Accordion
+                  type="single"
+                  collapsible
+                  className="w-full"
+                  value={openItem}
+                  onValueChange={(value) => setOpenItem(value || undefined)}
+                >
                   {filteredQA?.map((item) => (
                     <QAItem
                       key={item.id}

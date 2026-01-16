@@ -1,15 +1,28 @@
 import { useQueries } from "@tanstack/react-query";
 
-import { allCoursesQueryOptions, categoriesQueryOptions, usersQueryOptions } from "~/api/queries";
+import {
+  allCoursesQueryOptions,
+  categoriesQueryOptions,
+  lessonsQueryOptions,
+  usersQueryOptions,
+} from "~/api/queries";
 import { groupsQueryOptions } from "~/api/queries/admin/useGroups";
+import { qaSearchQueryOptions } from "~/api/queries/useAllQA";
 import { announcementsForUserOptions } from "~/api/queries/useAnnouncementsForUser";
+import { articlesSearchQueryOptions } from "~/api/queries/useArticlesSearch";
+import { newsSearchQueryOptions } from "~/api/queries/useNewsList";
+import { LessonEntry } from "~/components/Navigation/GlobalSearch/LessonEntry";
 import { useUserRole } from "~/hooks/useUserRole";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { AnnouncementEntry } from "./AnnouncementEntry";
+import { ArticleEntry } from "./ArticleEntry";
 import { CategoryEntry } from "./CategoryEntry";
 import { CourseEntry } from "./CourseEntry";
 import { GlobalSearchContent } from "./GlobalSearchContent";
 import { GroupEntry } from "./GroupEntry";
+import { NewsEntry } from "./NewsEntry";
+import { QAEntry } from "./QAEntry";
 import { UserEntry } from "./UserEntry";
 
 import type { GlobalSearchItem } from "./GlobalSearchContent";
@@ -27,29 +40,65 @@ export const GlobalSearchAdminResults = ({
 }) => {
   const { isAdmin, isContentCreator } = useUserRole();
   const isAllowed = isAdmin || isContentCreator;
+  const { language } = useLanguageStore();
 
   const tabsToDisplay = useQueries({
     queries: [
       allCoursesQueryOptions({ searchQuery: debouncedSearch }),
       usersQueryOptions({ keyword: debouncedSearch }, { enabled: isAllowed }),
+      lessonsQueryOptions(
+        { searchQuery: debouncedSearch },
+        { enabled: debouncedSearch.length >= 3 },
+      ),
       categoriesQueryOptions({ title: debouncedSearch }, { enabled: isAllowed }),
       groupsQueryOptions({ name: debouncedSearch }, { enabled: isAllowed }),
       announcementsForUserOptions({ title: debouncedSearch }, { enabled: isAllowed }),
+      newsSearchQueryOptions(
+        { searchQuery: debouncedSearch, language },
+        { enabled: debouncedSearch.length >= 3 },
+      ),
+      articlesSearchQueryOptions(
+        { searchQuery: debouncedSearch, language },
+        { enabled: debouncedSearch.length >= 3 },
+      ),
+      qaSearchQueryOptions(
+        { searchQuery: debouncedSearch, language },
+        { enabled: debouncedSearch.length >= 3 },
+      ),
     ],
     combine: (results) => {
-      const [courses, users, categories, groups, announcements] = results;
+      const [
+        courses,
+        users,
+        lessons,
+        categories,
+        groups,
+        announcements,
+        newsResults,
+        articlesResults,
+        qaResults,
+      ] = results;
 
       const coursesData = courses?.data;
       const usersData = users?.data?.data;
       const categoriesData = categories?.data;
+      const lessonData = lessons?.data;
       const groupsData = groups?.data;
       const announcementsData = announcements?.data;
+      const newsData = newsResults?.data;
+      const articlesData = articlesResults?.data;
+      const qaData = qaResults?.data;
 
       const mapped: GlobalSearchItem[] = [
         {
           resultType: "allCourses",
           resultData: coursesData ?? [],
           Component: CourseEntry,
+        },
+        {
+          resultType: "lessons",
+          resultData: lessonData ?? [],
+          Component: LessonEntry,
         },
         {
           resultType: "users",
@@ -70,6 +119,21 @@ export const GlobalSearchAdminResults = ({
           resultType: "announcements",
           resultData: announcementsData ?? [],
           Component: AnnouncementEntry,
+        },
+        {
+          resultType: "news",
+          resultData: newsData ?? [],
+          Component: NewsEntry,
+        },
+        {
+          resultType: "articles",
+          resultData: articlesData ?? [],
+          Component: ArticleEntry,
+        },
+        {
+          resultType: "qa",
+          resultData: qaData ?? [],
+          Component: QAEntry,
         },
       ];
 

@@ -38,7 +38,9 @@ import { EmailService } from "src/common/emails/emails.service";
 import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterConditions";
 import { buildJsonbField, deleteJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
 import { UpdateHasCertificateEvent } from "src/courses/events/updateHasCertificate.event";
+import { getCourseTsVector } from "src/courses/utils/courses.utils";
 import { EnvService } from "src/env/services/env.service";
 import { CreateCourseEvent, UpdateCourseEvent, EnrollCourseEvent } from "src/events";
 import { UsersAssignedToCourseEvent } from "src/events/user/user-assigned-to-course.event";
@@ -127,6 +129,7 @@ import type { UpdateCourseBody } from "./schemas/updateCourse.schema";
 import type { UpdateCourseSettings } from "./schemas/updateCourseSettings.schema";
 import type { CoursesSettings } from "./types/settings";
 import type { SupportedLanguages } from "@repo/shared";
+import type { SQL } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { CourseActivityLogSnapshot } from "src/activity-logs/types";
@@ -179,6 +182,7 @@ export class CourseService {
     const { sortOrder, sortedField } = getSortOptions(sort);
 
     const conditions = this.getFiltersConditions(filters, false);
+    const orderConditions = this.getOrderConditions(filters);
 
     if (currentUserRole === USER_ROLES.CONTENT_CREATOR && currentUserId) {
       conditions.push(eq(courses.authorId, currentUserId));
@@ -225,7 +229,10 @@ export class CourseService {
         courses.availableLocales,
         courses.baseLanguage,
       )
-      .orderBy(sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)));
+      .orderBy(
+        ...orderConditions,
+        sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)),
+      );
 
     const dynamicQuery = queryDB.$dynamic();
     const paginatedQuery = addPagination(dynamicQuery, page, perPage);
@@ -289,6 +296,8 @@ export class CourseService {
       ];
       conditions.push(...this.getFiltersConditions(filters, false));
 
+      const orderConditions = this.getOrderConditions(filters);
+
       const queryDB = trx
         .select(this.getSelectField(language))
         .from(studentCourses)
@@ -323,7 +332,10 @@ export class CourseService {
           courses.baseLanguage,
           groupCourses.dueDate,
         )
-        .orderBy(sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)));
+        .orderBy(
+          ...orderConditions,
+          sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)),
+        );
 
       const dynamicQuery = queryDB.$dynamic();
       const paginatedQuery = addPagination(dynamicQuery, page, perPage);
@@ -503,7 +515,9 @@ export class CourseService {
       );
 
       const conditions = [eq(courses.status, "published")];
-      conditions.push(...this.getFiltersConditions(filters));
+      conditions.push(...(this.getFiltersConditions(filters) as SQL<unknown>[]));
+
+      const orderConditions = this.getOrderConditions(filters);
 
       if (availableCourseIds.length > 0) {
         conditions.push(inArray(courses.id, availableCourseIds));
@@ -574,7 +588,10 @@ export class CourseService {
           courses.baseLanguage,
           groupCourses.dueDate,
         )
-        .orderBy(sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)));
+        .orderBy(
+          ...orderConditions,
+          sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)),
+        );
 
       const dynamicQuery = queryDB.$dynamic();
       const paginatedQuery = addPagination(dynamicQuery, page, perPage);
@@ -2126,6 +2143,21 @@ export class CourseService {
     };
   }
 
+  private getOrderConditions(filters: CoursesFilterSchema) {
+    const orderConditions = [];
+
+    if (filters.searchQuery) {
+      const searchTerm = filters.searchQuery?.trim();
+
+      const tsQuery = sql`to_tsquery('english', ${normalizeSearchTerm(searchTerm)})`;
+      const tsVector = getCourseTsVector();
+
+      orderConditions.push(sql`ts_rank(${tsVector}, ${tsQuery}) DESC`);
+    }
+
+    return orderConditions;
+  }
+
   private getFiltersConditions(filters: CoursesFilterSchema, publishedOnly = true) {
     const conditions = [];
 
@@ -2146,13 +2178,12 @@ export class CourseService {
     }
 
     if (filters.searchQuery) {
-      conditions.push(
-        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
-          courses.title
-        }) AS t(k, v) WHERE v ILIKE ${`%${filters.searchQuery}%`}) OR EXISTS (SELECT 1 FROM jsonb_each_text(${
-          courses.description
-        }) AS t(k, v) WHERE v ILIKE ${`%${filters.searchQuery}%`})`,
-      );
+      const searchTerm = filters.searchQuery?.trim();
+
+      const tsQuery = sql`to_tsquery('english', ${normalizeSearchTerm(searchTerm)})`;
+      const tsVector = getCourseTsVector();
+
+      conditions.push(sql`${tsVector} @@ ${tsQuery}`);
     }
 
     if (filters.category) {
@@ -2177,7 +2208,7 @@ export class CourseService {
       conditions.push(eq(courses.status, "published"));
     }
 
-    return conditions ?? undefined;
+    return conditions;
   }
 
   private getColumnToSortBy(sort: CourseSortField) {

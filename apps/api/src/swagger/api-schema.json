@@ -4211,9 +4211,9 @@
         }
       }
     },
-    "/api/lesson/student-lessons": {
+    "/api/lesson/all": {
       "get": {
-        "operationId": "LessonController_getEnrolledLessons",
+        "operationId": "LessonController_getLessons",
         "parameters": [
           {
             "name": "title",
@@ -4271,7 +4271,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetEnrolledLessonsResponse"
+                  "$ref": "#/components/schemas/GetLessonsResponse"
                 }
               }
             }
@@ -6421,6 +6421,14 @@
                 }
               ]
             }
+          },
+          {
+            "name": "searchQuery",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -6766,6 +6774,14 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "searchQuery",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -7331,6 +7347,14 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "searchQuery",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -15674,7 +15698,7 @@
           "data"
         ]
       },
-      "GetEnrolledLessonsResponse": {
+      "GetLessonsResponse": {
         "type": "object",
         "properties": {
           "data": {
@@ -15741,6 +15765,9 @@
                 },
                 "chapterDisplayOrder": {
                   "type": "number"
+                },
+                "searchRank": {
+                  "type": "number"
                 }
               },
               "required": [
@@ -15749,7 +15776,6 @@
                 "type",
                 "description",
                 "displayOrder",
-                "lessonCompleted",
                 "courseId",
                 "courseTitle",
                 "chapterId",

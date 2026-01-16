@@ -38,7 +38,7 @@ export default function QAItem({ title, description, isAdmin, id, availableLocal
   };
 
   return (
-    <AccordionItem value={id} className="border-b border-border rounded-none">
+    <AccordionItem value={id} id={`qa-${id}`} className="border-b border-border rounded-none">
       <AccordionTrigger className="group w-full px-6 p-5 text-left text-base font-semibold hover:no-underline focus-visible:outline-none focus-visible:ring-0">
         <div className="flex w-full items-center text-slate-900">
           <span className="text-primary font-semibold">Q:</span>
