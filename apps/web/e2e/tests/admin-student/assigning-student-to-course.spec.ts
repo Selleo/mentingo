@@ -520,14 +520,11 @@ const unenrollGroup = async (page: Page) => {
   await page.getByText("student0@example.com").click();
   await page.getByRole("button", { name: "Enroll groups" }).click();
   await page.getByRole("button", { name: "Unenroll groups" }).click();
-  // await page.getByText(`${GROUP.name}Enrolled`, { exact: true }).first().click();
-  // await page.getByLabel(IDS.groupSelect).click();
   await page
     .getByRole("checkbox", { name: /select-group-.*/ })
     .first()
     .click();
   await page.getByRole("button", { name: "Unenroll selected" }).click();
-  // await logoutAdmin(page);
 };
 
 const setCourseAsPrivate = async (page: Page) => {

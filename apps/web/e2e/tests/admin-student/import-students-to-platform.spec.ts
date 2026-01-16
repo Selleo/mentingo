@@ -68,9 +68,9 @@ const createNewPasswordAndLoginAsStudent = async (page: Page) => {
     .getByText("noreply@lms.selleo.app janekk")
     .first()
     .or(
-      page.getByText(
-        "noreply@mentingo.com janekk@example.com Zapraszamy na platformę! a few seconds",
-      ),
+      page
+        .getByText("noreply@mentingo.com janekk@example.com Zapraszamy na platformę! a few seconds")
+        .first(),
     )
     .click();
   const page2Promise = page.waitForEvent("popup");

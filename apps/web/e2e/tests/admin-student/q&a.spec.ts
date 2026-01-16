@@ -151,6 +151,6 @@ test.describe("Q&A flow", () => {
     await expect(page.getByRole("link", { name: "Q&A" })).not.toBeVisible();
     page.goto("/qa");
     // goes to home page as Q&A is disabled
-    await page.waitForURL("/", { waitUntil: "networkidle", timeout: 10000 });
+    await page.waitForURL("/", { waitUntil: "domcontentloaded", timeout: 10000 });
   });
 });

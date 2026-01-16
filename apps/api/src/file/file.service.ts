@@ -340,35 +340,39 @@ export class FileService {
   }
 
   async readCsvToRows(buffer: Buffer, delimiter = ","): Promise<any[][]> {
-    return new Promise((resolve, reject) => {
-      const tryParse = async (delim: string) =>
-        new Promise<any[][]>((res, rej) => {
-          const parsed: any[][] = [];
-          const input = Readable.from(buffer);
-          input
-            .pipe(
-              parse({
-                delimiter: delim,
-                relax_quotes: true,
-                bom: true,
-                trim: true,
-                skip_empty_lines: true,
-              }),
-            )
-            .on("data", (row) => parsed.push(row))
-            .on("end", () => res(parsed))
-            .on("error", rej);
-        });
+    const parseWithDelimiter = (delim: string) =>
+      new Promise<any[][]>((res, rej) => {
+        const parsed: any[][] = [];
+        const input = Readable.from(buffer);
+        input
+          .pipe(
+            parse({
+              delimiter: delim,
+              relax_quotes: true,
+              bom: true,
+              trim: true,
+              skip_empty_lines: true,
+            }),
+          )
+          .on("data", (row) => parsed.push(row))
+          .on("end", () => res(parsed))
+          .on("error", rej);
+      });
 
-      tryParse(delimiter)
-        .then((parsed) => {
-          if (parsed.length && parsed[0].length > 1) return resolve(parsed);
-          return tryParse(";").then(resolve).catch(reject);
-        })
-        .catch(() => {
-          tryParse(";").then(resolve).catch(reject);
-        });
-    });
+    const maxSemicolonAttempts = 5;
+    const delimiters = [delimiter, ...Array.from({ length: maxSemicolonAttempts }, () => ";")];
+
+    let lastError: unknown;
+    for (const delim of delimiters) {
+      try {
+        const parsed = await parseWithDelimiter(delim);
+        if (parsed.length && parsed[0].length > 1) return parsed;
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    throw lastError;
   }
 
   /**
