@@ -30,6 +30,7 @@
     "db:seed-staging": "node dist/src/seed/seed.js",
     "db:seed-prod": "tsx ./src/seed/seed-prod.ts",
     "db:seed-bulk": "tsx ./src/seed/bulk-users-seed.ts",
+    "db:seed:e2e": "tsx ./src/seed/nice-data-seeds.ts",
     "db:truncate-tables": "node dist/src/truncateTables.js"
   },
   "dependencies": {
