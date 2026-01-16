@@ -3,6 +3,9 @@ import {
   GetObjectCommand,
   PutObjectCommand,
   DeleteObjectCommand,
+  CreateMultipartUploadCommand,
+  UploadPartCommand,
+  CompleteMultipartUploadCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Injectable } from "@nestjs/common";
@@ -71,6 +74,13 @@ export class S3Service {
     );
   }
 
+  isConfigured(): boolean {
+    const config = this.loadS3Config();
+    return Boolean(
+      config.region && config.accessKeyId && config.secretAccessKey && config.bucketName,
+    );
+  }
+
   async getSignedUrl(key: string, expiresIn: number = 3600): Promise<string> {
     const command = new GetObjectCommand({
       Bucket: this.bucketName,
@@ -116,6 +126,53 @@ export class S3Service {
     const command = new DeleteObjectCommand({
       Bucket: this.bucketName,
       Key: key,
+    });
+
+    await this.s3Client.send(command);
+  }
+
+  async createMultipartUpload(key: string, contentType: string): Promise<{ uploadId: string }> {
+    const command = new CreateMultipartUploadCommand({
+      Bucket: this.bucketName,
+      Key: key,
+      ContentType: contentType,
+    });
+
+    const response = await this.s3Client.send(command);
+
+    if (!response.UploadId) {
+      throw new Error("Failed to initialize multipart upload");
+    }
+
+    return { uploadId: response.UploadId };
+  }
+
+  async getPresignedUploadPartUrl(
+    key: string,
+    uploadId: string,
+    partNumber: number,
+    expiresIn: number = 3600,
+  ): Promise<string> {
+    const command = new UploadPartCommand({
+      Bucket: this.bucketName,
+      Key: key,
+      UploadId: uploadId,
+      PartNumber: partNumber,
+    });
+
+    return getSignedUrl(this.s3Client, command, { expiresIn });
+  }
+
+  async completeMultipartUpload(
+    key: string,
+    uploadId: string,
+    parts: Array<{ ETag: string; PartNumber: number }>,
+  ): Promise<void> {
+    const command = new CompleteMultipartUploadCommand({
+      Bucket: this.bucketName,
+      Key: key,
+      UploadId: uploadId,
+      MultipartUpload: { Parts: parts },
     });
 
     await this.s3Client.send(command);

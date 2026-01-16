@@ -4,6 +4,7 @@ import { GripVertical, Video as VideoIcon, X } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
 import { Video } from "~/components/VideoPlayer/Video";
+import { cn } from "~/lib/utils";
 
 import {
   VIDEO_NODE_TYPE,
@@ -36,6 +37,7 @@ const getVideoDataAttributes = (attrs: VideoEmbedAttrs) => ({
   "data-source-type": attrs.sourceType,
   "data-provider": attrs.provider,
   "data-src": attrs.src ?? "",
+  ...(attrs.hasError ? { "data-error": "true" } : {}),
 });
 
 const VideoEditorView = ({ node, editor, getPos }: NodeViewProps) => {
@@ -55,7 +57,12 @@ const VideoEditorView = ({ node, editor, getPos }: NodeViewProps) => {
 
   return (
     <NodeViewWrapper className="video-node">
-      <div className="inline-flex max-w-full items-center gap-2 rounded border border-dashed border-neutral-300 bg-neutral-50 px-3 py-2 text-sm text-primary-700">
+      <div
+        className={cn(
+          "inline-flex max-w-full items-center gap-2 rounded border border-dashed border-neutral-300 bg-neutral-50 px-3 py-2 text-sm text-primary-700",
+          attrs.hasError && "border-red-500 border-2 bg-red-500/10",
+        )}
+      >
         <Button
           type="button"
           size="xs"
@@ -97,6 +104,8 @@ const VideoViewerView = ({ node, extension }: NodeViewProps) => {
 
   if (!attrs.src) return null;
 
+  if (attrs.hasError) return null;
+
   return (
     <NodeViewWrapper className="video-node">
       <Video
@@ -126,6 +135,9 @@ const baseVideoNodeConfig: NodeConfig = {
       provider: {
         default: "unknown",
       },
+      hasError: {
+        default: false,
+      },
     };
   },
 
@@ -147,11 +159,16 @@ const baseVideoNodeConfig: NodeConfig = {
   },
 
   renderHTML({ HTMLAttributes }) {
-    const { src, sourceType, provider, ...rest } = HTMLAttributes as Record<string, unknown>;
+    const { src, sourceType, provider, hasError, ...rest } = HTMLAttributes as Record<
+      string,
+      unknown
+    >;
+
     const normalized = normalizeVideoEmbedAttributes({
       src: typeof src === "string" ? src : null,
       sourceType: sourceType as VideoSourceType,
       provider: provider as VideoProvider,
+      hasError: hasError as boolean,
     });
 
     return ["div", mergeAttributes(getVideoDataAttributes(normalized), rest)];

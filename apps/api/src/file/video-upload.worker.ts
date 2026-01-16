@@ -41,6 +41,7 @@ export class VideoUploadWorker implements OnModuleDestroy {
             placeholderKey,
             fileType,
             bunnyVideoId: fileKey.replace("bunny-", ""),
+            provider: "bunny",
           });
 
           let updatedLesson;
