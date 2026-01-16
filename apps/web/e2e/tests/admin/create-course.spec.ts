@@ -141,10 +141,6 @@ export class CreateCourseActions {
     await page.locator('[data-testid="category-option-E2E Testing"]').click();
 
     await page.locator("#description").getByRole("paragraph").fill(NEW_COURSE.description);
-
-    // const fileInput = await page.locator('input[type="file"]');
-    // const filePath = "app/assets/thumbnail-e2e.jpg";
-    // await fileInput.setInputFiles(filePath);
   }
 
   async addChapter(page: Page, chapterTitle: string): Promise<string> {
@@ -466,6 +462,456 @@ export class CreateCourseActions {
   }
 }
 
+// const TEST_DATA = {
+//   base: {
+//     titleEn: "title",
+//     titlePl: "Polish course title",
+//     descEn: "description",
+//     descPl: "polish course description",
+//     category: "Web Development",
+//     intro: "opis",
+//   },
+//   chapters: ["chapter 1", "2", "3"],
+//   lessons: {
+//     text: "title",
+//     video: {
+//       title: "video title",
+//       file: path.join(process.cwd(), "app/assets/video-e2e.mp4"),
+//       description: "description",
+//     },
+//     presentation: {
+//       title: "presentation title",
+//       file: path.join(process.cwd(), "app/assets/presentation-e2e.pptx"),
+//       description: "desc",
+//     },
+//     quiz: { title: "Cars quiz", score: "50" },
+//     aiMentor: "AI Mentor lesson",
+//     embed: "embed lesson",
+//   },
+//   student: { email: "student0@example.com", password: "password" },
+//   admin: { email: "admin@example.com", password: "password" },
+// };
+
+// const selectLanguage = async (page: Page) => {
+//   await expect(
+//     page.getByRole("heading", { name: `${TEST_DATA.base.titleEn} Draft` }),
+//   ).toBeVisible();
+//   await page.getByRole("combobox").click();
+//   await page.getByText("Polish").click();
+//   await page.getByRole("button", { name: "Confirm" }).click();
+//   await page.getByRole("tab", { name: "Settings" }).click();
+//   await page.getByLabel("* Course title").click();
+//   await page.getByLabel("* Course title").fill(TEST_DATA.base.titlePl);
+//   await page.locator("#description").getByRole("paragraph").click();
+//   await page.locator("#description div").fill(TEST_DATA.base.descPl);
+//   await page.locator("#description div").press("ControlOrMeta+ArrowRight");
+//   await page.getByRole("button", { name: "Save" }).click();
+//   await expect(
+//     page.getByRole("heading", { name: `${TEST_DATA.base.titlePl} Draft` }),
+//   ).toBeVisible();
+//   await page.locator("button").filter({ hasText: "Polish" }).click();
+//   await page.getByText("English").click();
+//   await expect(
+//     page.getByRole("heading", { name: `${TEST_DATA.base.titleEn} Draft` }),
+//   ).toBeVisible();
+//   await page.getByRole("tab", { name: "Curriculum" }).click();
+// };
+
+// const createCourse = async (page: Page) => {
+//   await page.getByRole("button", { name: "Courses" }).getByRole("link").click();
+//   await page.locator(".h-min > button:nth-child(2)").click();
+//   await page.getByRole("button", { name: "Create new" }).click();
+//   await page.getByPlaceholder("Enter title").click();
+//   await page.getByPlaceholder("Enter title").fill(TEST_DATA.base.titleEn);
+//   await page.getByLabel("* Category").click();
+//   await page
+//     .getByTestId(`category-option-${TEST_DATA.base.category}`)
+//     .getByText(TEST_DATA.base.category)
+//     .click();
+//   await page.locator("button").filter({ hasText: "English" }).click();
+//   await page.getByLabel("Polish").getByText("Polish").click();
+//   await page.locator("#description").getByRole("paragraph").click();
+//   await page.locator("#description div").fill(TEST_DATA.base.intro);
+//   await page.locator("button").filter({ hasText: "Polish" }).click();
+//   await page.getByLabel("English").getByText("English").click();
+//   await page.getByText(TEST_DATA.base.intro).click();
+//   await page.locator("#description div").fill(TEST_DATA.base.descEn);
+//   await page.getByRole("button", { name: "Proceed" }).click();
+// };
+
+// const addChapters = async (page: Page) => {
+//   const addChapterButton = page.getByRole("button", { name: "Add chapter" }).first();
+//   await expect(addChapterButton).toBeVisible();
+
+//   for (const title of TEST_DATA.chapters) {
+//     await addChapterButton.click();
+//     const chapterTitleInput = page.getByLabel("* Title");
+//     await chapterTitleInput.waitFor({ state: "visible" });
+//     await chapterTitleInput.fill(title);
+//     await expect(chapterTitleInput).toHaveValue(title);
+//     await page.getByRole("button", { name: "Save" }).click();
+//     await expect(addChapterButton).toBeVisible();
+//   }
+
+//   const freemiumSwitch = /^Freemium - [0-9a-fA-F-]{36}$/;
+//   await page.getByTestId(freemiumSwitch).nth(0).click();
+//   await page.getByTestId(freemiumSwitch).nth(1).click();
+//   await page.getByTestId(freemiumSwitch).nth(2).click();
+// };
+
+// const addLessonsToFirstChapter = async (page: Page) => {
+//   await page.getByLabel("Notifications (F8)").getByRole("button").click();
+
+//   // Text lesson
+//   await page.getByRole("button", { name: "Add lesson" }).first().click();
+//   const textLessonType = page.getByLabel(
+//     "Choose adminCourseView.curriculum.lesson.other.content lesson type",
+//   );
+//   await expect(textLessonType).toBeVisible();
+//   await textLessonType.click();
+//   await page.getByPlaceholder("Provide lesson title...").fill(TEST_DATA.lessons.text);
+//   await page.getByRole("paragraph").click();
+//   await page.locator("#description div").fill("content");
+//   await page.getByText("content").click();
+//   await page.locator("#description div").fill("content\n\nheader");
+//   await page.getByText("contentheader").click();
+//   await page.getByText("contentheader").dblclick();
+//   await page.getByLabel("Curriculum").getByRole("combobox").click();
+//   await page.getByLabel("Heading 1").getByText("Heading").click();
+//   await page.getByRole("button", { name: "Save" }).click();
+//   await expect(page.getByLabel("Lesson: title")).toBeVisible();
+
+//   // Video lesson
+//   await page.getByRole("button", { name: "Add lesson" }).first().click();
+//   const videoLessonType = page.getByLabel(
+//     "Choose adminCourseView.curriculum.lesson.other.video lesson type",
+//   );
+//   await expect(videoLessonType).toBeVisible();
+//   await videoLessonType.click();
+//   await page.getByPlaceholder("Provide lesson title...").fill(TEST_DATA.lessons.video.title);
+//   const videoFileChooserPromise = page.waitForEvent("filechooser", { timeout: 5000 });
+//   await page.getByText("Click to upload or drag and", { exact: false }).first().click();
+//   const videoFileChooser = await videoFileChooserPromise;
+//   await videoFileChooser.setFiles(TEST_DATA.lessons.video.file);
+//   await page.locator("html").click();
+//   await page
+//     .getByPlaceholder("Provide description about the")
+//     .fill(TEST_DATA.lessons.video.description);
+//   const removeVideoButton = page.getByRole("button", { name: "Remove video" });
+//   await removeVideoButton.waitFor({ state: "visible" });
+//   await page.getByRole("button", { name: "Save" }).click();
+//   await expect(page.getByPlaceholder("Provide lesson title...")).toHaveValue(
+//     TEST_DATA.lessons.video.title,
+//   );
+
+//   // Presentation lesson
+//   await page.getByRole("button", { name: "Add lesson" }).first().click();
+//   const presentationLessonType = page.getByLabel(
+//     "Choose adminCourseView.curriculum.lesson.other.presentation lesson type",
+//   );
+//   await presentationLessonType.waitFor({ state: "visible" });
+//   await expect(presentationLessonType).toBeVisible();
+//   await expect(presentationLessonType).toBeEnabled();
+//   await presentationLessonType.click({ force: true });
+//   const lessonTitle = page.getByPlaceholder("Provide lesson title...");
+//   await expect(lessonTitle).toBeVisible();
+//   await lessonTitle.fill(TEST_DATA.lessons.presentation.title);
+//   await expect(lessonTitle).toHaveValue(TEST_DATA.lessons.presentation.title);
+//   await page.getByLabel("Curriculum").getByRole("combobox").click();
+//   await page.getByLabel("Upload file").click();
+//   const presentationFileChooserPromise = page.waitForEvent("filechooser", { timeout: 5000 });
+//   await page.getByText("Click to upload or drag and", { exact: false }).first().click();
+//   await page
+//     .getByPlaceholder("Provide description about the")
+//     .fill(TEST_DATA.lessons.presentation.description);
+//   await page.getByRole("button", { name: "Save" }).click();
+//   const presentationFileChooser = await presentationFileChooserPromise;
+//   await presentationFileChooser.setFiles(TEST_DATA.lessons.presentation.file);
+//   await expect(page.getByRole("button", { name: "Remove presentation" })).toBeVisible();
+//   await page.getByRole("button", { name: "Save" }).click();
+// };
+
+// const buildQuiz = async (page: Page) => {
+//   await page.getByRole("button", { name: "Add lesson" }).first().click();
+//   const quizLessonType = page.getByLabel(
+//     "Choose adminCourseView.curriculum.lesson.other.quiz lesson type",
+//   );
+//   await expect(quizLessonType).toBeVisible();
+//   await quizLessonType.waitFor({ state: "visible" });
+//   await quizLessonType.click();
+//   await page.getByLabel("*Title").fill(TEST_DATA.lessons.quiz.title);
+//   await page.getByPlaceholder("0").fill(TEST_DATA.lessons.quiz.score);
+//   await page.getByRole("button", { name: "Add question" }).click();
+//   await page.getByRole("button", { name: "Single choice" }).click();
+//   await page.locator('input[name="questions\\.0\\.title"]').fill("A or B");
+//   await page.getByPlaceholder("Option 1").fill("A");
+//   await page.getByPlaceholder("Option 2").fill("B");
+//   await page.locator('input[name="questions\\.0\\.options\\.0\\.isCorrect"]').check();
+//   await page.getByTestId("add-options-button-0").click();
+//   await page
+//     .locator("li")
+//     .filter({ hasText: /^CorrectOption text is required$/ })
+//     .getByRole("img")
+//     .nth(1)
+//     .click();
+//   await page.getByRole("button", { name: "Delete question" }).click();
+//   await page.getByRole("button", { name: "Delete" }).click();
+//   await page.getByRole("button", { name: "Add question" }).click();
+//   await page.getByRole("button", { name: "Multiple choice" }).click();
+//   await page.locator('input[name="questions\\.0\\.title"]').fill("2 or 3");
+//   await page.locator('input[name="questions\\.0\\.options\\.0\\.optionText"]').fill("2");
+//   await page.locator('input[name="questions\\.0\\.options\\.1\\.optionText"]').fill("3");
+//   await page.locator("#isCorrect").first().click();
+//   await page.locator("#isCorrect").nth(1).click();
+//   await page.getByTestId("add-options-button-0").click();
+//   await page.locator('input[name="questions\\.0\\.title"]').fill("2 or 3 or 4");
+//   await page.getByPlaceholder("Option 3").fill("4");
+//   await page.getByRole("button", { name: "Add question" }).click();
+//   await page.getByRole("button", { name: "True or false" }).click();
+//   await page.locator('input[name="questions\\.1\\.title"]').fill("true or false");
+//   await page.locator('input[name="questions\\.1\\.options\\.0\\.optionText"]').click();
+//   await page.locator('input[name="questions\\.1\\.title"]').fill("questions");
+//   await page.locator('input[name="questions\\.1\\.options\\.0\\.optionText"]').click();
+//   await page
+//     .locator('input[name="questions\\.1\\.options\\.0\\.optionText"]')
+//     .fill("is it dark or light?");
+//   await page.getByRole("radio").nth(1).check();
+//   await page.getByText("False").click();
+//   await page.getByText("True").click();
+//   await page.getByRole("button", { name: "Add question" }).click();
+//   await page.getByRole("button", { name: "Photo question" }).click();
+//   await page.locator('input[name="questions\\.2\\.title"]').fill("dark or light");
+//   await page.getByTestId("imageUpload").setInputFiles("app/assets/thumbnail-e2e.jpg");
+//   await page.getByLabel("Curriculum").getByRole("combobox").click();
+//   await page.getByLabel("Single choice").getByText("Single choice").click();
+//   await page.getByLabel("Curriculum").getByRole("combobox").click();
+//   await page.getByLabel("Multiple choice").getByText("Multiple choice").click();
+//   await page.locator('input[name="questions\\.2\\.options\\.0\\.optionText"]').fill("dark");
+//   await page.locator('input[name="questions\\.2\\.options\\.1\\.optionText"]').fill("light");
+//   await page.locator("#isCorrect").nth(3).click();
+//   const isChecked = await page.locator("#isCorrect").nth(3).isChecked();
+//   expect(isChecked).toBeTruthy();
+
+//   await page.getByRole("button", { name: "Add question" }).click();
+//   await page.getByRole("button", { name: "Fill in the blanks" }).click();
+//   await page.locator('input[name="questions\\.3\\.title"]').click();
+//   await page.getByRole("button", { name: "Delete question" }).nth(3).click();
+//   await page.getByRole("button", { name: "Delete" }).click();
+//   await page.getByRole("button", { name: "Add question" }).click();
+//   await page.getByRole("button", { name: "Free text" }).click();
+//   await page.locator('input[name="questions\\.3\\.title"]').fill("free text");
+//   await page.getByRole("button", { name: "Add question" }).click();
+//   await page.getByRole("button", { name: "Short answer" }).click();
+//   await page.locator('input[name="questions\\.4\\.title"]').fill("short answer");
+//   await page.getByRole("button", { name: "Add question" }).click();
+//   await page.getByRole("button", { name: "Gap fill" }).click();
+//   await page.locator('input[name="questions\\.5\\.title"]').fill("some cars has");
+//   await page
+//     .locator("div")
+//     .filter({ hasText: /^\*SentenceWrite a sentence and drop words in to it\.$/ })
+//     .getByRole("textbox")
+//     .getByRole("paragraph")
+//     .click();
+//   await page
+//     .locator("div")
+//     .filter({ hasText: /^\*SentenceWrite a sentence and drop words in to it\.$/ })
+//     .getByRole("textbox")
+//     .fill("some cars has downpipe and some does not");
+//   await page.locator('input[name="questions\\.5\\.title"]').fill("some cars has and some does not");
+//   await page.getByText("some cars has downpipe and").dblclick();
+//   await page
+//     .locator("div")
+//     .filter({ hasText: /^some cars has downpipe and some does not$/ })
+//     .nth(1)
+//     .fill("some cars has and some does not");
+//   await page.getByRole("button", { name: "Add words" }).click();
+//   await page.getByTestId("new-word-input").fill("downpipe");
+//   await page.getByTestId("add-word").click();
+//   await page.getByRole("button", { name: "Add words" }).click();
+//   await page.getByTestId("new-word-input").fill("not");
+//   await page.getByTestId("add-word").click();
+//   await page.getByRole("button", { name: "Add words" }).click();
+//   await page.getByTestId("new-word-input").fill("other");
+//   await page.getByTestId("add-word").click();
+//   await expect(
+//     page.locator("li").filter({ hasText: "This question will have" }).getByRole("textbox").nth(2),
+//   ).toBeVisible();
+//   await expect(
+//     page.locator("li").filter({ hasText: "This question will have" }).getByRole("textbox").nth(3),
+//   ).toBeVisible();
+//   await expect(
+//     page.locator("li").filter({ hasText: "This question will have" }).getByRole("textbox").nth(4),
+//   ).toBeVisible();
+//   await page.locator(".flex > div:nth-child(3) > .inline-flex").click();
+//   await page
+//     .locator("li")
+//     .filter({ hasText: "This question will have" })
+//     .getByRole("textbox")
+//     .nth(2)
+//     .click();
+//   await page.getByTestId("drag-downpipe").click();
+//   await page.getByText("some cars has and some does").click();
+//   await page.getByRole("button", { name: "Save" }).click();
+//   await page.getByTestId("drag-downpipe").click();
+//   await page.getByRole("button", { name: "Delete question" }).nth(3).click();
+//   await page.getByRole("button", { name: "Delete" }).click();
+//   await page.getByRole("button", { name: "Save" }).click();
+//   await page.getByLabel("Lesson: Cars quiz").click();
+//   await expect(page.locator('input[name="questions\\.0\\.title"]')).toBeVisible();
+//   await expect(page.locator('input[name="questions\\.1\\.title"]')).toBeVisible();
+//   await expect(page.locator('input[name="questions\\.2\\.title"]')).toBeVisible();
+//   await expect(page.locator('input[name="questions\\.3\\.title"]')).toBeVisible();
+//   await expect(page.locator('input[name="questions\\.4\\.title"]')).toBeVisible();
+//   await expect(page.getByLabel("Lesson: presentation title")).toBeVisible();
+//   await expect(page.getByLabel("Lesson: video title")).toBeVisible();
+// };
+
+// const addRemainingLessons = async (page: Page) => {
+//   // AI Mentor
+//   await page.getByRole("button", { name: "Add lesson" }).first().click();
+//   const aiMentorLessonType = page.getByLabel(
+//     "Choose adminCourseView.curriculum.lesson.other.aiMentor lesson type",
+//   );
+//   await aiMentorLessonType.waitFor({ state: "visible" });
+//   await aiMentorLessonType.click();
+//   await page.getByPlaceholder("Provide lesson title...").fill(TEST_DATA.lessons.aiMentor);
+//   await page.locator('input[type="text"]').fill("Mentor");
+//   await page.getByRole("button", { name: "Problem Solving" }).click();
+//   await page.getByRole("button", { name: "Save" }).click();
+//   await expect(page.getByLabel(`Lesson: ${TEST_DATA.lessons.aiMentor}`)).toBeVisible();
+
+//   // Embed
+//   await page.getByRole("button", { name: "Add lesson" }).first().click();
+//   const embedLessonType = page.getByLabel(
+//     "Choose adminCourseView.curriculum.lesson.other.embed lesson type",
+//   );
+//   await embedLessonType.waitFor({ state: "visible" });
+//   await embedLessonType.click();
+//   await page.getByPlaceholder("Provide lesson title...").fill(TEST_DATA.lessons.embed);
+//   await page.getByRole("button", { name: "Add resource" }).click();
+//   await page.getByPlaceholder("Enter the source URL...").click();
+//   await page.getByLabel("Allow fullscreen").click();
+//   await page.getByRole("button", { name: "Save" }).click();
+//   await expect(page.getByLabel(`Lesson: ${TEST_DATA.lessons.embed}`)).toBeVisible();
+// };
+
+// const publishAndEnroll = async (page: Page) => {
+//   await page.getByRole("tab", { name: "Status" }).click();
+//   await page.getByRole("button", { name: "Published" }).click();
+//   await page.getByRole("button", { name: "Save" }).click();
+//   await page.getByRole("tab", { name: "Enrolled students" }).click();
+//   await page.getByText("Student", { exact: true }).nth(2).click();
+//   await page.getByRole("button", { name: "Enroll", exact: true }).click();
+//   await page.getByRole("button", { name: "Enroll selected", exact: true }).click();
+//   await page.getByRole("button", { name: "Save" }).click();
+
+//   const enrollmentErrorResponse = await page
+//     .waitForResponse((response) => response.status() >= 500, { timeout: 3000 })
+//     .catch(() => null);
+
+//   if (enrollmentErrorResponse) {
+//     throw new Error(
+//       `Student enrollment failed with ${enrollmentErrorResponse.status()} on ${enrollmentErrorResponse.url()}`,
+//     );
+//   }
+// };
+
+// const waitForStudentLessonProgress = async (page: Page) => {
+//   await page.waitForResponse(
+//     (response) =>
+//       response.url().includes("api/studentLessonProgress") &&
+//       response.request().method() === "POST" &&
+//       response.status() === 201,
+//   );
+// };
+
+// const studentCompletesCourse = async (page: Page) => {
+//   await page.getByRole("button", { name: "Avatar for email@example.com" }).click();
+//   await page.getByRole("menuitem", { name: "Logout" }).locator("div").click();
+//   await page.getByPlaceholder("user@example.com").fill(TEST_DATA.student.email);
+//   await page.getByLabel("Password").fill(TEST_DATA.student.password);
+//   await page.getByRole("button", { name: "Login" }).click();
+//   await page.getByRole("button", { name: "Courses" }).getByRole("link").click();
+//   await page.getByTestId("title").click();
+//   await expect(page.getByRole("tab", { name: "Statistics" })).toBeHidden();
+//   await page.getByTestId("chapter 1").click();
+//   await page.getByRole("link", { name: "title Text Not Started" }).click();
+//   await expect(
+//     page
+//       .locator("div")
+//       .filter({ hasText: /^contentheader$/ })
+//       .nth(1),
+//   ).toBeVisible();
+//   await waitForStudentLessonProgress(page);
+//   await page.getByTestId("next-lesson-button").click();
+//   await page.getByRole("link", { name: "presentation title" }).click();
+//   await expect(page.getByText("presentation title").first()).toBeVisible();
+//   await page.getByTestId("next-lesson-button").click();
+//   await expect(page.getByText("Cars quiz").first()).toBeVisible();
+//   await expect(page.locator("div").filter({ hasText: /^Lesson 4\/6 – Quiz$/ })).toBeVisible();
+//   await page.locator("label").filter({ hasText: "2" }).nth(1).click();
+//   await page.locator("label").filter({ hasText: "3" }).nth(1).click();
+//   await page.getByText("True", { exact: true }).click();
+//   await page.locator("label").filter({ hasText: "dark" }).first().click();
+//   await page.getByTestId("detailed-response").fill("free text");
+//   await page.getByTestId("brief-response").fill("short answer");
+//   await page.getByRole("button", { name: "Submit" }).click();
+//   await waitForStudentLessonProgress(page);
+//   await page.getByTestId("next-lesson-button").click();
+//   await expect(page.getByText("Lesson 5/6 – Ai MentorBeta")).toBeVisible();
+//   await expect(page.getByText(TEST_DATA.lessons.aiMentor).first()).toBeVisible();
+//   const messageInput = page.getByPlaceholder("Write a message...");
+//   const sendButton = page.getByRole("button", { name: "Send" });
+
+//   const firstMessage =
+//     "I value the effort and results you’ve delivered. I understand why you’re asking, and I want to find a way to recognize your contributions even with our current budget constraints.";
+//   await messageInput.fill(firstMessage);
+//   await expect(messageInput).toHaveValue(firstMessage);
+//   await expect(sendButton).toBeEnabled();
+//   await sendButton.click();
+
+//   const secondMessage =
+//     "offer a funded professional development plan (e.g., a course or certification of their choice) with dedicated time to complete it, signaling investment in their growth even before a salary change is possible";
+//   await messageInput.fill(secondMessage);
+//   await expect(messageInput).toHaveValue(secondMessage);
+//   await expect(sendButton).toBeEnabled();
+//   await sendButton.click();
+
+//   const thirdMessage =
+//     "Let’s revisit compensation at the next review cycle in X months, or sooner if we hit A/B/C milestones (e.g., revenue target, project delivery, budget reset). I’ll keep you updated quarterly so you’re never in the dark.";
+//   await messageInput.fill(thirdMessage);
+//   await expect(messageInput).toHaveValue(thirdMessage);
+//   await expect(sendButton).toBeEnabled();
+//   await sendButton.click();
+//   await page.getByRole("button", { name: "Check" }).click();
+//   await page.getByRole("link", { name: "embed lesson Embed" }).click();
+//   await expect(page.locator("div").filter({ hasText: /^Lesson 6\/6 – Embed$/ })).toBeVisible();
+//   await expect(page.getByText(TEST_DATA.lessons.embed).first()).toBeVisible();
+//   await expect(page.getByRole("button", { name: "chapter" })).toBeVisible();
+//   await expect(page.getByRole("button", { name: "2" })).toBeVisible();
+//   await expect(page.getByRole("button", { name: "3" })).toBeVisible();
+// };
+
+// const verifyAdminStats = async (page: Page) => {
+//   await page.getByRole("button", { name: "Test Admin profile Test Admin" }).click();
+//   await page.getByRole("menuitem", { name: "Logout" }).locator("div").click();
+//   await page.getByPlaceholder("user@example.com").fill(TEST_DATA.admin.email);
+//   await page.getByLabel("Password").fill(TEST_DATA.admin.password);
+//   await page.getByRole("button", { name: "Login" }).click();
+//   await page.getByRole("link", { name: "Courses", exact: true }).click();
+//   await page.getByTestId("title").click();
+//   await page.getByRole("tab", { name: "Statistics" }).click();
+//   await expect(page.getByRole("heading", { name: "Statistics" })).toBeVisible();
+//   await expect(page.getByText("In Progress")).toBeVisible();
+//   await expect(page.getByText("Enrolled students count")).toBeVisible();
+//   await expect(page.locator("p").filter({ hasText: "1" })).toBeVisible();
+//   await expect(page.getByText("/6")).toBeVisible();
+//   await page.getByRole("tab", { name: "Quiz Results" }).click();
+//   await page.getByRole("tab", { name: "AI Mentor Results" }).click();
+//   await page.getByRole("tab", { name: "Progress" }).click();
+//   await expect(page.getByRole("cell", { name: "Test Admin profile Test Admin" })).toBeVisible();
+// };
+
 test.describe.serial("Course management", () => {
   let createCourseActions: CreateCourseActions;
   let newCourseId: string;
@@ -484,7 +930,7 @@ test.describe.serial("Course management", () => {
     await page.getByRole("button", { name: new RegExp(NEW_COURSE.button.cancel, "i") }).click();
     await page.waitForURL("/admin/courses");
 
-    const currentUrl = await page.url();
+    const currentUrl = page.url();
     expect(currentUrl).toMatch("/admin/courses");
   });
 
@@ -544,20 +990,6 @@ test.describe.serial("Course management", () => {
       chapterLocator.locator(`div[aria-label="Lesson: ${NEW_COURSE.lessons.contentLessonTitle}"]`),
     ).toBeVisible();
 
-    // await createCourseActions.addPresentationLesson(
-    //   page,
-    //   chapterLocator,
-    //   NEW_COURSE.lessons.presentationLessonTitle,
-    //   NEW_COURSE.lessons.presentationLessonDescription,
-    // );
-
-    // await createCourseActions.addVideoLesson(
-    //   page,
-    //   chapterLocator,
-    //   NEW_COURSE.lessons.videoLessonTitle,
-    //   NEW_COURSE.lessons.presentationLessonTitle,
-    // );
-
     await createCourseActions.addQuiz(page, chapterLocator);
 
     await createCourseActions.addQuestion(
@@ -613,16 +1045,6 @@ test.describe.serial("Course management", () => {
     );
 
     await createCourseActions.addScaleQuestion(page, 6);
-
-    // await createCourseActions.addQuestion(
-    //   page,
-    //   NEW_COURSE.questionType.photoQuestion,
-
-    //   NEW_COURSE.questions.photoQuestion,
-    //   7,
-    // );
-    // const imagePath = "app/assets/thumbnail-e2e.jpg";
-    // await createCourseActions.addPhotoQuestion(page, 7, imagePath, 2);
 
     await createCourseActions.addQuestion(
       page,
@@ -689,7 +1111,7 @@ test.describe.serial("Course management", () => {
     const chapterLocator = page.locator(`[data-chapter-id="${newChapterId}"]`);
     await chapterLocator.waitFor({ state: "visible" });
 
-    await expect(
+    expect(
       await page.locator(`[data-testid="Freemium - ${newChapterId}"]`).getAttribute("data-state"),
     ).toBe("checked");
   });
@@ -710,4 +1132,16 @@ test.describe.serial("Course management", () => {
 
     await expect(page.locator(`text=${NEW_COURSE.chapter.editedTitle}`)).not.toBeVisible();
   });
+
+  // test("should create a new course, few chapters with every lesson type", async ({ page }) => {
+  //   await createCourse(page);
+  //   await selectLanguage(page);
+  //   await addChapters(page);
+  //   await addLessonsToFirstChapter(page);
+  //   await buildQuiz(page);
+  //   await addRemainingLessons(page);
+  //   await publishAndEnroll(page);
+  //   await studentCompletesCourse(page);
+  //   await verifyAdminStats(page);
+  // });
 });

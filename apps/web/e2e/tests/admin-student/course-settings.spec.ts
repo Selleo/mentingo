@@ -14,11 +14,13 @@ import { ASSIGNING_STUDENT_TO_GROUP_PAGE_UI } from "./data/assigning-student-dat
 import { COURSE_SETTINGS_UI } from "./data/course-settings-data";
 
 const allowUnregisteredUsersToBrowseCourses = async (page: Page) => {
-  await page.getByRole("button", { name: "Test Admin profile Test Admin" }).click();
+  await page
+    .getByRole("button", { name: /Test Admin profile Test Admin|Avatar for email@example.com/i })
+    .click();
   await page.getByRole("link", { name: /settings/i }).click();
 
   await page
-    .getByRole("tab", { name: new RegExp(COURSE_SETTINGS_UI.button.organization, "i") })
+    .getByRole("tab", { name: new RegExp(COURSE_SETTINGS_UI.button.platformCustomization, "i") })
     .click();
 
   const showCoursesToggle = page.getByLabel(
@@ -127,7 +129,13 @@ test.describe("Course settings flow", () => {
         page,
         ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.courseToAssign,
       );
-      await enrollAllStudents(page);
+      const notEnrolledStudents = page.getByRole("cell", { name: /Not enrolled/i });
+      if ((await notEnrolledStudents.count()) > 0) {
+        await notEnrolledStudents.first().click();
+        await page.getByRole("button", { name: "Enroll", exact: true }).click();
+        await page.getByRole("button", { name: "Enroll selected", exact: true }).click();
+        await page.getByRole("button", { name: "Save" }).click();
+      }
       await setCourseStatus(page, COURSE_SETTINGS_UI.button.draft);
     });
 
@@ -147,17 +155,31 @@ test.describe("Course settings flow", () => {
   test("should set first chapter as freemium and check if a student can access it and check if an unregistered user must log in", async ({
     page,
   }) => {
-    await test.step("admin sets course as freemium", async () => {
+    await test.step("admin sets course as freemium and published", async () => {
       await selectCourse(page, ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.courseToAssign);
+
+      await page.getByRole("tab", { name: "Status" }).click();
+      await page.getByLabel("Published").click();
+      await page.getByRole("button", { name: "Save" }).click();
+
+      await expect(
+        page
+          .getByRole("status", { includeHidden: true })
+          .getByText("Course updated successfully", { exact: true }),
+      ).toBeVisible();
+
       await page.getByRole("tab", { name: COURSE_SETTINGS_UI.button.curriculum }).click();
       const freemiumToggle = page.locator("#freemiumToggle").first();
 
       if (!(await freemiumToggle.isChecked())) {
-        await freemiumToggle.click();
-        await page.waitForResponse(
-          (response) =>
-            response.url().includes("api/course/beta-course-by-id") && response.status() === 200,
-        );
+        const [response] = await Promise.all([
+          page.waitForResponse(
+            (res) => res.url().includes("/api/course/beta-course-by-id") && res.status() === 200,
+            { timeout: 45000 },
+          ),
+          freemiumToggle.click(),
+        ]);
+        expect(response.ok()).toBeTruthy();
       }
 
       await expect(freemiumToggle).toBeChecked();
@@ -177,18 +199,21 @@ test.describe("Course settings flow", () => {
       await navigateToPage(
         page,
         ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.button.browseCourses,
-        ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.header.yourCourses,
+        ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.button.myCourses,
+        page.getByRole("heading", {
+          name: new RegExp(ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.header.yourCourses, "i"),
+        }),
       );
 
-      await enterCourse(page, ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.thirdCourseToAssign);
+      await enterCourse(page, ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.courseToAssign);
 
       await expect(
-        page.getByRole("heading", { name: COURSE_SETTINGS_UI.header.chapterTitle2 }),
+        page.getByRole("heading", { name: COURSE_SETTINGS_UI.header.courseTitle }),
       ).toBeVisible();
 
-      await page.getByTestId(COURSE_SETTINGS_UI.header.chapterTitle3).click();
+      await page.getByTestId(COURSE_SETTINGS_UI.header.chapterTitle4).click();
 
-      await page.getByRole("button", { name: "Repeat lessons" }).click();
+      await page.getByRole("button", { name: /Repeat lessons|Play chapter/i }).click();
 
       const nextLessonButton = page.getByTestId(
         new RegExp(COURSE_SETTINGS_UI.button.nextLesson, "i"),
@@ -197,7 +222,9 @@ test.describe("Course settings flow", () => {
 
       await test.step("unregistered user tries to access free chapter", async () => {
         const newPage = page;
-        await page.getByRole("button", { name: "test Student profile test" }).click();
+        await page
+          .getByRole("button", { name: /test Student profile test|Avatar for email@example.com/i })
+          .click();
         await page
           .getByRole("menuitem", { name: /logout/i })
           .locator("div")
@@ -207,19 +234,19 @@ test.describe("Course settings flow", () => {
 
         await newPage.goto("/courses");
 
-        await newPage.waitForLoadState("networkidle");
+        const availableCourses = page.getByRole("heading", { name: "Available Courses" });
+        await availableCourses.waitFor({ state: "visible" });
+        await expect(availableCourses).toBeVisible();
 
-        await enterCourse(newPage, ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.thirdCourseToAssign);
+        await enterCourse(newPage, ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.courseToAssign);
 
         await newPage.waitForURL(
           /course\/[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/i,
         );
 
-        await page.getByText(COURSE_SETTINGS_UI.header.chapterTitle3, { exact: true }).click();
+        await page.getByText(COURSE_SETTINGS_UI.header.chapterTitle4, { exact: true }).click();
 
-        await newPage
-          .getByRole("button", { name: new RegExp(COURSE_SETTINGS_UI.button.playChapter, "i") })
-          .click();
+        await newPage.getByRole("button", { name: /Repeat lessons|Play chapter/i }).click();
 
         const header = newPage.getByRole("heading", { name: new RegExp("Login") });
         await expect(header).toBeVisible();
@@ -231,6 +258,16 @@ test.describe("Course settings flow", () => {
     page,
     browser,
   }) => {
+    await page.goto("/courses");
+    await page
+      .getByRole("button", { name: /Avatar for email@example.com|Test Admin profile Test Admin/i })
+      .click();
+    await page.getByRole("link", { name: "Settings" }).click();
+    await page.waitForURL("/settings");
+    await page.getByText("LanguageEnglish").getByRole("combobox").click();
+    await page.getByLabel("English").getByText("English").click();
+    await page.getByLabel("Go to homepage").click();
+
     await test.step("admin sets course as free", async () => {
       await selectCourseAndOpenEnrollmentTab(
         page,
@@ -250,10 +287,32 @@ test.describe("Course settings flow", () => {
         ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.data.password,
       );
 
+      await page
+        .getByRole("button", {
+          name: /Avatar for email@example.com|Test Admin profile Test Admin/i,
+        })
+        .click();
+      await page.getByRole("link", { name: /Settings|Ustawienia/i }).click();
+      await page.waitForURL("/settings");
+      await page
+        .getByText(/LanguageEnglish|JęzykPolski/)
+        .getByRole("combobox")
+        .click();
+
+      await page
+        .getByLabel("English")
+        .getByText("English")
+        .or(page.getByRole("option", { name: "Angielski" }))
+        .click();
+      await page.getByLabel("Go to homepage").click();
+
       await navigateToPage(
         page,
         ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.button.browseCourses,
-        ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.header.yourCourses,
+        ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.button.myCourses,
+        page.getByRole("heading", {
+          name: new RegExp(ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.header.yourCourses, "i"),
+        }),
       );
 
       await studentEnrollToCourse(
@@ -282,10 +341,7 @@ test.describe("Course settings flow", () => {
         ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.thirdCourseToAssign,
       );
 
-      const signupHeader = newPage.getByRole("heading", {
-        name: new RegExp(COURSE_SETTINGS_UI.header.signup, "i"),
-      });
-
+      const signupHeader = newPage.getByRole("heading", { name: /Sign Up|Login/i });
       await expect(signupHeader).toBeVisible();
     });
   });

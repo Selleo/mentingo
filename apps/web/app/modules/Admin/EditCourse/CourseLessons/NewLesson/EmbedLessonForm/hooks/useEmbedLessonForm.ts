@@ -80,14 +80,14 @@ export const useEmbedLessonForm = ({
     }
 
     setContentTypeToDisplay(ContentTypes.EMPTY);
-    await queryClient.invalidateQueries(courseQueryOptions(courseId));
+    await queryClient.invalidateQueries(courseQueryOptions(courseId, language));
   };
 
   const onDelete = async () => {
     if (!chapterToEdit?.id || !lessonToEdit?.id || !courseId) return;
 
     await deleteLesson({ chapterId: chapterToEdit?.id, lessonId: lessonToEdit.id });
-    await queryClient.invalidateQueries(courseQueryOptions(courseId));
+    await queryClient.invalidateQueries(courseQueryOptions(courseId, language));
     setContentTypeToDisplay(ContentTypes.EMPTY);
   };
 

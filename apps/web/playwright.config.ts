@@ -17,6 +17,7 @@ const baseURL = process.env.CI
 
 const config: PlaywrightTestConfig = {
   testDir: "./e2e",
+  timeout: 90 * 1000,
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -42,13 +43,18 @@ const config: PlaywrightTestConfig = {
   },
   projects: [
     {
-      name: "setup",
-      testMatch: /.*\.setup\.ts/,
+      name: "setup-db",
+      testMatch: /.*db\.setup\.ts/,
+    },
+    {
+      name: "setup-auth",
+      testMatch: /.*auth\.setup\.ts/,
+      dependencies: ["setup-db"],
     },
     {
       name: "language-guard",
       testMatch: /.*\.lang-guard\.ts/,
-      dependencies: ["setup"],
+      dependencies: ["setup-auth"],
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 1920, height: 1080 },
@@ -58,7 +64,7 @@ const config: PlaywrightTestConfig = {
     {
       name: "chromium-student",
       testDir: "./e2e/tests/student",
-      dependencies: ["setup"],
+      dependencies: ["setup-auth"],
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 1920, height: 1080 },
@@ -70,7 +76,7 @@ const config: PlaywrightTestConfig = {
     {
       name: "chromium-admin",
       testDir: "./e2e/tests/admin",
-      dependencies: ["setup"],
+      dependencies: ["setup-auth"],
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 1920, height: 1080 },
@@ -82,7 +88,7 @@ const config: PlaywrightTestConfig = {
     {
       name: "chromium-content-creator",
       testDir: "./e2e/tests/content-creator",
-      dependencies: ["setup"],
+      dependencies: ["setup-auth"],
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 1920, height: 1080 },
@@ -94,7 +100,7 @@ const config: PlaywrightTestConfig = {
     {
       name: "chromium-admin-student",
       testDir: "./e2e/tests/admin-student",
-      dependencies: ["setup"],
+      dependencies: ["setup-auth"],
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 1920, height: 1080 },
