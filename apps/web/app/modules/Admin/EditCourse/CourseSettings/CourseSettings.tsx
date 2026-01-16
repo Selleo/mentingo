@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import { useUploadFile } from "~/api/mutations/admin/useUploadFile";
 import { useCategoriesSuspense } from "~/api/queries/useCategories";
+import { useUserDetails } from "~/api/queries/useUserDetails";
 import ImageUploadInput from "~/components/FileUploadInput/ImageUploadInput";
 import { FormTextField } from "~/components/Form/FormTextField";
 import { Icon } from "~/components/Icon";
@@ -34,7 +35,8 @@ import { useCourseSettingsForm } from "./hooks/useCourseSettingsForm";
 import type { SupportedLanguages } from "@repo/shared";
 
 type CourseSettingsProps = {
-  courseId?: string;
+  courseId: string;
+  authorId: string;
   title?: string;
   description?: string;
   categoryId?: string;
@@ -46,6 +48,7 @@ type CourseSettingsProps = {
 
 const CourseSettings = ({
   courseId,
+  authorId,
   title,
   description,
   categoryId,
@@ -68,6 +71,9 @@ const CourseSettings = ({
   const { data: categories } = useCategoriesSuspense();
   const [isUploading, setIsUploading] = useState(false);
   const { mutateAsync: uploadFile } = useUploadFile();
+
+  const { data: userDetails } = useUserDetails(authorId);
+
   const isFormValid = form.formState.isDirty;
 
   const [displayThumbnailUrl, setDisplayThumbnailUrl] = useState<string | undefined>(
@@ -117,118 +123,120 @@ const CourseSettings = ({
   return (
     <div className="flex h-full w-full gap-x-6">
       <div className="w-full basis-full">
-        <div className="flex h-full w-full flex-col gap-y-6 overflow-y-auto rounded-lg border border-gray-200 bg-white p-8 shadow-md">
-          {isMissingContent && <MissingTranslationsAlert />}
+        <div className="flex h-full w-full flex-col gap-y-6 overflow-y-auto">
+          <div className="rounded-lg border border-gray-200 bg-white p-8 shadow-md">
+            {isMissingContent && <MissingTranslationsAlert />}
 
-          <div className="flex flex-col gap-y-1">
-            {courseId && (
-              <CourseCertificateSetting courseId={courseId} hasCertificate={hasCertificate} />
-            )}
-            <div className="flex items-center gap-x-2"></div>
-            <p className="body-lg-md text-neutral-800">
-              {t("adminCourseView.settings.editSubHeader")}
-            </p>
-          </div>
-          <Form {...form}>
-            <form className="flex flex-col gap-y-6" onSubmit={form.handleSubmit(onSubmit)}>
-              <div className="flex gap-x-6 *:w-full">
-                <FormTextField
-                  control={form.control}
-                  name="title"
-                  required
-                  label={t("adminCourseView.settings.field.title")}
+            <div className="flex flex-col gap-y-1">
+              {courseId && (
+                <CourseCertificateSetting courseId={courseId} hasCertificate={hasCertificate} />
+              )}
+              <div className="flex items-center gap-x-2"></div>
+              <p className="body-lg-md text-neutral-800">
+                {t("adminCourseView.settings.editSubHeader")}
+              </p>
+            </div>
+            <Form {...form}>
+              <form className="flex flex-col gap-y-6" onSubmit={form.handleSubmit(onSubmit)}>
+                <div className="flex gap-x-6 *:w-full">
+                  <FormTextField
+                    control={form.control}
+                    name="title"
+                    required
+                    label={t("adminCourseView.settings.field.title")}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="categoryId"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col gap-y-1.5">
+                        <Label htmlFor="categoryId">
+                          <span className="mr-1 text-error-600">*</span>
+                          {t("adminCourseView.settings.field.category")}
+                        </Label>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger id="categoryId">
+                              <SelectValue placeholder={t("selectCategory")} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {categories.map((category) => (
+                              <SelectItem value={category.id} key={category.id}>
+                                {category.title}
+                              </SelectItem>
+                            ))}
+                            <InlineCategoryCreationForm
+                              onCategoryCreated={(categoryId) => {
+                                form.setValue("categoryId", categoryId, { shouldValidate: true });
+                              }}
+                            />
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <BaseEditor
+                  id="description"
+                  content={description}
+                  onChange={(value) =>
+                    form.setValue("description", value, {
+                      shouldDirty: true,
+                      shouldTouch: true,
+                    })
+                  }
                 />
+                {watchedDescription.length > MAX_COURSE_DESCRIPTION_HTML_LENGTH && (
+                  <p className="text-sm text-red-500">
+                    {t("adminCourseView.settings.other.reachedCharactersLimitHtml")}
+                  </p>
+                )}
+                {descriptionFieldCharactersLeft <= 0 && (
+                  <p className="text-sm text-red-500">
+                    {t("adminCourseView.settings.other.reachedCharactersLimit")}
+                  </p>
+                )}
+                {courseId && <CourseSettingsSwitches courseId={courseId} />}
                 <FormField
                   control={form.control}
-                  name="categoryId"
+                  name="thumbnailS3Key"
                   render={({ field }) => (
-                    <FormItem className="flex flex-col gap-y-1.5">
-                      <Label htmlFor="categoryId">
-                        <span className="mr-1 text-error-600">*</span>
-                        {t("adminCourseView.settings.field.category")}
+                    <FormItem>
+                      <Label htmlFor="thumbnailS3Key">
+                        {t("adminCourseView.settings.field.thumbnail")}
                       </Label>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger id="categoryId">
-                            <SelectValue placeholder={t("selectCategory")} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {categories.map((category) => (
-                            <SelectItem value={category.id} key={category.id}>
-                              {category.title}
-                            </SelectItem>
-                          ))}
-                          <InlineCategoryCreationForm
-                            onCategoryCreated={(categoryId) => {
-                              form.setValue("categoryId", categoryId, { shouldValidate: true });
-                            }}
-                          />
-                        </SelectContent>
-                      </Select>
+                      <FormControl>
+                        <ImageUploadInput
+                          field={field}
+                          handleImageUpload={handleImageUpload}
+                          isUploading={isUploading}
+                          imageUrl={displayThumbnailUrl}
+                          fileInputRef={fileInputRef}
+                        />
+                      </FormControl>
+                      {isUploading && <p>{t("common.other.uploadingImage")}</p>}
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              </div>
-              <BaseEditor
-                id="description"
-                content={description}
-                onChange={(value) =>
-                  form.setValue("description", value, {
-                    shouldDirty: true,
-                    shouldTouch: true,
-                  })
-                }
-              />
-              {watchedDescription.length > MAX_COURSE_DESCRIPTION_HTML_LENGTH && (
-                <p className="text-sm text-red-500">
-                  {t("adminCourseView.settings.other.reachedCharactersLimitHtml")}
-                </p>
-              )}
-              {descriptionFieldCharactersLeft <= 0 && (
-                <p className="text-sm text-red-500">
-                  {t("adminCourseView.settings.other.reachedCharactersLimit")}
-                </p>
-              )}
-              {courseId && <CourseSettingsSwitches courseId={courseId} />}
-              <FormField
-                control={form.control}
-                name="thumbnailS3Key"
-                render={({ field }) => (
-                  <FormItem>
-                    <Label htmlFor="thumbnailS3Key">
-                      {t("adminCourseView.settings.field.thumbnail")}
-                    </Label>
-                    <FormControl>
-                      <ImageUploadInput
-                        field={field}
-                        handleImageUpload={handleImageUpload}
-                        isUploading={isUploading}
-                        imageUrl={displayThumbnailUrl}
-                        fileInputRef={fileInputRef}
-                      />
-                    </FormControl>
-                    {isUploading && <p>{t("common.other.uploadingImage")}</p>}
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="flex items-center justify-start gap-x-2">
-                {displayThumbnailUrl && (
-                  <Button onClick={removeThumbnail} className="bg-red-500 px-6 py-2 text-white">
-                    <Icon name="TrashIcon" className="mr-2" />
-                    {t("adminCourseView.settings.button.removeThumbnail")}
+                <div className="flex items-center justify-start gap-x-2">
+                  {displayThumbnailUrl && (
+                    <Button onClick={removeThumbnail} className="bg-red-500 px-6 py-2 text-white">
+                      <Icon name="TrashIcon" className="mr-2" />
+                      {t("adminCourseView.settings.button.removeThumbnail")}
+                    </Button>
+                  )}
+                </div>
+                <div className="flex space-x-5">
+                  <Button type="submit" disabled={!isFormValid || isUploading}>
+                    {t("common.button.save")}
                   </Button>
-                )}
-              </div>
-              <div className="flex space-x-5">
-                <Button type="submit" disabled={!isFormValid || isUploading}>
-                  {t("common.button.save")}
-                </Button>
-              </div>
-            </form>
-          </Form>
+                </div>
+              </form>
+            </Form>
+          </div>
         </div>
       </div>
       <div className="w-full max-w-[480px]">
@@ -237,6 +245,11 @@ const CourseSettings = ({
           title={watchedTitle}
           description={watchedDescription}
           category={categoryName}
+          data={{
+            username: `${userDetails?.firstName} ${userDetails?.lastName}`,
+            email: `${userDetails?.contactEmail}`,
+            profilePictureUrl: userDetails?.profilePictureUrl,
+          }}
         />
       </div>
     </div>

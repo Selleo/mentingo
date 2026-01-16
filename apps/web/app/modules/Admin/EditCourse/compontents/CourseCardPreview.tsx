@@ -10,9 +10,20 @@ type CourseCardPreviewProps = {
   title?: string;
   category?: string;
   description?: string;
+  data?: {
+    profilePictureUrl?: string | null;
+    username: string;
+    email: string;
+  };
 };
 
-const CourseCardPreview = ({ imageUrl, title, description, category }: CourseCardPreviewProps) => {
+const CourseCardPreview = ({
+  imageUrl,
+  title,
+  description,
+  category,
+  data,
+}: CourseCardPreviewProps) => {
   const { t } = useTranslation();
 
   return (
@@ -43,7 +54,7 @@ const CourseCardPreview = ({ imageUrl, title, description, category }: CourseCar
               <h1 className="break-words text-left font-bold">
                 {title || t("adminCourseView.settings.sideSection.other.untitled")}
               </h1>
-              <UserProfile />
+              <UserProfile data={data} />
               <div
                 className="description line-clamp-3 break-words text-left text-gray-500"
                 dangerouslySetInnerHTML={{

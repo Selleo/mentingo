@@ -7,7 +7,9 @@ import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { FileService } from "src/file/file.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import {
+  courses,
   coursesSummaryStats,
+  courseStudentsStats,
   groupCourses,
   lessons,
   studentChapterProgress,
@@ -2789,6 +2791,239 @@ describe("CourseController (e2e)", () => {
 
           expect(getResponse.body.data.quizFeedbackEnabled).toBe(false);
         });
+      });
+    });
+  });
+
+  describe("GET /api/course/course-ownership/:courseId", () => {
+    describe("when user is not logged in", () => {
+      it("returns 401", async () => {
+        await request(app.getHttpServer())
+          .get(`/api/course/course-ownership/${faker.string.uuid()}`)
+          .expect(401);
+      });
+    });
+
+    describe("when user is logged in", () => {
+      it("returns current author and candidate list for admin", async () => {
+        const admin = await userFactory
+          .withCredentials({ password })
+          .withAdminSettings(db)
+          .create({ role: USER_ROLES.ADMIN });
+        const author = await userFactory
+          .withCredentials({ password })
+          .withContentCreatorSettings(db)
+          .create({
+            role: USER_ROLES.CONTENT_CREATOR,
+            firstName: "Alice",
+            lastName: "Author",
+            email: "alice@example.com",
+          });
+        const candidate = await userFactory
+          .withCredentials({ password })
+          .withContentCreatorSettings(db)
+          .create({
+            role: USER_ROLES.CONTENT_CREATOR,
+            firstName: "Bob",
+            lastName: "Candidate",
+            email: "bob@example.com",
+          });
+        const category = await categoryFactory.create();
+        const course = await courseFactory.create({
+          authorId: author.id,
+          categoryId: category.id,
+          status: "published",
+          thumbnailS3Key: null,
+        });
+
+        const response = await request(app.getHttpServer())
+          .get(`/api/course/course-ownership/${course.id}`)
+          .set("Cookie", await cookieFor(admin, app))
+          .expect(200);
+
+        expect(response.body.data.currentAuthor).toEqual({
+          id: author.id,
+          name: "Alice Author",
+          email: "alice@example.com",
+        });
+        expect(response.body.data.possibleCandidates).toEqual(
+          expect.arrayContaining([expect.objectContaining({ id: candidate.id })]),
+        );
+        expect(
+          response.body.data.possibleCandidates.every(
+            (ownership: { id: string }) => ownership.id !== author.id,
+          ),
+        ).toBe(true);
+      });
+
+      it("returns 403 for content creator without access", async () => {
+        const contentCreator = await userFactory
+          .withCredentials({ password })
+          .withContentCreatorSettings(db)
+          .create({ role: USER_ROLES.CONTENT_CREATOR });
+        const author = await userFactory
+          .withCredentials({ password })
+          .withContentCreatorSettings(db)
+          .create({ role: USER_ROLES.CONTENT_CREATOR });
+        const category = await categoryFactory.create();
+        const course = await courseFactory.create({
+          authorId: author.id,
+          categoryId: category.id,
+          status: "published",
+          thumbnailS3Key: null,
+        });
+
+        await request(app.getHttpServer())
+          .get(`/api/course/course-ownership/${course.id}`)
+          .set("Cookie", await cookieFor(contentCreator, app))
+          .expect(403);
+      });
+    });
+  });
+
+  describe("POST /api/course/course-ownership/transfer", () => {
+    describe("when user is not logged in", () => {
+      it("returns 401", async () => {
+        await request(app.getHttpServer())
+          .post("/api/course/course-ownership/transfer")
+          .send({ courseId: faker.string.uuid(), userId: faker.string.uuid() })
+          .expect(401);
+      });
+    });
+
+    describe("when user is logged in", () => {
+      it("transfers ownership and updates stats for admin", async () => {
+        const admin = await userFactory
+          .withCredentials({ password })
+          .withAdminSettings(db)
+          .create({ role: USER_ROLES.ADMIN });
+        const author = await userFactory
+          .withCredentials({ password })
+          .withContentCreatorSettings(db)
+          .create({ role: USER_ROLES.CONTENT_CREATOR });
+        const newOwner = await userFactory
+          .withCredentials({ password })
+          .withContentCreatorSettings(db)
+          .create({ role: USER_ROLES.CONTENT_CREATOR });
+        const otherAuthor = await userFactory
+          .withCredentials({ password })
+          .withContentCreatorSettings(db)
+          .create({ role: USER_ROLES.CONTENT_CREATOR });
+
+        const category = await categoryFactory.create();
+        const course = await courseFactory.create({
+          authorId: author.id,
+          categoryId: category.id,
+          status: "published",
+          thumbnailS3Key: null,
+        });
+        const otherCourse = await courseFactory.create({
+          authorId: otherAuthor.id,
+          categoryId: category.id,
+          status: "published",
+          thumbnailS3Key: null,
+        });
+
+        await db.insert(coursesSummaryStats).values([
+          { courseId: course.id, authorId: author.id },
+          { courseId: otherCourse.id, authorId: otherAuthor.id },
+        ]);
+        await db.insert(courseStudentsStats).values([
+          { courseId: course.id, authorId: author.id, month: 1, year: 2025 },
+          { courseId: otherCourse.id, authorId: otherAuthor.id, month: 1, year: 2025 },
+        ]);
+
+        await request(app.getHttpServer())
+          .post("/api/course/course-ownership/transfer")
+          .send({ courseId: course.id, userId: newOwner.id })
+          .set("Cookie", await cookieFor(admin, app))
+          .expect(201);
+
+        const [updatedCourse] = await db.select().from(courses).where(eq(courses.id, course.id));
+        const [untouchedCourse] = await db
+          .select()
+          .from(courses)
+          .where(eq(courses.id, otherCourse.id));
+        expect(updatedCourse.authorId).toBe(newOwner.id);
+        expect(untouchedCourse.authorId).toBe(otherAuthor.id);
+
+        const [updatedSummary] = await db
+          .select()
+          .from(coursesSummaryStats)
+          .where(eq(coursesSummaryStats.courseId, course.id));
+        const [untouchedSummary] = await db
+          .select()
+          .from(coursesSummaryStats)
+          .where(eq(coursesSummaryStats.courseId, otherCourse.id));
+        expect(updatedSummary.authorId).toBe(newOwner.id);
+        expect(untouchedSummary.authorId).toBe(otherAuthor.id);
+
+        const [updatedStudentStats] = await db
+          .select()
+          .from(courseStudentsStats)
+          .where(eq(courseStudentsStats.courseId, course.id));
+        const [untouchedStudentStats] = await db
+          .select()
+          .from(courseStudentsStats)
+          .where(eq(courseStudentsStats.courseId, otherCourse.id));
+        expect(updatedStudentStats.authorId).toBe(newOwner.id);
+        expect(untouchedStudentStats.authorId).toBe(otherAuthor.id);
+      });
+
+      it("returns 400 when candidate is not available", async () => {
+        const admin = await userFactory
+          .withCredentials({ password })
+          .withAdminSettings(db)
+          .create({ role: USER_ROLES.ADMIN });
+        const author = await userFactory
+          .withCredentials({ password })
+          .withContentCreatorSettings(db)
+          .create({ role: USER_ROLES.CONTENT_CREATOR });
+        const student = await userFactory
+          .withCredentials({ password })
+          .withUserSettings(db)
+          .create({ role: USER_ROLES.STUDENT });
+        const category = await categoryFactory.create();
+        const course = await courseFactory.create({
+          authorId: author.id,
+          categoryId: category.id,
+          status: "published",
+          thumbnailS3Key: null,
+        });
+
+        await request(app.getHttpServer())
+          .post("/api/course/course-ownership/transfer")
+          .send({ courseId: course.id, userId: student.id })
+          .set("Cookie", await cookieFor(admin, app))
+          .expect(400);
+      });
+
+      it("returns 403 for content creator without access", async () => {
+        const contentCreator = await userFactory
+          .withCredentials({ password })
+          .withContentCreatorSettings(db)
+          .create({ role: USER_ROLES.CONTENT_CREATOR });
+        const author = await userFactory
+          .withCredentials({ password })
+          .withContentCreatorSettings(db)
+          .create({ role: USER_ROLES.CONTENT_CREATOR });
+        const newOwner = await userFactory
+          .withCredentials({ password })
+          .withContentCreatorSettings(db)
+          .create({ role: USER_ROLES.CONTENT_CREATOR });
+        const category = await categoryFactory.create();
+        const course = await courseFactory.create({
+          authorId: author.id,
+          categoryId: category.id,
+          status: "published",
+          thumbnailS3Key: null,
+        });
+
+        await request(app.getHttpServer())
+          .post("/api/course/course-ownership/transfer")
+          .send({ courseId: course.id, userId: newOwner.id })
+          .set("Cookie", await cookieFor(contentCreator, app))
+          .expect(403);
       });
     });
   });

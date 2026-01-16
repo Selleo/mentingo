@@ -2,6 +2,7 @@ import { useNavigate } from "@remix-run/react";
 import { formatDate } from "date-fns";
 import { useTranslation } from "react-i18next";
 
+import { useCurrentUser } from "~/api/queries";
 import CardPlaceholder from "~/assets/placeholders/card-placeholder.jpg";
 import { Icon } from "~/components/Icon";
 import Viewer from "~/components/RichText/Viever";
@@ -11,7 +12,6 @@ import { Card, CardContent } from "~/components/ui/card";
 import { CategoryChip } from "~/components/ui/CategoryChip";
 import { useUserRole } from "~/hooks/useUserRole";
 import { courseLanguages } from "~/modules/Admin/EditCourse/compontents/CourseLanguageSelector";
-import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
 
 import type { GetCourseResponse } from "~/api/generated-api";
 
@@ -24,7 +24,7 @@ export default function CourseOverview({ course }: CourseOverviewProps) {
   const { t } = useTranslation();
 
   const { isAdminLike, isAdmin } = useUserRole();
-  const { currentUser } = useCurrentUserStore();
+  const { data: currentUser } = useCurrentUser();
 
   const imageUrl = course?.thumbnailUrl ?? CardPlaceholder;
   const title = course?.title;
