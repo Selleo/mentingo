@@ -2155,6 +2155,29 @@
       }
     }
   },
+  "richText": {
+    "video": {
+      "tooltip": {
+        "bunnyMissing": "Video is not available. Please check Bunny CDN configuration."
+      },
+      "ariaLabel": {
+        "drag": "Drag video embed",
+        "remove": "Remove video embed"
+      }
+    },
+    "presentation": {
+      "ariaLabel": {
+        "drag": "Drag presentation embed",
+        "remove": "Remove presentation embed"
+      }
+    },
+    "downloadableFile": {
+      "ariaLabel": {
+        "drag": "Drag file",
+        "remove": "Remove downloadable file"
+      }
+    }
+  },
   "pages": {
     "dashboard": "Dashboard",
     "settings": "Settings",

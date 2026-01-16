@@ -2174,6 +2174,29 @@
       }
     }
   },
+  "richText": {
+    "video": {
+      "tooltip": {
+        "bunnyMissing": "Wideo jest niedostępne. Sprawdź konfigurację Bunny CDN."
+      },
+      "ariaLabel": {
+        "drag": "Przeciągnij osadzone wideo",
+        "remove": "Usuń osadzone wideo"
+      }
+    },
+    "presentation": {
+      "ariaLabel": {
+        "drag": "Przeciągnij osadzoną prezentację",
+        "remove": "Usuń osadzoną prezentację"
+      }
+    },
+    "downloadableFile": {
+      "ariaLabel": {
+        "drag": "Przeciągnij plik",
+        "remove": "Usuń plik do pobrania"
+      }
+    }
+  },
   "pages": {
     "dashboard": "Panel główny",
     "settings": "Ustawienia",

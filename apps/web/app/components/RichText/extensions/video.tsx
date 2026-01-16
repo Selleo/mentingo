@@ -1,8 +1,10 @@
 import { Node, mergeAttributes } from "@tiptap/core";
 import { NodeViewWrapper, ReactNodeViewRenderer } from "@tiptap/react";
 import { GripVertical, Video as VideoIcon, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { Video } from "~/components/VideoPlayer/Video";
 import { cn } from "~/lib/utils";
 
@@ -40,10 +42,62 @@ const getVideoDataAttributes = (attrs: VideoEmbedAttrs) => ({
   ...(attrs.hasError ? { "data-error": "true" } : {}),
 });
 
+const VideoEditorContent = ({
+  attrs,
+  onRemove,
+  dragLabel,
+  removeLabel,
+  containerClassName,
+  linkClassName,
+}: {
+  attrs: VideoEmbedAttrs & { src: string };
+  onRemove: () => void;
+  dragLabel: string;
+  removeLabel: string;
+  containerClassName?: string;
+  linkClassName?: string;
+}) => (
+  <div
+    className={cn(
+      "inline-flex max-w-full items-center gap-2 rounded border border-dashed border-neutral-300 bg-neutral-50 px-3 py-2 text-sm text-primary-700",
+      attrs.hasError && "border-red-500 border-2 bg-red-500/10",
+      containerClassName,
+    )}
+  >
+    <Button
+      type="button"
+      size="xs"
+      variant="ghost"
+      className="rounded-full text-neutral-500 hover:bg-neutral-200"
+      aria-label={dragLabel}
+      data-drag-handle
+    >
+      <GripVertical className="size-4" aria-hidden />
+    </Button>
+    <a
+      {...getVideoDataAttributes(attrs)}
+      href={attrs.src}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={cn("inline-flex min-w-0 items-center gap-2 underline", linkClassName)}
+      contentEditable={false}
+    >
+      <VideoIcon className="size-4 text-primary-700" aria-hidden />
+      <span className="truncate">{attrs.src}</span>
+    </a>
+    <Button type="button" onClick={onRemove} aria-label={removeLabel} size="xs" variant="ghost">
+      <X className="size-3.5" aria-hidden />
+    </Button>
+  </div>
+);
+
 const VideoEditorView = ({ node, editor, getPos }: NodeViewProps) => {
+  const { t } = useTranslation();
+
   const attrs = normalizeVideoEmbedAttributes(node.attrs);
 
   if (!attrs.src) return null;
+  const videoAttrs = attrs as VideoEmbedAttrs & { src: string };
 
   const handleRemove = () => {
     const pos = getPos();
@@ -55,45 +109,37 @@ const VideoEditorView = ({ node, editor, getPos }: NodeViewProps) => {
       .run();
   };
 
+  if (attrs.hasError) {
+    return (
+      <NodeViewWrapper className="video-node">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger className="cursor-help">
+              <VideoEditorContent
+                attrs={videoAttrs}
+                onRemove={handleRemove}
+                dragLabel={t("richText.video.ariaLabel.drag")}
+                removeLabel={t("richText.video.ariaLabel.remove")}
+                linkClassName="cursor-help"
+              />
+            </TooltipTrigger>
+            <TooltipContent>
+              <div>{t("richText.video.tooltip.bunnyMissing")}</div>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </NodeViewWrapper>
+    );
+  }
+
   return (
     <NodeViewWrapper className="video-node">
-      <div
-        className={cn(
-          "inline-flex max-w-full items-center gap-2 rounded border border-dashed border-neutral-300 bg-neutral-50 px-3 py-2 text-sm text-primary-700",
-          attrs.hasError && "border-red-500 border-2 bg-red-500/10",
-        )}
-      >
-        <Button
-          type="button"
-          size="xs"
-          variant="ghost"
-          className="rounded-full text-neutral-500 hover:bg-neutral-200"
-          aria-label="Drag video embed"
-          data-drag-handle
-        >
-          <GripVertical className="size-4" aria-hidden />
-        </Button>
-        <a
-          {...getVideoDataAttributes(attrs)}
-          href={attrs.src}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex min-w-0 items-center gap-2 underline"
-          contentEditable={false}
-        >
-          <VideoIcon className="size-4 text-primary-700" aria-hidden />
-          <span className="truncate">{attrs.src}</span>
-        </a>
-        <Button
-          type="button"
-          onClick={handleRemove}
-          aria-label="Remove video embed"
-          size="xs"
-          variant="ghost"
-        >
-          <X className="size-3.5" aria-hidden />
-        </Button>
-      </div>
+      <VideoEditorContent
+        attrs={videoAttrs}
+        onRemove={handleRemove}
+        dragLabel={t("richText.video.ariaLabel.drag")}
+        removeLabel={t("richText.video.ariaLabel.remove")}
+      />
     </NodeViewWrapper>
   );
 };
