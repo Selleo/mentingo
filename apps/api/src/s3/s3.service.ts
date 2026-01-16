@@ -163,6 +163,29 @@ export class S3Service {
     return getSignedUrl(this.s3Client, command, { expiresIn });
   }
 
+  async uploadMultipartPart(
+    key: string,
+    uploadId: string,
+    partNumber: number,
+    body: Buffer,
+  ): Promise<string> {
+    const command = new UploadPartCommand({
+      Bucket: this.bucketName,
+      Key: key,
+      UploadId: uploadId,
+      PartNumber: partNumber,
+      Body: body,
+    });
+
+    const response = await this.s3Client.send(command);
+
+    if (!response.ETag) {
+      throw new Error("Failed to upload multipart part");
+    }
+
+    return response.ETag.replace(/"/g, "");
+  }
+
   async completeMultipartUpload(
     key: string,
     uploadId: string,

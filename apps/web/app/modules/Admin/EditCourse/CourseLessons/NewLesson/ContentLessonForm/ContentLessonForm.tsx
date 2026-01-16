@@ -5,6 +5,7 @@ import {
   ALLOWED_PRESENTATION_FILE_TYPES,
   ALLOWED_VIDEO_FILE_TYPES,
   ALLOWED_WORD_FILE_TYPES,
+  DEFAULT_TUS_CHUNK_SIZE,
 } from "@repo/shared";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -12,10 +13,6 @@ import * as tus from "tus-js-client";
 
 import { useInitVideoUpload } from "~/api/mutations/admin/useInitVideoUpload";
 import { useLessonFileUpload } from "~/api/mutations/admin/useLessonFileUpload";
-import {
-  useCompleteS3MultipartUpload,
-  useSignS3MultipartPart,
-} from "~/api/mutations/admin/useS3MultipartVideoUpload";
 import { FormTextField } from "~/components/Form/FormTextField";
 import { Icon } from "~/components/Icon";
 import { LessonEditor } from "~/components/RichText/Editor";
@@ -68,8 +65,6 @@ const ContentLessonForm = ({
 
   const { mutateAsync: initVideoUpload } = useInitVideoUpload();
   const { mutateAsync: uploadFile } = useLessonFileUpload();
-  const { mutateAsync: signS3Part } = useSignS3MultipartPart();
-  const { mutateAsync: completeS3Multipart } = useCompleteS3MultipartUpload();
   const { getUploadForFile, saveUpload, clearUpload } = useVideoUploadResumeStore();
 
   const onCloseModal = () => {
@@ -90,21 +85,23 @@ const ContentLessonForm = ({
     session: InitVideoUploadResponse,
     editor?: TiptapEditor | null,
   ) => {
-    if (!session.tusEndpoint || !session.tusHeaders || !session.expiresAt || !session.bunnyGuid) {
-      throw new Error("Missing Bunny upload configuration");
+    if (!session.tusEndpoint || !session.tusHeaders || !session.expiresAt) {
+      throw new Error("Missing upload configuration");
     }
 
     const existingUpload = getUploadForFile(file);
 
-    const tusHeaders = normalizeTusHeaders(session.tusHeaders);
-    const tusFingerprint = `bunny-tus:${session.uploadId}:${buildFileFingerprint(file)}`;
+    const tusHeaders = normalizeTusHeaders(session.tusHeaders ?? {});
+    const tusFingerprint = `${session.provider}-tus:${session.uploadId}:${buildFileFingerprint(
+      file,
+    )}`;
 
     if (!existingUpload) {
       saveUpload({
         uploadId: session.uploadId,
         bunnyGuid: session.bunnyGuid,
         fileKey: session.fileKey,
-        provider: "bunny",
+        provider: session.provider,
         tusEndpoint: session.tusEndpoint,
         tusHeaders,
         expiresAt: session.expiresAt,
@@ -129,9 +126,11 @@ const ContentLessonForm = ({
         const upload = new tus.Upload(file, {
           endpoint: session.tusEndpoint,
           headers: tusHeaders,
+          chunkSize: session.partSize ?? DEFAULT_TUS_CHUNK_SIZE,
           metadata: {
             filename: file.name,
             filetype: file.type,
+            uploadId: session.uploadId,
           },
           retryDelays: [0, 1000, 3000, 5000, 10000],
           fingerprint: async () => tusFingerprint,
@@ -182,87 +181,6 @@ const ContentLessonForm = ({
       .run();
   };
 
-  const handleVideoMultipartUpload = async (
-    file: File,
-    session: InitVideoUploadResponse,
-    editor?: TiptapEditor | null,
-  ) => {
-    if (!session.multipartUploadId || !session.partSize) {
-      throw new Error("Missing S3 multipart upload configuration");
-    }
-
-    const partSize = session.partSize;
-    const totalParts = Math.ceil(file.size / partSize);
-    const parts: Array<{ etag: string; partNumber: number }> = [];
-
-    setIsVideoUploading(true);
-    setVideoUploadProgress(0);
-
-    try {
-      toast({
-        description: t("uploadFile.toast.videoUploading"),
-        duration: Number.POSITIVE_INFINITY,
-        variant: "loading",
-      });
-
-      for (let partNumber = 1; partNumber <= totalParts; partNumber += 1) {
-        const start = (partNumber - 1) * partSize;
-        const end = Math.min(start + partSize, file.size);
-        const chunk = file.slice(start, end);
-
-        const signResponse = await signS3Part({
-          uploadId: session.uploadId,
-          partNumber,
-        });
-
-        const uploadResponse = await fetch(signResponse.url, {
-          method: "PUT",
-          body: chunk,
-        });
-
-        if (!uploadResponse.ok) {
-          throw new Error(`S3 multipart upload failed for part ${partNumber}`);
-        }
-
-        const rawEtag = uploadResponse.headers.get("etag") ?? uploadResponse.headers.get("ETag");
-        if (!rawEtag) {
-          throw new Error("Missing ETag from S3 multipart response");
-        }
-
-        parts.push({ etag: rawEtag.replace(/"/g, ""), partNumber });
-
-        const progress = Math.round((end / file.size) * 100);
-        setVideoUploadProgress(progress);
-      }
-
-      await completeS3Multipart({
-        uploadId: session.uploadId,
-        parts,
-      });
-
-      toast({
-        description: t("uploadFile.toast.videoUploadedProcessing"),
-        duration: Number.POSITIVE_INFINITY,
-        variant: "success",
-      });
-    } finally {
-      setIsVideoUploading(false);
-      setVideoUploadProgress(null);
-    }
-
-    if (!session.resourceId) return;
-
-    const resourceUrl = `${baseUrl}/api/lesson/lesson-resource/${session.resourceId}`;
-    editor
-      ?.chain()
-      .insertContent("<br />")
-      .setVideoEmbed({
-        src: resourceUrl,
-        sourceType: session.provider === "s3" ? "external" : "internal",
-      })
-      .run();
-  };
-
   const handleFileUpload = async (file?: File, editor?: TiptapEditor | null) => {
     if (!file || !lessonToEdit?.id) return;
 
@@ -279,7 +197,7 @@ const ContentLessonForm = ({
         const session: InitVideoUploadResponse = existingUpload
           ? {
               ...existingUpload,
-              provider: "bunny",
+              provider: existingUpload.provider ?? "bunny",
             }
           : await initVideoUpload({
               filename: file.name,
@@ -289,11 +207,6 @@ const ContentLessonForm = ({
               resource: "lesson-content",
               lessonId: lessonToEdit?.id,
             });
-
-        if (session.provider === "s3") {
-          await handleVideoMultipartUpload(file, session, editor);
-          return;
-        }
 
         await handleVideoTusUpload(file, session, editor);
       } catch (error) {
