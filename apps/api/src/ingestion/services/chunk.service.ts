@@ -4,7 +4,6 @@ import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { TextLoader } from "langchain/document_loaders/fs/text";
 
-import { FileGuard } from "src/file/guards/file.guard";
 import { ALLOWED_FILE_TYPES_MAP } from "src/ingestion/ingestion.config";
 
 import type { TextExtractionBody } from "src/ingestion/ingestion.schema";
@@ -14,10 +13,8 @@ export class ChunkService {
   constructor() {}
 
   async extractText(file: Express.Multer.File): Promise<TextExtractionBody> {
-    const type = await FileGuard.getFileType(file);
-
-    const fileBlob = new Blob([file.buffer], { type: type?.mime });
-    switch (type?.mime) {
+    const fileBlob = new Blob([file.buffer], { type: file?.mimetype });
+    switch (file.mimetype) {
       case ALLOWED_FILE_TYPES_MAP.PDF: {
         const loader = new PDFLoader(fileBlob);
         return loader.load();

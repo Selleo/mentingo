@@ -4,6 +4,7 @@ import {
   Delete,
   ForbiddenException,
   Get,
+  HttpStatus,
   Param,
   Patch,
   Post,
@@ -15,7 +16,7 @@ import {
 import { FileInterceptor } from "@nestjs/platform-express/multer/interceptors/file.interceptor";
 import { ApiBody } from "@nestjs/swagger";
 import { ApiConsumes } from "@nestjs/swagger/dist/decorators/api-consumes.decorator";
-import { OnboardingPages } from "@repo/shared";
+import { ALLOWED_AVATAR_IMAGE_TYPES, OnboardingPages } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { memoryStorage } from "multer";
 import { Validate } from "nestjs-typebox";
@@ -34,6 +35,10 @@ import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
+import { ALLOWED_EXCEL_MIME_TYPES } from "src/file/file.constants";
+import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
+import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
+import { ImageConstraintsValidator } from "src/file/validators/image-constraints.validator";
 import { groupsFilterSchema } from "src/group/group.schema";
 import { GroupsFilterSchema } from "src/group/group.types";
 import {
@@ -41,6 +46,11 @@ import {
   createUserSchema,
   importUserResponseSchema,
 } from "src/user/schemas/createUser.schema";
+import {
+  AVATAR_ASPECT_RATIO,
+  AVATAR_MAX_RESOLUTION,
+  AVATAR_MAX_SIZE,
+} from "src/user/user.constants";
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
 import {
@@ -51,26 +61,26 @@ import {
 import { type ChangePasswordBody, changePasswordSchema } from "./schemas/changePassword.schema";
 import { deleteUsersSchema, type DeleteUsersSchema } from "./schemas/deleteUsers.schema";
 import {
+  BulkAssignUserGroups,
+  bulkAssignUsersGroupsSchema,
+  BulkUpdateUsersRolesBody,
+  bulkUpdateUsersRolesSchema,
   type UpdateUserBody,
   type UpdateUserProfileBody,
   updateUserProfileSchema,
   updateUserSchema,
   UpsertUserDetailsBody,
   upsertUserDetailsSchema,
-  BulkAssignUserGroups,
-  bulkAssignUsersGroupsSchema,
-  bulkUpdateUsersRolesSchema,
-  BulkUpdateUsersRolesBody,
 } from "./schemas/updateUser.schema";
 import {
   type AllUsersResponse,
   allUsersSchema,
-  type UserDetailsResponse,
-  type UserResponse,
   baseUserResponseSchema,
+  type UserDetailsResponse,
   userDetailsResponseSchema,
-  userSchema,
   userOnboardingStatusSchema,
+  type UserResponse,
+  userSchema,
 } from "./schemas/user.schema";
 import { sortUserFieldsOptions, SortUserFieldsOptions } from "./schemas/userQuery";
 import { USER_ROLES, UserRole } from "./schemas/userRoles";
@@ -221,7 +231,17 @@ export class UserController {
     @Body(new ValidateMultipartPipe(updateUserProfileSchema))
     userInfo: { data: UpdateUserProfileBody },
     @CurrentUser("userId") currentUserId: UUIDType,
-    @UploadedFile() userAvatar?: Express.Multer.File,
+    @UploadedFile(
+      getBaseFileTypePipe(buildFileTypeRegex(ALLOWED_AVATAR_IMAGE_TYPES), AVATAR_MAX_SIZE)
+        .addValidator(
+          new ImageConstraintsValidator({
+            maxResolution: AVATAR_MAX_RESOLUTION,
+            aspectRatio: AVATAR_ASPECT_RATIO,
+          }),
+        )
+        .build({ errorHttpStatusCode: HttpStatus.BAD_REQUEST, fileIsRequired: false }),
+    )
+    userAvatar?: Express.Multer.File,
   ): Promise<BaseResponse<{ message: string }>> {
     await this.usersService.updateUserProfile(currentUserId, userInfo.data, userAvatar);
 
@@ -367,7 +387,12 @@ export class UserController {
     response: baseResponse(importUserResponseSchema),
   })
   async importUsers(
-    @UploadedFile() usersFile: Express.Multer.File,
+    @UploadedFile(
+      getBaseFileTypePipe(buildFileTypeRegex(ALLOWED_EXCEL_MIME_TYPES)).build({
+        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
+      }),
+    )
+    usersFile: Express.Multer.File,
     @CurrentUser() creator: CurrentUserType,
   ) {
     const importStats = await this.usersService.importUsers(usersFile, creator);

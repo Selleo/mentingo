@@ -1,18 +1,7 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  Inject,
-  Injectable,
-  UnsupportedMediaTypeException,
-} from "@nestjs/common";
+import { BadRequestException, ForbiddenException, Inject, Injectable } from "@nestjs/common";
 
 import { DatabasePg } from "src/common";
-import { FileGuard } from "src/file/guards/file.guard";
-import {
-  ALLOWED_FILE_TYPES,
-  MAX_MB_PER_FILE,
-  MAX_NUM_OF_FILES,
-} from "src/ingestion/ingestion.config";
+import { MAX_NUM_OF_FILES } from "src/ingestion/ingestion.config";
 import { DOCUMENT_STATUS } from "src/ingestion/ingestion.constants";
 import { IngestionRepository } from "src/ingestion/repositories/ingestion.repository";
 import { DocumentService } from "src/ingestion/services/document.service";
@@ -40,18 +29,6 @@ export class IngestionService {
   ) {
     if (files.length > MAX_NUM_OF_FILES) {
       throw new BadRequestException("Exceeded max number of files");
-    }
-
-    for (const file of files) {
-      const type = await FileGuard.getFileType(file);
-
-      if (type?.mime && !ALLOWED_FILE_TYPES.includes(type.mime)) {
-        throw new UnsupportedMediaTypeException("Incorrect file type");
-      }
-
-      if (file.size / 1024 / 1024 > MAX_MB_PER_FILE) {
-        throw new BadRequestException("File size too large");
-      }
     }
 
     const { author } = await this.ingestionRepository.findCourseAuthorByLesson(lessonId);

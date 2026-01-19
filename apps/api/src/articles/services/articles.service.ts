@@ -28,7 +28,6 @@ import {
   RESOURCE_CATEGORIES,
 } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
-import { FileGuard } from "src/file/guards/file.guard";
 import { LocalizationService } from "src/localization/localization.service";
 import { SettingsService } from "src/settings/settings.service";
 import { articles, articleSections } from "src/storage/schema";
@@ -647,11 +646,6 @@ export class ArticlesService {
     currentUser?: CurrentUser,
   ) {
     await this.checkEditAccess(articleId, currentUser);
-
-    const type = await FileGuard.getFileType(file);
-
-    if (!file || !type?.mime.startsWith("image/"))
-      throw new BadRequestException("adminArticleView.toast.invalidCoverType");
 
     await this.validateArticleExists(articleId, language, false);
 

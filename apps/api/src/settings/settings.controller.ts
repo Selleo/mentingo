@@ -3,6 +3,7 @@ import {
   Get,
   Body,
   Patch,
+  HttpStatus,
   UseGuards,
   Put,
   UseInterceptors,
@@ -16,6 +17,9 @@ import {
   ALLOWED_ARTICLES_SETTINGS,
   ALLOWED_NEWS_SETTINGS,
   ALLOWED_QA_SETTINGS,
+  ALLOWED_AVATAR_IMAGE_TYPES,
+  ALLOWED_LESSON_IMAGE_FILE_TYPES,
+  LOGIN_PAGE_DOCUMENTS_FILE_TYPES,
   type AllowedArticlesSettings,
   type AllowedNewsSettings,
   type AllowedQASettings,
@@ -30,6 +34,8 @@ import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
+import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
+import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { CompanyInformaitonJSONSchema } from "./schemas/company-information.schema";
@@ -216,7 +222,13 @@ export class SettingsController {
     },
   })
   async updatePlatformLogo(
-    @UploadedFile() logo: Express.Multer.File | null,
+    @UploadedFile(
+      getBaseFileTypePipe(buildFileTypeRegex(ALLOWED_AVATAR_IMAGE_TYPES), FILE_SIZE_BASE).build({
+        fileIsRequired: false,
+        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
+      }),
+    )
+    logo: Express.Multer.File | null,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<void> {
     await this.settingsService.uploadPlatformLogo(logo, currentUser);
@@ -255,7 +267,13 @@ export class SettingsController {
     },
   })
   async updatePlatformSimpleLogo(
-    @UploadedFile() logo: Express.Multer.File | null,
+    @UploadedFile(
+      getBaseFileTypePipe(buildFileTypeRegex(ALLOWED_AVATAR_IMAGE_TYPES), FILE_SIZE_BASE).build({
+        fileIsRequired: false,
+        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
+      }),
+    )
+    logo: Express.Multer.File | null,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<void> {
     await this.settingsService.uploadPlatformSimpleLogo(logo, currentUser);
@@ -294,7 +312,16 @@ export class SettingsController {
     },
   })
   async updateLoginBackground(
-    @UploadedFile() loginBackground: Express.Multer.File | null,
+    @UploadedFile(
+      getBaseFileTypePipe(
+        buildFileTypeRegex(ALLOWED_LESSON_IMAGE_FILE_TYPES),
+        FILE_SIZE_BASE,
+      ).build({
+        fileIsRequired: false,
+        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
+      }),
+    )
+    loginBackground: Express.Multer.File | null,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<void> {
     await this.settingsService.uploadLoginBackgroundImage(loginBackground, currentUser);
@@ -353,7 +380,12 @@ export class SettingsController {
     },
   })
   async updateCertificateBackground(
-    @UploadedFile() certificateBackground: Express.Multer.File,
+    @UploadedFile(
+      getBaseFileTypePipe(buildFileTypeRegex(ALLOWED_LESSON_IMAGE_FILE_TYPES)).build({
+        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
+      }),
+    )
+    certificateBackground: Express.Multer.File,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
     return new BaseResponse(
@@ -478,7 +510,12 @@ export class SettingsController {
   })
   async updateLoginPageFiles(
     @Body() uploadedData: UploadFilesToLoginPageBody,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile(
+      getBaseFileTypePipe(buildFileTypeRegex(LOGIN_PAGE_DOCUMENTS_FILE_TYPES)).build({
+        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
+      }),
+    )
+    file: Express.Multer.File,
     @CurrentUser() currentUser: CurrentUserType,
   ) {
     return this.settingsService.uploadLoginPageFile(uploadedData, file, currentUser);

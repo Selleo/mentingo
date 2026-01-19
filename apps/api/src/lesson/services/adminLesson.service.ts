@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
-import { ALLOWED_AVATAR_IMAGE_TYPES, ALLOWED_VIDEO_FILE_TYPES } from "@repo/shared";
+import { ALLOWED_VIDEO_FILE_TYPES } from "@repo/shared";
 import { getTableColumns, sql } from "drizzle-orm";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
@@ -961,14 +961,6 @@ export class AdminLessonService {
     if (!file) {
       await this.adminLessonRepository.updateAiMentorAvatar(lessonId, null);
       return;
-    }
-
-    const type = await FileGuard.getFileType(file);
-
-    if (type?.mime && !ALLOWED_AVATAR_IMAGE_TYPES.includes(type.mime)) {
-      throw new BadRequestException({
-        message: "adminCourseView.toast.aiMentorAvatarIncorrectType",
-      });
     }
 
     const { fileKey } = await this.fileService.uploadFile(file, "lessons/ai-mentor-avatars");

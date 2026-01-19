@@ -2041,6 +2041,10 @@
     }
   },
   "files": {
+    "toast": {
+      "invalidData": "File upload failed - invalid file data",
+      "contentTypeMismatch": "File content type does not match the provided content type"
+    },
     "import": {
       "noFileUploaded": "No file uploaded",
       "invalidFileData": "File upload failed - invalid file data",

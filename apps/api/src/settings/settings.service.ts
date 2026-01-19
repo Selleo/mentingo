@@ -10,7 +10,6 @@ import {
   ALLOWED_ARTICLES_SETTINGS,
   ALLOWED_NEWS_SETTINGS,
   ALLOWED_QA_SETTINGS,
-  LOGIN_PAGE_DOCUMENTS_FILE_TYPES,
   MAX_LOGIN_PAGE_DOCUMENTS,
 } from "@repo/shared";
 import { and, eq, getTableColumns, inArray, isNull, sql } from "drizzle-orm";
@@ -1026,10 +1025,6 @@ export class SettingsService {
     file: Express.Multer.File,
     currentUser: CurrentUser,
   ) {
-    if (!LOGIN_PAGE_DOCUMENTS_FILE_TYPES.includes(file.mimetype)) {
-      throw new BadRequestException("loginFilesUpload.toast.invalidFileType");
-    }
-
     const existingResources = await this.getExistingLoginPageResourceIds();
 
     if (existingResources.resourceIds.length >= MAX_LOGIN_PAGE_DOCUMENTS) {
