@@ -25,7 +25,7 @@ import { uploadKey, videoKey } from "src/file/utils/bunnyCacheKeys";
 import { isEmptyObject, normalizeCellValue, normalizeHeader } from "src/file/utils/excel.utils";
 import getChecksum from "src/file/utils/getChecksum";
 import { S3Service } from "src/s3/s3.service";
-import { resources, resourceEntity, lessons } from "src/storage/schema";
+import { resources, resourceEntity } from "src/storage/schema";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import {
