@@ -2060,6 +2060,10 @@
     }
   },
   "files": {
+    "toast": {
+      "invalidData": "Nie udało się przesłać pliku - nieprawidłowe dane pliku",
+      "contentTypeMismatch": "Typ zawartości pliku nie odpowiada podanemu typowi"
+    },
     "import": {
       "noFileUploaded": "Nie przesłano pliku",
       "invalidFileData": "Nie udało się przesłać pliku - nieprawidłowe dane pliku",

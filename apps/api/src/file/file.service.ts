@@ -2,15 +2,7 @@ import { randomUUID } from "crypto";
 import { Readable } from "stream";
 
 import { Inject, BadRequestException, ConflictException, Injectable } from "@nestjs/common";
-import {
-  ALLOWED_EXCEL_FILE_TYPES,
-  ALLOWED_LESSON_IMAGE_FILE_TYPES,
-  ALLOWED_PDF_FILE_TYPES,
-  ALLOWED_PRESENTATION_FILE_TYPES,
-  ALLOWED_VIDEO_FILE_TYPES,
-  ALLOWED_WORD_FILE_TYPES,
-  VIDEO_UPLOAD_STATUS,
-} from "@repo/shared";
+import { ALLOWED_VIDEO_FILE_TYPES, VIDEO_UPLOAD_STATUS } from "@repo/shared";
 import { TypeCompiler } from "@sinclair/typebox/compiler";
 import { CacheManagerStore } from "cache-manager";
 import { parse } from "csv-parse";
@@ -30,20 +22,15 @@ import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-obje
 
 import {
   ENTITY_TYPES,
-  MAX_FILE_SIZE,
-  ALLOWED_EXCEL_MIME_TYPES,
   ALLOWED_EXCEL_MIME_TYPES_MAP,
-  ALLOWED_MIME_TYPES,
   RESOURCE_RELATIONSHIP_TYPES,
   MAX_VIDEO_SIZE,
 } from "./file.constants";
-import { FileGuard } from "./guards/file.guard";
 import { VideoProcessingStateService } from "./video-processing-state.service";
 import { VideoUploadNotificationGateway } from "./video-upload-notification.gateway";
 import { VideoUploadQueueService } from "./video-upload-queue.service";
 
 import type { ResourceRelationshipType, EntityType, ResourceCategory } from "./file.constants";
-import type { FileValidationOptions } from "./guards/file.guard";
 import type { BunnyWebhookBody } from "./schemas/bunny-webhook.schema";
 import type { VideoInitBody } from "./schemas/video-init.schema";
 import type { VideoUploadState } from "./video-processing-state.service";
@@ -101,17 +88,8 @@ export class FileService {
     file: Express.Multer.File,
     resource: string,
     lessonId?: string,
-    options?: FileValidationOptions,
     currentUserId?: UUIDType,
   ) {
-    if (!file) {
-      throw new BadRequestException("No file uploaded");
-    }
-
-    if (!file.originalname || !file.buffer || file.buffer.length === 0) {
-      throw new BadRequestException("File upload failed - invalid file data");
-    }
-
     if (file.size === 0) {
       throw new BadRequestException("File upload failed - empty file");
     }
@@ -119,18 +97,10 @@ export class FileService {
     const isVideo = file.mimetype.startsWith("video/");
 
     try {
-      const { type } = await FileGuard.validateFile(
-        file,
-        options ?? {
-          allowedTypes: ALLOWED_MIME_TYPES,
-          maxSize: isVideo ? MAX_VIDEO_SIZE : MAX_FILE_SIZE,
-        },
-      );
-
       if (isVideo) {
         const uploadId = randomUUID();
         const placeholderKey = `processing-${resource}-${uploadId}`;
-        const fileType = file.originalname?.split(".").pop();
+        const fileType = file.originalname.split(".").pop();
 
         try {
           await this.videoProcessingStateService.initializeState(
@@ -170,7 +140,7 @@ export class FileService {
       const fileKey = `${resource}/${randomUUID()}.${fileExtension}`;
 
       try {
-        await this.s3Service.uploadFile(file.buffer, fileKey, type);
+        await this.s3Service.uploadFile(file.buffer, fileKey, file.mimetype);
       } catch (s3Error) {
         throw new ConflictException("S3 upload failed");
       }
@@ -290,12 +260,6 @@ export class FileService {
       throw new BadRequestException({ message: "files.import.invalidFileData" });
     }
 
-    if (
-      !ALLOWED_EXCEL_MIME_TYPES.includes(file.mimetype as (typeof ALLOWED_EXCEL_MIME_TYPES)[number])
-    ) {
-      throw new BadRequestException({ message: "files.import.invalidFileType" });
-    }
-
     const validator = TypeCompiler.Compile(schema);
 
     const rows =
@@ -404,17 +368,7 @@ export class FileService {
 
     const checksum = getChecksum(file);
 
-    const { fileKey } = await this.uploadFile(file, resourceFolder, undefined, {
-      allowedTypes: [
-        ...ALLOWED_PDF_FILE_TYPES,
-        ...ALLOWED_EXCEL_FILE_TYPES,
-        ...ALLOWED_WORD_FILE_TYPES,
-        ...ALLOWED_VIDEO_FILE_TYPES,
-        ...ALLOWED_LESSON_IMAGE_FILE_TYPES,
-        ...ALLOWED_PRESENTATION_FILE_TYPES,
-      ],
-      maxSize: MAX_FILE_SIZE,
-    });
+    const { fileKey } = await this.uploadFile(file, resourceFolder, undefined);
 
     const { insertedResource } = await this.db.transaction(async (trx) => {
       const [insertedResource] = await trx

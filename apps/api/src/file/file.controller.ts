@@ -19,6 +19,8 @@ import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
+import { ALLOWED_MIME_TYPES, MAX_FILE_SIZE, MAX_VIDEO_SIZE } from "src/file/file.constants";
+import { FileGuard } from "src/file/guards/file.guard";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { FileService } from "./file.service";
@@ -73,12 +75,19 @@ export class FileController {
     type: FileUploadResponse,
   })
   async uploadFile(
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile()
+    file: Express.Multer.File,
     @Body("resource") resource: string = "file",
     @Body("lessonId") lessonId?: UUIDType,
     @CurrentUser("userId") userId?: UUIDType,
   ): Promise<FileUploadResponse> {
-    return await this.fileService.uploadFile(file, resource, lessonId, undefined, userId);
+    await FileGuard.validateFile(file, {
+      allowedTypes: ALLOWED_MIME_TYPES,
+      maxSize: MAX_FILE_SIZE,
+      maxVideoSize: MAX_VIDEO_SIZE,
+    });
+
+    return await this.fileService.uploadFile(file, resource, lessonId, userId);
   }
 
   @Roles(...Object.values(USER_ROLES))

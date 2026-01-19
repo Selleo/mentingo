@@ -1,13 +1,14 @@
 import {
+  Body,
   Controller,
+  Delete,
+  Get,
+  HttpStatus,
+  Param,
   Post,
+  UploadedFiles,
   UseGuards,
   UseInterceptors,
-  UploadedFiles,
-  Body,
-  Get,
-  Param,
-  Delete,
 } from "@nestjs/common";
 import { FilesInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes } from "@nestjs/swagger";
@@ -17,6 +18,9 @@ import { BaseResponse, baseResponse, UUIDSchema, UUIDType } from "src/common";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
+import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
+import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
+import { ALLOWED_FILE_TYPES_MAP, MAX_MB_PER_FILE } from "src/ingestion/ingestion.config";
 import { getAllAssignedDocumentsSchema } from "src/ingestion/ingestion.schema";
 import { IngestionService } from "src/ingestion/services/ingestion.service";
 import { USER_ROLES, UserRole } from "src/user/schemas/userRoles";
@@ -47,7 +51,16 @@ export class IngestionController {
   })
   async ingest(
     @Body("lessonId") lessonId: UUIDType,
-    @UploadedFiles() _files: Express.Multer.File[],
+    @UploadedFiles(
+      getBaseFileTypePipe(
+        buildFileTypeRegex(Object.values(ALLOWED_FILE_TYPES_MAP)),
+        MAX_MB_PER_FILE * 1024 * 1024,
+        true,
+      ).build({
+        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
+      }),
+    )
+    _files: Express.Multer.File[],
     @CurrentUser("role") role: UserRole,
     @CurrentUser("userId") userId: UUIDType,
   ) {

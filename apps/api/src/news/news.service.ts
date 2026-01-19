@@ -539,9 +539,6 @@ export class NewsService {
   ) {
     await this.checkAccess(currentUser?.userId);
 
-    if (!file || !file.mimetype.startsWith("image/"))
-      throw new BadRequestException("adminNewsView.toast.invalidCoverType");
-
     await this.validateNewsExists(newsId, language, false);
 
     const existingCover = await this.fileService.getResourcesForEntity(

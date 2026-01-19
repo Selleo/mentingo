@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
-import { ALLOWED_AVATAR_IMAGE_TYPES, ALLOWED_VIDEO_FILE_TYPES } from "@repo/shared";
+import { ALLOWED_VIDEO_FILE_TYPES } from "@repo/shared";
 import { getTableColumns, sql } from "drizzle-orm";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
@@ -19,6 +19,7 @@ import {
   RESOURCE_RELATIONSHIP_TYPES,
 } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
+import { FileGuard } from "src/file/guards/file.guard";
 import { DocumentService } from "src/ingestion/services/document.service";
 import { MAX_LESSON_TITLE_LENGTH } from "src/lesson/repositories/lesson.constants";
 import { LessonService } from "src/lesson/services/lesson.service";
@@ -896,6 +897,8 @@ export class AdminLessonService {
   ) {
     await this.validateAccess("lesson", currentUserRole, currentUserId, lessonId);
 
+    const type = await FileGuard.getFileType(file);
+
     const fileTitle = {
       [language]: title,
     };
@@ -904,7 +907,7 @@ export class AdminLessonService {
       [language]: description,
     };
 
-    if (ALLOWED_VIDEO_FILE_TYPES.includes(file.mimetype)) {
+    if (type?.mime && ALLOWED_VIDEO_FILE_TYPES.includes(type.mime)) {
       const lesson = await this.lessonRepository.getLesson(lessonId, language);
 
       const resources = await this.fileService.getResourcesForEntity(lessonId, ENTITY_TYPE.LESSON);
@@ -958,12 +961,6 @@ export class AdminLessonService {
     if (!file) {
       await this.adminLessonRepository.updateAiMentorAvatar(lessonId, null);
       return;
-    }
-
-    if (!ALLOWED_AVATAR_IMAGE_TYPES.includes(file.mimetype)) {
-      throw new BadRequestException({
-        message: "adminCourseView.toast.aiMentorAvatarIncorrectType",
-      });
     }
 
     const { fileKey } = await this.fileService.uploadFile(file, "lessons/ai-mentor-avatars");

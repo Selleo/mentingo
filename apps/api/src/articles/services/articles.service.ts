@@ -647,9 +647,6 @@ export class ArticlesService {
   ) {
     await this.checkEditAccess(articleId, currentUser);
 
-    if (!file || !file.mimetype.startsWith("image/"))
-      throw new BadRequestException("adminArticleView.toast.invalidCoverType");
-
     await this.validateArticleExists(articleId, language, false);
 
     const existingCover = await this.fileService.getResourcesForEntity(
