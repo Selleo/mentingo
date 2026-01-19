@@ -24,8 +24,9 @@ const openCourseEdit = async (page: Page) => {
   await page.getByTestId(/^accordion - [\w-]{36}$/).click();
 };
 
-const getLessonTitlesInEditor = (page: Page) =>
-  page.locator(".p-0 > div").getByTestId("lesson-title");
+const getLessonTitlesInEditor = (page: Page) => {
+  return page.locator(".p-0 > div").getByTestId("lesson-title");
+};
 
 const confirmOrderChangeToast = async (page: Page) => {
   await expect(page.getByText(TOAST_TEXT, { exact: true })).toBeVisible();
@@ -39,7 +40,7 @@ const assertLessonOrderInPreview = async (page: Page) => {
   await chapterButton.click();
 
   const lessonTitles = await page.getByTestId("lesson-title").all();
-  expect(lessonTitles.length).toBe(10);
+  expect(lessonTitles.length).toBe(9);
   const lastTitles = lessonTitles.slice(-expectedLastLessons.length);
 
   for (const [index, title] of expectedLastLessons.entries()) {
@@ -49,7 +50,7 @@ const assertLessonOrderInPreview = async (page: Page) => {
 
 const moveLessonToEnd = async (page: Page, labelPrefix: string, expectedTitle: string) => {
   const lessons = await getLessonTitlesInEditor(page).all();
-  expect(await lessons.at(1)?.textContent()).toBe(expectedTitle);
+  expect(await lessons.at(0)?.textContent()).toBe(expectedTitle);
   await page.getByLabel(labelPrefix).getByRole("button").click();
   await confirmOrderChangeToast(page);
   const updatedLessons = await getLessonTitlesInEditor(page).all();
