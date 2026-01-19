@@ -233,7 +233,7 @@ export class FileService {
     placeholderKey: string,
   ) {
     try {
-      return await provider.initVideoUpload(payload);
+      return provider.initVideoUpload(payload);
     } catch (error) {
       await this.videoProcessingStateService.markFailed(uploadId, placeholderKey, error?.message);
       throw error;

@@ -123,12 +123,7 @@ type VideoEmbedAttrsInput = {
 
 export const normalizeVideoEmbedAttributes = (attrs: VideoEmbedAttrsInput): VideoEmbedAttrs => {
   const src = typeof attrs.src === "string" ? attrs.src.trim() : "";
-  const hasError =
-    typeof attrs.hasError === "boolean"
-      ? attrs.hasError
-      : typeof attrs.hasError === "string"
-        ? attrs.hasError === "true"
-        : false;
+  const hasError = attrs.hasError === true || attrs.hasError === "true";
 
   const sourceType: VideoSourceType = match(attrs.sourceType)
     .when(isVideoSourceType, (value) => value)

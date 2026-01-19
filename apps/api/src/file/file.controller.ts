@@ -30,7 +30,7 @@ import { ALLOWED_MIME_TYPES, MAX_FILE_SIZE, MAX_VIDEO_SIZE } from "src/file/file
 import { FileGuard } from "src/file/guards/file.guard";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
-import { MAX_VIDEO_SIZE } from "./file.constants";
+import { MAX_VIDEO_SIZE, TUS_VERSION } from "./file.constants";
 import { FileService } from "./file.service";
 import { bunnyWebhookSchema, type BunnyWebhookBody } from "./schemas/bunny-webhook.schema";
 import {
@@ -251,8 +251,8 @@ export class FileController {
 
   private setTusHeaders(res: Response, extraHeaders: Record<string, string> = {}) {
     res.set({
-      "Tus-Resumable": "1.0.0",
-      "Tus-Version": "1.0.0",
+      "Tus-Resumable": TUS_VERSION,
+      "Tus-Version": TUS_VERSION,
       "Tus-Extension": "creation",
       "Tus-Max-Size": String(MAX_VIDEO_SIZE),
       "Access-Control-Expose-Headers":
@@ -266,7 +266,7 @@ export class FileController {
 
   private ensureTusVersion(req: Request) {
     const version = req.headers["tus-resumable"];
-    if (version && version !== "1.0.0") {
+    if (version && version !== TUS_VERSION) {
       throw new BadRequestException("Unsupported TUS version");
     }
   }
