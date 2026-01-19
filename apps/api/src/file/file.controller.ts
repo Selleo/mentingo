@@ -26,11 +26,15 @@ import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
-import { ALLOWED_MIME_TYPES, MAX_FILE_SIZE, MAX_VIDEO_SIZE } from "src/file/file.constants";
+import {
+  ALLOWED_MIME_TYPES,
+  MAX_FILE_SIZE,
+  MAX_VIDEO_SIZE,
+  TUS_VERSION,
+} from "src/file/file.constants";
 import { FileGuard } from "src/file/guards/file.guard";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
-import { MAX_VIDEO_SIZE, TUS_VERSION } from "./file.constants";
 import { FileService } from "./file.service";
 import { bunnyWebhookSchema, type BunnyWebhookBody } from "./schemas/bunny-webhook.schema";
 import {

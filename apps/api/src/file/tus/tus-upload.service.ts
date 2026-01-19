@@ -110,12 +110,14 @@ export class TusUploadService {
     }
 
     if (session.offset === 0 && chunk.length > 0) {
-      const detectedType = await FileGuard.validateMagicBytes(
+      const detectedType = await FileGuard.getFileType(
         chunk.subarray(0, Math.min(chunk.length, 512)),
-        ALLOWED_VIDEO_FILE_TYPES,
       );
 
-      session.sniffedMimeType = detectedType;
+      if (!detectedType || !ALLOWED_VIDEO_FILE_TYPES.includes(detectedType?.mime))
+        throw new BadRequestException("common.toast.somethingWentWrong");
+
+      session.sniffedMimeType = detectedType?.mime;
     }
 
     const partNumber = session.parts.length + 1;

@@ -58,10 +58,10 @@ export class FileGuard {
     };
   }
 
-  static async getFileType(file: Express.Multer.File) {
+  static async getFileType(file: Express.Multer.File | Buffer) {
     const { fileTypeFromBuffer } = await loadEsm<typeof import("file-type")>("file-type");
 
-    return fileTypeFromBuffer(file.buffer);
+    return fileTypeFromBuffer(file instanceof Buffer ? file : file.buffer);
   }
 
   private static normalizeMime(mime?: string) {
