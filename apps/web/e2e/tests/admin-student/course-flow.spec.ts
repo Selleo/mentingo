@@ -37,6 +37,28 @@ const TEST_DATA = {
   },
 };
 
+const waitForGenerateMissingTranslationsOrContent = async (page: Page) => {
+  const translationHeading = page.getByRole("heading", { name: "Generate missing translations" });
+  const addContentHeading = page.getByRole("heading", { name: "Add content to your chapter" });
+
+  const translationWatcher = translationHeading
+    .waitFor({ state: "visible", timeout: 8000 })
+    .then(() => "translation")
+    .catch(() => null);
+  const contentWatcher = addContentHeading
+    .waitFor({ state: "visible", timeout: 8000 })
+    .then(() => "content")
+    .catch(() => null);
+
+  const firstVisible = await Promise.race([translationWatcher, contentWatcher]);
+  if (firstVisible === "translation") {
+    await page.getByRole("button", { name: "Confirm" }).click();
+  }
+
+  await addContentHeading.waitFor({ state: "visible", timeout: 10000 });
+  await expect(addContentHeading).toBeVisible();
+};
+
 const selectLanguage = async (page: Page) => {
   await expect(
     page.getByRole("heading", { name: `${TEST_DATA.base.titleEn} Draft` }),
@@ -44,10 +66,7 @@ const selectLanguage = async (page: Page) => {
   await page.getByRole("combobox").click();
   await page.getByText("Polish").click();
   await page.getByRole("button", { name: "Confirm" }).click();
-  await page
-    .getByRole("heading", { name: "Generate missing translations" })
-    .waitFor({ state: "visible" });
-  await page.getByRole("button", { name: "Confirm" }).click();
+  await waitForGenerateMissingTranslationsOrContent(page);
   await page.getByRole("tab", { name: "Settings" }).click();
   await page.getByLabel("* Course title").click();
   await page.getByLabel("* Course title").fill(TEST_DATA.base.titlePl);
