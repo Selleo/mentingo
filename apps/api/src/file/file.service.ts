@@ -116,7 +116,9 @@ export class FileService {
       throw new BadRequestException("File upload failed - empty file");
     }
 
-    const isVideo = file.mimetype.startsWith("video/");
+    const type = await FileGuard.getFileType(file);
+
+    const isVideo = type?.mime.startsWith("video/");
 
     try {
       const { type } = await FileGuard.validateFile(
@@ -130,7 +132,7 @@ export class FileService {
       if (isVideo) {
         const uploadId = randomUUID();
         const placeholderKey = `processing-${resource}-${uploadId}`;
-        const fileType = file.originalname?.split(".").pop();
+        const fileType = type.ext;
 
         try {
           await this.videoProcessingStateService.initializeState(
@@ -170,7 +172,7 @@ export class FileService {
       const fileKey = `${resource}/${randomUUID()}.${fileExtension}`;
 
       try {
-        await this.s3Service.uploadFile(file.buffer, fileKey, type);
+        await this.s3Service.uploadFile(file.buffer, fileKey, type?.mime);
       } catch (s3Error) {
         throw new ConflictException("S3 upload failed");
       }
@@ -290,8 +292,10 @@ export class FileService {
       throw new BadRequestException({ message: "files.import.invalidFileData" });
     }
 
+    const type = await FileGuard.getFileType(file);
+
     if (
-      !ALLOWED_EXCEL_MIME_TYPES.includes(file.mimetype as (typeof ALLOWED_EXCEL_MIME_TYPES)[number])
+      !ALLOWED_EXCEL_MIME_TYPES.includes(type?.mime as (typeof ALLOWED_EXCEL_MIME_TYPES)[number])
     ) {
       throw new BadRequestException({ message: "files.import.invalidFileType" });
     }
@@ -299,7 +303,7 @@ export class FileService {
     const validator = TypeCompiler.Compile(schema);
 
     const rows =
-      file.mimetype === ALLOWED_EXCEL_MIME_TYPES_MAP.csv
+      type?.mime === ALLOWED_EXCEL_MIME_TYPES_MAP.csv
         ? await this.readCsvToRows(file.buffer)
         : await readXlsxFile(file.buffer, { sheet: 1 });
 
@@ -400,6 +404,10 @@ export class FileService {
     currentUser?: CurrentUser,
     options?: { folderIncludesResource?: boolean },
   ) {
+    const type = await FileGuard.getFileType(file);
+
+    if (!type?.mime) throw new BadRequestException("common.toast.somethingWentWrong");
+
     const resourceFolder = options?.folderIncludesResource ? folder : `${resource}/${folder}`;
 
     const checksum = getChecksum(file);
@@ -423,7 +431,7 @@ export class FileService {
           title: buildJsonbFieldWithMultipleEntries(title || {}),
           description: buildJsonbFieldWithMultipleEntries(description || {}),
           reference: fileKey,
-          contentType: file.mimetype,
+          contentType: type.mime,
           metadata: settingsToJSONBuildObject({
             originalFilename: file.originalname,
             size: file.size,

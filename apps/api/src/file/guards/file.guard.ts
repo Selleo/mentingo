@@ -1,7 +1,6 @@
 import { BadRequestException } from "@nestjs/common";
 import { Jimp } from "jimp";
-
-import { EXTENSION_TO_MIME_TYPE_MAP } from "../file.constants";
+import { loadEsm } from "load-esm";
 
 export type FileValidationOptions = {
   allowedTypes: readonly string[];
@@ -15,7 +14,8 @@ export type FileValidationOptions = {
 
 export class FileGuard {
   static async validateFile(file: Express.Multer.File, options: FileValidationOptions) {
-    const type = this.validateType(file, options.allowedTypes);
+    const type = await this.validateType(file, options.allowedTypes);
+
     const size = this.validateSize(file, options.maxSize);
     let resolution = null;
     let aspectRatio = null;
@@ -31,29 +31,27 @@ export class FileGuard {
     return { type, size, resolution, aspectRatio };
   }
 
-  private static validateType(file: Express.Multer.File, allowedTypes: readonly string[]) {
-    let type: string | undefined = file.mimetype;
+  static async getFileType(file: Express.Multer.File) {
+    const { fileTypeFromBuffer } = await loadEsm<typeof import("file-type")>("file-type");
 
-    // For video files, also check extension if MIME type is generic
-    if (type === "application/octet-stream" || !type) {
-      const extension = file.originalname.split(".").pop()?.toLowerCase();
-      if (extension) {
-        type = EXTENSION_TO_MIME_TYPE_MAP[extension];
-      }
-    }
+    return fileTypeFromBuffer(file.buffer);
+  }
 
-    if (!type || !allowedTypes.includes(type)) {
+  static async validateType(file: Express.Multer.File, allowedTypes: readonly string[]) {
+    const type = await this.getFileType(file);
+
+    if (!type?.mime || !allowedTypes.includes(type?.mime)) {
       throw new BadRequestException(
-        `File type ${type || "unknown"} is not allowed. Allowed types are: ${allowedTypes.join(
-          ", ",
-        )}`,
+        `File type ${
+          type?.mime || "unknown"
+        } is not allowed. Allowed types are: ${allowedTypes.join(", ")}`,
       );
     }
 
-    return type;
+    return { mime: type?.mime, ext: type?.ext };
   }
 
-  private static validateSize(file: Express.Multer.File, maxSize: number) {
+  static validateSize(file: Express.Multer.File, maxSize: number) {
     if (!file.size || file.size > maxSize) {
       throw new BadRequestException(
         `File size exceeds the maximum allowed size of ${maxSize} bytes`,

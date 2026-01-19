@@ -7,6 +7,7 @@ import {
 } from "@nestjs/common";
 
 import { DatabasePg } from "src/common";
+import { FileGuard } from "src/file/guards/file.guard";
 import {
   ALLOWED_FILE_TYPES,
   MAX_MB_PER_FILE,
@@ -42,7 +43,9 @@ export class IngestionService {
     }
 
     for (const file of files) {
-      if (!ALLOWED_FILE_TYPES.includes(file.mimetype)) {
+      const type = await FileGuard.getFileType(file);
+
+      if (type?.mime && !ALLOWED_FILE_TYPES.includes(type.mime)) {
         throw new UnsupportedMediaTypeException("Incorrect file type");
       }
 

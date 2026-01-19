@@ -15,6 +15,7 @@ import {
   RESOURCE_CATEGORIES,
 } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
+import { FileGuard } from "src/file/guards/file.guard";
 import { LocalizationService } from "src/localization/localization.service";
 import { SettingsService } from "src/settings/settings.service";
 import { news, users } from "src/storage/schema";
@@ -539,7 +540,9 @@ export class NewsService {
   ) {
     await this.checkAccess(currentUser?.userId);
 
-    if (!file || !file.mimetype.startsWith("image/"))
+    const type = await FileGuard.getFileType(file);
+
+    if (!file || !type?.mime.startsWith("image/"))
       throw new BadRequestException("adminNewsView.toast.invalidCoverType");
 
     await this.validateNewsExists(newsId, language, false);
