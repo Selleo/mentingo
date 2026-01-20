@@ -1047,6 +1047,8 @@
       "candidateNotAvailable": "Course ownership cannot be transferred to this user",
       "createCourseSuccessfully": "Course created successfully",
       "courseUpdatedSuccessfully": "Course updated successfully",
+      "courseTrailerUpdatedSuccessfully": "Course trailer updated successfully",
+      "courseTrailerRemovedSuccessfully": "Course trailer removed successfully",
       "certificateUpdatedSuccessfully": "Certificate updated successfully",
       "certificateUpdateError": "Error updating certificate",
       "maxTitleLengthExceeded_one": "Title cannot be longer than {{count}} character",
@@ -1071,6 +1073,7 @@
       },
       "button": {
         "removeThumbnail": "Remove Thumbnail",
+        "removeTrailer": "Remove Trailer",
         "includesCertificate": "Includes certificate",
         "doesNotIncludeCertificate": "Does not include certificate"
       },
@@ -1094,6 +1097,7 @@
         "category": "Category",
         "description": "Description",
         "thumbnail": "Thumbnail",
+        "trailer": "Course trailer",
         "baseLanguage": "Base language"
       },
       "placeholder": {
@@ -1633,6 +1637,17 @@
         "description": "Description",
         "author": "Author"
       }
+    },
+    "modernView": {
+      "continueLearning": "Continue learning",
+      "topCourses": "Top 5 most popular courses",
+      "hero": {
+        "start": "Start",
+        "moreInfo": "More info",
+        "info": "Info"
+      },
+      "lessonsCount_one": "{{count}} lesson",
+      "lessonsCount_other": "{{count}} lessons"
     }
   },
   "studentQuizSummaryView": {
