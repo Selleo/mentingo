@@ -1862,6 +1862,8 @@
       "newUserNotificationsDescription": "Receive notifications when a new user is created",
       "coursesVisibility": "Show courses to visitors",
       "coursesVisibilityDescription": "Allow visitors to view course list and access free lessons without logging in",
+      "modernCourseList": "Use modern course list view",
+      "modernCourseListDescription": "Enable the new course list design with hero and top courses sections",
       "finishedCourseNotification": "Finished Course Notifications",
       "finishedCourseNotificationDescription": "Receive notifications when a user finishes a course",
       "studentsWithOverdueCourseNotification": "Students with overdue courses notifications",
@@ -1870,6 +1872,7 @@
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "New user notification preferences have been successfully updated",
       "coursesVisibilityPreferenceChangeSuccess": "Course visibility preferences for unauthenticated users have been updated successfully",
+      "modernCourseListPreferenceChangeSuccess": "Modern course list preference has been updated successfully",
       "finishedCourseNotificationsPreferenceChangeSuccess": "Finished course notification preferences have been successfully updated",
       "finishedCourseNotificationsPreferenceChangeError": "Failed to update finished course notification preferences",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Overdue course notification preferences have been successfully updated",

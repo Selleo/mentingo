@@ -15,7 +15,11 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { ALLOWED_LESSON_IMAGE_FILE_TYPES, SupportedLanguages } from "@repo/shared";
+import {
+  ALLOWED_LESSON_IMAGE_FILE_TYPES,
+  ALLOWED_VIDEO_FILE_TYPES,
+  SupportedLanguages,
+} from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Request } from "express";
 import { Validate } from "nestjs-typebox";
@@ -37,6 +41,7 @@ import { CurrentUser as CurrentUserType } from "src/common/types/current-user.ty
 import { CourseService } from "src/courses/course.service";
 import {
   allCoursesForContentCreatorSchema,
+  allStudentCoursesSchema,
   allStudentAiMentorResultsSchema,
   allStudentCourseProgressionSchema,
   allStudentQuizResultsSchema,
@@ -79,6 +84,7 @@ import {
   studentCoursesValidation,
   studentsWithEnrolmentValidation,
 } from "src/courses/validations/validations";
+import { MAX_VIDEO_SIZE } from "src/file/file.constants";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
 import { GroupsFilterSchema } from "src/group/group.types";
@@ -271,6 +277,27 @@ export class CourseController {
     return new PaginatedResponse(data);
   }
 
+  @Get("top-courses")
+  @Validate({
+    request: [
+      { type: "query", name: "limit", schema: Type.Optional(Type.Number()) },
+      { type: "query", name: "days", schema: Type.Optional(Type.Number()) },
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
+    ],
+    response: baseResponse(allStudentCoursesSchema),
+  })
+  @Public()
+  async getTopCourses(
+    @Query("limit") limit: number,
+    @Query("days") days: number,
+    @Query("language") language: SupportedLanguages,
+    @CurrentUser("userId") currentUserId?: UUIDType,
+  ): Promise<BaseResponse<AllStudentCoursesResponse>> {
+    const data = await this.courseService.getTopCourses({ limit, days, language }, currentUserId);
+
+    return new BaseResponse(data);
+  }
+
   @Public()
   @Get("content-creator-courses")
   @Validate({
@@ -450,6 +477,46 @@ export class CourseController {
     );
 
     return new BaseResponse({ message: "Course updated successfully" });
+  }
+
+  @Patch(":id/trailer")
+  @UseInterceptors(FileInterceptor("trailer"))
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @Validate({
+    request: [{ type: "param", name: "id", schema: UUIDSchema }],
+    response: baseResponse(
+      Type.Object({
+        trailerUrl: Type.Union([Type.String(), Type.Null()]),
+      }),
+    ),
+  })
+  async uploadCourseTrailer(
+    @Param("id") id: UUIDType,
+    @UploadedFile(
+      getBaseFileTypePipe(buildFileTypeRegex(ALLOWED_VIDEO_FILE_TYPES), MAX_VIDEO_SIZE).build({
+        fileIsRequired: true,
+        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
+      }),
+    )
+    trailer: Express.Multer.File,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<{ trailerUrl: string | null }>> {
+    const data = await this.courseService.uploadCourseTrailer(id, trailer, currentUser);
+    return new BaseResponse(data);
+  }
+
+  @Delete(":id/trailer")
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @Validate({
+    request: [{ type: "param", name: "id", schema: UUIDSchema }],
+    response: baseResponse(Type.Object({ message: Type.String() })),
+  })
+  async deleteCourseTrailer(
+    @Param("id") id: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<{ message: string }>> {
+    const data = await this.courseService.deleteCourseTrailer(id, currentUser);
+    return new BaseResponse(data);
   }
 
   @Patch("update-has-certificate/:id")

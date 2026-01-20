@@ -153,6 +153,7 @@ export interface MFAVerifyResponse {
 export interface GetPublicGlobalSettingsResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
+    modernCourseListEnabled: boolean;
     enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
@@ -261,6 +262,7 @@ export interface UpdateAdminNewUserNotificationResponse {
 export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
+    modernCourseListEnabled: boolean;
     enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
@@ -302,6 +304,49 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
 export interface UpdateEnforceSSOResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
+    modernCourseListEnabled: boolean;
+    enforceSSO: boolean;
+    certificateBackgroundImage: string | null;
+    companyInformation?: {
+      companyName?: string;
+      /** @maxLength 10 */
+      companyShortName?: string;
+      registeredAddress?: string;
+      taxNumber?: string;
+      emailAddress?: string;
+      courtRegisterNumber?: string;
+    };
+    platformLogoS3Key: string | null;
+    loginBackgroundImageS3Key: string | null;
+    platformSimpleLogoS3Key: string | null;
+    MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
+    defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+    inviteOnlyRegistration: boolean;
+    userEmailTriggers: {
+      userFirstLogin: boolean;
+      userCourseAssignment: boolean;
+      userShortInactivity: boolean;
+      userLongInactivity: boolean;
+      userChapterFinished: boolean;
+      userCourseFinished: boolean;
+    };
+    primaryColor: string | null;
+    contrastColor: string | null;
+    unregisteredUserQAAccessibility: boolean;
+    QAEnabled: boolean;
+    unregisteredUserNewsAccessibility: boolean;
+    newsEnabled: boolean;
+    unregisteredUserArticlesAccessibility: boolean;
+    articlesEnabled: boolean;
+    ageLimit: 13 | 16 | null;
+    loginPageFiles: string[];
+  };
+}
+
+export interface UpdateModernCourseListEnabledResponse {
+  data: {
+    unregisteredUserCoursesAccessibility: boolean;
+    modernCourseListEnabled: boolean;
     enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
@@ -374,6 +419,7 @@ export interface UpdateColorSchemaBody {
 export interface UpdateColorSchemaResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
+    modernCourseListEnabled: boolean;
     enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
@@ -1038,6 +1084,7 @@ export interface GetAllCoursesResponse {
     id: string;
     title: string;
     thumbnailUrl: string | null;
+    trailerUrl?: string | null;
     description: string;
     /** @format uuid */
     authorId?: string;
@@ -1046,6 +1093,8 @@ export interface GetAllCoursesResponse {
     authorAvatarUrl: string | null;
     category: string;
     courseChapterCount: number;
+    lessonCount?: number;
+    estimatedDurationMinutes?: number;
     enrolledParticipantCount: number;
     priceInCents: number;
     currency: string;
@@ -1069,6 +1118,7 @@ export interface GetStudentCoursesResponse {
     id: string;
     title: string;
     thumbnailUrl: string | null;
+    trailerUrl?: string | null;
     description: string;
     /** @format uuid */
     authorId?: string;
@@ -1077,6 +1127,8 @@ export interface GetStudentCoursesResponse {
     authorAvatarUrl: string | null;
     category: string;
     courseChapterCount: number;
+    lessonCount?: number;
+    estimatedDurationMinutes?: number;
     enrolledParticipantCount: number;
     priceInCents: number;
     currency: string;
@@ -1127,6 +1179,7 @@ export interface GetAvailableCoursesResponse {
     id: string;
     title: string;
     thumbnailUrl: string | null;
+    trailerUrl?: string | null;
     description: string;
     /** @format uuid */
     authorId?: string;
@@ -1135,6 +1188,8 @@ export interface GetAvailableCoursesResponse {
     authorAvatarUrl: string | null;
     category: string;
     courseChapterCount: number;
+    lessonCount?: number;
+    estimatedDurationMinutes?: number;
     enrolledParticipantCount: number;
     priceInCents: number;
     currency: string;
@@ -1156,12 +1211,44 @@ export interface GetAvailableCoursesResponse {
   appliedFilters?: object;
 }
 
+export interface GetTopCoursesResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    title: string;
+    thumbnailUrl: string | null;
+    trailerUrl?: string | null;
+    description: string;
+    /** @format uuid */
+    authorId?: string;
+    author: string;
+    authorEmail?: string;
+    authorAvatarUrl: string | null;
+    category: string;
+    courseChapterCount: number;
+    lessonCount?: number;
+    estimatedDurationMinutes?: number;
+    enrolledParticipantCount: number;
+    priceInCents: number;
+    currency: string;
+    status?: "draft" | "published" | "private";
+    createdAt?: string;
+    hasFreeChapters?: boolean;
+    stripeProductId?: string | null;
+    stripePriceId?: string | null;
+    completedChapterCount: number;
+    enrolled?: boolean;
+    dueDate: string | null;
+  }[];
+}
+
 export interface GetContentCreatorCoursesResponse {
   data: {
     /** @format uuid */
     id: string;
     title: string;
     thumbnailUrl: string | null;
+    trailerUrl?: string | null;
     description: string;
     /** @format uuid */
     authorId: string;
@@ -1170,6 +1257,8 @@ export interface GetContentCreatorCoursesResponse {
     authorAvatarUrl: string | null;
     category: string;
     courseChapterCount: number;
+    lessonCount?: number;
+    estimatedDurationMinutes?: number;
     enrolledParticipantCount: number;
     priceInCents: number;
     currency: string;
@@ -1241,6 +1330,7 @@ export interface GetCourseResponse {
     isScorm?: boolean;
     priceInCents: number;
     thumbnailUrl?: string;
+    trailerUrl?: string | null;
     title: string;
     slug: string;
     stripeProductId: string | null;
@@ -1356,6 +1446,7 @@ export interface GetBetaCourseByIdResponse {
     thumbnailUrl?: string;
     thumbnailS3Key?: string;
     thumbnailS3SingedUrl?: string | null;
+    trailerUrl?: string | null;
     title: string;
     availableLocales: ("en" | "pl")[];
     baseLanguage: "en" | "pl";
@@ -1409,6 +1500,18 @@ export interface UpdateCourseBody {
 }
 
 export interface UpdateCourseResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface UploadCourseTrailerResponse {
+  data: {
+    trailerUrl: string | null;
+  };
+}
+
+export interface DeleteCourseTrailerResponse {
   data: {
     message: string;
   };
@@ -4080,6 +4183,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name SettingsControllerUpdateModernCourseListEnabled
+     * @request PATCH:/api/settings/admin/modern-course-list
+     */
+    settingsControllerUpdateModernCourseListEnabled: (params: RequestParams = {}) =>
+      this.request<UpdateModernCourseListEnabledResponse, any>({
+        path: `/api/settings/admin/modern-course-list`,
+        method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name SettingsControllerUpdateAdminFinishedCourseNotification
      * @request PATCH:/api/settings/admin/finished-course-notification
      */
@@ -5341,6 +5458,29 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name CourseControllerGetTopCourses
+     * @request GET:/api/course/top-courses
+     */
+    courseControllerGetTopCourses: (
+      query?: {
+        limit?: number;
+        days?: number;
+        /** @default "en" */
+        language?: "en" | "pl";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetTopCoursesResponse, any>({
+        path: `/api/course/top-courses`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name CourseControllerGetContentCreatorCourses
      * @request GET:/api/course/content-creator-courses
      */
@@ -5489,6 +5629,34 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "PATCH",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerUploadCourseTrailer
+     * @request PATCH:/api/course/{id}/trailer
+     */
+    courseControllerUploadCourseTrailer: (id: string, params: RequestParams = {}) =>
+      this.request<UploadCourseTrailerResponse, any>({
+        path: `/api/course/${id}/trailer`,
+        method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerDeleteCourseTrailer
+     * @request DELETE:/api/course/{id}/trailer
+     */
+    courseControllerDeleteCourseTrailer: (id: string, params: RequestParams = {}) =>
+      this.request<DeleteCourseTrailerResponse, any>({
+        path: `/api/course/${id}/trailer`,
+        method: "DELETE",
         format: "json",
         ...params,
       }),

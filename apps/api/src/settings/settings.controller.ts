@@ -146,6 +146,18 @@ export class SettingsController {
     return new BaseResponse(result);
   }
 
+  @Patch("admin/modern-course-list")
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    response: baseResponse(globalSettingsJSONSchema),
+  })
+  async updateModernCourseListEnabled(
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
+    const result = await this.settingsService.updateGlobalModernCourseListEnabled(currentUser);
+    return new BaseResponse(result);
+  }
+
   @Patch("admin/finished-course-notification")
   @Roles(USER_ROLES.ADMIN)
   @Validate({

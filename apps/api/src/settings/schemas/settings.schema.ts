@@ -28,6 +28,7 @@ export const userEmailTriggersJSONSchema = Type.Object({
 
 export const globalSettingsJSONSchema = Type.Object({
   unregisteredUserCoursesAccessibility: Type.Boolean(),
+  modernCourseListEnabled: Type.Boolean(),
   enforceSSO: Type.Boolean(),
   certificateBackgroundImage: Type.Union([Type.String(), Type.Null()]),
   companyInformation: Type.Optional(companyInformationJSONSchema),
