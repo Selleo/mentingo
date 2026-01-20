@@ -37,11 +37,7 @@ import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { FileService } from "./file.service";
 import { bunnyWebhookSchema, type BunnyWebhookBody } from "./schemas/bunny-webhook.schema";
-import {
-  AssociateLessonWithUploadBody,
-  associateLessonWithUploadSchema,
-  FileUploadResponse,
-} from "./schemas/file.schema";
+import { FileUploadResponse } from "./schemas/file.schema";
 import {
   videoInitResponseSchema,
   videoInitSchema,
@@ -243,14 +239,6 @@ export class FileController {
   })
   async deleteFile(@Query("fileKey") fileKey: string): Promise<void> {
     await this.fileService.deleteFile(fileKey);
-  }
-
-  @Post("associate-upload")
-  @Validate({
-    request: [{ type: "body", schema: associateLessonWithUploadSchema }],
-  })
-  async associateUploadWithLesson(@Body() data: AssociateLessonWithUploadBody): Promise<void> {
-    await this.fileService.associateUploadWithLesson(data.uploadId, data.lessonId);
   }
 
   private setTusHeaders(res: Response, extraHeaders: Record<string, string> = {}) {

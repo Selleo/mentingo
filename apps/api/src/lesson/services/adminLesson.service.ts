@@ -1,3 +1,5 @@
+import { randomUUID } from "crypto";
+
 import {
   BadRequestException,
   ForbiddenException,
@@ -6,7 +8,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
-import { ALLOWED_VIDEO_FILE_TYPES } from "@repo/shared";
+import { CacheManagerStore } from "cache-manager";
 import { getTableColumns, sql } from "drizzle-orm";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
@@ -19,7 +21,7 @@ import {
   RESOURCE_RELATIONSHIP_TYPES,
 } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
-import { FileGuard } from "src/file/guards/file.guard";
+import { CONTEXT_TTL, getContextKey } from "src/file/utils/resourceCacheKeys";
 import { DocumentService } from "src/ingestion/services/document.service";
 import { MAX_LESSON_TITLE_LENGTH } from "src/lesson/repositories/lesson.constants";
 import { LessonService } from "src/lesson/services/lesson.service";
@@ -36,13 +38,13 @@ import { LessonRepository } from "../repositories/lesson.repository";
 import type { LessonResourceMetadata, ResourceWithUrlError } from "../lesson-resource.types";
 import type {
   CreateAiMentorLessonBody,
+  CreateEmbedLessonBody,
   CreateLessonBody,
   CreateQuizLessonBody,
   UpdateAiMentorLessonBody,
+  UpdateEmbedLessonBody,
   UpdateLessonBody,
   UpdateQuizLessonBody,
-  CreateEmbedLessonBody,
-  UpdateEmbedLessonBody,
 } from "../lesson.schema";
 import type { EmbedLessonResourceType, LessonTypes } from "../lesson.type";
 import type { SupportedLanguages } from "@repo/shared";
@@ -61,8 +63,9 @@ export class AdminLessonService {
     private documentService: DocumentService,
     private fileService: FileService,
     private localizationService: LocalizationService,
-    private lessonService: LessonService,
     private readonly eventBus: EventBus,
+    private lessonService: LessonService,
+    @Inject("CACHE_MANAGER") private readonly cache: CacheManagerStore,
   ) {}
 
   async createLessonForChapter(data: CreateLessonBody, currentUser: CurrentUser) {
@@ -90,6 +93,16 @@ export class AdminLessonService {
       language,
     );
 
+    if (data.contextId) {
+      const resourceIds = await this.getResourcesByContextId(data.contextId);
+
+      if (resourceIds.length) {
+        await this.adminLessonRepository.linkResourcesToLesson(lesson.id, resourceIds);
+      }
+
+      await this.cache.del(getContextKey(data.contextId));
+    }
+
     await this.adminLessonRepository.updateLessonCountForChapter(lesson.chapterId);
 
     const createdLessonSnapshot = await this.buildLessonActivitySnapshot(lesson.id, language);
@@ -103,6 +116,10 @@ export class AdminLessonService {
     );
 
     return lesson.id;
+  }
+
+  async getResourcesByContextId(contextId: UUIDType) {
+    return (await this.cache.get(getContextKey(contextId))) as Promise<UUIDType[]>;
   }
 
   async createAiMentorLesson(data: CreateAiMentorLessonBody, currentUser: CurrentUser) {
@@ -887,18 +904,18 @@ export class AdminLessonService {
   }
 
   async uploadFileToLesson(
-    lessonId: UUIDType,
     currentUserId: UUIDType,
     currentUserRole: UserRole,
     file: Express.Multer.File,
     language: SupportedLanguages,
     title: string,
     description: string,
+    lessonId?: UUIDType,
+    contextId?: string,
   ) {
-    await this.validateAccess("lesson", currentUserRole, currentUserId, lessonId);
-
-    const type = await FileGuard.getFileType(file);
-
+    if (lessonId) {
+      await this.validateAccess("lesson", currentUserRole, currentUserId, lessonId);
+    }
     const fileTitle = {
       [language]: title,
     };
@@ -906,30 +923,6 @@ export class AdminLessonService {
     const fileDescription = {
       [language]: description,
     };
-
-    if (type?.mime && ALLOWED_VIDEO_FILE_TYPES.includes(type.mime)) {
-      const lesson = await this.lessonRepository.getLesson(lessonId, language);
-
-      const resources = await this.fileService.getResourcesForEntity(lessonId, ENTITY_TYPE.LESSON);
-
-      const mappedResources = resources.map((resource) => ({
-        id: resource.id,
-        fileUrl: resource.fileUrl,
-        contentType: resource.contentType,
-        title: typeof resource.title === "string" ? resource.title : undefined,
-        description: typeof resource.description === "string" ? resource.description : undefined,
-        fileName: this.lessonService.extractOriginalFilename(resource.metadata),
-      }));
-
-      const { contentCount } = this.lessonService.injectResourcesIntoContent(
-        lesson.description,
-        mappedResources,
-      );
-
-      if (contentCount.video > 0) {
-        throw new BadRequestException("adminCourseView.toast.maxOneVideoUploaded");
-      }
-    }
 
     const fileData = await this.fileService.uploadResource({
       file,
@@ -940,6 +933,7 @@ export class AdminLessonService {
       relationshipType: RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
       title: fileTitle,
       description: fileDescription,
+      options: {contextId}
     });
 
     return { resourceId: fileData.resourceId };
@@ -1078,5 +1072,13 @@ export class AdminLessonService {
     }
 
     return hasAccess;
+  }
+
+  async initializeLessonContext() {
+    const contextId = randomUUID().toString();
+
+    await this.cache.set(getContextKey(contextId), [], CONTEXT_TTL);
+
+    return { contextId };
   }
 }

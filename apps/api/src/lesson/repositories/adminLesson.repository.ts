@@ -620,4 +620,14 @@ export class AdminLessonRepository {
       .set({ avatarReference: fileKey })
       .where(eq(aiMentorLessons.lessonId, lessonId));
   }
+
+  async linkResourcesToLesson(lessonId: UUIDType, resourceIds: UUIDType[]) {
+    return this.db.insert(resourceEntity).values(
+      resourceIds.map((resourceId) => ({
+        resourceId,
+        entityType: ENTITY_TYPE.LESSON,
+        entityId: lessonId,
+      })),
+    );
+  }
 }
