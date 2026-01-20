@@ -39,8 +39,8 @@ import { CONTEXT_TTL, getContextKey } from "./utils/resourceCacheKeys";
 import { VideoProcessingStateService } from "./video-processing-state.service";
 import { VideoUploadNotificationGateway } from "./video-upload-notification.gateway";
 
-import type { ResourceRelationshipType, EntityType } from "./file.constants";
 import type { BunnyWebhookBody } from "./schemas/bunny-webhook.schema";
+import type { VideoInitBody } from "./schemas/video-init.schema";
 import type { VideoUploadState } from "./video-processing-state.service";
 import type {
   VideoProviderInitPayload,
@@ -50,9 +50,7 @@ import type {
 import type { SupportedLanguages } from "@repo/shared";
 import type { Static, TSchema } from "@sinclair/typebox";
 import type { UUIDType } from "src/common";
-import type { CurrentUser } from "src/common/types/current-user.type";
-import type { VideoInitBody } from "./schemas/video-init.schema";
-import type { UploadResourceParams } from "src/file/types/resource.types";
+import type { UploadResourceParams , CreateResourceForEntityParams } from "src/file/types/resource.types";
 
 @Injectable()
 export class FileService {
@@ -228,18 +226,18 @@ export class FileService {
 
     if (resource !== "lesson-content" || (!lessonId && !contextId)) return undefined;
 
-    const resourceResult = await this.createResourceForEntity(
-      fileKey,
-      mimeType,
-      lessonId,
-      ENTITY_TYPES.LESSON,
-      RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
-      {
+    const resourceResult = await this.createResourceForEntity({
+      reference: fileKey,
+      contentType: mimeType,
+      entityId: lessonId,
+      entityType: ENTITY_TYPES.LESSON,
+      relationshipType: RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+      metadata: {
         originalFilename: filename,
         size: sizeBytes,
       },
       contextId
-    );
+    });
 
     return resourceResult.resourceId;
   }
@@ -489,18 +487,19 @@ export class FileService {
   /**
    * Create a resource record linked to an entity without uploading a file.
    */
-  async createResourceForEntity(
-    reference: string,
-    contentType: string,
-    entityId?: UUIDType,
-    entityType?: EntityType,
-    relationshipType: ResourceRelationshipType = RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
-    metadata: Record<string, unknown> = {},
-    title: Partial<Record<SupportedLanguages, string>> = {},
-    description: Partial<Record<SupportedLanguages, string>> = {},
-    currentUser?: CurrentUser,
-    contextId?: UUIDType,
-  ) {
+
+  async createResourceForEntity({
+    reference,
+    contentType,
+    entityId,
+    entityType,
+    relationshipType = RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+    metadata = {},
+    title = {},
+    description = {},
+    currentUser,
+    contextId,
+  }: CreateResourceForEntityParams) {
     const { insertedResource } = await this.db.transaction(async (trx) => {
       const [insertedResource] = await trx
         .insert(resources)
