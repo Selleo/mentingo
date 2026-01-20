@@ -1,7 +1,14 @@
 import { randomUUID } from "crypto";
 import { Readable } from "stream";
 
-import { Inject, BadRequestException, ConflictException, Injectable } from "@nestjs/common";
+import {
+  Inject,
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from "@nestjs/common";
 import { ALLOWED_VIDEO_FILE_TYPES, VIDEO_UPLOAD_STATUS } from "@repo/shared";
 import { TypeCompiler } from "@sinclair/typebox/compiler";
 import { CacheManagerStore } from "cache-manager";
@@ -17,7 +24,7 @@ import { uploadKey, videoKey } from "src/file/utils/bunnyCacheKeys";
 import { isEmptyObject, normalizeCellValue, normalizeHeader } from "src/file/utils/excel.utils";
 import getChecksum from "src/file/utils/getChecksum";
 import { S3Service } from "src/s3/s3.service";
-import { resources, resourceEntity } from "src/storage/schema";
+import { lessons, resources, resourceEntity } from "src/storage/schema";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import {
@@ -26,6 +33,8 @@ import {
   RESOURCE_RELATIONSHIP_TYPES,
   MAX_VIDEO_SIZE,
 } from "./file.constants";
+import { BunnyVideoProvider } from "./providers/bunny-video.provider";
+import { S3VideoProvider } from "./providers/s3-video.provider";
 import { VideoProcessingStateService } from "./video-processing-state.service";
 import { VideoUploadNotificationGateway } from "./video-upload-notification.gateway";
 import { VideoUploadQueueService } from "./video-upload-queue.service";
@@ -34,6 +43,11 @@ import type { ResourceRelationshipType, EntityType, ResourceCategory } from "./f
 import type { BunnyWebhookBody } from "./schemas/bunny-webhook.schema";
 import type { VideoInitBody } from "./schemas/video-init.schema";
 import type { VideoUploadState } from "./video-processing-state.service";
+import type {
+  VideoProviderInitPayload,
+  VideoProviderInitResult,
+  VideoStorageProvider,
+} from "./video-storage-provider";
 import type { SupportedLanguages } from "@repo/shared";
 import type { Static, TSchema } from "@sinclair/typebox";
 import type { UUIDType } from "src/common";
@@ -41,11 +55,15 @@ import type { CurrentUser } from "src/common/types/current-user.type";
 
 @Injectable()
 export class FileService {
+  private readonly logger = new Logger(FileService.name);
+
   constructor(
     private readonly s3Service: S3Service,
     private readonly bunnyStreamService: BunnyStreamService,
     private readonly videoUploadQueueService: VideoUploadQueueService,
     private readonly videoProcessingStateService: VideoProcessingStateService,
+    private readonly bunnyVideoProvider: BunnyVideoProvider,
+    private readonly s3VideoProvider: S3VideoProvider,
     @Inject("DB") private readonly db: DatabasePg,
     @Inject("CACHE_MANAGER") private readonly cache: CacheManagerStore,
     private readonly notificationGateway: VideoUploadNotificationGateway,
@@ -60,6 +78,14 @@ export class FileService {
       return this.bunnyStreamService.getUrl(videoId);
     }
     return await this.s3Service.getSignedUrl(fileKey);
+  }
+
+  async isBunnyConfigured(): Promise<boolean> {
+    try {
+      return await this.bunnyStreamService.isConfigured();
+    } catch {
+      return false;
+    }
   }
 
   async getFileBuffer(fileKey: string): Promise<Buffer | null> {
@@ -156,6 +182,119 @@ export class FileService {
     }
   }
 
+  private async resolveVideoProvider() {
+    if (await this.bunnyVideoProvider.isAvailable()) {
+      return this.bunnyVideoProvider;
+    }
+
+    if (await this.s3VideoProvider.isAvailable()) {
+      this.logger.warn("Bunny configuration missing, falling back to S3 for video uploads.");
+      return this.s3VideoProvider;
+    }
+
+    throw new InternalServerErrorException("Video storage is not configured.");
+  }
+
+  private buildVideoUploadContext(resource: string, filename?: string) {
+    const uploadId = randomUUID();
+    const placeholderKey = `processing-${resource}-${uploadId}`;
+    const fileType = filename?.split(".").pop();
+
+    return { uploadId, placeholderKey, fileType };
+  }
+
+  private async initializeVideoUploadState(
+    uploadId: string,
+    placeholderKey: string,
+    fileType: string | undefined,
+    currentUserId?: UUIDType,
+  ) {
+    await this.videoProcessingStateService.initializeState(
+      uploadId,
+      placeholderKey,
+      fileType,
+      currentUserId,
+    );
+  }
+
+  private async initProviderUpload(
+    provider: VideoStorageProvider,
+    payload: VideoProviderInitPayload,
+    uploadId: string,
+    placeholderKey: string,
+  ) {
+    try {
+      return provider.initVideoUpload(payload);
+    } catch (error) {
+      await this.videoProcessingStateService.markFailed(uploadId, placeholderKey, error?.message);
+      throw error;
+    }
+  }
+
+  private async registerProviderUpload(
+    uploadId: string,
+    placeholderKey: string,
+    providerResponse: VideoProviderInitResult,
+  ) {
+    await this.videoProcessingStateService.updateState(uploadId, {
+      fileKey: providerResponse.fileKey,
+      provider: providerResponse.provider,
+      bunnyVideoId: providerResponse.bunnyGuid,
+      multipartUploadId: providerResponse.multipartUploadId,
+      partSize: providerResponse.partSize,
+    });
+
+    if (providerResponse.bunnyGuid) {
+      await this.videoProcessingStateService.registerVideoId({
+        uploadId,
+        bunnyVideoId: providerResponse.bunnyGuid,
+        placeholderKey,
+        fileKey: providerResponse.fileKey,
+        provider: providerResponse.provider,
+      });
+    }
+  }
+
+  private async createLessonContentResourceIfNeeded(params: {
+    resource: string;
+    lessonId?: string;
+    fileKey: string;
+    mimeType: string;
+    filename: string;
+    sizeBytes: number;
+  }) {
+    const { resource, lessonId, fileKey, mimeType, filename, sizeBytes } = params;
+
+    if (resource !== "lesson-content" || !lessonId) return undefined;
+
+    const resourceResult = await this.createResourceForEntity(
+      fileKey,
+      mimeType,
+      lessonId,
+      ENTITY_TYPES.LESSON,
+      RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+      {
+        originalFilename: filename,
+        size: sizeBytes,
+      },
+    );
+
+    return resourceResult.resourceId;
+  }
+
+  private async updateLessonVideoFile(
+    lessonId: string | undefined,
+    fileKey: string,
+    fileType: string | undefined,
+  ) {
+    if (!lessonId) return;
+
+    await this.db
+      .update(lessons)
+      .set({ fileS3Key: fileKey, fileType })
+      .where(eq(lessons.id, lessonId));
+  }
+
   async initVideoUpload(data: VideoInitBody, currentUserId?: UUIDType) {
     const { filename, sizeBytes, mimeType, title, resource = "lesson", lessonId } = data;
 
@@ -167,63 +306,50 @@ export class FileService {
       throw new BadRequestException("Video file exceeds maximum allowed size");
     }
 
-    const uploadId = randomUUID();
-    const placeholderKey = `processing-${resource}-${uploadId}`;
-    const fileType = filename?.split(".").pop();
+    const { uploadId, placeholderKey, fileType } = this.buildVideoUploadContext(resource, filename);
 
-    await this.videoProcessingStateService.initializeState(
+    await this.initializeVideoUploadState(uploadId, placeholderKey, fileType, currentUserId);
+
+    const provider = await this.resolveVideoProvider();
+    const providerResponse = await this.initProviderUpload(
+      provider,
+      {
+        filename,
+        title,
+        mimeType,
+        resource,
+      },
       uploadId,
       placeholderKey,
-      fileType,
-      currentUserId,
     );
 
-    let guid: string;
+    await this.registerProviderUpload(uploadId, placeholderKey, providerResponse);
 
-    try {
-      const response = await this.bunnyStreamService.createVideo(title || filename);
-      guid = response.guid;
-      await this.videoProcessingStateService.registerVideoId({
-        uploadId,
-        bunnyVideoId: guid,
-        placeholderKey,
-      });
-
-      if (lessonId) {
-        await this.videoProcessingStateService.associateWithLesson(uploadId, lessonId);
-      }
-    } catch (error) {
-      await this.videoProcessingStateService.markFailed(uploadId, placeholderKey, error?.message);
-      throw error;
+    if (lessonId) {
+      await this.videoProcessingStateService.associateWithLesson(uploadId, lessonId);
     }
 
-    let resourceId: UUIDType | undefined;
+    const resourceId = await this.createLessonContentResourceIfNeeded({
+      resource,
+      lessonId,
+      fileKey: providerResponse.fileKey,
+      mimeType,
+      filename,
+      sizeBytes,
+    });
 
-    if (resource === "lesson-content" && lessonId) {
-      const resourceResult = await this.createResourceForEntity(
-        placeholderKey,
-        mimeType,
-        lessonId,
-        ENTITY_TYPES.LESSON,
-        RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
-        {
-          originalFilename: filename,
-          size: sizeBytes,
-        },
-      );
-      resourceId = resourceResult.resourceId;
-    }
-
-    const { tusEndpoint, tusHeaders, expiresAt } =
-      await this.bunnyStreamService.getTusUploadConfig(guid);
+    await this.updateLessonVideoFile(lessonId, providerResponse.fileKey, fileType);
 
     return {
       uploadId,
-      bunnyGuid: guid,
-      fileKey: placeholderKey,
-      tusEndpoint,
-      tusHeaders,
-      expiresAt,
+      provider: providerResponse.provider,
+      bunnyGuid: providerResponse.bunnyGuid,
+      fileKey: providerResponse.fileKey,
+      tusEndpoint: providerResponse.tusEndpoint,
+      tusHeaders: providerResponse.tusHeaders,
+      expiresAt: providerResponse.expiresAt,
+      multipartUploadId: providerResponse.multipartUploadId,
+      partSize: providerResponse.partSize,
       resourceId,
     };
   }
@@ -515,10 +641,14 @@ export class FileService {
       .where(and(...conditions));
 
     return Promise.all(
-      results.map(async (resource) => ({
-        ...resource,
-        fileUrl: await this.getFileUrl(resource.reference),
-      })),
+      results.map(async (resource) => {
+        try {
+          const fileUrl = await this.getFileUrl(resource.reference);
+          return { ...resource, fileUrl };
+        } catch (error) {
+          return { ...resource, fileUrl: resource.reference, fileUrlError: true };
+        }
+      }),
     );
   }
 
@@ -579,14 +709,7 @@ export class FileService {
       throw new BadRequestException("No uploadId found in cache for videoId");
     }
 
-    const state = await this.videoProcessingStateService.markProcessed(videoId, fileUrl);
-
-    if (state?.placeholderKey) {
-      await this.db
-        .update(resources)
-        .set({ reference: fileKey })
-        .where(eq(resources.reference, state.placeholderKey));
-    }
+    await this.videoProcessingStateService.markProcessed(videoId, fileUrl);
 
     return { success: true };
   }

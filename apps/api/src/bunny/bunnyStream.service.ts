@@ -81,6 +81,21 @@ export class BunnyStreamService {
     });
   }
 
+  async isConfigured(): Promise<boolean> {
+    const [apiKey, libraryId] = await Promise.all([
+      this.envService
+        .getEnv("BUNNY_STREAM_API_KEY")
+        .then((r) => r.value)
+        .catch(() => this.configService.get("BUNNY_STREAM_API_KEY")),
+      this.envService
+        .getEnv("BUNNY_STREAM_LIBRARY_ID")
+        .then((r) => r.value)
+        .catch(() => this.configService.get("BUNNY_STREAM_LIBRARY_ID")),
+    ]);
+
+    return Boolean(apiKey && libraryId);
+  }
+
   async upload(file: Express.Multer.File): Promise<{
     fileKey: string;
     fileUrl: string;

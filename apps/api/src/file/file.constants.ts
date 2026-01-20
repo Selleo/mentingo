@@ -69,3 +69,5 @@ export const RESOURCE_CATEGORIES = {
 } as const;
 
 export type ResourceCategory = (typeof RESOURCE_CATEGORIES)[keyof typeof RESOURCE_CATEGORIES];
+
+export const TUS_VERSION = "1.0.0";

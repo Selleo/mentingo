@@ -1,6 +1,7 @@
 import { Node, mergeAttributes } from "@tiptap/core";
 import { NodeViewWrapper, ReactNodeViewRenderer } from "@tiptap/react";
 import { Download, GripVertical, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
 
@@ -37,6 +38,7 @@ const getDownloadableFileDataAttributes = (attrs: DownloadableFileAttrs) => ({
 });
 
 const DownloadableFileEditorView = ({ node, editor, getPos }: NodeViewProps) => {
+  const { t } = useTranslation();
   const attrs = normalizeDownloadableFileAttrs(node.attrs);
   if (!attrs.src) return null;
 
@@ -58,7 +60,7 @@ const DownloadableFileEditorView = ({ node, editor, getPos }: NodeViewProps) => 
           size="xs"
           variant="ghost"
           className="rounded-full text-neutral-500 hover:bg-neutral-200"
-          aria-label="Drag file"
+          aria-label={t("richText.downloadableFile.ariaLabel.drag")}
           data-drag-handle
         >
           <GripVertical className="size-4" aria-hidden />
@@ -77,7 +79,7 @@ const DownloadableFileEditorView = ({ node, editor, getPos }: NodeViewProps) => 
         <Button
           type="button"
           onClick={handleRemove}
-          aria-label="Remove downloadable file embed"
+          aria-label={t("richText.downloadableFile.ariaLabel.remove")}
           size="xs"
           variant="ghost"
         >

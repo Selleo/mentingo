@@ -11,5 +11,6 @@ export * from "./constants/loginPageDocuments";
 export * from "./constants/newsSettings";
 export * from "./constants/qaSettings";
 export * from "./constants/theme";
+export * from "./constants/tus";
 export * from "./types/onboarding";
 export * from "./types/videoUploadTypes";

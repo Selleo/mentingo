@@ -1,5 +1,5 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
-import { VIDEO_UPLOAD_STATUS, type VideoUploadStatus } from "@repo/shared";
+import { VIDEO_UPLOAD_STATUS, type VideoUploadStatus, type VideoProviderType } from "@repo/shared";
 import { CacheManagerStore } from "cache-manager";
 
 import { uploadKey, videoKey } from "src/file/utils/bunnyCacheKeys";
@@ -12,9 +12,12 @@ export type VideoUploadState = {
   uploadId: string;
   placeholderKey: string;
   status: VideoUploadStatus;
+  provider?: VideoProviderType;
   fileKey?: string;
   fileUrl?: string;
   bunnyVideoId?: string;
+  multipartUploadId?: string;
+  partSize?: number;
   fileType?: string;
   lessonId?: string;
   error?: string;
@@ -64,6 +67,12 @@ export class VideoProcessingStateService {
     placeholderKey: string,
     fileType?: string,
     userId?: UUIDType,
+    options?: {
+      provider?: VideoProviderType;
+      fileKey?: string;
+      multipartUploadId?: string;
+      partSize?: number;
+    },
   ) {
     const state: VideoUploadState = {
       uploadId,
@@ -71,6 +80,10 @@ export class VideoProcessingStateService {
       status: VIDEO_UPLOAD_STATUS.QUEUED,
       fileType,
       userId,
+      provider: options?.provider,
+      fileKey: options?.fileKey,
+      multipartUploadId: options?.multipartUploadId,
+      partSize: options?.partSize,
     };
 
     await this.retryOperation(
@@ -93,17 +106,36 @@ export class VideoProcessingStateService {
     }
   }
 
+  async updateState(uploadId: string, updates: Partial<VideoUploadState>) {
+    const current = await this.getState(uploadId);
+    if (!current) return null;
+
+    const next: VideoUploadState = {
+      ...current,
+      ...updates,
+    };
+
+    await this.retryOperation(
+      () => this.cache.set(uploadKey(uploadId), next, this.UPLOAD_STATE_TTL),
+      `updateState set upload state for ${uploadId}`,
+    );
+
+    return next;
+  }
+
   async markUploaded(params: {
     uploadId: string;
-    bunnyVideoId: string;
     fileKey: string;
     fileUrl: string;
     placeholderKey: string;
     fileType?: string;
+    bunnyVideoId?: string;
+    provider?: VideoProviderType;
   }) {
-    const current = (await this.getState(params.uploadId)) ?? {
+    const current: VideoUploadState = (await this.getState(params.uploadId)) ?? {
       uploadId: params.uploadId,
       placeholderKey: params.placeholderKey,
+      status: VIDEO_UPLOAD_STATUS.QUEUED,
       fileType: params.fileType,
       userId: "",
     };
@@ -111,7 +143,8 @@ export class VideoProcessingStateService {
     const next: VideoUploadState = {
       ...current,
       status: VIDEO_UPLOAD_STATUS.UPLOADED,
-      bunnyVideoId: params.bunnyVideoId,
+      provider: params.provider ?? current.provider ?? (params.bunnyVideoId ? "bunny" : undefined),
+      bunnyVideoId: params.bunnyVideoId ?? current.bunnyVideoId,
       fileKey: params.fileKey,
       fileUrl: params.fileUrl,
       fileType: params.fileType ?? current.fileType,
@@ -122,10 +155,14 @@ export class VideoProcessingStateService {
       `markUploaded set upload state for ${params.uploadId}`,
     );
 
-    await this.retryOperation(
-      () => this.cache.set(videoKey(params.bunnyVideoId), params.uploadId, this.VIDEO_MAPPING_TTL),
-      `markUploaded set video mapping for ${params.bunnyVideoId}`,
-    );
+    const bunnyVideoId = params.bunnyVideoId ?? current.bunnyVideoId;
+
+    if (bunnyVideoId) {
+      await this.retryOperation(
+        () => this.cache.set(videoKey(bunnyVideoId), params.uploadId, this.VIDEO_MAPPING_TTL),
+        `markUploaded set video mapping for ${bunnyVideoId}`,
+      );
+    }
 
     try {
       await this.retryOperation(
@@ -151,8 +188,10 @@ export class VideoProcessingStateService {
     uploadId: string;
     bunnyVideoId: string;
     placeholderKey: string;
+    fileKey?: string;
+    provider?: VideoProviderType;
   }) {
-    const current = (await this.getState(params.uploadId)) ?? {
+    const current: VideoUploadState = (await this.getState(params.uploadId)) ?? {
       uploadId: params.uploadId,
       placeholderKey: params.placeholderKey,
       status: VIDEO_UPLOAD_STATUS.QUEUED,
@@ -162,6 +201,8 @@ export class VideoProcessingStateService {
     const next: VideoUploadState = {
       ...current,
       bunnyVideoId: params.bunnyVideoId,
+      fileKey: params.fileKey ?? current.fileKey,
+      provider: params.provider ?? current.provider ?? "bunny",
     };
 
     await this.retryOperation(
@@ -193,6 +234,7 @@ export class VideoProcessingStateService {
     const next: VideoUploadState = {
       ...current,
       status: VIDEO_UPLOAD_STATUS.PROCESSED,
+      provider: current.provider ?? "bunny",
       bunnyVideoId,
       fileKey: current.fileKey ?? `bunny-${bunnyVideoId}`,
       fileUrl: fileUrl ?? current.fileUrl,

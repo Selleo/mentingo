@@ -526,11 +526,15 @@ export interface InitVideoUploadBody {
 export interface InitVideoUploadResponse {
   /** @format uuid */
   uploadId: string;
-  bunnyGuid: string;
+  provider: "bunny" | "s3";
   fileKey: string;
-  tusEndpoint: string;
-  tusHeaders: object;
-  expiresAt: string;
+  bunnyGuid?: string;
+  tusEndpoint?: string;
+  tusHeaders?: object;
+  expiresAt?: string;
+  multipartUploadId?: string;
+  /** @min 1 */
+  partSize?: number;
   /** @format uuid */
   resourceId?: string;
 }
@@ -539,9 +543,13 @@ export type GetVideoUploadStatusResponse = {
   uploadId: string;
   placeholderKey: string;
   status: "queued" | "uploaded" | "processed" | "failed";
+  provider?: "bunny" | "s3";
   fileKey?: string;
   fileUrl?: string;
   bunnyVideoId?: string;
+  multipartUploadId?: string;
+  /** @min 1 */
+  partSize?: number;
   fileType?: string;
   lessonId?: string;
   error?: string;
@@ -4505,6 +4513,71 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         body: data,
         type: ContentType.Json,
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerTusOptionsBase
+     * @request OPTIONS:/api/file/videos/tus
+     */
+    fileControllerTusOptionsBase: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/file/videos/tus`,
+        method: "OPTIONS",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerCreateTusUpload
+     * @request POST:/api/file/videos/tus
+     */
+    fileControllerCreateTusUpload: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/file/videos/tus`,
+        method: "POST",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerTusOptionsUpload
+     * @request OPTIONS:/api/file/videos/tus/{id}
+     */
+    fileControllerTusOptionsUpload: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/file/videos/tus/${id}`,
+        method: "OPTIONS",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerGetTusUpload
+     * @request HEAD:/api/file/videos/tus/{id}
+     */
+    fileControllerGetTusUpload: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/file/videos/tus/${id}`,
+        method: "HEAD",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerPatchTusUpload
+     * @request PATCH:/api/file/videos/tus/{id}
+     */
+    fileControllerPatchTusUpload: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/file/videos/tus/${id}`,
+        method: "PATCH",
         ...params,
       }),
 

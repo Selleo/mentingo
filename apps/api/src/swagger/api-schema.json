@@ -1021,6 +1021,73 @@
         }
       }
     },
+    "/api/file/videos/tus": {
+      "options": {
+        "operationId": "FileController_tusOptionsBase",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "post": {
+        "operationId": "FileController_createTusUpload",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/file/videos/tus/{id}": {
+      "options": {
+        "operationId": "FileController_tusOptionsUpload",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "head": {
+        "operationId": "FileController_getTusUpload",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "patch": {
+        "operationId": "FileController_patchTusUpload",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/file/videos/{id}": {
       "get": {
         "operationId": "FileController_getVideoUploadStatus",
@@ -9920,10 +9987,22 @@
             "format": "uuid",
             "type": "string"
           },
-          "bunnyGuid": {
-            "type": "string"
+          "provider": {
+            "anyOf": [
+              {
+                "const": "bunny",
+                "type": "string"
+              },
+              {
+                "const": "s3",
+                "type": "string"
+              }
+            ]
           },
           "fileKey": {
+            "type": "string"
+          },
+          "bunnyGuid": {
             "type": "string"
           },
           "tusEndpoint": {
@@ -9940,6 +10019,13 @@
           "expiresAt": {
             "type": "string"
           },
+          "multipartUploadId": {
+            "type": "string"
+          },
+          "partSize": {
+            "minimum": 1,
+            "type": "integer"
+          },
           "resourceId": {
             "format": "uuid",
             "type": "string"
@@ -9947,11 +10033,8 @@
         },
         "required": [
           "uploadId",
-          "bunnyGuid",
-          "fileKey",
-          "tusEndpoint",
-          "tusHeaders",
-          "expiresAt"
+          "provider",
+          "fileKey"
         ]
       },
       "GetVideoUploadStatusResponse": {
@@ -9985,6 +10068,18 @@
                   }
                 ]
               },
+              "provider": {
+                "anyOf": [
+                  {
+                    "const": "bunny",
+                    "type": "string"
+                  },
+                  {
+                    "const": "s3",
+                    "type": "string"
+                  }
+                ]
+              },
               "fileKey": {
                 "type": "string"
               },
@@ -9993,6 +10088,13 @@
               },
               "bunnyVideoId": {
                 "type": "string"
+              },
+              "multipartUploadId": {
+                "type": "string"
+              },
+              "partSize": {
+                "minimum": 1,
+                "type": "integer"
               },
               "fileType": {
                 "type": "string"
