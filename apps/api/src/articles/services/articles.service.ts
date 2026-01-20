@@ -621,18 +621,18 @@ export class ArticlesService {
 
     const filePath = this.getMonthlyFolderPath();
 
-    const fileData = await this.fileService.uploadResource(
+    const fileData = await this.fileService.uploadResource({
       file,
-      filePath,
-      RESOURCE_CATEGORIES.ARTICLES,
-      articleId,
-      ENTITY_TYPES.ARTICLES,
-      RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
-      fileTitle,
-      fileDescription,
+      folder: filePath,
+      resource: RESOURCE_CATEGORIES.ARTICLES,
+      entityId: articleId,
+      entityType: ENTITY_TYPES.ARTICLES,
+      relationshipType: RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+      title: fileTitle,
+      description: fileDescription,
       currentUser,
-      { folderIncludesResource: true },
-    );
+      options: { folderIncludesResource: true },
+    });
 
     return { resourceId: fileData.resourceId };
   }
@@ -663,18 +663,18 @@ export class ArticlesService {
 
     const filePath = this.getMonthlyFolderPath("covers");
 
-    return this.fileService.uploadResource(
+    return this.fileService.uploadResource({
       file,
-      filePath,
-      RESOURCE_CATEGORIES.ARTICLES,
-      articleId,
-      ENTITY_TYPES.ARTICLES,
-      RESOURCE_RELATIONSHIP_TYPES.COVER,
-      { [language]: title },
-      { [language]: description },
+      folder: filePath,
+      resource: RESOURCE_CATEGORIES.ARTICLES,
+      entityId: articleId,
+      entityType: ENTITY_TYPES.ARTICLES,
+      relationshipType: RESOURCE_RELATIONSHIP_TYPES.COVER,
+      title: { [language]: title },
+      description: { [language]: description },
       currentUser,
-      { folderIncludesResource: true },
-    );
+      options: { folderIncludesResource: true },
+    });
   }
 
   private async getArticleResources(articleId: UUIDType, language: SupportedLanguages) {
