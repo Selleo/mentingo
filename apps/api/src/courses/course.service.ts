@@ -473,7 +473,13 @@ export class CourseService {
       case EnrolledStudentSortFields.email:
         return users.email;
       case EnrolledStudentSortFields.isEnrolledByGroup:
-        return sql`CASE WHEN ${studentCourses.enrolledByGroupId} IS NULL THEN 0 ELSE 1 END`;
+        return sql`
+          CASE
+            WHEN ${studentCourses.enrolledByGroupId} IS NOT NULL THEN 2
+            WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN 1
+            ELSE 0
+          END
+        `;
       case EnrolledStudentSortFields.enrolledAt:
       default:
         return studentCourses.enrolledAt;

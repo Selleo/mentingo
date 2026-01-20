@@ -371,8 +371,8 @@ const Users = () => {
   const editMutation: Record<string, (payload?: BulkAssignUsersToGroupBody) => void> = {
     role: handleUsersRoles,
     group: handleUsersGroups,
-    delete: () => handleDeleteUsers(),
-    archive: () => handleArchiveUsers(),
+    delete: handleDeleteUsers,
+    archive: handleArchiveUsers,
   };
 
   const { totalItems, perPage, page } = userData?.pagination || {};

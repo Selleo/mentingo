@@ -3,7 +3,7 @@ import { COURSE_ENROLLMENT } from "@repo/shared";
 import { useReactTable, flexRender, getCoreRowModel } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { Minus, User, Users } from "lucide-react";
-import { startTransition, useEffect, useMemo, useState } from "react";
+import React, { startTransition, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 
@@ -46,6 +46,7 @@ import { useToast } from "~/components/ui/use-toast";
 import { formatHtmlString } from "~/lib/formatters/formatHtmlString";
 import { cn } from "~/lib/utils";
 import { SearchFilter } from "~/modules/common/SearchFilter/SearchFilter";
+import { handleRowSelectionRange } from "~/utils/tableRangeSelection";
 import { tanstackSortingToParam } from "~/utils/tanstackSortingToParam";
 
 import { GroupEnrollModal } from "./GroupEnrollModal";
@@ -80,6 +81,8 @@ export const CourseEnrolled = (): ReactElement => {
     page: 1,
     perPage: ITEMS_PER_PAGE_OPTIONS[0],
   });
+
+  const [lastSelectedRowIndex, setLastSelectedRowIndex] = React.useState<number>(0);
 
   const [sorting, setSorting] = useState<SortingState>([{ id: "enrolledAt", desc: false }]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
@@ -117,7 +120,18 @@ export const CourseEnrolled = (): ReactElement => {
           checked={row.getIsSelected()}
           onCheckedChange={(value) => row.toggleSelected(!!value)}
           aria-label="Select row"
-          onClick={(e) => e.stopPropagation()}
+          onClick={(event) => {
+            event.stopPropagation();
+            handleRowSelectionRange({
+              table,
+              event,
+              id: row.id,
+              idx: row.index,
+              value: row.getIsSelected(),
+              lastSelectedRowIndex,
+              setLastSelectedRowIndex,
+            });
+          }}
         />
       ),
       enableSorting: false,
