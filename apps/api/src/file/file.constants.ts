@@ -41,6 +41,7 @@ export const RESOURCE_RELATIONSHIP_TYPES = {
   COVER: "cover",
   ICON: "icon",
   BANNER: "banner",
+  TRAILER: "trailer",
   MEDIA: "media",
 } as const;
 
@@ -65,6 +66,7 @@ export const RESOURCE_CATEGORIES = {
   NEWS: "news",
   ARTICLES: "articles",
   LESSON: "lesson",
+  COURSE: "course",
   GLOBAL_SETTINGS: "global_settings",
 } as const;
 

@@ -7,6 +7,7 @@ import { chapters, users } from "src/storage/schema";
 
 import { createCourseFactory } from "./course.factory";
 
+import type { CourseTest } from "./course.factory";
 import type { InferSelectModel } from "drizzle-orm";
 import type { DatabasePg, UUIDType } from "src/common";
 
@@ -16,7 +17,7 @@ const ensureCourse = async (db: DatabasePg, courseId?: UUIDType): Promise<UUIDTy
   if (courseId) return courseId;
 
   const courseFactory = createCourseFactory(db);
-  const course = await courseFactory.create();
+  const course = (await courseFactory.create()) as CourseTest;
   return course.id;
 };
 
