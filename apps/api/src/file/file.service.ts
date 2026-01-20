@@ -438,7 +438,7 @@ export class FileService {
 
     const checksum = getChecksum(file);
 
-    const { fileKey } = await this.uploadFile(file, resourceFolder, undefined);
+    const { fileKey } = await this.uploadFile(file, resourceFolder);
 
     const { insertedResource } = await this.db.transaction(async (trx) => {
       const [insertedResource] = await trx

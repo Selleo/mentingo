@@ -90,8 +90,6 @@ export class FileController {
     @UploadedFile()
     file: Express.Multer.File,
     @Body("resource") resource: string = "file",
-    @Body("lessonId") lessonId?: UUIDType,
-    @CurrentUser("userId") userId?: UUIDType,
   ): Promise<FileUploadResponse> {
     await FileGuard.validateFile(file, {
       allowedTypes: ALLOWED_MIME_TYPES,
@@ -99,7 +97,7 @@ export class FileController {
       maxVideoSize: MAX_VIDEO_SIZE,
     });
 
-    return await this.fileService.uploadFile(file, resource, lessonId, userId);
+    return await this.fileService.uploadFile(file, resource);
   }
 
   @Roles(...Object.values(USER_ROLES))
