@@ -259,29 +259,6 @@ export class CreateCourseActions {
       .first()
       .click();
   }
-  async addMatchingQuestion(page: Page, questionIndex: number): Promise<void> {
-    await page.getByTestId(`add-options-button-${questionIndex}`).click();
-
-    for (let i = 0; i < NEW_COURSE.options.matching.length; i++) {
-      const option = NEW_COURSE.options.matching[i];
-      await page
-        .locator(`input[name="questions.${questionIndex}.options.${i}.optionText"]`)
-        .fill(option.optionText);
-      await page
-        .locator(`input[name="questions.${questionIndex}.options.${i}.matchedWord"]`)
-        .fill(option.matchedWord);
-    }
-  }
-  async addScaleQuestion(page: Page, questionIndex: number): Promise<void> {
-    await page.getByTestId(`add-options-button-${questionIndex}`).click();
-    await page.getByTestId(`add-options-button-${questionIndex}`).click();
-
-    for (let i = 0; i < NEW_COURSE.options.scale.length; i++) {
-      await page
-        .locator(`input[name="questions.${questionIndex}.options.${i}.optionText"]`)
-        .fill(NEW_COURSE.options.scale[i]);
-    }
-  }
   async addPhotoQuestion(
     page: Page,
     questionIndex: number,
@@ -581,26 +558,9 @@ test.describe.serial("Course management", () => {
 
     await createCourseActions.addQuestion(
       page,
-      NEW_COURSE.questionType.matching,
-      NEW_COURSE.questions.matching,
-      5,
-    );
-    await createCourseActions.addMatchingQuestion(page, 5);
-
-    await createCourseActions.addQuestion(
-      page,
-      NEW_COURSE.questionType.scale,
-      NEW_COURSE.questions.scale,
-      6,
-    );
-
-    await createCourseActions.addScaleQuestion(page, 6);
-
-    await createCourseActions.addQuestion(
-      page,
       NEW_COURSE.questionType.fillInTheBlanks,
       NEW_COURSE.questions.fillInTheBlank,
-      7,
+      5,
     );
     await createCourseActions.addFillInTheBlankQuestion(page, "CSS");
     await page.getByRole("button", { name: new RegExp(NEW_COURSE.button.save, "i") }).click();

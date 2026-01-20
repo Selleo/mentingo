@@ -362,6 +362,7 @@ const logoutStudent = async (page: Page) => {
     .getByRole("button", { name: /test Student profile test|Avatar for email@example.com/i })
     .click();
   await page.getByRole("menuitem", { name: "Logout" }).locator("div").click();
+  await page.waitForURL("/auth/login", { timeout: 10000 });
 };
 
 const createGroup = async (page: Page) => {
