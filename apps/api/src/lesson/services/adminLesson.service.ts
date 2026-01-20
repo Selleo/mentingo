@@ -933,7 +933,7 @@ export class AdminLessonService {
       relationshipType: RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
       title: fileTitle,
       description: fileDescription,
-      options: { contextId },
+      options: {contextId}
     });
 
     return { resourceId: fileData.resourceId };

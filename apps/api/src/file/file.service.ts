@@ -40,7 +40,6 @@ import { VideoProcessingStateService } from "./video-processing-state.service";
 import { VideoUploadNotificationGateway } from "./video-upload-notification.gateway";
 
 import type { BunnyWebhookBody } from "./schemas/bunny-webhook.schema";
-import type { VideoInitBody } from "./schemas/video-init.schema";
 import type { VideoUploadState } from "./video-processing-state.service";
 import type {
   VideoProviderInitPayload,
@@ -54,6 +53,8 @@ import type {
   UploadResourceParams,
   CreateResourceForEntityParams,
 } from "src/file/types/resource.types";
+import type { CurrentUser } from "src/common/types/current-user.type";
+import type { VideoInitBody } from "./schemas/video-init.schema";
 
 @Injectable()
 export class FileService {
