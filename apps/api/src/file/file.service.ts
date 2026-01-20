@@ -9,15 +9,7 @@ import {
   InternalServerErrorException,
   Logger,
 } from "@nestjs/common";
-import {
-  ALLOWED_EXCEL_FILE_TYPES,
-  ALLOWED_LESSON_IMAGE_FILE_TYPES,
-  ALLOWED_PDF_FILE_TYPES,
-  ALLOWED_PRESENTATION_FILE_TYPES,
-  ALLOWED_VIDEO_FILE_TYPES,
-  ALLOWED_WORD_FILE_TYPES,
-  VIDEO_UPLOAD_STATUS,
-} from "@repo/shared";
+import { ALLOWED_VIDEO_FILE_TYPES, VIDEO_UPLOAD_STATUS } from "@repo/shared";
 import { TypeCompiler } from "@sinclair/typebox/compiler";
 import { CacheManagerStore } from "cache-manager";
 import { parse } from "csv-parse";
@@ -41,7 +33,6 @@ import {
   RESOURCE_RELATIONSHIP_TYPES,
   MAX_VIDEO_SIZE,
 } from "./file.constants";
-import { FileGuard } from "./guards/file.guard";
 import { BunnyVideoProvider } from "./providers/bunny-video.provider";
 import { S3VideoProvider } from "./providers/s3-video.provider";
 import { VideoProcessingStateService } from "./video-processing-state.service";
