@@ -40,6 +40,7 @@ import { VideoProcessingStateService } from "./video-processing-state.service";
 import { VideoUploadNotificationGateway } from "./video-upload-notification.gateway";
 
 import type { BunnyWebhookBody } from "./schemas/bunny-webhook.schema";
+import type { VideoInitBody } from "./schemas/video-init.schema";
 import type { VideoUploadState } from "./video-processing-state.service";
 import type {
   VideoProviderInitPayload,
