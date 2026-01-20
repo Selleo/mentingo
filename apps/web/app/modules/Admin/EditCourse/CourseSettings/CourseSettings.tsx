@@ -1,6 +1,9 @@
+import { ALLOWED_VIDEO_FILE_TYPES } from "@repo/shared";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useDeleteCourseTrailer } from "~/api/mutations/admin/useDeleteCourseTrailer";
+import { useUploadCourseTrailer } from "~/api/mutations/admin/useUploadCourseTrailer";
 import { useUploadFile } from "~/api/mutations/admin/useUploadFile";
 import { useCategoriesSuspense } from "~/api/queries/useCategories";
 import { useUserDetails } from "~/api/queries/useUserDetails";
@@ -10,6 +13,7 @@ import { Icon } from "~/components/Icon";
 import { BaseEditor } from "~/components/RichText/Editor";
 import { Button } from "~/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "~/components/ui/form";
+import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import {
   Select,
@@ -42,6 +46,7 @@ type CourseSettingsProps = {
   categoryId?: string;
   thumbnailS3SingedUrl?: string | null;
   thumbnailS3Key?: string;
+  trailerUrl?: string | null;
   hasCertificate?: boolean;
   courseLanguage: SupportedLanguages;
 };
@@ -54,6 +59,7 @@ const CourseSettings = ({
   categoryId,
   thumbnailS3SingedUrl,
   thumbnailS3Key,
+  trailerUrl,
   hasCertificate = false,
   courseLanguage,
 }: CourseSettingsProps) => {
@@ -71,6 +77,9 @@ const CourseSettings = ({
   const { data: categories } = useCategoriesSuspense();
   const [isUploading, setIsUploading] = useState(false);
   const { mutateAsync: uploadFile } = useUploadFile();
+  const { mutateAsync: uploadTrailer } = useUploadCourseTrailer();
+  const { mutateAsync: deleteTrailer } = useDeleteCourseTrailer();
+  const [isTrailerUploading, setIsTrailerUploading] = useState(false);
 
   const { data: userDetails } = useUserDetails(authorId);
 
@@ -79,7 +88,11 @@ const CourseSettings = ({
   const [displayThumbnailUrl, setDisplayThumbnailUrl] = useState<string | undefined>(
     thumbnailS3SingedUrl || undefined,
   );
+  const [displayTrailerUrl, setDisplayTrailerUrl] = useState<string | undefined>(
+    trailerUrl || undefined,
+  );
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const trailerInputRef = useRef<HTMLInputElement | null>(null);
 
   const watchedTitle = form.watch("title");
   const watchedDescription = form.watch("description");
@@ -117,6 +130,35 @@ const CourseSettings = ({
       fileInputRef.current.value = "";
     }
   };
+
+  const handleTrailerUpload = useCallback(
+    async (file: File) => {
+      if (!courseId) return;
+      setIsTrailerUploading(true);
+      try {
+        const response = await uploadTrailer({ courseId, file });
+        setDisplayTrailerUrl(response.data.trailerUrl ?? undefined);
+      } catch (error) {
+        console.error("Error uploading trailer:", error);
+      } finally {
+        setIsTrailerUploading(false);
+      }
+    },
+    [courseId, uploadTrailer],
+  );
+
+  const removeTrailer = useCallback(async () => {
+    if (!courseId) return;
+    try {
+      await deleteTrailer({ courseId });
+      setDisplayTrailerUrl(undefined);
+      if (trailerInputRef.current) {
+        trailerInputRef.current.value = "";
+      }
+    } catch (error) {
+      console.error("Error removing trailer:", error);
+    }
+  }, [courseId, deleteTrailer]);
 
   const isMissingContent = !title?.trim() || !description?.trim();
 
@@ -227,6 +269,37 @@ const CourseSettings = ({
                       <Icon name="TrashIcon" className="mr-2" />
                       {t("adminCourseView.settings.button.removeThumbnail")}
                     </Button>
+                  )}
+                </div>
+                <div className="flex flex-col gap-3">
+                  <Label htmlFor="course-trailer">
+                    {t("adminCourseView.settings.field.trailer")}
+                  </Label>
+                  <Input
+                    id="course-trailer"
+                    type="file"
+                    accept={ALLOWED_VIDEO_FILE_TYPES.join(",")}
+                    ref={trailerInputRef}
+                    disabled={isTrailerUploading}
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      if (!file) return;
+                      void handleTrailerUpload(file);
+                    }}
+                  />
+                  {isTrailerUploading && <p>{t("common.other.uploadingImage")}</p>}
+                  {displayTrailerUrl && (
+                    <div className="flex flex-col gap-3">
+                      <div className="overflow-hidden rounded-lg border border-neutral-200">
+                        <video src={displayTrailerUrl} controls className="h-auto w-full">
+                          <track kind="captions" className="sr-only" />
+                        </video>
+                      </div>
+                      <Button type="button" onClick={removeTrailer} variant="destructive">
+                        <Icon name="TrashIcon" className="mr-2" />
+                        {t("adminCourseView.settings.button.removeTrailer")}
+                      </Button>
+                    </div>
                   )}
                 </div>
                 <div className="flex space-x-5">
