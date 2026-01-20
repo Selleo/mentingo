@@ -1,4 +1,4 @@
-import { redirect, useNavigate, useParams } from "@remix-run/react";
+import { redirect, useNavigate, useParams , useSearchParams } from "@remix-run/react";
 import { ACCESS_GUARD, SUPPORTED_LANGUAGES } from "@repo/shared";
 import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
@@ -72,7 +72,11 @@ export default function CourseViewPage() {
   const { id = "" } = useParams();
   const navigate = useNavigate();
 
-  const { language } = useLanguageStore();
+  const { language: defaultLanguage } = useLanguageStore();
+  const [searchParams] = useSearchParams();
+  const previewLanguage = searchParams.get("language");
+  const language =
+    previewLanguage && isSupportedLanguage(previewLanguage) ? previewLanguage : defaultLanguage;
 
   const { data: course } = useCourse(id, language);
 

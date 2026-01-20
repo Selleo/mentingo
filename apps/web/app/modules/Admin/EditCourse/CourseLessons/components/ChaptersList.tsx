@@ -362,6 +362,7 @@ const ChaptersList = ({
       newChapterPosition: number,
       newDisplayOrder: number,
     ) => {
+      if (!courseId) return;
       setChapterList(updatedItems);
 
       await mutateChapterDisplayOrder({
@@ -371,7 +372,14 @@ const ChaptersList = ({
         },
       });
 
-      await queryClient.invalidateQueries({ queryKey: [COURSE_QUERY_KEY, { id: courseId }] });
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: [COURSE_QUERY_KEY, { id: courseId }],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: getCourseQueryKey(courseId),
+        }),
+      ]);
 
       setTimeout(() => {
         setOpenItem(openItem);
