@@ -19,6 +19,11 @@ const submitSearchWithEnter = async (page: Page, query: string) => {
   const searchInput = page.getByPlaceholder(SEARCH_PLACEHOLDER);
   await searchInput.fill(query);
   await searchInput.press("Enter");
+  await page.waitForResponse(async (response) => {
+    return (
+      response.url().includes("/api/course/all?searchQuery=full-stack") && response.status() === 200
+    );
+  });
 };
 
 const openSearchHotkey = async (page: Page) => {
