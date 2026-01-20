@@ -35,7 +35,7 @@ import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
-import { ALLOWED_EXCEL_MIME_TYPES } from "src/file/file.constants";
+import { ALLOWED_EXCEL_MIME_TYPES, MAX_FILE_SIZE } from "src/file/file.constants";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
 import { ImageConstraintsValidator } from "src/file/validators/image-constraints.validator";
@@ -388,7 +388,7 @@ export class UserController {
   })
   async importUsers(
     @UploadedFile(
-      getBaseFileTypePipe(buildFileTypeRegex(ALLOWED_EXCEL_MIME_TYPES)).build({
+      getBaseFileTypePipe(buildFileTypeRegex(ALLOWED_EXCEL_MIME_TYPES), MAX_FILE_SIZE, true).build({
         errorHttpStatusCode: HttpStatus.BAD_REQUEST,
       }),
     )
