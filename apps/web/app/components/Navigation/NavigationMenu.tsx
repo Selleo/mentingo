@@ -14,6 +14,9 @@ type NavigationMenuProps = {
   expandableLabel?: string;
   expandableIcon?: IconName;
   isExpandable?: boolean;
+  showNavigationLabels: boolean;
+  shouldShowTooltips: boolean;
+  isSidebarCollapsed: boolean;
 };
 
 export function NavigationMenu({
@@ -23,6 +26,9 @@ export function NavigationMenu({
   expandableLabel,
   expandableIcon,
   isExpandable = false,
+  showNavigationLabels,
+  shouldShowTooltips,
+  isSidebarCollapsed,
 }: NavigationMenuProps) {
   const filteredMenuItems = menuItems.filter(
     (item) => item.roles && item.roles.includes(role as UserRole),
@@ -36,6 +42,9 @@ export function NavigationMenu({
         expandableLabel={expandableLabel}
         expandableIcon={expandableIcon as IconName}
         isExpandable={isExpandable}
+        showNavigationLabels={showNavigationLabels}
+        shouldShowTooltips={shouldShowTooltips}
+        isSidebarCollapsed={isSidebarCollapsed}
       />
     );
   }
@@ -48,6 +57,8 @@ export function NavigationMenu({
             key={item.label}
             item={item}
             setIsMobileNavOpen={setIsMobileNavOpen}
+            showLabel={showNavigationLabels}
+            showTooltip={shouldShowTooltips}
           />
         );
       })}

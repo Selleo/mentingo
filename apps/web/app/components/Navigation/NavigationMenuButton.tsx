@@ -13,6 +13,8 @@ type NavigationMenuButtonProps = {
   wrapperClassName?: string;
   className?: string;
   labelClassName?: string;
+  hideLabel?: boolean;
+  showTooltip?: boolean;
 };
 
 export function NavigationMenuButton({
@@ -21,6 +23,8 @@ export function NavigationMenuButton({
   wrapperClassName,
   className,
   labelClassName,
+  hideLabel = false,
+  showTooltip = false,
 }: NavigationMenuButtonProps) {
   return (
     <li key={item.label} className={wrapperClassName}>
@@ -34,14 +38,20 @@ export function NavigationMenuButton({
             )}
           >
             <Icon name={item.iconName} className="size-6" />
-            <span className={cn("capitalize 2xl:sr-only 3xl:not-sr-only", labelClassName)}>
+            <span
+              className={cn("capitalize", labelClassName, {
+                "sr-only": hideLabel,
+              })}
+            >
               {item.label}
             </span>
           </button>
         </TooltipTrigger>
         <TooltipContent
           side="right"
-          className="hidden 2xl:block 2xl:bg-neutral-950 2xl:capitalize 2xl:text-white 3xl:hidden"
+          className={cn("bg-neutral-950 capitalize text-white", {
+            hidden: !showTooltip,
+          })}
         >
           {item.label}
         </TooltipContent>

@@ -72,10 +72,7 @@ const ModernCourseCarousel = ({
             className="gap-3 px-2 pb-6 pt-10 md:gap-4 md:px-4 md:pt-12"
           >
             {courses.map((course) => (
-              <CarouselItem
-                key={course.id}
-                className="basis-[85%] sm:basis-[55%] md:basis-[50%] lg:basis-[28.5%] xl:basis-[28.5%]"
-              >
+              <CarouselItem key={course.id} className="w-[300px]">
                 <ModernCourseCard
                   id={course.id}
                   title={course.title}

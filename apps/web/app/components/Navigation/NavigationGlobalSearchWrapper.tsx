@@ -27,10 +27,12 @@ import { NavigationMenuButton } from "./NavigationMenuButton";
 export type NavigationGlobalSearchWrapperProps = {
   containerClassName?: string;
   autoFocusOnMount?: boolean;
+  useCompactVariant?: boolean;
 };
 
 export const NavigationGlobalSearchWrapper = ({
   containerClassName,
+  useCompactVariant = false,
 }: NavigationGlobalSearchWrapperProps) => {
   const [searchParams, setSearchParams] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
@@ -111,9 +113,13 @@ export const NavigationGlobalSearchWrapper = ({
       <NavigationMenuButton
         item={{ iconName: "Search", label: t("navigationSideBar.findInApplication") }}
         onClick={() => setIsGlobalSearchDialogOpen(true)}
-        wrapperClassName={cn("list-none visible sm:hidden 2xl:block 3xl:hidden")}
+        wrapperClassName={cn("list-none visible sm:hidden 2xl:block 3xl:hidden", {
+          "3xl:block": useCompactVariant,
+        })}
         className="justify-center bg-neutral-50 p-2 2xl:h-[42px] 2xl:w-[42px] 2xl:bg-white"
-        labelClassName="hidden"
+        labelClassName={useCompactVariant ? "sr-only" : "hidden"}
+        hideLabel={useCompactVariant}
+        showTooltip={useCompactVariant}
       />
 
       <button
@@ -123,6 +129,7 @@ export const NavigationGlobalSearchWrapper = ({
           "text-neutral-800 transition-colors hover:border-primary-500 hover:text-primary-500",
           "rounded-lg border border-neutral-300",
           "hidden sm:block 2xl:hidden 3xl:block",
+          { "3xl:hidden": useCompactVariant },
         )}
       >
         <Search className="absolute left-2 top-1/2 size-5 -translate-y-1/2 transform transition-colors" />
