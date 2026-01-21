@@ -13,7 +13,7 @@ const generateCentralBarrel = () => {
 
   const exportStatements = files
     .map((file) => {
-      const withoutExt = file.replace(/\.(ts|tsx)$/, "");
+      const withoutExt = file.replace(/\.(ts|tsx)$/, "").replace(/\\/g, "/");
       return `export * from "./${withoutExt}";`;
     })
     .join("\n");
