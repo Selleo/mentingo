@@ -7,7 +7,6 @@ CREATE TABLE IF NOT EXISTS "course_slugs" (
 	"lang" text NOT NULL
 );
 --> statement-breakpoint
-ALTER TABLE "courses" ALTER COLUMN "settings" SET DEFAULT '{"lessonSequenceEnabled":false,"quizFeedbackEnabled":true}'::jsonb;--> statement-breakpoint
 ALTER TABLE "courses" ADD COLUMN "short_id" varchar(5);--> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "courses_short_id_unique_idx" ON "courses" USING btree ("short_id");--> statement-breakpoint
 DO $$ BEGIN
@@ -16,4 +15,4 @@ EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
-CREATE UNIQUE INDEX IF NOT EXISTS "course_slug_course_short_id_lang_slug_unique_idx" ON "course_slugs" USING btree ("course_short_id","lang","slug");
+CREATE UNIQUE INDEX IF NOT EXISTS "course_slug_course_short_id_lang_unique_idx" ON "course_slugs" USING btree ("course_short_id","lang");

@@ -1342,7 +1342,6 @@ export class CourseService {
       const [newCourse] = await trx
         .insert(courses)
         .values({
-          shortId: "",
           title: buildJsonbField(createCourseBody.language, createCourseBody.title),
           description: buildJsonbField(createCourseBody.language, createCourseBody.description),
           baseLanguage: createCourseBody.language,

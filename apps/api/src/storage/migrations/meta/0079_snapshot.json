@@ -1,5 +1,5 @@
 {
-  "id": "fdc6a79d-bba9-40ff-801c-15cba2202cae",
+  "id": "11e17539-8a8b-48e5-8af1-4ac6989bb6a2",
   "prevId": "20920a60-7674-4a7b-a158-7f868e1257f0",
   "version": "7",
   "dialect": "postgresql",
@@ -1066,8 +1066,8 @@
         }
       },
       "indexes": {
-        "course_slug_course_short_id_lang_slug_unique_idx": {
-          "name": "course_slug_course_short_id_lang_slug_unique_idx",
+        "course_slug_course_short_id_lang_unique_idx": {
+          "name": "course_slug_course_short_id_lang_unique_idx",
           "columns": [
             {
               "expression": "course_short_id",
@@ -1077,12 +1077,6 @@
             },
             {
               "expression": "lang",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "slug",
               "isExpression": false,
               "asc": true,
               "nulls": "last"

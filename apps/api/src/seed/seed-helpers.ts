@@ -90,7 +90,6 @@ export async function createNiceCourses(
       .insert(courses)
       .values({
         id: crypto.randomUUID(),
-        shortId: "",
         title: sql`json_build_object('en', ${courseData.title}::text)`,
         description: sql`json_build_object('en', ${courseData.description}::text)`,
         thumbnailS3Key: courseData.thumbnailS3Key,

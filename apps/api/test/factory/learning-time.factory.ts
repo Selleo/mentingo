@@ -57,7 +57,6 @@ const ensureCourse = async (db: DatabasePg, courseId?: UUIDType | null): Promise
     .insert(courses)
     .values({
       id: faker.string.uuid(),
-      shortId: "",
       title: faker.commerce.productName(),
       description: faker.commerce.productDescription(),
       thumbnailS3Key: faker.system.directoryPath(),

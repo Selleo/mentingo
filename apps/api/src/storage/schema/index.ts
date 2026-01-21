@@ -182,9 +182,9 @@ export const courseSlugs = pgTable(
     lang: text("lang").notNull(),
   },
   (table) => ({
-    courseSlugCourseShortIdLangSlugUniqueIdx: uniqueIndex(
-      "course_slug_course_short_id_lang_slug_unique_idx",
-    ).on(table.courseShortId, table.lang, table.slug),
+    courseSlugCourseShortIdLangUniqueIdx: uniqueIndex(
+      "course_slug_course_short_id_lang_unique_idx",
+    ).on(table.courseShortId, table.lang),
   }),
 );
 
