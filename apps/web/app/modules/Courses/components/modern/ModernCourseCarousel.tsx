@@ -1,5 +1,15 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+
+import {
+  type CarouselApi,
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "~/components/ui/carousel";
+import { cn } from "~/lib/utils";
 
 import ModernCourseCard from "./ModernCourseCard";
 
@@ -20,95 +30,78 @@ const ModernCourseCarousel = ({
   courses,
   progressByCourseId = {},
 }: ModernCourseCarouselProps) => {
-  const [scrollPosition, setScrollPosition] = useState(0);
-  const [showLeftArrow, setShowLeftArrow] = useState(false);
-  const [showRightArrow, setShowRightArrow] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const checkScroll = () => {
-    if (!containerRef.current) return;
-
-    const { scrollLeft, scrollWidth, clientWidth } = containerRef.current;
-    setScrollPosition(scrollLeft);
-    setShowLeftArrow(scrollLeft > 10);
-    setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
-  };
-
-  const scroll = (direction: "left" | "right") => {
-    if (!containerRef.current) return;
-
-    const scrollAmount = 500;
-    const newPosition =
-      direction === "left" ? scrollPosition - scrollAmount : scrollPosition + scrollAmount;
-
-    containerRef.current.scrollTo({
-      left: newPosition,
-      behavior: "smooth",
-    });
-  };
+  const [isHovered, setIsHovered] = useState(false);
+  const [carouselApi, setCarouselApi] = useState<CarouselApi | null>(null);
+  const [canScrollPrev, setCanScrollPrev] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(false);
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    if (!carouselApi) return;
 
-    container.addEventListener("scroll", checkScroll);
-    checkScroll();
-    window.addEventListener("resize", checkScroll);
+    const updateScrollState = () => {
+      setCanScrollPrev(carouselApi.canScrollPrev());
+      setCanScrollNext(carouselApi.canScrollNext());
+    };
+
+    updateScrollState();
+    carouselApi.on("select", updateScrollState);
+    carouselApi.on("reInit", updateScrollState);
 
     return () => {
-      container.removeEventListener("scroll", checkScroll);
-      window.removeEventListener("resize", checkScroll);
+      carouselApi.off("select", updateScrollState);
+      carouselApi.off("reInit", updateScrollState);
     };
-  }, []);
+  }, [carouselApi]);
 
   if (!courses?.length) return null;
 
   return (
-    <section className="relative space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900 md:text-3xl">{title}</h2>
-      </div>
+    <section
+      className="space-y-4 overflow-visible"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <h2 className="text-2xl font-bold text-gray-900 md:text-3xl">{title}</h2>
 
       <div className="group relative">
-        {showLeftArrow && (
-          <button
-            onClick={() => scroll("left")}
-            className="absolute left-2 top-1/2 z-[150] hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 shadow-lg transition-all hover:scale-110 hover:bg-white md:flex md:opacity-0 md:group-hover:opacity-100"
-            aria-label="Scroll left"
-          >
-            <ChevronLeft className="h-6 w-6 text-gray-900" />
-          </button>
-        )}
-
-        {showRightArrow && (
-          <button
-            onClick={() => scroll("right")}
-            className="absolute right-2 top-1/2 z-[150] hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 shadow-lg transition-all hover:scale-110 hover:bg-white md:flex md:opacity-0 md:group-hover:opacity-100"
-            aria-label="Scroll right"
-          >
-            <ChevronRight className="h-6 w-6 text-gray-900" />
-          </button>
-        )}
-
-        <div
-          ref={containerRef}
-          className="scrollbar-hide flex gap-3 overflow-x-auto pb-6 pt-4 md:gap-4"
+        <Carousel
+          opts={{ align: "start", slidesToScroll: 1, skipSnaps: false }}
+          setApi={setCarouselApi}
         >
-          {courses.map((course) => (
-            <div key={course.id} className="flex-[0_0_280px] md:flex-[0_0_380px]">
-              <ModernCourseCard
-                id={course.id}
-                title={course.title}
-                thumbnailUrl={course.thumbnailUrl}
-                trailerUrl={course.trailerUrl}
-                category={course.category}
-                estimatedDurationMinutes={course.estimatedDurationMinutes}
-                lessonCount={course.lessonCount}
-                progressPercent={progressByCourseId[course.id]}
-              />
-            </div>
-          ))}
-        </div>
+          <CarouselContent
+            viewportClassName={cn(isHovered && "overflow-visible")}
+            className="gap-3 px-2 pb-6 pt-10 md:gap-4 md:px-4 md:pt-12"
+          >
+            {courses.map((course) => (
+              <CarouselItem
+                key={course.id}
+                className="basis-[75%] sm:basis-[55%] md:basis-[40%] lg:basis-[32%] xl:basis-[26%]"
+              >
+                <ModernCourseCard
+                  id={course.id}
+                  title={course.title}
+                  description={course.description}
+                  thumbnailUrl={course.thumbnailUrl}
+                  trailerUrl={course.trailerUrl}
+                  estimatedDurationMinutes={course.estimatedDurationMinutes}
+                  lessonCount={course.lessonCount}
+                  progressPercent={progressByCourseId[course.id]}
+                />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+
+          {isHovered && (canScrollPrev || canScrollNext) && (
+            <>
+              <CarouselPrevious className="absolute left-2 top-1/2 z-[150] hidden size-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 shadow-lg transition-all hover:scale-110 hover:bg-white md:flex md:opacity-0 md:group-hover:opacity-100">
+                <ChevronLeft className="size-6 text-gray-900" />
+              </CarouselPrevious>
+              <CarouselNext className="absolute right-2 top-1/2 z-[150] hidden size-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 shadow-lg transition-all hover:scale-110 hover:bg-white md:flex md:opacity-0 md:group-hover:opacity-100">
+                <ChevronRight className="size-6 text-gray-900" />
+              </CarouselNext>
+            </>
+          )}
+        </Carousel>
       </div>
     </section>
   );

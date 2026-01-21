@@ -1,5 +1,5 @@
 import { Link } from "@remix-run/react";
-import { Clock, BookOpen, Play } from "lucide-react";
+import { BookOpen, Clock, Play } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -11,9 +11,9 @@ import { formatDuration } from "./utils";
 type ModernCourseCardProps = {
   id: string;
   title: string;
+  description?: string | null;
   thumbnailUrl?: string | null;
   trailerUrl?: string | null;
-  category: string;
   estimatedDurationMinutes?: number;
   lessonCount?: number;
   progressPercent?: number;
@@ -23,9 +23,9 @@ type ModernCourseCardProps = {
 const ModernCourseCard = ({
   id,
   title,
+  description,
   thumbnailUrl,
   trailerUrl,
-  category,
   estimatedDurationMinutes,
   lessonCount,
   progressPercent,
@@ -37,9 +37,12 @@ const ModernCourseCard = ({
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const durationLabel = formatDuration(estimatedDurationMinutes);
+
   const lessonsLabel = lessonCount
     ? t("studentCoursesView.modernView.lessonsCount", { count: lessonCount })
     : undefined;
+
+  const showProgress = progressPercent && progressPercent > 0;
 
   useEffect(() => {
     if (!videoRef.current) return;
@@ -65,48 +68,32 @@ const ModernCourseCard = ({
   }, []);
 
   const handleMouseEnter = () => {
-    hoverTimeoutRef.current = setTimeout(() => {
-      setIsHovered(true);
-    }, 400);
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    hoverTimeoutRef.current = setTimeout(() => setIsHovered(true), 120);
   };
 
   const handleMouseLeave = () => {
-    if (hoverTimeoutRef.current) {
-      clearTimeout(hoverTimeoutRef.current);
-    }
-    setIsHovered(false);
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    hoverTimeoutRef.current = setTimeout(() => setIsHovered(false), 120);
   };
 
   return (
-    <Link
-      to={`/course/${id}`}
-      className={cn("group relative block w-full max-w-sm", className)}
+    <div
+      className={cn("group relative block w-full max-w-sm cursor-pointer", className)}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div className="aspect-video w-full" />
-
-      <div
-        className="absolute inset-0 transition-all duration-500 ease-out"
-        style={{
-          transform: isHovered ? "scale(1.12) translateY(-18%)" : "scale(1)",
-          transformOrigin: "center center",
-          zIndex: isHovered ? 50 : 1,
-        }}
-      >
-        <div
-          className={cn(
-            "relative aspect-video overflow-hidden bg-white shadow-md transition-all duration-300",
-            isHovered ? "rounded-t-lg" : "rounded-lg",
-          )}
-        >
+      <Link to={`/course/${id}`} className="block">
+        <div className="relative aspect-video overflow-hidden rounded-lg border border-gray-200 bg-white shadow-md transition-transform duration-300 group-hover:-translate-y-1">
           {trailerUrl ? (
             <>
               <img
                 src={thumbnailUrl || DefaultPhotoCourse}
                 alt={title}
-                className="absolute inset-0 h-full w-full object-cover transition-opacity duration-300"
-                style={{ opacity: isHovered ? 0 : 1 }}
+                className={cn(
+                  "h-full w-full object-cover transition-opacity duration-300",
+                  isHovered ? "opacity-0" : "opacity-100",
+                )}
                 onError={(event) => {
                   (event.target as HTMLImageElement).src = DefaultPhotoCourse;
                 }}
@@ -114,8 +101,10 @@ const ModernCourseCard = ({
               <video
                 ref={videoRef}
                 src={trailerUrl}
-                className="absolute inset-0 h-full w-full object-cover transition-opacity duration-300"
-                style={{ opacity: isHovered ? 1 : 0 }}
+                className={cn(
+                  "absolute inset-0 h-full w-full object-cover transition-opacity duration-300",
+                  isHovered ? "opacity-100" : "opacity-0",
+                )}
                 muted
                 loop
                 playsInline
@@ -132,7 +121,7 @@ const ModernCourseCard = ({
             />
           )}
 
-          {progressPercent !== undefined && progressPercent > 0 && (
+          {showProgress && (
             <div className="absolute bottom-0 left-0 right-0 z-30 h-1 bg-white/20">
               <div
                 className="h-full bg-red-600 transition-all duration-300"
@@ -141,82 +130,96 @@ const ModernCourseCard = ({
             </div>
           )}
 
-          <div
-            className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent transition-opacity duration-300"
-            style={{ opacity: isHovered ? 0 : 1 }}
-          />
-          <div
-            className="absolute bottom-0 left-0 right-0 p-4 transition-opacity duration-300"
-            style={{ opacity: isHovered ? 0 : 1 }}
-          >
-            <h3 className="line-clamp-2 text-sm font-semibold text-white drop-shadow-lg md:text-base">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/100 via-black/60 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 p-4">
+            <h3 className="line-clamp-2 text-base font-semibold text-white drop-shadow-lg">
+              {title}
+            </h3>
+          </div>
+        </div>
+      </Link>
+
+      <Link
+        to={`/course/${id}`}
+        className={cn(
+          "absolute left-1/2 top-0 z-50 w-full -translate-x-1/2 rounded-xl border border-gray-200 bg-white shadow-2xl transition-all duration-200 ease-out",
+          isHovered
+            ? "-translate-y-1/4 scale-[1.05] opacity-100 pointer-events-auto"
+            : "-translate-y-2 scale-100 opacity-0 pointer-events-none",
+        )}
+      >
+        <div className="relative aspect-video overflow-hidden rounded-t-xl">
+          {trailerUrl ? (
+            <>
+              <img
+                src={thumbnailUrl || DefaultPhotoCourse}
+                alt={title}
+                className={cn(
+                  "h-full w-full object-cover transition-opacity duration-300",
+                  isHovered ? "opacity-0" : "opacity-100",
+                )}
+                onError={(event) => {
+                  (event.target as HTMLImageElement).src = DefaultPhotoCourse;
+                }}
+              />
+              <video
+                ref={videoRef}
+                src={trailerUrl}
+                className={cn(
+                  "absolute inset-0 h-full w-full object-cover transition-opacity duration-300",
+                  isHovered ? "opacity-100" : "opacity-0",
+                )}
+                muted
+                loop
+                playsInline
+              />
+            </>
+          ) : (
+            <img
+              src={thumbnailUrl || DefaultPhotoCourse}
+              alt={title}
+              className="h-full w-full object-cover"
+              onError={(event) => {
+                (event.target as HTMLImageElement).src = DefaultPhotoCourse;
+              }}
+            />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 p-4">
+            <h3 className="line-clamp-2 text-lg font-semibold leading-tight text-white drop-shadow-lg">
               {title}
             </h3>
           </div>
         </div>
 
-        <div
-          className="overflow-hidden rounded-b-lg transition-all duration-300"
-          style={{
-            maxHeight: isHovered ? "200px" : "0px",
-            opacity: isHovered ? 1 : 0,
-          }}
-        >
-          <div className="border border-t-0 border-gray-200 bg-zinc-900 p-4 shadow-lg">
-            <h3
-              className="line-clamp-2 text-sm font-semibold text-white transition-all duration-300"
-              style={{
-                opacity: isHovered ? 1 : 0,
-                transform: isHovered ? "translateY(0)" : "translateY(-10px)",
-                transitionDelay: "100ms",
-              }}
-            >
-              {title}
-            </h3>
+        <div className="space-y-3 rounded-b-xl bg-white p-4">
+          {(durationLabel || lessonsLabel) && (
+            <div className="flex items-center gap-4 text-xs text-neutral-700">
+              {durationLabel && (
+                <div className="flex items-center gap-1.5">
+                  <Clock className="h-3.5 w-3.5" />
+                  <span>{durationLabel}</span>
+                </div>
+              )}
+              {lessonsLabel && (
+                <div className="flex items-center gap-1.5">
+                  <BookOpen className="h-3.5 w-3.5" />
+                  <span>{lessonsLabel}</span>
+                </div>
+              )}
+            </div>
+          )}
 
-            {(durationLabel || lessonsLabel) && (
-              <div
-                className="mt-3 flex items-center gap-4 text-xs text-white/80 transition-all duration-300"
-                style={{
-                  opacity: isHovered ? 1 : 0,
-                  transform: isHovered ? "translateY(0)" : "translateY(-10px)",
-                  transitionDelay: "150ms",
-                }}
-              >
-                {durationLabel && (
-                  <div className="flex items-center gap-1.5">
-                    <Clock className="h-3.5 w-3.5" />
-                    <span>{durationLabel}</span>
-                  </div>
-                )}
-                {lessonsLabel && (
-                  <div className="flex items-center gap-1.5">
-                    <BookOpen className="h-3.5 w-3.5" />
-                    <span>{lessonsLabel}</span>
-                  </div>
-                )}
-              </div>
-            )}
+          {description && <p className="line-clamp-3 text-sm text-neutral-700">{description}</p>}
 
-            <div
-              className="mt-3 flex items-center justify-between transition-all duration-300"
-              style={{
-                opacity: isHovered ? 1 : 0,
-                transform: isHovered ? "translateY(0)" : "translateY(-10px)",
-                transitionDelay: "200ms",
-              }}
-            >
-              <span className="rounded bg-white/10 px-2.5 py-1 text-xs font-medium text-white">
-                {category}
-              </span>
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white transition-all hover:scale-110 hover:shadow-lg">
-                <Play className="h-4 w-4 text-black" fill="currentColor" />
-              </div>
+          <div className="flex items-center justify-between">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-900 text-white shadow-md">
+              <Play className="h-4 w-4" fill="currentColor" />
             </div>
           </div>
         </div>
-      </div>
-    </Link>
+      </Link>
+    </div>
   );
 };
 

@@ -54,7 +54,7 @@ const TopCoursesCarousel = ({ courses }: TopCoursesCarouselProps) => {
   if (!courses?.length) return null;
 
   return (
-    <div className="group/carousel relative overflow-visible">
+    <div className="group/carousel relative overflow-x-hidden overflow-y-visible">
       {showLeftArrow && (
         <button
           onClick={() => scroll("left")}
@@ -79,7 +79,11 @@ const TopCoursesCarousel = ({ courses }: TopCoursesCarouselProps) => {
         </button>
       )}
 
-      <div ref={containerRef} className="scrollbar-hide flex gap-3 overflow-x-auto pb-4 md:gap-6">
+      <div
+        ref={containerRef}
+        className="scrollbar-hide flex gap-3 overflow-x-auto overflow-y-visible pb-6 pt-8 px-4 md:gap-6 md:pt-10 md:px-6"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+      >
         {courses.slice(0, 5).map((course, index) => (
           <TopCourseCard
             key={course.id}
