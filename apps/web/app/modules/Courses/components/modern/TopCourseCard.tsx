@@ -46,7 +46,7 @@ const TopCourseCard = ({ id, rank, title, thumbnailUrl, category }: TopCourseCar
     >
       <div className="relative flex items-center gap-2">
         <div className="relative -mr-12 flex-shrink-0">
-          <svg className="h-44 w-36" viewBox="0 0 160 190" fill="none">
+          <svg className="h-48 w-40" viewBox="0 0 160 190" fill="none">
             <text
               x="50%"
               y="50%"
@@ -54,7 +54,7 @@ const TopCourseCard = ({ id, rank, title, thumbnailUrl, category }: TopCourseCar
               textAnchor="middle"
               className="fill-zinc-200 stroke-zinc-300"
               style={{
-                fontSize: "180px",
+                fontSize: "190px",
                 fontWeight: "900",
                 strokeWidth: "2px",
               }}
@@ -64,19 +64,40 @@ const TopCourseCard = ({ id, rank, title, thumbnailUrl, category }: TopCourseCar
           </svg>
         </div>
 
-        <div className="relative w-[320px] md:w-[336px]">
+        <div className="relative w-[clamp(240px,70vw,336px)]">
           <div className="aspect-video w-full" />
+
+          <div className="absolute inset-0">
+            <div className="relative aspect-video overflow-hidden rounded-lg border border-gray-200 bg-white shadow-md">
+              <img
+                src={thumbnailUrl || DefaultPhotoCourse}
+                alt={title}
+                className="h-full w-full object-cover"
+                onError={(event) => {
+                  (event.target as HTMLImageElement).src = DefaultPhotoCourse;
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/100 via-black/60 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-2.5">
+                <h3 className="line-clamp-2 text-sm font-semibold text-white drop-shadow-lg">
+                  {title}
+                </h3>
+              </div>
+            </div>
+          </div>
 
           <div
             className="absolute inset-0 transition-all duration-500 ease-out"
             style={{
-              transform: isHovered ? "scale(1.12) translateY(-18%)" : "scale(1)",
+              opacity: isHovered ? 1 : 0,
+              transform: isHovered ? "scale(1.04) translateY(-4%)" : "scale(1)",
               transformOrigin: "center center",
-              zIndex: isHovered ? 50 : 1,
+              zIndex: 100,
+              pointerEvents: "none",
             }}
           >
             <div
-              className={`relative aspect-video overflow-hidden bg-white shadow-md transition-all duration-300 ${
+              className={`relative aspect-video overflow-hidden border border-gray-200 bg-white shadow-md transition-all duration-300 ${
                 isHovered ? "rounded-t-lg" : "rounded-lg"
               }`}
             >
@@ -89,7 +110,7 @@ const TopCourseCard = ({ id, rank, title, thumbnailUrl, category }: TopCourseCar
                 }}
               />
               <div
-                className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent transition-opacity duration-300"
+                className="absolute inset-0 bg-gradient-to-t from-black/100 via-black/60 to-transparent transition-opacity duration-300"
                 style={{ opacity: isHovered ? 0 : 1 }}
               />
               <div
@@ -105,7 +126,7 @@ const TopCourseCard = ({ id, rank, title, thumbnailUrl, category }: TopCourseCar
             <div
               className="overflow-hidden rounded-b-lg transition-all duration-300"
               style={{
-                maxHeight: isHovered ? "56px" : "0px",
+                maxHeight: isHovered ? "55px" : "0px",
                 opacity: isHovered ? 1 : 0,
               }}
             >
@@ -132,7 +153,7 @@ const TopCourseCard = ({ id, rank, title, thumbnailUrl, category }: TopCourseCar
                   <span className="rounded bg-white/10 px-2 py-0.5 text-xs font-medium text-white">
                     {category}
                   </span>
-                  <div className="flex h-5 w-5 items-center justify-center rounded-full bg-white transition-all hover:scale-110 hover:shadow-lg">
+                  <div className="flex h-5 w-5 items-center justify-center rounded-full bg-white">
                     <Play className="h-2.5 w-2.5 text-black" fill="currentColor" />
                   </div>
                 </div>

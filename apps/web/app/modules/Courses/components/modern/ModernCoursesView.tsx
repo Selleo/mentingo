@@ -24,14 +24,28 @@ const ModernCoursesView = () => {
     language,
     userId: currentUser?.id,
   });
+
   const { data: topCourses, isLoading: isTopCoursesLoading } = useTopCourses({
     limit: 5,
     days: 30,
     language,
   });
+
   const { data: studentCourses, isLoading: isStudentCoursesLoading } = useStudentCourses({
     language,
   });
+
+  const progressByCourseId = useMemo(() => {
+    if (!studentCourses) return {};
+
+    return studentCourses.reduce<Record<string, number | undefined>>((acc, course) => {
+      const completed = course.completedChapterCount ?? 0;
+      if (course.courseChapterCount > 0) {
+        acc[course.id] = Math.round((completed / course.courseChapterCount) * 100);
+      }
+      return acc;
+    }, {});
+  }, [studentCourses]);
 
   const coursesInProgress = useMemo(() => {
     return (studentCourses || []).filter((course) => {
@@ -94,7 +108,7 @@ const ModernCoursesView = () => {
           lessonCount={heroCourse.lessonCount}
         />
 
-        <div className="relative z-30 mx-auto max-w-[1800px] space-y-6 px-4 pb-12 pt-6 md:-mt-12 md:px-8 md:pt-8">
+        <div className="relative z-30 mx-auto -mt-8 max-w-[1800px] space-y-4 px-4 py-6 pb-12 md:-mt-12 md:space-y-6 md:px-8 md:py-8 md:pb-8">
           {isStudentCoursesLoading ? (
             <div className="flex h-full items-center justify-center py-6">
               <Loader />
@@ -104,21 +118,25 @@ const ModernCoursesView = () => {
               <ModernCourseCarousel
                 title={t("studentCoursesView.modernView.continueLearning")}
                 courses={coursesInProgress}
+                progressByCourseId={progressByCourseId}
               />
             )
           )}
 
-          {topCourses && topCourses.length > 0 && (
-            <section className="space-y-4">
-              <h2 className="text-2xl font-bold text-gray-900 md:text-3xl">
-                {t("studentCoursesView.modernView.topCourses")}
-              </h2>
-              <TopCoursesCarousel courses={topCourses} />
-            </section>
-          )}
+          <section>
+            <h2 className="mb-4 text-2xl font-bold text-gray-900 md:mb-6 md:text-3xl">
+              {t("studentCoursesView.modernView.topCourses")}
+            </h2>
+            <TopCoursesCarousel courses={topCourses ?? []} />
+          </section>
 
           {groupedCourses.map(({ category, courses }) => (
-            <ModernCourseCarousel key={category} title={category} courses={courses} />
+            <ModernCourseCarousel
+              key={category}
+              title={category}
+              courses={courses}
+              progressByCourseId={progressByCourseId}
+            />
           ))}
         </div>
       </div>
