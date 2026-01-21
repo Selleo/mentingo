@@ -26,6 +26,12 @@ const COURSE = {
   description: "description",
 };
 
+const LA_GROUP_NAME = "LA team";
+const LA_COURSE_TITLE = "Mobile App Development: Creating Your First Android App";
+const GROUP_UNENROLL_ERROR =
+  "You cannot unenroll these students because 1 of them are enrolled via a group.";
+const AVAILABLE_COURSES_HEADING = "Available Courses";
+
 const PRIVATE_COURSE = {
   titleTestId: "Advanced English: Mastering Complex Language Skills",
   heading: "Advanced English: Mastering",
@@ -526,6 +532,90 @@ const unenrollGroup = async (page: Page) => {
     .first()
     .click();
   await page.getByRole("button", { name: "Unenroll selected" }).click();
+  await logoutAdmin(page);
+};
+
+const openGroupsPage = async (page: Page) => {
+  await page.getByRole("button", { name: "Manage" }).nth(1).click();
+  const groupsBtn = page.getByRole("link", { name: "Groups" });
+  await groupsBtn.waitFor({ state: "visible", timeout: 10000 });
+  await expect(groupsBtn).toBeVisible();
+  await groupsBtn.click();
+  await expect(page.getByRole("heading", { name: "Groups" })).toBeVisible();
+};
+
+const createNamedGroup = async (page: Page, name: string) => {
+  await page.getByRole("button", { name: "Create new" }).click();
+  await page.getByTestId("groupName").click();
+  await page.getByTestId("groupName").fill(name);
+  await page.getByRole("button", { name: "Publish" }).click();
+  await expect(page.getByRole("cell", { name })).toBeVisible();
+};
+
+const unassignStudentFromGroup = async (page: Page, studentEmail: string, groupName: string) => {
+  await page.getByRole("link", { name: "Users" }).click();
+  await page.getByTestId(studentEmail).click();
+  await page.getByRole("button", { name: "Edit" }).click();
+  await page.getByRole("button", { name: "Change group" }).click();
+  await page.getByRole("option", { name: groupName }).click();
+  const header = page.getByRole("heading", { name: "Modify groups (1)" });
+  await header.click();
+  await page.getByRole("button", { name: "Save" }).click();
+  await page.getByRole("button", { name: "Confirm" }).click();
+  await expect(
+    page.getByText("Successfully updated selected users", { exact: true }),
+  ).toBeVisible();
+};
+
+const setupLAGroupForStudent = async (page: Page) => {
+  await openGroupsPage(page);
+  await createNamedGroup(page, LA_GROUP_NAME);
+  await unassignStudentFromGroup(page, USERS.student.email, LA_GROUP_NAME);
+};
+
+const enrollGroupIntoCourse = async (page: Page, courseTitle: string) => {
+  await page.getByRole("link", { name: "Courses" }).click();
+  await page.getByTestId(courseTitle).click();
+  await page.getByRole("button", { name: "Edit Course" }).click();
+  await page.getByRole("tab", { name: "Enrolled students" }).click();
+  await page.getByRole("button", { name: "Enroll groups" }).click();
+  await page.getByRole("button", { name: "Enroll groups", exact: true }).click();
+  await page
+    .getByLabel(/^select-group-(.+)$/)
+    .last()
+    .click();
+  await page.getByRole("button", { name: "Enroll groups (1)" }).click();
+  await expect(page.getByRole("cell", { name: "Enrolled by group" })).toBeVisible();
+  await expect(
+    page.getByRole("cell", { name: LA_GROUP_NAME }).locator("div").first(),
+  ).toBeVisible();
+};
+
+const expectGroupEnrollmentError = async (page: Page) => {
+  await page.getByText(USERS.student.email).click();
+  await page.getByRole("button", { name: "Enroll", exact: true }).click();
+  await page.getByRole("button", { name: "Unenroll selected" }).click();
+  await page.getByRole("button", { name: "Save" }).click();
+  await expect(page.getByText(GROUP_UNENROLL_ERROR, { exact: true })).toBeVisible();
+  await page.getByText("Cancel").click();
+};
+
+const logoutAdminAndLoginStudent = async (page: Page) => {
+  await page
+    .getByRole("button", { name: /Avatar for email@example.com|Test Admin profile Test Admin/i })
+    .click();
+  await page.getByRole("menuitem", { name: "Logout" }).locator("div").click();
+  await page.getByPlaceholder("user@example.com").click();
+  await page.getByPlaceholder("user@example.com").fill(USERS.student.email);
+  await page.getByLabel("Password").click();
+  await page.getByLabel("Password").fill(USERS.student.password);
+  await page.getByRole("button", { name: "Login" }).click();
+};
+
+const expectCourseNotVisibleForStudent = async (page: Page, courseTitle: string) => {
+  await page.waitForURL("/courses");
+  await expect(page.getByRole("heading", { name: AVAILABLE_COURSES_HEADING })).toBeVisible();
+  await expect(page.getByTestId(courseTitle)).not.toBeVisible();
 };
 
 const setCourseAsPrivate = async (page: Page) => {
@@ -687,6 +777,7 @@ test.describe.serial("Assigning students to course flow", () => {
       await enrollGroupToCourse(page);
       await studentSeesCourseByGroup(page);
       await unenrollGroup(page);
+      await expectCourseHiddenForStudent(page);
     });
   });
 
@@ -701,5 +792,17 @@ test.describe.serial("Assigning students to course flow", () => {
     await studentBlockedProgressFlow(page);
     await adminAddChapterFourWithQuizAndLesson(page);
     await studentCompletesFinalLessons(page);
+  });
+
+  test("should throw error when trying to unenroll student from course that is enrolled by group, after unenrolling student from group, he should not have access to the course", async ({
+    page,
+  }) => {
+    await expect(page.getByRole("heading", { name: AVAILABLE_COURSES_HEADING })).toBeVisible();
+    await setupLAGroupForStudent(page);
+    await enrollGroupIntoCourse(page, LA_COURSE_TITLE);
+    await expectGroupEnrollmentError(page);
+    await unassignStudentFromGroup(page, USERS.student.email, LA_GROUP_NAME);
+    await logoutAdminAndLoginStudent(page);
+    await expectCourseNotVisibleForStudent(page, LA_COURSE_TITLE);
   });
 });
