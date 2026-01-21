@@ -134,34 +134,40 @@ export const resetTokens = pgTable("reset_tokens", {
 export const coursesStatusEnum = pgEnum("status", ["draft", "published", "private"]);
 
 const coursesSettings = safeJsonb("settings", coursesSettingsSchema);
-export const courses = pgTable("courses", {
-  ...id,
-  shortId: varchar("short_id", { length: 5 }).notNull().unique(),
-  ...timestamps,
-  title: jsonb("title").default({}).notNull(),
-  description: jsonb("description").default({}).notNull(),
-  thumbnailS3Key: varchar("thumbnail_s3_key", { length: 200 }),
-  status: coursesStatusEnum("status").notNull().default("draft"),
-  hasCertificate: boolean("has_certificate").notNull().default(false),
-  priceInCents: integer("price_in_cents").notNull().default(0),
-  currency: varchar("currency").notNull().default("usd"),
-  chapterCount: integer("chapter_count").notNull().default(0),
-  isScorm: boolean("is_scorm").notNull().default(false),
-  authorId: uuid("author_id")
-    .references(() => users.id)
-    .notNull(),
-  categoryId: uuid("category_id")
-    .references(() => categories.id)
-    .notNull(),
-  stripeProductId: text("stripe_product_id"),
-  stripePriceId: text("stripe_price_id"),
-  settings: coursesSettings.column.notNull(),
-  baseLanguage: text("base_language").notNull().default("en"),
-  availableLocales: text("available_locales")
-    .array()
-    .notNull()
-    .default(sql`ARRAY['en']::text[]`),
-});
+export const courses = pgTable(
+  "courses",
+  {
+    ...id,
+    shortId: varchar("short_id", { length: 5 }),
+    ...timestamps,
+    title: jsonb("title").default({}).notNull(),
+    description: jsonb("description").default({}).notNull(),
+    thumbnailS3Key: varchar("thumbnail_s3_key", { length: 200 }),
+    status: coursesStatusEnum("status").notNull().default("draft"),
+    hasCertificate: boolean("has_certificate").notNull().default(false),
+    priceInCents: integer("price_in_cents").notNull().default(0),
+    currency: varchar("currency").notNull().default("usd"),
+    chapterCount: integer("chapter_count").notNull().default(0),
+    isScorm: boolean("is_scorm").notNull().default(false),
+    authorId: uuid("author_id")
+      .references(() => users.id)
+      .notNull(),
+    categoryId: uuid("category_id")
+      .references(() => categories.id)
+      .notNull(),
+    stripeProductId: text("stripe_product_id"),
+    stripePriceId: text("stripe_price_id"),
+    settings: coursesSettings.column.notNull(),
+    baseLanguage: text("base_language").notNull().default("en"),
+    availableLocales: text("available_locales")
+      .array()
+      .notNull()
+      .default(sql`ARRAY['en']::text[]`),
+  },
+  (table) => ({
+    shortIdUniqueIdx: uniqueIndex("courses_short_id_unique_idx").on(table.shortId),
+  }),
+);
 export const coursesSettingsHelpers = coursesSettings.getHelpers(courses.settings);
 
 export const courseSlugs = pgTable(
