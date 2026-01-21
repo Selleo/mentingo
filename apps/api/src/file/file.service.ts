@@ -50,7 +50,10 @@ import type {
 import type { SupportedLanguages } from "@repo/shared";
 import type { Static, TSchema } from "@sinclair/typebox";
 import type { UUIDType } from "src/common";
-import type { UploadResourceParams , CreateResourceForEntityParams } from "src/file/types/resource.types";
+import type {
+  UploadResourceParams,
+  CreateResourceForEntityParams,
+} from "src/file/types/resource.types";
 
 @Injectable()
 export class FileService {
@@ -236,7 +239,7 @@ export class FileService {
         originalFilename: filename,
         size: sizeBytes,
       },
-      contextId
+      contextId,
     });
 
     return resourceResult.resourceId;

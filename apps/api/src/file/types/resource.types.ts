@@ -20,11 +20,11 @@ export type UploadResourceParams = {
   file: Express.Multer.File;
   folder: string;
   resource: ResourceCategory;
-  entityId: string;
-  entityType: EntityType;
+  entityId?: string;
+  entityType?: EntityType;
   relationshipType?: ResourceRelationshipType;
   title?: Partial<Record<SupportedLanguages, string>>;
   description?: Partial<Record<SupportedLanguages, string>>;
   currentUser?: CurrentUser;
-  options?: { folderIncludesResource?: boolean, contextId?: UUIDType };
+  options?: { folderIncludesResource?: boolean; contextId?: UUIDType };
 };
