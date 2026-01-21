@@ -199,6 +199,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Install Uncloud CLI
         run: |
           curl -fsS https://get.uncloud.run/install.sh | sh
