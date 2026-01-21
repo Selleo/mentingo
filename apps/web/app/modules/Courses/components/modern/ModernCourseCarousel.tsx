@@ -60,7 +60,7 @@ const ModernCourseCarousel = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <h2 className="text-2xl font-bold text-gray-900 md:text-3xl">{title}</h2>
+      <h2 className="h2">{title}</h2>
 
       <div className="group relative">
         <Carousel
@@ -69,13 +69,10 @@ const ModernCourseCarousel = ({
         >
           <CarouselContent
             viewportClassName="overflow-visible"
-            className="gap-3 px-2 pb-6 pt-10 md:gap-4 md:px-4 md:pt-12"
+            className="gap-4 px-4 pb-6 pt-10 md:px-8"
           >
             {courses.map((course) => (
-              <CarouselItem
-                key={course.id}
-                className="basis-[85%] sm:basis-[55%] md:basis-[50%] lg:basis-[28.5%] xl:basis-[28.5%]"
-              >
+              <CarouselItem key={course.id} className="w-[320px] md:w-[380px] lg:w-[400px]">
                 <ModernCourseCard
                   id={course.id}
                   title={course.title}
@@ -85,6 +82,7 @@ const ModernCourseCarousel = ({
                   estimatedDurationMinutes={course.estimatedDurationMinutes}
                   lessonCount={course.lessonCount}
                   progressPercent={progressByCourseId[course.id]}
+                  category={course.category}
                 />
               </CarouselItem>
             ))}
@@ -92,11 +90,15 @@ const ModernCourseCarousel = ({
 
           {isHovered && (canScrollPrev || canScrollNext) && (
             <>
-              <CarouselPrevious className="absolute left-2 top-1/2 z-[150] hidden size-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 shadow-lg transition-all hover:scale-110 hover:bg-white md:flex md:opacity-0 md:group-hover:opacity-100">
-                <ChevronLeft className="size-6 text-gray-900" />
+              <CarouselPrevious className="absolute left-0 top-0 bottom-0 z-[150] hidden w-12 -translate-y-0 items-center justify-center bg-gradient-to-r from-black/50 to-transparent transition-opacity duration-300 hover:from-black/70 md:flex md:opacity-0 md:group-hover:opacity-100">
+                <div className="flex h-full w-full items-center justify-center">
+                  <ChevronLeft className="size-6 text-white" />
+                </div>
               </CarouselPrevious>
-              <CarouselNext className="absolute right-2 top-1/2 z-[150] hidden size-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 shadow-lg transition-all hover:scale-110 hover:bg-white md:flex md:opacity-0 md:group-hover:opacity-100">
-                <ChevronRight className="size-6 text-gray-900" />
+              <CarouselNext className="absolute right-0 top-0 bottom-0 z-[150] hidden w-12 -translate-y-0 items-center justify-center bg-gradient-to-l from-black/50 to-transparent transition-opacity duration-300 hover:from-black/70 md:flex md:opacity-0 md:group-hover:opacity-100">
+                <div className="flex h-full w-full items-center justify-center">
+                  <ChevronRight className="size-6 text-white" />
+                </div>
               </CarouselNext>
             </>
           )}

@@ -10,7 +10,7 @@ import {
   CarouselPrevious,
 } from "~/components/ui/carousel";
 
-import TopCourseCard from "./TopCourseCard";
+import ModernCourseCard from "./ModernCourseCard";
 
 import type { GetTopCoursesResponse } from "~/api/generated-api";
 
@@ -44,6 +44,27 @@ const TopCoursesCarousel = ({ courses }: TopCoursesCarouselProps) => {
 
   if (!courses?.length) return null;
 
+  const renderRank = (rank: number) => (
+    <div className="pointer-events-none absolute -left-10 top-3 h-52 w-32">
+      <svg className="h-full w-full" viewBox="0 0 160 190" fill="none">
+        <text
+          x="50%"
+          y="50%"
+          dominantBaseline="middle"
+          textAnchor="middle"
+          className="fill-zinc-200 stroke-zinc-300"
+          style={{
+            fontSize: "230px",
+            fontWeight: "900",
+            strokeWidth: "2px",
+          }}
+        >
+          {rank}
+        </text>
+      </svg>
+    </div>
+  );
+
   return (
     <section
       className="relative overflow-visible"
@@ -56,34 +77,38 @@ const TopCoursesCarousel = ({ courses }: TopCoursesCarouselProps) => {
       >
         <CarouselContent
           viewportClassName="overflow-visible"
-          className="gap-3 px-2 pb-6 pt-8 md:gap-4 md:px-4 md:pt-10"
+          className="gap-4 px-4 pb-6 pt-10 md:px-8"
         >
           {courses.map((course, index) => (
-            <CarouselItem
-              key={course.id}
-              className="basis-[85%] sm:basis-[55%] md:basis-[50%] lg:basis-[28.5%] xl:basis-[28.5%]"
-            >
-              <TopCourseCard
-                id={course.id}
-                rank={index + 1}
-                title={course.title}
-                thumbnailUrl={course.thumbnailUrl}
-                trailerUrl={course.trailerUrl}
-                description={course.description}
-                estimatedDurationMinutes={course.estimatedDurationMinutes}
-                lessonCount={course.lessonCount}
-              />
+            <CarouselItem key={course.id} className="w-[320px] md:w-[380px] lg:w-[400px]">
+              <div className="relative pl-6">
+                {renderRank(index + 1)}
+                <ModernCourseCard
+                  id={course.id}
+                  title={course.title}
+                  description={course.description}
+                  thumbnailUrl={course.thumbnailUrl}
+                  trailerUrl={course.trailerUrl}
+                  estimatedDurationMinutes={course.estimatedDurationMinutes}
+                  lessonCount={course.lessonCount}
+                  category={course.category}
+                />
+              </div>
             </CarouselItem>
           ))}
         </CarouselContent>
 
         {isHovered && (canScrollPrev || canScrollNext) && (
           <>
-            <CarouselPrevious className="absolute left-2 top-1/2 z-[150] hidden size-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 shadow-lg transition-all hover:scale-110 hover:bg-white md:flex md:opacity-0 md:group-hover:opacity-100">
-              <ChevronLeft className="size-6 text-gray-900" />
+            <CarouselPrevious className="absolute left-0 top-0 bottom-0 z-[150] hidden w-12 items-center justify-center bg-gradient-to-r from-black/50 to-transparent transition-opacity duration-300 hover:from-black/70 md:flex md:opacity-0 md:group-hover:opacity-100">
+              <div className="flex h-full w-full items-center justify-center">
+                <ChevronLeft className="size-6 text-white" />
+              </div>
             </CarouselPrevious>
-            <CarouselNext className="absolute right-2 top-1/2 z-[150] hidden size-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 shadow-lg transition-all hover:scale-110 hover:bg-white md:flex md:opacity-0 md:group-hover:opacity-100">
-              <ChevronRight className="size-6 text-gray-900" />
+            <CarouselNext className="absolute right-0 top-0 bottom-0 z-[150] hidden w-12 items-center justify-center bg-gradient-to-l from-black/50 to-transparent transition-opacity duration-300 hover:from-black/70 md:flex md:opacity-0 md:group-hover:opacity-100">
+              <div className="flex h-full w-full items-center justify-center">
+                <ChevronRight className="size-6 text-white" />
+              </div>
             </CarouselNext>
           </>
         )}

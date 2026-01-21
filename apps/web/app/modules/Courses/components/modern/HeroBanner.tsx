@@ -50,7 +50,7 @@ const HeroBanner = ({
             (event.target as HTMLImageElement).src = DefaultPhotoCourse;
           }}
         />
-        <div className="absolute bottom-0 left-0 right-0 h-[50%] bg-gradient-to-t from-primary-50 via-white/60 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-[50%] bg-gradient-to-t from-primary-50 via-white/80 via-white/60 to-transparent" />
       </div>
 
       {isHovered && trailerUrl && (
@@ -75,7 +75,7 @@ const HeroBanner = ({
             {category}
           </span>
 
-          <h1 className="text-3xl font-bold leading-tight text-neutral-900 md:text-5xl">{title}</h1>
+          <h1 className="h1">{title}</h1>
 
           {(durationLabel || lessonsLabel) && (
             <div className="flex gap-3 text-xs font-medium text-neutral-700 md:gap-4 md:text-sm">
