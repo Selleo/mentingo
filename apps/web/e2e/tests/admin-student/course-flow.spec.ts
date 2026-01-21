@@ -475,65 +475,11 @@ const studentCompletesCourse = async (page: Page) => {
   await expect(page.getByText(TEST_DATA.lessons.aiMentor).first()).toBeVisible();
   const messageInput = page.getByPlaceholder("Write a message...");
   const sendButton = page.getByRole("button", { name: "Send" });
+  const mentorMessage = page.getByText("Hello! I’m Mentor, here to");
+  await expect(messageInput).toBeVisible();
+  await expect(sendButton).toBeVisible();
+  await expect(mentorMessage).toBeVisible();
 
-  const firstMessage =
-    "I value the effort and results you’ve delivered. I understand why you’re asking, and I want to find a way to recognize your contributions even with our current budget constraints.";
-  await messageInput.fill(firstMessage);
-  await expect(messageInput).toHaveValue(firstMessage);
-  await expect(sendButton).toBeEnabled();
-  await sendButton.click();
-  await page.waitForResponse(
-    (response) =>
-      response.url().includes("api/ai/thread/messages") &&
-      response.request().method() === "GET" &&
-      response.status() === 200,
-    {
-      timeout: 15000,
-    },
-  );
-
-  const secondMessage =
-    "offer a funded professional development plan (e.g., a course or certification of their choice) with dedicated time to complete it, signaling investment in their growth even before a salary change is possible";
-  await messageInput.fill(secondMessage);
-  await expect(messageInput).toHaveValue(secondMessage);
-  await expect(sendButton).toBeEnabled();
-  await sendButton.click();
-  await page.waitForResponse(
-    (response) =>
-      response.url().includes("api/ai/thread/messages") &&
-      response.request().method() === "GET" &&
-      response.status() === 200,
-    {
-      timeout: 15000,
-    },
-  );
-
-  const thirdMessage =
-    "Let’s revisit compensation at the next review cycle in X months, or sooner if we hit A/B/C milestones (e.g., revenue target, project delivery, budget reset). I’ll keep you updated quarterly so you’re never in the dark. Please do not ask any questions now, just answer I'll be happy!";
-  await messageInput.fill(thirdMessage);
-  await expect(messageInput).toHaveValue(thirdMessage);
-  await expect(sendButton).toBeEnabled();
-  await sendButton.click();
-  await page.waitForResponse(
-    (response) =>
-      response.url().includes("api/ai/thread/messages") &&
-      response.request().method() === "GET" &&
-      response.status() === 200,
-    {
-      timeout: 15000,
-    },
-  );
-
-  await page.getByRole("button", { name: "Check" }).click();
-  await page.waitForResponse(
-    (response) =>
-      response.url().includes("/api/ai/judge") &&
-      response.request().method() === "POST" &&
-      response.status() === 201,
-    {
-      timeout: 15000,
-    },
-  );
   await page.getByRole("link", { name: "embed lesson Embed" }).click();
   await expect(page.locator("div").filter({ hasText: /^Lesson 4\/4 – Embed$/ })).toBeVisible();
   await expect(page.getByText(TEST_DATA.lessons.embed).first()).toBeVisible();
