@@ -39,7 +39,7 @@ import { VideoProcessingStateService } from "./video-processing-state.service";
 import { VideoUploadNotificationGateway } from "./video-upload-notification.gateway";
 import { VideoUploadQueueService } from "./video-upload-queue.service";
 
-import type { ResourceRelationshipType, EntityType, ResourceCategory } from "./file.constants";
+import type { ResourceRelationshipType, EntityType } from "./file.constants";
 import type { BunnyWebhookBody } from "./schemas/bunny-webhook.schema";
 import type { VideoInitBody } from "./schemas/video-init.schema";
 import type { VideoUploadState } from "./video-processing-state.service";
@@ -52,6 +52,7 @@ import type { SupportedLanguages } from "@repo/shared";
 import type { Static, TSchema } from "@sinclair/typebox";
 import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
+import type { UploadResourceParams } from "src/file/types/resource.types";
 
 @Injectable()
 export class FileService {
@@ -478,18 +479,18 @@ export class FileService {
    * @param description - Multilingual description object (optional)
    * @returns Object containing resourceId, fileKey, and fileUrl
    */
-  async uploadResource(
-    file: Express.Multer.File,
-    folder: string,
-    resource: ResourceCategory,
-    entityId: string,
-    entityType: EntityType,
-    relationshipType: ResourceRelationshipType = RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
-    title: Partial<Record<SupportedLanguages, string>> = {},
-    description: Partial<Record<SupportedLanguages, string>> = {},
-    currentUser?: CurrentUser,
-    options?: { folderIncludesResource?: boolean },
-  ) {
+  async uploadResource({
+    file,
+    folder,
+    resource,
+    entityId,
+    entityType,
+    relationshipType = RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+    title,
+    description,
+    currentUser,
+    options,
+  }: UploadResourceParams) {
     const resourceFolder = options?.folderIncludesResource ? folder : `${resource}/${folder}`;
 
     const checksum = getChecksum(file);

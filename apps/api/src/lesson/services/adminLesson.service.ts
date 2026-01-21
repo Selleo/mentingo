@@ -931,17 +931,16 @@ export class AdminLessonService {
       }
     }
 
-    const fileData = await this.fileService.uploadResource(
+    const fileData = await this.fileService.uploadResource({
       file,
-      "lesson-content",
-      RESOURCE_CATEGORIES.LESSON,
-      lessonId,
-      ENTITY_TYPES.LESSON,
-      RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
-      fileTitle,
-      fileDescription,
-      undefined,
-    );
+      folder: "lesson-content",
+      resource: RESOURCE_CATEGORIES.LESSON,
+      entityId: lessonId,
+      entityType: ENTITY_TYPES.LESSON,
+      relationshipType: RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+      title: fileTitle,
+      description: fileDescription,
+    });
 
     return { resourceId: fileData.resourceId };
   }

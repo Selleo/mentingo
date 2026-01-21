@@ -1035,17 +1035,17 @@ export class SettingsService {
     }
 
     await this.db.transaction(async (trx) => {
-      const { resourceId } = await this.fileService.uploadResource(
+      const { resourceId } = await this.fileService.uploadResource({
         file,
-        "login_page_files",
-        RESOURCE_CATEGORIES.GLOBAL_SETTINGS,
-        existingResources.id,
-        ENTITY_TYPES.GLOBAL_SETTINGS,
-        RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
-        { en: uploadedData.name },
-        {},
+        folder: "login_page_files",
+        resource: RESOURCE_CATEGORIES.GLOBAL_SETTINGS,
+        entityId: existingResources.id,
+        entityType: ENTITY_TYPES.GLOBAL_SETTINGS,
+        relationshipType: RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+        title: { en: uploadedData.name },
+        description: {},
         currentUser,
-      );
+      });
 
       await trx
         .update(settings)
