@@ -10,16 +10,23 @@ import {
   ALLOWED_ARTICLES_SETTINGS,
   ALLOWED_NEWS_SETTINGS,
   ALLOWED_QA_SETTINGS,
+  MAX_LOGIN_PAGE_DOCUMENTS,
 } from "@repo/shared";
-import { eq, isNull, sql } from "drizzle-orm";
+import { and, eq, getTableColumns, inArray, isNull, sql } from "drizzle-orm";
 import { isEqual } from "lodash";
 import sharp from "sharp";
 
 import { CORS_ORIGIN } from "src/auth/consts";
 import { DatabasePg } from "src/common";
 import { UpdateSettingsEvent } from "src/events";
+import {
+  ENTITY_TYPES,
+  RESOURCE_CATEGORIES,
+  RESOURCE_RELATIONSHIP_TYPES,
+} from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
-import { settings } from "src/storage/schema";
+import { LocalizationService } from "src/localization/localization.service";
+import { resourceEntity, resources, settings } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
@@ -36,6 +43,8 @@ import type {
   AdminSettingsJSONContentSchema,
   UserSettingsJSONContentSchema,
   UserEmailTriggersSchema,
+  UploadFilesToLoginPageBody,
+  LoginPageResourceResponseBody,
 } from "./schemas/settings.schema";
 import type {
   AllowedAgeLimit,
@@ -58,6 +67,7 @@ export class SettingsService {
     @Inject("DB") private readonly db: DatabasePg,
     private readonly fileService: FileService,
     private readonly eventBus: EventBus,
+    private readonly localizationService: LocalizationService,
   ) {}
 
   public async getGlobalSettings(): Promise<GlobalSettingsJSONContentSchema> {
@@ -147,10 +157,12 @@ export class SettingsService {
   }
 
   public async getUserSettings(userId: UUIDType): Promise<SettingsJSONContentSchema> {
-    const [{ settings: userSettings }] = await this.db
+    const [row] = await this.db
       .select({ settings: sql<SettingsJSONContentSchema>`${settings.settings}` })
       .from(settings)
       .where(eq(settings.userId, userId));
+
+    const userSettings = row?.settings;
 
     if (!userSettings) {
       throw new NotFoundException("User settings not found");
@@ -163,10 +175,12 @@ export class SettingsService {
     userId: UUIDType,
     updatedSettings: UpdateSettingsBody,
   ): Promise<SettingsJSONContentSchema> {
-    const [{ settings: currentSettings }] = await this.db
+    const [row] = await this.db
       .select({ settings: sql<SettingsJSONContentSchema>`${settings.settings}` })
       .from(settings)
       .where(eq(settings.userId, userId));
+
+    const currentSettings = row?.settings;
 
     if (!currentSettings) {
       throw new NotFoundException("User settings not found");
@@ -1006,6 +1020,73 @@ export class SettingsService {
     return updatedGlobalSettings;
   }
 
+  async uploadLoginPageFile(
+    uploadedData: UploadFilesToLoginPageBody,
+    file: Express.Multer.File,
+    currentUser: CurrentUser,
+  ) {
+    const existingResources = await this.getExistingLoginPageResourceIds();
+
+    if (existingResources.resourceIds.length >= MAX_LOGIN_PAGE_DOCUMENTS) {
+      throw new BadRequestException({
+        message: "loginFilesUpload.toast.maxResourceCount",
+        count: MAX_LOGIN_PAGE_DOCUMENTS,
+      });
+    }
+
+    await this.db.transaction(async (trx) => {
+      const { resourceId } = await this.fileService.uploadResource(
+        file,
+        "login_page_files",
+        RESOURCE_CATEGORIES.GLOBAL_SETTINGS,
+        existingResources.id,
+        ENTITY_TYPES.GLOBAL_SETTINGS,
+        RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+        { en: uploadedData.name },
+        {},
+        currentUser,
+      );
+
+      await trx
+        .update(settings)
+        .set({
+          settings: sql`
+          jsonb_set(
+            settings.settings,
+            '{loginPageFiles}',
+            COALESCE(settings.settings->'loginPageFiles', '[]'::jsonb) || jsonb_build_array(${resourceId}::text),
+            true
+          )
+        `,
+        })
+        .where(isNull(settings.userId));
+    });
+  }
+
+  async getLoginPageFiles(): Promise<LoginPageResourceResponseBody> {
+    const existingResourceIds = await this.getExistingLoginPageResourceIds();
+
+    if (!existingResourceIds.resourceIds.length) return { resources: [] };
+
+    const existingResources = await this.db
+      .select({
+        ...getTableColumns(resources),
+        title: this.localizationService.getFirstValue(resources.title),
+      })
+      .from(resources)
+      .where(inArray(resources.id, existingResourceIds.resourceIds));
+
+    return {
+      resources: await Promise.all(
+        existingResources.map(async (existingResource) => ({
+          id: existingResource.id,
+          name: existingResource.title,
+          resourceUrl: await this.fileService.getFileUrl(existingResource.reference),
+        })),
+      ),
+    };
+  }
+
   private getDefaultSettingsForRole(role: UserRole): SettingsJSONContentSchema {
     switch (role) {
       case USER_ROLES.ADMIN:
@@ -1017,6 +1098,56 @@ export class SettingsService {
     }
   }
 
+  async deleteLoginPageFile(id: UUIDType) {
+    await this.db.transaction(async (trx) => {
+      const [resource] = await trx
+        .select()
+        .from(resourceEntity)
+        .where(eq(resourceEntity.resourceId, id));
+
+      if (!resource) throw new BadRequestException("loginFilesUpload.toast.resourceNotFound");
+
+      await trx.delete(resourceEntity).where(eq(resourceEntity.resourceId, id));
+
+      await trx
+        .update(settings)
+        .set({
+          settings: sql`
+          jsonb_set(
+            settings.settings,
+            '{loginPageFiles}',
+            COALESCE(settings.settings->'loginPageFiles', '[]'::jsonb) - ${id}::text,
+            true
+          )
+        `,
+        })
+        .where(isNull(settings.userId));
+    });
+  }
+
+  private async getExistingLoginPageResourceIds() {
+    const [existingResources] = await this.db
+      .select({
+        id: settings.id,
+        resourceIds: sql<string[]>`
+          COALESCE(
+            ARRAY(
+              SELECT jsonb_array_elements_text(settings.settings->'loginPageFiles')
+            ),
+            ARRAY[]::text[]
+          )
+        `,
+      })
+      .from(settings)
+      .where(and(isNull(settings.userId)));
+
+    if (!existingResources) {
+      throw new NotFoundException("Global settings not found");
+    }
+
+    return existingResources;
+  }
+
   private parseGlobalSettings(
     settings: GlobalSettingsJSONContentSchema,
   ): GlobalSettingsJSONContentSchema {
@@ -1025,6 +1156,9 @@ export class SettingsService {
       MFAEnforcedRoles: Array.isArray(settings.MFAEnforcedRoles)
         ? settings.MFAEnforcedRoles
         : JSON.parse(settings.MFAEnforcedRoles ?? "[]"),
+      loginPageFiles: Array.isArray(settings.loginPageFiles)
+        ? settings.loginPageFiles
+        : JSON.parse(settings.loginPageFiles ?? "[]"),
       ageLimit: settings.ageLimit ?? null,
     };
   }

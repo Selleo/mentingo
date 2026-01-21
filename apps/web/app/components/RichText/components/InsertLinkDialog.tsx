@@ -82,11 +82,7 @@ export const InsertLinkDialog = ({ open, onClose, editor }: LinkDialogProps) => 
         <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-1">
             <Label htmlFor="link-url">{t("richTextEditor.toolbar.link.dialog.urlLabel")}</Label>
-            <Input
-              id="link-url"
-              placeholder="https://example.com"
-              {...register("url")}
-            />
+            <Input id="link-url" placeholder="https://example.com" {...register("url")} />
             {errors.url?.message && (
               <span className="text-xs text-red-500">{errors.url.message}</span>
             )}

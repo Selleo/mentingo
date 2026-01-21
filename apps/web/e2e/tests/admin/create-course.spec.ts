@@ -141,10 +141,6 @@ export class CreateCourseActions {
     await page.locator('[data-testid="category-option-E2E Testing"]').click();
 
     await page.locator("#description").getByRole("paragraph").fill(NEW_COURSE.description);
-
-    // const fileInput = await page.locator('input[type="file"]');
-    // const filePath = "app/assets/thumbnail-e2e.jpg";
-    // await fileInput.setInputFiles(filePath);
   }
 
   async addChapter(page: Page, chapterTitle: string): Promise<string> {
@@ -262,29 +258,6 @@ export class CreateCourseActions {
       .locator(`input[name="questions.${questionIndex}.options.${correctAnswerIndex}.isCorrect"]`)
       .first()
       .click();
-  }
-  async addMatchingQuestion(page: Page, questionIndex: number): Promise<void> {
-    await page.getByTestId(`add-options-button-${questionIndex}`).click();
-
-    for (let i = 0; i < NEW_COURSE.options.matching.length; i++) {
-      const option = NEW_COURSE.options.matching[i];
-      await page
-        .locator(`input[name="questions.${questionIndex}.options.${i}.optionText"]`)
-        .fill(option.optionText);
-      await page
-        .locator(`input[name="questions.${questionIndex}.options.${i}.matchedWord"]`)
-        .fill(option.matchedWord);
-    }
-  }
-  async addScaleQuestion(page: Page, questionIndex: number): Promise<void> {
-    await page.getByTestId(`add-options-button-${questionIndex}`).click();
-    await page.getByTestId(`add-options-button-${questionIndex}`).click();
-
-    for (let i = 0; i < NEW_COURSE.options.scale.length; i++) {
-      await page
-        .locator(`input[name="questions.${questionIndex}.options.${i}.optionText"]`)
-        .fill(NEW_COURSE.options.scale[i]);
-    }
   }
   async addPhotoQuestion(
     page: Page,
@@ -484,7 +457,7 @@ test.describe.serial("Course management", () => {
     await page.getByRole("button", { name: new RegExp(NEW_COURSE.button.cancel, "i") }).click();
     await page.waitForURL("/admin/courses");
 
-    const currentUrl = await page.url();
+    const currentUrl = page.url();
     expect(currentUrl).toMatch("/admin/courses");
   });
 
@@ -544,20 +517,6 @@ test.describe.serial("Course management", () => {
       chapterLocator.locator(`div[aria-label="Lesson: ${NEW_COURSE.lessons.contentLessonTitle}"]`),
     ).toBeVisible();
 
-    // await createCourseActions.addPresentationLesson(
-    //   page,
-    //   chapterLocator,
-    //   NEW_COURSE.lessons.presentationLessonTitle,
-    //   NEW_COURSE.lessons.presentationLessonDescription,
-    // );
-
-    // await createCourseActions.addVideoLesson(
-    //   page,
-    //   chapterLocator,
-    //   NEW_COURSE.lessons.videoLessonTitle,
-    //   NEW_COURSE.lessons.presentationLessonTitle,
-    // );
-
     await createCourseActions.addQuiz(page, chapterLocator);
 
     await createCourseActions.addQuestion(
@@ -599,36 +558,9 @@ test.describe.serial("Course management", () => {
 
     await createCourseActions.addQuestion(
       page,
-      NEW_COURSE.questionType.matching,
-      NEW_COURSE.questions.matching,
-      5,
-    );
-    await createCourseActions.addMatchingQuestion(page, 5);
-
-    await createCourseActions.addQuestion(
-      page,
-      NEW_COURSE.questionType.scale,
-      NEW_COURSE.questions.scale,
-      6,
-    );
-
-    await createCourseActions.addScaleQuestion(page, 6);
-
-    // await createCourseActions.addQuestion(
-    //   page,
-    //   NEW_COURSE.questionType.photoQuestion,
-
-    //   NEW_COURSE.questions.photoQuestion,
-    //   7,
-    // );
-    // const imagePath = "app/assets/thumbnail-e2e.jpg";
-    // await createCourseActions.addPhotoQuestion(page, 7, imagePath, 2);
-
-    await createCourseActions.addQuestion(
-      page,
       NEW_COURSE.questionType.fillInTheBlanks,
       NEW_COURSE.questions.fillInTheBlank,
-      7,
+      5,
     );
     await createCourseActions.addFillInTheBlankQuestion(page, "CSS");
     await page.getByRole("button", { name: new RegExp(NEW_COURSE.button.save, "i") }).click();
@@ -689,7 +621,7 @@ test.describe.serial("Course management", () => {
     const chapterLocator = page.locator(`[data-chapter-id="${newChapterId}"]`);
     await chapterLocator.waitFor({ state: "visible" });
 
-    await expect(
+    expect(
       await page.locator(`[data-testid="Freemium - ${newChapterId}"]`).getAttribute("data-state"),
     ).toBe("checked");
   });

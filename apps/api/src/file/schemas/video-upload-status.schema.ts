@@ -1,4 +1,4 @@
-import { VIDEO_UPLOAD_STATUS } from "@repo/shared";
+import { VIDEO_PROVIDERS, VIDEO_UPLOAD_STATUS } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
 import type { Static } from "@sinclair/typebox";
@@ -12,9 +12,12 @@ export const videoUploadStatusSchema = Type.Object({
     Type.Literal(VIDEO_UPLOAD_STATUS.PROCESSED),
     Type.Literal(VIDEO_UPLOAD_STATUS.FAILED),
   ]),
+  provider: Type.Optional(Type.Enum(VIDEO_PROVIDERS)),
   fileKey: Type.Optional(Type.String()),
   fileUrl: Type.Optional(Type.String()),
   bunnyVideoId: Type.Optional(Type.String()),
+  multipartUploadId: Type.Optional(Type.String()),
+  partSize: Type.Optional(Type.Integer({ minimum: 1 })),
   fileType: Type.Optional(Type.String()),
   lessonId: Type.Optional(Type.String()),
   error: Type.Optional(Type.String()),

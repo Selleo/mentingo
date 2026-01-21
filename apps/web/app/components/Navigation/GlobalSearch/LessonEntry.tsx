@@ -1,12 +1,12 @@
 import { Link } from "@remix-run/react";
 
-import type { GetEnrolledLessonsResponse } from "~/api/generated-api";
+import type { GetLessonsResponse } from "~/api/generated-api";
 
 export const LessonEntry = ({
   item,
   onSelect,
 }: {
-  item: GetEnrolledLessonsResponse["data"][number];
+  item: GetLessonsResponse["data"][number];
   onSelect: () => void;
 }) => {
   return (

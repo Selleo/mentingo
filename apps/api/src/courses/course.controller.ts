@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpStatus,
   Headers,
   Param,
   Patch,
@@ -14,7 +15,7 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { SupportedLanguages } from "@repo/shared";
+import { ALLOWED_LESSON_IMAGE_FILE_TYPES, SupportedLanguages } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Request } from "express";
 import { Validate } from "nestjs-typebox";
@@ -45,6 +46,9 @@ import {
   getLessonSequenceEnabledSchema,
   supportedLanguagesSchema,
   EnrolledCourseGroupsPayload,
+  transferCourseOwnershipRequestSchema,
+  TransferCourseOwnershipRequestBody,
+  courseOwnershipCandidatesResponseSchema,
 } from "src/courses/schemas/course.schema";
 import {
   COURSE_ENROLLMENT_SCOPES,
@@ -75,6 +79,8 @@ import {
   studentCoursesValidation,
   studentsWithEnrolmentValidation,
 } from "src/courses/validations/validations";
+import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
+import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
 import { GroupsFilterSchema } from "src/group/group.types";
 import {
   LearningTimeService,
@@ -106,6 +112,7 @@ import type {
   AllStudentQuizResultsResponse,
   CourseStatisticsResponse,
   LessonSequenceEnabledResponse,
+  CourseOwnershipCandidatesResponseBody,
 } from "src/courses/schemas/course.schema";
 import type {
   CoursesFilterSchema,
@@ -422,7 +429,13 @@ export class CourseController {
   async updateCourse(
     @Param("id") id: UUIDType,
     @Body() updateCourseBody: UpdateCourseBody,
-    @UploadedFile() image: Express.Multer.File,
+    @UploadedFile(
+      getBaseFileTypePipe(buildFileTypeRegex(ALLOWED_LESSON_IMAGE_FILE_TYPES)).build({
+        fileIsRequired: false,
+        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
+      }),
+    )
+    image: Express.Multer.File,
     @CurrentUser() currentUser: CurrentUserType,
     @Req() request: Request,
   ): Promise<BaseResponse<{ message: string }>> {
@@ -922,5 +935,26 @@ export class CourseController {
     @CurrentUser() currentUser: CurrentUserType,
   ) {
     return this.courseService.generateMissingTranslations(courseId, language, currentUser);
+  }
+
+  @Post("course-ownership/transfer")
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    request: [{ type: "body", schema: transferCourseOwnershipRequestSchema }],
+  })
+  async transferCourseOwnership(@Body() transferData: TransferCourseOwnershipRequestBody) {
+    return this.courseService.transferCourseOwnership(transferData);
+  }
+
+  @Get("course-ownership/:courseId")
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    request: [{ type: "param", name: "courseId", schema: UUIDSchema }],
+    response: baseResponse(courseOwnershipCandidatesResponseSchema),
+  })
+  async getCourseOwnership(
+    @Param("courseId") courseId: UUIDType,
+  ): Promise<BaseResponse<CourseOwnershipCandidatesResponseBody>> {
+    return new BaseResponse(await this.courseService.getCourseOwnership(courseId));
   }
 }

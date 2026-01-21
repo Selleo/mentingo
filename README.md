@@ -80,6 +80,7 @@ A modern, scalable Learning Management System built with cutting-edge technologi
 
 - **email-templates**: A package for email templates
 - **eslint-config**: A package for eslint configuration
+- **performance-tests**: K6 performance testing suite
 - **typescript-config**: A package for typescript configuration
 
 </br>
@@ -277,10 +278,23 @@ Email templates are automatically built when starting the development server. To
     ```
 
 - Backend tests:
+
   ```bash
   pnpm test:api        # Unit tests
   pnpm test:api:e2e    # E2E tests
   ```
+
+- Performance tests (requires [k6](https://k6.io/docs/getting-started/installation/)):
+
+  ```bash
+  pnpm perf:load              # Load test
+  pnpm perf:stress            # Stress test
+  pnpm perf:spike             # Spike test
+  pnpm perf:load:dashboard    # Load test with live dashboard
+  ```
+
+  > [!NOTE]
+  > Performance tests require k6 to be installed globally and proper configuration. See [packages/performance-tests/README.md](packages/performance-tests/README.md) for detailed setup and usage instructions.
 
 </br>
 <div align="center">
@@ -306,6 +320,7 @@ lms-core
 └── packages
     ├── email-templates
     ├── eslint-config
+    ├── performance-tests
     ├── shared
     └── typescript-config
 ```

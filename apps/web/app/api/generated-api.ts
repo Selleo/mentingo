@@ -187,6 +187,7 @@ export interface GetPublicGlobalSettingsResponse {
     unregisteredUserArticlesAccessibility: boolean;
     articlesEnabled: boolean;
     ageLimit: 13 | 16 | null;
+    loginPageFiles: string[];
   };
 }
 
@@ -294,6 +295,7 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     unregisteredUserArticlesAccessibility: boolean;
     articlesEnabled: boolean;
     ageLimit: 13 | 16 | null;
+    loginPageFiles: string[];
   };
 }
 
@@ -334,6 +336,7 @@ export interface UpdateEnforceSSOResponse {
     unregisteredUserArticlesAccessibility: boolean;
     articlesEnabled: boolean;
     ageLimit: 13 | 16 | null;
+    loginPageFiles: string[];
   };
 }
 
@@ -405,6 +408,7 @@ export interface UpdateColorSchemaResponse {
     unregisteredUserArticlesAccessibility: boolean;
     articlesEnabled: boolean;
     ageLimit: 13 | 16 | null;
+    loginPageFiles: string[];
   };
 }
 
@@ -490,6 +494,15 @@ export interface UpdateAgeLimitBody {
   ageLimit: 13 | 16 | null;
 }
 
+export interface GetLoginPageFilesResponse {
+  resources: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    resourceUrl: string;
+  }[];
+}
+
 export interface FileUploadResponse {
   fileKey: string;
   fileUrl?: string;
@@ -513,11 +526,15 @@ export interface InitVideoUploadBody {
 export interface InitVideoUploadResponse {
   /** @format uuid */
   uploadId: string;
-  bunnyGuid: string;
+  provider: "bunny" | "s3";
   fileKey: string;
-  tusEndpoint: string;
-  tusHeaders: object;
-  expiresAt: string;
+  bunnyGuid?: string;
+  tusEndpoint?: string;
+  tusHeaders?: object;
+  expiresAt?: string;
+  multipartUploadId?: string;
+  /** @min 1 */
+  partSize?: number;
   /** @format uuid */
   resourceId?: string;
 }
@@ -526,9 +543,13 @@ export type GetVideoUploadStatusResponse = {
   uploadId: string;
   placeholderKey: string;
   status: "queued" | "uploaded" | "processed" | "failed";
+  provider?: "bunny" | "s3";
   fileKey?: string;
   fileUrl?: string;
   bunnyVideoId?: string;
+  multipartUploadId?: string;
+  /** @min 1 */
+  partSize?: number;
   fileType?: string;
   lessonId?: string;
   error?: string;
@@ -1602,6 +1623,30 @@ export interface GetCourseStudentsAiMentorResultsResponse {
   appliedFilters?: object;
 }
 
+export interface TransferCourseOwnershipBody {
+  /** @format uuid */
+  courseId: string;
+  /** @format uuid */
+  userId: string;
+}
+
+export interface GetCourseOwnershipResponse {
+  data: {
+    currentAuthor: {
+      /** @format uuid */
+      id: string;
+      name: string;
+      email: string;
+    };
+    possibleCandidates: {
+      /** @format uuid */
+      id: string;
+      name: string;
+      email: string;
+    }[];
+  };
+}
+
 export interface GetChapterWithLessonResponse {
   data: {
     /** @format uuid */
@@ -1833,7 +1878,7 @@ export interface UpdateFreemiumStatusResponse {
   };
 }
 
-export interface GetEnrolledLessonsResponse {
+export interface GetLessonsResponse {
   data: {
     /** @format uuid */
     id: string;
@@ -1841,7 +1886,7 @@ export interface GetEnrolledLessonsResponse {
     type: "content" | "quiz" | "ai_mentor" | "embed";
     description: string | null;
     displayOrder: number;
-    lessonCompleted: boolean;
+    lessonCompleted?: boolean;
     /** @format uuid */
     courseId: string;
     courseTitle: string;
@@ -1849,6 +1894,7 @@ export interface GetEnrolledLessonsResponse {
     chapterId: string;
     chapterTitle: string;
     chapterDisplayOrder: number;
+    searchRank?: number;
   }[];
 }
 
@@ -4370,6 +4416,58 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name SettingsControllerUpdateLoginPageFiles
+     * @request PATCH:/api/settings/admin/login-page-files
+     */
+    settingsControllerUpdateLoginPageFiles: (
+      data: {
+        /** @format binary */
+        file: File;
+        /** @format uuid */
+        id?: string;
+        /** @minLength 1 */
+        name: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/settings/admin/login-page-files`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.FormData,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerGetLoginPageFiles
+     * @request GET:/api/settings/login-page-files
+     */
+    settingsControllerGetLoginPageFiles: (params: RequestParams = {}) =>
+      this.request<GetLoginPageFilesResponse, any>({
+        path: `/api/settings/login-page-files`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerDeleteLoginPageFile
+     * @request DELETE:/api/settings/login-page-files/{id}
+     */
+    settingsControllerDeleteLoginPageFile: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/settings/login-page-files/${id}`,
+        method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name FileControllerUploadFile
      * @request POST:/api/file
      */
@@ -4426,6 +4524,71 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         body: data,
         type: ContentType.Json,
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerTusOptionsBase
+     * @request OPTIONS:/api/file/videos/tus
+     */
+    fileControllerTusOptionsBase: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/file/videos/tus`,
+        method: "OPTIONS",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerCreateTusUpload
+     * @request POST:/api/file/videos/tus
+     */
+    fileControllerCreateTusUpload: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/file/videos/tus`,
+        method: "POST",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerTusOptionsUpload
+     * @request OPTIONS:/api/file/videos/tus/{id}
+     */
+    fileControllerTusOptionsUpload: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/file/videos/tus/${id}`,
+        method: "OPTIONS",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerGetTusUpload
+     * @request HEAD:/api/file/videos/tus/{id}
+     */
+    fileControllerGetTusUpload: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/file/videos/tus/${id}`,
+        method: "HEAD",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerPatchTusUpload
+     * @request PATCH:/api/file/videos/tus/{id}
+     */
+    fileControllerPatchTusUpload: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/file/videos/tus/${id}`,
+        method: "PATCH",
         ...params,
       }),
 
@@ -5808,6 +5971,38 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name CourseControllerTransferCourseOwnership
+     * @request POST:/api/course/course-ownership/transfer
+     */
+    courseControllerTransferCourseOwnership: (
+      data: TransferCourseOwnershipBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/course/course-ownership/transfer`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerGetCourseOwnership
+     * @request GET:/api/course/course-ownership/{courseId}
+     */
+    courseControllerGetCourseOwnership: (courseId: string, params: RequestParams = {}) =>
+      this.request<GetCourseOwnershipResponse, any>({
+        path: `/api/course/course-ownership/${courseId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name ChapterControllerGetChapterWithLesson
      * @request GET:/api/chapter
      */
@@ -5935,10 +6130,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name LessonControllerGetEnrolledLessons
-     * @request GET:/api/lesson/student-lessons
+     * @name LessonControllerGetLessons
+     * @request GET:/api/lesson/all
      */
-    lessonControllerGetEnrolledLessons: (
+    lessonControllerGetLessons: (
       query?: {
         title?: string;
         description?: string;
@@ -5949,8 +6144,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       },
       params: RequestParams = {},
     ) =>
-      this.request<GetEnrolledLessonsResponse, any>({
-        path: `/api/lesson/student-lessons`,
+      this.request<GetLessonsResponse, any>({
+        path: `/api/lesson/all`,
         method: "GET",
         query: query,
         format: "json",
@@ -7210,6 +7405,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         /** @default "en" */
         language?: "en" | "pl";
+        searchQuery?: string;
       },
       params: RequestParams = {},
     ) =>
@@ -7403,6 +7599,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         /** @default "en" */
         language?: "en" | "pl";
+        searchQuery?: string;
         /** @min 1 */
         page?: number;
       },
@@ -7705,6 +7902,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         /** @default "en" */
         language?: "en" | "pl";
+        searchQuery?: string;
       },
       params: RequestParams = {},
     ) =>

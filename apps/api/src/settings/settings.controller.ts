@@ -3,11 +3,13 @@ import {
   Get,
   Body,
   Patch,
+  HttpStatus,
   UseGuards,
   Put,
   UseInterceptors,
   UploadedFile,
   Param,
+  Delete,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes } from "@nestjs/swagger";
@@ -15,6 +17,9 @@ import {
   ALLOWED_ARTICLES_SETTINGS,
   ALLOWED_NEWS_SETTINGS,
   ALLOWED_QA_SETTINGS,
+  ALLOWED_AVATAR_IMAGE_TYPES,
+  ALLOWED_LESSON_IMAGE_FILE_TYPES,
+  LOGIN_PAGE_DOCUMENTS_FILE_TYPES,
   type AllowedArticlesSettings,
   type AllowedNewsSettings,
   type AllowedQASettings,
@@ -22,13 +27,15 @@ import {
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
-import { UUIDType, baseResponse, BaseResponse } from "src/common";
+import { UUIDType, baseResponse, BaseResponse, UUIDSchema } from "src/common";
 import { FILE_SIZE_BASE } from "src/common/constants";
 import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
+import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
+import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { CompanyInformaitonJSONSchema } from "./schemas/company-information.schema";
@@ -39,7 +46,9 @@ import {
   adminSettingsJSONContentSchema,
   companyInformationJSONSchema,
   globalSettingsJSONSchema,
+  loginPageResourceResponseSchema,
   settingsJSONContentSchema,
+  UploadFilesToLoginPageBody,
   userSettingsJSONContentSchema,
 } from "./schemas/settings.schema";
 import {
@@ -213,7 +222,13 @@ export class SettingsController {
     },
   })
   async updatePlatformLogo(
-    @UploadedFile() logo: Express.Multer.File | null,
+    @UploadedFile(
+      getBaseFileTypePipe(buildFileTypeRegex(ALLOWED_AVATAR_IMAGE_TYPES), FILE_SIZE_BASE).build({
+        fileIsRequired: false,
+        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
+      }),
+    )
+    logo: Express.Multer.File | null,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<void> {
     await this.settingsService.uploadPlatformLogo(logo, currentUser);
@@ -252,7 +267,13 @@ export class SettingsController {
     },
   })
   async updatePlatformSimpleLogo(
-    @UploadedFile() logo: Express.Multer.File | null,
+    @UploadedFile(
+      getBaseFileTypePipe(buildFileTypeRegex(ALLOWED_AVATAR_IMAGE_TYPES), FILE_SIZE_BASE).build({
+        fileIsRequired: false,
+        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
+      }),
+    )
+    logo: Express.Multer.File | null,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<void> {
     await this.settingsService.uploadPlatformSimpleLogo(logo, currentUser);
@@ -291,7 +312,16 @@ export class SettingsController {
     },
   })
   async updateLoginBackground(
-    @UploadedFile() loginBackground: Express.Multer.File | null,
+    @UploadedFile(
+      getBaseFileTypePipe(
+        buildFileTypeRegex(ALLOWED_LESSON_IMAGE_FILE_TYPES),
+        FILE_SIZE_BASE,
+      ).build({
+        fileIsRequired: false,
+        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
+      }),
+    )
+    loginBackground: Express.Multer.File | null,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<void> {
     await this.settingsService.uploadLoginBackgroundImage(loginBackground, currentUser);
@@ -350,7 +380,12 @@ export class SettingsController {
     },
   })
   async updateCertificateBackground(
-    @UploadedFile() certificateBackground: Express.Multer.File,
+    @UploadedFile(
+      getBaseFileTypePipe(buildFileTypeRegex(ALLOWED_LESSON_IMAGE_FILE_TYPES)).build({
+        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
+      }),
+    )
+    certificateBackground: Express.Multer.File,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
     return new BaseResponse(
@@ -456,5 +491,51 @@ export class SettingsController {
     );
 
     return new BaseResponse(updatedGlobalSettings);
+  }
+
+  @Patch("admin/login-page-files")
+  @Roles(USER_ROLES.ADMIN)
+  @UseInterceptors(FileInterceptor("file"))
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({
+    schema: {
+      type: "object",
+      properties: {
+        file: { type: "string", format: "binary" },
+        id: { type: "string", format: "uuid" },
+        name: { type: "string", minLength: 1 },
+      },
+      required: ["file", "name"],
+    },
+  })
+  async updateLoginPageFiles(
+    @Body() uploadedData: UploadFilesToLoginPageBody,
+    @UploadedFile(
+      getBaseFileTypePipe(buildFileTypeRegex(LOGIN_PAGE_DOCUMENTS_FILE_TYPES)).build({
+        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
+      }),
+    )
+    file: Express.Multer.File,
+    @CurrentUser() currentUser: CurrentUserType,
+  ) {
+    return this.settingsService.uploadLoginPageFile(uploadedData, file, currentUser);
+  }
+
+  @Public()
+  @Get("login-page-files")
+  @Validate({
+    response: loginPageResourceResponseSchema,
+  })
+  async getLoginPageFiles() {
+    return this.settingsService.getLoginPageFiles();
+  }
+
+  @Delete("login-page-files/:id")
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    request: [{ type: "param", name: "id", schema: UUIDSchema }],
+  })
+  async deleteLoginPageFile(@Param("id") id: UUIDType) {
+    return this.settingsService.deleteLoginPageFile(id);
   }
 }

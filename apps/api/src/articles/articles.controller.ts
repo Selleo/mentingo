@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpStatus,
   Param,
   Patch,
   Post,
@@ -13,7 +14,15 @@ import {
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiConsumes, ApiOperation } from "@nestjs/swagger";
-import { SupportedLanguages } from "@repo/shared";
+import {
+  ALLOWED_EXCEL_FILE_TYPES,
+  ALLOWED_LESSON_IMAGE_FILE_TYPES,
+  ALLOWED_PDF_FILE_TYPES,
+  ALLOWED_PRESENTATION_FILE_TYPES,
+  ALLOWED_VIDEO_FILE_TYPES,
+  ALLOWED_WORD_FILE_TYPES,
+  SupportedLanguages,
+} from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
@@ -30,6 +39,8 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
+import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
+import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
@@ -80,12 +91,12 @@ export class ArticlesController {
     @Body() createArticleSectionBody: CreateArticleSection,
     @CurrentUser() currentUser: CurrentUserType,
   ) {
-    const createdNews = await this.articlesService.createArticleSection(
+    const createdArticle = await this.articlesService.createArticleSection(
       createArticleSectionBody,
       currentUser,
     );
 
-    return new BaseResponse(createdNews);
+    return new BaseResponse(createdArticle);
   }
 
   @Get("section/:id")
@@ -100,8 +111,10 @@ export class ArticlesController {
   async getArticleSection(
     @Param("id") id: UUIDType,
     @Query("language") language: SupportedLanguages,
+    @CurrentUser() currentUser: CurrentUserType,
   ) {
-    const section = await this.articlesService.getArticleSection(id, language);
+    const section = await this.articlesService.getArticleSection(id, language, currentUser);
+
     return new BaseResponse(section);
   }
 
@@ -235,14 +248,18 @@ export class ArticlesController {
   @Public()
   @Get()
   @Validate({
-    request: [{ type: "query", name: "language", schema: supportedLanguagesSchema }],
+    request: [
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
+      { type: "query", name: "searchQuery", schema: Type.Optional(Type.String()) },
+    ],
     response: getArticlesResponseSchema,
   })
   async getArticles(
     @Query("language") language: SupportedLanguages,
+    @Query("searchQuery") searchQuery?: string,
     @CurrentUser() currentUser?: CurrentUserType,
   ): Promise<GetArticlesResponse> {
-    return this.articlesService.getArticles(language, currentUser);
+    return this.articlesService.getArticles(language, currentUser, searchQuery);
   }
 
   @Post("article")
@@ -274,7 +291,13 @@ export class ArticlesController {
   async updateArticle(
     @Param("id") id: string,
     @Body(new ValidateMultipartPipe(updateArticleSchema)) updateArticleBody: UpdateArticle,
-    @UploadedFile() cover?: Express.Multer.File,
+    @UploadedFile(
+      getBaseFileTypePipe(buildFileTypeRegex(ALLOWED_LESSON_IMAGE_FILE_TYPES)).build({
+        fileIsRequired: false,
+        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
+      }),
+    )
+    cover?: Express.Multer.File,
     @CurrentUser() currentUser?: CurrentUserType,
   ) {
     const updatedArticle = await this.articlesService.updateArticle(
@@ -350,7 +373,20 @@ export class ArticlesController {
   async uploadFileToArticle(
     @Param("id") id: string,
     @Body(new ValidateMultipartPipe(uploadFileSchema)) uploadFileBody: UploadFile,
-    @UploadedFile("file") file: Express.Multer.File,
+    @UploadedFile(
+      "file",
+      getBaseFileTypePipe(
+        buildFileTypeRegex([
+          ...ALLOWED_PDF_FILE_TYPES,
+          ...ALLOWED_EXCEL_FILE_TYPES,
+          ...ALLOWED_WORD_FILE_TYPES,
+          ...ALLOWED_VIDEO_FILE_TYPES,
+          ...ALLOWED_LESSON_IMAGE_FILE_TYPES,
+          ...ALLOWED_PRESENTATION_FILE_TYPES,
+        ]),
+      ).build({ errorHttpStatusCode: HttpStatus.BAD_REQUEST }),
+    )
+    file: Express.Multer.File,
     @CurrentUser() currentUser?: CurrentUserType,
   ) {
     const fileData = await this.articlesService.uploadFileToArticle(

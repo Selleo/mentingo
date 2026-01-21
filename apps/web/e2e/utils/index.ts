@@ -1,4 +1,4 @@
-import { type Browser, expect, type Page } from "@playwright/test";
+import { type Browser, expect, type Page, type Locator } from "@playwright/test";
 
 import { AuthFixture } from "../fixture/auth.fixture";
 import { ASSIGNING_STUDENT_TO_GROUP_PAGE_UI } from "../tests/admin-student/data/assigning-student-data";
@@ -16,7 +16,12 @@ export const logout = async (browser: Browser) => {
   return newPage;
 };
 
-export const navigateToPage = async (page: Page, name: string, headerText: string) => {
+export const navigateToPage = async (
+  page: Page,
+  name: string,
+  headerText: string,
+  headerItem?: Locator,
+) => {
   const announcementsButton = page
     .getByRole("link", { name: /announcements/i })
     .waitFor({ state: "visible", timeout: 5000 })
@@ -31,10 +36,13 @@ export const navigateToPage = async (page: Page, name: string, headerText: strin
 
   await page.getByRole("button", { name: new RegExp(name, "i") }).click();
 
-  const header = page
-    .getByRole("heading")
-    .first()
-    .filter({ hasText: new RegExp(headerText, "i") });
+  const header =
+    headerItem ||
+    page
+      .getByRole("button")
+      .first()
+      .filter({ hasText: new RegExp(headerText, "i") })
+      .getByRole("link");
 
   await header.waitFor({ state: "visible" });
 
@@ -135,6 +143,9 @@ export const verifyStudentSeesCourse = async (page: Page, course: string): Promi
     page,
     ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.button.browseCourses,
     ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.header.yourCourses,
+    page.getByRole("heading", {
+      name: new RegExp(ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.header.yourCourses, "i"),
+    }),
   );
 
   const expectedCourse = page.getByTestId(course);

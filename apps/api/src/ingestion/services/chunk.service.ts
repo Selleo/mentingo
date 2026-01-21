@@ -13,7 +13,7 @@ export class ChunkService {
   constructor() {}
 
   async extractText(file: Express.Multer.File): Promise<TextExtractionBody> {
-    const fileBlob = new Blob([file.buffer], { type: file.mimetype });
+    const fileBlob = new Blob([file.buffer], { type: file?.mimetype });
     switch (file.mimetype) {
       case ALLOWED_FILE_TYPES_MAP.PDF: {
         const loader = new PDFLoader(fileBlob);

@@ -551,15 +551,8 @@
     {
       "idx": 78,
       "version": "7",
-      "when": 1768389727223,
-      "tag": "0078_add_course_slugs",
-      "breakpoints": true
-    },
-    {
-      "idx": 79,
-      "version": "7",
-      "when": 1768389764023,
-      "tag": "0079_add_course_shortid_generation_function",
+      "when": 1768403653906,
+      "tag": "0078_add_fulltext_search_indexes",
       "breakpoints": true
     }
   ]

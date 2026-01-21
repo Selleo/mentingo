@@ -198,16 +198,26 @@ test.describe("complete course workflow", () => {
 
     const currentLessonNumber = await page.getByTestId("current-lesson-number").textContent();
     const lessonsCount = await page.getByTestId("lessons-count").textContent();
+    const totalLessons = Number(lessonsCount);
 
-    for (let i = Number(currentLessonNumber) ?? 1; i <= Number(lessonsCount); i++) {
+    for (let i = Number(currentLessonNumber) ?? 1; i <= totalLessons; i++) {
       const nextButton = page.getByTestId("next-lesson-button");
 
       await page.waitForLoadState("domcontentloaded");
 
-      const lessonType = await page.getByTestId("lesson-type").textContent();
+      const lessonType = (await page.getByTestId("lesson-type").textContent()) ?? "";
+      const lessonLabel = `Lesson ${i}/${totalLessons} – ${lessonType}`;
+      await expect(page.getByText(lessonLabel)).toBeVisible();
 
       if (lessonType === "Content") {
-        await navigateThroughContentLesson(page, nextButton);
+        const isSecondContentLesson = i === 2;
+        if (isSecondContentLesson) {
+          const mainHeading = page.getByText("Best Practices for E2E Testing").first();
+          await expect(mainHeading).toBeVisible();
+          await nextButton.click();
+        } else {
+          await navigateThroughContentLesson(page, nextButton);
+        }
       }
       if (lessonType === "Presentation" || lessonType === "Video") {
         test.skip(true, "Presentation/video lessons are deprecated in content lessons.");

@@ -1,8 +1,11 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { COURSE_ENROLLMENT } from "@repo/shared";
 import { and, desc, eq, getTableColumns, type SQL, sql } from "drizzle-orm";
+import { match } from "ts-pattern";
 
 import { DatabasePg, type UUIDType } from "src/common";
+import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
+import { getCourseTsVector, getLessonTsVector } from "src/courses/utils/courses.utils";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import {
@@ -20,12 +23,29 @@ import {
   resources,
   coursesSettingsHelpers,
 } from "src/storage/schema";
+import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import type { LessonTypes } from "../lesson.type";
 import type { SupportedLanguages } from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import type { AdminQuestionBody, EnrolledLessonsFilters } from "src/lesson/lesson.schema";
+import type { CurrentUser } from "src/common/types/current-user.type";
+import type { AdminQuestionBody, LessonsFilters } from "src/lesson/lesson.schema";
 import type * as schema from "src/storage/schema";
+
+export type EnrolledLessonWithSearch = {
+  id: UUIDType;
+  title: string;
+  type: LessonTypes;
+  description: string | null;
+  displayOrder: number;
+  lessonCompleted?: boolean;
+  courseId: UUIDType;
+  courseTitle: string;
+  chapterId: UUIDType;
+  chapterTitle: string;
+  chapterDisplayOrder: number;
+  searchRank?: number;
+};
 
 @Injectable()
 export class LessonRepository {
@@ -347,39 +367,43 @@ export class LessonRepository {
     return resource;
   }
 
-  async getEnrolledLessons(
-    userId: UUIDType,
-    filters: EnrolledLessonsFilters,
+  /**
+   * This method returns lessons available for each role
+   * - Student - Only lessons that the student is enrolled to
+   * - Content Creator - Only lessons that the content creator authors
+   * - Admin - All lessons
+   */
+  async getLessonsByRole(
+    currentUser: CurrentUser,
+    filters: LessonsFilters,
     language: SupportedLanguages,
-  ) {
-    const conditions = [
-      eq(studentCourses.studentId, userId),
-      eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
-    ];
+  ): Promise<EnrolledLessonWithSearch[]> {
+    const conditions: SQL[] = [];
 
-    if (filters.title) {
-      conditions.push(
-        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
-          lessons.title
-        }) AS t(k, v) WHERE v ILIKE ${`%${filters.title}%`})`,
-      );
-    }
+    match(currentUser?.role)
+      .with(USER_ROLES.STUDENT, () => {
+        conditions.push(
+          eq(studentCourses.studentId, currentUser?.userId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+        );
+      })
+      .with(USER_ROLES.CONTENT_CREATOR, () =>
+        conditions.push(eq(courses.authorId, currentUser?.userId)),
+      )
+      .otherwise(() => null);
+
+    if (currentUser?.role)
+      if (filters.title) {
+        conditions.push(
+          sql`EXISTS (SELECT 1 FROM jsonb_each_text(${lessons.title}) AS t(k, v) 
+             WHERE v ILIKE ${`%${filters.title}%`})`,
+        );
+      }
 
     if (filters.description) {
       conditions.push(
-        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
-          lessons.description
-        }) AS t(k, v) WHERE v ILIKE ${`%${filters.description}%`})`,
-      );
-    }
-
-    if (filters.searchQuery) {
-      conditions.push(
-        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
-          lessons.title
-        }) AS t(k, v) WHERE v ILIKE ${`%${filters.searchQuery}%`}) OR EXISTS (SELECT 1 FROM jsonb_each_text(${
-          lessons.description
-        }) AS t(k, v) WHERE v ILIKE ${`%${filters.searchQuery}%`})`,
+        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${lessons.description}) AS t(k, v) 
+             WHERE v ILIKE ${`%${filters.description}%`})`,
       );
     }
 
@@ -389,6 +413,61 @@ export class LessonRepository {
       } else {
         conditions.push(sql`${studentLessonProgress.completedAt} IS NULL`);
       }
+    }
+
+    if (filters.searchQuery) {
+      const searchTerm = filters.searchQuery.trim();
+
+      const tsQuery = sql`to_tsquery('english', ${normalizeSearchTerm(searchTerm)})`;
+      const unifiedVector = sql`${getLessonTsVector()} || ${getCourseTsVector()}`;
+
+      conditions.push(sql`${unifiedVector} @@ ${tsQuery}`);
+
+      return this.db
+        .select({
+          id: lessons.id,
+          title: this.localizationService.getLocalizedSqlField(lessons.title, language),
+          type: sql<LessonTypes>`${lessons.type}`,
+          description: this.localizationService.getLocalizedSqlField(lessons.description, language),
+          displayOrder: sql<number>`${lessons.displayOrder}`,
+          lessonCompleted: sql<boolean>`${studentLessonProgress.completedAt} IS NOT NULL`,
+          courseId: courses.id,
+          courseTitle: this.localizationService.getLocalizedSqlField(courses.title, language),
+          chapterId: chapters.id,
+          chapterTitle: this.localizationService.getLocalizedSqlField(chapters.title, language),
+          chapterDisplayOrder: sql<number>`${chapters.displayOrder}`,
+          searchRank: sql<number>`ts_rank(${unifiedVector}, ${tsQuery})`,
+        })
+        .from(lessons)
+        .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+        .innerJoin(courses, eq(courses.id, chapters.courseId))
+        .leftJoin(studentCourses, eq(studentCourses.courseId, courses.id))
+        .leftJoin(
+          studentLessonProgress,
+          and(
+            eq(studentLessonProgress.lessonId, lessons.id),
+            eq(studentLessonProgress.studentId, currentUser.userId),
+          ),
+        )
+        .where(and(...conditions))
+        .groupBy(
+          lessons.id,
+          courses.id,
+          chapters.id,
+          lessons.type,
+          lessons.displayOrder,
+          studentLessonProgress.completedAt,
+          courses.title,
+          chapters.title,
+          chapters.displayOrder,
+          lessons.description,
+        )
+        .orderBy(
+          desc(sql`ts_rank(${unifiedVector}, ${tsQuery})`),
+          lessons.id,
+          chapters.displayOrder,
+          lessons.displayOrder,
+        );
     }
 
     return this.db
@@ -408,16 +487,28 @@ export class LessonRepository {
       .from(lessons)
       .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
       .innerJoin(courses, eq(courses.id, chapters.courseId))
-      .innerJoin(studentCourses, eq(studentCourses.courseId, courses.id))
+      .leftJoin(studentCourses, eq(studentCourses.courseId, courses.id))
       .leftJoin(
         studentLessonProgress,
         and(
           eq(studentLessonProgress.lessonId, lessons.id),
-          eq(studentLessonProgress.studentId, userId),
+          eq(studentLessonProgress.studentId, currentUser.userId),
         ),
       )
       .where(and(...conditions))
-      .orderBy(chapters.displayOrder, lessons.displayOrder);
+      .groupBy(
+        lessons.id,
+        courses.id,
+        chapters.id,
+        lessons.type,
+        lessons.displayOrder,
+        studentLessonProgress.completedAt,
+        courses.title,
+        chapters.title,
+        chapters.displayOrder,
+        lessons.description,
+      )
+      .orderBy(lessons.id, chapters.displayOrder, lessons.displayOrder);
   }
 
   async getLessonProgress(lessonId: UUIDType, userId: UUIDType, conditions?: SQL[]) {

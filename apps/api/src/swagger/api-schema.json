@@ -856,6 +856,83 @@
         }
       }
     },
+    "/api/settings/admin/login-page-files": {
+      "patch": {
+        "operationId": "SettingsController_updateLoginPageFiles",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "file",
+                  "name"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/settings/login-page-files": {
+      "get": {
+        "operationId": "SettingsController_getLoginPageFiles",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetLoginPageFilesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/login-page-files/{id}": {
+      "delete": {
+        "operationId": "SettingsController_deleteLoginPageFile",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/file": {
       "post": {
         "operationId": "FileController_uploadFile",
@@ -940,6 +1017,73 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/file/videos/tus": {
+      "options": {
+        "operationId": "FileController_tusOptionsBase",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "post": {
+        "operationId": "FileController_createTusUpload",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/file/videos/tus/{id}": {
+      "options": {
+        "operationId": "FileController_tusOptionsUpload",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "head": {
+        "operationId": "FileController_getTusUpload",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "patch": {
+        "operationId": "FileController_patchTusUpload",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
           }
         }
       }
@@ -4010,6 +4154,54 @@
         }
       }
     },
+    "/api/course/course-ownership/transfer": {
+      "post": {
+        "operationId": "CourseController_transferCourseOwnership",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransferCourseOwnershipBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/course/course-ownership/{courseId}": {
+      "get": {
+        "operationId": "CourseController_getCourseOwnership",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCourseOwnershipResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/chapter": {
       "get": {
         "operationId": "ChapterController_getChapterWithLesson",
@@ -4206,9 +4398,9 @@
         }
       }
     },
-    "/api/lesson/student-lessons": {
+    "/api/lesson/all": {
       "get": {
-        "operationId": "LessonController_getEnrolledLessons",
+        "operationId": "LessonController_getLessons",
         "parameters": [
           {
             "name": "title",
@@ -4266,7 +4458,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetEnrolledLessonsResponse"
+                  "$ref": "#/components/schemas/GetLessonsResponse"
                 }
               }
             }
@@ -6416,6 +6608,14 @@
                 }
               ]
             }
+          },
+          {
+            "name": "searchQuery",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -6761,6 +6961,14 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "searchQuery",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -7326,6 +7534,14 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "searchQuery",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -8307,6 +8523,12 @@
                     "type": "null"
                   }
                 ]
+              },
+              "loginPageFiles": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
               }
             },
             "required": [
@@ -8328,7 +8550,8 @@
               "newsEnabled",
               "unregisteredUserArticlesAccessibility",
               "articlesEnabled",
-              "ageLimit"
+              "ageLimit",
+              "loginPageFiles"
             ]
           }
         },
@@ -8804,6 +9027,12 @@
                     "type": "null"
                   }
                 ]
+              },
+              "loginPageFiles": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
               }
             },
             "required": [
@@ -8825,7 +9054,8 @@
               "newsEnabled",
               "unregisteredUserArticlesAccessibility",
               "articlesEnabled",
-              "ageLimit"
+              "ageLimit",
+              "loginPageFiles"
             ]
           }
         },
@@ -9034,6 +9264,12 @@
                     "type": "null"
                   }
                 ]
+              },
+              "loginPageFiles": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
               }
             },
             "required": [
@@ -9055,7 +9291,8 @@
               "newsEnabled",
               "unregisteredUserArticlesAccessibility",
               "articlesEnabled",
-              "ageLimit"
+              "ageLimit",
+              "loginPageFiles"
             ]
           }
         },
@@ -9377,6 +9614,12 @@
                     "type": "null"
                   }
                 ]
+              },
+              "loginPageFiles": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
               }
             },
             "required": [
@@ -9398,7 +9641,8 @@
               "newsEnabled",
               "unregisteredUserArticlesAccessibility",
               "articlesEnabled",
-              "ageLimit"
+              "ageLimit",
+              "loginPageFiles"
             ]
           }
         },
@@ -9696,6 +9940,37 @@
           "ageLimit"
         ]
       },
+      "GetLoginPageFilesResponse": {
+        "type": "object",
+        "properties": {
+          "resources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "resourceUrl": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "resourceUrl"
+              ]
+            }
+          }
+        },
+        "required": [
+          "resources"
+        ]
+      },
       "FileUploadResponse": {
         "type": "object",
         "properties": {
@@ -9755,10 +10030,22 @@
             "format": "uuid",
             "type": "string"
           },
-          "bunnyGuid": {
-            "type": "string"
+          "provider": {
+            "anyOf": [
+              {
+                "const": "bunny",
+                "type": "string"
+              },
+              {
+                "const": "s3",
+                "type": "string"
+              }
+            ]
           },
           "fileKey": {
+            "type": "string"
+          },
+          "bunnyGuid": {
             "type": "string"
           },
           "tusEndpoint": {
@@ -9775,6 +10062,13 @@
           "expiresAt": {
             "type": "string"
           },
+          "multipartUploadId": {
+            "type": "string"
+          },
+          "partSize": {
+            "minimum": 1,
+            "type": "integer"
+          },
           "resourceId": {
             "format": "uuid",
             "type": "string"
@@ -9782,11 +10076,8 @@
         },
         "required": [
           "uploadId",
-          "bunnyGuid",
-          "fileKey",
-          "tusEndpoint",
-          "tusHeaders",
-          "expiresAt"
+          "provider",
+          "fileKey"
         ]
       },
       "GetVideoUploadStatusResponse": {
@@ -9820,6 +10111,18 @@
                   }
                 ]
               },
+              "provider": {
+                "anyOf": [
+                  {
+                    "const": "bunny",
+                    "type": "string"
+                  },
+                  {
+                    "const": "s3",
+                    "type": "string"
+                  }
+                ]
+              },
               "fileKey": {
                 "type": "string"
               },
@@ -9828,6 +10131,13 @@
               },
               "bunnyVideoId": {
                 "type": "string"
+              },
+              "multipartUploadId": {
+                "type": "string"
+              },
+              "partSize": {
+                "minimum": 1,
+                "type": "integer"
               },
               "fileType": {
                 "type": "string"
@@ -14519,6 +14829,83 @@
           "pagination"
         ]
       },
+      "TransferCourseOwnershipBody": {
+        "type": "object",
+        "properties": {
+          "courseId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "userId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "courseId",
+          "userId"
+        ]
+      },
+      "GetCourseOwnershipResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "currentAuthor": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "name",
+                  "email"
+                ]
+              },
+              "possibleCandidates": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "email"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "currentAuthor",
+              "possibleCandidates"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "GetChapterWithLessonResponse": {
         "type": "object",
         "properties": {
@@ -15639,7 +16026,7 @@
           "data"
         ]
       },
-      "GetEnrolledLessonsResponse": {
+      "GetLessonsResponse": {
         "type": "object",
         "properties": {
           "data": {
@@ -15706,6 +16093,9 @@
                 },
                 "chapterDisplayOrder": {
                   "type": "number"
+                },
+                "searchRank": {
+                  "type": "number"
                 }
               },
               "required": [
@@ -15714,7 +16104,6 @@
                 "type",
                 "description",
                 "displayOrder",
-                "lessonCompleted",
                 "courseId",
                 "courseTitle",
                 "chapterId",

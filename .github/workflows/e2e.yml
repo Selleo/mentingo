@@ -9,7 +9,7 @@ env:
   EMAIL_ADAPTER: "mailhog"
   DATABASE_URL: ""
   REDIS_URL: "redis://localhost:6380"
-  SMTP_HOST: ""
+  SMTP_HOST: "localhost"
   SMTP_PORT: "1025"
   SMTP_USER: ""
   SMTP_PASSWORD: ""
@@ -30,6 +30,8 @@ on:
         STRIPE_WEBHOOK_SECRET:
           required: true
         MASTER_KEY:
+          required: true
+        OPENAI_API_KEY:
           required: true
   push:
     branches:
@@ -65,6 +67,17 @@ jobs:
           - 6380:6379
         options: >-
           --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      mailhog:
+        image: mailhog/mailhog:v1.0.1
+        ports:
+          - 1025:1025
+          - 8025:8025
+        options: >-
+          --health-cmd "nc -z localhost 1025"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -184,6 +197,7 @@ jobs:
           STRIPE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_PUBLISHABLE_KEY }}
           STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
           MASTER_KEY: ${{ secrets.MASTER_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
       - name: Upload artifacts on failure
         if: failure()

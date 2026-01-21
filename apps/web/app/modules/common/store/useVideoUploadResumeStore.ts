@@ -1,10 +1,13 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+import type { VideoProviderType } from "@repo/shared";
+
 export type StoredVideoUpload = {
   uploadId: string;
-  bunnyGuid: string;
+  bunnyGuid?: string;
   fileKey: string;
+  provider?: VideoProviderType;
   tusEndpoint: string;
   tusHeaders: Record<string, string>;
   expiresAt: string;

@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpStatus,
   Param,
   Patch,
   Post,
@@ -14,7 +15,17 @@ import {
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes, ApiResponse } from "@nestjs/swagger";
-import { SUPPORTED_LANGUAGES, SupportedLanguages } from "@repo/shared";
+import {
+  ALLOWED_AVATAR_IMAGE_TYPES,
+  ALLOWED_EXCEL_FILE_TYPES,
+  ALLOWED_LESSON_IMAGE_FILE_TYPES,
+  ALLOWED_PDF_FILE_TYPES,
+  ALLOWED_PRESENTATION_FILE_TYPES,
+  ALLOWED_VIDEO_FILE_TYPES,
+  ALLOWED_WORD_FILE_TYPES,
+  SUPPORTED_LANGUAGES,
+  SupportedLanguages,
+} from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Response } from "express";
 import { Validate } from "nestjs-typebox";
@@ -25,6 +36,9 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
+import { MAX_VIDEO_SIZE } from "src/file/file.constants";
+import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
+import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
 import { USER_ROLES, UserRole } from "src/user/schemas/userRoles";
 
 import {
@@ -52,7 +66,7 @@ import {
 import { AdminLessonService } from "./services/adminLesson.service";
 import { LessonService } from "./services/lesson.service";
 
-import type { EnrolledLesson, EnrolledLessonsFilters, LessonShow } from "./lesson.schema";
+import type { EnrolledLesson, LessonsFilters, LessonShow } from "./lesson.schema";
 
 @Controller("lesson")
 @UseGuards(RolesGuard)
@@ -62,8 +76,8 @@ export class LessonController {
     private readonly lessonService: LessonService,
   ) {}
 
-  @Get("student-lessons")
-  @Roles(USER_ROLES.STUDENT)
+  @Get("all")
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR, USER_ROLES.STUDENT)
   @Validate({
     request: [
       { type: "query", name: "title", schema: Type.String() },
@@ -74,21 +88,21 @@ export class LessonController {
     ],
     response: baseResponse(Type.Array(enrolledLessonSchema)),
   })
-  async getEnrolledLessons(
+  async getLessons(
     @Query("title") title: string,
     @Query("description") description: string,
     @Query("searchQuery") searchQuery: string,
     @Query("lessonCompleted") lessonCompleted: string,
     @Query("language") language: SupportedLanguages,
-    @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<EnrolledLesson[]>> {
-    const filters: EnrolledLessonsFilters = {
+    const filters: LessonsFilters = {
       title,
       description,
       searchQuery,
       lessonCompleted: lessonCompleted ? lessonCompleted === "true" : undefined,
     };
-    const lessons = await this.lessonService.getEnrolledLessons(userId, filters, language);
+    const lessons = await this.lessonService.getLessons(currentUser, filters, language);
     return new BaseResponse(lessons);
   }
 
@@ -358,7 +372,20 @@ export class LessonController {
     @Body("lessonId") lessonId: UUIDType,
     @CurrentUser("userId") userId: UUIDType,
     @CurrentUser("role") role: UserRole,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile(
+      getBaseFileTypePipe(
+        buildFileTypeRegex([
+          ...ALLOWED_PDF_FILE_TYPES,
+          ...ALLOWED_EXCEL_FILE_TYPES,
+          ...ALLOWED_WORD_FILE_TYPES,
+          ...ALLOWED_VIDEO_FILE_TYPES,
+          ...ALLOWED_LESSON_IMAGE_FILE_TYPES,
+          ...ALLOWED_PRESENTATION_FILE_TYPES,
+        ]),
+        MAX_VIDEO_SIZE,
+      ).build({ errorHttpStatusCode: HttpStatus.BAD_REQUEST }),
+    )
+    file: Express.Multer.File,
     @Body("language") language: SupportedLanguages,
     @Body("title") title: string,
     @Body("description") description: string,
@@ -500,7 +527,13 @@ export class LessonController {
     @CurrentUser("role") role: UserRole,
     @CurrentUser("userId") userId: UUIDType,
     @Body("lessonId") lessonId: UUIDType,
-    @UploadedFile() uploadedFile: Express.Multer.File | null,
+    @UploadedFile(
+      getBaseFileTypePipe(buildFileTypeRegex(ALLOWED_AVATAR_IMAGE_TYPES)).build({
+        fileIsRequired: false,
+        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
+      }),
+    )
+    uploadedFile: Express.Multer.File | null,
   ) {
     await this.adminLessonsService.uploadAvatarToAiMentorLesson(
       userId,

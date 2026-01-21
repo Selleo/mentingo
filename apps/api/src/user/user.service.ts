@@ -64,14 +64,7 @@ import {
   UserSortFields,
 } from "./schemas/userQuery";
 import { USER_ROLES, type UserRole } from "./schemas/userRoles";
-import {
-  AVATAR_ALLOWED_TYPES,
-  AVATAR_ASPECT_RATIO,
-  AVATAR_MAX_RESOLUTION,
-  AVATAR_MAX_SIZE,
-  USER_LONG_INACTIVITY_DAYS,
-  USER_SHORT_INACTIVITY_DAYS,
-} from "./user.constants";
+import { USER_LONG_INACTIVITY_DAYS, USER_SHORT_INACTIVITY_DAYS } from "./user.constants";
 
 import type {
   UpdateUserProfileBody,
@@ -335,12 +328,7 @@ export class UserService {
     }
 
     if (userAvatar) {
-      const { fileKey } = await this.fileService.uploadFile(userAvatar, "user-avatars", undefined, {
-        allowedTypes: AVATAR_ALLOWED_TYPES,
-        maxSize: AVATAR_MAX_SIZE,
-        maxResolution: AVATAR_MAX_RESOLUTION,
-        aspectRatio: AVATAR_ASPECT_RATIO,
-      });
+      const { fileKey } = await this.fileService.uploadFile(userAvatar, "user-avatars", undefined);
       data.userAvatar = fileKey;
     }
 
@@ -603,7 +591,9 @@ export class UserService {
 
     if (!creator) {
       const createPasswordEmail = new CreatePasswordReminderEmail({
-        createPasswordLink: `${process.env.CORS_ORIGIN}/auth/create-new-password?createToken=${token}&email=${createdUser.email}`,
+        createPasswordLink: `${
+          process.env.CI ? "http://localhost:5173" : process.env.CORS_ORIGIN
+        }/auth/create-new-password?createToken=${token}&email=${createdUser.email}`,
         ...defaultEmailSettings,
       });
 

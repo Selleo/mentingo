@@ -73,16 +73,16 @@ const QuestionSelector = ({ addQuestion, disabled = false }: QuestionSelectorPro
       label: t("adminCourseView.curriculum.lesson.other.detailedResponse"),
       icon: QuestionIcons.DetailedResponse,
     },
-    {
-      type: QuestionType.MATCH_WORDS,
-      label: t("adminCourseView.curriculum.lesson.other.matchWords"),
-      icon: QuestionIcons.MatchWords,
-    },
-    {
-      type: QuestionType.SCALE_1_5,
-      label: t("adminCourseView.curriculum.lesson.other.scale1_5"),
-      icon: QuestionIcons.Scale_1_5,
-    },
+    // {
+    //   type: QuestionType.MATCH_WORDS,
+    //   label: t("adminCourseView.curriculum.lesson.other.matchWords"),
+    //   icon: QuestionIcons.MatchWords,
+    // },
+    // {
+    //   type: QuestionType.SCALE_1_5,
+    //   label: t("adminCourseView.curriculum.lesson.other.scale1_5"),
+    //   icon: QuestionIcons.Scale_1_5,
+    // },
   ];
 
   if (disabled) return null;

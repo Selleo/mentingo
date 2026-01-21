@@ -17,7 +17,7 @@ class CourseActions {
   constructor(private readonly page: Page) {}
 
   async searchCourse(): Promise<void> {
-    await this.page.getByRole("link", { name: "Courses" }).click();
+    await this.page.getByRole("button", { name: "Courses" }).getByRole("link").click();
     await expect(this.page.locator(".h-min > button:nth-child(2)")).toBeVisible();
     await this.page.getByText("Available Courses").click();
     await this.page.getByPlaceholder(/Search by title/).fill(TEST_COURSE.name);
@@ -26,9 +26,13 @@ class CourseActions {
 
   async openCourse(): Promise<void> {
     await this.page.getByRole("main").getByRole("button").nth(2).click();
+    await expect(this.page.getByRole("heading", { name: "Manage Courses" })).toBeVisible();
     await this.page.getByText(TEST_COURSE.name).click();
-    await this.page.waitForURL(URL_PATTERNS.course);
-    await expect(this.page).toHaveURL(URL_PATTERNS.course);
+    const combinedRegex = new RegExp(
+      [URL_PATTERNS.course.source, URL_PATTERNS.course2.source].join("|"),
+    );
+    await this.page.waitForURL(combinedRegex);
+    await expect(this.page).toHaveURL(combinedRegex);
     await this.verifyCourseContent();
   }
 

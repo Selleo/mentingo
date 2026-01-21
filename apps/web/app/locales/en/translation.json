@@ -39,6 +39,16 @@
     "error": {
       "somethingWentWrong": "Oops! Something went wrong."
     },
+    "loader": {
+      "textSequence": {
+        "aiMentor": {
+          "warmingUp": "Warming up AI mentor...",
+          "preparingSimulation": "Preparing simulation for you...",
+          "buildingContext": "Building scenario context...",
+          "takingLonger": "This is taking longer than usual..."
+        }
+      }
+    },
     "other": {
       "active": "Active",
       "archived": "Archived",
@@ -249,7 +259,10 @@
       "availableCourses": "Available Courses",
       "noSearchResults": "No search results for:",
       "announcements": "Announcements",
-      "lessons": "Lessons"
+      "lessons": "Lessons",
+      "news": "News",
+      "articles": "Articles",
+      "qa": "Q&A"
     }
   },
   "providerInformation": {
@@ -1030,6 +1043,8 @@
       "generateMissingTranslationsDescription": "Are you sure you want to generate missing translations? This action may take a few moments."
     },
     "toast": {
+      "courseNotFound": "Course not found",
+      "candidateNotAvailable": "Course ownership cannot be transferred to this user",
       "createCourseSuccessfully": "Course created successfully",
       "courseUpdatedSuccessfully": "Course updated successfully",
       "certificateUpdatedSuccessfully": "Certificate updated successfully",
@@ -1045,7 +1060,8 @@
       "noMissingTranslations": "No missing translations",
       "mismatchContentLength": "The number of translations does not match the number of generated translations",
       "translationsGeneratedSuccessfully": "Translations generated successfully",
-      "maxOneVideoUploaded": "You cannot upload more than 1 video."
+      "maxOneVideoUploaded": "You cannot upload more than 1 video.",
+      "successfullyTransferredCourseOwnership": "Course ownership transferred successfully"
     },
     "settings": {
       "breadcrumbs": {
@@ -1106,7 +1122,20 @@
       "header": "Create new course",
       "subHeader": "Provide the details to set up a new course. You’ll have more options to customize it later.",
       "editHeader": "Basic settings",
-      "editSubHeader": "Fill in the details to create a new course."
+      "editSubHeader": "Fill in the details to create a new course.",
+      "transferOwnership": {
+        "title": "Transfer ownership",
+        "description": "Transfer this course to another user. They will become the new owner and have full control over the course.",
+        "label": "Select new owner",
+        "placeholder": "Choose a user...",
+        "button": "Transfer",
+        "dialog": {
+          "title": "Confirm transfer",
+          "description": "You are about to transfer this course to {{user}}. This action cannot be undone.",
+          "confirm": "Confirm transfer",
+          "cancel": "Cancel"
+        }
+      }
     },
     "curriculum": {
       "emptyState": {
@@ -2012,6 +2041,10 @@
     }
   },
   "files": {
+    "toast": {
+      "invalidData": "File upload failed - invalid file data",
+      "contentTypeMismatch": "File content type does not match the provided content type"
+    },
     "import": {
       "noFileUploaded": "No file uploaded",
       "invalidFileData": "File upload failed - invalid file data",
@@ -2059,6 +2092,35 @@
       }
     }
   },
+  "loginFilesUpload": {
+    "header": "Login page files",
+    "subHeader": "Add up to {{count}} files and name each one.",
+    "emptyState": "No files added yet.",
+    "selectedFile": "Selected file",
+    "unnamedFile": "Unnamed file",
+    "deleteDialog": {
+      "title": "Remove file?",
+      "description": "This will remove \"{{name}}\" from the login page.",
+      "confirm": "Delete file"
+    },
+    "previewDialog": {
+      "subtitle": "Login page file preview",
+      "loading": "Loading preview...",
+      "error": "We couldn't load a preview for this file."
+    },
+    "fileName": {
+      "label": "Name",
+      "placeholder": "Enter name"
+    },
+    "toast": {
+      "invalidFileType": "Invalid file type. Please upload a valid file.",
+      "successfullyUploadedFile": "File uploaded successfully",
+      "maxResourceCount": "Max resource count reached ({{count}})",
+      "resourceNotFound": "Resource not found",
+      "successfullyDeletedFile": "File deleted successfully"
+    },
+    "addButton": "Add new file"
+  },
   "richTextEditor": {
     "placeholder": {
       "lineHint": "Paste a YouTube/Vimeo/Canva link, add Google Docs, or upload a file."
@@ -2090,6 +2152,29 @@
       "upload": {
         "uploadFailed": "File upload failed",
         "tooltip": "Upload: Allows you to upload file"
+      }
+    }
+  },
+  "richText": {
+    "video": {
+      "tooltip": {
+        "bunnyMissing": "Video is not available. Please check Bunny CDN configuration."
+      },
+      "ariaLabel": {
+        "drag": "Drag video embed",
+        "remove": "Remove video embed"
+      }
+    },
+    "presentation": {
+      "ariaLabel": {
+        "drag": "Drag presentation embed",
+        "remove": "Remove presentation embed"
+      }
+    },
+    "downloadableFile": {
+      "ariaLabel": {
+        "drag": "Drag file",
+        "remove": "Remove downloadable file"
       }
     }
   },

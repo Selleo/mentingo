@@ -12,15 +12,18 @@ import {
 } from "~/api/queries/useCurrentThreadMessages";
 import { queryClient } from "~/api/queryClient";
 import { Icon } from "~/components/Icon";
+import { LoaderWithTextSequence } from "~/components/LoaderWithTextSequence";
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
-import Loader from "~/modules/common/Loader/Loader";
 import ChatLoader from "~/modules/Courses/Lesson/AiMentorLesson/components/ChatLoader";
 import ChatMessage from "~/modules/Courses/Lesson/AiMentorLesson/components/ChatMessage";
 import { LessonForm } from "~/modules/Courses/Lesson/AiMentorLesson/components/LessonForm";
 import RetakeModal from "~/modules/Courses/Lesson/AiMentorLesson/components/RetakeModal";
 
 import type { GetLessonByIdResponse } from "~/api/generated-api";
+
+const apiUrl = import.meta.env.VITE_API_URL;
+const chatUrl = apiUrl ? `${apiUrl}/api/ai/chat` : "/api/ai/chat";
 
 interface AiMentorLessonProps {
   lesson: GetLessonByIdResponse["data"];
@@ -38,16 +41,17 @@ const AiMentorLesson = ({ lesson, lessonLoading, isPreviewMode = false }: AiMent
   );
   const { mutateAsync: retakeLesson } = useRetakeLesson(lesson.id, courseId);
 
-  const { data: currentThreadMessages } = useCurrentThreadMessages({
-    isThreadLoading: lessonLoading,
-    threadId: lesson.threadId,
-  });
+  const { data: currentThreadMessages, isLoading: isCurrentThreadMessagesLoading } =
+    useCurrentThreadMessages({
+      isThreadLoading: lessonLoading,
+      threadId: lesson.threadId,
+    });
 
   const [showRetakeModal, setShowRetakeModal] = useState(false);
 
   const { messages, input, setMessages, handleInputChange, handleSubmit, status, setInput } =
     useChat({
-      api: "/api/ai/chat",
+      api: chatUrl,
       body: {
         threadId: lesson.threadId ?? "",
       },
@@ -59,6 +63,7 @@ const AiMentorLesson = ({ lesson, lessonLoading, isPreviewMode = false }: AiMent
             content: body.messages[body.messages.length - 1]?.content || "",
             threadId: lesson.threadId ?? "",
           }),
+          credentials: "include",
         });
       },
       onFinish: async () => {
@@ -121,7 +126,9 @@ const AiMentorLesson = ({ lesson, lessonLoading, isPreviewMode = false }: AiMent
         />
       )}
 
-      {lessonLoading && <Loader />}
+      {lessonLoading || isCurrentThreadMessagesLoading ? (
+        <LoaderWithTextSequence preset="aiMentor" />
+      ) : null}
       <div
         ref={messagesContainerRef}
         className="flex w-full grow max-w-full relative flex-col gap-y-4 overflow-y-scroll"

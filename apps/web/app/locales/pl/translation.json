@@ -40,6 +40,16 @@
     "error": {
       "somethingWentWrong": "Ups! Coś poszło nie tak."
     },
+    "loader": {
+      "textSequence": {
+        "aiMentor": {
+          "warmingUp": "Rozgrzewam AI mentora...",
+          "preparingSimulation": "Przygotowuję dla Ciebie symulację...",
+          "buildingContext": "Buduję kontekst scenariusza...",
+          "takingLonger": "To trwa dłużej niż zwykle..."
+        }
+      }
+    },
     "other": {
       "active": "Aktywny",
       "archived": "Zarchiwizowany",
@@ -252,7 +262,10 @@
       "availableCourses": "Dostępne kursy",
       "noSearchResults": "Brak wyników wyszukiwania dla:",
       "announcements": "Powiadomienia",
-      "lessons": "Lekcje"
+      "lessons": "Lekcje",
+      "news": "Aktualności",
+      "articles": "Artykuły",
+      "qa": "Pytania i odpowiedzi"
     }
   },
   "providerInformation": {
@@ -1013,6 +1026,8 @@
       "generateMissingTranslationsDescription": "Czy na pewno chcesz wygenerować brakujące tłumaczenia? Ta akcja może zająć kilka chwil."
     },
     "toast": {
+      "courseNotFound": "Nie znaleziono kursu",
+      "candidateNotAvailable": "Nie można przenieść własności kursu na tego użytkownika",
       "createCourseSuccessfully": "Kurs utworzony pomyślnie",
       "courseUpdatedSuccessfully": "Kurs zaktualizowany pomyślnie",
       "certificateUpdatedSuccessfully": "Certyfikat zaktualizowany pomyślnie",
@@ -1030,7 +1045,8 @@
       "noMissingTranslations": "Brak brakujących tłumaczeń",
       "mismatchContentLength": "Liczba tłumaczeń nie jest równa liczbie wygenerowanych tłumaczeń",
       "translationsGeneratedSuccessfully": "Tłumaczenia wygenerowane pomyślnie",
-      "maxOneVideoUploaded": "Nie możesz przesłać więcej niż 1 wideo."
+      "maxOneVideoUploaded": "Nie możesz przesłać więcej niż 1 wideo.",
+      "successfullyTransferredCourseOwnership": "Własność kursu została pomyślnie przeniesiona"
     },
     "settings": {
       "breadcrumbs": {
@@ -1091,7 +1107,20 @@
       "header": "Utwórz nowy kurs",
       "subHeader": "Podaj szczegóły, aby utworzyć nowy kurs. Będziesz miał więcej opcji dostosowania później.",
       "editHeader": "Podstawowe ustawienia",
-      "editSubHeader": "Wypełnij dane, aby utworzyć nowy kurs."
+      "editSubHeader": "Wypełnij dane, aby utworzyć nowy kurs.",
+      "transferOwnership": {
+        "title": "Przekaż własność",
+        "description": "Przekaż ten kurs innemu użytkownikowi. Zostanie nowym właścicielem i będzie miał pełną kontrolę nad kursem.",
+        "label": "Wybierz nowego właściciela",
+        "placeholder": "Wybierz użytkownika...",
+        "button": "Przekaż",
+        "dialog": {
+          "title": "Potwierdź przekazanie",
+          "description": "Zamierzasz przekazać ten kurs użytkownikowi {{user}}. Tego działania nie można cofnąć.",
+          "confirm": "Potwierdź przekazanie",
+          "cancel": "Anuluj"
+        }
+      }
     },
     "curriculum": {
       "emptyState": {
@@ -2031,6 +2060,10 @@
     }
   },
   "files": {
+    "toast": {
+      "invalidData": "Nie udało się przesłać pliku - nieprawidłowe dane pliku",
+      "contentTypeMismatch": "Typ zawartości pliku nie odpowiada podanemu typowi"
+    },
     "import": {
       "noFileUploaded": "Nie przesłano pliku",
       "invalidFileData": "Nie udało się przesłać pliku - nieprawidłowe dane pliku",
@@ -2078,6 +2111,35 @@
       }
     }
   },
+  "loginFilesUpload": {
+    "header": "Pliki strony logowania",
+    "subHeader": "Dodaj maksymalnie {{count}} pliki i nadaj każdemu nazwę.",
+    "emptyState": "Brak dodanych plików.",
+    "selectedFile": "Wybrany plik",
+    "unnamedFile": "Plik bez nazwy",
+    "deleteDialog": {
+      "title": "Usunąć plik?",
+      "description": "Spowoduje to usunięcie „{{name}}” ze strony logowania.",
+      "confirm": "Usuń plik"
+    },
+    "previewDialog": {
+      "subtitle": "Podgląd pliku strony logowania",
+      "loading": "Ładowanie podglądu...",
+      "error": "Nie udało się wczytać podglądu tego pliku."
+    },
+    "fileName": {
+      "label": "Nazwa",
+      "placeholder": "Wpisz nazwę"
+    },
+    "addButton": "Dodaj nowy plik",
+    "toast": {
+      "invalidFileType": "Nieprawidłowy typ pliku. Wybierz poprawny plik.",
+      "successfullyUploadedFile": "Plik został pomyślnie przesłany",
+      "maxResourceCount": "Osiągnięto maksymalną liczbę zasobów ({{count}})",
+      "resourceNotFound": "Nie znaleziono zasobu",
+      "successfullyDeletedFile": "Plik został pomyślnie usunięty"
+    }
+  },
   "richTextEditor": {
     "placeholder": {
       "lineHint": "Wklej link YouTube/Vimeo/Canva, dodaj Google Docs lub wgraj plik."
@@ -2109,6 +2171,29 @@
       "upload": {
         "uploadFailed": "Nie udało się przesłać pliku",
         "tooltip": "Prześlij: Pozwala przesłać plik"
+      }
+    }
+  },
+  "richText": {
+    "video": {
+      "tooltip": {
+        "bunnyMissing": "Wideo jest niedostępne. Sprawdź konfigurację Bunny CDN."
+      },
+      "ariaLabel": {
+        "drag": "Przeciągnij osadzone wideo",
+        "remove": "Usuń osadzone wideo"
+      }
+    },
+    "presentation": {
+      "ariaLabel": {
+        "drag": "Przeciągnij osadzoną prezentację",
+        "remove": "Usuń osadzoną prezentację"
+      }
+    },
+    "downloadableFile": {
+      "ariaLabel": {
+        "drag": "Przeciągnij plik",
+        "remove": "Usuń plik do pobrania"
       }
     }
   },

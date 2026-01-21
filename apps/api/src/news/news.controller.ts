@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpStatus,
   Param,
   Patch,
   Post,
@@ -13,7 +14,15 @@ import {
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes, ApiOperation } from "@nestjs/swagger";
-import { SupportedLanguages } from "@repo/shared";
+import {
+  ALLOWED_EXCEL_FILE_TYPES,
+  ALLOWED_LESSON_IMAGE_FILE_TYPES,
+  ALLOWED_PDF_FILE_TYPES,
+  ALLOWED_PRESENTATION_FILE_TYPES,
+  ALLOWED_VIDEO_FILE_TYPES,
+  ALLOWED_WORD_FILE_TYPES,
+  SupportedLanguages,
+} from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
@@ -24,6 +33,8 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
+import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
+import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
@@ -61,8 +72,9 @@ export class NewsController {
   async getDraftNewsList(
     @Query("language") language: SupportedLanguages,
     @Query("page") page = 1,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<PaginatedResponse<GetNewsResponse[]>> {
-    const newsList = await this.newsService.getDraftNewsList(language, page);
+    const newsList = await this.newsService.getDraftNewsList(language, page, currentUser);
 
     return new PaginatedResponse(newsList);
   }
@@ -75,9 +87,15 @@ export class NewsController {
   @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   async generateNewsPreview(
     @Body() body: { newsId: UUIDType; language: SupportedLanguages; content: string },
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ parsedContent: string }>> {
     const { newsId, language, content } = body;
-    const previewContent = await this.newsService.generateNewsPreview(newsId, language, content);
+    const previewContent = await this.newsService.generateNewsPreview(
+      newsId,
+      language,
+      content,
+      currentUser,
+    );
 
     return new BaseResponse({ parsedContent: previewContent });
   }
@@ -107,15 +125,17 @@ export class NewsController {
     request: [
       { type: "query", name: "language", schema: supportedLanguagesSchema },
       { type: "query", name: "page", schema: Type.Optional(Type.Number({ minimum: 1 })) },
+      { type: "query", name: "searchQuery", schema: Type.Optional(Type.String()) },
     ],
     response: paginatedNewsListResponseSchema,
   })
   async getNewsList(
     @Query("language") language: SupportedLanguages,
     @Query("page") page = 1,
+    @Query("searchQuery") searchQuery?: string,
     @CurrentUser() currentUser?: CurrentUserType,
   ): Promise<PaginatedResponse<GetNewsResponse[]>> {
-    const newsList = await this.newsService.getNewsList(language, page, currentUser);
+    const newsList = await this.newsService.getNewsList(language, page, currentUser, searchQuery);
 
     return new PaginatedResponse(newsList);
   }
@@ -149,7 +169,13 @@ export class NewsController {
   async updateNews(
     @Param("id") id: string,
     @Body(new ValidateMultipartPipe(updateNewsSchema)) updateNewsBody: UpdateNews,
-    @UploadedFile() cover?: Express.Multer.File,
+    @UploadedFile(
+      getBaseFileTypePipe(buildFileTypeRegex(ALLOWED_LESSON_IMAGE_FILE_TYPES)).build({
+        fileIsRequired: false,
+        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
+      }),
+    )
+    cover?: Express.Multer.File,
     @CurrentUser() currentUser?: CurrentUserType,
   ) {
     const updatedNews = await this.newsService.updateNews(id, updateNewsBody, currentUser, cover);
@@ -244,7 +270,19 @@ export class NewsController {
   @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   async uploadFileToNews(
     @Param("id") id: string,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile(
+      getBaseFileTypePipe(
+        buildFileTypeRegex([
+          ...ALLOWED_PDF_FILE_TYPES,
+          ...ALLOWED_EXCEL_FILE_TYPES,
+          ...ALLOWED_WORD_FILE_TYPES,
+          ...ALLOWED_VIDEO_FILE_TYPES,
+          ...ALLOWED_LESSON_IMAGE_FILE_TYPES,
+          ...ALLOWED_PRESENTATION_FILE_TYPES,
+        ]),
+      ).build({ errorHttpStatusCode: HttpStatus.BAD_REQUEST }),
+    )
+    file: Express.Multer.File,
     @Body("language") language: SupportedLanguages,
     @Body("title") title: string,
     @Body("description") description: string,

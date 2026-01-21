@@ -7,6 +7,9 @@ import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../../api-client";
 
+import type { AxiosError } from "axios";
+import type { ApiErrorResponse } from "~/api/types";
+
 interface UseUploadCertificateBackgroundImageOptions {
   certificateBackgroundImage?: File;
 }
@@ -30,9 +33,11 @@ export function useUploadCertificateBackgroundImage() {
 
       toast({ description: t("certificateBackgroundUpload.toast.success") });
     },
-    onError: () => {
+    onError: (error: AxiosError) => {
+      const apiResponseData = error.response?.data as ApiErrorResponse;
+
       toast({
-        description: t("certificateBackgroundUpload.toast.error"),
+        description: t(apiResponseData.message),
         variant: "destructive",
       });
     },

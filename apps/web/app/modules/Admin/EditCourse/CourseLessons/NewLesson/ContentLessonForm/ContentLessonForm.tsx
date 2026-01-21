@@ -5,6 +5,7 @@ import {
   ALLOWED_PRESENTATION_FILE_TYPES,
   ALLOWED_VIDEO_FILE_TYPES,
   ALLOWED_WORD_FILE_TYPES,
+  DEFAULT_TUS_CHUNK_SIZE,
 } from "@repo/shared";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -32,6 +33,7 @@ import { useContentLessonForm } from "./hooks/useContentLessonForm";
 import type { Chapter, Lesson } from "../../../EditCourse.types";
 import type { SupportedLanguages } from "@repo/shared";
 import type { Editor as TiptapEditor } from "@tiptap/react";
+import type { InitVideoUploadResponse } from "~/api/generated-api";
 
 type ContentLessonProps = {
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
@@ -78,34 +80,37 @@ const ContentLessonForm = ({
 
   const buildFileFingerprint = (file: File) => `${file.name}:${file.size}:${file.lastModified}`;
 
-  const handleVideoTusUpload = async (file: File, editor?: TiptapEditor | null) => {
+  const handleVideoTusUpload = async (
+    file: File,
+    session: InitVideoUploadResponse,
+    editor?: TiptapEditor | null,
+  ) => {
+    if (!session.tusEndpoint || !session.tusHeaders || !session.expiresAt) {
+      throw new Error("Missing upload configuration");
+    }
+
     const existingUpload = getUploadForFile(file);
-    const session =
-      existingUpload ??
-      (await initVideoUpload({
+
+    const tusHeaders = normalizeTusHeaders(session.tusHeaders ?? {});
+    const tusFingerprint = `${session.provider}-tus:${session.uploadId}:${buildFileFingerprint(
+      file,
+    )}`;
+
+    if (!existingUpload) {
+      saveUpload({
+        uploadId: session.uploadId,
+        bunnyGuid: session.bunnyGuid,
+        fileKey: session.fileKey,
+        provider: session.provider,
+        tusEndpoint: session.tusEndpoint,
+        tusHeaders,
+        expiresAt: session.expiresAt,
         filename: file.name,
         sizeBytes: file.size,
-        mimeType: file.type,
-        title: file.name,
-        resource: "lesson-content",
-        lessonId: lessonToEdit?.id,
-      }));
-
-    const tusHeaders = normalizeTusHeaders(session.tusHeaders);
-    const tusFingerprint = `bunny-tus:${session.uploadId}:${buildFileFingerprint(file)}`;
-
-    saveUpload({
-      uploadId: session.uploadId,
-      bunnyGuid: session.bunnyGuid,
-      fileKey: session.fileKey,
-      tusEndpoint: session.tusEndpoint,
-      tusHeaders,
-      expiresAt: session.expiresAt,
-      filename: file.name,
-      sizeBytes: file.size,
-      lastModified: file.lastModified,
-      resourceId: session.resourceId,
-    });
+        lastModified: file.lastModified,
+        resourceId: session.resourceId,
+      });
+    }
 
     setIsVideoUploading(true);
     setVideoUploadProgress(0);
@@ -121,9 +126,11 @@ const ContentLessonForm = ({
         const upload = new tus.Upload(file, {
           endpoint: session.tusEndpoint,
           headers: tusHeaders,
+          chunkSize: session.partSize ?? DEFAULT_TUS_CHUNK_SIZE,
           metadata: {
             filename: file.name,
             filetype: file.type,
+            uploadId: session.uploadId,
           },
           retryDelays: [0, 1000, 3000, 5000, 10000],
           fingerprint: async () => tusFingerprint,
@@ -163,10 +170,14 @@ const ContentLessonForm = ({
     if (!session.resourceId) return;
 
     const resourceUrl = `${baseUrl}/api/lesson/lesson-resource/${session.resourceId}`;
+
     editor
       ?.chain()
       .insertContent("<br />")
-      .setVideoEmbed({ src: resourceUrl, sourceType: "internal" })
+      .setVideoEmbed({
+        src: resourceUrl,
+        sourceType: session.provider === "s3" ? "external" : "internal",
+      })
       .run();
   };
 
@@ -182,7 +193,22 @@ const ContentLessonForm = ({
 
     if (isVideo) {
       try {
-        await handleVideoTusUpload(file, editor);
+        const existingUpload = getUploadForFile(file);
+        const session: InitVideoUploadResponse = existingUpload
+          ? {
+              ...existingUpload,
+              provider: existingUpload.provider ?? "bunny",
+            }
+          : await initVideoUpload({
+              filename: file.name,
+              sizeBytes: file.size,
+              mimeType: file.type,
+              title: file.name,
+              resource: "lesson-content",
+              lessonId: lessonToEdit?.id,
+            });
+
+        await handleVideoTusUpload(file, session, editor);
       } catch (error) {
         console.error("Error uploading video:", error);
         toast({

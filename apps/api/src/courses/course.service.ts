@@ -11,6 +11,7 @@ import {
 import { EventBus } from "@nestjs/cqrs";
 import { BaseEmailTemplate } from "@repo/email-templates";
 import { COURSE_ENROLLMENT, SUPPORTED_LANGUAGES } from "@repo/shared";
+import { load as loadHtml } from "cheerio";
 import {
   and,
   between,
@@ -39,7 +40,9 @@ import { EmailService } from "src/common/emails/emails.service";
 import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterConditions";
 import { buildJsonbField, deleteJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
 import { UpdateHasCertificateEvent } from "src/courses/events/updateHasCertificate.event";
+import { getCourseTsVector } from "src/courses/utils/courses.utils";
 import { EnvService } from "src/env/services/env.service";
 import { CreateCourseEvent, UpdateCourseEvent, EnrollCourseEvent } from "src/events";
 import { UsersAssignedToCourseEvent } from "src/events/user/user-assigned-to-course.event";
@@ -71,6 +74,7 @@ import {
   studentCourses,
   studentLessonProgress,
   users,
+  courseStudentsStats,
 } from "src/storage/schema";
 import { StripeService } from "src/stripe/stripe.service";
 import { USER_ROLES } from "src/user/schemas/userRoles";
@@ -98,11 +102,13 @@ import type {
   AllStudentCoursesResponse,
   CourseAverageQuizScorePerQuiz,
   CourseAverageQuizScoresResponse,
+  CourseOwnershipBody,
   CourseStatisticsQueryBody,
   CourseStatisticsResponse,
   CourseStatusDistribution,
   EnrolledCourseGroupsPayload,
   LessonSequenceEnabledResponse,
+  TransferCourseOwnershipRequestBody,
 } from "./schemas/course.schema";
 import type { CourseLookupResponse } from "./schemas/courseLookupResponse.schema";
 import type {
@@ -127,6 +133,7 @@ import type { UpdateCourseBody } from "./schemas/updateCourse.schema";
 import type { UpdateCourseSettings } from "./schemas/updateCourseSettings.schema";
 import type { CoursesSettings } from "./types/settings";
 import type { SupportedLanguages } from "@repo/shared";
+import type { SQL } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { CourseActivityLogSnapshot } from "src/activity-logs/types";
@@ -180,6 +187,7 @@ export class CourseService {
     const { sortOrder, sortedField } = getSortOptions(sort);
 
     const conditions = this.getFiltersConditions(filters, false);
+    const orderConditions = this.getOrderConditions(filters);
 
     if (currentUserRole === USER_ROLES.CONTENT_CREATOR && currentUserId) {
       conditions.push(eq(courses.authorId, currentUserId));
@@ -226,7 +234,10 @@ export class CourseService {
         courses.availableLocales,
         courses.baseLanguage,
       )
-      .orderBy(sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)));
+      .orderBy(
+        ...orderConditions,
+        sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)),
+      );
 
     const dynamicQuery = queryDB.$dynamic();
     const paginatedQuery = addPagination(dynamicQuery, page, perPage);
@@ -290,6 +301,8 @@ export class CourseService {
       ];
       conditions.push(...this.getFiltersConditions(filters, false));
 
+      const orderConditions = this.getOrderConditions(filters);
+
       const queryDB = trx
         .select(this.getSelectField(language))
         .from(studentCourses)
@@ -324,7 +337,10 @@ export class CourseService {
           courses.baseLanguage,
           groupCourses.dueDate,
         )
-        .orderBy(sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)));
+        .orderBy(
+          ...orderConditions,
+          sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)),
+        );
 
       const dynamicQuery = queryDB.$dynamic();
       const paginatedQuery = addPagination(dynamicQuery, page, perPage);
@@ -518,7 +534,9 @@ export class CourseService {
       );
 
       const conditions = [eq(courses.status, "published")];
-      conditions.push(...this.getFiltersConditions(filters));
+      conditions.push(...(this.getFiltersConditions(filters) as SQL<unknown>[]));
+
+      const orderConditions = this.getOrderConditions(filters);
 
       if (availableCourseIds.length > 0) {
         conditions.push(inArray(courses.id, availableCourseIds));
@@ -589,7 +607,10 @@ export class CourseService {
           courses.baseLanguage,
           groupCourses.dueDate,
         )
-        .orderBy(sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)));
+        .orderBy(
+          ...orderConditions,
+          sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)),
+        );
 
       const dynamicQuery = queryDB.$dynamic();
       const paginatedQuery = addPagination(dynamicQuery, page, perPage);
@@ -1963,6 +1984,8 @@ export class CourseService {
             .from(lessons)
             .where(eq(lessons.chapterId, chapter.id));
 
+          if (chapterLessons.length === 0) return;
+
           await trx
             .insert(studentLessonProgress)
             .values(
@@ -2157,50 +2180,149 @@ export class CourseService {
   }
 
   private async addS3SignedUrlsToLessonsAndQuestions(lessons: AdminLessonWithContentSchema[]) {
+    const bunnyAvailable = await this.fileService.isBunnyConfigured();
+
     return await Promise.all(
-      lessons.map(async (lesson) => {
-        const updatedLesson = { ...lesson };
-        if (lesson.fileS3Key && lesson.type === LESSON_TYPES.CONTENT) {
-          if (!lesson.fileS3Key.startsWith("https://")) {
-            try {
-              const signedUrl = await this.fileService.getFileUrl(lesson.fileS3Key);
-              return { ...updatedLesson, fileS3SignedUrl: signedUrl };
-            } catch (error) {
-              console.error(`Failed to get signed URL for ${lesson.fileS3Key}:`, error);
-            }
+      lessons.map(async (lesson) => this.decorateLessonWithUrlsAndErrors(lesson, bunnyAvailable)),
+    );
+  }
+
+  private async decorateLessonWithUrlsAndErrors(
+    lesson: AdminLessonWithContentSchema,
+    bunnyAvailable: boolean,
+  ) {
+    let updatedLesson = this.normalizeLessonVideoEmbeds(lesson, bunnyAvailable);
+
+    updatedLesson = await this.attachLessonFileSignedUrl(updatedLesson, bunnyAvailable);
+    updatedLesson = await this.attachAiMentorAvatarUrl(updatedLesson);
+    updatedLesson = await this.attachQuestionSignedUrls(updatedLesson);
+
+    return updatedLesson;
+  }
+
+  private normalizeLessonVideoEmbeds(
+    lesson: AdminLessonWithContentSchema,
+    bunnyAvailable: boolean,
+  ) {
+    const updatedLesson = { ...lesson };
+
+    if (updatedLesson.type !== LESSON_TYPES.CONTENT || !updatedLesson.description) {
+      return updatedLesson;
+    }
+
+    if (!bunnyAvailable && updatedLesson.lessonResources?.length) {
+      const updatedDescription = this.markVideoEmbedsWithErrors(
+        updatedLesson.description,
+        updatedLesson.lessonResources,
+      );
+
+      if (updatedDescription) {
+        updatedLesson.description = updatedDescription;
+      }
+    }
+
+    if (bunnyAvailable) {
+      const cleanedDescription = this.clearVideoEmbedErrors(updatedLesson.description);
+      if (cleanedDescription) {
+        updatedLesson.description = cleanedDescription;
+      }
+    }
+
+    return updatedLesson;
+  }
+
+  private async attachLessonFileSignedUrl(
+    lesson: AdminLessonWithContentSchema,
+    bunnyAvailable: boolean,
+  ) {
+    if (!lesson.fileS3Key || lesson.type !== LESSON_TYPES.CONTENT) {
+      return lesson;
+    }
+
+    if (lesson.fileS3Key.startsWith("bunny-") && !bunnyAvailable) {
+      return lesson;
+    }
+
+    if (lesson.fileS3Key.startsWith("https://")) {
+      return lesson;
+    }
+
+    try {
+      const signedUrl = await this.fileService.getFileUrl(lesson.fileS3Key);
+      return { ...lesson, fileS3SignedUrl: signedUrl };
+    } catch (error) {
+      return lesson;
+    }
+  }
+
+  private async attachAiMentorAvatarUrl(lesson: AdminLessonWithContentSchema) {
+    if (lesson.type !== LESSON_TYPES.AI_MENTOR || !lesson.aiMentor?.avatarReference) {
+      return lesson;
+    }
+
+    const signedUrl = await this.fileService.getFileUrl(lesson.aiMentor.avatarReference);
+    return { ...lesson, avatarReferenceUrl: signedUrl };
+  }
+
+  private async attachQuestionSignedUrls(lesson: AdminLessonWithContentSchema) {
+    if (!lesson.questions || !Array.isArray(lesson.questions)) {
+      return lesson;
+    }
+
+    const questions = await Promise.all(
+      lesson.questions.map(async (question) => {
+        if (question.photoS3Key && !question.photoS3Key.startsWith("https://")) {
+          try {
+            const signedUrl = await this.fileService.getFileUrl(question.photoS3Key);
+            return { ...question, photoS3SingedUrl: signedUrl };
+          } catch (error) {
+            console.error(
+              `Failed to get signed URL for question thumbnail ${question.photoS3Key}:`,
+              error,
+            );
           }
         }
-
-        if (lesson.type === LESSON_TYPES.AI_MENTOR && lesson.aiMentor?.avatarReference) {
-          const signedUrl = await this.fileService.getFileUrl(lesson.aiMentor.avatarReference);
-
-          return { ...updatedLesson, avatarReferenceUrl: signedUrl };
-        }
-
-        if (lesson.questions && Array.isArray(lesson.questions)) {
-          updatedLesson.questions = await Promise.all(
-            lesson.questions.map(async (question) => {
-              if (question.photoS3Key) {
-                if (!question.photoS3Key.startsWith("https://")) {
-                  try {
-                    const signedUrl = await this.fileService.getFileUrl(question.photoS3Key);
-                    return { ...question, photoS3SingedUrl: signedUrl };
-                  } catch (error) {
-                    console.error(
-                      `Failed to get signed URL for question thumbnail ${question.photoS3Key}:`,
-                      error,
-                    );
-                  }
-                }
-              }
-              return question;
-            }),
-          );
-        }
-
-        return updatedLesson;
+        return question;
       }),
     );
+
+    return { ...lesson, questions };
+  }
+
+  private markVideoEmbedsWithErrors(
+    content: string,
+    resources: Array<{ id: string; fileUrl?: string | null }>,
+  ) {
+    const $ = loadHtml(content);
+    const resourceMap = new Map(resources.map((resource) => [resource.id, resource]));
+
+    $("[data-node-type='video']").each((_, element) => {
+      const src = $(element).attr("data-src");
+      if (!src) return;
+
+      const resourceIdMatch = src.match(/lesson-resource\/([0-9a-fA-F-]{36})/);
+      const resourceId = resourceIdMatch?.[1];
+      if (!resourceId) return;
+
+      const resource = resourceMap.get(resourceId);
+      if (!resource?.fileUrl) return;
+
+      if (resource.fileUrl.startsWith("bunny-")) {
+        $(element).attr("data-error", "true");
+      }
+    });
+
+    return $.html($("body").children());
+  }
+
+  private clearVideoEmbedErrors(content: string) {
+    const $ = loadHtml(content);
+
+    $("[data-node-type='video']").each((_, element) => {
+      $(element).removeAttr("data-error");
+    });
+
+    return $.html($("body").children());
   }
 
   private getSelectField(language: SupportedLanguages) {
@@ -2231,6 +2353,21 @@ export class CourseService {
     };
   }
 
+  private getOrderConditions(filters: CoursesFilterSchema) {
+    const orderConditions = [];
+
+    if (filters.searchQuery) {
+      const searchTerm = filters.searchQuery?.trim();
+
+      const tsQuery = sql`to_tsquery('english', ${normalizeSearchTerm(searchTerm)})`;
+      const tsVector = getCourseTsVector();
+
+      orderConditions.push(sql`ts_rank(${tsVector}, ${tsQuery}) DESC`);
+    }
+
+    return orderConditions;
+  }
+
   private getFiltersConditions(filters: CoursesFilterSchema, publishedOnly = true) {
     const conditions = [];
 
@@ -2251,13 +2388,12 @@ export class CourseService {
     }
 
     if (filters.searchQuery) {
-      conditions.push(
-        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
-          courses.title
-        }) AS t(k, v) WHERE v ILIKE ${`%${filters.searchQuery}%`}) OR EXISTS (SELECT 1 FROM jsonb_each_text(${
-          courses.description
-        }) AS t(k, v) WHERE v ILIKE ${`%${filters.searchQuery}%`})`,
-      );
+      const searchTerm = filters.searchQuery?.trim();
+
+      const tsQuery = sql`to_tsquery('english', ${normalizeSearchTerm(searchTerm)})`;
+      const tsVector = getCourseTsVector();
+
+      conditions.push(sql`${tsVector} @@ ${tsQuery}`);
     }
 
     if (filters.category) {
@@ -2282,7 +2418,7 @@ export class CourseService {
       conditions.push(eq(courses.status, "published"));
     }
 
-    return conditions ?? undefined;
+    return conditions;
   }
 
   private getColumnToSortBy(sort: CourseSortField) {
@@ -3312,6 +3448,70 @@ export class CourseService {
     });
   }
 
+  async getCourseOwnership(courseId: UUIDType) {
+    await this.getCourseExists(courseId);
+
+    const [courseOwnership] = await this.db
+      .select({
+        currentAuthor: sql<CourseOwnershipBody>`
+              json_build_object(
+                'id', ${users.id},
+                'name', ${users.firstName} || ' ' || ${users.lastName},
+                'email', ${users.email}
+              )
+            `,
+        possibleCandidates: sql<CourseOwnershipBody[]>`
+              COALESCE(
+                (
+                  SELECT json_agg(json_build_object(
+                    'id', ${users.id},
+                    'name', ${users.firstName} || ' ' || ${users.lastName},
+                    'email', ${users.email}
+                  ))
+                  FROM ${users}
+                  WHERE ${users.role} IN (${USER_ROLES.ADMIN}, ${USER_ROLES.CONTENT_CREATOR})
+                    AND ${users.id} <> ${courses.authorId}
+                ),
+                '[]'::json
+              )
+            `,
+      })
+      .from(courses)
+      .innerJoin(users, eq(courses.authorId, users.id))
+      .where(eq(courses.id, courseId))
+      .limit(1);
+
+    return courseOwnership;
+  }
+
+  async transferCourseOwnership(data: TransferCourseOwnershipRequestBody) {
+    const { userId, courseId } = data;
+
+    await this.getCourseExists(courseId);
+
+    const courseOwnership = await this.getCourseOwnership(courseId);
+
+    const candidate = courseOwnership.possibleCandidates.find(
+      (candidate) => candidate.id === userId,
+    );
+    if (!candidate) {
+      throw new BadRequestException("adminCourseView.toast.candidateNotAvailable");
+    }
+
+    await this.db.transaction(async (trx) => {
+      await trx.update(courses).set({ authorId: userId }).where(eq(courses.id, courseId));
+
+      await trx
+        .update(coursesSummaryStats)
+        .set({ authorId: userId })
+        .where(eq(coursesSummaryStats.courseId, courseId));
+      await trx
+        .update(courseStudentsStats)
+        .set({ authorId: userId })
+        .where(eq(courseStudentsStats.courseId, courseId));
+    });
+  }
+
   private *translationCandidates(
     courseId: UUIDType,
     course: Awaited<ReturnType<typeof this.getBetaCourseById>>,
@@ -3800,5 +4000,13 @@ export class CourseService {
       ilike(users.lastName, `%${searchQuery}%`),
       ilike(groups.name, `%${searchQuery}%`),
     );
+  }
+
+  private async getCourseExists(courseId: UUIDType) {
+    const [courseExists] = await this.db.select().from(courses).where(eq(courses.id, courseId));
+
+    if (!courseExists) throw new NotFoundException("adminCourseView.toast.courseNotFound");
+
+    return courseExists;
   }
 }

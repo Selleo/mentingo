@@ -15,11 +15,14 @@ export const videoInitSchema = Type.Object({
 
 export const videoInitResponseSchema = Type.Object({
   uploadId: UUIDSchema,
-  bunnyGuid: Type.String(),
+  provider: Type.Union([Type.Literal("bunny"), Type.Literal("s3")]),
   fileKey: Type.String(),
-  tusEndpoint: Type.String(),
-  tusHeaders: Type.Record(Type.String(), Type.String()),
-  expiresAt: Type.String(),
+  bunnyGuid: Type.Optional(Type.String()),
+  tusEndpoint: Type.Optional(Type.String()),
+  tusHeaders: Type.Optional(Type.Record(Type.String(), Type.String())),
+  expiresAt: Type.Optional(Type.String()),
+  multipartUploadId: Type.Optional(Type.String()),
+  partSize: Type.Optional(Type.Integer({ minimum: 1 })),
   resourceId: Type.Optional(UUIDSchema),
 });
 

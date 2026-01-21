@@ -241,6 +241,7 @@ const EditCourse = () => {
         <TabsContent value="Settings">
           <CourseSettings
             key={`${course?.id}-${courseLanguage}`}
+            authorId={course?.authorId || ""}
             courseId={course?.id || ""}
             title={course?.title}
             description={course?.description}

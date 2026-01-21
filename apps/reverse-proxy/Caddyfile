@@ -8,6 +8,13 @@ app.lms.localhost {
     }
 }
 
+api.lms.localhost {
+    handle {
+        reverse_proxy localhost:3000
+    }
+}
+
+
 mailbox.lms.localhost {
 	reverse_proxy localhost:8025
 }

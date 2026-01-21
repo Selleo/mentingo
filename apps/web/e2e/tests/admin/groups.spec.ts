@@ -56,8 +56,6 @@ const deleteAndAssert = async (page: Page, name: string) => {
     exact: true,
   });
 
-  await page.waitForLoadState("networkidle");
-
   await expect(newCell).toHaveCount(0, { timeout: 15000 });
 };
 
@@ -104,7 +102,12 @@ test.describe("Admin groups page flow", () => {
 
   test.describe("Group CRUD", () => {
     test.beforeEach(async ({ page }) => {
-      await navigateToPage(page, GROUPS_PAGE_UI.button.groups, GROUPS_PAGE_UI.header.groupHeader);
+      await navigateToPage(
+        page,
+        GROUPS_PAGE_UI.button.groups,
+        GROUPS_PAGE_UI.header.groupHeader,
+        page.getByRole("heading", { name: GROUPS_PAGE_UI.header.groupHeader }),
+      );
 
       await page.getByLabel("Select all").click();
       const zeroSelected = page.getByText("Selected (0)");
@@ -161,14 +164,28 @@ test.describe("Admin groups page flow", () => {
 
   test.describe("Assign groups to users", () => {
     test.beforeEach(async ({ page }) => {
-      await navigateToPage(page, GROUPS_PAGE_UI.button.groups, GROUPS_PAGE_UI.header.groupHeader);
+      await navigateToPage(
+        page,
+        GROUPS_PAGE_UI.button.groups,
+        GROUPS_PAGE_UI.header.groupHeader,
+        page.getByRole("heading", { name: GROUPS_PAGE_UI.header.groupHeader }),
+      );
       await createBasicGroup(page);
-      await navigateToPage(page, GROUPS_PAGE_UI.button.users, GROUPS_PAGE_UI.header.usersHeader);
+      await navigateToPage(
+        page,
+        GROUPS_PAGE_UI.button.users,
+        GROUPS_PAGE_UI.header.usersHeader,
+        page.getByRole("heading", { name: GROUPS_PAGE_UI.header.usersHeader }),
+      );
     });
 
     test.afterEach(async ({ page }) => {
-      await page.goto("/");
-      await navigateToPage(page, GROUPS_PAGE_UI.button.groups, GROUPS_PAGE_UI.header.groupHeader);
+      await navigateToPage(
+        page,
+        GROUPS_PAGE_UI.button.groups,
+        GROUPS_PAGE_UI.header.groupHeader,
+        page.getByRole("heading", { name: GROUPS_PAGE_UI.header.groupHeader }),
+      );
       await deleteAndAssert(page, GROUPS_PAGE_UI.expectedValues.groupName);
     });
 

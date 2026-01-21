@@ -127,6 +127,22 @@ export const enrolledCourseGroupsPayload = Type.Object({
   ),
 });
 
+export const courseOwnershipSchema = Type.Object({
+  id: UUIDSchema,
+  name: Type.String(),
+  email: Type.String(),
+});
+
+export const courseOwnershipCandidatesResponseSchema = Type.Object({
+  currentAuthor: courseOwnershipSchema,
+  possibleCandidates: Type.Array(courseOwnershipSchema),
+});
+
+export const transferCourseOwnershipRequestSchema = Type.Object({
+  courseId: UUIDSchema,
+  userId: UUIDSchema,
+});
+
 export const allStudentCourseProgressionSchema = Type.Array(studentCourseProgressionSchema);
 export const allStudentQuizResultsSchema = Type.Array(studentQuizResultSchema);
 export const allStudentAiMentorResultsSchema = Type.Array(studentAiMentorResultSchema);
@@ -134,6 +150,15 @@ export const allStudentAiMentorResultsSchema = Type.Array(studentAiMentorResultS
 export const allCoursesSchema = Type.Array(courseSchema);
 export const allStudentCoursesSchema = Type.Array(studentCourseSchema);
 export const allCoursesForContentCreatorSchema = Type.Array(coursesForContentCreatorSchema);
+
+export type CourseOwnershipBody = Static<typeof courseOwnershipSchema>;
+export type TransferCourseOwnershipRequestBody = Static<
+  typeof transferCourseOwnershipRequestSchema
+>;
+
+export type CourseOwnershipCandidatesResponseBody = Static<
+  typeof courseOwnershipCandidatesResponseSchema
+>;
 
 export type CourseStatisticsQueryBody = Static<typeof courseStatisticsQuerySchema>;
 

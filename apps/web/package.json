@@ -15,7 +15,7 @@
     "tsc": "tsc --noEmit",
     "test": "cross-env VITE_TEST=true VITE_API_URL=http://localhost:3000 vitest run",
     "test:e2e": "cross-env VITE_TEST=true playwright test",
-    "test:e2e:ui": "cross-env VITE_TEST=true playwright test --ui",
+    "test:e2e:ui": "cross-env VITE_TEST=true playwright codegen https://app.lms.localhost --viewport-size 1920,1000 & VITE_TEST=true playwright test --ui",
     "preview": "vite preview --port 5173"
   },
   "dependencies": {
@@ -69,8 +69,8 @@
     "@tiptap/extension-highlight": "2.27.1",
     "@tiptap/extension-image": "2.27.1",
     "@tiptap/extension-link": "2.27.1",
-    "@tiptap/extension-placeholder": "2.27.1",
     "@tiptap/extension-paragraph": "2.27.1",
+    "@tiptap/extension-placeholder": "2.27.1",
     "@tiptap/extension-task-item": "2.27.1",
     "@tiptap/extension-task-list": "2.27.1",
     "@tiptap/extension-text": "2.27.1",
@@ -124,8 +124,8 @@
     "socket.io-client": "4.8.0",
     "tailwind-merge": "2.4.0",
     "tailwindcss-animate": "1.0.7",
-    "tus-js-client": "4.1.0",
     "ts-pattern": "5.2.0",
+    "tus-js-client": "4.1.0",
     "vite-plugin-cjs-interop": "2.1.4",
     "vite-plugin-svgr": "4.2.0",
     "zod": "3.25.76",
@@ -172,8 +172,7 @@
     "vite": "^5.1.0",
     "vite-plugin-static-copy": "^1.0.6",
     "vite-tsconfig-paths": "5.0.0",
-    "vitest": "^2.0.4",
-    "webdriverio": "^8.39.1"
+    "vitest": "^2.0.4"
   },
   "engines": {
     "node": ">=20.0.0"
