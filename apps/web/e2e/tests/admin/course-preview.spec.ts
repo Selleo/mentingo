@@ -8,7 +8,6 @@ const CHAPTER_TITLE = "Arithmetic Essentials:";
 const CHAPTER_TITLE_UPDATED = "Arithmetic Essentials: Numbers and Operations (Changed title)";
 const LESSON_TITLE = "Introduction to Arithmetic (changed)";
 const NEW_CHAPTER_LABEL = "new chapter";
-const CHAPTER_OVERVIEW_PREFIX = "Mathematics Basics Quiz: Test";
 const FREEMIUM_TEST_ID =
   /^Freemium - [0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -83,16 +82,10 @@ const editChapterAndLesson = async (page: Page) => {
   await expect(page.getByRole("heading", { name: "Add content to your chapter" })).toBeVisible();
 };
 
-const moveChapterAndDelete = async (page: Page) => {
+const moveChapter = async (page: Page) => {
   const chapterToMove = page.locator(".ml-2 > div > button").first();
   const chapterDropTarget = page.locator("li:nth-child(4) > .p-0 > div");
   await chapterToMove.dragTo(chapterDropTarget);
-
-  await page.getByRole("heading", { name: CHAPTER_OVERVIEW_PREFIX }).click();
-  await expect(page.locator("span").filter({ hasText: CHAPTER_OVERVIEW_PREFIX })).toBeVisible();
-  await page.getByLabel("Delete chapter").click();
-  await expect(page.getByRole("heading", { name: "Are you sure you want to" })).toBeVisible();
-  await page.getByRole("button", { name: "Delete" }).click();
 };
 
 const validatePreview = async (page: Page) => {
@@ -104,14 +97,14 @@ const validatePreview = async (page: Page) => {
   await expect(page.getByRole("heading", { name: COURSE_HEADING })).toBeVisible();
   await expect(page.getByTestId(CHAPTER_TITLE_UPDATED)).toBeVisible();
   await expect(page.getByTestId(NEW_CHAPTER_LABEL)).toBeVisible();
-  expect(page.getByRole("heading", { name: CHAPTER_OVERVIEW_PREFIX })).not.toBeVisible();
 
   const freeLabels = await page.getByText("Free").all();
   expect(freeLabels.length).toBe(2);
-  await expect(page.getByText("03 new chapter0/0Free")).toBeVisible();
+  await expect(page.getByText("04 new chapter0/0Free")).toBeVisible();
   await page.getByTestId(CHAPTER_TITLE_UPDATED).click();
   await expect(page.getByRole("link", { name: LESSON_TITLE })).toBeVisible();
   await expect(page.getByRole("link", { name: "lesson title Content Not" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "chapter to delete" })).not.toBeVisible();
 };
 
 const changeLanguageAndVerifyIt = async (page: Page) => {
@@ -134,6 +127,20 @@ const changeLanguageAndVerifyIt = async (page: Page) => {
   await expect(page.getByRole("heading", { name: "Matematyka dla początkujących" })).toBeVisible();
 };
 
+const createAndDeleteChapter = async (page: Page) => {
+  await page.getByRole("button", { name: "Add chapter" }).click();
+  await page.getByLabel("* Title").click();
+  await page.getByLabel("* Title").fill("chapter to delete");
+  await page.getByRole("button", { name: "Save" }).click();
+  await page
+    .getByRole("heading", { name: "Add content to your chapter" })
+    .waitFor({ state: "visible", timeout: 10000 });
+  await page.getByRole("heading", { name: "chapter to delete" }).click();
+  await page.getByRole("button", { name: "Delete" }).click();
+  await expect(page.getByRole("heading", { name: "Are you sure you want to" })).toBeVisible();
+  await page.getByRole("button", { name: "Delete" }).click();
+};
+
 test.describe("Course preview", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
@@ -144,7 +151,8 @@ test.describe("Course preview", () => {
     await addChapterAndLesson(page);
     await markFreemium(page);
     await editChapterAndLesson(page);
-    await moveChapterAndDelete(page);
+    await moveChapter(page);
+    await createAndDeleteChapter(page);
     await validatePreview(page);
     await changeLanguageAndVerifyIt(page);
   });
