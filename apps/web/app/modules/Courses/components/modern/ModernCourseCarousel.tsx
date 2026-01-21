@@ -9,7 +9,6 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "~/components/ui/carousel";
-import { cn } from "~/lib/utils";
 
 import ModernCourseCard from "./ModernCourseCard";
 
@@ -69,13 +68,13 @@ const ModernCourseCarousel = ({
           setApi={setCarouselApi}
         >
           <CarouselContent
-            viewportClassName={cn(isHovered && "overflow-visible")}
+            viewportClassName="overflow-visible"
             className="gap-3 px-2 pb-6 pt-10 md:gap-4 md:px-4 md:pt-12"
           >
             {courses.map((course) => (
               <CarouselItem
                 key={course.id}
-                className="basis-[75%] sm:basis-[55%] md:basis-[40%] lg:basis-[32%] xl:basis-[26%]"
+                className="basis-[85%] sm:basis-[55%] md:basis-[50%] lg:basis-[28.5%] xl:basis-[28.5%]"
               >
                 <ModernCourseCard
                   id={course.id}

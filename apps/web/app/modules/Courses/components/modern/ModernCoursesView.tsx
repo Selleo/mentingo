@@ -96,8 +96,8 @@ const ModernCoursesView = () => {
   }
 
   return (
-    <PageWrapper isBarebones className="w-full p-0">
-      <div className="min-h-screen bg-gray-50">
+    <PageWrapper isBarebones className="w-full p-0 mb-4" wrapperClassName="h-full">
+      <div className="min-h-screen">
         <HeroBanner
           id={heroCourse.id}
           title={heroCourse.title}

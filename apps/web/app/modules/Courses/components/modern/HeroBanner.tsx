@@ -50,9 +50,7 @@ const HeroBanner = ({
             (event.target as HTMLImageElement).src = DefaultPhotoCourse;
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/70 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-white/80 via-white/30 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 h-[50%] bg-gradient-to-t from-white via-white/60 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-[50%] bg-gradient-to-t from-primary-50 via-white/60 to-transparent" />
       </div>
 
       {isHovered && trailerUrl && (
