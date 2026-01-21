@@ -13,6 +13,8 @@ type NavigationMenuItemProps = {
   className?: string;
   showBadge?: boolean;
   isFooter?: boolean;
+  showLabel?: boolean;
+  showTooltip?: boolean;
 };
 
 export function NavigationMenuItem({
@@ -21,6 +23,8 @@ export function NavigationMenuItem({
   className,
   showBadge,
   isFooter = false,
+  showLabel = true,
+  showTooltip = false,
 }: NavigationMenuItemProps) {
   return (
     <li key={item.label} className={className}>
@@ -36,6 +40,7 @@ export function NavigationMenuItem({
                   "border border-primary-200 bg-white text-primary-800 2xl:bg-primary-50": isActive,
                   "bg-white text-neutral-900": !isActive,
                   "flex-col sm:flex-row gap-y-1 sm:gap-y-0": isFooter,
+                  "justify-center": !showLabel,
                 },
               )
             }
@@ -50,7 +55,10 @@ export function NavigationMenuItem({
                 />
                 <span
                   className={cn(
-                    "line-clamp-1 overflow-hidden truncate whitespace-nowrap capitalize 2xl:sr-only 3xl:not-sr-only",
+                    "line-clamp-1 overflow-hidden truncate whitespace-nowrap capitalize",
+                    {
+                      "sr-only": !showLabel,
+                    },
                   )}
                 >
                   {item.label}
@@ -64,10 +72,9 @@ export function NavigationMenuItem({
         </TooltipTrigger>
         <TooltipContent
           side="right"
-          className={cn(
-            "hidden 2xl:block 2xl:bg-neutral-950 2xl:capitalize 2xl:text-white",
-            "3xl:hidden",
-          )}
+          className={cn("bg-neutral-950 capitalize text-white", {
+            hidden: !showTooltip,
+          })}
         >
           {item.label}
         </TooltipContent>

@@ -22,6 +22,9 @@ interface ExpandableNavigationMenuProps {
   expandableIcon: IconName;
   isExpandable: boolean;
   closeOnClickOutside?: boolean;
+  showNavigationLabels: boolean;
+  shouldShowTooltips: boolean;
+  isSidebarCollapsed: boolean;
 }
 
 export const ExpandableNavigationMenu = ({
@@ -30,14 +33,18 @@ export const ExpandableNavigationMenu = ({
   expandableLabel,
   expandableIcon,
   closeOnClickOutside = true,
+  showNavigationLabels,
+  shouldShowTooltips,
+  isSidebarCollapsed,
 }: ExpandableNavigationMenuProps) => {
   const expandedMenus = useNavigationStore((state) => state.expandedMenus);
   const setExpandedMenus = useNavigationStore((state) => state.setExpandedMenus);
 
   const isBetween1440And1680 = useIsWidthBetween(1440, 1680, false);
+  const shouldUseDropdownLayout = isBetween1440And1680 || isSidebarCollapsed;
 
-  const [isExpanded, setIsExpanded] = useState(
-    isBetween1440And1680 ? false : expandedMenus.includes(expandableIcon),
+  const [isExpanded, setIsExpanded] = useState(() =>
+    shouldUseDropdownLayout ? false : expandedMenus.includes(expandableIcon),
   );
 
   const handleExpandChange = useCallback(
@@ -54,6 +61,15 @@ export const ExpandableNavigationMenu = ({
   );
 
   const containerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (shouldUseDropdownLayout) {
+      setIsExpanded(false);
+      return;
+    }
+
+    setIsExpanded(expandedMenus.includes(expandableIcon));
+  }, [expandedMenus, expandableIcon, shouldUseDropdownLayout]);
 
   useEffect(() => {
     if (!closeOnClickOutside || !isExpanded) return;
@@ -78,7 +94,7 @@ export const ExpandableNavigationMenu = ({
     <DropdownMenu
       open={isExpanded}
       defaultOpen={isExpanded}
-      onOpenChange={() => handleExpandChange(isBetween1440And1680 ? true : !isExpanded)}
+      onOpenChange={() => handleExpandChange(shouldUseDropdownLayout ? true : !isExpanded)}
     >
       <DropdownMenuTrigger className="w-full">
         <button
@@ -90,20 +106,25 @@ export const ExpandableNavigationMenu = ({
           <Icon name={expandableIcon} className="size-6" />
           <span
             className={cn(
-              "line-clamp-1 grow truncate whitespace-nowrap text-left font-normal capitalize 2xl:sr-only 3xl:not-sr-only",
+              "line-clamp-1 grow truncate whitespace-nowrap text-left font-normal capitalize",
+              {
+                "sr-only": !showNavigationLabels,
+              },
             )}
           >
             {expandableLabel}
           </span>
-          <ChevronDown
-            className={cn("size-6 shrink-0 text-neutral-500 2xl:sr-only 3xl:not-sr-only", {
-              "rotate-180": isExpanded,
-            })}
-          />
+          {showNavigationLabels && (
+            <ChevronDown
+              className={cn("size-6 shrink-0 text-neutral-500", {
+                "rotate-180": isExpanded,
+              })}
+            />
+          )}
         </button>
       </DropdownMenuTrigger>
 
-      {isExpanded && isBetween1440And1680 && (
+      {isExpanded && shouldUseDropdownLayout && (
         <DropdownMenuContent
           ref={containerRef}
           align="end"
@@ -118,12 +139,17 @@ export const ExpandableNavigationMenu = ({
         </DropdownMenuContent>
       )}
 
-      {!isBetween1440And1680 && isExpanded && (
+      {!shouldUseDropdownLayout && isExpanded && (
         <menu className="ml-4 flex flex-col gap-y-3">
           {items.map((item) => {
             return (
               <div key={item.label}>
-                <NavigationMenuItem item={item} setIsMobileNavOpen={setIsMobileNavOpen} />
+                <NavigationMenuItem
+                  item={item}
+                  setIsMobileNavOpen={setIsMobileNavOpen}
+                  showLabel={showNavigationLabels}
+                  showTooltip={shouldShowTooltips}
+                />
               </div>
             );
           })}

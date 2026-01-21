@@ -25,11 +25,17 @@ import { NavigationMenuItemLink } from "./NavigationMenuItemLink";
 type NavigationFooterProps = {
   setIsMobileNavOpen: Dispatch<SetStateAction<boolean>>;
   hasConfigurationIssues?: boolean;
+  showNavigationLabels: boolean;
+  shouldShowTooltips: boolean;
+  isSidebarCollapsed: boolean;
 };
 
 export function NavigationFooter({
   setIsMobileNavOpen,
   hasConfigurationIssues,
+  showNavigationLabels,
+  shouldShowTooltips,
+  isSidebarCollapsed,
 }: NavigationFooterProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -38,6 +44,7 @@ export function NavigationFooter({
   const { t } = useTranslation();
 
   const isBetween1440And1680 = useIsWidthBetween(1440, 1680, false);
+  const hideLabels = isBetween1440And1680 || isSidebarCollapsed;
 
   return (
     <menu className="grid w-full grid-cols-4 gap-3 md:grid-cols-8 2xl:flex 2xl:flex-col 2xl:gap-2 2xl:self-end">
@@ -50,6 +57,8 @@ export function NavigationFooter({
             link: "/announcements",
           }}
           setIsMobileNavOpen={setIsMobileNavOpen}
+          showLabel={showNavigationLabels}
+          showTooltip={shouldShowTooltips}
         />
       )}
 
@@ -68,7 +77,7 @@ export function NavigationFooter({
           <DropdownMenuTrigger
             onClick={() => setIsDropdownOpen((prev) => !prev)}
             className={cn("flex w-full items-center justify-between gap-2 p-2 relative", {
-              "justify-center": isBetween1440And1680,
+              "justify-center": hideLabels,
             })}
           >
             <UserAvatar
@@ -78,14 +87,14 @@ export function NavigationFooter({
             />
             <span
               className={cn("block grow text-left body-sm-md", {
-                hidden: isBetween1440And1680,
+                hidden: hideLabels,
               })}
             >{`${user?.firstName} ${user?.lastName}`}</span>
             <ChevronDown
               className={cn(
                 "block size-6 shrink-0 rotate-180 text-neutral-500 group-data-[state=open]:rotate-180",
                 {
-                  hidden: isBetween1440And1680,
+                  hidden: hideLabels,
                 },
               )}
             />
