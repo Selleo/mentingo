@@ -15,6 +15,7 @@ export default function CoursesPage() {
   const { isStudent } = useUserRole();
   const { data: globalSettings } = useGlobalSettings();
 
+  // TODO: Remove isStudent check when we have a way to show the modern view to non-students
   const shouldShowModernView = isStudent && Boolean(globalSettings?.modernCourseListEnabled);
 
   return (

@@ -124,9 +124,7 @@ const ModernCoursesView = () => {
           )}
 
           <section>
-            <h2 className="mb-4 text-2xl font-bold text-gray-900 md:mb-6 md:text-3xl">
-              {t("studentCoursesView.modernView.topCourses")}
-            </h2>
+            <h2 className="h2">{t("studentCoursesView.modernView.topCourses")}</h2>
             <TopCoursesCarousel courses={topCourses ?? []} />
           </section>
 
