@@ -14,12 +14,20 @@ describe("excel.utils", () => {
       expect(normalizeHeader("  header  ")).toBe("header");
     });
 
-    it("removes carriage return characters", () => {
-      expect(normalizeHeader("header\r\nname")).toBe("header\nname");
+    it("camelCases separator headers", () => {
+      expect(normalizeHeader("First Name")).toBe("firstName");
+    });
+
+    it("removes carriage returns and camelCases", () => {
+      expect(normalizeHeader("header\r\nname")).toBe("headerName");
     });
 
     it("handles multiple carriage returns", () => {
-      expect(normalizeHeader("a\rb\rc")).toBe("abc");
+      expect(normalizeHeader("a\rb\rc")).toBe("aBC");
+    });
+
+    it("keeps existing camelCase", () => {
+      expect(normalizeHeader("firstName")).toBe("firstName");
     });
 
     it("converts number to string", () => {

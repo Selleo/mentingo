@@ -119,6 +119,7 @@ if (process.env.CI) {
       env: {
         DATABASE_URL: `postgresql://test_user:test_password@localhost:54321/test_db`,
         MODE: "test",
+        OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
       },
       reuseExistingServer: false,
       stderr: "pipe",
@@ -133,6 +134,7 @@ if (process.env.CI) {
         DATABASE_URL: `postgresql://test_user:test_password@localhost:54321/test_db`,
         REDIS_URL: "redis://localhost:6380",
         MODE: "test",
+        OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
       },
       stderr: "pipe",
       stdout: "pipe",

@@ -8,8 +8,8 @@ setup("database reset", async () => {
     const apiDir = path.resolve(process.cwd(), "../api");
     const isCI = process.env.CI === "true";
     const command = isCI
-      ? "pnpm db:migrate && pnpm db:seed:e2e"
-      : "docker compose up -d && pnpm db:migrate && pnpm db:seed:e2e";
+      ? "pnpm db:migrate && pnpm db:seed"
+      : "docker compose up -d && pnpm db:migrate && pnpm db:seed";
     execSync(command, { cwd: apiDir, stdio: "inherit", shell: true as unknown as string });
   };
 

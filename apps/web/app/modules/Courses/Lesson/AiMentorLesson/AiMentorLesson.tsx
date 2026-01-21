@@ -22,6 +22,9 @@ import RetakeModal from "~/modules/Courses/Lesson/AiMentorLesson/components/Reta
 
 import type { GetLessonByIdResponse } from "~/api/generated-api";
 
+const apiUrl = import.meta.env.VITE_API_URL;
+const chatUrl = apiUrl ? `${apiUrl}/api/ai/chat` : "/api/ai/chat";
+
 interface AiMentorLessonProps {
   lesson: GetLessonByIdResponse["data"];
   lessonLoading: boolean;
@@ -48,7 +51,7 @@ const AiMentorLesson = ({ lesson, lessonLoading, isPreviewMode = false }: AiMent
 
   const { messages, input, setMessages, handleInputChange, handleSubmit, status, setInput } =
     useChat({
-      api: "/api/ai/chat",
+      api: chatUrl,
       body: {
         threadId: lesson.threadId ?? "",
       },
@@ -60,6 +63,7 @@ const AiMentorLesson = ({ lesson, lessonLoading, isPreviewMode = false }: AiMent
             content: body.messages[body.messages.length - 1]?.content || "",
             threadId: lesson.threadId ?? "",
           }),
+          credentials: "include",
         });
       },
       onFinish: async () => {

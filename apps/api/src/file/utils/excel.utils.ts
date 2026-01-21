@@ -1,7 +1,20 @@
+const camelCase = (value: string) =>
+  value
+    .split(/[^a-zA-Z0-9]+/)
+    .filter(Boolean)
+    .map((word, index) => {
+      const normalized = word.toLowerCase();
+      if (index === 0) return normalized;
+      return `${normalized.charAt(0).toUpperCase()}${normalized.slice(1)}`;
+    })
+    .join("");
+
 export function normalizeHeader(h: unknown) {
-  return String(h ?? "")
+  const raw = String(h ?? "")
     .trim()
-    .replace(/\r/g, "");
+    .replace(/\r/g, " ");
+  if (/[^a-zA-Z0-9]+/.test(raw)) return camelCase(raw);
+  return raw ? `${raw.charAt(0).toLowerCase()}${raw.slice(1)}` : "";
 }
 
 export function normalizeCellValue(

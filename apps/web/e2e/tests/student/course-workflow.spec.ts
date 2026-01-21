@@ -198,13 +198,16 @@ test.describe("complete course workflow", () => {
 
     const currentLessonNumber = await page.getByTestId("current-lesson-number").textContent();
     const lessonsCount = await page.getByTestId("lessons-count").textContent();
+    const totalLessons = Number(lessonsCount);
 
-    for (let i = Number(currentLessonNumber) ?? 1; i <= Number(lessonsCount); i++) {
+    for (let i = Number(currentLessonNumber) ?? 1; i <= totalLessons; i++) {
       const nextButton = page.getByTestId("next-lesson-button");
 
       await page.waitForLoadState("domcontentloaded");
 
-      const lessonType = await page.getByTestId("lesson-type").textContent();
+      const lessonType = (await page.getByTestId("lesson-type").textContent()) ?? "";
+      const lessonLabel = `Lesson ${i}/${totalLessons} – ${lessonType}`;
+      await expect(page.getByText(lessonLabel)).toBeVisible();
 
       if (lessonType === "Content") {
         const isSecondContentLesson = i === 2;
