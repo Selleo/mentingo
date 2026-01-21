@@ -31,6 +31,8 @@ on:
           required: true
         MASTER_KEY:
           required: true
+        OPENAI_API_KEY:
+          required: true
   push:
     branches:
       - main
