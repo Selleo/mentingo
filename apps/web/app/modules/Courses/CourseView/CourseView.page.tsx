@@ -15,12 +15,29 @@ import { CourseViewSidebar } from "~/modules/Courses/CourseView/CourseViewSideba
 import { MoreCoursesByAuthor } from "~/modules/Courses/CourseView/MoreCoursesByAuthor";
 import { YouMayBeInterestedIn } from "~/modules/Courses/CourseView/YouMayBeInterestedIn";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
+import { isSupportedLanguage } from "~/utils/browser-language";
 
 import { ChapterListOverview } from "./components/ChapterListOverview";
 import { CourseAdminStatistics } from "./CourseAdminStatistics/CourseAdminStatistics";
 import CourseCertificate from "./CourseCertificate";
 
 import type { SupportedLanguages } from "@repo/shared";
+
+const resolvePreferredLanguage = (url: URL): SupportedLanguages => {
+  const languageFromQuery = url.searchParams.get("language");
+
+  if (languageFromQuery && isSupportedLanguage(languageFromQuery)) {
+    return languageFromQuery as SupportedLanguages;
+  }
+
+  const storedLanguage = useLanguageStore.getState().language;
+
+  if (storedLanguage && isSupportedLanguage(storedLanguage)) {
+    return storedLanguage as SupportedLanguages;
+  }
+
+  return SUPPORTED_LANGUAGES.EN;
+};
 
 export const clientLoader = async ({
   params,
@@ -33,8 +50,7 @@ export const clientLoader = async ({
   if (!idOrSlug) return null;
 
   const url = new URL(request.url);
-  const language =
-    (url.searchParams.get("language") as SupportedLanguages) || SUPPORTED_LANGUAGES.EN;
+  const language = resolvePreferredLanguage(url);
 
   const lookupResponse = await ApiClient.api.courseControllerLookupCourse({
     id: idOrSlug,
