@@ -31,6 +31,7 @@ import {
   sql,
 } from "drizzle-orm";
 import { camelCase, isEmpty, isEqual, pickBy } from "lodash";
+import { match } from "ts-pattern";
 
 import { AiService } from "src/ai/services/ai.service";
 import { AdminChapterRepository } from "src/chapter/repositories/adminChapter.repository";
@@ -85,6 +86,7 @@ import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 import { getSortOptions } from "../common/helpers/getSortOptions";
 
 import { LESSON_SEQUENCE_ENABLED } from "./constants";
+import { CourseSlugService } from "./course-slug.service";
 import {
   COURSE_ENROLLMENT_SCOPES,
   CourseSortFields,
@@ -108,6 +110,7 @@ import type {
   LessonSequenceEnabledResponse,
   TransferCourseOwnershipRequestBody,
 } from "./schemas/course.schema";
+import type { CourseLookupResponse } from "./schemas/courseLookupResponse.schema";
 import type {
   CourseEnrollmentScope,
   CoursesFilterSchema,
@@ -164,6 +167,7 @@ export class CourseService {
     private readonly learningTimeRepository: LearningTimeRepository,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
     private readonly emailService: EmailService,
+    private readonly courseSlugService: CourseSlugService,
   ) {}
 
   async getAllCourses(query: CoursesQuery): Promise<{
@@ -351,14 +355,20 @@ export class CourseService {
 
       const dataWithS3SignedUrls = await Promise.all(
         data.map(async (item) => {
-          if (!item.thumbnailUrl) return item;
+          if (!item.thumbnailUrl) {
+            return item;
+          }
 
           try {
             const signedUrl = await this.fileService.getFileUrl(item.thumbnailUrl);
             const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
               item.authorAvatarUrl,
             );
-            return { ...item, thumbnailUrl: signedUrl, authorAvatarUrl: authorAvatarSignedUrl };
+            return {
+              ...item,
+              thumbnailUrl: signedUrl,
+              authorAvatarUrl: authorAvatarSignedUrl,
+            };
           } catch (error) {
             console.error(`Failed to get signed URL for ${item.thumbnailUrl}:`, error);
             return item;
@@ -366,8 +376,16 @@ export class CourseService {
         }),
       );
 
+      const courseIds = dataWithS3SignedUrls.map((item) => item.id);
+      const slugsMap = await this.courseSlugService.getCoursesSlugs(language || "en", courseIds);
+
+      const dataWithSlugs = dataWithS3SignedUrls.map((item) => ({
+        ...item,
+        slug: slugsMap.get(item.id) || item.id,
+      }));
+
       return {
-        data: dataWithS3SignedUrls,
+        data: dataWithSlugs,
         pagination: {
           totalItems: totalItems || 0,
           page,
@@ -631,8 +649,16 @@ export class CourseService {
         }),
       );
 
+      const courseIds = dataWithS3SignedUrls.map((item) => item.id);
+      const slugsMap = await this.courseSlugService.getCoursesSlugs(language || "en", courseIds);
+
+      const dataWithSlugs = dataWithS3SignedUrls.map((item) => ({
+        ...item,
+        slug: slugsMap.get(item.id) || item.id,
+      }));
+
       return {
-        data: dataWithS3SignedUrls,
+        data: dataWithSlugs,
         pagination: {
           totalItems: totalItems || 0,
           page,
@@ -643,10 +669,18 @@ export class CourseService {
   }
 
   async getCourse(
-    id: UUIDType,
+    idOrSlug: UUIDType | string,
     userId: UUIDType,
     language: SupportedLanguages,
   ): Promise<CommonShowCourse> {
+    const { courseId: id, slug: currentSlug } = match(
+      await this.courseSlugService.getCourseIdBySlug(idOrSlug, language),
+    )
+      .with({ type: "notFound" }, () => {
+        throw new NotFoundException("Course not found");
+      })
+      .otherwise((value) => value);
+
     const [course] = await this.db
       .select({
         id: courses.id,
@@ -815,7 +849,74 @@ export class CourseService {
       ...course,
       thumbnailUrl,
       chapters: courseChapterList,
+      slug: currentSlug,
     };
+  }
+
+  async lookupCourse(
+    idOrSlug: string,
+    language: SupportedLanguages,
+    userId?: UUIDType,
+  ): Promise<CourseLookupResponse> {
+    const lookupResult = await this.courseSlugService.getCourseIdBySlug(idOrSlug, language);
+
+    if (lookupResult.type === "notFound") {
+      throw new NotFoundException("Course not found");
+    }
+
+    const courseId = lookupResult.courseId;
+
+    const [course] = await this.db
+      .select({
+        id: courses.id,
+        status: courses.status,
+        authorId: courses.authorId,
+        enrolled:
+          userId !== undefined
+            ? sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN TRUE ELSE FALSE END`
+            : sql<boolean>`FALSE`,
+      })
+      .from(courses)
+      .leftJoin(
+        studentCourses,
+        userId !== undefined
+          ? and(eq(studentCourses.courseId, courses.id), eq(studentCourses.studentId, userId))
+          : sql`FALSE`,
+      )
+      .where(eq(courses.id, courseId))
+      .limit(1);
+
+    if (!course) {
+      throw new NotFoundException("Course not found");
+    }
+
+    const isEnrolled = !!course.enrolled;
+    const NON_PUBLIC_STATUSES = ["draft", "private"];
+
+    if (userId !== undefined) {
+      if (
+        userId !== course.authorId &&
+        NON_PUBLIC_STATUSES.includes(course.status) &&
+        !isEnrolled
+      ) {
+        throw new NotFoundException("Course not found");
+      }
+    } else {
+      if (NON_PUBLIC_STATUSES.includes(course.status)) {
+        throw new NotFoundException("Course not found");
+      }
+    }
+
+    return match(lookupResult)
+      .with({ type: "redirect" }, (value) => ({
+        status: "redirect" as const,
+        slug: value.slug,
+      }))
+      .with({ type: "found" }, { type: "uuid" }, (value) => ({
+        status: "found" as const,
+        slug: value.slug,
+      }))
+      .exhaustive();
   }
 
   async getBetaCourseById(
@@ -1069,6 +1170,9 @@ export class CourseService {
         courses.title,
       );
 
+    const courseIds = contentCreatorCourses.map((course) => course.id);
+    const slugsMap = await this.courseSlugService.getCoursesSlugs(language, courseIds);
+
     return await Promise.all(
       contentCreatorCourses.map(async (course) => {
         const { authorAvatarUrl, ...courseWithoutReferences } = course;
@@ -1082,6 +1186,7 @@ export class CourseService {
             ? await this.fileService.getFileUrl(course.thumbnailUrl)
             : course.thumbnailUrl,
           authorAvatarUrl: authorAvatarSignedUrl,
+          slug: slugsMap.get(course.id) || course.id,
         };
       }),
     );
@@ -1443,6 +1548,10 @@ export class CourseService {
           updatedCourseSnapshot: updatedSnapshot,
         };
       });
+
+    if (updateCourseBody.title) {
+      await this.courseSlugService.regenerateCoursesSlugs([id]);
+    }
 
     if (this.areCourseSnapshotsEqual(previousCourseSnapshot, updatedCourseSnapshot)) {
       return updatedCourse;

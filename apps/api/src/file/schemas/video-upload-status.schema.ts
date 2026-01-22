@@ -19,7 +19,6 @@ export const videoUploadStatusSchema = Type.Object({
   multipartUploadId: Type.Optional(Type.String()),
   partSize: Type.Optional(Type.Integer({ minimum: 1 })),
   fileType: Type.Optional(Type.String()),
-  lessonId: Type.Optional(Type.String()),
   error: Type.Optional(Type.String()),
   userId: Type.Optional(Type.String()),
 });

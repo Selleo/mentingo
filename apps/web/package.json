@@ -13,9 +13,9 @@
     "start": "cross-env NODE_ENV=production node ./server.js",
     "generate:client": "swagger-typescript-api -p ../api/src/swagger/api-schema.json -o ./app/api --axios --name generated-api.ts --api-class-name API",
     "tsc": "tsc --noEmit",
-    "test": "VITE_TEST=true VITE_API_URL=http://localhost:3000 vitest run",
-    "test:e2e": "VITE_TEST=true playwright test",
-    "test:e2e:ui": "VITE_TEST=true playwright codegen https://app.lms.localhost --viewport-size 1920,1000 & VITE_TEST=true playwright test --ui",
+    "test": "cross-env VITE_TEST=true VITE_API_URL=http://localhost:3000 vitest run",
+    "test:e2e": "cross-env VITE_TEST=true playwright test",
+    "test:e2e:ui": "cross-env VITE_TEST=true playwright codegen https://app.lms.localhost --viewport-size 1920,1000 & VITE_TEST=true playwright test --ui",
     "preview": "vite preview --port 5173"
   },
   "dependencies": {

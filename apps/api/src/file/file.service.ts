@@ -24,7 +24,7 @@ import { uploadKey, videoKey } from "src/file/utils/bunnyCacheKeys";
 import { isEmptyObject, normalizeCellValue, normalizeHeader } from "src/file/utils/excel.utils";
 import getChecksum from "src/file/utils/getChecksum";
 import { S3Service } from "src/s3/s3.service";
-import { lessons, resources, resourceEntity } from "src/storage/schema";
+import { resources, resourceEntity } from "src/storage/schema";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import {
@@ -35,11 +35,10 @@ import {
 } from "./file.constants";
 import { BunnyVideoProvider } from "./providers/bunny-video.provider";
 import { S3VideoProvider } from "./providers/s3-video.provider";
+import { CONTEXT_TTL, getContextKey } from "./utils/resourceCacheKeys";
 import { VideoProcessingStateService } from "./video-processing-state.service";
 import { VideoUploadNotificationGateway } from "./video-upload-notification.gateway";
-import { VideoUploadQueueService } from "./video-upload-queue.service";
 
-import type { ResourceRelationshipType, EntityType } from "./file.constants";
 import type { BunnyWebhookBody } from "./schemas/bunny-webhook.schema";
 import type { VideoInitBody } from "./schemas/video-init.schema";
 import type { VideoUploadState } from "./video-processing-state.service";
@@ -51,8 +50,10 @@ import type {
 import type { SupportedLanguages } from "@repo/shared";
 import type { Static, TSchema } from "@sinclair/typebox";
 import type { UUIDType } from "src/common";
-import type { CurrentUser } from "src/common/types/current-user.type";
-import type { UploadResourceParams } from "src/file/types/resource.types";
+import type {
+  UploadResourceParams,
+  CreateResourceForEntityParams,
+} from "src/file/types/resource.types";
 
 @Injectable()
 export class FileService {
@@ -61,7 +62,6 @@ export class FileService {
   constructor(
     private readonly s3Service: S3Service,
     private readonly bunnyStreamService: BunnyStreamService,
-    private readonly videoUploadQueueService: VideoUploadQueueService,
     private readonly videoProcessingStateService: VideoProcessingStateService,
     private readonly bunnyVideoProvider: BunnyVideoProvider,
     private readonly s3VideoProvider: S3VideoProvider,
@@ -111,12 +111,7 @@ export class FileService {
     }
   }
 
-  async uploadFile(
-    file: Express.Multer.File,
-    resource: string,
-    lessonId?: string,
-    currentUserId?: UUIDType,
-  ) {
+  async uploadFile(file: Express.Multer.File, resource: string) {
     if (file.size === 0) {
       throw new BadRequestException("File upload failed - empty file");
     }
@@ -125,42 +120,7 @@ export class FileService {
 
     try {
       if (isVideo) {
-        const uploadId = randomUUID();
-        const placeholderKey = `processing-${resource}-${uploadId}`;
-        const fileType = file.originalname.split(".").pop();
-
-        try {
-          await this.videoProcessingStateService.initializeState(
-            uploadId,
-            placeholderKey,
-            fileType,
-            currentUserId,
-          );
-        } catch (cacheError) {
-          throw new BadRequestException("Cache service unavailable");
-        }
-
-        const { fileKey, fileUrl } = await this.bunnyStreamService.upload(file);
-
-        try {
-          await this.videoUploadQueueService.enqueueVideoUpload(
-            fileKey,
-            fileUrl,
-            resource,
-            uploadId,
-            placeholderKey,
-            fileType,
-            lessonId,
-          );
-        } catch (queueError) {
-          throw new ConflictException("Queue service unavailable");
-        }
-
-        return {
-          fileKey: placeholderKey,
-          status: "processing",
-          uploadId,
-        };
+        throw new BadRequestException("Video uploads must use the TUS endpoints");
       }
 
       const fileExtension = file.originalname.split(".").pop();
@@ -258,46 +218,35 @@ export class FileService {
 
   private async createLessonContentResourceIfNeeded(params: {
     resource: string;
-    lessonId?: string;
+    lessonId?: UUIDType;
     fileKey: string;
     mimeType: string;
     filename: string;
     sizeBytes: number;
+    contextId?: UUIDType;
   }) {
-    const { resource, lessonId, fileKey, mimeType, filename, sizeBytes } = params;
+    const { resource, lessonId, fileKey, mimeType, filename, sizeBytes, contextId } = params;
 
-    if (resource !== "lesson-content" || !lessonId) return undefined;
+    if (resource !== "lesson-content" || (!lessonId && !contextId)) return undefined;
 
-    const resourceResult = await this.createResourceForEntity(
-      fileKey,
-      mimeType,
-      lessonId,
-      ENTITY_TYPES.LESSON,
-      RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
-      {
+    const resourceResult = await this.createResourceForEntity({
+      reference: fileKey,
+      contentType: mimeType,
+      entityId: lessonId,
+      entityType: ENTITY_TYPES.LESSON,
+      relationshipType: RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+      metadata: {
         originalFilename: filename,
         size: sizeBytes,
       },
-    );
+      contextId,
+    });
 
     return resourceResult.resourceId;
   }
 
-  private async updateLessonVideoFile(
-    lessonId: string | undefined,
-    fileKey: string,
-    fileType: string | undefined,
-  ) {
-    if (!lessonId) return;
-
-    await this.db
-      .update(lessons)
-      .set({ fileS3Key: fileKey, fileType })
-      .where(eq(lessons.id, lessonId));
-  }
-
   async initVideoUpload(data: VideoInitBody, currentUserId?: UUIDType) {
-    const { filename, sizeBytes, mimeType, title, resource = "lesson", lessonId } = data;
+    const { filename, sizeBytes, mimeType, title, resource = "lesson", lessonId, contextId } = data;
 
     if (!ALLOWED_VIDEO_FILE_TYPES.includes(mimeType)) {
       throw new BadRequestException("Invalid video mime type");
@@ -326,10 +275,6 @@ export class FileService {
 
     await this.registerProviderUpload(uploadId, placeholderKey, providerResponse);
 
-    if (lessonId) {
-      await this.videoProcessingStateService.associateWithLesson(uploadId, lessonId);
-    }
-
     const resourceId = await this.createLessonContentResourceIfNeeded({
       resource,
       lessonId,
@@ -337,9 +282,8 @@ export class FileService {
       mimeType,
       filename,
       sizeBytes,
+      contextId,
     });
-
-    await this.updateLessonVideoFile(lessonId, providerResponse.fileKey, fileType);
 
     return {
       uploadId,
@@ -495,7 +439,7 @@ export class FileService {
 
     const checksum = getChecksum(file);
 
-    const { fileKey } = await this.uploadFile(file, resourceFolder, undefined);
+    const { fileKey } = await this.uploadFile(file, resourceFolder);
 
     const { insertedResource } = await this.db.transaction(async (trx) => {
       const [insertedResource] = await trx
@@ -514,12 +458,22 @@ export class FileService {
         })
         .returning();
 
-      await trx.insert(resourceEntity).values({
-        resourceId: insertedResource.id,
-        entityId,
-        entityType,
-        relationshipType,
-      });
+      if (options?.contextId) {
+        const contextKey = getContextKey(options.contextId);
+
+        const existingResources = (await this.cache.get(contextKey)) as UUIDType[];
+
+        await this.cache.set(contextKey, [...existingResources, insertedResource.id], CONTEXT_TTL);
+      }
+
+      if (entityType && entityId) {
+        await trx.insert(resourceEntity).values({
+          resourceId: insertedResource.id,
+          entityId,
+          entityType,
+          relationshipType,
+        });
+      }
 
       return { insertedResource };
     });
@@ -536,17 +490,19 @@ export class FileService {
   /**
    * Create a resource record linked to an entity without uploading a file.
    */
-  async createResourceForEntity(
-    reference: string,
-    contentType: string,
-    entityId: UUIDType,
-    entityType: EntityType,
-    relationshipType: ResourceRelationshipType = RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
-    metadata: Record<string, unknown> = {},
-    title: Partial<Record<SupportedLanguages, string>> = {},
-    description: Partial<Record<SupportedLanguages, string>> = {},
-    currentUser?: CurrentUser,
-  ) {
+
+  async createResourceForEntity({
+    reference,
+    contentType,
+    entityId,
+    entityType,
+    relationshipType = RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+    metadata = {},
+    title = {},
+    description = {},
+    currentUser,
+    contextId,
+  }: CreateResourceForEntityParams) {
     const { insertedResource } = await this.db.transaction(async (trx) => {
       const [insertedResource] = await trx
         .insert(resources)
@@ -560,12 +516,22 @@ export class FileService {
         })
         .returning();
 
-      await trx.insert(resourceEntity).values({
-        resourceId: insertedResource.id,
-        entityId,
-        entityType,
-        relationshipType,
-      });
+      if (contextId) {
+        const contextKey = getContextKey(contextId);
+
+        const existingResources = (await this.cache.get(contextKey)) as UUIDType[];
+
+        await this.cache.set(contextKey, [...existingResources, insertedResource.id], CONTEXT_TTL);
+      }
+
+      if (entityType && entityId) {
+        await trx.insert(resourceEntity).values({
+          resourceId: insertedResource.id,
+          entityId,
+          entityType,
+          relationshipType,
+        });
+      }
 
       return { insertedResource };
     });
@@ -576,33 +542,6 @@ export class FileService {
       resourceId: insertedResource.id,
       fileUrl: await this.getFileUrl(reference),
     };
-  }
-
-  async updateResource(
-    resourceId: UUIDType,
-    updates: {
-      reference?: string;
-      contentType?: string;
-      metadata?: Record<string, unknown>;
-      title?: Partial<Record<SupportedLanguages, string>>;
-      description?: Partial<Record<SupportedLanguages, string>>;
-    },
-  ) {
-    const [updated] = await this.db
-      .update(resources)
-      .set({
-        reference: updates.reference,
-        contentType: updates.contentType,
-        metadata: updates.metadata,
-        title: updates.title ? buildJsonbFieldWithMultipleEntries(updates.title) : undefined,
-        description: updates.description
-          ? buildJsonbFieldWithMultipleEntries(updates.description)
-          : undefined,
-      })
-      .where(eq(resources.id, resourceId))
-      .returning();
-
-    return updated;
   }
 
   /**
@@ -665,10 +604,6 @@ export class FileService {
   async getVideoUploadStatus(uploadId: string): Promise<VideoUploadState | null> {
     if (!uploadId) return null;
     return this.videoProcessingStateService.getState(uploadId);
-  }
-
-  async associateUploadWithLesson(uploadId: string, lessonId: string) {
-    await this.videoProcessingStateService.associateWithLesson(uploadId, lessonId);
   }
 
   async handleBunnyWebhook(payload: BunnyWebhookBody & Record<string, unknown>) {

@@ -3027,4 +3027,227 @@ describe("CourseController (e2e)", () => {
       });
     });
   });
+
+  describe("GET /api/course/lookup (slug functionality)", () => {
+    it("returns found status when accessing course by UUID", async () => {
+      const author = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: USER_ROLES.ADMIN });
+      const category = await categoryFactory.create();
+      const course = await courseFactory.create({
+        authorId: author.id,
+        categoryId: category.id,
+        status: "published",
+      });
+
+      const response = await request(app.getHttpServer())
+        .get("/api/course/lookup")
+        .query({ id: course.id, language: "en" })
+        .set("Cookie", await cookieFor(author, app))
+        .expect(200);
+
+      expect(response.body.data.status).toBe("found");
+      expect(response.body.data.slug).toBeDefined();
+    });
+
+    it("generates shortId and slug on first lookup when course has no shortId", async () => {
+      const author = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: USER_ROLES.ADMIN });
+      const category = await categoryFactory.create();
+      const course = await courseFactory.create({
+        authorId: author.id,
+        categoryId: category.id,
+        status: "published",
+      });
+
+      const [courseBeforeLookup] = await db
+        .select({ shortId: courses.shortId })
+        .from(courses)
+        .where(eq(courses.id, course.id));
+      expect(courseBeforeLookup.shortId).toBeNull();
+
+      const response = await request(app.getHttpServer())
+        .get("/api/course/lookup")
+        .query({ id: course.id, language: "en" })
+        .set("Cookie", await cookieFor(author, app))
+        .expect(200);
+
+      expect(response.body.data.slug).toBeDefined();
+      expect(response.body.data.slug).not.toBe(course.id);
+
+      const [courseAfterLookup] = await db
+        .select({ shortId: courses.shortId })
+        .from(courses)
+        .where(eq(courses.id, course.id));
+      expect(courseAfterLookup.shortId).toBeDefined();
+      expect(courseAfterLookup.shortId).toHaveLength(5);
+    });
+
+    it("returns found status when accessing with correct slug", async () => {
+      const author = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: USER_ROLES.ADMIN });
+      const category = await categoryFactory.create();
+      const course = await courseFactory.create({
+        authorId: author.id,
+        categoryId: category.id,
+        status: "published",
+      });
+
+      const firstResponse = await request(app.getHttpServer())
+        .get("/api/course/lookup")
+        .query({ id: course.id, language: "en" })
+        .set("Cookie", await cookieFor(author, app))
+        .expect(200);
+
+      const correctSlug = firstResponse.body.data.slug;
+
+      const secondResponse = await request(app.getHttpServer())
+        .get("/api/course/lookup")
+        .query({ id: correctSlug, language: "en" })
+        .set("Cookie", await cookieFor(author, app))
+        .expect(200);
+
+      expect(secondResponse.body.data.status).toBe("found");
+      expect(secondResponse.body.data.slug).toBe(correctSlug);
+    });
+
+    it("returns redirect status when accessing with invalid slug text but valid shortId", async () => {
+      const author = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: USER_ROLES.ADMIN });
+      const category = await categoryFactory.create();
+      const course = await courseFactory.create({
+        authorId: author.id,
+        categoryId: category.id,
+        status: "published",
+      });
+
+      const firstResponse = await request(app.getHttpServer())
+        .get("/api/course/lookup")
+        .query({ id: course.id, language: "en" })
+        .set("Cookie", await cookieFor(author, app))
+        .expect(200);
+
+      const correctSlug = firstResponse.body.data.slug;
+      const shortId = correctSlug.substring(0, 5);
+      const invalidSlug = `${shortId}-some-wrong-slug-text`;
+
+      const secondResponse = await request(app.getHttpServer())
+        .get("/api/course/lookup")
+        .query({ id: invalidSlug, language: "en" })
+        .set("Cookie", await cookieFor(author, app))
+        .expect(200);
+
+      expect(secondResponse.body.data.status).toBe("redirect");
+      expect(secondResponse.body.data.slug).toBe(correctSlug);
+    });
+
+    it("returns not found for non-existent shortId", async () => {
+      const author = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: USER_ROLES.ADMIN });
+
+      await request(app.getHttpServer())
+        .get("/api/course/lookup")
+        .query({ id: "zzzzz-non-existent-slug", language: "en" })
+        .set("Cookie", await cookieFor(author, app))
+        .expect(404);
+    });
+
+    it("returns not found for invalid slug format", async () => {
+      const author = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: USER_ROLES.ADMIN });
+
+      await request(app.getHttpServer())
+        .get("/api/course/lookup")
+        .query({ id: "invalid-slug-format", language: "en" })
+        .set("Cookie", await cookieFor(author, app))
+        .expect(404);
+    });
+
+    it("handles lookup in language without title (returns courseId as fallback slug)", async () => {
+      const author = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: USER_ROLES.ADMIN });
+      const category = await categoryFactory.create();
+      const course = await courseFactory.create({
+        authorId: author.id,
+        categoryId: category.id,
+        status: "published",
+      });
+
+      await db
+        .update(courses)
+        .set({ availableLocales: ["en", "pl"] })
+        .where(eq(courses.id, course.id));
+
+      const response = await request(app.getHttpServer())
+        .get("/api/course/lookup")
+        .query({ id: course.id, language: "pl" })
+        .set("Cookie", await cookieFor(author, app))
+        .expect(200);
+
+      expect(response.body.data.status).toBe("found");
+      expect(response.body.data.slug).toBeDefined();
+    });
+
+    it("handles lookup after adding title in new language", async () => {
+      const author = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: USER_ROLES.ADMIN });
+      const category = await categoryFactory.create();
+      const course = await courseFactory.create({
+        authorId: author.id,
+        categoryId: category.id,
+        status: "published",
+      });
+
+      await db
+        .update(courses)
+        .set({ availableLocales: ["en", "pl"] })
+        .where(eq(courses.id, course.id));
+
+      const firstResponse = await request(app.getHttpServer())
+        .get("/api/course/lookup")
+        .query({ id: course.id, language: "pl" })
+        .set("Cookie", await cookieFor(author, app))
+        .expect(200);
+
+      expect(firstResponse.body.data.status).toBe("found");
+      expect(firstResponse.body.data.slug).toBeDefined();
+
+      await db
+        .update(courses)
+        .set({
+          title: { en: course.title as string, pl: "Polski tytuł kursu" },
+        })
+        .where(eq(courses.id, course.id));
+
+      const secondResponse = await request(app.getHttpServer())
+        .get("/api/course/lookup")
+        .query({ id: course.id, language: "pl" })
+        .set("Cookie", await cookieFor(author, app))
+        .expect(200);
+
+      expect(secondResponse.body.data.status).toBe("found");
+      expect(secondResponse.body.data.slug).toBeDefined();
+
+      const [courseAfter] = await db
+        .select({ shortId: courses.shortId })
+        .from(courses)
+        .where(eq(courses.id, course.id));
+      expect(courseAfter.shortId).toHaveLength(5);
+    });
+  });
 });

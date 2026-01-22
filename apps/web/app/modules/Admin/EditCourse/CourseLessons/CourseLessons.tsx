@@ -44,6 +44,7 @@ const CourseLessons = ({
   const [selectedChapter, setSelectedChapter] = useState<Chapter | null>(null);
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
   const { setIsLeavingContent, isCurrentFormDirty, openLeaveModal } = useLeaveModal();
+
   const [isNewChapter, setIsNewChapter] = useState(false);
   const { t } = useTranslation();
 

@@ -140,6 +140,7 @@ export const createLessonSchema = Type.Intersect([
   Type.Object({
     chapterId: UUIDSchema,
     displayOrder: Type.Optional(Type.Number()),
+    contextId: Type.Optional(Type.String()),
   }),
 ]);
 
@@ -321,6 +322,11 @@ export const enrolledLessonSchema = Type.Object({
   searchRank: Type.Optional(Type.Number()),
 });
 
+export const initializeLessonContextSchema = Type.Object({
+  contextId: UUIDSchema,
+});
+
+export type InitializeLessonContextBody = Static<typeof initializeLessonContextSchema>;
 export type AdminLessonWithContentSchema = Static<typeof adminLessonSchema>;
 export type LessonForChapterSchema = Static<typeof lessonForChapterSchema>;
 export type CreateLessonBody = Static<typeof createLessonSchema>;

@@ -123,6 +123,7 @@
     "reflect-metadata": "0.2.0",
     "rxjs": "7.8.1",
     "sharp": "0.34.5",
+    "slugify": "1.6.6",
     "socket.io": "4.8.1",
     "stripe": "18.5.0",
     "tiktoken": "1.0.21",

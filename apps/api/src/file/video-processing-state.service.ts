@@ -19,7 +19,6 @@ export type VideoUploadState = {
   multipartUploadId?: string;
   partSize?: number;
   fileType?: string;
-  lessonId?: string;
   error?: string;
   userId?: string;
 };
@@ -282,22 +281,6 @@ export class VideoProcessingStateService {
       // Don't fail the whole operation if notification fails
     }
 
-    return next;
-  }
-
-  async associateWithLesson(uploadId: string, lessonId: string) {
-    const current = await this.getState(uploadId);
-    if (!current) return null;
-
-    const next: VideoUploadState = {
-      ...current,
-      lessonId,
-    };
-
-    await this.retryOperation(
-      () => this.cache.set(uploadKey(uploadId), next, this.UPLOAD_STATE_TTL),
-      `associateWithLesson set upload state for ${uploadId}`,
-    );
     return next;
   }
 }

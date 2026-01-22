@@ -47,15 +47,3 @@ export function useUploadFile() {
     },
   });
 }
-
-export function useAssociateUploadWithLesson() {
-  return useMutation({
-    mutationFn: async ({ uploadId, lessonId }: { uploadId: string; lessonId: string }) => {
-      const response = await ApiClient.api.fileControllerAssociateUploadWithLesson({
-        uploadId,
-        lessonId,
-      });
-      return response.data;
-    },
-  });
-}

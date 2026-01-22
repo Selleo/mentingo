@@ -3,7 +3,6 @@ export function normalizeSearchTerm(searchTerm: string) {
     .trim()
     .split(/\s+/)
     .map((token) => token.replace(/[':()&|!<>]/g, ""))
-    .filter(Boolean)
     .map((token) => `${token}:*`)
     .join(" & ");
 }

@@ -11,6 +11,7 @@ export const videoInitSchema = Type.Object({
   title: Type.Optional(Type.String()),
   resource: Type.Optional(Type.String()),
   lessonId: Type.Optional(UUIDSchema),
+  contextId: Type.Optional(UUIDSchema),
 });
 
 export const videoInitResponseSchema = Type.Object({

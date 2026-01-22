@@ -11,8 +11,6 @@ import { S3VideoProvider } from "./providers/s3-video.provider";
 import { TusUploadService } from "./tus/tus-upload.service";
 import { VideoProcessingStateService } from "./video-processing-state.service";
 import { VideoUploadNotificationGateway } from "./video-upload-notification.gateway";
-import { VideoUploadQueueService } from "./video-upload-queue.service";
-import { VideoUploadWorker } from "./video-upload.worker";
 
 import type { RedisConfigSchema } from "src/common/configuration/redis";
 
@@ -24,8 +22,6 @@ import type { RedisConfigSchema } from "src/common/configuration/redis";
     BunnyVideoProvider,
     S3VideoProvider,
     TusUploadService,
-    VideoUploadQueueService,
-    VideoUploadWorker,
     VideoProcessingStateService,
     VideoUploadNotificationGateway,
     {
