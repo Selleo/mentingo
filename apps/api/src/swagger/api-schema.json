@@ -2813,7 +2813,6 @@
             "required": true,
             "in": "query",
             "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },
@@ -2867,6 +2866,50 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CreateCourseResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/course/lookup": {
+      "get": {
+        "operationId": "CourseController_lookupCourse",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LookupCourseResponse"
                 }
               }
             }
@@ -12380,6 +12423,9 @@
                       "type": "null"
                     }
                   ]
+                },
+                "slug": {
+                  "type": "string"
                 }
               },
               "required": [
@@ -12395,7 +12441,8 @@
                 "priceInCents",
                 "currency",
                 "completedChapterCount",
-                "dueDate"
+                "dueDate",
+                "slug"
               ]
             }
           },
@@ -12646,6 +12693,9 @@
                       "type": "null"
                     }
                   ]
+                },
+                "slug": {
+                  "type": "string"
                 }
               },
               "required": [
@@ -12661,7 +12711,8 @@
                 "priceInCents",
                 "currency",
                 "completedChapterCount",
-                "dueDate"
+                "dueDate",
+                "slug"
               ]
             }
           },
@@ -12816,6 +12867,9 @@
                       "type": "null"
                     }
                   ]
+                },
+                "slug": {
+                  "type": "string"
                 }
               },
               "required": [
@@ -12833,7 +12887,8 @@
                 "priceInCents",
                 "currency",
                 "completedChapterCount",
-                "dueDate"
+                "dueDate",
+                "slug"
               ]
             }
           }
@@ -13098,6 +13153,9 @@
               "title": {
                 "type": "string"
               },
+              "slug": {
+                "type": "string"
+              },
               "stripeProductId": {
                 "anyOf": [
                   {
@@ -13166,11 +13224,43 @@
               "status",
               "priceInCents",
               "title",
+              "slug",
               "stripeProductId",
               "stripePriceId",
               "availableLocales",
               "baseLanguage",
               "dueDate"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "LookupCourseResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "found",
+                    "type": "string"
+                  },
+                  {
+                    "const": "redirect",
+                    "type": "string"
+                  }
+                ]
+              },
+              "slug": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "status"
             ]
           }
         },

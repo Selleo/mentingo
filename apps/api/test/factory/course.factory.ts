@@ -74,6 +74,7 @@ export const createCourseFactory = (db: DatabasePg) => {
 
     return {
       id: faker.string.uuid(),
+      shortId: null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       title: faker.commerce.department() + randomHex,

@@ -1085,6 +1085,7 @@ export interface GetStudentCoursesResponse {
     completedChapterCount: number;
     enrolled?: boolean;
     dueDate: string | null;
+    slug: string;
   }[];
   pagination: {
     totalItems: number;
@@ -1142,6 +1143,7 @@ export interface GetAvailableCoursesResponse {
     completedChapterCount: number;
     enrolled?: boolean;
     dueDate: string | null;
+    slug: string;
   }[];
   pagination: {
     totalItems: number;
@@ -1176,6 +1178,7 @@ export interface GetContentCreatorCoursesResponse {
     completedChapterCount: number;
     enrolled?: boolean;
     dueDate: string | null;
+    slug: string;
   }[];
 }
 
@@ -1236,11 +1239,19 @@ export interface GetCourseResponse {
     priceInCents: number;
     thumbnailUrl?: string;
     title: string;
+    slug: string;
     stripeProductId: string | null;
     stripePriceId: string | null;
     availableLocales: ("en" | "pl")[];
     baseLanguage: "en" | "pl";
     dueDate: string | null;
+  };
+}
+
+export interface LookupCourseResponse {
+  data: {
+    status: "found" | "redirect";
+    slug?: string;
   };
 }
 
@@ -5379,7 +5390,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     courseControllerGetCourse: (
       query: {
-        /** @format uuid */
         id: string;
         /** @default "en" */
         language?: "en" | "pl";
@@ -5406,6 +5416,28 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "POST",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerLookupCourse
+     * @request GET:/api/course/lookup
+     */
+    courseControllerLookupCourse: (
+      query: {
+        id: string;
+        /** @default "en" */
+        language?: "en" | "pl";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<LookupCourseResponse, any>({
+        path: `/api/course/lookup`,
+        method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),
