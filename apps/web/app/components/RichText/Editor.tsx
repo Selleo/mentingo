@@ -35,7 +35,6 @@ const Editor = ({
   uploadProgress,
   id,
   parentClassName,
-  lessonId,
   allowFiles = false,
   acceptedFileTypes = ALLOWED_LESSON_IMAGE_FILE_TYPES,
   variant = "lesson",
@@ -153,7 +152,6 @@ const Editor = ({
       <EditorToolbar
         editor={editor}
         allowFiles={allowFiles}
-        lessonId={lessonId}
         acceptedFileTypes={acceptedFileTypes}
         onUpload={onUpload}
       />

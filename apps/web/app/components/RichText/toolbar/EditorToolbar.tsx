@@ -33,7 +33,6 @@ import type React from "react";
 type EditorToolbarProps = {
   editor: Editor;
   allowFiles?: boolean;
-  lessonId?: string;
   acceptedFileTypes?: string[];
   onUpload?: (file?: File, editor?: Editor | null) => Promise<void>;
 };

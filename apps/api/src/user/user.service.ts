@@ -328,7 +328,7 @@ export class UserService {
     }
 
     if (userAvatar) {
-      const { fileKey } = await this.fileService.uploadFile(userAvatar, "user-avatars", undefined);
+      const { fileKey } = await this.fileService.uploadFile(userAvatar, "user-avatars");
       data.userAvatar = fileKey;
     }
 

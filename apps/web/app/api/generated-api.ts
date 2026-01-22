@@ -521,6 +521,8 @@ export interface InitVideoUploadBody {
   resource?: string;
   /** @format uuid */
   lessonId?: string;
+  /** @format uuid */
+  contextId?: string;
 }
 
 export interface InitVideoUploadResponse {
@@ -2038,6 +2040,7 @@ export type BetaCreateLessonBody = {
   /** @format uuid */
   chapterId: string;
   displayOrder?: number;
+  contextId?: string;
 };
 
 export interface BetaCreateLessonResponse {
@@ -2045,6 +2048,13 @@ export interface BetaCreateLessonResponse {
     /** @format uuid */
     id: string;
     message: string;
+  };
+}
+
+export interface InitializeLessonContextResponse {
+  data: {
+    /** @format uuid */
+    contextId: string;
   };
 }
 
@@ -2377,6 +2387,7 @@ export type BetaUpdateLessonBody = ({
   /** @format uuid */
   chapterId?: string;
   displayOrder?: number;
+  contextId?: string;
 }) & {
   /** @default "en" */
   language: "en" | "pl";
@@ -6162,6 +6173,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name LessonControllerInitializeLessonContext
+     * @request POST:/api/lesson/initialize-lesson-context
+     */
+    lessonControllerInitializeLessonContext: (params: RequestParams = {}) =>
+      this.request<InitializeLessonContextResponse, any>({
+        path: `/api/lesson/initialize-lesson-context`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name LessonControllerBetaCreateAiMentorLesson
      * @request POST:/api/lesson/beta-create-lesson/ai
      */
@@ -6315,12 +6340,13 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     lessonControllerUploadFileToLesson: (
       data: {
         /** @format uuid */
-        lessonId: string;
+        lessonId?: string;
         /** @format binary */
         file: File;
         language: "en" | "pl";
         title: string;
         description: string;
+        contextId?: string;
       },
       params: RequestParams = {},
     ) =>

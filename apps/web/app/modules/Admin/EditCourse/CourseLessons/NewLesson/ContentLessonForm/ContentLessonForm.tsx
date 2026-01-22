@@ -7,10 +7,11 @@ import {
   ALLOWED_WORD_FILE_TYPES,
   DEFAULT_TUS_CHUNK_SIZE,
 } from "@repo/shared";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import * as tus from "tus-js-client";
 
+import { useInitializeLessonContext } from "~/api/mutations/admin/useInitializeLessonContext";
 import { useInitVideoUpload } from "~/api/mutations/admin/useInitVideoUpload";
 import { useLessonFileUpload } from "~/api/mutations/admin/useLessonFileUpload";
 import { FormTextField } from "~/components/Form/FormTextField";
@@ -50,14 +51,19 @@ const ContentLessonForm = ({
   setSelectedLesson,
   language,
 }: ContentLessonProps) => {
+  const [contextId, setContextId] = useState<string | undefined>(undefined);
+
   const { form, onSubmit, onDelete } = useContentLessonForm({
     chapterToEdit,
     lessonToEdit,
     setContentTypeToDisplay,
     language,
+    contextId,
   });
   const { t } = useTranslation();
   const { toast } = useToast();
+
+  const { mutate: initializeLessonContext } = useInitializeLessonContext();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isVideoUploading, setIsVideoUploading] = useState(false);
@@ -182,7 +188,7 @@ const ContentLessonForm = ({
   };
 
   const handleFileUpload = async (file?: File, editor?: TiptapEditor | null) => {
-    if (!file || !lessonToEdit?.id) return;
+    if (!file) return;
 
     const isVideo = ALLOWED_VIDEO_FILE_TYPES.includes(file.type);
     const isPresentation = ALLOWED_PRESENTATION_FILE_TYPES.includes(file.type);
@@ -206,6 +212,7 @@ const ContentLessonForm = ({
               title: file.name,
               resource: "lesson-content",
               lessonId: lessonToEdit?.id,
+              contextId,
             });
 
         await handleVideoTusUpload(file, session, editor);
@@ -222,10 +229,11 @@ const ContentLessonForm = ({
     await uploadFile(
       {
         file,
-        lessonId: lessonToEdit.id,
+        lessonId: lessonToEdit?.id,
         language,
         title: file.name,
         description: file.name,
+        contextId,
       },
       {
         onSuccess: (data) => {
@@ -255,6 +263,14 @@ const ContentLessonForm = ({
 
   const missingTranslations =
     lessonToEdit && !lessonToEdit.title.trim() && !lessonToEdit.description.trim();
+
+  useEffect(() => {
+    if (!lessonToEdit) {
+      initializeLessonContext(undefined, {
+        onSuccess: ({ contextId }) => setContextId(contextId),
+      });
+    }
+  }, []);
 
   return (
     <div className="flex flex-col gap-y-6 rounded-lg bg-white p-8">
@@ -307,7 +323,7 @@ const ContentLessonForm = ({
                     id="description"
                     content={field.value}
                     lessonId={lessonToEdit?.id}
-                    allowFiles={!!lessonToEdit?.id}
+                    allowFiles={!!lessonToEdit?.id || !!contextId}
                     acceptedFileTypes={[
                       ...ALLOWED_LESSON_IMAGE_FILE_TYPES,
                       ...ALLOWED_VIDEO_FILE_TYPES,

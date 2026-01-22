@@ -62,6 +62,7 @@ import {
   CreateEmbedLessonBody,
   UpdateEmbedLessonBody,
   enrolledLessonSchema,
+  initializeLessonContextSchema,
 } from "./lesson.schema";
 import { AdminLessonService } from "./services/adminLesson.service";
 import { LessonService } from "./services/lesson.service";
@@ -144,6 +145,15 @@ export class LessonController {
     const id = await this.adminLessonsService.createLessonForChapter(createLessonBody, currentUser);
 
     return new BaseResponse({ id, message: "Lesson created successfully" });
+  }
+
+  @Post("initialize-lesson-context")
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @Validate({
+    response: baseResponse(initializeLessonContextSchema),
+  })
+  async initializeLessonContext() {
+    return new BaseResponse(await this.adminLessonsService.initializeLessonContext());
   }
 
   @Post("beta-create-lesson/ai")
@@ -345,8 +355,11 @@ export class LessonController {
         description: {
           type: "string",
         },
+        contextId: {
+          type: "string",
+        },
       },
-      required: ["lessonId", "file", "language", "title", "description"],
+      required: ["file", "language", "title", "description"],
     },
   })
   @ApiResponse({
@@ -369,7 +382,6 @@ export class LessonController {
     },
   })
   async uploadFileToLesson(
-    @Body("lessonId") lessonId: UUIDType,
     @CurrentUser("userId") userId: UUIDType,
     @CurrentUser("role") role: UserRole,
     @UploadedFile(
@@ -389,15 +401,18 @@ export class LessonController {
     @Body("language") language: SupportedLanguages,
     @Body("title") title: string,
     @Body("description") description: string,
+    @Body("lessonId") lessonId?: UUIDType,
+    @Body("contextId") contextId?: string,
   ) {
     const fileData = await this.adminLessonsService.uploadFileToLesson(
-      lessonId,
       userId,
       role,
       file,
       language,
       title,
       description,
+      lessonId,
+      contextId,
     );
 
     return new BaseResponse(fileData);

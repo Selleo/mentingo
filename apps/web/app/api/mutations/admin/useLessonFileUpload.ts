@@ -9,7 +9,8 @@ import type { AxiosError } from "axios";
 import type { ApiErrorResponse } from "~/api/types";
 
 export type LessonFileUploadOptions = {
-  lessonId: string;
+  lessonId?: string;
+  contextId?: string;
   file: File;
   language: SupportedLanguages;
   title: string;
@@ -25,10 +26,17 @@ export function useLessonFileUpload() {
       const formData = new FormData();
 
       formData.append("file", options.file);
-      formData.append("lessonId", options.lessonId);
       formData.append("language", options.language);
       formData.append("title", options.title);
       formData.append("description", options.description);
+
+      if (options.lessonId) {
+        formData.append("lessonId", options.lessonId);
+      }
+
+      if (options.contextId) {
+        formData.append("contextId", options.contextId);
+      }
 
       const response = await ApiClient.api.lessonControllerUploadFileToLesson(options, {
         headers: { "Content-Type": "multipart/form-data" },

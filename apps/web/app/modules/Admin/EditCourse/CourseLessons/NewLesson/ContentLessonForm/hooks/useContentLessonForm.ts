@@ -24,6 +24,7 @@ type ContentLessonFormProps = {
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
   setOpenChapter?: (chapterId: string) => void;
   language: SupportedLanguages;
+  contextId?: string;
 };
 
 export const useContentLessonForm = ({
@@ -32,6 +33,7 @@ export const useContentLessonForm = ({
   setContentTypeToDisplay,
   setOpenChapter,
   language,
+  contextId,
 }: ContentLessonFormProps) => {
   const { mutateAsync: createContentLesson } = useCreateBetaContentLesson();
   const { mutateAsync: updateTextBlockItem } = useUpdateContentLesson();
@@ -76,6 +78,7 @@ export const useContentLessonForm = ({
           data: {
             ...values,
             chapterId: chapterToEdit.id,
+            contextId,
           },
         });
         setOpenChapter && setOpenChapter(chapterToEdit.id);
