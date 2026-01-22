@@ -256,7 +256,7 @@ jobs:
           PREVIEW_MAILHOG_DOMAIN=""
           VERSION_TAG="0"
 
-          export PR_ID PREVIEW_WEB_DOMAIN PREVIEW_API_DOMAIN PREVIEW_MAILHOG_DOMAIN MINIO_ROOT_PASSWORD JWT_SECRET JWT_REFRESH_SECRET POSTGRES_PASSWORD
+          export VERSION_TAG PR_ID PREVIEW_WEB_DOMAIN PREVIEW_API_DOMAIN PREVIEW_MAILHOG_DOMAIN MINIO_ROOT_PASSWORD JWT_SECRET JWT_REFRESH_SECRET POSTGRES_PASSWORD
           envsubst < "docker-compose.preview.tpl.yml" > "docker-compose.pr.yml"
 
           # collect services and volumes:
@@ -275,6 +275,6 @@ jobs:
           set -euo pipefail
 
           # Extract user@host from UNCLOUD_CONNECT
-          ssh_target="$(echo "${{ secrets.UNCLOUD_CONNECT }}" | sed -E 's#^ssh(\+cli)?://##; s#:/.*##')"
+          ssh_target="$(echo "$UNCLOUD_CONNECT" | sed -E 's#^ssh(\+cli)?://##; s#:/.*##')"
 
           ssh -i ~/.ssh/id_ecdsa "$ssh_target" "docker image prune -f -a"
