@@ -8,6 +8,8 @@ import { validate as uuidValidate } from "uuid";
 import { DatabasePg } from "src/common";
 import { courses, courseSlugs } from "src/storage/schema";
 
+import type { SupportedLanguages } from "@repo/shared";
+
 export type CourseSlugResult =
   | { type: "found"; courseId: string; slug: string }
   | { type: "redirect"; courseId: string; slug: string }
@@ -169,10 +171,18 @@ export class CourseSlugService {
     return result;
   }
 
-  async getCourseIdBySlug(idOrSlug: string, language: string): Promise<CourseSlugResult> {
+  async getCourseIdBySlug(
+    idOrSlug: string,
+    language: SupportedLanguages,
+  ): Promise<CourseSlugResult> {
     if (uuidValidate(idOrSlug)) {
       const [course] = await this.db
-        .select({ id: courses.id })
+        .select({
+          id: courses.id,
+          shortId: courses.shortId,
+          baseLanguage: sql<SupportedLanguages>`${courses.baseLanguage}`,
+          availableLocales: sql<SupportedLanguages[]>`${courses.availableLocales}`,
+        })
         .from(courses)
         .where(eq(courses.id, idOrSlug))
         .limit(1);
@@ -181,8 +191,13 @@ export class CourseSlugService {
         return { type: "notFound" };
       }
 
-      const slugs = await this.getCoursesSlugs(language, [idOrSlug]);
-      const currentSlug = slugs.get(idOrSlug) || idOrSlug;
+      const currentSlug = await this.resolveSlugWithFallback({
+        courseId: course.id,
+        courseShortId: course.shortId,
+        requestedLanguage: language,
+        availableLocales: course.availableLocales,
+        baseLanguage: course.baseLanguage,
+      });
 
       return { type: "uuid", courseId: idOrSlug, slug: currentSlug };
     }
@@ -196,7 +211,12 @@ export class CourseSlugService {
     const { shortId, baseSlug } = slugParts;
 
     const [course] = await this.db
-      .select({ id: courses.id, shortId: courses.shortId })
+      .select({
+        id: courses.id,
+        shortId: courses.shortId,
+        availableLocales: sql<SupportedLanguages[]>`${courses.availableLocales}`,
+        baseLanguage: sql<SupportedLanguages>`${courses.baseLanguage}`,
+      })
       .from(courses)
       .where(eq(courses.shortId, shortId))
       .limit(1);
@@ -205,25 +225,13 @@ export class CourseSlugService {
       return { type: "notFound" };
     }
 
-    const [currentSlugEntry] = await this.db
-      .select({ slug: courseSlugs.slug })
-      .from(courseSlugs)
-      .where(and(eq(courseSlugs.courseShortId, shortId), eq(courseSlugs.lang, language)))
-      .limit(1);
-
-    let currentSlug: string;
-
-    if (!currentSlugEntry) {
-      const regenerated = await this.regenerateCoursesSlugs([course.id]);
-      const forLang = regenerated.find((r) => r.lang === language);
-      if (forLang) {
-        currentSlug = forLang.slug;
-      } else {
-        currentSlug = course.id;
-      }
-    } else {
-      currentSlug = this.generateSlug(shortId, currentSlugEntry.slug);
-    }
+    const currentSlug = await this.resolveSlugWithFallback({
+      courseId: course.id,
+      courseShortId: course.shortId,
+      requestedLanguage: language,
+      availableLocales: course.availableLocales,
+      baseLanguage: course.baseLanguage,
+    });
 
     const inputSlug = this.generateSlug(shortId, baseSlug);
 
@@ -249,5 +257,62 @@ export class CourseSlugService {
 
   private generateSlug(shortId: string, baseSlug: string) {
     return `${shortId}-${baseSlug}`;
+  }
+
+  private resolveLanguage(
+    requestedLanguage: SupportedLanguages,
+    availableLocales?: SupportedLanguages[] | null,
+    baseLanguage?: SupportedLanguages | null,
+  ) {
+    if (availableLocales?.includes(requestedLanguage)) return requestedLanguage;
+
+    if (baseLanguage) return baseLanguage;
+
+    return SUPPORTED_LANGUAGES.EN;
+  }
+
+  private async resolveSlugWithFallback(options: {
+    courseId: string;
+    courseShortId: string | null;
+    requestedLanguage: SupportedLanguages;
+    availableLocales?: SupportedLanguages[];
+    baseLanguage: SupportedLanguages;
+  }) {
+    const { courseId, courseShortId, requestedLanguage, availableLocales, baseLanguage } = options;
+
+    const resolvedShortId = courseShortId ?? (await this.ensureCourseShortId(courseId));
+    if (!resolvedShortId) return courseId;
+
+    const languageToUse = this.resolveLanguage(requestedLanguage, availableLocales, baseLanguage);
+
+    const [currentLangSlug] = await this.db
+      .select({ slug: courseSlugs.slug })
+      .from(courseSlugs)
+      .where(
+        and(eq(courseSlugs.courseShortId, resolvedShortId), eq(courseSlugs.lang, languageToUse)),
+      )
+      .limit(1);
+
+    if (currentLangSlug?.slug) return this.generateSlug(resolvedShortId, currentLangSlug.slug);
+
+    const regenerated = await this.regenerateCoursesSlugs([courseId]);
+    const regeneratedForLang = regenerated.find((entry) => entry.lang === languageToUse);
+
+    if (regeneratedForLang?.slug) return regeneratedForLang.slug;
+
+    const fallbackSlugs = await this.db
+      .select({ slug: courseSlugs.slug, lang: courseSlugs.lang })
+      .from(courseSlugs)
+      .where(eq(courseSlugs.courseShortId, resolvedShortId));
+
+    const preferredBaseLang = baseLanguage || SUPPORTED_LANGUAGES.EN;
+
+    const baseLangSlug = fallbackSlugs.find((entry) => entry.lang === preferredBaseLang)?.slug;
+    if (baseLangSlug) return this.generateSlug(resolvedShortId, baseLangSlug);
+
+    const anySlug = fallbackSlugs[0]?.slug;
+    if (anySlug) return this.generateSlug(resolvedShortId, anySlug);
+
+    return courseId;
   }
 }
