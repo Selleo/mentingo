@@ -575,6 +575,13 @@
       "when": 1769086105900,
       "tag": "0081_backfill_tenant_ids",
       "breakpoints": true
+    },
+    {
+      "idx": 82,
+      "version": "7",
+      "when": 1769087616258,
+      "tag": "0082_add_not_null_to_all_tenant_references",
+      "breakpoints": true
     }
   ]
 }

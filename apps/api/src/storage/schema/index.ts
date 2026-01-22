@@ -42,7 +42,9 @@ export const users = pgTable("users", {
     withTimezone: true,
     precision: 3,
   }),
-  tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+  tenantId: uuid("tenant_id")
+    .references(() => tenants.id, { onDelete: "cascade" })
+    .notNull(),
 });
 
 export const userDetails = pgTable("user_details", {
@@ -56,7 +58,9 @@ export const userDetails = pgTable("user_details", {
   description: text("description"),
   contactEmail: text("contact_email"),
   jobTitle: text("job_title"),
-  tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+  tenantId: uuid("tenant_id")
+    .references(() => tenants.id, { onDelete: "cascade" })
+    .notNull(),
 });
 
 export const userStatistics = pgTable("user_statistics", {
@@ -72,7 +76,9 @@ export const userStatistics = pgTable("user_statistics", {
   lastActivityDate: timestamp("last_activity_date", { withTimezone: true }),
 
   activityHistory: jsonb("activity_history").$type<ActivityHistory>().default({}),
-  tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+  tenantId: uuid("tenant_id")
+    .references(() => tenants.id, { onDelete: "cascade" })
+    .notNull(),
 });
 
 export const quizAttempts = pgTable("quiz_attempts", {
@@ -90,7 +96,9 @@ export const quizAttempts = pgTable("quiz_attempts", {
   correctAnswers: integer("correct_answers").notNull(),
   wrongAnswers: integer("wrong_answers").notNull(),
   score: integer("score").notNull(),
-  tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+  tenantId: uuid("tenant_id")
+    .references(() => tenants.id, { onDelete: "cascade" })
+    .notNull(),
 });
 
 export const credentials = pgTable("credentials", {
@@ -100,7 +108,9 @@ export const credentials = pgTable("credentials", {
     .references(() => users.id, { onDelete: "cascade" })
     .notNull(),
   password: text("password").notNull(),
-  tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+  tenantId: uuid("tenant_id")
+    .references(() => tenants.id, { onDelete: "cascade" })
+    .notNull(),
 });
 
 export const categories = pgTable("categories", {
@@ -108,7 +118,9 @@ export const categories = pgTable("categories", {
   ...timestamps,
   title: text("title").notNull().unique(),
   archived,
-  tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+  tenantId: uuid("tenant_id")
+    .references(() => tenants.id, { onDelete: "cascade" })
+    .notNull(),
 });
 
 export const createTokens = pgTable("create_tokens", {
@@ -123,7 +135,9 @@ export const createTokens = pgTable("create_tokens", {
     withTimezone: true,
   }).notNull(),
   reminderCount: integer("reminder_count").notNull().default(0),
-  tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+  tenantId: uuid("tenant_id")
+    .references(() => tenants.id, { onDelete: "cascade" })
+    .notNull(),
 });
 
 export const resetTokens = pgTable("reset_tokens", {
@@ -137,7 +151,9 @@ export const resetTokens = pgTable("reset_tokens", {
     precision: 3,
     withTimezone: true,
   }).notNull(),
-  tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+  tenantId: uuid("tenant_id")
+    .references(() => tenants.id, { onDelete: "cascade" })
+    .notNull(),
 });
 
 export const coursesStatusEnum = pgEnum("status", ["draft", "published", "private"]);
@@ -172,7 +188,9 @@ export const courses = pgTable(
       .array()
       .notNull()
       .default(sql`ARRAY['en']::text[]`),
-    tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+    tenantId: uuid("tenant_id")
+      .references(() => tenants.id, { onDelete: "cascade" })
+      .notNull(),
   },
   (table) => ({
     shortIdUniqueIdx: uniqueIndex("courses_short_id_unique_idx").on(table.shortId),
@@ -190,7 +208,9 @@ export const courseSlugs = pgTable(
       .references(() => courses.shortId, { onDelete: "cascade", onUpdate: "cascade" })
       .notNull(),
     lang: text("lang").notNull(),
-    tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+    tenantId: uuid("tenant_id")
+      .references(() => tenants.id, { onDelete: "cascade" })
+      .notNull(),
   },
   (table) => ({
     courseSlugCourseShortIdLangUniqueIdx: uniqueIndex(
@@ -212,7 +232,9 @@ export const chapters = pgTable("chapters", {
   isFreemium: boolean("is_freemium").notNull().default(false),
   displayOrder: integer("display_order"),
   lessonCount: integer("lesson_count").notNull().default(0),
-  tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+  tenantId: uuid("tenant_id")
+    .references(() => tenants.id, { onDelete: "cascade" })
+    .notNull(),
 });
 
 export const lessons = pgTable("lessons", {
@@ -231,7 +253,9 @@ export const lessons = pgTable("lessons", {
   fileS3Key: varchar("file_s3_key", { length: 200 }),
   fileType: varchar("file_type", { length: 20 }),
   isExternal: boolean("is_external").default(false),
-  tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+  tenantId: uuid("tenant_id")
+    .references(() => tenants.id, { onDelete: "cascade" })
+    .notNull(),
 });
 
 export const aiMentorLessons = pgTable("ai_mentor_lessons", {
@@ -245,7 +269,9 @@ export const aiMentorLessons = pgTable("ai_mentor_lessons", {
   name: text("name").notNull().default("AI Mentor"),
   avatarReference: varchar("avatar_reference", { length: 200 }),
   type: text("type").notNull().default("mentor"),
-  tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+  tenantId: uuid("tenant_id")
+    .references(() => tenants.id, { onDelete: "cascade" })
+    .notNull(),
 });
 
 export const aiMentorThreads = pgTable("ai_mentor_threads", {
@@ -259,7 +285,9 @@ export const aiMentorThreads = pgTable("ai_mentor_threads", {
     .notNull(),
   status: varchar("status", { length: 20 }).notNull().default("active"),
   userLanguage: varchar("user_language", { length: 20 }).notNull().default("en"),
-  tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+  tenantId: uuid("tenant_id")
+    .references(() => tenants.id, { onDelete: "cascade" })
+    .notNull(),
 });
 
 export const aiMentorThreadMessages = pgTable("ai_mentor_thread_messages", {
@@ -272,7 +300,9 @@ export const aiMentorThreadMessages = pgTable("ai_mentor_thread_messages", {
   content: text("content").notNull(),
   tokenCount: integer("token_count").notNull().default(0),
   archived: boolean("archived").default(false),
-  tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+  tenantId: uuid("tenant_id")
+    .references(() => tenants.id, { onDelete: "cascade" })
+    .notNull(),
 });
 
 export const questions = pgTable("questions", {
@@ -290,7 +320,9 @@ export const questions = pgTable("questions", {
   photoS3Key: varchar("photo_s3_key", { length: 200 }),
   description: jsonb("description"),
   solutionExplanation: jsonb("solution_explanation"),
-  tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+  tenantId: uuid("tenant_id")
+    .references(() => tenants.id, { onDelete: "cascade" })
+    .notNull(),
 });
 
 export const questionAnswerOptions = pgTable("question_answer_options", {
@@ -304,7 +336,9 @@ export const questionAnswerOptions = pgTable("question_answer_options", {
   displayOrder: integer("display_order"),
   matchedWord: jsonb("matched_word"),
   scaleAnswer: integer("scale_answer"),
-  tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+  tenantId: uuid("tenant_id")
+    .references(() => tenants.id, { onDelete: "cascade" })
+    .notNull(),
 });
 
 export const studentQuestionAnswers = pgTable(
@@ -320,7 +354,9 @@ export const studentQuestionAnswers = pgTable(
       .notNull(),
     answer: jsonb("answer").default({}),
     isCorrect: boolean("is_correct"),
-    tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+    tenantId: uuid("tenant_id")
+      .references(() => tenants.id, { onDelete: "cascade" })
+      .notNull(),
   },
   (table) => ({
     unq: unique().on(table.questionId, table.studentId),
@@ -354,7 +390,9 @@ export const studentCourses = pgTable(
     status: varchar("status").notNull().default("enrolled"), // enrolled/not_enrolled
     paymentId: varchar("payment_id", { length: 50 }),
     enrolledByGroupId: uuid("enrolled_by_group_id").references(() => groups.id),
-    tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+    tenantId: uuid("tenant_id")
+      .references(() => tenants.id, { onDelete: "cascade" })
+      .notNull(),
   },
   (table) => ({
     unq: unique().on(table.studentId, table.courseId),
@@ -386,7 +424,9 @@ export const studentLessonProgress = pgTable(
       precision: 3,
     }),
     languageAnswered: text("language_answered").default(SUPPORTED_LANGUAGES.EN),
-    tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+    tenantId: uuid("tenant_id")
+      .references(() => tenants.id, { onDelete: "cascade" })
+      .notNull(),
   },
   (table) => ({
     unq: unique().on(table.studentId, table.lessonId, table.chapterId),
@@ -405,7 +445,9 @@ export const aiMentorStudentLessonProgress = pgTable("ai_mentor_student_lesson_p
   maxScore: integer("max_score"),
   percentage: integer("percentage"),
   passed: boolean("passed").default(false),
-  tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+  tenantId: uuid("tenant_id")
+    .references(() => tenants.id, { onDelete: "cascade" })
+    .notNull(),
 });
 
 export const studentChapterProgress = pgTable(
@@ -429,7 +471,9 @@ export const studentChapterProgress = pgTable(
       precision: 3,
     }),
     completedAsFreemium: boolean("completed_as_freemium").notNull().default(false),
-    tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+    tenantId: uuid("tenant_id")
+      .references(() => tenants.id, { onDelete: "cascade" })
+      .notNull(),
   },
   (table) => ({
     unq: unique().on(table.studentId, table.courseId, table.chapterId),
@@ -453,7 +497,9 @@ export const coursesSummaryStats = pgTable("courses_summary_stats", {
     .default(0),
   completedFreemiumStudentCount: integer("completed_freemium_student_count").notNull().default(0),
   completedCourseStudentCount: integer("completed_course_student_count").notNull().default(0),
-  tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+  tenantId: uuid("tenant_id")
+    .references(() => tenants.id, { onDelete: "cascade" })
+    .notNull(),
 });
 
 export const courseStudentsStats = pgTable(
@@ -470,7 +516,9 @@ export const courseStudentsStats = pgTable(
     month: integer("month").notNull(),
     year: integer("year").notNull(),
     newStudentsCount: integer("new_students_count").notNull().default(0),
-    tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+    tenantId: uuid("tenant_id")
+      .references(() => tenants.id, { onDelete: "cascade" })
+      .notNull(),
   },
   (table) => ({
     unq: unique().on(table.courseId, table.month, table.year),
@@ -492,7 +540,9 @@ export const lessonLearningTime = pgTable(
       .references(() => courses.id, { onDelete: "cascade" })
       .notNull(),
     totalSeconds: integer("total_seconds").notNull().default(0),
-    tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+    tenantId: uuid("tenant_id")
+      .references(() => tenants.id, { onDelete: "cascade" })
+      .notNull(),
   },
   (table) => ({
     unq: unique().on(table.userId, table.lessonId),
@@ -512,7 +562,9 @@ export const scormMetadata = pgTable("scorm_metadata", {
   version: text("version").notNull(),
   entryPoint: text("entry_point").notNull(),
   s3Key: text("s3_key").notNull(),
-  tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+  tenantId: uuid("tenant_id")
+    .references(() => tenants.id, { onDelete: "cascade" })
+    .notNull(),
 });
 
 export const scormFiles = pgTable("scorm_files", {
@@ -521,7 +573,9 @@ export const scormFiles = pgTable("scorm_files", {
   title: text("title").notNull(),
   type: text("type").notNull(),
   s3KeyPath: text("s3_key_path").notNull(),
-  tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+  tenantId: uuid("tenant_id")
+    .references(() => tenants.id, { onDelete: "cascade" })
+    .notNull(),
 });
 
 export const groups = pgTable("groups", {
@@ -529,7 +583,9 @@ export const groups = pgTable("groups", {
   ...timestamps,
   name: text("name").notNull(),
   characteristic: text("characteristic"),
-  tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+  tenantId: uuid("tenant_id")
+    .references(() => tenants.id, { onDelete: "cascade" })
+    .notNull(),
 });
 
 export const groupUsers = pgTable(
@@ -543,7 +599,9 @@ export const groupUsers = pgTable(
     groupId: uuid("group_id")
       .references(() => groups.id, { onDelete: "cascade" })
       .notNull(),
-    tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+    tenantId: uuid("tenant_id")
+      .references(() => tenants.id, { onDelete: "cascade" })
+      .notNull(),
   },
   (table) => ({
     unq: unique().on(table.userId, table.groupId),
@@ -564,7 +622,9 @@ export const groupCourses = pgTable(
     enrolledBy: uuid("enrolled_by").references(() => users.id),
     isMandatory: boolean("is_mandatory").notNull().default(false),
     dueDate: timestamp("due_date", { withTimezone: true }),
-    tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+    tenantId: uuid("tenant_id")
+      .references(() => tenants.id, { onDelete: "cascade" })
+      .notNull(),
   },
   (table) => ({
     unq: unique().on(table.groupId, table.courseId),
@@ -576,7 +636,9 @@ export const settings = pgTable("settings", {
   ...timestamps,
   userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
   settings: jsonb("settings").$type<AllSettings>().notNull(),
-  tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+  tenantId: uuid("tenant_id")
+    .references(() => tenants.id, { onDelete: "cascade" })
+    .notNull(),
 });
 
 export const certificates = pgTable(
@@ -590,7 +652,9 @@ export const certificates = pgTable(
     courseId: uuid("course_id")
       .references(() => courses.id, { onDelete: "cascade" })
       .notNull(),
-    tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+    tenantId: uuid("tenant_id")
+      .references(() => tenants.id, { onDelete: "cascade" })
+      .notNull(),
   },
   (table) => ({
     unq: unique().on(table.userId, table.courseId),
@@ -606,7 +670,9 @@ export const announcements = pgTable("announcements", {
     .references(() => users.id, { onDelete: "cascade" })
     .notNull(),
   isEveryone: boolean("is_everyone").notNull().default(false),
-  tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+  tenantId: uuid("tenant_id")
+    .references(() => tenants.id, { onDelete: "cascade" })
+    .notNull(),
 });
 
 export const userAnnouncements = pgTable(
@@ -622,7 +688,9 @@ export const userAnnouncements = pgTable(
       .notNull(),
     isRead: boolean("is_read").notNull().default(false),
     readAt: timestamp("read_at", { withTimezone: true, precision: 3 }),
-    tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+    tenantId: uuid("tenant_id")
+      .references(() => tenants.id, { onDelete: "cascade" })
+      .notNull(),
   },
   (table) => ({
     unq: unique().on(table.userId, table.announcementId),
@@ -640,7 +708,9 @@ export const groupAnnouncements = pgTable(
     announcementId: uuid("announcement_id")
       .references(() => announcements.id, { onDelete: "cascade" })
       .notNull(),
-    tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+    tenantId: uuid("tenant_id")
+      .references(() => tenants.id, { onDelete: "cascade" })
+      .notNull(),
   },
   (table) => ({
     unq: unique().on(table.groupId, table.announcementId),
@@ -657,7 +727,9 @@ export const documents = pgTable("documents", {
   status: text("status").notNull().default("processing"), // 'processing' | 'ready' | 'failed'
   errorMessage: text("error_message"),
   metadata: jsonb("metadata"),
-  tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+  tenantId: uuid("tenant_id")
+    .references(() => tenants.id, { onDelete: "cascade" })
+    .notNull(),
 });
 
 export const docChunks = pgTable(
@@ -672,7 +744,9 @@ export const docChunks = pgTable(
     metadata: jsonb("metadata"),
     content: text("content").notNull(),
     embedding: vector("embedding", { dimensions: 1536 }),
-    tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+    tenantId: uuid("tenant_id")
+      .references(() => tenants.id, { onDelete: "cascade" })
+      .notNull(),
   },
   (t) => ({
     uniqueOrder: { columns: [t.documentId, t.chunkIndex], unique: true },
@@ -690,7 +764,9 @@ export const documentToAiMentorLesson = pgTable(
     aiMentorLessonId: uuid("ai_mentor_lesson_id")
       .references(() => aiMentorLessons.id, { onDelete: "cascade" })
       .notNull(),
-    tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+    tenantId: uuid("tenant_id")
+      .references(() => tenants.id, { onDelete: "cascade" })
+      .notNull(),
   },
   (t) => ({
     unq: unique().on(t.documentId, t.aiMentorLessonId),
@@ -712,7 +788,9 @@ export const secrets = pgTable(
     encryptedDekTag: text("encrypted_dek_tag").notNull(),
     alg: text("alg").notNull().default("AES-256-GCM"),
     metadata: jsonb("metadata"),
-    tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+    tenantId: uuid("tenant_id")
+      .references(() => tenants.id, { onDelete: "cascade" })
+      .notNull(),
   },
   (t) => ({
     nameUnique: uniqueIndex("secrets_name_uq").on(t.secretName),
@@ -734,7 +812,9 @@ export const userOnboarding = pgTable(
     profile: boolean("profile").notNull().default(false),
     settings: boolean("settings").notNull().default(false),
     providerInformation: boolean("provider_information").notNull().default(false),
-    tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+    tenantId: uuid("tenant_id")
+      .references(() => tenants.id, { onDelete: "cascade" })
+      .notNull(),
   },
   (table) => ({
     unq: unique().on(table.userId),
@@ -760,7 +840,9 @@ export const activityLogs = pgTable(
     resourceType: text("resource_type"),
     resourceId: uuid("resource_id"),
     metadata: jsonb("metadata").$type<ActivityLogMetadata>().notNull(),
-    tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+    tenantId: uuid("tenant_id")
+      .references(() => tenants.id, { onDelete: "cascade" })
+      .notNull(),
   },
   (table) => ({
     actorIdx: index("activity_logs_actor_idx").on(table.actorId, table.createdAt),
@@ -781,7 +863,9 @@ export const questionsAndAnswers = pgTable("questions_and_answers", {
     .array()
     .notNull()
     .default(sql`ARRAY['en']::text[]`),
-  tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+  tenantId: uuid("tenant_id")
+    .references(() => tenants.id, { onDelete: "cascade" })
+    .notNull(),
 });
 
 export const resources = pgTable("resources", {
@@ -794,7 +878,9 @@ export const resources = pgTable("resources", {
   metadata: jsonb("metadata").default({}),
   uploadedBy: uuid("uploaded_by_id").references(() => users.id, { onDelete: "set null" }),
   archived,
-  tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+  tenantId: uuid("tenant_id")
+    .references(() => tenants.id, { onDelete: "cascade" })
+    .notNull(),
 });
 
 export const resourceEntity = pgTable(
@@ -808,7 +894,9 @@ export const resourceEntity = pgTable(
     entityId: uuid("entity_id").notNull(),
     entityType: varchar("entity_type", { length: 100 }).notNull(),
     relationshipType: varchar("relationship_type", { length: 100 }).notNull().default("attachment"), // attachment / cover_image
-    tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+    tenantId: uuid("tenant_id")
+      .references(() => tenants.id, { onDelete: "cascade" })
+      .notNull(),
   },
   (table) => ({
     resourceIdx: index("resource_entity_resource_idx").on(table.resourceId),
@@ -849,7 +937,9 @@ export const articles = pgTable(
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
     updatedBy: uuid("updated_by_id").references(() => users.id, { onDelete: "set null" }),
-    tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+    tenantId: uuid("tenant_id")
+      .references(() => tenants.id, { onDelete: "cascade" })
+      .notNull(),
   },
   (table) => ({
     articleSectionIdx: index("article_section_idx").on(table.articleSectionId),
@@ -862,7 +952,9 @@ export const articleSections = pgTable("article_sections", {
   title: jsonb("title").notNull().default({}),
   baseLanguage,
   availableLocales,
-  tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+  tenantId: uuid("tenant_id")
+    .references(() => tenants.id, { onDelete: "cascade" })
+    .notNull(),
 });
 
 export const newsStatusEnum = pgEnum("news_status", ["draft", "published"]);
@@ -886,7 +978,9 @@ export const news = pgTable("news", {
   authorId: uuid("author_id")
     .references(() => users.id, { onDelete: "cascade" })
     .notNull(),
-  tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }),
+  tenantId: uuid("tenant_id")
+    .references(() => tenants.id, { onDelete: "cascade" })
+    .notNull(),
 });
 
 export const tenants = pgTable(
