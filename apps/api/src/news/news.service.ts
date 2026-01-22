@@ -1,23 +1,20 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
-import { load as loadHtml } from "cheerio";
+import { ENTITY_TYPES, type SupportedLanguages } from "@repo/shared";
 import { and, count, eq, getTableColumns, gt, lt, ne, sql } from "drizzle-orm";
 import { isEmpty, isEqual } from "lodash";
 import { match } from "ts-pattern";
 
 import { DatabasePg } from "src/common";
 import { buildJsonbField, deleteJsonbField } from "src/common/helpers/sqlHelpers";
+import { injectResourcesIntoContent } from "src/common/utils/injectResourcesIntoContent";
 import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
 import { CreateNewsEvent, DeleteNewsEvent, UpdateNewsEvent } from "src/events";
-import {
-  ENTITY_TYPES,
-  RESOURCE_RELATIONSHIP_TYPES,
-  RESOURCE_CATEGORIES,
-} from "src/file/file.constants";
+import { RESOURCE_RELATIONSHIP_TYPES, RESOURCE_CATEGORIES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { SettingsService } from "src/settings/settings.service";
-import { news, users } from "src/storage/schema";
+import { news, resourceEntity, resources, users } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { baseNewsTitle } from "./constants";
@@ -25,11 +22,12 @@ import { baseNewsTitle } from "./constants";
 import type { CreateNews } from "./schemas/createNews.schema";
 import type { NewsResource, NewsResources } from "./schemas/selectNews.schema";
 import type { UpdateNews } from "./schemas/updateNews.schema";
-import type { SupportedLanguages } from "@repo/shared";
 import type { InferSelectModel } from "drizzle-orm";
+import type { Response } from "express";
 import type { NewsActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
+import type { UserRole } from "src/user/schemas/userRoles";
 
 // News uses a custom pagination: first page shows up to 7 items, following pages up to 9.
 const FIRST_PAGE_SIZE = 7;
@@ -390,9 +388,14 @@ export class NewsService {
 
     const resources = await this.getNewsResources(newsId, requestedLanguage);
 
-    const contentWithResources = this.injectResourcesIntoContent(
+    const { html: contentWithResources } = injectResourcesIntoContent(
       existingNews.content,
       resources.flatList,
+      {
+        resourceIdRegex: /news-resource\/([0-9a-fA-F-]{36})/,
+        trackNodeTypes: ["video"],
+        buildImageTag: (resource) => this.buildImageTag(resource),
+      },
     );
 
     return {
@@ -407,6 +410,54 @@ export class NewsService {
         currentUser,
       )),
     };
+  }
+
+  async getNewsResource(res: Response, resourceId: UUIDType, userId?: UUIDType, role?: UserRole) {
+    await this.checkAccess(userId);
+
+    const [resource] = await this.db
+      .select({
+        ...getTableColumns(resources),
+        entityId: resourceEntity.entityId,
+        entityType: resourceEntity.entityType,
+      })
+      .from(resources)
+      .innerJoin(resourceEntity, eq(resourceEntity.resourceId, resources.id))
+      .where(
+        and(
+          eq(resources.id, resourceId),
+          eq(resourceEntity.entityType, ENTITY_TYPES.NEWS),
+          ne(resources.archived, true),
+        ),
+      );
+
+    if (!resource || resource.entityType !== ENTITY_TYPES.NEWS) {
+      throw new NotFoundException("News resource not found");
+    }
+
+    const [existingNews] = await this.db
+      .select({
+        ...getTableColumns(news),
+        authorId: news.authorId,
+      })
+      .from(news)
+      .where(and(eq(news.id, resource.entityId), ne(news.archived, true)));
+
+    if (!existingNews) throw new NotFoundException("News not found");
+
+    const isAdminLike = role === USER_ROLES.ADMIN || role === USER_ROLES.CONTENT_CREATOR;
+    const isAuthor = Boolean(userId && existingNews.authorId === userId);
+    const isPublic = Boolean(existingNews.isPublic && existingNews.publishedAt !== null);
+
+    if (!isAdminLike && !isAuthor && !isPublic) {
+      throw new NotFoundException("News resource not found");
+    }
+
+    const fileUrl = await this.fileService.getFileUrl(resource.reference);
+
+    if (!fileUrl) throw new Error("Error fetching file url");
+
+    return res.redirect(fileUrl);
   }
 
   private async getAdjacentNews(
@@ -628,63 +679,13 @@ export class NewsService {
 
     const resources = await this.getNewsResources(newsId, language);
 
-    return this.injectResourcesIntoContent(content, resources.flatList) ?? content;
-  }
-
-  private injectResourcesIntoContent(content: string | null, resources: NewsResource[]) {
-    if (!content) return content;
-    if (!resources.length) return content;
-
-    const $ = loadHtml(content);
-    const resourceMap = new Map(resources.map((resource) => [resource.id, resource]));
-
-    $("a").each((_, element) => {
-      const anchor = $(element);
-      const href = anchor.text() ?? "";
-      const hrefResourceId = this.extractResourceIdFromHref(href);
-
-      const matchingResource = hrefResourceId ? resourceMap.get(hrefResourceId) : undefined;
-
-      if (!matchingResource) return;
-
-      const parent = anchor.parent();
-
-      match(matchingResource.contentType ?? "")
-        .when(
-          (type) => type.startsWith("image/"),
-          () => {
-            const imgTag = this.buildImageTag(matchingResource);
-            if (parent.is("p")) {
-              anchor.remove();
-              parent.after(imgTag);
-            } else {
-              anchor.replaceWith(imgTag);
-            }
-          },
-        )
-        .when(
-          (type) => type.startsWith("video/"),
-          () => {
-            const iframe = this.buildVideoTag(matchingResource);
-            if (parent.is("p")) {
-              anchor.remove();
-              parent.after(iframe);
-            } else {
-              anchor.replaceWith(iframe);
-            }
-          },
-        )
-        .otherwise(() => {
-          anchor.attr("href", matchingResource.fileUrl);
-          anchor.attr("download", matchingResource.fileName ?? "");
-          anchor.attr("target", "_blank");
-          anchor.attr("rel", "noopener noreferrer");
-          anchor.text(matchingResource.title ?? matchingResource.fileName ?? "Download File");
-        });
+    const { html: parsedContent } = injectResourcesIntoContent(content, resources.flatList, {
+      resourceIdRegex: /news-resource\/([0-9a-fA-F-]{36})/,
+      trackNodeTypes: ["video"],
+      buildImageTag: (resource) => this.buildImageTag(resource),
     });
 
-    const bodyChildren = $("body").children();
-    return $.html(bodyChildren.length ? bodyChildren : $.root().children());
+    return parsedContent ?? content;
   }
 
   private async validateNewsExists(
@@ -793,18 +794,6 @@ export class NewsService {
 
   private buildImageTag(resource: NewsResource) {
     return `<img src="${resource.fileUrl}" alt="${resource.title ?? ""}" />`;
-  }
-
-  private buildVideoTag(resource: NewsResource) {
-    return `<iframe controls src="${resource.fileUrl}" title="${resource.title ?? ""}"></iframe>`;
-  }
-
-  private extractResourceIdFromHref(href: string): UUIDType | undefined {
-    if (!href) return undefined;
-
-    const uuidMatch = href.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
-
-    return uuidMatch ? (uuidMatch[0] as UUIDType) : undefined;
   }
 
   private extractOriginalFilename(metadata: StoredNewsResource["metadata"]) {

@@ -6798,6 +6798,27 @@
         }
       }
     },
+    "/api/news/news-resource/{resourceId}": {
+      "get": {
+        "operationId": "NewsController_getNewsResource",
+        "parameters": [
+          {
+            "name": "resourceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/news/{id}": {
       "get": {
         "operationId": "NewsController_getNews",
@@ -7401,6 +7422,27 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/articles/articles-resource/{resourceId}": {
+      "get": {
+        "operationId": "ArticlesController_getArticleResource",
+        "parameters": [
+          {
+            "name": "resourceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
           }
         }
       }
@@ -10010,19 +10052,64 @@
           "resource": {
             "type": "string"
           },
-          "lessonId": {
-            "format": "uuid",
-            "type": "string"
-          },
           "contextId": {
             "format": "uuid",
             "type": "string"
+          },
+          "entityId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "entityType": {
+            "anyOf": [
+              {
+                "const": "course",
+                "type": "string"
+              },
+              {
+                "const": "chapter",
+                "type": "string"
+              },
+              {
+                "const": "lesson",
+                "type": "string"
+              },
+              {
+                "const": "question",
+                "type": "string"
+              },
+              {
+                "const": "news",
+                "type": "string"
+              },
+              {
+                "const": "articles",
+                "type": "string"
+              },
+              {
+                "const": "user",
+                "type": "string"
+              },
+              {
+                "const": "category",
+                "type": "string"
+              },
+              {
+                "const": "announcement",
+                "type": "string"
+              },
+              {
+                "const": "global_settings",
+                "type": "string"
+              }
+            ]
           }
         },
         "required": [
           "filename",
           "sizeBytes",
-          "mimeType"
+          "mimeType",
+          "entityType"
         ]
       },
       "InitVideoUploadResponse": {
@@ -21479,7 +21566,14 @@
                             "type": "string"
                           },
                           "contentType": {
-                            "type": "string"
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
                           },
                           "title": {
                             "type": "string"
@@ -21511,7 +21605,14 @@
                             "type": "string"
                           },
                           "contentType": {
-                            "type": "string"
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
                           },
                           "title": {
                             "type": "string"
@@ -21543,7 +21644,14 @@
                             "type": "string"
                           },
                           "contentType": {
-                            "type": "string"
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
                           },
                           "title": {
                             "type": "string"
@@ -21573,7 +21681,14 @@
                           "type": "string"
                         },
                         "contentType": {
-                          "type": "string"
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
                         },
                         "title": {
                           "type": "string"
@@ -21808,7 +21923,14 @@
                           "type": "string"
                         },
                         "contentType": {
-                          "type": "string"
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
                         },
                         "title": {
                           "type": "string"
@@ -21840,7 +21962,14 @@
                           "type": "string"
                         },
                         "contentType": {
-                          "type": "string"
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
                         },
                         "title": {
                           "type": "string"
@@ -21872,7 +22001,14 @@
                           "type": "string"
                         },
                         "contentType": {
-                          "type": "string"
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
                         },
                         "title": {
                           "type": "string"
@@ -21902,7 +22038,14 @@
                         "type": "string"
                       },
                       "contentType": {
-                        "type": "string"
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
                       },
                       "title": {
                         "type": "string"
@@ -22061,7 +22204,14 @@
                             "type": "string"
                           },
                           "contentType": {
-                            "type": "string"
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
                           },
                           "title": {
                             "type": "string"
@@ -22093,7 +22243,14 @@
                             "type": "string"
                           },
                           "contentType": {
-                            "type": "string"
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
                           },
                           "title": {
                             "type": "string"
@@ -22125,7 +22282,14 @@
                             "type": "string"
                           },
                           "contentType": {
-                            "type": "string"
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
                           },
                           "title": {
                             "type": "string"
@@ -22155,7 +22319,14 @@
                           "type": "string"
                         },
                         "contentType": {
-                          "type": "string"
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
                         },
                         "title": {
                           "type": "string"
@@ -22740,7 +22911,17 @@
                         "type": "string"
                       },
                       "contentType": {
-                        "type": "string"
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "fileUrlError": {
+                        "type": "boolean"
                       },
                       "title": {
                         "type": "string"
@@ -22772,7 +22953,17 @@
                         "type": "string"
                       },
                       "contentType": {
-                        "type": "string"
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "fileUrlError": {
+                        "type": "boolean"
                       },
                       "title": {
                         "type": "string"
@@ -22804,7 +22995,17 @@
                         "type": "string"
                       },
                       "contentType": {
-                        "type": "string"
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "fileUrlError": {
+                        "type": "boolean"
                       },
                       "title": {
                         "type": "string"
@@ -22834,7 +23035,17 @@
                       "type": "string"
                     },
                     "contentType": {
-                      "type": "string"
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "fileUrlError": {
+                      "type": "boolean"
                     },
                     "title": {
                       "type": "string"
@@ -23045,7 +23256,17 @@
                           "type": "string"
                         },
                         "contentType": {
-                          "type": "string"
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "fileUrlError": {
+                          "type": "boolean"
                         },
                         "title": {
                           "type": "string"
@@ -23077,7 +23298,17 @@
                           "type": "string"
                         },
                         "contentType": {
-                          "type": "string"
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "fileUrlError": {
+                          "type": "boolean"
                         },
                         "title": {
                           "type": "string"
@@ -23109,7 +23340,17 @@
                           "type": "string"
                         },
                         "contentType": {
-                          "type": "string"
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "fileUrlError": {
+                          "type": "boolean"
                         },
                         "title": {
                           "type": "string"
@@ -23139,7 +23380,17 @@
                         "type": "string"
                       },
                       "contentType": {
-                        "type": "string"
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "fileUrlError": {
+                        "type": "boolean"
                       },
                       "title": {
                         "type": "string"
@@ -23265,7 +23516,17 @@
                         "type": "string"
                       },
                       "contentType": {
-                        "type": "string"
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "fileUrlError": {
+                        "type": "boolean"
                       },
                       "title": {
                         "type": "string"
@@ -23297,7 +23558,17 @@
                         "type": "string"
                       },
                       "contentType": {
-                        "type": "string"
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "fileUrlError": {
+                        "type": "boolean"
                       },
                       "title": {
                         "type": "string"
@@ -23329,7 +23600,17 @@
                         "type": "string"
                       },
                       "contentType": {
-                        "type": "string"
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "fileUrlError": {
+                        "type": "boolean"
                       },
                       "title": {
                         "type": "string"
@@ -23359,7 +23640,17 @@
                       "type": "string"
                     },
                     "contentType": {
-                      "type": "string"
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "fileUrlError": {
+                      "type": "boolean"
                     },
                     "title": {
                       "type": "string"

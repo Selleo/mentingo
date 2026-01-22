@@ -4,8 +4,10 @@ import {
   ALLOWED_EXCEL_FILE_TYPES,
   ALLOWED_LESSON_IMAGE_FILE_TYPES,
   ALLOWED_PDF_FILE_TYPES,
+  ALLOWED_PRESENTATION_FILE_TYPES,
   ALLOWED_VIDEO_FILE_TYPES,
   ALLOWED_WORD_FILE_TYPES,
+  ENTITY_TYPES,
   type SupportedLanguages,
 } from "@repo/shared";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -15,28 +17,35 @@ import { z } from "zod";
 
 import { useAddArticleLanguage } from "~/api/mutations/admin/useAddArticleLanguage";
 import { useDeleteArticleLanguage } from "~/api/mutations/admin/useDeleteArticleLanguage";
+import { useInitVideoUpload } from "~/api/mutations/admin/useInitVideoUpload";
 import { usePreviewArticle } from "~/api/mutations/usePreviewArticle";
 import { useUpdateArticle } from "~/api/mutations/useUpdateArticle";
-import { useUploadArticleFile } from "~/api/mutations/useUploadArticleFile";
 import { useArticle } from "~/api/queries";
 import { FormTextField } from "~/components/Form/FormTextField";
 import { PageWrapper } from "~/components/PageWrapper";
-import { BaseEditor } from "~/components/RichText/Editor";
+import { ContentEditor } from "~/components/RichText/Editor";
 import Viewer from "~/components/RichText/Viever";
 import { Button } from "~/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { useToast } from "~/components/ui/use-toast";
+import { useVideoPlayer } from "~/components/VideoPlayer/VideoPlayerContext";
+import {
+  buildEntityResourceUrl,
+  insertResourceIntoEditor,
+  useEntityResourceUpload,
+} from "~/hooks/useEntityResourceUpload";
+import { useTusVideoUpload } from "~/hooks/useTusVideoUpload";
 import { LanguageSelector } from "~/modules/Articles/LanguageSelector";
-import { baseUrl } from "~/utils/baseUrl";
 import { filterChangedData } from "~/utils/filterChangedData";
 
 import Loader from "../common/Loader/Loader";
 import { useLanguageStore } from "../Dashboard/Settings/Language/LanguageStore";
 
-import type { Editor as TipTapEditor } from "@tiptap/react";
-import type { UpdateArticleBody } from "~/api/generated-api";
+import type { Editor as TiptapEditor } from "@tiptap/react";
+import type { InitVideoUploadResponse, UpdateArticleBody } from "~/api/generated-api";
 
 type ArticleFormValues = {
   title: string;
@@ -74,13 +83,16 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
     isFetching: isFetchingArticle,
   } = useArticle(articleId ?? "", articleLanguage);
   const { mutateAsync: updateArticle } = useUpdateArticle();
-  const { mutateAsync: uploadArticleFile } = useUploadArticleFile();
+  const { uploadResource } = useEntityResourceUpload();
+  const { mutateAsync: initVideoUpload } = useInitVideoUpload();
+  const { toast } = useToast();
 
   const { mutateAsync: addLanguage } = useAddArticleLanguage();
   const { mutateAsync: deleteLanguage } = useDeleteArticleLanguage();
 
   const { mutateAsync: previewArticle, isPending: isPreviewLoading } = usePreviewArticle();
   const [previewContent, setPreviewContent] = useState("");
+  const { getSessionForFile, uploadVideo, isUploading, uploadProgress } = useTusVideoUpload();
 
   const pageTitle = t("adminArticleView.form.editTitle");
 
@@ -102,6 +114,17 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
 
   const initialValuesRef = useRef<ArticleFormValues | null>(null);
   const lastResetKeyRef = useRef<string | null>(null);
+
+  const { clearVideo } = useVideoPlayer();
+
+  useEffect(() => {
+    if (tabValue === "editor") {
+      clearVideo();
+    }
+    return () => {
+      clearVideo();
+    };
+  }, [clearVideo, tabValue]);
 
   useEffect(() => {
     if (!existingArticle || isFetchingArticle) return;
@@ -155,24 +178,71 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
     navigate(`/articles/${articleId}`);
   };
 
-  const handleFileUpload = async (file?: File, editor?: TipTapEditor | null) => {
+  const handleFileUpload = async (file?: File, editor?: TiptapEditor | null) => {
     if (!file || !articleId || !articleLanguage) return;
 
-    const uploaded = await uploadArticleFile({
-      id: articleId,
+    const isVideo = ALLOWED_VIDEO_FILE_TYPES.includes(file.type);
+    if (isVideo) {
+      try {
+        const session: InitVideoUploadResponse = await getSessionForFile({
+          file,
+          init: () =>
+            initVideoUpload({
+              filename: file.name,
+              sizeBytes: file.size,
+              mimeType: file.type,
+              title: file.name,
+              resource: ENTITY_TYPES.ARTICLES,
+              entityId: articleId,
+              entityType: ENTITY_TYPES.ARTICLES,
+            }),
+        });
+
+        await uploadVideo({ file, session });
+
+        if (session.resourceId) {
+          const resourceUrl = buildEntityResourceUrl(session.resourceId, "articles");
+
+          editor
+            ?.chain()
+            .insertContent("<br />")
+            .setVideoEmbed({
+              src: resourceUrl,
+              sourceType: session.provider === "s3" ? "external" : "internal",
+            })
+            .run();
+        }
+      } catch (error) {
+        console.error("Error uploading video:", error);
+        toast({
+          description: t("uploadFile.toast.videoFailed"),
+          variant: "destructive",
+        });
+      }
+      return;
+    }
+
+    const isPresentation = ALLOWED_PRESENTATION_FILE_TYPES.includes(file.type);
+    const isDocument =
+      ALLOWED_EXCEL_FILE_TYPES.includes(file.type) ||
+      ALLOWED_WORD_FILE_TYPES.includes(file.type) ||
+      ALLOWED_PDF_FILE_TYPES.includes(file.type);
+
+    const resourceId = await uploadResource({
       file,
+      entityType: ENTITY_TYPES.ARTICLES,
+      entityId: articleId,
       language: articleLanguage,
-      title: file.name,
-      description: file.name,
     });
 
-    const imageUrl = `${baseUrl}/api/article/resource/${uploaded.data.resourceId}`;
-
-    editor
-      ?.chain()
-      .insertContent("<br />")
-      .insertContent(`<a href="${imageUrl}">${imageUrl}</a>`)
-      .run();
+    insertResourceIntoEditor({
+      editor,
+      resourceId,
+      entityType: ENTITY_TYPES.ARTICLES,
+      file,
+      isPresentation,
+      isDocument,
+    });
   };
 
   const handleSaveHeaderImage = async (file: File) => {
@@ -324,7 +394,7 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
                       <TabsContent value="editor">
                         <FormControl>
                           <div className="flex flex-col gap-y-1.5">
-                            <BaseEditor
+                            <ContentEditor
                               id="content"
                               content={field.value}
                               allowFiles
@@ -334,8 +404,10 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
                                 ...ALLOWED_EXCEL_FILE_TYPES,
                                 ...ALLOWED_PDF_FILE_TYPES,
                                 ...ALLOWED_WORD_FILE_TYPES,
+                                ...ALLOWED_PRESENTATION_FILE_TYPES,
                               ]}
                               onUpload={handleFileUpload}
+                              uploadProgress={isUploading ? (uploadProgress ?? 0) : null}
                               onChange={field.onChange}
                             />
                             <FormMessage />

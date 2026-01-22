@@ -32,7 +32,8 @@ export const createArticleSectionResponseSchema = Type.Object({
 export const articleResourceSchema = Type.Object({
   id: UUIDSchema,
   fileUrl: Type.String(),
-  contentType: Type.String(),
+  contentType: Type.Union([Type.String(), Type.Null()]),
+  fileUrlError: Type.Optional(Type.Boolean()),
   title: Type.Optional(Type.String()),
   description: Type.Optional(Type.String()),
   fileName: Type.Optional(Type.String()),

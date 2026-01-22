@@ -57,29 +57,32 @@ export const InsertLinkDialog = ({ open, onClose, editor }: LinkDialogProps) => 
     }
   }, [open, editor, reset]);
 
-  const onSubmit = ({ url, text }: InsertLinkFormValues) => {
-    const { from, to } = editor.state.selection;
+  const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.stopPropagation();
+    handleSubmit(({ url, text }: InsertLinkFormValues) => {
+      const { from, to } = editor.state.selection;
 
-    if (text && editor.state.doc.textBetween(from, to, " ") !== text) {
-      editor
-        .chain()
-        .focus()
-        .insertContent(text)
-        .setTextSelection({ from, to: from + text.length })
-        .setLink({ href: url })
-        .run();
-    } else {
-      editor.chain().focus().setLink({ href: url }).run();
-    }
+      if (text && editor.state.doc.textBetween(from, to, " ") !== text) {
+        editor
+          .chain()
+          .focus()
+          .insertContent(text)
+          .setTextSelection({ from, to: from + text.length })
+          .setLink({ href: url })
+          .run();
+      } else {
+        editor.chain().focus().setLink({ href: url }).run();
+      }
 
-    onClose();
+      onClose();
+    })(event);
   };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
         <DialogTitle className="mb-2">{t("richTextEditor.toolbar.link.dialog.title")}</DialogTitle>
-        <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+        <form className="space-y-4" onSubmit={onSubmit}>
           <div className="space-y-1">
             <Label htmlFor="link-url">{t("richTextEditor.toolbar.link.dialog.urlLabel")}</Label>
             <Input id="link-url" placeholder="https://example.com" {...register("url")} />

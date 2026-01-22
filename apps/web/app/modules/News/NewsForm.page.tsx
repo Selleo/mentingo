@@ -4,8 +4,10 @@ import {
   ALLOWED_EXCEL_FILE_TYPES,
   ALLOWED_LESSON_IMAGE_FILE_TYPES,
   ALLOWED_PDF_FILE_TYPES,
+  ALLOWED_PRESENTATION_FILE_TYPES,
   ALLOWED_VIDEO_FILE_TYPES,
   ALLOWED_WORD_FILE_TYPES,
+  ENTITY_TYPES,
 } from "@repo/shared";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -13,11 +15,21 @@ import { useTranslation } from "react-i18next";
 import { useLocation } from "react-use";
 import { z } from "zod";
 
-import { usePreviewNews, useUpdateNews, useUploadNewsFile } from "../../api/mutations";
+import { useInitVideoUpload } from "~/api/mutations/admin/useInitVideoUpload";
+import { useToast } from "~/components/ui/use-toast";
+import { useVideoPlayer } from "~/components/VideoPlayer/VideoPlayerContext";
+import {
+  buildEntityResourceUrl,
+  insertResourceIntoEditor,
+  useEntityResourceUpload,
+} from "~/hooks/useEntityResourceUpload";
+import { useTusVideoUpload } from "~/hooks/useTusVideoUpload";
+
+import { usePreviewNews, useUpdateNews } from "../../api/mutations";
 import { useNews } from "../../api/queries";
 import { FormTextField } from "../../components/Form/FormTextField";
 import { PageWrapper } from "../../components/PageWrapper";
-import { BaseEditor } from "../../components/RichText/Editor";
+import { ContentEditor } from "../../components/RichText/Editor";
 import Viewer from "../../components/RichText/Viever";
 import { Button } from "../../components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "../../components/ui/form";
@@ -32,7 +44,6 @@ import {
 } from "../../components/ui/select";
 import { Switch } from "../../components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
-import { baseUrl } from "../../utils/baseUrl";
 import { filterChangedData } from "../../utils/filterChangedData";
 import Loader from "../common/Loader/Loader";
 import { useLanguageStore } from "../Dashboard/Settings/Language/LanguageStore";
@@ -83,8 +94,23 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
     { language },
     { enabled: isEdit },
   );
+
+  const { clearVideo } = useVideoPlayer();
+
+  useEffect(() => {
+    if (tabValue === "editor") {
+      clearVideo();
+    }
+    return () => {
+      clearVideo();
+    };
+  }, [clearVideo, tabValue]);
+
   const { mutateAsync: updateNews } = useUpdateNews();
-  const { mutateAsync: uploadNewsFile } = useUploadNewsFile();
+  const { uploadResource } = useEntityResourceUpload();
+  const { mutateAsync: initVideoUpload } = useInitVideoUpload();
+  const { getSessionForFile, uploadVideo, isUploading, uploadProgress } = useTusVideoUpload();
+  const { toast } = useToast();
   const { mutateAsync: previewNews, isPending: isPreviewLoading } = usePreviewNews();
   const [previewContent, setPreviewContent] = useState("");
   const pageTitle = isEdit ? t("newsView.edit") : t("newsView.create");
@@ -151,25 +177,68 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
   const handleFileUpload = async (file?: File, editor?: TipTapEditor | null) => {
     if (!file || !id) return;
 
-    await uploadNewsFile(
-      {
-        id,
-        file,
-        language,
-        title: file.name,
-        description: file.name,
-      },
-      {
-        onSuccess: (data) => {
-          const imageUrl = `${baseUrl}/api/news/resource/${data.data.resourceId}`;
+    const isVideo = ALLOWED_VIDEO_FILE_TYPES.includes(file.type);
+    const isPresentation = ALLOWED_PRESENTATION_FILE_TYPES.includes(file.type);
+    const isDocument =
+      ALLOWED_EXCEL_FILE_TYPES.includes(file.type) ||
+      ALLOWED_WORD_FILE_TYPES.includes(file.type) ||
+      ALLOWED_PDF_FILE_TYPES.includes(file.type);
+
+    if (isVideo) {
+      try {
+        const session = await getSessionForFile({
+          file,
+          init: () =>
+            initVideoUpload({
+              filename: file.name,
+              sizeBytes: file.size,
+              mimeType: file.type,
+              title: file.name,
+              resource: ENTITY_TYPES.NEWS,
+              entityId: id,
+              entityType: ENTITY_TYPES.NEWS,
+            }),
+        });
+
+        await uploadVideo({ file, session });
+
+        if (session.resourceId) {
+          const resourceUrl = buildEntityResourceUrl(session.resourceId, "news");
+
           editor
             ?.chain()
             .insertContent("<br />")
-            .insertContent(`<a href="${imageUrl}">${imageUrl}</a>`)
+            .setVideoEmbed({
+              src: resourceUrl,
+              sourceType: session.provider === "s3" ? "external" : "internal",
+            })
             .run();
-        },
-      },
-    );
+        }
+      } catch (error) {
+        console.error("Error uploading video:", error);
+        toast({
+          description: t("uploadFile.toast.videoFailed"),
+          variant: "destructive",
+        });
+      }
+      return;
+    }
+
+    const resourceId = await uploadResource({
+      file,
+      entityType: "news",
+      entityId: id,
+      language,
+    });
+
+    insertResourceIntoEditor({
+      editor,
+      resourceId,
+      entityType: "news",
+      file,
+      isPresentation,
+      isDocument,
+    });
   };
 
   const handleSaveHeaderImage = async (file: File) => {
@@ -376,7 +445,7 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
                       <TabsContent value="editor">
                         <FormControl>
                           <div className="flex flex-col gap-y-1.5">
-                            <BaseEditor
+                            <ContentEditor
                               id="content"
                               content={field.value}
                               allowFiles
@@ -386,8 +455,10 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
                                 ...ALLOWED_EXCEL_FILE_TYPES,
                                 ...ALLOWED_PDF_FILE_TYPES,
                                 ...ALLOWED_WORD_FILE_TYPES,
+                                ...ALLOWED_PRESENTATION_FILE_TYPES,
                               ]}
                               onUpload={handleFileUpload}
+                              uploadProgress={isUploading ? (uploadProgress ?? 0) : null}
                               {...field}
                             />
                             <FormMessage />

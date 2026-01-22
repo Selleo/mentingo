@@ -10,6 +10,7 @@ import {
   ALLOWED_ARTICLES_SETTINGS,
   ALLOWED_NEWS_SETTINGS,
   ALLOWED_QA_SETTINGS,
+  ENTITY_TYPES,
   MAX_LOGIN_PAGE_DOCUMENTS,
 } from "@repo/shared";
 import { and, eq, getTableColumns, inArray, isNull, sql } from "drizzle-orm";
@@ -19,11 +20,7 @@ import sharp from "sharp";
 import { CORS_ORIGIN } from "src/auth/consts";
 import { DatabasePg } from "src/common";
 import { UpdateSettingsEvent } from "src/events";
-import {
-  ENTITY_TYPES,
-  RESOURCE_CATEGORIES,
-  RESOURCE_RELATIONSHIP_TYPES,
-} from "src/file/file.constants";
+import { RESOURCE_CATEGORIES, RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { resourceEntity, resources, settings } from "src/storage/schema";

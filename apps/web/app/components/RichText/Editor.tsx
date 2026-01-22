@@ -7,7 +7,7 @@ import { cn } from "~/lib/utils";
 
 import { detectPresentationProvider } from "./extensions/utils/presentation";
 import { detectVideoProvider, extractUrlFromClipboard } from "./extensions/utils/video";
-import { baseEditorPlugins, lessonEditorPlugins } from "./plugins";
+import { baseEditorPlugins, contentEditorPlugins } from "./plugins";
 import { defaultClasses } from "./styles";
 import EditorToolbar from "./toolbar/EditorToolbar";
 
@@ -23,7 +23,7 @@ type EditorProps = {
   lessonId?: string;
   allowFiles?: boolean;
   acceptedFileTypes?: string[];
-  variant?: "base" | "lesson";
+  variant?: "base" | "content";
 };
 
 const Editor = ({
@@ -37,12 +37,12 @@ const Editor = ({
   parentClassName,
   allowFiles = false,
   acceptedFileTypes = ALLOWED_LESSON_IMAGE_FILE_TYPES,
-  variant = "lesson",
+  variant = "content",
 }: EditorProps) => {
   const editorRef = useRef<TiptapEditor | null>(null);
 
   const extensions = useMemo(
-    () => (variant === "base" ? baseEditorPlugins : lessonEditorPlugins),
+    () => (variant === "base" ? baseEditorPlugins : contentEditorPlugins),
     [variant],
   );
 
@@ -169,8 +169,8 @@ export const BaseEditor = (props: Omit<EditorProps, "variant">) => (
   <Editor {...props} variant="base" />
 );
 
-export const LessonEditor = (props: Omit<EditorProps, "variant">) => (
-  <Editor {...props} variant="lesson" />
+export const ContentEditor = (props: Omit<EditorProps, "variant">) => (
+  <Editor {...props} variant="content" />
 );
 
 export default Editor;

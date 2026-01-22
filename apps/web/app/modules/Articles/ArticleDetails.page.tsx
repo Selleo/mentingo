@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from "@remix-run/react";
 import { ACCESS_GUARD } from "@repo/shared";
 import { format } from "date-fns";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useDeleteArticle } from "~/api/mutations/useDeleteArticle";
@@ -12,6 +12,7 @@ import { PageWrapper } from "~/components/PageWrapper";
 import Viewer from "~/components/RichText/Viever";
 import { TOC } from "~/components/TOC/TOC";
 import { Button } from "~/components/ui/button";
+import { useVideoPlayer } from "~/components/VideoPlayer/VideoPlayerContext";
 import { ContentAccessGuard } from "~/Guards/AccessGuard";
 import { useUserRole } from "~/hooks/useUserRole";
 import { cn } from "~/lib/utils";
@@ -24,6 +25,9 @@ import { DeleteArticleDialog } from "./components/DeleteArticleDialog";
 export default function ArticleDetailsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+
+  const { clearVideo } = useVideoPlayer();
+
   const { articleId } = useParams();
 
   const { language } = useLanguageStore();
@@ -38,7 +42,15 @@ export default function ArticleDetailsPage() {
 
   const handleContentWithIds = useCallback((html: string) => setContentWithIds(html || ""), []);
 
-  console.log(contentWithIds);
+  useEffect(() => {
+    if (article?.id) {
+      clearVideo();
+    }
+
+    return () => {
+      clearVideo();
+    };
+  }, [article?.id, clearVideo]);
 
   if (isLoadingArticle) {
     return (
@@ -137,7 +149,7 @@ export default function ArticleDetailsPage() {
 
           {contentWithIds || article.content ? (
             <Viewer
-              variant="article"
+              variant="content"
               content={contentWithIds || article.content}
               className="mt-4"
             />

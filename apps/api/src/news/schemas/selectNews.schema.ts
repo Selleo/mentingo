@@ -27,7 +27,7 @@ export const createNewsResponseSchema = Type.Object({
 export const newsResourceSchema = Type.Object({
   id: UUIDSchema,
   fileUrl: Type.String(),
-  contentType: Type.String(),
+  contentType: Type.Union([Type.String(), Type.Null()]),
   title: Type.Optional(Type.String()),
   description: Type.Optional(Type.String()),
   fileName: Type.Optional(Type.String()),

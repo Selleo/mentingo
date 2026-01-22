@@ -7,15 +7,16 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
-import { load as loadHtml } from "cheerio";
+import { ENTITY_TYPES } from "@repo/shared";
 import { isNotNull } from "drizzle-orm";
 import { isNumber } from "lodash";
 
 import { AiService } from "src/ai/services/ai.service";
 import { THREAD_STATUS } from "src/ai/utils/ai.type";
 import { DatabasePg } from "src/common";
+import { injectResourcesIntoContent } from "src/common/utils/injectResourcesIntoContent";
 import { QuizCompletedEvent } from "src/events";
-import { ENTITY_TYPES, RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
+import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
@@ -113,9 +114,15 @@ export class LessonService {
         fileName: this.extractOriginalFilename(resource.metadata),
       }));
 
-      const { html: updatedDescription, contentCount } = this.injectResourcesIntoContent(
+      const { html: updatedDescription, contentCount } = injectResourcesIntoContent(
         lesson.description,
         mappedResources,
+        {
+          resourceIdRegex: /lesson-resource\/([0-9a-fA-F-]{36})/,
+          trackNodeTypes: ["video", "presentation", "downloadable-file"],
+          isImageResource: (resource) => this.isImageResource(resource),
+          buildImageTag: (resource) => this.buildImageTag(resource),
+        },
       );
 
       const hasVideo = this.hasOnlyVideo(contentCount);
@@ -471,88 +478,6 @@ export class LessonService {
     if (resource.fileName && /\.(png|jpe?g|gif|webp|svg|bmp|tiff)(\?|#|$)/i.test(resource.fileName))
       return true;
     return /\.(png|jpe?g|gif|webp|svg|bmp|tiff)(\?|#|$)/i.test(resource.fileUrl);
-  }
-
-  injectResourcesIntoContent(
-    content: string | null,
-    resources: Array<{
-      id: UUIDType;
-      fileUrl: string;
-      fileUrlError?: boolean;
-      contentType: string | null;
-      title?: string;
-      description?: string;
-      fileName?: string;
-    }>,
-  ): { html: string | null; contentCount: Record<string, number> } {
-    const contentCount: Record<string, number> = {};
-
-    const increment = (key: string) => (contentCount[key] = (contentCount[key] ?? 0) + 1);
-
-    if (!content) return { html: content, contentCount };
-
-    if (!resources.length) return { html: content, contentCount };
-
-    const $ = loadHtml(content);
-    const resourceMap = new Map(resources.map((resource) => [resource.id, resource]));
-
-    const extractResourceId = (src: string | null | undefined) => {
-      if (!src) return null;
-      const match = src.match(/lesson-resource\/([0-9a-fA-F-]{36})/);
-      return match?.[1] ?? null;
-    };
-
-    $("[data-node-type]").each((_, element) => {
-      const nodeType = $(element).attr("data-node-type");
-
-      if (!nodeType) return;
-
-      if (nodeType === "video") {
-        increment("video");
-        const src = $(element).attr("data-src");
-        const resourceId = extractResourceId(src);
-        const resource = resourceId ? resourceMap.get(resourceId as UUIDType) : null;
-
-        if (resource?.fileUrlError) {
-          $(element).attr("data-error", "true");
-        } else {
-          $(element).removeAttr("data-error");
-        }
-      }
-      if (nodeType === "presentation") increment("presentation");
-      if (nodeType === "downloadable-file") increment("file");
-    });
-
-    $("a").each((_, element) => {
-      const anchor = $(element);
-      const href = anchor.attr("href") || "";
-      const dataResourceId = anchor.attr("data-resource-id");
-
-      const matchingResource =
-        (dataResourceId && resourceMap.get(dataResourceId as UUIDType)) ||
-        resources.find((resource) => href.includes(String(resource.id)));
-
-      if (!matchingResource) return;
-
-      const parent = anchor.parent();
-
-      if (this.isImageResource(matchingResource)) {
-        const imgTag = this.buildImageTag(matchingResource);
-        if (parent.is("p")) {
-          anchor.remove();
-          parent.after(imgTag);
-        } else {
-          anchor.replaceWith(imgTag);
-        }
-
-        increment("image");
-        return;
-      }
-
-      return;
-    });
-
-    return { html: $.html($("body").children()), contentCount };
   }
 
   private hasOnlyVideo(contentCount: Record<string, number>) {
