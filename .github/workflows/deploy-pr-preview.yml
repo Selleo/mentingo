@@ -266,3 +266,15 @@ jobs:
           # remove services and volumes
           echo "$services" | xargs -r uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" rm || true
           echo "$volumes" | xargs -r uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" volume rm -y || true
+
+      - name: Prune unused Docker images
+        shell: bash
+        env:
+          UNCLOUD_CONNECT: ${{ secrets.UNCLOUD_CONNECT }}
+        run: |
+          set -euo pipefail
+
+          # Extract user@host from UNCLOUD_CONNECT
+          ssh_target="$(echo "${{ secrets.UNCLOUD_CONNECT }}" | sed -E 's#^ssh(\+cli)?://##; s#:/.*##')"
+
+          ssh -i ~/.ssh/id_ecdsa "$ssh_target" "docker image prune -f -a"
