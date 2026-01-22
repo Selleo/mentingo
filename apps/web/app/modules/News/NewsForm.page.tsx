@@ -17,7 +17,7 @@ import { z } from "zod";
 
 import { useInitVideoUpload } from "~/api/mutations/admin/useInitVideoUpload";
 import { useToast } from "~/components/ui/use-toast";
-import { useVideoPlayer } from "~/components/VideoPlayer/VideoPlayerContext";
+import { useClearVideoOnTabChange } from "~/hooks/useClearVideoOnTabChange";
 import {
   buildEntityResourceUrl,
   insertResourceIntoEditor,
@@ -95,16 +95,7 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
     { enabled: isEdit },
   );
 
-  const { clearVideo } = useVideoPlayer();
-
-  useEffect(() => {
-    if (tabValue === "editor") {
-      clearVideo();
-    }
-    return () => {
-      clearVideo();
-    };
-  }, [clearVideo, tabValue]);
+  useClearVideoOnTabChange(tabValue, "editor");
 
   const { mutateAsync: updateNews } = useUpdateNews();
   const { uploadResource } = useEntityResourceUpload();
@@ -203,7 +194,7 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
         await uploadVideo({ file, session });
 
         if (session.resourceId) {
-          const resourceUrl = buildEntityResourceUrl(session.resourceId, "news");
+          const resourceUrl = buildEntityResourceUrl(session.resourceId, ENTITY_TYPES.NEWS);
 
           editor
             ?.chain()
@@ -226,7 +217,7 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
 
     const resourceId = await uploadResource({
       file,
-      entityType: "news",
+      entityType: ENTITY_TYPES.NEWS,
       entityId: id,
       language,
     });
@@ -234,7 +225,7 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
     insertResourceIntoEditor({
       editor,
       resourceId,
-      entityType: "news",
+      entityType: ENTITY_TYPES.NEWS,
       file,
       isPresentation,
       isDocument,
@@ -475,7 +466,7 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
                           ) : (
                             <Viewer
                               content={previewContent}
-                              variant="news"
+                              variant={ENTITY_TYPES.NEWS}
                               className="prose max-w-none"
                             />
                           )}

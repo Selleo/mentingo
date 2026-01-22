@@ -31,7 +31,7 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { useToast } from "~/components/ui/use-toast";
-import { useVideoPlayer } from "~/components/VideoPlayer/VideoPlayerContext";
+import { useClearVideoOnTabChange } from "~/hooks/useClearVideoOnTabChange";
 import {
   buildEntityResourceUrl,
   insertResourceIntoEditor,
@@ -115,16 +115,7 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
   const initialValuesRef = useRef<ArticleFormValues | null>(null);
   const lastResetKeyRef = useRef<string | null>(null);
 
-  const { clearVideo } = useVideoPlayer();
-
-  useEffect(() => {
-    if (tabValue === "editor") {
-      clearVideo();
-    }
-    return () => {
-      clearVideo();
-    };
-  }, [clearVideo, tabValue]);
+  useClearVideoOnTabChange(tabValue, "editor");
 
   useEffect(() => {
     if (!existingArticle || isFetchingArticle) return;
@@ -201,7 +192,7 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
         await uploadVideo({ file, session });
 
         if (session.resourceId) {
-          const resourceUrl = buildEntityResourceUrl(session.resourceId, "articles");
+          const resourceUrl = buildEntityResourceUrl(session.resourceId, ENTITY_TYPES.ARTICLES);
 
           editor
             ?.chain()

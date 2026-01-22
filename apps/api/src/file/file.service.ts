@@ -53,8 +53,6 @@ import type {
   UploadResourceParams,
   CreateResourceForEntityParams,
 } from "src/file/types/resource.types";
-import type { CurrentUser } from "src/common/types/current-user.type";
-import type { VideoInitBody } from "./schemas/video-init.schema";
 
 @Injectable()
 export class FileService {

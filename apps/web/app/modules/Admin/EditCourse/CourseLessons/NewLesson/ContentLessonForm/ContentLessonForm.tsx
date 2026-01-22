@@ -103,14 +103,14 @@ const ContentLessonForm = ({
               resource: "lesson-content",
               contextId,
               entityId: lessonToEdit?.id,
-              entityType: "lesson",
+              entityType: ENTITY_TYPES.LESSON,
             }),
         });
 
         await uploadVideo({ file, session });
 
         if (session.resourceId) {
-          const resourceUrl = buildEntityResourceUrl(session.resourceId, "lesson");
+          const resourceUrl = buildEntityResourceUrl(session.resourceId, ENTITY_TYPES.LESSON);
 
           editor
             ?.chain()
@@ -133,7 +133,7 @@ const ContentLessonForm = ({
 
     const resourceId = await uploadResource({
       file,
-      entityType: "lesson",
+      entityType: ENTITY_TYPES.LESSON,
       entityId: lessonToEdit?.id,
       contextId,
       language,

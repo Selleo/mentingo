@@ -67,8 +67,7 @@ const ALLOWED_PRESENTATION_EXTENSIONS = ["ppt", "pptx", "odp"] as const;
 const PRESENTATION_REFERENCE_REGEX = /docs\.google\.com\/.*presentation|canva\.com\/.*design/i;
 const VIDEO_REFERENCE_REGEX = /youtube\.com|youtu\.be|vimeo\.com/i;
 
-const RESOURCE_REFERENCE_WHERE_REGEX =
-  "(youtube\\.com|youtu\\.be|vimeo\\.com|docs\\.google\\.com/.*/presentation|canva\\.com/.*/design)";
+const RESOURCE_REFERENCE_WHERE_REGEX = String.raw`(youtube\.com|youtu\.be|vimeo\.com|docs\.google\.com/.*/presentation|canva\.com/.*/design)`;
 
 const normalizeString = (value: string | null | undefined) =>
   typeof value === "string" ? value.toLowerCase() : "";
@@ -114,6 +113,18 @@ type ResourceClassification = {
   provider: Provider;
 };
 
+function getPresentationProvider(reference: string): Provider {
+  if (/docs\.google\.com\/.*presentation/i.test(reference)) return "google";
+  if (/canva\.com\/.*design/i.test(reference)) return "canva";
+  return "unsupported-external";
+}
+
+function getVideoProvider(reference: string): Provider {
+  if (/youtube\.com|youtu\.be/i.test(reference)) return "youtube";
+  if (/vimeo\.com/i.test(reference)) return "vimeo";
+  return "unsupported-external";
+}
+
 function classifyResource(input: {
   reference: string | null;
   contentType: string | null;
@@ -123,46 +134,25 @@ function classifyResource(input: {
   const external = isExternalUrl(input.reference);
 
   const isImage = contentType.startsWith("image/");
+  if (isImage) {
+    return { kind: "image", isExternal: false, provider: "self" };
+  }
+
+  const isPresentation =
+    allowedPresentationContentTypes.includes(contentType) ||
+    isPresentationReference(input.reference);
+  if (isPresentation) {
+    const provider = external ? getPresentationProvider(reference) : "self";
+    return { kind: "presentation", isExternal: external, provider };
+  }
 
   const isVideo =
     contentType.startsWith("video/") ||
     allowedVideoContentTypes.includes(contentType) ||
     isVideoReference(input.reference);
-
-  const isPresentation =
-    allowedPresentationContentTypes.includes(contentType) ||
-    isPresentationReference(input.reference);
-
-  if (isImage) {
-    return {
-      kind: "image",
-      isExternal: false,
-      provider: "self",
-    };
-  }
-
-  if (isPresentation) {
-    if (!external) return { kind: "presentation", isExternal: false, provider: "self" };
-
-    if (/docs\.google\.com\/.*presentation/i.test(reference))
-      return { kind: "presentation", isExternal: true, provider: "google" };
-
-    if (/canva\.com\/.*design/i.test(reference))
-      return { kind: "presentation", isExternal: true, provider: "canva" };
-
-    return { kind: "presentation", isExternal: true, provider: "unsupported-external" };
-  }
-
   if (isVideo) {
-    if (!external) return { kind: "video", isExternal: false, provider: "self" };
-
-    if (/youtube\.com|youtu\.be/i.test(reference))
-      return { kind: "video", isExternal: true, provider: "youtube" };
-
-    if (/vimeo\.com/i.test(reference))
-      return { kind: "video", isExternal: true, provider: "vimeo" };
-
-    return { kind: "video", isExternal: true, provider: "unsupported-external" };
+    const provider = external ? getVideoProvider(reference) : "self";
+    return { kind: "video", isExternal: external, provider };
   }
 
   return {
