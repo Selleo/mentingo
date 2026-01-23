@@ -37,7 +37,6 @@ export interface RegisterResponse {
     role: string;
     archived: boolean;
     deletedAt: string | null;
-    tenantId: string;
     profilePictureUrl: string | null;
   };
 }
@@ -64,7 +63,6 @@ export interface LoginResponse {
     role: string;
     archived: boolean;
     deletedAt: string | null;
-    tenantId: string;
     profilePictureUrl: string | null;
     shouldVerifyMFA: boolean;
     onboardingStatus: {
@@ -78,7 +76,6 @@ export interface LoginResponse {
       profile: boolean;
       settings: boolean;
       providerInformation: boolean;
-      tenantId: string;
     };
   };
 }
@@ -98,7 +95,6 @@ export interface CurrentUserResponse {
     role: string;
     archived: boolean;
     deletedAt: string | null;
-    tenantId: string;
     profilePictureUrl: string | null;
     shouldVerifyMFA: boolean;
     onboardingStatus: {
@@ -112,7 +108,6 @@ export interface CurrentUserResponse {
       profile: boolean;
       settings: boolean;
       providerInformation: boolean;
-      tenantId: string;
     };
   };
 }
@@ -655,7 +650,6 @@ export interface GetUsersResponse {
     role: string;
     archived: boolean;
     deletedAt: string | null;
-    tenantId: string;
     profilePictureUrl: string | null;
   } & {
     groups: {
@@ -683,7 +677,6 @@ export interface GetUserByIdResponse {
     role: string;
     archived: boolean;
     deletedAt: string | null;
-    tenantId: string;
     profilePictureUrl: string | null;
     groups: {
       /** @format uuid */
@@ -729,7 +722,6 @@ export interface UpdateUserResponse {
     role: string;
     archived: boolean;
     deletedAt: string | null;
-    tenantId: string;
     profilePictureUrl: string | null;
   };
 }
@@ -771,7 +763,6 @@ export interface AdminUpdateUserResponse {
     role: string;
     archived: boolean;
     deletedAt: string | null;
-    tenantId: string;
     profilePictureUrl: string | null;
   };
 }
@@ -865,7 +856,6 @@ export interface ResetOnboardingStatusResponse {
     profile: boolean;
     settings: boolean;
     providerInformation: boolean;
-    tenantId: string;
   };
 }
 
@@ -881,7 +871,6 @@ export interface MarkOnboardingCompleteResponse {
     profile: boolean;
     settings: boolean;
     providerInformation: boolean;
-    tenantId: string;
   };
 }
 
@@ -901,7 +890,6 @@ export interface GetAllGroupsResponse {
       role: string;
       archived: boolean;
       deletedAt: string | null;
-      tenantId: string;
       profilePictureUrl: string | null;
     }[];
     createdAt?: string;
@@ -931,7 +919,6 @@ export interface GetGroupByIdResponse {
       role: string;
       archived: boolean;
       deletedAt: string | null;
-      tenantId: string;
       profilePictureUrl: string | null;
     }[];
     createdAt?: string;
@@ -955,7 +942,6 @@ export interface GetUserGroupsResponse {
       role: string;
       archived: boolean;
       deletedAt: string | null;
-      tenantId: string;
       profilePictureUrl: string | null;
     }[];
     createdAt?: string;
@@ -2875,7 +2861,6 @@ export interface GetAllAnnouncementsResponse {
     content: string;
     authorId: string;
     isEveryone: boolean;
-    tenantId: string;
     authorName: string;
     authorProfilePictureUrl: string | null;
   }[];
@@ -2890,7 +2875,6 @@ export interface GetLatestUnreadAnnouncementsResponse {
     content: string;
     authorId: string;
     isEveryone: boolean;
-    tenantId: string;
     authorName: string;
     authorProfilePictureUrl: string | null;
   }[];
@@ -2911,7 +2895,6 @@ export interface GetAnnouncementsForUserResponse {
     content: string;
     authorId: string;
     isEveryone: boolean;
-    tenantId: string;
     authorName: string;
     authorProfilePictureUrl: string | null;
     isRead: boolean;
@@ -2926,7 +2909,6 @@ export interface CreateAnnouncementBody {
   title: string;
   /** @minLength 1 */
   content: string;
-  tenantId?: string;
   /** @default null */
   groupId: string | null;
 }
@@ -2940,7 +2922,6 @@ export interface CreateAnnouncementResponse {
     content: string;
     authorId: string;
     isEveryone: boolean;
-    tenantId: string;
   };
 }
 
@@ -2953,7 +2934,6 @@ export interface MarkAnnouncementAsReadResponse {
     announcementId: string;
     isRead: boolean;
     readAt: string | null;
-    tenantId: string;
   };
 }
 

@@ -1,10 +1,10 @@
 import type { ChapterActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { ActorUserType } from "src/common/types/actor-user.type";
 
 type ChapterCreationData = {
   chapterId: UUIDType;
-  actor: CurrentUser;
+  actor: ActorUserType;
   createdChapter: ChapterActivityLogSnapshot;
 };
 

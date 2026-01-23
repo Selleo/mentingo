@@ -41,10 +41,10 @@ import { ResetPasswordService } from "./reset-password.service";
 import { TokenService } from "./token.service";
 
 import type { CreatePasswordBody } from "./schemas/create-password.schema";
+import type { TokenUser } from "./types";
 import type { Response } from "express";
-import type { CommonUser } from "src/common/schemas/common-user.schema";
+import type { ActorUserType } from "src/common/types/actor-user.type";
 import type { CurrentUser } from "src/common/types/current-user.type";
-import type { UserResponse } from "src/user/schemas/user.schema";
 import type { ProviderLoginUserType } from "src/utils/types/provider-login-user.type";
 
 @Injectable()
@@ -163,11 +163,10 @@ export class AuthService {
 
     const onboardingStatus = await this.userService.getAllOnboardingStatus(user.id);
 
-    const actor: CurrentUser = {
+    const actor: ActorUserType = {
       userId: user.id,
       email: user.email,
       role: user.role as UserRole,
-      tenantId: user.tenantId,
     };
 
     this.eventBus.publish(new UserLoginEvent({ userId: user.id, method: "password", actor }));
@@ -277,7 +276,7 @@ export class AuthService {
     return user;
   }
 
-  private async getTokens(user: CommonUser | UserResponse) {
+  private async getTokens(user: TokenUser) {
     const { id: userId, email, role, tenantId } = user;
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
@@ -371,9 +370,7 @@ export class AuthService {
       { language: languageGuard },
     );
 
-    this.eventBus.publish(
-      new UserPasswordCreatedEvent({ ...existingUser, tenantId: createToken.tenantId }),
-    );
+    this.eventBus.publish(new UserPasswordCreatedEvent({ ...existingUser }));
 
     return existingUser;
   }
@@ -509,11 +506,10 @@ export class AuthService {
     const userSettings = await this.settingsService.getUserSettings(user.id);
     const { MFAEnforcedRoles } = await this.settingsService.getGlobalSettings();
 
-    const actor: CurrentUser = {
+    const actor: ActorUserType = {
       userId: user.id,
       email: user.email,
       role: user.role as UserRole,
-      tenantId: user.tenantId,
     };
 
     this.eventBus.publish(new UserLoginEvent({ userId: user.id, method: "provider", actor }));
