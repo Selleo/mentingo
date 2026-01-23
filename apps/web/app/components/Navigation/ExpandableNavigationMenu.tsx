@@ -6,7 +6,6 @@ import { cn } from "~/lib/utils";
 import { Icon } from "../Icon";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "../ui/dropdown-menu";
 
-import { useIsWidthBetween } from "./hooks/useIsWidthBetween";
 import { NavigationMenuItem } from "./NavigationMenuItem";
 import { NavigationMenuItemLink } from "./NavigationMenuItemLink";
 import { useNavigationStore } from "./stores/navigationStore";
@@ -40,8 +39,7 @@ export const ExpandableNavigationMenu = ({
   const expandedMenus = useNavigationStore((state) => state.expandedMenus);
   const setExpandedMenus = useNavigationStore((state) => state.setExpandedMenus);
 
-  const isBetween1440And1680 = useIsWidthBetween(1440, 1680, false);
-  const shouldUseDropdownLayout = isBetween1440And1680 || isSidebarCollapsed;
+  const shouldUseDropdownLayout = isSidebarCollapsed;
 
   const [isExpanded, setIsExpanded] = useState(() =>
     shouldUseDropdownLayout ? false : expandedMenus.includes(expandableIcon),
@@ -63,10 +61,7 @@ export const ExpandableNavigationMenu = ({
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (shouldUseDropdownLayout) {
-      setIsExpanded(false);
-      return;
-    }
+    if (shouldUseDropdownLayout) return;
 
     setIsExpanded(expandedMenus.includes(expandableIcon));
   }, [expandedMenus, expandableIcon, shouldUseDropdownLayout]);
@@ -91,11 +86,7 @@ export const ExpandableNavigationMenu = ({
   }, [closeOnClickOutside, isExpanded, handleExpandChange]);
 
   return (
-    <DropdownMenu
-      open={isExpanded}
-      defaultOpen={isExpanded}
-      onOpenChange={() => handleExpandChange(shouldUseDropdownLayout ? true : !isExpanded)}
-    >
+    <DropdownMenu open={isExpanded} defaultOpen={isExpanded} onOpenChange={handleExpandChange}>
       <DropdownMenuTrigger className="w-full">
         <button
           type="button"

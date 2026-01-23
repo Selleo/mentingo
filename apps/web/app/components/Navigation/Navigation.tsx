@@ -35,7 +35,6 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
   const { t } = useTranslation();
   const { pathname } = useLocation();
   const [is2xlBreakpoint, setIs2xlBreakpoint] = useState(false);
-  const [is3xlBreakpoint, setIs3xlBreakpoint] = useState(false);
   const { data: isStripeConfigured } = useStripeConfigured();
 
   const { data: globalSettings } = useGlobalSettings();
@@ -58,7 +57,6 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
     const updateBreakpoint = () => {
       const width = window.innerWidth;
       setIs2xlBreakpoint(width >= 1440);
-      setIs3xlBreakpoint(width >= 1680);
     };
     updateBreakpoint();
     window.addEventListener("resize", updateBreakpoint);
@@ -83,21 +81,37 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
 
   if (shouldHideTopbarAndSidebar(pathname)) return null;
 
-  const isSidebarCollapsed = !is3xlBreakpoint ? is2xlBreakpoint : persistedSidebarCollapsed;
+  const isSidebarCollapsed = is2xlBreakpoint ? persistedSidebarCollapsed : false;
   const showNavigationLabels = !isSidebarCollapsed || !is2xlBreakpoint;
   const shouldShowTooltips = isSidebarCollapsed && is2xlBreakpoint;
-  const showCollapseToggle = is3xlBreakpoint;
 
   return (
     <TooltipProvider>
       <header
         className={cn(
           "sticky top-0 h-min w-full transition-all duration-300 ease-in-out",
-          "2xl:flex 2xl:h-dvh 2xl:flex-col 2xl:gap-y-6 2xl:px-2 2xl:py-4",
+          "2xl:flex 2xl:h-dvh 2xl:flex-col 2xl:gap-y-4",
           "3xl:static",
-          isSidebarCollapsed ? "2xl:w-14 3xl:w-14 3xl:px-2 3xl:py-4" : "3xl:w-64 3xl:p-4",
+          isSidebarCollapsed
+            ? "2xl:w-14 2xl:px-2 2xl:py-4 3xl:w-14 3xl:px-2 3xl:py-4"
+            : "2xl:w-64 2xl:p-4 3xl:w-64 3xl:p-4",
         )}
       >
+        {is2xlBreakpoint && (
+          <div className="flex justify-end">
+            <Button
+              onClick={toggleSidebarCollapsed}
+              className="gap-2 py-2.5"
+              variant="outline"
+              size="icon"
+            >
+              <Icon
+                name={isSidebarCollapsed ? "PanelLeftOpen" : "PanelLeftClose"}
+                className="size-5"
+              />
+            </Button>
+          </div>
+        )}
         <NavigationHeader
           isMobileNavOpen={isMobileNavOpen}
           setIsMobileNavOpen={setIsMobileNavOpen}
@@ -106,36 +120,12 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
           isSidebarCollapsed={isSidebarCollapsed}
         />
 
-        {is2xlBreakpoint && (
-          <div
-            className={cn(
-              "flex w-full px-2 3xl:px-0",
-              isSidebarCollapsed ? "flex-col-reverse items-center gap-3" : "items-center gap-3",
-            )}
-          >
-            <NavigationGlobalSearchWrapper
-              useCompactVariant={isSidebarCollapsed}
-              containerClassName={cn("w-full", {
-                "flex justify-center": isSidebarCollapsed,
-              })}
-            />
-            {showCollapseToggle && (
-              <Button
-                onClick={toggleSidebarCollapsed}
-                className={cn(
-                  "flex items-center justify-center rounded-lg bg-neutral-50 text-neutral-900 hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-200",
-                  isSidebarCollapsed ? "h-10 w-full" : "size-10",
-                )}
-                size="icon"
-              >
-                <Icon
-                  name={isSidebarCollapsed ? "PanelLeftOpen" : "PanelLeftClose"}
-                  className="size-5"
-                />
-              </Button>
-            )}
-          </div>
-        )}
+        <NavigationGlobalSearchWrapper
+          useCompactVariant={isSidebarCollapsed}
+          containerClassName={cn("w-full", {
+            "flex justify-center": isSidebarCollapsed,
+          })}
+        />
 
         <Separator className="sr-only bg-neutral-200 2xl:not-sr-only 2xl:h-px" />
         <nav
