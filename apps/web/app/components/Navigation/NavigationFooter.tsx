@@ -17,7 +17,6 @@ import {
 } from "../ui/dropdown-menu";
 import { UserAvatar } from "../UserProfile/UserAvatar";
 
-import { useIsWidthBetween } from "./hooks/useIsWidthBetween";
 import { MobileNavigationFooterItems } from "./MobileNavigationFooterItems";
 import { NavigationMenuItem } from "./NavigationMenuItem";
 import { NavigationMenuItemLink } from "./NavigationMenuItemLink";
@@ -43,8 +42,7 @@ export function NavigationFooter({
   const { data: user } = useCurrentUser();
   const { t } = useTranslation();
 
-  const isBetween1440And1680 = useIsWidthBetween(1440, 1680, false);
-  const hideLabels = isBetween1440And1680 || isSidebarCollapsed;
+  const hideLabels = isSidebarCollapsed;
 
   return (
     <menu className="grid w-full grid-cols-4 gap-3 md:grid-cols-8 2xl:flex 2xl:flex-col 2xl:gap-2 2xl:self-end">
@@ -105,7 +103,7 @@ export function NavigationFooter({
           <DropdownMenuContent
             align="start"
             className={cn("w-80 p-1", {
-              "absolute bottom-0 left-16": isBetween1440And1680,
+              "absolute bottom-0 left-16": isSidebarCollapsed,
             })}
           >
             <menu className="flex flex-col gap-2 p-1">

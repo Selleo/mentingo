@@ -50,8 +50,7 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
     configurationState?.hasIssues &&
     !configurationState?.isWarningDismissed;
 
-  const { isSidebarCollapsed: persistedSidebarCollapsed, toggleSidebarCollapsed } =
-    useNavigationStore();
+  const { isSidebarCollapsed, toggleSidebarCollapsed } = useNavigationStore();
 
   useEffect(() => {
     const updateBreakpoint = () => {
@@ -81,7 +80,6 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
 
   if (shouldHideTopbarAndSidebar(pathname)) return null;
 
-  const isSidebarCollapsed = is2xlBreakpoint ? persistedSidebarCollapsed : false;
   const showNavigationLabels = !isSidebarCollapsed || !is2xlBreakpoint;
   const shouldShowTooltips = isSidebarCollapsed && is2xlBreakpoint;
 
@@ -112,6 +110,7 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
             </Button>
           </div>
         )}
+
         <NavigationHeader
           isMobileNavOpen={isMobileNavOpen}
           setIsMobileNavOpen={setIsMobileNavOpen}
