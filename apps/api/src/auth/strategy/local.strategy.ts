@@ -13,7 +13,7 @@ import type { CommonUser } from "src/common/schemas/common-user.schema";
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
   constructor(
-    private authService: AuthService,
+    private readonly authService: AuthService,
     private readonly tenantResolver: TenantResolverService,
     private readonly tenantRunner: TenantDbRunnerService,
   ) {
