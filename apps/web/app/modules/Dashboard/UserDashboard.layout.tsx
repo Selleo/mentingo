@@ -3,6 +3,8 @@ import { useMemo } from "react";
 
 import { currentUserQueryOptions, useCurrentUser } from "~/api/queries/useCurrentUser";
 import { queryClient } from "~/api/queryClient";
+import { VideoProvider } from "~/components/VideoPlayer/VideoPlayerContext";
+import { VideoPlayerSingleton } from "~/components/VideoPlayer/VideoPlayerSingleton";
 import { MFAGuard } from "~/Guards/MFAGuard";
 import { useNavigationHistoryStore } from "~/lib/stores/navigationHistory";
 import { Dashboard } from "~/modules/Dashboard/Dashboard";
@@ -56,7 +58,10 @@ export default function UserDashboardLayout() {
 
   return (
     <MFAGuard mode="app">
-      <Dashboard isAuthenticated={isAuthenticated} />
+      <VideoProvider>
+        <Dashboard isAuthenticated={isAuthenticated} />
+        <VideoPlayerSingleton />
+      </VideoProvider>
     </MFAGuard>
   );
 }

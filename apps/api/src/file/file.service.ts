@@ -9,7 +9,7 @@ import {
   InternalServerErrorException,
   Logger,
 } from "@nestjs/common";
-import { ALLOWED_VIDEO_FILE_TYPES, VIDEO_UPLOAD_STATUS } from "@repo/shared";
+import { ALLOWED_VIDEO_FILE_TYPES, ENTITY_TYPES, VIDEO_UPLOAD_STATUS } from "@repo/shared";
 import { TypeCompiler } from "@sinclair/typebox/compiler";
 import { CacheManagerStore } from "cache-manager";
 import { parse } from "csv-parse";
@@ -28,7 +28,6 @@ import { resources, resourceEntity } from "src/storage/schema";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import {
-  ENTITY_TYPES,
   ALLOWED_EXCEL_MIME_TYPES_MAP,
   RESOURCE_RELATIONSHIP_TYPES,
   MAX_VIDEO_SIZE,
@@ -47,7 +46,7 @@ import type {
   VideoProviderInitResult,
   VideoStorageProvider,
 } from "./video-storage-provider";
-import type { SupportedLanguages } from "@repo/shared";
+import type { SupportedLanguages, EntityType } from "@repo/shared";
 import type { Static, TSchema } from "@sinclair/typebox";
 import type { UUIDType } from "src/common";
 import type {
@@ -217,23 +216,23 @@ export class FileService {
   }
 
   private async createLessonContentResourceIfNeeded(params: {
-    resource: string;
-    lessonId?: UUIDType;
+    entityType: EntityType;
+    entityId?: UUIDType;
     fileKey: string;
     mimeType: string;
     filename: string;
     sizeBytes: number;
     contextId?: UUIDType;
   }) {
-    const { resource, lessonId, fileKey, mimeType, filename, sizeBytes, contextId } = params;
+    const { entityType, entityId, fileKey, mimeType, filename, sizeBytes, contextId } = params;
 
-    if (resource !== "lesson-content" || (!lessonId && !contextId)) return undefined;
+    if (!entityId && !contextId) return undefined;
 
     const resourceResult = await this.createResourceForEntity({
       reference: fileKey,
       contentType: mimeType,
-      entityId: lessonId,
-      entityType: ENTITY_TYPES.LESSON,
+      entityId,
+      entityType,
       relationshipType: RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
       metadata: {
         originalFilename: filename,
@@ -246,7 +245,20 @@ export class FileService {
   }
 
   async initVideoUpload(data: VideoInitBody, currentUserId?: UUIDType) {
-    const { filename, sizeBytes, mimeType, title, resource = "lesson", lessonId, contextId } = data;
+    const {
+      filename,
+      sizeBytes,
+      mimeType,
+      title,
+      resource = ENTITY_TYPES.LESSON,
+      contextId,
+      entityId,
+      entityType,
+    } = data;
+
+    if (!entityId && !contextId) {
+      throw new BadRequestException("Missing entityId or contextId");
+    }
 
     if (!ALLOWED_VIDEO_FILE_TYPES.includes(mimeType)) {
       throw new BadRequestException("Invalid video mime type");
@@ -276,8 +288,8 @@ export class FileService {
     await this.registerProviderUpload(uploadId, placeholderKey, providerResponse);
 
     const resourceId = await this.createLessonContentResourceIfNeeded({
-      resource,
-      lessonId,
+      entityType,
+      entityId,
       fileKey: providerResponse.fileKey,
       mimeType,
       filename,
@@ -553,7 +565,7 @@ export class FileService {
    */
   async getResourcesForEntity(
     entityId: UUIDType,
-    entityType: string,
+    entityType: EntityType,
     relationshipType?: string,
     language?: SupportedLanguages,
   ) {

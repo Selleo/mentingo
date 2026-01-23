@@ -8,6 +8,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
+import { ENTITY_TYPES } from "@repo/shared";
 import { CacheManagerStore } from "cache-manager";
 import { getTableColumns, sql } from "drizzle-orm";
 
@@ -15,11 +16,7 @@ import { AiRepository } from "src/ai/repositories/ai.repository";
 import { DatabasePg } from "src/common";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { CreateLessonEvent, DeleteLessonEvent, UpdateLessonEvent } from "src/events";
-import {
-  ENTITY_TYPES,
-  RESOURCE_CATEGORIES,
-  RESOURCE_RELATIONSHIP_TYPES,
-} from "src/file/file.constants";
+import { RESOURCE_CATEGORIES, RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { CONTEXT_TTL, getContextKey } from "src/file/utils/resourceCacheKeys";
 import { DocumentService } from "src/ingestion/services/document.service";

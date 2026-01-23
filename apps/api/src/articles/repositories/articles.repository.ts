@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { ARTICLE_STATUS } from "@repo/shared";
+import { ARTICLE_STATUS, ENTITY_TYPES } from "@repo/shared";
 import { and, asc, desc, eq, getTableColumns, gt, isNull, lt, ne, not, sql } from "drizzle-orm";
 
 import { baseArticleTitle } from "src/articles/constants";
@@ -7,7 +7,7 @@ import { DatabasePg } from "src/common";
 import { deleteJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
 import { LocalizationService } from "src/localization/localization.service";
-import { articles, articleSections, users } from "src/storage/schema";
+import { articleSections, articles, resourceEntity, resources, users } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import type { SupportedLanguages } from "@repo/shared";
@@ -311,6 +311,26 @@ export class ArticlesRepository {
       })
       .from(articleSections)
       .where(eq(articleSections.id, sectionId));
+  }
+
+  async getResource(resourceId: UUIDType) {
+    const [resource] = await this.db
+      .select({
+        ...getTableColumns(resources),
+        entityId: resourceEntity.entityId,
+        entityType: resourceEntity.entityType,
+      })
+      .from(resources)
+      .innerJoin(resourceEntity, eq(resourceEntity.resourceId, resources.id))
+      .where(
+        and(
+          eq(resources.id, resourceId),
+          eq(resourceEntity.entityType, ENTITY_TYPES.ARTICLES),
+          eq(resources.archived, false),
+        ),
+      );
+
+    return resource;
   }
 
   async getArticleSectionDetails(sectionId: UUIDType, requestedLanguage: SupportedLanguages) {

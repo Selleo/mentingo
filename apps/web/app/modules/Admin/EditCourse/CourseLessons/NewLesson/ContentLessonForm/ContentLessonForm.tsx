@@ -5,26 +5,28 @@ import {
   ALLOWED_PRESENTATION_FILE_TYPES,
   ALLOWED_VIDEO_FILE_TYPES,
   ALLOWED_WORD_FILE_TYPES,
-  DEFAULT_TUS_CHUNK_SIZE,
+  ENTITY_TYPES,
 } from "@repo/shared";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import * as tus from "tus-js-client";
 
 import { useInitializeLessonContext } from "~/api/mutations/admin/useInitializeLessonContext";
 import { useInitVideoUpload } from "~/api/mutations/admin/useInitVideoUpload";
-import { useLessonFileUpload } from "~/api/mutations/admin/useLessonFileUpload";
 import { FormTextField } from "~/components/Form/FormTextField";
 import { Icon } from "~/components/Icon";
-import { LessonEditor } from "~/components/RichText/Editor";
+import { ContentEditor } from "~/components/RichText/Editor";
 import { Button } from "~/components/ui/button";
 import { Form, FormControl, FormField, FormItem } from "~/components/ui/form";
 import { Label } from "~/components/ui/label";
 import { useToast } from "~/components/ui/use-toast";
+import {
+  buildEntityResourceUrl,
+  insertResourceIntoEditor,
+  useEntityResourceUpload,
+} from "~/hooks/useEntityResourceUpload";
+import { useTusVideoUpload } from "~/hooks/useTusVideoUpload";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
 import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/compontents/MissingTranslationsAlert";
-import { useVideoUploadResumeStore } from "~/modules/common/store/useVideoUploadResumeStore";
-import { baseUrl } from "~/utils/baseUrl";
 
 import { ContentTypes, DeleteContentType } from "../../../EditCourse.types";
 import Breadcrumb from "../components/Breadcrumb";
@@ -34,7 +36,6 @@ import { useContentLessonForm } from "./hooks/useContentLessonForm";
 import type { Chapter, Lesson } from "../../../EditCourse.types";
 import type { SupportedLanguages } from "@repo/shared";
 import type { Editor as TiptapEditor } from "@tiptap/react";
-import type { InitVideoUploadResponse } from "~/api/generated-api";
 
 type ContentLessonProps = {
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
@@ -66,12 +67,10 @@ const ContentLessonForm = ({
   const { mutate: initializeLessonContext } = useInitializeLessonContext();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isVideoUploading, setIsVideoUploading] = useState(false);
-  const [videoUploadProgress, setVideoUploadProgress] = useState<number | null>(null);
 
   const { mutateAsync: initVideoUpload } = useInitVideoUpload();
-  const { mutateAsync: uploadFile } = useLessonFileUpload();
-  const { getUploadForFile, saveUpload, clearUpload } = useVideoUploadResumeStore();
+  const { uploadResource } = useEntityResourceUpload();
+  const { getSessionForFile, uploadVideo, isUploading, uploadProgress } = useTusVideoUpload();
 
   const onCloseModal = () => {
     setIsModalOpen(false);
@@ -79,112 +78,6 @@ const ContentLessonForm = ({
 
   const onClickDelete = () => {
     setIsModalOpen(true);
-  };
-
-  const normalizeTusHeaders = (headers: object): Record<string, string> =>
-    Object.fromEntries(Object.entries(headers).map(([key, value]) => [key, String(value)]));
-
-  const buildFileFingerprint = (file: File) => `${file.name}:${file.size}:${file.lastModified}`;
-
-  const handleVideoTusUpload = async (
-    file: File,
-    session: InitVideoUploadResponse,
-    editor?: TiptapEditor | null,
-  ) => {
-    if (!session.tusEndpoint || !session.tusHeaders || !session.expiresAt) {
-      throw new Error("Missing upload configuration");
-    }
-
-    const existingUpload = getUploadForFile(file);
-
-    const tusHeaders = normalizeTusHeaders(session.tusHeaders ?? {});
-    const tusFingerprint = `${session.provider}-tus:${session.uploadId}:${buildFileFingerprint(
-      file,
-    )}`;
-
-    if (!existingUpload) {
-      saveUpload({
-        uploadId: session.uploadId,
-        bunnyGuid: session.bunnyGuid,
-        fileKey: session.fileKey,
-        provider: session.provider,
-        tusEndpoint: session.tusEndpoint,
-        tusHeaders,
-        expiresAt: session.expiresAt,
-        filename: file.name,
-        sizeBytes: file.size,
-        lastModified: file.lastModified,
-        resourceId: session.resourceId,
-      });
-    }
-
-    setIsVideoUploading(true);
-    setVideoUploadProgress(0);
-
-    try {
-      await new Promise<void>((resolve, reject) => {
-        toast({
-          description: t("uploadFile.toast.videoUploading"),
-          duration: Number.POSITIVE_INFINITY,
-          variant: "loading",
-        });
-
-        const upload = new tus.Upload(file, {
-          endpoint: session.tusEndpoint,
-          headers: tusHeaders,
-          chunkSize: session.partSize ?? DEFAULT_TUS_CHUNK_SIZE,
-          metadata: {
-            filename: file.name,
-            filetype: file.type,
-            uploadId: session.uploadId,
-          },
-          retryDelays: [0, 1000, 3000, 5000, 10000],
-          fingerprint: async () => tusFingerprint,
-          removeFingerprintOnSuccess: true,
-          onProgress: (bytesUploaded, bytesTotal) => {
-            if (bytesTotal === 0) return;
-            const progress = Math.round((bytesUploaded / bytesTotal) * 100);
-            setVideoUploadProgress(progress);
-          },
-          onError: (error) => {
-            clearUpload(session.uploadId);
-            reject(error);
-          },
-          onSuccess: () => {
-            clearUpload(session.uploadId);
-            toast({
-              description: t("uploadFile.toast.videoUploadedProcessing"),
-              duration: Number.POSITIVE_INFINITY,
-              variant: "success",
-            });
-            resolve();
-          },
-        });
-
-        upload.findPreviousUploads().then((previousUploads) => {
-          if (previousUploads.length > 0) {
-            upload.resumeFromPreviousUpload(previousUploads[0]);
-          }
-          upload.start();
-        });
-      });
-    } finally {
-      setIsVideoUploading(false);
-      setVideoUploadProgress(null);
-    }
-
-    if (!session.resourceId) return;
-
-    const resourceUrl = `${baseUrl}/api/lesson/lesson-resource/${session.resourceId}`;
-
-    editor
-      ?.chain()
-      .insertContent("<br />")
-      .setVideoEmbed({
-        src: resourceUrl,
-        sourceType: session.provider === "s3" ? "external" : "internal",
-      })
-      .run();
   };
 
   const handleFileUpload = async (file?: File, editor?: TiptapEditor | null) => {
@@ -199,23 +92,35 @@ const ContentLessonForm = ({
 
     if (isVideo) {
       try {
-        const existingUpload = getUploadForFile(file);
-        const session: InitVideoUploadResponse = existingUpload
-          ? {
-              ...existingUpload,
-              provider: existingUpload.provider ?? "bunny",
-            }
-          : await initVideoUpload({
+        const session = await getSessionForFile({
+          file,
+          init: () =>
+            initVideoUpload({
               filename: file.name,
               sizeBytes: file.size,
               mimeType: file.type,
               title: file.name,
               resource: "lesson-content",
-              lessonId: lessonToEdit?.id,
               contextId,
-            });
+              entityId: lessonToEdit?.id,
+              entityType: ENTITY_TYPES.LESSON,
+            }),
+        });
 
-        await handleVideoTusUpload(file, session, editor);
+        await uploadVideo({ file, session });
+
+        if (session.resourceId) {
+          const resourceUrl = buildEntityResourceUrl(session.resourceId, ENTITY_TYPES.LESSON);
+
+          editor
+            ?.chain()
+            .insertContent("<br />")
+            .setVideoEmbed({
+              src: resourceUrl,
+              sourceType: session.provider === "s3" ? "external" : "internal",
+            })
+            .run();
+        }
       } catch (error) {
         console.error("Error uploading video:", error);
         toast({
@@ -226,39 +131,22 @@ const ContentLessonForm = ({
       return;
     }
 
-    await uploadFile(
-      {
-        file,
-        lessonId: lessonToEdit?.id,
-        language,
-        title: file.name,
-        description: file.name,
-        contextId,
-      },
-      {
-        onSuccess: (data) => {
-          const resourceUrl = `${baseUrl}/api/lesson/lesson-resource/${data.data.resourceId}`;
-          const chain = editor?.chain().insertContent("<br />");
+    const resourceId = await uploadResource({
+      file,
+      entityType: ENTITY_TYPES.LESSON,
+      entityId: lessonToEdit?.id,
+      contextId,
+      language,
+    });
 
-          if (isPresentation) {
-            chain?.setPresentationEmbed({ src: resourceUrl, sourceType: "internal" }).run();
-            return;
-          }
-
-          if (isDocument) {
-            chain
-              ?.setDownloadableFile({
-                src: resourceUrl,
-                name: file.name,
-              })
-              .run();
-            return;
-          }
-
-          chain?.insertContent(`<a href="${resourceUrl}">${resourceUrl}</a>`).run();
-        },
-      },
-    );
+    insertResourceIntoEditor({
+      editor,
+      resourceId,
+      entityType: ENTITY_TYPES.LESSON,
+      file,
+      isPresentation,
+      isDocument,
+    });
   };
 
   const missingTranslations =
@@ -319,7 +207,7 @@ const ContentLessonForm = ({
                   {t("adminCourseView.curriculum.lesson.field.description")}
                 </Label>
                 <FormControl>
-                  <LessonEditor
+                  <ContentEditor
                     id="description"
                     content={field.value}
                     lessonId={lessonToEdit?.id}
@@ -333,7 +221,7 @@ const ContentLessonForm = ({
                       ...ALLOWED_PRESENTATION_FILE_TYPES,
                     ]}
                     onUpload={handleFileUpload}
-                    uploadProgress={isVideoUploading ? (videoUploadProgress ?? 0) : null}
+                    uploadProgress={isUploading ? (uploadProgress ?? 0) : null}
                     onCtrlSave={() => form.handleSubmit(onSubmit)()}
                     {...field}
                   />

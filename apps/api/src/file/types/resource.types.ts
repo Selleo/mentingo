@@ -1,5 +1,5 @@
-import type { ResourceCategory, ResourceRelationshipType, EntityType } from "../file.constants";
-import type { SupportedLanguages } from "@repo/shared";
+import type { ResourceCategory, ResourceRelationshipType } from "../file.constants";
+import type { EntityType, SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
 

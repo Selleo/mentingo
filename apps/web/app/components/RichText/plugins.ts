@@ -86,7 +86,7 @@ const basePlugins = [
 
 export const baseEditorPlugins = [...basePlugins];
 
-export const lessonEditorPlugins = [
+export const contentEditorPlugins = [
   ...basePlugins,
   Placeholder.configure({
     includeChildren: true,

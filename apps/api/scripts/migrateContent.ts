@@ -1,6 +1,11 @@
 /* eslint-disable no-console */
 
-import { ALLOWED_PRESENTATION_FILE_TYPES, ALLOWED_VIDEO_FILE_TYPES } from "@repo/shared";
+import {
+  ALLOWED_PRESENTATION_FILE_TYPES,
+  ALLOWED_VIDEO_FILE_TYPES,
+  ENTITY_TYPES,
+} from "@repo/shared";
+import * as cheerio from "cheerio";
 import dotenv from "dotenv";
 import { and, eq, getTableColumns, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
@@ -10,7 +15,15 @@ import { match } from "ts-pattern";
 import { buildSqlInClause, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { ENTITY_TYPE } from "src/localization/localization.types";
-import { chapters, courses, lessons, resourceEntity, resources } from "src/storage/schema";
+import {
+  articles,
+  chapters,
+  courses,
+  lessons,
+  news,
+  resourceEntity,
+  resources,
+} from "src/storage/schema";
 
 import * as schema from "../src/storage/schema";
 
@@ -26,6 +39,8 @@ const INTERNAL_RESOURCE_BLOCK = {
     `<div data-node-type="video" data-source-type="internal" data-provider="self" data-src="${src}"></div>`,
   download: (src: string, name: string) =>
     `<div data-node-type="downloadable-file" data-src="${src}" data-name="${name}"></div>`,
+  image: (src: string) =>
+    `<a target="_blank" rel="noopener noreferrer" class="text-primary-700 underline" href="${src}">${src}</a>`,
 } as const;
 
 const EXTERNAL_RESOURCE_BLOCK = {
@@ -50,9 +65,9 @@ const ALLOWED_VIDEO_EXTENSIONS = ["mp4", "mov", "webm", "ogg", "avi", "wmv", "qu
 const ALLOWED_PRESENTATION_EXTENSIONS = ["ppt", "pptx", "odp"] as const;
 
 const PRESENTATION_REFERENCE_REGEX = /docs\.google\.com\/.*presentation|canva\.com\/.*design/i;
+const VIDEO_REFERENCE_REGEX = /youtube\.com|youtu\.be|vimeo\.com/i;
 
-const RESOURCE_REFERENCE_WHERE_REGEX =
-  "(youtube\\.com|youtu\\.be|vimeo\\.com|docs\\.google\\.com/.*/presentation|canva\\.com/.*/design)";
+const RESOURCE_REFERENCE_WHERE_REGEX = String.raw`(youtube\.com|youtu\.be|vimeo\.com|docs\.google\.com/.*/presentation|canva\.com/.*/design)`;
 
 const normalizeString = (value: string | null | undefined) =>
   typeof value === "string" ? value.toLowerCase() : "";
@@ -64,8 +79,12 @@ const isPresentationReference = (reference: string | null | undefined) =>
   typeof reference === "string" &&
   (/(\.pptx|\.ppt|\.odp)(\?|#|$)/i.test(reference) || PRESENTATION_REFERENCE_REGEX.test(reference));
 
+const isVideoReference = (reference: string | null | undefined) =>
+  typeof reference === "string" && VIDEO_REFERENCE_REGEX.test(reference);
+
 const getOriginalFilename = (metadata: unknown): string | null => {
   const record = metadata as Record<string, unknown> | null;
+
   return typeof record?.originalFilename === "string" ? record.originalFilename : null;
 };
 
@@ -79,15 +98,33 @@ const allowedPresentationContentTypes = [
   ...ALLOWED_PRESENTATION_FILE_TYPES,
   ...ALLOWED_PRESENTATION_EXTENSIONS,
 ].map((t) => t.toLowerCase());
-
-type ResourceKind = "video" | "presentation" | "other";
+type ResourceKind = "video" | "presentation" | "other" | "image";
 type Provider = "self" | "youtube" | "vimeo" | "google" | "canva" | "unsupported-external";
+
+type ResourceData = {
+  id: string;
+  reference: string | null;
+  contentType: string | null;
+  metadata: unknown;
+};
 
 type ResourceClassification = {
   kind: ResourceKind;
   isExternal: boolean;
   provider: Provider;
 };
+
+function getPresentationProvider(reference: string): Provider {
+  if (/docs\.google\.com\/.*presentation/i.test(reference)) return "google";
+  if (/canva\.com\/.*design/i.test(reference)) return "canva";
+  return "unsupported-external";
+}
+
+function getVideoProvider(reference: string): Provider {
+  if (/youtube\.com|youtu\.be/i.test(reference)) return "youtube";
+  if (/vimeo\.com/i.test(reference)) return "vimeo";
+  return "unsupported-external";
+}
 
 function classifyResource(input: {
   reference: string | null;
@@ -97,29 +134,26 @@ function classifyResource(input: {
   const contentType = normalizeString(input.contentType);
   const external = isExternalUrl(input.reference);
 
-  const isVideo =
-    contentType.startsWith("video/") || allowedVideoContentTypes.includes(contentType);
+  const isImage = contentType.startsWith("image/");
+  if (isImage) {
+    return { kind: "image", isExternal: false, provider: "self" };
+  }
 
   const isPresentation =
     allowedPresentationContentTypes.includes(contentType) ||
     isPresentationReference(input.reference);
-
   if (isPresentation) {
-    if (!external) return { kind: "presentation", isExternal: false, provider: "self" };
-    if (/docs\.google\.com\/.*presentation/i.test(reference))
-      return { kind: "presentation", isExternal: true, provider: "google" };
-    if (/canva\.com\/.*design/i.test(reference))
-      return { kind: "presentation", isExternal: true, provider: "canva" };
-    return { kind: "presentation", isExternal: true, provider: "unsupported-external" };
+    const provider = external ? getPresentationProvider(reference) : "self";
+    return { kind: "presentation", isExternal: external, provider };
   }
 
+  const isVideo =
+    contentType.startsWith("video/") ||
+    allowedVideoContentTypes.includes(contentType) ||
+    isVideoReference(input.reference);
   if (isVideo) {
-    if (!external) return { kind: "video", isExternal: false, provider: "self" };
-    if (/youtube\.com|youtu\.be/i.test(reference))
-      return { kind: "video", isExternal: true, provider: "youtube" };
-    if (/vimeo\.com/i.test(reference))
-      return { kind: "video", isExternal: true, provider: "vimeo" };
-    return { kind: "video", isExternal: true, provider: "unsupported-external" };
+    const provider = external ? getVideoProvider(reference) : "self";
+    return { kind: "video", isExternal: external, provider };
   }
 
   return {
@@ -138,6 +172,7 @@ function buildEmbedHtml(params: {
   const { classification, reference, resourceUrl, fileName } = params;
 
   return match(classification)
+    .with({ kind: "image", isExternal: false }, () => INTERNAL_RESOURCE_BLOCK.image(resourceUrl))
     .with({ kind: "presentation", isExternal: false }, () =>
       INTERNAL_RESOURCE_BLOCK.presentation(resourceUrl),
     )
@@ -162,7 +197,7 @@ function buildEmbedHtml(params: {
     .otherwise(() => INTERNAL_RESOURCE_BLOCK.download(resourceUrl, fileName ?? ""));
 }
 
-function descriptionAlreadyContainsResource(params: {
+function lessonDescriptionContainsResource(params: {
   description: string;
   resourceUrl: string;
   resourceId: string;
@@ -176,34 +211,13 @@ function descriptionAlreadyContainsResource(params: {
   );
 }
 
-function mergeDescription(existingDescription: string, embedHtml: string): string {
+function mergeLessonDescription(existingDescription: string, embedHtml: string): string {
   return existingDescription
     ? `<p>${existingDescription}</p><p></p>${embedHtml}`
     : `<p></p>${embedHtml}`;
 }
 
-async function runMigration() {
-  // Dynamically import yargs to avoid issues with ESM/CJS when the app is built
-  const yargsModule = await (0, eval)("import('yargs')");
-  const helpersModule = await (0, eval)("import('yargs/helpers')");
-
-  const yargsFactory =
-    typeof yargsModule.default === "function" ? yargsModule.default : yargsModule;
-
-  const hideBin = helpersModule.hideBin ?? helpersModule.default?.hideBin;
-
-  const argv = await yargsFactory(hideBin(process.argv))
-    .option("url", {
-      alias: "u",
-      description: "Instance URL",
-      type: "string",
-      demandOption: true,
-    })
-    .help().argv;
-
-  const pg = postgres(process.env.DATABASE_URL!, { connect_timeout: 2 });
-  const db = drizzle(pg, { schema }) as DatabasePg;
-
+async function migrateLessons(url: string, db: DatabasePg) {
   const existingLessons = await db
     .select({
       ...getTableColumns(lessons),
@@ -246,11 +260,10 @@ async function runMigration() {
         resourceMetadata: metadata,
       } = lesson;
 
-      const resourceUrl = `${argv.url}/api/lesson/lesson-resource/${resourceId}`;
+      const resourceUrl = `${url}/api/lesson/lesson-resource/${resourceId}`;
       const fileName = getOriginalFilename(metadata);
 
       const classification = classifyResource({ reference, contentType });
-
       const embedHtml = buildEmbedHtml({
         classification,
         reference,
@@ -264,7 +277,7 @@ async function runMigration() {
         const existingDescription = description[lang] || "";
 
         if (
-          descriptionAlreadyContainsResource({
+          lessonDescriptionContainsResource({
             description: existingDescription,
             resourceUrl,
             resourceId,
@@ -284,7 +297,7 @@ async function runMigration() {
             description: setJsonbField(
               lessons.description,
               lang,
-              mergeDescription(existingDescription, embedHtml),
+              mergeLessonDescription(existingDescription, embedHtml),
               true,
             ),
           })
@@ -294,6 +307,190 @@ async function runMigration() {
   );
 
   console.log(`Successfully migrated ${existingLessons.length} lesson(s) of type CONTENT`);
+}
+
+function cmsReplaceExternalResources(existingDescription: string) {
+  const $ = cheerio.load(existingDescription, null, false);
+
+  const externalResources = $(`a`);
+
+  externalResources.each((_, el) => {
+    const reference = $(el).attr("href");
+
+    if (!reference) return;
+
+    const classification = classifyResource({
+      reference,
+      contentType: null,
+    });
+
+    if (!["video", "presentation"].includes(classification.kind)) return;
+
+    const embedHtml = buildEmbedHtml({
+      classification,
+      reference,
+      resourceUrl: reference,
+      fileName: null,
+    });
+
+    $(el).replaceWith(embedHtml);
+  });
+
+  return $.html();
+}
+
+function cmsMergeDescription(
+  existingDescription: string,
+  embedHtml: string,
+  resourceId: string,
+): string {
+  if (!existingDescription) {
+    return `<p></p>${embedHtml}`;
+  }
+
+  const $ = cheerio.load(existingDescription, null, false);
+
+  const selectors = [`a[href*="${resourceId}"]`];
+
+  for (const selector of selectors) {
+    const existing = $(selector);
+    existing.each((_, el) => {
+      $(el).replaceWith(embedHtml);
+    });
+  }
+
+  return $.html();
+}
+
+async function migrateCMSContent(
+  url: string,
+  table: typeof news | typeof articles,
+  db: DatabasePg,
+) {
+  const entityType = table === news ? ENTITY_TYPES.NEWS : ENTITY_TYPES.ARTICLES;
+  const tableName = table === news ? sql.identifier("news") : sql.identifier("articles");
+
+  const resourcesSubquery = sql<ResourceData[]>`
+    COALESCE(
+      (
+        SELECT json_agg(
+          json_build_object(
+            'id', r.id,
+            'reference', r.reference,
+            'contentType', r.content_type,
+            'metadata', r.metadata
+          )
+        )
+        FROM resources r
+        INNER JOIN resource_entity re ON r.id = re.resource_id
+        WHERE re.entity_id = ${tableName}.id
+          AND re.entity_type = ${entityType}
+      ),
+      '[]'::json
+    )
+  `;
+
+  const existingContent = await db
+    .select({
+      ...getTableColumns(table),
+      baseLanguage: sql<SupportedLanguages>`${table.baseLanguage}`,
+      availableLanguages: sql<SupportedLanguages[]>`${table.availableLocales}`,
+      resources: resourcesSubquery,
+    })
+    .from(table);
+
+  for (const content of existingContent) {
+    const description = (content.content ?? {}) as Partial<Record<SupportedLanguages, string>>;
+    const contentResources = (content.resources ?? []) as ResourceData[];
+
+    for (const lang of content.availableLanguages) {
+      let currentDescription = description[lang] || "";
+      if (!currentDescription) continue;
+
+      for (const resource of contentResources) {
+        if (!resource) continue;
+
+        const resourceUrl = `${url}/api/${entityType}/${entityType}-resource/${resource.id}`;
+
+        let parsedMetadata = resource.metadata;
+
+        if (typeof resource.metadata === "string") {
+          parsedMetadata = JSON.parse(resource.metadata);
+        }
+
+        const fileName = getOriginalFilename(parsedMetadata);
+        const classification = classifyResource({
+          reference: resource.reference,
+          contentType: resource.contentType,
+        });
+
+        const embedHtml = buildEmbedHtml({
+          classification,
+          reference: resource.reference,
+          resourceUrl,
+          fileName,
+        });
+
+        currentDescription = cmsMergeDescription(currentDescription, embedHtml, resource.id);
+      }
+
+      currentDescription = cmsReplaceExternalResources(currentDescription);
+
+      await db
+        .update(table)
+        .set({
+          content: setJsonbField(table.content, lang, currentDescription, true),
+        })
+        .where(eq(table.id, content.id));
+    }
+  }
+
+  console.log(`Successfully migrated ${existingContent.length} ${entityType}`);
+}
+
+async function runMigration() {
+  // Dynamically import yargs to avoid issues with ESM/CJS when the app is built
+  const yargsModule = await (0, eval)("import('yargs')");
+  const helpersModule = await (0, eval)("import('yargs/helpers')");
+
+  const yargsFactory =
+    typeof yargsModule.default === "function" ? yargsModule.default : yargsModule;
+
+  const hideBin = helpersModule.hideBin ?? helpersModule.default?.hideBin;
+
+  const argv = await yargsFactory(hideBin(process.argv))
+    .option("url", {
+      alias: "u",
+      description: "Instance URL",
+      type: "string",
+      demandOption: true,
+    })
+    .option("specific", {
+      alias: "s",
+      description: "Migrate only specific content by initials",
+      type: "string",
+    })
+    .help().argv;
+
+  const pg = postgres(process.env.DATABASE_URL!, { connect_timeout: 2 });
+  const db = drizzle(pg, { schema }) as DatabasePg;
+
+  const url = argv.url;
+
+  const specific = (argv.specific ?? "").toLowerCase();
+
+  if (!specific || specific.includes("l")) {
+    await migrateLessons(url, db);
+  }
+
+  if (!specific || specific.includes("n")) {
+    await migrateCMSContent(url, news, db);
+  }
+
+  if (!specific || specific.includes("a")) {
+    await migrateCMSContent(url, articles, db);
+  }
+
   await pg.end();
 }
 

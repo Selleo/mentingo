@@ -520,9 +520,20 @@ export interface InitVideoUploadBody {
   title?: string;
   resource?: string;
   /** @format uuid */
-  lessonId?: string;
-  /** @format uuid */
   contextId?: string;
+  /** @format uuid */
+  entityId?: string;
+  entityType:
+    | "course"
+    | "chapter"
+    | "lesson"
+    | "question"
+    | "news"
+    | "articles"
+    | "user"
+    | "category"
+    | "announcement"
+    | "global_settings";
 }
 
 export interface InitVideoUploadResponse {
@@ -553,7 +564,6 @@ export type GetVideoUploadStatusResponse = {
   /** @min 1 */
   partSize?: number;
   fileType?: string;
-  lessonId?: string;
   error?: string;
   userId?: string;
 } | null;
@@ -567,13 +577,6 @@ export interface HandleBunnyWebhookBody {
   VideoGuid?: string;
   guid?: string;
   Guid?: string;
-}
-
-export interface AssociateUploadWithLessonBody {
-  /** @format uuid */
-  lessonId: string;
-  /** @format uuid */
-  uploadId: string;
 }
 
 export interface GetUserStatisticsResponse {
@@ -4626,24 +4629,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     fileControllerHandleBunnyWebhook: (data: HandleBunnyWebhookBody, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/file/bunny/webhook`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FileControllerAssociateUploadWithLesson
-     * @request POST:/api/file/associate-upload
-     */
-    fileControllerAssociateUploadWithLesson: (
-      data: AssociateUploadWithLessonBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<void, any>({
-        path: `/api/file/associate-upload`,
         method: "POST",
         body: data,
         type: ContentType.Json,

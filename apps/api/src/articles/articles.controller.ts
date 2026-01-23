@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Query,
+  Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -24,6 +25,7 @@ import {
   SupportedLanguages,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
+import { Response } from "express";
 import { Validate } from "nestjs-typebox";
 
 import {
@@ -41,7 +43,7 @@ import { CurrentUser as CurrentUserType } from "src/common/types/current-user.ty
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
-import { USER_ROLES } from "src/user/schemas/userRoles";
+import { USER_ROLES, UserRole } from "src/user/schemas/userRoles";
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
 import { getArticleSectionResponseSchema as getArticleSectionDetailsResponseSchema } from "./schemas/articleSection.schema";
@@ -222,6 +224,20 @@ export class ArticlesController {
     const toc = await this.articlesService.getArticlesToc(language, isDraftMode, currentUser);
 
     return new BaseResponse(toc);
+  }
+
+  @Public()
+  @Get("articles-resource/:resourceId")
+  @Validate({
+    request: [{ type: "param", schema: UUIDSchema, name: "resourceId" }],
+  })
+  async getArticleResource(
+    @Param("resourceId") resourceId: UUIDType,
+    @Res() res: Response,
+    @CurrentUser("userId") userId?: UUIDType,
+    @CurrentUser("role") role?: UserRole,
+  ) {
+    return this.articlesService.getArticleResource(res, resourceId, userId, role);
   }
 
   @Public()

@@ -6,14 +6,14 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
-import { ARTICLE_STATUS, type SupportedLanguages } from "@repo/shared";
-import { load as loadHtml } from "cheerio";
+import { ARTICLE_STATUS, ENTITY_TYPES, type SupportedLanguages } from "@repo/shared";
 import { eq, getTableColumns, sql } from "drizzle-orm";
 import { isEmpty, isEqual } from "lodash";
 import { match } from "ts-pattern";
 
 import { DatabasePg } from "src/common";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
+import { injectResourcesIntoContent } from "src/common/utils/injectResourcesIntoContent";
 import {
   CreateArticleEvent,
   CreateArticleSectionEvent,
@@ -22,11 +22,7 @@ import {
   UpdateArticleEvent,
   UpdateArticleSectionEvent,
 } from "src/events";
-import {
-  ENTITY_TYPES,
-  RESOURCE_RELATIONSHIP_TYPES,
-  RESOURCE_CATEGORIES,
-} from "src/file/file.constants";
+import { RESOURCE_RELATIONSHIP_TYPES, RESOURCE_CATEGORIES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { SettingsService } from "src/settings/settings.service";
@@ -46,12 +42,15 @@ import type {
 import type { ArticleResource, ArticleResources } from "../schemas/selectArticle.schema";
 import type { UpdateArticle, UpdateArticleSection } from "../schemas/updateArticle.schema";
 import type { InferSelectModel } from "drizzle-orm";
+import type { Response } from "express";
 import type {
   ArticleActivityLogSnapshot,
   ArticleSectionActivityLogSnapshot,
 } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
+import type { ResourceWithUrlError } from "src/lesson/lesson-resource.types";
+import type { UserRole } from "src/user/schemas/userRoles";
 
 type StoredArticleResource = Awaited<ReturnType<FileService["getResourcesForEntity"]>>[number];
 type ResourceMetadata = StoredArticleResource["metadata"] & { originalFilename?: unknown };
@@ -484,15 +483,19 @@ export class ArticlesService {
       throw new NotFoundException("adminArticleView.toast.notFoundError");
 
     const resources = await this.getArticleResources(articleId, requestedLanguage);
-
-    const contentWithResources = this.injectResourcesIntoContent(
+    const { html: contentWithResources } = injectResourcesIntoContent(
       existingArticle.content,
       resources.flatList,
+      {
+        resourceIdRegex: /articles-resource\/([0-9a-fA-F-]{36})/,
+        trackNodeTypes: ["video"],
+        buildImageTag: (resource) => this.buildImageTag(resource),
+      },
     );
 
     return {
       ...existingArticle,
-      content: contentWithResources ?? "",
+      content: contentWithResources ?? existingArticle.content ?? "",
       plainContent: existingArticle.content ?? "",
       resources: resources.grouped,
       ...(await this.getAdjacentArticle(
@@ -503,6 +506,39 @@ export class ArticlesService {
         currentUser,
       )),
     };
+  }
+
+  async getArticleResource(
+    res: Response,
+    resourceId: UUIDType,
+    userId?: UUIDType,
+    role?: UserRole,
+  ) {
+    await this.checkAccess(userId);
+
+    const resource = await this.articlesRepository.getResource(resourceId);
+
+    if (!resource || resource.entityType !== ENTITY_TYPES.ARTICLES) {
+      throw new NotFoundException("Article resource not found");
+    }
+
+    const [article] = await this.articlesRepository.getArticleById(resource.entityId);
+
+    if (!article) throw new NotFoundException("Article not found");
+
+    const isAdminLike = role === USER_ROLES.ADMIN || role === USER_ROLES.CONTENT_CREATOR;
+    const isAuthor = Boolean(userId && article.authorId === userId);
+    const isPublic = Boolean(article.isPublic && article.publishedAt !== null);
+
+    if (!isAdminLike && !isAuthor && !isPublic) {
+      throw new NotFoundException("Article resource not found");
+    }
+
+    const fileUrl = await this.fileService.getFileUrl(resource.reference);
+
+    if (!fileUrl) throw new Error("Error fetching file url");
+
+    return res.redirect(fileUrl);
   }
 
   async getArticlesToc(
@@ -723,64 +759,6 @@ export class ArticlesService {
     return { grouped: groupedResources, flatList };
   }
 
-  private injectResourcesIntoContent(content: string | null, resources: ArticleResource[]) {
-    if (!content) return content;
-    if (!resources.length) return content;
-
-    const $ = loadHtml(content);
-    const resourceMap = new Map(resources.map((resource) => [resource.id, resource]));
-
-    $("a").each((_, element) => {
-      const anchor = $(element);
-      const href = anchor.attr("href") || "";
-      const dataResourceId = anchor.attr("data-resource-id");
-
-      const matchingResource =
-        (dataResourceId && resourceMap.get(dataResourceId as UUIDType)) ||
-        resources.find((resource) => href.includes(String(resource.id)));
-
-      if (!matchingResource) return;
-
-      const parent = anchor.parent();
-
-      match(matchingResource.contentType ?? "")
-        .when(
-          (type) => type.startsWith("image/"),
-          () => {
-            const imgTag = this.buildImageTag(matchingResource);
-            if (parent.is("p")) {
-              anchor.remove();
-              parent.after(imgTag);
-            } else {
-              anchor.replaceWith(imgTag);
-            }
-          },
-        )
-        .when(
-          (type) => type.startsWith("video/"),
-          () => {
-            const iframe = this.buildVideoTag(matchingResource);
-            if (parent.is("p")) {
-              anchor.remove();
-              parent.after(iframe);
-            } else {
-              anchor.replaceWith(iframe);
-            }
-          },
-        )
-        .otherwise(() => {
-          anchor.attr("href", matchingResource.fileUrl);
-          anchor.attr("download", matchingResource.fileName ?? "");
-          anchor.attr("target", "_blank");
-          anchor.attr("rel", "noopener noreferrer");
-          anchor.text(matchingResource.title || matchingResource.fileName || anchor.text());
-        });
-    });
-
-    const bodyChildren = $("body").children();
-    return $.html(bodyChildren.length ? bodyChildren : $.root().children());
-  }
-
   private async validateArticleExists(
     articleId: UUIDType,
     language?: SupportedLanguages,
@@ -846,10 +824,13 @@ export class ArticlesService {
     return updateData;
   }
 
-  private mapResourceToArticleResource(resource: StoredArticleResource): ArticleResource {
+  private mapResourceToArticleResource(
+    resource: StoredArticleResource,
+  ): ArticleResource & { fileUrlError?: boolean } {
     return {
       id: resource.id,
       fileUrl: resource.fileUrl,
+      fileUrlError: Boolean((resource as ResourceWithUrlError).fileUrlError),
       contentType: resource.contentType,
       title: typeof resource.title === "string" ? resource.title : undefined,
       description: typeof resource.description === "string" ? resource.description : undefined,
@@ -859,10 +840,6 @@ export class ArticlesService {
 
   private buildImageTag(resource: ArticleResource) {
     return `<img src="${resource.fileUrl}" alt="${resource.title ?? ""}" />`;
-  }
-
-  private buildVideoTag(resource: ArticleResource) {
-    return `<iframe controls src="${resource.fileUrl}" title="${resource.title ?? ""}"></iframe>`;
   }
 
   private extractOriginalFilename(metadata: StoredArticleResource["metadata"]) {
@@ -905,7 +882,13 @@ export class ArticlesService {
 
     const resources = await this.getArticleResources(articleId, language);
 
-    return this.injectResourcesIntoContent(content, resources.flatList) ?? content;
+    const { html: parsedContent } = injectResourcesIntoContent(content, resources.flatList, {
+      resourceIdRegex: /articles-resource\/([0-9a-fA-F-]{36})/,
+      trackNodeTypes: ["video"],
+      buildImageTag: (resource) => this.buildImageTag(resource),
+    });
+
+    return parsedContent ?? content;
   }
 
   private async buildArticleActivitySnapshot(

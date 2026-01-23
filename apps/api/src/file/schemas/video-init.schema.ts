@@ -1,3 +1,4 @@
+import { ENTITY_TYPES } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
@@ -10,8 +11,9 @@ export const videoInitSchema = Type.Object({
   mimeType: Type.String({ minLength: 1 }),
   title: Type.Optional(Type.String()),
   resource: Type.Optional(Type.String()),
-  lessonId: Type.Optional(UUIDSchema),
   contextId: Type.Optional(UUIDSchema),
+  entityId: Type.Optional(UUIDSchema),
+  entityType: Type.Enum(ENTITY_TYPES),
 });
 
 export const videoInitResponseSchema = Type.Object({

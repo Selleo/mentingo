@@ -1,6 +1,7 @@
 import { currentUserQueryOptions, useCurrentUser } from "~/api/queries/useCurrentUser";
 import { queryClient } from "~/api/queryClient";
 import { VideoProvider } from "~/components/VideoPlayer/VideoPlayerContext";
+import { VideoPlayerSingleton } from "~/components/VideoPlayer/VideoPlayerSingleton";
 import { Dashboard } from "~/modules/Dashboard/Dashboard";
 
 export const clientLoader = async () => {
@@ -17,6 +18,7 @@ export default function PublicDashboardLayout() {
   return (
     <VideoProvider>
       <Dashboard isAuthenticated={isAuthenticated} />
+      <VideoPlayerSingleton />
     </VideoProvider>
   );
 }
