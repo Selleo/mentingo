@@ -84,6 +84,7 @@ const isVideoReference = (reference: string | null | undefined) =>
 
 const getOriginalFilename = (metadata: unknown): string | null => {
   const record = metadata as Record<string, unknown> | null;
+
   return typeof record?.originalFilename === "string" ? record.originalFilename : null;
 };
 
@@ -410,7 +411,14 @@ async function migrateCMSContent(
         if (!resource) continue;
 
         const resourceUrl = `${url}/api/${entityType}/${entityType}-resource/${resource.id}`;
-        const fileName = getOriginalFilename(resource.metadata);
+
+        let parsedMetadata = resource.metadata;
+
+        if (typeof resource.metadata === "string") {
+          parsedMetadata = JSON.parse(resource.metadata);
+        }
+
+        const fileName = getOriginalFilename(parsedMetadata);
         const classification = classifyResource({
           reference: resource.reference,
           contentType: resource.contentType,
