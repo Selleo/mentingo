@@ -34,6 +34,7 @@ export const createAiMentorLessonFactory = (db: DatabasePg) => {
           type: LESSON_TYPES.AI_MENTOR,
           title: buildJsonbField("en", faker.commerce.productName()),
           isExternal: true,
+          tenantId: aiMentorLesson.tenantId,
         })
         .returning();
 
@@ -44,6 +45,7 @@ export const createAiMentorLessonFactory = (db: DatabasePg) => {
           aiMentorInstructions: aiMentorLesson.aiMentorInstructions,
           completionConditions: aiMentorLesson.completionConditions,
           type: aiMentorLesson.type,
+          tenantId: aiMentorLesson.tenantId,
         })
         .returning();
 
@@ -60,6 +62,7 @@ export const createAiMentorLessonFactory = (db: DatabasePg) => {
       type: AI_MENTOR_TYPE.MENTOR,
       name: "AI Mentor",
       avatarReference: null,
+      tenantId: faker.string.uuid(),
     };
   });
 };

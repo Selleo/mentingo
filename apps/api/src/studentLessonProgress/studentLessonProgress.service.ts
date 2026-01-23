@@ -626,7 +626,7 @@ export class StudentLessonProgressService {
     if (actor) return actor;
 
     const [user] = await dbInstance
-      .select({ userId: users.id, email: users.email, role: users.role })
+      .select({ userId: users.id, email: users.email, role: users.role, tenantId: users.tenantId })
       .from(users)
       .where(eq(users.id, userId));
 
@@ -638,6 +638,7 @@ export class StudentLessonProgressService {
       userId: user.userId,
       email: user.email,
       role: user.role as UserRole,
+      tenantId: user.tenantId,
     };
   }
 }

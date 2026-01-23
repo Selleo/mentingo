@@ -163,7 +163,13 @@ export class AuthService {
 
     const onboardingStatus = await this.userService.getAllOnboardingStatus(user.id);
 
-    const actor: CurrentUser = { userId: user.id, email: user.email, role: user.role as UserRole };
+    const actor: CurrentUser = {
+      userId: user.id,
+      email: user.email,
+      role: user.role as UserRole,
+      tenantId: user.tenantId,
+    };
+
     this.eventBus.publish(new UserLoginEvent({ userId: user.id, method: "password", actor }));
 
     if (
@@ -222,10 +228,12 @@ export class AuthService {
       }
 
       const tokens = await this.getTokens(user);
+
       const actor: CurrentUser = {
         userId: user.id,
         email: user.email,
         role: user.role as UserRole,
+        tenantId: user.tenantId,
       };
 
       this.eventBus.publish(
@@ -252,6 +260,7 @@ export class AuthService {
         archived: users.archived,
         avatarReference: users.avatarReference,
         deletedAt: users.deletedAt,
+        tenantId: users.tenantId,
       })
       .from(users)
       .leftJoin(credentials, eq(users.id, credentials.userId))
@@ -269,17 +278,17 @@ export class AuthService {
   }
 
   private async getTokens(user: CommonUser | UserResponse) {
-    const { id: userId, email, role } = user;
+    const { id: userId, email, role, tenantId } = user;
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
-        { userId, email, role },
+        { userId, email, role, tenantId },
         {
           expiresIn: this.configService.get<string>("jwt.expirationTime"),
           secret: this.configService.get<string>("jwt.secret"),
         },
       ),
       this.jwtService.signAsync(
-        { userId, email, role },
+        { userId, email, role, tenantId },
         {
           expiresIn: "7d",
           secret: this.configService.get<string>("jwt.refreshSecret"),
@@ -362,7 +371,9 @@ export class AuthService {
       { language: languageGuard },
     );
 
-    this.eventBus.publish(new UserPasswordCreatedEvent(existingUser));
+    this.eventBus.publish(
+      new UserPasswordCreatedEvent({ ...existingUser, tenantId: createToken.tenantId }),
+    );
 
     return existingUser;
   }
@@ -498,7 +509,13 @@ export class AuthService {
     const userSettings = await this.settingsService.getUserSettings(user.id);
     const { MFAEnforcedRoles } = await this.settingsService.getGlobalSettings();
 
-    const actor: CurrentUser = { userId: user.id, email: user.email, role: user.role as UserRole };
+    const actor: CurrentUser = {
+      userId: user.id,
+      email: user.email,
+      role: user.role as UserRole,
+      tenantId: user.tenantId,
+    };
+
     this.eventBus.publish(new UserLoginEvent({ userId: user.id, method: "provider", actor }));
 
     if (MFAEnforcedRoles.includes(user.role as UserRole) || userSettings.isMFAEnabled) {

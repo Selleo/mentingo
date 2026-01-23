@@ -21001,7 +21001,6 @@
         "required": [
           "title",
           "content",
-          "tenantId",
           "groupId"
         ]
       },

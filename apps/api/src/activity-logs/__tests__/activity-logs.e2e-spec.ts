@@ -92,7 +92,13 @@ describe("Activity Logs E2E", () => {
     globalSettingsId = globalSettings!.id;
 
     const adminUser = await userFactory.withAdminRole().create();
-    currentAdminUser = { userId: adminUser.id, role: USER_ROLES.ADMIN, email: adminUser.email };
+
+    currentAdminUser = {
+      userId: adminUser.id,
+      role: USER_ROLES.ADMIN,
+      email: adminUser.email,
+      tenantId: adminUser.tenantId,
+    };
   });
 
   const getLogs = async (
@@ -364,6 +370,7 @@ describe("Activity Logs E2E", () => {
         userId: student.id,
         role: USER_ROLES.STUDENT,
         email: student.email,
+        tenantId: student.tenantId,
       };
 
       const course = await createCourse();
@@ -433,6 +440,7 @@ describe("Activity Logs E2E", () => {
         userId: student.id,
         role: USER_ROLES.STUDENT,
         email: student.email,
+        tenantId: student.tenantId,
       };
 
       const announcement = await announcementsService.createAnnouncement(
@@ -688,6 +696,7 @@ describe("Activity Logs E2E", () => {
         userId: user.id,
         role: USER_ROLES.STUDENT,
         email: user.email,
+        tenantId: user.tenantId,
       };
 
       const responseMock = {

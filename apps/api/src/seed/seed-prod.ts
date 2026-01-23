@@ -5,7 +5,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
 import hashPassword from "../common/helpers/hashPassword";
-import { credentials, users } from "../storage/schema";
+import { credentials, users, tenants } from "../storage/schema";
 import { USER_ROLES } from "../user/schemas/userRoles";
 
 import { insertGlobalSettings, insertOnboardingData, insertUserSettings } from "./seed";
@@ -28,18 +28,19 @@ async function createOrFindUser(email: string, password: string, userData: any) 
   if (existingUser) return existingUser;
 
   const [newUser] = await db.insert(users).values(userData).returning();
-  await insertCredential(newUser.id, password);
-  insertOnboardingData(newUser.id);
+  await insertCredential(newUser.id, userData.tenantId, password);
+  await insertOnboardingData(newUser.id, userData.tenantId);
   return newUser;
 }
 
-async function insertCredential(userId: UUIDType, password: string) {
+async function insertCredential(userId: UUIDType, tenantId: UUIDType, password: string) {
   const credentialData = {
     id: faker.string.uuid(),
     userId,
     password: await hashPassword(password),
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
+    tenantId,
   };
   return (await db.insert(credentials).values(credentialData).returning())[0];
 }
@@ -48,6 +49,22 @@ async function seedProduction() {
   await seedTruncateAllTables(db);
 
   try {
+    let [tenant] = await db.select().from(tenants).limit(1);
+
+    if (!tenant) {
+      [tenant] = await db
+        .insert(tenants)
+        .values({
+          id: faker.string.uuid(),
+          name: "Default Tenant",
+          host: "localhost",
+          status: "active",
+        })
+        .returning();
+    }
+
+    const tenantId = tenant.id;
+
     const adminUser = await createOrFindUser("admin@example.com", "password", {
       id: faker.string.uuid(),
       email: "admin@example.com",
@@ -56,9 +73,10 @@ async function seedProduction() {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       role: USER_ROLES.ADMIN,
+      tenantId,
     });
     console.log("Created or found admin user:", adminUser);
-    const adminSettings = await insertUserSettings(db, adminUser.id, true);
+    const adminSettings = await insertUserSettings(db, adminUser.id, tenantId, true);
     console.log("Inserted admin user settings:", adminSettings);
 
     const studentUser = await createOrFindUser("user@example.com", "password", {
@@ -69,9 +87,10 @@ async function seedProduction() {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       role: USER_ROLES.STUDENT,
+      tenantId,
     });
     console.log("Created or found student user:", studentUser);
-    const studentSettings = await insertUserSettings(db, studentUser.id, false);
+    const studentSettings = await insertUserSettings(db, studentUser.id, tenantId, false);
     console.log("Inserted student user settings:", studentSettings);
 
     const contentCreatorUser = await createOrFindUser("contentcreator@example.com", "password", {
@@ -82,12 +101,18 @@ async function seedProduction() {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       role: USER_ROLES.CONTENT_CREATOR,
+      tenantId,
     });
     console.log("Created or found content creator user:", contentCreatorUser);
-    const contentCreatorSettings = await insertUserSettings(db, contentCreatorUser.id, false);
+    const contentCreatorSettings = await insertUserSettings(
+      db,
+      contentCreatorUser.id,
+      tenantId,
+      false,
+    );
     console.log("Inserted content creator user settings:", contentCreatorSettings);
 
-    const globalSettings = await insertGlobalSettings(db);
+    const globalSettings = await insertGlobalSettings(db, tenantId);
     console.log("Inserted global settings:", globalSettings);
 
     console.log("Seeding completed successfully");

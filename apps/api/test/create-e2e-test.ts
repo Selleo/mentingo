@@ -5,6 +5,7 @@ import * as express from "express";
 import { ActivityLogsService } from "src/activity-logs/activity-logs.service";
 import { AppModule } from "src/app.module";
 import { EmailAdapter } from "src/common/emails/adapters/email.adapter";
+import { DB_BASE } from "src/storage/db/db.providers";
 
 import { EmailTestingAdapter } from "./helpers/test-email.adapter";
 import { truncateAllTables } from "./helpers/test-helpers";
@@ -33,7 +34,7 @@ export async function createE2ETest(optionsOrProviders: E2ETestOptions | Provide
     imports: [AppModule],
     providers: [...customProviders],
   })
-    .overrideProvider("DB")
+    .overrideProvider(DB_BASE)
     .useValue(db)
     .overrideProvider(EmailAdapter)
     .useClass(EmailTestingAdapter);

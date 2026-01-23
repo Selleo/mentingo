@@ -2926,7 +2926,7 @@ export interface CreateAnnouncementBody {
   title: string;
   /** @minLength 1 */
   content: string;
-  tenantId: string;
+  tenantId?: string;
   /** @default null */
   groupId: string | null;
 }

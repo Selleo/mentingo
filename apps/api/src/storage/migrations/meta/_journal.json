@@ -582,6 +582,13 @@
       "when": 1769165716064,
       "tag": "0082_add_not_null_to_all_tenant_references",
       "breakpoints": true
+    },
+    {
+      "idx": 83,
+      "version": "7",
+      "when": 1769173708925,
+      "tag": "0083_enable_tenant_rls_for_every_table",
+      "breakpoints": true
     }
   ]
 }

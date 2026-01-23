@@ -1,4 +1,3 @@
-import { DrizzlePostgresModule } from "@knaadh/nestjs-drizzle-postgres";
 import { Module } from "@nestjs/common";
 import { ConditionalModule, ConfigModule, ConfigService } from "@nestjs/config";
 import { APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
@@ -52,7 +51,8 @@ import { ScormModule } from "./scorm/scorm.module";
 import { SentryInterceptor } from "./sentry/sentry.interceptor";
 import { SettingsModule } from "./settings/settings.module";
 import { StatisticsModule } from "./statistics/statistics.module";
-import * as schema from "./storage/schema";
+import { DbModule } from "./storage/db/db.module";
+import { TenantRlsInterceptor } from "./storage/db/tenant-rls.interceptor";
 import { StripeModule } from "./stripe/stripe.module";
 import { StudentLessonProgressModule } from "./studentLessonProgress/studentLessonProgress.module";
 import { TestConfigModule } from "./test-config/test-config.module";
@@ -73,20 +73,7 @@ import { UserModule } from "./user/user.module";
       ],
       isGlobal: true,
     }),
-    DrizzlePostgresModule.registerAsync({
-      tag: "DB",
-      useFactory(configService: ConfigService) {
-        return {
-          postgres: {
-            url: configService.get<string>("database.url")!,
-          },
-          config: {
-            schema: { ...schema },
-          },
-        };
-      },
-      inject: [ConfigService],
-    }),
+    DbModule,
     JwtModule.registerAsync({
       useFactory(configService: ConfigService) {
         return {
@@ -143,6 +130,10 @@ import { UserModule } from "./user/user.module";
   ],
   controllers: [],
   providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TenantRlsInterceptor,
+    },
     {
       provide: APP_INTERCEPTOR,
       useClass: SentryInterceptor,
