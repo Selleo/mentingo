@@ -27,10 +27,12 @@ import { NavigationMenuButton } from "./NavigationMenuButton";
 export type NavigationGlobalSearchWrapperProps = {
   containerClassName?: string;
   autoFocusOnMount?: boolean;
+  useCompactVariant?: boolean;
 };
 
 export const NavigationGlobalSearchWrapper = ({
   containerClassName,
+  useCompactVariant = false,
 }: NavigationGlobalSearchWrapperProps) => {
   const [searchParams, setSearchParams] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
@@ -108,33 +110,35 @@ export const NavigationGlobalSearchWrapper = ({
 
   return (
     <div className={cn("relative", containerClassName)}>
-      <NavigationMenuButton
-        item={{ iconName: "Search", label: t("navigationSideBar.findInApplication") }}
-        onClick={() => setIsGlobalSearchDialogOpen(true)}
-        wrapperClassName={cn("list-none visible sm:hidden 2xl:block 3xl:hidden")}
-        className="justify-center bg-neutral-50 p-2 2xl:h-[42px] 2xl:w-[42px] 2xl:bg-white"
-        labelClassName="hidden"
-      />
-
-      <button
-        onClick={() => setIsGlobalSearchDialogOpen(true)}
-        className={cn(
-          "h-[42px] w-full min-w-[160px] max-w-[320px] py-2 pl-8 pr-8 md:max-w-none",
-          "text-neutral-800 transition-colors hover:border-primary-500 hover:text-primary-500",
-          "rounded-lg border border-neutral-300",
-          "hidden sm:block 2xl:hidden 3xl:block",
-        )}
-      >
-        <Search className="absolute left-2 top-1/2 size-5 -translate-y-1/2 transform transition-colors" />
-        <span className="body-base inline-block w-full text-start text-current transition-colors">
-          {t("globalSearch.search")}
-        </span>
-        {isMac ? (
-          <GlobalSearchMac className="absolute right-2 top-1/2 -translate-y-1/2 transform" />
-        ) : (
-          <GlobalSearchWin className="absolute right-2 top-1/2 -translate-y-1/2 transform" />
-        )}
-      </button>
+      {useCompactVariant ? (
+        <NavigationMenuButton
+          item={{ iconName: "Search", label: t("navigationSideBar.findInApplication") }}
+          onClick={() => setIsGlobalSearchDialogOpen(true)}
+          wrapperClassName="list-none hidden 2xl:block"
+          className="justify-center bg-neutral-50 p-2 2xl:h-[42px] 2xl:w-[42px] 2xl:bg-white"
+          labelClassName="sr-only"
+          hideLabel
+          showTooltip
+        />
+      ) : (
+        <button
+          onClick={() => setIsGlobalSearchDialogOpen(true)}
+          className={cn(
+            "hidden h-[42px] w-full items-center justify-start rounded-lg border border-neutral-300 bg-white py-2 px-0 pl-8 pr-8 text-neutral-800 transition-colors hover:border-primary-500 hover:text-primary-500",
+            "2xl:flex",
+          )}
+        >
+          <Search className="absolute left-2 top-1/2 size-5 -translate-y-1/2 transform transition-colors" />
+          <span className="body-base inline-block w-full text-start text-current transition-colors">
+            {t("globalSearch.search")}
+          </span>
+          {isMac ? (
+            <GlobalSearchMac className="absolute right-2 top-1/2 -translate-y-1/2 transform" />
+          ) : (
+            <GlobalSearchWin className="absolute right-2 top-1/2 -translate-y-1/2 transform" />
+          )}
+        </button>
+      )}
 
       <Dialog open={isGlobalSearchDialogOpen} onOpenChange={setIsGlobalSearchDialogOpen}>
         <DialogContent
