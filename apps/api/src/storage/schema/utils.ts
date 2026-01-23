@@ -1,6 +1,8 @@
 import { sql } from "drizzle-orm";
 import { boolean, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
+import { tenants } from ".";
+
 export const id = {
   id: uuid("id")
     .default(sql`gen_random_uuid()`)
@@ -43,3 +45,8 @@ export const availableLocales = text("available_locales")
   .array()
   .notNull()
   .default(sql`ARRAY['en']::text[]`);
+
+export const tenantId = uuid("tenant_id")
+  .references(() => tenants.id, { onDelete: "cascade" })
+  .notNull()
+  .default(sql`current_setting('app.tenant_id', true)::uuid`);
