@@ -465,6 +465,11 @@ async function runMigration() {
       type: "string",
       demandOption: true,
     })
+    .option("specific", {
+      alias: "s",
+      description: "Migrate only specific content by initials",
+      type: "string",
+    })
     .help().argv;
 
   const pg = postgres(process.env.DATABASE_URL!, { connect_timeout: 2 });
@@ -472,10 +477,19 @@ async function runMigration() {
 
   const url = argv.url;
 
-  await migrateLessons(url, db);
+  const specific = (argv.specific ?? "").toLowerCase();
 
-  await migrateCMSContent(url, news, db);
-  await migrateCMSContent(url, articles, db);
+  if (!specific || specific.includes("l")) {
+    await migrateLessons(url, db);
+  }
+
+  if (!specific || specific.includes("n")) {
+    await migrateCMSContent(url, news, db);
+  }
+
+  if (!specific || specific.includes("a")) {
+    await migrateCMSContent(url, articles, db);
+  }
 
   await pg.end();
 }
