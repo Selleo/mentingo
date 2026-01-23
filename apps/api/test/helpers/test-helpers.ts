@@ -6,6 +6,8 @@ import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-obje
 
 import { settings } from "../../src/storage/schema";
 
+import { ensureTenant } from "./tenant-helpers";
+
 import type { DatabasePg } from "../../src/common";
 import type { INestApplication } from "@nestjs/common";
 import type { JwtService } from "@nestjs/jwt";
@@ -52,11 +54,14 @@ export async function truncateAllTables(connection: DatabasePg): Promise<void> {
   `),
   );
 
+  const tenantId = await ensureTenant(connection);
+
   // Recreate global settings required for authentication
   await connection.insert(settings).values({
     userId: null,
     createdAt: new Date().toISOString(),
     settings: settingsToJSONBuildObject(DEFAULT_GLOBAL_SETTINGS),
+    tenantId,
   });
 }
 

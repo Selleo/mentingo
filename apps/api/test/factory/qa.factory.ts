@@ -5,15 +5,18 @@ import { Factory } from "fishery";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { questionsAndAnswers } from "src/storage/schema";
 
+import { ensureTenant } from "../helpers/tenant-helpers";
+
 import type { SupportedLanguages } from "@repo/shared";
 import type { InferSelectModel } from "drizzle-orm";
-import type { DatabasePg } from "src/common";
+import type { DatabasePg, UUIDType } from "src/common";
 
 export type QATest = InferSelectModel<typeof questionsAndAnswers>;
 
 export const createQAFactory = (db: DatabasePg) =>
   Factory.define<QATest>(({ onCreate }) => {
     onCreate(async (qa) => {
+      const tenantId = await ensureTenant(db, qa.tenantId);
       const baseLanguage = (qa.baseLanguage ?? "en") as SupportedLanguages;
       const availableLocales =
         qa.availableLocales && qa.availableLocales.length > 0
@@ -28,6 +31,7 @@ export const createQAFactory = (db: DatabasePg) =>
           description: buildJsonbField(baseLanguage, qa.description as string),
           baseLanguage,
           availableLocales,
+          tenantId,
         })
         .returning({
           ...getTableColumns(questionsAndAnswers),
@@ -45,5 +49,6 @@ export const createQAFactory = (db: DatabasePg) =>
       metadata: {},
       baseLanguage: "en",
       availableLocales: ["en"],
+      tenantId: undefined as unknown as UUIDType,
     } as QATest;
   });

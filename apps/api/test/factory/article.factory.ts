@@ -4,6 +4,8 @@ import { Factory } from "fishery";
 import { buildJsonbField, buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelpers";
 import { articles, articleSections, users } from "src/storage/schema";
 
+import { ensureTenant } from "../helpers/tenant-helpers";
+
 import type { SupportedLanguages } from "@repo/shared";
 import type { InferSelectModel } from "drizzle-orm";
 import type { DatabasePg, UUIDType } from "src/common";
@@ -11,7 +13,7 @@ import type { DatabasePg, UUIDType } from "src/common";
 export type ArticleSectionTest = InferSelectModel<typeof articleSections>;
 export type ArticleTest = InferSelectModel<typeof articles>;
 
-const ensureAuthor = async (db: DatabasePg, authorId?: UUIDType) => {
+const ensureAuthor = async (db: DatabasePg, tenantId: UUIDType, authorId?: UUIDType) => {
   if (authorId) return authorId;
 
   const [author] = await db
@@ -23,17 +25,18 @@ const ensureAuthor = async (db: DatabasePg, authorId?: UUIDType) => {
       lastName: faker.person.lastName(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      tenantId,
     })
     .returning();
 
   return author.id;
 };
 
-const ensureSection = async (db: DatabasePg, sectionId?: UUIDType) => {
+const ensureSection = async (db: DatabasePg, tenantId: UUIDType, sectionId?: UUIDType) => {
   if (sectionId) return sectionId;
 
   const sectionFactory = createArticleSectionFactory(db);
-  const section = await sectionFactory.create();
+  const section = await sectionFactory.create({ tenantId });
   return section.id;
 };
 
@@ -41,6 +44,7 @@ export const createArticleSectionFactory = (db: DatabasePg) => {
   return Factory.define<ArticleSectionTest>(({ onCreate }) => {
     onCreate(async (section) => {
       const language = (section.baseLanguage as SupportedLanguages) ?? "en";
+      const tenantId = await ensureTenant(db, section.tenantId);
 
       const [inserted] = await db
         .insert(articleSections)
@@ -49,6 +53,7 @@ export const createArticleSectionFactory = (db: DatabasePg) => {
           title: buildJsonbField(language, section.title as string),
           baseLanguage: section.baseLanguage ?? language,
           availableLocales: section.availableLocales ?? [language],
+          tenantId,
         })
         .returning();
 
@@ -62,6 +67,7 @@ export const createArticleSectionFactory = (db: DatabasePg) => {
       title: faker.commerce.department(),
       baseLanguage: "en",
       availableLocales: ["en"],
+      tenantId: undefined as unknown as UUIDType,
     } as ArticleSectionTest;
   });
 };
@@ -70,8 +76,9 @@ export const createArticleFactory = (db: DatabasePg) => {
   return Factory.define<ArticleTest>(({ onCreate }) => {
     onCreate(async (article) => {
       const language = (article.baseLanguage as SupportedLanguages) ?? "en";
-      const sectionId = await ensureSection(db, article.articleSectionId as UUIDType);
-      const authorId = await ensureAuthor(db, article.authorId as UUIDType);
+      const tenantId = await ensureTenant(db, article.tenantId as UUIDType | undefined);
+      const sectionId = await ensureSection(db, tenantId, article.articleSectionId as UUIDType);
+      const authorId = await ensureAuthor(db, tenantId, article.authorId as UUIDType);
 
       const status = article.status ?? "published";
       const publishedAt =
@@ -90,6 +97,7 @@ export const createArticleFactory = (db: DatabasePg) => {
           authorId,
           status,
           publishedAt,
+          tenantId,
         })
         .returning();
 
@@ -112,6 +120,7 @@ export const createArticleFactory = (db: DatabasePg) => {
       articleSectionId: "",
       authorId: "",
       updatedBy: null,
+      tenantId: undefined as unknown as UUIDType,
     } as ArticleTest;
   });
 };
@@ -129,11 +138,13 @@ export const createArticleWithLocales = async (
     status?: "draft" | "published";
     isPublic?: boolean;
     publishedAt?: string | null;
+    tenantId?: UUIDType;
   },
 ) => {
   const status = options.status ?? "published";
   const publishedAt =
     status === "published" ? (options.publishedAt ?? new Date().toISOString()) : null;
+  const tenantId = await ensureTenant(db, options.tenantId);
 
   const [article] = await db
     .insert(articles)
@@ -148,6 +159,7 @@ export const createArticleWithLocales = async (
       publishedAt,
       articleSectionId: options.articleSectionId,
       authorId: options.authorId,
+      tenantId,
     })
     .returning();
 

@@ -9,13 +9,18 @@ import {
   lessons,
   categories,
 } from "../../src/storage/schema";
+import { ensureTenant } from "../helpers/tenant-helpers";
 
 import type { InferSelectModel } from "drizzle-orm";
 import type { DatabasePg, UUIDType } from "src/common";
 
 export type LearningTimeTest = InferSelectModel<typeof lessonLearningTime>;
 
-const ensureUser = async (db: DatabasePg, userId?: UUIDType | null): Promise<UUIDType> => {
+const ensureUser = async (
+  db: DatabasePg,
+  tenantId: UUIDType,
+  userId?: UUIDType | null,
+): Promise<UUIDType> => {
   if (userId) return userId;
 
   const [user] = await db
@@ -27,13 +32,14 @@ const ensureUser = async (db: DatabasePg, userId?: UUIDType | null): Promise<UUI
       lastName: faker.person.lastName(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      tenantId,
     })
     .returning();
 
   return user.id;
 };
 
-const ensureCategory = async (db: DatabasePg): Promise<UUIDType> => {
+const ensureCategory = async (db: DatabasePg, tenantId: UUIDType): Promise<UUIDType> => {
   const [category] = await db
     .insert(categories)
     .values({
@@ -41,17 +47,22 @@ const ensureCategory = async (db: DatabasePg): Promise<UUIDType> => {
       title: `${faker.commerce.department()}-${faker.string.nanoid(8)}`,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      tenantId,
     })
     .returning();
 
   return category.id;
 };
 
-const ensureCourse = async (db: DatabasePg, courseId?: UUIDType | null): Promise<UUIDType> => {
+const ensureCourse = async (
+  db: DatabasePg,
+  tenantId: UUIDType,
+  courseId?: UUIDType | null,
+): Promise<UUIDType> => {
   if (courseId) return courseId;
 
-  const authorId = await ensureUser(db);
-  const categoryId = await ensureCategory(db);
+  const authorId = await ensureUser(db, tenantId);
+  const categoryId = await ensureCategory(db, tenantId);
 
   const [course] = await db
     .insert(courses)
@@ -69,14 +80,19 @@ const ensureCourse = async (db: DatabasePg, courseId?: UUIDType | null): Promise
       categoryId,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      tenantId,
     })
     .returning();
 
   return course.id;
 };
 
-const ensureChapter = async (db: DatabasePg, courseId: UUIDType): Promise<UUIDType> => {
-  const authorId = await ensureUser(db);
+const ensureChapter = async (
+  db: DatabasePg,
+  tenantId: UUIDType,
+  courseId: UUIDType,
+): Promise<UUIDType> => {
+  const authorId = await ensureUser(db, tenantId);
 
   const [chapter] = await db
     .insert(chapters)
@@ -90,6 +106,7 @@ const ensureChapter = async (db: DatabasePg, courseId: UUIDType): Promise<UUIDTy
       lessonCount: 1,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      tenantId,
     })
     .returning();
 
@@ -98,16 +115,17 @@ const ensureChapter = async (db: DatabasePg, courseId: UUIDType): Promise<UUIDTy
 
 const ensureLesson = async (
   db: DatabasePg,
+  tenantId: UUIDType,
   lessonId?: UUIDType | null,
   courseId?: UUIDType | null,
 ): Promise<{ lessonId: UUIDType; courseId: UUIDType }> => {
-  const actualCourseId = courseId ?? (await ensureCourse(db));
+  const actualCourseId = courseId ?? (await ensureCourse(db, tenantId));
 
   if (lessonId) {
     return { lessonId, courseId: actualCourseId };
   }
 
-  const chapterId = await ensureChapter(db, actualCourseId);
+  const chapterId = await ensureChapter(db, tenantId, actualCourseId);
 
   const [lesson] = await db
     .insert(lessons)
@@ -123,6 +141,7 @@ const ensureLesson = async (
       isExternal: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      tenantId,
     })
     .returning();
 
@@ -132,9 +151,11 @@ const ensureLesson = async (
 export const createLearningTimeFactory = (db: DatabasePg) => {
   return Factory.define<LearningTimeTest>(({ onCreate }) => {
     onCreate(async (learningTime) => {
-      const userId = await ensureUser(db, learningTime.userId);
+      const tenantId = await ensureTenant(db, learningTime.tenantId as UUIDType | undefined);
+      const userId = await ensureUser(db, tenantId, learningTime.userId);
       const { lessonId, courseId } = await ensureLesson(
         db,
+        tenantId,
         learningTime.lessonId,
         learningTime.courseId,
       );
@@ -146,6 +167,7 @@ export const createLearningTimeFactory = (db: DatabasePg) => {
           userId,
           lessonId,
           courseId,
+          tenantId,
         })
         .returning();
 
@@ -160,14 +182,16 @@ export const createLearningTimeFactory = (db: DatabasePg) => {
       lessonId: null as unknown as string, // Will be replaced by ensureLesson
       courseId: null as unknown as string, // Will be replaced by ensureLesson
       totalSeconds: faker.number.int({ min: 60, max: 3600 }),
+      tenantId: undefined as unknown as UUIDType,
     };
   });
 };
 
 export const createLearningTimeTestSetup = async (db: DatabasePg) => {
-  const userId = await ensureUser(db);
-  const courseId = await ensureCourse(db);
-  const { lessonId } = await ensureLesson(db, undefined, courseId);
+  const tenantId = await ensureTenant(db);
+  const userId = await ensureUser(db, tenantId);
+  const courseId = await ensureCourse(db, tenantId);
+  const { lessonId } = await ensureLesson(db, tenantId, undefined, courseId);
 
   return { userId, courseId, lessonId };
 };

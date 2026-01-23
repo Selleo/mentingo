@@ -11,6 +11,7 @@ import {
   lessons,
   categories,
 } from "../../src/storage/schema";
+import { ensureTenant } from "../helpers/tenant-helpers";
 
 import type { InferSelectModel } from "drizzle-orm";
 import type { DatabasePg, UUIDType } from "src/common";
@@ -19,6 +20,7 @@ type QuizAttemptTest = InferSelectModel<typeof quizAttempts>;
 
 const ensureUser = async (
   db: DatabasePg,
+  tenantId: UUIDType,
   isContentCreator: boolean = false,
   userId?: UUIDType,
 ): Promise<UUIDType> => {
@@ -35,13 +37,14 @@ const ensureUser = async (
       role: isContentCreator ? USER_ROLES.CONTENT_CREATOR : USER_ROLES.STUDENT,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      tenantId,
     })
     .returning();
 
   return user.id;
 };
 
-const ensureCategory = async (db: DatabasePg): Promise<UUIDType> => {
+const ensureCategory = async (db: DatabasePg, tenantId: UUIDType): Promise<UUIDType> => {
   const [category] = await db
     .insert(categories)
     .values({
@@ -49,17 +52,22 @@ const ensureCategory = async (db: DatabasePg): Promise<UUIDType> => {
       title: faker.commerce.department(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      tenantId,
     })
     .returning();
 
   return category.id;
 };
 
-const ensureCourse = async (db: DatabasePg, courseId?: UUIDType): Promise<UUIDType> => {
+const ensureCourse = async (
+  db: DatabasePg,
+  tenantId: UUIDType,
+  courseId?: UUIDType,
+): Promise<UUIDType> => {
   if (courseId) return courseId;
 
-  const authorId = await ensureUser(db, true);
-  const categoryId = await ensureCategory(db);
+  const authorId = await ensureUser(db, tenantId, true);
+  const categoryId = await ensureCategory(db, tenantId);
 
   const [course] = await db
     .insert(courses)
@@ -77,6 +85,7 @@ const ensureCourse = async (db: DatabasePg, courseId?: UUIDType): Promise<UUIDTy
       categoryId,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      tenantId,
     })
     .returning();
 
@@ -85,20 +94,21 @@ const ensureCourse = async (db: DatabasePg, courseId?: UUIDType): Promise<UUIDTy
 
 const ensureChapter = async (
   db: DatabasePg,
+  tenantId: UUIDType,
   chapterId?: UUIDType,
   courseId?: UUIDType,
 ): Promise<{ chapterId: UUIDType; courseId: UUIDType }> => {
   let actualCourseId = courseId;
 
   if (!actualCourseId) {
-    actualCourseId = await ensureCourse(db);
+    actualCourseId = await ensureCourse(db, tenantId);
   }
 
   if (chapterId) {
     return { chapterId, courseId: actualCourseId };
   }
 
-  const authorId = await ensureUser(db, true);
+  const authorId = await ensureUser(db, tenantId, true);
 
   const [chapter] = await db
     .insert(chapters)
@@ -112,6 +122,7 @@ const ensureChapter = async (
       lessonCount: faker.number.int({ min: 1, max: 10 }),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      tenantId,
     })
     .returning();
 
@@ -120,12 +131,14 @@ const ensureChapter = async (
 
 const ensureLesson = async (
   db: DatabasePg,
+  tenantId: UUIDType,
   lessonId?: UUIDType,
   chapterId?: UUIDType,
   courseId?: UUIDType,
 ): Promise<{ lessonId: UUIDType; courseId: UUIDType }> => {
   const { chapterId: actualChapterId, courseId: actualCourseId } = await ensureChapter(
     db,
+    tenantId,
     chapterId,
     courseId,
   );
@@ -151,6 +164,7 @@ const ensureLesson = async (
       isExternal: faker.datatype.boolean(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      tenantId,
     })
     .returning();
 
@@ -160,9 +174,11 @@ const ensureLesson = async (
 export const createQuizAttemptFactory = (db: DatabasePg) => {
   return Factory.define<QuizAttemptTest>(({ onCreate }) => {
     onCreate(async (attempt) => {
-      const userId = await ensureUser(db, false, attempt.userId);
+      const tenantId = await ensureTenant(db, attempt.tenantId as UUIDType | undefined);
+      const userId = await ensureUser(db, tenantId, false, attempt.userId);
       const { lessonId, courseId } = await ensureLesson(
         db,
+        tenantId,
         attempt.lessonId,
         undefined,
         attempt.courseId,
@@ -175,6 +191,7 @@ export const createQuizAttemptFactory = (db: DatabasePg) => {
           userId,
           courseId,
           lessonId,
+          tenantId,
         })
         .returning();
 
@@ -196,6 +213,7 @@ export const createQuizAttemptFactory = (db: DatabasePg) => {
       correctAnswers,
       wrongAnswers,
       score,
+      tenantId: undefined as unknown as UUIDType,
     };
   });
 };

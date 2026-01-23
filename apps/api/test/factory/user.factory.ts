@@ -5,6 +5,7 @@ import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import hashPassword from "../../src/common/helpers/hashPassword";
 import { credentials, userOnboarding, users } from "../../src/storage/schema";
+import { ensureTenant } from "../helpers/tenant-helpers";
 
 import { createSettingsFactory } from "./settings.factory";
 
@@ -26,6 +27,7 @@ export const credentialFactory = Factory.define<Credential>(() => ({
   updatedAt: new Date().toISOString(),
   archived: false,
   deletedAt: null,
+  tenantId: undefined as unknown as string,
 }));
 
 class UserFactory extends Factory<UserWithCredentials> {
@@ -43,7 +45,7 @@ class UserFactory extends Factory<UserWithCredentials> {
 
   withAdminSettings(db: DatabasePg) {
     return this.associations({ role: USER_ROLES.ADMIN }).afterCreate(async (user) => {
-      const settingsFactory = createSettingsFactory(db, user.id, true);
+      const settingsFactory = createSettingsFactory(db, user.id, true, user.tenantId);
       await settingsFactory.create();
       return user;
     });
@@ -51,7 +53,7 @@ class UserFactory extends Factory<UserWithCredentials> {
 
   withUserSettings(db: DatabasePg) {
     return this.associations({ role: USER_ROLES.STUDENT }).afterCreate(async (user) => {
-      const settingsFactory = createSettingsFactory(db, user.id, false);
+      const settingsFactory = createSettingsFactory(db, user.id, false, user.tenantId);
       await settingsFactory.create();
       return user;
     });
@@ -59,7 +61,7 @@ class UserFactory extends Factory<UserWithCredentials> {
 
   withContentCreatorSettings(db: DatabasePg) {
     return this.associations({ role: USER_ROLES.CONTENT_CREATOR }).afterCreate(async (user) => {
-      const settingsFactory = createSettingsFactory(db, user.id, false);
+      const settingsFactory = createSettingsFactory(db, user.id, false, user.tenantId);
       await settingsFactory.create();
       return user;
     });
@@ -69,9 +71,16 @@ class UserFactory extends Factory<UserWithCredentials> {
 export const createUserFactory = (db: DatabasePg) => {
   return UserFactory.define(({ onCreate, associations }) => {
     onCreate(async (user) => {
-      const [inserted] = await db.insert(users).values(user).returning();
+      const tenantId = await ensureTenant(db, user.tenantId);
+      const [inserted] = await db
+        .insert(users)
+        .values({
+          ...user,
+          tenantId,
+        })
+        .returning();
 
-      await db.insert(userOnboarding).values({ userId: inserted.id });
+      await db.insert(userOnboarding).values({ userId: inserted.id, tenantId });
 
       if (associations.credentials) {
         const [insertedCredential] = await db
@@ -80,6 +89,7 @@ export const createUserFactory = (db: DatabasePg) => {
             ...associations.credentials,
             password: await hashPassword(associations.credentials.password),
             userId: inserted.id,
+            tenantId,
           })
           .returning();
 
@@ -106,6 +116,7 @@ export const createUserFactory = (db: DatabasePg) => {
       archived: false,
       avatarReference: null,
       deletedAt: null,
+      tenantId: undefined as unknown as string,
     };
   });
 };

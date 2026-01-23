@@ -3,8 +3,10 @@ import { Factory } from "fishery";
 
 import { groups, groupUsers } from "src/storage/schema";
 
+import { ensureTenant } from "../helpers/tenant-helpers";
+
 import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
-import type { DatabasePg } from "src/common";
+import type { DatabasePg, UUIDType } from "src/common";
 
 type Group = InferSelectModel<typeof groups>;
 type GroupInsert = InferInsertModel<typeof groups>;
@@ -27,7 +29,8 @@ export const createGroupFactory = (db: DatabasePg) => {
       associations?: Partial<GroupWithMembers>;
     }) => {
       onCreate(async (g: GroupInsert) => {
-        return await createGroupWithMembers(db, g, associations?.members || []);
+        const tenantId = await ensureTenant(db, g.tenantId);
+        return await createGroupWithMembers(db, { ...g, tenantId }, associations?.members || []);
       });
 
       return {
@@ -36,15 +39,25 @@ export const createGroupFactory = (db: DatabasePg) => {
         characteristic: null,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
+        tenantId: undefined as unknown as UUIDType,
       };
     },
   );
 };
 
-async function addUsersToGroup(db: DatabasePg, groupId: string, userIds: string[]) {
+async function addUsersToGroup(
+  db: DatabasePg,
+  groupId: string,
+  userIds: string[],
+  tenantId: UUIDType,
+) {
   if (!userIds.length) return;
 
-  const values = userIds.map((userId) => ({ groupId, userId }));
+  const values = userIds.map((userId) => ({
+    groupId,
+    userId,
+    tenantId,
+  }));
 
   await db.insert(groupUsers).values(values);
 }
@@ -52,7 +65,7 @@ async function addUsersToGroup(db: DatabasePg, groupId: string, userIds: string[
 async function createGroupWithMembers(db: DatabasePg, group: GroupInsert, memberIds: string[]) {
   const [createdGroup] = await db.insert(groups).values(group).returning();
 
-  await addUsersToGroup(db, createdGroup.id, memberIds);
+  await addUsersToGroup(db, createdGroup.id, memberIds, group.tenantId);
 
   return createdGroup;
 }

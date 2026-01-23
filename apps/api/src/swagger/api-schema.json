@@ -7858,6 +7858,9 @@
                   }
                 ]
               },
+              "tenantId": {
+                "type": "string"
+              },
               "profilePictureUrl": {
                 "anyOf": [
                   {
@@ -7879,6 +7882,7 @@
               "role",
               "archived",
               "deletedAt",
+              "tenantId",
               "profilePictureUrl"
             ]
           }
@@ -7948,6 +7952,9 @@
                   }
                 ]
               },
+              "tenantId": {
+                "type": "string"
+              },
               "profilePictureUrl": {
                 "anyOf": [
                   {
@@ -7993,6 +8000,9 @@
                   },
                   "providerInformation": {
                     "type": "boolean"
+                  },
+                  "tenantId": {
+                    "type": "string"
                   }
                 },
                 "required": [
@@ -8005,7 +8015,8 @@
                   "announcements",
                   "profile",
                   "settings",
-                  "providerInformation"
+                  "providerInformation",
+                  "tenantId"
                 ]
               }
             },
@@ -8019,6 +8030,7 @@
               "role",
               "archived",
               "deletedAt",
+              "tenantId",
               "profilePictureUrl",
               "shouldVerifyMFA",
               "onboardingStatus"
@@ -8075,6 +8087,9 @@
                   }
                 ]
               },
+              "tenantId": {
+                "type": "string"
+              },
               "profilePictureUrl": {
                 "anyOf": [
                   {
@@ -8120,6 +8135,9 @@
                   },
                   "providerInformation": {
                     "type": "boolean"
+                  },
+                  "tenantId": {
+                    "type": "string"
                   }
                 },
                 "required": [
@@ -8132,7 +8150,8 @@
                   "announcements",
                   "profile",
                   "settings",
-                  "providerInformation"
+                  "providerInformation",
+                  "tenantId"
                 ]
               }
             },
@@ -8146,6 +8165,7 @@
               "role",
               "archived",
               "deletedAt",
+              "tenantId",
               "profilePictureUrl",
               "shouldVerifyMFA",
               "onboardingStatus"
@@ -10605,6 +10625,9 @@
                         }
                       ]
                     },
+                    "tenantId": {
+                      "type": "string"
+                    },
                     "profilePictureUrl": {
                       "anyOf": [
                         {
@@ -10626,6 +10649,7 @@
                     "role",
                     "archived",
                     "deletedAt",
+                    "tenantId",
                     "profilePictureUrl"
                   ]
                 },
@@ -10730,6 +10754,9 @@
                   }
                 ]
               },
+              "tenantId": {
+                "type": "string"
+              },
               "profilePictureUrl": {
                 "anyOf": [
                   {
@@ -10770,6 +10797,7 @@
               "role",
               "archived",
               "deletedAt",
+              "tenantId",
               "profilePictureUrl",
               "groups"
             ]
@@ -10980,6 +11008,9 @@
                   }
                 ]
               },
+              "tenantId": {
+                "type": "string"
+              },
               "profilePictureUrl": {
                 "anyOf": [
                   {
@@ -11001,6 +11032,7 @@
               "role",
               "archived",
               "deletedAt",
+              "tenantId",
               "profilePictureUrl"
             ]
           }
@@ -11138,6 +11170,9 @@
                   }
                 ]
               },
+              "tenantId": {
+                "type": "string"
+              },
               "profilePictureUrl": {
                 "anyOf": [
                   {
@@ -11159,6 +11194,7 @@
               "role",
               "archived",
               "deletedAt",
+              "tenantId",
               "profilePictureUrl"
             ]
           }
@@ -11481,6 +11517,9 @@
               },
               "providerInformation": {
                 "type": "boolean"
+              },
+              "tenantId": {
+                "type": "string"
               }
             },
             "required": [
@@ -11493,7 +11532,8 @@
               "announcements",
               "profile",
               "settings",
-              "providerInformation"
+              "providerInformation",
+              "tenantId"
             ]
           }
         },
@@ -11536,6 +11576,9 @@
               },
               "providerInformation": {
                 "type": "boolean"
+              },
+              "tenantId": {
+                "type": "string"
               }
             },
             "required": [
@@ -11548,7 +11591,8 @@
               "announcements",
               "profile",
               "settings",
-              "providerInformation"
+              "providerInformation",
+              "tenantId"
             ]
           }
         },
@@ -11620,6 +11664,9 @@
                           }
                         ]
                       },
+                      "tenantId": {
+                        "type": "string"
+                      },
                       "profilePictureUrl": {
                         "anyOf": [
                           {
@@ -11641,6 +11688,7 @@
                       "role",
                       "archived",
                       "deletedAt",
+                      "tenantId",
                       "profilePictureUrl"
                     ]
                   }
@@ -11752,6 +11800,9 @@
                         }
                       ]
                     },
+                    "tenantId": {
+                      "type": "string"
+                    },
                     "profilePictureUrl": {
                       "anyOf": [
                         {
@@ -11773,6 +11824,7 @@
                     "role",
                     "archived",
                     "deletedAt",
+                    "tenantId",
                     "profilePictureUrl"
                   ]
                 }
@@ -11859,6 +11911,9 @@
                           }
                         ]
                       },
+                      "tenantId": {
+                        "type": "string"
+                      },
                       "profilePictureUrl": {
                         "anyOf": [
                           {
@@ -11880,6 +11935,7 @@
                       "role",
                       "archived",
                       "deletedAt",
+                      "tenantId",
                       "profilePictureUrl"
                     ]
                   }
@@ -20726,6 +20782,9 @@
                 "isEveryone": {
                   "type": "boolean"
                 },
+                "tenantId": {
+                  "type": "string"
+                },
                 "authorName": {
                   "type": "string"
                 },
@@ -20748,6 +20807,7 @@
                 "content",
                 "authorId",
                 "isEveryone",
+                "tenantId",
                 "authorName",
                 "authorProfilePictureUrl"
               ]
@@ -20787,6 +20847,9 @@
                 "isEveryone": {
                   "type": "boolean"
                 },
+                "tenantId": {
+                  "type": "string"
+                },
                 "authorName": {
                   "type": "string"
                 },
@@ -20809,6 +20872,7 @@
                 "content",
                 "authorId",
                 "isEveryone",
+                "tenantId",
                 "authorName",
                 "authorProfilePictureUrl"
               ]
@@ -20867,6 +20931,9 @@
                 "isEveryone": {
                   "type": "boolean"
                 },
+                "tenantId": {
+                  "type": "string"
+                },
                 "authorName": {
                   "type": "string"
                 },
@@ -20892,6 +20959,7 @@
                 "content",
                 "authorId",
                 "isEveryone",
+                "tenantId",
                 "authorName",
                 "authorProfilePictureUrl",
                 "isRead"
@@ -20915,6 +20983,9 @@
             "minLength": 1,
             "type": "string"
           },
+          "tenantId": {
+            "type": "string"
+          },
           "groupId": {
             "default": null,
             "anyOf": [
@@ -20930,6 +21001,7 @@
         "required": [
           "title",
           "content",
+          "tenantId",
           "groupId"
         ]
       },
@@ -20959,6 +21031,9 @@
               },
               "isEveryone": {
                 "type": "boolean"
+              },
+              "tenantId": {
+                "type": "string"
               }
             },
             "required": [
@@ -20968,7 +21043,8 @@
               "title",
               "content",
               "authorId",
-              "isEveryone"
+              "isEveryone",
+              "tenantId"
             ]
           }
         },
@@ -21009,6 +21085,9 @@
                     "type": "null"
                   }
                 ]
+              },
+              "tenantId": {
+                "type": "string"
               }
             },
             "required": [
@@ -21018,7 +21097,8 @@
               "userId",
               "announcementId",
               "isRead",
-              "readAt"
+              "readAt",
+              "tenantId"
             ]
           }
         },

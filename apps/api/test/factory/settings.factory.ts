@@ -10,6 +10,7 @@ import {
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import { settings } from "../../src/storage/schema";
+import { ensureTenant } from "../helpers/tenant-helpers";
 
 import type { InferSelectModel } from "drizzle-orm";
 import type { DatabasePg, UUIDType } from "src/common";
@@ -20,6 +21,7 @@ export const createSettingsFactory = (
   db: DatabasePg,
   userId: UUIDType | null = null,
   isAdmin: boolean = false,
+  tenantId?: UUIDType,
 ) => {
   const defaultSettings = match({ isAdmin, userId })
     .with({ isAdmin: false, userId: null }, () => DEFAULT_GLOBAL_SETTINGS)
@@ -29,12 +31,14 @@ export const createSettingsFactory = (
 
   return Factory.define<SettingsTest>(({ onCreate }) => {
     onCreate(async () => {
+      const resolvedTenantId = await ensureTenant(db, tenantId);
       const [inserted] = await db
         .insert(settings)
         .values({
           userId: userId,
           createdAt: new Date().toISOString(),
           settings: settingsToJSONBuildObject(defaultSettings),
+          tenantId: resolvedTenantId,
         })
         .returning();
 
@@ -47,6 +51,7 @@ export const createSettingsFactory = (
       updatedAt: new Date().toISOString(),
       userId: userId,
       settings: defaultSettings,
+      tenantId: tenantId ?? (undefined as unknown as UUIDType),
     };
   });
 };

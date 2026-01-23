@@ -37,6 +37,7 @@ export interface RegisterResponse {
     role: string;
     archived: boolean;
     deletedAt: string | null;
+    tenantId: string;
     profilePictureUrl: string | null;
   };
 }
@@ -63,6 +64,7 @@ export interface LoginResponse {
     role: string;
     archived: boolean;
     deletedAt: string | null;
+    tenantId: string;
     profilePictureUrl: string | null;
     shouldVerifyMFA: boolean;
     onboardingStatus: {
@@ -76,6 +78,7 @@ export interface LoginResponse {
       profile: boolean;
       settings: boolean;
       providerInformation: boolean;
+      tenantId: string;
     };
   };
 }
@@ -95,6 +98,7 @@ export interface CurrentUserResponse {
     role: string;
     archived: boolean;
     deletedAt: string | null;
+    tenantId: string;
     profilePictureUrl: string | null;
     shouldVerifyMFA: boolean;
     onboardingStatus: {
@@ -108,6 +112,7 @@ export interface CurrentUserResponse {
       profile: boolean;
       settings: boolean;
       providerInformation: boolean;
+      tenantId: string;
     };
   };
 }
@@ -553,7 +558,6 @@ export type GetVideoUploadStatusResponse = {
   /** @min 1 */
   partSize?: number;
   fileType?: string;
-  lessonId?: string;
   error?: string;
   userId?: string;
 } | null;
@@ -567,13 +571,6 @@ export interface HandleBunnyWebhookBody {
   VideoGuid?: string;
   guid?: string;
   Guid?: string;
-}
-
-export interface AssociateUploadWithLessonBody {
-  /** @format uuid */
-  lessonId: string;
-  /** @format uuid */
-  uploadId: string;
 }
 
 export interface GetUserStatisticsResponse {
@@ -658,6 +655,7 @@ export interface GetUsersResponse {
     role: string;
     archived: boolean;
     deletedAt: string | null;
+    tenantId: string;
     profilePictureUrl: string | null;
   } & {
     groups: {
@@ -685,6 +683,7 @@ export interface GetUserByIdResponse {
     role: string;
     archived: boolean;
     deletedAt: string | null;
+    tenantId: string;
     profilePictureUrl: string | null;
     groups: {
       /** @format uuid */
@@ -730,6 +729,7 @@ export interface UpdateUserResponse {
     role: string;
     archived: boolean;
     deletedAt: string | null;
+    tenantId: string;
     profilePictureUrl: string | null;
   };
 }
@@ -771,6 +771,7 @@ export interface AdminUpdateUserResponse {
     role: string;
     archived: boolean;
     deletedAt: string | null;
+    tenantId: string;
     profilePictureUrl: string | null;
   };
 }
@@ -864,6 +865,7 @@ export interface ResetOnboardingStatusResponse {
     profile: boolean;
     settings: boolean;
     providerInformation: boolean;
+    tenantId: string;
   };
 }
 
@@ -879,6 +881,7 @@ export interface MarkOnboardingCompleteResponse {
     profile: boolean;
     settings: boolean;
     providerInformation: boolean;
+    tenantId: string;
   };
 }
 
@@ -898,6 +901,7 @@ export interface GetAllGroupsResponse {
       role: string;
       archived: boolean;
       deletedAt: string | null;
+      tenantId: string;
       profilePictureUrl: string | null;
     }[];
     createdAt?: string;
@@ -927,6 +931,7 @@ export interface GetGroupByIdResponse {
       role: string;
       archived: boolean;
       deletedAt: string | null;
+      tenantId: string;
       profilePictureUrl: string | null;
     }[];
     createdAt?: string;
@@ -950,6 +955,7 @@ export interface GetUserGroupsResponse {
       role: string;
       archived: boolean;
       deletedAt: string | null;
+      tenantId: string;
       profilePictureUrl: string | null;
     }[];
     createdAt?: string;
@@ -2869,6 +2875,7 @@ export interface GetAllAnnouncementsResponse {
     content: string;
     authorId: string;
     isEveryone: boolean;
+    tenantId: string;
     authorName: string;
     authorProfilePictureUrl: string | null;
   }[];
@@ -2883,6 +2890,7 @@ export interface GetLatestUnreadAnnouncementsResponse {
     content: string;
     authorId: string;
     isEveryone: boolean;
+    tenantId: string;
     authorName: string;
     authorProfilePictureUrl: string | null;
   }[];
@@ -2903,6 +2911,7 @@ export interface GetAnnouncementsForUserResponse {
     content: string;
     authorId: string;
     isEveryone: boolean;
+    tenantId: string;
     authorName: string;
     authorProfilePictureUrl: string | null;
     isRead: boolean;
@@ -2917,6 +2926,7 @@ export interface CreateAnnouncementBody {
   title: string;
   /** @minLength 1 */
   content: string;
+  tenantId: string;
   /** @default null */
   groupId: string | null;
 }
@@ -2930,6 +2940,7 @@ export interface CreateAnnouncementResponse {
     content: string;
     authorId: string;
     isEveryone: boolean;
+    tenantId: string;
   };
 }
 
@@ -2942,6 +2953,7 @@ export interface MarkAnnouncementAsReadResponse {
     announcementId: string;
     isRead: boolean;
     readAt: string | null;
+    tenantId: string;
   };
 }
 
@@ -4626,24 +4638,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     fileControllerHandleBunnyWebhook: (data: HandleBunnyWebhookBody, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/file/bunny/webhook`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FileControllerAssociateUploadWithLesson
-     * @request POST:/api/file/associate-upload
-     */
-    fileControllerAssociateUploadWithLesson: (
-      data: AssociateUploadWithLessonBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<void, any>({
-        path: `/api/file/associate-upload`,
         method: "POST",
         body: data,
         type: ContentType.Json,

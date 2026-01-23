@@ -11,9 +11,10 @@ import {
   userAnnouncements,
   users,
 } from "../../src/storage/schema";
+import { ensureTenant } from "../helpers/tenant-helpers";
 
 import type { InferSelectModel, InferInsertModel } from "drizzle-orm";
-import type { DatabasePg } from "src/common";
+import type { DatabasePg, UUIDType } from "src/common";
 
 type Announcement = InferSelectModel<typeof announcements>;
 type AnnouncementInsert = InferInsertModel<typeof announcements>;
@@ -36,16 +37,20 @@ class AnnouncementFactory extends Factory<AnnouncementWithAssoc> {
 export const createAnnouncementFactory = (db: DatabasePg) => {
   return AnnouncementFactory.define(({ onCreate, associations }) => {
     onCreate(async (announcement: AnnouncementInsert) => {
-      const [inserted] = await db.insert(announcements).values(announcement).returning();
+      const tenantId = await ensureTenant(db, announcement.tenantId as UUIDType | undefined);
+      const [inserted] = await db
+        .insert(announcements)
+        .values({ ...announcement, tenantId })
+        .returning();
 
       const groupId = associations?.groupId;
 
       if (groupId) {
-        await createUserAnnouncementsForGroup(db, groupId, inserted.id);
+        await createUserAnnouncementsForGroup(db, groupId, inserted.id, tenantId);
         return inserted;
       }
 
-      await createUserAnnouncementsForAll(db, inserted.authorId, inserted.id);
+      await createUserAnnouncementsForAll(db, inserted.authorId, inserted.id, tenantId);
       return inserted;
     });
 
@@ -57,6 +62,7 @@ export const createAnnouncementFactory = (db: DatabasePg) => {
       isEveryone: true,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      tenantId: undefined as unknown as UUIDType,
     } as Announcement;
   });
 };
@@ -65,8 +71,9 @@ async function createUserAnnouncementsForGroup(
   db: DatabasePg,
   groupId: string,
   announcementId: string,
+  tenantId: UUIDType,
 ) {
-  await db.insert(groupAnnouncements).values({ groupId, announcementId });
+  await db.insert(groupAnnouncements).values({ groupId, announcementId, tenantId });
 
   const usersRelatedToGroup = await db
     .select({ userId: groupUsers.userId })
@@ -78,6 +85,7 @@ async function createUserAnnouncementsForGroup(
     userId: u.userId,
     announcementId,
     isRead: false,
+    tenantId,
   }));
 
   if (userAnnouncementsToInsert.length)
@@ -88,6 +96,7 @@ async function createUserAnnouncementsForAll(
   db: DatabasePg,
   authorId: string,
   announcementId: string,
+  tenantId: UUIDType,
 ) {
   const allUserIds = await db
     .select({ id: users.id })
@@ -98,6 +107,7 @@ async function createUserAnnouncementsForAll(
     userId: u.id,
     announcementId,
     isRead: false,
+    tenantId,
   }));
 
   if (userAnnouncementsToInsert.length)
