@@ -1,4 +1,4 @@
-import { redirect, useNavigate, useParams , useSearchParams } from "@remix-run/react";
+import { redirect, useNavigate, useParams, useSearchParams } from "@remix-run/react";
 import { ACCESS_GUARD, SUPPORTED_LANGUAGES } from "@repo/shared";
 import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
