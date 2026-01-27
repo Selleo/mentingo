@@ -1,5 +1,7 @@
 import request from "supertest";
 
+import { DB, DB_BASE } from "src/storage/db/db.providers";
+
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory, type UserWithCredentials } from "../../../test/factory/user.factory";
@@ -19,6 +21,7 @@ describe("SettingsController - Company Information (e2e)", () => {
   let studentCookies: string;
   const testPassword = "Password123@@";
   let db: DatabasePg;
+  let baseDb: DatabasePg;
   let userFactory: ReturnType<typeof createUserFactory>;
   let globalSettingsFactory: ReturnType<typeof createSettingsFactory>;
 
@@ -34,7 +37,8 @@ describe("SettingsController - Company Information (e2e)", () => {
   beforeAll(async () => {
     const { app: testApp } = await createE2ETest();
     app = testApp;
-    db = app.get("DB");
+    db = app.get(DB);
+    baseDb = app.get(DB_BASE);
     userFactory = createUserFactory(db);
     globalSettingsFactory = createSettingsFactory(db, null);
   });
@@ -44,7 +48,7 @@ describe("SettingsController - Company Information (e2e)", () => {
   }, 10000);
 
   beforeEach(async () => {
-    await truncateTables(db, ["settings"]);
+    await truncateTables(baseDb, ["settings"]);
 
     await globalSettingsFactory.create();
 

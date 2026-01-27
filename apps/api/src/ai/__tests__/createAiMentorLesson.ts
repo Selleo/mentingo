@@ -11,7 +11,7 @@ import { createChapterFactory } from "../../../test/factory/chapter.factory";
 import type { InferSelectModel } from "drizzle-orm";
 import type { DatabasePg, UUIDType } from "src/common";
 
-export type AiMentorLessonTest = InferSelectModel<typeof aiMentorLessons>;
+export type AiMentorLessonTest = Omit<InferSelectModel<typeof aiMentorLessons>, "tenantId">;
 
 const ensureChapter = async (db: DatabasePg, chapterId?: UUIDType) => {
   if (chapterId) return chapterId;
@@ -34,7 +34,6 @@ export const createAiMentorLessonFactory = (db: DatabasePg) => {
           type: LESSON_TYPES.AI_MENTOR,
           title: buildJsonbField("en", faker.commerce.productName()),
           isExternal: true,
-          tenantId: aiMentorLesson.tenantId,
         })
         .returning();
 
@@ -45,7 +44,6 @@ export const createAiMentorLessonFactory = (db: DatabasePg) => {
           aiMentorInstructions: aiMentorLesson.aiMentorInstructions,
           completionConditions: aiMentorLesson.completionConditions,
           type: aiMentorLesson.type,
-          tenantId: aiMentorLesson.tenantId,
         })
         .returning();
 
@@ -62,7 +60,6 @@ export const createAiMentorLessonFactory = (db: DatabasePg) => {
       type: AI_MENTOR_TYPE.MENTOR,
       name: "AI Mentor",
       avatarReference: null,
-      tenantId: faker.string.uuid(),
     };
   });
 };

@@ -1,5 +1,7 @@
 import request from "supertest";
 
+import { DB, DB_BASE } from "src/storage/db/db.providers";
+
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory, type UserWithCredentials } from "../../../test/factory/user.factory";
@@ -19,6 +21,7 @@ const validPngBuffer = Buffer.from([
 describe("SettingsController - login background (e2e)", () => {
   let app: INestApplication;
   let db: DatabasePg;
+  let baseDb: DatabasePg;
   let userFactory: ReturnType<typeof createUserFactory>;
   let globalSettingsFactory: ReturnType<typeof createSettingsFactory>;
   const testPassword = "Password123@@";
@@ -26,7 +29,8 @@ describe("SettingsController - login background (e2e)", () => {
   beforeAll(async () => {
     const { app: testApp } = await createE2ETest();
     app = testApp;
-    db = app.get("DB");
+    db = app.get(DB);
+    baseDb = app.get(DB_BASE);
     userFactory = createUserFactory(db);
     globalSettingsFactory = createSettingsFactory(db, null);
   }, 20000);
@@ -37,7 +41,7 @@ describe("SettingsController - login background (e2e)", () => {
 
   describe("GET /api/settings/login-background", () => {
     beforeEach(async () => {
-      await truncateTables(db, ["settings"]);
+      await truncateTables(baseDb, ["settings"]);
       await globalSettingsFactory.create({ userId: null });
     });
 
@@ -56,7 +60,7 @@ describe("SettingsController - login background (e2e)", () => {
     let adminCookies: string[] | string;
 
     beforeEach(async () => {
-      await truncateTables(db, ["settings"]);
+      await truncateTables(baseDb, ["settings"]);
       await globalSettingsFactory.create({ userId: null });
 
       adminUser = await userFactory

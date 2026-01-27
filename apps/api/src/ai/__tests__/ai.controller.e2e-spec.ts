@@ -2,6 +2,7 @@ import request from "supertest";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { THREAD_STATUS } from "src/ai/utils/ai.type";
+import { DB, DB_BASE } from "src/storage/db/db.providers";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
@@ -17,6 +18,7 @@ import type { DatabasePg, UUIDType } from "src/common";
 describe("AiController (e2e)", () => {
   let app: INestApplication;
   let db: DatabasePg;
+  let baseDb: DatabasePg;
   let aiRepository: AiRepository;
 
   let userFactory: ReturnType<typeof createUserFactory>;
@@ -28,7 +30,9 @@ describe("AiController (e2e)", () => {
   beforeAll(async () => {
     const { app: testApp, moduleFixture } = await createE2ETest();
     app = testApp;
-    db = app.get("DB");
+
+    db = app.get(DB);
+    baseDb = app.get(DB_BASE);
     aiRepository = moduleFixture.get(AiRepository);
 
     userFactory = createUserFactory(db);
@@ -37,7 +41,7 @@ describe("AiController (e2e)", () => {
   }, 30000);
 
   afterAll(async () => {
-    await truncateAllTables(db);
+    await truncateAllTables(baseDb, db);
   });
 
   beforeEach(async () => {

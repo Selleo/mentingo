@@ -2,24 +2,20 @@ import { faker } from "@faker-js/faker";
 import { Factory } from "fishery";
 
 import { categories } from "../../src/storage/schema";
-import { ensureTenant } from "../helpers/tenant-helpers";
 
 import type { InferSelectModel } from "drizzle-orm";
-import type { DatabasePg, UUIDType } from "src/common";
+import type { DatabasePg } from "src/common";
 
-export type CategoryTest = InferSelectModel<typeof categories>;
+export type CategoryTest = Omit<InferSelectModel<typeof categories>, "tenantId">;
 export type CategoriesTest = CategoryTest[];
 
 export const createCategoryFactory = (db: DatabasePg) => {
   return Factory.define<CategoryTest>(({ onCreate }) => {
     onCreate(async (category) => {
-      const tenantId = await ensureTenant(db, category.tenantId as UUIDType | undefined);
-
       const [inserted] = await db
         .insert(categories)
         .values({
           ...category,
-          tenantId,
         })
         .returning();
       return inserted;
@@ -33,7 +29,6 @@ export const createCategoryFactory = (db: DatabasePg) => {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       archived: false,
-      tenantId: undefined as unknown as UUIDType,
     };
   });
 };

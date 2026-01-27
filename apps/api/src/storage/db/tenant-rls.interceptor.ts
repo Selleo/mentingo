@@ -20,6 +20,12 @@ export class TenantRlsInterceptor implements NestInterceptor {
 
     const req = ctx.switchToHttp().getRequest();
 
+    const { path } = req;
+
+    if (path && path.includes("/api/healthcheck")) {
+      return next.handle();
+    }
+
     return defer(async () => {
       const tenantId = await this.tenantResolver.resolveTenantId(req);
 

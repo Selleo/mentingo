@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
+import { DB, DB_BASE } from "src/storage/db/db.providers";
 import { groupUsers, lessons, studentCourses } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
@@ -22,6 +23,7 @@ import type { DatabasePg } from "src/common";
 describe("groupController (e2e)", () => {
   let app: INestApplication;
   let db: DatabasePg;
+  let baseDb: DatabasePg;
   let userFactory: ReturnType<typeof createUserFactory>;
   let settingsFactory: ReturnType<typeof createSettingsFactory>;
   let groupFactory: ReturnType<typeof createGroupFactory>;
@@ -33,7 +35,8 @@ describe("groupController (e2e)", () => {
   beforeAll(async () => {
     const { app: testApp } = await createE2ETest();
     app = testApp;
-    db = app.get("DB");
+    db = app.get(DB);
+    baseDb = app.get(DB_BASE);
     userFactory = createUserFactory(db);
     settingsFactory = createSettingsFactory(db);
     groupFactory = createGroupFactory(db);
@@ -51,7 +54,7 @@ describe("groupController (e2e)", () => {
   });
 
   afterEach(async () => {
-    await truncateAllTables(db);
+    await truncateAllTables(baseDb, db);
   });
 
   describe("GET /api/group/all", () => {

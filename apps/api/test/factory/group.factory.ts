@@ -3,10 +3,8 @@ import { Factory } from "fishery";
 
 import { groups, groupUsers } from "src/storage/schema";
 
-import { ensureTenant } from "../helpers/tenant-helpers";
-
 import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
-import type { DatabasePg, UUIDType } from "src/common";
+import type { DatabasePg } from "src/common";
 
 type Group = InferSelectModel<typeof groups>;
 type GroupInsert = InferInsertModel<typeof groups>;
@@ -29,8 +27,7 @@ export const createGroupFactory = (db: DatabasePg) => {
       associations?: Partial<GroupWithMembers>;
     }) => {
       onCreate(async (g: GroupInsert) => {
-        const tenantId = await ensureTenant(db, g.tenantId);
-        return await createGroupWithMembers(db, { ...g, tenantId }, associations?.members || []);
+        return await createGroupWithMembers(db, g, associations?.members || []);
       });
 
       return {
@@ -39,24 +36,17 @@ export const createGroupFactory = (db: DatabasePg) => {
         characteristic: null,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        tenantId: undefined as unknown as UUIDType,
       };
     },
   );
 };
 
-async function addUsersToGroup(
-  db: DatabasePg,
-  groupId: string,
-  userIds: string[],
-  tenantId: UUIDType,
-) {
+async function addUsersToGroup(db: DatabasePg, groupId: string, userIds: string[]) {
   if (!userIds.length) return;
 
   const values = userIds.map((userId) => ({
     groupId,
     userId,
-    tenantId,
   }));
 
   await db.insert(groupUsers).values(values);
@@ -65,7 +55,7 @@ async function addUsersToGroup(
 async function createGroupWithMembers(db: DatabasePg, group: GroupInsert, memberIds: string[]) {
   const [createdGroup] = await db.insert(groups).values(group).returning();
 
-  await addUsersToGroup(db, createdGroup.id, memberIds, group.tenantId);
+  await addUsersToGroup(db, createdGroup.id, memberIds);
 
   return createdGroup;
 }

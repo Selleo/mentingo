@@ -6,18 +6,13 @@ import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { LESSON_SEQUENCE_ENABLED, QUIZ_FEEDBACK_ENABLED } from "src/courses/constants";
 
 import { categories, courses, users } from "../../src/storage/schema";
-import { ensureTenant } from "../helpers/tenant-helpers";
 
 import type { InferSelectModel } from "drizzle-orm";
 import type { DatabasePg, UUIDType } from "src/common";
 
-export type CourseTest = InferSelectModel<typeof courses>;
+export type CourseTest = Omit<InferSelectModel<typeof courses>, "tenantId">;
 
-const ensureCategory = async (
-  db: DatabasePg,
-  tenantId: UUIDType,
-  categoryId?: UUIDType,
-): Promise<UUIDType> => {
+const ensureCategory = async (db: DatabasePg, categoryId?: UUIDType): Promise<UUIDType> => {
   if (categoryId) return categoryId;
 
   const [category] = await db
@@ -27,18 +22,13 @@ const ensureCategory = async (
       title: faker.commerce.department(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      tenantId,
     })
     .returning();
 
   return category.id;
 };
 
-const ensureAuthor = async (
-  db: DatabasePg,
-  tenantId: UUIDType,
-  authorId?: UUIDType,
-): Promise<UUIDType> => {
+const ensureAuthor = async (db: DatabasePg, authorId?: UUIDType): Promise<UUIDType> => {
   if (authorId) return authorId;
 
   const [author] = await db
@@ -50,7 +40,6 @@ const ensureAuthor = async (
       lastName: faker.person.lastName(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      tenantId,
     })
     .returning();
 
@@ -60,9 +49,8 @@ const ensureAuthor = async (
 export const createCourseFactory = (db: DatabasePg) => {
   return Factory.define<CourseTest>(({ onCreate }) => {
     onCreate(async (course) => {
-      const tenantId = await ensureTenant(db, course.tenantId);
-      const categoryId = await ensureCategory(db, tenantId, course.categoryId);
-      const authorId = await ensureAuthor(db, tenantId, course.authorId);
+      const categoryId = await ensureCategory(db, course.categoryId);
+      const authorId = await ensureAuthor(db, course.authorId);
 
       const [inserted] = await db
         .insert(courses)
@@ -72,7 +60,6 @@ export const createCourseFactory = (db: DatabasePg) => {
           description: buildJsonbField("en", course.description as string),
           categoryId,
           authorId,
-          tenantId,
         })
         .returning({
           ...getTableColumns(courses),
@@ -109,7 +96,6 @@ export const createCourseFactory = (db: DatabasePg) => {
         lessonSequenceEnabled: LESSON_SEQUENCE_ENABLED,
         quizFeedbackEnabled: QUIZ_FEEDBACK_ENABLED,
       },
-      tenantId: undefined as unknown as UUIDType,
     };
   });
 };

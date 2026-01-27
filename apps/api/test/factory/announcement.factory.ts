@@ -16,7 +16,7 @@ import { ensureTenant } from "../helpers/tenant-helpers";
 import type { InferSelectModel, InferInsertModel } from "drizzle-orm";
 import type { DatabasePg, UUIDType } from "src/common";
 
-type Announcement = InferSelectModel<typeof announcements>;
+type Announcement = Omit<InferSelectModel<typeof announcements>, "tenantId">;
 type AnnouncementInsert = InferInsertModel<typeof announcements>;
 
 type AnnouncementWithAssoc = Announcement & {
@@ -62,8 +62,7 @@ export const createAnnouncementFactory = (db: DatabasePg) => {
       isEveryone: true,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      tenantId: undefined as unknown as UUIDType,
-    } as Announcement;
+    };
   });
 };
 

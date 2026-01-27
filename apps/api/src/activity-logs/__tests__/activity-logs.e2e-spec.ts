@@ -11,6 +11,7 @@ import { GroupService } from "src/group/group.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
 import { SettingsService } from "src/settings/settings.service";
+import { DB, DB_BASE } from "src/storage/db/db.providers";
 import { activityLogs } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
@@ -49,6 +50,7 @@ describe("Activity Logs E2E", () => {
   let authService: AuthService;
   let authController: AuthController;
   let db: DatabasePg;
+  let baseDb: DatabasePg;
 
   let courseFactory: ReturnType<typeof createCourseFactory>;
   let categoryFactory: ReturnType<typeof createCategoryFactory>;
@@ -61,7 +63,9 @@ describe("Activity Logs E2E", () => {
     const { app: testAppInstance } = await createE2ETest({ enableActivityLogs: true });
     app = testAppInstance;
 
-    db = app.get("DB");
+    db = app.get(DB);
+    baseDb = app.get(DB_BASE);
+
     adminChapterService = app.get(AdminChapterService);
     announcementsService = app.get(AnnouncementsService);
     adminLessonService = app.get(AdminLessonService);
@@ -79,12 +83,12 @@ describe("Activity Logs E2E", () => {
   }, 60000);
 
   afterAll(async () => {
-    await truncateAllTables(db);
+    await truncateAllTables(baseDb, db);
     await app.close();
   });
 
   beforeEach(async () => {
-    await truncateAllTables(db);
+    await truncateAllTables(baseDb, db);
 
     const globalSettings = await db.query.settings.findFirst({
       where: (s, { isNull }) => isNull(s.userId),

@@ -45,7 +45,7 @@ class UserFactory extends Factory<UserWithCredentials> {
 
   withAdminSettings(db: DatabasePg) {
     return this.associations({ role: USER_ROLES.ADMIN }).afterCreate(async (user) => {
-      const settingsFactory = createSettingsFactory(db, user.id, true, user.tenantId);
+      const settingsFactory = createSettingsFactory(db, user.id, true);
       await settingsFactory.create();
       return user;
     });
@@ -53,7 +53,7 @@ class UserFactory extends Factory<UserWithCredentials> {
 
   withUserSettings(db: DatabasePg) {
     return this.associations({ role: USER_ROLES.STUDENT }).afterCreate(async (user) => {
-      const settingsFactory = createSettingsFactory(db, user.id, false, user.tenantId);
+      const settingsFactory = createSettingsFactory(db, user.id, false);
       await settingsFactory.create();
       return user;
     });
@@ -61,7 +61,7 @@ class UserFactory extends Factory<UserWithCredentials> {
 
   withContentCreatorSettings(db: DatabasePg) {
     return this.associations({ role: USER_ROLES.CONTENT_CREATOR }).afterCreate(async (user) => {
-      const settingsFactory = createSettingsFactory(db, user.id, false, user.tenantId);
+      const settingsFactory = createSettingsFactory(db, user.id, false);
       await settingsFactory.create();
       return user;
     });
@@ -72,6 +72,7 @@ export const createUserFactory = (db: DatabasePg) => {
   return UserFactory.define(({ onCreate, associations }) => {
     onCreate(async (user) => {
       const tenantId = await ensureTenant(db, user.tenantId);
+
       const [inserted] = await db
         .insert(users)
         .values({
@@ -116,7 +117,7 @@ export const createUserFactory = (db: DatabasePg) => {
       archived: false,
       avatarReference: null,
       deletedAt: null,
-      tenantId: undefined as unknown as string,
+      tenantId: faker.string.uuid(),
     };
   });
 };
