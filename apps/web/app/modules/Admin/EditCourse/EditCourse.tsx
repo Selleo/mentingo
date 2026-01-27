@@ -252,7 +252,7 @@ const EditCourse = () => {
             courseLanguage={courseLanguage}
           />
         </TabsContent>
-        <TabsContent value="Curriculum" className="h-full overflow-hidden">
+        <TabsContent value="Curriculum" className="h-full">
           <LeaveModalProvider>
             <CourseLessons
               chapters={course?.chapters as Chapter[]}

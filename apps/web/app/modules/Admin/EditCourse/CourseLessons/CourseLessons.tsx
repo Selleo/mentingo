@@ -200,7 +200,7 @@ const CourseLessons = ({
           </Button>
         )}
       </div>
-      <div className="size-full md:sticky md:top-4 self-start">{renderContent}</div>
+      <div className="size-full md:sticky md:top-8 self-start">{renderContent}</div>
     </div>
   );
 };
