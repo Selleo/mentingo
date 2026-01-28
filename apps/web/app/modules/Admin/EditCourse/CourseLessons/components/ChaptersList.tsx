@@ -64,8 +64,9 @@ const ChapterCard = ({
   language,
   baseLanguage,
 }: ChapterCardProps) => {
-  const { mutateAsync: updateFreemiumStatus } = useUpdateLessonFreemiumStatus();
   const { id: courseId } = useParams();
+
+  const { mutateAsync: updateFreemiumStatus } = useUpdateLessonFreemiumStatus();
   const { openLeaveModal, isCurrentFormDirty, setIsLeavingContent } = useLeaveModal();
   const [isNewLesson, setIsNewLesson] = useState(false);
   const [pendingChapter, setPendingChapter] = useState<Chapter | null>(null);
@@ -204,6 +205,7 @@ const ChapterCard = ({
                 selectedLesson={selectedLesson}
                 setSelectedLesson={setSelectedLesson}
                 setContentTypeToDisplay={setContentTypeToDisplay}
+                language={language}
               />
             </AccordionContent>
             <div className="mt-3 flex items-center justify-between">
@@ -377,7 +379,10 @@ const ChaptersList = ({
           queryKey: [COURSE_QUERY_KEY, { id: courseId }],
         }),
         queryClient.invalidateQueries({
-          queryKey: getCourseQueryKey(courseId),
+          queryKey: getCourseQueryKey(courseId, language),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["course"],
         }),
       ]);
 
@@ -385,7 +390,7 @@ const ChaptersList = ({
         setOpenItem(openItem);
       }, 0);
     },
-    [courseId, mutateChapterDisplayOrder, openItem],
+    [courseId, mutateChapterDisplayOrder, openItem, language],
   );
 
   if (!chapters) return;

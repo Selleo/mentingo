@@ -3,10 +3,9 @@ import { expect, test } from "@playwright/test";
 import type { Locator, Page } from "@playwright/test";
 
 const URL_PATTERNS = {
-  course:
-    /course\/[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/,
+  course: /course\/[A-Za-z0-9_-]{8,64}$/,
   lesson:
-    /course\/[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}\/lesson\/[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/,
+    /course\/[A-Za-z0-9_-]{8,64}\/lesson\/[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/,
 } as const;
 
 const goToCoursePage = async (page: Page) => {
@@ -130,7 +129,7 @@ const ensureEnrolledAndStartLearning = async (page: Page) => {
   const learningButton = page.getByRole("button", {
     name: /Start learning|Continue learning|Repeat lessons/,
   });
-  const enrollButton = page.locator('button:has-text("Enroll to the course")');
+  const enrollButton = page.getByRole("button", { name: "Enroll to the course" });
 
   await Promise.race([
     learningButton.waitFor({ state: "visible", timeout: 5000 }).catch(() => {}),

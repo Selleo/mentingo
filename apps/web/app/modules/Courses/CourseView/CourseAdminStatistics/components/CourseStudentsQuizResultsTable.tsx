@@ -1,4 +1,3 @@
-import { useParams } from "@remix-run/react";
 import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { useCallback, useMemo, useState } from "react";
@@ -35,19 +34,19 @@ import type { FilterValue } from "~/modules/common/SearchFilter/SearchFilter";
 type CourseStudentsQuizResultsColumn = GetCourseStudentsQuizResultsResponse["data"][number];
 
 interface CourseStudentsQuizResultsTableProps {
+  courseId: string;
   course?: GetCourseResponse["data"];
   searchParams: CourseStudentsQuizResultsQueryParams;
   onFilterChange: (name: string, value: FilterValue) => void;
 }
 
 export function CourseStudentsQuizResultsTable({
+  courseId,
   course,
   searchParams,
   onFilterChange,
 }: CourseStudentsQuizResultsTableProps) {
   const { t } = useTranslation();
-
-  const { id = "" } = useParams();
 
   const { isAdminLike } = useUserRole();
 
@@ -69,7 +68,7 @@ export function CourseStudentsQuizResultsTable({
     isLoading,
     isFetching,
   } = useCourseStudentsQuizResults({
-    id,
+    id: courseId,
     enabled: isAdminLike,
     query,
   });

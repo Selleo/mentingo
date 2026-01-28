@@ -240,9 +240,7 @@ test.describe("Course settings flow", () => {
 
         await enterCourse(newPage, ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.courseToAssign);
 
-        await newPage.waitForURL(
-          /course\/[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/i,
-        );
+        await newPage.waitForURL(/\/course\/.+/);
 
         await page.getByText(COURSE_SETTINGS_UI.header.chapterTitle4, { exact: true }).click();
 

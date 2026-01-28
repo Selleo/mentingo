@@ -7,7 +7,7 @@ const STUDENT_EMAIL = "student@example.com";
 const PASSWORD = "password";
 
 const openSearch = async (page: Page) => {
-  await page.getByRole("button", { name: SEARCH_PLACEHOLDER }).click();
+  await page.getByRole("button", { name: SEARCH_PLACEHOLDER }).first().click();
 };
 
 const submitSearch = async (page: Page, query: string) => {

@@ -505,7 +505,12 @@ const enrollGroupToCourse = async (page: Page) => {
   await page.getByRole("button", { name: "Enroll groups" }).click();
   await page.getByRole("button", { name: "Enroll groups", exact: true }).click();
   await page.getByLabel("Enroll groups to course").getByText(GROUP.name).first().click();
-  await page.getByLabel(IDS.groupSelect).first().click();
+  await page
+    .locator("div")
+    .filter({ hasText: /^STUDENTS GROUP1 members$/ })
+    .first()
+    .getByLabel(IDS.groupSelect)
+    .click();
   await page.getByRole("button", { name: "Enroll groups" }).click();
   await expect(page.getByRole("cell", { name: "Enrolled by group" })).toBeVisible();
   await logoutAdmin(page);

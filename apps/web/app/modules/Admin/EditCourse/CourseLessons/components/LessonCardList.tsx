@@ -11,8 +11,8 @@ import { SortableList } from "~/components/SortableList/SortableList";
 import { useLeaveModal } from "~/context/LeaveModalContext";
 import LessonCard from "~/modules/Admin/EditCourse/CourseLessons/components/LessonCard";
 import { ContentTypes } from "~/modules/Admin/EditCourse/EditCourse.types";
-import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
+import type { SupportedLanguages } from "@repo/shared";
 import type { Sortable } from "~/components/SortableList/SortableList";
 import type { Lesson } from "~/modules/Admin/EditCourse/EditCourse.types";
 
@@ -21,6 +21,7 @@ type LessonCardListProps = {
   setContentTypeToDisplay: (contentType: string) => void;
   lessons: Sortable<Lesson>[];
   selectedLesson: Lesson | null;
+  language: SupportedLanguages;
 };
 
 export const LessonCardList = ({
@@ -28,6 +29,7 @@ export const LessonCardList = ({
   setSelectedLesson,
   setContentTypeToDisplay,
   selectedLesson,
+  language,
 }: LessonCardListProps) => {
   const { id: courseId } = useParams();
   const { mutateAsync: mutateLessonDisplayOrder } = useChangeLessonDisplayOrder();
@@ -35,8 +37,6 @@ export const LessonCardList = ({
   const [pendingLesson, setPendingLesson] = useState<Lesson | null>(null);
   const [lessonsList, setLessonsList] = useState<Sortable<Lesson>[]>(lessons);
   const { t } = useTranslation();
-
-  const { language } = useLanguageStore();
 
   useEffect(() => {
     setLessonsList(lessons);
@@ -95,6 +95,7 @@ export const LessonCardList = ({
 
       await queryClient.invalidateQueries({ queryKey: [COURSE_QUERY_KEY, { id: courseId }] });
       await queryClient.invalidateQueries({ queryKey: getCourseQueryKey(courseId!, language) });
+      await queryClient.invalidateQueries({ queryKey: ["course"] });
     },
     [courseId, mutateLessonDisplayOrder, language],
   );

@@ -51,7 +51,9 @@ const assertLessonOrderInPreview = async (page: Page) => {
 const moveLessonToEnd = async (page: Page, labelPrefix: string, expectedTitle: string) => {
   const lessons = await getLessonTitlesInEditor(page).all();
   expect(await lessons.at(0)?.textContent()).toBe(expectedTitle);
-  await page.getByLabel(labelPrefix).getByRole("button").click();
+  const dragHandle = page.getByLabel(labelPrefix).getByRole("button");
+  const elementAfterLastLesson = page.getByText("Add lessonFree chapter");
+  await dragHandle.dragTo(elementAfterLastLesson);
   await confirmOrderChangeToast(page);
   const updatedLessons = await getLessonTitlesInEditor(page).all();
   expect(await updatedLessons.at(-1)?.textContent()).toBe(expectedTitle);
@@ -71,6 +73,13 @@ test.describe("Drag and drop", () => {
 
     await expect(page.getByRole("link", { name: "Preview" })).toBeVisible();
     await page.getByRole("link", { name: "Preview" }).click();
+    await page.waitForResponse(async (response) => {
+      return (
+        response.url().includes("/api/course?id=") &&
+        response.status() === 200 &&
+        response.request().method() === "GET"
+      );
+    });
     await assertLessonOrderInPreview(page);
     await page
       .getByRole("button", { name: /Avatar for email@example.com|Test Admin profile Test Admin/i })

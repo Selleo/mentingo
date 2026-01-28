@@ -1,4 +1,3 @@
-import { useParams } from "@remix-run/react";
 import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { useCallback, useMemo, useState } from "react";
@@ -33,19 +32,19 @@ import type { FilterValue } from "~/modules/common/SearchFilter/SearchFilter";
 type CourseStudentsProgressColumn = GetCourseStudentsProgressResponse["data"][number];
 
 interface CourseStudentsProgressTableProps {
+  courseId: string;
   lessonCount: number;
   searchParams: CourseStudentsProgressQueryParams;
   onFilterChange: (name: string, value: FilterValue) => void;
 }
 
 export function CourseStudentsProgressTable({
+  courseId,
   lessonCount,
   searchParams,
   onFilterChange,
 }: CourseStudentsProgressTableProps) {
   const { t } = useTranslation();
-
-  const { id = "" } = useParams();
 
   const { isAdminLike } = useUserRole();
   const { language } = useLanguageStore();
@@ -58,7 +57,7 @@ export function CourseStudentsProgressTable({
   }, [searchParams, sorting, language]);
 
   const { data: courseStudentsProgress, isFetching } = useCourseStudentsProgress({
-    id,
+    id: courseId,
     enabled: isAdminLike,
     query,
   });
