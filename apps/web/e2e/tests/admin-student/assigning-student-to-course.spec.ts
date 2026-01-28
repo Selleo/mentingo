@@ -475,7 +475,7 @@ const studentSeesCourse = async (page: Page) => {
 const unenrollStudent = async (page: Page) => {
   await login(page, USERS.admin.email, USERS.admin.password);
   await page.getByRole("button", { name: "Courses" }).getByRole("link").click();
-  await page.getByTestId(COURSE.title).first().click();
+  await page.getByTestId(COURSE.title).last().click();
   const editCourseButton = page.getByRole("button", { name: "Edit Course" });
   await editCourseButton.waitFor({ state: "visible", timeout: 15000 });
   await expect(editCourseButton).toBeVisible();
