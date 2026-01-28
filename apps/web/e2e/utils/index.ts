@@ -86,6 +86,9 @@ export const selectCourse = async (page: Page, course: string) => {
 
   await page.locator(".h-min > button:nth-child(2)").click();
   await page.waitForURL("/admin/courses");
+  const createNewCourseBtn = await page.getByRole("button", { name: "Create new" });
+  await createNewCourseBtn.waitFor({ state: "visible", timeout: 10000 });
+  await expect(createNewCourseBtn).toBeVisible();
   await page.getByText("Advanced English: Mastering").click();
 
   const header = page.getByRole("link", {
