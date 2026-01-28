@@ -18,12 +18,6 @@ BEGIN
       r.table_schema,
       r.table_name
     );
-    EXECUTE format(
-      'CREATE INDEX IF NOT EXISTS %I ON %I.%I (tenant_id)',
-      concat(r.table_name, '_tenant_id_idx'),
-      r.table_schema,
-      r.table_name
-    );
   END LOOP;
 END
 $$;

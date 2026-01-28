@@ -589,6 +589,13 @@
       "when": 1769173708925,
       "tag": "0083_enable_tenant_rls_for_every_table",
       "breakpoints": true
+    },
+    {
+      "idx": 84,
+      "version": "7",
+      "when": 1769611061291,
+      "tag": "0084_add_tenant_id_indexes_for_rls",
+      "breakpoints": true
     }
   ]
 }

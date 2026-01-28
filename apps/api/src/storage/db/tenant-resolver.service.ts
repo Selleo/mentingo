@@ -1,4 +1,4 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, UnauthorizedException } from "@nestjs/common";
 import { eq } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
@@ -14,9 +14,20 @@ export class TenantResolverService {
 
   async resolveTenantId(req: Request): Promise<string | null> {
     const user = req.user as (Request["user"] & { tenantId?: string }) | undefined;
-    if (user?.tenantId) return user.tenantId;
-
     const origin = this.getRequestOrigin(req);
+
+    if (user?.tenantId) {
+      const [tenant] = await this.dbBase
+        .select()
+        .from(tenants)
+        .where(eq(tenants.id, user.tenantId))
+        .limit(1);
+
+      if (tenant?.host !== origin) throw new UnauthorizedException("Tenant host mismatch");
+
+      return user.tenantId;
+    }
+
     if (!origin) return null;
 
     const [tenant] = await this.dbBase

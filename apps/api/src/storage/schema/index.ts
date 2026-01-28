@@ -22,123 +22,163 @@ import { coursesSettingsSchema } from "src/courses/types/settings";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 import { safeJsonb } from "src/utils/safe-jsonb";
 
-import { archived, availableLocales, baseLanguage, id, tenantId, timestamps } from "./utils";
+import {
+  archived,
+  availableLocales,
+  baseLanguage,
+  id,
+  tenantId,
+  timestamps,
+  withTenantIdIndex,
+} from "./utils";
 
 import type { TenantStatus } from "@repo/shared";
 import type { ActivityLogMetadata } from "src/activity-logs/types";
 import type { ActivityHistory, AllSettings } from "src/common/types";
 
-export const users = pgTable("users", {
-  ...id,
-  ...timestamps,
-  email: text("email").notNull().unique(),
-  firstName: text("first_name").notNull(),
-  lastName: text("last_name").notNull(),
-  avatarReference: varchar("avatar_reference", { length: 200 }),
-  role: text("role").notNull().default(USER_ROLES.STUDENT),
-  archived,
-  deletedAt: timestamp("deleted_at", {
-    mode: "string",
-    withTimezone: true,
-    precision: 3,
-  }),
-  tenantId,
-});
+export const users = pgTable(
+  "users",
+  {
+    ...id,
+    ...timestamps,
+    email: text("email").notNull().unique(),
+    firstName: text("first_name").notNull(),
+    lastName: text("last_name").notNull(),
+    avatarReference: varchar("avatar_reference", { length: 200 }),
+    role: text("role").notNull().default(USER_ROLES.STUDENT),
+    archived,
+    deletedAt: timestamp("deleted_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    tenantId,
+  },
+  withTenantIdIndex("users"),
+);
 
-export const userDetails = pgTable("user_details", {
-  ...id,
-  ...timestamps,
-  userId: uuid("user_id")
-    .references(() => users.id, { onDelete: "cascade" })
-    .notNull()
-    .unique(),
-  contactPhoneNumber: text("contact_phone_number"),
-  description: text("description"),
-  contactEmail: text("contact_email"),
-  jobTitle: text("job_title"),
-  tenantId,
-});
+export const userDetails = pgTable(
+  "user_details",
+  {
+    ...id,
+    ...timestamps,
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull()
+      .unique(),
+    contactPhoneNumber: text("contact_phone_number"),
+    description: text("description"),
+    contactEmail: text("contact_email"),
+    jobTitle: text("job_title"),
+    tenantId,
+  },
+  withTenantIdIndex("user_details"),
+);
 
-export const userStatistics = pgTable("user_statistics", {
-  ...id,
-  ...timestamps,
-  userId: uuid("user_id")
-    .references(() => users.id, { onDelete: "cascade" })
-    .notNull()
-    .unique(),
+export const userStatistics = pgTable(
+  "user_statistics",
+  {
+    ...id,
+    ...timestamps,
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull()
+      .unique(),
 
-  currentStreak: integer("current_streak").notNull().default(0),
-  longestStreak: integer("longest_streak").notNull().default(0),
-  lastActivityDate: timestamp("last_activity_date", { withTimezone: true }),
+    currentStreak: integer("current_streak").notNull().default(0),
+    longestStreak: integer("longest_streak").notNull().default(0),
+    lastActivityDate: timestamp("last_activity_date", { withTimezone: true }),
 
-  activityHistory: jsonb("activity_history").$type<ActivityHistory>().default({}),
-  tenantId,
-});
+    activityHistory: jsonb("activity_history").$type<ActivityHistory>().default({}),
+    tenantId,
+  },
+  withTenantIdIndex("user_statistics"),
+);
 
-export const quizAttempts = pgTable("quiz_attempts", {
-  ...id,
-  ...timestamps,
-  userId: uuid("user_id")
-    .references(() => users.id)
-    .notNull(),
-  courseId: uuid("course_id")
-    .references(() => courses.id)
-    .notNull(),
-  lessonId: uuid("lesson_id")
-    .references(() => lessons.id)
-    .notNull(),
-  correctAnswers: integer("correct_answers").notNull(),
-  wrongAnswers: integer("wrong_answers").notNull(),
-  score: integer("score").notNull(),
-  tenantId,
-});
+export const quizAttempts = pgTable(
+  "quiz_attempts",
+  {
+    ...id,
+    ...timestamps,
+    userId: uuid("user_id")
+      .references(() => users.id)
+      .notNull(),
+    courseId: uuid("course_id")
+      .references(() => courses.id)
+      .notNull(),
+    lessonId: uuid("lesson_id")
+      .references(() => lessons.id)
+      .notNull(),
+    correctAnswers: integer("correct_answers").notNull(),
+    wrongAnswers: integer("wrong_answers").notNull(),
+    score: integer("score").notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("quiz_attempts"),
+);
 
-export const credentials = pgTable("credentials", {
-  ...id,
-  ...timestamps,
-  userId: uuid("user_id")
-    .references(() => users.id, { onDelete: "cascade" })
-    .notNull(),
-  password: text("password").notNull(),
-  tenantId,
-});
+export const credentials = pgTable(
+  "credentials",
+  {
+    ...id,
+    ...timestamps,
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    password: text("password").notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("credentials"),
+);
 
-export const categories = pgTable("categories", {
-  ...id,
-  ...timestamps,
-  title: text("title").notNull().unique(),
-  archived,
-  tenantId,
-});
+export const categories = pgTable(
+  "categories",
+  {
+    ...id,
+    ...timestamps,
+    title: text("title").notNull().unique(),
+    archived,
+    tenantId,
+  },
+  withTenantIdIndex("categories"),
+);
 
-export const createTokens = pgTable("create_tokens", {
-  ...id,
-  ...timestamps,
-  userId: uuid("user_id")
-    .references(() => users.id, { onDelete: "cascade" })
-    .notNull(),
-  createToken: text("create_token").notNull(),
-  expiryDate: timestamp("expiry_date", {
-    precision: 3,
-    withTimezone: true,
-  }).notNull(),
-  reminderCount: integer("reminder_count").notNull().default(0),
-  tenantId,
-});
+export const createTokens = pgTable(
+  "create_tokens",
+  {
+    ...id,
+    ...timestamps,
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    createToken: text("create_token").notNull(),
+    expiryDate: timestamp("expiry_date", {
+      precision: 3,
+      withTimezone: true,
+    }).notNull(),
+    reminderCount: integer("reminder_count").notNull().default(0),
+    tenantId,
+  },
+  withTenantIdIndex("create_tokens"),
+);
 
-export const resetTokens = pgTable("reset_tokens", {
-  ...id,
-  ...timestamps,
-  userId: uuid("user_id")
-    .references(() => users.id, { onDelete: "cascade" })
-    .notNull(),
-  resetToken: text("reset_token").notNull(),
-  expiryDate: timestamp("expiry_date", {
-    precision: 3,
-    withTimezone: true,
-  }).notNull(),
-  tenantId,
-});
+export const resetTokens = pgTable(
+  "reset_tokens",
+  {
+    ...id,
+    ...timestamps,
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    resetToken: text("reset_token").notNull(),
+    expiryDate: timestamp("expiry_date", {
+      precision: 3,
+      withTimezone: true,
+    }).notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("reset_tokens"),
+);
 
 export const coursesStatusEnum = pgEnum("status", ["draft", "published", "private"]);
 
@@ -174,9 +214,9 @@ export const courses = pgTable(
       .default(sql`ARRAY['en']::text[]`),
     tenantId,
   },
-  (table) => ({
+  withTenantIdIndex("courses", (table) => ({
     shortIdUniqueIdx: uniqueIndex("courses_short_id_unique_idx").on(table.shortId),
-  }),
+  })),
 );
 export const coursesSettingsHelpers = coursesSettings.getHelpers(courses.settings);
 
@@ -192,120 +232,148 @@ export const courseSlugs = pgTable(
     lang: text("lang").notNull(),
     tenantId,
   },
-  (table) => ({
+  withTenantIdIndex("course_slugs", (table) => ({
     courseSlugCourseShortIdLangUniqueIdx: uniqueIndex(
       "course_slug_course_short_id_lang_unique_idx",
     ).on(table.courseShortId, table.lang),
-  }),
+  })),
 );
 
-export const chapters = pgTable("chapters", {
-  ...id,
-  ...timestamps,
-  title: jsonb("title").default({}).notNull(),
-  courseId: uuid("course_id")
-    .references(() => courses.id, { onDelete: "cascade" })
-    .notNull(),
-  authorId: uuid("author_id")
-    .references(() => users.id)
-    .notNull(),
-  isFreemium: boolean("is_freemium").notNull().default(false),
-  displayOrder: integer("display_order"),
-  lessonCount: integer("lesson_count").notNull().default(0),
-  tenantId,
-});
+export const chapters = pgTable(
+  "chapters",
+  {
+    ...id,
+    ...timestamps,
+    title: jsonb("title").default({}).notNull(),
+    courseId: uuid("course_id")
+      .references(() => courses.id, { onDelete: "cascade" })
+      .notNull(),
+    authorId: uuid("author_id")
+      .references(() => users.id)
+      .notNull(),
+    isFreemium: boolean("is_freemium").notNull().default(false),
+    displayOrder: integer("display_order"),
+    lessonCount: integer("lesson_count").notNull().default(0),
+    tenantId,
+  },
+  withTenantIdIndex("chapters"),
+);
 
-export const lessons = pgTable("lessons", {
-  ...id,
-  ...timestamps,
-  chapterId: uuid("chapter_id")
-    .references(() => chapters.id, { onDelete: "cascade" })
-    .notNull(),
-  type: varchar("type", { length: 20 }).notNull(),
-  title: jsonb("title").default({}).notNull(),
-  description: jsonb("description"),
-  thresholdScore: integer("threshold_score"),
-  attemptsLimit: integer("attempts_limit"),
-  quizCooldownInHours: integer("quiz_cooldown_in_hours"),
-  displayOrder: integer("display_order"),
-  fileS3Key: varchar("file_s3_key", { length: 200 }),
-  fileType: varchar("file_type", { length: 20 }),
-  isExternal: boolean("is_external").default(false),
-  tenantId,
-});
+export const lessons = pgTable(
+  "lessons",
+  {
+    ...id,
+    ...timestamps,
+    chapterId: uuid("chapter_id")
+      .references(() => chapters.id, { onDelete: "cascade" })
+      .notNull(),
+    type: varchar("type", { length: 20 }).notNull(),
+    title: jsonb("title").default({}).notNull(),
+    description: jsonb("description"),
+    thresholdScore: integer("threshold_score"),
+    attemptsLimit: integer("attempts_limit"),
+    quizCooldownInHours: integer("quiz_cooldown_in_hours"),
+    displayOrder: integer("display_order"),
+    fileS3Key: varchar("file_s3_key", { length: 200 }),
+    fileType: varchar("file_type", { length: 20 }),
+    isExternal: boolean("is_external").default(false),
+    tenantId,
+  },
+  withTenantIdIndex("lessons"),
+);
 
-export const aiMentorLessons = pgTable("ai_mentor_lessons", {
-  ...id,
-  ...timestamps,
-  lessonId: uuid("lesson_id")
-    .references(() => lessons.id, { onDelete: "cascade" })
-    .notNull(),
-  aiMentorInstructions: text("ai_mentor_instructions").notNull(),
-  completionConditions: text("completion_conditions").notNull(),
-  name: text("name").notNull().default("AI Mentor"),
-  avatarReference: varchar("avatar_reference", { length: 200 }),
-  type: text("type").notNull().default("mentor"),
-  tenantId,
-});
+export const aiMentorLessons = pgTable(
+  "ai_mentor_lessons",
+  {
+    ...id,
+    ...timestamps,
+    lessonId: uuid("lesson_id")
+      .references(() => lessons.id, { onDelete: "cascade" })
+      .notNull(),
+    aiMentorInstructions: text("ai_mentor_instructions").notNull(),
+    completionConditions: text("completion_conditions").notNull(),
+    name: text("name").notNull().default("AI Mentor"),
+    avatarReference: varchar("avatar_reference", { length: 200 }),
+    type: text("type").notNull().default("mentor"),
+    tenantId,
+  },
+  withTenantIdIndex("ai_mentor_lessons"),
+);
 
-export const aiMentorThreads = pgTable("ai_mentor_threads", {
-  ...id,
-  ...timestamps,
-  userId: uuid("user_id")
-    .references(() => users.id, { onDelete: "cascade" })
-    .notNull(),
-  aiMentorLessonId: uuid("ai_mentor_lesson_id")
-    .references(() => aiMentorLessons.id, { onDelete: "cascade" })
-    .notNull(),
-  status: varchar("status", { length: 20 }).notNull().default("active"),
-  userLanguage: varchar("user_language", { length: 20 }).notNull().default("en"),
-  tenantId,
-});
+export const aiMentorThreads = pgTable(
+  "ai_mentor_threads",
+  {
+    ...id,
+    ...timestamps,
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    aiMentorLessonId: uuid("ai_mentor_lesson_id")
+      .references(() => aiMentorLessons.id, { onDelete: "cascade" })
+      .notNull(),
+    status: varchar("status", { length: 20 }).notNull().default("active"),
+    userLanguage: varchar("user_language", { length: 20 }).notNull().default("en"),
+    tenantId,
+  },
+  withTenantIdIndex("ai_mentor_threads"),
+);
 
-export const aiMentorThreadMessages = pgTable("ai_mentor_thread_messages", {
-  ...id,
-  ...timestamps,
-  threadId: uuid("thread_id")
-    .notNull()
-    .references(() => aiMentorThreads.id, { onDelete: "cascade" }),
-  role: varchar("role", { length: 20 }).notNull(),
-  content: text("content").notNull(),
-  tokenCount: integer("token_count").notNull().default(0),
-  archived: boolean("archived").default(false),
-  tenantId,
-});
+export const aiMentorThreadMessages = pgTable(
+  "ai_mentor_thread_messages",
+  {
+    ...id,
+    ...timestamps,
+    threadId: uuid("thread_id")
+      .notNull()
+      .references(() => aiMentorThreads.id, { onDelete: "cascade" }),
+    role: varchar("role", { length: 20 }).notNull(),
+    content: text("content").notNull(),
+    tokenCount: integer("token_count").notNull().default(0),
+    archived: boolean("archived").default(false),
+    tenantId,
+  },
+  withTenantIdIndex("ai_mentor_thread_messages"),
+);
 
-export const questions = pgTable("questions", {
-  ...id,
-  ...timestamps,
-  lessonId: uuid("lesson_id")
-    .references(() => lessons.id, { onDelete: "cascade" })
-    .notNull(),
-  authorId: uuid("author_id")
-    .references(() => users.id, { onDelete: "cascade" })
-    .notNull(),
-  type: text("type").notNull(),
-  title: jsonb("title").default({}).notNull(),
-  displayOrder: integer("display_order"),
-  photoS3Key: varchar("photo_s3_key", { length: 200 }),
-  description: jsonb("description"),
-  solutionExplanation: jsonb("solution_explanation"),
-  tenantId,
-});
+export const questions = pgTable(
+  "questions",
+  {
+    ...id,
+    ...timestamps,
+    lessonId: uuid("lesson_id")
+      .references(() => lessons.id, { onDelete: "cascade" })
+      .notNull(),
+    authorId: uuid("author_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    type: text("type").notNull(),
+    title: jsonb("title").default({}).notNull(),
+    displayOrder: integer("display_order"),
+    photoS3Key: varchar("photo_s3_key", { length: 200 }),
+    description: jsonb("description"),
+    solutionExplanation: jsonb("solution_explanation"),
+    tenantId,
+  },
+  withTenantIdIndex("questions"),
+);
 
-export const questionAnswerOptions = pgTable("question_answer_options", {
-  ...id,
-  ...timestamps,
-  questionId: uuid("question_id")
-    .references(() => questions.id, { onDelete: "cascade" })
-    .notNull(),
-  optionText: jsonb("option_text").default({}).notNull(),
-  isCorrect: boolean("is_correct").notNull(),
-  displayOrder: integer("display_order"),
-  matchedWord: jsonb("matched_word"),
-  scaleAnswer: integer("scale_answer"),
-  tenantId,
-});
+export const questionAnswerOptions = pgTable(
+  "question_answer_options",
+  {
+    ...id,
+    ...timestamps,
+    questionId: uuid("question_id")
+      .references(() => questions.id, { onDelete: "cascade" })
+      .notNull(),
+    optionText: jsonb("option_text").default({}).notNull(),
+    isCorrect: boolean("is_correct").notNull(),
+    displayOrder: integer("display_order"),
+    matchedWord: jsonb("matched_word"),
+    scaleAnswer: integer("scale_answer"),
+    tenantId,
+  },
+  withTenantIdIndex("question_answer_options"),
+);
 
 export const studentQuestionAnswers = pgTable(
   "student_question_answers",
@@ -322,9 +390,9 @@ export const studentQuestionAnswers = pgTable(
     isCorrect: boolean("is_correct"),
     tenantId,
   },
-  (table) => ({
+  withTenantIdIndex("student_question_answers", (table) => ({
     unq: unique().on(table.questionId, table.studentId),
-  }),
+  })),
 );
 
 export const studentCourses = pgTable(
@@ -356,9 +424,9 @@ export const studentCourses = pgTable(
     enrolledByGroupId: uuid("enrolled_by_group_id").references(() => groups.id),
     tenantId,
   },
-  (table) => ({
+  withTenantIdIndex("student_courses", (table) => ({
     unq: unique().on(table.studentId, table.courseId),
-  }),
+  })),
 );
 
 export const studentLessonProgress = pgTable(
@@ -388,25 +456,29 @@ export const studentLessonProgress = pgTable(
     languageAnswered: text("language_answered").default(SUPPORTED_LANGUAGES.EN),
     tenantId,
   },
-  (table) => ({
+  withTenantIdIndex("student_lesson_progress", (table) => ({
     unq: unique().on(table.studentId, table.lessonId, table.chapterId),
-  }),
+  })),
 );
 
-export const aiMentorStudentLessonProgress = pgTable("ai_mentor_student_lesson_progress", {
-  ...id,
-  ...timestamps,
-  studentLessonProgressId: uuid("student_lesson_progress_id")
-    .references(() => studentLessonProgress.id, { onDelete: "cascade" })
-    .notNull(),
-  summary: text("summary"),
-  score: integer("score"),
-  minScore: integer("min_score"),
-  maxScore: integer("max_score"),
-  percentage: integer("percentage"),
-  passed: boolean("passed").default(false),
-  tenantId,
-});
+export const aiMentorStudentLessonProgress = pgTable(
+  "ai_mentor_student_lesson_progress",
+  {
+    ...id,
+    ...timestamps,
+    studentLessonProgressId: uuid("student_lesson_progress_id")
+      .references(() => studentLessonProgress.id, { onDelete: "cascade" })
+      .notNull(),
+    summary: text("summary"),
+    score: integer("score"),
+    minScore: integer("min_score"),
+    maxScore: integer("max_score"),
+    percentage: integer("percentage"),
+    passed: boolean("passed").default(false),
+    tenantId,
+  },
+  withTenantIdIndex("ai_mentor_student_lesson_progress"),
+);
 
 export const studentChapterProgress = pgTable(
   "student_chapter_progress",
@@ -431,30 +503,34 @@ export const studentChapterProgress = pgTable(
     completedAsFreemium: boolean("completed_as_freemium").notNull().default(false),
     tenantId,
   },
-  (table) => ({
+  withTenantIdIndex("student_chapter_progress", (table) => ({
     unq: unique().on(table.studentId, table.courseId, table.chapterId),
-  }),
+  })),
 );
 
-export const coursesSummaryStats = pgTable("courses_summary_stats", {
-  ...id,
-  ...timestamps,
-  courseId: uuid("course_id")
-    .references(() => courses.id, { onDelete: "cascade" })
-    .unique()
-    .notNull(),
-  authorId: uuid("author_id")
-    .references(() => users.id, { onDelete: "cascade" })
-    .notNull(),
-  freePurchasedCount: integer("free_purchased_count").notNull().default(0),
-  paidPurchasedCount: integer("paid_purchased_count").notNull().default(0),
-  paidPurchasedAfterFreemiumCount: integer("paid_purchased_after_freemium_count")
-    .notNull()
-    .default(0),
-  completedFreemiumStudentCount: integer("completed_freemium_student_count").notNull().default(0),
-  completedCourseStudentCount: integer("completed_course_student_count").notNull().default(0),
-  tenantId,
-});
+export const coursesSummaryStats = pgTable(
+  "courses_summary_stats",
+  {
+    ...id,
+    ...timestamps,
+    courseId: uuid("course_id")
+      .references(() => courses.id, { onDelete: "cascade" })
+      .unique()
+      .notNull(),
+    authorId: uuid("author_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    freePurchasedCount: integer("free_purchased_count").notNull().default(0),
+    paidPurchasedCount: integer("paid_purchased_count").notNull().default(0),
+    paidPurchasedAfterFreemiumCount: integer("paid_purchased_after_freemium_count")
+      .notNull()
+      .default(0),
+    completedFreemiumStudentCount: integer("completed_freemium_student_count").notNull().default(0),
+    completedCourseStudentCount: integer("completed_course_student_count").notNull().default(0),
+    tenantId,
+  },
+  withTenantIdIndex("courses_summary_stats"),
+);
 
 export const courseStudentsStats = pgTable(
   "course_students_stats",
@@ -472,9 +548,9 @@ export const courseStudentsStats = pgTable(
     newStudentsCount: integer("new_students_count").notNull().default(0),
     tenantId,
   },
-  (table) => ({
+  withTenantIdIndex("course_students_stats", (table) => ({
     unq: unique().on(table.courseId, table.month, table.year),
-  }),
+  })),
 );
 
 export const lessonLearningTime = pgTable(
@@ -494,43 +570,55 @@ export const lessonLearningTime = pgTable(
     totalSeconds: integer("total_seconds").notNull().default(0),
     tenantId,
   },
-  (table) => ({
+  withTenantIdIndex("lesson_learning_time", (table) => ({
     unq: unique().on(table.userId, table.lessonId),
     userCourseIdx: index("lesson_learning_time_user_course_idx").on(table.userId, table.courseId),
-  }),
+  })),
 );
 
-export const scormMetadata = pgTable("scorm_metadata", {
-  ...id,
-  ...timestamps,
-  courseId: uuid("course_id")
-    .references(() => courses.id)
-    .notNull(),
-  fileId: uuid("file_id")
-    .references(() => scormFiles.id)
-    .notNull(),
-  version: text("version").notNull(),
-  entryPoint: text("entry_point").notNull(),
-  s3Key: text("s3_key").notNull(),
-  tenantId,
-});
+export const scormMetadata = pgTable(
+  "scorm_metadata",
+  {
+    ...id,
+    ...timestamps,
+    courseId: uuid("course_id")
+      .references(() => courses.id)
+      .notNull(),
+    fileId: uuid("file_id")
+      .references(() => scormFiles.id)
+      .notNull(),
+    version: text("version").notNull(),
+    entryPoint: text("entry_point").notNull(),
+    s3Key: text("s3_key").notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("scorm_metadata"),
+);
 
-export const scormFiles = pgTable("scorm_files", {
-  ...id,
-  ...timestamps,
-  title: text("title").notNull(),
-  type: text("type").notNull(),
-  s3KeyPath: text("s3_key_path").notNull(),
-  tenantId,
-});
+export const scormFiles = pgTable(
+  "scorm_files",
+  {
+    ...id,
+    ...timestamps,
+    title: text("title").notNull(),
+    type: text("type").notNull(),
+    s3KeyPath: text("s3_key_path").notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("scorm_files"),
+);
 
-export const groups = pgTable("groups", {
-  ...id,
-  ...timestamps,
-  name: text("name").notNull(),
-  characteristic: text("characteristic"),
-  tenantId,
-});
+export const groups = pgTable(
+  "groups",
+  {
+    ...id,
+    ...timestamps,
+    name: text("name").notNull(),
+    characteristic: text("characteristic"),
+    tenantId,
+  },
+  withTenantIdIndex("groups"),
+);
 
 export const groupUsers = pgTable(
   "group_users",
@@ -545,9 +633,9 @@ export const groupUsers = pgTable(
       .notNull(),
     tenantId,
   },
-  (table) => ({
+  withTenantIdIndex("group_users", (table) => ({
     unq: unique().on(table.userId, table.groupId),
-  }),
+  })),
 );
 
 export const groupCourses = pgTable(
@@ -566,18 +654,22 @@ export const groupCourses = pgTable(
     dueDate: timestamp("due_date", { withTimezone: true }),
     tenantId,
   },
-  (table) => ({
+  withTenantIdIndex("group_courses", (table) => ({
     unq: unique().on(table.groupId, table.courseId),
-  }),
+  })),
 );
 
-export const settings = pgTable("settings", {
-  ...id,
-  ...timestamps,
-  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
-  settings: jsonb("settings").$type<AllSettings>().notNull(),
-  tenantId,
-});
+export const settings = pgTable(
+  "settings",
+  {
+    ...id,
+    ...timestamps,
+    userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
+    settings: jsonb("settings").$type<AllSettings>().notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("settings"),
+);
 
 export const certificates = pgTable(
   "certificates",
@@ -592,22 +684,26 @@ export const certificates = pgTable(
       .notNull(),
     tenantId,
   },
-  (table) => ({
+  withTenantIdIndex("certificates", (table) => ({
     unq: unique().on(table.userId, table.courseId),
-  }),
+  })),
 );
 
-export const announcements = pgTable("announcements", {
-  ...id,
-  ...timestamps,
-  title: text("title").notNull(),
-  content: text("content").notNull(),
-  authorId: uuid("author_id")
-    .references(() => users.id, { onDelete: "cascade" })
-    .notNull(),
-  isEveryone: boolean("is_everyone").notNull().default(false),
-  tenantId,
-});
+export const announcements = pgTable(
+  "announcements",
+  {
+    ...id,
+    ...timestamps,
+    title: text("title").notNull(),
+    content: text("content").notNull(),
+    authorId: uuid("author_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    isEveryone: boolean("is_everyone").notNull().default(false),
+    tenantId,
+  },
+  withTenantIdIndex("announcements"),
+);
 
 export const userAnnouncements = pgTable(
   "user_announcements",
@@ -624,9 +720,9 @@ export const userAnnouncements = pgTable(
     readAt: timestamp("read_at", { withTimezone: true, precision: 3 }),
     tenantId,
   },
-  (table) => ({
+  withTenantIdIndex("user_announcements", (table) => ({
     unq: unique().on(table.userId, table.announcementId),
-  }),
+  })),
 );
 
 export const groupAnnouncements = pgTable(
@@ -642,23 +738,27 @@ export const groupAnnouncements = pgTable(
       .notNull(),
     tenantId,
   },
-  (table) => ({
+  withTenantIdIndex("group_announcements", (table) => ({
     unq: unique().on(table.groupId, table.announcementId),
-  }),
+  })),
 );
 
-export const documents = pgTable("documents", {
-  ...id,
-  ...timestamps,
-  fileName: text("file_name").notNull(),
-  contentType: text("content_type").notNull(),
-  byteSize: bigint("byte_size", { mode: "number" }).notNull(),
-  checksum: text("check_sum").notNull().unique(),
-  status: text("status").notNull().default("processing"), // 'processing' | 'ready' | 'failed'
-  errorMessage: text("error_message"),
-  metadata: jsonb("metadata"),
-  tenantId,
-});
+export const documents = pgTable(
+  "documents",
+  {
+    ...id,
+    ...timestamps,
+    fileName: text("file_name").notNull(),
+    contentType: text("content_type").notNull(),
+    byteSize: bigint("byte_size", { mode: "number" }).notNull(),
+    checksum: text("check_sum").notNull().unique(),
+    status: text("status").notNull().default("processing"), // 'processing' | 'ready' | 'failed'
+    errorMessage: text("error_message"),
+    metadata: jsonb("metadata"),
+    tenantId,
+  },
+  withTenantIdIndex("documents"),
+);
 
 export const docChunks = pgTable(
   "doc_chunks",
@@ -674,9 +774,9 @@ export const docChunks = pgTable(
     embedding: vector("embedding", { dimensions: 1536 }),
     tenantId,
   },
-  (t) => ({
+  withTenantIdIndex("doc_chunks", (t) => ({
     uniqueOrder: { columns: [t.documentId, t.chunkIndex], unique: true },
-  }),
+  })),
 );
 
 export const documentToAiMentorLesson = pgTable(
@@ -692,9 +792,9 @@ export const documentToAiMentorLesson = pgTable(
       .notNull(),
     tenantId,
   },
-  (t) => ({
+  withTenantIdIndex("document_to_ai_mentor_lesson", (t) => ({
     unq: unique().on(t.documentId, t.aiMentorLessonId),
-  }),
+  })),
 );
 
 export const secrets = pgTable(
@@ -714,10 +814,10 @@ export const secrets = pgTable(
     metadata: jsonb("metadata"),
     tenantId,
   },
-  (t) => ({
+  withTenantIdIndex("secrets", (t) => ({
     nameUnique: uniqueIndex("secrets_name_uq").on(t.secretName),
     nameIdx: index("secrets_name_idx").on(t.secretName),
-  }),
+  })),
 );
 
 export const userOnboarding = pgTable(
@@ -736,9 +836,9 @@ export const userOnboarding = pgTable(
     providerInformation: boolean("provider_information").notNull().default(false),
     tenantId,
   },
-  (table) => ({
+  withTenantIdIndex("user_onboarding", (table) => ({
     unq: unique().on(table.userId),
-  }),
+  })),
 );
 
 export const activityLogsActionTypeEnum = pgEnum(
@@ -762,40 +862,48 @@ export const activityLogs = pgTable(
     metadata: jsonb("metadata").$type<ActivityLogMetadata>().notNull(),
     tenantId,
   },
-  (table) => ({
+  withTenantIdIndex("activity_logs", (table) => ({
     actorIdx: index("activity_logs_actor_idx").on(table.actorId, table.createdAt),
     actionIdx: index("activity_logs_action_idx").on(table.actionType, table.createdAt),
     timeframeIdx: index("activity_logs_timeframe_idx").on(table.createdAt),
     resourceIdx: index("activity_logs_resource_idx").on(table.resourceType, table.resourceId),
-  }),
+  })),
 );
 
-export const questionsAndAnswers = pgTable("questions_and_answers", {
-  ...id,
-  ...timestamps,
-  title: jsonb("title").default({}).notNull(),
-  description: jsonb("description").default({}).notNull(),
-  metadata: jsonb("metadata").default({}),
-  baseLanguage: text("base_language").notNull().default("en"),
-  availableLocales: text("available_locales")
-    .array()
-    .notNull()
-    .default(sql`ARRAY['en']::text[]`),
-  tenantId,
-});
+export const questionsAndAnswers = pgTable(
+  "questions_and_answers",
+  {
+    ...id,
+    ...timestamps,
+    title: jsonb("title").default({}).notNull(),
+    description: jsonb("description").default({}).notNull(),
+    metadata: jsonb("metadata").default({}),
+    baseLanguage: text("base_language").notNull().default("en"),
+    availableLocales: text("available_locales")
+      .array()
+      .notNull()
+      .default(sql`ARRAY['en']::text[]`),
+    tenantId,
+  },
+  withTenantIdIndex("questions_and_answers"),
+);
 
-export const resources = pgTable("resources", {
-  ...id,
-  ...timestamps,
-  title: jsonb("title").notNull().default({}),
-  description: jsonb("description").notNull().default({}),
-  reference: varchar("reference", { length: 200 }).notNull(),
-  contentType: varchar("content_type", { length: 100 }).notNull(),
-  metadata: jsonb("metadata").default({}),
-  uploadedBy: uuid("uploaded_by_id").references(() => users.id, { onDelete: "set null" }),
-  archived,
-  tenantId,
-});
+export const resources = pgTable(
+  "resources",
+  {
+    ...id,
+    ...timestamps,
+    title: jsonb("title").notNull().default({}),
+    description: jsonb("description").notNull().default({}),
+    reference: varchar("reference", { length: 200 }).notNull(),
+    contentType: varchar("content_type", { length: 100 }).notNull(),
+    metadata: jsonb("metadata").default({}),
+    uploadedBy: uuid("uploaded_by_id").references(() => users.id, { onDelete: "set null" }),
+    archived,
+    tenantId,
+  },
+  withTenantIdIndex("resources"),
+);
 
 export const resourceEntity = pgTable(
   "resource_entity",
@@ -810,7 +918,7 @@ export const resourceEntity = pgTable(
     relationshipType: varchar("relationship_type", { length: 100 }).notNull().default("attachment"), // attachment / cover_image
     tenantId,
   },
-  (table) => ({
+  withTenantIdIndex("resource_entity", (table) => ({
     resourceIdx: index("resource_entity_resource_idx").on(table.resourceId),
     entityIdx: index("resource_entity_entity_idx").on(table.entityId, table.entityType),
     relationshipIdx: index("resource_entity_relationship_idx").on(
@@ -819,7 +927,7 @@ export const resourceEntity = pgTable(
       table.relationshipType,
     ),
     unq: unique().on(table.resourceId, table.entityId, table.entityType, table.relationshipType),
-  }),
+  })),
 );
 
 export const articleStatusEnum = pgEnum("article_status", ["draft", "published"]);
@@ -851,43 +959,51 @@ export const articles = pgTable(
     updatedBy: uuid("updated_by_id").references(() => users.id, { onDelete: "set null" }),
     tenantId,
   },
-  (table) => ({
+  withTenantIdIndex("articles", (table) => ({
     articleSectionIdx: index("article_section_idx").on(table.articleSectionId),
-  }),
+  })),
 );
 
-export const articleSections = pgTable("article_sections", {
-  ...id,
-  ...timestamps,
-  title: jsonb("title").notNull().default({}),
-  baseLanguage,
-  availableLocales,
-  tenantId,
-});
+export const articleSections = pgTable(
+  "article_sections",
+  {
+    ...id,
+    ...timestamps,
+    title: jsonb("title").notNull().default({}),
+    baseLanguage,
+    availableLocales,
+    tenantId,
+  },
+  withTenantIdIndex("article_sections"),
+);
 
 export const newsStatusEnum = pgEnum("news_status", ["draft", "published"]);
 
-export const news = pgTable("news", {
-  ...id,
-  ...timestamps,
-  title: jsonb("title").notNull().default({}),
-  summary: jsonb("summary").default({}),
-  content: jsonb("content").default({}),
-  status: newsStatusEnum("status").notNull().default("draft"),
-  isPublic: boolean("is_public").notNull().default(true),
-  archived,
-  baseLanguage,
-  availableLocales,
-  publishedAt: timestamp("published_at", {
-    mode: "string",
-    withTimezone: true,
-    precision: 3,
-  }),
-  authorId: uuid("author_id")
-    .references(() => users.id, { onDelete: "cascade" })
-    .notNull(),
-  tenantId,
-});
+export const news = pgTable(
+  "news",
+  {
+    ...id,
+    ...timestamps,
+    title: jsonb("title").notNull().default({}),
+    summary: jsonb("summary").default({}),
+    content: jsonb("content").default({}),
+    status: newsStatusEnum("status").notNull().default("draft"),
+    isPublic: boolean("is_public").notNull().default(true),
+    archived,
+    baseLanguage,
+    availableLocales,
+    publishedAt: timestamp("published_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    authorId: uuid("author_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("news"),
+);
 
 export const tenants = pgTable(
   "tenants",
