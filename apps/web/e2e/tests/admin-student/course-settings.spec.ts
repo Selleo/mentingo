@@ -3,7 +3,6 @@ import { expect, test, type Page } from "@playwright/test";
 import {
   enrollAllStudents,
   login,
-  logout,
   navigateToPage,
   selectCourse,
   selectCourseAndOpenEnrollmentTab,
@@ -254,7 +253,6 @@ test.describe("Course settings flow", () => {
 
   test("should set course as free and check if a student can enroll and check if an unregistered user must sign up", async ({
     page,
-    browser,
   }) => {
     await page.goto("/courses");
     await page
@@ -323,23 +321,25 @@ test.describe("Course settings flow", () => {
     });
 
     await test.step("unregistered user tries to enroll", async () => {
-      const newPage = await logout(browser);
+      await page.getByRole("button", { name: "Avatar for email@example.com" }).click();
+      await page.getByRole("menuitem", { name: "Logout" }).locator("div").click();
+      await page.waitForURL("/auth/login");
+      await expect(page).toHaveURL("/auth/login");
 
-      await newPage.goto("/courses");
-      await newPage.waitForLoadState("networkidle");
-      await newPage.waitForURL("/courses");
+      await page.goto("/courses");
+      await page.waitForURL("/courses");
 
-      const header = newPage.getByRole("heading", {
+      const header = page.getByRole("heading", {
         name: new RegExp(ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.header.availableCourses, "i"),
       });
       await expect(header).toBeVisible();
 
       await studentEnrollToCourse(
-        newPage,
+        page,
         ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.thirdCourseToAssign,
       );
 
-      const signupHeader = newPage.getByRole("heading", { name: /Sign Up|Login/i });
+      const signupHeader = page.getByRole("heading", { name: /Sign Up|Login/i });
       await expect(signupHeader).toBeVisible();
     });
   });

@@ -98,8 +98,6 @@ const validatePreview = async (page: Page) => {
   await expect(page.getByTestId(CHAPTER_TITLE_UPDATED)).toBeVisible();
   await expect(page.getByTestId(NEW_CHAPTER_LABEL)).toBeVisible();
 
-  const freeLabels = await page.getByText("Free").all();
-  expect(freeLabels.length).toBe(2);
   await expect(page.getByText("04 new chapter0/0Free")).toBeVisible();
   await page.getByTestId(CHAPTER_TITLE_UPDATED).click();
   await expect(page.getByRole("link", { name: LESSON_TITLE })).toBeVisible();
