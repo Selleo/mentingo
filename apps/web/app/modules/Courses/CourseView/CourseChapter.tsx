@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "@remix-run/react";
+import { Link, useNavigate, useParams } from "@remix-run/react";
 import { find } from "lodash-es";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
@@ -24,14 +24,12 @@ export type Lesson = GetCourseResponse["data"]["chapters"][0]["lessons"][0] & {
 type Chapter = GetCourseResponse["data"]["chapters"][0] & { lessons: Lesson[] };
 type CourseChapterProps = {
   chapter: Chapter;
-  courseId: string;
   isEnrolled: boolean;
   isPreviewMode?: boolean;
 };
 
 export const CourseChapter = ({
   chapter,
-  courseId,
   isEnrolled,
   isPreviewMode = false,
 }: CourseChapterProps) => {

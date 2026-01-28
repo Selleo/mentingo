@@ -54,7 +54,6 @@ test.describe("Archive user", () => {
   });
 
   test("should test archiving user flow", async ({ page }) => {
-    await login(page, ADMIN_EMAIL);
     await archiveStudent(page);
     await expect(page.getByRole("cell", { name: STUDENT_EMAIL })).not.toBeVisible();
     await logout(page);

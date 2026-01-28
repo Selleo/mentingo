@@ -1,4 +1,3 @@
-import { useParams } from "@remix-run/react";
 import { format } from "date-fns";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -13,19 +12,16 @@ import { useUserRole } from "~/hooks/useUserRole";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import CertificatePreview from "~/modules/Profile/Certificates/CertificatePreview";
 
-const CourseCertificate = () => {
+const CourseCertificate = ({ courseId }: { courseId: string }) => {
   const { t } = useTranslation();
-  const { id = "" } = useParams();
   const { language } = useLanguageStore();
 
-  const { data: course } = useCourse(id, language);
+  const { data: course } = useCourse(courseId, language);
   const { isStudent } = useUserRole();
   const { data: currentUser } = useCurrentUser();
   const { data: globalSettings } = useGlobalSettings();
 
   const [isCertificatePreviewOpen, setCertificatePreview] = useState(false);
-
-  const courseId = course?.id;
 
   const { data: certificate } = useCertificate({
     userId: currentUser?.id,

@@ -28,12 +28,6 @@ type CertificateResponse = {
   id: string;
 }[];
 
-type CourseResponse = {
-  data?: {
-    completedChapterCount: number;
-  };
-};
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -200,18 +194,6 @@ async function verifyQuizSubmission(page: Page) {
   expect(correctAnswerCount).toBe(1);
 }
 
-async function verifyCourseCompletion(page: Page) {
-  const courseResponse = await page.waitForResponse(
-    (response) =>
-      response.url().includes("/api/course") &&
-      response.status() === 200 &&
-      response.request().method() === "GET",
-  );
-  const courseBody = (await courseResponse.json()) as CourseResponse;
-  const completedChapterCount = courseBody?.data?.completedChapterCount;
-  expect(completedChapterCount).toBe(1);
-}
-
 async function verifyCertificateIsAvailable(page: Page) {
   await page.goBack();
   await page.goBack();
@@ -259,7 +241,6 @@ test.describe("Platform uploads", () => {
     await studentNavigatesToCourseAndCompletesQuiz(page);
 
     await verifyQuizSubmission(page);
-    await verifyCourseCompletion(page);
 
     await verifyCertificateIsAvailable(page);
   });

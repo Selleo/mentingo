@@ -137,7 +137,7 @@ export const LessonSidebar = ({ course, lessonId, isPreviewMode = false }: Lesso
                           return (
                             <Link
                               key={id}
-                              to={isBlocked ? "#" : `/course/${course.id}/lesson/${id}`}
+                              to={isBlocked ? "#" : `/course/${course.slug}/lesson/${id}`}
                               className={cn("flex gap-x-4 px-6 py-2 hover:bg-neutral-50 pl-10", {
                                 "cursor-not-allowed hover:bg-transparent opacity-30": isBlocked,
                                 "border-l-2 border-l-primary-600 bg-primary-50 last:rounded-es-lg":
