@@ -376,11 +376,11 @@ const createGroup = async (page: Page) => {
   await page.getByRole("link", { name: "Groups" }).click();
 
   await page.getByRole("button", { name: "Group name" }).waitFor({ state: "visible" });
-  const laTeamGroup = page
-    .getByRole("row", { name: "Select row LA team" })
+  const studentsGroup = page
+    .getByRole("row", { name: "Select row STUDENTS GROUP" })
     .getByLabel("Select row");
-  if (await laTeamGroup.isVisible({ timeout: 10000 })) {
-    await laTeamGroup.click();
+  if (await studentsGroup.isVisible({ timeout: 10000 })) {
+    await studentsGroup.click();
     await page.getByRole("button", { name: "Delete selected" }).first().click();
     await page.getByRole("button", { name: "Delete" }).click();
   }
