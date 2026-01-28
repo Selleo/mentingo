@@ -598,7 +598,7 @@ const enrollGroupIntoCourse = async (page: Page, courseTitle: string) => {
       .getByRole("cell", { name: LA_GROUP_NAME })
       .locator("div")
       .first()
-      .or(page.getByRole("button", { name: "+" })),
+      .or(page.getByText("LA team+")),
   ).toBeVisible();
 };
 
