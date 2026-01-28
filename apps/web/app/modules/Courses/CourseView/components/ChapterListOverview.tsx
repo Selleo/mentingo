@@ -10,16 +10,18 @@ import type { GetCourseResponse } from "~/api/generated-api";
 
 interface ChapterListOverviewProps {
   course?: GetCourseResponse["data"];
+  isPreviewMode?: boolean;
 }
 
-export function ChapterListOverview({ course }: ChapterListOverviewProps) {
+export function ChapterListOverview({ course, isPreviewMode = false }: ChapterListOverviewProps) {
   const { t } = useTranslation();
 
   const { sequenceEnabled } = useLessonsSequence(course?.id);
+  const shouldEnforceSequence = sequenceEnabled && !isPreviewMode;
 
   const chapters = useMemo(
-    () => getChaptersWithAccess(course?.chapters || [], sequenceEnabled),
-    [course?.chapters, sequenceEnabled],
+    () => getChaptersWithAccess(course?.chapters || [], shouldEnforceSequence),
+    [course?.chapters, shouldEnforceSequence],
   );
 
   return (
@@ -36,6 +38,7 @@ export function ChapterListOverview({ course }: ChapterListOverviewProps) {
             chapter={chapter}
             courseId={course!.id}
             isEnrolled={Boolean(course?.enrolled)}
+            isPreviewMode={isPreviewMode}
           />
         );
       })}

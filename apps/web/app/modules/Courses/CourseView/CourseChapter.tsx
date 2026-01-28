@@ -25,9 +25,15 @@ type CourseChapterProps = {
   chapter: Chapter;
   courseId: string;
   isEnrolled: boolean;
+  isPreviewMode?: boolean;
 };
 
-export const CourseChapter = ({ chapter, courseId, isEnrolled }: CourseChapterProps) => {
+export const CourseChapter = ({
+  chapter,
+  courseId,
+  isEnrolled,
+  isPreviewMode = false,
+}: CourseChapterProps) => {
   const { t } = useTranslation();
   const lessonText = formatWithPlural(
     chapter.lessonCount ?? 0,
@@ -39,7 +45,8 @@ export const CourseChapter = ({ chapter, courseId, isEnrolled }: CourseChapterPr
     t("courseChapterView.other.quiz"),
     t("courseChapterView.other.quizzes"),
   );
-  const hasAccessToChapter = chapter.lessons.some((lesson: Lesson) => lesson.hasAccess);
+  const hasAccessToChapter =
+    isPreviewMode || chapter.lessons.some((lesson: Lesson) => lesson.hasAccess);
 
   const navigate = useNavigate();
 
@@ -120,12 +127,23 @@ export const CourseChapter = ({ chapter, courseId, isEnrolled }: CourseChapterPr
                 {chapter?.lessons?.map((lesson: Lesson) => {
                   if (!lesson) return null;
 
-                  return (chapter.isFreemium || isEnrolled) && lesson.hasAccess ? (
+                  const canOpenLesson =
+                    isPreviewMode || ((chapter.isFreemium || isEnrolled) && lesson.hasAccess);
+
+                  return canOpenLesson ? (
                     <Link to={`/course/${courseId}/lesson/${lesson.id}`}>
-                      <CourseChapterLesson key={lesson.id} lesson={lesson} />
+                      <CourseChapterLesson
+                        key={lesson.id}
+                        lesson={lesson}
+                        isPreviewMode={isPreviewMode}
+                      />
                     </Link>
                   ) : (
-                    <CourseChapterLesson key={lesson.id} lesson={lesson} />
+                    <CourseChapterLesson
+                      key={lesson.id}
+                      lesson={lesson}
+                      isPreviewMode={isPreviewMode}
+                    />
                   );
                 })}
                 {chapter.isFreemium && hasAccessToChapter && (
