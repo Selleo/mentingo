@@ -57,7 +57,7 @@ export const LessonContent = ({
   const { language } = useLanguageStore();
 
   const { data: user } = useCurrentUser();
-  const { mutate: markLessonAsCompleted } = useMarkLessonAsCompleted(user?.id || "");
+  const { mutate: markLessonAsCompleted } = useMarkLessonAsCompleted(user?.id || "", course.slug);
   const { isAdminLike, isStudent } = useUserRole();
   const { sequenceEnabled } = useLessonsSequence(course.id);
 

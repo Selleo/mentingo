@@ -34,7 +34,6 @@ export function ChapterListOverview({ course }: ChapterListOverviewProps) {
           <CourseChapter
             key={chapter.id}
             chapter={chapter}
-            courseId={course!.id}
             isEnrolled={Boolean(course?.enrolled)}
           />
         );

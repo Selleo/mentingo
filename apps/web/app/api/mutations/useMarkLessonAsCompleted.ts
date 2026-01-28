@@ -5,11 +5,12 @@ import { queryClient } from "~/api/queryClient";
 import { toast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../api-client";
+import { courseQueryOptions } from "../queries";
 import { certificatesQueryOptions } from "../queries/useCertificates";
 
 import type { SupportedLanguages } from "@repo/shared";
 
-export const useMarkLessonAsCompleted = (userId: string) => {
+export const useMarkLessonAsCompleted = (userId: string, courseSlug: string) => {
   return useMutation({
     mutationFn: async ({
       lessonId,
@@ -28,6 +29,7 @@ export const useMarkLessonAsCompleted = (userId: string) => {
       queryClient.invalidateQueries({ queryKey: ["lesson", variables.lessonId] });
       queryClient.invalidateQueries({ queryKey: ["lessonProgress", variables.lessonId] });
       queryClient.invalidateQueries(certificatesQueryOptions({ userId }));
+      queryClient.invalidateQueries(courseQueryOptions(courseSlug));
     },
     onError: (error) => {
       if (error instanceof AxiosError) {
