@@ -8,6 +8,7 @@ import { queryClient } from "~/api/queryClient";
 import ErrorPage from "~/components/ErrorPage/ErrorPage";
 import { PageWrapper } from "~/components/PageWrapper";
 import { useLearningTimeTracker } from "~/hooks/useLearningTimeTracker";
+import { useUserRole } from "~/hooks/useUserRole";
 import Loader from "~/modules/common/Loader/Loader";
 import { LessonContent } from "~/modules/Courses/Lesson/LessonContent";
 import { LessonSidebar } from "~/modules/Courses/Lesson/LessonSidebar";
@@ -41,6 +42,7 @@ export default function LessonPage() {
 
   const { language } = useLanguageStore();
   const { data: user } = useCurrentUser();
+  const { isAdminLike } = useUserRole();
 
   const [error, setError] = useState(false);
 
@@ -83,6 +85,7 @@ export default function LessonPage() {
   }
 
   const { isFirst, isLast } = checkOverallLessonPosition(course.chapters, lessonId);
+  const isPreviewMode = !course.enrolled && isAdminLike;
 
   const currentChapter = course.chapters.find((chapter) =>
     chapter?.lessons.some((l) => l.id === lessonId),
@@ -190,7 +193,7 @@ export default function LessonPage() {
             lessonLoading={lessonLoading}
           />
         </div>
-        <LessonSidebar course={course} lessonId={lessonId} />
+        <LessonSidebar course={course} lessonId={lessonId} isPreviewMode={isPreviewMode} />
       </div>
     </PageWrapper>
   );

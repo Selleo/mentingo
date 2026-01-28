@@ -30,6 +30,7 @@ import type { GetCourseResponse } from "~/api/generated-api";
 type LessonSidebarProps = {
   course: GetCourseResponse["data"];
   lessonId: string;
+  isPreviewMode?: boolean;
 };
 
 const progressBadge = {
@@ -39,7 +40,7 @@ const progressBadge = {
   blocked: "Blocked",
 } as const;
 
-export const LessonSidebar = ({ course, lessonId }: LessonSidebarProps) => {
+export const LessonSidebar = ({ course, lessonId, isPreviewMode = false }: LessonSidebarProps) => {
   const { t } = useTranslation();
   const { state } = useLocation();
 
@@ -48,10 +49,11 @@ export const LessonSidebar = ({ course, lessonId }: LessonSidebarProps) => {
   );
 
   const { sequenceEnabled } = useLessonsSequence(course?.id);
+  const shouldEnforceSequence = sequenceEnabled && !isPreviewMode;
 
   const chapters = useMemo(
-    () => getChaptersWithAccess(course?.chapters || [], sequenceEnabled),
-    [course?.chapters, sequenceEnabled],
+    () => getChaptersWithAccess(course?.chapters || [], shouldEnforceSequence),
+    [course?.chapters, shouldEnforceSequence],
   );
 
   useEffect(() => {
@@ -101,7 +103,7 @@ export const LessonSidebar = ({ course, lessonId }: LessonSidebarProps) => {
                     <AccordionItem value={id} key={id}>
                       <AccordionTrigger
                         className={cn(
-                          "flex items-start gap-x-4 border border-neutral-200 px-6 py-4 text-start hover:bg-neutral-50 data-[state=closed]:rounded-none data-[state=open]:rounded-t-lg data-[state=closed]:border-x-transparent data-[state=closed]:border-t-transparent [&[data-state=closed]>svg]:duration-200 [&[data-state=closed]>svg]:ease-out [&[data-state=open]>svg]:rotate-180 [&[data-state=open]>svg]:duration-200 [&[data-state=open]>svg]:ease-out",
+                          "flex items-start gap-x-4 border border-neutral-200 px-6 py-4 text-start hover:bg-neutral-50 data-[state=closed]:rounded-none data-[state=open]:rounded-t-lg data-[state=open]:border-primary-500 data-[state=open]:bg-primary-50 data-[state=closed]:border-x-transparent data-[state=closed]:border-t-transparent [&[data-state=closed]>svg]:duration-200 [&[data-state=closed]>svg]:ease-out [&[data-state=open]>svg]:rotate-180 [&[data-state=open]>svg]:duration-200 [&[data-state=open]>svg]:ease-out",
                           {
                             "data-[state=closed]:border-b-0":
                               last(course?.chapters)?.id === id || activeChapter !== id,
@@ -119,6 +121,7 @@ export const LessonSidebar = ({ course, lessonId }: LessonSidebarProps) => {
                             ]
                           }
                           iconClasses="w-6 h-auto shrink-0"
+                          className={cn({ hidden: isPreviewMode })}
                         />
                         <div className="body-base-md w-full text-start text-neutral-950">
                           {title}
@@ -128,7 +131,8 @@ export const LessonSidebar = ({ course, lessonId }: LessonSidebarProps) => {
                       <AccordionContent className="flex flex-col rounded-b-lg border border-t-0">
                         {lessons?.map(({ id, title, status, type, hasAccess }) => {
                           const isBlocked =
-                            status === LESSON_PROGRESS_STATUSES.BLOCKED || !hasAccess;
+                            !isPreviewMode &&
+                            (status === LESSON_PROGRESS_STATUSES.BLOCKED || !hasAccess);
 
                           return (
                             <Link
@@ -148,6 +152,7 @@ export const LessonSidebar = ({ course, lessonId }: LessonSidebarProps) => {
                                   ]
                                 }
                                 iconClasses="w-6 h-auto shrink-0"
+                                className={cn({ hidden: isPreviewMode })}
                               />{" "}
                               <div className="flex flex-1 flex-col break-words overflow-x-hidden">
                                 <p className="body-sm-md text-neutral-950">{title}</p>
