@@ -381,7 +381,7 @@ const createGroup = async (page: Page) => {
     .getByLabel("Select row");
   if (await laTeamGroup.isVisible({ timeout: 10000 })) {
     await laTeamGroup.click();
-    await page.getByRole("button", { name: "Delete selected" }).click();
+    await page.getByRole("button", { name: "Delete selected" }).first().click();
     await page.getByRole("button", { name: "Delete" }).click();
   }
 
