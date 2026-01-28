@@ -7,7 +7,7 @@ import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 @Injectable()
 export class ResendVerificationMailCron {
   constructor(
-    private authService: AuthService,
+    private readonly authService: AuthService,
     private readonly tenantRunner: TenantDbRunnerService,
   ) {}
 

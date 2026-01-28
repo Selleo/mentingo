@@ -8,7 +8,7 @@ import { StatisticsService } from "./statistics.service";
 @Injectable()
 export class StatisticsCron {
   constructor(
-    private statisticsService: StatisticsService,
+    private readonly statisticsService: StatisticsService,
     private readonly tenantRunner: TenantDbRunnerService,
   ) {}
 

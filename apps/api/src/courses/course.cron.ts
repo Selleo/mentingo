@@ -8,7 +8,7 @@ import { CourseService } from "./course.service";
 @Injectable()
 export class CourseCron {
   constructor(
-    private courseService: CourseService,
+    private readonly courseService: CourseService,
     private readonly tenantRunner: TenantDbRunnerService,
   ) {}
 
