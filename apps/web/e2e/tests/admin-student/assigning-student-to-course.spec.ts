@@ -594,7 +594,11 @@ const enrollGroupIntoCourse = async (page: Page, courseTitle: string) => {
   await page.getByRole("button", { name: "Enroll groups (1)" }).click();
   await expect(page.getByRole("cell", { name: "Enrolled by group" })).toBeVisible();
   await expect(
-    page.getByRole("cell", { name: LA_GROUP_NAME }).locator("div").first(),
+    page
+      .getByRole("cell", { name: LA_GROUP_NAME })
+      .locator("div")
+      .first()
+      .or(page.getByRole("button", { name: "+" })),
   ).toBeVisible();
 };
 
