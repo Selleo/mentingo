@@ -561,6 +561,13 @@
       "when": 1769008387852,
       "tag": "0079_add_course_slugs",
       "breakpoints": true
+    },
+    {
+      "idx": 80,
+      "version": "7",
+      "when": 1769698315814,
+      "tag": "0080_add_default_modern_courses_view_setting",
+      "breakpoints": true
     }
   ]
 }
