@@ -889,7 +889,15 @@ export class CourseService {
         }),
       );
 
-      return dataWithS3SignedUrls;
+      const courseIds = dataWithS3SignedUrls.map((item) => item.id);
+      const slugsMap = await this.courseSlugService.getCoursesSlugs(language || "en", courseIds);
+
+      const dataWithSlugs = dataWithS3SignedUrls.map((item) => ({
+        ...item,
+        slug: slugsMap.get(item.id) || item.id,
+      }));
+
+      return dataWithSlugs;
     });
   }
 
@@ -1834,17 +1842,17 @@ export class CourseService {
       existingTrailerResources.map((resource) => resource.id),
     );
 
-    const uploadResult = await this.fileService.uploadResource(
+    const uploadResult = await this.fileService.uploadResource({
       file,
-      courseId,
-      RESOURCE_CATEGORIES.COURSE,
-      courseId,
-      ENTITY_TYPES.COURSE,
-      RESOURCE_RELATIONSHIP_TYPES.TRAILER,
-      { en: "Trailer" },
-      { en: "Trailer description" },
-      currentUser,
-    );
+      folder: courseId,
+      resource: RESOURCE_CATEGORIES.COURSE,
+      entityId: courseId,
+      entityType: ENTITY_TYPES.COURSE,
+      relationshipType: RESOURCE_RELATIONSHIP_TYPES.TRAILER,
+      title: { en: "Trailer" },
+      description: { en: "Trailer description" },
+      currentUser: currentUser,
+    });
 
     return { trailerUrl: uploadResult.fileUrl ?? null };
   }
