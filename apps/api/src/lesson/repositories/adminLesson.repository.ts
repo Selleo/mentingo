@@ -221,10 +221,14 @@ export class AdminLessonRepository {
     language: SupportedLanguages,
     dbInstance: DatabasePg = this.db,
   ) {
+    const descriptionValue =
+      data.description === undefined ? null : buildJsonbField(language, data.description, true);
+
     const [lesson] = await dbInstance
       .insert(lessons)
       .values({
         title: buildJsonbField(language, data.title),
+        description: descriptionValue,
         type: LESSON_TYPES.AI_MENTOR,
         chapterId: data?.chapterId,
         displayOrder,
@@ -241,15 +245,19 @@ export class AdminLessonRepository {
 
   async updateAiMentorLesson(
     id: UUIDType,
-    data: UpdateLessonBody,
+    data: { title?: string; description?: string | null; language: SupportedLanguages },
     dbInstance: DatabasePg = this.db,
   ) {
+    const description =
+      data.description !== undefined
+        ? setJsonbField(lessons.description, data.language, data.description, true, true)
+        : undefined;
+
     return dbInstance
       .update(lessons)
       .set({
-        ...data,
-        title: setJsonbField(lessons.title, data.language, data.title),
-        description: setJsonbField(lessons.description, data.language, data.description),
+        title: data.title ? setJsonbField(lessons.title, data.language, data.title) : undefined,
+        description,
       })
       .where(eq(lessons.id, id))
       .returning({

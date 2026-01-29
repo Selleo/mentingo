@@ -13,6 +13,12 @@ import {
 import { queryClient } from "~/api/queryClient";
 import { Icon } from "~/components/Icon";
 import { LoaderWithTextSequence } from "~/components/LoaderWithTextSequence";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "~/components/ui/accordion";
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 import ChatLoader from "~/modules/Courses/Lesson/AiMentorLesson/components/ChatLoader";
@@ -100,6 +106,10 @@ const AiMentorLesson = ({ lesson, lessonLoading, isPreviewMode = false }: AiMent
 
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
+  const hasTaskDescription = Boolean(
+    lesson.description && lesson.description.replace(/<[^>]*>/g, "").trim().length,
+  );
+
   useEffect(() => {
     const container = messagesContainerRef.current;
 
@@ -129,6 +139,40 @@ const AiMentorLesson = ({ lesson, lessonLoading, isPreviewMode = false }: AiMent
       {lessonLoading || isCurrentThreadMessagesLoading ? (
         <LoaderWithTextSequence preset="aiMentor" />
       ) : null}
+
+      {!lessonLoading && hasTaskDescription && (
+        <Accordion type="single" collapsible defaultValue="task" className="w-full mb-10">
+          <AccordionItem
+            value="task"
+            className="rounded-xl border border-l-4 border-primary-600 bg-white shadow-sm"
+          >
+            <AccordionTrigger className="group w-full items-start gap-3 px-4 py-3 text-left hover:no-underline">
+              <div className="text-primary-700">
+                <Icon name="BookOpen" className="size-5" />
+              </div>
+              <div className="flex-1">
+                <div className="font-semibold text-neutral-900">
+                  {t("studentCourseView.lesson.aiMentorLesson.taskDescription")}
+                </div>
+                <div className="text-xs text-neutral-500 group-data-[state=open]:hidden">
+                  {t("studentCourseView.lesson.aiMentorLesson.taskDescriptionExpand")}
+                </div>
+                <div className="text-xs text-neutral-500 group-data-[state=closed]:hidden">
+                  {t("studentCourseView.lesson.aiMentorLesson.taskDescriptionCollapse")}
+                </div>
+              </div>
+              <Icon
+                name="ArrowDown"
+                className="size-4 text-neutral-500 transition-transform group-data-[state=open]:rotate-180"
+              />
+            </AccordionTrigger>
+            <AccordionContent className="px-4 py-4 text-neutral-800 border-t border-neutral-100">
+              <div>{lesson.description}</div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      )}
+
       <div
         ref={messagesContainerRef}
         className="flex w-full grow max-w-full relative flex-col gap-y-4 overflow-y-scroll"

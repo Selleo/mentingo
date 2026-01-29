@@ -459,7 +459,7 @@ export class AdminLessonService {
     userId: UUIDType,
   ) {
     return await this.db.transaction(async (trx) => {
-      const { type: _type, ...rest } = data;
+      const { type: _type, aiMentorInstructions, completionConditions, name, ...lessonData } = data;
 
       const { availableLocales } = await this.localizationService.getBaseLanguage(
         ENTITY_TYPE.LESSON,
@@ -470,7 +470,15 @@ export class AdminLessonService {
         throw new BadRequestException("This course does not support this language");
       }
 
-      const [updatedLesson] = await this.adminLessonRepository.updateAiMentorLesson(id, rest, trx);
+      const [updatedLesson] = await this.adminLessonRepository.updateAiMentorLesson(
+        id,
+        {
+          title: lessonData.title,
+          description: lessonData.description !== undefined ? lessonData.description : undefined,
+          language: lessonData.language,
+        },
+        trx,
+      );
 
       if (isRichTextEmpty(data.aiMentorInstructions) || isRichTextEmpty(data.completionConditions))
         throw new BadRequestException("Instructions and conditions required");
@@ -482,10 +490,10 @@ export class AdminLessonService {
       await this.adminLessonRepository.updateAiMentorLessonData(
         id,
         {
-          aiMentorInstructions: data.aiMentorInstructions,
-          completionConditions: data.completionConditions,
+          aiMentorInstructions,
+          completionConditions,
           type: data.type,
-          name: data?.name,
+          name,
         },
         trx,
       );
