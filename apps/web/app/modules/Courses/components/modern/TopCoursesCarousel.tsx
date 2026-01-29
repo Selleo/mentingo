@@ -77,10 +77,10 @@ const TopCoursesCarousel = ({ courses }: TopCoursesCarouselProps) => {
       >
         <CarouselContent
           viewportClassName="overflow-visible"
-          className="gap-4 px-4 pb-6 pt-10 md:px-8"
+          className="gap-24 px-4 pb-6 pt-10 md:px-8 ml-20"
         >
           {courses.map((course, index) => (
-            <CarouselItem key={course.id} className="w-[320px] md:w-[380px] lg:w-[400px]">
+            <CarouselItem key={course.id} className="w-[360px] md:w-[420px] lg:w-[440px]">
               <div className="relative pl-6">
                 {renderRank(index + 1)}
                 <ModernCourseCard
@@ -92,6 +92,7 @@ const TopCoursesCarousel = ({ courses }: TopCoursesCarouselProps) => {
                   estimatedDurationMinutes={course.estimatedDurationMinutes}
                   lessonCount={course.lessonCount}
                   category={course.category}
+                  className="w-[320px] max-w-none md:w-[380px] lg:w-[400px]"
                 />
               </div>
             </CarouselItem>

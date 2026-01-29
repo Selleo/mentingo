@@ -69,7 +69,7 @@ const ModernCourseCarousel = ({
         >
           <CarouselContent
             viewportClassName="overflow-visible"
-            className="gap-4 px-4 pb-6 pt-10 md:px-8"
+            className="gap-4 px-4 pb-6 pt-10 md:px-8 max-w-fit"
           >
             {courses.map((course) => (
               <CarouselItem key={course.id} className="w-[320px] md:w-[380px] lg:w-[400px]">
@@ -83,6 +83,7 @@ const ModernCourseCarousel = ({
                   lessonCount={course.lessonCount}
                   progressPercent={progressByCourseId[course.id]}
                   category={course.category}
+                  className="w-[320px] max-w-none md:w-[380px] lg:w-[400px]"
                 />
               </CarouselItem>
             ))}
