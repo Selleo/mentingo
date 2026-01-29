@@ -82,25 +82,25 @@ const ModernCourseCard = ({
   };
 
   return (
-    <Link
-      to={`/course/${id}`}
+    <div
       className={cn(
         "group relative block w-full max-w-md cursor-pointer overflow-visible",
         className,
       )}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      tabIndex={0}
     >
       <div className="aspect-video w-full" />
 
-      <div
-        className="pointer-events-none absolute inset-0 transition-all duration-500 ease-out"
+      <Link
+        to={`/course/${id}`}
+        className="absolute inset-0 transition-all duration-500 ease-out"
         style={{
           transform: isHovered ? "scale(1.05) translateY(-35%)" : "scale(1)",
           transformOrigin: "center center",
           zIndex: isHovered ? 50 : 1,
         }}
+        tabIndex={0}
       >
         <div className="relative aspect-video overflow-hidden border border-gray-200 bg-white shadow-md transition-all duration-300">
           {trailerUrl ? (
@@ -205,8 +205,8 @@ const ModernCourseCard = ({
             </div>
           </div>
         </div>
-      </div>
-    </Link>
+      </Link>
+    </div>
   );
 };
 
