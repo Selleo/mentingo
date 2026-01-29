@@ -578,19 +578,16 @@ export class CourseService {
   }): number {
     const { descriptionHtml, resourceCounts, quizQuestionCount, lessonType } = params;
 
-    const wordCount = descriptionHtml ? this.countWordsFromHtml(descriptionHtml) : 0;
-    const readingSeconds = wordCount
-      ? Math.ceil((wordCount / DURATION_DEFAULTS.wordsPerMinute) * 60)
-      : 0;
+    const wordCount = this.countWordsFromHtml(descriptionHtml || "");
+    const readingSeconds = Math.ceil((wordCount / DURATION_DEFAULTS.wordsPerMinute) * 60);
 
-    const { video, image, download, other } = resourceCounts;
+    const {
+      video: videoCount,
+      image: imageCount,
+      download: downloadCount,
+      other: otherCount,
+    } = resourceCounts;
 
-    const videoSeconds = video * DURATION_DEFAULTS.videoMinutes * 60;
-    const imageSeconds = image * DURATION_DEFAULTS.imageSeconds;
-    const downloadSeconds = download * DURATION_DEFAULTS.downloadSeconds;
-    const otherSeconds = other * DURATION_DEFAULTS.otherSeconds;
-
-    const quizSeconds = quizQuestionCount * DURATION_DEFAULTS.quizSeconds;
     const aiMentorSeconds =
       lessonType === LESSON_TYPES.AI_MENTOR ? DURATION_DEFAULTS.aiMentorMinutes * 60 : 0;
     const embedSeconds =
@@ -598,11 +595,11 @@ export class CourseService {
 
     return (
       readingSeconds +
-      videoSeconds +
-      imageSeconds +
-      downloadSeconds +
-      otherSeconds +
-      quizSeconds +
+      videoCount * DURATION_DEFAULTS.videoMinutes * 60 +
+      imageCount * DURATION_DEFAULTS.imageSeconds +
+      downloadCount * DURATION_DEFAULTS.downloadSeconds +
+      otherCount * DURATION_DEFAULTS.otherSeconds +
+      quizQuestionCount * DURATION_DEFAULTS.quizSeconds +
       aiMentorSeconds +
       embedSeconds
     );
