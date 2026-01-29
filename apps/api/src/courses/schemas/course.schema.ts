@@ -20,6 +20,7 @@ export const courseSchema = Type.Object({
   courseChapterCount: Type.Number(),
   lessonCount: Type.Optional(Type.Number()),
   estimatedDurationMinutes: Type.Optional(Type.Number()),
+  estimatedDurationFormatted: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   // completedChapterCount: Type.Number(),
   enrolledParticipantCount: Type.Number(),
   priceInCents: Type.Number(),

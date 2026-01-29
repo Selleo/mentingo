@@ -1096,6 +1096,7 @@ export interface GetAllCoursesResponse {
     courseChapterCount: number;
     lessonCount?: number;
     estimatedDurationMinutes?: number;
+    estimatedDurationFormatted?: string | null;
     enrolledParticipantCount: number;
     priceInCents: number;
     currency: string;
@@ -1130,6 +1131,7 @@ export interface GetStudentCoursesResponse {
     courseChapterCount: number;
     lessonCount?: number;
     estimatedDurationMinutes?: number;
+    estimatedDurationFormatted?: string | null;
     enrolledParticipantCount: number;
     priceInCents: number;
     currency: string;
@@ -1191,6 +1193,7 @@ export interface GetAvailableCoursesResponse {
     courseChapterCount: number;
     lessonCount?: number;
     estimatedDurationMinutes?: number;
+    estimatedDurationFormatted?: string | null;
     enrolledParticipantCount: number;
     priceInCents: number;
     currency: string;
@@ -1229,6 +1232,7 @@ export interface GetTopCoursesResponse {
     courseChapterCount: number;
     lessonCount?: number;
     estimatedDurationMinutes?: number;
+    estimatedDurationFormatted?: string | null;
     enrolledParticipantCount: number;
     priceInCents: number;
     currency: string;
@@ -1261,6 +1265,7 @@ export interface GetContentCreatorCoursesResponse {
     courseChapterCount: number;
     lessonCount?: number;
     estimatedDurationMinutes?: number;
+    estimatedDurationFormatted?: string | null;
     enrolledParticipantCount: number;
     priceInCents: number;
     currency: string;

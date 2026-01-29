@@ -12664,6 +12664,16 @@
                 "estimatedDurationMinutes": {
                   "type": "number"
                 },
+                "estimatedDurationFormatted": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "enrolledParticipantCount": {
                   "type": "number"
                 },
@@ -12831,6 +12841,16 @@
                 },
                 "estimatedDurationMinutes": {
                   "type": "number"
+                },
+                "estimatedDurationFormatted": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 },
                 "enrolledParticipantCount": {
                   "type": "number"
@@ -13118,6 +13138,16 @@
                 "estimatedDurationMinutes": {
                   "type": "number"
                 },
+                "estimatedDurationFormatted": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "enrolledParticipantCount": {
                   "type": "number"
                 },
@@ -13308,6 +13338,16 @@
                 "estimatedDurationMinutes": {
                   "type": "number"
                 },
+                "estimatedDurationFormatted": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "enrolledParticipantCount": {
                   "type": "number"
                 },
@@ -13471,6 +13511,16 @@
                 },
                 "estimatedDurationMinutes": {
                   "type": "number"
+                },
+                "estimatedDurationFormatted": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 },
                 "enrolledParticipantCount": {
                   "type": "number"

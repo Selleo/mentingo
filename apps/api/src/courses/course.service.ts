@@ -90,6 +90,7 @@ import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 import { getSortOptions } from "../common/helpers/getSortOptions";
 
 import { LESSON_SEQUENCE_ENABLED } from "./constants";
+import { DURATION_DEFAULTS } from "./constants/duration-defaults";
 import { CourseSlugService } from "./course-slug.service";
 import {
   COURSE_ENROLLMENT_SCOPES,
@@ -144,6 +145,7 @@ import type { CourseActivityLogSnapshot } from "src/activity-logs/types";
 import type { Pagination, UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
 import type { CourseTranslationType } from "src/courses/types/course.types";
+import type { DurationEstimatesByCourse, DurationResourceKind } from "src/courses/types/duration";
 import type {
   AdminLessonWithContentSchema,
   LessonForChapterSchema,
@@ -562,6 +564,149 @@ export class CourseService {
     return trailers[courseId] ?? null;
   }
 
+  private countWordsFromHtml(content: string): number {
+    const $ = loadHtml(content);
+    const text = $.text();
+    return text.trim().split(/\s+/).filter(Boolean).length;
+  }
+
+  private lessonSeconds(params: {
+    descriptionHtml?: string | null;
+    resourceCounts: Record<DurationResourceKind, number>;
+    quizQuestionCount: number;
+    lessonType: string;
+  }): number {
+    const { descriptionHtml, resourceCounts, quizQuestionCount, lessonType } = params;
+
+    const wordCount = descriptionHtml ? this.countWordsFromHtml(descriptionHtml) : 0;
+    const readingSeconds = wordCount
+      ? Math.ceil((wordCount / DURATION_DEFAULTS.wordsPerMinute) * 60)
+      : 0;
+
+    const { video, image, download, other } = resourceCounts;
+
+    const videoSeconds = video * DURATION_DEFAULTS.videoMinutes * 60;
+    const imageSeconds = image * DURATION_DEFAULTS.imageSeconds;
+    const downloadSeconds = download * DURATION_DEFAULTS.downloadSeconds;
+    const otherSeconds = other * DURATION_DEFAULTS.otherSeconds;
+
+    const quizSeconds = quizQuestionCount * DURATION_DEFAULTS.quizSeconds;
+    const aiMentorSeconds =
+      lessonType === LESSON_TYPES.AI_MENTOR ? DURATION_DEFAULTS.aiMentorMinutes * 60 : 0;
+    const embedSeconds =
+      lessonType === LESSON_TYPES.EMBED ? DURATION_DEFAULTS.embedMinutes * 60 : 0;
+
+    return (
+      readingSeconds +
+      videoSeconds +
+      imageSeconds +
+      downloadSeconds +
+      otherSeconds +
+      quizSeconds +
+      aiMentorSeconds +
+      embedSeconds
+    );
+  }
+
+  private async computeCourseDurationEstimates(
+    courseIds: UUIDType[],
+    language: SupportedLanguages | undefined,
+    dbInstance: DatabasePg = this.db,
+  ): Promise<DurationEstimatesByCourse> {
+    if (!courseIds.length) return {};
+
+    const resourceCounts = dbInstance
+      .select({
+        lessonId: resourceEntity.entityId,
+        videoCount:
+          sql<number>`SUM(CASE WHEN ${resources.contentType} LIKE 'video/%' THEN 1 ELSE 0 END)`.as(
+            "videoCount",
+          ),
+        imageCount:
+          sql<number>`SUM(CASE WHEN ${resources.contentType} LIKE 'image/%' THEN 1 ELSE 0 END)`.as(
+            "imageCount",
+          ),
+        downloadCount:
+          sql<number>`SUM(CASE WHEN ${resources.contentType} LIKE 'application/pdf' THEN 1 WHEN ${resources.contentType} LIKE 'application/%' THEN 1 ELSE 0 END)`.as(
+            "downloadCount",
+          ),
+        otherCount:
+          sql<number>`SUM(CASE WHEN ${resources.contentType} LIKE 'video/%' OR ${resources.contentType} LIKE 'image/%' OR ${resources.contentType} LIKE 'application/%' THEN 0 ELSE 1 END)`.as(
+            "otherCount",
+          ),
+      })
+      .from(resourceEntity)
+      .innerJoin(resources, eq(resources.id, resourceEntity.resourceId))
+      .where(and(eq(resourceEntity.entityType, ENTITY_TYPES.LESSON), eq(resources.archived, false)))
+      .groupBy(resourceEntity.entityId)
+      .as("resource_counts");
+
+    const questionCounts = dbInstance
+      .select({
+        lessonId: questions.lessonId,
+        questionCount: count(questions.id).as("questionCount"),
+      })
+      .from(questions)
+      .groupBy(questions.lessonId)
+      .as("question_counts");
+
+    const lessonRows = await dbInstance
+      .select({
+        id: lessons.id,
+        courseId: chapters.courseId,
+        type: lessons.type,
+        description: this.localizationService.getLocalizedSqlField(lessons.description, language),
+        questionCount: sql<number>`COALESCE(${questionCounts.questionCount}, 0)`,
+        videoCount: sql<number>`COALESCE(${resourceCounts.videoCount}, 0)`,
+        imageCount: sql<number>`COALESCE(${resourceCounts.imageCount}, 0)`,
+        downloadCount: sql<number>`COALESCE(${resourceCounts.downloadCount}, 0)`,
+        otherCount: sql<number>`COALESCE(${resourceCounts.otherCount}, 0)`,
+      })
+      .from(lessons)
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
+      .leftJoin(questionCounts, eq(questionCounts.lessonId, lessons.id))
+      .leftJoin(resourceCounts, eq(resourceCounts.lessonId, lessons.id))
+      .where(inArray(chapters.courseId, courseIds));
+
+    const secondsByCourse = new Map<UUIDType, number>();
+
+    for (const lesson of lessonRows) {
+      const lessonSeconds = this.lessonSeconds({
+        descriptionHtml: lesson.description as string,
+        resourceCounts: {
+          video: Number(lesson.videoCount) || 0,
+          image: Number(lesson.imageCount) || 0,
+          download: Number(lesson.downloadCount) || 0,
+          other: Number(lesson.otherCount) || 0,
+        },
+        quizQuestionCount: Number(lesson.questionCount) || 0,
+        lessonType: lesson.type,
+      });
+
+      secondsByCourse.set(
+        lesson.courseId,
+        (secondsByCourse.get(lesson.courseId) ?? 0) + lessonSeconds,
+      );
+    }
+
+    const estimates: DurationEstimatesByCourse = {};
+
+    for (const [courseId, totalSeconds] of secondsByCourse) {
+      const totalMinutes = Math.max(1, Math.ceil(totalSeconds / 60));
+      estimates[courseId] = { totalMinutes, formatted: this.formatMinutes(totalMinutes) };
+    }
+
+    return estimates;
+  }
+
+  private formatMinutes(minutes: number): string {
+    if (minutes < 60) return `${minutes}m`;
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return mins === 0 ? `${hours}h` : `${hours}h ${mins}m`;
+  }
+
   async getAvailableCourses(
     query: CoursesQuery,
     currentUserId?: UUIDType,
@@ -590,29 +735,6 @@ export class CourseService {
         WHERE ${chapters.courseId} = ${courses.id}
       )`;
 
-      const estimatedDurationMinutesSql = sql<number>`(
-        SELECT COALESCE(
-          SUM(
-            CASE
-              WHEN ${lessons.type} = ${LESSON_TYPES.CONTENT} THEN 5
-              WHEN ${lessons.type} = ${LESSON_TYPES.EMBED} THEN 3
-              WHEN ${lessons.type} = ${LESSON_TYPES.AI_MENTOR} THEN 10
-              WHEN ${lessons.type} = ${LESSON_TYPES.QUIZ} THEN COALESCE(question_counts.question_count, 0)
-              ELSE 0
-            END
-          ),
-          0
-        )::int
-        FROM ${lessons}
-        LEFT JOIN (
-          SELECT ${questions.lessonId} AS lesson_id, COUNT(*) AS question_count
-          FROM ${questions}
-          GROUP BY ${questions.lessonId}
-        ) AS question_counts ON question_counts.lesson_id = ${lessons.id}
-        INNER JOIN ${chapters} ON ${chapters.id} = ${lessons.chapterId}
-        WHERE ${chapters.courseId} = ${courses.id}
-      )`;
-
       const conditions = [eq(courses.status, "published")];
       conditions.push(...(this.getFiltersConditions(filters) as SQL<unknown>[]));
 
@@ -637,7 +759,6 @@ export class CourseService {
           enrolledParticipantCount: sql<number>`COALESCE(${coursesSummaryStats.freePurchasedCount} + ${coursesSummaryStats.paidPurchasedCount}, 0)`,
           courseChapterCount: courses.chapterCount,
           lessonCount: lessonCountSql,
-          estimatedDurationMinutes: estimatedDurationMinutesSql,
           completedChapterCount: sql<number>`0`,
           priceInCents: courses.priceInCents,
           currency: courses.currency,
@@ -738,8 +859,18 @@ export class CourseService {
         slug: slugsMap.get(item.id) || item.id,
       }));
 
+      const durationEstimates = await this.computeCourseDurationEstimates(courseIds, language, trx);
+      const dataWithDuration = dataWithSlugs.map((item) => {
+        const duration = durationEstimates[item.id];
+        return {
+          ...item,
+          estimatedDurationMinutes: duration?.totalMinutes ?? 0,
+          estimatedDurationFormatted: duration?.formatted ?? null,
+        };
+      });
+
       return {
-        data: dataWithSlugs,
+        data: dataWithDuration,
         pagination: {
           totalItems: totalItems || 0,
           page,
@@ -766,29 +897,6 @@ export class CourseService {
         WHERE ${chapters.courseId} = ${courses.id}
       )`;
 
-      const estimatedDurationMinutesSql = sql<number>`(
-        SELECT COALESCE(
-          SUM(
-            CASE
-              WHEN ${lessons.type} = ${LESSON_TYPES.CONTENT} THEN 5
-              WHEN ${lessons.type} = ${LESSON_TYPES.EMBED} THEN 3
-              WHEN ${lessons.type} = ${LESSON_TYPES.AI_MENTOR} THEN 10
-              WHEN ${lessons.type} = ${LESSON_TYPES.QUIZ} THEN COALESCE(question_counts.question_count, 0)
-              ELSE 0
-            END
-          ),
-          0
-        )::int
-        FROM ${lessons}
-        LEFT JOIN (
-          SELECT ${questions.lessonId} AS lesson_id, COUNT(*) AS question_count
-          FROM ${questions}
-          GROUP BY ${questions.lessonId}
-        ) AS question_counts ON question_counts.lesson_id = ${lessons.id}
-        INNER JOIN ${chapters} ON ${chapters.id} = ${lessons.chapterId}
-        WHERE ${chapters.courseId} = ${courses.id}
-      )`;
-
       const conditions = [eq(courses.status, "published")];
 
       if (availableCourseIds.length > 0) {
@@ -810,7 +918,6 @@ export class CourseService {
           enrolledParticipantCount: sql<number>`COALESCE(${coursesSummaryStats.freePurchasedCount} + ${coursesSummaryStats.paidPurchasedCount}, 0)`,
           courseChapterCount: courses.chapterCount,
           lessonCount: lessonCountSql,
-          estimatedDurationMinutes: estimatedDurationMinutesSql,
           completedChapterCount: sql<number>`0`,
           priceInCents: courses.priceInCents,
           currency: courses.currency,
@@ -900,7 +1007,19 @@ export class CourseService {
         slug: slugsMap.get(item.id) || item.id,
       }));
 
-      return dataWithSlugs;
+      const durationEstimates = await this.computeCourseDurationEstimates(courseIds, language, trx);
+
+      const dataWithDuration = dataWithSlugs.map((item) => {
+        const duration = durationEstimates[item.id];
+
+        return {
+          ...item,
+          estimatedDurationMinutes: duration?.totalMinutes ?? 0,
+          estimatedDurationFormatted: duration?.formatted ?? null,
+        };
+      });
+
+      return dataWithDuration;
     });
   }
 
