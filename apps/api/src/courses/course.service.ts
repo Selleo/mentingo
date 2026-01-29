@@ -887,26 +887,18 @@ export class CourseService {
     return this.db.transaction(async (trx) => {
       const availableCourseIds = await this.getAvailableCourseIds(trx, currentUserId);
 
-      const lessonCountSql = sql<number>`(
-        SELECT COUNT(*)::int
-        FROM ${lessons}
-        INNER JOIN ${chapters} ON ${chapters.id} = ${lessons.chapterId}
-        WHERE ${chapters.courseId} = ${courses.id}
-      )`;
-
       const conditions = [eq(courses.status, "published")];
 
       if (availableCourseIds.length > 0) {
         conditions.push(inArray(courses.id, availableCourseIds));
       }
 
-      const data = await trx
+      const coursesRows = await trx
         .select({
-          id: courses.id,
+          ...getTableColumns(courses),
           title: this.localizationService.getLocalizedSqlField(courses.title, language),
           description: this.localizationService.getLocalizedSqlField(courses.description, language),
           thumbnailUrl: sql<string>`${courses.thumbnailS3Key}`,
-          authorId: sql<string>`${courses.authorId}`,
           author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
           authorEmail: sql<string>`${users.email}`,
           authorAvatarUrl: sql<string>`${users.avatarReference}`,
@@ -914,10 +906,13 @@ export class CourseService {
           enrolled: sql<boolean>`FALSE`,
           enrolledParticipantCount: sql<number>`COALESCE(${coursesSummaryStats.freePurchasedCount} + ${coursesSummaryStats.paidPurchasedCount}, 0)`,
           courseChapterCount: courses.chapterCount,
-          lessonCount: lessonCountSql,
+          lessonCount: sql<number>`(
+            SELECT COUNT(*)::int
+            FROM ${lessons}
+            INNER JOIN ${chapters} ON ${chapters.id} = ${lessons.chapterId}
+            WHERE ${chapters.courseId} = ${courses.id}
+          )`,
           completedChapterCount: sql<number>`0`,
-          priceInCents: courses.priceInCents,
-          currency: courses.currency,
           hasFreeChapters: sql<boolean>`
             EXISTS (
               SELECT 1
@@ -970,53 +965,46 @@ export class CourseService {
         .orderBy(desc(sql`COUNT(${studentCourses.id})`), desc(courses.createdAt))
         .limit(limit);
 
-      const trailerUrls = await this.getCourseTrailerUrls(data.map((item) => item.id));
+      const courseIds = coursesRows.map((course) => course.id);
 
-      const dataWithS3SignedUrls = await Promise.all(
-        data.map(async (item) => {
+      const trailerUrls = await this.getCourseTrailerUrls(courseIds);
+      const slugsMap = await this.courseSlugService.getCoursesSlugs(language || "en", courseIds);
+      const durationEstimates = await this.computeCourseDurationEstimates(courseIds, language, trx);
+
+      const coursesWithSignedUrls = await Promise.all(
+        coursesRows.map(async (course) => {
           try {
-            const { authorAvatarUrl, ...itemWithoutReferences } = item;
+            const { authorAvatarUrl: authorAvatarReference, ...itemWithoutReferences } = course;
 
-            const signedUrl = await this.fileService.getFileUrl(item.thumbnailUrl);
-            const authorAvatarSignedUrl =
-              await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
-
-            const trailerUrl = trailerUrls[item.id] ?? null;
+            const thumbnailUrl = await this.fileService.getFileUrl(course.thumbnailUrl);
+            const authorAvatarUrl =
+              await this.userService.getUsersProfilePictureUrl(authorAvatarReference);
+            const trailerUrl = trailerUrls[course.id] ?? null;
 
             return {
               ...itemWithoutReferences,
-              thumbnailUrl: signedUrl,
+              thumbnailUrl,
               trailerUrl,
-              authorAvatarUrl: authorAvatarSignedUrl,
+              authorAvatarUrl,
             };
           } catch (error) {
-            console.error(`Failed to get signed URL for ${item.thumbnailUrl}:`, error);
-            return item;
+            return course;
           }
         }),
       );
 
-      const courseIds = dataWithS3SignedUrls.map((item) => item.id);
-      const slugsMap = await this.courseSlugService.getCoursesSlugs(language || "en", courseIds);
-
-      const dataWithSlugs = dataWithS3SignedUrls.map((item) => ({
-        ...item,
-        slug: slugsMap.get(item.id) || item.id,
-      }));
-
-      const durationEstimates = await this.computeCourseDurationEstimates(courseIds, language, trx);
-
-      const dataWithDuration = dataWithSlugs.map((item) => {
-        const duration = durationEstimates[item.id];
+      const coursesWithDuration = coursesWithSignedUrls.map((course) => {
+        const duration = durationEstimates[course.id];
 
         return {
-          ...item,
+          ...course,
+          slug: slugsMap.get(course.id) || course.id,
           estimatedDurationMinutes: duration?.totalMinutes ?? 0,
           estimatedDurationFormatted: duration?.formatted ?? null,
         };
       });
 
-      return dataWithDuration;
+      return coursesWithDuration;
     });
   }
 
