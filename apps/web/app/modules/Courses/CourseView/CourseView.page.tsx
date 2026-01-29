@@ -90,15 +90,17 @@ export default function CourseViewPage() {
     navigate(`${url.pathname}${url.search ?? ""}`, { replace: true });
   }, [course?.slug, id, navigate]);
 
-  const { isStudent } = useUserRole();
+  const { isStudent, isAdminLike } = useUserRole();
   const { data: currentUser } = useCurrentUser();
+
+  const isPreviewMode = !course?.enrolled && isAdminLike;
 
   const courseViewTabs = useMemo(
     () => [
       {
         title: t("studentCourseView.tabs.chapters"),
         itemCount: course?.chapters?.length,
-        content: <ChapterListOverview course={course} />,
+        content: <ChapterListOverview course={course} isPreviewMode={isPreviewMode} />,
         isForAdminLike: false,
         isForUnregistered: true,
       },
@@ -120,7 +122,7 @@ export default function CourseViewPage() {
         isForUnregistered: false,
       },
     ],
-    [t, course],
+    [t, course, isPreviewMode],
   );
 
   if (!course) return null;

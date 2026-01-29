@@ -14,15 +14,19 @@ const progressBadge = {
 
 type CourseChapterLessonProps = {
   lesson: Lesson;
+  isPreviewMode?: boolean;
 };
 
-export const CourseChapterLesson = ({ lesson }: CourseChapterLessonProps) => {
-  const hasAccess = lesson.hasAccess;
+export const CourseChapterLesson = ({
+  lesson,
+  isPreviewMode = false,
+}: CourseChapterLessonProps) => {
+  const hasAccess = isPreviewMode || lesson.hasAccess;
 
   const lessonElement = (
     <div
       className={cn("flex w-full gap-x-2 p-2", {
-        "opacity-30": !hasAccess,
+        "opacity-30": !hasAccess && !isPreviewMode,
       })}
     >
       <Icon name={LessonTypesIcons[lesson.type]} className="size-6 text-accent-foreground" />
@@ -40,12 +44,12 @@ export const CourseChapterLesson = ({ lesson }: CourseChapterLessonProps) => {
       </div>
       <ProgressBadge
         progress={progressBadge[hasAccess ? lesson.status : "blocked"]}
-        className="self-center"
+        className={cn("self-center", { invisible: isPreviewMode })}
       />
     </div>
   );
 
-  if (!hasAccess) {
+  if (!hasAccess && !isPreviewMode) {
     return <button className="w-full flex cursor-not-allowed">{lessonElement}</button>;
   }
 
