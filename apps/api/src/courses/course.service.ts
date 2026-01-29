@@ -10,7 +10,7 @@ import {
 } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
 import { BaseEmailTemplate } from "@repo/email-templates";
-import { COURSE_ENROLLMENT, SUPPORTED_LANGUAGES } from "@repo/shared";
+import { COURSE_ENROLLMENT, SUPPORTED_LANGUAGES, ENTITY_TYPES } from "@repo/shared";
 import { load as loadHtml } from "cheerio";
 import {
   and,
@@ -47,11 +47,7 @@ import { getCourseTsVector } from "src/courses/utils/courses.utils";
 import { EnvService } from "src/env/services/env.service";
 import { CreateCourseEvent, UpdateCourseEvent, EnrollCourseEvent } from "src/events";
 import { UsersAssignedToCourseEvent } from "src/events/user/user-assigned-to-course.event";
-import {
-  ENTITY_TYPES,
-  RESOURCE_CATEGORIES,
-  RESOURCE_RELATIONSHIP_TYPES,
-} from "src/file/file.constants";
+import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { LearningTimeRepository } from "src/learning-time";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
@@ -526,14 +522,15 @@ export class CourseService {
     };
   }
 
-  private async getCourseTrailerUrls(courseIds: UUIDType[]) {
-    if (!courseIds.length) return new Map<UUIDType, string | null>();
+  private async getCourseTrailerUrls(
+    courseIds: UUIDType[],
+  ): Promise<Record<string, string | null>> {
+    if (!courseIds.length) return {};
 
-    const rows = await this.db
+    const trailerReferences = await this.db
       .select({
         courseId: resourceEntity.entityId,
         reference: resources.reference,
-        createdAt: resources.createdAt,
       })
       .from(resources)
       .innerJoin(resourceEntity, eq(resources.id, resourceEntity.resourceId))
@@ -547,22 +544,22 @@ export class CourseService {
       )
       .orderBy(desc(resources.createdAt));
 
-    const referenceMap = new Map<UUIDType, string>();
-    for (const row of rows) {
-      if (!referenceMap.has(row.courseId)) {
-        referenceMap.set(row.courseId, row.reference);
-      }
-    }
+    const trailerUrls: Record<UUIDType, string | null> = {};
 
-    const urlMap = new Map<UUIDType, string | null>();
     await Promise.all(
-      Array.from(referenceMap.entries()).map(async ([courseId, reference]) => {
-        const url = reference ? await this.fileService.getFileUrl(reference) : null;
-        urlMap.set(courseId, url);
+      trailerReferences.map(async (trailerReference) => {
+        trailerUrls[trailerReference.courseId] = await this.fileService.getFileUrl(
+          trailerReference.reference,
+        );
       }),
     );
 
-    return urlMap;
+    return trailerUrls;
+  }
+
+  private async getCourseTrailerUrl(courseId: UUIDType): Promise<string | null> {
+    const trailers = await this.getCourseTrailerUrls([courseId]);
+    return trailers[courseId] ?? null;
   }
 
   async getAvailableCourses(
@@ -708,6 +705,7 @@ export class CourseService {
         .where(and(...conditions));
 
       const trailerUrls = await this.getCourseTrailerUrls(data.map((item) => item.id));
+
       const dataWithS3SignedUrls = await Promise.all(
         data.map(async (item) => {
           try {
@@ -717,10 +715,12 @@ export class CourseService {
             const authorAvatarSignedUrl =
               await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
 
+            const trailerUrl = trailerUrls[item.id] ?? null;
+
             return {
               ...itemWithoutReferences,
               thumbnailUrl: signedUrl,
-              trailerUrl: trailerUrls.get(item.id) ?? null,
+              trailerUrl,
               authorAvatarUrl: authorAvatarSignedUrl,
             };
           } catch (error) {
@@ -867,6 +867,7 @@ export class CourseService {
         .limit(limit);
 
       const trailerUrls = await this.getCourseTrailerUrls(data.map((item) => item.id));
+
       const dataWithS3SignedUrls = await Promise.all(
         data.map(async (item) => {
           try {
@@ -876,10 +877,12 @@ export class CourseService {
             const authorAvatarSignedUrl =
               await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
 
+            const trailerUrl = trailerUrls[item.id] ?? null;
+
             return {
               ...itemWithoutReferences,
               thumbnailUrl: signedUrl,
-              trailerUrl: trailerUrls.get(item.id) ?? null,
+              trailerUrl,
               authorAvatarUrl: authorAvatarSignedUrl,
             };
           } catch (error) {
@@ -1077,7 +1080,7 @@ export class CourseService {
       .orderBy(chapters.displayOrder);
 
     const thumbnailUrl = await this.fileService.getFileUrl(course.thumbnailS3Key);
-    const trailerUrl = (await this.getCourseTrailerUrls([course.id])).get(course.id) ?? null;
+    const trailerUrl = await this.getCourseTrailerUrl(course.id);
 
     return {
       ...course,
@@ -1214,7 +1217,7 @@ export class CourseService {
     const thumbnailS3SingedUrl = course.thumbnailS3Key
       ? await this.fileService.getFileUrl(course.thumbnailS3Key)
       : null;
-    const trailerUrl = (await this.getCourseTrailerUrls([course.id])).get(course.id) ?? null;
+    const trailerUrl = await this.getCourseTrailerUrl(course.id);
 
     const updatedCourseLessonList = await Promise.all(
       courseChapterList?.map(async (chapter) => {
@@ -1804,57 +1807,6 @@ export class CourseService {
     );
 
     return updatedCourse;
-  }
-
-  async uploadCourseTrailer(
-    courseId: UUIDType,
-    file: Express.Multer.File,
-    currentUser: CurrentUser,
-  ) {
-    const { userId: currentUserId, role: currentUserRole } = currentUser;
-    const [course] = await this.db
-      .select({ id: courses.id, authorId: courses.authorId })
-      .from(courses)
-      .where(eq(courses.id, courseId));
-
-    if (!course) {
-      throw new NotFoundException("Course not found");
-    }
-
-    if (course.authorId !== currentUserId && currentUserRole !== USER_ROLES.ADMIN) {
-      throw new ForbiddenException("You don't have permission to update course");
-    }
-
-    const existingTrailerResources = await this.db
-      .select({ id: resources.id })
-      .from(resources)
-      .innerJoin(resourceEntity, eq(resources.id, resourceEntity.resourceId))
-      .where(
-        and(
-          eq(resourceEntity.entityId, courseId),
-          eq(resourceEntity.entityType, ENTITY_TYPES.COURSE),
-          eq(resourceEntity.relationshipType, RESOURCE_RELATIONSHIP_TYPES.TRAILER),
-          eq(resources.archived, false),
-        ),
-      );
-
-    await this.fileService.archiveResources(
-      existingTrailerResources.map((resource) => resource.id),
-    );
-
-    const uploadResult = await this.fileService.uploadResource({
-      file,
-      folder: courseId,
-      resource: RESOURCE_CATEGORIES.COURSE,
-      entityId: courseId,
-      entityType: ENTITY_TYPES.COURSE,
-      relationshipType: RESOURCE_RELATIONSHIP_TYPES.TRAILER,
-      title: { en: "Trailer" },
-      description: { en: "Trailer description" },
-      currentUser: currentUser,
-    });
-
-    return { trailerUrl: uploadResult.fileUrl ?? null };
   }
 
   async deleteCourseTrailer(courseId: UUIDType, currentUser: CurrentUser) {

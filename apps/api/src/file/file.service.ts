@@ -38,6 +38,7 @@ import { CONTEXT_TTL, getContextKey } from "./utils/resourceCacheKeys";
 import { VideoProcessingStateService } from "./video-processing-state.service";
 import { VideoUploadNotificationGateway } from "./video-upload-notification.gateway";
 
+import type { ResourceRelationshipType } from "./file.constants";
 import type { BunnyWebhookBody } from "./schemas/bunny-webhook.schema";
 import type { VideoInitBody } from "./schemas/video-init.schema";
 import type { VideoUploadState } from "./video-processing-state.service";
@@ -215,7 +216,7 @@ export class FileService {
     }
   }
 
-  private async createLessonContentResourceIfNeeded(params: {
+  private async createResourceIfNeeded(params: {
     entityType: EntityType;
     entityId?: UUIDType;
     fileKey: string;
@@ -223,8 +224,18 @@ export class FileService {
     filename: string;
     sizeBytes: number;
     contextId?: UUIDType;
+    relationshipType?: ResourceRelationshipType;
   }) {
-    const { entityType, entityId, fileKey, mimeType, filename, sizeBytes, contextId } = params;
+    const {
+      entityType,
+      entityId,
+      fileKey,
+      mimeType,
+      filename,
+      sizeBytes,
+      contextId,
+      relationshipType = RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+    } = params;
 
     if (!entityId && !contextId) return undefined;
 
@@ -233,7 +244,7 @@ export class FileService {
       contentType: mimeType,
       entityId,
       entityType,
-      relationshipType: RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+      relationshipType,
       metadata: {
         originalFilename: filename,
         size: sizeBytes,
@@ -254,7 +265,8 @@ export class FileService {
       contextId,
       entityId,
       entityType,
-    } = data;
+      relationshipType = RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+    } = data as VideoInitBody & { relationshipType?: ResourceRelationshipType };
 
     if (!entityId && !contextId) {
       throw new BadRequestException("Missing entityId or contextId");
@@ -269,6 +281,25 @@ export class FileService {
     }
 
     const { uploadId, placeholderKey, fileType } = this.buildVideoUploadContext(resource, filename);
+
+    if (entityId && entityType && relationshipType !== RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT) {
+      const existingResources = await this.db
+        .select({ id: resources.id })
+        .from(resources)
+        .innerJoin(resourceEntity, eq(resources.id, resourceEntity.resourceId))
+        .where(
+          and(
+            eq(resourceEntity.entityId, entityId),
+            eq(resourceEntity.entityType, entityType),
+            eq(resourceEntity.relationshipType, relationshipType),
+            eq(resources.archived, false),
+          ),
+        );
+
+      if (existingResources.length > 0) {
+        await this.archiveResources(existingResources.map((r) => r.id));
+      }
+    }
 
     await this.initializeVideoUploadState(uploadId, placeholderKey, fileType, currentUserId);
 
@@ -287,7 +318,7 @@ export class FileService {
 
     await this.registerProviderUpload(uploadId, placeholderKey, providerResponse);
 
-    const resourceId = await this.createLessonContentResourceIfNeeded({
+    const resourceId = await this.createResourceIfNeeded({
       entityType,
       entityId,
       fileKey: providerResponse.fileKey,
@@ -295,6 +326,7 @@ export class FileService {
       filename,
       sizeBytes,
       contextId,
+      relationshipType,
     });
 
     return {

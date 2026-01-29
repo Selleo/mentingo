@@ -3114,31 +3114,6 @@
       }
     },
     "/api/course/{id}/trailer": {
-      "patch": {
-        "operationId": "CourseController_uploadCourseTrailer",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UploadCourseTrailerResponse"
-                }
-              }
-            }
-          }
-        }
-      },
       "delete": {
         "operationId": "CourseController_deleteCourseTrailer",
         "parameters": [
@@ -10481,6 +10456,9 @@
                 "type": "string"
               }
             ]
+          },
+          "relationshipType": {
+            "type": "string"
           }
         },
         "required": [
@@ -13396,6 +13374,9 @@
                       "type": "null"
                     }
                   ]
+                },
+                "slug": {
+                  "type": "string"
                 }
               },
               "required": [
@@ -13411,7 +13392,8 @@
                 "priceInCents",
                 "currency",
                 "completedChapterCount",
-                "dueDate"
+                "dueDate",
+                "slug"
               ]
             }
           }
@@ -14705,32 +14687,6 @@
             },
             "required": [
               "message"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "UploadCourseTrailerResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "trailerUrl": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
-            "required": [
-              "trailerUrl"
             ]
           }
         },
