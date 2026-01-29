@@ -135,7 +135,6 @@ test.describe("Q&A flow", () => {
     await expect(page.getByText("Do nauki o samochodach")).toBeVisible();
     await logout(page);
     await login(page, USERS.admin);
-    await page.getByText("MenuFind in applicationSearch").click();
     await page
       .getByRole("button", { name: /Test Admin profile Test Admin|Avatar for email@example.com/i })
       .click();

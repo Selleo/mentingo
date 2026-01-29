@@ -1,4 +1,3 @@
-import { useParams } from "@remix-run/react";
 import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -32,17 +31,17 @@ type CourseStudentsLearningTimeColumn =
   GetCourseLearningTimeStatisticsResponse["data"]["users"][number];
 
 interface CourseStudentsProgressTableProps {
+  courseId: string;
   searchParams: CourseLearningTimeFilterQuery;
   onFilterChange: (name: string, value: FilterValue) => void;
 }
 
 export function CourseStudentsLearningTimeTable({
+  courseId,
   searchParams,
   onFilterChange,
 }: CourseStudentsProgressTableProps) {
   const { t } = useTranslation();
-
-  const { id = "" } = useParams();
 
   const { isAdminLike } = useUserRole();
 
@@ -54,7 +53,7 @@ export function CourseStudentsLearningTimeTable({
   }, [searchParams, sorting]);
 
   const { data: courseLearningTime, isFetching } = useCourseLearningTimeStatistics({
-    id,
+    id: courseId,
     enabled: isAdminLike,
     query,
   });

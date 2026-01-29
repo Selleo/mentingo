@@ -223,7 +223,7 @@ const EditCourse = () => {
                 asChild
                 className="border border-neutral-200 bg-transparent text-accent-foreground"
               >
-                <Link to={`/course/${course?.id}`}>
+                <Link to={`/course/${course?.id}?language=${courseLanguage}`}>
                   <Icon name="Eye" className="mr-2" />
                   {t("adminCourseView.common.preview")}
                 </Link>

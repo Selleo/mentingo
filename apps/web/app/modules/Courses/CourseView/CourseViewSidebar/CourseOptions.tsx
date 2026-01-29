@@ -1,4 +1,4 @@
-import { Link } from "@remix-run/react";
+import { Link, useParams } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
 
 import { useEnrollCourse } from "~/api/mutations";
@@ -17,13 +17,16 @@ type CourseOptionsProps = {
 };
 
 export const CourseOptions = ({ course }: CourseOptionsProps) => {
-  const { mutateAsync: enrollCourse } = useEnrollCourse();
   const { t } = useTranslation();
+  const { id = "" } = useParams();
+
+  const { mutateAsync: enrollCourse } = useEnrollCourse();
   const { data: currentUser } = useCurrentUser();
 
   const handleEnrollCourse = async () => {
     await enrollCourse({ id: course?.id }).then(() => {
       queryClient.invalidateQueries(courseQueryOptions(course?.id));
+      queryClient.invalidateQueries(courseQueryOptions(id));
     });
   };
 

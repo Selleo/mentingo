@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "@remix-run/react";
 import { find } from "lodash-es";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { CardBadge } from "~/components/CardBadge";
@@ -40,6 +41,7 @@ export const CourseChapter = ({ chapter, courseId, isEnrolled }: CourseChapterPr
     t("courseChapterView.other.quizzes"),
   );
   const hasAccessToChapter = chapter.lessons.some((lesson: Lesson) => lesson.hasAccess);
+  const lessons = useMemo(() => chapter?.lessons || [], [chapter?.lessons]);
 
   const navigate = useNavigate();
 
@@ -117,12 +119,12 @@ export const CourseChapter = ({ chapter, courseId, isEnrolled }: CourseChapterPr
             </AccordionTrigger>
             <AccordionContent>
               <div className="divide-y divide-neutral-200 rounded-b-lg border-x border-b border-primary-500 pb-4 pl-14 pt-3">
-                {chapter?.lessons?.map((lesson: Lesson) => {
+                {lessons?.map((lesson: Lesson) => {
                   if (!lesson) return null;
 
                   return (chapter.isFreemium || isEnrolled) && lesson.hasAccess ? (
-                    <Link to={`/course/${courseId}/lesson/${lesson.id}`}>
-                      <CourseChapterLesson key={lesson.id} lesson={lesson} />
+                    <Link key={lesson.id} to={`/course/${courseId}/lesson/${lesson.id}`}>
+                      <CourseChapterLesson lesson={lesson} />
                     </Link>
                   ) : (
                     <CourseChapterLesson key={lesson.id} lesson={lesson} />

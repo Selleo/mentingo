@@ -1,5 +1,4 @@
 import { TabsList } from "@radix-ui/react-tabs";
-import { useParams } from "@remix-run/react";
 import { useMemo, useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
@@ -71,8 +70,8 @@ export const formatLearningTime = (totalSeconds: number) => {
 
 export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
   const { t } = useTranslation();
+  const courseId = course?.id || "";
 
-  const { id = "" } = useParams();
   const { isAdminLike } = useUserRole();
 
   const [groupId, setGroupId] = useState<string | undefined>(undefined);
@@ -121,17 +120,17 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
   }, [course]);
 
   const { data: learningTimeFilterOptions } = useCourseStatisticsFilter({
-    id,
+    id: courseId,
     enabled: isAdminLike,
   });
 
   const { data: courseStatistics } = useCourseStatistics({
-    id,
+    id: courseId,
     enabled: isAdminLike,
     query: courseStatisticsParams,
   });
   const { data: averageQuizScores } = useCourseAverageScorePerQuiz({
-    id,
+    id: courseId,
     enabled: isAdminLike,
     query: courseStatisticsParams,
   });
@@ -380,6 +379,7 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
             </div>
             <TabsContent value="progress">
               <CourseStudentsProgressTable
+                courseId={courseId}
                 lessonCount={lessonCount}
                 searchParams={progressSearchParams}
                 onFilterChange={handleProgressFilterChange}
@@ -387,6 +387,7 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
             </TabsContent>
             <TabsContent value="quizResults">
               <CourseStudentsQuizResultsTable
+                courseId={courseId}
                 course={course}
                 searchParams={quizSearchParams}
                 onFilterChange={handleQuizFilterChange}
@@ -394,6 +395,7 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
             </TabsContent>
             <TabsContent value="aiMentorResults">
               <CourseStudentsAiMentorResultsTable
+                courseId={courseId}
                 course={course}
                 searchParams={aiMentorSearchParams}
                 onFilterChange={handleAiMentorFilterChange}
@@ -401,6 +403,7 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
             </TabsContent>
             <TabsContent value="learningTime">
               <CourseStudentsLearningTimeTable
+                courseId={courseId}
                 searchParams={learningTimeParams}
                 onFilterChange={handleLearningTimeFilterChange}
               />

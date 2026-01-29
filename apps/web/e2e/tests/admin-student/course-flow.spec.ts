@@ -508,9 +508,9 @@ const verifyAdminStats = async (page: Page) => {
   await expect(lastLesson).toBeVisible();
 
   await page.getByRole("tab", { name: "Quiz Results" }).click();
-  await expect(page.getByText("Cars quiz")).toBeVisible();
-  await expect(page.getByLabel("Quiz Results").getByText("75%")).toBeVisible();
-  const attemptsEl = page.getByRole("cell", { name: "1", exact: true });
+  await expect(page.getByText("Cars quiz").first()).toBeVisible();
+  await expect(page.getByLabel("Quiz Results").getByText("75%").first()).toBeVisible();
+  const attemptsEl = page.getByRole("cell", { name: "1", exact: true }).first();
   await expect(attemptsEl).toBeVisible();
 
   await page.getByRole("tab", { name: "AI Mentor Results" }).click();

@@ -25,9 +25,11 @@ const CourseCertificate = () => {
 
   const [isCertificatePreviewOpen, setCertificatePreview] = useState(false);
 
+  const courseId = course?.id;
+
   const { data: certificate } = useCertificate({
     userId: currentUser?.id,
-    courseId: id,
+    courseId,
     language,
   });
 
