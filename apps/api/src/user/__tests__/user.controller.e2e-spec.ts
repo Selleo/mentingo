@@ -3,6 +3,7 @@ import request from "supertest";
 
 import { AuthService } from "src/auth/auth.service";
 import { GroupService } from "src/group/group.service";
+import { DB, DB_BASE } from "src/storage/db/db.providers";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
@@ -21,6 +22,7 @@ describe("UsersController (e2e)", () => {
   let testCookies: string;
   const testPassword = "password123";
   let db: DatabasePg;
+  let baseDb: DatabasePg;
   let userFactory: ReturnType<typeof createUserFactory>;
   let settingsFactory: ReturnType<typeof createSettingsFactory>;
 
@@ -29,7 +31,8 @@ describe("UsersController (e2e)", () => {
     app = testApp;
     authService = app.get(AuthService);
     groupService = app.get(GroupService);
-    db = app.get("DB");
+    db = app.get(DB);
+    baseDb = app.get(DB_BASE);
     userFactory = createUserFactory(db);
     settingsFactory = createSettingsFactory(db);
   });
@@ -70,7 +73,7 @@ describe("UsersController (e2e)", () => {
   });
 
   afterEach(async () => {
-    await truncateTables(db, ["users", "groups", "settings"]);
+    await truncateTables(baseDb, ["users", "groups", "settings"]);
   });
 
   describe("GET /user?id=:id", () => {

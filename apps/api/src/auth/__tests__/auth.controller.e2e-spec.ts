@@ -3,6 +3,7 @@ import { isArray, omit } from "lodash";
 import { nanoid } from "nanoid";
 import request from "supertest";
 
+import { DB, DB_BASE } from "src/storage/db/db.providers";
 import { createTokens } from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
@@ -18,6 +19,7 @@ describe("AuthController (e2e)", () => {
   let app: INestApplication;
   let authService: AuthService;
   let db: DatabasePg;
+  let baseDb: DatabasePg;
   let userFactory: ReturnType<typeof createUserFactory>;
   let settingsFactory: ReturnType<typeof createSettingsFactory>;
 
@@ -25,7 +27,8 @@ describe("AuthController (e2e)", () => {
     const { app: testApp } = await createE2ETest();
     app = testApp;
     authService = app.get(AuthService);
-    db = app.get("DB");
+    db = app.get(DB);
+    baseDb = app.get(DB_BASE);
     userFactory = createUserFactory(db);
     settingsFactory = createSettingsFactory(db);
   });
@@ -35,7 +38,7 @@ describe("AuthController (e2e)", () => {
   });
 
   afterEach(async () => {
-    await truncateTables(db, ["settings"]);
+    await truncateTables(baseDb, ["settings"]);
   });
 
   describe("POST /api/auth/register", () => {

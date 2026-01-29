@@ -7,7 +7,7 @@ import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-obje
 import { ActivityLogsQueueService } from "./activity-logs.queue.service";
 
 import type { ActivityLogActionType, ActivityLogMetadata, ActivityLogResourceType } from "./types";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { ActorUserType } from "src/common/types/actor-user.type";
 import type { UserRole } from "src/user/schemas/userRoles";
 
 export type RecordActivityLogInput = {
@@ -28,7 +28,7 @@ export type ActorType = {
 };
 
 type RecordActivityLogParams = Omit<RecordActivityLogInput, "actor"> & {
-  actor: CurrentUser;
+  actor: ActorUserType;
 };
 
 @Injectable()
@@ -70,7 +70,7 @@ export class ActivityLogsService {
     });
   }
 
-  private getActorFromPayload(actor: CurrentUser): ActorType {
+  private getActorFromPayload(actor: ActorUserType): ActorType {
     return {
       actorId: actor.userId,
       actorEmail: actor.email,

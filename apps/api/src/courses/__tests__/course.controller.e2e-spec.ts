@@ -6,6 +6,7 @@ import request from "supertest";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { FileService } from "src/file/file.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
+import { DB, DB_BASE } from "src/storage/db/db.providers";
 import {
   courses,
   coursesSummaryStats,
@@ -34,6 +35,7 @@ import type { DatabasePg } from "src/common";
 describe("CourseController (e2e)", () => {
   let app: INestApplication;
   let db: DatabasePg;
+  let baseDb: DatabasePg;
   let categoryFactory: ReturnType<typeof createCategoryFactory>;
   let userFactory: ReturnType<typeof createUserFactory>;
   let courseFactory: ReturnType<typeof createCourseFactory>;
@@ -52,6 +54,7 @@ describe("CourseController (e2e)", () => {
       get: jest.fn().mockResolvedValue(""),
       set: jest.fn().mockResolvedValue(""),
     };
+
     const { app: testApp } = await createE2ETest([
       {
         provide: FileService,
@@ -64,7 +67,10 @@ describe("CourseController (e2e)", () => {
     ]);
 
     app = testApp;
-    db = app.get("DB");
+
+    db = app.get(DB);
+    baseDb = app.get(DB_BASE);
+
     userFactory = createUserFactory(db);
     settingsFactory = createSettingsFactory(db);
     categoryFactory = createCategoryFactory(db);
@@ -78,7 +84,7 @@ describe("CourseController (e2e)", () => {
   });
 
   afterEach(async () => {
-    await truncateTables(db, [
+    await truncateTables(baseDb, [
       "courses",
       "chapters",
       "lessons",

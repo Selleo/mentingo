@@ -4,12 +4,15 @@ import { createSelectSchema } from "drizzle-typebox";
 import { UUIDSchema, paginatedResponse } from "src/common";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { news } from "src/storage/schema";
+import { omitTenantId } from "src/utils/omitTenantId";
 
 import type { Static } from "@sinclair/typebox";
 
-const baseNewsSchema = createSelectSchema(news, {
-  publishedAt: Type.Union([Type.String(), Type.Null()]),
-});
+const baseNewsSchema = omitTenantId(
+  createSelectSchema(news, {
+    publishedAt: Type.Union([Type.String(), Type.Null()]),
+  }),
+);
 
 export const selectNewsSchema = Type.Composite([
   baseNewsSchema,

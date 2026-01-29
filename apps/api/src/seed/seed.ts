@@ -35,7 +35,7 @@ import { USER_ROLES } from "../user/schemas/userRoles";
 
 import { e2eCourses } from "./e2e-data-seeds";
 import { niceCourses } from "./nice-data-seeds";
-import { createNiceCourses, seedTruncateAllTables } from "./seed-helpers";
+import { createNiceCourses, ensureSeedTenant, seedTruncateAllTables } from "./seed-helpers";
 import { admin, contentCreators, students } from "./users-seed";
 
 import type { UsersSeed } from "./seed.types";
@@ -51,7 +51,11 @@ const connectionString = process.env.DATABASE_URL!;
 const sqlConnect = postgres(connectionString);
 const db = drizzle(sqlConnect) as DatabasePg;
 
-async function createUsers(users: UsersSeed, password = faker.internet.password()) {
+async function createUsers(
+  users: UsersSeed,
+  tenantId: UUIDType,
+  password = faker.internet.password(),
+) {
   return Promise.all(
     users.map(async (userData) => {
       const userToCreate = {
@@ -62,78 +66,96 @@ async function createUsers(users: UsersSeed, password = faker.internet.password(
         role: userData.role || USER_ROLES.STUDENT,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
+        tenantId,
       };
 
-      const user = await createOrFindUser(userToCreate.email, password, userToCreate);
+      const user = await createOrFindUser(userToCreate.email, password, userToCreate, tenantId);
 
-      await insertUserSettings(db, user.id, user.role === USER_ROLES.ADMIN);
+      await insertUserSettings(db, user.id, tenantId, user.role === USER_ROLES.ADMIN);
 
       return user;
     }),
   );
 }
 
-async function createOrFindUser(email: string, password: string, userData: any) {
+async function createOrFindUser(
+  email: string,
+  password: string,
+  userData: any,
+  tenantId: UUIDType,
+) {
   const [existingUser] = await db.select().from(users).where(eq(users.email, email));
   if (existingUser) return existingUser;
 
   const [newUser] = await db.insert(users).values(userData).returning();
 
-  await insertCredential(newUser.id, password);
-  await insertOnboardingData(newUser.id);
+  await insertCredential(newUser.id, tenantId, password);
+  await insertOnboardingData(newUser.id, tenantId);
 
   if (newUser.role === USER_ROLES.ADMIN || newUser.role === USER_ROLES.CONTENT_CREATOR)
-    await insertUserDetails(newUser.id);
+    await insertUserDetails(newUser.id, tenantId);
 
   return newUser;
 }
 
-async function insertCredential(userId: UUIDType, password: string) {
+async function insertCredential(userId: UUIDType, tenantId: UUIDType, password: string) {
   const credentialData = {
     id: faker.string.uuid(),
     userId,
     password: await hashPassword(password),
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
+    tenantId,
   };
   return (await db.insert(credentials).values(credentialData).returning())[0];
 }
 
-export async function insertOnboardingData(userId: UUIDType) {
+export async function insertOnboardingData(userId: UUIDType, tenantId: UUIDType) {
   return await db.insert(userOnboarding).values({
     userId,
+    tenantId,
   });
 }
 
-async function insertUserDetails(userId: UUIDType) {
+async function insertUserDetails(userId: UUIDType, tenantId: UUIDType) {
   return await db.insert(userDetails).values({
     userId,
     description: faker.lorem.paragraph(3),
     contactEmail: faker.internet.email(),
     contactPhoneNumber: faker.phone.number(),
     jobTitle: faker.person.jobTitle(),
+    tenantId,
   });
 }
 
-export async function insertGlobalSettings(database: DatabasePg) {
-  const [globalSettings] = await database.select().from(settings).where(isNull(settings.userId));
+export async function insertGlobalSettings(database: DatabasePg, tenantId: UUIDType) {
+  const [globalSettings] = await database
+    .select()
+    .from(settings)
+    .where(and(isNull(settings.userId), eq(settings.tenantId, tenantId)));
   if (globalSettings) return globalSettings;
 
   const [createdGlobalSettings] = await database
     .insert(settings)
     .values({
       settings: settingsToJSONBuildObject(DEFAULT_GLOBAL_SETTINGS),
+      tenantId,
     })
     .returning();
 
   return createdGlobalSettings;
 }
 
-export async function insertUserSettings(database: DatabasePg, userId: UUIDType, isAdmin: boolean) {
+export async function insertUserSettings(
+  database: DatabasePg,
+  userId: UUIDType,
+  tenantId: UUIDType,
+  isAdmin: boolean,
+) {
   const [existingUserSettings] = await database
     .select()
     .from(settings)
-    .where(eq(settings.userId, userId));
+    .where(and(eq(settings.userId, userId), eq(settings.tenantId, tenantId)));
 
   if (existingUserSettings) return existingUserSettings;
 
@@ -143,13 +165,14 @@ export async function insertUserSettings(database: DatabasePg, userId: UUIDType,
     .values({
       userId,
       settings: settingsToJSONBuildObject(settingsObject),
+      tenantId,
     })
     .returning();
 
   return createdUserSettings;
 }
 
-async function createStudentCourses(courses: any[], studentIds: UUIDType[]) {
+async function createStudentCourses(courses: any[], studentIds: UUIDType[], tenantId: UUIDType) {
   const studentsCoursesList = studentIds.flatMap((studentId) => {
     const courseCount = Math.floor(courses.length * 0.5);
     const selectedCourses = sampleSize(courses, courseCount);
@@ -166,6 +189,7 @@ async function createStudentCourses(courses: any[], studentIds: UUIDType[]) {
         enrolledByGroupId: null,
         createdAt: course.createdAt,
         updatedAt: course.updatedAt,
+        tenantId,
       };
     });
   });
@@ -173,7 +197,7 @@ async function createStudentCourses(courses: any[], studentIds: UUIDType[]) {
   return db.insert(studentCourses).values(studentsCoursesList).returning();
 }
 
-async function createLessonProgress(userId: UUIDType) {
+async function createLessonProgress(userId: UUIDType, tenantId: UUIDType) {
   const courseLessonsList = await db
     .select({
       lessonId: sql<UUIDType>`${lessons.id}`,
@@ -197,13 +221,14 @@ async function createLessonProgress(userId: UUIDType) {
       quizScore: courseLesson.lessonType === LESSON_TYPES.QUIZ ? 0 : null,
       attempts: courseLesson.lessonType === LESSON_TYPES.QUIZ ? 1 : null,
       isQuizPassed: courseLesson.lessonType === LESSON_TYPES.QUIZ ? false : null,
+      tenantId,
     };
   });
 
   return db.insert(studentLessonProgress).values(lessonProgressList).returning();
 }
 
-async function createCoursesSummaryStats(courses: any[] = []) {
+async function createCoursesSummaryStats(courses: any[] = [], tenantId: UUIDType) {
   const createdCoursesSummaryStats = courses.map((course) => ({
     authorId: course.authorId,
     courseId: course.id,
@@ -212,12 +237,13 @@ async function createCoursesSummaryStats(courses: any[] = []) {
     paidPurchasedAfterFreemiumCount: faker.number.int({ min: 0, max: 20 }),
     completedFreemiumStudentCount: faker.number.int({ min: 40, max: 60 }),
     completedCourseStudentCount: faker.number.int({ min: 0, max: 20 }),
+    tenantId,
   }));
 
   return db.insert(coursesSummaryStats).values(createdCoursesSummaryStats);
 }
 
-async function createQuizAttempts(userId: UUIDType) {
+async function createQuizAttempts(userId: UUIDType, tenantId: UUIDType) {
   const quizzes = await db
     .select({ courseId: courses.id, lessonId: lessons.id, questionCount: count(questions.id) })
     .from(courses)
@@ -237,6 +263,7 @@ async function createQuizAttempts(userId: UUIDType) {
       correctAnswers: correctAnswers,
       wrongAnswers: quiz.questionCount - correctAnswers,
       score: Math.round((correctAnswers / quiz.questionCount) * 100),
+      tenantId,
     };
   });
 
@@ -255,7 +282,7 @@ function getLast12Months(): Array<{ month: number; year: number; formattedDate: 
   }).reverse();
 }
 
-async function createCourseStudentsStats() {
+async function createCourseStudentsStats(tenantId: UUIDType) {
   const createdCourses = await db
     .select({
       courseId: courses.id,
@@ -273,6 +300,7 @@ async function createCourseStudentsStats() {
       newStudentsCount: faker.number.int({ min: 5, max: 25 }),
       month: monthDetails.month,
       year: monthDetails.year,
+      tenantId,
     })),
   );
 
@@ -282,13 +310,20 @@ async function createCourseStudentsStats() {
 async function seed() {
   await seedTruncateAllTables(db);
 
+  const tenantName = new URL(process.env.CORS_ORIGIN!).hostname;
+
+  const { id: tenantId } = await ensureSeedTenant(db, {
+    name: tenantName,
+    host: process.env.CORS_ORIGIN,
+  });
+
   try {
-    await insertGlobalSettings(db);
+    await insertGlobalSettings(db, tenantId);
     console.log("✨ Created global settings");
 
-    const createdStudents = await createUsers(students, "password");
-    const [createdAdmin] = await createUsers(admin, "password");
-    const createdContentCreators = await createUsers(contentCreators, "password");
+    const createdStudents = await createUsers(students, tenantId, "password");
+    const [createdAdmin] = await createUsers(admin, tenantId, "password");
+    const createdContentCreators = await createUsers(contentCreators, tenantId, "password");
     await createUsers(
       [
         {
@@ -298,6 +333,7 @@ async function seed() {
           role: USER_ROLES.STUDENT,
         },
       ],
+      tenantId,
       "password",
     );
 
@@ -311,30 +347,30 @@ async function seed() {
     console.log("Created or found students user:", createdStudents);
     console.log("Created or found content creators user:", createdContentCreators);
 
-    const createdCourses = await createNiceCourses(creatorCourseIds, db, niceCourses);
+    const createdCourses = await createNiceCourses(creatorCourseIds, db, niceCourses, tenantId);
     console.log("✨✨✨Created nice courses✨✨✨");
-    await createNiceCourses([createdAdmin.id], db, e2eCourses);
+    await createNiceCourses([createdAdmin.id], db, e2eCourses, tenantId);
     console.log("🧪 Created e2e courses");
 
     console.log("Selected random courses for student from createdCourses");
-    await createStudentCourses(createdCourses, createdStudentIds);
+    await createStudentCourses(createdCourses, createdStudentIds, tenantId);
     console.log("Created student courses");
 
     await Promise.all(
       createdStudentIds.map(async (studentId) => {
-        await createLessonProgress(studentId);
+        await createLessonProgress(studentId, tenantId);
       }),
     );
     console.log("Created student lesson progress");
 
-    await createCoursesSummaryStats(createdCourses);
+    await createCoursesSummaryStats(createdCourses, tenantId);
 
     await Promise.all(
       createdStudentIds.map(async (studentId) => {
-        await createQuizAttempts(studentId);
+        await createQuizAttempts(studentId, tenantId);
       }),
     );
-    await createCourseStudentsStats();
+    await createCourseStudentsStats(tenantId);
     console.log("Created student course students stats");
     console.log("Seeding completed successfully");
   } catch (error) {

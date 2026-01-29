@@ -2,8 +2,9 @@ import { Type } from "@sinclair/typebox";
 import { createSelectSchema } from "drizzle-typebox";
 
 import { announcements, userAnnouncements } from "src/storage/schema";
+import { omitTenantId } from "src/utils/omitTenantId";
 
-export const baseAnnouncementSchema = createSelectSchema(announcements);
+export const baseAnnouncementSchema = omitTenantId(createSelectSchema(announcements));
 
 export const announcementSchema = Type.Composite([
   baseAnnouncementSchema,
@@ -14,9 +15,11 @@ export const announcementSchema = Type.Composite([
 ]);
 export const allAnnouncementsSchema = Type.Array(announcementSchema);
 
-export const userAnnouncementsSchema = createSelectSchema(userAnnouncements, {
-  readAt: Type.String(),
-});
+export const userAnnouncementsSchema = omitTenantId(
+  createSelectSchema(userAnnouncements, {
+    readAt: Type.String(),
+  }),
+);
 
 export const unreadAnnouncementsSchema = Type.Object({ unreadCount: Type.Number() });
 

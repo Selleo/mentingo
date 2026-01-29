@@ -6,6 +6,7 @@ import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { FileService } from "src/file/file.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
+import { DB, DB_BASE } from "src/storage/db/db.providers";
 import { lessons, questions, questionAnswerOptions, studentCourses } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
@@ -23,6 +24,7 @@ import type { DatabasePg, UUIDType } from "src/common";
 describe("LessonController (e2e) - quiz feedback redaction", () => {
   let app: INestApplication;
   let db: DatabasePg;
+  let baseDb: DatabasePg;
   let categoryFactory: ReturnType<typeof createCategoryFactory>;
   let userFactory: ReturnType<typeof createUserFactory>;
   let courseFactory: ReturnType<typeof createCourseFactory>;
@@ -52,7 +54,8 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
     ]);
 
     app = testApp;
-    db = app.get("DB");
+    db = app.get(DB);
+    baseDb = app.get(DB_BASE);
     userFactory = createUserFactory(db);
     settingsFactory = createSettingsFactory(db);
     categoryFactory = createCategoryFactory(db);
@@ -65,7 +68,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
   });
 
   afterEach(async () => {
-    await truncateTables(db, [
+    await truncateTables(baseDb, [
       "courses",
       "chapters",
       "lessons",

@@ -3,6 +3,7 @@ import { eq, isNull } from "drizzle-orm";
 import request from "supertest";
 
 import { DEFAULT_GLOBAL_SETTINGS } from "src/settings/constants/settings.constants";
+import { DB, DB_BASE } from "src/storage/db/db.providers";
 import { questionsAndAnswers, settings } from "src/storage/schema";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
@@ -18,6 +19,7 @@ import type { DatabasePg } from "src/common";
 describe("QAController (e2e)", () => {
   let app: INestApplication;
   let db: DatabasePg;
+  let baseDb: DatabasePg;
   let qaFactory: ReturnType<typeof createQAFactory>;
   let userFactory: ReturnType<typeof createUserFactory>;
   let settingsFactory: ReturnType<typeof createSettingsFactory>;
@@ -50,7 +52,8 @@ describe("QAController (e2e)", () => {
   beforeAll(async () => {
     const { app: testApp } = await createE2ETest();
     app = testApp;
-    db = app.get("DB");
+    db = app.get(DB);
+    baseDb = app.get(DB_BASE);
 
     qaFactory = createQAFactory(db);
     userFactory = createUserFactory(db);
@@ -58,7 +61,7 @@ describe("QAController (e2e)", () => {
   });
 
   afterAll(async () => {
-    await truncateAllTables(db);
+    await truncateAllTables(baseDb, db);
     await app.close();
   });
 

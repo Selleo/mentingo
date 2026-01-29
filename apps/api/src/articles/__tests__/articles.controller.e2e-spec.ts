@@ -2,6 +2,7 @@ import { isNull } from "drizzle-orm";
 import request from "supertest";
 
 import { DEFAULT_GLOBAL_SETTINGS } from "src/settings/constants/settings.constants";
+import { DB, DB_BASE } from "src/storage/db/db.providers";
 import { settings } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
@@ -21,6 +22,7 @@ import type { DatabasePg } from "src/common";
 describe("ArticlesController (e2e)", () => {
   let app: INestApplication;
   let db: DatabasePg;
+  let baseDb: DatabasePg;
   let userFactory: ReturnType<typeof createUserFactory>;
   let articleFactory: ReturnType<typeof createArticleFactory>;
   let sectionFactory: ReturnType<typeof createArticleSectionFactory>;
@@ -50,7 +52,8 @@ describe("ArticlesController (e2e)", () => {
   beforeAll(async () => {
     const { app: testApp } = await createE2ETest();
     app = testApp;
-    db = app.get("DB");
+    db = app.get(DB);
+    baseDb = app.get(DB_BASE);
     userFactory = createUserFactory(db);
     articleFactory = createArticleFactory(db);
     sectionFactory = createArticleSectionFactory(db);
@@ -65,7 +68,7 @@ describe("ArticlesController (e2e)", () => {
   });
 
   afterEach(async () => {
-    await truncateTables(db, [
+    await truncateTables(baseDb, [
       "articles",
       "article_sections",
       "settings",

@@ -1,11 +1,11 @@
 import type { SupportedLanguages } from "@repo/shared";
 import type { NewsActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { ActorUserType } from "src/common/types/actor-user.type";
 
 type NewsUpdateData = {
   newsId: UUIDType;
-  actor: CurrentUser;
+  actor: ActorUserType;
   previousNewsData: NewsActivityLogSnapshot;
   updatedNewsData: NewsActivityLogSnapshot;
   language?: SupportedLanguages;

@@ -5,6 +5,7 @@ import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import hashPassword from "../../src/common/helpers/hashPassword";
 import { credentials, userOnboarding, users } from "../../src/storage/schema";
+import { ensureTenant } from "../helpers/tenant-helpers";
 
 import { createSettingsFactory } from "./settings.factory";
 
@@ -26,6 +27,7 @@ export const credentialFactory = Factory.define<Credential>(() => ({
   updatedAt: new Date().toISOString(),
   archived: false,
   deletedAt: null,
+  tenantId: undefined as unknown as string,
 }));
 
 class UserFactory extends Factory<UserWithCredentials> {
@@ -69,9 +71,17 @@ class UserFactory extends Factory<UserWithCredentials> {
 export const createUserFactory = (db: DatabasePg) => {
   return UserFactory.define(({ onCreate, associations }) => {
     onCreate(async (user) => {
-      const [inserted] = await db.insert(users).values(user).returning();
+      const tenantId = await ensureTenant(db, user.tenantId);
 
-      await db.insert(userOnboarding).values({ userId: inserted.id });
+      const [inserted] = await db
+        .insert(users)
+        .values({
+          ...user,
+          tenantId,
+        })
+        .returning();
+
+      await db.insert(userOnboarding).values({ userId: inserted.id, tenantId });
 
       if (associations.credentials) {
         const [insertedCredential] = await db
@@ -80,6 +90,7 @@ export const createUserFactory = (db: DatabasePg) => {
             ...associations.credentials,
             password: await hashPassword(associations.credentials.password),
             userId: inserted.id,
+            tenantId,
           })
           .returning();
 
@@ -106,6 +117,7 @@ export const createUserFactory = (db: DatabasePg) => {
       archived: false,
       avatarReference: null,
       deletedAt: null,
+      tenantId: faker.string.uuid(),
     };
   });
 };

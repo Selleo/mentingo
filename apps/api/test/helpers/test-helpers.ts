@@ -36,9 +36,14 @@ export function signInAs(userId: string, jwtService: JwtService): string {
   return jwtService.sign({ sub: userId });
 }
 
-export async function truncateAllTables(connection: DatabasePg): Promise<void> {
+export async function truncateAllTables(
+  connection: DatabasePg,
+  scopedConnection: DatabasePg,
+): Promise<void> {
   const tables = connection._.tableNamesMap;
+  // Keep the tenant row alive so FK defaults remain valid when we recreate settings.
   const tableNames = Object.keys(tables)
+    .filter((t) => t !== "tenants")
     .map((t) => `"${t}"`)
     .join(", ");
 
@@ -46,14 +51,14 @@ export async function truncateAllTables(connection: DatabasePg): Promise<void> {
   // session_replication_role = 'replica' disables all triggers including FK checks
   await connection.execute(
     sql.raw(`
-    SET session_replication_role = 'replica';
-    TRUNCATE TABLE ${tableNames} RESTART IDENTITY;
-    SET session_replication_role = 'origin';
-  `),
+      SET session_replication_role = 'replica';
+      TRUNCATE TABLE ${tableNames} RESTART IDENTITY;
+      SET session_replication_role = 'origin';
+      `),
   );
 
   // Recreate global settings required for authentication
-  await connection.insert(settings).values({
+  await scopedConnection.insert(settings).values({
     userId: null,
     createdAt: new Date().toISOString(),
     settings: settingsToJSONBuildObject(DEFAULT_GLOBAL_SETTINGS),

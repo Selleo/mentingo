@@ -1,10 +1,10 @@
 import type { CourseActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { ActorUserType } from "src/common/types/actor-user.type";
 
 type CourseUpdateData = {
   courseId: UUIDType;
-  actor: CurrentUser;
+  actor: ActorUserType;
   previousCourseData: CourseActivityLogSnapshot | null;
   updatedCourseData: CourseActivityLogSnapshot | null;
 };

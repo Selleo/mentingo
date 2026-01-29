@@ -44,7 +44,10 @@ export const createGroupFactory = (db: DatabasePg) => {
 async function addUsersToGroup(db: DatabasePg, groupId: string, userIds: string[]) {
   if (!userIds.length) return;
 
-  const values = userIds.map((userId) => ({ groupId, userId }));
+  const values = userIds.map((userId) => ({
+    groupId,
+    userId,
+  }));
 
   await db.insert(groupUsers).values(values);
 }

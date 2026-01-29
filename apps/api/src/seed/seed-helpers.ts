@@ -13,6 +13,7 @@ import {
   lessons,
   questionAnswerOptions,
   questions,
+  tenants,
 } from "src/storage/schema";
 import { StripeService } from "src/stripe/stripe.service";
 
@@ -23,6 +24,7 @@ export async function createNiceCourses(
   creatorUserIds: UUIDType[],
   db: DatabasePg,
   data: NiceCourseData[],
+  tenantId: UUIDType,
 ) {
   const createdCourses = [];
 
@@ -39,6 +41,7 @@ export async function createNiceCourses(
         archived: false,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
+        tenantId,
       })
       .onConflictDoNothing();
 
@@ -103,6 +106,7 @@ export async function createNiceCourses(
         updatedAt: createdAt,
         stripeProductId,
         stripePriceId,
+        tenantId,
       })
       .returning();
 
@@ -119,6 +123,7 @@ export async function createNiceCourses(
           updatedAt: createdAt,
           displayOrder: index + 1,
           lessonCount: chapterData.lessons.length,
+          tenantId,
         })
         .returning();
 
@@ -137,6 +142,7 @@ export async function createNiceCourses(
             chapterId: chapter.id,
             createdAt: createdAt,
             updatedAt: createdAt,
+            tenantId,
           })
           .returning();
         if (
@@ -150,6 +156,7 @@ export async function createNiceCourses(
               lessonId: lesson.id,
               aiMentorInstructions: lessonData.aiMentorInstructions,
               completionConditions: lessonData.completionConditions,
+              tenantId,
             })
             .returning();
         }
@@ -175,6 +182,7 @@ export async function createNiceCourses(
                   questionData.solutionExplanation ?? null
                 }::text)`,
                 photoS3Key: questionData.photoS3Key ?? null,
+                tenantId,
               })
               .returning();
 
@@ -192,6 +200,7 @@ export async function createNiceCourses(
                     questionAnswerOption.matchedWord || null
                   }::text)`,
                   scaleAnswer: questionAnswerOption.scaleAnswer || null,
+                  tenantId,
                 }),
               );
 
@@ -226,4 +235,22 @@ export async function seedTruncateAllTables(db: DatabasePg): Promise<void> {
 
     await tx.execute(sql`SET CONSTRAINTS ALL IMMEDIATE`);
   });
+}
+
+export async function ensureSeedTenant(db: DatabasePg, options?: { name?: string; host?: string }) {
+  const host = options?.host ?? "seed.local";
+  const name = options?.name ?? "Seed Tenant";
+
+  const [existing] = await db.select().from(tenants).where(eq(tenants.host, host));
+  if (existing) return existing;
+
+  const [createdTenant] = await db
+    .insert(tenants)
+    .values({
+      name,
+      host,
+    })
+    .returning();
+
+  return createdTenant;
 }

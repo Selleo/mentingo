@@ -1,5 +1,7 @@
 import { sql } from "drizzle-orm";
-import { boolean, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { boolean, index, text, timestamp, uuid } from "drizzle-orm/pg-core";
+
+import { tenants } from ".";
 
 export const id = {
   id: uuid("id")
@@ -43,3 +45,18 @@ export const availableLocales = text("available_locales")
   .array()
   .notNull()
   .default(sql`ARRAY['en']::text[]`);
+
+export const tenantId = uuid("tenant_id")
+  .references(() => tenants.id, { onDelete: "cascade" })
+  .notNull()
+  .default(sql`current_setting('app.tenant_id', true)::uuid`);
+
+export const withTenantIdIndex = (
+  tableName: string,
+  config?: (table: any) => Record<string, unknown>,
+) => {
+  return (table: any) => ({
+    tenantIdIdx: index(`${tableName}_tenant_id_idx`).on(table.tenantId),
+    ...(config ? config(table) : {}),
+  });
+};

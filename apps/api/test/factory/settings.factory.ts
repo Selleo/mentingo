@@ -14,7 +14,7 @@ import { settings } from "../../src/storage/schema";
 import type { InferSelectModel } from "drizzle-orm";
 import type { DatabasePg, UUIDType } from "src/common";
 
-type SettingsTest = InferSelectModel<typeof settings>;
+type SettingsTest = Omit<InferSelectModel<typeof settings>, "tenantId">;
 
 export const createSettingsFactory = (
   db: DatabasePg,

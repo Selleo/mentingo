@@ -1,5 +1,6 @@
 import request from "supertest";
 
+import { DB, DB_BASE } from "src/storage/db/db.providers";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
@@ -17,13 +18,15 @@ describe("CategoryController (e2e)", () => {
   let app: INestApplication;
   let categoryFactory: ReturnType<typeof createCategoryFactory>;
   let db: DatabasePg;
+  let baseDb: DatabasePg;
   let userFactory: ReturnType<typeof createUserFactory>;
   let settingsFactory: ReturnType<typeof createSettingsFactory>;
 
   beforeAll(async () => {
     const { app: testApp } = await createE2ETest();
     app = testApp;
-    db = app.get("DB");
+    db = app.get(DB);
+    baseDb = app.get(DB_BASE);
     userFactory = createUserFactory(db);
     categoryFactory = createCategoryFactory(db);
     settingsFactory = createSettingsFactory(db);
@@ -31,7 +34,7 @@ describe("CategoryController (e2e)", () => {
   }, 30000);
 
   afterAll(async () => {
-    await truncateAllTables(db);
+    await truncateAllTables(baseDb, db);
   });
 
   const password = "password123";
