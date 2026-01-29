@@ -11,7 +11,6 @@ import { formatDuration } from "./utils";
 type HeroBannerProps = {
   id: string;
   title: string;
-  category: string;
   thumbnailUrl?: string | null;
   trailerUrl?: string | null;
   estimatedDurationMinutes?: number;
@@ -21,7 +20,6 @@ type HeroBannerProps = {
 const HeroBanner = ({
   id,
   title,
-  category,
   thumbnailUrl,
   trailerUrl,
   estimatedDurationMinutes,
@@ -71,10 +69,6 @@ const HeroBanner = ({
 
       <div className="relative z-20 flex h-full items-end px-4 pb-12 md:px-8 md:pb-16">
         <div className="max-w-2xl space-y-3 md:space-y-4">
-          <span className="text-xs font-semibold uppercase tracking-wider text-neutral-700">
-            {category}
-          </span>
-
           <h1 className="h1">{title}</h1>
 
           {(durationLabel || lessonsLabel) && (

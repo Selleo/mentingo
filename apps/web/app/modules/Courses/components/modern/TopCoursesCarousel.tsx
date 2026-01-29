@@ -45,7 +45,7 @@ const TopCoursesCarousel = ({ courses }: TopCoursesCarouselProps) => {
   if (!courses?.length) return null;
 
   const renderRank = (rank: number) => (
-    <div className="pointer-events-none absolute -left-10 top-3 h-52 w-32">
+    <div className="pointer-events-none absolute -left-20 top-3 h-52 w-32">
       <svg className="h-full w-full" viewBox="0 0 160 190" fill="none">
         <text
           x="50%"

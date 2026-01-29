@@ -11,21 +11,23 @@ import {
 import { Separator } from "~/components/ui/separator";
 import { cn } from "~/lib/utils";
 
-type PublicMobileNavigationDropdownProps = {
+type MobileNavigationDropdownProps = {
   links: { to: string; label: string }[];
   menuLabel: string;
   closeLabel: string;
-  loginLabel: string;
-  signUpLabel: string;
+  loginLabel?: string;
+  signUpLabel?: string;
+  withAuthButtons?: boolean;
 };
 
-export function PublicMobileNavigationDropdown({
+export function MobileNavigationDropdown({
   links,
   menuLabel,
   closeLabel,
   loginLabel,
   signUpLabel,
-}: PublicMobileNavigationDropdownProps) {
+  withAuthButtons = true,
+}: MobileNavigationDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleLabel = isOpen ? closeLabel : menuLabel;
@@ -67,16 +69,20 @@ export function PublicMobileNavigationDropdown({
             </NavLink>
           ))}
 
-          <Separator className="bg-neutral-200" />
+          {withAuthButtons && (
+            <>
+              <Separator className="bg-neutral-200" />
 
-          <Link to="/auth/login" onClick={() => setIsOpen(false)}>
-            <Button variant="outline" className="w-full">
-              {loginLabel}
-            </Button>
-          </Link>
-          <Link to="/auth/register" onClick={() => setIsOpen(false)}>
-            <Button className="w-full">{signUpLabel}</Button>
-          </Link>
+              <Link to="/auth/login" onClick={() => setIsOpen(false)}>
+                <Button variant="outline" className="w-full">
+                  {loginLabel}
+                </Button>
+              </Link>
+              <Link to="/auth/register" onClick={() => setIsOpen(false)}>
+                <Button className="w-full">{signUpLabel}</Button>
+              </Link>
+            </>
+          )}
         </div>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -6,9 +6,11 @@ import { useAvailableCourses } from "~/api/queries/useAvailableCourses";
 import { useStudentCourses } from "~/api/queries/useStudentCourses";
 import { useTopCourses } from "~/api/queries/useTopCourses";
 import { PageWrapper } from "~/components/PageWrapper";
+import { useUserRole } from "~/hooks/useUserRole";
 import Loader from "~/modules/common/Loader/Loader";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
+import CoursesHeader from "./CoursesHeader";
 import HeroBanner from "./HeroBanner";
 import ModernCourseCarousel from "./ModernCourseCarousel";
 import TopCoursesCarousel from "./TopCoursesCarousel";
@@ -19,6 +21,7 @@ const ModernCoursesView = () => {
   const { t } = useTranslation();
   const { language } = useLanguageStore();
   const { data: currentUser } = useCurrentUser();
+  const { isAdminLike } = useUserRole();
 
   const { data: availableCourses, isLoading: isAvailableCoursesLoading } = useAvailableCourses({
     language,
@@ -98,10 +101,12 @@ const ModernCoursesView = () => {
   return (
     <PageWrapper isBarebones className="w-full p-0 mb-4" wrapperClassName="h-full">
       <div className="min-h-screen">
+        {/* TODO: course cards are overflowing, fix that */}
+        {isAdminLike && <CoursesHeader />}
+
         <HeroBanner
           id={heroCourse.id}
           title={heroCourse.title}
-          category={heroCourse.category}
           thumbnailUrl={heroCourse.thumbnailUrl}
           trailerUrl={heroCourse.trailerUrl}
           estimatedDurationMinutes={heroCourse.estimatedDurationMinutes}
