@@ -6,6 +6,8 @@ import { useTranslation } from "react-i18next";
 import DefaultPhotoCourse from "~/assets/svgs/default-photo-course.svg";
 import { cn } from "~/lib/utils";
 
+import MOCKED_VIDEO from "../../../../../app/assets/video-e2e.mp4";
+
 import { formatDuration } from "./utils";
 
 type ModernCourseCardProps = {
@@ -116,7 +118,8 @@ const ModernCourseCard = ({
               />
               <video
                 ref={videoRef}
-                src={trailerUrl}
+                // src={trailerUrl}
+                src={MOCKED_VIDEO}
                 className={cn(
                   "absolute inset-0 h-full w-full object-cover transition-opacity duration-300",
                   isHovered ? "opacity-100" : "opacity-0",

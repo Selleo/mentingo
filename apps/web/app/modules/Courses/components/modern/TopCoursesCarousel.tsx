@@ -19,7 +19,6 @@ type TopCoursesCarouselProps = {
 };
 
 const TopCoursesCarousel = ({ courses }: TopCoursesCarouselProps) => {
-  const [isHovered, setIsHovered] = useState(false);
   const [carouselApi, setCarouselApi] = useState<CarouselApi | null>(null);
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
@@ -66,19 +65,12 @@ const TopCoursesCarousel = ({ courses }: TopCoursesCarouselProps) => {
   );
 
   return (
-    <section
-      className="relative overflow-visible"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <section className="relative group">
       <Carousel
         opts={{ align: "start", slidesToScroll: 1, skipSnaps: false }}
         setApi={setCarouselApi}
       >
-        <CarouselContent
-          viewportClassName="overflow-visible"
-          className="gap-24 px-4 pb-6 pt-10 md:px-8 ml-20"
-        >
+        <CarouselContent className="gap-24 px-4 pb-6 pt-10 md:px-8 ml-20">
           {courses.map((course, index) => (
             <CarouselItem key={course.id} className="w-[360px] md:w-[420px] lg:w-[440px]">
               <div className="relative pl-6">
@@ -99,19 +91,19 @@ const TopCoursesCarousel = ({ courses }: TopCoursesCarouselProps) => {
           ))}
         </CarouselContent>
 
-        {isHovered && (canScrollPrev || canScrollNext) && (
-          <>
-            <CarouselPrevious className="absolute left-0 top-0 bottom-0 z-[150] hidden w-12 items-center justify-center bg-gradient-to-r from-black/50 to-transparent transition-opacity duration-300 hover:from-black/70 md:flex md:opacity-0 md:group-hover:opacity-100">
-              <div className="flex h-full w-full items-center justify-center">
-                <ChevronLeft className="size-6 text-white" />
-              </div>
-            </CarouselPrevious>
-            <CarouselNext className="absolute right-0 top-0 bottom-0 z-[150] hidden w-12 items-center justify-center bg-gradient-to-l from-black/50 to-transparent transition-opacity duration-300 hover:from-black/70 md:flex md:opacity-0 md:group-hover:opacity-100">
-              <div className="flex h-full w-full items-center justify-center">
-                <ChevronRight className="size-6 text-white" />
-              </div>
-            </CarouselNext>
-          </>
+        {canScrollPrev && (
+          <CarouselPrevious className="absolute left-0 top-0 bottom-0 z-[150] w-12 items-center justify-center bg-gradient-to-r from-black/50 to-transparent transition-opacity duration-300 hover:from-black/70 md:opacity-0 md:group-hover:opacity-100">
+            <div className="flex h-full w-full items-center justify-center">
+              <ChevronLeft className="size-6 text-white" />
+            </div>
+          </CarouselPrevious>
+        )}
+        {canScrollNext && (
+          <CarouselNext className="absolute right-0 top-0 bottom-0 z-[150] w-12 items-center justify-center bg-gradient-to-l from-black/50 to-transparent transition-opacity duration-300 hover:from-black/70 md:opacity-0 md:group-hover:opacity-100">
+            <div className="flex h-full w-full items-center justify-center">
+              <ChevronRight className="size-6 text-white" />
+            </div>
+          </CarouselNext>
         )}
       </Carousel>
     </section>

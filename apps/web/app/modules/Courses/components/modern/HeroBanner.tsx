@@ -1,6 +1,5 @@
 import { Link } from "@remix-run/react";
 import { BookOpen, Clock, Info, Play } from "lucide-react";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import DefaultPhotoCourse from "~/assets/svgs/default-photo-course.svg";
@@ -26,7 +25,6 @@ const HeroBanner = ({
   lessonCount,
 }: HeroBannerProps) => {
   const { t } = useTranslation();
-  const [isHovered, setIsHovered] = useState(false);
 
   const durationLabel = formatDuration(estimatedDurationMinutes);
   const lessonsLabel = lessonCount
@@ -34,11 +32,7 @@ const HeroBanner = ({
     : undefined;
 
   return (
-    <div
-      className="relative h-[50vh] min-h-[400px] w-full overflow-hidden md:h-[70vh] md:min-h-[500px]"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <div className="relative h-[50vh] min-h-[400px] w-full overflow-hidden md:h-[70vh] md:min-h-[500px]">
       <div className="absolute inset-0">
         <img
           src={thumbnailUrl || DefaultPhotoCourse}
@@ -48,10 +42,10 @@ const HeroBanner = ({
             (event.target as HTMLImageElement).src = DefaultPhotoCourse;
           }}
         />
-        <div className="absolute bottom-0 left-0 right-0 h-[50%] bg-gradient-to-t from-primary-50 via-white/80 via-white/60 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-[50%] bg-gradient-to-t from-primary-50 via-primary-50/80 via-primary-50/60 to-transparent" />
       </div>
 
-      {isHovered && trailerUrl && (
+      {trailerUrl && (
         <div className="absolute inset-0 z-10 hidden md:block">
           <video
             src={trailerUrl}
@@ -61,9 +55,9 @@ const HeroBanner = ({
             playsInline
             className="h-full w-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/70 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-white/80 via-white/30 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 h-[50%] bg-gradient-to-t from-white via-white/60 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-primary-50/95 via-primary-50/70 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-primary-50/80 via-primary-50/30 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 h-[50%] bg-gradient-to-t from-primary-50 via-primary-50/60 to-transparent" />
         </div>
       )}
 

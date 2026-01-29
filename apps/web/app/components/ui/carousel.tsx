@@ -141,7 +141,10 @@ const CarouselContent = React.forwardRef<HTMLDivElement, CarouselContentProps>(
     const { carouselRef, orientation } = useCarousel();
 
     return (
-      <div ref={carouselRef} className={cn("overflow-hidden", viewportClassName)}>
+    <div
+      ref={carouselRef}
+      className={cn("overflow-y-visible", viewportClassName)}
+    >
         <div
           ref={ref}
           className={cn("flex", { "flex-col": orientation === "vertical" }, className)}

@@ -3,7 +3,9 @@ import { useNavigate } from "@remix-run/react";
 import { useForm } from "react-hook-form";
 
 import { useCreateCourse } from "~/api/mutations/useCreateCourse";
+import { availableCoursesQueryOptions, studentCoursesQueryOptions } from "~/api/queries";
 import { ALL_COURSES_QUERY_KEY } from "~/api/queries/useCourses";
+import { topCoursesQueryOptions } from "~/api/queries/useTopCourses";
 import { queryClient } from "~/api/queryClient";
 import { addCourseFormSchema } from "~/modules/Admin/AddCourse/validators/addCourseFormSchema";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
@@ -39,6 +41,14 @@ export const useAddCourseForm = () => {
       data: { ...rest, description },
     }).then(({ data }) => {
       queryClient.invalidateQueries({ queryKey: ALL_COURSES_QUERY_KEY });
+      queryClient.invalidateQueries(topCoursesQueryOptions({ language }));
+      queryClient.invalidateQueries(
+        availableCoursesQueryOptions({ language, category: values.categoryId }),
+      );
+      queryClient.invalidateQueries(
+        studentCoursesQueryOptions({ language, category: values.categoryId }),
+      );
+
       navigate(`/admin/beta-courses/${data.id}`);
     });
   };

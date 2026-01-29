@@ -19,6 +19,7 @@ import type { GetAvailableCoursesResponse } from "~/api/generated-api";
 
 const ModernCoursesView = () => {
   const { t } = useTranslation();
+
   const { language } = useLanguageStore();
   const { data: currentUser } = useCurrentUser();
   const { isAdminLike } = useUserRole();
@@ -99,9 +100,12 @@ const ModernCoursesView = () => {
   }
 
   return (
-    <PageWrapper isBarebones className="w-full p-0 mb-4" wrapperClassName="h-full">
+    <PageWrapper
+      isBarebones
+      className="w-full p-0 mb-4 overflow-x-hidden"
+      wrapperClassName="h-full"
+    >
       <div className="min-h-screen">
-        {/* TODO: course cards are overflowing, fix that */}
         {isAdminLike && <CoursesHeader />}
 
         <HeroBanner

@@ -15,9 +15,8 @@ type MobileNavigationDropdownProps = {
   links: { to: string; label: string }[];
   menuLabel: string;
   closeLabel: string;
-  loginLabel?: string;
-  signUpLabel?: string;
-  withAuthButtons?: boolean;
+  loginLabel: string;
+  signUpLabel: string;
 };
 
 export function MobileNavigationDropdown({
@@ -26,7 +25,6 @@ export function MobileNavigationDropdown({
   closeLabel,
   loginLabel,
   signUpLabel,
-  withAuthButtons = true,
 }: MobileNavigationDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -69,20 +67,16 @@ export function MobileNavigationDropdown({
             </NavLink>
           ))}
 
-          {withAuthButtons && (
-            <>
-              <Separator className="bg-neutral-200" />
+          <Separator className="bg-neutral-200" />
 
-              <Link to="/auth/login" onClick={() => setIsOpen(false)}>
-                <Button variant="outline" className="w-full">
-                  {loginLabel}
-                </Button>
-              </Link>
-              <Link to="/auth/register" onClick={() => setIsOpen(false)}>
-                <Button className="w-full">{signUpLabel}</Button>
-              </Link>
-            </>
-          )}
+          <Link to="/auth/login" onClick={() => setIsOpen(false)}>
+            <Button variant="outline" className="w-full">
+              {loginLabel}
+            </Button>
+          </Link>
+          <Link to="/auth/register" onClick={() => setIsOpen(false)}>
+            <Button className="w-full">{signUpLabel}</Button>
+          </Link>
         </div>
       </DropdownMenuContent>
     </DropdownMenu>
