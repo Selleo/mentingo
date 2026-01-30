@@ -206,6 +206,8 @@ const ChapterCard = ({
                 setSelectedLesson={setSelectedLesson}
                 setContentTypeToDisplay={setContentTypeToDisplay}
                 language={language}
+                setSelectedChapter={setSelectedChapter}
+                chapter={chapter}
               />
             </AccordionContent>
             <div className="mt-3 flex items-center justify-between">

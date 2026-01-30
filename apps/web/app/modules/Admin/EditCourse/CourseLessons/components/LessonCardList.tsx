@@ -14,11 +14,13 @@ import { ContentTypes } from "~/modules/Admin/EditCourse/EditCourse.types";
 
 import type { SupportedLanguages } from "@repo/shared";
 import type { Sortable } from "~/components/SortableList/SortableList";
-import type { Lesson } from "~/modules/Admin/EditCourse/EditCourse.types";
+import type { Chapter, Lesson } from "~/modules/Admin/EditCourse/EditCourse.types";
 
 type LessonCardListProps = {
   setSelectedLesson: (lesson: Lesson) => void;
   setContentTypeToDisplay: (contentType: string) => void;
+  setSelectedChapter?: (chapter: Chapter | null) => void;
+  chapter?: Chapter;
   lessons: Sortable<Lesson>[];
   selectedLesson: Lesson | null;
   language: SupportedLanguages;
@@ -28,6 +30,8 @@ export const LessonCardList = ({
   lessons,
   setSelectedLesson,
   setContentTypeToDisplay,
+  setSelectedChapter,
+  chapter,
   selectedLesson,
   language,
 }: LessonCardListProps) => {
@@ -49,6 +53,10 @@ export const LessonCardList = ({
         setIsLeavingContent(true);
         openLeaveModal();
         return;
+      }
+
+      if (setSelectedChapter && chapter) {
+        setSelectedChapter(chapter);
       }
 
       setSelectedLesson(lesson);
@@ -73,6 +81,8 @@ export const LessonCardList = ({
       isCurrentFormDirty,
       setContentTypeToDisplay,
       setSelectedLesson,
+      setSelectedChapter,
+      chapter,
       openLeaveModal,
       setIsLeavingContent,
     ],
