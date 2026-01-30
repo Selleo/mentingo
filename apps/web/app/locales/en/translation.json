@@ -16,7 +16,8 @@
       "clearAll": "Clear All",
       "validate": "Validate",
       "edit": "Edit",
-      "uploading": "Uploading..."
+      "uploading": "Uploading...",
+      "sending": "Sending..."
     },
     "toast": {
       "noAccess": "You do not have permission to access this resource",
@@ -1582,6 +1583,7 @@
     },
     "other": {
       "forgotPassword": "Forgot your password?",
+      "useMagicLink": "Get a magic link instead",
       "dontHaveAccount": "Don't have an account?",
       "rememberMe": "Remember me",
       "signUp": "Sign up",
@@ -1593,6 +1595,30 @@
     "field": {
       "email": "Email",
       "password": "Password"
+    },
+    "magicLink": {
+      "subHeader": "We are validating your magic link. This may take a moment.",
+      "checking": "Checking your magic link...",
+      "success": "Magic link verified. Redirecting...",
+      "error": "Magic link is invalid or has expired.",
+      "backToLogin": "Back to login"
+    }
+  },
+  "magicLinkView": {
+    "header": "Get your magic link",
+    "subHeader": "Enter your email and we will send you a magic link to sign in.",
+    "validation": {
+      "email": "Invalid email"
+    },
+    "field": {
+      "email": "Email address"
+    },
+    "button": {
+      "sendLink": "Get magic link",
+      "backToLogin": "Back to login"
+    },
+    "toast": {
+      "sent": "Magic link sent to your email."
     }
   },
   "studentCoursesView": {
@@ -2189,6 +2215,7 @@
     "register": "Register",
     "passwordRecovery": "Password Recovery",
     "login": "Login",
+    "magicLink": "Magic Link",
     "createNewPassword": "Create New Password",
     "createAnnouncement": "Create Announcement",
     "announcements": "Announcements",

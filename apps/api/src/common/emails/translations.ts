@@ -49,6 +49,10 @@ export const EMAIL_SUBJECTS_TRANSLATIONS = {
     en: "A user has completed a course on your platform",
     pl: "Użytkownik ukończył kurs na Twojej platformie",
   },
+  magicLinkEmail: {
+    en: "Magic link",
+    pl: "Link do logowania",
+  },
 } as const;
 
 export type EmailSubjectKey = keyof typeof EMAIL_SUBJECTS_TRANSLATIONS;

@@ -27,3 +27,5 @@ export { useAddNewsLanguage } from "./useAddNewsLanguage";
 export { useDeleteNewsLanguage } from "./useDeleteNewsLanguage";
 export { useUploadNewsFile } from "./useUploadNewsFile";
 export { usePreviewNews } from "./usePreviewNews";
+export { useHandleMagicLink } from "./useHandleMagicLink";
+export { useCreateMagicLink } from "./useCreateMagicLink";

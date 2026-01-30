@@ -15,3 +15,4 @@ export const loginResponseSchema = Type.Object({
 });
 
 export type LoginBody = Static<typeof loginSchema>;
+export type LoginResponse = Static<typeof loginResponseSchema>;

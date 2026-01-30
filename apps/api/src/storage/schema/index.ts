@@ -840,3 +840,16 @@ export const news = pgTable("news", {
     .references(() => users.id, { onDelete: "cascade" })
     .notNull(),
 });
+
+export const magicLinkTokens = pgTable("magic_link_tokens", {
+  ...id,
+  ...timestamps,
+  userId: uuid("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+  token: text("token").notNull(),
+  expiryDate: timestamp("expiry_date", {
+    precision: 3,
+    withTimezone: true,
+  }).notNull(),
+});
