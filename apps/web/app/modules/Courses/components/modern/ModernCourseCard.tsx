@@ -146,17 +146,25 @@ const ModernCourseCard = ({
         <div className="relative aspect-video overflow-hidden border border-gray-200 bg-white shadow-md transition-all duration-300">
           {trailerUrl ? (
             <>
-              <img
-                src={thumbnailUrl || DefaultPhotoCourse}
-                alt={title}
+              <div
                 className={cn(
-                  "absolute inset-0 h-full w-full object-cover transition-opacity duration-300",
+                  "absolute inset-0 transition-opacity duration-300",
                   isHovered && showVideo ? "opacity-0" : "opacity-100",
                 )}
-                onError={(event) => {
-                  (event.target as HTMLImageElement).src = DefaultPhotoCourse;
-                }}
-              />
+              >
+                <img
+                  src={thumbnailUrl || DefaultPhotoCourse}
+                  alt={title}
+                  className="h-full w-full object-cover"
+                  onError={(event) => {
+                    (event.target as HTMLImageElement).src = DefaultPhotoCourse;
+                  }}
+                />
+                <div
+                  aria-hidden
+                  className="absolute inset-0 z-10 bg-gradient-to-t from-black via-black/50 to-transparent pointer-events-none"
+                />
+              </div>
               {isEmbed && embedSrc ? (
                 <iframe
                   src={isHovered ? embedSrc : undefined}
@@ -186,14 +194,20 @@ const ModernCourseCard = ({
               )}
             </>
           ) : (
-            <img
-              src={thumbnailUrl || DefaultPhotoCourse}
-              alt={title}
-              className="absolute inset-0 h-full w-full object-cover"
-              onError={(event) => {
-                (event.target as HTMLImageElement).src = DefaultPhotoCourse;
-              }}
-            />
+            <div className="absolute inset-0">
+              <img
+                src={thumbnailUrl || DefaultPhotoCourse}
+                alt={title}
+                className="h-full w-full object-cover"
+                onError={(event) => {
+                  (event.target as HTMLImageElement).src = DefaultPhotoCourse;
+                }}
+              />
+              <div
+                aria-hidden
+                className="absolute inset-0 z-10 bg-gradient-to-t from-black via-black/50 to-transparent pointer-events-none"
+              />
+            </div>
           )}
 
           {showProgress && (
@@ -205,11 +219,6 @@ const ModernCourseCard = ({
             </div>
           )}
 
-          <div
-            aria-hidden
-            className="absolute inset-0 z-20 bg-gradient-to-t from-black/90 via-black/70 to-transparent pointer-events-none transition-opacity duration-300"
-            style={{ opacity: isHovered ? 0 : 1 }}
-          />
           <div
             className="absolute bottom-0 left-0 right-0 z-20 p-4 transition-opacity duration-300"
             style={{ opacity: isHovered ? 0 : 1 }}

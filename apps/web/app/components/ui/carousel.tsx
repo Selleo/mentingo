@@ -137,14 +137,63 @@ type CarouselContentProps = React.HTMLAttributes<HTMLDivElement> & {
 };
 
 const CarouselContent = React.forwardRef<HTMLDivElement, CarouselContentProps>(
-  ({ className, viewportClassName, ...props }, ref) => {
-    const { carouselRef, orientation } = useCarousel();
+  ({ className, viewportClassName, onWheel, ...props }, ref) => {
+    const { carouselRef, orientation, scrollNext, scrollPrev } = useCarousel();
+    const wheelState = React.useRef({ direction: 0, count: 0, timer: null as ReturnType<typeof setTimeout> | null });
+
+    React.useEffect(() => {
+      return () => {
+        if (wheelState.current.timer) clearTimeout(wheelState.current.timer);
+      };
+    }, []);
+
+    const handleWheel = React.useCallback(
+      (event: React.WheelEvent<HTMLDivElement>) => {
+        if (orientation !== "horizontal") {
+          onWheel?.(event);
+          return;
+        }
+
+        const { deltaX, deltaY } = event;
+
+        if (Math.abs(deltaX) <= Math.abs(deltaY)) {
+          onWheel?.(event);
+          return;
+        }
+
+        event.preventDefault();
+
+        const state = wheelState.current;
+        const direction = deltaX > 0 ? 1 : -1;
+
+        if (state.direction !== direction) {
+          state.direction = direction;
+          state.count = 0;
+        }
+
+        if (state.count < 3) {
+          state.count += 1;
+          direction > 0 ? scrollNext() : scrollPrev();
+        }
+
+        if (state.timer) clearTimeout(state.timer);
+        state.timer = setTimeout(() => {
+          state.count = 0;
+          state.direction = 0;
+          state.timer = null;
+        }, 200);
+
+        onWheel?.(event);
+      },
+      [orientation, onWheel, scrollNext, scrollPrev],
+    );
 
     return (
-    <div
-      ref={carouselRef}
-      className={cn("overflow-y-visible", viewportClassName)}
-    >
+      <div
+        ref={carouselRef}
+        className={cn("overflow-y-visible", viewportClassName)}
+        onWheel={handleWheel}
+      >
         <div
           ref={ref}
           className={cn("flex", { "flex-col": orientation === "vertical" }, className)}
