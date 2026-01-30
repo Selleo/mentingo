@@ -1,4 +1,5 @@
 import { Link } from "@remix-run/react";
+import { FileSlidersIcon, PlusIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
@@ -11,11 +12,15 @@ const CoursesHeader = () => {
       <div className="items-center gap-3 flex">
         <Link to="/admin/courses">
           <Button variant="outline" className="w-full">
+            <FileSlidersIcon className="mr-1 size-5" />
             {t("adminCoursesView.courses.header")}
           </Button>
         </Link>
         <Link to="/admin/beta-courses/new">
-          <Button className="w-full">{t("adminCourseView.settings.header")}</Button>
+          <Button className="w-full">
+            <PlusIcon className="mr-1 size-5" />
+            {t("adminCourseView.settings.header")}
+          </Button>
         </Link>
       </div>
     </header>
