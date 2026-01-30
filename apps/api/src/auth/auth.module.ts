@@ -13,6 +13,7 @@ import { S3Service } from "src/s3/s3.service";
 import { SettingsService } from "src/settings/settings.service";
 import { StatisticsModule } from "src/statistics/statistics.module";
 import { StatisticsService } from "src/statistics/statistics.service";
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { UserModule } from "src/user/user.module";
 
 import { AuthController } from "./auth.controller";
@@ -44,6 +45,7 @@ import { TokenService } from "./token.service";
     LocalStrategy,
     CreatePasswordService,
     ResetPasswordService,
+    TenantDbRunnerService,
     ResendVerificationMailCron,
     S3Service,
     BunnyStreamService,

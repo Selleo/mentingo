@@ -9,7 +9,7 @@ import type { SupportedLanguages } from "@repo/shared";
 import type { InferSelectModel } from "drizzle-orm";
 import type { DatabasePg } from "src/common";
 
-export type QATest = InferSelectModel<typeof questionsAndAnswers>;
+export type QATest = Omit<InferSelectModel<typeof questionsAndAnswers>, "tenantId">;
 
 export const createQAFactory = (db: DatabasePg) =>
   Factory.define<QATest>(({ onCreate }) => {
@@ -45,5 +45,5 @@ export const createQAFactory = (db: DatabasePg) =>
       metadata: {},
       baseLanguage: "en",
       availableLocales: ["en"],
-    } as QATest;
+    };
   });

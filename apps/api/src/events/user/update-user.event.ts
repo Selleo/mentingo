@@ -1,10 +1,10 @@
 import type { UserActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { ActorUserType } from "src/common/types/actor-user.type";
 
 type UpdateUserData = {
   userId: UUIDType;
-  actor: CurrentUser;
+  actor: ActorUserType;
   previousUserData: UserActivityLogSnapshot | null;
   updatedUserData: UserActivityLogSnapshot | null;
 };

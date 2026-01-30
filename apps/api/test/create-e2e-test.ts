@@ -5,7 +5,10 @@ import * as express from "express";
 import { ActivityLogsService } from "src/activity-logs/activity-logs.service";
 import { AppModule } from "src/app.module";
 import { EmailAdapter } from "src/common/emails/adapters/email.adapter";
+import { DB, DB_BASE } from "src/storage/db/db.providers";
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
+import { DEFAULT_TEST_TENANT_HOST, ensureTenant } from "./helpers/tenant-helpers";
 import { EmailTestingAdapter } from "./helpers/test-email.adapter";
 import { truncateAllTables } from "./helpers/test-helpers";
 import { setupTestDatabase } from "./test-database";
@@ -25,16 +28,25 @@ export async function createE2ETest(optionsOrProviders: E2ETestOptions | Provide
   const customProviders = options.customProviders ?? [];
   const enableActivityLogs = options.enableActivityLogs ?? false;
 
-  const { db, sql } = await setupTestDatabase();
+  const { db, sql: pgSql, dbBase, pgConnectionString } = await setupTestDatabase();
 
-  await truncateAllTables(db);
+  const defaultTenantId = await ensureTenant(dbBase);
+
+  const dbName = new URL(pgConnectionString).pathname.replace(/^\//, "");
+  await pgSql.unsafe(`ALTER DATABASE "${dbName}" SET app.tenant_id = '${defaultTenantId}'`);
+
+  await pgSql`SELECT set_config('app.tenant_id', ${defaultTenantId}, false)`;
+
+  await truncateAllTables(dbBase, db);
 
   let testModuleBuilder = Test.createTestingModule({
     imports: [AppModule],
     providers: [...customProviders],
   })
-    .overrideProvider("DB")
+    .overrideProvider(DB)
     .useValue(db)
+    .overrideProvider(DB_BASE)
+    .useValue(dbBase)
     .overrideProvider(EmailAdapter)
     .useClass(EmailTestingAdapter);
 
@@ -56,6 +68,12 @@ export async function createE2ETest(optionsOrProviders: E2ETestOptions | Provide
   app.setGlobalPrefix("api");
   app.use(cookieParser());
 
+  app.use((req: express.Request, _res: express.Response, next: express.NextFunction) => {
+    req.headers.referer = `${DEFAULT_TEST_TENANT_HOST}/`;
+
+    next();
+  });
+
   app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
     if (req.path.startsWith("/api/better-auth")) {
       next();
@@ -75,12 +93,21 @@ export async function createE2ETest(optionsOrProviders: E2ETestOptions | Provide
 
   app.useLogger(false);
 
+  const tenantRunner = app.get(TenantDbRunnerService);
+
+  console.info("✅ App setup completed successfully");
+
   return {
     app,
     moduleFixture,
     db,
+    dbBase: app.get(DB_BASE),
+    defaultTenantId,
+    tenantRunner,
+    runAsTenant: <T>(tenantId: string, fn: () => Promise<T>) =>
+      tenantRunner.runWithTenant(tenantId, fn),
     cleanup: async () => {
-      await sql.end();
+      await pgSql.end();
     },
   };
 }

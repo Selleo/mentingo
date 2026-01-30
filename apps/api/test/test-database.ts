@@ -8,6 +8,8 @@ import type { DatabasePg } from "../src/common";
 export async function setupTestDatabase(): Promise<{
   db: DatabasePg;
   sql: ReturnType<typeof postgres>;
+  dbBase: DatabasePg;
+  sqlBase: ReturnType<typeof postgres>;
   pgConnectionString: string;
   redisUrl: string;
 }> {
@@ -19,8 +21,11 @@ export async function setupTestDatabase(): Promise<{
   const sql = postgres(pgConnectionString, { max: 10 });
   const db = drizzle(sql, { schema }) as DatabasePg;
 
+  const sqlBase = postgres(pgConnectionString, { max: 10 });
+  const dbBase = drizzle(sqlBase, { schema }) as DatabasePg;
+
   process.env.DATABASE_URL = pgConnectionString;
   process.env.REDIS_URL = redisUrl;
 
-  return { db, sql, pgConnectionString, redisUrl };
+  return { db, sql, dbBase, sqlBase, pgConnectionString, redisUrl };
 }
