@@ -42,12 +42,8 @@ export const useAddCourseForm = () => {
     }).then(({ data }) => {
       queryClient.invalidateQueries({ queryKey: ALL_COURSES_QUERY_KEY });
       queryClient.invalidateQueries(topCoursesQueryOptions({ language }));
-      queryClient.invalidateQueries(
-        availableCoursesQueryOptions({ language, category: values.categoryId }),
-      );
-      queryClient.invalidateQueries(
-        studentCoursesQueryOptions({ language, category: values.categoryId }),
-      );
+      queryClient.invalidateQueries(availableCoursesQueryOptions({ language }));
+      queryClient.invalidateQueries(studentCoursesQueryOptions({ language }));
 
       navigate(`/admin/beta-courses/${data.id}`);
     });

@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import DefaultPhotoCourse from "~/assets/svgs/default-photo-course.svg";
 import { cn } from "~/lib/utils";
+import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
 import { formatDuration } from "./utils";
 
@@ -121,6 +122,11 @@ const ModernCourseCard = ({
     setIsHovered(false);
     setShowVideo(false);
   };
+
+  const nonFormattedDescription = useMemo(
+    () => (description ? stripHtmlTags(description) : undefined),
+    [description],
+  );
 
   return (
     <div
@@ -258,7 +264,9 @@ const ModernCourseCard = ({
               </div>
             )}
 
-            {description && <p className="line-clamp-2 text-xs text-neutral-600">{description}</p>}
+            {nonFormattedDescription && (
+              <p className="line-clamp-2 text-xs text-neutral-600">{nonFormattedDescription}</p>
+            )}
 
             <div className="flex items-center justify-between">
               <span className="rounded bg-neutral-900 px-2.5 py-1 text-xs font-medium text-white">
