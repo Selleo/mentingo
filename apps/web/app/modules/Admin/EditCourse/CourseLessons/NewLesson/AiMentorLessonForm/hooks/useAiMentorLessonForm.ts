@@ -54,6 +54,7 @@ export const useAiMentorLessonForm = ({
     resolver: zodResolver(aiMentorLessonFormSchema(t)),
     defaultValues: {
       title: lessonToEdit?.title || "",
+      description: lessonToEdit?.description || "",
       aiMentorInstructions: lessonToEdit?.aiMentor?.aiMentorInstructions || "",
       completionConditions: lessonToEdit?.aiMentor?.completionConditions || "",
       type: lessonToEdit?.aiMentor?.type || AI_MENTOR_TYPE.MENTOR,
@@ -67,6 +68,7 @@ export const useAiMentorLessonForm = ({
     if (lessonToEdit) {
       reset({
         title: lessonToEdit.title,
+        description: lessonToEdit.description || "",
         aiMentorInstructions: lessonToEdit.aiMentor?.aiMentorInstructions || "",
         completionConditions: lessonToEdit.aiMentor?.completionConditions || "",
         type: lessonToEdit.aiMentor?.type || AI_MENTOR_TYPE.MENTOR,

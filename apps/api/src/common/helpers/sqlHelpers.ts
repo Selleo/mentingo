@@ -7,25 +7,30 @@ export function setJsonbField(
   key?: string | null,
   value?: string | null,
   createMissing: boolean = true,
+  allowEmpty: boolean = false,
 ) {
-  if (!(key && value)) {
-    return undefined;
-  }
+  if (key == null || value === undefined) return undefined;
+  if (!allowEmpty && !(key && value)) return undefined;
+  if (allowEmpty && value === null) return sql`null`;
 
   return sql`
     jsonb_set(
       COALESCE(${field}, '{}'::jsonb),
-    ARRAY[${key}]::text[],
-    to_jsonb(${value}::text),
-    ${createMissing}
+      ARRAY[${key}]::text[],
+      to_jsonb(${value}::text),
+      ${createMissing}
     )
   `;
 }
 
-export function buildJsonbField(key?: string | null, value?: string | null) {
-  if (!(key && value)) {
-    return undefined;
-  }
+export function buildJsonbField(
+  key?: string | null,
+  value?: string | null,
+  allowEmpty: boolean = false,
+) {
+  if (key == null || value === undefined) return undefined;
+  if (!allowEmpty && !(key && value)) return undefined;
+  if (allowEmpty && value === null) return sql`null`;
 
   return sql`json_build_object(${key}::text, ${value}::text)`;
 }

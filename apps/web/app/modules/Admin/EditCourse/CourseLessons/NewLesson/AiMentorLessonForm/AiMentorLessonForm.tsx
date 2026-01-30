@@ -31,6 +31,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
+import { Textarea } from "~/components/ui/textarea";
 import {
   Tooltip,
   TooltipContent,
@@ -309,6 +310,43 @@ const AiMentorLessonForm = ({
                   </div>
                 </div>
               </div>
+
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => {
+                  return (
+                    <FormItem className="mb-4">
+                      <Label htmlFor="description" className="flex items-center gap-2">
+                        <span>{t("adminCourseView.curriculum.lesson.field.taskDescription")}</span>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>
+                              <Icon name="Info" className="size-6 text-neutral-800" />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent
+                            side="top"
+                            align="center"
+                            className="max-w-sm whitespace-pre-line break-words rounded bg-black px-2 py-1 text-sm text-white shadow-md"
+                          >
+                            {t("adminCourseView.curriculum.lesson.other.taskDescriptionTooltip")}
+                            <TooltipArrow className="fill-black" />
+                          </TooltipContent>
+                        </Tooltip>
+                      </Label>
+                      <FormControl>
+                        <Textarea
+                          {...field}
+                          id="description"
+                          className="placeholder:body-base h-[164px] resize-none placeholder:text-neutral-600"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
+              />
 
               <FormField
                 render={({ field }) => (
