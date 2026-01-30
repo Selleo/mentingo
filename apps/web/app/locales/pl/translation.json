@@ -17,7 +17,8 @@
       "validate": "Popraw błędy",
       "edit": "Edytuj",
       "continue": "Kontynuuj",
-      "uploading": "Wgrywanie..."
+      "uploading": "Wgrywanie...",
+      "sending": "Wysyłanie..."
     },
     "toast": {
       "noAccess": "Nie masz uprawnień do tego zasobu",
@@ -1587,6 +1588,7 @@
     },
     "other": {
       "forgotPassword": "Zapomniałeś hasła?",
+      "useMagicLink": "Użyj magicznego linku",
       "dontHaveAccount": "Nie masz konta?",
       "rememberMe": "Zapamiętaj mnie",
       "signUp": "Zarejestruj się",
@@ -1598,6 +1600,30 @@
     "field": {
       "email": "Email",
       "password": "Hasło"
+    },
+    "magicLink": {
+      "subHeader": "Weryfikujemy Twój magiczny link. To może potrwać chwilę.",
+      "checking": "Sprawdzamy Twój magiczny link...",
+      "success": "Link zweryfikowany. Przekierowujemy...",
+      "error": "Magic link jest nieprawidłowy lub wygasł.",
+      "backToLogin": "Wróć do logowania"
+    }
+  },
+  "magicLinkView": {
+    "header": "Wyślij magiczny link",
+    "subHeader": "Podaj swój e-mail, a wyślemy Ci magiczny link do logowania.",
+    "validation": {
+      "email": "Nieprawidłowy adres email"
+    },
+    "field": {
+      "email": "Adres email"
+    },
+    "button": {
+      "sendLink": "Wyślij magiczny link",
+      "backToLogin": "Wróć do logowania"
+    },
+    "toast": {
+      "sent": "Magic link został wysłany na Twój e-mail."
     }
   },
   "studentCoursesView": {
@@ -2236,6 +2262,7 @@
     "register": "Rejestracja",
     "passwordRecovery": "Odzyskiwanie hasła",
     "login": "Logowanie",
+    "magicLink": "Magiczny link",
     "createNewPassword": "Utwórz nowe hasło",
     "createAnnouncement": "Utwórz ogłoszenie",
     "announcements": "Ogłoszenia",

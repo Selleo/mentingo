@@ -1,6 +1,9 @@
+import { Link } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
 
 import { ProviderOAuthLoginButton } from "~/components/Auth/ProviderOAuthLoginButton";
+import { Icon } from "~/components/Icon";
+import { Button } from "~/components/ui/button";
 import { baseUrl } from "~/utils/baseUrl";
 
 interface SocialLoginProps {
@@ -35,6 +38,13 @@ export function SocialLogin({
           </div>
         </div>
       )}
+
+      <Button type="button" variant="outline" className="mt-4 w-full" asChild>
+        <Link to="/auth/magic-link">
+          <Icon name="WandSparkles" className="mr-2 size-4" />
+          {t("loginView.other.useMagicLink")}
+        </Link>
+      </Button>
 
       {isGoogleOAuthEnabled && (
         <ProviderOAuthLoginButton

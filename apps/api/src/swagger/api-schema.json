@@ -8547,12 +8547,114 @@
           "data": {
             "type": "object",
             "properties": {
-              "message": {
+              "id": {
                 "type": "string"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "firstName": {
+                "type": "string"
+              },
+              "lastName": {
+                "type": "string"
+              },
+              "role": {
+                "type": "string"
+              },
+              "archived": {
+                "type": "boolean"
+              },
+              "deletedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "profilePictureUrl": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "shouldVerifyMFA": {
+                "type": "boolean"
+              },
+              "onboardingStatus": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "createdAt": {
+                    "type": "string"
+                  },
+                  "updatedAt": {
+                    "type": "string"
+                  },
+                  "userId": {
+                    "type": "string"
+                  },
+                  "dashboard": {
+                    "type": "boolean"
+                  },
+                  "courses": {
+                    "type": "boolean"
+                  },
+                  "announcements": {
+                    "type": "boolean"
+                  },
+                  "profile": {
+                    "type": "boolean"
+                  },
+                  "settings": {
+                    "type": "boolean"
+                  },
+                  "providerInformation": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "id",
+                  "createdAt",
+                  "updatedAt",
+                  "userId",
+                  "dashboard",
+                  "courses",
+                  "announcements",
+                  "profile",
+                  "settings",
+                  "providerInformation"
+                ]
               }
             },
             "required": [
-              "message"
+              "id",
+              "createdAt",
+              "updatedAt",
+              "email",
+              "firstName",
+              "lastName",
+              "role",
+              "archived",
+              "deletedAt",
+              "profilePictureUrl",
+              "shouldVerifyMFA",
+              "onboardingStatus"
             ]
           }
         },

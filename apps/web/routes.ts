@@ -10,6 +10,7 @@ export const routes: (
         route("register", "modules/Auth/Register.page.tsx");
         route("create-new-password", "modules/Auth/CreateNewPassword.page.tsx");
         route("password-recovery", "modules/Auth/PasswordRecovery.page.tsx");
+        route("magic-link", "modules/Auth/MagicLink.page.tsx");
         route("mfa", "modules/Auth/MFA.page.tsx");
       });
       route("", "modules/Navigation/NavigationWrapper.tsx", () => {

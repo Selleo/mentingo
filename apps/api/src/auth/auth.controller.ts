@@ -37,7 +37,6 @@ import {
   CreateMagicLinkBody,
   createMagicLinkResponseSchema,
   createMagicLinkSchema,
-  verifyMagicLinkResponseSchema,
 } from "./schemas/magic-link.schema";
 import {
   MFASetupResponseSchema,
@@ -53,6 +52,7 @@ import {
 } from "./schemas/reset-password.schema";
 import { TokenService } from "./token.service";
 
+import type { LoginResponse } from "./schemas/login.schema";
 import type { ProviderLoginUserType } from "src/utils/types/provider-login-user.type";
 
 @Controller("auth")
@@ -356,14 +356,14 @@ export class AuthController {
   @Get("magic-link/verify")
   @Validate({
     request: [{ type: "query", schema: Type.String(), name: "token", required: true }],
-    response: baseResponse(verifyMagicLinkResponseSchema),
+    response: baseResponse(loginResponseSchema),
   })
   async handleMagicLink(
     @Query("token") token: string,
     @Res({ passthrough: true }) response: Response,
-  ) {
-    await this.authService.handleMagicLinkLogin(response, token);
+  ): Promise<BaseResponse<LoginResponse>> {
+    const loginResponse = await this.authService.handleMagicLinkLogin(response, token);
 
-    return new BaseResponse({ message: "magicLink.verifiedSuccessfully" });
+    return new BaseResponse(loginResponse);
   }
 }

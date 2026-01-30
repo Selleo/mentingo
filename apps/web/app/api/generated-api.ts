@@ -162,7 +162,29 @@ export interface CreateMagicLinkResponse {
 
 export interface HandleMagicLinkResponse {
   data: {
-    message: string;
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+    archived: boolean;
+    deletedAt: string | null;
+    profilePictureUrl: string | null;
+    shouldVerifyMFA: boolean;
+    onboardingStatus: {
+      id: string;
+      createdAt: string;
+      updatedAt: string;
+      userId: string;
+      dashboard: boolean;
+      courses: boolean;
+      announcements: boolean;
+      profile: boolean;
+      settings: boolean;
+      providerInformation: boolean;
+    };
   };
 }
 

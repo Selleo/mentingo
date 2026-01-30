@@ -621,6 +621,8 @@ export class AuthService {
   }
 
   async handleMagicLinkLogin(response: Response, token: string) {
+    const { MFAEnforcedRoles } = await this.settingsService.getGlobalSettings();
+
     const dateNow = new Date();
 
     const { user, accessToken, refreshToken } = await this.db.transaction(async (trx) => {
@@ -647,9 +649,10 @@ export class AuthService {
       return { user, accessToken, refreshToken };
     });
 
-    this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
-
     const { id: userId, email, role } = user;
+
+    const userSettings = await this.settingsService.getUserSettings(userId);
+    const onboardingStatus = await this.userService.getAllOnboardingStatus(userId);
 
     this.eventBus.publish(
       new UserLoginEvent({
@@ -658,6 +661,24 @@ export class AuthService {
         actor: { userId, email, role: role as UserRole },
       }),
     );
+
+    if (MFAEnforcedRoles.includes(role as UserRole) || userSettings.isMFAEnabled) {
+      this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken);
+
+      return {
+        ...user,
+        shouldVerifyMFA: true,
+        onboardingStatus,
+      };
+    }
+
+    this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
+
+    return {
+      ...user,
+      shouldVerifyMFA: false,
+      onboardingStatus,
+    };
   }
 
   async createMagicLinkToken(userId: UUIDType): Promise<MagicLinkToken> {
