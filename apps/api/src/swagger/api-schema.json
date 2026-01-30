@@ -279,6 +279,59 @@
         }
       }
     },
+    "/api/auth/magic-link/create": {
+      "post": {
+        "operationId": "AuthController_createMagicLink",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMagicLinkBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateMagicLinkResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/magic-link/verify": {
+      "get": {
+        "operationId": "AuthController_handleMagicLink",
+        "parameters": [
+          {
+            "name": "token",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HandleMagicLinkResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/settings/global": {
       "get": {
         "operationId": "SettingsController_getPublicGlobalSettings",
@@ -8451,6 +8504,55 @@
             },
             "required": [
               "isValid"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CreateMagicLinkBody": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "CreateMagicLinkResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "HandleMagicLinkResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
             ]
           }
         },

@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Post,
+  Query,
   Req,
   Res,
   UnauthorizedException,
@@ -10,6 +11,7 @@ import {
 } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
 import { AuthGuard } from "@nestjs/passport";
+import { Type, type Static } from "@sinclair/typebox";
 import { type Request, Response } from "express";
 import { Validate } from "nestjs-typebox";
 
@@ -32,6 +34,12 @@ import { CreateAccountBody, createAccountSchema } from "./schemas/create-account
 import { type CreatePasswordBody, createPasswordSchema } from "./schemas/create-password.schema";
 import { LoginBody, loginResponseSchema, loginSchema } from "./schemas/login.schema";
 import {
+  CreateMagicLinkBody,
+  createMagicLinkResponseSchema,
+  createMagicLinkSchema,
+  verifyMagicLinkResponseSchema,
+} from "./schemas/magic-link.schema";
+import {
   MFASetupResponseSchema,
   MFAVerifyBody,
   MFAVerifyResponseSchema,
@@ -45,7 +53,6 @@ import {
 } from "./schemas/reset-password.schema";
 import { TokenService } from "./token.service";
 
-import type { Static } from "@sinclair/typebox";
 import type { ProviderLoginUserType } from "src/utils/types/provider-login-user.type";
 
 @Controller("auth")
@@ -331,5 +338,32 @@ export class AuthController {
     const isValid = await this.authService.verifyMFACode(userId, body.token, response);
 
     return new BaseResponse({ isValid });
+  }
+
+  @Public()
+  @Post("magic-link/create")
+  @Validate({
+    request: [{ type: "body", schema: createMagicLinkSchema }],
+    response: baseResponse(createMagicLinkResponseSchema),
+  })
+  async createMagicLink(@Body() body: CreateMagicLinkBody) {
+    await this.authService.createMagicLink(body.email);
+
+    return new BaseResponse({ message: "magicLink.createdSuccessfully" });
+  }
+
+  @Public()
+  @Get("magic-link/verify")
+  @Validate({
+    request: [{ type: "query", schema: Type.String(), name: "token", required: true }],
+    response: baseResponse(verifyMagicLinkResponseSchema),
+  })
+  async handleMagicLink(
+    @Query("token") token: string,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    await this.authService.handleMagicLinkLogin(response, token);
+
+    return new BaseResponse({ message: "magicLink.verifiedSuccessfully" });
   }
 }

@@ -5,6 +5,8 @@ import CreatePasswordReminderEmailTemplate from "./templates/CreatePasswordRemin
 export const CreatePasswordReminderEmail = emailTemplateFactory(CreatePasswordReminderEmailTemplate);
 import FinishedCourseEmailTemplate from "./templates/FinishedCourseEmail";
 export const FinishedCourseEmail = emailTemplateFactory(FinishedCourseEmailTemplate);
+import MagicLinkEmailTemplate from "./templates/MagicLinkEmail";
+export const MagicLinkEmail = emailTemplateFactory(MagicLinkEmailTemplate);
 import NewUserEmailTemplate from "./templates/NewUserEmail";
 export const NewUserEmail = emailTemplateFactory(NewUserEmailTemplate);
 import PasswordRecoveryEmailTemplate from "./templates/PasswordRecoveryEmail";
