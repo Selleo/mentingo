@@ -149,7 +149,14 @@ const ModernCourseCard = ({
         }}
         tabIndex={0}
       >
-        <div className="relative aspect-video overflow-hidden border border-gray-200 bg-white shadow-md transition-all duration-300">
+        <div
+          className={cn(
+            "relative aspect-video overflow-hidden border border-gray-200 bg-white shadow-md transition-all duration-300 rounded-lg",
+            {
+              "rounded-b-none": isHovered,
+            },
+          )}
+        >
           {trailerUrl ? (
             <>
               <div

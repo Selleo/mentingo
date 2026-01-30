@@ -1,5 +1,5 @@
 import useEmblaCarousel, { type UseEmblaCarouselType } from "embla-carousel-react";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import * as React from "react";
 
 import { Button } from "~/components/ui/button";
@@ -220,8 +220,14 @@ const CarouselItem = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLD
 );
 CarouselItem.displayName = "CarouselItem";
 
-const CarouselPrevious = React.forwardRef<HTMLButtonElement, React.ComponentProps<typeof Button>>(
-  ({ className, variant = "outline", size = "icon", ...props }, ref) => {
+const CarouselPrevious = React.forwardRef<
+  HTMLButtonElement,
+  React.ComponentProps<typeof Button> & { iconSize?: number; iconClassName?: string }
+>(
+  (
+    { className, variant = "outline", size = "icon", iconSize = 16, iconClassName, ...props },
+    ref,
+  ) => {
     const { scrollPrev, canScrollPrev } = useCarousel();
 
     return (
@@ -234,7 +240,7 @@ const CarouselPrevious = React.forwardRef<HTMLButtonElement, React.ComponentProp
         onClick={scrollPrev}
         {...props}
       >
-        <ArrowLeft className="size-4" />
+        <ChevronLeft size={iconSize} className={cn("text-black", iconClassName)} />
         <span className="sr-only">Previous slide</span>
       </Button>
     );
@@ -242,8 +248,11 @@ const CarouselPrevious = React.forwardRef<HTMLButtonElement, React.ComponentProp
 );
 CarouselPrevious.displayName = "CarouselPrevious";
 
-const CarouselNext = React.forwardRef<HTMLButtonElement, React.ComponentProps<typeof Button>>(
-  ({ className, variant = "outline", size = "icon", ...props }, ref) => {
+const CarouselNext = React.forwardRef<
+  HTMLButtonElement,
+  React.ComponentProps<typeof Button> & { iconSize?: number; iconClassName?: string }
+>(
+  ({ className, variant = "outline", size = "icon", iconSize = 16, iconClassName, ...props }, ref) => {
     const { scrollNext, canScrollNext } = useCarousel();
 
     return (
@@ -256,7 +265,7 @@ const CarouselNext = React.forwardRef<HTMLButtonElement, React.ComponentProps<ty
         onClick={scrollNext}
         {...props}
       >
-        <ArrowRight className="size-4" />
+        <ChevronRight size={iconSize} className={cn("text-black", iconClassName)} />
         <span className="sr-only">Next slide</span>
       </Button>
     );

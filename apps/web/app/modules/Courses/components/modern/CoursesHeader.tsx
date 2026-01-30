@@ -1,18 +1,21 @@
 import { Link } from "@remix-run/react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
 
 const CoursesHeader = () => {
+  const { t } = useTranslation();
+
   return (
-    <header className="sticky top-0 w-full flex justify-end p-2 -mt-16 z-[40]">
+    <header className="sticky top-0 w-full flex justify-end p-1 -mt-16 z-[40] bg-[rgba(255,255,255,0.3)] backdrop-blur">
       <div className="items-center gap-3 flex">
         <Link to="/admin/courses">
           <Button variant="outline" className="w-full">
-            Manage Courses
+            {t("adminCoursesView.courses.header")}
           </Button>
         </Link>
         <Link to="/admin/beta-courses/new">
-          <Button className="w-full">Create new course</Button>
+          <Button className="w-full">{t("adminCourseView.settings.header")}</Button>
         </Link>
       </div>
     </header>

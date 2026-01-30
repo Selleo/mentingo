@@ -660,7 +660,7 @@
       }
     },
     "courses": {
-      "header": "Manage Courses",
+      "header": "Manage courses",
       "subHeader": "All courses you can view and edit"
     },
     "field": {
@@ -1123,7 +1123,7 @@
         "descriptionMinLength": "Description must be at least 2 characters.",
         "categoryRequired": "Category is required"
       },
-      "header": "Create new course",
+      "header": "Create a new course",
       "subHeader": "Provide the details to set up a new course. You’ll have more options to customize it later.",
       "editHeader": "Basic settings",
       "editSubHeader": "Fill in the details to create a new course.",
@@ -2223,7 +2223,7 @@
     "createNewCategory": "Create New Category",
     "categoryDetails": "Category Details",
     "categories": "Categories",
-    "createNewCourse": "Create New Course",
+    "createNewCourse": "Create a new course",
     "admin": "Admin",
     "qa": "Q&A",
     "createQA": "Create new Q&A",

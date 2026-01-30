@@ -1,4 +1,3 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import {
@@ -65,12 +64,12 @@ const TopCoursesCarousel = ({ courses }: TopCoursesCarouselProps) => {
   );
 
   return (
-    <section className="relative group">
+    <section className="relative group px-4 md:px-8 mb-12">
       <Carousel
         opts={{ align: "start", slidesToScroll: 1, skipSnaps: false }}
         setApi={setCarouselApi}
       >
-        <CarouselContent className="gap-24 px-4 pb-6 pt-10 md:px-8 ml-20">
+        <CarouselContent className="gap-24 px-4 mt-10 md:px-8 ml-20">
           {courses.map((course, index) => (
             <CarouselItem key={course.id} className="w-[360px] md:w-[420px] lg:w-[440px]">
               <div className="relative pl-6">
@@ -92,20 +91,28 @@ const TopCoursesCarousel = ({ courses }: TopCoursesCarouselProps) => {
         </CarouselContent>
 
         {canScrollPrev && (
-          <CarouselPrevious className="absolute left-0 top-0 bottom-0 z-[150] w-12 items-center justify-center bg-gradient-to-r from-black/50 to-transparent transition-opacity duration-300 hover:from-black/70 md:opacity-0 md:group-hover:opacity-100">
-            <div className="flex h-full w-full items-center justify-center">
-              <ChevronLeft className="size-6 text-white" />
-            </div>
-          </CarouselPrevious>
+          <CarouselPrevious
+            iconSize={24}
+            className="absolute left-2 top-1/2 z-[150] border-none flex h-[52px] w-[52px] -translate-y-1/2 items-center justify-center rounded-full bg-black/70 shadow-lg transition-all hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white md:opacity-0 md:group-hover:opacity-100 bg-white hover:border-none duration-200"
+          />
         )}
         {canScrollNext && (
-          <CarouselNext className="absolute right-0 top-0 bottom-0 z-[150] w-12 items-center justify-center bg-gradient-to-l from-black/50 to-transparent transition-opacity duration-300 hover:from-black/70 md:opacity-0 md:group-hover:opacity-100">
-            <div className="flex h-full w-full items-center justify-center">
-              <ChevronRight className="size-6 text-white" />
-            </div>
-          </CarouselNext>
+          <CarouselNext
+            iconSize={24}
+            className="absolute right-2 top-1/2 z-[150] border-none flex h-[52px] w-[52px] -translate-y-1/2 items-center justify-center rounded-full bg-black/70 shadow-lg transition-all hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white md:opacity-0 md:group-hover:opacity-100 bg-white hover:border-none duration-200"
+          />
         )}
       </Carousel>
+      {canScrollPrev && (
+        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+          <div className="h-full w-full bg-gradient-to-r from-white via-white/80 to-white/0" />
+        </div>
+      )}
+      {canScrollNext && (
+        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+          <div className="h-full w-full bg-gradient-to-l from-white via-white/80 to-white/0" />
+        </div>
+      )}
     </section>
   );
 };
