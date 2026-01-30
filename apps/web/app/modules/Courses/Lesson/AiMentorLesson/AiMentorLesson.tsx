@@ -25,6 +25,7 @@ import ChatLoader from "~/modules/Courses/Lesson/AiMentorLesson/components/ChatL
 import ChatMessage from "~/modules/Courses/Lesson/AiMentorLesson/components/ChatMessage";
 import { LessonForm } from "~/modules/Courses/Lesson/AiMentorLesson/components/LessonForm";
 import RetakeModal from "~/modules/Courses/Lesson/AiMentorLesson/components/RetakeModal";
+import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
 import type { GetLessonByIdResponse } from "~/api/generated-api";
 
@@ -107,7 +108,7 @@ const AiMentorLesson = ({ lesson, lessonLoading, isPreviewMode = false }: AiMent
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   const hasTaskDescription = Boolean(
-    lesson.description && lesson.description.replace(/<[^>]*>/g, "").trim().length,
+    lesson.description && stripHtmlTags(lesson.description).trim().length,
   );
 
   useEffect(() => {
