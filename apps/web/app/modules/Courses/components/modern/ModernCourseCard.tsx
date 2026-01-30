@@ -1,14 +1,23 @@
 import { Link } from "@remix-run/react";
 import { BookOpen, Clock, Play } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import DefaultPhotoCourse from "~/assets/svgs/default-photo-course.svg";
 import { cn } from "~/lib/utils";
 
-import MOCKED_VIDEO from "../../../../../app/assets/video-e2e.mp4";
-
 import { formatDuration } from "./utils";
+
+const isEmbedUrl = (url: string): boolean => {
+  return url.includes("iframe.mediadelivery.net/embed") || url.includes("youtube.com/embed");
+};
+
+const getEmbedUrlWithParams = (url: string): string => {
+  const separator = url.includes("?") ? "&" : "?";
+  const params =
+    "autoplay=true&muted=true&loop=true&preload=true&controls=0&rel=0&modestbranding=1";
+  return `${url}${separator}${params}`;
+};
 
 type ModernCourseCardProps = {
   id: string;
@@ -37,8 +46,11 @@ const ModernCourseCard = ({
 }: ModernCourseCardProps) => {
   const { t } = useTranslation();
   const [isHovered, setIsHovered] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
+  const [isIframeLoaded, setIsIframeLoaded] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const preloadTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const durationLabel = formatDuration(estimatedDurationMinutes);
 
@@ -48,8 +60,19 @@ const ModernCourseCard = ({
 
   const showProgress = progressPercent && progressPercent > 0;
 
+  const isEmbed = useMemo(() => trailerUrl && isEmbedUrl(trailerUrl), [trailerUrl]);
+  const embedSrc = useMemo(
+    () => (trailerUrl && isEmbed ? getEmbedUrlWithParams(trailerUrl) : null),
+    [trailerUrl, isEmbed],
+  );
+
   useEffect(() => {
-    if (!videoRef.current) return;
+    if (isEmbed || !trailerUrl) return;
+    videoRef.current?.load();
+  }, [trailerUrl, isEmbed]);
+
+  useEffect(() => {
+    if (!videoRef.current || isEmbed) return;
 
     if (isHovered) {
       videoRef.current.currentTime = 0;
@@ -61,24 +84,42 @@ const ModernCourseCard = ({
     } else {
       videoRef.current.pause();
     }
-  }, [isHovered]);
+  }, [isHovered, isEmbed]);
 
   useEffect(() => {
+    if (isHovered && trailerUrl) {
+      if (preloadTimeoutRef.current) {
+        clearTimeout(preloadTimeoutRef.current);
+      }
+
+      preloadTimeoutRef.current = setTimeout(() => {
+        setShowVideo(true);
+      }, 1000);
+    } else {
+      if (preloadTimeoutRef.current) {
+        clearTimeout(preloadTimeoutRef.current);
+      }
+      setShowVideo(false);
+      setIsIframeLoaded(false);
+    }
+
     return () => {
-      if (hoverTimeoutRef.current) {
-        clearTimeout(hoverTimeoutRef.current);
+      if (preloadTimeoutRef.current) {
+        clearTimeout(preloadTimeoutRef.current);
       }
     };
-  }, []);
+  }, [isHovered, trailerUrl]);
 
   const handleMouseEnter = () => {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
     hoverTimeoutRef.current = setTimeout(() => setIsHovered(true), 220);
+    setShowVideo(false);
   };
 
   const handleMouseLeave = () => {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-    hoverTimeoutRef.current = setTimeout(() => setIsHovered(false), 60);
+    setIsHovered(false);
+    setShowVideo(false);
   };
 
   return (
@@ -110,24 +151,39 @@ const ModernCourseCard = ({
                 alt={title}
                 className={cn(
                   "absolute inset-0 h-full w-full object-cover transition-opacity duration-300",
-                  isHovered ? "opacity-0" : "opacity-100",
+                  isHovered && showVideo ? "opacity-0" : "opacity-100",
                 )}
                 onError={(event) => {
                   (event.target as HTMLImageElement).src = DefaultPhotoCourse;
                 }}
               />
-              <video
-                ref={videoRef}
-                // src={trailerUrl}
-                src={MOCKED_VIDEO}
-                className={cn(
-                  "absolute inset-0 h-full w-full object-cover transition-opacity duration-300",
-                  isHovered ? "opacity-100" : "opacity-0",
-                )}
-                muted
-                loop
-                playsInline
-              />
+              {isEmbed && embedSrc ? (
+                <iframe
+                  src={isHovered ? embedSrc : undefined}
+                  className={cn(
+                    "absolute inset-0 h-full w-full border-0 transition-opacity duration-300",
+                    isHovered && showVideo && isIframeLoaded ? "opacity-100" : "opacity-0",
+                  )}
+                  allow="autoplay; encrypted-media"
+                  title={title}
+                  onLoad={() => setIsIframeLoaded(true)}
+                />
+              ) : (
+                <video
+                  ref={videoRef}
+                  src={trailerUrl}
+                  preload="auto"
+                  className={cn(
+                    "absolute inset-0 h-full w-full object-cover transition-opacity duration-300",
+                    isHovered && showVideo ? "opacity-100" : "opacity-0",
+                  )}
+                  muted
+                  loop
+                  playsInline
+                  autoPlay
+                  controls={false}
+                />
+              )}
             </>
           ) : (
             <img
@@ -150,11 +206,12 @@ const ModernCourseCard = ({
           )}
 
           <div
-            className="absolute inset-0 bg-gradient-to-t from-black/100 via-black/60 to-transparent transition-opacity duration-300"
+            aria-hidden
+            className="absolute inset-0 z-20 bg-gradient-to-t from-black/90 via-black/70 to-transparent pointer-events-none transition-opacity duration-300"
             style={{ opacity: isHovered ? 0 : 1 }}
           />
           <div
-            className="absolute bottom-0 left-0 right-0 p-4 transition-opacity duration-300"
+            className="absolute bottom-0 left-0 right-0 z-20 p-4 transition-opacity duration-300"
             style={{ opacity: isHovered ? 0 : 1 }}
           >
             <h3 className="line-clamp-2 text-base font-semibold text-white drop-shadow-lg">

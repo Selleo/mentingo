@@ -1,12 +1,17 @@
-import { ALLOWED_VIDEO_FILE_TYPES } from "@repo/shared";
+import { ALLOWED_VIDEO_FILE_TYPES, ENTITY_TYPES } from "@repo/shared";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { ApiClient } from "~/api/api-client";
 import { useDeleteCourseTrailer } from "~/api/mutations/admin/useDeleteCourseTrailer";
-import { useUploadCourseTrailer } from "~/api/mutations/admin/useUploadCourseTrailer";
+import { useInitVideoUpload } from "~/api/mutations/admin/useInitVideoUpload";
 import { useUploadFile } from "~/api/mutations/admin/useUploadFile";
+import { availableCoursesQueryOptions, studentCoursesQueryOptions } from "~/api/queries";
+import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
 import { useCategoriesSuspense } from "~/api/queries/useCategories";
+import { topCoursesQueryOptions } from "~/api/queries/useTopCourses";
 import { useUserDetails } from "~/api/queries/useUserDetails";
+import { queryClient } from "~/api/queryClient";
 import ImageUploadInput from "~/components/FileUploadInput/ImageUploadInput";
 import { FormTextField } from "~/components/Form/FormTextField";
 import { Icon } from "~/components/Icon";
@@ -22,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { useTusVideoUpload } from "~/hooks/useTusVideoUpload";
 import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/compontents/MissingTranslationsAlert";
 import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
@@ -37,6 +43,11 @@ import { CourseSettingsSwitches } from "./components/CourseSettingsSwitches";
 import { useCourseSettingsForm } from "./hooks/useCourseSettingsForm";
 
 import type { SupportedLanguages } from "@repo/shared";
+
+const isEmbedUrl = (url?: string) => {
+  if (!url) return false;
+  return url.includes("iframe.mediadelivery.net/embed") || url.includes("youtube.com/embed");
+};
 
 type CourseSettingsProps = {
   courseId: string;
@@ -75,21 +86,26 @@ const CourseSettings = ({
   });
 
   const { data: categories } = useCategoriesSuspense();
-  const [isUploading, setIsUploading] = useState(false);
   const { mutateAsync: uploadFile } = useUploadFile();
-  const { mutateAsync: uploadTrailer } = useUploadCourseTrailer();
   const { mutateAsync: deleteTrailer } = useDeleteCourseTrailer();
-  const [isTrailerUploading, setIsTrailerUploading] = useState(false);
-
+  const { mutateAsync: initVideoUpload } = useInitVideoUpload();
+  const { getSessionForFile, uploadVideo } = useTusVideoUpload();
   const { data: userDetails } = useUserDetails(authorId);
 
   const isFormValid = form.formState.isDirty;
 
+  const [isUploading, setIsUploading] = useState(false);
+  const [isTrailerUploading, setIsTrailerUploading] = useState(false);
   const [displayThumbnailUrl, setDisplayThumbnailUrl] = useState<string | undefined>(
     thumbnailS3SingedUrl || undefined,
   );
   const [displayTrailerUrl, setDisplayTrailerUrl] = useState<string | undefined>(
     trailerUrl || undefined,
+  );
+
+  const trailerEmbedUrl = useMemo(
+    () => (displayTrailerUrl && isEmbedUrl(displayTrailerUrl) ? displayTrailerUrl : undefined),
+    [displayTrailerUrl],
   );
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const trailerInputRef = useRef<HTMLInputElement | null>(null);
@@ -136,15 +152,46 @@ const CourseSettings = ({
       if (!courseId) return;
       setIsTrailerUploading(true);
       try {
-        const response = await uploadTrailer({ courseId, file });
-        setDisplayTrailerUrl(response.data.trailerUrl ?? undefined);
+        const session = await getSessionForFile({
+          file,
+          init: () =>
+            initVideoUpload({
+              filename: file.name,
+              sizeBytes: file.size,
+              mimeType: file.type,
+              title: file.name,
+              resource: ENTITY_TYPES.COURSE,
+              entityId: courseId,
+              entityType: ENTITY_TYPES.COURSE,
+              relationshipType: "trailer",
+            }),
+        });
+
+        await uploadVideo({ file, session });
+
+        const courseResponse = await ApiClient.api.courseControllerGetBetaCourseById({
+          id: courseId,
+          language: courseLanguage,
+        });
+        setDisplayTrailerUrl(courseResponse.data.data.trailerUrl ?? undefined);
+
+        queryClient.invalidateQueries({
+          queryKey: [COURSE_QUERY_KEY, { id: courseId }],
+        });
+        queryClient.invalidateQueries({ queryKey: ["course"] });
+        queryClient.invalidateQueries(topCoursesQueryOptions({ language: courseLanguage }));
+        queryClient.invalidateQueries(availableCoursesQueryOptions({ language: courseLanguage }));
+        queryClient.invalidateQueries(studentCoursesQueryOptions({ language: courseLanguage }));
       } catch (error) {
         console.error("Error uploading trailer:", error);
       } finally {
         setIsTrailerUploading(false);
+        if (trailerInputRef.current) {
+          trailerInputRef.current.value = "";
+        }
       }
     },
-    [courseId, uploadTrailer],
+    [courseId, getSessionForFile, initVideoUpload, uploadVideo, courseLanguage],
   );
 
   const removeTrailer = useCallback(async () => {
@@ -291,9 +338,22 @@ const CourseSettings = ({
                   {displayTrailerUrl && (
                     <div className="flex flex-col gap-3">
                       <div className="overflow-hidden rounded-lg border border-neutral-200">
-                        <video src={displayTrailerUrl} controls className="h-auto w-full">
-                          <track kind="captions" className="sr-only" />
-                        </video>
+                        {trailerEmbedUrl ? (
+                          <iframe
+                            src={trailerEmbedUrl}
+                            title={t("adminCourseView.settings.trailerPreview", {
+                              defaultValue: "Trailer preview",
+                            })}
+                            allow="autoplay; encrypted-media"
+                            allowFullScreen
+                            loading="lazy"
+                            className="aspect-video h-auto w-full border-none"
+                          />
+                        ) : (
+                          <video src={displayTrailerUrl} controls className="h-auto w-full">
+                            <track kind="captions" className="sr-only" />
+                          </video>
+                        )}
                       </div>
                       <Button type="button" onClick={removeTrailer} variant="destructive">
                         <Icon name="TrashIcon" className="mr-2" />
