@@ -175,7 +175,7 @@ const ModernCourseCard = ({
                 <iframe
                   src={isHovered ? embedSrc : undefined}
                   className={cn(
-                    "absolute inset-0 h-full w-full border-0 transition-opacity duration-300",
+                    "absolute inset-0 h-full w-full border-0 transition-opacity duration-300 pointer-events-none",
                     isHovered && showVideo && isIframeLoaded ? "opacity-100" : "opacity-0",
                   )}
                   allow="autoplay; encrypted-media"
@@ -188,7 +188,7 @@ const ModernCourseCard = ({
                   src={trailerUrl}
                   preload="auto"
                   className={cn(
-                    "absolute inset-0 h-full w-full object-cover transition-opacity duration-300",
+                    "absolute inset-0 h-full w-full object-cover transition-opacity duration-300 pointer-events-none",
                     isHovered && showVideo ? "opacity-100" : "opacity-0",
                   )}
                   muted
