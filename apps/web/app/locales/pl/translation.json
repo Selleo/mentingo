@@ -1030,6 +1030,8 @@
       "candidateNotAvailable": "Nie można przenieść własności kursu na tego użytkownika",
       "createCourseSuccessfully": "Kurs utworzony pomyślnie",
       "courseUpdatedSuccessfully": "Kurs zaktualizowany pomyślnie",
+      "courseTrailerUpdatedSuccessfully": "Zwiastun kursu został zaktualizowany",
+      "courseTrailerRemovedSuccessfully": "Zwiastun kursu został usunięty",
       "certificateUpdatedSuccessfully": "Certyfikat zaktualizowany pomyślnie",
       "certificateUpdateError": "Wystąpił błąd podczas aktualizacji certyfikatu",
       "maxTitleLengthExceeded_one": "Tytuł nie może mieć więcej niż {{count}} znak",
@@ -1056,6 +1058,7 @@
       },
       "button": {
         "removeThumbnail": "Usuń miniaturę",
+        "removeTrailer": "Usuń zwiastun",
         "includesCertificate": "Zawiera certyfikat",
         "doesNotIncludeCertificate": "Nie zawiera certyfikatu"
       },
@@ -1080,6 +1083,7 @@
         "category": "Kategoria",
         "description": "Opis",
         "thumbnail": "Miniatura",
+        "trailer": "Zwiastun kursu",
         "baseLanguage": "Język podstawowy"
       },
       "placeholder": {
@@ -1630,6 +1634,19 @@
         "description": "Opis",
         "author": "Autor"
       }
+    },
+    "modernView": {
+      "continueLearning": "Kontynuuj naukę",
+      "topCourses": "Top 5 najpopularniejszych kursów",
+      "hero": {
+        "start": "Rozpocznij",
+        "moreInfo": "Więcej informacji",
+        "info": "Info"
+      },
+      "lessonsCount_one": "{{count}} lekcja",
+      "lessonsCount_few": "{{count}} lekcje",
+      "lessonsCount_many": "{{count}} lekcji",
+      "lessonsCount_other": "{{count}} lekcji"
     }
   },
   "studentQuizSummaryView": {
@@ -1896,6 +1913,8 @@
       "newUserNotificationsDescription": "Otrzymuj powiadomienia gdy zostanie utworzony nowy użytkownik",
       "coursesVisibility": "Pokazuj kursy odwiedzającym",
       "coursesVisibilityDescription": "Pozwól odwiedzającym przeglądać listę kursów i korzystać z darmowych lekcji bez logowania",
+      "modernCourseList": "Używaj nowoczesnej listy kursów",
+      "modernCourseListDescription": "Włącz nowy wygląd listy kursów z sekcją hero i top kursami",
       "finishedCourseNotification": "Powiadomienia o ukończonych kursach",
       "finishedCourseNotificationDescription": "Otrzymuj powiadomienia, gdy użytkownik ukończy kurs",
       "studentsWithOverdueCourseNotification": "Powiadomienia o studentach z zaległymi kursami",
@@ -1904,6 +1923,7 @@
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o nowych użytkownikach zostały pomyślnie zaktualizowane",
       "coursesVisibilityPreferenceChangeSuccess": "Preferencje widoczności kursów dla niezalogowanych użytkowników zostały zaktualizowane",
+      "modernCourseListPreferenceChangeSuccess": "Preferencje nowoczesnej listy kursów zostały pomyślnie zaktualizowane",
       "finishedCourseNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o ukończonych kursach zostały pomyślnie zaktualizowane",
       "finishedCourseNotificationsPreferenceChangeError": "Nie udało się zaktualizować preferencji powiadomień o ukończonych kursach",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o zaległych kursach zostały pomyślnie zaktualizowane",

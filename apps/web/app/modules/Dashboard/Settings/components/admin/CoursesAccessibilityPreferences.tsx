@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 
+import { useToggleModernCourseList } from "~/api/mutations/admin/useToggleModernCourseList";
 import { useUnregisteredUserCoursesAccessibility } from "~/api/mutations/admin/useUnregisteredUserCoursesAccessibility";
 
 import { SettingItem } from "../SettingItem";
@@ -17,6 +18,7 @@ export default function CoursesAccessibilityPreferences({
 
   const { mutate: changeUnregisteredUserCoursesAccessibility } =
     useUnregisteredUserCoursesAccessibility();
+  const { mutate: toggleModernCourseList } = useToggleModernCourseList();
 
   const handleCoursesAccessibilityChange = () => {
     changeUnregisteredUserCoursesAccessibility();
@@ -30,6 +32,13 @@ export default function CoursesAccessibilityPreferences({
         description={t("adminPreferences.field.coursesVisibilityDescription")}
         checked={globalSettings.unregisteredUserCoursesAccessibility}
         onCheckedChange={handleCoursesAccessibilityChange}
+      />
+      <SettingItem
+        id="modernCourseList"
+        label={t("adminPreferences.field.modernCourseList")}
+        description={t("adminPreferences.field.modernCourseListDescription")}
+        checked={globalSettings.modernCourseListEnabled}
+        onCheckedChange={toggleModernCourseList}
       />
     </div>
   );

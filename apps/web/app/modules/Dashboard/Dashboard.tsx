@@ -14,7 +14,7 @@ import { setPageTitle } from "~/utils/setPageTitle";
 
 import Loader from "../common/Loader/Loader";
 
-import { LatestAnnouncementsPopup, PublicMobileNavigationDropdown } from "./components";
+import { LatestAnnouncementsPopup, MobileNavigationDropdown } from "./components";
 
 import type { MetaFunction } from "@remix-run/react";
 import type { TFunction } from "i18next";
@@ -52,7 +52,7 @@ const PublicHeader = ({
         <PlatformLogo variant="full" className="h-10 w-full" alt="Go to homepage" />
       </Link>
       <div className="flex items-center gap-3">
-        <PublicMobileNavigationDropdown
+        <MobileNavigationDropdown
           links={publicNavigationLinks}
           menuLabel={t("navigationSideBar.menu")}
           closeLabel={t("navigationSideBar.close")}

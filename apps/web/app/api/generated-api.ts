@@ -153,6 +153,7 @@ export interface MFAVerifyResponse {
 export interface GetPublicGlobalSettingsResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
+    modernCourseListEnabled: boolean;
     enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
@@ -261,6 +262,7 @@ export interface UpdateAdminNewUserNotificationResponse {
 export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
+    modernCourseListEnabled: boolean;
     enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
@@ -302,6 +304,49 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
 export interface UpdateEnforceSSOResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
+    modernCourseListEnabled: boolean;
+    enforceSSO: boolean;
+    certificateBackgroundImage: string | null;
+    companyInformation?: {
+      companyName?: string;
+      /** @maxLength 10 */
+      companyShortName?: string;
+      registeredAddress?: string;
+      taxNumber?: string;
+      emailAddress?: string;
+      courtRegisterNumber?: string;
+    };
+    platformLogoS3Key: string | null;
+    loginBackgroundImageS3Key: string | null;
+    platformSimpleLogoS3Key: string | null;
+    MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
+    defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+    inviteOnlyRegistration: boolean;
+    userEmailTriggers: {
+      userFirstLogin: boolean;
+      userCourseAssignment: boolean;
+      userShortInactivity: boolean;
+      userLongInactivity: boolean;
+      userChapterFinished: boolean;
+      userCourseFinished: boolean;
+    };
+    primaryColor: string | null;
+    contrastColor: string | null;
+    unregisteredUserQAAccessibility: boolean;
+    QAEnabled: boolean;
+    unregisteredUserNewsAccessibility: boolean;
+    newsEnabled: boolean;
+    unregisteredUserArticlesAccessibility: boolean;
+    articlesEnabled: boolean;
+    ageLimit: 13 | 16 | null;
+    loginPageFiles: string[];
+  };
+}
+
+export interface UpdateModernCourseListEnabledResponse {
+  data: {
+    unregisteredUserCoursesAccessibility: boolean;
+    modernCourseListEnabled: boolean;
     enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
@@ -374,6 +419,7 @@ export interface UpdateColorSchemaBody {
 export interface UpdateColorSchemaResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
+    modernCourseListEnabled: boolean;
     enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
@@ -534,6 +580,7 @@ export interface InitVideoUploadBody {
     | "category"
     | "announcement"
     | "global_settings";
+  relationshipType?: string;
 }
 
 export interface InitVideoUploadResponse {
@@ -1038,6 +1085,7 @@ export interface GetAllCoursesResponse {
     id: string;
     title: string;
     thumbnailUrl: string | null;
+    trailerUrl?: string | null;
     description: string;
     /** @format uuid */
     authorId?: string;
@@ -1046,6 +1094,9 @@ export interface GetAllCoursesResponse {
     authorAvatarUrl: string | null;
     category: string;
     courseChapterCount: number;
+    lessonCount?: number;
+    estimatedDurationMinutes?: number;
+    estimatedDurationFormatted?: string | null;
     enrolledParticipantCount: number;
     priceInCents: number;
     currency: string;
@@ -1069,6 +1120,7 @@ export interface GetStudentCoursesResponse {
     id: string;
     title: string;
     thumbnailUrl: string | null;
+    trailerUrl?: string | null;
     description: string;
     /** @format uuid */
     authorId?: string;
@@ -1077,6 +1129,9 @@ export interface GetStudentCoursesResponse {
     authorAvatarUrl: string | null;
     category: string;
     courseChapterCount: number;
+    lessonCount?: number;
+    estimatedDurationMinutes?: number;
+    estimatedDurationFormatted?: string | null;
     enrolledParticipantCount: number;
     priceInCents: number;
     currency: string;
@@ -1127,6 +1182,7 @@ export interface GetAvailableCoursesResponse {
     id: string;
     title: string;
     thumbnailUrl: string | null;
+    trailerUrl?: string | null;
     description: string;
     /** @format uuid */
     authorId?: string;
@@ -1135,6 +1191,9 @@ export interface GetAvailableCoursesResponse {
     authorAvatarUrl: string | null;
     category: string;
     courseChapterCount: number;
+    lessonCount?: number;
+    estimatedDurationMinutes?: number;
+    estimatedDurationFormatted?: string | null;
     enrolledParticipantCount: number;
     priceInCents: number;
     currency: string;
@@ -1156,12 +1215,46 @@ export interface GetAvailableCoursesResponse {
   appliedFilters?: object;
 }
 
+export interface GetTopCoursesResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    title: string;
+    thumbnailUrl: string | null;
+    trailerUrl?: string | null;
+    description: string;
+    /** @format uuid */
+    authorId?: string;
+    author: string;
+    authorEmail?: string;
+    authorAvatarUrl: string | null;
+    category: string;
+    courseChapterCount: number;
+    lessonCount?: number;
+    estimatedDurationMinutes?: number;
+    estimatedDurationFormatted?: string | null;
+    enrolledParticipantCount: number;
+    priceInCents: number;
+    currency: string;
+    status?: "draft" | "published" | "private";
+    createdAt?: string;
+    hasFreeChapters?: boolean;
+    stripeProductId?: string | null;
+    stripePriceId?: string | null;
+    completedChapterCount: number;
+    enrolled?: boolean;
+    dueDate: string | null;
+    slug: string;
+  }[];
+}
+
 export interface GetContentCreatorCoursesResponse {
   data: {
     /** @format uuid */
     id: string;
     title: string;
     thumbnailUrl: string | null;
+    trailerUrl?: string | null;
     description: string;
     /** @format uuid */
     authorId: string;
@@ -1170,6 +1263,9 @@ export interface GetContentCreatorCoursesResponse {
     authorAvatarUrl: string | null;
     category: string;
     courseChapterCount: number;
+    lessonCount?: number;
+    estimatedDurationMinutes?: number;
+    estimatedDurationFormatted?: string | null;
     enrolledParticipantCount: number;
     priceInCents: number;
     currency: string;
@@ -1241,6 +1337,7 @@ export interface GetCourseResponse {
     isScorm?: boolean;
     priceInCents: number;
     thumbnailUrl?: string;
+    trailerUrl?: string | null;
     title: string;
     slug: string;
     stripeProductId: string | null;
@@ -1356,6 +1453,7 @@ export interface GetBetaCourseByIdResponse {
     thumbnailUrl?: string;
     thumbnailS3Key?: string;
     thumbnailS3SingedUrl?: string | null;
+    trailerUrl?: string | null;
     title: string;
     availableLocales: ("en" | "pl")[];
     baseLanguage: "en" | "pl";
@@ -1409,6 +1507,12 @@ export interface UpdateCourseBody {
 }
 
 export interface UpdateCourseResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface DeleteCourseTrailerResponse {
   data: {
     message: string;
   };
@@ -3049,7 +3153,7 @@ export interface GetDraftNewsListResponse {
         /** @format uuid */
         id: string;
         fileUrl: string;
-        contentType: string;
+        contentType: string | null;
         title?: string;
         description?: string;
         fileName?: string;
@@ -3058,7 +3162,7 @@ export interface GetDraftNewsListResponse {
         /** @format uuid */
         id: string;
         fileUrl: string;
-        contentType: string;
+        contentType: string | null;
         title?: string;
         description?: string;
         fileName?: string;
@@ -3067,7 +3171,7 @@ export interface GetDraftNewsListResponse {
         /** @format uuid */
         id: string;
         fileUrl: string;
-        contentType: string;
+        contentType: string | null;
         title?: string;
         description?: string;
         fileName?: string;
@@ -3076,7 +3180,7 @@ export interface GetDraftNewsListResponse {
         /** @format uuid */
         id: string;
         fileUrl: string;
-        contentType: string;
+        contentType: string | null;
         title?: string;
         description?: string;
         fileName?: string;
@@ -3128,7 +3232,7 @@ export interface GetNewsResponse {
         /** @format uuid */
         id: string;
         fileUrl: string;
-        contentType: string;
+        contentType: string | null;
         title?: string;
         description?: string;
         fileName?: string;
@@ -3137,7 +3241,7 @@ export interface GetNewsResponse {
         /** @format uuid */
         id: string;
         fileUrl: string;
-        contentType: string;
+        contentType: string | null;
         title?: string;
         description?: string;
         fileName?: string;
@@ -3146,7 +3250,7 @@ export interface GetNewsResponse {
         /** @format uuid */
         id: string;
         fileUrl: string;
-        contentType: string;
+        contentType: string | null;
         title?: string;
         description?: string;
         fileName?: string;
@@ -3155,7 +3259,7 @@ export interface GetNewsResponse {
         /** @format uuid */
         id: string;
         fileUrl: string;
-        contentType: string;
+        contentType: string | null;
         title?: string;
         description?: string;
         fileName?: string;
@@ -3186,7 +3290,7 @@ export interface GetNewsListResponse {
         /** @format uuid */
         id: string;
         fileUrl: string;
-        contentType: string;
+        contentType: string | null;
         title?: string;
         description?: string;
         fileName?: string;
@@ -3195,7 +3299,7 @@ export interface GetNewsListResponse {
         /** @format uuid */
         id: string;
         fileUrl: string;
-        contentType: string;
+        contentType: string | null;
         title?: string;
         description?: string;
         fileName?: string;
@@ -3204,7 +3308,7 @@ export interface GetNewsListResponse {
         /** @format uuid */
         id: string;
         fileUrl: string;
-        contentType: string;
+        contentType: string | null;
         title?: string;
         description?: string;
         fileName?: string;
@@ -3213,7 +3317,7 @@ export interface GetNewsListResponse {
         /** @format uuid */
         id: string;
         fileUrl: string;
-        contentType: string;
+        contentType: string | null;
         title?: string;
         description?: string;
         fileName?: string;
@@ -3363,7 +3467,8 @@ export type GetDraftArticlesResponse = {
       /** @format uuid */
       id: string;
       fileUrl: string;
-      contentType: string;
+      contentType: string | null;
+      fileUrlError?: boolean;
       title?: string;
       description?: string;
       fileName?: string;
@@ -3372,7 +3477,8 @@ export type GetDraftArticlesResponse = {
       /** @format uuid */
       id: string;
       fileUrl: string;
-      contentType: string;
+      contentType: string | null;
+      fileUrlError?: boolean;
       title?: string;
       description?: string;
       fileName?: string;
@@ -3381,7 +3487,8 @@ export type GetDraftArticlesResponse = {
       /** @format uuid */
       id: string;
       fileUrl: string;
-      contentType: string;
+      contentType: string | null;
+      fileUrlError?: boolean;
       title?: string;
       description?: string;
       fileName?: string;
@@ -3390,7 +3497,8 @@ export type GetDraftArticlesResponse = {
       /** @format uuid */
       id: string;
       fileUrl: string;
-      contentType: string;
+      contentType: string | null;
+      fileUrlError?: boolean;
       title?: string;
       description?: string;
       fileName?: string;
@@ -3438,7 +3546,8 @@ export interface GetArticleResponse {
         /** @format uuid */
         id: string;
         fileUrl: string;
-        contentType: string;
+        contentType: string | null;
+        fileUrlError?: boolean;
         title?: string;
         description?: string;
         fileName?: string;
@@ -3447,7 +3556,8 @@ export interface GetArticleResponse {
         /** @format uuid */
         id: string;
         fileUrl: string;
-        contentType: string;
+        contentType: string | null;
+        fileUrlError?: boolean;
         title?: string;
         description?: string;
         fileName?: string;
@@ -3456,7 +3566,8 @@ export interface GetArticleResponse {
         /** @format uuid */
         id: string;
         fileUrl: string;
-        contentType: string;
+        contentType: string | null;
+        fileUrlError?: boolean;
         title?: string;
         description?: string;
         fileName?: string;
@@ -3465,7 +3576,8 @@ export interface GetArticleResponse {
         /** @format uuid */
         id: string;
         fileUrl: string;
-        contentType: string;
+        contentType: string | null;
+        fileUrlError?: boolean;
         title?: string;
         description?: string;
         fileName?: string;
@@ -3492,7 +3604,8 @@ export type GetArticlesResponse = {
       /** @format uuid */
       id: string;
       fileUrl: string;
-      contentType: string;
+      contentType: string | null;
+      fileUrlError?: boolean;
       title?: string;
       description?: string;
       fileName?: string;
@@ -3501,7 +3614,8 @@ export type GetArticlesResponse = {
       /** @format uuid */
       id: string;
       fileUrl: string;
-      contentType: string;
+      contentType: string | null;
+      fileUrlError?: boolean;
       title?: string;
       description?: string;
       fileName?: string;
@@ -3510,7 +3624,8 @@ export type GetArticlesResponse = {
       /** @format uuid */
       id: string;
       fileUrl: string;
-      contentType: string;
+      contentType: string | null;
+      fileUrlError?: boolean;
       title?: string;
       description?: string;
       fileName?: string;
@@ -3519,7 +3634,8 @@ export type GetArticlesResponse = {
       /** @format uuid */
       id: string;
       fileUrl: string;
-      contentType: string;
+      contentType: string | null;
+      fileUrlError?: boolean;
       title?: string;
       description?: string;
       fileName?: string;
@@ -4072,6 +4188,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     settingsControllerUpdateEnforceSso: (params: RequestParams = {}) =>
       this.request<UpdateEnforceSSOResponse, any>({
         path: `/api/settings/admin/enforce-sso`,
+        method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateModernCourseListEnabled
+     * @request PATCH:/api/settings/admin/modern-course-list
+     */
+    settingsControllerUpdateModernCourseListEnabled: (params: RequestParams = {}) =>
+      this.request<UpdateModernCourseListEnabledResponse, any>({
+        path: `/api/settings/admin/modern-course-list`,
         method: "PATCH",
         format: "json",
         ...params,
@@ -5341,6 +5471,29 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name CourseControllerGetTopCourses
+     * @request GET:/api/course/top-courses
+     */
+    courseControllerGetTopCourses: (
+      query?: {
+        limit?: number;
+        days?: number;
+        /** @default "en" */
+        language?: "en" | "pl";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetTopCoursesResponse, any>({
+        path: `/api/course/top-courses`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name CourseControllerGetContentCreatorCourses
      * @request GET:/api/course/content-creator-courses
      */
@@ -5489,6 +5642,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "PATCH",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerDeleteCourseTrailer
+     * @request DELETE:/api/course/{id}/trailer
+     */
+    courseControllerDeleteCourseTrailer: (id: string, params: RequestParams = {}) =>
+      this.request<DeleteCourseTrailerResponse, any>({
+        path: `/api/course/${id}/trailer`,
+        method: "DELETE",
         format: "json",
         ...params,
       }),
@@ -7530,6 +7697,19 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name NewsControllerGetNewsResource
+     * @request GET:/api/news/news-resource/{resourceId}
+     */
+    newsControllerGetNewsResource: (resourceId: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/news/news-resource/${resourceId}`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name NewsControllerGetNews
      * @request GET:/api/news/{id}
      */
@@ -7844,6 +8024,19 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "GET",
         query: query,
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ArticlesControllerGetArticleResource
+     * @request GET:/api/articles/articles-resource/{resourceId}
+     */
+    articlesControllerGetArticleResource: (resourceId: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/articles/articles-resource/${resourceId}`,
+        method: "GET",
         ...params,
       }),
 

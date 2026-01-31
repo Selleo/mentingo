@@ -14,6 +14,7 @@ export const videoInitSchema = Type.Object({
   contextId: Type.Optional(UUIDSchema),
   entityId: Type.Optional(UUIDSchema),
   entityType: Type.Enum(ENTITY_TYPES),
+  relationshipType: Type.Optional(Type.String()),
 });
 
 export const videoInitResponseSchema = Type.Object({

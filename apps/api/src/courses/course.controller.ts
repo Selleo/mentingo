@@ -37,6 +37,7 @@ import { CurrentUser as CurrentUserType } from "src/common/types/current-user.ty
 import { CourseService } from "src/courses/course.service";
 import {
   allCoursesForContentCreatorSchema,
+  allStudentCoursesSchema,
   allStudentAiMentorResultsSchema,
   allStudentCourseProgressionSchema,
   allStudentQuizResultsSchema,
@@ -271,6 +272,27 @@ export class CourseController {
     return new PaginatedResponse(data);
   }
 
+  @Get("top-courses")
+  @Validate({
+    request: [
+      { type: "query", name: "limit", schema: Type.Optional(Type.Number()) },
+      { type: "query", name: "days", schema: Type.Optional(Type.Number()) },
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
+    ],
+    response: baseResponse(allStudentCoursesSchema),
+  })
+  @Public()
+  async getTopCourses(
+    @Query("limit") limit: number,
+    @Query("days") days: number,
+    @Query("language") language: SupportedLanguages,
+    @CurrentUser("userId") currentUserId?: UUIDType,
+  ): Promise<BaseResponse<AllStudentCoursesResponse>> {
+    const data = await this.courseService.getTopCourses({ limit, days, language }, currentUserId);
+
+    return new BaseResponse(data);
+  }
+
   @Public()
   @Get("content-creator-courses")
   @Validate({
@@ -450,6 +472,20 @@ export class CourseController {
     );
 
     return new BaseResponse({ message: "Course updated successfully" });
+  }
+
+  @Delete(":id/trailer")
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @Validate({
+    request: [{ type: "param", name: "id", schema: UUIDSchema }],
+    response: baseResponse(Type.Object({ message: Type.String() })),
+  })
+  async deleteCourseTrailer(
+    @Param("id") id: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<{ message: string }>> {
+    const data = await this.courseService.deleteCourseTrailer(id, currentUser);
+    return new BaseResponse(data);
   }
 
   @Patch("update-has-certificate/:id")

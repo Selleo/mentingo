@@ -660,7 +660,7 @@
       }
     },
     "courses": {
-      "header": "Manage Courses",
+      "header": "Manage courses",
       "subHeader": "All courses you can view and edit"
     },
     "field": {
@@ -1047,6 +1047,8 @@
       "candidateNotAvailable": "Course ownership cannot be transferred to this user",
       "createCourseSuccessfully": "Course created successfully",
       "courseUpdatedSuccessfully": "Course updated successfully",
+      "courseTrailerUpdatedSuccessfully": "Course trailer updated successfully",
+      "courseTrailerRemovedSuccessfully": "Course trailer removed successfully",
       "certificateUpdatedSuccessfully": "Certificate updated successfully",
       "certificateUpdateError": "Error updating certificate",
       "maxTitleLengthExceeded_one": "Title cannot be longer than {{count}} character",
@@ -1071,6 +1073,7 @@
       },
       "button": {
         "removeThumbnail": "Remove Thumbnail",
+        "removeTrailer": "Remove Trailer",
         "includesCertificate": "Includes certificate",
         "doesNotIncludeCertificate": "Does not include certificate"
       },
@@ -1094,6 +1097,7 @@
         "category": "Category",
         "description": "Description",
         "thumbnail": "Thumbnail",
+        "trailer": "Course trailer",
         "baseLanguage": "Base language"
       },
       "placeholder": {
@@ -1119,7 +1123,7 @@
         "descriptionMinLength": "Description must be at least 2 characters.",
         "categoryRequired": "Category is required"
       },
-      "header": "Create new course",
+      "header": "Create a new course",
       "subHeader": "Provide the details to set up a new course. You’ll have more options to customize it later.",
       "editHeader": "Basic settings",
       "editSubHeader": "Fill in the details to create a new course.",
@@ -1633,6 +1637,17 @@
         "description": "Description",
         "author": "Author"
       }
+    },
+    "modernView": {
+      "continueLearning": "Continue learning",
+      "topCourses": "Top 5 most popular courses",
+      "hero": {
+        "start": "Start",
+        "moreInfo": "More info",
+        "info": "Info"
+      },
+      "lessonsCount_one": "{{count}} lesson",
+      "lessonsCount_other": "{{count}} lessons"
     }
   },
   "studentQuizSummaryView": {
@@ -1862,6 +1877,8 @@
       "newUserNotificationsDescription": "Receive notifications when a new user is created",
       "coursesVisibility": "Show courses to visitors",
       "coursesVisibilityDescription": "Allow visitors to view course list and access free lessons without logging in",
+      "modernCourseList": "Use modern course list view",
+      "modernCourseListDescription": "Enable the new course list design with hero and top courses sections",
       "finishedCourseNotification": "Finished Course Notifications",
       "finishedCourseNotificationDescription": "Receive notifications when a user finishes a course",
       "studentsWithOverdueCourseNotification": "Students with overdue courses notifications",
@@ -1870,6 +1887,7 @@
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "New user notification preferences have been successfully updated",
       "coursesVisibilityPreferenceChangeSuccess": "Course visibility preferences for unauthenticated users have been updated successfully",
+      "modernCourseListPreferenceChangeSuccess": "Modern course list preference has been updated successfully",
       "finishedCourseNotificationsPreferenceChangeSuccess": "Finished course notification preferences have been successfully updated",
       "finishedCourseNotificationsPreferenceChangeError": "Failed to update finished course notification preferences",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Overdue course notification preferences have been successfully updated",
@@ -2205,7 +2223,7 @@
     "createNewCategory": "Create New Category",
     "categoryDetails": "Category Details",
     "categories": "Categories",
-    "createNewCourse": "Create New Course",
+    "createNewCourse": "Create a new course",
     "admin": "Admin",
     "qa": "Q&A",
     "createQA": "Create new Q&A",

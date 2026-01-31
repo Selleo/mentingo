@@ -11,7 +11,7 @@ import {
 import { Separator } from "~/components/ui/separator";
 import { cn } from "~/lib/utils";
 
-type PublicMobileNavigationDropdownProps = {
+type MobileNavigationDropdownProps = {
   links: { to: string; label: string }[];
   menuLabel: string;
   closeLabel: string;
@@ -19,13 +19,13 @@ type PublicMobileNavigationDropdownProps = {
   signUpLabel: string;
 };
 
-export function PublicMobileNavigationDropdown({
+export function MobileNavigationDropdown({
   links,
   menuLabel,
   closeLabel,
   loginLabel,
   signUpLabel,
-}: PublicMobileNavigationDropdownProps) {
+}: MobileNavigationDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleLabel = isOpen ? closeLabel : menuLabel;

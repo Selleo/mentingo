@@ -248,6 +248,7 @@ const EditCourse = () => {
             categoryId={course?.categoryId}
             thumbnailS3SingedUrl={course?.thumbnailS3SingedUrl}
             thumbnailS3Key={course?.thumbnailS3Key}
+            trailerUrl={course?.trailerUrl}
             hasCertificate={course?.hasCertificate || false}
             courseLanguage={courseLanguage}
           />
