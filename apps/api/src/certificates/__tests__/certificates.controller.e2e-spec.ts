@@ -1,5 +1,7 @@
 import request from "supertest";
 
+import { DB, DB_BASE } from "src/storage/db/db.providers";
+
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCategoryFactory } from "../../../test/factory/category.factory";
 import { createCourseFactory } from "../../../test/factory/course.factory";
@@ -16,6 +18,7 @@ import type { DatabasePg } from "src/common";
 describe("CertificatesController (e2e)", () => {
   let app: INestApplication;
   let db: DatabasePg;
+  let baseDb: DatabasePg;
   let userFactory: ReturnType<typeof createUserFactory>;
   let settingsFactory: ReturnType<typeof createSettingsFactory>;
   let categoryFactory: ReturnType<typeof createCategoryFactory>;
@@ -25,7 +28,8 @@ describe("CertificatesController (e2e)", () => {
   beforeAll(async () => {
     const { app: testApp } = await createE2ETest();
     app = testApp;
-    db = app.get("DB");
+    db = app.get(DB);
+    baseDb = app.get(DB_BASE);
     userFactory = createUserFactory(db);
     settingsFactory = createSettingsFactory(db);
     categoryFactory = createCategoryFactory(db);
@@ -41,7 +45,7 @@ describe("CertificatesController (e2e)", () => {
   });
 
   afterEach(async () => {
-    await truncateAllTables(db);
+    await truncateAllTables(baseDb, db);
   });
 
   describe("GET /api/certificates/all", () => {

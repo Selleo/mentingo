@@ -6,13 +6,18 @@ import { categories } from "../../src/storage/schema";
 import type { InferSelectModel } from "drizzle-orm";
 import type { DatabasePg } from "src/common";
 
-export type CategoryTest = InferSelectModel<typeof categories>;
+export type CategoryTest = Omit<InferSelectModel<typeof categories>, "tenantId">;
 export type CategoriesTest = CategoryTest[];
 
 export const createCategoryFactory = (db: DatabasePg) => {
   return Factory.define<CategoryTest>(({ onCreate }) => {
     onCreate(async (category) => {
-      const [inserted] = await db.insert(categories).values(category).returning();
+      const [inserted] = await db
+        .insert(categories)
+        .values({
+          ...category,
+        })
+        .returning();
       return inserted;
     });
 

@@ -5,6 +5,7 @@ export type CurrentUser = {
   userId: UUIDType;
   email: string;
   role: UserRole;
+  tenantId: UUIDType;
   iat?: number;
   exp?: number;
 };

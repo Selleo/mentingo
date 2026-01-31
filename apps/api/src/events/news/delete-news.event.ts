@@ -1,10 +1,10 @@
 import type { SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { ActorUserType } from "src/common/types/actor-user.type";
 
 type NewsDeleteData = {
   newsId: UUIDType;
-  actor: CurrentUser;
+  actor: ActorUserType;
   language?: SupportedLanguages;
   title?: string | null;
   baseLanguage?: SupportedLanguages;

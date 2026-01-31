@@ -13,7 +13,7 @@ import {
 import type { InferSelectModel } from "drizzle-orm";
 import type { DatabasePg, UUIDType } from "src/common";
 
-export type LearningTimeTest = InferSelectModel<typeof lessonLearningTime>;
+export type LearningTimeTest = Omit<InferSelectModel<typeof lessonLearningTime>, "tenantId">;
 
 const ensureUser = async (db: DatabasePg, userId?: UUIDType | null): Promise<UUIDType> => {
   if (userId) return userId;

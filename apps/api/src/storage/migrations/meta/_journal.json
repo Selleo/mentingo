@@ -565,8 +565,43 @@
     {
       "idx": 80,
       "version": "7",
-      "when": 1769698315814,
-      "tag": "0080_add_default_modern_courses_view_setting",
+      "when": 1769086016791,
+      "tag": "0080_add_tenants_table_with_references",
+      "breakpoints": true
+    },
+    {
+      "idx": 81,
+      "version": "7",
+      "when": 1769086105900,
+      "tag": "0081_backfill_tenant_ids",
+      "breakpoints": true
+    },
+    {
+      "idx": 82,
+      "version": "7",
+      "when": 1769165716064,
+      "tag": "0082_add_not_null_to_all_tenant_references",
+      "breakpoints": true
+    },
+    {
+      "idx": 83,
+      "version": "7",
+      "when": 1769173708925,
+      "tag": "0083_enable_tenant_rls_for_every_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 84,
+      "version": "7",
+      "when": 1769611061291,
+      "tag": "0084_add_tenant_id_indexes_for_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 85,
+      "version": "7",
+      "when": 1769852727924,
+      "tag": "0085_add_default_modern_courses_view_setting",
       "breakpoints": true
     }
   ]

@@ -1,6 +1,8 @@
 import { faker } from "@faker-js/faker";
 import request from "supertest";
 
+import { DB, DB_BASE } from "src/storage/db/db.providers";
+
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createAnnouncementFactory } from "../../../test/factory/announcement.factory";
 import { createGroupFactory } from "../../../test/factory/group.factory";
@@ -13,6 +15,7 @@ import type { DatabasePg } from "src/common";
 describe("AnnouncementsController (e2e)", () => {
   let app: INestApplication;
   let db: DatabasePg;
+  let baseDb: DatabasePg;
   let userFactory: ReturnType<typeof createUserFactory>;
   let groupFactory: ReturnType<typeof createGroupFactory>;
   let announcementsFactory: ReturnType<typeof createAnnouncementFactory>;
@@ -23,7 +26,8 @@ describe("AnnouncementsController (e2e)", () => {
     const { app: testApp } = await createE2ETest();
 
     app = testApp;
-    db = app.get("DB");
+    db = app.get(DB);
+    baseDb = app.get(DB_BASE);
 
     userFactory = createUserFactory(db);
     groupFactory = createGroupFactory(db);
@@ -35,7 +39,7 @@ describe("AnnouncementsController (e2e)", () => {
   });
 
   afterAll(async () => {
-    await truncateAllTables(db);
+    await truncateAllTables(baseDb, db);
   });
 
   describe("GET /api/announcements", () => {

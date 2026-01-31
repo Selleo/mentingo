@@ -5,6 +5,7 @@ import { FileModule } from "src/file/files.module";
 import { LocalizationModule } from "src/localization/localization.module";
 import { LocalizationService } from "src/localization/localization.service";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import { StatisticsHandler } from "./handlers/statistics.handler";
 import { StatisticsController } from "./statistics.controller";
@@ -20,6 +21,7 @@ import { StatisticsService } from "./statistics.service";
     StatisticsService,
     StatisticsCron,
     LocalizationService,
+    TenantDbRunnerService,
   ],
   exports: [StatisticsRepository, StatisticsService],
 })

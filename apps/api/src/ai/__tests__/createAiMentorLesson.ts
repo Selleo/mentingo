@@ -11,7 +11,7 @@ import { createChapterFactory } from "../../../test/factory/chapter.factory";
 import type { InferSelectModel } from "drizzle-orm";
 import type { DatabasePg, UUIDType } from "src/common";
 
-export type AiMentorLessonTest = InferSelectModel<typeof aiMentorLessons>;
+export type AiMentorLessonTest = Omit<InferSelectModel<typeof aiMentorLessons>, "tenantId">;
 
 const ensureChapter = async (db: DatabasePg, chapterId?: UUIDType) => {
   if (chapterId) return chapterId;

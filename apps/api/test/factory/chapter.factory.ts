@@ -11,7 +11,7 @@ import type { CourseTest } from "./course.factory";
 import type { InferSelectModel } from "drizzle-orm";
 import type { DatabasePg, UUIDType } from "src/common";
 
-export type ChapterTest = InferSelectModel<typeof chapters>;
+export type ChapterTest = Omit<InferSelectModel<typeof chapters>, "tenantId">;
 
 const ensureCourse = async (db: DatabasePg, courseId?: UUIDType): Promise<UUIDType> => {
   if (courseId) return courseId;

@@ -38,6 +38,7 @@ import type { SupportedLanguages } from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { ResponseAiJudgeJudgementBody } from "src/ai/utils/ai.schema";
 import type { UUIDType } from "src/common";
+import type { ActorUserType } from "src/common/types/actor-user.type";
 import type { CurrentUser } from "src/common/types/current-user.type";
 import type * as schema from "src/storage/schema";
 import type { ProgressStatus } from "src/utils/types/progress.type";
@@ -347,7 +348,7 @@ export class StudentLessonProgressService {
     studentId: UUIDType,
     lessonCount: number,
     completedAsFreemium = false,
-    actor: CurrentUser,
+    actor: ActorUserType,
     trx?: PostgresJsDatabase<typeof schema>,
   ) {
     const dbInstance = trx ?? this.db;
@@ -415,7 +416,7 @@ export class StudentLessonProgressService {
   private async checkCourseIsCompletedForUser(
     courseId: UUIDType,
     studentId: UUIDType,
-    actor: CurrentUser,
+    actor: ActorUserType,
     trx?: PostgresJsDatabase<typeof schema>,
     language?: SupportedLanguages,
   ) {
@@ -515,7 +516,7 @@ export class StudentLessonProgressService {
     courseId: UUIDType,
     progress: ProgressStatus,
     finishedChapterCount: number,
-    actor: CurrentUser,
+    actor: ActorUserType,
     dbInstance: PostgresJsDatabase<typeof schema> = this.db,
     language?: SupportedLanguages,
   ) {
@@ -622,7 +623,7 @@ export class StudentLessonProgressService {
     userId: UUIDType,
     actor: CurrentUser | undefined,
     dbInstance: PostgresJsDatabase<typeof schema> = this.db,
-  ): Promise<CurrentUser> {
+  ): Promise<ActorUserType> {
     if (actor) return actor;
 
     const [user] = await dbInstance
