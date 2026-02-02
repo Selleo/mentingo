@@ -10,7 +10,7 @@ import {
 } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
 import { BaseEmailTemplate } from "@repo/email-templates";
-import { COURSE_ENROLLMENT, SUPPORTED_LANGUAGES } from "@repo/shared";
+import { COURSE_ENROLLMENT, SUPPORTED_LANGUAGES, ENTITY_TYPES } from "@repo/shared";
 import { load as loadHtml } from "cheerio";
 import {
   and,
@@ -19,6 +19,7 @@ import {
   countDistinct,
   desc,
   eq,
+  gte,
   getTableColumns,
   ilike,
   inArray,
@@ -46,6 +47,7 @@ import { getCourseTsVector } from "src/courses/utils/courses.utils";
 import { EnvService } from "src/env/services/env.service";
 import { CreateCourseEvent, UpdateCourseEvent, EnrollCourseEvent } from "src/events";
 import { UsersAssignedToCourseEvent } from "src/events/user/user-assigned-to-course.event";
+import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { LearningTimeRepository } from "src/learning-time";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
@@ -70,6 +72,8 @@ import {
   questionAnswerOptions,
   questions,
   quizAttempts,
+  resourceEntity,
+  resources,
   studentChapterProgress,
   studentCourses,
   studentLessonProgress,
@@ -86,6 +90,7 @@ import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 import { getSortOptions } from "../common/helpers/getSortOptions";
 
 import { LESSON_SEQUENCE_ENABLED } from "./constants";
+import { DURATION_DEFAULTS } from "./constants/duration-defaults";
 import { CourseSlugService } from "./course-slug.service";
 import {
   COURSE_ENROLLMENT_SCOPES,
@@ -140,6 +145,7 @@ import type { CourseActivityLogSnapshot } from "src/activity-logs/types";
 import type { Pagination, UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
 import type { CourseTranslationType } from "src/courses/types/course.types";
+import type { DurationEstimatesByCourse, DurationResourceKind } from "src/courses/types/duration";
 import type {
   AdminLessonWithContentSchema,
   LessonForChapterSchema,
@@ -518,6 +524,186 @@ export class CourseService {
     };
   }
 
+  private async getCourseTrailerUrls(
+    courseIds: UUIDType[],
+  ): Promise<Record<string, string | null>> {
+    if (!courseIds.length) return {};
+
+    const trailerReferences = await this.db
+      .select({
+        courseId: resourceEntity.entityId,
+        reference: resources.reference,
+      })
+      .from(resources)
+      .innerJoin(resourceEntity, eq(resources.id, resourceEntity.resourceId))
+      .where(
+        and(
+          eq(resourceEntity.entityType, ENTITY_TYPES.COURSE),
+          eq(resourceEntity.relationshipType, RESOURCE_RELATIONSHIP_TYPES.TRAILER),
+          inArray(resourceEntity.entityId, courseIds),
+          eq(resources.archived, false),
+        ),
+      )
+      .orderBy(desc(resources.createdAt));
+
+    const trailerUrls: Record<UUIDType, string | null> = {};
+
+    await Promise.all(
+      trailerReferences.map(async (trailerReference) => {
+        trailerUrls[trailerReference.courseId] = await this.fileService.getFileUrl(
+          trailerReference.reference,
+        );
+      }),
+    );
+
+    return trailerUrls;
+  }
+
+  private async getCourseTrailerUrl(courseId: UUIDType): Promise<string | null> {
+    const trailers = await this.getCourseTrailerUrls([courseId]);
+    return trailers[courseId] ?? null;
+  }
+
+  private countWordsFromHtml(content: string): number {
+    const $ = loadHtml(content);
+    const text = $.text();
+    return text.trim().split(/\s+/).filter(Boolean).length;
+  }
+
+  private lessonSeconds(params: {
+    descriptionHtml?: string | null;
+    resourceCounts: Record<DurationResourceKind, number>;
+    quizQuestionCount: number;
+    lessonType: string;
+  }): number {
+    const { descriptionHtml, resourceCounts, quizQuestionCount, lessonType } = params;
+
+    const wordCount = this.countWordsFromHtml(descriptionHtml || "");
+    const readingSeconds = Math.ceil((wordCount / DURATION_DEFAULTS.wordsPerMinute) * 60);
+
+    const {
+      video: videoCount,
+      image: imageCount,
+      download: downloadCount,
+      other: otherCount,
+    } = resourceCounts;
+
+    const aiMentorSeconds =
+      lessonType === LESSON_TYPES.AI_MENTOR ? DURATION_DEFAULTS.aiMentorMinutes * 60 : 0;
+    const embedSeconds =
+      lessonType === LESSON_TYPES.EMBED ? DURATION_DEFAULTS.embedMinutes * 60 : 0;
+
+    return (
+      readingSeconds +
+      videoCount * DURATION_DEFAULTS.videoMinutes * 60 +
+      imageCount * DURATION_DEFAULTS.imageSeconds +
+      downloadCount * DURATION_DEFAULTS.downloadSeconds +
+      otherCount * DURATION_DEFAULTS.otherSeconds +
+      quizQuestionCount * DURATION_DEFAULTS.quizSeconds +
+      aiMentorSeconds +
+      embedSeconds
+    );
+  }
+
+  private async computeCourseDurationEstimates(
+    courseIds: UUIDType[],
+    language: SupportedLanguages | undefined,
+    dbInstance: DatabasePg = this.db,
+  ): Promise<DurationEstimatesByCourse> {
+    if (!courseIds.length) return {};
+
+    const resourceCounts = dbInstance
+      .select({
+        lessonId: resourceEntity.entityId,
+        videoCount:
+          sql<number>`SUM(CASE WHEN ${resources.contentType} LIKE 'video/%' THEN 1 ELSE 0 END)`.as(
+            "videoCount",
+          ),
+        imageCount:
+          sql<number>`SUM(CASE WHEN ${resources.contentType} LIKE 'image/%' THEN 1 ELSE 0 END)`.as(
+            "imageCount",
+          ),
+        downloadCount:
+          sql<number>`SUM(CASE WHEN ${resources.contentType} LIKE 'application/pdf' THEN 1 WHEN ${resources.contentType} LIKE 'application/%' THEN 1 ELSE 0 END)`.as(
+            "downloadCount",
+          ),
+        otherCount:
+          sql<number>`SUM(CASE WHEN ${resources.contentType} LIKE 'video/%' OR ${resources.contentType} LIKE 'image/%' OR ${resources.contentType} LIKE 'application/%' THEN 0 ELSE 1 END)`.as(
+            "otherCount",
+          ),
+      })
+      .from(resourceEntity)
+      .innerJoin(resources, eq(resources.id, resourceEntity.resourceId))
+      .where(and(eq(resourceEntity.entityType, ENTITY_TYPES.LESSON), eq(resources.archived, false)))
+      .groupBy(resourceEntity.entityId)
+      .as("resource_counts");
+
+    const questionCounts = dbInstance
+      .select({
+        lessonId: questions.lessonId,
+        questionCount: count(questions.id).as("questionCount"),
+      })
+      .from(questions)
+      .groupBy(questions.lessonId)
+      .as("question_counts");
+
+    const lessonRows = await dbInstance
+      .select({
+        id: lessons.id,
+        courseId: chapters.courseId,
+        type: lessons.type,
+        description: this.localizationService.getLocalizedSqlField(lessons.description, language),
+        questionCount: sql<number>`COALESCE(${questionCounts.questionCount}, 0)`,
+        videoCount: sql<number>`COALESCE(${resourceCounts.videoCount}, 0)`,
+        imageCount: sql<number>`COALESCE(${resourceCounts.imageCount}, 0)`,
+        downloadCount: sql<number>`COALESCE(${resourceCounts.downloadCount}, 0)`,
+        otherCount: sql<number>`COALESCE(${resourceCounts.otherCount}, 0)`,
+      })
+      .from(lessons)
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
+      .leftJoin(questionCounts, eq(questionCounts.lessonId, lessons.id))
+      .leftJoin(resourceCounts, eq(resourceCounts.lessonId, lessons.id))
+      .where(inArray(chapters.courseId, courseIds));
+
+    const secondsByCourse = new Map<UUIDType, number>();
+
+    for (const lesson of lessonRows) {
+      const lessonSeconds = this.lessonSeconds({
+        descriptionHtml: lesson.description as string,
+        resourceCounts: {
+          video: Number(lesson.videoCount) || 0,
+          image: Number(lesson.imageCount) || 0,
+          download: Number(lesson.downloadCount) || 0,
+          other: Number(lesson.otherCount) || 0,
+        },
+        quizQuestionCount: Number(lesson.questionCount) || 0,
+        lessonType: lesson.type,
+      });
+
+      secondsByCourse.set(
+        lesson.courseId,
+        (secondsByCourse.get(lesson.courseId) ?? 0) + lessonSeconds,
+      );
+    }
+
+    const estimates: DurationEstimatesByCourse = {};
+
+    for (const [courseId, totalSeconds] of secondsByCourse) {
+      const totalMinutes = Math.max(1, Math.ceil(totalSeconds / 60));
+      estimates[courseId] = { totalMinutes, formatted: this.formatMinutes(totalMinutes) };
+    }
+
+    return estimates;
+  }
+
+  private formatMinutes(minutes: number): string {
+    if (minutes < 60) return `${minutes}m`;
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return mins === 0 ? `${hours}h` : `${hours}h ${mins}m`;
+  }
+
   async getAvailableCourses(
     query: CoursesQuery,
     currentUserId?: UUIDType,
@@ -538,6 +724,13 @@ export class CourseService {
         undefined,
         query.excludeCourseId,
       );
+
+      const lessonCountSql = sql<number>`(
+        SELECT COUNT(*)::int
+        FROM ${lessons}
+        INNER JOIN ${chapters} ON ${chapters.id} = ${lessons.chapterId}
+        WHERE ${chapters.courseId} = ${courses.id}
+      )`;
 
       const conditions = [eq(courses.status, "published")];
       conditions.push(...(this.getFiltersConditions(filters) as SQL<unknown>[]));
@@ -562,6 +755,7 @@ export class CourseService {
           enrolled: sql<boolean>`FALSE`,
           enrolledParticipantCount: sql<number>`COALESCE(${coursesSummaryStats.freePurchasedCount} + ${coursesSummaryStats.paidPurchasedCount}, 0)`,
           courseChapterCount: courses.chapterCount,
+          lessonCount: lessonCountSql,
           completedChapterCount: sql<number>`0`,
           priceInCents: courses.priceInCents,
           currency: courses.currency,
@@ -628,6 +822,8 @@ export class CourseService {
         .leftJoin(users, eq(courses.authorId, users.id))
         .where(and(...conditions));
 
+      const trailerUrls = await this.getCourseTrailerUrls(data.map((item) => item.id));
+
       const dataWithS3SignedUrls = await Promise.all(
         data.map(async (item) => {
           try {
@@ -637,9 +833,12 @@ export class CourseService {
             const authorAvatarSignedUrl =
               await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
 
+            const trailerUrl = trailerUrls[item.id] ?? null;
+
             return {
               ...itemWithoutReferences,
               thumbnailUrl: signedUrl,
+              trailerUrl,
               authorAvatarUrl: authorAvatarSignedUrl,
             };
           } catch (error) {
@@ -657,14 +856,155 @@ export class CourseService {
         slug: slugsMap.get(item.id) || item.id,
       }));
 
+      const durationEstimates = await this.computeCourseDurationEstimates(courseIds, language, trx);
+      const dataWithDuration = dataWithSlugs.map((item) => {
+        const duration = durationEstimates[item.id];
+        return {
+          ...item,
+          estimatedDurationMinutes: duration?.totalMinutes ?? 0,
+          estimatedDurationFormatted: duration?.formatted ?? null,
+        };
+      });
+
       return {
-        data: dataWithSlugs,
+        data: dataWithDuration,
         pagination: {
           totalItems: totalItems || 0,
           page,
           perPage,
         },
       };
+    });
+  }
+
+  async getTopCourses(
+    query: { limit?: number; days?: number; language: SupportedLanguages },
+    currentUserId?: UUIDType,
+  ): Promise<AllStudentCoursesResponse> {
+    const { limit = 5, days = 30, language } = query;
+    const sinceDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+
+    return this.db.transaction(async (trx) => {
+      const availableCourseIds = await this.getAvailableCourseIds(trx, currentUserId);
+
+      const conditions = [eq(courses.status, "published")];
+
+      if (availableCourseIds.length > 0) {
+        conditions.push(inArray(courses.id, availableCourseIds));
+      }
+
+      const coursesRows = await trx
+        .select({
+          ...getTableColumns(courses),
+          title: this.localizationService.getLocalizedSqlField(courses.title, language),
+          description: this.localizationService.getLocalizedSqlField(courses.description, language),
+          thumbnailUrl: sql<string>`${courses.thumbnailS3Key}`,
+          author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
+          authorEmail: sql<string>`${users.email}`,
+          authorAvatarUrl: sql<string>`${users.avatarReference}`,
+          category: sql<string>`${categories.title}`,
+          enrolled: sql<boolean>`FALSE`,
+          enrolledParticipantCount: sql<number>`COALESCE(${coursesSummaryStats.freePurchasedCount} + ${coursesSummaryStats.paidPurchasedCount}, 0)`,
+          courseChapterCount: courses.chapterCount,
+          lessonCount: sql<number>`(
+            SELECT COUNT(*)::int
+            FROM ${lessons}
+            INNER JOIN ${chapters} ON ${chapters.id} = ${lessons.chapterId}
+            WHERE ${chapters.courseId} = ${courses.id}
+          )`,
+          completedChapterCount: sql<number>`0`,
+          hasFreeChapters: sql<boolean>`
+            EXISTS (
+              SELECT 1
+              FROM ${chapters}
+              WHERE ${chapters.courseId} = ${courses.id}
+                AND ${chapters.isFreemium} = TRUE
+            )
+          `,
+          dueDate: sql<
+            string | null
+          >`TO_CHAR(${groupCourses.dueDate}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
+        })
+        .from(courses)
+        .leftJoin(categories, eq(courses.categoryId, categories.id))
+        .leftJoin(users, eq(courses.authorId, users.id))
+        .leftJoin(coursesSummaryStats, eq(courses.id, coursesSummaryStats.courseId))
+        .leftJoin(
+          studentCourses,
+          and(
+            eq(studentCourses.courseId, courses.id),
+            eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+            gte(studentCourses.enrolledAt, sinceDate),
+          ),
+        )
+        .leftJoin(
+          groupCourses,
+          and(
+            eq(groupCourses.courseId, courses.id),
+            eq(groupCourses.groupId, studentCourses.enrolledByGroupId),
+          ),
+        )
+        .where(and(...conditions))
+        .groupBy(
+          courses.id,
+          courses.title,
+          courses.thumbnailS3Key,
+          courses.description,
+          courses.authorId,
+          users.firstName,
+          users.lastName,
+          users.email,
+          users.avatarReference,
+          categories.title,
+          coursesSummaryStats.freePurchasedCount,
+          coursesSummaryStats.paidPurchasedCount,
+          courses.availableLocales,
+          courses.baseLanguage,
+          groupCourses.dueDate,
+        )
+        .orderBy(desc(sql`COUNT(${studentCourses.id})`), desc(courses.createdAt))
+        .limit(limit);
+
+      const courseIds = coursesRows.map((course) => course.id);
+
+      const trailerUrls = await this.getCourseTrailerUrls(courseIds);
+      const slugsMap = await this.courseSlugService.getCoursesSlugs(language || "en", courseIds);
+      const durationEstimates = await this.computeCourseDurationEstimates(courseIds, language, trx);
+
+      const coursesWithSignedUrls = await Promise.all(
+        coursesRows.map(async (course) => {
+          try {
+            const { authorAvatarUrl: authorAvatarReference, ...itemWithoutReferences } = course;
+
+            const thumbnailUrl = await this.fileService.getFileUrl(course.thumbnailUrl);
+            const authorAvatarUrl =
+              await this.userService.getUsersProfilePictureUrl(authorAvatarReference);
+            const trailerUrl = trailerUrls[course.id] ?? null;
+
+            return {
+              ...itemWithoutReferences,
+              thumbnailUrl,
+              trailerUrl,
+              authorAvatarUrl,
+            };
+          } catch (error) {
+            return course;
+          }
+        }),
+      );
+
+      const coursesWithDuration = coursesWithSignedUrls.map((course) => {
+        const duration = durationEstimates[course.id];
+
+        return {
+          ...course,
+          slug: slugsMap.get(course.id) || course.id,
+          estimatedDurationMinutes: duration?.totalMinutes ?? 0,
+          estimatedDurationFormatted: duration?.formatted ?? null,
+        };
+      });
+
+      return coursesWithDuration;
     });
   }
 
@@ -844,10 +1184,12 @@ export class CourseService {
       .orderBy(chapters.displayOrder);
 
     const thumbnailUrl = await this.fileService.getFileUrl(course.thumbnailS3Key);
+    const trailerUrl = await this.getCourseTrailerUrl(course.id);
 
     return {
       ...course,
       thumbnailUrl,
+      trailerUrl,
       chapters: courseChapterList,
       slug: currentSlug,
     };
@@ -979,6 +1321,7 @@ export class CourseService {
     const thumbnailS3SingedUrl = course.thumbnailS3Key
       ? await this.fileService.getFileUrl(course.thumbnailS3Key)
       : null;
+    const trailerUrl = await this.getCourseTrailerUrl(course.id);
 
     const updatedCourseLessonList = await Promise.all(
       courseChapterList?.map(async (chapter) => {
@@ -997,6 +1340,7 @@ export class CourseService {
     return {
       ...course,
       thumbnailS3SingedUrl,
+      trailerUrl,
       chapters: updatedCourseLessonList ?? [],
     };
   }
@@ -1567,6 +1911,41 @@ export class CourseService {
     );
 
     return updatedCourse;
+  }
+
+  async deleteCourseTrailer(courseId: UUIDType, currentUser: CurrentUser) {
+    const { userId: currentUserId, role: currentUserRole } = currentUser;
+    const [course] = await this.db
+      .select({ id: courses.id, authorId: courses.authorId })
+      .from(courses)
+      .where(eq(courses.id, courseId));
+
+    if (!course) {
+      throw new NotFoundException("Course not found");
+    }
+
+    if (course.authorId !== currentUserId && currentUserRole !== USER_ROLES.ADMIN) {
+      throw new ForbiddenException("You don't have permission to update course");
+    }
+
+    const existingTrailerResources = await this.db
+      .select({ id: resources.id })
+      .from(resources)
+      .innerJoin(resourceEntity, eq(resources.id, resourceEntity.resourceId))
+      .where(
+        and(
+          eq(resourceEntity.entityId, courseId),
+          eq(resourceEntity.entityType, ENTITY_TYPES.COURSE),
+          eq(resourceEntity.relationshipType, RESOURCE_RELATIONSHIP_TYPES.TRAILER),
+          eq(resources.archived, false),
+        ),
+      );
+
+    await this.fileService.archiveResources(
+      existingTrailerResources.map((resource) => resource.id),
+    );
+
+    return { message: "Course trailer removed successfully" };
   }
 
   async enrollCourse(

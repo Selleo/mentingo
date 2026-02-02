@@ -24,6 +24,7 @@ export const DEFAULT_GLOBAL_SETTINGS = {
   unregisteredUserArticlesAccessibility: false,
   articlesEnabled: false,
   unregisteredUserCoursesAccessibility: false,
+  modernCourseListEnabled: true,
   companyInformation: DEFAULT_COMPANY_INFORMATION,
   enforceSSO: false,
   certificateBackgroundImage: null,

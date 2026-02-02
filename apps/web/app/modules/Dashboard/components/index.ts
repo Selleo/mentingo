@@ -1,2 +1,2 @@
 export { default as LatestAnnouncementsPopup } from "./LatestAnnouncementsPopup";
-export { PublicMobileNavigationDropdown } from "./PublicMobileNavigationDropdown";
+export { MobileNavigationDropdown } from "./MobileNavigationDropdown";

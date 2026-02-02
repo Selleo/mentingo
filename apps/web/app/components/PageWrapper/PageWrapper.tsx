@@ -13,6 +13,7 @@ type PageWrapperProps = HTMLAttributes<HTMLDivElement> & {
   isBarebones?: boolean;
   children: ReactNode;
   className?: string;
+  wrapperClassName?: string;
   rightSideContent?: ReactNode;
   leftSideContent?: ReactNode;
 };
@@ -61,6 +62,7 @@ export const PageWrapper = ({
   children,
   rightSideContent,
   leftSideContent,
+  wrapperClassName,
   ...props
 }: PageWrapperProps) => {
   const hasBreadcrumbs = Boolean(breadcrumbs);
@@ -74,7 +76,7 @@ export const PageWrapper = ({
   );
 
   return (
-    <div className="flex justify-between">
+    <div className={cn("flex justify-between", wrapperClassName)}>
       {leftSideContent}
 
       <div className={classes} {...props}>
