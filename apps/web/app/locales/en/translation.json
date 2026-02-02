@@ -1227,6 +1227,7 @@
           "aiMentorInstructionsMaxLength": "AI Mentor Instructions are too long (max 20000 characters)",
           "completionConditionsRequired": "Completion Conditions are required",
           "completionConditionsMaxLength": "Completion Conditions are too long (max 20000 characters)",
+          "taskDescriptionMaxLength": "Task description is too long (max 250 characters)",
           "passThresholdMin": "Pass threshold must be at least 1",
           "passThresholdMax": "Pass threshold cannot exceed 10",
           "titleMinLength": "Title is too short (min 2 characters)",
@@ -1275,6 +1276,7 @@
           "completionConditions": "Completion Conditions",
           "aiMentor": "AI Mentor",
           "mentorName": "Mentor Name",
+          "taskDescription": "Task description",
           "passThreshold": "Pass Threshold",
           "additionalContext": "Additional context",
           "aiMentorTypes": "AI Mentor Type",
@@ -1294,6 +1296,7 @@
           "allowFullscreen": "Allow fullscreen",
           "aiMentorInstructions": "Describe how the AI Mentor should behave during the lesson...",
           "completionConditions": "List what the student must achieve to pass this lesson...",
+          "taskDescription": "Describe the task the participant needs to complete...",
           "passThreshold": "e.g., 70%",
           "aiMentorTypes": "Mentor"
         },
@@ -1767,6 +1770,9 @@
         "userName": "User",
         "typing": "Typing a response...",
         "send": "Send",
+        "taskDescription": "Task description",
+        "taskDescriptionExpand": "Click to expand",
+        "taskDescriptionCollapse": "Click to collapse",
         "retakeModalTitle": "Are you sure you want to retake the lesson?",
         "retakeModalDescription": "This will reset your progress in this lesson. This action cannot be undone."
       }

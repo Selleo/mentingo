@@ -1212,6 +1212,7 @@
           "aiMentorInstructionsMaxLength": "Instrukcje AI Mentora są zbyt długie (maks. 20000 znaków)",
           "completionConditionsRequired": "Warunki zaliczenia są wymagane",
           "completionConditionsMaxLength": "Warunki zaliczenia są zbyt długie (maks. 20000 znaków)",
+          "taskDescriptionMaxLength": "Opis zadania jest zbyt długi (maks. 250 znaków)",
           "passThresholdMin": "Próg zaliczenia musi wynosić co najmniej 1",
           "passThresholdMax": "Próg zaliczenia nie może przekroczyć 10",
           "titleMinLength": "Tytuł jest zbyt krótki (min. 2 znaki)",
@@ -1262,6 +1263,7 @@
           "mentorName": "Nazwa Mentora",
           "aiMentorInstructions": "Instrukcje AI Mentora",
           "completionConditions": "Warunki zaliczenia",
+          "taskDescription": "Opis zadania",
           "passThreshold": "Próg zaliczenia",
           "aiMentorTypes": "Typ AI Mentora",
           "additionalContext": "Dodatkowy kontekst",
@@ -1283,6 +1285,7 @@
           "allowFullscreen": "Zezwól na pełny ekran",
           "aiMentorInstructions": "Opisz jak AI Mentor powinien zachowywać się podczas lekcji...",
           "completionConditions": "Wymień co student musi osiągnąć, aby zaliczyć tę lekcję...",
+          "taskDescription": "Opisz zadanie, które uczestnik ma zrealizować w trakcie tej lekcji.",
           "aiMentorTypes": "Mentor",
           "passThreshold": "np. 70%"
         },
@@ -1311,6 +1314,8 @@
           "scale1_5": "Skala 1 do 5",
           "updateAiMentorAvatarDescription": "Prześlij nowe zdjęcie dla AI Mentora lub usuń obecne.",
           "updateAiMentorAvatar": "Zaktualizuj avatar AI Mentora",
+          "taskDescriptionTooltip": "Krótko opisz, co uczestnik powinien zrobić podczas rozmowy z AI mentorem.",
+          "taskDescriptionHelper": "Pole opcjonalne; widoczne dla uczestnika pod tytułem lekcji.",
           "selectQuestionType": "Wybierz typ pytania",
           "contentLessonDescription": "Tekst z multimediami (obrazki, wideo, prezentacje).",
           "quizLessonDescription": "Zestaw pytań do sprawdzenia wiedzy.",
@@ -1766,6 +1771,9 @@
         "userName": "Użytkownik",
         "typing": "Pisze odpowiedź...",
         "send": "Wyślij",
+        "taskDescription": "Opis zadania",
+        "taskDescriptionExpand": "Kliknij, aby rozwinąć",
+        "taskDescriptionCollapse": "Kliknij, aby zwinąć",
         "retakeModalTitle": "Czy na pewno chcesz powtórzyć lekcję?",
         "retakeModalDescription": "Spowoduje to zresetowanie Twoich postępów w tej lekcji. Tej akcji nie można cofnąć."
       }
