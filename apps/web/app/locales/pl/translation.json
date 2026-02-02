@@ -1626,6 +1626,18 @@
       "sent": "Link do logowania został wysłany na Twój e-mail."
     }
   },
+  "magicLink": {
+    "error": {
+      "createToken": "Nie udało się wygenerować linku do logowania. Spróbuj ponownie.",
+      "invalidToken": "Link do logowania jest nieprawidłowy.",
+      "expiredToken": "Link do logowania wygasł."
+    }
+  },
+  "user": {
+    "error": {
+      "archived": "Twoje konto zostało zarchiwizowane."
+    }
+  },
   "studentCoursesView": {
     "other": {
       "cannotFindCourses": "Nie znaleziono żadnych kursów",

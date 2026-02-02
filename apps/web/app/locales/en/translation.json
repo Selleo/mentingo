@@ -1628,6 +1628,18 @@
       "sent": "Login link sent to your email."
     }
   },
+  "magicLink": {
+    "error": {
+      "createToken": "Unable to generate login link. Please try again.",
+      "invalidToken": "Login link is invalid.",
+      "expiredToken": "Login link has expired."
+    }
+  },
+  "user": {
+    "error": {
+      "archived": "Your account has been archived."
+    }
+  },
   "studentCoursesView": {
     "other": {
       "cannotFindCourses": "We could not find any courses",
