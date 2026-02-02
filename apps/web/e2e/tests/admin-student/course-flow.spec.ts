@@ -87,7 +87,7 @@ const selectLanguage = async (page: Page) => {
 
 const createCourse = async (page: Page) => {
   await page.getByRole("button", { name: "Courses" }).getByRole("link").click();
-  await page.locator(".h-min > button:nth-child(2)").click();
+  await page.getByRole("button", { name: "Manage courses" }).click();
   await page.getByRole("button", { name: "Create new" }).click();
   await page.getByPlaceholder("Enter title").click();
   await page.getByPlaceholder("Enter title").fill(TEST_DATA.base.titleEn);

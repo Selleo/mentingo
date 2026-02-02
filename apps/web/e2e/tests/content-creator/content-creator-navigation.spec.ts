@@ -10,7 +10,7 @@ const TEST_NAVIGATION = {
   },
   header: {
     welcomeBack: "Welcome back",
-    yourCourses: "Available Courses",
+    coursesHeader: "Top 5 most popular courses",
     settings: "Settings",
   },
 } as const;
@@ -21,13 +21,13 @@ test.describe("Content creator navigation", () => {
   });
   test("should check content creator navigation", async ({ page }) => {
     await page
-      .getByRole("button", { name: new RegExp(TEST_NAVIGATION.button.courses, "i") })
+      .getByRole("link", { name: new RegExp(TEST_NAVIGATION.button.courses, "i"), exact: true })
       .click();
     await page.waitForURL("/courses");
-    const yourCoursesHeader = page.locator("h4", { hasText: TEST_NAVIGATION.header.yourCourses });
-    await expect(yourCoursesHeader).toHaveText(new RegExp(TEST_NAVIGATION.header.yourCourses, "i"));
+    const coursesHeader = page.getByRole("heading", { name: TEST_NAVIGATION.header.coursesHeader });
+    await expect(coursesHeader).toHaveText(new RegExp(TEST_NAVIGATION.header.coursesHeader, "i"));
 
-    await page.locator(".h-min > button:nth-child(2)").click();
+    await page.getByRole("button", { name: "Manage courses" }).click();
     await page
       .getByRole("button", { name: new RegExp(TEST_NAVIGATION.button.createNew, "i") })
       .waitFor({ state: "visible" });

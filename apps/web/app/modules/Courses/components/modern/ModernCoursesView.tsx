@@ -51,12 +51,7 @@ const ModernCoursesView = () => {
     }, {});
   }, [studentCourses]);
 
-  const coursesInProgress = useMemo(() => {
-    return (studentCourses || []).filter((course) => {
-      const completed = course.completedChapterCount ?? 0;
-      return course.courseChapterCount > 0 && completed < course.courseChapterCount;
-    });
-  }, [studentCourses]);
+  const coursesInProgress = useMemo(() => studentCourses ?? [], [studentCourses]);
 
   const groupedCourses = useMemo(() => {
     const grouped = new Map<string, GetAvailableCoursesResponse["data"]>();

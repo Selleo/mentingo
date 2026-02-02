@@ -9,7 +9,7 @@ const TEST_NAVIGATION = {
   },
   header: {
     welcomeBack: "Welcome back",
-    yourCourses: "Your courses",
+    coursesHeader: "Top 5 most popular courses",
     settings: "Settings",
   },
 } as const;
@@ -24,8 +24,8 @@ test.describe("Student navigation", () => {
       .getByRole("button", { name: new RegExp(TEST_NAVIGATION.button.browseCourses, "i") })
       .click();
     await page.waitForURL("/courses");
-    const yourCoursesHeader = page.locator("h4", { hasText: TEST_NAVIGATION.header.yourCourses });
-    await expect(yourCoursesHeader).toHaveText(new RegExp(TEST_NAVIGATION.header.yourCourses, "i"));
+    const coursesHeader = page.getByRole("heading", { name: TEST_NAVIGATION.header.coursesHeader });
+    await expect(coursesHeader).toHaveText(new RegExp(TEST_NAVIGATION.header.coursesHeader, "i"));
 
     await page
       .getByRole("button", { name: /test Student profile test|Avatar for email@example.com/i })

@@ -92,7 +92,9 @@ const createNewPasswordAndLoginAsStudent = async (page: Page) => {
   await page2.getByLabel("Password").fill("Pass@123");
   await page2.getByRole("button", { name: "Login" }).click();
   await page2.waitForURL("/courses");
-  await expect(page2.getByRole("heading", { name: "Twoje kursy" })).toBeVisible();
+  await expect(
+    page2.getByRole("heading", { name: "Top 5 najpopularniejszych kursów" }),
+  ).toBeVisible();
 };
 
 test.describe("Import students to platform", () => {

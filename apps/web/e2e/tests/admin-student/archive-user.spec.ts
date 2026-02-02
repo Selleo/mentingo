@@ -73,6 +73,6 @@ test.describe("Archive user", () => {
     await expect(page.getByRole("cell", { name: STUDENT_EMAIL })).toBeVisible();
     await logout(page);
     await login(page, STUDENT_EMAIL);
-    await expect(page.getByRole("heading", { name: "Your Courses" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Top 5 most popular courses" })).toBeVisible();
   });
 });

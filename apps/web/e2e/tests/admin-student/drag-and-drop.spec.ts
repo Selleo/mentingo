@@ -17,7 +17,8 @@ const expectedLastLessons = [
 const EDITED_CHAPTER_NAME = "Edited chapter";
 
 const openCourseEdit = async (page: Page) => {
-  await page.getByTestId(COURSE_TITLE).click();
+  await page.getByTestId(COURSE_TITLE).first().click();
+  await page.waitForURL(/course\/[\w-]+/);
   await expect(page.getByRole("heading", { name: COURSE_HEADING })).toBeVisible();
   await page.getByRole("button", { name: "Edit Course" }).click();
   await expect(page.getByText("Chapter 1 • Number of lessons")).toBeVisible();
@@ -91,8 +92,8 @@ test.describe("Drag and drop", () => {
     await page.getByLabel("Password").fill("password");
     await page.getByRole("button", { name: "Login" }).click();
     await page.waitForURL("/courses");
-    await expect(page.getByTestId(COURSE_TITLE)).toBeVisible();
-    await page.getByTestId(COURSE_TITLE).click();
+    await expect(page.getByTestId(COURSE_TITLE).first()).toBeVisible();
+    await page.getByTestId(COURSE_TITLE).first().click();
 
     await assertLessonOrderInPreview(page);
   });

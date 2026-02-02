@@ -43,7 +43,7 @@ type QuizProps = {
 };
 
 export const Quiz = ({ lesson, userId, isPreviewMode = false, previewLessonId }: QuizProps) => {
-  const { lessonId = "", id = "" } = useParams();
+  const { lessonId = "", courseId: courseSlug = "" } = useParams();
   const { t } = useTranslation();
   const { isAdminLike } = useUserRole();
 
@@ -63,7 +63,7 @@ export const Quiz = ({ lesson, userId, isPreviewMode = false, previewLessonId }:
       queryClient.invalidateQueries({ queryKey: ["lesson", lessonId] });
       queryClient.invalidateQueries({ queryKey: ["lessonProgress", lessonId] });
       queryClient.invalidateQueries(certificatesQueryOptions({ userId }));
-      queryClient.invalidateQueries(courseQueryOptions(id));
+      queryClient.invalidateQueries(courseQueryOptions(courseSlug));
     },
   });
 

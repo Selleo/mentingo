@@ -147,7 +147,7 @@ async function verifyGlobalSettingsAfterLogout(
 }
 
 async function navigateToCourseEditor(page: Page) {
-  await page.getByTestId(COURSE_NAME).click();
+  await page.getByTestId(COURSE_NAME).first().click();
   await page.getByTestId(CHAPTER_NAME).click();
   await page.getByRole("button", { name: "Edit Course" }).click();
   await page.getByTestId(/Freemium - [a-f0-9-]{36}/).click();
@@ -172,8 +172,8 @@ async function logoutFromCourseEditor(page: Page) {
 }
 
 async function studentNavigatesToCourseAndCompletesQuiz(page: Page) {
-  await expect(page.getByRole("heading", { name: "Your Courses" })).toBeVisible();
-  await page.getByTestId(COURSE_NAME).click();
+  await expect(page.getByRole("heading", { name: "Top 5 most popular courses" })).toBeVisible();
+  await page.getByTestId(COURSE_NAME).first().click();
   await page.getByTestId(CHAPTER_NAME).click();
   await page.getByRole("link", { name: LESSON_LINK_NAME }).click();
   await expect(page.getByText(LESSON_TITLE).first()).toBeVisible();

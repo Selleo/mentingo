@@ -35,7 +35,7 @@ const goToCourses = async (page: Page) => {
 };
 
 const startCourseCreation = async (page: Page) => {
-  await page.locator(".h-min > button:nth-child(2)").click();
+  await page.getByRole("button", { name: "Manage courses" }).click();
   await page.getByRole("button", { name: "Create new" }).click();
 };
 
@@ -93,12 +93,7 @@ const login = async (page: Page, email: string, password: string) => {
 
 const openCourseAsStudent = async (page: Page) => {
   await page.getByRole("button", { name: "Courses" }).getByRole("link").click();
-  const nextSlide = page.getByRole("button", { name: "Next slide" });
-  await nextSlide.waitFor({ state: "visible" });
-  if (await nextSlide.isEnabled()) {
-    await nextSlide.click();
-  }
-  await page.getByTestId(COURSE.title).click();
+  await page.getByTestId(COURSE.title).first().click();
   await page.getByTestId(COURSE.chapterTitle).click();
   await page.getByRole("link", { name: TEXT.notStartedLesson }).click();
 

@@ -26,11 +26,11 @@ test.describe("Admin navigation", () => {
   });
   test("should check admin navigation", async ({ page }) => {
     await page
-      .getByRole("button", { name: new RegExp(TEST_NAVIGATION.button.courses, "i") })
+      .getByRole("button", { name: new RegExp(TEST_NAVIGATION.button.courses, "i"), exact: true })
       .click();
     await page.waitForURL("/courses");
 
-    await page.locator(".h-min > button:nth-child(2)").click();
+    await page.getByRole("button", { name: "Manage courses" }).click();
     await page
       .getByRole("button", { name: new RegExp(TEST_NAVIGATION.button.createNew, "i") })
       .waitFor({ state: "visible" });

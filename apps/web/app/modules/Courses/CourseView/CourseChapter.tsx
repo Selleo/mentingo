@@ -34,6 +34,7 @@ export const CourseChapter = ({
   isPreviewMode = false,
 }: CourseChapterProps) => {
   const { t } = useTranslation();
+  const { id: courseSlug } = useParams();
   const lessonText = formatWithPlural(
     chapter.lessonCount ?? 0,
     t("courseChapterView.other.lesson"),
@@ -131,7 +132,7 @@ export const CourseChapter = ({
                     isPreviewMode || ((chapter.isFreemium || isEnrolled) && lesson.hasAccess);
 
                   return canOpenLesson ? (
-                    <Link to={`/course/${courseId}/lesson/${lesson.id}`}>
+                    <Link to={`/course/${courseSlug}/lesson/${lesson.id}`}>
                       <CourseChapterLesson
                         key={lesson.id}
                         lesson={lesson}
