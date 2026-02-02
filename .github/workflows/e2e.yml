@@ -7,7 +7,7 @@ env:
   JWT_EXPIRATION_TIME: "15min"
   CORS_ORIGIN: ""
   EMAIL_ADAPTER: "mailhog"
-  DATABASE_URL: "postgres://postgres:guidebook@localhost:5432/guidebook"
+  DATABASE_URL: "postgresql://test_user:test_password@localhost:54321/test_db"
   REDIS_URL: "redis://localhost:6380"
   SMTP_HOST: "localhost"
   SMTP_PORT: "1025"
@@ -189,7 +189,7 @@ jobs:
         working-directory: ./apps/web
         env:
           PLAYWRIGHT_BROWSERS_PATH: /home/runner/.cache/ms-playwright
-          DATABASE_URL: postgres://postgres:guidebook@localhost:5432/guidebook
+          DATABASE_URL: postgresql://test_user:test_password@localhost:54321/test_db
           REDIS_URL: "redis://localhost:6380"
           NODE_ENV: test
           API_URL: http://localhost:3000
