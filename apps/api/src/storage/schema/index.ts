@@ -1018,3 +1018,21 @@ export const tenants = pgTable(
     uniqueHostIdx: uniqueIndex("unique_host_idx").on(table.host),
   }),
 );
+
+export const magicLinkTokens = pgTable(
+  "magic_link_tokens",
+  {
+    ...id,
+    ...timestamps,
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    token: text("token").notNull(),
+    expiryDate: timestamp("expiry_date", {
+      precision: 3,
+      withTimezone: true,
+    }).notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("magic_link_tokens"),
+);

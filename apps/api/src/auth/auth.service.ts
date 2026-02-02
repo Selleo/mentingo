@@ -1,3 +1,5 @@
+import { createHmac } from "node:crypto";
+
 import {
   BadRequestException,
   ConflictException,
@@ -5,6 +7,7 @@ import {
   forwardRef,
   Inject,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
@@ -13,6 +16,7 @@ import { EventBus } from "@nestjs/cqrs";
 import { JwtService } from "@nestjs/jwt";
 import {
   CreatePasswordReminderEmail,
+  MagicLinkEmail,
   PasswordRecoveryEmail,
   WelcomeEmail,
 } from "@repo/email-templates";
@@ -22,7 +26,7 @@ import { and, eq, isNull, lt, lte, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { authenticator } from "otplib";
 
-import { CORS_ORIGIN } from "src/auth/consts";
+import { CORS_ORIGIN, MAGIC_LINK_EXPIRATION_TIME } from "src/auth/consts";
 import { DatabasePg, type UUIDType } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
 import { getEmailSubject } from "src/common/emails/translations";
@@ -33,7 +37,14 @@ import { UserRegisteredEvent } from "src/events/user/user-registered.event";
 import { SettingsService } from "src/settings/settings.service";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
-import { createTokens, credentials, resetTokens, userOnboarding, users } from "../storage/schema";
+import {
+  createTokens,
+  credentials,
+  magicLinkTokens,
+  resetTokens,
+  userOnboarding,
+  users,
+} from "../storage/schema";
 import { UserService } from "../user/user.service";
 
 import { CreatePasswordService } from "./create-password.service";
@@ -49,6 +60,8 @@ import type { ProviderLoginUserType } from "src/utils/types/provider-login-user.
 
 @Injectable()
 export class AuthService {
+  private readonly ENCRYPTION_KEY: Buffer;
+
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
@@ -60,7 +73,9 @@ export class AuthService {
     private settingsService: SettingsService,
     private eventBus: EventBus,
     private tokenService: TokenService,
-  ) {}
+  ) {
+    this.ENCRYPTION_KEY = Buffer.from(process.env.MASTER_KEY!, "base64");
+  }
 
   public async register({
     email,
@@ -112,8 +127,9 @@ export class AuthService {
       );
 
       const { avatarReference, ...userWithoutAvatar } = newUser;
-      const usersProfilePictureUrl =
-        await this.userService.getUsersProfilePictureUrl(avatarReference);
+      const usersProfilePictureUrl = await this.userService.getUsersProfilePictureUrl(
+        avatarReference,
+      );
 
       this.eventBus.publish(new UserRegisteredEvent(newUser));
 
@@ -156,8 +172,9 @@ export class AuthService {
     const { accessToken, refreshToken } = await this.getTokens(user);
 
     const { avatarReference, ...userWithoutAvatar } = user;
-    const usersProfilePictureUrl =
-      await this.userService.getUsersProfilePictureUrl(avatarReference);
+    const usersProfilePictureUrl = await this.userService.getUsersProfilePictureUrl(
+      avatarReference,
+    );
 
     const userSettings = await this.settingsService.getUserSettings(user.id);
 
@@ -581,5 +598,117 @@ export class AuthService {
     });
 
     return isValid;
+  }
+
+  async createMagicLink(email: string) {
+    const user = await this.userService.getUserByEmail(email);
+
+    if (user.archived) throw new UnauthorizedException("user.error.archived");
+
+    const magicLinkToken = await this.createMagicLinkToken(user.id);
+
+    if (!magicLinkToken) throw new InternalServerErrorException("magicLink.error.createToken");
+
+    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(user.id);
+
+    const magicLinkEmail = new MagicLinkEmail({
+      magicLink: `${CORS_ORIGIN}/auth/login?token=${magicLinkToken}`,
+      ...defaultEmailSettings,
+    });
+
+    const { html, text } = magicLinkEmail;
+
+    await this.emailService.sendEmailWithLogo({
+      to: email,
+      subject: getEmailSubject("magicLinkEmail", defaultEmailSettings.language),
+      text,
+      html,
+    });
+  }
+
+  async handleMagicLinkLogin(response: Response, token: string) {
+    const { MFAEnforcedRoles } = await this.settingsService.getGlobalSettings();
+
+    const dateNow = new Date();
+
+    const hashedToken = this.hashMagicLinkToken(token);
+
+    const { user, accessToken, refreshToken } = await this.db.transaction(async (trx) => {
+      const [magicLinkToken] = await trx
+        .select()
+        .from(magicLinkTokens)
+        .where(eq(magicLinkTokens.token, hashedToken))
+        .limit(1)
+        .for("update");
+
+      if (!magicLinkToken) throw new UnauthorizedException("magicLink.error.invalidToken");
+
+      if (magicLinkToken.expiryDate < dateNow)
+        throw new UnauthorizedException("magicLink.error.expiredToken");
+
+      const user = await this.userService.getUserById(magicLinkToken.userId);
+
+      if (user.archived) throw new UnauthorizedException("user.error.archived");
+
+      await trx.delete(magicLinkTokens).where(eq(magicLinkTokens.id, magicLinkToken.id));
+
+      const { refreshToken, accessToken } = await this.getTokens(user);
+
+      return { user, accessToken, refreshToken };
+    });
+
+    const { id: userId, email, role } = user;
+
+    const userSettings = await this.settingsService.getUserSettings(userId);
+    const onboardingStatus = await this.userService.getAllOnboardingStatus(userId);
+
+    this.eventBus.publish(
+      new UserLoginEvent({
+        userId,
+        method: "magic_link",
+        actor: { userId, email, role: role as UserRole },
+      }),
+    );
+
+    if (MFAEnforcedRoles.includes(role as UserRole) || userSettings.isMFAEnabled) {
+      this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken);
+
+      return {
+        ...user,
+        shouldVerifyMFA: true,
+        onboardingStatus,
+      };
+    }
+
+    this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
+
+    return {
+      ...user,
+      shouldVerifyMFA: false,
+      onboardingStatus,
+    };
+  }
+
+  async createMagicLinkToken(userId: UUIDType): Promise<string> {
+    const token = nanoid(64);
+    const hashedToken = this.hashMagicLinkToken(token);
+
+    const expiryDate = new Date();
+    expiryDate.setTime(expiryDate.getTime() + MAGIC_LINK_EXPIRATION_TIME);
+
+    await this.db
+      .insert(magicLinkTokens)
+      .values({
+        userId,
+        token: hashedToken,
+        expiryDate,
+      })
+      .returning();
+
+    return token;
+  }
+
+  hashMagicLinkToken(token: string): string {
+    return createHmac("sha256", this.ENCRYPTION_KEY).update(token, "utf8").digest("hex");
   }
 }

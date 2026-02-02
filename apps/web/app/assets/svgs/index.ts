@@ -74,6 +74,7 @@ export { default as Target } from "./target.svg?react";
 export { default as PanelLeftClose } from "./panel-left-close.svg?react";
 export { default as PanelLeftOpen } from "./panel-left-open.svg?react";
 export { default as BookOpen } from "./book-open.svg?react";
+export { default as WandSparkles } from "./wand-sparkles.svg?react";
 
 export { SegmentedRing } from "./segmented-ring";
 

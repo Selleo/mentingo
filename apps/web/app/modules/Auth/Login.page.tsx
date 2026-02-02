@@ -1,11 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useSearchParams } from "@remix-run/react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
 import { version } from "~/../version.json";
+import { useHandleMagicLink } from "~/api/mutations/useHandleMagicLink";
 import { useLoginUser } from "~/api/mutations/useLoginUser";
 import { useGlobalSettingsSuspense } from "~/api/queries/useGlobalSettings";
 import useLoginPageFiles from "~/api/queries/useLoginPageFiles";
@@ -23,6 +24,7 @@ import { UploadFilesToLoginPagePreviewDialog } from "~/modules/Dashboard/Setting
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import { SocialLogin } from "./components";
+import { MagicLinkVerificationCard } from "./components/MagicLinkVerificationCard";
 
 import type { LoginPageResource } from "../Dashboard/Settings/components/admin/UploadFilesToLoginPageItem";
 import type { MetaFunction } from "@remix-run/react";
@@ -40,11 +42,21 @@ const loginSchema = (t: (key: string) => string) =>
 export default function LoginPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const error = searchParams.get("error");
+  const magicLinkToken = searchParams.get("token");
 
   const { data: loginPageFiles } = useLoginPageFiles();
 
   const [previewResource, setPreviewResource] = useState<LoginPageResource | null>(null);
   const [isPreviewDialogOpen, setIsPreviewDialogOpen] = useState(false);
+
+  const {
+    mutate: handleMagicLink,
+    isPending: isMagicLinkPending,
+    isSuccess: isMagicLinkSuccess,
+    isError: isMagicLinkError,
+  } = useHandleMagicLink();
+
+  const hasTriggeredMagicLink = useRef(false);
 
   useEffect(() => {
     if (error) {
@@ -87,7 +99,15 @@ export default function LoginPage() {
       inviteOnlyRegistration: inviteOnlyRegistration,
       loginBackgroundImageS3Key,
     },
+    isLoading: isGlobalSettingsLoading,
   } = useGlobalSettingsSuspense();
+
+  useEffect(() => {
+    if (magicLinkToken && !isGlobalSettingsLoading && !hasTriggeredMagicLink.current) {
+      hasTriggeredMagicLink.current = true;
+      handleMagicLink({ token: magicLinkToken });
+    }
+  }, [handleMagicLink, magicLinkToken, isGlobalSettingsLoading]);
 
   const {
     register,
@@ -108,6 +128,24 @@ export default function LoginPage() {
 
     loginUser({ data });
   };
+
+  if (magicLinkToken) {
+    const statusMessage = isMagicLinkPending
+      ? t("loginView.magicLink.checking")
+      : isMagicLinkSuccess
+        ? t("loginView.magicLink.success")
+        : t("loginView.magicLink.error");
+
+    return (
+      <MagicLinkVerificationCard
+        backgroundUrl={loginBackgroundImageS3Key}
+        statusMessage={statusMessage}
+        isPending={isMagicLinkPending}
+        isError={isMagicLinkError}
+        onBack={() => setSearchParams({})}
+      />
+    );
+  }
 
   return (
     <>
@@ -178,14 +216,12 @@ export default function LoginPage() {
             </form>
           )}
 
-          {isAnyProviderEnabled && (
-            <SocialLogin
-              isSSOEnforced={isSSOEnforced}
-              isGoogleOAuthEnabled={isGoogleOAuthEnabled}
-              isMicrosoftOAuthEnabled={isMicrosoftOAuthEnabled}
-              isSlackOAuthEnabled={isSlackOAuthEnabled}
-            />
-          )}
+          <SocialLogin
+            isSSOEnforced={isSSOEnforced}
+            isGoogleOAuthEnabled={isGoogleOAuthEnabled}
+            isMicrosoftOAuthEnabled={isMicrosoftOAuthEnabled}
+            isSlackOAuthEnabled={isSlackOAuthEnabled}
+          />
 
           {!inviteOnlyRegistration && (
             <div className="mt-4 text-center text-sm">

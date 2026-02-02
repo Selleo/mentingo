@@ -279,6 +279,59 @@
         }
       }
     },
+    "/api/auth/magic-link/create": {
+      "post": {
+        "operationId": "AuthController_createMagicLink",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMagicLinkBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateMagicLinkResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/magic-link/verify": {
+      "get": {
+        "operationId": "AuthController_handleMagicLink",
+        "parameters": [
+          {
+            "name": "token",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HandleMagicLinkResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/settings/global": {
       "get": {
         "operationId": "SettingsController_getPublicGlobalSettings",
@@ -8451,6 +8504,157 @@
             },
             "required": [
               "isValid"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CreateMagicLinkBody": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "CreateMagicLinkResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "HandleMagicLinkResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "firstName": {
+                "type": "string"
+              },
+              "lastName": {
+                "type": "string"
+              },
+              "role": {
+                "type": "string"
+              },
+              "archived": {
+                "type": "boolean"
+              },
+              "deletedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "profilePictureUrl": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "shouldVerifyMFA": {
+                "type": "boolean"
+              },
+              "onboardingStatus": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "createdAt": {
+                    "type": "string"
+                  },
+                  "updatedAt": {
+                    "type": "string"
+                  },
+                  "userId": {
+                    "type": "string"
+                  },
+                  "dashboard": {
+                    "type": "boolean"
+                  },
+                  "courses": {
+                    "type": "boolean"
+                  },
+                  "announcements": {
+                    "type": "boolean"
+                  },
+                  "profile": {
+                    "type": "boolean"
+                  },
+                  "settings": {
+                    "type": "boolean"
+                  },
+                  "providerInformation": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "id",
+                  "createdAt",
+                  "updatedAt",
+                  "userId",
+                  "dashboard",
+                  "courses",
+                  "announcements",
+                  "profile",
+                  "settings",
+                  "providerInformation"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "createdAt",
+              "updatedAt",
+              "email",
+              "firstName",
+              "lastName",
+              "role",
+              "archived",
+              "deletedAt",
+              "profilePictureUrl",
+              "shouldVerifyMFA",
+              "onboardingStatus"
             ]
           }
         },

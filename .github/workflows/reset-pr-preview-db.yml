@@ -88,9 +88,9 @@ jobs:
         run: |
           set -euo pipefail
 
-          echo "Dropping and recreating database schema for PR ${PR_ID}..."
+          echo "Dropping drizzle metadata and recreating database schema for PR ${PR_ID}..."
 
-          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec db-preview-pr-${PR_ID} psql -U postgres -d guidebook -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO postgres; GRANT ALL ON SCHEMA public TO public;"
+          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec db-preview-pr-${PR_ID} psql -U postgres -d guidebook -c "DROP SCHEMA IF EXISTS drizzle CASCADE; DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO postgres; GRANT ALL ON SCHEMA public TO public;"
 
       - name: Run database migrations
         env:
@@ -108,4 +108,3 @@ jobs:
           set -euo pipefail
           uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec api-preview-pr-${PR_ID} npm i -g tsx drizzle-kit drizzle-orm
           uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec api-preview-pr-${PR_ID} npm run db:seed || true
-

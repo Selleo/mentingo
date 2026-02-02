@@ -17,7 +17,8 @@
       "validate": "Popraw błędy",
       "edit": "Edytuj",
       "continue": "Kontynuuj",
-      "uploading": "Wgrywanie..."
+      "uploading": "Wgrywanie...",
+      "sending": "Wysyłanie..."
     },
     "toast": {
       "noAccess": "Nie masz uprawnień do tego zasobu",
@@ -1587,6 +1588,7 @@
     },
     "other": {
       "forgotPassword": "Zapomniałeś hasła?",
+      "useMagicLink": "Wyślij mi link do logowania",
       "dontHaveAccount": "Nie masz konta?",
       "rememberMe": "Zapamiętaj mnie",
       "signUp": "Zarejestruj się",
@@ -1598,6 +1600,42 @@
     "field": {
       "email": "Email",
       "password": "Hasło"
+    },
+    "magicLink": {
+      "subHeader": "Weryfikujemy Twój link do logowania. To może potrwać chwilę.",
+      "checking": "Sprawdzamy Twój link do logowania...",
+      "success": "Link zweryfikowany. Przekierowujemy...",
+      "error": "Link do logowania jest nieprawidłowy lub wygasł.",
+      "backToLogin": "Wróć do logowania"
+    }
+  },
+  "magicLinkView": {
+    "header": "Wyślij link do logowania",
+    "subHeader": "Podaj swój e-mail, a wyślemy Ci link do logowania.",
+    "validation": {
+      "email": "Nieprawidłowy adres email"
+    },
+    "field": {
+      "email": "Adres email"
+    },
+    "button": {
+      "sendLink": "Wyślij mi link do logowania",
+      "backToLogin": "Wróć do logowania"
+    },
+    "toast": {
+      "sent": "Link do logowania został wysłany na Twój e-mail."
+    }
+  },
+  "magicLink": {
+    "error": {
+      "createToken": "Nie udało się wygenerować linku do logowania. Spróbuj ponownie.",
+      "invalidToken": "Link do logowania jest nieprawidłowy.",
+      "expiredToken": "Link do logowania wygasł."
+    }
+  },
+  "user": {
+    "error": {
+      "archived": "Twoje konto zostało zarchiwizowane."
     }
   },
   "studentCoursesView": {
@@ -2236,6 +2274,7 @@
     "register": "Rejestracja",
     "passwordRecovery": "Odzyskiwanie hasła",
     "login": "Logowanie",
+    "magicLink": "Link do logowania",
     "createNewPassword": "Utwórz nowe hasło",
     "createAnnouncement": "Utwórz ogłoszenie",
     "announcements": "Ogłoszenia",

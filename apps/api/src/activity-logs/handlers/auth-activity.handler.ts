@@ -19,7 +19,7 @@ export class AuthActivityHandler implements IEventHandler<AuthEventType> {
   }
 
   private async handleLogin(event: UserLoginEvent) {
-    const context = event.loginData.method ? { method: event.loginData.method } : null;
+    const context = { method: event.loginData.method };
 
     await this.activityLogsService.recordActivity({
       actor: event.loginData.actor,

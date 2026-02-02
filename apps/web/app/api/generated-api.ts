@@ -150,6 +150,44 @@ export interface MFAVerifyResponse {
   };
 }
 
+export interface CreateMagicLinkBody {
+  email: string;
+}
+
+export interface CreateMagicLinkResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface HandleMagicLinkResponse {
+  data: {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+    archived: boolean;
+    deletedAt: string | null;
+    profilePictureUrl: string | null;
+    shouldVerifyMFA: boolean;
+    onboardingStatus: {
+      id: string;
+      createdAt: string;
+      updatedAt: string;
+      userId: string;
+      dashboard: boolean;
+      courses: boolean;
+      announcements: boolean;
+      profile: boolean;
+      settings: boolean;
+      providerInformation: boolean;
+    };
+  };
+}
+
 export interface GetPublicGlobalSettingsResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
@@ -4100,6 +4138,42 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "POST",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuthControllerCreateMagicLink
+     * @request POST:/api/auth/magic-link/create
+     */
+    authControllerCreateMagicLink: (data: CreateMagicLinkBody, params: RequestParams = {}) =>
+      this.request<CreateMagicLinkResponse, any>({
+        path: `/api/auth/magic-link/create`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuthControllerHandleMagicLink
+     * @request GET:/api/auth/magic-link/verify
+     */
+    authControllerHandleMagicLink: (
+      query: {
+        token: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<HandleMagicLinkResponse, any>({
+        path: `/api/auth/magic-link/verify`,
+        method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),
