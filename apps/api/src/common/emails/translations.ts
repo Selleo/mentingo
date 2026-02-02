@@ -50,7 +50,7 @@ export const EMAIL_SUBJECTS_TRANSLATIONS = {
     pl: "Użytkownik ukończył kurs na Twojej platformie",
   },
   magicLinkEmail: {
-    en: "Magic link",
+    en: "Login link",
     pl: "Link do logowania",
   },
 } as const;

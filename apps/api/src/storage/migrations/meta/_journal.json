@@ -603,6 +603,20 @@
       "when": 1769852727924,
       "tag": "0085_add_default_modern_courses_view_setting",
       "breakpoints": true
+    },
+    {
+      "idx": 86,
+      "version": "7",
+      "when": 1770026130716,
+      "tag": "0086_add_magic_link_tokens_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 87,
+      "version": "7",
+      "when": 1770026209126,
+      "tag": "0087_enable_tenant_rls_for_magic_link_tokens",
+      "breakpoints": true
     }
   ]
 }

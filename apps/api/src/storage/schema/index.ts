@@ -1032,6 +1032,7 @@ export const magicLinkTokens = pgTable(
       precision: 3,
       withTimezone: true,
     }).notNull(),
+    tenantId,
   },
   withTenantIdIndex("magic_link_tokens"),
 );

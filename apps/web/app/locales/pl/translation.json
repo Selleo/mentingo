@@ -1588,7 +1588,7 @@
     },
     "other": {
       "forgotPassword": "Zapomniałeś hasła?",
-      "useMagicLink": "Użyj magicznego linku",
+      "useMagicLink": "Wyślij mi link do logowania",
       "dontHaveAccount": "Nie masz konta?",
       "rememberMe": "Zapamiętaj mnie",
       "signUp": "Zarejestruj się",
@@ -1602,16 +1602,16 @@
       "password": "Hasło"
     },
     "magicLink": {
-      "subHeader": "Weryfikujemy Twój magiczny link. To może potrwać chwilę.",
-      "checking": "Sprawdzamy Twój magiczny link...",
+      "subHeader": "Weryfikujemy Twój link do logowania. To może potrwać chwilę.",
+      "checking": "Sprawdzamy Twój link do logowania...",
       "success": "Link zweryfikowany. Przekierowujemy...",
-      "error": "Magic link jest nieprawidłowy lub wygasł.",
+      "error": "Link do logowania jest nieprawidłowy lub wygasł.",
       "backToLogin": "Wróć do logowania"
     }
   },
   "magicLinkView": {
-    "header": "Wyślij magiczny link",
-    "subHeader": "Podaj swój e-mail, a wyślemy Ci magiczny link do logowania.",
+    "header": "Wyślij link do logowania",
+    "subHeader": "Podaj swój e-mail, a wyślemy Ci link do logowania.",
     "validation": {
       "email": "Nieprawidłowy adres email"
     },
@@ -1619,11 +1619,11 @@
       "email": "Adres email"
     },
     "button": {
-      "sendLink": "Wyślij magiczny link",
+      "sendLink": "Wyślij mi link do logowania",
       "backToLogin": "Wróć do logowania"
     },
     "toast": {
-      "sent": "Magic link został wysłany na Twój e-mail."
+      "sent": "Link do logowania został wysłany na Twój e-mail."
     }
   },
   "studentCoursesView": {
@@ -2262,7 +2262,7 @@
     "register": "Rejestracja",
     "passwordRecovery": "Odzyskiwanie hasła",
     "login": "Logowanie",
-    "magicLink": "Magiczny link",
+    "magicLink": "Link do logowania",
     "createNewPassword": "Utwórz nowe hasło",
     "createAnnouncement": "Utwórz ogłoszenie",
     "announcements": "Ogłoszenia",

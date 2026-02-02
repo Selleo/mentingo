@@ -3,18 +3,18 @@ import { EmailContent, Language } from "types";
 export const getMagicLinkEmailTranslations = (language: Language) => {
   const emailContent: Record<Language, EmailContent> = {
     en: {
-      heading: "Magic Link",
+      heading: "Login Link",
       paragraphs: [
-        "You have received a magic link to your account. Click the button below to open it.",
+        "You have received a login link to your account. Click the button below to open it.",
       ],
-      buttonText: "OPEN MAGIC LINK",
+      buttonText: "OPEN LOGIN LINK",
     },
     pl: {
-      heading: "Magiczny Link",
+      heading: "Link do logowania",
       paragraphs: [
-        "Otrzymałeś magiczny link do swojego konta. Kliknij przycisk poniżej, aby otworzyć go.",
+        "Otrzymałeś link do logowania do swojego konta. Kliknij przycisk poniżej, aby go otworzyć.",
       ],
-      buttonText: "OTWÓRZ MAGICZNY LINK",
+      buttonText: "OTWÓRZ LINK DO LOGOWANIA",
     },
   };
 

@@ -1590,7 +1590,7 @@
     },
     "other": {
       "forgotPassword": "Forgot your password?",
-      "useMagicLink": "Get a magic link instead",
+      "useMagicLink": "Email me a login link",
       "dontHaveAccount": "Don't have an account?",
       "rememberMe": "Remember me",
       "signUp": "Sign up",
@@ -1604,16 +1604,16 @@
       "password": "Password"
     },
     "magicLink": {
-      "subHeader": "We are validating your magic link. This may take a moment.",
-      "checking": "Checking your magic link...",
-      "success": "Magic link verified. Redirecting...",
-      "error": "Magic link is invalid or has expired.",
+      "subHeader": "We are validating your login link. This may take a moment.",
+      "checking": "Checking your login link...",
+      "success": "Login link verified. Redirecting...",
+      "error": "Login link is invalid or has expired.",
       "backToLogin": "Back to login"
     }
   },
   "magicLinkView": {
-    "header": "Get your magic link",
-    "subHeader": "Enter your email and we will send you a magic link to sign in.",
+    "header": "Get your login link",
+    "subHeader": "Enter your email and we will send you a login link to sign in.",
     "validation": {
       "email": "Invalid email"
     },
@@ -1621,11 +1621,11 @@
       "email": "Email address"
     },
     "button": {
-      "sendLink": "Get magic link",
+      "sendLink": "Get login link",
       "backToLogin": "Back to login"
     },
     "toast": {
-      "sent": "Magic link sent to your email."
+      "sent": "Login link sent to your email."
     }
   },
   "studentCoursesView": {
@@ -2239,7 +2239,7 @@
     "register": "Register",
     "passwordRecovery": "Password Recovery",
     "login": "Login",
-    "magicLink": "Magic Link",
+    "magicLink": "Login Link",
     "createNewPassword": "Create New Password",
     "createAnnouncement": "Create Announcement",
     "announcements": "Announcements",
