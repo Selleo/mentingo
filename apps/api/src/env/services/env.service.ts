@@ -105,15 +105,15 @@ export class EnvService {
     const [google, microsoft, slack] = await Promise.all([
       this.getEnv("VITE_GOOGLE_OAUTH_ENABLED")
         .then((r) => r.value)
-        .catch(() => undefined),
+        .catch(() => process.env.VITE_GOOGLE_OAUTH_ENABLED),
 
       this.getEnv("VITE_MICROSOFT_OAUTH_ENABLED")
         .then((r) => r.value)
-        .catch(() => undefined),
+        .catch(() => process.env.VITE_MICROSOFT_OAUTH_ENABLED),
 
       this.getEnv("VITE_SLACK_OAUTH_ENABLED")
         .then((r) => r.value)
-        .catch(() => undefined),
+        .catch(() => process.env.VITE_SLACK_OAUTH_ENABLED),
     ]);
 
     return {

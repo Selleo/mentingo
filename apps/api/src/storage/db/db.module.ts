@@ -7,6 +7,7 @@ import * as schema from "src/storage/schema";
 import { createDbProxy, DB, DB_BASE } from "./db.providers";
 import { TenantDbRunnerService } from "./tenant-db-runner.service";
 import { TenantResolverService } from "./tenant-resolver.service";
+import { TenantStateService } from "./tenant-state.service";
 
 import type { DatabasePg } from "src/common";
 
@@ -37,7 +38,14 @@ import type { DatabasePg } from "src/common";
     },
     TenantDbRunnerService,
     TenantResolverService,
+    TenantStateService,
   ],
-  exports: [DB, TenantDbRunnerService, TenantResolverService, DrizzlePostgresModule],
+  exports: [
+    DB,
+    TenantDbRunnerService,
+    TenantResolverService,
+    TenantStateService,
+    DrizzlePostgresModule,
+  ],
 })
 export class DbModule {}
