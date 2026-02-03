@@ -411,12 +411,14 @@ export class SettingsService {
       .from(settings)
       .where(isNull(settings.userId));
 
-    if (!globalSettings?.platformLogoS3Key) {
-      const defaultLogoUrl = `${CORS_ORIGIN}/app/assets/svgs/app-logo.svg`;
-      return await this.fileService.getFileBuffer(defaultLogoUrl);
-    }
+    const logoUrl =
+      globalSettings?.platformLogoS3Key ?? `${CORS_ORIGIN}/app/assets/svgs/app-logo.svg`;
 
-    return await this.fileService.getFileBuffer(globalSettings.platformLogoS3Key);
+    try {
+      return await this.fileService.getFileBuffer(logoUrl);
+    } catch {
+      return null;
+    }
   }
 
   public async uploadPlatformSimpleLogo(
@@ -835,15 +837,19 @@ export class SettingsService {
 
     const modifiedSvg = svgText.replace(/currentColor/g, primaryColor);
 
-    const pngBuffer = await sharp(Buffer.from(modifiedSvg, "utf-8"), { density: 300 })
-      .resize(230, 119, {
-        fit: "contain",
-        background: { r: 0, g: 0, b: 0, alpha: 0 },
-      })
-      .png()
-      .toBuffer();
+    try {
+      const pngBuffer = await sharp(Buffer.from(modifiedSvg, "utf-8"), { density: 300 })
+        .resize(230, 119, {
+          fit: "contain",
+          background: { r: 0, g: 0, b: 0, alpha: 0 },
+        })
+        .png()
+        .toBuffer();
 
-    return pngBuffer;
+      return pngBuffer;
+    } catch {
+      return null;
+    }
   }
 
   public async updateConfigWarningDismissed(
