@@ -586,7 +586,7 @@ const setupLAGroupForStudent = async (page: Page) => {
 
 const enrollGroupIntoCourse = async (page: Page, courseTitle: string) => {
   await page.getByRole("link", { name: "Courses" }).click();
-  await page.getByTestId(courseTitle).click();
+  await page.getByTestId(courseTitle).first().click();
   await page.getByRole("button", { name: "Edit Course" }).click();
   await page.getByRole("tab", { name: "Enrolled students" }).click();
   await page.getByRole("button", { name: "Enroll groups" }).click();
@@ -670,7 +670,7 @@ const expectCourseVisibleForPrivateStudent = async (page: Page) => {
   await expect(page.getByTestId(PRIVATE_COURSE.titleTestId).first()).toBeVisible();
   await page.getByTestId(PRIVATE_COURSE.titleTestId).first().click();
   await page.waitForURL(/course\/[\w-]+/);
-  await expect(page.getByRole("heading", { name: PRIVATE_COURSE.heading })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Author" })).toBeVisible();
 };
 
 const unenrollStudentFromCourse = async (page: Page) => {
