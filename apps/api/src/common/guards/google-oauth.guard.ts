@@ -1,41 +1,30 @@
-import { ForbiddenException, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 
 import { EnvService } from "src/env/services/env.service";
 import { TenantResolverService } from "src/storage/db/tenant-resolver.service";
 import { TenantStateService } from "src/storage/db/tenant-state.service";
 
-import { TenantOAuthGuard } from "./tenant-oauth.guard";
+import { createTenantOAuthGuard } from "./oauth-guard.factory";
 
-class GoogleOAuthGuardBase extends TenantOAuthGuard(
+class GoogleOAuthGuardBase extends createTenantOAuthGuard(
   "google",
   (req: { oauthState?: string }, isCallback: boolean) =>
     isCallback
       ? { accessType: "offline", prompt: "consent" }
       : { accessType: "offline", prompt: "consent", state: req.oauthState },
+  "GOOGLE_OAUTH_ENABLED",
+  "Google OAuth is disabled",
 ) {}
 
 @Injectable()
 export class GoogleOAuthGuard extends GoogleOAuthGuardBase {
   constructor(
-    private readonly envService: EnvService,
-    private readonly configService: ConfigService,
+    envService: EnvService,
+    configService: ConfigService,
     tenantResolver: TenantResolverService,
     tenantState: TenantStateService,
   ) {
-    super(tenantResolver, tenantState);
-  }
-
-  protected async isEnabled(): Promise<boolean> {
-    const enabled = await this.envService
-      .getEnv("GOOGLE_OAUTH_ENABLED")
-      .then((r) => r.value)
-      .catch(() => this.configService.get<string>("GOOGLE_OAUTH_ENABLED"));
-
-    return enabled === "true";
-  }
-
-  protected handleDisabled(): boolean {
-    throw new ForbiddenException("Google OAuth is disabled");
+    super(envService, configService, tenantResolver, tenantState);
   }
 }

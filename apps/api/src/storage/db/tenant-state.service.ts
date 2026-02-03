@@ -67,7 +67,7 @@ export class TenantStateService {
 
   private base64UrlEncode(value: string | Buffer): string {
     const buffer = typeof value === "string" ? Buffer.from(value, "utf8") : value;
-    return buffer.toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+    return buffer.toString("base64url");
   }
 
   private safeParsePayload(body: string): TenantStatePayload | null {
