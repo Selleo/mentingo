@@ -66,7 +66,7 @@ const IDS = {
 };
 
 const fillWithWait = async (locator: Locator, value: string) => {
-  await locator.waitFor({ state: "visible" });
+  await locator.waitFor({ state: "visible", timeout: 10000 });
   await locator.click();
   await locator.fill(value);
 };
@@ -161,7 +161,7 @@ const publishSequenceCourse = async (page: Page) => {
 };
 
 const openSequenceCourse = async (page: Page) => {
-  await page.getByTestId(SEQUENCE_COURSE.title).first().click();
+  await page.getByTestId(SEQUENCE_COURSE.title).last().click();
 };
 
 const loginSequenceUser = async (page: Page, role: "admin" | "student") => {
