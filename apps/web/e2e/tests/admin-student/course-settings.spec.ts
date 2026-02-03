@@ -68,7 +68,7 @@ const enterCourse = async (page: Page, courseHandle: string) => {
 
   await page.waitForURL(/course\/[\w-]+/);
 
-  const header = page.getByRole("link", { name: new RegExp(courseHandle, "i") });
+  const header = page.getByRole("link", { name: new RegExp(courseHandle, "i") }).first();
 
   await header.waitFor({ state: "visible" });
 
