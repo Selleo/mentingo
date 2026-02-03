@@ -1,6 +1,5 @@
 import { t } from "i18next";
 import { find, flatMap } from "lodash-es";
-import { match, P } from "ts-pattern";
 
 import { QuestionType } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/QuizLessonForm/QuizLessonForm.types";
 import { LESSON_PROGRESS_STATUSES, type QuizForm } from "~/modules/Courses/Lesson/types";
@@ -13,42 +12,45 @@ import type {
 
 type Questions = NonNullable<GetLessonByIdResponse["data"]["quizDetails"]>["questions"];
 
-type GetUserAnswersResult = {
-  singleAnswerQuestions: Record<string, Record<string, string>> | Record<string, string>;
-  multiAnswerQuestions: Record<string, Record<string, string>> | Record<string, string>;
-  trueOrFalseQuestions: Record<string, Record<string, string>> | Record<string, string>;
-  photoQuestionSingleChoice: Record<string, Record<string, string>> | Record<string, string>;
-  photoQuestionMultipleChoice: Record<string, Record<string, string>> | Record<string, string>;
-  fillInTheBlanksText: Record<string, Record<string, string>> | Record<string, string>;
-  fillInTheBlanksDnd: Record<string, Record<string, string>> | Record<string, string>;
-  matchWords: Record<string, Record<string, string>> | Record<string, string>;
-  scaleQuestions: Record<string, Record<string, string>> | Record<string, string>;
-  briefResponses: Record<string, string> | Record<string, Record<string, string>>;
-  detailedResponses: Record<string, string> | Record<string, Record<string, string>>;
-};
+type AnswersMap = Record<string, Record<string, string | null>>;
+type OpenAnswersMap = Record<string, string>;
 
-export const getUserAnswers = (questions: Questions): GetUserAnswersResult => {
+export const getUserAnswers = (questions: Questions): QuizForm => {
   const groupedQuestions = groupQuestionsByType(questions);
 
   return {
-    singleAnswerQuestions: prepareAnswers(groupedQuestions.single_choice, "options"),
-    multiAnswerQuestions: prepareAnswers(groupedQuestions.multiple_choice, "options"),
-    trueOrFalseQuestions: prepareAnswers(groupedQuestions.true_or_false, "options"),
-    photoQuestionSingleChoice: prepareAnswers(
-      groupedQuestions.photo_question_single_choice,
-      "options",
-    ),
-    photoQuestionMultipleChoice: prepareAnswers(
+    singleAnswerQuestions: prepareOptionAnswers(groupedQuestions.single_choice),
+    multiAnswerQuestions: prepareOptionAnswers(groupedQuestions.multiple_choice),
+    trueOrFalseQuestions: prepareOptionAnswers(groupedQuestions.true_or_false),
+    photoQuestionSingleChoice: prepareOptionAnswers(groupedQuestions.photo_question_single_choice),
+    photoQuestionMultipleChoice: prepareOptionAnswers(
       groupedQuestions.photo_question_multiple_choice,
-      "options",
     ),
-    fillInTheBlanksText: prepareAnswers(groupedQuestions.fill_in_the_blanks_text, "options"),
-    fillInTheBlanksDnd: prepareAnswers(groupedQuestions.fill_in_the_blanks_dnd, "options"),
-    matchWords: prepareAnswers(groupedQuestions.match_words, "options"),
-    scaleQuestions: prepareAnswers(groupedQuestions.scale_1_5, "options"),
-    briefResponses: prepareAnswers(groupedQuestions.brief_response, "open"),
-    detailedResponses: prepareAnswers(groupedQuestions.detailed_response, "open"),
+    fillInTheBlanksText: prepareOptionAnswers(groupedQuestions.fill_in_the_blanks_text),
+    fillInTheBlanksDnd: prepareOptionAnswers(groupedQuestions.fill_in_the_blanks_dnd),
+    briefResponses: prepareOpenAnswers(groupedQuestions.brief_response),
+    detailedResponses: prepareOpenAnswers(groupedQuestions.detailed_response),
   } as const;
+};
+
+export const getEmptyQuizAnswers = (questions: Questions): QuizForm => {
+  const groupedQuestions = groupQuestionsByType(questions);
+
+  return {
+    singleAnswerQuestions: prepareEmptyOptionAnswers(groupedQuestions.single_choice),
+    multiAnswerQuestions: prepareEmptyOptionAnswers(groupedQuestions.multiple_choice),
+    trueOrFalseQuestions: prepareEmptyOptionAnswers(groupedQuestions.true_or_false),
+    photoQuestionSingleChoice: prepareEmptyOptionAnswers(
+      groupedQuestions.photo_question_single_choice,
+    ),
+    photoQuestionMultipleChoice: prepareEmptyOptionAnswers(
+      groupedQuestions.photo_question_multiple_choice,
+    ),
+    fillInTheBlanksText: prepareEmptyOptionAnswers(groupedQuestions.fill_in_the_blanks_text),
+    fillInTheBlanksDnd: prepareEmptyOptionAnswers(groupedQuestions.fill_in_the_blanks_dnd),
+    briefResponses: prepareEmptyOpenAnswers(groupedQuestions.brief_response),
+    detailedResponses: prepareEmptyOpenAnswers(groupedQuestions.detailed_response),
+  };
 };
 
 const groupQuestionsByType = (questions: Questions) => {
@@ -71,80 +73,137 @@ const groupQuestionsByType = (questions: Questions) => {
   };
 };
 
-const prepareAnswers = (
-  questions: Questions,
-  mode: "options" | "open",
-): Record<string, string> | Record<string, Record<string, string>> => {
-  return questions.reduce(
-    (result, question) => {
-      if (question.type === QuestionType.TRUE_OR_FALSE) {
-        result[question.id] =
-          question?.options?.reduce(
-            (optionMap, option) => {
-              optionMap[option.id ?? "0"] = option.studentAnswer ?? "";
-              return optionMap;
-            },
-            {} as Record<string, string>,
-          ) || {};
+function prepareEmptyOptionAnswers(questions: Questions): AnswersMap {
+  return questions.reduce((result, question) => {
+    if (question.type === QuestionType.TRUE_OR_FALSE) {
+      result[question.id] =
+        question?.options?.reduce(
+          (optionMap, option) => {
+            if (option.id) {
+              optionMap[option.id] = null;
+            }
+            return optionMap;
+          },
+          {} as Record<string, string | null>,
+        ) || {};
 
-        return result;
-      }
-
-      if (question.type === QuestionType.FILL_IN_THE_BLANKS_TEXT) {
-        result[question.id ?? ""] =
-          question?.options?.reduce(
-            (map, { studentAnswer }, index) => {
-              map[`${index + 1}`] = studentAnswer ?? "";
-
-              return map;
-            },
-            {} as Record<string, string>,
-          ) || {};
-
-        return result;
-      }
-
-      if (question.type === QuestionType.FILL_IN_THE_BLANKS_DND) {
-        const maxAnswersAmount = question.description?.match(/\[word]/g)?.length ?? 0;
-        result[question.id ?? ""] =
-          question?.options?.reduce(
-            (optionMap, option, index) => {
-              if (index < maxAnswersAmount) {
-                optionMap[`${index + 1}`] = option.isStudentAnswer ? `${option.id}` : "";
-              }
-
-              return optionMap;
-            },
-            {} as Record<string, string>,
-          ) || {};
-
-        return result;
-      }
-
-      if (mode === "options") {
-        result[question.id ?? ""] =
-          question?.options?.reduce(
-            (optionMap, option) => {
-              optionMap[option.id ?? "0"] = option.isStudentAnswer ? `${option.id}` : "";
-              return optionMap;
-            },
-            {} as Record<string, string>,
-          ) || {};
-      }
-
-      if (mode === "open") {
-        const studentAnswer = question.options?.[0]?.studentAnswer || "";
-        const isStudentAnswer = question.options?.[0]?.isStudentAnswer || false;
-
-        result[question.id] = isStudentAnswer ? studentAnswer : "";
-      }
       return result;
-    },
-    mode === "options"
-      ? ({} as Record<string, Record<string, string>>)
-      : ({} as Record<string, string>),
-  );
-};
+    }
+
+    if (question.type === QuestionType.FILL_IN_THE_BLANKS_TEXT) {
+      result[question.id ?? ""] =
+        question?.options?.reduce(
+          (map, _option, index) => {
+            map[`${index + 1}`] = null;
+            return map;
+          },
+          {} as Record<string, string | null>,
+        ) || {};
+
+      return result;
+    }
+
+    if (question.type === QuestionType.FILL_IN_THE_BLANKS_DND) {
+      const maxAnswersAmount = question.description?.match(/\[word]/g)?.length ?? 0;
+      const emptyMap: Record<string, string | null> = {};
+      for (let index = 1; index <= maxAnswersAmount; index += 1) {
+        emptyMap[`${index}`] = null;
+      }
+      result[question.id ?? ""] = emptyMap;
+
+      return result;
+    }
+
+    result[question.id ?? ""] =
+      question?.options?.reduce(
+        (optionMap, option) => {
+          if (option.id) {
+            optionMap[option.id] = null;
+          }
+          return optionMap;
+        },
+        {} as Record<string, string | null>,
+      ) || {};
+
+    return result;
+  }, {} as AnswersMap);
+}
+
+function prepareEmptyOpenAnswers(questions: Questions): OpenAnswersMap {
+  return questions.reduce((result, question) => {
+    result[question.id] = "";
+    return result;
+  }, {} as OpenAnswersMap);
+}
+
+function prepareOptionAnswers(questions: Questions): AnswersMap {
+  return questions.reduce((result, question) => {
+    if (question.type === QuestionType.TRUE_OR_FALSE) {
+      result[question.id] =
+        question?.options?.reduce(
+          (optionMap, option) => {
+            optionMap[option.id ?? "0"] = option.studentAnswer ?? "";
+            return optionMap;
+          },
+          {} as Record<string, string | null>,
+        ) || {};
+
+      return result;
+    }
+
+    if (question.type === QuestionType.FILL_IN_THE_BLANKS_TEXT) {
+      result[question.id ?? ""] =
+        question?.options?.reduce(
+          (map, { studentAnswer }, index) => {
+            map[`${index + 1}`] = studentAnswer ?? "";
+
+            return map;
+          },
+          {} as Record<string, string | null>,
+        ) || {};
+
+      return result;
+    }
+
+    if (question.type === QuestionType.FILL_IN_THE_BLANKS_DND) {
+      const maxAnswersAmount = question.description?.match(/\[word]/g)?.length ?? 0;
+      result[question.id ?? ""] =
+        question?.options?.reduce(
+          (optionMap, option, index) => {
+            if (index < maxAnswersAmount) {
+              optionMap[`${index + 1}`] = option.isStudentAnswer ? `${option.id}` : "";
+            }
+
+            return optionMap;
+          },
+          {} as Record<string, string | null>,
+        ) || {};
+
+      return result;
+    }
+
+    result[question.id ?? ""] =
+      question?.options?.reduce(
+        (optionMap, option) => {
+          optionMap[option.id ?? "0"] = option.isStudentAnswer ? `${option.id}` : "";
+          return optionMap;
+        },
+        {} as Record<string, string | null>,
+      ) || {};
+
+    return result;
+  }, {} as AnswersMap);
+}
+
+function prepareOpenAnswers(questions: Questions): OpenAnswersMap {
+  return questions.reduce((result, question) => {
+    const studentAnswer = question.options?.[0]?.studentAnswer || "";
+    const isStudentAnswer = question.options?.[0]?.isStudentAnswer || false;
+
+    result[question.id] = isStudentAnswer ? studentAnswer : "";
+    return result;
+  }, {} as OpenAnswersMap);
+}
 
 export const parseQuizFormData = (input: QuizForm) => {
   const result: EvaluationQuizBody["questionsAnswers"] = [];
@@ -283,11 +342,10 @@ export const leftAttemptsToDisplay = (
 
   const leftAttempts = attemptsLimit - ((attempts ?? 1) % attemptsLimit);
 
-  return match({ canRetake, cooldownTimeLeft, attemptsLimit, leftAttempts })
-    .with({ canRetake: false, cooldownTimeLeft: P.when((v) => v !== null) }, () => "(0)")
-    .with({ attemptsLimit: 1 }, () => "(0)")
-    .with({ leftAttempts: P.when((v) => v > 0) }, ({ leftAttempts }) => `(${leftAttempts})`)
-    .otherwise(() => `(${attemptsLimit})`);
+  if (!canRetake && cooldownTimeLeft !== null) return "(0)";
+  if (attemptsLimit === 1) return "(0)";
+  if (leftAttempts > 0) return `(${leftAttempts})`;
+  return `(${attemptsLimit})`;
 };
 
 export const getQuizTooltipText = (
@@ -296,31 +354,13 @@ export const getQuizTooltipText = (
   hoursLeft: number | null,
   quizCooldownInHours: number | null,
 ): string => {
-  return match({
-    isUserSubmittedAnswer,
-    canRetake,
-    hoursLeft,
-    quizCooldownInHours,
-  })
-    .with(
-      {
-        isUserSubmittedAnswer: true,
-        canRetake: false,
-        hoursLeft: P.when((h) => h !== null),
-      },
-      () => {
-        return t("studentLessonView.tooltip.retakeAvailableIn", { time: hoursLeft });
-      },
-    )
-    .with(
-      {
-        quizCooldownInHours: P.when((c) => c !== null && c !== 0),
-      },
-      () => {
-        return t("studentLessonView.tooltip.cooldown", { time: quizCooldownInHours });
-      },
-    )
-    .otherwise(() => {
-      return t("studentLessonView.tooltip.noCooldown");
-    });
+  if (isUserSubmittedAnswer && !canRetake && hoursLeft !== null) {
+    return t("studentLessonView.tooltip.retakeAvailableIn", { time: hoursLeft });
+  }
+
+  if (quizCooldownInHours !== null && quizCooldownInHours !== 0) {
+    return t("studentLessonView.tooltip.cooldown", { time: quizCooldownInHours });
+  }
+
+  return t("studentLessonView.tooltip.noCooldown");
 };
