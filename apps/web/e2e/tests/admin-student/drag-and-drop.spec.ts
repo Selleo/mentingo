@@ -19,6 +19,9 @@ const EDITED_CHAPTER_NAME = "Edited chapter";
 const openCourseEdit = async (page: Page) => {
   await page.getByTestId(COURSE_TITLE).first().click();
   await page.waitForURL(/course\/[\w-]+/);
+  const editBtn = page.getByRole("button", { name: "Edit Course" });
+  await editBtn.waitFor({ state: "visible", timeout: 10000 });
+  await expect(editBtn).toBeVisible();
   await expect(page.getByRole("heading", { name: COURSE_HEADING })).toBeVisible();
   await page.getByRole("button", { name: "Edit Course" }).click();
   await expect(page.getByText("Chapter 1 • Number of lessons")).toBeVisible();
