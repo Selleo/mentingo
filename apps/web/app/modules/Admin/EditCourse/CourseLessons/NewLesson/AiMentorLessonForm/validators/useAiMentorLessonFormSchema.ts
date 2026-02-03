@@ -1,7 +1,11 @@
 import { AI_MENTOR_TYPE } from "@repo/shared";
 import { z } from "zod";
 
-import { MAX_MB_PER_FILE, MAX_NUM_OF_FILES } from "../AiMentorLesson.constants";
+import {
+  MAX_AI_MENTOR_TEXT_LENGTH,
+  MAX_MB_PER_FILE,
+  MAX_NUM_OF_FILES,
+} from "../AiMentorLesson.constants";
 
 import type { TFunction } from "i18next";
 
@@ -21,8 +25,10 @@ export const aiMentorLessonFormSchema = (t: TFunction) =>
       .max(255, { message: t("adminCourseView.curriculum.lesson.validation.titleMaxLength") }),
     description: z
       .string()
-      .max(250, {
-        message: t("adminCourseView.curriculum.lesson.validation.taskDescriptionMaxLength"),
+      .max(MAX_AI_MENTOR_TEXT_LENGTH, {
+        message: t("adminCourseView.curriculum.lesson.validation.taskDescriptionMaxLength", {
+          count: MAX_AI_MENTOR_TEXT_LENGTH,
+        }),
       })
       .optional(),
     aiMentorInstructions: z

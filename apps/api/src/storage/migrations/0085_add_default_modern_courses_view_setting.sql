@@ -4,7 +4,7 @@ UPDATE settings
 SET settings = jsonb_set(
         COALESCE(settings, '{}'::jsonb),
         '{defaultModernCoursesView}',
-        'true'::jsonb,
+        'false'::jsonb,
         true
     )
 WHERE user_id IS NULL;
