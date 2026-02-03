@@ -976,7 +976,7 @@
       "card": {
         "header": "Detail information",
         "subheader": "Define your group name and their characteristic",
-        "footer": "Remember, group members will see this description. AI Mentor will use it in conversations."
+        "footer": "Remember, AI Mentor will use it in conversations."
       },
       "fields": {
         "name": "Name",
@@ -1228,7 +1228,7 @@
           "aiMentorInstructionsMaxLength": "AI Mentor Instructions are too long (max 20000 characters)",
           "completionConditionsRequired": "Completion Conditions are required",
           "completionConditionsMaxLength": "Completion Conditions are too long (max 20000 characters)",
-          "taskDescriptionMaxLength": "Task description is too long (max 250 characters)",
+          "taskDescriptionMaxLength": "Task description is too long (max 20000 characters)",
           "passThresholdMin": "Pass threshold must be at least 1",
           "passThresholdMax": "Pass threshold cannot exceed 10",
           "titleMinLength": "Title is too short (min 2 characters)",
@@ -1374,7 +1374,8 @@
             }
           },
           "betaTooltip": "This functionality is provided in a test version. It may contain errors or may not work fully as intended and is used at your own risk.",
-          "dragWord": "Drag word into sentence"
+          "dragWord": "Drag word into sentence",
+          "taskDescriptionTooltip": "Briefly describe what the participant should do during the conversation with the AI mentor."
         }
       }
     },

@@ -21,7 +21,7 @@ export const aiMentorLessonFormSchema = (t: TFunction) =>
       .max(255, { message: t("adminCourseView.curriculum.lesson.validation.titleMaxLength") }),
     description: z
       .string()
-      .max(250, {
+      .max(20_000, {
         message: t("adminCourseView.curriculum.lesson.validation.taskDescriptionMaxLength"),
       })
       .optional(),
