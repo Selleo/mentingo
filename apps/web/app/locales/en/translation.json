@@ -1228,7 +1228,7 @@
           "aiMentorInstructionsMaxLength": "AI Mentor Instructions are too long (max 20000 characters)",
           "completionConditionsRequired": "Completion Conditions are required",
           "completionConditionsMaxLength": "Completion Conditions are too long (max 20000 characters)",
-          "taskDescriptionMaxLength": "Task description is too long (max 20000 characters)",
+          "taskDescriptionMaxLength": "Task description is too long (max {{ count }} characters)",
           "passThresholdMin": "Pass threshold must be at least 1",
           "passThresholdMax": "Pass threshold cannot exceed 10",
           "titleMinLength": "Title is too short (min 2 characters)",

@@ -1213,7 +1213,7 @@
           "aiMentorInstructionsMaxLength": "Instrukcje AI Mentora są zbyt długie (maks. 20000 znaków)",
           "completionConditionsRequired": "Warunki zaliczenia są wymagane",
           "completionConditionsMaxLength": "Warunki zaliczenia są zbyt długie (maks. 20000 znaków)",
-          "taskDescriptionMaxLength": "Opis zadania jest zbyt długi (maks. 20000 znaków)",
+          "taskDescriptionMaxLength": "Opis zadania jest zbyt długi (maks. {{ count }} znaków)",
           "passThresholdMin": "Próg zaliczenia musi wynosić co najmniej 1",
           "passThresholdMax": "Próg zaliczenia nie może przekroczyć 10",
           "titleMinLength": "Tytuł jest zbyt krótki (min. 2 znaki)",
