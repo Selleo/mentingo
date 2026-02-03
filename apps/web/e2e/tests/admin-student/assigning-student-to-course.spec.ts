@@ -597,11 +597,13 @@ const enrollGroupIntoCourse = async (page: Page, courseTitle: string) => {
     .click();
   await page.getByRole("button", { name: "Enroll groups (1)" }).click();
   await expect(page.getByRole("cell", { name: "Enrolled by group" })).toBeVisible();
-  const groupElement = page
-    .getByRole("button", { name: "+" })
-    .first()
-    .or(page.getByText(LA_GROUP_NAME));
-  await expect(groupElement).toBeVisible();
+  const groupCell = page.getByRole("cell", { name: LA_GROUP_NAME, exact: true });
+  const plusButton = page.getByRole("button", { name: "+" }).first();
+  if ((await groupCell.count()) > 0) {
+    await expect(groupCell).toBeVisible();
+  } else {
+    await expect(plusButton).toBeVisible();
+  }
 };
 
 const expectGroupEnrollmentError = async (page: Page) => {
