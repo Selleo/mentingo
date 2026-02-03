@@ -1,6 +1,5 @@
 import { t } from "i18next";
 import { find, flatMap } from "lodash-es";
-import { match, P } from "ts-pattern";
 
 import { QuestionType } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/QuizLessonForm/QuizLessonForm.types";
 import { LESSON_PROGRESS_STATUSES, type QuizForm } from "~/modules/Courses/Lesson/types";
@@ -51,6 +50,30 @@ export const getUserAnswers = (questions: Questions): GetUserAnswersResult => {
   } as const;
 };
 
+export const getEmptyQuizAnswers = (questions: Questions) => {
+  const groupedQuestions = groupQuestionsByType(questions);
+
+  return {
+    singleAnswerQuestions: prepareEmptyAnswers(groupedQuestions.single_choice, "options"),
+    multiAnswerQuestions: prepareEmptyAnswers(groupedQuestions.multiple_choice, "options"),
+    trueOrFalseQuestions: prepareEmptyAnswers(groupedQuestions.true_or_false, "options"),
+    photoQuestionSingleChoice: prepareEmptyAnswers(
+      groupedQuestions.photo_question_single_choice,
+      "options",
+    ),
+    photoQuestionMultipleChoice: prepareEmptyAnswers(
+      groupedQuestions.photo_question_multiple_choice,
+      "options",
+    ),
+    fillInTheBlanksText: prepareEmptyAnswers(groupedQuestions.fill_in_the_blanks_text, "options"),
+    fillInTheBlanksDnd: prepareEmptyAnswers(groupedQuestions.fill_in_the_blanks_dnd, "options"),
+    matchWords: prepareEmptyAnswers(groupedQuestions.match_words, "options"),
+    scaleQuestions: prepareEmptyAnswers(groupedQuestions.scale_1_5, "options"),
+    briefResponses: prepareEmptyAnswers(groupedQuestions.brief_response, "open"),
+    detailedResponses: prepareEmptyAnswers(groupedQuestions.detailed_response, "open"),
+  };
+};
+
 const groupQuestionsByType = (questions: Questions) => {
   return {
     single_choice: questions.filter(({ type }) => type === "single_choice"),
@@ -70,6 +93,73 @@ const groupQuestionsByType = (questions: Questions) => {
     detailed_response: questions.filter(({ type }) => type === "detailed_response"),
   };
 };
+
+function prepareEmptyAnswers(questions: Questions, mode: "options" | "open") {
+  return questions.reduce(
+    (result, question) => {
+      if (question.type === QuestionType.TRUE_OR_FALSE) {
+        result[question.id] =
+          question?.options?.reduce(
+            (optionMap, option) => {
+              if (option.id) {
+                optionMap[option.id] = "";
+              }
+              return optionMap;
+            },
+            {} as Record<string, string>,
+          ) || {};
+
+        return result;
+      }
+
+      if (question.type === QuestionType.FILL_IN_THE_BLANKS_TEXT) {
+        result[question.id ?? ""] =
+          question?.options?.reduce(
+            (map, _option, index) => {
+              map[`${index + 1}`] = "";
+              return map;
+            },
+            {} as Record<string, string>,
+          ) || {};
+
+        return result;
+      }
+
+      if (question.type === QuestionType.FILL_IN_THE_BLANKS_DND) {
+        const maxAnswersAmount = question.description?.match(/\[word]/g)?.length ?? 0;
+        const emptyMap: Record<string, string> = {};
+        for (let index = 1; index <= maxAnswersAmount; index += 1) {
+          emptyMap[`${index}`] = "";
+        }
+        result[question.id ?? ""] = emptyMap;
+
+        return result;
+      }
+
+      if (mode === "options") {
+        result[question.id ?? ""] =
+          question?.options?.reduce(
+            (optionMap, option) => {
+              if (option.id) {
+                optionMap[option.id] = "";
+              }
+              return optionMap;
+            },
+            {} as Record<string, string>,
+          ) || {};
+      }
+
+      if (mode === "open") {
+        result[question.id] = "";
+      }
+
+      return result;
+    },
+    mode === "options"
+      ? ({} as Record<string, Record<string, string>>)
+      : ({} as Record<string, string>),
+  );
+}
 
 const prepareAnswers = (
   questions: Questions,
@@ -283,11 +373,10 @@ export const leftAttemptsToDisplay = (
 
   const leftAttempts = attemptsLimit - ((attempts ?? 1) % attemptsLimit);
 
-  return match({ canRetake, cooldownTimeLeft, attemptsLimit, leftAttempts })
-    .with({ canRetake: false, cooldownTimeLeft: P.when((v) => v !== null) }, () => "(0)")
-    .with({ attemptsLimit: 1 }, () => "(0)")
-    .with({ leftAttempts: P.when((v) => v > 0) }, ({ leftAttempts }) => `(${leftAttempts})`)
-    .otherwise(() => `(${attemptsLimit})`);
+  if (!canRetake && cooldownTimeLeft !== null) return "(0)";
+  if (attemptsLimit === 1) return "(0)";
+  if (leftAttempts > 0) return `(${leftAttempts})`;
+  return `(${attemptsLimit})`;
 };
 
 export const getQuizTooltipText = (
@@ -296,31 +385,13 @@ export const getQuizTooltipText = (
   hoursLeft: number | null,
   quizCooldownInHours: number | null,
 ): string => {
-  return match({
-    isUserSubmittedAnswer,
-    canRetake,
-    hoursLeft,
-    quizCooldownInHours,
-  })
-    .with(
-      {
-        isUserSubmittedAnswer: true,
-        canRetake: false,
-        hoursLeft: P.when((h) => h !== null),
-      },
-      () => {
-        return t("studentLessonView.tooltip.retakeAvailableIn", { time: hoursLeft });
-      },
-    )
-    .with(
-      {
-        quizCooldownInHours: P.when((c) => c !== null && c !== 0),
-      },
-      () => {
-        return t("studentLessonView.tooltip.cooldown", { time: quizCooldownInHours });
-      },
-    )
-    .otherwise(() => {
-      return t("studentLessonView.tooltip.noCooldown");
-    });
+  if (isUserSubmittedAnswer && !canRetake && hoursLeft !== null) {
+    return t("studentLessonView.tooltip.retakeAvailableIn", { time: hoursLeft });
+  }
+
+  if (quizCooldownInHours !== null && quizCooldownInHours !== 0) {
+    return t("studentLessonView.tooltip.cooldown", { time: quizCooldownInHours });
+  }
+
+  return t("studentLessonView.tooltip.noCooldown");
 };

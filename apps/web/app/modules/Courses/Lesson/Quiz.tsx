@@ -25,6 +25,7 @@ import { Questions } from "./Questions";
 import { QuizFormSchema } from "./schemas";
 import {
   leftAttemptsToDisplay,
+  getEmptyQuizAnswers,
   getQuizTooltipText,
   getUserAnswers,
   parseQuizFormData,
@@ -68,7 +69,7 @@ export const Quiz = ({ lesson, userId, isPreviewMode = false, previewLessonId }:
     lessonId: previewLessonId || lessonId,
     handleOnSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["lesson", previewLessonId || lessonId] });
-      methods.reset();
+      methods.reset(getEmptyQuizAnswers(questions ?? []));
     },
   });
 
