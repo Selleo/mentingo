@@ -5,7 +5,7 @@ env:
   JWT_SECRET: "test_secret"
   JWT_REFRESH_SECRET: "test_refresh"
   JWT_EXPIRATION_TIME: "15min"
-  CORS_ORIGIN: ""
+  CORS_ORIGIN: "http://localhost:5173"
   EMAIL_ADAPTER: "mailhog"
   DATABASE_URL: "postgresql://test_user:test_password@localhost:54321/test_db"
   REDIS_URL: "redis://localhost:6380"
