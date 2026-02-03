@@ -64,6 +64,7 @@ const createNewPasswordAndLoginAsStudent = async (page: Page) => {
   await page.goto("/auth/login");
 
   await page.goto("http://localhost:8025/");
+  await page.waitForTimeout(2000);
   await page
     .getByText("noreply@lms.selleo.app janekk")
     .first()

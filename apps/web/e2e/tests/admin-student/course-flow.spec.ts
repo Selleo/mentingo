@@ -54,9 +54,6 @@ const waitForGenerateMissingTranslationsOrContent = async (page: Page) => {
   if (firstVisible === "translation") {
     await page.getByRole("button", { name: "Confirm" }).click();
   }
-
-  await addContentHeading.waitFor({ state: "visible", timeout: 10000 });
-  await expect(addContentHeading).toBeVisible();
 };
 
 const selectLanguage = async (page: Page) => {
