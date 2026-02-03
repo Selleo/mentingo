@@ -1,3 +1,39 @@
+<a name="v4.2.0"></a>
+
+## [v4.2.0] - 03.02.2026
+
+### Features:
+
+- allow passwordless login with magic links ([#1252](https://github.com/Selleo/mentingo/issues/1252))
+
+- allow adding task descriptions to AI Mentor lessons ([#1248](https://github.com/Selleo/mentingo/issues/1248))
+
+- update course list with a modern layout ([#1251](https://github.com/Selleo/mentingo/issues/1251))
+
+### Bug Fixes:
+
+- ensure quiz resets correctly after submission ([#1259](https://github.com/Selleo/mentingo/issues/1259))
+
+- allow saving lesson without selecting a chapter ([#1245](https://github.com/Selleo/mentingo/issues/1245))
+
+### Chores:
+
+- improve AI mentor task description ([#1256](https://github.com/Selleo/mentingo/issues/1256))
+
+- restore staging seed script ([#1253](https://github.com/Selleo/mentingo/issues/1253))
+
+- prepare database for multi-tenant support ([#1229](https://github.com/Selleo/mentingo/issues/1229))
+
+- improve admin course preview navigation ([#1243](https://github.com/Selleo/mentingo/issues/1243))
+
+- optimize caching to ensure reliable updates ([#1242](https://github.com/Selleo/mentingo/issues/1242))
+
+- keep lesson editor visible while editing a course ([#1240](https://github.com/Selleo/mentingo/issues/1240))
+
+### Tests:
+
+- cover course preview with E2E tests ([#1217](https://github.com/Selleo/mentingo/issues/1217))
+
 <a name="v4.1.0"></a>
 
 ## [v4.1.0] - 23.01.2026
@@ -43,6 +79,10 @@
 ### Code Refactoring:
 
 - simplify resource uploads configuration ([#1221](https://github.com/Selleo/mentingo/issues/1221))
+
+### Documentation:
+
+- update changelog for version v4.1.0
 
 ### Tests:
 
@@ -2334,7 +2374,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.1.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.2.0...HEAD
+[v4.2.0]: https://github.com/Selleo/mentingo/compare/v4.1.0...v4.2.0
 [v4.1.0]: https://github.com/Selleo/mentingo/compare/v4.0.0...v4.1.0
 [v4.0.0]: https://github.com/Selleo/mentingo/compare/v3.26.0...v4.0.0
 [v3.26.0]: https://github.com/Selleo/mentingo/compare/v3.25.0...v3.26.0
