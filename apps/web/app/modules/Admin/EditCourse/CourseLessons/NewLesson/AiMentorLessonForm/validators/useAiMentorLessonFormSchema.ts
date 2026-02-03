@@ -74,9 +74,7 @@ export const aiMentorLessonFormSchema = (t: TFunction) =>
           return textContent.length <= 20_000;
         },
         {
-          message: t("adminCourseView.curriculum.lesson.validation.completionConditionsMaxLength", {
-            count: 20_000,
-          }),
+          message: t("adminCourseView.curriculum.lesson.validation.completionConditionsMaxLength"),
         },
       ),
     type: z.nativeEnum(AI_MENTOR_TYPE).default(AI_MENTOR_TYPE.MENTOR),
