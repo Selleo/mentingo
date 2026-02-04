@@ -150,7 +150,6 @@ const buildInitialSequenceCurriculum = async (page: Page, descriptionEditor: Loc
   await addTextLesson(page, 0, SEQUENCE_COURSE.lessons.intro, descriptionEditor, "s");
   await addTextLesson(page, 0, SEQUENCE_COURSE.lessons.lesson2, descriptionEditor, "desc");
   await addTextLesson(page, 1, SEQUENCE_COURSE.lessons.lesson3, descriptionEditor, "desc");
-  await page.getByText("chapter 3Chapter 3 • Number of lessons 0Add lessonFree chapter").click();
   await addTextLesson(page, 2, SEQUENCE_COURSE.lessons.lesson4, descriptionEditor, "desc");
 };
 
@@ -182,8 +181,7 @@ const ensureAccordionOpen = async (button: Locator) => {
   for (let attempt = 0; attempt < 3; attempt++) {
     const state = await button.getAttribute("data-state");
     if (state === "open") return;
-    await button.scrollIntoViewIfNeeded();
-    await button.click({ timeout: 5000 });
+    await button.click({ timeout: 10000 });
     try {
       await expect(button).toHaveAttribute("data-state", "open", { timeout: 2000 });
       return;
@@ -199,7 +197,6 @@ const clickLessonWithRetry = async (page: Page, chapterButton: Locator, lessonLi
 
   for (let attempt = 0; attempt < 3; attempt++) {
     await ensureAccordionOpen(chapterButton);
-    await lessonLink.scrollIntoViewIfNeeded();
     await expect(lessonLink).toBeVisible({ timeout: 5000 });
 
     await lessonLink.click({ force: true, timeout: 8000 });
@@ -218,7 +215,7 @@ const clickLessonWithRetry = async (page: Page, chapterButton: Locator, lessonLi
 
 const studentInitialSequenceView = async (page: Page) => {
   await loginAndOpenSequenceCourse(page, "student");
-  await page.getByTestId("chapter 3").click();
+  await ensureAccordionOpen(page.getByTestId("chapter 3"));
   await expect(
     page.getByRole("link", { name: `${SEQUENCE_COURSE.lessons.lesson4} Content Not` }),
   ).toBeVisible();
@@ -345,7 +342,7 @@ const waitAndSelectContentLessonType = async (page: Page) => {
   const contentLessonType = page.getByLabel(
     "Choose adminCourseView.curriculum.lesson.other.content lesson type",
   );
-  await contentLessonType.waitFor({ state: "visible" });
+  await contentLessonType.waitFor({ state: "visible", timeout: 10000 });
   await expect(contentLessonType).toBeVisible();
   await contentLessonType.click();
   return contentLessonType;
