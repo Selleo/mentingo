@@ -1,9 +1,18 @@
-import { Link } from "@remix-run/react";
+import { Link, useNavigate } from "@remix-run/react";
 import { BookOpen, Clock, Info, Play } from "lucide-react";
+import { useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useEnrollCourse } from "~/api/mutations";
+import { courseQueryOptions, useCourse } from "~/api/queries";
+import { queryClient } from "~/api/queryClient";
 import DefaultPhotoCourse from "~/assets/svgs/default-photo-course.svg";
 import { Button } from "~/components/ui/button";
+import { useUserRole } from "~/hooks/useUserRole";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
+
+import { findFirstInProgressLessonId, findFirstNotStartedLessonId } from "../../Lesson/utils";
+import { navigateToNextLesson } from "../../utils/navigateToNextLesson";
 
 import { formatDuration } from "./utils";
 
@@ -14,6 +23,7 @@ type HeroBannerProps = {
   trailerUrl?: string | null;
   estimatedDurationMinutes?: number;
   lessonCount?: number;
+  courseSlug: string;
 };
 
 const HeroBanner = ({
@@ -23,13 +33,48 @@ const HeroBanner = ({
   trailerUrl,
   estimatedDurationMinutes,
   lessonCount,
+  courseSlug,
 }: HeroBannerProps) => {
   const { t } = useTranslation();
+  const { language } = useLanguageStore();
+  const navigate = useNavigate();
+
+  const { isAdminLike } = useUserRole();
+  const { mutateAsync: enrollCourse } = useEnrollCourse();
 
   const durationLabel = formatDuration(estimatedDurationMinutes);
   const lessonsLabel = lessonCount
     ? t("studentCoursesView.modernView.lessonsCount", { count: lessonCount })
     : undefined;
+
+  const { data: heroCourseData } = useCourse(courseSlug, language);
+  const hasCourseProgress = useMemo(() => {
+    return (
+      heroCourseData?.chapters.some(({ completedLessonCount }) => completedLessonCount) || false
+    );
+  }, [heroCourseData]);
+  const notStartedLessonId = heroCourseData ? findFirstNotStartedLessonId(heroCourseData) : null;
+  const firstInProgressLessonId = heroCourseData
+    ? findFirstInProgressLessonId(heroCourseData)
+    : null;
+
+  const handleNavigateToLesson = useCallback(async () => {
+    if (!heroCourseData) return;
+
+    if (!heroCourseData.enrolled) {
+      await enrollCourse(
+        { id: heroCourseData.id },
+        {
+          onSuccess: async () => {
+            await queryClient.invalidateQueries(courseQueryOptions(heroCourseData.id));
+            await queryClient.invalidateQueries(courseQueryOptions(heroCourseData.slug));
+          },
+        },
+      );
+    }
+
+    navigateToNextLesson(heroCourseData, navigate);
+  }, [heroCourseData, navigate, enrollCourse]);
 
   return (
     <div className="relative h-[50vh] min-h-[400px] w-full overflow-hidden md:h-[70vh] md:min-h-[500px]">
@@ -83,11 +128,20 @@ const HeroBanner = ({
           )}
 
           <div className="flex flex-wrap gap-2 pt-1 md:gap-3 md:pt-2">
-            <Button asChild className="bg-neutral-900 text-white hover:bg-neutral-800">
-              <Link to={`/course/${id}`}>
-                <Play className="mr-2 h-4 w-4" fill="currentColor" />
-                {t("studentCoursesView.modernView.hero.start")}
-              </Link>
+            <Button
+              className="bg-neutral-900 text-white hover:bg-neutral-800"
+              onClick={handleNavigateToLesson}
+            >
+              <Play className="mr-2 h-4 w-4" fill="currentColor" />
+              {t(
+                isAdminLike
+                  ? "adminCourseView.common.preview"
+                  : !hasCourseProgress
+                    ? "studentCourseView.sideSection.button.startLearning"
+                    : notStartedLessonId || firstInProgressLessonId
+                      ? "studentCourseView.sideSection.button.continueLearning"
+                      : "studentCourseView.sideSection.button.repeatLessons",
+              )}
             </Button>
             <Button
               asChild

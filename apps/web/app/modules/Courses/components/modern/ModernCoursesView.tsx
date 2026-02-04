@@ -102,9 +102,10 @@ const ModernCoursesView = () => {
           trailerUrl={heroCourse.trailerUrl}
           estimatedDurationMinutes={heroCourse.estimatedDurationMinutes}
           lessonCount={heroCourse.lessonCount}
+          courseSlug={heroCourse.slug}
         />
 
-        <div className="relative z-30 mx-auto -mt-8 max-w-[1800px] space-y-4 py-6 pb-12 md:-mt-12 md:space-y-6 md:py-8 md:pb-8">
+        <div className="relative z-30 mx-auto -mt-8 max-w-[1800px] space-y-4 py-6 pb-12 md:-mt-12 md:py-8 md:pb-8">
           {isStudentCoursesLoading ? (
             <div className="flex h-full items-center justify-center py-6">
               <Loader />
