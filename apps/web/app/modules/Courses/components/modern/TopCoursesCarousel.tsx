@@ -71,7 +71,10 @@ const TopCoursesCarousel = ({ courses }: TopCoursesCarouselProps) => {
       >
         <CarouselContent className="gap-24 px-4 mt-4 md:px-8 ml-20">
           {courses.map((course, index) => (
-            <CarouselItem key={course.id} className="w-[360px] md:w-[420px] lg:w-[440px]">
+            <CarouselItem
+              key={course.id}
+              className="w-[360px] md:w-[420px] lg:w-[440px] !basis-auto"
+            >
               <div className="relative pl-6">
                 {renderRank(index + 1)}
                 <ModernCourseCard
