@@ -61,9 +61,12 @@ const ModernCourseCarousel = ({
           opts={{ align: "start", slidesToScroll: 1, skipSnaps: false }}
           setApi={setCarouselApi}
         >
-          <CarouselContent className="gap-4 max-w-fit">
+          <CarouselContent className="gap-4">
             {courses.map((course) => (
-              <CarouselItem key={course.id} className="w-[320px] md:w-[380px] lg:w-[400px]">
+              <CarouselItem
+                key={course.id}
+                className="w-[320px] md:w-[380px] lg:w-[400px] !basis-auto"
+              >
                 <ModernCourseCard
                   id={course.id}
                   title={course.title}
