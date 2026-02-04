@@ -200,18 +200,18 @@ export class StudentLessonProgressService {
 
     const resolvedActor = await this.resolveActor(studentId, actor, dbInstance);
 
-    if (lessonCompleted || isQuizPassed || alreadyCompleted) {
-      if (lessonCompleted || isQuizPassed) {
-        this.eventBus.publish(
-          new LessonCompletedEvent({
-            userId: studentId,
-            courseId: lesson.courseId,
-            lessonId: lesson.id,
-            actor: resolvedActor,
-          }),
-        );
-      }
+    if (lessonCompleted || isQuizPassed) {
+      this.eventBus.publish(
+        new LessonCompletedEvent({
+          userId: studentId,
+          courseId: lesson.courseId,
+          lessonId: lesson.id,
+          actor: resolvedActor,
+        }),
+      );
+    }
 
+    if (lessonCompleted || isQuizPassed || alreadyCompleted) {
       await this.updateChapterProgress(
         lesson.courseId,
         lesson.chapterId,
