@@ -18,6 +18,7 @@ export const ASSIGNING_STUDENT_TO_GROUP_PAGE_UI = {
   header: {
     availableCourses: "available courses",
     yourCourses: "your courses",
+    sectionHeader: "Top 5 most popular courses",
   },
   data: {
     firstEnrolledCourse: "Course Language Learning",

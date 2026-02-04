@@ -18,14 +18,13 @@ class CourseActions {
 
   async searchCourse(): Promise<void> {
     await this.page.getByRole("button", { name: "Courses" }).getByRole("link").click();
-    await expect(this.page.locator(".h-min > button:nth-child(2)")).toBeVisible();
-    await this.page.getByText("Available Courses").click();
+    await expect(this.page.getByRole("button", { name: "Manage courses" })).toBeVisible();
+    await this.page.getByRole("button", { name: "Manage courses" }).click();
     await this.page.getByPlaceholder(/Search by title/).fill(TEST_COURSE.name);
     await expect(this.page.getByRole("button", { name: "Clear All" })).toBeVisible();
   }
 
   async openCourse(): Promise<void> {
-    await this.page.getByRole("main").getByRole("button").nth(2).click();
     await expect(this.page.getByRole("heading", { name: "Manage Courses" })).toBeVisible();
     await this.page.getByText(TEST_COURSE.name).click();
     const combinedRegex = new RegExp(

@@ -105,7 +105,7 @@ test.describe("Q&A flow", () => {
     await login(page, USERS.student);
 
     await page.waitForLoadState("networkidle");
-    await expect(page.getByTestId("enrolled-courses")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Continue learning" })).toBeVisible();
 
     const qaButton = page.getByRole("link", { name: "Q&A" });
     if (!(await qaButton.isVisible())) {

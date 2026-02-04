@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "@remix-run/react";
+import { Link, useNavigate, useParams } from "@remix-run/react";
 import { find } from "lodash-es";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
@@ -24,18 +24,17 @@ export type Lesson = GetCourseResponse["data"]["chapters"][0]["lessons"][0] & {
 type Chapter = GetCourseResponse["data"]["chapters"][0] & { lessons: Lesson[] };
 type CourseChapterProps = {
   chapter: Chapter;
-  courseId: string;
   isEnrolled: boolean;
   isPreviewMode?: boolean;
 };
 
 export const CourseChapter = ({
   chapter,
-  courseId,
   isEnrolled,
   isPreviewMode = false,
 }: CourseChapterProps) => {
   const { t } = useTranslation();
+  const { id: courseSlug } = useParams();
   const lessonText = formatWithPlural(
     chapter.lessonCount ?? 0,
     t("courseChapterView.other.lesson"),
@@ -133,7 +132,7 @@ export const CourseChapter = ({
                     isPreviewMode || ((chapter.isFreemium || isEnrolled) && lesson.hasAccess);
 
                   return canOpenLesson ? (
-                    <Link to={`/course/${courseId}/lesson/${lesson.id}`}>
+                    <Link to={`/course/${courseSlug}/lesson/${lesson.id}`}>
                       <CourseChapterLesson
                         key={lesson.id}
                         lesson={lesson}

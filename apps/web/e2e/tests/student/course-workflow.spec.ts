@@ -9,7 +9,7 @@ const URL_PATTERNS = {
 } as const;
 
 const goToCoursePage = async (page: Page) => {
-  await page.getByText("E2E Test: Automated Course for Full-Stack Development").click();
+  await page.getByText("E2E Test: Automated Course for Full-Stack Development").first().click();
 };
 
 const navigateThroughContentLesson = async (page: Page, nextButton: Locator) => {

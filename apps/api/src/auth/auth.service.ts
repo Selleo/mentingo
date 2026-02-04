@@ -127,9 +127,8 @@ export class AuthService {
       );
 
       const { avatarReference, ...userWithoutAvatar } = newUser;
-      const usersProfilePictureUrl = await this.userService.getUsersProfilePictureUrl(
-        avatarReference,
-      );
+      const usersProfilePictureUrl =
+        await this.userService.getUsersProfilePictureUrl(avatarReference);
 
       this.eventBus.publish(new UserRegisteredEvent(newUser));
 
@@ -172,9 +171,8 @@ export class AuthService {
     const { accessToken, refreshToken } = await this.getTokens(user);
 
     const { avatarReference, ...userWithoutAvatar } = user;
-    const usersProfilePictureUrl = await this.userService.getUsersProfilePictureUrl(
-      avatarReference,
-    );
+    const usersProfilePictureUrl =
+      await this.userService.getUsersProfilePictureUrl(avatarReference);
 
     const userSettings = await this.settingsService.getUserSettings(user.id);
 

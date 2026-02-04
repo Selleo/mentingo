@@ -117,9 +117,11 @@ if (process.env.CI) {
     {
       command: "cd ../api && pnpm run build && pnpm db:migrate && pnpm db:seed",
       env: {
+        ...process.env,
         DATABASE_URL: `postgresql://test_user:test_password@localhost:54321/test_db`,
         MODE: "test",
         OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
+        CORS_ORIGIN: process.env.CORS_ORIGIN || "http://localhost:5173",
       },
       reuseExistingServer: false,
       stderr: "pipe",
@@ -131,10 +133,12 @@ if (process.env.CI) {
       timeout: 120 * 1000,
       reuseExistingServer: false,
       env: {
+        ...process.env,
         DATABASE_URL: `postgresql://test_user:test_password@localhost:54321/test_db`,
         REDIS_URL: "redis://localhost:6380",
         MODE: "test",
         OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
+        CORS_ORIGIN: process.env.CORS_ORIGIN || "http://localhost:5173",
       },
       stderr: "pipe",
       stdout: "pipe",

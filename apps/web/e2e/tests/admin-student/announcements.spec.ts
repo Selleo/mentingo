@@ -62,7 +62,7 @@ const logoutAndLogin = async (page: Page, email: string, password: string) => {
 
 const studentMarksAnnouncementRead = async (page: Page) => {
   await expect(page.getByText(`${ANNOUNCEMENT.title}${ANNOUNCEMENT.body}`)).toBeVisible();
-  await page.locator("div:nth-child(2) > .items-center").first().click();
+  await page.getByRole("main").getByRole("button").first().click();
   await expect(page.getByText(TOASTS.markedRead, { exact: true })).toBeVisible();
   await page.getByRole("link", { name: "Announcements" }).click();
   await expect(page.getByText(`${ANNOUNCEMENT.title}${ANNOUNCEMENT.body}`)).toBeVisible();
@@ -86,6 +86,7 @@ test.describe("Announcements flow", () => {
     await createAnnouncementAsAdmin(page);
 
     await logoutAndLogin(page, USERS.student.email, USERS.student.password);
+
     await studentMarksAnnouncementRead(page);
 
     await logoutAndLogin(page, USERS.student2.email, USERS.student2.password);

@@ -24,7 +24,7 @@ export default function LatestAnnouncementsPopup({
   if (!isVisible || isAdmin || !latestUnreadAnnouncements.length) return null;
 
   return (
-    <div className="absolute z-10 mt-2 w-full space-y-4 md:mt-8">
+    <div className="absolute z-30 mt-2 w-full space-y-4 md:mt-8">
       <LatestAnnouncementCard
         announcement={latestUnreadAnnouncements[currentIndex]}
         setCurrentIndex={setCurrentIndex}

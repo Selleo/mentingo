@@ -149,7 +149,7 @@ export default function CourseViewPage() {
           <div className="flex flex-col gap-y-6 overflow-hidden">
             <CourseOverview course={course} />
 
-            <CourseCertificate />
+            <CourseCertificate courseId={course.id} />
 
             <Tabs defaultValue={courseViewTabs[0].title} className="w-full">
               <TabsList className="bg-card w-full justify-start gap-4 p-0 overflow-hidden">

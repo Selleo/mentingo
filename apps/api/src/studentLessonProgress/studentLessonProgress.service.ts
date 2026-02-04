@@ -83,13 +83,8 @@ export class StudentLessonProgressService {
     if (!accessCourseLessonWithDetails.isAssigned && !accessCourseLessonWithDetails.isFreemium)
       throw new UnauthorizedException("You don't have assignment to this lesson");
 
-    if (
-      accessCourseLessonWithDetails.lessonIsCompleted ||
-      accessCourseLessonWithDetails.attempts > 1
-    )
-      return;
-
-    if (accessCourseLessonWithDetails.lessonIsCompleted) return;
+    if (accessCourseLessonWithDetails.attempts > 1) return;
+    const alreadyCompleted = accessCourseLessonWithDetails.lessonIsCompleted;
 
     const { language: actualLanguage } = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.LESSON,
@@ -113,11 +108,11 @@ export class StudentLessonProgressService {
       throw new NotFoundException(`Lesson with id ${id} not found`);
     }
 
-    if (lesson.type === LESSON_TYPES.QUIZ && !quizCompleted) {
+    if (!alreadyCompleted && lesson.type === LESSON_TYPES.QUIZ && !quizCompleted) {
       throw new BadRequestException("Quiz not completed");
     }
 
-    if (lesson.type === LESSON_TYPES.AI_MENTOR && !aiMentorLessonData)
+    if (!alreadyCompleted && lesson.type === LESSON_TYPES.AI_MENTOR && !aiMentorLessonData)
       throw new BadRequestException("No AI Mentor Lesson Data given");
 
     const [lessonProgress] = await dbInstance
@@ -214,7 +209,9 @@ export class StudentLessonProgressService {
           actor: resolvedActor,
         }),
       );
+    }
 
+    if (lessonCompleted || isQuizPassed || alreadyCompleted) {
       await this.updateChapterProgress(
         lesson.courseId,
         lesson.chapterId,

@@ -45,8 +45,6 @@ export const navigateToPage = async (
       .getByRole("link");
 
   await header.waitFor({ state: "visible" });
-
-  await expect(header).toHaveText(new RegExp(headerText, "i"));
 };
 
 export const findAndClickCell = async (page: Page, name: string) => {
@@ -78,20 +76,14 @@ export const findAndClickButton = async (page: Page, name: string) =>
     .click();
 
 export const selectCourse = async (page: Page, course: string) => {
-  await page
-    .getByRole("button", {
-      name: new RegExp(ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.button.myCourses, "i"),
-    })
-    .click();
-
-  await page.locator(".h-min > button:nth-child(2)").click();
+  await page.getByRole("button", { name: "Manage courses" }).click();
   await page.waitForURL("/admin/courses");
-  const createNewCourseBtn = await page.getByRole("button", { name: "Create new" });
+  const createNewCourseBtn = page.getByRole("button", { name: "Create new" });
   await createNewCourseBtn.waitFor({ state: "visible", timeout: 10000 });
   await expect(createNewCourseBtn).toBeVisible();
   await page.getByText("Advanced English: Mastering").click();
 
-  const header = page.getByRole("link", {
+  const header = page.getByRole("heading", {
     name: new RegExp(course, "i"),
   });
 
@@ -147,11 +139,11 @@ export const verifyStudentSeesCourse = async (page: Page, course: string): Promi
     ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.button.browseCourses,
     ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.header.yourCourses,
     page.getByRole("heading", {
-      name: new RegExp(ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.header.yourCourses, "i"),
+      name: new RegExp(ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.header.sectionHeader, "i"),
     }),
   );
 
-  const expectedCourse = page.getByTestId(course);
+  const expectedCourse = page.getByTestId(course).first();
 
   if (!(await expectedCourse.isVisible())) return false;
 

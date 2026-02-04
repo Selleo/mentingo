@@ -64,15 +64,17 @@ const createNewPasswordAndLoginAsStudent = async (page: Page) => {
   await page.goto("/auth/login");
 
   await page.goto("http://localhost:8025/");
-  await page
+  const email = page
     .getByText("noreply@lms.selleo.app janekk")
     .first()
     .or(
       page
         .getByText("noreply@mentingo.com janekk@example.com Zapraszamy na platformę! a few seconds")
         .first(),
-    )
-    .click();
+    );
+  await email.waitFor({ state: "visible", timeout: 15000 });
+  await expect(email).toBeVisible();
+  await email.click();
   const page2Promise = page.waitForEvent("popup");
   await page
     .locator("#preview-html")
@@ -92,7 +94,9 @@ const createNewPasswordAndLoginAsStudent = async (page: Page) => {
   await page2.getByLabel("Password").fill("Pass@123");
   await page2.getByRole("button", { name: "Login" }).click();
   await page2.waitForURL("/courses");
-  await expect(page2.getByRole("heading", { name: "Twoje kursy" })).toBeVisible();
+  await expect(
+    page2.getByRole("heading", { name: "Top 5 najpopularniejszych kursów" }),
+  ).toBeVisible();
 };
 
 test.describe("Import students to platform", () => {

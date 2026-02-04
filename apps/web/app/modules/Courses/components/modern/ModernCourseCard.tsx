@@ -136,6 +136,7 @@ const ModernCourseCard = ({
       )}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      data-testid={title}
     >
       <div className="aspect-video w-full" />
 

@@ -4,6 +4,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import { useSubmitQuiz, useRetakeQuiz, useQuizRetakeStatus } from "~/api/mutations";
+import { courseQueryOptions } from "~/api/queries";
 import { certificatesQueryOptions } from "~/api/queries/useCertificates";
 import { queryClient } from "~/api/queryClient";
 import { Icon } from "~/components/Icon";
@@ -42,7 +43,7 @@ type QuizProps = {
 };
 
 export const Quiz = ({ lesson, userId, isPreviewMode = false, previewLessonId }: QuizProps) => {
-  const { lessonId = "" } = useParams();
+  const { lessonId = "", courseId: courseSlug = "" } = useParams();
   const { t } = useTranslation();
   const { isAdminLike } = useUserRole();
 
@@ -62,6 +63,7 @@ export const Quiz = ({ lesson, userId, isPreviewMode = false, previewLessonId }:
       queryClient.invalidateQueries({ queryKey: ["lesson", lessonId] });
       queryClient.invalidateQueries({ queryKey: ["lessonProgress", lessonId] });
       queryClient.invalidateQueries(certificatesQueryOptions({ userId }));
+      queryClient.invalidateQueries(courseQueryOptions(courseSlug));
     },
   });
 

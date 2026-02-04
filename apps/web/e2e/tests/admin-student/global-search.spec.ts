@@ -58,8 +58,13 @@ const openCourseFromSearch = async (page: Page, title: string) => {
   await page.getByRole("link", { name: title }).first().click();
 };
 
-const expectCourseHeading = async (page: Page, heading: string) => {
-  await expect(page.getByRole("heading", { name: heading })).toBeVisible();
+const expectCourseVisibility = async (page: Page, isAdmin: boolean) => {
+  if (isAdmin) {
+    await expect(page.getByRole("tab", { name: "Curriculum" })).toBeVisible();
+    return;
+  }
+
+  await expect(page.getByRole("heading", { name: "Author" })).toBeVisible();
 };
 
 const openCourseAndExpectHeading = async (page: Page, title: string, isAdmin: boolean) => {
@@ -68,7 +73,7 @@ const openCourseAndExpectHeading = async (page: Page, title: string, isAdmin: bo
     ? /\/admin\/beta-courses\/[0-9a-fA-F-]{36}$/
     : /\/course\/[0-9a-fA-F-]{36}$/;
   await page.waitForURL(urlPattern);
-  await expectCourseHeading(page, title);
+  await expectCourseVisibility(page, isAdmin);
 };
 
 test.describe("Global search", () => {

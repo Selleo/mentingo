@@ -36,7 +36,6 @@ export function ChapterListOverview({ course, isPreviewMode = false }: ChapterLi
           <CourseChapter
             key={chapter.id}
             chapter={chapter}
-            courseId={course!.id}
             isEnrolled={Boolean(course?.enrolled)}
             isPreviewMode={isPreviewMode}
           />

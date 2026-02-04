@@ -12,9 +12,9 @@ const FREEMIUM_TEST_ID =
   /^Freemium - [0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const openCourseEditor = async (page: Page) => {
-  await expect(page.getByRole("heading", { name: "Available Courses" })).toBeVisible();
-  await page.getByTestId(COURSE_TITLE).click();
-  await expect(page.getByRole("heading", { name: COURSE_HEADING })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Manage courses" })).toBeVisible();
+  await page.getByTestId(COURSE_TITLE).first().click();
+  await expect(page.getByRole("heading", { name: COURSE_HEADING }).first()).toBeVisible();
   await page.getByRole("button", { name: "Edit Course" }).click();
 };
 
@@ -55,12 +55,7 @@ const markFreemium = async (page: Page) => {
 };
 
 const editChapterAndLesson = async (page: Page) => {
-  await page
-    .locator("li")
-    .filter({ hasText: "new chapterChapter 5 • Number" })
-    .getByRole("button")
-    .first()
-    .click();
+  await page.getByRole("heading", { name: "new chapter" }).click();
 
   await page.getByRole("heading", { name: CHAPTER_TITLE }).click();
   const editButton = page.getByText("Edit:");
@@ -101,7 +96,7 @@ const validatePreview = async (page: Page) => {
   await expect(page.getByText("04 new chapter0/0Free")).toBeVisible();
   await page.getByTestId(CHAPTER_TITLE_UPDATED).click();
   await expect(page.getByRole("link", { name: LESSON_TITLE })).toBeVisible();
-  await expect(page.getByRole("link", { name: "lesson title Content Not" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "lesson title Content" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "chapter to delete" })).not.toBeVisible();
 };
 

@@ -154,16 +154,14 @@ const editProfilePicture = async (page: Page) => {
 
   await confirmEditMode(page);
 
-  const profileImage = page
-    .locator("section")
-    .filter({
-      hasText: `${PROFILE_PAGE_UI.expectedValues.firstName} ${PROFILE_PAGE_UI.expectedValues.lastName}Title:`,
-    })
-    .getByRole("img", {
-      name: `${PROFILE_PAGE_UI.expectedValues.firstName} ${PROFILE_PAGE_UI.expectedValues.lastName} profile`,
-    });
+  const userName = page.getByTestId("username");
+  await userName.waitFor({ state: "visible", timeout: 10000 });
+  await expect(userName).toBeVisible();
 
-  await expect(profileImage).toBeVisible();
+  const profileImage = page
+    .locator("#profile-card")
+    .getByRole("img", { name: "Avatar for email@example.com" });
+  await expect(profileImage).not.toBeVisible();
 };
 
 test.describe("Admin profile page flow", () => {

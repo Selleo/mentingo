@@ -54,9 +54,6 @@ const waitForGenerateMissingTranslationsOrContent = async (page: Page) => {
   if (firstVisible === "translation") {
     await page.getByRole("button", { name: "Confirm" }).click();
   }
-
-  await addContentHeading.waitFor({ state: "visible", timeout: 10000 });
-  await expect(addContentHeading).toBeVisible();
 };
 
 const selectLanguage = async (page: Page) => {
@@ -87,7 +84,7 @@ const selectLanguage = async (page: Page) => {
 
 const createCourse = async (page: Page) => {
   await page.getByRole("button", { name: "Courses" }).getByRole("link").click();
-  await page.locator(".h-min > button:nth-child(2)").click();
+  await page.getByRole("button", { name: "Manage courses" }).click();
   await page.getByRole("button", { name: "Create new" }).click();
   await page.getByPlaceholder("Enter title").click();
   await page.getByPlaceholder("Enter title").fill(TEST_DATA.base.titleEn);

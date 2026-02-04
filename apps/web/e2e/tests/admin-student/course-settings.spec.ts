@@ -56,7 +56,7 @@ const setCourseAsFree = async (page: Page) => {
 };
 
 const enterCourse = async (page: Page, courseHandle: string) => {
-  const courseCard = page.getByTestId(courseHandle);
+  const courseCard = page.getByTestId(courseHandle).first();
 
   const isVisible = await courseCard.isVisible();
 
@@ -66,7 +66,9 @@ const enterCourse = async (page: Page, courseHandle: string) => {
 
   await courseCard.click();
 
-  const header = page.getByRole("link", { name: new RegExp(courseHandle, "i") });
+  await page.waitForURL(/course\/[\w-]+/);
+
+  const header = page.getByRole("link", { name: new RegExp(courseHandle, "i") }).first();
 
   await header.waitFor({ state: "visible" });
 
@@ -200,7 +202,7 @@ test.describe("Course settings flow", () => {
         ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.button.browseCourses,
         ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.button.myCourses,
         page.getByRole("heading", {
-          name: new RegExp(ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.header.yourCourses, "i"),
+          name: new RegExp(ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.header.sectionHeader, "i"),
         }),
       );
 
@@ -233,9 +235,9 @@ test.describe("Course settings flow", () => {
 
         await newPage.goto("/courses");
 
-        const availableCourses = page.getByRole("heading", { name: "Available Courses" });
-        await availableCourses.waitFor({ state: "visible" });
-        await expect(availableCourses).toBeVisible();
+        const coursesHeader = page.getByRole("heading", { name: "Top 5 most popular courses" });
+        await coursesHeader.waitFor({ state: "visible" });
+        await expect(coursesHeader).toBeVisible();
 
         await enterCourse(newPage, ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.courseToAssign);
 
@@ -307,7 +309,7 @@ test.describe("Course settings flow", () => {
         ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.button.browseCourses,
         ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.button.myCourses,
         page.getByRole("heading", {
-          name: new RegExp(ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.header.yourCourses, "i"),
+          name: new RegExp(ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.header.sectionHeader, "i"),
         }),
       );
 
@@ -330,7 +332,7 @@ test.describe("Course settings flow", () => {
       await page.waitForURL("/courses");
 
       const header = page.getByRole("heading", {
-        name: new RegExp(ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.header.availableCourses, "i"),
+        name: new RegExp(ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.header.sectionHeader, "i"),
       });
       await expect(header).toBeVisible();
 
