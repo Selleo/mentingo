@@ -1,34 +1,28 @@
-import { ForbiddenException, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { AuthGuard } from "@nestjs/passport";
 
 import { EnvService } from "src/env/services/env.service";
+import { TenantResolverService } from "src/storage/db/tenant-resolver.service";
+import { TenantStateService } from "src/storage/db/tenant-state.service";
 
-import type { ExecutionContext } from "@nestjs/common";
+import { createTenantOAuthGuard } from "./oauth-guard.factory";
+
+class MicrosoftOAuthGuardBase extends createTenantOAuthGuard(
+  "microsoft",
+  (req: { oauthState?: string }, isCallback: boolean) =>
+    isCallback ? {} : { state: req.oauthState },
+  "MICROSOFT_OAUTH_ENABLED",
+  "Microsoft OAuth is disabled",
+) {}
 
 @Injectable()
-export class MicrosoftOAuthGuard extends AuthGuard("microsoft") {
+export class MicrosoftOAuthGuard extends MicrosoftOAuthGuardBase {
   constructor(
-    private readonly envService: EnvService,
-    private readonly configService: ConfigService,
+    envService: EnvService,
+    configService: ConfigService,
+    tenantResolver: TenantResolverService,
+    tenantState: TenantStateService,
   ) {
-    super();
-  }
-
-  private async isEnabled(): Promise<boolean> {
-    const enabled = await this.envService
-      .getEnv("MICROSOFT_OAUTH_ENABLED")
-      .then((r) => r.value)
-      .catch(() => this.configService.get<string>("MICROSOFT_OAUTH_ENABLED"));
-
-    return enabled === "true";
-  }
-
-  async canActivate(context: ExecutionContext) {
-    const enabled = await this.isEnabled();
-    if (!enabled) {
-      throw new ForbiddenException("Microsoft OAuth is disabled");
-    }
-    return super.canActivate(context) as any;
+    super(envService, configService, tenantResolver, tenantState);
   }
 }
