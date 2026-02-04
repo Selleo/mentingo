@@ -182,7 +182,6 @@ const ensureAccordionOpen = async (button: Locator) => {
   for (let attempt = 0; attempt < 3; attempt++) {
     const state = await button.getAttribute("data-state");
     if (state === "open") return;
-    await button.scrollIntoViewIfNeeded();
     await button.click({ timeout: 5000 });
     try {
       await expect(button).toHaveAttribute("data-state", "open", { timeout: 2000 });
