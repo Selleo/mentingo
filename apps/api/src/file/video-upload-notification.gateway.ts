@@ -28,10 +28,6 @@ export type VideoUploadNotification = {
 };
 
 @WebSocketGateway({
-  cors: {
-    origin: process.env.CORS_ORIGIN,
-    methods: ["GET", "POST"],
-  },
   path: "/api/ws",
   namespace: "/ws",
   transports: ["websocket"],

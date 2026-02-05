@@ -2533,5 +2533,11 @@
       "title": "Usuń wpis do bazy wiedzy",
       "description": "Czy na pewno chcesz usunąć ten wpis do bazy wiedzy? Tej operacji nie można cofnąć."
     }
+  },
+  "superAdminTenantsView": {
+    "toast": {
+      "tenantCreatedSuccessfully": "Najemca został utworzony pomyślnie",
+      "tenantUpdatedSuccessfully": "Najemca został zaktualizowany pomyślnie"
+    }
   }
 }

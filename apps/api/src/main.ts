@@ -6,12 +6,15 @@ import * as Sentry from "@sentry/node";
 import { nodeProfilingIntegration } from "@sentry/profiling-node";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 import { patchNestJsSwagger, applyFormats } from "nestjs-typebox";
 
 import { version } from "../version.json";
 
 import { AppModule } from "./app.module";
 import { startInstrumentation } from "./langfuse/instrumentation";
+import { DB_BASE } from "./storage/db/db.providers";
+import { createCorsOriginOption } from "./utils/cors";
 import { environmentValidation } from "./utils/environment-validation";
 import { exportSchemaToFile } from "./utils/save-swagger-to-file";
 import { setupValidation } from "./utils/setup-validation";
@@ -40,12 +43,16 @@ async function bootstrap() {
 
   setupValidation();
 
+  const dbBase = app.get(DB_BASE);
+
+  app.use(
+    cors({
+      origin: createCorsOriginOption(dbBase),
+      credentials: true,
+    }),
+  );
   app.use(cookieParser());
   app.setGlobalPrefix("api");
-  app.enableCors({
-    origin: process.env.CORS_ORIGIN,
-    credentials: true,
-  });
   app.use(
     "/api/file/videos/tus",
     bodyParser.raw({
@@ -64,6 +71,7 @@ async function bootstrap() {
   exportSchemaToFile(document);
 
   const redisUrl = process.env.REDIS_URL;
+
   if (redisUrl) {
     const redisIoAdapter = new RedisIoAdapter(app, redisUrl);
     await redisIoAdapter.connectToRedis();

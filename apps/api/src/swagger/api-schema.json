@@ -7925,6 +7925,137 @@
           }
         }
       }
+    },
+    "/api/super-admin/tenants": {
+      "get": {
+        "operationId": "TenantsController_listTenants",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListTenantsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "TenantsController_createTenant",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTenantBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateTenantResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/super-admin/tenants/{id}": {
+      "get": {
+        "operationId": "TenantsController_getTenant",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTenantResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "TenantsController_updateTenant",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTenantBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateTenantResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "info": {
@@ -8198,6 +8329,9 @@
                   "settings",
                   "providerInformation"
                 ]
+              },
+              "isManagingTenantAdmin": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -8212,7 +8346,8 @@
               "deletedAt",
               "profilePictureUrl",
               "shouldVerifyMFA",
-              "onboardingStatus"
+              "onboardingStatus",
+              "isManagingTenantAdmin"
             ]
           }
         },
@@ -8325,6 +8460,9 @@
                   "settings",
                   "providerInformation"
                 ]
+              },
+              "isManagingTenantAdmin": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -8339,7 +8477,8 @@
               "deletedAt",
               "profilePictureUrl",
               "shouldVerifyMFA",
-              "onboardingStatus"
+              "onboardingStatus",
+              "isManagingTenantAdmin"
             ]
           }
         },
@@ -8640,6 +8779,9 @@
                   "settings",
                   "providerInformation"
                 ]
+              },
+              "isManagingTenantAdmin": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -8654,7 +8796,8 @@
               "deletedAt",
               "profilePictureUrl",
               "shouldVerifyMFA",
-              "onboardingStatus"
+              "onboardingStatus",
+              "isManagingTenantAdmin"
             ]
           }
         },
@@ -24832,6 +24975,317 @@
             },
             "required": [
               "parsedContent"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ListTenantsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "host": {
+                  "type": "string"
+                },
+                "status": {
+                  "anyOf": [
+                    {
+                      "const": "active",
+                      "type": "string"
+                    },
+                    {
+                      "const": "inactive",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "isManaging": {
+                  "type": "boolean"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "host",
+                "status",
+                "isManaging",
+                "createdAt",
+                "updatedAt"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
+      },
+      "GetTenantResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "host": {
+                "type": "string"
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "active",
+                    "type": "string"
+                  },
+                  {
+                    "const": "inactive",
+                    "type": "string"
+                  }
+                ]
+              },
+              "isManaging": {
+                "type": "boolean"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "host",
+              "status",
+              "isManaging",
+              "createdAt",
+              "updatedAt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CreateTenantBody": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "host": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "const": "active",
+                "type": "string"
+              },
+              {
+                "const": "inactive",
+                "type": "string"
+              }
+            ]
+          },
+          "adminEmail": {
+            "format": "email",
+            "type": "string"
+          },
+          "adminFirstName": {
+            "type": "string"
+          },
+          "adminLastName": {
+            "type": "string"
+          },
+          "adminLanguage": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "host",
+          "adminEmail"
+        ]
+      },
+      "CreateTenantResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "host": {
+                "type": "string"
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "active",
+                    "type": "string"
+                  },
+                  {
+                    "const": "inactive",
+                    "type": "string"
+                  }
+                ]
+              },
+              "isManaging": {
+                "type": "boolean"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "host",
+              "status",
+              "isManaging",
+              "createdAt",
+              "updatedAt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateTenantBody": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "host": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "const": "active",
+                "type": "string"
+              },
+              {
+                "const": "inactive",
+                "type": "string"
+              }
+            ]
+          }
+        }
+      },
+      "UpdateTenantResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "host": {
+                "type": "string"
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "active",
+                    "type": "string"
+                  },
+                  {
+                    "const": "inactive",
+                    "type": "string"
+                  }
+                ]
+              },
+              "isManaging": {
+                "type": "boolean"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "host",
+              "status",
+              "isManaging",
+              "createdAt",
+              "updatedAt"
             ]
           }
         },

@@ -2511,5 +2511,11 @@
       "title": "Delete knowledge base entry",
       "description": "Are you sure you want to delete this knowledge base entry? This action cannot be undone."
     }
+  },
+  "superAdminTenantsView": {
+    "toast": {
+      "tenantCreatedSuccessfully": "Tenant created successfully",
+      "tenantUpdatedSuccessfully": "Tenant updated successfully"
+    }
   }
 }

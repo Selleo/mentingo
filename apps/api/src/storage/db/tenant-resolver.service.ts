@@ -1,19 +1,22 @@
-import { Inject, Injectable, UnauthorizedException } from "@nestjs/common";
+import { ForbiddenException, Inject, Injectable, UnauthorizedException } from "@nestjs/common";
+import { TENANT_STATUSES } from "@repo/shared";
 import { eq } from "drizzle-orm";
 
+import { TokenService } from "src/auth/token.service";
 import { DatabasePg } from "src/common";
 import { tenants } from "src/storage/schema";
 
 import { DB_BASE } from "./db.providers";
 import { TenantStateService } from "./tenant-state.service";
 
-import type { Request } from "express";
+import type { Request, Response } from "express";
 
 @Injectable()
 export class TenantResolverService {
   constructor(
     @Inject(DB_BASE) private readonly dbBase: DatabasePg,
     private readonly tenantState: TenantStateService,
+    private readonly tokenService: TokenService,
   ) {}
 
   async resolveTenantId(req: Request): Promise<string | null> {
@@ -30,18 +33,28 @@ export class TenantResolverService {
         .where(eq(tenants.id, user.tenantId))
         .limit(1);
 
-      if (tenant?.host !== origin) throw new UnauthorizedException("Tenant host mismatch");
+      if (tenant?.status === TENANT_STATUSES.INACTIVE) {
+        throw new ForbiddenException("Tenant is inactive");
+      }
 
-      return user.tenantId;
+      if (tenant?.host && origin && tenant.host !== origin) {
+        this.clearAuthCookies(req);
+      } else {
+        return user.tenantId;
+      }
     }
 
     if (!origin) return null;
 
     const [tenant] = await this.dbBase
-      .select({ id: tenants.id })
+      .select({ id: tenants.id, status: tenants.status })
       .from(tenants)
       .where(eq(tenants.host, origin))
       .limit(1);
+
+    if (tenant?.status === TENANT_STATUSES.INACTIVE) {
+      throw new ForbiddenException("Tenant is inactive");
+    }
 
     return tenant?.id ?? null;
   }
@@ -87,5 +100,11 @@ export class TenantResolverService {
     } catch {
       return null;
     }
+  }
+
+  private clearAuthCookies(req: Request) {
+    const res = req.res as Response | undefined;
+    if (!res) return;
+    this.tokenService.clearTokenCookies(res);
   }
 }

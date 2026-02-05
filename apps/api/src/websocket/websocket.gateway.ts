@@ -21,10 +21,6 @@ import type { Socket } from "socket.io";
 
 @WebSocketGateway({
   namespace: "/ws",
-  cors: {
-    origin: process.env.CORS_ORIGIN?.split(",") || true,
-    credentials: true,
-  },
   path: "/api/ws",
   transports: ["websocket", "polling"],
 })

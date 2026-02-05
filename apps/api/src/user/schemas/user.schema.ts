@@ -21,6 +21,7 @@ export const currentUserResponseSchema = Type.Composite([
   Type.Object({
     shouldVerifyMFA: Type.Boolean(),
     onboardingStatus: userOnboardingStatusSchema,
+    isManagingTenantAdmin: Type.Boolean(),
   }),
 ]);
 

@@ -136,11 +136,17 @@ export const categories = pgTable(
   {
     ...id,
     ...timestamps,
-    title: text("title").notNull().unique(),
+    title: text("title").notNull(),
     archived,
     tenantId,
   },
-  withTenantIdIndex("categories"),
+  (table) => ({
+    ...withTenantIdIndex("categories")(table),
+    tenantTitleUniqueIdx: uniqueIndex("categories_tenant_id_title_unique").on(
+      table.tenantId,
+      table.title,
+    ),
+  }),
 );
 
 export const createTokens = pgTable(
@@ -1013,6 +1019,7 @@ export const tenants = pgTable(
     name: text("name").notNull(),
     host: text("host").notNull(),
     status: text("status").notNull().$type<TenantStatus>().default(TENANT_STATUSES.ACTIVE),
+    isManaging: boolean("is_managing").notNull().default(false),
   },
   (table) => ({
     uniqueHostIdx: uniqueIndex("unique_host_idx").on(table.host),

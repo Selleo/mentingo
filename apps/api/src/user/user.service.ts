@@ -506,7 +506,12 @@ export class UserService {
     });
   }
 
-  public async createUser(data: CreateUserBody, dbInstance?: DatabasePg, creator?: CurrentUser) {
+  public async createUser(
+    data: CreateUserBody,
+    dbInstance?: DatabasePg,
+    creator?: CurrentUser,
+    options?: { invite?: { invitedByUserName?: string; origin?: string } },
+  ) {
     const db = dbInstance ?? this.db;
 
     const [existingUser] = await db
@@ -589,6 +594,22 @@ export class UserService {
 
     const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(createdUser.id);
 
+    if (!creator && options?.invite) {
+      const userInviteDetails: UserInvite = {
+        email: createdUser.email,
+        token,
+        userId: createdUser.id,
+        tenantId: createdUser.tenantId,
+        invitedByUserName: options.invite.invitedByUserName,
+        origin: options.invite.origin,
+        ...defaultEmailSettings,
+      };
+
+      this.eventBus.publish(new UserInviteEvent(userInviteDetails));
+
+      return createdUser;
+    }
+
     if (!creator) {
       const createPasswordEmail = new CreatePasswordReminderEmail({
         createPasswordLink: `${
@@ -612,6 +633,7 @@ export class UserService {
       email: createdUser.email,
       token,
       userId: createdUser.id,
+      tenantId: createdUser.tenantId,
       ...defaultEmailSettings,
     };
 

@@ -55,6 +55,7 @@ import { DbModule } from "./storage/db/db.module";
 import { TenantRlsInterceptor } from "./storage/db/tenant-rls.interceptor";
 import { StripeModule } from "./stripe/stripe.module";
 import { StudentLessonProgressModule } from "./studentLessonProgress/studentLessonProgress.module";
+import { SuperAdminModule } from "./super-admin/super-admin.module";
 import { TestConfigModule } from "./test-config/test-config.module";
 import { UserModule } from "./user/user.module";
 
@@ -127,6 +128,7 @@ import { UserModule } from "./user/user.module";
     NewsModule,
     ArticlesModule,
     AnalyticsModule,
+    SuperAdminModule,
   ],
   controllers: [],
   providers: [

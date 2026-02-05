@@ -136,9 +136,10 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
         >
           <div className="flex flex-col gap-y-3">
             {menuItems.map((group) => {
-              const { restrictedRoles } = group;
+              const { restrictedRoles, restrictedManagingTenantAdmin } = group;
 
               if (restrictedRoles && !restrictedRoles.includes(role as UserRole)) return null;
+              if (restrictedManagingTenantAdmin && !user?.isManagingTenantAdmin) return null;
 
               return (
                 <Fragment key={group.title}>

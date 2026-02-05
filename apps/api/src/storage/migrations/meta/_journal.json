@@ -617,6 +617,20 @@
       "when": 1770026209126,
       "tag": "0087_enable_tenant_rls_for_magic_link_tokens",
       "breakpoints": true
+    },
+    {
+      "idx": 88,
+      "version": "7",
+      "when": 1770207572794,
+      "tag": "0088_add_is_managing_field_to_tenants_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 89,
+      "version": "7",
+      "when": 1770214549246,
+      "tag": "0089_make_categories_unique_per_tenant",
+      "breakpoints": true
     }
   ]
 }

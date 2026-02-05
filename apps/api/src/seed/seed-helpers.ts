@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { ConfigService } from "@nestjs/config";
-import { eq, sql } from "drizzle-orm/sql";
+import { and, eq, sql } from "drizzle-orm/sql";
 
 import { EnvRepository } from "src/env/repositories/env.repository";
 import { EnvService } from "src/env/services/env.service";
@@ -43,12 +43,14 @@ export async function createNiceCourses(
         updatedAt: new Date().toISOString(),
         tenantId,
       })
-      .onConflictDoNothing();
+      .onConflictDoNothing({
+        target: [categories.tenantId, categories.title],
+      });
 
     const [category] = await db
       .select()
       .from(categories)
-      .where(eq(categories.title, courseData.category));
+      .where(and(eq(categories.title, courseData.category), eq(categories.tenantId, tenantId)));
 
     const createdAt = faker.date.past({ years: 1, refDate: new Date() }).toISOString();
 
@@ -237,9 +239,13 @@ export async function seedTruncateAllTables(db: DatabasePg): Promise<void> {
   });
 }
 
-export async function ensureSeedTenant(db: DatabasePg, options?: { name?: string; host?: string }) {
+export async function ensureSeedTenant(
+  db: DatabasePg,
+  options?: { name?: string; host?: string; isManaging?: boolean },
+) {
   const host = options?.host ?? "seed.local";
   const name = options?.name ?? "Seed Tenant";
+  const isManaging = options?.isManaging ?? false;
 
   const [existing] = await db.select().from(tenants).where(eq(tenants.host, host));
   if (existing) return existing;
@@ -249,6 +255,7 @@ export async function ensureSeedTenant(db: DatabasePg, options?: { name?: string
     .values({
       name,
       host,
+      isManaging,
     })
     .returning();
 

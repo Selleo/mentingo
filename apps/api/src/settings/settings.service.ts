@@ -512,14 +512,18 @@ export class SettingsService {
   }
 
   public async getCompanyInformation(): Promise<CompanyInformaitonJSONSchema> {
-    const [{ companyInformation }] = await this.db
+    const [row] = await this.db
       .select({
         companyInformation: sql<CompanyInformaitonJSONSchema>`${settings.settings}->'companyInformation'`,
       })
       .from(settings)
       .where(isNull(settings.userId));
 
-    return companyInformation;
+    if (!row?.companyInformation) {
+      return DEFAULT_GLOBAL_SETTINGS.companyInformation;
+    }
+
+    return row.companyInformation;
   }
 
   public async updateCompanyInformation(

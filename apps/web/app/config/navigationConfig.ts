@@ -27,6 +27,7 @@ export type NavigationGroups = {
   icon?: IconName;
   isExpandable?: boolean;
   restrictedRoles?: UserRole[];
+  restrictedManagingTenantAdmin?: boolean;
   items: NavigationItem[];
 };
 
@@ -134,6 +135,19 @@ export const getNavigationConfig = (
               } as NavigationItem,
             ]
           : []),
+      ],
+    },
+    {
+      title: t("navigationSideBar.superAdmin", "Super Admin"),
+      icon: "Admin",
+      isExpandable: false,
+      restrictedManagingTenantAdmin: true,
+      items: [
+        {
+          label: t("navigationSideBar.tenants", "Tenants"),
+          path: "super-admin/tenants",
+          iconName: "Admin",
+        },
       ],
     },
   ];

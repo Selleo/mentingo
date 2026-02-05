@@ -77,6 +77,7 @@ export interface LoginResponse {
       settings: boolean;
       providerInformation: boolean;
     };
+    isManagingTenantAdmin: boolean;
   };
 }
 
@@ -109,6 +110,7 @@ export interface CurrentUserResponse {
       settings: boolean;
       providerInformation: boolean;
     };
+    isManagingTenantAdmin: boolean;
   };
 }
 
@@ -185,6 +187,7 @@ export interface HandleMagicLinkResponse {
       settings: boolean;
       providerInformation: boolean;
     };
+    isManagingTenantAdmin: boolean;
   };
 }
 
@@ -3751,6 +3754,85 @@ export interface GenerateArticlePreviewBody {
 export interface GenerateArticlePreviewResponse {
   data: {
     parsedContent: string;
+  };
+}
+
+export interface ListTenantsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    host: string;
+    status: "active" | "inactive";
+    isManaging: boolean;
+    createdAt: string;
+    updatedAt: string;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface GetTenantResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    host: string;
+    status: "active" | "inactive";
+    isManaging: boolean;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface CreateTenantBody {
+  /** @minLength 1 */
+  name: string;
+  /** @minLength 1 */
+  host: string;
+  status?: "active" | "inactive";
+  /** @format email */
+  adminEmail: string;
+  adminFirstName?: string;
+  adminLastName?: string;
+  adminLanguage?: string;
+}
+
+export interface CreateTenantResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    host: string;
+    status: "active" | "inactive";
+    isManaging: boolean;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface UpdateTenantBody {
+  /** @minLength 1 */
+  name?: string;
+  /** @minLength 1 */
+  host?: string;
+  status?: "active" | "inactive";
+}
+
+export interface UpdateTenantResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    host: string;
+    status: "active" | "inactive";
+    isManaging: boolean;
+    createdAt: string;
+    updatedAt: string;
   };
 }
 
@@ -8299,6 +8381,80 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<void, any>({
         path: `/api/analytics/active-users`,
         method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name TenantsControllerListTenants
+     * @request GET:/api/super-admin/tenants
+     */
+    tenantsControllerListTenants: (
+      query?: {
+        /** @min 1 */
+        page?: number;
+        /** @min 1 */
+        perPage?: number;
+        search?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ListTenantsResponse, any>({
+        path: `/api/super-admin/tenants`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name TenantsControllerCreateTenant
+     * @request POST:/api/super-admin/tenants
+     */
+    tenantsControllerCreateTenant: (data: CreateTenantBody, params: RequestParams = {}) =>
+      this.request<CreateTenantResponse, any>({
+        path: `/api/super-admin/tenants`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name TenantsControllerGetTenant
+     * @request GET:/api/super-admin/tenants/{id}
+     */
+    tenantsControllerGetTenant: (id: string, params: RequestParams = {}) =>
+      this.request<GetTenantResponse, any>({
+        path: `/api/super-admin/tenants/${id}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name TenantsControllerUpdateTenant
+     * @request PATCH:/api/super-admin/tenants/{id}
+     */
+    tenantsControllerUpdateTenant: (
+      id: string,
+      data: UpdateTenantBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateTenantResponse, any>({
+        path: `/api/super-admin/tenants/${id}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
         ...params,
       }),
   };
