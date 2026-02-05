@@ -4,7 +4,13 @@ import { useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useEnrollCourse } from "~/api/mutations";
-import { courseQueryOptions, useCourse } from "~/api/queries";
+import {
+  availableCoursesQueryOptions,
+  courseQueryOptions,
+  studentCoursesQueryOptions,
+  useCourse,
+} from "~/api/queries";
+import { topCoursesQueryOptions } from "~/api/queries/useTopCourses";
 import { queryClient } from "~/api/queryClient";
 import DefaultPhotoCourse from "~/assets/svgs/default-photo-course.svg";
 import { Button } from "~/components/ui/button";
@@ -39,7 +45,7 @@ const HeroBanner = ({
   const { language } = useLanguageStore();
   const navigate = useNavigate();
 
-  const { isAdminLike } = useUserRole();
+  const { isAdminLike, isStudent } = useUserRole();
   const { mutateAsync: enrollCourse } = useEnrollCourse();
 
   const durationLabel = formatDuration(estimatedDurationMinutes);
@@ -61,20 +67,23 @@ const HeroBanner = ({
   const handleNavigateToLesson = useCallback(async () => {
     if (!heroCourseData) return;
 
-    if (!heroCourseData.enrolled) {
+    if (!heroCourseData.enrolled && isStudent) {
       await enrollCourse(
         { id: heroCourseData.id },
         {
           onSuccess: async () => {
             await queryClient.invalidateQueries(courseQueryOptions(heroCourseData.id));
             await queryClient.invalidateQueries(courseQueryOptions(heroCourseData.slug));
+            await queryClient.invalidateQueries(topCoursesQueryOptions({ language }));
+            await queryClient.invalidateQueries(availableCoursesQueryOptions({ language }));
+            await queryClient.invalidateQueries(studentCoursesQueryOptions({ language }));
           },
         },
       );
     }
 
     navigateToNextLesson(heroCourseData, navigate);
-  }, [heroCourseData, navigate, enrollCourse]);
+  }, [heroCourseData, navigate, enrollCourse, isStudent, language]);
 
   return (
     <div className="relative h-[50vh] min-h-[400px] w-full overflow-hidden md:h-[70vh] md:min-h-[500px]">

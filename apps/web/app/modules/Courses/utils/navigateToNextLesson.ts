@@ -21,7 +21,7 @@ export const navigateToNextLesson = (
     return navigate(`/course/${course.slug}/lesson/${firstLessonId}`);
   }
 
-  navigate(`/course/${course.slug}/lesson/${firstInProgressLessonId ?? notStartedLessonId}`, {
-    state: { chapterId: firstInProgressChapterId ?? notStartedChapterId },
+  navigate(`/course/${course.slug}/lesson/${notStartedLessonId ?? firstInProgressLessonId}`, {
+    state: { chapterId: notStartedChapterId ?? firstInProgressChapterId },
   });
 };

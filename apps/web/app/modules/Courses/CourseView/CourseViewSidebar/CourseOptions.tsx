@@ -2,12 +2,19 @@ import { Link, useParams } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
 
 import { useEnrollCourse } from "~/api/mutations";
-import { courseQueryOptions, useCurrentUser } from "~/api/queries";
+import {
+  availableCoursesQueryOptions,
+  courseQueryOptions,
+  studentCoursesQueryOptions,
+  useCurrentUser,
+} from "~/api/queries";
+import { topCoursesQueryOptions } from "~/api/queries/useTopCourses";
 import { queryClient } from "~/api/queryClient";
 import { Enroll } from "~/assets/svgs";
 import { CopyUrlButton } from "~/components/CopyUrlButton/CopyUrlButton";
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { PaymentModal } from "~/modules/stripe/PaymentModal";
 
 import type { GetCourseResponse } from "~/api/generated-api";
@@ -19,6 +26,7 @@ type CourseOptionsProps = {
 export const CourseOptions = ({ course }: CourseOptionsProps) => {
   const { t } = useTranslation();
   const { id = "" } = useParams();
+  const { language } = useLanguageStore();
 
   const { mutateAsync: enrollCourse } = useEnrollCourse();
   const { data: currentUser } = useCurrentUser();
@@ -27,6 +35,9 @@ export const CourseOptions = ({ course }: CourseOptionsProps) => {
     await enrollCourse({ id: course?.id }).then(() => {
       queryClient.invalidateQueries(courseQueryOptions(course?.id));
       queryClient.invalidateQueries(courseQueryOptions(id));
+      queryClient.invalidateQueries(topCoursesQueryOptions({ language }));
+      queryClient.invalidateQueries(availableCoursesQueryOptions({ language }));
+      queryClient.invalidateQueries(studentCoursesQueryOptions({ language }));
     });
   };
 
