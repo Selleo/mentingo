@@ -7928,7 +7928,7 @@
     },
     "/api/super-admin/tenants": {
       "get": {
-        "operationId": "TenantsController_listTenants",
+        "operationId": "TenantsController_findAllTenants",
         "parameters": [
           {
             "name": "page",
@@ -7962,7 +7962,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListTenantsResponse"
+                  "$ref": "#/components/schemas/FindAllTenantsResponse"
                 }
               }
             }
@@ -7997,7 +7997,7 @@
     },
     "/api/super-admin/tenants/{id}": {
       "get": {
-        "operationId": "TenantsController_getTenant",
+        "operationId": "TenantsController_findTenantById",
         "parameters": [
           {
             "name": "id",
@@ -8014,7 +8014,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetTenantResponse"
+                  "$ref": "#/components/schemas/FindTenantByIdResponse"
                 }
               }
             }
@@ -8022,7 +8022,7 @@
         }
       },
       "patch": {
-        "operationId": "TenantsController_updateTenant",
+        "operationId": "TenantsController_updateTenantById",
         "parameters": [
           {
             "name": "id",
@@ -8039,7 +8039,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateTenantBody"
+                "$ref": "#/components/schemas/UpdateTenantByIdBody"
               }
             }
           }
@@ -8049,7 +8049,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UpdateTenantResponse"
+                  "$ref": "#/components/schemas/UpdateTenantByIdResponse"
                 }
               }
             }
@@ -24982,7 +24982,7 @@
           "data"
         ]
       },
-      "ListTenantsResponse": {
+      "FindAllTenantsResponse": {
         "type": "object",
         "properties": {
           "data": {
@@ -25064,7 +25064,7 @@
           "pagination"
         ]
       },
-      "GetTenantResponse": {
+      "FindTenantByIdResponse": {
         "type": "object",
         "properties": {
           "data": {
@@ -25146,9 +25146,11 @@
             "type": "string"
           },
           "adminFirstName": {
+            "minLength": 1,
             "type": "string"
           },
           "adminLastName": {
+            "minLength": 1,
             "type": "string"
           },
           "adminLanguage": {
@@ -25158,7 +25160,9 @@
         "required": [
           "name",
           "host",
-          "adminEmail"
+          "adminEmail",
+          "adminFirstName",
+          "adminLastName"
         ]
       },
       "CreateTenantResponse": {
@@ -25214,7 +25218,7 @@
           "data"
         ]
       },
-      "UpdateTenantBody": {
+      "UpdateTenantByIdBody": {
         "additionalProperties": false,
         "type": "object",
         "properties": {
@@ -25240,7 +25244,7 @@
           }
         }
       },
-      "UpdateTenantResponse": {
+      "UpdateTenantByIdResponse": {
         "type": "object",
         "properties": {
           "data": {

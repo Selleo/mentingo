@@ -1,7 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "@remix-run/react";
+import { TENANT_STATUSES } from "@repo/shared";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
+import { useTranslation } from "react-i18next";
 
 import { useCreateTenant } from "~/api/mutations/super-admin/useCreateTenant";
 import { queryClient } from "~/api/queryClient";
@@ -17,43 +18,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-
-const formSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  host: z.string().url("Host must be a valid URL"),
-  status: z.enum(["active", "inactive"]).default("active"),
-  adminEmail: z.string().email("Admin email is required"),
-  adminFirstName: z.string().optional(),
-  adminLastName: z.string().optional(),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+import {
+  type CreateTenantFormValues,
+  createTenantFormSchema,
+} from "~/modules/SuperAdmin/schemas/tenant.schema";
 
 export default function CreateTenantPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { mutateAsync: createTenant } = useCreateTenant();
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<CreateTenantFormValues>({
+    resolver: zodResolver(createTenantFormSchema(t)),
     defaultValues: {
-      name: "",
-      host: "",
-      status: "active",
-      adminEmail: "",
-      adminFirstName: "",
-      adminLastName: "",
+      status: TENANT_STATUSES.ACTIVE,
     },
   });
 
-  const onSubmit = async (values: FormValues) => {
+  const onSubmit = async (tenant: CreateTenantFormValues) => {
     await createTenant({
       data: {
-        name: values.name,
-        host: values.host,
-        status: values.status,
-        adminEmail: values.adminEmail,
-        adminFirstName: values.adminFirstName || undefined,
-        adminLastName: values.adminLastName || undefined,
+        ...tenant,
       },
     });
 
@@ -65,9 +50,9 @@ export default function CreateTenantPage() {
     <PageWrapper>
       <div className="flex flex-col gap-y-6">
         <div>
-          <h1 className="text-xl font-semibold">Create Tenant</h1>
+          <h1 className="text-xl font-semibold">{t("superAdminTenantsView.create.title")}</h1>
           <p className="text-sm text-muted-foreground">
-            Create a new tenant and invite the first admin.
+            {t("superAdminTenantsView.create.description")}
           </p>
         </div>
 
@@ -78,7 +63,7 @@ export default function CreateTenantPage() {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <Label htmlFor="name">Tenant Name</Label>
+                  <Label htmlFor="name">{t("superAdminTenantsView.form.tenantName")}</Label>
                   <FormControl>
                     <Input id="name" {...field} />
                   </FormControl>
@@ -92,9 +77,13 @@ export default function CreateTenantPage() {
               name="host"
               render={({ field }) => (
                 <FormItem>
-                  <Label htmlFor="host">Tenant Host (full URL)</Label>
+                  <Label htmlFor="host">{t("superAdminTenantsView.form.tenantHost")}</Label>
                   <FormControl>
-                    <Input id="host" placeholder="https://tenant.example.com" {...field} />
+                    <Input
+                      id="host"
+                      placeholder={t("superAdminTenantsView.form.tenantHostPlaceholder")}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -106,16 +95,22 @@ export default function CreateTenantPage() {
               name="status"
               render={({ field }) => (
                 <FormItem>
-                  <Label>Status</Label>
+                  <Label>{t("superAdminTenantsView.form.status")}</Label>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select status" />
+                        <SelectValue
+                          placeholder={t("superAdminTenantsView.form.statusPlaceholder")}
+                        />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="inactive">Inactive</SelectItem>
+                      <SelectItem value="active">
+                        {t("superAdminTenantsView.status.active")}
+                      </SelectItem>
+                      <SelectItem value="inactive">
+                        {t("superAdminTenantsView.status.inactive")}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -129,7 +124,9 @@ export default function CreateTenantPage() {
                 name="adminFirstName"
                 render={({ field }) => (
                   <FormItem>
-                    <Label htmlFor="adminFirstName">Admin First Name</Label>
+                    <Label htmlFor="adminFirstName">
+                      {t("superAdminTenantsView.form.adminFirstName")}
+                    </Label>
                     <FormControl>
                       <Input id="adminFirstName" {...field} />
                     </FormControl>
@@ -142,7 +139,9 @@ export default function CreateTenantPage() {
                 name="adminLastName"
                 render={({ field }) => (
                   <FormItem>
-                    <Label htmlFor="adminLastName">Admin Last Name</Label>
+                    <Label htmlFor="adminLastName">
+                      {t("superAdminTenantsView.form.adminLastName")}
+                    </Label>
                     <FormControl>
                       <Input id="adminLastName" {...field} />
                     </FormControl>
@@ -157,7 +156,7 @@ export default function CreateTenantPage() {
               name="adminEmail"
               render={({ field }) => (
                 <FormItem>
-                  <Label htmlFor="adminEmail">Admin Email</Label>
+                  <Label htmlFor="adminEmail">{t("superAdminTenantsView.form.adminEmail")}</Label>
                   <FormControl>
                     <Input id="adminEmail" {...field} />
                   </FormControl>
@@ -167,7 +166,7 @@ export default function CreateTenantPage() {
             />
 
             <div className="flex justify-end">
-              <Button type="submit">Create Tenant</Button>
+              <Button type="submit">{t("superAdminTenantsView.create.submit")}</Button>
             </div>
           </form>
         </Form>

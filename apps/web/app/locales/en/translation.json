@@ -2513,9 +2513,74 @@
     }
   },
   "superAdminTenantsView": {
+    "title": "Tenants",
+    "description": "Manage tenant names, domains, status, and managing flags.",
+    "actions": {
+      "create": "Create Tenant"
+    },
+    "search": {
+      "placeholder": "Search tenants..."
+    },
+    "table": {
+      "name": "Name",
+      "host": "Host",
+      "status": "Status",
+      "managing": "Managing",
+      "actions": "Actions",
+      "loading": "Loading tenants...",
+      "empty": "No tenants found.",
+      "yes": "Yes",
+      "no": "No",
+      "edit": "Edit"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "create": {
+      "title": "Create Tenant",
+      "description": "Create a new tenant and invite the first admin.",
+      "submit": "Create Tenant"
+    },
+    "edit": {
+      "title": "Edit Tenant",
+      "description": "Update tenant details and status.",
+      "submit": "Save Changes"
+    },
+    "form": {
+      "tenantName": "Tenant Name",
+      "tenantHost": "Tenant Host (full URL)",
+      "tenantHostPlaceholder": "https://tenant.example.com",
+      "status": "Status",
+      "statusPlaceholder": "Select status",
+      "adminFirstName": "Admin First Name",
+      "adminLastName": "Admin Last Name",
+      "adminEmail": "Admin Email"
+    },
+    "validation": {
+      "nameRequired": "Name is required",
+      "hostInvalid": "Host must be a valid URL",
+      "adminEmailRequired": "Admin email is required",
+      "adminFirstNameRequired": "Admin first name is required",
+      "adminLastNameRequired": "Admin last name is required"
+    },
     "toast": {
       "tenantCreatedSuccessfully": "Tenant created successfully",
       "tenantUpdatedSuccessfully": "Tenant updated successfully"
+    }
+  },
+  "superAdminTenants": {
+    "error": {
+      "hostAlreadyExists": "Tenant host already exists",
+      "notFound": "Tenant not found",
+      "invalidHost": "Invalid tenant host URL",
+      "managingTenantRequired": "Managing tenant admin required"
+    }
+  },
+  "auth": {
+    "error": {
+      "unauthenticated": "User not authenticated",
+      "adminRoleRequired": "Admin role required"
     }
   }
 }

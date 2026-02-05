@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "@remix-run/react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
+import { useTranslation } from "react-i18next";
 
 import { useUpdateTenant } from "~/api/mutations/super-admin/useUpdateTenant";
 import { useTenant } from "~/api/queries/super-admin/useTenant";
@@ -19,43 +19,37 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import {
+  editTenantFormSchema,
+  type EditTenantFormValues,
+} from "~/modules/SuperAdmin/schemas/tenant.schema";
 
-const formSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  host: z.string().url("Host must be a valid URL"),
-  status: z.enum(["active", "inactive"]),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+import type { TenantStatus } from "@repo/shared";
 
 export default function EditTenantPage() {
   const navigate = useNavigate();
-  const { id } = useParams();
-  const tenantId = id || "";
-  const { data, isLoading } = useTenant(tenantId);
+  const { t } = useTranslation();
+  const { id: tenantId } = useParams();
+  const { data: tenant, isLoading } = useTenant(tenantId ?? "");
   const { mutateAsync: updateTenant } = useUpdateTenant();
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      host: "",
-      status: "active",
-    },
+  const form = useForm<EditTenantFormValues>({
+    resolver: zodResolver(editTenantFormSchema(t)),
   });
 
   useEffect(() => {
-    if (!data?.data) return;
-    form.reset({
-      name: data.data.name,
-      host: data.data.host,
-      status: data.data.status as "active" | "inactive",
-    });
-  }, [data, form]);
+    if (!tenant) return;
 
-  const onSubmit = async (values: FormValues) => {
+    form.reset({
+      name: tenant.name,
+      host: tenant.host,
+      status: tenant.status as TenantStatus,
+    });
+  }, [tenant, form]);
+
+  const onSubmit = async (values: EditTenantFormValues) => {
     await updateTenant({
-      id: tenantId,
+      id: tenantId || "",
       data: {
         name: values.name,
         host: values.host,
@@ -71,12 +65,16 @@ export default function EditTenantPage() {
     <PageWrapper>
       <div className="flex flex-col gap-y-6">
         <div>
-          <h1 className="text-xl font-semibold">Edit Tenant</h1>
-          <p className="text-sm text-muted-foreground">Update tenant details and status.</p>
+          <h1 className="text-xl font-semibold">{t("superAdminTenantsView.edit.title")}</h1>
+          <p className="text-sm text-muted-foreground">
+            {t("superAdminTenantsView.edit.description")}
+          </p>
         </div>
 
         {isLoading ? (
-          <div className="text-sm text-muted-foreground">Loading tenant...</div>
+          <div className="text-sm text-muted-foreground">
+            {t("superAdminTenantsView.table.loading")}
+          </div>
         ) : (
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -85,7 +83,7 @@ export default function EditTenantPage() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <Label htmlFor="name">Tenant Name</Label>
+                    <Label htmlFor="name">{t("superAdminTenantsView.form.tenantName")}</Label>
                     <FormControl>
                       <Input id="name" {...field} />
                     </FormControl>
@@ -99,9 +97,13 @@ export default function EditTenantPage() {
                 name="host"
                 render={({ field }) => (
                   <FormItem>
-                    <Label htmlFor="host">Tenant Host (full URL)</Label>
+                    <Label htmlFor="host">{t("superAdminTenantsView.form.tenantHost")}</Label>
                     <FormControl>
-                      <Input id="host" {...field} />
+                      <Input
+                        id="host"
+                        placeholder={t("superAdminTenantsView.form.tenantHostPlaceholder")}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -113,16 +115,22 @@ export default function EditTenantPage() {
                 name="status"
                 render={({ field }) => (
                   <FormItem>
-                    <Label>Status</Label>
+                    <Label>{t("superAdminTenantsView.form.status")}</Label>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select status" />
+                          <SelectValue
+                            placeholder={t("superAdminTenantsView.form.statusPlaceholder")}
+                          />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="inactive">Inactive</SelectItem>
+                        <SelectItem value="active">
+                          {t("superAdminTenantsView.status.active")}
+                        </SelectItem>
+                        <SelectItem value="inactive">
+                          {t("superAdminTenantsView.status.inactive")}
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -131,7 +139,7 @@ export default function EditTenantPage() {
               />
 
               <div className="flex justify-end">
-                <Button type="submit">Save Changes</Button>
+                <Button type="submit">{t("superAdminTenantsView.edit.submit")}</Button>
               </div>
             </form>
           </Form>

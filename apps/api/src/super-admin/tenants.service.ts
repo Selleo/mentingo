@@ -5,88 +5,48 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { TENANT_STATUSES, type TenantStatus } from "@repo/shared";
-import { and, count, eq, ilike, isNull, or } from "drizzle-orm";
+import { TENANT_STATUSES } from "@repo/shared";
+import { and, eq, isNull } from "drizzle-orm";
 
-import { DatabasePg, type Pagination } from "src/common";
+import { DatabasePg } from "src/common";
 import { DEFAULT_GLOBAL_SETTINGS } from "src/settings/constants/settings.constants";
-import { DB_BASE } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
-import { settings, tenants } from "src/storage/schema";
+import { settings } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 import { UserService } from "src/user/user.service";
 import { invalidateCorsCache } from "src/utils/cors";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
+import { TenantsRepository } from "./tenants.repository";
+
+import type { CreateTenantBody, ListTenantsQuery, Tenant, UpdateTenantBody } from "./types";
+import type { PaginatedResponse } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
-
-type CreateTenantInput = {
-  name: string;
-  host: string;
-  status?: TenantStatus;
-  adminEmail: string;
-  adminFirstName?: string;
-  adminLastName?: string;
-  adminLanguage?: string;
-};
-
-type UpdateTenantInput = {
-  name?: string;
-  host?: string;
-  status?: TenantStatus;
-};
-
-type TenantRow = typeof tenants.$inferSelect;
 
 @Injectable()
 export class TenantsService {
   constructor(
-    @Inject(DB_BASE) private readonly dbBase: DatabasePg,
     @Inject("DB") private readonly db: DatabasePg,
+    private readonly tenantsRepository: TenantsRepository,
     private readonly tenantRunner: TenantDbRunnerService,
     private readonly userService: UserService,
   ) {}
 
-  async listTenants({
+  async findAllTenants({
     page = 1,
     perPage = 20,
     search,
-  }: {
-    page?: number;
-    perPage?: number;
-    search?: string;
-  }): Promise<{ data: TenantRow[]; pagination: Pagination }> {
-    const conditions: Array<ReturnType<typeof and> | ReturnType<typeof or>> = [];
+  }: ListTenantsQuery): Promise<PaginatedResponse<Tenant[]>> {
+    const normalizedSearch = search?.trim() ? search.trim() : undefined;
 
-    if (search) {
-      const query = `%${search.toLowerCase()}%`;
-      conditions.push(or(ilike(tenants.name, query), ilike(tenants.host, query)));
-    }
-
-    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
-
-    const listQuery = whereClause
-      ? this.dbBase
-          .select()
-          .from(tenants)
-          .where(whereClause)
-          .orderBy(tenants.createdAt)
-          .limit(perPage)
-          .offset((page - 1) * perPage)
-      : this.dbBase
-          .select()
-          .from(tenants)
-          .orderBy(tenants.createdAt)
-          .limit(perPage)
-          .offset((page - 1) * perPage);
-
-    const data = await listQuery;
-
-    const countQuery = whereClause
-      ? this.dbBase.select({ totalItems: count() }).from(tenants).where(whereClause)
-      : this.dbBase.select({ totalItems: count() }).from(tenants);
-
-    const [{ totalItems }] = await countQuery;
+    const [data, totalItems] = await Promise.all([
+      this.tenantsRepository.findAll({
+        page,
+        perPage,
+        search: normalizedSearch,
+      }),
+      this.tenantsRepository.countAll({ search: normalizedSearch }),
+    ]);
 
     return {
       data,
@@ -98,30 +58,21 @@ export class TenantsService {
     };
   }
 
-  async createTenant(input: CreateTenantInput, actor: CurrentUser) {
+  async createTenant(input: CreateTenantBody, actor: CurrentUser) {
     const host = this.normalizeHost(input.host);
 
-    const [existing] = await this.dbBase
-      .select({ id: tenants.id })
-      .from(tenants)
-      .where(eq(tenants.host, host))
-      .limit(1);
+    const existing = await this.tenantsRepository.findIdByHost(host);
 
-    if (existing) {
-      throw new ConflictException("Tenant host already exists");
-    }
+    if (existing) throw new ConflictException("superAdminTenants.error.hostAlreadyExists");
 
-    const [createdTenant] = await this.dbBase
-      .insert(tenants)
-      .values({
-        name: input.name,
-        host,
-        status: input.status ?? TENANT_STATUSES.ACTIVE,
-      })
-      .returning();
+    const createdTenant = await this.tenantsRepository.create({
+      name: input.name,
+      host,
+      status: input.status ?? TENANT_STATUSES.ACTIVE,
+    });
 
-    const adminFirstName = input.adminFirstName?.trim() || "Admin";
-    const adminLastName = input.adminLastName?.trim() || "User";
+    const { adminFirstName, adminLastName } = input;
+
     const inviter = await this.userService.getUserById(actor.userId);
     const invitedByUserName = `${inviter.firstName} ${inviter.lastName}`.trim();
 
@@ -163,38 +114,30 @@ export class TenantsService {
     return createdTenant;
   }
 
-  async getTenant(id: string) {
-    const [tenant] = await this.dbBase.select().from(tenants).where(eq(tenants.id, id)).limit(1);
-    if (!tenant) throw new NotFoundException("Tenant not found");
+  async findTenantById(id: string) {
+    const tenant = await this.tenantsRepository.findById(id);
+
+    if (!tenant) throw new NotFoundException("superAdminTenants.error.notFound");
+
     return tenant;
   }
 
-  async updateTenant(id: string, input: UpdateTenantInput) {
-    const updates: UpdateTenantInput = { ...input };
+  async updateTenantById(id: string, input: UpdateTenantBody) {
+    const updates = { ...input };
 
     if (updates.host) {
       updates.host = this.normalizeHost(updates.host);
 
-      const [existing] = await this.dbBase
-        .select({ id: tenants.id })
-        .from(tenants)
-        .where(eq(tenants.host, updates.host))
-        .limit(1);
+      const existing = await this.tenantsRepository.findIdByHost(updates.host);
 
       if (existing && existing.id !== id) {
-        throw new ConflictException("Tenant host already exists");
+        throw new ConflictException("superAdminTenants.error.hostAlreadyExists");
       }
     }
 
-    const [updatedTenant] = await this.dbBase
-      .update(tenants)
-      .set(updates)
-      .where(eq(tenants.id, id))
-      .returning();
+    const updatedTenant = await this.tenantsRepository.update(id, updates);
 
-    if (!updatedTenant) {
-      throw new NotFoundException("Tenant not found");
-    }
+    if (!updatedTenant) throw new NotFoundException("superAdminTenants.error.notFound");
 
     await invalidateCorsCache();
 
@@ -205,7 +148,7 @@ export class TenantsService {
     try {
       return new URL(host).origin.replace(/\/$/, "");
     } catch {
-      throw new BadRequestException("Invalid tenant host URL");
+      throw new BadRequestException("superAdminTenants.error.invalidHost");
     }
   }
 }

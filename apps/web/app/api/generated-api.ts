@@ -3757,7 +3757,7 @@ export interface GenerateArticlePreviewResponse {
   };
 }
 
-export interface ListTenantsResponse {
+export interface FindAllTenantsResponse {
   data: {
     /** @format uuid */
     id: string;
@@ -3776,7 +3776,7 @@ export interface ListTenantsResponse {
   appliedFilters?: object;
 }
 
-export interface GetTenantResponse {
+export interface FindTenantByIdResponse {
   data: {
     /** @format uuid */
     id: string;
@@ -3797,8 +3797,10 @@ export interface CreateTenantBody {
   status?: "active" | "inactive";
   /** @format email */
   adminEmail: string;
-  adminFirstName?: string;
-  adminLastName?: string;
+  /** @minLength 1 */
+  adminFirstName: string;
+  /** @minLength 1 */
+  adminLastName: string;
   adminLanguage?: string;
 }
 
@@ -3815,7 +3817,7 @@ export interface CreateTenantResponse {
   };
 }
 
-export interface UpdateTenantBody {
+export interface UpdateTenantByIdBody {
   /** @minLength 1 */
   name?: string;
   /** @minLength 1 */
@@ -3823,7 +3825,7 @@ export interface UpdateTenantBody {
   status?: "active" | "inactive";
 }
 
-export interface UpdateTenantResponse {
+export interface UpdateTenantByIdResponse {
   data: {
     /** @format uuid */
     id: string;
@@ -8387,10 +8389,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name TenantsControllerListTenants
+     * @name TenantsControllerFindAllTenants
      * @request GET:/api/super-admin/tenants
      */
-    tenantsControllerListTenants: (
+    tenantsControllerFindAllTenants: (
       query?: {
         /** @min 1 */
         page?: number;
@@ -8400,7 +8402,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       },
       params: RequestParams = {},
     ) =>
-      this.request<ListTenantsResponse, any>({
+      this.request<FindAllTenantsResponse, any>({
         path: `/api/super-admin/tenants`,
         method: "GET",
         query: query,
@@ -8427,11 +8429,11 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name TenantsControllerGetTenant
+     * @name TenantsControllerFindTenantById
      * @request GET:/api/super-admin/tenants/{id}
      */
-    tenantsControllerGetTenant: (id: string, params: RequestParams = {}) =>
-      this.request<GetTenantResponse, any>({
+    tenantsControllerFindTenantById: (id: string, params: RequestParams = {}) =>
+      this.request<FindTenantByIdResponse, any>({
         path: `/api/super-admin/tenants/${id}`,
         method: "GET",
         format: "json",
@@ -8441,15 +8443,15 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name TenantsControllerUpdateTenant
+     * @name TenantsControllerUpdateTenantById
      * @request PATCH:/api/super-admin/tenants/{id}
      */
-    tenantsControllerUpdateTenant: (
+    tenantsControllerUpdateTenantById: (
       id: string,
-      data: UpdateTenantBody,
+      data: UpdateTenantByIdBody,
       params: RequestParams = {},
     ) =>
-      this.request<UpdateTenantResponse, any>({
+      this.request<UpdateTenantByIdResponse, any>({
         path: `/api/super-admin/tenants/${id}`,
         method: "PATCH",
         body: data,

@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
-import { type Static, Type } from "@sinclair/typebox";
+import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
 import { BaseResponse, baseResponse, PaginatedResponse, paginatedResponse } from "src/common";
@@ -17,6 +17,9 @@ import {
   updateTenantSchema,
 } from "./schemas/tenant.schema";
 import { TenantsService } from "./tenants.service";
+import { CreateTenantBody, UpdateTenantBody } from "./types";
+
+import type { TenantResponse, TenantsListResponse } from "./types";
 
 @Controller("super-admin/tenants")
 @UseGuards(RolesGuard, ManagingTenantAdminGuard)
@@ -33,12 +36,12 @@ export class TenantsController {
     ],
     response: paginatedResponse(tenantsListSchema),
   })
-  async listTenants(
+  async findAllTenants(
     @Query("page") page?: number,
     @Query("perPage") perPage?: number,
     @Query("search") search?: string,
-  ): Promise<PaginatedResponse<Static<typeof tenantsListSchema>>> {
-    const result = await this.tenantsService.listTenants({ page, perPage, search });
+  ): Promise<PaginatedResponse<TenantsListResponse>> {
+    const result = await this.tenantsService.findAllTenants({ page, perPage, search });
     return new PaginatedResponse(result);
   }
 
@@ -47,10 +50,8 @@ export class TenantsController {
     request: [{ type: "param", name: "id", schema: Type.String({ format: "uuid" }) }],
     response: baseResponse(tenantResponseSchema),
   })
-  async getTenant(
-    @Param("id") id: string,
-  ): Promise<BaseResponse<Static<typeof tenantResponseSchema>>> {
-    const tenant = await this.tenantsService.getTenant(id);
+  async findTenantById(@Param("id") id: string): Promise<BaseResponse<TenantResponse>> {
+    const tenant = await this.tenantsService.findTenantById(id);
     return new BaseResponse(tenant);
   }
 
@@ -60,9 +61,9 @@ export class TenantsController {
     response: baseResponse(tenantResponseSchema),
   })
   async createTenant(
-    @Body() body: Static<typeof createTenantSchema>,
+    @Body() body: CreateTenantBody,
     @CurrentUser() currentUser: CurrentUserType,
-  ): Promise<BaseResponse<Static<typeof tenantResponseSchema>>> {
+  ): Promise<BaseResponse<TenantResponse>> {
     const tenant = await this.tenantsService.createTenant(body, currentUser);
     return new BaseResponse(tenant);
   }
@@ -75,11 +76,11 @@ export class TenantsController {
     ],
     response: baseResponse(tenantResponseSchema),
   })
-  async updateTenant(
+  async updateTenantById(
     @Param("id") id: string,
-    @Body() body: Static<typeof updateTenantSchema>,
-  ): Promise<BaseResponse<Static<typeof tenantResponseSchema>>> {
-    const tenant = await this.tenantsService.updateTenant(id, body);
+    @Body() body: UpdateTenantBody,
+  ): Promise<BaseResponse<TenantResponse>> {
+    const tenant = await this.tenantsService.updateTenantById(id, body);
     return new BaseResponse(tenant);
   }
 }

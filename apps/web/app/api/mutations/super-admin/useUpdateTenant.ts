@@ -5,12 +5,12 @@ import { ApiClient } from "~/api/api-client";
 import { useToast } from "~/components/ui/use-toast";
 
 import type { AxiosError } from "axios";
-import type { UpdateTenantBody } from "~/api/generated-api";
+import type { UpdateTenantByIdBody } from "~/api/generated-api";
 import type { ApiErrorResponse } from "~/api/types";
 
 type UpdateTenantOptions = {
   id: string;
-  data: UpdateTenantBody;
+  data: UpdateTenantByIdBody;
 };
 
 export function useUpdateTenant() {
@@ -19,7 +19,10 @@ export function useUpdateTenant() {
 
   return useMutation({
     mutationFn: async (options: UpdateTenantOptions) => {
-      const response = await ApiClient.api.tenantsControllerUpdateTenant(options.id, options.data);
+      const response = await ApiClient.api.tenantsControllerUpdateTenantById(
+        options.id,
+        options.data,
+      );
       return response.data;
     },
     onSuccess: () => {

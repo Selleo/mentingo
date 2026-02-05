@@ -2,7 +2,7 @@ import { queryOptions, useQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "~/api/api-client";
 
-import type { ListTenantsResponse } from "~/api/generated-api";
+import type { FindAllTenantsResponse } from "~/api/generated-api";
 
 export const SUPER_ADMIN_TENANTS_QUERY_KEY = ["super-admin", "tenants"] as const;
 
@@ -10,10 +10,10 @@ export const tenantsQueryOptions = (params: { page?: number; perPage?: number; s
   queryOptions({
     queryKey: [...SUPER_ADMIN_TENANTS_QUERY_KEY, params],
     queryFn: async () => {
-      const response = await ApiClient.api.tenantsControllerListTenants(params);
+      const response = await ApiClient.api.tenantsControllerFindAllTenants(params);
       return response.data;
     },
-    select: (data: ListTenantsResponse) => data,
+    select: (data: FindAllTenantsResponse) => data,
   });
 
 export function useTenants(params: { page?: number; perPage?: number; search?: string }) {

@@ -1,80 +1,118 @@
 import { Link } from "@remix-run/react";
-import { useState } from "react";
+import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { useTenants } from "~/api/queries/super-admin/useTenants";
 import { PageWrapper } from "~/components/PageWrapper";
+import { Pagination } from "~/components/Pagination/Pagination";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "~/components/ui/table";
+import { cn } from "~/lib/utils";
+import { getTenantsColumns } from "~/modules/SuperAdmin/tenants.columns";
+
+import type { ITEMS_PER_PAGE_OPTIONS } from "~/components/Pagination/Pagination";
 
 export default function TenantsPage() {
   const [search, setSearch] = useState("");
-  const { data, isLoading } = useTenants({ page: 1, perPage: 50, search });
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState<(typeof ITEMS_PER_PAGE_OPTIONS)[number]>(10);
+
+  const { t } = useTranslation();
+  const { data: tenants, isLoading } = useTenants({ page, perPage, search });
+
+  const columns = useMemo(() => getTenantsColumns(t), [t]);
+
+  const table = useReactTable({
+    data: tenants?.data ?? [],
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
 
   return (
     <PageWrapper>
       <div className="flex flex-col gap-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-semibold">Tenants</h1>
+            <h1 className="text-xl font-semibold">{t("superAdminTenantsView.title")}</h1>
             <p className="text-sm text-muted-foreground">
-              Manage tenant names, domains, status, and managing flags.
+              {t("superAdminTenantsView.description")}
             </p>
           </div>
           <Button asChild>
-            <Link to="/super-admin/tenants/new">Create Tenant</Link>
+            <Link to="/super-admin/tenants/new">{t("superAdminTenantsView.actions.create")}</Link>
           </Button>
         </div>
 
         <div className="flex items-center gap-2">
           <Input
-            placeholder="Search tenants..."
+            placeholder={t("superAdminTenantsView.search.placeholder")}
             value={search}
-            onChange={(event) => setSearch(event.target.value)}
+            onChange={(event) => {
+              setSearch(event.target.value);
+              setPage(1);
+            }}
           />
         </div>
 
-        <div className="rounded-md border bg-white">
-          <table className="w-full text-sm">
-            <thead className="border-b bg-muted/50">
-              <tr>
-                <th className="px-4 py-3 text-left font-medium">Name</th>
-                <th className="px-4 py-3 text-left font-medium">Host</th>
-                <th className="px-4 py-3 text-left font-medium">Status</th>
-                <th className="px-4 py-3 text-left font-medium">Managing</th>
-                <th className="px-4 py-3 text-right font-medium">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading && (
-                <tr>
-                  <td colSpan={5} className="px-4 py-6 text-center text-muted-foreground">
-                    Loading tenants...
-                  </td>
-                </tr>
-              )}
-              {!isLoading && data?.data?.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="px-4 py-6 text-center text-muted-foreground">
-                    No tenants found.
-                  </td>
-                </tr>
-              )}
-              {data?.data?.map((tenant) => (
-                <tr key={tenant.id} className="border-b last:border-0">
-                  <td className="px-4 py-3 font-medium">{tenant.name}</td>
-                  <td className="px-4 py-3">{tenant.host}</td>
-                  <td className="px-4 py-3 capitalize">{tenant.status}</td>
-                  <td className="px-4 py-3">{tenant.isManaging ? "Yes" : "No"}</td>
-                  <td className="px-4 py-3 text-right">
-                    <Button asChild variant="outline" size="sm">
-                      <Link to={`/super-admin/tenants/${tenant.id}`}>Edit</Link>
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Table className="border bg-neutral-50">
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {isLoading && (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="text-center text-muted-foreground">
+                  {t("superAdminTenantsView.table.loading")}
+                </TableCell>
+              </TableRow>
+            )}
+            {!isLoading && table.getRowModel().rows.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="text-center text-muted-foreground">
+                  {t("superAdminTenantsView.table.empty")}
+                </TableCell>
+              </TableRow>
+            )}
+            {table.getRowModel().rows.map((row) => (
+              <TableRow key={row.id} className="hover:bg-neutral-100">
+                {row.getVisibleCells().map((cell, index) => (
+                  <TableCell key={cell.id} className={cn({ "!w-12": index === 0 })}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+        <Pagination
+          className="border-b border-x bg-neutral-50 rounded-b-lg"
+          emptyDataClassName="border-b border-x bg-neutral-50 rounded-b-lg"
+          totalItems={tenants?.pagination?.totalItems}
+          itemsPerPage={perPage}
+          currentPage={page}
+          onPageChange={(newPage) => setPage(newPage)}
+          onItemsPerPageChange={(newPerPage) => {
+            setPage(1);
+            setPerPage(Number(newPerPage) as (typeof ITEMS_PER_PAGE_OPTIONS)[number]);
+          }}
+        />
       </div>
     </PageWrapper>
   );

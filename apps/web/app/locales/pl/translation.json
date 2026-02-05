@@ -2535,9 +2535,74 @@
     }
   },
   "superAdminTenantsView": {
+    "title": "Najemcy",
+    "description": "Zarządzaj nazwami najemców, domenami, statusem i flagami zarządzania.",
+    "actions": {
+      "create": "Utwórz najemcę"
+    },
+    "search": {
+      "placeholder": "Szukaj najemców..."
+    },
+    "table": {
+      "name": "Nazwa",
+      "host": "Host",
+      "status": "Status",
+      "managing": "Zarządzający",
+      "actions": "Akcje",
+      "loading": "Ładowanie najemców...",
+      "empty": "Nie znaleziono najemców.",
+      "yes": "Tak",
+      "no": "Nie",
+      "edit": "Edytuj"
+    },
+    "status": {
+      "active": "Aktywny",
+      "inactive": "Nieaktywny"
+    },
+    "create": {
+      "title": "Utwórz najemcę",
+      "description": "Utwórz nowego najemcę i zaproś pierwszego administratora.",
+      "submit": "Utwórz najemcę"
+    },
+    "edit": {
+      "title": "Edytuj najemcę",
+      "description": "Zaktualizuj szczegóły i status najemcy.",
+      "submit": "Zapisz zmiany"
+    },
+    "form": {
+      "tenantName": "Nazwa najemcy",
+      "tenantHost": "Host najemcy (pełny URL)",
+      "tenantHostPlaceholder": "https://tenant.example.com",
+      "status": "Status",
+      "statusPlaceholder": "Wybierz status",
+      "adminFirstName": "Imię administratora",
+      "adminLastName": "Nazwisko administratora",
+      "adminEmail": "E-mail administratora"
+    },
+    "validation": {
+      "nameRequired": "Nazwa jest wymagana",
+      "hostInvalid": "Host musi być prawidłowym adresem URL",
+      "adminEmailRequired": "E-mail administratora jest wymagany",
+      "adminFirstNameRequired": "Imię administratora jest wymagane",
+      "adminLastNameRequired": "Nazwisko administratora jest wymagane"
+    },
     "toast": {
       "tenantCreatedSuccessfully": "Najemca został utworzony pomyślnie",
       "tenantUpdatedSuccessfully": "Najemca został zaktualizowany pomyślnie"
+    }
+  },
+  "superAdminTenants": {
+    "error": {
+      "hostAlreadyExists": "Host najemcy już istnieje",
+      "notFound": "Nie znaleziono najemcy",
+      "invalidHost": "Nieprawidłowy adres URL hosta najemcy",
+      "managingTenantRequired": "Wymagane uprawnienia administratora najemcy zarządzającego"
+    }
+  },
+  "auth": {
+    "error": {
+      "unauthenticated": "Użytkownik nie jest uwierzytelniony",
+      "adminRoleRequired": "Wymagana rola administratora"
     }
   }
 }

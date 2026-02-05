@@ -23,10 +23,10 @@ export class ManagingTenantAdminGuard implements CanActivate {
     const req = context.switchToHttp().getRequest();
     const user = req.user as CurrentUser | undefined;
 
-    if (!user) throw new UnauthorizedException("User not authenticated");
+    if (!user) throw new UnauthorizedException("auth.error.unauthenticated");
 
     if (user.role !== USER_ROLES.ADMIN) {
-      throw new ForbiddenException("Admin role required");
+      throw new ForbiddenException("auth.error.adminRoleRequired");
     }
 
     const [tenant] = await this.dbBase
@@ -36,7 +36,7 @@ export class ManagingTenantAdminGuard implements CanActivate {
       .limit(1);
 
     if (!tenant?.isManaging) {
-      throw new ForbiddenException("Managing tenant admin required");
+      throw new ForbiddenException("superAdminTenants.error.managingTenantRequired");
     }
 
     return true;
