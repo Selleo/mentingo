@@ -65,7 +65,7 @@ const TopCoursesCarousel = ({ courses }: TopCoursesCarouselProps) => {
   );
 
   return (
-    <section className="relative group px-4 md:px-8 mb-12">
+    <section className="relative group px-4 md:px-8 pb-6">
       <Carousel
         opts={{ align: "start", slidesToScroll: 1, skipSnaps: false }}
         setApi={setCarouselApi}
