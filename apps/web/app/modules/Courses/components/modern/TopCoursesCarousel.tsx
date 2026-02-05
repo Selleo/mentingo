@@ -21,6 +21,7 @@ const TopCoursesCarousel = ({ courses }: TopCoursesCarouselProps) => {
   const [carouselApi, setCarouselApi] = useState<CarouselApi | null>(null);
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
+  const popoutEnabled = courses.length > 1;
 
   useEffect(() => {
     if (!carouselApi) return;
@@ -87,6 +88,7 @@ const TopCoursesCarousel = ({ courses }: TopCoursesCarouselProps) => {
                   lessonCount={course.lessonCount}
                   category={course.category}
                   className="w-[320px] max-w-none md:w-[380px] lg:w-[400px]"
+                  popoutEnabled={popoutEnabled}
                 />
               </div>
             </CarouselItem>

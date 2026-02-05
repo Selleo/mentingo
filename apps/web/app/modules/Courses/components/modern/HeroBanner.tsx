@@ -87,7 +87,7 @@ const HeroBanner = ({
             (event.target as HTMLImageElement).src = DefaultPhotoCourse;
           }}
         />
-        <div className="absolute bottom-0 left-0 right-0 h-[50%] bg-gradient-to-t from-primary-50 via-primary-50/80 via-primary-50/60 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-[80%] bg-gradient-to-t from-primary-50 via-primary-50/80 via-primary-50/60 to-transparent" />
       </div>
 
       {trailerUrl && (
@@ -111,7 +111,7 @@ const HeroBanner = ({
           <h1 className="h1">{title}</h1>
 
           {(durationLabel || lessonsLabel) && (
-            <div className="flex gap-3 text-xs font-medium text-neutral-700 md:gap-4 md:text-sm">
+            <div className="flex gap-3 text-xs font-medium text-neutral-950 md:gap-4 md:text-sm">
               {durationLabel && (
                 <div className="flex items-center gap-1.5">
                   <Clock className="h-4 w-4" />
@@ -146,7 +146,7 @@ const HeroBanner = ({
             <Button
               asChild
               variant="outline"
-              className="border-neutral-900/30 bg-white/70 text-neutral-900 hover:bg-white"
+              className="border-neutral-600 bg-white/70 text-neutral-900 hover:bg-white"
             >
               <Link to={`/course/${id}`}>
                 <Info className="mr-2 h-4 w-4" />
