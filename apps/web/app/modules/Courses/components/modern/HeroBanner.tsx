@@ -111,7 +111,7 @@ const HeroBanner = ({
           <h1 className="h1">{title}</h1>
 
           {(durationLabel || lessonsLabel) && (
-            <div className="flex gap-3 text-xs font-medium text-neutral-950 md:gap-4 md:text-sm">
+            <div className="flex gap-3 font-medium md:gap-4 md:text-sm">
               {durationLabel && (
                 <div className="flex items-center gap-1.5">
                   <Clock className="h-4 w-4" />
@@ -128,10 +128,7 @@ const HeroBanner = ({
           )}
 
           <div className="flex flex-wrap gap-2 pt-1 md:gap-3 md:pt-2">
-            <Button
-              className="bg-neutral-900 text-white hover:bg-neutral-800"
-              onClick={handleNavigateToLesson}
-            >
+            <Button onClick={handleNavigateToLesson}>
               <Play className="mr-2 h-4 w-4" fill="currentColor" />
               {t(
                 isAdminLike
@@ -143,11 +140,7 @@ const HeroBanner = ({
                       : "studentCourseView.sideSection.button.repeatLessons",
               )}
             </Button>
-            <Button
-              asChild
-              variant="outline"
-              className="border-neutral-600 bg-white/70 text-neutral-900 hover:bg-white"
-            >
+            <Button asChild variant="outline">
               <Link to={`/course/${id}`}>
                 <Info className="mr-2 h-4 w-4" />
                 <span className="hidden sm:inline">
