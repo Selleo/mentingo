@@ -31,6 +31,7 @@ const ModernCourseCarousel = ({
   const [carouselApi, setCarouselApi] = useState<CarouselApi | null>(null);
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
+  const popoutEnabled = courses.length > 1;
 
   useEffect(() => {
     if (!carouselApi) return;
@@ -81,6 +82,7 @@ const ModernCourseCarousel = ({
                   enrolled={course.enrolled}
                   hasFreeChapters={course.hasFreeChapters}
                   dueDate={course.dueDate ? new Date(course.dueDate) : null}
+                  popoutEnabled={popoutEnabled}
                 />
               </CarouselItem>
             ))}
@@ -89,23 +91,23 @@ const ModernCourseCarousel = ({
           {canScrollPrev && (
             <CarouselPrevious
               iconSize={24}
-              className="absolute left-2 top-1/2 z-[150] border-none flex h-[52px] w-[52px] -translate-y-1/2 items-center justify-center rounded-full bg-black/70 shadow-lg transition-all hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white md:opacity-0 md:group-hover:opacity-100 bg-white hover:border-none duration-200"
+              className="absolute left-2 top-1/2 border-none flex h-[52px] w-[52px] -translate-y-1/2 items-center justify-center rounded-full bg-black/70 shadow-lg transition-all hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white md:opacity-0 md:group-hover:opacity-100 bg-white hover:border-none duration-200"
             />
           )}
           {canScrollNext && (
             <CarouselNext
               iconSize={24}
-              className="absolute right-2 top-1/2 z-[150] border-none flex h-[52px] w-[52px] -translate-y-1/2 items-center justify-center rounded-full bg-black/70 shadow-lg transition-all hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white md:opacity-0 md:group-hover:opacity-100 bg-white hover:border-none duration-200"
+              className="absolute right-2 top-1/2 border-none flex h-[52px] w-[52px] -translate-y-1/2 items-center justify-center rounded-full bg-black/70 shadow-lg transition-all hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white md:opacity-0 md:group-hover:opacity-100 bg-white hover:border-none duration-200"
             />
           )}
         </Carousel>
         {canScrollPrev && (
-          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-16 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
             <div className="h-full w-full bg-gradient-to-r from-white via-white/80 to-white/0" />
           </div>
         )}
         {canScrollNext && (
-          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-16 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
             <div className="h-full w-full bg-gradient-to-l from-white via-white/80 to-white/0" />
           </div>
         )}

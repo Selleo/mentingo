@@ -21,6 +21,7 @@ const TopCoursesCarousel = ({ courses }: TopCoursesCarouselProps) => {
   const [carouselApi, setCarouselApi] = useState<CarouselApi | null>(null);
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
+  const popoutEnabled = courses.length > 1;
 
   useEffect(() => {
     if (!carouselApi) return;
@@ -90,6 +91,7 @@ const TopCoursesCarousel = ({ courses }: TopCoursesCarouselProps) => {
                   enrolled={course.enrolled}
                   hasFreeChapters={course.hasFreeChapters}
                   dueDate={course.dueDate ? new Date(course.dueDate) : null}
+                  popoutEnabled={popoutEnabled}
                 />
               </div>
             </CarouselItem>
