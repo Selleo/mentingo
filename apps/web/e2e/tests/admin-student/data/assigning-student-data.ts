@@ -1,3 +1,5 @@
+import { getTenantEmail } from "../../../utils/tenant-email";
+
 export const ASSIGNING_STUDENT_TO_GROUP_PAGE_UI = {
   button: {
     myCourses: "Courses",
@@ -24,9 +26,9 @@ export const ASSIGNING_STUDENT_TO_GROUP_PAGE_UI = {
     firstEnrolledCourse: "Course Language Learning",
     secondEnrolledCourse: "Course Artificial",
     thirdEnrolledCourse: "Course E2E Testing E2E Test:",
-    adminEmail: "admin@example.com",
-    studentToAssignEmail: "student0@example.com",
-    secondStudentToAssignEmail: "student@example.com",
+    adminEmail: getTenantEmail("admin@example.com"),
+    studentToAssignEmail: getTenantEmail("student0@example.com"),
+    secondStudentToAssignEmail: getTenantEmail("student@example.com"),
     password: "password",
   },
 };

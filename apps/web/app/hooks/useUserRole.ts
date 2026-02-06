@@ -9,6 +9,7 @@ export const useUserRole = () => {
   const isContentCreator = data?.role === USER_ROLE.contentCreator;
   const isStudent = data?.role === USER_ROLE.student;
   const isAdminLike = isAdmin || isContentCreator;
+  const isManagingTenantAdmin = Boolean(data?.isManagingTenantAdmin);
 
-  return { role, isAdmin, isContentCreator, isAdminLike, isStudent };
+  return { role, isAdmin, isContentCreator, isAdminLike, isStudent, isManagingTenantAdmin };
 };

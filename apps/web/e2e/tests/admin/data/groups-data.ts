@@ -1,3 +1,5 @@
+import { getTenantEmail } from "../../../utils/tenant-email";
+
 export const GROUPS_PAGE_UI = {
   button: {
     groups: "groups",
@@ -27,8 +29,8 @@ export const GROUPS_PAGE_UI = {
   dataId: {
     groupName: "groupName",
     groupCharacteristic: "groupCharacteristic",
-    firstUser: "contentcreator@example.com",
-    secondUser: "student@example.com",
+    firstUser: getTenantEmail("contentcreator@example.com"),
+    secondUser: getTenantEmail("student@example.com"),
     groupSelect: "groupSelect",
   },
   placeholder: {

@@ -21,6 +21,7 @@ import { UsersLongInactivityEvent } from "src/events/user/user-long-inactivity.e
 import { UsersShortInactivityEvent } from "src/events/user/user-short-inactivity.event";
 import { SettingsService } from "src/settings/settings.service";
 import { StatisticsService } from "src/statistics/statistics.service";
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { UserService } from "src/user/user.service";
 
 import type { IEventHandler } from "@nestjs/cqrs";
@@ -63,6 +64,7 @@ export class NotifyUsersHandler implements IEventHandler {
     private readonly courseService: CourseService,
     private readonly statisticsService: StatisticsService,
     private readonly settingsService: SettingsService,
+    private readonly tenantRunner: TenantDbRunnerService,
   ) {}
 
   async handle(event: EventType) {
@@ -102,26 +104,31 @@ export class NotifyUsersHandler implements IEventHandler {
 
   async notifyUserAboutInvite(event: UserInviteEvent) {
     const { userInvite } = event;
-    const { email, creatorId, token, userId } = userInvite;
+    const { email, creatorId, token, userId, invitedByUserName, origin, tenantId } = userInvite;
 
-    const url = `${
-      process.env.CI ? "http://localhost:5173" : process.env.CORS_ORIGIN
-    }/auth/create-new-password?createToken=${token}&email=${email}`;
+    await this.tenantRunner.runWithTenant(tenantId, async () => {
+      const baseOrigin = origin || process.env.CORS_ORIGIN || "http://localhost:5173";
+      const url = `${baseOrigin}/auth/create-new-password?createToken=${token}&email=${email}`;
 
-    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(userId);
-    const { firstName, lastName } = await this.userService.getUserById(creatorId);
+      const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(userId);
 
-    const { text, html } = new UserInviteEmail({
-      invitedByUserName: `${firstName} ${lastName}`,
-      createPasswordLink: url,
-      ...defaultEmailSettings,
-    });
+      const invitingUser = creatorId ? await this.userService.getUserById(creatorId) : null;
 
-    await this.emailService.sendEmailWithLogo({
-      to: email,
-      subject: getEmailSubject("userInviteEmail", defaultEmailSettings.language),
-      text,
-      html,
+      const invitingUsername =
+        invitedByUserName || `${invitingUser?.firstName} ${invitingUser?.lastName}` || "Admin";
+
+      const { text, html } = new UserInviteEmail({
+        invitedByUserName: invitingUsername,
+        createPasswordLink: url,
+        ...defaultEmailSettings,
+      });
+
+      await this.emailService.sendEmailWithLogo({
+        to: email,
+        subject: getEmailSubject("userInviteEmail", defaultEmailSettings.language),
+        text,
+        html,
+      });
     });
   }
 

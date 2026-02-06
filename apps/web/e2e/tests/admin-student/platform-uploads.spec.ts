@@ -3,6 +3,8 @@ import { fileURLToPath } from "node:url";
 
 import { expect, test, type Page } from "@playwright/test";
 
+import { getTenantEmail } from "../../utils/tenant-email";
+
 type CertificateBackgroundResponse = {
   data?: {
     certificateBackgroundImage: string | null;
@@ -34,8 +36,8 @@ const __dirname = path.dirname(__filename);
 const SAMPLE_IMAGE = path.join(__dirname, "..", "..", "data", "images", "profile_icon_test.png");
 
 const CREDENTIALS = {
-  admin: { email: "admin@example.com", password: "password" },
-  student: { email: "student@example.com", password: "password" },
+  admin: { email: getTenantEmail("admin@example.com"), password: "password" },
+  student: { email: getTenantEmail("student@example.com"), password: "password" },
 };
 
 const COURSE_NAME = "Fake test to certificate";

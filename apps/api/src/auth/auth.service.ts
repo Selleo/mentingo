@@ -42,6 +42,7 @@ import {
   credentials,
   magicLinkTokens,
   resetTokens,
+  tenants,
   userOnboarding,
   users,
 } from "../storage/schema";
@@ -177,6 +178,10 @@ export class AuthService {
     const userSettings = await this.settingsService.getUserSettings(user.id);
 
     const onboardingStatus = await this.userService.getAllOnboardingStatus(user.id);
+    const isManagingTenantAdmin = await this.isManagingTenantAdmin(
+      user.tenantId,
+      user.role as UserRole,
+    );
 
     const actor: ActorUserType = {
       userId: user.id,
@@ -197,6 +202,7 @@ export class AuthService {
         refreshToken,
         shouldVerifyMFA: true,
         onboardingStatus,
+        isManagingTenantAdmin,
       };
     }
 
@@ -207,6 +213,7 @@ export class AuthService {
       refreshToken,
       shouldVerifyMFA: false,
       onboardingStatus,
+      isManagingTenantAdmin,
     };
   }
 
@@ -221,12 +228,16 @@ export class AuthService {
 
     const { MFAEnforcedRoles } = await this.settingsService.getGlobalSettings();
     const userSettings = await this.settingsService.getUserSettings(user.id);
+    const isManagingTenantAdmin = await this.isManagingTenantAdmin(
+      user.tenantId,
+      user.role as UserRole,
+    );
 
     if (MFAEnforcedRoles.includes(user.role as UserRole) || userSettings.isMFAEnabled) {
-      return { ...user, shouldVerifyMFA: true, onboardingStatus };
+      return { ...user, shouldVerifyMFA: true, onboardingStatus, isManagingTenantAdmin };
     }
 
-    return { ...user, shouldVerifyMFA: false, onboardingStatus };
+    return { ...user, shouldVerifyMFA: false, onboardingStatus, isManagingTenantAdmin };
   }
 
   public async refreshTokens(refreshToken: string) {
@@ -668,6 +679,8 @@ export class AuthService {
       }),
     );
 
+    const isManagingTenantAdmin = await this.isManagingTenantAdmin(user.tenantId, role as UserRole);
+
     if (MFAEnforcedRoles.includes(role as UserRole) || userSettings.isMFAEnabled) {
       this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken);
 
@@ -675,6 +688,7 @@ export class AuthService {
         ...user,
         shouldVerifyMFA: true,
         onboardingStatus,
+        isManagingTenantAdmin,
       };
     }
 
@@ -684,7 +698,20 @@ export class AuthService {
       ...user,
       shouldVerifyMFA: false,
       onboardingStatus,
+      isManagingTenantAdmin,
     };
+  }
+
+  private async isManagingTenantAdmin(tenantId: UUIDType, role: UserRole): Promise<boolean> {
+    if (role !== USER_ROLES.ADMIN) return false;
+
+    const [tenant] = await this.db
+      .select({ isManaging: tenants.isManaging })
+      .from(tenants)
+      .where(eq(tenants.id, tenantId))
+      .limit(1);
+
+    return Boolean(tenant?.isManaging);
   }
 
   async createMagicLinkToken(userId: UUIDType): Promise<string> {

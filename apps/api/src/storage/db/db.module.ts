@@ -2,6 +2,7 @@ import { DrizzlePostgresModule } from "@knaadh/nestjs-drizzle-postgres";
 import { Global, Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 
+import { TokenService } from "src/auth/token.service";
 import * as schema from "src/storage/schema";
 
 import { createDbProxy, DB, DB_BASE } from "./db.providers";
@@ -20,7 +21,7 @@ import type { DatabasePg } from "src/common";
       useFactory(configService: ConfigService) {
         return {
           postgres: {
-            url: configService.get<string>("database.url")!,
+            url: configService.get<string>("database.urlApp")!,
           },
           config: {
             schema: { ...schema },
@@ -39,6 +40,7 @@ import type { DatabasePg } from "src/common";
     TenantDbRunnerService,
     TenantResolverService,
     TenantStateService,
+    TokenService,
   ],
   exports: [
     DB,

@@ -332,6 +332,7 @@ describe("AuthController (e2e)", () => {
         ...omit(user, "credentials", "avatarReference"),
         profilePictureUrl: null,
         groups: [],
+        isManagingTenantAdmin: false,
         shouldVerifyMFA: false,
       });
     });

@@ -1,9 +1,11 @@
 import { expect, test, type Page } from "@playwright/test";
 
+import { getTenantEmail } from "../../utils/tenant-email";
+
 const USERS = {
   admin: { email: "email@example.com", password: "password" },
-  student: { email: "student@example.com", password: "password" },
-  student2: { email: "student0@example.com", password: "password" },
+  student: { email: getTenantEmail("student@example.com"), password: "password" },
+  student2: { email: getTenantEmail("student0@example.com"), password: "password" },
 } as const;
 
 const GROUP_NAME = "Students";

@@ -13,6 +13,7 @@ export const routes: (
         route("magic-link", "modules/Auth/MagicLink.page.tsx");
         route("mfa", "modules/Auth/MFA.page.tsx");
       });
+      route("tenant-inactive", "modules/Errors/TenantInactive.page.tsx");
       route("", "modules/Navigation/NavigationWrapper.tsx", () => {
         route("", "modules/Dashboard/PublicDashboard.layout.tsx", () => {
           route("courses", "modules/Courses/Courses.page.tsx");
@@ -74,6 +75,11 @@ export const routes: (
             "promotion-codes/:id",
             "modules/Admin/PromotionCodes/PromotionCodeDetails.page.tsx",
           );
+        });
+        route("super-admin", "modules/SuperAdmin/SuperAdmin.layout.tsx", () => {
+          route("tenants", "modules/SuperAdmin/Tenants.page.tsx", { index: true });
+          route("tenants/new", "modules/SuperAdmin/CreateTenant.page.tsx");
+          route("tenants/:id", "modules/SuperAdmin/EditTenant.page.tsx");
         });
       });
     });
