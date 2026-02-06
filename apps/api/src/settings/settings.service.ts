@@ -520,24 +520,11 @@ export class SettingsService {
       .where(isNull(settings.userId));
 
     if (!settingsRecord?.companyInformation) {
-      const [updatedSettings] = await this.db
-        .update(settings)
-        .set({
-          settings: sql`
-          jsonb_set(
-            settings.settings,
-            '{companyInformation}',
-            ${settingsToJSONBuildObject(DEFAULT_GLOBAL_SETTINGS.companyInformation)},
-            true
-          )
-        `,
-        })
-        .where(isNull(settings.userId))
-        .returning({
-          companyInformation: sql<CompanyInformaitonJSONSchema>`${settings.settings}->'companyInformation'`,
-        });
+      const updatedRecord = await this.updateCompanyInformation({
+        ...DEFAULT_GLOBAL_SETTINGS.companyInformation,
+      });
 
-      return updatedSettings.companyInformation;
+      return updatedRecord;
     }
 
     return settingsRecord.companyInformation;

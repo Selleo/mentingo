@@ -2582,5 +2582,9 @@
       "unauthenticated": "User not authenticated",
       "adminRoleRequired": "Admin role required"
     }
+  },
+  "tenantInactive": {
+    "title": "Tenant Disabled",
+    "description": "This workspace is currently inactive. If you believe this is a mistake, contact your administrator to restore access."
   }
 }

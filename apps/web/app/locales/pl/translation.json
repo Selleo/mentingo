@@ -2604,5 +2604,9 @@
       "unauthenticated": "Użytkownik nie jest uwierzytelniony",
       "adminRoleRequired": "Wymagana rola administratora"
     }
+  },
+  "tenantInactive": {
+    "title": "Najemca wyłączony",
+    "description": "Ta przestrzeń jest obecnie nieaktywna. Jeśli uważasz, że to błąd, skontaktuj się z administratorem, aby przywrócić dostęp."
   }
 }

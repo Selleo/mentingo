@@ -13,6 +13,11 @@ import type { Request, Response } from "express";
 
 @Injectable()
 export class TenantResolverService {
+  private readonly allowedInactiveApiRoutes: Record<string, string[]> = {
+    "/api/settings/company-information": ["GET"],
+    "/api/settings/platform-simple-logo": ["GET"],
+  };
+
   constructor(
     @Inject(DB_BASE) private readonly dbBase: DatabasePg,
     private readonly tenantState: TenantStateService,
@@ -25,6 +30,7 @@ export class TenantResolverService {
 
     const user = req.user as (Request["user"] & { tenantId?: string }) | undefined;
     const origin = this.getRequestOrigin(req);
+    const allowInactive = this.isInactiveAllowed(req);
 
     if (user?.tenantId) {
       const [tenant] = await this.dbBase
@@ -33,8 +39,8 @@ export class TenantResolverService {
         .where(eq(tenants.id, user.tenantId))
         .limit(1);
 
-      if (tenant?.status === TENANT_STATUSES.INACTIVE) {
-        throw new ForbiddenException("Tenant is inactive");
+      if (tenant?.status === TENANT_STATUSES.INACTIVE && !allowInactive) {
+        throw new ForbiddenException("tenant.error.inactive");
       }
 
       if (tenant?.host && origin && tenant.host !== origin) {
@@ -52,8 +58,8 @@ export class TenantResolverService {
       .where(eq(tenants.host, origin))
       .limit(1);
 
-    if (tenant?.status === TENANT_STATUSES.INACTIVE) {
-      throw new ForbiddenException("Tenant is inactive");
+    if (tenant?.status === TENANT_STATUSES.INACTIVE && !allowInactive) {
+      throw new ForbiddenException("tenant.error.inactive");
     }
 
     return tenant?.id ?? null;
@@ -106,5 +112,13 @@ export class TenantResolverService {
     const res = req.res as Response | undefined;
     if (!res) return;
     this.tokenService.clearTokenCookies(res);
+  }
+
+  private isInactiveAllowed(req: Request): boolean {
+    const route = this.allowedInactiveApiRoutes[req.path];
+
+    if (!route) return false;
+
+    return route.includes(req.method);
   }
 }

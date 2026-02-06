@@ -151,22 +151,7 @@ export async function insertGlobalSettings(database: DatabasePg, tenantId: UUIDT
       settings: sql<GlobalSettingsJSONContentSchema>`settings.settings`,
     });
 
-  const [updatedSettings] = await database
-    .update(settings)
-    .set({
-      settings: sql`
-        jsonb_set(
-          settings.settings,
-          '{companyInformation}',
-          to_jsonb(${settingsToJSONBuildObject(DEFAULT_GLOBAL_SETTINGS.companyInformation)}),
-          true
-        )
-      `,
-    })
-    .where(eq(settings.id, createdGlobalSettings.id))
-    .returning();
-
-  return updatedSettings;
+  return createdGlobalSettings;
 }
 
 export async function insertUserSettings(

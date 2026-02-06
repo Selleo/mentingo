@@ -61,11 +61,11 @@ ApiClient.instance.interceptors.response.use(
   async (error) => {
     if (
       error.response?.status === 403 &&
-      error.response?.data?.message === "Tenant is inactive" &&
-      typeof window !== "undefined"
+      error.response?.data?.message === "tenant.error.inactive" &&
+      typeof window !== "undefined" &&
+      window.location.pathname !== "/tenant-inactive"
     ) {
       window.location.href = "/tenant-inactive";
-      return Promise.reject(error);
     }
 
     if (error.config?.url?.includes("/logout")) {
