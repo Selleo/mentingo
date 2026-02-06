@@ -9,7 +9,7 @@ import { tenants } from "src/storage/schema";
 import { DB_BASE } from "./db.providers";
 import { TenantStateService } from "./tenant-state.service";
 
-import type { Request, Response } from "express";
+import type { Request } from "express";
 
 @Injectable()
 export class TenantResolverService {
@@ -43,11 +43,7 @@ export class TenantResolverService {
         throw new ForbiddenException("tenant.error.inactive");
       }
 
-      if (tenant?.host && origin && tenant.host !== origin) {
-        this.clearAuthCookies(req);
-      } else {
-        return user.tenantId;
-      }
+      return user.tenantId;
     }
 
     if (!origin) return null;
@@ -106,12 +102,6 @@ export class TenantResolverService {
     } catch {
       return null;
     }
-  }
-
-  private clearAuthCookies(req: Request) {
-    const res = req.res as Response | undefined;
-    if (!res) return;
-    this.tokenService.clearTokenCookies(res);
   }
 
   private isInactiveAllowed(req: Request): boolean {
