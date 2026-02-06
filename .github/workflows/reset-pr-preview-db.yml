@@ -100,6 +100,13 @@ jobs:
           uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec api-preview-pr-${PR_ID} npm i -g tsx drizzle-kit drizzle-orm
           uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec api-preview-pr-${PR_ID} npm run db:migrate
 
+      - name: Restart API after database reset
+        env:
+          PR_ID: ${{ inputs.pr_number }}
+        run: |
+          set -euo pipefail
+          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" restart api-preview-pr-${PR_ID}
+
       - name: Seed database
         continue-on-error: true
         env:
