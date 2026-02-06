@@ -30,7 +30,7 @@ describe("CategoryController (e2e)", () => {
     userFactory = createUserFactory(db);
     categoryFactory = createCategoryFactory(db);
     settingsFactory = createSettingsFactory(db);
-    categoryFactory.createList(CATEGORIES_COUNT);
+    await categoryFactory.createList(CATEGORIES_COUNT);
   }, 30000);
 
   afterAll(async () => {
