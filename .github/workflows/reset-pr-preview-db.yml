@@ -111,7 +111,8 @@ jobs:
           PR_ID: ${{ inputs.pr_number }}
         run: |
           set -euo pipefail
-          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" restart api-preview-pr-${PR_ID}
+          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" service stop api-preview-pr-${PR_ID}
+          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" service start api-preview-pr-${PR_ID}
 
       - name: Seed database
         continue-on-error: true

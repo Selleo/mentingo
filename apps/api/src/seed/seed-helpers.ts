@@ -275,6 +275,8 @@ export function getTenantEmailSuffix(origin: string) {
 }
 
 export const seedUserRoleGrantSql = async (db: DatabasePg) => {
+  if (process.env.CI === "true") return;
+
   await db.execute(sql`
       DO $$
       BEGIN
