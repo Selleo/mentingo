@@ -20,6 +20,7 @@ import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/Language
 import { findFirstInProgressLessonId, findFirstNotStartedLessonId } from "../../Lesson/utils";
 import { navigateToNextLesson } from "../../utils/navigateToNextLesson";
 
+import image from "./kurs.jpeg";
 import { formatDuration } from "./utils";
 
 type HeroBannerProps = {
@@ -89,7 +90,8 @@ const HeroBanner = ({
     <div className="relative h-[50vh] min-h-[400px] w-full overflow-hidden md:h-[70vh] md:min-h-[500px]">
       <div className="absolute inset-0">
         <img
-          src={thumbnailUrl || DefaultPhotoCourse}
+          // src={thumbnailUrl || DefaultPhotoCourse}
+          src={image}
           alt={title}
           className="h-full w-full object-cover"
           onError={(event) => {
@@ -100,7 +102,7 @@ const HeroBanner = ({
           className="absolute inset-0 pointer-events-none"
           style={{
             backgroundImage: `
-              linear-gradient(0deg, rgba(242,245,252,0.95) 0%, rgba(242,245,252,0.6) 12%, rgba(242,245,252,0.08) 60%, rgba(242,245,252,0) 80%),
+              linear-gradient(0deg, #f2f5fc 0%, rgba(242,245,252,0.95) 8%, rgba(242,245,252,0.4) 25%, rgba(242,245,252,0.08) 50%, rgba(242,245,252,0) 75%),
               radial-gradient(80% 70% at 0% 100%, rgba(242,245,252,0.95) 0%, rgba(242,245,252,0.7) 30%, rgba(242,245,252,0.2) 55%, rgba(242,245,252,0) 100%),
               radial-gradient(80% 70% at 100% 100%, rgba(242,245,252,0.95) 0%, rgba(242,245,252,0.7) 30%, rgba(242,245,252,0.2) 55%, rgba(242,245,252,0) 100%)
             `,
