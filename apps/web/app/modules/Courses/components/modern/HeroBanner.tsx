@@ -96,7 +96,16 @@ const HeroBanner = ({
             (event.target as HTMLImageElement).src = DefaultPhotoCourse;
           }}
         />
-        <div className="absolute bottom-0 left-0 right-0 h-[80%] bg-gradient-to-t from-primary-50 via-primary-50/80 via-primary-50/60 to-transparent" />
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: `
+              linear-gradient(0deg, rgba(242,245,252,0.95) 0%, rgba(242,245,252,0.6) 12%, rgba(242,245,252,0.08) 60%, rgba(242,245,252,0) 80%),
+              radial-gradient(80% 70% at 0% 100%, rgba(242,245,252,0.95) 0%, rgba(242,245,252,0.7) 30%, rgba(242,245,252,0.2) 55%, rgba(242,245,252,0) 100%),
+              radial-gradient(80% 70% at 100% 100%, rgba(242,245,252,0.95) 0%, rgba(242,245,252,0.7) 30%, rgba(242,245,252,0.2) 55%, rgba(242,245,252,0) 100%)
+            `,
+          }}
+        />
       </div>
 
       {trailerUrl && (
