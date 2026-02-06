@@ -90,7 +90,13 @@ jobs:
 
           echo "Dropping drizzle metadata and recreating database schema for PR ${PR_ID}..."
 
-          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec db-preview-pr-${PR_ID} psql -U postgres -d guidebook -c "DROP SCHEMA IF EXISTS drizzle CASCADE; DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO postgres; GRANT ALL ON SCHEMA public TO public;"
+          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec db-preview-pr-${PR_ID} psql -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -c "REVOKE CONNECT ON DATABASE guidebook FROM public;" \
+            -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'guidebook' AND pid <> pg_backend_pid();" \
+            -c "DROP DATABASE IF EXISTS guidebook;" \
+            -c "CREATE DATABASE guidebook;" \
+            -c "GRANT ALL PRIVILEGES ON DATABASE guidebook TO postgres;" \
+            -c "GRANT CONNECT ON DATABASE guidebook TO public;"
 
       - name: Run database migrations
         env:
