@@ -1,5 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 
+import { getTenantEmail } from "../../utils/tenant-email";
+
 const COURSE_TITLE = "Artificial Intelligence in Business: Fundamentals";
 const COURSE_HEADING = "Artificial Intelligence in";
 const CHAPTER_TITLE = "Understanding AI Basics";
@@ -90,7 +92,7 @@ test.describe("Drag and drop", () => {
       .click();
     await page.getByRole("menuitem", { name: "Logout" }).locator("div").click();
     await page.getByPlaceholder("user@example.com").click();
-    await page.getByPlaceholder("user@example.com").fill("student@example.com");
+    await page.getByPlaceholder("user@example.com").fill(getTenantEmail("student@example.com"));
     await page.getByLabel("Password").click();
     await page.getByLabel("Password").fill("password");
     await page.getByRole("button", { name: "Login" }).click();

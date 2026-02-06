@@ -1,7 +1,9 @@
 import { test, expect, type Page } from "@playwright/test";
 
-const STUDENT_EMAIL = "student2@example.com";
-const ADMIN_EMAIL = "admin@example.com";
+import { getTenantEmail } from "../../utils/tenant-email";
+
+const STUDENT_EMAIL = getTenantEmail("student2@example.com");
+const ADMIN_EMAIL = getTenantEmail("admin@example.com");
 const PASSWORD = "password";
 
 const PROFILE_BUTTON_NAME = /Avatar for email@example.com|Test Admin profile Test Admin/i;

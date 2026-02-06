@@ -1,9 +1,11 @@
 import { test, expect, type Page } from "@playwright/test";
 
+import { getTenantEmail } from "../../utils/tenant-email";
+
 const SEARCH_PLACEHOLDER = "Search...";
 const COURSE_PREFIX = "Artificial Intelligence in";
 const COURSE_FULL_STACK_TITLE = "E2E Test: Automated Course";
-const STUDENT_EMAIL = "student@example.com";
+const STUDENT_EMAIL = getTenantEmail("student@example.com");
 const PASSWORD = "password";
 
 const openSearch = async (page: Page) => {
