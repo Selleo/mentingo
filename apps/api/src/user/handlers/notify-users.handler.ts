@@ -107,28 +107,18 @@ export class NotifyUsersHandler implements IEventHandler {
     const { email, creatorId, token, userId, invitedByUserName, origin, tenantId } = userInvite;
 
     await this.tenantRunner.runWithTenant(tenantId, async () => {
-      const baseOrigin =
-        origin ||
-        (process.env.CI
-          ? "http://localhost:5173"
-          : process.env.CORS_ORIGIN || "http://localhost:5173");
+      const baseOrigin = origin || process.env.CORS_ORIGIN || "http://localhost:5173";
       const url = `${baseOrigin}/auth/create-new-password?createToken=${token}&email=${email}`;
 
       const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(userId);
-      const inviterName =
-        invitedByUserName ||
-        (creatorId
-          ? (() => {
-              return this.userService
-                .getUserById(creatorId)
-                .then((user) => `${user.firstName} ${user.lastName}`);
-            })()
-          : Promise.resolve("Admin"));
 
-      const resolvedInviterName = await inviterName;
+      const invitingUser = creatorId ? await this.userService.getUserById(creatorId) : null;
+
+      const invitingUsername =
+        invitedByUserName || `${invitingUser?.firstName} ${invitingUser?.lastName}` || "Admin";
 
       const { text, html } = new UserInviteEmail({
-        invitedByUserName: resolvedInviterName,
+        invitedByUserName: invitingUsername,
         createPasswordLink: url,
         ...defaultEmailSettings,
       });

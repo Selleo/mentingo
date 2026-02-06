@@ -261,3 +261,43 @@ export async function ensureSeedTenant(
 
   return createdTenant;
 }
+
+export function addEmailSuffix(email: string, suffix?: string) {
+  if (!suffix) return email;
+  const [local, domain] = email.split("@");
+  if (!domain) return email;
+  return `${local}+${suffix}@${domain}`;
+}
+
+export function getTenantEmailSuffix(origin: string) {
+  const hostname = new URL(origin).hostname;
+  return hostname.split(".")[0] || hostname;
+}
+
+export const seedUserRoleGrantSql = async (db: DatabasePg) => {
+  await db.execute(sql`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'lms_app_user') THEN
+          CREATE ROLE lms_app_user
+            LOGIN
+            PASSWORD 'replace_with_strong_password'
+            NOSUPERUSER
+            NOCREATEDB
+            NOCREATEROLE
+            NOBYPASSRLS;
+        END IF;
+      END
+      $$;
+    `);
+
+  await db.execute(sql`GRANT CONNECT ON DATABASE guidebook TO lms_app_user;`);
+  await db.execute(sql`GRANT USAGE ON SCHEMA public TO lms_app_user;`);
+  await db.execute(
+    sql`GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO lms_app_user;`,
+  );
+  await db.execute(sql`
+      ALTER DEFAULT PRIVILEGES IN SCHEMA public
+        GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO lms_app_user;
+    `);
+};

@@ -512,18 +512,35 @@ export class SettingsService {
   }
 
   public async getCompanyInformation(): Promise<CompanyInformaitonJSONSchema> {
-    const [row] = await this.db
+    const [settingsRecord] = await this.db
       .select({
         companyInformation: sql<CompanyInformaitonJSONSchema>`${settings.settings}->'companyInformation'`,
       })
       .from(settings)
       .where(isNull(settings.userId));
 
-    if (!row?.companyInformation) {
-      return DEFAULT_GLOBAL_SETTINGS.companyInformation;
+    if (!settingsRecord?.companyInformation) {
+      const [updatedSettings] = await this.db
+        .update(settings)
+        .set({
+          settings: sql`
+          jsonb_set(
+            settings.settings,
+            '{companyInformation}',
+            ${settingsToJSONBuildObject(DEFAULT_GLOBAL_SETTINGS.companyInformation)},
+            true
+          )
+        `,
+        })
+        .where(isNull(settings.userId))
+        .returning({
+          companyInformation: sql<CompanyInformaitonJSONSchema>`${settings.settings}->'companyInformation'`,
+        });
+
+      return updatedSettings.companyInformation;
     }
 
-    return row.companyInformation;
+    return settingsRecord.companyInformation;
   }
 
   public async updateCompanyInformation(

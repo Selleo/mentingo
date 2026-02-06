@@ -35,7 +35,14 @@ import { USER_ROLES } from "../user/schemas/userRoles";
 
 import { e2eCourses } from "./e2e-data-seeds";
 import { niceCourses } from "./nice-data-seeds";
-import { createNiceCourses, ensureSeedTenant, seedTruncateAllTables } from "./seed-helpers";
+import {
+  addEmailSuffix,
+  createNiceCourses,
+  ensureSeedTenant,
+  getTenantEmailSuffix,
+  seedTruncateAllTables,
+  seedUserRoleGrantSql,
+} from "./seed-helpers";
 import { admin, contentCreators, students } from "./users-seed";
 
 import type { UsersSeed } from "./seed.types";
@@ -52,17 +59,6 @@ const connectionString = process.env.MIGRATOR_DATABASE_URL || process.env.DATABA
 const sqlConnect = postgres(connectionString);
 const db = drizzle(sqlConnect) as DatabasePg;
 
-function addEmailSuffix(email: string, suffix: string) {
-  const [local, domain] = email.split("@");
-  if (!domain) return email;
-  return `${local}+${suffix}@${domain}`;
-}
-
-function getTenantEmailSuffix(origin: string) {
-  const hostname = new URL(origin).hostname;
-  return hostname.split(".")[0] || hostname;
-}
-
 async function createUsers(
   users: UsersSeed,
   tenantId: UUIDType,
@@ -72,7 +68,7 @@ async function createUsers(
   return Promise.all(
     users.map(async (userData) => {
       const baseEmail = userData.email || faker.internet.email();
-      const email = emailSuffix ? addEmailSuffix(baseEmail, emailSuffix) : baseEmail;
+      const email = addEmailSuffix(baseEmail, emailSuffix);
       const userToCreate = {
         id: faker.string.uuid(),
         email,
@@ -155,13 +151,10 @@ export async function insertGlobalSettings(database: DatabasePg, tenantId: UUIDT
       settings: sql<GlobalSettingsJSONContentSchema>`settings.settings`,
     });
 
-  const companyInformation = createdGlobalSettings.settings?.companyInformation;
-
-  if (!companyInformation) {
-    const [updated] = await database
-      .update(settings)
-      .set({
-        settings: sql`
+  const [updatedSettings] = await database
+    .update(settings)
+    .set({
+      settings: sql`
         jsonb_set(
           settings.settings,
           '{companyInformation}',
@@ -169,12 +162,11 @@ export async function insertGlobalSettings(database: DatabasePg, tenantId: UUIDT
           true
         )
       `,
-      })
-      .where(eq(settings.id, createdGlobalSettings.id))
-      .returning();
+    })
+    .where(eq(settings.id, createdGlobalSettings.id))
+    .returning();
 
-    return updated;
-  }
+  return updatedSettings;
 }
 
 export async function insertUserSettings(
@@ -350,31 +342,7 @@ async function createCourseStudentsStats(tenantId: UUIDType) {
 }
 
 async function seed() {
-  await db.execute(sql`
-    DO $$
-    BEGIN
-      IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'lms_app_user') THEN
-        CREATE ROLE lms_app_user
-          LOGIN
-          PASSWORD 'replace_with_strong_password'
-          NOSUPERUSER
-          NOCREATEDB
-          NOCREATEROLE
-          NOBYPASSRLS;
-      END IF;
-    END
-    $$;
-  `);
-
-  await db.execute(sql`GRANT CONNECT ON DATABASE guidebook TO lms_app_user;`);
-  await db.execute(sql`GRANT USAGE ON SCHEMA public TO lms_app_user;`);
-  await db.execute(
-    sql`GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO lms_app_user;`,
-  );
-  await db.execute(sql`
-    ALTER DEFAULT PRIVILEGES IN SCHEMA public
-      GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO lms_app_user;
-  `);
+  await seedUserRoleGrantSql(db);
 
   await seedTruncateAllTables(db);
 
