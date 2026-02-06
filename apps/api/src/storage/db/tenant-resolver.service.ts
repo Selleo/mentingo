@@ -2,7 +2,6 @@ import { ForbiddenException, Inject, Injectable, UnauthorizedException } from "@
 import { TENANT_STATUSES } from "@repo/shared";
 import { eq } from "drizzle-orm";
 
-import { TokenService } from "src/auth/token.service";
 import { DatabasePg } from "src/common";
 import { tenants } from "src/storage/schema";
 
@@ -21,7 +20,6 @@ export class TenantResolverService {
   constructor(
     @Inject(DB_BASE) private readonly dbBase: DatabasePg,
     private readonly tenantState: TenantStateService,
-    private readonly tokenService: TokenService,
   ) {}
 
   async resolveTenantId(req: Request): Promise<string | null> {
