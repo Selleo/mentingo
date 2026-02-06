@@ -2,6 +2,8 @@ import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { ApiClient } from "~/api/api-client";
+import { SUPER_ADMIN_TENANTS_QUERY_KEY } from "~/api/queries/super-admin/useTenants";
+import { queryClient } from "~/api/queryClient";
 import { useToast } from "~/components/ui/use-toast";
 
 import type { AxiosError } from "axios";
@@ -21,7 +23,8 @@ export function useCreateTenant() {
       const response = await ApiClient.api.tenantsControllerCreateTenant(options.data);
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: SUPER_ADMIN_TENANTS_QUERY_KEY });
       toast({ description: t("superAdminTenantsView.toast.tenantCreatedSuccessfully") });
     },
     onError: (error: AxiosError) => {

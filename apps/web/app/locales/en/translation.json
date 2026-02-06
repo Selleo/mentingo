@@ -2274,7 +2274,10 @@
     "qa": "Q&A",
     "createQA": "Create new Q&A",
     "analytics": "Analytics",
-    "progress": "Progress"
+    "progress": "Progress",
+    "tenant": "Tenant Details",
+    "createTenant": "Create Tenant",
+    "tenants": "Tenants"
   },
   "lessonPreview": {
     "breadcrumbs": {

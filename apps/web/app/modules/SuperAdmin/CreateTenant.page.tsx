@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "@remix-run/react";
+import { type MetaFunction, useNavigate } from "@remix-run/react";
 import { TENANT_STATUSES } from "@repo/shared";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -22,6 +22,9 @@ import {
   type CreateTenantFormValues,
   createTenantFormSchema,
 } from "~/modules/SuperAdmin/schemas/tenant.schema";
+import { setPageTitle } from "~/utils/setPageTitle";
+
+export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.createTenant");
 
 export default function CreateTenantPage() {
   const navigate = useNavigate();

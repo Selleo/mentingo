@@ -1,15 +1,12 @@
-import { type MetaFunction, Outlet, redirect, useNavigate } from "@remix-run/react";
+import { Outlet, redirect, useNavigate } from "@remix-run/react";
 import { Suspense, useLayoutEffect } from "react";
 
 import { currentUserQueryOptions } from "~/api/queries";
 import { useCurrentUser } from "~/api/queries/useCurrentUser";
 import { queryClient } from "~/api/queryClient";
 import Loader from "~/modules/common/Loader/Loader";
-import { setPageTitle } from "~/utils/setPageTitle";
 
 import type { PropsWithChildren } from "react";
-
-export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.superAdmin");
 
 export const clientLoader = async ({ request: _request }: { request: Request }) => {
   try {

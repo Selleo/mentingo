@@ -2296,7 +2296,10 @@
     "qa": "Q&A",
     "createQA": "Utwórz nowe Q&A",
     "analytics": "Analityka",
-    "progress": "Postępy"
+    "progress": "Postępy",
+    "tenant": "Detale najemcy",
+    "createTenant": "Utwórz najemcę",
+    "tenants": "Najemcy"
   },
   "lessonPreview": {
     "breadcrumbs": {

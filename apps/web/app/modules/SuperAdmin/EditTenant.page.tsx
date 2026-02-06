@@ -1,12 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate, useParams } from "@remix-run/react";
+import { type MetaFunction, useNavigate, useParams } from "@remix-run/react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import { useUpdateTenant } from "~/api/mutations/super-admin/useUpdateTenant";
 import { useTenant } from "~/api/queries/super-admin/useTenant";
-import { queryClient } from "~/api/queryClient";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "~/components/ui/form";
@@ -23,6 +22,9 @@ import {
   editTenantFormSchema,
   type EditTenantFormValues,
 } from "~/modules/SuperAdmin/schemas/tenant.schema";
+import { setPageTitle } from "~/utils/setPageTitle";
+
+export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.tenant");
 
 import type { TenantStatus } from "@repo/shared";
 
@@ -51,13 +53,10 @@ export default function EditTenantPage() {
     await updateTenant({
       id: tenantId || "",
       data: {
-        name: values.name,
-        host: values.host,
-        status: values.status,
+        ...values,
       },
     });
 
-    queryClient.invalidateQueries({ queryKey: ["superAdminTenants"] });
     navigate("/super-admin/tenants");
   };
 
@@ -116,7 +115,7 @@ export default function EditTenantPage() {
                 render={({ field }) => (
                   <FormItem>
                     <Label>{t("superAdminTenantsView.form.status")}</Label>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue
