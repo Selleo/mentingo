@@ -108,13 +108,13 @@ const Users = () => {
   const dropdownItems: DropdownItems[] = [
     {
       icon: "ArrowUpDown",
-      translationKey: "adminUsersView.dropdown.changeRole",
+      translationKey: "adminUsersView.dropdown.roles",
       action: () => setShowEditModal("role"),
       destructive: false,
     },
     {
       icon: "ArrowUpDown",
-      translationKey: "adminUsersView.dropdown.changeGroup",
+      translationKey: "adminUsersView.dropdown.groups",
       action: () => setShowEditModal("group"),
       destructive: false,
     },

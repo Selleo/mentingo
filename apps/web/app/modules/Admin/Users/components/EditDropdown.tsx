@@ -34,7 +34,7 @@ export const EditDropdown = ({ dropdownItems, disabled }: EditDropdownProps) => 
     <DropdownMenu onOpenChange={(open) => setOpenDropdown(open)}>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="flex gap-2" disabled={disabled}>
-          {t("adminUsersView.button.edit")}
+          {t("adminUsersView.button.bulkEdit")}
           <Icon className="size-4 text-black" name={openDropdown ? "ArrowUp" : "ArrowDown"} />
         </Button>
       </DropdownMenuTrigger>

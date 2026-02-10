@@ -10,7 +10,6 @@ export const GROUPS_PAGE_UI = {
     save: "save",
     back: "back",
     edit: "edit",
-    changeGroup: "Change group",
     confirm: "confirm",
   },
   cell: {

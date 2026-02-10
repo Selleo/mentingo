@@ -798,11 +798,12 @@
       "createNew": "Create new",
       "deleteSelected": "Delete selected",
       "edit": "Edit",
-      "import": "Import users"
+      "import": "Import users",
+      "bulkEdit": "Bulk edit"
     },
     "dropdown": {
-      "changeRole": "Change role",
-      "changeGroup": "Change group",
+      "roles": "Roles",
+      "groups": "Groups",
       "delete": "Delete",
       "archive": "Archive"
     },

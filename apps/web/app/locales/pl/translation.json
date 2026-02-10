@@ -780,11 +780,12 @@
       "createNew": "Utwórz nowego",
       "deleteSelected": "Usuń wybrane",
       "edit": "Edytuj",
-      "import": "Importuj użytkowników"
+      "import": "Importuj użytkowników",
+      "bulkEdit": "Edytuj wiele"
     },
     "dropdown": {
-      "changeRole": "Zmień role",
-      "changeGroup": "Zmień grupy",
+      "roles": "Role",
+      "groups": "Grupy",
       "delete": "Usuń",
       "archive": "Archiwizuj"
     },
