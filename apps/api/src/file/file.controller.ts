@@ -244,6 +244,7 @@ export class FileController {
     await this.fileService.deleteFile(fileKey);
   }
 
+  @Public()
   @Get("thumbnail")
   @Validate({
     request: [

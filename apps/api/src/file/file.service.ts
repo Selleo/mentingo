@@ -27,6 +27,7 @@ import sharp from "sharp";
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { DatabasePg } from "src/common";
 import { buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelpers";
+import { FILE_DELIVERY_TYPE, type FileDeliveryResult } from "src/file/types/file-delivery.type";
 import { uploadKey, videoKey } from "src/file/utils/bunnyCacheKeys";
 import { isEmptyObject, normalizeCellValue, normalizeHeader } from "src/file/utils/excel.utils";
 import getChecksum from "src/file/utils/getChecksum";
@@ -371,6 +372,25 @@ export class FileService {
     } catch (error) {
       throw new BadRequestException("Failed to retrieve file");
     }
+  }
+
+  async getFileDelivery(fileKey: string, range?: string): Promise<FileDeliveryResult> {
+    if (!fileKey) {
+      throw new BadRequestException("Failed to retrieve file");
+    }
+
+    if (fileKey.startsWith("bunny-")) {
+      try {
+        const videoId = fileKey.replace("bunny-", "");
+        const url = await this.bunnyStreamService.getUrl(videoId);
+        return { type: FILE_DELIVERY_TYPE.REDIRECT, url };
+      } catch {
+        throw new BadRequestException("Failed to retrieve file");
+      }
+    }
+
+    const stream = await this.getFileStream(fileKey, range);
+    return { type: FILE_DELIVERY_TYPE.STREAM, ...stream };
   }
 
   async parseExcelFile<T extends TSchema>(

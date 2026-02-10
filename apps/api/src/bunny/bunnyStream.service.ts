@@ -178,6 +178,7 @@ export class BunnyStreamService {
 
   async getUrl(videoId: string): Promise<string> {
     const cfg = await this.getConfig();
+    this.ensurePlaybackSigningConfig(cfg);
 
     const httpClient = this.createHttpClient(cfg);
 
@@ -192,6 +193,7 @@ export class BunnyStreamService {
 
   async getThumbnailUrl(videoId: string): Promise<string> {
     const cfg = await this.getConfig();
+    this.ensureThumbnailSigningConfig(cfg);
 
     const url = `https://${cfg.cdnUrl}/${videoId}/thumbnail.jpg`;
     const expiresAt = Math.floor(Date.now() / 1000) + BUNNY_CDN_TOKEN_EXPIRY;
@@ -259,5 +261,21 @@ export class BunnyStreamService {
   private getTokenPath(pathname: string): string {
     const lastSlashIndex = pathname.lastIndexOf("/");
     return lastSlashIndex >= 0 ? pathname.slice(0, lastSlashIndex + 1) : "/";
+  }
+
+  private ensurePlaybackSigningConfig(cfg: BunnyConfig) {
+    if (!cfg.tokenSigningKey) {
+      throw new InternalServerErrorException(
+        "BunnyStream configuration is missing token signing key.",
+      );
+    }
+  }
+
+  private ensureThumbnailSigningConfig(cfg: BunnyConfig) {
+    this.ensurePlaybackSigningConfig(cfg);
+
+    if (!cfg.cdnUrl) {
+      throw new InternalServerErrorException("BunnyStream configuration is missing CDN URL.");
+    }
   }
 }

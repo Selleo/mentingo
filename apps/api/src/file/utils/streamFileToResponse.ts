@@ -1,17 +1,7 @@
 import type { Response } from "express";
-import type { Readable } from "stream";
+import type { FileStreamPayload } from "src/file/types/file-stream.type";
 
-type StreamableFile = {
-  stream: Readable;
-  contentType?: string;
-  contentLength?: number;
-  contentRange?: string;
-  acceptRanges?: string;
-  etag?: string;
-  lastModified?: Date;
-};
-
-export const streamFileToResponse = (res: Response, file: StreamableFile) => {
+export const streamFileToResponse = (res: Response, file: FileStreamPayload) => {
   res.setHeader("Accept-Ranges", file.acceptRanges ?? "bytes");
 
   if (file.contentType) {

@@ -80,7 +80,7 @@
     "@tiptap/starter-kit": "2.27.1",
     "@types/crypto-js": "4.2.2",
     "@types/react-syntax-highlighter": "15.5.13",
-    "@vimeo/player": "^2.30.2",
+    "@vimeo/player": "2.30.2",
     "axios": "1.7.2",
     "class-variance-authority": "0.7.0",
     "clsx": "2.1.1",

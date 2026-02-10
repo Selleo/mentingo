@@ -18,6 +18,7 @@ import { injectResourcesIntoContent } from "src/common/utils/injectResourcesInto
 import { QuizCompletedEvent } from "src/events";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
+import { FILE_DELIVERY_TYPE } from "src/file/types/file-delivery.type";
 import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
@@ -455,7 +456,11 @@ export class LessonService {
     }
 
     const rangeHeader = req.headers.range;
-    const file = await this.fileService.getFileStream(lessonResource.reference, rangeHeader);
+    const file = await this.fileService.getFileDelivery(lessonResource.reference, rangeHeader);
+
+    if (file.type === FILE_DELIVERY_TYPE.REDIRECT) {
+      return res.redirect(file.url);
+    }
 
     if (!file || !file.stream) throw new Error("Error fetching file stream");
     streamFileToResponse(res, file);

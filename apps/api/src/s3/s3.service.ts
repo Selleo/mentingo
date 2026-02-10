@@ -12,18 +12,8 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 
+import type { FileStreamPayload } from "src/file/types/file-stream.type";
 import type { PassThrough, Readable } from "stream";
-
-type S3FileStreamResponse = {
-  stream: Readable;
-  contentType?: string;
-  contentLength?: number;
-  contentRange?: string;
-  acceptRanges?: string;
-  etag?: string;
-  lastModified?: Date;
-  statusCode?: number;
-};
 
 @Injectable()
 export class S3Service {
@@ -217,7 +207,7 @@ export class S3Service {
     await this.s3Client.send(command);
   }
 
-  async getFileStream(key: string, range?: string): Promise<S3FileStreamResponse> {
+  async getFileStream(key: string, range?: string): Promise<FileStreamPayload> {
     const command = new GetObjectCommand({
       Bucket: this.bucketName,
       Key: key,

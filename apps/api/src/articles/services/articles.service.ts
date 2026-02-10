@@ -25,6 +25,7 @@ import {
 } from "src/events";
 import { RESOURCE_RELATIONSHIP_TYPES, RESOURCE_CATEGORIES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
+import { FILE_DELIVERY_TYPE } from "src/file/types/file-delivery.type";
 import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
 import { LocalizationService } from "src/localization/localization.service";
 import { SettingsService } from "src/settings/settings.service";
@@ -538,7 +539,11 @@ export class ArticlesService {
     }
 
     const rangeHeader = req.headers.range;
-    const file = await this.fileService.getFileStream(resource.reference, rangeHeader);
+    const file = await this.fileService.getFileDelivery(resource.reference, rangeHeader);
+
+    if (file.type === FILE_DELIVERY_TYPE.REDIRECT) {
+      return res.redirect(file.url);
+    }
 
     if (!file || !file.stream) throw new Error("Error fetching file stream");
 

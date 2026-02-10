@@ -37,7 +37,6 @@ export const injectResourcesIntoContent = <T extends ContentResource>(
   const increment = (key: string) => (contentCount[key] = (contentCount[key] ?? 0) + 1);
 
   if (!content) return { html: content, contentCount, hasAutoplayTrigger };
-  if (!resources.length) return { html: content, contentCount, hasAutoplayTrigger };
 
   const $ = loadHtml(content);
   const resourceMap = new Map(resources.map((resource) => [resource.id, resource]));

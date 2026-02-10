@@ -86,9 +86,13 @@ async function runMigration() {
   const pg = postgres(process.env.DATABASE_URL!, { connect_timeout: 2 });
   const db = drizzle(pg, { schema }) as DatabasePg;
 
-  await migrateLessons(db);
-  await migrateArticles(db);
-  await migrateNews(db);
+  try {
+    await migrateLessons(db);
+    await migrateArticles(db);
+    await migrateNews(db);
+  } finally {
+    await pg.end();
+  }
 }
 
 runMigration().catch((err) => {
