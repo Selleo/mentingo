@@ -25,6 +25,7 @@ import { formatDuration } from "./utils";
 type HeroBannerProps = {
   id: string;
   title: string;
+  thumbnailUrl?: string | null;
   trailerUrl?: string | null;
   estimatedDurationMinutes?: number;
   lessonCount?: number;
@@ -34,6 +35,7 @@ type HeroBannerProps = {
 const HeroBanner = ({
   id,
   title,
+  thumbnailUrl,
   trailerUrl,
   estimatedDurationMinutes,
   lessonCount,
@@ -87,8 +89,7 @@ const HeroBanner = ({
     <div className="relative h-[50vh] min-h-[400px] w-full overflow-hidden md:h-[70vh] md:min-h-[500px]">
       <div className="absolute inset-0">
         <img
-          // src={thumbnailUrl || DefaultPhotoCourse}
-          src={image}
+          src={thumbnailUrl || DefaultPhotoCourse}
           alt={title}
           className="h-full w-full object-cover"
           onError={(event) => {
