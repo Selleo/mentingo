@@ -225,7 +225,7 @@ export const LessonContent = ({
       >
         <div className="flex w-full min-w-0 flex-col gap-y-10 px-6 sm:px-10 max-w-full 3xl:max-w-[1024px] 3xl:px-8 h-auto">
           {!isPreviewMode && (
-            <div className="flex w-full flex-col pb-6 sm:flex-row sm:items-end">
+            <div className="flex w-full flex-col pb-6">
               <div className="flex w-full min-w-0 flex-col gap-y-4 overflow-x-hidden">
                 <div className="flex items-center gap-x-2">
                   <p className="body-sm-md text-neutral-800">
