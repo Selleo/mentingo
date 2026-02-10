@@ -121,6 +121,7 @@ jobs:
         run: |
           set -euo pipefail
           uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec db-preview-pr-${PR_ID} psql -U postgres -d guidebook -c "DROP SCHEMA IF EXISTS drizzle CASCADE;"
+          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec db-preview-pr-${PR_ID} psql -U postgres -d guidebook -c "ALTER TABLE IF EXISTS courses DROP COLUMN IF EXISTS is_scorm;"
           uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec api-preview-pr-${PR_ID} npm i -g tsx drizzle-kit drizzle-orm
           uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec api-preview-pr-${PR_ID} npm run db:migrate
 
