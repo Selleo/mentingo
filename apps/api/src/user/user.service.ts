@@ -523,7 +523,7 @@ export class UserService {
       throw new ConflictException("User already exists");
     }
 
-    const { createdUser, token } = await this.db.transaction(async (trx) => {
+    const { createdUser, token } = await db.transaction(async (trx) => {
       const [createdUser] = await trx.insert(users).values(data).returning();
       await trx.insert(userOnboarding).values({ userId: createdUser.id });
 

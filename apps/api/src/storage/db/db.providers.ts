@@ -2,7 +2,8 @@ import { dbAls } from "./db-als.store";
 
 import type { DatabasePg } from "src/common";
 
-export const DB_BASE = "DB_BASE";
+export const DB_ADMIN = "DB_ADMIN";
+export const DB_APP = "DB_APP";
 export const DB = "DB";
 
 export function createDbProxy(dbBase: DatabasePg): DatabasePg {

@@ -13,7 +13,7 @@ import { version } from "../version.json";
 
 import { AppModule } from "./app.module";
 import { startInstrumentation } from "./langfuse/instrumentation";
-import { DB_BASE } from "./storage/db/db.providers";
+import { DB_ADMIN } from "./storage/db/db.providers";
 import { createCorsOriginOption } from "./utils/cors";
 import { environmentValidation } from "./utils/environment-validation";
 import { exportSchemaToFile } from "./utils/save-swagger-to-file";
@@ -43,7 +43,7 @@ async function bootstrap() {
 
   setupValidation();
 
-  const dbBase = app.get(DB_BASE);
+  const dbBase = app.get(DB_ADMIN);
 
   app.use(
     cors({

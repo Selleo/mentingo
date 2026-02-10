@@ -153,8 +153,28 @@ export class SettingsService {
     return createdSettings;
   }
 
-  public async getUserSettings(userId: UUIDType): Promise<SettingsJSONContentSchema> {
-    const [row] = await this.db
+  public async getUserSettings(
+    userId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ): Promise<SettingsJSONContentSchema> {
+    if (!userId || userId === "") {
+      console.error("getUserSettings called with empty userId");
+      console.error(new Error("Empty userId").stack);
+      throw new BadRequestException("User id is required");
+    }
+
+    const result = await dbInstance.execute(
+      sql`select current_setting('app.tenant_id', true) as tenant_id`,
+    );
+    const tenantId =
+      (result as unknown as Array<{ tenant_id: string | null }>)[0]?.tenant_id ?? null;
+    if (!tenantId) {
+      console.error("getUserSettings missing tenant context");
+      console.error(new Error("Missing tenant context").stack);
+      throw new UnauthorizedException("Missing tenant context");
+    }
+
+    const [row] = await dbInstance
       .select({ settings: sql<SettingsJSONContentSchema>`${settings.settings}` })
       .from(settings)
       .where(eq(settings.userId, userId));

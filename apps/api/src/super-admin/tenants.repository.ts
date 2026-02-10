@@ -2,7 +2,7 @@ import { Inject, Injectable } from "@nestjs/common";
 import { count, eq, ilike, or } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
-import { DB_BASE } from "src/storage/db/db.providers";
+import { DB_ADMIN } from "src/storage/db/db.providers";
 import { tenants } from "src/storage/schema";
 
 import type {
@@ -15,7 +15,7 @@ import type {
 
 @Injectable()
 export class TenantsRepository {
-  constructor(@Inject(DB_BASE) private readonly dbBase: DatabasePg) {}
+  constructor(@Inject(DB_ADMIN) private readonly dbBase: DatabasePg) {}
 
   async findAll({ page, perPage, search }: FindAllTenantsParams): Promise<Tenant[]> {
     const whereClause = this.buildSearchClause(search);

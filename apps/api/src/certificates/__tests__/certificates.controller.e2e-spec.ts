@@ -1,6 +1,6 @@
 import request from "supertest";
 
-import { DB, DB_BASE } from "src/storage/db/db.providers";
+import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCategoryFactory } from "../../../test/factory/category.factory";
@@ -29,7 +29,7 @@ describe("CertificatesController (e2e)", () => {
     const { app: testApp } = await createE2ETest();
     app = testApp;
     db = app.get(DB);
-    baseDb = app.get(DB_BASE);
+    baseDb = app.get(DB_ADMIN);
     userFactory = createUserFactory(db);
     settingsFactory = createSettingsFactory(db);
     categoryFactory = createCategoryFactory(db);

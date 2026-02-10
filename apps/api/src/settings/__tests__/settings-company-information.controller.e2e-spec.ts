@@ -1,6 +1,6 @@
 import request from "supertest";
 
-import { DB, DB_BASE } from "src/storage/db/db.providers";
+import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
@@ -38,7 +38,7 @@ describe("SettingsController - Company Information (e2e)", () => {
     const { app: testApp } = await createE2ETest();
     app = testApp;
     db = app.get(DB);
-    baseDb = app.get(DB_BASE);
+    baseDb = app.get(DB_ADMIN);
     userFactory = createUserFactory(db);
     globalSettingsFactory = createSettingsFactory(db, null);
   });

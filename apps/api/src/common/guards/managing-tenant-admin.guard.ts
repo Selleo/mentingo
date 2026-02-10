@@ -9,7 +9,7 @@ import {
 import { eq } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
-import { DB_BASE } from "src/storage/db/db.providers";
+import { DB_ADMIN } from "src/storage/db/db.providers";
 import { tenants } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
@@ -17,7 +17,7 @@ import type { CurrentUser } from "src/common/types/current-user.type";
 
 @Injectable()
 export class ManagingTenantAdminGuard implements CanActivate {
-  constructor(@Inject(DB_BASE) private readonly dbBase: DatabasePg) {}
+  constructor(@Inject(DB_ADMIN) private readonly dbBase: DatabasePg) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest();

@@ -3,7 +3,7 @@ import { isArray, omit } from "lodash";
 import { nanoid } from "nanoid";
 import request from "supertest";
 
-import { DB, DB_BASE } from "src/storage/db/db.providers";
+import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { createTokens } from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
@@ -28,7 +28,7 @@ describe("AuthController (e2e)", () => {
     app = testApp;
     authService = app.get(AuthService);
     db = app.get(DB);
-    baseDb = app.get(DB_BASE);
+    baseDb = app.get(DB_ADMIN);
     userFactory = createUserFactory(db);
     settingsFactory = createSettingsFactory(db);
   });

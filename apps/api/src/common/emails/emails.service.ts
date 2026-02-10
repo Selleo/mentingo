@@ -8,7 +8,7 @@ import { EmailAdapter } from "./adapters/email.adapter";
 
 import type { Attachment, Email } from "./email.interface";
 import type { SupportedLanguages } from "@repo/shared";
-import type { UUIDType } from "src/common";
+import type { DatabasePg, UUIDType } from "src/common";
 import type { EmailConfigSchema } from "src/common/configuration/email";
 import type { DefaultEmailSettings } from "src/events/types";
 
@@ -66,17 +66,20 @@ export class EmailService {
     });
   }
 
-  async getDefaultEmailProperties(userId?: UUIDType): Promise<DefaultEmailSettings> {
+  async getDefaultEmailProperties(
+    userId?: UUIDType,
+    dbInstance?: DatabasePg,
+  ): Promise<DefaultEmailSettings> {
     const globalSettings = await this.settingsService.getGlobalSettings();
 
     return {
       primaryColor: globalSettings.primaryColor || "#4796FD",
-      language: userId ? await this.getFinalLanguage(userId) : SUPPORTED_LANGUAGES.EN,
+      language: userId ? await this.getFinalLanguage(userId, dbInstance) : SUPPORTED_LANGUAGES.EN,
     };
   }
 
-  async getFinalLanguage(userId: UUIDType): Promise<SupportedLanguages> {
-    const userSettings = await this.settingsService.getUserSettings(userId);
+  async getFinalLanguage(userId: UUIDType, dbInstance?: DatabasePg): Promise<SupportedLanguages> {
+    const userSettings = await this.settingsService.getUserSettings(userId, dbInstance);
     const language = userSettings.language as SupportedLanguages;
 
     return Object.values(SUPPORTED_LANGUAGES).includes(language)

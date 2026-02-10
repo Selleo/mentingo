@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import { DatabasePg } from "src/common";
 import { tenants } from "src/storage/schema";
 
-import { DB_BASE } from "./db.providers";
+import { DB_ADMIN } from "./db.providers";
 import { TenantStateService } from "./tenant-state.service";
 
 import type { Request } from "express";
@@ -18,7 +18,7 @@ export class TenantResolverService {
   };
 
   constructor(
-    @Inject(DB_BASE) private readonly dbBase: DatabasePg,
+    @Inject(DB_ADMIN) private readonly dbBase: DatabasePg,
     private readonly tenantState: TenantStateService,
   ) {}
 
