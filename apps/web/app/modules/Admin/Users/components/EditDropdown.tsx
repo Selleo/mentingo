@@ -1,4 +1,5 @@
 import { DropdownMenu } from "@radix-ui/react-dropdown-menu";
+import { CopyCheck } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -14,7 +15,8 @@ import { cn } from "~/lib/utils";
 import type { IconName } from "~/types/shared";
 
 export type DropdownItems = {
-  icon: IconName;
+  iconName?: IconName;
+  icon?: React.ReactNode;
   translationKey: string;
   action: () => void;
   destructive: boolean;
@@ -34,6 +36,7 @@ export const EditDropdown = ({ dropdownItems, disabled }: EditDropdownProps) => 
     <DropdownMenu onOpenChange={(open) => setOpenDropdown(open)}>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="flex gap-2" disabled={disabled}>
+          <CopyCheck className="size-4" />
           {t("adminUsersView.button.bulkEdit")}
           <Icon className="size-4 text-black" name={openDropdown ? "ArrowUp" : "ArrowDown"} />
         </Button>
@@ -51,12 +54,16 @@ export const EditDropdown = ({ dropdownItems, disabled }: EditDropdownProps) => 
                 onClick={item.action}
                 variant="ghost"
               >
-                <Icon
-                  name={item.icon}
-                  className={cn("size-4 text-accent-foreground", {
-                    "text-error-700 hover:text-error-700": item.destructive,
-                  })}
-                />
+                {item.iconName ? (
+                  <Icon
+                    name={item.iconName}
+                    className={cn("size-4 text-accent-foreground", {
+                      "text-error-700 hover:text-error-700": item.destructive,
+                    })}
+                  />
+                ) : (
+                  item.icon
+                )}
                 {t(item.translationKey)}
               </Button>
             </DropdownMenuItem>
