@@ -68,12 +68,12 @@ export class NotifyUsersHandler implements IEventHandler {
   ) {}
 
   async handle(event: EventType) {
-    const { userEmailTriggers } = await this.settingsService.getGlobalSettings();
-
     if (event instanceof UserInviteEvent) {
       await this.notifyUserAboutInvite(event);
       return;
     }
+
+    const { userEmailTriggers } = await this.settingsService.getGlobalSettings();
 
     if (!userEmailTriggers[eventTriggerMap[event.constructor.name]]) return;
 
@@ -104,13 +104,12 @@ export class NotifyUsersHandler implements IEventHandler {
 
   async notifyUserAboutInvite(event: UserInviteEvent) {
     const { userInvite } = event;
-    const { email, creatorId, token, userId, invitedByUserName, origin, tenantId } = userInvite;
+    const { email, creatorId, token, invitedByUserName, origin, tenantId, language, primaryColor } =
+      userInvite;
 
     await this.tenantRunner.runWithTenant(tenantId, async () => {
       const baseOrigin = origin || process.env.CORS_ORIGIN || "http://localhost:5173";
       const url = `${baseOrigin}/auth/create-new-password?createToken=${token}&email=${email}`;
-
-      const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(userId);
 
       const invitingUser = creatorId ? await this.userService.getUserById(creatorId) : null;
 
@@ -120,12 +119,13 @@ export class NotifyUsersHandler implements IEventHandler {
       const { text, html } = new UserInviteEmail({
         invitedByUserName: invitingUsername,
         createPasswordLink: url,
-        ...defaultEmailSettings,
+        language,
+        primaryColor,
       });
 
       await this.emailService.sendEmailWithLogo({
         to: email,
-        subject: getEmailSubject("userInviteEmail", defaultEmailSettings.language),
+        subject: getEmailSubject("userInviteEmail", language),
         text,
         html,
       });
