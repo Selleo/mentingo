@@ -1,4 +1,4 @@
-import { ALLOWED_LESSON_IMAGE_FILE_TYPES } from "@repo/shared";
+import { ALLOWED_LESSON_IMAGE_FILE_TYPES, detectVideoProviderFromUrl } from "@repo/shared";
 import { EditorContent, useEditor, type Editor as TiptapEditor } from "@tiptap/react";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
@@ -6,7 +6,7 @@ import { Progress } from "~/components/ui/progress";
 import { cn } from "~/lib/utils";
 
 import { detectPresentationProvider } from "./extensions/utils/presentation";
-import { detectVideoProvider, extractUrlFromClipboard } from "./extensions/utils/video";
+import { extractUrlFromClipboard } from "./extensions/utils/video";
 import { baseEditorPlugins, contentEditorPlugins } from "./plugins";
 import { defaultClasses } from "./styles";
 import EditorToolbar from "./toolbar/EditorToolbar";
@@ -73,7 +73,7 @@ const Editor = ({
       const pastedUrl = extractUrlFromClipboard(event);
       if (!pastedUrl) return false;
 
-      const videoProvider = detectVideoProvider(pastedUrl);
+      const videoProvider = detectVideoProviderFromUrl(pastedUrl);
       const presentationProvider = detectPresentationProvider(pastedUrl);
 
       if (videoProvider === "unknown" && presentationProvider === "unknown") {

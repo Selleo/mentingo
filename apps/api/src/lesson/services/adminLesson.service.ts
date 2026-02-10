@@ -15,6 +15,7 @@ import { getTableColumns, sql } from "drizzle-orm";
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { DatabasePg } from "src/common";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
+import { annotateVideoAutoplayInContent } from "src/common/utils/annotateVideoAutoplayInContent";
 import { CreateLessonEvent, DeleteLessonEvent, UpdateLessonEvent } from "src/events";
 import { RESOURCE_CATEGORIES, RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
@@ -328,6 +329,10 @@ export class AdminLessonService {
     }
 
     const previousLessonSnapshot = await this.buildLessonActivitySnapshot(id, data.language);
+
+    if (data.description !== undefined) {
+      data.description = annotateVideoAutoplayInContent(data.description);
+    }
 
     const updatedLesson = await this.adminLessonRepository.updateLesson(id, data);
 

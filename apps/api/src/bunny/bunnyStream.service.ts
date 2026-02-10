@@ -4,6 +4,7 @@ import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import axios from "axios";
 
+import { BUNNY_CDN_TOKEN_EXPIRY } from "src/bunny/bunnyStream.constants";
 import { EnvService } from "src/env/services/env.service";
 
 import type { AxiosInstance } from "axios";
@@ -13,6 +14,7 @@ type BunnyConfig = {
   signingKey: string | null;
   libraryId: string;
   cdnUrl: string | null;
+  tokenSigningKey: string;
 };
 
 @Injectable()
@@ -30,26 +32,31 @@ export class BunnyStreamService {
       return this.cache.cfg;
     }
 
-    const [apiKey, signingKey, libraryId, cdnUrl] = await Promise.all([
+    const [apiKey, signingKey, libraryId, cdnUrl, tokenSigningKey] = await Promise.all([
       this.envService
         .getEnv("BUNNY_STREAM_API_KEY")
         .then((r) => r.value)
-        .catch(() => this.configService.get("BUNNY_STREAM_API_KEY")),
+        .catch(() => this.configService.get("bunny.BUNNY_STREAM_API_KEY")),
 
       this.envService
         .getEnv("BUNNY_STREAM_SIGNING_KEY")
         .then((r) => r.value)
-        .catch(() => this.configService.get("BUNNY_STREAM_SIGNING_KEY")),
+        .catch(() => this.configService.get("bunny.BUNNY_STREAM_SIGNING_KEY")),
 
       this.envService
         .getEnv("BUNNY_STREAM_LIBRARY_ID")
         .then((r) => r.value)
-        .catch(() => this.configService.get("BUNNY_STREAM_LIBRARY_ID")),
+        .catch(() => this.configService.get("bunny.BUNNY_STREAM_LIBRARY_ID")),
 
       this.envService
         .getEnv("BUNNY_STREAM_CDN_URL")
         .then((r) => r.value)
-        .catch(() => this.configService.get("BUNNY_STREAM_CDN_URL")),
+        .catch(() => this.configService.get("bunny.BUNNY_STREAM_CDN_URL")),
+
+      this.envService
+        .getEnv("BUNNY_STREAM_TOKEN_SIGNING_KEY")
+        .then((r) => r.value)
+        .catch(() => this.configService.get("bunny.BUNNY_STREAM_TOKEN_SIGNING_KEY")),
     ]);
 
     if (!apiKey || !libraryId) {
@@ -62,6 +69,7 @@ export class BunnyStreamService {
       apiKey,
       signingKey,
       libraryId,
+      tokenSigningKey,
       cdnUrl,
     };
 
@@ -86,11 +94,11 @@ export class BunnyStreamService {
       this.envService
         .getEnv("BUNNY_STREAM_API_KEY")
         .then((r) => r.value)
-        .catch(() => this.configService.get("BUNNY_STREAM_API_KEY")),
+        .catch(() => this.configService.get("bunny.BUNNY_STREAM_API_KEY")),
       this.envService
         .getEnv("BUNNY_STREAM_LIBRARY_ID")
         .then((r) => r.value)
-        .catch(() => this.configService.get("BUNNY_STREAM_LIBRARY_ID")),
+        .catch(() => this.configService.get("bunny.BUNNY_STREAM_LIBRARY_ID")),
     ]);
 
     return Boolean(apiKey && libraryId);
@@ -170,7 +178,86 @@ export class BunnyStreamService {
 
   async getUrl(videoId: string): Promise<string> {
     const cfg = await this.getConfig();
-    const baseUrl = `https://iframe.mediadelivery.net/embed/${cfg.libraryId}/${videoId}`;
-    return baseUrl;
+
+    const httpClient = this.createHttpClient(cfg);
+
+    const { data } = await httpClient.get(`/videos/${videoId}/play`);
+    const expiresAt = Math.floor(Date.now() / 1000) + BUNNY_CDN_TOKEN_EXPIRY;
+
+    return this.signBunnyUrl(data.videoPlaylistUrl, expiresAt, cfg.tokenSigningKey, {
+      pathAllowed: this.getTokenPath(new URL(data.videoPlaylistUrl).pathname),
+      outputFormat: "path",
+    });
+  }
+
+  async getThumbnailUrl(videoId: string): Promise<string> {
+    const cfg = await this.getConfig();
+
+    const url = `https://${cfg.cdnUrl}/${videoId}/thumbnail.jpg`;
+    const expiresAt = Math.floor(Date.now() / 1000) + BUNNY_CDN_TOKEN_EXPIRY;
+
+    return this.signBunnyUrl(url, expiresAt, cfg.tokenSigningKey);
+  }
+
+  async signBunnyUrl(
+    url: string,
+    expires: number,
+    securityKey: string,
+    options?: { pathAllowed?: string; userIp?: string; outputFormat?: "query" | "path" },
+  ) {
+    const u = new URL(url);
+    const parameters = new URLSearchParams(u.search);
+    const signaturePath = options?.pathAllowed ?? decodeURIComponent(u.pathname);
+    const userIp = options?.userIp ?? "";
+
+    if (options?.pathAllowed) {
+      parameters.set("token_path", options.pathAllowed);
+    }
+
+    const sortedParams = Array.from(parameters.entries())
+      .filter(([key]) => key !== "token" && key !== "expires")
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([key, value]) => `${key}=${value}`)
+      .join("&");
+
+    const base = securityKey + signaturePath + String(expires) + userIp + sortedParams;
+
+    const token = createHash("sha256")
+      .update(base)
+      .digest("base64")
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=+$/g, "");
+
+    parameters.set("token", token);
+    parameters.set("expires", String(expires));
+
+    if (options?.outputFormat === "path") {
+      const tokenPart = new URLSearchParams();
+      tokenPart.set("bcdn_token", token);
+      tokenPart.set("expires", String(expires));
+
+      const tokenPath = parameters.get("token_path");
+      if (tokenPath) {
+        tokenPart.set("token_path", tokenPath);
+      }
+
+      const passthroughParams = new URLSearchParams(parameters);
+      passthroughParams.delete("token");
+      passthroughParams.delete("expires");
+      passthroughParams.delete("token_path");
+
+      const passthroughQuery = passthroughParams.toString();
+      const signedPathUrl = `${u.origin}/${tokenPart.toString()}${u.pathname}`;
+      return passthroughQuery ? `${signedPathUrl}?${passthroughQuery}` : signedPathUrl;
+    }
+
+    const query = parameters.toString();
+    return `${u.origin}${u.pathname}${query ? `?${query}` : ""}`;
+  }
+
+  private getTokenPath(pathname: string): string {
+    const lastSlashIndex = pathname.lastIndexOf("/");
+    return lastSlashIndex >= 0 ? pathname.slice(0, lastSlashIndex + 1) : "/";
   }
 }

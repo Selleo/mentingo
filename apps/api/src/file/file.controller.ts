@@ -18,10 +18,12 @@ import {
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes, ApiQuery, ApiResponse } from "@nestjs/swagger";
+import { VIDEO_EMBED_PROVIDERS, type VideoProvider } from "@repo/shared";
+import { Type } from "@sinclair/typebox";
 import { Request, Response } from "express";
 import { Validate } from "nestjs-typebox";
 
-import { UUIDSchema, UUIDType } from "src/common";
+import { baseResponse, BaseResponse, UUIDSchema, UUIDType } from "src/common";
 import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
@@ -38,6 +40,7 @@ import { USER_ROLES } from "src/user/schemas/userRoles";
 import { FileService } from "./file.service";
 import { bunnyWebhookSchema, type BunnyWebhookBody } from "./schemas/bunny-webhook.schema";
 import { FileUploadResponse } from "./schemas/file.schema";
+import { getThumbnailQuerySchema } from "./schemas/thumbnail.schema";
 import {
   videoInitResponseSchema,
   videoInitSchema,
@@ -49,6 +52,8 @@ import {
   type VideoUploadStatusResponse,
 } from "./schemas/video-upload-status.schema";
 import { TusUploadService } from "./tus/tus-upload.service";
+
+import type { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 
 @UseGuards(RolesGuard)
 @Controller("file")
@@ -237,6 +242,38 @@ export class FileController {
   })
   async deleteFile(@Query("fileKey") fileKey: string): Promise<void> {
     await this.fileService.deleteFile(fileKey);
+  }
+
+  @Get("thumbnail")
+  @Validate({
+    request: [
+      {
+        type: "query",
+        name: "sourceUrl",
+        schema: getThumbnailQuerySchema.properties.sourceUrl,
+        required: true,
+      },
+      {
+        type: "query",
+        name: "provider",
+        schema: getThumbnailQuerySchema.properties.provider,
+        required: false,
+      },
+    ],
+    response: baseResponse(Type.Object({ url: Type.String() })),
+  })
+  async getThumbnail(
+    @Query("sourceUrl") sourceUrl: string,
+    @Query("provider") provider: VideoProvider | undefined,
+    @CurrentUser() currentUser: CurrentUserType | null,
+  ) {
+    return new BaseResponse({
+      url: await this.fileService.getThumbnail(
+        sourceUrl,
+        provider ?? VIDEO_EMBED_PROVIDERS.UNKNOWN,
+        currentUser,
+      ),
+    });
   }
 
   private setTusHeaders(res: Response, extraHeaders: Record<string, string> = {}) {

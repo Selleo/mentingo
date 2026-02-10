@@ -1,3 +1,4 @@
+import { VIDEO_AUTOPLAY } from "@repo/shared";
 import { load as loadHtml } from "cheerio";
 
 import type { UUIDType } from "src/common";
@@ -23,12 +24,20 @@ export const injectResourcesIntoContent = <T extends ContentResource>(
   content: string | null,
   resources: T[],
   options: InjectResourcesOptions<T>,
-): { html: string | null; contentCount: Record<string, number> } => {
+): {
+  html: string | null;
+  contentCount: Record<string, number>;
+  hasAutoplayTrigger: boolean;
+  videos?: string[];
+} => {
   const contentCount: Record<string, number> = {};
+  const videos: string[] = [];
+  let hasAutoplayTrigger = false;
+
   const increment = (key: string) => (contentCount[key] = (contentCount[key] ?? 0) + 1);
 
-  if (!content) return { html: content, contentCount };
-  if (!resources.length) return { html: content, contentCount };
+  if (!content) return { html: content, contentCount, hasAutoplayTrigger };
+  if (!resources.length) return { html: content, contentCount, hasAutoplayTrigger };
 
   const $ = loadHtml(content);
   const resourceMap = new Map(resources.map((resource) => [resource.id, resource]));
@@ -51,10 +60,24 @@ export const injectResourcesIntoContent = <T extends ContentResource>(
     }
 
     if (nodeType === "video") {
+      const autoplayAction = $(element).attr("data-autoplay");
+      if (
+        autoplayAction === VIDEO_AUTOPLAY.AUTOPLAY ||
+        autoplayAction === VIDEO_AUTOPLAY.AUTOPLAY_WITH_PLAY_NEXT
+      ) {
+        hasAutoplayTrigger = true;
+      }
+
       const src = $(element).attr("data-src");
       const match = src?.match(options.resourceIdRegex);
       const resourceId = match?.[1] ?? null;
       const resource = resourceId ? resourceMap.get(resourceId as UUIDType) : null;
+
+      $(element).attr("data-index", String(videos.length));
+
+      if (src && !resource?.fileUrlError) {
+        videos.push(src);
+      }
 
       if (resource?.fileUrlError) {
         $(element).attr("data-error", "true");
@@ -90,5 +113,10 @@ export const injectResourcesIntoContent = <T extends ContentResource>(
   });
 
   const bodyChildren = $("body").children();
-  return { html: $.html(bodyChildren.length ? bodyChildren : $.root().children()), contentCount };
+  return {
+    html: $.html(bodyChildren.length ? bodyChildren : $.root().children()),
+    contentCount,
+    hasAutoplayTrigger,
+    videos,
+  };
 };

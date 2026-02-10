@@ -1,62 +1,34 @@
+import {
+  VIDEO_EMBED_PROVIDERS,
+  detectVideoProviderFromUrl,
+  extractVimeoId,
+  extractYoutubeId,
+  tryParseUrl,
+  type VideoProvider,
+  type VideoAutoplay,
+  VIDEO_AUTOPLAY,
+} from "@repo/shared";
 import { match } from "ts-pattern";
 
 export const VIDEO_NODE_TYPE = "video" as const;
 
 export type VideoSourceType = "internal" | "external";
-export type VideoProvider = "self" | "youtube" | "vimeo" | "bunny" | "unknown";
-
+export type { VideoProvider } from "@repo/shared";
 export type VideoEmbedAttrs = {
   src: string | null;
   sourceType: VideoSourceType;
   provider: VideoProvider;
   hasError: boolean;
+  autoplay: VideoAutoplay;
+  index: number | null;
 };
 
 const isVideoSourceType = (value: string | null | undefined): value is VideoSourceType =>
   value === "internal" || value === "external";
 
 const isVideoProvider = (value: string | null | undefined): value is VideoProvider =>
-  value === "self" ||
-  value === "youtube" ||
-  value === "vimeo" ||
-  value === "bunny" ||
-  value === "unknown";
-
-const tryParseUrl = (input: string): URL | null => {
-  try {
-    return new URL(input);
-  } catch {
-    return null;
-  }
-};
-
-const extractYoutubeId = (url: URL): string | null => {
-  if (url.hostname === "youtu.be") {
-    return url.pathname.replace("/", "").split("/")[0] || null;
-  }
-
-  if (url.pathname === "/watch") {
-    return url.searchParams.get("v");
-  }
-
-  const pathParts = url.pathname.split("/").filter(Boolean);
-
-  const embedIndex = pathParts.findIndex((part) => part === "embed" || part === "shorts");
-
-  if (embedIndex !== -1 && pathParts[embedIndex + 1]) {
-    return pathParts[embedIndex + 1];
-  }
-
-  return null;
-};
-
-const extractVimeoId = (url: URL): string | null => {
-  const pathParts = url.pathname.split("/").filter(Boolean);
-  const lastPart = pathParts[pathParts.length - 1];
-  if (!lastPart) return null;
-
-  return /^\d+$/.test(lastPart) ? lastPart : null;
-};
+  typeof value === "string" &&
+  (Object.values(VIDEO_EMBED_PROVIDERS) as VideoProvider[]).includes(value as VideoProvider);
 
 export const extractUrlFromClipboard = (e: ClipboardEvent): string | null => {
   const text = e.clipboardData?.getData("text/plain")?.trim();
@@ -73,34 +45,11 @@ export const extractUrlFromClipboard = (e: ClipboardEvent): string | null => {
   }
 };
 
-export const detectVideoProvider = (src: string): VideoProvider => {
-  const url = tryParseUrl(src);
-
-  if (!url) return "unknown";
-
-  const host = url.hostname.toLowerCase();
-
-  return match(host)
-    .when(
-      (value) => value === "youtu.be" || value.endsWith("youtube.com"),
-      () => "youtube" as const,
-    )
-    .when(
-      (value) => value.endsWith("vimeo.com"),
-      () => "vimeo" as const,
-    )
-    .when(
-      (value) => value.includes("bunny") || value.includes("b-cdn"),
-      () => "bunny" as const,
-    )
-    .otherwise(() => "unknown");
-};
-
 export const canonicalizeExternalUrl = (src: string, provider?: VideoProvider): string => {
   const url = tryParseUrl(src);
   if (!url) return src;
 
-  const resolvedProvider = provider ?? detectVideoProvider(src);
+  const resolvedProvider = provider ?? detectVideoProviderFromUrl(src);
 
   return match(resolvedProvider)
     .with("youtube", () => {
@@ -119,6 +68,18 @@ type VideoEmbedAttrsInput = {
   sourceType?: string | null;
   provider?: string | null;
   hasError?: boolean | string | null;
+  autoplay?: string | null;
+  index?: number | string | null;
+};
+
+const normalizeVideoIndex = (value: number | string | null | undefined): number | null => {
+  if (typeof value === "number") {
+    return Number.isFinite(value) && value >= 0 ? Math.floor(value) : null;
+  }
+
+  if (typeof value !== "string") return null;
+  const parsed = Number.parseInt(value, 10);
+  return Number.isNaN(parsed) || parsed < 0 ? null : parsed;
 };
 
 export const normalizeVideoEmbedAttributes = (attrs: VideoEmbedAttrsInput): VideoEmbedAttrs => {
@@ -129,7 +90,11 @@ export const normalizeVideoEmbedAttributes = (attrs: VideoEmbedAttrsInput): Vide
     .when(isVideoSourceType, (value) => value)
     .otherwise(() => "external");
 
-  const detectedProvider = sourceType === "internal" ? "self" : detectVideoProvider(src || "");
+  const detectedProvider =
+    sourceType === "internal" ? VIDEO_EMBED_PROVIDERS.SELF : detectVideoProviderFromUrl(src || "");
+
+  const autoplay = (attrs.autoplay ?? VIDEO_AUTOPLAY.NO_AUTOPLAY) as VideoAutoplay;
+  const index = normalizeVideoIndex(attrs.index);
 
   const provider = match(attrs.provider)
     .when(isVideoProvider, (value) => value)
@@ -142,6 +107,8 @@ export const normalizeVideoEmbedAttributes = (attrs: VideoEmbedAttrsInput): Vide
     sourceType,
     provider,
     hasError,
+    autoplay,
+    index,
   };
 };
 
@@ -157,6 +124,8 @@ export const getVideoEmbedAttrsFromElement = (element: HTMLElement): VideoEmbedA
   const sourceTypeAttr = element.getAttribute("data-source-type");
   const providerAttr = element.getAttribute("data-provider");
   const errorAttr = element.getAttribute("data-error");
+  const autoplayAttr = element.getAttribute("data-autoplay");
+  const indexAttr = element.getAttribute("data-index");
 
   const sourceType: VideoSourceType = match(sourceTypeAttr)
     .when(isVideoSourceType, (value) => value)
@@ -164,12 +133,14 @@ export const getVideoEmbedAttrsFromElement = (element: HTMLElement): VideoEmbedA
 
   const provider = match(providerAttr)
     .when(isVideoProvider, (value) => value)
-    .otherwise(() => (sourceType === "internal" ? "self" : detectVideoProvider(src)));
+    .otherwise(() => (sourceType === "internal" ? "self" : detectVideoProviderFromUrl(src)));
 
   return normalizeVideoEmbedAttributes({
     src,
     sourceType,
     provider,
+    autoplay: autoplayAttr,
     hasError: errorAttr,
+    index: indexAttr,
   });
 };

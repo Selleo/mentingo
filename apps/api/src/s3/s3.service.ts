@@ -6,12 +6,24 @@ import {
   CreateMultipartUploadCommand,
   UploadPartCommand,
   CompleteMultipartUploadCommand,
+  HeadObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 
-import type { Readable } from "stream";
+import type { PassThrough, Readable } from "stream";
+
+type S3FileStreamResponse = {
+  stream: Readable;
+  contentType?: string;
+  contentLength?: number;
+  contentRange?: string;
+  acceptRanges?: string;
+  etag?: string;
+  lastModified?: Date;
+  statusCode?: number;
+};
 
 @Injectable()
 export class S3Service {
@@ -111,7 +123,11 @@ export class S3Service {
     return Buffer.from(bytes || []);
   }
 
-  async uploadFile(fileBuffer: Buffer, key: string, contentType: string): Promise<void> {
+  async uploadFile(
+    fileBuffer: Buffer | PassThrough,
+    key: string,
+    contentType: string,
+  ): Promise<void> {
     const command = new PutObjectCommand({
       Bucket: this.bucketName,
       Key: key,
@@ -201,13 +217,35 @@ export class S3Service {
     await this.s3Client.send(command);
   }
 
-  async getFileStream(key: string) {
+  async getFileStream(key: string, range?: string): Promise<S3FileStreamResponse> {
     const command = new GetObjectCommand({
       Bucket: this.bucketName,
       Key: key,
+      ...(range ? { Range: range } : {}),
     });
 
     const response = await this.s3Client.send(command);
-    return response.Body as Readable;
+    return {
+      stream: response.Body as Readable,
+      contentType: response.ContentType,
+      contentLength: response.ContentLength,
+      contentRange: response.ContentRange,
+      acceptRanges: response.AcceptRanges,
+      etag: response.ETag,
+      lastModified: response.LastModified,
+      statusCode: response.$metadata.httpStatusCode,
+    };
+  }
+
+  async getFileExists(key: string) {
+    const command = new HeadObjectCommand({ Bucket: this.bucketName, Key: key });
+
+    try {
+      await this.s3Client.send(command);
+      return true;
+    } catch (err) {
+      if (err?.$metadata.httpStatusCode === 404) return false;
+      throw err;
+    }
   }
 }

@@ -18,6 +18,7 @@ import { injectResourcesIntoContent } from "src/common/utils/injectResourcesInto
 import { QuizCompletedEvent } from "src/events";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
+import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import { QuestionRepository } from "src/questions/question.repository";
@@ -40,7 +41,7 @@ import type {
 } from "../lesson.schema";
 import type { EnrolledLessonWithSearch } from "../repositories/lesson.repository";
 import type { SupportedLanguages } from "@repo/shared";
-import type { Response } from "express";
+import type { Request, Response } from "express";
 import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
 
@@ -114,16 +115,17 @@ export class LessonService {
         fileName: this.extractOriginalFilename(resource.metadata),
       }));
 
-      const { html: updatedDescription, contentCount } = injectResourcesIntoContent(
-        lesson.description,
-        mappedResources,
-        {
-          resourceIdRegex: /lesson-resource\/([0-9a-fA-F-]{36})/,
-          trackNodeTypes: ["video", "presentation", "downloadable-file"],
-          isImageResource: (resource) => this.isImageResource(resource),
-          buildImageTag: (resource) => this.buildImageTag(resource),
-        },
-      );
+      const {
+        html: updatedDescription,
+        contentCount,
+        hasAutoplayTrigger,
+        videos,
+      } = injectResourcesIntoContent(lesson.description, mappedResources, {
+        resourceIdRegex: /lesson-resource\/([0-9a-fA-F-]{36})/,
+        trackNodeTypes: ["video", "presentation", "downloadable-file"],
+        isImageResource: (resource) => this.isImageResource(resource),
+        buildImageTag: (resource) => this.buildImageTag(resource),
+      });
 
       const hasVideo = this.hasOnlyVideo(contentCount);
 
@@ -131,6 +133,9 @@ export class LessonService {
         ...lesson,
         description: updatedDescription ?? lesson.description,
         hasOnlyVideo: hasVideo,
+        hasVideo: contentCount.video > 0,
+        hasAutoplayTrigger,
+        videos,
       };
     }
 
@@ -425,7 +430,13 @@ export class LessonService {
     });
   }
 
-  async getLessonResource(res: Response, userId: UUIDType, role: UserRole, resourceId: UUIDType) {
+  async getLessonResource(
+    req: Request,
+    res: Response,
+    userId: UUIDType,
+    role: UserRole,
+    resourceId: UUIDType,
+  ) {
     const isStudent = role === USER_ROLES.STUDENT;
 
     const lessonResource = await this.lessonRepository.getResource(resourceId);
@@ -443,11 +454,11 @@ export class LessonService {
       throw new ForbiddenException("You are not allowed to access this lesson!");
     }
 
-    const fileUrl = await this.fileService.getFileUrl(lessonResource.reference);
+    const rangeHeader = req.headers.range;
+    const file = await this.fileService.getFileStream(lessonResource.reference, rangeHeader);
 
-    if (!fileUrl) throw new Error("Error fetching file url");
-
-    return res.redirect(fileUrl);
+    if (!file || !file.stream) throw new Error("Error fetching file stream");
+    streamFileToResponse(res, file);
   }
 
   async getLessons(

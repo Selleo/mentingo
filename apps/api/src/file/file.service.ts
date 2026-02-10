@@ -9,7 +9,14 @@ import {
   InternalServerErrorException,
   Logger,
 } from "@nestjs/common";
-import { ALLOWED_VIDEO_FILE_TYPES, ENTITY_TYPES, VIDEO_UPLOAD_STATUS } from "@repo/shared";
+import {
+  ALLOWED_VIDEO_FILE_TYPES,
+  ENTITY_TYPES,
+  VIDEO_UPLOAD_STATUS,
+  type VideoProvider,
+  type SupportedLanguages,
+  type EntityType,
+} from "@repo/shared";
 import { TypeCompiler } from "@sinclair/typebox/compiler";
 import { CacheManagerStore } from "cache-manager";
 import { parse } from "csv-parse";
@@ -34,6 +41,7 @@ import {
 } from "./file.constants";
 import { BunnyVideoProvider } from "./providers/bunny-video.provider";
 import { S3VideoProvider } from "./providers/s3-video.provider";
+import { ThumbnailService } from "./thumbnail.service";
 import { CONTEXT_TTL, getContextKey } from "./utils/resourceCacheKeys";
 import { VideoProcessingStateService } from "./video-processing-state.service";
 import { VideoUploadNotificationGateway } from "./video-upload-notification.gateway";
@@ -47,9 +55,9 @@ import type {
   VideoProviderInitResult,
   VideoStorageProvider,
 } from "./video-storage-provider";
-import type { SupportedLanguages, EntityType } from "@repo/shared";
 import type { Static, TSchema } from "@sinclair/typebox";
 import type { UUIDType } from "src/common";
+import type { CurrentUser } from "src/common/types/current-user.type";
 import type {
   UploadResourceParams,
   CreateResourceForEntityParams,
@@ -65,6 +73,7 @@ export class FileService {
     private readonly videoProcessingStateService: VideoProcessingStateService,
     private readonly bunnyVideoProvider: BunnyVideoProvider,
     private readonly s3VideoProvider: S3VideoProvider,
+    private readonly thumbnailService: ThumbnailService,
     @Inject("DB") private readonly db: DatabasePg,
     @Inject("CACHE_MANAGER") private readonly cache: CacheManagerStore,
     private readonly notificationGateway: VideoUploadNotificationGateway,
@@ -78,7 +87,8 @@ export class FileService {
 
       return this.bunnyStreamService.getUrl(videoId);
     }
-    return await this.s3Service.getSignedUrl(fileKey);
+
+    return this.s3Service.getSignedUrl(fileKey);
   }
 
   async isBunnyConfigured(): Promise<boolean> {
@@ -355,9 +365,9 @@ export class FileService {
     }
   }
 
-  async getFileStream(fileKey: string) {
+  async getFileStream(fileKey: string, range?: string) {
     try {
-      return await this.s3Service.getFileStream(fileKey);
+      return await this.s3Service.getFileStream(fileKey, range);
     } catch (error) {
       throw new BadRequestException("Failed to retrieve file");
     }
@@ -692,5 +702,9 @@ export class FileService {
     await this.videoProcessingStateService.markProcessed(videoId, fileUrl);
 
     return { success: true };
+  }
+
+  async getThumbnail(sourceUrl: string, provider: VideoProvider, currentUser: CurrentUser | null) {
+    return this.thumbnailService.getThumbnail(sourceUrl, provider, currentUser);
   }
 }
