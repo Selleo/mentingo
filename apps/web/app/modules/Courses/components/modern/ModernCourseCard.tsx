@@ -150,7 +150,7 @@ const ModernCourseCard = ({
 
     let cancelled = false;
     getBunnySignedOriginalUrl({
-      trailerUrl,
+      trailerUrl: trailerUrl ?? "",
       cdnHost: bunnyCdnHost,
       signingKey: bunnySigningKey,
       ttlSeconds: 60 * 60,
