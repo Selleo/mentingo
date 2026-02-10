@@ -18,55 +18,6 @@ const isEmbedUrl = (url: string): boolean => {
   return url.includes("iframe.mediadelivery.net/embed") || url.includes("youtube.com/embed");
 };
 
-// Bunny CDN "Advanced Token Authentication" (SHA256):
-// token = Base64UrlSafe( SHA256( securityKey + signedPath + expires ) )
-const arrayBufferToBase64Url = (buffer: ArrayBuffer): string => {
-  const bytes = new Uint8Array(buffer);
-  let binary = "";
-  for (let i = 0; i < bytes.length; i += 1) {
-    binary += String.fromCharCode(bytes[i]);
-  }
-
-  // base64 -> base64url (replace +/ and strip =)
-  return btoa(binary).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
-};
-
-const sha256Base64Url = async (value: string): Promise<string> => {
-  const data = new TextEncoder().encode(value);
-  const digest = await crypto.subtle.digest("SHA-256", data);
-  return arrayBufferToBase64Url(digest);
-};
-
-const parseBunnyEmbedUrl = (url: string): { libraryId: string; videoId: string } | null => {
-  const match = url.match(/iframe\.mediadelivery\.net\/embed\/([^/]+)\/([^/?#]+)/);
-  if (!match) return null;
-  const [, libraryId, videoId] = match;
-  return { libraryId, videoId };
-};
-
-const getBunnySignedOriginalUrl = async ({
-  trailerUrl,
-  cdnHost,
-  signingKey,
-  ttlSeconds = 3600,
-}: {
-  trailerUrl: string;
-  cdnHost: string;
-  signingKey: string;
-  ttlSeconds?: number;
-}): Promise<string | null> => {
-  const parsed = parseBunnyEmbedUrl(trailerUrl);
-  if (!parsed) return null;
-
-  const { videoId } = parsed;
-  const signedPath = `/${videoId}/original`;
-  const expires = Math.floor(Date.now() / 1000) + ttlSeconds;
-
-  const token = await sha256Base64Url(`${signingKey}${signedPath}${expires}`);
-  console.log({ token });
-  return `https://${cdnHost}${signedPath}?token=${token}&expires=${expires}`;
-};
-
 const getEmbedUrlWithParams = (url: string): string => {
   const separator = url.includes("?") ? "&" : "?";
   const params =
@@ -115,7 +66,6 @@ const ModernCourseCard = ({
   const [isHovered, setIsHovered] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const [isIframeLoaded, setIsIframeLoaded] = useState(false);
-  const [signedBunnyOriginalSrc, setSignedBunnyOriginalSrc] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const preloadTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -140,62 +90,6 @@ const ModernCourseCard = ({
     () => (trailerUrl && isEmbed ? getEmbedUrlWithParams(trailerUrl) : null),
     [trailerUrl, isEmbed],
   );
-
-  const bunnyCdnHost = import.meta.env.VITE_BUNNY_STREAM_CDN_URL;
-  const bunnySigningKey = import.meta.env.VITE_BUNNY_STREAM_SIGNING_KEY;
-  const isBunnyEmbed = Boolean(trailerUrl?.includes("iframe.mediadelivery.net/embed"));
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    let cancelled = false;
-    getBunnySignedOriginalUrl({
-      trailerUrl: trailerUrl ?? "",
-      cdnHost: bunnyCdnHost,
-      signingKey: bunnySigningKey,
-      ttlSeconds: 60 * 60,
-    })
-      .then((url) => {
-        console.log({ url });
-        if (!cancelled) setSignedBunnyOriginalSrc(url);
-      })
-      .catch(() => {
-        if (!cancelled) setSignedBunnyOriginalSrc(null);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [bunnyCdnHost, bunnySigningKey, isBunnyEmbed, trailerUrl]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (!trailerUrl || !isBunnyEmbed || !bunnyCdnHost || !bunnySigningKey) return;
-
-    // Refresh the token periodically so it doesn't expire mid-session.
-    // Fast-return when not needed.
-    const intervalId = window.setInterval(
-      () => {
-        getBunnySignedOriginalUrl({
-          trailerUrl,
-          cdnHost: bunnyCdnHost,
-          signingKey: bunnySigningKey,
-          ttlSeconds: 60 * 60,
-        })
-          .then((url) => {
-            if (url) setSignedBunnyOriginalSrc(url);
-          })
-          .catch(() => {
-            // ignore refresh failures
-          });
-      },
-      15 * 60 * 1000,
-    );
-
-    return () => {
-      window.clearInterval(intervalId);
-    };
-  }, [bunnyCdnHost, bunnySigningKey, isBunnyEmbed, trailerUrl]);
 
   useEffect(() => {
     if (isEmbed || !trailerUrl) return;
@@ -337,8 +231,6 @@ const ModernCourseCard = ({
     const linkOpacity = isPortal ? (portalActive ? 1 : 0) : portalActive ? 0 : 1;
     const wrapperOpacity = linkOpacity;
 
-    console.log({ signedBunnyOriginalSrc });
-
     return (
       <div
         className={cn("relative z-50", className)}
@@ -441,22 +333,7 @@ const ModernCourseCard = ({
                       className="absolute inset-0 z-10 bg-gradient-to-t from-black via-black/50 to-transparent pointer-events-none"
                     />
                   </div>
-                  {signedBunnyOriginalSrc ? (
-                    <video
-                      ref={videoRef}
-                      src={signedBunnyOriginalSrc}
-                      preload="auto"
-                      className={cn(
-                        "absolute inset-0 h-full w-full object-cover transition-opacity duration-300 pointer-events-none",
-                        isHovered && showVideo ? "opacity-100" : "opacity-0",
-                      )}
-                      muted
-                      loop
-                      playsInline
-                      autoPlay
-                      controls={false}
-                    />
-                  ) : isEmbed && embedSrc ? (
+                  {isEmbed && embedSrc ? (
                     <iframe
                       src={isHovered ? embedSrc : undefined}
                       className={cn(
