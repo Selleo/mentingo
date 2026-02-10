@@ -415,7 +415,7 @@ const Users = () => {
             <Button onClick={() => setIsImportModalOpen(true)}>
               {t("adminUsersView.button.import")}
             </Button>
-            <EditDropdown dropdownItems={dropdownItems} />
+            <EditDropdown dropdownItems={dropdownItems} disabled={!selectedUsers.length} />
           </div>
         </div>
         <div className="flex items-center justify-between gap-2">
