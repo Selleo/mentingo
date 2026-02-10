@@ -142,8 +142,9 @@ const CarouselContent = React.forwardRef<HTMLDivElement, CarouselContentProps>(
     const wheelState = React.useRef({ direction: 0, count: 0, timer: null as ReturnType<typeof setTimeout> | null });
 
     React.useEffect(() => {
+      const timer = wheelState.current.timer;
       return () => {
-        if (wheelState.current.timer) clearTimeout(wheelState.current.timer);
+        if (timer) clearTimeout(timer);
       };
     }, []);
 

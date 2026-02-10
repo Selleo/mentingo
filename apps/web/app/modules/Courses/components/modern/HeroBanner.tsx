@@ -20,13 +20,11 @@ import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/Language
 import { findFirstInProgressLessonId, findFirstNotStartedLessonId } from "../../Lesson/utils";
 import { navigateToNextLesson } from "../../utils/navigateToNextLesson";
 
-import image from "./kurs.jpeg";
 import { formatDuration } from "./utils";
 
 type HeroBannerProps = {
   id: string;
   title: string;
-  thumbnailUrl?: string | null;
   trailerUrl?: string | null;
   estimatedDurationMinutes?: number;
   lessonCount?: number;
@@ -36,7 +34,6 @@ type HeroBannerProps = {
 const HeroBanner = ({
   id,
   title,
-  thumbnailUrl,
   trailerUrl,
   estimatedDurationMinutes,
   lessonCount,

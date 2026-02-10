@@ -70,7 +70,10 @@ const TopCoursesCarousel = ({ courses }: TopCoursesCarouselProps) => {
         opts={{ align: "start", slidesToScroll: 1, skipSnaps: false }}
         setApi={setCarouselApi}
       >
-        <CarouselContent className="gap-24 px-4 mt-4 md:px-8 ml-20">
+        <CarouselContent
+          className="gap-24 px-4 mt-4 md:px-8 ml-20"
+          viewportClassName="overflow-x-visible"
+        >
           {courses.map((course, index) => (
             <CarouselItem
               key={course.id}
