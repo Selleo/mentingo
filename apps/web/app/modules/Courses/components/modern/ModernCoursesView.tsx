@@ -72,7 +72,7 @@ const ModernCoursesView = () => {
       .sort((a, b) => a.category.localeCompare(b.category));
   }, [availableCourses]);
 
-  const heroCourse = topCourses?.[0] ?? availableCourses?.[0];
+  const heroCourse = topCourses?.[0] ?? availableCourses?.[0] ?? studentCourses?.[0];
 
   if ((isAvailableCoursesLoading || isTopCoursesLoading) && !heroCourse) {
     return (
@@ -84,25 +84,17 @@ const ModernCoursesView = () => {
     );
   }
 
-  if (!heroCourse) {
-    return (
-      <PageWrapper isBarebones className="w-full p-0">
-        <div className="flex h-full min-h-[60vh] items-center justify-center text-neutral-600">
+  const renderCourses = () => {
+    if (!heroCourse) {
+      return (
+        <div className="flex min-h-screen items-center justify-center text-neutral-600">
           {t("studentCoursesView.other.cannotFindCourses")}
         </div>
-      </PageWrapper>
-    );
-  }
+      );
+    }
 
-  return (
-    <PageWrapper
-      isBarebones
-      className="w-full p-0 mb-4 overflow-x-hidden"
-      wrapperClassName="h-full"
-    >
-      <div className="min-h-screen">
-        {isAdminLike && <CoursesHeader />}
-
+    return (
+      <>
         <HeroBanner
           id={heroCourse.id}
           title={heroCourse.title}
@@ -127,10 +119,12 @@ const ModernCoursesView = () => {
             )
           )}
 
-          <section>
-            <h2 className="h2 px-4 md:px-8">{t("studentCoursesView.modernView.topCourses")}</h2>
-            <TopCoursesCarousel courses={topCourses ?? []} />
-          </section>
+          {topCourses?.length ? (
+            <section>
+              <h2 className="h2 px-4 md:px-8">{t("studentCoursesView.modernView.topCourses")}</h2>
+              <TopCoursesCarousel courses={topCourses ?? []} />
+            </section>
+          ) : null}
 
           {groupedCourses.map(({ category, courses }) => (
             <ModernCourseCarousel
@@ -141,6 +135,20 @@ const ModernCoursesView = () => {
             />
           ))}
         </div>
+      </>
+    );
+  };
+
+  return (
+    <PageWrapper
+      isBarebones
+      className="w-full p-0 mb-4 overflow-x-hidden min-h-screen"
+      wrapperClassName="h-full"
+    >
+      <div className="min-h-screen">
+        {isAdminLike && <CoursesHeader />}
+
+        {renderCourses()}
       </div>
     </PageWrapper>
   );
