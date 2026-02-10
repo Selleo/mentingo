@@ -1,8 +1,8 @@
 import { VIDEO_EMBED_PROVIDERS, type VideoProvider } from "../constants/videoProviders";
 
-const UUID_REGEX = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+const UUID_REGEX = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i; // e.g. 123e4567-e89b-12d3-a456-426614174000
 
-export const tryParseUrl = (input: string): URL | null => {
+export const tryParseUrl = (input: string) => {
   try {
     return new URL(input);
   } catch {
