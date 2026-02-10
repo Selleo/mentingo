@@ -53,11 +53,11 @@ const logout = async (page: Page) => {
 };
 
 const expectCourseVisible = async (page: Page, title: string) => {
-  await expect(page.getByRole("link", { name: title }).first()).toBeVisible();
+  await expect(page.getByRole("listitem").filter({ hasText: title }).first()).toBeVisible();
 };
 
 const openCourseFromSearch = async (page: Page, title: string) => {
-  await page.getByRole("link", { name: title }).first().click();
+  await page.getByRole("listitem").filter({ hasText: title }).first().click();
 };
 
 const expectCourseVisibility = async (page: Page, isAdmin: boolean) => {

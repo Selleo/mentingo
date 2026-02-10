@@ -635,10 +635,19 @@ const expectCourseNotVisibleForStudent = async (page: Page, courseTitle: string)
   await expect(page.getByTestId(courseTitle)).not.toBeVisible();
 };
 
+const openAdminCourse = async (page: Page, courseTitle: string) => {
+  await login(page, PRIVATE_COURSE.admin.email, PRIVATE_COURSE.admin.password);
+  await page.getByRole("button", { name: "Manage courses" }).click();
+  await page.getByRole("button", { name: /create new/i }).waitFor({ state: "visible" });
+  await page.getByRole("cell", { name: courseTitle }).first().click();
+};
+
 const setCourseAsPrivate = async (page: Page) => {
-  await page.getByRole("button", { name: "Courses" }).getByRole("link").click();
-  await page.getByTestId(PRIVATE_COURSE.titleTestId).first().click();
-  await page.getByRole("button", { name: "Edit Course" }).click();
+  await openAdminCourse(page, PRIVATE_COURSE.heading);
+  const editButton = page.getByRole("button", { name: "Edit Course" });
+  if (await editButton.isVisible().catch(() => false)) {
+    await editButton.click();
+  }
   await page.getByRole("tab", { name: "Status" }).click();
   await page.getByRole("button", { name: "Private Students cannot" }).click();
   await page.getByRole("button", { name: "Save" }).click();
@@ -714,14 +723,14 @@ test.describe.serial("Assigning students to course flow", () => {
         ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.courseToAssign,
       );
 
+      await page.waitForURL(/tab=Enrolled/);
+
       await findAndClickCell(page, ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.data.studentToAssignEmail);
 
       await enrollSelected(page);
 
       await expect(
-        page.getByTestId(
-          new RegExp(ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.data.studentToAssignEmail, "i"),
-        ),
+        page.getByTestId(ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.data.studentToAssignEmail),
       ).toHaveText(new RegExp(ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.enrolled, "i"));
     });
 
