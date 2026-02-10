@@ -227,18 +227,20 @@ export const EditModal = ({
 
             <DialogDescription>{renderContent()}</DialogDescription>
           </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={onCancel}>
-              {t("common.button.cancel")}
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              variant={type === "delete" ? "destructive" : "primary"}
-              disabled={!selectedUsers || (type === "role" && !selectedValue)}
-            >
-              {t(`adminUsersView.modal.button.${type}`)}
-            </Button>
-          </DialogFooter>
+          <div className="flex justify-end">
+            <DialogFooter className="z-50">
+              <Button variant="outline" onClick={onCancel}>
+                {t("common.button.cancel")}
+              </Button>
+              <Button
+                onClick={handleSubmit}
+                variant={type === "delete" ? "destructive" : "primary"}
+                disabled={!selectedUsers || (type === "role" && !selectedValue)}
+              >
+                {t(`adminUsersView.modal.button.${type}`)}
+              </Button>
+            </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
     </>
