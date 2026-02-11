@@ -77,8 +77,8 @@ import type { UserDetailsResponse, UserDetailsWithAvatarKey } from "./schemas/us
 import type { UserActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
-import type { UserInvite } from "src/events/user/user-invite.event";
 import type { CreateUserBody, ImportUserResponse } from "src/user/schemas/createUser.schema";
+import type { CreateUserOptions, CreateUserTransactionResult } from "src/user/user.types";
 
 @Injectable()
 export class UserService {
@@ -515,7 +515,7 @@ export class UserService {
     data: CreateUserBody,
     dbInstance?: DatabasePg,
     creator?: CurrentUser,
-    options?: { invite?: { invitedByUserName?: string; origin?: string } },
+    options?: CreateUserOptions,
   ) {
     const db = dbInstance ?? this.db;
 
@@ -528,49 +528,109 @@ export class UserService {
       throw new ConflictException("User already exists");
     }
 
-    const { createdUser, token, defaultEmailSettings } = await db.transaction(async (trx) => {
+    const { createdUser, token, newUsersLanguage } = await this.createUserTransaction(
+      db,
+      data,
+      creator,
+    );
+
+    if (creator) {
+      const snapshot = await this.buildUserActivitySnapshot(createdUser.id);
+
+      await this.outboxPublisher.publish(
+        new CreateUserEvent({
+          userId: createdUser.id,
+          actor: creator,
+          createdUserData: snapshot,
+        }),
+      );
+
+      await this.outboxPublisher.publish(
+        new UserInviteEvent({
+          creatorId: creator.userId,
+          email: createdUser.email,
+          token,
+          userId: createdUser.id,
+          tenantId: createdUser.tenantId,
+        }),
+      );
+
+      return createdUser;
+    }
+
+    if (options?.invite) {
+      await this.outboxPublisher.publish(
+        new UserInviteEvent({
+          email: createdUser.email,
+          token,
+          userId: createdUser.id,
+          tenantId: createdUser.tenantId,
+          invitedByUserName: options.invite.invitedByUserName,
+          origin: options.invite.origin,
+        }),
+      );
+
+      return createdUser;
+    }
+
+    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
+      createdUser.tenantId,
+      createdUser.id,
+      newUsersLanguage,
+    );
+
+    const createPasswordEmail = new CreatePasswordReminderEmail({
+      createPasswordLink: `${
+        process.env.CI ? "http://localhost:5173" : process.env.CORS_ORIGIN
+      }/auth/create-new-password?createToken=${token}&email=${createdUser.email}`,
+      ...defaultEmailSettings,
+    });
+
+    await this.emailService.sendEmailWithLogo(
+      {
+        to: createdUser.email,
+        subject: getEmailSubject("passwordReminderEmail", defaultEmailSettings.language),
+        text: createPasswordEmail.text,
+        html: createPasswordEmail.html,
+      },
+      { tenantId: createdUser.tenantId },
+    );
+
+    return createdUser;
+  }
+
+  private async createUserTransaction(
+    db: DatabasePg,
+    data: CreateUserBody,
+    creator?: CurrentUser,
+  ): Promise<CreateUserTransactionResult> {
+    return db.transaction(async (trx) => {
       const [createdUser] = await trx.insert(users).values(data).returning();
+
       await trx.insert(userOnboarding).values({ userId: createdUser.id });
 
+      let newUsersLanguage: SupportedLanguages = SUPPORTED_LANGUAGES.EN;
+
       if (creator) {
-        let adminsLanguage: SupportedLanguages = SUPPORTED_LANGUAGES.EN;
+        const creatorSettings = await this.settingsService.getUserSettings(creator.userId, trx);
 
-        try {
-          const creatorSettings = await this.settingsService.getUserSettings(
-            creator.userId,
-            trx as DatabasePg,
-          );
-          adminsLanguage = creatorSettings.language as SupportedLanguages;
-        } catch (error) {
-          if (!(error instanceof NotFoundException)) {
-            throw error;
-          }
-
-          const createdSettings = await this.settingsService.createSettingsIfNotExists(
-            creator.userId,
-            creator.role as UserRole,
-            undefined,
-            trx,
-          );
-          adminsLanguage = createdSettings.language as SupportedLanguages;
-        }
-
-        const finalLanguage = Object.values(SUPPORTED_LANGUAGES).includes(
+        newUsersLanguage = Object.values(SUPPORTED_LANGUAGES).includes(
           data.language as SupportedLanguages,
         )
-          ? data.language
-          : adminsLanguage;
-
-        await this.settingsService.createSettingsIfNotExists(
-          createdUser.id,
-          createdUser.role as UserRole,
-          { language: finalLanguage },
-          trx,
-        );
+          ? (data.language as SupportedLanguages)
+          : (creatorSettings.language as SupportedLanguages);
       }
 
-      const token = nanoid(64);
+      const settingsOverride = creator ? { language: newUsersLanguage } : undefined;
 
+      await this.settingsService.createSettingsIfNotExists(
+        createdUser.id,
+        createdUser.role as UserRole,
+        settingsOverride,
+        trx,
+      );
+
+      const token = nanoid(64);
       const expiryDate = new Date();
       expiryDate.setFullYear(expiryDate.getFullYear() + 1);
 
@@ -584,91 +644,17 @@ export class UserService {
         })
         .returning();
 
-      await this.settingsService.createSettingsIfNotExists(
-        createdUser.id,
-        createdUser.role as UserRole,
-        undefined,
-        trx,
-      );
-
-      if (USER_ROLES.CONTENT_CREATOR === createdUser.role || USER_ROLES.ADMIN === createdUser.role)
+      if (
+        createdUser.role === USER_ROLES.CONTENT_CREATOR ||
+        createdUser.role === USER_ROLES.ADMIN
+      ) {
         await trx
           .insert(userDetails)
           .values({ userId: createdUser.id, contactEmail: createdUser.email });
+      }
 
-      const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
-        createdUser.tenantId,
-        createdUser.id,
-      );
-
-      return { createdUser, token: createToken, defaultEmailSettings };
+      return { createdUser, token: createToken, newUsersLanguage };
     });
-
-    if (!createdUser || !token) {
-      throw new Error("Failed to create user");
-    }
-
-    if (creator) {
-      const snapshot = await this.buildUserActivitySnapshot(createdUser.id);
-
-      await this.outboxPublisher.publish(
-        new CreateUserEvent({
-          userId: createdUser.id,
-          actor: creator,
-          createdUserData: snapshot,
-        }),
-      );
-    }
-
-    if (!creator && options?.invite) {
-      const userInviteDetails: UserInvite = {
-        email: createdUser.email,
-        token,
-        userId: createdUser.id,
-        tenantId: createdUser.tenantId,
-        invitedByUserName: options.invite.invitedByUserName,
-        origin: options.invite.origin,
-        ...defaultEmailSettings,
-      };
-
-      await this.outboxPublisher.publish(new UserInviteEvent(userInviteDetails));
-
-      return createdUser;
-    }
-
-    if (!creator) {
-      const createPasswordEmail = new CreatePasswordReminderEmail({
-        createPasswordLink: `${
-          process.env.CI ? "http://localhost:5173" : process.env.CORS_ORIGIN
-        }/auth/create-new-password?createToken=${token}&email=${createdUser.email}`,
-        ...defaultEmailSettings,
-      });
-
-      await this.emailService.sendEmailWithLogo(
-        {
-          to: createdUser.email,
-          subject: getEmailSubject("passwordReminderEmail", defaultEmailSettings.language),
-          text: createPasswordEmail.text,
-          html: createPasswordEmail.html,
-        },
-        { tenantId: createdUser.tenantId },
-      );
-
-      return createdUser;
-    }
-
-    const userInviteDetails: UserInvite = {
-      creatorId: creator.userId,
-      email: createdUser.email,
-      token,
-      userId: createdUser.id,
-      tenantId: createdUser.tenantId,
-      ...defaultEmailSettings,
-    };
-
-    await this.outboxPublisher.publish(new UserInviteEvent(userInviteDetails));
-
-    return createdUser;
   }
 
   public getUsersProfilePictureUrl = async (avatarReference: string | null) => {

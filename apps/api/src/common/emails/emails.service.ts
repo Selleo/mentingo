@@ -83,13 +83,15 @@ export class EmailService {
   async getDefaultEmailProperties(
     tenantId: UUIDType,
     userId?: UUIDType,
+    language?: SupportedLanguages,
   ): Promise<DefaultEmailSettings> {
     return this.tenantRunner.runWithTenant(tenantId, async () => {
       const globalSettings = await this.settingsService.getGlobalSettings();
 
       return {
         primaryColor: globalSettings.primaryColor || "#4796FD",
-        language: userId ? await this.getFinalLanguage(userId) : SUPPORTED_LANGUAGES.EN,
+        language:
+          language ?? (userId ? await this.getFinalLanguage(userId) : SUPPORTED_LANGUAGES.EN),
       };
     });
   }

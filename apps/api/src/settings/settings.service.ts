@@ -417,8 +417,6 @@ export class SettingsService {
     const logoUrl =
       globalSettings?.platformLogoS3Key ?? `${CORS_ORIGIN}/app/assets/svgs/app-logo.svg`;
 
-    console.log("logoUrl", { logoUrl });
-
     try {
       return await this.fileService.getFileBuffer(logoUrl);
     } catch {
@@ -827,8 +825,6 @@ export class SettingsService {
     const defaultLogoUrl = `${CORS_ORIGIN}/app/assets/svgs/app-email-border-circle.svg`;
     let svgText: string | null = null;
 
-    console.log("defaultLogoUrl", { defaultLogoUrl });
-
     try {
       const borderCircleResponse = await fetch(defaultLogoUrl);
 
@@ -851,8 +847,6 @@ export class SettingsService {
     const primaryColor = globalSettings?.primaryColor || "#4596FD";
 
     const modifiedSvg = svgText.replace(/currentColor/g, primaryColor);
-
-    console.log("modifiedSvg", { modifiedSvg });
 
     try {
       const pngBuffer = await sharp(Buffer.from(modifiedSvg, "utf-8"), { density: 300 })
