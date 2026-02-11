@@ -13,7 +13,7 @@ export class OutboxPublisher {
   ) {}
 
   async publish(event: object, dbInstance?: DatabasePg): Promise<void> {
-    if (process.env.NODE_ENV === "test") {
+    if (process.env.JEST_WORKER_ID) {
       await this.eventBus.publish(event);
       return;
     }
