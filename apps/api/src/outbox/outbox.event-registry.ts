@@ -1,3 +1,4 @@
+import { UpdateHasCertificateEvent } from "src/courses/events/updateHasCertificate.event";
 import * as events from "src/events";
 import { UserFirstLoginEvent } from "src/events/user/user-first-login.event";
 import { UserInviteEvent } from "src/events/user/user-invite.event";
@@ -8,6 +9,7 @@ type EventConstructor = new (...args: any[]) => object;
 
 const legacyEvents = {
   ...events,
+  UpdateHasCertificateEvent,
   UserFirstLoginEvent,
   UserInviteEvent,
   UsersLongInactivityEvent,

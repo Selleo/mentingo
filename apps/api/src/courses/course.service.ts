@@ -1561,7 +1561,9 @@ export class CourseService {
       .returning();
 
     if (hasCertificate) {
-      await this.outboxPublisher.publish(new UpdateHasCertificateEvent(courseId));
+      await this.outboxPublisher.publish(
+        new UpdateHasCertificateEvent({ courseId, tenantId: currentUser.tenantId }),
+      );
     }
 
     if (!updatedCourse) {
