@@ -1,5 +1,6 @@
 import { Inject, Injectable, Logger, type OnModuleInit } from "@nestjs/common";
 import { ilike, inArray, or, sql } from "drizzle-orm";
+import { validate as uuidValidate } from "uuid";
 
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
@@ -136,12 +137,20 @@ export class LearningTimeService implements OnModuleInit {
     }
 
     const userId = socket.data.user.userId;
+    const tenantId = socket.data.user.tenantId;
+
     const { lessonId } = payload;
     const sessionKey = this.getSessionKey(userId, lessonId, socket.id);
     const session = await this.getSession(sessionKey);
 
     if (session && session.accumulatedSeconds > 0) {
-      await this.queueTimeUpdate(userId, lessonId, session.courseId, session.accumulatedSeconds);
+      await this.queueTimeUpdate(
+        userId,
+        lessonId,
+        session.courseId,
+        tenantId,
+        session.accumulatedSeconds,
+      );
 
       this.logger.debug(
         `Flushed ${session.accumulatedSeconds}s for user ${userId} on lesson ${lessonId}`,
@@ -161,6 +170,7 @@ export class LearningTimeService implements OnModuleInit {
     }
 
     const userId = socket.data.user.userId;
+    const tenantId = socket.data.user.tenantId;
     const { lessonId, courseId, isActive } = payload;
     const sessionKey = this.getSessionKey(userId, lessonId, socket.id);
     const session = await this.getSession(sessionKey);
@@ -185,7 +195,13 @@ export class LearningTimeService implements OnModuleInit {
       session.lastHeartbeat = Date.now();
 
       if (session.accumulatedSeconds >= FLUSH_THRESHOLD) {
-        await this.queueTimeUpdate(userId, lessonId, courseId, session.accumulatedSeconds);
+        await this.queueTimeUpdate(
+          userId,
+          lessonId,
+          courseId,
+          tenantId,
+          session.accumulatedSeconds,
+        );
         session.accumulatedSeconds = 0;
 
         this.logger.debug(`Flushed ${FLUSH_THRESHOLD}s for user ${userId} on lesson ${lessonId}`);
@@ -201,6 +217,7 @@ export class LearningTimeService implements OnModuleInit {
 
   private async handleDisconnect(socket: AuthenticatedSocket): Promise<void> {
     const userId = socket.data.user.userId;
+    const tenantId = socket.data.user.tenantId;
     const socketSessionsKey = this.getSocketSessionsKey(socket.id);
     const sessionKeys = (await this.cacheManager.get<string[]>(socketSessionsKey)) || [];
 
@@ -212,6 +229,7 @@ export class LearningTimeService implements OnModuleInit {
           userId,
           session.lessonId,
           session.courseId,
+          tenantId,
           session.accumulatedSeconds,
         );
 
@@ -232,12 +250,19 @@ export class LearningTimeService implements OnModuleInit {
     userId: string,
     lessonId: string,
     courseId: string,
+    tenantId: string,
     seconds: number,
   ): Promise<void> {
+    if (!uuidValidate(userId) || !uuidValidate(lessonId) || !uuidValidate(tenantId)) {
+      this.logger.warn(`Skipping learning-time queueing due to invalid data`);
+      return;
+    }
+
     const jobData: LearningTimeJobData = {
       userId,
       lessonId,
       courseId,
+      tenantId,
       secondsToAdd: seconds,
       timestamp: Date.now(),
     };

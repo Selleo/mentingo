@@ -55,14 +55,11 @@ export class OutboxDispatcherService {
       await this.eventBus.publish(materializedEvent);
       await this.outboxRepository.markPublished(event.id);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unknown outbox dispatch error";
-      const tenantScope = event.tenantId ? `tenant=${event.tenantId}` : "tenant=unknown";
-
       this.logger.error(
-        `[${tenantScope}] Failed processing outbox event ${event.id} (${event.eventType}): ${message}`,
+        `[tenant=${tenantId}] Failed processing outbox event ${event.id} (${event.eventType}): ${error}`,
       );
 
-      await this.outboxRepository.markFailed(event.id, message, event.attemptCount + 1);
+      await this.outboxRepository.markFailed(event.id, error, event.attemptCount + 1);
     }
   }
 }
