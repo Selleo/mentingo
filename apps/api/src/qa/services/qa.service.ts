@@ -1,11 +1,11 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import { EventBus } from "@nestjs/cqrs";
 
 import { CreateQAEvent } from "src/events/qa/create-qa.event";
 import { DeleteQAEvent } from "src/events/qa/delete-qa.event";
 import { UpdateQAEvent } from "src/events/qa/update-qa.event";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { QARepository } from "src/qa/repositories/qa.repository";
 import { SettingsService } from "src/settings/settings.service";
 
@@ -20,7 +20,7 @@ export class QAService {
     private readonly qaRepository: QARepository,
     private readonly settingsService: SettingsService,
     private readonly localizationService: LocalizationService,
-    private readonly eventBus: EventBus,
+    private readonly outboxPublisher: OutboxPublisher,
   ) {}
 
   async createQA(data: CreateQABody, currentUser: CurrentUser) {
@@ -28,7 +28,7 @@ export class QAService {
 
     const [qa] = await this.qaRepository.createQA(data, { createdBy: currentUser.userId });
 
-    this.eventBus.publish(
+    await this.outboxPublisher.publish(
       new CreateQAEvent({
         qaId: qa.id,
         actor: currentUser,
@@ -64,7 +64,7 @@ export class QAService {
 
     const [updatedQA] = await this.qaRepository.createLanguage(qaId, newLanguages, language);
 
-    this.eventBus.publish(
+    await this.outboxPublisher.publish(
       new UpdateQAEvent({
         actor: currentUser,
         previousQAData: qa,
@@ -95,7 +95,7 @@ export class QAService {
 
     const [updatedQA] = await this.qaRepository.updateQA(data, language, qaId);
 
-    this.eventBus.publish(
+    await this.outboxPublisher.publish(
       new UpdateQAEvent({
         actor: currentUser,
         previousQAData: qa,
@@ -116,7 +116,7 @@ export class QAService {
 
     if (!qa) throw new BadRequestException({ message: "qaView.toast.notFound" });
 
-    this.eventBus.publish(
+    await this.outboxPublisher.publish(
       new DeleteQAEvent({
         qaId,
         qaName: qa.title,
@@ -140,7 +140,7 @@ export class QAService {
 
     const [updatedQA] = await this.qaRepository.deleteLanguage(qaId, language);
 
-    this.eventBus.publish(
+    await this.outboxPublisher.publish(
       new UpdateQAEvent({
         previousQAData: qa,
         updatedQAData: updatedQA,

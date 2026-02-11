@@ -876,6 +876,28 @@ export const activityLogs = pgTable(
   })),
 );
 
+export const outboxEvents = pgTable(
+  "outbox_events",
+  {
+    ...id,
+    ...timestamps,
+    eventType: text("event_type").notNull(),
+    payload: jsonb("payload").notNull(),
+    status: text("status").notNull().default("pending"),
+    attemptCount: integer("attempt_count").notNull().default(0),
+    publishedAt: timestamp("published_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    lastError: text("last_error"),
+    tenantId,
+  },
+  withTenantIdIndex("outbox_events", (table) => ({
+    pollIdx: index("outbox_events_poll_idx").on(table.tenantId, table.status, table.createdAt),
+  })),
+);
+
 export const questionsAndAnswers = pgTable(
   "questions_and_answers",
   {

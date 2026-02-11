@@ -631,6 +631,20 @@
       "when": 1770214549246,
       "tag": "0089_make_categories_unique_per_tenant",
       "breakpoints": true
+    },
+    {
+      "idx": 90,
+      "version": "7",
+      "when": 1770805700361,
+      "tag": "0090_add_outbox_events_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 91,
+      "version": "7",
+      "when": 1770805704949,
+      "tag": "0091_enable_tenant_rls_for_outbox_events",
+      "breakpoints": true
     }
   ]
 }

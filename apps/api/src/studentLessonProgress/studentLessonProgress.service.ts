@@ -5,7 +5,6 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
-import { EventBus } from "@nestjs/cqrs";
 import { COURSE_ENROLLMENT } from "@repo/shared";
 import { and, eq, isNotNull, isNull, sql } from "drizzle-orm";
 
@@ -18,6 +17,7 @@ import { UserCourseFinishedEvent } from "src/events/user/user-course-finished.ev
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
 import {
   aiMentorStudentLessonProgress,
@@ -49,7 +49,7 @@ export class StudentLessonProgressService {
     @Inject("DB") private readonly db: DatabasePg,
     private readonly statisticsRepository: StatisticsRepository,
     private readonly certificatesService: CertificatesService,
-    private readonly eventBus: EventBus,
+    private readonly outboxPublisher: OutboxPublisher,
     private readonly localizationService: LocalizationService,
   ) {}
 
@@ -201,13 +201,14 @@ export class StudentLessonProgressService {
     const resolvedActor = await this.resolveActor(studentId, actor, dbInstance);
 
     if (lessonCompleted || isQuizPassed) {
-      this.eventBus.publish(
+      await this.outboxPublisher.publish(
         new LessonCompletedEvent({
           userId: studentId,
           courseId: lesson.courseId,
           lessonId: lesson.id,
           actor: resolvedActor,
         }),
+        dbInstance,
       );
     }
 
@@ -361,8 +362,9 @@ export class StudentLessonProgressService {
       );
 
     if (completedLessonCount.count === lessonCount) {
-      this.eventBus.publish(
+      await this.outboxPublisher.publish(
         new UserChapterFinishedEvent({ chapterId, courseId, userId: studentId, actor }),
+        dbInstance,
       );
 
       return dbInstance
@@ -544,8 +546,14 @@ export class StudentLessonProgressService {
         courseId,
       );
 
-      this.eventBus.publish(new CourseCompletedEvent(courseCompletionDetails));
-      this.eventBus.publish(new UserCourseFinishedEvent({ userId: studentId, courseId, actor }));
+      await this.outboxPublisher.publish(
+        new CourseCompletedEvent(courseCompletionDetails),
+        dbInstance,
+      );
+      await this.outboxPublisher.publish(
+        new UserCourseFinishedEvent({ userId: studentId, courseId, actor }),
+        dbInstance,
+      );
 
       return studentCourse;
     }

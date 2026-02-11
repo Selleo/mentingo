@@ -12,7 +12,6 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { EventBus } from "@nestjs/cqrs";
 import { JwtService } from "@nestjs/jwt";
 import {
   CreatePasswordReminderEmail,
@@ -34,6 +33,7 @@ import hashPassword from "src/common/helpers/hashPassword";
 import { UserLoginEvent } from "src/events/user/user-login.event";
 import { UserPasswordCreatedEvent } from "src/events/user/user-password-created.event";
 import { UserRegisteredEvent } from "src/events/user/user-registered.event";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { SettingsService } from "src/settings/settings.service";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
@@ -72,7 +72,7 @@ export class AuthService {
     private createPasswordService: CreatePasswordService,
     private resetPasswordService: ResetPasswordService,
     private settingsService: SettingsService,
-    private eventBus: EventBus,
+    private readonly outboxPublisher: OutboxPublisher,
     private tokenService: TokenService,
   ) {
     this.ENCRYPTION_KEY = Buffer.from(process.env.MASTER_KEY!, "base64");
@@ -131,7 +131,7 @@ export class AuthService {
       const usersProfilePictureUrl =
         await this.userService.getUsersProfilePictureUrl(avatarReference);
 
-      this.eventBus.publish(new UserRegisteredEvent(newUser));
+      await this.outboxPublisher.publish(new UserRegisteredEvent(newUser), trx);
 
       return { ...userWithoutAvatar, profilePictureUrl: usersProfilePictureUrl };
     });
@@ -189,7 +189,9 @@ export class AuthService {
       role: user.role as UserRole,
     };
 
-    this.eventBus.publish(new UserLoginEvent({ userId: user.id, method: "password", actor }));
+    await this.outboxPublisher.publish(
+      new UserLoginEvent({ userId: user.id, method: "password", actor }),
+    );
 
     if (
       MFAEnforcedRoles.includes(userWithoutAvatar.role as UserRole) ||
@@ -261,7 +263,7 @@ export class AuthService {
         tenantId: user.tenantId,
       };
 
-      this.eventBus.publish(
+      await this.outboxPublisher.publish(
         new UserLoginEvent({ userId: user.id, method: "refresh_token", actor }),
       );
 
@@ -396,7 +398,7 @@ export class AuthService {
       { language: languageGuard },
     );
 
-    this.eventBus.publish(new UserPasswordCreatedEvent({ ...existingUser }));
+    await this.outboxPublisher.publish(new UserPasswordCreatedEvent({ ...existingUser }));
 
     return existingUser;
   }
@@ -538,7 +540,9 @@ export class AuthService {
       role: user.role as UserRole,
     };
 
-    this.eventBus.publish(new UserLoginEvent({ userId: user.id, method: "provider", actor }));
+    await this.outboxPublisher.publish(
+      new UserLoginEvent({ userId: user.id, method: "provider", actor }),
+    );
 
     if (MFAEnforcedRoles.includes(user.role as UserRole) || userSettings.isMFAEnabled) {
       return {
@@ -671,7 +675,7 @@ export class AuthService {
     const userSettings = await this.settingsService.getUserSettings(userId);
     const onboardingStatus = await this.userService.getAllOnboardingStatus(userId);
 
-    this.eventBus.publish(
+    await this.outboxPublisher.publish(
       new UserLoginEvent({
         userId,
         method: "magic_link",

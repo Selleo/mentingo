@@ -44,6 +44,7 @@ import { IngestionModule } from "./ingestion/ingestion.module";
 import { LessonModule } from "./lesson/lesson.module";
 import { LocalizationModule } from "./localization/localization.module";
 import { NewsModule } from "./news/news.module";
+import { OutboxModule } from "./outbox";
 import { QuestionsModule } from "./questions/question.module";
 import { ReportModule } from "./report/report.module";
 import { S3Module } from "./s3/s3.module";
@@ -129,6 +130,7 @@ import { UserModule } from "./user/user.module";
     ArticlesModule,
     AnalyticsModule,
     SuperAdminModule,
+    OutboxModule,
   ],
   controllers: [],
   providers: [

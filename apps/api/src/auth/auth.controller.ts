@@ -9,7 +9,6 @@ import {
   UnauthorizedException,
   UseGuards,
 } from "@nestjs/common";
-import { EventBus } from "@nestjs/cqrs";
 import { AuthGuard } from "@nestjs/passport";
 import { Type, type Static } from "@sinclair/typebox";
 import { type Request, Response } from "express";
@@ -25,6 +24,7 @@ import { RefreshTokenGuard } from "src/common/guards/refresh-token.guard";
 import { SlackOAuthGuard } from "src/common/guards/slack-oauth.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { UserActivityEvent, UserLogoutEvent } from "src/events";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { SettingsService } from "src/settings/settings.service";
 import { baseUserResponseSchema, currentUserResponseSchema } from "src/user/schemas/user.schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
@@ -62,7 +62,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly tokenService: TokenService,
-    private readonly eventBus: EventBus,
+    private readonly outboxPublisher: OutboxPublisher,
     private readonly settingsService: SettingsService,
   ) {
     this.CORS_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:5173";
@@ -132,7 +132,9 @@ export class AuthController {
   ): Promise<null> {
     this.tokenService.clearTokenCookies(response);
 
-    this.eventBus.publish(new UserLogoutEvent({ userId: currentUser.userId, actor: currentUser }));
+    await this.outboxPublisher.publish(
+      new UserLogoutEvent({ userId: currentUser.userId, actor: currentUser }),
+    );
     return null;
   }
 
@@ -174,7 +176,9 @@ export class AuthController {
   ): Promise<BaseResponse<Static<typeof currentUserResponseSchema>>> {
     const account = await this.authService.currentUser(currentUserId);
 
-    this.eventBus.publish(new UserActivityEvent(currentUserId, "LOGIN"));
+    await this.outboxPublisher.publish(
+      new UserActivityEvent({ userId: currentUserId, activityType: "LOGIN" }),
+    );
 
     return new BaseResponse(account);
   }

@@ -7,7 +7,6 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
-import { EventBus } from "@nestjs/cqrs";
 import { CreatePasswordReminderEmail } from "@repo/email-templates";
 import { OnboardingPages, type SupportedLanguages, SUPPORTED_LANGUAGES } from "@repo/shared";
 import * as bcrypt from "bcryptjs";
@@ -39,6 +38,7 @@ import { CreateUserEvent, DeleteUserEvent, UpdateUserEvent } from "src/events";
 import { UserInviteEvent } from "src/events/user/user-invite.event";
 import { FileService } from "src/file/file.service";
 import { GroupService } from "src/group/group.service";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { S3Service } from "src/s3/s3.service";
 import { SettingsService } from "src/settings/settings.service";
 import { StatisticsService } from "src/statistics/statistics.service";
@@ -84,7 +84,7 @@ import type { CreateUserBody, ImportUserResponse } from "src/user/schemas/create
 export class UserService {
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
-    private readonly eventBus: EventBus,
+    private readonly outboxPublisher: OutboxPublisher,
     private readonly emailService: EmailService,
     private fileService: FileService,
     private s3Service: S3Service,
@@ -275,13 +275,14 @@ export class UserService {
         actor && previousSnapshot && updatedSnapshot && !isEqual(previousSnapshot, updatedSnapshot);
 
       if (shouldPublishEvent) {
-        this.eventBus.publish(
+        await this.outboxPublisher.publish(
           new UpdateUserEvent({
             userId: id,
             actor,
             previousUserData: previousSnapshot,
             updatedUserData: updatedSnapshot,
           }),
+          trx,
         );
       }
 
@@ -440,12 +441,13 @@ export class UserService {
         .returning();
 
       if (userSnapshot) {
-        this.eventBus.publish(
+        await this.outboxPublisher.publish(
           new DeleteUserEvent({
             userId: id,
             actor,
             deletedUserData: userSnapshot,
           }),
+          trx,
         );
       }
 
@@ -491,18 +493,21 @@ export class UserService {
         ),
       );
 
-      usersSnapshots.forEach((snapshot, index) => {
-        const userId = ids[index];
-        if (!snapshot) return;
+      await Promise.all(
+        usersSnapshots.map((snapshot, index) => {
+          const userId = ids[index];
+          if (!snapshot) return Promise.resolve();
 
-        this.eventBus.publish(
-          new DeleteUserEvent({
-            userId,
-            actor,
-            deletedUserData: snapshot,
-          }),
-        );
-      });
+          return this.outboxPublisher.publish(
+            new DeleteUserEvent({
+              userId,
+              actor,
+              deletedUserData: snapshot,
+            }),
+            trx,
+          );
+        }),
+      );
     });
   }
 
@@ -583,7 +588,7 @@ export class UserService {
     if (creator) {
       const snapshot = await this.buildUserActivitySnapshot(createdUser.id);
 
-      this.eventBus.publish(
+      await this.outboxPublisher.publish(
         new CreateUserEvent({
           userId: createdUser.id,
           actor: creator,
@@ -605,7 +610,7 @@ export class UserService {
         ...defaultEmailSettings,
       };
 
-      this.eventBus.publish(new UserInviteEvent(userInviteDetails));
+      await this.outboxPublisher.publish(new UserInviteEvent(userInviteDetails));
 
       return createdUser;
     }
@@ -637,7 +642,7 @@ export class UserService {
       ...defaultEmailSettings,
     };
 
-    this.eventBus.publish(new UserInviteEvent(userInviteDetails));
+    await this.outboxPublisher.publish(new UserInviteEvent(userInviteDetails));
 
     return createdUser;
   }
