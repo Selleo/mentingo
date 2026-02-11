@@ -13,7 +13,7 @@ import { OutboxRepository } from "./outbox.repository";
     OutboxRepository,
     OutboxPublisher,
     OutboxDispatcherService,
-    ...(process.env.NODE_ENV === "test" || process.env.CI ? [] : [OutboxDispatcherCron]),
+    ...(process.env.NODE_ENV === "test" ? [] : [OutboxDispatcherCron]),
   ],
   exports: [OutboxPublisher],
 })
