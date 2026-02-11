@@ -76,7 +76,12 @@ export const detectVideoProviderFromUrl = (sourceUrl: string): VideoProvider => 
 
   if (host === "youtu.be" || host.endsWith("youtube.com")) return VIDEO_EMBED_PROVIDERS.YOUTUBE;
   if (host.endsWith("vimeo.com")) return VIDEO_EMBED_PROVIDERS.VIMEO;
-  if (host.includes("bunny") || host.includes("b-cdn") || host.includes("mediadelivery")) {
+  if (
+    host.endsWith("bunny.net") ||
+    host.endsWith("bunnycdn.com") ||
+    host.includes("b-cdn") ||
+    host.includes("mediadelivery")
+  ) {
     return VIDEO_EMBED_PROVIDERS.BUNNY;
   }
 

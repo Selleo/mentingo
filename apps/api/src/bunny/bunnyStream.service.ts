@@ -59,9 +59,27 @@ export class BunnyStreamService {
         .catch(() => this.configService.get("bunny.BUNNY_STREAM_TOKEN_SIGNING_KEY")),
     ]);
 
-    if (!apiKey || !libraryId) {
+    if (!apiKey) {
       throw new InternalServerErrorException(
-        "BunnyStream configuration is missing. Please set API key and library ID.",
+        "BunnyStream configuration is missing API key (BUNNY_STREAM_API_KEY).",
+      );
+    }
+
+    if (!libraryId) {
+      throw new InternalServerErrorException(
+        "BunnyStream configuration is missing library ID (BUNNY_STREAM_LIBRARY_ID).",
+      );
+    }
+
+    if (!tokenSigningKey) {
+      throw new InternalServerErrorException(
+        "BunnyStream configuration is missing token signing key (BUNNY_STREAM_TOKEN_SIGNING_KEY).",
+      );
+    }
+
+    if (!cdnUrl) {
+      throw new InternalServerErrorException(
+        "BunnyStream configuration is missing CDN URL (BUNNY_STREAM_CDN_URL).",
       );
     }
 
@@ -90,7 +108,7 @@ export class BunnyStreamService {
   }
 
   async isConfigured(): Promise<boolean> {
-    const [apiKey, libraryId] = await Promise.all([
+    const [apiKey, libraryId, cdnUrl, tokenSigningKey] = await Promise.all([
       this.envService
         .getEnv("BUNNY_STREAM_API_KEY")
         .then((r) => r.value)
@@ -99,9 +117,17 @@ export class BunnyStreamService {
         .getEnv("BUNNY_STREAM_LIBRARY_ID")
         .then((r) => r.value)
         .catch(() => this.configService.get("bunny.BUNNY_STREAM_LIBRARY_ID")),
+      this.envService
+        .getEnv("BUNNY_STREAM_CDN_URL")
+        .then((r) => r.value)
+        .catch(() => this.configService.get("bunny.BUNNY_STREAM_CDN_URL")),
+      this.envService
+        .getEnv("BUNNY_STREAM_TOKEN_SIGNING_KEY")
+        .then((r) => r.value)
+        .catch(() => this.configService.get("bunny.BUNNY_STREAM_TOKEN_SIGNING_KEY")),
     ]);
 
-    return Boolean(apiKey && libraryId);
+    return Boolean(apiKey && libraryId && cdnUrl && tokenSigningKey);
   }
 
   async upload(file: Express.Multer.File): Promise<{
@@ -178,7 +204,6 @@ export class BunnyStreamService {
 
   async getUrl(videoId: string): Promise<string> {
     const cfg = await this.getConfig();
-    this.ensurePlaybackSigningConfig(cfg);
 
     const httpClient = this.createHttpClient(cfg);
 
@@ -193,7 +218,6 @@ export class BunnyStreamService {
 
   async getThumbnailUrl(videoId: string): Promise<string> {
     const cfg = await this.getConfig();
-    this.ensureThumbnailSigningConfig(cfg);
 
     const url = `https://${cfg.cdnUrl}/${videoId}/thumbnail.jpg`;
     const expiresAt = Math.floor(Date.now() / 1000) + BUNNY_CDN_TOKEN_EXPIRY;
@@ -207,9 +231,9 @@ export class BunnyStreamService {
     securityKey: string,
     options?: { pathAllowed?: string; userIp?: string; outputFormat?: "query" | "path" },
   ) {
-    const u = new URL(url);
-    const parameters = new URLSearchParams(u.search);
-    const signaturePath = options?.pathAllowed ?? decodeURIComponent(u.pathname);
+    const signUrl = new URL(url);
+    const parameters = new URLSearchParams(signUrl.search);
+    const signaturePath = options?.pathAllowed ?? decodeURIComponent(signUrl.pathname);
     const userIp = options?.userIp ?? "";
 
     if (options?.pathAllowed) {
@@ -219,8 +243,7 @@ export class BunnyStreamService {
     const sortedParams = Array.from(parameters.entries())
       .filter(([key]) => key !== "token" && key !== "expires")
       .sort(([a], [b]) => a.localeCompare(b))
-      .map(([key, value]) => `${key}=${value}`)
-      .join("&");
+      .reduce((acc, [key, value], idx, _) => acc + (idx ? "&" : "") + `${key}=${value}`, "");
 
     const base = securityKey + signaturePath + String(expires) + userIp + sortedParams;
 
@@ -250,32 +273,16 @@ export class BunnyStreamService {
       passthroughParams.delete("token_path");
 
       const passthroughQuery = passthroughParams.toString();
-      const signedPathUrl = `${u.origin}/${tokenPart.toString()}${u.pathname}`;
+      const signedPathUrl = `${signUrl.origin}/${tokenPart.toString()}${signUrl.pathname}`;
       return passthroughQuery ? `${signedPathUrl}?${passthroughQuery}` : signedPathUrl;
     }
 
     const query = parameters.toString();
-    return `${u.origin}${u.pathname}${query ? `?${query}` : ""}`;
+    return `${signUrl.origin}${signUrl.pathname}${query ? `?${query}` : ""}`;
   }
 
   private getTokenPath(pathname: string): string {
     const lastSlashIndex = pathname.lastIndexOf("/");
     return lastSlashIndex >= 0 ? pathname.slice(0, lastSlashIndex + 1) : "/";
-  }
-
-  private ensurePlaybackSigningConfig(cfg: BunnyConfig) {
-    if (!cfg.tokenSigningKey) {
-      throw new InternalServerErrorException(
-        "BunnyStream configuration is missing token signing key.",
-      );
-    }
-  }
-
-  private ensureThumbnailSigningConfig(cfg: BunnyConfig) {
-    this.ensurePlaybackSigningConfig(cfg);
-
-    if (!cfg.cdnUrl) {
-      throw new InternalServerErrorException("BunnyStream configuration is missing CDN URL.");
-    }
   }
 }

@@ -7,17 +7,27 @@ import type { AnyNode } from "domhandler";
 const normalizeTextContent = (value: string) => value.replace(/\u00A0/g, " ").trim();
 
 const isMeaningfulElement = (html: CheerioAPI, element: AnyNode): boolean => {
-  if (element.type === "text") {
-    return normalizeTextContent(html(element).text()).length > 0;
+  const stack: AnyNode[] = [element];
+
+  while (stack.length > 0) {
+    const current = stack.pop();
+    if (!current) break;
+
+    if (current.type === "text") {
+      if (normalizeTextContent(html(current).text()).length > 0) return true;
+      continue;
+    }
+
+    const attributes = "attribs" in current ? (current.attribs ?? {}) : {};
+    if (Object.keys(attributes).length > 0) return true;
+
+    const children = html(current).children().toArray();
+    for (let i = children.length - 1; i >= 0; i -= 1) {
+      stack.push(children[i]);
+    }
   }
 
-  const attributes = "attribs" in element ? (element.attribs ?? {}) : {};
-  if (Object.keys(attributes).length > 0) return true;
-
-  if (normalizeTextContent(html(element).text()).length > 0) return true;
-
-  const children = html(element).children().toArray();
-  return children.some((child) => isMeaningfulElement(html, child));
+  return false;
 };
 
 const getVideoAutoplayAction = (

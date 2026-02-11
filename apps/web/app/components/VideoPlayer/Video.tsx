@@ -142,11 +142,13 @@ export function Video({
         </div>
       )}
 
-      <img
-        src={thumbnailUrl?.url ?? ""}
-        alt={thumbnailUrl?.url ?? ""}
-        className="w-full aspect-video object-cover"
-      />
+      {thumbnailUrl?.url && (
+        <img
+          src={thumbnailUrl?.url}
+          alt={thumbnailUrl?.url}
+          className="w-full aspect-video object-cover"
+        />
+      )}
     </div>
   );
 }

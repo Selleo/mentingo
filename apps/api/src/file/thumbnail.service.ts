@@ -278,8 +278,21 @@ export class ThumbnailService {
     const ffmpegBin = "ffmpeg";
 
     const ffmpeg = spawn(ffmpegBin, args);
+    let ffmpegExited = false;
+
+    const terminateFfmpeg = () => {
+      if (ffmpegExited || ffmpeg.killed) return;
+      try {
+        ffmpeg.kill("SIGKILL");
+      } catch {}
+    };
+
     const chunks: Buffer[] = [];
     let stderr = "";
+
+    ffmpeg.on("close", () => {
+      ffmpegExited = true;
+    });
 
     ffmpeg.stdout.on("data", (chunk: Buffer) => {
       chunks.push(chunk);
@@ -289,12 +302,43 @@ export class ThumbnailService {
       stderr += chunk.toString("utf8");
     });
 
-    const exitCode = await new Promise<number>((resolve, reject) => {
-      ffmpeg.on("error", reject);
-      ffmpeg.on("close", (code) => resolve(code ?? -1));
-      ffmpeg.stdout.on("error", reject);
-      ffmpeg.stderr.on("error", reject);
-    });
+    let exitCode: number;
+    try {
+      exitCode = await new Promise<number>((resolve, reject) => {
+        ffmpeg.on("error", (error) => {
+          terminateFfmpeg();
+          reject(error);
+        });
+        ffmpeg.on("close", (code) => resolve(code ?? -1));
+        ffmpeg.stdout.on("error", (error) => {
+          terminateFfmpeg();
+          reject(error);
+        });
+        ffmpeg.stderr.on("error", (error) => {
+          terminateFfmpeg();
+          reject(error);
+        });
+      });
+    } catch (error) {
+      terminateFfmpeg();
+      const spawnError = error as NodeJS.ErrnoException;
+
+      if (spawnError?.code === "ENOENT") {
+        throw new Error("Failed to extract thumbnail: ffmpeg binary not found in PATH.");
+      }
+
+      if (spawnError?.code === "EACCES") {
+        throw new Error("Failed to extract thumbnail: ffmpeg is not executable.");
+      }
+
+      throw new Error(
+        `Failed to start ffmpeg process${spawnError?.code ? ` (${spawnError.code})` : ""}: ${
+          spawnError?.message ?? "Unknown error"
+        }`,
+      );
+    } finally {
+      terminateFfmpeg();
+    }
 
     if (exitCode !== 0) {
       throw new Error(`ffmpeg exited with code ${exitCode}: ${stderr}`);
