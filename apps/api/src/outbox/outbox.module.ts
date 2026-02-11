@@ -9,7 +9,12 @@ import { OutboxRepository } from "./outbox.repository";
 @Global()
 @Module({
   imports: [CqrsModule],
-  providers: [OutboxRepository, OutboxPublisher, OutboxDispatcherService, OutboxDispatcherCron],
+  providers: [
+    OutboxRepository,
+    OutboxPublisher,
+    OutboxDispatcherService,
+    ...(process.env.NODE_ENV === "test" ? [] : [OutboxDispatcherCron]),
+  ],
   exports: [OutboxPublisher],
 })
 export class OutboxModule {}

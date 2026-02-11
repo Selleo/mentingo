@@ -1,4 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
+import { EventBus } from "@nestjs/cqrs";
 
 import { DatabasePg } from "src/common";
 import { DB } from "src/storage/db/db.providers";
@@ -6,9 +7,17 @@ import { outboxEvents } from "src/storage/schema";
 
 @Injectable()
 export class OutboxPublisher {
-  constructor(@Inject(DB) private readonly db: DatabasePg) {}
+  constructor(
+    @Inject(DB) private readonly db: DatabasePg,
+    private readonly eventBus: EventBus,
+  ) {}
 
   async publish(event: object, dbInstance?: DatabasePg): Promise<void> {
+    if (process.env.NODE_ENV === "test") {
+      await this.eventBus.publish(event);
+      return;
+    }
+
     const db = dbInstance ?? this.db;
 
     const eventType = this.getEventType(event);

@@ -5,7 +5,7 @@ import * as express from "express";
 import { ActivityLogsService } from "src/activity-logs/activity-logs.service";
 import { AppModule } from "src/app.module";
 import { EmailAdapter } from "src/common/emails/adapters/email.adapter";
-import { DB, DB_BASE } from "src/storage/db/db.providers";
+import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import { DEFAULT_TEST_TENANT_HOST, ensureTenant } from "./helpers/tenant-helpers";
@@ -28,16 +28,16 @@ export async function createE2ETest(optionsOrProviders: E2ETestOptions | Provide
   const customProviders = options.customProviders ?? [];
   const enableActivityLogs = options.enableActivityLogs ?? false;
 
-  const { db, sql: pgSql, dbBase, pgConnectionString } = await setupTestDatabase();
+  const { db, sql: pgSql, dbAdmin, pgConnectionString } = await setupTestDatabase();
 
-  const defaultTenantId = await ensureTenant(dbBase);
+  const defaultTenantId = await ensureTenant(dbAdmin);
 
   const dbName = new URL(pgConnectionString).pathname.replace(/^\//, "");
   await pgSql.unsafe(`ALTER DATABASE "${dbName}" SET app.tenant_id = '${defaultTenantId}'`);
 
   await pgSql`SELECT set_config('app.tenant_id', ${defaultTenantId}, false)`;
 
-  await truncateAllTables(dbBase, db);
+  await truncateAllTables(dbAdmin, db);
 
   let testModuleBuilder = Test.createTestingModule({
     imports: [AppModule],
@@ -45,8 +45,8 @@ export async function createE2ETest(optionsOrProviders: E2ETestOptions | Provide
   })
     .overrideProvider(DB)
     .useValue(db)
-    .overrideProvider(DB_BASE)
-    .useValue(dbBase)
+    .overrideProvider(DB_ADMIN)
+    .useValue(dbAdmin)
     .overrideProvider(EmailAdapter)
     .useClass(EmailTestingAdapter);
 
@@ -101,7 +101,7 @@ export async function createE2ETest(optionsOrProviders: E2ETestOptions | Provide
     app,
     moduleFixture,
     db,
-    dbBase: app.get(DB_BASE),
+    dbAdmin: app.get(DB_ADMIN),
     defaultTenantId,
     tenantRunner,
     runAsTenant: <T>(tenantId: string, fn: () => Promise<T>) =>
