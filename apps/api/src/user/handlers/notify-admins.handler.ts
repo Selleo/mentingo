@@ -40,9 +40,12 @@ export class NotifyAdminsHandler implements IEventHandler<EventType> {
 
     const adminsToNotify = await this.userService.getAdminsToNotifyAboutNewUser(email);
 
-    await Promise.all(
-      adminsToNotify.map(async ({ id: adminId, email: adminsEmail }) => {
-        const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(adminId);
+    await Promise.allSettled(
+      adminsToNotify.map(async ({ id: adminId, email: adminsEmail, tenantId }) => {
+        const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
+          tenantId,
+          adminId,
+        );
 
         const { text, html } = new NewUserEmail({
           userName: `${firstName} ${lastName}`,
@@ -50,12 +53,15 @@ export class NotifyAdminsHandler implements IEventHandler<EventType> {
           ...defaultEmailSettings,
         });
 
-        return this.emailService.sendEmailWithLogo({
-          to: adminsEmail,
-          subject: getEmailSubject("adminNewUserEmail", defaultEmailSettings.language),
-          text,
-          html,
-        });
+        return this.emailService.sendEmailWithLogo(
+          {
+            to: adminsEmail,
+            subject: getEmailSubject("adminNewUserEmail", defaultEmailSettings.language),
+            text,
+            html,
+          },
+          { tenantId },
+        );
       }),
     );
   }
@@ -67,9 +73,12 @@ export class NotifyAdminsHandler implements IEventHandler<EventType> {
 
     const adminsToNotify = await this.userService.getAdminsToNotifyAboutFinishedCourse();
 
-    await Promise.all(
-      adminsToNotify.map(async ({ id: adminId, email: adminsEmail }) => {
-        const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(adminId);
+    await Promise.allSettled(
+      adminsToNotify.map(async ({ id: adminId, email: adminsEmail, tenantId }) => {
+        const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
+          tenantId,
+          adminId,
+        );
 
         const { text, html } = new FinishedCourseEmail({
           userName,
@@ -78,12 +87,15 @@ export class NotifyAdminsHandler implements IEventHandler<EventType> {
           ...defaultEmailSettings,
         });
 
-        return this.emailService.sendEmailWithLogo({
-          to: adminsEmail,
-          subject: getEmailSubject("adminCourseFinishedEmail", defaultEmailSettings.language),
-          text,
-          html,
-        });
+        return this.emailService.sendEmailWithLogo(
+          {
+            to: adminsEmail,
+            subject: getEmailSubject("adminCourseFinishedEmail", defaultEmailSettings.language),
+            text,
+            html,
+          },
+          { tenantId },
+        );
       }),
     );
   }

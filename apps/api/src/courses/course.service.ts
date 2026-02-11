@@ -3718,8 +3718,11 @@ export class CourseService {
     const indent = "\u00A0\u00A0\u00A0\u00A0";
 
     await Promise.all(
-      adminsToNotify.map(async ({ id: adminId, email: adminEmail }) => {
-        const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(adminId);
+      adminsToNotify.map(async ({ id: adminId, email: adminEmail, tenantId }) => {
+        const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
+          tenantId,
+          adminId,
+        );
 
         const lines: string[] = [];
         for (const [courseKey, rows] of Object.entries(groupedByCourse)) {
@@ -3757,12 +3760,15 @@ export class CourseService {
           ...defaultEmailSettings,
         });
 
-        return this.emailService.sendEmailWithLogo({
-          to: adminEmail,
-          subject: "Overdue courses notification",
-          text,
-          html,
-        });
+        return this.emailService.sendEmailWithLogo(
+          {
+            to: adminEmail,
+            subject: "Overdue courses notification",
+            text,
+            html,
+          },
+          { tenantId },
+        );
       }),
     );
   }

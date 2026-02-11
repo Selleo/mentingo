@@ -142,19 +142,25 @@ export class AuthService {
 
     const createdSettings = await this.settingsService.getUserSettings(createdUser.id);
 
-    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(createdUser.id);
+    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
+      createdUser.tenantId,
+      createdUser.id,
+    );
 
     const emailTemplate = new WelcomeEmail({
       coursesLink: `${process.env.CORS_ORIGIN}/courses`,
       ...defaultEmailSettings,
     });
 
-    await this.emailService.sendEmailWithLogo({
-      to: email,
-      subject: getEmailSubject("welcomeEmail", createdSettings.language as SupportedLanguages),
-      text: emailTemplate.text,
-      html: emailTemplate.html,
-    });
+    await this.emailService.sendEmailWithLogo(
+      {
+        to: email,
+        subject: getEmailSubject("welcomeEmail", createdSettings.language as SupportedLanguages),
+        text: emailTemplate.text,
+        html: emailTemplate.html,
+      },
+      { tenantId: createdUser.tenantId },
+    );
 
     return createdUser;
   }
@@ -187,6 +193,7 @@ export class AuthService {
       userId: user.id,
       email: user.email,
       role: user.role as UserRole,
+      tenantId: user.tenantId,
     };
 
     await this.outboxPublisher.publish(
@@ -341,7 +348,10 @@ export class AuthService {
       expiryDate,
     });
 
-    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(user.id);
+    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
+      user.tenantId,
+      user.id,
+    );
 
     const emailTemplate = new PasswordRecoveryEmail({
       name: user.firstName,
@@ -349,12 +359,15 @@ export class AuthService {
       ...defaultEmailSettings,
     });
 
-    await this.emailService.sendEmailWithLogo({
-      to: email,
-      subject: getEmailSubject("passwordRecoveryEmail", defaultEmailSettings.language),
-      text: emailTemplate.text,
-      html: emailTemplate.html,
-    });
+    await this.emailService.sendEmailWithLogo(
+      {
+        to: email,
+        subject: getEmailSubject("passwordRecoveryEmail", defaultEmailSettings.language),
+        text: emailTemplate.text,
+        html: emailTemplate.html,
+      },
+      { tenantId: user.tenantId },
+    );
   }
 
   public async createPassword(data: CreatePasswordBody) {
@@ -434,7 +447,12 @@ export class AuthService {
   private async generateNewTokenAndEmail(userId: UUIDType, email: string) {
     const createToken = nanoid(64);
 
-    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(userId);
+    const user = await this.userService.getUserById(userId);
+
+    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
+      user.tenantId,
+      userId,
+    );
 
     const emailTemplate = new CreatePasswordReminderEmail({
       createPasswordLink: `${CORS_ORIGIN}/auth/create-new-password?createToken=${createToken}&email=${email}`,
@@ -445,6 +463,7 @@ export class AuthService {
   }
 
   private async sendEmailAndUpdateDatabase(
+    tenantId: UUIDType,
     userId: UUIDType,
     email: string,
     oldCreateToken: string,
@@ -462,14 +481,20 @@ export class AuthService {
           reminderCount,
         });
 
-        const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(userId);
+        const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
+          tenantId,
+          userId,
+        );
 
-        await this.emailService.sendEmailWithLogo({
-          to: email,
-          subject: getEmailSubject("passwordReminderEmail", defaultEmailSettings.language),
-          text: emailTemplate.text,
-          html: emailTemplate.html,
-        });
+        await this.emailService.sendEmailWithLogo(
+          {
+            to: email,
+            subject: getEmailSubject("passwordReminderEmail", defaultEmailSettings.language),
+            text: emailTemplate.text,
+            html: emailTemplate.html,
+          },
+          { tenantId },
+        );
 
         await transaction.delete(createTokens).where(eq(createTokens.createToken, oldCreateToken));
       } catch (error) {
@@ -487,9 +512,11 @@ export class AuthService {
     expiryDate.setHours(expiryDate.getHours() + 24);
 
     expiryTokens.map(async ({ userId, email, oldCreateToken, reminderCount }) => {
+      const user = await this.userService.getUserById(userId);
       const { createToken, emailTemplate } = await this.generateNewTokenAndEmail(userId, email);
 
       await this.sendEmailAndUpdateDatabase(
+        user.tenantId,
         userId,
         email,
         oldCreateToken,
@@ -538,6 +565,7 @@ export class AuthService {
       userId: user.id,
       email: user.email,
       role: user.role as UserRole,
+      tenantId: user.tenantId,
     };
 
     await this.outboxPublisher.publish(
@@ -622,7 +650,10 @@ export class AuthService {
 
     if (!magicLinkToken) throw new InternalServerErrorException("magicLink.error.createToken");
 
-    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(user.id);
+    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
+      user.tenantId,
+      user.id,
+    );
 
     const magicLinkEmail = new MagicLinkEmail({
       magicLink: `${CORS_ORIGIN}/auth/login?token=${magicLinkToken}`,
@@ -631,12 +662,15 @@ export class AuthService {
 
     const { html, text } = magicLinkEmail;
 
-    await this.emailService.sendEmailWithLogo({
-      to: email,
-      subject: getEmailSubject("magicLinkEmail", defaultEmailSettings.language),
-      text,
-      html,
-    });
+    await this.emailService.sendEmailWithLogo(
+      {
+        to: email,
+        subject: getEmailSubject("magicLinkEmail", defaultEmailSettings.language),
+        text,
+        html,
+      },
+      { tenantId: user.tenantId },
+    );
   }
 
   async handleMagicLinkLogin(response: Response, token: string) {
@@ -679,7 +713,7 @@ export class AuthService {
       new UserLoginEvent({
         userId,
         method: "magic_link",
-        actor: { userId, email, role: role as UserRole },
+        actor: { userId, email, role: role as UserRole, tenantId: user.tenantId },
       }),
     );
 

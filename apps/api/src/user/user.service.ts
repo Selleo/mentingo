@@ -528,14 +528,32 @@ export class UserService {
       throw new ConflictException("User already exists");
     }
 
-    const { createdUser, token } = await db.transaction(async (trx) => {
+    const { createdUser, token, defaultEmailSettings } = await db.transaction(async (trx) => {
       const [createdUser] = await trx.insert(users).values(data).returning();
       await trx.insert(userOnboarding).values({ userId: createdUser.id });
 
       if (creator) {
-        const { language: adminsLanguage } = await this.settingsService.getUserSettings(
-          creator.userId,
-        );
+        let adminsLanguage: SupportedLanguages = SUPPORTED_LANGUAGES.EN;
+
+        try {
+          const creatorSettings = await this.settingsService.getUserSettings(
+            creator.userId,
+            trx as DatabasePg,
+          );
+          adminsLanguage = creatorSettings.language as SupportedLanguages;
+        } catch (error) {
+          if (!(error instanceof NotFoundException)) {
+            throw error;
+          }
+
+          const createdSettings = await this.settingsService.createSettingsIfNotExists(
+            creator.userId,
+            creator.role as UserRole,
+            undefined,
+            trx,
+          );
+          adminsLanguage = createdSettings.language as SupportedLanguages;
+        }
 
         const finalLanguage = Object.values(SUPPORTED_LANGUAGES).includes(
           data.language as SupportedLanguages,
@@ -578,7 +596,12 @@ export class UserService {
           .insert(userDetails)
           .values({ userId: createdUser.id, contactEmail: createdUser.email });
 
-      return { createdUser, token: createToken };
+      const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
+        createdUser.tenantId,
+        createdUser.id,
+      );
+
+      return { createdUser, token: createToken, defaultEmailSettings };
     });
 
     if (!createdUser || !token) {
@@ -596,8 +619,6 @@ export class UserService {
         }),
       );
     }
-
-    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(createdUser.id);
 
     if (!creator && options?.invite) {
       const userInviteDetails: UserInvite = {
@@ -623,12 +644,15 @@ export class UserService {
         ...defaultEmailSettings,
       });
 
-      await this.emailService.sendEmailWithLogo({
-        to: createdUser.email,
-        subject: getEmailSubject("passwordReminderEmail", defaultEmailSettings.language),
-        text: createPasswordEmail.text,
-        html: createPasswordEmail.html,
-      });
+      await this.emailService.sendEmailWithLogo(
+        {
+          to: createdUser.email,
+          subject: getEmailSubject("passwordReminderEmail", defaultEmailSettings.language),
+          text: createPasswordEmail.text,
+          html: createPasswordEmail.html,
+        },
+        { tenantId: createdUser.tenantId },
+      );
 
       return createdUser;
     }
@@ -657,6 +681,7 @@ export class UserService {
       .select({
         id: users.id,
         email: users.email,
+        tenantId: users.tenantId,
       })
       .from(users)
       .innerJoin(settings, eq(users.id, settings.userId))
@@ -867,11 +892,14 @@ export class UserService {
     }
   }
 
-  public async getAdminsToNotifyAboutFinishedCourse(): Promise<{ email: string; id: string }[]> {
+  public async getAdminsToNotifyAboutFinishedCourse(): Promise<
+    { email: string; id: string; tenantId: string }[]
+  > {
     return this.db
       .select({
         id: users.id,
         email: users.email,
+        tenantId: users.tenantId,
       })
       .from(users)
       .innerJoin(settings, eq(users.id, settings.userId))
@@ -884,11 +912,14 @@ export class UserService {
       );
   }
 
-  public async getAdminsToNotifyAboutOverdueCourse(): Promise<{ email: string; id: string }[]> {
+  public async getAdminsToNotifyAboutOverdueCourse(): Promise<
+    { email: string; id: string; tenantId: string }[]
+  > {
     return this.db
       .select({
         id: users.id,
         email: users.email,
+        tenantId: users.tenantId,
       })
       .from(users)
       .innerJoin(settings, eq(users.id, settings.userId))

@@ -157,23 +157,6 @@ export class SettingsService {
     userId: UUIDType,
     dbInstance: DatabasePg = this.db,
   ): Promise<SettingsJSONContentSchema> {
-    if (!userId || userId === "") {
-      console.error("getUserSettings called with empty userId");
-      console.error(new Error("Empty userId").stack);
-      throw new BadRequestException("User id is required");
-    }
-
-    const result = await dbInstance.execute(
-      sql`select current_setting('app.tenant_id', true) as tenant_id`,
-    );
-    const tenantId =
-      (result as unknown as Array<{ tenant_id: string | null }>)[0]?.tenant_id ?? null;
-    if (!tenantId) {
-      console.error("getUserSettings missing tenant context");
-      console.error(new Error("Missing tenant context").stack);
-      throw new UnauthorizedException("Missing tenant context");
-    }
-
     const [row] = await dbInstance
       .select({ settings: sql<SettingsJSONContentSchema>`${settings.settings}` })
       .from(settings)
@@ -433,6 +416,8 @@ export class SettingsService {
 
     const logoUrl =
       globalSettings?.platformLogoS3Key ?? `${CORS_ORIGIN}/app/assets/svgs/app-logo.svg`;
+
+    console.log("logoUrl", { logoUrl });
 
     try {
       return await this.fileService.getFileBuffer(logoUrl);
@@ -842,6 +827,8 @@ export class SettingsService {
     const defaultLogoUrl = `${CORS_ORIGIN}/app/assets/svgs/app-email-border-circle.svg`;
     let svgText: string | null = null;
 
+    console.log("defaultLogoUrl", { defaultLogoUrl });
+
     try {
       const borderCircleResponse = await fetch(defaultLogoUrl);
 
@@ -864,6 +851,8 @@ export class SettingsService {
     const primaryColor = globalSettings?.primaryColor || "#4596FD";
 
     const modifiedSvg = svgText.replace(/currentColor/g, primaryColor);
+
+    console.log("modifiedSvg", { modifiedSvg });
 
     try {
       const pngBuffer = await sharp(Buffer.from(modifiedSvg, "utf-8"), { density: 300 })
