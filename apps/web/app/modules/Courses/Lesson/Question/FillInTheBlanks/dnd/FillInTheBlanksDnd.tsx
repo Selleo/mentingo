@@ -58,10 +58,12 @@ const getAnswers = (options: QuizQuestionOption[] | undefined) => {
 
 export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCompleted }) => {
   const { t } = useTranslation();
+
   const { isQuizFeedbackRedacted } = useQuizContext();
+  const { setValue } = useFormContext<QuizForm>();
+
   const [words, setWords] = useState<DndWord[]>(getAnswers(question.options));
   const [currentlyDraggedWord, setCurrentlyDraggedWord] = useState<DndWord | null>(null);
-  const { setValue } = useFormContext<QuizForm>();
 
   const solutionExplanation = question.solutionExplanation;
 
