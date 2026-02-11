@@ -11851,6 +11851,9 @@
               }
             ]
           },
+          "confirmPassword": {
+            "type": "string"
+          },
           "oldPassword": {
             "minLength": 8,
             "maxLength": 64,
@@ -11859,6 +11862,7 @@
         },
         "required": [
           "newPassword",
+          "confirmPassword",
           "oldPassword"
         ]
       },

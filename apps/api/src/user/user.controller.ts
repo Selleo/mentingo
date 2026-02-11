@@ -288,7 +288,7 @@ export class UserController {
     if (currentUserId !== id) {
       throw new ForbiddenException("You can only update your own account");
     }
-    await this.usersService.changePassword(id, data.oldPassword, data.newPassword);
+    await this.usersService.changePassword(id, data);
 
     return null;
   }

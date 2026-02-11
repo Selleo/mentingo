@@ -23,10 +23,15 @@ import { passwordSchema } from "../schema/password.schema";
 
 import type { ChangePasswordBody } from "~/api/generated-api";
 
-const changePasswordSchema = z.object({
-  oldPassword: z.string().min(1, "changePasswordView.validation.oldPassword"),
-  newPassword: passwordSchema,
-});
+const changePasswordSchema = z
+  .object({
+    oldPassword: z.string().min(1, "changePasswordView.validation.oldPassword"),
+    newPassword: passwordSchema,
+    confirmPassword: z.string(),
+  })
+  .refine(({ newPassword, confirmPassword }) => newPassword === confirmPassword, {
+    path: ["confirmPassword"],
+  });
 
 export default function ChangePasswordForm() {
   const { mutate: changePassword } = useChangePassword();
@@ -38,6 +43,7 @@ export default function ChangePasswordForm() {
     defaultValues: {
       oldPassword: "",
       newPassword: "",
+      confirmPassword: "",
     },
   });
 
@@ -92,8 +98,23 @@ export default function ChangePasswordForm() {
                 {...register("newPassword")}
               />
 
+              <Label htmlFor="confirmPassword" className="body-base-md">
+                {t("changePasswordView.field.confirmPassword")}
+              </Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                className={cn({
+                  "border-red-500 focus:!ring-red-500": errors.confirmPassword,
+                })}
+                {...register("confirmPassword")}
+              />
+
               <div id="password-hints" className="mb-3">
-                <PasswordValidationDisplay fieldName="newPassword" />
+                <PasswordValidationDisplay
+                  fieldName="newPassword"
+                  confirmFieldName="confirmPassword"
+                />
               </div>
             </div>
           </CardContent>
