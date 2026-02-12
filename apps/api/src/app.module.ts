@@ -99,7 +99,7 @@ import { UserModule } from "./user/user.module";
     EmailModule,
     TestConfigModule,
     CategoryModule,
-    ConditionalModule.registerWhen(ScheduleModule.forRoot(), (env) => env.NODE_ENV !== "test"),
+    ConditionalModule.registerWhen(ScheduleModule.forRoot(), (env) => !env.JEST_WORKER_ID),
     CourseModule,
     GroupModule,
     LessonModule,
