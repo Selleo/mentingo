@@ -9,12 +9,13 @@ import {
   selectCourseAndOpenEnrollmentTab,
   verifyStudentSeesCourse,
 } from "../../utils";
+import { getTenantEmail } from "../../utils/tenant-email";
 
 import { ASSIGNING_STUDENT_TO_GROUP_PAGE_UI } from "./data/assigning-student-data";
 
 const USERS = {
-  admin: { email: "admin@example.com", password: "password" },
-  student: { email: "student0@example.com", password: "password" },
+  admin: { email: getTenantEmail("admin@example.com"), password: "password" },
+  student: { email: getTenantEmail("student0@example.com"), password: "password" },
 };
 
 const GROUP = { name: "STUDENTS GROUP" };
@@ -35,13 +36,17 @@ const COURSES_HEADER = "Top 5 most popular courses";
 const PRIVATE_COURSE = {
   titleTestId: "Advanced English: Mastering Complex Language Skills",
   heading: "Advanced English: Mastering",
-  admin: { email: "admin@example.com", password: "password" },
-  student: { email: "student@example.com", password: "password", email2: "student0@example.com" },
+  admin: { email: getTenantEmail("admin@example.com"), password: "password" },
+  student: {
+    email: getTenantEmail("student@example.com"),
+    password: "password",
+    email2: getTenantEmail("student0@example.com"),
+  },
 };
 
 const SEQUENCE_USERS = {
-  admin: { email: "admin@example.com", password: "password" },
-  student: { email: "student@example.com", password: "password" },
+  admin: { email: getTenantEmail("admin@example.com"), password: "password" },
+  student: { email: getTenantEmail("student@example.com"), password: "password" },
 };
 
 const SEQUENCE_COURSE = {
@@ -423,7 +428,7 @@ const publishCourse = async (page: Page) => {
 const enrollStudentIndividually = async (page: Page) => {
   await page.getByRole("tab", { name: "Settings" }).click();
   await page.getByRole("tab", { name: "Enrolled students" }).click();
-  await page.getByText("student0@example.com").click();
+  await page.getByText(getTenantEmail("student0@example.com")).click();
   await page.getByRole("button", { name: "Enroll", exact: true }).click();
   await page.getByRole("button", { name: "Enroll selected", exact: true }).click();
   await page.getByRole("button", { name: "Save" }).click();
@@ -478,7 +483,7 @@ const unenrollStudent = async (page: Page) => {
   await expect(editCourseButton).toBeVisible();
   await editCourseButton.click();
   await page.getByRole("tab", { name: "Enrolled students" }).click();
-  await page.getByText("student0@example.com").click();
+  await page.getByText(getTenantEmail("student0@example.com")).click();
   await page.getByRole("button", { name: "Enroll", exact: true }).click();
   await page.getByRole("button", { name: "Unenroll selected" }).click();
   await page.getByRole("button", { name: "Save" }).click();
@@ -532,7 +537,7 @@ const unenrollGroup = async (page: Page) => {
   await page.getByTestId(COURSE.title).last().click();
   await page.getByRole("button", { name: "Edit Course" }).click();
   await page.getByRole("tab", { name: "Enrolled students" }).click();
-  await page.getByText("student0@example.com").click();
+  await page.getByText(getTenantEmail("student0@example.com")).click();
   await page.getByRole("button", { name: "Enroll groups" }).click();
   await page.getByRole("button", { name: "Unenroll groups" }).click();
   await page
@@ -630,10 +635,19 @@ const expectCourseNotVisibleForStudent = async (page: Page, courseTitle: string)
   await expect(page.getByTestId(courseTitle)).not.toBeVisible();
 };
 
+const openAdminCourse = async (page: Page, courseTitle: string) => {
+  await login(page, PRIVATE_COURSE.admin.email, PRIVATE_COURSE.admin.password);
+  await page.getByRole("button", { name: "Manage courses" }).click();
+  await page.getByRole("button", { name: /create new/i }).waitFor({ state: "visible" });
+  await page.getByRole("cell", { name: courseTitle }).first().click();
+};
+
 const setCourseAsPrivate = async (page: Page) => {
-  await page.getByRole("button", { name: "Courses" }).getByRole("link").click();
-  await page.getByTestId(PRIVATE_COURSE.titleTestId).first().click();
-  await page.getByRole("button", { name: "Edit Course" }).click();
+  await openAdminCourse(page, PRIVATE_COURSE.heading);
+  const editButton = page.getByRole("button", { name: "Edit Course" });
+  if (await editButton.isVisible().catch(() => false)) {
+    await editButton.click();
+  }
   await page.getByRole("tab", { name: "Status" }).click();
   await page.getByRole("button", { name: "Private Students cannot" }).click();
   await page.getByRole("button", { name: "Save" }).click();
@@ -709,14 +723,14 @@ test.describe.serial("Assigning students to course flow", () => {
         ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.courseToAssign,
       );
 
+      await page.waitForURL(/tab=Enrolled/);
+
       await findAndClickCell(page, ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.data.studentToAssignEmail);
 
       await enrollSelected(page);
 
       await expect(
-        page.getByTestId(
-          new RegExp(ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.data.studentToAssignEmail, "i"),
-        ),
+        page.getByTestId(ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.data.studentToAssignEmail),
       ).toHaveText(new RegExp(ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.enrolled, "i"));
     });
 

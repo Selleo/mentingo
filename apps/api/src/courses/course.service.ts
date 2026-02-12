@@ -8,7 +8,6 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from "@nestjs/common";
-import { EventBus } from "@nestjs/cqrs";
 import { BaseEmailTemplate } from "@repo/email-templates";
 import { COURSE_ENROLLMENT, SUPPORTED_LANGUAGES, ENTITY_TYPES } from "@repo/shared";
 import { load as loadHtml } from "cheerio";
@@ -55,6 +54,7 @@ import { LessonRepository } from "src/lesson/repositories/lesson.repository";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { SettingsService } from "src/settings/settings.service";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
 import {
@@ -167,7 +167,7 @@ export class CourseService {
     private readonly stripeService: StripeService,
     private readonly envService: EnvService,
     private readonly localizationService: LocalizationService,
-    private readonly eventBus: EventBus,
+    private readonly outboxPublisher: OutboxPublisher,
     private readonly aiService: AiService,
     private readonly adminLessonService: AdminLessonService,
     private readonly learningTimeRepository: LearningTimeRepository,
@@ -1561,7 +1561,9 @@ export class CourseService {
       .returning();
 
     if (hasCertificate) {
-      this.eventBus.publish(new UpdateHasCertificateEvent(courseId));
+      await this.outboxPublisher.publish(
+        new UpdateHasCertificateEvent({ courseId, tenantId: currentUser.tenantId }),
+      );
     }
 
     if (!updatedCourse) {
@@ -1572,7 +1574,7 @@ export class CourseService {
 
     if (this.areCourseSnapshotsEqual(previousSnapshot, updatedSnapshot)) return updatedCourse;
 
-    this.eventBus.publish(
+    await this.outboxPublisher.publish(
       new UpdateCourseEvent({
         courseId,
         actor: currentUser,
@@ -1619,7 +1621,7 @@ export class CourseService {
 
     if (this.areCourseSnapshotsEqual(previousSnapshot, updatedSnapshot)) return updatedCourse;
 
-    this.eventBus.publish(
+    await this.outboxPublisher.publish(
       new UpdateCourseEvent({
         courseId,
         actor: currentUser,
@@ -1725,7 +1727,7 @@ export class CourseService {
       createCourseBody.language,
     );
 
-    this.eventBus.publish(
+    await this.outboxPublisher.publish(
       new CreateCourseEvent({
         courseId: newCourse.id,
         actor: currentUser,
@@ -1901,7 +1903,7 @@ export class CourseService {
       return updatedCourse;
     }
 
-    this.eventBus.publish(
+    await this.outboxPublisher.publish(
       new UpdateCourseEvent({
         courseId: id,
         actor: currentUser,
@@ -1984,7 +1986,7 @@ export class CourseService {
     });
 
     if (currentUser) {
-      this.eventBus.publish(
+      await this.outboxPublisher.publish(
         new EnrollCourseEvent({
           courseId: id,
           userId: studentId,
@@ -2062,14 +2064,16 @@ export class CourseService {
       );
     });
 
-    this.eventBus.publish(new UsersAssignedToCourseEvent({ studentIds, courseId }));
-    studentIds.forEach((studentId) =>
-      this.eventBus.publish(
-        new EnrollCourseEvent({
-          courseId,
-          userId: studentId,
-          actor: currentUser,
-        }),
+    await this.outboxPublisher.publish(new UsersAssignedToCourseEvent({ studentIds, courseId }));
+    await Promise.all(
+      studentIds.map((studentId) =>
+        this.outboxPublisher.publish(
+          new EnrollCourseEvent({
+            courseId,
+            userId: studentId,
+            actor: currentUser,
+          }),
+        ),
       ),
     );
   }
@@ -2182,7 +2186,9 @@ export class CourseService {
       }
     });
 
-    this.eventBus.publish(new UsersAssignedToCourseEvent({ studentIds: newStudentIds, courseId }));
+    await this.outboxPublisher.publish(
+      new UsersAssignedToCourseEvent({ studentIds: newStudentIds, courseId }),
+    );
   }
 
   async unenrollGroupsFromCourse(courseId: UUIDType, groupIds: UUIDType[]) {
@@ -3714,8 +3720,11 @@ export class CourseService {
     const indent = "\u00A0\u00A0\u00A0\u00A0";
 
     await Promise.all(
-      adminsToNotify.map(async ({ id: adminId, email: adminEmail }) => {
-        const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(adminId);
+      adminsToNotify.map(async ({ id: adminId, email: adminEmail, tenantId }) => {
+        const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
+          tenantId,
+          adminId,
+        );
 
         const lines: string[] = [];
         for (const [courseKey, rows] of Object.entries(groupedByCourse)) {
@@ -3753,12 +3762,15 @@ export class CourseService {
           ...defaultEmailSettings,
         });
 
-        return this.emailService.sendEmailWithLogo({
-          to: adminEmail,
-          subject: "Overdue courses notification",
-          text,
-          html,
-        });
+        return this.emailService.sendEmailWithLogo(
+          {
+            to: adminEmail,
+            subject: "Overdue courses notification",
+            text,
+            html,
+          },
+          { tenantId },
+        );
       }),
     );
   }

@@ -2,6 +2,8 @@ import path from "path";
 
 import { test, expect, type Page } from "@playwright/test";
 
+import { getTenantEmail } from "../../utils/tenant-email";
+
 const TEST_DATA = {
   base: {
     titleEn: "title",
@@ -30,8 +32,8 @@ const TEST_DATA = {
     missingWord: "missing",
     gapWord: "missing v2",
   },
-  student: { email: "student0@example.com", password: "password" },
-  admin: { email: "admin@example.com", password: "password" },
+  student: { email: getTenantEmail("student0@example.com"), password: "password" },
+  admin: { email: getTenantEmail("admin@example.com"), password: "password" },
   regex: {
     lessonResource: /.*\/api\/lesson\/lesson-resource.*$/,
   },
@@ -373,7 +375,7 @@ const publishAndEnroll = async (page: Page) => {
   await page.getByRole("button", { name: "Published" }).click();
   await page.getByRole("button", { name: "Save" }).click();
   await page.getByRole("tab", { name: "Enrolled students" }).click();
-  await page.getByRole("cell", { name: "student0@example.com" }).click();
+  await page.getByRole("cell", { name: getTenantEmail("student0@example.com") }).click();
   await page.getByRole("button", { name: "Enroll", exact: true }).click();
   await page.getByRole("button", { name: "Enroll selected", exact: true }).click();
   await page.getByRole("button", { name: "Save" }).click();

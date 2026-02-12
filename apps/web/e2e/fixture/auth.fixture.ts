@@ -19,6 +19,11 @@ export class AuthFixture {
   }
 
   async login(email: string, password: string) {
+    await this.page.context().clearCookies();
+    await this.page.addInitScript(() => {
+      localStorage.clear();
+      sessionStorage.clear();
+    });
     await this.page.goto(LOGIN_URL);
     await this.page.waitForURL(LOGIN_URL);
     const loginHeading = this.page.getByRole("heading", { name: "Login" });

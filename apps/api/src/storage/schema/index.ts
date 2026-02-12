@@ -136,11 +136,17 @@ export const categories = pgTable(
   {
     ...id,
     ...timestamps,
-    title: text("title").notNull().unique(),
+    title: text("title").notNull(),
     archived,
     tenantId,
   },
-  withTenantIdIndex("categories"),
+  (table) => ({
+    ...withTenantIdIndex("categories")(table),
+    tenantTitleUniqueIdx: uniqueIndex("categories_tenant_id_title_unique").on(
+      table.tenantId,
+      table.title,
+    ),
+  }),
 );
 
 export const createTokens = pgTable(
@@ -870,6 +876,28 @@ export const activityLogs = pgTable(
   })),
 );
 
+export const outboxEvents = pgTable(
+  "outbox_events",
+  {
+    ...id,
+    ...timestamps,
+    eventType: text("event_type").notNull(),
+    payload: jsonb("payload").notNull(),
+    status: text("status").notNull().default("pending"),
+    attemptCount: integer("attempt_count").notNull().default(0),
+    publishedAt: timestamp("published_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    lastError: text("last_error"),
+    tenantId,
+  },
+  withTenantIdIndex("outbox_events", (table) => ({
+    pollIdx: index("outbox_events_poll_idx").on(table.tenantId, table.status, table.createdAt),
+  })),
+);
+
 export const questionsAndAnswers = pgTable(
   "questions_and_answers",
   {
@@ -1013,6 +1041,7 @@ export const tenants = pgTable(
     name: text("name").notNull(),
     host: text("host").notNull(),
     status: text("status").notNull().$type<TenantStatus>().default(TENANT_STATUSES.ACTIVE),
+    isManaging: boolean("is_managing").notNull().default(false),
   },
   (table) => ({
     uniqueHostIdx: uniqueIndex("unique_host_idx").on(table.host),

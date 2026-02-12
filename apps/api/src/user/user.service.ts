@@ -7,8 +7,6 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
-import { EventBus } from "@nestjs/cqrs";
-import { CreatePasswordReminderEmail } from "@repo/email-templates";
 import { OnboardingPages, type SupportedLanguages, SUPPORTED_LANGUAGES } from "@repo/shared";
 import * as bcrypt from "bcryptjs";
 import {
@@ -29,16 +27,16 @@ import { nanoid } from "nanoid";
 
 import { CreatePasswordService } from "src/auth/create-password.service";
 import { DatabasePg } from "src/common";
-import { EmailService } from "src/common/emails/emails.service";
-import { getEmailSubject } from "src/common/emails/translations";
 import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterConditions";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import hashPassword from "src/common/helpers/hashPassword";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { CreateUserEvent, DeleteUserEvent, UpdateUserEvent } from "src/events";
 import { UserInviteEvent } from "src/events/user/user-invite.event";
+import { UserPasswordReminderEvent } from "src/events/user/user-password-reminder.event";
 import { FileService } from "src/file/file.service";
 import { GroupService } from "src/group/group.service";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { S3Service } from "src/s3/s3.service";
 import { SettingsService } from "src/settings/settings.service";
 import { StatisticsService } from "src/statistics/statistics.service";
@@ -77,15 +75,14 @@ import type { UserDetailsResponse, UserDetailsWithAvatarKey } from "./schemas/us
 import type { UserActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
-import type { UserInvite } from "src/events/user/user-invite.event";
 import type { CreateUserBody, ImportUserResponse } from "src/user/schemas/createUser.schema";
+import type { CreateUserOptions, CreateUserTransactionResult } from "src/user/user.types";
 
 @Injectable()
 export class UserService {
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
-    private readonly eventBus: EventBus,
-    private readonly emailService: EmailService,
+    private readonly outboxPublisher: OutboxPublisher,
     private fileService: FileService,
     private s3Service: S3Service,
     private createPasswordService: CreatePasswordService,
@@ -275,13 +272,14 @@ export class UserService {
         actor && previousSnapshot && updatedSnapshot && !isEqual(previousSnapshot, updatedSnapshot);
 
       if (shouldPublishEvent) {
-        this.eventBus.publish(
+        await this.outboxPublisher.publish(
           new UpdateUserEvent({
             userId: id,
             actor,
             previousUserData: previousSnapshot,
             updatedUserData: updatedSnapshot,
           }),
+          trx,
         );
       }
 
@@ -440,12 +438,13 @@ export class UserService {
         .returning();
 
       if (userSnapshot) {
-        this.eventBus.publish(
+        await this.outboxPublisher.publish(
           new DeleteUserEvent({
             userId: id,
             actor,
             deletedUserData: userSnapshot,
           }),
+          trx,
         );
       }
 
@@ -491,22 +490,30 @@ export class UserService {
         ),
       );
 
-      usersSnapshots.forEach((snapshot, index) => {
-        const userId = ids[index];
-        if (!snapshot) return;
+      await Promise.all(
+        usersSnapshots.map((snapshot, index) => {
+          const userId = ids[index];
+          if (!snapshot) return Promise.resolve();
 
-        this.eventBus.publish(
-          new DeleteUserEvent({
-            userId,
-            actor,
-            deletedUserData: snapshot,
-          }),
-        );
-      });
+          return this.outboxPublisher.publish(
+            new DeleteUserEvent({
+              userId,
+              actor,
+              deletedUserData: snapshot,
+            }),
+            trx,
+          );
+        }),
+      );
     });
   }
 
-  public async createUser(data: CreateUserBody, dbInstance?: DatabasePg, creator?: CurrentUser) {
+  public async createUser(
+    data: CreateUserBody,
+    dbInstance?: DatabasePg,
+    creator?: CurrentUser,
+    options?: CreateUserOptions,
+  ) {
     const db = dbInstance ?? this.db;
 
     const [existingUser] = await db
@@ -518,31 +525,96 @@ export class UserService {
       throw new ConflictException("User already exists");
     }
 
-    const { createdUser, token } = await this.db.transaction(async (trx) => {
+    const { createdUser, token, newUsersLanguage } = await this.createUserTransaction(
+      db,
+      data,
+      creator,
+    );
+
+    if (creator) {
+      const snapshot = await this.buildUserActivitySnapshot(createdUser.id);
+
+      await this.outboxPublisher.publish(
+        new CreateUserEvent({
+          userId: createdUser.id,
+          actor: creator,
+          createdUserData: snapshot,
+        }),
+      );
+
+      await this.outboxPublisher.publish(
+        new UserInviteEvent({
+          creatorId: creator.userId,
+          email: createdUser.email,
+          token,
+          userId: createdUser.id,
+          tenantId: createdUser.tenantId,
+        }),
+      );
+
+      return createdUser;
+    }
+
+    if (options?.invite) {
+      await this.outboxPublisher.publish(
+        new UserInviteEvent({
+          email: createdUser.email,
+          token,
+          userId: createdUser.id,
+          tenantId: createdUser.tenantId,
+          invitedByUserName: options.invite.invitedByUserName,
+          origin: options.invite.origin,
+        }),
+      );
+
+      return createdUser;
+    }
+
+    await this.outboxPublisher.publish(
+      new UserPasswordReminderEvent({
+        email: createdUser.email,
+        token,
+        userId: createdUser.id,
+        tenantId: createdUser.tenantId,
+        language: newUsersLanguage,
+      }),
+    );
+
+    return createdUser;
+  }
+
+  private async createUserTransaction(
+    db: DatabasePg,
+    data: CreateUserBody,
+    creator?: CurrentUser,
+  ): Promise<CreateUserTransactionResult> {
+    return db.transaction(async (trx) => {
       const [createdUser] = await trx.insert(users).values(data).returning();
+
       await trx.insert(userOnboarding).values({ userId: createdUser.id });
 
-      if (creator) {
-        const { language: adminsLanguage } = await this.settingsService.getUserSettings(
-          creator.userId,
-        );
+      let newUsersLanguage: SupportedLanguages = SUPPORTED_LANGUAGES.EN;
 
-        const finalLanguage = Object.values(SUPPORTED_LANGUAGES).includes(
+      if (creator) {
+        const creatorSettings = await this.settingsService.getUserSettings(creator.userId, trx);
+
+        newUsersLanguage = Object.values(SUPPORTED_LANGUAGES).includes(
           data.language as SupportedLanguages,
         )
-          ? data.language
-          : adminsLanguage;
-
-        await this.settingsService.createSettingsIfNotExists(
-          createdUser.id,
-          createdUser.role as UserRole,
-          { language: finalLanguage },
-          trx,
-        );
+          ? (data.language as SupportedLanguages)
+          : (creatorSettings.language as SupportedLanguages);
       }
 
-      const token = nanoid(64);
+      const settingsOverride = creator ? { language: newUsersLanguage } : undefined;
 
+      await this.settingsService.createSettingsIfNotExists(
+        createdUser.id,
+        createdUser.role as UserRole,
+        settingsOverride,
+        trx,
+      );
+
+      const token = nanoid(64);
       const expiryDate = new Date();
       expiryDate.setFullYear(expiryDate.getFullYear() + 1);
 
@@ -556,68 +628,17 @@ export class UserService {
         })
         .returning();
 
-      await this.settingsService.createSettingsIfNotExists(
-        createdUser.id,
-        createdUser.role as UserRole,
-        undefined,
-        trx,
-      );
-
-      if (USER_ROLES.CONTENT_CREATOR === createdUser.role || USER_ROLES.ADMIN === createdUser.role)
+      if (
+        createdUser.role === USER_ROLES.CONTENT_CREATOR ||
+        createdUser.role === USER_ROLES.ADMIN
+      ) {
         await trx
           .insert(userDetails)
           .values({ userId: createdUser.id, contactEmail: createdUser.email });
+      }
 
-      return { createdUser, token: createToken };
+      return { createdUser, token: createToken, newUsersLanguage };
     });
-
-    if (!createdUser || !token) {
-      throw new Error("Failed to create user");
-    }
-
-    if (creator) {
-      const snapshot = await this.buildUserActivitySnapshot(createdUser.id);
-
-      this.eventBus.publish(
-        new CreateUserEvent({
-          userId: createdUser.id,
-          actor: creator,
-          createdUserData: snapshot,
-        }),
-      );
-    }
-
-    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(createdUser.id);
-
-    if (!creator) {
-      const createPasswordEmail = new CreatePasswordReminderEmail({
-        createPasswordLink: `${
-          process.env.CI ? "http://localhost:5173" : process.env.CORS_ORIGIN
-        }/auth/create-new-password?createToken=${token}&email=${createdUser.email}`,
-        ...defaultEmailSettings,
-      });
-
-      await this.emailService.sendEmailWithLogo({
-        to: createdUser.email,
-        subject: getEmailSubject("passwordReminderEmail", defaultEmailSettings.language),
-        text: createPasswordEmail.text,
-        html: createPasswordEmail.html,
-      });
-
-      return createdUser;
-    }
-
-    const userInviteDetails: UserInvite = {
-      creatorId: creator.userId,
-      email: createdUser.email,
-      token,
-      userId: createdUser.id,
-      ...defaultEmailSettings,
-    };
-
-    this.eventBus.publish(new UserInviteEvent(userInviteDetails));
-
-    return createdUser;
   }
 
   public getUsersProfilePictureUrl = async (avatarReference: string | null) => {
@@ -630,6 +651,7 @@ export class UserService {
       .select({
         id: users.id,
         email: users.email,
+        tenantId: users.tenantId,
       })
       .from(users)
       .innerJoin(settings, eq(users.id, settings.userId))
@@ -840,11 +862,14 @@ export class UserService {
     }
   }
 
-  public async getAdminsToNotifyAboutFinishedCourse(): Promise<{ email: string; id: string }[]> {
+  public async getAdminsToNotifyAboutFinishedCourse(): Promise<
+    { email: string; id: string; tenantId: string }[]
+  > {
     return this.db
       .select({
         id: users.id,
         email: users.email,
+        tenantId: users.tenantId,
       })
       .from(users)
       .innerJoin(settings, eq(users.id, settings.userId))
@@ -857,11 +882,14 @@ export class UserService {
       );
   }
 
-  public async getAdminsToNotifyAboutOverdueCourse(): Promise<{ email: string; id: string }[]> {
+  public async getAdminsToNotifyAboutOverdueCourse(): Promise<
+    { email: string; id: string; tenantId: string }[]
+  > {
     return this.db
       .select({
         id: users.id,
         email: users.email,
+        tenantId: users.tenantId,
       })
       .from(users)
       .innerJoin(settings, eq(users.id, settings.userId))

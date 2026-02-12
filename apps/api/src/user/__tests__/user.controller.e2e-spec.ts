@@ -3,7 +3,7 @@ import request from "supertest";
 
 import { AuthService } from "src/auth/auth.service";
 import { GroupService } from "src/group/group.service";
-import { DB, DB_BASE } from "src/storage/db/db.providers";
+import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
@@ -32,7 +32,7 @@ describe("UsersController (e2e)", () => {
     authService = app.get(AuthService);
     groupService = app.get(GroupService);
     db = app.get(DB);
-    baseDb = app.get(DB_BASE);
+    baseDb = app.get(DB_ADMIN);
     userFactory = createUserFactory(db);
     settingsFactory = createSettingsFactory(db);
   });

@@ -3,7 +3,7 @@ import { eq, isNull } from "drizzle-orm";
 import request from "supertest";
 
 import { DEFAULT_GLOBAL_SETTINGS } from "src/settings/constants/settings.constants";
-import { DB, DB_BASE } from "src/storage/db/db.providers";
+import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { questionsAndAnswers, settings } from "src/storage/schema";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
@@ -53,7 +53,7 @@ describe("QAController (e2e)", () => {
     const { app: testApp } = await createE2ETest();
     app = testApp;
     db = app.get(DB);
-    baseDb = app.get(DB_BASE);
+    baseDb = app.get(DB_ADMIN);
 
     qaFactory = createQAFactory(db);
     userFactory = createUserFactory(db);

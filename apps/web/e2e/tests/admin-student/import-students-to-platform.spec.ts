@@ -1,15 +1,8 @@
-import path from "path";
-import { fileURLToPath } from "url";
-
 import { expect, test, type Page } from "@playwright/test";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const csvPath = path.resolve(__dirname, "../../data/csv/user-csv.csv");
-const GROUP_NAME = "grupa pierwsza";
+const GROUP_NAME_PREFIX = "Grupa";
 const IMPORT_SUCCESS_MESSAGE =
   "Import completed successfully. Imported 1 users. Skipped 0 existing users.";
-const IMPORTED_USER_EMAIL = "janekk@example.com";
 
 const goToGroups = async (page: Page) => {
   await page.getByRole("button", { name: "Manage" }).nth(1).click();
@@ -17,13 +10,13 @@ const goToGroups = async (page: Page) => {
   await expect(page.getByRole("heading", { name: "Groups" })).toBeVisible();
 };
 
-const createGroup = async (page: Page) => {
+const createGroup = async (page: Page, groupName: string) => {
   await goToGroups(page);
   await page.getByRole("button", { name: "Create new" }).click();
   await page.getByTestId("groupName").click();
-  await page.getByTestId("groupName").fill(GROUP_NAME);
+  await page.getByTestId("groupName").fill(groupName);
   await page.getByRole("button", { name: "Publish" }).click();
-  await expect(page.getByRole("cell", { name: GROUP_NAME })).toBeVisible();
+  await expect(page.getByRole("cell", { name: groupName }).first()).toBeVisible();
 };
 
 const openImportUsers = async (page: Page) => {
@@ -31,13 +24,17 @@ const openImportUsers = async (page: Page) => {
   await page.getByRole("button", { name: "Import users" }).click();
 };
 
-const uploadCsvAndImport = async (page: Page) => {
-  await page.getByTestId("fileUploadInput").setInputFiles(csvPath);
+const uploadCsvAndImport = async (page: Page, csvContent: string) => {
+  await page.getByTestId("fileUploadInput").setInputFiles({
+    name: "user-csv.csv",
+    mimeType: "text/csv",
+    buffer: Buffer.from(csvContent, "utf-8"),
+  });
   await page.getByRole("button", { name: "Import users" }).click();
 };
 
-const verifyImportedUser = async (page: Page) => {
-  await expect(page.getByLabel("Imported (1)").getByText(IMPORTED_USER_EMAIL)).toBeVisible();
+const verifyImportedUser = async (page: Page, importedEmail: string) => {
+  await expect(page.getByLabel("Imported (1)").getByText(importedEmail)).toBeVisible();
 };
 
 const closeImportModal = async (page: Page) => {
@@ -48,9 +45,9 @@ const closeImportModal = async (page: Page) => {
     .click();
 };
 
-const verifySuccessAndGroup = async (page: Page) => {
+const verifySuccessAndGroup = async (page: Page, groupName: string) => {
   await expect(page.getByText(IMPORT_SUCCESS_MESSAGE, { exact: true })).toBeVisible();
-  await expect(page.getByText(GROUP_NAME)).toBeVisible();
+  await expect(page.getByText(groupName).first()).toBeVisible();
 };
 
 const logoutAdmin = async (page: Page) => {
@@ -60,28 +57,26 @@ const logoutAdmin = async (page: Page) => {
   await page.getByRole("menuitem", { name: "Logout" }).locator("div").click();
 };
 
-const createNewPasswordAndLoginAsStudent = async (page: Page) => {
+const createNewPasswordAndLoginAsStudent = async (page: Page, importedEmail: string) => {
   await page.goto("/auth/login");
-
   await page.goto("http://localhost:8025/");
-  const email = page
-    .getByText("noreply@lms.selleo.app janekk")
-    .first()
-    .or(
-      page
-        .getByText("noreply@mentingo.com janekk@example.com Zapraszamy na platformę! a few seconds")
-        .first(),
-    );
-  await email.waitFor({ state: "visible", timeout: 15000 });
-  await expect(email).toBeVisible();
-  await email.click();
-  const page2Promise = page.waitForEvent("popup");
-  await page
+
+  const messageRow = page.getByText(`noreply@lms.selleo.app ${importedEmail} Zapraszamy`).first();
+  await expect(messageRow).toBeVisible({ timeout: 90_000 });
+  await messageRow.click();
+
+  const inviteLinkLocator = page
     .locator("#preview-html")
     .contentFrame()
-    .getByRole("link", { name: "DOŁĄCZ TERAZ" })
-    .click();
-  const page2 = await page2Promise;
+    .locator("a[href*='/auth/create-new-password?createToken=']")
+    .first();
+  await expect(inviteLinkLocator).toBeVisible({ timeout: 15_000 });
+  const inviteLink = await inviteLinkLocator.getAttribute("href");
+
+  if (!inviteLink) throw new Error(`Invite link not found for ${importedEmail}`);
+
+  const page2 = await page.context().newPage();
+  await page2.goto(inviteLink);
   await page2.getByLabel("Password", { exact: true }).click();
   await page2.getByLabel("Password", { exact: true }).fill("Pass@123");
   await page2.getByLabel("Confirm password").click();
@@ -89,7 +84,7 @@ const createNewPasswordAndLoginAsStudent = async (page: Page) => {
   await page2.getByRole("button", { name: "Create password" }).click();
   await page2.goto("/auth/login");
   await page2.getByPlaceholder("user@example.com").click();
-  await page2.getByPlaceholder("user@example.com").fill("janekk@example.com");
+  await page2.getByPlaceholder("user@example.com").fill(importedEmail);
   await page2.getByLabel("Password").click();
   await page2.getByLabel("Password").fill("Pass@123");
   await page2.getByRole("button", { name: "Login" }).click();
@@ -104,14 +99,19 @@ test.describe("Import students to platform", () => {
     await page.goto("/");
   });
 
-  test("should import students to platform", async ({ page }) => {
-    await createGroup(page);
+  test("should import students to platform", async ({ page }, testInfo) => {
+    const runId = `${Date.now()}-${testInfo.workerIndex}-${testInfo.retry}`;
+    const importedEmail = `janekk+import-${runId}@example.com`;
+    const groupName = `${GROUP_NAME_PREFIX} ${runId}`;
+    const csvContent = `firstName;lastName;email;role;groups;language\nJanek;Kowalski;${importedEmail};student;${groupName};pl`;
+
+    await createGroup(page, groupName);
     await openImportUsers(page);
-    await uploadCsvAndImport(page);
-    await verifyImportedUser(page);
+    await uploadCsvAndImport(page, csvContent);
+    await verifyImportedUser(page, importedEmail);
     await closeImportModal(page);
-    await verifySuccessAndGroup(page);
+    await verifySuccessAndGroup(page, groupName);
     await logoutAdmin(page);
-    await createNewPasswordAndLoginAsStudent(page);
+    await createNewPasswordAndLoginAsStudent(page, importedEmail);
   });
 });

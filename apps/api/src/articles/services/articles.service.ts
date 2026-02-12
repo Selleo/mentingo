@@ -5,7 +5,6 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { EventBus } from "@nestjs/cqrs";
 import { ARTICLE_STATUS, ENTITY_TYPES, type SupportedLanguages } from "@repo/shared";
 import { eq, getTableColumns, sql } from "drizzle-orm";
 import { isEmpty, isEqual } from "lodash";
@@ -25,6 +24,7 @@ import {
 import { RESOURCE_RELATIONSHIP_TYPES, RESOURCE_CATEGORIES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { LocalizationService } from "src/localization/localization.service";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { SettingsService } from "src/settings/settings.service";
 import { articles, articleSections } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
@@ -61,7 +61,7 @@ export class ArticlesService {
     private readonly localizationService: LocalizationService,
     private readonly fileService: FileService,
     private readonly articlesRepository: ArticlesRepository,
-    private readonly eventBus: EventBus,
+    private readonly outboxPublisher: OutboxPublisher,
     private readonly settingsService: SettingsService,
     @Inject("DB") private readonly db: DatabasePg,
   ) {}
@@ -86,7 +86,7 @@ export class ArticlesService {
       language,
     );
 
-    this.eventBus.publish(
+    await this.outboxPublisher.publish(
       new CreateArticleSectionEvent({
         articleSectionId: section.id,
         actor: currentUser,
@@ -139,7 +139,7 @@ export class ArticlesService {
     const updatedSnapshot = await this.buildArticleSectionActivitySnapshot(sectionId, language);
 
     if (!this.areSectionSnapshotsEqual(previousSnapshot, updatedSnapshot)) {
-      this.eventBus.publish(
+      await this.outboxPublisher.publish(
         new UpdateArticleSectionEvent({
           articleSectionId: sectionId,
           actor: currentUser,
@@ -183,7 +183,7 @@ export class ArticlesService {
     const updatedSnapshot = await this.buildArticleSectionActivitySnapshot(sectionId, language);
 
     if (!this.areSectionSnapshotsEqual(previousSnapshot, updatedSnapshot)) {
-      this.eventBus.publish(
+      await this.outboxPublisher.publish(
         new UpdateArticleSectionEvent({
           articleSectionId: sectionId,
           actor: currentUser,
@@ -229,7 +229,7 @@ export class ArticlesService {
     const updatedSnapshot = await this.buildArticleSectionActivitySnapshot(sectionId, language);
 
     if (!this.areSectionSnapshotsEqual(previousSnapshot, updatedSnapshot)) {
-      this.eventBus.publish(
+      await this.outboxPublisher.publish(
         new UpdateArticleSectionEvent({
           articleSectionId: sectionId,
           actor: currentUser,
@@ -258,7 +258,7 @@ export class ArticlesService {
 
     if (!deletedSection) throw new BadRequestException("adminArticleView.toast.deleteSectionError");
 
-    this.eventBus.publish(
+    await this.outboxPublisher.publish(
       new DeleteArticleSectionEvent({
         articleSectionId: sectionId,
         actor: currentUser,
@@ -290,7 +290,7 @@ export class ArticlesService {
       language,
     );
 
-    this.eventBus.publish(
+    await this.outboxPublisher.publish(
       new CreateArticleEvent({
         articleId: createdArticle.id,
         actor: currentUser,
@@ -343,7 +343,7 @@ export class ArticlesService {
     const updatedSnapshot = await this.buildArticleActivitySnapshot(articleId, language);
 
     if (currentUser && !this.areArticleSnapshotsEqual(previousSnapshot, updatedSnapshot)) {
-      this.eventBus.publish(
+      await this.outboxPublisher.publish(
         new UpdateArticleEvent({
           articleId,
           actor: currentUser,
@@ -409,7 +409,7 @@ export class ArticlesService {
     const updatedSnapshot = await this.buildArticleActivitySnapshot(articleId, language);
 
     if (!this.areArticleSnapshotsEqual(previousSnapshot, updatedSnapshot)) {
-      this.eventBus.publish(
+      await this.outboxPublisher.publish(
         new UpdateArticleEvent({
           articleId,
           actor: currentUser,
@@ -440,7 +440,7 @@ export class ArticlesService {
     if (!deletedArticle) throw new BadRequestException("adminArticleView.toast.deleteError");
 
     if (currentUser) {
-      this.eventBus.publish(
+      await this.outboxPublisher.publish(
         new DeleteArticleEvent({
           articleId,
           actor: currentUser,
@@ -622,7 +622,7 @@ export class ArticlesService {
     const updatedSnapshot = await this.buildArticleActivitySnapshot(articleId, language);
 
     if (!this.areArticleSnapshotsEqual(previousSnapshot, updatedSnapshot)) {
-      this.eventBus.publish(
+      await this.outboxPublisher.publish(
         new UpdateArticleEvent({
           articleId,
           actor: currentUser,

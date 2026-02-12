@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { ConfigService } from "@nestjs/config";
-import { eq, sql } from "drizzle-orm/sql";
+import { and, eq, sql } from "drizzle-orm/sql";
 
 import { EnvRepository } from "src/env/repositories/env.repository";
 import { EnvService } from "src/env/services/env.service";
@@ -43,12 +43,14 @@ export async function createNiceCourses(
         updatedAt: new Date().toISOString(),
         tenantId,
       })
-      .onConflictDoNothing();
+      .onConflictDoNothing({
+        target: [categories.tenantId, categories.title],
+      });
 
     const [category] = await db
       .select()
       .from(categories)
-      .where(eq(categories.title, courseData.category));
+      .where(and(eq(categories.title, courseData.category), eq(categories.tenantId, tenantId)));
 
     const createdAt = faker.date.past({ years: 1, refDate: new Date() }).toISOString();
 
@@ -237,9 +239,13 @@ export async function seedTruncateAllTables(db: DatabasePg): Promise<void> {
   });
 }
 
-export async function ensureSeedTenant(db: DatabasePg, options?: { name?: string; host?: string }) {
+export async function ensureSeedTenant(
+  db: DatabasePg,
+  options?: { name?: string; host?: string; isManaging?: boolean },
+) {
   const host = options?.host ?? "seed.local";
   const name = options?.name ?? "Seed Tenant";
+  const isManaging = options?.isManaging ?? false;
 
   const [existing] = await db.select().from(tenants).where(eq(tenants.host, host));
   if (existing) return existing;
@@ -249,8 +255,51 @@ export async function ensureSeedTenant(db: DatabasePg, options?: { name?: string
     .values({
       name,
       host,
+      isManaging,
     })
     .returning();
 
   return createdTenant;
 }
+
+export function addEmailSuffix(email: string, suffix?: string) {
+  if (!suffix) return email;
+  const [local, domain] = email.split("@");
+  if (!domain) return email;
+  return `${local}+${suffix}@${domain}`;
+}
+
+export function getTenantEmailSuffix(origin: string) {
+  const hostname = new URL(origin).hostname;
+  return hostname.split(".")[0] || hostname;
+}
+
+export const seedUserRoleGrantSql = async (db: DatabasePg) => {
+  if (process.env.CI === "true") return;
+
+  await db.execute(sql`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'lms_app_user') THEN
+          CREATE ROLE lms_app_user
+            LOGIN
+            PASSWORD 'replace_with_strong_password'
+            NOSUPERUSER
+            NOCREATEDB
+            NOCREATEROLE
+            NOBYPASSRLS;
+        END IF;
+      END
+      $$;
+    `);
+
+  await db.execute(sql`GRANT CONNECT ON DATABASE guidebook TO lms_app_user;`);
+  await db.execute(sql`GRANT USAGE ON SCHEMA public TO lms_app_user;`);
+  await db.execute(
+    sql`GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO lms_app_user;`,
+  );
+  await db.execute(sql`
+      ALTER DEFAULT PRIVILEGES IN SCHEMA public
+        GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO lms_app_user;
+    `);
+};

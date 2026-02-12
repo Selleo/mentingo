@@ -6,7 +6,6 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
-import { EventBus } from "@nestjs/cqrs";
 import { ENTITY_TYPES } from "@repo/shared";
 import { isNotNull } from "drizzle-orm";
 import { isNumber } from "lodash";
@@ -20,6 +19,7 @@ import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { QuestionRepository } from "src/questions/question.repository";
 import { QuestionService } from "src/questions/question.service";
 import { studentLessonProgress } from "src/storage/schema";
@@ -54,7 +54,7 @@ export class LessonService {
     private readonly fileService: FileService,
     private readonly studentLessonProgressService: StudentLessonProgressService,
     private readonly aiService: AiService,
-    private readonly eventBus: EventBus,
+    private readonly outboxPublisher: OutboxPublisher,
     private readonly localizationService: LocalizationService,
   ) {}
 
@@ -336,15 +336,16 @@ export class LessonService {
           });
         }
 
-        this.eventBus.publish(
-          new QuizCompletedEvent(
+        await this.outboxPublisher.publish(
+          new QuizCompletedEvent({
             userId,
-            accessCourseLessonWithDetails.courseId,
-            studentQuizAnswers.lessonId,
-            evaluationResult.correctAnswerCount,
-            evaluationResult.wrongAnswerCount,
-            quizScore,
-          ),
+            courseId: accessCourseLessonWithDetails.courseId,
+            lessonId: studentQuizAnswers.lessonId,
+            correctAnswers: evaluationResult.correctAnswerCount,
+            wrongAnswers: evaluationResult.wrongAnswerCount,
+            score: quizScore,
+          }),
+          trx,
         );
 
         return {

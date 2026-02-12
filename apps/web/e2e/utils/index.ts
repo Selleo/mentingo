@@ -47,9 +47,11 @@ export const navigateToPage = async (
   await header.waitFor({ state: "visible" });
 };
 
+export const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 export const findAndClickCell = async (page: Page, name: string) => {
   await page
-    .getByRole("cell", { name: new RegExp(name, "i") })
+    .getByRole("cell", { name: new RegExp(escapeRegExp(name), "i") })
     .first()
     .click();
 };
@@ -65,7 +67,9 @@ export const fillAndAssertTextField = async (page: Page, testId: string, valueTo
 };
 
 export const findAndAssertCell = async (page: Page, expectedValue: string) => {
-  const field = page.getByRole("cell", { name: new RegExp(expectedValue, "i") }).first();
+  const field = page
+    .getByRole("cell", { name: new RegExp(escapeRegExp(expectedValue), "i") })
+    .first();
   await expect(field).toHaveText(expectedValue);
 };
 

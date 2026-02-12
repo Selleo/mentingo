@@ -9,6 +9,7 @@ export interface LearningTimeJobData {
   userId: string;
   lessonId: string;
   courseId: string;
+  tenantId?: string;
   secondsToAdd: number;
   timestamp: number;
 }

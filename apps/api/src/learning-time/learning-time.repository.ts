@@ -5,6 +5,7 @@ import { and, countDistinct, eq, ne, sql } from "drizzle-orm";
 import { DatabasePg } from "src/common";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import {
+  chapters,
   courses,
   groups,
   groupUsers,
@@ -36,6 +37,16 @@ export class LearningTimeRepository {
           totalSeconds: sql`${lessonLearningTime.totalSeconds} + ${seconds}`,
         },
       });
+  }
+
+  async getCourseIdByLessonId(lessonId: UUIDType): Promise<UUIDType | null> {
+    const [result] = await this.db
+      .select({ courseId: chapters.courseId })
+      .from(lessons)
+      .innerJoin(chapters, eq(lessons.chapterId, chapters.id))
+      .where(eq(lessons.id, lessonId));
+
+    return result?.courseId ?? null;
   }
 
   async getLearningTimeForUser(userId: UUIDType, lessonId: UUIDType) {

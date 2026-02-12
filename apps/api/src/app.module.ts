@@ -44,6 +44,7 @@ import { IngestionModule } from "./ingestion/ingestion.module";
 import { LessonModule } from "./lesson/lesson.module";
 import { LocalizationModule } from "./localization/localization.module";
 import { NewsModule } from "./news/news.module";
+import { OutboxModule } from "./outbox/outbox.module";
 import { QuestionsModule } from "./questions/question.module";
 import { ReportModule } from "./report/report.module";
 import { S3Module } from "./s3/s3.module";
@@ -55,6 +56,7 @@ import { DbModule } from "./storage/db/db.module";
 import { TenantRlsInterceptor } from "./storage/db/tenant-rls.interceptor";
 import { StripeModule } from "./stripe/stripe.module";
 import { StudentLessonProgressModule } from "./studentLessonProgress/studentLessonProgress.module";
+import { SuperAdminModule } from "./super-admin/super-admin.module";
 import { TestConfigModule } from "./test-config/test-config.module";
 import { UserModule } from "./user/user.module";
 
@@ -97,7 +99,7 @@ import { UserModule } from "./user/user.module";
     EmailModule,
     TestConfigModule,
     CategoryModule,
-    ConditionalModule.registerWhen(ScheduleModule.forRoot(), (env) => env.NODE_ENV !== "test"),
+    ConditionalModule.registerWhen(ScheduleModule.forRoot(), (env) => !env.JEST_WORKER_ID),
     CourseModule,
     GroupModule,
     LessonModule,
@@ -127,6 +129,8 @@ import { UserModule } from "./user/user.module";
     NewsModule,
     ArticlesModule,
     AnalyticsModule,
+    SuperAdminModule,
+    OutboxModule,
   ],
   controllers: [],
   providers: [

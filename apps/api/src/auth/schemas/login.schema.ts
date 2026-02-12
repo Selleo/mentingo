@@ -12,6 +12,7 @@ export const loginResponseSchema = Type.Object({
   ...baseUserResponseSchema.properties,
   shouldVerifyMFA: Type.Boolean(),
   onboardingStatus: userOnboardingStatusSchema,
+  isManagingTenantAdmin: Type.Boolean(),
 });
 
 export type LoginBody = Static<typeof loginSchema>;

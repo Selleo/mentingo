@@ -1,5 +1,4 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { EventBus } from "@nestjs/cqrs";
 import { ENTITY_TYPES, type SupportedLanguages } from "@repo/shared";
 import { and, count, eq, getTableColumns, gt, lt, ne, sql } from "drizzle-orm";
 import { isEmpty, isEqual } from "lodash";
@@ -13,6 +12,7 @@ import { CreateNewsEvent, DeleteNewsEvent, UpdateNewsEvent } from "src/events";
 import { RESOURCE_RELATIONSHIP_TYPES, RESOURCE_CATEGORIES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { LocalizationService } from "src/localization/localization.service";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { SettingsService } from "src/settings/settings.service";
 import { news, resourceEntity, resources, users } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
@@ -42,7 +42,7 @@ export class NewsService {
     @Inject("DB") private readonly db: DatabasePg,
     private readonly localizationService: LocalizationService,
     private readonly fileService: FileService,
-    private readonly eventBus: EventBus,
+    private readonly outboxPublisher: OutboxPublisher,
     private readonly settingsService: SettingsService,
   ) {}
 
@@ -68,7 +68,7 @@ export class NewsService {
 
     const createdNewsSnapshot = await this.buildNewsActivitySnapshot(createdNews.id, language);
 
-    this.eventBus.publish(
+    await this.outboxPublisher.publish(
       new CreateNewsEvent({
         newsId: createdNews.id,
         actor: currentUser,
@@ -121,7 +121,7 @@ export class NewsService {
     const updatedSnapshot = await this.buildNewsActivitySnapshot(newsId, language);
 
     if (currentUser && !this.areNewsSnapshotsEqual(previousSnapshot, updatedSnapshot)) {
-      this.eventBus.publish(
+      await this.outboxPublisher.publish(
         new UpdateNewsEvent({
           newsId,
           actor: currentUser,
@@ -305,7 +305,7 @@ export class NewsService {
     const updatedSnapshot = await this.buildNewsActivitySnapshot(newsId, language);
 
     if (currentUser && !this.areNewsSnapshotsEqual(previousSnapshot, updatedSnapshot)) {
-      this.eventBus.publish(
+      await this.outboxPublisher.publish(
         new UpdateNewsEvent({
           newsId,
           actor: currentUser,
@@ -339,7 +339,7 @@ export class NewsService {
     if (!deletedNews) throw new BadRequestException("adminNewsView.toast.deleteError");
 
     if (currentUser) {
-      this.eventBus.publish(
+      await this.outboxPublisher.publish(
         new DeleteNewsEvent({
           newsId,
           actor: currentUser,
@@ -529,7 +529,7 @@ export class NewsService {
     const updatedSnapshot = await this.buildNewsActivitySnapshot(newsId, language);
 
     if (currentUser && !this.areNewsSnapshotsEqual(previousSnapshot, updatedSnapshot)) {
-      this.eventBus.publish(
+      await this.outboxPublisher.publish(
         new UpdateNewsEvent({
           newsId,
           actor: currentUser,

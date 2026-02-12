@@ -20,6 +20,7 @@ export interface WsUser {
   userId: string;
   email: string;
   role: string;
+  tenantId: string;
 }
 
 export type AuthenticatedSocket = Socket<

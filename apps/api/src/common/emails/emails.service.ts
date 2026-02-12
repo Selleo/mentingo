@@ -1,8 +1,11 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { SUPPORTED_LANGUAGES } from "@repo/shared";
 
+import { DatabasePg } from "src/common";
 import { SettingsService } from "src/settings/settings.service";
+import { DB_ADMIN } from "src/storage/db/db.providers";
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import { EmailAdapter } from "./adapters/email.adapter";
 
@@ -18,8 +21,10 @@ export class EmailService {
   private readonly fromEmail: string;
 
   constructor(
+    @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
     private emailAdapter: EmailAdapter,
     private settingsService: SettingsService,
+    private readonly tenantRunner: TenantDbRunnerService,
     private configService: ConfigService,
   ) {
     this.usingMailhogAdapter =
@@ -35,9 +40,17 @@ export class EmailService {
     await this.emailAdapter.sendMail({ ...email, from: this.fromEmail });
   }
 
-  async sendEmailWithLogo(email: Omit<Email, "from" | "attachments">): Promise<void> {
-    const logoBuffer = await this.settingsService.getPlatformLogoBuffer();
-    const borderCircleBuffer = await this.settingsService.getEmailBorderCircleBuffer();
+  async sendEmailWithLogo(
+    email: Omit<Email, "from" | "attachments">,
+    options: { tenantId: UUIDType },
+  ): Promise<void> {
+    const { logoBuffer, borderCircleBuffer } = await this.tenantRunner.runWithTenant(
+      options.tenantId,
+      async () => ({
+        logoBuffer: await this.settingsService.getPlatformLogoBuffer(),
+        borderCircleBuffer: await this.settingsService.getEmailBorderCircleBuffer(),
+      }),
+    );
 
     const attachments: Attachment[] = [];
 
@@ -59,24 +72,35 @@ export class EmailService {
       });
     }
 
-    await this.emailAdapter.sendMail({
+    const payload = {
       ...(email as Email),
       from: this.fromEmail,
       attachments: attachments.length > 0 ? attachments : undefined,
+    };
+    await this.emailAdapter.sendMail(payload);
+  }
+
+  async getDefaultEmailProperties(
+    tenantId: UUIDType,
+    userId?: UUIDType,
+    language?: SupportedLanguages,
+  ): Promise<DefaultEmailSettings> {
+    return this.tenantRunner.runWithTenant(tenantId, async () => {
+      const globalSettings = await this.settingsService.getGlobalSettings();
+
+      return {
+        primaryColor: globalSettings.primaryColor || "#4796FD",
+        language:
+          language ?? (userId ? await this.getFinalLanguage(userId) : SUPPORTED_LANGUAGES.EN),
+      };
     });
   }
 
-  async getDefaultEmailProperties(userId?: UUIDType): Promise<DefaultEmailSettings> {
-    const globalSettings = await this.settingsService.getGlobalSettings();
-
-    return {
-      primaryColor: globalSettings.primaryColor || "#4796FD",
-      language: userId ? await this.getFinalLanguage(userId) : SUPPORTED_LANGUAGES.EN,
-    };
-  }
-
-  async getFinalLanguage(userId: UUIDType): Promise<SupportedLanguages> {
-    const userSettings = await this.settingsService.getUserSettings(userId);
+  async getFinalLanguage(userId: UUIDType, dbInstance?: DatabasePg): Promise<SupportedLanguages> {
+    const userSettings = await this.settingsService.getUserSettings(
+      userId,
+      dbInstance ?? this.dbAdmin,
+    );
     const language = userSettings.language as SupportedLanguages;
 
     return Object.values(SUPPORTED_LANGUAGES).includes(language)
