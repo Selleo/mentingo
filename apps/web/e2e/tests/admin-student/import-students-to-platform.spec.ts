@@ -61,7 +61,7 @@ const createNewPasswordAndLoginAsStudent = async (page: Page, importedEmail: str
   await page.goto("/auth/login");
   await page.goto("http://localhost:8025/");
 
-  const messageRow = page.locator("tr").filter({ hasText: importedEmail }).first();
+  const messageRow = page.getByText(`noreply@lms.selleo.app ${importedEmail} Zapraszamy`).first();
   await expect(messageRow).toBeVisible({ timeout: 90_000 });
   await messageRow.click();
 
