@@ -690,7 +690,7 @@ export class CourseService {
     const estimates: DurationEstimatesByCourse = {};
 
     for (const [courseId, totalSeconds] of secondsByCourse) {
-      const totalMinutes = Math.max(1, Math.ceil(totalSeconds / 60));
+      const totalMinutes = Math.ceil(Math.max(1, Math.ceil(totalSeconds / 60)) / 30) * 30;
       estimates[courseId] = { totalMinutes, formatted: this.formatMinutes(totalMinutes) };
     }
 
