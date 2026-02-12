@@ -124,6 +124,11 @@ export interface CreatePasswordBody {
   password: string;
   /** @minLength 1 */
   createToken: string;
+  /**
+   * @format email
+   * @minLength 1
+   */
+  email: string;
   language: string;
 }
 
@@ -131,6 +136,11 @@ export interface ResetPasswordBody {
   newPassword: string;
   /** @minLength 1 */
   resetToken: string;
+  /**
+   * @format email
+   * @minLength 1
+   */
+  email: string;
 }
 
 export interface MFASetupResponse {

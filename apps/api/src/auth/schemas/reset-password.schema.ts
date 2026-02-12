@@ -9,6 +9,7 @@ export const forgotPasswordSchema = Type.Object({
 export const resetPasswordSchema = Type.Object({
   newPassword: passwordSchema,
   resetToken: Type.String({ minLength: 1 }),
+  email: Type.String({ format: "email", minLength: 1 }),
 });
 
 export type ForgotPasswordBody = Static<typeof forgotPasswordSchema>;

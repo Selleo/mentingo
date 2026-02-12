@@ -413,10 +413,14 @@
       "confirmPassword": "Potwierdź hasło"
     },
     "validation": {
-      "passwordsDontMatch": "Hasła się nie zgadzają"
+      "passwordsDontMatch": "Hasła się nie zgadzają",
+      "missingEmail": "W linku brakuje adresu e-mail. Użyj pełnego linku z wiadomości."
     },
     "button": {
       "changePassword": "Utwórz hasło"
+    },
+    "error": {
+      "invalidTokenOrEmail": "Ten link do ustawienia hasła jest nieprawidłowy, wygasł lub nie pasuje do tego adresu e-mail."
     }
   },
   "passwordValidationDisplay": {

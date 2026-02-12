@@ -1,11 +1,13 @@
 import { useMutation } from "@tanstack/react-query";
-import { AxiosError } from "axios";
+import { useTranslation } from "react-i18next";
 
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../api-client";
 
 import type { CreatePasswordBody, ResetPasswordBody } from "../generated-api";
+import type { ApiErrorResponse } from "../types";
+import type { AxiosError } from "axios";
 
 type CreateNewPasswordOptions = {
   data: ResetPasswordBody | CreatePasswordBody;
@@ -16,6 +18,7 @@ type useCreateNewPasswordProps = {
 };
 
 export function useCreateNewPassword({ isCreate = true }: useCreateNewPasswordProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
 
   return useMutation({
@@ -34,16 +37,12 @@ export function useCreateNewPassword({ isCreate = true }: useCreateNewPasswordPr
 
       return response.data;
     },
-    onError: (error) => {
-      if (error instanceof AxiosError) {
-        return toast({
-          variant: "destructive",
-          description: error.response?.data.message,
-        });
-      }
+    onError: (error: AxiosError) => {
+      const { message } = (error.response?.data as ApiErrorResponse) || {};
+
       toast({
         variant: "destructive",
-        description: error.message,
+        description: message ? t(message) : t("common.error"),
       });
     },
   });

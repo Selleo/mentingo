@@ -8401,6 +8401,11 @@
             "minLength": 1,
             "type": "string"
           },
+          "email": {
+            "format": "email",
+            "minLength": 1,
+            "type": "string"
+          },
           "language": {
             "type": "string"
           }
@@ -8408,6 +8413,7 @@
         "required": [
           "password",
           "createToken",
+          "email",
           "language"
         ]
       },
@@ -8451,11 +8457,17 @@
           "resetToken": {
             "minLength": 1,
             "type": "string"
+          },
+          "email": {
+            "format": "email",
+            "minLength": 1,
+            "type": "string"
           }
         },
         "required": [
           "newPassword",
-          "resetToken"
+          "resetToken",
+          "email"
         ]
       },
       "MFASetupResponse": {
