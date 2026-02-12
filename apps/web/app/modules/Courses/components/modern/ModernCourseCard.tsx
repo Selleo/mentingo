@@ -1,9 +1,13 @@
 import { Link } from "@remix-run/react";
+import { formatDate } from "date-fns";
 import { BookOpen, Clock, Play } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import DefaultPhotoCourse from "~/assets/svgs/default-photo-course.svg";
+import { CardBadge } from "~/components/CardBadge";
+import { Icon } from "~/components/Icon";
+import { CategoryChip } from "~/components/ui/CategoryChip";
 import { cn } from "~/lib/utils";
 import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
@@ -31,6 +35,9 @@ type ModernCourseCardProps = {
   progressPercent?: number;
   category: string | null;
   className?: string;
+  enrolled?: boolean;
+  hasFreeChapters?: boolean;
+  dueDate?: Date | null;
 };
 
 const ModernCourseCard = ({
@@ -44,6 +51,9 @@ const ModernCourseCard = ({
   progressPercent,
   category,
   className,
+  enrolled,
+  hasFreeChapters,
+  dueDate,
 }: ModernCourseCardProps) => {
   const { t } = useTranslation();
   const [isHovered, setIsHovered] = useState(false);
@@ -128,6 +138,45 @@ const ModernCourseCard = ({
     [description],
   );
 
+  const image = (
+    <>
+      <img
+        src={thumbnailUrl || DefaultPhotoCourse}
+        alt={title}
+        className="h-full w-full object-cover"
+        onError={(event) => {
+          (event.target as HTMLImageElement).src = DefaultPhotoCourse;
+        }}
+      />
+      <div
+        aria-hidden
+        className="absolute inset-0 z-10 bg-gradient-to-t from-black via-black/50 to-transparent pointer-events-none"
+      />
+    </>
+  );
+
+  const courseBadges = (
+    <div
+      className="absolute left-4 right-4 top-4 flex flex-col gap-y-1 transition-opacity duration-300"
+      style={{ opacity: isHovered ? 0 : 1 }}
+    >
+      {hasFreeChapters && !enrolled && (
+        <CardBadge variant="successFilled">
+          <Icon name="FreeRight" className="w-4" />
+          {t("studentCoursesView.other.freeLessons")}
+        </CardBadge>
+      )}
+      {dueDate && (
+        <CategoryChip
+          category={t("common.other.dueDate", { date: formatDate(dueDate, "dd.MM.yyyy") })}
+          color="text-warning-600"
+          className="bg-warning-50"
+          textClassName="text-zest-900"
+        />
+      )}
+    </div>
+  );
+
   return (
     <div
       className={cn(
@@ -166,18 +215,8 @@ const ModernCourseCard = ({
                   isHovered && showVideo ? "opacity-0" : "opacity-100",
                 )}
               >
-                <img
-                  src={thumbnailUrl || DefaultPhotoCourse}
-                  alt={title}
-                  className="h-full w-full object-cover"
-                  onError={(event) => {
-                    (event.target as HTMLImageElement).src = DefaultPhotoCourse;
-                  }}
-                />
-                <div
-                  aria-hidden
-                  className="absolute inset-0 z-10 bg-gradient-to-t from-black via-black/50 to-transparent pointer-events-none"
-                />
+                {image}
+                {courseBadges}
               </div>
               {isEmbed && embedSrc ? (
                 <iframe
@@ -209,18 +248,8 @@ const ModernCourseCard = ({
             </>
           ) : (
             <div className="absolute inset-0">
-              <img
-                src={thumbnailUrl || DefaultPhotoCourse}
-                alt={title}
-                className="h-full w-full object-cover"
-                onError={(event) => {
-                  (event.target as HTMLImageElement).src = DefaultPhotoCourse;
-                }}
-              />
-              <div
-                aria-hidden
-                className="absolute inset-0 z-10 bg-gradient-to-t from-black via-black/50 to-transparent pointer-events-none"
-              />
+              {image}
+              {courseBadges}
             </div>
           )}
 

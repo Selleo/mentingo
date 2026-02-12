@@ -75,6 +75,9 @@ const ModernCourseCarousel = ({
                   progressPercent={progressByCourseId[course.id]}
                   category={course.category}
                   className="w-[320px] max-w-none md:w-[380px] lg:w-[400px]"
+                  enrolled={course.enrolled}
+                  hasFreeChapters={course.hasFreeChapters}
+                  dueDate={course.dueDate ? new Date(course.dueDate) : null}
                 />
               </CarouselItem>
             ))}
