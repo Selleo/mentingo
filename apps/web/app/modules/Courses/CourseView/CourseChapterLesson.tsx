@@ -1,7 +1,12 @@
+import { useTranslation } from "react-i18next";
+
 import { ProgressBadge } from "~/components/Badges/ProgressBadge";
 import { Icon } from "~/components/Icon";
 import { cn } from "~/lib/utils";
-import { LessonTypes, LessonTypesIcons } from "~/modules/Courses/CourseView/lessonTypes";
+import {
+  getLessonTypeTranslationKey,
+  LessonTypesIcons,
+} from "~/modules/Courses/CourseView/lessonTypes";
 
 import type { Lesson } from "./CourseChapter";
 
@@ -21,6 +26,7 @@ export const CourseChapterLesson = ({
   lesson,
   isPreviewMode = false,
 }: CourseChapterLessonProps) => {
+  const { t } = useTranslation();
   const hasAccess = isPreviewMode || lesson.hasAccess;
 
   const lessonElement = (
@@ -40,7 +46,9 @@ export const CourseChapterLesson = ({
             {lesson.quizQuestionCount ? `(${lesson.quizQuestionCount})` : null}
           </span>
         </p>
-        <span className="details text-neutral-800 text-left">{LessonTypes[lesson.type]}</span>
+        <span className="details text-neutral-800 text-left">
+          {t(getLessonTypeTranslationKey(lesson.type), { defaultValue: lesson.type })}
+        </span>
       </div>
       <ProgressBadge
         progress={progressBadge[hasAccess ? lesson.status : "blocked"]}

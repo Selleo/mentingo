@@ -1,5 +1,5 @@
 import { Link, useLocation } from "@remix-run/react";
-import { last, startCase } from "lodash-es";
+import { last } from "lodash-es";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -17,6 +17,7 @@ import { useLessonsSequence } from "~/hooks/useLessonsSequence";
 import { cn } from "~/lib/utils";
 import {
   CHAPTER_PROGRESS_STATUSES,
+  getLessonTypeTranslationKey,
   LessonTypesIcons,
 } from "~/modules/Courses/CourseView/lessonTypes";
 
@@ -156,7 +157,9 @@ export const LessonSidebar = ({ course, lessonId, isPreviewMode = false }: Lesso
                               />{" "}
                               <div className="flex flex-1 flex-col break-words overflow-x-hidden">
                                 <p className="body-sm-md text-neutral-950">{title}</p>
-                                <p className="details text-neutral-800">{startCase(type)}</p>
+                                <p className="details text-neutral-800">
+                                  {t(getLessonTypeTranslationKey(type), { defaultValue: type })}
+                                </p>
                               </div>
                               <Icon
                                 name={LessonTypesIcons[type]}

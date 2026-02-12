@@ -183,7 +183,7 @@ const AiMentorLessonForm = ({
           <div className="flex flex-col gap-y-1">
             {!lessonToEdit && (
               <Breadcrumb
-                lessonLabel="AI Mentor"
+                lessonLabel={t("common.lessonTypes.ai_mentor")}
                 setContentTypeToDisplay={setContentTypeToDisplay}
                 setSelectedLesson={setSelectedLesson}
               />

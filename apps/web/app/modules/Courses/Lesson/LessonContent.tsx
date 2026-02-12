@@ -1,5 +1,4 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { startCase } from "lodash-es";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -17,6 +16,7 @@ import { useUserRole } from "~/hooks/useUserRole";
 import { cn } from "~/lib/utils";
 import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 import { useVideoPreferencesStore } from "~/modules/common/store/useVideoPreferencesStore";
+import { getLessonTypeTranslationKey } from "~/modules/Courses/CourseView/lessonTypes";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { LessonContentRenderer } from "./LessonContentRenderer";
@@ -232,7 +232,9 @@ export const LessonContent = ({
                     {t("studentLessonView.other.lesson")}{" "}
                     <span data-testid="current-lesson-number">{lesson.displayOrder}</span>/
                     <span data-testid="lessons-count">{lessonsAmount}</span> –{" "}
-                    <span data-testid="lesson-type">{startCase(lesson.type)}</span>
+                    <span data-testid="lesson-type">
+                      {t(getLessonTypeTranslationKey(lesson.type), { defaultValue: lesson.type })}
+                    </span>
                   </p>
                   {lesson.type === LessonType.AI_MENTOR && (
                     <Tooltip>
