@@ -923,7 +923,7 @@ export class CourseService {
           `,
           dueDate: sql<
             string | null
-          >`TO_CHAR(${groupCourses.dueDate}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
+          >`TO_CHAR(MAX(${groupCourses.dueDate}), 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
         })
         .from(courses)
         .leftJoin(categories, eq(courses.categoryId, categories.id))
@@ -960,7 +960,6 @@ export class CourseService {
           coursesSummaryStats.paidPurchasedCount,
           courses.availableLocales,
           courses.baseLanguage,
-          groupCourses.dueDate,
         )
         .orderBy(desc(sql`COUNT(${studentCourses.id})`), desc(courses.createdAt))
         .limit(limit);
