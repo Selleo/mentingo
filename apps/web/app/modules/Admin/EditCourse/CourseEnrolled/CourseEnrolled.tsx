@@ -20,7 +20,6 @@ import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogOverlay,
@@ -492,12 +491,7 @@ export const CourseEnrolled = (): ReactElement => {
                 {t("adminCourseView.enrolled.unenrollConfirmation.description")}
               </DialogDescription>
               <form onSubmit={handleUnenrollFormSubmit}>
-                <div className="flex justify-end gap-4">
-                  <DialogClose>
-                    <Button type="reset" variant="ghost">
-                      {t("common.button.cancel")}
-                    </Button>
-                  </DialogClose>
+                <div className="flex justify-end">
                   <Button type="submit">{t("common.button.save")}</Button>
                 </div>
               </form>
@@ -514,12 +508,7 @@ export const CourseEnrolled = (): ReactElement => {
                 {t("adminCourseView.enrolled.confirmation.description")}
               </DialogDescription>
               <form onSubmit={handleFormSubmit}>
-                <div className="flex justify-end gap-4">
-                  <DialogClose>
-                    <Button type="reset" variant="ghost">
-                      {t("common.button.cancel")}
-                    </Button>
-                  </DialogClose>
+                <div className="flex justify-end">
                   <Button type="submit">{t("common.button.save")}</Button>
                 </div>
               </form>

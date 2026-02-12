@@ -10,7 +10,6 @@ import { useBulkGroupCourseEnroll } from "../../../../api/mutations/admin/useBul
 import { Button } from "../../../../components/ui/button";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogOverlay,
@@ -169,12 +168,7 @@ export const GroupEnrollModal = ({
                   })}
                 </div>
               </ScrollArea>
-              <div className="flex justify-end gap-4 mt-6">
-                <DialogClose>
-                  <Button type="reset" variant="outline">
-                    {t("common.button.cancel")}
-                  </Button>
-                </DialogClose>
+              <div className="flex justify-end mt-6">
                 <Button type="submit" variant="primary" disabled={!selectedCount}>
                   {t("adminCourseView.enrolled.enrollGroups")} ({selectedCount})
                 </Button>

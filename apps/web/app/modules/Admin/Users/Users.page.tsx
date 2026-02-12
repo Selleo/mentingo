@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { camelCase } from "lodash-es";
+import { Import, KeyRound, Plus, UsersRound } from "lucide-react";
 import React, { useCallback, useMemo, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -107,25 +108,29 @@ const Users = () => {
 
   const dropdownItems: DropdownItems[] = [
     {
-      icon: "ArrowUpDown",
-      translationKey: "adminUsersView.dropdown.changeRole",
+      iconName: undefined,
+      icon: <KeyRound className="size-4" />,
+      translationKey: "adminUsersView.dropdown.roles",
       action: () => setShowEditModal("role"),
       destructive: false,
     },
     {
-      icon: "ArrowUpDown",
-      translationKey: "adminUsersView.dropdown.changeGroup",
+      iconName: undefined,
+      icon: <UsersRound className="size-4" />,
+      translationKey: "adminUsersView.dropdown.groups",
       action: () => setShowEditModal("group"),
       destructive: false,
     },
     {
-      icon: "Archive",
+      iconName: "Archive",
+      icon: undefined,
       translationKey: "adminUsersView.dropdown.archive",
       action: () => setShowEditModal("archive"),
       destructive: true,
     },
     {
-      icon: "TrashIcon",
+      iconName: "TrashIcon",
+      icon: undefined,
       translationKey: "adminUsersView.dropdown.delete",
       action: () => setShowEditModal("delete"),
       destructive: true,
@@ -409,13 +414,17 @@ const Users = () => {
         <div className="flex flex-wrap justify-between gap-3">
           <h4 className="h4">{t("navigationSideBar.users")}</h4>
           <div className="flex gap-3">
-            <Button variant="primary" asChild>
-              <Link to="new">{t("adminUsersView.button.createNew")}</Link>
-            </Button>
-            <Button onClick={() => setIsImportModalOpen(true)}>
+            <Link to="new">
+              <Button variant="primary" className="gap-2">
+                <Plus className="size-4" />
+                {t("adminUsersView.button.createNew")}
+              </Button>
+            </Link>
+            <Button onClick={() => setIsImportModalOpen(true)} className="gap-2">
+              <Import className="size-4" />
               {t("adminUsersView.button.import")}
             </Button>
-            <EditDropdown dropdownItems={dropdownItems} />
+            <EditDropdown dropdownItems={dropdownItems} disabled={!selectedUsers.length} />
           </div>
         </div>
         <div className="flex items-center justify-between gap-2">

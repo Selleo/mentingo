@@ -9,7 +9,6 @@ import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogOverlay,
@@ -125,12 +124,7 @@ export const GroupUnenrollModal = ({
             )}
           </div>
           <form onSubmit={handleSubmit}>
-            <div className="mt-6 flex justify-end gap-4">
-              <DialogClose>
-                <Button type="reset" variant="ghost">
-                  {t("common.button.cancel")}
-                </Button>
-              </DialogClose>
+            <div className="mt-6 flex justify-end">
               <Button
                 type="submit"
                 variant="destructive"
