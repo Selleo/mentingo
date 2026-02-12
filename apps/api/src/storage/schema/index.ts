@@ -826,6 +826,34 @@ export const secrets = pgTable(
   })),
 );
 
+export const integrationApiKeys = pgTable(
+  "integration_api_keys",
+  {
+    ...id,
+    ...timestamps,
+    keyPrefix: text("key_prefix").notNull(),
+    keyHash: text("key_hash").notNull(),
+    createdByUserId: uuid("created_by_user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    lastUsedAt: timestamp("last_used_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    revokedAt: timestamp("revoked_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    tenantId,
+  },
+  withTenantIdIndex("integration_api_keys", (t) => ({
+    keyPrefixIdx: index("integration_api_keys_key_prefix_idx").on(t.keyPrefix),
+    createdByIdx: index("integration_api_keys_created_by_idx").on(t.createdByUserId),
+  })),
+);
+
 export const userOnboarding = pgTable(
   "user_onboarding",
   {

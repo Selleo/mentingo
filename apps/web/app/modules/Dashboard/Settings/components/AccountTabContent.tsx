@@ -3,6 +3,7 @@ import { isAdminSettings } from "~/utils/isAdminSettings";
 import ChangePasswordForm from "../forms/ChangePasswordForm";
 import UserDetailsForm from "../forms/UserDetailsForm";
 
+import { IntegrationApiKeyCard } from "./IntegrationApiKeyCard";
 import LanguageSelect from "./LanguageSelect";
 import NotificationPreferences from "./NotificationPreferences";
 import { ResetOnboarding } from "./ResetOnboarding";
@@ -26,6 +27,7 @@ export default function AccountTabContent({
       {(isContentCreator || isAdmin) && <UserDetailsForm />}
       <ChangePasswordForm />
       {isAdmin && isAdminSettings(settings) && <NotificationPreferences adminSettings={settings} />}
+      {isAdmin && <IntegrationApiKeyCard />}
       {!isAdmin && !isContentCreator && <ResetOnboarding />}
     </>
   );

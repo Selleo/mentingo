@@ -12,6 +12,7 @@ import { patchNestJsSwagger, applyFormats } from "nestjs-typebox";
 import { version } from "../version.json";
 
 import { AppModule } from "./app.module";
+import { IntegrationModule } from "./integration/integration.module";
 import { startInstrumentation } from "./langfuse/instrumentation";
 import { DB_ADMIN } from "./storage/db/db.providers";
 import { createCorsOriginOption } from "./utils/cors";
@@ -62,13 +63,19 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
-    .setTitle("Guidebook API")
-    .setDescription("Example usage of Swagger with Typebox")
-    .setVersion("1.0")
+    .setTitle("Mentingo API")
+    .setDescription("This is the API documentation for Mentingo")
+    .setVersion(version)
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup("api", app, document);
   exportSchemaToFile(document);
+
+  const integrationDocument = SwaggerModule.createDocument(app, config, {
+    include: [IntegrationModule],
+  });
+  SwaggerModule.setup("integration-docs", app, integrationDocument);
+  exportSchemaToFile(integrationDocument, "./src/swagger/integration-api-schema.json");
 
   const redisUrl = process.env.REDIS_URL;
 

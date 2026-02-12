@@ -2629,5 +2629,42 @@
   "tenantInactive": {
     "title": "Tenant Disabled",
     "description": "This workspace is currently inactive. If you believe this is a mistake, contact your administrator to restore access."
+  },
+  "integrationApiKey": {
+    "title": "Integration API key",
+    "description": "Generate a long-lived key for external integrations. Replacing the key immediately revokes the previous one.",
+    "status": "Status",
+    "active": "Active",
+    "inactive": "Not generated",
+    "prefix": "Key prefix",
+    "createdAt": "Created at",
+    "lastUsedAt": "Last used at",
+    "loading": "Loading key metadata...",
+    "generate": "Generate key",
+    "override": "Override key",
+    "copy": "Copy key",
+    "generated": {
+      "title": "Copy this key now. It will not be shown again."
+    },
+    "confirm": {
+      "title": "Override current API key?",
+      "description": "This action revokes the current key immediately. Integrations using it will stop working.",
+      "action": "Override key"
+    },
+    "toast": {
+      "fetchSuccess": "Integration API key loaded successfully",
+      "rotateSuccess": "Integration API key updated successfully",
+      "rotateError": "Failed to update integration API key",
+      "copySuccess": "Integration API key copied",
+      "copyError": "Failed to copy integration API key"
+    },
+    "errors": {
+      "rotateFailed": "Failed to rotate integration API key",
+      "invalidApiKey": "Invalid integration API key",
+      "ownerInactive": "API key owner is no longer active",
+      "ownerNotAdmin": "API key owner no longer has admin permissions",
+      "missingApiKeyHeader": "Missing X-API-Key header",
+      "missingTenantIdHeader": "Missing X-Tenant-Id header"
+    }
   }
 }

@@ -42,6 +42,7 @@ import { FileModule } from "./file/files.module";
 import { GroupModule } from "./group/group.module";
 import { HealthModule } from "./health/health.module";
 import { IngestionModule } from "./ingestion/ingestion.module";
+import { IntegrationModule } from "./integration/integration.module";
 import { LessonModule } from "./lesson/lesson.module";
 import { LocalizationModule } from "./localization/localization.module";
 import { NewsModule } from "./news/news.module";
@@ -123,6 +124,7 @@ import { UserModule } from "./user/user.module";
     CertificatesModule,
     AnnouncementsModule,
     IngestionModule,
+    IntegrationModule,
     LearningTimeModule,
     EnvModule,
     LocalizationModule,
