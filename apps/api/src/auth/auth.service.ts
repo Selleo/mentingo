@@ -35,6 +35,7 @@ import { UserRegisteredEvent } from "src/events/user/user-registered.event";
 import { UserWelcomeEvent } from "src/events/user/user-welcome.event";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { SettingsService } from "src/settings/settings.service";
+import { DB_ADMIN } from "src/storage/db/db.providers";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
 import {
@@ -65,6 +66,7 @@ export class AuthService {
 
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
+    @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
     private jwtService: JwtService,
     private configService: ConfigService,
@@ -339,9 +341,11 @@ export class AuthService {
       user.id,
     );
 
+    const tenantOrigin = await this.resolveTenantOrigin(user.tenantId);
+
     const emailTemplate = new PasswordRecoveryEmail({
       name: user.firstName,
-      resetLink: `${CORS_ORIGIN}/auth/create-new-password?resetToken=${resetToken}&email=${email}`,
+      resetLink: `${tenantOrigin}/auth/create-new-password?resetToken=${resetToken}&email=${email}`,
       ...defaultEmailSettings,
     });
 
@@ -736,6 +740,16 @@ export class AuthService {
       .limit(1);
 
     return Boolean(tenant?.isManaging);
+  }
+
+  private async resolveTenantOrigin(tenantId: UUIDType): Promise<string> {
+    const [tenant] = await this.dbAdmin
+      .select({ host: tenants.host })
+      .from(tenants)
+      .where(eq(tenants.id, tenantId))
+      .limit(1);
+
+    return tenant?.host || CORS_ORIGIN;
   }
 
   async createMagicLinkToken(userId: UUIDType): Promise<string> {
