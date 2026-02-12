@@ -34,6 +34,7 @@ export const CourseProgress = ({ course }: CourseProgressProps) => {
   );
 
   const firstLessonId = course.chapters[0]?.lessons[0]?.id;
+  const isCourseEmpty = !course.chapters.length || course.chapters?.[0]?.lessonCount === 0;
 
   const handleNavigateToLesson = () => {
     if (!notStartedLessonId && !firstInProgressLessonId) {
@@ -64,7 +65,7 @@ export const CourseProgress = ({ course }: CourseProgressProps) => {
           <span>{t("studentCourseView.sideSection.button.shareCourse")}</span>
         </CopyUrlButton>
         <>
-          <Button className="gap-x-2" onClick={handleNavigateToLesson}>
+          <Button className="gap-x-2" onClick={handleNavigateToLesson} disabled={isCourseEmpty}>
             <Icon name="Play" className="text-contrast h-auto w-6" />
             <span>
               {t(
