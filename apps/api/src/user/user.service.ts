@@ -7,7 +7,6 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
-import { CreatePasswordReminderEmail } from "@repo/email-templates";
 import { OnboardingPages, type SupportedLanguages, SUPPORTED_LANGUAGES } from "@repo/shared";
 import * as bcrypt from "bcryptjs";
 import {
@@ -28,14 +27,13 @@ import { nanoid } from "nanoid";
 
 import { CreatePasswordService } from "src/auth/create-password.service";
 import { DatabasePg } from "src/common";
-import { EmailService } from "src/common/emails/emails.service";
-import { getEmailSubject } from "src/common/emails/translations";
 import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterConditions";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import hashPassword from "src/common/helpers/hashPassword";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { CreateUserEvent, DeleteUserEvent, UpdateUserEvent } from "src/events";
 import { UserInviteEvent } from "src/events/user/user-invite.event";
+import { UserPasswordReminderEvent } from "src/events/user/user-password-reminder.event";
 import { FileService } from "src/file/file.service";
 import { GroupService } from "src/group/group.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
@@ -85,7 +83,6 @@ export class UserService {
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
     private readonly outboxPublisher: OutboxPublisher,
-    private readonly emailService: EmailService,
     private fileService: FileService,
     private s3Service: S3Service,
     private createPasswordService: CreatePasswordService,
@@ -573,27 +570,14 @@ export class UserService {
       return createdUser;
     }
 
-    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
-      createdUser.tenantId,
-      createdUser.id,
-      newUsersLanguage,
-    );
-
-    const createPasswordEmail = new CreatePasswordReminderEmail({
-      createPasswordLink: `${
-        process.env.CI ? "http://localhost:5173" : process.env.CORS_ORIGIN
-      }/auth/create-new-password?createToken=${token}&email=${createdUser.email}`,
-      ...defaultEmailSettings,
-    });
-
-    await this.emailService.sendEmailWithLogo(
-      {
-        to: createdUser.email,
-        subject: getEmailSubject("passwordReminderEmail", defaultEmailSettings.language),
-        text: createPasswordEmail.text,
-        html: createPasswordEmail.html,
-      },
-      { tenantId: createdUser.tenantId },
+    await this.outboxPublisher.publish(
+      new UserPasswordReminderEvent({
+        email: createdUser.email,
+        token,
+        userId: createdUser.id,
+        tenantId: createdUser.tenantId,
+        language: newUsersLanguage,
+      }),
     );
 
     return createdUser;

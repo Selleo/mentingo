@@ -1,5 +1,8 @@
+import { Inject } from "@nestjs/common";
 import { EventsHandler } from "@nestjs/cqrs";
 import {
+  CreatePasswordReminderEmail,
+  WelcomeEmail,
   UserFirstLoginEmail,
   UserAssignedToCourseEmail,
   UserInviteEmail,
@@ -8,7 +11,9 @@ import {
   UserFinishedChapterEmail,
   UserFinishedCourseEmail,
 } from "@repo/email-templates";
+import { eq } from "drizzle-orm";
 
+import { DatabasePg } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
 import { getEmailSubject } from "src/common/emails/translations";
 import { CourseService } from "src/courses/course.service";
@@ -18,10 +23,14 @@ import { UserCourseFinishedEvent } from "src/events/user/user-course-finished.ev
 import { UserFirstLoginEvent } from "src/events/user/user-first-login.event";
 import { UserInviteEvent } from "src/events/user/user-invite.event";
 import { UsersLongInactivityEvent } from "src/events/user/user-long-inactivity.event";
+import { UserPasswordReminderEvent } from "src/events/user/user-password-reminder.event";
 import { UsersShortInactivityEvent } from "src/events/user/user-short-inactivity.event";
+import { UserWelcomeEvent } from "src/events/user/user-welcome.event";
 import { SettingsService } from "src/settings/settings.service";
 import { StatisticsService } from "src/statistics/statistics.service";
+import { DB_ADMIN } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
+import { tenants } from "src/storage/schema";
 import { UserService } from "src/user/user.service";
 
 import type { IEventHandler } from "@nestjs/cqrs";
@@ -31,6 +40,8 @@ import type { UserEmailTriggersSchema } from "src/settings/schemas/settings.sche
 type EventType =
   | UserInviteEvent
   | UserFirstLoginEvent
+  | UserPasswordReminderEvent
+  | UserWelcomeEvent
   | UsersAssignedToCourseEvent
   | UsersShortInactivityEvent
   | UsersLongInactivityEvent
@@ -40,6 +51,8 @@ type EventType =
 const UserNotificationEvents = [
   UserInviteEvent,
   UserFirstLoginEvent,
+  UserPasswordReminderEvent,
+  UserWelcomeEvent,
   UsersAssignedToCourseEvent,
   UsersShortInactivityEvent,
   UsersLongInactivityEvent,
@@ -59,6 +72,7 @@ const eventTriggerMap: Record<string, keyof UserEmailTriggersSchema> = {
 @EventsHandler(...UserNotificationEvents)
 export class NotifyUsersHandler implements IEventHandler {
   constructor(
+    @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
     private readonly emailService: EmailService,
     private readonly userService: UserService,
     private readonly courseService: CourseService,
@@ -72,6 +86,16 @@ export class NotifyUsersHandler implements IEventHandler {
 
     if (event instanceof UserInviteEvent) {
       await this.notifyUserAboutInvite(event);
+      return;
+    }
+
+    if (event instanceof UserPasswordReminderEvent) {
+      await this.notifyUserAboutPasswordReminder(event);
+      return;
+    }
+
+    if (event instanceof UserWelcomeEvent) {
+      await this.notifyUserAboutWelcome(event);
       return;
     }
 
@@ -107,7 +131,7 @@ export class NotifyUsersHandler implements IEventHandler {
     const { email, creatorId, token, userId, invitedByUserName, origin, tenantId } = userInvite;
 
     await this.tenantRunner.runWithTenant(tenantId, async () => {
-      const baseOrigin = origin || process.env.CORS_ORIGIN || "http://localhost:5173";
+      const baseOrigin = await this.resolveTenantOrigin(tenantId, origin);
       const url = `${baseOrigin}/auth/create-new-password?createToken=${token}&email=${email}`;
 
       const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
@@ -164,6 +188,77 @@ export class NotifyUsersHandler implements IEventHandler {
       },
       { tenantId: user.tenantId },
     );
+  }
+
+  async notifyUserAboutPasswordReminder(event: UserPasswordReminderEvent) {
+    const { userPasswordReminder } = event;
+    const { email, token, userId, tenantId, language, origin } = userPasswordReminder;
+
+    await this.tenantRunner.runWithTenant(tenantId, async () => {
+      const baseOrigin = await this.resolveTenantOrigin(tenantId, origin);
+
+      const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
+        tenantId,
+        userId,
+        language,
+      );
+
+      const { text, html } = new CreatePasswordReminderEmail({
+        createPasswordLink: `${baseOrigin}/auth/create-new-password?createToken=${token}&email=${email}`,
+        ...defaultEmailSettings,
+      });
+
+      await this.emailService.sendEmailWithLogo(
+        {
+          to: email,
+          subject: getEmailSubject("passwordReminderEmail", defaultEmailSettings.language),
+          text,
+          html,
+        },
+        { tenantId },
+      );
+    });
+  }
+
+  async notifyUserAboutWelcome(event: UserWelcomeEvent) {
+    const { userWelcome } = event;
+    const { email, userId, tenantId, origin } = userWelcome;
+
+    await this.tenantRunner.runWithTenant(tenantId, async () => {
+      const baseOrigin = await this.resolveTenantOrigin(tenantId, origin);
+
+      const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
+        tenantId,
+        userId,
+      );
+
+      const { text, html } = new WelcomeEmail({
+        coursesLink: `${baseOrigin}/courses`,
+        ...defaultEmailSettings,
+      });
+
+      await this.emailService.sendEmailWithLogo(
+        {
+          to: email,
+          subject: getEmailSubject("welcomeEmail", defaultEmailSettings.language),
+          text,
+          html,
+        },
+        { tenantId },
+      );
+    });
+  }
+
+  private async resolveTenantOrigin(tenantId: string, fallbackOrigin?: string) {
+    if (fallbackOrigin) return fallbackOrigin.replace(/\/$/, "");
+
+    const [tenant] = await this.dbAdmin
+      .select({ host: tenants.host })
+      .from(tenants)
+      .where(eq(tenants.id, tenantId))
+      .limit(1);
+
+    return tenant?.host?.replace(/\/$/, "") || process.env.CORS_ORIGIN || "http://localhost:5173";
   }
 
   async notifyUserAboutCourseAssignment(event: UsersAssignedToCourseEvent) {

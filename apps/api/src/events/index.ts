@@ -24,6 +24,8 @@ export * from "./user/user-first-login.event";
 export * from "./user/user-invite.event";
 export * from "./user/user-short-inactivity.event";
 export * from "./user/user-long-inactivity.event";
+export * from "./user/user-password-reminder.event";
+export * from "./user/user-welcome.event";
 export * from "./announcement/create-announcement.event";
 export * from "./announcement/view-announcement.event";
 export * from "./category/create-category.event";

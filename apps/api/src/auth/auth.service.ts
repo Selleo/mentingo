@@ -17,7 +17,6 @@ import {
   CreatePasswordReminderEmail,
   MagicLinkEmail,
   PasswordRecoveryEmail,
-  WelcomeEmail,
 } from "@repo/email-templates";
 import { SUPPORTED_LANGUAGES, type SupportedLanguages } from "@repo/shared";
 import * as bcrypt from "bcryptjs";
@@ -33,6 +32,7 @@ import hashPassword from "src/common/helpers/hashPassword";
 import { UserLoginEvent } from "src/events/user/user-login.event";
 import { UserPasswordCreatedEvent } from "src/events/user/user-password-created.event";
 import { UserRegisteredEvent } from "src/events/user/user-registered.event";
+import { UserWelcomeEvent } from "src/events/user/user-welcome.event";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { SettingsService } from "src/settings/settings.service";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
@@ -140,26 +140,12 @@ export class AuthService {
       throw new BadRequestException("Failed to create user");
     }
 
-    const createdSettings = await this.settingsService.getUserSettings(createdUser.id);
-
-    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
-      createdUser.tenantId,
-      createdUser.id,
-    );
-
-    const emailTemplate = new WelcomeEmail({
-      coursesLink: `${process.env.CORS_ORIGIN}/courses`,
-      ...defaultEmailSettings,
-    });
-
-    await this.emailService.sendEmailWithLogo(
-      {
-        to: email,
-        subject: getEmailSubject("welcomeEmail", createdSettings.language as SupportedLanguages),
-        text: emailTemplate.text,
-        html: emailTemplate.html,
-      },
-      { tenantId: createdUser.tenantId },
+    await this.outboxPublisher.publish(
+      new UserWelcomeEvent({
+        email: createdUser.email,
+        userId: createdUser.id,
+        tenantId: createdUser.tenantId,
+      }),
     );
 
     return createdUser;
