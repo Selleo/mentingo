@@ -21,7 +21,7 @@ const isMeaningfulElement = (html: CheerioAPI, element: AnyNode): boolean => {
     const attributes = "attribs" in current ? (current.attribs ?? {}) : {};
     if (Object.keys(attributes).length > 0) return true;
 
-    const children = html(current).children().toArray();
+    const children = html(current).contents().toArray();
     for (let i = children.length - 1; i >= 0; i -= 1) {
       stack.push(children[i]);
     }

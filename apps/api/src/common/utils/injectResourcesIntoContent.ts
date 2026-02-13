@@ -1,6 +1,8 @@
 import { VIDEO_AUTOPLAY } from "@repo/shared";
 import { load as loadHtml } from "cheerio";
 
+import { annotateVideoAutoplayInContent } from "./annotateVideoAutoplayInContent";
+
 import type { UUIDType } from "src/common";
 
 export type ContentResource = {
@@ -38,7 +40,8 @@ export const injectResourcesIntoContent = <T extends ContentResource>(
 
   if (!content) return { html: content, contentCount, hasAutoplayTrigger };
 
-  const $ = loadHtml(content);
+  const normalizedContent = annotateVideoAutoplayInContent(content) ?? content;
+  const $ = loadHtml(normalizedContent);
   const resourceMap = new Map(resources.map((resource) => [resource.id, resource]));
   const trackNodeTypes = new Set(options.trackNodeTypes ?? []);
 
