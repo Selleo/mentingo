@@ -10,6 +10,7 @@ import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Switch } from "~/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
+import { shouldAutoAdvanceLessonWithoutNextVideo } from "~/components/VideoPlayer/autoplayFlow";
 import { useVideoPlayer } from "~/components/VideoPlayer/VideoPlayerContext";
 import { useLessonsSequence } from "~/hooks/useLessonsSequence";
 import { useUserRole } from "~/hooks/useUserRole";
@@ -48,8 +49,8 @@ export const LessonContent = ({
 }: LessonContentProps) => {
   const { t } = useTranslation();
 
-  const { clearVideo } = useVideoPlayer();
-  const { autoplay, setAutoplay } = useVideoPreferencesStore();
+  const { clearVideo, setOnEnded } = useVideoPlayer();
+  const { autoplay, setAutoplay, autoplaySettings } = useVideoPreferencesStore();
 
   const [isPreviousDisabled, setIsPreviousDisabled] = useState(false);
   const [isNextDisabled, setIsNextDisabled] = useState(false);
@@ -189,17 +190,31 @@ export const LessonContent = ({
 
   const handleVideoEnded = useCallback(() => {
     setIsNextDisabled(false);
-    if (isStudent) markLessonAsCompleted({ lessonId: lesson.id, language });
-    if (autoplay && lesson.hasOnlyVideo) handleNext();
+
+    if (
+      shouldAutoAdvanceLessonWithoutNextVideo({
+        autoplayEnabled: autoplay,
+        action: autoplaySettings.currentAction,
+        nextVideoUrl: autoplaySettings.nextVideoUrl,
+      })
+    ) {
+      if (isStudent) markLessonAsCompleted({ lessonId: lesson.id, language });
+      handleNext();
+    }
   }, [
+    autoplay,
+    autoplaySettings.currentAction,
+    autoplaySettings.nextVideoUrl,
     isStudent,
     markLessonAsCompleted,
     lesson.id,
     language,
-    autoplay,
     handleNext,
-    lesson.hasOnlyVideo,
   ]);
+
+  useEffect(() => {
+    setOnEnded(handleVideoEnded);
+  }, [handleVideoEnded, setOnEnded]);
 
   return (
     <TooltipProvider>
@@ -210,7 +225,7 @@ export const LessonContent = ({
       >
         <div className="flex w-full min-w-0 flex-col gap-y-10 px-6 sm:px-10 max-w-full 3xl:max-w-[1024px] 3xl:px-8 h-auto">
           {!isPreviewMode && (
-            <div className="flex w-full flex-col pb-6 sm:flex-row sm:items-end">
+            <div className="flex w-full flex-col pb-6">
               <div className="flex w-full min-w-0 flex-col gap-y-4 overflow-x-hidden">
                 <div className="flex items-center gap-x-2">
                   <p className="body-sm-md text-neutral-800">
@@ -236,7 +251,7 @@ export const LessonContent = ({
               </div>
               <div className="mt-4 flex flex-col gap-2 sm:ml-8 sm:mt-0 sm:items-end">
                 <div className="flex flex-row gap-x-4">
-                  {lesson.type === LessonType.CONTENT && lesson.hasOnlyVideo && (
+                  {lesson.type === LessonType.CONTENT && lesson.hasVideo && (
                     <label className="flex items-center gap-2 cursor-pointer">
                       <span className="text-sm text-neutral-600">
                         {t("studentLessonView.button.autoplay")}

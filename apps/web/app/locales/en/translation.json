@@ -22,7 +22,8 @@
     "toast": {
       "noAccess": "You do not have permission to access this resource",
       "globalSettingsNotFound": "Global settings not found",
-      "somethingWentWrong": "Something went wrong..."
+      "somethingWentWrong": "Something went wrong...",
+      "notFound": "Resource not found"
     },
     "tooltip": {
       "soon": "Cooming soon"
@@ -68,7 +69,9 @@
     },
     "continueWithGoogle": "Continue with Google",
     "continueWithMicrosoft": "Continue with Microsoft",
-    "continueWithSlack": "Continue with Slack"
+    "continueWithSlack": "Continue with Slack",
+    "enterFullscreen": "Fullscreen",
+    "exitFullscreen": "Exit fullscreen"
   },
   "lessons": {
     "sequenceUpdatedSuccessfully": "Lesson sequence updated successfully",
@@ -923,6 +926,9 @@
       "BUNNY_STREAM_LIBRARY_ID": {
         "label": "Bunny Stream Library ID"
       },
+      "BUNNY_STREAM_TOKEN_SIGNING_KEY": {
+        "label": "Bunny Stream Token Signing Key"
+      },
       "BUNNY_STREAM_CDN_URL": {
         "label": "Bunny Stream CDN URL"
       },
@@ -1745,6 +1751,13 @@
     "videoProcessing": {
       "title": "Video is being processed",
       "body": "Please wait a moment. It will appear here once it is ready."
+    },
+    "playNext": {
+      "title": "Up next",
+      "description": "Playing next in {{seconds}}s",
+      "descriptionNoCountdown": "Playing next",
+      "playNow": "Play now",
+      "cancel": "Cancel"
     },
     "placeholder": {
       "openQuestion": "Type your answer here"

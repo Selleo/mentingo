@@ -152,6 +152,7 @@ export default function ArticleDetailsPage() {
               variant="content"
               content={contentWithIds || article.content}
               className="mt-4"
+              videoAutoplayPolicy="disabled"
             />
           ) : null}
 

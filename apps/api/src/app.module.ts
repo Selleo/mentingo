@@ -24,6 +24,7 @@ import { BunnyStreamModule } from "./bunny/bunnyStream.module";
 import { CacheModule } from "./cache/cache.module";
 import { CategoryModule } from "./category/category.module";
 import { CertificatesModule } from "./certificates/certificates.module";
+import bunnyConfig from "./common/configuration/bunny";
 import callbackUrlConfig from "./common/configuration/callbackUrl";
 import database from "./common/configuration/database";
 import emailConfig from "./common/configuration/email";
@@ -69,6 +70,7 @@ import { UserModule } from "./user/user.module";
         stripeConfig,
         redisConfig,
         callbackUrlConfig,
+        bunnyConfig,
         ...getOptionalConfigs(),
       ],
       isGlobal: true,

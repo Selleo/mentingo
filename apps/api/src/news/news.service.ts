@@ -7,11 +7,14 @@ import { match } from "ts-pattern";
 
 import { DatabasePg } from "src/common";
 import { buildJsonbField, deleteJsonbField } from "src/common/helpers/sqlHelpers";
+import { annotateVideoAutoplayInContent } from "src/common/utils/annotateVideoAutoplayInContent";
 import { injectResourcesIntoContent } from "src/common/utils/injectResourcesIntoContent";
 import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
 import { CreateNewsEvent, DeleteNewsEvent, UpdateNewsEvent } from "src/events";
 import { RESOURCE_RELATIONSHIP_TYPES, RESOURCE_CATEGORIES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
+import { FILE_DELIVERY_TYPE } from "src/file/types/file-delivery.type";
+import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
 import { LocalizationService } from "src/localization/localization.service";
 import { SettingsService } from "src/settings/settings.service";
 import { news, resourceEntity, resources, users } from "src/storage/schema";
@@ -23,7 +26,7 @@ import type { CreateNews } from "./schemas/createNews.schema";
 import type { NewsResource, NewsResources } from "./schemas/selectNews.schema";
 import type { UpdateNews } from "./schemas/updateNews.schema";
 import type { InferSelectModel } from "drizzle-orm";
-import type { Response } from "express";
+import type { Request, Response } from "express";
 import type { NewsActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
@@ -412,7 +415,13 @@ export class NewsService {
     };
   }
 
-  async getNewsResource(res: Response, resourceId: UUIDType, userId?: UUIDType, role?: UserRole) {
+  async getNewsResource(
+    req: Request,
+    res: Response,
+    resourceId: UUIDType,
+    userId?: UUIDType,
+    role?: UserRole,
+  ) {
     await this.checkAccess(userId);
 
     const [resource] = await this.db
@@ -453,11 +462,16 @@ export class NewsService {
       throw new NotFoundException("News resource not found");
     }
 
-    const fileUrl = await this.fileService.getFileUrl(resource.reference);
+    const rangeHeader = req.headers.range;
+    const file = await this.fileService.getFileDelivery(resource.reference, rangeHeader);
 
-    if (!fileUrl) throw new Error("Error fetching file url");
+    if (file.type === FILE_DELIVERY_TYPE.REDIRECT) {
+      return res.redirect(file.url);
+    }
 
-    return res.redirect(fileUrl);
+    if (!file || !file.stream) throw new Error("Error fetching file stream");
+
+    streamFileToResponse(res, file);
   }
 
   private async getAdjacentNews(
@@ -719,6 +733,10 @@ export class NewsService {
   ): Record<string, unknown> {
     const localizableFields = ["title", "content", "summary"] as const;
     const directFields: Array<keyof Omit<UpdateNews, "language">> = ["status", "isPublic"];
+
+    if ("content" in updateNewsData && typeof updateNewsData.content === "string") {
+      updateNewsData.content = annotateVideoAutoplayInContent(updateNewsData.content) ?? undefined;
+    }
 
     const updateData: Record<string, unknown> = {
       ...this.localizationService.updateLocalizableFields(

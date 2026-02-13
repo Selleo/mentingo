@@ -13,6 +13,7 @@ import { match } from "ts-pattern";
 
 import { DatabasePg } from "src/common";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
+import { annotateVideoAutoplayInContent } from "src/common/utils/annotateVideoAutoplayInContent";
 import { injectResourcesIntoContent } from "src/common/utils/injectResourcesIntoContent";
 import {
   CreateArticleEvent,
@@ -24,6 +25,8 @@ import {
 } from "src/events";
 import { RESOURCE_RELATIONSHIP_TYPES, RESOURCE_CATEGORIES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
+import { FILE_DELIVERY_TYPE } from "src/file/types/file-delivery.type";
+import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
 import { LocalizationService } from "src/localization/localization.service";
 import { SettingsService } from "src/settings/settings.service";
 import { articles, articleSections } from "src/storage/schema";
@@ -42,7 +45,7 @@ import type {
 import type { ArticleResource, ArticleResources } from "../schemas/selectArticle.schema";
 import type { UpdateArticle, UpdateArticleSection } from "../schemas/updateArticle.schema";
 import type { InferSelectModel } from "drizzle-orm";
-import type { Response } from "express";
+import type { Request, Response } from "express";
 import type {
   ArticleActivityLogSnapshot,
   ArticleSectionActivityLogSnapshot,
@@ -509,6 +512,7 @@ export class ArticlesService {
   }
 
   async getArticleResource(
+    req: Request,
     res: Response,
     resourceId: UUIDType,
     userId?: UUIDType,
@@ -534,11 +538,16 @@ export class ArticlesService {
       throw new NotFoundException("Article resource not found");
     }
 
-    const fileUrl = await this.fileService.getFileUrl(resource.reference);
+    const rangeHeader = req.headers.range;
+    const file = await this.fileService.getFileDelivery(resource.reference, rangeHeader);
 
-    if (!fileUrl) throw new Error("Error fetching file url");
+    if (file.type === FILE_DELIVERY_TYPE.REDIRECT) {
+      return res.redirect(file.url);
+    }
 
-    return res.redirect(fileUrl);
+    if (!file || !file.stream) throw new Error("Error fetching file stream");
+
+    streamFileToResponse(res, file);
   }
 
   async getArticlesToc(
@@ -800,6 +809,11 @@ export class ArticlesService {
   ): Record<string, unknown> {
     const localizableFields = ["title", "content", "summary"] as const;
     const directFields: Array<keyof Omit<UpdateArticle, "language">> = ["status", "isPublic"];
+
+    if ("content" in updateArticleData && typeof updateArticleData.content === "string") {
+      updateArticleData.content =
+        annotateVideoAutoplayInContent(updateArticleData.content) ?? undefined;
+    }
 
     const updateData: Record<string, unknown> = {
       ...this.localizationService.updateLocalizableFields(

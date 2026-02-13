@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   Res,
   UploadedFile,
   UseGuards,
@@ -25,7 +26,7 @@ import {
   SupportedLanguages,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
-import { Response } from "express";
+import { Request, Response } from "express";
 import { Validate } from "nestjs-typebox";
 
 import {
@@ -233,11 +234,12 @@ export class ArticlesController {
   })
   async getArticleResource(
     @Param("resourceId") resourceId: UUIDType,
+    @Req() req: Request,
     @Res() res: Response,
     @CurrentUser("userId") userId?: UUIDType,
     @CurrentUser("role") role?: UserRole,
   ) {
-    return this.articlesService.getArticleResource(res, resourceId, userId, role);
+    return this.articlesService.getArticleResource(req, res, resourceId, userId, role);
   }
 
   @Public()

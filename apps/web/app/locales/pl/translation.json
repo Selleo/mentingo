@@ -23,7 +23,8 @@
     "toast": {
       "noAccess": "Nie masz uprawnień do tego zasobu",
       "globalSettingsNotFound": "Ustawienia globalne nie zostały znalezione",
-      "somethingWentWrong": "Coś poszło nie tak..."
+      "somethingWentWrong": "Coś poszło nie tak...",
+      "notFound": "Nie znaleziono zasobu"
     },
     "tooltip": {
       "soon": "Dostępne wkrótce"
@@ -69,7 +70,9 @@
     },
     "continueWithGoogle": "Kontynuuj z użyciem Google",
     "continueWithMicrosoft": "Kontynuuj z użyciem Microsoft",
-    "continueWithSlack": "Kontynuuj z użyciem Slack"
+    "continueWithSlack": "Kontynuuj z użyciem Slack",
+    "enterFullscreen": "Pełny ekran",
+    "exitFullscreen": "Wyjdź z pełnego ekranu"
   },
   "lessons": {
     "sequenceUpdatedSuccessfully": "Kolejność lekcji została pomyślnie zaktualizowana",
@@ -909,6 +912,9 @@
       "BUNNY_STREAM_LIBRARY_ID": {
         "label": "Bunny Stream Library ID"
       },
+      "BUNNY_STREAM_TOKEN_SIGNING_KEY": {
+        "label": "Bunny Stream Token Signing Key"
+      },
       "BUNNY_STREAM_CDN_URL": {
         "label": "Bunny Stream CDN URL"
       },
@@ -1745,6 +1751,13 @@
     "videoProcessing": {
       "title": "Wideo jest przetwarzane",
       "body": "Poczekaj chwilę. Pojawi się tutaj, gdy będzie gotowe."
+    },
+    "playNext": {
+      "title": "Następnie",
+      "description": "Odtwarzanie za {{seconds}} s",
+      "descriptionNoCountdown": "Odtwarzanie",
+      "playNow": "Odtwórz teraz",
+      "cancel": "Anuluj"
     },
     "placeholder": {
       "openQuestion": "Wpisz swoją odpowiedź tutaj"
