@@ -59,9 +59,18 @@ services:
       S3_ACCESS_KEY_ID: "minioadmin"
       S3_SECRET_ACCESS_KEY: "${MINIO_ROOT_PASSWORD}"
       MINIO_HOST: "minio-preview-pr-${PR_ID}"
-    volumes:
-      - ./create-minio-bucket.sh:/create-minio-bucket.sh
-    entrypoint: ["/bin/sh", "/create-minio-bucket.sh"]
+    entrypoint:
+      - /bin/sh
+      - -ec
+      - |
+        HOST="http://$${MINIO_HOST}:9000"
+        mc alias set local "$${HOST}" "$${S3_ACCESS_KEY_ID}" "$${S3_SECRET_ACCESS_KEY}"
+        if mc ls "local/$${S3_BUCKET_NAME}" > /dev/null 2>&1; then
+          echo "Bucket '$${S3_BUCKET_NAME}' already exists"
+        else
+          mc mb "local/$${S3_BUCKET_NAME}"
+          echo "Bucket '$${S3_BUCKET_NAME}' created"
+        fi
 
   api-preview-pr-${PR_ID}:
     build:
