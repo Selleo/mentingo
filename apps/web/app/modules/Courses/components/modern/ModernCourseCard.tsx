@@ -141,6 +141,11 @@ const ModernCourseCard = ({
   useLayoutEffect(() => {
     if (typeof window === "undefined" || !cardRef.current) return;
 
+    const closeHoverOnScroll = () => {
+      setIsHovered(false);
+      setShowVideo(false);
+    };
+
     const updateRect = () => {
       if (!cardRef.current) return;
       const rect = cardRef.current.getBoundingClientRect();
@@ -158,10 +163,16 @@ const ModernCourseCard = ({
     resizeObserver.observe(cardRef.current);
 
     window.addEventListener("scroll", updateRect, { passive: true });
+    window.addEventListener("scroll", closeHoverOnScroll, { passive: true });
+    window.addEventListener("wheel", closeHoverOnScroll, { passive: true });
+    window.addEventListener("touchmove", closeHoverOnScroll, { passive: true });
 
     return () => {
       resizeObserver.disconnect();
       window.removeEventListener("scroll", updateRect);
+      window.removeEventListener("scroll", closeHoverOnScroll);
+      window.removeEventListener("wheel", closeHoverOnScroll);
+      window.removeEventListener("touchmove", closeHoverOnScroll);
     };
   }, []);
 
