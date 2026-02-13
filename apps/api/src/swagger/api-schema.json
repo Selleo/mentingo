@@ -1206,62 +1206,6 @@
         }
       }
     },
-    "/api/file/thumbnail": {
-      "get": {
-        "operationId": "FileController_getThumbnail",
-        "parameters": [
-          {
-            "name": "sourceUrl",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "minLength": 1,
-              "type": "string"
-            }
-          },
-          {
-            "name": "provider",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "anyOf": [
-                {
-                  "const": "self",
-                  "type": "string"
-                },
-                {
-                  "const": "youtube",
-                  "type": "string"
-                },
-                {
-                  "const": "vimeo",
-                  "type": "string"
-                },
-                {
-                  "const": "bunny",
-                  "type": "string"
-                },
-                {
-                  "const": "unknown",
-                  "type": "string"
-                }
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetThumbnailResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/statistics/user-stats": {
       "get": {
         "operationId": "StatisticsController_getUserStatistics",
@@ -8457,11 +8401,6 @@
             "minLength": 1,
             "type": "string"
           },
-          "email": {
-            "format": "email",
-            "minLength": 1,
-            "type": "string"
-          },
           "language": {
             "type": "string"
           }
@@ -8469,7 +8408,6 @@
         "required": [
           "password",
           "createToken",
-          "email",
           "language"
         ]
       },
@@ -8513,17 +8451,11 @@
           "resetToken": {
             "minLength": 1,
             "type": "string"
-          },
-          "email": {
-            "format": "email",
-            "minLength": 1,
-            "type": "string"
           }
         },
         "required": [
           "newPassword",
-          "resetToken",
-          "email"
+          "resetToken"
         ]
       },
       "MFASetupResponse": {
@@ -10919,25 +10851,6 @@
             "type": "string"
           }
         }
-      },
-      "GetThumbnailResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "url": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "url"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
       },
       "GetUserStatisticsResponse": {
         "type": "object",
@@ -17611,15 +17524,6 @@
               },
               "hasVideo": {
                 "type": "boolean"
-              },
-              "hasAutoplayTrigger": {
-                "type": "boolean"
-              },
-              "videos": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
               },
               "isQuizFeedbackRedacted": {
                 "type": "boolean"
