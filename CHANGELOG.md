@@ -1,3 +1,37 @@
+<a name="v4.3.0"></a>
+
+## [v4.3.0] - 13.02.2026
+
+### Features:
+
+- introduce a new video player with autoplay support ([#1288](https://github.com/Selleo/mentingo/issues/1288))
+
+- highlight due dates and free lessons with course badges ([#1289](https://github.com/Selleo/mentingo/issues/1289))
+
+### Bug Fixes:
+
+- possibility to add course when there is none, show student courses in edge case ([#1287](https://github.com/Selleo/mentingo/issues/1287))
+
+- flaky tests for reliable development ([#1265](https://github.com/Selleo/mentingo/issues/1265))
+
+- ensure provider sign-in works correctly in multi-tenant setups ([#1263](https://github.com/Selleo/mentingo/issues/1263))
+
+### Chores:
+
+- improve accuracy of lesson duration tracking ([#1297](https://github.com/Selleo/mentingo/issues/1297))
+
+- improve modern courses view ([#1267](https://github.com/Selleo/mentingo/issues/1267))
+
+- improve account security and course data accuracy ([#1293](https://github.com/Selleo/mentingo/issues/1293))
+
+- improve in-progress indicators for chapters and lessons ([#1286](https://github.com/Selleo/mentingo/issues/1286))
+
+- enhance admin experience in user management ([#1285](https://github.com/Selleo/mentingo/issues/1285))
+
+### Tests:
+
+- cover login, certificate upload, and user archiving flows with tests ([#1225](https://github.com/Selleo/mentingo/issues/1225))
+
 <a name="v4.2.0"></a>
 
 ## [v4.2.0] - 03.02.2026
@@ -29,6 +63,10 @@
 - optimize caching to ensure reliable updates ([#1242](https://github.com/Selleo/mentingo/issues/1242))
 
 - keep lesson editor visible while editing a course ([#1240](https://github.com/Selleo/mentingo/issues/1240))
+
+### Documentation:
+
+- update changelog for version v4.2.0
 
 ### Tests:
 
@@ -2374,7 +2412,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.2.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.3.0...HEAD
+[v4.3.0]: https://github.com/Selleo/mentingo/compare/v4.2.0...v4.3.0
 [v4.2.0]: https://github.com/Selleo/mentingo/compare/v4.1.0...v4.2.0
 [v4.1.0]: https://github.com/Selleo/mentingo/compare/v4.0.0...v4.1.0
 [v4.0.0]: https://github.com/Selleo/mentingo/compare/v3.26.0...v4.0.0
