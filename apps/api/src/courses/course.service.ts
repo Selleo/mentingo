@@ -2126,6 +2126,48 @@ export class CourseService {
 
       const groupOrder = sql<number>`array_position(${groupIdsArray}, ${groupUsers.groupId})`;
 
+      const studentsToAttachGroupEnrollment = await trx
+        .selectDistinctOn([groupUsers.userId], {
+          studentId: groupUsers.userId,
+          groupId: groupUsers.groupId,
+        })
+        .from(groupUsers)
+        .innerJoin(users, eq(users.id, groupUsers.userId))
+        .innerJoin(
+          studentCourses,
+          and(
+            eq(studentCourses.studentId, groupUsers.userId),
+            eq(studentCourses.courseId, courseId),
+            eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+          ),
+        )
+        .where(
+          and(
+            inArray(groupUsers.groupId, groupIds),
+            eq(users.role, USER_ROLES.STUDENT),
+            isNull(studentCourses.enrolledByGroupId),
+          ),
+        )
+        .orderBy(groupUsers.userId, desc(groupOrder));
+
+      if (studentsToAttachGroupEnrollment.length) {
+        await Promise.all(
+          studentsToAttachGroupEnrollment.map(({ studentId, groupId }) =>
+            trx
+              .update(studentCourses)
+              .set({ enrolledByGroupId: groupId })
+              .where(
+                and(
+                  eq(studentCourses.studentId, studentId),
+                  eq(studentCourses.courseId, courseId),
+                  eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+                  isNull(studentCourses.enrolledByGroupId),
+                ),
+              ),
+          ),
+        );
+      }
+
       const eligibleStudents = await trx
         .selectDistinctOn([groupUsers.userId], {
           studentId: groupUsers.userId,

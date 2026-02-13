@@ -21,6 +21,7 @@ const TopCoursesCarousel = ({ courses }: TopCoursesCarouselProps) => {
   const [carouselApi, setCarouselApi] = useState<CarouselApi | null>(null);
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
+  const popoutEnabled = courses.length > 1;
 
   useEffect(() => {
     if (!carouselApi) return;
@@ -64,14 +65,20 @@ const TopCoursesCarousel = ({ courses }: TopCoursesCarouselProps) => {
   );
 
   return (
-    <section className="relative group px-4 md:px-8 mb-12">
+    <section className="relative group px-4 md:px-8 pb-6">
       <Carousel
         opts={{ align: "start", slidesToScroll: 1, skipSnaps: false }}
         setApi={setCarouselApi}
       >
-        <CarouselContent className="gap-24 px-4 mt-10 md:px-8 ml-20">
+        <CarouselContent
+          className="gap-24 px-4 mt-4 md:px-8 ml-20"
+          viewportClassName="overflow-x-visible"
+        >
           {courses.map((course, index) => (
-            <CarouselItem key={course.id} className="w-[360px] md:w-[420px] lg:w-[440px]">
+            <CarouselItem
+              key={course.id}
+              className="w-[360px] md:w-[420px] lg:w-[440px] !basis-auto"
+            >
               <div className="relative pl-6">
                 {renderRank(index + 1)}
                 <ModernCourseCard
@@ -87,6 +94,7 @@ const TopCoursesCarousel = ({ courses }: TopCoursesCarouselProps) => {
                   enrolled={course.enrolled}
                   hasFreeChapters={course.hasFreeChapters}
                   dueDate={course.dueDate ? new Date(course.dueDate) : null}
+                  popoutEnabled={popoutEnabled}
                 />
               </div>
             </CarouselItem>

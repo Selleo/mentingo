@@ -1,13 +1,15 @@
 import { Link } from "@remix-run/react";
 import { formatDate } from "date-fns";
 import { BookOpen, Clock, Play } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 
 import DefaultPhotoCourse from "~/assets/svgs/default-photo-course.svg";
 import { CardBadge } from "~/components/CardBadge";
 import { Icon } from "~/components/Icon";
 import { CategoryChip } from "~/components/ui/CategoryChip";
+import { useUserRole } from "~/hooks/useUserRole";
 import { cn } from "~/lib/utils";
 import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
@@ -38,6 +40,11 @@ type ModernCourseCardProps = {
   enrolled?: boolean;
   hasFreeChapters?: boolean;
   dueDate?: Date | null;
+  /**
+   * Whether to enable the popout effect when hovering over the card.
+   * @default true
+   */
+  popoutEnabled?: boolean;
 };
 
 const ModernCourseCard = ({
@@ -54,6 +61,7 @@ const ModernCourseCard = ({
   enrolled,
   hasFreeChapters,
   dueDate,
+  popoutEnabled = true,
 }: ModernCourseCardProps) => {
   const { t } = useTranslation();
   const [isHovered, setIsHovered] = useState(false);
@@ -62,6 +70,15 @@ const ModernCourseCard = ({
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const preloadTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cardRef = useRef<HTMLDivElement | null>(null);
+  const [portalRect, setPortalRect] = useState<{
+    top: number;
+    left: number;
+    width: number;
+    height: number;
+  } | null>(null);
+
+  const { isStudent } = useUserRole();
 
   const durationLabel = formatDuration(estimatedDurationMinutes);
 
@@ -121,6 +138,44 @@ const ModernCourseCard = ({
     };
   }, [isHovered, trailerUrl]);
 
+  useLayoutEffect(() => {
+    if (typeof window === "undefined" || !cardRef.current) return;
+
+    const closeHoverOnScroll = () => {
+      setIsHovered(false);
+      setShowVideo(false);
+    };
+
+    const updateRect = () => {
+      if (!cardRef.current) return;
+      const rect = cardRef.current.getBoundingClientRect();
+      setPortalRect({
+        top: rect.top + window.scrollY,
+        left: rect.left + window.scrollX,
+        width: rect.width,
+        height: rect.height,
+      });
+    };
+
+    updateRect();
+
+    const resizeObserver = new ResizeObserver(() => updateRect());
+    resizeObserver.observe(cardRef.current);
+
+    window.addEventListener("scroll", updateRect, { passive: true });
+    window.addEventListener("scroll", closeHoverOnScroll, { passive: true });
+    window.addEventListener("wheel", closeHoverOnScroll, { passive: true });
+    window.addEventListener("touchmove", closeHoverOnScroll, { passive: true });
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("scroll", updateRect);
+      window.removeEventListener("scroll", closeHoverOnScroll);
+      window.removeEventListener("wheel", closeHoverOnScroll);
+      window.removeEventListener("touchmove", closeHoverOnScroll);
+    };
+  }, []);
+
   const handleMouseEnter = () => {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
     hoverTimeoutRef.current = setTimeout(() => setIsHovered(true), 220);
@@ -155,10 +210,10 @@ const ModernCourseCard = ({
     </>
   );
 
-  const courseBadges = (
+  const courseBadges = isStudent && (
     <div
       className="absolute left-4 right-4 top-4 flex flex-col gap-y-1 transition-opacity duration-300"
-      style={{ opacity: isHovered ? 0 : 1 }}
+      style={{ opacity: isHovered ? 0 : 1, zIndex: isHovered ? 10 : 50 }}
     >
       {hasFreeChapters && !enrolled && (
         <CardBadge variant="successFilled">
@@ -177,41 +232,42 @@ const ModernCourseCard = ({
     </div>
   );
 
-  return (
-    <div
-      className={cn(
-        "group relative block w-full max-w-md cursor-pointer overflow-visible",
-        className,
-      )}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      data-testid={title}
-    >
-      <div className="aspect-video w-full" />
+  const portalActive = popoutEnabled && isHovered && Boolean(portalRect);
 
-      <Link
-        to={`/course/${id}`}
-        className="absolute inset-0 transition-all duration-500 ease-out"
+  const cardContent = ({
+    withRef = false,
+    isPortal = false,
+  }: {
+    withRef?: boolean;
+    isPortal?: boolean;
+  }) => {
+    const linkTransform = isHovered ? "scale(1.05) translateY(-35%)" : "scale(1)";
+    const linkOpacity = isPortal ? (portalActive ? 1 : 0) : portalActive ? 0 : 1;
+    const wrapperOpacity = linkOpacity;
+
+    return (
+      <div
+        className={cn("relative z-50", className)}
+        ref={withRef ? cardRef : undefined}
         style={{
-          transform: isHovered ? "scale(1.05) translateY(-35%)" : "scale(1)",
-          transformOrigin: "center center",
-          zIndex: isHovered ? 50 : 1,
+          opacity: wrapperOpacity,
+          transition: "opacity 150ms ease-out",
         }}
-        tabIndex={0}
       >
         <div
           className={cn(
-            "relative aspect-video overflow-hidden border border-gray-200 bg-white shadow-md transition-all duration-300 rounded-lg",
-            {
-              "rounded-b-none": isHovered,
-            },
+            "group relative block w-full max-w-md cursor-pointer overflow-visible",
+            className,
+            popoutEnabled && isHovered ? "absolute" : "",
           )}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
         >
           {trailerUrl ? (
             <>
               <div
                 className={cn(
-                  "absolute inset-0 transition-opacity duration-300",
+                  "absolute inset-0 overflow-hidden rounded-lg transition-opacity duration-300",
                   isHovered && showVideo ? "opacity-0" : "opacity-100",
                 )}
               >
@@ -247,77 +303,167 @@ const ModernCourseCard = ({
               )}
             </>
           ) : (
-            <div className="absolute inset-0">
+            <div className="absolute inset-0 overflow-hidden rounded-lg">
               {image}
               {courseBadges}
             </div>
           )}
 
-          {showProgress && (
-            <div className="absolute bottom-0 left-0 right-0 z-30 h-1 bg-white/20">
-              <div
-                className="h-full bg-red-600 transition-all duration-300"
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-          )}
+          <div className="aspect-video w-full" />
 
-          <div
-            className="absolute bottom-0 left-0 right-0 z-20 p-4 transition-opacity duration-300"
-            style={{ opacity: isHovered ? 0 : 1 }}
+          <Link
+            to={`/course/${id}`}
+            className="absolute inset-0 transition-transform duration-200 ease-out"
+            style={{
+              transform: linkTransform,
+              transformOrigin: "center center",
+              zIndex: isHovered ? 50 : 10,
+              opacity: linkOpacity,
+              willChange: "transform",
+            }}
+            tabIndex={0}
           >
-            <h3 className="line-clamp-2 text-base font-semibold text-white drop-shadow-lg">
-              {title}
-            </h3>
-          </div>
-        </div>
-
-        <div
-          className="overflow-hidden rounded-b-lg bg-white shadow-xl transition-all duration-300"
-          style={{
-            maxHeight: isHovered ? "220px" : "0px",
-            opacity: isHovered ? 1 : 0,
-          }}
-        >
-          <div className="space-y-3 border border-t-0 border-gray-200 p-4">
-            <h3 className="line-clamp-2 text-sm font-semibold leading-tight text-gray-900 transition-all duration-300">
-              {title}
-            </h3>
-
-            {(durationLabel || lessonsLabel) && (
-              <div className="flex items-center gap-4 text-xs text-neutral-700">
-                {durationLabel && (
-                  <div className="flex items-center gap-1.5">
-                    <Clock className="h-3.5 w-3.5" />
-                    <span>{durationLabel}</span>
+            <div
+              className={cn(
+                "relative aspect-video overflow-hidden border border-gray-200 bg-white shadow-md transition-all duration-300 rounded-lg",
+                {
+                  "rounded-b-none": isHovered,
+                },
+              )}
+            >
+              {trailerUrl ? (
+                <>
+                  <div
+                    className={cn(
+                      "absolute inset-0 transition-opacity duration-300",
+                      isHovered && showVideo ? "opacity-0" : "opacity-100",
+                    )}
+                  >
+                    {image}
                   </div>
-                )}
-                {lessonsLabel && (
-                  <div className="flex items-center gap-1.5">
-                    <BookOpen className="h-3.5 w-3.5" />
-                    <span>{lessonsLabel}</span>
-                  </div>
-                )}
-              </div>
-            )}
+                  {isEmbed && embedSrc ? (
+                    <iframe
+                      src={isHovered ? embedSrc : undefined}
+                      className={cn(
+                        "absolute inset-0 h-full w-full border-0 transition-opacity duration-300 pointer-events-none no-controls",
+                        isHovered && showVideo && isIframeLoaded ? "opacity-100" : "opacity-0",
+                      )}
+                      allow="autoplay; encrypted-media"
+                      title={title}
+                      onLoad={() => setIsIframeLoaded(true)}
+                    />
+                  ) : (
+                    <video
+                      ref={videoRef}
+                      src={trailerUrl}
+                      preload="auto"
+                      className={cn(
+                        "absolute inset-0 h-full w-full object-cover transition-opacity duration-300 pointer-events-none",
+                        isHovered && showVideo ? "opacity-100" : "opacity-0",
+                      )}
+                      muted
+                      loop
+                      playsInline
+                      autoPlay
+                      controls={false}
+                    />
+                  )}
+                </>
+              ) : (
+                <div className="absolute inset-0">{image}</div>
+              )}
 
-            {nonFormattedDescription && (
-              <p className="line-clamp-2 text-xs text-neutral-600">{nonFormattedDescription}</p>
-            )}
+              {showProgress && (
+                <div className="absolute bottom-0 left-0 right-0 z-30 h-1 bg-white/20">
+                  <div
+                    className="h-full bg-red-600 transition-all duration-300"
+                    style={{ width: `${progressPercent}%` }}
+                  />
+                </div>
+              )}
 
-            <div className="flex items-center justify-between">
-              <span className="rounded bg-neutral-900 px-2.5 py-1 text-xs font-medium text-white">
-                {category}
-              </span>
-
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-900 text-white shadow-md transition-transform duration-200 group-hover:scale-110">
-                <Play className="h-4 w-4" fill="currentColor" />
+              <div
+                className="absolute bottom-0 left-0 right-0 z-20 p-4 transition-opacity duration-300"
+                style={{ opacity: isHovered ? 0 : 1 }}
+              >
+                <h3 className="line-clamp-2 text-base font-semibold text-white drop-shadow-lg">
+                  {title}
+                </h3>
               </div>
             </div>
-          </div>
+
+            <div
+              className="overflow-hidden rounded-b-lg bg-white shadow-xl transition-all duration-300"
+              style={{
+                maxHeight: isHovered ? "220px" : "0px",
+                opacity: isHovered ? 1 : 0,
+              }}
+            >
+              <div className="space-y-3 border border-t-0 border-gray-200 p-4">
+                <h3 className="line-clamp-2 text-sm font-semibold leading-tight text-gray-900 transition-all duration-300">
+                  {title}
+                </h3>
+
+                {(durationLabel || lessonsLabel) && (
+                  <div className="flex items-center gap-4 text-xs text-neutral-700">
+                    {durationLabel && (
+                      <div className="flex items-center gap-1.5">
+                        <Clock className="h-3.5 w-3.5" />
+                        <span>{durationLabel}</span>
+                      </div>
+                    )}
+                    {lessonsLabel && (
+                      <div className="flex items-center gap-1.5">
+                        <BookOpen className="h-3.5 w-3.5" />
+                        <span>{lessonsLabel}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {nonFormattedDescription && (
+                  <p className="line-clamp-2 text-xs text-neutral-600">{nonFormattedDescription}</p>
+                )}
+
+                <div className="flex items-center justify-between">
+                  <span className="rounded bg-neutral-900 px-2.5 py-1 text-xs font-medium text-white">
+                    {category}
+                  </span>
+
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-900 text-white shadow-md transition-transform duration-200 group-hover:scale-110">
+                    <Play className="h-4 w-4" fill="currentColor" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Link>
         </div>
-      </Link>
-    </div>
+      </div>
+    );
+  };
+
+  return (
+    <>
+      {cardContent({ withRef: true })}
+      {popoutEnabled && portalRect && typeof document !== "undefined"
+        ? createPortal(
+            <div
+              style={{
+                position: "absolute",
+                top: portalRect.top,
+                left: portalRect.left,
+                width: portalRect.width,
+                height: portalRect.height,
+                pointerEvents: "none",
+                zIndex: 9999,
+              }}
+            >
+              <div style={{ pointerEvents: "none" }}>{cardContent({ isPortal: true })}</div>
+            </div>,
+            document.body,
+          )
+        : null}
+    </>
   );
 };
 
