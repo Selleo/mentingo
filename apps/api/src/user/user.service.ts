@@ -31,6 +31,7 @@ import { CreatePasswordService } from "src/auth/create-password.service";
 import { DatabasePg } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
 import { getEmailSubject } from "src/common/emails/translations";
+import { buildCreateNewPasswordLink } from "src/common/helpers/buildCreateNewPasswordLink";
 import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterConditions";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import hashPassword from "src/common/helpers/hashPassword";
@@ -591,9 +592,13 @@ export class UserService {
 
     if (!creator) {
       const createPasswordEmail = new CreatePasswordReminderEmail({
-        createPasswordLink: `${
-          process.env.CI ? "http://localhost:5173" : process.env.CORS_ORIGIN
-        }/auth/create-new-password?createToken=${token}&email=${createdUser.email}`,
+        createPasswordLink: buildCreateNewPasswordLink(
+          process.env.CI ? "http://localhost:5173" : process.env.CORS_ORIGIN!,
+          {
+            createToken: token,
+            email: createdUser.email,
+          },
+        ),
         ...defaultEmailSettings,
       });
 

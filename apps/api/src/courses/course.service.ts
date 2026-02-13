@@ -41,6 +41,7 @@ import { EmailService } from "src/common/emails/emails.service";
 import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterConditions";
 import { buildJsonbField, deleteJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { injectResourcesIntoContent } from "src/common/utils/injectResourcesIntoContent";
 import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
 import { UpdateHasCertificateEvent } from "src/courses/events/updateHasCertificate.event";
 import { getCourseTsVector } from "src/courses/utils/courses.utils";
@@ -145,7 +146,7 @@ import type { CourseActivityLogSnapshot } from "src/activity-logs/types";
 import type { Pagination, UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
 import type { CourseTranslationType } from "src/courses/types/course.types";
-import type { DurationEstimatesByCourse, DurationResourceKind } from "src/courses/types/duration";
+import type { DurationEstimatesByCourse } from "src/courses/types/duration";
 import type {
   AdminLessonWithContentSchema,
   LessonForChapterSchema,
@@ -572,37 +573,58 @@ export class CourseService {
 
   private lessonSeconds(params: {
     descriptionHtml?: string | null;
-    resourceCounts: Record<DurationResourceKind, number>;
     quizQuestionCount: number;
     lessonType: string;
   }): number {
-    const { descriptionHtml, resourceCounts, quizQuestionCount, lessonType } = params;
+    const { descriptionHtml, quizQuestionCount, lessonType } = params;
 
     const wordCount = this.countWordsFromHtml(descriptionHtml || "");
     const readingSeconds = Math.ceil((wordCount / DURATION_DEFAULTS.wordsPerMinute) * 60);
 
-    const {
+    const embeddedCounts = this.countEmbeddedResourcesFromHtml(descriptionHtml || "");
+    return match(lessonType)
+      .with(
+        LESSON_TYPES.CONTENT,
+        () =>
+          readingSeconds +
+          embeddedCounts.video * DURATION_DEFAULTS.videoMinutes * 60 +
+          embeddedCounts.image * DURATION_DEFAULTS.imageSeconds +
+          embeddedCounts.download * DURATION_DEFAULTS.downloadSeconds +
+          embeddedCounts.presentation * DURATION_DEFAULTS.embedMinutes * 60 +
+          quizQuestionCount * DURATION_DEFAULTS.quizSeconds,
+      )
+      .with(
+        LESSON_TYPES.QUIZ,
+        () => readingSeconds + quizQuestionCount * DURATION_DEFAULTS.quizSeconds,
+      )
+      .with(LESSON_TYPES.AI_MENTOR, () => readingSeconds + DURATION_DEFAULTS.aiMentorMinutes * 60)
+      .with(LESSON_TYPES.EMBED, () => readingSeconds + DURATION_DEFAULTS.embedMinutes * 60)
+      .otherwise(() => readingSeconds);
+  }
+
+  private countEmbeddedResourcesFromHtml(content: string): {
+    video: number;
+    image: number;
+    download: number;
+    presentation: number;
+  } {
+    const supportedNodeTypes = ["video", "downloadable-file", "presentation"];
+
+    const { contentCount } = injectResourcesIntoContent(content, [], {
+      resourceIdRegex: /lesson-resource\/([0-9a-fA-F-]{36})/,
+      trackNodeTypes: supportedNodeTypes,
+    });
+    const videoCount = Number(contentCount.video) || 0;
+    const imageCount = Number(contentCount.image) || 0;
+    const downloadCount = Number(contentCount["downloadable-file"]) || 0;
+    const presentationCount = Number(contentCount.presentation) || 0;
+
+    return {
       video: videoCount,
       image: imageCount,
       download: downloadCount,
-      other: otherCount,
-    } = resourceCounts;
-
-    const aiMentorSeconds =
-      lessonType === LESSON_TYPES.AI_MENTOR ? DURATION_DEFAULTS.aiMentorMinutes * 60 : 0;
-    const embedSeconds =
-      lessonType === LESSON_TYPES.EMBED ? DURATION_DEFAULTS.embedMinutes * 60 : 0;
-
-    return (
-      readingSeconds +
-      videoCount * DURATION_DEFAULTS.videoMinutes * 60 +
-      imageCount * DURATION_DEFAULTS.imageSeconds +
-      downloadCount * DURATION_DEFAULTS.downloadSeconds +
-      otherCount * DURATION_DEFAULTS.otherSeconds +
-      quizQuestionCount * DURATION_DEFAULTS.quizSeconds +
-      aiMentorSeconds +
-      embedSeconds
-    );
+      presentation: presentationCount,
+    };
   }
 
   private async computeCourseDurationEstimates(
@@ -612,31 +634,11 @@ export class CourseService {
   ): Promise<DurationEstimatesByCourse> {
     if (!courseIds.length) return {};
 
-    const resourceCounts = dbInstance
-      .select({
-        lessonId: resourceEntity.entityId,
-        videoCount:
-          sql<number>`SUM(CASE WHEN ${resources.contentType} LIKE 'video/%' THEN 1 ELSE 0 END)`.as(
-            "videoCount",
-          ),
-        imageCount:
-          sql<number>`SUM(CASE WHEN ${resources.contentType} LIKE 'image/%' THEN 1 ELSE 0 END)`.as(
-            "imageCount",
-          ),
-        downloadCount:
-          sql<number>`SUM(CASE WHEN ${resources.contentType} LIKE 'application/pdf' THEN 1 WHEN ${resources.contentType} LIKE 'application/%' THEN 1 ELSE 0 END)`.as(
-            "downloadCount",
-          ),
-        otherCount:
-          sql<number>`SUM(CASE WHEN ${resources.contentType} LIKE 'video/%' OR ${resources.contentType} LIKE 'image/%' OR ${resources.contentType} LIKE 'application/%' THEN 0 ELSE 1 END)`.as(
-            "otherCount",
-          ),
-      })
-      .from(resourceEntity)
-      .innerJoin(resources, eq(resources.id, resourceEntity.resourceId))
-      .where(and(eq(resourceEntity.entityType, ENTITY_TYPES.LESSON), eq(resources.archived, false)))
-      .groupBy(resourceEntity.entityId)
-      .as("resource_counts");
+    const scopedLessonIds = dbInstance
+      .select({ id: lessons.id })
+      .from(lessons)
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .where(inArray(chapters.courseId, courseIds));
 
     const questionCounts = dbInstance
       .select({
@@ -644,6 +646,7 @@ export class CourseService {
         questionCount: count(questions.id).as("questionCount"),
       })
       .from(questions)
+      .where(inArray(questions.lessonId, scopedLessonIds))
       .groupBy(questions.lessonId)
       .as("question_counts");
 
@@ -654,16 +657,11 @@ export class CourseService {
         type: lessons.type,
         description: this.localizationService.getLocalizedSqlField(lessons.description, language),
         questionCount: sql<number>`COALESCE(${questionCounts.questionCount}, 0)`,
-        videoCount: sql<number>`COALESCE(${resourceCounts.videoCount}, 0)`,
-        imageCount: sql<number>`COALESCE(${resourceCounts.imageCount}, 0)`,
-        downloadCount: sql<number>`COALESCE(${resourceCounts.downloadCount}, 0)`,
-        otherCount: sql<number>`COALESCE(${resourceCounts.otherCount}, 0)`,
       })
       .from(lessons)
       .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
       .innerJoin(courses, eq(courses.id, chapters.courseId))
       .leftJoin(questionCounts, eq(questionCounts.lessonId, lessons.id))
-      .leftJoin(resourceCounts, eq(resourceCounts.lessonId, lessons.id))
       .where(inArray(chapters.courseId, courseIds));
 
     const secondsByCourse = new Map<UUIDType, number>();
@@ -671,12 +669,6 @@ export class CourseService {
     for (const lesson of lessonRows) {
       const lessonSeconds = this.lessonSeconds({
         descriptionHtml: lesson.description as string,
-        resourceCounts: {
-          video: Number(lesson.videoCount) || 0,
-          image: Number(lesson.imageCount) || 0,
-          download: Number(lesson.downloadCount) || 0,
-          other: Number(lesson.otherCount) || 0,
-        },
         quizQuestionCount: Number(lesson.questionCount) || 0,
         lessonType: lesson.type,
       });
@@ -690,7 +682,7 @@ export class CourseService {
     const estimates: DurationEstimatesByCourse = {};
 
     for (const [courseId, totalSeconds] of secondsByCourse) {
-      const totalMinutes = Math.ceil(Math.max(1, Math.ceil(totalSeconds / 60)) / 30) * 30;
+      const totalMinutes = totalSeconds > 0 ? Math.ceil(Math.ceil(totalSeconds / 60) / 30) * 30 : 0;
       estimates[courseId] = { totalMinutes, formatted: this.formatMinutes(totalMinutes) };
     }
 

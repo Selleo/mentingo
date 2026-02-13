@@ -11,6 +11,7 @@ import {
 
 import { EmailService } from "src/common/emails/emails.service";
 import { getEmailSubject } from "src/common/emails/translations";
+import { buildCreateNewPasswordLink } from "src/common/helpers/buildCreateNewPasswordLink";
 import { CourseService } from "src/courses/course.service";
 import { UsersAssignedToCourseEvent } from "src/events/user/user-assigned-to-course.event";
 import { UserChapterFinishedEvent } from "src/events/user/user-chapter-finished.event";
@@ -104,9 +105,13 @@ export class NotifyUsersHandler implements IEventHandler {
     const { userInvite } = event;
     const { email, creatorId, token, userId } = userInvite;
 
-    const url = `${
-      process.env.CI ? "http://localhost:5173" : process.env.CORS_ORIGIN
-    }/auth/create-new-password?createToken=${token}&email=${email}`;
+    const url = buildCreateNewPasswordLink(
+      process.env.CI ? "http://localhost:5173" : process.env.CORS_ORIGIN!,
+      {
+        createToken: token,
+        email,
+      },
+    );
 
     const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(userId);
     const { firstName, lastName } = await this.userService.getUserById(creatorId);
