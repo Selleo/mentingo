@@ -9,6 +9,7 @@ import DefaultPhotoCourse from "~/assets/svgs/default-photo-course.svg";
 import { CardBadge } from "~/components/CardBadge";
 import { Icon } from "~/components/Icon";
 import { CategoryChip } from "~/components/ui/CategoryChip";
+import { useUserRole } from "~/hooks/useUserRole";
 import { cn } from "~/lib/utils";
 import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
@@ -76,6 +77,8 @@ const ModernCourseCard = ({
     width: number;
     height: number;
   } | null>(null);
+
+  const { isStudent } = useUserRole();
 
   const durationLabel = formatDuration(estimatedDurationMinutes);
 
@@ -196,10 +199,10 @@ const ModernCourseCard = ({
     </>
   );
 
-  const courseBadges = (
+  const courseBadges = isStudent && (
     <div
       className="absolute left-4 right-4 top-4 flex flex-col gap-y-1 transition-opacity duration-300"
-      style={{ opacity: isHovered ? 0 : 1 }}
+      style={{ opacity: isHovered ? 0 : 1, zIndex: isHovered ? 10 : 50 }}
     >
       {hasFreeChapters && !enrolled && (
         <CardBadge variant="successFilled">
@@ -235,7 +238,10 @@ const ModernCourseCard = ({
       <div
         className={cn("relative z-50", className)}
         ref={withRef ? cardRef : undefined}
-        style={{ opacity: wrapperOpacity, transition: "opacity 150ms ease-out" }}
+        style={{
+          opacity: wrapperOpacity,
+          transition: "opacity 150ms ease-out",
+        }}
       >
         <div
           className={cn(
@@ -250,7 +256,7 @@ const ModernCourseCard = ({
             <>
               <div
                 className={cn(
-                  "absolute inset-0 transition-opacity duration-300",
+                  "absolute inset-0 overflow-hidden rounded-lg transition-opacity duration-300",
                   isHovered && showVideo ? "opacity-0" : "opacity-100",
                 )}
               >
@@ -286,11 +292,13 @@ const ModernCourseCard = ({
               )}
             </>
           ) : (
-            <div className="absolute inset-0">
+            <div className="absolute inset-0 overflow-hidden rounded-lg">
               {image}
               {courseBadges}
             </div>
           )}
+
+          <div className="aspect-video w-full" />
 
           <Link
             to={`/course/${id}`}
@@ -298,7 +306,7 @@ const ModernCourseCard = ({
             style={{
               transform: linkTransform,
               transformOrigin: "center center",
-              zIndex: isHovered ? 50 : 1,
+              zIndex: isHovered ? 50 : 10,
               opacity: linkOpacity,
               willChange: "transform",
             }}
@@ -320,18 +328,7 @@ const ModernCourseCard = ({
                       isHovered && showVideo ? "opacity-0" : "opacity-100",
                     )}
                   >
-                    <img
-                      src={thumbnailUrl || DefaultPhotoCourse}
-                      alt={title}
-                      className="h-full w-full object-cover"
-                      onError={(event) => {
-                        (event.target as HTMLImageElement).src = DefaultPhotoCourse;
-                      }}
-                    />
-                    <div
-                      aria-hidden
-                      className="absolute inset-0 z-10 bg-gradient-to-t from-black via-black/50 to-transparent pointer-events-none"
-                    />
+                    {image}
                   </div>
                   {isEmbed && embedSrc ? (
                     <iframe
@@ -362,20 +359,7 @@ const ModernCourseCard = ({
                   )}
                 </>
               ) : (
-                <div className="absolute inset-0">
-                  <img
-                    src={thumbnailUrl || DefaultPhotoCourse}
-                    alt={title}
-                    className="h-full w-full object-cover"
-                    onError={(event) => {
-                      (event.target as HTMLImageElement).src = DefaultPhotoCourse;
-                    }}
-                  />
-                  <div
-                    aria-hidden
-                    className="absolute inset-0 z-10 bg-gradient-to-t from-black via-black/50 to-transparent pointer-events-none"
-                  />
-                </div>
+                <div className="absolute inset-0">{image}</div>
               )}
 
               {showProgress && (
