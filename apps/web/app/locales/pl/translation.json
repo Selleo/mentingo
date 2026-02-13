@@ -433,14 +433,16 @@
     "passwordUppercase": "co najmniej jedną wielką literę",
     "passwordLowercase": "co najmniej jedną małą literę",
     "passwordNumber": "co najmniej jedną cyfrę",
-    "passwordSpecial": "co najmniej jeden znak specjalny"
+    "passwordSpecial": "co najmniej jeden znak specjalny",
+    "passwordsMatch": "Hasła się zgadzają"
   },
   "changePasswordView": {
     "header": "Zmień hasło",
     "subHeader": "Zaktualizuj swoje hasło tutaj.",
     "field": {
       "oldPassword": "Stare hasło",
-      "newPassword": "Nowe hasło"
+      "newPassword": "Nowe hasło",
+      "confirmPassword": "Potwierdź hasło"
     },
     "validation": {
       "oldPassword": "Stare hasło jest wymagane",

@@ -454,11 +454,13 @@
     "subHeader": "Update your password here.",
     "field": {
       "oldPassword": "Old password",
-      "newPassword": "New password"
+      "newPassword": "New password",
+      "confirmPassword": "Confirm password"
     },
     "validation": {
       "oldPassword": "Old password is required",
-      "newPassword": "New password is required"
+      "newPassword": "New password is required",
+      "passwordsDontMatch": "Passwords do not match"
     },
     "toast": {
       "passwordChangedSuccessfully": "Password changed successfully",
@@ -473,7 +475,7 @@
     "passwordLowercase": "at least one lowercase letter",
     "passwordNumber": "at least one number",
     "passwordSpecial": "at least one special character",
-    "passwordsDontMatch": "Passwords do not match"
+    "passwordsMatch": "Passwords match"
   },
   "contentCreatorView": {
     "button": {
