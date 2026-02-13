@@ -146,7 +146,7 @@ import type { CourseActivityLogSnapshot } from "src/activity-logs/types";
 import type { Pagination, UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
 import type { CourseTranslationType } from "src/courses/types/course.types";
-import type { DurationEstimatesByCourse, DurationResourceKind } from "src/courses/types/duration";
+import type { DurationEstimatesByCourse } from "src/courses/types/duration";
 import type {
   AdminLessonWithContentSchema,
   LessonForChapterSchema,
@@ -573,112 +573,65 @@ export class CourseService {
 
   private lessonSeconds(params: {
     descriptionHtml?: string | null;
-    resourceCounts: Record<DurationResourceKind, number>;
     quizQuestionCount: number;
     lessonType: string;
-    isExternal?: boolean | null;
-    fileType?: string | null;
   }): number {
-    const { descriptionHtml, resourceCounts, quizQuestionCount, lessonType, isExternal, fileType } =
-      params;
+    const { descriptionHtml, quizQuestionCount, lessonType } = params;
 
     const wordCount = this.countWordsFromHtml(descriptionHtml || "");
     const readingSeconds = Math.ceil((wordCount / DURATION_DEFAULTS.wordsPerMinute) * 60);
 
     const embeddedCounts = this.countEmbeddedResourcesFromHtml(descriptionHtml || "");
 
-    const normalizedResourceCounts = { ...resourceCounts };
-
-    const totalResourceCount =
-      normalizedResourceCounts.video +
-      normalizedResourceCounts.image +
-      normalizedResourceCounts.download +
-      normalizedResourceCounts.other;
-
-    if (isExternal && totalResourceCount === 0) {
-      const inferredKind = this.getResourceKindFromContentType(fileType);
-      if (inferredKind) normalizedResourceCounts[inferredKind] += 1;
+    if (lessonType === LESSON_TYPES.CONTENT) {
+      return (
+        readingSeconds +
+        embeddedCounts.video * DURATION_DEFAULTS.videoMinutes * 60 +
+        embeddedCounts.image * DURATION_DEFAULTS.imageSeconds +
+        embeddedCounts.download * DURATION_DEFAULTS.downloadSeconds +
+        embeddedCounts.presentation * DURATION_DEFAULTS.embedMinutes * 60 +
+        quizQuestionCount * DURATION_DEFAULTS.quizSeconds
+      );
     }
 
-    normalizedResourceCounts.video = Math.max(normalizedResourceCounts.video, embeddedCounts.video);
-    normalizedResourceCounts.image = Math.max(normalizedResourceCounts.image, embeddedCounts.image);
-    normalizedResourceCounts.download = Math.max(
-      normalizedResourceCounts.download,
-      embeddedCounts.download,
-    );
-    normalizedResourceCounts.other += embeddedCounts.other;
+    if (lessonType === LESSON_TYPES.QUIZ) {
+      return readingSeconds + quizQuestionCount * DURATION_DEFAULTS.quizSeconds;
+    }
 
-    const {
-      video: videoCount,
-      image: imageCount,
-      download: downloadCount,
-      other: otherCount,
-    } = normalizedResourceCounts;
+    if (lessonType === LESSON_TYPES.AI_MENTOR) {
+      return readingSeconds + DURATION_DEFAULTS.aiMentorMinutes * 60;
+    }
 
-    const aiMentorSeconds =
-      lessonType === LESSON_TYPES.AI_MENTOR ? DURATION_DEFAULTS.aiMentorMinutes * 60 : 0;
-    const embedSeconds =
-      lessonType === LESSON_TYPES.EMBED ? DURATION_DEFAULTS.embedMinutes * 60 : 0;
+    if (lessonType === LESSON_TYPES.EMBED) {
+      return readingSeconds + DURATION_DEFAULTS.embedMinutes * 60;
+    }
 
-    return (
-      readingSeconds +
-      videoCount * DURATION_DEFAULTS.videoMinutes * 60 +
-      imageCount * DURATION_DEFAULTS.imageSeconds +
-      downloadCount * DURATION_DEFAULTS.downloadSeconds +
-      otherCount * DURATION_DEFAULTS.otherSeconds +
-      embeddedCounts.presentation * DURATION_DEFAULTS.embedMinutes * 60 +
-      quizQuestionCount * DURATION_DEFAULTS.quizSeconds +
-      aiMentorSeconds +
-      embedSeconds
-    );
+    return readingSeconds;
   }
 
   private countEmbeddedResourcesFromHtml(content: string): {
     video: number;
     image: number;
     download: number;
-    other: number;
     presentation: number;
   } {
     const supportedNodeTypes = ["video", "downloadable-file", "presentation"];
 
-    const { html, contentCount } = injectResourcesIntoContent(content, [], {
+    const { contentCount } = injectResourcesIntoContent(content, [], {
       resourceIdRegex: /lesson-resource\/([0-9a-fA-F-]{36})/,
       trackNodeTypes: supportedNodeTypes,
     });
-    const $ = loadHtml(html ?? content);
-
-    const trackedVideoCount = Number(contentCount.video) || 0;
-    const videoCount = Math.max(trackedVideoCount, $("iframe").length || 0);
-    const imageCount = $("img").length || 0;
+    const videoCount = Number(contentCount.video) || 0;
+    const imageCount = Number(contentCount.image) || 0;
     const downloadCount = Number(contentCount["downloadable-file"]) || 0;
     const presentationCount = Number(contentCount.presentation) || 0;
-
-    const otherCount =
-      $("[data-node-type]")
-        .toArray()
-        .filter((element) => {
-          const nodeType = $(element).attr("data-node-type");
-          return !nodeType || !supportedNodeTypes.includes(nodeType);
-        }).length || 0;
 
     return {
       video: videoCount,
       image: imageCount,
       download: downloadCount,
-      other: otherCount,
       presentation: presentationCount,
     };
-  }
-
-  private getResourceKindFromContentType(contentType?: string | null): DurationResourceKind | null {
-    if (!contentType) return null;
-    if (contentType.startsWith("video/")) return "video";
-    if (contentType.startsWith("image/")) return "image";
-    if (contentType === "application/pdf" || contentType.startsWith("application/")) {
-      return "download";
-    }
-    return "other";
   }
 
   private async computeCourseDurationEstimates(
@@ -693,39 +646,6 @@ export class CourseService {
       .from(lessons)
       .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
       .where(inArray(chapters.courseId, courseIds));
-
-    const resourceCounts = dbInstance
-      .select({
-        lessonId: resourceEntity.entityId,
-        videoCount:
-          sql<number>`SUM(CASE WHEN ${resources.contentType} LIKE 'video/%' THEN 1 ELSE 0 END)`.as(
-            "videoCount",
-          ),
-        imageCount:
-          sql<number>`SUM(CASE WHEN ${resources.contentType} LIKE 'image/%' THEN 1 ELSE 0 END)`.as(
-            "imageCount",
-          ),
-        downloadCount:
-          sql<number>`SUM(CASE WHEN ${resources.contentType} LIKE 'application/pdf' THEN 1 WHEN ${resources.contentType} LIKE 'application/%' THEN 1 ELSE 0 END)`.as(
-            "downloadCount",
-          ),
-        otherCount:
-          sql<number>`SUM(CASE WHEN ${resources.contentType} LIKE 'video/%' OR ${resources.contentType} LIKE 'image/%' OR ${resources.contentType} LIKE 'application/%' THEN 0 ELSE 1 END)`.as(
-            "otherCount",
-          ),
-      })
-      .from(resourceEntity)
-      .innerJoin(resources, eq(resources.id, resourceEntity.resourceId))
-      .where(
-        and(
-          eq(resourceEntity.entityType, ENTITY_TYPES.LESSON),
-          eq(resourceEntity.relationshipType, RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT),
-          eq(resources.archived, false),
-          inArray(resourceEntity.entityId, scopedLessonIds),
-        ),
-      )
-      .groupBy(resourceEntity.entityId)
-      .as("resource_counts");
 
     const questionCounts = dbInstance
       .select({
@@ -742,20 +662,13 @@ export class CourseService {
         id: lessons.id,
         courseId: chapters.courseId,
         type: lessons.type,
-        isExternal: lessons.isExternal,
-        fileType: lessons.fileType,
         description: this.localizationService.getLocalizedSqlField(lessons.description, language),
         questionCount: sql<number>`COALESCE(${questionCounts.questionCount}, 0)`,
-        videoCount: sql<number>`COALESCE(${resourceCounts.videoCount}, 0)`,
-        imageCount: sql<number>`COALESCE(${resourceCounts.imageCount}, 0)`,
-        downloadCount: sql<number>`COALESCE(${resourceCounts.downloadCount}, 0)`,
-        otherCount: sql<number>`COALESCE(${resourceCounts.otherCount}, 0)`,
       })
       .from(lessons)
       .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
       .innerJoin(courses, eq(courses.id, chapters.courseId))
       .leftJoin(questionCounts, eq(questionCounts.lessonId, lessons.id))
-      .leftJoin(resourceCounts, eq(resourceCounts.lessonId, lessons.id))
       .where(inArray(chapters.courseId, courseIds));
 
     const secondsByCourse = new Map<UUIDType, number>();
@@ -763,16 +676,8 @@ export class CourseService {
     for (const lesson of lessonRows) {
       const lessonSeconds = this.lessonSeconds({
         descriptionHtml: lesson.description as string,
-        resourceCounts: {
-          video: Number(lesson.videoCount) || 0,
-          image: Number(lesson.imageCount) || 0,
-          download: Number(lesson.downloadCount) || 0,
-          other: Number(lesson.otherCount) || 0,
-        },
         quizQuestionCount: Number(lesson.questionCount) || 0,
         lessonType: lesson.type,
-        isExternal: lesson.isExternal,
-        fileType: lesson.fileType,
       });
 
       secondsByCourse.set(
