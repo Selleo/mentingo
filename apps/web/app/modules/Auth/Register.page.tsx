@@ -124,142 +124,153 @@ export default function RegisterPage() {
 
   return (
     <FormProvider {...methods}>
-      {loginBackgroundImageS3Key && (
-        <div
-          className="absolute inset-0 -z-10"
-          style={{
-            backgroundImage: `url(${loginBackgroundImageS3Key}) `,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        />
-      )}
-      <Card className="mx-auto max-w-sm">
-        <CardHeader>
-          <CardTitle className="text-xl">{t("registerView.header")}</CardTitle>
-          <CardDescription>
-            {isSSOEnforced ? t("registerView.subHeaderSSO") : t("registerView.subHeader")}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {!isSSOEnforced && (
-            <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="firstName">{t("registerView.field.firstName")}</Label>
-                <Input id="firstName" type="text" placeholder="John" {...register("firstName")} />
-                {errors.firstName?.message && (
-                  <FormValidationError message={errors.firstName.message} />
-                )}
-              </div>
+      <div className="relative min-h-screen flex items-center justify-center">
+        {loginBackgroundImageS3Key && (
+          <div
+            className="absolute inset-0 -z-10"
+            style={{
+              backgroundImage: `url(${loginBackgroundImageS3Key}) `,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          />
+        )}
+        <div className="flex items-start justify-center px-4 py-6">
+          <Card className="w-full max-w-sm">
+            <CardHeader>
+              <CardTitle className="text-xl">{t("registerView.header")}</CardTitle>
+              <CardDescription>
+                {isSSOEnforced ? t("registerView.subHeaderSSO") : t("registerView.subHeader")}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {!isSSOEnforced && (
+                <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="firstName">{t("registerView.field.firstName")}</Label>
+                    <Input
+                      id="firstName"
+                      type="text"
+                      placeholder="John"
+                      {...register("firstName")}
+                    />
+                    {errors.firstName?.message && (
+                      <FormValidationError message={errors.firstName.message} />
+                    )}
+                  </div>
 
-              <div className="grid gap-2">
-                <Label htmlFor="lastName">{t("registerView.field.lastName")}</Label>
-                <Input id="lastName" type="text" placeholder="Doe" {...register("lastName")} />
-                {errors.lastName?.message && (
-                  <FormValidationError message={errors.lastName.message} />
-                )}
-              </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="lastName">{t("registerView.field.lastName")}</Label>
+                    <Input id="lastName" type="text" placeholder="Doe" {...register("lastName")} />
+                    {errors.lastName?.message && (
+                      <FormValidationError message={errors.lastName.message} />
+                    )}
+                  </div>
 
-              {globalSettings?.ageLimit && (
-                <div className="grid gap-2">
-                  <Label htmlFor="birthday">{t("registerView.field.birthday")}</Label>
-                  <Controller
-                    control={control}
-                    name="birthday"
-                    render={({ field }) => {
-                      const selectedDate = parseBirthday(field.value);
+                  {globalSettings?.ageLimit && (
+                    <div className="grid gap-2">
+                      <Label htmlFor="birthday">{t("registerView.field.birthday")}</Label>
+                      <Controller
+                        control={control}
+                        name="birthday"
+                        render={({ field }) => {
+                          const selectedDate = parseBirthday(field.value);
 
-                      return (
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              id="birthday"
-                              type="button"
-                              variant="outline"
-                              className={cn(
-                                "w-full flex items-center gap-3 font-normal bg-white shadow-sm border-neutral-200",
-                                selectedDate
-                                  ? "text-neutral-900 hover:text-neutral-900"
-                                  : "text-neutral-500 hover:text-neutral-500",
-                              )}
-                            >
-                              <Icon name="Calendar" className="size-4 text-neutral-500" />
-                              <span className="grow text-left">
-                                {selectedDate
-                                  ? format(selectedDate, "PPP", { locale: calendarLocale })
-                                  : t("registerView.field.birthdayPlaceholder")}
-                              </span>
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-2" align="start">
-                            <Calendar
-                              variant="default"
-                              captionLayout="dropdown-buttons"
-                              mode="single"
-                              selected={selectedDate ?? undefined}
-                              onSelect={(date) => {
-                                if (!date) return field.onChange("");
+                          return (
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  id="birthday"
+                                  type="button"
+                                  variant="outline"
+                                  className={cn(
+                                    "w-full flex items-center gap-3 font-normal bg-white shadow-sm border-neutral-200",
+                                    selectedDate
+                                      ? "text-neutral-900 hover:text-neutral-900"
+                                      : "text-neutral-500 hover:text-neutral-500",
+                                  )}
+                                >
+                                  <Icon name="Calendar" className="size-4 text-neutral-500" />
+                                  <span className="grow text-left">
+                                    {selectedDate
+                                      ? format(selectedDate, "PPP", { locale: calendarLocale })
+                                      : t("registerView.field.birthdayPlaceholder")}
+                                  </span>
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-2" align="start">
+                                <Calendar
+                                  variant="default"
+                                  captionLayout="dropdown-buttons"
+                                  mode="single"
+                                  selected={selectedDate ?? undefined}
+                                  onSelect={(date) => {
+                                    if (!date) return field.onChange("");
 
-                                field.onChange(format(date, "yyyy-MM-dd"));
-                              }}
-                              disabled={(date) => date > maxBirthdayDate}
-                              fromYear={maxBirthdayDate.getFullYear() - 120}
-                              toYear={maxBirthdayDate.getFullYear()}
-                              initialFocus
-                              weekStartsOn={1}
-                              locale={calendarLocale}
-                            />
-                          </PopoverContent>
-                        </Popover>
-                      );
-                    }}
-                  />
-                  {errors.birthday?.message && (
-                    <FormValidationError message={errors.birthday.message} />
+                                    field.onChange(format(date, "yyyy-MM-dd"));
+                                  }}
+                                  disabled={(date) => date > maxBirthdayDate}
+                                  fromYear={maxBirthdayDate.getFullYear() - 120}
+                                  toYear={maxBirthdayDate.getFullYear()}
+                                  initialFocus
+                                  weekStartsOn={1}
+                                  locale={calendarLocale}
+                                />
+                              </PopoverContent>
+                            </Popover>
+                          );
+                        }}
+                      />
+                      {errors.birthday?.message && (
+                        <FormValidationError message={errors.birthday.message} />
+                      )}
+                    </div>
                   )}
-                </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="email">{t("registerView.field.email")}</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="user@example.com"
+                      {...register("email")}
+                    />
+                    {errors.email?.message && (
+                      <FormValidationError message={errors.email.message} />
+                    )}
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="password">{t("registerView.field.password")}</Label>
+                    <Input id="password" type="password" {...register("password")} />
+                    <PasswordValidationDisplay fieldName="password" />
+                  </div>
+
+                  <Button type="submit" className="w-full" disabled={!isValid}>
+                    {t("registerView.button.createAccount")}
+                  </Button>
+                </form>
               )}
 
-              <div className="grid gap-2">
-                <Label htmlFor="email">{t("registerView.field.email")}</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="user@example.com"
-                  {...register("email")}
+              {isAnyProviderEnabled && (
+                <SocialLogin
+                  isSSOEnforced={isSSOEnforced}
+                  isGoogleOAuthEnabled={isGoogleOAuthEnabled}
+                  isMicrosoftOAuthEnabled={isMicrosoftOAuthEnabled}
+                  isSlackOAuthEnabled={isSlackOAuthEnabled}
                 />
-                {errors.email?.message && <FormValidationError message={errors.email.message} />}
+              )}
+
+              <div className="mt-4 text-center text-sm">
+                {t("registerView.other.alreadyHaveAccount")}{" "}
+                <Link to="/auth/login" className="underline">
+                  {t("registerView.button.signIn")}
+                </Link>
               </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="password">{t("registerView.field.password")}</Label>
-                <Input id="password" type="password" {...register("password")} />
-                <PasswordValidationDisplay fieldName="password" />
-              </div>
-
-              <Button type="submit" className="w-full" disabled={!isValid}>
-                {t("registerView.button.createAccount")}
-              </Button>
-            </form>
-          )}
-
-          {isAnyProviderEnabled && (
-            <SocialLogin
-              isSSOEnforced={isSSOEnforced}
-              isGoogleOAuthEnabled={isGoogleOAuthEnabled}
-              isMicrosoftOAuthEnabled={isMicrosoftOAuthEnabled}
-              isSlackOAuthEnabled={isSlackOAuthEnabled}
-            />
-          )}
-
-          <div className="mt-4 text-center text-sm">
-            {t("registerView.other.alreadyHaveAccount")}{" "}
-            <Link to="/auth/login" className="underline">
-              {t("registerView.button.signIn")}
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </FormProvider>
   );
 }
