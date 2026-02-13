@@ -89,14 +89,16 @@ export function CourseStudentsProgressTable({
       {
         accessorKey: "groups",
         header: () => (
-          <span className="body-sm">{t("adminCourseView.statistics.field.groupName")}</span>
+          <span className="body-sm whitespace-nowrap">
+            {t("adminCourseView.statistics.field.groupName")}
+          </span>
         ),
         cell: ({ row }) => {
           const groups = row.original.groups;
 
           if (!groups || !groups.length) {
             return (
-              <span className="text-muted-foreground">
+              <span className="text-muted-foreground whitespace-nowrap">
                 {t("adminCourseView.statistics.empty.noGroups")}
               </span>
             );
@@ -106,7 +108,7 @@ export function CourseStudentsProgressTable({
           const remainingCount = groups.length - visibleGroups.length;
 
           return (
-            <div className="flex gap-1">
+            <div className="flex w-max gap-1 whitespace-nowrap">
               {visibleGroups.map((group) => (
                 <Badge key={group.id} variant="secondary">
                   {group.name}

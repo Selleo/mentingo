@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import { useUpdateGroup } from "~/api/mutations/admin/useUpdateGroup";
+import { COURSE_STUDENTS_PROGRESS_QUERY_KEY } from "~/api/queries/admin/useCourseStudentsProgress";
 import { useGroupByIdQuerySuspense } from "~/api/queries/admin/useGroupById";
 import { GROUPS_QUERY_KEY } from "~/api/queries/admin/useGroups";
 import { queryClient } from "~/api/queryClient";
@@ -50,6 +51,7 @@ const EditGroup = (): ReactElement => {
     try {
       await updateGroupMutation(group);
       await queryClient.invalidateQueries({ queryKey: [GROUPS_QUERY_KEY, { groupId }] });
+      await queryClient.invalidateQueries({ queryKey: [COURSE_STUDENTS_PROGRESS_QUERY_KEY] });
       navigate("/admin/groups");
     } catch (error) {
       console.error(error);
