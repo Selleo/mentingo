@@ -413,7 +413,7 @@
       "confirmPassword": "Potwierdź hasło"
     },
     "validation": {
-      "passwordsDontMatch": "Hasła się nie zgadzają",
+      "passwordsDontMatch": "Hasła nie są takie same",
       "missingEmail": "W linku brakuje adresu e-mail. Użyj pełnego linku z wiadomości."
     },
     "button": {
