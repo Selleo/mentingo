@@ -4,7 +4,7 @@ import { nanoid } from "nanoid";
 import request from "supertest";
 
 import { DB, DB_BASE } from "src/storage/db/db.providers";
-import { createTokens } from "src/storage/schema";
+import { createTokens, resetTokens } from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
@@ -382,12 +382,38 @@ describe("AuthController (e2e)", () => {
   });
 
   describe("POST /api/auth/reset-password", () => {
+    it("should return 404 when reset token email does not match", async () => {
+      const user = await userFactory.withCredentials({ password: "Password123@" }).create();
+      const anotherUser = await userFactory.withCredentials({ password: "Password123@" }).create();
+      const resetToken = nanoid(64);
+      const expiryDate = new Date(Date.now() + 60 * 60 * 1000);
+
+      await db.insert(resetTokens).values({
+        userId: user.id,
+        resetToken,
+        expiryDate,
+      });
+
+      await request(app.getHttpServer())
+        .post("/api/auth/reset-password")
+        .send({
+          resetToken,
+          newPassword: "Newpassword123@",
+          email: anotherUser.email,
+        })
+        .expect(404);
+    });
+
     it("should reset the password successfully", async () => {
       jest.spyOn(authService, "resetPassword").mockImplementation(async () => {});
 
       const response = await request(app.getHttpServer())
         .post("/api/auth/reset-password")
-        .send({ resetToken: "valid-token", newPassword: "Newpassword123@" })
+        .send({
+          resetToken: "valid-token",
+          newPassword: "Newpassword123@",
+          email: "test@example.com",
+        })
         .expect(201);
 
       expect(response.body.data).toEqual({
@@ -398,7 +424,11 @@ describe("AuthController (e2e)", () => {
     it("should return 400 if new password does not match criteria", async () => {
       const response = await request(app.getHttpServer())
         .post("/api/auth/reset-password")
-        .send({ resetToken: "valid-token", newPassword: "passwordnotmatchcriteria" })
+        .send({
+          resetToken: "valid-token",
+          newPassword: "passwordnotmatchcriteria",
+          email: "test@example.com",
+        })
         .expect(400);
 
       expect(response.body.message).toEqual("Validation failed (body)");
@@ -407,7 +437,7 @@ describe("AuthController (e2e)", () => {
     it("should return 404 if reset token is missing", async () => {
       const response = await request(app.getHttpServer())
         .post("/api/auth/reset-password")
-        .send({ resetToken: "", newPassword: "Newpassword123@" })
+        .send({ resetToken: "", newPassword: "Newpassword123@", email: "test@example.com" })
         .expect(400);
 
       expect(response.body.message).toEqual("Validation failed (body)");
@@ -416,7 +446,7 @@ describe("AuthController (e2e)", () => {
     it("should return 400 if password is too short", async () => {
       const response = await request(app.getHttpServer())
         .post("/api/auth/reset-password")
-        .send({ resetToken: "valid-token", newPassword: "short" })
+        .send({ resetToken: "valid-token", newPassword: "short", email: "test@example.com" })
         .expect(400);
 
       expect(response.body.message).toEqual("Validation failed (body)");
@@ -424,6 +454,35 @@ describe("AuthController (e2e)", () => {
   });
 
   describe("POST /api/auth/create-password", () => {
+    it("should return 404 when create token email does not match", async () => {
+      const user = await userFactory.create({
+        email: `createpassword-main-${nanoid(8)}@example.com`,
+      });
+      const anotherUser = await userFactory.create({
+        email: `createpassword-other-${nanoid(8)}@example.com`,
+      });
+
+      const token = nanoid(64);
+      const expiryDate = new Date(Date.now() + 60 * 60 * 1000);
+
+      await db.insert(createTokens).values({
+        userId: user.id,
+        createToken: token,
+        expiryDate,
+        reminderCount: 0,
+      });
+
+      await request(app.getHttpServer())
+        .post("/api/auth/create-password")
+        .send({
+          createToken: token,
+          email: anotherUser.email,
+          password: "Password123@",
+          language: "en",
+        })
+        .expect(404);
+    });
+
     it("should save correct language when creating password with supported language other than 'en'", async () => {
       const user = await userFactory.create({
         email: "createpassword@example.com",
@@ -444,6 +503,7 @@ describe("AuthController (e2e)", () => {
 
       await authService.createPassword({
         createToken: token,
+        email: user.email,
         password,
         language: "pl",
       });
@@ -496,6 +556,7 @@ describe("AuthController (e2e)", () => {
 
       await authService.createPassword({
         createToken: token,
+        email: user.email,
         password,
         language: "ar",
       });

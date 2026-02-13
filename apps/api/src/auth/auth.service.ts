@@ -345,8 +345,8 @@ export class AuthService {
   }
 
   public async createPassword(data: CreatePasswordBody) {
-    const { createToken: token, password, language } = data;
-    const createToken = await this.createPasswordService.getOneByToken(token);
+    const { createToken: token, password, language, email } = data;
+    const createToken = await this.createPasswordService.getOneByTokenAndEmail(token, email);
 
     const [existingUser] = await this.db
       .select({
@@ -390,8 +390,8 @@ export class AuthService {
     return existingUser;
   }
 
-  public async resetPassword(token: string, newPassword: string) {
-    const resetToken = await this.resetPasswordService.getOneByToken(token);
+  public async resetPassword(token: string, newPassword: string, email: string) {
+    const resetToken = await this.resetPasswordService.getOneByTokenAndEmail(token, email);
 
     await this.userService.resetPassword(resetToken.userId, newPassword);
     await this.resetPasswordService.deleteToken(token);

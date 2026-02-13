@@ -209,7 +209,7 @@ export class AuthController {
     request: [{ type: "body", schema: resetPasswordSchema }],
   })
   async resetPassword(@Body() data: ResetPasswordBody): Promise<BaseResponse<{ message: string }>> {
-    await this.authService.resetPassword(data.resetToken, data.newPassword);
+    await this.authService.resetPassword(data.resetToken, data.newPassword, data.email);
     return new BaseResponse({ message: "Password reset successfully" });
   }
 

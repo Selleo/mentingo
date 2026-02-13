@@ -436,10 +436,14 @@
       "confirmPassword": "Confirm password"
     },
     "validation": {
-      "passwordsDontMatch": "Passwords do not match"
+      "passwordsDontMatch": "Passwords do not match",
+      "missingEmail": "Email address is missing from the link. Please use the full link from your email."
     },
     "button": {
       "changePassword": "Create password"
+    },
+    "error": {
+      "invalidTokenOrEmail": "This password setup link is invalid, expired, or does not match this email."
     }
   },
   "changePasswordView": {
