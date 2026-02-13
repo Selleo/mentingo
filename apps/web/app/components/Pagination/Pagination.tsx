@@ -20,9 +20,11 @@ interface PaginationProps {
   onItemsPerPageChange?: (itemsPerPage: string) => void;
 }
 
-export type ItemsPerPageOption = (typeof ITEMS_PER_PAGE_OPTIONS)[number];
+export type ItemsPerPageOption = (typeof ITEMS_PER_PAGE_OPTIONS_WITH_7_AND_9)[number];
 
-export const ITEMS_PER_PAGE_OPTIONS = [7, 9, 10, 20, 50, 100] as const;
+// 7 and 9 are here because those are the only options that are used in the news page
+export const ITEMS_PER_PAGE_OPTIONS = [10, 20, 50, 100] as const;
+export const ITEMS_PER_PAGE_OPTIONS_WITH_7_AND_9 = [7, 9, 10, 20, 50, 100] as const;
 
 export const Pagination = ({
   className,
@@ -42,6 +44,10 @@ export const Pagination = ({
   const totalPages = overrideTotalPages ?? Math.ceil(totalItems / itemsPerPage);
   const startItem = startItemOverride ?? (currentPage - 1) * itemsPerPage + 1;
   const endItem = endItemOverride ?? Math.min(currentPage * itemsPerPage, totalItems);
+  const itemsPerPageOptions =
+    itemsPerPage === 7 || itemsPerPage === 9
+      ? ITEMS_PER_PAGE_OPTIONS_WITH_7_AND_9
+      : ITEMS_PER_PAGE_OPTIONS;
 
   const handlePrevious = () => {
     if (currentPage > 1) onPageChange(currentPage - 1);
@@ -136,7 +142,7 @@ export const Pagination = ({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {ITEMS_PER_PAGE_OPTIONS.map((option) => (
+              {itemsPerPageOptions.map((option) => (
                 <SelectItem key={option} value={String(option)}>
                   {option}
                 </SelectItem>
