@@ -582,31 +582,24 @@ export class CourseService {
     const readingSeconds = Math.ceil((wordCount / DURATION_DEFAULTS.wordsPerMinute) * 60);
 
     const embeddedCounts = this.countEmbeddedResourcesFromHtml(descriptionHtml || "");
-
-    if (lessonType === LESSON_TYPES.CONTENT) {
-      return (
-        readingSeconds +
-        embeddedCounts.video * DURATION_DEFAULTS.videoMinutes * 60 +
-        embeddedCounts.image * DURATION_DEFAULTS.imageSeconds +
-        embeddedCounts.download * DURATION_DEFAULTS.downloadSeconds +
-        embeddedCounts.presentation * DURATION_DEFAULTS.embedMinutes * 60 +
-        quizQuestionCount * DURATION_DEFAULTS.quizSeconds
-      );
-    }
-
-    if (lessonType === LESSON_TYPES.QUIZ) {
-      return readingSeconds + quizQuestionCount * DURATION_DEFAULTS.quizSeconds;
-    }
-
-    if (lessonType === LESSON_TYPES.AI_MENTOR) {
-      return readingSeconds + DURATION_DEFAULTS.aiMentorMinutes * 60;
-    }
-
-    if (lessonType === LESSON_TYPES.EMBED) {
-      return readingSeconds + DURATION_DEFAULTS.embedMinutes * 60;
-    }
-
-    return readingSeconds;
+    return match(lessonType)
+      .with(
+        LESSON_TYPES.CONTENT,
+        () =>
+          readingSeconds +
+          embeddedCounts.video * DURATION_DEFAULTS.videoMinutes * 60 +
+          embeddedCounts.image * DURATION_DEFAULTS.imageSeconds +
+          embeddedCounts.download * DURATION_DEFAULTS.downloadSeconds +
+          embeddedCounts.presentation * DURATION_DEFAULTS.embedMinutes * 60 +
+          quizQuestionCount * DURATION_DEFAULTS.quizSeconds,
+      )
+      .with(
+        LESSON_TYPES.QUIZ,
+        () => readingSeconds + quizQuestionCount * DURATION_DEFAULTS.quizSeconds,
+      )
+      .with(LESSON_TYPES.AI_MENTOR, () => readingSeconds + DURATION_DEFAULTS.aiMentorMinutes * 60)
+      .with(LESSON_TYPES.EMBED, () => readingSeconds + DURATION_DEFAULTS.embedMinutes * 60)
+      .otherwise(() => readingSeconds);
   }
 
   private countEmbeddedResourcesFromHtml(content: string): {
