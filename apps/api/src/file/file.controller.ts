@@ -148,7 +148,8 @@ export class FileController {
     const currentUserId = (req as Request & { user?: { userId?: string } }).user?.userId;
     await this.tusUploadService.createSession(uploadId, uploadLength, currentUserId);
 
-    const location = `${req.protocol}://${req.get("host")}${req.originalUrl}/${uploadId}`;
+    const location = `/api/file/videos/tus/${uploadId}`;
+
     this.setTusHeaders(res, { Location: location });
 
     return res.status(201).send();
