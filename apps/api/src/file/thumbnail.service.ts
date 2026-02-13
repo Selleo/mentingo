@@ -273,7 +273,33 @@ export class ThumbnailService {
 
   private async extractThumbnail(reference: string, resourceId: UUIDType) {
     const signedUrl = await this.s3Service.getSignedUrl(reference);
-    const args = ["-i", signedUrl, "-vf", "thumbnail", "-frames:v", "1", "-f", "image2", "pipe:1"];
+    const args = [
+      "-hide_banner",
+      "-loglevel",
+      "error",
+
+      "-reconnect",
+      "1",
+      "-reconnect_streamed",
+      "1",
+      "-reconnect_delay_max",
+      "2",
+
+      "-ss",
+      "0",
+      "-i",
+      signedUrl,
+
+      "-frames:v",
+      "1",
+      "-vf",
+      "scale=640:-1",
+      "-f",
+      "mjpeg",
+      "-q:v",
+      "2",
+      "pipe:1",
+    ];
 
     const ffmpegBin = "ffmpeg";
 
@@ -301,6 +327,9 @@ export class ThumbnailService {
     ffmpeg.stderr.on("data", (chunk: Buffer) => {
       stderr += chunk.toString("utf8");
     });
+
+    ffmpeg.stderr.on("end", () => {});
+    ffmpeg.stdout.on("end", () => {});
 
     let exitCode: number;
     try {
