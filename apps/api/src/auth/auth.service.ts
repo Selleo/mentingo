@@ -30,6 +30,7 @@ import { CORS_ORIGIN, MAGIC_LINK_EXPIRATION_TIME } from "src/auth/consts";
 import { DatabasePg, type UUIDType } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
 import { getEmailSubject } from "src/common/emails/translations";
+import { buildCreateNewPasswordLink } from "src/common/helpers/buildCreateNewPasswordLink";
 import hashPassword from "src/common/helpers/hashPassword";
 import { UserLoginEvent } from "src/events/user/user-login.event";
 import { UserPasswordCreatedEvent } from "src/events/user/user-password-created.event";
@@ -332,7 +333,10 @@ export class AuthService {
 
     const emailTemplate = new PasswordRecoveryEmail({
       name: user.firstName,
-      resetLink: `${CORS_ORIGIN}/auth/create-new-password?resetToken=${resetToken}&email=${email}`,
+      resetLink: buildCreateNewPasswordLink(CORS_ORIGIN, {
+        resetToken,
+        email,
+      }),
       ...defaultEmailSettings,
     });
 
@@ -424,7 +428,10 @@ export class AuthService {
     const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(userId);
 
     const emailTemplate = new CreatePasswordReminderEmail({
-      createPasswordLink: `${CORS_ORIGIN}/auth/create-new-password?createToken=${createToken}&email=${email}`,
+      createPasswordLink: buildCreateNewPasswordLink(CORS_ORIGIN, {
+        createToken,
+        email,
+      }),
       ...defaultEmailSettings,
     });
 

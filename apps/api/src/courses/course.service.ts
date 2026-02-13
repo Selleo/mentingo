@@ -41,6 +41,7 @@ import { EmailService } from "src/common/emails/emails.service";
 import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterConditions";
 import { buildJsonbField, deleteJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { injectResourcesIntoContent } from "src/common/utils/injectResourcesIntoContent";
 import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
 import { UpdateHasCertificateEvent } from "src/courses/events/updateHasCertificate.event";
 import { getCourseTsVector } from "src/courses/utils/courses.utils";
@@ -575,18 +576,44 @@ export class CourseService {
     resourceCounts: Record<DurationResourceKind, number>;
     quizQuestionCount: number;
     lessonType: string;
+    isExternal?: boolean | null;
+    fileType?: string | null;
   }): number {
-    const { descriptionHtml, resourceCounts, quizQuestionCount, lessonType } = params;
+    const { descriptionHtml, resourceCounts, quizQuestionCount, lessonType, isExternal, fileType } =
+      params;
 
     const wordCount = this.countWordsFromHtml(descriptionHtml || "");
     const readingSeconds = Math.ceil((wordCount / DURATION_DEFAULTS.wordsPerMinute) * 60);
+
+    const embeddedCounts = this.countEmbeddedResourcesFromHtml(descriptionHtml || "");
+
+    const normalizedResourceCounts = { ...resourceCounts };
+
+    const totalResourceCount =
+      normalizedResourceCounts.video +
+      normalizedResourceCounts.image +
+      normalizedResourceCounts.download +
+      normalizedResourceCounts.other;
+
+    if (isExternal && totalResourceCount === 0) {
+      const inferredKind = this.getResourceKindFromContentType(fileType);
+      if (inferredKind) normalizedResourceCounts[inferredKind] += 1;
+    }
+
+    normalizedResourceCounts.video = Math.max(normalizedResourceCounts.video, embeddedCounts.video);
+    normalizedResourceCounts.image = Math.max(normalizedResourceCounts.image, embeddedCounts.image);
+    normalizedResourceCounts.download = Math.max(
+      normalizedResourceCounts.download,
+      embeddedCounts.download,
+    );
+    normalizedResourceCounts.other += embeddedCounts.other;
 
     const {
       video: videoCount,
       image: imageCount,
       download: downloadCount,
       other: otherCount,
-    } = resourceCounts;
+    } = normalizedResourceCounts;
 
     const aiMentorSeconds =
       lessonType === LESSON_TYPES.AI_MENTOR ? DURATION_DEFAULTS.aiMentorMinutes * 60 : 0;
@@ -599,10 +626,59 @@ export class CourseService {
       imageCount * DURATION_DEFAULTS.imageSeconds +
       downloadCount * DURATION_DEFAULTS.downloadSeconds +
       otherCount * DURATION_DEFAULTS.otherSeconds +
+      embeddedCounts.presentation * DURATION_DEFAULTS.embedMinutes * 60 +
       quizQuestionCount * DURATION_DEFAULTS.quizSeconds +
       aiMentorSeconds +
       embedSeconds
     );
+  }
+
+  private countEmbeddedResourcesFromHtml(content: string): {
+    video: number;
+    image: number;
+    download: number;
+    other: number;
+    presentation: number;
+  } {
+    const supportedNodeTypes = ["video", "downloadable-file", "presentation"];
+
+    const { html, contentCount } = injectResourcesIntoContent(content, [], {
+      resourceIdRegex: /lesson-resource\/([0-9a-fA-F-]{36})/,
+      trackNodeTypes: supportedNodeTypes,
+    });
+    const $ = loadHtml(html ?? content);
+
+    const trackedVideoCount = Number(contentCount.video) || 0;
+    const videoCount = Math.max(trackedVideoCount, $("iframe").length || 0);
+    const imageCount = $("img").length || 0;
+    const downloadCount = Number(contentCount["downloadable-file"]) || 0;
+    const presentationCount = Number(contentCount.presentation) || 0;
+
+    const otherCount =
+      $("[data-node-type]")
+        .toArray()
+        .filter((element) => {
+          const nodeType = $(element).attr("data-node-type");
+          return !nodeType || !supportedNodeTypes.includes(nodeType);
+        }).length || 0;
+
+    return {
+      video: videoCount,
+      image: imageCount,
+      download: downloadCount,
+      other: otherCount,
+      presentation: presentationCount,
+    };
+  }
+
+  private getResourceKindFromContentType(contentType?: string | null): DurationResourceKind | null {
+    if (!contentType) return null;
+    if (contentType.startsWith("video/")) return "video";
+    if (contentType.startsWith("image/")) return "image";
+    if (contentType === "application/pdf" || contentType.startsWith("application/")) {
+      return "download";
+    }
+    return "other";
   }
 
   private async computeCourseDurationEstimates(
@@ -611,6 +687,12 @@ export class CourseService {
     dbInstance: DatabasePg = this.db,
   ): Promise<DurationEstimatesByCourse> {
     if (!courseIds.length) return {};
+
+    const scopedLessonIds = dbInstance
+      .select({ id: lessons.id })
+      .from(lessons)
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .where(inArray(chapters.courseId, courseIds));
 
     const resourceCounts = dbInstance
       .select({
@@ -634,7 +716,14 @@ export class CourseService {
       })
       .from(resourceEntity)
       .innerJoin(resources, eq(resources.id, resourceEntity.resourceId))
-      .where(and(eq(resourceEntity.entityType, ENTITY_TYPES.LESSON), eq(resources.archived, false)))
+      .where(
+        and(
+          eq(resourceEntity.entityType, ENTITY_TYPES.LESSON),
+          eq(resourceEntity.relationshipType, RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT),
+          eq(resources.archived, false),
+          inArray(resourceEntity.entityId, scopedLessonIds),
+        ),
+      )
       .groupBy(resourceEntity.entityId)
       .as("resource_counts");
 
@@ -644,6 +733,7 @@ export class CourseService {
         questionCount: count(questions.id).as("questionCount"),
       })
       .from(questions)
+      .where(inArray(questions.lessonId, scopedLessonIds))
       .groupBy(questions.lessonId)
       .as("question_counts");
 
@@ -652,6 +742,8 @@ export class CourseService {
         id: lessons.id,
         courseId: chapters.courseId,
         type: lessons.type,
+        isExternal: lessons.isExternal,
+        fileType: lessons.fileType,
         description: this.localizationService.getLocalizedSqlField(lessons.description, language),
         questionCount: sql<number>`COALESCE(${questionCounts.questionCount}, 0)`,
         videoCount: sql<number>`COALESCE(${resourceCounts.videoCount}, 0)`,
@@ -679,6 +771,8 @@ export class CourseService {
         },
         quizQuestionCount: Number(lesson.questionCount) || 0,
         lessonType: lesson.type,
+        isExternal: lesson.isExternal,
+        fileType: lesson.fileType,
       });
 
       secondsByCourse.set(
@@ -690,7 +784,7 @@ export class CourseService {
     const estimates: DurationEstimatesByCourse = {};
 
     for (const [courseId, totalSeconds] of secondsByCourse) {
-      const totalMinutes = Math.ceil(Math.max(1, Math.ceil(totalSeconds / 60)) / 30) * 30;
+      const totalMinutes = totalSeconds > 0 ? Math.ceil(Math.ceil(totalSeconds / 60) / 30) * 30 : 0;
       estimates[courseId] = { totalMinutes, formatted: this.formatMinutes(totalMinutes) };
     }
 
