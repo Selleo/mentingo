@@ -118,7 +118,8 @@ const Editor = ({
       handleKeyDown,
       handlePaste: (_view, event) => handlePaste(event),
       attributes: {
-        class: "prose prose-xs sm:prose dark:prose-invert focus:outline-none max-w-full p-4",
+        class:
+          "prose prose-xs sm:prose dark:prose-invert focus:outline-none max-w-full p-4 h-[200px] !max-w-full",
       },
     },
   });
