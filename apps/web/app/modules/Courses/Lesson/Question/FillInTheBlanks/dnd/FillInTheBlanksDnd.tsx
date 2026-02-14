@@ -1,5 +1,7 @@
 import {
-  closestCorners,
+  pointerWithin,
+  rectIntersection,
+  type CollisionDetection,
   DndContext,
   type DragEndEvent,
   type DragOverEvent,
@@ -11,7 +13,7 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
-import { type FC, useEffect, useState } from "react";
+import { type FC, useEffect, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -58,10 +60,14 @@ const getAnswers = (options: QuizQuestionOption[] | undefined) => {
 
 export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCompleted }) => {
   const { t } = useTranslation();
+
   const { isQuizFeedbackRedacted } = useQuizContext();
+  const { setValue } = useFormContext<QuizForm>();
+
   const [words, setWords] = useState<DndWord[]>(getAnswers(question.options));
   const [currentlyDraggedWord, setCurrentlyDraggedWord] = useState<DndWord | null>(null);
-  const { setValue } = useFormContext<QuizForm>();
+  const [previewBlankId, setPreviewBlankId] = useState<string | null>(null);
+  const wordsBeforeDragRef = useRef<DndWord[] | null>(null);
 
   const solutionExplanation = question.solutionExplanation;
 
@@ -89,6 +95,29 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
   if (!question.description) return null;
 
   const maxAnswersAmount = question.description?.match(/\[word]/g)?.length ?? 0;
+  const isValidBlankId = (id: string) => {
+    if (id === "blank_preset") return true;
+    if (!/^\d+$/.test(id)) return false;
+
+    const value = Number(id);
+    return value >= 1 && value <= maxAnswersAmount;
+  };
+
+  const resolveOverBlankId = (over: DragEndEvent["over"] | DragOverEvent["over"]) => {
+    if (!over) return null;
+
+    const sortableContainerId = over?.data?.current?.sortable?.containerId;
+    const candidateId = sortableContainerId ?? over.id;
+    const id = String(candidateId);
+
+    return isValidBlankId(id) ? id : null;
+  };
+
+  const resetDragState = () => {
+    setCurrentlyDraggedWord(null);
+    setPreviewBlankId(null);
+    wordsBeforeDragRef.current = null;
+  };
 
   const handleDragStart = (event: DragStartEvent) => {
     if (isCompleted) return;
@@ -100,117 +129,124 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
 
     if (!word) return;
 
+    wordsBeforeDragRef.current = words.map((item) => ({ ...item }));
     setCurrentlyDraggedWord(word);
   };
 
+  const buildPreviewWords = (sourceWords: DndWord[]) => {
+    if (!previewBlankId || !currentlyDraggedWord) return sourceWords;
+
+    const activeWord = sourceWords.find((word) => word.id === currentlyDraggedWord.id);
+    if (!activeWord || activeWord.blankId === previewBlankId) return sourceWords;
+
+    const previewWords = sourceWords.map((word) => ({ ...word }));
+    const previewActiveWord = previewWords.find((word) => word.id === currentlyDraggedWord.id);
+    if (!previewActiveWord) return sourceWords;
+
+    const occupiedTargetWord = previewWords.find(
+      (word) => word.blankId === previewBlankId && word.id !== currentlyDraggedWord.id,
+    );
+    if (occupiedTargetWord && previewBlankId !== "blank_preset") {
+      occupiedTargetWord.blankId = previewActiveWord.blankId;
+    }
+
+    previewActiveWord.blankId = previewBlankId;
+    return previewWords;
+  };
+
   const handleDragOver = (event: DragOverEvent) => {
-    if (isCompleted) return;
+    if (isCompleted || !currentlyDraggedWord) return;
 
-    const { active, over } = event;
-    const { id: activeId } = active;
-    const { id: overId } = over || {};
-
-    const activeBlankId = active?.data?.current?.sortable?.containerId;
-    const overBlankId = over?.data?.current?.sortable?.containerId ?? overId;
-
-    if (!activeBlankId || !overBlankId || activeBlankId === overBlankId) {
+    const overBlankId = resolveOverBlankId(event.over);
+    if (!overBlankId) {
+      setPreviewBlankId(null);
       return;
     }
 
-    setWords((prev) => {
-      const activeWords = prev.filter(({ blankId }) => blankId === activeBlankId);
-      const activeWord = activeWords.find(({ id }) => id === activeId);
-      const updatedWord = prev.find(({ id }) => id === activeWord?.id);
+    const activeWord = words.find((word) => word.id === currentlyDraggedWord.id);
+    if (!activeWord || activeWord.blankId === overBlankId) {
+      setPreviewBlankId(null);
+      return;
+    }
 
-      if (updatedWord) {
-        updatedWord.blankId = overBlankId;
-      }
-
-      return [...prev];
-    });
+    setPreviewBlankId(overBlankId);
   };
 
   const handleCompletion = () => {};
+
+  const collisionDetection: CollisionDetection = (args) => {
+    const pointerCollisions = pointerWithin(args);
+    if (pointerCollisions.length > 0) return pointerCollisions;
+
+    return rectIntersection(args);
+  };
+
+  const handleDragCancel = () => {
+    if (wordsBeforeDragRef.current) {
+      setWords(wordsBeforeDragRef.current);
+    }
+    resetDragState();
+  };
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
 
     const activeId = active?.id;
-    const overId = over?.id;
 
-    if (!activeId || !overId) return;
+    if (!activeId) {
+      resetDragState();
+      return;
+    }
 
-    const activeBlankId = active?.data?.current?.sortable.containerId;
-    const overBlankId = over?.data.current?.sortable?.containerId ?? overId;
+    const overBlankId = resolveOverBlankId(over);
 
-    if (!activeBlankId || !overBlankId || activeBlankId !== overBlankId) {
+    if (!over || !overBlankId) {
+      if (wordsBeforeDragRef.current) {
+        setWords(wordsBeforeDragRef.current);
+      }
+      resetDragState();
       return;
     }
 
     setWords((prev) => {
-      const activeWords = prev.filter(({ blankId }) => blankId === activeBlankId);
-
-      const overWords = prev.filter(({ blankId }) => blankId === overBlankId);
-
-      const activeWord = activeWords.find(({ id }) => id === activeId);
-      const overWord = overWords.find(({ id }) => id === overId);
-
+      const activeWord = prev.find(({ id }) => id === activeId);
       if (!activeWord) return prev;
+      const activeBlankId = activeWord.blankId;
 
-      const updatedWords = [
-        ...new Set([
-          ...arrayMove(
-            overWords,
-            activeWords.indexOf(activeWord),
-            overWord ? overWords.indexOf(overWord) : 0,
-          ),
-          ...prev,
-        ]),
-      ];
+      let updatedWords = prev;
 
-      if (activeWords.length > 1) {
-        const [firstWord, secondWord] = activeWords;
+      if (activeBlankId !== overBlankId) {
+        updatedWords = prev.map((word) => ({ ...word }));
+        const updatedActiveWord = updatedWords.find(({ id }) => id === activeId);
+        if (!updatedActiveWord) return prev;
 
-        const isChangedPositionInWordsBank =
-          firstWord.blankId === "blank_preset" && secondWord.blankId === "blank_preset";
-
-        if (isChangedPositionInWordsBank) {
-          return updatedWords;
+        const occupiedTargetWord = updatedWords.find(
+          ({ blankId, id }) => blankId === overBlankId && id !== activeId,
+        );
+        if (occupiedTargetWord && overBlankId !== "blank_preset") {
+          occupiedTargetWord.blankId = activeBlankId;
         }
 
-        firstWord.blankId = "blank_preset";
+        updatedActiveWord.blankId = overBlankId;
+      }
 
-        const wordsWithUpdatedBlankId = [firstWord, secondWord];
+      if (activeBlankId === overBlankId && overBlankId === "blank_preset") {
+        const overId = String(over.id);
+        const activeWords = updatedWords.filter(({ blankId }) => blankId === activeBlankId);
+        const overWord = activeWords.find(({ id }) => id === overId);
+        const activeWordInSameContainer = activeWords.find(({ id }) => id === activeId);
 
-        const updatedWordsWithUpdatedBlankId = [
-          ...new Set([
-            ...arrayMove(
-              wordsWithUpdatedBlankId,
-              activeWords.indexOf(firstWord),
-              overWord ? wordsWithUpdatedBlankId.indexOf(secondWord) : 0,
-            ),
-            ...prev,
-          ]),
-        ];
+        if (activeWordInSameContainer) {
+          const activeIndex = activeWords.indexOf(activeWordInSameContainer);
+          const overIndex = overWord ? activeWords.indexOf(overWord) : 0;
+          const movedInContainer = arrayMove(activeWords, activeIndex, overIndex);
+          const movedIds = new Set(movedInContainer.map(({ id }) => id));
 
-        const filteredWords = updatedWordsWithUpdatedBlankId
-          .filter(({ blankId }) => blankId !== "blank_preset")
-          .map((item) => {
-            const newIndex = parseInt(item.blankId.match(/\d+$/)?.[0] ?? "0", 10);
-            return {
-              ...item,
-              index: newIndex,
-            };
-          });
-
-        if (filteredWords.length >= 1 && filteredWords.length <= maxAnswersAmount) {
-          const sortedWords = filteredWords.sort((a, b) => a.index - b.index);
-          if (sortedWords.length > 0 && sortedWords.length <= maxAnswersAmount) {
-            handleCompletion();
-          }
+          updatedWords = [
+            ...movedInContainer,
+            ...updatedWords.filter((word) => !movedIds.has(word.id)),
+          ];
         }
-
-        return updatedWordsWithUpdatedBlankId;
       }
 
       const filteredWords = updatedWords
@@ -239,10 +275,11 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
       return updatedWords;
     });
 
-    setCurrentlyDraggedWord(null);
+    resetDragState();
   }
 
-  const wordBankWords = words.filter(({ studentAnswerText, blankId, value }) => {
+  const renderedWords = buildPreviewWords(words);
+  const renderedWordBankWords = renderedWords.filter(({ studentAnswerText, blankId, value }) => {
     const isBlankPreset = blankId === "blank_preset";
     const isSubmitted = isCompleted;
     const isValuesEqualStudentAnswer = studentAnswerText === value;
@@ -261,9 +298,10 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
       <div className="h6 my-4 text-neutral-950">{t("studentLessonView.other.fillInTheBlanks")}</div>
       <DndContext
         sensors={sensors}
-        collisionDetection={closestCorners}
+        collisionDetection={collisionDetection}
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}
+        onDragCancel={handleDragCancel}
         onDragEnd={handleDragEnd}
       >
         <DragOverlay>
@@ -273,7 +311,7 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
           content={question.description}
           replacement={(index) => {
             const blankId = `${index + 1}`;
-            const wordsInBlank = words.filter((word) => word.blankId === blankId);
+            const wordsInBlank = renderedWords.filter((word) => word.blankId === blankId);
 
             return (
               <DndBlank
@@ -285,7 +323,7 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
             );
           }}
         />
-        <WordBank words={wordBankWords} />
+        <WordBank words={renderedWordBankWords} />
         {solutionExplanation && !question.passQuestion && !isQuizFeedbackRedacted && (
           <div className="mt-4">
             <span className="body-base-md text-error-700">

@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Icon } from "~/components/Icon";
 import { cn } from "~/lib/utils";
 import { LessonType, type Lesson } from "~/modules/Admin/EditCourse/EditCourse.types";
+import { getLessonTypeTranslationKey } from "~/modules/Courses/CourseView/lessonTypes";
 
 import { mapTypeToIcon } from "../CourseLessons.helpers";
 
@@ -34,7 +35,7 @@ const LessonCard = ({ item, onClickLessonCard, dragTrigger, selectedLesson }: Le
     }
   };
 
-  const contentType = useMemo(() => item.type, [item.type]);
+  const contentTypeKey = useMemo(() => getLessonTypeTranslationKey(item.type), [item.type]);
 
   return (
     <div
@@ -68,9 +69,9 @@ const LessonCard = ({ item, onClickLessonCard, dragTrigger, selectedLesson }: Le
           </p>
           <p
             className="details text-neutral-600 truncate"
-            title={t(`adminCoursesView.lessonCard.mappedTypes.${contentType}`)}
+            title={t(contentTypeKey, { defaultValue: item.type })}
           >
-            {t(`adminCoursesView.lessonCard.mappedTypes.${contentType}`)}
+            {t(contentTypeKey, { defaultValue: item.type })}
           </p>
         </hgroup>
       </div>

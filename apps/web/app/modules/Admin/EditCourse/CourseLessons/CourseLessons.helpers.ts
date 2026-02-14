@@ -2,22 +2,13 @@ import { match } from "ts-pattern";
 
 import { QuestionType } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/QuizLessonForm/QuizLessonForm.types";
 
-export const mapItemType = (itemType: string | undefined): string =>
-  match(itemType)
-    .with("content", () => "Content")
-    .with("question", () => "Quiz")
-    .with("ai_mentor", () => "AiMentor")
-    .with("embed", () => "Embed")
-    .otherwise(() => "Quiz");
-
 export const mapTypeToIcon = (itemType: string): string =>
   match(itemType)
     .with("content", () => "Content")
-    .with("question", () => "Quiz")
     .with("quiz", () => "Quiz")
     .with("ai_mentor", () => "AiMentor")
     .with("embed", () => "Embed")
-    .otherwise(() => "Quiz");
+    .otherwise(() => "Content");
 
 export const mapQuestionTypeToLabel = (questionType: QuestionType): string =>
   match(questionType)

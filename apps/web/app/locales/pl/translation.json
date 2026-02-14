@@ -39,6 +39,12 @@
       "en": "Angielski",
       "pl": "Polski"
     },
+    "lessonTypes": {
+      "content": "Treść",
+      "quiz": "Quiz",
+      "ai_mentor": "AI Mentor",
+      "embed": "Osadzenie"
+    },
     "error": {
       "somethingWentWrong": "Ups! Coś poszło nie tak."
     },
@@ -668,6 +674,7 @@
         "presentation": "Prezentacja",
         "content": "Treść",
         "quiz": "Quiz",
+        "ai_mentor": "AI Mentor",
         "aiMentor": "AI Mentor",
         "embed": "Osadzenie"
       }

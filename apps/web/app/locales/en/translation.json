@@ -38,6 +38,12 @@
       "en": "English",
       "pl": "Polish"
     },
+    "lessonTypes": {
+      "content": "Content",
+      "quiz": "Quiz",
+      "ai_mentor": "AI Mentor",
+      "embed": "Embed"
+    },
     "error": {
       "somethingWentWrong": "Oops! Something went wrong."
     },
