@@ -43,12 +43,16 @@ import {
 } from "src/group/group.schema";
 import { GroupService } from "src/group/group.service";
 import { GroupSortFieldsOptions, GroupsFilterSchema } from "src/group/group.types";
+import { IntegrationTenantOptional } from "src/integration/decorators/tenant-optional.decorator";
 import { IntegrationApiKeyGuard } from "src/integration/guards/integration-api-key.guard";
+import { IntegrationService } from "src/integration/integration.service";
 import {
   integrationDeleteUserResponseSchema,
   integrationMessageResponseSchema,
+  integrationTenantsSchema,
   setUserGroupsSchema,
   unenrollGroupsPayloadSchema,
+  type IntegrationTenant,
   type SetUserGroupsBody,
   type UnenrollGroupsPayload,
 } from "src/integration/schemas/integration.schema";
@@ -73,10 +77,9 @@ import type { GroupKeywordFilterBody } from "src/group/group.schema";
 import type { AllGroupsResponse } from "src/group/group.types";
 
 @ApiHeader({ name: "X-API-Key", required: true })
-@ApiHeader({ name: "X-Tenant-Id", required: true })
 @ApiTags("Integration")
 @ApiUnauthorizedResponse({
-  description: "Missing or invalid integration API key / tenant headers.",
+  description: "Missing or invalid integration API key.",
 })
 @ApiForbiddenResponse({
   description: "Authenticated integration key owner is not authorized.",
@@ -86,13 +89,31 @@ import type { AllGroupsResponse } from "src/group/group.types";
 @UseGuards(IntegrationApiKeyGuard, RolesGuard)
 export class IntegrationController {
   constructor(
+    private readonly integrationService: IntegrationService,
     private readonly userService: UserService,
     private readonly groupService: GroupService,
     private readonly courseService: CourseService,
   ) {}
 
+  @Get("tenants")
+  @Roles(USER_ROLES.ADMIN)
+  @IntegrationTenantOptional()
+  @ApiHeader({
+    name: "X-Tenant-Id",
+    required: false,
+    description: "Tenant ID is optional for this endpoint.",
+  })
+  @ApiOperation({ summary: "List all tenants for integration selection" })
+  @Validate({
+    response: baseResponse(integrationTenantsSchema),
+  })
+  async getTenants(): Promise<BaseResponse<IntegrationTenant[]>> {
+    return new BaseResponse(await this.integrationService.getAllTenants());
+  }
+
   @Get("users")
   @Roles(USER_ROLES.ADMIN)
+  @ApiHeader({ name: "X-Tenant-Id", required: true })
   @ApiOperation({ summary: "List users for integration" })
   @Validate({
     request: [
@@ -130,6 +151,7 @@ export class IntegrationController {
 
   @Get("users/:userId")
   @Roles(USER_ROLES.ADMIN)
+  @ApiHeader({ name: "X-Tenant-Id", required: true })
   @ApiOperation({ summary: "Get user by ID for integration" })
   @Validate({
     request: [{ type: "param", name: "userId", schema: UUIDSchema }],
@@ -141,6 +163,7 @@ export class IntegrationController {
 
   @Post("users")
   @Roles(USER_ROLES.ADMIN)
+  @ApiHeader({ name: "X-Tenant-Id", required: true })
   @ApiOperation({ summary: "Create user via integration API" })
   @Validate({
     request: [{ type: "body", schema: createUserSchema }],
@@ -157,6 +180,7 @@ export class IntegrationController {
 
   @Patch("users/:userId")
   @Roles(USER_ROLES.ADMIN)
+  @ApiHeader({ name: "X-Tenant-Id", required: true })
   @ApiOperation({ summary: "Update user via integration API" })
   @Validate({
     request: [
@@ -176,6 +200,7 @@ export class IntegrationController {
 
   @Delete("users/:userId")
   @Roles(USER_ROLES.ADMIN)
+  @ApiHeader({ name: "X-Tenant-Id", required: true })
   @ApiOperation({ summary: "Delete user via integration API" })
   @Validate({
     request: [{ type: "param", name: "userId", schema: UUIDSchema }],
@@ -192,6 +217,7 @@ export class IntegrationController {
 
   @Get("groups")
   @Roles(USER_ROLES.ADMIN)
+  @ApiHeader({ name: "X-Tenant-Id", required: true })
   @ApiOperation({ summary: "List groups for integration" })
   @Validate({
     request: [
@@ -220,6 +246,7 @@ export class IntegrationController {
 
   @Put("users/:userId/groups")
   @Roles(USER_ROLES.ADMIN)
+  @ApiHeader({ name: "X-Tenant-Id", required: true })
   @ApiOperation({ summary: "Set user groups via integration API" })
   @Validate({
     request: [
@@ -240,6 +267,7 @@ export class IntegrationController {
 
   @Post("courses/:courseId/enroll-users")
   @Roles(USER_ROLES.ADMIN)
+  @ApiHeader({ name: "X-Tenant-Id", required: true })
   @ApiOperation({ summary: "Enroll users to course via integration API" })
   @Validate({
     request: [
@@ -260,6 +288,7 @@ export class IntegrationController {
 
   @Delete("courses/:courseId/enroll-users")
   @Roles(USER_ROLES.ADMIN)
+  @ApiHeader({ name: "X-Tenant-Id", required: true })
   @ApiOperation({ summary: "Unenroll users from course via integration API" })
   @Validate({
     request: [
@@ -279,6 +308,7 @@ export class IntegrationController {
 
   @Post("courses/:courseId/enroll-groups")
   @Roles(USER_ROLES.ADMIN)
+  @ApiHeader({ name: "X-Tenant-Id", required: true })
   @ApiOperation({ summary: "Enroll groups to course via integration API" })
   @Validate({
     request: [
@@ -300,6 +330,7 @@ export class IntegrationController {
 
   @Delete("courses/:courseId/enroll-groups")
   @Roles(USER_ROLES.ADMIN)
+  @ApiHeader({ name: "X-Tenant-Id", required: true })
   @ApiOperation({ summary: "Unenroll groups from course via integration API" })
   @Validate({
     request: [

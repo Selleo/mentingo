@@ -2,8 +2,8 @@ import { Inject, Injectable } from "@nestjs/common";
 import { and, eq, isNull, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
-import { DB } from "src/storage/db/db.providers";
-import { integrationApiKeys, users } from "src/storage/schema";
+import { DB, DB_BASE } from "src/storage/db/db.providers";
+import { integrationApiKeys, tenants, users } from "src/storage/schema";
 
 import type {
   FindIntegrationKeyCandidateParams,
@@ -14,7 +14,10 @@ import type {
 
 @Injectable()
 export class IntegrationRepository {
-  constructor(@Inject(DB) private readonly db: DatabasePg) {}
+  constructor(
+    @Inject(DB) private readonly db: DatabasePg,
+    @Inject(DB_BASE) private readonly dbBase: DatabasePg,
+  ) {}
 
   async getCurrentActiveKeyByCreator(userId: string): Promise<IntegrationKeyMetadataRecord | null> {
     const [key] = await this.db
@@ -86,13 +89,23 @@ export class IntegrationRepository {
       .where(
         and(
           eq(integrationApiKeys.keyPrefix, params.keyPrefix),
-          eq(integrationApiKeys.tenantId, params.tenantId),
           isNull(integrationApiKeys.revokedAt),
         ),
       )
       .limit(1);
 
     return key;
+  }
+
+  async getAllTenants() {
+    return this.dbBase
+      .select({
+        id: tenants.id,
+        name: tenants.name,
+        host: tenants.host,
+      })
+      .from(tenants)
+      .orderBy(tenants.name);
   }
 
   async markKeyAsUsed(keyId: string): Promise<void> {

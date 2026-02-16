@@ -53,19 +53,13 @@ export class IntegrationService {
     };
   }
 
-  async authenticateApiKey(
-    apiKey: string,
-    tenantId: string,
-  ): Promise<{
+  async authenticateApiKey(apiKey: string): Promise<{
     keyId: string;
     user: CurrentUser;
   }> {
     const keyPrefix = this.extractPrefix(apiKey);
 
-    const key = await this.integrationRepository.getActiveKeyCandidate({
-      keyPrefix,
-      tenantId,
-    });
+    const key = await this.integrationRepository.getActiveKeyCandidate({ keyPrefix });
 
     if (!key) throw new UnauthorizedException("integrationApiKey.errors.invalidApiKey");
 
@@ -94,6 +88,10 @@ export class IntegrationService {
 
   async markKeyAsUsed(keyId: string) {
     await this.integrationRepository.markKeyAsUsed(keyId);
+  }
+
+  async getAllTenants() {
+    return this.integrationRepository.getAllTenants();
   }
 
   private buildRawApiKey() {

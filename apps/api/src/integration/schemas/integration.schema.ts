@@ -19,6 +19,14 @@ export const integrationMessageResponseSchema = Type.Object({
   message: Type.String(),
 });
 
+export const integrationTenantSchema = Type.Object({
+  id: UUIDSchema,
+  name: Type.String(),
+  host: Type.String(),
+});
+
+export const integrationTenantsSchema = Type.Array(integrationTenantSchema);
+
 export const unenrollUsersPayloadSchema = createCoursesEnrollmentSchema;
 export const enrollUsersPayloadSchema = createCoursesEnrollmentSchema;
 
@@ -30,6 +38,7 @@ export const unenrollGroupsPayloadSchema = Type.Object({
 export type IntegrationCreateUserBody = Static<typeof createUserSchema>;
 export type IntegrationUpdateUserBody = Static<typeof updateUserSchema>;
 export type SetUserGroupsBody = Static<typeof setUserGroupsSchema>;
+export type IntegrationTenant = Static<typeof integrationTenantSchema>;
 export type EnrollUsersPayload = Static<typeof enrollUsersPayloadSchema>;
 export type UnenrollUsersPayload = Static<typeof unenrollUsersPayloadSchema>;
 export type EnrollGroupsPayload = Static<typeof enrollGroupsPayloadSchema>;

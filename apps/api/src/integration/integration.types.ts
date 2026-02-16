@@ -19,7 +19,6 @@ export type RotateIntegrationKeyParams = {
 
 export type FindIntegrationKeyCandidateParams = {
   keyPrefix: string;
-  tenantId: string;
 };
 
 export type IntegrationApiKeyCandidate = {

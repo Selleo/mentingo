@@ -1,6 +1,5 @@
 import { and, eq, isNull } from "drizzle-orm";
 import request from "supertest";
-import { v4 as uuidv4 } from "uuid";
 
 import { DB, DB_BASE } from "src/storage/db/db.providers";
 import { integrationApiKeys } from "src/storage/schema";
@@ -106,22 +105,12 @@ describe("IntegrationController (e2e)", () => {
     it("returns 401 when X-API-Key header is missing", async () => {
       const response = await request(app.getHttpServer())
         .get("/api/integration/groups")
-        .set("X-Tenant-Id", uuidv4())
         .expect(401);
 
       expect(response.body.message).toBe("integrationApiKey.errors.missingApiKeyHeader");
     });
 
-    it("returns 401 when X-Tenant-Id header is missing", async () => {
-      const response = await request(app.getHttpServer())
-        .get("/api/integration/groups")
-        .set("X-API-Key", "itgk_invalid_key")
-        .expect(401);
-
-      expect(response.body.message).toBe("integrationApiKey.errors.missingTenantIdHeader");
-    });
-
-    it("returns paginated groups for valid key and tenant", async () => {
+    it("returns paginated groups for valid key", async () => {
       const admin = await userFactory
         .withCredentials({ password })
         .withAdminSettings(db)
@@ -146,6 +135,27 @@ describe("IntegrationController (e2e)", () => {
       expect(response.body.data[0].id).toBe(group.id);
       expect(response.body.data[0].name).toBe(group.name);
       expect(response.body.pagination.totalItems).toBe(1);
+    });
+
+    it("returns 401 when X-Tenant-Id header is missing for non-tenant-list endpoint", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: USER_ROLES.ADMIN });
+      const cookies = await cookieFor(admin, app);
+
+      const rotateResponse = await request(app.getHttpServer())
+        .post("/api/integration/key")
+        .set("Cookie", cookies)
+        .expect(201);
+      const apiKey = rotateResponse.body.data.key as string;
+
+      const response = await request(app.getHttpServer())
+        .get("/api/integration/groups")
+        .set("X-API-Key", apiKey)
+        .expect(401);
+
+      expect(response.body.message).toBe("integrationApiKey.errors.missingTenantIdHeader");
     });
 
     it("rejects old key after rotation override", async () => {
@@ -173,6 +183,35 @@ describe("IntegrationController (e2e)", () => {
         .expect(401);
 
       expect(response.body.message).toBe("integrationApiKey.errors.invalidApiKey");
+    });
+
+    it("returns all tenants for selection with valid key", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: USER_ROLES.ADMIN });
+      const cookies = await cookieFor(admin, app);
+
+      const rotateResponse = await request(app.getHttpServer())
+        .post("/api/integration/key")
+        .set("Cookie", cookies)
+        .expect(201);
+      const apiKey = rotateResponse.body.data.key as string;
+
+      const response = await request(app.getHttpServer())
+        .get("/api/integration/tenants")
+        .set("X-API-Key", apiKey)
+        .expect(200);
+
+      expect(Array.isArray(response.body.data)).toBe(true);
+      expect(response.body.data.length).toBeGreaterThan(0);
+      expect(response.body.data[0]).toEqual(
+        expect.objectContaining({
+          id: expect.any(String),
+          name: expect.any(String),
+          host: expect.any(String),
+        }),
+      );
     });
   });
 });

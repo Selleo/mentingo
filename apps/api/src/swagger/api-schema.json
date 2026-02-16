@@ -6548,19 +6548,56 @@
         }
       }
     },
-    "/api/integration/users": {
+    "/api/integration/tenants": {
       "get": {
-        "operationId": "IntegrationController_getUsers",
-        "summary": "List users for integration",
+        "operationId": "IntegrationController_getTenants",
+        "summary": "List all tenants for integration selection",
         "parameters": [
           {
-            "name": "X-Tenant-Id",
+            "name": "X-API-Key",
             "in": "header",
             "required": true,
             "schema": {
               "type": "string"
             }
           },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "description": "Tenant ID is optional for this endpoint.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTenantsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      }
+    },
+    "/api/integration/users": {
+      "get": {
+        "operationId": "IntegrationController_getUsers",
+        "summary": "List users for integration",
+        "parameters": [
           {
             "name": "X-API-Key",
             "in": "header",
@@ -6682,6 +6719,14 @@
                 "type": "string"
               }
             }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -6695,7 +6740,7 @@
             }
           },
           "401": {
-            "description": "Missing or invalid integration API key / tenant headers."
+            "description": "Missing or invalid integration API key."
           },
           "403": {
             "description": "Authenticated integration key owner is not authorized."
@@ -6710,7 +6755,7 @@
         "summary": "Create user via integration API",
         "parameters": [
           {
-            "name": "X-Tenant-Id",
+            "name": "X-API-Key",
             "in": "header",
             "required": true,
             "schema": {
@@ -6718,7 +6763,7 @@
             }
           },
           {
-            "name": "X-API-Key",
+            "name": "X-Tenant-Id",
             "in": "header",
             "required": true,
             "schema": {
@@ -6747,7 +6792,7 @@
             }
           },
           "401": {
-            "description": "Missing or invalid integration API key / tenant headers."
+            "description": "Missing or invalid integration API key."
           },
           "403": {
             "description": "Authenticated integration key owner is not authorized."
@@ -6764,14 +6809,6 @@
         "summary": "Get user by ID for integration",
         "parameters": [
           {
-            "name": "X-Tenant-Id",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "X-API-Key",
             "in": "header",
             "required": true,
@@ -6785,6 +6822,14 @@
             "in": "path",
             "schema": {
               "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
               "type": "string"
             }
           }
@@ -6800,7 +6845,7 @@
             }
           },
           "401": {
-            "description": "Missing or invalid integration API key / tenant headers."
+            "description": "Missing or invalid integration API key."
           },
           "403": {
             "description": "Authenticated integration key owner is not authorized."
@@ -6815,14 +6860,6 @@
         "summary": "Update user via integration API",
         "parameters": [
           {
-            "name": "X-Tenant-Id",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "X-API-Key",
             "in": "header",
             "required": true,
@@ -6836,6 +6873,14 @@
             "in": "path",
             "schema": {
               "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
               "type": "string"
             }
           }
@@ -6861,7 +6906,7 @@
             }
           },
           "401": {
-            "description": "Missing or invalid integration API key / tenant headers."
+            "description": "Missing or invalid integration API key."
           },
           "403": {
             "description": "Authenticated integration key owner is not authorized."
@@ -6875,14 +6920,6 @@
         "operationId": "IntegrationController_deleteUser",
         "summary": "Delete user via integration API",
         "parameters": [
-          {
-            "name": "X-Tenant-Id",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "X-API-Key",
             "in": "header",
@@ -6899,6 +6936,14 @@
               "format": "uuid",
               "type": "string"
             }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -6912,7 +6957,7 @@
             }
           },
           "401": {
-            "description": "Missing or invalid integration API key / tenant headers."
+            "description": "Missing or invalid integration API key."
           },
           "403": {
             "description": "Authenticated integration key owner is not authorized."
@@ -6928,14 +6973,6 @@
         "operationId": "IntegrationController_getGroups",
         "summary": "List groups for integration",
         "parameters": [
-          {
-            "name": "X-Tenant-Id",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "X-API-Key",
             "in": "header",
@@ -6985,6 +7022,14 @@
                 }
               ]
             }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -6998,7 +7043,7 @@
             }
           },
           "401": {
-            "description": "Missing or invalid integration API key / tenant headers."
+            "description": "Missing or invalid integration API key."
           },
           "403": {
             "description": "Authenticated integration key owner is not authorized."
@@ -7015,14 +7060,6 @@
         "summary": "Set user groups via integration API",
         "parameters": [
           {
-            "name": "X-Tenant-Id",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "X-API-Key",
             "in": "header",
             "required": true,
@@ -7036,6 +7073,14 @@
             "in": "path",
             "schema": {
               "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
               "type": "string"
             }
           }
@@ -7061,7 +7106,7 @@
             }
           },
           "401": {
-            "description": "Missing or invalid integration API key / tenant headers."
+            "description": "Missing or invalid integration API key."
           },
           "403": {
             "description": "Authenticated integration key owner is not authorized."
@@ -7078,14 +7123,6 @@
         "summary": "Enroll users to course via integration API",
         "parameters": [
           {
-            "name": "X-Tenant-Id",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "X-API-Key",
             "in": "header",
             "required": true,
@@ -7099,6 +7136,14 @@
             "in": "path",
             "schema": {
               "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
               "type": "string"
             }
           }
@@ -7124,7 +7169,7 @@
             }
           },
           "401": {
-            "description": "Missing or invalid integration API key / tenant headers."
+            "description": "Missing or invalid integration API key."
           },
           "403": {
             "description": "Authenticated integration key owner is not authorized."
@@ -7139,14 +7184,6 @@
         "summary": "Unenroll users from course via integration API",
         "parameters": [
           {
-            "name": "X-Tenant-Id",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "X-API-Key",
             "in": "header",
             "required": true,
@@ -7160,6 +7197,14 @@
             "in": "path",
             "schema": {
               "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
               "type": "string"
             }
           }
@@ -7185,7 +7230,7 @@
             }
           },
           "401": {
-            "description": "Missing or invalid integration API key / tenant headers."
+            "description": "Missing or invalid integration API key."
           },
           "403": {
             "description": "Authenticated integration key owner is not authorized."
@@ -7202,14 +7247,6 @@
         "summary": "Enroll groups to course via integration API",
         "parameters": [
           {
-            "name": "X-Tenant-Id",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "X-API-Key",
             "in": "header",
             "required": true,
@@ -7223,6 +7260,14 @@
             "in": "path",
             "schema": {
               "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
               "type": "string"
             }
           }
@@ -7248,7 +7293,7 @@
             }
           },
           "401": {
-            "description": "Missing or invalid integration API key / tenant headers."
+            "description": "Missing or invalid integration API key."
           },
           "403": {
             "description": "Authenticated integration key owner is not authorized."
@@ -7263,14 +7308,6 @@
         "summary": "Unenroll groups from course via integration API",
         "parameters": [
           {
-            "name": "X-Tenant-Id",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "X-API-Key",
             "in": "header",
             "required": true,
@@ -7284,6 +7321,14 @@
             "in": "path",
             "schema": {
               "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "required": true,
+            "schema": {
               "type": "string"
             }
           }
@@ -7309,7 +7354,7 @@
             }
           },
           "401": {
-            "description": "Missing or invalid integration API key / tenant headers."
+            "description": "Missing or invalid integration API key."
           },
           "403": {
             "description": "Authenticated integration key owner is not authorized."
@@ -23052,6 +23097,37 @@
               "isRead",
               "readAt"
             ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetTenantsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "host": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "host"
+              ]
+            }
           }
         },
         "required": [
