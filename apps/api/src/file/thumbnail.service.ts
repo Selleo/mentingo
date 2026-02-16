@@ -297,7 +297,7 @@ export class ThumbnailService {
       "-f",
       "mjpeg",
       "-q:v",
-      "2",
+      "1",
       "pipe:1",
     ];
 
