@@ -10,16 +10,24 @@ import { PasswordValidationRuleItem } from "./PasswordValidationRuleItem";
 
 interface PasswordValidationDisplayProps {
   fieldName: string;
+  confirmFieldName?: string;
 }
 
-export default function PasswordValidationDisplay({ fieldName }: PasswordValidationDisplayProps) {
+export default function PasswordValidationDisplay({
+  fieldName,
+  confirmFieldName,
+}: PasswordValidationDisplayProps) {
   const { watch } = useFormContext();
   const validationRulesConfig = usePasswordValidationRules();
 
   const { t } = useTranslation();
 
   const password = watch(fieldName) || "";
+  const confirmPassword = confirmFieldName ? watch(confirmFieldName) || "" : "";
   const validationResult = validatePasswordStrength(password);
+  const passwordsMatch = confirmFieldName
+    ? password.length > 0 && confirmPassword.length > 0 && password === confirmPassword
+    : true;
 
   return (
     <div id="password-hints" className="mb-3">
@@ -35,6 +43,12 @@ export default function PasswordValidationDisplay({ fieldName }: PasswordValidat
             text={rule.getText()}
           />
         ))}
+        {confirmFieldName && (
+          <PasswordValidationRuleItem
+            isValid={passwordsMatch}
+            text={t("passwordValidationDisplay.passwordsMatch")}
+          />
+        )}
       </ul>
     </div>
   );

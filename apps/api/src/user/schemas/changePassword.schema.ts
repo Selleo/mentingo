@@ -4,6 +4,7 @@ import { passwordSchema } from "src/auth/schemas/password.schema";
 
 export const changePasswordSchema = Type.Object({
   newPassword: passwordSchema,
+  confirmPassword: Type.String(),
   oldPassword: Type.String({ minLength: 8, maxLength: 64 }),
 });
 

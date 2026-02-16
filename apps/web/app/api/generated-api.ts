@@ -881,6 +881,7 @@ export interface AdminUpdateUserResponse {
 
 export interface ChangePasswordBody {
   newPassword: string;
+  confirmPassword: string;
   /**
    * @minLength 8
    * @maxLength 64
