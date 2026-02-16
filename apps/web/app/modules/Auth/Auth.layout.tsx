@@ -22,7 +22,7 @@ export default function AuthLayout() {
   setHasVerifiedMFA(false);
 
   return (
-    <main className="flex h-screen w-screen items-center justify-center">
+    <main className="flex min-h-screen w-screen items-center justify-center">
       <MFAGuard mode="auth">
         <Outlet />
       </MFAGuard>
