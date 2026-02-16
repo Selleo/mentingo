@@ -28,7 +28,11 @@ export const WordBank = ({ words }: WordBankProps) => {
   const draggableWords = renderDraggableWords();
 
   return (
-    <SortableContext id="blank_preset" items={words} strategy={horizontalListSortingStrategy}>
+    <SortableContext
+      id="blank_preset"
+      items={words.map(({ id }) => id)}
+      strategy={horizontalListSortingStrategy}
+    >
       <div className="mt-5">
         {t("studentLessonView.other.answers")}
         <div

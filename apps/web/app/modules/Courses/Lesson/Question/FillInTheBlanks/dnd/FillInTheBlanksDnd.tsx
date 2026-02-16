@@ -158,8 +158,8 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
     if (isCompleted || !currentlyDraggedWord) return;
 
     const overBlankId = resolveOverBlankId(event.over);
+
     if (!overBlankId) {
-      setPreviewBlankId(null);
       return;
     }
 
