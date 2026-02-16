@@ -26,6 +26,8 @@ type EditorProps = {
   variant?: "base" | "content";
 };
 
+const EMPTY_EDITOR_MIN_HEIGHT_CLASS = "min-h-[240px]";
+
 const Editor = ({
   content,
   placeholder,
@@ -118,8 +120,7 @@ const Editor = ({
       handleKeyDown,
       handlePaste: (_view, event) => handlePaste(event),
       attributes: {
-        class:
-          "prose prose-xs sm:prose dark:prose-invert focus:outline-none max-w-full p-4 h-[200px] !max-w-full",
+        class: `prose prose-xs sm:prose dark:prose-invert focus:outline-none max-w-full p-4 ${EMPTY_EDITOR_MIN_HEIGHT_CLASS} !max-w-full`,
       },
     },
   });
@@ -137,7 +138,8 @@ const Editor = ({
   if (!editor) return <></>;
 
   const editorClasses = cn(
-    "h-full min-h-[200px]",
+    "h-full",
+    EMPTY_EDITOR_MIN_HEIGHT_CLASS,
     defaultClasses.ul,
     defaultClasses.ol,
     defaultClasses.taskList,
