@@ -18,11 +18,11 @@ export const DndBlank = ({ words, blankId, isCorrect, isStudentAnswer }: DndBlan
   });
 
   return (
-    <SortableContext id={blankId} items={words} strategy={rectSwappingStrategy}>
+    <SortableContext id={blankId} items={words.map(({ id }) => id)} strategy={rectSwappingStrategy}>
       <div
         data-testid={blankId}
         ref={setNodeRef}
-        className="mx-2 h-9 min-w-32 overflow-hidden rounded-md border bg-white"
+        className="mx-2 inline-flex min-h-9 min-w-32 items-center rounded-md border bg-white px-1"
       >
         {words.map((word) => (
           <DraggableWord

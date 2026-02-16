@@ -45,10 +45,11 @@ export const DraggableWord = ({
       ref={setNodeRef}
       style={wordStyle}
       className={cn(
+        "inline-flex w-max items-center whitespace-nowrap",
         !isDragging
           ? quizWordStyle
           : "rounded-md bg-gray-100 px-2 py-1 text-neutral-700 blur-[0.3px]",
-        { "w-max -rotate-[6deg]": isOverlay },
+        { "-rotate-[6deg]": isOverlay },
       )}
     >
       {word?.studentAnswerText ? word?.studentAnswerText : word.value}

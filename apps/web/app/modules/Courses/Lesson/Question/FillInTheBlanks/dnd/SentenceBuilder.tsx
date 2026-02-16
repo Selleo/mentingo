@@ -8,7 +8,8 @@ type FillInTheDndBlanksProps = {
 };
 
 export const SentenceBuilder: FC<FillInTheDndBlanksProps> = ({ content, replacement }) => {
-  const parts = content?.split(/\[word]/g);
+  const text = content.replace(/<\/?p\b[^>]*>/gi, "");
+  const parts = text.split(/\[word]/g);
 
   return (
     <div className="body-base flex flex-wrap items-center gap-y-2 text-neutral-900">

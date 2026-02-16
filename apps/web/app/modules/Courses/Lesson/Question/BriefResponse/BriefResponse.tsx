@@ -1,4 +1,5 @@
 import { useFormContext } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 import { Textarea } from "~/components/ui/textarea";
 import { useUserRole } from "~/hooks/useUserRole";
@@ -16,6 +17,7 @@ export type BriefResponseProps = {
 export const BriefResponse = ({ question, isCompleted = false }: BriefResponseProps) => {
   const { isAdmin } = useUserRole();
   const { register } = useFormContext<QuizForm>();
+  const { t } = useTranslation();
 
   return (
     <QuestionCard
@@ -26,7 +28,7 @@ export const BriefResponse = ({ question, isCompleted = false }: BriefResponsePr
       <Textarea
         data-testid="brief-response"
         {...register(`briefResponses.${question.id}`)}
-        placeholder="Type your answer here"
+        placeholder={t("studentLessonView.placeholder.openQuestion")}
         rows={5}
         className={cn({
           "cursor-not-allowed": isAdmin,
