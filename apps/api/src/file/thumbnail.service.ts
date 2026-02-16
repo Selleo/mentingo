@@ -293,7 +293,7 @@ export class ThumbnailService {
       "-frames:v",
       "1",
       "-vf",
-      "scale=640:-1",
+      "thumbnail",
       "-f",
       "mjpeg",
       "-q:v",
