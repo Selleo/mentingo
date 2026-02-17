@@ -334,7 +334,8 @@
     },
     "toast": {
       "ssoEnforcementUpdatedSuccessfully": "SSO enforcement updated successfully",
-      "ssoEnforcementUpdateFailed": "Failed to update SSO enforcement"
+      "ssoEnforcementUpdateFailed": "Failed to update SSO enforcement",
+      "registerRedirect": "Registration with email is disabled because SSO is enforced."
     }
   },
   "userEmailTriggers": {
@@ -1553,6 +1554,10 @@
       "lastName": "Last name is required",
       "email": "Invalid email",
       "birthday": "You must be at least {{ageLimit}} years old"
+    },
+    "toast": {
+      "userAlreadyExists": "User with this email already exists.",
+      "createAccountFailed": "Unable to create account. Please try again."
     }
   },
   "courseChapterView": {

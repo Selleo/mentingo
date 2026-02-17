@@ -337,7 +337,8 @@
     },
     "toast": {
       "ssoEnforcementUpdatedSuccessfully": "Wymuszenie SSO zostało pomyślnie zaktualizowane",
-      "ssoEnforcementUpdateFailed": "Nie udało się zaktualizować wymuszenia SSO"
+      "ssoEnforcementUpdateFailed": "Nie udało się zaktualizować wymuszenia SSO",
+      "registerRedirect": "Rejestracja przez e-mail jest wyłączona, ponieważ SSO jest wymuszone."
     }
   },
   "inviteOnlyRegistrationView": {
@@ -1550,6 +1551,10 @@
       "lastName": "Nazwisko jest wymagane",
       "email": "Nieprawidłowy email",
       "birthday": "Aby się zarejestrować musisz mieć przynajmniej {{ageLimit}} lat"
+    },
+    "toast": {
+      "userAlreadyExists": "Użytkownik z tym adresem e-mail już istnieje.",
+      "createAccountFailed": "Nie udało się utworzyć konta. Spróbuj ponownie."
     }
   },
   "courseChapterView": {

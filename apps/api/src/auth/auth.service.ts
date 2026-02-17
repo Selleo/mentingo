@@ -44,7 +44,6 @@ import {
   magicLinkTokens,
   resetTokens,
   tenants,
-  userOnboarding,
   users,
 } from "../storage/schema";
 import { UserService } from "../user/user.service";
@@ -54,7 +53,7 @@ import { ResetPasswordService } from "./reset-password.service";
 import { TokenService } from "./token.service";
 
 import type { CreatePasswordBody } from "./schemas/create-password.schema";
-import type { TokenUser } from "./types";
+import type { RegisterUserWithHashedPasswordInput, TokenUser } from "./types";
 import type { Response } from "express";
 import type { ActorUserType } from "src/common/types/actor-user.type";
 import type { CurrentUser } from "src/common/types/current-user.type";
@@ -93,54 +92,24 @@ export class AuthService {
     password: string;
     language: string;
   }) {
-    const [existingUser] = await this.db.select().from(users).where(eq(users.email, email));
-    if (existingUser) {
-      throw new ConflictException("User already exists");
-    }
+    const [existingUser] = await this.dbAdmin
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.email, email));
+
+    if (existingUser) throw new ConflictException("registerView.toast.userAlreadyExists");
 
     const hashedPassword = await hashPassword(password);
 
-    const createdUser = await this.db.transaction(async (trx) => {
-      const [newUser] = await trx
-        .insert(users)
-        .values({
-          email,
-          firstName,
-          lastName,
-        })
-        .returning();
-
-      await trx.insert(credentials).values({
-        userId: newUser.id,
-        password: hashedPassword,
-      });
-
-      await trx.insert(userOnboarding).values({ userId: newUser.id });
-      const languageGuard = Object.values(SUPPORTED_LANGUAGES).includes(
-        language as SupportedLanguages,
-      )
-        ? language
-        : "en";
-
-      await this.settingsService.createSettingsIfNotExists(
-        newUser.id,
-        newUser.role as UserRole,
-        { language: languageGuard },
-        trx,
-      );
-
-      const { avatarReference, ...userWithoutAvatar } = newUser;
-      const usersProfilePictureUrl =
-        await this.userService.getUsersProfilePictureUrl(avatarReference);
-
-      await this.outboxPublisher.publish(new UserRegisteredEvent(newUser), trx);
-
-      return { ...userWithoutAvatar, profilePictureUrl: usersProfilePictureUrl };
+    const createdUser = await this.createRegisteredUser({
+      email,
+      firstName,
+      lastName,
+      language,
+      hashedPassword,
     });
 
-    if (!createdUser) {
-      throw new BadRequestException("Failed to create user");
-    }
+    if (!createdUser) throw new BadRequestException("registerView.toast.createAccountFailed");
 
     await this.outboxPublisher.publish(
       new UserWelcomeEvent({
@@ -151,6 +120,36 @@ export class AuthService {
     );
 
     return createdUser;
+  }
+
+  private async createRegisteredUser({
+    email,
+    firstName,
+    lastName,
+    language,
+    hashedPassword,
+  }: RegisterUserWithHashedPasswordInput) {
+    const createdUser = await this.userService.createUser(
+      {
+        email,
+        firstName,
+        lastName,
+        role: USER_ROLES.STUDENT,
+        language,
+      },
+      undefined,
+      undefined,
+      { registration: { hashedPassword } },
+    );
+
+    const { avatarReference, ...userWithoutAvatar } = createdUser;
+
+    const usersProfilePictureUrl =
+      await this.userService.getUsersProfilePictureUrl(avatarReference);
+
+    await this.outboxPublisher.publish(new UserRegisteredEvent(createdUser));
+
+    return { ...userWithoutAvatar, profilePictureUrl: usersProfilePictureUrl };
   }
 
   public async login(data: { email: string; password: string }, MFAEnforcedRoles: UserRole[]) {

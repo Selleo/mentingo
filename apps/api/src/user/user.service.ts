@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   Inject,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
@@ -521,17 +522,20 @@ export class UserService {
       .from(users)
       .where(and(eq(users.email, data.email)));
 
-    if (existingUser) {
-      throw new ConflictException("User already exists");
-    }
+    if (existingUser) throw new ConflictException("User already exists");
 
     const { createdUser, token, newUsersLanguage } = await this.createUserTransaction(
       db,
       data,
       creator,
+      options,
     );
 
+    if (options?.registration) return createdUser;
+
     if (creator) {
+      if (!token) throw new InternalServerErrorException("common.toast.somethingWentWrong");
+
       const snapshot = await this.buildUserActivitySnapshot(createdUser.id);
 
       await this.outboxPublisher.publish(
@@ -556,6 +560,8 @@ export class UserService {
     }
 
     if (options?.invite) {
+      if (!token) throw new InternalServerErrorException("common.toast.somethingWentWrong");
+
       await this.outboxPublisher.publish(
         new UserInviteEvent({
           email: createdUser.email,
@@ -569,6 +575,8 @@ export class UserService {
 
       return createdUser;
     }
+
+    if (!token) throw new InternalServerErrorException("common.toast.somethingWentWrong");
 
     await this.outboxPublisher.publish(
       new UserPasswordReminderEvent({
@@ -587,6 +595,7 @@ export class UserService {
     db: DatabasePg,
     data: CreateUserBody,
     creator?: CurrentUser,
+    options?: CreateUserOptions,
   ): Promise<CreateUserTransactionResult> {
     return db.transaction(async (trx) => {
       const [createdUser] = await trx.insert(users).values(data).returning();
@@ -605,7 +614,16 @@ export class UserService {
           : (creatorSettings.language as SupportedLanguages);
       }
 
-      const settingsOverride = creator ? { language: newUsersLanguage } : undefined;
+      if (options?.registration) {
+        newUsersLanguage = Object.values(SUPPORTED_LANGUAGES).includes(
+          data.language as SupportedLanguages,
+        )
+          ? (data.language as SupportedLanguages)
+          : SUPPORTED_LANGUAGES.EN;
+      }
+
+      const settingsOverride =
+        creator || options?.registration ? { language: newUsersLanguage } : undefined;
 
       await this.settingsService.createSettingsIfNotExists(
         createdUser.id,
@@ -613,6 +631,15 @@ export class UserService {
         settingsOverride,
         trx,
       );
+
+      if (options?.registration) {
+        await trx.insert(credentials).values({
+          userId: createdUser.id,
+          password: options.registration.hashedPassword,
+        });
+
+        return { createdUser, newUsersLanguage };
+      }
 
       const token = nanoid(64);
       const expiryDate = new Date();
