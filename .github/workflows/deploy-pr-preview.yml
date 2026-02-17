@@ -84,15 +84,14 @@ jobs:
           EOF
           chmod 600 ~/.ssh/config
 
-          # mask host from logs
           echo "::add-mask::$UNCLOUD_HOST"
           echo "::add-mask::$UNCLOUD_USER"
           echo "::add-mask::$UNCLOUD_PORT"
 
           ssh -o BatchMode=yes uncloud-host true
 
-          # do not print output of uc ps, just test connection
           uc ps --connect "ssh+cli://uncloud-host" > /dev/null 2>&1
+
           if [ $? -ne 0 ]; then
             echo "Failed to connect to server"
             exit 1
@@ -127,7 +126,6 @@ jobs:
         run: |
           set -euo pipefail
 
-          # create .env for web
           echo "VITE_API_URL=https://api-pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}" > apps/web/.env
           echo "VITE_APP_URL=https://pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}" >> apps/web/.env
 
@@ -137,7 +135,6 @@ jobs:
         run: |
           set -euo pipefail
 
-          # master_key
           MASTER_KEY=$(echo -n "preview-pr-${PR_ID}" | openssl dgst -sha256 -binary | head -c 32 | openssl base64)
           export MASTER_KEY
 
@@ -162,6 +159,7 @@ jobs:
           PR_ID: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
+
           uc --connect "ssh+cli://uncloud-host" exec api-preview-pr-${PR_ID} npm i -g tsx drizzle-kit drizzle-orm
           uc --connect "ssh+cli://uncloud-host" exec api-preview-pr-${PR_ID} npm run db:migrate
 
@@ -170,6 +168,7 @@ jobs:
           PR_ID: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
+
           uc --connect "ssh+cli://uncloud-host" service stop api-preview-pr-${PR_ID}
           uc --connect "ssh+cli://uncloud-host" service start api-preview-pr-${PR_ID}
 
@@ -179,6 +178,7 @@ jobs:
           PR_ID: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
+
           uc --connect "ssh+cli://uncloud-host" exec api-preview-pr-${PR_ID} npm i -g tsx drizzle-kit drizzle-orm
           uc --connect "ssh+cli://uncloud-host" exec api-preview-pr-${PR_ID} npm run db:seed || true
 
@@ -193,13 +193,10 @@ jobs:
           PREVIEW_WEB_DOMAIN="https://pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
           PREVIEW_MAILHOG_DOMAIN="https://mailhog-pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
 
-          # get current comments
           comments=$(curl -sS \
             -H "Authorization: Bearer $GH_TOKEN" \
             -H "Accept: application/vnd.github+json" \
             "${{ github.api_url }}/repos/${{ github.repository }}/issues/${PR_ID}/comments")
-
-          # check if message already exists
           already_exists=$(echo "$comments" | jq -r '
             any(.[];
               ((.user.type == "Bot") or (.user.login == "github-actions[bot]"))
@@ -302,14 +299,12 @@ jobs:
           EOF
           chmod 600 ~/.ssh/config
 
-          # mask host from logs
           echo "::add-mask::$UNCLOUD_HOST"
           echo "::add-mask::$UNCLOUD_USER"
           echo "::add-mask::$UNCLOUD_PORT"
 
           ssh -o BatchMode=yes uncloud-host true
 
-          # do not print output of uc ps, just test connection
           uc ps --connect "ssh+cli://uncloud-host" > /dev/null 2>&1
           if [ $? -ne 0 ]; then
             echo "Failed to connect to server"
@@ -323,7 +318,6 @@ jobs:
         run: |
           set -euo pipefail
 
-          # render compose as deployment does but with empty values:
           MINIO_ROOT_PASSWORD=""
           JWT_SECRET=""
           JWT_REFRESH_SECRET=""
@@ -336,11 +330,9 @@ jobs:
           export VERSION_TAG PR_ID PREVIEW_WEB_DOMAIN PREVIEW_API_DOMAIN PREVIEW_MAILHOG_DOMAIN MINIO_ROOT_PASSWORD JWT_SECRET JWT_REFRESH_SECRET POSTGRES_PASSWORD
           envsubst < "docker-compose.preview.tpl.yml" > "docker-compose.pr.yml"
 
-          # collect services and volumes:
           services="$(yq -r '.services | keys | .[]' docker-compose.pr.yml)"
           volumes="$(yq -r '.volumes | keys | .[]' docker-compose.pr.yml)"
 
-          # remove services and volumes
           echo "$services" | xargs -r uc --connect "ssh+cli://uncloud-host" rm || true
           echo "$volumes" | xargs -r uc --connect "ssh+cli://uncloud-host" volume rm -y || true
 

@@ -76,14 +76,12 @@ jobs:
           EOF
           chmod 600 ~/.ssh/config
 
-          # mask host from logs
           echo "::add-mask::$UNCLOUD_HOST"
           echo "::add-mask::$UNCLOUD_USER"
           echo "::add-mask::$UNCLOUD_PORT"
 
           ssh -o BatchMode=yes uncloud-host true
 
-          # do not print output of uc ps, just test connection
           uc ps --connect "ssh+cli://uncloud-host" > /dev/null 2>&1
           if [ $? -ne 0 ]; then
             echo "Failed to connect to server"
@@ -131,6 +129,7 @@ jobs:
           PR_ID: ${{ inputs.pr_number }}
         run: |
           set -euo pipefail
+
           uc --connect "ssh+cli://uncloud-host" exec api-preview-pr-${PR_ID} npm i -g tsx drizzle-kit drizzle-orm
           uc --connect "ssh+cli://uncloud-host" exec api-preview-pr-${PR_ID} npm run db:migrate
 
@@ -139,6 +138,7 @@ jobs:
           PR_ID: ${{ inputs.pr_number }}
         run: |
           set -euo pipefail
+
           uc --connect "ssh+cli://uncloud-host" service stop api-preview-pr-${PR_ID}
           uc --connect "ssh+cli://uncloud-host" service start api-preview-pr-${PR_ID}
 
@@ -148,5 +148,6 @@ jobs:
           PR_ID: ${{ inputs.pr_number }}
         run: |
           set -euo pipefail
+          
           uc --connect "ssh+cli://uncloud-host" exec api-preview-pr-${PR_ID} npm i -g tsx drizzle-kit drizzle-orm
           uc --connect "ssh+cli://uncloud-host" exec api-preview-pr-${PR_ID} npm run db:seed || true
