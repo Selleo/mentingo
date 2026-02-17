@@ -117,7 +117,7 @@ jobs:
           VERSION_TAG="${GIT_DATE}.${GIT_SHA_SHORT}"
 
           export VERSION_TAG PR_ID PREVIEW_WEB_DOMAIN PREVIEW_API_DOMAIN PREVIEW_MAILHOG_DOMAIN MINIO_ROOT_PASSWORD JWT_SECRET JWT_REFRESH_SECRET POSTGRES_PASSWORD
-          envsubst < "docker-compose.preview.tpl.yml" > "docker-compose.pr.yml"
+          envsubst '${VERSION_TAG} ${PR_ID} ${PREVIEW_WEB_DOMAIN} ${PREVIEW_API_DOMAIN} ${PREVIEW_MAILHOG_DOMAIN} ${MINIO_ROOT_PASSWORD} ${JWT_SECRET} ${JWT_REFRESH_SECRET} ${POSTGRES_PASSWORD}' < "docker-compose.preview.tpl.yml" > "docker-compose.pr.yml"
 
       - name: Create helpers to repair invalid stack building
         env:
@@ -328,7 +328,7 @@ jobs:
           VERSION_TAG="0"
 
           export VERSION_TAG PR_ID PREVIEW_WEB_DOMAIN PREVIEW_API_DOMAIN PREVIEW_MAILHOG_DOMAIN MINIO_ROOT_PASSWORD JWT_SECRET JWT_REFRESH_SECRET POSTGRES_PASSWORD
-          envsubst < "docker-compose.preview.tpl.yml" > "docker-compose.pr.yml"
+          envsubst '${VERSION_TAG} ${PR_ID} ${PREVIEW_WEB_DOMAIN} ${PREVIEW_API_DOMAIN} ${PREVIEW_MAILHOG_DOMAIN} ${MINIO_ROOT_PASSWORD} ${JWT_SECRET} ${JWT_REFRESH_SECRET} ${POSTGRES_PASSWORD}' < "docker-compose.preview.tpl.yml" > "docker-compose.pr.yml"
 
           services="$(yq -r '.services | keys | .[]' docker-compose.pr.yml)"
           volumes="$(yq -r '.volumes | keys | .[]' docker-compose.pr.yml)"
