@@ -184,6 +184,8 @@ export const lessonShowSchema = Type.Object({
   lessonResources: Type.Optional(Type.Array(lessonResourceSchema)),
   hasOnlyVideo: Type.Optional(Type.Boolean()),
   hasVideo: Type.Optional(Type.Boolean()),
+  hasAutoplayTrigger: Type.Optional(Type.Boolean()),
+  videos: Type.Optional(Type.Array(Type.String())),
   isQuizFeedbackRedacted: Type.Optional(Type.Boolean()),
   aiMentorDetails: Type.Optional(
     Type.Union([

@@ -5,6 +5,7 @@ import { passwordSchema } from "./password.schema";
 export const createPasswordSchema = Type.Object({
   password: passwordSchema,
   createToken: Type.String({ minLength: 1 }),
+  email: Type.String({ format: "email", minLength: 1 }),
   language: Type.String(),
 });
 

@@ -6,7 +6,12 @@ import ModernCoursesView from "~/modules/Courses/components/modern/ModernCourses
 import LegacyCoursesView from "~/modules/Courses/LegacyCoursesView";
 import { setPageTitle } from "~/utils/setPageTitle";
 
+import bodyStyles from "./bodyStyles.css?url";
+
+import type { LinksFunction } from "@remix-run/node";
 import type { MetaFunction } from "@remix-run/react";
+
+export const links: LinksFunction = () => [{ rel: "stylesheet", href: bodyStyles }];
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.courses");
 

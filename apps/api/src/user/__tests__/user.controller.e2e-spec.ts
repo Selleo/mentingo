@@ -147,7 +147,7 @@ describe("UsersController (e2e)", () => {
       await request(app.getHttpServer())
         .patch(`/api/user/change-password?id=${testUser.id}`)
         .set("Cookie", testCookies)
-        .send({ oldPassword: testPassword, newPassword })
+        .send({ oldPassword: testPassword, newPassword, confirmPassword: newPassword })
         .expect(200);
 
       const loginResponse = await request(app.getHttpServer())
@@ -168,7 +168,7 @@ describe("UsersController (e2e)", () => {
       await request(app.getHttpServer())
         .patch(`/api/user/change-password?id=${testUser.id}`)
         .set("Cookie", testCookies)
-        .send({ oldPassword: incorrectOldPassword, newPassword })
+        .send({ oldPassword: incorrectOldPassword, newPassword, confirmPassword: newPassword })
         .expect(401);
     });
 
@@ -181,10 +181,12 @@ describe("UsersController (e2e)", () => {
         language: "en",
       });
 
+      const password = "Password2137@";
+
       await request(app.getHttpServer())
         .patch(`/api/user/change-password?id=${anotherUser.id}`)
         .set("Cookie", testCookies)
-        .send({ oldPassword: "Password123@", newPassword: "Password2137@" })
+        .send({ oldPassword: "Password123@", newPassword: password, confirmPassword: password })
         .expect(403);
     });
   });

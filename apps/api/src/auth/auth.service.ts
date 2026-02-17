@@ -28,6 +28,7 @@ import { CORS_ORIGIN, MAGIC_LINK_EXPIRATION_TIME } from "src/auth/consts";
 import { DatabasePg, type UUIDType } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
 import { getEmailSubject } from "src/common/emails/translations";
+import { buildCreateNewPasswordLink } from "src/common/helpers/buildCreateNewPasswordLink";
 import hashPassword from "src/common/helpers/hashPassword";
 import { UserLoginEvent } from "src/events/user/user-login.event";
 import { UserPasswordCreatedEvent } from "src/events/user/user-password-created.event";
@@ -344,7 +345,10 @@ export class AuthService {
 
     const emailTemplate = new PasswordRecoveryEmail({
       name: user.firstName,
-      resetLink: `${tenantOrigin}/auth/create-new-password?resetToken=${resetToken}&email=${email}`,
+      resetLink: buildCreateNewPasswordLink(tenantOrigin, {
+        resetToken,
+        email,
+      }),
       ...defaultEmailSettings,
     });
 
@@ -360,8 +364,8 @@ export class AuthService {
   }
 
   public async createPassword(data: CreatePasswordBody) {
-    const { createToken: token, password, language } = data;
-    const createToken = await this.createPasswordService.getOneByToken(token);
+    const { createToken: token, password, language, email } = data;
+    const createToken = await this.createPasswordService.getOneByTokenAndEmail(token, email);
 
     const [existingUser] = await this.db
       .select({
@@ -405,8 +409,8 @@ export class AuthService {
     return existingUser;
   }
 
-  public async resetPassword(token: string, newPassword: string) {
-    const resetToken = await this.resetPasswordService.getOneByToken(token);
+  public async resetPassword(token: string, newPassword: string, email: string) {
+    const resetToken = await this.resetPasswordService.getOneByTokenAndEmail(token, email);
 
     await this.userService.resetPassword(resetToken.userId, newPassword);
     await this.resetPasswordService.deleteToken(token);
@@ -444,7 +448,10 @@ export class AuthService {
     );
 
     const emailTemplate = new CreatePasswordReminderEmail({
-      createPasswordLink: `${CORS_ORIGIN}/auth/create-new-password?createToken=${createToken}&email=${email}`,
+      createPasswordLink: buildCreateNewPasswordLink(CORS_ORIGIN, {
+        createToken,
+        email,
+      }),
       ...defaultEmailSettings,
     });
 

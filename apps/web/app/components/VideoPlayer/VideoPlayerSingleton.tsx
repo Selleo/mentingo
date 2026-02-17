@@ -1,9 +1,20 @@
+import { VIDEO_EMBED_PROVIDERS } from "@repo/shared";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import ReactPlayer from "react-player/lazy";
 
+import { useVideoPreferencesStore } from "~/modules/common/store/useVideoPreferencesStore";
+
+import { shouldShowPlayNextOverlay } from "./autoplayFlow";
+import { useAutoplayAction } from "./hooks/useAutoplayAction";
+import { useCountdown } from "./hooks/useCountdown";
+import { useFullscreenToggle } from "./hooks/useFullscreenToggle";
 import { usePlaceholderRect } from "./hooks/usePlaceholderRect";
-import { VideoPlayer as BunnyPlayer } from "./VideoPlayer";
+import { LoaderPlayNext } from "./LoaderPlayNext";
+import { VideoPlayer } from "./VideoPlayer";
+import { PLAY_NEXT_SECONDS } from "./VideoPlayer.constants";
 import { useVideoPlayer } from "./VideoPlayerContext";
+
+import type React from "react";
 
 /**
  * Singleton video player portaled to document.body.
@@ -16,11 +27,61 @@ import { useVideoPlayer } from "./VideoPlayerContext";
  * Position is synced with placeholder via usePlaceholderRect.
  */
 export function VideoPlayerSingleton() {
-  const { state, getOnEnded } = useVideoPlayer();
-  const { currentUrl, isExternal, placeholderElement } = state;
+  const { state, getOnEnded, activateVideoByUrl } = useVideoPlayer();
+  const { currentUrl, placeholderElement, provider } = state;
   const rect = usePlaceholderRect(placeholderElement);
+  const [showPlayNext, setShowPlayNext] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { isFullscreen } = useFullscreenToggle(containerRef);
 
-  if (!currentUrl || !rect) return null;
+  const { autoplay, autoplaySettings } = useVideoPreferencesStore();
+  const { onAutoplay } = useAutoplayAction(
+    autoplaySettings.currentAction,
+    autoplaySettings.nextVideoUrl,
+  );
+
+  useEffect(() => {
+    setShowPlayNext(false);
+  }, [currentUrl]);
+
+  const runAutoplay = useCallback(() => {
+    setShowPlayNext(false);
+
+    onAutoplay({
+      playVideoByUrl: (url) => {
+        const activated = activateVideoByUrl(url);
+
+        if (!activated) {
+          getOnEnded()?.();
+        }
+      },
+      goToNextLesson: () => {
+        getOnEnded()?.();
+      },
+      autoplayCurrentVideo: () => {
+        getOnEnded()?.();
+      },
+    });
+  }, [activateVideoByUrl, getOnEnded, onAutoplay]);
+
+  const countdown = useCountdown({
+    enabled: showPlayNext,
+    seconds: PLAY_NEXT_SECONDS,
+    onComplete: runAutoplay,
+  });
+
+  const handleEnded = useCallback(() => {
+    setShowPlayNext(
+      shouldShowPlayNextOverlay({
+        autoplayEnabled: autoplay,
+        action: autoplaySettings.currentAction,
+      }),
+    );
+  }, [autoplay, autoplaySettings]);
+
+  const canRender = !!rect && (currentUrl || showPlayNext);
+
+  if (!canRender) return null;
 
   const style: React.CSSProperties = {
     position: "fixed",
@@ -31,21 +92,30 @@ export function VideoPlayerSingleton() {
     zIndex: 10,
   };
 
-  const handleEnded = () => getOnEnded()?.();
-
   return createPortal(
-    <div style={style} className="bg-black">
-      {isExternal ? (
-        <ReactPlayer
+    <div ref={containerRef} style={style} className="relative bg-black">
+      {!showPlayNext && currentUrl && (
+        <VideoPlayer
+          provider={provider ?? VIDEO_EMBED_PROVIDERS.UNKNOWN}
           url={currentUrl}
-          height="100%"
-          width="100%"
-          playing
-          controls
           onEnded={handleEnded}
+          fill={isFullscreen}
+          className="size-full"
+          getFullscreenTarget={() => containerRef.current}
         />
-      ) : (
-        <BunnyPlayer initialUrl={currentUrl} handleVideoEnded={handleEnded} />
+      )}
+      {showPlayNext && (
+        <div className="absolute inset-0">
+          <LoaderPlayNext
+            seconds={countdown}
+            totalSeconds={PLAY_NEXT_SECONDS}
+            onPlayNext={runAutoplay}
+            onCancel={() => {
+              setShowPlayNext(false);
+            }}
+            className="size-full"
+          />
+        </div>
       )}
     </div>,
     document.body,

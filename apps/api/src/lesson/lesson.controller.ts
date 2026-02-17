@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   Res,
   UploadedFile,
   UseGuards,
@@ -27,7 +28,7 @@ import {
   SupportedLanguages,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
-import { Response } from "express";
+import { Request, Response } from "express";
 import { Validate } from "nestjs-typebox";
 
 import { baseResponse, BaseResponse, UUIDSchema, type UUIDType } from "src/common";
@@ -497,9 +498,10 @@ export class LessonController {
     @Param("resourceId") resourceId: UUIDType,
     @CurrentUser("userId") userId: UUIDType,
     @CurrentUser("role") role: UserRole,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
-    return this.lessonService.getLessonResource(res, userId, role, resourceId);
+    return this.lessonService.getLessonResource(req, res, userId, role, resourceId);
   }
 
   @Get("lesson-resource/:resourceId")
@@ -510,9 +512,10 @@ export class LessonController {
     @Param("resourceId") resourceId: UUIDType,
     @CurrentUser("userId") userId: UUIDType,
     @CurrentUser("role") role: UserRole,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
-    return this.lessonService.getLessonResource(res, userId, role, resourceId);
+    return this.lessonService.getLessonResource(req, res, userId, role, resourceId);
   }
 
   @Post("ai-mentor/avatar")

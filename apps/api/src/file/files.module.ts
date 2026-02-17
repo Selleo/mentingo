@@ -8,6 +8,7 @@ import { FileController } from "./file.controller";
 import { FileService } from "./file.service";
 import { BunnyVideoProvider } from "./providers/bunny-video.provider";
 import { S3VideoProvider } from "./providers/s3-video.provider";
+import { ThumbnailService } from "./thumbnail.service";
 import { TusUploadService } from "./tus/tus-upload.service";
 import { VideoProcessingStateService } from "./video-processing-state.service";
 import { VideoUploadNotificationGateway } from "./video-upload-notification.gateway";
@@ -19,6 +20,7 @@ import type { RedisConfigSchema } from "src/common/configuration/redis";
   controllers: [FileController],
   providers: [
     FileService,
+    ThumbnailService,
     BunnyVideoProvider,
     S3VideoProvider,
     TusUploadService,

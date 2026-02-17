@@ -23,7 +23,8 @@
     "toast": {
       "noAccess": "Nie masz uprawnień do tego zasobu",
       "globalSettingsNotFound": "Ustawienia globalne nie zostały znalezione",
-      "somethingWentWrong": "Coś poszło nie tak..."
+      "somethingWentWrong": "Coś poszło nie tak...",
+      "notFound": "Nie znaleziono zasobu"
     },
     "tooltip": {
       "soon": "Dostępne wkrótce"
@@ -37,6 +38,12 @@
     "languages": {
       "en": "Angielski",
       "pl": "Polski"
+    },
+    "lessonTypes": {
+      "content": "Treść",
+      "quiz": "Quiz",
+      "ai_mentor": "AI Mentor",
+      "embed": "Osadzenie"
     },
     "error": {
       "somethingWentWrong": "Ups! Coś poszło nie tak."
@@ -69,7 +76,9 @@
     },
     "continueWithGoogle": "Kontynuuj z użyciem Google",
     "continueWithMicrosoft": "Kontynuuj z użyciem Microsoft",
-    "continueWithSlack": "Kontynuuj z użyciem Slack"
+    "continueWithSlack": "Kontynuuj z użyciem Slack",
+    "enterFullscreen": "Pełny ekran",
+    "exitFullscreen": "Wyjdź z pełnego ekranu"
   },
   "lessons": {
     "sequenceUpdatedSuccessfully": "Kolejność lekcji została pomyślnie zaktualizowana",
@@ -414,10 +423,14 @@
       "confirmPassword": "Potwierdź hasło"
     },
     "validation": {
-      "passwordsDontMatch": "Hasła się nie zgadzają"
+      "passwordsDontMatch": "Hasła nie są takie same",
+      "missingEmail": "W linku brakuje adresu e-mail. Użyj pełnego linku z wiadomości."
     },
     "button": {
       "changePassword": "Utwórz hasło"
+    },
+    "error": {
+      "invalidTokenOrEmail": "Ten link do ustawienia hasła jest nieprawidłowy, wygasł lub nie pasuje do tego adresu e-mail."
     }
   },
   "passwordValidationDisplay": {
@@ -427,14 +440,16 @@
     "passwordUppercase": "co najmniej jedną wielką literę",
     "passwordLowercase": "co najmniej jedną małą literę",
     "passwordNumber": "co najmniej jedną cyfrę",
-    "passwordSpecial": "co najmniej jeden znak specjalny"
+    "passwordSpecial": "co najmniej jeden znak specjalny",
+    "passwordsMatch": "Hasła się zgadzają"
   },
   "changePasswordView": {
     "header": "Zmień hasło",
     "subHeader": "Zaktualizuj swoje hasło tutaj.",
     "field": {
       "oldPassword": "Stare hasło",
-      "newPassword": "Nowe hasło"
+      "newPassword": "Nowe hasło",
+      "confirmPassword": "Potwierdź hasło"
     },
     "validation": {
       "oldPassword": "Stare hasło jest wymagane",
@@ -662,6 +677,7 @@
         "presentation": "Prezentacja",
         "content": "Treść",
         "quiz": "Quiz",
+        "ai_mentor": "AI Mentor",
         "aiMentor": "AI Mentor",
         "embed": "Osadzenie"
       }
@@ -781,11 +797,12 @@
       "createNew": "Utwórz nowego",
       "deleteSelected": "Usuń wybrane",
       "edit": "Edytuj",
-      "import": "Importuj użytkowników"
+      "import": "Importuj użytkowników",
+      "bulkEdit": "Edytuj wiele"
     },
     "dropdown": {
-      "changeRole": "Zmień role",
-      "changeGroup": "Zmień grupy",
+      "roles": "Role",
+      "groups": "Grupy",
       "delete": "Usuń",
       "archive": "Archiwizuj"
     },
@@ -904,6 +921,9 @@
       },
       "BUNNY_STREAM_LIBRARY_ID": {
         "label": "Bunny Stream Library ID"
+      },
+      "BUNNY_STREAM_TOKEN_SIGNING_KEY": {
+        "label": "Bunny Stream Token Signing Key"
       },
       "BUNNY_STREAM_CDN_URL": {
         "label": "Bunny Stream CDN URL"
@@ -1745,6 +1765,13 @@
     "videoProcessing": {
       "title": "Wideo jest przetwarzane",
       "body": "Poczekaj chwilę. Pojawi się tutaj, gdy będzie gotowe."
+    },
+    "playNext": {
+      "title": "Następnie",
+      "description": "Odtwarzanie za {{seconds}} s",
+      "descriptionNoCountdown": "Odtwarzanie",
+      "playNow": "Odtwórz teraz",
+      "cancel": "Anuluj"
     },
     "placeholder": {
       "openQuestion": "Wpisz swoją odpowiedź tutaj"

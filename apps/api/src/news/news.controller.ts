@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   Res,
   UploadedFile,
   UseGuards,
@@ -25,7 +26,7 @@ import {
   SupportedLanguages,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
-import { Response } from "express";
+import { Request, Response } from "express";
 import { Validate } from "nestjs-typebox";
 
 import { BaseResponse, PaginatedResponse, UUIDSchema, UUIDType, baseResponse } from "src/common";
@@ -112,9 +113,10 @@ export class NewsController {
     @Param("resourceId") resourceId: UUIDType,
     @CurrentUser("userId") userId: UUIDType | undefined,
     @CurrentUser("role") role: UserRole | undefined,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
-    return this.newsService.getNewsResource(res, resourceId, userId, role);
+    return this.newsService.getNewsResource(req, res, resourceId, userId, role);
   }
 
   @Public()

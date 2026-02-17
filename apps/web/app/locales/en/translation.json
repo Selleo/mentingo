@@ -22,7 +22,8 @@
     "toast": {
       "noAccess": "You do not have permission to access this resource",
       "globalSettingsNotFound": "Global settings not found",
-      "somethingWentWrong": "Something went wrong..."
+      "somethingWentWrong": "Something went wrong...",
+      "notFound": "Resource not found"
     },
     "tooltip": {
       "soon": "Cooming soon"
@@ -36,6 +37,12 @@
     "languages": {
       "en": "English",
       "pl": "Polish"
+    },
+    "lessonTypes": {
+      "content": "Content",
+      "quiz": "Quiz",
+      "ai_mentor": "AI Mentor",
+      "embed": "Embed"
     },
     "error": {
       "somethingWentWrong": "Oops! Something went wrong."
@@ -68,7 +75,9 @@
     },
     "continueWithGoogle": "Continue with Google",
     "continueWithMicrosoft": "Continue with Microsoft",
-    "continueWithSlack": "Continue with Slack"
+    "continueWithSlack": "Continue with Slack",
+    "enterFullscreen": "Fullscreen",
+    "exitFullscreen": "Exit fullscreen"
   },
   "lessons": {
     "sequenceUpdatedSuccessfully": "Lesson sequence updated successfully",
@@ -437,10 +446,14 @@
       "confirmPassword": "Confirm password"
     },
     "validation": {
-      "passwordsDontMatch": "Passwords do not match"
+      "passwordsDontMatch": "Passwords do not match",
+      "missingEmail": "Email address is missing from the link. Please use the full link from your email."
     },
     "button": {
       "changePassword": "Create password"
+    },
+    "error": {
+      "invalidTokenOrEmail": "This password setup link is invalid, expired, or does not match this email."
     }
   },
   "changePasswordView": {
@@ -448,11 +461,13 @@
     "subHeader": "Update your password here.",
     "field": {
       "oldPassword": "Old password",
-      "newPassword": "New password"
+      "newPassword": "New password",
+      "confirmPassword": "Confirm password"
     },
     "validation": {
       "oldPassword": "Old password is required",
-      "newPassword": "New password is required"
+      "newPassword": "New password is required",
+      "passwordsDontMatch": "Passwords do not match"
     },
     "toast": {
       "passwordChangedSuccessfully": "Password changed successfully",
@@ -467,7 +482,7 @@
     "passwordLowercase": "at least one lowercase letter",
     "passwordNumber": "at least one number",
     "passwordSpecial": "at least one special character",
-    "passwordsDontMatch": "Passwords do not match"
+    "passwordsMatch": "Passwords match"
   },
   "contentCreatorView": {
     "button": {
@@ -799,11 +814,12 @@
       "createNew": "Create new",
       "deleteSelected": "Delete selected",
       "edit": "Edit",
-      "import": "Import users"
+      "import": "Import users",
+      "bulkEdit": "Bulk edit"
     },
     "dropdown": {
-      "changeRole": "Change role",
-      "changeGroup": "Change group",
+      "roles": "Roles",
+      "groups": "Groups",
       "delete": "Delete",
       "archive": "Archive"
     },
@@ -918,6 +934,9 @@
       },
       "BUNNY_STREAM_LIBRARY_ID": {
         "label": "Bunny Stream Library ID"
+      },
+      "BUNNY_STREAM_TOKEN_SIGNING_KEY": {
+        "label": "Bunny Stream Token Signing Key"
       },
       "BUNNY_STREAM_CDN_URL": {
         "label": "Bunny Stream CDN URL"
@@ -1745,6 +1764,13 @@
     "videoProcessing": {
       "title": "Video is being processed",
       "body": "Please wait a moment. It will appear here once it is ready."
+    },
+    "playNext": {
+      "title": "Up next",
+      "description": "Playing next in {{seconds}}s",
+      "descriptionNoCountdown": "Playing next",
+      "playNow": "Play now",
+      "cancel": "Cancel"
     },
     "placeholder": {
       "openQuestion": "Type your answer here"

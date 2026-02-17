@@ -31,6 +31,10 @@ export const SECRET_METADATA = {
     labelKey: "adminEnvsView.form.BUNNY_STREAM_LIBRARY_ID.label",
     placeholderKey: "adminEnvsView.form.placeholder",
   },
+  BUNNY_STREAM_TOKEN_SIGNING_KEY: {
+    labelKey: "adminEnvsView.form.BUNNY_STREAM_TOKEN_SIGNING_KEY.label",
+    placeholderKey: "adminEnvsView.form.placeholder",
+  },
   BUNNY_STREAM_CDN_URL: {
     labelKey: "adminEnvsView.form.BUNNY_STREAM_CDN_URL.label",
     placeholderKey: "adminEnvsView.form.placeholder",

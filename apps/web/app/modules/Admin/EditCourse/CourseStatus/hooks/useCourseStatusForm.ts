@@ -2,7 +2,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
 import { useUpdateCourse } from "~/api/mutations/admin/useUpdateCourse";
+import { availableCoursesQueryOptions, studentCoursesQueryOptions } from "~/api/queries";
 import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
+import { ALL_COURSES_QUERY_KEY, type CourseStatus } from "~/api/queries/useCourses";
+import { topCoursesQueryOptions } from "~/api/queries/useTopCourses";
 import { queryClient } from "~/api/queryClient";
 
 import { courseStatusFormSchema } from "../validators/courseStatusFormSchema";
@@ -10,7 +13,6 @@ import { courseStatusFormSchema } from "../validators/courseStatusFormSchema";
 import type { CourseStatusFormValues } from "../validators/courseStatusFormSchema";
 import type { SupportedLanguages } from "@repo/shared";
 import type { UpdateCourseBody } from "~/api/generated-api";
-import type { CourseStatus } from "~/api/queries/useCourses";
 
 type UseCourseStatusFormProps = {
   courseId: string;
@@ -32,6 +34,10 @@ export const useCourseStatusForm = ({ courseId, status, language }: UseCourseSta
       courseId,
     }).then(() => {
       queryClient.invalidateQueries({ queryKey: [COURSE_QUERY_KEY, { id: courseId }] });
+      queryClient.invalidateQueries({ queryKey: ALL_COURSES_QUERY_KEY });
+      queryClient.invalidateQueries(topCoursesQueryOptions({ language }));
+      queryClient.invalidateQueries(availableCoursesQueryOptions({ language }));
+      queryClient.invalidateQueries(studentCoursesQueryOptions({ language }));
     });
   };
 

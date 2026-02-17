@@ -1,4 +1,4 @@
-import { ALLOWED_LESSON_IMAGE_FILE_TYPES } from "@repo/shared";
+import { ALLOWED_LESSON_IMAGE_FILE_TYPES, detectVideoProviderFromUrl } from "@repo/shared";
 import { EditorContent, useEditor, type Editor as TiptapEditor } from "@tiptap/react";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
@@ -6,7 +6,7 @@ import { Progress } from "~/components/ui/progress";
 import { cn } from "~/lib/utils";
 
 import { detectPresentationProvider } from "./extensions/utils/presentation";
-import { detectVideoProvider, extractUrlFromClipboard } from "./extensions/utils/video";
+import { extractUrlFromClipboard } from "./extensions/utils/video";
 import { baseEditorPlugins, contentEditorPlugins } from "./plugins";
 import { defaultClasses } from "./styles";
 import EditorToolbar from "./toolbar/EditorToolbar";
@@ -25,6 +25,8 @@ type EditorProps = {
   acceptedFileTypes?: string[];
   variant?: "base" | "content";
 };
+
+const EMPTY_EDITOR_MIN_HEIGHT_CLASS = "min-h-[240px]";
 
 const Editor = ({
   content,
@@ -73,7 +75,7 @@ const Editor = ({
       const pastedUrl = extractUrlFromClipboard(event);
       if (!pastedUrl) return false;
 
-      const videoProvider = detectVideoProvider(pastedUrl);
+      const videoProvider = detectVideoProviderFromUrl(pastedUrl);
       const presentationProvider = detectPresentationProvider(pastedUrl);
 
       if (videoProvider === "unknown" && presentationProvider === "unknown") {
@@ -118,7 +120,7 @@ const Editor = ({
       handleKeyDown,
       handlePaste: (_view, event) => handlePaste(event),
       attributes: {
-        class: "prose prose-xs sm:prose dark:prose-invert focus:outline-none max-w-full p-4",
+        class: `prose prose-xs sm:prose dark:prose-invert focus:outline-none max-w-full p-4 ${EMPTY_EDITOR_MIN_HEIGHT_CLASS} !max-w-full`,
       },
     },
   });
@@ -136,7 +138,8 @@ const Editor = ({
   if (!editor) return <></>;
 
   const editorClasses = cn(
-    "h-full min-h-[200px]",
+    "h-full",
+    EMPTY_EDITOR_MIN_HEIGHT_CLASS,
     defaultClasses.ul,
     defaultClasses.ol,
     defaultClasses.taskList,

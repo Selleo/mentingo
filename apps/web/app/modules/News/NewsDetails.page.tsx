@@ -156,7 +156,12 @@ export default function NewsDetailsPage() {
           </div>
 
           {news.content ? (
-            <Viewer variant="news" content={contentWithIds || news.content} className="px-10" />
+            <Viewer
+              variant="news"
+              content={contentWithIds || news.content}
+              className="px-10"
+              videoAutoplayPolicy="disabled"
+            />
           ) : null}
 
           <div className="mx-auto w-full border-b border-primary-100" />

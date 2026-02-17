@@ -76,6 +76,7 @@ import type { UserDetailsResponse, UserDetailsWithAvatarKey } from "./schemas/us
 import type { UserActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
+import type { ChangePasswordBody } from "src/user/schemas/changePassword.schema";
 import type { CreateUserBody, ImportUserResponse } from "src/user/schemas/createUser.schema";
 import type { CreateUserOptions, CreateUserTransactionResult } from "src/user/user.types";
 
@@ -357,8 +358,14 @@ export class UserService {
     });
   }
 
-  async changePassword(id: UUIDType, oldPassword: string, newPassword: string) {
+  async changePassword(id: UUIDType, data: ChangePasswordBody) {
     const existingUser = await this.getExistingUser(id);
+
+    const { oldPassword, newPassword, confirmPassword } = data;
+
+    if (newPassword !== confirmPassword) {
+      throw new BadRequestException("changePasswordView.validation.passwordsDontMatch");
+    }
 
     if (!existingUser) {
       throw new NotFoundException("User not found");

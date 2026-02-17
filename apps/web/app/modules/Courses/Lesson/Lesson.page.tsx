@@ -1,4 +1,5 @@
 import { useNavigate, useParams } from "@remix-run/react";
+import { VIDEO_AUTOPLAY } from "@repo/shared";
 import { first, get, last, orderBy } from "lodash-es";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -7,9 +8,12 @@ import { useCourse, useCurrentUser, useLesson } from "~/api/queries";
 import { queryClient } from "~/api/queryClient";
 import ErrorPage from "~/components/ErrorPage/ErrorPage";
 import { PageWrapper } from "~/components/PageWrapper";
+import { getNextVideoUrl } from "~/components/VideoPlayer/autoplayFlow";
+import { useVideoPlayer } from "~/components/VideoPlayer/VideoPlayerContext";
 import { useLearningTimeTracker } from "~/hooks/useLearningTimeTracker";
 import { useUserRole } from "~/hooks/useUserRole";
 import Loader from "~/modules/common/Loader/Loader";
+import { useVideoPreferencesStore } from "~/modules/common/store/useVideoPreferencesStore";
 import { LessonContent } from "~/modules/Courses/Lesson/LessonContent";
 import { LessonSidebar } from "~/modules/Courses/Lesson/LessonSidebar";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
@@ -58,6 +62,51 @@ export default function LessonPage() {
     courseId,
     enabled: !!lesson && !!course,
   });
+
+  const { state, clearVideo } = useVideoPlayer();
+
+  const { autoplay, setAutoplaySettings, autoplaySettings } = useVideoPreferencesStore();
+
+  useEffect(() => {
+    setAutoplaySettings({ currentAction: VIDEO_AUTOPLAY.NO_AUTOPLAY, nextVideoUrl: undefined });
+  }, [lessonId, setAutoplaySettings]);
+
+  useEffect(() => {
+    setAutoplaySettings({
+      currentAction: autoplaySettings.currentAction,
+      nextVideoUrl: getNextVideoUrl({
+        videos: lesson?.videos,
+        currentUrl: state.currentUrl,
+        index: state.index,
+      }),
+    });
+  }, [
+    state.currentUrl,
+    state.index,
+    setAutoplaySettings,
+    autoplaySettings.currentAction,
+    lesson?.videos,
+  ]);
+
+  useEffect(() => {
+    if (!lesson) return;
+
+    if (lesson.type !== "content") {
+      clearVideo();
+      return;
+    }
+
+    if (!autoplay) {
+      clearVideo();
+      return;
+    }
+
+    const hasAutoplayTrigger = lesson.hasAutoplayTrigger;
+
+    if (!hasAutoplayTrigger) {
+      clearVideo();
+    }
+  }, [lesson, autoplay, clearVideo]);
 
   useEffect(() => {
     if (lessonError) {

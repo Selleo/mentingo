@@ -346,7 +346,7 @@ const QuizLessonForm = ({
         {hasMissingTranslations && <MissingTranslationsAlert />}
         {!lessonToEdit && (
           <Breadcrumb
-            lessonLabel="Quiz"
+            lessonLabel={t("common.lessonTypes.quiz")}
             setContentTypeToDisplay={setContentTypeToDisplay}
             setSelectedLesson={setSelectedLesson}
           />

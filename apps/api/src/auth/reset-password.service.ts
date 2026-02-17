@@ -1,22 +1,31 @@
 import { Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { eq, and, gte } from "drizzle-orm";
+import { and, eq, gte, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
-import { resetTokens } from "src/storage/schema";
+import { resetTokens, users } from "src/storage/schema";
 
 @Injectable()
 export class ResetPasswordService {
   constructor(@Inject("DB") private readonly db: DatabasePg) {}
 
-  public async getOneByToken(token: string) {
+  public async getOneByTokenAndEmail(token: string, email: string) {
+    const normalizedEmail = email.trim().toLowerCase();
+
     const [resetToken] = await this.db
-      .select()
+      .select({ tokenRecord: resetTokens })
       .from(resetTokens)
-      .where(and(eq(resetTokens.resetToken, token), gte(resetTokens.expiryDate, new Date())));
+      .innerJoin(users, eq(users.id, resetTokens.userId))
+      .where(
+        and(
+          eq(resetTokens.resetToken, token),
+          gte(resetTokens.expiryDate, new Date()),
+          sql`lower(${users.email}) = ${normalizedEmail}`,
+        ),
+      );
 
-    if (!resetToken) throw new NotFoundException("Invalid token");
+    if (!resetToken) throw new NotFoundException("createPasswordView.error.invalidTokenOrEmail");
 
-    return resetToken;
+    return resetToken.tokenRecord;
   }
 
   public async deleteToken(token: string) {

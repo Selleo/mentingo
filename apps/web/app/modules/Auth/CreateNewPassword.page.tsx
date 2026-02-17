@@ -17,7 +17,11 @@ import { detectBrowserLanguage, SUPPORTED_LANGUAGES } from "~/utils/browser-lang
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import type { MetaFunction } from "@remix-run/react";
-import type { ResetPasswordBody } from "~/api/generated-api";
+
+type CreateNewPasswordFormValues = {
+  newPassword: string;
+  newPasswordConfirmation: string;
+};
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.createNewPassword");
 
@@ -44,7 +48,7 @@ export default function CreateNewPasswordPage() {
   });
   const { t } = useTranslation();
 
-  const methods = useForm<ResetPasswordBody & { newPasswordConfirmation: string }>({
+  const methods = useForm<CreateNewPasswordFormValues>({
     resolver: zodResolver(createNewPasswordSchema(t)),
     mode: "onChange",
     defaultValues: {
@@ -59,10 +63,18 @@ export default function CreateNewPasswordPage() {
     formState: { errors, isValid },
   } = methods;
 
-  const onSubmit = (data: ResetPasswordBody) => {
+  const onSubmit = (data: Pick<CreateNewPasswordFormValues, "newPassword">) => {
+    if (!email) {
+      toast({
+        variant: "destructive",
+        description: t("createPasswordView.validation.missingEmail"),
+      });
+      return;
+    }
+
     if (resetToken) {
       createNewPassword({
-        data: { newPassword: data.newPassword, resetToken: resetToken },
+        data: { newPassword: data.newPassword, resetToken, email },
       }).then(() => {
         toast({
           description: t("changePasswordView.toast.passwordChangedSuccessfully"),
@@ -75,7 +87,8 @@ export default function CreateNewPasswordPage() {
       createNewPassword({
         data: {
           password: data.newPassword,
-          createToken: createToken,
+          createToken,
+          email,
           language: SUPPORTED_LANGUAGES.includes(detectBrowserLanguage())
             ? detectBrowserLanguage()
             : "en",

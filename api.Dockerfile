@@ -27,6 +27,7 @@ RUN apk add --no-cache \
     ttf-freefont \
     xvfb \
     libc6-compat \
+    ffmpeg \
     && rm -rf /var/cache/apk/*
 
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \

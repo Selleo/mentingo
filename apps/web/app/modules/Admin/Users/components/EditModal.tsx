@@ -224,21 +224,24 @@ export const EditModal = ({
             <DialogTitle>
               {t(`adminUsersView.modal.title.${type}`)} ({selectedUsers.length ?? 0})
             </DialogTitle>
-
-            <DialogDescription>{renderContent()}</DialogDescription>
+            {(type === "delete" || type === "archive") && (
+              <DialogDescription>{renderContent()}</DialogDescription>
+            )}
           </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={onCancel}>
-              {t("common.button.cancel")}
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              variant={type === "delete" ? "destructive" : "primary"}
-              disabled={!selectedUsers || (type === "role" && !selectedValue)}
-            >
-              {t(`adminUsersView.modal.button.${type}`)}
-            </Button>
-          </DialogFooter>
+          <div className="flex items-center justify-between gap-2">
+            <div className="w-full">
+              {type !== "delete" && type !== "archive" ? renderContent() : null}
+            </div>
+            <DialogFooter className="z-50">
+              <Button
+                onClick={handleSubmit}
+                variant={type === "delete" ? "destructive" : "primary"}
+                disabled={!selectedUsers.length || (type === "role" && !selectedValue)}
+              >
+                {t(`adminUsersView.modal.button.${type}`)}
+              </Button>
+            </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
     </>

@@ -1,9 +1,9 @@
 import { Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { and, eq, gte } from "drizzle-orm";
+import { and, eq, gte, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import hashPassword from "src/common/helpers/hashPassword";
-import { createTokens, credentials } from "src/storage/schema";
+import { createTokens, credentials, users } from "src/storage/schema";
 
 import type { UUIDType } from "src/common";
 
@@ -11,15 +11,24 @@ import type { UUIDType } from "src/common";
 export class CreatePasswordService {
   constructor(@Inject("DB") private readonly db: DatabasePg) {}
 
-  public async getOneByToken(token: string) {
+  public async getOneByTokenAndEmail(token: string, email: string) {
+    const normalizedEmail = email.trim().toLowerCase();
+
     const [createToken] = await this.db
-      .select()
+      .select({ tokenRecord: createTokens })
       .from(createTokens)
-      .where(and(eq(createTokens.createToken, token), gte(createTokens.expiryDate, new Date())));
+      .innerJoin(users, eq(users.id, createTokens.userId))
+      .where(
+        and(
+          eq(createTokens.createToken, token),
+          gte(createTokens.expiryDate, new Date()),
+          sql`lower(${users.email}) = ${normalizedEmail}`,
+        ),
+      );
 
-    if (!createToken) throw new NotFoundException("Invalid token");
+    if (!createToken) throw new NotFoundException("createPasswordView.error.invalidTokenOrEmail");
 
-    return createToken;
+    return createToken.tokenRecord;
   }
 
   public async deleteToken(token: string) {

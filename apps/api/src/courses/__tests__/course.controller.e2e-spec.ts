@@ -2045,7 +2045,7 @@ describe("CourseController (e2e)", () => {
         });
 
         describe("when group has users", () => {
-          it("should enroll new users and ignore already enrolled users", async () => {
+          it("should enroll new users and link already enrolled users to the group", async () => {
             const admin = await userFactory
               .withCredentials({ password })
               .withAdminSettings(db)
@@ -2113,13 +2113,13 @@ describe("CourseController (e2e)", () => {
 
             expect(enrollments.length).toBe(3);
 
-            // student1 should still have enrolledByGroup: false
+            // student1 should now be linked to the group
             const student1Enrollment = enrollments.find((e) => e.studentId === student1.id);
-            expect(student1Enrollment?.enrolledByGroupId).toBe(null);
+            expect(student1Enrollment?.enrolledByGroupId).toBe(group.id);
 
-            // student2 should still have enrolledByGroupId: null
+            // student2 should now be linked to the group
             const student2Enrollment = enrollments.find((e) => e.studentId === student2.id);
-            expect(student2Enrollment?.enrolledByGroupId).toBe(null);
+            expect(student2Enrollment?.enrolledByGroupId).toBe(group.id);
 
             // student3 should have enrolledByGroupId: group.id (newly enrolled from group)
             const student3Enrollment = enrollments.find((e) => e.studentId === student3.id);
@@ -2183,7 +2183,7 @@ describe("CourseController (e2e)", () => {
               .set("Cookie", cookies)
               .expect(201);
 
-            // Check that nothing changed
+            // Check that all users are linked to the group
             const enrollments = await db
               .select()
               .from(studentCourses)
@@ -2191,7 +2191,7 @@ describe("CourseController (e2e)", () => {
 
             expect(enrollments.length).toBe(2);
             enrollments.forEach((e) => {
-              expect(e.enrolledByGroupId).toBe(null);
+              expect(e.enrolledByGroupId).toBe(group.id);
             });
           });
         });
@@ -2398,7 +2398,7 @@ describe("CourseController (e2e)", () => {
   });
 
   describe("DELETE /api/course/unenroll-course", () => {
-    it("keeps student enrolled when group is still enrolled", async () => {
+    it("returns bad request when trying to unenroll a group-enrolled student", async () => {
       const admin = await userFactory
         .withCredentials({ password })
         .withAdminSettings(db)
@@ -2444,7 +2444,7 @@ describe("CourseController (e2e)", () => {
       await request(app.getHttpServer())
         .delete(`/api/course/unenroll-course?courseId=${course.id}&userIds[]=${student.id}`)
         .set("Cookie", cookies)
-        .expect(200);
+        .expect(400);
 
       const [updatedEnrollment] = await db
         .select()

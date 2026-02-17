@@ -10,6 +10,12 @@ import {
   defaultClasses,
   contentVariantClasses,
 } from "./styles";
+import {
+  resolveRichTextVideoAutoplay,
+  type RichTextVideoAutoplayPolicy,
+} from "./videoAutoplayPolicy";
+
+import type { VideoAutoplay } from "@repo/shared";
 
 type ViewerProps = {
   content: string;
@@ -17,9 +23,17 @@ type ViewerProps = {
   className?: string;
   variant?: "default" | "article" | "news" | "content";
   onVideoEnded?: () => void;
+  videoAutoplayPolicy?: RichTextVideoAutoplayPolicy;
 };
 
-const Viewer = ({ content, style, className, variant = "default", onVideoEnded }: ViewerProps) => {
+const Viewer = ({
+  content,
+  style,
+  className,
+  variant = "default",
+  onVideoEnded,
+  videoAutoplayPolicy = "inherit",
+}: ViewerProps) => {
   const variantStyles = {
     default: {
       wrapper: "",
@@ -75,10 +89,14 @@ const Viewer = ({ content, style, className, variant = "default", onVideoEnded }
     () =>
       viewerPlugins.map((extension) =>
         extension.name === "video"
-          ? extension.configure({ onVideoEnded: handleVideoEnded })
+          ? extension.configure({
+              onVideoEnded: handleVideoEnded,
+              resolveAutoplay: (autoplay: VideoAutoplay) =>
+                resolveRichTextVideoAutoplay(autoplay, videoAutoplayPolicy),
+            })
           : extension,
       ),
-    [handleVideoEnded],
+    [handleVideoEnded, videoAutoplayPolicy],
   );
 
   const editor = useEditor(

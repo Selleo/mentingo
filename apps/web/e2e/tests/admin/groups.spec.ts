@@ -218,7 +218,7 @@ test.describe("Admin groups page flow", () => {
       await page.getByTestId(GROUPS_PAGE_UI.dataId.secondUser).click();
 
       await findAndClickButton(page, GROUPS_PAGE_UI.button.edit);
-      await findAndClickButton(page, GROUPS_PAGE_UI.button.changeGroup);
+      await findAndClickButton(page, GROUPS_PAGE_UI.button.groups);
 
       const groupSelector = page.getByRole("combobox");
       await groupSelector.click();

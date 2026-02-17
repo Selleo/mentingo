@@ -126,6 +126,11 @@ export interface CreatePasswordBody {
   password: string;
   /** @minLength 1 */
   createToken: string;
+  /**
+   * @format email
+   * @minLength 1
+   */
+  email: string;
   language: string;
 }
 
@@ -133,6 +138,11 @@ export interface ResetPasswordBody {
   newPassword: string;
   /** @minLength 1 */
   resetToken: string;
+  /**
+   * @format email
+   * @minLength 1
+   */
+  email: string;
 }
 
 export interface MFASetupResponse {
@@ -667,6 +677,12 @@ export interface HandleBunnyWebhookBody {
   Guid?: string;
 }
 
+export interface GetThumbnailResponse {
+  data: {
+    url: string;
+  };
+}
+
 export interface GetUserStatisticsResponse {
   data: {
     averageStats: {
@@ -868,6 +884,7 @@ export interface AdminUpdateUserResponse {
 
 export interface ChangePasswordBody {
   newPassword: string;
+  confirmPassword: string;
   /**
    * @minLength 8
    * @maxLength 64
@@ -2124,6 +2141,8 @@ export interface GetLessonByIdResponse {
     }[];
     hasOnlyVideo?: boolean;
     hasVideo?: boolean;
+    hasAutoplayTrigger?: boolean;
+    videos?: string[];
     isQuizFeedbackRedacted?: boolean;
     aiMentorDetails?: {
       minScore: number | null;
@@ -4920,6 +4939,28 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "POST",
         body: data,
         type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerGetThumbnail
+     * @request GET:/api/file/thumbnail
+     */
+    fileControllerGetThumbnail: (
+      query: {
+        /** @minLength 1 */
+        sourceUrl: string;
+        provider?: "self" | "youtube" | "vimeo" | "bunny" | "unknown";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetThumbnailResponse, any>({
+        path: `/api/file/thumbnail`,
+        method: "GET",
+        query: query,
+        format: "json",
         ...params,
       }),
 

@@ -7,5 +7,15 @@ To migrate lesson types, run the following command from the `apps/api` directory
 > **Options:** Use `--specific` or `-s` with any combination of `l` (lessons), `n` (news), or `a` (articles) to migrate specific types. If unset, all types will be migrated.
 
 ```sh
-npx tsx ./scripts/migrateContent.ts --url=https://instanceApiUrl --specific=lna
+npx tsx ./scripts/migrateContent.ts --url=https://instanceUrl --specific=lna
+```
+
+# Autoplay Migration Script
+
+Autoplay uses a new attribute to know each action. In order to set that attribute, you need to just save each lesson. To avoid doing that manually run this script.
+
+> **Note:** This script is idempotent, so you can run it multiple times without causing duplicate changes.
+
+```sh
+npx tsx ./scripts/migrateAutoplay.ts
 ```

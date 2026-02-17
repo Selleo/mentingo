@@ -1,4 +1,5 @@
 import { useNavigate } from "@remix-run/react";
+import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 
 import { CopyUrlButton } from "~/components/CopyUrlButton";
@@ -8,6 +9,7 @@ import { useUserRole } from "~/hooks/useUserRole";
 import { CourseProgressChart } from "~/modules/Courses/CourseView/components/CourseProgressChart";
 
 import { findFirstInProgressLessonId, findFirstNotStartedLessonId } from "../../Lesson/utils";
+import { navigateToNextLesson } from "../../utils/navigateToNextLesson";
 
 import type { GetCourseResponse } from "~/api/generated-api";
 
@@ -20,30 +22,16 @@ export const CourseProgress = ({ course }: CourseProgressProps) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const notStartedLessonId = findFirstNotStartedLessonId(course);
-  const notStartedChapterId = course.chapters.find((chapter) => {
-    return chapter.lessons.some(({ id }) => id === notStartedLessonId);
-  })?.id;
 
   const firstInProgressLessonId = findFirstInProgressLessonId(course);
-  const firstInProgressChapterId = course.chapters.find((chapter) => {
-    return chapter.lessons.some(({ id }) => id === firstInProgressLessonId);
-  })?.id;
-
   const hasCourseProgress = course.chapters.some(
     ({ completedLessonCount }) => completedLessonCount,
   );
+  const isCourseEmpty = !course.chapters.length || course.chapters?.[0]?.lessonCount === 0;
 
-  const firstLessonId = course.chapters[0]?.lessons[0]?.id;
-
-  const handleNavigateToLesson = () => {
-    if (!notStartedLessonId && !firstInProgressLessonId) {
-      return navigate(`lesson/${firstLessonId}`);
-    }
-
-    navigate(`lesson/${firstInProgressLessonId ?? notStartedLessonId}`, {
-      state: { chapterId: firstInProgressChapterId ?? notStartedChapterId },
-    });
-  };
+  const handleNavigateToLesson = useCallback(() => {
+    navigateToNextLesson(course, navigate);
+  }, [course, navigate]);
 
   return (
     <>
@@ -64,7 +52,7 @@ export const CourseProgress = ({ course }: CourseProgressProps) => {
           <span>{t("studentCourseView.sideSection.button.shareCourse")}</span>
         </CopyUrlButton>
         <>
-          <Button className="gap-x-2" onClick={handleNavigateToLesson}>
+          <Button className="gap-x-2" onClick={handleNavigateToLesson} disabled={isCourseEmpty}>
             <Icon name="Play" className="text-contrast h-auto w-6" />
             <span>
               {t(
