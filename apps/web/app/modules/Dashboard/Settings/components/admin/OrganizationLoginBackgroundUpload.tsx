@@ -1,26 +1,12 @@
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useRef } from "react";
-import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { z } from "zod";
 
 import { useUploadBackgroundImage } from "~/api/mutations/admin/useUploadBackgroundImage";
 import ImageUploadInput from "~/components/FileUploadInput/ImageUploadInput";
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { useHandleImageUpload } from "~/hooks/useHandleImageUpload";
-
-const OrganizationLoginBackgroundUploadSchema = z.object({
-  backgroundImage: z.instanceof(File).nullable(),
-});
 
 interface OrganizationLoginBackgroundUploadProps {
   backgroundImage: string | null;
@@ -30,11 +16,7 @@ export function OrganizationLoginBackgroundUpload({
   backgroundImage: initialBackgroundImage,
 }: OrganizationLoginBackgroundUploadProps) {
   const { t } = useTranslation();
-  const { mutate: uploadBackgroundImage, isPending } = useUploadBackgroundImage();
-  const { setValue, control } = useForm({
-    resolver: zodResolver(OrganizationLoginBackgroundUploadSchema),
-  });
-
+  const { mutateAsync: uploadBackgroundImage, isPending } = useUploadBackgroundImage();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const {
@@ -43,66 +25,55 @@ export function OrganizationLoginBackgroundUpload({
     handleImageUpload,
     removeImage,
   } = useHandleImageUpload({
-    onUpload: (file) => {
-      setValue("backgroundImage", file);
+    onUpload: async (file) => {
+      await uploadBackgroundImage({ backgroundImage: file });
     },
-    onRemove: () => {
-      setValue("backgroundImage", null);
+    onRemove: async () => {
+      await uploadBackgroundImage({ backgroundImage: null });
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
     },
     initialImageUrl: initialBackgroundImage,
+    uploadSuccessMessage: t("organizationLoginBackgroundImageUpload.toast.success"),
+    removeSuccessMessage: t("organizationLoginBackgroundImageUpload.toast.success"),
+    uploadErrorMessage: t("organizationLoginBackgroundImageUpload.toast.error"),
+    removeErrorMessage: t("organizationLoginBackgroundImageUpload.toast.error"),
   });
 
-  const handleUploadBackgroundImage = () => {
-    const uploadedBackgroundImage = control._formValues.backgroundImage;
-    uploadBackgroundImage({
-      backgroundImage: uploadedBackgroundImage,
-    });
-  };
-
   return (
-    <Card id="organization-login-background-image-upload">
-      <CardHeader>
-        <CardTitle className="h5">{t("organizationLoginBackgroundImageUpload.title")}</CardTitle>
-        <CardDescription className="body-lg-md">
+    <Card
+      id="organization-login-background-image-upload"
+      className="h-full border-neutral-200 bg-white shadow-sm"
+    >
+      <CardHeader className="space-y-1 pb-2">
+        <CardTitle className="text-base font-semibold">
+          {t("organizationLoginBackgroundImageUpload.title")}
+        </CardTitle>
+        <CardDescription className="text-sm leading-5 text-neutral-700">
           {t("organizationLoginBackgroundImageUpload.description")}
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <Controller
-          name="backgroundImage"
-          control={control}
-          render={({ field }) => (
-            <div className="flex flex-col gap-y-2">
-              <ImageUploadInput
-                field={{
-                  ...field,
-                  value: backgroundImage || undefined,
-                }}
-                handleImageUpload={handleImageUpload}
-                isUploading={isUploading}
-                imageUrl={backgroundImage}
-                fileInputRef={fileInputRef}
-                variant="video"
-              />
-              {isUploading && <p>{t("common.button.uploading")}</p>}
-            </div>
-          )}
+      <CardContent className="space-y-3 pt-0">
+        <ImageUploadInput
+          field={{ value: backgroundImage || undefined }}
+          handleImageUpload={handleImageUpload}
+          isUploading={isUploading || isPending}
+          imageUrl={backgroundImage}
+          fileInputRef={fileInputRef}
+          variant="video"
+          detailsText={t("organizationLoginBackgroundImageUpload.field.imageRequirements")}
         />
+        {isUploading && (
+          <p className="text-xs font-medium text-neutral-500">{t("common.button.uploading")}</p>
+        )}
         {backgroundImage && (
-          <Button onClick={removeImage} className="mt-4 rounded bg-red-500 px-6 py-2 text-white">
+          <Button onClick={removeImage} variant="destructive" size="sm">
             <Icon name="TrashIcon" className="mr-2" />
             {t("organizationLoginBackgroundImageUpload.button.removeBackgroundImage")}
           </Button>
         )}
       </CardContent>
-      <CardFooter className="border-t px-6 py-4">
-        <Button disabled={isPending} type="submit" onClick={handleUploadBackgroundImage}>
-          {t("common.button.save")}
-        </Button>
-      </CardFooter>
     </Card>
   );
 }

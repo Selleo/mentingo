@@ -601,7 +601,7 @@ export class SettingsService {
   }
 
   async updateCertificateBackground(
-    certificateBackground: Express.Multer.File,
+    certificateBackground: Express.Multer.File | null,
     actor?: CurrentUser,
   ): Promise<GlobalSettingsJSONContentSchema> {
     const previousRecord = await this.getGlobalSettingsRecord();

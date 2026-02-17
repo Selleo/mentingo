@@ -6,12 +6,20 @@ type UseHandleImageUploadOptions = {
   onUpload: (file: File) => void | Promise<void>;
   onRemove?: () => void | Promise<void>;
   initialImageUrl: string | null;
+  uploadSuccessMessage?: string;
+  removeSuccessMessage?: string;
+  uploadErrorMessage?: string;
+  removeErrorMessage?: string;
 };
 
 export function useHandleImageUpload({
   onUpload,
   onRemove,
   initialImageUrl,
+  uploadSuccessMessage,
+  removeSuccessMessage,
+  uploadErrorMessage,
+  removeErrorMessage,
 }: UseHandleImageUploadOptions) {
   const { toast } = useToast();
 
@@ -24,21 +32,37 @@ export function useHandleImageUpload({
       try {
         setImageUrl(URL.createObjectURL(file));
         await onUpload(file);
+        if (uploadSuccessMessage) {
+          toast({ description: uploadSuccessMessage });
+        }
       } catch (error) {
-        toast({ description: `Error uploading image: ${error}`, variant: "destructive" });
+        toast({
+          description: uploadErrorMessage ?? `Error uploading image: ${error}`,
+          variant: "destructive",
+        });
       } finally {
         setIsUploading(false);
       }
     },
-    [onUpload, toast],
+    [onUpload, toast, uploadErrorMessage, uploadSuccessMessage],
   );
 
   const removeImage = useCallback(async () => {
-    setImageUrl(null);
-    if (onRemove) {
-      await onRemove();
+    try {
+      setImageUrl(null);
+      if (onRemove) {
+        await onRemove();
+      }
+      if (removeSuccessMessage) {
+        toast({ description: removeSuccessMessage });
+      }
+    } catch (error) {
+      toast({
+        description: removeErrorMessage ?? `Error removing image: ${error}`,
+        variant: "destructive",
+      });
     }
-  }, [onRemove]);
+  }, [onRemove, removeErrorMessage, removeSuccessMessage, toast]);
 
   return {
     imageUrl,

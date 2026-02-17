@@ -725,7 +725,8 @@
                 "properties": {
                   "certificate-background": {
                     "type": "string",
-                    "format": "binary"
+                    "format": "binary",
+                    "nullable": true
                   }
                 }
               }
