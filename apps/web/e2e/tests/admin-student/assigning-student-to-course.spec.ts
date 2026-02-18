@@ -528,6 +528,8 @@ const studentSeesCourseByGroup = async (page: Page) => {
   await page.getByRole("button", { name: "Courses" }).getByRole("link").click();
   await page.getByTestId(COURSE.title).last().click();
   await page.waitForURL(/course\/[\w-]+/);
+  const chaptersHeading = page.getByRole("heading", { name: "Chapters" });
+  await chaptersHeading.waitFor({ state: "visible" });
   await expect(page.getByRole("heading", { name: COURSE.title })).toBeVisible();
   await logoutStudent(page);
 };
