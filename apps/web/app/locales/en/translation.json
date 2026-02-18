@@ -1932,7 +1932,11 @@
     "title": "Certificate Background Upload",
     "description": "Upload a background image for the certificate.",
     "button": {
-      "removeBackgroundImage": "Remove Background Image"
+      "removeCertificateBackgroundImage": "Delete certificate background",
+      "preview": "Preview"
+    },
+    "field": {
+      "imageRequirements": "PNG, JPG or JPEG (max. 20 MB)"
     },
     "other": {
       "uploading": "Uploading...",
@@ -2093,10 +2097,11 @@
     "header": "Platform Logo",
     "subHeader": "Upload a custom logo for your platform. Supported formats: PNG, SVG",
     "field": {
-      "uploadLabel": "Logo Image"
+      "uploadLabel": "Logo Image",
+      "imageRequirements": "PNG or SVG (max. 10 MB)"
     },
     "button": {
-      "removeLogo": "Remove Logo"
+      "removeLogo": "Delete platform logo"
     },
     "toast": {
       "logoUploadedSuccessfully": "Platform logo uploaded successfully",
@@ -2106,12 +2111,13 @@
   },
   "platformSimpleLogo": {
     "header": "Platform Simple Logo (icon)",
-    "subHeader": "Upload a custom logo that will be used as a signet nad favicon. Supported formats: PNG, SVG",
+    "subHeader": "Upload a custom logo that will be used as a signet and favicon. Supported formats: PNG, SVG",
     "field": {
-      "uploadLabel": "Logo Image"
+      "uploadLabel": "Logo Image",
+      "imageRequirements": "PNG or SVG (max. 10 MB)"
     },
     "button": {
-      "removeLogo": "Remove Logo"
+      "removeLogo": "Delete platform icon logo"
     },
     "toast": {
       "logoUploadedSuccessfully": "Platform simple logo uploaded successfully",
@@ -2126,8 +2132,11 @@
   "organizationLoginBackgroundImageUpload": {
     "title": "Login Background Image Upload",
     "description": "Upload a custom background image for the organization login page.",
+    "field": {
+      "imageRequirements": "PNG, JPG or JPEG (max. 20 MB)"
+    },
     "button": {
-      "removeBackgroundImage": "Remove Background Image"
+      "removeBackgroundImage": "Delete login background image"
     },
     "toast": {
       "success": "Login background image changed successfully",

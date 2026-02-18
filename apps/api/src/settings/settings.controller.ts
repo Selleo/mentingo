@@ -378,7 +378,13 @@ export class SettingsController {
 
   @Patch("certificate-background")
   @Roles(USER_ROLES.ADMIN)
-  @UseInterceptors(FileInterceptor("certificate-background"))
+  @UseInterceptors(
+    FileInterceptor("certificate-background", {
+      limits: {
+        fileSize: FILE_SIZE_BASE,
+      },
+    }),
+  )
   @ApiConsumes("multipart/form-data")
   @ApiBody({
     schema: {
@@ -387,17 +393,22 @@ export class SettingsController {
         "certificate-background": {
           type: "string",
           format: "binary",
+          nullable: true,
         },
       },
     },
   })
   async updateCertificateBackground(
     @UploadedFile(
-      getBaseFileTypePipe(buildFileTypeRegex(ALLOWED_LESSON_IMAGE_FILE_TYPES)).build({
+      getBaseFileTypePipe(
+        buildFileTypeRegex(ALLOWED_LESSON_IMAGE_FILE_TYPES),
+        FILE_SIZE_BASE,
+      ).build({
+        fileIsRequired: false,
         errorHttpStatusCode: HttpStatus.BAD_REQUEST,
       }),
     )
-    certificateBackground: Express.Multer.File,
+    certificateBackground: Express.Multer.File | null,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
     return new BaseResponse(

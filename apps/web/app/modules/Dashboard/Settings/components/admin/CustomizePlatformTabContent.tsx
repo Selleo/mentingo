@@ -24,16 +24,17 @@ export default function CustomizePlatformTabContent({
       <QAPreferences globalSettings={globalSettings} />
       <NewsPreferences globalSettings={globalSettings} />
       <ArticlesPreferences globalSettings={globalSettings} />
-      <div className="grid w-full gap-6 lg:grid-cols-2 md:items-stretch">
+      <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
         <CertificateBackgroundUpload
           certificateBackgroundImage={globalSettings.certificateBackgroundImage}
+          platformLogo={globalSettings.platformLogoS3Key}
         />
         <OrganizationLoginBackgroundUpload
           backgroundImage={globalSettings.loginBackgroundImageS3Key}
         />
+        <PlatformLogoForm />
+        <PlatformSimpleLogoForm />
       </div>
-      <PlatformLogoForm />
-      <PlatformSimpleLogoForm />
       <OrganizationTheme />
     </>
   );

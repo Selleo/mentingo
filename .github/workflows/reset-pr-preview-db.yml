@@ -34,10 +34,19 @@ jobs:
       - name: Setup SSH
         shell: bash
         env:
-          UNCLOUD_CONNECT: ${{ secrets.UNCLOUD_CONNECT }}
+          UNCLOUD_HOST: ${{ secrets.UNCLOUD_HOST }}
+          UNCLOUD_USER: ${{ secrets.UNCLOUD_USER }}
+          UNCLOUD_PORT: ${{ secrets.UNCLOUD_PORT }}
           UNCLOUD_SSH_KEY: ${{ secrets.UNCLOUD_SSH_KEY }}
         run: |
           set -euo pipefail
+
+          for required in UNCLOUD_HOST UNCLOUD_USER UNCLOUD_PORT UNCLOUD_SSH_KEY; do
+            if [ -z "${!required:-}" ]; then
+              echo "Missing required secret: ${required}"
+              exit 1
+            fi
+          done
 
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
@@ -45,18 +54,35 @@ jobs:
           echo "${{ secrets.UNCLOUD_SSH_KEY }}" > ~/.ssh/id_ecdsa
           chmod 600 ~/.ssh/id_ecdsa
 
-          # Extract the host from the UNCLOUD_CONNECT secret
-          host="$(echo "${{ secrets.UNCLOUD_CONNECT }}" | sed -E 's#^ssh(\+cli)?://##; s#^[^@]+@##; s#:/.*##; s#:.*##')"
+      - name: Configure SSH multiplexing
+        shell: bash
+        env:
+          UNCLOUD_HOST: ${{ secrets.UNCLOUD_HOST }}
+          UNCLOUD_USER: ${{ secrets.UNCLOUD_USER }}
+          UNCLOUD_PORT: ${{ secrets.UNCLOUD_PORT }}
+        run: |
+          set -euo pipefail
 
-          # add to known_hosts:
-          ssh-keyscan -H "$host" >> ~/.ssh/known_hosts
-          chmod 644 ~/.ssh/known_hosts
+          cat > ~/.ssh/config <<EOF
+          Host uncloud-host
+            HostName ${UNCLOUD_HOST}
+            User ${UNCLOUD_USER}
+            Port ${UNCLOUD_PORT}
+            IdentityFile ~/.ssh/id_ecdsa
+            StrictHostKeyChecking no
+            ControlMaster auto
+            ControlPersist 10m
+            ControlPath ~/.ssh/control-%r@%h:%p
+          EOF
+          chmod 600 ~/.ssh/config
 
-          # mask host from logs
-          echo "::add-mask::$host"
+          echo "::add-mask::$UNCLOUD_HOST"
+          echo "::add-mask::$UNCLOUD_USER"
+          echo "::add-mask::$UNCLOUD_PORT"
 
-          # do not print output of uc ps, just test connection
-          uc ps --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" > /dev/null 2>&1
+          ssh -o BatchMode=yes uncloud-host true
+
+          uc ps --connect "ssh+cli://uncloud-host" > /dev/null 2>&1
           if [ $? -ne 0 ]; then
             echo "Failed to connect to server"
             exit 1
@@ -70,12 +96,12 @@ jobs:
 
           echo "Checking if preview for PR ${PR_ID} exists..."
 
-          if ! uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" service inspect db-preview-pr-${PR_ID} > /dev/null 2>&1; then
+          if ! uc --connect "ssh+cli://uncloud-host" service inspect db-preview-pr-${PR_ID} > /dev/null 2>&1; then
             echo "ERROR: Database container db-preview-pr-${PR_ID} does not exist"
             exit 1
           fi
 
-          if ! uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" service inspect api-preview-pr-${PR_ID} > /dev/null 2>&1; then
+          if ! uc --connect "ssh+cli://uncloud-host" service inspect api-preview-pr-${PR_ID} > /dev/null 2>&1; then
             echo "ERROR: API container api-preview-pr-${PR_ID} does not exist"
             exit 1
           fi
@@ -90,7 +116,7 @@ jobs:
 
           echo "Dropping drizzle metadata and recreating database schema for PR ${PR_ID}..."
 
-          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec db-preview-pr-${PR_ID} psql -v ON_ERROR_STOP=1 -U postgres -d postgres \
+          uc --connect "ssh+cli://uncloud-host" exec db-preview-pr-${PR_ID} psql -v ON_ERROR_STOP=1 -U postgres -d postgres \
             -c "REVOKE CONNECT ON DATABASE guidebook FROM public;" \
             -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'guidebook' AND pid <> pg_backend_pid();" \
             -c "DROP DATABASE IF EXISTS guidebook;" \
@@ -103,16 +129,18 @@ jobs:
           PR_ID: ${{ inputs.pr_number }}
         run: |
           set -euo pipefail
-          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec api-preview-pr-${PR_ID} npm i -g tsx drizzle-kit drizzle-orm
-          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec api-preview-pr-${PR_ID} npm run db:migrate
+
+          uc --connect "ssh+cli://uncloud-host" exec api-preview-pr-${PR_ID} npm i -g tsx drizzle-kit drizzle-orm
+          uc --connect "ssh+cli://uncloud-host" exec api-preview-pr-${PR_ID} npm run db:migrate
 
       - name: Restart API after database reset
         env:
           PR_ID: ${{ inputs.pr_number }}
         run: |
           set -euo pipefail
-          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" service stop api-preview-pr-${PR_ID}
-          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" service start api-preview-pr-${PR_ID}
+
+          uc --connect "ssh+cli://uncloud-host" service stop api-preview-pr-${PR_ID}
+          uc --connect "ssh+cli://uncloud-host" service start api-preview-pr-${PR_ID}
 
       - name: Seed database
         continue-on-error: true
@@ -120,5 +148,6 @@ jobs:
           PR_ID: ${{ inputs.pr_number }}
         run: |
           set -euo pipefail
-          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec api-preview-pr-${PR_ID} npm i -g tsx drizzle-kit drizzle-orm
-          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec api-preview-pr-${PR_ID} npm run db:seed || true
+          
+          uc --connect "ssh+cli://uncloud-host" exec api-preview-pr-${PR_ID} npm i -g tsx drizzle-kit drizzle-orm
+          uc --connect "ssh+cli://uncloud-host" exec api-preview-pr-${PR_ID} npm run db:seed || true

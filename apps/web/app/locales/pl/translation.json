@@ -1930,10 +1930,11 @@
     "header": "Proste logo platformy (ikona)",
     "subHeader": "Prześlij własne logo, które będzie używane jako sygnet i favicon. Obsługiwane formaty: PNG, SVG",
     "field": {
-      "uploadLabel": "Obraz logo"
+      "uploadLabel": "Obraz logo",
+      "imageRequirements": "PNG lub SVG (max. 10 MB)"
     },
     "button": {
-      "removeLogo": "Usuń logo"
+      "removeLogo": "Usuń logo ikony platformy"
     },
     "toast": {
       "logoUploadedSuccessfully": "Proste logo platformy zostało pomyślnie przesłane",
@@ -1945,7 +1946,11 @@
     "title": "Przesyłanie tła certyfikatu",
     "description": "Prześlij obraz tła dla certyfikatu.",
     "button": {
-      "removeBackgroundImage": "Usuń obraz tła"
+      "removeCertificateBackgroundImage": "Usuń tło certyfikatu",
+      "preview": "Podgląd"
+    },
+    "field": {
+      "imageRequirements": "PNG, JPG lub JPEG (max. 20 MB)"
     },
     "other": {
       "uploading": "Przesyłanie..."
@@ -2132,13 +2137,15 @@
     "header": "Logo Platformy",
     "subHeader": "Wgraj własne logo dla swojej platformy. Obsługiwane formaty: PNG, SVG",
     "field": {
-      "uploadLabel": "Obraz Logo"
+      "uploadLabel": "Obraz Logo",
+      "imageRequirements": "PNG lub SVG (max. 10 MB)"
     },
     "button": {
-      "removeLogo": "Usuń Logo"
+      "removeLogo": "Usuń logo platformy"
     },
     "toast": {
       "logoUploadedSuccessfully": "Logo platformy zostało pomyślnie wgrane",
+      "logoRemovedSuccessfully": "Logo platformy zostało pomyślnie usunięte",
       "logoFetchError": "Nie udało się pobrać logo platformy"
     }
   },
@@ -2149,8 +2156,11 @@
   "organizationLoginBackgroundImageUpload": {
     "title": "Przesyłanie obrazu tła logowania",
     "description": "Wgraj własny obraz tła dla strony logowania organizacji.",
+    "field": {
+      "imageRequirements": "PNG, JPG lub JPEG (max. 20 MB)"
+    },
     "button": {
-      "removeBackgroundImage": "Usuń obraz tła"
+      "removeBackgroundImage": "Usuń tło strony logowania"
     },
     "toast": {
       "success": "Obraz tła logowania został pomyślnie zmieniony",
