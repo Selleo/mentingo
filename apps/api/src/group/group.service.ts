@@ -428,20 +428,39 @@ export class GroupService {
       .where(eq(groupCourses.groupId, groupId));
 
     if (groupCoursesList.length === 0) return;
+    const groupCourseIds = groupCoursesList.map(({ courseId }) => courseId);
 
     const existingEnrollments = await trx
-      .select({ courseId: studentCourses.courseId })
+      .select({
+        courseId: studentCourses.courseId,
+        enrolledByGroupId: studentCourses.enrolledByGroupId,
+      })
       .from(studentCourses)
       .where(
         and(
           eq(studentCourses.studentId, userId),
           eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
-          inArray(
-            studentCourses.courseId,
-            groupCoursesList.map((gc) => gc.courseId),
-          ),
+          inArray(studentCourses.courseId, groupCourseIds),
         ),
       );
+
+    const individualEnrollmentCourseIds = existingEnrollments
+      .filter(({ enrolledByGroupId }) => !enrolledByGroupId)
+      .map(({ courseId }) => courseId);
+
+    if (individualEnrollmentCourseIds.length) {
+      await trx
+        .update(studentCourses)
+        .set({ enrolledByGroupId: groupId })
+        .where(
+          and(
+            eq(studentCourses.studentId, userId),
+            eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+            isNull(studentCourses.enrolledByGroupId),
+            inArray(studentCourses.courseId, individualEnrollmentCourseIds),
+          ),
+        );
+    }
 
     const existingCourseIds = existingEnrollments.map(({ courseId }) => courseId);
 
