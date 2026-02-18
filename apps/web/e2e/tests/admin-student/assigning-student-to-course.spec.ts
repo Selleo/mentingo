@@ -530,7 +530,7 @@ const studentSeesCourseByGroup = async (page: Page) => {
   await page.getByRole("button", { name: "Courses" }).getByRole("link").click();
   await page.getByTestId(COURSE.title).last().click();
   await page.waitForURL(/course\/[\w-]+/);
-  const courseBreadcrumb = page.getByRole("link", { name: "Course v1" });
+  const courseBreadcrumb = page.locator("nav").getByRole("link", { name: COURSE.title }).first();
   await courseBreadcrumb.waitFor({ state: "visible", timeout: 10000 });
   await expect(courseBreadcrumb).toBeVisible();
   await expect(page.getByRole("heading", { name: COURSE.title })).toBeVisible();
