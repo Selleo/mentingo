@@ -22,20 +22,16 @@ export const navigateToPage = async (
   headerText: string,
   headerItem?: Locator,
 ) => {
-  const announcementsVisible = await page
-    .getByRole("link", { name: /announcements/i })
-    .isVisible({ timeout: 5000 })
-    .catch(() => false);
+  const navigationLink = page.getByRole("link", { name: new RegExp(name, "i") }).first();
 
-  if (!announcementsVisible) {
-    await page
-      .getByRole("button", { name: /manage/i })
-      .first()
-      .click();
+  if (!(await navigationLink.isVisible({ timeout: 1000 }).catch(() => false))) {
+    const manageButton = page.getByRole("button", { name: /manage/i }).first();
+    if (await manageButton.isVisible({ timeout: 1000 }).catch(() => false)) {
+      await manageButton.click();
+    }
   }
 
-  const navigationLink = page.getByRole("link", { name: new RegExp(name, "i") }).first();
-  if (await navigationLink.isVisible().catch(() => false)) {
+  if (await navigationLink.isVisible({ timeout: 3000 }).catch(() => false)) {
     await navigationLink.click();
   } else {
     await page
@@ -52,7 +48,7 @@ export const navigateToPage = async (
       .filter({ hasText: new RegExp(headerText, "i") })
       .getByRole("link");
 
-  await header.waitFor({ state: "visible" });
+  await expect(header).toBeVisible();
 };
 
 export const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");

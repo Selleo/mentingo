@@ -68,8 +68,7 @@ const createNewPasswordAndLoginAsStudent = async (page: Page, importedEmail: str
   const inviteLinkLocator = page
     .locator("#preview-html")
     .contentFrame()
-    .locator("a[href*='/auth/create-new-password?createToken=']")
-    .first();
+    .getByRole("link", { name: "DOŁĄCZ TERAZ" });
   await expect(inviteLinkLocator).toBeVisible({ timeout: 15_000 });
   const inviteLink = await inviteLinkLocator.getAttribute("href");
 
