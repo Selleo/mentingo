@@ -42,10 +42,19 @@ jobs:
       - name: Setup SSH
         shell: bash
         env:
-          UNCLOUD_CONNECT: ${{ secrets.UNCLOUD_CONNECT }}
+          UNCLOUD_HOST: ${{ secrets.UNCLOUD_HOST }}
+          UNCLOUD_USER: ${{ secrets.UNCLOUD_USER }}
+          UNCLOUD_PORT: ${{ secrets.UNCLOUD_PORT }}
           UNCLOUD_SSH_KEY: ${{ secrets.UNCLOUD_SSH_KEY }}
         run: |
           set -euo pipefail
+
+          for required in UNCLOUD_HOST UNCLOUD_USER UNCLOUD_PORT UNCLOUD_SSH_KEY; do
+            if [ -z "${!required:-}" ]; then
+              echo "Missing required secret: ${required}"
+              exit 1
+            fi
+          done
 
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
@@ -53,18 +62,36 @@ jobs:
           echo "${{ secrets.UNCLOUD_SSH_KEY }}" > ~/.ssh/id_ecdsa
           chmod 600 ~/.ssh/id_ecdsa
 
-          # Extract the host from the UNCLOUD_CONNECT secret
-          host="$(echo "${{ secrets.UNCLOUD_CONNECT }}" | sed -E 's#^ssh(\+cli)?://##; s#^[^@]+@##; s#:/.*##; s#:.*##')"
+      - name: Configure SSH multiplexing
+        shell: bash
+        env:
+          UNCLOUD_HOST: ${{ secrets.UNCLOUD_HOST }}
+          UNCLOUD_USER: ${{ secrets.UNCLOUD_USER }}
+          UNCLOUD_PORT: ${{ secrets.UNCLOUD_PORT }}
+        run: |
+          set -euo pipefail
 
-          # add to known_hosts:
-          ssh-keyscan -H "$host" >> ~/.ssh/known_hosts
-          chmod 644 ~/.ssh/known_hosts
+          cat > ~/.ssh/config <<EOF
+          Host uncloud-host
+            HostName ${UNCLOUD_HOST}
+            User ${UNCLOUD_USER}
+            Port ${UNCLOUD_PORT}
+            IdentityFile ~/.ssh/id_ecdsa
+            StrictHostKeyChecking no
+            ControlMaster auto
+            ControlPersist 10m
+            ControlPath ~/.ssh/control-%r@%h:%p
+          EOF
+          chmod 600 ~/.ssh/config
 
-          # mask host from logs
-          echo "::add-mask::$host"
+          echo "::add-mask::$UNCLOUD_HOST"
+          echo "::add-mask::$UNCLOUD_USER"
+          echo "::add-mask::$UNCLOUD_PORT"
 
-          # do not print output of uc ps, just test connection
-          uc ps --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" > /dev/null 2>&1
+          ssh -o BatchMode=yes uncloud-host true
+
+          uc ps --connect "ssh+cli://uncloud-host" > /dev/null 2>&1
+
           if [ $? -ne 0 ]; then
             echo "Failed to connect to server"
             exit 1
@@ -85,12 +112,13 @@ jobs:
           PREVIEW_MAILHOG_DOMAIN="mailhog-pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
           PREVIEW_WEB_DOMAIN="pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
           PREVIEW_API_DOMAIN="api-pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
+          PREVIEW_MINIO_DOMAIN="minio-pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
           GIT_DATE=$(git show -s --format=%cd --date=format:'%Y%m%d-%H%M%S' "$GITHUB_SHA")
           GIT_SHA_SHORT=$(echo "$GITHUB_SHA" | cut -c1-7)
           VERSION_TAG="${GIT_DATE}.${GIT_SHA_SHORT}"
 
-          export VERSION_TAG PR_ID PREVIEW_WEB_DOMAIN PREVIEW_API_DOMAIN PREVIEW_MAILHOG_DOMAIN MINIO_ROOT_PASSWORD JWT_SECRET JWT_REFRESH_SECRET POSTGRES_PASSWORD
-          envsubst < "docker-compose.preview.tpl.yml" > "docker-compose.pr.yml"
+          export VERSION_TAG PR_ID PREVIEW_WEB_DOMAIN PREVIEW_API_DOMAIN PREVIEW_MAILHOG_DOMAIN PREVIEW_MINIO_DOMAIN MINIO_ROOT_PASSWORD JWT_SECRET JWT_REFRESH_SECRET POSTGRES_PASSWORD
+          envsubst '${VERSION_TAG} ${PR_ID} ${PREVIEW_WEB_DOMAIN} ${PREVIEW_API_DOMAIN} ${PREVIEW_MAILHOG_DOMAIN} ${PREVIEW_MINIO_DOMAIN} ${MINIO_ROOT_PASSWORD} ${JWT_SECRET} ${JWT_REFRESH_SECRET} ${POSTGRES_PASSWORD}' < "docker-compose.preview.tpl.yml" > "docker-compose.pr.yml"
 
       - name: Create helpers to repair invalid stack building
         env:
@@ -99,7 +127,6 @@ jobs:
         run: |
           set -euo pipefail
 
-          # create .env for web
           echo "VITE_API_URL=https://api-pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}" > apps/web/.env
           echo "VITE_APP_URL=https://pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}" >> apps/web/.env
 
@@ -109,20 +136,42 @@ jobs:
         run: |
           set -euo pipefail
 
-          # master_key
           MASTER_KEY=$(echo -n "preview-pr-${PR_ID}" | openssl dgst -sha256 -binary | head -c 32 | openssl base64)
           export MASTER_KEY
 
-          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" deploy -f docker-compose.pr.yml -y
+          uc --connect "ssh+cli://uncloud-host" deploy -f docker-compose.pr.yml -y
+
+      - name: Reset database (drop + recreate)
+        env:
+          PR_ID: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+
+          uc --connect "ssh+cli://uncloud-host" exec db-preview-pr-${PR_ID} psql -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -c "REVOKE CONNECT ON DATABASE guidebook FROM public;" \
+            -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'guidebook' AND pid <> pg_backend_pid();" \
+            -c "DROP DATABASE IF EXISTS guidebook;" \
+            -c "CREATE DATABASE guidebook;" \
+            -c "GRANT ALL PRIVILEGES ON DATABASE guidebook TO postgres;" \
+            -c "GRANT CONNECT ON DATABASE guidebook TO public;"
 
       - name: Run database migrations
         env:
           PR_ID: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
-          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec db-preview-pr-${PR_ID} psql -U postgres -d guidebook -c "DROP SCHEMA IF EXISTS public CASCADE; DROP SCHEMA IF EXISTS drizzle CASCADE; CREATE SCHEMA public;"
-          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec api-preview-pr-${PR_ID} npm i -g tsx drizzle-kit drizzle-orm
-          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec api-preview-pr-${PR_ID} npm run db:migrate
+
+          uc --connect "ssh+cli://uncloud-host" exec api-preview-pr-${PR_ID} npm i -g tsx drizzle-kit drizzle-orm
+          uc --connect "ssh+cli://uncloud-host" exec api-preview-pr-${PR_ID} npm run db:migrate
+
+      - name: Restart API after database reset
+        env:
+          PR_ID: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+
+          uc --connect "ssh+cli://uncloud-host" service stop api-preview-pr-${PR_ID}
+          uc --connect "ssh+cli://uncloud-host" service start api-preview-pr-${PR_ID}
 
       - name: Seed database
         continue-on-error: true
@@ -130,8 +179,9 @@ jobs:
           PR_ID: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
-          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec api-preview-pr-${PR_ID} npm i -g tsx drizzle-kit drizzle-orm
-          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec api-preview-pr-${PR_ID} npm run db:seed || true
+
+          uc --connect "ssh+cli://uncloud-host" exec api-preview-pr-${PR_ID} npm i -g tsx drizzle-kit drizzle-orm
+          uc --connect "ssh+cli://uncloud-host" exec api-preview-pr-${PR_ID} npm run db:seed || true
 
       - name: Comment PR - send message to PR preview link
         env:
@@ -144,13 +194,10 @@ jobs:
           PREVIEW_WEB_DOMAIN="https://pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
           PREVIEW_MAILHOG_DOMAIN="https://mailhog-pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
 
-          # get current comments
           comments=$(curl -sS \
             -H "Authorization: Bearer $GH_TOKEN" \
             -H "Accept: application/vnd.github+json" \
             "${{ github.api_url }}/repos/${{ github.repository }}/issues/${PR_ID}/comments")
-
-          # check if message already exists
           already_exists=$(echo "$comments" | jq -r '
             any(.[];
               ((.user.type == "Bot") or (.user.login == "github-actions[bot]"))
@@ -211,10 +258,19 @@ jobs:
       - name: Setup SSH
         shell: bash
         env:
-          UNCLOUD_CONNECT: ${{ secrets.UNCLOUD_CONNECT }}
+          UNCLOUD_HOST: ${{ secrets.UNCLOUD_HOST }}
+          UNCLOUD_USER: ${{ secrets.UNCLOUD_USER }}
+          UNCLOUD_PORT: ${{ secrets.UNCLOUD_PORT }}
           UNCLOUD_SSH_KEY: ${{ secrets.UNCLOUD_SSH_KEY }}
         run: |
           set -euo pipefail
+
+          for required in UNCLOUD_HOST UNCLOUD_USER UNCLOUD_PORT UNCLOUD_SSH_KEY; do
+            if [ -z "${!required:-}" ]; then
+              echo "Missing required secret: ${required}"
+              exit 1
+            fi
+          done
 
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
@@ -222,18 +278,35 @@ jobs:
           echo "${{ secrets.UNCLOUD_SSH_KEY }}" > ~/.ssh/id_ecdsa
           chmod 600 ~/.ssh/id_ecdsa
 
-          # Extract the host from the UNCLOUD_CONNECT secret
-          host="$(echo "${{ secrets.UNCLOUD_CONNECT }}" | sed -E 's#^ssh(\+cli)?://##; s#^[^@]+@##; s#:/.*##; s#:.*##')"
+      - name: Configure SSH multiplexing
+        shell: bash
+        env:
+          UNCLOUD_HOST: ${{ secrets.UNCLOUD_HOST }}
+          UNCLOUD_USER: ${{ secrets.UNCLOUD_USER }}
+          UNCLOUD_PORT: ${{ secrets.UNCLOUD_PORT }}
+        run: |
+          set -euo pipefail
 
-          # add to known_hosts:
-          ssh-keyscan -H "$host" >> ~/.ssh/known_hosts
-          chmod 644 ~/.ssh/known_hosts
+          cat > ~/.ssh/config <<EOF
+          Host uncloud-host
+            HostName ${UNCLOUD_HOST}
+            User ${UNCLOUD_USER}
+            Port ${UNCLOUD_PORT}
+            IdentityFile ~/.ssh/id_ecdsa
+            StrictHostKeyChecking no
+            ControlMaster auto
+            ControlPersist 10m
+            ControlPath ~/.ssh/control-%r@%h:%p
+          EOF
+          chmod 600 ~/.ssh/config
 
-          # mask host from logs
-          echo "::add-mask::$host"
+          echo "::add-mask::$UNCLOUD_HOST"
+          echo "::add-mask::$UNCLOUD_USER"
+          echo "::add-mask::$UNCLOUD_PORT"
 
-          # do not print output of uc ps, just test connection
-          uc ps --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" > /dev/null 2>&1
+          ssh -o BatchMode=yes uncloud-host true
+
+          uc ps --connect "ssh+cli://uncloud-host" > /dev/null 2>&1
           if [ $? -ne 0 ]; then
             echo "Failed to connect to server"
             exit 1
@@ -241,13 +314,11 @@ jobs:
 
       - name: Cleanup PR Preview stack
         env:
-          UNCLOUD_CONNECT: ${{ secrets.UNCLOUD_CONNECT }}
           PR_ID: ${{ github.event.pull_request.number }}
           UNCLOUD_PREVIEW_DOMAIN: ${{ vars.UNCLOUD_PREVIEW_DOMAIN }}
         run: |
           set -euo pipefail
 
-          # render compose as deployment does but with empty values:
           MINIO_ROOT_PASSWORD=""
           JWT_SECRET=""
           JWT_REFRESH_SECRET=""
@@ -255,27 +326,21 @@ jobs:
           PREVIEW_WEB_DOMAIN=""
           PREVIEW_API_DOMAIN=""
           PREVIEW_MAILHOG_DOMAIN=""
+          PREVIEW_MINIO_DOMAIN=""
           VERSION_TAG="0"
 
-          export VERSION_TAG PR_ID PREVIEW_WEB_DOMAIN PREVIEW_API_DOMAIN PREVIEW_MAILHOG_DOMAIN MINIO_ROOT_PASSWORD JWT_SECRET JWT_REFRESH_SECRET POSTGRES_PASSWORD
-          envsubst < "docker-compose.preview.tpl.yml" > "docker-compose.pr.yml"
+          export VERSION_TAG PR_ID PREVIEW_WEB_DOMAIN PREVIEW_API_DOMAIN PREVIEW_MAILHOG_DOMAIN PREVIEW_MINIO_DOMAIN MINIO_ROOT_PASSWORD JWT_SECRET JWT_REFRESH_SECRET POSTGRES_PASSWORD
+          envsubst '${VERSION_TAG} ${PR_ID} ${PREVIEW_WEB_DOMAIN} ${PREVIEW_API_DOMAIN} ${PREVIEW_MAILHOG_DOMAIN} ${PREVIEW_MINIO_DOMAIN} ${MINIO_ROOT_PASSWORD} ${JWT_SECRET} ${JWT_REFRESH_SECRET} ${POSTGRES_PASSWORD}' < "docker-compose.preview.tpl.yml" > "docker-compose.pr.yml"
 
-          # collect services and volumes:
           services="$(yq -r '.services | keys | .[]' docker-compose.pr.yml)"
           volumes="$(yq -r '.volumes | keys | .[]' docker-compose.pr.yml)"
 
-          # remove services and volumes
-          echo "$services" | xargs -r uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" rm || true
-          echo "$volumes" | xargs -r uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" volume rm -y || true
+          echo "$services" | xargs -r uc --connect "ssh+cli://uncloud-host" rm || true
+          echo "$volumes" | xargs -r uc --connect "ssh+cli://uncloud-host" volume rm -y || true
 
       - name: Prune unused Docker images
         shell: bash
-        env:
-          UNCLOUD_CONNECT: ${{ secrets.UNCLOUD_CONNECT }}
         run: |
           set -euo pipefail
 
-          # Extract user@host from UNCLOUD_CONNECT
-          ssh_target="$(echo "$UNCLOUD_CONNECT" | sed -E 's#^ssh(\+cli)?://##; s#:/.*##')"
-
-          ssh -i ~/.ssh/id_ecdsa "$ssh_target" "docker image prune -f -a"
+          ssh -i ~/.ssh/id_ecdsa uncloud-host "docker image prune -f -a"
