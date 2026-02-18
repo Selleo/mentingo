@@ -13,7 +13,7 @@ dotenv.config({ path: path.resolve(__dirname, ".env") });
 
 const baseURL = process.env.CI
   ? "http://localhost:5173"
-  : process.env.VITE_APP_URL || "http://localhost:5173";
+  : process.env.VITE_APP_URL || "https://tenant1.lms.localhost";
 
 const config: PlaywrightTestConfig = {
   testDir: "./e2e",

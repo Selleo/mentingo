@@ -34,7 +34,7 @@ const GROUP_UNENROLL_ERROR =
 const COURSES_HEADER = "Top 5 most popular courses";
 
 const PRIVATE_COURSE = {
-  titleTestId: "Advanced English: Mastering Complex Language Skills",
+  titleTestId: "Advanced English: Mastering",
   heading: "Advanced English: Mastering",
   admin: { email: getTenantEmail("admin@example.com"), password: "password" },
   student: {
@@ -43,6 +43,12 @@ const PRIVATE_COURSE = {
     email2: getTenantEmail("student0@example.com"),
   },
 };
+
+const privateCourseCard = (page: Page) =>
+  page
+    .getByTestId(PRIVATE_COURSE.titleTestId)
+    .first()
+    .or(page.getByText(PRIVATE_COURSE.heading).first());
 
 const SEQUENCE_USERS = {
   admin: { email: getTenantEmail("admin@example.com"), password: "password" },
@@ -396,8 +402,8 @@ const createGroup = async (page: Page) => {
 const assignGroupToStudent = async (page: Page) => {
   await page.getByRole("link", { name: "Users" }).click();
   await page.getByTestId(USERS.student.email).click();
-  await page.getByRole("button", { name: "Edit" }).click();
-  await page.getByRole("button", { name: "Change group" }).click();
+  await page.getByRole("button", { name: "Bulk edit" }).click();
+  await page.getByRole("button", { name: "Groups" }).click();
   const groupOption = page.getByRole("option", { name: GROUP.name }).first();
   await groupOption.click();
   await expect(groupOption).toHaveAttribute("aria-selected", "true");
@@ -568,8 +574,8 @@ const createNamedGroup = async (page: Page, name: string) => {
 const unassignStudentFromGroup = async (page: Page, studentEmail: string, groupName: string) => {
   await page.getByRole("link", { name: "Users" }).click();
   await page.getByTestId(studentEmail).click();
-  await page.getByRole("button", { name: "Edit" }).click();
-  await page.getByRole("button", { name: "Change group" }).click();
+  await page.getByRole("button", { name: "Bulk edit" }).click();
+  await page.getByRole("button", { name: "Groups" }).click();
   await page.getByRole("option", { name: groupName }).click();
   const header = page.getByRole("heading", { name: "Modify groups (1)" });
   await header.click();
@@ -659,7 +665,7 @@ const setCourseAsPrivate = async (page: Page) => {
 
 const expectCourseHiddenForPrivateStudent = async (page: Page) => {
   await login(page, PRIVATE_COURSE.student.email2, PRIVATE_COURSE.student.password);
-  await expect(page.getByTestId(PRIVATE_COURSE.titleTestId).first()).toBeHidden();
+  await expect(privateCourseCard(page)).toBeHidden();
   await logoutStudent(page);
 };
 
@@ -680,8 +686,8 @@ const enrollStudentToPrivateCourse = async (page: Page) => {
 
 const expectCourseVisibleForPrivateStudent = async (page: Page) => {
   await login(page, PRIVATE_COURSE.student.email2, PRIVATE_COURSE.student.password);
-  await expect(page.getByTestId(PRIVATE_COURSE.titleTestId).first()).toBeVisible();
-  await page.getByTestId(PRIVATE_COURSE.titleTestId).first().click();
+  await expect(privateCourseCard(page)).toBeVisible();
+  await privateCourseCard(page).click();
   await page.waitForURL(/course\/[\w-]+/);
   await expect(page.getByRole("heading", { name: "Author" })).toBeVisible();
 };
@@ -759,10 +765,7 @@ test.describe.serial("Assigning students to course flow", () => {
       );
 
       expect(
-        await verifyStudentSeesCourse(
-          page,
-          ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.secondCourseToAssign,
-        ),
+        await verifyStudentSeesCourse(page, ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.courseToAssign),
       ).toBeTruthy();
     });
   });

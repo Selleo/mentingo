@@ -11,7 +11,7 @@ export const GROUPS_PAGE_UI = {
     cancel: "cancel",
     save: "save",
     back: "back",
-    edit: "edit",
+    bulkEdit: "bulk edit",
     confirm: "confirm",
   },
   cell: {

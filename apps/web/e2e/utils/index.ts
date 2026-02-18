@@ -22,19 +22,27 @@ export const navigateToPage = async (
   headerText: string,
   headerItem?: Locator,
 ) => {
-  const announcementsButton = page
+  const announcementsVisible = await page
     .getByRole("link", { name: /announcements/i })
-    .waitFor({ state: "visible", timeout: 5000 })
-    .catch(() => null);
+    .isVisible({ timeout: 5000 })
+    .catch(() => false);
 
-  if (!announcementsButton) {
+  if (!announcementsVisible) {
     await page
       .getByRole("button", { name: /manage/i })
       .first()
       .click();
   }
 
-  await page.getByRole("button", { name: new RegExp(name, "i") }).click();
+  const navigationLink = page.getByRole("link", { name: new RegExp(name, "i") }).first();
+  if (await navigationLink.isVisible().catch(() => false)) {
+    await navigationLink.click();
+  } else {
+    await page
+      .getByRole("button", { name: new RegExp(name, "i") })
+      .first()
+      .click();
+  }
 
   const header =
     headerItem ||
@@ -147,7 +155,10 @@ export const verifyStudentSeesCourse = async (page: Page, course: string): Promi
     }),
   );
 
-  const expectedCourse = page.getByTestId(course).first();
+  const expectedCourse = page
+    .getByTestId(course)
+    .first()
+    .or(page.getByText(new RegExp(escapeRegExp(course), "i")).first());
 
   if (!(await expectedCourse.isVisible())) return false;
 

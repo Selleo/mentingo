@@ -29,7 +29,7 @@ const openUsers = async (page: Page) => {
 const archiveStudent = async (page: Page) => {
   await openUsers(page);
   await page.getByTestId(STUDENT_EMAIL).click();
-  await page.getByRole("button", { name: "Edit" }).click();
+  await page.getByRole("button", { name: "Bulk edit" }).click();
   await page.getByRole("button", { name: "Archive" }).click();
   await expect(page.getByRole("heading", { name: "Archive user accounts (1)" })).toBeVisible();
   await page.getByRole("button", { name: "Archive" }).click();

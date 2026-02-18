@@ -2,7 +2,7 @@ const DEFAULT_TENANT_ORIGIN =
   process.env.CORS_ORIGIN ||
   process.env.VITE_APP_URL ||
   process.env.PLAYWRIGHT_BASE_URL ||
-  "http://localhost:5173";
+  "https://tenant1.lms.localhost";
 
 export const getTenantEmail = (email: string, origin = DEFAULT_TENANT_ORIGIN) => {
   try {
