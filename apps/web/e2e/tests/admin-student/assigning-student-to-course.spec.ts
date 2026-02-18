@@ -413,7 +413,7 @@ const assignGroupToStudent = async (page: Page) => {
 };
 
 const createCourse = async (page: Page) => {
-  await page.getByRole("link", { name: "Courses" }).click();
+  await page.getByRole("button", { name: "Courses" }).getByRole("link").click();
   await page.getByRole("button", { name: "Manage courses" }).click();
   await page.getByRole("button", { name: "Create new" }).click();
   await page.getByPlaceholder("Enter title").fill(COURSE.title);
@@ -528,7 +528,9 @@ const studentSeesCourseByGroup = async (page: Page) => {
   await page.getByRole("button", { name: "Courses" }).getByRole("link").click();
   await page.getByTestId(COURSE.title).last().click();
   await page.waitForURL(/course\/[\w-]+/);
-  const courseBreadcrumb = page.getByRole("link", { name: COURSE.title });
+  const courseBreadcrumb = page
+    .getByRole("navigation")
+    .getByRole("link", { name: COURSE.title, exact: true });
   await courseBreadcrumb.waitFor({ state: "visible", timeout: 10000 });
   await expect(courseBreadcrumb).toBeVisible();
   await expect(page.getByRole("heading", { name: COURSE.title })).toBeVisible();
@@ -591,7 +593,7 @@ const setupLAGroupForStudent = async (page: Page) => {
 };
 
 const enrollStudentIndividuallyIntoCourse = async (page: Page, courseTitle: string) => {
-  await page.getByRole("link", { name: "Courses" }).click();
+  await page.getByRole("button", { name: "Courses" }).getByRole("link").click();
   await page.getByTestId(courseTitle).first().click();
   await page.getByRole("button", { name: "Edit Course" }).click();
   await page.getByRole("tab", { name: "Enrolled students" }).click();
@@ -602,7 +604,7 @@ const enrollStudentIndividuallyIntoCourse = async (page: Page, courseTitle: stri
 };
 
 const enrollGroupIntoCourse = async (page: Page, courseTitle: string) => {
-  await page.getByRole("link", { name: "Courses" }).click();
+  await page.getByRole("button", { name: "Courses" }).getByRole("link").click();
   await page.getByTestId(courseTitle).first().click();
   await page.getByRole("button", { name: "Edit Course" }).click();
   await page.getByRole("tab", { name: "Enrolled students" }).click();
