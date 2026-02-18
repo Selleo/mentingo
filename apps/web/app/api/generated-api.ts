@@ -4512,7 +4512,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     settingsControllerUpdateCertificateBackground: (
       data: {
         /** @format binary */
-        "certificate-background"?: File;
+        "certificate-background"?: File | null;
       },
       params: RequestParams = {},
     ) =>
