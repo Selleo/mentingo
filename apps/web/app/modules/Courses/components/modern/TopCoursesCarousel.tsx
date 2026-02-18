@@ -21,7 +21,7 @@ const TopCoursesCarousel = ({ courses }: TopCoursesCarouselProps) => {
   const [carouselApi, setCarouselApi] = useState<CarouselApi | null>(null);
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
-  const popoutEnabled = courses.length > 1;
+  const popoutEnabled = true;
 
   useEffect(() => {
     if (!carouselApi) return;
@@ -65,7 +65,7 @@ const TopCoursesCarousel = ({ courses }: TopCoursesCarouselProps) => {
   );
 
   return (
-    <section className="relative group px-4 md:px-8 pb-6">
+    <section className="relative group px-4 md:px-8 pb-6" data-course-row>
       <Carousel
         opts={{ align: "start", slidesToScroll: 1, skipSnaps: false }}
         setApi={setCarouselApi}

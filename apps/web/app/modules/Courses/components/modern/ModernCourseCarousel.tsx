@@ -31,7 +31,7 @@ const ModernCourseCarousel = ({
   const [carouselApi, setCarouselApi] = useState<CarouselApi | null>(null);
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
-  const popoutEnabled = courses.length > 1;
+  const popoutEnabled = true;
 
   useEffect(() => {
     if (!carouselApi) return;
@@ -57,7 +57,7 @@ const ModernCourseCarousel = ({
     <section className="space-y-4 pb-6">
       <h2 className="h2 px-4 md:px-8">{title}</h2>
 
-      <div className="group relative px-4 md:px-8 mt-10">
+      <div className="group relative px-4 md:px-8 mt-10" data-course-row>
         <Carousel
           opts={{ align: "start", slidesToScroll: 1, skipSnaps: false }}
           setApi={setCarouselApi}
