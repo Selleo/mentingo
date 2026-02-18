@@ -29,6 +29,8 @@ import {
   THREAD_STATUS,
 } from "src/ai/utils/ai.type";
 import { DatabasePg } from "src/common";
+import { dbAls } from "src/storage/db/db-als.store";
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { aiMentorThreads } from "src/storage/schema";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
@@ -56,6 +58,7 @@ export class AiService {
     private readonly summaryService: SummaryService,
     private readonly judgeService: JudgeService,
     private readonly studentLessonProgressService: StudentLessonProgressService,
+    private readonly tenantRunner: TenantDbRunnerService,
     @Inject("DB")
     private readonly db: DatabasePg,
   ) {}
@@ -121,19 +124,20 @@ export class AiService {
             const mentorTokenCount = this.tokenService.countTokens(model, event.text);
             const userTokenCount = this.tokenService.countTokens(model, data.content);
 
-            await this.messageService.createMessages(
-              {
-                ...data,
-                role: MESSAGE_ROLE.USER,
-                tokenCount: userTokenCount,
-              },
-              {
-                content: event.text,
-                role: MESSAGE_ROLE.MENTOR,
-                threadId: data.threadId,
-                tokenCount: mentorTokenCount,
-              },
-            );
+            const tenantId = dbAls.getStore()?.tenantId;
+            if (!tenantId) throw new Error("Missing tenant context in onFinish");
+
+            await this.tenantRunner.runWithTenant(tenantId, async () => {
+              await this.messageService.createMessages(
+                { ...data, role: MESSAGE_ROLE.USER, tokenCount: userTokenCount },
+                {
+                  threadId: data.threadId,
+                  content: event.text,
+                  role: MESSAGE_ROLE.MENTOR,
+                  tokenCount: mentorTokenCount,
+                },
+              );
+            });
 
             updateActiveObservation({
               input: { message: data.content },
