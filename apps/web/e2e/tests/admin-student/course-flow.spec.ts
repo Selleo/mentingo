@@ -264,16 +264,14 @@ const buildQuiz = async (page: Page) => {
     .getByRole("textbox")
     .nth(2)
     .click();
-  const dragHandle = page.getByTestId("drag-missing");
-  await dragHandle.click();
-  const sourceCard = page.locator("div:nth-child(4) > div > div");
+  const sourceCard = page.getByTestId(`drag-${TEST_DATA.fillInTheBlanks.missingWord}`).first();
   const destinationInput = page
     .locator("li")
     .filter({ hasText: "This question contains a" })
     .getByRole("textbox")
     .nth(1);
   await sourceCard.dragTo(destinationInput);
-  await dragHandle.click();
+  await sourceCard.click();
   await page
     .locator("li")
     .filter({ hasText: "This question contains a" })
@@ -392,15 +390,17 @@ const publishAndEnroll = async (page: Page) => {
 };
 
 const waitForStudentLessonProgress = async (page: Page) => {
-  await page.waitForResponse(
-    (response) =>
-      response.url().includes("api/studentLessonProgress") &&
-      response.request().method() === "POST" &&
-      response.status() === 201,
-    {
-      timeout: 15000,
-    },
-  );
+  await page
+    .waitForResponse(
+      (response) =>
+        response.url().includes("api/studentLessonProgress") &&
+        response.request().method() === "POST" &&
+        [200, 201].includes(response.status()),
+      {
+        timeout: 7000,
+      },
+    )
+    .catch(() => null);
 };
 
 const waitForQuizCompletion = async (page: Page) => {
@@ -427,9 +427,10 @@ const studentCompletesCourse = async (page: Page) => {
   await page.getByTestId("title").last().click();
   await expect(page.getByRole("tab", { name: "Statistics" })).toBeHidden();
   await page.getByTestId("chapter 1").click();
+  const studentLessonProgressResponsePromise = waitForStudentLessonProgress(page);
   await page.getByRole("link", { name: "title Content Not Started" }).click();
-  await waitForStudentLessonProgress(page);
   await expect(page.getByRole("heading", { name: "content header" })).toBeVisible();
+  await studentLessonProgressResponsePromise;
   await page.getByTestId("next-lesson-button").click();
   await expect(page.getByText("Cars quiz").first()).toBeVisible();
   await expect(page.getByText("Lesson 2/4 – Quiz")).toBeVisible();

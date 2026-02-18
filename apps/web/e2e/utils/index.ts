@@ -157,8 +157,8 @@ export const verifyStudentSeesCourse = async (page: Page, course: string): Promi
 
   const expectedCourse = page
     .getByTestId(course)
-    .first()
-    .or(page.getByText(new RegExp(escapeRegExp(course), "i")).first());
+    .or(page.getByText(new RegExp(escapeRegExp(course), "i")).first())
+    .first();
 
   if (!(await expectedCourse.isVisible())) return false;
 

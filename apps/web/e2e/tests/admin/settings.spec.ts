@@ -194,7 +194,7 @@ test.describe("Admin settings", () => {
     await page.locator("#primary-color-input").fill(HEX_PRIMARY.replace("#", ""));
     await page.locator("#contrast-color-input").dblclick();
     await page.locator("#contrast-color-input").fill(HEX_CONTRAST.replace("#", ""));
-    await page.getByRole("button", { name: "Save" }).nth(4).click();
+    await page.getByTestId("save-theme-colors").click();
     await page.getByRole("link", { name: "Analytics" }).click();
     const downloadReport = page.getByRole("button", { name: "Download Report" });
     await expect(downloadReport).toBeVisible();
