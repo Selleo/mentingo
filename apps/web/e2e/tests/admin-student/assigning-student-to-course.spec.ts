@@ -29,8 +29,6 @@ const COURSE = {
 
 const LA_GROUP_NAME = "LA team";
 const LA_COURSE_TITLE = "Mobile App Development: Creating Your First Android App";
-const GROUP_UNENROLL_ERROR =
-  "You cannot unenroll these students because 1 of them are enrolled via a group.";
 const COURSES_HEADER = "Top 5 most popular courses";
 
 const PRIVATE_COURSE = {
@@ -592,6 +590,17 @@ const setupLAGroupForStudent = async (page: Page) => {
   await unassignStudentFromGroup(page, USERS.student.email, LA_GROUP_NAME);
 };
 
+const enrollStudentIndividuallyIntoCourse = async (page: Page, courseTitle: string) => {
+  await page.getByRole("link", { name: "Courses" }).click();
+  await page.getByTestId(courseTitle).first().click();
+  await page.getByRole("button", { name: "Edit Course" }).click();
+  await page.getByRole("tab", { name: "Enrolled students" }).click();
+  await page.getByText(USERS.student.email).click();
+  await page.getByRole("button", { name: "Enroll", exact: true }).click();
+  await page.getByRole("button", { name: "Enroll selected", exact: true }).click();
+  await page.getByRole("button", { name: "Save" }).click();
+};
+
 const enrollGroupIntoCourse = async (page: Page, courseTitle: string) => {
   await page.getByRole("link", { name: "Courses" }).click();
   await page.getByTestId(courseTitle).first().click();
@@ -614,13 +623,8 @@ const enrollGroupIntoCourse = async (page: Page, courseTitle: string) => {
   }
 };
 
-const expectGroupEnrollmentError = async (page: Page) => {
-  await page.getByText(USERS.student.email).click();
-  await page.getByRole("button", { name: "Enroll", exact: true }).click();
-  await page.getByRole("button", { name: "Unenroll selected" }).click();
-  await page.getByRole("button", { name: "Save" }).click();
-  await expect(page.getByText(GROUP_UNENROLL_ERROR, { exact: true })).toBeVisible();
-  await page.getByText("Cancel").click();
+const expectEnrollmentCountedAsGroup = async (page: Page) => {
+  await expect(page.getByTestId(USERS.student.email).first()).toContainText(/Enrolled by group/i);
 };
 
 const logoutAdminAndLoginStudent = async (page: Page) => {
@@ -824,13 +828,14 @@ test.describe.serial("Assigning students to course flow", () => {
     await studentCompletesFinalLessons(page);
   });
 
-  test("should throw error when trying to unenroll student from course that is enrolled by group, after unenrolling student from group, he should not have access to the course", async ({
+  test("should mark individually enrolled student as enrolled by group after group enrollment and remove course access after group unassignment", async ({
     page,
   }) => {
     await expect(page.getByRole("heading", { name: COURSES_HEADER })).toBeVisible();
     await setupLAGroupForStudent(page);
+    await enrollStudentIndividuallyIntoCourse(page, LA_COURSE_TITLE);
     await enrollGroupIntoCourse(page, LA_COURSE_TITLE);
-    await expectGroupEnrollmentError(page);
+    await expectEnrollmentCountedAsGroup(page);
     await unassignStudentFromGroup(page, USERS.student.email, LA_GROUP_NAME);
     await logoutAdminAndLoginStudent(page);
     await expectCourseNotVisibleForStudent(page, LA_COURSE_TITLE);
