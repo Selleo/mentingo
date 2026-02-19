@@ -2,7 +2,7 @@ import { Inject, Injectable } from "@nestjs/common";
 import { and, eq, isNull, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
-import { DB, DB_BASE } from "src/storage/db/db.providers";
+import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { integrationApiKeys, tenants, users } from "src/storage/schema";
 
 import type {
@@ -16,7 +16,7 @@ import type {
 export class IntegrationRepository {
   constructor(
     @Inject(DB) private readonly db: DatabasePg,
-    @Inject(DB_BASE) private readonly dbBase: DatabasePg,
+    @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
   ) {}
 
   async getCurrentActiveKeyByCreator(userId: string): Promise<IntegrationKeyMetadataRecord | null> {
@@ -98,7 +98,7 @@ export class IntegrationRepository {
   }
 
   async getAllTenants() {
-    return this.dbBase
+    return this.dbAdmin
       .select({
         id: tenants.id,
         name: tenants.name,

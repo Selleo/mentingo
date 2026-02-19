@@ -1,7 +1,7 @@
 import { and, eq, isNull } from "drizzle-orm";
 import request from "supertest";
 
-import { DB, DB_BASE } from "src/storage/db/db.providers";
+import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { integrationApiKeys } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
@@ -17,7 +17,7 @@ import type { DatabasePg } from "src/common";
 describe("IntegrationController (e2e)", () => {
   let app: INestApplication;
   let db: DatabasePg;
-  let baseDb: DatabasePg;
+  let dbAdmin: DatabasePg;
   let userFactory: ReturnType<typeof createUserFactory>;
   let settingsFactory: ReturnType<typeof createSettingsFactory>;
   let groupFactory: ReturnType<typeof createGroupFactory>;
@@ -29,7 +29,7 @@ describe("IntegrationController (e2e)", () => {
 
     app = testApp;
     db = app.get(DB);
-    baseDb = app.get(DB_BASE);
+    dbAdmin = app.get(DB_ADMIN);
     userFactory = createUserFactory(db);
     settingsFactory = createSettingsFactory(db);
     groupFactory = createGroupFactory(db);
@@ -44,7 +44,7 @@ describe("IntegrationController (e2e)", () => {
   });
 
   afterEach(async () => {
-    await truncateAllTables(baseDb, db);
+    await truncateAllTables(dbAdmin, db);
   });
 
   describe("integration key management", () => {
