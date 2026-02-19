@@ -11,6 +11,7 @@ type DraggableWordProps = {
   isOverlay?: boolean;
   isCorrect?: boolean | null;
   isStudentAnswer?: boolean;
+  stretchToContainer?: boolean;
 };
 
 export const DraggableWord = ({
@@ -18,6 +19,7 @@ export const DraggableWord = ({
   isOverlay,
   isCorrect,
   isStudentAnswer,
+  stretchToContainer,
 }: DraggableWordProps) => {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useSortable({
     id: word.id,
@@ -27,6 +29,12 @@ export const DraggableWord = ({
 
   const wordStyle = {
     transform: CSS.Transform?.toString(transform),
+    ...(stretchToContainer
+      ? {
+          transitionDuration: "340ms",
+          transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
+        }
+      : null),
   };
 
   const quizWordStyle = cn("px-2 py-1 rounded-md text-black", {
@@ -45,10 +53,12 @@ export const DraggableWord = ({
       ref={setNodeRef}
       style={wordStyle}
       className={cn(
-        "inline-flex w-max items-center whitespace-nowrap",
+        "inline-flex items-center whitespace-nowrap will-change-transform transition-[transform,box-shadow] duration-300 ease-out",
+        stretchToContainer ? "h-full w-full justify-center rounded-none" : "w-max",
         !isDragging
           ? quizWordStyle
           : "rounded-md bg-gray-100 px-2 py-1 text-neutral-700 blur-[0.3px]",
+        !isDragging && "translate-y-0 scale-100 opacity-100",
         { "-rotate-[6deg]": isOverlay },
       )}
     >

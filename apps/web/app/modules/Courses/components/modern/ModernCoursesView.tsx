@@ -72,9 +72,30 @@ const ModernCoursesView = () => {
       .sort((a, b) => a.category.localeCompare(b.category));
   }, [availableCourses]);
 
-  const heroCourse = topCourses?.[0] ?? availableCourses?.[0] ?? studentCourses?.[0];
+  const { heroCourse, isHeroLoading } = useMemo(() => {
+    const topHero = topCourses?.[0];
+    if (topHero) return { heroCourse: topHero, isHeroLoading: false };
+    if (isTopCoursesLoading) return { heroCourse: undefined, isHeroLoading: true };
 
-  if ((isAvailableCoursesLoading || isTopCoursesLoading) && !heroCourse) {
+    const availableHero = availableCourses?.[0];
+    if (availableHero) return { heroCourse: availableHero, isHeroLoading: false };
+    if (isAvailableCoursesLoading) return { heroCourse: undefined, isHeroLoading: true };
+
+    const studentHero = studentCourses?.[0];
+    if (studentHero) return { heroCourse: studentHero, isHeroLoading: false };
+    if (isStudentCoursesLoading) return { heroCourse: undefined, isHeroLoading: true };
+
+    return { heroCourse: undefined, isHeroLoading: false };
+  }, [
+    topCourses,
+    availableCourses,
+    studentCourses,
+    isTopCoursesLoading,
+    isAvailableCoursesLoading,
+    isStudentCoursesLoading,
+  ]);
+
+  if (isHeroLoading && !heroCourse) {
     return (
       <PageWrapper isBarebones className="w-full p-0">
         <div className="flex h-full min-h-[60vh] items-center justify-center">

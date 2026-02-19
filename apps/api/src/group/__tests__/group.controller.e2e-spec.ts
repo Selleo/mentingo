@@ -740,7 +740,7 @@ describe("groupController (e2e)", () => {
       expect(course3Enrollments.length).toBe(0);
     });
 
-    it("should not enroll user to courses they are already enrolled in", async () => {
+    it("should attach group enrollment metadata for users already enrolled in group courses", async () => {
       const admin = await userFactory
         .withCredentials({ password })
         .withAdminSettings(db)
@@ -796,7 +796,7 @@ describe("groupController (e2e)", () => {
         .where(and(eq(studentCourses.studentId, user.id), eq(studentCourses.courseId, course.id)));
 
       expect(enrollment.length).toBe(1);
-      expect(enrollment[0]?.enrolledByGroupId).toBe(null);
+      expect(enrollment[0]?.enrolledByGroupId).toBe(group.id);
     });
   });
 });

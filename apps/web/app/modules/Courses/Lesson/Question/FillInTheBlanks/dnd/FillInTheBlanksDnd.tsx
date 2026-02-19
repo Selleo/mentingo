@@ -13,7 +13,7 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
-import { type FC, useEffect, useRef, useState } from "react";
+import { type FC, useEffect, useMemo, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -58,6 +58,15 @@ const getAnswers = (options: QuizQuestionOption[] | undefined) => {
   }, []);
 };
 
+const getLongestAnswerLength = (options: QuizQuestionOption[] | undefined) => {
+  if (!options?.length) return 0;
+
+  return options.reduce((maxLength, { optionText }) => {
+    const answerLength = optionText?.trim().length ?? 0;
+    return answerLength > maxLength ? answerLength : maxLength;
+  }, 0);
+};
+
 export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCompleted }) => {
   const { t } = useTranslation();
 
@@ -70,6 +79,12 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
   const wordsBeforeDragRef = useRef<DndWord[] | null>(null);
 
   const solutionExplanation = question.solutionExplanation;
+  const blankMinWidth = useMemo(() => {
+    const longestAnswerLength = getLongestAnswerLength(question.options);
+    const minLength = Math.max(longestAnswerLength, 8);
+
+    return `${minLength + 2}ch`;
+  }, [question.options]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -304,7 +319,7 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
         onDragCancel={handleDragCancel}
         onDragEnd={handleDragEnd}
       >
-        <DragOverlay>
+        <DragOverlay dropAnimation={null}>
           {currentlyDraggedWord && <DraggableWord word={currentlyDraggedWord} isOverlay />}
         </DragOverlay>
         <SentenceBuilder
@@ -319,6 +334,7 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
                 words={wordsInBlank}
                 isCorrect={wordsInBlank[0]?.isCorrect}
                 isStudentAnswer={!!wordsInBlank[0]?.isStudentAnswer}
+                minWidth={blankMinWidth}
               />
             );
           }}

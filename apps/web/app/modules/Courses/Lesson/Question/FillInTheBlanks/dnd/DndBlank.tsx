@@ -10,9 +10,16 @@ type DndBlankProps = {
   blankId: string;
   isCorrect?: boolean | null;
   isStudentAnswer?: boolean;
+  minWidth?: string;
 };
 
-export const DndBlank = ({ words, blankId, isCorrect, isStudentAnswer }: DndBlankProps) => {
+export const DndBlank = ({
+  words,
+  blankId,
+  isCorrect,
+  isStudentAnswer,
+  minWidth,
+}: DndBlankProps) => {
   const { setNodeRef } = useDroppable({
     id: blankId,
   });
@@ -22,7 +29,8 @@ export const DndBlank = ({ words, blankId, isCorrect, isStudentAnswer }: DndBlan
       <div
         data-testid={blankId}
         ref={setNodeRef}
-        className="mx-2 inline-flex min-h-9 min-w-32 items-center rounded-md border bg-white px-1"
+        style={minWidth ? { minWidth } : undefined}
+        className="mx-2 inline-flex min-h-9 items-stretch overflow-hidden rounded-md border bg-white"
       >
         {words.map((word) => (
           <DraggableWord
@@ -30,6 +38,7 @@ export const DndBlank = ({ words, blankId, isCorrect, isStudentAnswer }: DndBlan
             word={word}
             isCorrect={isCorrect}
             isStudentAnswer={isStudentAnswer}
+            stretchToContainer
           />
         ))}
       </div>
