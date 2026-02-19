@@ -20,7 +20,7 @@ export class IntegrationRepository {
   ) {}
 
   async getCurrentActiveKeyByCreator(userId: string): Promise<IntegrationKeyMetadataRecord | null> {
-    const [key] = await this.db
+    const [key] = await this.dbAdmin
       .select({
         id: integrationApiKeys.id,
         keyPrefix: integrationApiKeys.keyPrefix,
@@ -74,7 +74,7 @@ export class IntegrationRepository {
   async getActiveKeyCandidate(
     params: FindIntegrationKeyCandidateParams,
   ): Promise<IntegrationApiKeyCandidate | null> {
-    const [key] = await this.db
+    const [key] = await this.dbAdmin
       .select({
         keyId: integrationApiKeys.id,
         keyHash: integrationApiKeys.keyHash,
@@ -109,7 +109,7 @@ export class IntegrationRepository {
   }
 
   async markKeyAsUsed(keyId: string): Promise<void> {
-    await this.db
+    await this.dbAdmin
       .update(integrationApiKeys)
       .set({ lastUsedAt: sql`NOW()` })
       .where(eq(integrationApiKeys.id, keyId));

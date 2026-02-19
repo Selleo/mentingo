@@ -49,7 +49,11 @@ export const createCorsOriginOption = (
     getTenantOrigins(dbBase)
       .then((tenantOrigins) => {
         const envOrigins = getEnvOrigins();
-        const allowedOrigins = Array.from(new Set([...envOrigins, ...tenantOrigins]));
+        const integrationOrigins = splitOrigins(process.env.INTEGRATION_CORS_ORIGINS);
+
+        const allowedOrigins = Array.from(
+          new Set([...envOrigins, ...tenantOrigins, ...integrationOrigins]),
+        );
 
         if (allowedOrigins.length === 0) return callback(null, true);
         if (allowedOrigins.includes(origin)) return callback(null, true);
