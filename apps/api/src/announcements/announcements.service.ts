@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import { EventBus } from "@nestjs/cqrs";
 
 import { CreateAnnouncementEvent, ViewAnnouncementEvent } from "src/events";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 
 import { AnnouncementsRepository } from "./announcements.repository";
 
@@ -13,7 +13,7 @@ import type { CurrentUser } from "src/common/types/current-user.type";
 export class AnnouncementsService {
   constructor(
     private readonly announcementsRepository: AnnouncementsRepository,
-    private readonly eventBus: EventBus,
+    private readonly outboxPublisher: OutboxPublisher,
   ) {}
 
   async getAllAnnouncements() {
@@ -44,7 +44,7 @@ export class AnnouncementsService {
 
     const audience = announcement.isEveryone ? "everyone" : "group";
 
-    this.eventBus.publish(
+    await this.outboxPublisher.publish(
       new ViewAnnouncementEvent({
         announcementId,
         actor: currentUser,
@@ -67,7 +67,7 @@ export class AnnouncementsService {
 
     if (!createdAnnouncement) throw new BadRequestException("announcements.toast.createFailed");
 
-    this.eventBus.publish(
+    await this.outboxPublisher.publish(
       new CreateAnnouncementEvent({
         announcementId: createdAnnouncement.id,
         actor: author,

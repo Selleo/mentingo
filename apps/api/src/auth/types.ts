@@ -5,3 +5,11 @@ import type { UserResponse } from "src/user/schemas/user.schema";
 
 export type TokenUser = (CommonUser | UserResponse) & { tenantId: string };
 export type MagicLinkToken = InferSelectModel<typeof magicLinkTokens>;
+
+export type RegisterUserWithHashedPasswordInput = {
+  email: string;
+  firstName: string;
+  lastName: string;
+  language: string;
+  hashedPassword: string;
+};

@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker";
 import request from "supertest";
 
-import { DB, DB_BASE } from "src/storage/db/db.providers";
+import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createAnnouncementFactory } from "../../../test/factory/announcement.factory";
@@ -27,7 +27,7 @@ describe("AnnouncementsController (e2e)", () => {
 
     app = testApp;
     db = app.get(DB);
-    baseDb = app.get(DB_BASE);
+    baseDb = app.get(DB_ADMIN);
 
     userFactory = createUserFactory(db);
     groupFactory = createGroupFactory(db);

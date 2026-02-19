@@ -2,7 +2,7 @@ import { isNull } from "drizzle-orm";
 import request from "supertest";
 
 import { DEFAULT_GLOBAL_SETTINGS } from "src/settings/constants/settings.constants";
-import { DB, DB_BASE } from "src/storage/db/db.providers";
+import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { settings } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
@@ -53,7 +53,7 @@ describe("ArticlesController (e2e)", () => {
     const { app: testApp } = await createE2ETest();
     app = testApp;
     db = app.get(DB);
-    baseDb = app.get(DB_BASE);
+    baseDb = app.get(DB_ADMIN);
     userFactory = createUserFactory(db);
     articleFactory = createArticleFactory(db);
     sectionFactory = createArticleSectionFactory(db);

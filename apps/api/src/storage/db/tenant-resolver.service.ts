@@ -1,18 +1,24 @@
-import { Inject, Injectable, UnauthorizedException } from "@nestjs/common";
+import { ForbiddenException, Inject, Injectable, UnauthorizedException } from "@nestjs/common";
+import { TENANT_STATUSES } from "@repo/shared";
 import { eq } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { tenants } from "src/storage/schema";
 
-import { DB_BASE } from "./db.providers";
+import { DB_ADMIN } from "./db.providers";
 import { TenantStateService } from "./tenant-state.service";
 
 import type { Request } from "express";
 
 @Injectable()
 export class TenantResolverService {
+  private readonly allowedInactiveApiRoutes: Record<string, string[]> = {
+    "/api/settings/company-information": ["GET"],
+    "/api/settings/platform-simple-logo": ["GET"],
+  };
+
   constructor(
-    @Inject(DB_BASE) private readonly dbBase: DatabasePg,
+    @Inject(DB_ADMIN) private readonly dbBase: DatabasePg,
     private readonly tenantState: TenantStateService,
   ) {}
 
@@ -22,6 +28,7 @@ export class TenantResolverService {
 
     const user = req.user as (Request["user"] & { tenantId?: string }) | undefined;
     const origin = this.getRequestOrigin(req);
+    const allowInactive = this.isInactiveAllowed(req);
 
     if (user?.tenantId) {
       const [tenant] = await this.dbBase
@@ -30,7 +37,9 @@ export class TenantResolverService {
         .where(eq(tenants.id, user.tenantId))
         .limit(1);
 
-      if (tenant?.host !== origin) throw new UnauthorizedException("Tenant host mismatch");
+      if (tenant?.status === TENANT_STATUSES.INACTIVE && !allowInactive) {
+        throw new ForbiddenException("tenant.error.inactive");
+      }
 
       return user.tenantId;
     }
@@ -38,10 +47,14 @@ export class TenantResolverService {
     if (!origin) return null;
 
     const [tenant] = await this.dbBase
-      .select({ id: tenants.id })
+      .select({ id: tenants.id, status: tenants.status })
       .from(tenants)
       .where(eq(tenants.host, origin))
       .limit(1);
+
+    if (tenant?.status === TENANT_STATUSES.INACTIVE && !allowInactive) {
+      throw new ForbiddenException("tenant.error.inactive");
+    }
 
     return tenant?.id ?? null;
   }
@@ -87,5 +100,13 @@ export class TenantResolverService {
     } catch {
       return null;
     }
+  }
+
+  private isInactiveAllowed(req: Request): boolean {
+    const route = this.allowedInactiveApiRoutes[req.path];
+
+    if (!route) return false;
+
+    return route.includes(req.method);
   }
 }

@@ -1,5 +1,10 @@
-import { UUIDType } from "src/common";
+import type { UUIDType } from "src/common";
+
+export type UpdateHasCertificateData = {
+  courseId: UUIDType;
+  tenantId: UUIDType;
+};
 
 export class UpdateHasCertificateEvent {
-  constructor(public readonly courseId: UUIDType) {}
+  constructor(public readonly courseData: UpdateHasCertificateData) {}
 }

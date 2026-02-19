@@ -5,7 +5,6 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
-import { EventBus } from "@nestjs/cqrs";
 import {
   ALLOWED_ARTICLES_SETTINGS,
   ALLOWED_NEWS_SETTINGS,
@@ -23,6 +22,7 @@ import { UpdateSettingsEvent } from "src/events";
 import { RESOURCE_CATEGORIES, RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { LocalizationService } from "src/localization/localization.service";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { resourceEntity, resources, settings } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
@@ -63,7 +63,7 @@ export class SettingsService {
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
     private readonly fileService: FileService,
-    private readonly eventBus: EventBus,
+    private readonly outboxPublisher: OutboxPublisher,
     private readonly localizationService: LocalizationService,
   ) {}
 
@@ -153,8 +153,11 @@ export class SettingsService {
     return createdSettings;
   }
 
-  public async getUserSettings(userId: UUIDType): Promise<SettingsJSONContentSchema> {
-    const [row] = await this.db
+  public async getUserSettings(
+    userId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ): Promise<SettingsJSONContentSchema> {
+    const [row] = await dbInstance
       .select({ settings: sql<SettingsJSONContentSchema>`${settings.settings}` })
       .from(settings)
       .where(eq(settings.userId, userId));
@@ -512,14 +515,22 @@ export class SettingsService {
   }
 
   public async getCompanyInformation(): Promise<CompanyInformaitonJSONSchema> {
-    const [{ companyInformation }] = await this.db
+    const [settingsRecord] = await this.db
       .select({
         companyInformation: sql<CompanyInformaitonJSONSchema>`${settings.settings}->'companyInformation'`,
       })
       .from(settings)
       .where(isNull(settings.userId));
 
-    return companyInformation;
+    if (!settingsRecord?.companyInformation) {
+      const updatedRecord = await this.updateCompanyInformation({
+        ...DEFAULT_GLOBAL_SETTINGS.companyInformation,
+      });
+
+      return updatedRecord;
+    }
+
+    return settingsRecord.companyInformation;
   }
 
   public async updateCompanyInformation(
@@ -948,7 +959,7 @@ export class SettingsService {
     if (!actor || !previousSnapshot || !updatedSnapshot) return;
     if (isEqual(previousSnapshot, updatedSnapshot)) return;
 
-    this.eventBus.publish(
+    await this.outboxPublisher.publish(
       new UpdateSettingsEvent({
         settingsId: updatedSnapshot.id,
         actor,

@@ -22,19 +22,23 @@ export const navigateToPage = async (
   headerText: string,
   headerItem?: Locator,
 ) => {
-  const announcementsButton = page
-    .getByRole("link", { name: /announcements/i })
-    .waitFor({ state: "visible", timeout: 5000 })
-    .catch(() => null);
+  const navigationLink = page.getByRole("link", { name: new RegExp(name, "i") }).first();
 
-  if (!announcementsButton) {
+  if (!(await navigationLink.isVisible({ timeout: 1000 }).catch(() => false))) {
+    const manageButton = page.getByRole("button", { name: /manage/i }).first();
+    if (await manageButton.isVisible({ timeout: 1000 }).catch(() => false)) {
+      await manageButton.click();
+    }
+  }
+
+  if (await navigationLink.isVisible({ timeout: 3000 }).catch(() => false)) {
+    await navigationLink.click();
+  } else {
     await page
-      .getByRole("button", { name: /manage/i })
+      .getByRole("button", { name: new RegExp(name, "i") })
       .first()
       .click();
   }
-
-  await page.getByRole("button", { name: new RegExp(name, "i") }).click();
 
   const header =
     headerItem ||
@@ -44,12 +48,14 @@ export const navigateToPage = async (
       .filter({ hasText: new RegExp(headerText, "i") })
       .getByRole("link");
 
-  await header.waitFor({ state: "visible" });
+  await expect(header).toBeVisible();
 };
+
+export const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 export const findAndClickCell = async (page: Page, name: string) => {
   await page
-    .getByRole("cell", { name: new RegExp(name, "i") })
+    .getByRole("cell", { name: new RegExp(escapeRegExp(name), "i") })
     .first()
     .click();
 };
@@ -65,7 +71,9 @@ export const fillAndAssertTextField = async (page: Page, testId: string, valueTo
 };
 
 export const findAndAssertCell = async (page: Page, expectedValue: string) => {
-  const field = page.getByRole("cell", { name: new RegExp(expectedValue, "i") }).first();
+  const field = page
+    .getByRole("cell", { name: new RegExp(escapeRegExp(expectedValue), "i") })
+    .first();
   await expect(field).toHaveText(expectedValue);
 };
 
@@ -143,7 +151,10 @@ export const verifyStudentSeesCourse = async (page: Page, course: string): Promi
     }),
   );
 
-  const expectedCourse = page.getByTestId(course).first();
+  const expectedCourse = page
+    .getByTestId(course)
+    .or(page.getByText(new RegExp(escapeRegExp(course), "i")).first())
+    .first();
 
   if (!(await expectedCourse.isVisible())) return false;
 

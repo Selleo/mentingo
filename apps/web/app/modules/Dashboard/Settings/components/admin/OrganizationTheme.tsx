@@ -96,6 +96,7 @@ export const OrganizationTheme = () => {
       </CardContent>
       <CardFooter className="flex gap-4 border-t py-4">
         <Button
+          data-testid="save-theme-colors"
           disabled={disableSubmit}
           onClick={() => {
             updateColorSchema(

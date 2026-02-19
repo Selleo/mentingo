@@ -6,7 +6,6 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { EventBus } from "@nestjs/cqrs";
 import { COURSE_ENROLLMENT } from "@repo/shared";
 import {
   and,
@@ -32,6 +31,7 @@ import {
   UpdateGroupEvent,
 } from "src/events";
 import { GroupSortFields } from "src/group/group.schema";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { groups, groupUsers, users, groupCourses, studentCourses } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
@@ -53,7 +53,7 @@ export class GroupService {
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
     @Inject(forwardRef(() => CourseService)) private readonly courseService: CourseService,
-    private readonly eventBus: EventBus,
+    private readonly outboxPublisher: OutboxPublisher,
   ) {}
 
   public async getAllGroups(
@@ -188,7 +188,7 @@ export class GroupService {
     if (!createdGroup) throw new ConflictException("Unable to create group");
 
     if (currentUser) {
-      this.eventBus.publish(
+      await this.outboxPublisher.publish(
         new CreateGroupEvent({
           groupId: createdGroup.id,
           actor: currentUser,
@@ -222,7 +222,7 @@ export class GroupService {
     const updatedSnapshot = this.buildGroupSnapshot(updatedGroup);
 
     if (currentUser && !isEqual(previousSnapshot, updatedSnapshot)) {
-      this.eventBus.publish(
+      await this.outboxPublisher.publish(
         new UpdateGroupEvent({
           groupId,
           actor: currentUser,
@@ -243,7 +243,7 @@ export class GroupService {
     }
 
     if (currentUser) {
-      this.eventBus.publish(
+      await this.outboxPublisher.publish(
         new DeleteGroupEvent({
           groupId: deletedGroup.id,
           actor: currentUser,
@@ -333,13 +333,15 @@ export class GroupService {
     });
 
     if (actor && assignedGroupIds.length) {
-      assignedGroupIds.forEach((groupId) =>
-        this.eventBus.publish(
-          new EnrollUserToGroupEvent({
-            groupId,
-            userId,
-            actor,
-          }),
+      await Promise.all(
+        assignedGroupIds.map((groupId) =>
+          this.outboxPublisher.publish(
+            new EnrollUserToGroupEvent({
+              groupId,
+              userId,
+              actor,
+            }),
+          ),
         ),
       );
     }

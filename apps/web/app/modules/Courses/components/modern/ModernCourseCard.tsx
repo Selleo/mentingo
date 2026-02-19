@@ -313,6 +313,7 @@ const ModernCourseCard = ({
 
           <Link
             to={`/course/${id}`}
+            data-testid={isPortal ? undefined : title}
             className="absolute inset-0 transition-transform duration-200 ease-out"
             style={{
               transform: linkTransform,

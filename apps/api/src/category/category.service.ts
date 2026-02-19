@@ -5,7 +5,6 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from "@nestjs/common";
-import { EventBus } from "@nestjs/cqrs";
 import { and, count, eq, ilike, inArray, like } from "drizzle-orm";
 import { isEqual } from "lodash";
 
@@ -14,6 +13,7 @@ import { getSortOptions } from "src/common/helpers/getSortOptions";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { CreateCategoryEvent, DeleteCategoryEvent, UpdateCategoryEvent } from "src/events";
 import { LocalizationService } from "src/localization/localization.service";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { categories, courses } from "src/storage/schema";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
@@ -36,7 +36,7 @@ export class CategoryService {
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
     private readonly localizationService: LocalizationService,
-    private readonly eventBus: EventBus,
+    private readonly outboxPublisher: OutboxPublisher,
   ) {}
 
   public async getCategories(
@@ -113,7 +113,7 @@ export class CategoryService {
 
     if (!newCategory) throw new UnprocessableEntityException("Category not created");
 
-    this.eventBus.publish(
+    await this.outboxPublisher.publish(
       new CreateCategoryEvent({
         categoryId: newCategory.id,
         actor: currentUser,
@@ -147,7 +147,7 @@ export class CategoryService {
       const updatedSnapshot = this.buildCategorySnapshot(updatedCategory);
 
       if (!isEqual(previousSnapshot, updatedSnapshot)) {
-        this.eventBus.publish(
+        await this.outboxPublisher.publish(
           new UpdateCategoryEvent({
             categoryId: id,
             actor: currentUser,
@@ -201,7 +201,7 @@ export class CategoryService {
       }
       await this.db.delete(categories).where(eq(categories.id, id));
 
-      this.eventBus.publish(
+      await this.outboxPublisher.publish(
         new DeleteCategoryEvent({
           categoryId: category.id,
           actor: currentUser,
@@ -260,13 +260,15 @@ export class CategoryService {
       return `Successfully deleted categories: ${deletedTitles.join(", ")}`;
     });
 
-    deletedCategories.forEach(({ id, title }) =>
-      this.eventBus.publish(
-        new DeleteCategoryEvent({
-          categoryId: id,
-          actor: currentUser,
-          categoryTitle: title,
-        }),
+    await Promise.all(
+      deletedCategories.map(({ id, title }) =>
+        this.outboxPublisher.publish(
+          new DeleteCategoryEvent({
+            categoryId: id,
+            actor: currentUser,
+            categoryTitle: title,
+          }),
+        ),
       ),
     );
 

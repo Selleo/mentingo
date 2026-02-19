@@ -1,5 +1,4 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { EventBus } from "@nestjs/cqrs";
 import { eq, getTableColumns, sql } from "drizzle-orm";
 import { isEqual } from "lodash";
 
@@ -10,6 +9,7 @@ import { MAX_LESSON_TITLE_LENGTH } from "src/lesson/repositories/lesson.constant
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { chapters } from "src/storage/schema";
 
 import { AdminChapterRepository } from "./repositories/adminChapter.repository";
@@ -27,7 +27,7 @@ export class AdminChapterService {
     private readonly adminChapterRepository: AdminChapterRepository,
     private readonly adminLessonService: AdminLessonService,
     private readonly localizationService: LocalizationService,
-    private readonly eventBus: EventBus,
+    private readonly outboxPublisher: OutboxPublisher,
   ) {}
 
   async createChapterForCourse(body: CreateChapterBody, currentUser: CurrentUser) {
@@ -80,7 +80,7 @@ export class AdminChapterService {
 
     const createdChapterSnapshot = await this.buildChapterActivitySnapshot(chapter.id);
 
-    await this.eventBus.publish(
+    await this.outboxPublisher.publish(
       new CreateChapterEvent({
         chapterId: chapter.id,
         actor: currentUser,
@@ -157,7 +157,7 @@ export class AdminChapterService {
 
     if (this.areChapterSnapshotsEqual(previousSnapshot, updatedSnapshot)) return;
 
-    this.eventBus.publish(
+    await this.outboxPublisher.publish(
       new UpdateChapterEvent({
         chapterId: chapterToUpdate.id,
         actor: chapterObject.currentUser,
@@ -199,7 +199,7 @@ export class AdminChapterService {
 
     if (this.areChapterSnapshotsEqual(previousSnapshot, updatedSnapshot)) return;
 
-    this.eventBus.publish(
+    await this.outboxPublisher.publish(
       new UpdateChapterEvent({
         chapterId: chapter.id,
         actor: currentUser,
@@ -226,12 +226,13 @@ export class AdminChapterService {
       await this.adminChapterRepository.updateChapterDisplayOrder(chapter.courseId, trx);
       await this.adminChapterRepository.updateChapterCountForCourse(chapter.courseId, trx);
 
-      this.eventBus.publish(
+      await this.outboxPublisher.publish(
         new DeleteChapterEvent({
           chapterId: chapter.id,
           actor: currentUser,
           chapterName: chapter.title,
         }),
+        trx,
       );
     });
   }

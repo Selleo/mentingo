@@ -12,13 +12,11 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { EventBus } from "@nestjs/cqrs";
 import { JwtService } from "@nestjs/jwt";
 import {
   CreatePasswordReminderEmail,
   MagicLinkEmail,
   PasswordRecoveryEmail,
-  WelcomeEmail,
 } from "@repo/email-templates";
 import { SUPPORTED_LANGUAGES, type SupportedLanguages } from "@repo/shared";
 import * as bcrypt from "bcryptjs";
@@ -35,7 +33,10 @@ import hashPassword from "src/common/helpers/hashPassword";
 import { UserLoginEvent } from "src/events/user/user-login.event";
 import { UserPasswordCreatedEvent } from "src/events/user/user-password-created.event";
 import { UserRegisteredEvent } from "src/events/user/user-registered.event";
+import { UserWelcomeEvent } from "src/events/user/user-welcome.event";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { SettingsService } from "src/settings/settings.service";
+import { DB_ADMIN } from "src/storage/db/db.providers";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
 import {
@@ -43,7 +44,7 @@ import {
   credentials,
   magicLinkTokens,
   resetTokens,
-  userOnboarding,
+  tenants,
   users,
 } from "../storage/schema";
 import { UserService } from "../user/user.service";
@@ -53,7 +54,7 @@ import { ResetPasswordService } from "./reset-password.service";
 import { TokenService } from "./token.service";
 
 import type { CreatePasswordBody } from "./schemas/create-password.schema";
-import type { TokenUser } from "./types";
+import type { RegisterUserWithHashedPasswordInput, TokenUser } from "./types";
 import type { Response } from "express";
 import type { ActorUserType } from "src/common/types/actor-user.type";
 import type { CurrentUser } from "src/common/types/current-user.type";
@@ -65,6 +66,7 @@ export class AuthService {
 
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
+    @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
     private jwtService: JwtService,
     private configService: ConfigService,
@@ -72,7 +74,7 @@ export class AuthService {
     private createPasswordService: CreatePasswordService,
     private resetPasswordService: ResetPasswordService,
     private settingsService: SettingsService,
-    private eventBus: EventBus,
+    private readonly outboxPublisher: OutboxPublisher,
     private tokenService: TokenService,
   ) {
     this.ENCRYPTION_KEY = Buffer.from(process.env.MASTER_KEY!, "base64");
@@ -91,72 +93,64 @@ export class AuthService {
     password: string;
     language: string;
   }) {
-    const [existingUser] = await this.db.select().from(users).where(eq(users.email, email));
-    if (existingUser) {
-      throw new ConflictException("User already exists");
-    }
+    const [existingUser] = await this.dbAdmin
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.email, email));
+
+    if (existingUser) throw new ConflictException("registerView.toast.userAlreadyExists");
 
     const hashedPassword = await hashPassword(password);
 
-    const createdUser = await this.db.transaction(async (trx) => {
-      const [newUser] = await trx
-        .insert(users)
-        .values({
-          email,
-          firstName,
-          lastName,
-        })
-        .returning();
-
-      await trx.insert(credentials).values({
-        userId: newUser.id,
-        password: hashedPassword,
-      });
-
-      await trx.insert(userOnboarding).values({ userId: newUser.id });
-      const languageGuard = Object.values(SUPPORTED_LANGUAGES).includes(
-        language as SupportedLanguages,
-      )
-        ? language
-        : "en";
-
-      await this.settingsService.createSettingsIfNotExists(
-        newUser.id,
-        newUser.role as UserRole,
-        { language: languageGuard },
-        trx,
-      );
-
-      const { avatarReference, ...userWithoutAvatar } = newUser;
-      const usersProfilePictureUrl =
-        await this.userService.getUsersProfilePictureUrl(avatarReference);
-
-      this.eventBus.publish(new UserRegisteredEvent(newUser));
-
-      return { ...userWithoutAvatar, profilePictureUrl: usersProfilePictureUrl };
+    const createdUser = await this.createRegisteredUser({
+      email,
+      firstName,
+      lastName,
+      language,
+      hashedPassword,
     });
 
-    if (!createdUser) {
-      throw new BadRequestException("Failed to create user");
-    }
+    if (!createdUser) throw new BadRequestException("registerView.toast.createAccountFailed");
 
-    const createdSettings = await this.settingsService.getUserSettings(createdUser.id);
-
-    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(createdUser.id);
-
-    const emailTemplate = new WelcomeEmail({
-      coursesLink: `${process.env.CORS_ORIGIN}/courses`,
-      ...defaultEmailSettings,
-    });
-
-    await this.emailService.sendEmailWithLogo({
-      to: email,
-      subject: getEmailSubject("welcomeEmail", createdSettings.language as SupportedLanguages),
-      text: emailTemplate.text,
-      html: emailTemplate.html,
-    });
+    await this.outboxPublisher.publish(
+      new UserWelcomeEvent({
+        email: createdUser.email,
+        userId: createdUser.id,
+        tenantId: createdUser.tenantId,
+      }),
+    );
 
     return createdUser;
+  }
+
+  private async createRegisteredUser({
+    email,
+    firstName,
+    lastName,
+    language,
+    hashedPassword,
+  }: RegisterUserWithHashedPasswordInput) {
+    const createdUser = await this.userService.createUser(
+      {
+        email,
+        firstName,
+        lastName,
+        role: USER_ROLES.STUDENT,
+        language,
+      },
+      undefined,
+      undefined,
+      { registration: { hashedPassword } },
+    );
+
+    const { avatarReference, ...userWithoutAvatar } = createdUser;
+
+    const usersProfilePictureUrl =
+      await this.userService.getUsersProfilePictureUrl(avatarReference);
+
+    await this.outboxPublisher.publish(new UserRegisteredEvent(createdUser));
+
+    return { ...userWithoutAvatar, profilePictureUrl: usersProfilePictureUrl };
   }
 
   public async login(data: { email: string; password: string }, MFAEnforcedRoles: UserRole[]) {
@@ -178,14 +172,21 @@ export class AuthService {
     const userSettings = await this.settingsService.getUserSettings(user.id);
 
     const onboardingStatus = await this.userService.getAllOnboardingStatus(user.id);
+    const isManagingTenantAdmin = await this.isManagingTenantAdmin(
+      user.tenantId,
+      user.role as UserRole,
+    );
 
     const actor: ActorUserType = {
       userId: user.id,
       email: user.email,
       role: user.role as UserRole,
+      tenantId: user.tenantId,
     };
 
-    this.eventBus.publish(new UserLoginEvent({ userId: user.id, method: "password", actor }));
+    await this.outboxPublisher.publish(
+      new UserLoginEvent({ userId: user.id, method: "password", actor }),
+    );
 
     if (
       MFAEnforcedRoles.includes(userWithoutAvatar.role as UserRole) ||
@@ -198,6 +199,7 @@ export class AuthService {
         refreshToken,
         shouldVerifyMFA: true,
         onboardingStatus,
+        isManagingTenantAdmin,
       };
     }
 
@@ -208,6 +210,7 @@ export class AuthService {
       refreshToken,
       shouldVerifyMFA: false,
       onboardingStatus,
+      isManagingTenantAdmin,
     };
   }
 
@@ -222,12 +225,16 @@ export class AuthService {
 
     const { MFAEnforcedRoles } = await this.settingsService.getGlobalSettings();
     const userSettings = await this.settingsService.getUserSettings(user.id);
+    const isManagingTenantAdmin = await this.isManagingTenantAdmin(
+      user.tenantId,
+      user.role as UserRole,
+    );
 
     if (MFAEnforcedRoles.includes(user.role as UserRole) || userSettings.isMFAEnabled) {
-      return { ...user, shouldVerifyMFA: true, onboardingStatus };
+      return { ...user, shouldVerifyMFA: true, onboardingStatus, isManagingTenantAdmin };
     }
 
-    return { ...user, shouldVerifyMFA: false, onboardingStatus };
+    return { ...user, shouldVerifyMFA: false, onboardingStatus, isManagingTenantAdmin };
   }
 
   public async refreshTokens(refreshToken: string) {
@@ -251,7 +258,7 @@ export class AuthService {
         tenantId: user.tenantId,
       };
 
-      this.eventBus.publish(
+      await this.outboxPublisher.publish(
         new UserLoginEvent({ userId: user.id, method: "refresh_token", actor }),
       );
 
@@ -329,23 +336,31 @@ export class AuthService {
       expiryDate,
     });
 
-    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(user.id);
+    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
+      user.tenantId,
+      user.id,
+    );
+
+    const tenantOrigin = await this.resolveTenantOrigin(user.tenantId);
 
     const emailTemplate = new PasswordRecoveryEmail({
       name: user.firstName,
-      resetLink: buildCreateNewPasswordLink(CORS_ORIGIN, {
+      resetLink: buildCreateNewPasswordLink(tenantOrigin, {
         resetToken,
         email,
       }),
       ...defaultEmailSettings,
     });
 
-    await this.emailService.sendEmailWithLogo({
-      to: email,
-      subject: getEmailSubject("passwordRecoveryEmail", defaultEmailSettings.language),
-      text: emailTemplate.text,
-      html: emailTemplate.html,
-    });
+    await this.emailService.sendEmailWithLogo(
+      {
+        to: email,
+        subject: getEmailSubject("passwordRecoveryEmail", defaultEmailSettings.language),
+        text: emailTemplate.text,
+        html: emailTemplate.html,
+      },
+      { tenantId: user.tenantId },
+    );
   }
 
   public async createPassword(data: CreatePasswordBody) {
@@ -389,7 +404,7 @@ export class AuthService {
       { language: languageGuard },
     );
 
-    this.eventBus.publish(new UserPasswordCreatedEvent({ ...existingUser }));
+    await this.outboxPublisher.publish(new UserPasswordCreatedEvent({ ...existingUser }));
 
     return existingUser;
   }
@@ -425,7 +440,12 @@ export class AuthService {
   private async generateNewTokenAndEmail(userId: UUIDType, email: string) {
     const createToken = nanoid(64);
 
-    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(userId);
+    const user = await this.userService.getUserById(userId);
+
+    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
+      user.tenantId,
+      userId,
+    );
 
     const emailTemplate = new CreatePasswordReminderEmail({
       createPasswordLink: buildCreateNewPasswordLink(CORS_ORIGIN, {
@@ -439,6 +459,7 @@ export class AuthService {
   }
 
   private async sendEmailAndUpdateDatabase(
+    tenantId: UUIDType,
     userId: UUIDType,
     email: string,
     oldCreateToken: string,
@@ -456,14 +477,20 @@ export class AuthService {
           reminderCount,
         });
 
-        const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(userId);
+        const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
+          tenantId,
+          userId,
+        );
 
-        await this.emailService.sendEmailWithLogo({
-          to: email,
-          subject: getEmailSubject("passwordReminderEmail", defaultEmailSettings.language),
-          text: emailTemplate.text,
-          html: emailTemplate.html,
-        });
+        await this.emailService.sendEmailWithLogo(
+          {
+            to: email,
+            subject: getEmailSubject("passwordReminderEmail", defaultEmailSettings.language),
+            text: emailTemplate.text,
+            html: emailTemplate.html,
+          },
+          { tenantId },
+        );
 
         await transaction.delete(createTokens).where(eq(createTokens.createToken, oldCreateToken));
       } catch (error) {
@@ -481,9 +508,11 @@ export class AuthService {
     expiryDate.setHours(expiryDate.getHours() + 24);
 
     expiryTokens.map(async ({ userId, email, oldCreateToken, reminderCount }) => {
+      const user = await this.userService.getUserById(userId);
       const { createToken, emailTemplate } = await this.generateNewTokenAndEmail(userId, email);
 
       await this.sendEmailAndUpdateDatabase(
+        user.tenantId,
         userId,
         email,
         oldCreateToken,
@@ -532,9 +561,12 @@ export class AuthService {
       userId: user.id,
       email: user.email,
       role: user.role as UserRole,
+      tenantId: user.tenantId,
     };
 
-    this.eventBus.publish(new UserLoginEvent({ userId: user.id, method: "provider", actor }));
+    await this.outboxPublisher.publish(
+      new UserLoginEvent({ userId: user.id, method: "provider", actor }),
+    );
 
     if (MFAEnforcedRoles.includes(user.role as UserRole) || userSettings.isMFAEnabled) {
       return {
@@ -614,7 +646,10 @@ export class AuthService {
 
     if (!magicLinkToken) throw new InternalServerErrorException("magicLink.error.createToken");
 
-    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(user.id);
+    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
+      user.tenantId,
+      user.id,
+    );
 
     const magicLinkEmail = new MagicLinkEmail({
       magicLink: `${CORS_ORIGIN}/auth/login?token=${magicLinkToken}`,
@@ -623,12 +658,15 @@ export class AuthService {
 
     const { html, text } = magicLinkEmail;
 
-    await this.emailService.sendEmailWithLogo({
-      to: email,
-      subject: getEmailSubject("magicLinkEmail", defaultEmailSettings.language),
-      text,
-      html,
-    });
+    await this.emailService.sendEmailWithLogo(
+      {
+        to: email,
+        subject: getEmailSubject("magicLinkEmail", defaultEmailSettings.language),
+        text,
+        html,
+      },
+      { tenantId: user.tenantId },
+    );
   }
 
   async handleMagicLinkLogin(response: Response, token: string) {
@@ -667,13 +705,15 @@ export class AuthService {
     const userSettings = await this.settingsService.getUserSettings(userId);
     const onboardingStatus = await this.userService.getAllOnboardingStatus(userId);
 
-    this.eventBus.publish(
+    await this.outboxPublisher.publish(
       new UserLoginEvent({
         userId,
         method: "magic_link",
-        actor: { userId, email, role: role as UserRole },
+        actor: { userId, email, role: role as UserRole, tenantId: user.tenantId },
       }),
     );
+
+    const isManagingTenantAdmin = await this.isManagingTenantAdmin(user.tenantId, role as UserRole);
 
     if (MFAEnforcedRoles.includes(role as UserRole) || userSettings.isMFAEnabled) {
       this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken);
@@ -682,6 +722,7 @@ export class AuthService {
         ...user,
         shouldVerifyMFA: true,
         onboardingStatus,
+        isManagingTenantAdmin,
       };
     }
 
@@ -691,7 +732,30 @@ export class AuthService {
       ...user,
       shouldVerifyMFA: false,
       onboardingStatus,
+      isManagingTenantAdmin,
     };
+  }
+
+  private async isManagingTenantAdmin(tenantId: UUIDType, role: UserRole): Promise<boolean> {
+    if (role !== USER_ROLES.ADMIN) return false;
+
+    const [tenant] = await this.db
+      .select({ isManaging: tenants.isManaging })
+      .from(tenants)
+      .where(eq(tenants.id, tenantId))
+      .limit(1);
+
+    return Boolean(tenant?.isManaging);
+  }
+
+  private async resolveTenantOrigin(tenantId: UUIDType): Promise<string> {
+    const [tenant] = await this.dbAdmin
+      .select({ host: tenants.host })
+      .from(tenants)
+      .where(eq(tenants.id, tenantId))
+      .limit(1);
+
+    return tenant?.host || CORS_ORIGIN;
   }
 
   async createMagicLinkToken(userId: UUIDType): Promise<string> {

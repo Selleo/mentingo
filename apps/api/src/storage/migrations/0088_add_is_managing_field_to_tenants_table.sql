@@ -1,0 +1,1 @@
+ALTER TABLE "tenants" ADD COLUMN "is_managing" boolean DEFAULT false NOT NULL;

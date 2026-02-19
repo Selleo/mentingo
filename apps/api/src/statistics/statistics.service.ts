@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import { EventBus } from "@nestjs/cqrs";
 import {
   differenceInDays,
   eachDayOfInterval,
@@ -12,6 +11,7 @@ import {
 
 import { UserFirstLoginEvent } from "src/events/user/user-first-login.event";
 import { FileService } from "src/file/file.service";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
@@ -29,7 +29,7 @@ export class StatisticsService {
   constructor(
     private readonly statisticsRepository: StatisticsRepository,
     private readonly fileService: FileService,
-    private readonly eventBus: EventBus,
+    private readonly outboxPublisher: OutboxPublisher,
   ) {}
 
   async getUserStats(userId: UUIDType, language: SupportedLanguages): Promise<UserStats> {
@@ -141,7 +141,7 @@ export class StatisticsService {
 
     const currentStats = await this.statisticsRepository.getActivityStats(userId);
 
-    if (!currentStats) this.eventBus.publish(new UserFirstLoginEvent({ userId }));
+    if (!currentStats) await this.outboxPublisher.publish(new UserFirstLoginEvent({ userId }));
 
     const lastActivityDate = currentStats?.lastActivityDate
       ? startOfDay(new Date(currentStats.lastActivityDate))

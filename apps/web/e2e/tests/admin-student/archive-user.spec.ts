@@ -1,7 +1,9 @@
 import { test, expect, type Page } from "@playwright/test";
 
-const STUDENT_EMAIL = "student2@example.com";
-const ADMIN_EMAIL = "admin@example.com";
+import { getTenantEmail } from "../../utils/tenant-email";
+
+const STUDENT_EMAIL = getTenantEmail("student2@example.com");
+const ADMIN_EMAIL = getTenantEmail("admin@example.com");
 const PASSWORD = "password";
 
 const PROFILE_BUTTON_NAME = /Avatar for email@example.com|Test Admin profile Test Admin/i;
@@ -27,7 +29,7 @@ const openUsers = async (page: Page) => {
 const archiveStudent = async (page: Page) => {
   await openUsers(page);
   await page.getByTestId(STUDENT_EMAIL).click();
-  await page.getByRole("button", { name: "Edit" }).click();
+  await page.getByRole("button", { name: "Bulk edit" }).click();
   await page.getByRole("button", { name: "Archive" }).click();
   await expect(page.getByRole("heading", { name: "Archive user accounts (1)" })).toBeVisible();
   await page.getByRole("button", { name: "Archive" }).click();

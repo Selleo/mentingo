@@ -3,6 +3,8 @@ import { fileURLToPath } from "node:url";
 
 import { expect, test, type Page } from "@playwright/test";
 
+import { getTenantEmail } from "../../utils/tenant-email";
+
 type CertificateBackgroundResponse = {
   data?: {
     certificateBackgroundImage: string | null;
@@ -34,8 +36,8 @@ const __dirname = path.dirname(__filename);
 const SAMPLE_IMAGE = path.join(__dirname, "..", "..", "data", "images", "profile_icon_test.png");
 
 const CREDENTIALS = {
-  admin: { email: "admin@example.com", password: "password" },
-  student: { email: "student@example.com", password: "password" },
+  admin: { email: getTenantEmail("admin@example.com"), password: "password" },
+  student: { email: getTenantEmail("student@example.com"), password: "password" },
 };
 
 const COURSE_NAME = "Fake test to certificate";
@@ -45,6 +47,22 @@ const LESSON_TITLE = "What is Data Science?";
 const QUIZ_ANSWER = "Data destruction";
 
 const PROFILE_BUTTON_PATTERN = /Test Admin profile Test Admin|Avatar for email@example.com/i;
+const SETTINGS_LABELS = {
+  platformCustomizationTab: /Platform Customization|Dostosowanie Platformy/i,
+  certificateUploadHeading: /Certificate Background Upload|Przesyłanie tła certyfikatu/i,
+  removeCertificateBackground: /Delete certificate background|Usuń tło certyfikatu/i,
+  removeLoginBackground: /Delete login background image|Usuń tło strony logowania/i,
+  certificateToast:
+    /Certificate background image changed successfully|Tło certyfikatu zostało pomyślnie zmienione/i,
+  loginToast:
+    /Login background image changed successfully|Obraz tła logowania został pomyślnie zmieniony/i,
+};
+
+async function expectToastDescription(page: Page, message: RegExp) {
+  await expect(
+    page.locator("div.text-sm.opacity-90").filter({ hasText: message }).first(),
+  ).toBeVisible();
+}
 
 async function openProfileMenu(page: Page) {
   await page.getByRole("button", { name: PROFILE_BUTTON_PATTERN }).click();
@@ -70,61 +88,71 @@ async function navigateToSettings(page: Page) {
 }
 
 async function openPlatformCustomizationTab(page: Page) {
-  const platformCustomizationTab = page.getByRole("tab", { name: "Platform Customization" });
+  const platformCustomizationTab = page.getByRole("tab", {
+    name: SETTINGS_LABELS.platformCustomizationTab,
+  });
   await platformCustomizationTab.waitFor({ state: "visible" });
   await platformCustomizationTab.click();
-  await expect(page.getByRole("heading", { name: "Certificate Background Upload" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: SETTINGS_LABELS.certificateUploadHeading }),
+  ).toBeVisible();
 }
 
 async function uploadCertificateBackground(page: Page) {
-  await page.locator("#certificate-background-upload").getByTestId("imageUpload").click();
-  await page
-    .locator("#certificate-background-upload")
-    .getByTestId("imageUpload")
-    .setInputFiles(SAMPLE_IMAGE);
-  await expect(page.getByRole("button", { name: "Remove Background Image" })).toBeVisible();
-  await page
-    .locator("#certificate-background-upload")
-    .getByRole("button", { name: "Save" })
-    .click();
-
-  const certificateResponse = await page.waitForResponse(
+  const certificateUploadResponsePromise = page.waitForResponse(
     (response) =>
       response.url().includes("/api/settings/certificate-background") &&
       response.status() === 200 &&
       response.request().method() === "PATCH",
   );
+
+  await Promise.all([
+    certificateUploadResponsePromise,
+    page
+      .locator("#certificate-background-upload")
+      .getByTestId("imageUpload")
+      .setInputFiles(SAMPLE_IMAGE),
+  ]);
+
+  await expect(
+    page
+      .locator("#certificate-background-upload")
+      .getByRole("button", { name: SETTINGS_LABELS.removeCertificateBackground }),
+  ).toBeVisible();
+
+  const certificateResponse = await certificateUploadResponsePromise;
   const certificateBody = (await certificateResponse.json()) as CertificateBackgroundResponse;
   const uploadedCertificatePath = certificateBody?.data?.certificateBackgroundImage;
 
-  await expect(
-    page.getByText("Certificate background image changed successfully", { exact: true }),
-  ).toBeVisible();
+  await expectToastDescription(page, SETTINGS_LABELS.certificateToast);
 
   return uploadedCertificatePath;
 }
 
 async function uploadLoginBackground(page: Page) {
-  await page
-    .locator("#organization-login-background-image-upload")
-    .getByTestId("imageUpload")
-    .click();
-  await page
-    .locator("#organization-login-background-image-upload")
-    .getByTestId("imageUpload")
-    .setInputFiles(SAMPLE_IMAGE);
+  const loginUploadResponsePromise = page.waitForResponse(
+    (response) =>
+      response.url().includes("/api/settings/login-background") &&
+      response.status() === 200 &&
+      response.request().method() === "PATCH",
+  );
+
+  await Promise.all([
+    loginUploadResponsePromise,
+    page
+      .locator("#organization-login-background-image-upload")
+      .getByTestId("imageUpload")
+      .setInputFiles(SAMPLE_IMAGE),
+  ]);
+
   await expect(
     page
       .locator("#organization-login-background-image-upload")
-      .getByRole("button", { name: "Remove Background Image" }),
+      .getByRole("button", { name: SETTINGS_LABELS.removeLoginBackground }),
   ).toBeVisible();
-  await page
-    .locator("#organization-login-background-image-upload")
-    .getByRole("button", { name: "Save" })
-    .click();
-  await expect(
-    page.getByText("Login background image changed successfully", { exact: true }),
-  ).toBeVisible();
+
+  await loginUploadResponsePromise;
+  await expectToastDescription(page, SETTINGS_LABELS.loginToast);
 }
 
 async function verifyGlobalSettingsAfterLogout(

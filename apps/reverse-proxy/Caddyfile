@@ -8,6 +8,16 @@ app.lms.localhost {
     }
 }
 
+tenant1.lms.localhost tenant2.lms.localhost tenant3.lms.localhost tenant4.lms.localhost {
+    reverse_proxy /api/* {
+        to http://localhost:3000
+    }
+
+    handle {
+        reverse_proxy localhost:5173
+    }
+}
+
 api.lms.localhost {
     handle {
         reverse_proxy localhost:3000

@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
-import { DB, DB_BASE } from "src/storage/db/db.providers";
+import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { groupUsers, lessons, studentCourses } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
@@ -36,7 +36,7 @@ describe("groupController (e2e)", () => {
     const { app: testApp } = await createE2ETest();
     app = testApp;
     db = app.get(DB);
-    baseDb = app.get(DB_BASE);
+    baseDb = app.get(DB_ADMIN);
     userFactory = createUserFactory(db);
     settingsFactory = createSettingsFactory(db);
     groupFactory = createGroupFactory(db);

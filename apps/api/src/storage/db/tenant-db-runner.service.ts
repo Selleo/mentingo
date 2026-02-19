@@ -5,11 +5,11 @@ import { DatabasePg } from "src/common";
 import { tenants } from "src/storage/schema";
 
 import { dbAls } from "./db-als.store";
-import { DB_BASE } from "./db.providers";
+import { DB_APP } from "./db.providers";
 
 @Injectable()
 export class TenantDbRunnerService {
-  constructor(@Inject(DB_BASE) private readonly dbBase: DatabasePg) {}
+  constructor(@Inject(DB_APP) private readonly dbBase: DatabasePg) {}
 
   async runWithTenant<T>(tenantId: string, fn: () => Promise<T>) {
     return this.dbBase.transaction(async (trx) => {

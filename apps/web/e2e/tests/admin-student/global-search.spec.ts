@@ -1,9 +1,11 @@
 import { test, expect, type Page } from "@playwright/test";
 
+import { getTenantEmail } from "../../utils/tenant-email";
+
 const SEARCH_PLACEHOLDER = "Search...";
 const COURSE_PREFIX = "Artificial Intelligence in";
 const COURSE_FULL_STACK_TITLE = "E2E Test: Automated Course";
-const STUDENT_EMAIL = "student@example.com";
+const STUDENT_EMAIL = getTenantEmail("student@example.com");
 const PASSWORD = "password";
 
 const openSearch = async (page: Page) => {
@@ -51,11 +53,11 @@ const logout = async (page: Page) => {
 };
 
 const expectCourseVisible = async (page: Page, title: string) => {
-  await expect(page.getByRole("link", { name: title }).first()).toBeVisible();
+  await expect(page.getByRole("listitem").filter({ hasText: title }).first()).toBeVisible();
 };
 
 const openCourseFromSearch = async (page: Page, title: string) => {
-  await page.getByRole("link", { name: title }).first().click();
+  await page.getByRole("listitem").filter({ hasText: title }).first().click();
 };
 
 const expectCourseVisibility = async (page: Page, isAdmin: boolean) => {

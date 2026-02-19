@@ -21,6 +21,7 @@ describe("RouteGuard", () => {
       isContentCreator: false,
       isAdminLike: true,
       isStudent: false,
+      isManagingTenantAdmin: false,
     });
 
     const RemixStub = createRemixStub([
@@ -51,6 +52,7 @@ describe("RouteGuard", () => {
       isContentCreator: false,
       isAdminLike: false,
       isStudent: false,
+      isManagingTenantAdmin: false,
     });
 
     const RemixStub = createRemixStub([

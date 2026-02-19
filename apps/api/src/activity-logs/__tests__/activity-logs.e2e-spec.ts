@@ -11,7 +11,7 @@ import { GroupService } from "src/group/group.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
 import { SettingsService } from "src/settings/settings.service";
-import { DB, DB_BASE } from "src/storage/db/db.providers";
+import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { activityLogs } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
@@ -64,7 +64,7 @@ describe("Activity Logs E2E", () => {
     app = testAppInstance;
 
     db = app.get(DB);
-    baseDb = app.get(DB_BASE);
+    baseDb = app.get(DB_ADMIN);
 
     adminChapterService = app.get(AdminChapterService);
     announcementsService = app.get(AnnouncementsService);

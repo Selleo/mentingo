@@ -30,24 +30,30 @@ import {
 import { USER_ROLES } from "../user/schemas/userRoles";
 
 import { niceCourses } from "./nice-data-seeds";
-import { createNiceCourses, ensureSeedTenant } from "./seed-helpers";
+import {
+  addEmailSuffix,
+  createNiceCourses,
+  ensureSeedTenant,
+  getTenantEmailSuffix,
+  seedUserRoleGrantSql,
+} from "./seed-helpers";
 
 import type { DatabasePg, UUIDType } from "../common";
 import type { UserRole } from "../user/schemas/userRoles";
 
 dotenv.config({ path: "./.env" });
 
-if (!("DATABASE_URL" in process.env)) {
-  throw new Error("DATABASE_URL not found on .env");
+if (!("DATABASE_URL" in process.env) && !("MIGRATOR_DATABASE_URL" in process.env)) {
+  throw new Error("MIGRATOR_DATABASE_URL or DATABASE_URL not found on .env");
 }
 
-const connectionString = process.env.DATABASE_URL!;
+const connectionString = process.env.MIGRATOR_DATABASE_URL || process.env.DATABASE_URL!;
 const sqlConnect = postgres(connectionString);
 const db = drizzle(sqlConnect) as DatabasePg;
 
-function generateDeterministicEmail(role: UserRole, index: number): string {
+function generateDeterministicEmail(role: UserRole, index: number, suffix?: string): string {
   const roleKey = role === USER_ROLES.CONTENT_CREATOR ? "creator" : role.toLowerCase();
-  return `user+${roleKey}+${index}@example.com`;
+  return addEmailSuffix(`user+${roleKey}+${index}@example.com`, suffix);
 }
 
 export async function generateBulkUsers(
@@ -56,6 +62,7 @@ export async function generateBulkUsers(
   tenantId: UUIDType,
   password: string = "password",
   startIndex: number = 1,
+  emailSuffix?: string,
 ) {
   const createdUsers = [];
 
@@ -63,7 +70,7 @@ export async function generateBulkUsers(
     const index = startIndex + i;
     const userToCreate = {
       id: faker.string.uuid(),
-      email: generateDeterministicEmail(role, index),
+      email: generateDeterministicEmail(role, index, emailSuffix),
       firstName: faker.person.firstName(),
       lastName: faker.person.lastName(),
       role: role,
@@ -137,6 +144,7 @@ export async function insertGlobalSettings(database: DatabasePg, tenantId: UUIDT
     .select()
     .from(settings)
     .where(and(isNull(settings.userId), eq(settings.tenantId, tenantId)));
+
   if (globalSettings) return globalSettings;
 
   const [createdGlobalSettings] = await database
@@ -147,7 +155,22 @@ export async function insertGlobalSettings(database: DatabasePg, tenantId: UUIDT
     })
     .returning();
 
-  return createdGlobalSettings;
+  const [updatedGlobalSettings] = await database
+    .update(settings)
+    .set({
+      settings: sql`
+            jsonb_set(
+              settings.settings,
+              '{companyInformation}',
+              to_jsonb(${settingsToJSONBuildObject(DEFAULT_GLOBAL_SETTINGS.companyInformation)}),
+              true
+            )
+          `,
+    })
+    .where(eq(settings.id, createdGlobalSettings.id))
+    .returning();
+
+  return updatedGlobalSettings;
 }
 
 export async function insertUserSettings(
@@ -240,6 +263,8 @@ export async function seedBulkUsers(options: {
   createCourses?: boolean;
   enrollStudents?: boolean;
 }) {
+  await seedUserRoleGrantSql(db);
+
   const {
     studentCount = 1000,
     adminCount = 100,
@@ -249,100 +274,119 @@ export async function seedBulkUsers(options: {
     enrollStudents = false,
   } = options;
 
-  const tenantName = new URL(process.env.CORS_ORIGIN!).hostname;
+  const corsOrigin = process.env.CORS_ORIGIN;
+  const devTenantOrigins = (process.env.DEV_TENANT_ORIGINS || "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter((origin): origin is string => Boolean(origin));
 
-  const tenant = await ensureSeedTenant(db, {
-    name: tenantName,
-    host: process.env.CORS_ORIGIN,
-  });
+  const tenantOrigins =
+    devTenantOrigins.length > 0
+      ? devTenantOrigins
+      : [corsOrigin].filter((origin): origin is string => Boolean(origin));
 
-  const tenantId = tenant.id;
+  if (tenantOrigins.length === 0) {
+    throw new Error("CORS_ORIGIN or DEV_TENANT_ORIGINS must be set to seed tenants.");
+  }
+
+  const primaryTenantOrigin = corsOrigin || tenantOrigins[0];
 
   try {
-    await insertGlobalSettings(db, tenantId);
-    console.log("✨ Created global settings");
+    for (const origin of tenantOrigins) {
+      const name = new URL(origin).hostname;
+      const emailSuffix = getTenantEmailSuffix(origin);
+      const tenant = await ensureSeedTenant(db, {
+        name,
+        host: origin,
+        isManaging: origin === primaryTenantOrigin,
+      });
 
-    // Generate users with deterministic emails
-    // Students: user+student+1@example.com to user+student+1000@example.com
-    console.log(`Creating ${studentCount} students...`);
-    const createdStudents = await generateBulkUsers(
-      studentCount,
-      USER_ROLES.STUDENT,
-      tenantId,
-      password,
-      1, // Start index
-    );
-    console.log(
-      `✅ Created ${createdStudents.length} students (user+student+1@example.com to user+student+${studentCount}@example.com)`,
-    );
+      const tenantId = tenant.id;
 
-    // Admins: user+admin+1@example.com to user+admin+100@example.com
-    console.log(`Creating ${adminCount} admins...`);
-    const createdAdmins = await generateBulkUsers(
-      adminCount,
-      USER_ROLES.ADMIN,
-      tenantId,
-      password,
-      1, // Start index
-    );
-    console.log(
-      `✅ Created ${createdAdmins.length} admins (user+admin+1@example.com to user+admin+${adminCount}@example.com)`,
-    );
+      await insertGlobalSettings(db, tenantId);
+      console.log(`✨ Created global settings for tenant ${origin}`);
 
-    // Content Creators: user+creator+1@example.com to user+creator+100@example.com
-    console.log(`Creating ${contentCreatorCount} content creators...`);
-    const createdContentCreators = await generateBulkUsers(
-      contentCreatorCount,
-      USER_ROLES.CONTENT_CREATOR,
-      tenantId,
-      password,
-      1, // Start index
-    );
-    console.log(
-      `✅ Created ${createdContentCreators.length} content creators (user+creator+1@example.com to user+creator+${contentCreatorCount}@example.com)`,
-    );
+      // Generate users with deterministic emails
+      // Students: user+student+1@example.com to user+student+1000@example.com
+      console.log(`Creating ${studentCount} students for ${origin}...`);
+      const createdStudents = await generateBulkUsers(
+        studentCount,
+        USER_ROLES.STUDENT,
+        tenantId,
+        password,
+        1, // Start index
+        emailSuffix,
+      );
+      console.log(
+        `✅ Created ${createdStudents.length} students (user+student+1@example.com to user+student+${studentCount}@example.com)`,
+      );
 
-    // Optionally create courses and enroll students
-    if (createCourses && createdContentCreators.length > 0) {
-      const creatorIds = createdContentCreators.map((cc) => cc.id);
-      const createdCourses = await createNiceCourses(creatorIds, db, niceCourses, tenantId);
-      console.log(`✨ Created ${createdCourses.length} courses`);
+      // Admins: user+admin+1@example.com to user+admin+100@example.com
+      console.log(`Creating ${adminCount} admins for ${origin}...`);
+      const createdAdmins = await generateBulkUsers(
+        adminCount,
+        USER_ROLES.ADMIN,
+        tenantId,
+        password,
+        1, // Start index
+        emailSuffix,
+      );
+      console.log(
+        `✅ Created ${createdAdmins.length} admins (user+admin+1@example.com to user+admin+${adminCount}@example.com)`,
+      );
 
-      if (enrollStudents && createdStudents.length > 0) {
-        const studentIds = createdStudents.map((s) => s.id);
-        await createStudentCourses(createdCourses, studentIds, tenantId);
-        console.log(`✅ Enrolled students in courses`);
+      // Content Creators: user+creator+1@example.com to user+creator+100@example.com
+      console.log(`Creating ${contentCreatorCount} content creators for ${origin}...`);
+      const createdContentCreators = await generateBulkUsers(
+        contentCreatorCount,
+        USER_ROLES.CONTENT_CREATOR,
+        tenantId,
+        password,
+        1, // Start index
+        emailSuffix,
+      );
+      console.log(
+        `✅ Created ${createdContentCreators.length} content creators (user+creator+1@example.com to user+creator+${contentCreatorCount}@example.com)`,
+      );
 
-        // Create lesson progress for enrolled students
-        await Promise.all(
-          studentIds.map(async (studentId) => {
-            await createLessonProgress(studentId, tenantId);
-          }),
-        );
-        console.log(`✅ Created lesson progress for students`);
+      // Optionally create courses and enroll students
+      if (createCourses && createdContentCreators.length > 0) {
+        const creatorIds = createdContentCreators.map((cc) => cc.id);
+        const createdCourses = await createNiceCourses(creatorIds, db, niceCourses, tenantId);
+        console.log(`✨ Created ${createdCourses.length} courses`);
+
+        if (enrollStudents && createdStudents.length > 0) {
+          const studentIds = createdStudents.map((s) => s.id);
+          await createStudentCourses(createdCourses, studentIds, tenantId);
+          console.log(`✅ Enrolled students in courses`);
+
+          // Create lesson progress for enrolled students
+          await Promise.all(
+            studentIds.map(async (studentId) => {
+              await createLessonProgress(studentId, tenantId);
+            }),
+          );
+          console.log(`✅ Created lesson progress for students`);
+        }
       }
+
+      console.log("\n📊 Summary:");
+      console.log(
+        `  Students: ${createdStudents.length} (user+student+1@example.com to user+student+${studentCount}@example.com)`,
+      );
+      console.log(
+        `  Admins: ${createdAdmins.length} (user+admin+1@example.com to user+admin+${adminCount}@example.com)`,
+      );
+      console.log(
+        `  Content Creators: ${createdContentCreators.length} (user+creator+1@example.com to user+creator+${contentCreatorCount}@example.com)`,
+      );
+      console.log(`\n📝 All users use password: ${password}`);
+      console.log(
+        `\n💡 k6 tests can generate these emails deterministically using the same pattern`,
+      );
+
+      console.log(`\n✅ Bulk user seeding completed successfully for ${origin}!`);
     }
-
-    console.log("\n📊 Summary:");
-    console.log(
-      `  Students: ${createdStudents.length} (user+student+1@example.com to user+student+${studentCount}@example.com)`,
-    );
-    console.log(
-      `  Admins: ${createdAdmins.length} (user+admin+1@example.com to user+admin+${adminCount}@example.com)`,
-    );
-    console.log(
-      `  Content Creators: ${createdContentCreators.length} (user+creator+1@example.com to user+creator+${contentCreatorCount}@example.com)`,
-    );
-    console.log(`\n📝 All users use password: ${password}`);
-    console.log(`\n💡 k6 tests can generate these emails deterministically using the same pattern`);
-
-    console.log("\n✅ Bulk user seeding completed successfully!");
-
-    return {
-      students: createdStudents,
-      admins: createdAdmins,
-      contentCreators: createdContentCreators,
-    };
   } catch (error) {
     console.error("❌ Bulk user seeding failed:", error);
     throw error;

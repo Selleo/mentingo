@@ -1,6 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 
 import { DatabasePg, type UUIDType } from "src/common";
+import { dbAls } from "src/storage/db/db-als.store";
 import { activityLogs } from "src/storage/schema";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
@@ -19,6 +20,7 @@ export type RecordActivityLogInput = {
   before?: Record<string, string> | null;
   after?: Record<string, string> | null;
   context?: Record<string, string> | null;
+  tenantId?: UUIDType;
 };
 
 export type ActorType = {
@@ -39,14 +41,18 @@ export class ActivityLogsService {
   ) {}
 
   async recordActivity(payload: RecordActivityLogParams): Promise<void> {
+    const tenantId = dbAls.getStore()?.tenantId;
+
     if (process.env.NODE_ENV === "test") {
       return this.persistActivityLog({
+        ...(tenantId ? { tenantId } : {}),
         ...payload,
         actor: this.getActorFromPayload(payload.actor),
       });
     }
 
     await this.activityLogsQueueService.enqueueActivityLog({
+      ...(tenantId ? { tenantId } : {}),
       ...payload,
       actor: this.getActorFromPayload(payload.actor),
     });

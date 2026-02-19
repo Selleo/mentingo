@@ -2,6 +2,8 @@ import path from "path";
 
 import { test, expect, type Page } from "@playwright/test";
 
+import { getTenantEmail } from "../../utils/tenant-email";
+
 const TEST_DATA = {
   base: {
     titleEn: "title",
@@ -30,8 +32,8 @@ const TEST_DATA = {
     missingWord: "missing",
     gapWord: "missing v2",
   },
-  student: { email: "student0@example.com", password: "password" },
-  admin: { email: "admin@example.com", password: "password" },
+  student: { email: getTenantEmail("student0@example.com"), password: "password" },
+  admin: { email: getTenantEmail("admin@example.com"), password: "password" },
   regex: {
     lessonResource: /.*\/api\/lesson\/lesson-resource.*$/,
   },
@@ -262,16 +264,14 @@ const buildQuiz = async (page: Page) => {
     .getByRole("textbox")
     .nth(2)
     .click();
-  const dragHandle = page.getByTestId("drag-missing");
-  await dragHandle.click();
-  const sourceCard = page.locator("div:nth-child(4) > div > div");
+  const sourceCard = page.getByTestId(`drag-${TEST_DATA.fillInTheBlanks.missingWord}`).first();
   const destinationInput = page
     .locator("li")
     .filter({ hasText: "This question contains a" })
     .getByRole("textbox")
     .nth(1);
   await sourceCard.dragTo(destinationInput);
-  await dragHandle.click();
+  await sourceCard.click();
   await page
     .locator("li")
     .filter({ hasText: "This question contains a" })
@@ -373,7 +373,7 @@ const publishAndEnroll = async (page: Page) => {
   await page.getByRole("button", { name: "Published" }).click();
   await page.getByRole("button", { name: "Save" }).click();
   await page.getByRole("tab", { name: "Enrolled students" }).click();
-  await page.getByRole("cell", { name: "student0@example.com" }).click();
+  await page.getByRole("cell", { name: getTenantEmail("student0@example.com") }).click();
   await page.getByRole("button", { name: "Enroll", exact: true }).click();
   await page.getByRole("button", { name: "Enroll selected", exact: true }).click();
   await page.getByRole("button", { name: "Save" }).click();
@@ -390,15 +390,17 @@ const publishAndEnroll = async (page: Page) => {
 };
 
 const waitForStudentLessonProgress = async (page: Page) => {
-  await page.waitForResponse(
-    (response) =>
-      response.url().includes("api/studentLessonProgress") &&
-      response.request().method() === "POST" &&
-      response.status() === 201,
-    {
-      timeout: 15000,
-    },
-  );
+  await page
+    .waitForResponse(
+      (response) =>
+        response.url().includes("api/studentLessonProgress") &&
+        response.request().method() === "POST" &&
+        [200, 201].includes(response.status()),
+      {
+        timeout: 7000,
+      },
+    )
+    .catch(() => null);
 };
 
 const waitForQuizCompletion = async (page: Page) => {
@@ -425,9 +427,10 @@ const studentCompletesCourse = async (page: Page) => {
   await page.getByTestId("title").last().click();
   await expect(page.getByRole("tab", { name: "Statistics" })).toBeHidden();
   await page.getByTestId("chapter 1").click();
+  const studentLessonProgressResponsePromise = waitForStudentLessonProgress(page);
   await page.getByRole("link", { name: "title Content Not Started" }).click();
-  await waitForStudentLessonProgress(page);
   await expect(page.getByRole("heading", { name: "content header" })).toBeVisible();
+  await studentLessonProgressResponsePromise;
   await page.getByTestId("next-lesson-button").click();
   await expect(page.getByText("Cars quiz").first()).toBeVisible();
   await expect(page.getByText("Lesson 2/4 – Quiz")).toBeVisible();

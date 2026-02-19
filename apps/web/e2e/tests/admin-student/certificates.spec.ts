@@ -2,10 +2,12 @@ import fs from "fs/promises";
 
 import { expect, test } from "@playwright/test";
 
+import { getTenantEmail } from "../../utils/tenant-email";
+
 import type { Page } from "@playwright/test";
 
 const USERS = {
-  student: { email: "student@example.com", password: "password" },
+  student: { email: getTenantEmail("student@example.com"), password: "password" },
 };
 
 const COURSE = {

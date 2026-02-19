@@ -1,9 +1,11 @@
 import { expect, test, type Page } from "@playwright/test";
 
+import { getTenantEmail } from "../../utils/tenant-email";
+
 const USERS = {
   admin: { email: "email@example.com", password: "password" },
-  student: { email: "student@example.com", password: "password" },
-  student2: { email: "student0@example.com", password: "password" },
+  student: { email: getTenantEmail("student@example.com"), password: "password" },
+  student2: { email: getTenantEmail("student0@example.com"), password: "password" },
 } as const;
 
 const GROUP_NAME = "Students";
@@ -26,8 +28,8 @@ const createGroupAndAssignStudent = async (page: Page) => {
 
   await page.getByRole("link", { name: "Users" }).click();
   await page.getByTestId(USERS.student.email).click();
-  await page.getByRole("button", { name: "Edit" }).click();
-  await page.getByRole("button", { name: "Change group" }).click();
+  await page.getByRole("button", { name: "Bulk edit" }).click();
+  await page.getByRole("button", { name: "Groups" }).click();
   await page.getByRole("option", { name: GROUP_NAME, exact: true }).click();
   await page.getByRole("heading", { name: "Modify groups (1)" }).click();
   await page.getByRole("button", { name: "Save" }).click();
@@ -41,7 +43,7 @@ const createAnnouncementAsAdmin = async (page: Page) => {
   await page.getByPlaceholder("Enter title").fill(ANNOUNCEMENT.title);
   await page.getByPlaceholder("Write your announcement here").fill(ANNOUNCEMENT.body);
   await page.getByLabel("* Group").click();
-  await page.getByLabel(GROUP_NAME).click();
+  await page.getByRole("option", { name: GROUP_NAME, exact: true }).click();
   await page.getByRole("button", { name: "Confirm" }).click();
   await expect(page.getByText(TOASTS.created, { exact: true })).toBeVisible();
   await page.getByRole("main").getByRole("link", { name: "Announcements" }).click();

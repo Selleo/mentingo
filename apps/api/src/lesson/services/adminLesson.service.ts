@@ -7,7 +7,6 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { EventBus } from "@nestjs/cqrs";
 import { ENTITY_TYPES } from "@repo/shared";
 import { CacheManagerStore } from "cache-manager";
 import { getTableColumns, sql } from "drizzle-orm";
@@ -25,6 +24,7 @@ import { MAX_LESSON_TITLE_LENGTH } from "src/lesson/repositories/lesson.constant
 import { LessonService } from "src/lesson/services/lesson.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { questionAnswerOptions, questions } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 import { isRichTextEmpty } from "src/utils/isRichTextEmpty";
@@ -61,7 +61,7 @@ export class AdminLessonService {
     private documentService: DocumentService,
     private fileService: FileService,
     private localizationService: LocalizationService,
-    private readonly eventBus: EventBus,
+    private readonly outboxPublisher: OutboxPublisher,
     private lessonService: LessonService,
     @Inject("CACHE_MANAGER") private readonly cache: CacheManagerStore,
   ) {}
@@ -105,7 +105,7 @@ export class AdminLessonService {
 
     const createdLessonSnapshot = await this.buildLessonActivitySnapshot(lesson.id, language);
 
-    await this.eventBus.publish(
+    await this.outboxPublisher.publish(
       new CreateLessonEvent({
         lessonId: lesson.id,
         actor: currentUser,
@@ -150,7 +150,7 @@ export class AdminLessonService {
 
     const createdLessonSnapshot = await this.buildLessonActivitySnapshot(lesson.id, language);
 
-    await this.eventBus.publish(
+    await this.outboxPublisher.publish(
       new CreateLessonEvent({
         lessonId: lesson.id,
         actor: currentUser,
@@ -193,7 +193,7 @@ export class AdminLessonService {
 
     const createdLessonSnapshot = await this.buildLessonActivitySnapshot(lesson.id, language);
 
-    await this.eventBus.publish(
+    await this.outboxPublisher.publish(
       new CreateLessonEvent({
         lessonId: lesson.id,
         actor: currentUser,
@@ -243,7 +243,7 @@ export class AdminLessonService {
 
     const updatedLessonSnapshot = await this.buildLessonActivitySnapshot(id, data.language);
 
-    await this.eventBus.publish(
+    await this.outboxPublisher.publish(
       new UpdateLessonEvent({
         lessonId: id,
         actor: currentUser,
@@ -292,7 +292,7 @@ export class AdminLessonService {
 
     const updatedLessonSnapshot = await this.buildLessonActivitySnapshot(id, data.language);
 
-    await this.eventBus.publish(
+    await this.outboxPublisher.publish(
       new UpdateLessonEvent({
         lessonId: id,
         actor: currentUser,
@@ -338,7 +338,7 @@ export class AdminLessonService {
 
     const updatedLessonSnapshot = await this.buildLessonActivitySnapshot(id, data.language);
 
-    await this.eventBus.publish(
+    await this.outboxPublisher.publish(
       new UpdateLessonEvent({
         lessonId: id,
         actor: currentUser,
@@ -366,7 +366,7 @@ export class AdminLessonService {
       await this.adminLessonRepository.updateLessonCountForChapter(lesson.chapterId, trx);
     });
 
-    await this.eventBus.publish(
+    await this.outboxPublisher.publish(
       new DeleteLessonEvent({
         lessonId: lesson.id,
         actor: currentUser,
@@ -416,7 +416,7 @@ export class AdminLessonService {
       language,
     );
 
-    await this.eventBus.publish(
+    await this.outboxPublisher.publish(
       new UpdateLessonEvent({
         lessonId: lessonObject.lessonId,
         actor: lessonObject.currentUser,
@@ -800,7 +800,7 @@ export class AdminLessonService {
 
     const createdLessonSnapshot = await this.buildLessonActivitySnapshot(lesson.id, language);
 
-    await this.eventBus.publish(
+    await this.outboxPublisher.publish(
       new CreateLessonEvent({
         lessonId: lesson.id,
         actor: currentUser,
@@ -901,7 +901,7 @@ export class AdminLessonService {
 
     const updatedLessonSnapshot = await this.buildLessonActivitySnapshot(lessonId, data.language);
 
-    await this.eventBus.publish(
+    await this.outboxPublisher.publish(
       new UpdateLessonEvent({
         lessonId,
         actor: currentUser,

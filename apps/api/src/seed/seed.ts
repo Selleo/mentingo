@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { format, subMonths } from "date-fns";
 import * as dotenv from "dotenv";
-import { and, count, eq, isNull, sql } from "drizzle-orm";
+import { and, count, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { flatMap, sampleSize } from "lodash";
 import postgres from "postgres";
@@ -35,19 +35,27 @@ import { USER_ROLES } from "../user/schemas/userRoles";
 
 import { e2eCourses } from "./e2e-data-seeds";
 import { niceCourses } from "./nice-data-seeds";
-import { createNiceCourses, ensureSeedTenant, seedTruncateAllTables } from "./seed-helpers";
+import {
+  addEmailSuffix,
+  createNiceCourses,
+  ensureSeedTenant,
+  getTenantEmailSuffix,
+  seedTruncateAllTables,
+  seedUserRoleGrantSql,
+} from "./seed-helpers";
 import { admin, contentCreators, students } from "./users-seed";
 
 import type { UsersSeed } from "./seed.types";
 import type { DatabasePg, UUIDType } from "../common";
+import type { GlobalSettingsJSONContentSchema } from "src/settings/schemas/settings.schema";
 
 dotenv.config({ path: "./.env" });
 
-if (!("DATABASE_URL" in process.env)) {
-  throw new Error("DATABASE_URL not found on .env");
+if (!("DATABASE_URL" in process.env) && !("MIGRATOR_DATABASE_URL" in process.env)) {
+  throw new Error("MIGRATOR_DATABASE_URL or DATABASE_URL not found on .env");
 }
 
-const connectionString = process.env.DATABASE_URL!;
+const connectionString = process.env.MIGRATOR_DATABASE_URL || process.env.DATABASE_URL!;
 const sqlConnect = postgres(connectionString);
 const db = drizzle(sqlConnect) as DatabasePg;
 
@@ -55,12 +63,15 @@ async function createUsers(
   users: UsersSeed,
   tenantId: UUIDType,
   password = faker.internet.password(),
+  emailSuffix?: string,
 ) {
   return Promise.all(
     users.map(async (userData) => {
+      const baseEmail = userData.email || faker.internet.email();
+      const email = addEmailSuffix(baseEmail, emailSuffix);
       const userToCreate = {
         id: faker.string.uuid(),
-        email: userData.email || faker.internet.email(),
+        email,
         firstName: userData.firstName || faker.person.firstName(),
         lastName: userData.lastName || faker.person.lastName(),
         role: userData.role || USER_ROLES.STUDENT,
@@ -129,19 +140,16 @@ async function insertUserDetails(userId: UUIDType, tenantId: UUIDType) {
 }
 
 export async function insertGlobalSettings(database: DatabasePg, tenantId: UUIDType) {
-  const [globalSettings] = await database
-    .select()
-    .from(settings)
-    .where(and(isNull(settings.userId), eq(settings.tenantId, tenantId)));
-  if (globalSettings) return globalSettings;
-
   const [createdGlobalSettings] = await database
     .insert(settings)
     .values({
       settings: settingsToJSONBuildObject(DEFAULT_GLOBAL_SETTINGS),
       tenantId,
     })
-    .returning();
+    .returning({
+      id: settings.id,
+      settings: sql<GlobalSettingsJSONContentSchema>`settings.settings`,
+    });
 
   return createdGlobalSettings;
 }
@@ -250,7 +258,13 @@ async function createQuizAttempts(userId: UUIDType, tenantId: UUIDType) {
     .innerJoin(chapters, eq(courses.id, chapters.courseId))
     .innerJoin(lessons, eq(lessons.chapterId, chapters.id))
     .innerJoin(questions, eq(questions.lessonId, lessons.id))
-    .where(and(eq(courses.status, "published"), eq(lessons.type, LESSON_TYPES.QUIZ)))
+    .where(
+      and(
+        eq(courses.status, "published"),
+        eq(lessons.type, LESSON_TYPES.QUIZ),
+        eq(courses.tenantId, tenantId),
+      ),
+    )
     .groupBy(courses.id, lessons.id);
 
   const createdQuizAttempts = quizzes.map((quiz) => {
@@ -289,7 +303,7 @@ async function createCourseStudentsStats(tenantId: UUIDType) {
       authorId: courses.authorId,
     })
     .from(courses)
-    .where(eq(courses.status, "published"));
+    .where(and(eq(courses.status, "published"), eq(courses.tenantId, tenantId)));
 
   const twelveMonthsAgoArray = getLast12Months();
 
@@ -304,75 +318,108 @@ async function createCourseStudentsStats(tenantId: UUIDType) {
     })),
   );
 
-  await db.insert(courseStudentsStats).values(createdTwelveMonthsAgoStats);
+  await db
+    .insert(courseStudentsStats)
+    .values(createdTwelveMonthsAgoStats)
+    .onConflictDoNothing({
+      target: [courseStudentsStats.courseId, courseStudentsStats.month, courseStudentsStats.year],
+    });
 }
 
 async function seed() {
+  await seedUserRoleGrantSql(db);
+
   await seedTruncateAllTables(db);
 
-  const tenantName = new URL(process.env.CORS_ORIGIN!).hostname;
+  const corsOrigin = process.env.CORS_ORIGIN;
+  const devTenantOrigins = (process.env.DEV_TENANT_ORIGINS || "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter((origin): origin is string => Boolean(origin));
 
-  const { id: tenantId } = await ensureSeedTenant(db, {
-    name: tenantName,
-    host: process.env.CORS_ORIGIN,
-  });
+  const tenantOrigins =
+    devTenantOrigins.length > 0
+      ? devTenantOrigins
+      : [corsOrigin].filter((origin): origin is string => Boolean(origin));
+
+  if (tenantOrigins.length === 0) {
+    throw new Error("CORS_ORIGIN or DEV_TENANT_ORIGINS must be set to seed tenants.");
+  }
+
+  const primaryTenantOrigin = corsOrigin || tenantOrigins[0];
 
   try {
-    await insertGlobalSettings(db, tenantId);
-    console.log("✨ Created global settings");
+    for (const origin of tenantOrigins) {
+      const name = new URL(origin).hostname;
+      const emailSuffix = getTenantEmailSuffix(origin);
+      const { id: tenantId } = await ensureSeedTenant(db, {
+        name,
+        host: origin,
+        isManaging: origin === primaryTenantOrigin,
+      });
 
-    const createdStudents = await createUsers(students, tenantId, "password");
-    const [createdAdmin] = await createUsers(admin, tenantId, "password");
-    const createdContentCreators = await createUsers(contentCreators, tenantId, "password");
-    await createUsers(
-      [
-        {
-          email: "student0@example.com",
-          firstName: faker.person.firstName(),
-          lastName: "Student",
-          role: USER_ROLES.STUDENT,
-        },
-      ],
-      tenantId,
-      "password",
-    );
+      await insertGlobalSettings(db, tenantId);
+      console.log(`✨ Created global settings for tenant ${origin}`);
 
-    const createdStudentIds = createdStudents.map((student) => student.id);
-    const creatorCourseIds = [
-      createdAdmin.id,
-      ...createdContentCreators.map((contentCreator) => contentCreator.id),
-    ];
+      const createdStudents = await createUsers(students, tenantId, "password", emailSuffix);
+      const [createdAdmin] = await createUsers(admin, tenantId, "password", emailSuffix);
+      const createdContentCreators = await createUsers(
+        contentCreators,
+        tenantId,
+        "password",
+        emailSuffix,
+      );
+      await createUsers(
+        [
+          {
+            email: "student0@example.com",
+            firstName: faker.person.firstName(),
+            lastName: "Student",
+            role: USER_ROLES.STUDENT,
+          },
+        ],
+        tenantId,
+        "password",
+        emailSuffix,
+      );
 
-    console.log("Created or found admin user:", createdAdmin);
-    console.log("Created or found students user:", createdStudents);
-    console.log("Created or found content creators user:", createdContentCreators);
+      const createdStudentIds = createdStudents.map((student) => student.id);
+      const creatorCourseIds = [
+        createdAdmin.id,
+        ...createdContentCreators.map((contentCreator) => contentCreator.id),
+      ];
 
-    const createdCourses = await createNiceCourses(creatorCourseIds, db, niceCourses, tenantId);
-    console.log("✨✨✨Created nice courses✨✨✨");
-    await createNiceCourses([createdAdmin.id], db, e2eCourses, tenantId);
-    console.log("🧪 Created e2e courses");
+      console.log("Created or found admin user:", createdAdmin);
+      console.log("Created or found students user:", createdStudents);
+      console.log("Created or found content creators user:", createdContentCreators);
 
-    console.log("Selected random courses for student from createdCourses");
-    await createStudentCourses(createdCourses, createdStudentIds, tenantId);
-    console.log("Created student courses");
+      const createdCourses = await createNiceCourses(creatorCourseIds, db, niceCourses, tenantId);
+      console.log("✨✨✨Created nice courses✨✨✨");
+      await createNiceCourses([createdAdmin.id], db, e2eCourses, tenantId);
+      console.log("🧪 Created e2e courses");
 
-    await Promise.all(
-      createdStudentIds.map(async (studentId) => {
-        await createLessonProgress(studentId, tenantId);
-      }),
-    );
-    console.log("Created student lesson progress");
+      console.log("Selected random courses for student from createdCourses");
+      await createStudentCourses(createdCourses, createdStudentIds, tenantId);
+      console.log("Created student courses");
 
-    await createCoursesSummaryStats(createdCourses, tenantId);
+      await Promise.all(
+        createdStudentIds.map(async (studentId) => {
+          await createLessonProgress(studentId, tenantId);
+        }),
+      );
+      console.log("Created student lesson progress");
 
-    await Promise.all(
-      createdStudentIds.map(async (studentId) => {
-        await createQuizAttempts(studentId, tenantId);
-      }),
-    );
-    await createCourseStudentsStats(tenantId);
-    console.log("Created student course students stats");
-    console.log("Seeding completed successfully");
+      await createCoursesSummaryStats(createdCourses, tenantId);
+
+      await Promise.all(
+        createdStudentIds.map(async (studentId) => {
+          await createQuizAttempts(studentId, tenantId);
+        }),
+      );
+      await createCourseStudentsStats(tenantId);
+      console.log("Created student course students stats");
+      console.log(`Seeding completed successfully for tenant ${origin}`);
+    }
   } catch (error) {
     console.error("Seeding failed:", error);
   } finally {
