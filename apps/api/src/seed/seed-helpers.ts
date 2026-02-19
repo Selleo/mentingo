@@ -275,7 +275,19 @@ export function getTenantEmailSuffix(origin: string) {
 }
 
 export const seedUserRoleGrantSql = async (db: DatabasePg) => {
-  if (process.env.CI === "true") return;
+  const forceManageDbRole = process.env.SEED_MANAGE_DB_ROLE === "true";
+
+  const isCi = process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true";
+  const isNonLocalEnv = ["production", "staging", "test"].includes(process.env.NODE_ENV ?? "");
+
+  const isLocal = !isCi && !isNonLocalEnv;
+
+  if (!isLocal && !forceManageDbRole) {
+    console.warn(
+      "Skipping DB role management outside local env. Set SEED_MANAGE_DB_ROLE=true to enable.",
+    );
+    return;
+  }
 
   await db.execute(sql`
       DO $$
@@ -293,7 +305,13 @@ export const seedUserRoleGrantSql = async (db: DatabasePg) => {
       $$;
     `);
 
-  await db.execute(sql`GRANT CONNECT ON DATABASE guidebook TO lms_app_user;`);
+  await db.execute(sql`
+      DO $$
+      BEGIN
+        EXECUTE format('GRANT CONNECT ON DATABASE %I TO lms_app_user', current_database());
+      END
+      $$;
+    `);
   await db.execute(sql`GRANT USAGE ON SCHEMA public TO lms_app_user;`);
   await db.execute(
     sql`GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO lms_app_user;`,
