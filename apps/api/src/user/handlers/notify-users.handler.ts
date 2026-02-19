@@ -147,7 +147,9 @@ export class NotifyUsersHandler implements IEventHandler {
         userId,
       );
 
-      const invitingUser = creatorId ? await this.userService.getUserById(creatorId) : null;
+      const invitingUser = creatorId
+        ? await this.userService.getUserById(creatorId, this.dbAdmin)
+        : null;
 
       const invitingUsername =
         invitedByUserName || `${invitingUser?.firstName} ${invitingUser?.lastName}` || "Admin";

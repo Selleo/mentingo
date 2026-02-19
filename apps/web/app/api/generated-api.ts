@@ -3112,6 +3112,126 @@ export interface MarkAnnouncementAsReadResponse {
   };
 }
 
+export interface GetTenantsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    host: string;
+  }[];
+}
+
+export interface DeleteUserResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface GetGroupsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    characteristic: string | null;
+    users?: {
+      id: string;
+      createdAt: string;
+      updatedAt: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      role: string;
+      archived: boolean;
+      deletedAt: string | null;
+      profilePictureUrl: string | null;
+    }[];
+    createdAt?: string;
+    updatedAt?: string;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface SetUserGroupsBody {
+  groupIds: string[];
+}
+
+export interface EnrollUsersBody {
+  studentIds: string[];
+}
+
+export interface EnrollUsersResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface UnenrollUsersBody {
+  studentIds: string[];
+}
+
+export interface UnenrollUsersResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface EnrollGroupsBody {
+  groups: {
+    /** @format uuid */
+    id: string;
+    isMandatory: boolean;
+    dueDate?: string | null;
+  }[];
+}
+
+export interface EnrollGroupsResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface UnenrollGroupsBody {
+  groupIds: string[];
+}
+
+export interface UnenrollGroupsResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface GetCurrentKeyResponse {
+  data: {
+    key: {
+      /** @format uuid */
+      id: string;
+      keyPrefix: string;
+      createdAt: string;
+      updatedAt: string;
+      lastUsedAt: string | null;
+    } | null;
+  };
+}
+
+export interface RotateKeyResponse {
+  data: {
+    key: string;
+    metadata: {
+      /** @format uuid */
+      id: string;
+      keyPrefix: string;
+      createdAt: string;
+      updatedAt: string;
+      lastUsedAt: string | null;
+    };
+  };
+}
+
 export type BulkUpsertEnvBody = {
   name: string;
   value: string;
@@ -4010,11 +4130,11 @@ export class HttpClient<SecurityDataType = unknown> {
 }
 
 /**
- * @title Guidebook API
- * @version 1.0
+ * @title Mentingo API
+ * @version v0.0.0
  * @contact
  *
- * Example usage of Swagger with Typebox
+ * This is the API documentation for Mentingo
  */
 export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
   api = {
@@ -7610,6 +7730,301 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<MarkAnnouncementAsReadResponse, any>({
         path: `/api/announcements/${id}/read`,
         method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Integration
+     * @name IntegrationControllerGetTenants
+     * @summary List all tenants for integration selection
+     * @request GET:/api/integration/tenants
+     */
+    integrationControllerGetTenants: (params: RequestParams = {}) =>
+      this.request<GetTenantsResponse, void>({
+        path: `/api/integration/tenants`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Integration
+     * @name IntegrationControllerGetUsers
+     * @summary List users for integration
+     * @request GET:/api/integration/users
+     */
+    integrationControllerGetUsers: (
+      query?: {
+        keyword?: string;
+        role?: "admin" | "student" | "content_creator";
+        archived?: string;
+        /** @min 1 */
+        page?: number;
+        perPage?: number;
+        sort?:
+          | "firstName"
+          | "lastName"
+          | "email"
+          | "createdAt"
+          | "groupName"
+          | "-firstName"
+          | "-lastName"
+          | "-email"
+          | "-createdAt"
+          | "-groupName";
+        groups?: string[];
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetUsersResponse, void>({
+        path: `/api/integration/users`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Integration
+     * @name IntegrationControllerCreateUser
+     * @summary Create user via integration API
+     * @request POST:/api/integration/users
+     */
+    integrationControllerCreateUser: (data: CreateUserBody, params: RequestParams = {}) =>
+      this.request<CreateUserResponse, void>({
+        path: `/api/integration/users`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Integration
+     * @name IntegrationControllerGetUserById
+     * @summary Get user by ID for integration
+     * @request GET:/api/integration/users/{userId}
+     */
+    integrationControllerGetUserById: (userId: string, params: RequestParams = {}) =>
+      this.request<GetUserByIdResponse, void>({
+        path: `/api/integration/users/${userId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Integration
+     * @name IntegrationControllerUpdateUser
+     * @summary Update user via integration API
+     * @request PATCH:/api/integration/users/{userId}
+     */
+    integrationControllerUpdateUser: (
+      userId: string,
+      data: UpdateUserBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateUserResponse, void>({
+        path: `/api/integration/users/${userId}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Integration
+     * @name IntegrationControllerDeleteUser
+     * @summary Delete user via integration API
+     * @request DELETE:/api/integration/users/{userId}
+     */
+    integrationControllerDeleteUser: (userId: string, params: RequestParams = {}) =>
+      this.request<DeleteUserResponse, void>({
+        path: `/api/integration/users/${userId}`,
+        method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Integration
+     * @name IntegrationControllerGetGroups
+     * @summary List groups for integration
+     * @request GET:/api/integration/groups
+     */
+    integrationControllerGetGroups: (
+      query?: {
+        keyword?: string;
+        /** @min 1 */
+        page?: number;
+        perPage?: number;
+        sort?: "name" | "createdAt";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetGroupsResponse, void>({
+        path: `/api/integration/groups`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Integration
+     * @name IntegrationControllerSetUserGroups
+     * @summary Set user groups via integration API
+     * @request PUT:/api/integration/users/{userId}/groups
+     */
+    integrationControllerSetUserGroups: (
+      userId: string,
+      data: SetUserGroupsBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<SetUserGroupsResponse, void>({
+        path: `/api/integration/users/${userId}/groups`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Integration
+     * @name IntegrationControllerEnrollUsers
+     * @summary Enroll users to course via integration API
+     * @request POST:/api/integration/courses/{courseId}/enroll-users
+     */
+    integrationControllerEnrollUsers: (
+      courseId: string,
+      data: EnrollUsersBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<EnrollUsersResponse, void>({
+        path: `/api/integration/courses/${courseId}/enroll-users`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Integration
+     * @name IntegrationControllerUnenrollUsers
+     * @summary Unenroll users from course via integration API
+     * @request DELETE:/api/integration/courses/{courseId}/enroll-users
+     */
+    integrationControllerUnenrollUsers: (
+      courseId: string,
+      data: UnenrollUsersBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UnenrollUsersResponse, void>({
+        path: `/api/integration/courses/${courseId}/enroll-users`,
+        method: "DELETE",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Integration
+     * @name IntegrationControllerEnrollGroups
+     * @summary Enroll groups to course via integration API
+     * @request POST:/api/integration/courses/{courseId}/enroll-groups
+     */
+    integrationControllerEnrollGroups: (
+      courseId: string,
+      data: EnrollGroupsBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<EnrollGroupsResponse, void>({
+        path: `/api/integration/courses/${courseId}/enroll-groups`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Integration
+     * @name IntegrationControllerUnenrollGroups
+     * @summary Unenroll groups from course via integration API
+     * @request DELETE:/api/integration/courses/{courseId}/enroll-groups
+     */
+    integrationControllerUnenrollGroups: (
+      courseId: string,
+      data: UnenrollGroupsBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UnenrollGroupsResponse, void>({
+        path: `/api/integration/courses/${courseId}/enroll-groups`,
+        method: "DELETE",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Integration Admin
+     * @name IntegrationAdminControllerGetCurrentKey
+     * @summary Get current integration API key metadata for admin
+     * @request GET:/api/integration/key
+     */
+    integrationAdminControllerGetCurrentKey: (params: RequestParams = {}) =>
+      this.request<GetCurrentKeyResponse, void>({
+        path: `/api/integration/key`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Integration Admin
+     * @name IntegrationAdminControllerRotateKey
+     * @summary Rotate integration API key for admin
+     * @request POST:/api/integration/key
+     */
+    integrationAdminControllerRotateKey: (params: RequestParams = {}) =>
+      this.request<RotateKeyResponse, void>({
+        path: `/api/integration/key`,
+        method: "POST",
         format: "json",
         ...params,
       }),

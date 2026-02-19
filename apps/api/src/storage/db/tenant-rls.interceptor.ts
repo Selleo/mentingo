@@ -8,6 +8,11 @@ import type { CallHandler, ExecutionContext, NestInterceptor } from "@nestjs/com
 
 @Injectable()
 export class TenantRlsInterceptor implements NestInterceptor {
+  private static readonly BYPASSED_PATHS = new Set<string>([
+    "/api/healthcheck",
+    "/api/integration/tenants",
+  ]);
+
   constructor(
     private readonly runner: TenantDbRunnerService,
     private readonly tenantResolver: TenantResolverService,
@@ -22,7 +27,7 @@ export class TenantRlsInterceptor implements NestInterceptor {
 
     const { path } = req;
 
-    if (path && path.includes("/api/healthcheck")) {
+    if (path && this.shouldBypassTenantResolution(path)) {
       return next.handle();
     }
 
@@ -33,5 +38,12 @@ export class TenantRlsInterceptor implements NestInterceptor {
 
       return this.runner.runWithTenant(tenantId, () => lastValueFrom(next.handle()));
     });
+  }
+
+  private shouldBypassTenantResolution(path: string): boolean {
+    if (TenantRlsInterceptor.BYPASSED_PATHS.has(path)) return true;
+
+    const normalizedPath = path.endsWith("/") ? path.slice(0, -1) : path;
+    return TenantRlsInterceptor.BYPASSED_PATHS.has(normalizedPath);
   }
 }

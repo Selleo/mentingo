@@ -41,6 +41,7 @@ import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { S3Service } from "src/s3/s3.service";
 import { SettingsService } from "src/settings/settings.service";
 import { StatisticsService } from "src/statistics/statistics.service";
+import { DB_ADMIN } from "src/storage/db/db.providers";
 import { importUserSchema } from "src/user/schemas/createUser.schema";
 
 import {
@@ -84,6 +85,7 @@ import type { CreateUserOptions, CreateUserTransactionResult } from "src/user/us
 export class UserService {
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
+    @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
     private readonly outboxPublisher: OutboxPublisher,
     private fileService: FileService,
     private s3Service: S3Service,
@@ -150,8 +152,10 @@ export class UserService {
     };
   }
 
-  public async getUserById(id: UUIDType) {
-    const [user] = await this.db
+  public async getUserById(id: UUIDType, db?: DatabasePg) {
+    const dbInstance = db ?? this.db;
+
+    const [user] = await dbInstance
       .select({
         ...getTableColumns(users),
         groups: sql<
@@ -612,7 +616,10 @@ export class UserService {
       let newUsersLanguage: SupportedLanguages = SUPPORTED_LANGUAGES.EN;
 
       if (creator) {
-        const creatorSettings = await this.settingsService.getUserSettings(creator.userId, trx);
+        const creatorSettings = await this.settingsService.getUserSettings(
+          creator.userId,
+          this.dbAdmin,
+        );
 
         newUsersLanguage = Object.values(SUPPORTED_LANGUAGES).includes(
           data.language as SupportedLanguages,

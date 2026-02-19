@@ -2653,5 +2653,42 @@
   "tenantInactive": {
     "title": "Najemca wyłączony",
     "description": "Ta przestrzeń jest obecnie nieaktywna. Jeśli uważasz, że to błąd, skontaktuj się z administratorem, aby przywrócić dostęp."
+  },
+  "integrationApiKey": {
+    "title": "Klucz API integracji",
+    "description": "Wygeneruj długoterminowy klucz dla integracji zewnętrznych. Zastąpienie klucza natychmiast unieważnia poprzedni.",
+    "status": "Status",
+    "active": "Aktywny",
+    "inactive": "Nie wygenerowano",
+    "prefix": "Prefiks klucza",
+    "createdAt": "Utworzono",
+    "lastUsedAt": "Ostatnie użycie",
+    "loading": "Ładowanie metadanych klucza...",
+    "generate": "Wygeneruj klucz",
+    "override": "Zastąp klucz",
+    "copy": "Skopiuj klucz",
+    "generated": {
+      "title": "Skopiuj ten klucz teraz. Nie zostanie wyświetlony ponownie."
+    },
+    "confirm": {
+      "title": "Zastąpić bieżący klucz API?",
+      "description": "Ta operacja natychmiast unieważni bieżący klucz. Integracje korzystające z niego przestaną działać.",
+      "action": "Zastąp klucz"
+    },
+    "toast": {
+      "fetchSuccess": "Pobrano klucz API integracji",
+      "rotateSuccess": "Klucz API integracji został zaktualizowany",
+      "rotateError": "Nie udało się zaktualizować klucza API integracji",
+      "copySuccess": "Skopiowano klucz API integracji",
+      "copyError": "Nie udało się skopiować klucza API integracji"
+    },
+    "errors": {
+      "rotateFailed": "Nie udało się obrócić klucza API integracji",
+      "invalidApiKey": "Nieprawidłowy klucz API integracji",
+      "ownerInactive": "Właściciel klucza API nie jest już aktywny",
+      "ownerNotAdmin": "Właściciel klucza API nie ma już uprawnień administratora",
+      "missingApiKeyHeader": "Brak nagłówka X-API-Key",
+      "missingTenantIdHeader": "Brak nagłówka X-Tenant-Id"
+    }
   }
 }

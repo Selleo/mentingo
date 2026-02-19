@@ -1,11 +1,11 @@
 import { writeFile } from "node:fs";
 
-const SCHEMA_FILE = "./src/swagger/api-schema.json";
+const DEFAULT_SCHEMA_FILE = "./src/swagger/api-schema.json";
 
-export const exportSchemaToFile = (schema: object) => {
+export const exportSchemaToFile = (schema: object, filePath: string = DEFAULT_SCHEMA_FILE) => {
   const content = JSON.stringify(schema, null, 2);
 
-  writeFile(SCHEMA_FILE, content, (err) => {
+  writeFile(filePath, content, (err) => {
     if (err) {
       return console.error(err);
     }

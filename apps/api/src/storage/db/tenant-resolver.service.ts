@@ -27,6 +27,15 @@ export class TenantResolverService {
     if (tenantIdFromState) return tenantIdFromState;
 
     const user = req.user as (Request["user"] & { tenantId?: string }) | undefined;
+
+    const integrationTenantValidated = Boolean(
+      (req as Request & { integrationTenantValidated?: boolean }).integrationTenantValidated,
+    );
+
+    if (integrationTenantValidated && user?.tenantId) {
+      return user.tenantId;
+    }
+
     const origin = this.getRequestOrigin(req);
     const allowInactive = this.isInactiveAllowed(req);
 
