@@ -79,6 +79,7 @@ export class IntegrationRepository {
         keyId: integrationApiKeys.id,
         keyHash: integrationApiKeys.keyHash,
         keyTenantId: integrationApiKeys.tenantId,
+        keyTenantIsManaging: tenants.isManaging,
         userId: users.id,
         userEmail: users.email,
         userRole: users.role,
@@ -86,6 +87,7 @@ export class IntegrationRepository {
       })
       .from(integrationApiKeys)
       .innerJoin(users, eq(users.id, integrationApiKeys.createdByUserId))
+      .innerJoin(tenants, eq(tenants.id, integrationApiKeys.tenantId))
       .where(
         and(
           eq(integrationApiKeys.keyPrefix, params.keyPrefix),
@@ -106,6 +108,21 @@ export class IntegrationRepository {
       })
       .from(tenants)
       .orderBy(tenants.name);
+  }
+
+  async getTenantById(tenantId: string) {
+    const [tenant] = await this.dbAdmin
+      .select({
+        id: tenants.id,
+        name: tenants.name,
+        host: tenants.host,
+        isManaging: tenants.isManaging,
+      })
+      .from(tenants)
+      .where(eq(tenants.id, tenantId))
+      .limit(1);
+
+    return tenant ?? null;
   }
 
   async markKeyAsUsed(keyId: string): Promise<void> {

@@ -55,6 +55,8 @@ export class IntegrationService {
 
   async authenticateApiKey(apiKey: string): Promise<{
     keyId: string;
+    keyTenantId: string;
+    keyTenantIsManaging: boolean;
     user: CurrentUser;
   }> {
     const keyPrefix = this.extractPrefix(apiKey);
@@ -73,10 +75,12 @@ export class IntegrationService {
     if (key.userRole !== USER_ROLES.ADMIN)
       throw new ForbiddenException("integrationApiKey.errors.ownerNotAdmin");
 
-    const { keyId, keyTenantId, userId, userEmail, userRole } = key;
+    const { keyId, keyTenantId, keyTenantIsManaging, userId, userEmail, userRole } = key;
 
     return {
       keyId,
+      keyTenantId,
+      keyTenantIsManaging,
       user: {
         userId,
         email: userEmail,
@@ -91,6 +95,24 @@ export class IntegrationService {
   }
 
   async getAllTenants() {
+    return this.integrationRepository.getAllTenants();
+  }
+
+  async getTenantsForActor(actor: CurrentUser) {
+    const currentTenant = await this.integrationRepository.getTenantById(actor.tenantId);
+
+    if (!currentTenant) throw new UnauthorizedException("integrationApiKey.errors.invalidApiKey");
+
+    if (!currentTenant.isManaging) {
+      return [
+        {
+          id: currentTenant.id,
+          name: currentTenant.name,
+          host: currentTenant.host,
+        },
+      ];
+    }
+
     return this.integrationRepository.getAllTenants();
   }
 

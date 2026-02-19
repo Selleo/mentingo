@@ -1,8 +1,10 @@
+import { randomUUID } from "node:crypto";
+
 import { and, eq, isNull } from "drizzle-orm";
 import request from "supertest";
 
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { integrationApiKeys } from "src/storage/schema";
+import { integrationApiKeys, tenants } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
@@ -23,6 +25,7 @@ describe("IntegrationController (e2e)", () => {
   let groupFactory: ReturnType<typeof createGroupFactory>;
 
   const password = "Password123@@";
+  const uniqueTenantHost = (prefix: string) => `https://${prefix}-${randomUUID()}.local`;
 
   beforeAll(async () => {
     const { app: testApp } = await createE2ETest();
@@ -185,12 +188,22 @@ describe("IntegrationController (e2e)", () => {
       expect(response.body.message).toBe("integrationApiKey.errors.invalidApiKey");
     });
 
-    it("returns all tenants for selection with valid key", async () => {
+    it("returns only own tenant for non-managing admin", async () => {
       const admin = await userFactory
         .withCredentials({ password })
         .withAdminSettings(db)
         .create({ role: USER_ROLES.ADMIN });
       const cookies = await cookieFor(admin, app);
+
+      await dbAdmin
+        .update(tenants)
+        .set({ isManaging: false })
+        .where(eq(tenants.id, admin.tenantId));
+
+      await dbAdmin.insert(tenants).values({
+        name: "Another Tenant",
+        host: uniqueTenantHost("another-tenant"),
+      });
 
       const rotateResponse = await request(app.getHttpServer())
         .post("/api/integration/key")
@@ -204,14 +217,107 @@ describe("IntegrationController (e2e)", () => {
         .expect(200);
 
       expect(Array.isArray(response.body.data)).toBe(true);
-      expect(response.body.data.length).toBeGreaterThan(0);
+      expect(response.body.data).toHaveLength(1);
       expect(response.body.data[0]).toEqual(
         expect.objectContaining({
-          id: expect.any(String),
+          id: admin.tenantId,
           name: expect.any(String),
           host: expect.any(String),
         }),
       );
+    });
+
+    it("returns all tenants for managing admin", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: USER_ROLES.ADMIN });
+      const cookies = await cookieFor(admin, app);
+
+      await dbAdmin.update(tenants).set({ isManaging: true }).where(eq(tenants.id, admin.tenantId));
+
+      await dbAdmin.insert(tenants).values({
+        name: "Selectable Tenant",
+        host: uniqueTenantHost("selectable-tenant"),
+      });
+
+      const rotateResponse = await request(app.getHttpServer())
+        .post("/api/integration/key")
+        .set("Cookie", cookies)
+        .expect(201);
+      const apiKey = rotateResponse.body.data.key as string;
+
+      const response = await request(app.getHttpServer())
+        .get("/api/integration/tenants")
+        .set("X-API-Key", apiKey)
+        .expect(200);
+
+      expect(response.body.data.length).toBeGreaterThan(1);
+    });
+
+    it("returns 403 when non-managing admin uses another tenant id", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: USER_ROLES.ADMIN });
+      const cookies = await cookieFor(admin, app);
+
+      await dbAdmin
+        .update(tenants)
+        .set({ isManaging: false })
+        .where(eq(tenants.id, admin.tenantId));
+
+      const [{ id: otherTenantId }] = await dbAdmin
+        .insert(tenants)
+        .values({
+          name: "Other Tenant",
+          host: uniqueTenantHost("other-tenant"),
+        })
+        .returning({ id: tenants.id });
+
+      const rotateResponse = await request(app.getHttpServer())
+        .post("/api/integration/key")
+        .set("Cookie", cookies)
+        .expect(201);
+      const apiKey = rotateResponse.body.data.key as string;
+
+      const response = await request(app.getHttpServer())
+        .get("/api/integration/groups")
+        .set("X-API-Key", apiKey)
+        .set("X-Tenant-Id", otherTenantId)
+        .expect(403);
+
+      expect(response.body.message).toBe("integrationApiKey.errors.crossTenantAccessForbidden");
+    });
+
+    it("allows managing admin to use another tenant id", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: USER_ROLES.ADMIN });
+      const cookies = await cookieFor(admin, app);
+
+      await dbAdmin.update(tenants).set({ isManaging: true }).where(eq(tenants.id, admin.tenantId));
+
+      const [{ id: otherTenantId }] = await dbAdmin
+        .insert(tenants)
+        .values({
+          name: "Managed Target Tenant",
+          host: uniqueTenantHost("managed-target-tenant"),
+        })
+        .returning({ id: tenants.id });
+
+      const rotateResponse = await request(app.getHttpServer())
+        .post("/api/integration/key")
+        .set("Cookie", cookies)
+        .expect(201);
+      const apiKey = rotateResponse.body.data.key as string;
+
+      await request(app.getHttpServer())
+        .get("/api/integration/groups")
+        .set("X-API-Key", apiKey)
+        .set("X-Tenant-Id", otherTenantId)
+        .expect(200);
     });
   });
 });

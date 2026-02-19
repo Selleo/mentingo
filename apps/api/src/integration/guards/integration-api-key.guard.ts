@@ -1,4 +1,5 @@
 import {
+  ForbiddenException,
   Injectable,
   type CanActivate,
   type ExecutionContext,
@@ -40,9 +41,14 @@ export class IntegrationApiKeyGuard implements CanActivate {
       throw new UnauthorizedException("integrationApiKey.errors.missingTenantIdHeader");
     }
 
-    const { user, keyId } = await this.integrationService.authenticateApiKey(apiKey);
+    const { user, keyId, keyTenantId, keyTenantIsManaging } =
+      await this.integrationService.authenticateApiKey(apiKey);
 
     if (tenantId && typeof tenantId === "string") {
+      if (!keyTenantIsManaging && tenantId !== keyTenantId) {
+        throw new ForbiddenException("integrationApiKey.errors.crossTenantAccessForbidden");
+      }
+
       user.tenantId = tenantId;
     }
 

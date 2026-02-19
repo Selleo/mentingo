@@ -25,6 +25,7 @@ export type IntegrationApiKeyCandidate = {
   keyId: string;
   keyHash: string;
   keyTenantId: string;
+  keyTenantIsManaging: boolean;
   userId: string;
   userEmail: string;
   userRole: string;

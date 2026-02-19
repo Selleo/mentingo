@@ -107,8 +107,10 @@ export class IntegrationController {
   @Validate({
     response: baseResponse(integrationTenantsSchema),
   })
-  async getTenants(): Promise<BaseResponse<IntegrationTenant[]>> {
-    return new BaseResponse(await this.integrationService.getAllTenants());
+  async getTenants(
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<IntegrationTenant[]>> {
+    return new BaseResponse(await this.integrationService.getTenantsForActor(currentUser));
   }
 
   @Get("users")
