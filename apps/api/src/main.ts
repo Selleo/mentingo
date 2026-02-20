@@ -1,5 +1,7 @@
 import "dotenv/config";
+import { ConfigService } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
+import { JwtService } from "@nestjs/jwt";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { DEFAULT_TUS_CHUNK_SIZE } from "@repo/shared";
 import * as Sentry from "@sentry/node";
@@ -12,11 +14,16 @@ import { patchNestJsSwagger, applyFormats } from "nestjs-typebox";
 import { version } from "../version.json";
 
 import { AppModule } from "./app.module";
+import {
+  SWAGGER_INTEGRATION_ROUTE,
+  SWAGGER_MAIN_ROUTE,
+  registerSwaggerDocsAccessControl,
+} from "./common/utils/swagger-docs-access";
 import { IntegrationModule } from "./integration/integration.module";
 import { startInstrumentation } from "./langfuse/instrumentation";
 import { DB_ADMIN } from "./storage/db/db.providers";
 import { createCorsOriginOption } from "./utils/cors";
-import { environmentValidation } from "./utils/environment-validation";
+import { Environment, environmentValidation } from "./utils/environment-validation";
 import { exportSchemaToFile } from "./utils/save-swagger-to-file";
 import { setupValidation } from "./utils/setup-validation";
 import { RedisIoAdapter } from "./websocket/websocket.adapter";
@@ -54,6 +61,15 @@ async function bootstrap() {
   );
   app.use(cookieParser());
   app.setGlobalPrefix("api");
+
+  const jwtService = app.get(JwtService);
+  const jwtSecret = app.get(ConfigService).get<string>("jwt.secret");
+
+  const isDevelopment =
+    environmentValidation(process.env.NODE_ENV as string) === Environment.DEVELOPMENT;
+
+  registerSwaggerDocsAccessControl({ app, jwtService, jwtSecret, isDevelopment });
+
   app.use(
     "/api/file/videos/tus",
     bodyParser.raw({
@@ -67,14 +83,17 @@ async function bootstrap() {
     .setDescription("This is the API documentation for Mentingo")
     .setVersion(version)
     .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup("api", app, document);
-  exportSchemaToFile(document);
+
+  if (isDevelopment) {
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup(SWAGGER_MAIN_ROUTE, app, document);
+    exportSchemaToFile(document);
+  }
 
   const integrationDocument = SwaggerModule.createDocument(app, config, {
     include: [IntegrationModule],
   });
-  SwaggerModule.setup("integration-docs", app, integrationDocument);
+  SwaggerModule.setup(SWAGGER_INTEGRATION_ROUTE, app, integrationDocument);
   exportSchemaToFile(integrationDocument, "./src/swagger/integration-api-schema.json");
 
   const redisUrl = process.env.REDIS_URL;
