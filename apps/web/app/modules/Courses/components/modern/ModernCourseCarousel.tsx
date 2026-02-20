@@ -57,7 +57,7 @@ const ModernCourseCarousel = ({
     <section className="space-y-4 pb-6">
       <h2 className="h2 px-4 md:px-8">{title}</h2>
 
-      <div className="group relative px-4 md:px-8 mt-10" data-course-row>
+      <div className="group relative px-4 md:px-8 mt-10" data-course-row data-testid="course-row">
         <Carousel
           opts={{ align: "start", slidesToScroll: 1, skipSnaps: false }}
           setApi={setCarouselApi}
@@ -102,11 +102,16 @@ const ModernCourseCarousel = ({
           )}
         </Carousel>
         {canScrollPrev && (
-          <div aria-hidden className="absolute inset-y-0 left-0 z-[140] w-28 pointer-events-auto" />
+          <div
+            aria-hidden
+            data-testid="course-row-arrow-block-left"
+            className="absolute inset-y-0 left-0 z-[140] w-28 pointer-events-auto"
+          />
         )}
         {canScrollNext && (
           <div
             aria-hidden
+            data-testid="course-row-arrow-block-right"
             className="absolute inset-y-0 right-0 z-[140] w-28 pointer-events-auto"
           />
         )}

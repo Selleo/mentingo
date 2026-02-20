@@ -193,6 +193,7 @@ const ModernCourseCard = ({
   return (
     <div
       ref={cardRef}
+      data-testid={title}
       className={cn(
         "group relative block w-full max-w-md cursor-pointer overflow-visible",
         className,
@@ -207,6 +208,7 @@ const ModernCourseCard = ({
 
       <Link
         to={`/course/${id}`}
+        data-testid="modern-course-card-link"
         className="absolute inset-0 transition-transform"
         style={{
           transform:
