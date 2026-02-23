@@ -29,7 +29,7 @@ import type React from "react";
 export function VideoPlayerSingleton() {
   const { state, getOnEnded, activateVideoByUrl } = useVideoPlayer();
   const { currentUrl, placeholderElement, provider } = state;
-  const rect = usePlaceholderRect(placeholderElement);
+  const rect = usePlaceholderRect(placeholderElement, currentUrl);
   const [showPlayNext, setShowPlayNext] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const { isFullscreen } = useFullscreenToggle(containerRef);
