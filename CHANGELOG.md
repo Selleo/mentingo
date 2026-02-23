@@ -1,3 +1,43 @@
+<a name="v4.4.0"></a>
+
+## [v4.4.0] - 23.02.2026
+
+### Features:
+
+- enable external integrations through API ([#1302](https://github.com/Selleo/mentingo/issues/1302))
+
+- introduce super-admins role with ability to manage tenants ([#1276](https://github.com/Selleo/mentingo/issues/1276))
+
+- improve password change security with confirm password field ([#1291](https://github.com/Selleo/mentingo/issues/1291))
+
+### Bug Fixes:
+
+- visual artifacts in video player ([#1318](https://github.com/Selleo/mentingo/issues/1318))
+
+- ensure staging environment works correctly ([#1308](https://github.com/Selleo/mentingo/issues/1308))
+
+- restore correct AI mentor behavior ([#1306](https://github.com/Selleo/mentingo/issues/1306))
+
+- ensure PR preview environments set up storage correctly ([#1299](https://github.com/Selleo/mentingo/issues/1299))
+
+- eliminate flickering in fill-in-the-blanks questions ([#1290](https://github.com/Selleo/mentingo/issues/1290))
+
+- ensure video upload processes smoothly regardless of environment ([#1298](https://github.com/Selleo/mentingo/issues/1298))
+
+### Chores:
+
+- enhance animations and interactions in the modern courses layout ([#1312](https://github.com/Selleo/mentingo/issues/1312))
+
+- enhance API documentation clarity and access control ([#1315](https://github.com/Selleo/mentingo/issues/1315))
+
+- improve modern course list animations and expand behavior ([#1305](https://github.com/Selleo/mentingo/issues/1305))
+
+- reorganize image fields in settings ([#1304](https://github.com/Selleo/mentingo/issues/1304))
+
+- improve thumbnail performance and quality ([#1301](https://github.com/Selleo/mentingo/issues/1301))
+
+- improve registration page responsiveness and editor usability ([#1296](https://github.com/Selleo/mentingo/issues/1296))
+
 <a name="v4.3.0"></a>
 
 ## [v4.3.0] - 13.02.2026
@@ -27,6 +67,10 @@
 - improve in-progress indicators for chapters and lessons ([#1286](https://github.com/Selleo/mentingo/issues/1286))
 
 - enhance admin experience in user management ([#1285](https://github.com/Selleo/mentingo/issues/1285))
+
+### Documentation:
+
+- update changelog for version v4.3.0
 
 ### Tests:
 
@@ -2412,7 +2456,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.3.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.4.0...HEAD
+[v4.4.0]: https://github.com/Selleo/mentingo/compare/v4.3.0...v4.4.0
 [v4.3.0]: https://github.com/Selleo/mentingo/compare/v4.2.0...v4.3.0
 [v4.2.0]: https://github.com/Selleo/mentingo/compare/v4.1.0...v4.2.0
 [v4.1.0]: https://github.com/Selleo/mentingo/compare/v4.0.0...v4.1.0
