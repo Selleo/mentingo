@@ -105,6 +105,8 @@ const ModernCourseCard = ({
     row.dataset[ROW_HOVER_COUNT_KEY] = String(nextCount);
   };
 
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
     setRowElevated(isHovered);
     return () => {
@@ -198,8 +200,14 @@ const ModernCourseCard = ({
         "group relative block w-full max-w-md cursor-pointer overflow-visible",
         className,
       )}
-      onMouseEnter={() => setIsHovered(true)}
+      onMouseEnter={() => {
+        timeoutRef.current = setTimeout(() => {
+          setIsHovered(true);
+        }, 200);
+      }}
       onMouseLeave={() => {
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
         setIsHovered(false);
         setShowVideo(false);
       }}
@@ -332,6 +340,7 @@ const ModernCourseCard = ({
             opacity: isHovered ? 1 : 0,
             transitionDuration: PANEL_TRANSITION_DURATION,
             transitionTimingFunction: SMOOTH_EASE,
+            transitionDelay: isHovered ? "0.2s" : "0s",
           }}
         >
           <div className="space-y-3 border border-t-0 border-gray-200 p-4">
