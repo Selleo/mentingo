@@ -38,8 +38,8 @@ export const PlatformLogoForm = () => {
   });
 
   return (
-    <Card className="h-full border-neutral-200 bg-white shadow-sm">
-      <CardHeader className="space-y-1 pb-2">
+    <Card className="flex h-full flex-col border-neutral-200 bg-white shadow-sm">
+      <CardHeader className="min-h-24 space-y-1 pb-2">
         <CardTitle className="text-base font-semibold">{t("platformLogo.header")}</CardTitle>
         <CardDescription className="text-sm leading-5 text-neutral-700">
           {t("platformLogo.subHeader")}
