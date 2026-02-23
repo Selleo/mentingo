@@ -25,9 +25,7 @@ test.describe("Admin navigation", () => {
     await page.goto("/");
   });
   test("should check admin navigation", async ({ page }) => {
-    await page
-      .getByRole("button", { name: new RegExp(TEST_NAVIGATION.button.courses, "i"), exact: true })
-      .click();
+    await page.getByRole("button", { name: "Courses", exact: true }).click();
     await page.waitForURL("/courses");
 
     await page.getByRole("button", { name: "Manage courses" }).click();
