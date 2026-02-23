@@ -32,7 +32,7 @@ export const LoaderPlayNext = ({
   return (
     <div
       className={cn(
-        "relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-lg bg-background text-foreground",
+        "relative flex aspect-video w-full items-center justify-center overflow-hidden bg-background text-foreground",
         className,
       )}
     >
