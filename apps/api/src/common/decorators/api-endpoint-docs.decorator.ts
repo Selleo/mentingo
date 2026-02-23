@@ -18,12 +18,8 @@ export const API_HEADERS = {
   } satisfies SwaggerHeaderOptions,
 };
 
-export const ApiEndpointDocs = ({
-  summary,
-  description,
-  headers = [API_HEADERS.X_TENANT_ID],
-}: ApiEndpointDocsOptions) =>
+export const ApiEndpointDocs = ({ summary, description, headers }: ApiEndpointDocsOptions) =>
   applyDecorators(
     ApiOperation({ summary, description }),
-    ...headers.map((header) => ApiHeader(header)),
+    ...(headers?.map((header) => ApiHeader(header)) ?? []),
   );

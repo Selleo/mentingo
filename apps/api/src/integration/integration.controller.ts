@@ -124,6 +124,7 @@ export class IntegrationController {
     summary: "List users for integration",
     description:
       "Returns users from the tenant selected by X-Tenant-Id.\n\nSupports keyword search, role filtering, archived filtering ('true' or 'false'), group filtering, sorting, and pagination so integrations can sync user directories in batches.",
+    headers: [API_HEADERS.X_TENANT_ID],
   })
   @Validate({
     request: [
