@@ -7735,7 +7735,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
-     * No description
+     * @description Returns all tenants accessible to the current integration API key. Use this endpoint first to discover which tenant IDs you can operate on. For the rest of integration endpoints, pass one of those IDs in the X-Tenant-Id header.
      *
      * @tags Integration
      * @name IntegrationControllerGetTenants
@@ -7751,7 +7751,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
-     * No description
+     * @description Returns users from the tenant selected by X-Tenant-Id. Supports keyword search, role filtering, archived filtering ('true' or 'false'), group filtering, sorting, and pagination so integrations can sync user directories in batches.
      *
      * @tags Integration
      * @name IntegrationControllerGetUsers
@@ -7790,7 +7790,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
-     * No description
+     * @description Creates a new user inside the tenant selected by X-Tenant-Id. Provide the user payload in the request body. The response returns the created user ID so your external system can persist the Mentingo mapping.
      *
      * @tags Integration
      * @name IntegrationControllerCreateUser
@@ -7808,7 +7808,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
-     * No description
+     * @description Returns the full current state of a single tenant user by userId. Use this endpoint when your integration needs an authoritative read before applying updates or enrollment changes.
      *
      * @tags Integration
      * @name IntegrationControllerGetUserById
@@ -7824,7 +7824,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
-     * No description
+     * @description Updates an existing tenant user identified by userId. Only fields included in the body are modified. Use this endpoint for profile, role, or status synchronization from an external identity source.
      *
      * @tags Integration
      * @name IntegrationControllerUpdateUser
@@ -7846,7 +7846,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
-     * No description
+     * @description Deletes the tenant user identified by userId. Use this when your source-of-truth system has deprovisioned a user and Mentingo access should be removed as part of lifecycle automation.
      *
      * @tags Integration
      * @name IntegrationControllerDeleteUser
@@ -7862,7 +7862,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
-     * No description
+     * @description Returns groups from the tenant selected by X-Tenant-Id. Supports keyword filtering, sorting, and pagination so your integration can resolve external groups to Mentingo group IDs before assignment or enrollment operations.
      *
      * @tags Integration
      * @name IntegrationControllerGetGroups
@@ -7888,7 +7888,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
-     * No description
+     * @description Sets the complete group membership for a user in the selected tenant. This operation treats the provided groupIds list as the source of truth and updates membership to match it.
      *
      * @tags Integration
      * @name IntegrationControllerSetUserGroups
@@ -7910,7 +7910,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
-     * No description
+     * @description Enrolls the provided user IDs into the specified course within the selected tenant. Use this endpoint to synchronize direct, user-level course access from your external system.
      *
      * @tags Integration
      * @name IntegrationControllerEnrollUsers
@@ -7932,7 +7932,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
-     * No description
+     * @description Removes the provided user IDs from the specified course within the selected tenant. Use this endpoint to revoke direct course access when enrollment should no longer apply.
      *
      * @tags Integration
      * @name IntegrationControllerUnenrollUsers
@@ -7954,7 +7954,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
-     * No description
+     * @description Enrolls members of the provided group IDs into the specified course within the selected tenant. Use this for group-driven provisioning where course access is managed at group level instead of per user.
      *
      * @tags Integration
      * @name IntegrationControllerEnrollGroups
@@ -7976,7 +7976,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
-     * No description
+     * @description Removes members of the provided group IDs from the specified course within the selected tenant. Use this for group-driven deprovisioning when course access is no longer required.
      *
      * @tags Integration
      * @name IntegrationControllerUnenrollGroups
