@@ -5,12 +5,10 @@
       "get": {
         "operationId": "IntegrationController_getTenants",
         "summary": "List all tenants for integration selection",
-        "description": "Returns all tenants accessible to the current integration API key.\n\nUse this endpoint first to discover which tenant IDs you can operate on. For the rest of integration endpoints, pass one of those IDs in the X-Tenant-Id header.",
         "parameters": [
           {
             "name": "X-API-Key",
             "in": "header",
-            "description": "Integration API key used to authenticate every integration request.",
             "required": true,
             "schema": {
               "type": "string"
@@ -52,12 +50,10 @@
       "get": {
         "operationId": "IntegrationController_getUsers",
         "summary": "List users for integration",
-        "description": "Returns users from the tenant selected by X-Tenant-Id.\n\nSupports keyword search, role filtering, archived filtering ('true' or 'false'), group filtering, sorting, and pagination so integrations can sync user directories in batches.",
         "parameters": [
           {
             "name": "X-API-Key",
             "in": "header",
-            "description": "Integration API key used to authenticate every integration request.",
             "required": true,
             "schema": {
               "type": "string"
@@ -180,7 +176,6 @@
           {
             "name": "X-Tenant-Id",
             "in": "header",
-            "description": "Target tenant context for this request. Must be one of the tenant IDs returned by GET /integration/tenants.",
             "required": true,
             "schema": {
               "type": "string"
@@ -211,12 +206,10 @@
       "post": {
         "operationId": "IntegrationController_createUser",
         "summary": "Create user via integration API",
-        "description": "Creates a new user inside the tenant selected by X-Tenant-Id.\n\nProvide the user payload in the request body. The response returns the created user ID so your external system can persist the Mentingo mapping.",
         "parameters": [
           {
             "name": "X-API-Key",
             "in": "header",
-            "description": "Integration API key used to authenticate every integration request.",
             "required": true,
             "schema": {
               "type": "string"
@@ -225,7 +218,6 @@
           {
             "name": "X-Tenant-Id",
             "in": "header",
-            "description": "Target tenant context for this request. Must be one of the tenant IDs returned by GET /integration/tenants.",
             "required": true,
             "schema": {
               "type": "string"
@@ -268,12 +260,10 @@
       "get": {
         "operationId": "IntegrationController_getUserById",
         "summary": "Get user by ID for integration",
-        "description": "Returns the full current state of a single tenant user by userId.\n\nUse this endpoint when your integration needs an authoritative read before applying updates or enrollment changes.",
         "parameters": [
           {
             "name": "X-API-Key",
             "in": "header",
-            "description": "Integration API key used to authenticate every integration request.",
             "required": true,
             "schema": {
               "type": "string"
@@ -291,7 +281,6 @@
           {
             "name": "X-Tenant-Id",
             "in": "header",
-            "description": "Target tenant context for this request. Must be one of the tenant IDs returned by GET /integration/tenants.",
             "required": true,
             "schema": {
               "type": "string"
@@ -322,12 +311,10 @@
       "patch": {
         "operationId": "IntegrationController_updateUser",
         "summary": "Update user via integration API",
-        "description": "Updates an existing tenant user identified by userId.\n\nOnly fields included in the body are modified. Use this endpoint for profile, role, or status synchronization from an external identity source.",
         "parameters": [
           {
             "name": "X-API-Key",
             "in": "header",
-            "description": "Integration API key used to authenticate every integration request.",
             "required": true,
             "schema": {
               "type": "string"
@@ -345,7 +332,6 @@
           {
             "name": "X-Tenant-Id",
             "in": "header",
-            "description": "Target tenant context for this request. Must be one of the tenant IDs returned by GET /integration/tenants.",
             "required": true,
             "schema": {
               "type": "string"
@@ -386,12 +372,10 @@
       "delete": {
         "operationId": "IntegrationController_deleteUser",
         "summary": "Delete user via integration API",
-        "description": "Deletes the tenant user identified by userId.\n\nUse this when your source-of-truth system has deprovisioned a user and Mentingo access should be removed as part of lifecycle automation.",
         "parameters": [
           {
             "name": "X-API-Key",
             "in": "header",
-            "description": "Integration API key used to authenticate every integration request.",
             "required": true,
             "schema": {
               "type": "string"
@@ -409,7 +393,6 @@
           {
             "name": "X-Tenant-Id",
             "in": "header",
-            "description": "Target tenant context for this request. Must be one of the tenant IDs returned by GET /integration/tenants.",
             "required": true,
             "schema": {
               "type": "string"
@@ -442,12 +425,10 @@
       "get": {
         "operationId": "IntegrationController_getGroups",
         "summary": "List groups for integration",
-        "description": "Returns groups from the tenant selected by X-Tenant-Id.\n\nSupports keyword filtering, sorting, and pagination so your integration can resolve external groups to Mentingo group IDs before assignment or enrollment operations.",
         "parameters": [
           {
             "name": "X-API-Key",
             "in": "header",
-            "description": "Integration API key used to authenticate every integration request.",
             "required": true,
             "schema": {
               "type": "string"
@@ -498,7 +479,6 @@
           {
             "name": "X-Tenant-Id",
             "in": "header",
-            "description": "Target tenant context for this request. Must be one of the tenant IDs returned by GET /integration/tenants.",
             "required": true,
             "schema": {
               "type": "string"
@@ -531,12 +511,10 @@
       "put": {
         "operationId": "IntegrationController_setUserGroups",
         "summary": "Set user groups via integration API",
-        "description": "Sets the complete group membership for a user in the selected tenant.\n\nThis operation treats the provided groupIds list as the source of truth and updates membership to match it.",
         "parameters": [
           {
             "name": "X-API-Key",
             "in": "header",
-            "description": "Integration API key used to authenticate every integration request.",
             "required": true,
             "schema": {
               "type": "string"
@@ -554,7 +532,6 @@
           {
             "name": "X-Tenant-Id",
             "in": "header",
-            "description": "Target tenant context for this request. Must be one of the tenant IDs returned by GET /integration/tenants.",
             "required": true,
             "schema": {
               "type": "string"
@@ -597,12 +574,10 @@
       "post": {
         "operationId": "IntegrationController_enrollUsers",
         "summary": "Enroll users to course via integration API",
-        "description": "Enrolls the provided user IDs into the specified course within the selected tenant.\n\nUse this endpoint to synchronize direct, user-level course access from your external system.",
         "parameters": [
           {
             "name": "X-API-Key",
             "in": "header",
-            "description": "Integration API key used to authenticate every integration request.",
             "required": true,
             "schema": {
               "type": "string"
@@ -620,7 +595,6 @@
           {
             "name": "X-Tenant-Id",
             "in": "header",
-            "description": "Target tenant context for this request. Must be one of the tenant IDs returned by GET /integration/tenants.",
             "required": true,
             "schema": {
               "type": "string"
@@ -661,12 +635,10 @@
       "delete": {
         "operationId": "IntegrationController_unenrollUsers",
         "summary": "Unenroll users from course via integration API",
-        "description": "Removes the provided user IDs from the specified course within the selected tenant.\n\nUse this endpoint to revoke direct course access when enrollment should no longer apply.",
         "parameters": [
           {
             "name": "X-API-Key",
             "in": "header",
-            "description": "Integration API key used to authenticate every integration request.",
             "required": true,
             "schema": {
               "type": "string"
@@ -684,7 +656,6 @@
           {
             "name": "X-Tenant-Id",
             "in": "header",
-            "description": "Target tenant context for this request. Must be one of the tenant IDs returned by GET /integration/tenants.",
             "required": true,
             "schema": {
               "type": "string"
@@ -727,12 +698,10 @@
       "post": {
         "operationId": "IntegrationController_enrollGroups",
         "summary": "Enroll groups to course via integration API",
-        "description": "Enrolls members of the provided group IDs into the specified course within the selected tenant.\n\nUse this for group-driven provisioning where course access is managed at group level instead of per user.",
         "parameters": [
           {
             "name": "X-API-Key",
             "in": "header",
-            "description": "Integration API key used to authenticate every integration request.",
             "required": true,
             "schema": {
               "type": "string"
@@ -750,7 +719,6 @@
           {
             "name": "X-Tenant-Id",
             "in": "header",
-            "description": "Target tenant context for this request. Must be one of the tenant IDs returned by GET /integration/tenants.",
             "required": true,
             "schema": {
               "type": "string"
@@ -791,12 +759,10 @@
       "delete": {
         "operationId": "IntegrationController_unenrollGroups",
         "summary": "Unenroll groups from course via integration API",
-        "description": "Removes members of the provided group IDs from the specified course within the selected tenant.\n\nUse this for group-driven deprovisioning when course access is no longer required.",
         "parameters": [
           {
             "name": "X-API-Key",
             "in": "header",
-            "description": "Integration API key used to authenticate every integration request.",
             "required": true,
             "schema": {
               "type": "string"
@@ -814,7 +780,6 @@
           {
             "name": "X-Tenant-Id",
             "in": "header",
-            "description": "Target tenant context for this request. Must be one of the tenant IDs returned by GET /integration/tenants.",
             "required": true,
             "schema": {
               "type": "string"

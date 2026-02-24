@@ -55,6 +55,7 @@ import { LessonRepository } from "src/lesson/repositories/lesson.repository";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
+import { LumaService } from "src/luma/luma.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { SettingsService } from "src/settings/settings.service";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
@@ -177,6 +178,7 @@ export class CourseService {
     private readonly emailService: EmailService,
     private readonly courseSlugService: CourseSlugService,
     private readonly masterCourseService: MasterCourseService,
+    private readonly lumaService: LumaService,
   ) {}
 
   async getAllCourses(query: CoursesQuery): Promise<{
@@ -2482,11 +2484,20 @@ export class CourseService {
       throw new ForbiddenException("You can't delete a published course");
     }
 
+    const { enabled: isLumaConfigured } = await this.envService.getLumaConfigured();
+
     return this.db.transaction(async (trx) => {
       await trx.delete(quizAttempts).where(eq(quizAttempts.courseId, id));
       await trx.delete(studentCourses).where(eq(studentCourses.courseId, id));
       await trx.delete(studentChapterProgress).where(eq(studentChapterProgress.courseId, id));
       await trx.delete(coursesSummaryStats).where(eq(coursesSummaryStats.courseId, id));
+
+      if (isLumaConfigured) {
+        await this.lumaService
+          .getLumaClient()
+          .then((luma) => luma && luma.deleteDraft({ integrationId: id }))
+          .catch((error) => console.error(error));
+      }
 
       const [deletedCourse] = await trx.delete(courses).where(eq(courses.id, id)).returning();
 

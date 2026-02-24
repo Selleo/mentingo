@@ -1,15 +1,18 @@
 import { Link, useNavigate, useParams, useSearchParams } from "@remix-run/react";
 import { COURSE_ORIGIN_TYPES, type SupportedLanguages } from "@repo/shared";
 import { Building } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useExportMasterCourse } from "~/api/mutations/admin/useExportMasterCourse";
 import useGenerateMissingTranslations from "~/api/mutations/admin/useGenerateMissingTranslations";
+import { useSaveGeneratedCourse } from "~/api/mutations/admin/useSaveGeneratedCourse";
 import { useBetaCourseById } from "~/api/queries/admin/useBetaCourse";
+import { useCourseGenerationDraft } from "~/api/queries/admin/useCourseGenerationDraft";
 import { useMissingTranslations } from "~/api/queries/admin/useHasMissingTranslations";
 import { useMasterCourseExportCandidates } from "~/api/queries/admin/useMasterCourseExportCandidates";
 import { useAIConfigured } from "~/api/queries/useAIConfigured";
+import { useLumaConfigured } from "~/api/queries/useLumaConfigured";
 import { useStripeConfigured } from "~/api/queries/useStripeConfigured";
 import { Icon } from "~/components/Icon";
 import { PageWrapper } from "~/components/PageWrapper";
@@ -57,6 +60,7 @@ const EditCourse = () => {
 
   const { data: isStripeConfigured } = useStripeConfigured();
   const { data: isAIConfigured } = useAIConfigured();
+  const { data: isLumaConfigured } = useLumaConfigured();
   const { isManagingTenantAdmin } = useUserRole();
 
   const { language } = useLanguageStore();
@@ -67,6 +71,8 @@ const EditCourse = () => {
   const [selectedTenantIds, setSelectedTenantIds] = useState<string[]>([]);
   const { mutateAsync: generateTranslations, isPending: isGenerationPending } =
     useGenerateMissingTranslations();
+  const { mutateAsync: saveGeneratedCourse } = useSaveGeneratedCourse();
+  const courseGenerationSaveTriggeredForDraftId = useRef<string | null>(null);
   const { mutateAsync: exportMasterCourse, isPending: isExportPending } = useExportMasterCourse();
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -82,6 +88,25 @@ const EditCourse = () => {
     dataUpdatedAt,
     error,
   } = useBetaCourseById(id, courseLanguage);
+
+  const showCourseGenerationButton = useMemo(
+    () => !!isLumaConfigured?.enabled,
+    [isLumaConfigured?.enabled],
+  );
+
+  const isCourseGenerationDisabled = useMemo(
+    () => (course?.chapters.length ?? 0) > 0,
+    [course?.chapters.length],
+  );
+
+  const isCourseGenerationDraftEnabled =
+    !!course?.id && !isCourseGenerationDisabled && showCourseGenerationButton;
+
+  const { data: draft } = useCourseGenerationDraft(
+    course?.id ?? "",
+    course?.title ?? "",
+    isCourseGenerationDraftEnabled,
+  );
 
   const { data: hasMissingTranslations } = useMissingTranslations(id, courseLanguage);
   const { data: exportCandidates } = useMasterCourseExportCandidates(id, isManagingTenantAdmin);
@@ -118,6 +143,22 @@ const EditCourse = () => {
     }
   }, [language, courseLanguage, course, isFetching]);
 
+  useEffect(() => {
+    if (!course?.id || !draft?.draftId || !draft.isCourseGenerated) return;
+    if ((course.chapters.length ?? 0) > 0) return;
+    if (courseGenerationSaveTriggeredForDraftId.current === draft.draftId) return;
+
+    courseGenerationSaveTriggeredForDraftId.current = draft.draftId;
+    void saveGeneratedCourse({
+      integrationId: course.id,
+      draftName: course.title ?? "",
+    });
+  }, [course, draft?.draftId, draft?.isCourseGenerated, saveGeneratedCourse]);
+
+  const handleTabChange = (tabValue: string) => {
+    params.set("tab", tabValue);
+    setSearchParams(params);
+  };
   const handleTabChange = useCallback(
     (tabValue: string) => {
       setSearchParams((prevParams) => {
@@ -373,6 +414,9 @@ const EditCourse = () => {
                 chapters={course?.chapters as Chapter[]}
                 canRefetchChapterList={!!canRefetchChapterList}
                 language={courseLanguage}
+                draft={draft}
+                showCourseGenerationButton={showCourseGenerationButton}
+                isCourseGenerationDisabled={isCourseGenerationDisabled}
                 baseLanguage={course?.baseLanguage ?? courseLanguage}
               />
             </LeaveModalProvider>

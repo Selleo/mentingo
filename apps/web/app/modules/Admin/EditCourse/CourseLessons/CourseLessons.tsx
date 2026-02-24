@@ -3,14 +3,9 @@ import { useTranslation } from "react-i18next";
 
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
-import {
-  Tooltip,
-  TooltipArrow,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "~/components/ui/tooltip";
 import { useLeaveModal } from "~/context/LeaveModalContext";
+import { cn } from "~/lib/utils";
+import { CourseGenerationButton } from "~/modules/Admin/EditCourse/compontents/CourseGenerationButton";
 
 import { ContentTypes } from "../EditCourse.types";
 
@@ -25,6 +20,7 @@ import QuizLessonForm from "./NewLesson/QuizLessonForm/QuizLessonForm";
 
 import type { Chapter, Lesson } from "../EditCourse.types";
 import type { SupportedLanguages } from "@repo/shared";
+import type { GetCourseGenerationDraftResponse } from "~/api/generated-api";
 import type { Sortable } from "~/components/SortableList/SortableList";
 
 interface CourseLessonsProps {
@@ -32,6 +28,9 @@ interface CourseLessonsProps {
   canRefetchChapterList: boolean;
   language: SupportedLanguages;
   baseLanguage: SupportedLanguages;
+  isCourseGenerationDisabled: boolean;
+  showCourseGenerationButton: boolean;
+  draft?: GetCourseGenerationDraftResponse;
 }
 
 const CourseLessons = ({
@@ -39,6 +38,9 @@ const CourseLessons = ({
   canRefetchChapterList,
   language,
   baseLanguage,
+  draft,
+  isCourseGenerationDisabled,
+  showCourseGenerationButton,
 }: CourseLessonsProps) => {
   const [contentTypeToDisplay, setContentTypeToDisplay] = useState(ContentTypes.EMPTY);
   const [selectedChapter, setSelectedChapter] = useState<Chapter | null>(null);
@@ -49,6 +51,11 @@ const CourseLessons = ({
   const { t } = useTranslation();
 
   const isBaseLanguage = baseLanguage === language;
+  const isCourseGenerationVisible =
+    isBaseLanguage &&
+    showCourseGenerationButton &&
+    !isCourseGenerationDisabled &&
+    !draft?.isCourseGenerated;
 
   useEffect(() => {
     if (!chapters) return;
@@ -172,33 +179,17 @@ const CourseLessons = ({
             baseLanguage={baseLanguage}
           />
         </div>
-        {!isBaseLanguage ? (
-          <TooltipProvider delayDuration={0}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span>
-                  <Button onClick={addChapter} className="rounded-lg px-4 py-2 w-full" disabled>
-                    <Icon name="Plus" className="mr-2" />
-                    {t("adminCourseView.curriculum.chapter.button.addChapter")}
-                  </Button>
-                </span>
-              </TooltipTrigger>
-              <TooltipContent
-                side="top"
-                align="center"
-                className="rounded bg-black px-2 py-1 text-sm text-white shadow-md"
-              >
-                {t("adminCourseView.curriculum.chapter.button.addChapterDisabledTooltip")}
-                <TooltipArrow className="fill-black" />
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        ) : (
-          <Button onClick={addChapter} className="rounded-lg px-4 py-2">
+        <div className="mt-4 flex w-full gap-3">
+          <Button
+            onClick={addChapter}
+            disabled={!isBaseLanguage}
+            className={cn("rounded-lg px-4 py-2", isCourseGenerationVisible ? "w-1/2" : "w-full")}
+          >
             <Icon name="Plus" className="mr-2" />
             {t("adminCourseView.curriculum.chapter.button.addChapter")}
           </Button>
-        )}
+          {isCourseGenerationVisible && <CourseGenerationButton draft={draft} className="w-1/2" />}
+        </div>
       </div>
       <div className="size-full md:sticky md:top-8 self-start">{renderContent}</div>
     </div>

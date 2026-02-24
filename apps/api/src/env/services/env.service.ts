@@ -161,6 +161,16 @@ export class EnvService {
     return { enabled };
   }
 
+  async getLumaConfigured() {
+    const lumaKey = await this.getEnv("LUMA_API_KEY")
+      .then((r) => r.value)
+      .catch(() => undefined);
+
+    const enabled = !!lumaKey;
+
+    return { enabled };
+  }
+
   async getEnvSetup(userId: string) {
     const allKeys = Object.values(SERVICE_GROUPS).flat();
 

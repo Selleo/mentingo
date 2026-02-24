@@ -3357,6 +3357,12 @@ export interface GetAIConfiguredResponse {
   };
 }
 
+export interface GetLumaConfiguredResponse {
+  data: {
+    enabled: boolean;
+  };
+}
+
 export interface GetIsConfigSetupResponse {
   data: {
     fullyConfigured: string[];
@@ -4070,6 +4076,50 @@ export interface UpdateTenantByIdResponse {
     updatedAt: string;
   };
 }
+
+export interface ChatWithCourseGenerationAgentBody {
+  /** @format uuid */
+  integrationId: string;
+  message: string;
+}
+
+export type GetCourseGenerationMessagesResponse = {
+  /** @format uuid */
+  id: string;
+  /** @format uuid */
+  draftId: string;
+  role: string;
+  content: string;
+  contentType: string;
+  draftMetadata?: object | null;
+  createdAt: string;
+  updatedAt: string;
+}[];
+
+export interface GetCourseGenerationDraftResponse {
+  /** @format uuid */
+  integrationId: string;
+  /** @format uuid */
+  draftId: string;
+  isCourseGenerated: boolean;
+}
+
+export interface SaveCourseGenerationBody {
+  /** @format uuid */
+  integrationId: string;
+}
+
+export interface IngestCourseGenerationFilesBody {
+  /** @format uuid */
+  integrationId: string;
+}
+
+export type GetCourseGenerationFilesResponse = {
+  /** @format uuid */
+  id: string;
+  filename: string;
+  contentType: string;
+}[];
 
 import type {
   AxiosInstance,
@@ -8262,6 +8312,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name EnvControllerGetLumaConfigured
+     * @request GET:/api/env/luma
+     */
+    envControllerGetLumaConfigured: (params: RequestParams = {}) =>
+      this.request<GetLumaConfiguredResponse, any>({
+        path: `/api/env/luma`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name EnvControllerGetIsConfigSetup
      * @request GET:/api/env/config/setup
      */
@@ -9071,6 +9135,135 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "PATCH",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LumaControllerChatWithCourseGenerationAgent
+     * @request POST:/api/luma/course-generation/chat
+     */
+    lumaControllerChatWithCourseGenerationAgent: (
+      data: ChatWithCourseGenerationAgentBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/luma/course-generation/chat`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LumaControllerGetCourseGenerationMessages
+     * @request GET:/api/luma/course-generation/messages
+     */
+    lumaControllerGetCourseGenerationMessages: (
+      query?: {
+        /** @format uuid */
+        integrationId?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCourseGenerationMessagesResponse, any>({
+        path: `/api/luma/course-generation/messages`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LumaControllerGetCourseGenerationDraft
+     * @request GET:/api/luma/course-generation/draft
+     */
+    lumaControllerGetCourseGenerationDraft: (
+      query?: {
+        /** @format uuid */
+        integrationId?: string;
+        /** @minLength 1 */
+        draftName?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCourseGenerationDraftResponse, any>({
+        path: `/api/luma/course-generation/draft`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LumaControllerSaveCourseGeneration
+     * @request POST:/api/luma/course-generation/save
+     */
+    lumaControllerSaveCourseGeneration: (
+      data: SaveCourseGenerationBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/luma/course-generation/save`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LumaControllerIngestCourseGenerationFiles
+     * @request POST:/api/luma/course-generation/files/ingest
+     */
+    lumaControllerIngestCourseGenerationFiles: (
+      data: IngestCourseGenerationFilesBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/luma/course-generation/files/ingest`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LumaControllerDeleteIngestedCourseGenerationFile
+     * @request DELETE:/api/luma/course-generation/files/{integrationId}/{documentId}
+     */
+    lumaControllerDeleteIngestedCourseGenerationFile: (
+      integrationId: string,
+      documentId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/luma/course-generation/files/${integrationId}/${documentId}`,
+        method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LumaControllerGetCourseGenerationFiles
+     * @request GET:/api/luma/course-generation/files/{integrationId}
+     */
+    lumaControllerGetCourseGenerationFiles: (integrationId: string, params: RequestParams = {}) =>
+      this.request<GetCourseGenerationFilesResponse, any>({
+        path: `/api/luma/course-generation/files/${integrationId}`,
+        method: "GET",
         format: "json",
         ...params,
       }),

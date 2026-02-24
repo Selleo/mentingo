@@ -16,7 +16,7 @@ import {
   getEnvResponseSchema,
   stripePublishableKeyResponseSchema,
   isEnvSetupResponseSchema,
-  aiConfiguredResponseSchema,
+  isConfiguredResponseSchema,
 } from "src/env/env.schema";
 import { EnvService } from "src/env/services/env.service";
 import { USER_ROLES } from "src/user/schemas/userRoles";
@@ -69,10 +69,18 @@ export class EnvController {
 
   @Get("ai")
   @Validate({
-    response: baseResponse(aiConfiguredResponseSchema),
+    response: baseResponse(isConfiguredResponseSchema),
   })
   async getAIConfigured() {
     return new BaseResponse(await this.envService.getAIConfigured());
+  }
+
+  @Get("luma")
+  @Validate({
+    response: baseResponse(isConfiguredResponseSchema),
+  })
+  async getLumaConfigured() {
+    return new BaseResponse(await this.envService.getLumaConfigured());
   }
 
   @Get("config/setup")

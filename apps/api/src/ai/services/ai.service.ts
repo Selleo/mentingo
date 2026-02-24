@@ -279,7 +279,7 @@ export class AiService {
     }>,
     language: SupportedLanguages,
     courseId: string,
-    chunkSize: number = 10,
+    chunkSize: number = 4,
   ) {
     return observe(
       async () => {
@@ -357,6 +357,7 @@ export class AiService {
         };
 
         const chunked = _.chunk(data, chunkSize);
+
         return Promise.all(chunked.map(translateChunk));
       },
       { name: "translation-generator", asType: "generation" },

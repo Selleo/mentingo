@@ -23,6 +23,7 @@ interface ChatMessageProps {
   userName?: string;
   aiName?: string | null;
   avatarUrl?: string;
+  messageMaxWidthClass?: string;
 }
 
 const ChatMessage = ({
@@ -34,6 +35,7 @@ const ChatMessage = ({
   userName,
   aiName,
   avatarUrl,
+  messageMaxWidthClass = "max-w-[90%]",
 }: ChatMessageProps) => {
   const { t } = useTranslation();
   const { data: currentUser } = useCurrentUserSuspense();
@@ -90,7 +92,8 @@ const ChatMessage = ({
 
       <div
         className={cn(
-          "min-w-0 max-w-[90%] flex flex-col gap-1",
+          "min-w-0 flex flex-col gap-1",
+          messageMaxWidthClass,
           isAssistant ? "items-start" : "items-end",
         )}
       >

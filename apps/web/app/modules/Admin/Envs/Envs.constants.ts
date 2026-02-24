@@ -83,4 +83,8 @@ export const SECRET_METADATA = {
     labelKey: "adminEnvsView.form.VITE_SLACK_OAUTH_ENABLED.label",
     placeholderKey: "adminEnvsView.form.placeholder",
   },
+  LUMA_API_KEY: {
+    labelKey: "adminEnvsView.form.LUMA_API_KEY.label",
+    placeholderKey: "adminEnvsView.form.placeholder",
+  },
 };

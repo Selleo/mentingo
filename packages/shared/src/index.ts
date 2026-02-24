@@ -9,6 +9,7 @@ export * from "./constants/entityTypes";
 export * from "./constants/fileTypes";
 export * from "./constants/languages";
 export * from "./constants/loginPageDocuments";
+export * from "./constants/lumaFileIngestion";
 export * from "./constants/masterCourse";
 export * from "./constants/newsSettings";
 export * from "./constants/qaSettings";
