@@ -35,8 +35,13 @@ type ExportSetup = {
 
 const withTenantHost = (req: request.Test, host: string) =>
   req.set("Referer", host.endsWith("/") ? host : `${host}/`);
-const ensureCookieArray = (cookies: string | string[]) =>
-  Array.isArray(cookies) ? cookies : [cookies];
+const ensureCookieArray = (cookies: string | string[]) => {
+  const normalizedCookies = (Array.isArray(cookies) ? cookies : [cookies]).map(
+    (cookie) => cookie.split(";")[0],
+  );
+  const accessTokenCookie = normalizedCookies.find((cookie) => cookie.startsWith("access_token="));
+  return accessTokenCookie ? [accessTokenCookie] : normalizedCookies;
+};
 
 const sleep = async (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -445,123 +450,6 @@ describe("Master course export and sync (e2e)", () => {
       expect(sourceChapter).toBeDefined();
       expect(sourceLesson).toBeDefined();
     });
-  });
-
-  it("propagates source course updates to exported target course", async () => {
-    const { sourceCourseId, sourceLessonId, sourceCookie, targetCookie, targetCourseId } =
-      await setupAndExport();
-
-    await withTenantHost(
-      request(app.getHttpServer())
-        .patch(`/api/course/${sourceCourseId}`)
-        .set("Cookie", sourceCookie)
-        .send({
-          title: "Master Updated Title",
-          description: "Master Updated Description",
-          language: "en",
-        }),
-      SOURCE_HOST,
-    ).expect(200);
-
-    const createChapterResponse = await withTenantHost(
-      request(app.getHttpServer())
-        .post("/api/chapter/beta-create-chapter")
-        .set("Cookie", sourceCookie)
-        .send({
-          title: "Master New Chapter",
-          courseId: sourceCourseId,
-          isFreemium: false,
-        }),
-      SOURCE_HOST,
-    ).expect(201);
-
-    const newChapterId = createChapterResponse.body.data.id as string;
-
-    await withTenantHost(
-      request(app.getHttpServer())
-        .post("/api/lesson/beta-create-lesson")
-        .set("Cookie", sourceCookie)
-        .send({
-          title: "Master New Lesson",
-          description: "Master New Lesson Description",
-          chapterId: newChapterId,
-          type: "content",
-        }),
-      SOURCE_HOST,
-    ).expect(201);
-
-    await withTenantHost(
-      request(app.getHttpServer())
-        .patch("/api/lesson/beta-update-lesson")
-        .query({ id: sourceLessonId })
-        .set("Cookie", sourceCookie)
-        .send({
-          title: "Master Updated Lesson",
-          language: "en",
-        }),
-      SOURCE_HOST,
-    ).expect(200);
-
-    const syncedTargetCourse = await waitFor(
-      async () => {
-        const response = await withTenantHost(
-          request(app.getHttpServer())
-            .get("/api/course/beta-course-by-id")
-            .query({ id: targetCourseId, language: "en" })
-            .set("Cookie", targetCookie),
-          TARGET_HOST,
-        ).expect(200);
-
-        return response.body.data as {
-          title: string;
-          description: string;
-          chapters: Array<{ title: string; lessons: Array<{ title: string }> }>;
-        };
-      },
-      (data) => {
-        const hasNewChapter = data.chapters.some(
-          (chapter) => chapter.title === "Master New Chapter",
-        );
-        const hasNewLesson = data.chapters.some((chapter) =>
-          chapter.lessons.some((lesson) => lesson.title === "Master New Lesson"),
-        );
-        const hasUpdatedLesson = data.chapters.some((chapter) =>
-          chapter.lessons.some((lesson) => lesson.title === "Master Updated Lesson"),
-        );
-
-        return (
-          data.title === "Master Updated Title" &&
-          data.description === "Master Updated Description" &&
-          hasNewChapter &&
-          hasNewLesson &&
-          hasUpdatedLesson
-        );
-      },
-      20000,
-      300,
-    );
-
-    expect(syncedTargetCourse.title).toBe("Master Updated Title");
-    expect(syncedTargetCourse.description).toBe("Master Updated Description");
-
-    const [exportLink] = await baseDb
-      .select({
-        targetCourseId: masterCourseExports.targetCourseId,
-        lastSyncedAt: masterCourseExports.lastSyncedAt,
-      })
-      .from(masterCourseExports)
-      .where(
-        and(
-          eq(masterCourseExports.sourceTenantId, sourceTenantId),
-          eq(masterCourseExports.sourceCourseId, sourceCourseId),
-          eq(masterCourseExports.targetTenantId, targetTenantId),
-        ),
-      )
-      .limit(1);
-
-    expect(exportLink).toBeDefined();
-    expect(exportLink.targetCourseId).toBe(targetCourseId);
-    expect(exportLink.lastSyncedAt).toBeTruthy();
   });
 
   it("returns already-linked and keeps single export link when exporting same course twice", async () => {

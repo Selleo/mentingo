@@ -5,7 +5,7 @@ env:
   # environment variables for testing
   JWT_SECRET: "test_secret"
   JWT_REFRESH_SECRET: "test_refresh"
-  JWT_EXPIRATION_TIME: "15min"
+  JWT_EXPIRATION_TIME: "24h"
   CORS_ORIGIN: ""
   EMAIL_ADAPTER: "mailhog"
   DATABASE_URL: "postgresql://postgres:guidebook@localhost:5432/guidebook"
