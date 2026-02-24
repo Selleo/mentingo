@@ -21,13 +21,13 @@ import { useInitVideoUpload } from "~/api/mutations/admin/useInitVideoUpload";
 import { usePreviewArticle } from "~/api/mutations/usePreviewArticle";
 import { useUpdateArticle } from "~/api/mutations/useUpdateArticle";
 import { useArticle } from "~/api/queries";
+import ImageUploadInput from "~/components/FileUploadInput/ImageUploadInput";
 import { FormTextField } from "~/components/Form/FormTextField";
 import { PageWrapper } from "~/components/PageWrapper";
 import { ContentEditor } from "~/components/RichText/Editor";
 import Viewer from "~/components/RichText/Viever";
 import { Button } from "~/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "~/components/ui/form";
-import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { useToast } from "~/components/ui/use-toast";
@@ -37,6 +37,7 @@ import {
   insertResourceIntoEditor,
   useEntityResourceUpload,
 } from "~/hooks/useEntityResourceUpload";
+import { useHandleImageUpload } from "~/hooks/useHandleImageUpload";
 import { useTusVideoUpload } from "~/hooks/useTusVideoUpload";
 import { LanguageSelector } from "~/modules/Articles/LanguageSelector";
 import { filterChangedData } from "~/utils/filterChangedData";
@@ -69,7 +70,7 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { articleId = "" } = useParams();
-  const fileRef = useRef<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [tabValue, setTabValue] = useState("editor");
 
@@ -114,6 +115,26 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
 
   const initialValuesRef = useRef<ArticleFormValues | null>(null);
   const lastResetKeyRef = useRef<string | null>(null);
+  const {
+    imageUrl: headerImageUrl,
+    isUploading: isHeaderImageUploading,
+    handleImageUpload: handleHeaderImageUpload,
+  } = useHandleImageUpload({
+    onUpload: async (file) => {
+      if (!articleId || !articleLanguage) return;
+
+      const formData = new FormData();
+      formData.append("language", articleLanguage);
+      formData.append("cover", file);
+
+      await updateArticle({
+        id: articleId,
+        data: formData as unknown as UpdateArticleBody,
+      });
+    },
+    initialImageUrl:
+      existingArticle?.resources?.coverImage?.fileUrl ?? defaultValues?.imageUrl ?? null,
+  });
 
   useClearVideoOnTabChange(tabValue, "editor");
 
@@ -126,7 +147,7 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
         title: existingArticle.title ?? "",
         summary: existingArticle.summary ?? "",
         content: existingArticle.plainContent ?? "",
-        imageUrl: existingArticle.resources?.coverImage?.fileName ?? "",
+        imageUrl: existingArticle.resources?.coverImage?.fileUrl ?? "",
       };
 
       reset(nextValues);
@@ -158,8 +179,6 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
     if (changedValues.title) formData.append("title", changedValues.title);
     if (changedValues.summary) formData.append("summary", changedValues.summary);
     if (changedValues.content) formData.append("content", changedValues.content);
-
-    if (fileRef.current) formData.append("cover", fileRef.current);
 
     await updateArticle({
       id: articleId,
@@ -234,10 +253,6 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
       isPresentation,
       isDocument,
     });
-  };
-
-  const handleSaveHeaderImage = async (file: File) => {
-    fileRef.current = file;
   };
 
   const fetchPreview = useCallback(
@@ -326,7 +341,7 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
                 </div>
               </div>
 
-              <div className="w-full">
+              <div className="w-1/2">
                 <FormField
                   control={form.control}
                   name="imageUrl"
@@ -335,19 +350,18 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
                       <Label htmlFor="media-upload" className="body-base-md text-neutral-900">
                         {t("adminArticleView.form.fields.cover")}
                       </Label>
-                      <Input
-                        id="media-upload"
-                        type="file"
-                        accept={[
-                          ...ALLOWED_LESSON_IMAGE_FILE_TYPES,
-                          ...ALLOWED_VIDEO_FILE_TYPES,
-                        ].join(",")}
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (!file) return;
-                          handleSaveHeaderImage(file);
-                          field.onChange(file.name);
+                      <ImageUploadInput
+                        field={{ value: headerImageUrl || field.value || undefined }}
+                        handleImageUpload={(file) => {
+                          field.onChange(URL.createObjectURL(file));
+                          handleHeaderImageUpload(file);
                         }}
+                        isUploading={isHeaderImageUploading}
+                        imageUrl={headerImageUrl || field.value}
+                        fileInputRef={fileInputRef}
+                        inputId="media-upload"
+                        variant="video"
+                        accept={ALLOWED_LESSON_IMAGE_FILE_TYPES.join(",")}
                       />
                       <FormMessage />
                     </FormItem>

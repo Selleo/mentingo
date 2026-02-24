@@ -98,6 +98,11 @@ export class NewsService {
     const previousSnapshot = await this.buildNewsActivitySnapshot(newsId, language);
 
     const finalUpdateData = this.buildUpdateData(existingNews, updateNewsData, language);
+    const hasNewsDataToUpdate = !isEmpty(finalUpdateData);
+
+    if (!hasNewsDataToUpdate && !coverFile) {
+      throw new BadRequestException("adminNewsView.toast.updateError");
+    }
 
     if (coverFile) {
       await this.uploadCoverImageToNews(
@@ -110,14 +115,17 @@ export class NewsService {
       );
     }
 
+    if (hasNewsDataToUpdate) {
+      await this.db.update(news).set(finalUpdateData).where(eq(news.id, newsId));
+    }
+
     const [updatedNews] = await this.db
-      .update(news)
-      .set({ ...(finalUpdateData ?? null) })
-      .where(eq(news.id, newsId))
-      .returning({
+      .select({
         id: news.id,
         title: this.localizationService.getFieldByLanguage(news.title, language),
-      });
+      })
+      .from(news)
+      .where(eq(news.id, newsId));
 
     if (!updatedNews) throw new BadRequestException("adminNewsView.toast.updateError");
 

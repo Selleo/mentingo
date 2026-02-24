@@ -5,7 +5,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
 import hashPassword from "../common/helpers/hashPassword";
-import { credentials, users, tenants } from "../storage/schema";
+import { credentials, userDetails, users, tenants } from "../storage/schema";
 import { USER_ROLES } from "../user/schemas/userRoles";
 
 import { insertGlobalSettings, insertOnboardingData, insertUserSettings } from "./seed";
@@ -25,12 +25,38 @@ const db = drizzle(sql) as DatabasePg;
 
 async function createOrFindUser(email: string, password: string, userData: any) {
   const [existingUser] = await db.select().from(users).where(eq(users.email, email));
-  if (existingUser) return existingUser;
+
+  if (existingUser) {
+    if (
+      existingUser.role === USER_ROLES.ADMIN ||
+      existingUser.role === USER_ROLES.CONTENT_CREATOR
+    ) {
+      await insertUserDetailsIfMissing(existingUser.id, existingUser.tenantId, existingUser.email);
+    }
+
+    return existingUser;
+  }
 
   const [newUser] = await db.insert(users).values(userData).returning();
   await insertCredential(newUser.id, userData.tenantId, password);
   await insertOnboardingData(newUser.id, userData.tenantId);
+
+  if (newUser.role === USER_ROLES.ADMIN || newUser.role === USER_ROLES.CONTENT_CREATOR) {
+    await insertUserDetailsIfMissing(newUser.id, userData.tenantId, newUser.email);
+  }
+
   return newUser;
+}
+
+async function insertUserDetailsIfMissing(userId: UUIDType, tenantId: UUIDType, email: string) {
+  await db
+    .insert(userDetails)
+    .values({
+      userId,
+      tenantId,
+      contactEmail: email,
+    })
+    .onConflictDoNothing({ target: userDetails.userId });
 }
 
 async function insertCredential(userId: UUIDType, tenantId: UUIDType, password: string) {

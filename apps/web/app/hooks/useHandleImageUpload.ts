@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { useToast } from "~/components/ui/use-toast";
 
@@ -25,6 +25,10 @@ export function useHandleImageUpload({
 
   const [imageUrl, setImageUrl] = useState<string | null>(initialImageUrl);
   const [isUploading, setIsUploading] = useState(false);
+
+  useEffect(() => {
+    setImageUrl(initialImageUrl);
+  }, [initialImageUrl]);
 
   const handleImageUpload = useCallback(
     async (file: File) => {

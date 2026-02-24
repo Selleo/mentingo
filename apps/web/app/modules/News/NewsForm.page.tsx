@@ -23,17 +23,18 @@ import {
   insertResourceIntoEditor,
   useEntityResourceUpload,
 } from "~/hooks/useEntityResourceUpload";
+import { useHandleImageUpload } from "~/hooks/useHandleImageUpload";
 import { useTusVideoUpload } from "~/hooks/useTusVideoUpload";
 
 import { usePreviewNews, useUpdateNews } from "../../api/mutations";
 import { useNews } from "../../api/queries";
+import ImageUploadInput from "../../components/FileUploadInput/ImageUploadInput";
 import { FormTextField } from "../../components/Form/FormTextField";
 import { PageWrapper } from "../../components/PageWrapper";
 import { ContentEditor } from "../../components/RichText/Editor";
 import Viewer from "../../components/RichText/Viever";
 import { Button } from "../../components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "../../components/ui/form";
-import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import {
   Select,
@@ -84,7 +85,7 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
   const createdNewsId = location.state?.usr?.createdNewsId;
   const isEdit = Boolean(newsId);
   const id = isEdit ? newsId : createdNewsId;
-  const fileRef = useRef<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [tabValue, setTabValue] = useState("editor");
 
@@ -137,6 +138,26 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
 
   const { reset, getValues } = form;
   const initialValuesRef = useRef<NewsFormValues | null>(null);
+  const {
+    imageUrl: headerImageUrl,
+    isUploading: isHeaderImageUploading,
+    handleImageUpload: handleHeaderImageUpload,
+  } = useHandleImageUpload({
+    onUpload: async (file) => {
+      if (!id) return;
+
+      const formData = new FormData();
+      formData.append("language", language);
+      formData.append("cover", file);
+
+      await updateNews({
+        id,
+        data: formData as unknown as UpdateNewsPayload,
+      });
+    },
+    initialImageUrl:
+      existingNews?.resources?.coverImage?.fileUrl ?? defaultValues?.imageUrl ?? null,
+  });
 
   const onSubmit = async (values: NewsFormValues) => {
     if (!id) return;
@@ -152,10 +173,6 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
     if (changedValues.status) formData.append("status", changedValues.status);
     if (changedValues.isPublic !== undefined)
       formData.append("isPublic", String(changedValues.isPublic));
-
-    if (fileRef.current) {
-      formData.append("cover", fileRef.current);
-    }
 
     await updateNews({
       id,
@@ -232,10 +249,6 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
     });
   };
 
-  const handleSaveHeaderImage = async (file: File) => {
-    fileRef.current = file;
-  };
-
   useEffect(() => {
     if (!existingNews) return;
 
@@ -243,7 +256,7 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
       title: existingNews.title ?? "",
       summary: existingNews.summary ?? "",
       content: existingNews.plainContent ?? "",
-      imageUrl: existingNews.resources?.images?.[0]?.fileUrl ?? "",
+      imageUrl: existingNews.resources?.coverImage?.fileUrl ?? "",
       status: (existingNews.status as "draft" | "published") ?? "draft",
       isPublic: existingNews.isPublic ?? false,
     };
@@ -381,7 +394,7 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
                 </div>
               </div>
 
-              <div className="w-full">
+              <div className="w-1/2">
                 <FormField
                   control={form.control}
                   name="imageUrl"
@@ -390,19 +403,18 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
                       <Label htmlFor="media-upload" className="body-base-md text-neutral-900">
                         {t("newsView.field.image")}
                       </Label>
-                      <Input
-                        id="media-upload"
-                        type="file"
-                        accept={[
-                          ...ALLOWED_LESSON_IMAGE_FILE_TYPES,
-                          ...ALLOWED_VIDEO_FILE_TYPES,
-                        ].join(",")}
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (!file) return;
-                          handleSaveHeaderImage(file);
-                          field.onChange(file.name);
+                      <ImageUploadInput
+                        field={{ value: headerImageUrl || field.value || undefined }}
+                        handleImageUpload={(file) => {
+                          field.onChange(URL.createObjectURL(file));
+                          handleHeaderImageUpload(file);
                         }}
+                        isUploading={isHeaderImageUploading}
+                        imageUrl={headerImageUrl || field.value}
+                        fileInputRef={fileInputRef}
+                        inputId="media-upload"
+                        variant="video"
+                        accept={ALLOWED_LESSON_IMAGE_FILE_TYPES.join(",")}
                       />
                       <FormMessage />
                     </FormItem>
