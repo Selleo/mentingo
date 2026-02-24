@@ -4360,6 +4360,123 @@
         }
       }
     },
+    "/api/course/master/{courseId}/export": {
+      "post": {
+        "operationId": "CourseController_exportMasterCourse",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportMasterCourseBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportMasterCourseResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/course/master/{courseId}/exports": {
+      "get": {
+        "operationId": "CourseController_getMasterCourseExports",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMasterCourseExportsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/course/master/{courseId}/export-candidates": {
+      "get": {
+        "operationId": "CourseController_getMasterCourseExportCandidates",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMasterCourseExportCandidatesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/course/master/export-jobs/{jobId}": {
+      "get": {
+        "operationId": "CourseController_getMasterCourseJobStatus",
+        "parameters": [
+          {
+            "name": "jobId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMasterCourseJobStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/course/course-ownership/{courseId}": {
       "get": {
         "operationId": "CourseController_getCourseOwnership",
@@ -14067,6 +14184,47 @@
                       "type": "null"
                     }
                   ]
+                },
+                "originType": {
+                  "anyOf": [
+                    {
+                      "const": "regular",
+                      "type": "string"
+                    },
+                    {
+                      "const": "master",
+                      "type": "string"
+                    },
+                    {
+                      "const": "exported",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "isContentReadonly": {
+                  "type": "boolean"
+                },
+                "sourceCourseId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "sourceTenantId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
               },
               "required": [
@@ -14239,6 +14397,47 @@
                 "stripePriceId": {
                   "anyOf": [
                     {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "originType": {
+                  "anyOf": [
+                    {
+                      "const": "regular",
+                      "type": "string"
+                    },
+                    {
+                      "const": "master",
+                      "type": "string"
+                    },
+                    {
+                      "const": "exported",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "isContentReadonly": {
+                  "type": "boolean"
+                },
+                "sourceCourseId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "sourceTenantId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
                       "type": "string"
                     },
                     {
@@ -14542,6 +14741,47 @@
                     }
                   ]
                 },
+                "originType": {
+                  "anyOf": [
+                    {
+                      "const": "regular",
+                      "type": "string"
+                    },
+                    {
+                      "const": "master",
+                      "type": "string"
+                    },
+                    {
+                      "const": "exported",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "isContentReadonly": {
+                  "type": "boolean"
+                },
+                "sourceCourseId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "sourceTenantId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "completedChapterCount": {
                   "type": "number"
                 },
@@ -14742,6 +14982,47 @@
                     }
                   ]
                 },
+                "originType": {
+                  "anyOf": [
+                    {
+                      "const": "regular",
+                      "type": "string"
+                    },
+                    {
+                      "const": "master",
+                      "type": "string"
+                    },
+                    {
+                      "const": "exported",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "isContentReadonly": {
+                  "type": "boolean"
+                },
+                "sourceCourseId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "sourceTenantId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "completedChapterCount": {
                   "type": "number"
                 },
@@ -14909,6 +15190,47 @@
                 "stripePriceId": {
                   "anyOf": [
                     {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "originType": {
+                  "anyOf": [
+                    {
+                      "const": "regular",
+                      "type": "string"
+                    },
+                    {
+                      "const": "master",
+                      "type": "string"
+                    },
+                    {
+                      "const": "exported",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "isContentReadonly": {
+                  "type": "boolean"
+                },
+                "sourceCourseId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "sourceTenantId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
                       "type": "string"
                     },
                     {
@@ -15205,6 +15527,47 @@
                   }
                 ]
               },
+              "originType": {
+                "anyOf": [
+                  {
+                    "const": "regular",
+                    "type": "string"
+                  },
+                  {
+                    "const": "master",
+                    "type": "string"
+                  },
+                  {
+                    "const": "exported",
+                    "type": "string"
+                  }
+                ]
+              },
+              "isContentReadonly": {
+                "type": "boolean"
+              },
+              "sourceCourseId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "sourceTenantId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "isScorm": {
                 "type": "boolean"
               },
@@ -15296,6 +15659,10 @@
               "description",
               "id",
               "status",
+              "originType",
+              "isContentReadonly",
+              "sourceCourseId",
+              "sourceTenantId",
               "priceInCents",
               "title",
               "slug",
@@ -15798,6 +16165,47 @@
                   }
                 ]
               },
+              "originType": {
+                "anyOf": [
+                  {
+                    "const": "regular",
+                    "type": "string"
+                  },
+                  {
+                    "const": "master",
+                    "type": "string"
+                  },
+                  {
+                    "const": "exported",
+                    "type": "string"
+                  }
+                ]
+              },
+              "isContentReadonly": {
+                "type": "boolean"
+              },
+              "sourceCourseId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "sourceTenantId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "isScorm": {
                 "type": "boolean"
               },
@@ -15869,6 +16277,10 @@
               "description",
               "id",
               "status",
+              "originType",
+              "isContentReadonly",
+              "sourceCourseId",
+              "sourceTenantId",
               "priceInCents",
               "title",
               "availableLocales",
@@ -16929,6 +17341,299 @@
         "required": [
           "courseId",
           "userId"
+        ]
+      },
+      "ExportMasterCourseBody": {
+        "type": "object",
+        "properties": {
+          "targetTenantIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "targetTenantIds"
+        ]
+      },
+      "ExportMasterCourseResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "sourceCourseId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "jobs": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "targetTenantId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "queued": {
+                      "type": "boolean"
+                    },
+                    "reason": {
+                      "type": "string"
+                    },
+                    "exportId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "targetTenantId",
+                    "queued"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "sourceCourseId",
+              "jobs"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetMasterCourseExportsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "sourceTenantId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "sourceCourseId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "targetTenantId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "targetCourseId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "syncStatus": {
+                  "anyOf": [
+                    {
+                      "const": "active",
+                      "type": "string"
+                    },
+                    {
+                      "const": "failed",
+                      "type": "string"
+                    },
+                    {
+                      "const": "paused",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "lastSyncedAt": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "sourceTenantId",
+                "sourceCourseId",
+                "targetTenantId",
+                "targetCourseId",
+                "syncStatus",
+                "lastSyncedAt"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetMasterCourseExportCandidatesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "tenants": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "host": {
+                      "type": "string"
+                    },
+                    "isExported": {
+                      "type": "boolean"
+                    },
+                    "targetCourseId": {
+                      "anyOf": [
+                        {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "syncStatus": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "const": "active",
+                              "type": "string"
+                            },
+                            {
+                              "const": "failed",
+                              "type": "string"
+                            },
+                            {
+                              "const": "paused",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "lastSyncedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "host",
+                    "isExported",
+                    "targetCourseId",
+                    "syncStatus",
+                    "lastSyncedAt"
+                  ]
+                }
+              },
+              "summary": {
+                "type": "object",
+                "properties": {
+                  "totalTenants": {
+                    "type": "number"
+                  },
+                  "exportedCount": {
+                    "type": "number"
+                  },
+                  "remainingCount": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "totalTenants",
+                  "exportedCount",
+                  "remainingCount"
+                ]
+              }
+            },
+            "required": [
+              "tenants",
+              "summary"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetMasterCourseJobStatusResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "state": {
+                "type": "string"
+              },
+              "attemptsMade": {
+                "type": "number"
+              },
+              "failedReason": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "state",
+              "attemptsMade",
+              "failedReason"
+            ]
+          }
+        },
+        "required": [
+          "data"
         ]
       },
       "GetCourseOwnershipResponse": {

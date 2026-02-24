@@ -3,6 +3,7 @@ import type { ActorUserType } from "src/common/types/actor-user.type";
 
 type DeleteChapterData = {
   chapterId: UUIDType;
+  courseId: UUIDType;
   chapterName: string;
   actor: ActorUserType;
 };

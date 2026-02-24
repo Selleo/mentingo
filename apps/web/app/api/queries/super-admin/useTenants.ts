@@ -6,9 +6,13 @@ import type { FindAllTenantsResponse } from "~/api/generated-api";
 
 export const SUPER_ADMIN_TENANTS_QUERY_KEY = ["super-admin", "tenants"] as const;
 
-export const tenantsQueryOptions = (params: { page?: number; perPage?: number; search?: string }) =>
+export const tenantsQueryOptions = (
+  params: { page?: number; perPage?: number; search?: string },
+  enabled = true,
+) =>
   queryOptions({
     queryKey: [...SUPER_ADMIN_TENANTS_QUERY_KEY, params],
+    enabled,
     queryFn: async () => {
       const response = await ApiClient.api.tenantsControllerFindAllTenants(params);
       return response.data;
@@ -16,6 +20,9 @@ export const tenantsQueryOptions = (params: { page?: number; perPage?: number; s
     select: (data: FindAllTenantsResponse) => data,
   });
 
-export function useTenants(params: { page?: number; perPage?: number; search?: string }) {
-  return useQuery(tenantsQueryOptions(params));
+export function useTenants(
+  params: { page?: number; perPage?: number; search?: string },
+  enabled = true,
+) {
+  return useQuery(tenantsQueryOptions(params, enabled));
 }

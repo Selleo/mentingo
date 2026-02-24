@@ -74,8 +74,18 @@ export async function truncateTables(
   }
 }
 
-export async function cookieFor(user: UserWithCredentials, app: INestApplication<any>) {
-  const loginResponse = await request(app.getHttpServer()).post("/api/auth/login").send({
+export async function cookieFor(
+  user: UserWithCredentials,
+  app: INestApplication<any>,
+  referer?: string,
+) {
+  const loginRequest = request(app.getHttpServer()).post("/api/auth/login");
+
+  if (referer) {
+    loginRequest.set("Referer", referer.endsWith("/") ? referer : `${referer}/`);
+  }
+
+  const loginResponse = await loginRequest.send({
     email: user.email,
     password: user.credentials?.password,
   });

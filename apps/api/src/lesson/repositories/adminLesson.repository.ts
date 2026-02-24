@@ -43,6 +43,7 @@ export class AdminLessonRepository {
     return this.db
       .select({
         ...getTableColumns(lessons),
+        courseId: chapters.courseId,
         title: this.localizationService.getLocalizedSqlField(lessons.title, language),
         description: this.localizationService.getLocalizedSqlField(lessons.description, language),
         aiMentorInstructions: aiMentorLessons.aiMentorInstructions,

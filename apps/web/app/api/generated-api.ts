@@ -1163,6 +1163,10 @@ export interface GetAllCoursesResponse {
     hasFreeChapters?: boolean;
     stripeProductId?: string | null;
     stripePriceId?: string | null;
+    originType?: "regular" | "master" | "exported";
+    isContentReadonly?: boolean;
+    sourceCourseId?: string | null;
+    sourceTenantId?: string | null;
   }[];
   pagination: {
     totalItems: number;
@@ -1198,6 +1202,10 @@ export interface GetStudentCoursesResponse {
     hasFreeChapters?: boolean;
     stripeProductId?: string | null;
     stripePriceId?: string | null;
+    originType?: "regular" | "master" | "exported";
+    isContentReadonly?: boolean;
+    sourceCourseId?: string | null;
+    sourceTenantId?: string | null;
     completedChapterCount: number;
     enrolled?: boolean;
     dueDate: string | null;
@@ -1260,6 +1268,10 @@ export interface GetAvailableCoursesResponse {
     hasFreeChapters?: boolean;
     stripeProductId?: string | null;
     stripePriceId?: string | null;
+    originType?: "regular" | "master" | "exported";
+    isContentReadonly?: boolean;
+    sourceCourseId?: string | null;
+    sourceTenantId?: string | null;
     completedChapterCount: number;
     enrolled?: boolean;
     dueDate: string | null;
@@ -1299,6 +1311,10 @@ export interface GetTopCoursesResponse {
     hasFreeChapters?: boolean;
     stripeProductId?: string | null;
     stripePriceId?: string | null;
+    originType?: "regular" | "master" | "exported";
+    isContentReadonly?: boolean;
+    sourceCourseId?: string | null;
+    sourceTenantId?: string | null;
     completedChapterCount: number;
     enrolled?: boolean;
     dueDate: string | null;
@@ -1332,6 +1348,10 @@ export interface GetContentCreatorCoursesResponse {
     hasFreeChapters?: boolean;
     stripeProductId?: string | null;
     stripePriceId?: string | null;
+    originType?: "regular" | "master" | "exported";
+    isContentReadonly?: boolean;
+    sourceCourseId?: string | null;
+    sourceTenantId?: string | null;
     completedChapterCount: number;
     enrolled?: boolean;
     dueDate: string | null;
@@ -1392,6 +1412,10 @@ export interface GetCourseResponse {
     /** @format uuid */
     id: string;
     status: "draft" | "published" | "private";
+    originType: "regular" | "master" | "exported";
+    isContentReadonly: boolean;
+    sourceCourseId: string | null;
+    sourceTenantId: string | null;
     isScorm?: boolean;
     priceInCents: number;
     thumbnailUrl?: string;
@@ -1506,6 +1530,10 @@ export interface GetBetaCourseByIdResponse {
     /** @format uuid */
     id: string;
     status: "draft" | "published" | "private";
+    originType: "regular" | "master" | "exported";
+    isContentReadonly: boolean;
+    sourceCourseId: string | null;
+    sourceTenantId: string | null;
     isScorm?: boolean;
     priceInCents: number;
     thumbnailUrl?: string;
@@ -1795,6 +1823,72 @@ export interface TransferCourseOwnershipBody {
   courseId: string;
   /** @format uuid */
   userId: string;
+}
+
+export interface ExportMasterCourseBody {
+  /** @minItems 1 */
+  targetTenantIds: string[];
+}
+
+export interface ExportMasterCourseResponse {
+  data: {
+    /** @format uuid */
+    sourceCourseId: string;
+    jobs: {
+      /** @format uuid */
+      targetTenantId: string;
+      queued: boolean;
+      reason?: string;
+      /** @format uuid */
+      exportId?: string;
+    }[];
+  };
+}
+
+export interface GetMasterCourseExportsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    sourceTenantId: string;
+    /** @format uuid */
+    sourceCourseId: string;
+    /** @format uuid */
+    targetTenantId: string;
+    targetCourseId: string | null;
+    syncStatus: "active" | "failed" | "paused";
+    lastSyncedAt: string | null;
+  }[];
+}
+
+export interface GetMasterCourseExportCandidatesResponse {
+  data: {
+    tenants: {
+      /** @format uuid */
+      id: string;
+      name: string;
+      host: string;
+      isExported: boolean;
+      targetCourseId: string | null;
+      syncStatus: ("active" | "failed" | "paused") | null;
+      lastSyncedAt: string | null;
+    }[];
+    summary: {
+      totalTenants: number;
+      exportedCount: number;
+      remainingCount: number;
+    };
+  };
+}
+
+export interface GetMasterCourseJobStatusResponse {
+  data: {
+    id: string;
+    name: string;
+    state: string;
+    attemptsMade: number;
+    failedReason: string | null;
+  };
 }
 
 export interface GetCourseOwnershipResponse {
@@ -6465,6 +6559,71 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "POST",
         body: data,
         type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerExportMasterCourse
+     * @request POST:/api/course/master/{courseId}/export
+     */
+    courseControllerExportMasterCourse: (
+      courseId: string,
+      data: ExportMasterCourseBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<ExportMasterCourseResponse, any>({
+        path: `/api/course/master/${courseId}/export`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerGetMasterCourseExports
+     * @request GET:/api/course/master/{courseId}/exports
+     */
+    courseControllerGetMasterCourseExports: (courseId: string, params: RequestParams = {}) =>
+      this.request<GetMasterCourseExportsResponse, any>({
+        path: `/api/course/master/${courseId}/exports`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerGetMasterCourseExportCandidates
+     * @request GET:/api/course/master/{courseId}/export-candidates
+     */
+    courseControllerGetMasterCourseExportCandidates: (
+      courseId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<GetMasterCourseExportCandidatesResponse, any>({
+        path: `/api/course/master/${courseId}/export-candidates`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerGetMasterCourseJobStatus
+     * @request GET:/api/course/master/export-jobs/{jobId}
+     */
+    courseControllerGetMasterCourseJobStatus: (jobId: string, params: RequestParams = {}) =>
+      this.request<GetMasterCourseJobStatusResponse, any>({
+        path: `/api/course/master/export-jobs/${jobId}`,
+        method: "GET",
+        format: "json",
         ...params,
       }),
 

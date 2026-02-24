@@ -1544,6 +1544,20 @@
     "deleteLanguage": {
       "title": "Usuń język",
       "description": "Czy na pewno chcesz usunąć ten język?"
+    },
+    "sharedCourse": {
+      "badgeMaster": "Udostępniony",
+      "badgeExported": "Udostępniony",
+      "exportedNoticeTitle": "Ten kurs został wyeksportowany do tego tenantu",
+      "exportedNoticeDescription": "Treść jest zarządzana w tenantcie źródłowym i tutaj jest tylko do odczytu.",
+      "exportsTitle": "Udostępnianie",
+      "exportsDescription": "Udostępnij ten kurs do tenantów. Każdy tenant może otrzymać ten kurs tylko raz.",
+      "exportedCount": "Wyeksportowano: {{count}}",
+      "remainingCount": "Pozostało: {{count}}",
+      "selectTenants": "Wybierz tenanty",
+      "selectedCount": "Wybrano:",
+      "exportButton": "Udostępnij",
+      "exportingButton": "Udostępnianie..."
     }
   },
   "registerView": {

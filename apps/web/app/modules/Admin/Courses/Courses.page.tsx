@@ -1,4 +1,5 @@
 import { Link, useLoaderData, useNavigate } from "@remix-run/react";
+import { COURSE_ORIGIN_TYPES } from "@repo/shared";
 import {
   type ColumnDef,
   flexRender,
@@ -199,12 +200,27 @@ const Courses = () => {
       accessorKey: "status",
       header: t("adminCoursesView.field.state"),
       cell: ({ row }) => (
-        <Badge
-          variant={getCourseBadgeVariant(row.original.status as CourseStatus)}
-          className="w-max"
-        >
-          {getCourseStatus(row.original.status as CourseStatus, t)}
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Badge
+            variant={getCourseBadgeVariant(row.original.status as CourseStatus)}
+            className="w-max"
+          >
+            {getCourseStatus(row.original.status as CourseStatus, t)}
+          </Badge>
+          {(row.original.originType === COURSE_ORIGIN_TYPES.MASTER ||
+            row.original.originType === COURSE_ORIGIN_TYPES.EXPORTED) && (
+            <Badge
+              variant={
+                row.original.originType === COURSE_ORIGIN_TYPES.MASTER
+                  ? "successFilled"
+                  : "secondary"
+              }
+              className="w-max"
+            >
+              {row.original.originType === COURSE_ORIGIN_TYPES.MASTER ? "Master" : "Exported"}
+            </Badge>
+          )}
+        </div>
       ),
     },
     {

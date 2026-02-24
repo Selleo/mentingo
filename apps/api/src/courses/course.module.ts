@@ -5,7 +5,9 @@ import { AiModule } from "src/ai/ai.module";
 import { CertificatesModule } from "src/certificates/certificates.module";
 import { ChapterModule } from "src/chapter/chapter.module";
 import { EmailModule } from "src/common/emails/emails.module";
+import { ManagingTenantAdminGuard } from "src/common/guards/managing-tenant-admin.guard";
 import { CourseHandler } from "src/courses/handlers/course.handler";
+import { MasterCourseSyncHandler } from "src/courses/handlers/master-course-sync.handler";
 import { FileModule } from "src/file/files.module";
 import { LearningTimeModule } from "src/learning-time/learning-time.module";
 import { LessonModule } from "src/lesson/lesson.module";
@@ -20,13 +22,17 @@ import { CourseSlugService } from "./course-slug.service";
 import { CourseController } from "./course.controller";
 import { CourseCron } from "./course.cron";
 import { CourseService } from "./course.service";
+import { MasterCourseQueueService } from "./master-course.queue.service";
+import { MasterCourseRepository } from "./master-course.repository";
+import { MasterCourseService } from "./master-course.service";
+import { MasterCourseWorker } from "./master-course.worker";
 
 @Module({
   imports: [
     FileModule,
     StatisticsModule,
-    ChapterModule,
-    LessonModule,
+    forwardRef(() => ChapterModule),
+    forwardRef(() => LessonModule),
     LearningTimeModule,
     SettingsModule,
     LocalizationModule,
@@ -38,7 +44,19 @@ import { CourseService } from "./course.service";
     forwardRef(() => UserModule),
   ],
   controllers: [CourseController],
-  providers: [CourseService, CourseSlugService, CourseHandler, LocalizationService, CourseCron],
-  exports: [CourseService, CourseSlugService],
+  providers: [
+    CourseService,
+    CourseSlugService,
+    CourseHandler,
+    LocalizationService,
+    CourseCron,
+    MasterCourseService,
+    MasterCourseRepository,
+    MasterCourseQueueService,
+    MasterCourseWorker,
+    MasterCourseSyncHandler,
+    ManagingTenantAdminGuard,
+  ],
+  exports: [CourseService, CourseSlugService, MasterCourseService],
 })
 export class CourseModule {}

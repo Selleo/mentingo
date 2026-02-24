@@ -659,6 +659,13 @@
       "when": 1771488032516,
       "tag": "0093_enable_tenant_rls_for_integration_api_keys",
       "breakpoints": true
+    },
+    {
+      "idx": 94,
+      "version": "7",
+      "when": 1771935043458,
+      "tag": "0094_add_master_course_export_tables_and_course_origin_fields",
+      "breakpoints": true
     }
   ]
 }

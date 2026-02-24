@@ -1,4 +1,4 @@
-import { SUPPORTED_LANGUAGES } from "@repo/shared";
+import { COURSE_ORIGIN_TYPES, SUPPORTED_LANGUAGES } from "@repo/shared";
 import { type Static, Type } from "@sinclair/typebox";
 
 import { chapterSchema, showChapterSchema } from "src/chapter/schemas/chapter.schema";
@@ -21,6 +21,10 @@ export const commonShowCourseSchema = Type.Object({
   hasCertificate: Type.Optional(Type.Boolean()),
   id: Type.String({ format: "uuid" }),
   status: coursesStatusOptions,
+  originType: Type.Enum(COURSE_ORIGIN_TYPES),
+  isContentReadonly: Type.Boolean(),
+  sourceCourseId: Type.Union([UUIDSchema, Type.Null()]),
+  sourceTenantId: Type.Union([UUIDSchema, Type.Null()]),
   isScorm: Type.Optional(Type.Boolean()),
   priceInCents: Type.Number(),
   thumbnailUrl: Type.Optional(Type.String()),
@@ -49,6 +53,10 @@ export const commonShowBetaCourseSchema = Type.Object({
   hasCertificate: Type.Optional(Type.Boolean()),
   id: Type.String({ format: "uuid" }),
   status: coursesStatusOptions,
+  originType: Type.Enum(COURSE_ORIGIN_TYPES),
+  isContentReadonly: Type.Boolean(),
+  sourceCourseId: Type.Union([UUIDSchema, Type.Null()]),
+  sourceTenantId: Type.Union([UUIDSchema, Type.Null()]),
   isScorm: Type.Optional(Type.Boolean()),
   priceInCents: Type.Number(),
   thumbnailUrl: Type.Optional(Type.String()),

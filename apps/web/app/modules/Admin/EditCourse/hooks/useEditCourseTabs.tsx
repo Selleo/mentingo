@@ -8,7 +8,7 @@ export const useEditCourseTabs = () => {
   const { t } = useTranslation();
   const { data: isStripeConfigured } = useStripeConfigured();
 
-  const { isAdmin } = useUserRole();
+  const { isAdmin, isManagingTenantAdmin } = useUserRole();
 
   const baseTabs = useMemo(
     () => [
@@ -28,8 +28,13 @@ export const useEditCourseTabs = () => {
   );
 
   const adminTabs = useMemo(
-    () => [{ label: t("adminCourseView.common.enrolledStudents"), value: "Enrolled" }],
-    [t],
+    () => [
+      { label: t("adminCourseView.common.enrolledStudents"), value: "Enrolled" },
+      ...(isManagingTenantAdmin
+        ? [{ label: t("adminCourseView.sharedCourse.exportsTitle"), value: "Exports" }]
+        : []),
+    ],
+    [isManagingTenantAdmin, t],
   );
 
   return isAdmin ? [...baseTabs, ...adminTabs] : baseTabs;

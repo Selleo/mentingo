@@ -1546,6 +1546,20 @@
     "deleteLanguage": {
       "title": "Delete language",
       "description": "Are you sure you want to delete this language?"
+    },
+    "sharedCourse": {
+      "badgeMaster": "Shared",
+      "badgeExported": "Shared",
+      "exportedNoticeTitle": "This course was exported to this tenant",
+      "exportedNoticeDescription": "Content is managed in the source tenant and is read-only in this tenant.",
+      "exportsTitle": "Sharing",
+      "exportsDescription": "Share this course to tenants. Each tenant can receive this course only once.",
+      "exportedCount": "Exported: {{count}}",
+      "remainingCount": "Remaining: {{count}}",
+      "selectTenants": "Select Tenants",
+      "selectedCount": "Selected:",
+      "exportButton": "Share",
+      "exportingButton": "Sharing..."
     }
   },
   "registerView": {
