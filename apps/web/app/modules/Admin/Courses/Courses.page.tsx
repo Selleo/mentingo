@@ -91,6 +91,11 @@ const Courses = () => {
   const { t } = useTranslation();
   const [lastSelectedRowIndex, setLastSelectedRowIndex] = React.useState<number>(0);
 
+  const coursesWithOriginBadge: TCourse["originType"][] = [
+    COURSE_ORIGIN_TYPES.MASTER,
+    COURSE_ORIGIN_TYPES.EXPORTED,
+  ];
+
   const filterConfig: FilterConfig[] = [
     {
       name: "title",
@@ -207,8 +212,7 @@ const Courses = () => {
           >
             {getCourseStatus(row.original.status as CourseStatus, t)}
           </Badge>
-          {(row.original.originType === COURSE_ORIGIN_TYPES.MASTER ||
-            row.original.originType === COURSE_ORIGIN_TYPES.EXPORTED) && (
+          {coursesWithOriginBadge.includes(row.original.originType) && (
             <Badge
               variant={
                 row.original.originType === COURSE_ORIGIN_TYPES.MASTER

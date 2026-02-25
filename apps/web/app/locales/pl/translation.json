@@ -1548,13 +1548,13 @@
     "sharedCourse": {
       "badgeMaster": "Udostępniony",
       "badgeExported": "Udostępniony",
-      "exportedNoticeTitle": "Ten kurs został wyeksportowany do tego tenantu",
-      "exportedNoticeDescription": "Treść jest zarządzana w tenantcie źródłowym i tutaj jest tylko do odczytu.",
+      "exportedNoticeTitle": "Ten kurs został wyeksportowany do tego najemcy",
+      "exportedNoticeDescription": "Treść jest zarządzana w najemcy źródłowym i tutaj jest tylko do odczytu.",
       "exportsTitle": "Udostępnianie",
-      "exportsDescription": "Udostępnij ten kurs do tenantów. Każdy tenant może otrzymać ten kurs tylko raz.",
+      "exportsDescription": "Udostępnij ten kurs do najemców. Każdy najemiec może otrzymać ten kurs tylko raz.",
       "exportedCount": "Wyeksportowano: {{count}}",
       "remainingCount": "Pozostało: {{count}}",
-      "selectTenants": "Wybierz tenanty",
+      "selectTenants": "Wybierz najemców",
       "selectedCount": "Wybrano:",
       "exportButton": "Udostępnij",
       "exportingButton": "Udostępnianie..."
