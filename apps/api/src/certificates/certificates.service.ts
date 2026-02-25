@@ -25,6 +25,7 @@ export class CertificatesService implements OnModuleDestroy, OnModuleInit {
   private readonly logger = new Logger(CertificatesService.name);
 
   private browser: Browser | null = null;
+  private browserInitialization: Promise<Browser> | null = null;
 
   constructor(
     private readonly certificateRepository: CertificateRepository,
@@ -40,13 +41,18 @@ export class CertificatesService implements OnModuleDestroy, OnModuleInit {
   }
 
   async onModuleDestroy() {
-    if (!this.browser) return;
+    const browser =
+      this.browser ??
+      (this.browserInitialization ? await this.browserInitialization.catch(() => null) : null);
 
-    await this.browser.close().catch((error) => {
+    if (!browser) return;
+
+    await browser.close().catch((error) => {
       this.logger.warn(`Certificate PDF browser close failed during module destroy: ${error}`);
     });
 
     this.browser = null;
+    this.browserInitialization = null;
   }
 
   async getAllCertificates(
@@ -175,21 +181,32 @@ export class CertificatesService implements OnModuleDestroy, OnModuleInit {
 
   private async getBrowser() {
     if (this.browser?.connected) return this.browser;
+    if (this.browserInitialization) return this.browserInitialization;
 
-    const browser = await puppeteer.launch({
-      headless: true,
-      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
-      args: [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
-        "--disable-gpu",
-      ],
+    this.browserInitialization = (async () => {
+      const browser = await puppeteer.launch({
+        headless: true,
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
+        args: [
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--disable-dev-shm-usage",
+          "--disable-gpu",
+        ],
+      });
+
+      this.browser = browser;
+
+      browser.on("disconnected", () => {
+        if (this.browser === browser) this.browser = null;
+      });
+
+      return browser;
+    })().finally(() => {
+      this.browserInitialization = null;
     });
 
-    this.browser = browser;
-
-    return browser;
+    return this.browserInitialization;
   }
 
   async downloadCertificate(html: string): Promise<Buffer> {
