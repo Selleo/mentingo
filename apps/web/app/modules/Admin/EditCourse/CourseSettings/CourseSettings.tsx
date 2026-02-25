@@ -129,13 +129,14 @@ const CourseSettings = ({
         const result = await uploadFile({ file, resource: "course" });
         form.setValue("thumbnailS3Key", result.fileKey, { shouldValidate: true });
         setDisplayThumbnailUrl(result.fileUrl);
+        form.handleSubmit(onSubmit)();
       } catch (error) {
         console.error("Error uploading image:", error);
       } finally {
         setIsUploading(false);
       }
     },
-    [form, uploadFile],
+    [form, uploadFile, onSubmit],
   );
 
   const removeThumbnail = () => {
@@ -145,6 +146,8 @@ const CourseSettings = ({
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+
+    form.handleSubmit(onSubmit)();
   };
 
   const handleTrailerUpload = useCallback(
@@ -292,7 +295,7 @@ const CourseSettings = ({
                   control={form.control}
                   name="thumbnailS3Key"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="max-w-md">
                       <Label htmlFor="thumbnailS3Key">
                         {t("adminCourseView.settings.field.thumbnail")}
                       </Label>
@@ -303,9 +306,14 @@ const CourseSettings = ({
                           isUploading={isUploading}
                           imageUrl={displayThumbnailUrl}
                           fileInputRef={fileInputRef}
+                          variant="video"
                         />
                       </FormControl>
-                      {isUploading && <p>{t("common.other.uploadingImage")}</p>}
+                      {isUploading && (
+                        <p className="text-xs font-medium text-neutral-500">
+                          {t("common.other.uploadingImage")}
+                        </p>
+                      )}
                       <FormMessage />
                     </FormItem>
                   )}
