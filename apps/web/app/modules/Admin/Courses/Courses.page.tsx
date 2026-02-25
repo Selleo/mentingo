@@ -90,7 +90,6 @@ const Courses = () => {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const { t } = useTranslation();
   const [lastSelectedRowIndex, setLastSelectedRowIndex] = React.useState<number>(0);
-
   const coursesWithOriginBadge: TCourse["originType"][] = [
     COURSE_ORIGIN_TYPES.MASTER,
     COURSE_ORIGIN_TYPES.EXPORTED,
@@ -205,27 +204,23 @@ const Courses = () => {
       accessorKey: "status",
       header: t("adminCoursesView.field.state"),
       cell: ({ row }) => (
-        <div className="flex items-center gap-2">
-          <Badge
-            variant={getCourseBadgeVariant(row.original.status as CourseStatus)}
-            className="w-max"
-          >
-            {getCourseStatus(row.original.status as CourseStatus, t)}
-          </Badge>
-          {coursesWithOriginBadge.includes(row.original.originType) && (
-            <Badge
-              variant={
-                row.original.originType === COURSE_ORIGIN_TYPES.MASTER
-                  ? "successFilled"
-                  : "secondary"
-              }
-              className="w-max"
-            >
-              {row.original.originType === COURSE_ORIGIN_TYPES.MASTER ? "Master" : "Exported"}
-            </Badge>
-          )}
-        </div>
+        <Badge
+          variant={getCourseBadgeVariant(row.original.status as CourseStatus)}
+          className="w-max"
+        >
+          {getCourseStatus(row.original.status as CourseStatus, t)}
+        </Badge>
       ),
+    },
+    {
+      accessorKey: "originType",
+      header: t("adminCoursesView.field.sharedCourse"),
+      cell: ({ row }) =>
+        coursesWithOriginBadge.includes(row.original.originType) ? (
+          <Badge variant="secondaryWithOutline" className="w-max">
+            {t("adminCourseView.sharedCourse.badgeExported")}
+          </Badge>
+        ) : null,
     },
     {
       accessorKey: "createdAt",

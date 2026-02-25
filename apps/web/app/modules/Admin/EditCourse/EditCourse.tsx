@@ -1,5 +1,6 @@
 import { Link, useNavigate, useParams, useSearchParams } from "@remix-run/react";
 import { COURSE_ORIGIN_TYPES, type SupportedLanguages } from "@repo/shared";
+import { Building } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -24,6 +25,7 @@ import {
 } from "~/components/ui/dialog";
 import { Separator } from "~/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { LeaveModalProvider } from "~/context/LeaveModalContext";
 import { useTrackDataUpdatedAt } from "~/hooks/useTrackDataUpdatedAt";
 import { useUserRole } from "~/hooks/useUserRole";
@@ -46,6 +48,8 @@ import type { Chapter } from "./EditCourse.types";
 import type { MetaFunction } from "@remix-run/react";
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.editCourse");
+
+const EXPORTED_COURSE_VISIBLE_TAB_VALUES = ["Status", "Enrolled"];
 
 const EditCourse = () => {
   const { t } = useTranslation();
@@ -87,7 +91,7 @@ const EditCourse = () => {
     hasMissingTranslations?.data?.hasMissingTranslations ?? false;
 
   const { tenants: shareableTenants = [], summary } = exportCandidates ?? {};
-  const { exportedCount, remainingCount } = summary ?? { exportedCount: 0, remainingCount: 0 };
+  const { remainingCount } = summary ?? { remainingCount: 0 };
 
   const canExportMore = remainingCount > 0;
 
@@ -148,6 +152,27 @@ const EditCourse = () => {
     previousDataUpdatedAt && currentDataUpdatedAt && previousDataUpdatedAt < currentDataUpdatedAt,
   );
 
+  const selectedTab = searchParams.get("tab") ?? EXPORTED_COURSE_VISIBLE_TAB_VALUES[0];
+
+  const { isExportedCourse, isMasterCourse } = useMemo(() => {
+    const isExportedCourse = course?.originType === COURSE_ORIGIN_TYPES.EXPORTED;
+    const isMasterCourse = course?.originType === COURSE_ORIGIN_TYPES.MASTER;
+
+    return { isExportedCourse, isMasterCourse };
+  }, [course]);
+
+  const { visibleCourseTabs, activeTab } = useMemo(() => {
+    const visibleCourseTabs = isExportedCourse
+      ? courseTabs.filter((tab) => EXPORTED_COURSE_VISIBLE_TAB_VALUES.includes(tab.value))
+      : courseTabs;
+
+    const activeTab = visibleCourseTabs.some((tab) => tab.value === selectedTab)
+      ? selectedTab
+      : EXPORTED_COURSE_VISIBLE_TAB_VALUES[0];
+
+    return { visibleCourseTabs, activeTab };
+  }, [courseTabs, isExportedCourse, selectedTab]);
+
   useEffect(() => {
     if (error) {
       navigate("/");
@@ -168,9 +193,6 @@ const EditCourse = () => {
     { title: t("adminCourseView.breadcrumbs.courses"), href: "/admin/courses" },
     { title: course?.title || "", href: `/admin/beta-courses/${id}` },
   ];
-  const activeTab = searchParams.get("tab") ?? "Curriculum";
-  const courseOriginType = course?.originType;
-  const isExportedCourse = courseOriginType === COURSE_ORIGIN_TYPES.EXPORTED;
 
   return (
     <PageWrapper breadcrumbs={breadcrumbs}>
@@ -209,77 +231,94 @@ const EditCourse = () => {
                   {t("common.other.private")}
                 </Badge>
               )}
-              {courseOriginType === COURSE_ORIGIN_TYPES.MASTER && (
-                <Badge variant="successFilled" fontWeight="bold" className="ml-2">
+              {isMasterCourse && (
+                <Badge variant="secondaryWithOutline" fontWeight="bold" className="ml-2">
+                  <Building className="size-3.5" />
                   {t("adminCourseView.sharedCourse.badgeMaster")}
                 </Badge>
               )}
-              {courseOriginType === COURSE_ORIGIN_TYPES.EXPORTED && (
-                <Badge variant="secondary" fontWeight="bold" className="ml-2">
-                  {t("adminCourseView.sharedCourse.badgeExported")}
-                </Badge>
+              {isExportedCourse && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Badge variant="secondaryWithOutline" fontWeight="bold" className="ml-2">
+                        <Building className="size-3.5" />
+                        {t("adminCourseView.sharedCourse.badgeExported")}
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      {t("adminCourseView.sharedCourse.badgeExportedTooltip")}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               )}
             </h4>
 
             <div className="flex gap-4 items-center">
-              <div className="flex gap-2 items-center">
-                <CourseLanguageSelector
-                  courseLanguage={courseLanguage}
-                  course={
-                    course && {
-                      id: course.id,
-                      baseLanguage: course.baseLanguage,
-                      availableLocales: course.availableLocales,
-                    }
-                  }
-                  isAIConfigured={isAIConfigured?.enabled ?? false}
-                  onChange={setCourseLanguage}
-                  setOpenGenerateTranslationModal={setOpenGenerateTranslationModal}
-                />
+              {!isExportedCourse && (
+                <>
+                  <div className="flex gap-2 items-center">
+                    <CourseLanguageSelector
+                      courseLanguage={courseLanguage}
+                      course={
+                        course && {
+                          id: course.id,
+                          baseLanguage: course.baseLanguage,
+                          availableLocales: course.availableLocales,
+                        }
+                      }
+                      isAIConfigured={isAIConfigured?.enabled ?? false}
+                      onChange={setCourseLanguage}
+                      setOpenGenerateTranslationModal={setOpenGenerateTranslationModal}
+                    />
 
-                {hasMissingCourseTranslations && isAIConfigured?.enabled && (
-                  <Dialog
-                    open={openGenerateTranslationModal}
-                    onOpenChange={setOpenGenerateTranslationModal}
-                  >
-                    <DialogTrigger asChild>
-                      <Button variant="outline" className="gap-2">
-                        <Icon name="AiMentor" className="size-4" />
-                        {t("adminCourseView.common.generateMissingTranslations")}
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogTitle>
-                        {t("adminCourseView.common.generateMissingTranslations")}
-                      </DialogTitle>
-                      <DialogDescription>
-                        {t("adminCourseView.common.generateMissingTranslationsDescription")}
-                      </DialogDescription>
-                      <DialogFooter>
+                    {hasMissingCourseTranslations && isAIConfigured?.enabled && (
+                      <Dialog
+                        open={openGenerateTranslationModal}
+                        onOpenChange={setOpenGenerateTranslationModal}
+                      >
                         <DialogTrigger asChild>
-                          <Button variant="outline">{t("contentCreatorView.button.cancel")}</Button>
+                          <Button variant="outline" className="gap-2">
+                            <Icon name="AiMentor" className="size-4" />
+                            {t("adminCourseView.common.generateMissingTranslations")}
+                          </Button>
                         </DialogTrigger>
-                        <Button
-                          type="button"
-                          onClick={handleGenerate}
-                          disabled={isGenerationPending}
-                        >
-                          {isGenerationPending ? (
-                            <span className="flex items-center gap-2">
-                              <span className="size-4 border-2 border-t-2 border-gray-300 border-t-gray-900 rounded-full animate-spin"></span>
-                              {t("contentCreatorView.button.confirm")}
-                            </span>
-                          ) : (
-                            t("contentCreatorView.button.confirm")
-                          )}
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                )}
-              </div>
+                        <DialogContent>
+                          <DialogTitle>
+                            {t("adminCourseView.common.generateMissingTranslations")}
+                          </DialogTitle>
+                          <DialogDescription>
+                            {t("adminCourseView.common.generateMissingTranslationsDescription")}
+                          </DialogDescription>
+                          <DialogFooter>
+                            <DialogTrigger asChild>
+                              <Button variant="outline">
+                                {t("contentCreatorView.button.cancel")}
+                              </Button>
+                            </DialogTrigger>
+                            <Button
+                              type="button"
+                              onClick={handleGenerate}
+                              disabled={isGenerationPending}
+                            >
+                              {isGenerationPending ? (
+                                <span className="flex items-center gap-2">
+                                  <span className="size-4 border-2 border-t-2 border-gray-300 border-t-gray-900 rounded-full animate-spin"></span>
+                                  {t("contentCreatorView.button.confirm")}
+                                </span>
+                              ) : (
+                                t("contentCreatorView.button.confirm")
+                              )}
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    )}
+                  </div>
 
-              <Separator orientation="vertical" className="h-10" decorative />
+                  <Separator orientation="vertical" className="h-10" decorative />
+                </>
+              )}
 
               <Button
                 asChild
@@ -293,7 +332,7 @@ const EditCourse = () => {
             </div>
           </div>
           <TabsList className="w-min">
-            {courseTabs.map(({ label, value }) => (
+            {visibleCourseTabs.map(({ label, value }) => (
               <TabsTrigger key={value} value={value} onClick={() => handleTabChange(value)}>
                 {label}
               </TabsTrigger>
@@ -339,7 +378,7 @@ const EditCourse = () => {
             </LeaveModalProvider>
           )}
         </TabsContent>
-        {isStripeConfigured?.enabled && (
+        {isMasterCourse && isStripeConfigured?.enabled && (
           <TabsContent value="Pricing">
             <CoursePricing
               courseId={course?.id || ""}
@@ -364,8 +403,6 @@ const EditCourse = () => {
             <SharedCourseExportsTabContent
               tenants={shareableTenants}
               selectedTenantIds={validSelectedTenantIds}
-              exportedCount={exportedCount}
-              remainingCount={remainingCount}
               canExportMore={canExportMore}
               isExportPending={isExportPending}
               onToggleTenantSelection={toggleTenantSelection}

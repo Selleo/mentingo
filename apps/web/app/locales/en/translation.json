@@ -687,6 +687,7 @@
       "price": "Price",
       "state": "State",
       "status": "Status",
+      "sharedCourse": "Shared",
       "createdAt": "Created At"
     },
     "lessonCard": {
@@ -1550,13 +1551,12 @@
     "sharedCourse": {
       "badgeMaster": "Shared",
       "badgeExported": "Shared",
+      "badgeExportedTooltip": "This course is managed centrally. You can publish it and assign participants, but you cannot edit its content.",
       "exportedNoticeTitle": "This course was exported to this tenant",
       "exportedNoticeDescription": "Content is managed in the source tenant and is read-only in this tenant.",
       "exportsTitle": "Sharing",
-      "exportsDescription": "Share this course to tenants. Each tenant can receive this course only once.",
-      "exportedCount": "Exported: {{count}}",
-      "remainingCount": "Remaining: {{count}}",
-      "selectTenants": "Select Tenants",
+      "exportsDescription": "Share this course with selected tenants.",
+      "selectTenants": "Select tenants",
       "selectedCount": "Selected:",
       "exportButton": "Share",
       "exportingButton": "Sharing..."

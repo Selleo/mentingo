@@ -384,7 +384,7 @@ export class MasterCourseService {
         true,
       ),
       thumbnailS3Key: params.sourceSnapshot.course.thumbnailS3Key,
-      status: params.sourceSnapshot.course.status,
+      status: "draft",
       hasCertificate: params.sourceSnapshot.course.hasCertificate,
       priceInCents: params.sourceSnapshot.course.priceInCents,
       currency: params.sourceSnapshot.course.currency,

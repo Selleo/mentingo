@@ -3,15 +3,12 @@ import { useTranslation } from "react-i18next";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
-import { Separator } from "~/components/ui/separator";
 
 import type { GetMasterCourseExportCandidatesResponse } from "~/api/generated-api";
 
 type SharedCourseExportsTabContentProps = {
   tenants: GetMasterCourseExportCandidatesResponse["data"]["tenants"];
   selectedTenantIds: string[];
-  exportedCount: number;
-  remainingCount: number;
   canExportMore: boolean;
   isExportPending: boolean;
   onToggleTenantSelection: (tenantId: string, checked: boolean) => void;
@@ -21,8 +18,6 @@ type SharedCourseExportsTabContentProps = {
 export const SharedCourseExportsTabContent = ({
   tenants,
   selectedTenantIds,
-  exportedCount,
-  remainingCount,
   canExportMore,
   isExportPending,
   onToggleTenantSelection,
@@ -38,16 +33,6 @@ export const SharedCourseExportsTabContent = ({
           {t("adminCourseView.sharedCourse.exportsDescription")}
         </p>
       </div>
-      <div className="flex flex-wrap items-center gap-2">
-        <Badge variant="successFilled" fontWeight="bold">
-          {t("adminCourseView.sharedCourse.exportedCount", { count: exportedCount })}
-        </Badge>
-        <Badge variant="default" fontWeight="bold">
-          {t("adminCourseView.sharedCourse.remainingCount", { count: remainingCount })}
-        </Badge>
-      </div>
-
-      <Separator />
 
       <div className="flex flex-col gap-y-3">
         <h6 className="font-semibold text-neutral-950">
@@ -74,7 +59,7 @@ export const SharedCourseExportsTabContent = ({
                   <span className="text-sm text-neutral-900">{tenant.name}</span>
                 </div>
                 {isAlreadyExported && (
-                  <Badge variant="secondary" fontWeight="bold">
+                  <Badge variant="secondaryWithOutline">
                     {t("adminCourseView.sharedCourse.badgeExported")}
                   </Badge>
                 )}
