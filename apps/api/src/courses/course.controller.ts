@@ -5,6 +5,7 @@ import {
   Get,
   HttpStatus,
   Headers,
+  NotFoundException,
   Param,
   Patch,
   Post,
@@ -32,9 +33,11 @@ import {
 import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
+import { ManagingTenantAdminGuard } from "src/common/guards/managing-tenant-admin.guard";
 import { RolesGuard } from "src/common/guards/roles.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { CourseService } from "src/courses/course.service";
+import { MasterCourseService } from "src/courses/master-course.service";
 import {
   allCoursesForContentCreatorSchema,
   allStudentCoursesSchema,
@@ -65,6 +68,15 @@ import {
   SortCourseStudentAiMentorResultsOptions,
 } from "src/courses/schemas/courseQuery";
 import { CreateCourseBody, createCourseSchema } from "src/courses/schemas/createCourse.schema";
+import {
+  masterCourseExportBodySchema,
+  masterCourseExportCandidatesResponseSchema,
+  masterCourseExportLinkSchema,
+  masterCourseExportResponseSchema,
+  masterCourseJobStatusResponseSchema,
+  type MasterCourseExportBody,
+  type MasterCourseExportCandidatesResponse,
+} from "src/courses/schemas/masterCourse.schema";
 import {
   commonShowBetaCourseSchema,
   commonShowCourseSchema,
@@ -130,6 +142,7 @@ export class CourseController {
   constructor(
     private readonly courseService: CourseService,
     private readonly learningTimeService: LearningTimeService,
+    private readonly masterCourseService: MasterCourseService,
   ) {}
 
   @Get("all")
@@ -980,6 +993,69 @@ export class CourseController {
   })
   async transferCourseOwnership(@Body() transferData: TransferCourseOwnershipRequestBody) {
     return this.courseService.transferCourseOwnership(transferData);
+  }
+
+  @Post("master/:courseId/export")
+  @UseGuards(ManagingTenantAdminGuard, RolesGuard)
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    request: [
+      { type: "param", name: "courseId", schema: UUIDSchema, required: true },
+      { type: "body", schema: masterCourseExportBodySchema, required: true },
+    ],
+    response: baseResponse(masterCourseExportResponseSchema),
+  })
+  async exportMasterCourse(
+    @Param("courseId") courseId: UUIDType,
+    @Body() body: MasterCourseExportBody,
+    @CurrentUser() actor: CurrentUserType,
+  ) {
+    const data = await this.masterCourseService.exportCourseToTenants(courseId, body, actor);
+    return new BaseResponse(data);
+  }
+
+  @Get("master/:courseId/exports")
+  @UseGuards(ManagingTenantAdminGuard, RolesGuard)
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    request: [{ type: "param", name: "courseId", schema: UUIDSchema, required: true }],
+    response: baseResponse(Type.Array(masterCourseExportLinkSchema)),
+  })
+  async getMasterCourseExports(
+    @Param("courseId") courseId: UUIDType,
+    @CurrentUser() actor: CurrentUserType,
+  ) {
+    const data = await this.masterCourseService.getCourseExports(courseId, actor);
+    return new BaseResponse(data);
+  }
+
+  @Get("master/:courseId/export-candidates")
+  @UseGuards(ManagingTenantAdminGuard, RolesGuard)
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    request: [{ type: "param", name: "courseId", schema: UUIDSchema, required: true }],
+    response: baseResponse(masterCourseExportCandidatesResponseSchema),
+  })
+  async getMasterCourseExportCandidates(
+    @Param("courseId") courseId: UUIDType,
+    @CurrentUser() actor: CurrentUserType,
+  ): Promise<BaseResponse<MasterCourseExportCandidatesResponse>> {
+    return new BaseResponse(
+      await this.masterCourseService.getCourseExportCandidates(courseId, actor),
+    );
+  }
+
+  @Get("master/export-jobs/:jobId")
+  @UseGuards(ManagingTenantAdminGuard, RolesGuard)
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    request: [{ type: "param", name: "jobId", schema: Type.String(), required: true }],
+    response: baseResponse(masterCourseJobStatusResponseSchema),
+  })
+  async getMasterCourseJobStatus(@Param("jobId") jobId: string) {
+    const status = await this.masterCourseService.getJobStatus(jobId);
+    if (!status) throw new NotFoundException("masterCourse.error.jobNotFound");
+    return new BaseResponse(status);
   }
 
   @Get("course-ownership/:courseId")

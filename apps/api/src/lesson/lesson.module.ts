@@ -1,6 +1,7 @@
-import { Module } from "@nestjs/common";
+import { forwardRef, Module } from "@nestjs/common";
 
 import { AiModule } from "src/ai/ai.module";
+import { CourseModule } from "src/courses/course.module";
 import { FileModule } from "src/file/files.module";
 import { IngestionModule } from "src/ingestion/ingestion.module";
 import { LocalizationModule } from "src/localization/localization.module";
@@ -22,6 +23,7 @@ import { LessonService } from "./services/lesson.service";
     AiModule,
     IngestionModule,
     LocalizationModule,
+    forwardRef(() => CourseModule),
   ],
   controllers: [LessonController],
   providers: [

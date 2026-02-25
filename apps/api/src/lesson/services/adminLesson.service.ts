@@ -15,6 +15,7 @@ import { AiRepository } from "src/ai/repositories/ai.repository";
 import { DatabasePg } from "src/common";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { annotateVideoAutoplayInContent } from "src/common/utils/annotateVideoAutoplayInContent";
+import { MasterCourseService } from "src/courses/master-course.service";
 import { CreateLessonEvent, DeleteLessonEvent, UpdateLessonEvent } from "src/events";
 import { RESOURCE_CATEGORIES, RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
@@ -63,10 +64,13 @@ export class AdminLessonService {
     private localizationService: LocalizationService,
     private readonly outboxPublisher: OutboxPublisher,
     private lessonService: LessonService,
+    private readonly masterCourseService: MasterCourseService,
     @Inject("CACHE_MANAGER") private readonly cache: CacheManagerStore,
   ) {}
 
   async createLessonForChapter(data: CreateLessonBody, currentUser: CurrentUser) {
+    await this.masterCourseService.assertCourseContentEditableByChapterId(data.chapterId);
+
     await this.validateAccess("chapter", currentUser.role, currentUser.userId, data.chapterId);
 
     const { language } = await this.localizationService.getBaseLanguage(
@@ -121,6 +125,8 @@ export class AdminLessonService {
   }
 
   async createAiMentorLesson(data: CreateAiMentorLessonBody, currentUser: CurrentUser) {
+    await this.masterCourseService.assertCourseContentEditableByChapterId(data.chapterId);
+
     await this.validateAccess("chapter", currentUser.role, currentUser.userId, data.chapterId);
 
     const { language } = await this.localizationService.getBaseLanguage(
@@ -162,6 +168,8 @@ export class AdminLessonService {
   }
 
   async createQuizLesson(data: CreateQuizLessonBody, currentUser: CurrentUser) {
+    await this.masterCourseService.assertCourseContentEditableByChapterId(data.chapterId);
+
     await this.validateAccess("chapter", currentUser.role, currentUser.userId, data.chapterId);
 
     const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(data.chapterId);
@@ -208,6 +216,8 @@ export class AdminLessonService {
     data: UpdateAiMentorLessonBody,
     currentUser: CurrentUser,
   ) {
+    await this.masterCourseService.assertCourseContentEditableByLessonId(id);
+
     await this.validateAccess("lesson", currentUser.role, currentUser.userId, id);
 
     const { availableLocales } = await this.localizationService.getBaseLanguage(
@@ -256,6 +266,8 @@ export class AdminLessonService {
   }
 
   async updateQuizLesson(id: UUIDType, data: UpdateQuizLessonBody, currentUser: CurrentUser) {
+    await this.masterCourseService.assertCourseContentEditableByLessonId(id);
+
     await this.validateAccess("lesson", currentUser.role, currentUser.userId, id);
 
     if (data.title && data.title.length > MAX_LESSON_TITLE_LENGTH) {
@@ -305,6 +317,8 @@ export class AdminLessonService {
   }
 
   async updateLesson(id: UUIDType, data: UpdateLessonBody, currentUser: CurrentUser) {
+    await this.masterCourseService.assertCourseContentEditableByLessonId(id);
+
     await this.validateAccess("lesson", currentUser.role, currentUser.userId, id);
 
     const { availableLocales } = await this.localizationService.getBaseLanguage(
@@ -351,6 +365,8 @@ export class AdminLessonService {
   }
 
   async removeLesson(lessonId: UUIDType, currentUser: CurrentUser) {
+    await this.masterCourseService.assertCourseContentEditableByLessonId(lessonId);
+
     await this.validateAccess("lesson", currentUser.role, currentUser.userId, lessonId);
 
     const [lesson] = await this.adminLessonRepository.getLesson(lessonId);
@@ -369,6 +385,7 @@ export class AdminLessonService {
     await this.outboxPublisher.publish(
       new DeleteLessonEvent({
         lessonId: lesson.id,
+        courseId: lesson.courseId,
         actor: currentUser,
         lessonName: lesson.title,
       }),
@@ -380,6 +397,8 @@ export class AdminLessonService {
     displayOrder: number;
     currentUser: CurrentUser;
   }): Promise<void> {
+    await this.masterCourseService.assertCourseContentEditableByLessonId(lessonObject.lessonId);
+
     await this.validateAccess(
       "lesson",
       lessonObject.currentUser.role,
@@ -756,6 +775,8 @@ export class AdminLessonService {
   }
 
   async createEmbedLesson(data: CreateEmbedLessonBody, currentUser: CurrentUser) {
+    await this.masterCourseService.assertCourseContentEditableByChapterId(data.chapterId);
+
     await this.validateAccess("chapter", currentUser.role, currentUser.userId, data.chapterId);
 
     if (data.title.length > MAX_LESSON_TITLE_LENGTH) {
@@ -816,6 +837,8 @@ export class AdminLessonService {
     currentUser: CurrentUser,
     data: UpdateEmbedLessonBody,
   ) {
+    await this.masterCourseService.assertCourseContentEditableByLessonId(lessonId);
+
     await this.validateAccess("lesson", currentUser.role, currentUser.userId, lessonId);
 
     if (data.title && data.title.length > MAX_LESSON_TITLE_LENGTH) {
@@ -924,6 +947,7 @@ export class AdminLessonService {
     contextId?: string,
   ) {
     if (lessonId) {
+      await this.masterCourseService.assertCourseContentEditableByLessonId(lessonId);
       await this.validateAccess("lesson", currentUserRole, currentUserId, lessonId);
     }
     const fileTitle = {
@@ -955,6 +979,8 @@ export class AdminLessonService {
     lessonId: UUIDType,
     file: Express.Multer.File | null,
   ) {
+    await this.masterCourseService.assertCourseContentEditableByLessonId(lessonId);
+
     const [course] = await this.adminLessonRepository.getCourseByLesson(lessonId);
 
     if (!(currentUserRole === USER_ROLES.ADMIN || course.authorId === currentUserId)) {

@@ -194,7 +194,8 @@
       "goToAvailableCourses": "Przejdź do dostępnych kursów"
     },
     "qa": "Q&A",
-    "articles": "Baza wiedzy"
+    "articles": "Baza wiedzy",
+    "tenants": "organizacje"
   },
   "newsView": {
     "header": "Aktualności",
@@ -669,6 +670,7 @@
       "price": "Cena",
       "state": "Stan",
       "status": "Status",
+      "sharedCourse": "Udostępniony",
       "createdAt": "Utworzono"
     },
     "lessonCard": {
@@ -1544,6 +1546,19 @@
     "deleteLanguage": {
       "title": "Usuń język",
       "description": "Czy na pewno chcesz usunąć ten język?"
+    },
+    "sharedCourse": {
+      "badgeMaster": "Udostępniony",
+      "badgeExported": "Udostępniony",
+      "badgeExportedTooltip": "Ten kurs jest zarządzany centralnie. Możesz go publikować i przypisywać uczestników, ale nie możesz edytować jego treści.",
+      "exportedNoticeTitle": "Ten kurs został wyeksportowany do tej organizacji",
+      "exportedNoticeDescription": "Treść jest zarządzana w organizacji źródłowej i tutaj jest tylko do odczytu.",
+      "exportsTitle": "Udostępnianie",
+      "exportsDescription": "Udostępnij ten kurs wybranym organizacjom.",
+      "selectTenants": "Wybierz organizacje",
+      "selectedCount": "Wybrano:",
+      "exportButton": "Udostępnij",
+      "exportingButton": "Udostępnianie..."
     }
   },
   "registerView": {
@@ -2339,9 +2354,9 @@
     "createQA": "Utwórz nowe Q&A",
     "analytics": "Analityka",
     "progress": "Postępy",
-    "tenant": "Detale najemcy",
-    "createTenant": "Utwórz najemcę",
-    "tenants": "Najemcy"
+    "tenant": "Szczegóły organizacji",
+    "createTenant": "Utwórz organizację",
+    "tenants": "Organizacje"
   },
   "lessonPreview": {
     "breadcrumbs": {
@@ -2580,13 +2595,13 @@
     }
   },
   "superAdminTenantsView": {
-    "title": "Najemcy",
-    "description": "Zarządzaj nazwami najemców, domenami, statusem i flagami zarządzania.",
+    "title": "Organizacje",
+    "description": "Zarządzaj nazwami organizacji, domenami, statusem i flagami zarządzania.",
     "actions": {
-      "create": "Utwórz najemcę"
+      "create": "Utwórz organizację"
     },
     "search": {
-      "placeholder": "Szukaj najemców..."
+      "placeholder": "Szukaj organizacji..."
     },
     "table": {
       "name": "Nazwa",
@@ -2594,8 +2609,8 @@
       "status": "Status",
       "managing": "Zarządzający",
       "actions": "Akcje",
-      "loading": "Ładowanie najemców...",
-      "empty": "Nie znaleziono najemców.",
+      "loading": "Ładowanie organizacji...",
+      "empty": "Nie znaleziono organizacji.",
       "yes": "Tak",
       "no": "Nie",
       "edit": "Edytuj"
@@ -2605,19 +2620,19 @@
       "inactive": "Nieaktywny"
     },
     "create": {
-      "title": "Utwórz najemcę",
-      "description": "Utwórz nowego najemcę i zaproś pierwszego administratora.",
-      "submit": "Utwórz najemcę"
+      "title": "Utwórz organizację",
+      "description": "Utwórz nową organizację i zaproś pierwszego administratora.",
+      "submit": "Utwórz organizację"
     },
     "edit": {
-      "title": "Edytuj najemcę",
-      "description": "Zaktualizuj szczegóły i status najemcy.",
+      "title": "Edytuj organizację",
+      "description": "Zaktualizuj szczegóły i status organizacji.",
       "submit": "Zapisz zmiany"
     },
     "form": {
-      "tenantName": "Nazwa najemcy",
-      "tenantHost": "Host najemcy (pełny URL)",
-      "tenantHostPlaceholder": "https://tenant.example.com",
+      "tenantName": "Nazwa organizacji",
+      "tenantHost": "Host organizacji (pełny URL)",
+      "tenantHostPlaceholder": "https://organizacja.example.com",
       "status": "Status",
       "statusPlaceholder": "Wybierz status",
       "adminFirstName": "Imię administratora",
@@ -2632,16 +2647,16 @@
       "adminLastNameRequired": "Nazwisko administratora jest wymagane"
     },
     "toast": {
-      "tenantCreatedSuccessfully": "Najemca został utworzony pomyślnie",
-      "tenantUpdatedSuccessfully": "Najemca został zaktualizowany pomyślnie"
+      "tenantCreatedSuccessfully": "Organizacja została utworzona pomyślnie",
+      "tenantUpdatedSuccessfully": "Organizacja została zaktualizowana pomyślnie"
     }
   },
   "superAdminTenants": {
     "error": {
-      "hostAlreadyExists": "Host najemcy już istnieje",
-      "notFound": "Nie znaleziono najemcy",
-      "invalidHost": "Nieprawidłowy adres URL hosta najemcy",
-      "managingTenantRequired": "Wymagane uprawnienia administratora najemcy zarządzającego"
+      "hostAlreadyExists": "Host organizacji już istnieje",
+      "notFound": "Nie znaleziono organizacji",
+      "invalidHost": "Nieprawidłowy adres URL hosta organizacji",
+      "managingTenantRequired": "Wymagane uprawnienia administratora zarządzającej organizacji"
     }
   },
   "auth": {
@@ -2651,7 +2666,7 @@
     }
   },
   "tenantInactive": {
-    "title": "Najemca wyłączony",
+    "title": "Organizacja wyłączona",
     "description": "Ta przestrzeń jest obecnie nieaktywna. Jeśli uważasz, że to błąd, skontaktuj się z administratorem, aby przywrócić dostęp."
   },
   "integrationApiKey": {

@@ -90,6 +90,9 @@ export const createCourseFactory = (db: DatabasePg) => {
       isScorm: false,
       stripeProductId: null,
       stripePriceId: null,
+      originType: "regular",
+      sourceCourseId: null,
+      sourceTenantId: null,
       baseLanguage: "en",
       availableLocales: ["en"],
       settings: {

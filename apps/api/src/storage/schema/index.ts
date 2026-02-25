@@ -1,4 +1,9 @@
-import { SUPPORTED_LANGUAGES, TENANT_STATUSES } from "@repo/shared";
+import {
+  COURSE_ORIGIN_TYPES,
+  MASTER_COURSE_EXPORT_SYNC_STATUSES,
+  SUPPORTED_LANGUAGES,
+  TENANT_STATUSES,
+} from "@repo/shared";
 import { sql } from "drizzle-orm";
 import {
   bigint,
@@ -32,7 +37,12 @@ import {
   withTenantIdIndex,
 } from "./utils";
 
-import type { TenantStatus } from "@repo/shared";
+import type {
+  CourseOriginType,
+  MasterCourseEntityType,
+  MasterCourseExportSyncStatus,
+  TenantStatus,
+} from "@repo/shared";
 import type { ActivityLogMetadata } from "src/activity-logs/types";
 import type { ActivityHistory, AllSettings } from "src/common/types";
 
@@ -212,6 +222,12 @@ export const courses = pgTable(
       .notNull(),
     stripeProductId: text("stripe_product_id"),
     stripePriceId: text("stripe_price_id"),
+    originType: text("origin_type")
+      .notNull()
+      .$type<CourseOriginType>()
+      .default(COURSE_ORIGIN_TYPES.REGULAR),
+    sourceCourseId: uuid("source_course_id"),
+    sourceTenantId: uuid("source_tenant_id"),
     settings: coursesSettings.column.notNull(),
     baseLanguage: text("base_language").notNull().default("en"),
     availableLocales: text("available_locales")
@@ -1073,6 +1089,74 @@ export const tenants = pgTable(
   },
   (table) => ({
     uniqueHostIdx: uniqueIndex("unique_host_idx").on(table.host),
+  }),
+);
+
+export const masterCourseExports = pgTable(
+  "master_course_exports",
+  {
+    ...id,
+    ...timestamps,
+    sourceTenantId: uuid("source_tenant_id")
+      .references(() => tenants.id, { onDelete: "cascade" })
+      .notNull(),
+    sourceCourseId: uuid("source_course_id")
+      .references(() => courses.id, { onDelete: "cascade" })
+      .notNull(),
+    targetTenantId: uuid("target_tenant_id")
+      .references(() => tenants.id, { onDelete: "cascade" })
+      .notNull(),
+    targetCourseId: uuid("target_course_id").references(() => courses.id, { onDelete: "cascade" }),
+    syncStatus: text("sync_status")
+      .notNull()
+      .$type<MasterCourseExportSyncStatus>()
+      .default(MASTER_COURSE_EXPORT_SYNC_STATUSES.ACTIVE),
+    lastSyncedAt: timestamp("last_synced_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+  },
+  (table) => ({
+    sourceCourseIdx: index("master_course_exports_source_course_idx").on(
+      table.sourceTenantId,
+      table.sourceCourseId,
+    ),
+    targetCourseIdx: index("master_course_exports_target_course_idx").on(
+      table.targetTenantId,
+      table.targetCourseId,
+    ),
+    sourceTargetUniqueIdx: uniqueIndex("master_course_exports_source_target_unique_idx").on(
+      table.sourceTenantId,
+      table.sourceCourseId,
+      table.targetTenantId,
+    ),
+  }),
+);
+
+export const masterCourseEntityMap = pgTable(
+  "master_course_entity_map",
+  {
+    ...id,
+    ...timestamps,
+    exportId: uuid("export_id")
+      .references(() => masterCourseExports.id, { onDelete: "cascade" })
+      .notNull(),
+    entityType: text("entity_type").notNull().$type<MasterCourseEntityType>(),
+    sourceEntityId: uuid("source_entity_id").notNull(),
+    targetEntityId: uuid("target_entity_id").notNull(),
+  },
+  (table) => ({
+    exportIdx: index("master_course_entity_map_export_idx").on(table.exportId),
+    sourceEntityIdx: index("master_course_entity_map_source_entity_idx").on(
+      table.entityType,
+      table.sourceEntityId,
+    ),
+    sourceUniqueIdx: uniqueIndex("master_course_entity_map_source_unique_idx").on(
+      table.exportId,
+      table.entityType,
+      table.sourceEntityId,
+    ),
   }),
 );
 

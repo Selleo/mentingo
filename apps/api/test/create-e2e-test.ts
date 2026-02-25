@@ -69,7 +69,9 @@ export async function createE2ETest(optionsOrProviders: E2ETestOptions | Provide
   app.use(cookieParser());
 
   app.use((req: express.Request, _res: express.Response, next: express.NextFunction) => {
-    req.headers.referer = `${DEFAULT_TEST_TENANT_HOST}/`;
+    if (!req.headers.referer) {
+      req.headers.referer = `${DEFAULT_TEST_TENANT_HOST}/`;
+    }
 
     next();
   });

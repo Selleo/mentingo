@@ -93,6 +93,7 @@ import { getSortOptions } from "../common/helpers/getSortOptions";
 import { LESSON_SEQUENCE_ENABLED } from "./constants";
 import { DURATION_DEFAULTS } from "./constants/duration-defaults";
 import { CourseSlugService } from "./course-slug.service";
+import { MasterCourseService } from "./master-course.service";
 import {
   COURSE_ENROLLMENT_SCOPES,
   CourseSortFields,
@@ -175,6 +176,7 @@ export class CourseService {
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
     private readonly emailService: EmailService,
     private readonly courseSlugService: CourseSlugService,
+    private readonly masterCourseService: MasterCourseService,
   ) {}
 
   async getAllCourses(query: CoursesQuery): Promise<{
@@ -217,6 +219,10 @@ export class CourseService {
         createdAt: courses.createdAt,
         stripeProductId: courses.stripeProductId,
         stripePriceId: courses.stripePriceId,
+        originType: courses.originType,
+        isContentReadonly: sql<boolean>`${courses.originType} = 'exported'`,
+        sourceCourseId: courses.sourceCourseId,
+        sourceTenantId: courses.sourceTenantId,
       })
       .from(courses)
       .leftJoin(categories, eq(courses.categoryId, categories.id))
@@ -235,6 +241,9 @@ export class CourseService {
         courses.priceInCents,
         courses.currency,
         courses.status,
+        courses.originType,
+        courses.sourceCourseId,
+        courses.sourceTenantId,
         coursesSummaryStats.freePurchasedCount,
         coursesSummaryStats.paidPurchasedCount,
         courses.createdAt,
@@ -762,6 +771,10 @@ export class CourseService {
           dueDate: sql<
             string | null
           >`TO_CHAR(${groupCourses.dueDate}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
+          originType: courses.originType,
+          isContentReadonly: sql<boolean>`${courses.originType} = 'exported'`,
+          sourceCourseId: courses.sourceCourseId,
+          sourceTenantId: courses.sourceTenantId,
         })
         .from(courses)
         .leftJoin(categories, eq(courses.categoryId, categories.id))
@@ -797,6 +810,9 @@ export class CourseService {
           coursesSummaryStats.paidPurchasedCount,
           courses.availableLocales,
           courses.baseLanguage,
+          courses.originType,
+          courses.sourceCourseId,
+          courses.sourceTenantId,
           groupCourses.dueDate,
         )
         .orderBy(
@@ -1040,6 +1056,10 @@ export class CourseService {
         availableLocales: sql<SupportedLanguages[]>`${courses.availableLocales}`,
         baseLanguage: sql<SupportedLanguages>`${courses.baseLanguage}`,
         dueDate: sql<string | null>`TO_CHAR(${groupCourses.dueDate}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
+        originType: courses.originType,
+        isContentReadonly: sql<boolean>`${courses.originType} = 'exported'`,
+        sourceCourseId: courses.sourceCourseId,
+        sourceTenantId: courses.sourceTenantId,
       })
       .from(courses)
       .leftJoin(categories, eq(courses.categoryId, categories.id))
@@ -1274,6 +1294,10 @@ export class CourseService {
         hasCertificate: courses.hasCertificate,
         availableLocales: sql<SupportedLanguages[]>`${courses.availableLocales}`,
         baseLanguage: sql<SupportedLanguages>`${courses.baseLanguage}`,
+        originType: courses.originType,
+        isContentReadonly: sql<boolean>`${courses.originType} = 'exported'`,
+        sourceCourseId: courses.sourceCourseId,
+        sourceTenantId: courses.sourceTenantId,
       })
       .from(courses)
       .innerJoin(categories, eq(courses.categoryId, categories.id))
@@ -1467,6 +1491,10 @@ export class CourseService {
             AND ${chapters.isFreemium} = true
         )`,
         dueDate: sql<string | null>`TO_CHAR(${groupCourses.dueDate}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
+        originType: courses.originType,
+        isContentReadonly: sql<boolean>`${courses.originType} = 'exported'`,
+        sourceCourseId: courses.sourceCourseId,
+        sourceTenantId: courses.sourceTenantId,
       })
       .from(courses)
       .leftJoin(
@@ -1582,6 +1610,8 @@ export class CourseService {
     settings: UpdateCourseSettings,
     currentUser: CurrentUser,
   ) {
+    await this.masterCourseService.assertCourseContentEditable(courseId);
+
     const [course] = await this.db.select().from(courses).where(eq(courses.id, courseId));
 
     if (!course) {
@@ -1736,6 +1766,16 @@ export class CourseService {
     isPlaywrightTest: boolean,
     image?: Express.Multer.File,
   ) {
+    const attemptedFieldKeys = Object.entries(updateCourseBody)
+      .filter(([, value]) => value !== undefined)
+      .map(([key]) => key);
+
+    await this.masterCourseService.assertCourseContentEditable(
+      id,
+      ["status", "priceInCents", "currency", "language"],
+      attemptedFieldKeys,
+    );
+
     const { userId: currentUserId, role: currentUserRole } = currentUser;
 
     const { updatedCourse, previousCourseSnapshot, updatedCourseSnapshot } =
@@ -3558,6 +3598,8 @@ export class CourseService {
     userId: UUIDType,
     role: UserRole,
   ) {
+    await this.masterCourseService.assertCourseContentEditable(courseId);
+
     await this.adminLessonService.validateAccess("course", role, userId, courseId);
 
     const [{ availableLocales }] = await this.db
@@ -3583,6 +3625,8 @@ export class CourseService {
     role: UserRole,
     userId: UUIDType,
   ) {
+    await this.masterCourseService.assertCourseContentEditable(courseId);
+
     const { baseLanguage, availableLocales } = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.COURSE,
       courseId,
@@ -3813,6 +3857,8 @@ export class CourseService {
     language: SupportedLanguages,
     currentUser: CurrentUser,
   ) {
+    await this.masterCourseService.assertCourseContentEditable(courseId);
+
     const { baseLanguage, availableLocales } = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.COURSE,
       courseId,

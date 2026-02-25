@@ -4,6 +4,7 @@ import { isEqual } from "lodash";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
+import { MasterCourseService } from "src/courses/master-course.service";
 import { CreateChapterEvent, DeleteChapterEvent, UpdateChapterEvent } from "src/events";
 import { MAX_LESSON_TITLE_LENGTH } from "src/lesson/repositories/lesson.constants";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
@@ -26,11 +27,14 @@ export class AdminChapterService {
     @Inject("DB") private readonly db: DatabasePg,
     private readonly adminChapterRepository: AdminChapterRepository,
     private readonly adminLessonService: AdminLessonService,
+    private readonly masterCourseService: MasterCourseService,
     private readonly localizationService: LocalizationService,
     private readonly outboxPublisher: OutboxPublisher,
   ) {}
 
   async createChapterForCourse(body: CreateChapterBody, currentUser: CurrentUser) {
+    await this.masterCourseService.assertCourseContentEditable(body.courseId);
+
     const chapter = await this.db.transaction(async (trx) => {
       await this.adminLessonService.validateAccess(
         "course",
@@ -97,6 +101,8 @@ export class AdminChapterService {
     currentUserId: UUIDType,
     currentUserRole: UserRole,
   ) {
+    await this.masterCourseService.assertCourseContentEditableByChapterId(chapterId);
+
     await this.adminLessonService.validateAccess(
       "chapter",
       currentUserRole,
@@ -112,6 +118,8 @@ export class AdminChapterService {
     displayOrder: number;
     currentUser: CurrentUser;
   }): Promise<void> {
+    await this.masterCourseService.assertCourseContentEditableByChapterId(chapterObject.chapterId);
+
     await this.adminLessonService.validateAccess(
       "chapter",
       chapterObject.currentUser.role,
@@ -168,6 +176,8 @@ export class AdminChapterService {
   }
 
   async updateChapter(id: UUIDType, body: UpdateChapterBody, currentUser: CurrentUser) {
+    await this.masterCourseService.assertCourseContentEditableByChapterId(id);
+
     await this.adminLessonService.validateAccess(
       "chapter",
       currentUser.role,
@@ -210,6 +220,8 @@ export class AdminChapterService {
   }
 
   async removeChapter(chapterId: UUIDType, currentUser: CurrentUser) {
+    await this.masterCourseService.assertCourseContentEditableByChapterId(chapterId);
+
     await this.adminLessonService.validateAccess(
       "chapter",
       currentUser.role,
@@ -229,6 +241,7 @@ export class AdminChapterService {
       await this.outboxPublisher.publish(
         new DeleteChapterEvent({
           chapterId: chapter.id,
+          courseId: chapter.courseId,
           actor: currentUser,
           chapterName: chapter.title,
         }),

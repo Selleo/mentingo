@@ -63,6 +63,7 @@ module.exports = {
         "test/jest-setup.ts",
         "test/test-database.ts",
         "test/jest-e2e-setup.ts",
+        "test/create-e2e-test.ts",
       ],
       rules: {
         "no-console": "off",

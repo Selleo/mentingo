@@ -1,5 +1,6 @@
-import { Module } from "@nestjs/common";
+import { forwardRef, Module } from "@nestjs/common";
 
+import { CourseModule } from "src/courses/course.module";
 import { FileModule } from "src/file/files.module";
 import { LessonModule } from "src/lesson/lesson.module";
 import { LocalizationModule } from "src/localization/localization.module";
@@ -11,7 +12,7 @@ import { AdminChapterRepository } from "./repositories/adminChapter.repository";
 import { ChapterRepository } from "./repositories/chapter.repository";
 
 @Module({
-  imports: [FileModule, LessonModule, LocalizationModule],
+  imports: [FileModule, LessonModule, LocalizationModule, forwardRef(() => CourseModule)],
   controllers: [ChapterController],
   providers: [ChapterService, AdminChapterService, ChapterRepository, AdminChapterRepository],
   exports: [ChapterRepository, AdminChapterService, AdminChapterRepository],

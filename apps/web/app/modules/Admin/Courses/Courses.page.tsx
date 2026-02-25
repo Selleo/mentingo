@@ -1,4 +1,5 @@
 import { Link, useLoaderData, useNavigate } from "@remix-run/react";
+import { COURSE_ORIGIN_TYPES } from "@repo/shared";
 import {
   type ColumnDef,
   flexRender,
@@ -89,6 +90,10 @@ const Courses = () => {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const { t } = useTranslation();
   const [lastSelectedRowIndex, setLastSelectedRowIndex] = React.useState<number>(0);
+  const coursesWithOriginBadge: TCourse["originType"][] = [
+    COURSE_ORIGIN_TYPES.MASTER,
+    COURSE_ORIGIN_TYPES.EXPORTED,
+  ];
 
   const filterConfig: FilterConfig[] = [
     {
@@ -206,6 +211,16 @@ const Courses = () => {
           {getCourseStatus(row.original.status as CourseStatus, t)}
         </Badge>
       ),
+    },
+    {
+      accessorKey: "originType",
+      header: t("adminCoursesView.field.sharedCourse"),
+      cell: ({ row }) =>
+        coursesWithOriginBadge.includes(row.original.originType) ? (
+          <Badge variant="secondaryWithOutline" className="w-max">
+            {t("adminCourseView.sharedCourse.badgeExported")}
+          </Badge>
+        ) : null,
     },
     {
       accessorKey: "createdAt",
