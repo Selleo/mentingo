@@ -2084,6 +2084,7 @@
       "loading": "Ładowanie certyfikatów...",
       "noCertificates": "Nie masz jeszcze żadnych certyfikatów. Ukończ kurs, aby otrzymać certyfikat.",
       "failedToLoad": "Nie udało się załadować certyfikatów. Spróbuj ponownie później.",
+      "preparingDownload": "Twój certyfikat jest przygotowywany do pobrania...",
       "failedToDownload": "Nie udało się pobrać certyfikatu. Spróbuj ponownie później."
     },
     "button": {

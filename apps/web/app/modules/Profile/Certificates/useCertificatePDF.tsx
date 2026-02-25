@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useToast } from "~/components/ui/use-toast";
@@ -17,13 +17,17 @@ interface CertificateToPDFProps {
 const useCertificatePDF = () => {
   const { toast } = useToast();
   const { t } = useTranslation();
+  const [isPreparingDownload, setIsPreparingDownload] = useState(false);
 
   const targetRef = useRef<HTMLDivElement>(null);
 
   const downloadCertificatePdf = async (courseName?: string) => {
-    if (!targetRef.current) return;
+    if (!targetRef.current || isPreparingDownload) return;
 
     try {
+      setIsPreparingDownload(true);
+      toast({ description: t("studentCertificateView.informations.preparingDownload") });
+
       const response = await fetch("/api/certificates/download", {
         method: "POST",
         headers: {
@@ -46,6 +50,8 @@ const useCertificatePDF = () => {
       URL.revokeObjectURL(url);
     } catch (error) {
       toast({ description: t("studentCertificateView.informations.failedToDownload") });
+    } finally {
+      setIsPreparingDownload(false);
     }
   };
 
@@ -90,6 +96,6 @@ const useCertificatePDF = () => {
     </div>
   );
 
-  return { downloadCertificatePdf, HiddenCertificate };
+  return { downloadCertificatePdf, HiddenCertificate, isPreparingDownload };
 };
 export default useCertificatePDF;

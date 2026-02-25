@@ -3,8 +3,9 @@ import {
   NotFoundException,
   ConflictException,
   BadRequestException,
+  Logger,
 } from "@nestjs/common";
-import puppeteer from "puppeteer";
+import puppeteer, { type Page, type Browser } from "puppeteer";
 
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
@@ -13,17 +14,40 @@ import { SettingsService } from "src/settings/settings.service";
 import { CertificateRepository } from "./certificate.repository";
 
 import type { CertificatesQuery, AllCertificatesResponse } from "./certificates.types";
+import type { OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import type { SupportedLanguages } from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { PaginatedResponse, UUIDType } from "src/common";
 import type * as schema from "src/storage/schema";
 
 @Injectable()
-export class CertificatesService {
+export class CertificatesService implements OnModuleDestroy, OnModuleInit {
+  private readonly logger = new Logger(CertificatesService.name);
+
+  private browser: Browser | null = null;
+
   constructor(
     private readonly certificateRepository: CertificateRepository,
     private readonly settingsService: SettingsService,
   ) {}
+
+  async onModuleInit() {
+    try {
+      await this.getBrowser();
+    } catch (error) {
+      this.logger.warn(`Certificate PDF browser warm-up failed during module init: ${error}`);
+    }
+  }
+
+  async onModuleDestroy() {
+    if (!this.browser) return;
+
+    await this.browser.close().catch((error) => {
+      this.logger.warn(`Certificate PDF browser close failed during module destroy: ${error}`);
+    });
+
+    this.browser = null;
+  }
 
   async getAllCertificates(
     query: CertificatesQuery,
@@ -149,12 +173,31 @@ export class CertificatesService {
     }
   }
 
-  async downloadCertificate(html: string): Promise<Buffer> {
-    const globalSettings = await this.settingsService.getGlobalSettings();
+  private async getBrowser() {
+    if (this.browser?.connected) return this.browser;
 
-    if (!html) {
+    const browser = await puppeteer.launch({
+      headless: true,
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-gpu",
+      ],
+    });
+
+    this.browser = browser;
+
+    return browser;
+  }
+
+  async downloadCertificate(html: string): Promise<Buffer> {
+    if (!html.trim()) {
       throw new BadRequestException("HTML content is required");
     }
+
+    const globalSettings = await this.settingsService.getGlobalSettings();
 
     const backgroundImage = globalSettings?.certificateBackgroundImage;
 
@@ -192,21 +235,20 @@ export class CertificatesService {
     </html>
   `;
 
+    let page: Page | null = null;
+
     try {
-      const browser = await puppeteer.launch({
-        headless: true,
-        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
-        args: [
-          "--no-sandbox",
-          "--disable-setuid-sandbox",
-          "--disable-dev-shm-usage",
-          "--disable-gpu",
-        ],
-      });
+      const browser = await this.getBrowser();
 
-      const page = await browser.newPage();
+      page = await browser.newPage();
 
-      await page.setContent(completeHtml, { waitUntil: "networkidle0" });
+      await page.setContent(completeHtml, { waitUntil: "domcontentloaded", timeout: 30_000 });
+      await page.waitForSelector("body > *", { timeout: 5_000 });
+      await page
+        .waitForFunction(() => {
+          return !("fonts" in document) || document.fonts.status === "loaded";
+        })
+        .catch(() => {});
 
       const pdfBuffer = await page.pdf({
         format: "A4",
@@ -221,11 +263,17 @@ export class CertificatesService {
         printBackground: true,
       });
 
-      await browser.close();
-
       return Buffer.from(pdfBuffer);
     } catch (error) {
-      throw new Error(`Error generating PDF`);
+      this.logger.error(`Certificate PDF generation failed: ${error}`);
+
+      throw new Error(`Certificate PDF generation failed: ${error}`);
+    } finally {
+      if (page) {
+        await page.close().catch((closeError) => {
+          this.logger.warn(`Certificate PDF generation page close failed: ${closeError}`);
+        });
+      }
     }
   }
 }
