@@ -5,11 +5,11 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
 import hashPassword from "../common/helpers/hashPassword";
-import { credentials, userDetails, users, tenants } from "../storage/schema";
+import { credentials, userDetails, users } from "../storage/schema";
 import { USER_ROLES } from "../user/schemas/userRoles";
 
 import { insertGlobalSettings, insertOnboardingData, insertUserSettings } from "./seed";
-import { seedTruncateAllTables } from "./seed-helpers";
+import { ensureSeedTenant, seedTruncateAllTables } from "./seed-helpers";
 
 import type { DatabasePg, UUIDType } from "../common";
 
@@ -75,19 +75,10 @@ async function seedProduction() {
   await seedTruncateAllTables(db);
 
   try {
-    let [tenant] = await db.select().from(tenants).limit(1);
-
-    if (!tenant) {
-      [tenant] = await db
-        .insert(tenants)
-        .values({
-          id: faker.string.uuid(),
-          name: "Default Tenant",
-          host: "localhost",
-          status: "active",
-        })
-        .returning();
-    }
+    const tenant = await ensureSeedTenant(db, {
+      name: "Default Tenant",
+      host: process.env.CORS_ORIGIN ?? "localhost",
+    });
 
     const tenantId = tenant.id;
 
