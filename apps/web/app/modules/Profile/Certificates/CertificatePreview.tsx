@@ -21,7 +21,7 @@ const CertificatePreview = ({
   platformLogo,
   certificateBackgroundImageUrl,
 }: CertificatePreviewProps) => {
-  const { HiddenCertificate, downloadCertificatePdf } = useCertificatePDF();
+  const { HiddenCertificate, downloadCertificatePdf, isPreparingDownload } = useCertificatePDF();
   const [toggled, setToggled] = useState<boolean>(false);
 
   const lang = toggled ? "pl" : "en";
@@ -34,6 +34,7 @@ const CertificatePreview = ({
         completionDate={completionDate}
         platformLogo={platformLogo}
         lang={lang}
+        backgroundImageUrl={certificateBackgroundImageUrl}
       />
 
       <div className="mx-auto w-full max-w-[95vw] overflow-hidden rounded-t-lg">
@@ -49,6 +50,7 @@ const CertificatePreview = ({
             languageToggled={toggled}
             setLanguageToggled={setToggled}
             downloadCertificatePdf={downloadCertificatePdf}
+            isPreparingDownload={isPreparingDownload}
           />
         </div>
 

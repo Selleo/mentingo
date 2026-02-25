@@ -1,4 +1,5 @@
-import { Download, X } from "lucide-react";
+import { Download, Loader2, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import RectangularSwitch from "~/components/RectangularSwitch";
 
@@ -8,6 +9,7 @@ interface CertificateControlsProps {
   languageToggled: boolean;
   setLanguageToggled: (languageToggled: boolean) => void;
   downloadCertificatePdf: (courseName?: string) => Promise<void>;
+  isPreparingDownload: boolean;
 }
 
 const buttonClasses =
@@ -19,7 +21,10 @@ const CertificateControls = ({
   languageToggled,
   setLanguageToggled,
   downloadCertificatePdf,
+  isPreparingDownload,
 }: CertificateControlsProps) => {
+  const { t } = useTranslation();
+
   const handleDownload = () => {
     downloadCertificatePdf(courseName);
   };
@@ -33,8 +38,17 @@ const CertificateControls = ({
         toggled={languageToggled}
         setToggled={setLanguageToggled}
       />
-      <button className={buttonClasses} onClick={handleDownload}>
-        <Download className="size-5" />
+      <button
+        className={buttonClasses}
+        onClick={handleDownload}
+        disabled={isPreparingDownload}
+        aria-label={t("studentCertificateView.button.download")}
+      >
+        {isPreparingDownload ? (
+          <Loader2 className="size-5 animate-spin" />
+        ) : (
+          <Download className="size-5" />
+        )}
       </button>
       {onClose && (
         <button className={buttonClasses} onClick={onClose}>
