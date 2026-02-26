@@ -290,6 +290,61 @@ export class StudentLessonProgressService {
     }
   }
 
+  async recalculateProgressAfterLessonDeletion(
+    courseId: UUIDType,
+    chapterId: UUIDType,
+    actor: ActorUserType,
+    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+  ) {
+    const [chapter] = await dbInstance
+      .select({ lessonCount: chapters.lessonCount })
+      .from(chapters)
+      .where(and(eq(chapters.id, chapterId), eq(chapters.courseId, courseId)))
+      .limit(1);
+
+    if (!chapter) return;
+
+    const studentsToRecalculate = await dbInstance
+      .selectDistinct({ studentId: studentCourses.studentId })
+      .from(studentCourses)
+      .leftJoin(
+        studentChapterProgress,
+        and(
+          eq(studentChapterProgress.studentId, studentCourses.studentId),
+          eq(studentChapterProgress.courseId, studentCourses.courseId),
+          eq(studentChapterProgress.chapterId, chapterId),
+        ),
+      )
+      .leftJoin(
+        studentLessonProgress,
+        and(
+          eq(studentLessonProgress.studentId, studentCourses.studentId),
+          eq(studentLessonProgress.chapterId, chapterId),
+        ),
+      )
+      .where(
+        and(
+          eq(studentCourses.courseId, courseId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+          sql<boolean>`${studentChapterProgress.id} IS NOT NULL OR ${studentLessonProgress.id} IS NOT NULL`,
+        ),
+      );
+
+    for (const { studentId } of studentsToRecalculate) {
+      await this.updateChapterProgress(
+        courseId,
+        chapterId,
+        studentId,
+        chapter.lessonCount,
+        false,
+        actor,
+        dbInstance,
+      );
+
+      await this.checkCourseIsCompletedForUser(courseId, studentId, actor, dbInstance);
+    }
+  }
+
   async updateQuizProgress(
     chapterId: UUIDType,
     lessonId: UUIDType,
