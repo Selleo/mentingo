@@ -17,3 +17,10 @@ export type CurrentUser = {
   iat?: number;
   exp?: number;
 };
+
+export type SupportModeCurrentUser = CurrentUser & {
+  isSupportMode: true;
+  supportSessionId: UUIDType;
+  originalUserId: UUIDType;
+  originalTenantId: UUIDType;
+};

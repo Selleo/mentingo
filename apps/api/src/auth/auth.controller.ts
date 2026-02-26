@@ -27,10 +27,14 @@ import {
   isSupportModeSession,
   shouldEmitUserScopedEvents,
 } from "src/common/helpers/support-mode-context";
-import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
-import { UserActivityEvent, UserLogoutEvent } from "src/events";
+import {
+  CurrentUser as CurrentUserType,
+  type SupportModeCurrentUser,
+} from "src/common/types/current-user.type";
+import { SupportModeEnterEvent, UserActivityEvent, UserLogoutEvent } from "src/events";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { SettingsService } from "src/settings/settings.service";
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { baseUserResponseSchema, currentUserResponseSchema } from "src/user/schemas/user.schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
@@ -69,6 +73,7 @@ export class AuthController {
     private readonly tokenService: TokenService,
     private readonly outboxPublisher: OutboxPublisher,
     private readonly settingsService: SettingsService,
+    private readonly tenantRunner: TenantDbRunnerService,
   ) {
     this.CORS_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:5173";
   }
@@ -184,6 +189,10 @@ export class AuthController {
   ): Promise<BaseResponse<Static<typeof currentUserResponseSchema>>> {
     const account = await this.authService.currentUser(currentUser);
 
+    if (isSupportModeSession(currentUser)) {
+      await this.publishSupportModeEnterEvent(currentUser);
+    }
+
     if (shouldEmitUserScopedEvents(currentUser)) {
       await this.outboxPublisher.publish(
         new UserActivityEvent({ userId: currentUser.userId, activityType: "LOGIN" }),
@@ -191,6 +200,25 @@ export class AuthController {
     }
 
     return new BaseResponse(account);
+  }
+
+  private async publishSupportModeEnterEvent(currentUser: SupportModeCurrentUser): Promise<void> {
+    const payload = {
+      supportSessionId: currentUser.supportSessionId,
+      sourceUserId: currentUser.originalUserId,
+      sourceTenantId: currentUser.originalTenantId,
+      targetUserId: currentUser.userId,
+      targetTenantId: currentUser.tenantId,
+      actor: currentUser,
+    };
+
+    const tenantIds = new Set([currentUser.originalTenantId, currentUser.tenantId]);
+
+    for (const tenantId of tenantIds) {
+      await this.tenantRunner.runWithTenant(tenantId, async () => {
+        await this.outboxPublisher.publish(new SupportModeEnterEvent(payload));
+      });
+    }
   }
 
   @Public()

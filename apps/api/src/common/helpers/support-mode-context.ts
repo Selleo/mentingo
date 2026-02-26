@@ -1,14 +1,9 @@
 import type { DatabasePg } from "src/common";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { CurrentUser, SupportModeCurrentUser } from "src/common/types/current-user.type";
 
 export const isSupportModeSession = (
   currentUser: CurrentUser | null | undefined,
-): currentUser is CurrentUser & {
-  isSupportMode: true;
-  supportSessionId: string;
-  originalUserId: string;
-  originalTenantId: string;
-} => {
+): currentUser is SupportModeCurrentUser => {
   return Boolean(
     currentUser?.isSupportMode &&
       currentUser.supportSessionId &&
