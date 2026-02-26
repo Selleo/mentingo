@@ -4360,6 +4360,123 @@
         }
       }
     },
+    "/api/course/master/{courseId}/export": {
+      "post": {
+        "operationId": "CourseController_exportMasterCourse",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportMasterCourseBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportMasterCourseResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/course/master/{courseId}/exports": {
+      "get": {
+        "operationId": "CourseController_getMasterCourseExports",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMasterCourseExportsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/course/master/{courseId}/export-candidates": {
+      "get": {
+        "operationId": "CourseController_getMasterCourseExportCandidates",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMasterCourseExportCandidatesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/course/master/export-jobs/{jobId}": {
+      "get": {
+        "operationId": "CourseController_getMasterCourseJobStatus",
+        "parameters": [
+          {
+            "name": "jobId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMasterCourseJobStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/course/course-ownership/{courseId}": {
       "get": {
         "operationId": "CourseController_getCourseOwnership",
@@ -6714,10 +6831,12 @@
       "get": {
         "operationId": "IntegrationController_getTenants",
         "summary": "List all tenants for integration selection",
+        "description": "Returns all tenants accessible to the current integration API key.\n\nUse this endpoint first to discover which tenant IDs you can operate on. For the rest of integration endpoints, pass one of those IDs in the X-Tenant-Id header.",
         "parameters": [
           {
             "name": "X-API-Key",
             "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
             "required": true,
             "schema": {
               "type": "string"
@@ -6759,10 +6878,12 @@
       "get": {
         "operationId": "IntegrationController_getUsers",
         "summary": "List users for integration",
+        "description": "Returns users from the tenant selected by X-Tenant-Id.\n\nSupports keyword search, role filtering, archived filtering ('true' or 'false'), group filtering, sorting, and pagination so integrations can sync user directories in batches.",
         "parameters": [
           {
             "name": "X-API-Key",
             "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
             "required": true,
             "schema": {
               "type": "string"
@@ -6885,6 +7006,7 @@
           {
             "name": "X-Tenant-Id",
             "in": "header",
+            "description": "Target tenant context for this request. Must be one of the tenant IDs returned by GET /integration/tenants.",
             "required": true,
             "schema": {
               "type": "string"
@@ -6915,10 +7037,12 @@
       "post": {
         "operationId": "IntegrationController_createUser",
         "summary": "Create user via integration API",
+        "description": "Creates a new user inside the tenant selected by X-Tenant-Id.\n\nProvide the user payload in the request body. The response returns the created user ID so your external system can persist the Mentingo mapping.",
         "parameters": [
           {
             "name": "X-API-Key",
             "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
             "required": true,
             "schema": {
               "type": "string"
@@ -6927,6 +7051,7 @@
           {
             "name": "X-Tenant-Id",
             "in": "header",
+            "description": "Target tenant context for this request. Must be one of the tenant IDs returned by GET /integration/tenants.",
             "required": true,
             "schema": {
               "type": "string"
@@ -6969,10 +7094,12 @@
       "get": {
         "operationId": "IntegrationController_getUserById",
         "summary": "Get user by ID for integration",
+        "description": "Returns the full current state of a single tenant user by userId.\n\nUse this endpoint when your integration needs an authoritative read before applying updates or enrollment changes.",
         "parameters": [
           {
             "name": "X-API-Key",
             "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
             "required": true,
             "schema": {
               "type": "string"
@@ -6990,6 +7117,7 @@
           {
             "name": "X-Tenant-Id",
             "in": "header",
+            "description": "Target tenant context for this request. Must be one of the tenant IDs returned by GET /integration/tenants.",
             "required": true,
             "schema": {
               "type": "string"
@@ -7020,10 +7148,12 @@
       "patch": {
         "operationId": "IntegrationController_updateUser",
         "summary": "Update user via integration API",
+        "description": "Updates an existing tenant user identified by userId.\n\nOnly fields included in the body are modified. Use this endpoint for profile, role, or status synchronization from an external identity source.",
         "parameters": [
           {
             "name": "X-API-Key",
             "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
             "required": true,
             "schema": {
               "type": "string"
@@ -7041,6 +7171,7 @@
           {
             "name": "X-Tenant-Id",
             "in": "header",
+            "description": "Target tenant context for this request. Must be one of the tenant IDs returned by GET /integration/tenants.",
             "required": true,
             "schema": {
               "type": "string"
@@ -7081,10 +7212,12 @@
       "delete": {
         "operationId": "IntegrationController_deleteUser",
         "summary": "Delete user via integration API",
+        "description": "Deletes the tenant user identified by userId.\n\nUse this when your source-of-truth system has deprovisioned a user and Mentingo access should be removed as part of lifecycle automation.",
         "parameters": [
           {
             "name": "X-API-Key",
             "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
             "required": true,
             "schema": {
               "type": "string"
@@ -7102,6 +7235,7 @@
           {
             "name": "X-Tenant-Id",
             "in": "header",
+            "description": "Target tenant context for this request. Must be one of the tenant IDs returned by GET /integration/tenants.",
             "required": true,
             "schema": {
               "type": "string"
@@ -7134,10 +7268,12 @@
       "get": {
         "operationId": "IntegrationController_getGroups",
         "summary": "List groups for integration",
+        "description": "Returns groups from the tenant selected by X-Tenant-Id.\n\nSupports keyword filtering, sorting, and pagination so your integration can resolve external groups to Mentingo group IDs before assignment or enrollment operations.",
         "parameters": [
           {
             "name": "X-API-Key",
             "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
             "required": true,
             "schema": {
               "type": "string"
@@ -7188,6 +7324,7 @@
           {
             "name": "X-Tenant-Id",
             "in": "header",
+            "description": "Target tenant context for this request. Must be one of the tenant IDs returned by GET /integration/tenants.",
             "required": true,
             "schema": {
               "type": "string"
@@ -7220,10 +7357,12 @@
       "put": {
         "operationId": "IntegrationController_setUserGroups",
         "summary": "Set user groups via integration API",
+        "description": "Sets the complete group membership for a user in the selected tenant.\n\nThis operation treats the provided groupIds list as the source of truth and updates membership to match it.",
         "parameters": [
           {
             "name": "X-API-Key",
             "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
             "required": true,
             "schema": {
               "type": "string"
@@ -7241,6 +7380,7 @@
           {
             "name": "X-Tenant-Id",
             "in": "header",
+            "description": "Target tenant context for this request. Must be one of the tenant IDs returned by GET /integration/tenants.",
             "required": true,
             "schema": {
               "type": "string"
@@ -7283,10 +7423,12 @@
       "post": {
         "operationId": "IntegrationController_enrollUsers",
         "summary": "Enroll users to course via integration API",
+        "description": "Enrolls the provided user IDs into the specified course within the selected tenant.\n\nUse this endpoint to synchronize direct, user-level course access from your external system.",
         "parameters": [
           {
             "name": "X-API-Key",
             "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
             "required": true,
             "schema": {
               "type": "string"
@@ -7304,6 +7446,7 @@
           {
             "name": "X-Tenant-Id",
             "in": "header",
+            "description": "Target tenant context for this request. Must be one of the tenant IDs returned by GET /integration/tenants.",
             "required": true,
             "schema": {
               "type": "string"
@@ -7344,10 +7487,12 @@
       "delete": {
         "operationId": "IntegrationController_unenrollUsers",
         "summary": "Unenroll users from course via integration API",
+        "description": "Removes the provided user IDs from the specified course within the selected tenant.\n\nUse this endpoint to revoke direct course access when enrollment should no longer apply.",
         "parameters": [
           {
             "name": "X-API-Key",
             "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
             "required": true,
             "schema": {
               "type": "string"
@@ -7365,6 +7510,7 @@
           {
             "name": "X-Tenant-Id",
             "in": "header",
+            "description": "Target tenant context for this request. Must be one of the tenant IDs returned by GET /integration/tenants.",
             "required": true,
             "schema": {
               "type": "string"
@@ -7407,10 +7553,12 @@
       "post": {
         "operationId": "IntegrationController_enrollGroups",
         "summary": "Enroll groups to course via integration API",
+        "description": "Enrolls members of the provided group IDs into the specified course within the selected tenant.\n\nUse this for group-driven provisioning where course access is managed at group level instead of per user.",
         "parameters": [
           {
             "name": "X-API-Key",
             "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
             "required": true,
             "schema": {
               "type": "string"
@@ -7428,6 +7576,7 @@
           {
             "name": "X-Tenant-Id",
             "in": "header",
+            "description": "Target tenant context for this request. Must be one of the tenant IDs returned by GET /integration/tenants.",
             "required": true,
             "schema": {
               "type": "string"
@@ -7468,10 +7617,12 @@
       "delete": {
         "operationId": "IntegrationController_unenrollGroups",
         "summary": "Unenroll groups from course via integration API",
+        "description": "Removes members of the provided group IDs from the specified course within the selected tenant.\n\nUse this for group-driven deprovisioning when course access is no longer required.",
         "parameters": [
           {
             "name": "X-API-Key",
             "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
             "required": true,
             "schema": {
               "type": "string"
@@ -7489,6 +7640,7 @@
           {
             "name": "X-Tenant-Id",
             "in": "header",
+            "description": "Target tenant context for this request. Must be one of the tenant IDs returned by GET /integration/tenants.",
             "required": true,
             "schema": {
               "type": "string"
@@ -14211,6 +14363,47 @@
                       "type": "null"
                     }
                   ]
+                },
+                "originType": {
+                  "anyOf": [
+                    {
+                      "const": "regular",
+                      "type": "string"
+                    },
+                    {
+                      "const": "master",
+                      "type": "string"
+                    },
+                    {
+                      "const": "exported",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "isContentReadonly": {
+                  "type": "boolean"
+                },
+                "sourceCourseId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "sourceTenantId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
               },
               "required": [
@@ -14383,6 +14576,47 @@
                 "stripePriceId": {
                   "anyOf": [
                     {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "originType": {
+                  "anyOf": [
+                    {
+                      "const": "regular",
+                      "type": "string"
+                    },
+                    {
+                      "const": "master",
+                      "type": "string"
+                    },
+                    {
+                      "const": "exported",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "isContentReadonly": {
+                  "type": "boolean"
+                },
+                "sourceCourseId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "sourceTenantId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
                       "type": "string"
                     },
                     {
@@ -14686,6 +14920,47 @@
                     }
                   ]
                 },
+                "originType": {
+                  "anyOf": [
+                    {
+                      "const": "regular",
+                      "type": "string"
+                    },
+                    {
+                      "const": "master",
+                      "type": "string"
+                    },
+                    {
+                      "const": "exported",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "isContentReadonly": {
+                  "type": "boolean"
+                },
+                "sourceCourseId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "sourceTenantId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "completedChapterCount": {
                   "type": "number"
                 },
@@ -14886,6 +15161,47 @@
                     }
                   ]
                 },
+                "originType": {
+                  "anyOf": [
+                    {
+                      "const": "regular",
+                      "type": "string"
+                    },
+                    {
+                      "const": "master",
+                      "type": "string"
+                    },
+                    {
+                      "const": "exported",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "isContentReadonly": {
+                  "type": "boolean"
+                },
+                "sourceCourseId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "sourceTenantId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "completedChapterCount": {
                   "type": "number"
                 },
@@ -15053,6 +15369,47 @@
                 "stripePriceId": {
                   "anyOf": [
                     {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "originType": {
+                  "anyOf": [
+                    {
+                      "const": "regular",
+                      "type": "string"
+                    },
+                    {
+                      "const": "master",
+                      "type": "string"
+                    },
+                    {
+                      "const": "exported",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "isContentReadonly": {
+                  "type": "boolean"
+                },
+                "sourceCourseId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "sourceTenantId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
                       "type": "string"
                     },
                     {
@@ -15349,6 +15706,47 @@
                   }
                 ]
               },
+              "originType": {
+                "anyOf": [
+                  {
+                    "const": "regular",
+                    "type": "string"
+                  },
+                  {
+                    "const": "master",
+                    "type": "string"
+                  },
+                  {
+                    "const": "exported",
+                    "type": "string"
+                  }
+                ]
+              },
+              "isContentReadonly": {
+                "type": "boolean"
+              },
+              "sourceCourseId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "sourceTenantId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "isScorm": {
                 "type": "boolean"
               },
@@ -15440,6 +15838,10 @@
               "description",
               "id",
               "status",
+              "originType",
+              "isContentReadonly",
+              "sourceCourseId",
+              "sourceTenantId",
               "priceInCents",
               "title",
               "slug",
@@ -15942,6 +16344,47 @@
                   }
                 ]
               },
+              "originType": {
+                "anyOf": [
+                  {
+                    "const": "regular",
+                    "type": "string"
+                  },
+                  {
+                    "const": "master",
+                    "type": "string"
+                  },
+                  {
+                    "const": "exported",
+                    "type": "string"
+                  }
+                ]
+              },
+              "isContentReadonly": {
+                "type": "boolean"
+              },
+              "sourceCourseId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "sourceTenantId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "isScorm": {
                 "type": "boolean"
               },
@@ -16013,6 +16456,10 @@
               "description",
               "id",
               "status",
+              "originType",
+              "isContentReadonly",
+              "sourceCourseId",
+              "sourceTenantId",
               "priceInCents",
               "title",
               "availableLocales",
@@ -17073,6 +17520,299 @@
         "required": [
           "courseId",
           "userId"
+        ]
+      },
+      "ExportMasterCourseBody": {
+        "type": "object",
+        "properties": {
+          "targetTenantIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "targetTenantIds"
+        ]
+      },
+      "ExportMasterCourseResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "sourceCourseId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "jobs": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "targetTenantId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "queued": {
+                      "type": "boolean"
+                    },
+                    "reason": {
+                      "type": "string"
+                    },
+                    "exportId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "targetTenantId",
+                    "queued"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "sourceCourseId",
+              "jobs"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetMasterCourseExportsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "sourceTenantId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "sourceCourseId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "targetTenantId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "targetCourseId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "syncStatus": {
+                  "anyOf": [
+                    {
+                      "const": "active",
+                      "type": "string"
+                    },
+                    {
+                      "const": "failed",
+                      "type": "string"
+                    },
+                    {
+                      "const": "paused",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "lastSyncedAt": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "sourceTenantId",
+                "sourceCourseId",
+                "targetTenantId",
+                "targetCourseId",
+                "syncStatus",
+                "lastSyncedAt"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetMasterCourseExportCandidatesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "tenants": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "host": {
+                      "type": "string"
+                    },
+                    "isExported": {
+                      "type": "boolean"
+                    },
+                    "targetCourseId": {
+                      "anyOf": [
+                        {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "syncStatus": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "const": "active",
+                              "type": "string"
+                            },
+                            {
+                              "const": "failed",
+                              "type": "string"
+                            },
+                            {
+                              "const": "paused",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "lastSyncedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "host",
+                    "isExported",
+                    "targetCourseId",
+                    "syncStatus",
+                    "lastSyncedAt"
+                  ]
+                }
+              },
+              "summary": {
+                "type": "object",
+                "properties": {
+                  "totalTenants": {
+                    "type": "number"
+                  },
+                  "exportedCount": {
+                    "type": "number"
+                  },
+                  "remainingCount": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "totalTenants",
+                  "exportedCount",
+                  "remainingCount"
+                ]
+              }
+            },
+            "required": [
+              "tenants",
+              "summary"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetMasterCourseJobStatusResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "state": {
+                "type": "string"
+              },
+              "attemptsMade": {
+                "type": "number"
+              },
+              "failedReason": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "state",
+              "attemptsMade",
+              "failedReason"
+            ]
+          }
+        },
+        "required": [
+          "data"
         ]
       },
       "GetCourseOwnershipResponse": {

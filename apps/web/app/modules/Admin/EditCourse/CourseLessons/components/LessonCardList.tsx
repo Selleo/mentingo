@@ -9,8 +9,8 @@ import { queryClient } from "~/api/queryClient";
 import { Icon } from "~/components/Icon";
 import { SortableList } from "~/components/SortableList/SortableList";
 import { useLeaveModal } from "~/context/LeaveModalContext";
+import { getContentTypeByLessonType } from "~/modules/Admin/EditCourse/CourseLessons/components/courseLessonContentType.utils";
 import LessonCard from "~/modules/Admin/EditCourse/CourseLessons/components/LessonCard";
-import { ContentTypes } from "~/modules/Admin/EditCourse/EditCourse.types";
 
 import type { SupportedLanguages } from "@repo/shared";
 import type { Sortable } from "~/components/SortableList/SortableList";
@@ -60,22 +60,7 @@ export const LessonCardList = ({
       }
 
       setSelectedLesson(lesson);
-      switch (lesson.type) {
-        case "content":
-          setContentTypeToDisplay(ContentTypes.CONTENT_LESSON_FORM);
-          break;
-        case "quiz":
-          setContentTypeToDisplay(ContentTypes.QUIZ_FORM);
-          break;
-        case "ai_mentor":
-          setContentTypeToDisplay(ContentTypes.AI_MENTOR_FORM);
-          break;
-        case "embed":
-          setContentTypeToDisplay(ContentTypes.EMBED_FORM);
-          break;
-        default:
-          setContentTypeToDisplay(ContentTypes.EMPTY);
-      }
+      setContentTypeToDisplay(getContentTypeByLessonType(lesson.type));
     },
     [
       isCurrentFormDirty,

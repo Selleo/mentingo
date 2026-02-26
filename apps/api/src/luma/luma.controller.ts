@@ -32,13 +32,13 @@ import { LumaService } from "src/luma/luma.service";
 import {
   chatOptionsSchema,
   courseGenerationDraftSchema,
+  courseGenerationFileParamsSchema,
   courseGenerationFilesSchema,
   courseGenerationIngestBodySchema,
   courseGenerationMessagesSchema,
+  deleteCourseGenerationFileParamsSchema,
   integrationDraftSchema,
   integrationIdSchema,
-  saveGeneratedCourseSchema,
-  SaveGeneratedCourseBody,
 } from "src/luma/schema/luma.schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
@@ -59,23 +59,30 @@ export class LumaController {
     @CurrentUser() currentUser: CurrentUserType,
     @Res() res: Response,
   ) {
-    const response = await this.lumaService.chatWithCourseAgent(data, currentUser);
-
     res.setHeader("Content-Type", "text/plain; charset=utf-8");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
     res.setHeader("X-Vercel-AI-Data-Stream", "v1");
 
-    response.data.on("data", (chunk: Buffer) => {
-      res.write(`${chunk.toString()}`);
-    });
-    response.data.on("end", () => {
+    const response = await this.lumaService.chatWithCourseAgent(data, currentUser);
+    const streamState = this.lumaService.createStreamState();
+
+    try {
+      for await (const chunk of response.data as AsyncIterable<Buffer>) {
+        const transformedChunk = await this.lumaService.handleChunk(chunk, {
+          integrationId: data.integrationId,
+          currentUser,
+          state: streamState,
+        });
+
+        if (transformedChunk) res.write(transformedChunk);
+      }
+
       res.end();
-    });
-    response.data.on("error", (err: Error) => {
+    } catch (err) {
       res.write(`event: error\ndata: ${JSON.stringify(err)}\n\n`);
       res.end();
-    });
+    }
   }
 
   @Get("course-generation/messages")
@@ -122,18 +129,6 @@ export class LumaController {
     return this.lumaService.getDraft(data, currentUser);
   }
 
-  @Post("course-generation/save")
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
-  @Validate({
-    request: [{ type: "body", schema: saveGeneratedCourseSchema }],
-  })
-  async saveCourseGeneration(
-    @Body() data: SaveGeneratedCourseBody,
-    @CurrentUser() currentUser: CurrentUserType,
-  ) {
-    return this.lumaService.saveGeneratedCourse(data, currentUser);
-  }
-
   @Post("course-generation/files/ingest")
   @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   @UseInterceptors(FilesInterceptor("files"))
@@ -178,9 +173,13 @@ export class LumaController {
       {
         type: "param",
         name: "integrationId",
-        schema: integrationIdSchema.properties.integrationId,
+        schema: deleteCourseGenerationFileParamsSchema.properties.integrationId,
       },
-      { type: "param", name: "documentId", schema: integrationIdSchema.properties.integrationId },
+      {
+        type: "param",
+        name: "documentId",
+        schema: deleteCourseGenerationFileParamsSchema.properties.documentId,
+      },
     ],
   })
   async deleteIngestedCourseGenerationFile(
@@ -200,7 +199,7 @@ export class LumaController {
       {
         type: "param",
         name: "integrationId",
-        schema: integrationIdSchema.properties.integrationId,
+        schema: courseGenerationFileParamsSchema.properties.integrationId,
       },
     ],
     response: courseGenerationFilesSchema,

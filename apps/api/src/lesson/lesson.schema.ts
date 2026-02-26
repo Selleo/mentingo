@@ -89,6 +89,7 @@ export const lessonResourceSchema = Type.Object({
 
 export const adminLessonSchema = Type.Object({
   id: UUIDSchema,
+  chapterId: Type.Optional(UUIDSchema),
   type: Type.Enum(LESSON_TYPES),
   displayOrder: Type.Number(),
   title: Type.String(),

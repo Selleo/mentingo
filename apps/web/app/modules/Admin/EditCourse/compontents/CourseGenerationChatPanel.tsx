@@ -1,88 +1,49 @@
-import { type Message, useChat } from "@ai-sdk/react";
 import { useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
-import { COURSE_GENERATION_DRAFT_QUERY_KEY } from "~/api/queries/admin/useCourseGenerationDraft";
-import {
-  getCourseGenerationMessagesQueryKey,
-  useCourseGenerationMessages,
-} from "~/api/queries/admin/useCourseGenerationMessages";
-import { queryClient } from "~/api/queryClient";
 import { Icon } from "~/components/Icon";
 import {
   getCurrentMessageKey,
   getMessageText,
-  hasCourseGeneratedFlag,
 } from "~/modules/Admin/EditCourse/compontents/courseGenerationChat.utils";
 import { CourseGenerationComposer } from "~/modules/Admin/EditCourse/compontents/CourseGenerationComposer";
 import { CourseGenerationAiTypingMessage } from "~/modules/Admin/EditCourse/compontents/CourseGenerationMessages";
 import ChatMessage from "~/modules/Courses/Lesson/AiMentorLesson/components/ChatMessage";
 
-import type { GetCourseGenerationDraftResponse } from "~/api/generated-api";
-
-type CourseGenerationChatPanelProps = {
-  onMessageCountChange: (count: number) => void;
-  onClose: () => void;
-  draft?: GetCourseGenerationDraftResponse;
+type CourseGenerationMessage = {
+  id: string;
+  role: string;
+  content: unknown;
 };
 
-const apiUrl = import.meta.env.VITE_API_URL;
-const chatUrl = apiUrl
-  ? `${apiUrl}/api/luma/course-generation/chat`
-  : "/api/luma/course-generation/chat";
+type CourseGenerationChatPanelProps = {
+  courseId: string;
+  messages: CourseGenerationMessage[];
+  streamData: unknown;
+  input: string;
+  onInputChange: (value: string) => void;
+  onSubmit: () => void;
+  isProcessing: boolean;
+  onMessageCountChange: (count: number) => void;
+  onClose: () => void;
+  onGenerationStarted?: () => void;
+};
 
 export function CourseGenerationChatPanel({
+  courseId,
+  messages,
+  streamData,
+  input,
+  onInputChange,
+  onSubmit,
+  isProcessing,
   onMessageCountChange,
   onClose,
-  draft,
+  onGenerationStarted,
 }: CourseGenerationChatPanelProps) {
   const { t } = useTranslation();
   const scrollRef = useRef<HTMLDivElement | null>(null);
-  const draftInvalidatedRef = useRef(false);
-  const courseId = draft?.integrationId ?? "";
-
-  const { data: courseGenerationMessages } = useCourseGenerationMessages(
-    courseId,
-    !!courseId && !!draft?.draftId,
-  );
-
-  const { messages, data, input, setInput, handleSubmit, status, setMessages } = useChat({
-    api: chatUrl,
-    body: {
-      integrationId: courseId,
-    },
-    fetch: async (url, options) => {
-      const body = JSON.parse((options?.body as string) ?? "{}");
-
-      return fetch(url, {
-        ...options,
-        body: JSON.stringify({
-          integrationId: courseId,
-          message: body.messages?.[body.messages.length - 1]?.content || "",
-        }),
-        credentials: "include",
-      });
-    },
-    onFinish: async () => {
-      if (!draft?.draftId) return;
-
-      await queryClient.invalidateQueries({
-        queryKey: getCourseGenerationMessagesQueryKey(courseId),
-      });
-    },
-  });
-
-  useEffect(() => {
-    setMessages(
-      (courseGenerationMessages ?? []).map(
-        (message): Message => ({
-          id: message.id,
-          role: message.role as Message["role"],
-          content: message.content,
-        }),
-      ),
-    );
-  }, [courseGenerationMessages, setMessages]);
+  const generationStartedRef = useRef(false);
 
   useEffect(() => {
     onMessageCountChange(messages.length);
@@ -94,22 +55,13 @@ export function CourseGenerationChatPanel({
   }, [messages]);
 
   useEffect(() => {
-    if (status === "submitted") {
-      draftInvalidatedRef.current = false;
-    }
-  }, [status]);
+    if (generationStartedRef.current) return;
+    if (getCurrentMessageKey(streamData) !== "DESIGNING_CHAPTERS") return;
+    generationStartedRef.current = true;
+    onGenerationStarted?.();
+  }, [streamData, onGenerationStarted]);
 
-  useEffect(() => {
-    if (draftInvalidatedRef.current) return;
-    if (!hasCourseGeneratedFlag(data)) return;
-    draftInvalidatedRef.current = true;
-
-    void queryClient.invalidateQueries({
-      queryKey: [COURSE_GENERATION_DRAFT_QUERY_KEY],
-    });
-  }, [data]);
-
-  const handleSend = () => handleSubmit();
+  const currentMessageKey = getCurrentMessageKey(streamData);
 
   const renderedMessages = useMemo(
     () =>
@@ -124,7 +76,7 @@ export function CourseGenerationChatPanel({
           <ChatMessage
             key={message.id}
             id={message.id}
-            role={message.role as Message["role"]}
+            role={message.role as "user" | "assistant"}
             content={message.text}
             aiName={t("adminCourseView.common.aiCourseCreation")}
             messageMaxWidthClass="max-w-[80%]"
@@ -136,13 +88,9 @@ export function CourseGenerationChatPanel({
   const lastMessage = messages[messages.length - 1];
   const hasStreamingAssistantText =
     lastMessage?.role === "assistant" && getMessageText(lastMessage.content).trim().length > 0;
-  const showTypingLoader =
-    status === "submitted" || (status === "streaming" && !hasStreamingAssistantText);
-  const currentMessageKey = getCurrentMessageKey(data);
+  const showTypingLoader = isProcessing && !hasStreamingAssistantText;
   const showThinkingLabel =
-    Boolean(currentMessageKey) &&
-    (status === "submitted" || status === "streaming") &&
-    !hasStreamingAssistantText;
+    Boolean(currentMessageKey) && isProcessing && !hasStreamingAssistantText;
   const thinkingLabel = t(`adminCourseView.thinking.${currentMessageKey ?? "THINKING"}`);
   const aiCourseCreationLabel = t("adminCourseView.common.aiCourseCreation");
 
@@ -186,8 +134,8 @@ export function CourseGenerationChatPanel({
           <CourseGenerationComposer
             input={input}
             integrationId={courseId}
-            onInputChange={setInput}
-            onSubmit={handleSend}
+            onInputChange={onInputChange}
+            onSubmit={onSubmit}
           />
         </div>
       </div>

@@ -1,3 +1,5 @@
+import { flattenDeep, isPlainObject } from "lodash-es";
+
 type ChatContentPart = {
   text?: unknown;
 };
@@ -6,6 +8,9 @@ type ThinkingStateChunk = {
   message_key?: unknown;
   course_generated?: unknown;
 };
+
+const flattenEntries = (data: unknown): unknown[] =>
+  flattenDeep(Array.isArray(data) ? data : [data]) as unknown[];
 
 export const getMessageText = (content: unknown): string => {
   if (typeof content === "string") return content;
@@ -26,11 +31,10 @@ export const getMessageText = (content: unknown): string => {
 };
 
 export const getCurrentMessageKey = (data: unknown): string | null => {
-  if (!Array.isArray(data)) return null;
-
-  for (let idx = data.length - 1; idx >= 0; idx -= 1) {
-    const entry = data[idx];
-    if (!entry || typeof entry !== "object") continue;
+  const entries = flattenEntries(data);
+  for (let idx = entries.length - 1; idx >= 0; idx -= 1) {
+    const entry = entries[idx];
+    if (!isPlainObject(entry)) continue;
 
     const messageKey = (entry as ThinkingStateChunk).message_key;
     if (typeof messageKey === "string" && messageKey.trim().length > 0) {
@@ -42,17 +46,10 @@ export const getCurrentMessageKey = (data: unknown): string | null => {
 };
 
 export const hasCourseGeneratedFlag = (data: unknown): boolean => {
-  if (!Array.isArray(data)) return false;
-
-  for (let idx = data.length - 1; idx >= 0; idx -= 1) {
-    const entry = data[idx];
-
-    if (Array.isArray(entry)) {
-      if (hasCourseGeneratedFlag(entry)) return true;
-      continue;
-    }
-
-    if (!entry || typeof entry !== "object") continue;
+  const entries = flattenEntries(data);
+  for (let idx = entries.length - 1; idx >= 0; idx -= 1) {
+    const entry = entries[idx];
+    if (!isPlainObject(entry)) continue;
     if ((entry as ThinkingStateChunk).course_generated === true) return true;
   }
 

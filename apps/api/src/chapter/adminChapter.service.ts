@@ -92,7 +92,7 @@ export class AdminChapterService {
       }),
     );
 
-    return { id: chapter.id };
+    return chapter;
   }
 
   async updateFreemiumStatus(

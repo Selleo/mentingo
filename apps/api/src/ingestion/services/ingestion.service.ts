@@ -1,4 +1,10 @@
-import { BadRequestException, ForbiddenException, Inject, Injectable } from "@nestjs/common";
+import {
+  BadRequestException,
+  ForbiddenException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 
 import { DatabasePg } from "src/common";
 import { MAX_NUM_OF_FILES } from "src/ingestion/ingestion.config";
@@ -31,14 +37,13 @@ export class IngestionService {
       throw new BadRequestException("Exceeded max number of files");
     }
 
-    const { author } = await this.ingestionRepository.findCourseAuthorByLesson(lessonId);
+    const author = await this.getLessonAuthorOrThrow(lessonId);
 
     if (role !== USER_ROLES.ADMIN && author !== currentUserId) {
       throw new ForbiddenException("You can only upload files to your own lessons");
     }
 
-    const { id: aiMentorLessonId } =
-      await this.ingestionRepository.findAiMentorLessonFromLesson(lessonId);
+    const aiMentorLessonId = await this.getAiMentorLessonIdOrThrow(lessonId);
 
     const jobs: Job[] = [];
 
@@ -83,7 +88,7 @@ export class IngestionService {
     currentUserId: UUIDType,
     currentUserRole: UserRole,
   ) {
-    const { author } = await this.ingestionRepository.findCourseAuthorByLesson(lessonId);
+    const author = await this.getLessonAuthorOrThrow(lessonId);
 
     if (currentUserId !== author && currentUserRole !== USER_ROLES.ADMIN) {
       throw new ForbiddenException("You are not allowed to view files for this lesson.");
@@ -97,7 +102,7 @@ export class IngestionService {
     currentUserId: UUIDType,
     currentUserRole: UserRole,
   ) {
-    const { author } = await this.documentService.findCourseAuthorByDocumentLinkId(documentLinkId);
+    const author = await this.getDocumentLinkAuthorOrThrow(documentLinkId);
 
     if (currentUserId !== author && currentUserRole !== USER_ROLES.ADMIN) {
       throw new ForbiddenException("You are not allowed to view files for this lesson.");
@@ -110,5 +115,33 @@ export class IngestionService {
     return {
       message: "Successfully deleted document link",
     };
+  }
+
+  private async getLessonAuthorOrThrow(lessonId: UUIDType): Promise<UUIDType> {
+    const lessonAuthor = await this.ingestionRepository.findCourseAuthorByLesson(lessonId);
+    if (!lessonAuthor) {
+      throw new NotFoundException("Lesson not found");
+    }
+
+    return lessonAuthor.author;
+  }
+
+  private async getDocumentLinkAuthorOrThrow(documentLinkId: UUIDType): Promise<UUIDType> {
+    const documentLinkAuthor =
+      await this.documentService.findCourseAuthorByDocumentLinkId(documentLinkId);
+    if (!documentLinkAuthor) {
+      throw new NotFoundException("Document link not found");
+    }
+
+    return documentLinkAuthor.author;
+  }
+
+  private async getAiMentorLessonIdOrThrow(lessonId: UUIDType): Promise<UUIDType> {
+    const aiMentorLesson = await this.ingestionRepository.findAiMentorLessonFromLesson(lessonId);
+    if (!aiMentorLesson) {
+      throw new NotFoundException("AI mentor lesson not found");
+    }
+
+    return aiMentorLesson.id;
   }
 }

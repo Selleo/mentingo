@@ -2,7 +2,7 @@ import { Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
 
-import type { Static } from "@sinclair/typebox";
+import type { GeneratedCourseResponse } from "@japro/luma-sdk";
 
 /**
  * `integrationId` is equivalent to the courseId
@@ -38,12 +38,6 @@ export const courseGenerationMessageSchema = Type.Object({
   updatedAt: Type.String(),
 });
 
-export const saveGeneratedCourseSchema = Type.Object({
-  integrationId: UUIDSchema,
-});
-
-export type SaveGeneratedCourseBody = Static<typeof saveGeneratedCourseSchema>;
-
 export const courseGenerationMessagesSchema = Type.Array(courseGenerationMessageSchema);
 
 export const courseGenerationIngestBodySchema = Type.Object({
@@ -66,3 +60,17 @@ export const courseGenerationFileSchema = Type.Object({
 });
 
 export const courseGenerationFilesSchema = Type.Array(courseGenerationFileSchema);
+
+export type GeneratedLesson = {
+  type: string;
+  generation: GeneratedCourseResponse["chapters"][number]["lessons"][number];
+  chapterIndex: number;
+  lessonIndex: number;
+};
+
+export type GeneratedChapter = {
+  type: string;
+  generation: {
+    title: string;
+  };
+};

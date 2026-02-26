@@ -1107,6 +1107,15 @@
       "WAITING_FOR_CONFIRMATION": "Oczekiwanie na Twoje potwierdzenie...",
       "THINKING": "Myślenie..."
     },
+    "generation": {
+      "processingTitle": "Generowanie kursu w tle",
+      "exitHint": "Pozostaw tę stronę otwartą. Generowanie może potrwać kilka minut.",
+      "exitDialogTitle": "Opuścić tę stronę?",
+      "exitWarning": "Trwa generowanie kursu. Czy na pewno chcesz opuścić tę stronę?",
+      "finishedTitle": "Generowanie kursu zakończone",
+      "finishedDescription": "Rozdziały i lekcje są gotowe do przejrzenia.",
+      "preparingStructure": "Przygotowywanie struktury rozdziałów..."
+    },
     "settings": {
       "breadcrumbs": {
         "back": "Wstecz",

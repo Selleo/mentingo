@@ -1,12 +1,11 @@
 import { Link, useNavigate, useParams, useSearchParams } from "@remix-run/react";
 import { COURSE_ORIGIN_TYPES, type SupportedLanguages } from "@repo/shared";
 import { Building } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState, useRef } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useExportMasterCourse } from "~/api/mutations/admin/useExportMasterCourse";
 import useGenerateMissingTranslations from "~/api/mutations/admin/useGenerateMissingTranslations";
-import { useSaveGeneratedCourse } from "~/api/mutations/admin/useSaveGeneratedCourse";
 import { useBetaCourseById } from "~/api/queries/admin/useBetaCourse";
 import { useCourseGenerationDraft } from "~/api/queries/admin/useCourseGenerationDraft";
 import { useMissingTranslations } from "~/api/queries/admin/useHasMissingTranslations";
@@ -71,8 +70,7 @@ const EditCourse = () => {
   const [selectedTenantIds, setSelectedTenantIds] = useState<string[]>([]);
   const { mutateAsync: generateTranslations, isPending: isGenerationPending } =
     useGenerateMissingTranslations();
-  const { mutateAsync: saveGeneratedCourse } = useSaveGeneratedCourse();
-  const courseGenerationSaveTriggeredForDraftId = useRef<string | null>(null);
+
   const { mutateAsync: exportMasterCourse, isPending: isExportPending } = useExportMasterCourse();
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -107,6 +105,8 @@ const EditCourse = () => {
     course?.title ?? "",
     isCourseGenerationDraftEnabled,
   );
+  const [isCourseGeneratedOverride, setIsCourseGeneratedOverride] = useState(false);
+  const isCourseGenerated = Boolean(draft?.isCourseGenerated) || isCourseGeneratedOverride;
 
   const { data: hasMissingTranslations } = useMissingTranslations(id, courseLanguage);
   const { data: exportCandidates } = useMasterCourseExportCandidates(id, isManagingTenantAdmin);
@@ -143,22 +143,6 @@ const EditCourse = () => {
     }
   }, [language, courseLanguage, course, isFetching]);
 
-  useEffect(() => {
-    if (!course?.id || !draft?.draftId || !draft.isCourseGenerated) return;
-    if ((course.chapters.length ?? 0) > 0) return;
-    if (courseGenerationSaveTriggeredForDraftId.current === draft.draftId) return;
-
-    courseGenerationSaveTriggeredForDraftId.current = draft.draftId;
-    void saveGeneratedCourse({
-      integrationId: course.id,
-      draftName: course.title ?? "",
-    });
-  }, [course, draft?.draftId, draft?.isCourseGenerated, saveGeneratedCourse]);
-
-  const handleTabChange = (tabValue: string) => {
-    params.set("tab", tabValue);
-    setSearchParams(params);
-  };
   const handleTabChange = useCallback(
     (tabValue: string) => {
       setSearchParams((prevParams) => {
@@ -189,10 +173,12 @@ const EditCourse = () => {
     });
   }, []);
 
-  const canRefetchChapterList = Boolean(
-    previousDataUpdatedAt && currentDataUpdatedAt && previousDataUpdatedAt < currentDataUpdatedAt,
-  );
+  const handleCourseGenerationFinished = () => {
+    setIsCourseGeneratedOverride(true);
+  };
 
+  const canRefetchChapterList =
+    previousDataUpdatedAt && currentDataUpdatedAt && previousDataUpdatedAt < currentDataUpdatedAt;
   const selectedTab = searchParams.get("tab") ?? EXPORTED_COURSE_VISIBLE_TAB_VALUES[0];
 
   const { isExportedCourse, isMasterCourse } = useMemo(() => {
@@ -411,12 +397,14 @@ const EditCourse = () => {
           ) : (
             <LeaveModalProvider>
               <CourseLessons
+                showCourseGenerationButton={showCourseGenerationButton}
+                isCourseGenerationDisabled={isCourseGenerationDisabled}
+                draft={draft}
+                isCourseGenerated={isCourseGenerated}
+                onCourseGenerationFinished={handleCourseGenerationFinished}
                 chapters={course?.chapters as Chapter[]}
                 canRefetchChapterList={!!canRefetchChapterList}
                 language={courseLanguage}
-                draft={draft}
-                showCourseGenerationButton={showCourseGenerationButton}
-                isCourseGenerationDisabled={isCourseGenerationDisabled}
                 baseLanguage={course?.baseLanguage ?? courseLanguage}
               />
             </LeaveModalProvider>

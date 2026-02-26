@@ -16,6 +16,7 @@ import {
 
 import type { UpdateChapterBody } from "../schemas/chapter.schema";
 import type { SupportedLanguages } from "@repo/shared";
+import type { SQL } from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type {
   AdminLessonWithContentSchema,
@@ -104,6 +105,7 @@ export class AdminChapterRepository {
   async getBetaChapterLessons(
     chapterId: UUIDType,
     language: SupportedLanguages,
+    conditions: SQL<unknown>[] = [],
   ): Promise<AdminLessonWithContentSchema[]> {
     return this.db
       .select({
@@ -199,7 +201,7 @@ export class AdminChapterRepository {
       .from(lessons)
       .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
       .innerJoin(courses, eq(courses.id, chapters.courseId))
-      .where(and(eq(lessons.chapterId, chapterId)))
+      .where(and(eq(lessons.chapterId, chapterId), ...conditions))
       .orderBy(lessons.displayOrder);
   }
 

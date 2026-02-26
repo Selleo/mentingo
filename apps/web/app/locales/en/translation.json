@@ -1120,6 +1120,15 @@
       "WAITING_FOR_CONFIRMATION": "Waiting for your confirmation...",
       "THINKING": "Thinking..."
     },
+    "generation": {
+      "processingTitle": "Generating course in background",
+      "exitHint": "Keep this page open. Generation can take a few minutes.",
+      "exitDialogTitle": "Leave this page?",
+      "exitWarning": "Course generation is in progress. Are you sure you want to leave this page?",
+      "finishedTitle": "Course generation finished",
+      "finishedDescription": "Your chapters and lessons are ready to review.",
+      "preparingStructure": "Preparing chapter structure..."
+    },
     "settings": {
       "breadcrumbs": {
         "back": "Back",
