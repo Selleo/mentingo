@@ -55,6 +55,14 @@ export class JwtAuthGuard implements CanActivate {
         secret: this.configService.get<string>("jwt.secret"),
       });
 
+      if (
+        payload.isSupportMode &&
+        payload.supportExpiresAt &&
+        new Date(payload.supportExpiresAt).getTime() <= Date.now()
+      ) {
+        throw new UnauthorizedException("supportMode.errors.sessionExpired");
+      }
+
       request["user"] = payload;
 
       return true;

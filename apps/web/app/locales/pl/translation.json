@@ -2595,6 +2595,13 @@
       "description": "Czy na pewno chcesz usunąć ten wpis do bazy wiedzy? Tej operacji nie można cofnąć."
     }
   },
+  "supportMode": {
+    "banner": {
+      "message": "Działasz w trybie wsparcia dla organizacji: {{organization}}.",
+      "timeLeft": "Pozostało {{minutes}} min",
+      "exit": "Wyjdź z trybu wsparcia"
+    }
+  },
   "superAdminTenantsView": {
     "title": "Organizacje",
     "description": "Zarządzaj nazwami organizacji, domenami, statusem i flagami zarządzania.",
@@ -2609,12 +2616,15 @@
       "host": "Host",
       "status": "Status",
       "managing": "Zarządzający",
-      "actions": "Akcje",
       "loading": "Ładowanie organizacji...",
       "empty": "Nie znaleziono organizacji.",
       "yes": "Tak",
       "no": "Nie",
-      "edit": "Edytuj"
+      "edit": "Edytuj",
+      "actions": {
+        "title": "Akcje",
+        "enterSupportMode": "Wejdź w tryb wsparcia"
+      }
     },
     "status": {
       "active": "Aktywny",
@@ -2657,7 +2667,8 @@
       "hostAlreadyExists": "Host organizacji już istnieje",
       "notFound": "Nie znaleziono organizacji",
       "invalidHost": "Nieprawidłowy adres URL hosta organizacji",
-      "managingTenantRequired": "Wymagane uprawnienia administratora zarządzającej organizacji"
+      "managingTenantRequired": "Wymagane uprawnienia administratora zarządzającej organizacji",
+      "currentTenantSupportNotAllowed": "Tryb wsparcia nie jest dostępny dla bieżącej organizacji"
     }
   },
   "auth": {

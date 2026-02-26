@@ -67,6 +67,7 @@ export function NavigationFooter({
       <MobileNavigationFooterItems
         setIsMobileNavOpen={setIsMobileNavOpen}
         userId={user?.id}
+        isSupportMode={Boolean(user?.isSupportMode)}
         hasConfigurationIssues={hasConfigurationIssues}
       />
 
@@ -117,15 +118,17 @@ export function NavigationFooter({
                 />
               </DropdownMenuItem>
 
-              <DropdownMenuItem onClick={() => setIsDropdownOpen(false)}>
-                <NavigationMenuItemLink
-                  item={{
-                    iconName: "User",
-                    label: t("navigationSideBar.profile"),
-                    link: `/profile/${user?.id}`,
-                  }}
-                />
-              </DropdownMenuItem>
+              {!user?.isSupportMode && (
+                <DropdownMenuItem onClick={() => setIsDropdownOpen(false)}>
+                  <NavigationMenuItemLink
+                    item={{
+                      iconName: "User",
+                      label: t("navigationSideBar.profile"),
+                      link: `/profile/${user?.id}`,
+                    }}
+                  />
+                </DropdownMenuItem>
+              )}
 
               <DropdownMenuItem onClick={() => setIsDropdownOpen(false)} className="relative">
                 <NavigationMenuItemLink

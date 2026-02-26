@@ -12,6 +12,7 @@ export * from "./constants/loginPageDocuments";
 export * from "./constants/masterCourse";
 export * from "./constants/newsSettings";
 export * from "./constants/qaSettings";
+export * from "./constants/supportMode";
 export * from "./constants/tenant";
 export * from "./constants/theme";
 export * from "./constants/tus";

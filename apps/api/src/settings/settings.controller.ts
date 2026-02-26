@@ -32,6 +32,7 @@ import { FILE_SIZE_BASE } from "src/common/constants";
 import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
+import { DisallowSupportModeGuard } from "src/common/guards/disallow-support-mode.guard";
 import { RolesGuard } from "src/common/guards/roles.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
@@ -92,12 +93,13 @@ export class SettingsController {
     response: baseResponse(userSettingsJSONContentSchema),
   })
   async getUserSettings(
-    @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<SettingsJSONContentSchema>> {
-    return new BaseResponse(await this.settingsService.getUserSettings(userId));
+    return new BaseResponse(await this.settingsService.getCurrentUserSettings(currentUser));
   }
 
   @Put()
+  @UseGuards(DisallowSupportModeGuard)
   @Validate({
     request: [{ type: "body", schema: updateSettingsBodySchema }],
     response: baseResponse(settingsJSONContentSchema),
@@ -110,6 +112,7 @@ export class SettingsController {
   }
 
   @Patch("admin/new-user-notification")
+  @UseGuards(DisallowSupportModeGuard)
   @Roles(USER_ROLES.ADMIN)
   @Validate({
     response: baseResponse(adminSettingsJSONContentSchema),
@@ -159,6 +162,7 @@ export class SettingsController {
   }
 
   @Patch("admin/finished-course-notification")
+  @UseGuards(DisallowSupportModeGuard)
   @Roles(USER_ROLES.ADMIN)
   @Validate({
     response: baseResponse(adminSettingsJSONContentSchema),
@@ -171,6 +175,7 @@ export class SettingsController {
   }
 
   @Patch("admin/overdue-course-notification")
+  @UseGuards(DisallowSupportModeGuard)
   @Roles(USER_ROLES.ADMIN)
   @Validate({
     response: baseResponse(adminSettingsJSONContentSchema),

@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UnauthorizedException,
+  UseGuards,
+} from "@nestjs/common";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
@@ -8,6 +18,7 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 import { ManagingTenantAdminGuard } from "src/common/guards/managing-tenant-admin.guard";
 import { RolesGuard } from "src/common/guards/roles.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
+import { SupportModeService } from "src/support-mode/support-mode.service";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import {
@@ -25,7 +36,10 @@ import type { TenantResponse, TenantsListResponse } from "./types";
 @UseGuards(RolesGuard, ManagingTenantAdminGuard)
 @Roles(USER_ROLES.ADMIN)
 export class TenantsController {
-  constructor(private readonly tenantsService: TenantsService) {}
+  constructor(
+    private readonly tenantsService: TenantsService,
+    private readonly supportModeService: SupportModeService,
+  ) {}
 
   @Get()
   @Validate({
@@ -40,8 +54,14 @@ export class TenantsController {
     @Query("page") page?: number,
     @Query("perPage") perPage?: number,
     @Query("search") search?: string,
+    @CurrentUser("tenantId") currentTenantId?: string,
   ): Promise<PaginatedResponse<TenantsListResponse>> {
-    const result = await this.tenantsService.findAllTenants({ page, perPage, search });
+    if (!currentTenantId) throw new UnauthorizedException("auth.error.unauthenticated");
+
+    const result = await this.tenantsService.findAllTenants(
+      { page, perPage, search },
+      currentTenantId,
+    );
     return new PaginatedResponse(result);
   }
 
@@ -82,5 +102,23 @@ export class TenantsController {
   ): Promise<BaseResponse<TenantResponse>> {
     const tenant = await this.tenantsService.updateTenantById(id, body);
     return new BaseResponse(tenant);
+  }
+
+  @Post(":id/support-session")
+  @Validate({
+    request: [{ type: "param", name: "id", schema: Type.String({ format: "uuid" }) }],
+    response: baseResponse(
+      Type.Object({
+        redirectUrl: Type.String(),
+        expiresAt: Type.String(),
+      }),
+    ),
+  })
+  async createSupportSession(
+    @Param("id") id: string,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<{ redirectUrl: string; expiresAt: string }>> {
+    const session = await this.supportModeService.createSupportSession(currentUser, id);
+    return new BaseResponse(session);
   }
 }

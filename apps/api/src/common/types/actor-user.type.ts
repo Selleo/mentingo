@@ -6,6 +6,10 @@ export type ActorUserType = {
   email: string;
   role: UserRole;
   tenantId: UUIDType;
+  isSupportMode?: boolean;
+  supportSessionId?: UUIDType;
+  originalUserId?: UUIDType;
+  originalTenantId?: UUIDType;
   iat?: number;
   exp?: number;
 };

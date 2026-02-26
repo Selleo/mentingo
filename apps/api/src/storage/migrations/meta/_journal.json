@@ -666,6 +666,13 @@
       "when": 1771935043458,
       "tag": "0094_add_master_course_export_tables_and_course_origin_fields",
       "breakpoints": true
+    },
+    {
+      "idx": 95,
+      "version": "7",
+      "when": 1772111112913,
+      "tag": "0095_add_support_sessions_table",
+      "breakpoints": true
     }
   ]
 }

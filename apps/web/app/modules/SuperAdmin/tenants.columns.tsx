@@ -1,14 +1,19 @@
 import { Link } from "@remix-run/react";
+import { HandHelping, Pencil } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
 
 import type { ColumnDef } from "@tanstack/react-table";
 import type i18next from "i18next";
-import type { FindTenantByIdResponse } from "~/api/generated-api";
+import type { FindAllTenantsResponse } from "~/api/generated-api";
 
-export type Tenant = FindTenantByIdResponse["data"];
+export type Tenant = FindAllTenantsResponse["data"][number] & { isCurrentTenant?: boolean };
 
-export const getTenantsColumns = (t: typeof i18next.t): ColumnDef<Tenant>[] => [
+export const getTenantsColumns = (
+  t: typeof i18next.t,
+  onSupportLogin: (tenantId: string) => Promise<void>,
+  isSupportLoginLoading: boolean,
+): ColumnDef<Tenant>[] => [
   {
     accessorKey: "name",
     header: t("superAdminTenantsView.table.name"),
@@ -35,11 +40,25 @@ export const getTenantsColumns = (t: typeof i18next.t): ColumnDef<Tenant>[] => [
   },
   {
     id: "actions",
-    header: () => <div className="text-right">{t("superAdminTenantsView.table.actions")}</div>,
+    header: () => (
+      <div className="text-right">{t("superAdminTenantsView.table.actions.title")}</div>
+    ),
     cell: ({ row }) => (
-      <div className="text-right">
-        <Button asChild variant="outline" size="sm">
+      <div className="text-right flex items-center justify-end gap-2">
+        {!row.original.isCurrentTenant && (
+          <Button
+            size="sm"
+            className="gap-2"
+            onClick={() => onSupportLogin(row.original.id)}
+            disabled={isSupportLoginLoading}
+          >
+            <HandHelping className="size-4" aria-hidden="true" />
+            {t("superAdminTenantsView.table.actions.enterSupportMode")}
+          </Button>
+        )}
+        <Button asChild variant="outline" size="sm" className="gap-2">
           <Link to={`/super-admin/tenants/${row.original.id}`}>
+            <Pencil className="size-4" aria-hidden="true" />
             {t("superAdminTenantsView.table.edit")}
           </Link>
         </Button>

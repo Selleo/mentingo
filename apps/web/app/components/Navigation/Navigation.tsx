@@ -88,7 +88,7 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
       <header
         className={cn(
           "sticky top-0 h-min w-full transition-all duration-300 ease-in-out",
-          "2xl:flex 2xl:h-dvh 2xl:flex-col 2xl:gap-y-4",
+          "2xl:flex 2xl:h-full 2xl:flex-col 2xl:gap-y-4",
           "3xl:static",
           isSidebarCollapsed
             ? "2xl:w-14 2xl:px-2 2xl:py-4 3xl:w-14 3xl:px-2 3xl:py-4"
@@ -139,7 +139,11 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
               const { restrictedRoles, restrictedManagingTenantAdmin } = group;
 
               if (restrictedRoles && !restrictedRoles.includes(role as UserRole)) return null;
-              if (restrictedManagingTenantAdmin && !user?.isManagingTenantAdmin) return null;
+              if (
+                restrictedManagingTenantAdmin &&
+                (!user?.isManagingTenantAdmin || user?.isSupportMode)
+              )
+                return null;
 
               return (
                 <Fragment key={group.title}>

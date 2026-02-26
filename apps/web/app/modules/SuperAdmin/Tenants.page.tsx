@@ -1,8 +1,10 @@
 import { Link, type MetaFunction } from "@remix-run/react";
 import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useCreateSupportSession } from "~/api/mutations/super-admin/useCreateSupportSession";
 import { useTenants } from "~/api/queries/super-admin/useTenants";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Pagination } from "~/components/Pagination/Pagination";
@@ -32,8 +34,21 @@ export default function TenantsPage() {
 
   const { t } = useTranslation();
   const { data: tenants, isLoading } = useTenants({ page, perPage, search });
+  const { mutateAsync: createSupportSession, isPending: isCreatingSupportSession } =
+    useCreateSupportSession();
 
-  const columns = useMemo(() => getTenantsColumns(t), [t]);
+  const columns = useMemo(
+    () =>
+      getTenantsColumns(
+        t,
+        async (tenantId: string) => {
+          const response = await createSupportSession({ tenantId });
+          window.location.assign(response.data.redirectUrl);
+        },
+        isCreatingSupportSession,
+      ),
+    [createSupportSession, isCreatingSupportSession, t],
+  );
   const filters = useMemo<FilterConfig[]>(
     () => [
       {
@@ -62,8 +77,11 @@ export default function TenantsPage() {
               {t("superAdminTenantsView.description")}
             </p>
           </div>
-          <Button asChild>
-            <Link to="/super-admin/tenants/new">{t("superAdminTenantsView.actions.create")}</Link>
+          <Button asChild className="gap-2">
+            <Link to="/super-admin/tenants/new">
+              <Plus className="size-4" aria-hidden="true" />
+              {t("superAdminTenantsView.actions.create")}
+            </Link>
           </Button>
         </div>
 

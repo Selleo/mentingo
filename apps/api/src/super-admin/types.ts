@@ -5,6 +5,7 @@ import type { tenants } from "src/storage/schema";
 import type {
   createTenantSchema,
   listTenantsQuerySchema,
+  tenantsListItemSchema,
   tenantResponseSchema,
   tenantsListSchema,
   updateTenantSchema,
@@ -16,12 +17,14 @@ export type CreateTenantBody = Static<typeof createTenantSchema>;
 export type UpdateTenantBody = Static<typeof updateTenantSchema>;
 export type ListTenantsQuery = Static<typeof listTenantsQuerySchema>;
 export type TenantResponse = Static<typeof tenantResponseSchema>;
+export type TenantsListItemResponse = Static<typeof tenantsListItemSchema>;
 export type TenantsListResponse = Static<typeof tenantsListSchema>;
 
 export type FindAllTenantsParams = {
   page: number;
   perPage: number;
   search?: string;
+  currentTenantId: string;
 };
 
 export type CountAllTenantsParams = {

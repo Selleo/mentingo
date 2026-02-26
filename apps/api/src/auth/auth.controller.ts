@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -22,6 +23,10 @@ import { GoogleOAuthGuard } from "src/common/guards/google-oauth.guard";
 import { MicrosoftOAuthGuard } from "src/common/guards/microsoft-oauth.guard";
 import { RefreshTokenGuard } from "src/common/guards/refresh-token.guard";
 import { SlackOAuthGuard } from "src/common/guards/slack-oauth.guard";
+import {
+  isSupportModeSession,
+  shouldEmitUserScopedEvents,
+} from "src/common/helpers/support-mode-context";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { UserActivityEvent, UserLogoutEvent } from "src/events";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
@@ -127,6 +132,12 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<null> {
+    if (isSupportModeSession(currentUser)) {
+      await this.authService.revokeSupportSession(currentUser.supportSessionId);
+      this.tokenService.clearTokenCookies(response);
+      return null;
+    }
+
     this.tokenService.clearTokenCookies(response);
 
     await this.outboxPublisher.publish(
@@ -169,15 +180,51 @@ export class AuthController {
     response: baseResponse(currentUserResponseSchema),
   })
   async currentUser(
-    @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<Static<typeof currentUserResponseSchema>>> {
-    const account = await this.authService.currentUser(currentUserId);
+    const account = await this.authService.currentUser(currentUser);
 
-    await this.outboxPublisher.publish(
-      new UserActivityEvent({ userId: currentUserId, activityType: "LOGIN" }),
-    );
+    if (shouldEmitUserScopedEvents(currentUser)) {
+      await this.outboxPublisher.publish(
+        new UserActivityEvent({ userId: currentUser.userId, activityType: "LOGIN" }),
+      );
+    }
 
     return new BaseResponse(account);
+  }
+
+  @Public()
+  @Get("support/callback")
+  @Validate({
+    request: [{ type: "query", name: "grant", schema: Type.String({ minLength: 1 }) }],
+  })
+  async supportCallback(
+    @Query("grant") grant: string,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<void> {
+    const { accessToken, refreshToken } = await this.authService.createSupportModeTokens(grant);
+
+    this.tokenService.setTokenCookies(response, accessToken, refreshToken, false);
+
+    response.redirect("/");
+  }
+
+  @Post("support/exit")
+  @Validate({
+    response: baseResponse(Type.Object({ redirectUrl: Type.String() })),
+  })
+  async exitSupportMode(
+    @CurrentUser() currentUser: CurrentUserType,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<BaseResponse<{ redirectUrl: string }>> {
+    if (!currentUser.isSupportMode || !currentUser.supportSessionId) {
+      throw new BadRequestException("supportMode.errors.notInSupportMode");
+    }
+
+    await this.authService.revokeSupportSession(currentUser.supportSessionId);
+    this.tokenService.clearTokenCookies(response);
+
+    return new BaseResponse({ redirectUrl: currentUser.returnUrl ?? this.CORS_ORIGIN });
   }
 
   @Public()

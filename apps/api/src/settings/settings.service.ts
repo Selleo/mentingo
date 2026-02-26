@@ -18,11 +18,13 @@ import sharp from "sharp";
 
 import { CORS_ORIGIN } from "src/auth/consts";
 import { DatabasePg } from "src/common";
+import { getSupportModeContext } from "src/common/helpers/support-mode-context";
 import { UpdateSettingsEvent } from "src/events";
 import { RESOURCE_CATEGORIES, RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
+import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { resourceEntity, resources, settings } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
@@ -61,11 +63,20 @@ import type { UserRole } from "src/user/schemas/userRoles";
 @Injectable()
 export class SettingsService {
   constructor(
-    @Inject("DB") private readonly db: DatabasePg,
+    @Inject(DB) private readonly db: DatabasePg,
+    @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
     private readonly fileService: FileService,
     private readonly outboxPublisher: OutboxPublisher,
     private readonly localizationService: LocalizationService,
   ) {}
+
+  public async getCurrentUserSettings(
+    currentUser: CurrentUser,
+  ): Promise<SettingsJSONContentSchema> {
+    const { dbInstance, sourceUserId } = getSupportModeContext(currentUser, this.db, this.dbAdmin);
+
+    return this.getUserSettings(sourceUserId, dbInstance);
+  }
 
   public async getGlobalSettings(): Promise<GlobalSettingsJSONContentSchema> {
     const [globalSettings] = await this.db
