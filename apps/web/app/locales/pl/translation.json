@@ -1048,7 +1048,7 @@
       "generateMissingTranslations": "Wygeneruj brakujące tłumaczenia",
       "enrolledStudents": "Zapisani studenci",
       "testAiMentor": "Przetestuj AI Mentora",
-      "aiCourseCreation": "AI Course Creation",
+      "aiCourseCreation": "Tworzenie kursu AI",
       "notAddedLanguages": "Niedodane",
       "baseLanguage": "Domyślny",
       "generateMissingTranslationsDescription": "Czy na pewno chcesz wygenerować brakujące tłumaczenia? Ta akcja może zająć kilka chwil."
@@ -1358,14 +1358,14 @@
         },
         "courseGenerationComposer": {
           "placeholders": {
-            "topic": "Podstawy prawa pracy dla zespołów softwareowych obejmujące umowy, własność intelektualną i compliance",
-            "targetAudience": "Developerzy w zespołach produktowych współpracujący z działem prawnym i HR",
-            "currentLevel": "Poziom początkujący do średniozaawansowanego bez wymaganego wykształcenia prawniczego",
-            "desiredOutcomes": "Pewne rozpoznawanie ryzyk prawnych w codziennych decyzjach inżynierskich i wiedza kiedy eskalować temat",
-            "constraintsPrerequisites": "Cztery do pięciu godzin tygodniowo w trybie zdalnym przy wymaganym podstawowym doświadczeniu programistycznym",
-            "preferredFormatAssessment": "Mieszany format obejmujący krótkie materiały, praktyczne scenariusze i krótkie oceny oparte na przypadkach",
-            "timeBudget": "Łącznie jeden miesiąc z tygodniowymi kamieniami milowymi i sesją podsumowującą",
-            "successCriteriaDomainContext": "Uczestnicy potrafią jasno wyjaśnić temat i samodzielnie rozwiązać realistyczne sytuacje prawne z życia firmy technologicznej"
+            "topic": "Podstawy prawa pracy dla zespołów softwareowych obejmujące umowy, własność intelektualną i compliance.",
+            "targetAudience": "Developerzy w zespołach produktowych współpracujący z działem prawnym i HR.",
+            "currentLevel": "Poziom początkujący do średniozaawansowanego bez wymaganego wykształcenia prawniczego.",
+            "desiredOutcomes": "Pewne rozpoznawanie ryzyk prawnych w codziennych decyzjach inżynierskich i wiedza kiedy eskalować temat.",
+            "constraintsPrerequisites": "Cztery do pięciu godzin tygodniowo w trybie zdalnym przy wymaganym podstawowym doświadczeniu programistycznym.",
+            "preferredFormatAssessment": "Mieszany format obejmujący krótkie materiały, praktyczne scenariusze i krótkie oceny oparte na przypadkach.",
+            "timeBudget": "Łącznie jeden miesiąc z tygodniowymi kamieniami milowymi i sesją podsumowującą.",
+            "successCriteriaDomainContext": "Uczestnicy potrafią jasno wyjaśnić temat i samodzielnie rozwiązać realistyczne sytuacje prawne z życia firmy technologicznej."
           }
         },
         "other": {

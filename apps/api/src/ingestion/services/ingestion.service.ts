@@ -37,13 +37,13 @@ export class IngestionService {
       throw new BadRequestException("Exceeded max number of files");
     }
 
-    const author = await this.getLessonAuthorOrThrow(lessonId);
+    const author = await this.getLessonAuthor(lessonId);
 
     if (role !== USER_ROLES.ADMIN && author !== currentUserId) {
       throw new ForbiddenException("You can only upload files to your own lessons");
     }
 
-    const aiMentorLessonId = await this.getAiMentorLessonIdOrThrow(lessonId);
+    const aiMentorLessonId = await this.getAiMentorLessonId(lessonId);
 
     const jobs: Job[] = [];
 
@@ -88,7 +88,7 @@ export class IngestionService {
     currentUserId: UUIDType,
     currentUserRole: UserRole,
   ) {
-    const author = await this.getLessonAuthorOrThrow(lessonId);
+    const author = await this.getLessonAuthor(lessonId);
 
     if (currentUserId !== author && currentUserRole !== USER_ROLES.ADMIN) {
       throw new ForbiddenException("You are not allowed to view files for this lesson.");
@@ -102,7 +102,7 @@ export class IngestionService {
     currentUserId: UUIDType,
     currentUserRole: UserRole,
   ) {
-    const author = await this.getDocumentLinkAuthorOrThrow(documentLinkId);
+    const author = await this.getDocumentLinkAuthor(documentLinkId);
 
     if (currentUserId !== author && currentUserRole !== USER_ROLES.ADMIN) {
       throw new ForbiddenException("You are not allowed to view files for this lesson.");
@@ -117,26 +117,26 @@ export class IngestionService {
     };
   }
 
-  private async getLessonAuthorOrThrow(lessonId: UUIDType): Promise<UUIDType> {
-    const lessonAuthor = await this.ingestionRepository.findCourseAuthorByLesson(lessonId);
-    if (!lessonAuthor) {
+  private async getLessonAuthor(lessonId: UUIDType): Promise<UUIDType> {
+    const lesson = await this.ingestionRepository.findCourseAuthorByLesson(lessonId);
+    if (!lesson) {
       throw new NotFoundException("Lesson not found");
     }
 
-    return lessonAuthor.author;
+    return lesson.author;
   }
 
-  private async getDocumentLinkAuthorOrThrow(documentLinkId: UUIDType): Promise<UUIDType> {
-    const documentLinkAuthor =
+  private async getDocumentLinkAuthor(documentLinkId: UUIDType): Promise<UUIDType> {
+    const documentLink =
       await this.documentService.findCourseAuthorByDocumentLinkId(documentLinkId);
-    if (!documentLinkAuthor) {
+    if (!documentLink) {
       throw new NotFoundException("Document link not found");
     }
 
-    return documentLinkAuthor.author;
+    return documentLink.author;
   }
 
-  private async getAiMentorLessonIdOrThrow(lessonId: UUIDType): Promise<UUIDType> {
+  private async getAiMentorLessonId(lessonId: UUIDType): Promise<UUIDType> {
     const aiMentorLesson = await this.ingestionRepository.findAiMentorLessonFromLesson(lessonId);
     if (!aiMentorLesson) {
       throw new NotFoundException("AI mentor lesson not found");

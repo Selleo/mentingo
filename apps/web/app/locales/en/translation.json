@@ -1367,14 +1367,14 @@
         },
         "courseGenerationComposer": {
           "placeholders": {
-            "topic": "Workplace law essentials for software teams including contracts, intellectual property, and compliance",
-            "targetAudience": "Developers in product teams who collaborate with legal and HR stakeholders",
-            "currentLevel": "Beginner to intermediate with no formal legal training required",
-            "desiredOutcomes": "Confidently identify legal risk in daily engineering decisions and know when to escalate",
-            "constraintsPrerequisites": "Four to five hours per week in a fully remote setting with basic software experience required",
-            "preferredFormatAssessment": "Mixed format with concise reading, practical scenarios, and short case-based assessments",
-            "timeBudget": "One month total with weekly milestones and a final recap session",
-            "successCriteriaDomainContext": "Learners can clearly explain the topic and solve realistic workplace law situations in a tech company context"
+            "topic": "Workplace law essentials for software teams including contracts, intellectual property, and compliance.",
+            "targetAudience": "Developers in product teams who collaborate with legal and HR stakeholders.",
+            "currentLevel": "Beginner to intermediate with no formal legal training required.",
+            "desiredOutcomes": "Confidently identify legal risk in daily engineering decisions and know when to escalate.",
+            "constraintsPrerequisites": "Four to five hours per week in a fully remote setting with basic software experience required.",
+            "preferredFormatAssessment": "Mixed format with concise reading, practical scenarios, and short case-based assessments.",
+            "timeBudget": "One month total with weekly milestones and a final recap session.",
+            "successCriteriaDomainContext": "Learners can clearly explain the topic and solve realistic workplace law situations in a tech company context."
           }
         },
         "other": {
