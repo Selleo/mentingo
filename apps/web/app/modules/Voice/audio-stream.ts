@@ -14,6 +14,7 @@ export type StreamProtocol<TStartContext = void, TStopContext = void> = {
   buildStartEmit: (params: { init: StreamInitPayload; context: TStartContext }) => SocketEmitSpec;
   buildChunkEmit: (params: { chunkMeta: PcmChunkMeta; chunkBuffer: ArrayBuffer }) => SocketEmitSpec;
   buildStopEmit: (params: { lastSeq: number; context?: TStopContext }) => SocketEmitSpec;
+  buildCancelEmit: () => SocketEmitSpec;
 };
 
 export class RealtimePCMStreamerWorklet {
@@ -42,15 +43,9 @@ export class RealtimePCMStreamerWorklet {
   async start<TStartContext>(context: TStartContext) {
     this.socket = acquireSocket();
 
-    this.socket.connect();
     this.socket.on("voice:sessionMetadataCleared", this.onSessionMetadataCleared);
 
-    await new Promise<void>((resolve, reject) => {
-      this.socket?.on("connect", resolve);
-      this.socket?.on("connect_error", (e) => {
-        reject(e);
-      });
-    });
+    this.socket.connect();
 
     this.mediaStream = await navigator.mediaDevices.getUserMedia({
       audio: {
@@ -77,8 +72,8 @@ export class RealtimePCMStreamerWorklet {
         chunkMs: this.chunkMs,
         vad: {
           startFrames: 3,
-          stopFrames: 15,
-          preRollFrames: 10,
+          stopFrames: 28,
+          preRollFrames: 24,
           minRms: 0.008,
           thresholdMultiplier: 3,
           minZcr: 0.02,
@@ -159,6 +154,22 @@ export class RealtimePCMStreamerWorklet {
       this.socket?.emit(stopEmit.event, ...stopEmit.args);
     }
 
+    this.cleanup();
+
+    return ackPayload;
+  }
+
+  async cancel(): Promise<void> {
+    const cancelEmit = this.protocol.buildCancelEmit();
+
+    if (this.socket?.connected) {
+      this.socket.emit(cancelEmit.event, ...cancelEmit.args);
+    }
+
+    this.cleanup();
+  }
+
+  private cleanup() {
     releaseSocket();
 
     this.socket?.off("voice:sessionMetadataCleared", this.onSessionMetadataCleared);
@@ -178,9 +189,6 @@ export class RealtimePCMStreamerWorklet {
     this.source = null;
     this.audioCtx = null;
     this.socket = null;
-
     this.seq = 0;
-
-    return ackPayload;
   }
 }

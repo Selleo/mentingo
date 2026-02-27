@@ -2,17 +2,25 @@ import {
   LUMA_FILE_INGESTION_ALLOWED_EXTENSIONS,
   LUMA_FILE_INGESTION_ALLOWED_MIME_TYPES,
 } from "@repo/shared";
-import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useState } from "react";
+import {
+  type Dispatch,
+  type SetStateAction,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+} from "react";
 import { useTranslation } from "react-i18next";
 
 import { useDeleteCourseGenerationFile } from "~/api/mutations/admin/useDeleteCourseGenerationFile";
 import { useIngestCourseGenerationFiles } from "~/api/mutations/admin/useIngestCourseGenerationFiles";
 import { useCourseGenerationFiles } from "~/api/queries/admin/useCourseGenerationFiles";
-import { Icon } from "~/components/Icon";
-import { Button } from "~/components/ui/button";
-import { CourseGenerationFileList } from "~/modules/Admin/EditCourse/compontents/CourseGenerationFileList";
-import { CourseGenerationFileUpload } from "~/modules/Admin/EditCourse/compontents/CourseGenerationFileUpload";
+import { CourseGenerationComposerCenterContent } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationComposerCenterContent";
+import { CourseGenerationComposerLeftControl } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationComposerLeftControl";
+import { CourseGenerationComposerRightControls } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationComposerRightControls";
+import { CourseGenerationFileList } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationFileList";
+import { useTranscription } from "~/modules/Voice/hooks/useTranscription";
 
 const PLACEHOLDER_KEYS = [
   "adminCourseView.curriculum.lesson.courseGenerationComposer.placeholders.topic",
@@ -28,6 +36,7 @@ const PLACEHOLDER_KEYS = [
 type CourseGenerationComposerProps = {
   integrationId: string;
   input: string;
+  setInput: Dispatch<SetStateAction<string>>;
   onInputChange: (value: string) => void;
   onSubmit: () => void;
 };
@@ -37,13 +46,22 @@ export function CourseGenerationComposer({
   input,
   onInputChange,
   onSubmit,
+  setInput,
 }: CourseGenerationComposerProps) {
   const { t } = useTranslation();
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
+  const [isVoiceMode, setIsVoiceMode] = useState(false);
+  const [voiceLevel, setVoiceLevel] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { data: ingestedFiles = [] } = useCourseGenerationFiles(integrationId, !!integrationId);
   const { mutateAsync: ingestFiles, isPending: isIngestPending } = useIngestCourseGenerationFiles();
   const { mutateAsync: deleteFile, isPending: isDeletePending } = useDeleteCourseGenerationFile();
-  const placeholders = PLACEHOLDER_KEYS.map((key) => t(key));
+  const placeholders = useMemo(() => PLACEHOLDER_KEYS.map((key) => t(key)), [t]);
+
+  const { startRecording, stopRecording, cancelTranscription } = useTranscription({
+    setInput,
+    onLevelChange: setVoiceLevel,
+  });
 
   useEffect(() => {
     if (input.trim().length > 0) return;
@@ -79,6 +97,12 @@ export function CourseGenerationComposer({
 
     await ingestFiles({ integrationId, files: allowedFiles });
   };
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? []);
+    if (!files.length) return;
+    void handleFilesSelected(files);
+    event.target.value = "";
+  };
 
   const removeFile = async (documentId: string) => {
     if (!integrationId) return;
@@ -91,6 +115,23 @@ export function CourseGenerationComposer({
   };
 
   const currentPlaceholder = placeholders[placeholderIndex];
+  const isUploadDisabled = isIngestPending || isDeletePending || !integrationId;
+  const startVoiceMode = async () => {
+    setIsVoiceMode(true);
+    await startRecording();
+  };
+
+  const stopVoiceMode = async () => {
+    await stopRecording();
+    setIsVoiceMode(false);
+    setVoiceLevel(0);
+  };
+
+  const cancelVoiceMode = async () => {
+    await cancelTranscription();
+    setIsVoiceMode(false);
+    setVoiceLevel(0);
+  };
 
   return (
     <div className="mx-auto w-full max-w-[620px]">
@@ -101,62 +142,40 @@ export function CourseGenerationComposer({
           disableRemove={isDeletePending}
         />
 
-        <div className="flex items-center gap-2">
-          <CourseGenerationFileUpload
-            disabled={isIngestPending || isDeletePending || !integrationId}
-            onFilesSelected={handleFilesSelected}
+        <div className="grid grid-cols-[2rem_1fr_2rem_2rem] items-center gap-2">
+          <CourseGenerationComposerLeftControl
+            isVoiceMode={isVoiceMode}
+            isUploadDisabled={isUploadDisabled}
+            onAttachFile={() => fileInputRef.current?.click()}
+            onCloseVoiceMode={() => void cancelVoiceMode()}
           />
 
-          <div className="relative h-8 min-w-0 flex-1">
-            <input
-              value={input}
-              onChange={(event) => onInputChange(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  event.preventDefault();
-                  handleSubmit();
-                }
-              }}
-              className="h-8 w-full border-none bg-transparent text-sm text-neutral-950 focus:outline-none"
-            />
+          <CourseGenerationComposerCenterContent
+            isVoiceMode={isVoiceMode}
+            input={input}
+            currentPlaceholder={currentPlaceholder}
+            voiceLevel={voiceLevel}
+            onInputChange={onInputChange}
+            onSubmit={handleSubmit}
+          />
 
-            {!input.trim() && (
-              <div className="pointer-events-none absolute inset-0 flex items-center overflow-hidden">
-                <AnimatePresence mode="wait">
-                  <motion.span
-                    key={currentPlaceholder}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="block w-full overflow-hidden text-ellipsis whitespace-nowrap text-sm text-neutral-500"
-                  >
-                    {currentPlaceholder.split("").map((char, index) => (
-                      <motion.span
-                        key={`${char}-${index}`}
-                        initial={{ opacity: 0, x: -2 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.16, delay: index * 0.018 }}
-                      >
-                        {char === " " ? "\u00A0" : char}
-                      </motion.span>
-                    ))}
-                  </motion.span>
-                </AnimatePresence>
-              </div>
-            )}
-          </div>
-
-          <Button
-            type="button"
-            variant="default"
-            onClick={handleSubmit}
-            className="flex size-8 p-0 items-center justify-center rounded-lg"
-            aria-label="Send"
-          >
-            <Icon name="Send" className="size-4" />
-          </Button>
+          <CourseGenerationComposerRightControls
+            isVoiceMode={isVoiceMode}
+            onStartVoiceMode={() => void startVoiceMode()}
+            onStopVoiceMode={() => void stopVoiceMode()}
+            onSubmit={handleSubmit}
+          />
         </div>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          disabled={isUploadDisabled}
+          accept={LUMA_FILE_INGESTION_ALLOWED_EXTENSIONS.join(",")}
+          onChange={handleFileChange}
+          className="hidden"
+        />
       </div>
     </div>
   );

@@ -35,8 +35,13 @@ export class AudioWorker implements OnModuleDestroy {
       },
     );
 
-    this.worker.on("completed", (job) => this.logger.log(`Job finished - ${job.id}`));
-    this.worker.on("error", (error) => this.logger.error(error));
+    this.worker.on("completed", (job) => this.logger.log(`Job finished - ${job.id} - ${job.name}`));
+    this.worker.on("failed", (job, error) =>
+      this.logger.error(
+        `Job failed - ID: ${job?.id}, Name: ${job?.name}, Reason: ${error?.message}`,
+        error?.stack,
+      ),
+    );
   }
 
   async onModuleDestroy() {

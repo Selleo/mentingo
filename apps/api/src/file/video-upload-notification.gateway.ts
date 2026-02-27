@@ -49,8 +49,8 @@ export class VideoUploadNotificationGateway implements OnGatewayInit, OnModuleIn
     private readonly redisPublisher: RedisClient,
   ) {}
 
-  async onModuleInit() {
-    await this.setupRedisSubscriber();
+  onModuleInit() {
+    void this.setupRedisSubscriber();
   }
 
   afterInit(_server: Server) {

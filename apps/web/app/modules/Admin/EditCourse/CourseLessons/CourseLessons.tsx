@@ -5,11 +5,11 @@ import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
 import { useLeaveModal } from "~/context/LeaveModalContext";
 import { cn } from "~/lib/utils";
-import { CourseGenerationButton } from "~/modules/Admin/EditCourse/compontents/CourseGenerationButton";
-import { CourseGenerationChatRuntime } from "~/modules/Admin/EditCourse/compontents/CourseGenerationChatRuntime";
-import { CourseGenerationCompletedNotice } from "~/modules/Admin/EditCourse/compontents/CourseGenerationCompletedNotice";
-import { CourseGenerationExitGuard } from "~/modules/Admin/EditCourse/compontents/CourseGenerationExitGuard";
-import { CourseGenerationProgressStrip } from "~/modules/Admin/EditCourse/compontents/CourseGenerationProgressStrip";
+import { CourseGenerationButton } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationButton";
+import { CourseGenerationChatRuntime } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationChatRuntime";
+import { CourseGenerationCompletedNotice } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationCompletedNotice";
+import { CourseGenerationExitGuard } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationExitGuard";
+import { CourseGenerationProgressStrip } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationProgressStrip";
 
 import { ContentTypes } from "../EditCourse.types";
 

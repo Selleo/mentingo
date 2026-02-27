@@ -1,4 +1,4 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 import { VOICE_ACTION, VOICE_SOCKET_EVENT } from "@repo/shared";
 import { match } from "ts-pattern";
 
@@ -19,6 +19,8 @@ import type { StartAudioBody, StopAudioMessage } from "src/audio/types/audio.typ
 
 @Injectable()
 export class AudioService implements OnModuleInit {
+  private readonly logger = new Logger(AudioService.name);
+
   constructor(
     private readonly queueService: QueueService,
     @Inject(REDIS_CLIENT) private readonly redisClient: RedisClient,
@@ -26,11 +28,18 @@ export class AudioService implements OnModuleInit {
     @Inject(REALTIME_PUBLISHER) private readonly realtimePublisher: RealtimePublisher,
   ) {}
 
-  async onModuleInit() {
-    await this.setupRedisSubscriber();
+  onModuleInit() {
+    void this.setupRedisSubscriber().catch((error) => {
+      this.logger.error("Failed to setup audio redis subscriber", error);
+    });
   }
 
   async startAudio(clientId: string, payload: StartAudioBody) {
+    if (!payload?.voiceAction || !payload?.meta) {
+      this.logger.warn(`Invalid startAudio payload for client ${clientId}`);
+      return;
+    }
+
     await this.redisClient.HSET(getAudioMetaKey(clientId), {
       ...payload.meta,
       voiceAction: payload.voiceAction,
@@ -66,6 +75,11 @@ export class AudioService implements OnModuleInit {
     await this.queueService.enqueue(QUEUE_NAMES.AUDIO, voiceAction, { clientId });
   }
 
+  async cancelAudio(clientId: string) {
+    await this.clearAudioState(clientId);
+    this.realtimePublisher.emitToRoom("voice:sessionMetadataCleared", clientId, { clientId });
+  }
+
   private async setupRedisSubscriber() {
     await this.redisSubscriber.subscribe(REDIS_AUDIO_SUBSCRIBER_CHANNEL, async (message) => {
       const data = this.parseMessage(message);
@@ -86,10 +100,14 @@ export class AudioService implements OnModuleInit {
           });
         });
 
-      await this.redisClient.del(getAudioDataKey(data.clientId));
-      await this.redisClient.del(getAudioMetaKey(data.clientId));
-      await this.redisClient.del(getAudioTranscriptKey(data.clientId));
+      await this.clearAudioState(data.clientId);
     });
+  }
+
+  private async clearAudioState(clientId: string) {
+    await this.redisClient.del(getAudioDataKey(clientId));
+    await this.redisClient.del(getAudioMetaKey(clientId));
+    await this.redisClient.del(getAudioTranscriptKey(clientId));
   }
 
   private async getVoiceAction(clientId: string) {

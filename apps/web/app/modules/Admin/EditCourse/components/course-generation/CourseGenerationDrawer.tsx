@@ -1,8 +1,14 @@
-import { type PointerEvent as ReactPointerEvent, useCallback, useState } from "react";
+import {
+  type Dispatch,
+  type PointerEvent as ReactPointerEvent,
+  type SetStateAction,
+  useCallback,
+  useState,
+} from "react";
 
 import { Drawer, DrawerContent } from "~/components/ui/drawer";
 import { cn } from "~/lib/utils";
-import { CourseGenerationChatPanel } from "~/modules/Admin/EditCourse/compontents/CourseGenerationChatPanel";
+import { CourseGenerationChatPanel } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationChatPanel";
 
 import type { GetCourseGenerationDraftResponse } from "~/api/generated-api";
 
@@ -17,6 +23,7 @@ type CourseGenerationDrawerProps = {
     messages: Array<{ id: string; role: string; content: unknown }>;
     streamData: unknown;
     input: string;
+    setInput: Dispatch<SetStateAction<string>>;
     onInputChange: (value: string) => void;
     onSubmit: () => void;
     isProcessing: boolean;
@@ -130,6 +137,7 @@ export function CourseGenerationDrawer({
           <div className="h-[calc(100%-2rem)]">
             <CourseGenerationChatPanel
               courseId={courseId}
+              setInput={chat.setInput}
               messages={chat.messages}
               streamData={chat.streamData}
               input={chat.input}

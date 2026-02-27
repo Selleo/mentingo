@@ -8,6 +8,7 @@ export const VOICE_SOCKET_EVENT = {
   START_AUDIO: "startAudio",
   AUDIO_CHUNK: "audioChunk",
   STOP_AUDIO: "stopAudio",
+  CANCEL_AUDIO: "cancelAudio",
 } as const;
 
 export type VoiceSocketEvent = (typeof VOICE_SOCKET_EVENT)[keyof typeof VOICE_SOCKET_EVENT];

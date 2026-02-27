@@ -26,7 +26,7 @@ import {
 } from "~/hooks/useEntityResourceUpload";
 import { useTusVideoUpload } from "~/hooks/useTusVideoUpload";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
-import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/compontents/MissingTranslationsAlert";
+import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/components/MissingTranslationsAlert";
 
 import { ContentTypes, DeleteContentType } from "../../../EditCourse.types";
 import Breadcrumb from "../components/Breadcrumb";

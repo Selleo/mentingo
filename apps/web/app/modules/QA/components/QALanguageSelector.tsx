@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
-import { courseLanguages } from "~/modules/Admin/EditCourse/compontents/CourseLanguageSelector";
+import { courseLanguages } from "~/modules/Admin/EditCourse/components/CourseLanguageSelector";
 
 import { CreateQALanguageDialog } from "./CreateQALanguageDialog";
 import { DeleteQALanguageDialog } from "./DeleteQALanguageDialog";

@@ -71,4 +71,10 @@ export class AudioGateway implements OnGatewayInit, RealtimePublisher {
   async stopAudio(@ConnectedSocket() client: AuthenticatedSocket) {
     return await this.audioService.stopAudio(client.id);
   }
+
+  @UseGuards(WsJwtGuard)
+  @SubscribeMessage(VOICE_SOCKET_EVENT.CANCEL_AUDIO)
+  async cancelAudio(@ConnectedSocket() client: AuthenticatedSocket) {
+    return await this.audioService.cancelAudio(client.id);
+  }
 }
