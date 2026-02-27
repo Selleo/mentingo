@@ -21,6 +21,7 @@ import { filterChangedData } from "~/utils/filterChangedData";
 import { setPageTitle } from "~/utils/setPageTitle";
 import { isAdminLike } from "~/utils/userRoles";
 
+import { LOGIN_REDIRECT_URL } from "../Auth/constants";
 import Loader from "../common/Loader/Loader";
 import { CoursesCarousel } from "../Dashboard/Courses/CoursesCarousel";
 import { useTourSetup } from "../Onboarding/hooks/useTourSetup";
@@ -32,6 +33,7 @@ import { ProfileActionButtons, ProfileCard, ProfileEditCard } from "./components
 
 import type { UpdateUserProfileBody } from "./types";
 import type { MetaFunction } from "@remix-run/react";
+import type { CurrentUserResponse } from "~/api/generated-api";
 import type { CertificateType } from "~/types/certificate";
 
 const updateUserProfileSchema = z.object({
@@ -47,6 +49,18 @@ const updateUserProfileSchema = z.object({
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.profile");
 
 export default function ProfilePage() {
+  const { data: currentUser } = useCurrentUser();
+
+  if (currentUser?.isSupportMode) return <Navigate to={LOGIN_REDIRECT_URL} replace />;
+
+  return <ProfilePageContent currentUser={currentUser} />;
+}
+
+type ProfilePageContentProps = {
+  currentUser?: CurrentUserResponse["data"];
+};
+
+function ProfilePageContent({ currentUser }: ProfilePageContentProps) {
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
   const { t } = useTranslation();
@@ -56,7 +70,6 @@ export default function ProfilePage() {
 
   const { isStudent } = useUserRole();
   const { data: userDetails, error } = useUserDetails(id);
-  const { data: currentUser } = useCurrentUser();
 
   const { data: globalSettings } = useGlobalSettings();
 

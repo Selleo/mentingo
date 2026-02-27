@@ -19,7 +19,12 @@ import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-obje
 
 import { TenantsRepository } from "./tenants.repository";
 
-import type { CreateTenantBody, ListTenantsQuery, Tenant, UpdateTenantBody } from "./types";
+import type {
+  CreateTenantBody,
+  ListTenantsQuery,
+  TenantsListItemResponse,
+  UpdateTenantBody,
+} from "./types";
 import type { PaginatedResponse } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
 
@@ -32,11 +37,10 @@ export class TenantsService {
     private readonly userService: UserService,
   ) {}
 
-  async findAllTenants({
-    page = 1,
-    perPage = 20,
-    search,
-  }: ListTenantsQuery): Promise<PaginatedResponse<Tenant[]>> {
+  async findAllTenants(
+    { page = 1, perPage = 20, search }: ListTenantsQuery,
+    currentTenantId: string,
+  ): Promise<PaginatedResponse<TenantsListItemResponse[]>> {
     const normalizedSearch = search?.trim() ? search.trim() : undefined;
 
     const [data, totalItems] = await Promise.all([
@@ -44,6 +48,7 @@ export class TenantsService {
         page,
         perPage,
         search: normalizedSearch,
+        currentTenantId,
       }),
       this.tenantsRepository.countAll({ search: normalizedSearch }),
     ]);

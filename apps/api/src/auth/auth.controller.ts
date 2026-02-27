@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -22,10 +23,18 @@ import { GoogleOAuthGuard } from "src/common/guards/google-oauth.guard";
 import { MicrosoftOAuthGuard } from "src/common/guards/microsoft-oauth.guard";
 import { RefreshTokenGuard } from "src/common/guards/refresh-token.guard";
 import { SlackOAuthGuard } from "src/common/guards/slack-oauth.guard";
-import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
-import { UserActivityEvent, UserLogoutEvent } from "src/events";
+import {
+  isSupportModeSession,
+  shouldEmitUserScopedEvents,
+} from "src/common/helpers/support-mode-context";
+import {
+  CurrentUser as CurrentUserType,
+  type SupportModeCurrentUser,
+} from "src/common/types/current-user.type";
+import { SupportModeEnterEvent, UserActivityEvent, UserLogoutEvent } from "src/events";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { SettingsService } from "src/settings/settings.service";
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { baseUserResponseSchema, currentUserResponseSchema } from "src/user/schemas/user.schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
@@ -64,6 +73,7 @@ export class AuthController {
     private readonly tokenService: TokenService,
     private readonly outboxPublisher: OutboxPublisher,
     private readonly settingsService: SettingsService,
+    private readonly tenantRunner: TenantDbRunnerService,
   ) {
     this.CORS_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:5173";
   }
@@ -127,6 +137,12 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<null> {
+    if (isSupportModeSession(currentUser)) {
+      await this.authService.revokeSupportSession(currentUser.supportSessionId);
+      this.tokenService.clearTokenCookies(response);
+      return null;
+    }
+
     this.tokenService.clearTokenCookies(response);
 
     await this.outboxPublisher.publish(
@@ -169,15 +185,74 @@ export class AuthController {
     response: baseResponse(currentUserResponseSchema),
   })
   async currentUser(
-    @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<Static<typeof currentUserResponseSchema>>> {
-    const account = await this.authService.currentUser(currentUserId);
+    const account = await this.authService.currentUser(currentUser);
 
-    await this.outboxPublisher.publish(
-      new UserActivityEvent({ userId: currentUserId, activityType: "LOGIN" }),
-    );
+    if (isSupportModeSession(currentUser)) {
+      await this.publishSupportModeEnterEvent(currentUser);
+    }
+
+    if (shouldEmitUserScopedEvents(currentUser)) {
+      await this.outboxPublisher.publish(
+        new UserActivityEvent({ userId: currentUser.userId, activityType: "LOGIN" }),
+      );
+    }
 
     return new BaseResponse(account);
+  }
+
+  private async publishSupportModeEnterEvent(currentUser: SupportModeCurrentUser): Promise<void> {
+    const payload = {
+      supportSessionId: currentUser.supportSessionId,
+      sourceUserId: currentUser.originalUserId,
+      sourceTenantId: currentUser.originalTenantId,
+      targetUserId: currentUser.userId,
+      targetTenantId: currentUser.tenantId,
+      actor: currentUser,
+    };
+
+    const tenantIds = new Set([currentUser.originalTenantId, currentUser.tenantId]);
+
+    for (const tenantId of tenantIds) {
+      await this.tenantRunner.runWithTenant(tenantId, async () => {
+        await this.outboxPublisher.publish(new SupportModeEnterEvent(payload));
+      });
+    }
+  }
+
+  @Public()
+  @Get("support/callback")
+  @Validate({
+    request: [{ type: "query", name: "grant", schema: Type.String({ minLength: 1 }) }],
+  })
+  async supportCallback(
+    @Query("grant") grant: string,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<void> {
+    const { accessToken, refreshToken } = await this.authService.createSupportModeTokens(grant);
+
+    this.tokenService.setTokenCookies(response, accessToken, refreshToken, false);
+
+    response.redirect("/");
+  }
+
+  @Post("support/exit")
+  @Validate({
+    response: baseResponse(Type.Object({ redirectUrl: Type.String() })),
+  })
+  async exitSupportMode(
+    @CurrentUser() currentUser: CurrentUserType,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<BaseResponse<{ redirectUrl: string }>> {
+    if (!currentUser.isSupportMode || !currentUser.supportSessionId) {
+      throw new BadRequestException("supportMode.errors.notInSupportMode");
+    }
+
+    await this.authService.revokeSupportSession(currentUser.supportSessionId);
+    this.tokenService.clearTokenCookies(response);
+
+    return new BaseResponse({ redirectUrl: currentUser.returnUrl ?? this.CORS_ORIGIN });
   }
 
   @Public()

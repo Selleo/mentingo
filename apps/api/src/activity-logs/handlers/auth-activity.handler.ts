@@ -1,21 +1,22 @@
 import { Injectable } from "@nestjs/common";
 import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
 
-import { UserLoginEvent, UserLogoutEvent } from "src/events";
+import { SupportModeEnterEvent, UserLoginEvent, UserLogoutEvent } from "src/events";
 
 import { ActivityLogsService } from "../activity-logs.service";
 import { ACTIVITY_LOG_ACTION_TYPES, ACTIVITY_LOG_RESOURCE_TYPES } from "../types";
 
-type AuthEventType = UserLoginEvent | UserLogoutEvent;
+type AuthEventType = UserLoginEvent | UserLogoutEvent | SupportModeEnterEvent;
 
 @Injectable()
-@EventsHandler(UserLoginEvent, UserLogoutEvent)
+@EventsHandler(UserLoginEvent, UserLogoutEvent, SupportModeEnterEvent)
 export class AuthActivityHandler implements IEventHandler<AuthEventType> {
   constructor(private readonly activityLogsService: ActivityLogsService) {}
 
   async handle(event: AuthEventType) {
     if (event instanceof UserLoginEvent) return await this.handleLogin(event);
     if (event instanceof UserLogoutEvent) return await this.handleLogout(event);
+    if (event instanceof SupportModeEnterEvent) return await this.handleSupportModeEnter(event);
   }
 
   private async handleLogin(event: UserLoginEvent) {
@@ -36,6 +37,23 @@ export class AuthActivityHandler implements IEventHandler<AuthEventType> {
       operation: ACTIVITY_LOG_ACTION_TYPES.LOGOUT,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.USER,
       resourceId: event.logoutData.userId,
+    });
+  }
+
+  private async handleSupportModeEnter(event: SupportModeEnterEvent) {
+    const context = {
+      method: "support_mode_enter",
+      supportSessionId: event.supportModeEnterData.supportSessionId,
+      sourceTenantId: event.supportModeEnterData.sourceTenantId,
+      targetTenantId: event.supportModeEnterData.targetTenantId,
+    };
+
+    await this.activityLogsService.recordActivity({
+      actor: event.supportModeEnterData.actor,
+      operation: ACTIVITY_LOG_ACTION_TYPES.LOGIN,
+      resourceType: ACTIVITY_LOG_RESOURCE_TYPES.USER,
+      resourceId: event.supportModeEnterData.sourceUserId,
+      context,
     });
   }
 }

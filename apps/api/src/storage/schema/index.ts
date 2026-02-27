@@ -2,6 +2,7 @@ import {
   COURSE_ORIGIN_TYPES,
   MASTER_COURSE_EXPORT_SYNC_STATUSES,
   SUPPORTED_LANGUAGES,
+  SUPPORT_SESSION_STATUSES,
   TENANT_STATUSES,
 } from "@repo/shared";
 import { sql } from "drizzle-orm";
@@ -41,6 +42,7 @@ import type {
   CourseOriginType,
   MasterCourseEntityType,
   MasterCourseExportSyncStatus,
+  SupportSessionStatus,
   TenantStatus,
 } from "@repo/shared";
 import type { ActivityLogMetadata } from "src/activity-logs/types";
@@ -868,6 +870,57 @@ export const integrationApiKeys = pgTable(
     keyPrefixIdx: index("integration_api_keys_key_prefix_idx").on(t.keyPrefix),
     createdByIdx: index("integration_api_keys_created_by_idx").on(t.createdByUserId),
   })),
+);
+
+export const supportSessions = pgTable(
+  "support_sessions",
+  {
+    ...id,
+    ...timestamps,
+    originalUserId: uuid("original_user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    originalTenantId: uuid("original_tenant_id")
+      .references(() => tenants.id, { onDelete: "cascade" })
+      .notNull(),
+    targetTenantId: uuid("target_tenant_id")
+      .references(() => tenants.id, { onDelete: "cascade" })
+      .notNull(),
+    hashedGrantToken: text("hashed_grant_token").notNull(),
+    grantExpiresAt: timestamp("grant_expires_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    activatedAt: timestamp("activated_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    expiresAt: timestamp("expires_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    revokedAt: timestamp("revoked_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    returnUrl: text("return_url").notNull(),
+    status: text("status")
+      .notNull()
+      .$type<SupportSessionStatus>()
+      .default(SUPPORT_SESSION_STATUSES.PENDING),
+  },
+  (table) => ({
+    hashedGrantTokenUniqueIdx: uniqueIndex("support_sessions_hashed_grant_token_unique").on(
+      table.hashedGrantToken,
+    ),
+    statusIdx: index("support_sessions_status_idx").on(table.status),
+    originalUserIdx: index("support_sessions_original_user_idx").on(table.originalUserId),
+    targetTenantIdx: index("support_sessions_target_tenant_idx").on(table.targetTenantId),
+  }),
 );
 
 export const userOnboarding = pgTable(

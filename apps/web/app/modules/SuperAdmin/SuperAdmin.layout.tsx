@@ -26,7 +26,7 @@ const SuperAdminGuard = ({ children }: PropsWithChildren) => {
   const { data: currentUser } = useCurrentUser();
   const navigate = useNavigate();
 
-  const isAllowed = Boolean(currentUser?.isManagingTenantAdmin);
+  const isAllowed = Boolean(currentUser?.isManagingTenantAdmin && !currentUser?.isSupportMode);
 
   useLayoutEffect(() => {
     if (!isAllowed) {

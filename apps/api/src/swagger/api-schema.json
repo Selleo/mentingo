@@ -106,6 +106,44 @@
         }
       }
     },
+    "/api/auth/support/callback": {
+      "get": {
+        "operationId": "AuthController_supportCallback",
+        "parameters": [
+          {
+            "name": "grant",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/auth/support/exit": {
+      "post": {
+        "operationId": "AuthController_exitSupportMode",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExitSupportModeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/forgot-password": {
       "post": {
         "operationId": "AuthController_forgotPassword",
@@ -9313,6 +9351,33 @@
           }
         }
       }
+    },
+    "/api/super-admin/tenants/{id}/support-session": {
+      "post": {
+        "operationId": "TenantsController_createSupportSession",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSupportSessionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "info": {
@@ -9720,6 +9785,39 @@
               },
               "isManagingTenantAdmin": {
                 "type": "boolean"
+              },
+              "isSupportMode": {
+                "type": "boolean"
+              },
+              "supportContext": {
+                "type": "object",
+                "properties": {
+                  "originalUserId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "originalTenantId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "targetTenantId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "expiresAt": {
+                    "type": "string"
+                  },
+                  "returnUrl": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "originalUserId",
+                  "originalTenantId",
+                  "targetTenantId",
+                  "expiresAt",
+                  "returnUrl"
+                ]
               }
             },
             "required": [
@@ -9735,7 +9833,27 @@
               "profilePictureUrl",
               "shouldVerifyMFA",
               "onboardingStatus",
-              "isManagingTenantAdmin"
+              "isManagingTenantAdmin",
+              "isSupportMode"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ExitSupportModeResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "redirectUrl": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "redirectUrl"
             ]
           }
         },
@@ -27492,47 +27610,63 @@
             "type": "array",
             "items": {
               "type": "object",
-              "properties": {
-                "id": {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "host": {
-                  "type": "string"
-                },
-                "status": {
-                  "anyOf": [
-                    {
-                      "const": "active",
+              "allOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
                       "type": "string"
                     },
-                    {
-                      "const": "inactive",
+                    "name": {
+                      "type": "string"
+                    },
+                    "host": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "anyOf": [
+                        {
+                          "const": "active",
+                          "type": "string"
+                        },
+                        {
+                          "const": "inactive",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "isManaging": {
+                      "type": "boolean"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
                       "type": "string"
                     }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "host",
+                    "status",
+                    "isManaging",
+                    "createdAt",
+                    "updatedAt"
                   ]
                 },
-                "isManaging": {
-                  "type": "boolean"
-                },
-                "createdAt": {
-                  "type": "string"
-                },
-                "updatedAt": {
-                  "type": "string"
+                {
+                  "type": "object",
+                  "properties": {
+                    "isCurrentTenant": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "isCurrentTenant"
+                  ]
                 }
-              },
-              "required": [
-                "id",
-                "name",
-                "host",
-                "status",
-                "isManaging",
-                "createdAt",
-                "updatedAt"
               ]
             }
           },
@@ -27793,6 +27927,29 @@
               "isManaging",
               "createdAt",
               "updatedAt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CreateSupportSessionResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "redirectUrl": {
+                "type": "string"
+              },
+              "expiresAt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "redirectUrl",
+              "expiresAt"
             ]
           }
         },

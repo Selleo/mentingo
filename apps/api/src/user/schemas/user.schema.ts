@@ -22,6 +22,16 @@ export const currentUserResponseSchema = Type.Composite([
     shouldVerifyMFA: Type.Boolean(),
     onboardingStatus: userOnboardingStatusSchema,
     isManagingTenantAdmin: Type.Boolean(),
+    isSupportMode: Type.Boolean(),
+    supportContext: Type.Optional(
+      Type.Object({
+        originalUserId: UUIDSchema,
+        originalTenantId: UUIDSchema,
+        targetTenantId: UUIDSchema,
+        expiresAt: Type.String(),
+        returnUrl: Type.String(),
+      }),
+    ),
   }),
 ]);
 

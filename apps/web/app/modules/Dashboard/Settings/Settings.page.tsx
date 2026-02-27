@@ -28,14 +28,16 @@ export default function SettingsPage() {
   const { t } = useTranslation();
 
   const { isContentCreator, isAdmin, isStudent } = useUserRole();
-  const { data: userSettings, isLoading: isLoadingUserSettings } = useUserSettings();
-  const { data: globalSettings, isLoading: isLoadingGlobalSettings } = useGlobalSettings();
   const { data: user, isLoading: isLoadingUser } = useCurrentUser();
+  const isSupportMode = Boolean(user?.isSupportMode);
+  const { data: userSettings, isLoading: isLoadingUserSettings } = useUserSettings(!isSupportMode);
+  const { data: globalSettings, isLoading: isLoadingGlobalSettings } = useGlobalSettings();
   const { data: configurationState } = useConfigurationState({
     enabled: user?.role === USER_ROLE.admin,
   });
 
-  const isLoading = isLoadingUserSettings || isLoadingGlobalSettings || isLoadingUser;
+  const isLoading =
+    (isSupportMode ? false : isLoadingUserSettings) || isLoadingGlobalSettings || isLoadingUser;
 
   const steps = useMemo(() => (isStudent ? studentSettingsSteps(t) : []), [isStudent, t]);
 
@@ -71,13 +73,16 @@ export default function SettingsPage() {
       >
         <SettingsNavigationTabs
           isAdmin={isAdmin}
+          hideAccountTab={isSupportMode}
           hasConfigurationIssues={hasConfigurationIssues}
           accountContent={
-            <AccountTabContent
-              isContentCreator={isContentCreator}
-              isAdmin={isAdmin}
-              settings={isUserSettings(userSettings) ? userSettings : { language: "en" }}
-            />
+            !isSupportMode && (
+              <AccountTabContent
+                isContentCreator={isContentCreator}
+                isAdmin={isAdmin}
+                settings={isUserSettings(userSettings) ? userSettings : { language: "en" }}
+              />
+            )
           }
           organizationContent={
             globalSettings && (

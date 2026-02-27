@@ -30,6 +30,7 @@ import { EmailService } from "src/common/emails/emails.service";
 import { getEmailSubject } from "src/common/emails/translations";
 import { buildCreateNewPasswordLink } from "src/common/helpers/buildCreateNewPasswordLink";
 import hashPassword from "src/common/helpers/hashPassword";
+import { getSupportModeContext } from "src/common/helpers/support-mode-context";
 import { UserLoginEvent } from "src/events/user/user-login.event";
 import { UserPasswordCreatedEvent } from "src/events/user/user-password-created.event";
 import { UserRegisteredEvent } from "src/events/user/user-registered.event";
@@ -37,6 +38,7 @@ import { UserWelcomeEvent } from "src/events/user/user-welcome.event";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { SettingsService } from "src/settings/settings.service";
 import { DB_ADMIN } from "src/storage/db/db.providers";
+import { SupportModeService } from "src/support-mode/support-mode.service";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
 import {
@@ -44,6 +46,7 @@ import {
   credentials,
   magicLinkTokens,
   resetTokens,
+  userOnboarding,
   tenants,
   users,
 } from "../storage/schema";
@@ -58,6 +61,7 @@ import type { RegisterUserWithHashedPasswordInput, TokenUser } from "./types";
 import type { Response } from "express";
 import type { ActorUserType } from "src/common/types/actor-user.type";
 import type { CurrentUser } from "src/common/types/current-user.type";
+import type { SupportSession } from "src/support-mode/support-mode.types";
 import type { ProviderLoginUserType } from "src/utils/types/provider-login-user.type";
 
 @Injectable()
@@ -76,6 +80,7 @@ export class AuthService {
     private settingsService: SettingsService,
     private readonly outboxPublisher: OutboxPublisher,
     private tokenService: TokenService,
+    private readonly supportModeService: SupportModeService,
   ) {
     this.ENCRYPTION_KEY = Buffer.from(process.env.MASTER_KEY!, "base64");
   }
@@ -214,27 +219,82 @@ export class AuthService {
     };
   }
 
-  public async currentUser(id: UUIDType) {
-    const user = await this.userService.getUserById(id);
+  public async currentUser(currentUser: CurrentUser) {
+    const { isSupportMode, dbInstance, sourceUserId, sourceTenantId } = getSupportModeContext(
+      currentUser,
+      this.db,
+      this.dbAdmin,
+    );
 
-    if (!user) {
-      throw new UnauthorizedException("User not found");
+    if (isSupportMode) {
+      return this.resolveSupportModeCurrentUser(
+        currentUser,
+        sourceUserId,
+        sourceTenantId,
+        dbInstance,
+      );
     }
 
-    const onboardingStatus = await this.userService.getAllOnboardingStatus(user.id);
+    const { userId, tenantId } = currentUser;
 
+    const user = await this.userService.getUserById(userId);
+    if (!user) throw new UnauthorizedException("User not found");
+
+    const onboardingStatus = await this.getOnboardingStatus(userId);
     const { MFAEnforcedRoles } = await this.settingsService.getGlobalSettings();
-    const userSettings = await this.settingsService.getUserSettings(user.id);
+    const userSettings = await this.settingsService.getUserSettings(userId);
+
+    const isManagingTenantAdmin = await this.isManagingTenantAdmin(tenantId, user.role as UserRole);
+
+    if (MFAEnforcedRoles.includes(user.role as UserRole) || userSettings.isMFAEnabled) {
+      return {
+        ...user,
+        shouldVerifyMFA: true,
+        onboardingStatus,
+        isManagingTenantAdmin,
+        isSupportMode: false,
+      };
+    }
+
+    return {
+      ...user,
+      shouldVerifyMFA: false,
+      onboardingStatus,
+      isManagingTenantAdmin,
+      isSupportMode: false,
+    };
+  }
+
+  private async resolveSupportModeCurrentUser(
+    currentUser: CurrentUser,
+    sourceUserId: UUIDType,
+    sourceTenantId: UUIDType,
+    dbInstance: DatabasePg,
+  ) {
+    const { supportSessionId } = currentUser;
+
+    if (!supportSessionId) throw new UnauthorizedException("Support session is invalid");
+
+    const session = await this.supportModeService.assertActiveSession(supportSessionId);
+
+    const user = await this.userService.getUserById(sourceUserId, dbInstance);
+    const onboardingStatus = await this.getOnboardingStatus(sourceUserId, dbInstance);
+
     const isManagingTenantAdmin = await this.isManagingTenantAdmin(
-      user.tenantId,
+      sourceTenantId,
       user.role as UserRole,
     );
 
-    if (MFAEnforcedRoles.includes(user.role as UserRole) || userSettings.isMFAEnabled) {
-      return { ...user, shouldVerifyMFA: true, onboardingStatus, isManagingTenantAdmin };
-    }
-
-    return { ...user, shouldVerifyMFA: false, onboardingStatus, isManagingTenantAdmin };
+    return {
+      ...user,
+      shouldVerifyMFA: false,
+      onboardingStatus,
+      isManagingTenantAdmin,
+      isSupportMode: true,
+      supportContext: {
+        ...session,
+      },
+    };
   }
 
   public async refreshTokens(refreshToken: string) {
@@ -243,6 +303,14 @@ export class AuthService {
         secret: this.configService.get<string>("jwt.refreshSecret"),
         ignoreExpiration: false,
       });
+
+      if (payload.isSupportMode && payload.supportSessionId) {
+        const session = await this.supportModeService.assertActiveSession(payload.supportSessionId);
+
+        const tokens = await this.getSupportTokensForSession(session);
+
+        return tokens;
+      }
 
       const user = await this.userService.getUserById(payload.userId);
       if (!user) {
@@ -301,24 +369,70 @@ export class AuthService {
 
   private async getTokens(user: TokenUser) {
     const { id: userId, email, role, tenantId } = user;
+    return this.signTokens({ userId, email, role, tenantId });
+  }
+
+  async getSupportTokensForSession(session: SupportSession) {
+    const now = Date.now();
+
+    const sessionExpiresAtMs = new Date(session.expiresAt).getTime();
+    const remainingSeconds = Math.floor((sessionExpiresAtMs - now) / 1000);
+
+    if (remainingSeconds <= 0) throw new ForbiddenException("supportMode.errors.sessionExpired");
+
+    const [originalUser] = await this.dbAdmin
+      .select({ email: users.email })
+      .from(users)
+      .where(and(eq(users.id, session.originalUserId), isNull(users.deletedAt)))
+      .limit(1);
+
+    if (!originalUser) throw new UnauthorizedException("Support session is invalid");
+
+    const supportPayload = {
+      userId: session.originalUserId,
+      email: originalUser.email,
+      role: USER_ROLES.ADMIN,
+      tenantId: session.targetTenantId,
+      isSupportMode: true,
+      supportSessionId: session.id,
+      supportExpiresAt: session.expiresAt,
+      originalUserId: session.originalUserId,
+      originalTenantId: session.originalTenantId,
+      returnUrl: session.returnUrl,
+    };
+
+    return this.signTokens(supportPayload, `${remainingSeconds}s`, `${remainingSeconds}s`);
+  }
+
+  private async signTokens(
+    payload: Record<string, unknown>,
+    accessExpiresIn?: string,
+    refreshExpiresIn: string = "7d",
+  ) {
     const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(
-        { userId, email, role, tenantId },
-        {
-          expiresIn: this.configService.get<string>("jwt.expirationTime"),
-          secret: this.configService.get<string>("jwt.secret"),
-        },
-      ),
-      this.jwtService.signAsync(
-        { userId, email, role, tenantId },
-        {
-          expiresIn: "7d",
-          secret: this.configService.get<string>("jwt.refreshSecret"),
-        },
-      ),
+      this.jwtService.signAsync(payload, {
+        expiresIn: accessExpiresIn ?? this.configService.get<string>("jwt.expirationTime"),
+        secret: this.configService.get<string>("jwt.secret"),
+      }),
+      this.jwtService.signAsync(payload, {
+        expiresIn: refreshExpiresIn,
+        secret: this.configService.get<string>("jwt.refreshSecret"),
+      }),
     ]);
 
     return { accessToken, refreshToken };
+  }
+
+  async createSupportModeTokens(grantToken: string) {
+    const session = await this.supportModeService.consumeGrantToken(grantToken);
+
+    const tokens = await this.getSupportTokensForSession(session);
+
+    return { ...tokens, session };
+  }
+
+  async revokeSupportSession(sessionId: string) {
+    await this.supportModeService.revokeSession(sessionId);
   }
 
   public async forgotPassword(email: string) {
@@ -746,6 +860,18 @@ export class AuthService {
       .limit(1);
 
     return Boolean(tenant?.isManaging);
+  }
+
+  private async getOnboardingStatus(userId: UUIDType, db?: DatabasePg) {
+    const dbInstance = db ?? this.db;
+
+    const [onboardingStatus] = await dbInstance
+      .select()
+      .from(userOnboarding)
+      .where(eq(userOnboarding.userId, userId))
+      .limit(1);
+
+    return onboardingStatus;
   }
 
   private async resolveTenantOrigin(tenantId: UUIDType): Promise<string> {

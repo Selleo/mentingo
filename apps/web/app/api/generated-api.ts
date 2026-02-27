@@ -111,6 +111,23 @@ export interface CurrentUserResponse {
       providerInformation: boolean;
     };
     isManagingTenantAdmin: boolean;
+    isSupportMode: boolean;
+    supportContext?: {
+      /** @format uuid */
+      originalUserId: string;
+      /** @format uuid */
+      originalTenantId: string;
+      /** @format uuid */
+      targetTenantId: string;
+      expiresAt: string;
+      returnUrl: string;
+    };
+  };
+}
+
+export interface ExitSupportModeResponse {
+  data: {
+    redirectUrl: string;
   };
 }
 
@@ -4036,7 +4053,7 @@ export interface GenerateArticlePreviewResponse {
 }
 
 export interface FindAllTenantsResponse {
-  data: {
+  data: ({
     /** @format uuid */
     id: string;
     name: string;
@@ -4045,7 +4062,9 @@ export interface FindAllTenantsResponse {
     isManaging: boolean;
     createdAt: string;
     updatedAt: string;
-  }[];
+  } & {
+    isCurrentTenant: boolean;
+  })[];
   pagination: {
     totalItems: number;
     page: number;
@@ -4113,6 +4132,13 @@ export interface UpdateTenantByIdResponse {
     isManaging: boolean;
     createdAt: string;
     updatedAt: string;
+  };
+}
+
+export interface CreateSupportSessionResponse {
+  data: {
+    redirectUrl: string;
+    expiresAt: string;
   };
 }
 
@@ -4347,6 +4373,40 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<CurrentUserResponse, any>({
         path: `/api/auth/current-user`,
         method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuthControllerSupportCallback
+     * @request GET:/api/auth/support/callback
+     */
+    authControllerSupportCallback: (
+      query?: {
+        /** @minLength 1 */
+        grant?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/auth/support/callback`,
+        method: "GET",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuthControllerExitSupportMode
+     * @request POST:/api/auth/support/exit
+     */
+    authControllerExitSupportMode: (params: RequestParams = {}) =>
+      this.request<ExitSupportModeResponse, any>({
+        path: `/api/auth/support/exit`,
+        method: "POST",
         format: "json",
         ...params,
       }),
@@ -9241,6 +9301,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "PATCH",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name TenantsControllerCreateSupportSession
+     * @request POST:/api/super-admin/tenants/{id}/support-session
+     */
+    tenantsControllerCreateSupportSession: (id: string, params: RequestParams = {}) =>
+      this.request<CreateSupportSessionResponse, any>({
+        path: `/api/super-admin/tenants/${id}/support-session`,
+        method: "POST",
         format: "json",
         ...params,
       }),

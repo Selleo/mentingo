@@ -2625,6 +2625,13 @@
       "description": "Are you sure you want to delete this knowledge base entry? This action cannot be undone."
     }
   },
+  "supportMode": {
+    "banner": {
+      "message": "You are running in support mode",
+      "timeLeft": "{{minutes}} min left",
+      "exit": "Exit support mode"
+    }
+  },
   "superAdminTenantsView": {
     "title": "Tenants",
     "description": "Manage tenant names, domains, status, and managing flags.",
@@ -2639,12 +2646,15 @@
       "host": "Host",
       "status": "Status",
       "managing": "Managing",
-      "actions": "Actions",
       "loading": "Loading tenants...",
       "empty": "No tenants found.",
       "yes": "Yes",
       "no": "No",
-      "edit": "Edit"
+      "edit": "Edit",
+      "actions": {
+        "title": "Actions",
+        "enterSupportMode": "Enter support mode"
+      }
     },
     "status": {
       "active": "Active",
@@ -2687,7 +2697,8 @@
       "hostAlreadyExists": "Tenant host already exists",
       "notFound": "Tenant not found",
       "invalidHost": "Invalid tenant host URL",
-      "managingTenantRequired": "Managing tenant admin required"
+      "managingTenantRequired": "Managing tenant admin required",
+      "currentTenantSupportNotAllowed": "Support mode is not available for the current tenant"
     }
   },
   "auth": {

@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { count, eq, ilike, or } from "drizzle-orm";
+import { count, eq, getTableColumns, ilike, or, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { DB_ADMIN } from "src/storage/db/db.providers";
@@ -10,6 +10,7 @@ import type {
   CreateTenantRecord,
   FindAllTenantsParams,
   Tenant,
+  TenantsListItemResponse,
   UpdateTenantRecord,
 } from "./types";
 
@@ -17,11 +18,19 @@ import type {
 export class TenantsRepository {
   constructor(@Inject(DB_ADMIN) private readonly dbBase: DatabasePg) {}
 
-  async findAll({ page, perPage, search }: FindAllTenantsParams): Promise<Tenant[]> {
+  async findAll({
+    page,
+    perPage,
+    search,
+    currentTenantId,
+  }: FindAllTenantsParams): Promise<TenantsListItemResponse[]> {
     const whereClause = this.buildSearchClause(search);
 
     const query = this.dbBase
-      .select()
+      .select({
+        ...getTableColumns(tenants),
+        isCurrentTenant: sql<boolean>`${tenants.id} = ${currentTenantId}`,
+      })
       .from(tenants)
       .orderBy(tenants.createdAt)
       .limit(perPage)

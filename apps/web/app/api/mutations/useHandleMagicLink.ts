@@ -44,14 +44,15 @@ export function useHandleMagicLink() {
     },
     onSuccess: ({ data }) => {
       const { shouldVerifyMFA } = data;
+      const normalizedUser = { ...data, isSupportMode: false };
 
-      queryClient.setQueryData(currentUserQueryOptions.queryKey, { data });
+      queryClient.setQueryData(currentUserQueryOptions.queryKey, { data: normalizedUser });
       queryClient.invalidateQueries(currentUserQueryOptions);
       queryClient.invalidateQueries(userSettingsQueryOptions);
       queryClient.invalidateQueries(mfaSetupQueryOptions);
 
       setLoggedIn(true);
-      setCurrentUser(data);
+      setCurrentUser(normalizedUser);
       setHasVerifiedMFA(!shouldVerifyMFA);
 
       mergeNavigationHistory();

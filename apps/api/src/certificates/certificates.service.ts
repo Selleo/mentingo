@@ -33,11 +33,9 @@ export class CertificatesService implements OnModuleDestroy, OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    try {
-      await this.getBrowser();
-    } catch (error) {
+    void this.getBrowser().catch((error) => {
       this.logger.warn(`Certificate PDF browser warm-up failed during module init: ${error}`);
-    }
+    });
   }
 
   async onModuleDestroy() {

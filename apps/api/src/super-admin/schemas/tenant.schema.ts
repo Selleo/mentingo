@@ -13,7 +13,14 @@ export const tenantResponseSchema = Type.Object({
   updatedAt: Type.String(),
 });
 
-export const tenantsListSchema = Type.Array(tenantResponseSchema);
+export const tenantsListItemSchema = Type.Intersect([
+  tenantResponseSchema,
+  Type.Object({
+    isCurrentTenant: Type.Boolean(),
+  }),
+]);
+
+export const tenantsListSchema = Type.Array(tenantsListItemSchema);
 
 export const listTenantsQuerySchema = Type.Object({
   page: Type.Optional(Type.Number({ minimum: 1 })),

@@ -333,6 +333,7 @@ describe("AuthController (e2e)", () => {
         profilePictureUrl: null,
         groups: [],
         isManagingTenantAdmin: false,
+        isSupportMode: false,
         shouldVerifyMFA: false,
       });
     });

@@ -3,6 +3,7 @@ import { Module } from "@nestjs/common";
 import { BunnyStreamModule } from "src/bunny/bunnyStream.module";
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { EmailModule } from "src/common/emails/emails.module";
+import { DisallowInSupportModeGuard } from "src/common/guards/disallow-support-mode.guard";
 import { FileModule } from "src/file/files.module";
 import { LocalizationModule } from "src/localization/localization.module";
 import { S3Module } from "src/s3/s3.module";
@@ -22,7 +23,7 @@ import { SettingsService } from "./settings.service";
     LocalizationModule,
   ],
   controllers: [SettingsController],
-  providers: [SettingsService, S3Service, BunnyStreamService],
+  providers: [SettingsService, S3Service, BunnyStreamService, DisallowInSupportModeGuard],
   exports: [SettingsService],
 })
 export class SettingsModule {}

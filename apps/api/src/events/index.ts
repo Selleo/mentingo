@@ -19,6 +19,7 @@ export * from "./user/user-assigned-to-course.event";
 export * from "./course/update-course.event";
 export * from "./course/create-course.event";
 export * from "./user/user-login.event";
+export * from "./user/support-mode-enter.event";
 export * from "./user/user-logout.event";
 export * from "./user/user-first-login.event";
 export * from "./user/user-invite.event";

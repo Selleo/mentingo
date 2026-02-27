@@ -12,15 +12,17 @@ import { NavigationMenuItem } from "./NavigationMenuItem";
 
 interface MobileNavigationFooterItemsProps {
   userId?: string;
+  isSupportMode?: boolean;
   setIsMobileNavOpen: React.Dispatch<React.SetStateAction<boolean>>;
   showLabelsOn2xl?: boolean;
   hasConfigurationIssues?: boolean;
 }
 
 export const MobileNavigationFooterItems = ({
+  userId,
+  isSupportMode,
   setIsMobileNavOpen,
   showLabelsOn2xl,
-  userId,
   hasConfigurationIssues,
 }: MobileNavigationFooterItemsProps) => {
   const { t } = useTranslation();
@@ -40,16 +42,18 @@ export const MobileNavigationFooterItems = ({
         isFooter
       />
 
-      <NavigationMenuItem
-        className="col-span-1 md:col-span-2 2xl:hidden"
-        item={{
-          label: t("navigationSideBar.profile"),
-          link: `/profile/${userId}`,
-          iconName: "User",
-        }}
-        setIsMobileNavOpen={setIsMobileNavOpen}
-        isFooter
-      />
+      {!isSupportMode && (
+        <NavigationMenuItem
+          className="col-span-1 md:col-span-2 2xl:hidden"
+          item={{
+            label: t("navigationSideBar.profile"),
+            link: `/profile/${userId}`,
+            iconName: "User",
+          }}
+          setIsMobileNavOpen={setIsMobileNavOpen}
+          isFooter
+        />
+      )}
 
       <NavigationMenuItem
         className="col-span-1 md:col-span-2 2xl:hidden"
