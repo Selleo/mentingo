@@ -28,7 +28,7 @@ type EvaluationQuizResponse = {
 
 type CertificateResponse = {
   id: string;
-}[];
+} | null;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -233,7 +233,7 @@ async function verifyCertificateIsAvailable(page: Page) {
       response.request().method() === "GET",
   );
   const certificateBody2 = (await certificateResponse2.json()) as CertificateResponse;
-  const certificateId = certificateBody2?.[0].id;
+  const certificateId = certificateBody2?.id;
   expect(certificateId).toBeTruthy();
 
   const certificateHeader = page.getByText("Congratulations! You have");

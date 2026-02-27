@@ -9,6 +9,8 @@ export const certificateSchema = Type.Object({
   courseTitle: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   completionDate: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   fullName: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  certificateSignatureUrl: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  certificateFontColor: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   createdAt: Type.String(),
 });
 
@@ -18,5 +20,6 @@ export const downloadCertificateSchema = Type.Object({
 });
 
 export const allCertificatesSchema = Type.Array(certificateSchema);
+export const singleCertificateSchema = Type.Union([certificateSchema, Type.Null()]);
 
 export const paginatedCertificatesSchema = paginatedResponse(allCertificatesSchema);

@@ -5,13 +5,17 @@ import { useToast } from "~/components/ui/use-toast";
 
 import CertificateContent from "./CertificateContent";
 
+import type { CertificateColorTheme } from "./certificateTheme";
+
 interface CertificateToPDFProps {
   studentName?: string;
   courseName?: string;
   completionDate?: string;
   platformLogo?: string | null;
   backgroundImageUrl?: string | null;
+  signatureImageUrl?: string | null;
   lang: "pl" | "en";
+  colorTheme?: CertificateColorTheme;
 }
 
 const useCertificatePDF = () => {
@@ -39,6 +43,23 @@ const useCertificatePDF = () => {
         }),
       });
 
+      if (!response.ok) {
+        const errorResponse = (await response.json().catch(() => null)) as {
+          message?: string;
+        } | null;
+        const apiMessage = errorResponse?.message;
+
+        if (apiMessage) {
+          throw new Error(
+            t(apiMessage, {
+              defaultValue: t("studentCertificateView.informations.failedToDownload"),
+            }),
+          );
+        }
+
+        throw new Error(t("studentCertificateView.informations.failedToDownload"));
+      }
+
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       const linkElement = document.createElement("a");
@@ -49,7 +70,11 @@ const useCertificatePDF = () => {
       document.body.removeChild(linkElement);
       URL.revokeObjectURL(url);
     } catch (error) {
-      toast({ description: t("studentCertificateView.informations.failedToDownload") });
+      const description =
+        error instanceof Error
+          ? error.message
+          : t("studentCertificateView.informations.failedToDownload");
+      toast({ description });
     } finally {
       setIsPreparingDownload(false);
     }
@@ -61,14 +86,18 @@ const useCertificatePDF = () => {
     completionDate,
     platformLogo,
     backgroundImageUrl,
+    signatureImageUrl,
     lang,
+    colorTheme,
   }: CertificateToPDFProps) => (
     <div
+      aria-hidden="true"
       style={{
         position: "fixed",
         top: 0,
         left: 0,
         opacity: 0,
+        visibility: "hidden",
         pointerEvents: "none",
         width: "297mm",
         height: "210mm",
@@ -91,6 +120,8 @@ const useCertificatePDF = () => {
           lang={lang}
           platformLogo={platformLogo}
           backgroundImageUrl={backgroundImageUrl}
+          signatureImageUrl={signatureImageUrl}
+          colorTheme={colorTheme}
         />
       </div>
     </div>

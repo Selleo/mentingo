@@ -56,7 +56,7 @@ describe("CertificatesController (e2e)", () => {
     });
 
     describe("when user is logged in", () => {
-      it.only("returns certificates of specific user", async () => {
+      it("returns certificates of specific user", async () => {
         const admin = await userFactory
           .withCredentials({ password })
           .withAdminSettings(db)
@@ -231,16 +231,15 @@ describe("CertificatesController (e2e)", () => {
           .query({ userId: student.id, courseId: course.id })
           .expect(200);
 
-        expect(response.body).toHaveLength(1);
-        expect(response.body[0].id).toBeDefined();
-        expect(response.body[0].courseId).toBe(course.id);
-        expect(response.body[0].courseTitle).toBe(course.title);
-        expect(response.body[0].completionDate).toBe(null);
-        expect(response.body[0].fullName).toBe(`${student.firstName} ${student.lastName}`);
-        expect(response.body[0].userId).toBe(student.id);
+        expect(response.body.id).toBeDefined();
+        expect(response.body.courseId).toBe(course.id);
+        expect(response.body.courseTitle).toBe(course.title);
+        expect(response.body.completionDate).toBe(null);
+        expect(response.body.fullName).toBe(`${student.firstName} ${student.lastName}`);
+        expect(response.body.userId).toBe(student.id);
       });
 
-      it("returns 404 if certificate does not exist", async () => {
+      it("returns an empty array if certificate does not exist", async () => {
         const admin = await userFactory
           .withCredentials({ password })
           .withAdminSettings(db)
@@ -259,11 +258,13 @@ describe("CertificatesController (e2e)", () => {
           hasCertificate: true,
         });
 
-        await request(app.getHttpServer())
+        const response = await request(app.getHttpServer())
           .get("/api/certificates/certificate")
           .set("Cookie", cookies)
           .query({ userId: student.id, courseId: course.id })
-          .expect(404);
+          .expect(200);
+
+        expect(response.body).toBeNull();
       });
     });
   });
@@ -347,6 +348,20 @@ describe("CertificatesController (e2e)", () => {
         expect(response.headers["content-type"]).toBe("application/pdf");
         expect(response.headers["content-disposition"]).toBe(`attachment; filename="${filename}"`);
         expect(response.body instanceof Buffer).toBe(true);
+      });
+
+      it("returns 400 when html content is empty", async () => {
+        const student = await userFactory
+          .withCredentials({ password })
+          .withUserSettings(db)
+          .create({ role: USER_ROLES.STUDENT });
+        const cookies = await cookieFor(student, app);
+
+        await request(app.getHttpServer())
+          .post("/api/certificates/download")
+          .set("Cookie", cookies)
+          .send({ html: "   " })
+          .expect(400);
       });
     });
   });

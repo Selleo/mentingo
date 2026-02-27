@@ -4,16 +4,22 @@ import {
   ConflictException,
   BadRequestException,
   Logger,
+  InternalServerErrorException,
 } from "@nestjs/common";
 import puppeteer, { type Page, type Browser } from "puppeteer";
 
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { FileService } from "src/file/file.service";
 import { SettingsService } from "src/settings/settings.service";
 
 import { CertificateRepository } from "./certificate.repository";
 
-import type { CertificatesQuery, AllCertificatesResponse } from "./certificates.types";
+import type {
+  CertificatesQuery,
+  AllCertificatesResponse,
+  CertificateResponse,
+} from "./certificates.types";
 import type { OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import type { SupportedLanguages } from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
@@ -30,6 +36,7 @@ export class CertificatesService implements OnModuleDestroy, OnModuleInit {
   constructor(
     private readonly certificateRepository: CertificateRepository,
     private readonly settingsService: SettingsService,
+    private readonly fileService: FileService,
   ) {}
 
   async onModuleInit() {
@@ -61,7 +68,7 @@ export class CertificatesService implements OnModuleDestroy, OnModuleInit {
 
     try {
       return await this.certificateRepository.transaction(async (trx) => {
-        const data = await this.certificateRepository.findCertificatesByUserId(
+        const certificates = await this.certificateRepository.findCertificatesByUserId(
           userId,
           page,
           perPage,
@@ -70,13 +77,17 @@ export class CertificatesService implements OnModuleDestroy, OnModuleInit {
           trx,
         );
 
+        const data = await Promise.all(
+          certificates.map((certificate) => this.mapCertificateWithSignatureUrl(certificate)),
+        );
+
         const totalItems = await this.certificateRepository.countByUserId(userId, trx);
 
         return { data, pagination: { totalItems, page, perPage } };
       });
     } catch (error) {
-      console.error("Error fetching certificates:", error);
-      throw new Error("Failed to fetch certificates");
+      this.logger.error("Error fetching certificates", error);
+      throw new InternalServerErrorException("Failed to fetch certificates");
     }
   }
 
@@ -89,35 +100,12 @@ export class CertificatesService implements OnModuleDestroy, OnModuleInit {
       const executeInTransaction = async (
         transactionInstance: PostgresJsDatabase<typeof schema>,
       ) => {
-        const existingUser = await this.certificateRepository.findUserById(
-          userId,
-          transactionInstance,
-        );
-        const existingCourse = await this.certificateRepository.findCourseById(
-          courseId,
-          transactionInstance,
-        );
-        const courseCompletion = await this.certificateRepository.findCourseCompletion(
-          userId,
-          courseId,
-          transactionInstance,
-        );
-
-        if (!existingUser) {
-          throw new NotFoundException("User not found");
-        }
-
-        if (!existingCourse) {
-          throw new NotFoundException("Course not found");
-        }
-
-        if (!existingCourse.certificateEnabled) {
-          throw new BadRequestException("Certificates are disabled for this course");
-        }
-
-        if (!courseCompletion?.completedAt) {
-          throw new BadRequestException("Course must be completed to generate certificate");
-        }
+        const { existingUser, existingCourse, completionDate } =
+          await this.validateCertificateCreationPreconditions(
+            userId,
+            courseId,
+            transactionInstance,
+          );
 
         const existingCertificate = await this.certificateRepository.findExistingCertificate(
           userId,
@@ -143,7 +131,7 @@ export class CertificatesService implements OnModuleDestroy, OnModuleInit {
           ...createdCertificate,
           fullName: `${existingUser.firstName} ${existingUser.lastName}`,
           courseTitle: existingCourse.title,
-          completionDate: new Date(courseCompletion.completedAt).toISOString(),
+          completionDate: new Date(completionDate).toISOString(),
         };
       };
 
@@ -153,28 +141,25 @@ export class CertificatesService implements OnModuleDestroy, OnModuleInit {
         return await this.certificateRepository.transaction(executeInTransaction);
       }
     } catch (error) {
-      console.error("Error creating certificate:", error);
+      this.logger.error("Error creating certificate", error);
       throw error;
     }
   }
 
-  async getCertificate(userId: UUIDType, courseId: UUIDType, language: SupportedLanguages) {
-    try {
-      const certificate = await this.certificateRepository.findCertificateByUserAndCourse(
-        userId,
-        courseId,
-        language,
-      );
+  async getCertificate(
+    userId: UUIDType,
+    courseId: UUIDType,
+    language: SupportedLanguages,
+  ): Promise<CertificateResponse | null> {
+    const certificate = await this.certificateRepository.findCertificateByUserAndCourse(
+      userId,
+      courseId,
+      language,
+    );
 
-      if (!certificate) {
-        throw new NotFoundException("Certificate not found");
-      }
+    if (!certificate) return null;
 
-      return certificate;
-    } catch (error) {
-      console.error("Error fetching certificate:", error);
-      throw error;
-    }
+    return this.mapCertificateWithSignatureUrl(certificate);
   }
 
   private async getBrowser() {
@@ -208,53 +193,24 @@ export class CertificatesService implements OnModuleDestroy, OnModuleInit {
   }
 
   async downloadCertificate(html: string): Promise<Buffer> {
-    if (!html.trim()) {
-      throw new BadRequestException("HTML content is required");
-    }
+    if (!html.trim())
+      throw new BadRequestException("studentCertificateView.informations.htmlRequired");
 
     const globalSettings = await this.settingsService.getGlobalSettings();
 
-    const backgroundImage = globalSettings?.certificateBackgroundImage;
+    const completeHtml = this.buildCertificateHtmlDocument(
+      html,
+      globalSettings?.certificateBackgroundImage,
+    );
 
-    const backgroundStyle = backgroundImage
-      ? `background: url(${backgroundImage}) no-repeat center center; background-size: 100% 100%;`
-      : "background-color: white;";
+    return this.renderPdfFromHtml(completeHtml);
+  }
 
-    const completeHtml = `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <style>
-        * {
-          margin: 0; 
-          padding: 0;
-          box-sizing: border-box;
-        }
-        body {
-          overflow: hidden;
-          ${backgroundStyle}
-        }
-       
-        body > * {
-          transform: scale(2.2);
-        }
-        </style>
-        <title>Certificate</title>
-        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    </head>
-    <body>
-      ${html}
-    </body>
-    </html>
-  `;
-
+  private async renderPdfFromHtml(completeHtml: string): Promise<Buffer> {
     let page: Page | null = null;
 
     try {
       const browser = await this.getBrowser();
-
       page = await browser.newPage();
 
       await page.setContent(completeHtml, { waitUntil: "domcontentloaded", timeout: 30_000 });
@@ -281,8 +237,9 @@ export class CertificatesService implements OnModuleDestroy, OnModuleInit {
       return Buffer.from(pdfBuffer);
     } catch (error) {
       this.logger.error(`Certificate PDF generation failed: ${error}`);
-
-      throw new Error(`Certificate PDF generation failed: ${error}`);
+      throw new InternalServerErrorException(
+        "studentCertificateView.informations.pdfGenerationFailed",
+      );
     } finally {
       if (page) {
         await page.close().catch((closeError) => {
@@ -290,5 +247,91 @@ export class CertificatesService implements OnModuleDestroy, OnModuleInit {
         });
       }
     }
+  }
+
+  private buildCertificateHtmlDocument(html: string, backgroundImage?: string | null): string {
+    const backgroundStyle = backgroundImage
+      ? `background: url(${backgroundImage}) no-repeat center center; background-size: 100% 100%;`
+      : "background-color: white;";
+
+    return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>
+        * {
+          margin: 0; 
+          padding: 0;
+          box-sizing: border-box;
+        }
+        body {
+          width: 297mm;
+          height: 210mm;
+          overflow: hidden;
+          ${backgroundStyle}
+        }
+       
+        body > * {
+          width: 297mm;
+          height: 210mm;
+          transform-origin: top left;
+        }
+        </style>
+        <title>Certificate</title>
+        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    </head>
+    <body>
+      ${html}
+    </body>
+    </html>
+  `;
+  }
+
+  private async validateCertificateCreationPreconditions(
+    userId: UUIDType,
+    courseId: UUIDType,
+    transactionInstance: PostgresJsDatabase<typeof schema>,
+  ) {
+    const existingUser = await this.certificateRepository.findUserById(userId, transactionInstance);
+    const existingCourse = await this.certificateRepository.findCourseById(
+      courseId,
+      transactionInstance,
+    );
+    const courseCompletion = await this.certificateRepository.findCourseCompletion(
+      userId,
+      courseId,
+      transactionInstance,
+    );
+
+    if (!existingUser) throw new NotFoundException("User not found");
+
+    if (!existingCourse) throw new NotFoundException("Course not found");
+
+    if (!existingCourse.certificateEnabled)
+      throw new BadRequestException("Certificates are disabled for this course");
+
+    if (!courseCompletion?.completedAt)
+      throw new BadRequestException("Course must be completed to generate certificate");
+
+    return {
+      existingUser,
+      existingCourse,
+      completionDate: courseCompletion.completedAt,
+    };
+  }
+
+  private async mapCertificateWithSignatureUrl<T extends { certificateSignature?: string | null }>(
+    certificate: T,
+  ): Promise<Omit<T, "certificateSignature"> & { certificateSignatureUrl: string | null }> {
+    const { certificateSignature, ...rest } = certificate;
+
+    return {
+      ...rest,
+      certificateSignatureUrl: certificateSignature
+        ? await this.fileService.getFileUrl(certificateSignature)
+        : null,
+    };
   }
 }

@@ -1631,13 +1631,6 @@ export interface UpdateHasCertificateResponse {
   };
 }
 
-export interface UpdateCourseSettingsBody {
-  /** @default false */
-  lessonSequenceEnabled?: boolean;
-  /** @default true */
-  quizFeedbackEnabled?: boolean;
-}
-
 export interface UpdateCourseSettingsResponse {
   data: {
     message: string;
@@ -1650,6 +1643,11 @@ export interface GetCourseSettingsResponse {
     lessonSequenceEnabled: boolean;
     /** @default true */
     quizFeedbackEnabled: boolean;
+    /** @default null */
+    certificateSignature: string | null;
+    /** @default null */
+    certificateFontColor: string | null;
+    certificateSignatureUrl: string | null;
   };
 }
 
@@ -2613,6 +2611,8 @@ export interface GetAllCertificatesResponse {
     courseTitle?: string | null;
     completionDate?: string | null;
     fullName?: string | null;
+    certificateSignatureUrl?: string | null;
+    certificateFontColor?: string | null;
     createdAt: string;
   }[];
   pagination: {
@@ -2633,8 +2633,10 @@ export type GetCertificateResponse = {
   courseTitle?: string | null;
   completionDate?: string | null;
   fullName?: string | null;
+  certificateSignatureUrl?: string | null;
+  certificateFontColor?: string | null;
   createdAt: string;
-}[];
+} | null;
 
 export interface DownloadCertificateBody {
   html: string;
@@ -6204,16 +6206,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name CourseControllerUpdateCourseSettings
      * @request PATCH:/api/course/settings/{courseId}
      */
-    courseControllerUpdateCourseSettings: (
-      courseId: string,
-      data: UpdateCourseSettingsBody,
-      params: RequestParams = {},
-    ) =>
+    courseControllerUpdateCourseSettings: (courseId: string, params: RequestParams = {}) =>
       this.request<UpdateCourseSettingsResponse, any>({
         path: `/api/course/settings/${courseId}`,
         method: "PATCH",
-        body: data,
-        type: ContentType.Json,
         format: "json",
         ...params,
       }),

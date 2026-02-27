@@ -220,10 +220,7 @@ const CourseSettings = ({
             {isMissingContent && <MissingTranslationsAlert />}
 
             <div className="flex flex-col gap-y-1">
-              {courseId && (
-                <CourseCertificateSetting courseId={courseId} hasCertificate={hasCertificate} />
-              )}
-              <div className="flex items-center gap-x-2"></div>
+              <h5 className="h5 text-neutral-950">{t("adminCourseView.settings.editHeader")}</h5>
               <p className="body-lg-md text-neutral-800">
                 {t("adminCourseView.settings.editSubHeader")}
               </p>
@@ -289,6 +286,13 @@ const CourseSettings = ({
                   <p className="text-sm text-red-500">
                     {t("adminCourseView.settings.other.reachedCharactersLimit")}
                   </p>
+                )}
+                {courseId && (
+                  <CourseCertificateSetting
+                    courseId={courseId}
+                    hasCertificate={hasCertificate}
+                    courseTitle={watchedTitle || title}
+                  />
                 )}
                 {courseId && <CourseSettingsSwitches courseId={courseId} />}
                 <FormField

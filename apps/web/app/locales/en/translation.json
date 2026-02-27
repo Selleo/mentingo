@@ -1138,6 +1138,7 @@
       "button": {
         "removeThumbnail": "Remove Thumbnail",
         "removeTrailer": "Remove Trailer",
+        "removeCertificateSignature": "Remove signature",
         "includesCertificate": "Includes certificate",
         "doesNotIncludeCertificate": "Does not include certificate"
       },
@@ -1174,6 +1175,13 @@
         "reachedCharactersLimit": "You have reached the character limit.",
         "reachedCharactersLimitHtml": "Too much formatting. Please reduce the amount of formatting to fit within the limit.",
         "enableCertificate": "Enable certificate",
+        "enableCertificateDescription": "Allow students to receive a certificate after finishing this course.",
+        "certificateSignatureRequirements": "PNG or SVG (recommended transparent background)",
+        "certificatePreviewTitle": "Certificate preview",
+        "certificatePreviewDescription": "Open preview to adjust language and color.",
+        "certificatePreviewButton": "Preview",
+        "certificatePreviewStudentName": "Student Name",
+        "certificatePreviewCourseName": "Course Name",
         "enforceLessonSequence": "Enforce lesson sequence",
         "requireSequentialLessons": "Require students to complete lessons in order",
         "enableQuizFeedback": "Quiz feedback",
@@ -2103,11 +2111,17 @@
       "noCertificates": "No certificates available yet. Complete courses to earn certificates.",
       "failedToLoad": "Failed to load certificates. Please try again later.",
       "preparingDownload": "Your certificate is being prepared for download...",
-      "failedToDownload": "Failed to download certificate. Please try again later."
+      "failedToDownload": "Failed to download certificate. Please try again later.",
+      "htmlRequired": "Certificate content is missing. Please refresh and try again.",
+      "pdfGenerationFailed": "Failed to generate certificate PDF. Please try again."
     },
     "button": {
       "download": "Download",
       "preview": "Preview"
+    },
+    "controls": {
+      "languageToggle": "Language toggle",
+      "fontColor": "Font color"
     }
   },
   "announcements": {
@@ -2220,7 +2234,8 @@
   "files": {
     "toast": {
       "invalidData": "File upload failed - invalid file data",
-      "contentTypeMismatch": "File content type does not match the provided content type"
+      "contentTypeMismatch": "File content type does not match the provided content type",
+      "invalidFileType": "Invalid file type. Please upload a PNG or SVG file."
     },
     "import": {
       "noFileUploaded": "No file uploaded",

@@ -1125,6 +1125,7 @@
       "button": {
         "removeThumbnail": "Usuń miniaturę",
         "removeTrailer": "Usuń zwiastun",
+        "removeCertificateSignature": "Usuń podpis",
         "includesCertificate": "Zawiera certyfikat",
         "doesNotIncludeCertificate": "Nie zawiera certyfikatu"
       },
@@ -1161,6 +1162,14 @@
         "charactersLeft": "Pozostało znaków",
         "reachedCharactersLimit": "Osiągnięto limit znaków.",
         "reachedCharactersLimitHtml": "Zbyt dużo formatowania. Zmniejsz ilość formatowania, aby zmieścić się w limicie.",
+        "enableCertificate": "Włącz certyfikat",
+        "enableCertificateDescription": "Pozwól studentom otrzymać certyfikat po ukończeniu tego kursu.",
+        "certificateSignatureRequirements": "PNG lub SVG (zalecane przezroczyste tło)",
+        "certificatePreviewTitle": "Podgląd certyfikatu",
+        "certificatePreviewDescription": "Otwórz podgląd, aby dostosować język i kolor.",
+        "certificatePreviewButton": "Podgląd",
+        "certificatePreviewStudentName": "Imię i nazwisko",
+        "certificatePreviewCourseName": "Nazwa kursu",
         "enforceLessonSequence": "Wymuś sekwencję lekcji",
         "requireSequentialLessons": "Wymagaj ukończenia lekcji w kolejności",
         "enableQuizFeedback": "Feedback po quizie",
@@ -2144,11 +2153,17 @@
       "noCertificates": "Nie masz jeszcze żadnych certyfikatów. Ukończ kurs, aby otrzymać certyfikat.",
       "failedToLoad": "Nie udało się załadować certyfikatów. Spróbuj ponownie później.",
       "preparingDownload": "Twój certyfikat jest przygotowywany do pobrania...",
-      "failedToDownload": "Nie udało się pobrać certyfikatu. Spróbuj ponownie później."
+      "failedToDownload": "Nie udało się pobrać certyfikatu. Spróbuj ponownie później.",
+      "htmlRequired": "Brakuje treści certyfikatu. Odśwież stronę i spróbuj ponownie.",
+      "pdfGenerationFailed": "Nie udało się wygenerować PDF certyfikatu. Spróbuj ponownie."
     },
     "button": {
       "download": "Pobierz",
       "preview": "Podgląd"
+    },
+    "controls": {
+      "languageToggle": "Przełącznik języka",
+      "fontColor": "Kolor czcionki"
     }
   },
   "announcements": {
@@ -2245,7 +2260,8 @@
   "files": {
     "toast": {
       "invalidData": "Nie udało się przesłać pliku - nieprawidłowe dane pliku",
-      "contentTypeMismatch": "Typ zawartości pliku nie odpowiada podanemu typowi"
+      "contentTypeMismatch": "Typ zawartości pliku nie odpowiada podanemu typowi",
+      "invalidFileType": "Nieprawidłowy typ pliku. Prześlij plik PNG lub SVG."
     },
     "import": {
       "noFileUploaded": "Nie przesłano pliku",

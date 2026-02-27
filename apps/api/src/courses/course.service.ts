@@ -91,7 +91,7 @@ import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
 import { getSortOptions } from "../common/helpers/getSortOptions";
 
-import { LESSON_SEQUENCE_ENABLED } from "./constants";
+import { LESSON_SEQUENCE_ENABLED, QUIZ_FEEDBACK_ENABLED } from "./constants";
 import { DURATION_DEFAULTS } from "./constants/duration-defaults";
 import { CourseSlugService } from "./course-slug.service";
 import { MasterCourseService } from "./master-course.service";
@@ -1611,6 +1611,7 @@ export class CourseService {
     courseId: UUIDType,
     settings: UpdateCourseSettings,
     currentUser: CurrentUser,
+    certificateSignature?: Express.Multer.File | null,
   ) {
     await this.masterCourseService.assertCourseContentEditable(courseId);
 
@@ -1627,11 +1628,28 @@ export class CourseService {
 
     const previousSnapshot = await this.buildCourseActivitySnapshot(courseId, resolvedLanguage);
 
-    const incomingSettings = pickBy(settings, (value) => value !== undefined && value !== null);
+    const incomingSettings = pickBy(
+      settings,
+      (value, key) => key !== "removeCertificateSignature" && value !== undefined && value !== null,
+    );
+
+    let certificateSignatureReference = course.settings.certificateSignature ?? null;
+
+    if (certificateSignature) {
+      const { fileKey } = await this.fileService.uploadFile(certificateSignature, "certificate");
+      certificateSignatureReference = fileKey;
+    }
+
+    if (settings.removeCertificateSignature) certificateSignatureReference = null;
+
     const [updatedCourse] = await this.db
       .update(courses)
       .set({
-        settings: { ...course.settings, ...incomingSettings },
+        settings: {
+          ...course.settings,
+          ...incomingSettings,
+          certificateSignature: certificateSignatureReference,
+        },
       })
       .where(eq(courses.id, courseId))
       .returning();
@@ -1656,14 +1674,23 @@ export class CourseService {
     return updatedCourse;
   }
 
-  async getCourseSettings(courseId: UUIDType): Promise<CoursesSettings> {
+  async getCourseSettings(
+    courseId: UUIDType,
+  ): Promise<CoursesSettings & { certificateSignatureUrl: string | null }> {
     const [course] = await this.db.select().from(courses).where(eq(courses.id, courseId));
 
     if (!course) {
       throw new NotFoundException("Course not found");
     }
 
-    return course.settings;
+    const certificateSignatureUrl = course.settings.certificateSignature
+      ? await this.fileService.getFileUrl(course.settings.certificateSignature)
+      : null;
+
+    return {
+      ...course.settings,
+      certificateSignatureUrl,
+    };
   }
 
   private areCourseSnapshotsEqual(
@@ -1712,7 +1739,12 @@ export class CourseService {
         }
       }
 
-      const settings = sql`json_build_object('lessonSequenceEnabled', ${LESSON_SEQUENCE_ENABLED}::boolean)`;
+      const settings = sql`json_build_object(
+        'lessonSequenceEnabled', ${LESSON_SEQUENCE_ENABLED}::boolean,
+        'quizFeedbackEnabled', ${QUIZ_FEEDBACK_ENABLED}::boolean,
+        'certificateSignature', NULL,
+        'certificateFontColor', NULL
+      )`;
 
       const [newCourse] = await trx
         .insert(courses)

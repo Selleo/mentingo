@@ -3339,16 +3339,6 @@
             }
           }
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateCourseSettingsBody"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
             "content": {
@@ -16845,20 +16835,6 @@
           "data"
         ]
       },
-      "UpdateCourseSettingsBody": {
-        "additionalProperties": false,
-        "type": "object",
-        "properties": {
-          "lessonSequenceEnabled": {
-            "default": false,
-            "type": "boolean"
-          },
-          "quizFeedbackEnabled": {
-            "default": true,
-            "type": "boolean"
-          }
-        }
-      },
       "UpdateCourseSettingsResponse": {
         "type": "object",
         "properties": {
@@ -16882,7 +16858,6 @@
         "type": "object",
         "properties": {
           "data": {
-            "additionalProperties": false,
             "type": "object",
             "properties": {
               "lessonSequenceEnabled": {
@@ -16892,11 +16867,46 @@
               "quizFeedbackEnabled": {
                 "default": true,
                 "type": "boolean"
+              },
+              "certificateSignature": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "certificateFontColor": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "certificateSignatureUrl": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
               "lessonSequenceEnabled",
-              "quizFeedbackEnabled"
+              "quizFeedbackEnabled",
+              "certificateSignature",
+              "certificateFontColor",
+              "certificateSignatureUrl"
             ]
           }
         },
@@ -21318,6 +21328,26 @@
                     }
                   ]
                 },
+                "certificateSignatureUrl": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "certificateFontColor": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "createdAt": {
                   "type": "string"
                 }
@@ -21362,63 +21392,87 @@
         ]
       },
       "GetCertificateResponse": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "format": "uuid",
-              "type": "string"
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "userId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "courseId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "courseTitle": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "completionDate": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "fullName": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "certificateSignatureUrl": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "certificateFontColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "createdAt": {
+                "type": "string"
+              }
             },
-            "userId": {
-              "format": "uuid",
-              "type": "string"
-            },
-            "courseId": {
-              "format": "uuid",
-              "type": "string"
-            },
-            "courseTitle": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "completionDate": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "fullName": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "createdAt": {
-              "type": "string"
-            }
+            "required": [
+              "id",
+              "userId",
+              "courseId",
+              "createdAt"
+            ]
           },
-          "required": [
-            "id",
-            "userId",
-            "courseId",
-            "createdAt"
-          ]
-        }
+          {
+            "type": "null"
+          }
+        ]
       },
       "DownloadCertificateBody": {
         "type": "object",
