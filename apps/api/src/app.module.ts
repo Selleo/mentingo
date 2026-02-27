@@ -45,6 +45,7 @@ import { IngestionModule } from "./ingestion/ingestion.module";
 import { IntegrationModule } from "./integration/integration.module";
 import { LessonModule } from "./lesson/lesson.module";
 import { LocalizationModule } from "./localization/localization.module";
+import { LumaModule } from "./luma/luma.module";
 import { NewsModule } from "./news/news.module";
 import { OutboxModule } from "./outbox/outbox.module";
 import { QuestionsModule } from "./questions/question.module";
@@ -135,6 +136,7 @@ import { UserModule } from "./user/user.module";
     AnalyticsModule,
     SuperAdminModule,
     OutboxModule,
+    LumaModule,
   ],
   controllers: [],
   providers: [

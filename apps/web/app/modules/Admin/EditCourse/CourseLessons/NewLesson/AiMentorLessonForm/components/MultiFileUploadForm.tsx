@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { memo, useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -10,56 +10,21 @@ import {
   useAiMentorLessonFiles,
 } from "~/api/queries/admin/useAiMentorLessonFiles";
 import { queryClient } from "~/api/queryClient";
-import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { cn } from "~/lib/utils";
 import {
   MAX_MB_PER_FILE,
   MAX_NUM_OF_FILES,
 } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/AiMentorLesson.constants";
 import { FileLoader } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/components/FileLoader";
+import { UploadFileCard } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/components/UploadFileCard";
 
 import { FILE_TYPES_MAP } from "../utils/AiMentor.constants";
 import {
   type AiMentorLessonContextValues,
   aiMentorLessonFileSchema,
 } from "../validators/useAiMentorLessonFormSchema";
-
-interface FileCardProps {
-  name: string;
-  fileType: string;
-  onRemove: () => void;
-  error: boolean;
-}
-
-const FileCard = memo(({ name, fileType, onRemove, error }: FileCardProps) => (
-  <div className="relative flex items-center gap-3 rounded-lg border border-neutral-200 bg-white p-3 shadow-sm">
-    <button
-      type="button"
-      aria-label="Remove file"
-      onClick={onRemove}
-      className="absolute right-2 top-2 inline-flex size-6 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-500 shadow-sm hover:bg-neutral-50 hover:text-neutral-700 focus:outline-none focus:ring-2 focus:ring-neutral-300 focus:ring-offset-1"
-    >
-      <Icon name="IconX" className="size-4" />
-    </button>
-
-    <div className="flex size-10 flex-none items-center justify-center rounded-md bg-neutral-50 text-neutral-500">
-      <Icon
-        name={error ? "ExclamationTriangle" : "Directory"}
-        className={cn("size-6", { "text-error-600": error })}
-      />
-    </div>
-
-    <div className="min-w-0 flex-1">
-      <p className="truncate text-sm font-medium text-neutral-900" title={name}>
-        {name}
-      </p>
-      <p className="text-xs text-neutral-500">{FILE_TYPES_MAP[fileType] ?? fileType ?? "File"}</p>
-    </div>
-  </div>
-));
 
 export interface FileWithOptionalId extends File {
   id?: string | undefined;
@@ -162,9 +127,9 @@ export function MultiFileUploadForm({ lessonId }: { lessonId: string }) {
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {!isUploadPending &&
               files.map((item, idx) => (
-                <FileCard
+                <UploadFileCard
                   name={item.name}
-                  fileType={item.type}
+                  meta={FILE_TYPES_MAP[item.type] ?? item.type ?? "File"}
                   key={`${item.name} - ${item.type} - ${item.size}`}
                   onRemove={() => removeWhere({ fileName: item.name, fileSize: item.size })}
                   error={idx >= MAX_NUM_OF_FILES}

@@ -13,6 +13,7 @@ import { LearningTimeModule } from "src/learning-time/learning-time.module";
 import { LessonModule } from "src/lesson/lesson.module";
 import { LocalizationModule } from "src/localization/localization.module";
 import { LocalizationService } from "src/localization/localization.service";
+import { LumaModule } from "src/luma/luma.module";
 import { SettingsModule } from "src/settings/settings.module";
 import { StatisticsModule } from "src/statistics/statistics.module";
 import { StripeModule } from "src/stripe/stripe.module";
@@ -29,6 +30,7 @@ import { MasterCourseWorker } from "./master-course.worker";
 
 @Module({
   imports: [
+    LumaModule,
     FileModule,
     StatisticsModule,
     forwardRef(() => ChapterModule),

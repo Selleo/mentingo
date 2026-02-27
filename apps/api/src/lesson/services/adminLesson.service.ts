@@ -1117,4 +1117,10 @@ export class AdminLessonService {
 
     return { contextId };
   }
+
+  async courseHasChapters(courseId: UUIDType) {
+    const [course] = await this.adminLessonRepository.getCourse(courseId);
+
+    return course.chapterCount > 0;
+  }
 }

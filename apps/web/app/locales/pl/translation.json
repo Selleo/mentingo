@@ -960,6 +960,9 @@
       "VITE_SLACK_OAUTH_ENABLED": {
         "label": "Vite Slack OAuth Enabled (true/false)"
       },
+      "LUMA_API_KEY": {
+        "label": "Luma API Key"
+      },
       "save": "Zapisz"
     },
     "breadcrumbs": {
@@ -1045,6 +1048,7 @@
       "generateMissingTranslations": "Wygeneruj brakujące tłumaczenia",
       "enrolledStudents": "Zapisani studenci",
       "testAiMentor": "Przetestuj AI Mentora",
+      "aiCourseCreation": "Tworzenie kursu AI",
       "notAddedLanguages": "Niedodane",
       "baseLanguage": "Domyślny",
       "generateMissingTranslationsDescription": "Czy na pewno chcesz wygenerować brakujące tłumaczenia? Ta akcja może zająć kilka chwil."
@@ -1071,8 +1075,46 @@
       "noMissingTranslations": "Brak brakujących tłumaczeń",
       "mismatchContentLength": "Liczba tłumaczeń nie jest równa liczbie wygenerowanych tłumaczeń",
       "translationsGeneratedSuccessfully": "Tłumaczenia wygenerowane pomyślnie",
+      "lumaNotConfigured": "Klucz API Luma nie jest skonfigurowany.",
+      "lumaBadRequest": "Żądanie do Luma było nieprawidłowe.",
+      "lumaUnauthorized": "Autoryzacja Luma nie powiodła się.",
+      "lumaResourceNotFound": "Nie znaleziono żądanego zasobu Luma.",
+      "lumaRequestTimeout": "Przekroczono limit czasu żądania do Luma.",
+      "lumaConflict": "Luma zwróciła konflikt.",
+      "lumaValidationFailed": "Walidacja w Luma nie powiodła się.",
+      "lumaRateLimited": "Osiągnięto limit zapytań Luma. Spróbuj ponownie za chwilę.",
+      "lumaServiceUnavailable": "Usługa Luma jest obecnie niedostępna.",
+      "courseHasChapters": "Ten kurs ma już rozdziały.",
+      "courseGeneratedSavedSuccessfully": "Wygenerowany kurs został zapisany.",
       "maxOneVideoUploaded": "Nie możesz przesłać więcej niż 1 wideo.",
       "successfullyTransferredCourseOwnership": "Własność kursu została pomyślnie przeniesiona"
+    },
+    "thinking": {
+      "PLANNING_NEXT_STEP": "Wybieranie następnego kroku...",
+      "USING_TOOLS": "Używanie narzędzi do pobrania kontekstu...",
+      "SUMMARIZING_CONTEXT": "Podsumowywanie pobranego kontekstu...",
+      "ANALYZING_OBJECTIVES": "Analizowanie celów...",
+      "SCANNING_LEARNING_EVIDENCE": "Skanowanie materiałów edukacyjnych...",
+      "RUNNING_CURRICULUM_DESIGN": "Tworzenie planu kursu...",
+      "INITIALIZING_CURRICULUM_PLAN": "Inicjalizowanie planu kursu...",
+      "DESIGNING_CHAPTERS": "Projektowanie rozdziałów...",
+      "DESIGNING_LESSON_BLUEPRINTS": "Projektowanie konspektów lekcji...",
+      "FINALIZING_COURSE_STRUCTURE": "Finalizowanie struktury kursu...",
+      "PREPARING_FINAL_COURSE_SHELL": "Przygotowywanie finalnej struktury kursu...",
+      "FINALIZING_LESSON_PAYLOADS": "Finalizowanie zawartości lekcji...",
+      "COURSE_FINISHED": "Zapisywanie wygenerowanego kursu...",
+      "WRITING_RESPONSE": "Tworzenie odpowiedzi...",
+      "WAITING_FOR_CONFIRMATION": "Oczekiwanie na Twoje potwierdzenie...",
+      "THINKING": "Myślenie..."
+    },
+    "generation": {
+      "processingTitle": "Generowanie kursu w tle",
+      "exitHint": "Pozostaw tę stronę otwartą. Generowanie może potrwać kilka minut.",
+      "exitDialogTitle": "Opuścić tę stronę?",
+      "exitWarning": "Trwa generowanie kursu. Czy na pewno chcesz opuścić tę stronę?",
+      "finishedTitle": "Generowanie kursu zakończone",
+      "finishedDescription": "Rozdziały i lekcje są gotowe do przejrzenia.",
+      "preparingStructure": "Przygotowywanie struktury rozdziałów..."
     },
     "settings": {
       "breadcrumbs": {
@@ -1175,7 +1217,7 @@
       "chapter": {
         "button": {
           "addChapter": "Dodaj rozdział",
-          "addChapterDisabledTooltip": "Aby dodać rozdział, musisz być w języku bazowym."
+          "generateWithAI": "Generuj z AI"
         },
         "toast": {
           "chapterCreatedSuccessfully": "Rozdział utworzony pomyślnie",
@@ -1260,6 +1302,7 @@
           "aiMentorLessonCreatedSuccessfully": "Lekcja AI Mentora utworzona pomyślnie",
           "aiMentorLessonUpdatedSuccessfully": "Lekcja AI Mentora zaktualizowana pomyślnie",
           "aiMentorLessonFileAddedSuccessfully": "Pliki lekcji AI Mentora zostały pomyślnie przesłane",
+          "courseGenerationFileAddedToUploadQueue": "Plik dodano do kolejki przesyłania",
           "aiMentorLessonFileDeletedSuccessfully": "Pliki lekcji AI Mentora zostały pomyślnie usunięte",
           "lessonUpdatedSuccessfully": "Lekcja zaktualizowana pomyślnie",
           "contentLessonUpdatedSuccessfully": "Lekcja zaktualizowana pomyślnie",
@@ -1312,6 +1355,18 @@
           "taskDescription": "Opisz zadanie, które uczestnik ma zrealizować w trakcie tej lekcji.",
           "aiMentorTypes": "Mentor",
           "passThreshold": "np. 70%"
+        },
+        "courseGenerationComposer": {
+          "placeholders": {
+            "topic": "Podstawy prawa pracy dla zespołów softwareowych obejmujące umowy, własność intelektualną i compliance.",
+            "targetAudience": "Developerzy w zespołach produktowych współpracujący z działem prawnym i HR.",
+            "currentLevel": "Poziom początkujący do średniozaawansowanego bez wymaganego wykształcenia prawniczego.",
+            "desiredOutcomes": "Pewne rozpoznawanie ryzyk prawnych w codziennych decyzjach inżynierskich i wiedza kiedy eskalować temat.",
+            "constraintsPrerequisites": "Cztery do pięciu godzin tygodniowo w trybie zdalnym przy wymaganym podstawowym doświadczeniu programistycznym.",
+            "preferredFormatAssessment": "Mieszany format obejmujący krótkie materiały, praktyczne scenariusze i krótkie oceny oparte na przypadkach.",
+            "timeBudget": "Łącznie jeden miesiąc z tygodniowymi kamieniami milowymi i sesją podsumowującą.",
+            "successCriteriaDomainContext": "Uczestnicy potrafią jasno wyjaśnić temat i samodzielnie rozwiązać realistyczne sytuacje prawne z życia firmy technologicznej."
+          }
         },
         "other": {
           "lessonNumber": "Liczba lekcji",

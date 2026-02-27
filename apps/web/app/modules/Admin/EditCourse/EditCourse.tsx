@@ -7,9 +7,11 @@ import { useTranslation } from "react-i18next";
 import { useExportMasterCourse } from "~/api/mutations/admin/useExportMasterCourse";
 import useGenerateMissingTranslations from "~/api/mutations/admin/useGenerateMissingTranslations";
 import { useBetaCourseById } from "~/api/queries/admin/useBetaCourse";
+import { useCourseGenerationDraft } from "~/api/queries/admin/useCourseGenerationDraft";
 import { useMissingTranslations } from "~/api/queries/admin/useHasMissingTranslations";
 import { useMasterCourseExportCandidates } from "~/api/queries/admin/useMasterCourseExportCandidates";
 import { useAIConfigured } from "~/api/queries/useAIConfigured";
+import { useLumaConfigured } from "~/api/queries/useLumaConfigured";
 import { useStripeConfigured } from "~/api/queries/useStripeConfigured";
 import { Icon } from "~/components/Icon";
 import { PageWrapper } from "~/components/PageWrapper";
@@ -57,6 +59,7 @@ const EditCourse = () => {
 
   const { data: isStripeConfigured } = useStripeConfigured();
   const { data: isAIConfigured } = useAIConfigured();
+  const { data: isLumaConfigured } = useLumaConfigured();
   const { isManagingTenantAdmin } = useUserRole();
 
   const { language } = useLanguageStore();
@@ -67,6 +70,7 @@ const EditCourse = () => {
   const [selectedTenantIds, setSelectedTenantIds] = useState<string[]>([]);
   const { mutateAsync: generateTranslations, isPending: isGenerationPending } =
     useGenerateMissingTranslations();
+
   const { mutateAsync: exportMasterCourse, isPending: isExportPending } = useExportMasterCourse();
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -82,6 +86,27 @@ const EditCourse = () => {
     dataUpdatedAt,
     error,
   } = useBetaCourseById(id, courseLanguage);
+
+  const showCourseGenerationButton = useMemo(
+    () => !!isLumaConfigured?.enabled,
+    [isLumaConfigured?.enabled],
+  );
+
+  const isCourseGenerationDisabled = useMemo(
+    () => (course?.chapters.length ?? 0) > 0,
+    [course?.chapters.length],
+  );
+
+  const isCourseGenerationDraftEnabled =
+    !!course?.id && !isCourseGenerationDisabled && showCourseGenerationButton;
+
+  const { data: draft } = useCourseGenerationDraft(
+    course?.id ?? "",
+    course?.title ?? "",
+    isCourseGenerationDraftEnabled,
+  );
+  const [isCourseGeneratedOverride, setIsCourseGeneratedOverride] = useState(false);
+  const isCourseGenerated = Boolean(draft?.isCourseGenerated) || isCourseGeneratedOverride;
 
   const { data: hasMissingTranslations } = useMissingTranslations(id, courseLanguage);
   const { data: exportCandidates } = useMasterCourseExportCandidates(id, isManagingTenantAdmin);
@@ -148,10 +173,12 @@ const EditCourse = () => {
     });
   }, []);
 
-  const canRefetchChapterList = Boolean(
-    previousDataUpdatedAt && currentDataUpdatedAt && previousDataUpdatedAt < currentDataUpdatedAt,
-  );
+  const handleCourseGenerationFinished = () => {
+    setIsCourseGeneratedOverride(true);
+  };
 
+  const canRefetchChapterList =
+    previousDataUpdatedAt && currentDataUpdatedAt && previousDataUpdatedAt < currentDataUpdatedAt;
   const selectedTab = searchParams.get("tab") ?? EXPORTED_COURSE_VISIBLE_TAB_VALUES[0];
 
   const { isExportedCourse, isMasterCourse } = useMemo(() => {
@@ -370,6 +397,11 @@ const EditCourse = () => {
           ) : (
             <LeaveModalProvider>
               <CourseLessons
+                showCourseGenerationButton={showCourseGenerationButton}
+                isCourseGenerationDisabled={isCourseGenerationDisabled}
+                draft={draft}
+                isCourseGenerated={isCourseGenerated}
+                onCourseGenerationFinished={handleCourseGenerationFinished}
                 chapters={course?.chapters as Chapter[]}
                 canRefetchChapterList={!!canRefetchChapterList}
                 language={courseLanguage}

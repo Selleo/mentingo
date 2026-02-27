@@ -975,6 +975,9 @@
       "VITE_SLACK_OAUTH_ENABLED": {
         "label": "Vite Slack OAuth Enabled (true/false)"
       },
+      "LUMA_API_KEY": {
+        "label": "Luma API Key"
+      },
       "save": "Save"
     },
     "breadcrumbs": {
@@ -1060,6 +1063,7 @@
       "generateMissingTranslations": "Generate missing translations",
       "enrolledStudents": "Enrolled students",
       "testAiMentor": "Test AI Mentor",
+      "aiCourseCreation": "AI Course Creation",
       "notAddedLanguages": "Not added",
       "baseLanguage": "Default",
       "generateMissingTranslationsDescription": "Are you sure you want to generate missing translations? This action may take a few moments."
@@ -1084,8 +1088,46 @@
       "noMissingTranslations": "No missing translations",
       "mismatchContentLength": "The number of translations does not match the number of generated translations",
       "translationsGeneratedSuccessfully": "Translations generated successfully",
+      "lumaNotConfigured": "Luma API key is not configured.",
+      "lumaBadRequest": "Luma request was invalid.",
+      "lumaUnauthorized": "Luma authorization failed.",
+      "lumaResourceNotFound": "Requested Luma resource was not found.",
+      "lumaRequestTimeout": "Luma request timed out.",
+      "lumaConflict": "Luma reported a conflict.",
+      "lumaValidationFailed": "Luma validation failed.",
+      "lumaRateLimited": "Luma rate limit reached. Please try again shortly.",
+      "lumaServiceUnavailable": "Luma service is currently unavailable.",
+      "courseHasChapters": "This course already has chapters.",
+      "courseGeneratedSavedSuccessfully": "Generated course saved successfully.",
       "maxOneVideoUploaded": "You cannot upload more than 1 video.",
       "successfullyTransferredCourseOwnership": "Course ownership transferred successfully"
+    },
+    "thinking": {
+      "PLANNING_NEXT_STEP": "Planning next step...",
+      "USING_TOOLS": "Using tools to fetch context...",
+      "SUMMARIZING_CONTEXT": "Summarizing retrieved context...",
+      "ANALYZING_OBJECTIVES": "Analyzing objectives...",
+      "SCANNING_LEARNING_EVIDENCE": "Scanning learning evidence...",
+      "RUNNING_CURRICULUM_DESIGN": "Running curriculum design...",
+      "INITIALIZING_CURRICULUM_PLAN": "Initializing curriculum plan...",
+      "DESIGNING_CHAPTERS": "Designing chapters...",
+      "DESIGNING_LESSON_BLUEPRINTS": "Designing lesson blueprints...",
+      "FINALIZING_COURSE_STRUCTURE": "Finalizing course structure...",
+      "PREPARING_FINAL_COURSE_SHELL": "Preparing final course shell...",
+      "FINALIZING_LESSON_PAYLOADS": "Finalizing lesson payloads...",
+      "COURSE_FINISHED": "Saving generated course...",
+      "WRITING_RESPONSE": "Writing response...",
+      "WAITING_FOR_CONFIRMATION": "Waiting for your confirmation...",
+      "THINKING": "Thinking..."
+    },
+    "generation": {
+      "processingTitle": "Generating course in background",
+      "exitHint": "Keep this page open. Generation can take a few minutes.",
+      "exitDialogTitle": "Leave this page?",
+      "exitWarning": "Course generation is in progress. Are you sure you want to leave this page?",
+      "finishedTitle": "Course generation finished",
+      "finishedDescription": "Your chapters and lessons are ready to review.",
+      "preparingStructure": "Preparing chapter structure..."
     },
     "settings": {
       "breadcrumbs": {
@@ -1188,7 +1230,7 @@
       "chapter": {
         "button": {
           "addChapter": "Add chapter",
-          "addChapterDisabledTooltip": "To add a chapter, you must be in the base language."
+          "generateWithAI": "Generate with AI"
         },
         "toast": {
           "chapterCreatedSuccessfully": "Chapter created successfully",
@@ -1271,6 +1313,7 @@
           "aiMentorLessonCreatedSuccessfully": "AI Mentor lesson created successfully",
           "aiMentorLessonUpdatedSuccessfully": "AI Mentor lesson updated successfully",
           "aiMentorLessonFileAddedSuccessfully": "AI Mentor lesson files uploaded successfully",
+          "courseGenerationFileAddedToUploadQueue": "File added to the upload queue",
           "aiMentorLessonFileDeletedSuccessfully": "AI Mentor lesson files deleted successfully",
           "lessonUpdatedSuccessfully": "Lesson updated successfully",
           "contentLessonUpdatedSuccessfully": "Content lesson updated successfully",
@@ -1321,6 +1364,18 @@
           "taskDescription": "Describe the task the participant needs to complete...",
           "passThreshold": "e.g., 70%",
           "aiMentorTypes": "Mentor"
+        },
+        "courseGenerationComposer": {
+          "placeholders": {
+            "topic": "Workplace law essentials for software teams including contracts, intellectual property, and compliance.",
+            "targetAudience": "Developers in product teams who collaborate with legal and HR stakeholders.",
+            "currentLevel": "Beginner to intermediate with no formal legal training required.",
+            "desiredOutcomes": "Confidently identify legal risk in daily engineering decisions and know when to escalate.",
+            "constraintsPrerequisites": "Four to five hours per week in a fully remote setting with basic software experience required.",
+            "preferredFormatAssessment": "Mixed format with concise reading, practical scenarios, and short case-based assessments.",
+            "timeBudget": "One month total with weekly milestones and a final recap session.",
+            "successCriteriaDomainContext": "Learners can clearly explain the topic and solve realistic workplace law situations in a tech company context."
+          }
         },
         "other": {
           "lessonNumber": "Number of lessons",
