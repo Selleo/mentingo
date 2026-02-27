@@ -2572,7 +2572,7 @@
   },
   "supportMode": {
     "banner": {
-      "message": "You are running in support mode for organization: {{organization}}.",
+      "message": "You are running in support mode",
       "timeLeft": "{{minutes}} min left",
       "exit": "Exit support mode"
     }

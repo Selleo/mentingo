@@ -380,9 +380,17 @@ export class AuthService {
 
     if (remainingSeconds <= 0) throw new ForbiddenException("supportMode.errors.sessionExpired");
 
+    const [originalUser] = await this.dbAdmin
+      .select({ email: users.email })
+      .from(users)
+      .where(and(eq(users.id, session.originalUserId), isNull(users.deletedAt)))
+      .limit(1);
+
+    if (!originalUser) throw new UnauthorizedException("Support session is invalid");
+
     const supportPayload = {
       userId: session.originalUserId,
-      email: session.originalUserEmail,
+      email: originalUser.email,
       role: USER_ROLES.ADMIN,
       tenantId: session.targetTenantId,
       isSupportMode: true,
@@ -390,8 +398,6 @@ export class AuthService {
       supportExpiresAt: session.expiresAt,
       originalUserId: session.originalUserId,
       originalTenantId: session.originalTenantId,
-      originalTenantName: session.originalTenantName,
-      targetTenantName: session.targetTenantName,
       returnUrl: session.returnUrl,
     };
 

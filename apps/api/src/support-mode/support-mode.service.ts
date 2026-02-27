@@ -62,12 +62,9 @@ export class SupportModeService {
 
     await this.supportModeRepository.createSupportSession({
       originalUserId: requestingUser.userId,
-      originalUserEmail: requestingUser.email,
       originalTenantId: requestingUser.tenantId,
-      originalTenantName: originalTenant.name,
       targetTenantId,
-      targetTenantName: targetTenant.name,
-      grantHash: hashedGrantToken,
+      hashedGrantToken,
       grantExpiresAt: grantTokenExpiresAt,
       expiresAt: sessionExpiresAt,
       returnUrl,

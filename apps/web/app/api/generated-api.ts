@@ -117,10 +117,8 @@ export interface CurrentUserResponse {
       originalUserId: string;
       /** @format uuid */
       originalTenantId: string;
-      originalTenantName: string;
       /** @format uuid */
       targetTenantId: string;
-      targetTenantName: string;
       expiresAt: string;
       returnUrl: string;
     };

@@ -31,7 +31,7 @@ export class SupportModeRepository {
   }
 
   async consumeGrantByHash(
-    grantHashValue: string,
+    hashedGrantTokenValue: string,
     currentTimestampIso: string,
   ): Promise<SupportSession | null> {
     return this.dbAdmin.transaction(async (transaction) => {
@@ -40,7 +40,7 @@ export class SupportModeRepository {
         .from(supportSessions)
         .where(
           and(
-            eq(supportSessions.grantHash, grantHashValue),
+            eq(supportSessions.hashedGrantToken, hashedGrantTokenValue),
             eq(supportSessions.status, SUPPORT_SESSION_STATUSES.PENDING),
             isNull(supportSessions.revokedAt),
             gt(supportSessions.grantExpiresAt, currentTimestampIso),
@@ -54,7 +54,6 @@ export class SupportModeRepository {
           .update(supportSessions)
           .set({
             status: SUPPORT_SESSION_STATUSES.ACTIVE,
-            grantUsedAt: currentTimestampIso,
             activatedAt: currentTimestampIso,
           })
           .where(eq(supportSessions.id, pendingSession.id))

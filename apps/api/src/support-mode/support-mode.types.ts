@@ -18,8 +18,6 @@ export type SupportTokenClaims = {
   supportExpiresAt: string;
   originalUserId: string;
   originalTenantId: string;
-  originalTenantName: string;
-  targetTenantName: string;
   returnUrl: string;
 };
 

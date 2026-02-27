@@ -11,8 +11,6 @@ export type CurrentUser = {
   supportExpiresAt?: string;
   originalUserId?: UUIDType;
   originalTenantId?: UUIDType;
-  originalTenantName?: string;
-  targetTenantName?: string;
   returnUrl?: string;
   iat?: number;
   exp?: number;

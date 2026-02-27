@@ -27,9 +27,7 @@ export const currentUserResponseSchema = Type.Composite([
       Type.Object({
         originalUserId: UUIDSchema,
         originalTenantId: UUIDSchema,
-        originalTenantName: Type.String(),
         targetTenantId: UUIDSchema,
-        targetTenantName: Type.String(),
         expiresAt: Type.String(),
         returnUrl: Type.String(),
       }),

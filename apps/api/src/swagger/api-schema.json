@@ -9621,14 +9621,8 @@
                     "format": "uuid",
                     "type": "string"
                   },
-                  "originalTenantName": {
-                    "type": "string"
-                  },
                   "targetTenantId": {
                     "format": "uuid",
-                    "type": "string"
-                  },
-                  "targetTenantName": {
                     "type": "string"
                   },
                   "expiresAt": {
@@ -9641,9 +9635,7 @@
                 "required": [
                   "originalUserId",
                   "originalTenantId",
-                  "originalTenantName",
                   "targetTenantId",
-                  "targetTenantName",
                   "expiresAt",
                   "returnUrl"
                 ]

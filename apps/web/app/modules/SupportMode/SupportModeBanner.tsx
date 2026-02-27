@@ -46,13 +46,7 @@ export function SupportModeBanner() {
 
   return (
     <div className="bg-warning-500 text-warning-950 px-4 py-2 text-sm flex items-center justify-between gap-3 border-b border-warning-600">
-      <p>
-        {t(
-          "supportMode.banner.message",
-          "You are running in support mode for organization: {{organization}}.",
-          { organization: currentUser.supportContext.targetTenantName },
-        )}
-      </p>
+      <p>{t("supportMode.banner.message")}</p>
       <div className="flex items-center gap-3">
         <span>
           {t("supportMode.banner.timeLeft", "{{minutes}} min left", {

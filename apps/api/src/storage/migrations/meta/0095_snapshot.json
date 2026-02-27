@@ -1,5 +1,5 @@
 {
-  "id": "9b9488e2-a6ec-4544-9fc4-98232c230df1",
+  "id": "6a618854-cca5-429b-a8dd-03b3fd15106d",
   "prevId": "fb14de33-db38-4117-bf31-d2651f4687c7",
   "version": "7",
   "dialect": "postgresql",
@@ -6285,21 +6285,9 @@
           "primaryKey": false,
           "notNull": true
         },
-        "original_user_email": {
-          "name": "original_user_email",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
         "original_tenant_id": {
           "name": "original_tenant_id",
           "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "original_tenant_name": {
-          "name": "original_tenant_name",
-          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -6309,14 +6297,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "target_tenant_name": {
-          "name": "target_tenant_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "grant_hash": {
-          "name": "grant_hash",
+        "hashed_grant_token": {
+          "name": "hashed_grant_token",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -6326,12 +6308,6 @@
           "type": "timestamp(3) with time zone",
           "primaryKey": false,
           "notNull": true
-        },
-        "grant_used_at": {
-          "name": "grant_used_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": false
         },
         "activated_at": {
           "name": "activated_at",
@@ -6366,11 +6342,11 @@
         }
       },
       "indexes": {
-        "support_sessions_grant_hash_unique": {
-          "name": "support_sessions_grant_hash_unique",
+        "support_sessions_hashed_grant_token_unique": {
+          "name": "support_sessions_hashed_grant_token_unique",
           "columns": [
             {
-              "expression": "grant_hash",
+              "expression": "hashed_grant_token",
               "isExpression": false,
               "asc": true,
               "nulls": "last"

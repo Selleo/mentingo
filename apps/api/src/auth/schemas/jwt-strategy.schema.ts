@@ -13,8 +13,6 @@ export const jwtPayloadSchema = Type.Object({
   supportExpiresAt: Type.Optional(Type.String()),
   originalUserId: Type.Optional(UUIDSchema),
   originalTenantId: Type.Optional(UUIDSchema),
-  originalTenantName: Type.Optional(Type.String()),
-  targetTenantName: Type.Optional(Type.String()),
   returnUrl: Type.Optional(Type.String()),
 });
 

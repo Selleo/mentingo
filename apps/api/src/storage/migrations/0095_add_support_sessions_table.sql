@@ -3,14 +3,10 @@ CREATE TABLE IF NOT EXISTS "support_sessions" (
 	"created_at" timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	"original_user_id" uuid NOT NULL,
-	"original_user_email" text NOT NULL,
 	"original_tenant_id" uuid NOT NULL,
-	"original_tenant_name" text NOT NULL,
 	"target_tenant_id" uuid NOT NULL,
-	"target_tenant_name" text NOT NULL,
-	"grant_hash" text NOT NULL,
+	"hashed_grant_token" text NOT NULL,
 	"grant_expires_at" timestamp(3) with time zone NOT NULL,
-	"grant_used_at" timestamp(3) with time zone,
 	"activated_at" timestamp(3) with time zone,
 	"expires_at" timestamp(3) with time zone NOT NULL,
 	"revoked_at" timestamp(3) with time zone,
@@ -36,7 +32,7 @@ EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
-CREATE UNIQUE INDEX IF NOT EXISTS "support_sessions_grant_hash_unique" ON "support_sessions" USING btree ("grant_hash");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "support_sessions_hashed_grant_token_unique" ON "support_sessions" USING btree ("hashed_grant_token");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "support_sessions_status_idx" ON "support_sessions" USING btree ("status");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "support_sessions_original_user_idx" ON "support_sessions" USING btree ("original_user_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "support_sessions_target_tenant_idx" ON "support_sessions" USING btree ("target_tenant_id");

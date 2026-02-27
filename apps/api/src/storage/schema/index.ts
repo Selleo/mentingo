@@ -880,26 +880,18 @@ export const supportSessions = pgTable(
     originalUserId: uuid("original_user_id")
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
-    originalUserEmail: text("original_user_email").notNull(),
     originalTenantId: uuid("original_tenant_id")
       .references(() => tenants.id, { onDelete: "cascade" })
       .notNull(),
-    originalTenantName: text("original_tenant_name").notNull(),
     targetTenantId: uuid("target_tenant_id")
       .references(() => tenants.id, { onDelete: "cascade" })
       .notNull(),
-    targetTenantName: text("target_tenant_name").notNull(),
-    grantHash: text("grant_hash").notNull(),
+    hashedGrantToken: text("hashed_grant_token").notNull(),
     grantExpiresAt: timestamp("grant_expires_at", {
       mode: "string",
       withTimezone: true,
       precision: 3,
     }).notNull(),
-    grantUsedAt: timestamp("grant_used_at", {
-      mode: "string",
-      withTimezone: true,
-      precision: 3,
-    }),
     activatedAt: timestamp("activated_at", {
       mode: "string",
       withTimezone: true,
@@ -922,7 +914,9 @@ export const supportSessions = pgTable(
       .default(SUPPORT_SESSION_STATUSES.PENDING),
   },
   (table) => ({
-    grantHashUniqueIdx: uniqueIndex("support_sessions_grant_hash_unique").on(table.grantHash),
+    hashedGrantTokenUniqueIdx: uniqueIndex("support_sessions_hashed_grant_token_unique").on(
+      table.hashedGrantToken,
+    ),
     statusIdx: index("support_sessions_status_idx").on(table.status),
     originalUserIdx: index("support_sessions_original_user_idx").on(table.originalUserId),
     targetTenantIdx: index("support_sessions_target_tenant_idx").on(table.targetTenantId),
