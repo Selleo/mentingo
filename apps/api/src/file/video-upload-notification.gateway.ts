@@ -5,17 +5,19 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from "@nestjs/websockets";
-import { createClient as createRedisClient } from "redis";
 import { Server } from "socket.io";
 
-import { buildRedisConnection, RedisConfigSchema } from "src/common/configuration/redis";
 import { getUserRoomKey } from "src/file/utils/userRoom";
+import {
+  REDIS_EVENTS_SUBSCRIBER_CLIENT,
+  REDIS_PUBLISHER_CLIENT,
+  type RedisClient,
+} from "src/redis";
 import { AuthenticatedSocket, WsJwtGuard } from "src/websocket";
 
-import type { OnModuleDestroy, OnModuleInit } from "@nestjs/common";
+import type { OnModuleInit } from "@nestjs/common";
 import type { OnGatewayInit } from "@nestjs/websockets";
 import type { VideoUploadStatus } from "@repo/shared";
-import type { RedisClientType } from "redis";
 import type { UUIDType } from "src/common";
 
 export type VideoUploadNotification = {
@@ -33,26 +35,22 @@ export type VideoUploadNotification = {
   transports: ["websocket"],
 })
 @Injectable()
-export class VideoUploadNotificationGateway
-  implements OnGatewayInit, OnModuleDestroy, OnModuleInit
-{
+export class VideoUploadNotificationGateway implements OnGatewayInit, OnModuleInit {
   @WebSocketServer()
   server: Server;
 
   private readonly logger = new Logger(VideoUploadNotificationGateway.name);
-  private redisSubscriber: RedisClientType;
-  private redisPublisher: RedisClientType;
   private readonly channel = "video-upload:notifications";
 
-  constructor(@Inject("REDIS_CONFIG") private readonly redisConfig: RedisConfigSchema) {}
+  constructor(
+    @Inject(REDIS_EVENTS_SUBSCRIBER_CLIENT)
+    private readonly redisSubscriber: RedisClient,
+    @Inject(REDIS_PUBLISHER_CLIENT)
+    private readonly redisPublisher: RedisClient,
+  ) {}
 
   async onModuleInit() {
     await this.setupRedisSubscriber();
-  }
-
-  async onModuleDestroy() {
-    await this.redisSubscriber?.quit();
-    await this.redisPublisher?.quit();
   }
 
   afterInit(_server: Server) {
@@ -81,14 +79,6 @@ export class VideoUploadNotificationGateway
 
   private async setupRedisSubscriber() {
     try {
-      const connection = buildRedisConnection(this.redisConfig);
-
-      this.redisSubscriber = createRedisClient(connection);
-
-      this.redisPublisher = createRedisClient(connection);
-
-      await Promise.all([this.redisSubscriber.connect(), this.redisPublisher.connect()]);
-
       await this.redisSubscriber.subscribe(this.channel, (message) => {
         const notification = this.safeParseNotification(message);
         if (!notification?.userId) {
@@ -109,7 +99,7 @@ export class VideoUploadNotificationGateway
         );
       });
 
-      this.logger.log("Redis subscriber and publisher setup completed");
+      this.logger.log("Redis subscriber setup completed");
     } catch (error) {
       this.logger.error("Failed to setup Redis subscriber/publisher:", error);
     }
@@ -126,11 +116,6 @@ export class VideoUploadNotificationGateway
 
   async publishNotification(notification: VideoUploadNotification) {
     try {
-      if (!this.redisPublisher) {
-        this.logger.error("Redis publisher not initialized");
-        return;
-      }
-
       await this.redisPublisher.publish(this.channel, JSON.stringify(notification));
       this.logger.debug(
         `Published notification: ${notification.uploadId}, status: ${notification.status}`,

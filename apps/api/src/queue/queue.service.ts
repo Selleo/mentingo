@@ -72,7 +72,7 @@ export class QueueService implements OnModuleInit, OnModuleDestroy {
   ): Promise<Job<T>> {
     const queue = this.getQueue(queueName);
 
-    return queue.add(jobName, data, options) as Promise<Job<T>>;
+    return queue.add(jobName, data, options);
   }
 
   async waitForJobsCompletion(queueName: QueueName, jobs: Job[]) {

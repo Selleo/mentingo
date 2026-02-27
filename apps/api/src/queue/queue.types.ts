@@ -3,6 +3,7 @@ export const QUEUE_NAMES = {
   LEARNING_TIME: "learning-time",
   MASTER_COURSE_EXPORT: "master-course-export",
   MASTER_COURSE_SYNC: "master-course-sync",
+  AUDIO: "audio",
 } as const;
 
 export type QueueName = (typeof QUEUE_NAMES)[keyof typeof QUEUE_NAMES];

@@ -10,12 +10,14 @@ import { EnvModule } from "src/env/env.module";
 import { LearningTimeModule } from "src/learning-time";
 import { QAModule } from "src/qa/qa.module";
 import { QueueModule } from "src/queue";
+import { RedisClientsModule } from "src/redis";
 import { WebSocketModule } from "src/websocket";
 
 import { AiModule } from "./ai/ai.module";
 import { AnalyticsModule } from "./analytics/analytics.module";
 import { AnnouncementsModule } from "./announcements/announcements.module";
 import { ArticlesModule } from "./articles/articles.module";
+import { AudioModule } from "./audio/audio.module";
 import { AuthModule } from "./auth/auth.module";
 import { GoogleStrategy } from "./auth/strategy/google.strategy";
 import { MicrosoftStrategy } from "./auth/strategy/microsoft.strategy";
@@ -120,6 +122,7 @@ import { UserModule } from "./user/user.module";
     ReportModule,
     ScormModule,
     CacheModule,
+    RedisClientsModule,
     QueueModule,
     WebSocketModule,
     AiModule,
@@ -138,6 +141,7 @@ import { UserModule } from "./user/user.module";
     AnalyticsModule,
     SuperAdminModule,
     OutboxModule,
+    AudioModule,
     LumaModule,
   ],
   controllers: [],

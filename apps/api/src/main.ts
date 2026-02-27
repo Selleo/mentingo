@@ -21,6 +21,7 @@ import {
 } from "./common/utils/swagger-docs-access";
 import { IntegrationModule } from "./integration/integration.module";
 import { startInstrumentation } from "./langfuse/instrumentation";
+import { REDIS_PUBLISHER_CLIENT, REDIS_SUBSCRIBER_CLIENT, type RedisClient } from "./redis";
 import { DB_ADMIN } from "./storage/db/db.providers";
 import { createCorsOriginOption } from "./utils/cors";
 import { Environment, environmentValidation } from "./utils/environment-validation";
@@ -96,13 +97,10 @@ async function bootstrap() {
   SwaggerModule.setup(SWAGGER_INTEGRATION_ROUTE, app, integrationDocument);
   exportSchemaToFile(integrationDocument, "./src/swagger/integration-api-schema.json");
 
-  const redisUrl = process.env.REDIS_URL;
-
-  if (redisUrl) {
-    const redisIoAdapter = new RedisIoAdapter(app, redisUrl);
-    await redisIoAdapter.connectToRedis();
-    app.useWebSocketAdapter(redisIoAdapter);
-  }
+  const redisPublisher = app.get<RedisClient>(REDIS_PUBLISHER_CLIENT);
+  const redisSubscriber = app.get<RedisClient>(REDIS_SUBSCRIBER_CLIENT);
+  const redisIoAdapter = new RedisIoAdapter(app, redisPublisher, redisSubscriber);
+  app.useWebSocketAdapter(redisIoAdapter);
 
   await app.listen(3000);
 }

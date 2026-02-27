@@ -72,7 +72,6 @@ export class AdminLessonService {
 
   async createLessonForChapter(data: CreateLessonBody, currentUser: CurrentUser) {
     await this.masterCourseService.assertCourseContentEditableByChapterId(data.chapterId);
-
     await this.validateAccess("chapter", currentUser.role, currentUser.userId, data.chapterId);
 
     const { language } = await this.localizationService.getBaseLanguage(
