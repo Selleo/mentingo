@@ -227,30 +227,12 @@ export class AuthService {
     );
 
     if (isSupportMode) {
-      const { supportSessionId } = currentUser;
-
-      if (!supportSessionId) throw new UnauthorizedException("Support session is invalid");
-
-      const session = await this.supportModeService.assertActiveSession(supportSessionId);
-
-      const user = await this.userService.getUserById(sourceUserId, dbInstance);
-      const onboardingStatus = await this.getOnboardingStatus(sourceUserId, dbInstance);
-
-      const isManagingTenantAdmin = await this.isManagingTenantAdmin(
+      return this.resolveSupportModeCurrentUser(
+        currentUser,
+        sourceUserId,
         sourceTenantId,
-        user.role as UserRole,
+        dbInstance,
       );
-
-      return {
-        ...user,
-        shouldVerifyMFA: false,
-        onboardingStatus,
-        isManagingTenantAdmin,
-        isSupportMode: true,
-        supportContext: {
-          ...session,
-        },
-      };
     }
 
     const { userId, tenantId } = currentUser;
@@ -280,6 +262,38 @@ export class AuthService {
       onboardingStatus,
       isManagingTenantAdmin,
       isSupportMode: false,
+    };
+  }
+
+  private async resolveSupportModeCurrentUser(
+    currentUser: CurrentUser,
+    sourceUserId: UUIDType,
+    sourceTenantId: UUIDType,
+    dbInstance: DatabasePg,
+  ) {
+    const { supportSessionId } = currentUser;
+
+    if (!supportSessionId) throw new UnauthorizedException("Support session is invalid");
+
+    const session = await this.supportModeService.assertActiveSession(supportSessionId);
+
+    const user = await this.userService.getUserById(sourceUserId, dbInstance);
+    const onboardingStatus = await this.getOnboardingStatus(sourceUserId, dbInstance);
+
+    const isManagingTenantAdmin = await this.isManagingTenantAdmin(
+      sourceTenantId,
+      user.role as UserRole,
+    );
+
+    return {
+      ...user,
+      shouldVerifyMFA: false,
+      onboardingStatus,
+      isManagingTenantAdmin,
+      isSupportMode: true,
+      supportContext: {
+        ...session,
+      },
     };
   }
 
