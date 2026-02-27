@@ -8,7 +8,7 @@ import {
 import type { CurrentUser } from "src/common/types/current-user.type";
 
 @Injectable()
-export class DisallowSupportModeGuard implements CanActivate {
+export class DisallowInSupportModeGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest();
     const user = request.user as CurrentUser | undefined;
