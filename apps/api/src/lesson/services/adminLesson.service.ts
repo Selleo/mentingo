@@ -27,6 +27,7 @@ import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { questionAnswerOptions, questions } from "src/storage/schema";
+import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 import { isRichTextEmpty } from "src/utils/isRichTextEmpty";
 
@@ -64,6 +65,7 @@ export class AdminLessonService {
     private localizationService: LocalizationService,
     private readonly outboxPublisher: OutboxPublisher,
     private lessonService: LessonService,
+    private readonly studentLessonProgressService: StudentLessonProgressService,
     private readonly masterCourseService: MasterCourseService,
     @Inject("CACHE_MANAGER") private readonly cache: CacheManagerStore,
   ) {}
@@ -380,6 +382,12 @@ export class AdminLessonService {
       await this.adminLessonRepository.removeLesson(lessonId, trx);
       await this.adminLessonRepository.updateLessonDisplayOrderAfterRemove(lesson.chapterId, trx);
       await this.adminLessonRepository.updateLessonCountForChapter(lesson.chapterId, trx);
+      await this.studentLessonProgressService.recalculateProgressAfterLessonDeletion(
+        lesson.courseId,
+        lesson.chapterId,
+        currentUser,
+        trx,
+      );
     });
 
     await this.outboxPublisher.publish(
