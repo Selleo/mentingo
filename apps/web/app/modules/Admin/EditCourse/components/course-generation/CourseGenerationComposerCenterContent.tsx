@@ -1,5 +1,7 @@
 import { AnimatePresence, motion } from "motion/react";
 
+import { VoiceLevelBars } from "~/modules/Voice/components/VoiceLevelBars";
+
 type CourseGenerationComposerCenterContentProps = {
   isVoiceMode: boolean;
   input: string;
@@ -9,8 +11,6 @@ type CourseGenerationComposerCenterContentProps = {
   onSubmit: () => void;
 };
 
-const BAR_COUNT = 16;
-
 export function CourseGenerationComposerCenterContent({
   isVoiceMode,
   input,
@@ -19,9 +19,6 @@ export function CourseGenerationComposerCenterContent({
   onInputChange,
   onSubmit,
 }: CourseGenerationComposerCenterContentProps) {
-  const normalizedLevel = Number.isFinite(voiceLevel) ? Math.max(0, Math.min(1, voiceLevel)) : 0;
-  const boostedLevel = Math.min(1, Math.pow(normalizedLevel, 0.45) * 1.2);
-
   return (
     <div className="relative h-8 min-w-0 overflow-hidden">
       <AnimatePresence initial={false} mode="wait">
@@ -34,19 +31,7 @@ export function CourseGenerationComposerCenterContent({
             transition={{ duration: 0.2, ease: "easeOut" }}
             className="flex h-8 items-center justify-center"
           >
-            <div className="flex h-7 items-end gap-1">
-              {Array.from({ length: BAR_COUNT }, (_, index) => {
-                const wave = 0.35 + 0.65 * Math.abs(Math.sin(index * 0.65));
-                const height = 6 + Math.round(boostedLevel * 20 * wave);
-                return (
-                  <span
-                    key={index}
-                    className="w-1.5 rounded-full bg-neutral-800 transition-all duration-200"
-                    style={{ height: `${height}px` }}
-                  />
-                );
-              })}
-            </div>
+            <VoiceLevelBars voiceLevel={voiceLevel} />
           </motion.div>
         ) : (
           <motion.div

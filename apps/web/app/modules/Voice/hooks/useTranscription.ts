@@ -52,7 +52,7 @@ export function useTranscription({ setInput, onLevelChange }: TranscriptionProps
   }, [setInput]);
 
   const startRecording = async () => {
-    if (isRecording || !streamerRef.current) return;
+    if (isRecording || !streamerRef.current) return false;
 
     try {
       await streamerRef.current.start({
@@ -60,8 +60,10 @@ export function useTranscription({ setInput, onLevelChange }: TranscriptionProps
       });
 
       setIsRecording(true);
+      return true;
     } catch (error) {
       console.error("Failed to start transcription recording", error);
+      return false;
     }
   };
 

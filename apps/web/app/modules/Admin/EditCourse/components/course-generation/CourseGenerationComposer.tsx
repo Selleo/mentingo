@@ -117,8 +117,9 @@ export function CourseGenerationComposer({
   const currentPlaceholder = placeholders[placeholderIndex];
   const isUploadDisabled = isIngestPending || isDeletePending || !integrationId;
   const startVoiceMode = async () => {
+    const hasStarted = await startRecording();
+    if (!hasStarted) return;
     setIsVoiceMode(true);
-    await startRecording();
   };
 
   const stopVoiceMode = async () => {
