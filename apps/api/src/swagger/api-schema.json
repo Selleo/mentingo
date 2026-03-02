@@ -5555,6 +5555,89 @@
         }
       }
     },
+    "/api/certificates/share-link": {
+      "post": {
+        "operationId": "CertificatesController_createCertificateShareLink",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCertificateShareLinkBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateCertificateShareLinkResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/certificates/share": {
+      "get": {
+        "operationId": "CertificatesController_getCertificateSharePage",
+        "parameters": [
+          {
+            "name": "certificateId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/certificates/share-image": {
+      "get": {
+        "operationId": "CertificatesController_getCertificateShareImage",
+        "parameters": [
+          {
+            "name": "certificateId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/ai/thread": {
       "get": {
         "operationId": "AiController_getThread",
@@ -21486,6 +21569,36 @@
         },
         "required": [
           "html"
+        ]
+      },
+      "CreateCertificateShareLinkBody": {
+        "type": "object",
+        "properties": {
+          "certificateId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "certificateId"
+        ]
+      },
+      "CreateCertificateShareLinkResponse": {
+        "type": "object",
+        "properties": {
+          "shareUrl": {
+            "type": "string"
+          },
+          "linkedinShareUrl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "shareUrl",
+          "linkedinShareUrl"
         ]
       },
       "GetThreadResponse": {

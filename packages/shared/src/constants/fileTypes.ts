@@ -36,4 +36,8 @@ export const ALLOWED_WORD_FILE_TYPES = [
 
 export const ALLOWED_PDF_FILE_TYPES = ["application/pdf"];
 
-export const ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES = ["image/png", "image/svg+xml"] as const;
+export const ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES = [
+  "image/png",
+  "image/svg+xml",
+  "application/xml",
+] as const;

@@ -4,7 +4,8 @@ import { eq, and, countDistinct, sql, isNull } from "drizzle-orm";
 import { DatabasePg } from "src/common";
 import { addPagination } from "src/common/pagination";
 import { LocalizationService } from "src/localization/localization.service";
-import { certificates, users, courses, studentCourses } from "src/storage/schema";
+import { DB, DB_ADMIN } from "src/storage/db/db.providers";
+import { certificates, users, courses, studentCourses, tenants } from "src/storage/schema";
 
 import type { SupportedLanguages } from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
@@ -13,7 +14,8 @@ import type * as schema from "src/storage/schema";
 @Injectable()
 export class CertificateRepository {
   constructor(
-    @Inject("DB") private readonly db: DatabasePg,
+    @Inject(DB) private readonly db: DatabasePg,
+    @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
     private readonly localizationService: LocalizationService,
   ) {}
 
@@ -158,6 +160,56 @@ export class CertificateRepository {
           isNull(users.deletedAt),
         ),
       );
+
+    return certificate;
+  }
+
+  async findOwnedCertificateById(userId: string, certificateId: string) {
+    const [certificate] = await this.db
+      .select({
+        id: certificates.id,
+        tenantId: certificates.tenantId,
+        courseId: certificates.courseId,
+      })
+      .from(certificates)
+      .innerJoin(users, eq(users.id, certificates.userId))
+      .where(
+        and(
+          eq(certificates.id, certificateId),
+          eq(certificates.userId, userId),
+          isNull(users.deletedAt),
+        ),
+      );
+
+    return certificate;
+  }
+
+  async findPublicShareCertificateById(certificateId: string, language: SupportedLanguages) {
+    const [certificate] = await this.dbAdmin
+      .select({
+        id: certificates.id,
+        tenantId: certificates.tenantId,
+        tenantHost: tenants.host,
+        tenantName: tenants.name,
+        courseId: certificates.courseId,
+        courseTitle: this.localizationService.getLocalizedSqlField(courses.title, language),
+        completionDate: studentCourses.completedAt,
+        fullName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
+        certificateSignature: sql<string | null>`(${courses.settings} ->> 'certificateSignature')`,
+        certificateFontColor: sql<string | null>`(${courses.settings} ->> 'certificateFontColor')`,
+      })
+      .from(certificates)
+      .innerJoin(users, eq(users.id, certificates.userId))
+      .innerJoin(courses, eq(courses.id, certificates.courseId))
+      .innerJoin(tenants, eq(tenants.id, certificates.tenantId))
+      .leftJoin(
+        studentCourses,
+        and(
+          eq(studentCourses.studentId, certificates.userId),
+          eq(studentCourses.courseId, certificates.courseId),
+        ),
+      )
+      .where(and(eq(certificates.id, certificateId), isNull(users.deletedAt)));
 
     return certificate;
   }

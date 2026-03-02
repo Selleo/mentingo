@@ -2643,6 +2643,17 @@ export interface DownloadCertificateBody {
   filename?: string;
 }
 
+export interface CreateCertificateShareLinkBody {
+  /** @format uuid */
+  certificateId: string;
+  language?: string;
+}
+
+export interface CreateCertificateShareLinkResponse {
+  shareUrl: string;
+  linkedinShareUrl: string;
+}
+
 export interface GetThreadResponse {
   data: {
     /** @format uuid */
@@ -7331,6 +7342,65 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "POST",
         body: data,
         type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CertificatesControllerCreateCertificateShareLink
+     * @request POST:/api/certificates/share-link
+     */
+    certificatesControllerCreateCertificateShareLink: (
+      data: CreateCertificateShareLinkBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateCertificateShareLinkResponse, any>({
+        path: `/api/certificates/share-link`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CertificatesControllerGetCertificateSharePage
+     * @request GET:/api/certificates/share
+     */
+    certificatesControllerGetCertificateSharePage: (
+      query: {
+        certificateId: string;
+        lang: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/certificates/share`,
+        method: "GET",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CertificatesControllerGetCertificateShareImage
+     * @request GET:/api/certificates/share-image
+     */
+    certificatesControllerGetCertificateShareImage: (
+      query: {
+        certificateId: string;
+        lang: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/certificates/share-image`,
+        method: "GET",
+        query: query,
         ...params,
       }),
 

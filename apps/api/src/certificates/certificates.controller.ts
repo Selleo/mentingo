@@ -5,17 +5,27 @@ import { Response } from "express";
 import { Validate } from "nestjs-typebox";
 
 import { PaginatedResponse, paginatedResponse, UUIDSchema, UUIDType } from "src/common";
+import { Public } from "src/common/decorators/public.decorator";
+import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
+import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 
 import {
   allCertificatesSchema,
+  certificateShareLinkResponseSchema,
+  createCertificateShareLinkSchema,
   downloadCertificateSchema,
   singleCertificateSchema,
 } from "./certificates.schema";
 import { CertificatesService } from "./certificates.service";
+import { CreateCertificateShareLinkBody } from "./certificates.types";
 
-import type { AllCertificatesResponse, SingleCertificateResponse } from "./certificates.types";
+import type {
+  AllCertificatesResponse,
+  CertificateShareLinkResponse,
+  SingleCertificateResponse,
+} from "./certificates.types";
 
 @Controller("certificates")
 @UseGuards(RolesGuard)
@@ -86,5 +96,56 @@ export class CertificatesController {
       "Content-Length": pdfBuffer.length,
     });
     res.send(pdfBuffer);
+  }
+
+  @Post("share-link")
+  @Validate({
+    request: [{ type: "body", schema: createCertificateShareLinkSchema }],
+    response: certificateShareLinkResponseSchema,
+  })
+  async createCertificateShareLink(
+    @Body() body: CreateCertificateShareLinkBody,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<CertificateShareLinkResponse> {
+    return this.certificatesService.createCertificateShareLink(
+      currentUser.userId,
+      body.certificateId,
+      body.language,
+    );
+  }
+
+  @Public()
+  @Get("share")
+  async getCertificateSharePage(
+    @Query("certificateId") certificateId: UUIDType,
+    @Query("lang") language: SupportedLanguages,
+    @Res() res: Response,
+  ): Promise<void> {
+    const html = await this.certificatesService.getPublicSharePage(certificateId, language);
+
+    res.set({
+      "Content-Type": "text/html; charset=utf-8",
+      "Cache-Control": "public, max-age=300",
+    });
+
+    res.send(html);
+  }
+
+  @Public()
+  @Get("share-image")
+  async getCertificateShareImage(
+    @Query("certificateId") certificateId: UUIDType,
+    @Query("lang") language: SupportedLanguages,
+    @Res() res: Response,
+  ): Promise<void> {
+    const imageBuffer = await this.certificatesService.getPublicShareImage(certificateId, language);
+
+    res.set({
+      "Content-Type": "image/png",
+      "Content-Length": imageBuffer.length,
+      "Cache-Control": "public, max-age=3600",
+    });
+
+    res.send(imageBuffer);
   }
 }

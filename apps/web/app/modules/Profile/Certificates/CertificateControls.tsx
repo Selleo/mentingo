@@ -1,5 +1,5 @@
 import { HEX_COLOR_REGEX } from "@repo/shared";
-import { Download, Loader2, Palette, X } from "lucide-react";
+import { Download, Linkedin, Loader2, Palette, X } from "lucide-react";
 import { useState } from "react";
 import { HexColorPicker } from "react-colorful";
 import { useTranslation } from "react-i18next";
@@ -12,40 +12,44 @@ import { applyUniformCertificateColor } from "./certificateTheme";
 import type { CertificateColorTheme } from "./certificateTheme";
 
 interface CertificateControlsProps {
-  courseName?: string;
   onClose?: () => void;
   languageToggled: boolean;
   setLanguageToggled: (languageToggled: boolean) => void;
-  downloadCertificatePdf: (courseName?: string) => Promise<void>;
+  downloadCertificatePdf: () => Promise<void>;
   isPreparingDownload: boolean;
+  onShareToLinkedIn?: () => Promise<void>;
+  isPreparingShare?: boolean;
   colorTheme: CertificateColorTheme;
   setColorTheme: React.Dispatch<React.SetStateAction<CertificateColorTheme>>;
   onColorChange?: (color: string) => void;
   showColorPicker?: boolean;
   showDownloadButton?: boolean;
+  showShareButton?: boolean;
 }
 
 const buttonClasses =
   "flex size-8 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700";
 
 const CertificateControls = ({
-  courseName,
   onClose,
   languageToggled,
   setLanguageToggled,
   downloadCertificatePdf,
   isPreparingDownload,
+  onShareToLinkedIn,
+  isPreparingShare = false,
   colorTheme,
   setColorTheme,
   onColorChange,
   showColorPicker = false,
   showDownloadButton = true,
+  showShareButton = false,
 }: CertificateControlsProps) => {
   const { t } = useTranslation();
   const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
 
   const handleDownload = () => {
-    downloadCertificatePdf(courseName);
+    void downloadCertificatePdf();
   };
 
   const updateAllColors = (value: string) => {
@@ -120,6 +124,20 @@ const CertificateControls = ({
             <Loader2 className="size-5 animate-spin" />
           ) : (
             <Download className="size-5" />
+          )}
+        </button>
+      )}
+      {showShareButton && (
+        <button
+          className={buttonClasses}
+          onClick={() => void onShareToLinkedIn?.()}
+          disabled={isPreparingShare}
+          aria-label={t("studentCertificateView.button.shareLinkedIn")}
+        >
+          {isPreparingShare ? (
+            <Loader2 className="size-5 animate-spin" />
+          ) : (
+            <Linkedin className="size-5" />
           )}
         </button>
       )}

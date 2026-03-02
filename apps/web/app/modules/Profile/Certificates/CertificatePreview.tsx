@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+import { useCreateCertificateShareLink } from "~/api/mutations/useCreateCertificateShareLink";
+
 import CertificateContent from "./CertificateContent";
 import CertificateControls from "./CertificateControls";
 import { getCertificateColorTheme } from "./certificateTheme";
@@ -17,6 +19,8 @@ interface CertificatePreviewProps {
   certificateSignatureUrl?: string | null;
   showColorPicker?: boolean;
   showDownloadButton?: boolean;
+  certificateId?: string;
+  showShareButton?: boolean;
   minimalFrame?: boolean;
   initialColor?: string | null;
   onColorChange?: (color: string) => void;
@@ -32,11 +36,14 @@ const CertificatePreview = ({
   certificateSignatureUrl,
   showColorPicker = false,
   showDownloadButton = true,
+  certificateId,
+  showShareButton = false,
   minimalFrame = false,
   initialColor,
   onColorChange,
 }: CertificatePreviewProps) => {
-  const { HiddenCertificate, downloadCertificatePdf, isPreparingDownload } = useCertificatePDF();
+  const { downloadCertificatePdf, isPreparingDownload } = useCertificatePDF();
+  const createCertificateShareLink = useCreateCertificateShareLink();
   const [toggled, setToggled] = useState<boolean>(false);
   const [colorTheme, setColorTheme] = useState<CertificateColorTheme>(
     getCertificateColorTheme(initialColor),
@@ -48,31 +55,44 @@ const CertificatePreview = ({
 
   const lang = toggled ? "pl" : "en";
 
+  const handleShareToLinkedIn = async () => {
+    if (!certificateId || createCertificateShareLink.isPending) return;
+
+    const response = await createCertificateShareLink.mutateAsync({
+      certificateId,
+      language: lang,
+    });
+
+    window.open(response.linkedinShareUrl, "_blank", "noopener,noreferrer");
+  };
+
+  const handleDownloadCertificate = async () => {
+    await downloadCertificatePdf({
+      studentName,
+      courseName,
+      completionDate,
+      platformLogo,
+      backgroundImageUrl: certificateBackgroundImageUrl,
+      signatureImageUrl: certificateSignatureUrl,
+      lang,
+      colorTheme,
+    });
+  };
+
   return (
     <>
-      <HiddenCertificate
-        studentName={studentName}
-        courseName={courseName}
-        completionDate={completionDate}
-        platformLogo={platformLogo}
-        lang={lang}
-        backgroundImageUrl={certificateBackgroundImageUrl}
-        signatureImageUrl={certificateSignatureUrl}
-        colorTheme={colorTheme}
-      />
-
       <div
         className={
           minimalFrame
-            ? "mx-auto w-full"
-            : "mx-auto w-full overflow-hidden rounded-xl border border-gray-200 bg-white"
+            ? "mx-auto w-full bg-white"
+            : "mx-auto w-full max-w-[95vw] overflow-hidden rounded-t-lg bg-white"
         }
       >
         <div
           className={
             minimalFrame
               ? "flex flex-wrap items-start justify-between gap-3 p-1"
-              : "flex flex-wrap items-start justify-between gap-3 border-b border-gray-100 p-4"
+              : "flex items-center justify-between bg-white p-4"
           }
         >
           <div className="flex flex-col items-start">
@@ -82,16 +102,18 @@ const CertificatePreview = ({
 
           <CertificateControls
             onClose={onClose}
-            courseName={courseName}
             languageToggled={toggled}
             setLanguageToggled={setToggled}
-            downloadCertificatePdf={downloadCertificatePdf}
+            downloadCertificatePdf={handleDownloadCertificate}
             isPreparingDownload={isPreparingDownload}
+            onShareToLinkedIn={handleShareToLinkedIn}
+            isPreparingShare={createCertificateShareLink.isPending}
             colorTheme={colorTheme}
             setColorTheme={setColorTheme}
             onColorChange={onColorChange}
             showColorPicker={showColorPicker}
             showDownloadButton={showDownloadButton}
+            showShareButton={showShareButton && Boolean(certificateId)}
           />
         </div>
 

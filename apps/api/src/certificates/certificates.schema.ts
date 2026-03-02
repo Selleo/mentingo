@@ -19,6 +19,16 @@ export const downloadCertificateSchema = Type.Object({
   filename: Type.Optional(Type.String()),
 });
 
+export const createCertificateShareLinkSchema = Type.Object({
+  certificateId: UUIDSchema,
+  language: Type.Optional(Type.String()),
+});
+
+export const certificateShareLinkResponseSchema = Type.Object({
+  shareUrl: Type.String(),
+  linkedinShareUrl: Type.String(),
+});
+
 export const allCertificatesSchema = Type.Array(certificateSchema);
 export const singleCertificateSchema = Type.Union([certificateSchema, Type.Null()]);
 

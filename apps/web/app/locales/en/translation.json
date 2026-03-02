@@ -2112,12 +2112,14 @@
       "failedToLoad": "Failed to load certificates. Please try again later.",
       "preparingDownload": "Your certificate is being prepared for download...",
       "failedToDownload": "Failed to download certificate. Please try again later.",
+      "shareFailed": "Failed to prepare the LinkedIn share link. Please try again later.",
       "htmlRequired": "Certificate content is missing. Please refresh and try again.",
       "pdfGenerationFailed": "Failed to generate certificate PDF. Please try again."
     },
     "button": {
       "download": "Download",
-      "preview": "Preview"
+      "preview": "Preview",
+      "shareLinkedIn": "Share on LinkedIn"
     },
     "controls": {
       "languageToggle": "Language toggle",

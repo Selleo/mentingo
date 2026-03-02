@@ -127,6 +127,57 @@ export class SettingsService {
     };
   }
 
+  public async getGlobalSettingsByTenantId(
+    tenantId: UUIDType,
+  ): Promise<GlobalSettingsJSONContentSchema> {
+    const [globalSettings] = await this.dbAdmin
+      .select({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` })
+      .from(settings)
+      .where(and(eq(settings.tenantId, tenantId), isNull(settings.userId)));
+
+    if (!globalSettings) {
+      throw new NotFoundException("Global settings not found");
+    }
+
+    const parsedSettings = this.parseGlobalSettings(globalSettings.settings);
+
+    const {
+      certificateBackgroundImage,
+      platformLogoS3Key,
+      platformSimpleLogoS3Key,
+      loginBackgroundImageS3Key,
+      userEmailTriggers,
+      ...restOfSettings
+    } = parsedSettings;
+
+    const reorderedEmailTriggers = this.reorderEmailTriggers(userEmailTriggers);
+
+    const certificateBackgroundSignedUrl = certificateBackgroundImage
+      ? await this.fileService.getFileUrl(certificateBackgroundImage)
+      : null;
+
+    const platformLogoUrl = platformLogoS3Key
+      ? await this.fileService.getFileUrl(platformLogoS3Key)
+      : null;
+
+    const platformSimpleLogoUrl = platformSimpleLogoS3Key
+      ? await this.fileService.getFileUrl(platformSimpleLogoS3Key)
+      : null;
+
+    const loginBackgroundSignedUrl = loginBackgroundImageS3Key
+      ? await this.fileService.getFileUrl(loginBackgroundImageS3Key)
+      : null;
+
+    return {
+      ...restOfSettings,
+      userEmailTriggers: reorderedEmailTriggers,
+      platformLogoS3Key: platformLogoUrl,
+      platformSimpleLogoS3Key: platformSimpleLogoUrl,
+      loginBackgroundImageS3Key: loginBackgroundSignedUrl,
+      certificateBackgroundImage: certificateBackgroundSignedUrl,
+    };
+  }
+
   public async createSettingsIfNotExists(
     userId: UUIDType | null,
     userRole: UserRole,

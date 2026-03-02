@@ -2154,12 +2154,14 @@
       "failedToLoad": "Nie udało się załadować certyfikatów. Spróbuj ponownie później.",
       "preparingDownload": "Twój certyfikat jest przygotowywany do pobrania...",
       "failedToDownload": "Nie udało się pobrać certyfikatu. Spróbuj ponownie później.",
+      "shareFailed": "Nie udało się przygotować linku do udostępnienia na LinkedIn. Spróbuj ponownie później.",
       "htmlRequired": "Brakuje treści certyfikatu. Odśwież stronę i spróbuj ponownie.",
       "pdfGenerationFailed": "Nie udało się wygenerować PDF certyfikatu. Spróbuj ponownie."
     },
     "button": {
       "download": "Pobierz",
-      "preview": "Podgląd"
+      "preview": "Podgląd",
+      "shareLinkedIn": "Udostępnij na LinkedIn"
     },
     "controls": {
       "languageToggle": "Przełącznik języka",

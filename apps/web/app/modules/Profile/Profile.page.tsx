@@ -209,6 +209,7 @@ function ProfilePageContent({ currentUser }: ProfilePageContentProps) {
         >
           <div role="presentation" onClick={(event) => event.stopPropagation()}>
             <CertificatePreview
+              certificateId={certificatePreview.certData?.id}
               studentName={certificatePreview.certData?.fullName || ""}
               courseName={certificatePreview.certData?.courseTitle || ""}
               completionDate={formatedDate}
@@ -217,6 +218,7 @@ function ProfilePageContent({ currentUser }: ProfilePageContentProps) {
               certificateBackgroundImageUrl={globalSettings?.certificateBackgroundImage || null}
               certificateSignatureUrl={certificatePreview.certData?.certificateSignatureUrl || null}
               initialColor={certificatePreview.certData?.certificateFontColor || null}
+              showShareButton={Boolean(certificatePreview.certData?.id)}
             />
           </div>
         </div>

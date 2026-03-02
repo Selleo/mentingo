@@ -82,6 +82,7 @@ const CourseCertificate = ({ courseId }: { courseId: string }) => {
         >
           <div role="presentation" onClick={(event) => event.stopPropagation()}>
             <CertificatePreview
+              certificateId={certificateRecord?.id}
               studentName={studentName}
               courseName={courseName}
               completionDate={formattedDate}
@@ -90,6 +91,7 @@ const CourseCertificate = ({ courseId }: { courseId: string }) => {
               certificateBackgroundImageUrl={globalSettings?.certificateBackgroundImage}
               certificateSignatureUrl={certificateRecord?.certificateSignatureUrl}
               initialColor={certificateRecord?.certificateFontColor}
+              showShareButton={Boolean(certificateRecord?.id)}
             />
           </div>
         </div>

@@ -1,24 +1,11 @@
-export interface CertificateColorTheme {
-  titleColor: string;
-  certifyTextColor: string;
-  nameColor: string;
-  courseNameColor: string;
-  bodyTextColor: string;
-  labelTextColor: string;
-  lineColor: string;
-  logoColor: string;
-}
+import {
+  defaultCertificateRenderTheme,
+  type CertificateRenderTheme as CertificateColorTheme,
+} from "@repo/shared";
 
-export const defaultCertificateColorTheme: CertificateColorTheme = {
-  titleColor: "#1f2937",
-  certifyTextColor: "#374151",
-  nameColor: "#1f2937",
-  courseNameColor: "#1f2937",
-  bodyTextColor: "#4b5563",
-  labelTextColor: "#1f2937",
-  lineColor: "#9ca3af",
-  logoColor: "#1f2937",
-};
+export type { CertificateColorTheme };
+
+export const defaultCertificateColorTheme = defaultCertificateRenderTheme;
 
 export const applyUniformCertificateColor = (
   color: string,
