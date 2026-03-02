@@ -88,7 +88,7 @@ describe("CertificatesController (e2e)", () => {
         const response = await request(app.getHttpServer())
           .get("/api/certificates/all")
           .set("Cookie", cookies)
-          .query({ userId: student.id })
+          .query({ userId: student.id, language: "en" })
           .expect(200);
 
         expect(response.body.data).toHaveLength(1);
@@ -140,7 +140,7 @@ describe("CertificatesController (e2e)", () => {
         const response = await request(app.getHttpServer())
           .get("/api/certificates/all")
           .set("Cookie", cookies)
-          .query({ userId: student.id, perPage: 1, page: 2 })
+          .query({ userId: student.id, language: "en", perPage: 1, page: 2 })
           .expect(200);
 
         expect(response.body.data).toHaveLength(1);
@@ -184,7 +184,7 @@ describe("CertificatesController (e2e)", () => {
         const response = await request(app.getHttpServer())
           .get("/api/certificates/all")
           .set("Cookie", cookies)
-          .query({ userId: student.id, sort: "createdAt" })
+          .query({ userId: student.id, language: "en", sort: "createdAt" })
           .expect(200);
 
         expect(response.body.data).toHaveLength(2);
@@ -228,7 +228,7 @@ describe("CertificatesController (e2e)", () => {
         const response = await request(app.getHttpServer())
           .get("/api/certificates/certificate")
           .set("Cookie", cookies)
-          .query({ userId: student.id, courseId: course.id })
+          .query({ userId: student.id, courseId: course.id, language: "en" })
           .expect(200);
 
         expect(response.body.id).toBeDefined();
@@ -261,10 +261,10 @@ describe("CertificatesController (e2e)", () => {
         const response = await request(app.getHttpServer())
           .get("/api/certificates/certificate")
           .set("Cookie", cookies)
-          .query({ userId: student.id, courseId: course.id })
+          .query({ userId: student.id, courseId: course.id, language: "en" })
           .expect(200);
 
-        expect(response.body).toBeNull();
+        expect(response.body).toEqual({});
       });
     });
   });
@@ -300,7 +300,7 @@ describe("CertificatesController (e2e)", () => {
           courseId: course.id,
         });
 
-        const html = `test`;
+        const html = "<div>test</div>";
         const response = await request(app.getHttpServer())
           .post("/api/certificates/download")
           .set("Cookie", cookies)
@@ -337,7 +337,7 @@ describe("CertificatesController (e2e)", () => {
           courseId: course.id,
         });
 
-        const html = `test`;
+        const html = "<div>test</div>";
         const filename = "test.pdf";
         const response = await request(app.getHttpServer())
           .post("/api/certificates/download")
