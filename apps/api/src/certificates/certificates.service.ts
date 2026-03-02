@@ -112,7 +112,7 @@ export class CertificatesService implements OnModuleDestroy, OnModuleInit {
       });
     } catch (error) {
       this.logger.error("Error fetching certificates", error);
-      throw new InternalServerErrorException("Failed to fetch certificates");
+      throw new InternalServerErrorException("studentCertificateView.informations.failedToFetch");
     }
   }
 
@@ -139,7 +139,7 @@ export class CertificatesService implements OnModuleDestroy, OnModuleInit {
         );
 
         if (existingCertificate) {
-          throw new ConflictException("Certificate already exists");
+          throw new ConflictException("studentCertificateView.informations.alreadyExists");
         }
 
         const createdCertificate = await this.certificateRepository.create(
@@ -149,7 +149,7 @@ export class CertificatesService implements OnModuleDestroy, OnModuleInit {
         );
 
         if (!createdCertificate) {
-          throw new ConflictException("Unable to create certificate");
+          throw new ConflictException("studentCertificateView.informations.createFailed");
         }
 
         return {
@@ -200,7 +200,7 @@ export class CertificatesService implements OnModuleDestroy, OnModuleInit {
     );
 
     if (!ownedCertificate?.tenantId) {
-      throw new NotFoundException("Certificate not found");
+      throw new NotFoundException("studentCertificateView.informations.certificateNotFound");
     }
 
     const shareLanguage = this.normalizeLanguage(language);
@@ -363,7 +363,9 @@ export class CertificatesService implements OnModuleDestroy, OnModuleInit {
       return Buffer.from(screenshot);
     } catch (error) {
       this.logger.error(`Certificate share image generation failed: ${error}`);
-      throw new InternalServerErrorException("Failed to generate certificate share image");
+      throw new InternalServerErrorException(
+        "studentCertificateView.informations.shareImageGenerationFailed",
+      );
     } finally {
       if (page) {
         await page.close().catch((closeError) => {
@@ -419,7 +421,7 @@ export class CertificatesService implements OnModuleDestroy, OnModuleInit {
     );
 
     if (!certificate?.tenantId) {
-      throw new NotFoundException("Certificate not found");
+      throw new NotFoundException("studentCertificateView.informations.certificateNotFound");
     }
 
     return certificate;
@@ -575,34 +577,34 @@ export class CertificatesService implements OnModuleDestroy, OnModuleInit {
 
   private buildShareImageHtmlDocument(html: string): string {
     return `<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      html, body {
-        width: ${SHARE_IMAGE_WIDTH}px;
-        height: ${SHARE_IMAGE_HEIGHT}px;
-        overflow: hidden;
-        background: transparent;
-      }
-      body > * {
-        width: ${SHARE_IMAGE_WIDTH}px;
-        height: ${SHARE_IMAGE_HEIGHT}px;
-      }
-    </style>
-    <title>Certificate</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-  </head>
-  <body>
-    ${html}
-  </body>
-</html>`;
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <style>
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          html, body {
+            width: ${SHARE_IMAGE_WIDTH}px;
+            height: ${SHARE_IMAGE_HEIGHT}px;
+            overflow: hidden;
+            background: transparent;
+          }
+          body > * {
+            width: ${SHARE_IMAGE_WIDTH}px;
+            height: ${SHARE_IMAGE_HEIGHT}px;
+          }
+        </style>
+        <title>Certificate</title>
+        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+      </head>
+      <body>
+        ${html}
+      </body>
+    </html>`;
   }
 
   private buildTenantUrl(
@@ -626,7 +628,7 @@ export class CertificatesService implements OnModuleDestroy, OnModuleInit {
   }
 
   private getShareImageKey(certificateId: UUIDType, language: SupportedLanguages): string {
-    return `certificate-share/v2/${certificateId}/${language}.png`;
+    return `certificate-share/${certificateId}/${language}.png`;
   }
 
   private normalizeLanguage(language?: string): SupportedLanguages {
@@ -703,15 +705,19 @@ export class CertificatesService implements OnModuleDestroy, OnModuleInit {
       transactionInstance,
     );
 
-    if (!existingUser) throw new NotFoundException("User not found");
+    if (!existingUser)
+      throw new NotFoundException("studentCertificateView.informations.userNotFound");
 
-    if (!existingCourse) throw new NotFoundException("Course not found");
+    if (!existingCourse)
+      throw new NotFoundException("studentCertificateView.informations.courseNotFound");
 
     if (!existingCourse.certificateEnabled)
-      throw new BadRequestException("Certificates are disabled for this course");
+      throw new BadRequestException(
+        "studentCertificateView.informations.courseCertificateDisabled",
+      );
 
     if (!courseCompletion?.completedAt)
-      throw new BadRequestException("Course must be completed to generate certificate");
+      throw new BadRequestException("studentCertificateView.informations.courseCompletionRequired");
 
     return {
       existingUser,

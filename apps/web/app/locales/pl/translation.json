@@ -2152,11 +2152,20 @@
       "loading": "Ładowanie certyfikatów...",
       "noCertificates": "Nie masz jeszcze żadnych certyfikatów. Ukończ kurs, aby otrzymać certyfikat.",
       "failedToLoad": "Nie udało się załadować certyfikatów. Spróbuj ponownie później.",
+      "failedToFetch": "Nie udało się pobrać certyfikatów. Spróbuj ponownie później.",
       "preparingDownload": "Twój certyfikat jest przygotowywany do pobrania...",
       "failedToDownload": "Nie udało się pobrać certyfikatu. Spróbuj ponownie później.",
       "shareFailed": "Nie udało się przygotować linku do udostępnienia na LinkedIn. Spróbuj ponownie później.",
       "htmlRequired": "Brakuje treści certyfikatu. Odśwież stronę i spróbuj ponownie.",
-      "pdfGenerationFailed": "Nie udało się wygenerować PDF certyfikatu. Spróbuj ponownie."
+      "pdfGenerationFailed": "Nie udało się wygenerować PDF certyfikatu. Spróbuj ponownie.",
+      "shareImageGenerationFailed": "Nie udało się wygenerować obrazu certyfikatu do udostępnienia. Spróbuj ponownie później.",
+      "alreadyExists": "Certyfikat już istnieje.",
+      "createFailed": "Nie udało się utworzyć certyfikatu. Spróbuj ponownie później.",
+      "certificateNotFound": "Nie znaleziono certyfikatu.",
+      "userNotFound": "Nie znaleziono użytkownika.",
+      "courseNotFound": "Nie znaleziono kursu.",
+      "courseCertificateDisabled": "Certyfikaty są wyłączone dla tego kursu.",
+      "courseCompletionRequired": "Aby wygenerować certyfikat, musisz ukończyć kurs."
     },
     "button": {
       "download": "Pobierz",

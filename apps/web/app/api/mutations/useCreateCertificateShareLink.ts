@@ -1,22 +1,16 @@
 import { useMutation } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { useTranslation } from "react-i18next";
 
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../api-client";
 
-import type { SupportedLanguages } from "@repo/shared";
-
-type CreateCertificateShareLinkPayload = {
-  certificateId: string;
-  language: SupportedLanguages;
-};
-
-type CreateCertificateShareLinkResponse = {
-  shareUrl: string;
-  linkedinShareUrl: string;
-};
+import type {
+  CreateCertificateShareLinkBody,
+  CreateCertificateShareLinkResponse,
+} from "../generated-api";
+import type { ApiErrorResponse } from "../types";
+import type { AxiosError } from "axios";
 
 export function useCreateCertificateShareLink() {
   const { toast } = useToast();
@@ -24,28 +18,19 @@ export function useCreateCertificateShareLink() {
 
   return useMutation({
     mutationFn: async (
-      payload: CreateCertificateShareLinkPayload,
+      payload: CreateCertificateShareLinkBody,
     ): Promise<CreateCertificateShareLinkResponse> => {
-      const response = await ApiClient.instance.post<CreateCertificateShareLinkResponse>(
-        "/api/certificates/share-link",
-        payload,
-      );
+      const { data } =
+        await ApiClient.api.certificatesControllerCreateCertificateShareLink(payload);
 
-      return response.data;
+      return data;
     },
-    onError: (error) => {
-      if (error instanceof AxiosError) {
-        toast({
-          variant: "destructive",
-          description:
-            error.response?.data?.message || t("studentCertificateView.informations.shareFailed"),
-        });
-        return;
-      }
+    onError: (error: AxiosError) => {
+      const { message } = (error.response?.data as ApiErrorResponse) ?? {};
 
       toast({
         variant: "destructive",
-        description: t("studentCertificateView.informations.shareFailed"),
+        description: t(message || "studentCertificateView.informations.shareFailed"),
       });
     },
   });
