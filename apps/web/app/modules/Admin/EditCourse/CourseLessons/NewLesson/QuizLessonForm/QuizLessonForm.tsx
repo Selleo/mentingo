@@ -11,7 +11,7 @@ import { Label } from "~/components/ui/label";
 import { useLeaveModal } from "~/context/LeaveModalContext";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
 import LeaveConfirmationModal from "~/modules/Admin/components/LeaveConfirmationModal";
-import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/compontents/MissingTranslationsAlert";
+import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/components/MissingTranslationsAlert";
 import { QuestionType } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/QuizLessonForm/QuizLessonForm.types";
 
 import { ContentTypes, DeleteContentType } from "../../../EditCourse.types";

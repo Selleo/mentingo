@@ -7,7 +7,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { trace } from "@opentelemetry/api";
-import { generateObject, jsonSchema, type Message, streamText } from "ai";
+import { experimental_transcribe, generateObject, jsonSchema, type Message, streamText } from "ai";
 import { eq } from "drizzle-orm";
 import _ from "lodash";
 
@@ -260,6 +260,35 @@ export class AiService {
       await this.aiRepository.setThreadsToArchived(lessonId, userId, trx);
       await this.aiRepository.resetStudentProgressForLesson(lessonId, userId, trx);
     });
+  }
+
+  async transcribe(clientId: string, audio: Buffer) {
+    const openai = await this.promptService.getOpenAI();
+
+    const whisper = openai.transcriptionModel?.(OPENAI_MODELS.TRANSCRIBE);
+    if (!whisper) return;
+
+    return observe(
+      async () => {
+        updateActiveTrace({ sessionId: `transcription-${clientId}` });
+
+        const transcription = await experimental_transcribe({
+          model: whisper,
+          audio,
+        });
+
+        updateActiveObservation(
+          {
+            input: { audioLength: audio.length },
+            output: { ...transcription },
+          },
+          { asType: "generation" },
+        );
+
+        return transcription;
+      },
+      { name: "transcription-generator", asType: "generation" },
+    )();
   }
 
   async generateMissingTranslations(

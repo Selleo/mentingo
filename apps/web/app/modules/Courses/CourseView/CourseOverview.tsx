@@ -11,7 +11,7 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { CategoryChip } from "~/components/ui/CategoryChip";
 import { useUserRole } from "~/hooks/useUserRole";
-import { courseLanguages } from "~/modules/Admin/EditCourse/compontents/CourseLanguageSelector";
+import { courseLanguages } from "~/modules/Admin/EditCourse/components/CourseLanguageSelector";
 
 import type { GetCourseResponse } from "~/api/generated-api";
 

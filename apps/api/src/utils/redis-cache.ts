@@ -2,12 +2,14 @@ import { createClient } from "redis";
 
 import type { RedisClientType } from "redis";
 
-let redisClient: RedisClientType | null = null;
-let connectPromise: Promise<RedisClientType | null> | null = null;
+type NullableRedisClient = RedisClientType | null;
+
+let redisClient: NullableRedisClient = null;
+let connectPromise: Promise<NullableRedisClient> | null = null;
 
 const getRedisUrl = () => process.env.REDIS_URL || "";
 
-export const getRedisClient = async (): Promise<RedisClientType | null> => {
+export const getRedisClient = async (): Promise<NullableRedisClient> => {
   const redisUrl = getRedisUrl();
 
   if (!redisUrl) return null;

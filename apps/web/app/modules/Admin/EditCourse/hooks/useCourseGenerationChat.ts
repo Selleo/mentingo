@@ -8,8 +8,8 @@ import {
   useCourseGenerationMessages,
 } from "~/api/queries/admin/useCourseGenerationMessages";
 import { queryClient } from "~/api/queryClient";
-import { hasCourseGeneratedFlag } from "~/modules/Admin/EditCourse/compontents/courseGenerationChat.utils";
-import { updateGeneratedCourseCacheFromStreamData } from "~/modules/Admin/EditCourse/compontents/courseGenerationCourseCache.utils";
+import { hasCourseGeneratedFlag } from "~/modules/Admin/EditCourse/components/course-generation/utils/courseGenerationChat.utils";
+import { updateGeneratedCourseCacheFromStreamData } from "~/modules/Admin/EditCourse/components/course-generation/utils/courseGenerationCourseCache.utils";
 
 import type { Message } from "@ai-sdk/react";
 

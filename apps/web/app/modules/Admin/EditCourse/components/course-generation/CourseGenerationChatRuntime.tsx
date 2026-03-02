@@ -1,11 +1,11 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef } from "react";
 
+import { CourseGenerationDrawer } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationDrawer";
 import {
   getCurrentMessageKey,
   hasCourseGeneratedFlag,
-} from "~/modules/Admin/EditCourse/compontents/courseGenerationChat.utils";
-import { CourseGenerationDrawer } from "~/modules/Admin/EditCourse/compontents/CourseGenerationDrawer";
+} from "~/modules/Admin/EditCourse/components/course-generation/utils/courseGenerationChat.utils";
 import { useCourseGenerationChat } from "~/modules/Admin/EditCourse/hooks/useCourseGenerationChat";
 
 import type { GetCourseGenerationDraftResponse } from "~/api/generated-api";
@@ -66,6 +66,7 @@ export function CourseGenerationChatRuntime({
     onInputChange: generationChat.setInput,
     onSubmit: () => generationChat.handleSubmit(),
     isProcessing,
+    setInput: generationChat.setInput,
   };
 
   return (

@@ -1,13 +1,13 @@
-import { useEffect, useMemo, useRef } from "react";
+import { type Dispatch, type SetStateAction, useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Icon } from "~/components/Icon";
+import { CourseGenerationComposer } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationComposer";
+import { CourseGenerationAiTypingMessage } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationMessages";
 import {
   getCurrentMessageKey,
   getMessageText,
-} from "~/modules/Admin/EditCourse/compontents/courseGenerationChat.utils";
-import { CourseGenerationComposer } from "~/modules/Admin/EditCourse/compontents/CourseGenerationComposer";
-import { CourseGenerationAiTypingMessage } from "~/modules/Admin/EditCourse/compontents/CourseGenerationMessages";
+} from "~/modules/Admin/EditCourse/components/course-generation/utils/courseGenerationChat.utils";
 import ChatMessage from "~/modules/Courses/Lesson/AiMentorLesson/components/ChatMessage";
 
 type CourseGenerationMessage = {
@@ -23,6 +23,7 @@ type CourseGenerationChatPanelProps = {
   input: string;
   onInputChange: (value: string) => void;
   onSubmit: () => void;
+  setInput: Dispatch<SetStateAction<string>>;
   isProcessing: boolean;
   onMessageCountChange: (count: number) => void;
   onClose: () => void;
@@ -39,6 +40,7 @@ export function CourseGenerationChatPanel({
   isProcessing,
   onMessageCountChange,
   onClose,
+  setInput,
   onGenerationStarted,
 }: CourseGenerationChatPanelProps) {
   const { t } = useTranslation();
@@ -132,6 +134,7 @@ export function CourseGenerationChatPanel({
       <div className="border-t border-neutral-200 px-5 py-4">
         <div className="mx-auto w-full max-w-[80%]">
           <CourseGenerationComposer
+            setInput={setInput}
             input={input}
             integrationId={courseId}
             onInputChange={onInputChange}

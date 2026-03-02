@@ -28,7 +28,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { useTusVideoUpload } from "~/hooks/useTusVideoUpload";
-import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/compontents/MissingTranslationsAlert";
+import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/components/MissingTranslationsAlert";
 import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
 import {
@@ -36,7 +36,7 @@ import {
   MAX_COURSE_DESCRIPTION_LENGTH,
 } from "../../AddCourse/constants";
 import { InlineCategoryCreationForm } from "../../Categories/components/InlineCategoryCreationForm";
-import CourseCardPreview from "../compontents/CourseCardPreview";
+import CourseCardPreview from "../components/CourseCardPreview";
 
 import CourseCertificateSetting from "./components/CourseCertificateSetting";
 import { CourseSettingsSwitches } from "./components/CourseSettingsSwitches";

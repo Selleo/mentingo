@@ -31,7 +31,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/comp
 import { LeaveModalProvider } from "~/context/LeaveModalContext";
 import { useTrackDataUpdatedAt } from "~/hooks/useTrackDataUpdatedAt";
 import { useUserRole } from "~/hooks/useUserRole";
-import { CourseLanguageSelector } from "~/modules/Admin/EditCourse/compontents/CourseLanguageSelector";
+import { CourseLanguageSelector } from "~/modules/Admin/EditCourse/components/CourseLanguageSelector";
 import { CourseEnrolled } from "~/modules/Admin/EditCourse/CourseEnrolled/CourseEnrolled";
 import { useEditCourseTabs } from "~/modules/Admin/EditCourse/hooks/useEditCourseTabs";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";

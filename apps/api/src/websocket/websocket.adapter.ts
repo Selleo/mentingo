@@ -1,35 +1,21 @@
 import { INestApplication } from "@nestjs/common";
 import { IoAdapter } from "@nestjs/platform-socket.io";
 import { createAdapter } from "@socket.io/redis-adapter";
-import { createClient } from "redis";
 
+import { RedisClient } from "src/redis";
 import { DB_ADMIN } from "src/storage/db/db.providers";
 import { createCorsOriginOption } from "src/utils/cors";
 
-import type { RedisClientType } from "redis";
 import type { ServerOptions } from "socket.io";
 
 export class RedisIoAdapter extends IoAdapter {
-  private adapterConstructor: ReturnType<typeof createAdapter> | null = null;
-  private pubClient: RedisClientType | null = null;
-  private subClient: RedisClientType | null = null;
+  private readonly adapterConstructor: ReturnType<typeof createAdapter>;
   private readonly appRef: INestApplication;
 
-  constructor(
-    app: INestApplication,
-    private readonly redisUrl: string,
-  ) {
+  constructor(app: INestApplication, pubClient: RedisClient, subClient: RedisClient) {
     super(app);
     this.appRef = app;
-  }
-
-  async connectToRedis(): Promise<void> {
-    this.pubClient = createClient({ url: this.redisUrl }) as RedisClientType;
-    this.subClient = this.pubClient.duplicate() as RedisClientType;
-
-    await Promise.all([this.pubClient.connect(), this.subClient.connect()]);
-
-    this.adapterConstructor = createAdapter(this.pubClient, this.subClient);
+    this.adapterConstructor = createAdapter(pubClient, subClient);
   }
 
   createIOServer(port: number, options?: ServerOptions) {
@@ -43,15 +29,8 @@ export class RedisIoAdapter extends IoAdapter {
       },
     });
 
-    if (this.adapterConstructor) {
-      server.adapter(this.adapterConstructor);
-    }
+    server.adapter(this.adapterConstructor);
 
     return server;
-  }
-
-  async close(): Promise<void> {
-    await this.pubClient?.quit();
-    await this.subClient?.quit();
   }
 }
