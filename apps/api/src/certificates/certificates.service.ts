@@ -515,17 +515,21 @@ export class CertificatesService implements OnModuleDestroy, OnModuleInit {
     const translations = {
       pl: {
         openLabel: "Otwórz platformę",
+        pageTitle: `Certyfikat ukończenia kursu "${context.certificate.courseTitle}"`,
+        pageDescription: `${context.certificate.fullName} ukończył/a kurs "${context.certificate.courseTitle}" i otrzymał/a certyfikat.`,
       },
       en: {
         openLabel: "Open platform",
+        pageTitle: `Course completion certificate for "${context.certificate.courseTitle}"`,
+        pageDescription: `${context.certificate.fullName} completed "${context.certificate.courseTitle}" and earned a certificate.`,
       },
     } as const;
 
     const localizedContent = translations[context.language];
 
     return {
-      pageTitle: this.escapeHtml(this.getShareTitle(context)),
-      pageDescription: this.escapeHtml(this.getShareDescription(context)),
+      pageTitle: this.escapeHtml(localizedContent.pageTitle),
+      pageDescription: this.escapeHtml(localizedContent.pageDescription),
       siteName: this.escapeHtml(context.certificate.tenantName),
       courseTitle: this.escapeHtml(context.certificate.courseTitle),
       shareUrl: this.escapeHtml(context.shareUrl),
@@ -612,7 +616,7 @@ export class CertificatesService implements OnModuleDestroy, OnModuleInit {
     path: string,
     query: Record<string, string | undefined>,
   ): string {
-    const base = this.normalizeHost(tenantHost);
+    const base = tenantHost.replace(/\/$/, "");
     const url = new URL(path, `${base}/`);
 
     for (const [key, value] of Object.entries(query)) {
@@ -623,33 +627,12 @@ export class CertificatesService implements OnModuleDestroy, OnModuleInit {
     return url.toString();
   }
 
-  private normalizeHost(host: string): string {
-    return host.replace(/\/$/, "");
-  }
-
   private getShareImageKey(certificateId: UUIDType, language: SupportedLanguages): string {
     return `certificate-share/${certificateId}/${language}.png`;
   }
 
   private normalizeLanguage(language?: string): SupportedLanguages {
     return language === "pl" ? "pl" : "en";
-  }
-
-  private getShareTitle(context: ShareRenderContext): string {
-    const courseTitle = context.certificate.courseTitle || "Certificate";
-
-    return context.language === "pl"
-      ? `Certyfikat ukończenia kursu "${courseTitle}"`
-      : `Course completion certificate for "${courseTitle}"`;
-  }
-
-  private getShareDescription(context: ShareRenderContext): string {
-    const fullName = context.certificate.fullName || "";
-    const courseTitle = context.certificate.courseTitle || "Certificate";
-
-    return context.language === "pl"
-      ? `${fullName} ukończył/a kurs "${courseTitle}" i otrzymał/a certyfikat.`
-      : `${fullName} completed "${courseTitle}" and earned a certificate.`;
   }
 
   private formatDate(input?: string | null): string {
