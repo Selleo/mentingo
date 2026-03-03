@@ -52,5 +52,5 @@ export const SERVICE_GROUPS = {
     "VITE_SLACK_OAUTH_ENABLED",
   ],
   openAI: ["OPENAI_API_KEY"],
-  luma: ["LUMA_API_KEY"],
+  luma: ["LUMA_API_KEY", "LUMA_BASE_URL"],
 };
