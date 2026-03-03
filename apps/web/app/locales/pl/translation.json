@@ -1163,7 +1163,7 @@
         "reachedCharactersLimit": "Osiągnięto limit znaków.",
         "reachedCharactersLimitHtml": "Zbyt dużo formatowania. Zmniejsz ilość formatowania, aby zmieścić się w limicie.",
         "enableCertificate": "Włącz certyfikat",
-        "enableCertificateDescription": "Pozwól studentom otrzymać certyfikat po ukończeniu tego kursu.",
+        "enableCertificateDescription": "Włącz tę opcję, aby wystawiać certyfikaty dla tego kursu i móc skonfigurować podpis.",
         "certificateSignatureRequirements": "PNG lub SVG (zalecane przezroczyste tło)",
         "certificatePreviewTitle": "Podgląd certyfikatu",
         "certificatePreviewDescription": "Otwórz podgląd, aby dostosować język i kolor.",

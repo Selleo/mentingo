@@ -82,7 +82,7 @@ export function buildCertificateMarkup(options: BuildCertificateMarkupOptions): 
     : `<div class="h-11" style="color:${escapeHtml(colorTheme.logoColor)};">${APP_LOGO_SVG}</div>`;
 
   const signatureImageMarkup = signatureImageUrl
-    ? `<img src="${escapeHtml(signatureImageUrl)}" alt="${escapeHtml(t.signature)}" class="mb-2 h-12 w-full object-contain" />`
+    ? `<img src="${escapeHtml(signatureImageUrl)}" alt="${escapeHtml(t.signature)}" class="mb-2 h-16 w-full object-contain" />`
     : "";
 
   const certificateBodyMarkup = `<div
@@ -133,7 +133,7 @@ export function buildCertificateMarkup(options: BuildCertificateMarkupOptions): 
     </div>
 
     <div class="flex items-end gap-x-52">
-      <div class="flex w-[240px] flex-col items-center">
+      <div class="flex w-[280px] flex-col items-center">
         <p
           class="text-[18px] text-gray-600"
           style="color:${escapeHtml(colorTheme.bodyTextColor)};"
@@ -152,7 +152,7 @@ export function buildCertificateMarkup(options: BuildCertificateMarkupOptions): 
         </p>
       </div>
 
-      <div class="flex w-[240px] flex-col items-center">
+      <div class="flex w-[280px] flex-col items-center">
         ${signatureImageMarkup}
         <hr
           class="mx-auto mb-3 w-full"

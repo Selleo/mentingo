@@ -41,7 +41,7 @@ const translations = {
 const hrClasses = "mx-auto mb-3 w-full";
 const textClasses = "text-[18px] uppercase text-gray-800";
 const text2Classes = "text-[18px] text-gray-600";
-const signatureClasses = "flex w-[240px] flex-col items-center";
+const signatureClasses = "flex w-[280px] flex-col items-center";
 const CertificateContent = ({
   studentName,
   courseName,
@@ -142,7 +142,7 @@ const CertificateContent = ({
             <img
               src={signatureImageUrl}
               alt={translations[lang].signature}
-              className="mb-2 h-12 w-full object-contain"
+              className="mb-2 h-16 w-full object-contain"
             />
           )}
           <hr className={hrClasses} style={{ borderColor: colorTheme.lineColor }} />

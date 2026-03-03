@@ -8,6 +8,7 @@ interface ImageUploadProps {
   field: { value?: string };
   handleImageUpload: (file: File) => void;
   isUploading: boolean;
+  disabled?: boolean;
   imageUrl?: string | null;
   fileInputRef?: React.RefObject<HTMLInputElement>;
   inputId?: string;
@@ -22,6 +23,7 @@ const ImageUploadInput = ({
   field,
   handleImageUpload,
   isUploading,
+  disabled = false,
   imageUrl,
   fileInputRef,
   inputId,
@@ -41,7 +43,8 @@ const ImageUploadInput = ({
     <div className="flex flex-col items-center justify-center gap-y-2">
       <div
         className={cn(
-          "relative flex w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-lg border-2 border-solid border-gray-300 bg-gray-100",
+          "relative flex w-full flex-col items-center justify-center overflow-hidden rounded-lg border-2 border-solid border-gray-300 bg-gray-100",
+          disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer",
           { "aspect-video": variant === "video" && size === "default" },
           { "aspect-square": variant === "square" && size === "default" },
           { "h-36": size === "compact" },
@@ -95,8 +98,11 @@ const ImageUploadInput = ({
               handleImageUpload(file);
             }
           }}
-          disabled={isUploading}
-          className="absolute inset-0 cursor-pointer opacity-0"
+          disabled={isUploading || disabled}
+          className={cn(
+            "absolute inset-0 opacity-0",
+            disabled ? "cursor-not-allowed" : "cursor-pointer",
+          )}
         />
       </div>
     </div>

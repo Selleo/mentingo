@@ -1175,7 +1175,7 @@
         "reachedCharactersLimit": "You have reached the character limit.",
         "reachedCharactersLimitHtml": "Too much formatting. Please reduce the amount of formatting to fit within the limit.",
         "enableCertificate": "Enable certificate",
-        "enableCertificateDescription": "Allow students to receive a certificate after finishing this course.",
+        "enableCertificateDescription": "Turn this on to issue certificates for this course and configure their signature and preview below.",
         "certificateSignatureRequirements": "PNG or SVG (recommended transparent background)",
         "certificatePreviewTitle": "Certificate preview",
         "certificatePreviewDescription": "Open preview to adjust language and color.",

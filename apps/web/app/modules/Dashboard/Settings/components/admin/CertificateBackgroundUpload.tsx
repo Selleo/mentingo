@@ -6,9 +6,9 @@ import ImageUploadInput from "~/components/FileUploadInput/ImageUploadInput";
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "~/components/ui/dialog";
+import { Dialog, DialogContent } from "~/components/ui/dialog";
 import { useHandleImageUpload } from "~/hooks/useHandleImageUpload";
-import CertificateContent from "~/modules/Profile/Certificates/CertificateContent";
+import CertificatePreview from "~/modules/Profile/Certificates/CertificatePreview";
 
 interface CertificateBackgroundUploadProps {
   certificateBackgroundImage: string | null;
@@ -94,6 +94,7 @@ export function CertificateBackgroundUpload({
               size="sm"
               onClick={() => setIsPreviewOpen(true)}
             >
+              <Icon name="Eye" className="mr-2 size-4" />
               {t("certificateBackgroundUpload.button.preview")}
             </Button>
           </div>
@@ -101,18 +102,17 @@ export function CertificateBackgroundUpload({
       </Card>
 
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-        <DialogContent className="max-w-[95vw] p-3 sm:p-4">
-          <DialogHeader>
-            <DialogTitle>{t("certificateBackgroundUpload.button.preview")}</DialogTitle>
-          </DialogHeader>
-          <CertificateContent
+        <DialogContent
+          className="w-[95vw] max-w-[1120px] border-none bg-transparent p-0 shadow-none"
+          noCloseButton
+        >
+          <CertificatePreview
             studentName="John Doe"
             courseName="Leadership Essentials"
             completionDate="February 17, 2026"
-            isModal
             platformLogo={platformLogo}
-            backgroundImageUrl={certificateBackgroundImage}
-            lang="en"
+            certificateBackgroundImageUrl={certificateBackgroundImage}
+            showDownloadButton={false}
           />
         </DialogContent>
       </Dialog>

@@ -19,7 +19,9 @@ import { S3Service } from "src/s3/s3.service";
 import { SettingsService } from "src/settings/settings.service";
 
 import { CertificateRepository } from "./certificate.repository";
+import { SHARE_IMAGE_HEIGHT, SHARE_IMAGE_WIDTH } from "./certificates.constants";
 
+import type { ShareCertificateRecord, ShareRenderContext } from "./certificates.share.types";
 import type {
   CertificatesQuery,
   AllCertificatesResponse,
@@ -30,25 +32,7 @@ import type { OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import type { SupportedLanguages } from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { PaginatedResponse, UUIDType } from "src/common";
-import type { GlobalSettingsJSONContentSchema } from "src/settings/schemas/settings.schema";
 import type * as schema from "src/storage/schema";
-
-type ShareCertificateRecord = NonNullable<
-  Awaited<ReturnType<CertificateRepository["findPublicShareCertificateById"]>>
->;
-
-type ShareRenderContext = {
-  certificate: ShareCertificateRecord;
-  shareUrl: string;
-  shareImageUrl: string;
-  settings: GlobalSettingsJSONContentSchema;
-  certificateSignatureUrl: string | null;
-  formattedDate: string;
-  language: SupportedLanguages;
-};
-
-const SHARE_IMAGE_WIDTH = 1200;
-const SHARE_IMAGE_HEIGHT = Math.round((SHARE_IMAGE_WIDTH * 210) / 297);
 
 @Injectable()
 export class CertificatesService implements OnModuleDestroy, OnModuleInit {
@@ -204,10 +188,10 @@ export class CertificatesService implements OnModuleDestroy, OnModuleInit {
     }
 
     const shareLanguage = this.normalizeLanguage(language);
-    const publicCertificate = await this.getPublicShareCertificateOrThrow(
-      certificateId,
-      shareLanguage,
-    );
+    const publicCertificate = await this.getPublicShareCertificate(certificateId, shareLanguage);
+
+    await this.getPublicShareImage(certificateId, shareLanguage);
+
     const shareUrl = this.buildTenantUrl(publicCertificate.tenantHost, "/api/certificates/share", {
       certificateId,
       lang: shareLanguage,
@@ -380,13 +364,14 @@ export class CertificatesService implements OnModuleDestroy, OnModuleInit {
     language?: string,
   ): Promise<ShareRenderContext> {
     const shareLanguage = this.normalizeLanguage(language);
-    const certificate = await this.getPublicShareCertificateOrThrow(certificateId, shareLanguage);
+    const certificate = await this.getPublicShareCertificate(certificateId, shareLanguage);
     const settings = await this.settingsService.getGlobalSettingsByTenantId(certificate.tenantId);
 
     const shareUrl = this.buildTenantUrl(certificate.tenantHost, "/api/certificates/share", {
       certificateId,
       lang: shareLanguage,
     });
+
     const shareImageUrl = this.buildTenantUrl(
       certificate.tenantHost,
       "/api/certificates/share-image",
@@ -411,7 +396,7 @@ export class CertificatesService implements OnModuleDestroy, OnModuleInit {
     };
   }
 
-  private async getPublicShareCertificateOrThrow(
+  private async getPublicShareCertificate(
     certificateId: UUIDType,
     language: SupportedLanguages,
   ): Promise<ShareCertificateRecord> {
