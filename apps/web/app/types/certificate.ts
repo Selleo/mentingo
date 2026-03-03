@@ -5,6 +5,8 @@ export interface CertificateType {
   courseTitle?: string | null;
   completionDate?: string | null;
   fullName?: string | null;
+  certificateSignatureUrl?: string | null;
+  certificateFontColor?: string | null;
   createdAt: string;
 }
 

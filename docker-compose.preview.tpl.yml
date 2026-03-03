@@ -138,8 +138,6 @@ services:
       OPENAI_API_KEY: ""
       WORKER_CONCURRENCY: "10"
       MASTER_KEY: "${MASTER_KEY}"
-    x-ports:
-      - ${PREVIEW_API_DOMAIN}:3000/https
     volumes:
       - api-preview-pr-${PR_ID}-uploads:/app/apps/api/uploads
 
@@ -151,16 +149,24 @@ services:
         - type=gha,scope=web-preview-pr-${PR_ID}
       cache_to:
         - type=gha,mode=max,scope=web-preview-pr-${PR_ID}
+      args:
+        VITE_API_URL: "https://${PREVIEW_WEB_DOMAIN}"
+        VITE_APP_URL: "https://${PREVIEW_WEB_DOMAIN}"
     image: web-preview-pr-${PR_ID}:${VERSION_TAG}
     restart: always
     depends_on:
       api-preview-pr-${PR_ID}:
         condition: service_started
-    x-ports:
-      - ${PREVIEW_WEB_DOMAIN}:8080/https
-    environment:
-      VITE_API_URL: "https://${PREVIEW_API_DOMAIN}"
-      VITE_APP_URL: "https://${PREVIEW_WEB_DOMAIN}"
+    x-caddy: |
+      ${PREVIEW_WEB_DOMAIN} {
+        handle /api/* {
+          reverse_proxy {{upstreams "api-preview-pr-${PR_ID}" 3000}}
+        }
+
+        handle {
+          reverse_proxy {{upstreams "web-preview-pr-${PR_ID}" 8080}}
+        }
+      }
 
 volumes:
   db-preview-pr-${PR_ID}-data:

@@ -10,11 +10,21 @@ import { useToast } from "~/components/ui/use-toast";
 import { getCourseSettingsQueryKey } from "../queries/useCourseSettings.js";
 import { getLessonSequenceQueryKey } from "../queries/useLessonSequence.js";
 
-import type { UpdateCourseSettingsBody } from "../generated-api.js";
+import type { ApiErrorResponse } from "../types";
+import type { AxiosError } from "axios";
+
+type UpdateCourseSettingsBody = {
+  lessonSequenceEnabled?: boolean;
+  quizFeedbackEnabled?: boolean;
+  removeCertificateSignature?: boolean;
+  certificateSignature?: File;
+  certificateFontColor?: string;
+};
 
 type UpdateCourseSettingsParams = {
   courseId: string;
   data: UpdateCourseSettingsBody;
+  showToast?: boolean;
 };
 
 export function useUpdateCourseSettings() {
@@ -24,36 +34,58 @@ export function useUpdateCourseSettings() {
   return useMutation({
     mutationFn: async ({ courseId, data }: UpdateCourseSettingsParams) => {
       const response = await ApiClient.api.courseControllerUpdateCourseSettings(courseId, data);
+
       return response.data;
     },
-    onSuccess: (_, { courseId, data }) => {
+    onSuccess: (_, { courseId, data, showToast = true }) => {
       queryClient.invalidateQueries({ queryKey: getCourseSettingsQueryKey({ courseId }) });
+
+      if (!showToast) return;
+
       const changedValues = Object.keys(data).filter(
         (key) => get(data, key) !== undefined,
       ) as (keyof UpdateCourseSettingsBody)[];
+
       const description = match(changedValues)
         .with(["lessonSequenceEnabled"], () => {
           queryClient.invalidateQueries({ queryKey: getLessonSequenceQueryKey({ courseId }) });
           return t("lessons.sequenceUpdatedSuccessfully");
         })
         .with(["quizFeedbackEnabled"], () => t("lessons.quizFeedbackUpdatedSuccessfully"))
+        .with(["certificateSignature"], () =>
+          t("adminCourseView.toast.certificateUpdatedSuccessfully"),
+        )
+        .with(["removeCertificateSignature"], () =>
+          t("adminCourseView.toast.certificateUpdatedSuccessfully"),
+        )
         .otherwise(() => t("lessons.settingsUpdatedSuccessfully"));
+
       toast({
         variant: "default",
         description,
       });
     },
-    onError: (_, { data }) => {
+    onError: (error: AxiosError, { data, showToast = true }) => {
+      if (!showToast) return;
+
+      const { message } = error.response?.data as ApiErrorResponse;
+
       const changedValues = Object.keys(data).filter(
         (key) => get(data, key) !== undefined,
       ) as (keyof UpdateCourseSettingsBody)[];
+
       const description = match(changedValues)
         .with(["lessonSequenceEnabled"], () => t("lessons.sequenceUpdateFailed"))
         .with(["quizFeedbackEnabled"], () => t("lessons.quizFeedbackUpdateFailed"))
+        .with(["certificateSignature"], () => t("adminCourseView.toast.certificateUpdateError"))
+        .with(["removeCertificateSignature"], () =>
+          t("adminCourseView.toast.certificateUpdateError"),
+        )
         .otherwise(() => t("lessons.settingsUpdateFailed"));
+
       toast({
         variant: "destructive",
-        description,
+        description: message ? t(message) : description,
       });
     },
   });

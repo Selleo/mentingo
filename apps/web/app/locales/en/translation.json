@@ -1140,6 +1140,7 @@
       "button": {
         "removeThumbnail": "Remove Thumbnail",
         "removeTrailer": "Remove Trailer",
+        "removeCertificateSignature": "Remove signature",
         "includesCertificate": "Includes certificate",
         "doesNotIncludeCertificate": "Does not include certificate"
       },
@@ -1176,6 +1177,13 @@
         "reachedCharactersLimit": "You have reached the character limit.",
         "reachedCharactersLimitHtml": "Too much formatting. Please reduce the amount of formatting to fit within the limit.",
         "enableCertificate": "Enable certificate",
+        "enableCertificateDescription": "Turn this on to issue certificates for this course and configure their signature and preview below.",
+        "certificateSignatureRequirements": "PNG or SVG (recommended transparent background)",
+        "certificatePreviewTitle": "Certificate preview",
+        "certificatePreviewDescription": "Open preview to adjust language and color.",
+        "certificatePreviewButton": "Preview",
+        "certificatePreviewStudentName": "Student Name",
+        "certificatePreviewCourseName": "Course Name",
         "enforceLessonSequence": "Enforce lesson sequence",
         "requireSequentialLessons": "Require students to complete lessons in order",
         "enableQuizFeedback": "Quiz feedback",
@@ -2104,12 +2112,29 @@
       "loading": "Loading certificates...",
       "noCertificates": "No certificates available yet. Complete courses to earn certificates.",
       "failedToLoad": "Failed to load certificates. Please try again later.",
+      "failedToFetch": "Failed to fetch certificates. Please try again later.",
       "preparingDownload": "Your certificate is being prepared for download...",
-      "failedToDownload": "Failed to download certificate. Please try again later."
+      "failedToDownload": "Failed to download certificate. Please try again later.",
+      "shareFailed": "Failed to prepare the LinkedIn share link. Please try again later.",
+      "htmlRequired": "Certificate content is missing. Please refresh and try again.",
+      "pdfGenerationFailed": "Failed to generate certificate PDF. Please try again.",
+      "shareImageGenerationFailed": "Failed to generate the certificate share image. Please try again later.",
+      "alreadyExists": "Certificate already exists.",
+      "createFailed": "Failed to create certificate. Please try again later.",
+      "certificateNotFound": "Certificate not found.",
+      "userNotFound": "User not found.",
+      "courseNotFound": "Course not found.",
+      "courseCertificateDisabled": "Certificates are disabled for this course.",
+      "courseCompletionRequired": "You must complete the course before generating a certificate."
     },
     "button": {
       "download": "Download",
-      "preview": "Preview"
+      "preview": "Preview",
+      "shareLinkedIn": "Share on LinkedIn"
+    },
+    "controls": {
+      "languageToggle": "Language toggle",
+      "fontColor": "Font color"
     }
   },
   "announcements": {
@@ -2222,7 +2247,8 @@
   "files": {
     "toast": {
       "invalidData": "File upload failed - invalid file data",
-      "contentTypeMismatch": "File content type does not match the provided content type"
+      "contentTypeMismatch": "File content type does not match the provided content type",
+      "invalidFileType": "Invalid file type. Please upload a PNG or SVG file."
     },
     "import": {
       "noFileUploaded": "No file uploaded",

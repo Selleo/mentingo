@@ -16,7 +16,12 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { ALLOWED_LESSON_IMAGE_FILE_TYPES, SupportedLanguages } from "@repo/shared";
+import { ApiConsumes } from "@nestjs/swagger";
+import {
+  ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES,
+  ALLOWED_LESSON_IMAGE_FILE_TYPES,
+  SupportedLanguages,
+} from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Request } from "express";
 import { Validate } from "nestjs-typebox";
@@ -83,8 +88,10 @@ import {
 } from "src/courses/schemas/showCourseCommon.schema";
 import { UpdateCourseBody, updateCourseSchema } from "src/courses/schemas/updateCourse.schema";
 import {
+  updateCourseSettingsMultipartSchema,
   updateCourseSettingsSchema,
   type UpdateCourseSettings,
+  type UpdateCourseSettingsMultipart,
 } from "src/courses/schemas/updateCourseSettings.schema";
 import {
   allCoursesValidation,
@@ -92,6 +99,7 @@ import {
   studentCoursesValidation,
   studentsWithEnrolmentValidation,
 } from "src/courses/validations/validations";
+import { MAX_FILE_SIZE } from "src/file/file.constants";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
 import { GroupsFilterSchema } from "src/group/group.types";
@@ -103,19 +111,20 @@ import {
   LearningTimeStatisticsSortOptions,
 } from "src/learning-time";
 import { USER_ROLES, UserRole } from "src/user/schemas/userRoles";
+import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
 import {
   courseLookupResponseSchema,
   type CourseLookupResponse,
 } from "./schemas/courseLookupResponse.schema";
-import { coursesSettingsSchema } from "./schemas/coursesSettings.schema";
+import { getCourseSettingsSchema } from "./schemas/coursesSettings.schema";
 import {
   CreateCoursesEnrollment,
   createCoursesEnrollmentSchema,
 } from "./schemas/createCoursesEnrollment";
 
+import type { GetCourseSettings } from "./schemas/coursesSettings.schema";
 import type { EnrolledStudent } from "./schemas/enrolledStudent.schema";
-import type { CoursesSettings } from "./types/settings";
 import type {
   AllCoursesForContentCreatorResponse,
   AllCoursesResponse,
@@ -521,20 +530,39 @@ export class CourseController {
   }
 
   @Patch("settings/:courseId")
+  @UseInterceptors(FileInterceptor("certificateSignature"))
+  @ApiConsumes("multipart/form-data")
   @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   @Validate({
     request: [
       { type: "param", name: "courseId", schema: UUIDSchema },
-      { type: "body", schema: updateCourseSettingsSchema },
+      { type: "body", schema: updateCourseSettingsMultipartSchema },
     ],
     response: baseResponse(Type.Object({ message: Type.String() })),
   })
   async updateCourseSettings(
     @Param("courseId") courseId: UUIDType,
-    @Body() body: UpdateCourseSettings,
+    @Body(new ValidateMultipartPipe(updateCourseSettingsSchema))
+    body: UpdateCourseSettingsMultipart,
+    @UploadedFile(
+      getBaseFileTypePipe(
+        buildFileTypeRegex([...ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES]),
+        MAX_FILE_SIZE,
+        true,
+      ).build({
+        fileIsRequired: false,
+        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
+      }),
+    )
+    certificateSignature: Express.Multer.File | null,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.courseService.updateCourseSettings(courseId, body, currentUser);
+    await this.courseService.updateCourseSettings(
+      courseId,
+      body as UpdateCourseSettings,
+      currentUser,
+      certificateSignature,
+    );
 
     return new BaseResponse({ message: "Course lesson settings updated successfully" });
   }
@@ -542,12 +570,12 @@ export class CourseController {
   @Get("settings/:courseId")
   @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   @Validate({
-    response: baseResponse(coursesSettingsSchema),
+    response: baseResponse(getCourseSettingsSchema),
     request: [{ type: "param", name: "courseId", schema: UUIDSchema }],
   })
   async getCourseSettings(
     @Param("courseId") courseId: UUIDType,
-  ): Promise<BaseResponse<CoursesSettings>> {
+  ): Promise<BaseResponse<GetCourseSettings>> {
     const data = await this.courseService.getCourseSettings(courseId);
     return new BaseResponse(data);
   }

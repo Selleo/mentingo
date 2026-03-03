@@ -29,6 +29,7 @@ export const useMarkLessonAsCompleted = (userId: string, courseSlug: string) => 
       queryClient.invalidateQueries({ queryKey: ["lesson", variables.lessonId] });
       queryClient.invalidateQueries({ queryKey: ["lessonProgress", variables.lessonId] });
       queryClient.invalidateQueries(certificatesQueryOptions({ userId }));
+      queryClient.invalidateQueries({ queryKey: ["certificate", userId] });
       queryClient.invalidateQueries(courseQueryOptions(courseSlug));
     },
     onError: (error) => {

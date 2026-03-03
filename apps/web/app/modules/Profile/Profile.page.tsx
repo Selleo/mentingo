@@ -196,7 +196,7 @@ function ProfilePageContent({ currentUser }: ProfilePageContentProps) {
       ]}
     >
       {certificatePreview.isOpen && (
-        <button
+        <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50"
           onClick={handleCloseCertificatePreview}
           onKeyDown={(e) => {
@@ -204,18 +204,24 @@ function ProfilePageContent({ currentUser }: ProfilePageContentProps) {
               handleCloseCertificatePreview();
             }
           }}
+          role="button"
+          tabIndex={0}
         >
-          <div>
+          <div role="presentation" onClick={(event) => event.stopPropagation()}>
             <CertificatePreview
+              certificateId={certificatePreview.certData?.id}
               studentName={certificatePreview.certData?.fullName || ""}
               courseName={certificatePreview.certData?.courseTitle || ""}
               completionDate={formatedDate}
               onClose={handleCloseCertificatePreview}
               platformLogo={globalSettings?.platformLogoS3Key}
               certificateBackgroundImageUrl={globalSettings?.certificateBackgroundImage || null}
+              certificateSignatureUrl={certificatePreview.certData?.certificateSignatureUrl || null}
+              initialColor={certificatePreview.certData?.certificateFontColor || null}
+              showShareButton={Boolean(certificatePreview.certData?.id)}
             />
           </div>
-        </button>
+        </div>
       )}
       <div className="flex flex-col items-center gap-6">
         <section className="flex w-full max-w-[720px] flex-col justify-between gap-2 md:flex-row">

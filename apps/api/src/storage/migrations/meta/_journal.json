@@ -673,6 +673,13 @@
       "when": 1772182402684,
       "tag": "0095_add_support_sessions_table",
       "breakpoints": true
+    },
+    {
+      "idx": 96,
+      "version": "7",
+      "when": 1772457423678,
+      "tag": "0096_backfill_course_settings",
+      "breakpoints": true
     }
   ]
 }

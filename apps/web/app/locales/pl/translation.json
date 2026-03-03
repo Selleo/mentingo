@@ -1127,6 +1127,7 @@
       "button": {
         "removeThumbnail": "Usuń miniaturę",
         "removeTrailer": "Usuń zwiastun",
+        "removeCertificateSignature": "Usuń podpis",
         "includesCertificate": "Zawiera certyfikat",
         "doesNotIncludeCertificate": "Nie zawiera certyfikatu"
       },
@@ -1163,6 +1164,14 @@
         "charactersLeft": "Pozostało znaków",
         "reachedCharactersLimit": "Osiągnięto limit znaków.",
         "reachedCharactersLimitHtml": "Zbyt dużo formatowania. Zmniejsz ilość formatowania, aby zmieścić się w limicie.",
+        "enableCertificate": "Włącz certyfikat",
+        "enableCertificateDescription": "Włącz tę opcję, aby wystawiać certyfikaty dla tego kursu i móc skonfigurować podpis.",
+        "certificateSignatureRequirements": "PNG lub SVG (zalecane przezroczyste tło)",
+        "certificatePreviewTitle": "Podgląd certyfikatu",
+        "certificatePreviewDescription": "Otwórz podgląd, aby dostosować język i kolor.",
+        "certificatePreviewButton": "Podgląd",
+        "certificatePreviewStudentName": "Imię i nazwisko",
+        "certificatePreviewCourseName": "Nazwa kursu",
         "enforceLessonSequence": "Wymuś sekwencję lekcji",
         "requireSequentialLessons": "Wymagaj ukończenia lekcji w kolejności",
         "enableQuizFeedback": "Feedback po quizie",
@@ -2145,12 +2154,29 @@
       "loading": "Ładowanie certyfikatów...",
       "noCertificates": "Nie masz jeszcze żadnych certyfikatów. Ukończ kurs, aby otrzymać certyfikat.",
       "failedToLoad": "Nie udało się załadować certyfikatów. Spróbuj ponownie później.",
+      "failedToFetch": "Nie udało się pobrać certyfikatów. Spróbuj ponownie później.",
       "preparingDownload": "Twój certyfikat jest przygotowywany do pobrania...",
-      "failedToDownload": "Nie udało się pobrać certyfikatu. Spróbuj ponownie później."
+      "failedToDownload": "Nie udało się pobrać certyfikatu. Spróbuj ponownie później.",
+      "shareFailed": "Nie udało się przygotować linku do udostępnienia na LinkedIn. Spróbuj ponownie później.",
+      "htmlRequired": "Brakuje treści certyfikatu. Odśwież stronę i spróbuj ponownie.",
+      "pdfGenerationFailed": "Nie udało się wygenerować PDF certyfikatu. Spróbuj ponownie.",
+      "shareImageGenerationFailed": "Nie udało się wygenerować obrazu certyfikatu do udostępnienia. Spróbuj ponownie później.",
+      "alreadyExists": "Certyfikat już istnieje.",
+      "createFailed": "Nie udało się utworzyć certyfikatu. Spróbuj ponownie później.",
+      "certificateNotFound": "Nie znaleziono certyfikatu.",
+      "userNotFound": "Nie znaleziono użytkownika.",
+      "courseNotFound": "Nie znaleziono kursu.",
+      "courseCertificateDisabled": "Certyfikaty są wyłączone dla tego kursu.",
+      "courseCompletionRequired": "Aby wygenerować certyfikat, musisz ukończyć kurs."
     },
     "button": {
       "download": "Pobierz",
-      "preview": "Podgląd"
+      "preview": "Podgląd",
+      "shareLinkedIn": "Udostępnij na LinkedIn"
+    },
+    "controls": {
+      "languageToggle": "Przełącznik języka",
+      "fontColor": "Kolor czcionki"
     }
   },
   "announcements": {
@@ -2247,7 +2273,8 @@
   "files": {
     "toast": {
       "invalidData": "Nie udało się przesłać pliku - nieprawidłowe dane pliku",
-      "contentTypeMismatch": "Typ zawartości pliku nie odpowiada podanemu typowi"
+      "contentTypeMismatch": "Typ zawartości pliku nie odpowiada podanemu typowi",
+      "invalidFileType": "Nieprawidłowy typ pliku. Prześlij plik PNG lub SVG."
     },
     "import": {
       "noFileUploaded": "Nie przesłano pliku",

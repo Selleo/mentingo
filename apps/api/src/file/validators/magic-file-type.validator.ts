@@ -10,7 +10,7 @@ export type MagicFileTypeValidatorOptions = {
 };
 
 export class MagicFileTypeValidator extends FileValidator<MagicFileTypeValidatorOptions> {
-  private errorMessage = "common.toast.somethingWentWrong";
+  private errorMessage = "files.toast.invalidFileType";
 
   async isValid<TFile extends IFile = any>(file?: TFile): Promise<boolean> {
     if (!file) return true;

@@ -10,6 +10,12 @@ export const coursesSettingsSchema = Type.Object(
     quizFeedbackEnabled: Type.Boolean({
       default: QUIZ_FEEDBACK_ENABLED,
     }),
+    certificateSignature: Type.Union([Type.String(), Type.Null()], {
+      default: null,
+    }),
+    certificateFontColor: Type.Union([Type.String(), Type.Null()], {
+      default: null,
+    }),
   },
   {
     additionalProperties: false,

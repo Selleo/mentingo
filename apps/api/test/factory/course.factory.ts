@@ -98,6 +98,8 @@ export const createCourseFactory = (db: DatabasePg) => {
       settings: {
         lessonSequenceEnabled: LESSON_SEQUENCE_ENABLED,
         quizFeedbackEnabled: QUIZ_FEEDBACK_ENABLED,
+        certificateSignature: null,
+        certificateFontColor: null,
       },
     };
   });
