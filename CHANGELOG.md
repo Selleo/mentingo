@@ -1,3 +1,31 @@
+<a name="v4.5.0"></a>
+
+## [v4.5.0] - 03.03.2026
+
+### Features:
+
+- enable adding a signature image to certificates and exporting to LinkedIn ([#1334](https://github.com/Selleo/mentingo/issues/1334))
+
+- implement speech to text ([#1333](https://github.com/Selleo/mentingo/issues/1333))
+
+- introduce support mode to help super admins manage tenants more effectively ([#1325](https://github.com/Selleo/mentingo/issues/1325))
+
+- introduce AI-powered course generation ([#1319](https://github.com/Selleo/mentingo/issues/1319))
+
+- enable exporting and synchronizing courses across tenants ([#1320](https://github.com/Selleo/mentingo/issues/1320))
+
+### Bug Fixes:
+
+- improve Luma and Langfuse setup reliability ([#1337](https://github.com/Selleo/mentingo/issues/1337))
+
+- ensure lesson and course progress update correctly after lesson deletion ([#1328](https://github.com/Selleo/mentingo/issues/1328))
+
+### Chores:
+
+- speed up certificate generation and improve download experience ([#1323](https://github.com/Selleo/mentingo/issues/1323))
+
+- improve image upload across the app ([#1321](https://github.com/Selleo/mentingo/issues/1321))
+
 <a name="v4.4.0"></a>
 
 ## [v4.4.0] - 23.02.2026
@@ -37,6 +65,10 @@
 - improve thumbnail performance and quality ([#1301](https://github.com/Selleo/mentingo/issues/1301))
 
 - improve registration page responsiveness and editor usability ([#1296](https://github.com/Selleo/mentingo/issues/1296))
+
+### Documentation:
+
+- update changelog for version v4.4.0
 
 <a name="v4.3.0"></a>
 
@@ -2456,7 +2488,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.4.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.5.0...HEAD
+[v4.5.0]: https://github.com/Selleo/mentingo/compare/v4.4.0...v4.5.0
 [v4.4.0]: https://github.com/Selleo/mentingo/compare/v4.3.0...v4.4.0
 [v4.3.0]: https://github.com/Selleo/mentingo/compare/v4.2.0...v4.3.0
 [v4.2.0]: https://github.com/Selleo/mentingo/compare/v4.1.0...v4.2.0
