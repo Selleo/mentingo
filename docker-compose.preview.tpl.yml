@@ -154,8 +154,6 @@ services:
     depends_on:
       api-preview-pr-${PR_ID}:
         condition: service_started
-    x-ports:
-      - ${PREVIEW_WEB_DOMAIN}:8080/https
     x-caddy: |
       ${PREVIEW_WEB_DOMAIN} {
         handle /api/* {
@@ -166,6 +164,7 @@ services:
           reverse_proxy {{upstreams "web-preview-pr-${PR_ID}" 8080}}
         }
       }
+
     environment:
       VITE_API_URL: "https://${PREVIEW_WEB_DOMAIN}/api"
       VITE_APP_URL: "https://${PREVIEW_WEB_DOMAIN}"
