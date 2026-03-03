@@ -10,6 +10,7 @@ import { useToast } from "~/components/ui/use-toast";
 import { getCourseSettingsQueryKey } from "../queries/useCourseSettings.js";
 import { getLessonSequenceQueryKey } from "../queries/useLessonSequence.js";
 
+import type { ApiErrorResponse } from "../types";
 import type { AxiosError } from "axios";
 
 type UpdateCourseSettingsBody = {
@@ -32,29 +33,19 @@ export function useUpdateCourseSettings() {
 
   return useMutation({
     mutationFn: async ({ courseId, data }: UpdateCourseSettingsParams) => {
-      const hasFile = data.certificateSignature instanceof File;
-      const response = hasFile
-        ? await (() => {
-            const formData = new FormData();
-            Object.entries(data).forEach(([key, value]) => {
-              if (value === undefined || value === null) return;
-              formData.append(key, value instanceof File ? value : String(value));
-            });
-
-            return ApiClient.instance.patch(`/api/course/settings/${courseId}`, formData, {
-              headers: { "Content-Type": "multipart/form-data" },
-            });
-          })()
-        : await ApiClient.instance.patch(`/api/course/settings/${courseId}`, data);
+      const response = await ApiClient.api.courseControllerUpdateCourseSettings(courseId, data);
 
       return response.data;
     },
     onSuccess: (_, { courseId, data, showToast = true }) => {
       queryClient.invalidateQueries({ queryKey: getCourseSettingsQueryKey({ courseId }) });
+
       if (!showToast) return;
+
       const changedValues = Object.keys(data).filter(
         (key) => get(data, key) !== undefined,
       ) as (keyof UpdateCourseSettingsBody)[];
+
       const description = match(changedValues)
         .with(["lessonSequenceEnabled"], () => {
           queryClient.invalidateQueries({ queryKey: getLessonSequenceQueryKey({ courseId }) });
@@ -68,6 +59,7 @@ export function useUpdateCourseSettings() {
           t("adminCourseView.toast.certificateUpdatedSuccessfully"),
         )
         .otherwise(() => t("lessons.settingsUpdatedSuccessfully"));
+
       toast({
         variant: "default",
         description,
@@ -75,10 +67,13 @@ export function useUpdateCourseSettings() {
     },
     onError: (error: AxiosError, { data, showToast = true }) => {
       if (!showToast) return;
-      const message = (error.response?.data as { message?: string })?.message;
+
+      const { message } = error.response?.data as ApiErrorResponse;
+
       const changedValues = Object.keys(data).filter(
         (key) => get(data, key) !== undefined,
       ) as (keyof UpdateCourseSettingsBody)[];
+
       const description = match(changedValues)
         .with(["lessonSequenceEnabled"], () => t("lessons.sequenceUpdateFailed"))
         .with(["quizFeedbackEnabled"], () => t("lessons.quizFeedbackUpdateFailed"))
@@ -87,9 +82,10 @@ export function useUpdateCourseSettings() {
           t("adminCourseView.toast.certificateUpdateError"),
         )
         .otherwise(() => t("lessons.settingsUpdateFailed"));
+
       toast({
         variant: "destructive",
-        description: message ?? description,
+        description: message ? t(message) : description,
       });
     },
   });

@@ -1631,6 +1631,17 @@ export interface UpdateHasCertificateResponse {
   };
 }
 
+export interface UpdateCourseSettingsBody {
+  /** @default false */
+  lessonSequenceEnabled?: boolean;
+  /** @default true */
+  quizFeedbackEnabled?: boolean;
+  certificateSignature?: any;
+  /** @default null */
+  certificateFontColor?: string | null;
+  removeCertificateSignature?: boolean;
+}
+
 export interface UpdateCourseSettingsResponse {
   data: {
     message: string;
@@ -6217,10 +6228,16 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name CourseControllerUpdateCourseSettings
      * @request PATCH:/api/course/settings/{courseId}
      */
-    courseControllerUpdateCourseSettings: (courseId: string, params: RequestParams = {}) =>
+    courseControllerUpdateCourseSettings: (
+      courseId: string,
+      data: UpdateCourseSettingsBody,
+      params: RequestParams = {},
+    ) =>
       this.request<UpdateCourseSettingsResponse, any>({
         path: `/api/course/settings/${courseId}`,
         method: "PATCH",
+        body: data,
+        type: ContentType.FormData,
         format: "json",
         ...params,
       }),

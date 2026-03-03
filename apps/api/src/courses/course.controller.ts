@@ -88,6 +88,7 @@ import {
 } from "src/courses/schemas/showCourseCommon.schema";
 import { UpdateCourseBody, updateCourseSchema } from "src/courses/schemas/updateCourse.schema";
 import {
+  updateCourseSettingsMultipartSchema,
   updateCourseSettingsSchema,
   type UpdateCourseSettings,
 } from "src/courses/schemas/updateCourseSettings.schema";
@@ -532,7 +533,10 @@ export class CourseController {
   @ApiConsumes("multipart/form-data")
   @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   @Validate({
-    request: [{ type: "param", name: "courseId", schema: UUIDSchema }],
+    request: [
+      { type: "param", name: "courseId", schema: UUIDSchema },
+      { type: "body", schema: updateCourseSettingsMultipartSchema },
+    ],
     response: baseResponse(Type.Object({ message: Type.String() })),
   })
   async updateCourseSettings(

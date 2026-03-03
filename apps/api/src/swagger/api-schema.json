@@ -3339,6 +3339,16 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCourseSettingsBody"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "content": {
@@ -16917,6 +16927,34 @@
         "required": [
           "data"
         ]
+      },
+      "UpdateCourseSettingsBody": {
+        "type": "object",
+        "properties": {
+          "lessonSequenceEnabled": {
+            "default": false,
+            "type": "boolean"
+          },
+          "quizFeedbackEnabled": {
+            "default": true,
+            "type": "boolean"
+          },
+          "certificateSignature": {},
+          "certificateFontColor": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "removeCertificateSignature": {
+            "type": "boolean"
+          }
+        }
       },
       "UpdateCourseSettingsResponse": {
         "type": "object",
