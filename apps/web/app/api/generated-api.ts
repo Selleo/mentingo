@@ -1632,14 +1632,12 @@ export interface UpdateHasCertificateResponse {
 }
 
 export interface UpdateCourseSettingsBody {
-  /** @default false */
-  lessonSequenceEnabled?: boolean;
-  /** @default true */
-  quizFeedbackEnabled?: boolean;
-  certificateSignature?: any;
-  /** @default null */
-  certificateFontColor?: string | null;
-  removeCertificateSignature?: boolean;
+  lessonSequenceEnabled?: boolean | string;
+  quizFeedbackEnabled?: boolean | string;
+  certificateFontColor?: string;
+  removeCertificateSignature?: boolean | string;
+  /** @format binary */
+  certificateSignature?: File;
 }
 
 export interface UpdateCourseSettingsResponse {
