@@ -10,6 +10,8 @@ import {
   buildCertificateHtmlDocument as buildSharedCertificateHtmlDocument,
   buildCertificateMarkup,
 } from "@repo/shared";
+import { format } from "date-fns";
+import { escape } from "lodash";
 import puppeteer, { type Page, type Browser } from "puppeteer";
 
 import { getSortOptions } from "src/common/helpers/getSortOptions";
@@ -513,15 +515,15 @@ export class CertificatesService implements OnModuleDestroy, OnModuleInit {
     const localizedContent = translations[context.language];
 
     return {
-      pageTitle: this.escapeHtml(localizedContent.pageTitle),
-      pageDescription: this.escapeHtml(localizedContent.pageDescription),
-      siteName: this.escapeHtml(context.certificate.tenantName),
-      courseTitle: this.escapeHtml(context.certificate.courseTitle),
-      shareUrl: this.escapeHtml(context.shareUrl),
-      shareImageUrl: this.escapeHtml(context.shareImageUrl),
-      homeUrl: this.escapeHtml(this.buildTenantUrl(context.certificate.tenantHost, "/", {})),
-      openLabel: this.escapeHtml(localizedContent.openLabel),
-      faviconUrl: this.escapeHtml(
+      pageTitle: escape(localizedContent.pageTitle),
+      pageDescription: escape(localizedContent.pageDescription),
+      siteName: escape(context.certificate.tenantName),
+      courseTitle: escape(context.certificate.courseTitle),
+      shareUrl: escape(context.shareUrl),
+      shareImageUrl: escape(context.shareImageUrl),
+      homeUrl: escape(this.buildTenantUrl(context.certificate.tenantHost, "/", {})),
+      openLabel: escape(localizedContent.openLabel),
+      faviconUrl: escape(
         context.settings.platformSimpleLogoS3Key ||
           this.buildTenantUrl(
             context.certificate.tenantHost,
@@ -529,9 +531,9 @@ export class CertificatesService implements OnModuleDestroy, OnModuleInit {
             {},
           ),
       ),
-      primaryColor: this.escapeHtml(context.settings.primaryColor || "#3f58b6"),
-      contrastColor: this.escapeHtml(context.settings.contrastColor || "#ffffff"),
-      embeddedImage: this.escapeHtml(embeddedImageSrc),
+      primaryColor: escape(context.settings.primaryColor || "#3f58b6"),
+      contrastColor: escape(context.settings.contrastColor || "#ffffff"),
+      embeddedImage: escape(embeddedImageSrc),
     };
   }
 
@@ -620,26 +622,13 @@ export class CertificatesService implements OnModuleDestroy, OnModuleInit {
     return language === "pl" ? "pl" : "en";
   }
 
-  private formatDate(input?: string | null): string {
-    if (!input) return "";
+  private formatDate(inputDate?: string | null): string {
+    if (!inputDate) return "";
 
-    const parsed = new Date(input);
-    if (Number.isNaN(parsed.getTime())) return input;
+    const parsedDate = new Date(inputDate);
+    if (Number.isNaN(parsedDate.getTime())) return inputDate;
 
-    const day = String(parsed.getUTCDate()).padStart(2, "0");
-    const month = String(parsed.getUTCMonth() + 1).padStart(2, "0");
-    const year = parsed.getUTCFullYear();
-
-    return `${day}.${month}.${year}`;
-  }
-
-  private escapeHtml(value: string): string {
-    return value
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#39;");
+    return format(parsedDate, "dd.MM.yyyy");
   }
 
   private toDataUri(buffer: Buffer, mimeType: string): string {

@@ -28,7 +28,6 @@ const CourseCertificate = ({ courseId }: { courseId: string }) => {
     courseId,
     language,
   });
-  const certificateRecord = certificate;
 
   const hasFinishedCourse = useMemo(() => {
     return course?.completedChapterCount === course?.courseChapterCount;
@@ -39,14 +38,13 @@ const CourseCertificate = ({ courseId }: { courseId: string }) => {
       return { studentName: "", courseName: "", formattedDate: "" };
     }
 
-    const studentName =
-      certificateRecord?.fullName || `${currentUser.firstName} ${currentUser.lastName}`;
-    const courseName = certificateRecord?.courseTitle || course.title;
-    const completionDate = certificateRecord ? certificateRecord.completionDate : null;
+    const studentName = certificate?.fullName || `${currentUser.firstName} ${currentUser.lastName}`;
+    const courseName = certificate?.courseTitle || course.title;
+    const completionDate = certificate ? certificate.completionDate : null;
     const formattedDate = completionDate ? format(new Date(completionDate), "dd.MM.yyyy") : "";
 
     return { studentName, courseName, formattedDate };
-  }, [certificateRecord, currentUser, course, isStudent]);
+  }, [certificate, currentUser, course, isStudent]);
 
   const { studentName, courseName, formattedDate } = certificateInfo;
 
@@ -55,7 +53,7 @@ const CourseCertificate = ({ courseId }: { courseId: string }) => {
 
   return (
     <div>
-      {Boolean(certificateRecord) && hasFinishedCourse && (
+      {Boolean(certificate) && hasFinishedCourse && (
         <Card className="p-4 md:px-8 flex items-center gap-4 bg-success-50">
           <div className="bg-success-50 aspect-square size-10 rounded-full grid place-items-center">
             <Icon name="InputRoundedMarkerSuccess" className="size-4" />
@@ -70,7 +68,7 @@ const CourseCertificate = ({ courseId }: { courseId: string }) => {
         </Card>
       )}
 
-      {Boolean(certificateRecord) && isCertificatePreviewOpen && isStudent && (
+      {Boolean(certificate) && isCertificatePreviewOpen && isStudent && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50"
           onClick={handleCloseCertificatePreview}
@@ -82,16 +80,16 @@ const CourseCertificate = ({ courseId }: { courseId: string }) => {
         >
           <div role="presentation" onClick={(event) => event.stopPropagation()}>
             <CertificatePreview
-              certificateId={certificateRecord?.id}
+              certificateId={certificate?.id}
               studentName={studentName}
               courseName={courseName}
               completionDate={formattedDate}
               onClose={handleCloseCertificatePreview}
               platformLogo={globalSettings?.platformLogoS3Key}
               certificateBackgroundImageUrl={globalSettings?.certificateBackgroundImage}
-              certificateSignatureUrl={certificateRecord?.certificateSignatureUrl}
-              initialColor={certificateRecord?.certificateFontColor}
-              showShareButton={Boolean(certificateRecord?.id)}
+              certificateSignatureUrl={certificate?.certificateSignatureUrl}
+              initialColor={certificate?.certificateFontColor}
+              showShareButton={Boolean(certificate?.id)}
             />
           </div>
         </div>

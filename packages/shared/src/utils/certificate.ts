@@ -1,3 +1,5 @@
+import { SupportedLanguages } from "../constants/languages";
+
 export interface CertificateRenderTheme {
   titleColor: string;
   certifyTextColor: string;
@@ -20,8 +22,6 @@ export const defaultCertificateRenderTheme: CertificateRenderTheme = {
   logoColor: "#1f2937",
 };
 
-export type CertificateRenderLanguage = "pl" | "en";
-
 export type BuildCertificateMarkupOptions = {
   studentName?: string;
   courseName?: string;
@@ -30,7 +30,7 @@ export type BuildCertificateMarkupOptions = {
   signatureImageUrl?: string | null;
   backgroundImageUrl?: string | null;
   platformName?: string;
-  lang?: CertificateRenderLanguage;
+  lang?: SupportedLanguages;
   colorTheme?: CertificateRenderTheme;
   isModal?: boolean;
   isDownload?: boolean;

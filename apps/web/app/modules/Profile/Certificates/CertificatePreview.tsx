@@ -43,7 +43,8 @@ const CertificatePreview = ({
   onColorChange,
 }: CertificatePreviewProps) => {
   const { downloadCertificatePdf, isPreparingDownload } = useCertificatePDF();
-  const createCertificateShareLink = useCreateCertificateShareLink();
+  const { mutateAsync: createCertificateShareLink, isPending: isPreparingShare } =
+    useCreateCertificateShareLink();
   const [toggled, setToggled] = useState<boolean>(false);
   const [colorTheme, setColorTheme] = useState<CertificateColorTheme>(
     getCertificateColorTheme(initialColor),
@@ -56,14 +57,14 @@ const CertificatePreview = ({
   const lang = toggled ? "pl" : "en";
 
   const handleShareToLinkedIn = async () => {
-    if (!certificateId || createCertificateShareLink.isPending) return;
+    if (!certificateId || isPreparingShare) return;
 
-    const response = await createCertificateShareLink.mutateAsync({
+    const { linkedinShareUrl } = await createCertificateShareLink({
       certificateId,
       language: lang,
     });
 
-    window.open(response.linkedinShareUrl, "_blank", "noopener,noreferrer");
+    window.open(linkedinShareUrl, "_blank", "noopener,noreferrer");
   };
 
   const handleDownloadCertificate = async () => {
@@ -107,7 +108,7 @@ const CertificatePreview = ({
             downloadCertificatePdf={handleDownloadCertificate}
             isPreparingDownload={isPreparingDownload}
             onShareToLinkedIn={handleShareToLinkedIn}
-            isPreparingShare={createCertificateShareLink.isPending}
+            isPreparingShare={isPreparingShare}
             colorTheme={colorTheme}
             setColorTheme={setColorTheme}
             onColorChange={onColorChange}
