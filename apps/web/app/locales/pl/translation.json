@@ -388,7 +388,8 @@
         "google_authorization": "Google OAuth",
         "microsoft_authorization": "Microsoft OAuth",
         "slack_authorization": "Slack OAuth",
-        "openAI": "OpenAI"
+        "openAI": "OpenAI",
+        "luma": "Luma"
       },
       "serviceDescriptions": {
         "stripe": "Przetwarzanie płatności za kursy i zarządzanie subskrypcjami",
@@ -396,7 +397,8 @@
         "google_authorization": "Umożliwia użytkownikom logowanie przez konto Google",
         "microsoft_authorization": "Umożliwia użytkownikom logowanie przez konto Microsoft",
         "slack_authorization": "Umożliwia użytkownikom logowanie przez konto Slack",
-        "openAI": "Włączenie funkcji AI Mentora"
+        "openAI": "Włączenie funkcji AI Mentora",
+        "luma": "Włącz funkcje generowania kursów AI"
       }
     }
   },

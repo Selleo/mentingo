@@ -73,7 +73,10 @@ export class AiService {
             return { data: threadData.thread };
           }
 
-          updateActiveTrace({ userId: threadData.thread.userId, sessionId: threadData.thread.id });
+          updateActiveTrace({
+            userId: dbAls.getStore()?.tenantId,
+            sessionId: threadData.thread.id,
+          });
 
           const systemPrompt = await this.promptService.setSystemPrompt({
             threadId: threadData.thread.id,
@@ -98,9 +101,10 @@ export class AiService {
   async streamMessage(data: StreamChatBody, model: OpenAIModels, userId: UUIDType) {
     return observe(
       async () => {
+        const tenantId = dbAls.getStore()?.tenantId;
         updateActiveTrace({
           sessionId: data.threadId,
-          userId,
+          userId: tenantId,
         });
 
         await this.isThreadActive(data.threadId, userId);
@@ -185,7 +189,10 @@ export class AiService {
   async runJudge(data: ThreadOwnershipBody, userRole: UserRole = USER_ROLES.STUDENT) {
     const judged = await observe(
       async () => {
-        updateActiveTrace({ sessionId: data.threadId, userId: data.userId });
+        updateActiveTrace({
+          sessionId: data.threadId,
+          userId: dbAls.getStore()?.tenantId,
+        });
         return this.judgeService.runJudge(data);
       },
       { name: "Thread Evaluator", asType: "evaluator" },
