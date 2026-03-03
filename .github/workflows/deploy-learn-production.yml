@@ -162,6 +162,11 @@ jobs:
             SLACK_CLIENT_SECRET
             SLACK_OAUTH_ENABLED
             MASTER_KEY
+            LANGFUSE_HOST
+            LANGFUSE_SECRET_KEY
+            LANGFUSE_PUBLIC_KEY
+            LUMA_BASE_URL
+            ANALYTICS_SECRET
 
           paths: |
             /learn/production/api/terraform/

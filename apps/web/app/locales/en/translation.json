@@ -410,7 +410,8 @@
         "google_authorization": "Google OAuth",
         "microsoft_authorization": "Microsoft OAuth",
         "slack_authorization": "Slack OAuth",
-        "openAI": "OpenAI"
+        "openAI": "OpenAI",
+        "luma": "Luma"
       },
       "serviceDescriptions": {
         "stripe": "Process course payments and manage subscriptions",
@@ -418,7 +419,8 @@
         "google_authorization": "Allow users to sign in with their Google account",
         "microsoft_authorization": "Allow users to sign in with their Microsoft account",
         "slack_authorization": "Allow users to sign in with their Slack account",
-        "openAI": "Enable AI Mentor features"
+        "openAI": "Enable AI Mentor features",
+        "luma": "Enable AI Course Generation features"
       }
     }
   },

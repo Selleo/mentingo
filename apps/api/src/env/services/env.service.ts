@@ -165,8 +165,9 @@ export class EnvService {
     const lumaKey = await this.getEnv("LUMA_API_KEY")
       .then((r) => r.value)
       .catch(() => undefined);
+    const lumaBaseUrl = process.env.LUMA_BASE_URL;
 
-    const enabled = !!lumaKey;
+    const enabled = !!lumaKey && !!lumaBaseUrl;
 
     return { enabled };
   }
