@@ -51,6 +51,8 @@ export class CertificatesService implements OnModuleDestroy, OnModuleInit {
   ) {}
 
   async onModuleInit() {
+    if (this.shouldSkipBrowserWarmup()) return;
+
     void this.getBrowser().catch((error) => {
       this.logger.warn(`Certificate PDF browser warm-up failed during module init: ${error}`);
     });
@@ -236,6 +238,10 @@ export class CertificatesService implements OnModuleDestroy, OnModuleInit {
     });
 
     return imageBuffer;
+  }
+
+  private shouldSkipBrowserWarmup() {
+    return Boolean(process.env.JEST_WORKER_ID);
   }
 
   private async getBrowser() {

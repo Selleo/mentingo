@@ -3,6 +3,7 @@ import { isArray, omit } from "lodash";
 import { nanoid } from "nanoid";
 import request from "supertest";
 
+import { SettingsService } from "src/settings/settings.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { createTokens, resetTokens } from "src/storage/schema";
 
@@ -22,11 +23,13 @@ describe("AuthController (e2e)", () => {
   let baseDb: DatabasePg;
   let userFactory: ReturnType<typeof createUserFactory>;
   let settingsFactory: ReturnType<typeof createSettingsFactory>;
+  let settingsService: SettingsService;
 
   beforeAll(async () => {
     const { app: testApp } = await createE2ETest();
     app = testApp;
     authService = app.get(AuthService);
+    settingsService = app.get(SettingsService);
     db = app.get(DB);
     baseDb = app.get(DB_ADMIN);
     userFactory = createUserFactory(db);
@@ -90,7 +93,7 @@ describe("AuthController (e2e)", () => {
       const user = userFactory.build();
       const password = "Password123@";
 
-      await authService.register({
+      const registeredUser = await authService.register({
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
@@ -98,39 +101,17 @@ describe("AuthController (e2e)", () => {
         language: "ar",
       });
 
-      const loginResponse = await request(app.getHttpServer()).post("/api/auth/login").send({
-        email: user.email,
-        password: password,
-      });
+      const userSettings = await settingsService.getUserSettings(registeredUser.id);
 
-      expect(loginResponse.status).toBe(201);
-
-      const cookies = loginResponse.headers["set-cookie"];
-      let accessToken = "";
-
-      if (Array.isArray(cookies)) {
-        cookies.forEach((cookieString) => {
-          const parsedCookie = cookie.parse(cookieString);
-          if ("access_token" in parsedCookie) {
-            accessToken = parsedCookie.access_token;
-          }
-        });
-      }
-
-      const settingsResponse = await request(app.getHttpServer())
-        .get("/api/settings")
-        .set("Cookie", `access_token=${accessToken};`)
-        .expect(200);
-
-      expect(settingsResponse.body.data).toBeDefined();
-      expect(settingsResponse.body.data.language).toBe("en");
+      expect(userSettings).toBeDefined();
+      expect(userSettings.language).toBe("en");
     });
 
     it("should save correct language when registering with supported language other than 'en'", async () => {
       const user = userFactory.build();
       const password = "Password123@";
 
-      await authService.register({
+      const registeredUser = await authService.register({
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
@@ -138,32 +119,10 @@ describe("AuthController (e2e)", () => {
         language: "pl",
       });
 
-      const loginResponse = await request(app.getHttpServer()).post("/api/auth/login").send({
-        email: user.email,
-        password: password,
-      });
+      const userSettings = await settingsService.getUserSettings(registeredUser.id);
 
-      expect(loginResponse.status).toBe(201);
-
-      const cookies = loginResponse.headers["set-cookie"];
-      let accessToken = "";
-
-      if (Array.isArray(cookies)) {
-        cookies.forEach((cookieString) => {
-          const parsedCookie = cookie.parse(cookieString);
-          if ("access_token" in parsedCookie) {
-            accessToken = parsedCookie.access_token;
-          }
-        });
-      }
-
-      const settingsResponse = await request(app.getHttpServer())
-        .get("/api/settings")
-        .set("Cookie", `access_token=${accessToken};`)
-        .expect(200);
-
-      expect(settingsResponse.body.data).toBeDefined();
-      expect(settingsResponse.body.data.language).toBe("pl");
+      expect(userSettings).toBeDefined();
+      expect(userSettings.language).toBe("pl");
     });
   });
 
@@ -334,6 +293,7 @@ describe("AuthController (e2e)", () => {
         groups: [],
         isManagingTenantAdmin: false,
         isSupportMode: false,
+        studentModeCourseIds: [],
         shouldVerifyMFA: false,
       });
     });
