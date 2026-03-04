@@ -1,7 +1,7 @@
 import type { QuizQuestionOption } from "../types";
 
-export const getOptionConfig = (option: QuizQuestionOption, isAdmin: boolean) => {
-  const isFieldDisabled = isAdmin || typeof option.isCorrect === "boolean";
+export const getOptionConfig = (option: QuizQuestionOption, isPreviewMode: boolean) => {
+  const isFieldDisabled = isPreviewMode || typeof option.isCorrect === "boolean";
 
   const isCorrectAnswer = Boolean(typeof option.isCorrect === "boolean" && option.isStudentAnswer);
   const isWrongAnswer = Boolean(!option.isCorrect && option.isStudentAnswer);
@@ -13,6 +13,6 @@ export const getOptionConfig = (option: QuizQuestionOption, isAdmin: boolean) =>
     isCorrectAnswerNotSelected,
     isCorrectAnswer: option.isCorrect,
     isCorrectAnswerSelected: isCorrectAnswer,
-    isPreviewMode: isAdmin,
+    isPreviewMode,
   };
 };

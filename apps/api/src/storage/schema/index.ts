@@ -453,6 +453,24 @@ export const studentCourses = pgTable(
   })),
 );
 
+export const courseStudentMode = pgTable(
+  "course_student_mode",
+  {
+    ...id,
+    ...timestamps,
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    courseId: uuid("course_id")
+      .references(() => courses.id, { onDelete: "cascade" })
+      .notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("course_student_mode", (table) => ({
+    unq: unique().on(table.userId, table.courseId),
+  })),
+);
+
 export const studentLessonProgress = pgTable(
   "student_lesson_progress",
   {

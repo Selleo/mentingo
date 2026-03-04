@@ -5,6 +5,7 @@ type CourseProgressProps = {
   completedLessonCount: number;
   courseLessonCount: number;
   isCompleted?: boolean;
+  redactProgress?: boolean;
 };
 
 const CourseProgress = ({
@@ -12,6 +13,7 @@ const CourseProgress = ({
   completedLessonCount,
   courseLessonCount,
   isCompleted = false,
+  redactProgress = false,
 }: CourseProgressProps) => {
   const getCourseProgressParts = () => {
     return Array.from({ length: courseLessonCount }).map((_, index) => (
@@ -20,8 +22,6 @@ const CourseProgress = ({
         className={cn("h-[5px] flex-grow rounded-[40px]", {
           "bg-success-500": isCompleted,
           "bg-secondary-500": index < completedLessonCount && !isCompleted,
-          "bg-primary-50":
-            (index >= completedLessonCount || completedLessonCount === 0) && !isCompleted,
         })}
       />
     ));
@@ -31,10 +31,14 @@ const CourseProgress = ({
 
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-xs text-neutral-600">
-        {label} {completedLessonCount}/{courseLessonCount}
-      </p>
-      <div className="flex items-center justify-between gap-px">{courseProgressParts}</div>
+      {!redactProgress ? (
+        <>
+          <p className="text-xs text-neutral-600">
+            {label} {completedLessonCount}/{courseLessonCount}
+          </p>
+          <div className="flex items-center justify-between gap-px">{courseProgressParts}</div>
+        </>
+      ) : null}
     </div>
   );
 };

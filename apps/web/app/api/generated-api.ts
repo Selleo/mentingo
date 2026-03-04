@@ -112,6 +112,7 @@ export interface CurrentUserResponse {
     };
     isManagingTenantAdmin: boolean;
     isSupportMode: boolean;
+    studentModeCourseIds: string[];
     supportContext?: {
       /** @format uuid */
       originalUserId: string;
@@ -1657,6 +1658,19 @@ export interface GetCourseSettingsResponse {
     /** @default null */
     certificateFontColor: string | null;
     certificateSignatureUrl: string | null;
+  };
+}
+
+export interface SetCourseStudentModeBody {
+  enabled: boolean;
+}
+
+export interface SetCourseStudentModeResponse {
+  data: {
+    /** @format uuid */
+    courseId: string;
+    enabled: boolean;
+    studentModeCourseIds: string[];
   };
 }
 
@@ -6250,6 +6264,26 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<GetCourseSettingsResponse, any>({
         path: `/api/course/settings/${courseId}`,
         method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerSetCourseStudentMode
+     * @request PATCH:/api/course/{courseId}/student-mode
+     */
+    courseControllerSetCourseStudentMode: (
+      courseId: string,
+      data: SetCourseStudentModeBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<SetCourseStudentModeResponse, any>({
+        path: `/api/course/${courseId}/student-mode`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),

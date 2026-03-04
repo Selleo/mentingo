@@ -10,6 +10,7 @@ import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { useUserRole } from "~/hooks/useUserRole";
 import { cn } from "~/lib/utils";
 import TransferOwnershipSelect from "~/modules/Admin/EditCourse/CourseSettings/components/TransferOwnershipSelect";
+import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import { CourseOptions } from "~/modules/Courses/CourseView/CourseViewSidebar/CourseOptions";
 import { CourseProgress } from "~/modules/Courses/CourseView/CourseViewSidebar/CourseProgress";
 
@@ -25,6 +26,7 @@ export const CourseViewSidebar = ({ course }: CourseViewSidebar) => {
 
   const { data: userDetails } = useUserDetails(course?.authorId ?? "");
   const { isAdminLike, isAdmin } = useUserRole();
+  const { isEffectiveStudentExperience } = useCourseAccessProvider();
 
   const { t } = useTranslation();
 
@@ -35,7 +37,8 @@ export const CourseViewSidebar = ({ course }: CourseViewSidebar) => {
     enabled: isAdmin,
   });
 
-  const shouldShowCourseOptions = !course?.enrolled && !isAdminLike;
+  const shouldShowCourseOptions =
+    !course?.enrolled && !isEffectiveStudentExperience && !isAdminLike;
   const canEditOwner =
     isAdmin && !!course.id && !!courseOwnershipCandidates?.possibleCandidates?.length;
 

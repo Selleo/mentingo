@@ -1966,6 +1966,14 @@
       },
       "courseCompleted": "Congratulations! You have completed the course! Now you have access to your certificate."
     },
+    "studentMode": {
+      "enter": "Enter learning mode",
+      "exit": "Exit learning mode",
+      "bannerTitle": "You're taking this course in learning mode",
+      "bannerDescription": "Your learning progress is being tracked. Completed lessons count toward your personal completion and course statistics.",
+      "exitBanner": "Exit learning mode",
+      "learningModeRequired": "Learning mode is not active for this course."
+    },
     "tabs": {
       "chapters": "Chapters",
       "moreFromAuthor": "More from author",

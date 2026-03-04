@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
 import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { VideoProvider } from "~/components/VideoPlayer/VideoPlayerContext";
 import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
+import { CourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import { LessonContent } from "~/modules/Courses/Lesson/LessonContent";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
@@ -126,17 +127,18 @@ export default function LessonPreviewDialog({
             </div>
           </div>
           <VideoProvider>
-            <LessonContent
-              lesson={lesson}
-              course={course}
-              lessonsAmount={currentChapter?.lessons.length ?? 0}
-              handleNext={() => {}}
-              handlePrevious={() => {}}
-              isLastLesson={true}
-              isFirstLesson={true}
-              lessonLoading={isLoadingLesson}
-              isPreviewMode={true}
-            />
+            <CourseAccessProvider course={course} forcePreviewMode>
+              <LessonContent
+                lesson={lesson}
+                course={course}
+                lessonsAmount={currentChapter?.lessons.length ?? 0}
+                handleNext={() => {}}
+                handlePrevious={() => {}}
+                isLastLesson={true}
+                isFirstLesson={true}
+                lessonLoading={isLoadingLesson}
+              />
+            </CourseAccessProvider>
           </VideoProvider>
         </div>
       </DialogContent>

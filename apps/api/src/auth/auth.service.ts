@@ -42,6 +42,7 @@ import { SupportModeService } from "src/support-mode/support-mode.service";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
 import {
+  courseStudentMode,
   createTokens,
   credentials,
   magicLinkTokens,
@@ -245,6 +246,7 @@ export class AuthService {
     const userSettings = await this.settingsService.getUserSettings(userId);
 
     const isManagingTenantAdmin = await this.isManagingTenantAdmin(tenantId, user.role as UserRole);
+    const studentModeCourseIds = await this.getStudentModeCourseIds(userId, this.db);
 
     if (MFAEnforcedRoles.includes(user.role as UserRole) || userSettings.isMFAEnabled) {
       return {
@@ -253,6 +255,7 @@ export class AuthService {
         onboardingStatus,
         isManagingTenantAdmin,
         isSupportMode: false,
+        studentModeCourseIds,
       };
     }
 
@@ -262,6 +265,7 @@ export class AuthService {
       onboardingStatus,
       isManagingTenantAdmin,
       isSupportMode: false,
+      studentModeCourseIds,
     };
   }
 
@@ -284,6 +288,7 @@ export class AuthService {
       sourceTenantId,
       user.role as UserRole,
     );
+    const studentModeCourseIds = await this.getStudentModeCourseIds(sourceUserId, dbInstance);
 
     return {
       ...user,
@@ -291,6 +296,7 @@ export class AuthService {
       onboardingStatus,
       isManagingTenantAdmin,
       isSupportMode: true,
+      studentModeCourseIds,
       supportContext: {
         ...session,
       },
@@ -334,6 +340,15 @@ export class AuthService {
     } catch (error) {
       throw new ForbiddenException("Invalid refresh token");
     }
+  }
+
+  private async getStudentModeCourseIds(userId: UUIDType, dbInstance: DatabasePg) {
+    const studentModeRecords = await dbInstance
+      .select({ courseId: courseStudentMode.courseId })
+      .from(courseStudentMode)
+      .where(eq(courseStudentMode.userId, userId));
+
+    return studentModeRecords.map(({ courseId }) => courseId);
   }
 
   public async validateUser(email: string, password: string) {

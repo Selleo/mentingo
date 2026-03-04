@@ -3387,6 +3387,43 @@
         }
       }
     },
+    "/api/course/{courseId}/student-mode": {
+      "patch": {
+        "operationId": "CourseController_setCourseStudentMode",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetCourseStudentModeBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetCourseStudentModeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/course/lesson-sequence-enabled/{courseId}": {
       "get": {
         "operationId": "CourseController_getLessonSequenceEnabled",
@@ -9872,6 +9909,13 @@
               "isSupportMode": {
                 "type": "boolean"
               },
+              "studentModeCourseIds": {
+                "type": "array",
+                "items": {
+                  "format": "uuid",
+                  "type": "string"
+                }
+              },
               "supportContext": {
                 "type": "object",
                 "properties": {
@@ -9917,7 +9961,8 @@
               "shouldVerifyMFA",
               "onboardingStatus",
               "isManagingTenantAdmin",
-              "isSupportMode"
+              "isSupportMode",
+              "studentModeCourseIds"
             ]
           }
         },
@@ -17042,6 +17087,49 @@
               "certificateSignature",
               "certificateFontColor",
               "certificateSignatureUrl"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "SetCourseStudentModeBody": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "enabled"
+        ]
+      },
+      "SetCourseStudentModeResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "courseId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "enabled": {
+                "type": "boolean"
+              },
+              "studentModeCourseIds": {
+                "type": "array",
+                "items": {
+                  "format": "uuid",
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "courseId",
+              "enabled",
+              "studentModeCourseIds"
             ]
           }
         },

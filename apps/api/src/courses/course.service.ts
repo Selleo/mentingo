@@ -65,6 +65,7 @@ import {
   categories,
   certificates,
   chapters,
+  courseStudentMode,
   courses,
   coursesSummaryStats,
   groups,
@@ -2397,8 +2398,9 @@ export class CourseService {
     studentId: UUIDType,
     paymentId: string | null = null,
     enrolledByGroupId: UUIDType | null = null,
+    dbInstance: DatabasePg = this.db,
   ): Promise<StudentCourseSelect> {
-    const [enrolledCourse] = await this.db
+    const [enrolledCourse] = await dbInstance
       .insert(studentCourses)
       .values({
         studentId,
@@ -2499,6 +2501,103 @@ export class CourseService {
         }),
       );
     }
+  }
+
+  async setCourseStudentMode(
+    courseId: UUIDType,
+    userId: UUIDType,
+    userRole: UserRole,
+    enableStudentMode: boolean,
+  ) {
+    const [course] = await this.db
+      .select({ id: courses.id, authorId: courses.authorId })
+      .from(courses)
+      .where(eq(courses.id, courseId));
+
+    if (!course) throw new NotFoundException("Course not found");
+
+    if (userRole === USER_ROLES.CONTENT_CREATOR && course.authorId !== userId) {
+      throw new ForbiddenException("You don't have permission to change student mode");
+    }
+
+    await this.db.transaction(async (trx) => {
+      if (enableStudentMode) return await this.enableCourseStudentMode(courseId, userId, trx);
+
+      await this.disableCourseStudentMode(courseId, userId, trx);
+    });
+
+    const studentModeCourseIds = await this.getStudentModeCourseIds(userId);
+
+    return {
+      courseId,
+      enabled: enableStudentMode,
+      studentModeCourseIds,
+    };
+  }
+
+  private async enableCourseStudentMode(
+    courseId: UUIDType,
+    userId: UUIDType,
+    trx: PostgresJsDatabase<typeof schema>,
+  ) {
+    await this.createStudentCourse(courseId, userId, null, null, trx);
+
+    await trx.insert(courseStudentMode).values({ userId, courseId }).onConflictDoNothing();
+
+    await this.createCourseDependencies(courseId, userId, null, trx);
+  }
+
+  private async disableCourseStudentMode(
+    courseId: UUIDType,
+    userId: UUIDType,
+    trx: PostgresJsDatabase<typeof schema>,
+  ) {
+    await trx
+      .delete(courseStudentMode)
+      .where(and(eq(courseStudentMode.userId, userId), eq(courseStudentMode.courseId, courseId)));
+  }
+
+  async getStudentModeCourseIds(
+    userId: UUIDType,
+    dbInstance: PostgresJsDatabase<typeof schema> | DatabasePg = this.db,
+  ) {
+    const courseIds = await dbInstance
+      .select({ courseId: courseStudentMode.courseId })
+      .from(courseStudentMode)
+      .where(eq(courseStudentMode.userId, userId));
+
+    return courseIds.map(({ courseId }) => courseId);
+  }
+
+  async isCourseStudentModeEnabled(
+    courseId: UUIDType,
+    userId: UUIDType,
+    dbInstance: PostgresJsDatabase<typeof schema> | DatabasePg = this.db,
+  ) {
+    const [studentModeExists] = await dbInstance
+      .select({ id: courseStudentMode.id })
+      .from(courseStudentMode)
+      .where(and(eq(courseStudentMode.courseId, courseId), eq(courseStudentMode.userId, userId)));
+
+    return Boolean(studentModeExists);
+  }
+
+  async isLessonStudentModeEnabled(
+    lessonId: UUIDType,
+    userId: UUIDType,
+    dbInstance: PostgresJsDatabase<typeof schema> | DatabasePg = this.db,
+  ) {
+    const [lesson] = await dbInstance
+      .select({ courseId: chapters.courseId })
+      .from(lessons)
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .where(eq(lessons.id, lessonId));
+
+    if (!lesson?.courseId) {
+      throw new NotFoundException("Lesson not found");
+    }
+
+    return this.isCourseStudentModeEnabled(lesson.courseId, userId, dbInstance);
   }
 
   async deleteCourse(id: UUIDType, currentUserRole: UserRole) {

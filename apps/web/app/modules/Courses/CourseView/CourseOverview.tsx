@@ -2,6 +2,7 @@ import { useNavigate } from "@remix-run/react";
 import { formatDate } from "date-fns";
 import { useTranslation } from "react-i18next";
 
+import { useToggleCourseStudentMode } from "~/api/mutations";
 import { useCurrentUser } from "~/api/queries";
 import CardPlaceholder from "~/assets/placeholders/card-placeholder.jpg";
 import { Icon } from "~/components/Icon";
@@ -12,6 +13,7 @@ import { Card, CardContent } from "~/components/ui/card";
 import { CategoryChip } from "~/components/ui/CategoryChip";
 import { useUserRole } from "~/hooks/useUserRole";
 import { courseLanguages } from "~/modules/Admin/EditCourse/components/CourseLanguageSelector";
+import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 
 import type { GetCourseResponse } from "~/api/generated-api";
 
@@ -25,6 +27,9 @@ export default function CourseOverview({ course }: CourseOverviewProps) {
 
   const { isAdminLike, isAdmin } = useUserRole();
   const { data: currentUser } = useCurrentUser();
+  const { isCourseStudentModeActive } = useCourseAccessProvider();
+  const { mutate: toggleLearningMode, isPending: isTogglingLearningMode } =
+    useToggleCourseStudentMode(course.id, course.slug);
 
   const imageUrl = course?.thumbnailUrl ?? CardPlaceholder;
   const title = course?.title;
@@ -36,7 +41,21 @@ export default function CourseOverview({ course }: CourseOverviewProps) {
     <Card className="w-full border-none pt-1 drop-shadow-primary lg:pt-0">
       <CardContent className="flex flex-col px-0">
         {(isAdmin || (isAdminLike && course.authorId === currentUser?.id)) && (
-          <div className="border-b border-1 border-neutral-200 flex items-center justify-end p-4 px-6 mb-8 xl:mb-0">
+          <div className="border-b border-1 border-neutral-200 flex items-center justify-between p-4 px-6 mb-8 xl:mb-0">
+            <Button
+              className="flex gap-2 mr-2"
+              variant={isCourseStudentModeActive ? "primary" : "outline"}
+              onClick={() => toggleLearningMode({ enabled: !isCourseStudentModeActive })}
+              disabled={isTogglingLearningMode}
+            >
+              <Icon
+                name={isCourseStudentModeActive ? "X" : "Hat"}
+                className={isCourseStudentModeActive ? "size-2.5" : "size-4"}
+              />
+              {isCourseStudentModeActive
+                ? t("studentCourseView.studentMode.exit")
+                : t("studentCourseView.studentMode.enter")}
+            </Button>
             <Button className="flex gap-2" variant="primary" onClick={navigateToEditCourse}>
               <Icon name="Edit" className="size-4" />
               {t("pages.editCourse")}

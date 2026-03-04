@@ -2,8 +2,8 @@ import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import { Textarea } from "~/components/ui/textarea";
-import { useUserRole } from "~/hooks/useUserRole";
 import { cn } from "~/lib/utils";
+import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import { QuestionCard } from "~/modules/Courses/Lesson/Question/QuestionCard";
 
 import type { QuizQuestion } from "~/modules/Courses/Lesson/Question/types";
@@ -14,7 +14,7 @@ export type DetailedResponseProps = {
   isCompleted?: boolean;
 };
 export const DetailedResponse = ({ question, isCompleted = false }: DetailedResponseProps) => {
-  const { isAdmin } = useUserRole();
+  const { isPreviewMode } = useCourseAccessProvider();
   const { register } = useFormContext<QuizForm>();
   const { t } = useTranslation();
 
@@ -30,7 +30,7 @@ export const DetailedResponse = ({ question, isCompleted = false }: DetailedResp
         placeholder={t("studentLessonView.placeholder.openQuestion")}
         rows={5}
         className={cn({
-          "cursor-not-allowed": isAdmin,
+          "cursor-not-allowed": isPreviewMode,
           "pointer-events-none": isCompleted,
         })}
       />

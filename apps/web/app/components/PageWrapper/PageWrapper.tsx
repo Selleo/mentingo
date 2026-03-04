@@ -16,6 +16,7 @@ type PageWrapperProps = HTMLAttributes<HTMLDivElement> & {
   wrapperClassName?: string;
   rightSideContent?: ReactNode;
   leftSideContent?: ReactNode;
+  aboveBreadcrumbs?: ReactNode;
 };
 
 type Breadcrumb = { title: string; href: string };
@@ -63,12 +64,14 @@ export const PageWrapper = ({
   rightSideContent,
   leftSideContent,
   wrapperClassName,
+  aboveBreadcrumbs,
   ...props
 }: PageWrapperProps) => {
-  const hasBreadcrumbs = Boolean(breadcrumbs);
+  const hasBreadcrumbs = Boolean(breadcrumbs?.length);
 
-  const classes = cn(
-    !isBarebones && "w-full pt-6 px-4 pb-4 md:px-6 md:pb-6 3xl:pt-12 3xl:px-8 3xl:pb-8",
+  const contentClasses = cn(
+    "w-full",
+    !isBarebones && "pt-6 px-4 pb-4 md:px-6 md:pb-6 3xl:pt-12 3xl:px-8 3xl:pb-8",
     {
       "pt-8 md:pt-6 3xl:pt-6 3xl:pb-2 [&_.breadcrumbs]:mb-2": hasBreadcrumbs,
     },
@@ -79,13 +82,16 @@ export const PageWrapper = ({
     <div className={cn("flex justify-between", wrapperClassName)}>
       {leftSideContent}
 
-      <div className={classes} {...props}>
-        {breadcrumbs && (
-          <div className="breadcrumbs">
-            <Breadcrumbs breadcrumbs={breadcrumbs} />
-          </div>
-        )}
-        {children}
+      <div className="flex min-w-0 flex-1 flex-col">
+        {aboveBreadcrumbs}
+        <div className={contentClasses} {...props}>
+          {hasBreadcrumbs ? (
+            <div className="breadcrumbs">
+              <Breadcrumbs breadcrumbs={breadcrumbs ?? []} />
+            </div>
+          ) : null}
+          {children}
+        </div>
       </div>
 
       {rightSideContent}
