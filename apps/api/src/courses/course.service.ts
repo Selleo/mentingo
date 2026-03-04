@@ -2507,7 +2507,7 @@ export class CourseService {
     courseId: UUIDType,
     userId: UUIDType,
     userRole: UserRole,
-    enabled: boolean,
+    enableStudentMode: boolean,
   ) {
     const [course] = await this.db
       .select({ id: courses.id, authorId: courses.authorId })
@@ -2521,27 +2521,40 @@ export class CourseService {
     }
 
     await this.db.transaction(async (trx) => {
-      if (enabled) {
-        await this.createStudentCourse(courseId, userId, null, null, trx);
+      if (enableStudentMode) return await this.enableCourseStudentMode(courseId, userId, trx);
 
-        await trx.insert(courseStudentMode).values({ userId, courseId }).onConflictDoNothing();
-
-        await this.createCourseDependencies(courseId, userId, null, trx);
-        return;
-      }
-
-      await trx
-        .delete(courseStudentMode)
-        .where(and(eq(courseStudentMode.userId, userId), eq(courseStudentMode.courseId, courseId)));
+      await this.disableCourseStudentMode(courseId, userId, trx);
     });
 
     const studentModeCourseIds = await this.getStudentModeCourseIds(userId);
 
     return {
       courseId,
-      enabled,
+      enabled: enableStudentMode,
       studentModeCourseIds,
     };
+  }
+
+  private async enableCourseStudentMode(
+    courseId: UUIDType,
+    userId: UUIDType,
+    trx: PostgresJsDatabase<typeof schema>,
+  ) {
+    await this.createStudentCourse(courseId, userId, null, null, trx);
+
+    await trx.insert(courseStudentMode).values({ userId, courseId }).onConflictDoNothing();
+
+    await this.createCourseDependencies(courseId, userId, null, trx);
+  }
+
+  private async disableCourseStudentMode(
+    courseId: UUIDType,
+    userId: UUIDType,
+    trx: PostgresJsDatabase<typeof schema>,
+  ) {
+    await trx
+      .delete(courseStudentMode)
+      .where(and(eq(courseStudentMode.userId, userId), eq(courseStudentMode.courseId, courseId)));
   }
 
   async getStudentModeCourseIds(
