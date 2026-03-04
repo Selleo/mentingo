@@ -83,6 +83,12 @@ import {
   type MasterCourseExportCandidatesResponse,
 } from "src/courses/schemas/masterCourse.schema";
 import {
+  setCourseStudentModeResponseSchema,
+  setCourseStudentModeSchema,
+  type SetCourseStudentMode,
+  type SetCourseStudentModeResponse,
+} from "src/courses/schemas/setCourseStudentMode.schema";
+import {
   commonShowBetaCourseSchema,
   commonShowCourseSchema,
 } from "src/courses/schemas/showCourseCommon.schema";
@@ -585,24 +591,16 @@ export class CourseController {
   @Validate({
     request: [
       { type: "param", name: "courseId", schema: UUIDSchema },
-      { type: "body", schema: Type.Object({ enabled: Type.Boolean() }) },
+      { type: "body", schema: setCourseStudentModeSchema },
     ],
-    response: baseResponse(
-      Type.Object({
-        courseId: UUIDSchema,
-        enabled: Type.Boolean(),
-        studentModeCourseIds: Type.Array(UUIDSchema),
-      }),
-    ),
+    response: baseResponse(setCourseStudentModeResponseSchema),
   })
   async setCourseStudentMode(
     @Param("courseId") courseId: UUIDType,
-    @Body() body: { enabled: boolean },
+    @Body() body: SetCourseStudentMode,
     @CurrentUser("userId") currentUserId: UUIDType,
     @CurrentUser("role") currentUserRole: UserRole,
-  ): Promise<
-    BaseResponse<{ courseId: UUIDType; enabled: boolean; studentModeCourseIds: UUIDType[] }>
-  > {
+  ): Promise<BaseResponse<SetCourseStudentModeResponse>> {
     const data = await this.courseService.setCourseStudentMode(
       courseId,
       currentUserId,

@@ -34,7 +34,7 @@ export const ChapterCounter = ({
       className={cn(
         "sr-only after:block after:h-full after:w-0.5 md:not-sr-only md:flex md:flex-col md:items-center md:gap-y-1 md:pt-4",
         {
-          "after:bg-primary-200": isPreviewMode || !isChapterStarted,
+          "after:bg-primary-200": !isPreviewMode || !isChapterStarted,
           "after:bg-secondary-200": !isPreviewMode && isChapterStarted,
           "after:bg-success-200": !isPreviewMode && isChapterCompleted,
         },
@@ -42,7 +42,7 @@ export const ChapterCounter = ({
     >
       <div
         className={cn("relative aspect-square size-10 rounded-full", {
-          "bg-primary-50": isPreviewMode || !isChapterStarted,
+          "bg-primary-50": !isPreviewMode || !isChapterStarted,
           "bg-secondary-50": !isPreviewMode && isChapterStarted,
           "bg-success-50": !isPreviewMode && isChapterCompleted,
         })}

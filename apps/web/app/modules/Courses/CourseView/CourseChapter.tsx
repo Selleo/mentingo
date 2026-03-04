@@ -49,6 +49,7 @@ export const CourseChapter = ({ chapter }: CourseChapterProps) => {
   const lessons = useMemo(() => chapter?.lessons || [], [chapter?.lessons]);
 
   const navigate = useNavigate();
+
   const chapterProgressSegments = Array.from({ length: chapter.lessonCount }).map((_, index) => {
     const isCompletedSegment =
       typeof chapter?.completedLessonCount === "number" && index < chapter.completedLessonCount;
@@ -57,11 +58,11 @@ export const CourseChapter = ({ chapter }: CourseChapterProps) => {
       <span
         key={index}
         className={cn("h-1 w-full rounded-lg", {
-          "bg-primary-100":
+          "bg-secondary-100":
             typeof chapter?.completedLessonCount === "number" &&
             index >= chapter.completedLessonCount,
           "bg-success-500": isCompletedSegment,
-          "bg-secondary-500": !chapter.completedLessonCount && !isCompletedSegment,
+          "bg-primary-100": !chapter.completedLessonCount && !isCompletedSegment,
         })}
       />
     );
