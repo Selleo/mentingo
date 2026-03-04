@@ -12,10 +12,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/comp
 import { shouldAutoAdvanceLessonWithoutNextVideo } from "~/components/VideoPlayer/autoplayFlow";
 import { useVideoPlayer } from "~/components/VideoPlayer/VideoPlayerContext";
 import { useLessonsSequence } from "~/hooks/useLessonsSequence";
-import { useUserRole } from "~/hooks/useUserRole";
 import { cn } from "~/lib/utils";
 import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 import { useVideoPreferencesStore } from "~/modules/common/store/useVideoPreferencesStore";
+import { useCourseExperience } from "~/modules/Courses/context/CourseExperienceContext";
 import { getLessonTypeTranslationKey } from "~/modules/Courses/CourseView/lessonTypes";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
@@ -33,7 +33,6 @@ type LessonContentProps = {
   isFirstLesson: boolean;
   isLastLesson: boolean;
   lessonLoading: boolean;
-  isPreviewMode?: boolean;
 };
 
 export const LessonContent = ({
@@ -45,12 +44,12 @@ export const LessonContent = ({
   isFirstLesson,
   lessonLoading,
   isLastLesson,
-  isPreviewMode = false,
 }: LessonContentProps) => {
   const { t } = useTranslation();
 
   const { clearVideo, setOnEnded } = useVideoPlayer();
   const { autoplay, setAutoplay, autoplaySettings } = useVideoPreferencesStore();
+  const { isEffectiveStudentExperience, isPreviewMode } = useCourseExperience();
 
   const [isPreviousDisabled, setIsPreviousDisabled] = useState(false);
   const [isNextDisabled, setIsNextDisabled] = useState(false);
@@ -59,7 +58,6 @@ export const LessonContent = ({
 
   const { data: user } = useCurrentUser();
   const { mutate: markLessonAsCompleted } = useMarkLessonAsCompleted(user?.id || "", course.slug);
-  const { isAdminLike, isStudent } = useUserRole();
   const { sequenceEnabled } = useLessonsSequence(course.id);
 
   const currentChapterIndex = course.chapters.findIndex((chapter) =>
@@ -99,12 +97,6 @@ export const LessonContent = ({
   useEffect(() => {
     if (isPreviewMode) return;
 
-    if (isAdminLike) {
-      setIsNextDisabled(false);
-      setIsPreviousDisabled(false);
-      return;
-    }
-
     const nextLessonId =
       currentChapter?.lessons?.[nextLessonIndex]?.id ?? nextChapter?.lessons?.[0]?.id;
     const cannotEnterNextLesson = nextLessonId ? !canAccessLesson(course, nextLessonId) : false;
@@ -129,7 +121,6 @@ export const LessonContent = ({
 
     queryClient.invalidateQueries({ queryKey: ["course", { id: course.id }] });
   }, [
-    isAdminLike,
     lesson.type,
     lesson.lessonCompleted,
     currentLessonIndex,
@@ -200,14 +191,16 @@ export const LessonContent = ({
         nextVideoUrl: autoplaySettings.nextVideoUrl,
       })
     ) {
-      if (isStudent) markLessonAsCompleted({ lessonId: lesson.id, language });
+      if (isEffectiveStudentExperience) {
+        markLessonAsCompleted({ lessonId: lesson.id, language });
+      }
       handleNext();
     }
   }, [
     autoplay,
     autoplaySettings.currentAction,
     autoplaySettings.nextVideoUrl,
-    isStudent,
+    isEffectiveStudentExperience,
     markLessonAsCompleted,
     lesson.id,
     language,
@@ -288,7 +281,6 @@ export const LessonContent = ({
           <LessonContentRenderer
             lesson={lesson}
             user={user}
-            isPreviewMode={isPreviewMode}
             lessonLoading={lessonLoading}
             onVideoEnded={handleVideoEnded}
           />

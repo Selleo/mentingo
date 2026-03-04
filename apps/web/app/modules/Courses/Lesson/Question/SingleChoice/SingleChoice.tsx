@@ -1,4 +1,4 @@
-import { useUserRole } from "~/hooks/useUserRole";
+import { useCourseExperience } from "~/modules/Courses/context/CourseExperienceContext";
 import { QuestionCard } from "~/modules/Courses/Lesson/Question/QuestionCard";
 
 import { SingleChoiceOptionList } from "./SingleChoiceOptionList";
@@ -11,7 +11,7 @@ type SingleChoiceProps = {
 };
 
 export const SingleChoice = ({ question, isCompleted = false }: SingleChoiceProps) => {
-  const { isAdmin } = useUserRole();
+  const { isPreviewMode } = useCourseExperience();
 
   return (
     <QuestionCard
@@ -23,7 +23,7 @@ export const SingleChoice = ({ question, isCompleted = false }: SingleChoiceProp
       <SingleChoiceOptionList
         options={question.options || []}
         questionId={question.id}
-        isAdmin={isAdmin}
+        isPreviewMode={isPreviewMode}
         isCompleted={isCompleted}
       />
     </QuestionCard>

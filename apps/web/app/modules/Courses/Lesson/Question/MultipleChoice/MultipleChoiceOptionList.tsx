@@ -7,7 +7,7 @@ import type { QuizQuestionOption } from "../types";
 type MultipleChoiceQuestionListProps = {
   options: QuizQuestionOption[];
   questionId: string;
-  isAdmin: boolean;
+  isPreviewMode: boolean;
   isCompleted: boolean;
   withPicture?: boolean;
 };
@@ -15,7 +15,7 @@ type MultipleChoiceQuestionListProps = {
 export const MultipleChoiceOptionList = ({
   options,
   questionId,
-  isAdmin,
+  isPreviewMode,
   isCompleted,
   withPicture = false,
 }: MultipleChoiceQuestionListProps) => (
@@ -29,7 +29,7 @@ export const MultipleChoiceOptionList = ({
         isCompleted={isCompleted}
         isStudentAnswer={Boolean(option.isStudentAnswer)}
         optionFieldId={withPicture ? "photoQuestionMultipleChoice" : "multiAnswerQuestions"}
-        {...getOptionConfig(option, isAdmin)}
+        {...getOptionConfig(option, isPreviewMode)}
       />
     ))}
   </>

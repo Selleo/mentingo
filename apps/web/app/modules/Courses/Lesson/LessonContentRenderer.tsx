@@ -12,32 +12,18 @@ import type { CurrentUserResponse, GetLessonByIdResponse } from "~/api/generated
 type LessonContentRendererProps = {
   lesson: GetLessonByIdResponse["data"];
   user: CurrentUserResponse["data"] | undefined;
-  isPreviewMode: boolean;
   lessonLoading: boolean;
   onVideoEnded?: () => void;
 };
 
 export const LessonContentRenderer = memo(
-  ({ lesson, user, isPreviewMode, lessonLoading, onVideoEnded }: LessonContentRendererProps) => {
+  ({ lesson, user, lessonLoading, onVideoEnded }: LessonContentRendererProps) => {
     return match(lesson.type)
       .with("content", () => (
         <Viewer variant="content" content={lesson?.description ?? ""} onVideoEnded={onVideoEnded} />
       ))
-      .with("quiz", () => (
-        <Quiz
-          lesson={lesson}
-          userId={user?.id || ""}
-          isPreviewMode={isPreviewMode}
-          previewLessonId={lesson.id}
-        />
-      ))
-      .with("ai_mentor", () => (
-        <AiMentorLesson
-          lesson={lesson}
-          lessonLoading={lessonLoading}
-          isPreviewMode={isPreviewMode}
-        />
-      ))
+      .with("quiz", () => <Quiz lesson={lesson} userId={user?.id || ""} />)
+      .with("ai_mentor", () => <AiMentorLesson lesson={lesson} lessonLoading={lessonLoading} />)
       .with("embed", () => (
         <EmbedLesson lessonResources={lesson.lessonResources ?? []} lesson={lesson} />
       ))

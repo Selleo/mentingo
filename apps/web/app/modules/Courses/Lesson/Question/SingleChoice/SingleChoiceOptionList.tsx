@@ -6,7 +6,7 @@ import type { QuizQuestionOption } from "../types";
 type SingleChoiceOptionListProps = {
   options: QuizQuestionOption[];
   questionId: string;
-  isAdmin: boolean;
+  isPreviewMode: boolean;
   isCompleted: boolean;
   withPicture?: boolean;
 };
@@ -14,7 +14,7 @@ type SingleChoiceOptionListProps = {
 export const SingleChoiceOptionList = ({
   options,
   questionId,
-  isAdmin,
+  isPreviewMode,
   isCompleted,
   withPicture = false,
 }: SingleChoiceOptionListProps) => (
@@ -27,7 +27,7 @@ export const SingleChoiceOptionList = ({
         questionId={questionId}
         isCompleted={isCompleted}
         optionFieldId={withPicture ? "photoQuestionSingleChoice" : "singleAnswerQuestions"}
-        {...getOptionConfig(option, isAdmin)}
+        {...getOptionConfig(option, isPreviewMode)}
       />
     ))}
   </>

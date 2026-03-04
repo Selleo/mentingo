@@ -2,19 +2,14 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useLessonsSequence } from "~/hooks/useLessonsSequence";
+import { useCourseExperience } from "~/modules/Courses/context/CourseExperienceContext";
 
 import { getChaptersWithAccess } from "../../utils";
 import { CourseChapter } from "../CourseChapter";
 
-import type { GetCourseResponse } from "~/api/generated-api";
-
-interface ChapterListOverviewProps {
-  course?: GetCourseResponse["data"];
-  isPreviewMode?: boolean;
-}
-
-export function ChapterListOverview({ course, isPreviewMode = false }: ChapterListOverviewProps) {
+export function ChapterListOverview() {
   const { t } = useTranslation();
+  const { course, isPreviewMode } = useCourseExperience();
 
   const { sequenceEnabled } = useLessonsSequence(course?.id);
   const shouldEnforceSequence = sequenceEnabled && !isPreviewMode;
@@ -32,14 +27,7 @@ export function ChapterListOverview({ course, isPreviewMode = false }: ChapterLi
       </div>
       {chapters.map((chapter) => {
         if (!chapter) return null;
-        return (
-          <CourseChapter
-            key={chapter.id}
-            chapter={chapter}
-            isEnrolled={Boolean(course?.enrolled)}
-            isPreviewMode={isPreviewMode}
-          />
-        );
+        return <CourseChapter key={chapter.id} chapter={chapter} />;
       })}
     </div>
   );

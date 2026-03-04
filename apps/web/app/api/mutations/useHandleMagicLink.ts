@@ -44,7 +44,7 @@ export function useHandleMagicLink() {
     },
     onSuccess: ({ data }) => {
       const { shouldVerifyMFA } = data;
-      const normalizedUser = { ...data, isSupportMode: false };
+      const normalizedUser = { ...data, isSupportMode: false, studentModeCourseIds: [] };
 
       queryClient.setQueryData(currentUserQueryOptions.queryKey, { data: normalizedUser });
       queryClient.invalidateQueries(currentUserQueryOptions);

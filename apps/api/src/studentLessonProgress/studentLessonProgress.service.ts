@@ -22,6 +22,7 @@ import { StatisticsRepository } from "src/statistics/repositories/statistics.rep
 import {
   aiMentorStudentLessonProgress,
   chapters,
+  courseStudentMode,
   courses,
   groups,
   groupUsers,
@@ -76,9 +77,26 @@ export class StudentLessonProgressService {
     language: SupportedLanguages;
     isQuizPassed?: boolean;
   }) {
-    if (userRole === USER_ROLES.CONTENT_CREATOR || userRole === USER_ROLES.ADMIN) return;
+    if (userRole === USER_ROLES.CONTENT_CREATOR || userRole === USER_ROLES.ADMIN) {
+      const isStudentModeEnabled = await this.isLessonStudentModeEnabled(id, studentId, dbInstance);
+
+      if (!isStudentModeEnabled) return;
+    }
 
     const [accessCourseLessonWithDetails] = await this.checkLessonAssignment(id, studentId);
+
+    if (
+      (userRole === USER_ROLES.CONTENT_CREATOR || userRole === USER_ROLES.ADMIN) &&
+      !accessCourseLessonWithDetails.isAssigned
+    ) {
+      await this.ensureStudentCourseEnrollment(
+        accessCourseLessonWithDetails.courseId,
+        studentId,
+        dbInstance,
+      );
+
+      accessCourseLessonWithDetails.isAssigned = true;
+    }
 
     if (!accessCourseLessonWithDetails.isAssigned && !accessCourseLessonWithDetails.isFreemium)
       throw new UnauthorizedException("You don't have assignment to this lesson");
@@ -243,7 +261,20 @@ export class StudentLessonProgressService {
   ) {
     const [accessCourseLessonWithDetails] = await this.checkLessonAssignment(id, studentId);
 
-    if (userRole === USER_ROLES.CONTENT_CREATOR || userRole === USER_ROLES.ADMIN) return;
+    if (userRole === USER_ROLES.CONTENT_CREATOR || userRole === USER_ROLES.ADMIN) {
+      const isStudentModeEnabled = await this.isLessonStudentModeEnabled(id, studentId, dbInstance);
+
+      if (!isStudentModeEnabled) return;
+
+      if (!accessCourseLessonWithDetails.isAssigned) {
+        await this.ensureStudentCourseEnrollment(
+          accessCourseLessonWithDetails.courseId,
+          studentId,
+          dbInstance,
+        );
+        accessCourseLessonWithDetails.isAssigned = true;
+      }
+    }
 
     if (!accessCourseLessonWithDetails.isAssigned && !accessCourseLessonWithDetails.isFreemium)
       throw new UnauthorizedException("You don't have assignment to this lesson");
@@ -343,6 +374,43 @@ export class StudentLessonProgressService {
 
       await this.checkCourseIsCompletedForUser(courseId, studentId, actor, dbInstance);
     }
+  }
+
+  private async isLessonStudentModeEnabled(
+    lessonId: UUIDType,
+    userId: UUIDType,
+    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+  ) {
+    const [studentModeExists] = await dbInstance
+      .select({ id: courseStudentMode.id })
+      .from(courseStudentMode)
+      .innerJoin(chapters, eq(chapters.courseId, courseStudentMode.courseId))
+      .innerJoin(lessons, eq(lessons.chapterId, chapters.id))
+      .where(and(eq(courseStudentMode.userId, userId), eq(lessons.id, lessonId)));
+
+    return Boolean(studentModeExists);
+  }
+
+  private async ensureStudentCourseEnrollment(
+    courseId: UUIDType,
+    studentId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    await dbInstance
+      .insert(studentCourses)
+      .values({
+        studentId,
+        courseId,
+        enrolledAt: sql`NOW()`,
+        status: COURSE_ENROLLMENT.ENROLLED,
+      })
+      .onConflictDoUpdate({
+        target: [studentCourses.studentId, studentCourses.courseId],
+        set: {
+          enrolledAt: sql`EXCLUDED.enrolled_at`,
+          status: sql`EXCLUDED.status`,
+        },
+      });
   }
 
   async updateQuizProgress(

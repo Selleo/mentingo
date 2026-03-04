@@ -1,4 +1,4 @@
-import { useUserRole } from "~/hooks/useUserRole";
+import { useCourseExperience } from "~/modules/Courses/context/CourseExperienceContext";
 import { QuestionCard } from "~/modules/Courses/Lesson/Question/QuestionCard";
 
 import { MultipleChoiceOptionList } from "./MultipleChoiceOptionList";
@@ -11,7 +11,7 @@ type MultipleChoiceProps = {
 };
 
 export const MultipleChoice = ({ question, isCompleted = false }: MultipleChoiceProps) => {
-  const { isAdmin } = useUserRole();
+  const { isPreviewMode } = useCourseExperience();
 
   return (
     <QuestionCard
@@ -23,7 +23,7 @@ export const MultipleChoice = ({ question, isCompleted = false }: MultipleChoice
         options={question.options ?? []}
         questionId={question.id}
         isCompleted={isCompleted}
-        isAdmin={isAdmin}
+        isPreviewMode={isPreviewMode}
       />
     </QuestionCard>
   );

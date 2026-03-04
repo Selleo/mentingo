@@ -2,6 +2,7 @@ import { useNavigate } from "@remix-run/react";
 import { formatDate } from "date-fns";
 import { useTranslation } from "react-i18next";
 
+import { useToggleCourseStudentMode } from "~/api/mutations";
 import { useCurrentUser } from "~/api/queries";
 import CardPlaceholder from "~/assets/placeholders/card-placeholder.jpg";
 import { Icon } from "~/components/Icon";
@@ -12,6 +13,7 @@ import { Card, CardContent } from "~/components/ui/card";
 import { CategoryChip } from "~/components/ui/CategoryChip";
 import { useUserRole } from "~/hooks/useUserRole";
 import { courseLanguages } from "~/modules/Admin/EditCourse/components/CourseLanguageSelector";
+import { useCourseExperience } from "~/modules/Courses/context/CourseExperienceContext";
 
 import type { GetCourseResponse } from "~/api/generated-api";
 
@@ -25,6 +27,9 @@ export default function CourseOverview({ course }: CourseOverviewProps) {
 
   const { isAdminLike, isAdmin } = useUserRole();
   const { data: currentUser } = useCurrentUser();
+  const { isCourseStudentModeActive } = useCourseExperience();
+  const { mutate: toggleStudentMode, isPending: isTogglingStudentMode } =
+    useToggleCourseStudentMode(course.id, course.slug);
 
   const imageUrl = course?.thumbnailUrl ?? CardPlaceholder;
   const title = course?.title;
@@ -37,6 +42,17 @@ export default function CourseOverview({ course }: CourseOverviewProps) {
       <CardContent className="flex flex-col px-0">
         {(isAdmin || (isAdminLike && course.authorId === currentUser?.id)) && (
           <div className="border-b border-1 border-neutral-200 flex items-center justify-end p-4 px-6 mb-8 xl:mb-0">
+            <Button
+              className="flex gap-2 mr-2"
+              variant={isCourseStudentModeActive ? "outline" : "secondary"}
+              onClick={() => toggleStudentMode({ enabled: !isCourseStudentModeActive })}
+              disabled={isTogglingStudentMode}
+            >
+              <Icon name="Play" className="size-4" />
+              {isCourseStudentModeActive
+                ? t("studentCourseView.studentMode.exit", "Exit student mode")
+                : t("studentCourseView.studentMode.enter", "Enter student mode")}
+            </Button>
             <Button className="flex gap-2" variant="primary" onClick={navigateToEditCourse}>
               <Icon name="Edit" className="size-4" />
               {t("pages.editCourse")}

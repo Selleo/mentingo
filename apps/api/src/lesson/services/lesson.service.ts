@@ -7,7 +7,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { ENTITY_TYPES } from "@repo/shared";
-import { isNotNull } from "drizzle-orm";
+import { and, eq, isNotNull } from "drizzle-orm";
 import { isNumber } from "lodash";
 
 import { AiService } from "src/ai/services/ai.service";
@@ -24,7 +24,7 @@ import { ENTITY_TYPE } from "src/localization/localization.types";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { QuestionRepository } from "src/questions/question.repository";
 import { QuestionService } from "src/questions/question.service";
-import { studentLessonProgress } from "src/storage/schema";
+import { chapters, courseStudentMode, lessons, studentLessonProgress } from "src/storage/schema";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 import { isQuizAccessAllowed } from "src/utils/isQuizAccessAllowed";
@@ -261,12 +261,15 @@ export class LessonService {
   async evaluationQuiz(
     studentQuizAnswers: AnswerQuestionBody,
     userId: UUIDType,
+    userRole: UserRole,
   ): Promise<{
     correctAnswerCount: number;
     wrongAnswerCount: number;
     questionCount: number;
     score: number;
   }> {
+    await this.assertStudentProgressMutationAllowed(studentQuizAnswers.lessonId, userId, userRole);
+
     const [accessCourseLessonWithDetails] = await this.lessonRepository.checkLessonAssignment(
       studentQuizAnswers.lessonId,
       userId,
@@ -371,7 +374,13 @@ export class LessonService {
     });
   }
 
-  async deleteStudentQuizAnswers(lessonId: UUIDType, userId: UUIDType): Promise<void> {
+  async deleteStudentQuizAnswers(
+    lessonId: UUIDType,
+    userId: UUIDType,
+    userRole: UserRole,
+  ): Promise<void> {
+    await this.assertStudentProgressMutationAllowed(lessonId, userId, userRole);
+
     const [accessCourseLessonWithDetails] = await this.lessonRepository.checkLessonAssignment(
       lessonId,
       userId,
@@ -430,6 +439,27 @@ export class LessonService {
         throw new ConflictException(`Failed to delete student quiz answers: ${error.message}`);
       }
     });
+  }
+
+  private async assertStudentProgressMutationAllowed(
+    lessonId: UUIDType,
+    userId: UUIDType,
+    userRole: UserRole,
+  ) {
+    if (userRole === USER_ROLES.STUDENT) {
+      return;
+    }
+
+    const [studentModeExists] = await this.db
+      .select({ id: courseStudentMode.id })
+      .from(courseStudentMode)
+      .innerJoin(chapters, eq(chapters.courseId, courseStudentMode.courseId))
+      .innerJoin(lessons, eq(lessons.chapterId, chapters.id))
+      .where(and(eq(courseStudentMode.userId, userId), eq(lessons.id, lessonId)));
+
+    if (!studentModeExists) {
+      throw new ForbiddenException("Student mode is not active for this course");
+    }
   }
 
   async getLessonResource(

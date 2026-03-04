@@ -1,10 +1,11 @@
-import { Outlet, redirect } from "@remix-run/react";
+import { Outlet, redirect, useParams } from "@remix-run/react";
 
 import { currentUserQueryOptions } from "~/api/queries/useCurrentUser";
 import { queryClient } from "~/api/queryClient";
 import { VideoProvider } from "~/components/VideoPlayer/VideoPlayerContext";
 import { VideoPlayerSingleton } from "~/components/VideoPlayer/VideoPlayerSingleton";
 import { RouteGuard } from "~/Guards/RouteGuard";
+import { StudentModeBanner } from "~/modules/Courses/Lesson/StudentModeBanner";
 import { saveEntryToNavigationHistory } from "~/utils/saveEntryToNavigationHistory";
 
 import type { MetaFunction } from "@remix-run/react";
@@ -36,11 +37,14 @@ export const clientLoader = async ({ request }: { request: Request }) => {
 };
 
 export default function LessonLayout() {
+  const { courseId = "" } = useParams();
+
   return (
     <VideoProvider>
       <VideoPlayerSingleton />
       <main className="relative flex-1 overflow-y-auto bg-primary-50">
         <RouteGuard>
+          <StudentModeBanner courseSlug={courseId} />
           <Outlet />
         </RouteGuard>
       </main>

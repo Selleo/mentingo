@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { ContentAccessGuard } from "~/Guards/AccessGuard";
 import { useUserRole } from "~/hooks/useUserRole";
 import { cn } from "~/lib/utils";
+import { CourseExperienceProvider } from "~/modules/Courses/context/CourseExperienceContext";
 import CourseOverview from "~/modules/Courses/CourseView/CourseOverview";
 import { CourseViewSidebar } from "~/modules/Courses/CourseView/CourseViewSidebar/CourseViewSidebar";
 import { MoreCoursesByAuthor } from "~/modules/Courses/CourseView/MoreCoursesByAuthor";
@@ -90,17 +91,15 @@ export default function CourseViewPage() {
     navigate(`${url.pathname}${url.search ?? ""}`, { replace: true });
   }, [course?.slug, id, navigate]);
 
-  const { isStudent, isAdminLike } = useUserRole();
+  const { isStudent } = useUserRole();
   const { data: currentUser } = useCurrentUser();
-
-  const isPreviewMode = !course?.enrolled && isAdminLike;
 
   const courseViewTabs = useMemo(
     () => [
       {
         title: t("studentCourseView.tabs.chapters"),
         itemCount: course?.chapters?.length,
-        content: <ChapterListOverview course={course} isPreviewMode={isPreviewMode} />,
+        content: <ChapterListOverview />,
         isForAdminLike: false,
         isForUnregistered: true,
       },
@@ -122,7 +121,7 @@ export default function CourseViewPage() {
         isForUnregistered: false,
       },
     ],
-    [t, course, isPreviewMode],
+    [t, course],
   );
 
   if (!course) return null;
@@ -145,56 +144,58 @@ export default function CourseViewPage() {
   return (
     <ContentAccessGuard type={ACCESS_GUARD.UNREGISTERED_COURSE_ACCESS}>
       <PageWrapper breadcrumbs={breadcrumbs}>
-        <div className="flex w-full max-w-full flex-col gap-6 lg:grid lg:grid-cols-[1fr_480px]">
-          <div className="flex flex-col gap-y-6 overflow-hidden">
-            <CourseOverview course={course} />
+        <CourseExperienceProvider course={course}>
+          <div className="flex w-full max-w-full flex-col gap-6 lg:grid lg:grid-cols-[1fr_480px]">
+            <div className="flex flex-col gap-y-6 overflow-hidden">
+              <CourseOverview course={course} />
 
-            <CourseCertificate courseId={course.id} />
+              <CourseCertificate courseId={course.id} />
 
-            <Tabs defaultValue={courseViewTabs[0].title} className="w-full">
-              <TabsList className="bg-card w-full justify-start gap-4 p-0 overflow-hidden">
+              <Tabs defaultValue={courseViewTabs[0].title} className="w-full">
+                <TabsList className="bg-card w-full justify-start gap-4 p-0 overflow-hidden">
+                  {courseViewTabs.map((tab) => {
+                    const { title, isForAdminLike, isForUnregistered } = tab;
+
+                    if (!canView(isForAdminLike, isForUnregistered)) return null;
+
+                    return (
+                      <TabsTrigger
+                        key={title}
+                        value={title}
+                        className="flex h-full rounded-none items-center gap-1.5 data-[state=active]:shadow-none text-neutral-900 data-[state=active]:text-primary-700 data-[state=active]:border-b-2 data-[state=active]:border-b-primary-700"
+                      >
+                        <span className="body-sm">{title}</span>{" "}
+                        {tab.itemCount && (
+                          <span className="body-sm bg-neutral-200 px-2 rounded-lg">
+                            {tab.itemCount}
+                          </span>
+                        )}
+                      </TabsTrigger>
+                    );
+                  })}
+                </TabsList>
                 {courseViewTabs.map((tab) => {
-                  const { title, isForAdminLike, isForUnregistered } = tab;
+                  const { title, isForAdminLike, content, isForUnregistered } = tab;
 
                   if (!canView(isForAdminLike, isForUnregistered)) return null;
 
                   return (
-                    <TabsTrigger
+                    <TabsContent
                       key={title}
                       value={title}
-                      className="flex h-full rounded-none items-center gap-1.5 data-[state=active]:shadow-none text-neutral-900 data-[state=active]:text-primary-700 data-[state=active]:border-b-2 data-[state=active]:border-b-primary-700"
+                      className={cn({
+                        "data-[state=active]:mt-6": true,
+                      })}
                     >
-                      <span className="body-sm">{title}</span>{" "}
-                      {tab.itemCount && (
-                        <span className="body-sm bg-neutral-200 px-2 rounded-lg">
-                          {tab.itemCount}
-                        </span>
-                      )}
-                    </TabsTrigger>
+                      {content}
+                    </TabsContent>
                   );
                 })}
-              </TabsList>
-              {courseViewTabs.map((tab) => {
-                const { title, isForAdminLike, content, isForUnregistered } = tab;
-
-                if (!canView(isForAdminLike, isForUnregistered)) return null;
-
-                return (
-                  <TabsContent
-                    key={title}
-                    value={title}
-                    className={cn({
-                      "data-[state=active]:mt-6": true,
-                    })}
-                  >
-                    {content}
-                  </TabsContent>
-                );
-              })}
-            </Tabs>
+              </Tabs>
+            </div>
+            <CourseViewSidebar course={course} />
           </div>
-          <CourseViewSidebar course={course} />
-        </div>
+        </CourseExperienceProvider>
       </PageWrapper>
     </ContentAccessGuard>
   );

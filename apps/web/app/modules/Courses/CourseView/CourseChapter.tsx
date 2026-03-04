@@ -13,6 +13,7 @@ import {
 } from "~/components/ui/accordion";
 import { Button } from "~/components/ui/button";
 import { formatWithPlural } from "~/lib/utils";
+import { useCourseExperience } from "~/modules/Courses/context/CourseExperienceContext";
 import { ChapterCounter } from "~/modules/Courses/CourseView/components/ChapterCounter";
 import { CourseChapterLesson } from "~/modules/Courses/CourseView/CourseChapterLesson";
 
@@ -24,17 +25,15 @@ export type Lesson = GetCourseResponse["data"]["chapters"][0]["lessons"][0] & {
 type Chapter = GetCourseResponse["data"]["chapters"][0] & { lessons: Lesson[] };
 type CourseChapterProps = {
   chapter: Chapter;
-  isEnrolled: boolean;
-  isPreviewMode?: boolean;
 };
 
-export const CourseChapter = ({
-  chapter,
-  isEnrolled,
-  isPreviewMode = false,
-}: CourseChapterProps) => {
+export const CourseChapter = ({ chapter }: CourseChapterProps) => {
   const { t } = useTranslation();
   const { id: courseSlug } = useParams();
+  const {
+    course: { enrolled },
+    isPreviewMode,
+  } = useCourseExperience();
   const lessonText = formatWithPlural(
     chapter.lessonCount ?? 0,
     t("courseChapterView.other.lesson"),
@@ -129,22 +128,14 @@ export const CourseChapter = ({
                   if (!lesson) return null;
 
                   const canOpenLesson =
-                    isPreviewMode || ((chapter.isFreemium || isEnrolled) && lesson.hasAccess);
+                    isPreviewMode || ((chapter.isFreemium || enrolled) && lesson.hasAccess);
 
                   return canOpenLesson ? (
                     <Link to={`/course/${courseSlug}/lesson/${lesson.id}`}>
-                      <CourseChapterLesson
-                        key={lesson.id}
-                        lesson={lesson}
-                        isPreviewMode={isPreviewMode}
-                      />
+                      <CourseChapterLesson key={lesson.id} lesson={lesson} />
                     </Link>
                   ) : (
-                    <CourseChapterLesson
-                      key={lesson.id}
-                      lesson={lesson}
-                      isPreviewMode={isPreviewMode}
-                    />
+                    <CourseChapterLesson key={lesson.id} lesson={lesson} />
                   );
                 })}
                 {chapter.isFreemium && hasAccessToChapter && (

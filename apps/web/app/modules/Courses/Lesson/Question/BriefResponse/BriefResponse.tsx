@@ -2,8 +2,8 @@ import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import { Textarea } from "~/components/ui/textarea";
-import { useUserRole } from "~/hooks/useUserRole";
 import { cn } from "~/lib/utils";
+import { useCourseExperience } from "~/modules/Courses/context/CourseExperienceContext";
 import { QuestionCard } from "~/modules/Courses/Lesson/Question/QuestionCard";
 
 import type { QuizQuestion } from "~/modules/Courses/Lesson/Question/types";
@@ -15,7 +15,7 @@ export type BriefResponseProps = {
 };
 
 export const BriefResponse = ({ question, isCompleted = false }: BriefResponseProps) => {
-  const { isAdmin } = useUserRole();
+  const { isPreviewMode } = useCourseExperience();
   const { register } = useFormContext<QuizForm>();
   const { t } = useTranslation();
 
@@ -31,7 +31,7 @@ export const BriefResponse = ({ question, isCompleted = false }: BriefResponsePr
         placeholder={t("studentLessonView.placeholder.openQuestion")}
         rows={5}
         className={cn({
-          "cursor-not-allowed": isAdmin,
+          "cursor-not-allowed": isPreviewMode,
           "pointer-events-none": isCompleted,
         })}
       />

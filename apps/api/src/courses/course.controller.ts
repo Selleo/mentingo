@@ -580,6 +580,39 @@ export class CourseController {
     return new BaseResponse(data);
   }
 
+  @Patch(":courseId/student-mode")
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @Validate({
+    request: [
+      { type: "param", name: "courseId", schema: UUIDSchema },
+      { type: "body", schema: Type.Object({ enabled: Type.Boolean() }) },
+    ],
+    response: baseResponse(
+      Type.Object({
+        courseId: UUIDSchema,
+        enabled: Type.Boolean(),
+        studentModeCourseIds: Type.Array(UUIDSchema),
+      }),
+    ),
+  })
+  async setCourseStudentMode(
+    @Param("courseId") courseId: UUIDType,
+    @Body() body: { enabled: boolean },
+    @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser("role") currentUserRole: UserRole,
+  ): Promise<
+    BaseResponse<{ courseId: UUIDType; enabled: boolean; studentModeCourseIds: UUIDType[] }>
+  > {
+    const data = await this.courseService.setCourseStudentMode(
+      courseId,
+      currentUserId,
+      currentUserRole,
+      body.enabled,
+    );
+
+    return new BaseResponse(data);
+  }
+
   @Get("lesson-sequence-enabled/:courseId")
   @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR, USER_ROLES.STUDENT)
   @Validate({
