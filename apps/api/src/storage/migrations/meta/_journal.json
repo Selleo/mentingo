@@ -687,6 +687,13 @@
       "when": 1772619505961,
       "tag": "0097_add_student_mode_table",
       "breakpoints": true
+    },
+    {
+      "idx": 98,
+      "version": "7",
+      "when": 1772653268592,
+      "tag": "0098_enable_tenant_rls_for_student_mode_sessions",
+      "breakpoints": true
     }
   ]
 }
