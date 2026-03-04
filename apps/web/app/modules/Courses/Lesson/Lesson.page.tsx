@@ -16,6 +16,7 @@ import { useVideoPreferencesStore } from "~/modules/common/store/useVideoPrefere
 import { CourseExperienceProvider } from "~/modules/Courses/context/CourseExperienceContext";
 import { LessonContent } from "~/modules/Courses/Lesson/LessonContent";
 import { LessonSidebar } from "~/modules/Courses/Lesson/LessonSidebar";
+import { StudentModeBanner } from "~/modules/Courses/Lesson/StudentModeBanner";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { setPageTitle } from "~/utils/setPageTitle";
 
@@ -218,32 +219,38 @@ export default function LessonPage() {
   ];
 
   return (
-    <PageWrapper className="h-auto max-w-full" breadcrumbs={breadcrumbs}>
-      <CourseExperienceProvider course={course}>
-        <div className="flex w-full max-w-full flex-col gap-6 lg:grid lg:grid-cols-[1fr_480px] lg:items-start">
-          <div className="flex w-full min-w-0 flex-col divide-y rounded-lg bg-white">
-            <div className="flex items-center p-6 sm:px-10 3xl:px-8">
-              <p className="h6 text-neutral-950">
-                <span className="text-neutral-800">
-                  {t("studentLessonView.other.chapter")} {currentChapter?.displayOrder}:
-                </span>{" "}
-                {currentChapter?.title}
-              </p>
+    <CourseExperienceProvider course={course}>
+      <PageWrapper
+        className="h-auto"
+        breadcrumbs={breadcrumbs}
+        aboveBreadcrumbs={<StudentModeBanner />}
+      >
+        <div className="flex w-full max-w-full flex-col gap-6">
+          <div className="flex w-full max-w-full flex-col gap-6 lg:grid lg:grid-cols-[1fr_480px] lg:items-start">
+            <div className="flex w-full min-w-0 flex-col divide-y rounded-lg bg-white">
+              <div className="flex items-center p-6 sm:px-10 3xl:px-8">
+                <p className="h6 text-neutral-950">
+                  <span className="text-neutral-800">
+                    {t("studentLessonView.other.chapter")} {currentChapter?.displayOrder}:
+                  </span>{" "}
+                  {currentChapter?.title}
+                </p>
+              </div>
+              <LessonContent
+                lesson={lesson}
+                course={course}
+                lessonsAmount={currentChapter?.lessons.length ?? 0}
+                handlePrevious={() => handlePrevLesson(lessonId, course.chapters)}
+                handleNext={() => handleNextLesson(lessonId, course.chapters)}
+                isFirstLesson={isFirst}
+                isLastLesson={isLast}
+                lessonLoading={lessonLoading}
+              />
             </div>
-            <LessonContent
-              lesson={lesson}
-              course={course}
-              lessonsAmount={currentChapter?.lessons.length ?? 0}
-              handlePrevious={() => handlePrevLesson(lessonId, course.chapters)}
-              handleNext={() => handleNextLesson(lessonId, course.chapters)}
-              isFirstLesson={isFirst}
-              isLastLesson={isLast}
-              lessonLoading={lessonLoading}
-            />
+            <LessonSidebar course={course} lessonId={lessonId} />
           </div>
-          <LessonSidebar course={course} lessonId={lessonId} />
         </div>
-      </CourseExperienceProvider>
-    </PageWrapper>
+      </PageWrapper>
+    </CourseExperienceProvider>
   );
 }

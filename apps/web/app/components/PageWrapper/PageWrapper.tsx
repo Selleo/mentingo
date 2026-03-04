@@ -16,6 +16,7 @@ type PageWrapperProps = HTMLAttributes<HTMLDivElement> & {
   wrapperClassName?: string;
   rightSideContent?: ReactNode;
   leftSideContent?: ReactNode;
+  aboveBreadcrumbs?: ReactNode;
 };
 
 type Breadcrumb = { title: string; href: string };
@@ -63,17 +64,40 @@ export const PageWrapper = ({
   rightSideContent,
   leftSideContent,
   wrapperClassName,
+  aboveBreadcrumbs,
   ...props
 }: PageWrapperProps) => {
   const hasBreadcrumbs = Boolean(breadcrumbs);
 
   const classes = cn(
-    !isBarebones && "w-full pt-6 px-4 pb-4 md:px-6 md:pb-6 3xl:pt-12 3xl:px-8 3xl:pb-8",
+    !isBarebones && "w-full pt-6 px-4 pb-4 md:px-6 md:pb-6 3xl:pt-12 3xl:px-8 3xl:pb-8 w-full",
     {
       "pt-8 md:pt-6 3xl:pt-6 3xl:pb-2 [&_.breadcrumbs]:mb-2": hasBreadcrumbs,
     },
     className,
   );
+
+  if (aboveBreadcrumbs) {
+    return (
+      <div className={cn("flex justify-between", wrapperClassName)}>
+        {leftSideContent}
+
+        <div className="flex min-w-0 flex-1 flex-col">
+          {aboveBreadcrumbs}
+          <div className={classes} {...props}>
+            {breadcrumbs && (
+              <div className="breadcrumbs">
+                <Breadcrumbs breadcrumbs={breadcrumbs} />
+              </div>
+            )}
+            {children}
+          </div>
+        </div>
+
+        {rightSideContent}
+      </div>
+    );
+  }
 
   return (
     <div className={cn("flex justify-between", wrapperClassName)}>

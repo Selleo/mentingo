@@ -1969,6 +1969,13 @@
       },
       "courseCompleted": "Gratulacje! Ukończyłeś ten kurs! Teraz masz dostęp do swojego certyfikatu."
     },
+    "studentMode": {
+      "enter": "Włącz tryb nauki",
+      "exit": "Wyłącz tryb nauki",
+      "bannerTitle": "Korzystasz z tego kursu w trybie nauki",
+      "bannerDescription": "Twoje postępy są śledzone. Ukończone lekcje wliczają się do Twojego postępu i statystyk kursu.",
+      "exitBanner": "Wyłącz tryb nauki"
+    },
     "tabs": {
       "chapters": "Rozdziały",
       "moreFromAuthor": "Więcej od autora",

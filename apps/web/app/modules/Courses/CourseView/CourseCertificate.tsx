@@ -8,7 +8,7 @@ import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
-import { useUserRole } from "~/hooks/useUserRole";
+import { useCourseExperience } from "~/modules/Courses/context/CourseExperienceContext";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import CertificatePreview from "~/modules/Profile/Certificates/CertificatePreview";
 
@@ -17,9 +17,9 @@ const CourseCertificate = ({ courseId }: { courseId: string }) => {
   const { language } = useLanguageStore();
 
   const { data: course } = useCourse(courseId, language);
-  const { isStudent } = useUserRole();
   const { data: currentUser } = useCurrentUser();
   const { data: globalSettings } = useGlobalSettings();
+  const { isEffectiveStudentExperience } = useCourseExperience();
 
   const [isCertificatePreviewOpen, setCertificatePreview] = useState(false);
 
@@ -34,7 +34,7 @@ const CourseCertificate = ({ courseId }: { courseId: string }) => {
   }, [course?.completedChapterCount, course?.courseChapterCount]);
 
   const certificateInfo = useMemo(() => {
-    if (!course || !currentUser || !isStudent) {
+    if (!course || !currentUser || !isEffectiveStudentExperience) {
       return { studentName: "", courseName: "", formattedDate: "" };
     }
 
@@ -44,7 +44,7 @@ const CourseCertificate = ({ courseId }: { courseId: string }) => {
     const formattedDate = completionDate ? format(new Date(completionDate), "dd.MM.yyyy") : "";
 
     return { studentName, courseName, formattedDate };
-  }, [certificate, currentUser, course, isStudent]);
+  }, [certificate, currentUser, course, isEffectiveStudentExperience]);
 
   const { studentName, courseName, formattedDate } = certificateInfo;
 
@@ -53,7 +53,7 @@ const CourseCertificate = ({ courseId }: { courseId: string }) => {
 
   return (
     <div>
-      {Boolean(certificate) && hasFinishedCourse && (
+      {Boolean(certificate) && hasFinishedCourse && isEffectiveStudentExperience && (
         <Card className="p-4 md:px-8 flex items-center gap-4 bg-success-50">
           <div className="bg-success-50 aspect-square size-10 rounded-full grid place-items-center">
             <Icon name="InputRoundedMarkerSuccess" className="size-4" />
@@ -68,7 +68,7 @@ const CourseCertificate = ({ courseId }: { courseId: string }) => {
         </Card>
       )}
 
-      {Boolean(certificate) && isCertificatePreviewOpen && isStudent && (
+      {Boolean(certificate) && isCertificatePreviewOpen && isEffectiveStudentExperience && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50"
           onClick={handleCloseCertificatePreview}

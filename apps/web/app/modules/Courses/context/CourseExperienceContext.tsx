@@ -26,7 +26,7 @@ export function CourseExperienceProvider({
   children,
 }: CourseExperienceProviderProps) {
   const { data: currentUser } = useCurrentUser();
-  const { isAdminLike, isStudent } = useUserRole();
+  const { isAdmin, isContentCreator, isAdminLike, isStudent } = useUserRole();
 
   const value = useMemo(() => {
     const isCourseStudentModeActive = Boolean(
@@ -34,12 +34,16 @@ export function CourseExperienceProvider({
     );
 
     const hasLearnerEnrollment = Boolean(course.enrolled);
+    const isContentCreatorLearner =
+      isContentCreator && (hasLearnerEnrollment || isCourseStudentModeActive);
+    const isAdminLearner = isAdmin && isCourseStudentModeActive;
+    const isStudentLearner = isStudent;
 
     const isPreviewMode =
-      forcePreviewMode || (isAdminLike && !hasLearnerEnrollment && !isCourseStudentModeActive);
+      forcePreviewMode || (isAdminLike && !isAdminLearner && !isContentCreatorLearner);
 
     const isEffectiveStudentExperience =
-      !isPreviewMode && (isStudent || hasLearnerEnrollment || isCourseStudentModeActive);
+      !isPreviewMode && (isStudentLearner || isAdminLearner || isContentCreatorLearner);
 
     return {
       course,
@@ -47,7 +51,15 @@ export function CourseExperienceProvider({
       isPreviewMode,
       isEffectiveStudentExperience,
     };
-  }, [course, currentUser?.studentModeCourseIds, forcePreviewMode, isAdminLike, isStudent]);
+  }, [
+    course,
+    currentUser?.studentModeCourseIds,
+    forcePreviewMode,
+    isAdmin,
+    isAdminLike,
+    isContentCreator,
+    isStudent,
+  ]);
 
   return (
     <CourseExperienceContext.Provider value={value}>{children}</CourseExperienceContext.Provider>

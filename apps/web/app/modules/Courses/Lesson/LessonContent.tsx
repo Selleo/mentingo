@@ -12,7 +12,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/comp
 import { shouldAutoAdvanceLessonWithoutNextVideo } from "~/components/VideoPlayer/autoplayFlow";
 import { useVideoPlayer } from "~/components/VideoPlayer/VideoPlayerContext";
 import { useLessonsSequence } from "~/hooks/useLessonsSequence";
-import { cn } from "~/lib/utils";
 import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 import { useVideoPreferencesStore } from "~/modules/common/store/useVideoPreferencesStore";
 import { useCourseExperience } from "~/modules/Courses/context/CourseExperienceContext";
@@ -213,39 +212,35 @@ export const LessonContent = ({
 
   return (
     <TooltipProvider>
-      <div
-        className={cn("flex w-full min-w-0 flex-col items-center h-auto", {
-          "py-10": !isPreviewMode,
-        })}
-      >
+      <div className="flex w-full min-w-0 flex-col items-center h-auto py-10">
         <div className="flex w-full min-w-0 flex-col gap-y-10 px-6 sm:px-10 max-w-full 3xl:max-w-[1024px] 3xl:px-8 h-auto">
-          {!isPreviewMode && (
-            <div className="flex w-full flex-col pb-6">
-              <div className="flex w-full min-w-0 flex-col gap-y-4 overflow-x-hidden">
-                <div className="flex items-center gap-x-2">
-                  <p className="body-sm-md text-neutral-800">
-                    {t("studentLessonView.other.lesson")}{" "}
-                    <span data-testid="current-lesson-number">{lesson.displayOrder}</span>/
-                    <span data-testid="lessons-count">{lessonsAmount}</span> –{" "}
-                    <span data-testid="lesson-type">
-                      {t(getLessonTypeTranslationKey(lesson.type), { defaultValue: lesson.type })}
-                    </span>
-                  </p>
-                  {lesson.type === LessonType.AI_MENTOR && (
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <Badge variant="secondary" className="uppercase">
-                          Beta
-                        </Badge>
-                      </TooltipTrigger>
-                      <TooltipContent side="bottom">
-                        {t("studentLessonView.tooltip.beta")}
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
-                </div>
-                <p className="h4 text-neutral-950 break-words min-w-0">{lesson.title}</p>
+          <div className="flex w-full flex-col pb-6">
+            <div className="flex w-full min-w-0 flex-col gap-y-4 overflow-x-hidden">
+              <div className="flex items-center gap-x-2">
+                <p className="body-sm-md text-neutral-800">
+                  {t("studentLessonView.other.lesson")}{" "}
+                  <span data-testid="current-lesson-number">{lesson.displayOrder}</span>/
+                  <span data-testid="lessons-count">{lessonsAmount}</span> –{" "}
+                  <span data-testid="lesson-type">
+                    {t(getLessonTypeTranslationKey(lesson.type), { defaultValue: lesson.type })}
+                  </span>
+                </p>
+                {lesson.type === LessonType.AI_MENTOR && (
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Badge variant="secondary" className="uppercase">
+                        Beta
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">
+                      {t("studentLessonView.tooltip.beta")}
+                    </TooltipContent>
+                  </Tooltip>
+                )}
               </div>
+              <p className="h4 text-neutral-950 break-words min-w-0">{lesson.title}</p>
+            </div>
+            {!isPreviewMode ? (
               <div className="mt-4 flex flex-col gap-2 sm:ml-8 sm:mt-0 sm:items-end">
                 <div className="flex flex-row gap-x-4">
                   {lesson.type === LessonType.CONTENT && lesson.hasVideo && (
@@ -275,8 +270,8 @@ export const LessonContent = ({
                   </Button>
                 </div>
               </div>
-            </div>
-          )}
+            ) : null}
+          </div>
 
           <LessonContentRenderer
             lesson={lesson}

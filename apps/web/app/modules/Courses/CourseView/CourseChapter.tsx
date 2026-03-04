@@ -12,7 +12,7 @@ import {
   AccordionTrigger,
 } from "~/components/ui/accordion";
 import { Button } from "~/components/ui/button";
-import { formatWithPlural } from "~/lib/utils";
+import { cn, formatWithPlural } from "~/lib/utils";
 import { useCourseExperience } from "~/modules/Courses/context/CourseExperienceContext";
 import { ChapterCounter } from "~/modules/Courses/CourseView/components/ChapterCounter";
 import { CourseChapterLesson } from "~/modules/Courses/CourseView/CourseChapterLesson";
@@ -49,6 +49,23 @@ export const CourseChapter = ({ chapter }: CourseChapterProps) => {
   const lessons = useMemo(() => chapter?.lessons || [], [chapter?.lessons]);
 
   const navigate = useNavigate();
+  const chapterProgressSegments = Array.from({ length: chapter.lessonCount }).map((_, index) => {
+    const isCompletedSegment =
+      typeof chapter?.completedLessonCount === "number" && index < chapter.completedLessonCount;
+
+    return (
+      <span
+        key={index}
+        className={cn("h-1 w-full rounded-lg", {
+          "bg-primary-100":
+            typeof chapter?.completedLessonCount === "number" &&
+            index >= chapter.completedLessonCount,
+          "bg-success-500": isCompletedSegment,
+          "bg-secondary-500": !chapter.completedLessonCount && !isCompletedSegment,
+        })}
+      />
+    );
+  });
 
   const playChapter = (chapter: CourseChapterProps["chapter"]) => {
     const firstNotStartedLesson = find(
@@ -73,6 +90,7 @@ export const CourseChapter = ({ chapter }: CourseChapterProps) => {
           <ChapterCounter
             chapterProgress={chapter.chapterProgress}
             displayOrder={chapter.displayOrder}
+            isPreviewMode={isPreviewMode}
           />
           <div className="flex w-full flex-col">
             <AccordionTrigger
@@ -88,31 +106,14 @@ export const CourseChapter = ({ chapter }: CourseChapterProps) => {
                     {lessonText} {lessonText && quizText ? "• " : ""} {quizText}
                   </div>
                   <p className="body-base-md text-neutral-950">{chapter.title}</p>
-                  <div className="details flex max-w-[620px] items-center gap-x-1 text-neutral-800">
-                    <span className="pr-2">
-                      {chapter.completedLessonCount}/{chapter.lessonCount}
-                    </span>
-                    {Array.from({ length: chapter.lessonCount }).map((_, index) => {
-                      if (
-                        typeof chapter?.completedLessonCount === "number" &&
-                        index >= chapter.completedLessonCount
-                      ) {
-                        return (
-                          <span key={index} className="h-1 w-full rounded-lg bg-primary-100" />
-                        );
-                      }
-
-                      if (chapter.completedLessonCount && index < chapter.completedLessonCount) {
-                        return (
-                          <span key={index} className="h-1 w-full rounded-lg bg-success-500" />
-                        );
-                      }
-
-                      return (
-                        <span key={index} className="h-1 w-full rounded-lg bg-secondary-500" />
-                      );
-                    })}
-                  </div>
+                  {!isPreviewMode ? (
+                    <div className="details flex max-w-[620px] items-center gap-x-1 text-neutral-800">
+                      <span className="pr-2">
+                        {chapter.completedLessonCount}/{chapter.lessonCount}
+                      </span>
+                      {chapterProgressSegments}
+                    </div>
+                  ) : null}
                 </div>
                 {chapter.isFreemium && (
                   <CardBadge variant="successFilled">

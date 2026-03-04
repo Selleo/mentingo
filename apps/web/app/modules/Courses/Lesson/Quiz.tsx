@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "@remix-run/react";
+import { useMemo } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -47,12 +48,26 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
 
   const { language } = useLanguageStore();
 
-  const questions = lesson.quizDetails?.questions;
-  const isUserSubmittedAnswer = Boolean(lesson.lessonCompleted);
+  const questions = useMemo(
+    () =>
+      (lesson.quizDetails?.questions ?? []).map((question) => ({
+        ...question,
+        options: question.options?.map((option) => ({
+          ...option,
+          isCorrect: isPreviewMode ? null : option.isCorrect,
+          isStudentAnswer: isPreviewMode ? false : option.isStudentAnswer,
+          studentAnswer: isPreviewMode ? null : option.studentAnswer,
+        })),
+      })),
+    [isPreviewMode, lesson.quizDetails?.questions],
+  );
+  const isUserSubmittedAnswer = !isPreviewMode && Boolean(lesson.lessonCompleted);
 
   const methods = useForm<QuizForm>({
     mode: "onSubmit",
-    defaultValues: getUserAnswers(questions ?? []) as QuizForm,
+    defaultValues: (isPreviewMode
+      ? getEmptyQuizAnswers(questions)
+      : getUserAnswers(questions)) as QuizForm,
     resolver: zodResolver(QuizFormSchema(t)),
   });
 
@@ -81,7 +96,7 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
     lesson.quizCooldownInHours,
   );
 
-  if (!questions?.length) return null;
+  if (!questions.length) return null;
 
   const handleOnSubmit = async (data: QuizForm) => {
     submitQuiz.mutate({ lessonId, questionsAnswers: parseQuizFormData(data), language });

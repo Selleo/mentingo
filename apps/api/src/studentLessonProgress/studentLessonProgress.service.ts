@@ -77,18 +77,25 @@ export class StudentLessonProgressService {
     language: SupportedLanguages;
     isQuizPassed?: boolean;
   }) {
-    if (userRole === USER_ROLES.CONTENT_CREATOR || userRole === USER_ROLES.ADMIN) {
-      const isStudentModeEnabled = await this.isLessonStudentModeEnabled(id, studentId, dbInstance);
+    const [accessCourseLessonWithDetails] = await this.checkLessonAssignment(id, studentId);
+    const isStudentModeEnabled =
+      userRole === USER_ROLES.CONTENT_CREATOR || userRole === USER_ROLES.ADMIN
+        ? await this.isLessonStudentModeEnabled(id, studentId, dbInstance)
+        : false;
 
-      if (!isStudentModeEnabled) return;
+    if (userRole === USER_ROLES.ADMIN && !isStudentModeEnabled) {
+      return;
     }
 
-    const [accessCourseLessonWithDetails] = await this.checkLessonAssignment(id, studentId);
-
     if (
-      (userRole === USER_ROLES.CONTENT_CREATOR || userRole === USER_ROLES.ADMIN) &&
+      userRole === USER_ROLES.CONTENT_CREATOR &&
+      !isStudentModeEnabled &&
       !accessCourseLessonWithDetails.isAssigned
     ) {
+      return;
+    }
+
+    if (isStudentModeEnabled && !accessCourseLessonWithDetails.isAssigned) {
       await this.ensureStudentCourseEnrollment(
         accessCourseLessonWithDetails.courseId,
         studentId,
@@ -260,20 +267,30 @@ export class StudentLessonProgressService {
     dbInstance: PostgresJsDatabase<typeof schema> = this.db,
   ) {
     const [accessCourseLessonWithDetails] = await this.checkLessonAssignment(id, studentId);
+    const isStudentModeEnabled =
+      userRole === USER_ROLES.CONTENT_CREATOR || userRole === USER_ROLES.ADMIN
+        ? await this.isLessonStudentModeEnabled(id, studentId, dbInstance)
+        : false;
 
-    if (userRole === USER_ROLES.CONTENT_CREATOR || userRole === USER_ROLES.ADMIN) {
-      const isStudentModeEnabled = await this.isLessonStudentModeEnabled(id, studentId, dbInstance);
+    if (userRole === USER_ROLES.ADMIN && !isStudentModeEnabled) {
+      return;
+    }
 
-      if (!isStudentModeEnabled) return;
+    if (
+      userRole === USER_ROLES.CONTENT_CREATOR &&
+      !isStudentModeEnabled &&
+      !accessCourseLessonWithDetails.isAssigned
+    ) {
+      return;
+    }
 
-      if (!accessCourseLessonWithDetails.isAssigned) {
-        await this.ensureStudentCourseEnrollment(
-          accessCourseLessonWithDetails.courseId,
-          studentId,
-          dbInstance,
-        );
-        accessCourseLessonWithDetails.isAssigned = true;
-      }
+    if (isStudentModeEnabled && !accessCourseLessonWithDetails.isAssigned) {
+      await this.ensureStudentCourseEnrollment(
+        accessCourseLessonWithDetails.courseId,
+        studentId,
+        dbInstance,
+      );
+      accessCourseLessonWithDetails.isAssigned = true;
     }
 
     if (!accessCourseLessonWithDetails.isAssigned && !accessCourseLessonWithDetails.isFreemium)

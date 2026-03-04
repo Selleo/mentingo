@@ -9,6 +9,7 @@ import type { GetCourseResponse } from "~/api/generated-api";
 type ChapterCounterProps = {
   chapterProgress: GetCourseResponse["data"]["chapters"][number]["chapterProgress"];
   displayOrder: GetCourseResponse["data"]["chapters"][number]["displayOrder"];
+  isPreviewMode?: boolean;
 };
 
 const chapterCounterIcon = {
@@ -20,6 +21,7 @@ const chapterCounterIcon = {
 export const ChapterCounter = ({
   chapterProgress = CHAPTER_PROGRESS_STATUSES.NOT_STARTED,
   displayOrder,
+  isPreviewMode = false,
 }: ChapterCounterProps) => {
   const chapterNumber = formatNumberToTwoDigits(displayOrder);
 
@@ -32,20 +34,20 @@ export const ChapterCounter = ({
       className={cn(
         "sr-only after:block after:h-full after:w-0.5 md:not-sr-only md:flex md:flex-col md:items-center md:gap-y-1 md:pt-4",
         {
-          "after:bg-secondary-200": isChapterStarted,
-          "after:bg-primary-200": !isChapterStarted,
-          "after:bg-success-200": isChapterCompleted,
+          "after:bg-primary-200": isPreviewMode || !isChapterStarted,
+          "after:bg-secondary-200": !isPreviewMode && isChapterStarted,
+          "after:bg-success-200": !isPreviewMode && isChapterCompleted,
         },
       )}
     >
       <div
         className={cn("relative aspect-square size-10 rounded-full", {
-          "bg-secondary-50": isChapterStarted,
-          "bg-primary-50": !isChapterStarted,
-          "bg-success-50": isChapterCompleted,
+          "bg-primary-50": isPreviewMode || !isChapterStarted,
+          "bg-secondary-50": !isPreviewMode && isChapterStarted,
+          "bg-success-50": !isPreviewMode && isChapterCompleted,
         })}
       >
-        {isChapterStarted || isChapterCompleted ? (
+        {!isPreviewMode && (isChapterStarted || isChapterCompleted) ? (
           <Icon
             name={chapterCounterIcon[chapterProgress]}
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"

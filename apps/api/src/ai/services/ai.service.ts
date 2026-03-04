@@ -304,7 +304,11 @@ export class AiService {
       )
       .where(eq(lessons.id, lessonId));
 
-    if (!access?.isAssigned && !access?.isStudentMode) {
+    if (userRole === USER_ROLES.ADMIN && !access?.isStudentMode) {
+      throw new ForbiddenException("Student mode is not active for this course");
+    }
+
+    if (userRole === USER_ROLES.CONTENT_CREATOR && !access?.isAssigned && !access?.isStudentMode) {
       throw new ForbiddenException("Student mode is not active for this course");
     }
   }

@@ -26,6 +26,7 @@ export const CourseChapterLesson = ({ lesson }: CourseChapterLessonProps) => {
   const { t } = useTranslation();
   const { isPreviewMode } = useCourseExperience();
   const hasAccess = isPreviewMode || lesson.hasAccess;
+  const badgeProgress = isPreviewMode ? "not_started" : hasAccess ? lesson.status : "blocked";
 
   const lessonElement = (
     <div
@@ -48,10 +49,9 @@ export const CourseChapterLesson = ({ lesson }: CourseChapterLessonProps) => {
           {t(getLessonTypeTranslationKey(lesson.type), { defaultValue: lesson.type })}
         </span>
       </div>
-      <ProgressBadge
-        progress={progressBadge[hasAccess ? lesson.status : "blocked"]}
-        className={cn("self-center", { invisible: isPreviewMode })}
-      />
+      {!isPreviewMode ? (
+        <ProgressBadge progress={progressBadge[badgeProgress]} className="self-center" />
+      ) : null}
     </div>
   );
 

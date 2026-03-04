@@ -41,17 +41,20 @@ export default function CourseOverview({ course }: CourseOverviewProps) {
     <Card className="w-full border-none pt-1 drop-shadow-primary lg:pt-0">
       <CardContent className="flex flex-col px-0">
         {(isAdmin || (isAdminLike && course.authorId === currentUser?.id)) && (
-          <div className="border-b border-1 border-neutral-200 flex items-center justify-end p-4 px-6 mb-8 xl:mb-0">
+          <div className="border-b border-1 border-neutral-200 flex items-center justify-between p-4 px-6 mb-8 xl:mb-0">
             <Button
               className="flex gap-2 mr-2"
-              variant={isCourseStudentModeActive ? "outline" : "secondary"}
+              variant={isCourseStudentModeActive ? "primary" : "outline"}
               onClick={() => toggleStudentMode({ enabled: !isCourseStudentModeActive })}
               disabled={isTogglingStudentMode}
             >
-              <Icon name="Play" className="size-4" />
+              <Icon
+                name={isCourseStudentModeActive ? "X" : "Hat"}
+                className={isCourseStudentModeActive ? "size-2.5" : "size-4"}
+              />
               {isCourseStudentModeActive
-                ? t("studentCourseView.studentMode.exit", "Exit student mode")
-                : t("studentCourseView.studentMode.enter", "Enter student mode")}
+                ? t("studentCourseView.studentMode.exit")
+                : t("studentCourseView.studentMode.enter")}
             </Button>
             <Button className="flex gap-2" variant="primary" onClick={navigateToEditCourse}>
               <Icon name="Edit" className="size-4" />

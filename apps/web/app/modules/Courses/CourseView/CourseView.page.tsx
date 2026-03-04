@@ -15,6 +15,7 @@ import CourseOverview from "~/modules/Courses/CourseView/CourseOverview";
 import { CourseViewSidebar } from "~/modules/Courses/CourseView/CourseViewSidebar/CourseViewSidebar";
 import { MoreCoursesByAuthor } from "~/modules/Courses/CourseView/MoreCoursesByAuthor";
 import { YouMayBeInterestedIn } from "~/modules/Courses/CourseView/YouMayBeInterestedIn";
+import { StudentModeBanner } from "~/modules/Courses/Lesson/StudentModeBanner";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { isSupportedLanguage } from "~/utils/browser-language";
 
@@ -143,8 +144,8 @@ export default function CourseViewPage() {
 
   return (
     <ContentAccessGuard type={ACCESS_GUARD.UNREGISTERED_COURSE_ACCESS}>
-      <PageWrapper breadcrumbs={breadcrumbs}>
-        <CourseExperienceProvider course={course}>
+      <CourseExperienceProvider course={course}>
+        <PageWrapper breadcrumbs={breadcrumbs} aboveBreadcrumbs={<StudentModeBanner />}>
           <div className="flex w-full max-w-full flex-col gap-6 lg:grid lg:grid-cols-[1fr_480px]">
             <div className="flex flex-col gap-y-6 overflow-hidden">
               <CourseOverview course={course} />
@@ -195,8 +196,8 @@ export default function CourseViewPage() {
             </div>
             <CourseViewSidebar course={course} />
           </div>
-        </CourseExperienceProvider>
-      </PageWrapper>
+        </PageWrapper>
+      </CourseExperienceProvider>
     </ContentAccessGuard>
   );
 }

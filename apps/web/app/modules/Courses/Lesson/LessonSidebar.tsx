@@ -66,6 +66,8 @@ export const LessonSidebar = ({ course, lessonId }: LessonSidebarProps) => {
     setActiveChapter(value);
   };
 
+  const getPreviewIcon = () => progressBadge[LESSON_PROGRESS_STATUSES.NOT_STARTED];
+
   if (!course) return null;
 
   return (
@@ -81,6 +83,7 @@ export const LessonSidebar = ({ course, lessonId }: LessonSidebarProps) => {
             completedLessonCount={course.completedChapterCount ?? 0}
             courseLessonCount={course.courseChapterCount ?? 0}
             isCompleted={course.completedChapterCount === course.courseChapterCount}
+            redactProgress={isPreviewMode}
           />
         </div>
         <div className="flex flex-col gap-y-4 px-4">
@@ -115,15 +118,16 @@ export const LessonSidebar = ({ course, lessonId }: LessonSidebarProps) => {
                         <Badge
                           variant="icon"
                           icon={
-                            progressBadge[
-                              state?.chapterId === id &&
-                              chapterProgress === CHAPTER_PROGRESS_STATUSES.NOT_STARTED
-                                ? CHAPTER_PROGRESS_STATUSES.IN_PROGRESS
-                                : chapterProgress
-                            ]
+                            isPreviewMode
+                              ? getPreviewIcon()
+                              : progressBadge[
+                                  state?.chapterId === id &&
+                                  chapterProgress === CHAPTER_PROGRESS_STATUSES.NOT_STARTED
+                                    ? CHAPTER_PROGRESS_STATUSES.IN_PROGRESS
+                                    : chapterProgress
+                                ]
                           }
                           iconClasses="w-6 h-auto shrink-0"
-                          className={cn({ hidden: isPreviewMode })}
                         />
                         <div className="body-base-md w-full text-start text-neutral-950">
                           {title}
@@ -149,12 +153,13 @@ export const LessonSidebar = ({ course, lessonId }: LessonSidebarProps) => {
                               <Badge
                                 variant="icon"
                                 icon={
-                                  progressBadge[
-                                    isBlocked ? LESSON_PROGRESS_STATUSES.BLOCKED : status
-                                  ]
+                                  isPreviewMode
+                                    ? getPreviewIcon()
+                                    : progressBadge[
+                                        isBlocked ? LESSON_PROGRESS_STATUSES.BLOCKED : status
+                                      ]
                                 }
                                 iconClasses="w-6 h-auto shrink-0"
-                                className={cn({ hidden: isPreviewMode })}
                               />{" "}
                               <div className="flex flex-1 flex-col break-words overflow-x-hidden">
                                 <p className="body-sm-md text-neutral-950">{title}</p>
