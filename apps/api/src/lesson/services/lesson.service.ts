@@ -14,6 +14,10 @@ import { AiService } from "src/ai/services/ai.service";
 import { THREAD_STATUS } from "src/ai/utils/ai.type";
 import { DatabasePg } from "src/common";
 import { injectResourcesIntoContent } from "src/common/utils/injectResourcesIntoContent";
+import {
+  canUseLessonProgressAsLearner,
+  LEARNING_MODE_REQUIRED_ERROR_KEY,
+} from "src/common/utils/lessonLearningAccess";
 import { QuizCompletedEvent } from "src/events";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
@@ -474,12 +478,13 @@ export class LessonService {
       )
       .where(eq(lessons.id, lessonId));
 
-    if (userRole === USER_ROLES.ADMIN && !access?.isStudentMode) {
-      throw new ForbiddenException("Student mode is not active for this course");
-    }
+    const hasLearnerAccess = canUseLessonProgressAsLearner(userRole, {
+      hasEnrollment: Boolean(access?.isAssigned),
+      isLearningModeActive: Boolean(access?.isStudentMode),
+    });
 
-    if (userRole === USER_ROLES.CONTENT_CREATOR && !access?.isAssigned && !access?.isStudentMode) {
-      throw new ForbiddenException("Student mode is not active for this course");
+    if (!hasLearnerAccess) {
+      throw new ForbiddenException(LEARNING_MODE_REQUIRED_ERROR_KEY);
     }
   }
 

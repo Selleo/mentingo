@@ -13,7 +13,7 @@ import { Card, CardContent } from "~/components/ui/card";
 import { CategoryChip } from "~/components/ui/CategoryChip";
 import { useUserRole } from "~/hooks/useUserRole";
 import { courseLanguages } from "~/modules/Admin/EditCourse/components/CourseLanguageSelector";
-import { useCourseExperience } from "~/modules/Courses/context/CourseExperienceContext";
+import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 
 import type { GetCourseResponse } from "~/api/generated-api";
 
@@ -27,8 +27,8 @@ export default function CourseOverview({ course }: CourseOverviewProps) {
 
   const { isAdminLike, isAdmin } = useUserRole();
   const { data: currentUser } = useCurrentUser();
-  const { isCourseStudentModeActive } = useCourseExperience();
-  const { mutate: toggleStudentMode, isPending: isTogglingStudentMode } =
+  const { isCourseStudentModeActive } = useCourseAccessProvider();
+  const { mutate: toggleLearningMode, isPending: isTogglingLearningMode } =
     useToggleCourseStudentMode(course.id, course.slug);
 
   const imageUrl = course?.thumbnailUrl ?? CardPlaceholder;
@@ -45,8 +45,8 @@ export default function CourseOverview({ course }: CourseOverviewProps) {
             <Button
               className="flex gap-2 mr-2"
               variant={isCourseStudentModeActive ? "primary" : "outline"}
-              onClick={() => toggleStudentMode({ enabled: !isCourseStudentModeActive })}
-              disabled={isTogglingStudentMode}
+              onClick={() => toggleLearningMode({ enabled: !isCourseStudentModeActive })}
+              disabled={isTogglingLearningMode}
             >
               <Icon
                 name={isCourseStudentModeActive ? "X" : "Hat"}

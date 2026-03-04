@@ -29,6 +29,10 @@ import {
   THREAD_STATUS,
 } from "src/ai/utils/ai.type";
 import { DatabasePg } from "src/common";
+import {
+  canUseLessonProgressAsLearner,
+  LEARNING_MODE_REQUIRED_ERROR_KEY,
+} from "src/common/utils/lessonLearningAccess";
 import { dbAls } from "src/storage/db/db-als.store";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import {
@@ -304,13 +308,12 @@ export class AiService {
       )
       .where(eq(lessons.id, lessonId));
 
-    if (userRole === USER_ROLES.ADMIN && !access?.isStudentMode) {
-      throw new ForbiddenException("Student mode is not active for this course");
-    }
+    const hasLearnerAccess = canUseLessonProgressAsLearner(userRole, {
+      hasEnrollment: !!access?.isAssigned,
+      isLearningModeActive: !!access?.isStudentMode,
+    });
 
-    if (userRole === USER_ROLES.CONTENT_CREATOR && !access?.isAssigned && !access?.isStudentMode) {
-      throw new ForbiddenException("Student mode is not active for this course");
-    }
+    if (!hasLearnerAccess) throw new ForbiddenException(LEARNING_MODE_REQUIRED_ERROR_KEY);
   }
 
   async transcribe(clientId: string, audio: Buffer) {

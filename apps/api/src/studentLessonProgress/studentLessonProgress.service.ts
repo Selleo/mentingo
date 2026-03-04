@@ -11,6 +11,7 @@ import { and, eq, isNotNull, isNull, sql } from "drizzle-orm";
 import { CertificatesService } from "src/certificates/certificates.service";
 import { DatabasePg } from "src/common";
 import { setJsonbField } from "src/common/helpers/sqlHelpers";
+import { canUseLessonProgressAsLearner } from "src/common/utils/lessonLearningAccess";
 import { CourseCompletedEvent, LessonCompletedEvent } from "src/events";
 import { UserChapterFinishedEvent } from "src/events/user/user-chapter-finished.event";
 import { UserCourseFinishedEvent } from "src/events/user/user-course-finished.event";
@@ -78,24 +79,22 @@ export class StudentLessonProgressService {
     isQuizPassed?: boolean;
   }) {
     const [accessCourseLessonWithDetails] = await this.checkLessonAssignment(id, studentId);
-    const isStudentModeEnabled =
-      userRole === USER_ROLES.CONTENT_CREATOR || userRole === USER_ROLES.ADMIN
-        ? await this.isLessonStudentModeEnabled(id, studentId, dbInstance)
-        : false;
 
-    if (userRole === USER_ROLES.ADMIN && !isStudentModeEnabled) {
-      return;
-    }
+    const isLearningModeActive = await this.resolveLearningModeStatus(
+      id,
+      studentId,
+      userRole,
+      dbInstance,
+    );
 
-    if (
-      userRole === USER_ROLES.CONTENT_CREATOR &&
-      !isStudentModeEnabled &&
-      !accessCourseLessonWithDetails.isAssigned
-    ) {
-      return;
-    }
+    const canTrackProgress = canUseLessonProgressAsLearner(userRole, {
+      hasEnrollment: Boolean(accessCourseLessonWithDetails.isAssigned),
+      isLearningModeActive,
+    });
 
-    if (isStudentModeEnabled && !accessCourseLessonWithDetails.isAssigned) {
+    if (!canTrackProgress) return;
+
+    if (isLearningModeActive && !accessCourseLessonWithDetails.isAssigned) {
       await this.ensureStudentCourseEnrollment(
         accessCourseLessonWithDetails.courseId,
         studentId,
@@ -267,29 +266,28 @@ export class StudentLessonProgressService {
     dbInstance: PostgresJsDatabase<typeof schema> = this.db,
   ) {
     const [accessCourseLessonWithDetails] = await this.checkLessonAssignment(id, studentId);
-    const isStudentModeEnabled =
-      userRole === USER_ROLES.CONTENT_CREATOR || userRole === USER_ROLES.ADMIN
-        ? await this.isLessonStudentModeEnabled(id, studentId, dbInstance)
-        : false;
 
-    if (userRole === USER_ROLES.ADMIN && !isStudentModeEnabled) {
-      return;
-    }
+    const isLearningModeActive = await this.resolveLearningModeStatus(
+      id,
+      studentId,
+      userRole,
+      dbInstance,
+    );
 
-    if (
-      userRole === USER_ROLES.CONTENT_CREATOR &&
-      !isStudentModeEnabled &&
-      !accessCourseLessonWithDetails.isAssigned
-    ) {
-      return;
-    }
+    const canTrackProgress = canUseLessonProgressAsLearner(userRole, {
+      hasEnrollment: !!accessCourseLessonWithDetails.isAssigned,
+      isLearningModeActive,
+    });
 
-    if (isStudentModeEnabled && !accessCourseLessonWithDetails.isAssigned) {
+    if (!canTrackProgress) return;
+
+    if (isLearningModeActive && !accessCourseLessonWithDetails.isAssigned) {
       await this.ensureStudentCourseEnrollment(
         accessCourseLessonWithDetails.courseId,
         studentId,
         dbInstance,
       );
+
       accessCourseLessonWithDetails.isAssigned = true;
     }
 
@@ -391,6 +389,19 @@ export class StudentLessonProgressService {
 
       await this.checkCourseIsCompletedForUser(courseId, studentId, actor, dbInstance);
     }
+  }
+
+  private async resolveLearningModeStatus(
+    lessonId: UUIDType,
+    userId: UUIDType,
+    userRole: UserRole | undefined,
+    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+  ) {
+    const isAdminLike = userRole === USER_ROLES.ADMIN || userRole === USER_ROLES.CONTENT_CREATOR;
+
+    if (!isAdminLike) return false;
+
+    return this.isLessonStudentModeEnabled(lessonId, userId, dbInstance);
   }
 
   private async isLessonStudentModeEnabled(

@@ -13,7 +13,7 @@ import {
 } from "~/components/ui/accordion";
 import { Button } from "~/components/ui/button";
 import { cn, formatWithPlural } from "~/lib/utils";
-import { useCourseExperience } from "~/modules/Courses/context/CourseExperienceContext";
+import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import { ChapterCounter } from "~/modules/Courses/CourseView/components/ChapterCounter";
 import { CourseChapterLesson } from "~/modules/Courses/CourseView/CourseChapterLesson";
 
@@ -33,7 +33,7 @@ export const CourseChapter = ({ chapter }: CourseChapterProps) => {
   const {
     course: { enrolled },
     isPreviewMode,
-  } = useCourseExperience();
+  } = useCourseAccessProvider();
   const lessonText = formatWithPlural(
     chapter.lessonCount ?? 0,
     t("courseChapterView.other.lesson"),

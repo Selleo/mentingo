@@ -14,7 +14,7 @@ import { useVideoPlayer } from "~/components/VideoPlayer/VideoPlayerContext";
 import { useLessonsSequence } from "~/hooks/useLessonsSequence";
 import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 import { useVideoPreferencesStore } from "~/modules/common/store/useVideoPreferencesStore";
-import { useCourseExperience } from "~/modules/Courses/context/CourseExperienceContext";
+import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import { getLessonTypeTranslationKey } from "~/modules/Courses/CourseView/lessonTypes";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
@@ -48,7 +48,7 @@ export const LessonContent = ({
 
   const { clearVideo, setOnEnded } = useVideoPlayer();
   const { autoplay, setAutoplay, autoplaySettings } = useVideoPreferencesStore();
-  const { isEffectiveStudentExperience, isPreviewMode } = useCourseExperience();
+  const { isEffectiveStudentExperience, isPreviewMode } = useCourseAccessProvider();
 
   const [isPreviousDisabled, setIsPreviousDisabled] = useState(false);
   const [isNextDisabled, setIsNextDisabled] = useState(false);

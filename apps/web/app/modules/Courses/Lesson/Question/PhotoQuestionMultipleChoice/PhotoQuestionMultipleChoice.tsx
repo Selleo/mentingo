@@ -1,4 +1,4 @@
-import { useCourseExperience } from "~/modules/Courses/context/CourseExperienceContext";
+import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import { MultipleChoiceOptionList } from "~/modules/Courses/Lesson/Question/MultipleChoice/MultipleChoiceOptionList";
 
 import { QuestionCard } from "../QuestionCard";
@@ -14,7 +14,7 @@ export const PhotoQuestionMultipleChoice = ({
   question,
   isCompleted = false,
 }: PhotoQuestionMultipleChoiceProps) => {
-  const { isPreviewMode } = useCourseExperience();
+  const { isPreviewMode } = useCourseAccessProvider();
 
   return (
     <QuestionCard

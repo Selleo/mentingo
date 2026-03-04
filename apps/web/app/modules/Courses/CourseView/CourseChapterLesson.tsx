@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { ProgressBadge } from "~/components/Badges/ProgressBadge";
 import { Icon } from "~/components/Icon";
 import { cn } from "~/lib/utils";
-import { useCourseExperience } from "~/modules/Courses/context/CourseExperienceContext";
+import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import {
   getLessonTypeTranslationKey,
   LessonTypesIcons,
@@ -24,7 +24,7 @@ type CourseChapterLessonProps = {
 
 export const CourseChapterLesson = ({ lesson }: CourseChapterLessonProps) => {
   const { t } = useTranslation();
-  const { isPreviewMode } = useCourseExperience();
+  const { isPreviewMode } = useCourseAccessProvider();
   const hasAccess = isPreviewMode || lesson.hasAccess;
   const badgeProgress = isPreviewMode ? "not_started" : hasAccess ? lesson.status : "blocked";
 

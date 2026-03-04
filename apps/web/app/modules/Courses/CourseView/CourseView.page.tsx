@@ -10,12 +10,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { ContentAccessGuard } from "~/Guards/AccessGuard";
 import { useUserRole } from "~/hooks/useUserRole";
 import { cn } from "~/lib/utils";
-import { CourseExperienceProvider } from "~/modules/Courses/context/CourseExperienceContext";
+import { CourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import CourseOverview from "~/modules/Courses/CourseView/CourseOverview";
 import { CourseViewSidebar } from "~/modules/Courses/CourseView/CourseViewSidebar/CourseViewSidebar";
 import { MoreCoursesByAuthor } from "~/modules/Courses/CourseView/MoreCoursesByAuthor";
 import { YouMayBeInterestedIn } from "~/modules/Courses/CourseView/YouMayBeInterestedIn";
-import { StudentModeBanner } from "~/modules/Courses/Lesson/StudentModeBanner";
+import { LearningModeBanner } from "~/modules/Courses/Lesson/LearningModeBanner";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { isSupportedLanguage } from "~/utils/browser-language";
 
@@ -144,8 +144,8 @@ export default function CourseViewPage() {
 
   return (
     <ContentAccessGuard type={ACCESS_GUARD.UNREGISTERED_COURSE_ACCESS}>
-      <CourseExperienceProvider course={course}>
-        <PageWrapper breadcrumbs={breadcrumbs} aboveBreadcrumbs={<StudentModeBanner />}>
+      <CourseAccessProvider course={course}>
+        <PageWrapper breadcrumbs={breadcrumbs} aboveBreadcrumbs={<LearningModeBanner />}>
           <div className="flex w-full max-w-full flex-col gap-6 lg:grid lg:grid-cols-[1fr_480px]">
             <div className="flex flex-col gap-y-6 overflow-hidden">
               <CourseOverview course={course} />
@@ -197,7 +197,7 @@ export default function CourseViewPage() {
             <CourseViewSidebar course={course} />
           </div>
         </PageWrapper>
-      </CourseExperienceProvider>
+      </CourseAccessProvider>
     </ContentAccessGuard>
   );
 }

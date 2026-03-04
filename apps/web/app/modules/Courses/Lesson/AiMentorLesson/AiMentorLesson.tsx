@@ -21,7 +21,7 @@ import {
 } from "~/components/ui/accordion";
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
-import { useOptionalCourseExperience } from "~/modules/Courses/context/CourseExperienceContext";
+import { useOptionalCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import ChatLoader from "~/modules/Courses/Lesson/AiMentorLesson/components/ChatLoader";
 import ChatMessage from "~/modules/Courses/Lesson/AiMentorLesson/components/ChatMessage";
 import { LessonForm } from "~/modules/Courses/Lesson/AiMentorLesson/components/LessonForm";
@@ -41,7 +41,7 @@ interface AiMentorLessonProps {
 const AiMentorLesson = ({ lesson, lessonLoading }: AiMentorLessonProps) => {
   const { t } = useTranslation();
   const { courseId = "" } = useParams();
-  const courseExperience = useOptionalCourseExperience();
+  const courseExperience = useOptionalCourseAccessProvider();
   const isPreviewMode = courseExperience?.isPreviewMode ?? true;
 
   const { mutateAsync: judgeLesson, isPending: isJudgePending } = useJudgeLesson(

@@ -2,14 +2,14 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useLessonsSequence } from "~/hooks/useLessonsSequence";
-import { useCourseExperience } from "~/modules/Courses/context/CourseExperienceContext";
+import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 
 import { getChaptersWithAccess } from "../../utils";
 import { CourseChapter } from "../CourseChapter";
 
 export function ChapterListOverview() {
   const { t } = useTranslation();
-  const { course, isPreviewMode } = useCourseExperience();
+  const { course, isPreviewMode } = useCourseAccessProvider();
 
   const { sequenceEnabled } = useLessonsSequence(course?.id);
   const shouldEnforceSequence = sequenceEnabled && !isPreviewMode;

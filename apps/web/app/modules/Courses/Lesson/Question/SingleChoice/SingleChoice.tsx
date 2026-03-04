@@ -1,4 +1,4 @@
-import { useCourseExperience } from "~/modules/Courses/context/CourseExperienceContext";
+import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import { QuestionCard } from "~/modules/Courses/Lesson/Question/QuestionCard";
 
 import { SingleChoiceOptionList } from "./SingleChoiceOptionList";
@@ -11,7 +11,7 @@ type SingleChoiceProps = {
 };
 
 export const SingleChoice = ({ question, isCompleted = false }: SingleChoiceProps) => {
-  const { isPreviewMode } = useCourseExperience();
+  const { isPreviewMode } = useCourseAccessProvider();
 
   return (
     <QuestionCard

@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { CopyUrlButton } from "~/components/CopyUrlButton";
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
-import { useCourseExperience } from "~/modules/Courses/context/CourseExperienceContext";
+import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import { CourseProgressChart } from "~/modules/Courses/CourseView/components/CourseProgressChart";
 
 import { findFirstInProgressLessonId, findFirstNotStartedLessonId } from "../../Lesson/utils";
@@ -18,7 +18,7 @@ type CourseProgressProps = {
 };
 
 export const CourseProgress = ({ course }: CourseProgressProps) => {
-  const { isEffectiveStudentExperience, isPreviewMode } = useCourseExperience();
+  const { isEffectiveStudentExperience, isPreviewMode } = useCourseAccessProvider();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const notStartedLessonId = findFirstNotStartedLessonId(course);

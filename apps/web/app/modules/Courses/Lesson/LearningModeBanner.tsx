@@ -5,20 +5,22 @@ import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
 import { useUserRole } from "~/hooks/useUserRole";
 import { cn } from "~/lib/utils";
-import { useCourseExperience } from "~/modules/Courses/context/CourseExperienceContext";
+import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 
-type StudentModeBannerProps = {
+type LearningModeBannerProps = {
   className?: string;
 };
 
-export function StudentModeBanner({ className }: StudentModeBannerProps) {
+export function LearningModeBanner({ className }: LearningModeBannerProps) {
   const { t } = useTranslation();
   const { isAdminLike } = useUserRole();
-  const { course, isCourseStudentModeActive } = useCourseExperience();
-  const { mutate: toggleStudentMode, isPending: isTogglingStudentMode } =
+  const { course, isCourseStudentModeActive } = useCourseAccessProvider();
+  const { mutate: toggleLearningMode, isPending: isTogglingLearningMode } =
     useToggleCourseStudentMode(course.id, course.slug);
 
   if (!isAdminLike || !isCourseStudentModeActive) return null;
+
+  const handleExitLearningMode = () => toggleLearningMode({ enabled: false });
 
   return (
     <div
@@ -39,8 +41,8 @@ export function StudentModeBanner({ className }: StudentModeBannerProps) {
       <Button
         variant="outline"
         className="flex items-center gap-2"
-        onClick={() => toggleStudentMode({ enabled: false })}
-        disabled={isTogglingStudentMode}
+        onClick={handleExitLearningMode}
+        disabled={isTogglingLearningMode}
       >
         <Icon name="X" className="size-2.5" />
         {t("studentCourseView.studentMode.exitBanner", "Exit learning mode")}

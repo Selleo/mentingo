@@ -1974,7 +1974,8 @@
       "exit": "Wyłącz tryb nauki",
       "bannerTitle": "Korzystasz z tego kursu w trybie nauki",
       "bannerDescription": "Twoje postępy są śledzone. Ukończone lekcje wliczają się do Twojego postępu i statystyk kursu.",
-      "exitBanner": "Wyłącz tryb nauki"
+      "exitBanner": "Wyłącz tryb nauki",
+      "learningModeRequired": "Tryb nauki nie jest aktywny dla tego kursu."
     },
     "tabs": {
       "chapters": "Rozdziały",

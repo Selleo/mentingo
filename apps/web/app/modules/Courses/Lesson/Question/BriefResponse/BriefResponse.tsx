@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import { Textarea } from "~/components/ui/textarea";
 import { cn } from "~/lib/utils";
-import { useCourseExperience } from "~/modules/Courses/context/CourseExperienceContext";
+import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import { QuestionCard } from "~/modules/Courses/Lesson/Question/QuestionCard";
 
 import type { QuizQuestion } from "~/modules/Courses/Lesson/Question/types";
@@ -15,7 +15,7 @@ export type BriefResponseProps = {
 };
 
 export const BriefResponse = ({ question, isCompleted = false }: BriefResponseProps) => {
-  const { isPreviewMode } = useCourseExperience();
+  const { isPreviewMode } = useCourseAccessProvider();
   const { register } = useFormContext<QuizForm>();
   const { t } = useTranslation();
 

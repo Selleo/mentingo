@@ -15,7 +15,7 @@ import { Badge } from "~/components/ui/badge";
 import { CategoryChip } from "~/components/ui/CategoryChip";
 import { useLessonsSequence } from "~/hooks/useLessonsSequence";
 import { cn } from "~/lib/utils";
-import { useCourseExperience } from "~/modules/Courses/context/CourseExperienceContext";
+import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import {
   CHAPTER_PROGRESS_STATUSES,
   getLessonTypeTranslationKey,
@@ -44,7 +44,7 @@ const progressBadge = {
 export const LessonSidebar = ({ course, lessonId }: LessonSidebarProps) => {
   const { t } = useTranslation();
   const { state } = useLocation();
-  const { isPreviewMode } = useCourseExperience();
+  const { isPreviewMode } = useCourseAccessProvider();
 
   const [activeChapter, setActiveChapter] = useState<string | undefined>(
     state?.chapterId ?? getCurrentChapterId(course, lessonId),

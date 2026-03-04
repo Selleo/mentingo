@@ -8,7 +8,7 @@ import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
-import { useCourseExperience } from "~/modules/Courses/context/CourseExperienceContext";
+import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import CertificatePreview from "~/modules/Profile/Certificates/CertificatePreview";
 
@@ -19,7 +19,7 @@ const CourseCertificate = ({ courseId }: { courseId: string }) => {
   const { data: course } = useCourse(courseId, language);
   const { data: currentUser } = useCurrentUser();
   const { data: globalSettings } = useGlobalSettings();
-  const { isEffectiveStudentExperience } = useCourseExperience();
+  const { isEffectiveStudentExperience } = useCourseAccessProvider();
 
   const [isCertificatePreviewOpen, setCertificatePreview] = useState(false);
 

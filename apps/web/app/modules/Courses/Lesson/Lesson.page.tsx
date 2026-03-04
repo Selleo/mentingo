@@ -13,10 +13,10 @@ import { useVideoPlayer } from "~/components/VideoPlayer/VideoPlayerContext";
 import { useLearningTimeTracker } from "~/hooks/useLearningTimeTracker";
 import Loader from "~/modules/common/Loader/Loader";
 import { useVideoPreferencesStore } from "~/modules/common/store/useVideoPreferencesStore";
-import { CourseExperienceProvider } from "~/modules/Courses/context/CourseExperienceContext";
+import { CourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
+import { LearningModeBanner } from "~/modules/Courses/Lesson/LearningModeBanner";
 import { LessonContent } from "~/modules/Courses/Lesson/LessonContent";
 import { LessonSidebar } from "~/modules/Courses/Lesson/LessonSidebar";
-import { StudentModeBanner } from "~/modules/Courses/Lesson/StudentModeBanner";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { setPageTitle } from "~/utils/setPageTitle";
 
@@ -219,11 +219,11 @@ export default function LessonPage() {
   ];
 
   return (
-    <CourseExperienceProvider course={course}>
+    <CourseAccessProvider course={course}>
       <PageWrapper
         className="h-auto"
         breadcrumbs={breadcrumbs}
-        aboveBreadcrumbs={<StudentModeBanner />}
+        aboveBreadcrumbs={<LearningModeBanner />}
       >
         <div className="flex w-full max-w-full flex-col gap-6">
           <div className="flex w-full max-w-full flex-col gap-6 lg:grid lg:grid-cols-[1fr_480px] lg:items-start">
@@ -251,6 +251,6 @@ export default function LessonPage() {
           </div>
         </div>
       </PageWrapper>
-    </CourseExperienceProvider>
+    </CourseAccessProvider>
   );
 }

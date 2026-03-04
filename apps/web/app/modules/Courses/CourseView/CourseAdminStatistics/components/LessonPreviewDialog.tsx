@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
 import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { VideoProvider } from "~/components/VideoPlayer/VideoPlayerContext";
 import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
-import { CourseExperienceProvider } from "~/modules/Courses/context/CourseExperienceContext";
+import { CourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import { LessonContent } from "~/modules/Courses/Lesson/LessonContent";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
@@ -127,7 +127,7 @@ export default function LessonPreviewDialog({
             </div>
           </div>
           <VideoProvider>
-            <CourseExperienceProvider course={course} forcePreviewMode>
+            <CourseAccessProvider course={course} forcePreviewMode>
               <LessonContent
                 lesson={lesson}
                 course={course}
@@ -138,7 +138,7 @@ export default function LessonPreviewDialog({
                 isFirstLesson={true}
                 lessonLoading={isLoadingLesson}
               />
-            </CourseExperienceProvider>
+            </CourseAccessProvider>
           </VideoProvider>
         </div>
       </DialogContent>

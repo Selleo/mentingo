@@ -18,7 +18,7 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { toast } from "~/components/ui/use-toast";
-import { useCourseExperience } from "~/modules/Courses/context/CourseExperienceContext";
+import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { QuizContextProvider } from "../components/QuizContextProvider";
@@ -44,7 +44,7 @@ type QuizProps = {
 export const Quiz = ({ lesson, userId }: QuizProps) => {
   const { lessonId = "", courseId: courseSlug = "" } = useParams();
   const { t } = useTranslation();
-  const { isPreviewMode } = useCourseExperience();
+  const { isPreviewMode } = useCourseAccessProvider();
 
   const { language } = useLanguageStore();
 
