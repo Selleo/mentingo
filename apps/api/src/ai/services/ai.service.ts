@@ -31,7 +31,13 @@ import {
 import { DatabasePg } from "src/common";
 import { dbAls } from "src/storage/db/db-als.store";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
-import { aiMentorThreads, chapters, courseStudentMode, lessons } from "src/storage/schema";
+import {
+  aiMentorThreads,
+  chapters,
+  courseStudentMode,
+  lessons,
+  studentCourses,
+} from "src/storage/schema";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
@@ -278,14 +284,27 @@ export class AiService {
   ) {
     if (userRole === USER_ROLES.STUDENT) return;
 
-    const [studentModeExists] = await this.db
-      .select({ id: courseStudentMode.id })
-      .from(courseStudentMode)
-      .innerJoin(chapters, eq(chapters.courseId, courseStudentMode.courseId))
-      .innerJoin(lessons, eq(lessons.chapterId, chapters.id))
-      .where(and(eq(courseStudentMode.userId, userId), eq(lessons.id, lessonId)));
+    const [access] = await this.db
+      .select({
+        isAssigned: studentCourses.id,
+        isStudentMode: courseStudentMode.id,
+      })
+      .from(lessons)
+      .innerJoin(chapters, eq(lessons.chapterId, chapters.id))
+      .leftJoin(
+        studentCourses,
+        and(eq(studentCourses.courseId, chapters.courseId), eq(studentCourses.studentId, userId)),
+      )
+      .leftJoin(
+        courseStudentMode,
+        and(
+          eq(courseStudentMode.courseId, chapters.courseId),
+          eq(courseStudentMode.userId, userId),
+        ),
+      )
+      .where(eq(lessons.id, lessonId));
 
-    if (!studentModeExists) {
+    if (!access?.isAssigned && !access?.isStudentMode) {
       throw new ForbiddenException("Student mode is not active for this course");
     }
   }

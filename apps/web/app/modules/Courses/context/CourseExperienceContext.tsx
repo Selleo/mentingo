@@ -32,8 +32,14 @@ export function CourseExperienceProvider({
     const isCourseStudentModeActive = Boolean(
       !forcePreviewMode && isAdminLike && currentUser?.studentModeCourseIds?.includes(course.id),
     );
-    const isPreviewMode = forcePreviewMode || (isAdminLike && !isCourseStudentModeActive);
-    const isEffectiveStudentExperience = !isPreviewMode && (isStudent || isCourseStudentModeActive);
+
+    const hasLearnerEnrollment = Boolean(course.enrolled);
+
+    const isPreviewMode =
+      forcePreviewMode || (isAdminLike && !hasLearnerEnrollment && !isCourseStudentModeActive);
+
+    const isEffectiveStudentExperience =
+      !isPreviewMode && (isStudent || hasLearnerEnrollment || isCourseStudentModeActive);
 
     return {
       course,
@@ -54,4 +60,8 @@ export function useCourseExperience() {
   if (!context) throw new Error("useCourseExperience must be used within CourseExperienceProvider");
 
   return context;
+}
+
+export function useOptionalCourseExperience() {
+  return useContext(CourseExperienceContext);
 }
