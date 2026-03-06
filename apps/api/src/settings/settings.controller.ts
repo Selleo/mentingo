@@ -10,6 +10,8 @@ import {
   UploadedFile,
   Param,
   Delete,
+  Req,
+  Res,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes } from "@nestjs/swagger";
@@ -25,6 +27,7 @@ import {
   type AllowedQASettings,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
+import { Request, Response } from "express";
 import { Validate } from "nestjs-typebox";
 
 import { UUIDType, baseResponse, BaseResponse, UUIDSchema } from "src/common";
@@ -66,7 +69,7 @@ import {
   updateAgeLimitSchema,
   UpdateAgeLimitBody,
 } from "./schemas/update-settings.schema";
-import { SettingsService } from "./settings.service";
+import { SETTINGS_IMAGE_ASSET, SettingsService } from "./settings.service";
 
 import type {
   AdminSettingsJSONContentSchema,
@@ -85,7 +88,7 @@ export class SettingsController {
     response: baseResponse(globalSettingsJSONSchema),
   })
   async getPublicGlobalSettings(): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
-    return new BaseResponse(await this.settingsService.getGlobalSettings());
+    return new BaseResponse(await this.settingsService.getPublicGlobalSettings());
   }
 
   @Get()
@@ -216,6 +219,16 @@ export class SettingsController {
     return new BaseResponse({ url });
   }
 
+  @Get("platform-logo/image")
+  @Public()
+  async getPlatformLogoImage(@Req() req: Request, @Res() res: Response) {
+    return this.settingsService.streamSettingsImageByAssetType(
+      req,
+      res,
+      SETTINGS_IMAGE_ASSET.PLATFORM_LOGO,
+    );
+  }
+
   @Patch("platform-logo")
   @Roles(USER_ROLES.ADMIN)
   @UseInterceptors(
@@ -261,6 +274,16 @@ export class SettingsController {
     return new BaseResponse({ url });
   }
 
+  @Get("platform-simple-logo/image")
+  @Public()
+  async getPlatformSimpleLogoImage(@Req() req: Request, @Res() res: Response) {
+    return this.settingsService.streamSettingsImageByAssetType(
+      req,
+      res,
+      SETTINGS_IMAGE_ASSET.PLATFORM_SIMPLE_LOGO,
+    );
+  }
+
   @Patch("platform-simple-logo")
   @Roles(USER_ROLES.ADMIN)
   @UseInterceptors(
@@ -304,6 +327,16 @@ export class SettingsController {
   async getLoginBackground() {
     const loginBackgroundImageS3Key = await this.settingsService.getLoginBackgroundImageUrl();
     return new BaseResponse(loginBackgroundImageS3Key);
+  }
+
+  @Get("login-background/image")
+  @Public()
+  async getLoginBackgroundImage(@Req() req: Request, @Res() res: Response) {
+    return this.settingsService.streamSettingsImageByAssetType(
+      req,
+      res,
+      SETTINGS_IMAGE_ASSET.LOGIN_BACKGROUND,
+    );
   }
 
   @Patch("login-background")
@@ -418,6 +451,16 @@ export class SettingsController {
   ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
     return new BaseResponse(
       await this.settingsService.updateCertificateBackground(certificateBackground, currentUser),
+    );
+  }
+
+  @Get("certificate-background/image")
+  @Public()
+  async getCertificateBackgroundImage(@Req() req: Request, @Res() res: Response) {
+    return this.settingsService.streamSettingsImageByAssetType(
+      req,
+      res,
+      SETTINGS_IMAGE_ASSET.CERTIFICATE_BACKGROUND,
     );
   }
 

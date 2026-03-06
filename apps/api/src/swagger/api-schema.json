@@ -601,6 +601,17 @@
         }
       }
     },
+    "/api/settings/platform-logo/image": {
+      "get": {
+        "operationId": "SettingsController_getPlatformLogoImage",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/settings/platform-simple-logo": {
       "get": {
         "operationId": "SettingsController_getPlatformSimpleLogo",
@@ -644,6 +655,17 @@
         }
       }
     },
+    "/api/settings/platform-simple-logo/image": {
+      "get": {
+        "operationId": "SettingsController_getPlatformSimpleLogoImage",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/settings/login-background": {
       "get": {
         "operationId": "SettingsController_getLoginBackground",
@@ -680,6 +702,17 @@
             }
           }
         },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/settings/login-background/image": {
+      "get": {
+        "operationId": "SettingsController_getLoginBackgroundImage",
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -771,6 +804,17 @@
             }
           }
         },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/settings/certificate-background/image": {
+      "get": {
+        "operationId": "SettingsController_getCertificateBackgroundImage",
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""

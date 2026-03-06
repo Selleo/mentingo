@@ -15,6 +15,10 @@ export class TenantResolverService {
   private readonly allowedInactiveApiRoutes: Record<string, string[]> = {
     "/api/settings/company-information": ["GET"],
     "/api/settings/platform-simple-logo": ["GET"],
+    "/api/settings/platform-simple-logo/image": ["GET"],
+    "/api/settings/platform-logo/image": ["GET"],
+    "/api/settings/login-background/image": ["GET"],
+    "/api/settings/certificate-background/image": ["GET"],
   };
 
   constructor(

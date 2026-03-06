@@ -171,7 +171,15 @@ async function verifyGlobalSettingsAfterLogout(
   const loginBackgroundImage = globalBody?.data?.loginBackgroundImageS3Key;
   const certificateBackgroundImage = globalBody?.data?.certificateBackgroundImage;
   expect(loginBackgroundImage).toBeTruthy();
-  expect(certificateBackgroundImage).toContain(uploadedCertificatePath);
+  expect(certificateBackgroundImage).toBeTruthy();
+
+  const certificateBackgroundImageUrl = new URL(certificateBackgroundImage!, page.url());
+  expect(certificateBackgroundImageUrl.pathname).toContain(
+    "/api/settings/certificate-background/image",
+  );
+
+  const certificateVersion = certificateBackgroundImageUrl.searchParams.get("v");
+  expect(decodeURIComponent(certificateVersion ?? "")).toBe(uploadedCertificatePath);
 }
 
 async function navigateToCourseEditor(page: Page) {
