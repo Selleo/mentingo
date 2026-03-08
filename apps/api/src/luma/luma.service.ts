@@ -3,6 +3,7 @@ import {
   BadRequestException,
   ConflictException,
   HttpException,
+  Inject,
   Injectable,
   NotFoundException,
   ServiceUnavailableException,
@@ -10,17 +11,21 @@ import {
 } from "@nestjs/common";
 import { AI_MENTOR_TYPE } from "@repo/shared";
 import { isAxiosError } from "axios";
+import * as cheerio from "cheerio";
 import { eq } from "drizzle-orm";
 import { match } from "ts-pattern";
 
 import { AdminChapterService } from "src/chapter/adminChapter.service";
 import { AdminChapterRepository } from "src/chapter/repositories/adminChapter.repository";
+import { DatabasePg } from "src/common";
+import { resolveTenantOrigin } from "src/common/helpers/resolveTenantOrigin";
 import { EnvService } from "src/env/services/env.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
+import { DB_ADMIN } from "src/storage/db/db.providers";
 import { lessons } from "src/storage/schema";
 
 import type {
@@ -34,7 +39,11 @@ import type {
 import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
 import type { AdminLessonWithContentSchema } from "src/lesson/lesson.schema";
-import type { GeneratedChapter, GeneratedLesson } from "src/luma/schema/luma.schema";
+import type {
+  GeneratedAssetPayload,
+  GeneratedChapter,
+  GeneratedLesson,
+} from "src/luma/schema/luma.schema";
 
 type CreatedChapter = Awaited<ReturnType<AdminChapterService["createChapterForCourse"]>>;
 
@@ -42,6 +51,7 @@ type StreamState = {
   chapterIdsByIndex: Map<number, UUIDType>;
   chapterByEventKey: Map<string, CreatedChapter>;
   lessonByEventKey: Map<string, { type: string; lesson: Record<string, unknown> }>;
+  lessonIdsWithAssets: Set<UUIDType>;
 };
 
 type ChunkContext = {
@@ -55,6 +65,7 @@ type LumaClient = ReturnType<typeof createLumaClient>;
 @Injectable()
 export class LumaService {
   constructor(
+    @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
     private readonly envService: EnvService,
     private readonly adminLessonService: AdminLessonService,
     private readonly adminChapterService: AdminChapterService,
@@ -161,6 +172,7 @@ export class LumaService {
       chapterIdsByIndex: new Map<number, UUIDType>(),
       chapterByEventKey: new Map<string, CreatedChapter>(),
       lessonByEventKey: new Map<string, { type: string; lesson: Record<string, unknown> }>(),
+      lessonIdsWithAssets: new Set(),
     };
   }
 
@@ -203,66 +215,166 @@ export class LumaService {
       }
 
       const transformedPayload = await match(payload.type)
-        .with("designer.chapter.generated", async () => {
-          const chapterPayload = payload as GeneratedChapter;
-          const chapterEventKey = this.buildChapterEventKey(chapterPayload);
-          const existingChapter = context.state.chapterByEventKey.get(chapterEventKey);
-          if (existingChapter) {
-            return {
-              type: chapterPayload.type,
-              chapter: existingChapter,
-            };
-          }
-
-          const createdChapter = await this.adminChapterService.createChapterForCourse(
-            {
-              courseId: context.integrationId,
-              title: chapterPayload.generation?.title?.trim() || "Generated chapter",
-              isFreemium: false,
-            },
-            context.currentUser,
-          );
-
-          context.state.chapterIdsByIndex.set(
-            (createdChapter.displayOrder ?? 1) - 1,
-            createdChapter.id,
-          );
-          context.state.chapterByEventKey.set(chapterEventKey, createdChapter);
-
-          return {
-            type: chapterPayload.type,
-            chapter: createdChapter,
-          };
-        })
-        .with("architect.lesson.generated", async () => {
-          const lessonPayload = payload as GeneratedLesson;
-          const lessonEventKey = this.buildLessonEventKey(lessonPayload);
-          const existingLesson = context.state.lessonByEventKey.get(lessonEventKey);
-          if (existingLesson) return existingLesson;
-
-          const chapterId = context.state.chapterIdsByIndex.get(lessonPayload.chapterIndex);
-          if (!chapterId) return payload;
-
-          const lesson = await this.saveGeneratedLesson(
-            chapterId,
-            lessonPayload.generation,
-            context.currentUser,
-          );
-
-          const transformedLesson = {
-            type: lessonPayload.type,
-            lesson,
-          };
-
-          context.state.lessonByEventKey.set(lessonEventKey, transformedLesson);
-          return transformedLesson;
-        })
+        .with("designer.chapter.generated", () =>
+          this.handleChapterGeneratedPayload(payload as GeneratedChapter, context),
+        )
+        .with("architect.lesson.generated", () =>
+          this.handleLessonGeneratedPayload(payload as GeneratedLesson, context),
+        )
+        .with("assets.generated", () =>
+          this.handleAssetsGeneratedPayload(payload as GeneratedAssetPayload, context),
+        )
         .otherwise(() => payload);
 
       transformedFrames.push(`2:${JSON.stringify([transformedPayload])}`);
     }
 
     return transformedFrames;
+  }
+
+  private async handleChapterGeneratedPayload(payload: GeneratedChapter, context: ChunkContext) {
+    const chapterEventKey = this.buildChapterEventKey(payload);
+    const existingChapter = context.state.chapterByEventKey.get(chapterEventKey);
+    if (existingChapter) {
+      return {
+        type: payload.type,
+        chapter: existingChapter,
+      };
+    }
+
+    const createdChapter = await this.adminChapterService.createChapterForCourse(
+      {
+        courseId: context.integrationId,
+        title: payload.generation?.title?.trim() || "Generated chapter",
+        isFreemium: false,
+      },
+      context.currentUser,
+    );
+
+    context.state.chapterIdsByIndex.set((createdChapter.displayOrder ?? 1) - 1, createdChapter.id);
+    context.state.chapterByEventKey.set(chapterEventKey, createdChapter);
+
+    return {
+      type: payload.type,
+      chapter: createdChapter,
+    };
+  }
+
+  private async handleLessonGeneratedPayload(payload: GeneratedLesson, context: ChunkContext) {
+    const lessonEventKey = this.buildLessonEventKey(payload);
+    const existingLesson = context.state.lessonByEventKey.get(lessonEventKey);
+    if (existingLesson) return existingLesson;
+
+    const chapterId = context.state.chapterIdsByIndex.get(payload.chapterIndex);
+    if (!chapterId) return payload;
+
+    const lesson = await this.saveGeneratedLesson(
+      chapterId,
+      payload.generation,
+      context.currentUser,
+    );
+
+    if (payload.generation.assets.length > 0) {
+      context.state.lessonIdsWithAssets.add(lesson.id);
+    }
+
+    const transformedLesson = {
+      type: payload.type,
+      lesson,
+    };
+
+    context.state.lessonByEventKey.set(lessonEventKey, transformedLesson);
+    return transformedLesson;
+  }
+
+  private async handleAssetsGeneratedPayload(
+    payload: GeneratedAssetPayload,
+    context: ChunkContext,
+  ) {
+    await this.replaceAssetPlaceholders(context);
+    return payload;
+  }
+
+  private async replaceAssetPlaceholders(context: ChunkContext) {
+    const client = await this.getLumaClient();
+    const assets = await client.getAssets({ integrationId: context.integrationId });
+
+    const assetMap = new Map(assets.map((asset) => [asset.assetId, asset.signedUrl]));
+
+    const lessons = await this.adminLessonService.getContentLessonsByIds(
+      Array.from(context.state.lessonIdsWithAssets),
+    );
+
+    const baseUrl = await resolveTenantOrigin(this.dbAdmin, context.currentUser.tenantId);
+
+    await Promise.all(
+      lessons.map((lesson) =>
+        this.replaceAssetPlaceholdersInLesson(lesson, assetMap, baseUrl, context.currentUser),
+      ),
+    );
+  }
+
+  private async replaceAssetPlaceholdersInLesson(
+    lesson: {
+      id: UUIDType;
+      description: string;
+    },
+    assetMap: Map<string, string>,
+    baseUrl: string,
+    currentUser: CurrentUser,
+  ) {
+    if (!lesson.description) return;
+
+    const $ = cheerio.load(lesson.description);
+    const placeholderNodes = $('[data-node-type="loading-ai-asset"]').toArray();
+    if (!placeholderNodes.length) return;
+
+    let hasChanges = false;
+
+    for (const element of placeholderNodes) {
+      const node = $(element);
+      const assetId = node.attr("data-placeholder");
+
+      if (!assetId) {
+        node.remove();
+        hasChanges = true;
+        continue;
+      }
+
+      const signedUrl = assetMap.get(assetId);
+      if (!signedUrl) {
+        node.remove();
+        hasChanges = true;
+        continue;
+      }
+
+      const uploaded = await this.adminLessonService.uploadFileToLessonFromSignedUrl(
+        currentUser.userId,
+        lesson.id,
+        signedUrl,
+      );
+
+      const resourceUrl = `${baseUrl}/api/lesson/lesson-resource/${uploaded.resourceId}`;
+      node.replaceWith(
+        `<a href="${resourceUrl}" data-resource-id="${uploaded.resourceId}">${resourceUrl}</a>`,
+      );
+      hasChanges = true;
+    }
+
+    if (!hasChanges) return;
+
+    const bodyChildren = $("body").children();
+    const updatedDescription = $.html(bodyChildren.length ? bodyChildren : $.root().children());
+    const { language } = await this.localizationService.getBaseLanguage(
+      ENTITY_TYPE.LESSON,
+      lesson.id,
+    );
+
+    await this.adminLessonService.updateLesson(
+      lesson.id,
+      { language, description: updatedDescription },
+      currentUser,
+    );
   }
 
   private async saveGeneratedLesson(

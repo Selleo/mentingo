@@ -13,6 +13,7 @@ type CachedCourse = Course | { data: Course };
 type StreamEvents = {
   chapters: Chapter[];
   lessons: Lesson[];
+  invalidate: boolean;
 };
 
 type CourseEnvelope = { data: Course };
@@ -41,6 +42,7 @@ function asLesson(value: unknown): Lesson | null {
 function extractEvents(streamData: unknown): StreamEvents {
   const chapters: Chapter[] = [];
   const lessons: Lesson[] = [];
+  let invalidate: boolean = false;
 
   for (const item of flatten(streamData)) {
     const entry = toObject(item);
@@ -56,9 +58,13 @@ function extractEvents(streamData: unknown): StreamEvents {
       const lesson = asLesson(entry.lesson);
       if (lesson) lessons.push(lesson);
     }
+
+    if (entry.type === "assets.generated") {
+      invalidate = true;
+    }
   }
 
-  return { chapters, lessons };
+  return { chapters, lessons, invalidate };
 }
 
 function sortByDisplayOrder<T extends { displayOrder: number }>(items: T[]): T[] {
@@ -149,8 +155,9 @@ export function updateGeneratedCourseCacheFromStreamData(
   streamData: unknown,
 ) {
   const events = extractEvents(streamData);
+
   if (!events.chapters.length && !events.lessons.length) {
-    return { chapterEventsCount: 0, lessonEventsCount: 0 };
+    return { chapterEventsCount: 0, lessonEventsCount: 0, invalidate: events.invalidate };
   }
 
   for (const [queryKey, cachedData] of queryClient.getQueriesData({
@@ -165,5 +172,6 @@ export function updateGeneratedCourseCacheFromStreamData(
   return {
     chapterEventsCount: events.chapters.length,
     lessonEventsCount: events.lessons.length,
+    invalidate: events.invalidate,
   };
 }

@@ -17,6 +17,7 @@ type CourseGenerationChatRuntimeProps = {
   onOpenChange: (open: boolean) => void;
   onBackgroundGenerationStateChange?: (isBackgroundGenerating: boolean) => void;
   onGenerationFinished?: () => void;
+  onInvalidate?: () => void;
   onProcessingStateChange?: (state: {
     currentMessageKey: string | null;
     isProcessing: boolean;
@@ -30,6 +31,7 @@ export function CourseGenerationChatRuntime({
   onOpenChange,
   onBackgroundGenerationStateChange,
   onGenerationFinished,
+  onInvalidate,
   onProcessingStateChange,
 }: CourseGenerationChatRuntimeProps) {
   const courseId = draft?.integrationId ?? "";
@@ -37,6 +39,7 @@ export function CourseGenerationChatRuntime({
   const generationChat = useCourseGenerationChat({
     courseId,
     draftId: draft?.draftId,
+    onInvalidate,
   });
 
   const currentMessageKey = getCurrentMessageKey(generationChat.data);

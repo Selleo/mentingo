@@ -1,4 +1,5 @@
 import { randomUUID } from "crypto";
+import { Readable } from "stream";
 
 import {
   BadRequestException,
@@ -14,7 +15,7 @@ import { getTableColumns, sql } from "drizzle-orm";
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { DatabasePg } from "src/common";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
-import { annotateVideoAutoplayInContent } from "src/common/utils/annotateVideoAutoplayInContent";
+import { annotateVideoAutoplayAndBlockIndexesInContent } from "src/common/utils/annotateVideoAutoplayAndBlockIndexesInContent";
 import { MasterCourseService } from "src/courses/master-course.service";
 import { CreateLessonEvent, DeleteLessonEvent, UpdateLessonEvent } from "src/events";
 import { RESOURCE_CATEGORIES, RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
@@ -123,6 +124,10 @@ export class AdminLessonService {
 
   async getResourcesByContextId(contextId: UUIDType) {
     return (await this.cache.get(getContextKey(contextId))) as Promise<UUIDType[]>;
+  }
+
+  async getContentLessonsByIds(lessonIds: UUIDType[], language?: SupportedLanguages) {
+    return this.adminLessonRepository.getContentLessonsByIds(lessonIds, language);
   }
 
   async createAiMentorLesson(data: CreateAiMentorLessonBody, currentUser: CurrentUser) {
@@ -346,7 +351,7 @@ export class AdminLessonService {
     const previousLessonSnapshot = await this.buildLessonActivitySnapshot(id, data.language);
 
     if (data.description !== undefined) {
-      data.description = annotateVideoAutoplayInContent(data.description);
+      data.description = annotateVideoAutoplayAndBlockIndexesInContent(data.description);
     }
 
     const updatedLesson = await this.adminLessonRepository.updateLesson(id, data);
@@ -978,6 +983,86 @@ export class AdminLessonService {
     });
 
     return { resourceId: fileData.resourceId };
+  }
+
+  async uploadFileToLessonFromSignedUrl(
+    currentUserId: UUIDType,
+    lessonId: UUIDType,
+    signedUrl: string,
+    options?: { originalFilename?: string },
+  ) {
+    await this.masterCourseService.assertCourseContentEditableByLessonId(lessonId);
+
+    const file = await this.buildMulterFileFromSignedUrl(signedUrl, options?.originalFilename);
+    const { fileKey, fileUrl } = await this.fileService.uploadFile(
+      file,
+      `${RESOURCE_CATEGORIES.LESSON}/lesson-content`,
+    );
+
+    const [resource] = await this.adminLessonRepository.createLessonResources(lessonId, [
+      {
+        reference: fileKey,
+        contentType: file.mimetype,
+        metadata: {
+          originalFilename: file.originalname,
+          size: file.size,
+          sourceUrl: signedUrl,
+        },
+        uploadedById: currentUserId,
+      },
+    ]);
+
+    return {
+      resourceId: resource.id,
+      fileKey,
+      fileUrl,
+    };
+  }
+
+  private async buildMulterFileFromSignedUrl(signedUrl: string, originalFilename?: string) {
+    const response = await fetch(signedUrl);
+
+    if (!response.ok) {
+      throw new BadRequestException(`Failed to download file from signed URL: ${response.status}`);
+    }
+
+    const contentTypeHeader = response.headers.get("content-type");
+    const contentType = contentTypeHeader?.split(";")[0] || "application/octet-stream";
+    const buffer = Buffer.from(await response.arrayBuffer());
+    const fileName = originalFilename || this.extractFilenameFromUrl(signedUrl, contentType);
+
+    return {
+      fieldname: "file",
+      originalname: fileName,
+      mimetype: contentType,
+      size: buffer.length,
+      buffer,
+      destination: "",
+      filename: fileName,
+      path: "",
+      stream: Readable.from(buffer),
+    } as Express.Multer.File;
+  }
+
+  private extractFilenameFromUrl(signedUrl: string, contentType: string) {
+    const fallbackByMimeType: Record<string, string> = {
+      "image/jpeg": "jpg",
+      "image/png": "png",
+      "image/webp": "webp",
+      "image/gif": "gif",
+      "image/svg+xml": "svg",
+    };
+
+    const url = new URL(signedUrl);
+    const pathname = url.pathname;
+    const lastSegment = pathname.split("/").pop();
+
+    if (lastSegment && lastSegment.includes(".")) {
+      return lastSegment;
+    }
+
+    const extension = fallbackByMimeType[contentType] || "bin";
+    return `asset.${extension}`;
   }
 
   async uploadAvatarToAiMentorLesson(

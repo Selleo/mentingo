@@ -6,7 +6,7 @@ import { match } from "ts-pattern";
 
 import { DatabasePg } from "src/common";
 import { buildJsonbField, deleteJsonbField } from "src/common/helpers/sqlHelpers";
-import { annotateVideoAutoplayInContent } from "src/common/utils/annotateVideoAutoplayInContent";
+import { annotateVideoAutoplayAndBlockIndexesInContent } from "src/common/utils/annotateVideoAutoplayAndBlockIndexesInContent";
 import { injectResourcesIntoContent } from "src/common/utils/injectResourcesIntoContent";
 import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
 import { CreateNewsEvent, DeleteNewsEvent, UpdateNewsEvent } from "src/events";
@@ -743,7 +743,8 @@ export class NewsService {
     const directFields: Array<keyof Omit<UpdateNews, "language">> = ["status", "isPublic"];
 
     if ("content" in updateNewsData && typeof updateNewsData.content === "string") {
-      updateNewsData.content = annotateVideoAutoplayInContent(updateNewsData.content) ?? undefined;
+      updateNewsData.content =
+        annotateVideoAutoplayAndBlockIndexesInContent(updateNewsData.content) ?? undefined;
     }
 
     const updateData: Record<string, unknown> = {

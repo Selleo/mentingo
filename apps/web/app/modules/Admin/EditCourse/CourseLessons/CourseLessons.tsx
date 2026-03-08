@@ -207,6 +207,9 @@ const CourseLessons = ({
     },
     [],
   );
+  const handleGenerationInvalidate = useCallback(() => {
+    setSelectedLesson(null);
+  }, []);
   const isExitGuardEnabled =
     (isGenerationProcessing || isBackgroundGenerating) && !isCourseGenerated;
 
@@ -265,6 +268,7 @@ const CourseLessons = ({
         open={isGenerationDrawerOpen}
         onOpenChange={setIsGenerationDrawerOpen}
         onBackgroundGenerationStateChange={setIsBackgroundGenerating}
+        onInvalidate={handleGenerationInvalidate}
         onGenerationFinished={() => {
           onCourseGenerationFinished();
         }}

@@ -2380,6 +2380,9 @@
         "drag": "Przeciągnij plik",
         "remove": "Usuń plik do pobrania"
       }
+    },
+    "loadingAiAsset": {
+      "processing": "Zasób jest obecnie przetwarzany"
     }
   },
   "pages": {

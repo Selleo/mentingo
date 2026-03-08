@@ -11,12 +11,12 @@ import {
   UserFinishedChapterEmail,
   UserFinishedCourseEmail,
 } from "@repo/email-templates";
-import { eq } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
 import { getEmailSubject } from "src/common/emails/translations";
 import { buildCreateNewPasswordLink } from "src/common/helpers/buildCreateNewPasswordLink";
+import { resolveTenantOrigin } from "src/common/helpers/resolveTenantOrigin";
 import { CourseService } from "src/courses/course.service";
 import { UsersAssignedToCourseEvent } from "src/events/user/user-assigned-to-course.event";
 import { UserChapterFinishedEvent } from "src/events/user/user-chapter-finished.event";
@@ -31,7 +31,6 @@ import { SettingsService } from "src/settings/settings.service";
 import { StatisticsService } from "src/statistics/statistics.service";
 import { DB_ADMIN } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
-import { tenants } from "src/storage/schema";
 import { UserService } from "src/user/user.service";
 
 import type { IEventHandler } from "@nestjs/cqrs";
@@ -132,7 +131,7 @@ export class NotifyUsersHandler implements IEventHandler {
     const { email, creatorId, token, userId, invitedByUserName, origin, tenantId } = userInvite;
 
     await this.tenantRunner.runWithTenant(tenantId, async () => {
-      const baseOrigin = await this.resolveTenantOrigin(tenantId, origin);
+      const baseOrigin = await resolveTenantOrigin(this.dbAdmin, tenantId, origin);
 
       const url = buildCreateNewPasswordLink(
         process.env.CI ? "http://localhost:5173" : baseOrigin,
@@ -205,7 +204,7 @@ export class NotifyUsersHandler implements IEventHandler {
     const { email, token, userId, tenantId, language, origin } = userPasswordReminder;
 
     await this.tenantRunner.runWithTenant(tenantId, async () => {
-      const baseOrigin = await this.resolveTenantOrigin(tenantId, origin);
+      const baseOrigin = await resolveTenantOrigin(this.dbAdmin, tenantId, origin);
 
       const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
         tenantId,
@@ -235,7 +234,7 @@ export class NotifyUsersHandler implements IEventHandler {
     const { email, userId, tenantId, origin } = userWelcome;
 
     await this.tenantRunner.runWithTenant(tenantId, async () => {
-      const baseOrigin = await this.resolveTenantOrigin(tenantId, origin);
+      const baseOrigin = await resolveTenantOrigin(this.dbAdmin, tenantId, origin);
 
       const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
         tenantId,
@@ -257,18 +256,6 @@ export class NotifyUsersHandler implements IEventHandler {
         { tenantId },
       );
     });
-  }
-
-  private async resolveTenantOrigin(tenantId: string, fallbackOrigin?: string) {
-    if (fallbackOrigin) return fallbackOrigin.replace(/\/$/, "");
-
-    const [tenant] = await this.dbAdmin
-      .select({ host: tenants.host })
-      .from(tenants)
-      .where(eq(tenants.id, tenantId))
-      .limit(1);
-
-    return tenant?.host?.replace(/\/$/, "") || process.env.CORS_ORIGIN || "http://localhost:5173";
   }
 
   async notifyUserAboutCourseAssignment(event: UsersAssignedToCourseEvent) {

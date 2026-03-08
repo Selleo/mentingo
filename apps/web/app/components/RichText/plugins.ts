@@ -14,6 +14,10 @@ import {
 } from "~/components/RichText/extensions/downloadableFile";
 import { Iframe } from "~/components/RichText/extensions/iframe";
 import {
+  LoadingAiAssetEditor,
+  LoadingAiAssetViewer,
+} from "~/components/RichText/extensions/loading-ai-asset";
+import {
   PresentationEmbedEditor,
   PresentationEmbedViewer,
 } from "~/components/RichText/extensions/presentation";
@@ -95,6 +99,7 @@ export const contentEditorPlugins = [
       node.type.name === "paragraph" ? i18n.t("richTextEditor.placeholder.lineHint") : "",
   }),
   DownloadableFileEmbedEditor,
+  LoadingAiAssetEditor,
   PresentationEmbedEditor,
   VideoEmbedEditor,
 ];
@@ -102,6 +107,7 @@ export const contentEditorPlugins = [
 export const viewerPlugins = [
   ...basePlugins,
   DownloadableFileEmbedViewer,
+  LoadingAiAssetViewer,
   PresentationEmbedViewer,
   VideoEmbedViewer,
 ];

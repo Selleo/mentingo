@@ -59,6 +59,22 @@ export class AdminLessonRepository {
       .where(eq(lessons.id, id));
   }
 
+  async getContentLessonsByIds(lessonIds: UUIDType[], language?: SupportedLanguages) {
+    if (!lessonIds.length) return [];
+
+    return this.db
+      .select({
+        ...getTableColumns(lessons),
+        courseId: chapters.courseId,
+        title: this.localizationService.getLocalizedSqlField(lessons.title, language),
+        description: this.localizationService.getLocalizedSqlField(lessons.description, language),
+      })
+      .from(lessons)
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
+      .where(and(inArray(lessons.id, lessonIds), eq(lessons.type, LESSON_TYPES.CONTENT)));
+  }
+
   async createLessonForChapter(data: CreateLessonBody, language: SupportedLanguages) {
     const [lesson] = await this.db
       .insert(lessons)
