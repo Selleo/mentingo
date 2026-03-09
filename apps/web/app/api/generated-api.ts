@@ -4810,6 +4810,19 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name SettingsControllerGetPlatformLogoImage
+     * @request GET:/api/settings/platform-logo/image
+     */
+    settingsControllerGetPlatformLogoImage: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/settings/platform-logo/image`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name SettingsControllerGetPlatformSimpleLogo
      * @request GET:/api/settings/platform-simple-logo
      */
@@ -4845,6 +4858,19 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name SettingsControllerGetPlatformSimpleLogoImage
+     * @request GET:/api/settings/platform-simple-logo/image
+     */
+    settingsControllerGetPlatformSimpleLogoImage: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/settings/platform-simple-logo/image`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name SettingsControllerGetLoginBackground
      * @request GET:/api/settings/login-background
      */
@@ -4874,6 +4900,19 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "PATCH",
         body: data,
         type: ContentType.FormData,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerGetLoginBackgroundImage
+     * @request GET:/api/settings/login-background/image
+     */
+    settingsControllerGetLoginBackgroundImage: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/settings/login-background/image`,
+        method: "GET",
         ...params,
       }),
 
@@ -4946,6 +4985,19 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "PATCH",
         body: data,
         type: ContentType.FormData,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerGetCertificateBackgroundImage
+     * @request GET:/api/settings/certificate-background/image
+     */
+    settingsControllerGetCertificateBackgroundImage: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/settings/certificate-background/image`,
+        method: "GET",
         ...params,
       }),
 
