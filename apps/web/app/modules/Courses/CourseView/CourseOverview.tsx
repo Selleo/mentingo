@@ -29,7 +29,7 @@ export default function CourseOverview({ course }: CourseOverviewProps) {
   const { data: currentUser } = useCurrentUser();
   const { isCourseStudentModeActive } = useCourseAccessProvider();
   const { mutate: toggleLearningMode, isPending: isTogglingLearningMode } =
-    useToggleCourseStudentMode(course.id, course.slug);
+    useToggleCourseStudentMode(course.id);
 
   const imageUrl = course?.thumbnailUrl ?? CardPlaceholder;
   const title = course?.title;

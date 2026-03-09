@@ -16,7 +16,7 @@ export function LearningModeBanner({ className }: LearningModeBannerProps) {
   const { isAdminLike } = useUserRole();
   const { course, isCourseStudentModeActive } = useCourseAccessProvider();
   const { mutate: toggleLearningMode, isPending: isTogglingLearningMode } =
-    useToggleCourseStudentMode(course.id, course.slug);
+    useToggleCourseStudentMode(course.id);
 
   if (!isAdminLike || !isCourseStudentModeActive) return null;
 
