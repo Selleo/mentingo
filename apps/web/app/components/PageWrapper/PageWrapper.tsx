@@ -85,11 +85,11 @@ export const PageWrapper = ({
       <div className="flex min-w-0 flex-1 flex-col">
         {aboveBreadcrumbs}
         <div className={contentClasses} {...props}>
-          {hasBreadcrumbs ? (
+          {hasBreadcrumbs && (
             <div className="breadcrumbs">
               <Breadcrumbs breadcrumbs={breadcrumbs ?? []} />
             </div>
-          ) : null}
+          )}
           {children}
         </div>
       </div>

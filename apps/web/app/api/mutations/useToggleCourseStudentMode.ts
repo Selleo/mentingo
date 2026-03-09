@@ -1,14 +1,18 @@
 import { useMutation } from "@tanstack/react-query";
-import { AxiosError } from "axios";
+import { useTranslation } from "react-i18next";
 
 import { ApiClient } from "~/api/api-client";
 import { currentUserQueryOptions, courseQueryOptions } from "~/api/queries";
 import { queryClient } from "~/api/queryClient";
 import { toast } from "~/components/ui/use-toast";
 
+import type { ApiErrorResponse } from "../types";
+import type { AxiosError } from "axios";
 import type { CurrentUserResponse } from "~/api/generated-api";
 
-export const useToggleCourseStudentMode = (courseId: string, courseSlug: string) => {
+export const useToggleCourseStudentMode = (courseId: string) => {
+  const { t } = useTranslation();
+
   return useMutation({
     mutationFn: async ({ enabled }: { enabled: boolean }) => {
       const response = await ApiClient.api.courseControllerSetCourseStudentMode(courseId, {
@@ -21,30 +25,23 @@ export const useToggleCourseStudentMode = (courseId: string, courseSlug: string)
       queryClient.setQueryData<CurrentUserResponse | null>(
         currentUserQueryOptions.queryKey,
         (prev) =>
-          prev
-            ? {
-                ...prev,
-                data: {
-                  ...prev.data,
-                  studentModeCourseIds: data.studentModeCourseIds,
-                },
-              }
-            : prev,
+          prev && {
+            ...prev,
+            data: {
+              ...prev.data,
+              studentModeCourseIds: data.studentModeCourseIds,
+            },
+          },
       );
 
       await queryClient.invalidateQueries({ queryKey: currentUserQueryOptions.queryKey });
-      await queryClient.invalidateQueries({ queryKey: courseQueryOptions(courseSlug).queryKey });
+      await queryClient.invalidateQueries({ queryKey: courseQueryOptions(courseId).queryKey });
     },
-    onError: (error) => {
-      if (error instanceof AxiosError) {
-        return toast({
-          description: error.response?.data.message,
-          variant: "destructive",
-        });
-      }
+    onError: (error: AxiosError) => {
+      const { message } = error.response?.data as ApiErrorResponse;
 
       toast({
-        description: error.message,
+        description: t(message),
         variant: "destructive",
       });
     },

@@ -240,7 +240,7 @@ export const LessonContent = ({
               </div>
               <p className="h4 text-neutral-950 break-words min-w-0">{lesson.title}</p>
             </div>
-            {!isPreviewMode ? (
+            {!isPreviewMode && (
               <div className="mt-4 flex flex-col gap-2 sm:ml-8 sm:mt-0 sm:items-end">
                 <div className="flex flex-row gap-x-4">
                   {lesson.type === LessonType.CONTENT && lesson.hasVideo && (
@@ -270,7 +270,7 @@ export const LessonContent = ({
                   </Button>
                 </div>
               </div>
-            ) : null}
+            )}
           </div>
 
           <LessonContentRenderer

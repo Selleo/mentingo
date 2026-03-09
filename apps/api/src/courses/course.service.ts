@@ -144,7 +144,6 @@ import type { CoursesSettings } from "./types/settings";
 import type { SupportedLanguages } from "@repo/shared";
 import type { SQL } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
-import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { CourseActivityLogSnapshot } from "src/activity-logs/types";
 import type { Pagination, UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
@@ -154,7 +153,6 @@ import type {
   AdminLessonWithContentSchema,
   LessonForChapterSchema,
 } from "src/lesson/lesson.schema";
-import type * as schema from "src/storage/schema";
 import type { UserRole } from "src/user/schemas/userRoles";
 import type { ProgressStatus } from "src/utils/types/progress.type";
 import type Stripe from "stripe";
@@ -2425,7 +2423,7 @@ export class CourseService {
     courseId: UUIDType,
     studentId: UUIDType,
     paymentId: string | null = null,
-    trx: PostgresJsDatabase<typeof schema>,
+    trx: DatabasePg,
   ) {
     const alreadyHasEnrollmentRecord = Boolean(
       (
@@ -2535,11 +2533,7 @@ export class CourseService {
     };
   }
 
-  private async enableCourseStudentMode(
-    courseId: UUIDType,
-    userId: UUIDType,
-    trx: PostgresJsDatabase<typeof schema>,
-  ) {
+  private async enableCourseStudentMode(courseId: UUIDType, userId: UUIDType, trx: DatabasePg) {
     await this.createStudentCourse(courseId, userId, null, null, trx);
 
     await trx.insert(courseStudentMode).values({ userId, courseId }).onConflictDoNothing();
@@ -2547,20 +2541,13 @@ export class CourseService {
     await this.createCourseDependencies(courseId, userId, null, trx);
   }
 
-  private async disableCourseStudentMode(
-    courseId: UUIDType,
-    userId: UUIDType,
-    trx: PostgresJsDatabase<typeof schema>,
-  ) {
+  private async disableCourseStudentMode(courseId: UUIDType, userId: UUIDType, trx: DatabasePg) {
     await trx
       .delete(courseStudentMode)
       .where(and(eq(courseStudentMode.userId, userId), eq(courseStudentMode.courseId, courseId)));
   }
 
-  async getStudentModeCourseIds(
-    userId: UUIDType,
-    dbInstance: PostgresJsDatabase<typeof schema> | DatabasePg = this.db,
-  ) {
+  async getStudentModeCourseIds(userId: UUIDType, dbInstance: DatabasePg = this.db) {
     const courseIds = await dbInstance
       .select({ courseId: courseStudentMode.courseId })
       .from(courseStudentMode)
@@ -2572,7 +2559,7 @@ export class CourseService {
   async isCourseStudentModeEnabled(
     courseId: UUIDType,
     userId: UUIDType,
-    dbInstance: PostgresJsDatabase<typeof schema> | DatabasePg = this.db,
+    dbInstance: DatabasePg = this.db,
   ) {
     const [studentModeExists] = await dbInstance
       .select({ id: courseStudentMode.id })
@@ -2585,7 +2572,7 @@ export class CourseService {
   async isLessonStudentModeEnabled(
     lessonId: UUIDType,
     userId: UUIDType,
-    dbInstance: PostgresJsDatabase<typeof schema> | DatabasePg = this.db,
+    dbInstance: DatabasePg = this.db,
   ) {
     const [lesson] = await dbInstance
       .select({ courseId: chapters.courseId })
@@ -2768,7 +2755,7 @@ export class CourseService {
     courseId: UUIDType,
     paymentId: string | null,
     existingFreemiumLessonProgress: boolean,
-    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+    dbInstance: DatabasePg = this.db,
   ) {
     if (!paymentId) {
       return this.statisticsRepository.updateFreePurchasedCoursesStats(courseId, dbInstance);
@@ -3044,7 +3031,7 @@ export class CourseService {
   }
 
   private async getAvailableCourseIds(
-    trx: PostgresJsDatabase<typeof schema>,
+    trx: DatabasePg,
     currentUserId?: UUIDType,
     authorId?: UUIDType,
     excludeCourseId?: UUIDType,
@@ -3662,7 +3649,7 @@ export class CourseService {
   private async buildCourseActivitySnapshot(
     courseId: UUIDType,
     language?: SupportedLanguages,
-    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+    dbInstance: DatabasePg = this.db,
   ): Promise<CourseActivityLogSnapshot> {
     const {
       language: resolvedLanguage,

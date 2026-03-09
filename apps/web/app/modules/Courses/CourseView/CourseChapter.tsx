@@ -107,14 +107,14 @@ export const CourseChapter = ({ chapter }: CourseChapterProps) => {
                     {lessonText} {lessonText && quizText ? "• " : ""} {quizText}
                   </div>
                   <p className="body-base-md text-neutral-950">{chapter.title}</p>
-                  {!isPreviewMode ? (
+                  {!isPreviewMode && (
                     <div className="details flex max-w-[620px] items-center gap-x-1 text-neutral-800">
                       <span className="pr-2">
                         {chapter.completedLessonCount}/{chapter.lessonCount}
                       </span>
                       {chapterProgressSegments}
                     </div>
-                  ) : null}
+                  )}
                 </div>
                 {chapter.isFreemium && (
                   <CardBadge variant="successFilled">

@@ -31,14 +31,14 @@ const CourseProgress = ({
 
   return (
     <div className="flex flex-col gap-2">
-      {!redactProgress ? (
+      {!redactProgress && (
         <>
           <p className="text-xs text-neutral-600">
             {label} {completedLessonCount}/{courseLessonCount}
           </p>
           <div className="flex items-center justify-between gap-px">{courseProgressParts}</div>
         </>
-      ) : null}
+      )}
     </div>
   );
 };

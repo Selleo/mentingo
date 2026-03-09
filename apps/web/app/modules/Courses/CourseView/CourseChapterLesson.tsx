@@ -9,6 +9,8 @@ import {
   LessonTypesIcons,
 } from "~/modules/Courses/CourseView/lessonTypes";
 
+import { LESSON_PROGRESS_STATUSES } from "../Lesson/types";
+
 import type { Lesson } from "./CourseChapter";
 
 const progressBadge = {
@@ -26,7 +28,11 @@ export const CourseChapterLesson = ({ lesson }: CourseChapterLessonProps) => {
   const { t } = useTranslation();
   const { isPreviewMode } = useCourseAccessProvider();
   const hasAccess = isPreviewMode || lesson.hasAccess;
-  const badgeProgress = isPreviewMode ? "not_started" : hasAccess ? lesson.status : "blocked";
+  const badgeProgress = isPreviewMode
+    ? LESSON_PROGRESS_STATUSES.NOT_STARTED
+    : hasAccess
+      ? lesson.status
+      : LESSON_PROGRESS_STATUSES.BLOCKED;
 
   const lessonElement = (
     <div
@@ -49,9 +55,9 @@ export const CourseChapterLesson = ({ lesson }: CourseChapterLessonProps) => {
           {t(getLessonTypeTranslationKey(lesson.type), { defaultValue: lesson.type })}
         </span>
       </div>
-      {!isPreviewMode ? (
+      {!isPreviewMode && (
         <ProgressBadge progress={progressBadge[badgeProgress]} className="self-center" />
-      ) : null}
+      )}
     </div>
   );
 
