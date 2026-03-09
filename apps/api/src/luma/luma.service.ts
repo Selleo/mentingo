@@ -233,8 +233,14 @@ export class LumaService {
   }
 
   private async handleChapterGeneratedPayload(payload: GeneratedChapter, context: ChunkContext) {
+    const {
+      integrationId,
+      currentUser,
+      state: { chapterIdsByIndex, chapterByEventKey },
+    } = context;
+
     const chapterEventKey = this.buildChapterEventKey(payload);
-    const existingChapter = context.state.chapterByEventKey.get(chapterEventKey);
+    const existingChapter = chapterByEventKey.get(chapterEventKey);
     if (existingChapter) {
       return {
         type: payload.type,
@@ -244,15 +250,15 @@ export class LumaService {
 
     const createdChapter = await this.adminChapterService.createChapterForCourse(
       {
-        courseId: context.integrationId,
+        courseId: integrationId,
         title: payload.generation?.title?.trim() || "Generated chapter",
         isFreemium: false,
       },
-      context.currentUser,
+      currentUser,
     );
 
-    context.state.chapterIdsByIndex.set((createdChapter.displayOrder ?? 1) - 1, createdChapter.id);
-    context.state.chapterByEventKey.set(chapterEventKey, createdChapter);
+    chapterIdsByIndex.set((createdChapter.displayOrder ?? 1) - 1, createdChapter.id);
+    chapterByEventKey.set(chapterEventKey, createdChapter);
 
     return {
       type: payload.type,
@@ -261,21 +267,22 @@ export class LumaService {
   }
 
   private async handleLessonGeneratedPayload(payload: GeneratedLesson, context: ChunkContext) {
+    const {
+      currentUser,
+      state: { chapterIdsByIndex, lessonByEventKey, lessonIdsWithAssets },
+    } = context;
+
     const lessonEventKey = this.buildLessonEventKey(payload);
-    const existingLesson = context.state.lessonByEventKey.get(lessonEventKey);
+    const existingLesson = lessonByEventKey.get(lessonEventKey);
     if (existingLesson) return existingLesson;
 
-    const chapterId = context.state.chapterIdsByIndex.get(payload.chapterIndex);
+    const chapterId = chapterIdsByIndex.get(payload.chapterIndex);
     if (!chapterId) return payload;
 
-    const lesson = await this.saveGeneratedLesson(
-      chapterId,
-      payload.generation,
-      context.currentUser,
-    );
+    const lesson = await this.saveGeneratedLesson(chapterId, payload.generation, currentUser);
 
     if (payload.generation.assets.length > 0) {
-      context.state.lessonIdsWithAssets.add(lesson.id);
+      lessonIdsWithAssets.add(lesson.id);
     }
 
     const transformedLesson = {
@@ -283,7 +290,7 @@ export class LumaService {
       lesson,
     };
 
-    context.state.lessonByEventKey.set(lessonEventKey, transformedLesson);
+    lessonByEventKey.set(lessonEventKey, transformedLesson);
     return transformedLesson;
   }
 
@@ -296,20 +303,26 @@ export class LumaService {
   }
 
   private async replaceAssetPlaceholders(context: ChunkContext) {
+    const {
+      integrationId,
+      currentUser,
+      state: { lessonIdsWithAssets },
+    } = context;
+
     const client = await this.getLumaClient();
-    const assets = await client.getAssets({ integrationId: context.integrationId });
+    const assets = await client.getAssets({ integrationId });
 
     const assetMap = new Map(assets.map((asset) => [asset.assetId, asset.signedUrl]));
 
     const lessons = await this.adminLessonService.getContentLessonsByIds(
-      Array.from(context.state.lessonIdsWithAssets),
+      Array.from(lessonIdsWithAssets),
     );
 
-    const baseUrl = await resolveTenantOrigin(this.dbAdmin, context.currentUser.tenantId);
+    const baseUrl = await resolveTenantOrigin(this.dbAdmin, currentUser.tenantId);
 
     await Promise.all(
       lessons.map((lesson) =>
-        this.replaceAssetPlaceholdersInLesson(lesson, assetMap, baseUrl, context.currentUser),
+        this.replaceAssetPlaceholdersInLesson(lesson, assetMap, baseUrl, currentUser),
       ),
     );
   }
