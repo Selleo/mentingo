@@ -143,7 +143,7 @@ export function CourseGenerationComposer({
           disableRemove={isDeletePending}
         />
 
-        <div className="grid grid-cols-[2rem_1fr_2rem_2rem] items-center gap-2">
+        <div className="grid grid-cols-[2rem_1fr_2rem_2rem] items-end gap-2">
           <CourseGenerationComposerLeftControl
             isVoiceMode={isVoiceMode}
             isUploadDisabled={isUploadDisabled}
