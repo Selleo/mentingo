@@ -13,13 +13,10 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useDeleteCourseGenerationFile } from "~/api/mutations/admin/useDeleteCourseGenerationFile";
 import { useIngestCourseGenerationFiles } from "~/api/mutations/admin/useIngestCourseGenerationFiles";
-import { useCourseGenerationFiles } from "~/api/queries/admin/useCourseGenerationFiles";
 import { CourseGenerationComposerCenterContent } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationComposerCenterContent";
 import { CourseGenerationComposerLeftControl } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationComposerLeftControl";
 import { CourseGenerationComposerRightControls } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationComposerRightControls";
-import { CourseGenerationFileList } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationFileList";
 import { useTranscription } from "~/modules/Voice/hooks/useTranscription";
 
 const PLACEHOLDER_KEYS = [
@@ -53,9 +50,7 @@ export function CourseGenerationComposer({
   const [isVoiceMode, setIsVoiceMode] = useState(false);
   const [voiceLevel, setVoiceLevel] = useState(0);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const { data: ingestedFiles = [] } = useCourseGenerationFiles(integrationId, !!integrationId);
   const { mutateAsync: ingestFiles, isPending: isIngestPending } = useIngestCourseGenerationFiles();
-  const { mutateAsync: deleteFile, isPending: isDeletePending } = useDeleteCourseGenerationFile();
   const placeholders = useMemo(() => PLACEHOLDER_KEYS.map((key) => t(key)), [t]);
 
   const { startRecording, stopRecording, cancelTranscription } = useTranscription({
@@ -104,18 +99,13 @@ export function CourseGenerationComposer({
     event.target.value = "";
   };
 
-  const removeFile = async (documentId: string) => {
-    if (!integrationId) return;
-    await deleteFile({ integrationId, documentId });
-  };
-
   const handleSubmit = () => {
     if (!input.trim().length) return;
     onSubmit();
   };
 
   const currentPlaceholder = placeholders[placeholderIndex];
-  const isUploadDisabled = isIngestPending || isDeletePending || !integrationId;
+  const isUploadDisabled = isIngestPending || !integrationId;
   const startVoiceMode = async () => {
     const hasStarted = await startRecording();
     if (!hasStarted) return;
@@ -137,12 +127,6 @@ export function CourseGenerationComposer({
   return (
     <div className="mx-auto w-full max-w-[620px]">
       <div className="rounded-2xl border border-neutral-200 bg-white px-3 py-3 shadow-md">
-        <CourseGenerationFileList
-          files={ingestedFiles}
-          onRemoveFile={removeFile}
-          disableRemove={isDeletePending}
-        />
-
         <div className="grid grid-cols-[2rem_1fr_2rem_2rem] items-end gap-2">
           <CourseGenerationComposerLeftControl
             isVoiceMode={isVoiceMode}
