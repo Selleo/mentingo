@@ -22,6 +22,8 @@ import { getSupportModeContext } from "src/common/helpers/support-mode-context";
 import { UpdateSettingsEvent } from "src/events";
 import { RESOURCE_CATEGORIES, RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
+import { FILE_DELIVERY_TYPE } from "src/file/types/file-delivery.type";
+import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
 import { LocalizationService } from "src/localization/localization.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
@@ -54,11 +56,24 @@ import type {
 import type * as schema from "../storage/schema";
 import type { AllowedArticlesSettings, AllowedNewsSettings, AllowedQASettings } from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import type { Request, Response } from "express";
 import type { SettingsActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
 import type { LoginBackgroundResponseBody } from "src/settings/schemas/login-background.schema";
 import type { UserRole } from "src/user/schemas/userRoles";
+
+const STATIC_SETTINGS_IMAGE_CACHE_CONTROL = "public, max-age=86400";
+
+export const SETTINGS_IMAGE_ASSET = {
+  PLATFORM_LOGO: "platform-logo",
+  PLATFORM_SIMPLE_LOGO: "platform-simple-logo",
+  LOGIN_BACKGROUND: "login-background",
+  CERTIFICATE_BACKGROUND: "certificate-background",
+} as const;
+
+export type SettingsImageAssetType =
+  (typeof SETTINGS_IMAGE_ASSET)[keyof typeof SETTINGS_IMAGE_ASSET];
 
 @Injectable()
 export class SettingsService {
@@ -124,6 +139,51 @@ export class SettingsService {
       platformSimpleLogoS3Key: platformSimpleLogoUrl,
       loginBackgroundImageS3Key: loginBackgroundSignedUrl,
       certificateBackgroundImage: certificateBackgroundSignedUrl,
+    };
+  }
+
+  public async getPublicGlobalSettings(): Promise<GlobalSettingsJSONContentSchema> {
+    const [globalSettings] = await this.db
+      .select({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` })
+      .from(settings)
+      .where(isNull(settings.userId));
+
+    if (!globalSettings) {
+      throw new NotFoundException("Global settings not found");
+    }
+
+    const parsedSettings = this.parseGlobalSettings(globalSettings.settings);
+
+    const {
+      certificateBackgroundImage,
+      platformLogoS3Key,
+      platformSimpleLogoS3Key,
+      loginBackgroundImageS3Key,
+      userEmailTriggers,
+      ...restOfSettings
+    } = parsedSettings;
+
+    const reorderedEmailTriggers = this.reorderEmailTriggers(userEmailTriggers);
+
+    return {
+      ...restOfSettings,
+      userEmailTriggers: reorderedEmailTriggers,
+      platformLogoS3Key: this.buildSettingsImageUrl(
+        SETTINGS_IMAGE_ASSET.PLATFORM_LOGO,
+        platformLogoS3Key,
+      ),
+      platformSimpleLogoS3Key: this.buildSettingsImageUrl(
+        SETTINGS_IMAGE_ASSET.PLATFORM_SIMPLE_LOGO,
+        platformSimpleLogoS3Key,
+      ),
+      loginBackgroundImageS3Key: this.buildSettingsImageUrl(
+        SETTINGS_IMAGE_ASSET.LOGIN_BACKGROUND,
+        loginBackgroundImageS3Key,
+      ),
+      certificateBackgroundImage: this.buildSettingsImageUrl(
+        SETTINGS_IMAGE_ASSET.CERTIFICATE_BACKGROUND,
+        certificateBackgroundImage,
+      ),
     };
   }
 
@@ -463,9 +523,11 @@ export class SettingsService {
   }
 
   public async getPlatformLogoUrl(): Promise<string | null> {
-    const globalSettings = await this.getGlobalSettings();
-
-    return globalSettings.platformLogoS3Key;
+    const globalSettings = await this.getGlobalSettingsRecord();
+    return this.buildSettingsImageUrl(
+      SETTINGS_IMAGE_ASSET.PLATFORM_LOGO,
+      globalSettings.settings.platformLogoS3Key,
+    );
   }
 
   public async getPlatformLogoBuffer(): Promise<Buffer | null> {
@@ -523,15 +585,11 @@ export class SettingsService {
   }
 
   public async getPlatformSimpleLogoUrl(): Promise<string | null> {
-    const globalSettings = await this.getGlobalSettings();
-
-    const platformSimpleLogoS3Key = globalSettings.platformSimpleLogoS3Key;
-
-    if (!platformSimpleLogoS3Key) {
-      return null;
-    }
-
-    return await this.fileService.getFileUrl(platformSimpleLogoS3Key);
+    const globalSettings = await this.getGlobalSettingsRecord();
+    return this.buildSettingsImageUrl(
+      SETTINGS_IMAGE_ASSET.PLATFORM_SIMPLE_LOGO,
+      globalSettings.settings.platformSimpleLogoS3Key,
+    );
   }
 
   public async uploadLoginBackgroundImage(
@@ -571,9 +629,44 @@ export class SettingsService {
   }
 
   public async getLoginBackgroundImageUrl(): Promise<LoginBackgroundResponseBody> {
-    const globalSettings = await this.getGlobalSettings();
+    const globalSettings = await this.getGlobalSettingsRecord();
 
-    return { url: globalSettings.loginBackgroundImageS3Key ?? null };
+    return {
+      url: this.buildSettingsImageUrl(
+        SETTINGS_IMAGE_ASSET.LOGIN_BACKGROUND,
+        globalSettings.settings.loginBackgroundImageS3Key,
+      ),
+    };
+  }
+
+  public async streamSettingsImageByAssetType(
+    req: Request,
+    res: Response,
+    assetType: SettingsImageAssetType,
+  ): Promise<void> {
+    const globalSettings = await this.getGlobalSettingsRecord();
+    const key = this.getSettingsImageKey(assetType, globalSettings.settings);
+
+    if (!key) throw new NotFoundException("Settings image not found");
+
+    const file = await this.fileService.getFileDelivery(key, req.headers.range);
+
+    res.setHeader("Cache-Control", STATIC_SETTINGS_IMAGE_CACHE_CONTROL);
+
+    if (file.type === FILE_DELIVERY_TYPE.REDIRECT) {
+      res.redirect(file.url);
+      return;
+    }
+
+    if (this.isRevalidationHit(req, file.etag, file.lastModified)) {
+      if (file.etag) res.setHeader("ETag", file.etag);
+      if (file.lastModified) res.setHeader("Last-Modified", file.lastModified.toUTCString());
+
+      res.status(304).end();
+      return;
+    }
+
+    streamFileToResponse(res, file);
   }
 
   public async getCompanyInformation(): Promise<CompanyInformaitonJSONSchema> {
@@ -1283,5 +1376,63 @@ export class SettingsService {
         .filter((key) => key in emailTriggers)
         .map((key) => [key, emailTriggers[key as keyof UserEmailTriggersSchema]]),
     ) as UserEmailTriggersSchema;
+  }
+
+  private buildSettingsImageUrl(
+    assetType: SettingsImageAssetType,
+    fileKey: string | null | undefined,
+  ): string | null {
+    if (!fileKey) return null;
+
+    const version = encodeURIComponent(fileKey);
+    return `/api/settings/${assetType}/image?v=${version}`;
+  }
+
+  private getSettingsImageKey(
+    assetType: SettingsImageAssetType,
+    globalSettings: GlobalSettingsJSONContentSchema,
+  ): string | null {
+    switch (assetType) {
+      case SETTINGS_IMAGE_ASSET.PLATFORM_LOGO:
+        return globalSettings.platformLogoS3Key;
+      case SETTINGS_IMAGE_ASSET.PLATFORM_SIMPLE_LOGO:
+        return globalSettings.platformSimpleLogoS3Key;
+      case SETTINGS_IMAGE_ASSET.LOGIN_BACKGROUND:
+        return globalSettings.loginBackgroundImageS3Key;
+      case SETTINGS_IMAGE_ASSET.CERTIFICATE_BACKGROUND:
+        return globalSettings.certificateBackgroundImage;
+      default:
+        return null;
+    }
+  }
+
+  private isRevalidationHit(
+    req: Request,
+    etag: string | undefined,
+    lastModified: Date | undefined,
+  ): boolean {
+    const ifNoneMatchHeader = req.headers["if-none-match"];
+    if (etag && typeof ifNoneMatchHeader === "string") {
+      const normalizedEtag = this.normalizeEtag(etag);
+      const requestedEtags = ifNoneMatchHeader.split(",").map((value) => this.normalizeEtag(value));
+
+      if (requestedEtags.includes(normalizedEtag) || ifNoneMatchHeader.includes("*")) {
+        return true;
+      }
+    }
+
+    const ifModifiedSinceHeader = req.headers["if-modified-since"];
+    if (lastModified && typeof ifModifiedSinceHeader === "string") {
+      const ifModifiedSince = new Date(ifModifiedSinceHeader);
+      if (!Number.isNaN(ifModifiedSince.getTime()) && lastModified <= ifModifiedSince) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private normalizeEtag(value: string): string {
+    return value.replace(/^W\//, "").trim();
   }
 }

@@ -1,6 +1,8 @@
+import { isNull, sql } from "drizzle-orm";
 import request from "supertest";
 
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
+import { settings } from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
@@ -225,6 +227,57 @@ describe("SettingsController (e2e)", () => {
           .expect(200);
 
         expect(updatedResponse.body.data.unregisteredUserCoursesAccessibility).toBe(!initialValue);
+      });
+
+      it("should return versioned settings image URLs for configured assets", async () => {
+        const platformLogoKey = "platform-logos/logo.png";
+        const simpleLogoKey = "platform-simple-logos/simple.svg";
+        const loginBackgroundKey = "login-backgrounds/login.jpg";
+        const certificateBackgroundKey = "certificate-backgrounds/certificate.png";
+
+        await db
+          .update(settings)
+          .set({
+            settings: sql`
+              jsonb_set(
+                jsonb_set(
+                  jsonb_set(
+                    jsonb_set(
+                      settings.settings,
+                      '{platformLogoS3Key}',
+                      to_jsonb(${platformLogoKey}::text),
+                      true
+                    ),
+                    '{platformSimpleLogoS3Key}',
+                    to_jsonb(${simpleLogoKey}::text),
+                    true
+                  ),
+                  '{loginBackgroundImageS3Key}',
+                  to_jsonb(${loginBackgroundKey}::text),
+                  true
+                ),
+                '{certificateBackgroundImage}',
+                to_jsonb(${certificateBackgroundKey}::text),
+                true
+              )
+            `,
+          })
+          .where(isNull(settings.userId));
+
+        const response = await request(app.getHttpServer()).get("/api/settings/global").expect(200);
+
+        expect(response.body.data.platformLogoS3Key).toBe(
+          `/api/settings/platform-logo/image?v=${encodeURIComponent(platformLogoKey)}`,
+        );
+        expect(response.body.data.platformSimpleLogoS3Key).toBe(
+          `/api/settings/platform-simple-logo/image?v=${encodeURIComponent(simpleLogoKey)}`,
+        );
+        expect(response.body.data.loginBackgroundImageS3Key).toBe(
+          `/api/settings/login-background/image?v=${encodeURIComponent(loginBackgroundKey)}`,
+        );
+        expect(response.body.data.certificateBackgroundImage).toBe(
+          `/api/settings/certificate-background/image?v=${encodeURIComponent(certificateBackgroundKey)}`,
+        );
       });
     });
 
