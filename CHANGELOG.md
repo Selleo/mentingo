@@ -1,3 +1,13 @@
+<a name="v4.5.1"></a>
+
+## [v4.5.1] - 10.03.2026
+
+### Chores:
+
+- improve loading speed by caching platform logos, certificate backgrounds, and login screen images ([#1345](https://github.com/Selleo/mentingo/issues/1345))
+
+- update workflow with new environment variables ([#1339](https://github.com/Selleo/mentingo/issues/1339))
+
 <a name="v4.5.0"></a>
 
 ## [v4.5.0] - 03.03.2026
@@ -25,6 +35,10 @@
 - speed up certificate generation and improve download experience ([#1323](https://github.com/Selleo/mentingo/issues/1323))
 
 - improve image upload across the app ([#1321](https://github.com/Selleo/mentingo/issues/1321))
+
+### Documentation:
+
+- update changelog for version v4.5.0
 
 <a name="v4.4.0"></a>
 
@@ -2488,7 +2502,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.5.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.5.1...HEAD
+[v4.5.1]: https://github.com/Selleo/mentingo/compare/v4.5.0...v4.5.1
 [v4.5.0]: https://github.com/Selleo/mentingo/compare/v4.4.0...v4.5.0
 [v4.4.0]: https://github.com/Selleo/mentingo/compare/v4.3.0...v4.4.0
 [v4.3.0]: https://github.com/Selleo/mentingo/compare/v4.2.0...v4.3.0
