@@ -1188,7 +1188,8 @@
         "requireSequentialLessons": "Require students to complete lessons in order",
         "enableQuizFeedback": "Quiz feedback",
         "enableQuizFeedbackDescription": "After submitting the quiz, the student will see which answers were correct, incorrect, or unanswered.",
-        "fallbackLanguageWarning": "Warning: Some fields are empty. Translations from the base language will be used instead.",
+        "fallbackLanguageWarningTitle": "Note: missing translations",
+        "fallbackLanguageWarningDescription": "Some fields in this language version are empty. In those places, students will see content from the default language until you add translations.",
         "baseLanguageTooltip": "You cannot change or remove this language. It is the default and will always be part of the course."
       },
       "validation": {
@@ -1240,6 +1241,7 @@
       "chapter": {
         "button": {
           "addChapter": "Add chapter",
+          "addChapterDisabledTooltip": "You can only add new chapters in the default language.",
           "generateWithAI": "Generate with AI"
         },
         "toast": {
