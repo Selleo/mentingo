@@ -1,10 +1,12 @@
 import * as cookie from "cookie";
+import { eq } from "drizzle-orm";
 import { isArray, omit } from "lodash";
 import { nanoid } from "nanoid";
 import request from "supertest";
 
+import { SettingsService } from "src/settings/settings.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { createTokens, resetTokens } from "src/storage/schema";
+import { createTokens, formFieldAnswers, resetTokens } from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
@@ -22,11 +24,13 @@ describe("AuthController (e2e)", () => {
   let baseDb: DatabasePg;
   let userFactory: ReturnType<typeof createUserFactory>;
   let settingsFactory: ReturnType<typeof createSettingsFactory>;
+  let settingsService: SettingsService;
 
   beforeAll(async () => {
     const { app: testApp } = await createE2ETest();
     app = testApp;
     authService = app.get(AuthService);
+    settingsService = app.get(SettingsService);
     db = app.get(DB);
     baseDb = app.get(DB_ADMIN);
     userFactory = createUserFactory(db);
@@ -38,7 +42,7 @@ describe("AuthController (e2e)", () => {
   });
 
   afterEach(async () => {
-    await truncateTables(baseDb, ["settings"]);
+    await truncateTables(baseDb, ["form_field_answers", "form_fields", "forms", "settings"]);
   });
 
   describe("POST /api/auth/register", () => {
@@ -164,6 +168,80 @@ describe("AuthController (e2e)", () => {
 
       expect(settingsResponse.body.data).toBeDefined();
       expect(settingsResponse.body.data.language).toBe("pl");
+    });
+
+    it("should save registration checkbox answers with the label snapshot", async () => {
+      const registrationForm = await settingsService.updateRegistrationForm({
+        fields: [
+          {
+            type: "checkbox",
+            required: true,
+            displayOrder: 0,
+            archived: false,
+            label: {
+              en: '<p>I accept the <a href="https://example.com/terms">Terms</a>.</p>',
+              pl: '<p>Akceptuje <a href="https://example.com/terms">Regulamin</a>.</p>',
+            },
+          },
+        ],
+      });
+
+      const field = registrationForm.fields[0];
+      const user = userFactory.build();
+
+      const response = await request(app.getHttpServer())
+        .post("/api/auth/register")
+        .send({
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          password: "Password123@",
+          language: "pl",
+          formAnswers: {
+            [field.id]: true,
+          },
+        })
+        .expect(201);
+
+      const [answer] = await db
+        .select()
+        .from(formFieldAnswers)
+        .where(eq(formFieldAnswers.userId, response.body.data.id));
+
+      expect(answer).toBeDefined();
+      expect(answer.value).toBe(true);
+      expect(answer.answeredLanguage).toBe("pl");
+      expect(answer.labelSnapshot).toEqual(field.label);
+    });
+
+    it("should reject registration when a required checkbox answer is missing", async () => {
+      await settingsService.updateRegistrationForm({
+        fields: [
+          {
+            type: "checkbox",
+            required: true,
+            displayOrder: 0,
+            archived: false,
+            label: {
+              en: "<p>I accept the terms.</p>",
+              pl: "<p>Akceptuje regulamin.</p>",
+            },
+          },
+        ],
+      });
+
+      const user = userFactory.build();
+
+      await request(app.getHttpServer())
+        .post("/api/auth/register")
+        .send({
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          password: "Password123@",
+          language: "en",
+        })
+        .expect(400);
     });
   });
 

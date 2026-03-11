@@ -194,6 +194,11 @@ describe("SettingsController (e2e)", () => {
   });
 
   describe("Global Settings", () => {
+    beforeEach(async () => {
+      await truncateTables(baseDb, ["form_field_answers", "form_fields", "forms", "settings"]);
+      await globalSettingsFactory.create({ userId: null });
+    });
+
     describe("GET /api/settings/global", () => {
       it("should return global settings without authentication (public endpoint)", async () => {
         const response = await request(app.getHttpServer()).get("/api/settings/global").expect(200);

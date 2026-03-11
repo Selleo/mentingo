@@ -24,6 +24,7 @@ export interface RegisterBody {
   lastName: string;
   password: string;
   language: "en" | "pl";
+  formAnswers?: object;
 }
 
 export interface RegisterResponse {
@@ -257,6 +258,25 @@ export interface GetPublicGlobalSettingsResponse {
     articlesEnabled: boolean;
     ageLimit: 13 | 16 | null;
     loginPageFiles: string[];
+  };
+}
+
+export interface GetPublicRegistrationFormResponse {
+  data: {
+    fields: {
+      /** @format uuid */
+      id: string;
+      type: "checkbox";
+      /** @minLength 1 */
+      label: string;
+      baseLanguage: "en" | "pl";
+      availableLocales: ("en" | "pl")[];
+      required: boolean;
+      displayOrder: number;
+      archived: boolean;
+      createdAt: string;
+      updatedAt: string;
+    }[];
   };
 }
 
@@ -523,6 +543,71 @@ export interface UpdateColorSchemaResponse {
     articlesEnabled: boolean;
     ageLimit: 13 | 16 | null;
     loginPageFiles: string[];
+  };
+}
+
+export interface GetAdminRegistrationFormResponse {
+  data: {
+    fields: {
+      /** @format uuid */
+      id: string;
+      type: "checkbox";
+      label: {
+        /** @minLength 1 */
+        en?: string;
+        /** @minLength 1 */
+        pl?: string;
+      };
+      baseLanguage: "en" | "pl";
+      availableLocales: ("en" | "pl")[];
+      required: boolean;
+      displayOrder: number;
+      archived: boolean;
+      createdAt: string;
+      updatedAt: string;
+    }[];
+  };
+}
+
+export interface UpdateRegistrationFormBody {
+  fields: {
+    /** @format uuid */
+    id?: string;
+    type: "checkbox";
+    label: {
+      /** @minLength 1 */
+      en?: string;
+      /** @minLength 1 */
+      pl?: string;
+    };
+    baseLanguage?: "en" | "pl";
+    availableLocales?: ("en" | "pl")[];
+    required: boolean;
+    displayOrder: number;
+    archived: boolean;
+  }[];
+}
+
+export interface UpdateRegistrationFormResponse {
+  data: {
+    fields: {
+      /** @format uuid */
+      id: string;
+      type: "checkbox";
+      label: {
+        /** @minLength 1 */
+        en?: string;
+        /** @minLength 1 */
+        pl?: string;
+      };
+      baseLanguage: "en" | "pl";
+      availableLocales: ("en" | "pl")[];
+      required: boolean;
+      displayOrder: number;
+      archived: boolean;
+      createdAt: string;
+      updatedAt: string;
+    }[];
   };
 }
 
@@ -4639,6 +4724,27 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name SettingsControllerGetPublicRegistrationForm
+     * @request GET:/api/settings/registration-form
+     */
+    settingsControllerGetPublicRegistrationForm: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetPublicRegistrationFormResponse, any>({
+        path: `/api/settings/registration-form`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name SettingsControllerGetUserSettings
      * @request GET:/api/settings
      */
@@ -4765,6 +4871,39 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     ) =>
       this.request<UpdateColorSchemaResponse, any>({
         path: `/api/settings/admin/color-schema`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerGetAdminRegistrationForm
+     * @request GET:/api/settings/admin/registration-form
+     */
+    settingsControllerGetAdminRegistrationForm: (params: RequestParams = {}) =>
+      this.request<GetAdminRegistrationFormResponse, any>({
+        path: `/api/settings/admin/registration-form`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateRegistrationForm
+     * @request PATCH:/api/settings/admin/registration-form
+     */
+    settingsControllerUpdateRegistrationForm: (
+      data: UpdateRegistrationFormBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateRegistrationFormResponse, any>({
+        path: `/api/settings/admin/registration-form`,
         method: "PATCH",
         body: data,
         type: ContentType.Json,

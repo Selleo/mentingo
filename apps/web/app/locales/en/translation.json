@@ -1637,7 +1637,9 @@
       "email": "Email",
       "password": "Password",
       "birthday": "Date of birth",
-      "birthdayPlaceholder": "Select date"
+      "birthdayPlaceholder": "Select date",
+      "requiredBadge": "Required",
+      "optionalBadge": "Optional"
     },
     "other": {
       "alreadyHaveAccount": "Already have an account?",
@@ -1651,11 +1653,14 @@
       "firstName": "First name is required",
       "lastName": "Last name is required",
       "email": "Invalid email",
-      "birthday": "You must be at least {{ageLimit}} years old"
+      "birthday": "You must be at least {{ageLimit}} years old",
+      "requiredCheckbox": "This consent is required."
     },
     "toast": {
       "userAlreadyExists": "User with this email already exists.",
-      "createAccountFailed": "Unable to create account. Please try again."
+      "createAccountFailed": "Unable to create account. Please try again.",
+      "requiredFormFieldMissing": "Please accept all required consents.",
+      "invalidFormField": "One of the submitted registration fields is invalid."
     }
   },
   "courseChapterView": {
@@ -2055,6 +2060,41 @@
       "finishedCourseNotificationsPreferenceChangeError": "Failed to update finished course notification preferences",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Overdue course notification preferences have been successfully updated",
       "overdueCourseNotificationsPreferenceChangeError": "Failed to update overdue course notification preferences"
+    }
+  },
+  "registrationFormBuilder": {
+    "title": "Registration Form Builder",
+    "description": "Manage additional checkbox fields shown during user registration.",
+    "badge": "Register",
+    "loading": "Loading registration form fields...",
+    "empty": "No additional registration fields yet.",
+    "addFieldTitle": "Add checkbox consent",
+    "addFieldDescription": "Create optional or required checkbox fields for registration.",
+    "summaryLabel": "Fields",
+    "addField": "Add field",
+    "save": "Save registration form",
+    "validation": {
+      "labelRequired": "Label content is required."
+    },
+    "toast": {
+      "saved": "Registration form saved successfully."
+    },
+    "field": {
+      "heading": "Field {{index}}",
+      "typeCheckbox": "Checkbox field",
+      "cardDescription": "Configure copy, required state, and ordering for this consent.",
+      "required": "Required field",
+      "requiredDescription": "Users must check this box before creating an account.",
+      "requiredBadge": "Required",
+      "optionalBadge": "Optional",
+      "archivedBadge": "Archived",
+      "languageLabel": "Label in {{language}}",
+      "languageDescription": "This content is shown to users who register in this language.",
+      "labelPlaceholder": "Enter consent text and add links when needed.",
+      "linkOnlyHint": "Plain text with links only.",
+      "addLink": "Add link",
+      "archive": "Archive",
+      "restore": "Restore"
     }
   },
   "mfa": {

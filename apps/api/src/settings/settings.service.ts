@@ -10,14 +10,17 @@ import {
   ALLOWED_NEWS_SETTINGS,
   ALLOWED_QA_SETTINGS,
   ENTITY_TYPES,
+  FORM_TYPES,
   MAX_LOGIN_PAGE_DOCUMENTS,
+  SUPPORTED_LANGUAGES,
 } from "@repo/shared";
-import { and, eq, getTableColumns, inArray, isNull, sql } from "drizzle-orm";
+import { and, asc, eq, getTableColumns, inArray, isNull, sql } from "drizzle-orm";
 import { isEqual } from "lodash";
 import sharp from "sharp";
 
 import { CORS_ORIGIN } from "src/auth/consts";
 import { DatabasePg } from "src/common";
+import { buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelpers";
 import { getSupportModeContext } from "src/common/helpers/support-mode-context";
 import { UpdateSettingsEvent } from "src/events";
 import { RESOURCE_CATEGORIES, RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
@@ -27,7 +30,7 @@ import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
 import { LocalizationService } from "src/localization/localization.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { resourceEntity, resources, settings } from "src/storage/schema";
+import { formFields, forms, resourceEntity, resources, settings } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
@@ -38,6 +41,12 @@ import {
 } from "./constants/settings.constants";
 
 import type { CompanyInformaitonJSONSchema } from "./schemas/company-information.schema";
+import type {
+  LocalizedRegistrationFormField,
+  LocalizedRegistrationFormResponse,
+  RegistrationFormResponse,
+  UpdateRegistrationFormBody,
+} from "./schemas/registration-form.schema";
 import type {
   SettingsJSONContentSchema,
   GlobalSettingsJSONContentSchema,
@@ -53,8 +62,14 @@ import type {
   UpdateMFAEnforcedRolesRequest,
   UpdateSettingsBody,
 } from "./schemas/update-settings.schema";
+import type { RegistrationFormFieldDbModel } from "./types/registration-form.types";
 import type * as schema from "../storage/schema";
-import type { AllowedArticlesSettings, AllowedNewsSettings, AllowedQASettings } from "@repo/shared";
+import type {
+  AllowedArticlesSettings,
+  AllowedNewsSettings,
+  AllowedQASettings,
+  SupportedLanguages,
+} from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { Request, Response } from "express";
 import type { SettingsActivityLogSnapshot } from "src/activity-logs/types";
@@ -236,6 +251,187 @@ export class SettingsService {
       loginBackgroundImageS3Key: loginBackgroundSignedUrl,
       certificateBackgroundImage: certificateBackgroundSignedUrl,
     };
+  }
+
+  public async getRegistrationForm(
+    dbInstance: DatabasePg = this.db,
+  ): Promise<RegistrationFormResponse> {
+    const fields = await this.getRegistrationFormFields(dbInstance);
+
+    return {
+      fields,
+    };
+  }
+
+  public async getLocalizedRegistrationForm(
+    language: SupportedLanguages,
+    dbInstance: DatabasePg = this.db,
+  ): Promise<LocalizedRegistrationFormResponse> {
+    const fields = await this.getLocalizedRegistrationFormFields(language, dbInstance);
+
+    return {
+      fields,
+    };
+  }
+
+  public async getAdminRegistrationForm(
+    dbInstance: DatabasePg = this.db,
+  ): Promise<RegistrationFormResponse> {
+    const fields = await this.getRegistrationFormFields(dbInstance, { includeArchived: true });
+
+    return {
+      fields,
+    };
+  }
+
+  private async getRegistrationFormFields(
+    dbInstance: DatabasePg = this.db,
+    options?: { includeArchived?: boolean },
+  ): Promise<RegistrationFormFieldDbModel[]> {
+    const includeArchived = options?.includeArchived ?? false;
+
+    const [registrationForm] = await dbInstance
+      .select({ id: forms.id })
+      .from(forms)
+      .where(and(eq(forms.type, FORM_TYPES.REGISTRATION), eq(forms.isActive, true)));
+
+    if (!registrationForm) return [];
+
+    const conditions = [eq(formFields.formId, registrationForm.id)];
+
+    if (!includeArchived) {
+      conditions.push(eq(formFields.archived, false));
+    }
+
+    const fields = await dbInstance
+      .select()
+      .from(formFields)
+      .where(and(...conditions))
+      .orderBy(asc(formFields.displayOrder), asc(formFields.createdAt));
+
+    return fields;
+  }
+
+  private async getLocalizedRegistrationFormFields(
+    language: SupportedLanguages,
+    dbInstance: DatabasePg = this.db,
+  ): Promise<LocalizedRegistrationFormField[]> {
+    const [registrationForm] = await dbInstance
+      .select({ id: forms.id })
+      .from(forms)
+      .where(and(eq(forms.type, FORM_TYPES.REGISTRATION), eq(forms.isActive, true)));
+
+    if (!registrationForm) return [];
+
+    const conditions = [eq(formFields.formId, registrationForm.id), eq(formFields.archived, false)];
+
+    const fields = await dbInstance
+      .select({
+        ...getTableColumns(formFields),
+        label: this.localizationService.getLocalizedSqlField(
+          formFields.label,
+          language,
+          formFields,
+        ),
+      })
+      .from(formFields)
+      .where(and(...conditions))
+      .orderBy(asc(formFields.displayOrder), asc(formFields.createdAt));
+
+    return fields.map((field) => ({
+      ...field,
+    }));
+  }
+
+  public async updateRegistrationForm(
+    body: UpdateRegistrationFormBody,
+  ): Promise<RegistrationFormResponse> {
+    return this.db.transaction(async (trx) => {
+      let [registrationForm] = await trx
+        .select({ id: forms.id })
+        .from(forms)
+        .where(and(eq(forms.type, FORM_TYPES.REGISTRATION), eq(forms.isActive, true)));
+
+      if (!registrationForm) {
+        [registrationForm] = await trx
+          .insert(forms)
+          .values({ type: FORM_TYPES.REGISTRATION, isActive: true })
+          .returning({ id: forms.id });
+      }
+
+      const existingFields = await trx
+        .select({
+          id: formFields.id,
+          baseLanguage: formFields.baseLanguage,
+          availableLocales: formFields.availableLocales,
+        })
+        .from(formFields)
+        .where(eq(formFields.formId, registrationForm.id));
+
+      const existingFieldsById = new Map(existingFields.map((field) => [field.id, field]));
+
+      for (const field of body.fields) {
+        const existingField = field.id ? existingFieldsById.get(field.id) : undefined;
+
+        const labelJson = buildJsonbFieldWithMultipleEntries(field.label);
+
+        const availableLocalesSql = field.availableLocales ??
+          existingField?.availableLocales ?? [SUPPORTED_LANGUAGES.EN];
+        const baseLanguageSql =
+          field.baseLanguage ?? existingField?.baseLanguage ?? SUPPORTED_LANGUAGES.EN;
+
+        if (field.id && existingField) {
+          await trx
+            .update(formFields)
+            .set({
+              type: field.type,
+              label: labelJson,
+              baseLanguage: baseLanguageSql,
+              availableLocales: availableLocalesSql,
+              required: field.required,
+              displayOrder: field.displayOrder,
+              archived: field.archived,
+            })
+            .where(eq(formFields.id, field.id));
+          continue;
+        }
+
+        await trx.insert(formFields).values({
+          formId: registrationForm.id,
+          type: field.type,
+          label: labelJson,
+          baseLanguage: baseLanguageSql,
+          availableLocales: availableLocalesSql,
+          required: field.required,
+          displayOrder: field.displayOrder,
+          archived: field.archived,
+        });
+      }
+
+      await this.normalizeRegistrationFormFieldDisplayOrder(registrationForm.id, trx);
+
+      return this.getAdminRegistrationForm(trx);
+    });
+  }
+
+  private async normalizeRegistrationFormFieldDisplayOrder(
+    formId: UUIDType,
+    dbInstance: DatabasePg,
+  ): Promise<void> {
+    await dbInstance.execute(sql`
+      WITH ranked_form_fields AS (
+        SELECT
+          id,
+          row_number() OVER (ORDER BY display_order, created_at) - 1 AS new_display_order
+        FROM ${formFields}
+        WHERE form_id = ${formId}
+      )
+      UPDATE ${formFields} ff
+      SET display_order = rff.new_display_order
+      FROM ranked_form_fields rff
+      WHERE ff.id = rff.id
+        AND ff.form_id = ${formId}
+    `);
   }
 
   public async createSettingsIfNotExists(
