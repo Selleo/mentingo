@@ -12145,7 +12145,6 @@
                       "type": "string"
                     },
                     "label": {
-                      "minProperties": 1,
                       "type": "object",
                       "properties": {
                         "en": {
@@ -12157,10 +12156,7 @@
                           "type": "string"
                         }
                       },
-                      "required": [
-                        "en",
-                        "pl"
-                      ]
+                      "minProperties": 1
                     },
                     "baseLanguage": {
                       "anyOf": [
@@ -12246,7 +12242,6 @@
                   "type": "string"
                 },
                 "label": {
-                  "minProperties": 1,
                   "type": "object",
                   "properties": {
                     "en": {
@@ -12258,10 +12253,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "en",
-                    "pl"
-                  ]
+                  "minProperties": 1
                 },
                 "baseLanguage": {
                   "anyOf": [
@@ -12334,7 +12326,6 @@
                       "type": "string"
                     },
                     "label": {
-                      "minProperties": 1,
                       "type": "object",
                       "properties": {
                         "en": {
@@ -12346,10 +12337,7 @@
                           "type": "string"
                         }
                       },
-                      "required": [
-                        "en",
-                        "pl"
-                      ]
+                      "minProperties": 1
                     },
                     "baseLanguage": {
                       "anyOf": [
