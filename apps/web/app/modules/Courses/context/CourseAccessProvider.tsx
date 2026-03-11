@@ -16,6 +16,7 @@ type CourseExperienceContextValue = {
 type CourseExperienceResolverParams = {
   course: GetCourseResponse["data"];
   forcePreviewMode: boolean;
+  currentUserId?: string;
   isAdmin: boolean;
   isAdminLike: boolean;
   isContentCreator: boolean;
@@ -33,6 +34,7 @@ type CourseAccessProviderProps = PropsWithChildren<{
 function resolveCourseExperienceState({
   course,
   forcePreviewMode,
+  currentUserId,
   isAdmin,
   isAdminLike,
   isContentCreator,
@@ -42,8 +44,10 @@ function resolveCourseExperienceState({
   const isCourseStudentModeActive =
     !forcePreviewMode && isAdminLike && activeLearningModeCourseIds.includes(course.id);
 
+  const isCourseAuthor = currentUserId === course.authorId;
+
   const canContentCreatorLearn =
-    isContentCreator && (!!course.enrolled || isCourseStudentModeActive);
+    isContentCreator && (isCourseStudentModeActive || (!isCourseAuthor && !!course.enrolled));
 
   const canAdminLearn = isAdmin && isCourseStudentModeActive;
 
@@ -73,6 +77,7 @@ export function CourseAccessProvider({
     return resolveCourseExperienceState({
       course,
       forcePreviewMode,
+      currentUserId: currentUser?.id,
       isAdmin,
       isAdminLike,
       isContentCreator,
@@ -81,6 +86,7 @@ export function CourseAccessProvider({
     });
   }, [
     course,
+    currentUser?.id,
     currentUser?.studentModeCourseIds,
     forcePreviewMode,
     isAdmin,
