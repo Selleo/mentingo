@@ -1972,7 +1972,8 @@
       "bannerTitle": "You're taking this course in learning mode",
       "bannerDescription": "Your learning progress is being tracked. Completed lessons count toward your personal completion and course statistics.",
       "exitBanner": "Exit learning mode",
-      "learningModeRequired": "Learning mode is not active for this course."
+      "learningModeRequired": "Learning mode is not active for this course.",
+      "draftCourseTooltip": "This course is in draft status. You cannot enroll in it or continue learning."
     },
     "tabs": {
       "chapters": "Chapters",
