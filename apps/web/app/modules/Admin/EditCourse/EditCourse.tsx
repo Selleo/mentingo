@@ -103,6 +103,7 @@ const EditCourse = () => {
   const { data: draft } = useCourseGenerationDraft(
     course?.id ?? "",
     course?.title ?? "",
+    courseLanguage,
     isCourseGenerationDraftEnabled,
   );
   const [isCourseGeneratedOverride, setIsCourseGeneratedOverride] = useState(false);

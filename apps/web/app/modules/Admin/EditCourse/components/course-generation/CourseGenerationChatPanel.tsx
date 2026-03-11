@@ -116,7 +116,7 @@ export function CourseGenerationChatPanel({
 
   return (
     <div className="flex h-full flex-col">
-      <header className="relative flex h-14 items-center justify-between border-b border-neutral-200 px-6">
+      <header className="relative flex h-16 items-center justify-between border-b border-neutral-200 px-6">
         <div className="flex min-w-0 flex-1 items-center gap-3 text-neutral-900">
           <div className="flex items-center gap-2">
             <Icon name="AiMentor" className="size-4 text-primary-600" />

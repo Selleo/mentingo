@@ -49,11 +49,7 @@ export function CourseGenerationComposerCenterContent({
   }, [input, isVoiceMode]);
 
   return (
-    <motion.div
-      layout
-      transition={layoutTransition}
-      className="relative min-w-0"
-    >
+    <motion.div layout transition={layoutTransition} className="relative min-w-0">
       <AnimatePresence initial={false} mode="wait">
         {isVoiceMode ? (
           <motion.div
