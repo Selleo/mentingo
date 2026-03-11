@@ -83,6 +83,12 @@ import {
   type MasterCourseExportCandidatesResponse,
 } from "src/courses/schemas/masterCourse.schema";
 import {
+  setCourseStudentModeResponseSchema,
+  setCourseStudentModeSchema,
+  type SetCourseStudentMode,
+  type SetCourseStudentModeResponse,
+} from "src/courses/schemas/setCourseStudentMode.schema";
+import {
   commonShowBetaCourseSchema,
   commonShowCourseSchema,
 } from "src/courses/schemas/showCourseCommon.schema";
@@ -580,6 +586,31 @@ export class CourseController {
     return new BaseResponse(data);
   }
 
+  @Patch(":courseId/student-mode")
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @Validate({
+    request: [
+      { type: "param", name: "courseId", schema: UUIDSchema },
+      { type: "body", schema: setCourseStudentModeSchema },
+    ],
+    response: baseResponse(setCourseStudentModeResponseSchema),
+  })
+  async setCourseStudentMode(
+    @Param("courseId") courseId: UUIDType,
+    @Body() body: SetCourseStudentMode,
+    @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser("role") currentUserRole: UserRole,
+  ): Promise<BaseResponse<SetCourseStudentModeResponse>> {
+    const data = await this.courseService.setCourseStudentMode(
+      courseId,
+      currentUserId,
+      currentUserRole,
+      body.enabled,
+    );
+
+    return new BaseResponse(data);
+  }
+
   @Get("lesson-sequence-enabled/:courseId")
   @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR, USER_ROLES.STUDENT)
   @Validate({
@@ -595,7 +626,7 @@ export class CourseController {
   }
 
   @Post("enroll-course")
-  @Roles(USER_ROLES.STUDENT)
+  @Roles(USER_ROLES.STUDENT, USER_ROLES.CONTENT_CREATOR)
   @Validate({
     request: [{ type: "query", name: "id", schema: UUIDSchema }],
     response: baseResponse(Type.Object({ message: Type.String() })),

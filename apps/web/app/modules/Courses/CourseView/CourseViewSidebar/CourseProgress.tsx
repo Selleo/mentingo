@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { CopyUrlButton } from "~/components/CopyUrlButton";
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
-import { useUserRole } from "~/hooks/useUserRole";
+import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import { CourseProgressChart } from "~/modules/Courses/CourseView/components/CourseProgressChart";
 
 import { findFirstInProgressLessonId, findFirstNotStartedLessonId } from "../../Lesson/utils";
@@ -18,7 +18,7 @@ type CourseProgressProps = {
 };
 
 export const CourseProgress = ({ course }: CourseProgressProps) => {
-  const { isAdminLike } = useUserRole();
+  const { isEffectiveStudentExperience, isPreviewMode } = useCourseAccessProvider();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const notStartedLessonId = findFirstNotStartedLessonId(course);
@@ -36,11 +36,11 @@ export const CourseProgress = ({ course }: CourseProgressProps) => {
   return (
     <>
       <h4 className="h6 pb-1 text-neutral-950">
-        {isAdminLike
+        {isPreviewMode
           ? t("studentCourseView.sideSection.other.options")
           : t("studentCourseView.sideSection.other.courseProgress")}
       </h4>
-      {!isAdminLike && (
+      {isEffectiveStudentExperience && (
         <CourseProgressChart
           chaptersCount={course?.courseChapterCount}
           completedChaptersCount={course?.completedChapterCount}
@@ -56,7 +56,7 @@ export const CourseProgress = ({ course }: CourseProgressProps) => {
             <Icon name="Play" className="text-contrast h-auto w-6" />
             <span>
               {t(
-                isAdminLike
+                isPreviewMode
                   ? "adminCourseView.common.preview"
                   : !hasCourseProgress
                     ? "studentCourseView.sideSection.button.startLearning"

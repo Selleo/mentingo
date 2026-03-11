@@ -11,6 +11,7 @@ import { and, eq, isNotNull, isNull, sql } from "drizzle-orm";
 import { CertificatesService } from "src/certificates/certificates.service";
 import { DatabasePg } from "src/common";
 import { setJsonbField } from "src/common/helpers/sqlHelpers";
+import { canUseLessonProgressAsLearner } from "src/common/utils/lessonLearningAccess";
 import { CourseCompletedEvent, LessonCompletedEvent } from "src/events";
 import { UserChapterFinishedEvent } from "src/events/user/user-chapter-finished.event";
 import { UserCourseFinishedEvent } from "src/events/user/user-course-finished.event";
@@ -22,6 +23,7 @@ import { StatisticsRepository } from "src/statistics/repositories/statistics.rep
 import {
   aiMentorStudentLessonProgress,
   chapters,
+  courseStudentMode,
   courses,
   groups,
   groupUsers,
@@ -35,12 +37,10 @@ import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
 import type { SupportedLanguages } from "@repo/shared";
-import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { ResponseAiJudgeJudgementBody } from "src/ai/utils/ai.schema";
 import type { UUIDType } from "src/common";
 import type { ActorUserType } from "src/common/types/actor-user.type";
 import type { CurrentUser } from "src/common/types/current-user.type";
-import type * as schema from "src/storage/schema";
 import type { ProgressStatus } from "src/utils/types/progress.type";
 
 @Injectable()
@@ -71,14 +71,36 @@ export class StudentLessonProgressService {
     actor?: CurrentUser;
     quizCompleted?: boolean;
     completedQuestionCount?: number;
-    dbInstance?: PostgresJsDatabase<typeof schema>;
+    dbInstance?: DatabasePg;
     aiMentorLessonData?: ResponseAiJudgeJudgementBody;
     language: SupportedLanguages;
     isQuizPassed?: boolean;
   }) {
-    if (userRole === USER_ROLES.CONTENT_CREATOR || userRole === USER_ROLES.ADMIN) return;
-
     const [accessCourseLessonWithDetails] = await this.checkLessonAssignment(id, studentId);
+
+    const isLearningModeActive = await this.resolveLearningModeStatus(
+      id,
+      studentId,
+      userRole,
+      dbInstance,
+    );
+
+    const canTrackProgress = canUseLessonProgressAsLearner(userRole, {
+      hasEnrollment: Boolean(accessCourseLessonWithDetails.isAssigned),
+      isLearningModeActive,
+    });
+
+    if (!canTrackProgress) return;
+
+    if (isLearningModeActive && !accessCourseLessonWithDetails.isAssigned) {
+      await this.ensureStudentCourseEnrollment(
+        accessCourseLessonWithDetails.courseId,
+        studentId,
+        dbInstance,
+      );
+
+      accessCourseLessonWithDetails.isAssigned = true;
+    }
 
     if (!accessCourseLessonWithDetails.isAssigned && !accessCourseLessonWithDetails.isFreemium)
       throw new UnauthorizedException("You don't have assignment to this lesson");
@@ -239,11 +261,33 @@ export class StudentLessonProgressService {
     id: UUIDType,
     studentId: UUIDType,
     userRole?: UserRole,
-    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+    dbInstance: DatabasePg = this.db,
   ) {
     const [accessCourseLessonWithDetails] = await this.checkLessonAssignment(id, studentId);
 
-    if (userRole === USER_ROLES.CONTENT_CREATOR || userRole === USER_ROLES.ADMIN) return;
+    const isLearningModeActive = await this.resolveLearningModeStatus(
+      id,
+      studentId,
+      userRole,
+      dbInstance,
+    );
+
+    const canTrackProgress = canUseLessonProgressAsLearner(userRole, {
+      hasEnrollment: !!accessCourseLessonWithDetails.isAssigned,
+      isLearningModeActive,
+    });
+
+    if (!canTrackProgress) return;
+
+    if (isLearningModeActive && !accessCourseLessonWithDetails.isAssigned) {
+      await this.ensureStudentCourseEnrollment(
+        accessCourseLessonWithDetails.courseId,
+        studentId,
+        dbInstance,
+      );
+
+      accessCourseLessonWithDetails.isAssigned = true;
+    }
 
     if (!accessCourseLessonWithDetails.isAssigned && !accessCourseLessonWithDetails.isFreemium)
       throw new UnauthorizedException("You don't have assignment to this lesson");
@@ -294,7 +338,7 @@ export class StudentLessonProgressService {
     courseId: UUIDType,
     chapterId: UUIDType,
     actor: ActorUserType,
-    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+    dbInstance: DatabasePg = this.db,
   ) {
     const [chapter] = await dbInstance
       .select({ lessonCount: chapters.lessonCount })
@@ -345,6 +389,56 @@ export class StudentLessonProgressService {
     }
   }
 
+  private async resolveLearningModeStatus(
+    lessonId: UUIDType,
+    userId: UUIDType,
+    userRole: UserRole | undefined,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    const isAdminLike = userRole === USER_ROLES.ADMIN || userRole === USER_ROLES.CONTENT_CREATOR;
+
+    if (!isAdminLike) return false;
+
+    return this.isLessonStudentModeEnabled(lessonId, userId, dbInstance);
+  }
+
+  private async isLessonStudentModeEnabled(
+    lessonId: UUIDType,
+    userId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    const [studentModeExists] = await dbInstance
+      .select({ id: courseStudentMode.id })
+      .from(courseStudentMode)
+      .innerJoin(chapters, eq(chapters.courseId, courseStudentMode.courseId))
+      .innerJoin(lessons, eq(lessons.chapterId, chapters.id))
+      .where(and(eq(courseStudentMode.userId, userId), eq(lessons.id, lessonId)));
+
+    return Boolean(studentModeExists);
+  }
+
+  private async ensureStudentCourseEnrollment(
+    courseId: UUIDType,
+    studentId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    await dbInstance
+      .insert(studentCourses)
+      .values({
+        studentId,
+        courseId,
+        enrolledAt: sql`NOW()`,
+        status: COURSE_ENROLLMENT.ENROLLED,
+      })
+      .onConflictDoUpdate({
+        target: [studentCourses.studentId, studentCourses.courseId],
+        set: {
+          enrolledAt: sql`EXCLUDED.enrolled_at`,
+          status: sql`EXCLUDED.status`,
+        },
+      });
+  }
+
   async updateQuizProgress(
     chapterId: UUIDType,
     lessonId: UUIDType,
@@ -354,7 +448,7 @@ export class StudentLessonProgressService {
     attempts: number,
     isQuizPassed: boolean,
     isCompleted: boolean,
-    trx: PostgresJsDatabase<typeof schema> = this.db,
+    trx: DatabasePg = this.db,
     languageAnswered?: SupportedLanguages | null,
   ) {
     const { language } = await this.localizationService.getBaseLanguage(
@@ -402,7 +496,7 @@ export class StudentLessonProgressService {
     lessonCount: number,
     completedAsFreemium = false,
     actor: ActorUserType,
-    trx?: PostgresJsDatabase<typeof schema>,
+    trx?: DatabasePg,
   ) {
     const dbInstance = trx ?? this.db;
     const [completedLessonCount] = await dbInstance
@@ -471,7 +565,7 @@ export class StudentLessonProgressService {
     courseId: UUIDType,
     studentId: UUIDType,
     actor: ActorUserType,
-    trx?: PostgresJsDatabase<typeof schema>,
+    trx?: DatabasePg,
     language?: SupportedLanguages,
   ) {
     const courseFinishedChapterCount = await this.getCourseFinishedChapterCount(
@@ -526,7 +620,7 @@ export class StudentLessonProgressService {
   private async getCourseFinishedChapterCount(
     courseId: UUIDType,
     studentId: UUIDType,
-    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+    dbInstance: DatabasePg = this.db,
   ) {
     const [finishedChapterCount] = await dbInstance
       .select({
@@ -548,7 +642,7 @@ export class StudentLessonProgressService {
     courseId: UUIDType,
     studentId: UUIDType,
     courseFinishedChapterCount: number,
-    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+    dbInstance: DatabasePg = this.db,
   ) {
     const [courseCompletedStatus] = await dbInstance
       .select({
@@ -571,7 +665,7 @@ export class StudentLessonProgressService {
     progress: ProgressStatus,
     finishedChapterCount: number,
     actor: ActorUserType,
-    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+    dbInstance: DatabasePg = this.db,
     language?: SupportedLanguages,
   ) {
     if (progress === PROGRESS_STATUSES.COMPLETED) {
@@ -622,7 +716,7 @@ export class StudentLessonProgressService {
   private async checkLessonAssignment(
     id: UUIDType,
     userId: UUIDType,
-    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+    dbInstance: DatabasePg = this.db,
   ) {
     return dbInstance
       .select({
@@ -682,7 +776,7 @@ export class StudentLessonProgressService {
   private async resolveActor(
     userId: UUIDType,
     actor: CurrentUser | undefined,
-    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+    dbInstance: DatabasePg = this.db,
   ): Promise<ActorUserType> {
     if (actor) return actor;
 

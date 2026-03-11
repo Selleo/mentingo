@@ -1,4 +1,4 @@
-import { useUserRole } from "~/hooks/useUserRole";
+import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 
 import { QuestionCard } from "../QuestionCard";
 import { SingleChoiceOptionList } from "../SingleChoice/SingleChoiceOptionList";
@@ -14,7 +14,7 @@ export const PhotoQuestionSingleChoice = ({
   question,
   isCompleted = false,
 }: PhotoQuestionSingleChoiceProps) => {
-  const { isAdmin } = useUserRole();
+  const { isPreviewMode } = useCourseAccessProvider();
 
   return (
     <QuestionCard
@@ -31,7 +31,7 @@ export const PhotoQuestionSingleChoice = ({
       <SingleChoiceOptionList
         options={question.options || []}
         questionId={question.id}
-        isAdmin={isAdmin}
+        isPreviewMode={isPreviewMode}
         isCompleted={isCompleted}
         withPicture
       />

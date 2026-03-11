@@ -23,6 +23,7 @@ export const currentUserResponseSchema = Type.Composite([
     onboardingStatus: userOnboardingStatusSchema,
     isManagingTenantAdmin: Type.Boolean(),
     isSupportMode: Type.Boolean(),
+    studentModeCourseIds: Type.Array(UUIDSchema),
     supportContext: Type.Optional(
       Type.Object({
         originalUserId: UUIDSchema,

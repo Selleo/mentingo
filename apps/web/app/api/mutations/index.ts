@@ -30,3 +30,4 @@ export { usePreviewNews } from "./usePreviewNews";
 export { useExitSupportMode } from "./useExitSupportMode";
 export { useHandleMagicLink } from "./useHandleMagicLink";
 export { useCreateMagicLink } from "./useCreateMagicLink";
+export { useToggleCourseStudentMode } from "./useToggleCourseStudentMode";

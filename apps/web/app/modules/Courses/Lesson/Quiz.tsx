@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "@remix-run/react";
+import { useMemo } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -17,7 +18,7 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { toast } from "~/components/ui/use-toast";
-import { useUserRole } from "~/hooks/useUserRole";
+import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { QuizContextProvider } from "../components/QuizContextProvider";
@@ -38,23 +39,35 @@ import type { GetLessonByIdResponse } from "~/api/generated-api";
 type QuizProps = {
   lesson: GetLessonByIdResponse["data"];
   userId: string;
-  isPreviewMode: boolean;
-  previewLessonId: string;
 };
 
-export const Quiz = ({ lesson, userId, isPreviewMode = false, previewLessonId }: QuizProps) => {
+export const Quiz = ({ lesson, userId }: QuizProps) => {
   const { lessonId = "", courseId: courseSlug = "" } = useParams();
   const { t } = useTranslation();
-  const { isAdminLike } = useUserRole();
+  const { isPreviewMode } = useCourseAccessProvider();
 
   const { language } = useLanguageStore();
 
-  const questions = lesson.quizDetails?.questions;
-  const isUserSubmittedAnswer = Boolean(lesson.lessonCompleted);
+  const questions = useMemo(
+    () =>
+      (lesson.quizDetails?.questions ?? []).map((question) => ({
+        ...question,
+        options: question.options?.map((option) => ({
+          ...option,
+          isCorrect: isPreviewMode ? null : option.isCorrect,
+          isStudentAnswer: isPreviewMode ? false : option.isStudentAnswer,
+          studentAnswer: isPreviewMode ? null : option.studentAnswer,
+        })),
+      })),
+    [isPreviewMode, lesson.quizDetails?.questions],
+  );
+  const isUserSubmittedAnswer = !isPreviewMode && Boolean(lesson.lessonCompleted);
 
   const methods = useForm<QuizForm>({
     mode: "onSubmit",
-    defaultValues: getUserAnswers(questions ?? []) as QuizForm,
+    defaultValues: (isPreviewMode
+      ? getEmptyQuizAnswers(questions)
+      : getUserAnswers(questions)) as QuizForm,
     resolver: zodResolver(QuizFormSchema(t)),
   });
 
@@ -69,9 +82,9 @@ export const Quiz = ({ lesson, userId, isPreviewMode = false, previewLessonId }:
   });
 
   const retakeQuiz = useRetakeQuiz({
-    lessonId: previewLessonId || lessonId,
+    lessonId: lesson.id,
     handleOnSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["lesson", previewLessonId || lessonId] });
+      queryClient.invalidateQueries({ queryKey: ["lesson", lesson.id] });
       methods.reset(getEmptyQuizAnswers(questions ?? []));
     },
   });
@@ -83,7 +96,7 @@ export const Quiz = ({ lesson, userId, isPreviewMode = false, previewLessonId }:
     lesson.quizCooldownInHours,
   );
 
-  if (!questions?.length) return null;
+  if (!questions.length) return null;
 
   const handleOnSubmit = async (data: QuizForm) => {
     submitQuiz.mutate({ lessonId, questionsAnswers: parseQuizFormData(data), language });
@@ -132,7 +145,7 @@ export const Quiz = ({ lesson, userId, isPreviewMode = false, previewLessonId }:
           <Questions
             questions={questions}
             isQuizCompleted={isUserSubmittedAnswer}
-            lessonId={previewLessonId || lessonId}
+            lessonId={lesson.id}
           />
           {!isPreviewMode && (
             <div className="flex gap-x-2 self-end">
@@ -146,7 +159,7 @@ export const Quiz = ({ lesson, userId, isPreviewMode = false, previewLessonId }:
                           type="button"
                           onClick={handleRetake}
                           className="gap-x-1"
-                          disabled={isAdminLike || !isUserSubmittedAnswer || !canRetake}
+                          disabled={!isUserSubmittedAnswer || !canRetake}
                         >
                           <span>
                             {`${t("studentLessonView.button.retake")} ${leftAttemptsToDisplay(
@@ -178,7 +191,7 @@ export const Quiz = ({ lesson, userId, isPreviewMode = false, previewLessonId }:
               <Button
                 type="submit"
                 className="flex items-center gap-x-2"
-                disabled={isAdminLike || isUserSubmittedAnswer}
+                disabled={isUserSubmittedAnswer}
               >
                 <span>{t("studentLessonView.button.submit")}</span>
                 <Icon name="ArrowRight" className="h-auto w-4" />

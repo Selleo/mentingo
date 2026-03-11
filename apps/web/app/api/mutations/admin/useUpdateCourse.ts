@@ -29,6 +29,9 @@ export function useUpdateCourse() {
       await queryClient.invalidateQueries({
         queryKey: [COURSE_QUERY_KEY, { id: options.courseId }],
       });
+      await queryClient.invalidateQueries({
+        queryKey: ["course"],
+      });
 
       return response.data;
     },

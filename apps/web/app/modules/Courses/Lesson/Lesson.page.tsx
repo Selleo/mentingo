@@ -11,9 +11,10 @@ import { PageWrapper } from "~/components/PageWrapper";
 import { getNextVideoUrl } from "~/components/VideoPlayer/autoplayFlow";
 import { useVideoPlayer } from "~/components/VideoPlayer/VideoPlayerContext";
 import { useLearningTimeTracker } from "~/hooks/useLearningTimeTracker";
-import { useUserRole } from "~/hooks/useUserRole";
 import Loader from "~/modules/common/Loader/Loader";
 import { useVideoPreferencesStore } from "~/modules/common/store/useVideoPreferencesStore";
+import { CourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
+import { LearningModeBanner } from "~/modules/Courses/Lesson/LearningModeBanner";
 import { LessonContent } from "~/modules/Courses/Lesson/LessonContent";
 import { LessonSidebar } from "~/modules/Courses/Lesson/LessonSidebar";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
@@ -46,7 +47,6 @@ export default function LessonPage() {
 
   const { language } = useLanguageStore();
   const { data: user } = useCurrentUser();
-  const { isAdminLike } = useUserRole();
 
   const [error, setError] = useState(false);
 
@@ -134,7 +134,6 @@ export default function LessonPage() {
   }
 
   const { isFirst, isLast } = checkOverallLessonPosition(course.chapters, lessonId);
-  const isPreviewMode = !course.enrolled && isAdminLike;
 
   const currentChapter = course.chapters.find((chapter) =>
     chapter?.lessons.some((l) => l.id === lessonId),
@@ -220,30 +219,38 @@ export default function LessonPage() {
   ];
 
   return (
-    <PageWrapper className="h-auto max-w-full" breadcrumbs={breadcrumbs}>
-      <div className="flex w-full max-w-full flex-col gap-6 lg:grid lg:grid-cols-[1fr_480px] lg:items-start">
-        <div className="flex w-full min-w-0 flex-col divide-y rounded-lg bg-white">
-          <div className="flex items-center p-6 sm:px-10 3xl:px-8">
-            <p className="h6 text-neutral-950">
-              <span className="text-neutral-800">
-                {t("studentLessonView.other.chapter")} {currentChapter?.displayOrder}:
-              </span>{" "}
-              {currentChapter?.title}
-            </p>
+    <CourseAccessProvider course={course}>
+      <PageWrapper
+        className="h-auto"
+        breadcrumbs={breadcrumbs}
+        aboveBreadcrumbs={<LearningModeBanner />}
+      >
+        <div className="flex w-full max-w-full flex-col gap-6">
+          <div className="flex w-full max-w-full flex-col gap-6 lg:grid lg:grid-cols-[1fr_480px] lg:items-start">
+            <div className="flex w-full min-w-0 flex-col divide-y rounded-lg bg-white">
+              <div className="flex items-center p-6 sm:px-10 3xl:px-8">
+                <p className="h6 text-neutral-950">
+                  <span className="text-neutral-800">
+                    {t("studentLessonView.other.chapter")} {currentChapter?.displayOrder}:
+                  </span>{" "}
+                  {currentChapter?.title}
+                </p>
+              </div>
+              <LessonContent
+                lesson={lesson}
+                course={course}
+                lessonsAmount={currentChapter?.lessons.length ?? 0}
+                handlePrevious={() => handlePrevLesson(lessonId, course.chapters)}
+                handleNext={() => handleNextLesson(lessonId, course.chapters)}
+                isFirstLesson={isFirst}
+                isLastLesson={isLast}
+                lessonLoading={lessonLoading}
+              />
+            </div>
+            <LessonSidebar course={course} lessonId={lessonId} />
           </div>
-          <LessonContent
-            lesson={lesson}
-            course={course}
-            lessonsAmount={currentChapter?.lessons.length ?? 0}
-            handlePrevious={() => handlePrevLesson(lessonId, course.chapters)}
-            handleNext={() => handleNextLesson(lessonId, course.chapters)}
-            isFirstLesson={isFirst}
-            isLastLesson={isLast}
-            lessonLoading={lessonLoading}
-          />
         </div>
-        <LessonSidebar course={course} lessonId={lessonId} isPreviewMode={isPreviewMode} />
-      </div>
-    </PageWrapper>
+      </PageWrapper>
+    </CourseAccessProvider>
   );
 }

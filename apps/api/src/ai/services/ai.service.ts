@@ -8,7 +8,7 @@ import {
 } from "@nestjs/common";
 import { trace } from "@opentelemetry/api";
 import { experimental_transcribe, generateObject, jsonSchema, type Message, streamText } from "ai";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import _ from "lodash";
 
 import { MAX_TOKENS } from "src/ai/ai.constants";
@@ -29,9 +29,19 @@ import {
   THREAD_STATUS,
 } from "src/ai/utils/ai.type";
 import { DatabasePg } from "src/common";
+import {
+  canUseLessonProgressAsLearner,
+  LEARNING_MODE_REQUIRED_ERROR_KEY,
+} from "src/common/utils/lessonLearningAccess";
 import { dbAls } from "src/storage/db/db-als.store";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
-import { aiMentorThreads } from "src/storage/schema";
+import {
+  aiMentorThreads,
+  chapters,
+  courseStudentMode,
+  lessons,
+  studentCourses,
+} from "src/storage/schema";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
@@ -258,6 +268,8 @@ export class AiService {
   }
 
   async retakeLesson(lessonId: UUIDType, userId: UUIDType, userRole: UserRole) {
+    await this.assertStudentProgressMutationAllowed(lessonId, userId, userRole);
+
     const [lesson] = await this.aiRepository.checkLessonAssignment(lessonId, userId);
 
     if (userRole === USER_ROLES.STUDENT && !lesson.isAssigned && !lesson.isFreemium)
@@ -267,6 +279,41 @@ export class AiService {
       await this.aiRepository.setThreadsToArchived(lessonId, userId, trx);
       await this.aiRepository.resetStudentProgressForLesson(lessonId, userId, trx);
     });
+  }
+
+  private async assertStudentProgressMutationAllowed(
+    lessonId: UUIDType,
+    userId: UUIDType,
+    userRole: UserRole,
+  ) {
+    if (userRole === USER_ROLES.STUDENT) return;
+
+    const [access] = await this.db
+      .select({
+        isAssigned: studentCourses.id,
+        isStudentMode: courseStudentMode.id,
+      })
+      .from(lessons)
+      .innerJoin(chapters, eq(lessons.chapterId, chapters.id))
+      .leftJoin(
+        studentCourses,
+        and(eq(studentCourses.courseId, chapters.courseId), eq(studentCourses.studentId, userId)),
+      )
+      .leftJoin(
+        courseStudentMode,
+        and(
+          eq(courseStudentMode.courseId, chapters.courseId),
+          eq(courseStudentMode.userId, userId),
+        ),
+      )
+      .where(eq(lessons.id, lessonId));
+
+    const hasLearnerAccess = canUseLessonProgressAsLearner(userRole, {
+      hasEnrollment: !!access?.isAssigned,
+      isLearningModeActive: !!access?.isStudentMode,
+    });
+
+    if (!hasLearnerAccess) throw new ForbiddenException(LEARNING_MODE_REQUIRED_ERROR_KEY);
   }
 
   async transcribe(clientId: string, audio: Buffer) {

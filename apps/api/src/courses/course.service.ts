@@ -65,6 +65,7 @@ import {
   categories,
   certificates,
   chapters,
+  courseStudentMode,
   courses,
   coursesSummaryStats,
   groups,
@@ -143,7 +144,6 @@ import type { CoursesSettings } from "./types/settings";
 import type { SupportedLanguages } from "@repo/shared";
 import type { SQL } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
-import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { CourseActivityLogSnapshot } from "src/activity-logs/types";
 import type { Pagination, UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
@@ -153,7 +153,6 @@ import type {
   AdminLessonWithContentSchema,
   LessonForChapterSchema,
 } from "src/lesson/lesson.schema";
-import type * as schema from "src/storage/schema";
 import type { UserRole } from "src/user/schemas/userRoles";
 import type { ProgressStatus } from "src/utils/types/progress.type";
 import type Stripe from "stripe";
@@ -2025,6 +2024,7 @@ export class CourseService {
     const [course] = await this.db
       .select({
         id: courses.id,
+        authorId: courses.authorId,
         enrolled: sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN TRUE ELSE FALSE END`,
         price: courses.priceInCents,
         userDeletedAt: users.deletedAt,
@@ -2041,6 +2041,13 @@ export class CourseService {
 
     if (course.userDeletedAt) {
       throw new NotFoundException("User not found");
+    }
+
+    if (
+      currentUser?.role === USER_ROLES.CONTENT_CREATOR &&
+      currentUser.userId === course.authorId
+    ) {
+      throw new ForbiddenException("You don't have permission to enroll in your own course");
     }
 
     if (course.enrolled) throw new ConflictException("Course is already enrolled");
@@ -2397,8 +2404,9 @@ export class CourseService {
     studentId: UUIDType,
     paymentId: string | null = null,
     enrolledByGroupId: UUIDType | null = null,
+    dbInstance: DatabasePg = this.db,
   ): Promise<StudentCourseSelect> {
-    const [enrolledCourse] = await this.db
+    const [enrolledCourse] = await dbInstance
       .insert(studentCourses)
       .values({
         studentId,
@@ -2423,7 +2431,7 @@ export class CourseService {
     courseId: UUIDType,
     studentId: UUIDType,
     paymentId: string | null = null,
-    trx: PostgresJsDatabase<typeof schema>,
+    trx: DatabasePg,
   ) {
     const alreadyHasEnrollmentRecord = Boolean(
       (
@@ -2499,6 +2507,92 @@ export class CourseService {
         }),
       );
     }
+  }
+
+  async setCourseStudentMode(
+    courseId: UUIDType,
+    userId: UUIDType,
+    userRole: UserRole,
+    enableStudentMode: boolean,
+  ) {
+    const [course] = await this.db
+      .select({ id: courses.id, authorId: courses.authorId })
+      .from(courses)
+      .where(eq(courses.id, courseId));
+
+    if (!course) throw new NotFoundException("Course not found");
+
+    if (userRole === USER_ROLES.CONTENT_CREATOR && course.authorId !== userId) {
+      throw new ForbiddenException("You don't have permission to change student mode");
+    }
+
+    await this.db.transaction(async (trx) => {
+      if (enableStudentMode) return await this.enableCourseStudentMode(courseId, userId, trx);
+
+      await this.disableCourseStudentMode(courseId, userId, trx);
+    });
+
+    const studentModeCourseIds = await this.getStudentModeCourseIds(userId);
+
+    return {
+      courseId,
+      enabled: enableStudentMode,
+      studentModeCourseIds,
+    };
+  }
+
+  private async enableCourseStudentMode(courseId: UUIDType, userId: UUIDType, trx: DatabasePg) {
+    await this.createStudentCourse(courseId, userId, null, null, trx);
+
+    await trx.insert(courseStudentMode).values({ userId, courseId }).onConflictDoNothing();
+
+    await this.createCourseDependencies(courseId, userId, null, trx);
+  }
+
+  private async disableCourseStudentMode(courseId: UUIDType, userId: UUIDType, trx: DatabasePg) {
+    await trx
+      .delete(courseStudentMode)
+      .where(and(eq(courseStudentMode.userId, userId), eq(courseStudentMode.courseId, courseId)));
+  }
+
+  async getStudentModeCourseIds(userId: UUIDType, dbInstance: DatabasePg = this.db) {
+    const courseIds = await dbInstance
+      .select({ courseId: courseStudentMode.courseId })
+      .from(courseStudentMode)
+      .where(eq(courseStudentMode.userId, userId));
+
+    return courseIds.map(({ courseId }) => courseId);
+  }
+
+  async isCourseStudentModeEnabled(
+    courseId: UUIDType,
+    userId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    const [studentModeExists] = await dbInstance
+      .select({ id: courseStudentMode.id })
+      .from(courseStudentMode)
+      .where(and(eq(courseStudentMode.courseId, courseId), eq(courseStudentMode.userId, userId)));
+
+    return Boolean(studentModeExists);
+  }
+
+  async isLessonStudentModeEnabled(
+    lessonId: UUIDType,
+    userId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    const [lesson] = await dbInstance
+      .select({ courseId: chapters.courseId })
+      .from(lessons)
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .where(eq(lessons.id, lessonId));
+
+    if (!lesson?.courseId) {
+      throw new NotFoundException("Lesson not found");
+    }
+
+    return this.isCourseStudentModeEnabled(lesson.courseId, userId, dbInstance);
   }
 
   async deleteCourse(id: UUIDType, currentUserRole: UserRole) {
@@ -2669,7 +2763,7 @@ export class CourseService {
     courseId: UUIDType,
     paymentId: string | null,
     existingFreemiumLessonProgress: boolean,
-    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+    dbInstance: DatabasePg = this.db,
   ) {
     if (!paymentId) {
       return this.statisticsRepository.updateFreePurchasedCoursesStats(courseId, dbInstance);
@@ -2945,7 +3039,7 @@ export class CourseService {
   }
 
   private async getAvailableCourseIds(
-    trx: PostgresJsDatabase<typeof schema>,
+    trx: DatabasePg,
     currentUserId?: UUIDType,
     authorId?: UUIDType,
     excludeCourseId?: UUIDType,
@@ -3563,7 +3657,7 @@ export class CourseService {
   private async buildCourseActivitySnapshot(
     courseId: UUIDType,
     language?: SupportedLanguages,
-    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+    dbInstance: DatabasePg = this.db,
   ): Promise<CourseActivityLogSnapshot> {
     const {
       language: resolvedLanguage,

@@ -3,10 +3,13 @@ import { useTranslation } from "react-i18next";
 import { ProgressBadge } from "~/components/Badges/ProgressBadge";
 import { Icon } from "~/components/Icon";
 import { cn } from "~/lib/utils";
+import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import {
   getLessonTypeTranslationKey,
   LessonTypesIcons,
 } from "~/modules/Courses/CourseView/lessonTypes";
+
+import { LESSON_PROGRESS_STATUSES } from "../Lesson/types";
 
 import type { Lesson } from "./CourseChapter";
 
@@ -19,15 +22,17 @@ const progressBadge = {
 
 type CourseChapterLessonProps = {
   lesson: Lesson;
-  isPreviewMode?: boolean;
 };
 
-export const CourseChapterLesson = ({
-  lesson,
-  isPreviewMode = false,
-}: CourseChapterLessonProps) => {
+export const CourseChapterLesson = ({ lesson }: CourseChapterLessonProps) => {
   const { t } = useTranslation();
+  const { isPreviewMode } = useCourseAccessProvider();
   const hasAccess = isPreviewMode || lesson.hasAccess;
+  const badgeProgress = isPreviewMode
+    ? LESSON_PROGRESS_STATUSES.NOT_STARTED
+    : hasAccess
+      ? lesson.status
+      : LESSON_PROGRESS_STATUSES.BLOCKED;
 
   const lessonElement = (
     <div
@@ -50,10 +55,9 @@ export const CourseChapterLesson = ({
           {t(getLessonTypeTranslationKey(lesson.type), { defaultValue: lesson.type })}
         </span>
       </div>
-      <ProgressBadge
-        progress={progressBadge[hasAccess ? lesson.status : "blocked"]}
-        className={cn("self-center", { invisible: isPreviewMode })}
-      />
+      {!isPreviewMode && (
+        <ProgressBadge progress={progressBadge[badgeProgress]} className="self-center" />
+      )}
     </div>
   );
 

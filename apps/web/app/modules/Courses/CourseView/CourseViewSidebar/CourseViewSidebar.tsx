@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useTransferCourseOwnership } from "~/api/mutations/admin/useTransferCourseOwnership";
+import { useCurrentUser } from "~/api/queries";
 import { useCourseOwnershipCandidates } from "~/api/queries/admin/useCourseOwnershipCandidates";
 import { useUserDetails } from "~/api/queries/useUserDetails";
 import { Button } from "~/components/ui/button";
@@ -10,6 +11,7 @@ import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { useUserRole } from "~/hooks/useUserRole";
 import { cn } from "~/lib/utils";
 import TransferOwnershipSelect from "~/modules/Admin/EditCourse/CourseSettings/components/TransferOwnershipSelect";
+import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import { CourseOptions } from "~/modules/Courses/CourseView/CourseViewSidebar/CourseOptions";
 import { CourseProgress } from "~/modules/Courses/CourseView/CourseViewSidebar/CourseProgress";
 
@@ -24,7 +26,9 @@ export const CourseViewSidebar = ({ course }: CourseViewSidebar) => {
   const [selectedUserId, setSelectedUserId] = useState("");
 
   const { data: userDetails } = useUserDetails(course?.authorId ?? "");
-  const { isAdminLike, isAdmin } = useUserRole();
+  const { data: currentUser } = useCurrentUser();
+  const { isAdminLike, isAdmin, isContentCreator } = useUserRole();
+  const { isEffectiveStudentExperience } = useCourseAccessProvider();
 
   const { t } = useTranslation();
 
@@ -35,7 +39,13 @@ export const CourseViewSidebar = ({ course }: CourseViewSidebar) => {
     enabled: isAdmin,
   });
 
-  const shouldShowCourseOptions = !course?.enrolled && !isAdminLike;
+  const isNonAuthorContentCreator = isContentCreator && currentUser?.id !== course.authorId;
+
+  const shouldShowCourseOptions =
+    !course?.enrolled &&
+    !isEffectiveStudentExperience &&
+    (!isAdminLike || isNonAuthorContentCreator);
+
   const canEditOwner =
     isAdmin && !!course.id && !!courseOwnershipCandidates?.possibleCandidates?.length;
 

@@ -297,7 +297,7 @@ export class LessonController {
   }
 
   @Post("evaluation-quiz")
-  @Roles(USER_ROLES.STUDENT)
+  @Roles(USER_ROLES.STUDENT, USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   @Validate({
     request: [{ type: "body", schema: answerQuestionsForLessonBody, required: true }],
     response: baseResponse(
@@ -315,6 +315,7 @@ export class LessonController {
   async evaluationQuiz(
     @Body() answers: AnswerQuestionBody,
     @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser("role") currentUserRole: UserRole,
   ): Promise<
     BaseResponse<{
       message: string;
@@ -326,7 +327,11 @@ export class LessonController {
       };
     }>
   > {
-    const evaluationResult = await this.lessonService.evaluationQuiz(answers, currentUserId);
+    const evaluationResult = await this.lessonService.evaluationQuiz(
+      answers,
+      currentUserId,
+      currentUserRole,
+    );
     return new BaseResponse({
       message: "Evaluation quiz successfully",
       data: evaluationResult,
@@ -420,7 +425,7 @@ export class LessonController {
   }
 
   @Delete("delete-student-quiz-answers")
-  @Roles(USER_ROLES.STUDENT)
+  @Roles(USER_ROLES.STUDENT, USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   @Validate({
     request: [{ type: "query", name: "lessonId", schema: UUIDSchema, required: true }],
     response: baseResponse(Type.Object({ message: Type.String() })),
@@ -428,8 +433,9 @@ export class LessonController {
   async deleteStudentQuizAnswers(
     @Query("lessonId") lessonId: UUIDType,
     @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser("role") currentUserRole: UserRole,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.lessonService.deleteStudentQuizAnswers(lessonId, currentUserId);
+    await this.lessonService.deleteStudentQuizAnswers(lessonId, currentUserId, currentUserRole);
     return new BaseResponse({ message: "Evaluation quiz answers removed successfully" });
   }
 

@@ -30,14 +30,14 @@ import type {
   CertificateResponse,
   CertificateShareLinkResponse,
 } from "./certificates.types";
-import type { OnModuleDestroy, OnModuleInit } from "@nestjs/common";
+import type { OnModuleDestroy } from "@nestjs/common";
 import type { SupportedLanguages } from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { PaginatedResponse, UUIDType } from "src/common";
 import type * as schema from "src/storage/schema";
 
 @Injectable()
-export class CertificatesService implements OnModuleDestroy, OnModuleInit {
+export class CertificatesService implements OnModuleDestroy {
   private readonly logger = new Logger(CertificatesService.name);
 
   private browser: Browser | null = null;
@@ -49,12 +49,6 @@ export class CertificatesService implements OnModuleDestroy, OnModuleInit {
     private readonly fileService: FileService,
     private readonly s3Service: S3Service,
   ) {}
-
-  async onModuleInit() {
-    void this.getBrowser().catch((error) => {
-      this.logger.warn(`Certificate PDF browser warm-up failed during module init: ${error}`);
-    });
-  }
 
   async onModuleDestroy() {
     const browser =
