@@ -31,8 +31,9 @@ export function VideoPlayerSingleton() {
   const { currentUrl, placeholderElement, provider } = state;
   const rect = usePlaceholderRect(placeholderElement, currentUrl);
   const [showPlayNext, setShowPlayNext] = useState(false);
+  const [lastRect, setLastRect] = useState<DOMRect | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const { isFullscreen } = useFullscreenToggle(containerRef);
+  const { isFullscreen, isAnyFullscreen } = useFullscreenToggle(containerRef);
 
   const { autoplay, autoplaySettings } = useVideoPreferencesStore();
   const { onAutoplay } = useAutoplayAction(
@@ -43,6 +44,10 @@ export function VideoPlayerSingleton() {
   useEffect(() => {
     setShowPlayNext(false);
   }, [currentUrl]);
+
+  useEffect(() => {
+    if (rect) setLastRect(rect);
+  }, [rect]);
 
   const runAutoplay = useCallback(() => {
     setShowPlayNext(false);
@@ -79,18 +84,28 @@ export function VideoPlayerSingleton() {
     );
   }, [autoplay, autoplaySettings]);
 
-  const canRender = !!rect && (currentUrl || showPlayNext);
+  const activeRect = rect ?? lastRect;
+  const canRender = (Boolean(activeRect) || isAnyFullscreen) && (currentUrl || showPlayNext);
 
   if (!canRender) return null;
 
-  const style: React.CSSProperties = {
-    position: "fixed",
-    top: rect.top,
-    left: rect.left,
-    width: rect.width,
-    height: rect.height,
-    zIndex: 10,
-  };
+  const style: React.CSSProperties =
+    !activeRect && isAnyFullscreen
+      ? {
+          position: "fixed",
+          inset: 0,
+          width: "100vw",
+          height: "100vh",
+          zIndex: 10,
+        }
+      : {
+          position: "fixed",
+          top: activeRect?.top ?? 0,
+          left: activeRect?.left ?? 0,
+          width: activeRect?.width ?? 0,
+          height: activeRect?.height ?? 0,
+          zIndex: 10,
+        };
 
   return createPortal(
     <div ref={containerRef} style={style} className="relative bg-black">
