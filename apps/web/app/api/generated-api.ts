@@ -554,9 +554,9 @@ export interface GetAdminRegistrationFormResponse {
       type: "checkbox";
       label: {
         /** @minLength 1 */
-        en: string;
+        en?: string;
         /** @minLength 1 */
-        pl: string;
+        pl?: string;
       };
       baseLanguage: "en" | "pl";
       availableLocales: ("en" | "pl")[];
@@ -576,9 +576,9 @@ export interface UpdateRegistrationFormBody {
     type: "checkbox";
     label: {
       /** @minLength 1 */
-      en: string;
+      en?: string;
       /** @minLength 1 */
-      pl: string;
+      pl?: string;
     };
     baseLanguage?: "en" | "pl";
     availableLocales?: ("en" | "pl")[];
@@ -596,9 +596,9 @@ export interface UpdateRegistrationFormResponse {
       type: "checkbox";
       label: {
         /** @minLength 1 */
-        en: string;
+        en?: string;
         /** @minLength 1 */
-        pl: string;
+        pl?: string;
       };
       baseLanguage: "en" | "pl";
       availableLocales: ("en" | "pl")[];
