@@ -2024,6 +2024,7 @@ export class CourseService {
     const [course] = await this.db
       .select({
         id: courses.id,
+        authorId: courses.authorId,
         enrolled: sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN TRUE ELSE FALSE END`,
         price: courses.priceInCents,
         userDeletedAt: users.deletedAt,
@@ -2040,6 +2041,13 @@ export class CourseService {
 
     if (course.userDeletedAt) {
       throw new NotFoundException("User not found");
+    }
+
+    if (
+      currentUser?.role === USER_ROLES.CONTENT_CREATOR &&
+      currentUser.userId === course.authorId
+    ) {
+      throw new ForbiddenException("You don't have permission to enroll in your own course");
     }
 
     if (course.enrolled) throw new ConflictException("Course is already enrolled");

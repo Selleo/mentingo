@@ -626,7 +626,7 @@ export class CourseController {
   }
 
   @Post("enroll-course")
-  @Roles(USER_ROLES.STUDENT)
+  @Roles(USER_ROLES.STUDENT, USER_ROLES.CONTENT_CREATOR)
   @Validate({
     request: [{ type: "query", name: "id", schema: UUIDSchema }],
     response: baseResponse(Type.Object({ message: Type.String() })),
