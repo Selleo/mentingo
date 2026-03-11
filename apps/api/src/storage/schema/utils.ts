@@ -1,7 +1,10 @@
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { sql } from "drizzle-orm";
 import { boolean, index, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 import { tenants } from ".";
+
+import type { SupportedLanguages } from "@repo/shared";
 
 export const id = {
   id: uuid("id")
@@ -40,9 +43,13 @@ export const STATUS_KEYS = Object.fromEntries(
   Object.entries(STATUS).map(([key, { value }]) => [key, value]),
 );
 
-export const baseLanguage = text("base_language").notNull().default("en");
+export const baseLanguage = text("base_language")
+  .$type<SupportedLanguages>()
+  .notNull()
+  .default(SUPPORTED_LANGUAGES.EN);
 export const availableLocales = text("available_locales")
   .array()
+  .$type<SupportedLanguages[]>()
   .notNull()
   .default(sql`ARRAY['en']::text[]`);
 

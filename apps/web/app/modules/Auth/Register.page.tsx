@@ -8,19 +8,23 @@ import { useTranslation } from "react-i18next";
 
 import { useRegisterUser } from "~/api/mutations/useRegisterUser";
 import { useGlobalSettings, useGlobalSettingsSuspense } from "~/api/queries/useGlobalSettings";
+import { useRegistrationForm } from "~/api/queries/useRegistrationForm";
 import { useSSOEnabled } from "~/api/queries/useSSOEnabled";
 import { Icon } from "~/components/Icon";
 import PasswordValidationDisplay from "~/components/PasswordValidation/PasswordValidationDisplay";
+import { PlatformLogo } from "~/components/PlatformLogo";
+import Viewer from "~/components/RichText/Viever";
 import { Button } from "~/components/ui/button";
 import { Calendar } from "~/components/ui/calendar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import { Checkbox } from "~/components/ui/checkbox";
 import { FormValidationError } from "~/components/ui/form-validation-error";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
 import { useToast } from "~/components/ui/use-toast";
 import { cn } from "~/lib/utils";
-import { detectBrowserLanguage, SUPPORTED_LANGUAGES } from "~/utils/browser-language";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import { SocialLogin } from "./components";
@@ -30,6 +34,11 @@ import { parseBirthday } from "./utils/birthday";
 import type { MetaFunction } from "@remix-run/react";
 import type { RegisterBody } from "~/api/generated-api";
 
+type RegisterFormValues = RegisterBody & {
+  birthday: string;
+  formAnswers: Record<string, boolean>;
+};
+
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.register");
 
 export default function RegisterPage() {
@@ -37,9 +46,10 @@ export default function RegisterPage() {
   const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const navigate = useNavigate();
-
+  const selectedLanguage = useLanguageStore((state) => state.language);
   const { data: ssoEnabled } = useSSOEnabled();
   const { data: globalSettings } = useGlobalSettings();
+  const { data: registrationForm } = useRegistrationForm(selectedLanguage);
 
   const isGoogleOAuthEnabled =
     (ssoEnabled?.data.google ?? import.meta.env.VITE_GOOGLE_OAUTH_ENABLED) === "true";
@@ -50,24 +60,28 @@ export default function RegisterPage() {
   const isSlackOAuthEnabled =
     (ssoEnabled?.data.slack ?? import.meta.env.VITE_SLACK_OAUTH_ENABLED) === "true";
 
-  const registerSchema = useMemo(
-    () => makeRegisterSchema(t, globalSettings?.ageLimit ?? undefined),
-    [globalSettings?.ageLimit, t],
+  const requiredFieldIds = useMemo(
+    () => registrationForm?.fields.filter((field) => field.required).map((field) => field.id) ?? [],
+    [registrationForm?.fields],
   );
 
-  const methods = useForm<RegisterBody & { birthday: string }>({
+  const registerSchema = useMemo(
+    () => makeRegisterSchema(t, globalSettings?.ageLimit ?? undefined, requiredFieldIds),
+    [globalSettings?.ageLimit, requiredFieldIds, t],
+  );
+
+  const methods = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
-    mode: "onChange",
     defaultValues: {
       firstName: "",
       lastName: "",
       email: "",
       password: "",
-      language: SUPPORTED_LANGUAGES.includes(detectBrowserLanguage())
-        ? detectBrowserLanguage()
-        : "en",
+      language: selectedLanguage,
       birthday: "",
+      formAnswers: {},
     },
+    mode: "onChange",
   });
 
   const {
@@ -82,8 +96,31 @@ export default function RegisterPage() {
     register,
     handleSubmit,
     control,
+    reset,
     formState: { errors, isValid },
   } = methods;
+
+  useEffect(() => {
+    if (!registrationForm?.fields) return;
+
+    const currentValues = methods.getValues();
+    const nextFormAnswers = Object.fromEntries(
+      registrationForm.fields.map((field) => [
+        field.id,
+        currentValues.formAnswers?.[field.id] ?? false,
+      ]),
+    );
+
+    reset(
+      {
+        ...currentValues,
+        formAnswers: nextFormAnswers,
+      },
+      {
+        keepDirtyValues: true,
+      },
+    );
+  }, [methods, registrationForm?.fields, reset]);
 
   const isAnyProviderEnabled = useMemo(
     () => isGoogleOAuthEnabled || isMicrosoftOAuthEnabled || isSlackOAuthEnabled,
@@ -102,7 +139,7 @@ export default function RegisterPage() {
     // eslint-disable-next-line
   }, [inviteOnlyRegistration, navigate, toast]);
 
-  const onSubmit = async (data: RegisterBody & { birthday: string }) => {
+  const onSubmit = async (data: RegisterFormValues) => {
     if (isSSOEnforced && isAnyProviderEnabled) return;
 
     /**
@@ -136,10 +173,13 @@ export default function RegisterPage() {
           />
         )}
         <div className="flex items-start justify-center px-4 py-6">
-          <Card className="w-full max-w-sm">
+          <Card className="w-full max-w-md border-neutral-200/80 bg-white/95 shadow-xl backdrop-blur">
             <CardHeader>
+              <div className="mb-2 flex justify-center">
+                <PlatformLogo className="h-16 w-auto py-2" alt="Platform Logo" />
+              </div>
               <CardTitle className="text-xl">{t("registerView.header")}</CardTitle>
-              <CardDescription>
+              <CardDescription className="max-w-md text-sm leading-6">
                 {isSSOEnforced ? t("registerView.subHeaderSSO") : t("registerView.subHeader")}
               </CardDescription>
             </CardHeader>
@@ -245,6 +285,50 @@ export default function RegisterPage() {
                     <Input id="password" type="password" {...register("password")} />
                     <PasswordValidationDisplay fieldName="password" />
                   </div>
+
+                  {registrationForm?.fields.length ? (
+                    <div className="grid gap-2">
+                      {registrationForm.fields.map((field) => {
+                        const fieldError = errors.formAnswers?.[field.id]?.message;
+
+                        return (
+                          <div key={field.id} className="space-y-2">
+                            <div className="flex items-start gap-3">
+                              <Controller
+                                control={control}
+                                name={`formAnswers.${field.id}`}
+                                render={({ field: controllerField }) => (
+                                  <div className="flex items-start gap-2">
+                                    <Checkbox
+                                      id={field.id}
+                                      checked={Boolean(controllerField.value)}
+                                      onCheckedChange={(checked) =>
+                                        controllerField.onChange(Boolean(checked))
+                                      }
+                                      className="mt-1.5"
+                                    />
+
+                                    <div className="flex items-center gap-1 text-sm">
+                                      <Viewer
+                                        content={field.label}
+                                        className="text-sm [&_article]:m-0"
+                                      />
+                                    </div>
+                                    {field.required && (
+                                      <span className="font-semibold leading-6 text-destructive">
+                                        *
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
+                              />
+                            </div>
+                            <FormValidationError message={fieldError} />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : null}
 
                   <Button type="submit" className="w-full" disabled={!isValid}>
                     {t("registerView.button.createAccount")}

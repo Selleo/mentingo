@@ -7,7 +7,11 @@ import { calculateAge } from "../utils/birthday";
 
 import type i18next from "i18next";
 
-export const makeRegisterSchema = (t: typeof i18next.t, ageLimit?: number) =>
+export const makeRegisterSchema = (
+  t: typeof i18next.t,
+  ageLimit?: number,
+  requiredFieldIds: string[] = [],
+) =>
   z
     .object({
       firstName: z.string().min(2, { message: t("registerView.validation.firstName") }),
@@ -16,9 +20,20 @@ export const makeRegisterSchema = (t: typeof i18next.t, ageLimit?: number) =>
       password: passwordSchema,
       language: z.enum([...SUPPORTED_LANGUAGES] as [string, ...string[]]),
       birthday: z.string().optional(),
+      formAnswers: z.record(z.string(), z.boolean()).default({}),
     })
     .superRefine((data, ctx) => {
-      if (!ageLimit) return; // no rule to apply
+      for (const fieldId of requiredFieldIds) {
+        if (data.formAnswers?.[fieldId] !== true) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["formAnswers", fieldId],
+            message: t("registerView.validation.requiredCheckbox"),
+          });
+        }
+      }
+
+      if (!ageLimit) return; // no age rule to apply
 
       const age = calculateAge(data.birthday);
 

@@ -5,6 +5,7 @@ import { OrganizationLoginBackgroundUpload } from "~/modules/Dashboard/Settings/
 import { OrganizationTheme } from "~/modules/Dashboard/Settings/components/admin/OrganizationTheme";
 import AdminPreferences from "~/modules/Dashboard/Settings/components/admin/Preferences";
 import QAPreferences from "~/modules/Dashboard/Settings/components/admin/QAPreferences";
+import { RegistrationFormBuilder } from "~/modules/Dashboard/Settings/components/admin/RegistrationFormBuilder";
 import { PlatformLogoForm } from "~/modules/Dashboard/Settings/forms/PlatformLogoForm";
 import { PlatformSimpleLogoForm } from "~/modules/Dashboard/Settings/forms/PlatformSimpleLogoForm";
 
@@ -16,11 +17,13 @@ interface OrganizationTabContentProps {
 }
 
 export default function CustomizePlatformTabContent({
+  isAdmin,
   globalSettings,
 }: OrganizationTabContentProps) {
   return (
     <>
       <AdminPreferences globalSettings={globalSettings} />
+      {isAdmin && <RegistrationFormBuilder />}
       <QAPreferences globalSettings={globalSettings} />
       <NewsPreferences globalSettings={globalSettings} />
       <ArticlesPreferences globalSettings={globalSettings} />

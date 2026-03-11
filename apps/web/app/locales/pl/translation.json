@@ -1637,7 +1637,9 @@
       "email": "Email",
       "password": "Hasło",
       "birthday": "Data urodzenia",
-      "birthdayPlaceholder": "Wybierz datę"
+      "birthdayPlaceholder": "Wybierz datę",
+      "requiredBadge": "Wymagane",
+      "optionalBadge": "Opcjonalne"
     },
     "other": {
       "alreadyHaveAccount": "Masz już konto?",
@@ -1651,11 +1653,14 @@
       "firstName": "Imię jest wymagane",
       "lastName": "Nazwisko jest wymagane",
       "email": "Nieprawidłowy email",
-      "birthday": "Aby się zarejestrować musisz mieć przynajmniej {{ageLimit}} lat"
+      "birthday": "Aby się zarejestrować musisz mieć przynajmniej {{ageLimit}} lat",
+      "requiredCheckbox": "Ta zgoda jest wymagana."
     },
     "toast": {
       "userAlreadyExists": "Użytkownik z tym adresem e-mail już istnieje.",
-      "createAccountFailed": "Nie udało się utworzyć konta. Spróbuj ponownie."
+      "createAccountFailed": "Nie udało się utworzyć konta. Spróbuj ponownie.",
+      "requiredFormFieldMissing": "Zaakceptuj wszystkie wymagane zgody.",
+      "invalidFormField": "Jedno z przesłanych pól rejestracyjnych jest nieprawidłowe."
     }
   },
   "courseChapterView": {
@@ -2107,6 +2112,41 @@
       "overdueCourseNotificationsPreferenceChangeError": "Nie udało się zaktualizować preferencji powiadomień o zaległych kursach"
     },
     "globalActionWarning": "Ta akcja ma globalny wpływ na aplikację. Zmieni zachowanie dla wszystkich użytkowników."
+  },
+  "registrationFormBuilder": {
+    "title": "Kreator formularza rejestracji",
+    "description": "Zarządzaj dodatkowymi polami typu checkbox widocznymi podczas rejestracji.",
+    "badge": "Rejestracja",
+    "loading": "Ładowanie pól formularza rejestracji...",
+    "empty": "Brak dodatkowych pól rejestracyjnych.",
+    "addFieldTitle": "Dodaj zgodę checkbox",
+    "addFieldDescription": "Twórz opcjonalne lub wymagane pola checkbox dla rejestracji.",
+    "summaryLabel": "Pola",
+    "addField": "Dodaj pole",
+    "save": "Zapisz formularz rejestracji",
+    "validation": {
+      "labelRequired": "Treść etykiety jest wymagana."
+    },
+    "toast": {
+      "saved": "Formularz rejestracji został zapisany."
+    },
+    "field": {
+      "heading": "Pole {{index}}",
+      "typeCheckbox": "Pole typu checkbox",
+      "cardDescription": "Skonfiguruj treść, wymagalność i kolejność tej zgody.",
+      "required": "Pole wymagane",
+      "requiredDescription": "Użytkownik musi zaznaczyć to pole przed utworzeniem konta.",
+      "requiredBadge": "Wymagane",
+      "optionalBadge": "Opcjonalne",
+      "archivedBadge": "Archiwalne",
+      "languageLabel": "Etykieta w języku {{language}}",
+      "languageDescription": "Ta treść jest wyświetlana użytkownikom rejestrującym się w tym języku.",
+      "labelPlaceholder": "Wpisz treść zgody i dodaj linki, jeśli są potrzebne.",
+      "linkOnlyHint": "Tylko zwykły tekst i linki.",
+      "addLink": "Dodaj link",
+      "archive": "Archiwizuj",
+      "restore": "Przywróć"
+    }
   },
   "mfa": {
     "setup": {
