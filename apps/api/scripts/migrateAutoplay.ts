@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
-import { annotateVideoAutoplayInContent } from "src/common/utils/annotateVideoAutoplayInContent";
+import { annotateVideoAutoplayAndBlockIndexesInContent } from "src/common/utils/annotateVideoAutoplayAndBlockIndexesInContent";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import * as schema from "src/storage/schema";
 import { articles, lessons, news } from "src/storage/schema";
@@ -20,7 +20,7 @@ const buildAnnotatedContent = (
 
   for (const language of Object.keys(content)) {
     const current = content[language] as string | null;
-    const annotated = annotateVideoAutoplayInContent(current);
+    const annotated = annotateVideoAutoplayAndBlockIndexesInContent(current);
 
     if (annotated !== current) {
       if (!nextContent) nextContent = { ...content };

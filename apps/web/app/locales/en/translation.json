@@ -2381,6 +2381,9 @@
         "drag": "Drag file",
         "remove": "Remove downloadable file"
       }
+    },
+    "loadingAiAsset": {
+      "processing": "Resource is currently processing"
     }
   },
   "pages": {

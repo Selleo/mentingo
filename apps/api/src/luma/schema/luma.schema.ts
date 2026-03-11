@@ -68,6 +68,11 @@ export type GeneratedLesson = {
   lessonIndex: number;
 };
 
+export type GeneratedAssetPayload = {
+  type: string;
+  draftId: string;
+};
+
 export type GeneratedChapter = {
   type: string;
   generation: {
