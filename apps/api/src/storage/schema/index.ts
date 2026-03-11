@@ -40,8 +40,12 @@ import {
 
 import type {
   CourseOriginType,
+  FormType,
+  LocalizedText,
   MasterCourseEntityType,
   MasterCourseExportSyncStatus,
+  RegistrationFormFieldType,
+  SupportedLanguages,
   SupportSessionStatus,
   TenantStatus,
 } from "@repo/shared";
@@ -693,6 +697,76 @@ export const settings = pgTable(
     tenantId,
   },
   withTenantIdIndex("settings"),
+);
+
+export const forms = pgTable(
+  "forms",
+  {
+    ...id,
+    ...timestamps,
+    type: varchar("type", { length: 50 }).$type<FormType>().notNull(),
+    isActive: boolean("is_active").notNull().default(true),
+    tenantId,
+  },
+  withTenantIdIndex("forms", (table) => ({
+    tenantTypeUniqueIdx: uniqueIndex("forms_tenant_id_type_unique_idx").on(
+      table.tenantId,
+      table.type,
+    ),
+  })),
+);
+
+export const formFields = pgTable(
+  "form_fields",
+  {
+    ...id,
+    ...timestamps,
+    formId: uuid("form_id")
+      .references(() => forms.id, { onDelete: "cascade" })
+      .notNull(),
+    type: varchar("type", { length: 50 }).$type<RegistrationFormFieldType>().notNull(),
+    label: jsonb("label").$type<LocalizedText>().notNull().default({}),
+    required: boolean("required").notNull().default(false),
+    displayOrder: integer("display_order").notNull().default(0),
+    baseLanguage,
+    availableLocales,
+    archived: boolean("archived").notNull().default(false),
+    tenantId,
+  },
+  withTenantIdIndex("form_fields", (table) => ({
+    formDisplayOrderIdx: index("form_fields_form_id_display_order_idx").on(
+      table.formId,
+      table.displayOrder,
+    ),
+  })),
+);
+
+export const formFieldAnswers = pgTable(
+  "form_field_answers",
+  {
+    ...id,
+    ...timestamps,
+    formFieldId: uuid("form_field_id")
+      .references(() => formFields.id, { onDelete: "restrict" })
+      .notNull(),
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    value: boolean("value").notNull(),
+    labelSnapshot: jsonb("label_snapshot").$type<LocalizedText>().notNull().default({}),
+    answeredLanguage: text("answered_language")
+      .$type<SupportedLanguages>()
+      .notNull()
+      .default(SUPPORTED_LANGUAGES.EN),
+    tenantId,
+  },
+  withTenantIdIndex("form_field_answers", (table) => ({
+    userFieldUniqueIdx: uniqueIndex("form_field_answers_user_id_form_field_id_unique").on(
+      table.userId,
+      table.formFieldId,
+    ),
+    userIdx: index("form_field_answers_user_id_idx").on(table.userId),
+  })),
 );
 
 export const certificates = pgTable(

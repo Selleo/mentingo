@@ -680,6 +680,13 @@
       "when": 1772457423678,
       "tag": "0096_backfill_course_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 97,
+      "version": "7",
+      "when": 1773153702669,
+      "tag": "0097_add_registration_form_fields",
+      "breakpoints": true
     }
   ]
 }

@@ -10,8 +10,12 @@ import { ApiClient } from "../api-client";
 import type { RegisterBody } from "../generated-api";
 import type { ApiErrorResponse } from "../types";
 
+type RegisterPayload = RegisterBody & {
+  formAnswers?: Record<string, boolean>;
+};
+
 type RegisterUserOptions = {
-  data: RegisterBody;
+  data: RegisterPayload;
 };
 
 export function useRegisterUser() {
