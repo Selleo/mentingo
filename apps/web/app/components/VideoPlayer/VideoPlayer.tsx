@@ -18,7 +18,6 @@ import {
   registerMentingoFullscreenControl,
 } from "./VideoJSFullscreenControl";
 import "./videojs-vimeo-tech";
-
 import "./videoPlayer.css";
 
 interface VideoPlayerProps {
@@ -30,43 +29,22 @@ interface VideoPlayerProps {
   getFullscreenTarget?: () => HTMLElement | null;
 }
 
-export type VideoJSType = ReturnType<typeof videojs>;
-type VideoPlayerOptions = {
-  autoplay: boolean;
-  controls: boolean;
-  inactivityTimeout: number;
-  loop: boolean;
-  bigPlayButton: boolean;
-  responsive: boolean;
-  fluid: boolean;
-  fill: boolean;
-  techOrder: string[];
-  getFullscreenTarget?: () => HTMLElement | null;
-};
-
-type PlayerWithControlBar = VideoJSType & {
-  controlBar?: {
-    getChild: (name: string) => unknown;
-    addChild: (name: string, options?: Record<string, unknown>) => unknown;
-    removeChild: (child: unknown) => unknown;
-  };
-};
-type PlayerWithErrorState = VideoJSType & {
-  error: (err?: unknown) => unknown;
-  removeClass?: (name: string) => void;
-};
-type VideoJsSource = {
-  src: string;
-  type?: string;
-};
+type VideoJSType = ReturnType<typeof videojs>;
 
 const replaceFullscreenControl = (player: VideoJSType) => {
-  const playerWithControlBar = player as PlayerWithControlBar;
-  const controlBar = playerWithControlBar.controlBar;
+  const controlBar = (
+    player as VideoJSType & {
+      controlBar?: {
+        getChild: (name: string) => unknown;
+        addChild: (name: string, options?: Record<string, unknown>) => unknown;
+        removeChild: (child: unknown) => unknown;
+      };
+    }
+  ).controlBar;
+
   if (!controlBar) return;
 
-  const existingCustom = controlBar.getChild(MENTINGO_FULLSCREEN_CONTROL_NAME);
-  if (!existingCustom) {
+  if (!controlBar.getChild(MENTINGO_FULLSCREEN_CONTROL_NAME)) {
     controlBar.addChild(MENTINGO_FULLSCREEN_CONTROL_NAME, {});
   }
 
@@ -80,9 +58,19 @@ const getTypeByProvider = (provider: VideoProvider) =>
   match(provider)
     .with(VIDEO_EMBED_PROVIDERS.YOUTUBE, () => "video/youtube")
     .with(VIDEO_EMBED_PROVIDERS.VIMEO, () => "video/vimeo")
-    .with(VIDEO_EMBED_PROVIDERS.BUNNY, () => "application/x-mpegURL")
-    .with(VIDEO_EMBED_PROVIDERS.SELF, () => "video/mp4")
+    .with(VIDEO_EMBED_PROVIDERS.BUNNY, () => "application/vnd.apple.mpegurl")
+    .with(VIDEO_EMBED_PROVIDERS.SELF, () => "")
     .otherwise(() => "");
+
+const getSourceTypes = (url: string, type: string) => {
+  const isInternalLessonResource = /\/api\/lesson\/lesson-resource\//i.test(url);
+
+  return Array.from(
+    new Set(
+      isInternalLessonResource ? [type, "application/vnd.apple.mpegurl", "video/mp4"] : [type],
+    ),
+  ).filter(Boolean) as string[];
+};
 
 export const VideoPlayer = ({
   url,
@@ -92,21 +80,24 @@ export const VideoPlayer = ({
   className,
   getFullscreenTarget,
 }: VideoPlayerProps) => {
-  const resolvedProvider = useMemo(
-    () => (provider === VIDEO_EMBED_PROVIDERS.UNKNOWN ? detectVideoProviderFromUrl(url) : provider),
-    [provider, url],
-  );
-  const type = useMemo(() => getTypeByProvider(resolvedProvider), [resolvedProvider]);
   const videoRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<VideoJSType | null>(null);
-  const onEndedRef = useRef<(() => void) | undefined>(onEnded);
+  const onEndedRef = useRef(onEnded);
+  const lastSourceRef = useRef<string | null>(null);
 
   useEffect(() => {
     onEndedRef.current = onEnded;
   }, [onEnded]);
 
-  const options = useMemo<VideoPlayerOptions>(() => {
-    return {
+  const resolvedProvider = useMemo(
+    () => (provider === VIDEO_EMBED_PROVIDERS.UNKNOWN ? detectVideoProviderFromUrl(url) : provider),
+    [provider, url],
+  );
+
+  const type = useMemo(() => getTypeByProvider(resolvedProvider), [resolvedProvider]);
+
+  const options = useMemo(
+    () => ({
       autoplay: true,
       controls: true,
       inactivityTimeout: 3000,
@@ -117,11 +108,18 @@ export const VideoPlayer = ({
       fill: true,
       getFullscreenTarget,
       techOrder: ["html5", "youtube", "Vimeo"],
-    };
-  }, [getFullscreenTarget]);
+      html5: {
+        vhs: { overrideNative: true },
+        nativeAudioTracks: false,
+        nativeVideoTracks: false,
+      },
+    }),
+    [getFullscreenTarget],
+  );
 
   useEffect(() => {
     if (playerRef.current) return;
+
     registerMentingoFullscreenControl();
 
     const videoElement = document.createElement("video-js");
@@ -129,6 +127,7 @@ export const VideoPlayer = ({
     videoRef.current?.appendChild(videoElement);
 
     const player = (playerRef.current = videojs(videoElement, options));
+
     player.ready(() => {
       replaceFullscreenControl(player);
     });
@@ -140,44 +139,59 @@ export const VideoPlayer = ({
 
   useEffect(() => {
     const player = playerRef.current;
-    if (!player) return;
+    if (!player || !url) return;
 
-    const playerWithErrorState = player as PlayerWithErrorState;
-    playerWithErrorState.error(null);
-    playerWithErrorState.removeClass?.("vjs-error");
+    const sourceTypes = getSourceTypes(url, type);
+    const sourceKey = `${url}::${sourceTypes.join("|")}`;
 
-    const typedSource: VideoJsSource[] = type ? [{ src: url, type }] : [{ src: url }];
-    player.src(typedSource);
+    if (lastSourceRef.current === sourceKey) {
+      return;
+    }
 
-    let retriedWithoutType = false;
+    lastSourceRef.current = sourceKey;
+
+    let attemptIndex = 0;
+
+    const applySource = () => {
+      const currentType = sourceTypes[attemptIndex];
+      const source = currentType ? [{ src: url, type: currentType }] : [{ src: url }];
+
+      player.error(undefined);
+      player.removeClass?.("vjs-error");
+
+      player.src(source);
+      player.load();
+      void player.play()?.catch(() => undefined);
+    };
+
     const onError = () => {
       const mediaError = player.error();
-      if (!mediaError || mediaError.code !== 4 || retriedWithoutType || !type) {
-        return;
-      }
+      if (!mediaError || mediaError.code !== 4) return;
 
-      retriedWithoutType = true;
-      playerWithErrorState.error(null);
-      playerWithErrorState.removeClass?.("vjs-error");
-      player.src([{ src: url }]);
+      attemptIndex += 1;
+      if (attemptIndex >= sourceTypes.length) return;
+
+      applySource();
     };
 
     player.on("error", onError);
+    applySource();
+
     return () => {
       player.off("error", onError);
     };
   }, [url, type]);
 
   useEffect(() => {
-    const player = playerRef.current;
-
     return () => {
-      if (player && !player.isDisposed()) {
-        player.dispose();
+      lastSourceRef.current = null;
+
+      if (playerRef.current && !playerRef.current.isDisposed()) {
+        playerRef.current.dispose();
         playerRef.current = null;
       }
     };
-  }, [playerRef]);
+  }, []);
 
   return (
     <div
