@@ -130,6 +130,6 @@ export const SYSTEM_ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
 
 export const SYSTEM_RULE_SET_SLUGS = {
   [SYSTEM_ROLE_SLUGS.STUDENT]: "student-default",
-  [SYSTEM_ROLE_SLUGS.CONTENT_CREATOR]: "content-creator-default",
+  [SYSTEM_ROLE_SLUGS.CONTENT_CREATOR]: "content_creator-default",
   [SYSTEM_ROLE_SLUGS.ADMIN]: "admin-default",
 } as const;
