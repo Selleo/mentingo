@@ -29,11 +29,11 @@ import {
   THREAD_STATUS,
 } from "src/ai/utils/ai.type";
 import { DatabasePg } from "src/common";
+import { canTrackLearningProgress } from "src/permission/permission-access";
 import { dbAls } from "src/storage/db/db-als.store";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { aiMentorThreads } from "src/storage/schema";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
-import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
 import type { SupportedLanguages } from "@repo/shared";
 import type {
@@ -45,6 +45,7 @@ import type {
 } from "src/ai/utils/ai.schema";
 import type { UUIDType } from "src/common";
 import type { CourseTranslationType } from "src/courses/types/course.types";
+import type { PermissionKey } from "src/permission/permission.constants";
 
 @Injectable()
 export class AiService {
@@ -186,7 +187,7 @@ export class AiService {
     });
   }
 
-  async runJudge(data: ThreadOwnershipBody, userRole: UserRole = USER_ROLES.STUDENT) {
+  async runJudge(data: ThreadOwnershipBody, userPermissions?: PermissionKey[]) {
     const judged = await observe(
       async () => {
         updateActiveTrace({
@@ -205,7 +206,7 @@ export class AiService {
     await this.markAsCompletedIfJudge(
       lessonId,
       data.userId,
-      userRole,
+      userPermissions,
       judged.data,
       thread.userLanguage,
       true,
@@ -238,7 +239,7 @@ export class AiService {
   async markAsCompletedIfJudge(
     lessonId: UUIDType,
     studentId: UUIDType,
-    userRole: UserRole,
+    userPermissions: PermissionKey[] | undefined,
     message: string | ResponseAiJudgeJudgementBody,
     language: SupportedLanguages,
     isJudge?: boolean,
@@ -251,16 +252,16 @@ export class AiService {
     await this.studentLessonProgressService.markLessonAsCompleted({
       id: lessonId,
       studentId,
-      userRole,
+      userPermissions,
       aiMentorLessonData,
       language,
     });
   }
 
-  async retakeLesson(lessonId: UUIDType, userId: UUIDType, userRole: UserRole) {
+  async retakeLesson(lessonId: UUIDType, userId: UUIDType, userPermissions?: PermissionKey[]) {
     const [lesson] = await this.aiRepository.checkLessonAssignment(lessonId, userId);
 
-    if (userRole === USER_ROLES.STUDENT && !lesson.isAssigned && !lesson.isFreemium)
+    if (canTrackLearningProgress(userPermissions) && !lesson.isAssigned && !lesson.isFreemium)
       throw new UnauthorizedException("You are not assigned to this lesson");
 
     await this.db.transaction(async (trx) => {

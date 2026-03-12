@@ -49,7 +49,7 @@ import {
   type SetUserGroupsBody,
   type UnenrollGroupsPayload,
 } from "src/integration/schemas/integration.schema";
-import { PERMISSIONS } from "src/permission/permission.constants";
+import { PERMISSIONS, type PermissionKey } from "src/permission/permission.constants";
 import { RequirePermission } from "src/permission/permission.decorator";
 import { PermissionsGuard } from "src/permission/permission.guard";
 import { createUserSchema } from "src/user/schemas/createUser.schema";
@@ -360,9 +360,9 @@ export class IntegrationController {
     @Param("courseId") courseId: UUIDType,
     @Body() body: Static<typeof enrolledCourseGroupsPayload>,
     @CurrentUser("userId") userId: UUIDType,
-    @CurrentUser("role") role: UserRole,
+    @CurrentUser("permissions") userPermissions: PermissionKey[] | undefined,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.courseService.enrollGroupsToCourse(courseId, body.groups, userId, role);
+    await this.courseService.enrollGroupsToCourse(courseId, body.groups, userId, userPermissions);
 
     return new BaseResponse({ message: "Groups enrolled successfully" });
   }

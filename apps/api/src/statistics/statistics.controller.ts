@@ -5,10 +5,9 @@ import { Validate } from "nestjs-typebox";
 import { baseResponse, UUIDType, BaseResponse } from "src/common";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
-import { PERMISSIONS } from "src/permission/permission.constants";
+import { PERMISSIONS, type PermissionKey } from "src/permission/permission.constants";
 import { RequirePermission } from "src/permission/permission.decorator";
 import { PermissionsGuard } from "src/permission/permission.guard";
-import { UserRole } from "src/user/schemas/userRoles";
 
 import { UserStatsSchema, StatsSchema } from "./schemas/userStats.schema";
 import { StatisticsService } from "./statistics.service";
@@ -42,10 +41,10 @@ export class StatisticsController {
   async getStats(
     @Query("language") language: SupportedLanguages,
     @CurrentUser("userId") currentUserId: UUIDType,
-    @CurrentUser("role") userRole: UserRole,
+    @CurrentUser("permissions") userPermissions: PermissionKey[] | undefined,
   ): Promise<BaseResponse<Stats>> {
     return new BaseResponse(
-      await this.statisticsService.getStats(currentUserId, userRole, language),
+      await this.statisticsService.getStats(currentUserId, userPermissions, language),
     );
   }
 }

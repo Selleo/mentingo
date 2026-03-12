@@ -36,6 +36,9 @@ import { UserPasswordCreatedEvent } from "src/events/user/user-password-created.
 import { UserRegisteredEvent } from "src/events/user/user-registered.event";
 import { UserWelcomeEvent } from "src/events/user/user-welcome.event";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
+import { hasPermission } from "src/permission/permission-access";
+import { PERMISSIONS } from "src/permission/permission.constants";
+import { PermissionService } from "src/permission/permission.service";
 import { SettingsService } from "src/settings/settings.service";
 import { DB_ADMIN } from "src/storage/db/db.providers";
 import { SupportModeService } from "src/support-mode/support-mode.service";
@@ -78,6 +81,7 @@ export class AuthService {
     private createPasswordService: CreatePasswordService,
     private resetPasswordService: ResetPasswordService,
     private settingsService: SettingsService,
+    private readonly permissionService: PermissionService,
     private readonly outboxPublisher: OutboxPublisher,
     private tokenService: TokenService,
     private readonly supportModeService: SupportModeService,
@@ -177,10 +181,7 @@ export class AuthService {
     const userSettings = await this.settingsService.getUserSettings(user.id);
 
     const onboardingStatus = await this.userService.getAllOnboardingStatus(user.id);
-    const isManagingTenantAdmin = await this.isManagingTenantAdmin(
-      user.tenantId,
-      user.role as UserRole,
-    );
+    const isManagingTenantAdmin = await this.isManagingTenantAdmin(user.id, user.tenantId);
 
     const actor: ActorUserType = {
       userId: user.id,
@@ -826,7 +827,7 @@ export class AuthService {
       }),
     );
 
-    const isManagingTenantAdmin = await this.isManagingTenantAdmin(user.tenantId, role as UserRole);
+    const isManagingTenantAdmin = await this.isManagingTenantAdmin(userId, user.tenantId);
 
     if (MFAEnforcedRoles.includes(role as UserRole) || userSettings.isMFAEnabled) {
       this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken);
@@ -849,8 +850,12 @@ export class AuthService {
     };
   }
 
-  private async isManagingTenantAdmin(tenantId: UUIDType, role: UserRole): Promise<boolean> {
-    if (role !== USER_ROLES.ADMIN) return false;
+  private async isManagingTenantAdmin(userId: UUIDType, tenantId: UUIDType): Promise<boolean> {
+    const permissionContext = await this.permissionService.getPermissionContext(userId, tenantId);
+
+    if (!hasPermission(permissionContext.permissions, PERMISSIONS.TENANT_MANAGE)) {
+      return false;
+    }
 
     const [tenant] = await this.db
       .select({ isManaging: tenants.isManaging })

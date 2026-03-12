@@ -108,10 +108,9 @@ import {
   learningTimeStatisticsSortOptions,
   LearningTimeStatisticsSortOptions,
 } from "src/learning-time";
-import { PERMISSIONS } from "src/permission/permission.constants";
+import { PERMISSIONS, type PermissionKey } from "src/permission/permission.constants";
 import { RequirePermission } from "src/permission/permission.decorator";
 import { PermissionsGuard } from "src/permission/permission.guard";
-import { UserRole } from "src/user/schemas/userRoles";
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
 import {
@@ -171,7 +170,7 @@ export class CourseController {
     @Query("perPage") perPage: number,
     @Query("language") language: SupportedLanguages,
     @CurrentUser("userId") currentUserId: UUIDType,
-    @CurrentUser("role") currentUserRole: UserRole,
+    @CurrentUser("permissions") currentUserPermissions: PermissionKey[] | undefined,
   ): Promise<PaginatedResponse<AllCoursesResponse>> {
     const [creationDateRangeStart, creationDateRangeEnd] = creationDateRange || [];
     const filters: CoursesFilterSchema = {
@@ -193,7 +192,7 @@ export class CourseController {
       perPage,
       sort,
       currentUserId,
-      currentUserRole,
+      currentUserPermissions,
       language,
     };
 
@@ -414,10 +413,15 @@ export class CourseController {
     @Query("id") id: UUIDType,
     @Query("language") language: SupportedLanguages,
     @CurrentUser("userId") currentUserId: UUIDType,
-    @CurrentUser("role") currentUserRole: UserRole,
+    @CurrentUser("permissions") currentUserPermissions: PermissionKey[] | undefined,
   ): Promise<BaseResponse<CommonShowBetaCourse>> {
     return new BaseResponse(
-      await this.courseService.getBetaCourseById(id, language, currentUserId, currentUserRole),
+      await this.courseService.getBetaCourseById(
+        id,
+        language,
+        currentUserId,
+        currentUserPermissions,
+      ),
     );
   }
 
@@ -434,13 +438,13 @@ export class CourseController {
     @Query("id") id: UUIDType,
     @Query("language") language: SupportedLanguages,
     @CurrentUser("userId") currentUserId: UUIDType,
-    @CurrentUser("role") currentUserRole: UserRole,
+    @CurrentUser("permissions") currentUserPermissions: PermissionKey[] | undefined,
   ): Promise<BaseResponse<{ hasMissingTranslations: boolean }>> {
     const hasMissingTranslations = await this.courseService.hasMissingTranslations(
       id,
       language,
       currentUserId,
-      currentUserRole,
+      currentUserPermissions,
     );
 
     return new BaseResponse({ hasMissingTranslations });
@@ -663,13 +667,13 @@ export class CourseController {
     @Param("courseId") courseId: UUIDType,
     @Body() body: EnrolledCourseGroupsPayload,
     @CurrentUser("userId") currentUserId: UUIDType,
-    @CurrentUser("role") currentUserRole: UserRole,
+    @CurrentUser("permissions") currentUserPermissions: PermissionKey[] | undefined,
   ): Promise<BaseResponse<{ message: string }>> {
     await this.courseService.enrollGroupsToCourse(
       courseId,
       body.groups,
       currentUserId,
-      currentUserRole,
+      currentUserPermissions,
     );
 
     return new BaseResponse({ message: "Pomyślnie zapisano grupy na kurs" });
@@ -710,9 +714,9 @@ export class CourseController {
   })
   async deleteCourse(
     @Param("id") id: UUIDType,
-    @CurrentUser("role") currentUserRole: UserRole,
+    @CurrentUser("permissions") currentUserPermissions: PermissionKey[] | undefined,
   ): Promise<null> {
-    await this.courseService.deleteCourse(id, currentUserRole);
+    await this.courseService.deleteCourse(id, currentUserPermissions);
 
     return null;
   }
@@ -725,9 +729,9 @@ export class CourseController {
   })
   async deleteManyCourses(
     @Body() body: { ids: UUIDType[] },
-    @CurrentUser("role") currentUserRole: UserRole,
+    @CurrentUser("permissions") currentUserPermissions: PermissionKey[] | undefined,
   ) {
-    return await this.courseService.deleteManyCourses(body.ids, currentUserRole);
+    return await this.courseService.deleteManyCourses(body.ids, currentUserPermissions);
   }
 
   @Delete("unenroll-course")
@@ -978,10 +982,10 @@ export class CourseController {
   async createLanguage(
     @Query("language") language: SupportedLanguages,
     @Param("courseId") courseId: UUIDType,
-    @CurrentUser("role") role: UserRole,
+    @CurrentUser("permissions") userPermissions: PermissionKey[] | undefined,
     @CurrentUser("userId") userId: UUIDType,
   ) {
-    await this.courseService.createLanguage(courseId, language, userId, role);
+    await this.courseService.createLanguage(courseId, language, userId, userPermissions);
   }
 
   @Delete("language/:courseId")
@@ -995,10 +999,10 @@ export class CourseController {
   async deleteLanguage(
     @Param("courseId") courseId: UUIDType,
     @Query("language") language: SupportedLanguages,
-    @CurrentUser("role") role: UserRole,
+    @CurrentUser("permissions") userPermissions: PermissionKey[] | undefined,
     @CurrentUser("userId") userId: UUIDType,
   ) {
-    return this.courseService.deleteLanguage(courseId, language, role, userId);
+    return this.courseService.deleteLanguage(courseId, language, userPermissions, userId);
   }
 
   @Post("generate-translations/:courseId")

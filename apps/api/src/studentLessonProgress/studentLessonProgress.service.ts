@@ -18,6 +18,7 @@ import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
+import { canManageCourseContent } from "src/permission/permission-access";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
 import {
   aiMentorStudentLessonProgress,
@@ -31,7 +32,6 @@ import {
   studentLessonProgress,
   users,
 } from "src/storage/schema";
-import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
 import type { SupportedLanguages } from "@repo/shared";
@@ -40,6 +40,7 @@ import type { ResponseAiJudgeJudgementBody } from "src/ai/utils/ai.schema";
 import type { UUIDType } from "src/common";
 import type { ActorUserType } from "src/common/types/actor-user.type";
 import type { CurrentUser } from "src/common/types/current-user.type";
+import type { PermissionKey } from "src/permission/permission.constants";
 import type * as schema from "src/storage/schema";
 import type { ProgressStatus } from "src/utils/types/progress.type";
 
@@ -56,7 +57,7 @@ export class StudentLessonProgressService {
   async markLessonAsCompleted({
     id,
     studentId,
-    userRole,
+    userPermissions,
     actor,
     quizCompleted = false,
     completedQuestionCount = 0,
@@ -67,7 +68,7 @@ export class StudentLessonProgressService {
   }: {
     id: UUIDType;
     studentId: UUIDType;
-    userRole?: UserRole;
+    userPermissions?: PermissionKey[];
     actor?: CurrentUser;
     quizCompleted?: boolean;
     completedQuestionCount?: number;
@@ -76,7 +77,7 @@ export class StudentLessonProgressService {
     language: SupportedLanguages;
     isQuizPassed?: boolean;
   }) {
-    if (userRole === USER_ROLES.CONTENT_CREATOR || userRole === USER_ROLES.ADMIN) return;
+    if (canManageCourseContent(userPermissions)) return;
 
     const [accessCourseLessonWithDetails] = await this.checkLessonAssignment(id, studentId);
 
@@ -238,12 +239,12 @@ export class StudentLessonProgressService {
   async markLessonAsStarted(
     id: UUIDType,
     studentId: UUIDType,
-    userRole?: UserRole,
+    userPermissions?: PermissionKey[],
     dbInstance: PostgresJsDatabase<typeof schema> = this.db,
   ) {
     const [accessCourseLessonWithDetails] = await this.checkLessonAssignment(id, studentId);
 
-    if (userRole === USER_ROLES.CONTENT_CREATOR || userRole === USER_ROLES.ADMIN) return;
+    if (canManageCourseContent(userPermissions)) return;
 
     if (!accessCourseLessonWithDetails.isAssigned && !accessCourseLessonWithDetails.isFreemium)
       throw new UnauthorizedException("You don't have assignment to this lesson");

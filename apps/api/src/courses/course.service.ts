@@ -57,6 +57,10 @@ import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import { LumaService } from "src/luma/luma.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
+import {
+  canManageCourseContent,
+  isTenantManager,
+} from "src/permission/permission-access";
 import { SettingsService } from "src/settings/settings.service";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
 import {
@@ -153,8 +157,8 @@ import type {
   AdminLessonWithContentSchema,
   LessonForChapterSchema,
 } from "src/lesson/lesson.schema";
+import type { PermissionKey } from "src/permission/permission.constants";
 import type * as schema from "src/storage/schema";
-import type { UserRole } from "src/user/schemas/userRoles";
 import type { ProgressStatus } from "src/utils/types/progress.type";
 import type Stripe from "stripe";
 
@@ -191,7 +195,7 @@ export class CourseService {
       perPage = DEFAULT_PAGE_SIZE,
       sort = CourseSortFields.title,
       currentUserId,
-      currentUserRole,
+      currentUserPermissions,
       language,
     } = query;
 
@@ -200,7 +204,7 @@ export class CourseService {
     const conditions = this.getFiltersConditions(filters, false);
     const orderConditions = this.getOrderConditions(filters);
 
-    if (currentUserRole === USER_ROLES.CONTENT_CREATOR && currentUserId) {
+    if (currentUserId && !isTenantManager(currentUserPermissions)) {
       conditions.push(eq(courses.authorId, currentUserId));
     }
 
@@ -1278,7 +1282,7 @@ export class CourseService {
     id: UUIDType,
     language: SupportedLanguages,
     currentUserId: UUIDType,
-    currentUserRole: UserRole,
+    currentUserPermissions: PermissionKey[] | undefined,
   ): Promise<CommonShowBetaCourse> {
     const [course] = await this.db
       .select({
@@ -1307,7 +1311,7 @@ export class CourseService {
 
     if (!course) throw new NotFoundException("Course not found");
 
-    if (currentUserRole !== USER_ROLES.ADMIN && course.authorId !== currentUserId) {
+    if (!isTenantManager(currentUserPermissions) && course.authorId !== currentUserId) {
       throw new ForbiddenException("You do not have permission to edit this course");
     }
 
@@ -1366,13 +1370,13 @@ export class CourseService {
     id: UUIDType,
     language: SupportedLanguages,
     currentUserId: UUIDType,
-    currentUserRole: UserRole,
+    currentUserPermissions: PermissionKey[] | undefined,
   ): Promise<boolean> {
     const courseInRequestedLanguage = await this.getBetaCourseById(
       id,
       language,
       currentUserId,
-      currentUserRole,
+      currentUserPermissions,
     );
 
     if (language === courseInRequestedLanguage.baseLanguage) return false;
@@ -1381,7 +1385,7 @@ export class CourseService {
       id,
       courseInRequestedLanguage.baseLanguage,
       currentUserId,
-      currentUserRole,
+      currentUserPermissions,
     );
 
     return (
@@ -1810,7 +1814,7 @@ export class CourseService {
       attemptedFieldKeys,
     );
 
-    const { userId: currentUserId, role: currentUserRole } = currentUser;
+    const { userId: currentUserId, permissions: currentUserPermissions } = currentUser;
 
     const { updatedCourse, previousCourseSnapshot, updatedCourseSnapshot } =
       await this.db.transaction(async (trx) => {
@@ -1833,7 +1837,10 @@ export class CourseService {
           throw new NotFoundException("Course not found");
         }
 
-        if (existingCourse.authorId !== currentUserId && currentUserRole !== USER_ROLES.ADMIN) {
+        if (
+          existingCourse.authorId !== currentUserId &&
+          !isTenantManager(currentUserPermissions)
+        ) {
           throw new ForbiddenException("You don't have permission to update course");
         }
 
@@ -1981,7 +1988,7 @@ export class CourseService {
   }
 
   async deleteCourseTrailer(courseId: UUIDType, currentUser: CurrentUser) {
-    const { userId: currentUserId, role: currentUserRole } = currentUser;
+    const { userId: currentUserId, permissions: currentUserPermissions } = currentUser;
     const [course] = await this.db
       .select({ id: courses.id, authorId: courses.authorId })
       .from(courses)
@@ -1991,7 +1998,7 @@ export class CourseService {
       throw new NotFoundException("Course not found");
     }
 
-    if (course.authorId !== currentUserId && currentUserRole !== USER_ROLES.ADMIN) {
+    if (course.authorId !== currentUserId && !isTenantManager(currentUserPermissions)) {
       throw new ForbiddenException("You don't have permission to update course");
     }
 
@@ -2147,7 +2154,7 @@ export class CourseService {
     courseId: UUIDType,
     groupsToEnroll: EnrolledCourseGroupsPayload["groups"],
     userId?: UUIDType,
-    currentUserRole?: UserRole,
+    currentUserPermissions?: PermissionKey[],
   ) {
     const groupIds = groupsToEnroll.map((group) => group.id);
     const groupInfoById = new Map(groupsToEnroll.map((group) => [group.id, group]));
@@ -2158,7 +2165,7 @@ export class CourseService {
     const groupExists = await this.db.select().from(groups).where(inArray(groups.id, groupIds));
     if (!groupExists.length) throw new NotFoundException("Groups not found");
 
-    if (currentUserRole === USER_ROLES.CONTENT_CREATOR && userId !== course.authorId) {
+    if (!isTenantManager(currentUserPermissions) && userId !== course.authorId) {
       throw new ForbiddenException("You don't have permission to enroll groups to this course");
     }
 
@@ -2501,14 +2508,14 @@ export class CourseService {
     }
   }
 
-  async deleteCourse(id: UUIDType, currentUserRole: UserRole) {
+  async deleteCourse(id: UUIDType, currentUserPermissions?: PermissionKey[]) {
     const [course] = await this.db.select().from(courses).where(eq(courses.id, id));
 
     if (!course) {
       throw new NotFoundException("Course not found");
     }
 
-    if (currentUserRole !== USER_ROLES.ADMIN && currentUserRole !== USER_ROLES.CONTENT_CREATOR) {
+    if (!canManageCourseContent(currentUserPermissions)) {
       throw new ForbiddenException("You don't have permission to delete this course");
     }
 
@@ -2541,12 +2548,12 @@ export class CourseService {
     });
   }
 
-  async deleteManyCourses(ids: UUIDType[], currentUserRole: UserRole) {
+  async deleteManyCourses(ids: UUIDType[], currentUserPermissions?: PermissionKey[]) {
     if (!ids.length) {
       throw new BadRequestException("No course ids provided");
     }
 
-    if (currentUserRole !== USER_ROLES.ADMIN && currentUserRole !== USER_ROLES.CONTENT_CREATOR) {
+    if (!canManageCourseContent(currentUserPermissions)) {
       throw new ForbiddenException("You don't have permission to delete these courses");
     }
 
@@ -3639,11 +3646,11 @@ export class CourseService {
     courseId: UUIDType,
     language: SupportedLanguages,
     userId: UUIDType,
-    role: UserRole,
+    userPermissions: PermissionKey[] | undefined,
   ) {
     await this.masterCourseService.assertCourseContentEditable(courseId);
 
-    await this.adminLessonService.validateAccess("course", role, userId, courseId);
+    await this.adminLessonService.validateAccess("course", userPermissions, userId, courseId);
 
     const [{ availableLocales }] = await this.db
       .select()
@@ -3665,7 +3672,7 @@ export class CourseService {
   async deleteLanguage(
     courseId: UUIDType,
     language: SupportedLanguages,
-    role: UserRole,
+    userPermissions: PermissionKey[] | undefined,
     userId: UUIDType,
   ) {
     await this.masterCourseService.assertCourseContentEditable(courseId);
@@ -3679,7 +3686,7 @@ export class CourseService {
       throw new BadRequestException({ message: "adminCourseView.toast.invalidLanguageToDelete" });
     }
 
-    const data = await this.getBetaCourseById(courseId, language, userId, role);
+    const data = await this.getBetaCourseById(courseId, language, userId, userPermissions);
 
     return this.db.transaction(async (trx) => {
       const chapterIds = data.chapters.map(({ id }) => id);
@@ -3915,14 +3922,14 @@ export class CourseService {
       courseId,
       language,
       currentUser.userId,
-      currentUser.role,
+      currentUser.permissions,
     );
 
     const courseInBaseLanguage = await this.getBetaCourseById(
       courseId,
       baseLanguage,
       currentUser.userId,
-      currentUser.role,
+      currentUser.permissions,
     );
 
     const { flat: missingData, withContext } = this.collectMissingTranslationFieldsWithContext(

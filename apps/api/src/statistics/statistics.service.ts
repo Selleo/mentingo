@@ -12,8 +12,9 @@ import {
 import { UserFirstLoginEvent } from "src/events/user/user-first-login.event";
 import { FileService } from "src/file/file.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
+import { hasPermission } from "src/permission/permission-access";
+import { PERMISSIONS, type PermissionKey } from "src/permission/permission.constants";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import type {
   CourseStudentsStatsByMonth,
@@ -22,7 +23,6 @@ import type {
 } from "./schemas/userStats.schema";
 import type { SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
-import type { UserRole } from "src/user/schemas/userRoles";
 
 @Injectable()
 export class StatisticsService {
@@ -70,23 +70,27 @@ export class StatisticsService {
     };
   }
 
-  async getStats(userId: UUIDType, userRole: UserRole, language: SupportedLanguages) {
+  async getStats(userId: UUIDType, userPermissions: PermissionKey[] | undefined, language: SupportedLanguages) {
+    const scopeUserId = hasPermission(userPermissions, PERMISSIONS.STATISTICS_READ)
+      ? undefined
+      : userId;
+
     const fiveMostPopularCourses = await this.statisticsRepository.getFiveMostPopularCourses(
-      userRole !== USER_ROLES.ADMIN ? userId : undefined,
+      scopeUserId,
       language,
     );
     const [totalCoursesCompletionStats] = await this.statisticsRepository.getTotalCoursesCompletion(
-      userRole !== USER_ROLES.ADMIN ? userId : undefined,
+      scopeUserId,
     );
     const [conversionAfterFreemiumLesson] =
       await this.statisticsRepository.getConversionAfterFreemiumLesson(
-        userRole !== USER_ROLES.ADMIN ? userId : undefined,
+        scopeUserId,
       );
     const courseStudentsStats = await this.statisticsRepository.getCourseStudentsStats(
-      userRole !== USER_ROLES.ADMIN ? userId : undefined,
+      scopeUserId,
     );
     const [avgQuizScore] = await this.statisticsRepository.getAvgQuizScore(
-      userRole !== USER_ROLES.ADMIN ? userId : undefined,
+      scopeUserId,
     );
 
     return {

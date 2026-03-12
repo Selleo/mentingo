@@ -7,10 +7,10 @@ import { baseResponse, BaseResponse, UUIDSchema, type UUIDType } from "src/commo
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
+import { isTenantManager } from "src/permission/permission-access";
 import { PERMISSIONS } from "src/permission/permission.constants";
 import { RequirePermission } from "src/permission/permission.decorator";
 import { PermissionsGuard } from "src/permission/permission.guard";
-import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
 import { AdminChapterService } from "./adminChapter.service";
 import { ChapterService } from "./chapter.service";
@@ -23,6 +23,7 @@ import {
 } from "./schemas/chapter.schema";
 
 import type { ChapterResponse } from "./schemas/chapter.schema";
+import type { PermissionKey } from "src/permission/permission.constants";
 
 @UseGuards(PermissionsGuard)
 @Controller("chapter")
@@ -44,7 +45,7 @@ export class ChapterController {
   async getChapterWithLesson(
     @Query("id") id: UUIDType,
     @Query("language") language: SupportedLanguages,
-    @CurrentUser("role") userRole: UserRole,
+    @CurrentUser("permissions") userPermissions: PermissionKey[] | undefined,
     @CurrentUser("userId") userId: UUIDType,
   ): Promise<BaseResponse<ChapterResponse>> {
     return new BaseResponse(
@@ -52,7 +53,7 @@ export class ChapterController {
         id,
         userId,
         language,
-        userRole === USER_ROLES.ADMIN,
+        isTenantManager(userPermissions),
       ),
     );
   }
@@ -177,9 +178,14 @@ export class ChapterController {
     @Query("chapterId") chapterId: UUIDType,
     @Body() body: { isFreemium: boolean },
     @CurrentUser("userId") userId: UUIDType,
-    @CurrentUser("role") role: UserRole,
+    @CurrentUser("permissions") userPermissions: PermissionKey[] | undefined,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.adminChapterService.updateFreemiumStatus(chapterId, body.isFreemium, userId, role);
+    await this.adminChapterService.updateFreemiumStatus(
+      chapterId,
+      body.isFreemium,
+      userId,
+      userPermissions,
+    );
     return new BaseResponse({
       message: "Course lesson free status updated successfully",
     });

@@ -6,10 +6,9 @@ import { Validate } from "nestjs-typebox";
 import { baseResponse, BaseResponse, UUIDSchema, UUIDType } from "src/common";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
-import { PERMISSIONS } from "src/permission/permission.constants";
+import { PERMISSIONS, type PermissionKey } from "src/permission/permission.constants";
 import { RequirePermission } from "src/permission/permission.decorator";
 import { PermissionsGuard } from "src/permission/permission.guard";
-import { UserRole } from "src/user/schemas/userRoles";
 
 import { StudentLessonProgressService } from "./studentLessonProgress.service";
 
@@ -31,12 +30,12 @@ export class StudentLessonProgressController {
     @Query("id") id: UUIDType,
     @Query("language") language: SupportedLanguages,
     @CurrentUser("userId") currentUserId: UUIDType,
-    @CurrentUser("role") currentUserRole: UserRole,
+    @CurrentUser("permissions") userPermissions: PermissionKey[] | undefined,
   ): Promise<BaseResponse<{ message: string }>> {
     await this.studentLessonProgressService.markLessonAsCompleted({
       id,
       studentId: currentUserId,
-      userRole: currentUserRole,
+      userPermissions,
       language,
     });
 

@@ -22,11 +22,11 @@ import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
+import { canManageCourseContent } from "src/permission/permission-access";
 import { QuestionRepository } from "src/questions/question.repository";
 import { QuestionService } from "src/questions/question.service";
 import { studentLessonProgress } from "src/storage/schema";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
-import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 import { isQuizAccessAllowed } from "src/utils/isQuizAccessAllowed";
 
 import { LESSON_TYPES } from "../lesson.type";
@@ -45,6 +45,7 @@ import type { SupportedLanguages } from "@repo/shared";
 import type { Request, Response } from "express";
 import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
+import type { PermissionKey } from "src/permission/permission.constants";
 
 @Injectable()
 export class LessonService {
@@ -63,10 +64,10 @@ export class LessonService {
   async getLessonById(
     id: UUIDType,
     userId: UUIDType,
-    userRole: UserRole,
+    userPermissions: PermissionKey[] | undefined,
     language?: SupportedLanguages,
   ): Promise<LessonShow> {
-    const isStudent = userRole === USER_ROLES.STUDENT;
+    const isStudent = !canManageCourseContent(userPermissions);
 
     const hasLessonAccess = await this.lessonRepository.getHasLessonAccess(id, userId, isStudent);
 
@@ -95,7 +96,11 @@ export class LessonService {
       lesson.type === LESSON_TYPES.CONTENT ||
       lesson.type === LESSON_TYPES.AI_MENTOR
     ) {
-      await this.studentLessonProgressService.markLessonAsStarted(lesson.id, userId, userRole);
+      await this.studentLessonProgressService.markLessonAsStarted(
+        lesson.id,
+        userId,
+        userPermissions,
+      );
     }
 
     if (lesson.type === LESSON_TYPES.CONTENT) {
@@ -436,10 +441,10 @@ export class LessonService {
     req: Request,
     res: Response,
     userId: UUIDType,
-    role: UserRole,
+    userPermissions: PermissionKey[] | undefined,
     resourceId: UUIDType,
   ) {
-    const isStudent = role === USER_ROLES.STUDENT;
+    const isStudent = !canManageCourseContent(userPermissions);
 
     const lessonResource = await this.lessonRepository.getResource(resourceId);
 

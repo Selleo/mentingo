@@ -3,12 +3,12 @@ import { eq, inArray } from "drizzle-orm";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { THREAD_STATUS } from "src/ai/utils/ai.type";
+import { isTenantManager } from "src/permission/permission-access";
 import { aiMentorThreads } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import type { CreateThreadBody } from "src/ai/utils/ai.schema";
 import type { UUIDType } from "src/common";
-import type { UserRole } from "src/user/schemas/userRoles";
+import type { PermissionKey } from "src/permission/permission.constants";
 
 @Injectable()
 export class ThreadService {
@@ -33,7 +33,7 @@ export class ThreadService {
     return { thread: newThread, newThread: true };
   }
 
-  async findThread(threadId: UUIDType, userId: UUIDType, userRole: UserRole = USER_ROLES.STUDENT) {
+  async findThread(threadId: UUIDType, userId: UUIDType, userPermissions?: PermissionKey[]) {
     const thread = await this.aiRepository.findThread([eq(aiMentorThreads.id, threadId)]);
 
     if (!thread) throw new NotFoundException("Thread not found");
@@ -42,7 +42,7 @@ export class ThreadService {
 
     const author = await this.aiRepository.getCourseAuthorByLesson(lessonId);
 
-    const hasAccess = userRole === USER_ROLES.ADMIN || author === userId;
+    const hasAccess = isTenantManager(userPermissions) || author === userId;
 
     if (!(thread.userId === userId || hasAccess))
       throw new ForbiddenException("You don't have access to this thread");
@@ -50,8 +50,13 @@ export class ThreadService {
     return { data: thread };
   }
 
-  async findAllMessagesByThread(threadId: UUIDType, userId: UUIDType, userRole: UserRole) {
-    await this.findThread(threadId, userId, userRole);
+  async findAllMessagesByThread(
+    threadId: UUIDType,
+    userId: UUIDType,
+    userPermissions?: PermissionKey[],
+  ) {
+    await this.findThread(threadId, userId, userPermissions);
+
     const messages = await this.aiRepository.findMessageHistory(threadId);
 
     return { data: messages };

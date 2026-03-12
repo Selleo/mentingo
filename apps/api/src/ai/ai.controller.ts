@@ -21,7 +21,8 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 import { PERMISSIONS } from "src/permission/permission.constants";
 import { RequirePermission } from "src/permission/permission.decorator";
 import { PermissionsGuard } from "src/permission/permission.guard";
-import { UserRole } from "src/user/schemas/userRoles";
+
+import type { PermissionKey } from "src/permission/permission.constants";
 
 @UseGuards(PermissionsGuard)
 @Controller("ai")
@@ -40,9 +41,9 @@ export class AiController {
   async getThread(
     @Query("thread") threadId: UUIDType,
     @CurrentUser("userId") userId: UUIDType,
-    @CurrentUser("role") userRole: UserRole,
+    @CurrentUser("permissions") userPermissions: PermissionKey[] | undefined,
   ): Promise<BaseResponse<ResponseThreadBody>> {
-    return await this.threadService.findThread(threadId, userId, userRole);
+    return await this.threadService.findThread(threadId, userId, userPermissions);
   }
 
   @Get("thread/messages")
@@ -54,9 +55,9 @@ export class AiController {
   async getThreadMessages(
     @Query("thread") threadId: UUIDType,
     @CurrentUser("userId") userId: UUIDType,
-    @CurrentUser("role") userRole: UserRole,
+    @CurrentUser("permissions") userPermissions: PermissionKey[] | undefined,
   ): Promise<BaseResponse<ResponseThreadMessageBody[]>> {
-    return await this.threadService.findAllMessagesByThread(threadId, userId, userRole);
+    return await this.threadService.findAllMessagesByThread(threadId, userId, userPermissions);
   }
 
   @Post("chat")
@@ -82,9 +83,9 @@ export class AiController {
   async judgeThread(
     @Param("threadId") threadId: UUIDType,
     @CurrentUser("userId") userId: UUIDType,
-    @CurrentUser("role") userRole: UserRole,
+    @CurrentUser("permissions") userPermissions: PermissionKey[] | undefined,
   ): Promise<BaseResponse<ResponseJudgeBody>> {
-    return await this.aiService.runJudge({ threadId, userId }, userRole);
+    return await this.aiService.runJudge({ threadId, userId }, userPermissions);
   }
 
   @Post("retake/:lessonId")
@@ -95,8 +96,8 @@ export class AiController {
   async retakeLesson(
     @Param("lessonId") lessonId: UUIDType,
     @CurrentUser("userId") userId: UUIDType,
-    @CurrentUser("role") userRole: UserRole,
+    @CurrentUser("permissions") userPermissions: PermissionKey[] | undefined,
   ) {
-    await this.aiService.retakeLesson(lessonId, userId, userRole);
+    await this.aiService.retakeLesson(lessonId, userId, userPermissions);
   }
 }

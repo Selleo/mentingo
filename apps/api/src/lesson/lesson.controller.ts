@@ -11,7 +11,9 @@ import {
   Req,
   Res,
   UploadedFile,
-  UseInterceptors, UseGuards } from "@nestjs/common";
+  UseGuards,
+  UseInterceptors,
+} from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes, ApiResponse } from "@nestjs/swagger";
 import {
@@ -39,7 +41,6 @@ import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
 import { PERMISSIONS } from "src/permission/permission.constants";
 import { RequirePermission } from "src/permission/permission.decorator";
 import { PermissionsGuard } from "src/permission/permission.guard";
-import { UserRole } from "src/user/schemas/userRoles";
 
 import {
   AnswerQuestionBody,
@@ -68,6 +69,7 @@ import { AdminLessonService } from "./services/adminLesson.service";
 import { LessonService } from "./services/lesson.service";
 
 import type { EnrolledLesson, LessonsFilters, LessonShow } from "./lesson.schema";
+import type { PermissionKey } from "src/permission/permission.constants";
 
 @UseGuards(PermissionsGuard)
 @Controller("lesson")
@@ -121,10 +123,10 @@ export class LessonController {
     @Query("language") language: SupportedLanguages,
     @Query("studentId") studentId: UUIDType,
     @CurrentUser("userId") userId: UUIDType,
-    @CurrentUser("role") userRole: UserRole,
+    @CurrentUser("permissions") userPermissions: PermissionKey[] | undefined,
   ): Promise<BaseResponse<LessonShow>> {
     return new BaseResponse(
-      await this.lessonService.getLessonById(id, studentId || userId, userRole, language),
+      await this.lessonService.getLessonById(id, studentId || userId, userPermissions, language),
     );
   }
 
@@ -384,7 +386,7 @@ export class LessonController {
   })
   async uploadFileToLesson(
     @CurrentUser("userId") userId: UUIDType,
-    @CurrentUser("role") role: UserRole,
+    @CurrentUser("permissions") userPermissions: PermissionKey[] | undefined,
     @UploadedFile(
       getBaseFileTypePipe(
         buildFileTypeRegex([
@@ -407,7 +409,7 @@ export class LessonController {
   ) {
     const fileData = await this.adminLessonsService.uploadFileToLesson(
       userId,
-      role,
+      userPermissions,
       file,
       language,
       title,
@@ -497,11 +499,11 @@ export class LessonController {
   async getLessonImage(
     @Param("resourceId") resourceId: UUIDType,
     @CurrentUser("userId") userId: UUIDType,
-    @CurrentUser("role") role: UserRole,
+    @CurrentUser("permissions") userPermissions: PermissionKey[] | undefined,
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    return this.lessonService.getLessonResource(req, res, userId, role, resourceId);
+    return this.lessonService.getLessonResource(req, res, userId, userPermissions, resourceId);
   }
 
   @Get("lesson-resource/:resourceId")
@@ -512,11 +514,11 @@ export class LessonController {
   async getLessonResource(
     @Param("resourceId") resourceId: UUIDType,
     @CurrentUser("userId") userId: UUIDType,
-    @CurrentUser("role") role: UserRole,
+    @CurrentUser("permissions") userPermissions: PermissionKey[] | undefined,
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    return this.lessonService.getLessonResource(req, res, userId, role, resourceId);
+    return this.lessonService.getLessonResource(req, res, userId, userPermissions, resourceId);
   }
 
   @Post("ai-mentor/avatar")
@@ -543,7 +545,7 @@ export class LessonController {
     type: String,
   })
   async uploadAiMentorAvatar(
-    @CurrentUser("role") role: UserRole,
+    @CurrentUser("permissions") userPermissions: PermissionKey[] | undefined,
     @CurrentUser("userId") userId: UUIDType,
     @Body("lessonId") lessonId: UUIDType,
     @UploadedFile(
@@ -556,7 +558,7 @@ export class LessonController {
   ) {
     await this.adminLessonsService.uploadAvatarToAiMentorLesson(
       userId,
-      role,
+      userPermissions,
       lessonId,
       uploadedFile,
     );

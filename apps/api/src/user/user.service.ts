@@ -664,6 +664,10 @@ export class UserService {
         trx,
       );
 
+      await trx
+        .insert(userDetails)
+        .values({ userId: createdUser.id, contactEmail: createdUser.email });
+
       if (options?.registration) {
         await trx.insert(credentials).values({
           userId: createdUser.id,
@@ -686,15 +690,6 @@ export class UserService {
           reminderCount: 0,
         })
         .returning();
-
-      if (
-        createdUser.role === USER_ROLES.CONTENT_CREATOR ||
-        createdUser.role === USER_ROLES.ADMIN
-      ) {
-        await trx
-          .insert(userDetails)
-          .values({ userId: createdUser.id, contactEmail: createdUser.email });
-      }
 
       return { createdUser, token: createToken, newUsersLanguage };
     });
