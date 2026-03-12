@@ -32,8 +32,9 @@ import {
 } from "src/events";
 import { GroupSortFields } from "src/group/group.schema";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
+import { canManageCourseContent } from "src/permission/permission-access";
+import { PermissionService } from "src/permission/permission.service";
 import { groups, groupUsers, users, groupCourses, studentCourses } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import type { SQL } from "drizzle-orm";
 import type { GroupActivityLogSnapshot } from "src/activity-logs/types";
@@ -53,6 +54,7 @@ export class GroupService {
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
     @Inject(forwardRef(() => CourseService)) private readonly courseService: CourseService,
+    private readonly permissionService: PermissionService,
     private readonly outboxPublisher: OutboxPublisher,
   ) {}
 
@@ -290,7 +292,12 @@ export class GroupService {
 
       await trx.delete(groupUsers).where(eq(groupUsers.userId, userId));
 
-      if (removedGroupIds.length && user.role === USER_ROLES.STUDENT) {
+      const shouldManageLearningEnrollment = await this.shouldManageLearningEnrollment(
+        user.id,
+        user.tenantId,
+      );
+
+      if (removedGroupIds.length && shouldManageLearningEnrollment) {
         await trx
           .update(studentCourses)
           .set({
@@ -322,7 +329,7 @@ export class GroupService {
         await trx.insert(groupUsers).values(groupsToAssign);
         assignedGroupIds = groupsToAssign.map(({ groupId }) => groupId);
 
-        if (user.role === USER_ROLES.STUDENT) {
+        if (shouldManageLearningEnrollment) {
           await Promise.all(
             groupsToAssign.map(({ groupId }) =>
               this.enrollUserToCoursesInGroup(groupId, userId, trx),
@@ -481,5 +488,13 @@ export class GroupService {
       name: group.name,
       characteristic: group.characteristic,
     };
+  }
+
+  private async shouldManageLearningEnrollment(
+    userId: UUIDType,
+    tenantId: UUIDType,
+  ): Promise<boolean> {
+    const { permissions } = await this.permissionService.getPermissionContext(userId, tenantId);
+    return !canManageCourseContent(permissions);
   }
 }

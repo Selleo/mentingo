@@ -384,6 +384,17 @@ export async function ensureSeedPermissionData(database: DatabasePg, tenantId: U
           permissionRuleSetPermissions.permission,
         ],
       });
+
+    // Keep default system rulesets in sync with current permission constants.
+    await database.execute(sql`
+      DELETE FROM ${permissionRuleSetPermissions}
+      WHERE ${permissionRuleSetPermissions.ruleSetId} = ${ruleSetId}
+        AND ${permissionRuleSetPermissions.tenantId} = ${tenantId}
+        AND ${permissionRuleSetPermissions.permission} NOT IN (${sql.join(
+          permissions.map((permission) => sql`${permission}`),
+          sql`, `,
+        )})
+    `);
   }
 }
 

@@ -820,7 +820,7 @@ describe("CourseController (e2e)", () => {
             .set("Cookie", cookies);
 
           expect(response.status).toBe(403);
-          expect(response.body.message).toBe("Forbidden resource");
+          expect(response.body.message).toBe("permission.error.insufficientPermission");
         });
       });
 

@@ -4,6 +4,7 @@ import { Factory } from "fishery";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import hashPassword from "../../src/common/helpers/hashPassword";
+import { assignSeedUserRole, ensureSeedPermissionData } from "../../src/seed/seed-helpers";
 import { credentials, userOnboarding, users } from "../../src/storage/schema";
 import { ensureTenant } from "../helpers/tenant-helpers";
 
@@ -11,6 +12,7 @@ import { createSettingsFactory } from "./settings.factory";
 
 import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import type { DatabasePg } from "src/common";
+import type { UserRole } from "src/user/schemas/userRoles";
 
 type User = InferSelectModel<typeof users>;
 type Credential = InferInsertModel<typeof credentials>;
@@ -80,6 +82,9 @@ export const createUserFactory = (db: DatabasePg) => {
           tenantId,
         })
         .returning();
+
+      await ensureSeedPermissionData(db, tenantId);
+      await assignSeedUserRole(db, inserted.id, tenantId, inserted.role as UserRole);
 
       await db.insert(userOnboarding).values({ userId: inserted.id, tenantId });
 

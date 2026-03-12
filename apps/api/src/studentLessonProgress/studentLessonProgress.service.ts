@@ -699,7 +699,7 @@ export class StudentLessonProgressService {
     return {
       userId: user.userId,
       email: user.email,
-      role: user.role as UserRole,
+      role: user.role,
       tenantId: user.tenantId,
     };
   }

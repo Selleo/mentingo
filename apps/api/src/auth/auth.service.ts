@@ -245,7 +245,7 @@ export class AuthService {
     const { MFAEnforcedRoles } = await this.settingsService.getGlobalSettings();
     const userSettings = await this.settingsService.getUserSettings(userId);
 
-    const isManagingTenantAdmin = await this.isManagingTenantAdmin(tenantId, user.role as UserRole);
+    const isManagingTenantAdmin = await this.isManagingTenantAdmin(userId, tenantId);
 
     if (MFAEnforcedRoles.includes(user.role as UserRole) || userSettings.isMFAEnabled) {
       return {
@@ -281,10 +281,7 @@ export class AuthService {
     const user = await this.userService.getUserById(sourceUserId, dbInstance);
     const onboardingStatus = await this.getOnboardingStatus(sourceUserId, dbInstance);
 
-    const isManagingTenantAdmin = await this.isManagingTenantAdmin(
-      sourceTenantId,
-      user.role as UserRole,
-    );
+    const isManagingTenantAdmin = await this.isManagingTenantAdmin(sourceUserId, sourceTenantId);
 
     return {
       ...user,

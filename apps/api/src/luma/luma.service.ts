@@ -464,7 +464,7 @@ export class LumaService {
   private async validateCourseAccess(integrationId: string, currentUser: CurrentUser) {
     await this.adminLessonService.validateAccess(
       ENTITY_TYPE.COURSE,
-      currentUser.role,
+      currentUser.permissions,
       currentUser.userId,
       integrationId,
     );
