@@ -12,6 +12,7 @@ export * from "./constants/loginPageDocuments";
 export * from "./constants/lumaFileIngestion";
 export * from "./constants/masterCourse";
 export * from "./constants/newsSettings";
+export * from "./constants/permissions";
 export * from "./constants/qaSettings";
 export * from "./constants/supportMode";
 export * from "./constants/tenant";
