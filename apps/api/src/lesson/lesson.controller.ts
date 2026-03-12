@@ -11,7 +11,6 @@ import {
   Req,
   Res,
   UploadedFile,
-  UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
@@ -32,15 +31,15 @@ import { Request, Response } from "express";
 import { Validate } from "nestjs-typebox";
 
 import { baseResponse, BaseResponse, UUIDSchema, type UUIDType } from "src/common";
-import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
-import { RolesGuard } from "src/common/guards/roles.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { MAX_VIDEO_SIZE } from "src/file/file.constants";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
-import { USER_ROLES, UserRole } from "src/user/schemas/userRoles";
+import { PERMISSIONS } from "src/permission/permission.constants";
+import { RequirePermission } from "src/permission/permission.decorator";
+import { UserRole } from "src/user/schemas/userRoles";
 
 import {
   AnswerQuestionBody,
@@ -71,7 +70,6 @@ import { LessonService } from "./services/lesson.service";
 import type { EnrolledLesson, LessonsFilters, LessonShow } from "./lesson.schema";
 
 @Controller("lesson")
-@UseGuards(RolesGuard)
 export class LessonController {
   constructor(
     private readonly adminLessonsService: AdminLessonService,
@@ -79,7 +77,7 @@ export class LessonController {
   ) {}
 
   @Get("all")
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR, USER_ROLES.STUDENT)
+  @RequirePermission(PERMISSIONS.COURSE_READ)
   @Validate({
     request: [
       { type: "query", name: "title", schema: Type.String() },
@@ -109,6 +107,7 @@ export class LessonController {
   }
 
   @Get(":id")
+  @RequirePermission(PERMISSIONS.COURSE_READ)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -129,7 +128,7 @@ export class LessonController {
   }
 
   @Post("beta-create-lesson")
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [
       {
@@ -149,7 +148,7 @@ export class LessonController {
   }
 
   @Post("initialize-lesson-context")
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     response: baseResponse(initializeLessonContextSchema),
   })
@@ -158,7 +157,7 @@ export class LessonController {
   }
 
   @Post("beta-create-lesson/ai")
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [
       {
@@ -182,7 +181,7 @@ export class LessonController {
   }
 
   @Patch("beta-update-lesson/ai")
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [
       {
@@ -209,7 +208,7 @@ export class LessonController {
   }
 
   @Post("beta-create-lesson/quiz")
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [
       {
@@ -230,7 +229,7 @@ export class LessonController {
   }
 
   @Patch("beta-update-lesson/quiz")
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [
       {
@@ -256,7 +255,7 @@ export class LessonController {
   }
 
   @Patch("beta-update-lesson")
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [
       {
@@ -281,7 +280,7 @@ export class LessonController {
   }
 
   @Delete()
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [{ type: "query", name: "lessonId", schema: UUIDSchema, required: true }],
     response: baseResponse(Type.Object({ message: Type.String() })),
@@ -297,7 +296,7 @@ export class LessonController {
   }
 
   @Post("evaluation-quiz")
-  @Roles(USER_ROLES.STUDENT)
+  @RequirePermission(PERMISSIONS.LEARNING_PROGRESS_UPDATE)
   @Validate({
     request: [{ type: "body", schema: answerQuestionsForLessonBody, required: true }],
     response: baseResponse(
@@ -334,7 +333,7 @@ export class LessonController {
   }
 
   @Post("upload-files-to-lesson")
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @UseInterceptors(FileInterceptor("file"))
   @ApiConsumes("multipart/form-data")
   @ApiBody({
@@ -420,7 +419,7 @@ export class LessonController {
   }
 
   @Delete("delete-student-quiz-answers")
-  @Roles(USER_ROLES.STUDENT)
+  @RequirePermission(PERMISSIONS.LEARNING_PROGRESS_UPDATE)
   @Validate({
     request: [{ type: "query", name: "lessonId", schema: UUIDSchema, required: true }],
     response: baseResponse(Type.Object({ message: Type.String() })),
@@ -434,7 +433,7 @@ export class LessonController {
   }
 
   @Post("create-lesson/embed")
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [{ type: "body", schema: createEmbedLessonSchema, required: true }],
     response: baseResponse(Type.Object({ message: Type.String() })),
@@ -448,7 +447,7 @@ export class LessonController {
   }
 
   @Patch("update-lesson/embed/:id")
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema, required: true },
@@ -466,7 +465,6 @@ export class LessonController {
   }
 
   //   @Delete("clear-quiz-progress")
-  //   @Roles(USER_ROLES.STUDENT)
   //   @Validate({
   //     request: [
   //       { type: "query", name: "courseId", schema: UUIDSchema, required: true },
@@ -491,6 +489,7 @@ export class LessonController {
   //   }
 
   @Get("lesson-image/:resourceId")
+  @RequirePermission(PERMISSIONS.COURSE_READ)
   @Validate({
     request: [{ type: "param", schema: UUIDSchema, name: "resourceId" }],
   })
@@ -505,6 +504,7 @@ export class LessonController {
   }
 
   @Get("lesson-resource/:resourceId")
+  @RequirePermission(PERMISSIONS.COURSE_READ)
   @Validate({
     request: [{ type: "param", schema: UUIDSchema, name: "resourceId" }],
   })
@@ -519,7 +519,7 @@ export class LessonController {
   }
 
   @Post("ai-mentor/avatar")
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @UseInterceptors(FileInterceptor("file"))
   @ApiConsumes("multipart/form-data")
   @ApiBody({
@@ -562,7 +562,7 @@ export class LessonController {
   }
 
   @Patch("update-lesson-display-order")
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [
       {

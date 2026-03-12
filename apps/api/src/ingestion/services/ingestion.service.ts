@@ -12,11 +12,10 @@ import { DOCUMENT_STATUS } from "src/ingestion/ingestion.constants";
 import { IngestionRepository } from "src/ingestion/repositories/ingestion.repository";
 import { DocumentService } from "src/ingestion/services/document.service";
 import { IngestionQueueService } from "src/ingestion/services/queue.service";
-import { USER_ROLES } from "src/user/schemas/userRoles";
+import { PERMISSIONS, type PermissionKey } from "src/permission/permission.constants";
 
 import type { Job } from "bullmq";
 import type { UUIDType } from "src/common";
-import type { UserRole } from "src/user/schemas/userRoles";
 
 @Injectable()
 export class IngestionService {
@@ -31,7 +30,7 @@ export class IngestionService {
     lessonId: UUIDType,
     files: Express.Multer.File[],
     currentUserId: UUIDType,
-    role: UserRole,
+    permissions?: PermissionKey[],
   ) {
     if (files.length > MAX_NUM_OF_FILES) {
       throw new BadRequestException("Exceeded max number of files");
@@ -39,7 +38,7 @@ export class IngestionService {
 
     const author = await this.getLessonAuthor(lessonId);
 
-    if (role !== USER_ROLES.ADMIN && author !== currentUserId) {
+    if (!permissions?.includes(PERMISSIONS.TENANT_MANAGE) && author !== currentUserId) {
       throw new ForbiddenException("You can only upload files to your own lessons");
     }
 
@@ -86,11 +85,11 @@ export class IngestionService {
   async findAllDocumentsForLesson(
     lessonId: UUIDType,
     currentUserId: UUIDType,
-    currentUserRole: UserRole,
+    permissions?: PermissionKey[],
   ) {
     const author = await this.getLessonAuthor(lessonId);
 
-    if (currentUserId !== author && currentUserRole !== USER_ROLES.ADMIN) {
+    if (currentUserId !== author && !permissions?.includes(PERMISSIONS.TENANT_MANAGE)) {
       throw new ForbiddenException("You are not allowed to view files for this lesson.");
     }
 
@@ -100,11 +99,11 @@ export class IngestionService {
   async deleteDocumentLink(
     documentLinkId: UUIDType,
     currentUserId: UUIDType,
-    currentUserRole: UserRole,
+    permissions?: PermissionKey[],
   ) {
     const author = await this.getDocumentLinkAuthor(documentLinkId);
 
-    if (currentUserId !== author && currentUserRole !== USER_ROLES.ADMIN) {
+    if (currentUserId !== author && !permissions?.includes(PERMISSIONS.TENANT_MANAGE)) {
       throw new ForbiddenException("You are not allowed to view files for this lesson.");
     }
 

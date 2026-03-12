@@ -9,9 +9,15 @@ import { credentials, userDetails, users } from "../storage/schema";
 import { USER_ROLES } from "../user/schemas/userRoles";
 
 import { insertGlobalSettings, insertOnboardingData, insertUserSettings } from "./seed";
-import { ensureSeedTenant, seedTruncateAllTables } from "./seed-helpers";
+import {
+  assignSeedUserRole,
+  ensureSeedPermissionData,
+  ensureSeedTenant,
+  seedTruncateAllTables,
+} from "./seed-helpers";
 
 import type { DatabasePg, UUIDType } from "../common";
+import type { UserRole } from "../user/schemas/userRoles";
 
 dotenv.config({ path: "./.env" });
 
@@ -27,6 +33,12 @@ async function createOrFindUser(email: string, password: string, userData: any) 
   const [existingUser] = await db.select().from(users).where(eq(users.email, email));
 
   if (existingUser) {
+    await assignSeedUserRole(
+      db,
+      existingUser.id,
+      existingUser.tenantId,
+      existingUser.role as UserRole,
+    );
     if (
       existingUser.role === USER_ROLES.ADMIN ||
       existingUser.role === USER_ROLES.CONTENT_CREATOR
@@ -38,6 +50,7 @@ async function createOrFindUser(email: string, password: string, userData: any) 
   }
 
   const [newUser] = await db.insert(users).values(userData).returning();
+  await assignSeedUserRole(db, newUser.id, userData.tenantId, newUser.role as UserRole);
   await insertCredential(newUser.id, userData.tenantId, password);
   await insertOnboardingData(newUser.id, userData.tenantId);
 
@@ -82,6 +95,7 @@ async function seedProduction() {
 
     const tenantId = tenant.id;
 
+    await ensureSeedPermissionData(db, tenantId);
     const adminUser = await createOrFindUser("admin@example.com", "password", {
       id: faker.string.uuid(),
       email: "admin@example.com",

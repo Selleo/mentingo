@@ -1,12 +1,10 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post } from "@nestjs/common";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
 import { baseResponse, BaseResponse, UUIDType } from "src/common";
 import { Public } from "src/common/decorators/public.decorator";
-import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
-import { RolesGuard } from "src/common/guards/roles.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import {
   BulkUpsertEnvBody,
@@ -19,15 +17,15 @@ import {
   isConfiguredResponseSchema,
 } from "src/env/env.schema";
 import { EnvService } from "src/env/services/env.service";
-import { USER_ROLES } from "src/user/schemas/userRoles";
+import { PERMISSIONS } from "src/permission/permission.constants";
+import { RequirePermission } from "src/permission/permission.decorator";
 
 @Controller("env")
-@UseGuards(RolesGuard)
 export class EnvController {
   constructor(private readonly envService: EnvService) {}
 
   @Post("bulk")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.ENV_MANAGE)
   @Validate({
     request: [{ type: "body", name: "bulkUpsertEnvBody", schema: bulkUpsertEnvSchema }],
   })
@@ -41,6 +39,7 @@ export class EnvController {
 
   @Public()
   @Get("frontend/sso")
+  @RequirePermission(PERMISSIONS.ENV_READ_PUBLIC)
   @Validate({
     response: baseResponse(frontendSSOEnabledResponseSchema),
   })
@@ -50,6 +49,7 @@ export class EnvController {
 
   @Public()
   @Get("stripe/publishable-key")
+  @RequirePermission(PERMISSIONS.ENV_READ_PUBLIC)
   @Validate({
     response: baseResponse(stripePublishableKeyResponseSchema),
   })
@@ -60,6 +60,7 @@ export class EnvController {
   }
 
   @Get("frontend/stripe")
+  @RequirePermission(PERMISSIONS.ENV_READ_STATUS)
   @Validate({
     response: baseResponse(frontendStripeConfiguredResponseSchema),
   })
@@ -68,6 +69,7 @@ export class EnvController {
   }
 
   @Get("ai")
+  @RequirePermission(PERMISSIONS.ENV_READ_STATUS)
   @Validate({
     response: baseResponse(isConfiguredResponseSchema),
   })
@@ -76,6 +78,7 @@ export class EnvController {
   }
 
   @Get("luma")
+  @RequirePermission(PERMISSIONS.ENV_READ_STATUS)
   @Validate({
     response: baseResponse(isConfiguredResponseSchema),
   })
@@ -84,7 +87,7 @@ export class EnvController {
   }
 
   @Get("config/setup")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.ENV_MANAGE)
   @Validate({
     response: baseResponse(isEnvSetupResponseSchema),
   })
@@ -94,7 +97,7 @@ export class EnvController {
   }
 
   @Get(":envName")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.ENV_MANAGE)
   @Validate({
     request: [{ type: "param", name: "envName", schema: Type.String() }],
     response: baseResponse(getEnvResponseSchema),

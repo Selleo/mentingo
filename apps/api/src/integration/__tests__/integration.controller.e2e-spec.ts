@@ -18,6 +18,7 @@ import type { DatabasePg } from "src/common";
 
 describe("IntegrationController (e2e)", () => {
   let app: INestApplication;
+  let cleanup: () => Promise<void>;
   let db: DatabasePg;
   let dbAdmin: DatabasePg;
   let userFactory: ReturnType<typeof createUserFactory>;
@@ -28,9 +29,10 @@ describe("IntegrationController (e2e)", () => {
   const uniqueTenantHost = (prefix: string) => `https://${prefix}-${randomUUID()}.local`;
 
   beforeAll(async () => {
-    const { app: testApp } = await createE2ETest();
+    const { app: testApp, cleanup: testCleanup } = await createE2ETest();
 
     app = testApp;
+    cleanup = testCleanup;
     db = app.get(DB);
     dbAdmin = app.get(DB_ADMIN);
     userFactory = createUserFactory(db);
@@ -40,6 +42,7 @@ describe("IntegrationController (e2e)", () => {
 
   afterAll(async () => {
     await app.close();
+    await cleanup();
   });
 
   beforeEach(async () => {

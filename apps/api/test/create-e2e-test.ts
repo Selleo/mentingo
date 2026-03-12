@@ -28,7 +28,13 @@ export async function createE2ETest(optionsOrProviders: E2ETestOptions | Provide
   const customProviders = options.customProviders ?? [];
   const enableActivityLogs = options.enableActivityLogs ?? false;
 
-  const { db, sql: pgSql, dbAdmin, pgConnectionString } = await setupTestDatabase();
+  const {
+    db,
+    sql: pgSql,
+    dbAdmin,
+    pgConnectionString,
+    sqlAdmin: pgSqlAdmin,
+  } = await setupTestDatabase();
 
   const defaultTenantId = await ensureTenant(dbAdmin);
 
@@ -110,6 +116,7 @@ export async function createE2ETest(optionsOrProviders: E2ETestOptions | Provide
       tenantRunner.runWithTenant(tenantId, fn),
     cleanup: async () => {
       await pgSql.end();
+      await pgSqlAdmin.end();
     },
   };
 }

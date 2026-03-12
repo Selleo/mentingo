@@ -37,14 +37,15 @@ import {
 } from "src/articles/schemas/previewArticle.schema";
 import { BaseResponse, UUIDSchema, UUIDType, baseResponse } from "src/common";
 import { Public } from "src/common/decorators/public.decorator";
-import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
-import { RolesGuard } from "src/common/guards/roles.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
-import { USER_ROLES, UserRole } from "src/user/schemas/userRoles";
+import { PERMISSIONS } from "src/permission/permission.constants";
+import { RequirePermission } from "src/permission/permission.decorator";
+import { PermissionsGuard } from "src/permission/permission.guard";
+import { UserRole } from "src/user/schemas/userRoles";
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
 import { getArticleSectionResponseSchema as getArticleSectionDetailsResponseSchema } from "./schemas/articleSection.schema";
@@ -79,17 +80,17 @@ import {
 } from "./schemas/updateArticle.schema";
 import { ArticlesService } from "./services/articles.service";
 
+@UseGuards(PermissionsGuard)
 @Controller("articles")
-@UseGuards(RolesGuard)
 export class ArticlesController {
   constructor(private readonly articlesService: ArticlesService) {}
 
   @Post("section")
+  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE)
   @Validate({
     request: [{ type: "body", schema: createArticleSectionSchema }],
     response: baseResponse(createArticleSectionResponseSchema),
   })
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   async createArticleSection(
     @Body() createArticleSectionBody: CreateArticleSection,
     @CurrentUser() currentUser: CurrentUserType,
@@ -103,6 +104,7 @@ export class ArticlesController {
   }
 
   @Get("section/:id")
+  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -110,7 +112,6 @@ export class ArticlesController {
     ],
     response: baseResponse(getArticleSectionDetailsResponseSchema),
   })
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   async getArticleSection(
     @Param("id") id: UUIDType,
     @Query("language") language: SupportedLanguages,
@@ -122,6 +123,7 @@ export class ArticlesController {
   }
 
   @Patch("section/:id")
+  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -129,7 +131,6 @@ export class ArticlesController {
     ],
     response: baseResponse(createArticleSectionResponseSchema),
   })
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   async updateArticleSection(
     @Param("id") id: UUIDType,
     @Body() updateArticleSectionBody: UpdateArticleSection,
@@ -146,6 +147,7 @@ export class ArticlesController {
 
   @ApiOperation({ summary: "Add a new language to an article section" })
   @Post("section/:id/language")
+  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -153,7 +155,6 @@ export class ArticlesController {
     ],
     response: baseResponse(createArticleSectionResponseSchema),
   })
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   async addNewLanguageToSection(
     @Param("id") id: UUIDType,
     @Body() createLanguageBody: CreateArticleSection,
@@ -169,13 +170,13 @@ export class ArticlesController {
   }
 
   @Delete("section/:id/language")
+  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
       { type: "query", name: "language", schema: supportedLanguagesSchema },
     ],
   })
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   async deleteArticleSectionLanguage(
     @Param("id") id: UUIDType,
     @Query("language") language: SupportedLanguages,
@@ -185,10 +186,10 @@ export class ArticlesController {
   }
 
   @Delete("section/:id")
+  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE)
   @Validate({
     request: [{ type: "param", name: "id", schema: UUIDSchema }],
   })
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   async deleteArticleSection(
     @Param("id") id: UUIDType,
     @CurrentUser() currentUser: CurrentUserType,
@@ -197,11 +198,11 @@ export class ArticlesController {
   }
 
   @Get("drafts")
+  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE)
   @Validate({
     request: [{ type: "query", name: "language", schema: supportedLanguagesSchema }],
     response: getArticlesResponseSchema,
   })
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   async getDraftArticles(
     @Query("language") language: SupportedLanguages,
   ): Promise<GetArticlesResponse> {
@@ -210,6 +211,7 @@ export class ArticlesController {
 
   @Public()
   @Get("toc")
+  @RequirePermission(PERMISSIONS.ARTICLE_READ_PUBLIC)
   @Validate({
     request: [
       { type: "query", name: "language", schema: supportedLanguagesSchema },
@@ -229,6 +231,7 @@ export class ArticlesController {
 
   @Public()
   @Get("articles-resource/:resourceId")
+  @RequirePermission(PERMISSIONS.ARTICLE_READ_PUBLIC)
   @Validate({
     request: [{ type: "param", schema: UUIDSchema, name: "resourceId" }],
   })
@@ -244,6 +247,7 @@ export class ArticlesController {
 
   @Public()
   @Get(":id")
+  @RequirePermission(PERMISSIONS.ARTICLE_READ_PUBLIC)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -265,6 +269,7 @@ export class ArticlesController {
 
   @Public()
   @Get()
+  @RequirePermission(PERMISSIONS.ARTICLE_READ_PUBLIC)
   @Validate({
     request: [
       { type: "query", name: "language", schema: supportedLanguagesSchema },
@@ -281,11 +286,11 @@ export class ArticlesController {
   }
 
   @Post("article")
+  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE)
   @Validate({
     request: [{ type: "body", schema: createArticleSchema }],
     response: baseResponse(createArticleResponseSchema),
   })
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   async createArticle(
     @Body() createArticleBody: CreateArticle,
     @CurrentUser() currentUser: CurrentUserType,
@@ -296,6 +301,7 @@ export class ArticlesController {
   }
 
   @Patch(":id")
+  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE)
   @UseInterceptors(FileInterceptor("cover"))
   @ApiConsumes("multipart/form-data")
   @Validate({
@@ -305,7 +311,6 @@ export class ArticlesController {
     ],
     response: baseResponse(createArticleResponseSchema),
   })
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   async updateArticle(
     @Param("id") id: string,
     @Body(new ValidateMultipartPipe(updateArticleSchema)) updateArticleBody: UpdateArticle,
@@ -330,6 +335,7 @@ export class ArticlesController {
 
   @ApiOperation({ summary: "Add a new language to an article" })
   @Post("article/:id")
+  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -337,7 +343,6 @@ export class ArticlesController {
     ],
     response: baseResponse(createArticleResponseSchema),
   })
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   async addNewLanguage(
     @Param("id") id: string,
     @Body() createLanguageBody: CreateLanguageArticle,
@@ -353,13 +358,13 @@ export class ArticlesController {
   }
 
   @Delete(":id/language")
+  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
       { type: "query", name: "language", schema: supportedLanguagesSchema },
     ],
   })
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   async deleteArticleLanguage(
     @Param("id") id: UUIDType,
     @Query("language") language: SupportedLanguages,
@@ -369,15 +374,16 @@ export class ArticlesController {
   }
 
   @Delete(":id")
+  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE)
   @Validate({
     request: [{ type: "param", name: "id", schema: UUIDSchema }],
   })
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   async deleteArticle(@Param("id") id: string, @CurrentUser() currentUser?: CurrentUserType) {
     await this.articlesService.deleteArticle(id, currentUser);
   }
 
   @Post(":id/upload")
+  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE)
   @UseInterceptors(FileInterceptor("file"))
   @ApiConsumes("multipart/form-data")
   @Validate({
@@ -387,7 +393,6 @@ export class ArticlesController {
     ],
     response: baseResponse(uploadArticleFileResponseSchema),
   })
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   async uploadFileToArticle(
     @Param("id") id: string,
     @Body(new ValidateMultipartPipe(uploadFileSchema)) uploadFileBody: UploadFile,
@@ -420,11 +425,11 @@ export class ArticlesController {
   }
 
   @Post("preview")
+  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE)
   @Validate({
     request: [{ type: "body", schema: previewArticleRequestSchema }],
     response: baseResponse(previewArticleResponseSchema),
   })
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   async generateArticlePreview(
     @Body() body: PreviewArticleRequest,
   ): Promise<BaseResponse<PreviewArticleResponse>> {

@@ -38,7 +38,7 @@ import type { CreateLessonBody, UpdateLessonBody } from "src/lesson/lesson.schem
 
 describe("Activity Logs E2E", () => {
   let app: INestApplication;
-
+  let cleanup: () => Promise<void>;
   let adminChapterService: AdminChapterService;
   let announcementsService: AnnouncementsService;
   let adminLessonService: AdminLessonService;
@@ -60,8 +60,11 @@ describe("Activity Logs E2E", () => {
   let currentAdminUser: CurrentUser;
 
   beforeAll(async () => {
-    const { app: testAppInstance } = await createE2ETest({ enableActivityLogs: true });
+    const { app: testAppInstance, cleanup: testCleanup } = await createE2ETest({
+      enableActivityLogs: true,
+    });
     app = testAppInstance;
+    cleanup = testCleanup;
 
     db = app.get(DB);
     baseDb = app.get(DB_ADMIN);
@@ -85,6 +88,7 @@ describe("Activity Logs E2E", () => {
   afterAll(async () => {
     await truncateAllTables(baseDb, db);
     await app.close();
+    await cleanup();
   });
 
   beforeEach(async () => {

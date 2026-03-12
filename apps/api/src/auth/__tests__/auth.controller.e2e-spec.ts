@@ -17,6 +17,7 @@ import type { DatabasePg } from "src/common";
 
 describe("AuthController (e2e)", () => {
   let app: INestApplication;
+  let cleanup: () => Promise<void>;
   let authService: AuthService;
   let db: DatabasePg;
   let baseDb: DatabasePg;
@@ -24,8 +25,9 @@ describe("AuthController (e2e)", () => {
   let settingsFactory: ReturnType<typeof createSettingsFactory>;
 
   beforeAll(async () => {
-    const { app: testApp } = await createE2ETest();
+    const { app: testApp, cleanup: testCleanup } = await createE2ETest();
     app = testApp;
+    cleanup = testCleanup;
     authService = app.get(AuthService);
     db = app.get(DB);
     baseDb = app.get(DB_ADMIN);
@@ -39,6 +41,11 @@ describe("AuthController (e2e)", () => {
 
   afterEach(async () => {
     await truncateTables(baseDb, ["settings"]);
+  });
+
+  afterAll(async () => {
+    await app.close();
+    await cleanup();
   });
 
   describe("POST /api/auth/register", () => {

@@ -25,10 +25,12 @@ describe("UsersController (e2e)", () => {
   let baseDb: DatabasePg;
   let userFactory: ReturnType<typeof createUserFactory>;
   let settingsFactory: ReturnType<typeof createSettingsFactory>;
+  let cleanup: () => Promise<void>;
 
   beforeAll(async () => {
-    const { app: testApp } = await createE2ETest();
+    const { app: testApp, cleanup: testCleanup } = await createE2ETest();
     app = testApp;
+    cleanup = testCleanup;
     authService = app.get(AuthService);
     groupService = app.get(GroupService);
     db = app.get(DB);
@@ -39,6 +41,7 @@ describe("UsersController (e2e)", () => {
 
   afterAll(async () => {
     await app.close();
+    await cleanup();
   });
 
   beforeEach(async () => {

@@ -3,11 +3,11 @@ import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
 import { baseResponse, BaseResponse, UUIDType } from "src/common";
-import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
-import { RolesGuard } from "src/common/guards/roles.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
-import { USER_ROLES } from "src/user/schemas/userRoles";
+import { PERMISSIONS } from "src/permission/permission.constants";
+import { RequirePermission } from "src/permission/permission.decorator";
+import { PermissionsGuard } from "src/permission/permission.guard";
 
 import { AnnouncementsService } from "./announcements.service";
 import {
@@ -22,13 +22,13 @@ import { CreateAnnouncement } from "./types/announcement.types";
 
 import type { AnnouncementFilters } from "./types/announcement.types";
 
-@UseGuards(RolesGuard)
+@UseGuards(PermissionsGuard)
 @Controller("announcements")
 export class AnnouncementsController {
   constructor(private readonly announcementsService: AnnouncementsService) {}
 
   @Get()
-  @Roles(...Object.values(USER_ROLES))
+  @RequirePermission(PERMISSIONS.ANNOUNCEMENT_READ)
   @Validate({
     response: baseResponse(allAnnouncementsSchema),
   })
@@ -39,7 +39,7 @@ export class AnnouncementsController {
   }
 
   @Get("latest")
-  @Roles(...Object.values(USER_ROLES))
+  @RequirePermission(PERMISSIONS.ANNOUNCEMENT_READ)
   @Validate({
     response: baseResponse(allAnnouncementsSchema),
   })
@@ -50,19 +50,20 @@ export class AnnouncementsController {
   }
 
   @Get("unread")
-  @Roles(...Object.values(USER_ROLES))
+  @RequirePermission(PERMISSIONS.ANNOUNCEMENT_READ)
   @Validate({
     response: baseResponse(unreadAnnouncementsSchema),
   })
   async getUnreadAnnouncementsCount(@CurrentUser("userId") userId: UUIDType) {
-    const unreadAnnouncementsCount =
-      await this.announcementsService.getUnreadAnnouncementsCount(userId);
+    const unreadAnnouncementsCount = await this.announcementsService.getUnreadAnnouncementsCount(
+      userId,
+    );
 
     return new BaseResponse(unreadAnnouncementsCount);
   }
 
   @Get("user/me")
-  @Roles(...Object.values(USER_ROLES))
+  @RequirePermission(PERMISSIONS.ANNOUNCEMENT_READ)
   @Validate({
     request: [
       { type: "query", name: "title", schema: Type.Optional(Type.String()) },
@@ -96,7 +97,7 @@ export class AnnouncementsController {
   }
 
   @Post()
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.ANNOUNCEMENT_CREATE)
   @Validate({
     request: [{ type: "body", schema: createAnnouncementSchema }],
     response: baseResponse(baseAnnouncementSchema),
@@ -114,7 +115,7 @@ export class AnnouncementsController {
   }
 
   @Patch(":id/read")
-  @Roles(...Object.values(USER_ROLES))
+  @RequirePermission(PERMISSIONS.ANNOUNCEMENT_READ)
   @Validate({
     response: baseResponse(userAnnouncementsSchema),
   })

@@ -10,7 +10,6 @@ import {
   Post,
   Query,
   UploadedFile,
-  UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express/multer/interceptors/file.interceptor";
@@ -31,9 +30,7 @@ import {
   type UUIDType,
 } from "src/common";
 import { Public } from "src/common/decorators/public.decorator";
-import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
-import { RolesGuard } from "src/common/guards/roles.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { ALLOWED_EXCEL_MIME_TYPES, MAX_FILE_SIZE } from "src/file/file.constants";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
@@ -41,6 +38,8 @@ import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
 import { ImageConstraintsValidator } from "src/file/validators/image-constraints.validator";
 import { groupsFilterSchema } from "src/group/group.schema";
 import { GroupsFilterSchema } from "src/group/group.types";
+import { PERMISSIONS } from "src/permission/permission.constants";
+import { RequirePermission } from "src/permission/permission.decorator";
 import {
   type CreateUserBody,
   createUserSchema,
@@ -91,12 +90,11 @@ import type { UsersFilterSchema } from "./schemas/userQuery";
 import type { Static } from "@sinclair/typebox";
 
 @Controller("user")
-@UseGuards(RolesGuard)
 export class UserController {
   constructor(private readonly usersService: UserService) {}
 
   @Get("all")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.USER_MANAGE)
   @Validate({
     request: [
       { type: "query", name: "keyword", schema: Type.String() },
@@ -133,7 +131,7 @@ export class UserController {
   }
 
   @Get()
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.USER_MANAGE)
   @Validate({
     request: [{ type: "query", name: "id", schema: UUIDSchema, required: true }],
     response: baseResponse(userSchema),
@@ -146,6 +144,7 @@ export class UserController {
 
   @Get("details")
   @Public()
+  @RequirePermission(PERMISSIONS.USER_READ_SELF)
   @Validate({
     request: [{ type: "query", name: "userId", schema: UUIDSchema, required: true }],
     response: baseResponse(userDetailsResponseSchema),
@@ -160,7 +159,7 @@ export class UserController {
   }
 
   @Patch()
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.ACCOUNT_UPDATE_SELF)
   @Validate({
     response: baseResponse(baseUserResponseSchema),
     request: [
@@ -186,7 +185,7 @@ export class UserController {
   }
 
   @Patch("details")
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.USER_MANAGE)
   @Validate({
     response: baseResponse(Type.Object({ id: UUIDSchema, message: Type.String() })),
     request: [{ type: "body", schema: upsertUserDetailsSchema }],
@@ -206,6 +205,7 @@ export class UserController {
   }
 
   @Patch("profile")
+  @RequirePermission(PERMISSIONS.ACCOUNT_UPDATE_SELF)
   @UseInterceptors(FileInterceptor("userAvatar", { storage: memoryStorage() }))
   @ApiConsumes("multipart/form-data")
   @ApiBody({
@@ -251,7 +251,7 @@ export class UserController {
   }
 
   @Patch("admin")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.USER_MANAGE)
   @Validate({
     response: baseResponse(baseUserResponseSchema),
     request: [
@@ -273,6 +273,7 @@ export class UserController {
   }
 
   @Patch("change-password")
+  @RequirePermission(PERMISSIONS.ACCOUNT_UPDATE_SELF)
   @Validate({
     response: nullResponse(),
     request: [
@@ -294,7 +295,7 @@ export class UserController {
   }
 
   @Delete()
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.USER_MANAGE)
   @Validate({
     response: nullResponse(),
     request: [{ type: "body", schema: deleteUsersSchema }],
@@ -309,7 +310,7 @@ export class UserController {
   }
 
   @Patch("bulk/groups")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.USER_MANAGE)
   @Validate({
     request: [{ type: "body", schema: bulkAssignUsersGroupsSchema }],
   })
@@ -325,7 +326,7 @@ export class UserController {
   }
 
   @Patch("bulk/archive")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.USER_MANAGE)
   @Validate({
     request: [{ type: "body", schema: archiveUsersSchema }],
     response: baseResponse(archiveUsersSchemaResponse),
@@ -339,7 +340,7 @@ export class UserController {
   }
 
   @Patch("bulk/roles")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.USER_MANAGE)
   @Validate({
     request: [{ type: "body", schema: bulkUpdateUsersRolesSchema }],
   })
@@ -351,7 +352,7 @@ export class UserController {
   }
 
   @Post()
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.USER_MANAGE)
   @Validate({
     response: baseResponse(Type.Object({ id: UUIDSchema, message: Type.String() })),
     request: [{ type: "body", schema: createUserSchema }],
@@ -369,7 +370,7 @@ export class UserController {
   }
 
   @Post("import")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.USER_MANAGE)
   @UseInterceptors(FileInterceptor("usersFile"))
   @ApiConsumes("multipart/form-data")
   @ApiBody({
@@ -401,7 +402,7 @@ export class UserController {
   }
 
   @Patch("onboarding-status/reset")
-  @Roles(...Object.values(USER_ROLES))
+  @RequirePermission(PERMISSIONS.ACCOUNT_UPDATE_SELF)
   @Validate({
     response: baseResponse(userOnboardingStatusSchema),
   })
@@ -412,7 +413,7 @@ export class UserController {
   }
 
   @Patch("onboarding-status/:page")
-  @Roles(...Object.values(USER_ROLES))
+  @RequirePermission(PERMISSIONS.ACCOUNT_UPDATE_SELF)
   @Validate({
     response: baseResponse(userOnboardingStatusSchema),
   })

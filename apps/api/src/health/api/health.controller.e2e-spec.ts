@@ -6,10 +6,17 @@ import type { INestApplication } from "@nestjs/common";
 
 describe("HealthController (e2e)", () => {
   let app: INestApplication;
+  let cleanup: () => Promise<void>;
 
   beforeAll(async () => {
-    const { app: testApp } = await createE2ETest();
+    const { app: testApp, cleanup: testCleanup } = await createE2ETest();
     app = testApp;
+    cleanup = testCleanup;
+  });
+
+  afterAll(async () => {
+    await app.close();
+    await cleanup();
   });
 
   describe("GET /healthcheck", () => {

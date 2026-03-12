@@ -32,7 +32,9 @@ import { USER_ROLES } from "../user/schemas/userRoles";
 import { niceCourses } from "./nice-data-seeds";
 import {
   addEmailSuffix,
+  assignSeedUserRole,
   createNiceCourses,
+  ensureSeedPermissionData,
   ensureSeedTenant,
   getTenantEmailSuffix,
   seedUserRoleGrantSql,
@@ -99,10 +101,14 @@ async function createOrFindUser(
   tenantId: UUIDType,
 ) {
   const [existingUser] = await db.select().from(users).where(eq(users.email, email));
-  if (existingUser) return existingUser;
+  if (existingUser) {
+    await assignSeedUserRole(db, existingUser.id, tenantId, existingUser.role as UserRole);
+    return existingUser;
+  }
 
   const [newUser] = await db.insert(users).values(userData).returning();
 
+  await assignSeedUserRole(db, newUser.id, tenantId, newUser.role as UserRole);
   await insertCredential(newUser.id, tenantId, password);
   await insertOnboardingData(newUser.id, tenantId);
 
@@ -303,6 +309,7 @@ export async function seedBulkUsers(options: {
 
       const tenantId = tenant.id;
 
+      await ensureSeedPermissionData(db, tenantId);
       await insertGlobalSettings(db, tenantId);
       console.log(`✨ Created global settings for tenant ${origin}`);
 

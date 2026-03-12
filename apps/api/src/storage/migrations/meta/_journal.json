@@ -680,6 +680,20 @@
       "when": 1772457423678,
       "tag": "0096_backfill_course_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 97,
+      "version": "7",
+      "when": 1773067601741,
+      "tag": "0097_permission-rbac-structure",
+      "breakpoints": true
+    },
+    {
+      "idx": 98,
+      "version": "7",
+      "when": 1773067607734,
+      "tag": "0098_permission-rbac-backfill",
+      "breakpoints": true
     }
   ]
 }

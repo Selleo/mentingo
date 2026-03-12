@@ -23,6 +23,7 @@ import type { DatabasePg, UUIDType } from "src/common";
 
 describe("LessonController (e2e) - quiz feedback redaction", () => {
   let app: INestApplication;
+  let cleanup: () => Promise<void>;
   let db: DatabasePg;
   let baseDb: DatabasePg;
   let categoryFactory: ReturnType<typeof createCategoryFactory>;
@@ -42,7 +43,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       set: jest.fn().mockResolvedValue(""),
     };
 
-    const { app: testApp } = await createE2ETest([
+    const { app: testApp, cleanup: testCleanup } = await createE2ETest([
       {
         provide: FileService,
         useValue: mockFileService,
@@ -54,6 +55,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
     ]);
 
     app = testApp;
+    cleanup = testCleanup;
     db = app.get(DB);
     baseDb = app.get(DB_ADMIN);
     userFactory = createUserFactory(db);
@@ -65,6 +67,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
 
   afterAll(async () => {
     await app.close();
+    await cleanup();
   });
 
   afterEach(async () => {

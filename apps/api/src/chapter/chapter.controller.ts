@@ -1,14 +1,14 @@
-import { Body, Controller, Delete, Get, Patch, Post, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Patch, Post, Query } from "@nestjs/common";
 import { SupportedLanguages } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
 import { baseResponse, BaseResponse, UUIDSchema, type UUIDType } from "src/common";
-import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
-import { RolesGuard } from "src/common/guards/roles.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
+import { PERMISSIONS } from "src/permission/permission.constants";
+import { RequirePermission } from "src/permission/permission.decorator";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
 import { AdminChapterService } from "./adminChapter.service";
@@ -24,7 +24,6 @@ import {
 import type { ChapterResponse } from "./schemas/chapter.schema";
 
 @Controller("chapter")
-@UseGuards(RolesGuard)
 export class ChapterController {
   constructor(
     private readonly chapterService: ChapterService,
@@ -32,7 +31,7 @@ export class ChapterController {
   ) {}
 
   @Get()
-  @Roles(...Object.values(USER_ROLES))
+  @RequirePermission(PERMISSIONS.COURSE_READ)
   @Validate({
     request: [
       { type: "query", name: "id", schema: UUIDSchema, required: true },
@@ -57,7 +56,7 @@ export class ChapterController {
   }
 
   @Post("beta-create-chapter")
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [
       {
@@ -80,7 +79,7 @@ export class ChapterController {
   }
 
   @Patch()
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [
       {
@@ -106,7 +105,7 @@ export class ChapterController {
   }
 
   @Patch("chapter-display-order")
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [
       {
@@ -139,7 +138,7 @@ export class ChapterController {
   }
 
   @Delete()
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [{ type: "query", name: "chapterId", schema: UUIDSchema, required: true }],
     response: baseResponse(Type.Object({ message: Type.String() })),
@@ -155,7 +154,7 @@ export class ChapterController {
   }
 
   @Patch("freemium-status")
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [
       {

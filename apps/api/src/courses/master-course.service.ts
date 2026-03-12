@@ -19,10 +19,10 @@ import { LESSON_SEQUENCE_ENABLED, QUIZ_FEEDBACK_ENABLED } from "src/courses/cons
 import { MasterCourseQueueService } from "src/courses/master-course.queue.service";
 import { MasterCourseRepository } from "src/courses/master-course.repository";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
+import { PERMISSIONS } from "src/permission/permission.constants";
 import { DB } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { chapters, courses, lessons, questionAnswerOptions, questions } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
@@ -918,7 +918,7 @@ export class MasterCourseService {
   }
 
   private async assertManagingTenantAdmin(actor: CurrentUser) {
-    if (actor.role !== USER_ROLES.ADMIN)
+    if (!actor.permissions?.includes(PERMISSIONS.TENANT_MANAGE))
       throw new ForbiddenException("auth.error.adminRoleRequired");
 
     const tenant = await this.masterCourseRepository.getTenantManagingStatus(actor.tenantId);

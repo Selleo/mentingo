@@ -18,6 +18,7 @@ import type { DatabasePg } from "src/common";
 
 describe("QAController (e2e)", () => {
   let app: INestApplication;
+  let cleanup: () => Promise<void>;
   let db: DatabasePg;
   let baseDb: DatabasePg;
   let qaFactory: ReturnType<typeof createQAFactory>;
@@ -50,8 +51,9 @@ describe("QAController (e2e)", () => {
   };
 
   beforeAll(async () => {
-    const { app: testApp } = await createE2ETest();
+    const { app: testApp, cleanup: testCleanup } = await createE2ETest();
     app = testApp;
+    cleanup = testCleanup;
     db = app.get(DB);
     baseDb = app.get(DB_ADMIN);
 
@@ -63,6 +65,7 @@ describe("QAController (e2e)", () => {
   afterAll(async () => {
     await truncateAllTables(baseDb, db);
     await app.close();
+    await cleanup();
   });
 
   beforeEach(async () => {

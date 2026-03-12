@@ -15,6 +15,7 @@ import type { INestApplication } from "@nestjs/common";
 
 describe("SettingsController - Company Information (e2e)", () => {
   let app: INestApplication;
+  let cleanup: () => Promise<void>;
   let adminUser: UserWithCredentials;
   let studentUser: UserWithCredentials;
   let adminCookies: string;
@@ -35,8 +36,9 @@ describe("SettingsController - Company Information (e2e)", () => {
   };
 
   beforeAll(async () => {
-    const { app: testApp } = await createE2ETest();
+    const { app: testApp, cleanup: testCleanup } = await createE2ETest();
     app = testApp;
+    cleanup = testCleanup;
     db = app.get(DB);
     baseDb = app.get(DB_ADMIN);
     userFactory = createUserFactory(db);
@@ -45,6 +47,7 @@ describe("SettingsController - Company Information (e2e)", () => {
 
   afterAll(async () => {
     await app.close();
+    await cleanup();
   }, 10000);
 
   beforeEach(async () => {

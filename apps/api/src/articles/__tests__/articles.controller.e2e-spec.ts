@@ -21,6 +21,7 @@ import type { DatabasePg } from "src/common";
 
 describe("ArticlesController (e2e)", () => {
   let app: INestApplication;
+  let cleanup: () => Promise<void>;
   let db: DatabasePg;
   let baseDb: DatabasePg;
   let userFactory: ReturnType<typeof createUserFactory>;
@@ -50,8 +51,9 @@ describe("ArticlesController (e2e)", () => {
   };
 
   beforeAll(async () => {
-    const { app: testApp } = await createE2ETest();
+    const { app: testApp, cleanup: testCleanup } = await createE2ETest();
     app = testApp;
+    cleanup = testCleanup;
     db = app.get(DB);
     baseDb = app.get(DB_ADMIN);
     userFactory = createUserFactory(db);
@@ -76,6 +78,11 @@ describe("ArticlesController (e2e)", () => {
       "user_onboarding",
       "users",
     ]);
+  });
+
+  afterAll(async () => {
+    await app.close();
+    await cleanup();
   });
 
   describe("GET /api/articles", () => {

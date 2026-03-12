@@ -68,6 +68,7 @@ async function waitFor<T>(
 
 describe("Master course export and sync (e2e)", () => {
   let app: INestApplication;
+  let cleanup: () => Promise<void>;
   let db: DatabasePg;
   let baseDb: DatabasePg;
   let runAsTenant: <T>(tenantId: string, fn: () => Promise<T>) => Promise<T>;
@@ -104,6 +105,7 @@ describe("Master course export and sync (e2e)", () => {
     ]);
 
     app = e2e.app;
+    cleanup = e2e.cleanup;
     db = app.get(DB);
     baseDb = app.get(DB_ADMIN);
     runAsTenant = e2e.runAsTenant;
@@ -183,6 +185,7 @@ describe("Master course export and sync (e2e)", () => {
 
   afterAll(async () => {
     await app.close();
+    await cleanup();
   });
 
   const setupAndExport = async (): Promise<

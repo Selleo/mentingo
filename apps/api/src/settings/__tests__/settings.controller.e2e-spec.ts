@@ -13,6 +13,7 @@ import type { AdminSettings, GlobalSettings, StudentSettings } from "src/common/
 
 describe("SettingsController (e2e)", () => {
   let app: INestApplication;
+  let cleanup: () => Promise<void>;
   let db: DatabasePg;
   let baseDb: DatabasePg;
   let userFactory: ReturnType<typeof createUserFactory>;
@@ -20,8 +21,9 @@ describe("SettingsController (e2e)", () => {
   const testPassword = "Password123@@";
 
   beforeAll(async () => {
-    const { app: testApp } = await createE2ETest();
+    const { app: testApp, cleanup: testCleanup } = await createE2ETest();
     app = testApp;
+    cleanup = testCleanup;
     db = app.get(DB);
     baseDb = app.get(DB_ADMIN);
     userFactory = createUserFactory(db);
@@ -30,6 +32,7 @@ describe("SettingsController (e2e)", () => {
 
   afterAll(async () => {
     await app.close();
+    await cleanup();
   });
 
   describe("User Settings", () => {

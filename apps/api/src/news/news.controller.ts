@@ -11,7 +11,6 @@ import {
   Req,
   Res,
   UploadedFile,
-  UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
@@ -31,14 +30,13 @@ import { Validate } from "nestjs-typebox";
 
 import { BaseResponse, PaginatedResponse, UUIDSchema, UUIDType, baseResponse } from "src/common";
 import { Public } from "src/common/decorators/public.decorator";
-import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
-import { RolesGuard } from "src/common/guards/roles.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
-import { USER_ROLES } from "src/user/schemas/userRoles";
+import { PERMISSIONS } from "src/permission/permission.constants";
+import { RequirePermission } from "src/permission/permission.decorator";
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
 import { NewsService } from "./news.service";
@@ -60,11 +58,11 @@ import type { GetNewsResponse, GetNewsResponseWithPlainContent } from "./schemas
 import type { UserRole } from "src/user/schemas/userRoles";
 
 @Controller("news")
-@UseGuards(RolesGuard)
 export class NewsController {
   constructor(private readonly newsService: NewsService) {}
 
   @Get("drafts")
+  @RequirePermission(PERMISSIONS.NEWS_MANAGE)
   @Validate({
     request: [
       { type: "query", name: "language", schema: supportedLanguagesSchema },
@@ -72,7 +70,6 @@ export class NewsController {
     ],
     response: paginatedNewsListResponseSchema,
   })
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   async getDraftNewsList(
     @Query("language") language: SupportedLanguages,
     @Query("page") page = 1,
@@ -84,11 +81,11 @@ export class NewsController {
   }
 
   @Post("preview")
+  @RequirePermission(PERMISSIONS.NEWS_MANAGE)
   @Validate({
     request: [{ type: "body", schema: previewNewsRequestSchema }],
     response: baseResponse(previewNewsResponseSchema),
   })
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   async generateNewsPreview(
     @Body() body: { newsId: UUIDType; language: SupportedLanguages; content: string },
     @CurrentUser() currentUser: CurrentUserType,
@@ -106,6 +103,7 @@ export class NewsController {
 
   @Public()
   @Get("news-resource/:resourceId")
+  @RequirePermission(PERMISSIONS.NEWS_READ_PUBLIC)
   @Validate({
     request: [{ type: "param", schema: UUIDSchema, name: "resourceId" }],
   })
@@ -121,6 +119,7 @@ export class NewsController {
 
   @Public()
   @Get(":id")
+  @RequirePermission(PERMISSIONS.NEWS_READ_PUBLIC)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -140,6 +139,7 @@ export class NewsController {
 
   @Public()
   @Get()
+  @RequirePermission(PERMISSIONS.NEWS_READ_PUBLIC)
   @Validate({
     request: [
       { type: "query", name: "language", schema: supportedLanguagesSchema },
@@ -160,11 +160,11 @@ export class NewsController {
   }
 
   @Post()
+  @RequirePermission(PERMISSIONS.NEWS_MANAGE)
   @Validate({
     request: [{ type: "body", schema: createNewsSchema }],
     response: baseResponse(createNewsResponseSchema),
   })
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   async createNews(
     @Body() createNewsBody: CreateNews,
     @CurrentUser() currentUser: CurrentUserType,
@@ -175,6 +175,7 @@ export class NewsController {
   }
 
   @Patch(":id")
+  @RequirePermission(PERMISSIONS.NEWS_MANAGE)
   @UseInterceptors(FileInterceptor("cover"))
   @ApiConsumes("multipart/form-data")
   @Validate({
@@ -184,7 +185,6 @@ export class NewsController {
     ],
     response: baseResponse(createNewsResponseSchema),
   })
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   async updateNews(
     @Param("id") id: string,
     @Body(new ValidateMultipartPipe(updateNewsSchema)) updateNewsBody: UpdateNews,
@@ -204,6 +204,7 @@ export class NewsController {
 
   @ApiOperation({ summary: "Add a new language to a news item" })
   @Post(":id")
+  @RequirePermission(PERMISSIONS.NEWS_MANAGE)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -211,7 +212,6 @@ export class NewsController {
     ],
     response: baseResponse(createNewsResponseSchema),
   })
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   async addNewLanguage(
     @Param("id") id: string,
     @Body() createLanguageBody: CreateNews,
@@ -227,6 +227,7 @@ export class NewsController {
   }
 
   @Delete(":id/language")
+  @RequirePermission(PERMISSIONS.NEWS_MANAGE)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -234,7 +235,6 @@ export class NewsController {
     ],
     response: baseResponse(deleteNewsLanguageResponseSchema),
   })
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   async deleteNewsLanguage(
     @Param("id") id: UUIDType,
     @Query("language") language: SupportedLanguages,
@@ -246,11 +246,11 @@ export class NewsController {
   }
 
   @Delete(":id")
+  @RequirePermission(PERMISSIONS.NEWS_MANAGE)
   @Validate({
     request: [{ type: "param", name: "id", schema: UUIDSchema }],
     response: baseResponse(deleteNewsResponseSchema),
   })
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   async deleteNews(@Param("id") id: string, @CurrentUser() currentUser?: CurrentUserType) {
     const deletedNews = await this.newsService.deleteNews(id, currentUser);
 
@@ -258,6 +258,7 @@ export class NewsController {
   }
 
   @Post(":id/upload")
+  @RequirePermission(PERMISSIONS.NEWS_MANAGE)
   @UseInterceptors(FileInterceptor("file"))
   @ApiConsumes("multipart/form-data")
   @ApiBody({
@@ -286,7 +287,6 @@ export class NewsController {
     request: [{ type: "param", name: "id", schema: UUIDSchema }],
     response: baseResponse(uploadNewsFileResponseSchema),
   })
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   async uploadFileToNews(
     @Param("id") id: string,
     @UploadedFile(

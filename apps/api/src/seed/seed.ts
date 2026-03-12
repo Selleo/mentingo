@@ -37,7 +37,9 @@ import { e2eCourses } from "./e2e-data-seeds";
 import { niceCourses } from "./nice-data-seeds";
 import {
   addEmailSuffix,
+  assignSeedUserRole,
   createNiceCourses,
+  ensureSeedPermissionData,
   ensureSeedTenant,
   getTenantEmailSuffix,
   seedTruncateAllTables,
@@ -48,6 +50,7 @@ import { admin, contentCreators, students } from "./users-seed";
 import type { UsersSeed } from "./seed.types";
 import type { DatabasePg, UUIDType } from "../common";
 import type { GlobalSettingsJSONContentSchema } from "src/settings/schemas/settings.schema";
+import type { UserRole } from "src/user/schemas/userRoles";
 
 dotenv.config({ path: "./.env" });
 
@@ -96,10 +99,14 @@ async function createOrFindUser(
   tenantId: UUIDType,
 ) {
   const [existingUser] = await db.select().from(users).where(eq(users.email, email));
-  if (existingUser) return existingUser;
+  if (existingUser) {
+    await assignSeedUserRole(db, existingUser.id, tenantId, existingUser.role as UserRole);
+    return existingUser;
+  }
 
   const [newUser] = await db.insert(users).values(userData).returning();
 
+  await assignSeedUserRole(db, newUser.id, tenantId, newUser.role as UserRole);
   await insertCredential(newUser.id, tenantId, password);
   await insertOnboardingData(newUser.id, tenantId);
 
@@ -358,6 +365,7 @@ async function seed() {
         isManaging: origin === primaryTenantOrigin,
       });
 
+      await ensureSeedPermissionData(db, tenantId);
       await insertGlobalSettings(db, tenantId);
       console.log(`✨ Created global settings for tenant ${origin}`);
 

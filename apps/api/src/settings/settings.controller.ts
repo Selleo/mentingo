@@ -30,14 +30,13 @@ import { Validate } from "nestjs-typebox";
 import { UUIDType, baseResponse, BaseResponse, UUIDSchema } from "src/common";
 import { FILE_SIZE_BASE } from "src/common/constants";
 import { Public } from "src/common/decorators/public.decorator";
-import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { DisallowInSupportModeGuard } from "src/common/guards/disallow-support-mode.guard";
-import { RolesGuard } from "src/common/guards/roles.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
-import { USER_ROLES } from "src/user/schemas/userRoles";
+import { PERMISSIONS } from "src/permission/permission.constants";
+import { RequirePermission } from "src/permission/permission.decorator";
 
 import { CompanyInformaitonJSONSchema } from "./schemas/company-information.schema";
 import { loginBackgroundResponseSchema } from "./schemas/login-background.schema";
@@ -75,12 +74,12 @@ import type {
 } from "./schemas/settings.schema";
 
 @Controller("settings")
-@UseGuards(RolesGuard)
 export class SettingsController {
   constructor(private readonly settingsService: SettingsService) {}
 
   @Public()
   @Get("global")
+  @RequirePermission(PERMISSIONS.SETTINGS_READ_PUBLIC)
   @Validate({
     response: baseResponse(globalSettingsJSONSchema),
   })
@@ -89,6 +88,7 @@ export class SettingsController {
   }
 
   @Get()
+  @RequirePermission(PERMISSIONS.SETTINGS_READ_SELF)
   @Validate({
     response: baseResponse(userSettingsJSONContentSchema),
   })
@@ -99,6 +99,7 @@ export class SettingsController {
   }
 
   @Put()
+  @RequirePermission(PERMISSIONS.SETTINGS_UPDATE_SELF)
   @UseGuards(DisallowInSupportModeGuard)
   @Validate({
     request: [{ type: "body", schema: updateSettingsBodySchema }],
@@ -112,8 +113,8 @@ export class SettingsController {
   }
 
   @Patch("admin/new-user-notification")
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @UseGuards(DisallowInSupportModeGuard)
-  @Roles(USER_ROLES.ADMIN)
   @Validate({
     response: baseResponse(adminSettingsJSONContentSchema),
   })
@@ -125,7 +126,7 @@ export class SettingsController {
   }
 
   @Patch("admin/unregistered-user-courses-accessibility")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @Validate({
     response: baseResponse(globalSettingsJSONSchema),
   })
@@ -138,7 +139,7 @@ export class SettingsController {
   }
 
   @Patch("admin/enforce-sso")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @Validate({
     response: baseResponse(globalSettingsJSONSchema),
   })
@@ -150,7 +151,7 @@ export class SettingsController {
   }
 
   @Patch("admin/modern-course-list")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @Validate({
     response: baseResponse(globalSettingsJSONSchema),
   })
@@ -162,8 +163,8 @@ export class SettingsController {
   }
 
   @Patch("admin/finished-course-notification")
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @UseGuards(DisallowInSupportModeGuard)
-  @Roles(USER_ROLES.ADMIN)
   @Validate({
     response: baseResponse(adminSettingsJSONContentSchema),
   })
@@ -175,8 +176,8 @@ export class SettingsController {
   }
 
   @Patch("admin/overdue-course-notification")
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @UseGuards(DisallowInSupportModeGuard)
-  @Roles(USER_ROLES.ADMIN)
   @Validate({
     response: baseResponse(adminSettingsJSONContentSchema),
   })
@@ -189,7 +190,7 @@ export class SettingsController {
   }
 
   @Patch("admin/color-schema")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @Validate({
     response: baseResponse(globalSettingsJSONSchema),
     request: [{ type: "body", schema: updateGlobalColorSchema }],
@@ -208,6 +209,7 @@ export class SettingsController {
 
   @Get("platform-logo")
   @Public()
+  @RequirePermission(PERMISSIONS.SETTINGS_READ_PUBLIC)
   @Validate({
     response: baseResponse(platformLogoResponseSchema),
   })
@@ -217,7 +219,7 @@ export class SettingsController {
   }
 
   @Patch("platform-logo")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @UseInterceptors(
     FileInterceptor("logo", {
       limits: {
@@ -253,6 +255,7 @@ export class SettingsController {
 
   @Get("platform-simple-logo")
   @Public()
+  @RequirePermission(PERMISSIONS.SETTINGS_READ_PUBLIC)
   @Validate({
     response: baseResponse(platformSimpleLogoResponseSchema),
   })
@@ -262,7 +265,7 @@ export class SettingsController {
   }
 
   @Patch("platform-simple-logo")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @UseInterceptors(
     FileInterceptor("logo", {
       limits: {
@@ -298,6 +301,7 @@ export class SettingsController {
 
   @Get("login-background")
   @Public()
+  @RequirePermission(PERMISSIONS.SETTINGS_READ_PUBLIC)
   @Validate({
     response: baseResponse(loginBackgroundResponseSchema),
   })
@@ -307,7 +311,7 @@ export class SettingsController {
   }
 
   @Patch("login-background")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @UseInterceptors(
     FileInterceptor("login-background", {
       limits: {
@@ -346,6 +350,7 @@ export class SettingsController {
 
   @Get("company-information")
   @Public()
+  @RequirePermission(PERMISSIONS.SETTINGS_READ_PUBLIC)
   @Validate({
     response: baseResponse(companyInformationJSONSchema),
   })
@@ -355,7 +360,7 @@ export class SettingsController {
   }
 
   @Patch("company-information")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @Validate({
     request: [{ type: "body", schema: companyInformationJSONSchema }],
     response: baseResponse(companyInformationJSONSchema),
@@ -370,7 +375,7 @@ export class SettingsController {
   }
 
   @Patch("admin/mfa-enforced-roles")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @Validate({
     request: [{ type: "body", schema: updateMFAEnforcedRolesSchema }],
   })
@@ -382,7 +387,7 @@ export class SettingsController {
   }
 
   @Patch("certificate-background")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @UseInterceptors(
     FileInterceptor("certificate-background", {
       limits: {
@@ -422,7 +427,7 @@ export class SettingsController {
   }
 
   @Patch("admin/default-course-currency")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @Validate({
     request: [{ type: "body", schema: updateDefaultCourseCurrencySchema }],
   })
@@ -439,7 +444,7 @@ export class SettingsController {
   }
 
   @Patch("admin/invite-only-registration")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   async updateInviteOnlyRegistration(@CurrentUser() currentUser: CurrentUserType) {
     return new BaseResponse(
       await this.settingsService.updateGlobalInviteOnlyRegistration(currentUser),
@@ -447,10 +452,10 @@ export class SettingsController {
   }
 
   @Patch("admin/user-email-triggers/:triggerKey")
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @Validate({
     request: [{ type: "param", name: "triggerKey", schema: Type.String() }],
   })
-  @Roles(USER_ROLES.ADMIN)
   async updateUserEmailTriggers(
     @Param("triggerKey") triggerKey: string,
     @CurrentUser() currentUser: CurrentUserType,
@@ -461,7 +466,7 @@ export class SettingsController {
   }
 
   @Patch("admin/config-warning-dismissed")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @Validate({
     request: [{ type: "body", schema: updateConfigWarningDismissedSchema }],
     response: baseResponse(adminSettingsJSONContentSchema),
@@ -478,34 +483,34 @@ export class SettingsController {
   }
 
   @Patch("admin/qa/:setting")
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @Validate({
     request: [{ type: "param", name: "setting", schema: Type.Enum(ALLOWED_QA_SETTINGS) }],
   })
-  @Roles(USER_ROLES.ADMIN)
   async updateQaSetting(@Param("setting") setting: AllowedQASettings) {
     return new BaseResponse(await this.settingsService.updateQASetting(setting));
   }
 
   @Patch("admin/news/:setting")
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @Validate({
     request: [{ type: "param", name: "setting", schema: Type.Enum(ALLOWED_NEWS_SETTINGS) }],
   })
-  @Roles(USER_ROLES.ADMIN)
   async updateNewsSetting(@Param("setting") setting: AllowedNewsSettings) {
     return new BaseResponse(await this.settingsService.updateNewsSetting(setting));
   }
 
   @Patch("admin/articles/:setting")
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @Validate({
     request: [{ type: "param", name: "setting", schema: Type.Enum(ALLOWED_ARTICLES_SETTINGS) }],
   })
-  @Roles(USER_ROLES.ADMIN)
   async updateArticlesSetting(@Param("setting") setting: AllowedArticlesSettings) {
     return new BaseResponse(await this.settingsService.updateArticlesSetting(setting));
   }
 
   @Patch("admin/age-limit")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @Validate({
     request: [{ type: "body", schema: updateAgeLimitSchema }],
   })
@@ -522,7 +527,7 @@ export class SettingsController {
   }
 
   @Patch("admin/login-page-files")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @UseInterceptors(FileInterceptor("file"))
   @ApiConsumes("multipart/form-data")
   @ApiBody({
@@ -551,6 +556,7 @@ export class SettingsController {
 
   @Public()
   @Get("login-page-files")
+  @RequirePermission(PERMISSIONS.SETTINGS_READ_PUBLIC)
   @Validate({
     response: loginPageResourceResponseSchema,
   })
@@ -559,7 +565,7 @@ export class SettingsController {
   }
 
   @Delete("login-page-files/:id")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @Validate({
     request: [{ type: "param", name: "id", schema: UUIDSchema }],
   })

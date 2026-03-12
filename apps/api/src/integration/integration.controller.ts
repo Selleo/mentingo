@@ -24,9 +24,7 @@ import {
 } from "src/common";
 import { API_HEADERS, ApiEndpointDocs } from "src/common/decorators/api-endpoint-docs.decorator";
 import { Public } from "src/common/decorators/public.decorator";
-import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
-import { RolesGuard } from "src/common/guards/roles.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { CourseService } from "src/courses/course.service";
 import { enrolledCourseGroupsPayload } from "src/courses/schemas/course.schema";
@@ -51,6 +49,8 @@ import {
   type SetUserGroupsBody,
   type UnenrollGroupsPayload,
 } from "src/integration/schemas/integration.schema";
+import { PERMISSIONS } from "src/permission/permission.constants";
+import { RequirePermission } from "src/permission/permission.decorator";
 import { createUserSchema } from "src/user/schemas/createUser.schema";
 import { type UpdateUserBody, updateUserSchema } from "src/user/schemas/updateUser.schema";
 import {
@@ -85,7 +85,8 @@ import type { AllGroupsResponse } from "src/group/group.types";
 })
 @Public()
 @Controller("integration")
-@UseGuards(IntegrationApiKeyGuard, RolesGuard)
+@UseGuards(IntegrationApiKeyGuard)
+@RequirePermission(PERMISSIONS.INTEGRATION_API_USE)
 export class IntegrationController {
   constructor(
     private readonly integrationService: IntegrationService,
@@ -95,7 +96,6 @@ export class IntegrationController {
   ) {}
 
   @Get("tenants")
-  @Roles(USER_ROLES.ADMIN)
   @IntegrationTenantOptional()
   @ApiEndpointDocs({
     summary: "List all tenants for integration selection",
@@ -119,7 +119,6 @@ export class IntegrationController {
   }
 
   @Get("users")
-  @Roles(USER_ROLES.ADMIN)
   @ApiEndpointDocs({
     summary: "List users for integration",
     description:
@@ -161,7 +160,6 @@ export class IntegrationController {
   }
 
   @Get("users/:userId")
-  @Roles(USER_ROLES.ADMIN)
   @ApiEndpointDocs({
     summary: "Get user by ID for integration",
     description:
@@ -177,7 +175,6 @@ export class IntegrationController {
   }
 
   @Post("users")
-  @Roles(USER_ROLES.ADMIN)
   @ApiEndpointDocs({
     summary: "Create user via integration API",
     description:
@@ -198,7 +195,6 @@ export class IntegrationController {
   }
 
   @Patch("users/:userId")
-  @Roles(USER_ROLES.ADMIN)
   @ApiEndpointDocs({
     summary: "Update user via integration API",
     description:
@@ -222,7 +218,6 @@ export class IntegrationController {
   }
 
   @Delete("users/:userId")
-  @Roles(USER_ROLES.ADMIN)
   @ApiEndpointDocs({
     summary: "Delete user via integration API",
     description:
@@ -243,7 +238,6 @@ export class IntegrationController {
   }
 
   @Get("groups")
-  @Roles(USER_ROLES.ADMIN)
   @ApiEndpointDocs({
     summary: "List groups for integration",
     description:
@@ -276,7 +270,6 @@ export class IntegrationController {
   }
 
   @Put("users/:userId/groups")
-  @Roles(USER_ROLES.ADMIN)
   @ApiEndpointDocs({
     summary: "Set user groups via integration API",
     description:
@@ -301,7 +294,6 @@ export class IntegrationController {
   }
 
   @Post("courses/:courseId/enroll-users")
-  @Roles(USER_ROLES.ADMIN)
   @ApiEndpointDocs({
     summary: "Enroll users to course via integration API",
     description:
@@ -326,7 +318,6 @@ export class IntegrationController {
   }
 
   @Delete("courses/:courseId/enroll-users")
-  @Roles(USER_ROLES.ADMIN)
   @ApiEndpointDocs({
     summary: "Unenroll users from course via integration API",
     description:
@@ -350,7 +341,6 @@ export class IntegrationController {
   }
 
   @Post("courses/:courseId/enroll-groups")
-  @Roles(USER_ROLES.ADMIN)
   @ApiEndpointDocs({
     summary: "Enroll groups to course via integration API",
     description:
@@ -376,7 +366,6 @@ export class IntegrationController {
   }
 
   @Delete("courses/:courseId/enroll-groups")
-  @Roles(USER_ROLES.ADMIN)
   @ApiEndpointDocs({
     summary: "Unenroll groups from course via integration API",
     description:

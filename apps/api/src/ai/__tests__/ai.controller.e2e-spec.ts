@@ -17,6 +17,7 @@ import type { DatabasePg, UUIDType } from "src/common";
 
 describe("AiController (e2e)", () => {
   let app: INestApplication;
+  let cleanup: () => Promise<void>;
   let db: DatabasePg;
   let baseDb: DatabasePg;
   let aiRepository: AiRepository;
@@ -28,8 +29,9 @@ describe("AiController (e2e)", () => {
   const password = "password123";
 
   beforeAll(async () => {
-    const { app: testApp, moduleFixture } = await createE2ETest();
+    const { app: testApp, cleanup: testCleanup, moduleFixture } = await createE2ETest();
     app = testApp;
+    cleanup = testCleanup;
 
     db = app.get(DB);
     baseDb = app.get(DB_ADMIN);
@@ -42,6 +44,8 @@ describe("AiController (e2e)", () => {
 
   afterAll(async () => {
     await truncateAllTables(baseDb, db);
+    await app.close();
+    await cleanup();
   });
 
   beforeEach(async () => {

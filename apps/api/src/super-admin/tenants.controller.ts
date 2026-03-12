@@ -13,13 +13,12 @@ import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
 import { BaseResponse, baseResponse, PaginatedResponse, paginatedResponse } from "src/common";
-import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { ManagingTenantAdminGuard } from "src/common/guards/managing-tenant-admin.guard";
-import { RolesGuard } from "src/common/guards/roles.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
+import { PERMISSIONS } from "src/permission/permission.constants";
+import { RequirePermission } from "src/permission/permission.decorator";
 import { SupportModeService } from "src/support-mode/support-mode.service";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import {
   createTenantSchema,
@@ -33,8 +32,8 @@ import { CreateTenantBody, UpdateTenantBody } from "./types";
 import type { TenantResponse, TenantsListResponse } from "./types";
 
 @Controller("super-admin/tenants")
-@UseGuards(RolesGuard, ManagingTenantAdminGuard)
-@Roles(USER_ROLES.ADMIN)
+@UseGuards(ManagingTenantAdminGuard)
+@RequirePermission(PERMISSIONS.TENANT_MANAGE)
 export class TenantsController {
   constructor(
     private readonly tenantsService: TenantsService,

@@ -50,6 +50,9 @@ import { LocalizationModule } from "./localization/localization.module";
 import { LumaModule } from "./luma/luma.module";
 import { NewsModule } from "./news/news.module";
 import { OutboxModule } from "./outbox/outbox.module";
+import { PermissionContextGuard } from "./permission/permission-context.guard";
+import { PermissionsGuard } from "./permission/permission.guard";
+import { PermissionModule } from "./permission/permission.module";
 import { QuestionsModule } from "./questions/question.module";
 import { ReportModule } from "./report/report.module";
 import { S3Module } from "./s3/s3.module";
@@ -110,6 +113,7 @@ import { UserModule } from "./user/user.module";
     ConditionalModule.registerWhen(ScheduleModule.forRoot(), (env) => !env.JEST_WORKER_ID),
     CourseModule,
     GroupModule,
+    PermissionModule,
     LessonModule,
     QuestionsModule,
     StudentLessonProgressModule,
@@ -161,6 +165,14 @@ import { UserModule } from "./user/user.module";
     {
       provide: APP_GUARD,
       useClass: StagingGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: PermissionContextGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: PermissionsGuard,
     },
     GoogleStrategy,
     MicrosoftStrategy,

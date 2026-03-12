@@ -22,6 +22,7 @@ import type { DatabasePg } from "src/common";
 
 describe("groupController (e2e)", () => {
   let app: INestApplication;
+  let cleanup: () => Promise<void>;
   let db: DatabasePg;
   let baseDb: DatabasePg;
   let userFactory: ReturnType<typeof createUserFactory>;
@@ -33,8 +34,9 @@ describe("groupController (e2e)", () => {
   const password = "password123";
 
   beforeAll(async () => {
-    const { app: testApp } = await createE2ETest();
+    const { app: testApp, cleanup: testCleanup } = await createE2ETest();
     app = testApp;
+    cleanup = testCleanup;
     db = app.get(DB);
     baseDb = app.get(DB_ADMIN);
     userFactory = createUserFactory(db);
@@ -47,6 +49,7 @@ describe("groupController (e2e)", () => {
 
   afterAll(async () => {
     await app.close();
+    await cleanup();
   });
 
   beforeEach(async () => {

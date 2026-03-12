@@ -17,7 +17,6 @@ import { Validate } from "nestjs-typebox";
 
 import { baseResponse, BaseResponse, nullResponse, type UUIDType } from "src/common";
 import { Public } from "src/common/decorators/public.decorator";
-import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { GoogleOAuthGuard } from "src/common/guards/google-oauth.guard";
 import { MicrosoftOAuthGuard } from "src/common/guards/microsoft-oauth.guard";
@@ -33,10 +32,11 @@ import {
 } from "src/common/types/current-user.type";
 import { SupportModeEnterEvent, UserActivityEvent, UserLogoutEvent } from "src/events";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
+import { PERMISSIONS } from "src/permission/permission.constants";
+import { RequirePermission } from "src/permission/permission.decorator";
 import { SettingsService } from "src/settings/settings.service";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { baseUserResponseSchema, currentUserResponseSchema } from "src/user/schemas/user.schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { AuthService } from "./auth.service";
 import { CreateAccountBody, createAccountSchema } from "./schemas/create-account.schema";
@@ -80,6 +80,7 @@ export class AuthController {
 
   @Public()
   @Post("register")
+  @RequirePermission(PERMISSIONS.ACCOUNT_ACCESS_PUBLIC)
   @Validate({
     request: [{ type: "body", schema: createAccountSchema }],
     response: baseResponse(baseUserResponseSchema),
@@ -102,6 +103,7 @@ export class AuthController {
   @Public()
   @UseGuards(AuthGuard("local"))
   @Post("login")
+  @RequirePermission(PERMISSIONS.ACCOUNT_ACCESS_PUBLIC)
   @Validate({
     request: [{ type: "body", schema: loginSchema }],
     response: baseResponse(loginResponseSchema),
@@ -129,7 +131,7 @@ export class AuthController {
   }
 
   @Post("logout")
-  @Roles(...Object.values(USER_ROLES))
+  @RequirePermission(PERMISSIONS.ACCOUNT_READ_SELF)
   @Validate({
     response: nullResponse(),
   })
@@ -154,6 +156,7 @@ export class AuthController {
   @Public()
   @UseGuards(RefreshTokenGuard)
   @Post("refresh")
+  @RequirePermission(PERMISSIONS.ACCOUNT_ACCESS_PUBLIC)
   @Validate({
     response: nullResponse(),
   })
@@ -181,6 +184,7 @@ export class AuthController {
   }
 
   @Get("current-user")
+  @RequirePermission(PERMISSIONS.ACCOUNT_READ_SELF)
   @Validate({
     response: baseResponse(currentUserResponseSchema),
   })
@@ -223,6 +227,7 @@ export class AuthController {
 
   @Public()
   @Get("support/callback")
+  @RequirePermission(PERMISSIONS.ACCOUNT_ACCESS_PUBLIC)
   @Validate({
     request: [{ type: "query", name: "grant", schema: Type.String({ minLength: 1 }) }],
   })
@@ -238,6 +243,7 @@ export class AuthController {
   }
 
   @Post("support/exit")
+  @RequirePermission(PERMISSIONS.ACCOUNT_READ_SELF)
   @Validate({
     response: baseResponse(Type.Object({ redirectUrl: Type.String() })),
   })
@@ -257,6 +263,7 @@ export class AuthController {
 
   @Public()
   @Post("forgot-password")
+  @RequirePermission(PERMISSIONS.ACCOUNT_ACCESS_PUBLIC)
   @Validate({
     request: [{ type: "body", schema: forgotPasswordSchema }],
   })
@@ -269,6 +276,7 @@ export class AuthController {
 
   @Public()
   @Post("create-password")
+  @RequirePermission(PERMISSIONS.ACCOUNT_ACCESS_PUBLIC)
   @Validate({
     request: [{ type: "body", schema: createPasswordSchema }],
   })
@@ -281,6 +289,7 @@ export class AuthController {
 
   @Public()
   @Post("reset-password")
+  @RequirePermission(PERMISSIONS.ACCOUNT_ACCESS_PUBLIC)
   @Validate({
     request: [{ type: "body", schema: resetPasswordSchema }],
   })
@@ -291,6 +300,7 @@ export class AuthController {
 
   @Public()
   @Get("google")
+  @RequirePermission(PERMISSIONS.ACCOUNT_ACCESS_PUBLIC)
   @UseGuards(GoogleOAuthGuard)
   async googleAuth(@Req() _request: Request): Promise<void> {
     // Initiates the Google OAuth flow
@@ -299,6 +309,7 @@ export class AuthController {
 
   @Public()
   @Get("google/callback")
+  @RequirePermission(PERMISSIONS.ACCOUNT_ACCESS_PUBLIC)
   @UseGuards(GoogleOAuthGuard)
   async googleAuthCallback(
     @Req() request: Request & { user: ProviderLoginUserType },
@@ -324,6 +335,7 @@ export class AuthController {
 
   @Public()
   @Get("microsoft")
+  @RequirePermission(PERMISSIONS.ACCOUNT_ACCESS_PUBLIC)
   @UseGuards(MicrosoftOAuthGuard)
   async microsoftAuth() {
     // Initiates the Microsoft OAuth flow
@@ -331,6 +343,7 @@ export class AuthController {
 
   @Public()
   @Get("microsoft/callback")
+  @RequirePermission(PERMISSIONS.ACCOUNT_ACCESS_PUBLIC)
   @UseGuards(MicrosoftOAuthGuard)
   async microsoftAuthCallback(
     @Req() request: Request & { user: ProviderLoginUserType },
@@ -356,6 +369,7 @@ export class AuthController {
 
   @Public()
   @Get("slack")
+  @RequirePermission(PERMISSIONS.ACCOUNT_ACCESS_PUBLIC)
   @UseGuards(SlackOAuthGuard)
   async slackAuth() {
     // Initiates the Slack OAuth flow
@@ -363,6 +377,7 @@ export class AuthController {
 
   @Public()
   @Get("slack/callback")
+  @RequirePermission(PERMISSIONS.ACCOUNT_ACCESS_PUBLIC)
   @UseGuards(SlackOAuthGuard)
   async slackAuthCallback(
     @Req() request: Request & { user: ProviderLoginUserType },
@@ -387,7 +402,7 @@ export class AuthController {
   }
 
   @Post("mfa/setup")
-  @Roles(...Object.values(USER_ROLES))
+  @RequirePermission(PERMISSIONS.ACCOUNT_MFA)
   @Validate({
     response: baseResponse(MFASetupResponseSchema),
   })
@@ -401,7 +416,7 @@ export class AuthController {
   }
 
   @Post("mfa/verify")
-  @Roles(...Object.values(USER_ROLES))
+  @RequirePermission(PERMISSIONS.ACCOUNT_MFA)
   @Validate({
     request: [{ type: "body", schema: MFAVerifySchema }],
     response: baseResponse(MFAVerifyResponseSchema),
@@ -418,6 +433,7 @@ export class AuthController {
 
   @Public()
   @Post("magic-link/create")
+  @RequirePermission(PERMISSIONS.ACCOUNT_ACCESS_PUBLIC)
   @Validate({
     request: [{ type: "body", schema: createMagicLinkSchema }],
     response: baseResponse(createMagicLinkResponseSchema),
@@ -430,6 +446,7 @@ export class AuthController {
 
   @Public()
   @Get("magic-link/verify")
+  @RequirePermission(PERMISSIONS.ACCOUNT_ACCESS_PUBLIC)
   @Validate({
     request: [{ type: "query", schema: Type.String(), name: "token", required: true }],
     response: baseResponse(loginResponseSchema),

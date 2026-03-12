@@ -368,8 +368,8 @@ export class AuthService {
   }
 
   private async getTokens(user: TokenUser) {
-    const { id: userId, email, role, tenantId } = user;
-    return this.signTokens({ userId, email, role, tenantId });
+    const { id: userId, email, tenantId } = user;
+    return this.signTokens({ userId, email, tenantId });
   }
 
   async getSupportTokensForSession(session: SupportSession) {
@@ -391,7 +391,6 @@ export class AuthService {
     const supportPayload = {
       userId: session.originalUserId,
       email: originalUser.email,
-      role: USER_ROLES.ADMIN,
       tenantId: session.targetTenantId,
       isSupportMode: true,
       supportSessionId: session.id,

@@ -34,6 +34,7 @@ import type { DatabasePg } from "src/common";
 
 describe("CourseController (e2e)", () => {
   let app: INestApplication;
+  let cleanup: () => Promise<void>;
   let db: DatabasePg;
   let baseDb: DatabasePg;
   let categoryFactory: ReturnType<typeof createCategoryFactory>;
@@ -55,7 +56,7 @@ describe("CourseController (e2e)", () => {
       set: jest.fn().mockResolvedValue(""),
     };
 
-    const { app: testApp } = await createE2ETest([
+    const { app: testApp, cleanup: testCleanup } = await createE2ETest([
       {
         provide: FileService,
         useValue: mockFileService,
@@ -67,6 +68,7 @@ describe("CourseController (e2e)", () => {
     ]);
 
     app = testApp;
+    cleanup = testCleanup;
 
     db = app.get(DB);
     baseDb = app.get(DB_ADMIN);
@@ -81,6 +83,7 @@ describe("CourseController (e2e)", () => {
 
   afterAll(async () => {
     await app.close();
+    await cleanup();
   });
 
   afterEach(async () => {

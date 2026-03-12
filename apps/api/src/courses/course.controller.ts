@@ -36,10 +36,8 @@ import {
   type UUIDType,
 } from "src/common";
 import { Public } from "src/common/decorators/public.decorator";
-import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { ManagingTenantAdminGuard } from "src/common/guards/managing-tenant-admin.guard";
-import { RolesGuard } from "src/common/guards/roles.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { CourseService } from "src/courses/course.service";
 import { MasterCourseService } from "src/courses/master-course.service";
@@ -110,7 +108,9 @@ import {
   learningTimeStatisticsSortOptions,
   LearningTimeStatisticsSortOptions,
 } from "src/learning-time";
-import { USER_ROLES, UserRole } from "src/user/schemas/userRoles";
+import { PERMISSIONS } from "src/permission/permission.constants";
+import { RequirePermission } from "src/permission/permission.decorator";
+import { UserRole } from "src/user/schemas/userRoles";
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
 import {
@@ -146,7 +146,6 @@ import type {
 } from "src/courses/schemas/showCourseCommon.schema";
 
 @Controller("course")
-@UseGuards(RolesGuard)
 export class CourseController {
   constructor(
     private readonly courseService: CourseService,
@@ -155,7 +154,7 @@ export class CourseController {
   ) {}
 
   @Get("all")
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.COURSE_READ_MANAGEABLE)
   @Validate(allCoursesValidation)
   async getAllCourses(
     @Query("title") title: string,
@@ -202,6 +201,7 @@ export class CourseController {
   }
 
   @Get("get-student-courses")
+  @RequirePermission(PERMISSIONS.COURSE_READ_ASSIGNED)
   @Validate(studentCoursesValidation)
   async getStudentCourses(
     @Query("title") title: string,
@@ -235,8 +235,8 @@ export class CourseController {
     return new PaginatedResponse(data);
   }
 
-  @Roles(USER_ROLES.ADMIN)
   @Get(":courseId/students")
+  @RequirePermission(PERMISSIONS.COURSE_ENROLLMENT)
   @Validate(studentsWithEnrolmentValidation)
   async getStudentsWithEnrollmentDate(
     @Param("courseId") courseId: UUIDType,
@@ -259,6 +259,7 @@ export class CourseController {
   }
 
   @Get("available-courses")
+  @RequirePermission(PERMISSIONS.COURSE_READ_PUBLIC)
   @Validate(coursesValidation)
   @Public()
   async getAvailableCourses(
@@ -295,6 +296,7 @@ export class CourseController {
   }
 
   @Get("top-courses")
+  @RequirePermission(PERMISSIONS.COURSE_READ_PUBLIC)
   @Validate({
     request: [
       { type: "query", name: "limit", schema: Type.Optional(Type.Number()) },
@@ -317,6 +319,7 @@ export class CourseController {
 
   @Public()
   @Get("content-creator-courses")
+  @RequirePermission(PERMISSIONS.COURSE_READ_PUBLIC)
   @Validate({
     request: [
       { type: "query", name: "authorId", schema: UUIDSchema, required: true },
@@ -359,6 +362,7 @@ export class CourseController {
 
   @Public()
   @Get()
+  @RequirePermission(PERMISSIONS.COURSE_READ_PUBLIC)
   @Validate({
     request: [
       { type: "query", name: "id", schema: Type.String(), required: true },
@@ -377,6 +381,7 @@ export class CourseController {
 
   @Public()
   @Get("lookup")
+  @RequirePermission(PERMISSIONS.COURSE_READ_PUBLIC)
   @Validate({
     request: [
       { type: "query", name: "id", schema: Type.String(), required: true },
@@ -395,7 +400,7 @@ export class CourseController {
   }
 
   @Get("beta-course-by-id")
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_READ_MANAGEABLE)
   @Validate({
     request: [
       { type: "query", name: "id", schema: UUIDSchema, required: true },
@@ -415,7 +420,7 @@ export class CourseController {
   }
 
   @Get("beta-course-missing-translations")
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_READ_MANAGEABLE)
   @Validate({
     request: [
       { type: "query", name: "id", schema: UUIDSchema, required: true },
@@ -440,7 +445,7 @@ export class CourseController {
   }
 
   @Post()
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.COURSE_CREATE)
   @Validate({
     request: [{ type: "body", schema: createCourseSchema }],
     response: baseResponse(Type.Object({ id: UUIDSchema, message: Type.String() })),
@@ -461,8 +466,8 @@ export class CourseController {
   }
 
   @Patch(":id")
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @UseInterceptors(FileInterceptor("image"))
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -497,7 +502,7 @@ export class CourseController {
   }
 
   @Delete(":id/trailer")
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [{ type: "param", name: "id", schema: UUIDSchema }],
     response: baseResponse(Type.Object({ message: Type.String() })),
@@ -511,7 +516,7 @@ export class CourseController {
   }
 
   @Patch("update-has-certificate/:id")
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -530,9 +535,9 @@ export class CourseController {
   }
 
   @Patch("settings/:courseId")
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @UseInterceptors(FileInterceptor("certificateSignature"))
   @ApiConsumes("multipart/form-data")
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   @Validate({
     request: [
       { type: "param", name: "courseId", schema: UUIDSchema },
@@ -568,7 +573,7 @@ export class CourseController {
   }
 
   @Get("settings/:courseId")
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.COURSE_READ_MANAGEABLE)
   @Validate({
     response: baseResponse(getCourseSettingsSchema),
     request: [{ type: "param", name: "courseId", schema: UUIDSchema }],
@@ -581,7 +586,7 @@ export class CourseController {
   }
 
   @Get("lesson-sequence-enabled/:courseId")
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR, USER_ROLES.STUDENT)
+  @RequirePermission(PERMISSIONS.COURSE_READ)
   @Validate({
     response: baseResponse(getLessonSequenceEnabledSchema),
     request: [{ type: "param", name: "courseId", schema: UUIDSchema }],
@@ -595,7 +600,7 @@ export class CourseController {
   }
 
   @Post("enroll-course")
-  @Roles(USER_ROLES.STUDENT)
+  @RequirePermission(PERMISSIONS.COURSE_ENROLLMENT)
   @Validate({
     request: [{ type: "query", name: "id", schema: UUIDSchema }],
     response: baseResponse(Type.Object({ message: Type.String() })),
@@ -611,7 +616,7 @@ export class CourseController {
   }
 
   @Post("/:courseId/enroll-courses")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_ENROLLMENT)
   @Validate({
     request: [
       {
@@ -637,7 +642,7 @@ export class CourseController {
   }
 
   @Post("/:courseId/enroll-groups-to-course")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_ENROLLMENT)
   @Validate({
     request: [
       {
@@ -669,7 +674,7 @@ export class CourseController {
   }
 
   @Delete("/:courseId/unenroll-groups-from-course")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_ENROLLMENT)
   @Validate({
     request: [
       {
@@ -696,7 +701,7 @@ export class CourseController {
   }
 
   @Delete("deleteCourse/:id")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_DELETE)
   @Validate({
     request: [{ type: "param", name: "id", schema: UUIDSchema }],
     response: nullResponse(),
@@ -711,7 +716,7 @@ export class CourseController {
   }
 
   @Delete("deleteManyCourses")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_DELETE)
   @Validate({
     request: [{ type: "body", schema: Type.Object({ ids: Type.Array(UUIDSchema) }) }],
     response: nullResponse(),
@@ -724,7 +729,7 @@ export class CourseController {
   }
 
   @Delete("unenroll-course")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_ENROLLMENT)
   @Validate({
     response: nullResponse(),
     request: [
@@ -742,7 +747,7 @@ export class CourseController {
   }
 
   @Get(":courseId/statistics")
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.COURSE_STATISTICS)
   @Validate({
     response: baseResponse(getCourseStatisticsSchema),
     request: [
@@ -762,7 +767,7 @@ export class CourseController {
   }
 
   @Get(":courseId/statistics/learning-time")
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.COURSE_STATISTICS)
   @Validate({
     response: paginatedResponse(learningTimeStatisticsSchema),
     request: [
@@ -791,7 +796,7 @@ export class CourseController {
   }
 
   @Get(":courseId/statistics/learning-time-filter-options")
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.COURSE_STATISTICS)
   @Validate({
     response: baseResponse(learningTimeStatisticsFilterOptionsSchema),
     request: [{ type: "param", name: "courseId", schema: UUIDSchema }],
@@ -803,7 +808,7 @@ export class CourseController {
   }
 
   @Get(":courseId/statistics/average-quiz-score")
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.COURSE_STATISTICS)
   @Validate({
     request: [
       { type: "param", name: "courseId", schema: UUIDSchema },
@@ -829,7 +834,7 @@ export class CourseController {
   }
 
   @Get(":courseId/statistics/students-progress")
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.COURSE_STATISTICS)
   @Validate({
     request: [
       { type: "param", name: "courseId", schema: UUIDSchema },
@@ -871,7 +876,7 @@ export class CourseController {
   }
 
   @Get(":courseId/statistics/students-quiz-results")
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.COURSE_STATISTICS)
   @Validate({
     request: [
       { type: "param", name: "courseId", schema: UUIDSchema },
@@ -916,7 +921,7 @@ export class CourseController {
   }
 
   @Get(":courseId/statistics/students-ai-mentor-results")
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.COURSE_STATISTICS)
   @Validate({
     request: [
       { type: "param", name: "courseId", schema: UUIDSchema },
@@ -961,7 +966,7 @@ export class CourseController {
   }
 
   @Post("beta-create-language/:courseId")
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [
       { type: "query", name: "language", schema: supportedLanguagesSchema },
@@ -978,7 +983,7 @@ export class CourseController {
   }
 
   @Delete("language/:courseId")
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [
       { type: "param", name: "courseId", schema: UUIDSchema },
@@ -995,7 +1000,7 @@ export class CourseController {
   }
 
   @Post("generate-translations/:courseId")
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [
       {
@@ -1015,7 +1020,7 @@ export class CourseController {
   }
 
   @Post("course-ownership/transfer")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_OWNERSHIP)
   @Validate({
     request: [{ type: "body", schema: transferCourseOwnershipRequestSchema }],
   })
@@ -1024,8 +1029,8 @@ export class CourseController {
   }
 
   @Post("master/:courseId/export")
-  @UseGuards(ManagingTenantAdminGuard, RolesGuard)
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_EXPORT)
+  @UseGuards(ManagingTenantAdminGuard)
   @Validate({
     request: [
       { type: "param", name: "courseId", schema: UUIDSchema, required: true },
@@ -1043,8 +1048,8 @@ export class CourseController {
   }
 
   @Get("master/:courseId/exports")
-  @UseGuards(ManagingTenantAdminGuard, RolesGuard)
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_EXPORT)
+  @UseGuards(ManagingTenantAdminGuard)
   @Validate({
     request: [{ type: "param", name: "courseId", schema: UUIDSchema, required: true }],
     response: baseResponse(Type.Array(masterCourseExportLinkSchema)),
@@ -1058,8 +1063,8 @@ export class CourseController {
   }
 
   @Get("master/:courseId/export-candidates")
-  @UseGuards(ManagingTenantAdminGuard, RolesGuard)
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_EXPORT)
+  @UseGuards(ManagingTenantAdminGuard)
   @Validate({
     request: [{ type: "param", name: "courseId", schema: UUIDSchema, required: true }],
     response: baseResponse(masterCourseExportCandidatesResponseSchema),
@@ -1074,8 +1079,8 @@ export class CourseController {
   }
 
   @Get("master/export-jobs/:jobId")
-  @UseGuards(ManagingTenantAdminGuard, RolesGuard)
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_EXPORT)
+  @UseGuards(ManagingTenantAdminGuard)
   @Validate({
     request: [{ type: "param", name: "jobId", schema: Type.String(), required: true }],
     response: baseResponse(masterCourseJobStatusResponseSchema),
@@ -1087,7 +1092,7 @@ export class CourseController {
   }
 
   @Get("course-ownership/:courseId")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_OWNERSHIP)
   @Validate({
     request: [{ type: "param", name: "courseId", schema: UUIDSchema }],
     response: baseResponse(courseOwnershipCandidatesResponseSchema),

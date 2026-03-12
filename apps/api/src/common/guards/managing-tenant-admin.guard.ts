@@ -9,9 +9,9 @@ import {
 import { eq } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
+import { PERMISSIONS } from "src/permission/permission.constants";
 import { DB_ADMIN } from "src/storage/db/db.providers";
 import { tenants } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import type { CurrentUser } from "src/common/types/current-user.type";
 
@@ -25,7 +25,11 @@ export class ManagingTenantAdminGuard implements CanActivate {
 
     if (!user) throw new UnauthorizedException("auth.error.unauthenticated");
 
-    if (user.role !== USER_ROLES.ADMIN) {
+    if (!Array.isArray(user.permissions)) {
+      throw new ForbiddenException("permission.error.contextMissing");
+    }
+
+    if (!user.permissions.includes(PERMISSIONS.TENANT_MANAGE)) {
       throw new ForbiddenException("auth.error.adminRoleRequired");
     }
 

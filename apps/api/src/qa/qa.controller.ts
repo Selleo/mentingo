@@ -7,7 +7,6 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards,
 } from "@nestjs/common";
 import { SupportedLanguages } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
@@ -15,11 +14,11 @@ import { Validate } from "nestjs-typebox";
 
 import { UUIDSchema, UUIDType } from "src/common";
 import { Public } from "src/common/decorators/public.decorator";
-import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
-import { RolesGuard } from "src/common/guards/roles.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
+import { PERMISSIONS } from "src/permission/permission.constants";
+import { RequirePermission } from "src/permission/permission.decorator";
 import {
   type AllQAResponseBody,
   allQAResponseSchema,
@@ -31,10 +30,8 @@ import {
   QAUpdateSchema,
 } from "src/qa/schemas/qa.schema";
 import { QAService } from "src/qa/services/qa.service";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 @Controller("qa")
-@UseGuards(RolesGuard)
 export class QAController {
   constructor(private readonly qaService: QAService) {}
 
@@ -46,7 +43,7 @@ export class QAController {
     ],
     response: QAResponseSchema,
   })
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.QA_MANAGE)
   async getQA(
     @Param("qaId") qaId: UUIDType,
     @Query("language") language: SupportedLanguages,
@@ -57,6 +54,7 @@ export class QAController {
 
   @Public()
   @Get()
+  @RequirePermission(PERMISSIONS.QA_READ_PUBLIC)
   @Validate({
     request: [
       { type: "query", name: "language", schema: supportedLanguagesSchema },
@@ -76,7 +74,7 @@ export class QAController {
   @Validate({
     request: [{ type: "body", schema: createQASchema }],
   })
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.QA_MANAGE)
   async createQA(@Body() data: CreateQABody, @CurrentUser() currentUser: CurrentUserType) {
     return this.qaService.createQA(data, currentUser);
   }
@@ -88,7 +86,7 @@ export class QAController {
       { type: "query", name: "language", schema: supportedLanguagesSchema },
     ],
   })
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.QA_MANAGE)
   async createLanguage(
     @Param("qaId") qaId: UUIDType,
     @Query("language") language: SupportedLanguages,
@@ -105,7 +103,7 @@ export class QAController {
       { type: "body", schema: QAUpdateSchema },
     ],
   })
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.QA_MANAGE)
   async updateQA(
     @Param("qaId") qaId: UUIDType,
     @Query("language") language: SupportedLanguages,
@@ -119,7 +117,7 @@ export class QAController {
   @Validate({
     request: [{ type: "param", name: "qaId", schema: UUIDSchema }],
   })
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.QA_MANAGE)
   async deleteQA(@Param("qaId") qaId: UUIDType, @CurrentUser() currentUser: CurrentUserType) {
     return this.qaService.deleteQA(qaId, currentUser);
   }
@@ -131,7 +129,7 @@ export class QAController {
       { type: "query", name: "language", schema: supportedLanguagesSchema },
     ],
   })
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.QA_MANAGE)
   async deleteLanguage(
     @Param("qaId") qaId: UUIDType,
     @Query("language") language: SupportedLanguages,

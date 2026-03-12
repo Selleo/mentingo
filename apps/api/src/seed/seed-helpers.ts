@@ -1,24 +1,33 @@
 import { faker } from "@faker-js/faker";
 import { ConfigService } from "@nestjs/config";
-import { and, eq, sql } from "drizzle-orm/sql";
+import { and, eq, inArray, sql } from "drizzle-orm/sql";
 
 import { EnvRepository } from "src/env/repositories/env.repository";
 import { EnvService } from "src/env/services/env.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
+import { SYSTEM_ROLE_PERMISSIONS } from "src/permission/permission.constants";
 import {
   aiMentorLessons,
   categories,
   chapters,
   courses,
+  permissionRoleRuleSets,
+  permissionRoles,
+  permissionRuleSetPermissions,
+  permissionRuleSets,
+  permissionUserRoles,
   lessons,
   questionAnswerOptions,
   questions,
   tenants,
 } from "src/storage/schema";
 import { StripeService } from "src/stripe/stripe.service";
+import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import type { DatabasePg, UUIDType } from "../common";
 import type { NiceCourseData } from "../utils/types/test-types";
+import type { PermissionKey } from "src/permission/permission.constants";
+import type { UserRole } from "src/user/schemas/userRoles";
 
 export async function createNiceCourses(
   creatorUserIds: UUIDType[],
@@ -274,6 +283,142 @@ export function getTenantEmailSuffix(origin: string) {
   return hostname.split(".")[0] || hostname;
 }
 
+export async function ensureSeedPermissionData(database: DatabasePg, tenantId: UUIDType) {
+  const roleValues = Object.values(USER_ROLES) as UserRole[];
+
+  for (const roleSlug of roleValues) {
+    const roleName = getRoleDisplayName(roleSlug);
+    const ruleSetSlug = `${roleSlug}-default`;
+
+    await database
+      .insert(permissionRoles)
+      .values({
+        name: roleName,
+        slug: roleSlug,
+        description: `${roleName} system role`,
+        isSystem: true,
+        tenantId,
+      })
+      .onConflictDoNothing({
+        target: [permissionRoles.tenantId, permissionRoles.slug],
+      });
+
+    await database
+      .insert(permissionRuleSets)
+      .values({
+        name: `${roleName} Default`,
+        slug: ruleSetSlug,
+        description: `${roleName} default permissions`,
+        isSystem: true,
+        tenantId,
+      })
+      .onConflictDoNothing({
+        target: [permissionRuleSets.tenantId, permissionRuleSets.slug],
+      });
+  }
+
+  const roles = await database
+    .select({
+      id: permissionRoles.id,
+      slug: permissionRoles.slug,
+    })
+    .from(permissionRoles)
+    .where(and(eq(permissionRoles.tenantId, tenantId), inArray(permissionRoles.slug, roleValues)));
+
+  const ruleSets = await database
+    .select({
+      id: permissionRuleSets.id,
+      slug: permissionRuleSets.slug,
+    })
+    .from(permissionRuleSets)
+    .where(
+      and(
+        eq(permissionRuleSets.tenantId, tenantId),
+        inArray(
+          permissionRuleSets.slug,
+          roleValues.map((roleSlug) => `${roleSlug}-default`),
+        ),
+      ),
+    );
+
+  const roleMap = Object.fromEntries(roles.map((role) => [role.slug, role.id])) as Record<
+    UserRole,
+    UUIDType
+  >;
+  const ruleSetMap = Object.fromEntries(
+    ruleSets.map((ruleSet) => [ruleSet.slug, ruleSet.id]),
+  ) as Record<string, UUIDType>;
+
+  for (const roleSlug of roleValues) {
+    const roleId = roleMap[roleSlug];
+    const ruleSetId = ruleSetMap[`${roleSlug}-default`];
+
+    if (!roleId || !ruleSetId) continue;
+
+    await database
+      .insert(permissionRoleRuleSets)
+      .values({
+        roleId,
+        ruleSetId,
+        tenantId,
+      })
+      .onConflictDoNothing({
+        target: [permissionRoleRuleSets.roleId, permissionRoleRuleSets.ruleSetId],
+      });
+
+    const permissions = (SYSTEM_ROLE_PERMISSIONS[roleSlug] ?? []) as PermissionKey[];
+    if (!permissions.length) continue;
+
+    await database
+      .insert(permissionRuleSetPermissions)
+      .values(
+        permissions.map((permission) => ({
+          ruleSetId,
+          permission,
+          tenantId,
+        })),
+      )
+      .onConflictDoNothing({
+        target: [
+          permissionRuleSetPermissions.ruleSetId,
+          permissionRuleSetPermissions.permission,
+        ],
+      });
+  }
+}
+
+export async function assignSeedUserRole(
+  database: DatabasePg,
+  userId: UUIDType,
+  tenantId: UUIDType,
+  role: UserRole,
+) {
+  await ensureSeedPermissionData(database, tenantId);
+
+  const [permissionRole] = await database
+    .select({
+      id: permissionRoles.id,
+    })
+    .from(permissionRoles)
+    .where(and(eq(permissionRoles.tenantId, tenantId), eq(permissionRoles.slug, role)))
+    .limit(1);
+
+  if (!permissionRole) {
+    throw new Error(`Missing permission role ${role} for tenant ${tenantId}`);
+  }
+
+  await database
+    .insert(permissionUserRoles)
+    .values({
+      userId,
+      roleId: permissionRole.id,
+      tenantId,
+    })
+    .onConflictDoNothing({
+      target: [permissionUserRoles.userId, permissionUserRoles.roleId],
+    });
+}
+
 export const seedUserRoleGrantSql = async (db: DatabasePg) => {
   const forceManageDbRole = process.env.SEED_MANAGE_DB_ROLE === "true";
 
@@ -321,3 +466,15 @@ export const seedUserRoleGrantSql = async (db: DatabasePg) => {
         GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO lms_app_user;
     `);
 };
+
+function getRoleDisplayName(role: UserRole) {
+  switch (role) {
+    case USER_ROLES.ADMIN:
+      return "Admin";
+    case USER_ROLES.CONTENT_CREATOR:
+      return "Content Creator";
+    case USER_ROLES.STUDENT:
+    default:
+      return "Student";
+  }
+}

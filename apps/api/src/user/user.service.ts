@@ -38,6 +38,7 @@ import { UserPasswordReminderEvent } from "src/events/user/user-password-reminde
 import { FileService } from "src/file/file.service";
 import { GroupService } from "src/group/group.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
+import { PermissionService } from "src/permission/permission.service";
 import { S3Service } from "src/s3/s3.service";
 import { SettingsService } from "src/settings/settings.service";
 import { StatisticsService } from "src/statistics/statistics.service";
@@ -90,6 +91,7 @@ export class UserService {
     private fileService: FileService,
     private s3Service: S3Service,
     private createPasswordService: CreatePasswordService,
+    private readonly permissionService: PermissionService,
     private settingsService: SettingsService,
     private readonly groupService: GroupService,
     private statisticsService: StatisticsService,
@@ -261,6 +263,15 @@ export class UserService {
       const [updatedUser] = hasUserDataToUpdate
         ? await trx.update(users).set(userData).where(eq(users.id, id)).returning()
         : [existingUser.users];
+
+      if (updatedUser.role) {
+        await this.permissionService.replaceUserSystemRoles(
+          id,
+          updatedUser.tenantId,
+          [updatedUser.role as UserRole],
+          trx,
+        );
+      }
 
       const { avatarReference, ...userWithoutAvatar } = updatedUser;
       const usersProfilePictureUrl = await this.getUsersProfilePictureUrl(avatarReference);
@@ -610,6 +621,13 @@ export class UserService {
   ): Promise<CreateUserTransactionResult> {
     return db.transaction(async (trx) => {
       const [createdUser] = await trx.insert(users).values(data).returning();
+
+      await this.permissionService.replaceUserSystemRoles(
+        createdUser.id,
+        createdUser.tenantId,
+        [createdUser.role as UserRole],
+        trx,
+      );
 
       await trx.insert(userOnboarding).values({ userId: createdUser.id });
 
@@ -1024,6 +1042,12 @@ export class UserService {
       .update(users)
       .set({ role: data.role })
       .where(and(inArray(users.id, data.userIds), isNull(users.deletedAt)));
+
+    await Promise.all(
+      data.userIds.map((userId) =>
+        this.permissionService.replaceUserSystemRoles(userId, currentUser.tenantId, [data.role]),
+      ),
+    );
   }
 
   private async deflateStatisticsForCourseDeletedUser(userId: UUIDType, trx: DatabasePg = this.db) {

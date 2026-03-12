@@ -1,25 +1,25 @@
-import { Controller, Get, Query, UseGuards } from "@nestjs/common";
+import { Controller, Get, Query } from "@nestjs/common";
 import { SupportedLanguages } from "@repo/shared";
 import { Validate } from "nestjs-typebox";
 
 import { baseResponse, UUIDType, BaseResponse } from "src/common";
-import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
-import { RolesGuard } from "src/common/guards/roles.guard";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
-import { USER_ROLES, UserRole } from "src/user/schemas/userRoles";
+import { PERMISSIONS } from "src/permission/permission.constants";
+import { RequirePermission } from "src/permission/permission.decorator";
+import { UserRole } from "src/user/schemas/userRoles";
 
 import { UserStatsSchema, StatsSchema } from "./schemas/userStats.schema";
 import { StatisticsService } from "./statistics.service";
 
 import type { UserStats, Stats } from "./schemas/userStats.schema";
 
-@UseGuards(RolesGuard)
 @Controller("statistics")
 export class StatisticsController {
   constructor(private statisticsService: StatisticsService) {}
 
   @Get("user-stats")
+  @RequirePermission(PERMISSIONS.STATISTICS_READ_SELF)
   @Validate({
     request: [{ type: "query", name: "language", schema: supportedLanguagesSchema }],
     response: baseResponse(UserStatsSchema),
@@ -32,7 +32,7 @@ export class StatisticsController {
   }
 
   @Get("stats")
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.STATISTICS_READ)
   @Validate({
     request: [{ type: "query", name: "language", schema: supportedLanguagesSchema }],
     response: baseResponse(StatsSchema),

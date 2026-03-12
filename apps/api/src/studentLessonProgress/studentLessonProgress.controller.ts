@@ -1,24 +1,23 @@
-import { Controller, Post, Query, UseGuards } from "@nestjs/common";
+import { Controller, Post, Query } from "@nestjs/common";
 import { SupportedLanguages } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
 import { baseResponse, BaseResponse, UUIDSchema, UUIDType } from "src/common";
-import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
-import { RolesGuard } from "src/common/guards/roles.guard";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
-import { USER_ROLES, UserRole } from "src/user/schemas/userRoles";
+import { PERMISSIONS } from "src/permission/permission.constants";
+import { RequirePermission } from "src/permission/permission.decorator";
+import { UserRole } from "src/user/schemas/userRoles";
 
 import { StudentLessonProgressService } from "./studentLessonProgress.service";
 
-@UseGuards(RolesGuard)
 @Controller("studentLessonProgress")
 export class StudentLessonProgressController {
   constructor(private readonly studentLessonProgressService: StudentLessonProgressService) {}
 
   @Post()
-  @Roles(USER_ROLES.STUDENT, USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.LEARNING_PROGRESS_UPDATE)
   @Validate({
     request: [
       { type: "query", name: "id", schema: UUIDSchema, required: true },
