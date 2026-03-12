@@ -641,7 +641,7 @@ export class UserService {
 
       await this.settingsService.createSettingsIfNotExists(
         createdUser.id,
-        createdUser.role as UserRole,
+        data.roleSlugs,
         settingsOverride,
         trx,
       );

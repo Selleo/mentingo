@@ -1,10 +1,11 @@
+import type { PermissionKey } from "@repo/shared";
 import type { UUIDType } from "src/common";
-import type { UserRole } from "src/user/schemas/userRoles";
 
 export type ActorUserType = {
   userId: UUIDType;
   email: string;
-  role: UserRole;
+  roleSlugs: string[];
+  permissions: PermissionKey[];
   tenantId: UUIDType;
   isSupportMode?: boolean;
   supportSessionId?: UUIDType;

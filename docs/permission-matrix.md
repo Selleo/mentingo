@@ -64,6 +64,7 @@ Legend:
 
 | Permission                 | What it covers                                                     | Anonymous | Student | Content Creator | Admin |
 | -------------------------- | ------------------------------------------------------------------ | --------: | ------: | --------------: | ----: |
+| `learning_mode.use`        | Learning mode access for learner-view flows and student-mode paths |        No |   Yes\* |           Yes\* |   Yes |
 | `learning_progress.update` | Lesson progress updates and learner progress actions               |        No |   Yes\* |             Yes |   Yes |
 | `certificate.read`         | Certificate reads and certificate listing                          |        No |       ? |               ? |     ? |
 | `certificate.share`        | Create certificate share links and public certificate share access |     Yes\* |   Yes\* |           Yes\* | Yes\* |

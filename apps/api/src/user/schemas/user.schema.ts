@@ -1,3 +1,4 @@
+import { PERMISSIONS } from "@repo/shared";
 import { type Static, Type } from "@sinclair/typebox";
 import { createSelectSchema } from "drizzle-typebox";
 
@@ -19,6 +20,10 @@ export const userOnboardingStatusSchema = omitTenantId(createSelectSchema(userOn
 export const currentUserResponseSchema = Type.Composite([
   baseUserResponseSchema,
   Type.Object({
+    roleSlugs: Type.Array(Type.String()),
+    permissions: Type.Array(
+      Type.Union(Object.values(PERMISSIONS).map((permission) => Type.Literal(permission))),
+    ),
     shouldVerifyMFA: Type.Boolean(),
     onboardingStatus: userOnboardingStatusSchema,
     isManagingTenantAdmin: Type.Boolean(),
@@ -71,7 +76,6 @@ export const userDetailsSchema = Type.Object({
   contactEmail: Type.Union([Type.String(), Type.Null()]),
   contactPhone: Type.Union([Type.String(), Type.Null()]),
   jobTitle: Type.Union([Type.String(), Type.Null()]),
-  role: Type.Enum(USER_ROLES),
 });
 
 export const userDetailsResponseSchema = Type.Object({

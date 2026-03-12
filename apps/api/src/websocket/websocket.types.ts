@@ -19,7 +19,8 @@ export interface LeaveLessonPayload {
 export interface WsUser {
   userId: string;
   email: string;
-  role: string;
+  roleSlugs: string[];
+  permissions: string[];
   tenantId: string;
 }
 

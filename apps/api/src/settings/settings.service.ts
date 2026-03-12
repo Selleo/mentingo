@@ -11,6 +11,7 @@ import {
   ALLOWED_QA_SETTINGS,
   ENTITY_TYPES,
   MAX_LOGIN_PAGE_DOCUMENTS,
+  PERMISSIONS,
 } from "@repo/shared";
 import { and, eq, getTableColumns, inArray, isNull, sql } from "drizzle-orm";
 import { isEqual } from "lodash";
@@ -27,8 +28,14 @@ import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
 import { LocalizationService } from "src/localization/localization.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { resourceEntity, resources, settings } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
+import {
+  permissionRoleRuleSets,
+  permissionRoles,
+  permissionRuleSetPermissions,
+  resourceEntity,
+  resources,
+  settings,
+} from "src/storage/schema";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import {
@@ -54,7 +61,12 @@ import type {
   UpdateSettingsBody,
 } from "./schemas/update-settings.schema";
 import type * as schema from "../storage/schema";
-import type { AllowedArticlesSettings, AllowedNewsSettings, AllowedQASettings } from "@repo/shared";
+import type {
+  AllowedArticlesSettings,
+  AllowedNewsSettings,
+  AllowedQASettings,
+  PermissionKey,
+} from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { Request, Response } from "express";
 import type { SettingsActivityLogSnapshot } from "src/activity-logs/types";
@@ -240,7 +252,7 @@ export class SettingsService {
 
   public async createSettingsIfNotExists(
     userId: UUIDType | null,
-    userRole: UserRole,
+    roleSlugs: string[],
     customSettings?: Partial<SettingsJSONContentSchema>,
     dbInstance: PostgresJsDatabase<typeof schema> = this.db,
   ): Promise<SettingsJSONContentSchema> {
@@ -257,7 +269,8 @@ export class SettingsService {
       return existingSettings.settings;
     }
 
-    const defaultSettings = this.getDefaultSettingsForRole(userRole);
+    const resolvedPermissions = await this.resolvePermissionsForRoleSlugs(roleSlugs, dbInstance);
+    const defaultSettings = this.getDefaultSettingsForPermissions(resolvedPermissions);
 
     const finalSettings = {
       ...defaultSettings,
@@ -1291,15 +1304,42 @@ export class SettingsService {
     };
   }
 
-  private getDefaultSettingsForRole(role: UserRole): SettingsJSONContentSchema {
-    switch (role) {
-      case USER_ROLES.ADMIN:
-        return DEFAULT_ADMIN_SETTINGS;
-      case USER_ROLES.STUDENT:
-        return DEFAULT_STUDENT_SETTINGS;
-      default:
-        return DEFAULT_STUDENT_SETTINGS;
-    }
+  private async resolvePermissionsForRoleSlugs(
+    roleSlugs: string[],
+    dbInstance: PostgresJsDatabase<typeof schema>,
+  ): Promise<PermissionKey[]> {
+    if (!roleSlugs.length) return [];
+
+    const permissionRows = await dbInstance
+      .select({
+        permission: permissionRuleSetPermissions.permission,
+      })
+      .from(permissionRoles)
+      .innerJoin(
+        permissionRoleRuleSets,
+        and(
+          eq(permissionRoleRuleSets.roleId, permissionRoles.id),
+          eq(permissionRoleRuleSets.tenantId, permissionRoles.tenantId),
+        ),
+      )
+      .innerJoin(
+        permissionRuleSetPermissions,
+        and(
+          eq(permissionRuleSetPermissions.ruleSetId, permissionRoleRuleSets.ruleSetId),
+          eq(permissionRuleSetPermissions.tenantId, permissionRoleRuleSets.tenantId),
+        ),
+      )
+      .where(inArray(permissionRoles.slug, roleSlugs));
+
+    return Array.from(new Set(permissionRows.map((row) => row.permission as PermissionKey)));
+  }
+
+  private getDefaultSettingsForPermissions(
+    permissions: PermissionKey[],
+  ): SettingsJSONContentSchema {
+    if (permissions.includes(PERMISSIONS.SETTINGS_MANAGE)) return DEFAULT_ADMIN_SETTINGS;
+
+    return DEFAULT_STUDENT_SETTINGS;
   }
 
   async deleteLoginPageFile(id: UUIDType) {

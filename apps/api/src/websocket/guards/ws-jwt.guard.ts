@@ -37,7 +37,8 @@ export class WsJwtGuard implements CanActivate {
       const user: WsUser = {
         userId: payload.userId,
         email: payload.email,
-        role: payload.role,
+        roleSlugs: payload.roleSlugs ?? [],
+        permissions: payload.permissions ?? [],
         tenantId: payload.tenantId,
       };
 

@@ -37,6 +37,7 @@ import s3Config from "./common/configuration/s3";
 import stripeConfig from "./common/configuration/stripe";
 import { EmailModule } from "./common/emails/emails.module";
 import { JwtAuthGuard } from "./common/guards/jwt-auth.guard";
+import { PermissionsGuard } from "./common/guards/permissions.guard";
 import { StagingGuard } from "./common/guards/staging.guard";
 import { CourseModule } from "./courses/course.module";
 import { EventsModule } from "./events/events.module";
@@ -161,6 +162,10 @@ import { UserModule } from "./user/user.module";
     {
       provide: APP_GUARD,
       useClass: StagingGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: PermissionsGuard,
     },
     GoogleStrategy,
     MicrosoftStrategy,
