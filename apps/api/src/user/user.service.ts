@@ -38,6 +38,18 @@ import { UserPasswordReminderEvent } from "src/events/user/user-password-reminde
 import { FileService } from "src/file/file.service";
 import { GroupService } from "src/group/group.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
+import { hasAnyPermission } from "src/permission/permission-access";
+import {
+  PERMISSIONS,
+  SYSTEM_ROLE_SLUGS,
+  SYSTEM_ROLE_SLUG_VALUES,
+  type SystemRoleSlug,
+} from "src/permission/permission.constants";
+import {
+  hasAnyPermissionCondition,
+  hasPermissionCondition,
+  hasSystemRoleCondition,
+} from "src/permission/permission-sql";
 import { PermissionService } from "src/permission/permission.service";
 import { S3Service } from "src/s3/s3.service";
 import { SettingsService } from "src/settings/settings.service";
@@ -64,7 +76,6 @@ import {
   type UsersQuery,
   UserSortFields,
 } from "./schemas/userQuery";
-import { USER_ROLES, type UserRole } from "./schemas/userRoles";
 import { USER_LONG_INACTIVITY_DAYS, USER_SHORT_INACTIVITY_DAYS } from "./user.constants";
 
 import type {
@@ -74,7 +85,7 @@ import type {
   UpdateUserBody,
   BulkUpdateUsersRolesBody,
 } from "./schemas/updateUser.schema";
-import type { UserDetailsResponse, UserDetailsWithAvatarKey } from "./schemas/user.schema";
+import type { UserDetailsResponse } from "./schemas/user.schema";
 import type { UserActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
@@ -201,14 +212,14 @@ export class UserService {
   public async getUserDetails(
     userId: UUIDType,
     currentUserId: UUIDType,
-    userRole: UserRole,
+    userPermissions: CurrentUser["permissions"],
   ): Promise<UserDetailsResponse> {
-    const [userBio]: UserDetailsWithAvatarKey[] = await this.db
+    const [userBio] = await this.db
       .select({
         firstName: users.firstName,
         lastName: users.lastName,
         avatarReference: users.avatarReference,
-        role: sql<UserRole>`${users.role}`,
+        tenantId: users.tenantId,
         id: users.id,
         description: userDetails.description,
         contactEmail: userDetails.contactEmail,
@@ -221,16 +232,17 @@ export class UserService {
 
     const canView =
       userId === currentUserId ||
-      USER_ROLES.ADMIN === userRole ||
-      USER_ROLES.CONTENT_CREATOR === userRole ||
-      USER_ROLES.ADMIN === userBio.role ||
-      USER_ROLES.CONTENT_CREATOR === userBio.role;
+      hasAnyPermission(userPermissions, [PERMISSIONS.USER_MANAGE, PERMISSIONS.COURSE_UPDATE]);
 
     if (!canView) {
       throw new ForbiddenException("Cannot access user details");
     }
 
     const { avatarReference, ...user } = userBio;
+    const permissionContext = await this.permissionService.getPermissionContext(
+      userBio.id,
+      userBio.tenantId,
+    );
 
     const profilePictureUrl = avatarReference
       ? await this.s3Service.getSignedUrl(avatarReference)
@@ -238,6 +250,7 @@ export class UserService {
 
     return {
       ...user,
+      role: permissionContext.role,
       profilePictureUrl,
     };
   }
@@ -257,18 +270,18 @@ export class UserService {
     return this.db.transaction(async (trx) => {
       const previousSnapshot = actor ? await this.buildUserActivitySnapshot(id, trx) : null;
 
-      const { groups, ...userData } = data;
+      const { groups, role, ...userData } = data;
 
       const hasUserDataToUpdate = Object.keys(userData).length > 0;
       const [updatedUser] = hasUserDataToUpdate
         ? await trx.update(users).set(userData).where(eq(users.id, id)).returning()
         : [existingUser.users];
 
-      if (updatedUser.role) {
+      if (role) {
         await this.permissionService.replaceUserSystemRoles(
           id,
           updatedUser.tenantId,
-          [updatedUser.role as UserRole],
+          [role as SystemRoleSlug],
           trx,
         );
       }
@@ -438,7 +451,23 @@ export class UserService {
     const [userToDelete] = await this.db
       .select()
       .from(users)
-      .where(and(eq(users.id, id), isNull(users.deletedAt), eq(users.role, USER_ROLES.STUDENT)));
+      .where(
+        and(
+          eq(users.id, id),
+          isNull(users.deletedAt),
+          hasPermissionCondition(
+            sql`${users.id}`,
+            sql`${users.tenantId}`,
+            PERMISSIONS.COURSE_READ_ASSIGNED,
+          ),
+          not(
+            hasAnyPermissionCondition(sql`${users.id}`, sql`${users.tenantId}`, [
+              PERMISSIONS.TENANT_MANAGE,
+              PERMISSIONS.COURSE_READ_MANAGEABLE,
+            ]),
+          ),
+        ),
+      );
 
     if (!userToDelete) throw new BadRequestException("You can only delete students");
 
@@ -484,7 +513,21 @@ export class UserService {
       .select()
       .from(users)
       .where(
-        and(inArray(users.id, ids), isNull(users.deletedAt), eq(users.role, USER_ROLES.STUDENT)),
+        and(
+          inArray(users.id, ids),
+          isNull(users.deletedAt),
+          hasPermissionCondition(
+            sql`${users.id}`,
+            sql`${users.tenantId}`,
+            PERMISSIONS.COURSE_READ_ASSIGNED,
+          ),
+          not(
+            hasAnyPermissionCondition(sql`${users.id}`, sql`${users.tenantId}`, [
+              PERMISSIONS.TENANT_MANAGE,
+              PERMISSIONS.COURSE_READ_MANAGEABLE,
+            ]),
+          ),
+        ),
       );
 
     if (usersToDelete.length !== ids.length)
@@ -620,12 +663,13 @@ export class UserService {
     options?: CreateUserOptions,
   ): Promise<CreateUserTransactionResult> {
     return db.transaction(async (trx) => {
-      const [createdUser] = await trx.insert(users).values(data).returning();
+      const { role, ...userData } = data;
+      const [createdUser] = await trx.insert(users).values(userData).returning();
 
       await this.permissionService.replaceUserSystemRoles(
         createdUser.id,
         createdUser.tenantId,
-        [createdUser.role as UserRole],
+        [role as SystemRoleSlug],
         trx,
       );
 
@@ -659,7 +703,7 @@ export class UserService {
 
       await this.settingsService.createSettingsIfNotExists(
         createdUser.id,
-        createdUser.role as UserRole,
+        role as SystemRoleSlug,
         settingsOverride,
         trx,
       );
@@ -712,7 +756,11 @@ export class UserService {
       .where(
         and(
           isNull(users.deletedAt),
-          eq(users.role, USER_ROLES.ADMIN),
+          hasPermissionCondition(
+            sql`${users.id}`,
+            sql`${users.tenantId}`,
+            PERMISSIONS.TENANT_MANAGE,
+          ),
           sql`${settings.settings}->>'adminNewUserNotification' = 'true'`,
           not(eq(users.email, emailToExclude)),
         ),
@@ -726,7 +774,22 @@ export class UserService {
         email: users.email,
       })
       .from(users)
-      .where(and(eq(users.role, USER_ROLES.STUDENT), inArray(users.id, studentIds)));
+      .where(
+        and(
+          inArray(users.id, studentIds),
+          hasPermissionCondition(
+            sql`${users.id}`,
+            sql`${users.tenantId}`,
+            PERMISSIONS.COURSE_READ_ASSIGNED,
+          ),
+          not(
+            hasAnyPermissionCondition(sql`${users.id}`, sql`${users.tenantId}`, [
+              PERMISSIONS.TENANT_MANAGE,
+              PERMISSIONS.COURSE_READ_MANAGEABLE,
+            ]),
+          ),
+        ),
+      );
   }
 
   async bulkAssignUsersToGroup(data: BulkAssignUserGroups, actor?: CurrentUser) {
@@ -750,7 +813,16 @@ export class UserService {
       })
       .from(users)
       .leftJoin(settings, eq(users.id, settings.userId))
-      .where(and(eq(users.role, USER_ROLES.ADMIN), isNull(users.deletedAt)));
+      .where(
+        and(
+          isNull(users.deletedAt),
+          hasPermissionCondition(
+            sql`${users.id}`,
+            sql`${users.tenantId}`,
+            PERMISSIONS.TENANT_MANAGE,
+          ),
+        ),
+      );
 
     return adminsWithSettings;
   }
@@ -850,10 +922,14 @@ export class UserService {
     if (!user) return null;
 
     const userGroups = await this.getUserGroupsForSnapshot(userId, dbInstance);
+    const permissionContext = await this.permissionService.getPermissionContext(
+      user.id,
+      user.tenantId,
+    );
 
     return {
       ...user,
-      role: user.role as UserRole,
+      role: permissionContext.role,
       groups: userGroups,
     };
   }
@@ -891,7 +967,9 @@ export class UserService {
       conditions.push(eq(users.archived, filters.archived));
     }
     if (filters.role) {
-      conditions.push(eq(users.role, filters.role));
+      conditions.push(
+        hasSystemRoleCondition(sql`${users.id}`, sql`${users.tenantId}`, filters.role as SystemRoleSlug),
+      );
     }
 
     if (filters.groups?.length) {
@@ -929,7 +1007,11 @@ export class UserService {
       .innerJoin(settings, eq(users.id, settings.userId))
       .where(
         and(
-          eq(users.role, USER_ROLES.ADMIN),
+          hasPermissionCondition(
+            sql`${users.id}`,
+            sql`${users.tenantId}`,
+            PERMISSIONS.TENANT_MANAGE,
+          ),
           sql`${settings.settings}->>'adminFinishedCourseNotification' = 'true'`,
           isNull(users.deletedAt),
         ),
@@ -949,7 +1031,11 @@ export class UserService {
       .innerJoin(settings, eq(users.id, settings.userId))
       .where(
         and(
-          eq(users.role, USER_ROLES.ADMIN),
+          hasPermissionCondition(
+            sql`${users.id}`,
+            sql`${users.tenantId}`,
+            PERMISSIONS.TENANT_MANAGE,
+          ),
           sql`${settings.settings}->>'adminOverdueCourseNotification' = 'true'`,
           isNull(users.deletedAt),
         ),
@@ -1033,14 +1119,20 @@ export class UserService {
       throw new BadRequestException("adminUsersView.toast.noUserSelected");
     }
 
+    if (!SYSTEM_ROLE_SLUG_VALUES.includes(data.role as SystemRoleSlug)) {
+      throw new BadRequestException("adminUsersView.toast.invalidRole");
+    }
+
+    const roleSlug = data.role as SystemRoleSlug;
+
     await this.db
       .update(users)
-      .set({ role: data.role })
+      .set({ updatedAt: sql`NOW()` })
       .where(and(inArray(users.id, data.userIds), isNull(users.deletedAt)));
 
     await Promise.all(
       data.userIds.map((userId) =>
-        this.permissionService.replaceUserSystemRoles(userId, currentUser.tenantId, [data.role]),
+        this.permissionService.replaceUserSystemRoles(userId, currentUser.tenantId, [roleSlug]),
       ),
     );
   }

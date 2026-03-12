@@ -1,9 +1,12 @@
-export const userRoles = ["admin", "student", "content_creator"] as const;
+import {
+  SYSTEM_ROLE_SLUGS,
+  SYSTEM_ROLE_SLUG_VALUES,
+  type SystemRoleSlug,
+} from "src/permission/permission.constants";
 
-export const USER_ROLES = {
-  ADMIN: "admin",
-  STUDENT: "student",
-  CONTENT_CREATOR: "content_creator",
-} as const;
+export const userRoles = SYSTEM_ROLE_SLUG_VALUES;
 
-export type UserRole = (typeof USER_ROLES)[keyof typeof USER_ROLES];
+// Backward-compatible alias kept temporarily during migration.
+export const USER_ROLES = SYSTEM_ROLE_SLUGS;
+
+export type UserRole = SystemRoleSlug;

@@ -11,11 +11,15 @@ import {
   permissionUserRoles,
   users,
 } from "src/storage/schema";
-import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
-import { SYSTEM_ROLE_PERMISSIONS, SYSTEM_ROLE_SLUGS } from "./permission.constants";
+import {
+  type PermissionKey,
+  SYSTEM_ROLE_PERMISSIONS,
+  SYSTEM_ROLE_SLUGS,
+  SYSTEM_ROLE_SLUG_VALUES,
+  type SystemRoleSlug,
+} from "./permission.constants";
 
-import type { PermissionKey } from "./permission.constants";
 import type { AssignedRole, HydratedPermissionContext } from "./permission.types";
 
 @Injectable()
@@ -157,20 +161,21 @@ export class PermissionService {
     }, {});
   }
 
-  getPrimarySystemRole(roles: AssignedRole[]): UserRole {
+  getPrimarySystemRole(roles: AssignedRole[]): SystemRoleSlug {
     const roleSlugs = new Set(roles.map((role) => role.slug));
 
-    if (roleSlugs.has(USER_ROLES.ADMIN)) return USER_ROLES.ADMIN;
-    if (roleSlugs.has(USER_ROLES.CONTENT_CREATOR)) return USER_ROLES.CONTENT_CREATOR;
-    if (roleSlugs.has(USER_ROLES.STUDENT)) return USER_ROLES.STUDENT;
+    if (roleSlugs.has(SYSTEM_ROLE_SLUGS.ADMIN)) return SYSTEM_ROLE_SLUGS.ADMIN;
+    if (roleSlugs.has(SYSTEM_ROLE_SLUGS.CONTENT_CREATOR))
+      return SYSTEM_ROLE_SLUGS.CONTENT_CREATOR;
+    if (roleSlugs.has(SYSTEM_ROLE_SLUGS.STUDENT)) return SYSTEM_ROLE_SLUGS.STUDENT;
 
-    return USER_ROLES.STUDENT;
+    return SYSTEM_ROLE_SLUGS.STUDENT;
   }
 
   async replaceUserSystemRoles(
     userId: UUIDType,
     tenantId: UUIDType,
-    roleSlugs: UserRole[],
+    roleSlugs: SystemRoleSlug[],
     dbInstance: DatabasePg = this.db,
   ) {
     const roleMap = await this.ensureSystemRolesForTenant(tenantId, dbInstance);
@@ -191,8 +196,8 @@ export class PermissionService {
   async ensureSystemRolesForTenant(
     tenantId: UUIDType,
     dbInstance: DatabasePg = this.db,
-  ): Promise<Record<UserRole, UUIDType>> {
-    for (const roleSlug of Object.values(USER_ROLES)) {
+  ): Promise<Record<SystemRoleSlug, UUIDType>> {
+    for (const roleSlug of SYSTEM_ROLE_SLUG_VALUES) {
       const ruleSetSlug = `${roleSlug}-default`;
 
       await dbInstance
@@ -227,7 +232,7 @@ export class PermissionService {
       .where(
         and(
           eq(permissionRoles.tenantId, tenantId),
-          inArray(permissionRoles.slug, Object.values(USER_ROLES)),
+          inArray(permissionRoles.slug, SYSTEM_ROLE_SLUG_VALUES),
         ),
       );
 
@@ -242,7 +247,7 @@ export class PermissionService {
           eq(permissionRuleSets.tenantId, tenantId),
           inArray(
             permissionRuleSets.slug,
-            Object.values(USER_ROLES).map((roleSlug) => `${roleSlug}-default`),
+            SYSTEM_ROLE_SLUG_VALUES.map((roleSlug) => `${roleSlug}-default`),
           ),
         ),
       );
@@ -257,7 +262,7 @@ export class PermissionService {
       return acc;
     }, {});
 
-    for (const roleSlug of Object.values(USER_ROLES)) {
+    for (const roleSlug of SYSTEM_ROLE_SLUG_VALUES) {
       const roleId = roleMap[roleSlug];
       const ruleSetId = ruleSetMap[`${roleSlug}-default`];
 
@@ -287,16 +292,16 @@ export class PermissionService {
         .onConflictDoNothing();
     }
 
-    return roleMap as Record<UserRole, UUIDType>;
+    return roleMap as Record<SystemRoleSlug, UUIDType>;
   }
 
-  private getRoleDisplayName(roleSlug: UserRole): string {
+  private getRoleDisplayName(roleSlug: SystemRoleSlug): string {
     switch (roleSlug) {
-      case USER_ROLES.ADMIN:
+      case SYSTEM_ROLE_SLUGS.ADMIN:
         return "Admin";
-      case USER_ROLES.CONTENT_CREATOR:
+      case SYSTEM_ROLE_SLUGS.CONTENT_CREATOR:
         return "Content Creator";
-      case USER_ROLES.STUDENT:
+      case SYSTEM_ROLE_SLUGS.STUDENT:
       default:
         return "Student";
     }

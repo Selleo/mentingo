@@ -2,7 +2,6 @@ import { ALLOWED_AGE_LIMITS } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { ALLOWED_CURRENCIES } from "../constants/settings.constants";
 
@@ -35,7 +34,7 @@ export const globalSettingsJSONSchema = Type.Object({
   platformLogoS3Key: Type.Union([Type.String(), Type.Null()]),
   loginBackgroundImageS3Key: Type.Union([Type.String(), Type.Null()]),
   platformSimpleLogoS3Key: Type.Union([Type.String(), Type.Null()]),
-  MFAEnforcedRoles: Type.Array(Type.Enum(USER_ROLES)),
+  MFAEnforcedRoles: Type.Array(Type.String()),
   defaultCourseCurrency: Type.Union(ALLOWED_CURRENCIES.map((currency) => Type.Literal(currency))),
   inviteOnlyRegistration: Type.Boolean(),
   userEmailTriggers: userEmailTriggersJSONSchema,

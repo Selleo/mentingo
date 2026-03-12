@@ -82,7 +82,6 @@ import {
   userSchema,
 } from "./schemas/user.schema";
 import { sortUserFieldsOptions, SortUserFieldsOptions } from "./schemas/userQuery";
-import { USER_ROLES, UserRole } from "./schemas/userRoles";
 import { UserService } from "./user.service";
 
 import type { ArchiveUsersSchemaResponse } from "./schemas/archiveUsers.schema";
@@ -99,7 +98,7 @@ export class UserController {
   @Validate({
     request: [
       { type: "query", name: "keyword", schema: Type.String() },
-      { type: "query", name: "role", schema: Type.Enum(USER_ROLES) },
+      { type: "query", name: "role", schema: Type.String() },
       { type: "query", name: "archived", schema: Type.String() },
       { type: "query", name: "page", schema: Type.Number({ minimum: 1 }) },
       { type: "query", name: "perPage", schema: Type.Number() },
@@ -110,7 +109,7 @@ export class UserController {
   })
   async getUsers(
     @Query("keyword") keyword: string,
-    @Query("role") role: UserRole,
+    @Query("role") role: string,
     @Query("archived") archived: string,
     @Query("page") page: number,
     @Query("perPage") perPage: number,
@@ -119,7 +118,7 @@ export class UserController {
   ): Promise<PaginatedResponse<AllUsersResponse>> {
     const filters: UsersFilterSchema = {
       keyword,
-      role,
+      role: role as UsersFilterSchema["role"],
       archived: archived ? archived === "true" : undefined,
       groups,
     };
@@ -152,10 +151,14 @@ export class UserController {
   })
   async getUserDetails(
     @Query("userId") userId: UUIDType,
-    @CurrentUser("role") role: UserRole,
+    @CurrentUser("permissions") userPermissions: CurrentUserType["permissions"],
     @CurrentUser("userId") currentUserId: UUIDType,
   ): Promise<BaseResponse<UserDetailsResponse>> {
-    const userDetails = await this.usersService.getUserDetails(userId, currentUserId, role);
+    const userDetails = await this.usersService.getUserDetails(
+      userId,
+      currentUserId,
+      userPermissions,
+    );
     return new BaseResponse(userDetails);
   }
 

@@ -25,7 +25,7 @@ import {
 
 import { ACTIVITY_LOG_ACTION_TYPES } from "src/activity-logs/types";
 import { coursesSettingsSchema } from "src/courses/types/settings";
-import { USER_ROLES } from "src/user/schemas/userRoles";
+import { SYSTEM_ROLE_SLUGS } from "src/permission/permission.constants";
 import { safeJsonb } from "src/utils/safe-jsonb";
 
 import {
@@ -57,7 +57,6 @@ export const users = pgTable(
     firstName: text("first_name").notNull(),
     lastName: text("last_name").notNull(),
     avatarReference: varchar("avatar_reference", { length: 200 }),
-    role: text("role").notNull().default(USER_ROLES.STUDENT),
     archived,
     deletedAt: timestamp("deleted_at", {
       mode: "string",

@@ -14,6 +14,8 @@ import {
 } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
+import { PERMISSIONS } from "src/permission/permission.constants";
+import { hasPermissionCondition } from "src/permission/permission-sql";
 import {
   announcements,
   groupAnnouncements,
@@ -21,7 +23,6 @@ import {
   userAnnouncements,
   users,
 } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 import { UserService } from "src/user/user.service";
 
 import { LATEST_ANNOUNCEMENTS_LIMIT } from "./consts";
@@ -105,7 +106,13 @@ export class AnnouncementsRepository {
         .where(
           and(
             eq(groupUsers.groupId, groupId),
-            not(eq(users.role, USER_ROLES.ADMIN)),
+            not(
+              hasPermissionCondition(
+                sql`${users.id}`,
+                sql`${users.tenantId}`,
+                PERMISSIONS.TENANT_MANAGE,
+              ),
+            ),
             isNull(users.deletedAt),
           ),
         );

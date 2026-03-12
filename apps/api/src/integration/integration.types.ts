@@ -28,7 +28,6 @@ export type IntegrationApiKeyCandidate = {
   keyTenantIsManaging: boolean;
   userId: string;
   userEmail: string;
-  userRole: string;
   userDeletedAt: string | null;
 };
 

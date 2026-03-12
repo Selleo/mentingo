@@ -8,6 +8,8 @@ import {
 import { and, asc, eq, getTableColumns, inArray, ne, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
+import { PERMISSIONS } from "src/permission/permission.constants";
+import { hasAnyPermissionCondition } from "src/permission/permission-sql";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   aiMentorLessons,
@@ -25,7 +27,6 @@ import {
   tenants,
   users,
 } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import type {
   AiMentorLessonInsert,
@@ -382,7 +383,7 @@ export class MasterCourseRepository {
     const [targetAuthor] = await this.db
       .select({ id: users.id })
       .from(users)
-      .where(inArray(users.role, [USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR]))
+      .where(hasAnyPermissionCondition(sql`${users.id}`, sql`${users.tenantId}`, [PERMISSIONS.COURSE_UPDATE]))
       .limit(1);
 
     return targetAuthor;

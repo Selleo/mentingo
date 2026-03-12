@@ -4,6 +4,8 @@ import { and, desc, eq, gte, inArray, isNull, lt, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { LocalizationService } from "src/localization/localization.service";
+import { PERMISSIONS } from "src/permission/permission.constants";
+import { hasAnyPermissionCondition, hasPermissionCondition } from "src/permission/permission-sql";
 import {
   chapters,
   courses,
@@ -17,7 +19,6 @@ import {
   users,
   userStatistics,
 } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
 import type { SupportedLanguages } from "@repo/shared";
@@ -436,7 +437,15 @@ export class StatisticsRepository {
       .innerJoin(users, eq(userStatistics.userId, users.id))
       .where(
         and(
-          eq(users.role, USER_ROLES.STUDENT),
+          hasPermissionCondition(
+            sql`${users.id}`,
+            sql`${users.tenantId}`,
+            PERMISSIONS.COURSE_READ_ASSIGNED,
+          ),
+          sql`NOT ${hasAnyPermissionCondition(sql`${users.id}`, sql`${users.tenantId}`, [
+            PERMISSIONS.COURSE_READ_MANAGEABLE,
+            PERMISSIONS.TENANT_MANAGE,
+          ])}`,
           eq(
             sql`DATE(${userStatistics.lastActivityDate})`,
             sql`CURRENT_DATE - (${inactivityDays}::INTEGER * INTERVAL '1 day')`,

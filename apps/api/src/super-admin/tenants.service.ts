@@ -9,10 +9,10 @@ import { TENANT_STATUSES } from "@repo/shared";
 import { and, eq, isNull } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
+import { SYSTEM_ROLE_SLUGS } from "src/permission/permission.constants";
 import { DEFAULT_GLOBAL_SETTINGS } from "src/settings/constants/settings.constants";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { settings } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 import { UserService } from "src/user/user.service";
 import { invalidateCorsCache } from "src/utils/cors";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
@@ -100,7 +100,7 @@ export class TenantsService {
           email: input.adminEmail,
           firstName: adminFirstName,
           lastName: adminLastName,
-          role: USER_ROLES.ADMIN,
+          role: SYSTEM_ROLE_SLUGS.ADMIN,
           language: input.adminLanguage,
         },
         this.db,

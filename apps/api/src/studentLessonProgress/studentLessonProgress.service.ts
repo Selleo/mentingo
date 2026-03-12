@@ -19,6 +19,7 @@ import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { canManageCourseContent } from "src/permission/permission-access";
+import { PermissionService } from "src/permission/permission.service";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
 import {
   aiMentorStudentLessonProgress,
@@ -52,6 +53,7 @@ export class StudentLessonProgressService {
     private readonly certificatesService: CertificatesService,
     private readonly outboxPublisher: OutboxPublisher,
     private readonly localizationService: LocalizationService,
+    private readonly permissionService: PermissionService,
   ) {}
 
   async markLessonAsCompleted({
@@ -688,7 +690,7 @@ export class StudentLessonProgressService {
     if (actor) return actor;
 
     const [user] = await dbInstance
-      .select({ userId: users.id, email: users.email, role: users.role, tenantId: users.tenantId })
+      .select({ userId: users.id, email: users.email, tenantId: users.tenantId })
       .from(users)
       .where(eq(users.id, userId));
 
@@ -696,10 +698,15 @@ export class StudentLessonProgressService {
       throw new NotFoundException("User not found");
     }
 
+    const permissionContext = await this.permissionService.getPermissionContext(
+      user.userId,
+      user.tenantId,
+    );
+
     return {
       userId: user.userId,
       email: user.email,
-      role: user.role,
+      role: permissionContext.role,
       tenantId: user.tenantId,
     };
   }

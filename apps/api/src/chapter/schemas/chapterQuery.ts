@@ -1,7 +1,6 @@
 import { type Static, Type } from "@sinclair/typebox";
 
 import type { UUIDType } from "src/common";
-import type { UserRole } from "src/user/schemas/userRoles";
 
 export const lessonSortFields = ["title", "createdAt", "state", "itemsCount"] as const;
 
@@ -40,6 +39,6 @@ export type LessonsQuery = {
   sort?: SortLessonFieldsOptions;
   page?: number;
   perPage?: number;
-  currentUserRole?: UserRole;
+  currentUserRole?: string;
   currentUserId?: UUIDType;
 };

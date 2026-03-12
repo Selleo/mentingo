@@ -1,4 +1,11 @@
-import { USER_ROLES } from "src/user/schemas/userRoles";
+export const SYSTEM_ROLE_SLUGS = {
+  ADMIN: "admin",
+  STUDENT: "student",
+  CONTENT_CREATOR: "content_creator",
+} as const;
+
+export type SystemRoleSlug = (typeof SYSTEM_ROLE_SLUGS)[keyof typeof SYSTEM_ROLE_SLUGS];
+export const SYSTEM_ROLE_SLUG_VALUES = Object.values(SYSTEM_ROLE_SLUGS) as SystemRoleSlug[];
 
 export const PERMISSIONS = {
   ACCOUNT_ACCESS_PUBLIC: "account.access_public",
@@ -63,8 +70,6 @@ export const PERMISSIONS = {
 } as const;
 
 export type PermissionKey = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
-
-export const SYSTEM_ROLE_SLUGS = USER_ROLES;
 
 export const SYSTEM_ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
   [SYSTEM_ROLE_SLUGS.STUDENT]: [

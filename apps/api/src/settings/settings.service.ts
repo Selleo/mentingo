@@ -24,9 +24,9 @@ import { RESOURCE_CATEGORIES, RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.
 import { FileService } from "src/file/file.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
+import { SYSTEM_ROLE_SLUGS, type SystemRoleSlug } from "src/permission/permission.constants";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { resourceEntity, resources, settings } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import {
@@ -58,7 +58,6 @@ import type { SettingsActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
 import type { LoginBackgroundResponseBody } from "src/settings/schemas/login-background.schema";
-import type { UserRole } from "src/user/schemas/userRoles";
 
 @Injectable()
 export class SettingsService {
@@ -180,7 +179,7 @@ export class SettingsService {
 
   public async createSettingsIfNotExists(
     userId: UUIDType | null,
-    userRole: UserRole,
+    userRole: SystemRoleSlug,
     customSettings?: Partial<SettingsJSONContentSchema>,
     dbInstance: PostgresJsDatabase<typeof schema> = this.db,
   ): Promise<SettingsJSONContentSchema> {
@@ -643,10 +642,10 @@ export class SettingsService {
   ): Promise<GlobalSettingsJSONContentSchema> {
     const previousRecord = await this.getGlobalSettingsRecord();
 
-    const enforcedRoles: UserRole[] = [];
+    const enforcedRoles: string[] = [];
 
     Object.entries(rolesRequest).forEach(([role, shouldEnforce]) => {
-      if (shouldEnforce === true) enforcedRoles.push(role as UserRole);
+      if (shouldEnforce === true) enforcedRoles.push(role);
     });
 
     const [{ settings: updatedSettings }] = await this.db
@@ -1198,11 +1197,11 @@ export class SettingsService {
     };
   }
 
-  private getDefaultSettingsForRole(role: UserRole): SettingsJSONContentSchema {
+  private getDefaultSettingsForRole(role: SystemRoleSlug): SettingsJSONContentSchema {
     switch (role) {
-      case USER_ROLES.ADMIN:
+      case SYSTEM_ROLE_SLUGS.ADMIN:
         return DEFAULT_ADMIN_SETTINGS;
-      case USER_ROLES.STUDENT:
+      case SYSTEM_ROLE_SLUGS.STUDENT:
         return DEFAULT_STUDENT_SETTINGS;
       default:
         return DEFAULT_STUDENT_SETTINGS;

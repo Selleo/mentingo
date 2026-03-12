@@ -1,6 +1,5 @@
-import type { PermissionKey } from "./permission.constants";
+import type { PermissionKey, SystemRoleSlug } from "./permission.constants";
 import type { UUIDType } from "src/common";
-import type { UserRole } from "src/user/schemas/userRoles";
 
 export type AssignedRole = {
   id: UUIDType;
@@ -11,5 +10,5 @@ export type AssignedRole = {
 export type HydratedPermissionContext = {
   roles: AssignedRole[];
   permissions: PermissionKey[];
-  role: UserRole;
+  role: SystemRoleSlug;
 };

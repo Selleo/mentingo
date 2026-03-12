@@ -1,8 +1,6 @@
 import { ALLOWED_AGE_LIMITS, HEX_COLOR_REGEX } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
-import { USER_ROLES } from "src/user/schemas/userRoles";
-
 import { ALLOWED_CURRENCIES } from "../constants/settings.constants";
 
 import {
@@ -20,7 +18,7 @@ export const updateSettingsBodySchema = Type.Partial(
 );
 
 export const updateMFAEnforcedRolesSchema = Type.Record(
-  Type.Enum(USER_ROLES),
+  Type.String(),
   Type.Optional(Type.Boolean()),
 );
 

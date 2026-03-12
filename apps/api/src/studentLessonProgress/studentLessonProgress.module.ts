@@ -3,13 +3,14 @@ import { Module } from "@nestjs/common";
 import { CertificatesModule } from "src/certificates/certificates.module";
 import { LocalizationModule } from "src/localization/localization.module";
 import { LocalizationService } from "src/localization/localization.service";
+import { PermissionModule } from "src/permission/permission.module";
 import { StatisticsModule } from "src/statistics/statistics.module";
 
 import { StudentLessonProgressController } from "./studentLessonProgress.controller";
 import { StudentLessonProgressService } from "./studentLessonProgress.service";
 
 @Module({
-  imports: [StatisticsModule, CertificatesModule, LocalizationModule],
+  imports: [StatisticsModule, CertificatesModule, LocalizationModule, PermissionModule],
   controllers: [StudentLessonProgressController],
   providers: [StudentLessonProgressService, LocalizationService],
   exports: [StudentLessonProgressService],

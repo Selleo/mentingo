@@ -61,6 +61,8 @@ import {
   canManageCourseContent,
   isTenantManager,
 } from "src/permission/permission-access";
+import { PERMISSIONS } from "src/permission/permission.constants";
+import { hasAnyPermissionCondition, hasPermissionCondition } from "src/permission/permission-sql";
 import { SettingsService } from "src/settings/settings.service";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
 import {
@@ -76,6 +78,9 @@ import {
   lessonLearningTime,
   lessons,
   questionAnswerOptions,
+  permissionRoleRuleSets,
+  permissionRuleSetPermissions,
+  permissionUserRoles,
   questions,
   quizAttempts,
   resourceEntity,
@@ -87,7 +92,6 @@ import {
   courseStudentsStats,
 } from "src/storage/schema";
 import { StripeService } from "src/stripe/stripe.service";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 import { UserService } from "src/user/user.service";
 import { hasLocalizableUpdates } from "src/utils/getLocalizableKeys";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
@@ -424,7 +428,13 @@ export class CourseService {
     const { sortOrder, sortedField } = getSortOptions(sort);
 
     const conditions = [
-      eq(users.role, USER_ROLES.STUDENT),
+      hasPermissionCondition(sql`${users.id}`, sql`${users.tenantId}`, PERMISSIONS.COURSE_READ_ASSIGNED),
+      not(
+        hasAnyPermissionCondition(sql`${users.id}`, sql`${users.tenantId}`, [
+          PERMISSIONS.COURSE_READ_MANAGEABLE,
+          PERMISSIONS.TENANT_MANAGE,
+        ]),
+      ),
       eq(users.archived, false),
       isNull(users.deletedAt),
     ];
@@ -2221,7 +2231,17 @@ export class CourseService {
         .where(
           and(
             inArray(groupUsers.groupId, groupIds),
-            eq(users.role, USER_ROLES.STUDENT),
+            hasPermissionCondition(
+              sql`${users.id}`,
+              sql`${users.tenantId}`,
+              PERMISSIONS.COURSE_READ_ASSIGNED,
+            ),
+            not(
+              hasAnyPermissionCondition(sql`${users.id}`, sql`${users.tenantId}`, [
+                PERMISSIONS.COURSE_READ_MANAGEABLE,
+                PERMISSIONS.TENANT_MANAGE,
+              ]),
+            ),
             isNull(studentCourses.enrolledByGroupId),
           ),
         )
@@ -2263,7 +2283,17 @@ export class CourseService {
         .where(
           and(
             inArray(groupUsers.groupId, groupIds),
-            eq(users.role, USER_ROLES.STUDENT),
+            hasPermissionCondition(
+              sql`${users.id}`,
+              sql`${users.tenantId}`,
+              PERMISSIONS.COURSE_READ_ASSIGNED,
+            ),
+            not(
+              hasAnyPermissionCondition(sql`${users.id}`, sql`${users.tenantId}`, [
+                PERMISSIONS.COURSE_READ_MANAGEABLE,
+                PERMISSIONS.TENANT_MANAGE,
+              ]),
+            ),
             isNull(studentCourses.id),
           ),
         )
@@ -2322,7 +2352,17 @@ export class CourseService {
         and(
           eq(studentCourses.courseId, courseId),
           inArray(studentCourses.enrolledByGroupId, groupIds),
-          eq(users.role, USER_ROLES.STUDENT),
+          hasPermissionCondition(
+            sql`${users.id}`,
+            sql`${users.tenantId}`,
+            PERMISSIONS.COURSE_READ_ASSIGNED,
+          ),
+          not(
+            hasAnyPermissionCondition(sql`${users.id}`, sql`${users.tenantId}`, [
+              PERMISSIONS.COURSE_READ_MANAGEABLE,
+              PERMISSIONS.TENANT_MANAGE,
+            ]),
+          ),
         ),
       );
 
@@ -3822,7 +3862,17 @@ export class CourseService {
         and(
           isNotNull(groupCourses.dueDate),
           sql`${groupCourses.dueDate} < NOW()`,
-          eq(users.role, USER_ROLES.STUDENT),
+          hasPermissionCondition(
+            sql`${users.id}`,
+            sql`${users.tenantId}`,
+            PERMISSIONS.COURSE_READ_ASSIGNED,
+          ),
+          not(
+            hasAnyPermissionCondition(sql`${users.id}`, sql`${users.tenantId}`, [
+              PERMISSIONS.COURSE_READ_MANAGEABLE,
+              PERMISSIONS.TENANT_MANAGE,
+            ]),
+          ),
           isNull(users.deletedAt),
           isNull(studentCourses.completedAt),
         ),
@@ -3994,7 +4044,17 @@ export class CourseService {
                     'email', ${users.email}
                   ))
                   FROM ${users}
-                  WHERE ${users.role} IN (${USER_ROLES.ADMIN}, ${USER_ROLES.CONTENT_CREATOR})
+                  WHERE EXISTS (
+                    SELECT 1
+                    FROM ${permissionUserRoles} pur
+                    INNER JOIN ${permissionRoleRuleSets} prrs ON prrs.role_id = pur.role_id
+                    INNER JOIN ${permissionRuleSetPermissions} prsp ON prsp.rule_set_id = prrs.rule_set_id
+                    WHERE pur.user_id = ${users.id}
+                      AND pur.tenant_id = ${users.tenantId}
+                      AND prrs.tenant_id = ${users.tenantId}
+                      AND prsp.tenant_id = ${users.tenantId}
+                      AND prsp.permission IN (${PERMISSIONS.COURSE_UPDATE}, ${PERMISSIONS.TENANT_MANAGE})
+                  )
                     AND ${users.id} <> ${courses.authorId}
                 ),
                 '[]'::json

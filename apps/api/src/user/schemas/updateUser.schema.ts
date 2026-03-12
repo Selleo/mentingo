@@ -2,14 +2,12 @@ import { type Static, Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
 
-import { USER_ROLES } from "./userRoles";
-
 export const updateUserSchema = Type.Object({
   firstName: Type.Optional(Type.String()),
   lastName: Type.Optional(Type.String()),
   groups: Type.Optional(Type.Union([Type.Array(Type.String()), Type.Null()])),
   email: Type.Optional(Type.String({ format: "email" })),
-  role: Type.Optional(Type.Enum(USER_ROLES)),
+  role: Type.Optional(Type.String()),
   archived: Type.Optional(Type.Boolean()),
 });
 export const upsertUserDetailsSchema = Type.Object({
@@ -38,7 +36,7 @@ export const bulkAssignUsersGroupsSchema = Type.Array(
 
 export const bulkUpdateUsersRolesSchema = Type.Object({
   userIds: Type.Array(Type.String()),
-  role: Type.Enum(USER_ROLES),
+  role: Type.String(),
 });
 
 export type BulkUpdateUsersRolesBody = Static<typeof bulkUpdateUsersRolesSchema>;

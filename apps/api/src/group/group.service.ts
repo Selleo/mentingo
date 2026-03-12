@@ -86,7 +86,6 @@ export class GroupService {
                     'email', u.email,
                     'firstName', u.first_name,
                     'lastName', u.last_name,
-                    'role', u.role,
                     'archived', u.archived,
                     'profilePictureUrl', u.avatar_reference,
                     'deletedAt', u.deleted_at

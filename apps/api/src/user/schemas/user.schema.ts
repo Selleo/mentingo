@@ -4,7 +4,6 @@ import { createSelectSchema } from "drizzle-typebox";
 import { UUIDSchema } from "src/common";
 import { commonUserSchema } from "src/common/schemas/common-user.schema";
 import { userOnboarding } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 import { omitTenantId } from "src/utils/omitTenantId";
 
 export const baseUserResponseSchema = Type.Composite([
@@ -70,7 +69,7 @@ export const userDetailsSchema = Type.Object({
   contactEmail: Type.Union([Type.String(), Type.Null()]),
   contactPhone: Type.Union([Type.String(), Type.Null()]),
   jobTitle: Type.Union([Type.String(), Type.Null()]),
-  role: Type.Enum(USER_ROLES),
+  role: Type.String(),
 });
 
 export const userDetailsResponseSchema = Type.Object({

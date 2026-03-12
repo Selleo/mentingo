@@ -2,8 +2,6 @@ import { Type, type Static } from "@sinclair/typebox";
 
 import { groupsFilterSchema } from "src/group/group.schema";
 
-import { USER_ROLES } from "./userRoles";
-
 export const userSortFields = ["firstName", "lastName", "email", "createdAt", "groupName"] as const;
 
 export const UserSortFields: Record<UserSortField, UserSortField> = {
@@ -27,7 +25,7 @@ export const usersFilterSchema = Type.Composite([
   Type.Object({
     keyword: Type.Optional(Type.String()),
     archived: Type.Optional(Type.Boolean()),
-    role: Type.Optional(Type.Enum(USER_ROLES)),
+    role: Type.Optional(Type.String()),
   }),
   Type.Object({
     groups: Type.Optional(groupsFilterSchema),
