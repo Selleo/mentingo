@@ -7,7 +7,9 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 
-import { USER_ROLES } from "src/user/schemas/userRoles";
+import { hasPermission } from "src/permission/permission-access";
+import { PERMISSIONS } from "src/permission/permission.constants";
+import { PermissionService } from "src/permission/permission.service";
 
 import { IntegrationRepository } from "./integration.repository";
 
@@ -18,7 +20,10 @@ import type { CurrentUser } from "src/common/types/current-user.type";
 export class IntegrationService {
   private readonly keySecret: Buffer;
 
-  constructor(private readonly integrationRepository: IntegrationRepository) {
+  constructor(
+    private readonly integrationRepository: IntegrationRepository,
+    private readonly permissionService: PermissionService,
+  ) {
     if (!process.env.MASTER_KEY) throw new Error("MASTER_KEY is required for integration API keys");
 
     this.keySecret = Buffer.from(process.env.MASTER_KEY, "base64");
@@ -72,10 +77,15 @@ export class IntegrationService {
 
     if (key.userDeletedAt) throw new ForbiddenException("integrationApiKey.errors.ownerInactive");
 
-    if (key.userRole !== USER_ROLES.ADMIN)
+    const permissionContext = await this.permissionService.getPermissionContext(
+      key.userId,
+      key.keyTenantId,
+    );
+
+    if (!hasPermission(permissionContext.permissions, PERMISSIONS.INTEGRATION_API_USE))
       throw new ForbiddenException("integrationApiKey.errors.ownerNotAdmin");
 
-    const { keyId, keyTenantId, keyTenantIsManaging, userId, userEmail, userRole } = key;
+    const { keyId, keyTenantId, keyTenantIsManaging, userId, userEmail } = key;
 
     return {
       keyId,
@@ -84,7 +94,9 @@ export class IntegrationService {
       user: {
         userId,
         email: userEmail,
-        role: userRole,
+        role: permissionContext.role,
+        roles: permissionContext.roles,
+        permissions: permissionContext.permissions,
         tenantId: keyTenantId,
       },
     };

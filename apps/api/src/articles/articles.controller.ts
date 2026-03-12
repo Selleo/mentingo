@@ -45,7 +45,6 @@ import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
 import { PERMISSIONS } from "src/permission/permission.constants";
 import { RequirePermission } from "src/permission/permission.decorator";
 import { PermissionsGuard } from "src/permission/permission.guard";
-import { UserRole } from "src/user/schemas/userRoles";
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
 import { getArticleSectionResponseSchema as getArticleSectionDetailsResponseSchema } from "./schemas/articleSection.schema";
@@ -240,9 +239,9 @@ export class ArticlesController {
     @Req() req: Request,
     @Res() res: Response,
     @CurrentUser("userId") userId?: UUIDType,
-    @CurrentUser("role") role?: UserRole,
+    @CurrentUser("permissions") permissions?: CurrentUserType["permissions"],
   ) {
-    return this.articlesService.getArticleResource(req, res, resourceId, userId, role);
+    return this.articlesService.getArticleResource(req, res, resourceId, userId, permissions);
   }
 
   @Public()

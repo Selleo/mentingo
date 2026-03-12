@@ -6,7 +6,9 @@ import {
   Param,
   Patch,
   Post,
-  Query, UseGuards } from "@nestjs/common";
+  Query,
+  UseGuards,
+} from "@nestjs/common";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
@@ -21,10 +23,9 @@ import {
 import { Public } from "src/common/decorators/public.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
-import { PERMISSIONS } from "src/permission/permission.constants";
+import { PERMISSIONS, type PermissionKey } from "src/permission/permission.constants";
 import { RequirePermission } from "src/permission/permission.decorator";
 import { PermissionsGuard } from "src/permission/permission.guard";
-import { UserRole } from "src/user/schemas/userRoles";
 
 import { CategoryService } from "./category.service";
 import {
@@ -60,12 +61,12 @@ export class CategoryController {
     @Query("page") page: number,
     @Query("perPage") perPage: number,
     @Query("sort") sort: SortCategoryFieldsOptions,
-    @CurrentUser("role") currentUserRole?: UserRole,
+    @CurrentUser("permissions") userPermissions?: PermissionKey[],
   ): Promise<PaginatedResponse<AllCategoriesResponse>> {
     const filters = { archived, title };
     const query = { filters, page, perPage, sort };
 
-    const data = await this.categoryService.getCategories(query, currentUserRole);
+    const data = await this.categoryService.getCategories(query, userPermissions);
 
     return new PaginatedResponse(data);
   }

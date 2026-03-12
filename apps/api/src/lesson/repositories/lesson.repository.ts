@@ -1,13 +1,13 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { COURSE_ENROLLMENT } from "@repo/shared";
 import { and, desc, eq, getTableColumns, type SQL, sql } from "drizzle-orm";
-import { match } from "ts-pattern";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
 import { getCourseTsVector, getLessonTsVector } from "src/courses/utils/courses.utils";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
+import { canManageCourseContent, isTenantManager } from "src/permission/permission-access";
 import {
   aiMentorLessons,
   aiMentorStudentLessonProgress,
@@ -23,7 +23,6 @@ import {
   resources,
   coursesSettingsHelpers,
 } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import type { LessonTypes } from "../lesson.type";
 import type { SupportedLanguages } from "@repo/shared";
@@ -380,25 +379,24 @@ export class LessonRepository {
   ): Promise<EnrolledLessonWithSearch[]> {
     const conditions: SQL[] = [];
 
-    match(currentUser?.role)
-      .with(USER_ROLES.STUDENT, () => {
-        conditions.push(
-          eq(studentCourses.studentId, currentUser?.userId),
-          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
-        );
-      })
-      .with(USER_ROLES.CONTENT_CREATOR, () =>
-        conditions.push(eq(courses.authorId, currentUser?.userId)),
-      )
-      .otherwise(() => null);
+    const canManageCourses = canManageCourseContent(currentUser?.permissions);
+    const canManageTenant = isTenantManager(currentUser?.permissions);
 
-    if (currentUser?.role)
-      if (filters.title) {
-        conditions.push(
-          sql`EXISTS (SELECT 1 FROM jsonb_each_text(${lessons.title}) AS t(k, v) 
+    if (!canManageCourses) {
+      conditions.push(
+        eq(studentCourses.studentId, currentUser?.userId),
+        eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+      );
+    } else if (!canManageTenant) {
+      conditions.push(eq(courses.authorId, currentUser?.userId));
+    }
+
+    if (filters.title) {
+      conditions.push(
+        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${lessons.title}) AS t(k, v) 
              WHERE v ILIKE ${`%${filters.title}%`})`,
-        );
-      }
+      );
+    }
 
     if (filters.description) {
       conditions.push(

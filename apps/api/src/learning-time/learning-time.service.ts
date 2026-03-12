@@ -5,10 +5,10 @@ import { validate as uuidValidate } from "uuid";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { LearningTimeRepository } from "src/learning-time/learning-time.repository";
+import { canManageCourseContent } from "src/permission/permission-access";
 import { QUEUE_NAMES, QueueService } from "src/queue";
 import { S3Service } from "src/s3/s3.service";
 import { groups, lessonLearningTime, users } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 import { WsGateway } from "src/websocket";
 
 import type { createCache } from "cache-manager";
@@ -105,7 +105,7 @@ export class LearningTimeService implements OnModuleInit {
     socket: AuthenticatedSocket,
     payload: JoinLessonPayload,
   ): Promise<void> {
-    if (socket.data.user.role !== USER_ROLES.STUDENT) {
+    if (canManageCourseContent(socket.data.user.permissions)) {
       return;
     }
 
@@ -132,7 +132,7 @@ export class LearningTimeService implements OnModuleInit {
     socket: AuthenticatedSocket,
     payload: LeaveLessonPayload,
   ): Promise<void> {
-    if (socket.data.user.role !== USER_ROLES.STUDENT) {
+    if (canManageCourseContent(socket.data.user.permissions)) {
       return;
     }
 
@@ -165,7 +165,7 @@ export class LearningTimeService implements OnModuleInit {
     socket: AuthenticatedSocket,
     payload: HeartbeatPayload,
   ): Promise<void> {
-    if (socket.data.user.role !== USER_ROLES.STUDENT) {
+    if (canManageCourseContent(socket.data.user.permissions)) {
       return;
     }
 

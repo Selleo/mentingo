@@ -1,4 +1,5 @@
 import type { Socket } from "socket.io";
+import type { PermissionKey } from "src/permission/permission.constants";
 
 export interface HeartbeatPayload {
   lessonId: string;
@@ -20,6 +21,7 @@ export interface WsUser {
   userId: string;
   email: string;
   role: string;
+  permissions?: PermissionKey[];
   tenantId: string;
 }
 

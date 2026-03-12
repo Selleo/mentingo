@@ -66,7 +66,6 @@ import {
   type UsersFilterSchema,
   type SortUserFieldsOptions,
 } from "src/user/schemas/userQuery";
-import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 import { UserService } from "src/user/user.service";
 
 import type { GroupKeywordFilterBody } from "src/group/group.schema";
@@ -130,7 +129,7 @@ export class IntegrationController {
   @Validate({
     request: [
       { type: "query", name: "keyword", schema: Type.String() },
-      { type: "query", name: "role", schema: Type.Enum(USER_ROLES) },
+      { type: "query", name: "role", schema: Type.String() },
       { type: "query", name: "archived", schema: Type.String() },
       { type: "query", name: "page", schema: Type.Number({ minimum: 1 }) },
       { type: "query", name: "perPage", schema: Type.Number() },
@@ -141,7 +140,7 @@ export class IntegrationController {
   })
   async getUsers(
     @Query("keyword") keyword: string,
-    @Query("role") role: UserRole,
+    @Query("role") role: string,
     @Query("archived") archived: string,
     @Query("page") page: number,
     @Query("perPage") perPage: number,
@@ -150,7 +149,7 @@ export class IntegrationController {
   ): Promise<PaginatedResponse<AllUsersResponse>> {
     const filters: UsersFilterSchema = {
       keyword,
-      role,
+      role: role as UsersFilterSchema["role"],
       archived: archived ? archived === "true" : undefined,
       groups,
     };

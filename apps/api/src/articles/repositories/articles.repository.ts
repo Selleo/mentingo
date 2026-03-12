@@ -7,8 +7,9 @@ import { DatabasePg } from "src/common";
 import { deleteJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
 import { LocalizationService } from "src/localization/localization.service";
+import { hasPermission } from "src/permission/permission-access";
+import { PERMISSIONS } from "src/permission/permission.constants";
 import { articleSections, articles, resourceEntity, resources, users } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import type { SupportedLanguages } from "@repo/shared";
 import type { SQL } from "drizzle-orm";
@@ -367,7 +368,7 @@ export class ArticlesRepository {
     currentUser?: CurrentUser,
   ) {
     const sectionTitle =
-      currentUser?.role === USER_ROLES.ADMIN || currentUser?.role === USER_ROLES.CONTENT_CREATOR
+      hasPermission(currentUser?.permissions, PERMISSIONS.ARTICLE_MANAGE)
         ? this.localizationService.getFieldByLanguage(articleSections.title, requestedLanguage)
         : this.localizationService.getLocalizedSqlField(
             articleSections.title,
@@ -412,8 +413,7 @@ export class ArticlesRepository {
     currentUser?: CurrentUser,
     options?: { isDraftMode?: boolean; excludedId?: UUIDType },
   ): SQL<unknown>[] {
-    const isAdminLike =
-      currentUser?.role === USER_ROLES.ADMIN || currentUser?.role === USER_ROLES.CONTENT_CREATOR;
+    const canManageArticles = hasPermission(currentUser?.permissions, PERMISSIONS.ARTICLE_MANAGE);
 
     const conditions = [
       ne(articles.archived, true),
@@ -421,8 +421,8 @@ export class ArticlesRepository {
         ? [isNull(articles.publishedAt)]
         : [not(isNull(articles.publishedAt))]),
       ...(!currentUser ? [eq(articles.isPublic, true)] : []),
-      ...(isAdminLike ? [] : [sql`${language} = ANY(${articles.availableLocales})`]),
-      ...(isAdminLike ? [] : [sql`${language} = ANY(${articleSections.availableLocales})`]),
+      ...(canManageArticles ? [] : [sql`${language} = ANY(${articles.availableLocales})`]),
+      ...(canManageArticles ? [] : [sql`${language} = ANY(${articleSections.availableLocales})`]),
     ];
 
     if (options?.excludedId) conditions.push(ne(articles.id, options.excludedId));

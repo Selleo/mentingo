@@ -34,7 +34,7 @@ import { CurrentUser as CurrentUserType } from "src/common/types/current-user.ty
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
-import { PERMISSIONS } from "src/permission/permission.constants";
+import { PERMISSIONS, type PermissionKey } from "src/permission/permission.constants";
 import { RequirePermission } from "src/permission/permission.decorator";
 import { PermissionsGuard } from "src/permission/permission.guard";
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
@@ -55,8 +55,6 @@ import {
 import { UpdateNews, updateNewsSchema } from "./schemas/updateNews.schema";
 
 import type { GetNewsResponse, GetNewsResponseWithPlainContent } from "./schemas/selectNews.schema";
-import type { UserRole } from "src/user/schemas/userRoles";
-
 @UseGuards(PermissionsGuard)
 @Controller("news")
 export class NewsController {
@@ -111,11 +109,11 @@ export class NewsController {
   async getNewsResource(
     @Param("resourceId") resourceId: UUIDType,
     @CurrentUser("userId") userId: UUIDType | undefined,
-    @CurrentUser("role") role: UserRole | undefined,
+    @CurrentUser("permissions") userPermissions: PermissionKey[] | undefined,
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    return this.newsService.getNewsResource(req, res, resourceId, userId, role);
+    return this.newsService.getNewsResource(req, res, resourceId, userId, userPermissions);
   }
 
   @Public()

@@ -4,6 +4,7 @@ import { and, eq, isNull, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { LocalizationService } from "src/localization/localization.service";
+import { isTenantManager } from "src/permission/permission-access";
 import {
   chapters,
   courses,
@@ -14,7 +15,6 @@ import {
   studentLessonProgress,
   users,
 } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import type { SupportedLanguages } from "@repo/shared";
 import type { CurrentUser } from "src/common/types/current-user.type";
@@ -42,11 +42,10 @@ export class ReportRepository {
   ): Promise<StudentCourseReportRow[]> {
     const conditions = [
       eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
-      eq(users.role, USER_ROLES.STUDENT),
       isNull(users.deletedAt),
     ];
 
-    if (currentUser?.role === USER_ROLES.CONTENT_CREATOR) {
+    if (!isTenantManager(currentUser.permissions)) {
       conditions.push(eq(courses.authorId, currentUser.userId));
     }
 

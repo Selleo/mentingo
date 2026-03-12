@@ -28,9 +28,10 @@ import { FILE_DELIVERY_TYPE } from "src/file/types/file-delivery.type";
 import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
 import { LocalizationService } from "src/localization/localization.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
+import { hasPermission } from "src/permission/permission-access";
+import { PERMISSIONS, type PermissionKey } from "src/permission/permission.constants";
 import { SettingsService } from "src/settings/settings.service";
 import { articles, articleSections } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { baseArticleSectionTitle, baseArticleTitle } from "../constants";
 import { ArticlesRepository } from "../repositories/articles.repository";
@@ -53,7 +54,6 @@ import type {
 import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
 import type { ResourceWithUrlError } from "src/lesson/lesson-resource.types";
-import type { UserRole } from "src/user/schemas/userRoles";
 
 type StoredArticleResource = Awaited<ReturnType<FileService["getResourcesForEntity"]>>[number];
 type ResourceMetadata = StoredArticleResource["metadata"] & { originalFilename?: unknown };
@@ -463,10 +463,9 @@ export class ArticlesService {
   ) {
     await this.checkAccess(currentUser?.userId);
 
-    const isAdminLike =
-      currentUser?.role === USER_ROLES.ADMIN || currentUser?.role === USER_ROLES.CONTENT_CREATOR;
+    const canManageArticles = hasPermission(currentUser?.permissions, PERMISSIONS.ARTICLE_MANAGE);
 
-    if (isDraftMode && !isAdminLike)
+    if (isDraftMode && !canManageArticles)
       throw new NotFoundException("adminArticleView.toast.notFoundError");
 
     const accessConditions = this.articlesRepository.getVisibleArticleConditions(
@@ -516,7 +515,7 @@ export class ArticlesService {
     res: Response,
     resourceId: UUIDType,
     userId?: UUIDType,
-    role?: UserRole,
+    userPermissions?: PermissionKey[],
   ) {
     await this.checkAccess(userId);
 
@@ -530,11 +529,11 @@ export class ArticlesService {
 
     if (!article) throw new NotFoundException("Article not found");
 
-    const isAdminLike = role === USER_ROLES.ADMIN || role === USER_ROLES.CONTENT_CREATOR;
+    const canManageArticles = hasPermission(userPermissions, PERMISSIONS.ARTICLE_MANAGE);
     const isAuthor = Boolean(userId && article.authorId === userId);
     const isPublic = Boolean(article.isPublic && article.publishedAt !== null);
 
-    if (!isAdminLike && !isAuthor && !isPublic) {
+    if (!canManageArticles && !isAuthor && !isPublic) {
       throw new NotFoundException("Article resource not found");
     }
 
@@ -879,11 +878,9 @@ export class ArticlesService {
 
   private async checkEditAccess(articleId: UUIDType, currentUser?: CurrentUser) {
     const [article] = await this.articlesRepository.getArticleAuthorId(articleId);
+    const canManageArticles = hasPermission(currentUser?.permissions, PERMISSIONS.ARTICLE_MANAGE);
 
-    if (
-      !currentUser ||
-      !(article.authorId === currentUser.userId || currentUser.role === USER_ROLES.ADMIN)
-    )
+    if (!currentUser || !(article.authorId === currentUser.userId || canManageArticles))
       throw new BadRequestException("common.toast.noAccess");
   }
 

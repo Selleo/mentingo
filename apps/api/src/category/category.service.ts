@@ -14,8 +14,9 @@ import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { CreateCategoryEvent, DeleteCategoryEvent, UpdateCategoryEvent } from "src/events";
 import { LocalizationService } from "src/localization/localization.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
+import { hasPermission } from "src/permission/permission-access";
+import { PERMISSIONS, type PermissionKey } from "src/permission/permission.constants";
 import { categories, courses } from "src/storage/schema";
-import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
 import {
   type CategoryFilterSchema,
@@ -41,7 +42,7 @@ export class CategoryService {
 
   public async getCategories(
     query: CategoryQuery,
-    userRole?: UserRole,
+    userPermissions?: PermissionKey[],
   ): Promise<{
     data: AllCategoriesResponse;
     pagination: Pagination;
@@ -55,7 +56,7 @@ export class CategoryService {
 
     const { sortOrder, sortedField } = getSortOptions(sort);
 
-    const isAdmin = userRole === USER_ROLES.ADMIN;
+    const isAdmin = hasPermission(userPermissions, PERMISSIONS.CATEGORY_MANAGE);
 
     const selectedColumns = {
       id: categories.id,

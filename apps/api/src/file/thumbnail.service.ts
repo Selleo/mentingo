@@ -21,6 +21,8 @@ import { and, eq, getTableColumns, isNull, sql } from "drizzle-orm";
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { DatabasePg } from "src/common";
 import { setJsonbField } from "src/common/helpers/sqlHelpers";
+import { hasAnyPermission } from "src/permission/permission-access";
+import { PERMISSIONS } from "src/permission/permission.constants";
 import { S3Service } from "src/s3/s3.service";
 import {
   articles,
@@ -33,7 +35,6 @@ import {
   settings,
   studentCourses,
 } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { BASE_THUMBNAIL_CONTENT_TYPE, getVideoThumbnailKey } from "./utils/videoThumbnail";
 
@@ -151,9 +152,13 @@ export class ThumbnailService {
   }
 
   private isAdminLike(currentUser: CurrentUser | null) {
-    return (
-      currentUser?.role === USER_ROLES.ADMIN || currentUser?.role === USER_ROLES.CONTENT_CREATOR
-    );
+    return hasAnyPermission(currentUser?.permissions, [
+      PERMISSIONS.TENANT_MANAGE,
+      PERMISSIONS.COURSE_UPDATE,
+      PERMISSIONS.COURSE_CREATE,
+      PERMISSIONS.ARTICLE_MANAGE,
+      PERMISSIONS.NEWS_MANAGE,
+    ]);
   }
 
   private async validateArticleThumbnailAccess(

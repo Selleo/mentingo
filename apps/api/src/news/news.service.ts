@@ -16,9 +16,10 @@ import { FILE_DELIVERY_TYPE } from "src/file/types/file-delivery.type";
 import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
 import { LocalizationService } from "src/localization/localization.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
+import { hasPermission } from "src/permission/permission-access";
+import { PERMISSIONS, type PermissionKey } from "src/permission/permission.constants";
 import { SettingsService } from "src/settings/settings.service";
 import { news, resourceEntity, resources, users } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { baseNewsTitle } from "./constants";
 
@@ -30,7 +31,6 @@ import type { Request, Response } from "express";
 import type { NewsActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
-import type { UserRole } from "src/user/schemas/userRoles";
 
 // News uses a custom pagination: first page shows up to 7 items, following pages up to 9.
 const FIRST_PAGE_SIZE = 7;
@@ -371,8 +371,7 @@ export class NewsService {
   ) {
     await this.checkAccess(currentUser?.userId);
 
-    const isAdminLike =
-      currentUser?.role === USER_ROLES.ADMIN || currentUser?.role === USER_ROLES.CONTENT_CREATOR;
+    const isAdminLike = hasPermission(currentUser?.permissions, PERMISSIONS.NEWS_MANAGE);
 
     const accessConditions = this.getNewsAccessConditions(requestedLanguage, currentUser, {
       requirePublished: !isAdminLike,
@@ -428,7 +427,7 @@ export class NewsService {
     res: Response,
     resourceId: UUIDType,
     userId?: UUIDType,
-    role?: UserRole,
+    userPermissions?: PermissionKey[],
   ) {
     await this.checkAccess(userId);
 
@@ -462,7 +461,7 @@ export class NewsService {
 
     if (!existingNews) throw new NotFoundException("News not found");
 
-    const isAdminLike = role === USER_ROLES.ADMIN || role === USER_ROLES.CONTENT_CREATOR;
+    const isAdminLike = hasPermission(userPermissions, PERMISSIONS.NEWS_MANAGE);
     const isAuthor = Boolean(userId && existingNews.authorId === userId);
     const isPublic = Boolean(existingNews.isPublic && existingNews.publishedAt !== null);
 
@@ -788,8 +787,7 @@ export class NewsService {
     currentUser?: CurrentUser,
     options?: { excludedId?: UUIDType; requirePublished?: boolean },
   ) {
-    const isAdminLike =
-      currentUser?.role === USER_ROLES.ADMIN || currentUser?.role === USER_ROLES.CONTENT_CREATOR;
+    const isAdminLike = hasPermission(currentUser?.permissions, PERMISSIONS.NEWS_MANAGE);
 
     const conditions = [ne(news.archived, true)];
 
