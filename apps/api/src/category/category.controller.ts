@@ -7,9 +7,8 @@ import {
   Patch,
   Post,
   Query,
-  UnauthorizedException,
-  UseGuards,
 } from "@nestjs/common";
+import { PERMISSIONS } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
@@ -22,11 +21,9 @@ import {
   type UUIDType,
 } from "src/common";
 import { Public } from "src/common/decorators/public.decorator";
-import { Roles } from "src/common/decorators/roles.decorator";
+import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
-import { RolesGuard } from "src/common/guards/roles.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
-import { USER_ROLES, UserRole } from "src/user/schemas/userRoles";
 
 import { CategoryService } from "./category.service";
 import {
@@ -38,7 +35,6 @@ import { type SortCategoryFieldsOptions, sortCategoryFieldsOptions } from "./sch
 import { categoryCreateSchema, type CategoryInsert } from "./schemas/createCategorySchema";
 import { type CategoryUpdateBody, categoryUpdateSchema } from "./schemas/updateCategorySchema";
 
-@UseGuards(RolesGuard)
 @Controller("category")
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
@@ -61,18 +57,18 @@ export class CategoryController {
     @Query("page") page: number,
     @Query("perPage") perPage: number,
     @Query("sort") sort: SortCategoryFieldsOptions,
-    @CurrentUser("role") currentUserRole?: UserRole,
+    @CurrentUser() currentUser?: CurrentUserType,
   ): Promise<PaginatedResponse<AllCategoriesResponse>> {
     const filters = { archived, title };
     const query = { filters, page, perPage, sort };
 
-    const data = await this.categoryService.getCategories(query, currentUserRole);
+    const data = await this.categoryService.getCategories(query, currentUser?.permissions);
 
     return new PaginatedResponse(data);
   }
 
   @Get(":id")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.CATEGORY_MANAGE)
   @Validate({
     response: baseResponse(categorySchema),
     request: [{ type: "param", name: "id", schema: UUIDSchema }],
@@ -84,7 +80,7 @@ export class CategoryController {
   }
 
   @Post()
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.CATEGORY_MANAGE)
   @Validate({
     request: [
       {
@@ -104,7 +100,7 @@ export class CategoryController {
   }
 
   @Patch(":id")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.CATEGORY_MANAGE)
   @Validate({
     response: baseResponse(categorySchema),
     request: [
@@ -117,17 +113,13 @@ export class CategoryController {
     @Body() updateCategoryBody: CategoryUpdateBody,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<CategorySchema>> {
-    if (currentUser.role !== USER_ROLES.ADMIN) {
-      throw new UnauthorizedException("You don't have permission to update category");
-    }
-
     const category = await this.categoryService.updateCategory(id, updateCategoryBody, currentUser);
 
     return new BaseResponse(category);
   }
 
   @Delete("deleteCategory/:id")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.CATEGORY_MANAGE)
   @Validate({
     response: baseResponse(Type.Object({ message: Type.String() })),
     request: [{ type: "param", name: "id", schema: UUIDSchema }],
@@ -142,7 +134,7 @@ export class CategoryController {
   }
 
   @Delete("deleteManyCategories")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.CATEGORY_MANAGE)
   @Validate({
     response: baseResponse(Type.Object({ message: Type.String() })),
     request: [{ type: "body", schema: Type.Array(UUIDSchema) }],

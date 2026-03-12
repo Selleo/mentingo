@@ -23,6 +23,10 @@
 - [x] Migrate `user.controller` from `@Roles` to `@RequirePermission`
 - [x] Replace `@CurrentUser("role")` usage in user resource with permission-driven checks
 - [x] Replace `user.service` role comparisons/queries with permission-role assignment joins
+- [x] Migrate `category.controller` from `@Roles` to `@RequirePermission`
+- [x] Replace category role checks with permission-driven flow
+- [x] Migrate `group.controller` from `@Roles` to `@RequirePermission`
+- [x] Replace group role comparisons (`users.role`) with permission-role slug resolution
 - [ ] Checkpoint complete
 
 ## Segment 5: Cleanup
