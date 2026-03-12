@@ -189,7 +189,10 @@ export class AiRepository {
   }
 
   async insertMessage(data: ThreadMessageBody) {
-    return this.db.insert(aiMentorThreadMessages).values(data).returning();
+    return this.db
+      .insert(aiMentorThreadMessages)
+      .values({ ...data, createdAt: sql`clock_timestamp()` })
+      .returning();
   }
 
   async findMentorLessonByThreadId(

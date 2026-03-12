@@ -6905,6 +6905,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         integrationId?: string;
         /** @minLength 1 */
         draftName?: string;
+        courseLanguage?: "en" | "pl";
       },
       params: RequestParams = {},
     ) =>
