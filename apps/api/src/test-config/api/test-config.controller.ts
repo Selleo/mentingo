@@ -1,12 +1,14 @@
-import { Controller, Post } from "@nestjs/common";
+import { Controller, Post, UseGuards } from "@nestjs/common";
 
 import { Public } from "src/common/decorators/public.decorator";
 import { OnlyStaging } from "src/common/decorators/staging.decorator";
 import { PERMISSIONS } from "src/permission/permission.constants";
 import { RequirePermission } from "src/permission/permission.decorator";
+import { PermissionsGuard } from "src/permission/permission.guard";
 
 import { TestConfigService } from "../test-config.service";
 
+@UseGuards(PermissionsGuard)
 @Controller("test-config")
 export class TestConfigController {
   constructor(private testConfigService: TestConfigService) {}

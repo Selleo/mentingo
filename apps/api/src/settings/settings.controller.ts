@@ -37,6 +37,7 @@ import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
 import { PERMISSIONS } from "src/permission/permission.constants";
 import { RequirePermission } from "src/permission/permission.decorator";
+import { PermissionsGuard } from "src/permission/permission.guard";
 
 import { CompanyInformaitonJSONSchema } from "./schemas/company-information.schema";
 import { loginBackgroundResponseSchema } from "./schemas/login-background.schema";
@@ -73,6 +74,7 @@ import type {
   SettingsJSONContentSchema,
 } from "./schemas/settings.schema";
 
+@UseGuards(PermissionsGuard)
 @Controller("settings")
 export class SettingsController {
   constructor(private readonly settingsService: SettingsService) {}

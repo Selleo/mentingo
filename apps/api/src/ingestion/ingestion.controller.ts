@@ -7,8 +7,7 @@ import {
   Param,
   Post,
   UploadedFiles,
-  UseInterceptors,
-} from "@nestjs/common";
+  UseInterceptors, UseGuards } from "@nestjs/common";
 import { FilesInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes } from "@nestjs/swagger";
 import { Validate } from "nestjs-typebox";
@@ -22,9 +21,11 @@ import { getAllAssignedDocumentsSchema } from "src/ingestion/ingestion.schema";
 import { IngestionService } from "src/ingestion/services/ingestion.service";
 import { PERMISSIONS, type PermissionKey } from "src/permission/permission.constants";
 import { RequirePermission } from "src/permission/permission.decorator";
+import { PermissionsGuard } from "src/permission/permission.guard";
 
 import type { GetAllAssignedDocumentsBody } from "src/ingestion/ingestion.schema";
 
+@UseGuards(PermissionsGuard)
 @Controller("ingestion")
 export class IngestionController {
   constructor(private readonly ingestionService: IngestionService) {}

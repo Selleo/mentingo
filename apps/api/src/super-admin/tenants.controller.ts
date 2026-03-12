@@ -18,6 +18,7 @@ import { ManagingTenantAdminGuard } from "src/common/guards/managing-tenant-admi
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { PERMISSIONS } from "src/permission/permission.constants";
 import { RequirePermission } from "src/permission/permission.decorator";
+import { PermissionsGuard } from "src/permission/permission.guard";
 import { SupportModeService } from "src/support-mode/support-mode.service";
 
 import {
@@ -31,6 +32,7 @@ import { CreateTenantBody, UpdateTenantBody } from "./types";
 
 import type { TenantResponse, TenantsListResponse } from "./types";
 
+@UseGuards(PermissionsGuard)
 @Controller("super-admin/tenants")
 @UseGuards(ManagingTenantAdminGuard)
 @RequirePermission(PERMISSIONS.TENANT_MANAGE)

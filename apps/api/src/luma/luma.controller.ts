@@ -10,8 +10,7 @@ import {
   Query,
   Res,
   UploadedFiles,
-  UseInterceptors,
-} from "@nestjs/common";
+  UseInterceptors, UseGuards } from "@nestjs/common";
 import { FilesInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes } from "@nestjs/swagger";
 import {
@@ -39,9 +38,11 @@ import {
 } from "src/luma/schema/luma.schema";
 import { PERMISSIONS } from "src/permission/permission.constants";
 import { RequirePermission } from "src/permission/permission.decorator";
+import { PermissionsGuard } from "src/permission/permission.guard";
 
 import type { CreateDraftOptions, DeleteIngestedDocumentOptions } from "@japro/luma-sdk";
 
+@UseGuards(PermissionsGuard)
 @Controller("luma")
 export class LumaController {
   constructor(private readonly lumaService: LumaService) {}

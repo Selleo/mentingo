@@ -34,6 +34,7 @@ import { SupportModeEnterEvent, UserActivityEvent, UserLogoutEvent } from "src/e
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { PERMISSIONS } from "src/permission/permission.constants";
 import { RequirePermission } from "src/permission/permission.decorator";
+import { PermissionsGuard } from "src/permission/permission.guard";
 import { SettingsService } from "src/settings/settings.service";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { baseUserResponseSchema, currentUserResponseSchema } from "src/user/schemas/user.schema";
@@ -64,6 +65,7 @@ import { TokenService } from "./token.service";
 import type { LoginResponse } from "./schemas/login.schema";
 import type { ProviderLoginUserType } from "src/utils/types/provider-login-user.type";
 
+@UseGuards(PermissionsGuard)
 @Controller("auth")
 export class AuthController {
   private CORS_ORIGIN: string;

@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Res } from "@nestjs/common";
+import { Controller, Get, Query, Res, UseGuards } from "@nestjs/common";
 import { SupportedLanguages } from "@repo/shared";
 import { Response } from "express";
 import { Validate } from "nestjs-typebox";
@@ -8,9 +8,11 @@ import { CurrentUser as CurrentUserType } from "src/common/types/current-user.ty
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { PERMISSIONS } from "src/permission/permission.constants";
 import { RequirePermission } from "src/permission/permission.decorator";
+import { PermissionsGuard } from "src/permission/permission.guard";
 
 import { ReportService } from "./report.service";
 
+@UseGuards(PermissionsGuard)
 @Controller("report")
 export class ReportController {
   constructor(private readonly reportService: ReportService) {}

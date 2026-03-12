@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query, Res } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Query, Res, UseGuards } from "@nestjs/common";
 import { Type } from "@sinclair/typebox";
 import { Response } from "express";
 import { Validate } from "nestjs-typebox";
@@ -20,8 +20,10 @@ import { type BaseResponse, baseResponse, UUIDSchema, UUIDType } from "src/commo
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { PERMISSIONS } from "src/permission/permission.constants";
 import { RequirePermission } from "src/permission/permission.decorator";
+import { PermissionsGuard } from "src/permission/permission.guard";
 import { UserRole } from "src/user/schemas/userRoles";
 
+@UseGuards(PermissionsGuard)
 @Controller("ai")
 export class AiController {
   constructor(

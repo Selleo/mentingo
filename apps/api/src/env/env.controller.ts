@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
@@ -19,7 +19,9 @@ import {
 import { EnvService } from "src/env/services/env.service";
 import { PERMISSIONS } from "src/permission/permission.constants";
 import { RequirePermission } from "src/permission/permission.decorator";
+import { PermissionsGuard } from "src/permission/permission.guard";
 
+@UseGuards(PermissionsGuard)
 @Controller("env")
 export class EnvController {
   constructor(private readonly envService: EnvService) {}

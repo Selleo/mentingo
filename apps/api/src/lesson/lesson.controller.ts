@@ -11,8 +11,7 @@ import {
   Req,
   Res,
   UploadedFile,
-  UseInterceptors,
-} from "@nestjs/common";
+  UseInterceptors, UseGuards } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes, ApiResponse } from "@nestjs/swagger";
 import {
@@ -39,6 +38,7 @@ import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
 import { PERMISSIONS } from "src/permission/permission.constants";
 import { RequirePermission } from "src/permission/permission.decorator";
+import { PermissionsGuard } from "src/permission/permission.guard";
 import { UserRole } from "src/user/schemas/userRoles";
 
 import {
@@ -69,6 +69,7 @@ import { LessonService } from "./services/lesson.service";
 
 import type { EnrolledLesson, LessonsFilters, LessonShow } from "./lesson.schema";
 
+@UseGuards(PermissionsGuard)
 @Controller("lesson")
 export class LessonController {
   constructor(

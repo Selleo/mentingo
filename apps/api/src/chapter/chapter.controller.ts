@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Patch, Post, Query } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Patch, Post, Query, UseGuards } from "@nestjs/common";
 import { SupportedLanguages } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
@@ -9,6 +9,7 @@ import { CurrentUser as CurrentUserType } from "src/common/types/current-user.ty
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { PERMISSIONS } from "src/permission/permission.constants";
 import { RequirePermission } from "src/permission/permission.decorator";
+import { PermissionsGuard } from "src/permission/permission.guard";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
 import { AdminChapterService } from "./adminChapter.service";
@@ -23,6 +24,7 @@ import {
 
 import type { ChapterResponse } from "./schemas/chapter.schema";
 
+@UseGuards(PermissionsGuard)
 @Controller("chapter")
 export class ChapterController {
   constructor(

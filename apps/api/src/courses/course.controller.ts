@@ -110,6 +110,7 @@ import {
 } from "src/learning-time";
 import { PERMISSIONS } from "src/permission/permission.constants";
 import { RequirePermission } from "src/permission/permission.decorator";
+import { PermissionsGuard } from "src/permission/permission.guard";
 import { UserRole } from "src/user/schemas/userRoles";
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
@@ -145,6 +146,7 @@ import type {
   CommonShowCourse,
 } from "src/courses/schemas/showCourseCommon.schema";
 
+@UseGuards(PermissionsGuard)
 @Controller("course")
 export class CourseController {
   constructor(

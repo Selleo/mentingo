@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, Res } from "@nestjs/common";
+import { Body, Controller, Get, Post, Query, Res, UseGuards } from "@nestjs/common";
 import { SupportedLanguages } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Response } from "express";
@@ -11,6 +11,7 @@ import { CurrentUser as CurrentUserType } from "src/common/types/current-user.ty
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { PERMISSIONS } from "src/permission/permission.constants";
 import { RequirePermission } from "src/permission/permission.decorator";
+import { PermissionsGuard } from "src/permission/permission.guard";
 
 import {
   allCertificatesSchema,
@@ -28,6 +29,7 @@ import type {
   SingleCertificateResponse,
 } from "./certificates.types";
 
+@UseGuards(PermissionsGuard)
 @Controller("certificates")
 export class CertificatesController {
   constructor(private readonly certificatesService: CertificatesService) {}

@@ -5,8 +5,10 @@ import { AnalyticsService } from "src/analytics/services/analytics.service";
 import { Public } from "src/common/decorators/public.decorator";
 import { PERMISSIONS } from "src/permission/permission.constants";
 import { RequirePermission } from "src/permission/permission.decorator";
+import { PermissionsGuard } from "src/permission/permission.guard";
 
 @UseGuards(AnalyticsSecretGuard)
+@UseGuards(PermissionsGuard)
 @Controller("analytics")
 export class AnalyticsController {
   constructor(private readonly analyticsService: AnalyticsService) {}

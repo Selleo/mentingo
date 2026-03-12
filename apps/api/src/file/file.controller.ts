@@ -13,8 +13,7 @@ import {
   Req,
   Res,
   UploadedFile,
-  UseInterceptors,
-} from "@nestjs/common";
+  UseInterceptors, UseGuards } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes, ApiQuery, ApiResponse } from "@nestjs/swagger";
 import { VIDEO_EMBED_PROVIDERS, type VideoProvider } from "@repo/shared";
@@ -34,6 +33,7 @@ import {
 import { FileGuard } from "src/file/guards/file.guard";
 import { PERMISSIONS } from "src/permission/permission.constants";
 import { RequirePermission } from "src/permission/permission.decorator";
+import { PermissionsGuard } from "src/permission/permission.guard";
 
 import { FileService } from "./file.service";
 import { bunnyWebhookSchema, type BunnyWebhookBody } from "./schemas/bunny-webhook.schema";
@@ -53,6 +53,7 @@ import { TusUploadService } from "./tus/tus-upload.service";
 
 import type { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 
+@UseGuards(PermissionsGuard)
 @Controller("file")
 export class FileController {
   constructor(

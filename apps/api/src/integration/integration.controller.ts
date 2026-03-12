@@ -51,6 +51,7 @@ import {
 } from "src/integration/schemas/integration.schema";
 import { PERMISSIONS } from "src/permission/permission.constants";
 import { RequirePermission } from "src/permission/permission.decorator";
+import { PermissionsGuard } from "src/permission/permission.guard";
 import { createUserSchema } from "src/user/schemas/createUser.schema";
 import { type UpdateUserBody, updateUserSchema } from "src/user/schemas/updateUser.schema";
 import {
@@ -84,6 +85,7 @@ import type { AllGroupsResponse } from "src/group/group.types";
   description: "Authenticated integration key owner is not authorized.",
 })
 @Public()
+@UseGuards(PermissionsGuard)
 @Controller("integration")
 @UseGuards(IntegrationApiKeyGuard)
 @RequirePermission(PERMISSIONS.INTEGRATION_API_USE)

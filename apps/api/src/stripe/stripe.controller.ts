@@ -3,7 +3,7 @@ import {
   InjectStripeModuleConfig,
   StripeModuleConfig,
 } from "@golevelup/nestjs-stripe";
-import { Controller, Post, Query, Headers, Req, Get, Patch, Param, Body } from "@nestjs/common";
+import { Controller, Post, Query, Headers, Req, Get, Patch, Param, Body, UseGuards } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
@@ -13,6 +13,7 @@ import { BaseResponse, baseResponse, UUIDType } from "src/common";
 import { Public } from "src/common/decorators/public.decorator";
 import { PERMISSIONS } from "src/permission/permission.constants";
 import { RequirePermission } from "src/permission/permission.decorator";
+import { PermissionsGuard } from "src/permission/permission.guard";
 
 import { checkoutSessionSchema, CreateCheckoutSessionBody } from "./schemas/checkoutSession.schema";
 import { CreatePromotionCode, createPromotionCodeSchema } from "./schemas/createPromotionCode";
@@ -29,6 +30,7 @@ interface RequestWithRawBody extends Request {
   rawBody?: string;
 }
 
+@UseGuards(PermissionsGuard)
 @Controller("stripe")
 export class StripeController {
   private readonly requestBodyProperty: string;

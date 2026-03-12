@@ -6,8 +6,7 @@ import {
   Param,
   Patch,
   Post,
-  Query,
-} from "@nestjs/common";
+  Query, UseGuards } from "@nestjs/common";
 import { SupportedLanguages } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
@@ -19,6 +18,7 @@ import { CurrentUser as CurrentUserType } from "src/common/types/current-user.ty
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { PERMISSIONS } from "src/permission/permission.constants";
 import { RequirePermission } from "src/permission/permission.decorator";
+import { PermissionsGuard } from "src/permission/permission.guard";
 import {
   type AllQAResponseBody,
   allQAResponseSchema,
@@ -31,6 +31,7 @@ import {
 } from "src/qa/schemas/qa.schema";
 import { QAService } from "src/qa/services/qa.service";
 
+@UseGuards(PermissionsGuard)
 @Controller("qa")
 export class QAController {
   constructor(private readonly qaService: QAService) {}

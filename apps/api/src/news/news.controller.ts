@@ -11,8 +11,7 @@ import {
   Req,
   Res,
   UploadedFile,
-  UseInterceptors,
-} from "@nestjs/common";
+  UseInterceptors, UseGuards } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes, ApiOperation } from "@nestjs/swagger";
 import {
@@ -37,6 +36,7 @@ import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
 import { PERMISSIONS } from "src/permission/permission.constants";
 import { RequirePermission } from "src/permission/permission.decorator";
+import { PermissionsGuard } from "src/permission/permission.guard";
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
 import { NewsService } from "./news.service";
@@ -57,6 +57,7 @@ import { UpdateNews, updateNewsSchema } from "./schemas/updateNews.schema";
 import type { GetNewsResponse, GetNewsResponseWithPlainContent } from "./schemas/selectNews.schema";
 import type { UserRole } from "src/user/schemas/userRoles";
 
+@UseGuards(PermissionsGuard)
 @Controller("news")
 export class NewsController {
   constructor(private readonly newsService: NewsService) {}

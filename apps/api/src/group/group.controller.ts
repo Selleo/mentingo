@@ -6,8 +6,7 @@ import {
   Param,
   Patch,
   Post,
-  Query,
-} from "@nestjs/common";
+  Query, UseGuards } from "@nestjs/common";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
@@ -32,10 +31,12 @@ import { GroupService } from "src/group/group.service";
 import { UpsertGroupBody, GroupSortFieldsOptions } from "src/group/group.types";
 import { PERMISSIONS } from "src/permission/permission.constants";
 import { RequirePermission } from "src/permission/permission.decorator";
+import { PermissionsGuard } from "src/permission/permission.guard";
 
 import type { GroupKeywordFilterBody } from "src/group/group.schema";
 import type { AllGroupsResponse, GroupResponse } from "src/group/group.types";
 
+@UseGuards(PermissionsGuard)
 @Controller("group")
 export class GroupController {
   constructor(private readonly groupService: GroupService) {}

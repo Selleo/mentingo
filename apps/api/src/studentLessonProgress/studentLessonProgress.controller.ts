@@ -1,4 +1,4 @@
-import { Controller, Post, Query } from "@nestjs/common";
+import { Controller, Post, Query, UseGuards } from "@nestjs/common";
 import { SupportedLanguages } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
@@ -8,10 +8,12 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { PERMISSIONS } from "src/permission/permission.constants";
 import { RequirePermission } from "src/permission/permission.decorator";
+import { PermissionsGuard } from "src/permission/permission.guard";
 import { UserRole } from "src/user/schemas/userRoles";
 
 import { StudentLessonProgressService } from "./studentLessonProgress.service";
 
+@UseGuards(PermissionsGuard)
 @Controller("studentLessonProgress")
 export class StudentLessonProgressController {
   constructor(private readonly studentLessonProgressService: StudentLessonProgressService) {}

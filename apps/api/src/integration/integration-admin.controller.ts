@@ -1,4 +1,4 @@
-import { Controller, Get, Post } from "@nestjs/common";
+import { Controller, Get, Post, UseGuards } from "@nestjs/common";
 import {
   ApiForbiddenResponse,
   ApiOperation,
@@ -19,6 +19,7 @@ import {
 } from "src/integration/schemas/integration-key.schema";
 import { PERMISSIONS } from "src/permission/permission.constants";
 import { RequirePermission } from "src/permission/permission.decorator";
+import { PermissionsGuard } from "src/permission/permission.guard";
 
 @ApiTags("Integration Admin")
 @ApiUnauthorizedResponse({
@@ -27,6 +28,7 @@ import { RequirePermission } from "src/permission/permission.decorator";
 @ApiForbiddenResponse({
   description: "Admin role required.",
 })
+@UseGuards(PermissionsGuard)
 @Controller("integration/key")
 export class IntegrationAdminController {
   constructor(private readonly integrationService: IntegrationService) {}

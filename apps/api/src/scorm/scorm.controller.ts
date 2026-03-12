@@ -9,8 +9,7 @@ import {
   Req,
   Res,
   UploadedFile,
-  UseInterceptors,
-} from "@nestjs/common";
+  UseInterceptors, UseGuards } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes } from "@nestjs/swagger";
 import { Request, Response } from "express";
@@ -21,10 +20,12 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { PERMISSIONS } from "src/permission/permission.constants";
 import { RequirePermission } from "src/permission/permission.decorator";
+import { PermissionsGuard } from "src/permission/permission.guard";
 
 import { scormMetadataSchema, scormUploadResponseSchema } from "./schemas/scorm.schema";
 import { ScormService } from "./services/scorm.service";
 
+@UseGuards(PermissionsGuard)
 @Controller("scorm")
 export class ScormController {
   constructor(private readonly scormService: ScormService) {}

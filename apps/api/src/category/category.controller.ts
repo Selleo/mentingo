@@ -6,8 +6,7 @@ import {
   Param,
   Patch,
   Post,
-  Query,
-} from "@nestjs/common";
+  Query, UseGuards } from "@nestjs/common";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
@@ -24,6 +23,7 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { PERMISSIONS } from "src/permission/permission.constants";
 import { RequirePermission } from "src/permission/permission.decorator";
+import { PermissionsGuard } from "src/permission/permission.guard";
 import { UserRole } from "src/user/schemas/userRoles";
 
 import { CategoryService } from "./category.service";
@@ -36,6 +36,7 @@ import { type SortCategoryFieldsOptions, sortCategoryFieldsOptions } from "./sch
 import { categoryCreateSchema, type CategoryInsert } from "./schemas/createCategorySchema";
 import { type CategoryUpdateBody, categoryUpdateSchema } from "./schemas/updateCategorySchema";
 
+@UseGuards(PermissionsGuard)
 @Controller("category")
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}

@@ -10,8 +10,7 @@ import {
   Post,
   Query,
   UploadedFile,
-  UseInterceptors,
-} from "@nestjs/common";
+  UseInterceptors, UseGuards } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express/multer/interceptors/file.interceptor";
 import { ApiBody } from "@nestjs/swagger";
 import { ApiConsumes } from "@nestjs/swagger/dist/decorators/api-consumes.decorator";
@@ -40,6 +39,7 @@ import { groupsFilterSchema } from "src/group/group.schema";
 import { GroupsFilterSchema } from "src/group/group.types";
 import { PERMISSIONS } from "src/permission/permission.constants";
 import { RequirePermission } from "src/permission/permission.decorator";
+import { PermissionsGuard } from "src/permission/permission.guard";
 import {
   type CreateUserBody,
   createUserSchema,
@@ -89,6 +89,7 @@ import type { ArchiveUsersSchemaResponse } from "./schemas/archiveUsers.schema";
 import type { UsersFilterSchema } from "./schemas/userQuery";
 import type { Static } from "@sinclair/typebox";
 
+@UseGuards(PermissionsGuard)
 @Controller("user")
 export class UserController {
   constructor(private readonly usersService: UserService) {}
