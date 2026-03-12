@@ -20,9 +20,9 @@
 - [x] Checkpoint complete
 
 ## Segment 4: Replace Remaining Role-Based Checks In API Modules
-- [ ] Migrate remaining controllers from `@Roles` to `@RequirePermission`
-- [ ] Replace all `@CurrentUser("role")` usage with permission-driven checks
-- [ ] Replace service/repository role comparisons with permission checks
+- [x] Migrate `user.controller` from `@Roles` to `@RequirePermission`
+- [x] Replace `@CurrentUser("role")` usage in user resource with permission-driven checks
+- [x] Replace `user.service` role comparisons/queries with permission-role assignment joins
 - [ ] Checkpoint complete
 
 ## Segment 5: Cleanup

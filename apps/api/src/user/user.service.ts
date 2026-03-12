@@ -8,7 +8,13 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
-import { OnboardingPages, type SupportedLanguages, SUPPORTED_LANGUAGES } from "@repo/shared";
+import {
+  OnboardingPages,
+  PERMISSIONS,
+  SYSTEM_ROLE_SLUGS,
+  type SupportedLanguages,
+  SUPPORTED_LANGUAGES,
+} from "@repo/shared";
 import * as bcrypt from "bcryptjs";
 import {
   and,
@@ -32,6 +38,7 @@ import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterCondi
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import hashPassword from "src/common/helpers/hashPassword";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { hasPermission } from "src/common/permissions/permission.utils";
 import { CreateUserEvent, DeleteUserEvent, UpdateUserEvent } from "src/events";
 import { UserInviteEvent } from "src/events/user/user-invite.event";
 import { UserPasswordReminderEvent } from "src/events/user/user-password-reminder.event";
@@ -49,6 +56,8 @@ import {
   credentials,
   groups,
   groupUsers,
+  permissionRoles,
+  permissionUserRoles,
   userDetails,
   users,
   settings,
@@ -63,7 +72,6 @@ import {
   type UsersQuery,
   UserSortFields,
 } from "./schemas/userQuery";
-import { USER_ROLES, type UserRole } from "./schemas/userRoles";
 import { USER_LONG_INACTIVITY_DAYS, USER_SHORT_INACTIVITY_DAYS } from "./user.constants";
 
 import type {
@@ -198,15 +206,15 @@ export class UserService {
 
   public async getUserDetails(
     userId: UUIDType,
-    currentUserId: UUIDType,
-    userRole: UserRole,
+    currentUser: CurrentUser,
   ): Promise<UserDetailsResponse> {
+    const { userId: currentUserId } = currentUser;
+
     const [userBio]: UserDetailsWithAvatarKey[] = await this.db
       .select({
         firstName: users.firstName,
         lastName: users.lastName,
         avatarReference: users.avatarReference,
-        role: sql<UserRole>`${users.role}`,
         id: users.id,
         description: userDetails.description,
         contactEmail: userDetails.contactEmail,
@@ -217,12 +225,14 @@ export class UserService {
       .leftJoin(userDetails, eq(userDetails.userId, users.id))
       .where(and(eq(users.id, userId), isNull(users.deletedAt)));
 
-    const canView =
-      userId === currentUserId ||
-      USER_ROLES.ADMIN === userRole ||
-      USER_ROLES.CONTENT_CREATOR === userRole ||
-      USER_ROLES.ADMIN === userBio.role ||
-      USER_ROLES.CONTENT_CREATOR === userBio.role;
+    if (!userBio) {
+      throw new NotFoundException("User not found");
+    }
+
+    const canViewSelf = userId === currentUserId;
+    const canManageUsers = hasPermission(currentUser.permissions, PERMISSIONS.USER_MANAGE);
+
+    const canView = canViewSelf || canManageUsers;
 
     if (!canView) {
       throw new ForbiddenException("Cannot access user details");
@@ -255,7 +265,7 @@ export class UserService {
     return this.db.transaction(async (trx) => {
       const previousSnapshot = actor ? await this.buildUserActivitySnapshot(id, trx) : null;
 
-      const { groups, ...userData } = data;
+      const { groups, roleSlugs, ...userData } = data;
 
       const hasUserDataToUpdate = Object.keys(userData).length > 0;
       const [updatedUser] = hasUserDataToUpdate
@@ -270,6 +280,10 @@ export class UserService {
           actor,
           db: trx,
         });
+      }
+
+      if (roleSlugs !== undefined) {
+        await this.replaceUserRoleAssignments(id, existingUser.users.tenantId, roleSlugs, trx);
       }
 
       const updatedSnapshot = actor ? await this.buildUserActivitySnapshot(id, trx) : null;
@@ -425,9 +439,29 @@ export class UserService {
     }
 
     const [userToDelete] = await this.db
-      .select()
+      .select({ id: users.id })
       .from(users)
-      .where(and(eq(users.id, id), isNull(users.deletedAt), eq(users.role, USER_ROLES.STUDENT)));
+      .innerJoin(
+        permissionUserRoles,
+        and(
+          eq(permissionUserRoles.userId, users.id),
+          eq(permissionUserRoles.tenantId, users.tenantId),
+        ),
+      )
+      .innerJoin(
+        permissionRoles,
+        and(
+          eq(permissionRoles.id, permissionUserRoles.roleId),
+          eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
+        ),
+      )
+      .where(
+        and(
+          eq(users.id, id),
+          isNull(users.deletedAt),
+          eq(permissionRoles.slug, SYSTEM_ROLE_SLUGS.STUDENT),
+        ),
+      );
 
     if (!userToDelete) throw new BadRequestException("You can only delete students");
 
@@ -470,10 +504,28 @@ export class UserService {
     }
 
     const usersToDelete = await this.db
-      .select()
+      .select({ id: users.id })
       .from(users)
+      .innerJoin(
+        permissionUserRoles,
+        and(
+          eq(permissionUserRoles.userId, users.id),
+          eq(permissionUserRoles.tenantId, users.tenantId),
+        ),
+      )
+      .innerJoin(
+        permissionRoles,
+        and(
+          eq(permissionRoles.id, permissionUserRoles.roleId),
+          eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
+        ),
+      )
       .where(
-        and(inArray(users.id, ids), isNull(users.deletedAt), eq(users.role, USER_ROLES.STUDENT)),
+        and(
+          inArray(users.id, ids),
+          isNull(users.deletedAt),
+          eq(permissionRoles.slug, SYSTEM_ROLE_SLUGS.STUDENT),
+        ),
       );
 
     if (usersToDelete.length !== ids.length)
@@ -609,7 +661,10 @@ export class UserService {
     options?: CreateUserOptions,
   ): Promise<CreateUserTransactionResult> {
     return db.transaction(async (trx) => {
-      const [createdUser] = await trx.insert(users).values(data).returning();
+      const { roleSlugs, ...userData } = data;
+      const [createdUser] = await trx.insert(users).values(userData).returning();
+
+      await this.replaceUserRoleAssignments(createdUser.id, createdUser.tenantId, roleSlugs, trx);
 
       await trx.insert(userOnboarding).values({ userId: createdUser.id });
 
@@ -641,7 +696,7 @@ export class UserService {
 
       await this.settingsService.createSettingsIfNotExists(
         createdUser.id,
-        data.roleSlugs,
+        roleSlugs,
         settingsOverride,
         trx,
       );
@@ -670,8 +725,8 @@ export class UserService {
         .returning();
 
       if (
-        createdUser.role === USER_ROLES.CONTENT_CREATOR ||
-        createdUser.role === USER_ROLES.ADMIN
+        roleSlugs.includes(SYSTEM_ROLE_SLUGS.CONTENT_CREATOR) ||
+        roleSlugs.includes(SYSTEM_ROLE_SLUGS.ADMIN)
       ) {
         await trx
           .insert(userDetails)
@@ -695,11 +750,25 @@ export class UserService {
         tenantId: users.tenantId,
       })
       .from(users)
+      .innerJoin(
+        permissionUserRoles,
+        and(
+          eq(permissionUserRoles.userId, users.id),
+          eq(permissionUserRoles.tenantId, users.tenantId),
+        ),
+      )
+      .innerJoin(
+        permissionRoles,
+        and(
+          eq(permissionRoles.id, permissionUserRoles.roleId),
+          eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
+        ),
+      )
       .innerJoin(settings, eq(users.id, settings.userId))
       .where(
         and(
           isNull(users.deletedAt),
-          eq(users.role, USER_ROLES.ADMIN),
+          eq(permissionRoles.slug, SYSTEM_ROLE_SLUGS.ADMIN),
           sql`${settings.settings}->>'adminNewUserNotification' = 'true'`,
           not(eq(users.email, emailToExclude)),
         ),
@@ -713,7 +782,27 @@ export class UserService {
         email: users.email,
       })
       .from(users)
-      .where(and(eq(users.role, USER_ROLES.STUDENT), inArray(users.id, studentIds)));
+      .innerJoin(
+        permissionUserRoles,
+        and(
+          eq(permissionUserRoles.userId, users.id),
+          eq(permissionUserRoles.tenantId, users.tenantId),
+        ),
+      )
+      .innerJoin(
+        permissionRoles,
+        and(
+          eq(permissionRoles.id, permissionUserRoles.roleId),
+          eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
+        ),
+      )
+      .where(
+        and(
+          eq(permissionRoles.slug, SYSTEM_ROLE_SLUGS.STUDENT),
+          inArray(users.id, studentIds),
+          isNull(users.deletedAt),
+        ),
+      );
   }
 
   async bulkAssignUsersToGroup(data: BulkAssignUserGroups, actor?: CurrentUser) {
@@ -736,8 +825,22 @@ export class UserService {
         settings: settings,
       })
       .from(users)
+      .innerJoin(
+        permissionUserRoles,
+        and(
+          eq(permissionUserRoles.userId, users.id),
+          eq(permissionUserRoles.tenantId, users.tenantId),
+        ),
+      )
+      .innerJoin(
+        permissionRoles,
+        and(
+          eq(permissionRoles.id, permissionUserRoles.roleId),
+          eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
+        ),
+      )
       .leftJoin(settings, eq(users.id, settings.userId))
-      .where(and(eq(users.role, USER_ROLES.ADMIN), isNull(users.deletedAt)));
+      .where(and(eq(permissionRoles.slug, SYSTEM_ROLE_SLUGS.ADMIN), isNull(users.deletedAt)));
 
     return adminsWithSettings;
   }
@@ -840,7 +943,6 @@ export class UserService {
 
     return {
       ...user,
-      role: user.role as UserRole,
       groups: userGroups,
     };
   }
@@ -877,8 +979,19 @@ export class UserService {
     if (filters.archived !== undefined) {
       conditions.push(eq(users.archived, filters.archived));
     }
-    if (filters.role) {
-      conditions.push(eq(users.role, filters.role));
+
+    if (filters.roleSlug) {
+      conditions.push(sql`
+        EXISTS (
+          SELECT 1
+          FROM permission_user_roles pur
+          INNER JOIN permission_roles pr
+            ON pr.id = pur.role_id
+           AND pr.tenant_id = pur.tenant_id
+          WHERE pur.user_id = ${users.id}
+            AND pr.slug = ${filters.roleSlug}
+        )
+      `);
     }
 
     if (filters.groups?.length) {
@@ -913,10 +1026,24 @@ export class UserService {
         tenantId: users.tenantId,
       })
       .from(users)
+      .innerJoin(
+        permissionUserRoles,
+        and(
+          eq(permissionUserRoles.userId, users.id),
+          eq(permissionUserRoles.tenantId, users.tenantId),
+        ),
+      )
+      .innerJoin(
+        permissionRoles,
+        and(
+          eq(permissionRoles.id, permissionUserRoles.roleId),
+          eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
+        ),
+      )
       .innerJoin(settings, eq(users.id, settings.userId))
       .where(
         and(
-          eq(users.role, USER_ROLES.ADMIN),
+          eq(permissionRoles.slug, SYSTEM_ROLE_SLUGS.ADMIN),
           sql`${settings.settings}->>'adminFinishedCourseNotification' = 'true'`,
           isNull(users.deletedAt),
         ),
@@ -933,10 +1060,24 @@ export class UserService {
         tenantId: users.tenantId,
       })
       .from(users)
+      .innerJoin(
+        permissionUserRoles,
+        and(
+          eq(permissionUserRoles.userId, users.id),
+          eq(permissionUserRoles.tenantId, users.tenantId),
+        ),
+      )
+      .innerJoin(
+        permissionRoles,
+        and(
+          eq(permissionRoles.id, permissionUserRoles.roleId),
+          eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
+        ),
+      )
       .innerJoin(settings, eq(users.id, settings.userId))
       .where(
         and(
-          eq(users.role, USER_ROLES.ADMIN),
+          eq(permissionRoles.slug, SYSTEM_ROLE_SLUGS.ADMIN),
           sql`${settings.settings}->>'adminOverdueCourseNotification' = 'true'`,
           isNull(users.deletedAt),
         ),
@@ -947,8 +1088,9 @@ export class UserService {
     const shortInactivity = await this.statisticsService.getInactiveStudents(
       USER_SHORT_INACTIVITY_DAYS,
     );
-    const longInactivity =
-      await this.statisticsService.getInactiveStudents(USER_LONG_INACTIVITY_DAYS);
+    const longInactivity = await this.statisticsService.getInactiveStudents(
+      USER_LONG_INACTIVITY_DAYS,
+    );
 
     return { shortInactivity, longInactivity };
   }
@@ -1020,10 +1162,56 @@ export class UserService {
       throw new BadRequestException("adminUsersView.toast.noUserSelected");
     }
 
-    await this.db
-      .update(users)
-      .set({ role: data.role })
+    const usersToUpdate = await this.db
+      .select({ id: users.id, tenantId: users.tenantId })
+      .from(users)
       .where(and(inArray(users.id, data.userIds), isNull(users.deletedAt)));
+
+    if (usersToUpdate.length !== data.userIds.length) {
+      throw new BadRequestException("adminUsersView.toast.noUserSelected");
+    }
+
+    await this.db.transaction(async (trx) => {
+      await Promise.all(
+        usersToUpdate.map((user) =>
+          this.replaceUserRoleAssignments(user.id, user.tenantId, data.roleSlugs, trx),
+        ),
+      );
+    });
+  }
+
+  private async replaceUserRoleAssignments(
+    userId: UUIDType,
+    tenantId: UUIDType,
+    roleSlugs: string[],
+    dbInstance: DatabasePg = this.db,
+  ): Promise<void> {
+    const uniqueRoleSlugs = Array.from(new Set(roleSlugs));
+
+    if (!uniqueRoleSlugs.length) {
+      throw new BadRequestException("adminUsersView.toast.noUserSelected");
+    }
+
+    const roles = await dbInstance
+      .select({ id: permissionRoles.id, slug: permissionRoles.slug })
+      .from(permissionRoles)
+      .where(
+        and(eq(permissionRoles.tenantId, tenantId), inArray(permissionRoles.slug, uniqueRoleSlugs)),
+      );
+
+    if (roles.length !== uniqueRoleSlugs.length) {
+      throw new BadRequestException("adminUsersView.toast.invalidRole");
+    }
+
+    await dbInstance.delete(permissionUserRoles).where(eq(permissionUserRoles.userId, userId));
+
+    await dbInstance.insert(permissionUserRoles).values(
+      roles.map((role) => ({
+        userId,
+        roleId: role.id,
+        tenantId,
+      })),
+    );
   }
 
   private async deflateStatisticsForCourseDeletedUser(userId: UUIDType, trx: DatabasePg = this.db) {

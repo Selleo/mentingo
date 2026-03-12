@@ -5,7 +5,6 @@ import { createSelectSchema } from "drizzle-typebox";
 import { UUIDSchema } from "src/common";
 import { commonUserSchema } from "src/common/schemas/common-user.schema";
 import { userOnboarding } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 import { omitTenantId } from "src/utils/omitTenantId";
 
 export const baseUserResponseSchema = Type.Composite([
