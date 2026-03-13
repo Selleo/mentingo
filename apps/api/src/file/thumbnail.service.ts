@@ -9,6 +9,7 @@ import {
 } from "@nestjs/common";
 import {
   ENTITY_TYPES,
+  PERMISSIONS,
   VIDEO_EMBED_PROVIDERS,
   detectVideoProviderFromUrl,
   extractResourceIdFromSourceUrl,
@@ -33,7 +34,6 @@ import {
   settings,
   studentCourses,
 } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { BASE_THUMBNAIL_CONTENT_TYPE, getVideoThumbnailKey } from "./utils/videoThumbnail";
 
@@ -150,9 +150,12 @@ export class ThumbnailService {
     return (globalSettings?.settings ?? {}) as Record<string, unknown>;
   }
 
-  private isAdminLike(currentUser: CurrentUser | null) {
+  private canManagePublishedContent(currentUser: CurrentUser | null) {
+    if (!currentUser) return false;
+
     return (
-      currentUser?.role === USER_ROLES.ADMIN || currentUser?.role === USER_ROLES.CONTENT_CREATOR
+      currentUser.permissions.includes(PERMISSIONS.ARTICLE_MANAGE) ||
+      currentUser.permissions.includes(PERMISSIONS.NEWS_MANAGE)
     );
   }
 
@@ -185,7 +188,7 @@ export class ThumbnailService {
     const isAuthor = Boolean(currentUser?.userId && article.authorId === currentUser.userId);
     const isPublic = Boolean(article.isPublic && article.publishedAt !== null);
 
-    if (!this.isAdminLike(currentUser) && !isAuthor && !isPublic) {
+    if (!this.canManagePublishedContent(currentUser) && !isAuthor && !isPublic) {
       throw new NotFoundException("Article resource not found");
     }
   }
@@ -218,7 +221,7 @@ export class ThumbnailService {
     const isAuthor = Boolean(currentUser?.userId && newsItem.authorId === currentUser.userId);
     const isPublic = Boolean(newsItem.isPublic && newsItem.publishedAt !== null);
 
-    if (!this.isAdminLike(currentUser) && !isAuthor && !isPublic) {
+    if (!this.canManagePublishedContent(currentUser) && !isAuthor && !isPublic) {
       throw new NotFoundException("News resource not found");
     }
   }
@@ -258,7 +261,11 @@ export class ThumbnailService {
           lessonAccess.chapterAuthorId === currentUserId),
     );
 
-    if (this.isAdminLike(currentUser) || isAuthor) {
+    const canManageCourseContent = Boolean(
+      currentUser?.permissions.includes(PERMISSIONS.COURSE_UPDATE),
+    );
+
+    if (canManageCourseContent || isAuthor) {
       return;
     }
 

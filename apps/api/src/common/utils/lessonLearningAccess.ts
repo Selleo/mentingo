@@ -1,4 +1,4 @@
-import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
+import { PERMISSIONS } from "@repo/shared";
 
 type LessonLearningAccess = {
   hasEnrollment: boolean;
@@ -9,16 +9,16 @@ export const LEARNING_MODE_REQUIRED_ERROR_KEY =
   "studentCourseView.studentMode.learningModeRequired";
 
 export function canUseLessonProgressAsLearner(
-  userRole: UserRole | undefined,
+  permissions: string[] | undefined,
   access: LessonLearningAccess,
 ) {
-  if (!userRole || userRole === USER_ROLES.STUDENT) return true;
+  if (!permissions?.includes(PERMISSIONS.LEARNING_MODE_USE)) return true;
 
-  if (userRole === USER_ROLES.ADMIN) {
+  if (permissions.includes(PERMISSIONS.TENANT_MANAGE)) {
     return access.isLearningModeActive;
   }
 
-  if (userRole === USER_ROLES.CONTENT_CREATOR) {
+  if (permissions.includes(PERMISSIONS.COURSE_UPDATE)) {
     return access.hasEnrollment || access.isLearningModeActive;
   }
 

@@ -1,20 +1,20 @@
 import { Controller, Get, Query, UseGuards } from "@nestjs/common";
-import { SupportedLanguages } from "@repo/shared";
+import { PERMISSIONS, SupportedLanguages } from "@repo/shared";
 import { Validate } from "nestjs-typebox";
 
 import { baseResponse, UUIDType, BaseResponse } from "src/common";
-import { Roles } from "src/common/decorators/roles.decorator";
+import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
-import { RolesGuard } from "src/common/guards/roles.guard";
+import { PermissionsGuard } from "src/common/guards/permissions.guard";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
-import { USER_ROLES, UserRole } from "src/user/schemas/userRoles";
+import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 
 import { UserStatsSchema, StatsSchema } from "./schemas/userStats.schema";
 import { StatisticsService } from "./statistics.service";
 
 import type { UserStats, Stats } from "./schemas/userStats.schema";
 
-@UseGuards(RolesGuard)
+@UseGuards(PermissionsGuard)
 @Controller("statistics")
 export class StatisticsController {
   constructor(private statisticsService: StatisticsService) {}
@@ -32,18 +32,15 @@ export class StatisticsController {
   }
 
   @Get("stats")
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.STATISTICS_READ)
   @Validate({
     request: [{ type: "query", name: "language", schema: supportedLanguagesSchema }],
     response: baseResponse(StatsSchema),
   })
   async getStats(
     @Query("language") language: SupportedLanguages,
-    @CurrentUser("userId") currentUserId: UUIDType,
-    @CurrentUser("role") userRole: UserRole,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<Stats>> {
-    return new BaseResponse(
-      await this.statisticsService.getStats(currentUserId, userRole, language),
-    );
+    return new BaseResponse(await this.statisticsService.getStats(currentUser, language));
   }
 }

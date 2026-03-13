@@ -11,7 +11,7 @@ import {
 import {
   OnboardingPages,
   PERMISSIONS,
-  SYSTEM_ROLE_SLUGS,
+  type PermissionKey,
   type SupportedLanguages,
   SUPPORTED_LANGUAGES,
 } from "@repo/shared";
@@ -27,6 +27,7 @@ import {
   isNull,
   not,
   or,
+  type SQL,
   sql,
 } from "drizzle-orm";
 import { isEqual } from "lodash";
@@ -57,6 +58,8 @@ import {
   groups,
   groupUsers,
   permissionRoles,
+  permissionRoleRuleSets,
+  permissionRuleSetPermissions,
   permissionUserRoles,
   userDetails,
   users,
@@ -82,6 +85,7 @@ import type {
   BulkUpdateUsersRolesBody,
 } from "./schemas/updateUser.schema";
 import type { UserDetailsResponse, UserDetailsWithAvatarKey } from "./schemas/user.schema";
+import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import type { UserActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
@@ -441,25 +445,16 @@ export class UserService {
     const [userToDelete] = await this.db
       .select({ id: users.id })
       .from(users)
-      .innerJoin(
-        permissionUserRoles,
-        and(
-          eq(permissionUserRoles.userId, users.id),
-          eq(permissionUserRoles.tenantId, users.tenantId),
-        ),
-      )
-      .innerJoin(
-        permissionRoles,
-        and(
-          eq(permissionRoles.id, permissionUserRoles.roleId),
-          eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
-        ),
-      )
       .where(
         and(
           eq(users.id, id),
           isNull(users.deletedAt),
-          eq(permissionRoles.slug, SYSTEM_ROLE_SLUGS.STUDENT),
+          this.userHasPermissionCondition(
+            users.id,
+            users.tenantId,
+            PERMISSIONS.LEARNING_PROGRESS_UPDATE,
+          ),
+          this.userLacksPermissionCondition(users.id, users.tenantId, PERMISSIONS.COURSE_UPDATE),
         ),
       );
 
@@ -506,25 +501,16 @@ export class UserService {
     const usersToDelete = await this.db
       .select({ id: users.id })
       .from(users)
-      .innerJoin(
-        permissionUserRoles,
-        and(
-          eq(permissionUserRoles.userId, users.id),
-          eq(permissionUserRoles.tenantId, users.tenantId),
-        ),
-      )
-      .innerJoin(
-        permissionRoles,
-        and(
-          eq(permissionRoles.id, permissionUserRoles.roleId),
-          eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
-        ),
-      )
       .where(
         and(
           inArray(users.id, ids),
           isNull(users.deletedAt),
-          eq(permissionRoles.slug, SYSTEM_ROLE_SLUGS.STUDENT),
+          this.userHasPermissionCondition(
+            users.id,
+            users.tenantId,
+            PERMISSIONS.LEARNING_PROGRESS_UPDATE,
+          ),
+          this.userLacksPermissionCondition(users.id, users.tenantId, PERMISSIONS.COURSE_UPDATE),
         ),
       );
 
@@ -724,10 +710,15 @@ export class UserService {
         })
         .returning();
 
-      if (
-        roleSlugs.includes(SYSTEM_ROLE_SLUGS.CONTENT_CREATOR) ||
-        roleSlugs.includes(SYSTEM_ROLE_SLUGS.ADMIN)
-      ) {
+      const rolePermissions = await this.getPermissionsForRoleSlugs(
+        roleSlugs,
+        createdUser.tenantId,
+        trx,
+      );
+      const canManageContent = rolePermissions.includes(PERMISSIONS.COURSE_UPDATE);
+      const canManageTenant = rolePermissions.includes(PERMISSIONS.TENANT_MANAGE);
+
+      if (canManageContent || canManageTenant) {
         await trx
           .insert(userDetails)
           .values({ userId: createdUser.id, contactEmail: createdUser.email });
@@ -750,25 +741,11 @@ export class UserService {
         tenantId: users.tenantId,
       })
       .from(users)
-      .innerJoin(
-        permissionUserRoles,
-        and(
-          eq(permissionUserRoles.userId, users.id),
-          eq(permissionUserRoles.tenantId, users.tenantId),
-        ),
-      )
-      .innerJoin(
-        permissionRoles,
-        and(
-          eq(permissionRoles.id, permissionUserRoles.roleId),
-          eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
-        ),
-      )
       .innerJoin(settings, eq(users.id, settings.userId))
       .where(
         and(
           isNull(users.deletedAt),
-          eq(permissionRoles.slug, SYSTEM_ROLE_SLUGS.ADMIN),
+          this.userHasPermissionCondition(users.id, users.tenantId, PERMISSIONS.TENANT_MANAGE),
           sql`${settings.settings}->>'adminNewUserNotification' = 'true'`,
           not(eq(users.email, emailToExclude)),
         ),
@@ -782,23 +759,14 @@ export class UserService {
         email: users.email,
       })
       .from(users)
-      .innerJoin(
-        permissionUserRoles,
-        and(
-          eq(permissionUserRoles.userId, users.id),
-          eq(permissionUserRoles.tenantId, users.tenantId),
-        ),
-      )
-      .innerJoin(
-        permissionRoles,
-        and(
-          eq(permissionRoles.id, permissionUserRoles.roleId),
-          eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
-        ),
-      )
       .where(
         and(
-          eq(permissionRoles.slug, SYSTEM_ROLE_SLUGS.STUDENT),
+          this.userHasPermissionCondition(
+            users.id,
+            users.tenantId,
+            PERMISSIONS.LEARNING_PROGRESS_UPDATE,
+          ),
+          this.userLacksPermissionCondition(users.id, users.tenantId, PERMISSIONS.COURSE_UPDATE),
           inArray(users.id, studentIds),
           isNull(users.deletedAt),
         ),
@@ -825,22 +793,13 @@ export class UserService {
         settings: settings,
       })
       .from(users)
-      .innerJoin(
-        permissionUserRoles,
-        and(
-          eq(permissionUserRoles.userId, users.id),
-          eq(permissionUserRoles.tenantId, users.tenantId),
-        ),
-      )
-      .innerJoin(
-        permissionRoles,
-        and(
-          eq(permissionRoles.id, permissionUserRoles.roleId),
-          eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
-        ),
-      )
       .leftJoin(settings, eq(users.id, settings.userId))
-      .where(and(eq(permissionRoles.slug, SYSTEM_ROLE_SLUGS.ADMIN), isNull(users.deletedAt)));
+      .where(
+        and(
+          this.userHasPermissionCondition(users.id, users.tenantId, PERMISSIONS.TENANT_MANAGE),
+          isNull(users.deletedAt),
+        ),
+      );
 
     return adminsWithSettings;
   }
@@ -1026,24 +985,10 @@ export class UserService {
         tenantId: users.tenantId,
       })
       .from(users)
-      .innerJoin(
-        permissionUserRoles,
-        and(
-          eq(permissionUserRoles.userId, users.id),
-          eq(permissionUserRoles.tenantId, users.tenantId),
-        ),
-      )
-      .innerJoin(
-        permissionRoles,
-        and(
-          eq(permissionRoles.id, permissionUserRoles.roleId),
-          eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
-        ),
-      )
       .innerJoin(settings, eq(users.id, settings.userId))
       .where(
         and(
-          eq(permissionRoles.slug, SYSTEM_ROLE_SLUGS.ADMIN),
+          this.userHasPermissionCondition(users.id, users.tenantId, PERMISSIONS.TENANT_MANAGE),
           sql`${settings.settings}->>'adminFinishedCourseNotification' = 'true'`,
           isNull(users.deletedAt),
         ),
@@ -1060,24 +1005,10 @@ export class UserService {
         tenantId: users.tenantId,
       })
       .from(users)
-      .innerJoin(
-        permissionUserRoles,
-        and(
-          eq(permissionUserRoles.userId, users.id),
-          eq(permissionUserRoles.tenantId, users.tenantId),
-        ),
-      )
-      .innerJoin(
-        permissionRoles,
-        and(
-          eq(permissionRoles.id, permissionUserRoles.roleId),
-          eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
-        ),
-      )
       .innerJoin(settings, eq(users.id, settings.userId))
       .where(
         and(
-          eq(permissionRoles.slug, SYSTEM_ROLE_SLUGS.ADMIN),
+          this.userHasPermissionCondition(users.id, users.tenantId, PERMISSIONS.TENANT_MANAGE),
           sql`${settings.settings}->>'adminOverdueCourseNotification' = 'true'`,
           isNull(users.deletedAt),
         ),
@@ -1212,6 +1143,71 @@ export class UserService {
         tenantId,
       })),
     );
+  }
+
+  private async getPermissionsForRoleSlugs(
+    roleSlugs: string[],
+    tenantId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ): Promise<PermissionKey[]> {
+    const uniqueRoleSlugs = Array.from(new Set(roleSlugs));
+
+    if (!uniqueRoleSlugs.length) {
+      return [];
+    }
+
+    const rolePermissions = await dbInstance
+      .selectDistinct({ permission: permissionRuleSetPermissions.permission })
+      .from(permissionRoles)
+      .innerJoin(
+        permissionRoleRuleSets,
+        and(
+          eq(permissionRoleRuleSets.roleId, permissionRoles.id),
+          eq(permissionRoleRuleSets.tenantId, permissionRoles.tenantId),
+        ),
+      )
+      .innerJoin(
+        permissionRuleSetPermissions,
+        and(
+          eq(permissionRuleSetPermissions.ruleSetId, permissionRoleRuleSets.ruleSetId),
+          eq(permissionRuleSetPermissions.tenantId, permissionRoleRuleSets.tenantId),
+        ),
+      )
+      .where(
+        and(eq(permissionRoles.tenantId, tenantId), inArray(permissionRoles.slug, uniqueRoleSlugs)),
+      );
+
+    return rolePermissions.map(({ permission }) => permission);
+  }
+
+  private userHasPermissionCondition(
+    userIdColumn: AnyPgColumn,
+    tenantIdColumn: AnyPgColumn,
+    permission: PermissionKey,
+  ): SQL {
+    return sql`
+      EXISTS (
+        SELECT 1
+        FROM ${permissionUserRoles}
+        INNER JOIN ${permissionRoleRuleSets}
+          ON ${permissionRoleRuleSets.roleId} = ${permissionUserRoles.roleId}
+          AND ${permissionRoleRuleSets.tenantId} = ${permissionUserRoles.tenantId}
+        INNER JOIN ${permissionRuleSetPermissions}
+          ON ${permissionRuleSetPermissions.ruleSetId} = ${permissionRoleRuleSets.ruleSetId}
+          AND ${permissionRuleSetPermissions.tenantId} = ${permissionRoleRuleSets.tenantId}
+        WHERE ${permissionUserRoles.userId} = ${userIdColumn}
+          AND ${permissionUserRoles.tenantId} = ${tenantIdColumn}
+          AND ${permissionRuleSetPermissions.permission} = ${permission}
+      )
+    `;
+  }
+
+  private userLacksPermissionCondition(
+    userIdColumn: AnyPgColumn,
+    tenantIdColumn: AnyPgColumn,
+    permission: PermissionKey,
+  ): SQL {
+    return sql`NOT (${this.userHasPermissionCondition(userIdColumn, tenantIdColumn, permission)})`;
   }
 
   private async deflateStatisticsForCourseDeletedUser(userId: UUIDType, trx: DatabasePg = this.db) {

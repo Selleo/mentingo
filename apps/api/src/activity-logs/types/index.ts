@@ -1,7 +1,6 @@
 import type { UUIDType } from "src/common";
 import type { LessonTypes } from "src/lesson/lesson.type";
 import type { QuestionType } from "src/questions/schema/question.types";
-import type { UserRole } from "src/user/schemas/userRoles";
 
 export const ACTIVITY_LOG_ACTION_TYPES = {
   CREATE: "create",
@@ -187,7 +186,7 @@ export type UserActivityLogSnapshot = {
   firstName?: string | null;
   lastName?: string | null;
   email?: string | null;
-  role?: UserRole | null;
+  role?: string | null;
   archived?: boolean | null;
   groups?: Array<{ id: UUIDType; name?: string | null }>;
 };

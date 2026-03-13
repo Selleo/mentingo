@@ -53,6 +53,16 @@
 - [x] Replace `ingestion.service` role-based author/admin branching with permission-based checks
 - [x] Migrate `announcements.controller` to `@RequirePermission(PERMISSIONS.ANNOUNCEMENT_READ/ANNOUNCEMENT_CREATE)` and remove `RolesGuard`
 - [x] Replace `announcements.repository` role-based recipient filtering (`users.role = admin`) with permission-based filtering
+- [x] Migrate `file.controller` to `@RequirePermission(PERMISSIONS.FILE_*)` and remove `RolesGuard`
+- [x] Replace `file/thumbnail.service` role checks with permission-based checks (`ARTICLE_MANAGE/NEWS_MANAGE/COURSE_UPDATE`)
+- [x] Migrate `statistics.controller` to `@RequirePermission(PERMISSIONS.STATISTICS_READ)`
+- [x] Replace `statistics.service` role branching with permission-based branching (`TENANT_MANAGE`)
+- [x] Replace `statistics.repository` `users.role = student` filter with permission-based learner filtering
+- [x] Migrate `super-admin/tenants.controller` to permission guards (`PERMISSIONS.TENANT_MANAGE`)
+- [x] Replace `super-admin/tenants.service` admin creation payload from `role` to `roleSlugs`
+- [x] Replace `lesson.repository` role-based lesson visibility branching with permission-based branching
+- [x] Replace `learning-time.service` websocket student-role gating with permission-based learner gating
+- [x] Remove remaining runtime `UserRole` dependencies in `activity-logs` and chapter query types
 - [ ] Checkpoint complete
 
 ## Segment 5: Cleanup

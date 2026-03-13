@@ -1,7 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { COURSE_ENROLLMENT } from "@repo/shared";
+import { COURSE_ENROLLMENT, PERMISSIONS } from "@repo/shared";
 import { and, desc, eq, getTableColumns, type SQL, sql } from "drizzle-orm";
-import { match } from "ts-pattern";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
@@ -23,7 +22,6 @@ import {
   resources,
   coursesSettingsHelpers,
 } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import type { LessonTypes } from "../lesson.type";
 import type { SupportedLanguages } from "@repo/shared";
@@ -379,26 +377,24 @@ export class LessonRepository {
     language: SupportedLanguages,
   ): Promise<EnrolledLessonWithSearch[]> {
     const conditions: SQL[] = [];
+    const canManageCourseContent = currentUser.permissions.includes(PERMISSIONS.COURSE_UPDATE);
+    const canManageTenant = currentUser.permissions.includes(PERMISSIONS.TENANT_MANAGE);
 
-    match(currentUser?.role)
-      .with(USER_ROLES.STUDENT, () => {
-        conditions.push(
-          eq(studentCourses.studentId, currentUser?.userId),
-          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
-        );
-      })
-      .with(USER_ROLES.CONTENT_CREATOR, () =>
-        conditions.push(eq(courses.authorId, currentUser?.userId)),
-      )
-      .otherwise(() => null);
+    if (!canManageCourseContent) {
+      conditions.push(
+        eq(studentCourses.studentId, currentUser.userId),
+        eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+      );
+    } else if (!canManageTenant) {
+      conditions.push(eq(courses.authorId, currentUser.userId));
+    }
 
-    if (currentUser?.role)
-      if (filters.title) {
-        conditions.push(
-          sql`EXISTS (SELECT 1 FROM jsonb_each_text(${lessons.title}) AS t(k, v) 
-             WHERE v ILIKE ${`%${filters.title}%`})`,
-        );
-      }
+    if (filters.title) {
+      conditions.push(
+        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${lessons.title}) AS t(k, v) 
+           WHERE v ILIKE ${`%${filters.title}%`})`,
+      );
+    }
 
     if (filters.description) {
       conditions.push(

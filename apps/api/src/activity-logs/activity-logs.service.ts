@@ -9,7 +9,6 @@ import { ActivityLogsQueueService } from "./activity-logs.queue.service";
 
 import type { ActivityLogActionType, ActivityLogMetadata, ActivityLogResourceType } from "./types";
 import type { ActorUserType } from "src/common/types/actor-user.type";
-import type { UserRole } from "src/user/schemas/userRoles";
 
 export type RecordActivityLogInput = {
   actor: ActorType;
@@ -26,7 +25,7 @@ export type RecordActivityLogInput = {
 export type ActorType = {
   actorId: UUIDType;
   actorEmail: string;
-  actorRole: UserRole;
+  actorRole: string;
 };
 
 type RecordActivityLogParams = Omit<RecordActivityLogInput, "actor"> & {
@@ -77,10 +76,12 @@ export class ActivityLogsService {
   }
 
   private getActorFromPayload(actor: ActorUserType): ActorType {
+    const roleSlugs = actor.roleSlugs.join(", ");
+
     return {
       actorId: actor.userId,
       actorEmail: actor.email,
-      actorRole: actor.role,
+      actorRole: roleSlugs,
     };
   }
 }
