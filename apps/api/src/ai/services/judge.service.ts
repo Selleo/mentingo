@@ -8,6 +8,12 @@ import { ThreadService } from "src/ai/services/thread.service";
 import { MESSAGE_ROLE, THREAD_STATUS } from "src/ai/utils/ai.type";
 
 import type { ThreadOwnershipBody } from "src/ai/utils/ai.schema";
+import type { PermissionKey } from "@repo/shared";
+
+type JudgeViewer = {
+  userId: string;
+  permissions: PermissionKey[];
+};
 
 @Injectable()
 export class JudgeService {
@@ -19,8 +25,12 @@ export class JudgeService {
     private readonly promptService: PromptService,
   ) {}
 
-  async runJudge(data: ThreadOwnershipBody) {
-    const thread = await this.threadService.findThread(data.threadId, data.userId);
+  async runJudge(data: ThreadOwnershipBody, viewer: JudgeViewer) {
+    const thread = await this.threadService.findThread(data.threadId, {
+      userId: viewer.userId,
+      permissions: viewer.permissions,
+    });
+
     if (thread.data.status !== THREAD_STATUS.ACTIVE)
       throw new BadRequestException("Thread must be active");
 

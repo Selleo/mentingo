@@ -31,6 +31,8 @@
 - [x] Switch chapter/lesson edit access validation to permission-based checks (no role checks)
 - [x] Align course edit endpoints with `PERMISSIONS.COURSE_UPDATE`
 - [x] Switch course edit service checks from role-based to permission-based where updated
+- [x] Migrate `ai.controller` from `@Roles` to `@RequirePermission(PERMISSIONS.AI_USE)`
+- [x] Replace AI role-based thread/retake authorization with permission-based checks
 - [ ] Checkpoint complete
 
 ## Segment 5: Cleanup
