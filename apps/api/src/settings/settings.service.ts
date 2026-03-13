@@ -73,7 +73,6 @@ import type { SettingsActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
 import type { LoginBackgroundResponseBody } from "src/settings/schemas/login-background.schema";
-import type { UserRole } from "src/user/schemas/userRoles";
 
 const STATIC_SETTINGS_IMAGE_CACHE_CONTROL = "public, max-age=86400";
 
@@ -749,10 +748,10 @@ export class SettingsService {
   ): Promise<GlobalSettingsJSONContentSchema> {
     const previousRecord = await this.getGlobalSettingsRecord();
 
-    const enforcedRoles: UserRole[] = [];
+    const enforcedRoles: string[] = [];
 
     Object.entries(rolesRequest).forEach(([role, shouldEnforce]) => {
-      if (shouldEnforce === true) enforcedRoles.push(role as UserRole);
+      if (shouldEnforce === true) enforcedRoles.push(role);
     });
 
     const [{ settings: updatedSettings }] = await this.db
