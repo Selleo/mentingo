@@ -9,6 +9,7 @@ import {
   COURSE_ORIGIN_TYPES,
   ENTITY_TYPES,
   MASTER_COURSE_ENTITY_TYPES,
+  PERMISSIONS,
   type MasterCourseEntityType,
 } from "@repo/shared";
 import { eq } from "drizzle-orm";
@@ -22,7 +23,6 @@ import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { DB } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { chapters, courses, lessons, questionAnswerOptions, questions } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
@@ -918,7 +918,7 @@ export class MasterCourseService {
   }
 
   private async assertManagingTenantAdmin(actor: CurrentUser) {
-    if (actor.role !== USER_ROLES.ADMIN)
+    if (!actor.permissions.includes(PERMISSIONS.TENANT_MANAGE))
       throw new ForbiddenException("auth.error.adminRoleRequired");
 
     const tenant = await this.masterCourseRepository.getTenantManagingStatus(actor.tenantId);

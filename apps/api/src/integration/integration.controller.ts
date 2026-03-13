@@ -367,10 +367,9 @@ export class IntegrationController {
   async enrollGroups(
     @Param("courseId") courseId: UUIDType,
     @Body() body: Static<typeof enrolledCourseGroupsPayload>,
-    @CurrentUser("userId") userId: UUIDType,
-    @CurrentUser("role") role: UserRole,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.courseService.enrollGroupsToCourse(courseId, body.groups, userId, role);
+    await this.courseService.enrollGroupsToCourse(courseId, body.groups, currentUser);
 
     return new BaseResponse({ message: "Groups enrolled successfully" });
   }

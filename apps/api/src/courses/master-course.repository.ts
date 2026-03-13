@@ -3,9 +3,10 @@ import {
   COURSE_ORIGIN_TYPES,
   ENTITY_TYPES,
   MASTER_COURSE_EXPORT_SYNC_STATUSES,
+  PERMISSIONS,
   type MasterCourseEntityType,
 } from "@repo/shared";
-import { and, asc, eq, getTableColumns, inArray, ne, sql } from "drizzle-orm";
+import { and, asc, eq, getTableColumns, inArray, isNull, ne, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
@@ -20,12 +21,14 @@ import {
   masterCourseExports,
   questionAnswerOptions,
   questions,
+  permissionRoleRuleSets,
+  permissionRuleSetPermissions,
+  permissionUserRoles,
   resourceEntity,
   resources,
   tenants,
   users,
 } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import type {
   AiMentorLessonInsert,
@@ -382,7 +385,26 @@ export class MasterCourseRepository {
     const [targetAuthor] = await this.db
       .select({ id: users.id })
       .from(users)
-      .where(inArray(users.role, [USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR]))
+      .where(
+        and(
+          isNull(users.deletedAt),
+          sql`
+            EXISTS (
+              SELECT 1
+              FROM ${permissionUserRoles}
+              INNER JOIN ${permissionRoleRuleSets}
+                ON ${permissionRoleRuleSets.roleId} = ${permissionUserRoles.roleId}
+                AND ${permissionRoleRuleSets.tenantId} = ${permissionUserRoles.tenantId}
+              INNER JOIN ${permissionRuleSetPermissions}
+                ON ${permissionRuleSetPermissions.ruleSetId} = ${permissionRoleRuleSets.ruleSetId}
+                AND ${permissionRuleSetPermissions.tenantId} = ${permissionRoleRuleSets.tenantId}
+              WHERE ${permissionUserRoles.userId} = ${users.id}
+                AND ${permissionUserRoles.tenantId} = ${users.tenantId}
+                AND ${permissionRuleSetPermissions.permission} = ${PERMISSIONS.COURSE_UPDATE}
+            )
+          `,
+        ),
+      )
       .limit(1);
 
     return targetAuthor;

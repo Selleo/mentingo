@@ -11,7 +11,6 @@ import {
   Req,
   Res,
   UploadedFile,
-  UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
@@ -24,6 +23,7 @@ import {
   ALLOWED_PRESENTATION_FILE_TYPES,
   ALLOWED_VIDEO_FILE_TYPES,
   ALLOWED_WORD_FILE_TYPES,
+  PERMISSIONS,
   SUPPORTED_LANGUAGES,
   SupportedLanguages,
 } from "@repo/shared";
@@ -32,15 +32,13 @@ import { Request, Response } from "express";
 import { Validate } from "nestjs-typebox";
 
 import { baseResponse, BaseResponse, UUIDSchema, type UUIDType } from "src/common";
-import { Roles } from "src/common/decorators/roles.decorator";
+import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
-import { RolesGuard } from "src/common/guards/roles.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { MAX_VIDEO_SIZE } from "src/file/file.constants";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
-import { USER_ROLES, UserRole } from "src/user/schemas/userRoles";
 
 import {
   AnswerQuestionBody,
@@ -71,7 +69,6 @@ import { LessonService } from "./services/lesson.service";
 import type { EnrolledLesson, LessonsFilters, LessonShow } from "./lesson.schema";
 
 @Controller("lesson")
-@UseGuards(RolesGuard)
 export class LessonController {
   constructor(
     private readonly adminLessonsService: AdminLessonService,
@@ -79,7 +76,7 @@ export class LessonController {
   ) {}
 
   @Get("all")
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR, USER_ROLES.STUDENT)
+  @RequirePermission(PERMISSIONS.COURSE_READ)
   @Validate({
     request: [
       { type: "query", name: "title", schema: Type.String() },
@@ -109,6 +106,7 @@ export class LessonController {
   }
 
   @Get(":id")
+  @RequirePermission(PERMISSIONS.COURSE_READ)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -120,16 +118,20 @@ export class LessonController {
     @Param("id") id: UUIDType,
     @Query("language") language: SupportedLanguages,
     @Query("studentId") studentId: UUIDType,
-    @CurrentUser("userId") userId: UUIDType,
-    @CurrentUser("role") userRole: UserRole,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<LessonShow>> {
     return new BaseResponse(
-      await this.lessonService.getLessonById(id, studentId || userId, userRole, language),
+      await this.lessonService.getLessonById(
+        id,
+        studentId || currentUser.userId,
+        currentUser,
+        language,
+      ),
     );
   }
 
   @Post("beta-create-lesson")
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [
       {
@@ -149,7 +151,7 @@ export class LessonController {
   }
 
   @Post("initialize-lesson-context")
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     response: baseResponse(initializeLessonContextSchema),
   })
@@ -158,7 +160,7 @@ export class LessonController {
   }
 
   @Post("beta-create-lesson/ai")
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [
       {
@@ -182,7 +184,7 @@ export class LessonController {
   }
 
   @Patch("beta-update-lesson/ai")
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [
       {
@@ -209,7 +211,7 @@ export class LessonController {
   }
 
   @Post("beta-create-lesson/quiz")
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [
       {
@@ -230,7 +232,7 @@ export class LessonController {
   }
 
   @Patch("beta-update-lesson/quiz")
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [
       {
@@ -256,7 +258,7 @@ export class LessonController {
   }
 
   @Patch("beta-update-lesson")
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [
       {
@@ -281,7 +283,7 @@ export class LessonController {
   }
 
   @Delete()
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [{ type: "query", name: "lessonId", schema: UUIDSchema, required: true }],
     response: baseResponse(Type.Object({ message: Type.String() })),
@@ -297,7 +299,7 @@ export class LessonController {
   }
 
   @Post("evaluation-quiz")
-  @Roles(USER_ROLES.STUDENT, USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.LEARNING_PROGRESS_UPDATE)
   @Validate({
     request: [{ type: "body", schema: answerQuestionsForLessonBody, required: true }],
     response: baseResponse(
@@ -314,8 +316,7 @@ export class LessonController {
   })
   async evaluationQuiz(
     @Body() answers: AnswerQuestionBody,
-    @CurrentUser("userId") currentUserId: UUIDType,
-    @CurrentUser("role") currentUserRole: UserRole,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<
     BaseResponse<{
       message: string;
@@ -327,11 +328,7 @@ export class LessonController {
       };
     }>
   > {
-    const evaluationResult = await this.lessonService.evaluationQuiz(
-      answers,
-      currentUserId,
-      currentUserRole,
-    );
+    const evaluationResult = await this.lessonService.evaluationQuiz(answers, currentUser);
     return new BaseResponse({
       message: "Evaluation quiz successfully",
       data: evaluationResult,
@@ -339,7 +336,7 @@ export class LessonController {
   }
 
   @Post("upload-files-to-lesson")
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @UseInterceptors(FileInterceptor("file"))
   @ApiConsumes("multipart/form-data")
   @ApiBody({
@@ -388,8 +385,7 @@ export class LessonController {
     },
   })
   async uploadFileToLesson(
-    @CurrentUser("userId") userId: UUIDType,
-    @CurrentUser("role") role: UserRole,
+    @CurrentUser() currentUser: CurrentUserType,
     @UploadedFile(
       getBaseFileTypePipe(
         buildFileTypeRegex([
@@ -411,8 +407,7 @@ export class LessonController {
     @Body("contextId") contextId?: string,
   ) {
     const fileData = await this.adminLessonsService.uploadFileToLesson(
-      userId,
-      role,
+      currentUser,
       file,
       language,
       title,
@@ -425,22 +420,21 @@ export class LessonController {
   }
 
   @Delete("delete-student-quiz-answers")
-  @Roles(USER_ROLES.STUDENT, USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.LEARNING_PROGRESS_UPDATE)
   @Validate({
     request: [{ type: "query", name: "lessonId", schema: UUIDSchema, required: true }],
     response: baseResponse(Type.Object({ message: Type.String() })),
   })
   async deleteStudentQuizAnswers(
     @Query("lessonId") lessonId: UUIDType,
-    @CurrentUser("userId") currentUserId: UUIDType,
-    @CurrentUser("role") currentUserRole: UserRole,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.lessonService.deleteStudentQuizAnswers(lessonId, currentUserId, currentUserRole);
+    await this.lessonService.deleteStudentQuizAnswers(lessonId, currentUser);
     return new BaseResponse({ message: "Evaluation quiz answers removed successfully" });
   }
 
   @Post("create-lesson/embed")
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [{ type: "body", schema: createEmbedLessonSchema, required: true }],
     response: baseResponse(Type.Object({ message: Type.String() })),
@@ -454,7 +448,7 @@ export class LessonController {
   }
 
   @Patch("update-lesson/embed/:id")
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema, required: true },
@@ -471,61 +465,36 @@ export class LessonController {
     return new BaseResponse({ message: "Embed lesson updated successfully" });
   }
 
-  //   @Delete("clear-quiz-progress")
-  //   @Roles(USER_ROLES.STUDENT)
-  //   @Validate({
-  //     request: [
-  //       { type: "query", name: "courseId", schema: UUIDSchema, required: true },
-  //       { type: "query", name: "lessonId", schema: UUIDSchema, required: true },
-  //     ],
-  //     response: baseResponse(Type.Object({ message: Type.String() })),
-  //   })
-  //   async clearQuizProgress(
-  //     @Query("courseId") courseId: UUIDType,
-  //     @Query("lessonId") lessonId: UUIDType,
-  //     @CurrentUser("userId") currentUserId: UUIDType,
-  //   ): Promise<BaseResponse<{ message: string }>> {
-  //     const result = await this.lessonsService.clearQuizProgress(courseId, lessonId, currentUserId);
-  //     if (result)
-  //       return new BaseResponse({
-  //         message: "Evaluation quiz successfully",
-  //       });
-
-  //     return new BaseResponse({
-  //       message: "Evaluation quiz ending in error",
-  //     });
-  //   }
-
   @Get("lesson-image/:resourceId")
+  @RequirePermission(PERMISSIONS.COURSE_READ)
   @Validate({
     request: [{ type: "param", schema: UUIDSchema, name: "resourceId" }],
   })
   async getLessonImage(
     @Param("resourceId") resourceId: UUIDType,
-    @CurrentUser("userId") userId: UUIDType,
-    @CurrentUser("role") role: UserRole,
+    @CurrentUser() currentUser: CurrentUserType,
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    return this.lessonService.getLessonResource(req, res, userId, role, resourceId);
+    return this.lessonService.getLessonResource(req, res, currentUser, resourceId);
   }
 
   @Get("lesson-resource/:resourceId")
+  @RequirePermission(PERMISSIONS.COURSE_READ)
   @Validate({
     request: [{ type: "param", schema: UUIDSchema, name: "resourceId" }],
   })
   async getLessonResource(
     @Param("resourceId") resourceId: UUIDType,
-    @CurrentUser("userId") userId: UUIDType,
-    @CurrentUser("role") role: UserRole,
+    @CurrentUser() currentUser: CurrentUserType,
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    return this.lessonService.getLessonResource(req, res, userId, role, resourceId);
+    return this.lessonService.getLessonResource(req, res, currentUser, resourceId);
   }
 
   @Post("ai-mentor/avatar")
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @UseInterceptors(FileInterceptor("file"))
   @ApiConsumes("multipart/form-data")
   @ApiBody({
@@ -548,8 +517,7 @@ export class LessonController {
     type: String,
   })
   async uploadAiMentorAvatar(
-    @CurrentUser("role") role: UserRole,
-    @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
     @Body("lessonId") lessonId: UUIDType,
     @UploadedFile(
       getBaseFileTypePipe(buildFileTypeRegex(ALLOWED_AVATAR_IMAGE_TYPES)).build({
@@ -560,15 +528,14 @@ export class LessonController {
     uploadedFile: Express.Multer.File | null,
   ) {
     await this.adminLessonsService.uploadAvatarToAiMentorLesson(
-      userId,
-      role,
+      currentUser,
       lessonId,
       uploadedFile,
     );
   }
 
   @Patch("update-lesson-display-order")
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [
       {

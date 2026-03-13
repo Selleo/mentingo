@@ -1,15 +1,13 @@
-import { Body, Controller, Delete, Get, Patch, Post, Query, UseGuards } from "@nestjs/common";
-import { SupportedLanguages } from "@repo/shared";
+import { Body, Controller, Delete, Get, Patch, Post, Query } from "@nestjs/common";
+import { PERMISSIONS, SupportedLanguages } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
 import { baseResponse, BaseResponse, UUIDSchema, type UUIDType } from "src/common";
-import { Roles } from "src/common/decorators/roles.decorator";
+import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
-import { RolesGuard } from "src/common/guards/roles.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
-import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
 import { AdminChapterService } from "./adminChapter.service";
 import { ChapterService } from "./chapter.service";
@@ -24,7 +22,6 @@ import {
 import type { ChapterResponse } from "./schemas/chapter.schema";
 
 @Controller("chapter")
-@UseGuards(RolesGuard)
 export class ChapterController {
   constructor(
     private readonly chapterService: ChapterService,
@@ -32,7 +29,7 @@ export class ChapterController {
   ) {}
 
   @Get()
-  @Roles(...Object.values(USER_ROLES))
+  @RequirePermission(PERMISSIONS.COURSE_READ)
   @Validate({
     request: [
       { type: "query", name: "id", schema: UUIDSchema, required: true },
@@ -43,21 +40,20 @@ export class ChapterController {
   async getChapterWithLesson(
     @Query("id") id: UUIDType,
     @Query("language") language: SupportedLanguages,
-    @CurrentUser("role") userRole: UserRole,
-    @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<ChapterResponse>> {
     return new BaseResponse(
       await this.chapterService.getChapterWithLessons(
         id,
-        userId,
+        currentUser.userId,
         language,
-        userRole === USER_ROLES.ADMIN,
+        currentUser.permissions.includes(PERMISSIONS.USER_MANAGE),
       ),
     );
   }
 
   @Post("beta-create-chapter")
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [
       {
@@ -80,7 +76,7 @@ export class ChapterController {
   }
 
   @Patch()
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [
       {
@@ -106,7 +102,7 @@ export class ChapterController {
   }
 
   @Patch("chapter-display-order")
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [
       {
@@ -139,7 +135,7 @@ export class ChapterController {
   }
 
   @Delete()
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [{ type: "query", name: "chapterId", schema: UUIDSchema, required: true }],
     response: baseResponse(Type.Object({ message: Type.String() })),
@@ -155,7 +151,7 @@ export class ChapterController {
   }
 
   @Patch("freemium-status")
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [
       {
@@ -175,10 +171,9 @@ export class ChapterController {
   async updateFreemiumStatus(
     @Query("chapterId") chapterId: UUIDType,
     @Body() body: { isFreemium: boolean },
-    @CurrentUser("userId") userId: UUIDType,
-    @CurrentUser("role") role: UserRole,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.adminChapterService.updateFreemiumStatus(chapterId, body.isFreemium, userId, role);
+    await this.adminChapterService.updateFreemiumStatus(chapterId, body.isFreemium, currentUser);
     return new BaseResponse({
       message: "Course lesson free status updated successfully",
     });

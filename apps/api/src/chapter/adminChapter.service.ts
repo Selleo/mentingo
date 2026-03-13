@@ -19,7 +19,6 @@ import type { CreateChapterBody, UpdateChapterBody } from "./schemas/chapter.sch
 import type { SupportedLanguages } from "@repo/shared";
 import type { ChapterActivityLogSnapshot } from "src/activity-logs/types";
 import type { CurrentUser } from "src/common/types/current-user.type";
-import type { UserRole } from "src/user/schemas/userRoles";
 
 @Injectable()
 export class AdminChapterService {
@@ -38,8 +37,7 @@ export class AdminChapterService {
     const chapter = await this.db.transaction(async (trx) => {
       await this.adminLessonService.validateAccess(
         "course",
-        currentUser.role,
-        currentUser.userId,
+        currentUser,
         body.courseId,
       );
 
@@ -98,17 +96,11 @@ export class AdminChapterService {
   async updateFreemiumStatus(
     chapterId: UUIDType,
     isFreemium: boolean,
-    currentUserId: UUIDType,
-    currentUserRole: UserRole,
+    currentUser: CurrentUser,
   ) {
     await this.masterCourseService.assertCourseContentEditableByChapterId(chapterId);
 
-    await this.adminLessonService.validateAccess(
-      "chapter",
-      currentUserRole,
-      currentUserId,
-      chapterId,
-    );
+    await this.adminLessonService.validateAccess("chapter", currentUser, chapterId);
 
     return await this.adminChapterRepository.updateFreemiumStatus(chapterId, isFreemium);
   }
@@ -122,8 +114,7 @@ export class AdminChapterService {
 
     await this.adminLessonService.validateAccess(
       "chapter",
-      chapterObject.currentUser.role,
-      chapterObject.currentUser.userId,
+      chapterObject.currentUser,
       chapterObject.chapterId,
     );
 
@@ -180,8 +171,7 @@ export class AdminChapterService {
 
     await this.adminLessonService.validateAccess(
       "chapter",
-      currentUser.role,
-      currentUser.userId,
+      currentUser,
       id,
     );
 
@@ -224,8 +214,7 @@ export class AdminChapterService {
 
     await this.adminLessonService.validateAccess(
       "chapter",
-      currentUser.role,
-      currentUser.userId,
+      currentUser,
       chapterId,
     );
 

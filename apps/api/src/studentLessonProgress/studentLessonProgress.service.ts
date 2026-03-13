@@ -5,13 +5,12 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
-import { COURSE_ENROLLMENT } from "@repo/shared";
+import { COURSE_ENROLLMENT, PERMISSIONS } from "@repo/shared";
 import { and, eq, isNotNull, isNull, sql } from "drizzle-orm";
 
 import { CertificatesService } from "src/certificates/certificates.service";
 import { DatabasePg } from "src/common";
 import { setJsonbField } from "src/common/helpers/sqlHelpers";
-import { canUseLessonProgressAsLearner } from "src/common/utils/lessonLearningAccess";
 import { CourseCompletedEvent, LessonCompletedEvent } from "src/events";
 import { UserChapterFinishedEvent } from "src/events/user/user-chapter-finished.event";
 import { UserCourseFinishedEvent } from "src/events/user/user-course-finished.event";
@@ -28,15 +27,18 @@ import {
   groups,
   groupUsers,
   lessons,
+  permissionRoles,
+  permissionRoleRuleSets,
+  permissionRuleSetPermissions,
+  permissionUserRoles,
   studentChapterProgress,
   studentCourses,
   studentLessonProgress,
   users,
 } from "src/storage/schema";
-import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
-import type { SupportedLanguages } from "@repo/shared";
+import type { PermissionKey, SupportedLanguages } from "@repo/shared";
 import type { ResponseAiJudgeJudgementBody } from "src/ai/utils/ai.schema";
 import type { UUIDType } from "src/common";
 import type { ActorUserType } from "src/common/types/actor-user.type";
@@ -56,7 +58,7 @@ export class StudentLessonProgressService {
   async markLessonAsCompleted({
     id,
     studentId,
-    userRole,
+    userPermissions = [],
     actor,
     quizCompleted = false,
     completedQuestionCount = 0,
@@ -67,7 +69,7 @@ export class StudentLessonProgressService {
   }: {
     id: UUIDType;
     studentId: UUIDType;
-    userRole?: UserRole;
+    userPermissions?: PermissionKey[];
     actor?: CurrentUser;
     quizCompleted?: boolean;
     completedQuestionCount?: number;
@@ -78,14 +80,14 @@ export class StudentLessonProgressService {
   }) {
     const [accessCourseLessonWithDetails] = await this.checkLessonAssignment(id, studentId);
 
-    const isLearningModeActive = await this.resolveLearningModeStatus(
+    const isLearningModeActive = await this.resolveLearningModeStatusByPermissions(
       id,
       studentId,
-      userRole,
+      userPermissions,
       dbInstance,
     );
 
-    const canTrackProgress = canUseLessonProgressAsLearner(userRole, {
+    const canTrackProgress = this.canUseLearnerProgressByPermissions(userPermissions, {
       hasEnrollment: Boolean(accessCourseLessonWithDetails.isAssigned),
       isLearningModeActive,
     });
@@ -260,19 +262,19 @@ export class StudentLessonProgressService {
   async markLessonAsStarted(
     id: UUIDType,
     studentId: UUIDType,
-    userRole?: UserRole,
+    userPermissions: PermissionKey[] = [],
     dbInstance: DatabasePg = this.db,
   ) {
     const [accessCourseLessonWithDetails] = await this.checkLessonAssignment(id, studentId);
 
-    const isLearningModeActive = await this.resolveLearningModeStatus(
+    const isLearningModeActive = await this.resolveLearningModeStatusByPermissions(
       id,
       studentId,
-      userRole,
+      userPermissions,
       dbInstance,
     );
 
-    const canTrackProgress = canUseLessonProgressAsLearner(userRole, {
+    const canTrackProgress = this.canUseLearnerProgressByPermissions(userPermissions, {
       hasEnrollment: !!accessCourseLessonWithDetails.isAssigned,
       isLearningModeActive,
     });
@@ -389,17 +391,25 @@ export class StudentLessonProgressService {
     }
   }
 
-  private async resolveLearningModeStatus(
+  private async resolveLearningModeStatusByPermissions(
     lessonId: UUIDType,
     userId: UUIDType,
-    userRole: UserRole | undefined,
+    userPermissions: PermissionKey[],
     dbInstance: DatabasePg = this.db,
   ) {
-    const isAdminLike = userRole === USER_ROLES.ADMIN || userRole === USER_ROLES.CONTENT_CREATOR;
-
-    if (!isAdminLike) return false;
+    if (!userPermissions.includes(PERMISSIONS.LEARNING_MODE_USE)) return false;
 
     return this.isLessonStudentModeEnabled(lessonId, userId, dbInstance);
+  }
+
+  private canUseLearnerProgressByPermissions(
+    userPermissions: PermissionKey[],
+    access: { hasEnrollment: boolean; isLearningModeActive: boolean },
+  ) {
+    const canUseLearningMode = userPermissions.includes(PERMISSIONS.LEARNING_MODE_USE);
+    if (canUseLearningMode) return access.isLearningModeActive;
+
+    return true;
   }
 
   private async isLessonStudentModeEnabled(
@@ -781,7 +791,7 @@ export class StudentLessonProgressService {
     if (actor) return actor;
 
     const [user] = await dbInstance
-      .select({ userId: users.id, email: users.email, role: users.role, tenantId: users.tenantId })
+      .select({ userId: users.id, email: users.email, tenantId: users.tenantId })
       .from(users)
       .where(eq(users.id, userId));
 
@@ -789,10 +799,55 @@ export class StudentLessonProgressService {
       throw new NotFoundException("User not found");
     }
 
+    const userAccessRows = await dbInstance
+      .select({
+        roleSlug: permissionRoles.slug,
+        permission: permissionRuleSetPermissions.permission,
+      })
+      .from(permissionUserRoles)
+      .innerJoin(
+        permissionRoles,
+        and(
+          eq(permissionRoles.id, permissionUserRoles.roleId),
+          eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
+        ),
+      )
+      .leftJoin(
+        permissionRoleRuleSets,
+        and(
+          eq(permissionRoleRuleSets.roleId, permissionRoles.id),
+          eq(permissionRoleRuleSets.tenantId, permissionRoles.tenantId),
+        ),
+      )
+      .leftJoin(
+        permissionRuleSetPermissions,
+        and(
+          eq(permissionRuleSetPermissions.ruleSetId, permissionRoleRuleSets.ruleSetId),
+          eq(permissionRuleSetPermissions.tenantId, permissionRoleRuleSets.tenantId),
+        ),
+      )
+      .where(
+        and(
+          eq(permissionUserRoles.userId, userId),
+          eq(permissionUserRoles.tenantId, user.tenantId),
+        ),
+      );
+
+    const roleSlugs = Array.from(new Set(userAccessRows.map(({ roleSlug }) => roleSlug)));
+
+    const permissions = Array.from(
+      new Set(
+        userAccessRows
+          .map(({ permission }) => permission)
+          .filter((permission): permission is PermissionKey => Boolean(permission)),
+      ),
+    );
+
     return {
       userId: user.userId,
       email: user.email,
-      role: user.role as UserRole,
+      roleSlugs,
+      permissions,
       tenantId: user.tenantId,
     };
   }

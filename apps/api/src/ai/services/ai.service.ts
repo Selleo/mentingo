@@ -45,7 +45,7 @@ import {
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
-import type { SupportedLanguages } from "@repo/shared";
+import type { PermissionKey, SupportedLanguages } from "@repo/shared";
 import type {
   CreateThreadBody,
   GenerateTranslationBody,
@@ -54,6 +54,7 @@ import type {
   ThreadOwnershipBody,
 } from "src/ai/utils/ai.schema";
 import type { UUIDType } from "src/common";
+import type { CurrentUser } from "src/common/types/current-user.type";
 import type { CourseTranslationType } from "src/courses/types/course.types";
 
 @Injectable()
@@ -196,7 +197,7 @@ export class AiService {
     });
   }
 
-  async runJudge(data: ThreadOwnershipBody, userRole: UserRole = USER_ROLES.STUDENT) {
+  async runJudge(data: ThreadOwnershipBody, currentUser?: CurrentUser) {
     const judged = await observe(
       async () => {
         updateActiveTrace({
@@ -215,7 +216,8 @@ export class AiService {
     await this.markAsCompletedIfJudge(
       lessonId,
       data.userId,
-      userRole,
+      currentUser?.permissions ?? [],
+      currentUser,
       judged.data,
       thread.userLanguage,
       true,
@@ -248,7 +250,8 @@ export class AiService {
   async markAsCompletedIfJudge(
     lessonId: UUIDType,
     studentId: UUIDType,
-    userRole: UserRole,
+    userPermissions: PermissionKey[],
+    actor: CurrentUser | undefined,
     message: string | ResponseAiJudgeJudgementBody,
     language: SupportedLanguages,
     isJudge?: boolean,
@@ -261,7 +264,8 @@ export class AiService {
     await this.studentLessonProgressService.markLessonAsCompleted({
       id: lessonId,
       studentId,
-      userRole,
+      userPermissions,
+      actor,
       aiMentorLessonData,
       language,
     });

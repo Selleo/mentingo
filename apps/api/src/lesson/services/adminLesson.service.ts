@@ -7,7 +7,7 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { ENTITY_TYPES } from "@repo/shared";
+import { ENTITY_TYPES, PERMISSIONS } from "@repo/shared";
 import { CacheManagerStore } from "cache-manager";
 import { getTableColumns, sql } from "drizzle-orm";
 
@@ -28,7 +28,6 @@ import { ENTITY_TYPE } from "src/localization/localization.types";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { questionAnswerOptions, questions } from "src/storage/schema";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 import { isRichTextEmpty } from "src/utils/isRichTextEmpty";
 
 import { LESSON_TYPES } from "../lesson.type";
@@ -51,7 +50,6 @@ import type { SupportedLanguages } from "@repo/shared";
 import type { LessonActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
-import type { UserRole } from "src/user/schemas/userRoles";
 
 @Injectable()
 export class AdminLessonService {
@@ -72,7 +70,7 @@ export class AdminLessonService {
 
   async createLessonForChapter(data: CreateLessonBody, currentUser: CurrentUser) {
     await this.masterCourseService.assertCourseContentEditableByChapterId(data.chapterId);
-    await this.validateAccess("chapter", currentUser.role, currentUser.userId, data.chapterId);
+    await this.validateAccess("chapter", currentUser, data.chapterId);
 
     const { language } = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.CHAPTER,
@@ -128,7 +126,7 @@ export class AdminLessonService {
   async createAiMentorLesson(data: CreateAiMentorLessonBody, currentUser: CurrentUser) {
     await this.masterCourseService.assertCourseContentEditableByChapterId(data.chapterId);
 
-    await this.validateAccess("chapter", currentUser.role, currentUser.userId, data.chapterId);
+    await this.validateAccess("chapter", currentUser, data.chapterId);
 
     const { language } = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.CHAPTER,
@@ -171,7 +169,7 @@ export class AdminLessonService {
   async createQuizLesson(data: CreateQuizLessonBody, currentUser: CurrentUser) {
     await this.masterCourseService.assertCourseContentEditableByChapterId(data.chapterId);
 
-    await this.validateAccess("chapter", currentUser.role, currentUser.userId, data.chapterId);
+    await this.validateAccess("chapter", currentUser, data.chapterId);
 
     const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(data.chapterId);
 
@@ -219,7 +217,7 @@ export class AdminLessonService {
   ) {
     await this.masterCourseService.assertCourseContentEditableByLessonId(id);
 
-    await this.validateAccess("lesson", currentUser.role, currentUser.userId, id);
+    await this.validateAccess("lesson", currentUser, id);
 
     const { availableLocales } = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.LESSON,
@@ -269,7 +267,7 @@ export class AdminLessonService {
   async updateQuizLesson(id: UUIDType, data: UpdateQuizLessonBody, currentUser: CurrentUser) {
     await this.masterCourseService.assertCourseContentEditableByLessonId(id);
 
-    await this.validateAccess("lesson", currentUser.role, currentUser.userId, id);
+    await this.validateAccess("lesson", currentUser, id);
 
     if (data.title && data.title.length > MAX_LESSON_TITLE_LENGTH) {
       throw new BadRequestException({
@@ -320,7 +318,7 @@ export class AdminLessonService {
   async updateLesson(id: UUIDType, data: UpdateLessonBody, currentUser: CurrentUser) {
     await this.masterCourseService.assertCourseContentEditableByLessonId(id);
 
-    await this.validateAccess("lesson", currentUser.role, currentUser.userId, id);
+    await this.validateAccess("lesson", currentUser, id);
 
     const { availableLocales } = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.LESSON,
@@ -368,7 +366,7 @@ export class AdminLessonService {
   async removeLesson(lessonId: UUIDType, currentUser: CurrentUser) {
     await this.masterCourseService.assertCourseContentEditableByLessonId(lessonId);
 
-    await this.validateAccess("lesson", currentUser.role, currentUser.userId, lessonId);
+    await this.validateAccess("lesson", currentUser, lessonId);
 
     const [lesson] = await this.adminLessonRepository.getLesson(lessonId);
 
@@ -406,12 +404,7 @@ export class AdminLessonService {
   }): Promise<void> {
     await this.masterCourseService.assertCourseContentEditableByLessonId(lessonObject.lessonId);
 
-    await this.validateAccess(
-      "lesson",
-      lessonObject.currentUser.role,
-      lessonObject.currentUser.userId,
-      lessonObject.lessonId,
-    );
+    await this.validateAccess("lesson", lessonObject.currentUser, lessonObject.lessonId);
 
     const [lessonToUpdate] = await this.adminLessonRepository.getLesson(lessonObject.lessonId);
 
@@ -784,7 +777,7 @@ export class AdminLessonService {
   async createEmbedLesson(data: CreateEmbedLessonBody, currentUser: CurrentUser) {
     await this.masterCourseService.assertCourseContentEditableByChapterId(data.chapterId);
 
-    await this.validateAccess("chapter", currentUser.role, currentUser.userId, data.chapterId);
+    await this.validateAccess("chapter", currentUser, data.chapterId);
 
     if (data.title.length > MAX_LESSON_TITLE_LENGTH) {
       throw new BadRequestException({
@@ -846,7 +839,7 @@ export class AdminLessonService {
   ) {
     await this.masterCourseService.assertCourseContentEditableByLessonId(lessonId);
 
-    await this.validateAccess("lesson", currentUser.role, currentUser.userId, lessonId);
+    await this.validateAccess("lesson", currentUser, lessonId);
 
     if (data.title && data.title.length > MAX_LESSON_TITLE_LENGTH) {
       throw new BadRequestException({
@@ -944,8 +937,7 @@ export class AdminLessonService {
   }
 
   async uploadFileToLesson(
-    currentUserId: UUIDType,
-    currentUserRole: UserRole,
+    currentUser: CurrentUser,
     file: Express.Multer.File,
     language: SupportedLanguages,
     title: string,
@@ -955,7 +947,7 @@ export class AdminLessonService {
   ) {
     if (lessonId) {
       await this.masterCourseService.assertCourseContentEditableByLessonId(lessonId);
-      await this.validateAccess("lesson", currentUserRole, currentUserId, lessonId);
+      await this.validateAccess("lesson", currentUser, lessonId);
     }
     const fileTitle = {
       [language]: title,
@@ -981,18 +973,13 @@ export class AdminLessonService {
   }
 
   async uploadAvatarToAiMentorLesson(
-    currentUserId: UUIDType,
-    currentUserRole: UserRole,
+    currentUser: CurrentUser,
     lessonId: UUIDType,
     file: Express.Multer.File | null,
   ) {
     await this.masterCourseService.assertCourseContentEditableByLessonId(lessonId);
 
-    const [course] = await this.adminLessonRepository.getCourseByLesson(lessonId);
-
-    if (!(currentUserRole === USER_ROLES.ADMIN || course.authorId === currentUserId)) {
-      throw new ForbiddenException({ message: "common.toast.noAccess" });
-    }
+    await this.validateAccess("lesson", currentUser, lessonId);
 
     if (!file) {
       await this.adminLessonRepository.updateAiMentorAvatar(lessonId, null);
@@ -1087,8 +1074,7 @@ export class AdminLessonService {
 
   async validateAccess(
     entity: "chapter" | "lesson" | "course",
-    currentUserRole: UserRole,
-    currentUserId: UUIDType,
+    currentUser: CurrentUser,
     id: UUIDType,
     throwOnNoAccess: boolean = true,
   ) {
@@ -1108,7 +1094,9 @@ export class AdminLessonService {
 
     if (!course) throw new NotFoundException("Course not found");
 
-    const hasAccess = currentUserRole === USER_ROLES.ADMIN || course.authorId === currentUserId;
+    const hasAccess =
+      currentUser.permissions.includes(PERMISSIONS.COURSE_UPDATE) ||
+      course.authorId === currentUser.userId;
 
     if (throwOnNoAccess && !hasAccess) {
       throw new ForbiddenException({ message: "common.toast.noAccess" });

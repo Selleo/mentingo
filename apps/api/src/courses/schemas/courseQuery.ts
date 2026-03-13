@@ -2,9 +2,8 @@ import { type Static, Type } from "@sinclair/typebox";
 
 import { groupsFilterSchema } from "src/group/group.schema";
 
-import type { SupportedLanguages } from "@repo/shared";
+import type { PermissionKey, SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
-import type { UserRole } from "src/user/schemas/userRoles";
 
 export const courseSortFields = [
   "title",
@@ -83,7 +82,7 @@ export type CoursesQuery = {
   perPage?: number;
   sort?: SortCourseFieldsOptions;
   currentUserId?: UUIDType;
-  currentUserRole?: UserRole;
+  currentUserPermissions?: PermissionKey[];
   excludeCourseId?: UUIDType;
   language: SupportedLanguages;
 };

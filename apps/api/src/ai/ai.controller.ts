@@ -20,6 +20,7 @@ import { type BaseResponse, baseResponse, UUIDSchema, UUIDType } from "src/commo
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
+import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { USER_ROLES, UserRole } from "src/user/schemas/userRoles";
 
 @Controller("ai")
@@ -80,10 +81,9 @@ export class AiController {
   })
   async judgeThread(
     @Param("threadId") threadId: UUIDType,
-    @CurrentUser("userId") userId: UUIDType,
-    @CurrentUser("role") userRole: UserRole,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<ResponseJudgeBody>> {
-    return await this.aiService.runJudge({ threadId, userId }, userRole);
+    return await this.aiService.runJudge({ threadId, userId: currentUser.userId }, currentUser);
   }
 
   @Post("retake/:lessonId")

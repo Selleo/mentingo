@@ -27,6 +27,10 @@
 - [x] Replace category role checks with permission-driven flow
 - [x] Migrate `group.controller` from `@Roles` to `@RequirePermission`
 - [x] Replace group role comparisons (`users.role`) with permission-role slug resolution
+- [x] Align chapter/lesson edit endpoints with `PERMISSIONS.COURSE_UPDATE`
+- [x] Switch chapter/lesson edit access validation to permission-based checks (no role checks)
+- [x] Align course edit endpoints with `PERMISSIONS.COURSE_UPDATE`
+- [x] Switch course edit service checks from role-based to permission-based where updated
 - [ ] Checkpoint complete
 
 ## Segment 5: Cleanup
