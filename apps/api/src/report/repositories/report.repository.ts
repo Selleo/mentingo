@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { COURSE_ENROLLMENT } from "@repo/shared";
+import { COURSE_ENROLLMENT, PERMISSIONS } from "@repo/shared";
 import { and, eq, isNull, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
@@ -14,7 +14,6 @@ import {
   studentLessonProgress,
   users,
 } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import type { SupportedLanguages } from "@repo/shared";
 import type { CurrentUser } from "src/common/types/current-user.type";
@@ -42,11 +41,12 @@ export class ReportRepository {
   ): Promise<StudentCourseReportRow[]> {
     const conditions = [
       eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
-      eq(users.role, USER_ROLES.STUDENT),
       isNull(users.deletedAt),
     ];
 
-    if (currentUser?.role === USER_ROLES.CONTENT_CREATOR) {
+    const canViewAllCourses = currentUser.permissions.includes(PERMISSIONS.USER_MANAGE);
+
+    if (!canViewAllCourses) {
       conditions.push(eq(courses.authorId, currentUser.userId));
     }
 

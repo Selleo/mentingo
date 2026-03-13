@@ -462,12 +462,7 @@ export class LumaService {
   }
 
   private async validateCourseAccess(integrationId: string, currentUser: CurrentUser) {
-    await this.adminLessonService.validateAccess(
-      ENTITY_TYPE.COURSE,
-      currentUser.role,
-      currentUser.userId,
-      integrationId,
-    );
+    await this.adminLessonService.validateAccess(ENTITY_TYPE.COURSE, currentUser, integrationId);
   }
 
   private async getAuthorizedLumaClient(

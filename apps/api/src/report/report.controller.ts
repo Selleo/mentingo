@@ -1,24 +1,23 @@
 import { Controller, Get, Query, Res, UseGuards } from "@nestjs/common";
-import { SupportedLanguages } from "@repo/shared";
+import { PERMISSIONS, SupportedLanguages } from "@repo/shared";
 import { Response } from "express";
 import { Validate } from "nestjs-typebox";
 
-import { Roles } from "src/common/decorators/roles.decorator";
+import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
-import { RolesGuard } from "src/common/guards/roles.guard";
+import { PermissionsGuard } from "src/common/guards/permissions.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { ReportService } from "./report.service";
 
-@UseGuards(RolesGuard)
+@UseGuards(PermissionsGuard)
 @Controller("report")
 export class ReportController {
   constructor(private readonly reportService: ReportService) {}
 
   @Get("summary")
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.REPORT_READ)
   @Validate({
     request: [{ type: "query", name: "language", schema: supportedLanguagesSchema }],
   })

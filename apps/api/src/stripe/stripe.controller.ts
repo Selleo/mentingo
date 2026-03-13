@@ -5,14 +5,14 @@ import {
 } from "@golevelup/nestjs-stripe";
 import { Controller, Post, Query, Headers, Req, Get, Patch, Param, Body } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { PERMISSIONS } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 import Stripe from "stripe";
 
 import { BaseResponse, baseResponse, UUIDType } from "src/common";
 import { Public } from "src/common/decorators/public.decorator";
-import { Roles } from "src/common/decorators/roles.decorator";
-import { USER_ROLES } from "src/user/schemas/userRoles";
+import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 
 import { checkoutSessionSchema, CreateCheckoutSessionBody } from "./schemas/checkoutSession.schema";
 import { CreatePromotionCode, createPromotionCodeSchema } from "./schemas/createPromotionCode";
@@ -45,7 +45,7 @@ export class StripeController {
   }
 
   @Post()
-  @Roles(USER_ROLES.STUDENT)
+  @RequirePermission(PERMISSIONS.BILLING_CHECKOUT)
   @Validate({
     response: baseResponse(paymentIntentSchema),
     request: [
@@ -87,7 +87,7 @@ export class StripeController {
   }
 
   @Post("checkout-session")
-  @Roles(USER_ROLES.STUDENT)
+  @RequirePermission(PERMISSIONS.BILLING_CHECKOUT)
   @Validate({
     response: baseResponse(Type.Object({ clientSecret: Type.String() })),
     request: [{ type: "body", schema: checkoutSessionSchema }],
@@ -139,17 +139,16 @@ export class StripeController {
   @Validate({
     response: baseResponse(Type.Array(promotionCodeSchema)),
   })
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.BILLING_MANAGE)
   async getPromotionCodes() {
     return new BaseResponse(await this.stripeService.getPromotionCodes());
   }
 
-  @Public()
   @Get("promotion-code/:id")
   @Validate({
     response: baseResponse(promotionCodeSchema),
   })
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.BILLING_MANAGE)
   async getPromotionCode(@Param("id") id: string) {
     return new BaseResponse(await this.stripeService.getPromotionCode(id));
   }
@@ -159,7 +158,7 @@ export class StripeController {
     response: baseResponse(Type.String()),
     request: [{ type: "body", schema: createPromotionCodeSchema }],
   })
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.BILLING_MANAGE)
   async createPromotionCoupon(
     @Body()
     body: CreatePromotionCode,
@@ -182,8 +181,8 @@ export class StripeController {
       },
     ],
   })
-  @Roles(USER_ROLES.ADMIN)
-  async updatePromotionCode(@Param("code") id: string, @Body() body: UpdatePromotionCode) {
+  @RequirePermission(PERMISSIONS.BILLING_MANAGE)
+  async updatePromotionCode(@Param("id") id: string, @Body() body: UpdatePromotionCode) {
     return new BaseResponse(await this.stripeService.updatePromotionCode(id, body));
   }
 }

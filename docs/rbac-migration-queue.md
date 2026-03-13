@@ -38,6 +38,15 @@
 - [x] Migrate `settings.controller` to `@RequirePermission(PERMISSIONS.SETTINGS_MANAGE)` for admin/manage endpoints
 - [x] Migrate `ai.controller` from `@Roles` to `@RequirePermission(PERMISSIONS.AI_USE)`
 - [x] Replace AI role-based thread/retake authorization with permission-based checks
+- [x] Migrate `report.controller` from `@Roles` to `@RequirePermission(PERMISSIONS.REPORT_READ)`
+- [x] Replace `report.repository` role-based filtering (`users.role` / `currentUser.role`) with permission-based scope checks
+- [x] Migrate `qa.controller` to `@RequirePermission(PERMISSIONS.QA_MANAGE/QA_READ_PUBLIC)` and remove `RolesGuard`
+- [x] Migrate `env.controller` to `@RequirePermission(PERMISSIONS.ENV_*)` and remove `RolesGuard`
+- [x] Migrate `luma.controller` to `@RequirePermission(PERMISSIONS.LUMA_MANAGE)` and remove `RolesGuard`
+- [x] Replace `luma.service` role-based course access call with permission-aware `currentUser` flow
+- [x] Migrate `stripe.controller` to `@RequirePermission(PERMISSIONS.BILLING_CHECKOUT/BILLING_MANAGE)`
+- [x] Migrate `scorm.controller` to `@RequirePermission(PERMISSIONS.SCORM_UPLOAD/SCORM_READ)` and remove `RolesGuard`
+- [x] Migrate `certificates.controller` to `@RequirePermission(PERMISSIONS.CERTIFICATE_*)` and remove `RolesGuard`
 - [ ] Checkpoint complete
 
 ## Segment 5: Cleanup
