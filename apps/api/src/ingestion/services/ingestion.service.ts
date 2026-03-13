@@ -5,6 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
+import { PERMISSIONS } from "@repo/shared";
 
 import { DatabasePg } from "src/common";
 import { MAX_NUM_OF_FILES } from "src/ingestion/ingestion.config";
@@ -12,11 +13,10 @@ import { DOCUMENT_STATUS } from "src/ingestion/ingestion.constants";
 import { IngestionRepository } from "src/ingestion/repositories/ingestion.repository";
 import { DocumentService } from "src/ingestion/services/document.service";
 import { IngestionQueueService } from "src/ingestion/services/queue.service";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import type { Job } from "bullmq";
 import type { UUIDType } from "src/common";
-import type { UserRole } from "src/user/schemas/userRoles";
+import type { CurrentUser } from "src/common/types/current-user.type";
 
 @Injectable()
 export class IngestionService {
@@ -27,19 +27,14 @@ export class IngestionService {
     private readonly queueService: IngestionQueueService,
   ) {}
 
-  async ingest(
-    lessonId: UUIDType,
-    files: Express.Multer.File[],
-    currentUserId: UUIDType,
-    role: UserRole,
-  ) {
+  async ingest(lessonId: UUIDType, files: Express.Multer.File[], currentUser: CurrentUser) {
     if (files.length > MAX_NUM_OF_FILES) {
       throw new BadRequestException("Exceeded max number of files");
     }
 
     const author = await this.getLessonAuthor(lessonId);
 
-    if (role !== USER_ROLES.ADMIN && author !== currentUserId) {
+    if (!this.canManageAnyLesson(currentUser) && author !== currentUser.userId) {
       throw new ForbiddenException("You can only upload files to your own lessons");
     }
 
@@ -83,28 +78,20 @@ export class IngestionService {
     return { message: "Ingested files successfully" };
   }
 
-  async findAllDocumentsForLesson(
-    lessonId: UUIDType,
-    currentUserId: UUIDType,
-    currentUserRole: UserRole,
-  ) {
+  async findAllDocumentsForLesson(lessonId: UUIDType, currentUser: CurrentUser) {
     const author = await this.getLessonAuthor(lessonId);
 
-    if (currentUserId !== author && currentUserRole !== USER_ROLES.ADMIN) {
+    if (currentUser.userId !== author && !this.canManageAnyLesson(currentUser)) {
       throw new ForbiddenException("You are not allowed to view files for this lesson.");
     }
 
     return this.documentService.findAllDocumentsForLesson(lessonId);
   }
 
-  async deleteDocumentLink(
-    documentLinkId: UUIDType,
-    currentUserId: UUIDType,
-    currentUserRole: UserRole,
-  ) {
+  async deleteDocumentLink(documentLinkId: UUIDType, currentUser: CurrentUser) {
     const author = await this.getDocumentLinkAuthor(documentLinkId);
 
-    if (currentUserId !== author && currentUserRole !== USER_ROLES.ADMIN) {
+    if (currentUser.userId !== author && !this.canManageAnyLesson(currentUser)) {
       throw new ForbiddenException("You are not allowed to view files for this lesson.");
     }
 
@@ -127,8 +114,9 @@ export class IngestionService {
   }
 
   private async getDocumentLinkAuthor(documentLinkId: UUIDType): Promise<UUIDType> {
-    const documentLink =
-      await this.documentService.findCourseAuthorByDocumentLinkId(documentLinkId);
+    const documentLink = await this.documentService.findCourseAuthorByDocumentLinkId(
+      documentLinkId,
+    );
     if (!documentLink) {
       throw new NotFoundException("Document link not found");
     }
@@ -143,5 +131,9 @@ export class IngestionService {
     }
 
     return aiMentorLesson.id;
+  }
+
+  private canManageAnyLesson(currentUser: CurrentUser) {
+    return currentUser.permissions.includes(PERMISSIONS.COURSE_UPDATE);
   }
 }

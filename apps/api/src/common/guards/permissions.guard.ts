@@ -24,8 +24,15 @@ export class PermissionsGuard implements CanActivate {
 
     if (!requiredPermissions?.length) return true;
 
+    const isPublic = this.reflector.getAllAndOverride<boolean>("isPublic", [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
     const request = context.switchToHttp().getRequest();
     const user = request.user as CurrentUser | undefined;
+
+    if (isPublic && !user) return true;
 
     if (!user) return false;
 

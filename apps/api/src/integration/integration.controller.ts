@@ -10,6 +10,7 @@ import {
   Query,
   UseGuards,
 } from "@nestjs/common";
+import { PERMISSIONS } from "@repo/shared";
 import { ApiForbiddenResponse, ApiHeader, ApiUnauthorizedResponse, ApiTags } from "@nestjs/swagger";
 import { type Static, Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
@@ -24,9 +25,9 @@ import {
 } from "src/common";
 import { API_HEADERS, ApiEndpointDocs } from "src/common/decorators/api-endpoint-docs.decorator";
 import { Public } from "src/common/decorators/public.decorator";
-import { Roles } from "src/common/decorators/roles.decorator";
+import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
-import { RolesGuard } from "src/common/guards/roles.guard";
+import { PermissionsGuard } from "src/common/guards/permissions.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { CourseService } from "src/courses/course.service";
 import { enrolledCourseGroupsPayload } from "src/courses/schemas/course.schema";
@@ -65,7 +66,6 @@ import {
   type UsersFilterSchema,
   type SortUserFieldsOptions,
 } from "src/user/schemas/userQuery";
-import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 import { UserService } from "src/user/user.service";
 
 import type { GroupKeywordFilterBody } from "src/group/group.schema";
@@ -85,7 +85,7 @@ import type { AllGroupsResponse } from "src/group/group.types";
 })
 @Public()
 @Controller("integration")
-@UseGuards(IntegrationApiKeyGuard, RolesGuard)
+@UseGuards(IntegrationApiKeyGuard, PermissionsGuard)
 export class IntegrationController {
   constructor(
     private readonly integrationService: IntegrationService,
@@ -95,7 +95,7 @@ export class IntegrationController {
   ) {}
 
   @Get("tenants")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.INTEGRATION_API_USE)
   @IntegrationTenantOptional()
   @ApiEndpointDocs({
     summary: "List all tenants for integration selection",
@@ -119,7 +119,7 @@ export class IntegrationController {
   }
 
   @Get("users")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.INTEGRATION_API_USE)
   @ApiEndpointDocs({
     summary: "List users for integration",
     description:
@@ -129,7 +129,7 @@ export class IntegrationController {
   @Validate({
     request: [
       { type: "query", name: "keyword", schema: Type.String() },
-      { type: "query", name: "role", schema: Type.Enum(USER_ROLES) },
+      { type: "query", name: "roleSlug", schema: Type.String() },
       { type: "query", name: "archived", schema: Type.String() },
       { type: "query", name: "page", schema: Type.Number({ minimum: 1 }) },
       { type: "query", name: "perPage", schema: Type.Number() },
@@ -140,7 +140,7 @@ export class IntegrationController {
   })
   async getUsers(
     @Query("keyword") keyword: string,
-    @Query("role") role: UserRole,
+    @Query("roleSlug") roleSlug: string,
     @Query("archived") archived: string,
     @Query("page") page: number,
     @Query("perPage") perPage: number,
@@ -149,7 +149,7 @@ export class IntegrationController {
   ): Promise<PaginatedResponse<AllUsersResponse>> {
     const filters: UsersFilterSchema = {
       keyword,
-      role,
+      roleSlug,
       archived: archived ? archived === "true" : undefined,
       groups,
     };
@@ -161,7 +161,7 @@ export class IntegrationController {
   }
 
   @Get("users/:userId")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.INTEGRATION_API_USE)
   @ApiEndpointDocs({
     summary: "Get user by ID for integration",
     description:
@@ -177,7 +177,7 @@ export class IntegrationController {
   }
 
   @Post("users")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.INTEGRATION_API_USE)
   @ApiEndpointDocs({
     summary: "Create user via integration API",
     description:
@@ -198,7 +198,7 @@ export class IntegrationController {
   }
 
   @Patch("users/:userId")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.INTEGRATION_API_USE)
   @ApiEndpointDocs({
     summary: "Update user via integration API",
     description:
@@ -222,7 +222,7 @@ export class IntegrationController {
   }
 
   @Delete("users/:userId")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.INTEGRATION_API_USE)
   @ApiEndpointDocs({
     summary: "Delete user via integration API",
     description:
@@ -243,7 +243,7 @@ export class IntegrationController {
   }
 
   @Get("groups")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.INTEGRATION_API_USE)
   @ApiEndpointDocs({
     summary: "List groups for integration",
     description:
@@ -276,7 +276,7 @@ export class IntegrationController {
   }
 
   @Put("users/:userId/groups")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.INTEGRATION_API_USE)
   @ApiEndpointDocs({
     summary: "Set user groups via integration API",
     description:
@@ -301,7 +301,7 @@ export class IntegrationController {
   }
 
   @Post("courses/:courseId/enroll-users")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.INTEGRATION_API_USE)
   @ApiEndpointDocs({
     summary: "Enroll users to course via integration API",
     description:
@@ -326,7 +326,7 @@ export class IntegrationController {
   }
 
   @Delete("courses/:courseId/enroll-users")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.INTEGRATION_API_USE)
   @ApiEndpointDocs({
     summary: "Unenroll users from course via integration API",
     description:
@@ -350,7 +350,7 @@ export class IntegrationController {
   }
 
   @Post("courses/:courseId/enroll-groups")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.INTEGRATION_API_USE)
   @ApiEndpointDocs({
     summary: "Enroll groups to course via integration API",
     description:
@@ -375,7 +375,7 @@ export class IntegrationController {
   }
 
   @Delete("courses/:courseId/enroll-groups")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.INTEGRATION_API_USE)
   @ApiEndpointDocs({
     summary: "Unenroll groups from course via integration API",
     description:

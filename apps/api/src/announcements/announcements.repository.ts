@@ -1,4 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
+import { PERMISSIONS } from "@repo/shared";
 import {
   eq,
   and,
@@ -7,6 +8,7 @@ import {
   isNotNull,
   sql,
   not,
+  notExists,
   desc,
   ilike,
   or,
@@ -18,10 +20,13 @@ import {
   announcements,
   groupAnnouncements,
   groupUsers,
+  permissionRoleRuleSets,
+  permissionRoles,
+  permissionRuleSetPermissions,
+  permissionUserRoles,
   userAnnouncements,
   users,
 } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 import { UserService } from "src/user/user.service";
 
 import { LATEST_ANNOUNCEMENTS_LIMIT } from "./consts";
@@ -105,7 +110,7 @@ export class AnnouncementsRepository {
         .where(
           and(
             eq(groupUsers.groupId, groupId),
-            not(eq(users.role, USER_ROLES.ADMIN)),
+            this.excludeUsersWithPermission(users.id, PERMISSIONS.USER_MANAGE),
             isNull(users.deletedAt),
           ),
         );
@@ -235,6 +240,41 @@ export class AnnouncementsRepository {
           announcement.authorProfilePictureUrl,
         ),
       })),
+    );
+  }
+
+  private excludeUsersWithPermission(userIdColumn: typeof users.id, permission: string) {
+    return notExists(
+      this.db
+        .select({ userId: permissionUserRoles.userId })
+        .from(permissionUserRoles)
+        .innerJoin(
+          permissionRoles,
+          and(
+            eq(permissionRoles.id, permissionUserRoles.roleId),
+            eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
+          ),
+        )
+        .innerJoin(
+          permissionRoleRuleSets,
+          and(
+            eq(permissionRoleRuleSets.roleId, permissionRoles.id),
+            eq(permissionRoleRuleSets.tenantId, permissionRoles.tenantId),
+          ),
+        )
+        .innerJoin(
+          permissionRuleSetPermissions,
+          and(
+            eq(permissionRuleSetPermissions.ruleSetId, permissionRoleRuleSets.ruleSetId),
+            eq(permissionRuleSetPermissions.tenantId, permissionRoleRuleSets.tenantId),
+          ),
+        )
+        .where(
+          and(
+            eq(permissionUserRoles.userId, userIdColumn),
+            eq(permissionRuleSetPermissions.permission, permission),
+          ),
+        ),
     );
   }
 }

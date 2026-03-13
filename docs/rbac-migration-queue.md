@@ -47,6 +47,12 @@
 - [x] Migrate `stripe.controller` to `@RequirePermission(PERMISSIONS.BILLING_CHECKOUT/BILLING_MANAGE)`
 - [x] Migrate `scorm.controller` to `@RequirePermission(PERMISSIONS.SCORM_UPLOAD/SCORM_READ)` and remove `RolesGuard`
 - [x] Migrate `certificates.controller` to `@RequirePermission(PERMISSIONS.CERTIFICATE_*)` and remove `RolesGuard`
+- [x] Migrate `integration` controllers to `@RequirePermission(PERMISSIONS.INTEGRATION_API_USE/INTEGRATION_KEY_MANAGE)` and remove `RolesGuard`
+- [x] Replace `integration.service` API-key owner admin-role check with permission-resolution check (`PERMISSIONS.INTEGRATION_API_USE`)
+- [x] Migrate `ingestion.controller` to `@RequirePermission(PERMISSIONS.INGESTION_MANAGE)` and remove `RolesGuard`
+- [x] Replace `ingestion.service` role-based author/admin branching with permission-based checks
+- [x] Migrate `announcements.controller` to `@RequirePermission(PERMISSIONS.ANNOUNCEMENT_READ/ANNOUNCEMENT_CREATE)` and remove `RolesGuard`
+- [x] Replace `announcements.repository` role-based recipient filtering (`users.role = admin`) with permission-based filtering
 - [ ] Checkpoint complete
 
 ## Segment 5: Cleanup

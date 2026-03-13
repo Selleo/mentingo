@@ -82,7 +82,6 @@ export class IntegrationRepository {
         keyTenantIsManaging: tenants.isManaging,
         userId: users.id,
         userEmail: users.email,
-        userRole: users.role,
         userDeletedAt: users.deletedAt,
       })
       .from(integrationApiKeys)
