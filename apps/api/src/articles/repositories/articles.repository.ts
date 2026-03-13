@@ -1,14 +1,14 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { ARTICLE_STATUS, ENTITY_TYPES } from "@repo/shared";
+import { ARTICLE_STATUS, ENTITY_TYPES, PERMISSIONS } from "@repo/shared";
 import { and, asc, desc, eq, getTableColumns, gt, isNull, lt, ne, not, sql } from "drizzle-orm";
 
 import { baseArticleTitle } from "src/articles/constants";
 import { DatabasePg } from "src/common";
 import { deleteJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
+import { hasPermission } from "src/common/permissions/permission.utils";
 import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
 import { LocalizationService } from "src/localization/localization.service";
 import { articleSections, articles, resourceEntity, resources, users } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import type { SupportedLanguages } from "@repo/shared";
 import type { SQL } from "drizzle-orm";
@@ -366,14 +366,13 @@ export class ArticlesRepository {
     conditions: SQL<unknown>[],
     currentUser?: CurrentUser,
   ) {
-    const sectionTitle =
-      currentUser?.role === USER_ROLES.ADMIN || currentUser?.role === USER_ROLES.CONTENT_CREATOR
-        ? this.localizationService.getFieldByLanguage(articleSections.title, requestedLanguage)
-        : this.localizationService.getLocalizedSqlField(
-            articleSections.title,
-            requestedLanguage,
-            articleSections,
-          );
+    const sectionTitle = hasPermission(currentUser?.permissions, PERMISSIONS.ARTICLE_MANAGE)
+      ? this.localizationService.getFieldByLanguage(articleSections.title, requestedLanguage)
+      : this.localizationService.getLocalizedSqlField(
+          articleSections.title,
+          requestedLanguage,
+          articleSections,
+        );
 
     const articleTitle = this.localizationService.getFieldByLanguage(
       articles.title,
@@ -412,8 +411,7 @@ export class ArticlesRepository {
     currentUser?: CurrentUser,
     options?: { isDraftMode?: boolean; excludedId?: UUIDType },
   ): SQL<unknown>[] {
-    const isAdminLike =
-      currentUser?.role === USER_ROLES.ADMIN || currentUser?.role === USER_ROLES.CONTENT_CREATOR;
+    const isAdminLike = hasPermission(currentUser?.permissions, PERMISSIONS.ARTICLE_MANAGE);
 
     const conditions = [
       ne(articles.archived, true),

@@ -5,13 +5,14 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { ARTICLE_STATUS, ENTITY_TYPES, type SupportedLanguages } from "@repo/shared";
+import { ARTICLE_STATUS, ENTITY_TYPES, PERMISSIONS, type SupportedLanguages } from "@repo/shared";
 import { eq, getTableColumns, sql } from "drizzle-orm";
 import { isEmpty, isEqual } from "lodash";
 import { match } from "ts-pattern";
 
 import { DatabasePg } from "src/common";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
+import { hasPermission } from "src/common/permissions/permission.utils";
 import { annotateVideoAutoplayInContent } from "src/common/utils/annotateVideoAutoplayInContent";
 import { injectResourcesIntoContent } from "src/common/utils/injectResourcesIntoContent";
 import {
@@ -30,7 +31,6 @@ import { LocalizationService } from "src/localization/localization.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { SettingsService } from "src/settings/settings.service";
 import { articles, articleSections } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { baseArticleSectionTitle, baseArticleTitle } from "../constants";
 import { ArticlesRepository } from "../repositories/articles.repository";
@@ -53,7 +53,6 @@ import type {
 import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
 import type { ResourceWithUrlError } from "src/lesson/lesson-resource.types";
-import type { UserRole } from "src/user/schemas/userRoles";
 
 type StoredArticleResource = Awaited<ReturnType<FileService["getResourcesForEntity"]>>[number];
 type ResourceMetadata = StoredArticleResource["metadata"] & { originalFilename?: unknown };
@@ -463,8 +462,7 @@ export class ArticlesService {
   ) {
     await this.checkAccess(currentUser?.userId);
 
-    const isAdminLike =
-      currentUser?.role === USER_ROLES.ADMIN || currentUser?.role === USER_ROLES.CONTENT_CREATOR;
+    const isAdminLike = hasPermission(currentUser?.permissions, PERMISSIONS.ARTICLE_MANAGE);
 
     if (isDraftMode && !isAdminLike)
       throw new NotFoundException("adminArticleView.toast.notFoundError");
@@ -515,10 +513,9 @@ export class ArticlesService {
     req: Request,
     res: Response,
     resourceId: UUIDType,
-    userId?: UUIDType,
-    role?: UserRole,
+    currentUser?: CurrentUser,
   ) {
-    await this.checkAccess(userId);
+    await this.checkAccess(currentUser?.userId);
 
     const resource = await this.articlesRepository.getResource(resourceId);
 
@@ -530,8 +527,9 @@ export class ArticlesService {
 
     if (!article) throw new NotFoundException("Article not found");
 
-    const isAdminLike = role === USER_ROLES.ADMIN || role === USER_ROLES.CONTENT_CREATOR;
-    const isAuthor = Boolean(userId && article.authorId === userId);
+    const isAdminLike = hasPermission(currentUser?.permissions, PERMISSIONS.ARTICLE_MANAGE);
+
+    const isAuthor = Boolean(currentUser?.userId && article.authorId === currentUser.userId);
     const isPublic = Boolean(article.isPublic && article.publishedAt !== null);
 
     if (!isAdminLike && !isAuthor && !isPublic) {
@@ -882,7 +880,10 @@ export class ArticlesService {
 
     if (
       !currentUser ||
-      !(article.authorId === currentUser.userId || currentUser.role === USER_ROLES.ADMIN)
+      !(
+        article.authorId === currentUser.userId ||
+        hasPermission(currentUser.permissions, PERMISSIONS.USER_MANAGE)
+      )
     )
       throw new BadRequestException("common.toast.noAccess");
   }

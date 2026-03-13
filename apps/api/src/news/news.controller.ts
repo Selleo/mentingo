@@ -11,7 +11,6 @@ import {
   Req,
   Res,
   UploadedFile,
-  UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
@@ -23,6 +22,7 @@ import {
   ALLOWED_PRESENTATION_FILE_TYPES,
   ALLOWED_VIDEO_FILE_TYPES,
   ALLOWED_WORD_FILE_TYPES,
+  PERMISSIONS,
   SupportedLanguages,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
@@ -31,14 +31,12 @@ import { Validate } from "nestjs-typebox";
 
 import { BaseResponse, PaginatedResponse, UUIDSchema, UUIDType, baseResponse } from "src/common";
 import { Public } from "src/common/decorators/public.decorator";
-import { Roles } from "src/common/decorators/roles.decorator";
+import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
-import { RolesGuard } from "src/common/guards/roles.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
 import { NewsService } from "./news.service";
@@ -57,10 +55,8 @@ import {
 import { UpdateNews, updateNewsSchema } from "./schemas/updateNews.schema";
 
 import type { GetNewsResponse, GetNewsResponseWithPlainContent } from "./schemas/selectNews.schema";
-import type { UserRole } from "src/user/schemas/userRoles";
 
 @Controller("news")
-@UseGuards(RolesGuard)
 export class NewsController {
   constructor(private readonly newsService: NewsService) {}
 
@@ -72,7 +68,7 @@ export class NewsController {
     ],
     response: paginatedNewsListResponseSchema,
   })
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.NEWS_MANAGE)
   async getDraftNewsList(
     @Query("language") language: SupportedLanguages,
     @Query("page") page = 1,
@@ -88,7 +84,7 @@ export class NewsController {
     request: [{ type: "body", schema: previewNewsRequestSchema }],
     response: baseResponse(previewNewsResponseSchema),
   })
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.NEWS_MANAGE)
   async generateNewsPreview(
     @Body() body: { newsId: UUIDType; language: SupportedLanguages; content: string },
     @CurrentUser() currentUser: CurrentUserType,
@@ -111,12 +107,11 @@ export class NewsController {
   })
   async getNewsResource(
     @Param("resourceId") resourceId: UUIDType,
-    @CurrentUser("userId") userId: UUIDType | undefined,
-    @CurrentUser("role") role: UserRole | undefined,
+    @CurrentUser() currentUser: CurrentUserType | undefined,
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    return this.newsService.getNewsResource(req, res, resourceId, userId, role);
+    return this.newsService.getNewsResource(req, res, resourceId, currentUser);
   }
 
   @Public()
@@ -164,7 +159,7 @@ export class NewsController {
     request: [{ type: "body", schema: createNewsSchema }],
     response: baseResponse(createNewsResponseSchema),
   })
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.NEWS_MANAGE)
   async createNews(
     @Body() createNewsBody: CreateNews,
     @CurrentUser() currentUser: CurrentUserType,
@@ -184,7 +179,7 @@ export class NewsController {
     ],
     response: baseResponse(createNewsResponseSchema),
   })
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.NEWS_MANAGE)
   async updateNews(
     @Param("id") id: string,
     @Body(new ValidateMultipartPipe(updateNewsSchema)) updateNewsBody: UpdateNews,
@@ -211,7 +206,7 @@ export class NewsController {
     ],
     response: baseResponse(createNewsResponseSchema),
   })
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.NEWS_MANAGE)
   async addNewLanguage(
     @Param("id") id: string,
     @Body() createLanguageBody: CreateNews,
@@ -234,7 +229,7 @@ export class NewsController {
     ],
     response: baseResponse(deleteNewsLanguageResponseSchema),
   })
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.NEWS_MANAGE)
   async deleteNewsLanguage(
     @Param("id") id: UUIDType,
     @Query("language") language: SupportedLanguages,
@@ -250,7 +245,7 @@ export class NewsController {
     request: [{ type: "param", name: "id", schema: UUIDSchema }],
     response: baseResponse(deleteNewsResponseSchema),
   })
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.NEWS_MANAGE)
   async deleteNews(@Param("id") id: string, @CurrentUser() currentUser?: CurrentUserType) {
     const deletedNews = await this.newsService.deleteNews(id, currentUser);
 
@@ -286,7 +281,7 @@ export class NewsController {
     request: [{ type: "param", name: "id", schema: UUIDSchema }],
     response: baseResponse(uploadNewsFileResponseSchema),
   })
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.NEWS_MANAGE)
   async uploadFileToNews(
     @Param("id") id: string,
     @UploadedFile(
