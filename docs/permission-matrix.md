@@ -53,7 +53,8 @@ Legend:
 | `course.read_manageable` | View courses I can manage                                                                                              |        No |      No |           Yes\* |   Yes |
 | `course.read`            | Course reads in authenticated flows, including course structure and content reads, but not statistics                  |        No |   Yes\* |           Yes\* |   Yes |
 | `course.create`          | Create a new course                                                                                                    |        No |      No |             Yes |   Yes |
-| `course.update`          | Update course content and structure: course settings, chapters, lessons, uploads, translations, certificates, trailers |        No |      No |           Yes\* |   Yes |
+| `course.update`          | Update course content and structure: course settings, chapters, lessons, uploads, translations, certificates, trailers |        No |      No |              No |   Yes |
+| `course.update_own`      | Update only own-authored course content and structure                                                                  |        No |      No |           Yes\* |   Yes |
 | `course.delete`          | Delete courses                                                                                                         |        No |      No |               ? |   Yes |
 | `course.enrollment`      | Individual and group enrollment/unenrollment                                                                           |        No |   Yes\* |              No | Yes\* |
 | `course.statistics`      | Course statistics and related reporting filters                                                                        |        No |      No |           Yes\* |   Yes |
@@ -80,13 +81,16 @@ Legend:
 | --------------------- | -------------------------------------------------------------------- | --------: | ------: | --------------: | ----: |
 | `ai.use`              | AI mentor threads, chat, judging, and retakes                        |        No |     Yes |             Yes |   Yes |
 | `luma.manage`         | Luma course generation workflows                                     |        No |      No |           Yes\* |   Yes |
-| `ingestion.manage`    | Ingest, list, and delete lesson documents                            |        No |      No |           Yes\* |   Yes |
+| `ingestion.manage`    | Ingest, list, and delete lesson documents for any manageable lesson  |        No |      No |           Yes\* |   Yes |
+| `ingestion.manage_own`| Ingest, list, and delete lesson documents for own-authored lessons   |        No |      No |           Yes\* |   Yes |
 | `announcement.read`   | Read and mark announcements                                          |        No |     Yes |             Yes |   Yes |
 | `announcement.create` | Create announcements                                                 |        No |      No |             Yes |   Yes |
 | `news.read_public`    | Public news reads                                                    |     Yes\* |      No |              No |    No |
-| `news.manage`         | Create, update, publish, preview, delete, and upload news content    |        No |      No |           Yes\* |   Yes |
+| `news.manage`         | Create, update, publish, preview, delete, and upload any news content |       No |      No |           Yes\* |   Yes |
+| `news.manage_own`     | Create, update, publish, preview, delete, and upload own news content |       No |      No |           Yes\* |   Yes |
 | `article.read_public` | Public article reads                                                 |     Yes\* |      No |              No |    No |
-| `article.manage`      | Create, update, publish, preview, delete, and upload article content |        No |      No |           Yes\* |   Yes |
+| `article.manage`      | Create, update, publish, preview, delete, and upload any article content |      No |      No |           Yes\* |   Yes |
+| `article.manage_own`  | Create, update, publish, preview, delete, and upload own article content |      No |      No |           Yes\* |   Yes |
 | `qa.read_public`      | Public FAQ reads                                                     |       Yes |      No |              No |    No |
 | `qa.manage`           | FAQ create, update, delete, and language operations                  |        No |      No |              No |   Yes |
 

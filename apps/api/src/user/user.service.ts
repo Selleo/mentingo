@@ -454,7 +454,7 @@ export class UserService {
             users.tenantId,
             PERMISSIONS.LEARNING_PROGRESS_UPDATE,
           ),
-          this.userLacksPermissionCondition(users.id, users.tenantId, PERMISSIONS.COURSE_UPDATE),
+          this.userLacksAnyPermissionsCondition(users.id, users.tenantId, [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN]),
         ),
       );
 
@@ -510,7 +510,7 @@ export class UserService {
             users.tenantId,
             PERMISSIONS.LEARNING_PROGRESS_UPDATE,
           ),
-          this.userLacksPermissionCondition(users.id, users.tenantId, PERMISSIONS.COURSE_UPDATE),
+          this.userLacksAnyPermissionsCondition(users.id, users.tenantId, [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN]),
         ),
       );
 
@@ -715,7 +715,9 @@ export class UserService {
         createdUser.tenantId,
         trx,
       );
-      const canManageContent = rolePermissions.includes(PERMISSIONS.COURSE_UPDATE);
+      const canManageContent =
+        rolePermissions.includes(PERMISSIONS.COURSE_UPDATE) ||
+        rolePermissions.includes(PERMISSIONS.COURSE_UPDATE_OWN);
       const canManageTenant = rolePermissions.includes(PERMISSIONS.TENANT_MANAGE);
 
       if (canManageContent || canManageTenant) {
@@ -766,7 +768,7 @@ export class UserService {
             users.tenantId,
             PERMISSIONS.LEARNING_PROGRESS_UPDATE,
           ),
-          this.userLacksPermissionCondition(users.id, users.tenantId, PERMISSIONS.COURSE_UPDATE),
+          this.userLacksAnyPermissionsCondition(users.id, users.tenantId, [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN]),
           inArray(users.id, studentIds),
           isNull(users.deletedAt),
         ),
@@ -1208,6 +1210,20 @@ export class UserService {
     permission: PermissionKey,
   ): SQL {
     return sql`NOT (${this.userHasPermissionCondition(userIdColumn, tenantIdColumn, permission)})`;
+  }
+
+  private userLacksAnyPermissionsCondition(
+    userIdColumn: AnyPgColumn,
+    tenantIdColumn: AnyPgColumn,
+    permissions: PermissionKey[],
+  ): SQL {
+    if (!permissions.length) return sql`TRUE`;
+
+    return and(
+      ...permissions.map((permission) =>
+        this.userLacksPermissionCondition(userIdColumn, tenantIdColumn, permission),
+      ),
+    ) as SQL;
   }
 
   private async deflateStatisticsForCourseDeletedUser(userId: UUIDType, trx: DatabasePg = this.db) {

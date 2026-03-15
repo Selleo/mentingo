@@ -378,14 +378,17 @@ export class LessonRepository {
   ): Promise<EnrolledLessonWithSearch[]> {
     const conditions: SQL[] = [];
     const canManageCourseContent = currentUser.permissions.includes(PERMISSIONS.COURSE_UPDATE);
+    const canManageOwnCourseContent = currentUser.permissions.includes(
+      PERMISSIONS.COURSE_UPDATE_OWN,
+    );
     const canManageTenant = currentUser.permissions.includes(PERMISSIONS.TENANT_MANAGE);
 
-    if (!canManageCourseContent) {
+    if (!canManageCourseContent && !canManageOwnCourseContent) {
       conditions.push(
         eq(studentCourses.studentId, currentUser.userId),
         eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
       );
-    } else if (!canManageTenant) {
+    } else if (!canManageTenant || canManageOwnCourseContent) {
       conditions.push(eq(courses.authorId, currentUser.userId));
     }
 

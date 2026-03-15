@@ -131,7 +131,7 @@ export class LessonController {
   }
 
   @Post("beta-create-lesson")
-  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
   @Validate({
     request: [
       {
@@ -151,7 +151,7 @@ export class LessonController {
   }
 
   @Post("initialize-lesson-context")
-  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
   @Validate({
     response: baseResponse(initializeLessonContextSchema),
   })
@@ -160,7 +160,7 @@ export class LessonController {
   }
 
   @Post("beta-create-lesson/ai")
-  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
   @Validate({
     request: [
       {
@@ -184,7 +184,7 @@ export class LessonController {
   }
 
   @Patch("beta-update-lesson/ai")
-  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
   @Validate({
     request: [
       {
@@ -211,7 +211,7 @@ export class LessonController {
   }
 
   @Post("beta-create-lesson/quiz")
-  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
   @Validate({
     request: [
       {
@@ -232,7 +232,7 @@ export class LessonController {
   }
 
   @Patch("beta-update-lesson/quiz")
-  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
   @Validate({
     request: [
       {
@@ -258,7 +258,7 @@ export class LessonController {
   }
 
   @Patch("beta-update-lesson")
-  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
   @Validate({
     request: [
       {
@@ -283,7 +283,7 @@ export class LessonController {
   }
 
   @Delete()
-  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
   @Validate({
     request: [{ type: "query", name: "lessonId", schema: UUIDSchema, required: true }],
     response: baseResponse(Type.Object({ message: Type.String() })),
@@ -336,7 +336,7 @@ export class LessonController {
   }
 
   @Post("upload-files-to-lesson")
-  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
   @UseInterceptors(FileInterceptor("file"))
   @ApiConsumes("multipart/form-data")
   @ApiBody({
@@ -434,7 +434,7 @@ export class LessonController {
   }
 
   @Post("create-lesson/embed")
-  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
   @Validate({
     request: [{ type: "body", schema: createEmbedLessonSchema, required: true }],
     response: baseResponse(Type.Object({ message: Type.String() })),
@@ -448,7 +448,7 @@ export class LessonController {
   }
 
   @Patch("update-lesson/embed/:id")
-  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema, required: true },
@@ -494,7 +494,7 @@ export class LessonController {
   }
 
   @Post("ai-mentor/avatar")
-  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
   @UseInterceptors(FileInterceptor("file"))
   @ApiConsumes("multipart/form-data")
   @ApiBody({
@@ -535,7 +535,7 @@ export class LessonController {
   }
 
   @Patch("update-lesson-display-order")
-  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
   @Validate({
     request: [
       {

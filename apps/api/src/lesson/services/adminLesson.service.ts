@@ -1096,7 +1096,8 @@ export class AdminLessonService {
 
     const hasAccess =
       currentUser.permissions.includes(PERMISSIONS.COURSE_UPDATE) ||
-      course.authorId === currentUser.userId;
+      (currentUser.permissions.includes(PERMISSIONS.COURSE_UPDATE_OWN) &&
+        course.authorId === currentUser.userId);
 
     if (throwOnNoAccess && !hasAccess) {
       throw new ForbiddenException({ message: "common.toast.noAccess" });

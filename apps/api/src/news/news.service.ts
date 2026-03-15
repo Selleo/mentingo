@@ -6,7 +6,7 @@ import { match } from "ts-pattern";
 
 import { DatabasePg } from "src/common";
 import { buildJsonbField, deleteJsonbField } from "src/common/helpers/sqlHelpers";
-import { hasPermission } from "src/common/permissions/permission.utils";
+import { hasAnyPermission, hasPermission } from "src/common/permissions/permission.utils";
 import { annotateVideoAutoplayInContent } from "src/common/utils/annotateVideoAutoplayInContent";
 import { injectResourcesIntoContent } from "src/common/utils/injectResourcesIntoContent";
 import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
@@ -370,7 +370,10 @@ export class NewsService {
   ) {
     await this.checkAccess(currentUser?.userId);
 
-    const isAdminLike = hasPermission(currentUser?.permissions, PERMISSIONS.NEWS_MANAGE);
+    const isAdminLike = hasAnyPermission(currentUser?.permissions, [
+      PERMISSIONS.NEWS_MANAGE,
+      PERMISSIONS.NEWS_MANAGE_OWN,
+    ]);
 
     const accessConditions = this.getNewsAccessConditions(requestedLanguage, currentUser, {
       requirePublished: !isAdminLike,
@@ -459,8 +462,15 @@ export class NewsService {
 
     if (!existingNews) throw new NotFoundException("News not found");
 
-    const isAdminLike = hasPermission(currentUser?.permissions, PERMISSIONS.NEWS_MANAGE);
-    const isAuthor = Boolean(currentUser?.userId && existingNews.authorId === currentUser.userId);
+    const isAdminLike = hasAnyPermission(currentUser?.permissions, [
+      PERMISSIONS.NEWS_MANAGE,
+      PERMISSIONS.NEWS_MANAGE_OWN,
+    ]);
+    const isAuthor = Boolean(
+      currentUser?.userId &&
+        hasPermission(currentUser?.permissions, PERMISSIONS.NEWS_MANAGE_OWN) &&
+        existingNews.authorId === currentUser.userId,
+    );
     const isPublic = Boolean(existingNews.isPublic && existingNews.publishedAt !== null);
 
     if (!isAdminLike && !isAuthor && !isPublic) {
@@ -785,7 +795,10 @@ export class NewsService {
     currentUser?: CurrentUser,
     options?: { excludedId?: UUIDType; requirePublished?: boolean },
   ) {
-    const isAdminLike = hasPermission(currentUser?.permissions, PERMISSIONS.NEWS_MANAGE);
+    const isAdminLike = hasAnyPermission(currentUser?.permissions, [
+      PERMISSIONS.NEWS_MANAGE,
+      PERMISSIONS.NEWS_MANAGE_OWN,
+    ]);
 
     const conditions = [ne(news.archived, true)];
 

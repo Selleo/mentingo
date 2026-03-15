@@ -40,6 +40,7 @@ import { EmailService } from "src/common/emails/emails.service";
 import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterConditions";
 import { buildJsonbField, deleteJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { hasAnyPermission } from "src/common/permissions/permission.utils";
 import { injectResourcesIntoContent } from "src/common/utils/injectResourcesIntoContent";
 import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
 import { UpdateHasCertificateEvent } from "src/courses/events/updateHasCertificate.event";
@@ -1308,10 +1309,7 @@ export class CourseService {
 
     if (!course) throw new NotFoundException("Course not found");
 
-    if (
-      !currentUser.permissions.includes(PERMISSIONS.COURSE_UPDATE) &&
-      course.authorId !== currentUser.userId
-    ) {
+    if (!this.canUpdateCourse(currentUser, course.authorId)) {
       throw new ForbiddenException("You do not have permission to edit this course");
     }
 
@@ -1829,7 +1827,7 @@ export class CourseService {
           throw new NotFoundException("Course not found");
         }
 
-        if (!currentUser.permissions.includes(PERMISSIONS.COURSE_UPDATE)) {
+        if (!this.canUpdateCourse(currentUser, existingCourse.authorId)) {
           throw new ForbiddenException("You don't have permission to update course");
         }
 
@@ -1986,7 +1984,7 @@ export class CourseService {
       throw new NotFoundException("Course not found");
     }
 
-    if (!currentUser.permissions.includes(PERMISSIONS.COURSE_UPDATE)) {
+    if (!this.canUpdateCourse(currentUser, course.authorId)) {
       throw new ForbiddenException("You don't have permission to update course");
     }
 
@@ -2040,7 +2038,11 @@ export class CourseService {
     }
 
     if (
-      currentUser?.permissions.includes(PERMISSIONS.COURSE_UPDATE) &&
+      currentUser &&
+      hasAnyPermission(currentUser.permissions, [
+        PERMISSIONS.COURSE_UPDATE,
+        PERMISSIONS.COURSE_UPDATE_OWN,
+      ]) &&
       currentUser.userId === course.authorId
     ) {
       throw new ForbiddenException("You don't have permission to enroll in your own course");
@@ -2163,7 +2165,7 @@ export class CourseService {
     if (
       currentUser &&
       !currentUser.permissions.includes(PERMISSIONS.COURSE_ENROLLMENT) &&
-      currentUser.userId !== course.authorId
+      !this.canUpdateCourse(currentUser, course.authorId)
     ) {
       throw new ForbiddenException("You don't have permission to enroll groups to this course");
     }
@@ -4101,7 +4103,14 @@ export class CourseService {
         and(
           ne(users.id, course.authorId),
           isNull(users.deletedAt),
-          this.userHasPermissionCondition(users.id, users.tenantId, PERMISSIONS.COURSE_UPDATE),
+          or(
+            this.userHasPermissionCondition(users.id, users.tenantId, PERMISSIONS.COURSE_UPDATE),
+            this.userHasPermissionCondition(
+              users.id,
+              users.tenantId,
+              PERMISSIONS.COURSE_UPDATE_OWN,
+            ),
+          ),
         ),
       );
 
@@ -4658,5 +4667,18 @@ export class CourseService {
     if (!courseExists) throw new NotFoundException("adminCourseView.toast.courseNotFound");
 
     return courseExists;
+  }
+
+  private canUpdateAnyCourse(currentUser: CurrentUser) {
+    return currentUser.permissions.includes(PERMISSIONS.COURSE_UPDATE);
+  }
+
+  private canUpdateOwnCourse(currentUser: CurrentUser) {
+    return currentUser.permissions.includes(PERMISSIONS.COURSE_UPDATE_OWN);
+  }
+
+  private canUpdateCourse(currentUser: CurrentUser, authorId: UUIDType) {
+    if (this.canUpdateAnyCourse(currentUser)) return true;
+    return this.canUpdateOwnCourse(currentUser) && currentUser.userId === authorId;
   }
 }

@@ -34,7 +34,11 @@ export class IngestionService {
 
     const author = await this.getLessonAuthor(lessonId);
 
-    if (!this.canManageAnyLesson(currentUser) && author !== currentUser.userId) {
+    const canManageAny = this.canManageAnyLesson(currentUser);
+    const canManageOwn = this.canManageOwnLesson(currentUser);
+    const ownsLesson = author === currentUser.userId;
+
+    if (!canManageAny && !(canManageOwn && ownsLesson)) {
       throw new ForbiddenException("You can only upload files to your own lessons");
     }
 
@@ -81,7 +85,11 @@ export class IngestionService {
   async findAllDocumentsForLesson(lessonId: UUIDType, currentUser: CurrentUser) {
     const author = await this.getLessonAuthor(lessonId);
 
-    if (currentUser.userId !== author && !this.canManageAnyLesson(currentUser)) {
+    const canManageAny = this.canManageAnyLesson(currentUser);
+    const canManageOwn = this.canManageOwnLesson(currentUser);
+    const ownsLesson = currentUser.userId === author;
+
+    if (!canManageAny && !(canManageOwn && ownsLesson)) {
       throw new ForbiddenException("You are not allowed to view files for this lesson.");
     }
 
@@ -91,7 +99,11 @@ export class IngestionService {
   async deleteDocumentLink(documentLinkId: UUIDType, currentUser: CurrentUser) {
     const author = await this.getDocumentLinkAuthor(documentLinkId);
 
-    if (currentUser.userId !== author && !this.canManageAnyLesson(currentUser)) {
+    const canManageAny = this.canManageAnyLesson(currentUser);
+    const canManageOwn = this.canManageOwnLesson(currentUser);
+    const ownsLesson = currentUser.userId === author;
+
+    if (!canManageAny && !(canManageOwn && ownsLesson)) {
       throw new ForbiddenException("You are not allowed to view files for this lesson.");
     }
 
@@ -134,6 +146,16 @@ export class IngestionService {
   }
 
   private canManageAnyLesson(currentUser: CurrentUser) {
-    return currentUser.permissions.includes(PERMISSIONS.COURSE_UPDATE);
+    return (
+      currentUser.permissions.includes(PERMISSIONS.INGESTION_MANAGE) ||
+      currentUser.permissions.includes(PERMISSIONS.COURSE_UPDATE)
+    );
+  }
+
+  private canManageOwnLesson(currentUser: CurrentUser) {
+    return (
+      currentUser.permissions.includes(PERMISSIONS.INGESTION_MANAGE_OWN) ||
+      currentUser.permissions.includes(PERMISSIONS.COURSE_UPDATE_OWN)
+    );
   }
 }

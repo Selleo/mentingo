@@ -63,6 +63,9 @@
 - [x] Replace `lesson.repository` role-based lesson visibility branching with permission-based branching
 - [x] Replace `learning-time.service` websocket student-role gating with permission-based learner gating
 - [x] Remove remaining runtime `UserRole` dependencies in `activity-logs` and chapter query types
+- [x] Add ownership-scoped permissions (`course.update_own`, `ingestion.manage_own`, `news.manage_own`, `article.manage_own`)
+- [x] Update author-based access checks to require ownership permissions plus author match
+- [x] Allow ownership permissions in guarded controllers for course/chapter/lesson/news/articles/ingestion
 - [ ] Checkpoint complete
 
 ## Segment 5: Cleanup

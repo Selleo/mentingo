@@ -370,6 +370,9 @@ export class LearningTimeService implements OnModuleInit {
   }
 
   private canTrackLearningTime(socket: AuthenticatedSocket) {
-    return !socket.data.user.permissions.includes(PERMISSIONS.COURSE_UPDATE);
+    return (
+      !socket.data.user.permissions.includes(PERMISSIONS.COURSE_UPDATE) &&
+      !socket.data.user.permissions.includes(PERMISSIONS.COURSE_UPDATE_OWN)
+    );
   }
 }

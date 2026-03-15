@@ -12,7 +12,7 @@ import { match } from "ts-pattern";
 
 import { DatabasePg } from "src/common";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
-import { hasPermission } from "src/common/permissions/permission.utils";
+import { hasAnyPermission, hasPermission } from "src/common/permissions/permission.utils";
 import { annotateVideoAutoplayInContent } from "src/common/utils/annotateVideoAutoplayInContent";
 import { injectResourcesIntoContent } from "src/common/utils/injectResourcesIntoContent";
 import {
@@ -462,7 +462,10 @@ export class ArticlesService {
   ) {
     await this.checkAccess(currentUser?.userId);
 
-    const isAdminLike = hasPermission(currentUser?.permissions, PERMISSIONS.ARTICLE_MANAGE);
+    const isAdminLike = hasAnyPermission(currentUser?.permissions, [
+      PERMISSIONS.ARTICLE_MANAGE,
+      PERMISSIONS.ARTICLE_MANAGE_OWN,
+    ]);
 
     if (isDraftMode && !isAdminLike)
       throw new NotFoundException("adminArticleView.toast.notFoundError");
@@ -527,9 +530,16 @@ export class ArticlesService {
 
     if (!article) throw new NotFoundException("Article not found");
 
-    const isAdminLike = hasPermission(currentUser?.permissions, PERMISSIONS.ARTICLE_MANAGE);
+    const isAdminLike = hasAnyPermission(currentUser?.permissions, [
+      PERMISSIONS.ARTICLE_MANAGE,
+      PERMISSIONS.ARTICLE_MANAGE_OWN,
+    ]);
 
-    const isAuthor = Boolean(currentUser?.userId && article.authorId === currentUser.userId);
+    const isAuthor = Boolean(
+      currentUser?.userId &&
+        hasPermission(currentUser?.permissions, PERMISSIONS.ARTICLE_MANAGE_OWN) &&
+        article.authorId === currentUser.userId,
+    );
     const isPublic = Boolean(article.isPublic && article.publishedAt !== null);
 
     if (!isAdminLike && !isAuthor && !isPublic) {
@@ -881,8 +891,9 @@ export class ArticlesService {
     if (
       !currentUser ||
       !(
-        article.authorId === currentUser.userId ||
-        hasPermission(currentUser.permissions, PERMISSIONS.USER_MANAGE)
+        hasAnyPermission(currentUser.permissions, [PERMISSIONS.ARTICLE_MANAGE]) ||
+        (hasPermission(currentUser.permissions, PERMISSIONS.ARTICLE_MANAGE_OWN) &&
+          article.authorId === currentUser.userId)
       )
     )
       throw new BadRequestException("common.toast.noAccess");

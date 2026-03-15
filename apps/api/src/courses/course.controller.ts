@@ -416,7 +416,7 @@ export class CourseController {
   }
 
   @Get("beta-course-missing-translations")
-  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
   @Validate({
     request: [
       { type: "query", name: "id", schema: UUIDSchema, required: true },
@@ -461,7 +461,7 @@ export class CourseController {
 
   @Patch(":id")
   @UseInterceptors(FileInterceptor("image"))
-  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -496,7 +496,7 @@ export class CourseController {
   }
 
   @Delete(":id/trailer")
-  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
   @Validate({
     request: [{ type: "param", name: "id", schema: UUIDSchema }],
     response: baseResponse(Type.Object({ message: Type.String() })),
@@ -510,7 +510,7 @@ export class CourseController {
   }
 
   @Patch("update-has-certificate/:id")
-  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -531,7 +531,7 @@ export class CourseController {
   @Patch("settings/:courseId")
   @UseInterceptors(FileInterceptor("certificateSignature"))
   @ApiConsumes("multipart/form-data")
-  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
   @Validate({
     request: [
       { type: "param", name: "courseId", schema: UUIDSchema },
@@ -973,7 +973,7 @@ export class CourseController {
   }
 
   @Post("beta-create-language/:courseId")
-  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
   @Validate({
     request: [
       { type: "query", name: "language", schema: supportedLanguagesSchema },
@@ -989,7 +989,7 @@ export class CourseController {
   }
 
   @Delete("language/:courseId")
-  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
   @Validate({
     request: [
       { type: "param", name: "courseId", schema: UUIDSchema },
@@ -1005,7 +1005,7 @@ export class CourseController {
   }
 
   @Post("generate-translations/:courseId")
-  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
   @Validate({
     request: [
       {

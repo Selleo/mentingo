@@ -5,7 +5,7 @@ import { and, asc, desc, eq, getTableColumns, gt, isNull, lt, ne, not, sql } fro
 import { baseArticleTitle } from "src/articles/constants";
 import { DatabasePg } from "src/common";
 import { deleteJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
-import { hasPermission } from "src/common/permissions/permission.utils";
+import { hasAnyPermission, hasPermission } from "src/common/permissions/permission.utils";
 import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
 import { LocalizationService } from "src/localization/localization.service";
 import { articleSections, articles, resourceEntity, resources, users } from "src/storage/schema";
@@ -366,7 +366,10 @@ export class ArticlesRepository {
     conditions: SQL<unknown>[],
     currentUser?: CurrentUser,
   ) {
-    const sectionTitle = hasPermission(currentUser?.permissions, PERMISSIONS.ARTICLE_MANAGE)
+    const sectionTitle = hasAnyPermission(currentUser?.permissions, [
+      PERMISSIONS.ARTICLE_MANAGE,
+      PERMISSIONS.ARTICLE_MANAGE_OWN,
+    ])
       ? this.localizationService.getFieldByLanguage(articleSections.title, requestedLanguage)
       : this.localizationService.getLocalizedSqlField(
           articleSections.title,
@@ -411,7 +414,10 @@ export class ArticlesRepository {
     currentUser?: CurrentUser,
     options?: { isDraftMode?: boolean; excludedId?: UUIDType },
   ): SQL<unknown>[] {
-    const isAdminLike = hasPermission(currentUser?.permissions, PERMISSIONS.ARTICLE_MANAGE);
+    const isAdminLike = hasAnyPermission(currentUser?.permissions, [
+      PERMISSIONS.ARTICLE_MANAGE,
+      PERMISSIONS.ARTICLE_MANAGE_OWN,
+    ]);
 
     const conditions = [
       ne(articles.archived, true),

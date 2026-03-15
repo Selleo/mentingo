@@ -400,7 +400,7 @@ export class MasterCourseRepository {
                 AND ${permissionRuleSetPermissions.tenantId} = ${permissionRoleRuleSets.tenantId}
               WHERE ${permissionUserRoles.userId} = ${users.id}
                 AND ${permissionUserRoles.tenantId} = ${users.tenantId}
-                AND ${permissionRuleSetPermissions.permission} = ${PERMISSIONS.COURSE_UPDATE}
+                AND ${permissionRuleSetPermissions.permission} IN (${PERMISSIONS.COURSE_UPDATE}, ${PERMISSIONS.COURSE_UPDATE_OWN})
             )
           `,
         ),

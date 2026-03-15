@@ -18,7 +18,10 @@ export function canUseLessonProgressAsLearner(
     return access.isLearningModeActive;
   }
 
-  if (permissions.includes(PERMISSIONS.COURSE_UPDATE)) {
+  if (
+    permissions.includes(PERMISSIONS.COURSE_UPDATE) ||
+    permissions.includes(PERMISSIONS.COURSE_UPDATE_OWN)
+  ) {
     return access.hasEnrollment || access.isLearningModeActive;
   }
 

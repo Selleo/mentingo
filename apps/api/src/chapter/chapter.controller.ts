@@ -53,7 +53,7 @@ export class ChapterController {
   }
 
   @Post("beta-create-chapter")
-  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
   @Validate({
     request: [
       {
@@ -76,7 +76,7 @@ export class ChapterController {
   }
 
   @Patch()
-  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
   @Validate({
     request: [
       {
@@ -102,7 +102,7 @@ export class ChapterController {
   }
 
   @Patch("chapter-display-order")
-  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
   @Validate({
     request: [
       {
@@ -135,7 +135,7 @@ export class ChapterController {
   }
 
   @Delete()
-  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
   @Validate({
     request: [{ type: "query", name: "chapterId", schema: UUIDSchema, required: true }],
     response: baseResponse(Type.Object({ message: Type.String() })),
@@ -151,7 +151,7 @@ export class ChapterController {
   }
 
   @Patch("freemium-status")
-  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
   @Validate({
     request: [
       {

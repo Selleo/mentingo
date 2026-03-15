@@ -501,7 +501,10 @@ export class StatisticsRepository {
               .where(
                 and(
                   eq(permissionUserRoles.userId, users.id),
-                  eq(permissionRuleSetPermissions.permission, PERMISSIONS.COURSE_UPDATE),
+                  inArray(permissionRuleSetPermissions.permission, [
+                    PERMISSIONS.COURSE_UPDATE,
+                    PERMISSIONS.COURSE_UPDATE_OWN,
+                  ]),
                 ),
               ),
           ),

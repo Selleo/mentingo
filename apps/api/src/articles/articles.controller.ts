@@ -86,7 +86,7 @@ export class ArticlesController {
     request: [{ type: "body", schema: createArticleSectionSchema }],
     response: baseResponse(createArticleSectionResponseSchema),
   })
-  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE)
+  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
   async createArticleSection(
     @Body() createArticleSectionBody: CreateArticleSection,
     @CurrentUser() currentUser: CurrentUserType,
@@ -107,7 +107,7 @@ export class ArticlesController {
     ],
     response: baseResponse(getArticleSectionDetailsResponseSchema),
   })
-  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE)
+  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
   async getArticleSection(
     @Param("id") id: UUIDType,
     @Query("language") language: SupportedLanguages,
@@ -126,7 +126,7 @@ export class ArticlesController {
     ],
     response: baseResponse(createArticleSectionResponseSchema),
   })
-  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE)
+  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
   async updateArticleSection(
     @Param("id") id: UUIDType,
     @Body() updateArticleSectionBody: UpdateArticleSection,
@@ -150,7 +150,7 @@ export class ArticlesController {
     ],
     response: baseResponse(createArticleSectionResponseSchema),
   })
-  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE)
+  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
   async addNewLanguageToSection(
     @Param("id") id: UUIDType,
     @Body() createLanguageBody: CreateArticleSection,
@@ -172,7 +172,7 @@ export class ArticlesController {
       { type: "query", name: "language", schema: supportedLanguagesSchema },
     ],
   })
-  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE)
+  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
   async deleteArticleSectionLanguage(
     @Param("id") id: UUIDType,
     @Query("language") language: SupportedLanguages,
@@ -185,7 +185,7 @@ export class ArticlesController {
   @Validate({
     request: [{ type: "param", name: "id", schema: UUIDSchema }],
   })
-  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE)
+  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
   async deleteArticleSection(
     @Param("id") id: UUIDType,
     @CurrentUser() currentUser: CurrentUserType,
@@ -198,7 +198,7 @@ export class ArticlesController {
     request: [{ type: "query", name: "language", schema: supportedLanguagesSchema }],
     response: getArticlesResponseSchema,
   })
-  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE)
+  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
   async getDraftArticles(
     @Query("language") language: SupportedLanguages,
   ): Promise<GetArticlesResponse> {
@@ -281,7 +281,7 @@ export class ArticlesController {
     request: [{ type: "body", schema: createArticleSchema }],
     response: baseResponse(createArticleResponseSchema),
   })
-  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE)
+  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
   async createArticle(
     @Body() createArticleBody: CreateArticle,
     @CurrentUser() currentUser: CurrentUserType,
@@ -301,7 +301,7 @@ export class ArticlesController {
     ],
     response: baseResponse(createArticleResponseSchema),
   })
-  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE)
+  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
   async updateArticle(
     @Param("id") id: string,
     @Body(new ValidateMultipartPipe(updateArticleSchema)) updateArticleBody: UpdateArticle,
@@ -333,7 +333,7 @@ export class ArticlesController {
     ],
     response: baseResponse(createArticleResponseSchema),
   })
-  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE)
+  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
   async addNewLanguage(
     @Param("id") id: string,
     @Body() createLanguageBody: CreateLanguageArticle,
@@ -355,7 +355,7 @@ export class ArticlesController {
       { type: "query", name: "language", schema: supportedLanguagesSchema },
     ],
   })
-  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE)
+  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
   async deleteArticleLanguage(
     @Param("id") id: UUIDType,
     @Query("language") language: SupportedLanguages,
@@ -368,7 +368,7 @@ export class ArticlesController {
   @Validate({
     request: [{ type: "param", name: "id", schema: UUIDSchema }],
   })
-  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE)
+  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
   async deleteArticle(@Param("id") id: string, @CurrentUser() currentUser?: CurrentUserType) {
     await this.articlesService.deleteArticle(id, currentUser);
   }
@@ -383,7 +383,7 @@ export class ArticlesController {
     ],
     response: baseResponse(uploadArticleFileResponseSchema),
   })
-  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE)
+  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
   async uploadFileToArticle(
     @Param("id") id: string,
     @Body(new ValidateMultipartPipe(uploadFileSchema)) uploadFileBody: UploadFile,
@@ -420,7 +420,7 @@ export class ArticlesController {
     request: [{ type: "body", schema: previewArticleRequestSchema }],
     response: baseResponse(previewArticleResponseSchema),
   })
-  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE)
+  @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
   async generateArticlePreview(
     @Body() body: PreviewArticleRequest,
   ): Promise<BaseResponse<PreviewArticleResponse>> {

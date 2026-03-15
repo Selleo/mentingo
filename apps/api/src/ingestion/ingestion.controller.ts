@@ -34,7 +34,7 @@ export class IngestionController {
   constructor(private readonly ingestionService: IngestionService) {}
 
   @Post("ingest")
-  @RequirePermission(PERMISSIONS.INGESTION_MANAGE)
+  @RequirePermission(PERMISSIONS.INGESTION_MANAGE, PERMISSIONS.INGESTION_MANAGE_OWN)
   @UseInterceptors(FilesInterceptor("files"))
   @ApiConsumes("multipart/form-data")
   @ApiBody({
@@ -68,7 +68,7 @@ export class IngestionController {
   }
 
   @Get(":lessonId")
-  @RequirePermission(PERMISSIONS.INGESTION_MANAGE)
+  @RequirePermission(PERMISSIONS.INGESTION_MANAGE, PERMISSIONS.INGESTION_MANAGE_OWN)
   @Validate({
     request: [{ type: "param", name: "lessonId", schema: UUIDSchema }],
     response: baseResponse(getAllAssignedDocumentsSchema),
@@ -81,7 +81,7 @@ export class IngestionController {
   }
 
   @Delete(":documentLinkId")
-  @RequirePermission(PERMISSIONS.INGESTION_MANAGE)
+  @RequirePermission(PERMISSIONS.INGESTION_MANAGE, PERMISSIONS.INGESTION_MANAGE_OWN)
   @Validate({
     request: [{ type: "param", name: "documentLinkId", schema: UUIDSchema }],
   })

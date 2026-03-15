@@ -68,7 +68,7 @@ export class NewsController {
     ],
     response: paginatedNewsListResponseSchema,
   })
-  @RequirePermission(PERMISSIONS.NEWS_MANAGE)
+  @RequirePermission(PERMISSIONS.NEWS_MANAGE, PERMISSIONS.NEWS_MANAGE_OWN)
   async getDraftNewsList(
     @Query("language") language: SupportedLanguages,
     @Query("page") page = 1,
@@ -84,7 +84,7 @@ export class NewsController {
     request: [{ type: "body", schema: previewNewsRequestSchema }],
     response: baseResponse(previewNewsResponseSchema),
   })
-  @RequirePermission(PERMISSIONS.NEWS_MANAGE)
+  @RequirePermission(PERMISSIONS.NEWS_MANAGE, PERMISSIONS.NEWS_MANAGE_OWN)
   async generateNewsPreview(
     @Body() body: { newsId: UUIDType; language: SupportedLanguages; content: string },
     @CurrentUser() currentUser: CurrentUserType,
@@ -159,7 +159,7 @@ export class NewsController {
     request: [{ type: "body", schema: createNewsSchema }],
     response: baseResponse(createNewsResponseSchema),
   })
-  @RequirePermission(PERMISSIONS.NEWS_MANAGE)
+  @RequirePermission(PERMISSIONS.NEWS_MANAGE, PERMISSIONS.NEWS_MANAGE_OWN)
   async createNews(
     @Body() createNewsBody: CreateNews,
     @CurrentUser() currentUser: CurrentUserType,
@@ -179,7 +179,7 @@ export class NewsController {
     ],
     response: baseResponse(createNewsResponseSchema),
   })
-  @RequirePermission(PERMISSIONS.NEWS_MANAGE)
+  @RequirePermission(PERMISSIONS.NEWS_MANAGE, PERMISSIONS.NEWS_MANAGE_OWN)
   async updateNews(
     @Param("id") id: string,
     @Body(new ValidateMultipartPipe(updateNewsSchema)) updateNewsBody: UpdateNews,
@@ -206,7 +206,7 @@ export class NewsController {
     ],
     response: baseResponse(createNewsResponseSchema),
   })
-  @RequirePermission(PERMISSIONS.NEWS_MANAGE)
+  @RequirePermission(PERMISSIONS.NEWS_MANAGE, PERMISSIONS.NEWS_MANAGE_OWN)
   async addNewLanguage(
     @Param("id") id: string,
     @Body() createLanguageBody: CreateNews,
@@ -229,7 +229,7 @@ export class NewsController {
     ],
     response: baseResponse(deleteNewsLanguageResponseSchema),
   })
-  @RequirePermission(PERMISSIONS.NEWS_MANAGE)
+  @RequirePermission(PERMISSIONS.NEWS_MANAGE, PERMISSIONS.NEWS_MANAGE_OWN)
   async deleteNewsLanguage(
     @Param("id") id: UUIDType,
     @Query("language") language: SupportedLanguages,
@@ -245,7 +245,7 @@ export class NewsController {
     request: [{ type: "param", name: "id", schema: UUIDSchema }],
     response: baseResponse(deleteNewsResponseSchema),
   })
-  @RequirePermission(PERMISSIONS.NEWS_MANAGE)
+  @RequirePermission(PERMISSIONS.NEWS_MANAGE, PERMISSIONS.NEWS_MANAGE_OWN)
   async deleteNews(@Param("id") id: string, @CurrentUser() currentUser?: CurrentUserType) {
     const deletedNews = await this.newsService.deleteNews(id, currentUser);
 
@@ -281,7 +281,7 @@ export class NewsController {
     request: [{ type: "param", name: "id", schema: UUIDSchema }],
     response: baseResponse(uploadNewsFileResponseSchema),
   })
-  @RequirePermission(PERMISSIONS.NEWS_MANAGE)
+  @RequirePermission(PERMISSIONS.NEWS_MANAGE, PERMISSIONS.NEWS_MANAGE_OWN)
   async uploadFileToNews(
     @Param("id") id: string,
     @UploadedFile(

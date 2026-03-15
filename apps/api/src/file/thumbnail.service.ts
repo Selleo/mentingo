@@ -159,6 +159,18 @@ export class ThumbnailService {
     );
   }
 
+  private canManageOwnArticle(currentUser: CurrentUser | null) {
+    return Boolean(currentUser?.permissions.includes(PERMISSIONS.ARTICLE_MANAGE_OWN));
+  }
+
+  private canManageOwnNews(currentUser: CurrentUser | null) {
+    return Boolean(currentUser?.permissions.includes(PERMISSIONS.NEWS_MANAGE_OWN));
+  }
+
+  private canManageOwnCourse(currentUser: CurrentUser | null) {
+    return Boolean(currentUser?.permissions.includes(PERMISSIONS.COURSE_UPDATE_OWN));
+  }
+
   private async validateArticleThumbnailAccess(
     resourceEntityId: UUIDType,
     currentUser: CurrentUser | null,
@@ -185,7 +197,11 @@ export class ThumbnailService {
 
     if (!article) throw new NotFoundException("Article resource not found");
 
-    const isAuthor = Boolean(currentUser?.userId && article.authorId === currentUser.userId);
+    const isAuthor = Boolean(
+      currentUser?.userId &&
+        this.canManageOwnArticle(currentUser) &&
+        article.authorId === currentUser.userId,
+    );
     const isPublic = Boolean(article.isPublic && article.publishedAt !== null);
 
     if (!this.canManagePublishedContent(currentUser) && !isAuthor && !isPublic) {
@@ -218,7 +234,11 @@ export class ThumbnailService {
 
     if (!newsItem) throw new NotFoundException("News resource not found");
 
-    const isAuthor = Boolean(currentUser?.userId && newsItem.authorId === currentUser.userId);
+    const isAuthor = Boolean(
+      currentUser?.userId &&
+        this.canManageOwnNews(currentUser) &&
+        newsItem.authorId === currentUser.userId,
+    );
     const isPublic = Boolean(newsItem.isPublic && newsItem.publishedAt !== null);
 
     if (!this.canManagePublishedContent(currentUser) && !isAuthor && !isPublic) {
@@ -255,7 +275,9 @@ export class ThumbnailService {
       throw new NotFoundException("Lesson resource not found");
     }
 
+    const canUseOwnCourseAccess = this.canManageOwnCourse(currentUser);
     const isAuthor = Boolean(
+      canUseOwnCourseAccess &&
       currentUserId &&
         (lessonAccess.courseAuthorId === currentUserId ||
           lessonAccess.chapterAuthorId === currentUserId),
