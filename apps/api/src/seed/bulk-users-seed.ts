@@ -1,4 +1,5 @@
 import { faker } from "@faker-js/faker";
+import { SYSTEM_ROLE_SLUGS, type SystemRoleSlug } from "@repo/shared";
 import * as dotenv from "dotenv";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
@@ -27,19 +28,19 @@ import {
   userOnboarding,
   users,
 } from "../storage/schema";
-import { USER_ROLES } from "../user/schemas/userRoles";
 
 import { niceCourses } from "./nice-data-seeds";
 import {
   addEmailSuffix,
+  assignSystemRoleToUser,
   createNiceCourses,
   ensureSeedTenant,
   getTenantEmailSuffix,
+  seedSystemRolesForTenant,
   seedUserRoleGrantSql,
 } from "./seed-helpers";
 
 import type { DatabasePg, UUIDType } from "../common";
-import type { UserRole } from "../user/schemas/userRoles";
 
 dotenv.config({ path: "./.env" });
 
@@ -51,14 +52,18 @@ const connectionString = process.env.MIGRATOR_DATABASE_URL || process.env.DATABA
 const sqlConnect = postgres(connectionString);
 const db = drizzle(sqlConnect) as DatabasePg;
 
-function generateDeterministicEmail(role: UserRole, index: number, suffix?: string): string {
-  const roleKey = role === USER_ROLES.CONTENT_CREATOR ? "creator" : role.toLowerCase();
+function generateDeterministicEmail(
+  roleSlug: SystemRoleSlug,
+  index: number,
+  suffix?: string,
+): string {
+  const roleKey = roleSlug === SYSTEM_ROLE_SLUGS.CONTENT_CREATOR ? "creator" : roleSlug;
   return addEmailSuffix(`user+${roleKey}+${index}@example.com`, suffix);
 }
 
 export async function generateBulkUsers(
   count: number,
-  role: UserRole,
+  roleSlug: SystemRoleSlug,
   tenantId: UUIDType,
   password: string = "password",
   startIndex: number = 1,
@@ -70,21 +75,23 @@ export async function generateBulkUsers(
     const index = startIndex + i;
     const userToCreate = {
       id: faker.string.uuid(),
-      email: generateDeterministicEmail(role, index, emailSuffix),
+      email: generateDeterministicEmail(roleSlug, index, emailSuffix),
       firstName: faker.person.firstName(),
       lastName: faker.person.lastName(),
-      role: role,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       tenantId,
     };
 
-    const user = await createOrFindUser(userToCreate.email, password, userToCreate, tenantId);
-    await insertUserSettings(db, user.id, tenantId, user.role === USER_ROLES.ADMIN);
-
-    if (user.role === USER_ROLES.ADMIN || user.role === USER_ROLES.CONTENT_CREATOR) {
-      await insertUserDetails(user.id, tenantId);
-    }
+    const user = await createOrFindUser(
+      userToCreate.email,
+      password,
+      userToCreate,
+      tenantId,
+      roleSlug,
+    );
+    await insertUserSettings(db, user.id, tenantId, roleSlug === SYSTEM_ROLE_SLUGS.ADMIN);
+    await insertUserDetails(user.id, tenantId);
 
     createdUsers.push(user);
   }
@@ -97,14 +104,19 @@ async function createOrFindUser(
   password: string,
   userData: any,
   tenantId: UUIDType,
+  roleSlug: SystemRoleSlug,
 ) {
   const [existingUser] = await db.select().from(users).where(eq(users.email, email));
-  if (existingUser) return existingUser;
+  if (existingUser) {
+    await assignSystemRoleToUser(db, existingUser.id, existingUser.tenantId, roleSlug);
+    return existingUser;
+  }
 
   const [newUser] = await db.insert(users).values(userData).returning();
 
   await insertCredential(newUser.id, tenantId, password);
   await insertOnboardingData(newUser.id, tenantId);
+  await assignSystemRoleToUser(db, newUser.id, tenantId, roleSlug);
 
   return newUser;
 }
@@ -302,6 +314,7 @@ export async function seedBulkUsers(options: {
       });
 
       const tenantId = tenant.id;
+      await seedSystemRolesForTenant(db, tenantId);
 
       await insertGlobalSettings(db, tenantId);
       console.log(`✨ Created global settings for tenant ${origin}`);
@@ -311,7 +324,7 @@ export async function seedBulkUsers(options: {
       console.log(`Creating ${studentCount} students for ${origin}...`);
       const createdStudents = await generateBulkUsers(
         studentCount,
-        USER_ROLES.STUDENT,
+        SYSTEM_ROLE_SLUGS.STUDENT,
         tenantId,
         password,
         1, // Start index
@@ -325,7 +338,7 @@ export async function seedBulkUsers(options: {
       console.log(`Creating ${adminCount} admins for ${origin}...`);
       const createdAdmins = await generateBulkUsers(
         adminCount,
-        USER_ROLES.ADMIN,
+        SYSTEM_ROLE_SLUGS.ADMIN,
         tenantId,
         password,
         1, // Start index
@@ -339,7 +352,7 @@ export async function seedBulkUsers(options: {
       console.log(`Creating ${contentCreatorCount} content creators for ${origin}...`);
       const createdContentCreators = await generateBulkUsers(
         contentCreatorCount,
-        USER_ROLES.CONTENT_CREATOR,
+        SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
         tenantId,
         password,
         1, // Start index
