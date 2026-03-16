@@ -2127,7 +2127,7 @@
     "validation": {
       "labelRequired": "Treść etykiety jest wymagana.",
       "toastLabelRequired": "Przed zapisem dodaj treść checkboxa po polsku i po angielsku.",
-      "toastGeneric": "Przed zapisem popraw zaznaczone ustawienia checkboxów."
+      "toastGeneric": "Przed zapisem popraw zaznaczoną treść checkboxa."
     },
     "toast": {
       "saved": "Formularz rejestracji został zapisany."

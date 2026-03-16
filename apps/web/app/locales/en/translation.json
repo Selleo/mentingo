@@ -2085,7 +2085,7 @@
     "validation": {
       "labelRequired": "Label content is required.",
       "toastLabelRequired": "Please add checkbox text in both English and Polish before saving.",
-      "toastGeneric": "Please fix the highlighted checkbox settings before saving."
+      "toastGeneric": "Please fix the highlighted checkbox text before saving."
     },
     "toast": {
       "saved": "Registration form saved successfully."
