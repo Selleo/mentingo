@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 
 import { Icon } from "~/components/Icon";
+import { TypingDots } from "~/components/TypingDots";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 
 const ChatLoader = ({ aiName, avatarUrl }: { aiName?: string | null; avatarUrl?: string }) => {
@@ -21,14 +22,7 @@ const ChatLoader = ({ aiName, avatarUrl }: { aiName?: string | null; avatarUrl?:
       <div className="min-w-0 max-w-[90%] flex flex-col gap-1 items-start">
         <span className="text-sm font-semibold text-primary-900">{displayName}</span>
         <div className="w-fit max-w-full rounded-xl text-sm text-gray-600">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1">
-              <span className="size-2 rounded-full bg-gray-400 animate-bounce" />
-              <span className="size-2 rounded-full bg-gray-400 animate-bounce delay-100" />
-              <span className="size-2 rounded-full bg-gray-400 animate-bounce delay-200" />
-            </div>
-            <span>{t("studentCourseView.lesson.aiMentorLesson.typing")}</span>
-          </div>
+          <TypingDots />
         </div>
       </div>
     </div>

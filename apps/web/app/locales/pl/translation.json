@@ -1176,7 +1176,8 @@
         "requireSequentialLessons": "Wymagaj ukończenia lekcji w kolejności",
         "enableQuizFeedback": "Feedback po quizie",
         "enableQuizFeedbackDescription": "Po przesłaniu quizu student zobaczy, które odpowiedzi były poprawne, niepoprawne lub pominięte.",
-        "fallbackLanguageWarning": "Ostrzeżenie: Niektóre pola są puste. Zamiast nich zostaną użyte tłumaczenia z języka bazowego.",
+        "fallbackLanguageWarningTitle": "Uwaga: brakujące tłumaczenia",
+        "fallbackLanguageWarningDescription": "Niektóre pola w tej wersji językowej są puste. W tych miejscach system wyświetli studentom treści z języka domyślnego, dopóki nie dodasz tłumaczeń.",
         "baseLanguageTooltip": "Nie można zmienić ani usunąć tego języka. Jest on domyślny i zawsze będzie częścią kursu."
       },
       "validation": {
@@ -1228,6 +1229,7 @@
       "chapter": {
         "button": {
           "addChapter": "Dodaj rozdział",
+          "addChapterDisabledTooltip": "Aby dodać rozdział, musisz być w języku domyślnym.",
           "generateWithAI": "Generuj z AI"
         },
         "toast": {
@@ -1255,7 +1257,7 @@
           "saveLesson": "Zapisz lekcje",
           "addResource": "Dodaj zasób",
           "removeResource": "Usuń zasób",
-          "addLessonDisabledTooltip": "Aby utworzyć lekcję, musisz być w języku bazowym."
+          "addLessonDisabledTooltip": "Aby utworzyć lekcję, musisz być w języku domyślnym."
         },
         "breadcrumbs": {
           "back": "Wstecz"
@@ -2458,6 +2460,9 @@
         "drag": "Przeciągnij plik",
         "remove": "Usuń plik do pobrania"
       }
+    },
+    "loadingAiAsset": {
+      "processing": "Zasób jest obecnie przetwarzany"
     }
   },
   "pages": {

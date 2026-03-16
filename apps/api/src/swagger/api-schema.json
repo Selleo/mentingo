@@ -4770,6 +4770,23 @@
               "minLength": 1,
               "type": "string"
             }
+          },
+          {
+            "name": "courseLanguage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
+            }
           }
         ],
         "responses": {

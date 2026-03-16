@@ -2,6 +2,8 @@ import { queryOptions, useQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "~/api/api-client";
 
+import type { SupportedLanguages } from "@repo/shared";
+
 export const COURSE_GENERATION_DRAFT_QUERY_KEY = "course-generation-draft";
 
 export const getCourseGenerationDraftQueryKey = (integrationId: string, draftName: string) =>
@@ -10,6 +12,7 @@ export const getCourseGenerationDraftQueryKey = (integrationId: string, draftNam
 export const courseGenerationDraftQueryOptions = (
   integrationId: string,
   draftName: string,
+  courseLanguage: SupportedLanguages,
   enabled = true,
 ) =>
   queryOptions({
@@ -19,12 +22,20 @@ export const courseGenerationDraftQueryOptions = (
       const response = await ApiClient.api.lumaControllerGetCourseGenerationDraft({
         integrationId,
         draftName,
+        courseLanguage,
       });
 
       return response.data;
     },
   });
 
-export function useCourseGenerationDraft(integrationId: string, draftName: string, enabled = true) {
-  return useQuery(courseGenerationDraftQueryOptions(integrationId, draftName, enabled));
+export function useCourseGenerationDraft(
+  integrationId: string,
+  draftName: string,
+  courseLanguage: SupportedLanguages,
+  enabled = true,
+) {
+  return useQuery(
+    courseGenerationDraftQueryOptions(integrationId, draftName, courseLanguage, enabled),
+  );
 }

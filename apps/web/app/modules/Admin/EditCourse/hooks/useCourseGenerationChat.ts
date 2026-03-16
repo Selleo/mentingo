@@ -1,5 +1,5 @@
 import { useChat } from "@ai-sdk/react";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
 import { COURSE_GENERATION_DRAFT_QUERY_KEY } from "~/api/queries/admin/useCourseGenerationDraft";
@@ -16,6 +16,7 @@ import type { Message } from "@ai-sdk/react";
 type UseCourseGenerationChatOptions = {
   courseId: string;
   draftId?: string;
+  onInvalidate?: () => void;
 };
 
 const apiUrl = import.meta.env.VITE_API_URL;
@@ -23,7 +24,17 @@ const chatUrl = apiUrl
   ? `${apiUrl}/api/luma/course-generation/chat`
   : "/api/luma/course-generation/chat";
 
-export function useCourseGenerationChat({ courseId, draftId }: UseCourseGenerationChatOptions) {
+export function useCourseGenerationChat({
+  courseId,
+  draftId,
+  onInvalidate,
+}: UseCourseGenerationChatOptions) {
+  const onInvalidateRef = useRef(onInvalidate);
+
+  useEffect(() => {
+    onInvalidateRef.current = onInvalidate;
+  }, [onInvalidate]);
+
   const { data: courseGenerationMessages } = useCourseGenerationMessages(
     courseId,
     Boolean(courseId && draftId),
@@ -46,6 +57,8 @@ export function useCourseGenerationChat({ courseId, draftId }: UseCourseGenerati
         queryKey: ["course"],
       }),
     ]);
+
+    onInvalidateRef.current?.();
   }, [courseId]);
 
   const chat = useChat({
@@ -87,8 +100,10 @@ export function useCourseGenerationChat({ courseId, draftId }: UseCourseGenerati
 
   useEffect(() => {
     if (!courseId || !Array.isArray(data)) return;
-    updateGeneratedCourseCacheFromStreamData(queryClient, courseId, data);
-  }, [courseId, data]);
+    const events = updateGeneratedCourseCacheFromStreamData(queryClient, courseId, data);
+
+    if (events.invalidate) void invalidateGenerationQueries();
+  }, [courseId, data, invalidateGenerationQueries]);
 
   useEffect(() => {
     if (!hasCourseGeneratedFlag(data)) return;
