@@ -387,6 +387,42 @@
         }
       }
     },
+    "/api/settings/registration-form": {
+      "get": {
+        "operationId": "SettingsController_getPublicRegistrationForm",
+        "parameters": [
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPublicRegistrationFormResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/settings": {
       "get": {
         "operationId": "SettingsController_getUserSettings",
@@ -551,6 +587,48 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/UpdateColorSchemaResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/admin/registration-form": {
+      "get": {
+        "operationId": "SettingsController_getAdminRegistrationForm",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAdminRegistrationFormResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "SettingsController_updateRegistrationForm",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRegistrationFormBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateRegistrationFormResponse"
                 }
               }
             }
@@ -9616,6 +9694,14 @@
                 "type": "string"
               }
             ]
+          },
+          "formAnswers": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {
+                "type": "boolean"
+              }
+            }
           }
         },
         "required": [
@@ -10598,6 +10684,96 @@
               "articlesEnabled",
               "ageLimit",
               "loginPageFiles"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetPublicRegistrationFormResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "fields": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "type": {
+                      "const": "checkbox",
+                      "type": "string"
+                    },
+                    "label": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "baseLanguage": {
+                      "anyOf": [
+                        {
+                          "const": "en",
+                          "type": "string"
+                        },
+                        {
+                          "const": "pl",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "availableLocales": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "const": "en",
+                            "type": "string"
+                          },
+                          {
+                            "const": "pl",
+                            "type": "string"
+                          }
+                        ]
+                      }
+                    },
+                    "required": {
+                      "type": "boolean"
+                    },
+                    "displayOrder": {
+                      "type": "number"
+                    },
+                    "archived": {
+                      "type": "boolean"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "type",
+                    "label",
+                    "baseLanguage",
+                    "availableLocales",
+                    "required",
+                    "displayOrder",
+                    "archived",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "fields"
             ]
           }
         },
@@ -11942,6 +12118,287 @@
               "articlesEnabled",
               "ageLimit",
               "loginPageFiles"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetAdminRegistrationFormResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "fields": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "type": {
+                      "const": "checkbox",
+                      "type": "string"
+                    },
+                    "label": {
+                      "type": "object",
+                      "properties": {
+                        "en": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "pl": {
+                          "minLength": 1,
+                          "type": "string"
+                        }
+                      },
+                      "minProperties": 1
+                    },
+                    "baseLanguage": {
+                      "anyOf": [
+                        {
+                          "const": "en",
+                          "type": "string"
+                        },
+                        {
+                          "const": "pl",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "availableLocales": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "const": "en",
+                            "type": "string"
+                          },
+                          {
+                            "const": "pl",
+                            "type": "string"
+                          }
+                        ]
+                      }
+                    },
+                    "required": {
+                      "type": "boolean"
+                    },
+                    "displayOrder": {
+                      "type": "number"
+                    },
+                    "archived": {
+                      "type": "boolean"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "type",
+                    "label",
+                    "baseLanguage",
+                    "availableLocales",
+                    "required",
+                    "displayOrder",
+                    "archived",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "fields"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateRegistrationFormBody": {
+        "type": "object",
+        "properties": {
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "type": {
+                  "const": "checkbox",
+                  "type": "string"
+                },
+                "label": {
+                  "type": "object",
+                  "properties": {
+                    "en": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "pl": {
+                      "minLength": 1,
+                      "type": "string"
+                    }
+                  },
+                  "minProperties": 1
+                },
+                "baseLanguage": {
+                  "anyOf": [
+                    {
+                      "const": "en",
+                      "type": "string"
+                    },
+                    {
+                      "const": "pl",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "availableLocales": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      }
+                    ]
+                  }
+                },
+                "required": {
+                  "type": "boolean"
+                },
+                "displayOrder": {
+                  "type": "number"
+                },
+                "archived": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "type",
+                "label",
+                "required",
+                "displayOrder",
+                "archived"
+              ]
+            }
+          }
+        },
+        "required": [
+          "fields"
+        ]
+      },
+      "UpdateRegistrationFormResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "fields": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "type": {
+                      "const": "checkbox",
+                      "type": "string"
+                    },
+                    "label": {
+                      "type": "object",
+                      "properties": {
+                        "en": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "pl": {
+                          "minLength": 1,
+                          "type": "string"
+                        }
+                      },
+                      "minProperties": 1
+                    },
+                    "baseLanguage": {
+                      "anyOf": [
+                        {
+                          "const": "en",
+                          "type": "string"
+                        },
+                        {
+                          "const": "pl",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "availableLocales": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "const": "en",
+                            "type": "string"
+                          },
+                          {
+                            "const": "pl",
+                            "type": "string"
+                          }
+                        ]
+                      }
+                    },
+                    "required": {
+                      "type": "boolean"
+                    },
+                    "displayOrder": {
+                      "type": "number"
+                    },
+                    "archived": {
+                      "type": "boolean"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "type",
+                    "label",
+                    "baseLanguage",
+                    "availableLocales",
+                    "required",
+                    "displayOrder",
+                    "archived",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "fields"
             ]
           }
         },

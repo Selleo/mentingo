@@ -694,6 +694,20 @@
       "when": 1772653268592,
       "tag": "0098_enable_tenant_rls_for_student_mode_sessions",
       "breakpoints": true
+    },
+    {
+      "idx": 99,
+      "version": "7",
+      "when": 1773663135119,
+      "tag": "0099_add_registration_form_fields",
+      "breakpoints": true
+    },
+    {
+      "idx": 100,
+      "version": "7",
+      "when": 1773663138647,
+      "tag": "0100_enable_tenant_rls_for_customizable_fields",
+      "breakpoints": true
     }
   ]
 }

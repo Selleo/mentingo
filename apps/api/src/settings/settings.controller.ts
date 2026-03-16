@@ -12,6 +12,7 @@ import {
   Delete,
   Req,
   Res,
+  Query,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes } from "@nestjs/swagger";
@@ -25,6 +26,7 @@ import {
   type AllowedArticlesSettings,
   type AllowedNewsSettings,
   type AllowedQASettings,
+  SupportedLanguages,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Request, Response } from "express";
@@ -38,6 +40,7 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 import { DisallowInSupportModeGuard } from "src/common/guards/disallow-support-mode.guard";
 import { RolesGuard } from "src/common/guards/roles.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
+import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
 import { USER_ROLES } from "src/user/schemas/userRoles";
@@ -46,6 +49,13 @@ import { CompanyInformaitonJSONSchema } from "./schemas/company-information.sche
 import { loginBackgroundResponseSchema } from "./schemas/login-background.schema";
 import { platformLogoResponseSchema } from "./schemas/platform-logo.schema";
 import { platformSimpleLogoResponseSchema } from "./schemas/platform-simple-logo.schema";
+import {
+  localizedRegistrationFormResponseSchema,
+  registrationFormResponseSchema,
+  updateRegistrationFormSchema,
+  type RegistrationFormResponse,
+  type UpdateRegistrationFormBody,
+} from "./schemas/registration-form.schema";
 import {
   adminSettingsJSONContentSchema,
   companyInformationJSONSchema,
@@ -89,6 +99,16 @@ export class SettingsController {
   })
   async getPublicGlobalSettings(): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
     return new BaseResponse(await this.settingsService.getPublicGlobalSettings());
+  }
+
+  @Public()
+  @Get("registration-form")
+  @Validate({
+    request: [{ type: "query", name: "language", schema: supportedLanguagesSchema }],
+    response: baseResponse(localizedRegistrationFormResponseSchema),
+  })
+  async getPublicRegistrationForm(@Query("language") language: SupportedLanguages) {
+    return new BaseResponse(await this.settingsService.getLocalizedRegistrationForm(language));
   }
 
   @Get()
@@ -207,6 +227,27 @@ export class SettingsController {
       currentUser,
     );
     return new BaseResponse(result);
+  }
+
+  @Get("admin/registration-form")
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    response: baseResponse(registrationFormResponseSchema),
+  })
+  async getAdminRegistrationForm() {
+    return new BaseResponse(await this.settingsService.getAdminRegistrationForm());
+  }
+
+  @Patch("admin/registration-form")
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    request: [{ type: "body", schema: updateRegistrationFormSchema }],
+    response: baseResponse(registrationFormResponseSchema),
+  })
+  async updateRegistrationForm(
+    @Body() body: UpdateRegistrationFormBody,
+  ): Promise<BaseResponse<RegistrationFormResponse>> {
+    return new BaseResponse(await this.settingsService.updateRegistrationForm(body));
   }
 
   @Get("platform-logo")
