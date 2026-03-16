@@ -2115,27 +2115,29 @@
   },
   "registrationFormBuilder": {
     "title": "Kreator formularza rejestracji",
-    "description": "Zarządzaj dodatkowymi polami typu checkbox widocznymi podczas rejestracji.",
+    "description": "Zarządzaj dodatkowymi checkboxami widocznymi podczas rejestracji.",
     "badge": "Rejestracja",
-    "loading": "Ładowanie pól formularza rejestracji...",
-    "empty": "Brak dodatkowych pól rejestracyjnych.",
+    "loading": "Ładowanie checkboxów formularza rejestracji...",
+    "empty": "Brak dodatkowych checkboxów rejestracyjnych.",
     "addFieldTitle": "Dodaj zgodę checkbox",
-    "addFieldDescription": "Twórz opcjonalne lub wymagane pola checkbox dla rejestracji.",
-    "summaryLabel": "Pola",
-    "addField": "Dodaj pole",
+    "addFieldDescription": "Twórz opcjonalne lub wymagane checkboxy dla rejestracji.",
+    "summaryLabel": "Checkboxy",
+    "addField": "Dodaj checkbox",
     "save": "Zapisz formularz rejestracji",
     "validation": {
-      "labelRequired": "Treść etykiety jest wymagana."
+      "labelRequired": "Treść etykiety jest wymagana.",
+      "toastLabelRequired": "Przed zapisem dodaj treść checkboxa po polsku i po angielsku.",
+      "toastGeneric": "Przed zapisem popraw zaznaczone ustawienia checkboxów."
     },
     "toast": {
       "saved": "Formularz rejestracji został zapisany."
     },
     "field": {
-      "heading": "Pole {{index}}",
-      "typeCheckbox": "Pole typu checkbox",
+      "heading": "Checkbox {{index}}",
+      "typeCheckbox": "Checkbox",
       "cardDescription": "Skonfiguruj treść, wymagalność i kolejność tej zgody.",
-      "required": "Pole wymagane",
-      "requiredDescription": "Użytkownik musi zaznaczyć to pole przed utworzeniem konta.",
+      "required": "Wymagany checkbox",
+      "requiredDescription": "Użytkownik musi zaznaczyć ten checkbox przed utworzeniem konta.",
       "requiredBadge": "Wymagane",
       "optionalBadge": "Opcjonalne",
       "archivedBadge": "Archiwalne",

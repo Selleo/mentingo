@@ -374,9 +374,10 @@ export class SettingsService {
         const existingField = field.id ? existingFieldsById.get(field.id) : undefined;
 
         const labelJson = buildJsonbFieldWithMultipleEntries(field.label);
+        const defaultAvailableLocales = Object.keys(field.label) as SupportedLanguages[];
 
-        const availableLocalesSql = field.availableLocales ??
-          existingField?.availableLocales ?? [SUPPORTED_LANGUAGES.EN];
+        const availableLocalesSql =
+          field.availableLocales ?? existingField?.availableLocales ?? defaultAvailableLocales;
         const baseLanguageSql =
           field.baseLanguage ?? existingField?.baseLanguage ?? SUPPORTED_LANGUAGES.EN;
 

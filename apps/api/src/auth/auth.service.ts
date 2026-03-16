@@ -186,7 +186,7 @@ export class AuthService {
     formAnswers?: Record<string, boolean>,
   ) {
     const answers = formAnswers ?? {};
-    const activeFieldIds = new Set(fields.map((field) => field.id));
+    const activeFieldIds = new Set(fields.map(({ id }) => id));
 
     for (const field of fields) {
       if (field.required && answers[field.id] !== true) {

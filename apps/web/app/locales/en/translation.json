@@ -2073,26 +2073,28 @@
   },
   "registrationFormBuilder": {
     "title": "Registration Form Builder",
-    "description": "Manage additional checkbox fields shown during user registration.",
+    "description": "Manage additional checkboxes shown during user registration.",
     "badge": "Register",
-    "loading": "Loading registration form fields...",
-    "empty": "No additional registration fields yet.",
+    "loading": "Loading registration form checkboxes...",
+    "empty": "No additional registration checkboxes yet.",
     "addFieldTitle": "Add checkbox consent",
-    "addFieldDescription": "Create optional or required checkbox fields for registration.",
-    "summaryLabel": "Fields",
-    "addField": "Add field",
+    "addFieldDescription": "Create optional or required checkboxes for registration.",
+    "summaryLabel": "Checkboxes",
+    "addField": "Add checkbox",
     "save": "Save registration form",
     "validation": {
-      "labelRequired": "Label content is required."
+      "labelRequired": "Label content is required.",
+      "toastLabelRequired": "Please add checkbox text in both English and Polish before saving.",
+      "toastGeneric": "Please fix the highlighted checkbox settings before saving."
     },
     "toast": {
       "saved": "Registration form saved successfully."
     },
     "field": {
-      "heading": "Field {{index}}",
-      "typeCheckbox": "Checkbox field",
+      "heading": "Checkbox {{index}}",
+      "typeCheckbox": "Checkbox",
       "cardDescription": "Configure copy, required state, and ordering for this consent.",
-      "required": "Required field",
+      "required": "Required checkbox",
       "requiredDescription": "Users must check this box before creating an account.",
       "requiredBadge": "Required",
       "optionalBadge": "Optional",

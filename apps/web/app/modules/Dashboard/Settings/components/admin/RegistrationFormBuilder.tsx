@@ -10,6 +10,7 @@ import { useUpdateRegistrationForm } from "~/api/mutations/admin/useUpdateRegist
 import { useAdminRegistrationForm } from "~/api/queries/admin/useAdminRegistrationForm";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import { useToast } from "~/components/ui/use-toast";
 
 import {
   buildUpdateRegistrationFormBody,
@@ -24,7 +25,9 @@ import type { DragEndEvent } from "@dnd-kit/core";
 
 export function RegistrationFormBuilder() {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const hydratedVersionRef = useRef<string | null>(null);
+  const preserveUnsavedOnHydrateRef = useRef(false);
   const { data: registrationForm, isLoading } = useAdminRegistrationForm();
 
   const {
@@ -59,7 +62,7 @@ export function RegistrationFormBuilder() {
     }),
   );
 
-  const { fields, append } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control,
     name: "fields",
     keyName: "fieldKey",
@@ -68,6 +71,7 @@ export function RegistrationFormBuilder() {
   const visibleFields = fields.map((field, index) => ({
     field,
     index,
+    isArchived: watchedFields?.[index]?.archived ?? false,
     isRequired: watchedFields?.[index]?.required ?? false,
   }));
 
@@ -80,13 +84,23 @@ export function RegistrationFormBuilder() {
 
     hydratedVersionRef.current = serializedFields;
 
+    const localUnsavedFields = preserveUnsavedOnHydrateRef.current
+      ? getValues("fields").filter((field) => !field.id)
+      : [];
+    const persistedFields = registrationForm.fields.map((field) => ({
+      ...field,
+      type: "checkbox" as const,
+    }));
+
     reset({
-      fields: registrationForm.fields.map((field) => ({
+      fields: [...persistedFields, ...localUnsavedFields].map((field, index) => ({
         ...field,
-        type: "checkbox",
+        displayOrder: index,
       })),
     });
-  }, [registrationForm?.fields, reset]);
+
+    preserveUnsavedOnHydrateRef.current = false;
+  }, [getValues, registrationForm?.fields, reset]);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -113,6 +127,7 @@ export function RegistrationFormBuilder() {
 
   const handleArchive = async (index: number) => {
     const previousFields = getValues("fields");
+    preserveUnsavedOnHydrateRef.current = true;
 
     const nextFields = previousFields.map((field, currentIndex) =>
       currentIndex === index ? { ...field, archived: true } : field,
@@ -121,14 +136,56 @@ export function RegistrationFormBuilder() {
     reset({ fields: nextFields });
 
     try {
-      await updateRegistrationFormAsync(buildUpdateRegistrationFormBody(nextFields));
+      const persistedFields = nextFields.filter((field) => Boolean(field.id));
+      await updateRegistrationFormAsync(buildUpdateRegistrationFormBody(persistedFields));
+    } catch {
+      reset({ fields: previousFields });
+    }
+  };
+
+  const handleRestore = async (index: number) => {
+    const previousFields = getValues("fields");
+    preserveUnsavedOnHydrateRef.current = true;
+
+    const nextFields = previousFields.map((field, currentIndex) =>
+      currentIndex === index ? { ...field, archived: false } : field,
+    );
+
+    reset({ fields: nextFields });
+
+    try {
+      const persistedFields = nextFields.filter((field) => Boolean(field.id));
+      await updateRegistrationFormAsync(buildUpdateRegistrationFormBody(persistedFields));
     } catch {
       reset({ fields: previousFields });
     }
   };
 
   const onSubmit = (values: RegistrationFormValues) => {
+    preserveUnsavedOnHydrateRef.current = false;
     updateRegistrationForm(buildUpdateRegistrationFormBody(values.fields));
+  };
+
+  const onInvalidSubmit = () => {
+    let hasLabelErrors = false;
+
+    if (Array.isArray(errors.fields)) {
+      for (const fieldError of errors.fields) {
+        if (fieldError?.label?.en || fieldError?.label?.pl) {
+          hasLabelErrors = true;
+          break;
+        }
+      }
+    }
+
+    toast({
+      variant: "destructive",
+      description: t(
+        hasLabelErrors
+          ? "registrationFormBuilder.validation.toastLabelRequired"
+          : "registrationFormBuilder.validation.toastGeneric",
+      ),
+    });
   };
 
   return (
@@ -140,7 +197,7 @@ export function RegistrationFormBuilder() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-5">
-        <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+        <form className="space-y-4" onSubmit={handleSubmit(onSubmit, onInvalidSubmit)}>
           <Button type="button" onClick={() => append(createEmptyField(fields.length))}>
             <Plus className="mr-2 size-4" />
             {t("registrationFormBuilder.addField")}
@@ -168,17 +225,21 @@ export function RegistrationFormBuilder() {
               strategy={verticalListSortingStrategy}
             >
               <div className="space-y-4">
-                {visibleFields.map(({ field, index, isRequired }, visibleIndex) => {
+                {visibleFields.map(({ field, index, isArchived, isRequired }, visibleIndex) => {
                   return (
                     <SortableFieldCard key={field.fieldKey} id={field.fieldKey}>
                       {({ attributes, listeners }) => (
                         <RegistrationFormBuilderField
                           control={control}
                           errors={errors}
+                          isArchived={isArchived}
                           index={index}
                           isArchiving={isPending}
+                          isPersisted={Boolean(field.id)}
                           isRequired={isRequired}
                           onArchive={handleArchive}
+                          onDelete={remove}
+                          onRestore={handleRestore}
                           sortAttributes={attributes}
                           sortListeners={listeners}
                           visibleIndex={visibleIndex}
