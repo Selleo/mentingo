@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { PERMISSIONS } from "@repo/shared";
+import { PERMISSIONS, type PermissionKey } from "@repo/shared";
 import {
   eq,
   and,
@@ -243,7 +243,7 @@ export class AnnouncementsRepository {
     );
   }
 
-  private excludeUsersWithPermission(userIdColumn: typeof users.id, permission: string) {
+  private excludeUsersWithPermission(userIdColumn: typeof users.id, permission: PermissionKey) {
     return notExists(
       this.db
         .select({ userId: permissionUserRoles.userId })

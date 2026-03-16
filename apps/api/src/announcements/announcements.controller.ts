@@ -75,12 +75,12 @@ export class AnnouncementsController {
     response: baseResponse(announcementsForUserSchema),
   })
   async getAnnouncementsForUser(
-    @CurrentUser("userId") userId: UUIDType,
     @Query("title") title?: string,
     @Query("content") content?: string,
     @Query("authorName") authorName?: string,
     @Query("search") search?: string,
     @Query("isRead") isRead?: string,
+    @CurrentUser("userId") userId?: UUIDType,
   ) {
     const filters: AnnouncementFilters = {
       title,
@@ -89,8 +89,7 @@ export class AnnouncementsController {
       search,
       isRead: isRead ? isRead === "true" : undefined,
     };
-
-    const announcements = await this.announcementsService.getAnnouncementsForUser(userId, filters);
+    const announcements = await this.announcementsService.getAnnouncementsForUser(userId!, filters);
 
     return new BaseResponse(announcements);
   }

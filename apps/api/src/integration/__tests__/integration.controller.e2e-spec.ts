@@ -5,7 +5,7 @@ import request from "supertest";
 
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { integrationApiKeys, tenants } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
+import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createGroupFactory } from "../../../test/factory/group.factory";
@@ -59,7 +59,7 @@ describe("IntegrationController (e2e)", () => {
       const admin = await userFactory
         .withCredentials({ password })
         .withAdminSettings(db)
-        .create({ role: USER_ROLES.ADMIN });
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
       const cookies = await cookieFor(admin, app);
 
       const response = await request(app.getHttpServer())
@@ -74,7 +74,7 @@ describe("IntegrationController (e2e)", () => {
       const admin = await userFactory
         .withCredentials({ password })
         .withAdminSettings(db)
-        .create({ role: USER_ROLES.ADMIN });
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
       const cookies = await cookieFor(admin, app);
 
       const response = await request(app.getHttpServer())
@@ -117,7 +117,7 @@ describe("IntegrationController (e2e)", () => {
       const admin = await userFactory
         .withCredentials({ password })
         .withAdminSettings(db)
-        .create({ role: USER_ROLES.ADMIN });
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
       const cookies = await cookieFor(admin, app);
       const group = await groupFactory.create();
 
@@ -144,7 +144,7 @@ describe("IntegrationController (e2e)", () => {
       const admin = await userFactory
         .withCredentials({ password })
         .withAdminSettings(db)
-        .create({ role: USER_ROLES.ADMIN });
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
       const cookies = await cookieFor(admin, app);
 
       const rotateResponse = await request(app.getHttpServer())
@@ -165,7 +165,7 @@ describe("IntegrationController (e2e)", () => {
       const admin = await userFactory
         .withCredentials({ password })
         .withAdminSettings(db)
-        .create({ role: USER_ROLES.ADMIN });
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
       const cookies = await cookieFor(admin, app);
 
       const firstRotateResponse = await request(app.getHttpServer())
@@ -192,7 +192,7 @@ describe("IntegrationController (e2e)", () => {
       const admin = await userFactory
         .withCredentials({ password })
         .withAdminSettings(db)
-        .create({ role: USER_ROLES.ADMIN });
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
       const cookies = await cookieFor(admin, app);
 
       await dbAdmin
@@ -231,7 +231,7 @@ describe("IntegrationController (e2e)", () => {
       const admin = await userFactory
         .withCredentials({ password })
         .withAdminSettings(db)
-        .create({ role: USER_ROLES.ADMIN });
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
       const cookies = await cookieFor(admin, app);
 
       await dbAdmin.update(tenants).set({ isManaging: true }).where(eq(tenants.id, admin.tenantId));
@@ -259,7 +259,7 @@ describe("IntegrationController (e2e)", () => {
       const admin = await userFactory
         .withCredentials({ password })
         .withAdminSettings(db)
-        .create({ role: USER_ROLES.ADMIN });
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
       const cookies = await cookieFor(admin, app);
 
       await dbAdmin
@@ -294,7 +294,7 @@ describe("IntegrationController (e2e)", () => {
       const admin = await userFactory
         .withCredentials({ password })
         .withAdminSettings(db)
-        .create({ role: USER_ROLES.ADMIN });
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
       const cookies = await cookieFor(admin, app);
 
       await dbAdmin.update(tenants).set({ isManaging: true }).where(eq(tenants.id, admin.tenantId));

@@ -17,7 +17,7 @@ import {
   studentCourses,
   studentLessonProgress,
 } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
+import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCategoryFactory } from "../../../test/factory/category.factory";
@@ -117,7 +117,7 @@ describe("CourseController (e2e)", () => {
           const author = await userFactory
             .withCredentials({ password })
             .withAdminSettings(db)
-            .create({ role: USER_ROLES.ADMIN });
+            .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
           await courseFactory.create({
             authorId: author.id,
             categoryId: category.id,
@@ -145,7 +145,7 @@ describe("CourseController (e2e)", () => {
           const user = await userFactory
             .withCredentials({ password })
             .withUserSettings(db)
-            .create({ role: USER_ROLES.STUDENT });
+            .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
 
           await request(app.getHttpServer())
             .get("/api/course/all")
@@ -160,11 +160,11 @@ describe("CourseController (e2e)", () => {
           const contentCreator = await userFactory
             .withCredentials({ password })
             .withContentCreatorSettings(db)
-            .create({ role: USER_ROLES.CONTENT_CREATOR });
+            .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
           const otherContentCreator = await userFactory
             .withCredentials({ password })
             .withContentCreatorSettings(db)
-            .create({ role: USER_ROLES.CONTENT_CREATOR });
+            .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
 
           await courseFactory.create({
             authorId: contentCreator.id,
@@ -198,7 +198,7 @@ describe("CourseController (e2e)", () => {
           const admin = await userFactory
             .withCredentials({ password })
             .withAdminSettings(db)
-            .create({ role: USER_ROLES.ADMIN });
+            .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
           const cookies = await cookieFor(admin, app);
           const category = await categoryFactory.create();
           await courseFactory.create({
@@ -227,7 +227,7 @@ describe("CourseController (e2e)", () => {
           const admin = await userFactory
             .withCredentials({ password })
             .withAdminSettings(db)
-            .create({ role: USER_ROLES.ADMIN });
+            .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
           const cookies = await cookieFor(admin, app);
           const category = await categoryFactory.create();
           await courseFactory.create({
@@ -258,7 +258,7 @@ describe("CourseController (e2e)", () => {
           const admin = await userFactory
             .withCredentials({ password })
             .withAdminSettings(db)
-            .create({ role: USER_ROLES.ADMIN });
+            .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
           const cookies = await cookieFor(admin, app);
           const category = await categoryFactory.create();
           await courseFactory.create({
@@ -302,7 +302,7 @@ describe("CourseController (e2e)", () => {
           const admin = await userFactory
             .withCredentials({ password })
             .withAdminSettings(db)
-            .create({ role: USER_ROLES.ADMIN });
+            .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
           const cookies = await cookieFor(admin, app);
           const category = await categoryFactory.create();
           const pastDate = new Date("2023-01-01");
@@ -329,7 +329,7 @@ describe("CourseController (e2e)", () => {
           const admin = await userFactory
             .withCredentials({ password })
             .withAdminSettings(db)
-            .create({ role: USER_ROLES.ADMIN });
+            .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
           const cookies = await cookieFor(admin, app);
           const category = await categoryFactory.create();
 
@@ -376,7 +376,7 @@ describe("CourseController (e2e)", () => {
           const admin = await userFactory
             .withCredentials({ password })
             .withAdminSettings(db)
-            .create({ role: USER_ROLES.ADMIN });
+            .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
 
           for (let i = 0; i < 15; i++) {
             await courseFactory.create({
@@ -407,7 +407,7 @@ describe("CourseController (e2e)", () => {
           const admin = await userFactory
             .withCredentials({ password })
             .withAdminSettings(db)
-            .create({ role: USER_ROLES.ADMIN });
+            .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
 
           await courseFactory.create({
             title: "Z Course",
@@ -447,10 +447,12 @@ describe("CourseController (e2e)", () => {
         const student = await userFactory
           .withCredentials({ password })
           .withUserSettings(db)
-          .create({ role: USER_ROLES.STUDENT });
+          .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
-        const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
+        const contentCreator = await userFactory.create({
+          role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
+        });
 
         const enrolledCourse = await courseFactory.create({
           authorId: contentCreator.id,
@@ -486,10 +488,12 @@ describe("CourseController (e2e)", () => {
         const student = await userFactory
           .withCredentials({ password })
           .withUserSettings(db)
-          .create({ role: USER_ROLES.STUDENT });
+          .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
-        const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
+        const contentCreator = await userFactory.create({
+          role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
+        });
 
         const pythonCourse = await courseFactory.create({
           title: "Python Course",
@@ -532,10 +536,12 @@ describe("CourseController (e2e)", () => {
         const student = await userFactory
           .withCredentials({ password })
           .withUserSettings(db)
-          .create({ role: USER_ROLES.STUDENT });
+          .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
-        const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
+        const contentCreator = await userFactory.create({
+          role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
+        });
 
         const course1 = await courseFactory.create({
           title: "Course One",
@@ -580,10 +586,12 @@ describe("CourseController (e2e)", () => {
         const student = await userFactory
           .withCredentials({ password })
           .withUserSettings(db)
-          .create({ role: USER_ROLES.STUDENT });
+          .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
-        const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
+        const contentCreator = await userFactory.create({
+          role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
+        });
 
         const course1 = await courseFactory.create({
           title: "Python Basics",
@@ -647,10 +655,12 @@ describe("CourseController (e2e)", () => {
         const student = await userFactory
           .withCredentials({ password })
           .withUserSettings(db)
-          .create({ role: USER_ROLES.STUDENT });
+          .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
-        const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
+        const contentCreator = await userFactory.create({
+          role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
+        });
 
         const publishedCourse = await courseFactory.create({
           authorId: contentCreator.id,
@@ -704,10 +714,12 @@ describe("CourseController (e2e)", () => {
         const student = await userFactory
           .withCredentials({ password })
           .withUserSettings(db)
-          .create({ role: USER_ROLES.STUDENT });
+          .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
-        const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
+        const contentCreator = await userFactory.create({
+          role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
+        });
 
         const courseA = await courseFactory.create({
           title: "A Course",
@@ -750,10 +762,12 @@ describe("CourseController (e2e)", () => {
         const student = await userFactory
           .withCredentials({ password })
           .withUserSettings(db)
-          .create({ role: USER_ROLES.STUDENT });
+          .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
-        const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
+        const contentCreator = await userFactory.create({
+          role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
+        });
 
         const coursesToCreate = Array.from(
           { length: 15 },
@@ -808,7 +822,7 @@ describe("CourseController (e2e)", () => {
             .withCredentials({ password })
             .withUserSettings(db)
             .create({
-              role: USER_ROLES.STUDENT,
+              role: SYSTEM_ROLE_SLUGS.STUDENT,
             });
           const cookies = await cookieFor(admin, app);
 
@@ -817,7 +831,7 @@ describe("CourseController (e2e)", () => {
             .set("Cookie", cookies);
 
           expect(response.status).toBe(403);
-          expect(response.body.message).toBe("Forbidden resource");
+          expect(response.body.message).toBe("auth.error.missingPermission");
         });
       });
 
@@ -831,7 +845,9 @@ describe("CourseController (e2e)", () => {
           const cookies = await cookieFor(admin, app);
 
           const students = await Promise.all(
-            Array.from({ length: 2 }, (_, _i) => userFactory.create({ role: USER_ROLES.STUDENT })),
+            Array.from({ length: 2 }, (_, _i) =>
+              userFactory.create({ role: SYSTEM_ROLE_SLUGS.STUDENT }),
+            ),
           );
 
           const course = await courseFactory.create({
@@ -1108,10 +1124,12 @@ describe("CourseController (e2e)", () => {
         const student = await userFactory
           .withCredentials({ password })
           .withUserSettings(db)
-          .create({ role: USER_ROLES.STUDENT });
+          .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
-        const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
+        const contentCreator = await userFactory.create({
+          role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
+        });
 
         const enrolledCourse = await courseFactory.create({
           authorId: contentCreator.id,
@@ -1154,10 +1172,12 @@ describe("CourseController (e2e)", () => {
         const student = await userFactory
           .withCredentials({ password })
           .withUserSettings(db)
-          .create({ role: USER_ROLES.STUDENT });
+          .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
-        const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
+        const contentCreator = await userFactory.create({
+          role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
+        });
 
         await courseFactory.create({
           title: "Python Course",
@@ -1187,10 +1207,12 @@ describe("CourseController (e2e)", () => {
         const student = await userFactory
           .withCredentials({ password })
           .withUserSettings(db)
-          .create({ role: USER_ROLES.STUDENT });
+          .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
-        const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
+        const contentCreator = await userFactory.create({
+          role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
+        });
 
         await courseFactory.create({
           title: "Course One",
@@ -1222,10 +1244,12 @@ describe("CourseController (e2e)", () => {
         const student = await userFactory
           .withCredentials({ password })
           .withUserSettings(db)
-          .create({ role: USER_ROLES.STUDENT });
+          .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
-        const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
+        const contentCreator = await userFactory.create({
+          role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
+        });
 
         await courseFactory.create({
           title: "Python Basics",
@@ -1271,10 +1295,12 @@ describe("CourseController (e2e)", () => {
         const student = await userFactory
           .withCredentials({ password })
           .withUserSettings(db)
-          .create({ role: USER_ROLES.STUDENT });
+          .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
-        const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
+        const contentCreator = await userFactory.create({
+          role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
+        });
 
         const courseToExclude = await courseFactory.create({
           authorId: contentCreator.id,
@@ -1303,10 +1329,12 @@ describe("CourseController (e2e)", () => {
         const student = await userFactory
           .withCredentials({ password })
           .withUserSettings(db)
-          .create({ role: USER_ROLES.STUDENT });
+          .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
-        const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
+        const contentCreator = await userFactory.create({
+          role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
+        });
 
         const course = await courseFactory.create({
           authorId: contentCreator.id,
@@ -1337,10 +1365,12 @@ describe("CourseController (e2e)", () => {
         const student = await userFactory
           .withCredentials({ password })
           .withUserSettings(db)
-          .create({ role: USER_ROLES.STUDENT });
+          .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
-        const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
+        const contentCreator = await userFactory.create({
+          role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
+        });
 
         await courseFactory.create({
           title: "A Course",
@@ -1370,10 +1400,12 @@ describe("CourseController (e2e)", () => {
         const student = await userFactory
           .withCredentials({ password })
           .withUserSettings(db)
-          .create({ role: USER_ROLES.STUDENT });
+          .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
-        const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
+        const contentCreator = await userFactory.create({
+          role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
+        });
 
         const coursesToCreate = Array.from(
           { length: 15 },
@@ -1407,10 +1439,10 @@ describe("CourseController (e2e)", () => {
       const student = await userFactory
         .withCredentials({ password })
         .withUserSettings(db)
-        .create({ role: USER_ROLES.STUDENT });
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
       const cookies = await cookieFor(student, app);
       const category = await categoryFactory.create();
-      const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
+      const contentCreator = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
 
       const course = await courseFactory.create({
         authorId: contentCreator.id,
@@ -1447,9 +1479,11 @@ describe("CourseController (e2e)", () => {
       const student = await userFactory
         .withCredentials({ password })
         .withUserSettings(db)
-        .create({ role: USER_ROLES.STUDENT });
-      const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
-      const otherContentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const contentCreator = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+      const otherContentCreator = await userFactory.create({
+        role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
+      });
       const category = await categoryFactory.create();
       const cookies = await cookieFor(student, app);
 
@@ -1487,8 +1521,8 @@ describe("CourseController (e2e)", () => {
       const student = await userFactory
         .withCredentials({ password })
         .withUserSettings(db)
-        .create({ role: USER_ROLES.STUDENT });
-      const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const contentCreator = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
       const category = await categoryFactory.create();
       const cookies = await cookieFor(student, app);
 
@@ -1526,8 +1560,8 @@ describe("CourseController (e2e)", () => {
       const student = await userFactory
         .withCredentials({ password })
         .withUserSettings(db)
-        .create({ role: USER_ROLES.STUDENT });
-      const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const contentCreator = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
       const category = await categoryFactory.create();
       const cookies = await cookieFor(student, app);
 
@@ -1565,8 +1599,8 @@ describe("CourseController (e2e)", () => {
       const student = await userFactory
         .withCredentials({ password })
         .withUserSettings(db)
-        .create({ role: USER_ROLES.STUDENT });
-      const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const contentCreator = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
       const category = await categoryFactory.create();
       const cookies = await cookieFor(student, app);
 
@@ -1599,9 +1633,9 @@ describe("CourseController (e2e)", () => {
       const student = await userFactory
         .withCredentials({ password })
         .withUserSettings(db)
-        .create({ role: USER_ROLES.STUDENT });
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
       const contentCreator = await userFactory.create({
-        role: USER_ROLES.CONTENT_CREATOR,
+        role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
         firstName: "John",
         lastName: "Doe",
         email: "john@example.com",
@@ -1630,8 +1664,8 @@ describe("CourseController (e2e)", () => {
       const student = await userFactory
         .withCredentials({ password })
         .withUserSettings(db)
-        .create({ role: USER_ROLES.STUDENT });
-      const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const contentCreator = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
       const category = await categoryFactory.create();
       const cookies = await cookieFor(student, app);
 
@@ -1674,7 +1708,7 @@ describe("CourseController (e2e)", () => {
       describe("when user is not admin", () => {
         it("should return 403 Forbidden", async () => {
           const user = await userFactory.withCredentials({ password }).withUserSettings(db).create({
-            role: USER_ROLES.STUDENT,
+            role: SYSTEM_ROLE_SLUGS.STUDENT,
           });
           const cookies = await cookieFor(user, app);
 
@@ -1846,7 +1880,7 @@ describe("CourseController (e2e)", () => {
           const student = await userFactory
             .withCredentials({ password })
             .withUserSettings(db)
-            .create({ role: USER_ROLES.STUDENT });
+            .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
 
           const admin = await userFactory
             .withCredentials({ password })
@@ -2216,7 +2250,7 @@ describe("CourseController (e2e)", () => {
           const student = await userFactory
             .withCredentials({ password })
             .withUserSettings(db)
-            .create({ role: USER_ROLES.STUDENT });
+            .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
 
           const admin = await userFactory
             .withCredentials({ password })
@@ -2473,10 +2507,12 @@ describe("CourseController (e2e)", () => {
           const student = await userFactory
             .withCredentials({ password })
             .withUserSettings(db)
-            .create({ role: USER_ROLES.STUDENT });
+            .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
           const cookies = await cookieFor(student, app);
           const category = await categoryFactory.create();
-          const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
+          const contentCreator = await userFactory.create({
+            role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
+          });
           const course = await courseFactory.create({
             authorId: contentCreator.id,
             categoryId: category.id,
@@ -2564,7 +2600,7 @@ describe("CourseController (e2e)", () => {
           const contentCreator = await userFactory
             .withCredentials({ password })
             .withContentCreatorSettings(db)
-            .create({ role: USER_ROLES.CONTENT_CREATOR });
+            .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
           const cookies = await cookieFor(contentCreator, app);
           const category = await categoryFactory.create();
           const course = await courseFactory.create({
@@ -2602,10 +2638,12 @@ describe("CourseController (e2e)", () => {
           const student = await userFactory
             .withCredentials({ password })
             .withUserSettings(db)
-            .create({ role: USER_ROLES.STUDENT });
+            .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
           const cookies = await cookieFor(student, app);
           const category = await categoryFactory.create();
-          const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
+          const contentCreator = await userFactory.create({
+            role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
+          });
           const course = await courseFactory.create({
             authorId: contentCreator.id,
             categoryId: category.id,
@@ -2773,7 +2811,7 @@ describe("CourseController (e2e)", () => {
           const contentCreator = await userFactory
             .withCredentials({ password })
             .withContentCreatorSettings(db)
-            .create({ role: USER_ROLES.CONTENT_CREATOR });
+            .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
           const cookies = await cookieFor(contentCreator, app);
           const category = await categoryFactory.create();
           const course = await courseFactory.create({
@@ -2815,12 +2853,12 @@ describe("CourseController (e2e)", () => {
         const admin = await userFactory
           .withCredentials({ password })
           .withAdminSettings(db)
-          .create({ role: USER_ROLES.ADMIN });
+          .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
         const author = await userFactory
           .withCredentials({ password })
           .withContentCreatorSettings(db)
           .create({
-            role: USER_ROLES.CONTENT_CREATOR,
+            role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
             firstName: "Alice",
             lastName: "Author",
             email: "alice@example.com",
@@ -2829,7 +2867,7 @@ describe("CourseController (e2e)", () => {
           .withCredentials({ password })
           .withContentCreatorSettings(db)
           .create({
-            role: USER_ROLES.CONTENT_CREATOR,
+            role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
             firstName: "Bob",
             lastName: "Candidate",
             email: "bob@example.com",
@@ -2866,11 +2904,11 @@ describe("CourseController (e2e)", () => {
         const contentCreator = await userFactory
           .withCredentials({ password })
           .withContentCreatorSettings(db)
-          .create({ role: USER_ROLES.CONTENT_CREATOR });
+          .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
         const author = await userFactory
           .withCredentials({ password })
           .withContentCreatorSettings(db)
-          .create({ role: USER_ROLES.CONTENT_CREATOR });
+          .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
         const category = await categoryFactory.create();
         const course = await courseFactory.create({
           authorId: author.id,
@@ -2902,19 +2940,19 @@ describe("CourseController (e2e)", () => {
         const admin = await userFactory
           .withCredentials({ password })
           .withAdminSettings(db)
-          .create({ role: USER_ROLES.ADMIN });
+          .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
         const author = await userFactory
           .withCredentials({ password })
           .withContentCreatorSettings(db)
-          .create({ role: USER_ROLES.CONTENT_CREATOR });
+          .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
         const newOwner = await userFactory
           .withCredentials({ password })
           .withContentCreatorSettings(db)
-          .create({ role: USER_ROLES.CONTENT_CREATOR });
+          .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
         const otherAuthor = await userFactory
           .withCredentials({ password })
           .withContentCreatorSettings(db)
-          .create({ role: USER_ROLES.CONTENT_CREATOR });
+          .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
 
         const category = await categoryFactory.create();
         const course = await courseFactory.create({
@@ -2980,15 +3018,15 @@ describe("CourseController (e2e)", () => {
         const admin = await userFactory
           .withCredentials({ password })
           .withAdminSettings(db)
-          .create({ role: USER_ROLES.ADMIN });
+          .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
         const author = await userFactory
           .withCredentials({ password })
           .withContentCreatorSettings(db)
-          .create({ role: USER_ROLES.CONTENT_CREATOR });
+          .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
         const student = await userFactory
           .withCredentials({ password })
           .withUserSettings(db)
-          .create({ role: USER_ROLES.STUDENT });
+          .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
         const category = await categoryFactory.create();
         const course = await courseFactory.create({
           authorId: author.id,
@@ -3008,15 +3046,15 @@ describe("CourseController (e2e)", () => {
         const contentCreator = await userFactory
           .withCredentials({ password })
           .withContentCreatorSettings(db)
-          .create({ role: USER_ROLES.CONTENT_CREATOR });
+          .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
         const author = await userFactory
           .withCredentials({ password })
           .withContentCreatorSettings(db)
-          .create({ role: USER_ROLES.CONTENT_CREATOR });
+          .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
         const newOwner = await userFactory
           .withCredentials({ password })
           .withContentCreatorSettings(db)
-          .create({ role: USER_ROLES.CONTENT_CREATOR });
+          .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
         const category = await categoryFactory.create();
         const course = await courseFactory.create({
           authorId: author.id,
@@ -3039,7 +3077,7 @@ describe("CourseController (e2e)", () => {
       const author = await userFactory
         .withCredentials({ password })
         .withAdminSettings(db)
-        .create({ role: USER_ROLES.ADMIN });
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
       const category = await categoryFactory.create();
       const course = await courseFactory.create({
         authorId: author.id,
@@ -3061,7 +3099,7 @@ describe("CourseController (e2e)", () => {
       const author = await userFactory
         .withCredentials({ password })
         .withAdminSettings(db)
-        .create({ role: USER_ROLES.ADMIN });
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
       const category = await categoryFactory.create();
       const course = await courseFactory.create({
         authorId: author.id,
@@ -3096,7 +3134,7 @@ describe("CourseController (e2e)", () => {
       const author = await userFactory
         .withCredentials({ password })
         .withAdminSettings(db)
-        .create({ role: USER_ROLES.ADMIN });
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
       const category = await categoryFactory.create();
       const course = await courseFactory.create({
         authorId: author.id,
@@ -3126,7 +3164,7 @@ describe("CourseController (e2e)", () => {
       const author = await userFactory
         .withCredentials({ password })
         .withAdminSettings(db)
-        .create({ role: USER_ROLES.ADMIN });
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
       const category = await categoryFactory.create();
       const course = await courseFactory.create({
         authorId: author.id,
@@ -3158,7 +3196,7 @@ describe("CourseController (e2e)", () => {
       const author = await userFactory
         .withCredentials({ password })
         .withAdminSettings(db)
-        .create({ role: USER_ROLES.ADMIN });
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
 
       await request(app.getHttpServer())
         .get("/api/course/lookup")
@@ -3171,7 +3209,7 @@ describe("CourseController (e2e)", () => {
       const author = await userFactory
         .withCredentials({ password })
         .withAdminSettings(db)
-        .create({ role: USER_ROLES.ADMIN });
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
 
       await request(app.getHttpServer())
         .get("/api/course/lookup")
@@ -3184,7 +3222,7 @@ describe("CourseController (e2e)", () => {
       const author = await userFactory
         .withCredentials({ password })
         .withAdminSettings(db)
-        .create({ role: USER_ROLES.ADMIN });
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
       const category = await categoryFactory.create();
       const course = await courseFactory.create({
         authorId: author.id,
@@ -3211,7 +3249,7 @@ describe("CourseController (e2e)", () => {
       const author = await userFactory
         .withCredentials({ password })
         .withAdminSettings(db)
-        .create({ role: USER_ROLES.ADMIN });
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
       const category = await categoryFactory.create();
       const course = await courseFactory.create({
         authorId: author.id,

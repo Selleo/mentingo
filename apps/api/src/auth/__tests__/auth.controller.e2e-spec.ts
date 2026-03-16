@@ -6,6 +6,7 @@ import request from "supertest";
 import { SettingsService } from "src/settings/settings.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { createTokens, resetTokens } from "src/storage/schema";
+import { SYSTEM_ROLE_SLUGS, PERMISSIONS } from "@repo/shared";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
@@ -287,7 +288,7 @@ describe("AuthController (e2e)", () => {
 
       const { onboardingStatus: _, ...currentUser } = response.body.data;
 
-      expect(currentUser).toStrictEqual({
+      expect(currentUser).toMatchObject({
         ...omit(user, "credentials", "avatarReference"),
         profilePictureUrl: null,
         groups: [],
@@ -295,7 +296,15 @@ describe("AuthController (e2e)", () => {
         isSupportMode: false,
         studentModeCourseIds: [],
         shouldVerifyMFA: false,
+        roleSlugs: [SYSTEM_ROLE_SLUGS.STUDENT],
       });
+      expect(currentUser.permissions).toEqual(
+        expect.arrayContaining([
+          PERMISSIONS.COURSE_READ,
+          PERMISSIONS.COURSE_READ_ASSIGNED,
+          PERMISSIONS.LEARNING_PROGRESS_UPDATE,
+        ]),
+      );
     });
 
     it("should return 401 for unauthenticated request", async () => {

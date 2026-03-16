@@ -11,7 +11,11 @@ import {
 import {
   OnboardingPages,
   PERMISSIONS,
+  SYSTEM_ROLE_PERMISSIONS,
+  SYSTEM_ROLE_SLUGS,
+  SYSTEM_RULE_SET_SLUGS,
   type PermissionKey,
+  type SystemRoleSlug,
   type SupportedLanguages,
   SUPPORTED_LANGUAGES,
 } from "@repo/shared";
@@ -60,6 +64,7 @@ import {
   permissionRoles,
   permissionRoleRuleSets,
   permissionRuleSetPermissions,
+  permissionRuleSets,
   permissionUserRoles,
   userDetails,
   users,
@@ -95,6 +100,12 @@ import type { CreateUserOptions, CreateUserTransactionResult } from "src/user/us
 
 @Injectable()
 export class UserService {
+  private readonly SYSTEM_ROLE_DISPLAY_NAME: Record<SystemRoleSlug, string> = {
+    [SYSTEM_ROLE_SLUGS.ADMIN]: "Admin",
+    [SYSTEM_ROLE_SLUGS.CONTENT_CREATOR]: "Content Creator",
+    [SYSTEM_ROLE_SLUGS.STUDENT]: "Student",
+  };
+
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
     @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
@@ -188,10 +199,12 @@ export class UserService {
 
     const { avatarReference, ...userWithoutAvatar } = user;
     const usersProfilePictureUrl = await this.getUsersProfilePictureUrl(avatarReference);
+    const { roleSlugs } = await this.getUserAccess(user.id, dbInstance);
 
     return {
       ...userWithoutAvatar,
       profilePictureUrl: usersProfilePictureUrl,
+      roleSlugs,
     };
   }
 
@@ -235,8 +248,10 @@ export class UserService {
 
     const canViewSelf = userId === currentUserId;
     const canManageUsers = hasPermission(currentUser.permissions, PERMISSIONS.USER_MANAGE);
+    const { roleSlugs: targetRoleSlugs } = await this.getUserAccess(userId);
+    const targetIsAdmin = targetRoleSlugs.includes(SYSTEM_ROLE_SLUGS.ADMIN);
 
-    const canView = canViewSelf || canManageUsers;
+    const canView = canViewSelf || canManageUsers || targetIsAdmin;
 
     if (!canView) {
       throw new ForbiddenException("Cannot access user details");
@@ -1119,6 +1134,8 @@ export class UserService {
     roleSlugs: string[],
     dbInstance: DatabasePg = this.db,
   ): Promise<void> {
+    await this.ensureSystemRolesForTenant(tenantId, dbInstance);
+
     const uniqueRoleSlugs = Array.from(new Set(roleSlugs));
 
     if (!uniqueRoleSlugs.length) {
@@ -1145,6 +1162,90 @@ export class UserService {
         tenantId,
       })),
     );
+  }
+
+  private async ensureSystemRolesForTenant(
+    tenantId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ): Promise<void> {
+    for (const roleSlug of Object.values(SYSTEM_ROLE_SLUGS)) {
+      const ruleSetSlug = SYSTEM_RULE_SET_SLUGS[roleSlug];
+      const permissions = SYSTEM_ROLE_PERMISSIONS[roleSlug];
+
+      const [role] = await dbInstance
+        .insert(permissionRoles)
+        .values({
+          tenantId,
+          name: this.SYSTEM_ROLE_DISPLAY_NAME[roleSlug],
+          slug: roleSlug,
+          isSystem: true,
+        })
+        .onConflictDoUpdate({
+          target: [permissionRoles.tenantId, permissionRoles.slug],
+          set: {
+            name: this.SYSTEM_ROLE_DISPLAY_NAME[roleSlug],
+            isSystem: true,
+            updatedAt: sql`NOW()`,
+          },
+        })
+        .returning({ id: permissionRoles.id });
+
+      const [ruleSet] = await dbInstance
+        .insert(permissionRuleSets)
+        .values({
+          tenantId,
+          name: `${this.SYSTEM_ROLE_DISPLAY_NAME[roleSlug]} Default`,
+          slug: ruleSetSlug,
+          isSystem: true,
+        })
+        .onConflictDoUpdate({
+          target: [permissionRuleSets.tenantId, permissionRuleSets.slug],
+          set: {
+            name: `${this.SYSTEM_ROLE_DISPLAY_NAME[roleSlug]} Default`,
+            isSystem: true,
+            updatedAt: sql`NOW()`,
+          },
+        })
+        .returning({ id: permissionRuleSets.id });
+
+      await dbInstance
+        .insert(permissionRoleRuleSets)
+        .values({
+          tenantId,
+          roleId: role.id,
+          ruleSetId: ruleSet.id,
+        })
+        .onConflictDoNothing({
+          target: [permissionRoleRuleSets.roleId, permissionRoleRuleSets.ruleSetId],
+        });
+
+      await dbInstance
+        .delete(permissionRuleSetPermissions)
+        .where(
+          and(
+            eq(permissionRuleSetPermissions.ruleSetId, ruleSet.id),
+            eq(permissionRuleSetPermissions.tenantId, tenantId),
+          ),
+        );
+
+      if (permissions.length) {
+        await dbInstance
+          .insert(permissionRuleSetPermissions)
+          .values(
+            permissions.map((permission) => ({
+              tenantId,
+              ruleSetId: ruleSet.id,
+              permission,
+            })),
+          )
+          .onConflictDoNothing({
+            target: [
+              permissionRuleSetPermissions.ruleSetId,
+              permissionRuleSetPermissions.permission,
+            ],
+          });
+      }
+    }
   }
 
   private async getPermissionsForRoleSlugs(
@@ -1180,6 +1281,57 @@ export class UserService {
       );
 
     return rolePermissions.map(({ permission }) => permission);
+  }
+
+  private async getUserAccess(userId: UUIDType, dbInstance: DatabasePg = this.db) {
+    const roleRows = await dbInstance
+      .select({
+        roleSlug: permissionRoles.slug,
+      })
+      .from(permissionUserRoles)
+      .innerJoin(
+        permissionRoles,
+        and(
+          eq(permissionRoles.id, permissionUserRoles.roleId),
+          eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
+        ),
+      )
+      .where(eq(permissionUserRoles.userId, userId));
+
+    const permissionRows = await dbInstance
+      .select({
+        permission: permissionRuleSetPermissions.permission,
+      })
+      .from(permissionUserRoles)
+      .innerJoin(
+        permissionRoles,
+        and(
+          eq(permissionRoles.id, permissionUserRoles.roleId),
+          eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
+        ),
+      )
+      .innerJoin(
+        permissionRoleRuleSets,
+        and(
+          eq(permissionRoleRuleSets.roleId, permissionRoles.id),
+          eq(permissionRoleRuleSets.tenantId, permissionRoles.tenantId),
+        ),
+      )
+      .innerJoin(
+        permissionRuleSetPermissions,
+        and(
+          eq(permissionRuleSetPermissions.ruleSetId, permissionRoleRuleSets.ruleSetId),
+          eq(permissionRuleSetPermissions.tenantId, permissionRoleRuleSets.tenantId),
+        ),
+      )
+      .where(eq(permissionUserRoles.userId, userId));
+
+    const roleSlugs = Array.from(new Set(roleRows.map((row) => row.roleSlug)));
+    const permissions = Array.from(
+      new Set(permissionRows.map((row) => row.permission as PermissionKey)),
+    );
+
+    return { roleSlugs, permissions };
   }
 
   private userHasPermissionCondition(

@@ -1,4 +1,5 @@
 import { eq, and, isNull } from "drizzle-orm";
+import { PERMISSIONS, SYSTEM_ROLE_SLUGS } from "@repo/shared";
 
 import { AnnouncementsService } from "src/announcements/announcements.service";
 import { AuthController } from "src/auth/auth.controller";
@@ -13,7 +14,6 @@ import { AdminLessonService } from "src/lesson/services/adminLesson.service";
 import { SettingsService } from "src/settings/settings.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { activityLogs } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCategoryFactory } from "../../../test/factory/category.factory";
@@ -99,8 +99,9 @@ describe("Activity Logs E2E", () => {
 
     currentAdminUser = {
       userId: adminUser.id,
-      role: USER_ROLES.ADMIN,
       email: adminUser.email,
+      roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN],
+      permissions: Object.values(PERMISSIONS),
       tenantId: adminUser.tenantId,
     };
   });
@@ -372,8 +373,9 @@ describe("Activity Logs E2E", () => {
 
       const currentStudentUser: CurrentUser = {
         userId: student.id,
-        role: USER_ROLES.STUDENT,
         email: student.email,
+        roleSlugs: [SYSTEM_ROLE_SLUGS.STUDENT],
+        permissions: [],
         tenantId: student.tenantId,
       };
 
@@ -442,8 +444,9 @@ describe("Activity Logs E2E", () => {
       const student = await userFactory.create();
       const currentStudentUser: CurrentUser = {
         userId: student.id,
-        role: USER_ROLES.STUDENT,
         email: student.email,
+        roleSlugs: [SYSTEM_ROLE_SLUGS.STUDENT],
+        permissions: [],
         tenantId: student.tenantId,
       };
 
@@ -698,8 +701,9 @@ describe("Activity Logs E2E", () => {
 
       const currentStudentUser: CurrentUser = {
         userId: user.id,
-        role: USER_ROLES.STUDENT,
         email: user.email,
+        roleSlugs: [SYSTEM_ROLE_SLUGS.STUDENT],
+        permissions: [],
         tenantId: user.tenantId,
       };
 

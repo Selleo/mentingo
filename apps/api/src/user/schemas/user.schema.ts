@@ -58,6 +58,7 @@ export const userSchema = Type.Composite([
   Type.Omit(commonUserSchema, ["avatarReference"]),
   Type.Object({
     profilePictureUrl: Type.Union([Type.String(), Type.Null()]),
+    roleSlugs: Type.Array(Type.String()),
     groups: Type.Array(
       Type.Object({
         id: UUIDSchema,
@@ -87,5 +88,5 @@ export type UserDetailsWithAvatarKey = Static<typeof userDetailsSchema> & {
 };
 
 export type UserDetailsResponse = Static<typeof userDetailsResponseSchema>;
-export type UserResponse = Static<typeof baseUserResponseSchema>;
+export type UserResponse = Static<typeof userSchema>;
 export type AllUsersResponse = Static<typeof allUsersSchema>;

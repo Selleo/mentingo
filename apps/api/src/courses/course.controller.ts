@@ -567,7 +567,7 @@ export class CourseController {
   }
 
   @Get("settings/:courseId")
-  @RequirePermission(PERMISSIONS.COURSE_READ)
+  @RequirePermission(PERMISSIONS.COURSE_READ_MANAGEABLE)
   @Validate({
     response: baseResponse(getCourseSettingsSchema),
     request: [{ type: "param", name: "courseId", schema: UUIDSchema }],

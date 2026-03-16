@@ -38,6 +38,7 @@ import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
 import { ImageConstraintsValidator } from "src/file/validators/image-constraints.validator";
 import { groupsFilterSchema } from "src/group/group.schema";
 import { GroupsFilterSchema } from "src/group/group.types";
+import { hasPermission } from "src/common/permissions/permission.utils";
 import {
   type CreateUserBody,
   createUserSchema,
@@ -172,9 +173,14 @@ export class UserController {
         throw new ForbiddenException("You can only update your own account");
       }
 
+      const canManageUsers = hasPermission(currentUser.permissions, PERMISSIONS.USER_MANAGE);
       const { roleSlugs, groups, archived } = data;
 
-      if (roleSlugs !== undefined || groups !== undefined || archived !== undefined) {
+      if ((roleSlugs !== undefined || archived !== undefined) && !canManageUsers) {
+        throw new ForbiddenException("You can only update your own basic account data");
+      }
+
+      if (groups !== undefined && !canManageUsers) {
         throw new ForbiddenException("You can only update your own basic account data");
       }
 

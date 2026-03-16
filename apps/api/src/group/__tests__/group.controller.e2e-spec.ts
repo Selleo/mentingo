@@ -6,7 +6,7 @@ import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { groupUsers, lessons, studentCourses } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
+import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCategoryFactory } from "../../../test/factory/category.factory";
@@ -69,7 +69,7 @@ describe("groupController (e2e)", () => {
         const student = await userFactory
           .withCredentials({ password })
           .withUserSettings(db)
-          .create({ role: USER_ROLES.STUDENT });
+          .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
         const cookies = await cookieFor(student, app);
 
         await request(app.getHttpServer()).get("/api/group/all").set("Cookie", cookies).expect(403);
@@ -79,7 +79,7 @@ describe("groupController (e2e)", () => {
         const student = await userFactory
           .withCredentials({ password })
           .withContentCreatorSettings(db)
-          .create({ role: USER_ROLES.CONTENT_CREATOR });
+          .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
         const cookies = await cookieFor(student, app);
 
         await request(app.getHttpServer()).get("/api/group/all").set("Cookie", cookies).expect(403);
@@ -91,7 +91,7 @@ describe("groupController (e2e)", () => {
         const admin = await userFactory
           .withCredentials({ password })
           .withAdminSettings(db)
-          .create({ role: USER_ROLES.ADMIN });
+          .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
         const cookies = await cookieFor(admin, app);
         const group = await groupFactory.create();
 
@@ -113,7 +113,7 @@ describe("groupController (e2e)", () => {
         const admin = await userFactory
           .withCredentials({ password })
           .withAdminSettings(db)
-          .create({ role: USER_ROLES.ADMIN });
+          .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
         const cookies = await cookieFor(admin, app);
         await groupFactory.create();
         const group2 = await groupFactory.create();
@@ -132,7 +132,7 @@ describe("groupController (e2e)", () => {
         const admin = await userFactory
           .withCredentials({ password })
           .withAdminSettings(db)
-          .create({ role: USER_ROLES.ADMIN });
+          .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
         const cookies = await cookieFor(admin, app);
         const group1 = await groupFactory.create({ name: "B" });
         const group2 = await groupFactory.create({ name: "A" });
@@ -152,7 +152,7 @@ describe("groupController (e2e)", () => {
         const admin = await userFactory
           .withCredentials({ password })
           .withAdminSettings(db)
-          .create({ role: USER_ROLES.ADMIN });
+          .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
         const cookies = await cookieFor(admin, app);
         const group1 = await groupFactory.create({ name: "B" });
         const group2 = await groupFactory.create({ name: "A" });
@@ -172,7 +172,7 @@ describe("groupController (e2e)", () => {
         const admin = await userFactory
           .withCredentials({ password })
           .withAdminSettings(db)
-          .create({ role: USER_ROLES.ADMIN });
+          .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
         const cookies = await cookieFor(admin, app);
         await groupFactory.create({ name: "B" });
         const group1 = await groupFactory.create({ name: "AB" });
@@ -205,7 +205,7 @@ describe("groupController (e2e)", () => {
         const student = await userFactory
           .withCredentials({ password })
           .withUserSettings(db)
-          .create({ role: USER_ROLES.STUDENT });
+          .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
         const cookies = await cookieFor(student, app);
         const group = await groupFactory.create();
 
@@ -219,7 +219,7 @@ describe("groupController (e2e)", () => {
         const student = await userFactory
           .withCredentials({ password })
           .withContentCreatorSettings(db)
-          .create({ role: USER_ROLES.CONTENT_CREATOR });
+          .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
         const cookies = await cookieFor(student, app);
         const group = await groupFactory.create();
 
@@ -235,7 +235,7 @@ describe("groupController (e2e)", () => {
         const admin = await userFactory
           .withCredentials({ password })
           .withAdminSettings(db)
-          .create({ role: USER_ROLES.ADMIN });
+          .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
         const cookies = await cookieFor(admin, app);
         const group = await groupFactory.create();
 
@@ -265,7 +265,7 @@ describe("groupController (e2e)", () => {
         const student = await userFactory
           .withCredentials({ password })
           .withUserSettings(db)
-          .create({ role: USER_ROLES.STUDENT });
+          .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
         const cookies = await cookieFor(student, app);
         const user = await userFactory.create();
 
@@ -279,7 +279,7 @@ describe("groupController (e2e)", () => {
         const student = await userFactory
           .withCredentials({ password })
           .withContentCreatorSettings(db)
-          .create({ role: USER_ROLES.CONTENT_CREATOR });
+          .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
         const cookies = await cookieFor(student, app);
         const user = await userFactory.create();
 
@@ -295,7 +295,7 @@ describe("groupController (e2e)", () => {
         const admin = await userFactory
           .withCredentials({ password })
           .withAdminSettings(db)
-          .create({ role: USER_ROLES.ADMIN });
+          .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
         const cookies = await cookieFor(admin, app);
         const user = await userFactory.create();
         const group = await groupFactory.create();
@@ -319,7 +319,7 @@ describe("groupController (e2e)", () => {
         const admin = await userFactory
           .withCredentials({ password })
           .withAdminSettings(db)
-          .create({ role: USER_ROLES.ADMIN });
+          .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
         const cookies = await cookieFor(admin, app);
         const user = await userFactory.create();
         const group = await groupFactory.create();
@@ -338,7 +338,7 @@ describe("groupController (e2e)", () => {
         const admin = await userFactory
           .withCredentials({ password })
           .withAdminSettings(db)
-          .create({ role: USER_ROLES.ADMIN });
+          .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
         const cookies = await cookieFor(admin, app);
         const user = await userFactory.create();
         const group = await groupFactory.create({ name: "A" });
@@ -374,7 +374,7 @@ describe("groupController (e2e)", () => {
         const student = await userFactory
           .withCredentials({ password })
           .withUserSettings(db)
-          .create({ role: USER_ROLES.STUDENT });
+          .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
         const cookies = await cookieFor(student, app);
         const name = "Programmers";
         const characteristic = "People who love programming";
@@ -390,7 +390,7 @@ describe("groupController (e2e)", () => {
         const student = await userFactory
           .withCredentials({ password })
           .withContentCreatorSettings(db)
-          .create({ role: USER_ROLES.CONTENT_CREATOR });
+          .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
         const cookies = await cookieFor(student, app);
         const name = "Programmers";
         const characteristic = "People who love programming";
@@ -408,7 +408,7 @@ describe("groupController (e2e)", () => {
         const admin = await userFactory
           .withCredentials({ password })
           .withAdminSettings(db)
-          .create({ role: USER_ROLES.ADMIN });
+          .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
         const cookies = await cookieFor(admin, app);
         const name = "Programmers";
         const characteristic = "People who love programming";
@@ -441,7 +441,7 @@ describe("groupController (e2e)", () => {
         const student = await userFactory
           .withCredentials({ password })
           .withUserSettings(db)
-          .create({ role: USER_ROLES.STUDENT });
+          .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
         const cookies = await cookieFor(student, app);
         const group = await groupFactory.create();
         const name = "Programmers";
@@ -458,7 +458,7 @@ describe("groupController (e2e)", () => {
         const student = await userFactory
           .withCredentials({ password })
           .withContentCreatorSettings(db)
-          .create({ role: USER_ROLES.CONTENT_CREATOR });
+          .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
         const cookies = await cookieFor(student, app);
         const group = await groupFactory.create();
         const name = "Programmers";
@@ -477,7 +477,7 @@ describe("groupController (e2e)", () => {
         const admin = await userFactory
           .withCredentials({ password })
           .withAdminSettings(db)
-          .create({ role: USER_ROLES.ADMIN });
+          .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
         const cookies = await cookieFor(admin, app);
         const group = await groupFactory.create();
         const name = "Programmers";
@@ -498,7 +498,7 @@ describe("groupController (e2e)", () => {
         const admin = await userFactory
           .withCredentials({ password })
           .withAdminSettings(db)
-          .create({ role: USER_ROLES.ADMIN });
+          .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
         const cookies = await cookieFor(admin, app);
         const name = "Programmers";
         const characteristic = "People who love programming";
@@ -526,7 +526,7 @@ describe("groupController (e2e)", () => {
         const student = await userFactory
           .withCredentials({ password })
           .withUserSettings(db)
-          .create({ role: USER_ROLES.STUDENT });
+          .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
         const cookies = await cookieFor(student, app);
         const group = await groupFactory.create();
 
@@ -540,7 +540,7 @@ describe("groupController (e2e)", () => {
         const student = await userFactory
           .withCredentials({ password })
           .withContentCreatorSettings(db)
-          .create({ role: USER_ROLES.CONTENT_CREATOR });
+          .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
         const cookies = await cookieFor(student, app);
         const group = await groupFactory.create();
 
@@ -556,7 +556,7 @@ describe("groupController (e2e)", () => {
         const admin = await userFactory
           .withCredentials({ password })
           .withAdminSettings(db)
-          .create({ role: USER_ROLES.ADMIN });
+          .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
         const cookies = await cookieFor(admin, app);
         const group = await groupFactory.create();
 
@@ -570,7 +570,7 @@ describe("groupController (e2e)", () => {
         const admin = await userFactory
           .withCredentials({ password })
           .withAdminSettings(db)
-          .create({ role: USER_ROLES.ADMIN });
+          .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
         const cookies = await cookieFor(admin, app);
 
         await request(app.getHttpServer())
@@ -593,7 +593,7 @@ describe("groupController (e2e)", () => {
         const student = await userFactory
           .withCredentials({ password })
           .withUserSettings(db)
-          .create({ role: USER_ROLES.STUDENT });
+          .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
         const cookies = await cookieFor(student, app);
 
         await request(app.getHttpServer()).delete("/api/group").set("Cookie", cookies).expect(403);
@@ -603,7 +603,7 @@ describe("groupController (e2e)", () => {
         const student = await userFactory
           .withCredentials({ password })
           .withContentCreatorSettings(db)
-          .create({ role: USER_ROLES.CONTENT_CREATOR });
+          .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
         const cookies = await cookieFor(student, app);
 
         await request(app.getHttpServer()).delete("/api/group").set("Cookie", cookies).expect(403);
@@ -615,7 +615,7 @@ describe("groupController (e2e)", () => {
         const admin = await userFactory
           .withCredentials({ password })
           .withAdminSettings(db)
-          .create({ role: USER_ROLES.ADMIN });
+          .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
         const cookies = await cookieFor(admin, app);
         const group1 = await groupFactory.create();
         const group2 = await groupFactory.create();
@@ -631,7 +631,7 @@ describe("groupController (e2e)", () => {
         const admin = await userFactory
           .withCredentials({ password })
           .withAdminSettings(db)
-          .create({ role: USER_ROLES.ADMIN });
+          .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
         const cookies = await cookieFor(admin, app);
 
         await request(app.getHttpServer())

@@ -4,7 +4,7 @@ import request from "supertest";
 import { AuthService } from "src/auth/auth.service";
 import { GroupService } from "src/group/group.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { USER_ROLES } from "src/user/schemas/userRoles";
+import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
@@ -87,6 +87,7 @@ describe("UsersController (e2e)", () => {
       expect(response.body.data).toStrictEqual({
         ...omit(testUser, "credentials", "avatarReference"),
         profilePictureUrl: null,
+        roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN],
         groups: [],
       });
     });
@@ -374,7 +375,10 @@ describe("UsersController (e2e)", () => {
       await request(app.getHttpServer())
         .patch("/api/user/bulk/roles")
         .set("Cookie", testCookies)
-        .send({ userIds: [firstUser.id, secondUser.id], role: USER_ROLES.CONTENT_CREATOR })
+        .send({
+          userIds: [firstUser.id, secondUser.id],
+          roleSlugs: [SYSTEM_ROLE_SLUGS.CONTENT_CREATOR],
+        })
         .expect(200);
 
       const firstResponse = await request(app.getHttpServer())
@@ -387,15 +391,15 @@ describe("UsersController (e2e)", () => {
         .set("Cookie", testCookies)
         .expect(200);
 
-      expect(firstResponse.body.data.role).toBe(USER_ROLES.CONTENT_CREATOR);
-      expect(secondResponse.body.data.role).toBe(USER_ROLES.CONTENT_CREATOR);
+      expect(firstResponse.body.data.roleSlugs).toContain(SYSTEM_ROLE_SLUGS.CONTENT_CREATOR);
+      expect(secondResponse.body.data.roleSlugs).toContain(SYSTEM_ROLE_SLUGS.CONTENT_CREATOR);
     });
 
     it("should return 400 when no users are provided", async () => {
       const response = await request(app.getHttpServer())
         .patch("/api/user/bulk/roles")
         .set("Cookie", testCookies)
-        .send({ userIds: [], role: USER_ROLES.ADMIN })
+        .send({ userIds: [], roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN] })
         .expect(400);
 
       expect(response.body.message).toBe("adminUsersView.toast.noUserSelected");
@@ -405,7 +409,7 @@ describe("UsersController (e2e)", () => {
       const response = await request(app.getHttpServer())
         .patch("/api/user/bulk/roles")
         .set("Cookie", testCookies)
-        .send({ userIds: [testUser.id], role: USER_ROLES.STUDENT })
+        .send({ userIds: [testUser.id], roleSlugs: [SYSTEM_ROLE_SLUGS.STUDENT] })
         .expect(400);
 
       expect(response.body.message).toBe("adminUsersView.toast.cannotUpdateOwnRole");
@@ -433,7 +437,7 @@ describe("UsersController (e2e)", () => {
       await request(app.getHttpServer())
         .patch("/api/user/bulk/roles")
         .set("Cookie", cookies)
-        .send({ userIds: [regularUser.id], role: USER_ROLES.ADMIN })
+        .send({ userIds: [regularUser.id], roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN] })
         .expect(403);
     });
   });
