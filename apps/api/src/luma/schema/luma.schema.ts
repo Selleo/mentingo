@@ -1,3 +1,4 @@
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
@@ -19,6 +20,7 @@ export const integrationIdSchema = Type.Object({
 export const integrationDraftSchema = Type.Object({
   integrationId: UUIDSchema,
   draftName: Type.String({ minLength: 1 }),
+  courseLanguage: Type.Enum(SUPPORTED_LANGUAGES),
 });
 
 export const courseGenerationDraftSchema = Type.Object({

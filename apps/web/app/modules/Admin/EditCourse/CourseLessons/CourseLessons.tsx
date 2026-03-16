@@ -3,6 +3,13 @@ import { useTranslation } from "react-i18next";
 
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
+import {
+  Tooltip,
+  TooltipArrow,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
 import { useLeaveModal } from "~/context/LeaveModalContext";
 import { cn } from "~/lib/utils";
 import { CourseGenerationButton } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationButton";
@@ -243,17 +250,40 @@ const CourseLessons = ({
           )}
         </div>
         <div className="mt-4 flex w-full gap-3">
-          <Button
-            onClick={addChapter}
-            disabled={!isBaseLanguage}
-            className={cn(
-              "rounded-lg px-4 py-2",
-              shouldShowCourseGenerationButton ? "w-1/2" : "w-full",
-            )}
-          >
-            <Icon name="Plus" className="mr-2" />
-            {t("adminCourseView.curriculum.chapter.button.addChapter")}
-          </Button>
+          {!isBaseLanguage ? (
+            <TooltipProvider delayDuration={0}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className={cn(shouldShowCourseGenerationButton ? "w-1/2" : "w-full")}>
+                    <Button onClick={addChapter} disabled className="w-full rounded-lg px-4 py-2">
+                      <Icon name="Plus" className="mr-2" />
+                      {t("adminCourseView.curriculum.chapter.button.addChapter")}
+                    </Button>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="top"
+                  align="center"
+                  className="rounded bg-black px-2 py-1 text-sm text-white shadow-md"
+                >
+                  {t("adminCourseView.curriculum.chapter.button.addChapterDisabledTooltip")}
+                  <TooltipArrow className="fill-black" />
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ) : (
+            <Button
+              onClick={addChapter}
+              disabled={!isBaseLanguage}
+              className={cn(
+                "rounded-lg px-4 py-2",
+                shouldShowCourseGenerationButton ? "w-1/2" : "w-full",
+              )}
+            >
+              <Icon name="Plus" className="mr-2" />
+              {t("adminCourseView.curriculum.chapter.button.addChapter")}
+            </Button>
+          )}
           {shouldShowCourseGenerationButton && (
             <CourseGenerationButton
               className="w-1/2"

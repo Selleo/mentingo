@@ -1,5 +1,11 @@
+import { useEffect, useRef, useState } from "react";
+
 import { Icon } from "~/components/Icon";
 import { cn } from "~/lib/utils";
+
+import { defaultCertificateColorTheme } from "./certificateTheme";
+
+import type { CertificateColorTheme } from "./certificateTheme";
 
 interface CertificateContentProps {
   studentName?: string;
@@ -9,13 +15,14 @@ interface CertificateContentProps {
   isDownload?: boolean;
   backgroundImageUrl?: string | null;
   platformLogo?: string | null;
+  signatureImageUrl?: string | null;
   lang?: "pl" | "en";
+  colorTheme?: CertificateColorTheme;
 }
 
 const translations = {
   pl: {
     certificate: "CERTYFIKAT",
-    courseCompletion: "UKOŃCZENIA KURSU",
     certifyThat: "NINIEJSZYM ZAŚWIADCZA SIĘ, ŻE",
     successfulCompletion: "ukończył/a kurs",
     confirmation: "potwierdzając tym samym realizację programu szkoleniowego.",
@@ -24,7 +31,6 @@ const translations = {
   },
   en: {
     certificate: "CERTIFICATE",
-    courseCompletion: "OF COURSE COMPLETION",
     certifyThat: "THIS IS TO CERTIFY THAT",
     successfulCompletion: "has successfully completed the course",
     confirmation: "thereby confirming participation in the full training program.",
@@ -33,10 +39,9 @@ const translations = {
   },
 };
 const hrClasses = "mx-auto mb-3 w-full";
-const textClasses = "text-md uppercase text-gray-800";
-const text2Classes = "text-md text-gray-600";
-const signatureClasses = "flex w-[200px] flex-col items-center";
-
+const textClasses = "text-[18px] uppercase text-gray-800";
+const text2Classes = "text-[18px] text-gray-600";
+const signatureClasses = "flex w-[280px] flex-col items-center";
 const CertificateContent = ({
   studentName,
   courseName,
@@ -45,73 +50,136 @@ const CertificateContent = ({
   isDownload,
   backgroundImageUrl,
   platformLogo,
+  signatureImageUrl,
   lang = "en",
+  colorTheme = defaultCertificateColorTheme,
 }: CertificateContentProps) => {
-  return (
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+
+  useEffect(() => {
+    if (isDownload) {
+      setScale(1);
+      return;
+    }
+
+    const element = containerRef.current;
+    if (!element) return;
+
+    const updateScale = () => {
+      const nextScale = Math.min(element.clientWidth / 1200, 1);
+      setScale(nextScale);
+    };
+
+    updateScale();
+
+    const resizeObserver = new ResizeObserver(() => updateScale());
+    resizeObserver.observe(element);
+
+    return () => resizeObserver.disconnect();
+  }, [isDownload]);
+
+  const certificateBody = (
     <div
-      className={cn(
-        "mx-auto flex aspect-[297/210] flex-col items-center justify-center gap-y-4 overflow-hidden p-10 xl:gap-y-12",
-        isModal ? "h-auto w-[min(95vw,1000px)]" : "h-auto w-full",
-        !isDownload && "bg-white",
-        !isModal && "rounded-lg",
-      )}
+      className="flex h-full w-full flex-col items-center justify-center gap-y-12 px-14 py-12"
       style={{
-        backgroundImage: `url(${backgroundImageUrl})`,
+        backgroundImage: backgroundImageUrl ? `url(${backgroundImageUrl})` : undefined,
         backgroundSize: "100% 100%",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
+        backgroundColor: backgroundImageUrl ? undefined : "white",
       }}
     >
       {platformLogo ? (
-        <img
-          src={platformLogo}
-          alt="Platform Logo"
-          className={cn("aspect-auto h-8", !isModal && "scale-75 xl:scale-100")}
-        />
+        <img src={platformLogo} alt="Platform Logo" className="aspect-auto h-11" />
       ) : (
-        <Icon name="AppLogo" className={cn("h-8", !isModal && "scale-75 xl:scale-100")} />
+        <Icon name="AppLogo" className="h-11" style={{ color: colorTheme.logoColor }} />
       )}
-      <div
-        className={cn(
-          "flex flex-col items-center justify-center gap-y-4",
-          !isModal && "scale-75 xl:scale-100",
-        )}
-      >
-        <p className="text-5xl font-black uppercase tracking-wider text-gray-800">
+
+      <div className="flex flex-col items-center justify-center gap-y-4">
+        <p
+          className="text-[62px] font-black uppercase tracking-wider"
+          style={{ color: colorTheme.titleColor }}
+        >
           {translations[lang].certificate}
         </p>
-        <p className="text-xl font-semibold uppercase text-gray-600">
-          {translations[lang].courseCompletion}
+        <p
+          className="text-[17px] font-semibold uppercase tracking-[0.2em]"
+          style={{ color: colorTheme.certifyTextColor }}
+        >
+          {translations[lang].certifyThat}
         </p>
-        <div className="relative flex items-center justify-center">
-          <Icon name="Ribbon" className="h-12 text-[#5d84d4]" />
-          <p className="text-md absolute inset-0 flex items-center justify-center font-semibold uppercase text-white">
-            {translations[lang].certifyThat}
+      </div>
+
+      <div className="flex flex-col items-center justify-center">
+        <p className="mb-4 text-[44px] tracking-wider" style={{ color: colorTheme.nameColor }}>
+          {studentName}
+        </p>
+        <p className={text2Classes} style={{ color: colorTheme.bodyTextColor }}>
+          {translations[lang].successfulCompletion}
+        </p>
+        <p className="text-[24px]" style={{ color: colorTheme.courseNameColor }}>
+          &quot;{courseName}&quot;
+        </p>
+        <p className={text2Classes} style={{ color: colorTheme.bodyTextColor }}>
+          {translations[lang].confirmation}
+        </p>
+      </div>
+
+      <div className="flex items-end gap-x-52">
+        <div className={signatureClasses}>
+          <p className={text2Classes} style={{ color: colorTheme.bodyTextColor }}>
+            {completionDate}
+          </p>
+          <hr className={hrClasses} style={{ borderColor: colorTheme.lineColor }} />
+          <p className={textClasses} style={{ color: colorTheme.labelTextColor }}>
+            {translations[lang].date}
+          </p>
+        </div>
+
+        <div className={signatureClasses}>
+          {signatureImageUrl && (
+            <img
+              src={signatureImageUrl}
+              alt={translations[lang].signature}
+              className="mb-2 h-16 w-full object-contain"
+            />
+          )}
+          <hr className={hrClasses} style={{ borderColor: colorTheme.lineColor }} />
+          <p className={textClasses} style={{ color: colorTheme.labelTextColor }}>
+            {translations[lang].signature}
           </p>
         </div>
       </div>
-      <div
-        className={cn(
-          "flex flex-col items-center justify-center",
-          !isModal && "scale-75 xl:scale-100",
-        )}
-      >
-        <p className="mb-4 text-3xl tracking-wider text-gray-800">{studentName}</p>
-        <p className={text2Classes}>{translations[lang].successfulCompletion}</p>
-        <p className="text-lg text-gray-800">&quot;{courseName}&quot;</p>
-        <p className={text2Classes}>{translations[lang].confirmation}</p>
-      </div>
+    </div>
+  );
 
-      <div className={cn("flex items-end gap-x-40", !isModal && "scale-75 xl:scale-100")}>
-        <div className={signatureClasses}>
-          <p className={text2Classes}>{completionDate}</p>
-          <hr className={hrClasses} />
-          <p className={textClasses}>{translations[lang].date}</p>
-        </div>
-        <div className={signatureClasses}>
-          <hr className={hrClasses} />
-          <p className={textClasses}>{translations[lang].signature}</p>
-        </div>
+  if (isDownload) {
+    return (
+      <div className={cn("mx-auto h-[210mm] w-[297mm] overflow-hidden", !isModal && "rounded-lg")}>
+        {certificateBody}
+      </div>
+    );
+  }
+
+  const baseHeight = (1200 * 210) / 297;
+
+  return (
+    <div
+      ref={containerRef}
+      className={cn("mx-auto w-full", !isModal && "max-w-full")}
+      style={{ height: `${baseHeight * scale}px` }}
+    >
+      <div
+        className={cn("origin-top-left overflow-hidden", !isModal && "rounded-lg")}
+        style={{
+          width: "1200px",
+          height: `${baseHeight}px`,
+          transform: `scale(${scale})`,
+          transformOrigin: "top left",
+        }}
+      >
+        {certificateBody}
       </div>
     </div>
   );

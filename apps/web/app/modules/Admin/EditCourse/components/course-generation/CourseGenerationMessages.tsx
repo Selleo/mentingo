@@ -1,4 +1,5 @@
 import { Icon } from "~/components/Icon";
+import { TypingDots } from "~/components/TypingDots";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import { Badge } from "~/components/ui/badge";
 
@@ -32,11 +33,7 @@ export function CourseGenerationAiTypingMessage({
             </Badge>
           )}
         </div>
-        <div className="inline-flex items-center gap-1.5 rounded-xl bg-primary-50 px-4 py-3">
-          <span className="size-1.5 animate-[bounce_1s_infinite] rounded-full bg-primary-500 [animation-delay:-0.3s]" />
-          <span className="size-1.5 animate-[bounce_1s_infinite] rounded-full bg-primary-500 [animation-delay:-0.15s]" />
-          <span className="size-1.5 animate-[bounce_1s_infinite] rounded-full bg-primary-500" />
-        </div>
+        <TypingDots />
       </div>
     </div>
   );

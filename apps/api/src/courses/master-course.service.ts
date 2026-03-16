@@ -268,6 +268,8 @@ export class MasterCourseService {
       const courseSettings = this.normalizeJsonb<CoursesSettings>(sourceSnapshot.course.settings, {
         lessonSequenceEnabled: LESSON_SEQUENCE_ENABLED,
         quizFeedbackEnabled: QUIZ_FEEDBACK_ENABLED,
+        certificateSignature: null,
+        certificateFontColor: null,
       });
 
       const targetAuthor = await this.masterCourseRepository.findTargetAuthor();

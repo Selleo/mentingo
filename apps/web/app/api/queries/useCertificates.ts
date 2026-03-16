@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "../api-client";
 
-import type { GetAllCertificatesResponse } from "../generated-api";
+import type { GetAllCertificatesResponse, GetCertificateResponse } from "../generated-api";
 import type { SupportedLanguages } from "@repo/shared";
 import type { CertificateType } from "~/types/certificate";
 
@@ -45,6 +45,7 @@ export const certificateQueryOptions = (params: CertificateQueryParams) => ({
     });
     return response.data;
   },
+  select: (data: GetCertificateResponse): CertificateType | null => data,
 });
 
 export function useCertificates(params: CertificatesParams) {

@@ -38,11 +38,9 @@ const CourseCertificate = ({ courseId }: { courseId: string }) => {
       return { studentName: "", courseName: "", formattedDate: "" };
     }
 
-    const cert = certificate?.[0];
-
-    const studentName = cert?.fullName || `${currentUser.firstName} ${currentUser.lastName}`;
-    const courseName = cert?.courseTitle || course.title;
-    const completionDate = cert ? cert.completionDate : null;
+    const studentName = certificate?.fullName || `${currentUser.firstName} ${currentUser.lastName}`;
+    const courseName = certificate?.courseTitle || course.title;
+    const completionDate = certificate ? certificate.completionDate : null;
     const formattedDate = completionDate ? format(new Date(completionDate), "dd.MM.yyyy") : "";
 
     return { studentName, courseName, formattedDate };
@@ -55,7 +53,7 @@ const CourseCertificate = ({ courseId }: { courseId: string }) => {
 
   return (
     <div>
-      {certificate && hasFinishedCourse && (
+      {Boolean(certificate) && hasFinishedCourse && (
         <Card className="p-4 md:px-8 flex items-center gap-4 bg-success-50">
           <div className="bg-success-50 aspect-square size-10 rounded-full grid place-items-center">
             <Icon name="InputRoundedMarkerSuccess" className="size-4" />
@@ -70,22 +68,31 @@ const CourseCertificate = ({ courseId }: { courseId: string }) => {
         </Card>
       )}
 
-      {certificate && isCertificatePreviewOpen && isStudent && (
-        <button
+      {Boolean(certificate) && isCertificatePreviewOpen && isStudent && (
+        <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50"
           onClick={handleCloseCertificatePreview}
+          onKeyDown={(event) => {
+            if (event.key === "Escape" || event.key === "Enter") handleCloseCertificatePreview();
+          }}
+          role="button"
+          tabIndex={0}
         >
-          <div>
+          <div role="presentation" onClick={(event) => event.stopPropagation()}>
             <CertificatePreview
+              certificateId={certificate?.id}
               studentName={studentName}
               courseName={courseName}
               completionDate={formattedDate}
               onClose={handleCloseCertificatePreview}
               platformLogo={globalSettings?.platformLogoS3Key}
               certificateBackgroundImageUrl={globalSettings?.certificateBackgroundImage}
+              certificateSignatureUrl={certificate?.certificateSignatureUrl}
+              initialColor={certificate?.certificateFontColor}
+              showShareButton={Boolean(certificate?.id)}
             />
           </div>
-        </button>
+        </div>
       )}
     </div>
   );

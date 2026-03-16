@@ -36,6 +36,7 @@ import type {
   IngestDraftFileResponse,
   IntegrationIdOptions,
 } from "@japro/luma-sdk";
+import type { SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
 import type { AdminLessonWithContentSchema } from "src/lesson/lesson.schema";
@@ -102,6 +103,14 @@ export class LumaService {
     });
 
     if (!draft) {
+      const { language } = await this.localizationService.getBaseLanguage(
+        ENTITY_TYPE.COURSE,
+        data.integrationId,
+        data.courseLanguage as SupportedLanguages,
+      );
+
+      data.courseLanguage = language;
+
       const { draftId } = await this.withLumaErrorHandling(() => luma.createDraft(data));
 
       return { integrationId: data.integrationId, draftId, isCourseGenerated: false };
@@ -239,11 +248,13 @@ export class LumaService {
       state: { chapterIdsByIndex, chapterByEventKey },
     } = context;
 
-    const chapterEventKey = this.buildChapterEventKey(payload);
+    const chapterPayload = payload as GeneratedChapter;
+
+    const chapterEventKey = this.buildChapterEventKey(chapterPayload);
     const existingChapter = chapterByEventKey.get(chapterEventKey);
     if (existingChapter) {
       return {
-        type: payload.type,
+        type: chapterPayload.type,
         chapter: existingChapter,
       };
     }
@@ -251,7 +262,7 @@ export class LumaService {
     const createdChapter = await this.adminChapterService.createChapterForCourse(
       {
         courseId: integrationId,
-        title: payload.generation?.title?.trim() || "Generated chapter",
+        title: this.sanitizeText(chapterPayload.generation?.title?.trim() || "Generated chapter"),
         isFreemium: false,
       },
       currentUser,
@@ -395,7 +406,7 @@ export class LumaService {
     lesson: GeneratedCourseResponse["chapters"][number]["lessons"][number],
     currentUser: CurrentUser,
   ): Promise<AdminLessonWithContentSchema> {
-    const lessonTitle = lesson.title?.trim() || "Generated lesson";
+    const lessonTitle = this.sanitizeText(lesson.title?.trim() || "Generated lesson");
     const lessonType = this.resolveGeneratedLessonType(lesson);
     let lessonId: UUIDType;
 
@@ -406,23 +417,23 @@ export class LumaService {
         {
           chapterId,
           title: lessonTitle,
-          description: aiMentor?.taskDescription ?? lesson.content ?? "",
+          description: this.sanitizeText(aiMentor?.taskDescription ?? lesson.content ?? ""),
           type: this.mapAiMentorType(aiMentor?.type),
-          aiMentorInstructions: aiMentor?.aiMentorInstructions ?? "",
-          completionConditions: aiMentor?.completionConditions ?? "",
-          name: aiMentor?.name ?? "AI Mentor",
+          aiMentorInstructions: this.sanitizeText(aiMentor?.aiMentorInstructions ?? ""),
+          completionConditions: this.sanitizeText(aiMentor?.completionConditions ?? ""),
+          name: this.sanitizeText(aiMentor?.name ?? "AI Mentor"),
         },
         currentUser,
       );
     } else if (lessonType === LESSON_TYPES.QUIZ) {
       const questions = (lesson.questions ?? []).map((question, questionIndex) => ({
         type: this.mapQuestionType(question.type),
-        title: question.title?.trim() || `Question ${questionIndex + 1}`,
-        description: question.description ?? "",
-        solutionExplanation: question.solutionExplanation ?? "",
+        title: this.sanitizeText(question.title?.trim() || `Question ${questionIndex + 1}`),
+        description: this.sanitizeText(question.description ?? ""),
+        solutionExplanation: this.sanitizeText(question.solutionExplanation ?? ""),
         displayOrder: question.questionIndex || questionIndex + 1,
         options: (question.options ?? []).map((option, optionIndex) => ({
-          optionText: option.optionText ?? "",
+          optionText: this.sanitizeText(option.optionText ?? ""),
           isCorrect: Boolean(option.isCorrect),
           displayOrder: option.optionIndex || optionIndex + 1,
         })),
@@ -432,7 +443,7 @@ export class LumaService {
         lessonId = await this.createGeneratedContentLesson(
           chapterId,
           lessonTitle,
-          lesson.content ?? "",
+          this.sanitizeText(lesson.content ?? ""),
           currentUser,
         );
       } else {
@@ -453,7 +464,7 @@ export class LumaService {
       lessonId = await this.createGeneratedContentLesson(
         chapterId,
         lessonTitle,
-        lesson.content ?? "",
+        this.sanitizeText(lesson.content ?? ""),
         currentUser,
       );
     }
@@ -510,12 +521,16 @@ export class LumaService {
     return this.adminLessonService.createLessonForChapter(
       {
         chapterId,
-        title,
-        description,
+        title: this.sanitizeText(title),
+        description: this.sanitizeText(description),
         type: LESSON_TYPES.CONTENT,
       },
       currentUser,
     );
+  }
+
+  private sanitizeText(value: string): string {
+    return value.replace(/\u0000/g, "");
   }
 
   private parseDataChunk(chunkString: string): unknown[] {
@@ -571,9 +586,9 @@ export class LumaService {
       case "DetailedResponse":
         return QUESTION_TYPE.DETAILED_RESPONSE;
       case "FillInTheBlanks":
-        return QUESTION_TYPE.FILL_IN_THE_BLANKS_TEXT;
-      case "GapFill":
         return QUESTION_TYPE.FILL_IN_THE_BLANKS_DND;
+      case "GapFill":
+        return QUESTION_TYPE.FILL_IN_THE_BLANKS_TEXT;
       case "BriefResponse":
       default:
         return QUESTION_TYPE.BRIEF_RESPONSE;

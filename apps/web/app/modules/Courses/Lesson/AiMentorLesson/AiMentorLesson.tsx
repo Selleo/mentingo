@@ -102,7 +102,7 @@ const AiMentorLesson = ({ lesson, lessonLoading, isPreviewMode = false }: AiMent
     await retakeLesson({ lessonId: lesson.id });
   };
 
-  const isSubmitted = status === "submitted";
+  const isProcessing = status === "submitted" || status === "streaming";
   const isThreadActive = lesson.status === "active";
 
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -110,6 +110,10 @@ const AiMentorLesson = ({ lesson, lessonLoading, isPreviewMode = false }: AiMent
   const hasTaskDescription = Boolean(
     lesson.description && stripHtmlTags(lesson.description).trim().length,
   );
+  const lastMessage = messages[messages.length - 1];
+  const hasStreamingAssistantText =
+    lastMessage?.role === "assistant" && String(lastMessage.content ?? "").trim().length > 0;
+  const showChatLoader = (isProcessing && !hasStreamingAssistantText) || isJudgePending;
 
   useEffect(() => {
     const container = messagesContainerRef.current;
@@ -188,13 +192,12 @@ const AiMentorLesson = ({ lesson, lessonLoading, isPreviewMode = false }: AiMent
             />
           ))}
 
-        {isSubmitted ||
-          (isJudgePending && (
-            <ChatLoader
-              aiName={lesson.aiMentor?.name || ""}
-              avatarUrl={lesson.aiMentor?.avatarReferenceUrl}
-            />
-          ))}
+        {showChatLoader && (
+          <ChatLoader
+            aiName={lesson.aiMentor?.name || ""}
+            avatarUrl={lesson.aiMentor?.avatarReferenceUrl}
+          />
+        )}
       </div>
 
       {isThreadActive && !isJudgePending && (

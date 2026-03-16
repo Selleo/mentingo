@@ -3342,7 +3342,7 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
                 "$ref": "#/components/schemas/UpdateCourseSettingsBody"
               }
@@ -4611,6 +4611,23 @@
               "minLength": 1,
               "type": "string"
             }
+          },
+          {
+            "name": "courseLanguage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
+            }
           }
         ],
         "responses": {
@@ -5560,6 +5577,89 @@
         },
         "responses": {
           "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/certificates/share-link": {
+      "post": {
+        "operationId": "CertificatesController_createCertificateShareLink",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCertificateShareLinkBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateCertificateShareLinkResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/certificates/share": {
+      "get": {
+        "operationId": "CertificatesController_getCertificateSharePage",
+        "parameters": [
+          {
+            "name": "certificateId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/certificates/share-image": {
+      "get": {
+        "operationId": "CertificatesController_getCertificateShareImage",
+        "parameters": [
+          {
+            "name": "certificateId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
             "description": ""
           }
         }
@@ -16846,16 +16946,44 @@
         ]
       },
       "UpdateCourseSettingsBody": {
-        "additionalProperties": false,
         "type": "object",
         "properties": {
           "lessonSequenceEnabled": {
-            "default": false,
-            "type": "boolean"
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string"
+              }
+            ]
           },
           "quizFeedbackEnabled": {
-            "default": true,
-            "type": "boolean"
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "certificateFontColor": {
+            "type": "string"
+          },
+          "removeCertificateSignature": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "certificateSignature": {
+            "format": "binary",
+            "type": "string"
           }
         }
       },
@@ -16882,7 +17010,6 @@
         "type": "object",
         "properties": {
           "data": {
-            "additionalProperties": false,
             "type": "object",
             "properties": {
               "lessonSequenceEnabled": {
@@ -16892,11 +17019,46 @@
               "quizFeedbackEnabled": {
                 "default": true,
                 "type": "boolean"
+              },
+              "certificateSignature": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "certificateFontColor": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "certificateSignatureUrl": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
               "lessonSequenceEnabled",
-              "quizFeedbackEnabled"
+              "quizFeedbackEnabled",
+              "certificateSignature",
+              "certificateFontColor",
+              "certificateSignatureUrl"
             ]
           }
         },
@@ -21318,6 +21480,26 @@
                     }
                   ]
                 },
+                "certificateSignatureUrl": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "certificateFontColor": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "createdAt": {
                   "type": "string"
                 }
@@ -21362,63 +21544,87 @@
         ]
       },
       "GetCertificateResponse": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "format": "uuid",
-              "type": "string"
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "userId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "courseId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "courseTitle": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "completionDate": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "fullName": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "certificateSignatureUrl": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "certificateFontColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "createdAt": {
+                "type": "string"
+              }
             },
-            "userId": {
-              "format": "uuid",
-              "type": "string"
-            },
-            "courseId": {
-              "format": "uuid",
-              "type": "string"
-            },
-            "courseTitle": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "completionDate": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "fullName": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "createdAt": {
-              "type": "string"
-            }
+            "required": [
+              "id",
+              "userId",
+              "courseId",
+              "createdAt"
+            ]
           },
-          "required": [
-            "id",
-            "userId",
-            "courseId",
-            "createdAt"
-          ]
-        }
+          {
+            "type": "null"
+          }
+        ]
       },
       "DownloadCertificateBody": {
         "type": "object",
@@ -21432,6 +21638,36 @@
         },
         "required": [
           "html"
+        ]
+      },
+      "CreateCertificateShareLinkBody": {
+        "type": "object",
+        "properties": {
+          "certificateId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "certificateId"
+        ]
+      },
+      "CreateCertificateShareLinkResponse": {
+        "type": "object",
+        "properties": {
+          "shareUrl": {
+            "type": "string"
+          },
+          "linkedinShareUrl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "shareUrl",
+          "linkedinShareUrl"
         ]
       },
       "GetThreadResponse": {

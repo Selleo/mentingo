@@ -63,6 +63,7 @@ export const Quiz = ({ lesson, userId, isPreviewMode = false, previewLessonId }:
       queryClient.invalidateQueries({ queryKey: ["lesson", lessonId] });
       queryClient.invalidateQueries({ queryKey: ["lessonProgress", lessonId] });
       queryClient.invalidateQueries(certificatesQueryOptions({ userId }));
+      queryClient.invalidateQueries({ queryKey: ["certificate", userId] });
       queryClient.invalidateQueries(courseQueryOptions(courseSlug));
     },
   });

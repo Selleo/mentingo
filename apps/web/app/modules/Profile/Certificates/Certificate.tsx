@@ -49,6 +49,7 @@ const Certificate = ({
         platformLogo={platformLogo}
         lang="en"
         backgroundImageUrl={backgroundImageUrl}
+        signatureImageUrl={certData?.certificateSignatureUrl}
       />
       <div className="grid grid-cols-1 gap-4">
         <div className="relative">

@@ -1632,10 +1632,12 @@ export interface UpdateHasCertificateResponse {
 }
 
 export interface UpdateCourseSettingsBody {
-  /** @default false */
-  lessonSequenceEnabled?: boolean;
-  /** @default true */
-  quizFeedbackEnabled?: boolean;
+  lessonSequenceEnabled?: boolean | string;
+  quizFeedbackEnabled?: boolean | string;
+  certificateFontColor?: string;
+  removeCertificateSignature?: boolean | string;
+  /** @format binary */
+  certificateSignature?: File;
 }
 
 export interface UpdateCourseSettingsResponse {
@@ -1650,6 +1652,11 @@ export interface GetCourseSettingsResponse {
     lessonSequenceEnabled: boolean;
     /** @default true */
     quizFeedbackEnabled: boolean;
+    /** @default null */
+    certificateSignature: string | null;
+    /** @default null */
+    certificateFontColor: string | null;
+    certificateSignatureUrl: string | null;
   };
 }
 
@@ -2613,6 +2620,8 @@ export interface GetAllCertificatesResponse {
     courseTitle?: string | null;
     completionDate?: string | null;
     fullName?: string | null;
+    certificateSignatureUrl?: string | null;
+    certificateFontColor?: string | null;
     createdAt: string;
   }[];
   pagination: {
@@ -2633,12 +2642,25 @@ export type GetCertificateResponse = {
   courseTitle?: string | null;
   completionDate?: string | null;
   fullName?: string | null;
+  certificateSignatureUrl?: string | null;
+  certificateFontColor?: string | null;
   createdAt: string;
-}[];
+} | null;
 
 export interface DownloadCertificateBody {
   html: string;
   filename?: string;
+}
+
+export interface CreateCertificateShareLinkBody {
+  /** @format uuid */
+  certificateId: string;
+  language?: string;
+}
+
+export interface CreateCertificateShareLinkResponse {
+  shareUrl: string;
+  linkedinShareUrl: string;
 }
 
 export interface GetThreadResponse {
@@ -6213,7 +6235,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/course/settings/${courseId}`,
         method: "PATCH",
         body: data,
-        type: ContentType.Json,
+        type: ContentType.FormData,
         format: "json",
         ...params,
       }),
@@ -6797,6 +6819,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         integrationId?: string;
         /** @minLength 1 */
         draftName?: string;
+        courseLanguage?: "en" | "pl";
       },
       params: RequestParams = {},
     ) =>
@@ -7335,6 +7358,65 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "POST",
         body: data,
         type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CertificatesControllerCreateCertificateShareLink
+     * @request POST:/api/certificates/share-link
+     */
+    certificatesControllerCreateCertificateShareLink: (
+      data: CreateCertificateShareLinkBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateCertificateShareLinkResponse, any>({
+        path: `/api/certificates/share-link`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CertificatesControllerGetCertificateSharePage
+     * @request GET:/api/certificates/share
+     */
+    certificatesControllerGetCertificateSharePage: (
+      query: {
+        certificateId: string;
+        lang: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/certificates/share`,
+        method: "GET",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CertificatesControllerGetCertificateShareImage
+     * @request GET:/api/certificates/share-image
+     */
+    certificatesControllerGetCertificateShareImage: (
+      query: {
+        certificateId: string;
+        lang: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/certificates/share-image`,
+        method: "GET",
+        query: query,
         ...params,
       }),
 

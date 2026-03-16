@@ -23,4 +23,5 @@ export * from "./constants/voiceAction";
 export * from "./types/audioTypes";
 export * from "./types/onboarding";
 export * from "./types/videoUploadTypes";
+export * from "./utils/certificate";
 export * from "./utils/videoUrls";

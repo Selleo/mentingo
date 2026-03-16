@@ -151,7 +151,8 @@ export const LessonContent = ({
 
     if (
       (lesson.type === LessonType.CONTENT || lesson.type === LessonType.EMBED) &&
-      !lesson.hasVideo
+      !lesson.hasVideo &&
+      !lesson.lessonCompleted
     ) {
       markLessonAsCompleted({ lessonId: lesson.id, language });
     }
@@ -180,6 +181,7 @@ export const LessonContent = ({
     markLessonAsCompleted,
     language,
     lesson.hasVideo,
+    lesson.lessonCompleted,
   ]);
 
   useEffect(() => {
