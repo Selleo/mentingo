@@ -75,24 +75,6 @@ export function RegistrationFormBuilder() {
     isRequired: watchedFields?.[index]?.required ?? false,
   }));
 
-  const mapPersistedApiFields = () =>
-    registrationForm?.fields.map((field) => ({
-      ...field,
-      type: "checkbox" as const,
-    })) ?? [];
-
-  const mapHydratedFields = (persistUnsavedFields: boolean) => {
-    const persistedFields = mapPersistedApiFields();
-    const localUnsavedFields = persistUnsavedFields
-      ? getValues("fields").filter((field) => !field.id)
-      : [];
-
-    return [...persistedFields, ...localUnsavedFields].map((field, index) => ({
-      ...field,
-      displayOrder: index,
-    }));
-  };
-
   const hasAnyLabelErrors = () => {
     if (!Array.isArray(errors.fields)) return false;
 
@@ -113,12 +95,30 @@ export function RegistrationFormBuilder() {
 
     hydratedVersionRef.current = serializedFields;
 
+    const mapPersistedApiFields = () =>
+      registrationForm.fields.map((field) => ({
+        ...field,
+        type: "checkbox" as const,
+      }));
+
+    const mapHydratedFields = (persistUnsavedFields: boolean) => {
+      const persistedFields = mapPersistedApiFields();
+      const localUnsavedFields = persistUnsavedFields
+        ? getValues("fields").filter((field) => !field.id)
+        : [];
+
+      return [...persistedFields, ...localUnsavedFields].map((field, index) => ({
+        ...field,
+        displayOrder: index,
+      }));
+    };
+
     reset({
       fields: mapHydratedFields(preserveUnsavedOnHydrateRef.current),
     });
 
     preserveUnsavedOnHydrateRef.current = false;
-  }, [getValues, registrationForm?.fields, reset, mapHydratedFields]);
+  }, [getValues, registrationForm?.fields, reset]);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
