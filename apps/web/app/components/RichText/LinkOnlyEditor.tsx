@@ -18,9 +18,16 @@ type LinkOnlyEditorProps = {
   onChange: (value: string) => void;
   placeholder?: string;
   className?: string;
+  enableLinkClick?: boolean;
 };
 
-export function LinkOnlyEditor({ content, onChange, placeholder, className }: LinkOnlyEditorProps) {
+export function LinkOnlyEditor({
+  content,
+  onChange,
+  placeholder,
+  className,
+  enableLinkClick = false,
+}: LinkOnlyEditorProps) {
   const { t } = useTranslation();
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
 
@@ -30,9 +37,9 @@ export function LinkOnlyEditor({ content, onChange, placeholder, className }: Li
       Paragraph,
       Text,
       Link.configure({
-        openOnClick: false,
+        openOnClick: enableLinkClick,
         HTMLAttributes: {
-          class: "text-primary-700 underline",
+          class: "text-primary-700 underline cursor-pointer",
           rel: "noopener noreferrer",
           target: "_blank",
         },
@@ -48,7 +55,7 @@ export function LinkOnlyEditor({ content, onChange, placeholder, className }: Li
     editorProps: {
       attributes: {
         class:
-          "min-h-[120px] max-w-full p-4 focus:outline-none prose prose-sm max-w-none [&_p]:my-0",
+          "min-h-[120px] max-w-full p-4 focus:outline-none prose prose-sm max-w-none [&_p]:my-0 [&_a]:cursor-pointer [&_a]:pointer-events-auto",
       },
     },
   });

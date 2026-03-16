@@ -210,6 +210,7 @@ export function RegistrationFormBuilderField({
                     render={({ field }) => (
                       <LinkOnlyEditor
                         content={field.value}
+                        enableLinkClick
                         onChange={field.onChange}
                         placeholder={t("registrationFormBuilder.field.labelPlaceholder")}
                       />
