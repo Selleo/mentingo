@@ -289,15 +289,10 @@ export class SettingsService {
     options?: { includeArchived?: boolean },
   ): Promise<RegistrationFormFieldDbModel[]> {
     const includeArchived = options?.includeArchived ?? false;
+    const registrationFormId = await this.getActiveRegistrationFormId(dbInstance);
+    if (!registrationFormId) return [];
 
-    const [registrationForm] = await dbInstance
-      .select({ id: forms.id })
-      .from(forms)
-      .where(and(eq(forms.type, FORM_TYPES.REGISTRATION), eq(forms.isActive, true)));
-
-    if (!registrationForm) return [];
-
-    const conditions = [eq(formFields.formId, registrationForm.id)];
+    const conditions = [eq(formFields.formId, registrationFormId)];
 
     if (!includeArchived) {
       conditions.push(eq(formFields.archived, false));
@@ -316,14 +311,10 @@ export class SettingsService {
     language: SupportedLanguages,
     dbInstance: DatabasePg = this.db,
   ): Promise<LocalizedRegistrationFormField[]> {
-    const [registrationForm] = await dbInstance
-      .select({ id: forms.id })
-      .from(forms)
-      .where(and(eq(forms.type, FORM_TYPES.REGISTRATION), eq(forms.isActive, true)));
+    const registrationFormId = await this.getActiveRegistrationFormId(dbInstance);
+    if (!registrationFormId) return [];
 
-    if (!registrationForm) return [];
-
-    const conditions = [eq(formFields.formId, registrationForm.id), eq(formFields.archived, false)];
+    const conditions = [eq(formFields.formId, registrationFormId), eq(formFields.archived, false)];
 
     const fields = await dbInstance
       .select({
@@ -338,9 +329,16 @@ export class SettingsService {
       .where(and(...conditions))
       .orderBy(asc(formFields.displayOrder), asc(formFields.createdAt));
 
-    return fields.map((field) => ({
-      ...field,
-    }));
+    return fields;
+  }
+
+  private async getActiveRegistrationFormId(dbInstance: DatabasePg): Promise<UUIDType | null> {
+    const [registrationForm] = await dbInstance
+      .select({ id: forms.id })
+      .from(forms)
+      .where(and(eq(forms.type, FORM_TYPES.REGISTRATION), eq(forms.isActive, true)));
+
+    return registrationForm?.id ?? null;
   }
 
   public async updateRegistrationForm(

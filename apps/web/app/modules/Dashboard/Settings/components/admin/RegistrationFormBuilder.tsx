@@ -68,12 +68,41 @@ export function RegistrationFormBuilder() {
     keyName: "fieldKey",
   });
 
-  const visibleFields = fields.map((field, index) => ({
+  const checkboxRows = fields.map((field, index) => ({
     field,
     index,
     isArchived: watchedFields?.[index]?.archived ?? false,
     isRequired: watchedFields?.[index]?.required ?? false,
   }));
+
+  const mapPersistedApiFields = () =>
+    registrationForm?.fields.map((field) => ({
+      ...field,
+      type: "checkbox" as const,
+    })) ?? [];
+
+  const mapHydratedFields = (persistUnsavedFields: boolean) => {
+    const persistedFields = mapPersistedApiFields();
+    const localUnsavedFields = persistUnsavedFields
+      ? getValues("fields").filter((field) => !field.id)
+      : [];
+
+    return [...persistedFields, ...localUnsavedFields].map((field, index) => ({
+      ...field,
+      displayOrder: index,
+    }));
+  };
+
+  const hasAnyLabelErrors = () => {
+    if (!Array.isArray(errors.fields)) return false;
+
+    return errors.fields.some((fieldError) =>
+      Boolean(fieldError?.label?.en || fieldError?.label?.pl),
+    );
+  };
+
+  const getPersistedFields = (formFields: RegistrationFormValues["fields"]) =>
+    formFields.filter((field) => Boolean(field.id));
 
   useEffect(() => {
     if (!registrationForm?.fields) return;
@@ -84,36 +113,25 @@ export function RegistrationFormBuilder() {
 
     hydratedVersionRef.current = serializedFields;
 
-    const localUnsavedFields = preserveUnsavedOnHydrateRef.current
-      ? getValues("fields").filter((field) => !field.id)
-      : [];
-    const persistedFields = registrationForm.fields.map((field) => ({
-      ...field,
-      type: "checkbox" as const,
-    }));
-
     reset({
-      fields: [...persistedFields, ...localUnsavedFields].map((field, index) => ({
-        ...field,
-        displayOrder: index,
-      })),
+      fields: mapHydratedFields(preserveUnsavedOnHydrateRef.current),
     });
 
     preserveUnsavedOnHydrateRef.current = false;
-  }, [getValues, registrationForm?.fields, reset]);
+  }, [getValues, registrationForm?.fields, reset, mapHydratedFields]);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
     if (!over || active.id === over.id || !watchedFields) return;
 
-    const fromVisibleIndex = visibleFields.findIndex(({ field }) => field.fieldKey === active.id);
-    const toVisibleIndex = visibleFields.findIndex(({ field }) => field.fieldKey === over.id);
+    const fromVisibleIndex = checkboxRows.findIndex(({ field }) => field.fieldKey === active.id);
+    const toVisibleIndex = checkboxRows.findIndex(({ field }) => field.fieldKey === over.id);
 
     if (fromVisibleIndex === -1 || toVisibleIndex === -1) return;
 
-    const fromIndex = visibleFields[fromVisibleIndex]?.index;
-    const toIndex = visibleFields[toVisibleIndex]?.index;
+    const fromIndex = checkboxRows[fromVisibleIndex]?.index;
+    const toIndex = checkboxRows[toVisibleIndex]?.index;
 
     if (fromIndex === undefined || toIndex === undefined) return;
 
@@ -125,40 +143,31 @@ export function RegistrationFormBuilder() {
     });
   };
 
-  const handleArchive = async (index: number) => {
+  const updateArchivedStatus = async (index: number, archived: boolean) => {
     const previousFields = getValues("fields");
     preserveUnsavedOnHydrateRef.current = true;
 
     const nextFields = previousFields.map((field, currentIndex) =>
-      currentIndex === index ? { ...field, archived: true } : field,
+      currentIndex === index ? { ...field, archived } : field,
     );
 
     reset({ fields: nextFields });
 
     try {
-      const persistedFields = nextFields.filter((field) => Boolean(field.id));
-      await updateRegistrationFormAsync(buildUpdateRegistrationFormBody(persistedFields));
+      await updateRegistrationFormAsync(
+        buildUpdateRegistrationFormBody(getPersistedFields(nextFields)),
+      );
     } catch {
       reset({ fields: previousFields });
     }
   };
 
+  const handleArchive = async (index: number) => {
+    await updateArchivedStatus(index, true);
+  };
+
   const handleRestore = async (index: number) => {
-    const previousFields = getValues("fields");
-    preserveUnsavedOnHydrateRef.current = true;
-
-    const nextFields = previousFields.map((field, currentIndex) =>
-      currentIndex === index ? { ...field, archived: false } : field,
-    );
-
-    reset({ fields: nextFields });
-
-    try {
-      const persistedFields = nextFields.filter((field) => Boolean(field.id));
-      await updateRegistrationFormAsync(buildUpdateRegistrationFormBody(persistedFields));
-    } catch {
-      reset({ fields: previousFields });
-    }
+    await updateArchivedStatus(index, false);
   };
 
   const onSubmit = (values: RegistrationFormValues) => {
@@ -167,21 +176,10 @@ export function RegistrationFormBuilder() {
   };
 
   const onInvalidSubmit = () => {
-    let hasLabelErrors = false;
-
-    if (Array.isArray(errors.fields)) {
-      for (const fieldError of errors.fields) {
-        if (fieldError?.label?.en || fieldError?.label?.pl) {
-          hasLabelErrors = true;
-          break;
-        }
-      }
-    }
-
     toast({
       variant: "destructive",
       description: t(
-        hasLabelErrors
+        hasAnyLabelErrors()
           ? "registrationFormBuilder.validation.toastLabelRequired"
           : "registrationFormBuilder.validation.toastGeneric",
       ),
@@ -209,7 +207,7 @@ export function RegistrationFormBuilder() {
             </div>
           )}
 
-          {!isLoading && visibleFields.length === 0 && (
+          {!isLoading && checkboxRows.length === 0 && (
             <div className="body-sm rounded-lg bg-muted/40 px-4 py-6 text-muted-foreground">
               {t("registrationFormBuilder.empty")}
             </div>
@@ -221,11 +219,11 @@ export function RegistrationFormBuilder() {
             onDragEnd={handleDragEnd}
           >
             <SortableContext
-              items={visibleFields.map(({ field }) => field.fieldKey)}
+              items={checkboxRows.map(({ field }) => field.fieldKey)}
               strategy={verticalListSortingStrategy}
             >
               <div className="space-y-4">
-                {visibleFields.map(({ field, index, isArchived, isRequired }, visibleIndex) => {
+                {checkboxRows.map(({ field, index, isArchived, isRequired }, visibleIndex) => {
                   return (
                     <SortableFieldCard key={field.fieldKey} id={field.fieldKey}>
                       {({ attributes, listeners }) => (

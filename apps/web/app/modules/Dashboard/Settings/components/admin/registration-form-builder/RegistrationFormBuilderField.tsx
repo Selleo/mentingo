@@ -56,10 +56,14 @@ export function RegistrationFormBuilderField({
 }: RegistrationFormBuilderFieldProps) {
   const { t } = useTranslation();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const headingLabel = t("registrationFormBuilder.field.heading", {
+    index: visibleIndex + 1,
+  });
   const languageNames: Record<(typeof SUPPORTED_LANGUAGES)[number], string> = {
     en: t("changeUserLanguageView.options.english"),
     pl: t("changeUserLanguageView.options.polish"),
   };
+
   const getLabelErrorMessage = (language: (typeof SUPPORTED_LANGUAGES)[number]) => {
     const languageError = errors.fields?.[index]?.label?.[language];
 
@@ -71,6 +75,53 @@ export function RegistrationFormBuilderField({
   };
 
   const hasFieldError = Boolean(errors.fields?.[index]);
+  const requiredBadgeLabel = t(
+    isRequired
+      ? "registrationFormBuilder.field.requiredBadge"
+      : "registrationFormBuilder.field.optionalBadge",
+  );
+
+  const renderStateActionButton = () => {
+    if (!isPersisted) {
+      return (
+        <Button
+          type="button"
+          variant="outline"
+          disabled={isArchiving}
+          onClick={() => onDelete(index)}
+        >
+          <Trash2 className="mr-2 size-4" />
+          {t("common.button.delete")}
+        </Button>
+      );
+    }
+
+    if (isArchived) {
+      return (
+        <Button
+          type="button"
+          variant="outline"
+          disabled={isArchiving}
+          onClick={() => onRestore(index)}
+        >
+          <RotateCcw className="mr-2 size-4" />
+          {t("registrationFormBuilder.field.restore")}
+        </Button>
+      );
+    }
+
+    return (
+      <Button
+        type="button"
+        variant="outline"
+        disabled={isArchiving}
+        onClick={() => onArchive(index)}
+      >
+        <Archive className="mr-2 size-4" />
+        {t("registrationFormBuilder.field.archive")}
+      </Button>
+    );
+  };
 
   return (
     <div
@@ -84,9 +135,7 @@ export function RegistrationFormBuilderField({
           <Button
             variant="outline"
             className="mt-0.5 cursor-grab text-muted-foreground active:cursor-grabbing"
-            aria-label={t("registrationFormBuilder.field.heading", {
-              index: visibleIndex + 1,
-            })}
+            aria-label={headingLabel}
             {...sortAttributes}
             {...sortListeners}
           >
@@ -94,18 +143,8 @@ export function RegistrationFormBuilderField({
           </Button>
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="body-base-md text-neutral-900">
-                {t("registrationFormBuilder.field.heading", {
-                  index: visibleIndex + 1,
-                })}
-              </p>
-              <Badge variant={isRequired ? "secondary" : "default"}>
-                {t(
-                  isRequired
-                    ? "registrationFormBuilder.field.requiredBadge"
-                    : "registrationFormBuilder.field.optionalBadge",
-                )}
-              </Badge>
+              <p className="body-base-md text-neutral-900">{headingLabel}</p>
+              <Badge variant={isRequired ? "secondary" : "default"}>{requiredBadgeLabel}</Badge>
               {isArchived && (
                 <Badge variant="default">{t("registrationFormBuilder.field.archivedBadge")}</Badge>
               )}
@@ -122,48 +161,14 @@ export function RegistrationFormBuilderField({
             <Pencil className="mr-2 size-4" />
             {t("common.button.edit")}
           </Button>
-          {!isPersisted ? (
-            <Button
-              type="button"
-              variant="outline"
-              disabled={isArchiving}
-              onClick={() => onDelete(index)}
-            >
-              <Trash2 className="mr-2 size-4" />
-              {t("common.button.delete")}
-            </Button>
-          ) : isArchived ? (
-            <Button
-              type="button"
-              variant="outline"
-              disabled={isArchiving}
-              onClick={() => onRestore(index)}
-            >
-              <RotateCcw className="mr-2 size-4" />
-              {t("registrationFormBuilder.field.restore")}
-            </Button>
-          ) : (
-            <Button
-              type="button"
-              variant="outline"
-              disabled={isArchiving}
-              onClick={() => onArchive(index)}
-            >
-              <Archive className="mr-2 size-4" />
-              {t("registrationFormBuilder.field.archive")}
-            </Button>
-          )}
+          {renderStateActionButton()}
         </div>
       </div>
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="max-w-5xl border-neutral-200 bg-gradient-to-b from-background to-muted/10 p-0">
           <DialogHeader className="border-b border-border px-6 pb-4 pt-6">
-            <DialogTitle className="h5 text-neutral-900">
-              {t("registrationFormBuilder.field.heading", {
-                index: visibleIndex + 1,
-              })}
-            </DialogTitle>
+            <DialogTitle className="h5 text-neutral-900">{headingLabel}</DialogTitle>
             <DialogDescription className="body-sm text-muted-foreground">
               {t("registrationFormBuilder.field.cardDescription")}
             </DialogDescription>
