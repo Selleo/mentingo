@@ -1,11 +1,11 @@
 import { randomUUID } from "node:crypto";
 
+import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { and, eq, isNull } from "drizzle-orm";
 import request from "supertest";
 
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { integrationApiKeys, tenants } from "src/storage/schema";
-import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createGroupFactory } from "../../../test/factory/group.factory";

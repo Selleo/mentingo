@@ -77,22 +77,22 @@ Legend:
 
 ## AI, Content, And Publishing
 
-| Permission            | What it covers                                                       | Anonymous | Student | Content Creator | Admin |
-| --------------------- | -------------------------------------------------------------------- | --------: | ------: | --------------: | ----: |
-| `ai.use`              | AI mentor threads, chat, judging, and retakes                        |        No |     Yes |             Yes |   Yes |
-| `luma.manage`         | Luma course generation workflows                                     |        No |      No |           Yes\* |   Yes |
-| `ingestion.manage`    | Ingest, list, and delete lesson documents for any manageable lesson  |        No |      No |           Yes\* |   Yes |
-| `ingestion.manage_own`| Ingest, list, and delete lesson documents for own-authored lessons   |        No |      No |           Yes\* |   Yes |
-| `announcement.read`   | Read and mark announcements                                          |        No |     Yes |             Yes |   Yes |
-| `announcement.create` | Create announcements                                                 |        No |      No |             Yes |   Yes |
-| `news.read_public`    | Public news reads                                                    |     Yes\* |      No |              No |    No |
-| `news.manage`         | Create, update, publish, preview, delete, and upload any news content |       No |      No |           Yes\* |   Yes |
-| `news.manage_own`     | Create, update, publish, preview, delete, and upload own news content |       No |      No |           Yes\* |   Yes |
-| `article.read_public` | Public article reads                                                 |     Yes\* |      No |              No |    No |
-| `article.manage`      | Create, update, publish, preview, delete, and upload any article content |      No |      No |           Yes\* |   Yes |
-| `article.manage_own`  | Create, update, publish, preview, delete, and upload own article content |      No |      No |           Yes\* |   Yes |
-| `qa.read_public`      | Public FAQ reads                                                     |       Yes |      No |              No |    No |
-| `qa.manage`           | FAQ create, update, delete, and language operations                  |        No |      No |              No |   Yes |
+| Permission             | What it covers                                                           | Anonymous | Student | Content Creator | Admin |
+| ---------------------- | ------------------------------------------------------------------------ | --------: | ------: | --------------: | ----: |
+| `ai.use`               | AI mentor threads, chat, judging, and retakes                            |        No |     Yes |             Yes |   Yes |
+| `luma.manage`          | Luma course generation workflows                                         |        No |      No |           Yes\* |   Yes |
+| `ingestion.manage`     | Ingest, list, and delete lesson documents for any manageable lesson      |        No |      No |           Yes\* |   Yes |
+| `ingestion.manage_own` | Ingest, list, and delete lesson documents for own-authored lessons       |        No |      No |           Yes\* |   Yes |
+| `announcement.read`    | Read and mark announcements                                              |        No |     Yes |             Yes |   Yes |
+| `announcement.create`  | Create announcements                                                     |        No |      No |             Yes |   Yes |
+| `news.read_public`     | Public news reads                                                        |     Yes\* |      No |              No |    No |
+| `news.manage`          | Create, update, publish, preview, delete, and upload any news content    |        No |      No |           Yes\* |   Yes |
+| `news.manage_own`      | Create, update, publish, preview, delete, and upload own news content    |        No |      No |           Yes\* |   Yes |
+| `article.read_public`  | Public article reads                                                     |     Yes\* |      No |              No |    No |
+| `article.manage`       | Create, update, publish, preview, delete, and upload any article content |        No |      No |           Yes\* |   Yes |
+| `article.manage_own`   | Create, update, publish, preview, delete, and upload own article content |        No |      No |           Yes\* |   Yes |
+| `qa.read_public`       | Public FAQ reads                                                         |       Yes |      No |              No |    No |
+| `qa.manage`            | FAQ create, update, delete, and language operations                      |        No |      No |              No |   Yes |
 
 ## Reporting, Billing & Platform
 

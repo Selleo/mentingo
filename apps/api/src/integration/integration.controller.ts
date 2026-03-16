@@ -10,8 +10,8 @@ import {
   Query,
   UseGuards,
 } from "@nestjs/common";
-import { PERMISSIONS } from "@repo/shared";
 import { ApiForbiddenResponse, ApiHeader, ApiUnauthorizedResponse, ApiTags } from "@nestjs/swagger";
+import { PERMISSIONS } from "@repo/shared";
 import { type Static, Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 

@@ -69,9 +69,9 @@ class UserFactory extends Factory<UserFactoryAttributes> {
   withContentCreatorSettings(db: DatabasePg) {
     return this.associations({ roleSlug: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR }).afterCreate(
       async (user) => {
-      const settingsFactory = createSettingsFactory(db, user.id, false);
-      await settingsFactory.create();
-      return user;
+        const settingsFactory = createSettingsFactory(db, user.id, false);
+        await settingsFactory.create();
+        return user;
       },
     );
   }

@@ -7,8 +7,8 @@ import { PromptService } from "src/ai/services/prompt.service";
 import { ThreadService } from "src/ai/services/thread.service";
 import { MESSAGE_ROLE, THREAD_STATUS } from "src/ai/utils/ai.type";
 
-import type { ThreadOwnershipBody } from "src/ai/utils/ai.schema";
 import type { PermissionKey } from "@repo/shared";
+import type { ThreadOwnershipBody } from "src/ai/utils/ai.schema";
 
 type JudgeViewer = {
   userId: string;

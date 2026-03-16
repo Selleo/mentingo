@@ -1,5 +1,4 @@
 import { observe, updateActiveObservation, updateActiveTrace } from "@langfuse/tracing";
-import { PERMISSIONS } from "@repo/shared";
 import {
   BadRequestException,
   ForbiddenException,
@@ -8,6 +7,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { trace } from "@opentelemetry/api";
+import { PERMISSIONS } from "@repo/shared";
 import { experimental_transcribe, generateObject, jsonSchema, type Message, streamText } from "ai";
 import { and, eq } from "drizzle-orm";
 import _ from "lodash";

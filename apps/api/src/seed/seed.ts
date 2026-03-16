@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { SYSTEM_ROLE_SLUGS, type SystemRoleSlug } from "@repo/shared";
+import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { format, subMonths } from "date-fns";
 import * as dotenv from "dotenv";
 import { and, count, eq, sql } from "drizzle-orm";

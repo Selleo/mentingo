@@ -6,8 +6,8 @@ import { baseResponse, UUIDType, BaseResponse } from "src/common";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { PermissionsGuard } from "src/common/guards/permissions.guard";
-import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
+import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 
 import { UserStatsSchema, StatsSchema } from "./schemas/userStats.schema";
 import { StatisticsService } from "./statistics.service";

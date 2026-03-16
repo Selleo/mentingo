@@ -5,7 +5,7 @@ import { and, asc, desc, eq, getTableColumns, gt, isNull, lt, ne, not, sql } fro
 import { baseArticleTitle } from "src/articles/constants";
 import { DatabasePg } from "src/common";
 import { deleteJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
-import { hasAnyPermission, hasPermission } from "src/common/permissions/permission.utils";
+import { hasAnyPermission } from "src/common/permissions/permission.utils";
 import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
 import { LocalizationService } from "src/localization/localization.service";
 import { articleSections, articles, resourceEntity, resources, users } from "src/storage/schema";

@@ -469,7 +469,10 @@ export class UserService {
             users.tenantId,
             PERMISSIONS.LEARNING_PROGRESS_UPDATE,
           ),
-          this.userLacksAnyPermissionsCondition(users.id, users.tenantId, [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN]),
+          this.userLacksAnyPermissionsCondition(users.id, users.tenantId, [
+            PERMISSIONS.COURSE_UPDATE,
+            PERMISSIONS.COURSE_UPDATE_OWN,
+          ]),
         ),
       );
 
@@ -525,7 +528,10 @@ export class UserService {
             users.tenantId,
             PERMISSIONS.LEARNING_PROGRESS_UPDATE,
           ),
-          this.userLacksAnyPermissionsCondition(users.id, users.tenantId, [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN]),
+          this.userLacksAnyPermissionsCondition(users.id, users.tenantId, [
+            PERMISSIONS.COURSE_UPDATE,
+            PERMISSIONS.COURSE_UPDATE_OWN,
+          ]),
         ),
       );
 
@@ -783,7 +789,10 @@ export class UserService {
             users.tenantId,
             PERMISSIONS.LEARNING_PROGRESS_UPDATE,
           ),
-          this.userLacksAnyPermissionsCondition(users.id, users.tenantId, [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN]),
+          this.userLacksAnyPermissionsCondition(users.id, users.tenantId, [
+            PERMISSIONS.COURSE_UPDATE,
+            PERMISSIONS.COURSE_UPDATE_OWN,
+          ]),
           inArray(users.id, studentIds),
           isNull(users.deletedAt),
         ),
@@ -1036,9 +1045,8 @@ export class UserService {
     const shortInactivity = await this.statisticsService.getInactiveStudents(
       USER_SHORT_INACTIVITY_DAYS,
     );
-    const longInactivity = await this.statisticsService.getInactiveStudents(
-      USER_LONG_INACTIVITY_DAYS,
-    );
+    const longInactivity =
+      await this.statisticsService.getInactiveStudents(USER_LONG_INACTIVITY_DAYS);
 
     return { shortInactivity, longInactivity };
   }

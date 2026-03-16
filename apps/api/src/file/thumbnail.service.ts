@@ -278,7 +278,7 @@ export class ThumbnailService {
     const canUseOwnCourseAccess = this.canManageOwnCourse(currentUser);
     const isAuthor = Boolean(
       canUseOwnCourseAccess &&
-      currentUserId &&
+        currentUserId &&
         (lessonAccess.courseAuthorId === currentUserId ||
           lessonAccess.chapterAuthorId === currentUserId),
     );

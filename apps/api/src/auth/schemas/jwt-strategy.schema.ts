@@ -7,7 +7,9 @@ export const jwtPayloadSchema = Type.Object({
   userId: UUIDSchema,
   email: Type.String({ format: "email" }),
   roleSlugs: Type.Array(Type.String()),
-  permissions: Type.Array(Type.Union(Object.values(PERMISSIONS).map((permission) => Type.Literal(permission)))),
+  permissions: Type.Array(
+    Type.Union(Object.values(PERMISSIONS).map((permission) => Type.Literal(permission))),
+  ),
   tenantId: UUIDSchema,
   isSupportMode: Type.Optional(Type.Boolean()),
   supportSessionId: Type.Optional(UUIDSchema),

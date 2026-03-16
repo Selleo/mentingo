@@ -41,12 +41,7 @@ async function createOrFindUser(
       await insertUserDetailsIfMissing(existingUser.id, existingUser.tenantId, existingUser.email);
     }
 
-    await assignSystemRoleToUser(
-      db,
-      existingUser.id,
-      existingUser.tenantId,
-      roleSlug,
-    );
+    await assignSystemRoleToUser(db, existingUser.id, existingUser.tenantId, roleSlug);
 
     return existingUser;
   }
@@ -59,12 +54,7 @@ async function createOrFindUser(
     await insertUserDetailsIfMissing(newUser.id, userData.tenantId, newUser.email);
   }
 
-  await assignSystemRoleToUser(
-    db,
-    newUser.id,
-    userData.tenantId,
-    roleSlug,
-  );
+  await assignSystemRoleToUser(db, newUser.id, userData.tenantId, roleSlug);
 
   return newUser;
 }
@@ -108,13 +98,13 @@ async function seedProduction() {
       "admin@example.com",
       "password",
       {
-      id: faker.string.uuid(),
-      email: "admin@example.com",
-      firstName: faker.person.firstName(),
-      lastName: "Admin",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      tenantId,
+        id: faker.string.uuid(),
+        email: "admin@example.com",
+        firstName: faker.person.firstName(),
+        lastName: "Admin",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        tenantId,
       },
       SYSTEM_ROLE_SLUGS.ADMIN,
     );
@@ -126,13 +116,13 @@ async function seedProduction() {
       "user@example.com",
       "password",
       {
-      id: faker.string.uuid(),
-      email: "user@example.com",
-      firstName: faker.person.firstName(),
-      lastName: "Student",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      tenantId,
+        id: faker.string.uuid(),
+        email: "user@example.com",
+        firstName: faker.person.firstName(),
+        lastName: "Student",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        tenantId,
       },
       SYSTEM_ROLE_SLUGS.STUDENT,
     );
@@ -144,13 +134,13 @@ async function seedProduction() {
       "contentcreator@example.com",
       "password",
       {
-      id: faker.string.uuid(),
-      email: "contentcreator@example.com",
-      firstName: faker.person.firstName(),
-      lastName: "Content Creator",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      tenantId,
+        id: faker.string.uuid(),
+        email: "contentcreator@example.com",
+        firstName: faker.person.firstName(),
+        lastName: "Content Creator",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        tenantId,
       },
       SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
     );

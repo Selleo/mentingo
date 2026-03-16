@@ -1,4 +1,5 @@
 import { faker } from "@faker-js/faker";
+import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { and, eq } from "drizzle-orm";
 import request from "supertest";
 
@@ -6,7 +7,6 @@ import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { FileService } from "src/file/file.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { chapters, courses, lessons, masterCourseExports, tenants } from "src/storage/schema";
-import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCategoryFactory } from "../../../test/factory/category.factory";

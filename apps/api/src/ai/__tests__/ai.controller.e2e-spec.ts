@@ -1,9 +1,9 @@
+import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import request from "supertest";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { THREAD_STATUS } from "src/ai/utils/ai.type";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";

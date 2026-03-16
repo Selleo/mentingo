@@ -1,3 +1,4 @@
+import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import request from "supertest";
 
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
@@ -10,7 +11,6 @@ import { createUserFactory } from "../../../test/factory/user.factory";
 import { cookieFor, truncateAllTables } from "../../../test/helpers/test-helpers";
 import { DEFAULT_PAGE_SIZE } from "../../common/pagination";
 import { certificates } from "../../storage/schema";
-import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 
 import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg } from "src/common";

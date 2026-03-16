@@ -841,9 +841,8 @@ export class CourseService {
             const { authorAvatarUrl, ...itemWithoutReferences } = item;
 
             const signedUrl = await this.fileService.getFileUrl(item.thumbnailUrl);
-            const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
-              authorAvatarUrl,
-            );
+            const authorAvatarSignedUrl =
+              await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
 
             const trailerUrl = trailerUrls[item.id] ?? null;
 
@@ -988,9 +987,8 @@ export class CourseService {
             const { authorAvatarUrl: authorAvatarReference, ...itemWithoutReferences } = course;
 
             const thumbnailUrl = await this.fileService.getFileUrl(course.thumbnailUrl);
-            const authorAvatarUrl = await this.userService.getUsersProfilePictureUrl(
-              authorAvatarReference,
-            );
+            const authorAvatarUrl =
+              await this.userService.getUsersProfilePictureUrl(authorAvatarReference);
             const trailerUrl = trailerUrls[course.id] ?? null;
 
             return {
@@ -1537,9 +1535,8 @@ export class CourseService {
       contentCreatorCourses.map(async (course) => {
         const { authorAvatarUrl, ...courseWithoutReferences } = course;
 
-        const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
-          authorAvatarUrl,
-        );
+        const authorAvatarSignedUrl =
+          await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
 
         return {
           ...courseWithoutReferences,
@@ -4301,9 +4298,8 @@ export class CourseService {
     earlyReturn = false,
   ): CourseTranslationType[] {
     const dataToUpdate: CourseTranslationType[] = [];
-    type Candidate = ReturnType<typeof this.translationCandidates> extends Generator<infer T>
-      ? T
-      : never;
+    type Candidate =
+      ReturnType<typeof this.translationCandidates> extends Generator<infer T> ? T : never;
 
     const pushMissing = ({ id, hasValue, baseValue, field, idColumn }: Candidate) => {
       if (hasValue || !id) return false;

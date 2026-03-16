@@ -55,9 +55,8 @@ export class AnnouncementsController {
     response: baseResponse(unreadAnnouncementsSchema),
   })
   async getUnreadAnnouncementsCount(@CurrentUser("userId") userId: UUIDType) {
-    const unreadAnnouncementsCount = await this.announcementsService.getUnreadAnnouncementsCount(
-      userId,
-    );
+    const unreadAnnouncementsCount =
+      await this.announcementsService.getUnreadAnnouncementsCount(userId);
 
     return new BaseResponse(unreadAnnouncementsCount);
   }

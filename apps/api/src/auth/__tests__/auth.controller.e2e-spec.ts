@@ -1,3 +1,4 @@
+import { SYSTEM_ROLE_SLUGS, PERMISSIONS } from "@repo/shared";
 import * as cookie from "cookie";
 import { isArray, omit } from "lodash";
 import { nanoid } from "nanoid";
@@ -6,7 +7,6 @@ import request from "supertest";
 import { SettingsService } from "src/settings/settings.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { createTokens, resetTokens } from "src/storage/schema";
-import { SYSTEM_ROLE_SLUGS, PERMISSIONS } from "@repo/shared";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";

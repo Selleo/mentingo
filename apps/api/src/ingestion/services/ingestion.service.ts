@@ -126,9 +126,8 @@ export class IngestionService {
   }
 
   private async getDocumentLinkAuthor(documentLinkId: UUIDType): Promise<UUIDType> {
-    const documentLink = await this.documentService.findCourseAuthorByDocumentLinkId(
-      documentLinkId,
-    );
+    const documentLink =
+      await this.documentService.findCourseAuthorByDocumentLinkId(documentLinkId);
     if (!documentLink) {
       throw new NotFoundException("Document link not found");
     }

@@ -158,9 +158,8 @@ export class AuthService {
 
     const { avatarReference, ...userWithoutAvatar } = createdUser;
 
-    const usersProfilePictureUrl = await this.userService.getUsersProfilePictureUrl(
-      avatarReference,
-    );
+    const usersProfilePictureUrl =
+      await this.userService.getUsersProfilePictureUrl(avatarReference);
 
     await this.outboxPublisher.publish(new UserRegisteredEvent(createdUser));
 
@@ -180,9 +179,8 @@ export class AuthService {
     const { accessToken, refreshToken } = await this.getTokens(user);
 
     const { avatarReference, ...userWithoutAvatar } = user;
-    const usersProfilePictureUrl = await this.userService.getUsersProfilePictureUrl(
-      avatarReference,
-    );
+    const usersProfilePictureUrl =
+      await this.userService.getUsersProfilePictureUrl(avatarReference);
 
     const userSettings = await this.settingsService.getUserSettings(user.id);
     const { permissions, roleSlugs } = await this.permissionsService.getUserAccess(user.id);

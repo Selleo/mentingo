@@ -1,3 +1,4 @@
+import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import request from "supertest";
 
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
@@ -6,7 +7,6 @@ import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory, type UserWithCredentials } from "../../../test/factory/user.factory";
 import { truncateTables } from "../../../test/helpers/test-helpers";
-import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 
 import type { DatabasePg } from "../../common";
 import type { CompanyInformaitonJSONSchema } from "../schemas/company-information.schema";

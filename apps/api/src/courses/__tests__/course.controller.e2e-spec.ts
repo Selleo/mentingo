@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { COURSE_ENROLLMENT } from "@repo/shared";
+import { COURSE_ENROLLMENT, SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { and, eq, inArray } from "drizzle-orm";
 import request from "supertest";
 
@@ -17,7 +17,6 @@ import {
   studentCourses,
   studentLessonProgress,
 } from "src/storage/schema";
-import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCategoryFactory } from "../../../test/factory/category.factory";

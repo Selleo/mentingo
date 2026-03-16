@@ -1,10 +1,10 @@
+import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { isNull } from "drizzle-orm";
 import request from "supertest";
 
 import { DEFAULT_GLOBAL_SETTINGS } from "src/settings/constants/settings.constants";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { settings } from "src/storage/schema";
-import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import { createE2ETest } from "../../../test/create-e2e-test";

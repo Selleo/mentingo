@@ -35,11 +35,7 @@ export class AdminChapterService {
     await this.masterCourseService.assertCourseContentEditable(body.courseId);
 
     const chapter = await this.db.transaction(async (trx) => {
-      await this.adminLessonService.validateAccess(
-        "course",
-        currentUser,
-        body.courseId,
-      );
+      await this.adminLessonService.validateAccess("course", currentUser, body.courseId);
 
       const [maxDisplayOrder] = await trx
         .select({ displayOrder: sql<number>`COALESCE(MAX(${chapters.displayOrder}), 0)` })
@@ -93,11 +89,7 @@ export class AdminChapterService {
     return chapter;
   }
 
-  async updateFreemiumStatus(
-    chapterId: UUIDType,
-    isFreemium: boolean,
-    currentUser: CurrentUser,
-  ) {
+  async updateFreemiumStatus(chapterId: UUIDType, isFreemium: boolean, currentUser: CurrentUser) {
     await this.masterCourseService.assertCourseContentEditableByChapterId(chapterId);
 
     await this.adminLessonService.validateAccess("chapter", currentUser, chapterId);
@@ -169,11 +161,7 @@ export class AdminChapterService {
   async updateChapter(id: UUIDType, body: UpdateChapterBody, currentUser: CurrentUser) {
     await this.masterCourseService.assertCourseContentEditableByChapterId(id);
 
-    await this.adminLessonService.validateAccess(
-      "chapter",
-      currentUser,
-      id,
-    );
+    await this.adminLessonService.validateAccess("chapter", currentUser, id);
 
     if (body.title && body.title.length > MAX_LESSON_TITLE_LENGTH) {
       throw new BadRequestException({
@@ -212,11 +200,7 @@ export class AdminChapterService {
   async removeChapter(chapterId: UUIDType, currentUser: CurrentUser) {
     await this.masterCourseService.assertCourseContentEditableByChapterId(chapterId);
 
-    await this.adminLessonService.validateAccess(
-      "chapter",
-      currentUser,
-      chapterId,
-    );
+    await this.adminLessonService.validateAccess("chapter", currentUser, chapterId);
 
     const [chapter] = await this.adminChapterRepository.getChapterById(chapterId);
 

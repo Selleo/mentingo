@@ -77,7 +77,9 @@ export class IngestionController {
     @Param("lessonId") lessonId: UUIDType,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<GetAllAssignedDocumentsBody>> {
-    return new BaseResponse(await this.ingestionService.findAllDocumentsForLesson(lessonId, currentUser));
+    return new BaseResponse(
+      await this.ingestionService.findAllDocumentsForLesson(lessonId, currentUser),
+    );
   }
 
   @Delete(":documentLinkId")
@@ -89,6 +91,8 @@ export class IngestionController {
     @Param("documentLinkId") documentLinkId: UUIDType,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ message: string }>> {
-    return new BaseResponse(await this.ingestionService.deleteDocumentLink(documentLinkId, currentUser));
+    return new BaseResponse(
+      await this.ingestionService.deleteDocumentLink(documentLinkId, currentUser),
+    );
   }
 }

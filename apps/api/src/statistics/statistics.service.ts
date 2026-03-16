@@ -78,19 +78,12 @@ export class StatisticsService {
       ownerUserId,
       language,
     );
-    const [totalCoursesCompletionStats] = await this.statisticsRepository.getTotalCoursesCompletion(
-      ownerUserId,
-    );
+    const [totalCoursesCompletionStats] =
+      await this.statisticsRepository.getTotalCoursesCompletion(ownerUserId);
     const [conversionAfterFreemiumLesson] =
-      await this.statisticsRepository.getConversionAfterFreemiumLesson(
-        ownerUserId,
-      );
-    const courseStudentsStats = await this.statisticsRepository.getCourseStudentsStats(
-      ownerUserId,
-    );
-    const [avgQuizScore] = await this.statisticsRepository.getAvgQuizScore(
-      ownerUserId,
-    );
+      await this.statisticsRepository.getConversionAfterFreemiumLesson(ownerUserId);
+    const courseStudentsStats = await this.statisticsRepository.getCourseStudentsStats(ownerUserId);
+    const [avgQuizScore] = await this.statisticsRepository.getAvgQuizScore(ownerUserId);
 
     return {
       fiveMostPopularCourses,
