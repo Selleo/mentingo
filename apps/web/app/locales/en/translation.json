@@ -1188,7 +1188,8 @@
         "requireSequentialLessons": "Require students to complete lessons in order",
         "enableQuizFeedback": "Quiz feedback",
         "enableQuizFeedbackDescription": "After submitting the quiz, the student will see which answers were correct, incorrect, or unanswered.",
-        "fallbackLanguageWarning": "Warning: Some fields are empty. Translations from the base language will be used instead.",
+        "fallbackLanguageWarningTitle": "Note: missing translations",
+        "fallbackLanguageWarningDescription": "Some fields in this language version are empty. In those places, students will see content from the default language until you add translations.",
         "baseLanguageTooltip": "You cannot change or remove this language. It is the default and will always be part of the course."
       },
       "validation": {
@@ -1240,6 +1241,7 @@
       "chapter": {
         "button": {
           "addChapter": "Add chapter",
+          "addChapterDisabledTooltip": "You can only add new chapters in the default language.",
           "generateWithAI": "Generate with AI"
         },
         "toast": {
@@ -1637,7 +1639,9 @@
       "email": "Email",
       "password": "Password",
       "birthday": "Date of birth",
-      "birthdayPlaceholder": "Select date"
+      "birthdayPlaceholder": "Select date",
+      "requiredBadge": "Required",
+      "optionalBadge": "Optional"
     },
     "other": {
       "alreadyHaveAccount": "Already have an account?",
@@ -1651,11 +1655,14 @@
       "firstName": "First name is required",
       "lastName": "Last name is required",
       "email": "Invalid email",
-      "birthday": "You must be at least {{ageLimit}} years old"
+      "birthday": "You must be at least {{ageLimit}} years old",
+      "requiredCheckbox": "This consent is required."
     },
     "toast": {
       "userAlreadyExists": "User with this email already exists.",
-      "createAccountFailed": "Unable to create account. Please try again."
+      "createAccountFailed": "Unable to create account. Please try again.",
+      "requiredFormFieldMissing": "Please accept all required consents.",
+      "invalidFormField": "One of the submitted registration fields is invalid."
     }
   },
   "courseChapterView": {
@@ -2066,6 +2073,43 @@
       "overdueCourseNotificationsPreferenceChangeError": "Failed to update overdue course notification preferences"
     }
   },
+  "registrationFormBuilder": {
+    "title": "Registration Form Builder",
+    "description": "Manage additional checkboxes shown during user registration.",
+    "badge": "Register",
+    "loading": "Loading registration form checkboxes...",
+    "empty": "No additional registration checkboxes yet.",
+    "addFieldTitle": "Add checkbox consent",
+    "addFieldDescription": "Create optional or required checkboxes for registration.",
+    "summaryLabel": "Checkboxes",
+    "addField": "Add checkbox",
+    "save": "Save registration form",
+    "validation": {
+      "labelRequired": "Label content is required.",
+      "toastLabelRequired": "Please add checkbox text in both English and Polish before saving.",
+      "toastGeneric": "Please fix the highlighted checkbox text before saving."
+    },
+    "toast": {
+      "saved": "Registration form saved successfully."
+    },
+    "field": {
+      "heading": "Checkbox {{index}}",
+      "typeCheckbox": "Checkbox",
+      "cardDescription": "Configure copy, required state, and ordering for this consent.",
+      "required": "Required checkbox",
+      "requiredDescription": "Users must check this box before creating an account.",
+      "requiredBadge": "Required",
+      "optionalBadge": "Optional",
+      "archivedBadge": "Archived",
+      "languageLabel": "Label in {{language}}",
+      "languageDescription": "This content is shown to users who register in this language.",
+      "labelPlaceholder": "Enter consent text and add links when needed.",
+      "linkOnlyHint": "Plain text with links only.",
+      "addLink": "Add link",
+      "archive": "Archive",
+      "restore": "Restore"
+    }
+  },
   "mfa": {
     "setup": {
       "title": "Setup Multi-Factor Authentication",
@@ -2390,6 +2434,9 @@
         "drag": "Drag file",
         "remove": "Remove downloadable file"
       }
+    },
+    "loadingAiAsset": {
+      "processing": "Resource is currently processing"
     }
   },
   "pages": {

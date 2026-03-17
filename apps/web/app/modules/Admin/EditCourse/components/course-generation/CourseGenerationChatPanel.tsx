@@ -1,6 +1,8 @@
 import { type Dispatch, type SetStateAction, useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useDeleteCourseGenerationFile } from "~/api/mutations/admin/useDeleteCourseGenerationFile";
+import { useCourseGenerationFiles } from "~/api/queries/admin/useCourseGenerationFiles";
 import { Icon } from "~/components/Icon";
 import { CourseGenerationComposer } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationComposer";
 import { CourseGenerationAiTypingMessage } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationMessages";
@@ -8,6 +10,7 @@ import {
   getCurrentMessageKey,
   getMessageText,
 } from "~/modules/Admin/EditCourse/components/course-generation/utils/courseGenerationChat.utils";
+import { UploadFileCard } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/components/UploadFileCard";
 import ChatMessage from "~/modules/Courses/Lesson/AiMentorLesson/components/ChatMessage";
 
 type CourseGenerationMessage = {
@@ -46,6 +49,8 @@ export function CourseGenerationChatPanel({
   const { t } = useTranslation();
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const generationStartedRef = useRef(false);
+  const { data: ingestedFiles = [] } = useCourseGenerationFiles(courseId, !!courseId);
+  const { mutateAsync: deleteFile, isPending: isDeletePending } = useDeleteCourseGenerationFile();
 
   useEffect(() => {
     onMessageCountChange(messages.length);
@@ -96,14 +101,50 @@ export function CourseGenerationChatPanel({
   const thinkingLabel = t(`adminCourseView.thinking.${currentMessageKey ?? "THINKING"}`);
   const aiCourseCreationLabel = t("adminCourseView.common.aiCourseCreation");
 
+  const handleRemoveFile = async (documentId: string) => {
+    if (!courseId) return;
+    await deleteFile({ integrationId: courseId, documentId });
+  };
+
+  const getFileTypeLabel = (contentType: string) => {
+    if (contentType.includes("pdf")) return "PDF document";
+    if (contentType.includes("wordprocessingml")) return "DOCX document";
+    if (contentType.includes("markdown")) return "Markdown file";
+    if (contentType.includes("text")) return "Text file";
+    return contentType || "File";
+  };
+
   return (
     <div className="flex h-full flex-col">
-      <header className="relative flex h-14 items-center justify-between border-b border-neutral-200 px-6">
-        <div className="flex items-center gap-2 text-neutral-900">
-          <Icon name="AiMentor" className="size-4 text-primary-600" />
-          <span className="text-base font-semibold tracking-tight text-black">
-            {aiCourseCreationLabel}
-          </span>
+      <header className="relative flex h-16 items-center justify-between border-b border-neutral-200 px-6">
+        <div className="flex min-w-0 flex-1 items-center gap-3 text-neutral-900">
+          <div className="flex items-center gap-2">
+            <Icon name="AiMentor" className="size-4 text-primary-600" />
+            <span className="text-base font-semibold tracking-tight text-black">
+              {aiCourseCreationLabel}
+            </span>
+          </div>
+
+          {ingestedFiles.length > 0 && (
+            <>
+              <div className="h-5 w-px bg-neutral-200" />
+              <div className="min-w-0 flex-1 overflow-x-auto">
+                <div className="flex min-w-max items-center gap-2 pr-3">
+                  {ingestedFiles.map((file) => (
+                    <div key={file.id} className="w-56 shrink-0">
+                      <UploadFileCard
+                        name={file.filename}
+                        meta={getFileTypeLabel(file.contentType)}
+                        onRemove={() => void handleRemoveFile(file.id)}
+                        compact
+                        removeDisabled={isDeletePending}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
         </div>
         <div className="flex items-center gap-3">
           {messages.length > 0 && (

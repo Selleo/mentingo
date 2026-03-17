@@ -698,15 +698,29 @@
     {
       "idx": 99,
       "version": "7",
-      "when": 1773326854289,
-      "tag": "0099_add_roles_and_rulesets_structure",
+      "when": 1773663135119,
+      "tag": "0099_add_registration_form_fields",
       "breakpoints": true
     },
     {
       "idx": 100,
       "version": "7",
-      "when": 1773326991008,
-      "tag": "0100_enable_tenant_rls_for_permissions_related_tables",
+      "when": 1773663138647,
+      "tag": "0100_enable_tenant_rls_for_customizable_fields",
+      "breakpoints": true
+    },
+    {
+      "idx": 101,
+      "version": "7",
+      "when": 1773732905530,
+      "tag": "0101_add_permissions_schema",
+      "breakpoints": true
+    },
+    {
+      "idx": 102,
+      "version": "7",
+      "when": 1773732925681,
+      "tag": "0102_enable_tenant_rls_for_permissions_related_tables",
       "breakpoints": true
     }
   ]

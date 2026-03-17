@@ -51,6 +51,7 @@ import {
   courseStudentMode,
   createTokens,
   credentials,
+  formFieldAnswers,
   magicLinkTokens,
   resetTokens,
   userOnboarding,
@@ -68,6 +69,7 @@ import type { RegisterUserWithHashedPasswordInput, TokenUser } from "./types";
 import type { Response } from "express";
 import type { ActorUserType } from "src/common/types/actor-user.type";
 import type { CurrentUser } from "src/common/types/current-user.type";
+import type { RegistrationFormField } from "src/settings/schemas/registration-form.schema";
 import type { SupportSession } from "src/support-mode/support-mode.types";
 import type { ProviderLoginUserType } from "src/utils/types/provider-login-user.type";
 
@@ -99,12 +101,14 @@ export class AuthService {
     lastName,
     password,
     language,
+    formAnswers,
   }: {
     email: string;
     firstName: string;
     lastName: string;
     password: string;
     language: string;
+    formAnswers?: Record<string, boolean>;
   }) {
     const [existingUser] = await this.dbAdmin
       .select({ id: users.id })
@@ -115,12 +119,33 @@ export class AuthService {
 
     const hashedPassword = await hashPassword(password);
 
-    const createdUser = await this.createRegisteredUser({
-      email,
-      firstName,
-      lastName,
-      language,
-      hashedPassword,
+    const registrationForm = await this.settingsService.getRegistrationForm();
+    this.assertRegistrationAnswersAreValid(registrationForm.fields, formAnswers);
+
+    const createdUser = await this.db.transaction(async (trx) => {
+      const user = await this.createRegisteredUser(
+        {
+          email,
+          firstName,
+          lastName,
+          language,
+          hashedPassword,
+        },
+        trx,
+      );
+
+      const registrationAnswers = this.buildRegistrationAnswers(
+        registrationForm.fields,
+        formAnswers,
+        language,
+        user.id,
+      );
+
+      if (registrationAnswers.length) {
+        await trx.insert(formFieldAnswers).values(registrationAnswers);
+      }
+
+      return user;
     });
 
     if (!createdUser) throw new BadRequestException("registerView.toast.createAccountFailed");
@@ -136,13 +161,10 @@ export class AuthService {
     return createdUser;
   }
 
-  private async createRegisteredUser({
-    email,
-    firstName,
-    lastName,
-    language,
-    hashedPassword,
-  }: RegisterUserWithHashedPasswordInput) {
+  private async createRegisteredUser(
+    { email, firstName, lastName, language, hashedPassword }: RegisterUserWithHashedPasswordInput,
+    dbInstance: DatabasePg = this.db,
+  ) {
     const createdUser = await this.userService.createUser(
       {
         email,
@@ -151,7 +173,7 @@ export class AuthService {
         roleSlugs: [SYSTEM_ROLE_SLUGS.STUDENT],
         language,
       },
-      undefined,
+      dbInstance,
       undefined,
       { registration: { hashedPassword } },
     );
@@ -164,6 +186,49 @@ export class AuthService {
     await this.outboxPublisher.publish(new UserRegisteredEvent(createdUser));
 
     return { ...userWithoutAvatar, profilePictureUrl: usersProfilePictureUrl };
+  }
+
+  private assertRegistrationAnswersAreValid(
+    fields: RegistrationFormField[],
+    formAnswers?: Record<string, boolean>,
+  ) {
+    const answers = formAnswers ?? {};
+    const activeFieldIds = new Set(fields.map(({ id }) => id));
+
+    for (const field of fields) {
+      if (field.required && answers[field.id] !== true) {
+        throw new BadRequestException("registerView.toast.requiredFormFieldMissing");
+      }
+    }
+
+    for (const fieldId of Object.keys(answers)) {
+      if (!activeFieldIds.has(fieldId)) {
+        throw new BadRequestException("registerView.toast.invalidFormField");
+      }
+    }
+  }
+
+  private buildRegistrationAnswers(
+    fields: RegistrationFormField[],
+    formAnswers: Record<string, boolean> | undefined,
+    language: string,
+    userId: UUIDType,
+  ) {
+    if (!formAnswers) return [];
+
+    return fields
+      .filter((field) => Object.prototype.hasOwnProperty.call(formAnswers, field.id))
+      .map((field) => ({
+        formFieldId: field.id,
+        userId,
+        value: Boolean(formAnswers[field.id]),
+        labelSnapshot: field.label,
+        answeredLanguage: Object.values(SUPPORTED_LANGUAGES).includes(
+          language as SupportedLanguages,
+        )
+          ? (language as SupportedLanguages)
+          : SUPPORTED_LANGUAGES.EN,
+      }));
   }
 
   public async login(data: { email: string; password: string }, MFAEnforcedRoles: string[]) {

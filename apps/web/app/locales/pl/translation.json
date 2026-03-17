@@ -1176,7 +1176,8 @@
         "requireSequentialLessons": "Wymagaj ukończenia lekcji w kolejności",
         "enableQuizFeedback": "Feedback po quizie",
         "enableQuizFeedbackDescription": "Po przesłaniu quizu student zobaczy, które odpowiedzi były poprawne, niepoprawne lub pominięte.",
-        "fallbackLanguageWarning": "Ostrzeżenie: Niektóre pola są puste. Zamiast nich zostaną użyte tłumaczenia z języka bazowego.",
+        "fallbackLanguageWarningTitle": "Uwaga: brakujące tłumaczenia",
+        "fallbackLanguageWarningDescription": "Niektóre pola w tej wersji językowej są puste. W tych miejscach system wyświetli studentom treści z języka domyślnego, dopóki nie dodasz tłumaczeń.",
         "baseLanguageTooltip": "Nie można zmienić ani usunąć tego języka. Jest on domyślny i zawsze będzie częścią kursu."
       },
       "validation": {
@@ -1228,6 +1229,7 @@
       "chapter": {
         "button": {
           "addChapter": "Dodaj rozdział",
+          "addChapterDisabledTooltip": "Aby dodać rozdział, musisz być w języku domyślnym.",
           "generateWithAI": "Generuj z AI"
         },
         "toast": {
@@ -1255,7 +1257,7 @@
           "saveLesson": "Zapisz lekcje",
           "addResource": "Dodaj zasób",
           "removeResource": "Usuń zasób",
-          "addLessonDisabledTooltip": "Aby utworzyć lekcję, musisz być w języku bazowym."
+          "addLessonDisabledTooltip": "Aby utworzyć lekcję, musisz być w języku domyślnym."
         },
         "breadcrumbs": {
           "back": "Wstecz"
@@ -1637,7 +1639,9 @@
       "email": "Email",
       "password": "Hasło",
       "birthday": "Data urodzenia",
-      "birthdayPlaceholder": "Wybierz datę"
+      "birthdayPlaceholder": "Wybierz datę",
+      "requiredBadge": "Wymagane",
+      "optionalBadge": "Opcjonalne"
     },
     "other": {
       "alreadyHaveAccount": "Masz już konto?",
@@ -1651,11 +1655,14 @@
       "firstName": "Imię jest wymagane",
       "lastName": "Nazwisko jest wymagane",
       "email": "Nieprawidłowy email",
-      "birthday": "Aby się zarejestrować musisz mieć przynajmniej {{ageLimit}} lat"
+      "birthday": "Aby się zarejestrować musisz mieć przynajmniej {{ageLimit}} lat",
+      "requiredCheckbox": "Ta zgoda jest wymagana."
     },
     "toast": {
       "userAlreadyExists": "Użytkownik z tym adresem e-mail już istnieje.",
-      "createAccountFailed": "Nie udało się utworzyć konta. Spróbuj ponownie."
+      "createAccountFailed": "Nie udało się utworzyć konta. Spróbuj ponownie.",
+      "requiredFormFieldMissing": "Zaakceptuj wszystkie wymagane zgody.",
+      "invalidFormField": "Jedno z przesłanych pól rejestracyjnych jest nieprawidłowe."
     }
   },
   "courseChapterView": {
@@ -2108,6 +2115,43 @@
     },
     "globalActionWarning": "Ta akcja ma globalny wpływ na aplikację. Zmieni zachowanie dla wszystkich użytkowników."
   },
+  "registrationFormBuilder": {
+    "title": "Kreator formularza rejestracji",
+    "description": "Zarządzaj dodatkowymi checkboxami widocznymi podczas rejestracji.",
+    "badge": "Rejestracja",
+    "loading": "Ładowanie checkboxów formularza rejestracji...",
+    "empty": "Brak dodatkowych checkboxów rejestracyjnych.",
+    "addFieldTitle": "Dodaj zgodę checkbox",
+    "addFieldDescription": "Twórz opcjonalne lub wymagane checkboxy dla rejestracji.",
+    "summaryLabel": "Checkboxy",
+    "addField": "Dodaj checkbox",
+    "save": "Zapisz formularz rejestracji",
+    "validation": {
+      "labelRequired": "Treść etykiety jest wymagana.",
+      "toastLabelRequired": "Przed zapisem dodaj treść checkboxa po polsku i po angielsku.",
+      "toastGeneric": "Przed zapisem popraw zaznaczoną treść checkboxa."
+    },
+    "toast": {
+      "saved": "Formularz rejestracji został zapisany."
+    },
+    "field": {
+      "heading": "Checkbox {{index}}",
+      "typeCheckbox": "Checkbox",
+      "cardDescription": "Skonfiguruj treść, wymagalność i kolejność tej zgody.",
+      "required": "Wymagany checkbox",
+      "requiredDescription": "Użytkownik musi zaznaczyć ten checkbox przed utworzeniem konta.",
+      "requiredBadge": "Wymagane",
+      "optionalBadge": "Opcjonalne",
+      "archivedBadge": "Archiwalne",
+      "languageLabel": "Etykieta w języku {{language}}",
+      "languageDescription": "Ta treść jest wyświetlana użytkownikom rejestrującym się w tym języku.",
+      "labelPlaceholder": "Wpisz treść zgody i dodaj linki, jeśli są potrzebne.",
+      "linkOnlyHint": "Tylko zwykły tekst i linki.",
+      "addLink": "Dodaj link",
+      "archive": "Archiwizuj",
+      "restore": "Przywróć"
+    }
+  },
   "mfa": {
     "setup": {
       "title": "Skonfiguruj uwierzytelnianie dwuskładnikowe",
@@ -2416,6 +2460,9 @@
         "drag": "Przeciągnij plik",
         "remove": "Usuń plik do pobrania"
       }
+    },
+    "loadingAiAsset": {
+      "processing": "Zasób jest obecnie przetwarzany"
     }
   },
   "pages": {

@@ -19,6 +19,7 @@ import {
   PERMISSIONS,
   LUMA_FILE_INGESTION_ALLOWED_MIME_TYPES,
   LUMA_FILE_INGESTION_MAX_SIZE_BYTES,
+  SupportedLanguages,
 } from "@repo/shared";
 import { Response } from "express";
 import { Validate } from "nestjs-typebox";
@@ -116,15 +117,21 @@ export class LumaController {
         schema: integrationDraftSchema.properties.integrationId,
       },
       { type: "query", name: "draftName", schema: integrationDraftSchema.properties.draftName },
+      {
+        type: "query",
+        name: "courseLanguage",
+        schema: integrationDraftSchema.properties.courseLanguage,
+      },
     ],
     response: courseGenerationDraftSchema,
   })
   async getCourseGenerationDraft(
     @Query("integrationId") integrationId: string,
     @Query("draftName") draftName: string,
+    @Query("courseLanguage") courseLanguage: SupportedLanguages,
     @CurrentUser() currentUser: CurrentUserType,
   ) {
-    const data: CreateDraftOptions = { integrationId, draftName };
+    const data: CreateDraftOptions = { integrationId, draftName, courseLanguage };
 
     return this.lumaService.getDraft(data, currentUser);
   }

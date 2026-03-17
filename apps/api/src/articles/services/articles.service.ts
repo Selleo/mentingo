@@ -13,7 +13,7 @@ import { match } from "ts-pattern";
 import { DatabasePg } from "src/common";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { hasAnyPermission, hasPermission } from "src/common/permissions/permission.utils";
-import { annotateVideoAutoplayInContent } from "src/common/utils/annotateVideoAutoplayInContent";
+import { annotateVideoAutoplayAndBlockIndexesInContent } from "src/common/utils/annotateVideoAutoplayAndBlockIndexesInContent";
 import { injectResourcesIntoContent } from "src/common/utils/injectResourcesIntoContent";
 import {
   CreateArticleEvent,
@@ -820,7 +820,7 @@ export class ArticlesService {
 
     if ("content" in updateArticleData && typeof updateArticleData.content === "string") {
       updateArticleData.content =
-        annotateVideoAutoplayInContent(updateArticleData.content) ?? undefined;
+        annotateVideoAutoplayAndBlockIndexesInContent(updateArticleData.content) ?? undefined;
     }
 
     const updateData: Record<string, unknown> = {

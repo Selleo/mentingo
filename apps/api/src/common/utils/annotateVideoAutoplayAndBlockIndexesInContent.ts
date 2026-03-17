@@ -40,7 +40,9 @@ const getVideoAutoplayAction = (
   return VIDEO_AUTOPLAY.NO_AUTOPLAY;
 };
 
-export const annotateVideoAutoplayInContent = (content: string | null): string | null => {
+export const annotateVideoAutoplayAndBlockIndexesInContent = (
+  content: string | null,
+): string | null => {
   if (!content) return content;
 
   const $ = loadHtml(content);
@@ -70,6 +72,8 @@ export const annotateVideoAutoplayInContent = (content: string | null): string |
   };
 
   nodeMeta.forEach((node, index) => {
+    $(node.element).attr("data-block-index", String(index));
+
     if (!node.isVideo) return;
 
     const prevMeaningfulIndex = getPrevMeaningfulIndex(index);

@@ -3,6 +3,7 @@ import {
   BadRequestException,
   ConflictException,
   HttpException,
+  Inject,
   Injectable,
   NotFoundException,
   ServiceUnavailableException,
@@ -10,17 +11,21 @@ import {
 } from "@nestjs/common";
 import { AI_MENTOR_TYPE } from "@repo/shared";
 import { isAxiosError } from "axios";
+import * as cheerio from "cheerio";
 import { eq } from "drizzle-orm";
 import { match } from "ts-pattern";
 
 import { AdminChapterService } from "src/chapter/adminChapter.service";
 import { AdminChapterRepository } from "src/chapter/repositories/adminChapter.repository";
+import { DatabasePg } from "src/common";
+import { resolveTenantOrigin } from "src/common/helpers/resolveTenantOrigin";
 import { EnvService } from "src/env/services/env.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
+import { DB_ADMIN } from "src/storage/db/db.providers";
 import { lessons } from "src/storage/schema";
 
 import type {
@@ -31,10 +36,15 @@ import type {
   IngestDraftFileResponse,
   IntegrationIdOptions,
 } from "@japro/luma-sdk";
+import type { SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
 import type { AdminLessonWithContentSchema } from "src/lesson/lesson.schema";
-import type { GeneratedChapter, GeneratedLesson } from "src/luma/schema/luma.schema";
+import type {
+  GeneratedAssetPayload,
+  GeneratedChapter,
+  GeneratedLesson,
+} from "src/luma/schema/luma.schema";
 
 type CreatedChapter = Awaited<ReturnType<AdminChapterService["createChapterForCourse"]>>;
 
@@ -42,6 +52,7 @@ type StreamState = {
   chapterIdsByIndex: Map<number, UUIDType>;
   chapterByEventKey: Map<string, CreatedChapter>;
   lessonByEventKey: Map<string, { type: string; lesson: Record<string, unknown> }>;
+  lessonIdsWithAssets: Set<UUIDType>;
 };
 
 type ChunkContext = {
@@ -55,6 +66,7 @@ type LumaClient = ReturnType<typeof createLumaClient>;
 @Injectable()
 export class LumaService {
   constructor(
+    @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
     private readonly envService: EnvService,
     private readonly adminLessonService: AdminLessonService,
     private readonly adminChapterService: AdminChapterService,
@@ -91,6 +103,14 @@ export class LumaService {
     });
 
     if (!draft) {
+      const { language } = await this.localizationService.getBaseLanguage(
+        ENTITY_TYPE.COURSE,
+        data.integrationId,
+        data.courseLanguage as SupportedLanguages,
+      );
+
+      data.courseLanguage = language;
+
       const { draftId } = await this.withLumaErrorHandling(() => luma.createDraft(data));
 
       return { integrationId: data.integrationId, draftId, isCourseGenerated: false };
@@ -161,6 +181,7 @@ export class LumaService {
       chapterIdsByIndex: new Map<number, UUIDType>(),
       chapterByEventKey: new Map<string, CreatedChapter>(),
       lessonByEventKey: new Map<string, { type: string; lesson: Record<string, unknown> }>(),
+      lessonIdsWithAssets: new Set(),
     };
   }
 
@@ -203,60 +224,15 @@ export class LumaService {
       }
 
       const transformedPayload = await match(payload.type)
-        .with("designer.chapter.generated", async () => {
-          const chapterPayload = payload as GeneratedChapter;
-          const chapterEventKey = this.buildChapterEventKey(chapterPayload);
-          const existingChapter = context.state.chapterByEventKey.get(chapterEventKey);
-          if (existingChapter) {
-            return {
-              type: chapterPayload.type,
-              chapter: existingChapter,
-            };
-          }
-
-          const createdChapter = await this.adminChapterService.createChapterForCourse(
-            {
-              courseId: context.integrationId,
-              title: chapterPayload.generation?.title?.trim() || "Generated chapter",
-              isFreemium: false,
-            },
-            context.currentUser,
-          );
-
-          context.state.chapterIdsByIndex.set(
-            (createdChapter.displayOrder ?? 1) - 1,
-            createdChapter.id,
-          );
-          context.state.chapterByEventKey.set(chapterEventKey, createdChapter);
-
-          return {
-            type: chapterPayload.type,
-            chapter: createdChapter,
-          };
-        })
-        .with("architect.lesson.generated", async () => {
-          const lessonPayload = payload as GeneratedLesson;
-          const lessonEventKey = this.buildLessonEventKey(lessonPayload);
-          const existingLesson = context.state.lessonByEventKey.get(lessonEventKey);
-          if (existingLesson) return existingLesson;
-
-          const chapterId = context.state.chapterIdsByIndex.get(lessonPayload.chapterIndex);
-          if (!chapterId) return payload;
-
-          const lesson = await this.saveGeneratedLesson(
-            chapterId,
-            lessonPayload.generation,
-            context.currentUser,
-          );
-
-          const transformedLesson = {
-            type: lessonPayload.type,
-            lesson,
-          };
-
-          context.state.lessonByEventKey.set(lessonEventKey, transformedLesson);
-          return transformedLesson;
-        })
+        .with("designer.chapter.generated", () =>
+          this.handleChapterGeneratedPayload(payload as GeneratedChapter, context),
+        )
+        .with("architect.lesson.generated", () =>
+          this.handleLessonGeneratedPayload(payload as GeneratedLesson, context),
+        )
+        .with("assets.generated", () =>
+          this.handleAssetsGeneratedPayload(payload as GeneratedAssetPayload, context),
+        )
         .otherwise(() => payload);
 
       transformedFrames.push(`2:${JSON.stringify([transformedPayload])}`);
@@ -265,12 +241,172 @@ export class LumaService {
     return transformedFrames;
   }
 
+  private async handleChapterGeneratedPayload(payload: GeneratedChapter, context: ChunkContext) {
+    const {
+      integrationId,
+      currentUser,
+      state: { chapterIdsByIndex, chapterByEventKey },
+    } = context;
+
+    const chapterPayload = payload as GeneratedChapter;
+
+    const chapterEventKey = this.buildChapterEventKey(chapterPayload);
+    const existingChapter = chapterByEventKey.get(chapterEventKey);
+    if (existingChapter) {
+      return {
+        type: chapterPayload.type,
+        chapter: existingChapter,
+      };
+    }
+
+    const createdChapter = await this.adminChapterService.createChapterForCourse(
+      {
+        courseId: integrationId,
+        title: this.sanitizeText(chapterPayload.generation?.title?.trim() || "Generated chapter"),
+        isFreemium: false,
+      },
+      currentUser,
+    );
+
+    chapterIdsByIndex.set((createdChapter.displayOrder ?? 1) - 1, createdChapter.id);
+    chapterByEventKey.set(chapterEventKey, createdChapter);
+
+    return {
+      type: payload.type,
+      chapter: createdChapter,
+    };
+  }
+
+  private async handleLessonGeneratedPayload(payload: GeneratedLesson, context: ChunkContext) {
+    const {
+      currentUser,
+      state: { chapterIdsByIndex, lessonByEventKey, lessonIdsWithAssets },
+    } = context;
+
+    const lessonEventKey = this.buildLessonEventKey(payload);
+    const existingLesson = lessonByEventKey.get(lessonEventKey);
+    if (existingLesson) return existingLesson;
+
+    const chapterId = chapterIdsByIndex.get(payload.chapterIndex);
+    if (!chapterId) return payload;
+
+    const lesson = await this.saveGeneratedLesson(chapterId, payload.generation, currentUser);
+
+    if (payload.generation.assets.length > 0) {
+      lessonIdsWithAssets.add(lesson.id);
+    }
+
+    const transformedLesson = {
+      type: payload.type,
+      lesson,
+    };
+
+    lessonByEventKey.set(lessonEventKey, transformedLesson);
+    return transformedLesson;
+  }
+
+  private async handleAssetsGeneratedPayload(
+    payload: GeneratedAssetPayload,
+    context: ChunkContext,
+  ) {
+    await this.replaceAssetPlaceholders(context);
+    return payload;
+  }
+
+  private async replaceAssetPlaceholders(context: ChunkContext) {
+    const {
+      integrationId,
+      currentUser,
+      state: { lessonIdsWithAssets },
+    } = context;
+
+    const client = await this.getLumaClient();
+    const assets = await client.getAssets({ integrationId });
+
+    const assetMap = new Map(assets.map((asset) => [asset.assetId, asset.signedUrl]));
+
+    const lessons = await this.adminLessonService.getContentLessonsByIds(
+      Array.from(lessonIdsWithAssets),
+    );
+
+    const baseUrl = await resolveTenantOrigin(this.dbAdmin, currentUser.tenantId);
+
+    await Promise.all(
+      lessons.map((lesson) =>
+        this.replaceAssetPlaceholdersInLesson(lesson, assetMap, baseUrl, currentUser),
+      ),
+    );
+  }
+
+  private async replaceAssetPlaceholdersInLesson(
+    lesson: {
+      id: UUIDType;
+      description: string;
+    },
+    assetMap: Map<string, string>,
+    baseUrl: string,
+    currentUser: CurrentUser,
+  ) {
+    if (!lesson.description) return;
+
+    const $ = cheerio.load(lesson.description);
+    const placeholderNodes = $('[data-node-type="loading-ai-asset"]').toArray();
+    if (!placeholderNodes.length) return;
+
+    let hasChanges = false;
+
+    for (const element of placeholderNodes) {
+      const node = $(element);
+      const assetId = node.attr("data-placeholder");
+
+      if (!assetId) {
+        node.remove();
+        hasChanges = true;
+        continue;
+      }
+
+      const signedUrl = assetMap.get(assetId);
+      if (!signedUrl) {
+        node.remove();
+        hasChanges = true;
+        continue;
+      }
+
+      const uploaded = await this.adminLessonService.uploadFileToLessonFromSignedUrl(
+        currentUser.userId,
+        lesson.id,
+        signedUrl,
+      );
+
+      const resourceUrl = `${baseUrl}/api/lesson/lesson-resource/${uploaded.resourceId}`;
+      node.replaceWith(
+        `<a href="${resourceUrl}" data-resource-id="${uploaded.resourceId}">${resourceUrl}</a>`,
+      );
+      hasChanges = true;
+    }
+
+    if (!hasChanges) return;
+
+    const bodyChildren = $("body").children();
+    const updatedDescription = $.html(bodyChildren.length ? bodyChildren : $.root().children());
+    const { language } = await this.localizationService.getBaseLanguage(
+      ENTITY_TYPE.LESSON,
+      lesson.id,
+    );
+
+    await this.adminLessonService.updateLesson(
+      lesson.id,
+      { language, description: updatedDescription },
+      currentUser,
+    );
+  }
+
   private async saveGeneratedLesson(
     chapterId: UUIDType,
     lesson: GeneratedCourseResponse["chapters"][number]["lessons"][number],
     currentUser: CurrentUser,
   ): Promise<AdminLessonWithContentSchema> {
-    const lessonTitle = lesson.title?.trim() || "Generated lesson";
+    const lessonTitle = this.sanitizeText(lesson.title?.trim() || "Generated lesson");
     const lessonType = this.resolveGeneratedLessonType(lesson);
     let lessonId: UUIDType;
 
@@ -281,23 +417,23 @@ export class LumaService {
         {
           chapterId,
           title: lessonTitle,
-          description: aiMentor?.taskDescription ?? lesson.content ?? "",
+          description: this.sanitizeText(aiMentor?.taskDescription ?? lesson.content ?? ""),
           type: this.mapAiMentorType(aiMentor?.type),
-          aiMentorInstructions: aiMentor?.aiMentorInstructions ?? "",
-          completionConditions: aiMentor?.completionConditions ?? "",
-          name: aiMentor?.name ?? "AI Mentor",
+          aiMentorInstructions: this.sanitizeText(aiMentor?.aiMentorInstructions ?? ""),
+          completionConditions: this.sanitizeText(aiMentor?.completionConditions ?? ""),
+          name: this.sanitizeText(aiMentor?.name ?? "AI Mentor"),
         },
         currentUser,
       );
     } else if (lessonType === LESSON_TYPES.QUIZ) {
       const questions = (lesson.questions ?? []).map((question, questionIndex) => ({
         type: this.mapQuestionType(question.type),
-        title: question.title?.trim() || `Question ${questionIndex + 1}`,
-        description: question.description ?? "",
-        solutionExplanation: question.solutionExplanation ?? "",
+        title: this.sanitizeText(question.title?.trim() || `Question ${questionIndex + 1}`),
+        description: this.sanitizeText(question.description ?? ""),
+        solutionExplanation: this.sanitizeText(question.solutionExplanation ?? ""),
         displayOrder: question.questionIndex || questionIndex + 1,
         options: (question.options ?? []).map((option, optionIndex) => ({
-          optionText: option.optionText ?? "",
+          optionText: this.sanitizeText(option.optionText ?? ""),
           isCorrect: Boolean(option.isCorrect),
           displayOrder: option.optionIndex || optionIndex + 1,
         })),
@@ -307,7 +443,7 @@ export class LumaService {
         lessonId = await this.createGeneratedContentLesson(
           chapterId,
           lessonTitle,
-          lesson.content ?? "",
+          this.sanitizeText(lesson.content ?? ""),
           currentUser,
         );
       } else {
@@ -328,7 +464,7 @@ export class LumaService {
       lessonId = await this.createGeneratedContentLesson(
         chapterId,
         lessonTitle,
-        lesson.content ?? "",
+        this.sanitizeText(lesson.content ?? ""),
         currentUser,
       );
     }
@@ -385,12 +521,16 @@ export class LumaService {
     return this.adminLessonService.createLessonForChapter(
       {
         chapterId,
-        title,
-        description,
+        title: this.sanitizeText(title),
+        description: this.sanitizeText(description),
         type: LESSON_TYPES.CONTENT,
       },
       currentUser,
     );
+  }
+
+  private sanitizeText(value: string): string {
+    return value.replace(/\u0000/g, "");
   }
 
   private parseDataChunk(chunkString: string): unknown[] {
@@ -446,9 +586,9 @@ export class LumaService {
       case "DetailedResponse":
         return QUESTION_TYPE.DETAILED_RESPONSE;
       case "FillInTheBlanks":
-        return QUESTION_TYPE.FILL_IN_THE_BLANKS_TEXT;
-      case "GapFill":
         return QUESTION_TYPE.FILL_IN_THE_BLANKS_DND;
+      case "GapFill":
+        return QUESTION_TYPE.FILL_IN_THE_BLANKS_TEXT;
       case "BriefResponse":
       default:
         return QUESTION_TYPE.BRIEF_RESPONSE;
