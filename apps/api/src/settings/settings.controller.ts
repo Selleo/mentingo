@@ -228,7 +228,7 @@ export class SettingsController {
   }
 
   @Get("admin/registration-form")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @Validate({
     response: baseResponse(registrationFormResponseSchema),
   })
@@ -237,7 +237,7 @@ export class SettingsController {
   }
 
   @Patch("admin/registration-form")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @Validate({
     request: [{ type: "body", schema: updateRegistrationFormSchema }],
     response: baseResponse(registrationFormResponseSchema),
