@@ -2440,6 +2440,20 @@
     }
   },
   "richText": {
+    "uploadDisplayModeDialog": {
+      "title": "Wybierz sposób wyświetlania pliku",
+      "description": "Wybierz, jak plik „{{name}}” ma być widoczny dla studentów.",
+      "options": {
+        "preview": {
+          "title": "Podgląd",
+          "description": "Pokaż plik osadzony w treści, aby można było go od razu obejrzeć."
+        },
+        "download": {
+          "title": "Pobieranie",
+          "description": "Wstaw plik jako link do pobrania."
+        }
+      }
+    },
     "video": {
       "tooltip": {
         "bunnyMissing": "Wideo jest niedostępne. Sprawdź konfigurację Bunny CDN."
@@ -2459,6 +2473,12 @@
       "ariaLabel": {
         "drag": "Przeciągnij plik",
         "remove": "Usuń plik do pobrania"
+      }
+    },
+    "pdfPreview": {
+      "ariaLabel": {
+        "drag": "Przeciągnij podgląd PDF",
+        "remove": "Usuń podgląd PDF"
       }
     },
     "loadingAiAsset": {

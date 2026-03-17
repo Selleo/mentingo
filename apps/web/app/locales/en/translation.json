@@ -2414,6 +2414,20 @@
     }
   },
   "richText": {
+    "uploadDisplayModeDialog": {
+      "title": "Choose how to display this file",
+      "description": "Select how \"{{name}}\" should appear for students.",
+      "options": {
+        "preview": {
+          "title": "Preview",
+          "description": "Show file inline so students can view it directly."
+        },
+        "download": {
+          "title": "Download",
+          "description": "Insert as a downloadable file link."
+        }
+      }
+    },
     "video": {
       "tooltip": {
         "bunnyMissing": "Video is not available. Please check Bunny CDN configuration."
@@ -2433,6 +2447,12 @@
       "ariaLabel": {
         "drag": "Drag file",
         "remove": "Remove downloadable file"
+      }
+    },
+    "pdfPreview": {
+      "ariaLabel": {
+        "drag": "Drag PDF preview",
+        "remove": "Remove PDF preview"
       }
     },
     "loadingAiAsset": {

@@ -13,6 +13,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-use";
+import { match } from "ts-pattern";
 import { z } from "zod";
 
 import { useInitVideoUpload } from "~/api/mutations/admin/useInitVideoUpload";
@@ -25,6 +26,7 @@ import {
 } from "~/hooks/useEntityResourceUpload";
 import { useHandleImageUpload } from "~/hooks/useHandleImageUpload";
 import { useTusVideoUpload } from "~/hooks/useTusVideoUpload";
+import { useUploadDisplayModeDialog } from "~/hooks/useUploadDisplayModeDialog";
 
 import { usePreviewNews, useUpdateNews } from "../../api/mutations";
 import { useNews } from "../../api/queries";
@@ -105,6 +107,7 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
   const { toast } = useToast();
   const { mutateAsync: previewNews, isPending: isPreviewLoading } = usePreviewNews();
   const [previewContent, setPreviewContent] = useState("");
+  const { askForDisplayMode, dialog: uploadDisplayModeDialog } = useUploadDisplayModeDialog();
   const pageTitle = isEdit ? t("newsView.edit") : t("newsView.create");
   const breadcrumbs = [
     { title: t("navigationSideBar.news"), href: "/news" },
@@ -187,10 +190,11 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
 
     const isVideo = ALLOWED_VIDEO_FILE_TYPES.includes(file.type);
     const isPresentation = ALLOWED_PRESENTATION_FILE_TYPES.includes(file.type);
+    const isPdf = ALLOWED_PDF_FILE_TYPES.includes(file.type);
     const isDocument =
+      isPdf ||
       ALLOWED_EXCEL_FILE_TYPES.includes(file.type) ||
-      ALLOWED_WORD_FILE_TYPES.includes(file.type) ||
-      ALLOWED_PDF_FILE_TYPES.includes(file.type);
+      ALLOWED_WORD_FILE_TYPES.includes(file.type);
 
     if (isVideo) {
       try {
@@ -232,6 +236,14 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
       return;
     }
 
+    let displayMode: "preview" | "download" = "preview";
+
+    if (isPresentation || isPdf) {
+      const selectedMode = await askForDisplayMode(file.name);
+      if (!selectedMode) return;
+      displayMode = selectedMode;
+    }
+
     const resourceId = await uploadResource({
       file,
       entityType: ENTITY_TYPES.NEWS,
@@ -244,8 +256,12 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
       resourceId,
       entityType: ENTITY_TYPES.NEWS,
       file,
-      isPresentation,
-      isDocument,
+      resourceType: match({ isPresentation, isPdf, isDocument })
+        .with({ isPresentation: true }, () => "presentation" as const)
+        .with({ isPdf: true }, () => "pdf" as const)
+        .with({ isDocument: true }, () => "document" as const)
+        .otherwise(() => "other" as const),
+      displayMode: isPresentation || isDocument ? displayMode : "preview",
     });
   };
 
@@ -506,6 +522,7 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
           </Form>
         </div>
       </div>
+      {uploadDisplayModeDialog}
     </PageWrapper>
   );
 }

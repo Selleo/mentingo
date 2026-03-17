@@ -9,6 +9,7 @@ import {
 } from "@repo/shared";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { match } from "ts-pattern";
 
 import { useInitializeLessonContext } from "~/api/mutations/admin/useInitializeLessonContext";
 import { useInitVideoUpload } from "~/api/mutations/admin/useInitVideoUpload";
@@ -25,6 +26,7 @@ import {
   useEntityResourceUpload,
 } from "~/hooks/useEntityResourceUpload";
 import { useTusVideoUpload } from "~/hooks/useTusVideoUpload";
+import { useUploadDisplayModeDialog } from "~/hooks/useUploadDisplayModeDialog";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
 import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/components/MissingTranslationsAlert";
 
@@ -70,6 +72,7 @@ const ContentLessonForm = ({
 
   const { mutateAsync: initVideoUpload } = useInitVideoUpload();
   const { uploadResource } = useEntityResourceUpload();
+  const { askForDisplayMode, dialog: uploadDisplayModeDialog } = useUploadDisplayModeDialog();
   const { getSessionForFile, uploadVideo, isUploading, uploadProgress } = useTusVideoUpload();
 
   const onCloseModal = () => {
@@ -85,10 +88,11 @@ const ContentLessonForm = ({
 
     const isVideo = ALLOWED_VIDEO_FILE_TYPES.includes(file.type);
     const isPresentation = ALLOWED_PRESENTATION_FILE_TYPES.includes(file.type);
+    const isPdf = ALLOWED_PDF_FILE_TYPES.includes(file.type);
     const isDocument =
+      isPdf ||
       ALLOWED_EXCEL_FILE_TYPES.includes(file.type) ||
-      ALLOWED_WORD_FILE_TYPES.includes(file.type) ||
-      ALLOWED_PDF_FILE_TYPES.includes(file.type);
+      ALLOWED_WORD_FILE_TYPES.includes(file.type);
 
     if (isVideo) {
       try {
@@ -131,6 +135,14 @@ const ContentLessonForm = ({
       return;
     }
 
+    let displayMode: "preview" | "download" = "preview";
+
+    if (isPresentation || isPdf) {
+      const selectedMode = await askForDisplayMode(file.name);
+      if (!selectedMode) return;
+      displayMode = selectedMode;
+    }
+
     const resourceId = await uploadResource({
       file,
       entityType: ENTITY_TYPES.LESSON,
@@ -144,8 +156,12 @@ const ContentLessonForm = ({
       resourceId,
       entityType: ENTITY_TYPES.LESSON,
       file,
-      isPresentation,
-      isDocument,
+      resourceType: match({ isPresentation, isPdf, isDocument })
+        .with({ isPresentation: true }, () => "presentation" as const)
+        .with({ isPdf: true }, () => "pdf" as const)
+        .with({ isDocument: true }, () => "document" as const)
+        .otherwise(() => "other" as const),
+      displayMode: isPresentation || isDocument ? displayMode : "preview",
     });
   };
 
@@ -259,6 +275,7 @@ const ContentLessonForm = ({
         onDelete={onDelete}
         contentType={DeleteContentType.CONTENT}
       />
+      {uploadDisplayModeDialog}
     </div>
   );
 };

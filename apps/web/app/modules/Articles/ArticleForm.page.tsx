@@ -13,6 +13,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { match } from "ts-pattern";
 import { z } from "zod";
 
 import { useAddArticleLanguage } from "~/api/mutations/admin/useAddArticleLanguage";
@@ -39,6 +40,7 @@ import {
 } from "~/hooks/useEntityResourceUpload";
 import { useHandleImageUpload } from "~/hooks/useHandleImageUpload";
 import { useTusVideoUpload } from "~/hooks/useTusVideoUpload";
+import { useUploadDisplayModeDialog } from "~/hooks/useUploadDisplayModeDialog";
 import { LanguageSelector } from "~/modules/Articles/LanguageSelector";
 import { filterChangedData } from "~/utils/filterChangedData";
 
@@ -94,6 +96,7 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
   const { mutateAsync: previewArticle, isPending: isPreviewLoading } = usePreviewArticle();
   const [previewContent, setPreviewContent] = useState("");
   const { getSessionForFile, uploadVideo, isUploading, uploadProgress } = useTusVideoUpload();
+  const { askForDisplayMode, dialog: uploadDisplayModeDialog } = useUploadDisplayModeDialog();
 
   const pageTitle = t("adminArticleView.form.editTitle");
 
@@ -233,10 +236,19 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
     }
 
     const isPresentation = ALLOWED_PRESENTATION_FILE_TYPES.includes(file.type);
+    const isPdf = ALLOWED_PDF_FILE_TYPES.includes(file.type);
     const isDocument =
+      isPdf ||
       ALLOWED_EXCEL_FILE_TYPES.includes(file.type) ||
-      ALLOWED_WORD_FILE_TYPES.includes(file.type) ||
-      ALLOWED_PDF_FILE_TYPES.includes(file.type);
+      ALLOWED_WORD_FILE_TYPES.includes(file.type);
+
+    let displayMode: "preview" | "download" = "preview";
+
+    if (isPresentation || isPdf) {
+      const selectedMode = await askForDisplayMode(file.name);
+      if (!selectedMode) return;
+      displayMode = selectedMode;
+    }
 
     const resourceId = await uploadResource({
       file,
@@ -250,8 +262,12 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
       resourceId,
       entityType: ENTITY_TYPES.ARTICLES,
       file,
-      isPresentation,
-      isDocument,
+      resourceType: match({ isPresentation, isPdf, isDocument })
+        .with({ isPresentation: true }, () => "presentation" as const)
+        .with({ isPdf: true }, () => "pdf" as const)
+        .with({ isDocument: true }, () => "document" as const)
+        .otherwise(() => "other" as const),
+      displayMode: isPresentation || isDocument ? displayMode : "preview",
     });
   };
 
@@ -457,6 +473,7 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
           </Form>
         </div>
       </div>
+      {uploadDisplayModeDialog}
     </PageWrapper>
   );
 }
