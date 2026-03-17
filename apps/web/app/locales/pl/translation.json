@@ -2479,7 +2479,12 @@
       "ariaLabel": {
         "drag": "Przeciągnij podgląd PDF",
         "remove": "Usuń podgląd PDF"
-      }
+      },
+      "loading": "Ładowanie podglądu...",
+      "openFile": "Otwórz plik",
+      "showingPage": "Strona {{page}} z {{total}}",
+      "previous": "Poprzednia",
+      "next": "Następna"
     },
     "loadingAiAsset": {
       "processing": "Zasób jest obecnie przetwarzany"

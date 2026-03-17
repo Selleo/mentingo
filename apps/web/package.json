@@ -114,6 +114,7 @@
     "react-hook-form": "7.52.1",
     "react-i18next": "^15.4.0",
     "react-markdown": "^10.1.0",
+    "react-pdf": "10.4.1",
     "react-player": "2.16.0",
     "react-popper": "2.3.0",
     "react-syntax-highlighter": "15.6.6",

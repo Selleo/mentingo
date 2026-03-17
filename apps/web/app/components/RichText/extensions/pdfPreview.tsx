@@ -1,12 +1,15 @@
 import { Node, mergeAttributes } from "@tiptap/core";
 import { NodeViewWrapper, ReactNodeViewRenderer } from "@tiptap/react";
-import { FileText, GripVertical, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, FileText, GripVertical, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
 
 import type { NodeConfig } from "@tiptap/core";
 import type { NodeViewProps } from "@tiptap/react";
+
+type ReactPdfModule = typeof import("react-pdf");
 
 type PdfPreviewAttrs = {
   src: string | null;
@@ -54,7 +57,7 @@ const PdfPreviewEditorView = ({ node, editor, getPos }: NodeViewProps) => {
   };
 
   return (
-    <NodeViewWrapper className="pdf-preview-node">
+    <NodeViewWrapper className="pdf-preview-node block w-full">
       <div className="inline-flex max-w-full items-center gap-2 rounded border border-dashed border-neutral-300 bg-neutral-50 px-3 py-2 text-sm text-primary-700">
         <Button
           type="button"
@@ -92,17 +95,143 @@ const PdfPreviewEditorView = ({ node, editor, getPos }: NodeViewProps) => {
 };
 
 const PdfPreviewViewerView = ({ node }: NodeViewProps) => {
+  const { t } = useTranslation();
   const attrs = normalizePdfPreviewAttrs(node.attrs);
+  const [pageCount, setPageCount] = useState<number | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [reactPdf, setReactPdf] = useState<ReactPdfModule | null>(null);
+  const [viewerWidth, setViewerWidth] = useState<number | null>(null);
+  const viewerContainerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!attrs.src) return;
+
+    const canRenderPdf = typeof window !== "undefined" && typeof DOMMatrix !== "undefined";
+    if (!canRenderPdf) return;
+
+    let isMounted = true;
+
+    void import("react-pdf")
+      .then((module) => {
+        if (!isMounted) return;
+
+        module.pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${module.pdfjs.version}/build/pdf.worker.min.mjs`;
+
+        setReactPdf(module);
+      })
+      .catch(() => setReactPdf(null));
+
+    return () => {
+      isMounted = false;
+    };
+  }, [attrs.src]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+    setPageCount(null);
+  }, [attrs.src]);
+
+  useEffect(() => {
+    if (!viewerContainerRef.current) return;
+
+    const element = viewerContainerRef.current;
+    const updateWidth = () => {
+      setViewerWidth(Math.floor(element.clientWidth));
+    };
+
+    updateWidth();
+
+    const observer = new ResizeObserver(updateWidth);
+    observer.observe(element);
+
+    return () => observer.disconnect();
+  }, []);
 
   if (!attrs.src) return null;
 
+  if (!reactPdf) {
+    return (
+      <NodeViewWrapper className="pdf-preview-node block w-full">
+        <div className="w-full rounded-md border p-2">
+          <a
+            href={attrs.src}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-4 text-sm text-primary-700 underline"
+          >
+            {t("richText.pdfPreview.openFile")}
+          </a>
+        </div>
+      </NodeViewWrapper>
+    );
+  }
+
+  const { Document, Page } = reactPdf;
+
   return (
-    <NodeViewWrapper className="pdf-preview-node">
-      <iframe
-        title={attrs.name ?? "PDF Preview"}
-        src={attrs.src}
-        className="h-[640px] w-full rounded-md border"
-      />
+    <NodeViewWrapper className="pdf-preview-node block w-full">
+      <div ref={viewerContainerRef} className="w-full rounded-md border p-2">
+        <Document
+          className="w-full"
+          file={attrs.src}
+          onLoadSuccess={({ numPages }: { numPages: number }) => {
+            setPageCount(numPages);
+            setCurrentPage((prev) => Math.min(Math.max(prev, 1), numPages));
+          }}
+          loading={
+            <div className="p-4 text-sm text-neutral-600">{t("richText.pdfPreview.loading")}</div>
+          }
+          error={
+            <a
+              href={attrs.src}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-4 text-sm text-primary-700 underline"
+            >
+              {t("richText.pdfPreview.openFile")}
+            </a>
+          }
+        >
+          <Page
+            pageNumber={currentPage}
+            width={viewerWidth ?? undefined}
+            className="[&>canvas]:!h-auto [&>canvas]:!w-full"
+            renderAnnotationLayer={false}
+            renderTextLayer={false}
+          />
+        </Document>
+        {pageCount && (
+          <div className="mt-2 flex items-center justify-between gap-2">
+            <div className="text-xs text-neutral-600">
+              {t("richText.pdfPreview.showingPage", { page: currentPage, total: pageCount })}
+            </div>
+            {pageCount > 1 && (
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="inline-flex items-center gap-1"
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={currentPage <= 1}
+                >
+                  <ChevronLeft className="size-3.5" aria-hidden />
+                  {t("richText.pdfPreview.previous")}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="inline-flex items-center gap-1"
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, pageCount))}
+                  disabled={currentPage >= pageCount}
+                >
+                  {t("richText.pdfPreview.next")}
+                  <ChevronRight className="size-3.5" aria-hidden />
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </NodeViewWrapper>
   );
 };

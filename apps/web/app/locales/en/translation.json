@@ -2453,7 +2453,12 @@
       "ariaLabel": {
         "drag": "Drag PDF preview",
         "remove": "Remove PDF preview"
-      }
+      },
+      "loading": "Loading preview...",
+      "openFile": "Open file",
+      "showingPage": "Showing page {{page}} of {{total}}",
+      "previous": "Previous",
+      "next": "Next"
     },
     "loadingAiAsset": {
       "processing": "Resource is currently processing"
