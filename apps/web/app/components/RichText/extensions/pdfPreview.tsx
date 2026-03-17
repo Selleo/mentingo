@@ -1,7 +1,7 @@
 import { Node, mergeAttributes } from "@tiptap/core";
 import { NodeViewWrapper, ReactNodeViewRenderer } from "@tiptap/react";
 import { ChevronLeft, ChevronRight, FileText, GripVertical, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
@@ -14,6 +14,74 @@ type ReactPdfModule = typeof import("react-pdf");
 type PdfPreviewAttrs = {
   src: string | null;
   name: string | null;
+};
+
+type PdfViewerState = {
+  pageCount: number | null;
+  currentPage: number;
+  visiblePage: number;
+  isPageRendering: boolean;
+};
+
+const PDF_VIEWER_ACTION = {
+  RESET: "reset",
+  DOCUMENT_LOADED: "documentLoaded",
+  REQUEST_PAGE_CHANGE: "requestPageChange",
+  PRELOAD_SUCCESS: "preloadSuccess",
+  PRELOAD_ERROR: "preloadError",
+} as const;
+
+type PdfViewerAction =
+  | { type: (typeof PDF_VIEWER_ACTION)["RESET"] }
+  | { type: (typeof PDF_VIEWER_ACTION)["DOCUMENT_LOADED"]; pageCount: number }
+  | { type: (typeof PDF_VIEWER_ACTION)["REQUEST_PAGE_CHANGE"]; nextPage: number }
+  | { type: (typeof PDF_VIEWER_ACTION)["PRELOAD_SUCCESS"] }
+  | { type: (typeof PDF_VIEWER_ACTION)["PRELOAD_ERROR"] };
+
+const initialPdfViewerState: PdfViewerState = {
+  pageCount: null,
+  currentPage: 1,
+  visiblePage: 1,
+  isPageRendering: false,
+};
+
+const pdfViewerReducer = (state: PdfViewerState, action: PdfViewerAction): PdfViewerState => {
+  switch (action.type) {
+    case PDF_VIEWER_ACTION.RESET:
+      return initialPdfViewerState;
+    case PDF_VIEWER_ACTION.DOCUMENT_LOADED: {
+      const normalizedPage = Math.min(Math.max(state.currentPage, 1), action.pageCount);
+      return {
+        pageCount: action.pageCount,
+        currentPage: normalizedPage,
+        visiblePage: normalizedPage,
+        isPageRendering: false,
+      };
+    }
+    case PDF_VIEWER_ACTION.REQUEST_PAGE_CHANGE:
+      if (action.nextPage === state.visiblePage) {
+        return state;
+      }
+      return {
+        ...state,
+        currentPage: action.nextPage,
+        isPageRendering: true,
+      };
+    case PDF_VIEWER_ACTION.PRELOAD_SUCCESS:
+      return {
+        ...state,
+        visiblePage: state.currentPage,
+        isPageRendering: false,
+      };
+    case PDF_VIEWER_ACTION.PRELOAD_ERROR:
+      return {
+        ...state,
+        currentPage: state.visiblePage,
+        isPageRendering: false,
+      };
+    default:
+      return state;
+  }
 };
 
 declare module "@tiptap/core" {
@@ -97,10 +165,11 @@ const PdfPreviewEditorView = ({ node, editor, getPos }: NodeViewProps) => {
 const PdfPreviewViewerView = ({ node }: NodeViewProps) => {
   const { t } = useTranslation();
   const attrs = normalizePdfPreviewAttrs(node.attrs);
-  const [pageCount, setPageCount] = useState<number | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [visiblePage, setVisiblePage] = useState(1);
-  const [isPageRendering, setIsPageRendering] = useState(false);
+  const [{ pageCount, currentPage, visiblePage, isPageRendering }, dispatch] = useReducer(
+    pdfViewerReducer,
+    initialPdfViewerState,
+  );
+
   const [reactPdf, setReactPdf] = useState<ReactPdfModule | null>(null);
   const [viewerWidth, setViewerWidth] = useState<number | null>(null);
   const viewerContainerRef = useRef<HTMLDivElement | null>(null);
@@ -129,10 +198,7 @@ const PdfPreviewViewerView = ({ node }: NodeViewProps) => {
   }, [attrs.src]);
 
   useEffect(() => {
-    setCurrentPage(1);
-    setVisiblePage(1);
-    setIsPageRendering(false);
-    setPageCount(null);
+    dispatch({ type: PDF_VIEWER_ACTION.RESET });
   }, [attrs.src]);
 
   useEffect(() => {
@@ -182,11 +248,7 @@ const PdfPreviewViewerView = ({ node }: NodeViewProps) => {
           className="w-full"
           file={attrs.src}
           onLoadSuccess={({ numPages }: { numPages: number }) => {
-            setPageCount(numPages);
-            const normalizedPage = Math.min(Math.max(currentPage, 1), numPages);
-            setCurrentPage(normalizedPage);
-            setVisiblePage(normalizedPage);
-            setIsPageRendering(false);
+            dispatch({ type: PDF_VIEWER_ACTION.DOCUMENT_LOADED, pageCount: numPages });
           }}
           loading={
             <div className="p-4 text-sm text-neutral-600">{t("richText.pdfPreview.loading")}</div>
@@ -218,14 +280,8 @@ const PdfPreviewViewerView = ({ node }: NodeViewProps) => {
                   className="[&>canvas]:!h-auto [&>canvas]:!w-full"
                   renderAnnotationLayer={false}
                   renderTextLayer={false}
-                  onRenderSuccess={() => {
-                    setVisiblePage(currentPage);
-                    setIsPageRendering(false);
-                  }}
-                  onRenderError={() => {
-                    setCurrentPage(visiblePage);
-                    setIsPageRendering(false);
-                  }}
+                  onRenderSuccess={() => dispatch({ type: PDF_VIEWER_ACTION.PRELOAD_SUCCESS })}
+                  onRenderError={() => dispatch({ type: PDF_VIEWER_ACTION.PRELOAD_ERROR })}
                 />
               </div>
             )}
@@ -244,9 +300,7 @@ const PdfPreviewViewerView = ({ node }: NodeViewProps) => {
                   className="inline-flex items-center gap-1"
                   onClick={() => {
                     const nextPage = Math.max(currentPage - 1, 1);
-                    if (nextPage === visiblePage) return;
-                    setCurrentPage(nextPage);
-                    setIsPageRendering(true);
+                    dispatch({ type: PDF_VIEWER_ACTION.REQUEST_PAGE_CHANGE, nextPage });
                   }}
                   disabled={currentPage <= 1 || isPageRendering}
                 >
@@ -259,9 +313,7 @@ const PdfPreviewViewerView = ({ node }: NodeViewProps) => {
                   className="inline-flex items-center gap-1"
                   onClick={() => {
                     const nextPage = Math.min(currentPage + 1, pageCount);
-                    if (nextPage === visiblePage) return;
-                    setCurrentPage(nextPage);
-                    setIsPageRendering(true);
+                    dispatch({ type: PDF_VIEWER_ACTION.REQUEST_PAGE_CHANGE, nextPage });
                   }}
                   disabled={currentPage >= pageCount || isPageRendering}
                 >
