@@ -18,6 +18,10 @@ import {
   LoadingAiAssetViewer,
 } from "~/components/RichText/extensions/loading-ai-asset";
 import {
+  PdfPreviewEmbedEditor,
+  PdfPreviewEmbedViewer,
+} from "~/components/RichText/extensions/pdfPreview";
+import {
   PresentationEmbedEditor,
   PresentationEmbedViewer,
 } from "~/components/RichText/extensions/presentation";
@@ -100,6 +104,7 @@ export const contentEditorPlugins = [
   }),
   DownloadableFileEmbedEditor,
   LoadingAiAssetEditor,
+  PdfPreviewEmbedEditor,
   PresentationEmbedEditor,
   VideoEmbedEditor,
 ];
@@ -108,6 +113,7 @@ export const viewerPlugins = [
   ...basePlugins,
   DownloadableFileEmbedViewer,
   LoadingAiAssetViewer,
+  PdfPreviewEmbedViewer,
   PresentationEmbedViewer,
   VideoEmbedViewer,
 ];

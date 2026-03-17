@@ -18,13 +18,16 @@ type UploadResourceArgs = {
   description?: string;
 };
 
+export type RichTextResourceType = "presentation" | "pdf" | "document" | "other";
+export type RichTextResourceDisplayMode = "preview" | "download";
+
 type InsertResourceArgs = {
   editor?: TiptapEditor | null;
   resourceId: string;
   entityType: EntityType;
   file: File;
-  isPresentation?: boolean;
-  isDocument?: boolean;
+  resourceType?: RichTextResourceType;
+  displayMode?: RichTextResourceDisplayMode;
 };
 
 export const buildEntityResourceUrl = (resourceId: string, entityType: EntityType) => {
@@ -45,18 +48,48 @@ export const insertResourceIntoEditor = ({
   resourceId,
   entityType,
   file,
-  isPresentation = false,
-  isDocument = false,
+  resourceType = "other",
+  displayMode = "preview",
 }: InsertResourceArgs) => {
   const resourceUrl = buildEntityResourceUrl(resourceId, entityType);
   const chain = editor?.chain().insertContent("<br />");
 
-  if (isPresentation) {
+  if (resourceType === "presentation") {
+    if (displayMode === "download") {
+      chain
+        ?.setDownloadableFile({
+          src: resourceUrl,
+          name: file.name,
+        })
+        .run();
+      return;
+    }
+
     chain?.setPresentationEmbed({ src: resourceUrl, sourceType: "internal" }).run();
     return;
   }
 
-  if (isDocument) {
+  if (resourceType === "pdf") {
+    if (displayMode === "preview") {
+      chain
+        ?.setPdfPreviewEmbed({
+          src: resourceUrl,
+          name: file.name,
+        })
+        .run();
+      return;
+    }
+
+    chain
+      ?.setDownloadableFile({
+        src: resourceUrl,
+        name: file.name,
+      })
+      .run();
+    return;
+  }
+
+  if (resourceType === "document") {
     chain
       ?.setDownloadableFile({
         src: resourceUrl,
