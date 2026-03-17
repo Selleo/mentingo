@@ -1,3 +1,21 @@
+<a name="v4.6.0"></a>
+
+## [v4.6.0] - 17.03.2026
+
+### Features:
+
+- add option to preview pdf files in lesson content ([#1363](https://github.com/Selleo/mentingo/issues/1363))
+
+- implemented embedding resources to ai course generation ([#1344](https://github.com/Selleo/mentingo/issues/1344))
+
+- implement customizable registration form builder for admins ([#1356](https://github.com/Selleo/mentingo/issues/1356))
+
+- enable admins and content creators to complete courses ([#1340](https://github.com/Selleo/mentingo/issues/1340))
+
+### Bug Fixes:
+
+- video player not working on Firefox ([#1355](https://github.com/Selleo/mentingo/issues/1355))
+
 <a name="v4.5.1"></a>
 
 ## [v4.5.1] - 10.03.2026
@@ -7,6 +25,10 @@
 - improve loading speed by caching platform logos, certificate backgrounds, and login screen images ([#1345](https://github.com/Selleo/mentingo/issues/1345))
 
 - update workflow with new environment variables ([#1339](https://github.com/Selleo/mentingo/issues/1339))
+
+### Documentation:
+
+- update changelog for version v4.5.1
 
 <a name="v4.5.0"></a>
 
@@ -2502,7 +2524,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.5.1...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.6.0...HEAD
+[v4.6.0]: https://github.com/Selleo/mentingo/compare/v4.5.1...v4.6.0
 [v4.5.1]: https://github.com/Selleo/mentingo/compare/v4.5.0...v4.5.1
 [v4.5.0]: https://github.com/Selleo/mentingo/compare/v4.4.0...v4.5.0
 [v4.4.0]: https://github.com/Selleo/mentingo/compare/v4.3.0...v4.4.0
