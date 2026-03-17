@@ -99,6 +99,8 @@ const PdfPreviewViewerView = ({ node }: NodeViewProps) => {
   const attrs = normalizePdfPreviewAttrs(node.attrs);
   const [pageCount, setPageCount] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [visiblePage, setVisiblePage] = useState(1);
+  const [isPageRendering, setIsPageRendering] = useState(false);
   const [reactPdf, setReactPdf] = useState<ReactPdfModule | null>(null);
   const [viewerWidth, setViewerWidth] = useState<number | null>(null);
   const viewerContainerRef = useRef<HTMLDivElement | null>(null);
@@ -128,6 +130,8 @@ const PdfPreviewViewerView = ({ node }: NodeViewProps) => {
 
   useEffect(() => {
     setCurrentPage(1);
+    setVisiblePage(1);
+    setIsPageRendering(false);
     setPageCount(null);
   }, [attrs.src]);
 
@@ -148,8 +152,10 @@ const PdfPreviewViewerView = ({ node }: NodeViewProps) => {
   }, []);
 
   if (!attrs.src) return null;
+  const canRenderPdf =
+    typeof window !== "undefined" && typeof DOMMatrix !== "undefined" && reactPdf !== null;
 
-  if (!reactPdf) {
+  if (!canRenderPdf) {
     return (
       <NodeViewWrapper className="pdf-preview-node block w-full">
         <div className="w-full rounded-md border p-2">
@@ -167,6 +173,7 @@ const PdfPreviewViewerView = ({ node }: NodeViewProps) => {
   }
 
   const { Document, Page } = reactPdf;
+  const isPreloadingNextPage = currentPage !== visiblePage;
 
   return (
     <NodeViewWrapper className="pdf-preview-node block w-full">
@@ -176,7 +183,10 @@ const PdfPreviewViewerView = ({ node }: NodeViewProps) => {
           file={attrs.src}
           onLoadSuccess={({ numPages }: { numPages: number }) => {
             setPageCount(numPages);
-            setCurrentPage((prev) => Math.min(Math.max(prev, 1), numPages));
+            const normalizedPage = Math.min(Math.max(currentPage, 1), numPages);
+            setCurrentPage(normalizedPage);
+            setVisiblePage(normalizedPage);
+            setIsPageRendering(false);
           }}
           loading={
             <div className="p-4 text-sm text-neutral-600">{t("richText.pdfPreview.loading")}</div>
@@ -192,18 +202,39 @@ const PdfPreviewViewerView = ({ node }: NodeViewProps) => {
             </a>
           }
         >
-          <Page
-            pageNumber={currentPage}
-            width={viewerWidth ?? undefined}
-            className="[&>canvas]:!h-auto [&>canvas]:!w-full"
-            renderAnnotationLayer={false}
-            renderTextLayer={false}
-          />
+          <div className="relative">
+            <Page
+              pageNumber={visiblePage}
+              width={viewerWidth ?? undefined}
+              className="[&>canvas]:!h-auto [&>canvas]:!w-full"
+              renderAnnotationLayer={false}
+              renderTextLayer={false}
+            />
+            {isPreloadingNextPage && (
+              <div className="pointer-events-none absolute inset-0 opacity-0">
+                <Page
+                  pageNumber={currentPage}
+                  width={viewerWidth ?? undefined}
+                  className="[&>canvas]:!h-auto [&>canvas]:!w-full"
+                  renderAnnotationLayer={false}
+                  renderTextLayer={false}
+                  onRenderSuccess={() => {
+                    setVisiblePage(currentPage);
+                    setIsPageRendering(false);
+                  }}
+                  onRenderError={() => {
+                    setCurrentPage(visiblePage);
+                    setIsPageRendering(false);
+                  }}
+                />
+              </div>
+            )}
+          </div>
         </Document>
         {pageCount && (
           <div className="mt-2 flex items-center justify-between gap-2">
             <div className="text-xs text-neutral-600">
-              {t("richText.pdfPreview.showingPage", { page: currentPage, total: pageCount })}
+              {t("richText.pdfPreview.showingPage", { page: visiblePage, total: pageCount })}
             </div>
             {pageCount > 1 && (
               <div className="flex items-center gap-2">
@@ -211,8 +242,13 @@ const PdfPreviewViewerView = ({ node }: NodeViewProps) => {
                   type="button"
                   variant="outline"
                   className="inline-flex items-center gap-1"
-                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                  disabled={currentPage <= 1}
+                  onClick={() => {
+                    const nextPage = Math.max(currentPage - 1, 1);
+                    if (nextPage === visiblePage) return;
+                    setCurrentPage(nextPage);
+                    setIsPageRendering(true);
+                  }}
+                  disabled={currentPage <= 1 || isPageRendering}
                 >
                   <ChevronLeft className="size-3.5" aria-hidden />
                   {t("richText.pdfPreview.previous")}
@@ -221,8 +257,13 @@ const PdfPreviewViewerView = ({ node }: NodeViewProps) => {
                   type="button"
                   variant="outline"
                   className="inline-flex items-center gap-1"
-                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, pageCount))}
-                  disabled={currentPage >= pageCount}
+                  onClick={() => {
+                    const nextPage = Math.min(currentPage + 1, pageCount);
+                    if (nextPage === visiblePage) return;
+                    setCurrentPage(nextPage);
+                    setIsPageRendering(true);
+                  }}
+                  disabled={currentPage >= pageCount || isPageRendering}
                 >
                   {t("richText.pdfPreview.next")}
                   <ChevronRight className="size-3.5" aria-hidden />
