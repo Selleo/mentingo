@@ -23,6 +23,7 @@ import { isEqual } from "lodash";
 import { DatabasePg } from "src/common";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { hasPermission } from "src/common/permissions/permission.utils";
 import { CourseService } from "src/courses/course.service";
 import {
   CreateGroupEvent,
@@ -32,16 +33,8 @@ import {
 } from "src/events";
 import { GroupSortFields } from "src/group/group.schema";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
-import {
-  groupCourses,
-  groups,
-  groupUsers,
-  permissionRoleRuleSets,
-  permissionRuleSetPermissions,
-  permissionUserRoles,
-  studentCourses,
-  users,
-} from "src/storage/schema";
+import { PermissionsService } from "src/permissions/permissions.service";
+import { groupCourses, groups, groupUsers, studentCourses, users } from "src/storage/schema";
 
 import type { SQL } from "drizzle-orm";
 import type { GroupActivityLogSnapshot } from "src/activity-logs/types";
@@ -62,6 +55,7 @@ export class GroupService {
     @Inject("DB") private readonly db: DatabasePg,
     @Inject(forwardRef(() => CourseService)) private readonly courseService: CourseService,
     private readonly outboxPublisher: OutboxPublisher,
+    private readonly permissionsService: PermissionsService,
   ) {}
 
   public async getAllGroups(
@@ -287,28 +281,12 @@ export class GroupService {
         throw new NotFoundException("User not found");
       }
 
-      const userPermissionRows = await trx
-        .select({ permission: permissionRuleSetPermissions.permission })
-        .from(permissionUserRoles)
-        .innerJoin(
-          permissionRoleRuleSets,
-          and(
-            eq(permissionRoleRuleSets.roleId, permissionUserRoles.roleId),
-            eq(permissionRoleRuleSets.tenantId, permissionUserRoles.tenantId),
-          ),
-        )
-        .innerJoin(
-          permissionRuleSetPermissions,
-          and(
-            eq(permissionRuleSetPermissions.ruleSetId, permissionRoleRuleSets.ruleSetId),
-            eq(permissionRuleSetPermissions.tenantId, permissionRoleRuleSets.tenantId),
-          ),
-        )
-        .where(eq(permissionUserRoles.userId, userId));
+      const { permissions: userPermissions } = await this.permissionsService.getUserAccess(
+        userId,
+        trx,
+      );
 
-      const userPermissions = new Set(userPermissionRows.map(({ permission }) => permission));
-
-      const canManageCourseEnrollment = userPermissions.has(PERMISSIONS.COURSE_ENROLLMENT);
+      const canManageUsers = hasPermission(userPermissions, PERMISSIONS.USER_MANAGE);
 
       const currentUserGroups = await trx
         .select({ groupId: groupUsers.groupId })
@@ -320,7 +298,7 @@ export class GroupService {
 
       await trx.delete(groupUsers).where(eq(groupUsers.userId, userId));
 
-      if (removedGroupIds.length && !canManageCourseEnrollment) {
+      if (removedGroupIds.length && !canManageUsers) {
         await trx
           .update(studentCourses)
           .set({
@@ -352,7 +330,7 @@ export class GroupService {
         await trx.insert(groupUsers).values(groupsToAssign);
         assignedGroupIds = groupsToAssign.map(({ groupId }) => groupId);
 
-        if (!canManageCourseEnrollment) {
+        if (!canManageUsers) {
           await Promise.all(
             groupsToAssign.map(({ groupId }) =>
               this.enrollUserToCoursesInGroup(groupId, userId, trx),

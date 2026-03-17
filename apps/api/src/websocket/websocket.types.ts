@@ -1,3 +1,4 @@
+import type { PermissionKey } from "@repo/shared";
 import type { Socket } from "socket.io";
 
 export interface HeartbeatPayload {
@@ -20,7 +21,7 @@ export interface WsUser {
   userId: string;
   email: string;
   roleSlugs: string[];
-  permissions: string[];
+  permissions: PermissionKey[];
   tenantId: string;
 }
 

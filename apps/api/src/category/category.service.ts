@@ -12,6 +12,7 @@ import { isEqual } from "lodash";
 import { DatabasePg } from "src/common";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { hasPermission } from "src/common/permissions/permission.utils";
 import { CreateCategoryEvent, DeleteCategoryEvent, UpdateCategoryEvent } from "src/events";
 import { LocalizationService } from "src/localization/localization.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
@@ -55,7 +56,7 @@ export class CategoryService {
 
     const { sortOrder, sortedField } = getSortOptions(sort);
 
-    const canManageCategories = Boolean(userPermissions?.includes(PERMISSIONS.CATEGORY_MANAGE));
+    const canManageCategories = hasPermission(userPermissions, PERMISSIONS.CATEGORY_MANAGE);
 
     const selectedColumns = {
       id: categories.id,

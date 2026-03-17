@@ -16,7 +16,7 @@ export class StudentLessonProgressController {
   constructor(private readonly studentLessonProgressService: StudentLessonProgressService) {}
 
   @Post()
-  @RequirePermission(PERMISSIONS.LEARNING_PROGRESS_UPDATE)
+  @RequirePermission(PERMISSIONS.LEARNING_PROGRESS_UPDATE, PERMISSIONS.LEARNING_MODE_USE)
   @Validate({
     request: [
       { type: "query", name: "id", schema: UUIDSchema, required: true },

@@ -15,6 +15,7 @@ import { getTableColumns, sql } from "drizzle-orm";
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { DatabasePg } from "src/common";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
+import { hasPermission } from "src/common/permissions/permission.utils";
 import { annotateVideoAutoplayAndBlockIndexesInContent } from "src/common/utils/annotateVideoAutoplayAndBlockIndexesInContent";
 import { MasterCourseService } from "src/courses/master-course.service";
 import { CreateLessonEvent, DeleteLessonEvent, UpdateLessonEvent } from "src/events";
@@ -1179,10 +1180,19 @@ export class AdminLessonService {
 
     if (!course) throw new NotFoundException("Course not found");
 
+    const canManageCourseContent = hasPermission(
+      currentUser.permissions,
+      PERMISSIONS.COURSE_UPDATE,
+    );
+
+    const canManageOwnCourseContent = hasPermission(
+      currentUser.permissions,
+      PERMISSIONS.COURSE_UPDATE_OWN,
+    );
+
     const hasAccess =
-      currentUser.permissions.includes(PERMISSIONS.COURSE_UPDATE) ||
-      (currentUser.permissions.includes(PERMISSIONS.COURSE_UPDATE_OWN) &&
-        course.authorId === currentUser.userId);
+      canManageCourseContent ||
+      (canManageOwnCourseContent && course.authorId === currentUser.userId);
 
     if (throwOnNoAccess && !hasAccess) {
       throw new ForbiddenException({ message: "common.toast.noAccess" });

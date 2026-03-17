@@ -22,6 +22,7 @@ import { and, eq, getTableColumns, isNull, sql } from "drizzle-orm";
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { DatabasePg } from "src/common";
 import { setJsonbField } from "src/common/helpers/sqlHelpers";
+import { hasPermission } from "src/common/permissions/permission.utils";
 import { S3Service } from "src/s3/s3.service";
 import {
   articles,
@@ -154,21 +155,21 @@ export class ThumbnailService {
     if (!currentUser) return false;
 
     return (
-      currentUser.permissions.includes(PERMISSIONS.ARTICLE_MANAGE) ||
-      currentUser.permissions.includes(PERMISSIONS.NEWS_MANAGE)
+      hasPermission(currentUser.permissions, PERMISSIONS.ARTICLE_MANAGE) ||
+      hasPermission(currentUser.permissions, PERMISSIONS.NEWS_MANAGE)
     );
   }
 
   private canManageOwnArticle(currentUser: CurrentUser | null) {
-    return Boolean(currentUser?.permissions.includes(PERMISSIONS.ARTICLE_MANAGE_OWN));
+    return hasPermission(currentUser?.permissions, PERMISSIONS.ARTICLE_MANAGE_OWN);
   }
 
   private canManageOwnNews(currentUser: CurrentUser | null) {
-    return Boolean(currentUser?.permissions.includes(PERMISSIONS.NEWS_MANAGE_OWN));
+    return hasPermission(currentUser?.permissions, PERMISSIONS.NEWS_MANAGE_OWN);
   }
 
   private canManageOwnCourse(currentUser: CurrentUser | null) {
-    return Boolean(currentUser?.permissions.includes(PERMISSIONS.COURSE_UPDATE_OWN));
+    return hasPermission(currentUser?.permissions, PERMISSIONS.COURSE_UPDATE_OWN);
   }
 
   private async validateArticleThumbnailAccess(
@@ -283,17 +284,14 @@ export class ThumbnailService {
           lessonAccess.chapterAuthorId === currentUserId),
     );
 
-    const canManageCourseContent = Boolean(
-      currentUser?.permissions.includes(PERMISSIONS.COURSE_UPDATE),
+    const canManageCourseContent = hasPermission(
+      currentUser?.permissions,
+      PERMISSIONS.COURSE_UPDATE,
     );
 
-    if (canManageCourseContent || isAuthor) {
-      return;
-    }
+    if (canManageCourseContent || isAuthor) return;
 
-    if (lessonAccess.isFreemium) {
-      return;
-    }
+    if (lessonAccess.isFreemium) return;
 
     if (!lessonAccess.isAssigned) {
       throw new ForbiddenException("You are not allowed to access this lesson!");

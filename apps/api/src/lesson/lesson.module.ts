@@ -6,6 +6,7 @@ import { FileModule } from "src/file/files.module";
 import { IngestionModule } from "src/ingestion/ingestion.module";
 import { LocalizationModule } from "src/localization/localization.module";
 import { LocalizationService } from "src/localization/localization.service";
+import { PermissionsModule } from "src/permissions/permissions.module";
 import { QuestionsModule } from "src/questions/question.module";
 import { StudentLessonProgressModule } from "src/studentLessonProgress/studentLessonProgress.module";
 
@@ -23,6 +24,7 @@ import { LessonService } from "./services/lesson.service";
     AiModule,
     IngestionModule,
     LocalizationModule,
+    PermissionsModule,
     forwardRef(() => CourseModule),
   ],
   controllers: [LessonController],

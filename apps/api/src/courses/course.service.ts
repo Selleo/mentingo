@@ -40,7 +40,7 @@ import { EmailService } from "src/common/emails/emails.service";
 import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterConditions";
 import { buildJsonbField, deleteJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
-import { hasAnyPermission } from "src/common/permissions/permission.utils";
+import { hasPermission } from "src/common/permissions/permission.utils";
 import { injectResourcesIntoContent } from "src/common/utils/injectResourcesIntoContent";
 import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
 import { UpdateHasCertificateEvent } from "src/courses/events/updateHasCertificate.event";
@@ -201,7 +201,7 @@ export class CourseService {
     const conditions = this.getFiltersConditions(filters, false);
     const orderConditions = this.getOrderConditions(filters);
 
-    if (currentUserId && !currentUserPermissions.includes(PERMISSIONS.USER_MANAGE)) {
+    if (currentUserId && hasPermission(currentUserPermissions, PERMISSIONS.COURSE_UPDATE_OWN)) {
       conditions.push(eq(courses.authorId, currentUserId));
     }
 
@@ -420,10 +420,16 @@ export class CourseService {
 
     const { sortOrder, sortedField } = getSortOptions(sort);
 
+    const hasCourseUpdatePermissions = sql`(
+      ${this.userHasPermissionCondition(PERMISSIONS.COURSE_UPDATE)}
+      OR
+      ${this.userHasPermissionCondition(PERMISSIONS.COURSE_UPDATE_OWN)}
+    )`;
+
     const conditions = [
       eq(users.archived, false),
       isNull(users.deletedAt),
-      not(this.userHasPermissionCondition(users.id, users.tenantId, PERMISSIONS.COURSE_ENROLLMENT)),
+      not(hasCourseUpdatePermissions),
     ];
 
     if (keyword) {
@@ -2036,10 +2042,7 @@ export class CourseService {
 
     if (
       currentUser &&
-      hasAnyPermission(currentUser.permissions, [
-        PERMISSIONS.COURSE_UPDATE,
-        PERMISSIONS.COURSE_UPDATE_OWN,
-      ]) &&
+      hasPermission(currentUser.permissions, PERMISSIONS.COURSE_UPDATE_OWN) &&
       currentUser.userId === course.authorId
     ) {
       throw new ForbiddenException("You don't have permission to enroll in your own course");
@@ -2161,7 +2164,7 @@ export class CourseService {
 
     if (
       currentUser &&
-      !currentUser.permissions.includes(PERMISSIONS.COURSE_ENROLLMENT) &&
+      !hasPermission(currentUser.permissions, PERMISSIONS.COURSE_ENROLLMENT) &&
       !this.canUpdateCourse(currentUser, course.authorId)
     ) {
       throw new ForbiddenException("You don't have permission to enroll groups to this course");
@@ -2219,13 +2222,7 @@ export class CourseService {
         .where(
           and(
             inArray(groupUsers.groupId, groupIds),
-            not(
-              this.userHasPermissionCondition(
-                users.id,
-                users.tenantId,
-                PERMISSIONS.COURSE_ENROLLMENT,
-              ),
-            ),
+            not(this.hasCourseUpdatePermissions()),
             isNull(studentCourses.enrolledByGroupId),
           ),
         )
@@ -2267,13 +2264,7 @@ export class CourseService {
         .where(
           and(
             inArray(groupUsers.groupId, groupIds),
-            not(
-              this.userHasPermissionCondition(
-                users.id,
-                users.tenantId,
-                PERMISSIONS.COURSE_ENROLLMENT,
-              ),
-            ),
+            not(this.hasCourseUpdatePermissions()),
             isNull(studentCourses.id),
           ),
         )
@@ -2332,13 +2323,7 @@ export class CourseService {
         and(
           eq(studentCourses.courseId, courseId),
           inArray(studentCourses.enrolledByGroupId, groupIds),
-          not(
-            this.userHasPermissionCondition(
-              users.id,
-              users.tenantId,
-              PERMISSIONS.COURSE_ENROLLMENT,
-            ),
-          ),
+          not(this.hasCourseUpdatePermissions()),
         ),
       );
 
@@ -2537,7 +2522,7 @@ export class CourseService {
 
     if (!course) throw new NotFoundException("Course not found");
 
-    if (!currentUser.permissions.includes(PERMISSIONS.LEARNING_MODE_USE)) {
+    if (!hasPermission(currentUser.permissions, PERMISSIONS.LEARNING_MODE_USE)) {
       throw new ForbiddenException("You don't have permission to change student mode");
     }
 
@@ -2618,7 +2603,7 @@ export class CourseService {
       throw new NotFoundException("Course not found");
     }
 
-    if (!currentUser.permissions.includes(PERMISSIONS.COURSE_DELETE)) {
+    if (!hasPermission(currentUser.permissions, PERMISSIONS.COURSE_DELETE)) {
       throw new ForbiddenException("You don't have permission to delete this course");
     }
 
@@ -2656,7 +2641,7 @@ export class CourseService {
       throw new BadRequestException("No course ids provided");
     }
 
-    if (!currentUser.permissions.includes(PERMISSIONS.COURSE_DELETE)) {
+    if (!hasPermission(currentUser.permissions, PERMISSIONS.COURSE_DELETE)) {
       throw new ForbiddenException("You don't have permission to delete these courses");
     }
 
@@ -3915,13 +3900,7 @@ export class CourseService {
         and(
           isNotNull(groupCourses.dueDate),
           sql`${groupCourses.dueDate} < NOW()`,
-          not(
-            this.userHasPermissionCondition(
-              users.id,
-              users.tenantId,
-              PERMISSIONS.COURSE_ENROLLMENT,
-            ),
-          ),
+          not(this.hasCourseUpdatePermissions()),
           isNull(users.deletedAt),
           isNull(studentCourses.completedAt),
         ),
@@ -4101,12 +4080,8 @@ export class CourseService {
           ne(users.id, course.authorId),
           isNull(users.deletedAt),
           or(
-            this.userHasPermissionCondition(users.id, users.tenantId, PERMISSIONS.COURSE_UPDATE),
-            this.userHasPermissionCondition(
-              users.id,
-              users.tenantId,
-              PERMISSIONS.COURSE_UPDATE_OWN,
-            ),
+            this.userHasPermissionCondition(PERMISSIONS.COURSE_UPDATE),
+            this.userHasPermissionCondition(PERMISSIONS.COURSE_UPDATE_OWN),
           ),
         ),
       );
@@ -4117,11 +4092,7 @@ export class CourseService {
     };
   }
 
-  private userHasPermissionCondition(
-    userIdColumn: AnyPgColumn,
-    tenantIdColumn: AnyPgColumn,
-    permission: PermissionKey,
-  ): SQL {
+  private userHasPermissionCondition(permission: PermissionKey): SQL {
     return sql`
       EXISTS (
         SELECT 1
@@ -4132,8 +4103,8 @@ export class CourseService {
         INNER JOIN ${permissionRuleSetPermissions}
           ON ${permissionRuleSetPermissions.ruleSetId} = ${permissionRoleRuleSets.ruleSetId}
           AND ${permissionRuleSetPermissions.tenantId} = ${permissionRoleRuleSets.tenantId}
-        WHERE ${permissionUserRoles.userId} = ${userIdColumn}
-          AND ${permissionUserRoles.tenantId} = ${tenantIdColumn}
+        WHERE ${permissionUserRoles.userId} = ${users.id}
+          AND ${permissionUserRoles.tenantId} = ${users.tenantId}
           AND ${permissionRuleSetPermissions.permission} = ${permission}
       )
     `;
@@ -4666,15 +4637,23 @@ export class CourseService {
   }
 
   private canUpdateAnyCourse(currentUser: CurrentUser) {
-    return currentUser.permissions.includes(PERMISSIONS.COURSE_UPDATE);
+    return hasPermission(currentUser.permissions, PERMISSIONS.COURSE_UPDATE);
   }
 
   private canUpdateOwnCourse(currentUser: CurrentUser) {
-    return currentUser.permissions.includes(PERMISSIONS.COURSE_UPDATE_OWN);
+    return hasPermission(currentUser.permissions, PERMISSIONS.COURSE_UPDATE_OWN);
   }
 
   private canUpdateCourse(currentUser: CurrentUser, authorId: UUIDType) {
     if (this.canUpdateAnyCourse(currentUser)) return true;
     return this.canUpdateOwnCourse(currentUser) && currentUser.userId === authorId;
+  }
+
+  private hasCourseUpdatePermissions() {
+    return sql`(
+      ${this.userHasPermissionCondition(PERMISSIONS.COURSE_UPDATE)}
+      OR
+      ${this.userHasPermissionCondition(PERMISSIONS.COURSE_UPDATE_OWN)}
+    )`;
   }
 }

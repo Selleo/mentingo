@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { PERMISSIONS, type PermissionKey } from "@repo/shared";
+import { PERMISSIONS } from "@repo/shared";
 import {
   eq,
   and,
@@ -8,7 +8,6 @@ import {
   isNotNull,
   sql,
   not,
-  notExists,
   desc,
   ilike,
   or,
@@ -16,14 +15,11 @@ import {
 } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
+import { PermissionsService } from "src/permissions/permissions.service";
 import {
   announcements,
   groupAnnouncements,
   groupUsers,
-  permissionRoleRuleSets,
-  permissionRoles,
-  permissionRuleSetPermissions,
-  permissionUserRoles,
   userAnnouncements,
   users,
 } from "src/storage/schema";
@@ -43,6 +39,7 @@ export class AnnouncementsRepository {
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
     private readonly userService: UserService,
+    private readonly permissionsService: PermissionsService,
   ) {}
 
   async getAllAnnouncements() {
@@ -110,7 +107,7 @@ export class AnnouncementsRepository {
         .where(
           and(
             eq(groupUsers.groupId, groupId),
-            this.excludeUsersWithPermission(users.id, PERMISSIONS.USER_MANAGE),
+            this.permissionsService.excludeUsersWithPermission(PERMISSIONS.USER_MANAGE),
             isNull(users.deletedAt),
           ),
         );
@@ -240,41 +237,6 @@ export class AnnouncementsRepository {
           announcement.authorProfilePictureUrl,
         ),
       })),
-    );
-  }
-
-  private excludeUsersWithPermission(userIdColumn: typeof users.id, permission: PermissionKey) {
-    return notExists(
-      this.db
-        .select({ userId: permissionUserRoles.userId })
-        .from(permissionUserRoles)
-        .innerJoin(
-          permissionRoles,
-          and(
-            eq(permissionRoles.id, permissionUserRoles.roleId),
-            eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
-          ),
-        )
-        .innerJoin(
-          permissionRoleRuleSets,
-          and(
-            eq(permissionRoleRuleSets.roleId, permissionRoles.id),
-            eq(permissionRoleRuleSets.tenantId, permissionRoles.tenantId),
-          ),
-        )
-        .innerJoin(
-          permissionRuleSetPermissions,
-          and(
-            eq(permissionRuleSetPermissions.ruleSetId, permissionRoleRuleSets.ruleSetId),
-            eq(permissionRuleSetPermissions.tenantId, permissionRoleRuleSets.tenantId),
-          ),
-        )
-        .where(
-          and(
-            eq(permissionUserRoles.userId, userIdColumn),
-            eq(permissionRuleSetPermissions.permission, permission),
-          ),
-        ),
     );
   }
 }

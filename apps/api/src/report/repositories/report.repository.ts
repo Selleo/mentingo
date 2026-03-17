@@ -3,6 +3,7 @@ import { COURSE_ENROLLMENT, PERMISSIONS } from "@repo/shared";
 import { and, eq, isNull, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
+import { hasPermission } from "src/common/permissions/permission.utils";
 import { LocalizationService } from "src/localization/localization.service";
 import {
   chapters,
@@ -44,9 +45,12 @@ export class ReportRepository {
       isNull(users.deletedAt),
     ];
 
-    const canViewAllCourses = currentUser.permissions.includes(PERMISSIONS.USER_MANAGE);
+    const canViewOnlyCreatedCourses = hasPermission(
+      currentUser.permissions,
+      PERMISSIONS.COURSE_UPDATE_OWN,
+    );
 
-    if (!canViewAllCourses) {
+    if (canViewOnlyCreatedCourses) {
       conditions.push(eq(courses.authorId, currentUser.userId));
     }
 

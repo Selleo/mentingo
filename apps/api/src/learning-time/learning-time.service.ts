@@ -5,6 +5,7 @@ import { validate as uuidValidate } from "uuid";
 
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { hasPermission } from "src/common/permissions/permission.utils";
 import { LearningTimeRepository } from "src/learning-time/learning-time.repository";
 import { QUEUE_NAMES, QueueService } from "src/queue";
 import { S3Service } from "src/s3/s3.service";
@@ -371,8 +372,8 @@ export class LearningTimeService implements OnModuleInit {
 
   private canTrackLearningTime(socket: AuthenticatedSocket) {
     return (
-      !socket.data.user.permissions.includes(PERMISSIONS.COURSE_UPDATE) &&
-      !socket.data.user.permissions.includes(PERMISSIONS.COURSE_UPDATE_OWN)
+      !hasPermission(socket.data.user.permissions, PERMISSIONS.COURSE_UPDATE) &&
+      !hasPermission(socket.data.user.permissions, PERMISSIONS.COURSE_UPDATE_OWN)
     );
   }
 }

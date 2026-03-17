@@ -10,6 +10,7 @@ import {
   subDays,
 } from "date-fns";
 
+import { hasPermission } from "src/common/permissions/permission.utils";
 import { UserFirstLoginEvent } from "src/events/user/user-first-login.event";
 import { FileService } from "src/file/file.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
@@ -71,7 +72,7 @@ export class StatisticsService {
   }
 
   async getStats(currentUser: CurrentUser, language: SupportedLanguages) {
-    const canReadAll = currentUser.permissions.includes(PERMISSIONS.TENANT_MANAGE);
+    const canReadAll = hasPermission(currentUser.permissions, PERMISSIONS.COURSE_UPDATE_OWN);
     const ownerUserId = canReadAll ? undefined : currentUser.userId;
 
     const fiveMostPopularCourses = await this.statisticsRepository.getFiveMostPopularCourses(

@@ -33,12 +33,7 @@ export class IngestionService {
     }
 
     const author = await this.getLessonAuthor(lessonId);
-
-    const canManageAny = this.canManageAnyLesson(currentUser);
-    const canManageOwn = this.canManageOwnLesson(currentUser);
-    const ownsLesson = author === currentUser.userId;
-
-    if (!canManageAny && !(canManageOwn && ownsLesson)) {
+    if (!this.canManageLesson(currentUser, author)) {
       throw new ForbiddenException("You can only upload files to your own lessons");
     }
 
@@ -84,12 +79,7 @@ export class IngestionService {
 
   async findAllDocumentsForLesson(lessonId: UUIDType, currentUser: CurrentUser) {
     const author = await this.getLessonAuthor(lessonId);
-
-    const canManageAny = this.canManageAnyLesson(currentUser);
-    const canManageOwn = this.canManageOwnLesson(currentUser);
-    const ownsLesson = currentUser.userId === author;
-
-    if (!canManageAny && !(canManageOwn && ownsLesson)) {
+    if (!this.canManageLesson(currentUser, author)) {
       throw new ForbiddenException("You are not allowed to view files for this lesson.");
     }
 
@@ -98,12 +88,7 @@ export class IngestionService {
 
   async deleteDocumentLink(documentLinkId: UUIDType, currentUser: CurrentUser) {
     const author = await this.getDocumentLinkAuthor(documentLinkId);
-
-    const canManageAny = this.canManageAnyLesson(currentUser);
-    const canManageOwn = this.canManageOwnLesson(currentUser);
-    const ownsLesson = currentUser.userId === author;
-
-    if (!canManageAny && !(canManageOwn && ownsLesson)) {
+    if (!this.canManageLesson(currentUser, author)) {
       throw new ForbiddenException("You are not allowed to view files for this lesson.");
     }
 
@@ -156,5 +141,13 @@ export class IngestionService {
       currentUser.permissions.includes(PERMISSIONS.INGESTION_MANAGE_OWN) ||
       currentUser.permissions.includes(PERMISSIONS.COURSE_UPDATE_OWN)
     );
+  }
+
+  private canManageLesson(currentUser: CurrentUser, authorId: UUIDType) {
+    const canManageAny = this.canManageAnyLesson(currentUser);
+    const canManageOwn = this.canManageOwnLesson(currentUser);
+    const ownsLesson = currentUser.userId === authorId;
+
+    return canManageAny || (canManageOwn && ownsLesson);
   }
 }

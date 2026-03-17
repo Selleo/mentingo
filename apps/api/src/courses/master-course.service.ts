@@ -16,6 +16,7 @@ import { eq } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { buildJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
+import { hasPermission } from "src/common/permissions/permission.utils";
 import { LESSON_SEQUENCE_ENABLED, QUIZ_FEEDBACK_ENABLED } from "src/courses/constants";
 import { MasterCourseQueueService } from "src/courses/master-course.queue.service";
 import { MasterCourseRepository } from "src/courses/master-course.repository";
@@ -918,7 +919,7 @@ export class MasterCourseService {
   }
 
   private async assertManagingTenantAdmin(actor: CurrentUser) {
-    if (!actor.permissions.includes(PERMISSIONS.TENANT_MANAGE))
+    if (!hasPermission(actor.permissions, PERMISSIONS.TENANT_MANAGE))
       throw new ForbiddenException("auth.error.adminRoleRequired");
 
     const tenant = await this.masterCourseRepository.getTenantManagingStatus(actor.tenantId);

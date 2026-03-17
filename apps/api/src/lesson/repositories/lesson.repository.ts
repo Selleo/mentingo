@@ -3,6 +3,7 @@ import { COURSE_ENROLLMENT, PERMISSIONS } from "@repo/shared";
 import { and, desc, eq, getTableColumns, type SQL, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
+import { hasPermission } from "src/common/permissions/permission.utils";
 import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
 import { getCourseTsVector, getLessonTsVector } from "src/courses/utils/courses.utils";
 import { LocalizationService } from "src/localization/localization.service";
@@ -377,18 +378,23 @@ export class LessonRepository {
     language: SupportedLanguages,
   ): Promise<EnrolledLessonWithSearch[]> {
     const conditions: SQL[] = [];
-    const canManageCourseContent = currentUser.permissions.includes(PERMISSIONS.COURSE_UPDATE);
-    const canManageOwnCourseContent = currentUser.permissions.includes(
+
+    const canManageCourseContent = hasPermission(
+      currentUser.permissions,
+      PERMISSIONS.COURSE_UPDATE,
+    );
+
+    const canManageOwnCourseContent = hasPermission(
+      currentUser.permissions,
       PERMISSIONS.COURSE_UPDATE_OWN,
     );
-    const canManageTenant = currentUser.permissions.includes(PERMISSIONS.TENANT_MANAGE);
 
     if (!canManageCourseContent && !canManageOwnCourseContent) {
       conditions.push(
         eq(studentCourses.studentId, currentUser.userId),
         eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
       );
-    } else if (!canManageTenant || canManageOwnCourseContent) {
+    } else if (canManageOwnCourseContent) {
       conditions.push(eq(courses.authorId, currentUser.userId));
     }
 

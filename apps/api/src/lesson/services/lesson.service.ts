@@ -28,6 +28,7 @@ import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
+import { PermissionsService } from "src/permissions/permissions.service";
 import { QuestionRepository } from "src/questions/question.repository";
 import { QuestionService } from "src/questions/question.service";
 import {
@@ -68,6 +69,7 @@ export class LessonService {
     private readonly aiService: AiService,
     private readonly outboxPublisher: OutboxPublisher,
     private readonly localizationService: LocalizationService,
+    private readonly permissionsService: PermissionsService,
   ) {}
 
   async getLessonById(
@@ -457,7 +459,9 @@ export class LessonService {
   }
 
   private async assertStudentProgressMutationAllowed(lessonId: UUIDType, currentUser: CurrentUser) {
-    if (this.isLearnerOnly(currentUser.permissions)) return;
+    const { permissions } = await this.permissionsService.getUserAccess(currentUser.userId);
+
+    if (this.isLearnerOnly(permissions)) return;
 
     const [access] = await this.db
       .select({
@@ -482,7 +486,7 @@ export class LessonService {
       )
       .where(eq(lessons.id, lessonId));
 
-    const hasLearnerAccess = this.canUseLearnerProgress(currentUser.permissions, {
+    const hasLearnerAccess = this.canUseLearnerProgress(permissions, {
       hasEnrollment: !!access?.isAssigned,
       isLearningModeActive: !!access?.isStudentMode,
     });

@@ -72,24 +72,11 @@
             }
           },
           {
-            "name": "role",
+            "name": "roleSlug",
             "required": false,
             "in": "query",
             "schema": {
-              "anyOf": [
-                {
-                  "const": "admin",
-                  "type": "string"
-                },
-                {
-                  "const": "student",
-                  "type": "string"
-                },
-                {
-                  "const": "content_creator",
-                  "type": "string"
-                }
-              ]
+              "type": "string"
             }
           },
           {
@@ -976,9 +963,6 @@
                     "lastName": {
                       "type": "string"
                     },
-                    "role": {
-                      "type": "string"
-                    },
                     "archived": {
                       "type": "boolean"
                     },
@@ -1010,7 +994,6 @@
                     "email",
                     "firstName",
                     "lastName",
-                    "role",
                     "archived",
                     "deletedAt",
                     "profilePictureUrl"
@@ -1101,9 +1084,6 @@
               "lastName": {
                 "type": "string"
               },
-              "role": {
-                "type": "string"
-              },
               "archived": {
                 "type": "boolean"
               },
@@ -1126,6 +1106,12 @@
                     "type": "null"
                   }
                 ]
+              },
+              "roleSlugs": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
               },
               "groups": {
                 "type": "array",
@@ -1154,10 +1140,10 @@
               "email",
               "firstName",
               "lastName",
-              "role",
               "archived",
               "deletedAt",
               "profilePictureUrl",
+              "roleSlugs",
               "groups"
             ]
           }
@@ -1183,21 +1169,11 @@
             "maxLength": 64,
             "type": "string"
           },
-          "role": {
-            "anyOf": [
-              {
-                "const": "admin",
-                "type": "string"
-              },
-              {
-                "const": "student",
-                "type": "string"
-              },
-              {
-                "const": "content_creator",
-                "type": "string"
-              }
-            ]
+          "roleSlugs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "language": {
             "type": "string"
@@ -1207,7 +1183,7 @@
           "email",
           "firstName",
           "lastName",
-          "role"
+          "roleSlugs"
         ]
       },
       "CreateUserResponse": {
@@ -1260,21 +1236,12 @@
             "format": "email",
             "type": "string"
           },
-          "role": {
-            "anyOf": [
-              {
-                "const": "admin",
-                "type": "string"
-              },
-              {
-                "const": "student",
-                "type": "string"
-              },
-              {
-                "const": "content_creator",
-                "type": "string"
-              }
-            ]
+          "roleSlugs": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "archived": {
             "type": "boolean"
@@ -1303,9 +1270,6 @@
                 "type": "string"
               },
               "lastName": {
-                "type": "string"
-              },
-              "role": {
                 "type": "string"
               },
               "archived": {
@@ -1339,7 +1303,6 @@
               "email",
               "firstName",
               "lastName",
-              "role",
               "archived",
               "deletedAt",
               "profilePictureUrl"
@@ -1417,9 +1380,6 @@
                       "lastName": {
                         "type": "string"
                       },
-                      "role": {
-                        "type": "string"
-                      },
                       "archived": {
                         "type": "boolean"
                       },
@@ -1451,7 +1411,6 @@
                       "email",
                       "firstName",
                       "lastName",
-                      "role",
                       "archived",
                       "deletedAt",
                       "profilePictureUrl"

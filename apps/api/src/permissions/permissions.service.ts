@@ -1,5 +1,5 @@
 import { Injectable, Inject } from "@nestjs/common";
-import { and, eq } from "drizzle-orm";
+import { and, eq, notExists } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import {
@@ -7,6 +7,7 @@ import {
   permissionRoles,
   permissionRuleSetPermissions,
   permissionUserRoles,
+  users,
 } from "src/storage/schema";
 
 import type { PermissionKey } from "@repo/shared";
@@ -16,8 +17,43 @@ import type { UUIDType } from "src/common";
 export class PermissionsService {
   constructor(@Inject("DB") private readonly db: DatabasePg) {}
 
-  public async getUserAccess(userId: UUIDType) {
-    const roleRows = await this.db
+  public excludeUsersWithPermission(permission: PermissionKey) {
+    return notExists(
+      this.db
+        .select({ userId: permissionUserRoles.userId })
+        .from(permissionUserRoles)
+        .innerJoin(
+          permissionRoles,
+          and(
+            eq(permissionRoles.id, permissionUserRoles.roleId),
+            eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
+          ),
+        )
+        .innerJoin(
+          permissionRoleRuleSets,
+          and(
+            eq(permissionRoleRuleSets.roleId, permissionRoles.id),
+            eq(permissionRoleRuleSets.tenantId, permissionRoles.tenantId),
+          ),
+        )
+        .innerJoin(
+          permissionRuleSetPermissions,
+          and(
+            eq(permissionRuleSetPermissions.ruleSetId, permissionRoleRuleSets.ruleSetId),
+            eq(permissionRuleSetPermissions.tenantId, permissionRoleRuleSets.tenantId),
+          ),
+        )
+        .where(
+          and(
+            eq(permissionUserRoles.userId, users.id),
+            eq(permissionRuleSetPermissions.permission, permission),
+          ),
+        ),
+    );
+  }
+
+  public async getUserAccess(userId: UUIDType, dbInstance: DatabasePg = this.db) {
+    const roleRows = await dbInstance
       .select({
         roleSlug: permissionRoles.slug,
       })
@@ -31,7 +67,7 @@ export class PermissionsService {
       )
       .where(eq(permissionUserRoles.userId, userId));
 
-    const permissionRows = await this.db
+    const permissionRows = await dbInstance
       .select({
         permission: permissionRuleSetPermissions.permission,
       })
