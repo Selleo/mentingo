@@ -1,13 +1,14 @@
-import { Controller, Get, Query, UseGuards, Post, Body, Res } from "@nestjs/common";
+import { Controller, Get, Query, UseGuards, Post, Body, Res, Req } from "@nestjs/common";
 import { SupportedLanguages } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
-import { Response } from "express";
+import { Request, Response } from "express";
 import { Validate } from "nestjs-typebox";
 
 import { PaginatedResponse, paginatedResponse, UUIDSchema, UUIDType } from "src/common";
 import { Public } from "src/common/decorators/public.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
+import { getRequestBaseUrl } from "src/common/helpers/getRequestBaseUrl";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 
@@ -84,11 +85,13 @@ export class CertificatesController {
   })
   async downloadCertificate(
     @Body() body: { html: string; filename?: string },
+    @Req() req: Request,
     @Res() res: Response,
   ): Promise<void> {
     const { html, filename = "certificate.pdf" } = body;
+    const requestBaseUrl = getRequestBaseUrl(req);
 
-    const pdfBuffer = await this.certificatesService.downloadCertificate(html);
+    const pdfBuffer = await this.certificatesService.downloadCertificate(html, requestBaseUrl);
 
     res.set({
       "Content-Type": "application/pdf",
