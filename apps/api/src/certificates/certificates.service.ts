@@ -262,11 +262,11 @@ export class CertificatesService implements OnModuleDestroy {
     return this.browserInitialization;
   }
 
-  async downloadCertificate(html: string): Promise<Buffer> {
+  async downloadCertificate(html: string, baseUrl?: string | null): Promise<Buffer> {
     if (!html.trim())
       throw new BadRequestException("studentCertificateView.informations.htmlRequired");
 
-    const completeHtml = buildSharedCertificateHtmlDocument(html);
+    const completeHtml = buildSharedCertificateHtmlDocument(html, { baseUrl });
 
     return this.renderPdfFromHtml(completeHtml);
   }
