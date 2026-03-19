@@ -2747,8 +2747,9 @@ export type GetCertificateResponse = {
 } | null;
 
 export interface DownloadCertificateBody {
-  html: string;
-  filename?: string;
+  /** @format uuid */
+  certificateId: string;
+  language: "en" | "pl";
 }
 
 export interface CreateCertificateShareLinkBody {

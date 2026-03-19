@@ -1,98 +1,16 @@
-import { buildCertificateMarkup } from "@repo/shared";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useDownloadCertificatePdf } from "~/api/mutations/useDownloadCertificatePdf";
 import { useToast } from "~/components/ui/use-toast";
 
-import type { CertificateColorTheme } from "./certificateTheme";
+import { extractFilenameFromContentDisposition } from "./utils/extractFilenameFromContentDisposition";
 
-interface CertificateToPDFProps {
-  studentName?: string;
-  courseName?: string;
-  completionDate?: string;
-  platformLogo?: string | null;
-  backgroundImageUrl?: string | null;
-  signatureImageUrl?: string | null;
-  lang: "pl" | "en";
-  colorTheme?: CertificateColorTheme;
-}
+import type { SupportedLanguages } from "@repo/shared";
 
-const CERTIFICATE_DOWNLOAD_ENDPOINT = "/api/certificates/download";
-
-const toAbsoluteUrl = (value?: string | null): string | null => {
-  if (!value) return null;
-
-  if (typeof window === "undefined") return value;
-
-  try {
-    return new URL(value, window.location.origin).toString();
-  } catch {
-    return value;
-  }
-};
-
-const blobToDataUrl = (blob: Blob): Promise<string> =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      if (typeof reader.result === "string") {
-        resolve(reader.result);
-        return;
-      }
-      reject(new Error("Failed to read image data"));
-    };
-    reader.onerror = () => reject(new Error("Failed to read image data"));
-    reader.readAsDataURL(blob);
-  });
-
-const toEmbeddableImageSource = async (value?: string | null): Promise<string | null> => {
-  const absoluteUrl = toAbsoluteUrl(value);
-  if (!absoluteUrl) return null;
-
-  try {
-    const response = await fetch(absoluteUrl);
-    if (!response.ok) return absoluteUrl;
-
-    const contentType = response.headers.get("content-type") || "";
-    if (!contentType.startsWith("image/")) return absoluteUrl;
-
-    const blob = await response.blob();
-    return await blobToDataUrl(blob);
-  } catch {
-    return absoluteUrl;
-  }
-};
-
-const buildCertificateFilename = (courseName?: string): string =>
-  `${courseName || "certificate"}.pdf`;
-
-const prepareCertificateImageSources = async (options: {
-  platformLogo?: string | null;
-  backgroundImageUrl?: string | null;
-  signatureImageUrl?: string | null;
-}) => {
-  const [platformLogoUrl, backgroundImageUrl, signatureImageUrl] = await Promise.all([
-    toEmbeddableImageSource(options.platformLogo),
-    toEmbeddableImageSource(options.backgroundImageUrl),
-    toEmbeddableImageSource(options.signatureImageUrl),
-  ]);
-
-  return { platformLogoUrl, backgroundImageUrl, signatureImageUrl };
-};
-
-const resolveApiErrorMessage = async (
-  response: Response,
-  fallbackMessage: string,
-  translate: (key: string, options?: { defaultValue?: string }) => string,
-) => {
-  const errorResponse = (await response.json().catch(() => null)) as {
-    message?: string;
-  } | null;
-  const apiMessage = errorResponse?.message;
-
-  if (apiMessage) return translate(apiMessage, { defaultValue: fallbackMessage });
-
-  return fallbackMessage;
+type CertificateToPDFProps = {
+  certificateId?: string;
+  lang: SupportedLanguages;
 };
 
 const triggerPdfDownload = (blob: Blob, filename: string) => {
@@ -112,76 +30,34 @@ const useCertificatePDF = () => {
   const { toast } = useToast();
   const { t } = useTranslation();
   const [isPreparingDownload, setIsPreparingDownload] = useState(false);
+  const { mutateAsync: downloadCertificatePdfMutation } = useDownloadCertificatePdf();
 
-  const downloadCertificatePdf = async ({
-    studentName,
-    courseName,
-    completionDate,
-    platformLogo,
-    backgroundImageUrl,
-    signatureImageUrl,
-    lang,
-    colorTheme,
-  }: CertificateToPDFProps) => {
-    if (isPreparingDownload) return;
+  const downloadCertificatePdf = async ({ certificateId, lang }: CertificateToPDFProps) => {
+    if (isPreparingDownload || !certificateId) return;
 
     try {
       setIsPreparingDownload(true);
       toast({ description: t("studentCertificateView.informations.preparingDownload") });
 
-      const imageSources = await prepareCertificateImageSources({
-        platformLogo,
-        backgroundImageUrl,
-        signatureImageUrl,
+      const response = await downloadCertificatePdfMutation({
+        certificateId,
+        language: lang,
       });
 
-      const filename = buildCertificateFilename(courseName);
-      const html = buildCertificateMarkup({
-        studentName,
-        courseName,
-        completionDate,
-        ...imageSources,
-        isDownload: true,
-        lang,
-        colorTheme,
-      });
+      const blob = response.data;
+      const filename =
+        extractFilenameFromContentDisposition(response.headers["content-disposition"]) ||
+        "certificate.pdf";
 
-      const response = await fetch(CERTIFICATE_DOWNLOAD_ENDPOINT, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          html,
-          filename,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(
-          await resolveApiErrorMessage(
-            response,
-            t("studentCertificateView.informations.failedToDownload"),
-            t,
-          ),
-        );
-      }
-
-      const blob = await response.blob();
       triggerPdfDownload(blob, filename);
     } catch (error) {
-      const description =
-        error instanceof Error
-          ? error.message
-          : t("studentCertificateView.informations.failedToDownload");
+      const description = t("studentCertificateView.informations.failedToDownload");
       toast({ description });
     } finally {
       setIsPreparingDownload(false);
     }
   };
 
-  const HiddenCertificate = (_props: CertificateToPDFProps) => null;
-
-  return { downloadCertificatePdf, HiddenCertificate, isPreparingDownload };
+  return { downloadCertificatePdf, isPreparingDownload };
 };
 export default useCertificatePDF;

@@ -5,6 +5,7 @@ export { useCreateUser } from "./admin/useCreateUser";
 export { useDeleteCategory } from "./admin/useDeleteCategory";
 export { useDeleteManyCategories } from "./admin/useDeleteManyCategories";
 export { useEnrollCourse } from "./useEnrollCourse";
+export { useDownloadCertificatePdf } from "./useDownloadCertificatePdf";
 export { useLoginUser } from "./useLoginUser";
 export { useLogoutUser } from "./useLogoutUser";
 export { useMarkLessonAsCompleted } from "./useMarkLessonAsCompleted";

@@ -1,3 +1,4 @@
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
 import { UUIDSchema, paginatedResponse } from "src/common";
@@ -15,8 +16,8 @@ export const certificateSchema = Type.Object({
 });
 
 export const downloadCertificateSchema = Type.Object({
-  html: Type.String(),
-  filename: Type.Optional(Type.String()),
+  certificateId: UUIDSchema,
+  language: Type.Enum(SUPPORTED_LANGUAGES),
 });
 
 export const createCertificateShareLinkSchema = Type.Object({

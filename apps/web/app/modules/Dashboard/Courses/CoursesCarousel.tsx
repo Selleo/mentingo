@@ -28,7 +28,7 @@ export const CoursesCarousel = ({
       return (
         <CarouselItem
           key={course.id}
-          className="mr-3 w-full max-w-[calc(100%-24px)] shrink-0 *:h-full xs:max-w-[320px] sm:mr-6 sm:last:mr-0"
+          className="w-full max-w-[calc(100%-24px)] shrink-0 pr-3 *:h-full xs:max-w-[320px] sm:pr-6 last:pr-0"
         >
           <CourseCard {...course} />
         </CarouselItem>
@@ -45,7 +45,10 @@ export const CoursesCarousel = ({
 
   return (
     <Carousel className="w-full" opts={{ slidesToScroll: "auto" }}>
-      <CarouselContent className="flex w-full rounded-lg lg:bg-white">
+      <CarouselContent
+        className="flex w-full rounded-lg lg:bg-white"
+        viewportClassName="overflow-x-hidden overflow-y-visible"
+      >
         {carouselItems}
       </CarouselContent>
       <div className={buttonContainerStyle}>
