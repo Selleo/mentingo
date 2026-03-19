@@ -277,21 +277,24 @@ export class CertificatesService implements OnModuleDestroy {
       throw new NotFoundException("studentCertificateView.informations.certificateNotFound");
     }
 
-    const settings = await this.settingsService.getGlobalSettingsByTenantId(certificate.tenantId);
-    const certificateSignatureUrl = certificate.certificateSignature
-      ? await this.fileService.getFileUrl(certificate.certificateSignature)
-      : null;
+    const imageSettings = await this.settingsService.getImageS3Keys();
+    const [platformLogoImageUrl, certificateSignatureImageUrl, backgroundImageUrl] =
+      await Promise.all([
+        this.getImageDataUriFromS3Key(imageSettings.platformLogoS3Key),
+        this.getImageDataUriFromS3Key(certificate.certificateSignature),
+        this.getImageDataUriFromS3Key(imageSettings.certificateBackgroundImage),
+      ]);
 
-    const accentColor = certificate.certificateFontColor || settings.primaryColor || "#1f2937";
+    const accentColor = certificate.certificateFontColor || imageSettings.primaryColor || "#1f2937";
     const certificateDate = certificate.completionDate || certificate.createdAt;
 
     const html = buildCertificateMarkup({
       studentName: certificate.fullName || "",
       courseName: certificate.courseTitle || "",
       completionDate: this.formatDate(certificateDate || null),
-      platformLogoUrl: settings.platformLogoS3Key,
-      signatureImageUrl: certificateSignatureUrl,
-      backgroundImageUrl: settings.certificateBackgroundImage,
+      platformLogoUrl: platformLogoImageUrl,
+      signatureImageUrl: certificateSignatureImageUrl,
+      backgroundImageUrl,
       lang: shareLanguage,
       isDownload: true,
       colorTheme: {
@@ -302,7 +305,7 @@ export class CertificatesService implements OnModuleDestroy {
         bodyTextColor: accentColor,
         labelTextColor: accentColor,
         lineColor: accentColor,
-        logoColor: settings.primaryColor || accentColor,
+        logoColor: imageSettings.primaryColor || accentColor,
       },
     });
 
@@ -683,6 +686,28 @@ export class CertificatesService implements OnModuleDestroy {
 
   private toDataUri(buffer: Buffer, mimeType: string): string {
     return `data:${mimeType};base64,${buffer.toString("base64")}`;
+  }
+
+  private async getImageDataUriFromS3Key(s3Key?: string | null): Promise<string | null> {
+    if (!s3Key) {
+      return null;
+    }
+
+    try {
+      const [fileBuffer, contentType] = await Promise.all([
+        this.s3Service.getFileBuffer(s3Key),
+        this.s3Service.getFileContentType(s3Key).catch(() => null),
+      ]);
+
+      if (!fileBuffer.length || !contentType) {
+        return null;
+      }
+
+      return this.toDataUri(fileBuffer, contentType);
+    } catch (error) {
+      this.logger.warn(`Failed to get S3 image buffer for key ${s3Key}: ${error}`);
+      return null;
+    }
   }
 
   private scheduleCertificateImagePrewarm(certificateId: UUIDType): void {

@@ -238,4 +238,10 @@ export class S3Service {
       throw err;
     }
   }
+
+  async getFileContentType(key: string): Promise<string | null> {
+    const command = new HeadObjectCommand({ Bucket: this.bucketName, Key: key });
+    const response = await this.s3Client.send(command);
+    return response.ContentType ?? null;
+  }
 }
