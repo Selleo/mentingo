@@ -22218,15 +22218,26 @@
       "DownloadCertificateBody": {
         "type": "object",
         "properties": {
-          "html": {
+          "certificateId": {
+            "format": "uuid",
             "type": "string"
           },
-          "filename": {
-            "type": "string"
+          "language": {
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              }
+            ]
           }
         },
         "required": [
-          "html"
+          "certificateId",
+          "language"
         ]
       },
       "CreateCertificateShareLinkBody": {

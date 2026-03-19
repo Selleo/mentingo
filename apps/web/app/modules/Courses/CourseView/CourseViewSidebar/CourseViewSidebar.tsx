@@ -1,6 +1,7 @@
 import { Link } from "@remix-run/react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { match } from "ts-pattern";
 
 import { useTransferCourseOwnership } from "~/api/mutations/admin/useTransferCourseOwnership";
 import { useCurrentUser } from "~/api/queries";
@@ -27,7 +28,7 @@ export const CourseViewSidebar = ({ course }: CourseViewSidebar) => {
 
   const { data: userDetails } = useUserDetails(course?.authorId ?? "");
   const { data: currentUser } = useCurrentUser();
-  const { isAdminLike, isAdmin, isContentCreator } = useUserRole();
+  const { isAdminLike, isAdmin, isContentCreator, isStudent } = useUserRole();
   const { isEffectiveStudentExperience } = useCourseAccessProvider();
 
   const { t } = useTranslation();
@@ -41,10 +42,27 @@ export const CourseViewSidebar = ({ course }: CourseViewSidebar) => {
 
   const isNonAuthorContentCreator = isContentCreator && currentUser?.id !== course.authorId;
 
-  const shouldShowCourseOptions =
-    !course?.enrolled &&
-    !isEffectiveStudentExperience &&
-    (!isAdminLike || isNonAuthorContentCreator);
+  const canShowCourseOptionsForRole = !isAdminLike || isNonAuthorContentCreator;
+
+  const shouldShowCourseOptions = match({
+    isUnenrolled: !course?.enrolled,
+    canShowCourseOptionsForRole,
+    isEnrollmentEntryFlow: !currentUser || isStudent,
+    isEffectiveStudentExperience,
+  })
+    .with(
+      { isUnenrolled: true, canShowCourseOptionsForRole: true, isEnrollmentEntryFlow: true },
+      () => true,
+    )
+    .with(
+      {
+        isUnenrolled: true,
+        canShowCourseOptionsForRole: true,
+        isEffectiveStudentExperience: false,
+      },
+      () => true,
+    )
+    .otherwise(() => false);
 
   const canEditOwner =
     isAdmin && !!course.id && !!courseOwnershipCandidates?.possibleCandidates?.length;

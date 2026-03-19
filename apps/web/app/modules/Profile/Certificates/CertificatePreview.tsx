@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { useCreateCertificateShareLink } from "~/api/mutations/useCreateCertificateShareLink";
+import { cn } from "~/lib/utils";
 
 import CertificateContent from "./CertificateContent";
 import CertificateControls from "./CertificateControls";
@@ -68,69 +69,59 @@ const CertificatePreview = ({
   };
 
   const handleDownloadCertificate = async () => {
-    await downloadCertificatePdf({
-      studentName,
-      courseName,
-      completionDate,
-      platformLogo,
-      backgroundImageUrl: certificateBackgroundImageUrl,
-      signatureImageUrl: certificateSignatureUrl,
-      lang,
-      colorTheme,
-    });
+    await downloadCertificatePdf({ certificateId, lang });
   };
 
   return (
-    <>
-      <div
-        className={
-          minimalFrame
-            ? "mx-auto w-full bg-white"
-            : "mx-auto w-full max-w-[95vw] overflow-hidden rounded-t-lg bg-white"
-        }
-      >
+    <div className="flex w-full justify-center">
+      <div className="w-full origin-center scale-100 md:scale-[0.8]">
         <div
-          className={
-            minimalFrame
-              ? "flex flex-wrap items-start justify-between gap-3 p-1"
-              : "flex items-center justify-between bg-white p-4"
-          }
+          className={cn("mx-auto w-full bg-white", {
+            "max-w-[98vw] overflow-hidden rounded-t-lg sm:max-w-[95vw]": !minimalFrame,
+          })}
         >
-          <div className="flex flex-col items-start">
-            <h2 className="font-medium text-primary-800">{courseName}</h2>
-            <h2 className="text-sm text-gray-400">{completionDate}</h2>
+          <div
+            className={cn("flex justify-between", {
+              "flex-wrap items-start gap-3 p-1": minimalFrame,
+              "items-center bg-white p-2 sm:p-4": !minimalFrame,
+            })}
+          >
+            <div className="flex flex-col items-start">
+              <h2 className="font-medium text-primary-800">{courseName}</h2>
+              <h2 className="text-sm text-gray-400">{completionDate}</h2>
+            </div>
+
+            <CertificateControls
+              onClose={onClose}
+              languageToggled={toggled}
+              setLanguageToggled={setToggled}
+              downloadCertificatePdf={handleDownloadCertificate}
+              isPreparingDownload={isPreparingDownload}
+              onShareToLinkedIn={handleShareToLinkedIn}
+              isPreparingShare={isPreparingShare}
+              colorTheme={colorTheme}
+              setColorTheme={setColorTheme}
+              onColorChange={onColorChange}
+              showColorPicker={showColorPicker}
+              showDownloadButton={showDownloadButton}
+              showShareButton={showShareButton && Boolean(certificateId)}
+            />
           </div>
 
-          <CertificateControls
-            onClose={onClose}
-            languageToggled={toggled}
-            setLanguageToggled={setToggled}
-            downloadCertificatePdf={handleDownloadCertificate}
-            isPreparingDownload={isPreparingDownload}
-            onShareToLinkedIn={handleShareToLinkedIn}
-            isPreparingShare={isPreparingShare}
+          <CertificateContent
+            studentName={studentName}
+            courseName={courseName}
+            completionDate={completionDate}
+            isModal
+            platformLogo={platformLogo}
+            backgroundImageUrl={certificateBackgroundImageUrl}
+            signatureImageUrl={certificateSignatureUrl}
+            lang={lang}
             colorTheme={colorTheme}
-            setColorTheme={setColorTheme}
-            onColorChange={onColorChange}
-            showColorPicker={showColorPicker}
-            showDownloadButton={showDownloadButton}
-            showShareButton={showShareButton && Boolean(certificateId)}
           />
         </div>
-
-        <CertificateContent
-          studentName={studentName}
-          courseName={courseName}
-          completionDate={completionDate}
-          isModal
-          platformLogo={platformLogo}
-          backgroundImageUrl={certificateBackgroundImageUrl}
-          signatureImageUrl={certificateSignatureUrl}
-          lang={lang}
-          colorTheme={colorTheme}
-        />
       </div>
-    </>
+    </div>
   );
 };
 

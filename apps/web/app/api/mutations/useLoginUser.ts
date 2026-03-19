@@ -1,11 +1,8 @@
-import { useNavigate } from "@remix-run/react";
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 
 import { useToast } from "~/components/ui/use-toast";
-import { useNavigationHistoryStore } from "~/lib/stores/navigationHistory";
 import { useAuthStore } from "~/modules/Auth/authStore";
-import { LOGIN_REDIRECT_URL } from "~/modules/Auth/constants";
 import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
 
 import { ApiClient } from "../api-client";
@@ -27,11 +24,6 @@ export function useLoginUser() {
   const setCurrentUser = useCurrentUserStore((state) => state.setCurrentUser);
   const setHasVerifiedMFA = useCurrentUserStore((state) => state.setHasVerifiedMFA);
 
-  const navigate = useNavigate();
-  const getLastEntry = useNavigationHistoryStore((state) => state.getLastEntry);
-  const mergeNavigationHistory = useNavigationHistoryStore((state) => state.mergeNavigationHistory);
-  const cleanHistory = useNavigationHistoryStore((state) => state.clearHistory);
-
   return useMutation({
     mutationFn: async (options: LoginUserOptions) => {
       const response = await ApiClient.api.authControllerLogin(options.data);
@@ -50,14 +42,6 @@ export function useLoginUser() {
       setLoggedIn(true);
       setCurrentUser(normalizedUser);
       setHasVerifiedMFA(!shouldVerifyMFA);
-
-      mergeNavigationHistory();
-
-      const lastEntry = getLastEntry();
-
-      navigate(shouldVerifyMFA ? "/auth/mfa" : lastEntry?.pathname || LOGIN_REDIRECT_URL);
-
-      cleanHistory();
     },
     onError: (error) => {
       if (error instanceof AxiosError) {

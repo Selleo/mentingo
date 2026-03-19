@@ -184,6 +184,43 @@ export class CertificateRepository {
     return certificate;
   }
 
+  async findOwnedCertificateByIdForRender(
+    userId: string,
+    certificateId: string,
+    language: SupportedLanguages,
+  ) {
+    const [certificate] = await this.db
+      .select({
+        id: certificates.id,
+        tenantId: certificates.tenantId,
+        createdAt: certificates.createdAt,
+        courseTitle: this.localizationService.getLocalizedSqlField(courses.title, language),
+        completionDate: studentCourses.completedAt,
+        fullName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
+        certificateSignature: sql<string | null>`(${courses.settings} ->> 'certificateSignature')`,
+        certificateFontColor: sql<string | null>`(${courses.settings} ->> 'certificateFontColor')`,
+      })
+      .from(certificates)
+      .innerJoin(users, eq(users.id, certificates.userId))
+      .innerJoin(courses, eq(courses.id, certificates.courseId))
+      .leftJoin(
+        studentCourses,
+        and(
+          eq(studentCourses.studentId, certificates.userId),
+          eq(studentCourses.courseId, certificates.courseId),
+        ),
+      )
+      .where(
+        and(
+          eq(certificates.id, certificateId),
+          eq(certificates.userId, userId),
+          isNull(users.deletedAt),
+        ),
+      );
+
+    return certificate;
+  }
+
   async findPublicShareCertificateById(certificateId: string, language: SupportedLanguages) {
     const [certificate] = await this.dbAdmin
       .select({

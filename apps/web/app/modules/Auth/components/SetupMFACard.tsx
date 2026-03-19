@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod/dist/zod.js";
-import { useNavigate } from "@remix-run/react";
 import { QRCodeSVG } from "qrcode.react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -18,7 +17,6 @@ import {
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "~/components/ui/input-otp";
 import { Label } from "~/components/ui/label";
 import { Skeleton } from "~/components/ui/skeleton";
-import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
 
 const mfaSetupSchema = z.object({
   token: z.string().min(1),
@@ -26,9 +24,6 @@ const mfaSetupSchema = z.object({
 
 export function SetupMFACard() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-
-  const setHasVerifiedMFA = useCurrentUserStore((state) => state.setHasVerifiedMFA);
 
   const { data: enableMFAData, isPending: isSettingUpMFA } = useSetupMFA();
   const { isPending: isVerifyingMFA, mutate: verifyMFA } = useVerifyMFA();
@@ -39,12 +34,7 @@ export function SetupMFACard() {
   });
 
   const onSubmit = (data: z.infer<typeof mfaSetupSchema>) => {
-    verifyMFA(data.token, {
-      onSuccess: () => {
-        setHasVerifiedMFA(true);
-        navigate("/");
-      },
-    });
+    verifyMFA(data.token);
   };
 
   return (

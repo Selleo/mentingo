@@ -50,7 +50,6 @@ export default function UserDashboardLayout() {
 
   if (lastEntry && lastEntry.pathname !== location.pathname) {
     clearHistory();
-
     return <Navigate to={lastEntry.pathname || LOGIN_REDIRECT_URL} />;
   }
 

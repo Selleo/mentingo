@@ -218,6 +218,7 @@ function ProfilePageContent({ currentUser }: ProfilePageContentProps) {
               certificateBackgroundImageUrl={globalSettings?.certificateBackgroundImage || null}
               certificateSignatureUrl={certificatePreview.certData?.certificateSignatureUrl || null}
               initialColor={certificatePreview.certData?.certificateFontColor || null}
+              showDownloadButton={isProfileOwner}
               showShareButton={Boolean(certificatePreview.certData?.id)}
             />
           </div>
