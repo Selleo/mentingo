@@ -295,62 +295,31 @@ describe("CertificatesController (e2e)", () => {
           thumbnailS3Key: null,
           hasCertificate: true,
         });
-        await db.insert(certificates).values({
-          userId: student.id,
-          courseId: course.id,
-        });
+        const [createdCertificate] = await db
+          .insert(certificates)
+          .values({
+            userId: student.id,
+            courseId: course.id,
+          })
+          .returning();
 
-        const html = "<div>test</div>";
         const response = await request(app.getHttpServer())
           .post("/api/certificates/download")
           .set("Cookie", cookies)
-          .send({ html })
+          .send({ certificateId: createdCertificate.id, language: "en" })
           .expect(201);
 
         expect(response.headers["content-type"]).toBe("application/pdf");
-        expect(response.headers["content-disposition"]).toBe(
-          'attachment; filename="certificate.pdf"',
+        expect(response.headers["content-disposition"]).toContain(
+          'attachment; filename="Python Basics.pdf"',
+        );
+        expect(response.headers["content-disposition"]).toContain(
+          "filename*=UTF-8''Python%20Basics.pdf",
         );
         expect(response.body instanceof Buffer).toBe(true);
       });
 
-      it("returns pdf file with custom filename", async () => {
-        const admin = await userFactory
-          .withCredentials({ password })
-          .withAdminSettings(db)
-          .create({ role: USER_ROLES.ADMIN });
-        const student = await userFactory
-          .withCredentials({ password })
-          .withUserSettings(db)
-          .create({ role: USER_ROLES.STUDENT });
-        const cookies = await cookieFor(student, app);
-        const category = await categoryFactory.create();
-        const course = await courseFactory.create({
-          title: "Python Basics",
-          authorId: admin.id,
-          categoryId: category.id,
-          thumbnailS3Key: null,
-          hasCertificate: true,
-        });
-        await db.insert(certificates).values({
-          userId: student.id,
-          courseId: course.id,
-        });
-
-        const html = "<div>test</div>";
-        const filename = "test.pdf";
-        const response = await request(app.getHttpServer())
-          .post("/api/certificates/download")
-          .set("Cookie", cookies)
-          .send({ html, filename })
-          .expect(201);
-
-        expect(response.headers["content-type"]).toBe("application/pdf");
-        expect(response.headers["content-disposition"]).toBe(`attachment; filename="${filename}"`);
-        expect(response.body instanceof Buffer).toBe(true);
-      });
-
-      it("returns 400 when html content is empty", async () => {
+      it("returns 400 when certificateId is missing", async () => {
         const student = await userFactory
           .withCredentials({ password })
           .withUserSettings(db)
@@ -360,7 +329,7 @@ describe("CertificatesController (e2e)", () => {
         await request(app.getHttpServer())
           .post("/api/certificates/download")
           .set("Cookie", cookies)
-          .send({ html: "   " })
+          .send({ language: "en" })
           .expect(400);
       });
     });
