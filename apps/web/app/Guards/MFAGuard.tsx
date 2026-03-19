@@ -1,8 +1,11 @@
 import { Navigate, useLocation } from "@remix-run/react";
+import { useEffect, useMemo } from "react";
 import { match } from "ts-pattern";
 
 import { useCurrentUser } from "~/api/queries/useCurrentUser";
+import { useNavigationHistoryStore } from "~/lib/stores/navigationHistory";
 import { LOGIN_REDIRECT_URL } from "~/modules/Auth/constants";
+import { resolvePostAuthRedirectPath } from "~/modules/Auth/utils/resolvePostAuthRedirectPath";
 import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
 
 import type React from "react";
@@ -16,13 +19,27 @@ export const MFAGuard = ({ children, mode }: MFAGuardProps) => {
   const location = useLocation();
   const { data: currentUser, isLoading } = useCurrentUser();
   const hasVerifiedMFA = useCurrentUserStore((state) => state.hasVerifiedMFA);
+  const getLastEntry = useNavigationHistoryStore((state) => state.getLastEntry);
+  const mergeNavigationHistory = useNavigationHistoryStore((state) => state.mergeNavigationHistory);
+  const clearHistory = useNavigationHistoryStore((state) => state.clearHistory);
+
+  const shouldVerifyMFA = Boolean(currentUser?.shouldVerifyMFA);
+  const isMFAComplete = !shouldVerifyMFA || hasVerifiedMFA;
+  const redirectPath = useMemo(() => {
+    mergeNavigationHistory();
+
+    return resolvePostAuthRedirectPath({ pathname: getLastEntry()?.pathname });
+  }, [getLastEntry, mergeNavigationHistory]);
+
+  useEffect(() => {
+    if (mode !== "auth" || !currentUser || shouldVerifyMFA) return;
+
+    clearHistory();
+  }, [clearHistory, currentUser, mode, shouldVerifyMFA]);
 
   if (isLoading) {
     return null;
   }
-
-  const shouldVerifyMFA = Boolean(currentUser?.shouldVerifyMFA);
-  const isMFAComplete = !shouldVerifyMFA || hasVerifiedMFA;
 
   return match(mode)
     .with("auth", () => {
@@ -35,7 +52,7 @@ export const MFAGuard = ({ children, mode }: MFAGuardProps) => {
       }
 
       if (!shouldVerifyMFA) {
-        return <Navigate to={LOGIN_REDIRECT_URL} />;
+        return <Navigate to={redirectPath || LOGIN_REDIRECT_URL} />;
       }
 
       return children;
