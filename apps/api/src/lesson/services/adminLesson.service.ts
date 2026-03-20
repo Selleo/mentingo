@@ -8,7 +8,7 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { ENTITY_TYPES } from "@repo/shared";
+import { AI_MENTOR_TTS_PRESET, AI_MENTOR_VOICE_MODE, ENTITY_TYPES } from "@repo/shared";
 import { CacheManagerStore } from "cache-manager";
 import { getTableColumns, sql } from "drizzle-orm";
 
@@ -153,8 +153,21 @@ export class AdminLessonService {
       throw new BadRequestException("Instructions and conditions required");
 
     if (!data.name?.trim().length) data.name = "AI Mentor";
+    const voiceMode = data.voiceMode ?? AI_MENTOR_VOICE_MODE.PRESET;
+    const customTtsReference = data.customTtsReference?.trim() || null;
 
-    const lesson = await this.createAiMentorLessonWithTransaction(data, maxDisplayOrder + 1);
+    if (voiceMode === AI_MENTOR_VOICE_MODE.CUSTOM && !customTtsReference) {
+      throw new BadRequestException("Custom TTS reference is required for custom voice mode");
+    }
+
+    const lesson = await this.createAiMentorLessonWithTransaction(
+      {
+        ...data,
+        voiceMode,
+        customTtsReference,
+      },
+      maxDisplayOrder + 1,
+    );
 
     await this.adminLessonRepository.updateLessonCountForChapter(data.chapterId);
 
@@ -481,6 +494,10 @@ export class AdminLessonService {
           completionConditions: data.completionConditions,
           type: data.type,
           name: data?.name,
+          voiceMode: data.voiceMode ?? AI_MENTOR_VOICE_MODE.PRESET,
+          ttsPreset: data.ttsPreset ?? AI_MENTOR_TTS_PRESET.MALE,
+          customTtsReference: data.customTtsReference,
+          language,
         },
         trx,
       );
@@ -523,6 +540,13 @@ export class AdminLessonService {
         data.name = "AI Mentor";
       }
 
+      const voiceMode = data.voiceMode ?? AI_MENTOR_VOICE_MODE.PRESET;
+      const customTtsReference = data.customTtsReference?.trim() || null;
+
+      if (voiceMode === AI_MENTOR_VOICE_MODE.CUSTOM && !customTtsReference) {
+        throw new BadRequestException("Custom TTS reference is required for custom voice mode");
+      }
+
       await this.adminLessonRepository.updateAiMentorLessonData(
         id,
         {
@@ -530,6 +554,10 @@ export class AdminLessonService {
           completionConditions,
           type: data.type,
           name,
+          voiceMode,
+          ttsPreset: data.ttsPreset ?? AI_MENTOR_TTS_PRESET.MALE,
+          customTtsReference,
+          language: data.language,
         },
         trx,
       );
@@ -1165,6 +1193,9 @@ export class AdminLessonService {
               name: lesson.aiMentorName,
               avatarReference: lesson.aiMentorAvatarReference,
               type: lesson.aiMentorType,
+              voiceMode: lesson.aiMentorVoiceMode,
+              ttsPreset: lesson.aiMentorTTSPreset,
+              customTtsReference: lesson.aiMentorCustomTtsReference,
             }
           : undefined,
     };

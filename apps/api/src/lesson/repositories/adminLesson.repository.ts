@@ -28,7 +28,12 @@ import type {
   UpdateLessonBody,
   UpdateQuizLessonBody,
 } from "../lesson.schema";
-import type { AiMentorType, SupportedLanguages } from "@repo/shared";
+import type {
+  AiMentorType,
+  AiMentorTTSPreset,
+  AiMentorVoiceMode,
+  SupportedLanguages,
+} from "@repo/shared";
 import type { LessonActivityLogOption, LessonActivityLogQuestion } from "src/activity-logs/types";
 import type { QuestionType } from "src/questions/schema/question.types";
 
@@ -51,6 +56,12 @@ export class AdminLessonRepository {
         aiMentorName: aiMentorLessons.name,
         aiMentorAvatarReference: aiMentorLessons.avatarReference,
         aiMentorType: aiMentorLessons.type,
+        aiMentorVoiceMode: aiMentorLessons.voiceMode,
+        aiMentorTTSPreset: aiMentorLessons.ttsPreset,
+        aiMentorCustomTtsReference: this.localizationService.getLocalizedSqlField(
+          aiMentorLessons.customTtsReference,
+          language,
+        ),
       })
       .from(lessons)
       .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
@@ -291,12 +302,35 @@ export class AdminLessonRepository {
       completionConditions: string;
       type: AiMentorType;
       name?: string;
+      voiceMode: AiMentorVoiceMode;
+      ttsPreset: AiMentorTTSPreset;
+      customTtsReference?: string | null;
+      language: SupportedLanguages;
     },
     dbInstance: DatabasePg = this.db,
   ) {
+    const customTtsReference =
+      data.customTtsReference === undefined
+        ? undefined
+        : setJsonbField(
+            aiMentorLessons.customTtsReference,
+            data.language,
+            data.customTtsReference,
+            true,
+            true,
+          );
+
     return dbInstance
       .update(aiMentorLessons)
-      .set(data)
+      .set({
+        aiMentorInstructions: data.aiMentorInstructions,
+        completionConditions: data.completionConditions,
+        type: data.type,
+        name: data.name,
+        voiceMode: data.voiceMode,
+        ttsPreset: data.ttsPreset,
+        customTtsReference,
+      })
       .where(eq(aiMentorLessons.lessonId, lessonId));
   }
 
@@ -307,10 +341,31 @@ export class AdminLessonRepository {
       completionConditions: string;
       type: AiMentorType;
       name?: string;
+      voiceMode: AiMentorVoiceMode;
+      ttsPreset: AiMentorTTSPreset;
+      customTtsReference?: string | null;
+      language: SupportedLanguages;
     },
     dbInstance: DatabasePg = this.db,
   ) {
-    return dbInstance.insert(aiMentorLessons).values(data).returning();
+    const customTtsReference =
+      data.customTtsReference === undefined
+        ? undefined
+        : buildJsonbField(data.language, data.customTtsReference, true);
+
+    return dbInstance
+      .insert(aiMentorLessons)
+      .values({
+        lessonId: data.lessonId,
+        aiMentorInstructions: data.aiMentorInstructions,
+        completionConditions: data.completionConditions,
+        type: data.type,
+        name: data.name,
+        voiceMode: data.voiceMode,
+        ttsPreset: data.ttsPreset,
+        customTtsReference,
+      })
+      .returning();
   }
 
   async getMaxDisplayOrder(chapterId: UUIDType) {

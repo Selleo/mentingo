@@ -1,6 +1,6 @@
 import { type Message, useChat } from "@ai-sdk/react";
 import { useParams } from "@remix-run/react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useJudgeLesson } from "~/api/mutations/useJudgeLesson";
@@ -90,6 +90,48 @@ const AiMentorLesson = ({ lesson, lessonLoading }: AiMentorLessonProps) => {
   useEffect(() => {
     setMessages((currentThreadMessages?.data as Message[]) || []);
   }, [currentThreadMessages, setMessages]);
+
+  const appendVoiceMessage = useCallback(
+    (role: Message["role"], content: string) => {
+      const nextContent = content.trim();
+      if (!nextContent) {
+        return;
+      }
+
+      const nextMessage: Message = {
+        id: `voice-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+        role,
+        content: nextContent,
+      };
+
+      setMessages((prev) => [...prev, nextMessage]);
+    },
+    [setMessages],
+  );
+
+  const invalidateCurrentThreadMessages = useCallback(() => {
+    if (!lesson.threadId) {
+      return;
+    }
+
+    void queryClient.invalidateQueries({
+      queryKey: getCurrentThreadMessagesQueryKey(lesson.threadId),
+    });
+  }, [lesson.threadId]);
+
+  const handleVoiceMentorTranscription = useCallback(
+    (text: string) => {
+      appendVoiceMessage("user", text);
+    },
+    [appendVoiceMessage],
+  );
+
+  const handleVoiceMentorResponseCompleted = useCallback(
+    (text: string) => {
+      appendVoiceMessage("assistant", text);
+    },
+    [appendVoiceMessage],
+  );
 
   const handleJudge = async () => {
     if (!lesson.threadId) return;
@@ -204,7 +246,16 @@ const AiMentorLesson = ({ lesson, lessonLoading }: AiMentorLessonProps) => {
 
       {isThreadActive && !isJudgePending && (
         <LessonForm
+          lessonId={lesson.id}
+          mentorName={
+            lesson.aiMentor?.name || t("studentCourseView.lesson.aiMentorLesson.aiMentorName")
+          }
+          mentorAvatarUrl={lesson.aiMentor?.avatarReferenceUrl}
           handleSubmit={handleSubmit}
+          onMentorTranscription={handleVoiceMentorTranscription}
+          onMentorResponseCompleted={handleVoiceMentorResponseCompleted}
+          onAudioInterrupted={invalidateCurrentThreadMessages}
+          onAudioOutputCompleted={invalidateCurrentThreadMessages}
           handleInputChange={handleInputChange}
           input={input}
           setInput={setInput}

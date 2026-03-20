@@ -54,6 +54,7 @@ import type {
   ThreadOwnershipBody,
 } from "src/ai/utils/ai.schema";
 import type { UUIDType } from "src/common";
+import type { CurrentUser } from "src/common/types/current-user.type";
 import type { CourseTranslationType } from "src/courses/types/course.types";
 
 @Injectable()
@@ -108,16 +109,15 @@ export class AiService {
     )();
   }
 
-  async streamMessage(data: StreamChatBody, model: OpenAIModels, userId: UUIDType) {
+  async streamMessage(data: StreamChatBody, model: OpenAIModels, currentUser: CurrentUser) {
     return observe(
       async () => {
-        const tenantId = dbAls.getStore()?.tenantId;
         updateActiveTrace({
           sessionId: data.threadId,
-          userId: tenantId,
+          userId: currentUser.tenantId,
         });
 
-        await this.isThreadActive(data.threadId, userId);
+        await this.isThreadActive(data.threadId, currentUser.userId);
         await this.summaryService.summarizeThreadOnTokenThreshold(data.threadId);
 
         const prompt = await this.promptService.buildPrompt(data.threadId, data.content, data.id);
@@ -138,10 +138,9 @@ export class AiService {
             const mentorTokenCount = this.tokenService.countTokens(model, event.text);
             const userTokenCount = this.tokenService.countTokens(model, data.content);
 
-            const tenantId = dbAls.getStore()?.tenantId;
-            if (!tenantId) throw new Error("Missing tenant context in onFinish");
+            if (!currentUser.tenantId) throw new Error("Missing tenant context in onFinish");
 
-            await this.tenantRunner.runWithTenant(tenantId, async () => {
+            await this.tenantRunner.runWithTenant(currentUser.tenantId, async () => {
               await this.messageService.createMessages(
                 { ...data, role: MESSAGE_ROLE.USER, tokenCount: userTokenCount },
                 {

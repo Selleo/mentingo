@@ -1,4 +1,4 @@
-import { AI_MENTOR_TYPE } from "@repo/shared";
+import { AI_MENTOR_TTS_PRESET, AI_MENTOR_TYPE, AI_MENTOR_VOICE_MODE } from "@repo/shared";
 import { z } from "zod";
 
 import {
@@ -18,68 +18,85 @@ export const stripHtmlTags = (str: string): string => {
 };
 
 export const aiMentorLessonFormSchema = (t: TFunction) =>
-  z.object({
-    title: z
-      .string()
-      .min(1, { message: t("adminCourseView.curriculum.lesson.validation.titleRequired") })
-      .max(255, { message: t("adminCourseView.curriculum.lesson.validation.titleMaxLength") }),
-    description: z
-      .string()
-      .max(MAX_AI_MENTOR_TEXT_LENGTH, {
-        message: t("adminCourseView.curriculum.lesson.validation.taskDescriptionMaxLength", {
-          count: MAX_AI_MENTOR_TEXT_LENGTH,
-        }),
-      })
-      .optional(),
-    aiMentorInstructions: z
-      .string()
-      .min(1, {
-        message: t("adminCourseView.curriculum.lesson.validation.aiMentorInstructionsRequired"),
-      })
-      .refine(
-        (val) => {
-          const textContent = stripHtmlTags(val);
-          return textContent.length > 0;
-        },
-        {
+  z
+    .object({
+      title: z
+        .string()
+        .min(1, { message: t("adminCourseView.curriculum.lesson.validation.titleRequired") })
+        .max(255, { message: t("adminCourseView.curriculum.lesson.validation.titleMaxLength") }),
+      description: z
+        .string()
+        .max(MAX_AI_MENTOR_TEXT_LENGTH, {
+          message: t("adminCourseView.curriculum.lesson.validation.taskDescriptionMaxLength", {
+            count: MAX_AI_MENTOR_TEXT_LENGTH,
+          }),
+        })
+        .optional(),
+      aiMentorInstructions: z
+        .string()
+        .min(1, {
           message: t("adminCourseView.curriculum.lesson.validation.aiMentorInstructionsRequired"),
-        },
-      )
-      .refine(
-        (val) => {
-          const textContent = stripHtmlTags(val);
-          return textContent.length <= 20_000;
-        },
-        {
-          message: t("adminCourseView.curriculum.lesson.validation.aiMentorInstructionsMaxLength"),
-        },
-      ),
-    completionConditions: z
-      .string()
-      .min(1, {
-        message: t("adminCourseView.curriculum.lesson.validation.completionConditionsRequired"),
-      })
-      .refine(
-        (val) => {
-          const textContent = stripHtmlTags(val);
-          return textContent.length > 0;
-        },
-        {
+        })
+        .refine(
+          (val) => {
+            const textContent = stripHtmlTags(val);
+            return textContent.length > 0;
+          },
+          {
+            message: t("adminCourseView.curriculum.lesson.validation.aiMentorInstructionsRequired"),
+          },
+        )
+        .refine(
+          (val) => {
+            const textContent = stripHtmlTags(val);
+            return textContent.length <= 20_000;
+          },
+          {
+            message: t(
+              "adminCourseView.curriculum.lesson.validation.aiMentorInstructionsMaxLength",
+            ),
+          },
+        ),
+      completionConditions: z
+        .string()
+        .min(1, {
           message: t("adminCourseView.curriculum.lesson.validation.completionConditionsRequired"),
-        },
-      )
-      .refine(
-        (val) => {
-          const textContent = stripHtmlTags(val);
-          return textContent.length <= 20_000;
-        },
-        {
-          message: t("adminCourseView.curriculum.lesson.validation.completionConditionsMaxLength"),
-        },
-      ),
-    type: z.nativeEnum(AI_MENTOR_TYPE).default(AI_MENTOR_TYPE.MENTOR),
-    name: z.string(),
-  });
+        })
+        .refine(
+          (val) => {
+            const textContent = stripHtmlTags(val);
+            return textContent.length > 0;
+          },
+          {
+            message: t("adminCourseView.curriculum.lesson.validation.completionConditionsRequired"),
+          },
+        )
+        .refine(
+          (val) => {
+            const textContent = stripHtmlTags(val);
+            return textContent.length <= 20_000;
+          },
+          {
+            message: t(
+              "adminCourseView.curriculum.lesson.validation.completionConditionsMaxLength",
+            ),
+          },
+        ),
+      type: z.nativeEnum(AI_MENTOR_TYPE).default(AI_MENTOR_TYPE.MENTOR),
+      name: z.string(),
+      voiceMode: z.nativeEnum(AI_MENTOR_VOICE_MODE).default(AI_MENTOR_VOICE_MODE.PRESET),
+      ttsPreset: z.nativeEnum(AI_MENTOR_TTS_PRESET).default(AI_MENTOR_TTS_PRESET.MALE),
+      customTtsReference: z.string().nullable().optional(),
+    })
+    .superRefine((values, ctx) => {
+      if (values.voiceMode === AI_MENTOR_VOICE_MODE.CUSTOM && !values.customTtsReference?.trim()) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t("adminCourseView.curriculum.lesson.validation.customTTSReferenceRequired"),
+          path: ["customTtsReference"],
+        });
+      }
+    });
 
 export const aiMentorLessonFileSchema = (t: TFunction) =>
   z.object({

@@ -1,4 +1,9 @@
-import { AI_MENTOR_TYPE, SUPPORTED_LANGUAGES } from "@repo/shared";
+import {
+  AI_MENTOR_TTS_PRESET,
+  AI_MENTOR_TYPE,
+  AI_MENTOR_VOICE_MODE,
+  SUPPORTED_LANGUAGES,
+} from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
 import { THREAD_STATUS } from "src/ai/utils/ai.type";
@@ -75,6 +80,9 @@ export const aiMentorLessonSchema = Type.Object({
   completionConditions: Type.String(),
   type: Type.Enum(AI_MENTOR_TYPE),
   avatarReference: Type.Union([Type.String(), Type.Null()]),
+  voiceMode: Type.Enum(AI_MENTOR_VOICE_MODE),
+  ttsPreset: Type.Enum(AI_MENTOR_TTS_PRESET),
+  customTtsReference: Type.Union([Type.String(), Type.Null()]),
 });
 
 export const lessonResourceSchema = Type.Object({
@@ -127,6 +135,9 @@ export const createAiMentorLessonSchema = Type.Intersect([
     completionConditions: Type.String(),
     type: Type.Enum(AI_MENTOR_TYPE),
     name: Type.Optional(Type.String()),
+    voiceMode: Type.Optional(Type.Enum(AI_MENTOR_VOICE_MODE)),
+    ttsPreset: Type.Optional(Type.Enum(AI_MENTOR_TTS_PRESET)),
+    customTtsReference: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   }),
 ]);
 export const updateAiMentorLessonSchema = Type.Intersect([

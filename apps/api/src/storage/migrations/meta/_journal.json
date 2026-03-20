@@ -708,6 +708,13 @@
       "when": 1773663138647,
       "tag": "0100_enable_tenant_rls_for_customizable_fields",
       "breakpoints": true
+    },
+    {
+      "idx": 101,
+      "version": "7",
+      "when": 1774007927210,
+      "tag": "0101_added_voice_mode_ai_mentor",
+      "breakpoints": true
     }
   ]
 }

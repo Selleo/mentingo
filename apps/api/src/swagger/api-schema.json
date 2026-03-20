@@ -17173,6 +17173,40 @@
                                         "type": "null"
                                       }
                                     ]
+                                  },
+                                  "voiceMode": {
+                                    "anyOf": [
+                                      {
+                                        "const": "preset",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "custom",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "ttsPreset": {
+                                    "anyOf": [
+                                      {
+                                        "const": "male",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "female",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "customTtsReference": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
                                   }
                                 },
                                 "required": [
@@ -17181,7 +17215,10 @@
                                   "aiMentorInstructions",
                                   "completionConditions",
                                   "type",
-                                  "avatarReference"
+                                  "avatarReference",
+                                  "voiceMode",
+                                  "ttsPreset",
+                                  "customTtsReference"
                                 ]
                               },
                               {
@@ -20027,6 +20064,40 @@
                             "type": "null"
                           }
                         ]
+                      },
+                      "voiceMode": {
+                        "anyOf": [
+                          {
+                            "const": "preset",
+                            "type": "string"
+                          },
+                          {
+                            "const": "custom",
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "ttsPreset": {
+                        "anyOf": [
+                          {
+                            "const": "male",
+                            "type": "string"
+                          },
+                          {
+                            "const": "female",
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "customTtsReference": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
                       }
                     },
                     "required": [
@@ -20035,7 +20106,10 @@
                       "aiMentorInstructions",
                       "completionConditions",
                       "type",
-                      "avatarReference"
+                      "avatarReference",
+                      "voiceMode",
+                      "ttsPreset",
+                      "customTtsReference"
                     ]
                   },
                   {
@@ -20389,6 +20463,40 @@
                             "type": "null"
                           }
                         ]
+                      },
+                      "voiceMode": {
+                        "anyOf": [
+                          {
+                            "const": "preset",
+                            "type": "string"
+                          },
+                          {
+                            "const": "custom",
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "ttsPreset": {
+                        "anyOf": [
+                          {
+                            "const": "male",
+                            "type": "string"
+                          },
+                          {
+                            "const": "female",
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "customTtsReference": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
                       }
                     },
                     "required": [
@@ -20397,7 +20505,10 @@
                       "aiMentorInstructions",
                       "completionConditions",
                       "type",
-                      "avatarReference"
+                      "avatarReference",
+                      "voiceMode",
+                      "ttsPreset",
+                      "customTtsReference"
                     ]
                   },
                   {
@@ -20447,6 +20558,40 @@
               },
               "name": {
                 "type": "string"
+              },
+              "voiceMode": {
+                "anyOf": [
+                  {
+                    "const": "preset",
+                    "type": "string"
+                  },
+                  {
+                    "const": "custom",
+                    "type": "string"
+                  }
+                ]
+              },
+              "ttsPreset": {
+                "anyOf": [
+                  {
+                    "const": "male",
+                    "type": "string"
+                  },
+                  {
+                    "const": "female",
+                    "type": "string"
+                  }
+                ]
+              },
+              "customTtsReference": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -20757,6 +20902,40 @@
                                 "type": "null"
                               }
                             ]
+                          },
+                          "voiceMode": {
+                            "anyOf": [
+                              {
+                                "const": "preset",
+                                "type": "string"
+                              },
+                              {
+                                "const": "custom",
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "ttsPreset": {
+                            "anyOf": [
+                              {
+                                "const": "male",
+                                "type": "string"
+                              },
+                              {
+                                "const": "female",
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "customTtsReference": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
                           }
                         },
                         "required": [
@@ -20765,7 +20944,10 @@
                           "aiMentorInstructions",
                           "completionConditions",
                           "type",
-                          "avatarReference"
+                          "avatarReference",
+                          "voiceMode",
+                          "ttsPreset",
+                          "customTtsReference"
                         ]
                       },
                       {
@@ -20808,6 +20990,40 @@
                   },
                   "name": {
                     "type": "string"
+                  },
+                  "voiceMode": {
+                    "anyOf": [
+                      {
+                        "const": "preset",
+                        "type": "string"
+                      },
+                      {
+                        "const": "custom",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "ttsPreset": {
+                    "anyOf": [
+                      {
+                        "const": "male",
+                        "type": "string"
+                      },
+                      {
+                        "const": "female",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "customTtsReference": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
                   }
                 },
                 "required": [
@@ -21733,6 +21949,40 @@
                                 "type": "null"
                               }
                             ]
+                          },
+                          "voiceMode": {
+                            "anyOf": [
+                              {
+                                "const": "preset",
+                                "type": "string"
+                              },
+                              {
+                                "const": "custom",
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "ttsPreset": {
+                            "anyOf": [
+                              {
+                                "const": "male",
+                                "type": "string"
+                              },
+                              {
+                                "const": "female",
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "customTtsReference": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
                           }
                         },
                         "required": [
@@ -21741,7 +21991,10 @@
                           "aiMentorInstructions",
                           "completionConditions",
                           "type",
-                          "avatarReference"
+                          "avatarReference",
+                          "voiceMode",
+                          "ttsPreset",
+                          "customTtsReference"
                         ]
                       },
                       {
@@ -23187,6 +23440,40 @@
                                   "type": "null"
                                 }
                               ]
+                            },
+                            "voiceMode": {
+                              "anyOf": [
+                                {
+                                  "const": "preset",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "custom",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "ttsPreset": {
+                              "anyOf": [
+                                {
+                                  "const": "male",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "female",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "customTtsReference": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
                             }
                           },
                           "required": [
@@ -23195,7 +23482,10 @@
                             "aiMentorInstructions",
                             "completionConditions",
                             "type",
-                            "avatarReference"
+                            "avatarReference",
+                            "voiceMode",
+                            "ttsPreset",
+                            "customTtsReference"
                           ]
                         },
                         {
@@ -23606,6 +23896,40 @@
                                       "type": "null"
                                     }
                                   ]
+                                },
+                                "voiceMode": {
+                                  "anyOf": [
+                                    {
+                                      "const": "preset",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "custom",
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "ttsPreset": {
+                                  "anyOf": [
+                                    {
+                                      "const": "male",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "female",
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "customTtsReference": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
                                 }
                               },
                               "required": [
@@ -23614,7 +23938,10 @@
                                 "aiMentorInstructions",
                                 "completionConditions",
                                 "type",
-                                "avatarReference"
+                                "avatarReference",
+                                "voiceMode",
+                                "ttsPreset",
+                                "customTtsReference"
                               ]
                             },
                             {
@@ -25870,10 +26197,18 @@
             "properties": {
               "enabled": {
                 "type": "boolean"
+              },
+              "courseGenerationEnabled": {
+                "type": "boolean"
+              },
+              "voiceMentorEnabled": {
+                "type": "boolean"
               }
             },
             "required": [
-              "enabled"
+              "enabled",
+              "courseGenerationEnabled",
+              "voiceMentorEnabled"
             ]
           }
         },

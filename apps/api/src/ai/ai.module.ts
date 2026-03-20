@@ -31,6 +31,6 @@ import { StudentLessonProgressModule } from "src/studentLessonProgress/studentLe
     RagService,
     RagRepository,
   ],
-  exports: [AiService, AiRepository],
+  exports: [AiService, AiRepository, ThreadService],
 })
 export class AiModule {}

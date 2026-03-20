@@ -15,6 +15,11 @@ type TranscriptionProps = {
   onLevelChange: (level: number) => void;
 };
 
+type StopAudioEventPayload = {
+  payload?: string;
+  voiceAction?: string | null;
+};
+
 export function useTranscription({ setInput, onLevelChange }: TranscriptionProps) {
   const streamerRef = useRef<RealtimePCMStreamerWorklet | null>(null);
   const socketRef = useRef<Socket | null>(null);
@@ -35,15 +40,21 @@ export function useTranscription({ setInput, onLevelChange }: TranscriptionProps
     socketRef.current = acquireSocket();
     socketRef.current.connect();
 
-    socketRef.current.on(VOICE_SOCKET_EVENT.STOP_AUDIO, (data) => {
+    const handleStopAudio = (data: StopAudioEventPayload) => {
+      if (data?.voiceAction !== VOICE_ACTION.TRANSCRIPT) {
+        return;
+      }
+
       const payload = data?.payload;
       if (typeof payload === "string" && payload.length > 0) {
         setInput((prev) => prev + payload);
       }
-    });
+    };
+
+    socketRef.current.on(VOICE_SOCKET_EVENT.STOP_AUDIO, handleStopAudio);
 
     return () => {
-      socketRef.current?.off(VOICE_SOCKET_EVENT.STOP_AUDIO);
+      socketRef.current?.off(VOICE_SOCKET_EVENT.STOP_AUDIO, handleStopAudio);
       void streamerRef.current?.stop().catch(() => undefined);
       streamerRef.current = null;
       socketRef.current = null;

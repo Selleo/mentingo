@@ -17,6 +17,7 @@ import {
   stripePublishableKeyResponseSchema,
   isEnvSetupResponseSchema,
   isConfiguredResponseSchema,
+  lumaConfiguredResponseSchema,
 } from "src/env/env.schema";
 import { EnvService } from "src/env/services/env.service";
 import { USER_ROLES } from "src/user/schemas/userRoles";
@@ -77,7 +78,7 @@ export class EnvController {
 
   @Get("luma")
   @Validate({
-    response: baseResponse(isConfiguredResponseSchema),
+    response: baseResponse(lumaConfiguredResponseSchema),
   })
   async getLumaConfigured() {
     return new BaseResponse(await this.envService.getLumaConfigured());
