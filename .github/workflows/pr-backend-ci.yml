@@ -29,7 +29,7 @@ env:
   AWS_ACCESS_KEY_ID: "minioadmin"
   AWS_SECRET_ACCESS_KEY: "minioadmin"
   AWS_BUCKET_NAME: "test-bucket"
-  AWS_ENDPOINT_URL: "http://localhost:9000"
+  AWS_ENDPOINT_URL: "http://localhost:9100"
 
   PUPPETEER_EXECUTABLE_PATH: "/usr/bin/google-chrome"
 
@@ -158,23 +158,43 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-      minio:
-        image: quay.io/minio/minio:latest
-        env:
-          MINIO_ROOT_USER: minioadmin
-          MINIO_ROOT_PASSWORD: minioadmin
-        ports:
-          - 9000:9000
-        options: >-
-          --health-cmd "curl -f http://localhost:9000/minio/health/live || exit 1"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 5
-        command: server /data --console-address ":9001"
 
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
+
+      - name: Start MinIO
+        run: |
+          docker run -d --name minio \
+            -p 9100:9000 \
+            -e MINIO_ROOT_USER=minioadmin \
+            -e MINIO_ROOT_PASSWORD=minioadmin \
+            --health-cmd "curl -f http://localhost:9000/minio/health/live || exit 1" \
+            --health-interval 5s \
+            --health-timeout 5s \
+            --health-retries 5 \
+            quay.io/minio/minio:latest server /data --console-address ":9001"
+
+          health_status="starting"
+          for i in {1..30}; do
+            health_status="$(docker inspect --format='{{.State.Health.Status}}' minio)"
+            if [ "$health_status" = "healthy" ]; then
+              echo "MinIO is ready"
+              break
+            fi
+            if [ "$health_status" = "unhealthy" ]; then
+              echo "MinIO became unhealthy"
+              docker logs minio || true
+              exit 1
+            fi
+            sleep 2
+          done
+
+          if [ "$health_status" != "healthy" ]; then
+            echo "MinIO failed to become healthy in time"
+            docker logs minio || true
+            exit 1
+          fi
 
       - name: Setup MinIO bucket
         run: |
@@ -188,6 +208,8 @@ jobs:
             /bin/sh -ec '
               mc alias set local "$S3_ENDPOINT" "$S3_ACCESS_KEY_ID" "$S3_SECRET_ACCESS_KEY"
               mc mb --ignore-existing "local/$S3_BUCKET_NAME"
+              echo "{\"CORSRules\":[{\"AllowedOrigins\":[\"*\"],\"AllowedMethods\":[\"GET\",\"PUT\",\"POST\",\"DELETE\"],\"AllowedHeaders\":[\"*\"]}]}" > /tmp/cors.json
+              mc cors set "local/$S3_BUCKET_NAME" /tmp/cors.json || true
             '
 
       - uses: actions/setup-node@v4
@@ -209,3 +231,7 @@ jobs:
 
       - name: Run e2e tests
         run: pnpm --filter=api test:e2e
+
+      - name: Stop MinIO
+        if: always()
+        run: docker rm -f minio || true
