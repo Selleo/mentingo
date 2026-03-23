@@ -1,3 +1,17 @@
+<a name="v4.6.1"></a>
+
+## [v4.6.1] - 23.03.2026
+
+### Features:
+
+- add fullscreen mode to PDF previews for easier reading ([#1375](https://github.com/Selleo/mentingo/issues/1375))
+
+### Bug Fixes:
+
+- improved access permissions, signup page background, post-login redirects and certificate download ([#1366](https://github.com/Selleo/mentingo/issues/1366))
+
+- certificate download functionality has correct background ([#1364](https://github.com/Selleo/mentingo/issues/1364))
+
 <a name="v4.6.0"></a>
 
 ## [v4.6.0] - 17.03.2026
@@ -15,6 +29,10 @@
 ### Bug Fixes:
 
 - video player not working on Firefox ([#1355](https://github.com/Selleo/mentingo/issues/1355))
+
+### Documentation:
+
+- update changelog for version v4.6.0
 
 <a name="v4.5.1"></a>
 
@@ -2524,7 +2542,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.6.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.6.1...HEAD
+[v4.6.1]: https://github.com/Selleo/mentingo/compare/v4.6.0...v4.6.1
 [v4.6.0]: https://github.com/Selleo/mentingo/compare/v4.5.1...v4.6.0
 [v4.5.1]: https://github.com/Selleo/mentingo/compare/v4.5.0...v4.5.1
 [v4.5.0]: https://github.com/Selleo/mentingo/compare/v4.4.0...v4.5.0
