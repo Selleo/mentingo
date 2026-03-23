@@ -9,15 +9,15 @@ import { ApiClient } from "../api-client";
 
 import { handleAuthSuccess } from "./helpers/handleAuthSuccess";
 
-import type { LoginBody } from "../generated-api";
+import type { CreatePasswordBody } from "../generated-api";
 import type { ApiErrorResponse } from "../types";
 import type { AxiosError } from "axios";
 
-type LoginUserOptions = {
-  data: LoginBody;
+type CreatePasswordOptions = {
+  data: CreatePasswordBody;
 };
 
-export function useLoginUser() {
+export function useCreatePassword() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const setLoggedIn = useAuthStore((state) => state.setLoggedIn);
@@ -25,20 +25,19 @@ export function useLoginUser() {
   const setHasVerifiedMFA = useCurrentUserStore((state) => state.setHasVerifiedMFA);
 
   return useMutation({
-    mutationFn: async (options: LoginUserOptions) => {
-      const response = await ApiClient.api.authControllerLogin(options.data);
-
+    mutationFn: async (options: CreatePasswordOptions) => {
+      const response = await ApiClient.api.authControllerCreatePassword(options.data);
       return response.data;
     },
     onSuccess: ({ data }) => {
       handleAuthSuccess({ user: data, setLoggedIn, setCurrentUser, setHasVerifiedMFA });
     },
     onError: (error: AxiosError) => {
-      const { message } = error.response?.data as ApiErrorResponse;
+      const { message } = (error.response?.data as ApiErrorResponse) || {};
 
       toast({
         variant: "destructive",
-        description: t(message),
+        description: message ? t(message) : t("common.error"),
       });
     },
   });

@@ -4,7 +4,8 @@ import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
-import { useCreateNewPassword } from "~/api/mutations/useCreateNewPassword";
+import { useCreatePassword } from "~/api/mutations/useCreatePassword";
+import { useResetPassword } from "~/api/mutations/useResetPassword";
 import PasswordValidationDisplay from "~/components/PasswordValidation/PasswordValidationDisplay";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
@@ -43,9 +44,8 @@ export default function CreateNewPasswordPage() {
   const resetToken = searchParams.get("resetToken");
   const createToken = searchParams.get("createToken");
   const email = searchParams.get("email");
-  const { mutateAsync: createNewPassword } = useCreateNewPassword({
-    isCreate: !resetToken,
-  });
+  const { mutateAsync: createPassword } = useCreatePassword();
+  const { mutateAsync: resetPassword } = useResetPassword();
   const { t } = useTranslation();
 
   const methods = useForm<CreateNewPasswordFormValues>({
@@ -73,7 +73,7 @@ export default function CreateNewPasswordPage() {
     }
 
     if (resetToken) {
-      createNewPassword({
+      resetPassword({
         data: { newPassword: data.newPassword, resetToken, email },
       }).then(() => {
         toast({
@@ -84,7 +84,7 @@ export default function CreateNewPasswordPage() {
     }
 
     if (createToken) {
-      createNewPassword({
+      createPassword({
         data: {
           password: data.newPassword,
           createToken,
@@ -97,7 +97,6 @@ export default function CreateNewPasswordPage() {
         toast({
           description: t("changePasswordView.toast.passwordCreatedSuccessfully"),
         });
-        navigate("/auth/login");
       });
     }
   };

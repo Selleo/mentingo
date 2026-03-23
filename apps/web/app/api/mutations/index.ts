@@ -1,6 +1,6 @@
 export { useChangePassword } from "./useChangePassword";
 export { useCreateCourse } from "./useCreateCourse";
-export { useCreateNewPassword } from "./useCreateNewPassword";
+export { useCreatePassword } from "./useCreatePassword";
 export { useCreateUser } from "./admin/useCreateUser";
 export { useDeleteCategory } from "./admin/useDeleteCategory";
 export { useDeleteManyCategories } from "./admin/useDeleteManyCategories";
@@ -18,6 +18,7 @@ export { useUpdateUser } from "./useUpdateUser";
 export { useUpsertUserDetails } from "./useUpsertUserDetails";
 export { useUpdateUserProfile } from "./useUpdateUserProfile";
 export { useRetakeQuiz } from "./useRetakeQuiz";
+export { useResetPassword } from "./useResetPassword";
 export { useQuizRetakeStatus } from "./useQuizRetakeStatus";
 export { useSetupMFA } from "./useSetupMFA";
 export { useVerifyMFA } from "./useVerifyMFA";
