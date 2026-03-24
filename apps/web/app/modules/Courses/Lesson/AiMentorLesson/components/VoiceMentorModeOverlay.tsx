@@ -50,6 +50,7 @@ export function VoiceMentorModeOverlay({
   };
   const meta = stateMeta[state];
   const isSpeaking = state === VOICE_MODE_STATE.SPEAKING;
+  const isThinking = state === VOICE_MODE_STATE.THINKING;
   const showVoiceBars = state === VOICE_MODE_STATE.LISTENING || state === VOICE_MODE_STATE.SPEAKING;
   const speakingPulsePeak = 1 + Math.min(0.06, voiceLevel / 1000);
 
@@ -83,20 +84,26 @@ export function VoiceMentorModeOverlay({
                 <motion.div
                   className="absolute size-56 rounded-full border-2 border-primary/70"
                   animate={
-                    isSpeaking
+                    isSpeaking || isThinking
                       ? {
-                          scale: [1, speakingPulsePeak, 1.01, speakingPulsePeak + 0.01, 1],
-                          opacity: [0.45, 0.62, 0.5, 0.62, 0.45],
+                          scale: isThinking
+                            ? [1, 1, 1.03, 1.03, 1.06, 1.06, 1]
+                            : [1, speakingPulsePeak, 1.01, speakingPulsePeak + 0.01, 1],
+                          opacity: isThinking
+                            ? [0.36, 0.36, 0.46, 0.46, 0.56, 0.56, 0.36]
+                            : [0.45, 0.62, 0.5, 0.62, 0.45],
                         }
                       : undefined
                   }
                   transition={
-                    isSpeaking
+                    isSpeaking || isThinking
                       ? {
-                          duration: 0.58,
+                          duration: isThinking ? 2.4 : 0.58,
                           repeat: Infinity,
                           ease: "linear",
-                          times: [0, 0.18, 0.45, 0.72, 1],
+                          times: isThinking
+                            ? [0, 0.12, 0.28, 0.42, 0.58, 0.72, 1]
+                            : [0, 0.18, 0.45, 0.72, 1],
                         }
                       : undefined
                   }
@@ -104,21 +111,27 @@ export function VoiceMentorModeOverlay({
                 <motion.div
                   className="absolute size-48 rounded-full border-2 border-primary/50"
                   animate={
-                    isSpeaking
+                    isSpeaking || isThinking
                       ? {
-                          scale: [1, speakingPulsePeak + 0.02, 1.01, speakingPulsePeak + 0.015, 1],
-                          opacity: [0.32, 0.5, 0.36, 0.5, 0.32],
+                          scale: isThinking
+                            ? [1, 1, 1.04, 1.04, 1.08, 1.08, 1]
+                            : [1, speakingPulsePeak + 0.02, 1.01, speakingPulsePeak + 0.015, 1],
+                          opacity: isThinking
+                            ? [0.22, 0.22, 0.32, 0.32, 0.42, 0.42, 0.22]
+                            : [0.32, 0.5, 0.36, 0.5, 0.32],
                         }
                       : undefined
                   }
                   transition={
-                    isSpeaking
+                    isSpeaking || isThinking
                       ? {
-                          duration: 0.58,
+                          duration: isThinking ? 2.4 : 0.58,
                           repeat: Infinity,
                           ease: "linear",
-                          times: [0, 0.18, 0.45, 0.72, 1],
-                          delay: 0.07,
+                          times: isThinking
+                            ? [0, 0.12, 0.28, 0.42, 0.58, 0.72, 1]
+                            : [0, 0.18, 0.45, 0.72, 1],
+                          delay: isThinking ? 0.2 : 0.07,
                         }
                       : undefined
                   }
@@ -126,8 +139,25 @@ export function VoiceMentorModeOverlay({
 
                 <motion.div
                   className={cn(
-                    "relative z-10 flex size-44 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-primary-500 via-primary-600 to-primary-800 shadow-2xl shadow-primary-700/30",
+                    "relative z-10 flex size-44 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-primary-500 via-primary-600 to-primary-800 shadow-xl shadow-primary-100",
                   )}
+                  animate={
+                    isThinking
+                      ? {
+                          scale: [1, 1, 1.02, 1.02, 1.035, 1.035, 1],
+                        }
+                      : undefined
+                  }
+                  transition={
+                    isThinking
+                      ? {
+                          duration: 2.4,
+                          repeat: Infinity,
+                          ease: "easeInOut",
+                          times: [0, 0.12, 0.28, 0.42, 0.58, 0.72, 1],
+                        }
+                      : undefined
+                  }
                 >
                   <motion.div
                     className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
@@ -142,8 +172,16 @@ export function VoiceMentorModeOverlay({
                       </div>
                     ) : state === VOICE_MODE_STATE.THINKING ? (
                       <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                        animate={{
+                          scale: [1, 1, 1.1, 1.1, 1.16, 1.16, 1],
+                          opacity: [0.82, 0.82, 0.92, 0.92, 1, 1, 0.82],
+                        }}
+                        transition={{
+                          duration: 2.4,
+                          repeat: Infinity,
+                          ease: "easeInOut",
+                          times: [0, 0.12, 0.28, 0.42, 0.58, 0.72, 1],
+                        }}
                       >
                         <Sparkles className="size-12 text-white" />
                       </motion.div>
