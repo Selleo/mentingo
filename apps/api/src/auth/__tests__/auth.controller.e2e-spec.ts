@@ -580,7 +580,7 @@ describe("AuthController (e2e)", () => {
 
       await db.insert(createTokens).values({
         userId: user.id,
-        createToken: token,
+        createToken: hashToken(token),
         expiryDate,
         reminderCount: 0,
       });
