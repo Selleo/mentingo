@@ -404,7 +404,7 @@ describe("AuthController (e2e)", () => {
         .expect(201);
 
       expect(response.body.data).toEqual({
-        message: "Password reset link sent",
+        message: "forgotPasswordView.toast.resetPassword",
       });
     });
 

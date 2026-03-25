@@ -190,10 +190,6 @@ export class UserService {
       .from(users)
       .where(and(eq(users.email, email), isNull(users.deletedAt)));
 
-    if (!user) {
-      throw new NotFoundException("User not found");
-    }
-
     return user;
   }
 
