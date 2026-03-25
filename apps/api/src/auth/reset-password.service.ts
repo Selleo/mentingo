@@ -1,7 +1,8 @@
 import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { and, eq, gte, sql } from "drizzle-orm";
 
-import { DatabasePg } from "src/common";
+import { hashToken } from "src/auth/utils/hash-auth-token";
+import { DatabasePg, type UUIDType } from "src/common";
 import { resetTokens, users } from "src/storage/schema";
 
 @Injectable()
@@ -10,6 +11,7 @@ export class ResetPasswordService {
 
   public async getOneByTokenAndEmail(token: string, email: string) {
     const normalizedEmail = email.trim().toLowerCase();
+    const hashedToken = hashToken(token);
 
     const [resetToken] = await this.db
       .select({ tokenRecord: resetTokens })
@@ -17,7 +19,7 @@ export class ResetPasswordService {
       .innerJoin(users, eq(users.id, resetTokens.userId))
       .where(
         and(
-          eq(resetTokens.resetToken, token),
+          eq(resetTokens.resetToken, hashedToken),
           gte(resetTokens.expiryDate, new Date()),
           sql`lower(${users.email}) = ${normalizedEmail}`,
         ),
@@ -28,10 +30,10 @@ export class ResetPasswordService {
     return resetToken.tokenRecord;
   }
 
-  public async deleteToken(token: string) {
+  public async deleteToken(tokenId: UUIDType) {
     const [deletedToken] = await this.db
       .delete(resetTokens)
-      .where(eq(resetTokens.resetToken, token))
+      .where(eq(resetTokens.id, tokenId))
       .returning();
 
     if (!deletedToken) throw new NotFoundException("Token not found");

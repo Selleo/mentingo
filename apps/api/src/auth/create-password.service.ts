@@ -1,6 +1,7 @@
 import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { and, eq, gte, sql } from "drizzle-orm";
 
+import { hashToken } from "src/auth/utils/hash-auth-token";
 import { DatabasePg } from "src/common";
 import hashPassword from "src/common/helpers/hashPassword";
 import { createTokens, credentials, users } from "src/storage/schema";
@@ -13,6 +14,7 @@ export class CreatePasswordService {
 
   public async getOneByTokenAndEmail(token: string, email: string) {
     const normalizedEmail = email.trim().toLowerCase();
+    const hashedToken = hashToken(token);
 
     const [createToken] = await this.db
       .select({ tokenRecord: createTokens })
@@ -20,7 +22,7 @@ export class CreatePasswordService {
       .innerJoin(users, eq(users.id, createTokens.userId))
       .where(
         and(
-          eq(createTokens.createToken, token),
+          eq(createTokens.createToken, hashedToken),
           gte(createTokens.expiryDate, new Date()),
           sql`lower(${users.email}) = ${normalizedEmail}`,
         ),
@@ -31,10 +33,10 @@ export class CreatePasswordService {
     return createToken.tokenRecord;
   }
 
-  public async deleteToken(token: string) {
+  public async deleteToken(tokenId: UUIDType) {
     const [deletedToken] = await this.db
       .delete(createTokens)
-      .where(eq(createTokens.createToken, token))
+      .where(eq(createTokens.id, tokenId))
       .returning();
 
     if (!deletedToken) throw new NotFoundException("Token not found");

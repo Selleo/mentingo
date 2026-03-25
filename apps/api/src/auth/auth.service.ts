@@ -1,5 +1,3 @@
-import { createHmac } from "node:crypto";
-
 import {
   BadRequestException,
   ConflictException,
@@ -25,6 +23,7 @@ import { nanoid } from "nanoid";
 import { authenticator } from "otplib";
 
 import { CORS_ORIGIN, MAGIC_LINK_EXPIRATION_TIME } from "src/auth/consts";
+import { hashToken } from "src/auth/utils/hash-auth-token";
 import { DatabasePg, type UUIDType } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
 import { getEmailSubject } from "src/common/emails/translations";
@@ -69,8 +68,6 @@ import type { ProviderLoginUserType } from "src/utils/types/provider-login-user.
 
 @Injectable()
 export class AuthService {
-  private readonly ENCRYPTION_KEY: Buffer;
-
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
     @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
@@ -84,9 +81,7 @@ export class AuthService {
     private readonly outboxPublisher: OutboxPublisher,
     private tokenService: TokenService,
     private readonly supportModeService: SupportModeService,
-  ) {
-    this.ENCRYPTION_KEY = Buffer.from(process.env.MASTER_KEY!, "base64");
-  }
+  ) {}
 
   public async register({
     email,
@@ -521,12 +516,13 @@ export class AuthService {
     if (!user) throw new BadRequestException("Email not found");
 
     const resetToken = nanoid(64);
+    const hashedResetToken = hashToken(resetToken);
     const expiryDate = new Date();
     expiryDate.setHours(expiryDate.getHours() + 1);
 
     await this.db.insert(resetTokens).values({
       userId: user.id,
-      resetToken,
+      resetToken: hashedResetToken,
       expiryDate,
     });
 
@@ -584,7 +580,7 @@ export class AuthService {
     await this.db
       .insert(credentials)
       .values({ userId: createToken.userId, password: hashedPassword });
-    await this.createPasswordService.deleteToken(token);
+    await this.createPasswordService.deleteToken(createToken.id);
 
     const languageGuard = Object.values(SUPPORTED_LANGUAGES).includes(
       language as SupportedLanguages,
@@ -607,7 +603,7 @@ export class AuthService {
     const resetToken = await this.resetPasswordService.getOneByTokenAndEmail(token, email);
 
     await this.userService.resetPassword(resetToken.userId, newPassword);
-    await this.resetPasswordService.deleteToken(token);
+    await this.resetPasswordService.deleteToken(resetToken.id);
   }
 
   private async fetchExpiredTokens() {
@@ -662,11 +658,13 @@ export class AuthService {
     expiryDate: Date,
     reminderCount: number,
   ) {
+    const hashedCreateToken = hashToken(createToken);
+
     await this.db.transaction(async (transaction) => {
       try {
         await transaction.insert(createTokens).values({
           userId,
-          createToken,
+          createToken: hashedCreateToken,
           expiryDate,
           reminderCount,
         });
@@ -868,7 +866,7 @@ export class AuthService {
 
     const dateNow = new Date();
 
-    const hashedToken = this.hashMagicLinkToken(token);
+    const hashedToken = hashToken(token);
 
     const { user, accessToken, refreshToken } = await this.db.transaction(async (trx) => {
       const [magicLinkToken] = await trx
@@ -966,7 +964,7 @@ export class AuthService {
 
   async createMagicLinkToken(userId: UUIDType): Promise<string> {
     const token = nanoid(64);
-    const hashedToken = this.hashMagicLinkToken(token);
+    const hashedToken = hashToken(token);
 
     const expiryDate = new Date();
     expiryDate.setTime(expiryDate.getTime() + MAGIC_LINK_EXPIRATION_TIME);
@@ -981,9 +979,5 @@ export class AuthService {
       .returning();
 
     return token;
-  }
-
-  hashMagicLinkToken(token: string): string {
-    return createHmac("sha256", this.ENCRYPTION_KEY).update(token, "utf8").digest("hex");
   }
 }
