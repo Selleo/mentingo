@@ -220,12 +220,10 @@ describe("AuthController (e2e)", () => {
           email: "test@example.com",
         });
 
-      const response = await request(app.getHttpServer())
-        .post("/api/auth/login")
-        .send({
-          email: user.email,
-          password: user.credentials?.password,
-        });
+      const response = await request(app.getHttpServer()).post("/api/auth/login").send({
+        email: user.email,
+        password: user.credentials?.password,
+      });
 
       expect(response.status).toEqual(201);
       expect(response.body.data).toHaveProperty("id");
@@ -644,7 +642,7 @@ describe("AuthController (e2e)", () => {
 
       await db.insert(createTokens).values({
         userId: user.id,
-        createToken: token,
+        createToken: hashToken(token),
         expiryDate,
         reminderCount: 0,
       });
