@@ -23,7 +23,8 @@
       "noAccess": "You do not have permission to access this resource",
       "globalSettingsNotFound": "Global settings not found",
       "somethingWentWrong": "Something went wrong...",
-      "notFound": "Resource not found"
+      "notFound": "Resource not found",
+      "tooManyRequests": "Too many requests. Try again in {{seconds}} seconds."
     },
     "tooltip": {
       "soon": "Cooming soon"

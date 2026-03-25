@@ -6,6 +6,9 @@ import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore"
 
 import { ApiClient } from "../api-client";
 
+import type { ApiErrorResponse } from "../types";
+import type { AxiosError } from "axios";
+
 export function useVerifyMFA() {
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -25,9 +28,11 @@ export function useVerifyMFA() {
 
       setHasVerifiedMFA(true);
     },
-    onError: () => {
+    onError: (error: AxiosError) => {
+      const { message } = error.response?.data as ApiErrorResponse;
+
       toast({
-        description: t("mfa.verify.toast.error"),
+        description: t(message),
         variant: "destructive",
       });
     },

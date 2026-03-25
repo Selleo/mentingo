@@ -5,6 +5,7 @@ import { nanoid } from "nanoid";
 import request from "supertest";
 
 import { hashToken } from "src/auth/utils/hash-auth-token";
+import { RATE_LIMITS } from "src/rate-limit/rate-limit.constants";
 import { SettingsService } from "src/settings/settings.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { createTokens, formFieldAnswers, resetTokens } from "src/storage/schema";
@@ -219,10 +220,12 @@ describe("AuthController (e2e)", () => {
           email: "test@example.com",
         });
 
-      const response = await request(app.getHttpServer()).post("/api/auth/login").send({
-        email: user.email,
-        password: user.credentials?.password,
-      });
+      const response = await request(app.getHttpServer())
+        .post("/api/auth/login")
+        .send({
+          email: user.email,
+          password: user.credentials?.password,
+        });
 
       expect(response.status).toEqual(201);
       expect(response.body.data).toHaveProperty("id");
@@ -239,6 +242,67 @@ describe("AuthController (e2e)", () => {
           password: "wrongpassword",
         })
         .expect(401);
+    });
+
+    it("should return 429 after reaching auth login limit for the same email", async () => {
+      const email = `rate-limit-auth-${nanoid()}@example.com`;
+
+      for (
+        let attempt = 1;
+        attempt <= RATE_LIMITS.AUTH_SENSITIVE_ENDPOINTS_REQUESTS_PER_MINUTE;
+        attempt += 1
+      ) {
+        await request(app.getHttpServer())
+          .post("/api/auth/login")
+          .send({
+            email,
+            password: "wrongpassword",
+          })
+          .expect(401);
+      }
+
+      await request(app.getHttpServer())
+        .post("/api/auth/login")
+        .send({
+          email,
+          password: "wrongpassword",
+        })
+        .expect(429);
+    });
+
+    it("should not apply login rate limit from one email to another email", async () => {
+      const rateLimitedEmail = `rate-limit-auth-a-${nanoid()}@example.com`;
+
+      for (
+        let attempt = 1;
+        attempt <= RATE_LIMITS.AUTH_SENSITIVE_ENDPOINTS_REQUESTS_PER_MINUTE;
+        attempt += 1
+      ) {
+        await request(app.getHttpServer())
+          .post("/api/auth/login")
+          .send({
+            email: rateLimitedEmail,
+            password: "wrongpassword",
+          })
+          .expect(401);
+      }
+
+      const allowedUser = await userFactory
+        .withCredentials({
+          password: "Password123@",
+        })
+        .withUserSettings(db)
+        .create({
+          email: `rate-limit-auth-b-${nanoid()}@example.com`,
+        });
+
+      await request(app.getHttpServer())
+        .post("/api/auth/login")
+        .send({
+          email: allowedUser.email,
+          password: "Password123@",
+        })
+        .expect(201);
     });
   });
 

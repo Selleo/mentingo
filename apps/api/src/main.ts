@@ -50,6 +50,8 @@ async function bootstrap() {
     rawBody: true,
   });
 
+  app.getHttpAdapter().getInstance().set("trust proxy", 1);
+
   setupValidation();
 
   const dbBase = app.get(DB_ADMIN);

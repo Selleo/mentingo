@@ -1,5 +1,7 @@
 export type ApiErrorResponse = {
   message: string;
+  statusCode?: number;
+  retryAfterSeconds?: number;
 };
 
 export type EmbedLessonResource = {
