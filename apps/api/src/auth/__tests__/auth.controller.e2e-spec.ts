@@ -66,6 +66,11 @@ describe("AuthController (e2e)", () => {
       expect(response.status).toEqual(201);
       expect(response.body.data).toHaveProperty("id");
       expect(response.body.data.email).toBe(user.email);
+      expect(response.body.data).toHaveProperty("shouldVerifyMFA");
+      expect(response.body.data).toHaveProperty("onboardingStatus");
+      expect(response.body.data).toHaveProperty("isManagingTenantAdmin");
+      expect(response.headers["set-cookie"]).toBeDefined();
+      expect(response.headers["set-cookie"].length).toBe(2);
     });
 
     it("should return 409 if user already exists", async () => {
@@ -562,6 +567,41 @@ describe("AuthController (e2e)", () => {
           language: "en",
         })
         .expect(404);
+    });
+
+    it("should create password and login user with cookies", async () => {
+      const user = await userFactory.create({
+        email: `createpassword-login-${nanoid(8)}@example.com`,
+      });
+
+      const token = nanoid(64);
+      const expiryDate = new Date();
+      expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+
+      await db.insert(createTokens).values({
+        userId: user.id,
+        createToken: token,
+        expiryDate,
+        reminderCount: 0,
+      });
+
+      const response = await request(app.getHttpServer())
+        .post("/api/auth/create-password")
+        .send({
+          createToken: token,
+          email: user.email,
+          password: "Password123@",
+          language: "en",
+        })
+        .expect(201);
+
+      expect(response.body.data).toHaveProperty("id", user.id);
+      expect(response.body.data).toHaveProperty("email", user.email);
+      expect(response.body.data).toHaveProperty("shouldVerifyMFA");
+      expect(response.body.data).toHaveProperty("onboardingStatus");
+      expect(response.body.data).toHaveProperty("isManagingTenantAdmin");
+      expect(response.headers["set-cookie"]).toBeDefined();
+      expect(response.headers["set-cookie"].length).toBe(2);
     });
 
     it("should save correct language when creating password with supported language other than 'en'", async () => {

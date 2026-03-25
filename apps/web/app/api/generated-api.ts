@@ -39,6 +39,20 @@ export interface RegisterResponse {
     archived: boolean;
     deletedAt: string | null;
     profilePictureUrl: string | null;
+    shouldVerifyMFA: boolean;
+    onboardingStatus: {
+      id: string;
+      createdAt: string;
+      updatedAt: string;
+      userId: string;
+      dashboard: boolean;
+      courses: boolean;
+      announcements: boolean;
+      profile: boolean;
+      settings: boolean;
+      providerInformation: boolean;
+    };
+    isManagingTenantAdmin: boolean;
   };
 }
 
@@ -151,6 +165,35 @@ export interface CreatePasswordBody {
    */
   email: string;
   language: string;
+}
+
+export interface CreatePasswordResponse {
+  data: {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+    archived: boolean;
+    deletedAt: string | null;
+    profilePictureUrl: string | null;
+    shouldVerifyMFA: boolean;
+    onboardingStatus: {
+      id: string;
+      createdAt: string;
+      updatedAt: string;
+      userId: string;
+      dashboard: boolean;
+      courses: boolean;
+      announcements: boolean;
+      profile: boolean;
+      settings: boolean;
+      providerInformation: boolean;
+    };
+    isManagingTenantAdmin: boolean;
+  };
 }
 
 export interface ResetPasswordBody {
@@ -4555,11 +4598,12 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request POST:/api/auth/create-password
      */
     authControllerCreatePassword: (data: CreatePasswordBody, params: RequestParams = {}) =>
-      this.request<void, any>({
+      this.request<CreatePasswordResponse, any>({
         path: `/api/auth/create-password`,
         method: "POST",
         body: data,
         type: ContentType.Json,
+        format: "json",
         ...params,
       }),
 
