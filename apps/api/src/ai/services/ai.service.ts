@@ -28,6 +28,7 @@ import {
   type OpenAIModels,
   THREAD_STATUS,
 } from "src/ai/utils/ai.type";
+import { stripVoiceEmotionBrackets } from "src/ai/utils/voiceEmotionBrackets";
 import { DatabasePg } from "src/common";
 import {
   canUseLessonProgressAsLearner,
@@ -109,7 +110,12 @@ export class AiService {
     )();
   }
 
-  async streamMessage(data: StreamChatBody, model: OpenAIModels, currentUser: CurrentUser) {
+  async streamMessage(
+    data: StreamChatBody,
+    model: OpenAIModels,
+    currentUser: CurrentUser,
+    isVoiceMentor: boolean = false,
+  ) {
     return observe(
       async () => {
         updateActiveTrace({
@@ -120,8 +126,25 @@ export class AiService {
         await this.isThreadActive(data.threadId, currentUser.userId);
         await this.summaryService.summarizeThreadOnTokenThreshold(data.threadId);
 
-        const prompt = await this.promptService.buildPrompt(data.threadId, data.content, data.id);
+        const prompt = await this.promptService.buildPrompt(
+          data.threadId,
+          data.content,
+          isVoiceMentor,
+          data.id,
+        );
+
         const provider = await this.promptService.getOpenAI();
+        const generationConfig = isVoiceMentor
+          ? {
+              temperature: 0.2,
+              topK: 20,
+              topP: 0.5,
+            }
+          : {
+              temperature: 0.8,
+              topK: 50,
+              topP: 0.8,
+            };
 
         return streamText({
           model: provider(model),
@@ -130,12 +153,14 @@ export class AiService {
             role: this.mapRole(m.role),
           })) as Omit<Message, "id">[],
           maxTokens: MAX_TOKENS,
-          temperature: 0.8,
-          topK: 50,
-          topP: 0.8,
+          ...generationConfig,
           experimental_telemetry: { isEnabled: true },
           onFinish: async (event) => {
-            const mentorTokenCount = this.tokenService.countTokens(model, event.text);
+            const mentorContent = isVoiceMentor
+              ? stripVoiceEmotionBrackets(event.text)
+              : event.text;
+
+            const mentorTokenCount = this.tokenService.countTokens(model, mentorContent);
             const userTokenCount = this.tokenService.countTokens(model, data.content);
 
             if (!currentUser.tenantId) throw new Error("Missing tenant context in onFinish");
@@ -145,7 +170,7 @@ export class AiService {
                 { ...data, role: MESSAGE_ROLE.USER, tokenCount: userTokenCount },
                 {
                   threadId: data.threadId,
-                  content: event.text,
+                  content: mentorContent,
                   role: MESSAGE_ROLE.MENTOR,
                   tokenCount: mentorTokenCount,
                 },
@@ -154,7 +179,7 @@ export class AiService {
 
             updateActiveObservation({
               input: { message: data.content },
-              output: { message: event.text },
+              output: { message: mentorContent },
             });
 
             trace.getActiveSpan()?.end();

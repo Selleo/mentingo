@@ -32,6 +32,8 @@ export const translationPromptSchema = Type.Object({
   language: Type.String(),
 });
 
+export const voiceMentorAddonSchema = Type.Object({});
+
 export const PROMPT_MAP = {
   judgePrompt: judgePromptSchema,
   mentorPrompt: aiPromptSchema,
@@ -41,4 +43,5 @@ export const PROMPT_MAP = {
   welcomePrompt: welcomePromptSchema,
   securityAndRagBlock: securityAndRagBlockSchema,
   translationPrompt: translationPromptSchema,
+  voiceMentorAddon: voiceMentorAddonSchema,
 };

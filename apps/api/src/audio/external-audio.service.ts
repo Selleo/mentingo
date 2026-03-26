@@ -21,6 +21,7 @@ import { AiRepository } from "src/ai/repositories/ai.repository";
 import { AiService } from "src/ai/services/ai.service";
 import { ThreadService } from "src/ai/services/thread.service";
 import { OPENAI_MODELS, THREAD_STATUS } from "src/ai/utils/ai.type";
+import { stripVoiceEmotionBrackets } from "src/ai/utils/voiceEmotionBrackets";
 import { ExternalAudioSessionStore } from "src/audio/external-audio-session.store";
 import { EnvService } from "src/env/services/env.service";
 import { LocalizationService } from "src/localization/localization.service";
@@ -293,6 +294,7 @@ export class ExternalAudioService {
           { threadId: session.threadId, content: text },
           OPENAI_MODELS.BASIC,
           session.currentUser,
+          true,
         );
 
         let responseText = "";
@@ -323,7 +325,7 @@ export class ExternalAudioService {
         });
 
         this.emitMentorResponseCompleted(sessionId, {
-          text: responseText.trim(),
+          text: stripVoiceEmotionBrackets(responseText.trim()),
           jobId: payload.jobId,
           reason: "complete",
         });
