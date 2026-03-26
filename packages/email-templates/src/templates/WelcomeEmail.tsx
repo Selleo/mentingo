@@ -11,6 +11,7 @@ export type WelcomeEmailProps = {
 export const WelcomeEmail = ({
   coursesLink,
   primaryColor = "#4796FD",
+  companyName,
   language = "en",
 }: WelcomeEmailProps) => {
   const { heading, paragraphs, buttonText } = getWelcomeEmailTranslations(language);
@@ -21,6 +22,7 @@ export const WelcomeEmail = ({
     buttonText,
     buttonLink: coursesLink,
     primaryColor,
+    companyName,
   });
 };
 

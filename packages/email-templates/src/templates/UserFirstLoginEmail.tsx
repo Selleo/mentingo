@@ -13,6 +13,7 @@ export const UserFirstLoginEmail = ({
   name,
   coursesUrl,
   primaryColor,
+  companyName,
   language = "en",
 }: UserFirstLoginEmailProps) => {
   const { heading, paragraphs, buttonText } = getUserFirstLoginEmailTranslations(language, name);
@@ -23,6 +24,7 @@ export const UserFirstLoginEmail = ({
     buttonText,
     buttonLink: coursesUrl,
     primaryColor,
+    companyName,
   });
 };
 

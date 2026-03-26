@@ -13,6 +13,7 @@ export const UserLongInactivityEmail = ({
   courseName,
   courseLink,
   primaryColor,
+  companyName,
   language = "en",
 }: UserLongInactivityProps) => {
   const { heading, paragraphs, buttonText } = getUserLongInactivityEmailTranslations(
@@ -26,6 +27,7 @@ export const UserLongInactivityEmail = ({
     buttonText,
     buttonLink: courseLink,
     primaryColor,
+    companyName,
   });
 };
 

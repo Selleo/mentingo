@@ -13,6 +13,7 @@ export const NewUserEmail = ({
   userName,
   profileLink,
   primaryColor,
+  companyName,
   language = "en",
 }: NewUserEmailProps) => {
   const { heading, paragraphs, buttonText } = getNewUserEmailTranslations(language, userName);
@@ -23,6 +24,7 @@ export const NewUserEmail = ({
     buttonText,
     buttonLink: profileLink,
     primaryColor,
+    companyName,
   });
 };
 

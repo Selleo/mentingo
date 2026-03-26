@@ -27,6 +27,7 @@ export const BaseEmailTemplate = ({
   buttonText,
   buttonLink,
   primaryColor,
+  companyName,
 }: BaseEmailTemplateProps) => {
   const styles = getBaseEmailStyles(primaryColor);
 
@@ -96,7 +97,7 @@ export const BaseEmailTemplate = ({
         </Section>
         <Section style={styles.footerSection}>
           <Text style={styles.footerText} className="footer-text">
-            Powered by &copy;{new Date().getFullYear()} Mentingo.com
+            Powered by {companyName}
           </Text>
         </Section>
       </Body>

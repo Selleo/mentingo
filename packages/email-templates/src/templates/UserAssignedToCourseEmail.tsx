@@ -15,6 +15,7 @@ export const UserAssignedToCourse = ({
   courseName,
   formatedCourseDueDate,
   primaryColor,
+  companyName,
   language = "en",
 }: UserAssignedToCourseProps) => {
   const { heading, paragraphs, buttonText } = getUserAssignedToCourseEmailTranslations(
@@ -29,6 +30,7 @@ export const UserAssignedToCourse = ({
     buttonText,
     buttonLink: courseLink,
     primaryColor,
+    companyName,
   });
 };
 

@@ -13,6 +13,7 @@ export const UserInviteEmail = ({
   invitedByUserName,
   createPasswordLink,
   primaryColor,
+  companyName,
   language = "en",
 }: UserInviteProps) => {
   const { heading, paragraphs, buttonText } = getUserInviteEmailTranslations(
@@ -26,6 +27,7 @@ export const UserInviteEmail = ({
     buttonText,
     buttonLink: createPasswordLink,
     primaryColor,
+    companyName,
   });
 };
 
