@@ -32,8 +32,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build shared packages
-        run: pnpm --filter="@repo/shared" run build
+      - name: Build packages
+        run: pnpm -w packages:build
 
       - name: Run ESLint & Compile Typescript
         run: pnpm lint-tsc
@@ -54,8 +54,10 @@ jobs:
           cache: pnpm
 
       - run: pnpm install
-      - name: Build shared packages
-        run: pnpm --filter="@repo/shared" run build
+
+      - name: Build packages
+        run: pnpm -w packages:build
+
       - name: Build the app
         run: pnpm run build
 
@@ -77,8 +79,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build shared packages
-        run: pnpm --filter="@repo/shared" run build
+      - name: Build packages
+        run: pnpm -w packages:build
 
       - name: Run Vite tests
         run: pnpm test
