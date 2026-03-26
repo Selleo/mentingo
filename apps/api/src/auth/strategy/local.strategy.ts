@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { Strategy } from "passport-local";
 
+import { USER_LOGIN_METHOD } from "src/events/user/user-login.event";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { TenantResolverService } from "src/storage/db/tenant-resolver.service";
 
@@ -25,12 +26,24 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
 
     if (!tenantId) throw new UnauthorizedException("Missing tenantId");
 
-    const user = await this.tenantRunner.runWithTenant(tenantId, () =>
-      this.authService.validateUser(email, password),
-    );
+    try {
+      const user = await this.tenantRunner.runWithTenant(tenantId, () =>
+        this.authService.validateUser(email, password),
+      );
 
-    if (!user) throw new UnauthorizedException("Invalid email or password");
+      if (!user) throw new UnauthorizedException("auth.error.invalidEmailOrPassword");
 
-    return user;
+      return user;
+    } catch (error) {
+      await this.tenantRunner.runWithTenant(tenantId, () =>
+        this.authService.handleAuthFailed({
+          email,
+          method: USER_LOGIN_METHOD.PASSWORD,
+          error: (error as Error)?.message,
+        }),
+      );
+
+      throw error;
+    }
   }
 }

@@ -104,7 +104,9 @@ export class CertificatesController {
         .replace(/[^\x20-\x7E]/g, "")
         .replace(/["\\]/g, "")
         .trim() || "certificate.pdf";
-    const contentDisposition = `attachment; filename="${asciiFilename}"; filename*=UTF-8''${encodeURIComponent(filename)}`;
+    const contentDisposition = `attachment; filename="${asciiFilename}"; filename*=UTF-8''${encodeURIComponent(
+      filename,
+    )}`;
 
     res.set({
       "Content-Type": "application/pdf",

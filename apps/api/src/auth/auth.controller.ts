@@ -32,6 +32,7 @@ import {
   type SupportModeCurrentUser,
 } from "src/common/types/current-user.type";
 import { SupportModeEnterEvent, UserActivityEvent, UserLogoutEvent } from "src/events";
+import { USER_LOGIN_METHOD } from "src/events/user/user-login.event";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { SettingsService } from "src/settings/settings.service";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
@@ -117,7 +118,7 @@ export class AuthController {
     @Body() data: LoginBody,
     @Res({ passthrough: true }) response: Response,
   ): Promise<BaseResponse<Static<typeof loginResponseSchema>>> {
-    return this.authenticateAndRespond(data, response);
+    return await this.authenticateAndRespond(data, response);
   }
 
   private async authenticateAndRespond(
@@ -339,6 +340,11 @@ export class AuthController {
 
       response.redirect(this.CORS_ORIGIN);
     } catch (e) {
+      await this.authService.handleAuthFailed({
+        email: googleUser.email,
+        method: USER_LOGIN_METHOD.PROVIDER,
+        error: (e as Error)?.message,
+      });
       response.redirect(
         this.CORS_ORIGIN + "/auth/login?error=" + encodeURIComponent((e as Error).message),
       );
@@ -371,6 +377,11 @@ export class AuthController {
 
       response.redirect(this.CORS_ORIGIN);
     } catch (e) {
+      await this.authService.handleAuthFailed({
+        email: microsoftUser.email,
+        method: USER_LOGIN_METHOD.PROVIDER,
+        error: (e as Error)?.message,
+      });
       response.redirect(
         this.CORS_ORIGIN + "/auth/login?error=" + encodeURIComponent((e as Error).message),
       );
@@ -403,6 +414,11 @@ export class AuthController {
 
       response.redirect(this.CORS_ORIGIN);
     } catch (e) {
+      await this.authService.handleAuthFailed({
+        email: slackUser.email,
+        method: USER_LOGIN_METHOD.PROVIDER,
+        error: (e as Error)?.message,
+      });
       response.redirect(
         this.CORS_ORIGIN + "/auth/login?error=" + encodeURIComponent((e as Error).message),
       );

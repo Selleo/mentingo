@@ -715,6 +715,13 @@
       "when": 1774007927210,
       "tag": "0101_added_voice_mode_ai_mentor",
       "breakpoints": true
+    },
+    {
+      "idx": 102,
+      "version": "7",
+      "when": 1774521049823,
+      "tag": "0102_add_login_failed_action_type_to_activity_logs",
+      "breakpoints": true
     }
   ]
 }
