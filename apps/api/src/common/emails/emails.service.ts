@@ -87,9 +87,11 @@ export class EmailService {
   ): Promise<DefaultEmailSettings> {
     return this.tenantRunner.runWithTenant(tenantId, async () => {
       const globalSettings = await this.settingsService.getGlobalSettings();
+      const companyName = globalSettings.companyInformation?.companyName || "Mentingo.com";
 
       return {
         primaryColor: globalSettings.primaryColor || "#4796FD",
+        companyName,
         language:
           language ?? (userId ? await this.getFinalLanguage(userId) : SUPPORTED_LANGUAGES.EN),
       };

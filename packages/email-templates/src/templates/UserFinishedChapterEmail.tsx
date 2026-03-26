@@ -15,6 +15,7 @@ export const UserFinishedChapterEmail = ({
   courseLink,
   courseName,
   primaryColor,
+  companyName,
   language = "en",
 }: UserFinishedChapterProps) => {
   const { heading, paragraphs, buttonText } = getUserFinishedChapterEmailTranslations(
@@ -29,6 +30,7 @@ export const UserFinishedChapterEmail = ({
     buttonText,
     buttonLink: courseLink,
     primaryColor,
+    companyName,
   });
 };
 

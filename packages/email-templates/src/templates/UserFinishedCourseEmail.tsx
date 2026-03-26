@@ -14,6 +14,7 @@ export const UserFinishedCourseEmail = ({
   courseName,
   buttonLink,
   primaryColor,
+  companyName,
   language = "en",
   hasCertificate,
 }: UserFinishedCourseProps) => {
@@ -29,6 +30,7 @@ export const UserFinishedCourseEmail = ({
     buttonText,
     buttonLink,
     primaryColor,
+    companyName,
   });
 };
 

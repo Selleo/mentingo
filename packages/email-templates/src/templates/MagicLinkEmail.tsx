@@ -10,6 +10,7 @@ export type MagicLinkEmailProps = {
 export const MagicLinkEmail = ({
   magicLink,
   primaryColor,
+  companyName,
   language = "en",
 }: MagicLinkEmailProps) => {
   const { heading, paragraphs, buttonText } = getMagicLinkEmailTranslations(language);
@@ -20,6 +21,7 @@ export const MagicLinkEmail = ({
     buttonText,
     buttonLink: magicLink,
     primaryColor,
+    companyName,
   });
 };
 
