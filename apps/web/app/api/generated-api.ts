@@ -23,7 +23,7 @@ export interface RegisterBody {
    */
   lastName: string;
   password: string;
-  language: "en" | "pl";
+  language: "en" | "pl" | "de" | "lt" | "cs";
   formAnswers?: object;
 }
 
@@ -164,7 +164,7 @@ export interface CreatePasswordBody {
    * @minLength 1
    */
   email: string;
-  language: string;
+  language: "en" | "pl" | "de" | "lt" | "cs";
 }
 
 export interface CreatePasswordResponse {
@@ -313,8 +313,8 @@ export interface GetPublicRegistrationFormResponse {
       type: "checkbox";
       /** @minLength 1 */
       label: string;
-      baseLanguage: "en" | "pl";
-      availableLocales: ("en" | "pl")[];
+      baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
+      availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
       required: boolean;
       displayOrder: number;
       archived: boolean;
@@ -327,13 +327,13 @@ export interface GetPublicRegistrationFormResponse {
 export interface GetUserSettingsResponse {
   data:
     | {
-        language: string;
+        language: "en" | "pl" | "de" | "lt" | "cs";
         /** @default false */
         isMFAEnabled: boolean;
         MFASecret: string | null;
       }
     | {
-        language: string;
+        language: "en" | "pl" | "de" | "lt" | "cs";
         /** @default false */
         isMFAEnabled: boolean;
         MFASecret: string | null;
@@ -345,13 +345,13 @@ export interface GetUserSettingsResponse {
 
 export type UpdateUserSettingsBody =
   | {
-      language?: string;
+      language?: "en" | "pl" | "de" | "lt" | "cs";
       /** @default false */
       isMFAEnabled?: boolean;
       MFASecret?: string | null;
     }
   | {
-      language?: string;
+      language?: "en" | "pl" | "de" | "lt" | "cs";
       /** @default false */
       isMFAEnabled?: boolean;
       MFASecret?: string | null;
@@ -363,13 +363,13 @@ export type UpdateUserSettingsBody =
 export interface UpdateUserSettingsResponse {
   data:
     | {
-        language: string;
+        language: "en" | "pl" | "de" | "lt" | "cs";
         /** @default false */
         isMFAEnabled: boolean;
         MFASecret: string | null;
       }
     | {
-        language: string;
+        language: "en" | "pl" | "de" | "lt" | "cs";
         /** @default false */
         isMFAEnabled: boolean;
         MFASecret: string | null;
@@ -381,7 +381,7 @@ export interface UpdateUserSettingsResponse {
 
 export interface UpdateAdminNewUserNotificationResponse {
   data: {
-    language: string;
+    language: "en" | "pl" | "de" | "lt" | "cs";
     /** @default false */
     isMFAEnabled: boolean;
     MFASecret: string | null;
@@ -519,7 +519,7 @@ export interface UpdateModernCourseListEnabledResponse {
 
 export interface UpdateAdminFinishedCourseNotificationResponse {
   data: {
-    language: string;
+    language: "en" | "pl" | "de" | "lt" | "cs";
     /** @default false */
     isMFAEnabled: boolean;
     MFASecret: string | null;
@@ -531,7 +531,7 @@ export interface UpdateAdminFinishedCourseNotificationResponse {
 
 export interface UpdateAdminOverdueCourseNotificationResponse {
   data: {
-    language: string;
+    language: "en" | "pl" | "de" | "lt" | "cs";
     /** @default false */
     isMFAEnabled: boolean;
     MFASecret: string | null;
@@ -601,9 +601,15 @@ export interface GetAdminRegistrationFormResponse {
         en?: string;
         /** @minLength 1 */
         pl?: string;
+        /** @minLength 1 */
+        de?: string;
+        /** @minLength 1 */
+        lt?: string;
+        /** @minLength 1 */
+        cs?: string;
       };
-      baseLanguage: "en" | "pl";
-      availableLocales: ("en" | "pl")[];
+      baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
+      availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
       required: boolean;
       displayOrder: number;
       archived: boolean;
@@ -623,9 +629,15 @@ export interface UpdateRegistrationFormBody {
       en?: string;
       /** @minLength 1 */
       pl?: string;
+      /** @minLength 1 */
+      de?: string;
+      /** @minLength 1 */
+      lt?: string;
+      /** @minLength 1 */
+      cs?: string;
     };
-    baseLanguage?: "en" | "pl";
-    availableLocales?: ("en" | "pl")[];
+    baseLanguage?: "en" | "pl" | "de" | "lt" | "cs";
+    availableLocales?: ("en" | "pl" | "de" | "lt" | "cs")[];
     required: boolean;
     displayOrder: number;
     archived: boolean;
@@ -643,9 +655,15 @@ export interface UpdateRegistrationFormResponse {
         en?: string;
         /** @minLength 1 */
         pl?: string;
+        /** @minLength 1 */
+        de?: string;
+        /** @minLength 1 */
+        lt?: string;
+        /** @minLength 1 */
+        cs?: string;
       };
-      baseLanguage: "en" | "pl";
-      availableLocales: ("en" | "pl")[];
+      baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
+      availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
       required: boolean;
       displayOrder: number;
       archived: boolean;
@@ -723,7 +741,7 @@ export interface UpdateConfigWarningDismissedBody {
 
 export interface UpdateConfigWarningDismissedResponse {
   data: {
-    language: string;
+    language: "en" | "pl" | "de" | "lt" | "cs";
     /** @default false */
     isMFAEnabled: boolean;
     MFASecret: string | null;
@@ -1570,8 +1588,8 @@ export interface GetCourseResponse {
     slug: string;
     stripeProductId: string | null;
     stripePriceId: string | null;
-    availableLocales: ("en" | "pl")[];
-    baseLanguage: "en" | "pl";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
     dueDate: string | null;
   };
 }
@@ -1639,10 +1657,10 @@ export interface GetBetaCourseByIdResponse {
             matchedWord?: string | null;
             scaleAnswer?: number | null;
             /** @default "en" */
-            language?: "en" | "pl";
+            language?: "en" | "pl" | "de" | "lt" | "cs";
           }[];
           /** @default "en" */
-          language?: "en" | "pl";
+          language?: "en" | "pl" | "de" | "lt" | "cs";
         }[];
         aiMentor?: {
           /** @format uuid */
@@ -1653,6 +1671,9 @@ export interface GetBetaCourseByIdResponse {
           completionConditions: string;
           type: "mentor" | "teacher" | "roleplay";
           avatarReference: string | null;
+          voiceMode: "preset" | "custom";
+          ttsPreset: "male" | "female";
+          customTtsReference: string | null;
         } | null;
         updatedAt?: string;
       }[];
@@ -1687,8 +1708,8 @@ export interface GetBetaCourseByIdResponse {
     thumbnailS3SingedUrl?: string | null;
     trailerUrl?: string | null;
     title: string;
-    availableLocales: ("en" | "pl")[];
-    baseLanguage: "en" | "pl";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
   };
 }
 
@@ -1710,7 +1731,7 @@ export type CreateCourseBody = {
   isScorm?: boolean;
   hasCertificate?: boolean;
   /** @default "en" */
-  language: "en" | "pl";
+  language: "en" | "pl" | "de" | "lt" | "cs";
 } & {
   chapters?: string[];
 };
@@ -1735,7 +1756,7 @@ export interface UpdateCourseBody {
   chapters?: string[];
   archived?: boolean;
   /** @default "en" */
-  language?: "en" | "pl";
+  language?: "en" | "pl" | "de" | "lt" | "cs";
 }
 
 export interface UpdateCourseResponse {
@@ -2175,7 +2196,7 @@ export interface GetLessonByIdResponse {
           questionId?: string;
         }[];
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
         passQuestion: boolean | null;
       }[];
       questionCount: number;
@@ -2193,7 +2214,7 @@ export interface GetLessonByIdResponse {
     displayOrder: number;
     isExternal?: boolean;
     nextLessonId: string | null;
-    userLanguage?: "en" | "pl";
+    userLanguage?: "en" | "pl" | "de" | "lt" | "cs";
     status?: "active" | "completed" | "archived";
     /** @format uuid */
     threadId?: string;
@@ -2266,10 +2287,10 @@ export type BetaCreateLessonBody = {
       matchedWord?: string | null;
       scaleAnswer?: number | null;
       /** @default "en" */
-      language?: "en" | "pl";
+      language?: "en" | "pl" | "de" | "lt" | "cs";
     }[];
     /** @default "en" */
-    language?: "en" | "pl";
+    language?: "en" | "pl" | "de" | "lt" | "cs";
   }[];
   aiMentor?: {
     /** @format uuid */
@@ -2280,6 +2301,9 @@ export type BetaCreateLessonBody = {
     completionConditions: string;
     type: "mentor" | "teacher" | "roleplay";
     avatarReference: string | null;
+    voiceMode: "preset" | "custom";
+    ttsPreset: "male" | "female";
+    customTtsReference: string | null;
   } | null;
   updatedAt?: string;
 } & {
@@ -2343,10 +2367,10 @@ export type BetaCreateAiMentorLessonBody = {
       matchedWord?: string | null;
       scaleAnswer?: number | null;
       /** @default "en" */
-      language?: "en" | "pl";
+      language?: "en" | "pl" | "de" | "lt" | "cs";
     }[];
     /** @default "en" */
-    language?: "en" | "pl";
+    language?: "en" | "pl" | "de" | "lt" | "cs";
   }[];
   aiMentor?: {
     /** @format uuid */
@@ -2357,6 +2381,9 @@ export type BetaCreateAiMentorLessonBody = {
     completionConditions: string;
     type: "mentor" | "teacher" | "roleplay";
     avatarReference: string | null;
+    voiceMode: "preset" | "custom";
+    ttsPreset: "male" | "female";
+    customTtsReference: string | null;
   } | null;
   updatedAt?: string;
 } & {
@@ -2367,6 +2394,9 @@ export type BetaCreateAiMentorLessonBody = {
   completionConditions: string;
   type: "mentor" | "teacher" | "roleplay";
   name?: string;
+  voiceMode?: "preset" | "custom";
+  ttsPreset?: "male" | "female";
+  customTtsReference?: string | null;
 };
 
 export interface BetaCreateAiMentorLessonResponse {
@@ -2416,10 +2446,10 @@ export type BetaUpdateAiMentorLessonBody = ({
       matchedWord?: string | null;
       scaleAnswer?: number | null;
       /** @default "en" */
-      language?: "en" | "pl";
+      language?: "en" | "pl" | "de" | "lt" | "cs";
     }[];
     /** @default "en" */
-    language?: "en" | "pl";
+    language?: "en" | "pl" | "de" | "lt" | "cs";
   }[];
   aiMentor?: {
     /** @format uuid */
@@ -2430,6 +2460,9 @@ export type BetaUpdateAiMentorLessonBody = ({
     completionConditions: string;
     type: "mentor" | "teacher" | "roleplay";
     avatarReference: string | null;
+    voiceMode: "preset" | "custom";
+    ttsPreset: "male" | "female";
+    customTtsReference: string | null;
   } | null;
   updatedAt?: string;
 } & {
@@ -2437,9 +2470,12 @@ export type BetaUpdateAiMentorLessonBody = ({
   completionConditions: string;
   type: "mentor" | "teacher" | "roleplay";
   name?: string;
+  voiceMode?: "preset" | "custom";
+  ttsPreset?: "male" | "female";
+  customTtsReference?: string | null;
 }) & {
   /** @default "en" */
-  language: "en" | "pl";
+  language: "en" | "pl" | "de" | "lt" | "cs";
 };
 
 export interface BetaUpdateAiMentorLessonResponse {
@@ -2491,10 +2527,10 @@ export type BetaCreateQuizLessonBody = {
       matchedWord?: string | null;
       scaleAnswer?: number | null;
       /** @default "en" */
-      language?: "en" | "pl";
+      language?: "en" | "pl" | "de" | "lt" | "cs";
     }[];
     /** @default "en" */
-    language?: "en" | "pl";
+    language?: "en" | "pl" | "de" | "lt" | "cs";
   }[];
 } & {
   /** @format uuid */
@@ -2553,10 +2589,10 @@ export type BetaUpdateQuizLessonBody = ({
       matchedWord?: string | null;
       scaleAnswer?: number | null;
       /** @default "en" */
-      language?: "en" | "pl";
+      language?: "en" | "pl" | "de" | "lt" | "cs";
     }[];
     /** @default "en" */
-    language?: "en" | "pl";
+    language?: "en" | "pl" | "de" | "lt" | "cs";
   }[];
 } & {
   /** @format uuid */
@@ -2564,7 +2600,7 @@ export type BetaUpdateQuizLessonBody = ({
   displayOrder?: number;
 }) & {
   /** @default "en" */
-  language: "en" | "pl";
+  language: "en" | "pl" | "de" | "lt" | "cs";
 };
 
 export interface BetaUpdateQuizLessonResponse {
@@ -2613,10 +2649,10 @@ export type BetaUpdateLessonBody = ({
       matchedWord?: string | null;
       scaleAnswer?: number | null;
       /** @default "en" */
-      language?: "en" | "pl";
+      language?: "en" | "pl" | "de" | "lt" | "cs";
     }[];
     /** @default "en" */
-    language?: "en" | "pl";
+    language?: "en" | "pl" | "de" | "lt" | "cs";
   }[];
   aiMentor?: {
     /** @format uuid */
@@ -2627,6 +2663,9 @@ export type BetaUpdateLessonBody = ({
     completionConditions: string;
     type: "mentor" | "teacher" | "roleplay";
     avatarReference: string | null;
+    voiceMode: "preset" | "custom";
+    ttsPreset: "male" | "female";
+    customTtsReference: string | null;
   } | null;
   updatedAt?: string;
 } & {
@@ -2636,7 +2675,7 @@ export type BetaUpdateLessonBody = ({
   contextId?: string;
 }) & {
   /** @default "en" */
-  language: "en" | "pl";
+  language: "en" | "pl" | "de" | "lt" | "cs";
 };
 
 export interface BetaUpdateLessonResponse {
@@ -2672,7 +2711,7 @@ export interface EvaluationQuizBody {
         }
     )[];
   }[];
-  language: "en" | "pl";
+  language: "en" | "pl" | "de" | "lt" | "cs";
 }
 
 export interface EvaluationQuizResponse {
@@ -2724,7 +2763,7 @@ export interface UpdateEmbedLessonBody {
   /** @format uuid */
   lessonId: string;
   /** @default "en" */
-  language: "en" | "pl";
+  language: "en" | "pl" | "de" | "lt" | "cs";
 }
 
 export interface UpdateEmbedLessonResponse {
@@ -2792,7 +2831,7 @@ export type GetCertificateResponse = {
 export interface DownloadCertificateBody {
   /** @format uuid */
   certificateId: string;
-  language: "en" | "pl";
+  language: "en" | "pl" | "de" | "lt" | "cs";
 }
 
 export interface CreateCertificateShareLinkBody {
@@ -2814,7 +2853,7 @@ export interface GetThreadResponse {
     aiMentorLessonId: string;
     /** @format uuid */
     userId: string;
-    userLanguage: "en" | "pl";
+    userLanguage: "en" | "pl" | "de" | "lt" | "cs";
     createdAt: string;
     updatedAt: string;
     status: "active" | "completed" | "archived";
@@ -2942,10 +2981,10 @@ export type BetaCreateChapterBody = {
         matchedWord?: string | null;
         scaleAnswer?: number | null;
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       }[];
       /** @default "en" */
-      language?: "en" | "pl";
+      language?: "en" | "pl" | "de" | "lt" | "cs";
     }[];
     aiMentor?: {
       /** @format uuid */
@@ -2956,6 +2995,9 @@ export type BetaCreateChapterBody = {
       completionConditions: string;
       type: "mentor" | "teacher" | "roleplay";
       avatarReference: string | null;
+      voiceMode: "preset" | "custom";
+      ttsPreset: "male" | "female";
+      customTtsReference: string | null;
     } | null;
     updatedAt?: string;
   }[];
@@ -3024,10 +3066,10 @@ export type UpdateChapterBody = ({
         matchedWord?: string | null;
         scaleAnswer?: number | null;
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       }[];
       /** @default "en" */
-      language?: "en" | "pl";
+      language?: "en" | "pl" | "de" | "lt" | "cs";
     }[];
     aiMentor?: {
       /** @format uuid */
@@ -3038,6 +3080,9 @@ export type UpdateChapterBody = ({
       completionConditions: string;
       type: "mentor" | "teacher" | "roleplay";
       avatarReference: string | null;
+      voiceMode: "preset" | "custom";
+      ttsPreset: "male" | "female";
+      customTtsReference: string | null;
     } | null;
     updatedAt?: string;
   }[];
@@ -3053,7 +3098,7 @@ export type UpdateChapterBody = ({
   courseId?: string;
 }) & {
   /** @default "en" */
-  language: "en" | "pl";
+  language: "en" | "pl" | "de" | "lt" | "cs";
 };
 
 export interface UpdateChapterResponse {
@@ -3104,7 +3149,7 @@ export interface CreateCheckoutSessionBody {
   productDescription?: string;
   courseId: string;
   customerId: string;
-  locale?: string;
+  locale: "en" | "pl" | "de" | "lt" | "cs";
   priceId: string;
 }
 
@@ -3614,8 +3659,8 @@ export interface GetQAResponse {
   id: string;
   title: string | null;
   description: string | null;
-  baseLanguage: "en" | "pl";
-  availableLocales: ("en" | "pl")[];
+  baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
+  availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
 }
 
 export type GetAllQAResponse = {
@@ -3623,14 +3668,14 @@ export type GetAllQAResponse = {
   id: string;
   title: string | null;
   description: string | null;
-  baseLanguage: "en" | "pl";
-  availableLocales: ("en" | "pl")[];
+  baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
+  availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
 }[];
 
 export interface CreateQABody {
   title: string;
   description: string;
-  language: "en" | "pl";
+  language: "en" | "pl" | "de" | "lt" | "cs";
 }
 
 export interface UpdateQABody {
@@ -3647,8 +3692,8 @@ export interface GetDraftNewsListResponse {
     status: string;
     isPublic: boolean;
     /** @default "en" */
-    baseLanguage: "en" | "pl";
-    availableLocales: ("en" | "pl")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
     publishedAt: string | null;
     authorName: string;
     resources?: {
@@ -3706,7 +3751,7 @@ export interface GenerateNewsPreviewBody {
   /** @format uuid */
   newsId: string;
   /** @default "en" */
-  language: "en" | "pl";
+  language: "en" | "pl" | "de" | "lt" | "cs";
   content: string;
 }
 
@@ -3726,8 +3771,8 @@ export interface GetNewsResponse {
     status: string;
     isPublic: boolean;
     /** @default "en" */
-    baseLanguage: "en" | "pl";
-    availableLocales: ("en" | "pl")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
     publishedAt: string | null;
     authorName: string;
     resources?: {
@@ -3784,8 +3829,8 @@ export interface GetNewsListResponse {
     status: string;
     isPublic: boolean;
     /** @default "en" */
-    baseLanguage: "en" | "pl";
-    availableLocales: ("en" | "pl")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
     publishedAt: string | null;
     authorName: string;
     resources?: {
@@ -3841,7 +3886,7 @@ export interface GetNewsListResponse {
 
 export interface CreateNewsBody {
   /** @default "en" */
-  language: "en" | "pl";
+  language: "en" | "pl" | "de" | "lt" | "cs";
 }
 
 export interface CreateNewsResponse {
@@ -3853,7 +3898,7 @@ export interface CreateNewsResponse {
 
 export interface UpdateNewsBody {
   /** @default "en" */
-  language: "en" | "pl";
+  language: "en" | "pl" | "de" | "lt" | "cs";
   title?: string;
   summary?: string;
   content?: string;
@@ -3875,7 +3920,7 @@ export interface UpdateNewsResponse {
 
 export interface AddNewLanguageBody {
   /** @default "en" */
-  language: "en" | "pl";
+  language: "en" | "pl" | "de" | "lt" | "cs";
 }
 
 export interface AddNewLanguageResponse {
@@ -3909,7 +3954,7 @@ export interface UploadFileToNewsResponse {
 
 export interface CreateArticleSectionBody {
   /** @default "en" */
-  language: "en" | "pl";
+  language: "en" | "pl" | "de" | "lt" | "cs";
 }
 
 export interface CreateArticleSectionResponse {
@@ -3925,15 +3970,15 @@ export interface GetArticleSectionResponse {
     id: string;
     title: string;
     /** @default "en" */
-    baseLanguage: "en" | "pl";
-    availableLocales: ("en" | "pl")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
     assignedArticlesCount: number;
   };
 }
 
 export interface UpdateArticleSectionBody {
   /** @default "en" */
-  language: "en" | "pl";
+  language: "en" | "pl" | "de" | "lt" | "cs";
   title?: string;
 }
 
@@ -3946,7 +3991,7 @@ export interface UpdateArticleSectionResponse {
 
 export interface AddNewLanguageToSectionBody {
   /** @default "en" */
-  language: "en" | "pl";
+  language: "en" | "pl" | "de" | "lt" | "cs";
 }
 
 export interface AddNewLanguageToSectionResponse {
@@ -4038,8 +4083,8 @@ export interface GetArticleResponse {
     status: string;
     isPublic: boolean;
     /** @default "en" */
-    baseLanguage: "en" | "pl";
-    availableLocales: ("en" | "pl")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
     publishedAt: string | null;
     authorName: string;
     /** @format uuid */
@@ -4152,7 +4197,7 @@ export type GetArticlesResponse = {
 
 export interface CreateArticleBody {
   /** @default "en" */
-  language: "en" | "pl";
+  language: "en" | "pl" | "de" | "lt" | "cs";
   /** @format uuid */
   sectionId: string;
 }
@@ -4166,7 +4211,7 @@ export interface CreateArticleResponse {
 
 export interface UpdateArticleBody {
   /** @default "en" */
-  language: "en" | "pl";
+  language: "en" | "pl" | "de" | "lt" | "cs";
   title?: string;
   summary?: string;
   content?: string;
@@ -4193,7 +4238,7 @@ export interface UploadFileToArticleBody {
    */
   file?: File;
   /** @default "en" */
-  language: "en" | "pl";
+  language: "en" | "pl" | "de" | "lt" | "cs";
   title: string;
   description: string;
 }
@@ -4209,7 +4254,7 @@ export interface GenerateArticlePreviewBody {
   /** @format uuid */
   articleId: string;
   /** @default "en" */
-  language: "en" | "pl";
+  language: "en" | "pl" | "de" | "lt" | "cs";
   content: string;
 }
 
@@ -4791,7 +4836,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     settingsControllerGetPublicRegistrationForm: (
       query?: {
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -5566,7 +5611,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     statisticsControllerGetUserStatistics: (
       query?: {
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -5587,7 +5632,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     statisticsControllerGetStats: (
       query?: {
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -6122,7 +6167,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         page?: number;
         perPage?: number;
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -6166,7 +6211,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
           | "-chapterCount"
           | "-enrolledParticipantsCount";
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -6248,7 +6293,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @format uuid */
         excludeCourseId?: string;
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -6271,7 +6316,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         limit?: number;
         days?: number;
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -6300,7 +6345,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         description?: string;
         searchQuery?: string;
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -6322,7 +6367,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query: {
         id: string;
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -6360,7 +6405,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query: {
         id: string;
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -6383,7 +6428,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @format uuid */
         id: string;
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -6406,7 +6451,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @format uuid */
         id: string;
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -6752,7 +6797,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @format uuid */
         groupId?: string;
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -6790,7 +6835,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
           | "-lastActivity"
           | "-lastCompletedLessonName";
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -6829,7 +6874,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
           | "-attempts"
           | "-lastAttempt";
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -6868,7 +6913,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
           | "-lastSession"
           | "-lastCompletedLessonName";
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -6890,7 +6935,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       courseId: string,
       query?: {
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -6911,7 +6956,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       courseId: string,
       query?: {
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -6932,7 +6977,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       courseId: string,
       query?: {
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -7091,7 +7136,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         integrationId?: string;
         /** @minLength 1 */
         draftName?: string;
-        courseLanguage?: "en" | "pl";
+        courseLanguage?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -7165,7 +7210,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         searchQuery?: string;
         lessonCompleted?: string;
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -7187,7 +7232,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       id: string,
       query: {
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
         studentId: string;
       },
       params: RequestParams = {},
@@ -7389,7 +7434,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         lessonId?: string;
         /** @format binary */
         file: File;
-        language: "en" | "pl";
+        language: "en" | "pl" | "de" | "lt" | "cs";
         title: string;
         description: string;
         contextId?: string;
@@ -7551,7 +7596,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @format uuid */
         id: string;
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -7574,7 +7619,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @format uuid */
         userId?: string;
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
         /** @min 1 */
         page?: number;
         perPage?: number;
@@ -7603,7 +7648,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @format uuid */
         courseId?: string;
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -7839,7 +7884,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @format uuid */
         id: string;
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -8291,7 +8336,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     reportControllerDownloadSummaryReport: (
       query?: {
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -8881,7 +8926,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       qaId: string,
       query?: {
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -8904,7 +8949,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       data: UpdateQABody,
       query?: {
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -8939,7 +8984,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     qaControllerGetAllQa: (
       query?: {
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
         searchQuery?: string;
       },
       params: RequestParams = {},
@@ -8977,7 +9022,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       qaId: string,
       query?: {
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -8998,7 +9043,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       qaId: string,
       query?: {
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -9018,7 +9063,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     newsControllerGetDraftNewsList: (
       query?: {
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
         /** @min 1 */
         page?: number;
       },
@@ -9074,7 +9119,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       id: string,
       query?: {
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -9146,7 +9191,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     newsControllerGetNewsList: (
       query?: {
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
         searchQuery?: string;
         /** @min 1 */
         page?: number;
@@ -9187,7 +9232,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       id: string,
       query?: {
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -9210,7 +9255,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       data: {
         /** @format binary */
         file: File;
-        language: "en" | "pl";
+        language: "en" | "pl" | "de" | "lt" | "cs";
         title: string;
         description: string;
       },
@@ -9254,7 +9299,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       id: string,
       query?: {
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -9330,7 +9375,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       id: string,
       query?: {
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -9350,7 +9395,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     articlesControllerGetDraftArticles: (
       query?: {
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -9371,7 +9416,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     articlesControllerGetArticleToc: (
       query?: {
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
         isDraftMode?: boolean;
       },
       params: RequestParams = {},
@@ -9407,7 +9452,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       id: string,
       query?: {
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
         isDraftMode?: boolean;
       },
       params: RequestParams = {},
@@ -9462,7 +9507,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     articlesControllerGetArticles: (
       query?: {
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
         searchQuery?: string;
       },
       params: RequestParams = {},
@@ -9522,7 +9567,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       id: string,
       query?: {
         /** @default "en" */
-        language?: "en" | "pl";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>

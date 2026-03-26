@@ -1,0 +1,2913 @@
+{
+  "common": {
+    "button": {
+      "save": "Speichern",
+      "saving": "Sparen...",
+      "delete": "Löschen",
+      "create": "Erstellen",
+      "cancel": "Stornieren",
+      "back": "Zurück",
+      "proceed": "Fortfahren",
+      "add": "Hinzufügen",
+      "close": "Schließen",
+      "goToDashboard": "Gehen Sie zum Dashboard",
+      "goBack": "Geh zurück",
+      "ignore": "Ignorieren",
+      "clearAll": "Alles löschen",
+      "validate": "Bestätigen",
+      "edit": "Bearbeiten",
+      "uploading": "Hochladen...",
+      "sending": "Senden..."
+    },
+    "toast": {
+      "noAccess": "Sie haben keine Berechtigung, auf diese Ressource zuzugreifen",
+      "globalSettingsNotFound": "Globale Einstellungen nicht gefunden",
+      "somethingWentWrong": "Etwas ist schiefgelaufen...",
+      "notFound": "Ressource nicht gefunden",
+      "tooManyRequests": "Zu viele Anfragen. Versuchen Sie es in {{seconds}} Sekunden erneut."
+    },
+    "tooltip": {
+      "soon": "Kommt bald"
+    },
+    "tableOfContents": "Inhaltsverzeichnis",
+    "roles": {
+      "admin": "Admin",
+      "contentCreator": "Inhaltsersteller",
+      "student": "Student"
+    },
+    "languages": {
+      "en": "Englisch",
+      "pl": "Polnisch",
+      "de": "Deutsch",
+      "lt": "Litauisch",
+      "cs": "Tschechisch"
+    },
+    "lessonTypes": {
+      "content": "Inhalt",
+      "quiz": "Quiz",
+      "ai_mentor": "KI-Mentor",
+      "embed": "Einbetten"
+    },
+    "error": {
+      "somethingWentWrong": "Hoppla! Etwas ist schief gelaufen."
+    },
+    "loader": {
+      "textSequence": {
+        "aiMentor": {
+          "warmingUp": "KI-Mentor aufwärmen...",
+          "preparingSimulation": "Simulation wird für Sie vorbereitet...",
+          "buildingContext": "Kontext des Gebäudeszenarios...",
+          "takingLonger": "Das dauert länger als gewöhnlich..."
+        }
+      }
+    },
+    "other": {
+      "active": "Aktiv",
+      "archived": "Archiviert",
+      "selected": "Ausgewählt",
+      "allStatuses": "Alle Status",
+      "draft": "Entwurf",
+      "all": "Alle",
+      "search": "Suchen",
+      "published": "Veröffentlicht",
+      "private": "Privat",
+      "publish": "Veröffentlichen",
+      "uploadingImage": "Bild wird hochgeladen...",
+      "copyUrl": "Die URL-Adresse wurde in die Zwischenablage kopiert",
+      "dueDate": "Fälligkeitsdatum: {{date}}",
+      "appVersion": "App-Version: {{version}}"
+    },
+    "continueWithGoogle": "Weiter mit Google",
+    "continueWithMicrosoft": "Weiter mit Microsoft",
+    "continueWithSlack": "Fahren Sie mit Slack fort",
+    "enterFullscreen": "Vollbild",
+    "exitFullscreen": "Beenden Sie den Vollbildmodus"
+  },
+  "lessons": {
+    "sequenceUpdatedSuccessfully": "Lektionssequenz erfolgreich aktualisiert",
+    "sequenceUpdateFailed": "Die Unterrichtssequenz konnte nicht aktualisiert werden",
+    "quizFeedbackUpdatedSuccessfully": "Die Option „Quiz-Feedback“ wurde erfolgreich aktualisiert",
+    "quizFeedbackUpdateFailed": "Die Option „Quiz-Feedback“ konnte nicht aktualisiert werden",
+    "settingsUpdatedSuccessfully": "Einstellungen erfolgreich aktualisiert",
+    "settingsUpdateFailed": "Die Einstellungen konnten nicht aktualisiert werden"
+  },
+  "uploadFile": {
+    "header": "Klicken Sie zum Hochladen",
+    "subHeader": "oder per Drag & Drop",
+    "replace": "Klicken Sie zum Ersetzen",
+    "toast": {
+      "fileUploadedSuccessfully": "Datei erfolgreich hochgeladen",
+      "videoFailed": "Das Hochladen des Videos ist fehlgeschlagen",
+      "videoReady": "Das Video ist einsatzbereit",
+      "videoUploading": "Wir laden Ihr Video hoch. Bitte schließen Sie den Tab nicht.",
+      "videoUploadedProcessing": "Ihr Upload ist abgeschlossen. Jetzt wird Ihr Video verarbeitet. Schließen Sie den Tab gerne."
+    },
+    "details": {
+      "imageCrop": "PNG, JPG, JPEG oder SVG",
+      "video": "MP4, MOV, MPEG-2 oder Hevc (max. bis 5 GB)",
+      "presentation": "PPT/PPTX (max. bis 100 MB)"
+    },
+    "processing": {
+      "title": "Video wird verarbeitet",
+      "body": "Sie können mit der Bearbeitung fortfahren. Wir benachrichtigen Sie, wenn es fertig ist."
+    },
+    "remove": {
+      "video": "Video entfernen",
+      "presentation": "Präsentation entfernen"
+    }
+  },
+  "deleteFile": {
+    "toast": {
+      "success": "Datei erfolgreich gelöscht"
+    }
+  },
+  "adminScorm": {
+    "header": "Laden Sie SCORM hoch",
+    "subHeader": "Laden Sie Ihre SCORM-ZIP-Datei hoch.",
+    "field": {
+      "price": "Preis",
+      "title": "Kurstitel",
+      "category": "Kategorie",
+      "description": "Beschreibung",
+      "thumbnail": "Miniaturansicht hochladen"
+    },
+    "placeholder": {
+      "price": "Menge",
+      "title": "Titel eingeben...",
+      "category": "Kategorie auswählen",
+      "description": "Geben Sie eine Beschreibung des Kurses an..."
+    },
+    "other": {
+      "setUpCourse": "Kurs einrichten",
+      "provideDetails": "Geben Sie die Details an, um einen neuen Kurs einzurichten",
+      "uploadFileHeader": "Klicken Sie zum Hochladen oder ziehen Sie es per Drag & Drop",
+      "uploadFileBody": "SCORM .zip-Datei (max. 500 MB)",
+      "pricing": "Preise",
+      "status": "Status",
+      "setUpPricing": "Legen Sie die Preise für den Kurs fest",
+      "setUpStatus": "Status für den Kurs festlegen",
+      "noDescription": "Noch keine Beschreibung.",
+      "untitled": "Ohne Titel",
+      "free": "Frei",
+      "paidCourse": "Bezahlter Kurs",
+      "freeCourseBody": "Studierende können sich anmelden und auf die Kursinhalte zugreifen, ohne dafür etwas zu bezahlen.",
+      "paidCourseBody": "Studierende können die Kursinhalte erwerben und darauf zugreifen. Nach der Auswahl können Sie Währung und Preis festlegen.",
+      "draftBody": "Studierende können diesen Kurs weder kaufen noch sich für ihn anmelden. Bei bereits eingeschriebenen Teilnehmern erscheint der Kurs nicht in der Kursliste ihrer Studierenden.",
+      "publishBody": "Studierende können die Kursinhalte kaufen, sich anmelden und darauf zugreifen. Sobald Sie sich angemeldet haben, wird der Kurs im Studenten-Dashboard angezeigt.",
+      "charactersLeft": "Zeichen übrig"
+    },
+    "button": {
+      "back": "Zurück",
+      "status": "Status",
+      "creatingCourse": "Kurs erstellen...",
+      "createCourse": "Kurs erstellen"
+    },
+    "toast": {
+      "scormUploadedSuccessfully": "SCORM-Paket erfolgreich hochgeladen"
+    }
+  },
+  "studentChapterCardView": {
+    "other": {
+      "chapterProgress": "Kapitelfortschritt:"
+    }
+  },
+  "navigationSideBar": {
+    "settings": "Einstellungen",
+    "logout": "Abmelden",
+    "panel": "Panel",
+    "menu": "Speisekarte",
+    "close": "Schließen",
+    "profile": "Profil",
+    "dashboard": "Armaturenbrett",
+    "statistics": "Statistiken",
+    "analytics": "Analytik",
+    "progress": "Fortschritt",
+    "findInApplication": "Finden Sie in der Anwendung",
+    "courses": "Kurse",
+    "content": "Inhalt",
+    "categories": "Kategorien",
+    "users": "Benutzer",
+    "groups": "Gruppen",
+    "articles": "Wissensdatenbank",
+    "news": "Nachricht",
+    "providerInformation": "Information",
+    "announcements": "Ankündigungen",
+    "promotionCodes": "Aktionscodes",
+    "manage": "Verwalten",
+    "ariaLabels": {
+      "goToAvailableCourses": "Gehen Sie zu den verfügbaren Kursen"
+    },
+    "qa": "Fragen und Antworten",
+    "tenants": "Organisationen"
+  },
+  "newsView": {
+    "header": "Nachricht",
+    "notFound": "Nachrichten nicht gefunden.",
+    "previousNews": "Vorherige Nachrichten",
+    "nextNews": "Nächste Neuigkeiten",
+    "prompt": {
+      "photoUrl": "Foto-URL",
+      "photoCaption": "Bildunterschrift (optional)",
+      "videoUrl": "Video-URL (mp4 usw.)",
+      "videoCaption": "Videounterschrift (optional)"
+    },
+    "field": {
+      "title": "Titel",
+      "summary": "Zusammenfassung",
+      "intro": "Einführung",
+      "content": "Inhalt",
+      "image": "Bild",
+      "status": "Status",
+      "isPublic": "Ist öffentlich"
+    },
+    "placeholder": {
+      "title": "Geben Sie den Nachrichtentitel ein",
+      "summary": "Fügen Sie eine kurze Zusammenfassung hinzu",
+      "intro": "Fügen Sie eine kurze Einleitung hinzu"
+    },
+    "create": "Erstellen",
+    "edit": "Bearbeiten",
+    "status": {
+      "draft": "Entwurf",
+      "published": "Veröffentlicht",
+      "draftMany": "Entwürfe",
+      "publishedMany": "Veröffentlicht"
+    },
+    "button": {
+      "delete": "Löschen"
+    },
+    "validation": {
+      "titleRequired": "Titel ist erforderlich",
+      "introRequired": "Eine Einführung ist erforderlich",
+      "contentRequired": "Inhalte sind erforderlich",
+      "imageRequired": "Bild ist erforderlich",
+      "statusRequired": "Status ist erforderlich"
+    },
+    "editor": "Editor",
+    "preview": "Vorschau",
+    "isPublicDescription": "Teilen Sie diese Neuigkeiten auch für nicht angemeldete Benutzer.",
+    "language": {
+      "label": "Sprache",
+      "baseLanguage": "Standard",
+      "notAddedLanguages": "Sprachen zum Hinzufügen",
+      "createTitle": "Übersetzung erstellen",
+      "createDescription": "Eine Übersetzung für diese Nachricht in {{language}} erstellen?",
+      "deleteTitle": "Übersetzung löschen",
+      "deleteDescription": "Die {{language}}-Übersetzung löschen? Der Inhalt wird entfernt."
+    }
+  },
+  "globalSearch": {
+    "notFound": "Leider wurde nichts gefunden",
+    "tryAgain": "Versuchen Sie es erneut mit anderen Schlüsselwörtern",
+    "search": "Suchen...",
+    "searchIn": "Suche in {{companyName}}",
+    "searchInDescription": "Beginnen Sie mit der Eingabe, um Kurse, Ankündigungen und mehr zu durchsuchen.",
+    "navigate": "Navigieren",
+    "goTo": "Gehe zu",
+    "close": "Schließen",
+    "entries": {
+      "users": "Benutzer",
+      "categories": "Kategorien",
+      "groups": "Gruppen",
+      "allCourses": "Alle Kurse",
+      "myCourses": "Meine Kurse",
+      "availableCourses": "Verfügbare Kurse",
+      "noSearchResults": "Keine Suchergebnisse für:",
+      "announcements": "Ankündigungen",
+      "lessons": "Unterricht",
+      "news": "Nachricht",
+      "articles": "Artikel",
+      "qa": "Fragen und Antworten"
+    }
+  },
+  "providerInformation": {
+    "title": "Anbieterinformationen",
+    "description": "Informationen über Ihr Unternehmen, die für Benutzer sichtbar sind",
+    "editTitle": "Bearbeiten Sie die Anbieterinformationen",
+    "companyName": "Name der Firma",
+    "companyShortName": "Firmenkurzname",
+    "registeredAddress": "Registrierte Adresse",
+    "taxNumber": "Steuernummer (NIP)",
+    "emailAddress": "E-Mail-Adresse",
+    "courtRegisterNumber": "Gerichtsregisternummer (KRS)",
+    "noDataAvailable": "Keine Anbieterinformationen verfügbar",
+    "createSuccess": "Anbieterinformationen erfolgreich erstellt",
+    "updateSuccess": "Anbieterinformationen erfolgreich aktualisiert",
+    "createError": "Anbieterinformationen konnten nicht erstellt werden",
+    "updateError": "Anbieterinformationen konnten nicht aktualisiert werden",
+    "saveError": "Anbieterinformationen konnten nicht gespeichert werden",
+    "validation": {
+      "nipMustBe10Digits": "NIP muss 10 Ziffern lang sein",
+      "krsMustBe10Digits": "KRS muss 10-stellig sein",
+      "invalidEmailFormat": "Ungültiges E-Mail-Format"
+    },
+    "noCompanyInformationAvailable": "Keine Firmeninformationen verfügbar",
+    "breadcrumbs": {
+      "providerInformation": "Anbieterinformationen"
+    }
+  },
+  "changeUserLanguageView": {
+    "header": "Sprache ändern",
+    "subHeader": "Wählen Sie Ihre bevorzugte Sprache",
+    "field": {
+      "language": "Sprache"
+    },
+    "options": {
+      "english": "Englisch",
+      "polish": "Polieren",
+      "german": "Deutsch",
+      "czech": "Tschechisch",
+      "lithuanian": "Litauisch"
+    }
+  },
+  "resetOnboarding": {
+    "header": "Einführung zurücksetzen",
+    "subHeader": "Hier können Sie die Anwendungseinführung zurücksetzen",
+    "button": {
+      "reset": "Einführung zurücksetzen"
+    },
+    "toast": {
+      "success": "Die Einführung wurde erfolgreich zurückgesetzt",
+      "error": "Die Einführung konnte nicht zurückgesetzt werden"
+    }
+  },
+  "changeUserEmailView": {
+    "header": "Benutzerinformationen ändern",
+    "subHeader": "Aktualisieren Sie hier Ihre Benutzerinformationen.",
+    "field": {
+      "email": "E-Mail"
+    },
+    "validation": {
+      "email": "E-Mail ist erforderlich"
+    }
+  },
+  "ssoEnforcementView": {
+    "header": "SSO-Durchsetzung",
+    "subHeader": "Erzwingen Sie die SSO-Anmeldung für alle Benutzer",
+    "description": "Dieser Schalter erzwingt die Google-/Microsoft-Anmeldung für alle Benutzer. Wenn diese Option deaktiviert ist, können sich Benutzer mit dem herkömmlichen Anmeldeformular anmelden.",
+    "switch": {
+      "enabled": "Ermöglicht",
+      "disabled": "Deaktiviert"
+    },
+    "toast": {
+      "ssoEnforcementUpdatedSuccessfully": "SSO-Erzwingung erfolgreich aktualisiert",
+      "ssoEnforcementUpdateFailed": "Die SSO-Erzwingung konnte nicht aktualisiert werden",
+      "registerRedirect": "Die Registrierung per E-Mail ist deaktiviert, da SSO erzwungen wird."
+    }
+  },
+  "userEmailTriggers": {
+    "header": "Benutzer-E-Mail-Trigger",
+    "subHeader": "Verwalten Sie automatisierte E-Mail-Benachrichtigungen, die an Benutzer gesendet werden",
+    "settings": {
+      "userFirstLogin": "Erster Login",
+      "userFirstLoginDescription": "Senden Sie nach der ersten Anmeldung am System eine E-Mail an den Benutzer.",
+      "userCourseAssignment": "Kursanmeldung",
+      "userCourseAssignmentDescription": "Senden Sie eine E-Mail an den Benutzer, nachdem er von einem Administrator für einen Kurs angemeldet wurde.",
+      "userShortInactivity": "Kurze Inaktivität (14 Tage)",
+      "userShortInactivityDescription": "Senden Sie nach 14 Tagen Inaktivität eine E-Mail an den Benutzer.",
+      "userLongInactivity": "Lange Inaktivität (30 Tage)",
+      "userLongInactivityDescription": "Senden Sie nach 30 Tagen Inaktivität eine E-Mail an den Benutzer.",
+      "userChapterFinished": "Kapitel abgeschlossen",
+      "userChapterFinishedDescription": "Senden Sie eine E-Mail an den Benutzer, nachdem er ein Kapitel abgeschlossen hat.",
+      "userCourseFinished": "Kurs abgeschlossen",
+      "userCourseFinishedDescription": "Senden Sie eine E-Mail an den Benutzer, nachdem er einen Kurs abgeschlossen hat."
+    },
+    "switch": {
+      "enabled": "Ermöglicht",
+      "disabled": "Deaktiviert"
+    },
+    "toast": {
+      "userEmailTriggersUpdatedSuccessfully": "E-Mail-Trigger wurden erfolgreich aktualisiert",
+      "userEmailTriggersUpdateFailed": "E-Mail-Trigger konnten nicht aktualisiert werden"
+    }
+  },
+  "inviteOnlyRegistrationView": {
+    "header": "Durchsetzung der Registrierung nur auf Einladung",
+    "subHeader": "Für die Registrierung ist eine Einladung erforderlich",
+    "description": "Aktivieren Sie diese Einstellung, um die Registrierung nur auf eingeladene Benutzer zu beschränken. Bei Deaktivierung kann sich jeder ohne Einladung registrieren.",
+    "switch": {
+      "enabled": "Ermöglicht",
+      "disabled": "Deaktiviert"
+    },
+    "toast": {
+      "inviteOnlyRegistrationUpdatedSuccessfully": "Die Einstellungen für die Nur-Einladung-Registrierung wurden erfolgreich aktualisiert",
+      "inviteOnlyRegistrationUpdateFailed": "Die Einstellungen für die Nur-Einladung-Registrierung konnten nicht aktualisiert werden",
+      "registerRedirect": "Eine Anmeldung ist nur auf Einladung möglich."
+    }
+  },
+  "environmentConfigurationView": {
+    "header": "Umgebungskonfiguration",
+    "description": "Zeigen Sie detaillierte Informationen zu Ihrer Umgebungskonfiguration an, einschließlich vollständig konfigurierter Dienste, teilweise konfigurierter Dienste und fehlender Umgebungsvariablen.",
+    "button": {
+      "viewStatus": "Status anzeigen",
+      "loading": "Laden...",
+      "dismissWarning": "Warnung verwerfen"
+    },
+    "dialog": {
+      "title": "Umgebungskonfigurationsstatus",
+      "fullyConfigured": "Vollständig konfiguriert",
+      "partiallyConfigured": "Teilweise konfiguriert",
+      "youMightWantToSetThisUp": "Vielleicht möchten Sie dies einrichten",
+      "noFullyConfigured": "Keine vollständig konfigurierten Dienste.",
+      "noPartiallyConfigured": "Keine teilweise konfigurierten Dienste.",
+      "allConfigured": "Alle Umgebungsschlüssel sind korrekt konfiguriert.",
+      "dismissWarning": "Zurückweisen",
+      "serviceNames": {
+        "stripe": "Stripe-Zahlung",
+        "bunny": "Bunny CDN",
+        "google_authorization": "Google OAuth",
+        "microsoft_authorization": "Microsoft OAuth",
+        "slack_authorization": "Slack OAuth",
+        "openAI": "OpenAI",
+        "luma": "Luma"
+      },
+      "serviceDescriptions": {
+        "stripe": "Verarbeiten Sie Kurszahlungen und verwalten Sie Abonnements",
+        "bunny": "Streamen Sie Videos und stellen Sie Inhalte effizient bereit",
+        "google_authorization": "Erlauben Sie Benutzern, sich mit ihrem Google-Konto anzumelden",
+        "microsoft_authorization": "Erlauben Sie Benutzern, sich mit ihrem Microsoft-Konto anzumelden",
+        "slack_authorization": "Erlauben Sie Benutzern, sich mit ihrem Slack-Konto anzumelden",
+        "openAI": "Aktivieren Sie AI Mentor-Funktionen",
+        "luma": "Aktivieren Sie die Funktionen zur KI-Kursgenerierung"
+      }
+    }
+  },
+  "mostPopularCoursesView": {
+    "header": "Am beliebtesten",
+    "subHeader": "Top 5 Kurse",
+    "other": {
+      "noData": "Keine Daten verfügbar",
+      "students": "Studenten"
+    }
+  },
+  "enrollmentChartView": {
+    "header": "Einschreibung",
+    "subHeader": "Anmeldezahlen",
+    "other": {
+      "noData": "Keine Daten verfügbar",
+      "enrollments": "Anmeldungen"
+    }
+  },
+  "createPasswordView": {
+    "header": "Neues Passwort erstellen",
+    "subHeader": "Geben Sie ein neues Passwort für ein",
+    "field": {
+      "password": "Passwort",
+      "confirmPassword": "Passwort bestätigen"
+    },
+    "validation": {
+      "passwordsDontMatch": "Passwörter stimmen nicht überein",
+      "missingEmail": "Im Link fehlt die E-Mail-Adresse. Bitte verwenden Sie den vollständigen Link aus Ihrer E-Mail."
+    },
+    "button": {
+      "changePassword": "Passwort erstellen"
+    },
+    "error": {
+      "invalidTokenOrEmail": "Dieser Link zur Passworteinrichtung ist ungültig, abgelaufen oder stimmt nicht mit dieser E-Mail überein."
+    }
+  },
+  "changePasswordView": {
+    "header": "Kennwort ändern",
+    "subHeader": "Aktualisieren Sie hier Ihr Passwort.",
+    "field": {
+      "oldPassword": "Altes Passwort",
+      "newPassword": "Neues Passwort",
+      "confirmPassword": "Passwort bestätigen"
+    },
+    "validation": {
+      "oldPassword": "Altes Passwort ist erforderlich",
+      "newPassword": "Neues Passwort ist erforderlich",
+      "passwordsDontMatch": "Passwörter stimmen nicht überein"
+    },
+    "toast": {
+      "passwordChangedSuccessfully": "Passwort erfolgreich geändert",
+      "passwordCreatedSuccessfully": "Passwort erfolgreich erstellt"
+    }
+  },
+  "passwordValidationDisplay": {
+    "title": "Passwortanforderungen",
+    "header": "Ihr Passwort muss Folgendes enthalten:",
+    "passwordMinLength": "mindestens 8 Zeichen",
+    "passwordUppercase": "mindestens ein Großbuchstabe",
+    "passwordLowercase": "mindestens ein Kleinbuchstabe",
+    "passwordNumber": "mindestens eine Zahl",
+    "passwordSpecial": "mindestens ein Sonderzeichen",
+    "passwordsMatch": "Passwörter stimmen überein"
+  },
+  "contentCreatorView": {
+    "button": {
+      "collapse": "Zusammenbruch",
+      "showMore": "Mehr anzeigen",
+      "edit": "Bearbeiten",
+      "share": "Profil teilen",
+      "cancel": "Stornieren",
+      "confirm": "Bestätigen",
+      "deleteProfilePicture": "Profilbild löschen"
+    },
+    "field": {
+      "firstName": "Name",
+      "firstNamePlaceholder": "Geben Sie Ihren Namen ein",
+      "lastName": "Nachname",
+      "lastNamePlaceholder": "Geben Sie Ihren Nachnamen ein",
+      "contactEmail": "E-Mail-Adresse",
+      "contactEmailPlaceholder": "Geben Sie Ihre E-Mail-Adresse ein",
+      "contactPhone": "Telefonnummer",
+      "contactPhonePlaceholder": "Geben Sie Ihre Telefonnummer ein",
+      "jobTitle": "Titel",
+      "jobTitlePlaceholder": "Geben Sie Ihren Titel ein",
+      "description": "Bio-Notiz",
+      "descriptionPlaceholder": "Geben Sie eine kurze Bio-Notiz ein",
+      "uploadThumbnailLabel": "Miniaturansicht hochladen"
+    },
+    "toast": {
+      "profileLinkCopied": "Profillink kopiert!",
+      "profileLinkCopyError": "Fehler beim Kopieren des Profillinks!"
+    },
+    "other": {
+      "personalInfoTitle": "Hauptinformationen",
+      "personalInfoDescription": "Verwalten Sie Ihre grundlegenden Kontoinformationen",
+      "aboutTitle": "Um",
+      "aboutDescription": "Erzählen Sie mehr über sich",
+      "appearanceTitle": "Aussehen",
+      "appearanceDescription": "Laden Sie Ihr Profilbild hoch",
+      "pageTitle": "Profil",
+      "about": "Um",
+      "contact": "Kontakt",
+      "courses": "Kurse",
+      "title": "Titel"
+    }
+  },
+  "changeUserInformationView": {
+    "header": "Benutzerdetails ändern",
+    "subHeader": "Aktualisieren Sie hier Ihre Biografie.",
+    "toast": {
+      "userUpdatedSuccessfully": "Benutzer erfolgreich aktualisiert",
+      "userDetailsUpdatedSuccessfully": "Benutzerdetails erfolgreich aktualisiert",
+      "updatedSelectedUsersSuccessfully": "Ausgewählte Benutzer erfolgreich aktualisiert",
+      "deletedSelectedUsersSuccessfully": "Ausgewählte Benutzer wurden erfolgreich gelöscht",
+      "archivedSelectedUsersSuccessfully": "Ausgewählte Benutzer erfolgreich archiviert",
+      "archiveSelectedUsersError": "Ausgewählte Benutzer konnten nicht archiviert werden"
+    },
+    "field": {
+      "description": "Beschreibung",
+      "email": "E-Mail",
+      "phoneNumber": "Telefonnummer",
+      "jobTitle": "Berufsbezeichnung"
+    },
+    "placeholder": {
+      "description": "Ihre Beschreibung",
+      "phoneNumber": "Ihre Telefonnummer",
+      "jobTitle": "Ihre Berufsbezeichnung"
+    }
+  },
+  "clientStatisticsView": {
+    "header": "Willkommen zurück,",
+    "button": {
+      "enroll": "Einschreiben",
+      "searchCourses": "Kurse suchen",
+      "continue": "Weitermachen",
+      "start": "Start",
+      "readMore": "Mehr lesen",
+      "tryAgain": "Versuchen Sie es erneut",
+      "view": "Sicht"
+    },
+    "other": {
+      "completedCourses": "Abgeschlossene Kurse",
+      "startedCourses": "Gestartete Kurse",
+      "correctAnswers": "Richtige Antworten",
+      "wrongAnswers": "Falsche Antworten",
+      "avgQuizScorePercentage": "Durchschn. Prozentuale Punktzahl der Tests",
+      "avgQuizCompletionPercentage": "Durchschn. Prozent der Kurskonkurrenz",
+      "noData": "Keine Daten",
+      "courses": "Kurse",
+      "lessons": "Unterricht",
+      "completed": "Vollendet",
+      "started": "Begonnen",
+      "noDataAvailable": "Keine Daten verfügbar",
+      "rates": "Preise",
+      "numberOf": "Anzahl",
+      "noLessonsToContinue": "Derzeit gibt es keinen Unterricht, der fortgesetzt werden kann.",
+      "continueLearning": "Lernen Sie weiter in:"
+    }
+  },
+  "profileWithCalendarView": {
+    "header": "Mein Profil",
+    "button": {
+      "settings": "Einstellungen"
+    },
+    "other": {
+      "dailyStreak": "Tagessträhne"
+    }
+  },
+  "adminStatisticsView": {
+    "header": "Willkommen zurück,",
+    "other": {
+      "courseCompletionPercentage": "Prozentsatz der Kursabschlüsse",
+      "conversionsAfterFreemiumLesson": "Konvertierungen nach Freemium-Lektion",
+      "avgQuizScore": "Durchschn. Punkte in allen Tests",
+      "purchasedCourse": "Gekaufter Kurs",
+      "remainedOnFreemium": "Bin bei Freemium geblieben",
+      "correct": "Richtig",
+      "incorrect": "Falsch",
+      "completed": "Vollendet",
+      "enrolled": "Eingeschrieben",
+      "noData": "Keine Daten",
+      "downloadReport": "Bericht herunterladen",
+      "downloadingReport": "Bericht wird heruntergeladen..."
+    },
+    "toast": {
+      "reportDownloadSuccess": "Bericht erfolgreich heruntergeladen",
+      "reportDownloadError": "Der Bericht konnte nicht heruntergeladen werden. Bitte versuchen Sie es erneut."
+    }
+  },
+  "adminPromotionCodesView": {
+    "notifications": {
+      "createdSuccessfully": "Aktionscode erfolgreich erstellt",
+      "updatedSuccessfully": "Aktionscode erfolgreich aktualisiert"
+    },
+    "headers": {
+      "create": "Aktionscode erstellen",
+      "update": "Aktionscode aktualisieren"
+    },
+    "status": {
+      "active": "Aktiv",
+      "deactivated": "Deaktiviert",
+      "expired": "Abgelaufen",
+      "usageLimitReached": "Nutzungslimit erreicht"
+    },
+    "field": {
+      "code": "Code",
+      "status": "Status",
+      "uses": "Anzahl der Verwendungen",
+      "associatedCourses": "Zugehörige Kurse",
+      "discountType": "Rabatttyp",
+      "discountTypePercent": "Prozent",
+      "discountTypeFixed": "Behoben",
+      "discountValue": "Rabattwert",
+      "maxRedemptions": "Maximale Einlösungen",
+      "expiresAt": "Läuft ab um",
+      "assignedCourses": "Zugewiesene Kurse",
+      "type": "Typ",
+      "associateCourse": {
+        "checkAll": "Bewerben Sie sich für alle Kurse"
+      },
+      "discount": "Rabatt",
+      "createdAt": "Erstellt am"
+    },
+    "breadcrumbs": {
+      "promotionCodes": "Aktionscodes",
+      "createNew": "Neu erstellen",
+      "update": "Aktualisieren",
+      "back": "Zurück"
+    },
+    "button": {
+      "createNew": "Neu erstellen",
+      "createCoupon": "Aktionscode erstellen",
+      "deactivatePromotionCode": "Dieser Aktionscode ist aktiv",
+      "activatePromotionCode": "Dieser Aktionscode ist nicht aktiv"
+    },
+    "other": {
+      "noCourses": "Keine Kurse",
+      "usageInfo": "Nutzungsinformationen",
+      "usageAmount": "Nutzungsmenge",
+      "baseInfo": "Grundlegende Informationen"
+    }
+  },
+  "adminCoursesView": {
+    "filters": {
+      "placeholder": {
+        "title": "Suche nach Titel ...",
+        "categories": "Kategorien",
+        "states": "Staaten"
+      },
+      "other": {
+        "draft": "Entwurf",
+        "published": "Veröffentlicht",
+        "private": "Privat"
+      }
+    },
+    "courses": {
+      "header": "Kurse verwalten",
+      "subHeader": "Alle Kurse können Sie einsehen und bearbeiten"
+    },
+    "field": {
+      "title": "Titel",
+      "author": "Autor",
+      "category": "Kategorie",
+      "price": "Preis",
+      "state": "Zustand",
+      "status": "Status",
+      "sharedCourse": "Geteilt",
+      "createdAt": "Erstellt am"
+    },
+    "lessonCard": {
+      "mappedTypes": {
+        "video": "Video",
+        "presentation": "Präsentation",
+        "content": "Inhalt",
+        "quiz": "Quiz",
+        "ai_mentor": "KI-Mentor",
+        "embed": "Einbetten"
+      }
+    },
+    "other": {
+      "selected": "Ausgewählt",
+      "noLessons": "Kein Unterricht"
+    },
+    "button": {
+      "uploadScorm": "Laden Sie SCORM hoch",
+      "createNew": "Neu erstellen",
+      "deleteSelected": "Ausgewählte löschen"
+    },
+    "deleteModal": {
+      "titleSingle": "Kurs löschen",
+      "titleMultiple": "Kurse löschen",
+      "descriptionSingle": "Möchten Sie diesen Kurs wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+      "descriptionMultiple": "Sind Sie sicher, dass Sie {{count}} Kurse löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden."
+    },
+    "toast": {
+      "deleteCourseSuccessfully": "Kurs erfolgreich gelöscht",
+      "deleteCourseFailed": "Der Kurs konnte nicht gelöscht werden",
+      "deletePublishedCourseFailed": "Ein veröffentlichter Kurs kann nicht gelöscht werden. Bitte setzen Sie den Status zunächst auf „Entwurf“."
+    }
+  },
+  "adminCategoriesView": {
+    "filters": {
+      "placeholder": {
+        "title": "Suche nach Titel ..."
+      }
+    },
+    "field": {
+      "title": "Titel",
+      "status": "Status",
+      "createdAt": "Erstellt am"
+    },
+    "button": {
+      "createNew": "Neu erstellen",
+      "clearAll": "Alles löschen",
+      "deleteSelected": "Ausgewählte löschen"
+    },
+    "deleteModal": {
+      "titleSingle": "Kategorie löschen",
+      "titleMultiple": "Kategorien löschen",
+      "descriptionSingle": "Sind Sie sicher, dass Sie diese Kategorie löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+      "descriptionMultiple": "Sind Sie sicher, dass Sie {{count}} Kategorien löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden."
+    },
+    "toast": {
+      "deleteCategorySuccessfully": "Kategorie erfolgreich gelöscht",
+      "deleteCategoryFailed": "Kategorie konnte nicht gelöscht werden"
+    },
+    "breadcrumbs": {
+      "categories": "Kategorien",
+      "createNew": "Neue Kategorie erstellen",
+      "back": "Zurück"
+    }
+  },
+  "adminCategoryView": {
+    "header": "Neue Kategorie erstellen",
+    "subHeader": "Geben Sie einen Titel für Ihre neue Kategorie ein. Klicken Sie auf Speichern, wenn Sie fertig sind.",
+    "editCategoryHeader": "Kategorieinformationen",
+    "field": {
+      "title": "Titel",
+      "status": "Status",
+      "newCategoryName": "Neuer Kategoriename"
+    },
+    "placeholder": {
+      "categoryName": "Kategorienamen eingeben..."
+    },
+    "button": {
+      "createCategory": "Kategorie erstellen"
+    },
+    "toast": {
+      "categoryCreatedSuccessfully": "Kategorie erfolgreich erstellt",
+      "categoryUpdatedSuccessfully": "Kategorie erfolgreich aktualisiert"
+    },
+    "error": {
+      "categoryNotFound": "Kategorie nicht gefunden",
+      "categoryIdNotFound": "Kategorie-ID nicht gefunden"
+    },
+    "breadcrumbs": {
+      "categories": "Kategorien",
+      "categoryDetails": "Kategoriedetails",
+      "back": "Zurück"
+    }
+  },
+  "adminUsersView": {
+    "filters": {
+      "placeholder": {
+        "searchByKeyword": "Suche nach Stichwort...",
+        "roles": "Rollen",
+        "groups": "Alle Gruppen"
+      }
+    },
+    "field": {
+      "firstName": "Vorname",
+      "lastName": "Nachname",
+      "email": "E-Mail",
+      "role": "Rolle",
+      "status": "Status",
+      "createdAt": "Erstellt am",
+      "group": "Gruppe"
+    },
+    "other": {
+      "selected": "Ausgewählt"
+    },
+    "toast": {
+      "cannotUpdateOwnRole": "Der Administrator kann seine eigene Rolle nicht ändern",
+      "noUserSelected": "Kein Benutzer ausgewählt"
+    },
+    "import": {
+      "toast": {
+        "success": "Der Import wurde erfolgreich abgeschlossen.\nImportierte {{ importedUsersAmount }} Benutzer.\n{{ skippedUsersAmount }} vorhandene Benutzer wurden übersprungen."
+      }
+    },
+    "button": {
+      "createNew": "Neu erstellen",
+      "deleteSelected": "Ausgewählte löschen",
+      "edit": "Bearbeiten",
+      "import": "Benutzer importieren",
+      "bulkEdit": "Massenbearbeitung"
+    },
+    "dropdown": {
+      "roles": "Rollen",
+      "groups": "Gruppen",
+      "delete": "Löschen",
+      "archive": "Archiv"
+    },
+    "modal": {
+      "title": {
+        "delete": "Möchten Sie diese Konten löschen?",
+        "role": "Rollen ändern",
+        "group": "Gruppen ändern",
+        "archive": "Benutzerkonten archivieren",
+        "confirmation": "Sind Sie sicher, dass Sie fortfahren möchten?",
+        "import": "Benutzer importieren",
+        "importResult": "Ergebnis importieren"
+      },
+      "button": {
+        "delete": "Löschen",
+        "role": "Speichern",
+        "group": "Speichern",
+        "archive": "Archiv",
+        "continue": "Bestätigen"
+      },
+      "description": {
+        "delete": "Sind Sie sicher, dass Sie diese Konten löschen möchten? Diese Aktion ist irreversibel.",
+        "confirmationForGroup_one": "Sie ändern die Gruppe für einen Benutzer in {{ group }}",
+        "confirmationForGroup_other": "Sie ändern die Gruppe für {{ count }} Benutzer in {{ group }}",
+        "confirmationForRole_one": "Sie ändern die Rolle für einen Benutzer in {{ role }}.",
+        "confirmationForRole_other": "Sie ändern die Rolle für {{ count }} Benutzer in {{ role }}",
+        "archive": "Sind Sie sicher, dass Sie diese Konten archivieren möchten?",
+        "import": "Laden Sie eine CSV- oder XLSX-Datei mit den folgenden Spalten hoch: Vorname, Nachname, E-Mail, Rolle (Administrator, Student oder Inhaltsersteller), Gruppen („Gruppe1, Gruppe2“), Sprache (EN oder Pl).",
+        "noUsersImported": "Es wurden keine Benutzer importiert.",
+        "noUsersSkipped": "Es wurden keine Benutzer übersprungen."
+      },
+      "placeholder": {
+        "group": "Gruppe auswählen",
+        "role": "Rolle auswählen"
+      },
+      "note": {
+        "import": "Hinweis: Bestehende Benutzer werden übersprungen. Wenn eine Gruppe angegeben ist und nicht existiert, wird keine neue Gruppe erstellt. Das Sprachfeld ist optional; Falls nicht angegeben oder ungültig, wird die Standardsprache auf die Sprache des Administrators eingestellt."
+      },
+      "tabs": {
+        "imported": "Importiert",
+        "skipped": "Übersprungen"
+      }
+    },
+    "breadcrumbs": {
+      "users": "Benutzer",
+      "createNew": "Neuen Benutzer erstellen",
+      "back": "Zurück",
+      "news": "Nachricht"
+    }
+  },
+  "adminUserView": {
+    "header": "Neuen Benutzer erstellen",
+    "subHeader": "Geben Sie die Details ein, um einen neuen Benutzer zu erstellen. Klicken Sie auf Speichern, wenn Sie fertig sind.",
+    "editUserHeader": "Benutzerinformationen",
+    "placeholder": {
+      "role": "Wählen Sie eine Rolle aus",
+      "groupId": "Wählen Sie eine Gruppe aus",
+      "language": "Wählen Sie eine Sprache aus"
+    },
+    "field": {
+      "firstName": "Vorname",
+      "lastName": "Nachname",
+      "email": "E-Mail",
+      "role": "Rolle",
+      "language": "Sprache",
+      "status": "Status",
+      "groups": "Gruppe"
+    },
+    "toast": {
+      "userCreatedSuccessfully": "Benutzer erfolgreich erstellt",
+      "userWithAttemptsError": "Benutzer mit verknüpften Quizergebnissen können nicht gelöscht werden. Es stehen nur Anonymisierung und Archivierung zur Verfügung.",
+      "userWithCreatedCoursesError": "Ein Benutzer, der Autor vorhandener Kurse ist, kann nicht gelöscht werden. Es stehen nur Anonymisierung und Archivierung zur Verfügung."
+    },
+    "button": {
+      "createUser": "Benutzer erstellen"
+    },
+    "error": {
+      "userNotFound": "Benutzer nicht gefunden"
+    },
+    "breadcrumbs": {
+      "users": "Benutzer",
+      "userDetails": "Benutzerdetails",
+      "back": "Zurück"
+    }
+  },
+  "adminEnvsView": {
+    "name": "Umgebungsvariablen",
+    "keysTitle": "Schlüssel",
+    "updateSuccessful": "Geheimnisse erfolgreich aktualisiert",
+    "form": {
+      "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "MICROSOFT_CLIENT_ID": {
+        "label": "Microsoft-Client-ID"
+      },
+      "MICROSOFT_CLIENT_SECRET": {
+        "label": "Microsoft-Client-Geheimnis"
+      },
+      "MICROSOFT_OAUTH_ENABLED": {
+        "label": "Microsoft OAuth aktiviert (wahr/falsch)"
+      },
+      "VITE_MICROSOFT_OAUTH_ENABLED": {
+        "label": "Vite Microsoft OAuth aktiviert (wahr/falsch)"
+      },
+      "OPENAI_API_KEY": {
+        "label": "OpenAI-API-Schlüssel"
+      },
+      "BUNNY_STREAM_API_KEY": {
+        "label": "Bunny Stream API-Schlüssel"
+      },
+      "BUNNY_STREAM_SIGNING_KEY": {
+        "label": "Bunny Stream-Signaturschlüssel"
+      },
+      "BUNNY_STREAM_LIBRARY_ID": {
+        "label": "Bunny Stream-Bibliotheks-ID"
+      },
+      "BUNNY_STREAM_TOKEN_SIGNING_KEY": {
+        "label": "Bunny Stream-Token-Signaturschlüssel"
+      },
+      "BUNNY_STREAM_CDN_URL": {
+        "label": "Bunny Stream CDN-URL"
+      },
+      "GOOGLE_CLIENT_ID": {
+        "label": "Google-Client-ID"
+      },
+      "GOOGLE_CLIENT_SECRET": {
+        "label": "Google-Client-Geheimnis"
+      },
+      "GOOGLE_OAUTH_ENABLED": {
+        "label": "Google OAuth aktiviert (wahr/falsch)"
+      },
+      "VITE_GOOGLE_OAUTH_ENABLED": {
+        "label": "Vite Google OAuth aktiviert (wahr/falsch)"
+      },
+      "STRIPE_WEBHOOK_SECRET": {
+        "label": "Stripe-Webhook-Geheimnis"
+      },
+      "STRIPE_SECRET_KEY": {
+        "label": "Stripe-Geheimschlüssel"
+      },
+      "VITE_STRIPE_PUBLISHABLE_KEY": {
+        "label": "Veröffentlichbarer Vite Stripe-Schlüssel"
+      },
+      "SLACK_CLIENT_ID": {
+        "label": "Slack-Client-ID"
+      },
+      "SLACK_CLIENT_SECRET": {
+        "label": "Slack-Client-Geheimnis"
+      },
+      "SLACK_OAUTH_ENABLED": {
+        "label": "Slack OAuth aktiviert (wahr/falsch)"
+      },
+      "VITE_SLACK_OAUTH_ENABLED": {
+        "label": "Vite Slack OAuth aktiviert (wahr/falsch)"
+      },
+      "LUMA_API_KEY": {
+        "label": "Luma-API-Schlüssel"
+      },
+      "save": "Speichern"
+    },
+    "breadcrumbs": {
+      "envs": "Umgebungsvariablen"
+    }
+  },
+  "adminGroupsView": {
+    "name": "Gruppenname",
+    "characteristic": "Merkmal",
+    "buttons": {
+      "create": "Neu erstellen",
+      "deleteSelected": "Ausgewählte löschen"
+    },
+    "groupSelect": {
+      "label": "Wählen Sie Gruppen aus",
+      "noGroups": "Keine Gruppen gefunden"
+    },
+    "newGroup": {
+      "header": "Neue Gruppe erstellen",
+      "card": {
+        "header": "Detailinformationen",
+        "subheader": "Definieren Sie Ihren Gruppennamen und deren Charakteristik",
+        "footer": "Denken Sie daran, dass AI Mentor es in Gesprächen verwenden wird."
+      },
+      "fields": {
+        "name": "Name",
+        "characteristic": "Merkmal"
+      },
+      "cancel": "Stornieren",
+      "submit": "Veröffentlichen"
+    },
+    "updateGroup": {
+      "header": "Gruppe aktualisieren",
+      "fields": {
+        "name": "Name",
+        "description": "Beschreibung"
+      },
+      "submit": "Gruppe bearbeiten",
+      "groupUpdatedSuccessfully": "Gruppe erfolgreich aktualisiert",
+      "groupNotFound": "Gruppe nicht gefunden"
+    },
+    "deleteGroup": {
+      "title": "Bestätigen Sie den Löschvorgang",
+      "description": "Sind Sie sicher, dass Sie diese Gruppen löschen möchten?",
+      "cancel": "Stornieren",
+      "submit": "Löschen"
+    },
+    "breadcrumbs": {
+      "groups": "Gruppen",
+      "createNew": "Neu erstellen",
+      "editGroup": "Gruppe bearbeiten",
+      "back": "Zurück"
+    }
+  },
+  "enrollCourseView": {
+    "toast": {
+      "unenrollCourseSuccessfully": "Kurs erfolgreich abgemeldet"
+    }
+  },
+  "paymentView": {
+    "toast": {
+      "successful": "Zahlung erfolgreich",
+      "failed": "Die Zahlungsabsicht konnte nicht erstellt werden",
+      "somethingWentWrong": "Etwas ist schief gelaufen"
+    },
+    "other": {
+      "buyFor": "Kaufen für",
+      "enrollCourse": "Melden Sie sich für den Kurs an"
+    }
+  },
+  "adminCourseView": {
+    "mandatoryCourse": "Pflichtkurs",
+    "mandatoryCourseTooltip": "Markieren Sie diesen Kurs als Pflichtkurs für die ausgewählte Gruppe. Sie müssen eine Fertigstellungsfrist festlegen. Nach Ablauf der Frist erhält der Administrator eine E-Mail-Benachrichtigung mit den Teilnehmern, die den Kurs nicht abgeschlossen haben.",
+    "deadline": "Frist",
+    "selectDate": "Datum auswählen",
+    "deadlineRequired": "Für den Pflichtkurs ist eine Frist erforderlich",
+    "common": {
+      "settings": "Einstellungen",
+      "curriculum": "Lehrplan",
+      "status": "Status",
+      "pricing": "Preise",
+      "preview": "Vorschau",
+      "generateMissingTranslations": "Fehlende Übersetzungen generieren",
+      "enrolledStudents": "Eingeschriebene Studierende",
+      "testAiMentor": "Testen Sie den KI-Mentor",
+      "aiCourseCreation": "KI-Kurserstellung",
+      "notAddedLanguages": "Nicht hinzugefügt",
+      "baseLanguage": "Standard",
+      "generateMissingTranslationsDescription": "Sind Sie sicher, dass Sie fehlende Übersetzungen generieren möchten? Dieser Vorgang kann einige Momente dauern."
+    },
+    "toast": {
+      "courseNotFound": "Kurs nicht gefunden",
+      "candidateNotAvailable": "Der Kursbesitz kann nicht auf diesen Benutzer übertragen werden",
+      "createCourseSuccessfully": "Kurs erfolgreich erstellt",
+      "courseUpdatedSuccessfully": "Kurs erfolgreich aktualisiert",
+      "courseTrailerUpdatedSuccessfully": "Kurstrailer erfolgreich aktualisiert",
+      "courseTrailerRemovedSuccessfully": "Kurstrailer erfolgreich entfernt",
+      "certificateUpdatedSuccessfully": "Zertifikat erfolgreich aktualisiert",
+      "certificateUpdateError": "Fehler beim Aktualisieren des Zertifikats",
+      "maxTitleLengthExceeded_one": "Der Titel darf nicht länger als {{count}} Zeichen sein",
+      "maxTitleLengthExceeded_other": "Der Titel darf nicht länger als {{count}} Zeichen sein",
+      "aiMentorAvatarIncorrectType": "Ungültiger Dateityp. Bitte laden Sie ein JPG-, JPEG-, PNG- oder SVG-Bild hoch.",
+      "languageNotSupported": "Dieser Kurs unterstützt diese Sprache nicht.",
+      "updateCourseMissingLanguage": "Für die Übersetzung ist keine Sprache vorgesehen",
+      "successfullyDeletedLanguage": "Die Sprache wurde erfolgreich aus dem Kurs gelöscht",
+      "invalidLanguageToDelete": "Sie können diese Sprache nicht löschen.",
+      "cannotModifyQuestionsInNonBaseLanguage": "Sie können keine Fragen in einer anderen Sprache als der Standardsprache ändern.",
+      "noMissingTranslations": "Keine fehlenden Übersetzungen",
+      "mismatchContentLength": "Die Anzahl der Übersetzungen stimmt nicht mit der Anzahl der generierten Übersetzungen überein",
+      "translationsGeneratedSuccessfully": "Übersetzungen erfolgreich generiert",
+      "lumaNotConfigured": "Der Luma-API-Schlüssel ist nicht konfiguriert.",
+      "lumaBadRequest": "Die Luma-Anfrage war ungültig.",
+      "lumaUnauthorized": "Die Luma-Autorisierung ist fehlgeschlagen.",
+      "lumaResourceNotFound": "Die angeforderte Luma-Ressource wurde nicht gefunden.",
+      "lumaRequestTimeout": "Zeitüberschreitung bei der Luma-Anfrage.",
+      "lumaConflict": "Luma hat einen Konflikt gemeldet.",
+      "lumaValidationFailed": "Die Luma-Validierung ist fehlgeschlagen.",
+      "lumaRateLimited": "Luma-Ratenlimit erreicht. Bitte versuchen Sie es in Kürze noch einmal.",
+      "lumaServiceUnavailable": "Der Luma-Dienst ist derzeit nicht verfügbar.",
+      "courseHasChapters": "Dieser Kurs hat bereits Kapitel.",
+      "courseGeneratedSavedSuccessfully": "Der generierte Kurs wurde erfolgreich gespeichert.",
+      "maxOneVideoUploaded": "Sie können nicht mehr als ein Video hochladen.",
+      "successfullyTransferredCourseOwnership": "Der Kursbesitz wurde erfolgreich übertragen"
+    },
+    "thinking": {
+      "PLANNING_NEXT_STEP": "Nächsten Schritt planen...",
+      "USING_TOOLS": "Verwenden von Tools zum Abrufen von Kontext ...",
+      "SUMMARIZING_CONTEXT": "Abgerufenen Kontext zusammenfassen...",
+      "ANALYZING_OBJECTIVES": "Ziele analysieren...",
+      "SCANNING_LEARNING_EVIDENCE": "Lernnachweise werden gescannt...",
+      "RUNNING_CURRICULUM_DESIGN": "Laufende Lehrplangestaltung...",
+      "INITIALIZING_CURRICULUM_PLAN": "Lehrplan wird initialisiert...",
+      "DESIGNING_CHAPTERS": "Kapitel entwerfen...",
+      "DESIGNING_LESSON_BLUEPRINTS": "Entwerfen von Unterrichtsplänen...",
+      "FINALIZING_COURSE_STRUCTURE": "Finalisierung der Kursstruktur...",
+      "PREPARING_FINAL_COURSE_SHELL": "Vorbereitung des Abschlusskurses...",
+      "FINALIZING_LESSON_PAYLOADS": "Lektionsnutzlasten werden fertiggestellt...",
+      "COURSE_FINISHED": "Generierter Kurs wird gespeichert...",
+      "WRITING_RESPONSE": "Antwort schreiben...",
+      "WAITING_FOR_CONFIRMATION": "Warten auf Ihre Bestätigung...",
+      "THINKING": "Denken..."
+    },
+    "generation": {
+      "processingTitle": "Kurs wird im Hintergrund generiert",
+      "exitHint": "Lassen Sie diese Seite geöffnet. Die Generierung kann einige Minuten dauern.",
+      "exitDialogTitle": "Diese Seite verlassen?",
+      "exitWarning": "Die Kurserstellung ist im Gange. Sind Sie sicher, dass Sie diese Seite verlassen möchten?",
+      "finishedTitle": "Kursgenerierung abgeschlossen",
+      "finishedDescription": "Ihre Kapitel und Lektionen können jetzt überprüft werden.",
+      "preparingStructure": "Kapitelstruktur wird vorbereitet..."
+    },
+    "settings": {
+      "breadcrumbs": {
+        "back": "Zurück",
+        "myCourses": "Meine Kurse",
+        "createNew": "Neu erstellen"
+      },
+      "button": {
+        "removeThumbnail": "Miniaturansicht entfernen",
+        "removeTrailer": "Trailer entfernen",
+        "removeCertificateSignature": "Signatur entfernen",
+        "includesCertificate": "Inklusive Zertifikat",
+        "doesNotIncludeCertificate": "Zertifikat ist nicht im Lieferumfang enthalten"
+      },
+      "selectButton": {
+        "uploadFile": "Datei hochladen",
+        "External": "Extern (URL)"
+      },
+      "sideSection": {
+        "header": "Kartenvorschau",
+        "subHeader": "So wird Ihr Kurs für Studierende sichtbar.",
+        "button": {
+          "enroll": "Einschreiben"
+        },
+        "other": {
+          "noDescription": "Noch keine Beschreibung.",
+          "untitled": "Ohne Titel"
+        }
+      },
+      "field": {
+        "title": "Kurstitel",
+        "category": "Kategorie",
+        "description": "Beschreibung",
+        "thumbnail": "Miniaturansicht",
+        "trailer": "Kurstrailer",
+        "baseLanguage": "Basissprache"
+      },
+      "placeholder": {
+        "title": "Titel eingeben",
+        "category": "Kategorie auswählen",
+        "description": "Geben Sie eine Beschreibung des Kurses an..."
+      },
+      "other": {
+        "charactersLeft": "Charaktere übrig",
+        "reachedCharactersLimit": "Sie haben die Zeichenbeschränkung erreicht.",
+        "reachedCharactersLimitHtml": "Zu viel Formatierung. Bitte reduzieren Sie die Formatierung, damit sie innerhalb des Limits liegt.",
+        "enableCertificate": "Zertifikat aktivieren",
+        "enableCertificateDescription": "Aktivieren Sie diese Option, um Zertifikate für diesen Kurs auszustellen und konfigurieren Sie unten deren Signatur und Vorschau.",
+        "certificateSignatureRequirements": "PNG oder SVG (empfohlener transparenter Hintergrund)",
+        "certificatePreviewTitle": "Zertifikatsvorschau",
+        "certificatePreviewDescription": "Öffnen Sie die Vorschau, um Sprache und Farbe anzupassen.",
+        "certificatePreviewButton": "Vorschau",
+        "certificatePreviewStudentName": "Name des Studenten",
+        "certificatePreviewCourseName": "Kursname",
+        "enforceLessonSequence": "Unterrichtsreihenfolge erzwingen",
+        "requireSequentialLessons": "Fordern Sie die Schüler auf, die Lektionen der Reihe nach abzuschließen",
+        "enableQuizFeedback": "Quiz-Feedback",
+        "enableQuizFeedbackDescription": "Nach dem Absenden des Quiz sieht der Schüler, welche Antworten richtig, falsch oder unbeantwortet waren.",
+        "fallbackLanguageWarningTitle": "Hinweis: fehlende Übersetzungen",
+        "fallbackLanguageWarningDescription": "Einige Felder in dieser Sprachversion sind leer. An diesen Stellen sehen die Schüler Inhalte in der Standardsprache, bis Sie Übersetzungen hinzufügen.",
+        "baseLanguageTooltip": "Sie können diese Sprache nicht ändern oder entfernen. Dies ist die Standardeinstellung und wird immer Teil des Kurses sein."
+      },
+      "validation": {
+        "titleMinLength": "Der Titel muss mindestens 2 Zeichen lang sein.",
+        "titleMaxLength": "Der Titel darf höchstens 250 Zeichen lang sein.",
+        "descriptionMinLength": "Die Beschreibung muss mindestens 2 Zeichen lang sein.",
+        "categoryRequired": "Kategorie ist erforderlich"
+      },
+      "header": "Erstellen Sie einen neuen Kurs",
+      "subHeader": "Geben Sie die Details an, um einen neuen Kurs einzurichten. Später haben Sie weitere Möglichkeiten, es anzupassen.",
+      "editHeader": "Grundeinstellungen",
+      "editSubHeader": "Geben Sie die Details ein, um einen neuen Kurs zu erstellen.",
+      "transferOwnership": {
+        "title": "Eigentum übertragen",
+        "description": "Übertragen Sie diesen Kurs an einen anderen Benutzer. Sie werden der neue Eigentümer und haben die volle Kontrolle über den Platz.",
+        "label": "Wählen Sie einen neuen Besitzer",
+        "placeholder": "Wählen Sie einen Benutzer...",
+        "button": "Überweisen",
+        "dialog": {
+          "title": "Bestätigen Sie die Übertragung",
+          "description": "Sie sind dabei, diesen Kurs auf {{user}} zu übertragen. Diese Aktion kann nicht rückgängig gemacht werden.",
+          "confirm": "Bestätigen Sie die Übertragung",
+          "cancel": "Stornieren"
+        }
+      }
+    },
+    "curriculum": {
+      "emptyState": {
+        "header": "Fügen Sie Ihrem Kapitel Inhalte hinzu",
+        "subHeader": "Verwenden Sie das Bedienfeld auf der linken Seite, um neue Kapitel zu erstellen oder vorhandene Kapitel zu aktualisieren"
+      },
+      "other": {
+        "lessonNumber": "Anzahl der Unterrichtsstunden",
+        "chapter": "Kapitel",
+        "lesson": "Lektion",
+        "edit": "Bearbeiten",
+        "create": "Erstellen",
+        "resources": "Ressourcen",
+        "removeContentQuestionBody": "Dadurch wird die Frage aus dem Quiz entfernt",
+        "removeContentBody": "Dadurch werden alle bereitgestellten Daten, einschließlich hochgeladener Medien, entfernt.",
+        "removeContentLesson": "Sind Sie sicher, dass Sie diese Inhaltslektion aus dem Kapitel löschen möchten?",
+        "removeQuizLesson": "Sind Sie sicher, dass Sie diese Quizlektion aus dem Kapitel löschen möchten?",
+        "removeAiMentorLesson": "Sind Sie sicher, dass Sie diese AI Mentor-Lektion aus dem Kapitel löschen möchten?",
+        "removeEmbedLesson": "Sind Sie sicher, dass Sie diese Einbettungslektion aus dem Kapitel löschen möchten?",
+        "removeChapter": "Sind Sie sicher, dass Sie dieses Kapitel löschen möchten?",
+        "removeQuestion": "Sind Sie sicher, dass Sie die Frage löschen möchten?",
+        "removeContent": "Sind Sie sicher, dass Sie Inhalte löschen möchten?"
+      },
+      "chapter": {
+        "button": {
+          "addChapter": "Kapitel hinzufügen",
+          "addChapterDisabledTooltip": "Sie können neue Kapitel nur in der Standardsprache hinzufügen.",
+          "generateWithAI": "Generieren Sie mit KI"
+        },
+        "toast": {
+          "chapterCreatedSuccessfully": "Kapitel erfolgreich erstellt",
+          "chapterUpdatedSuccessfully": "Kapitel erfolgreich aktualisiert",
+          "chapterDisplayOrderUpdatedSuccessfully": "Die Anzeigereihenfolge der Kapitel wurde erfolgreich aktualisiert",
+          "errorWhileUpdating": "Beim Aktualisieren ist ein Fehler aufgetreten.",
+          "unexpectedError": "Es ist ein unerwarteter Fehler aufgetreten."
+        },
+        "field": {
+          "title": "Titel"
+        },
+        "other": {
+          "freemium": "Kostenloses Kapitel",
+          "freemiumToolTip": "Studierende können auf Freemium-Kapitel zugreifen, ohne sich für den Kurs anzumelden."
+        }
+      },
+      "lesson": {
+        "button": {
+          "addLesson": "Lektion hinzufügen",
+          "addQuestion": "Frage hinzufügen",
+          "addOption": "Option hinzufügen",
+          "deleteQuestion": "Frage löschen",
+          "addWords": "Wörter hinzufügen",
+          "saveLesson": "Speichern",
+          "addResource": "Ressource hinzufügen",
+          "removeResource": "Ressource entfernen",
+          "addLessonDisabledTooltip": "Um eine Lektion zu erstellen, müssen Sie sich in der Basissprache befinden."
+        },
+        "breadcrumbs": {
+          "back": "Zurück"
+        },
+        "settings": {
+          "title": "Einstellungen",
+          "passingThreshold": "Überschreitungsschwelle (%)",
+          "attemptsLimit": "Versuche beschränken sich",
+          "quizCooldownInHours": "Zeitsperre nach Fehlversuchen (in Stunden)",
+          "numberOfQuestions": "{{count1}} von {{count2}} Fragen",
+          "noQuestions": "Keine Fragen"
+        },
+        "tooltip": {
+          "switch": "Wenn diese Option aktiviert ist, hat der Schüler eine begrenzte Anzahl von Quizversuchen.",
+          "passingThreshold": "Der prozentuale Schwellenwert für das Bestehen des Quiz. Erreicht ein Schüler diese Punktzahl, gilt das Quiz als bestanden.",
+          "attemptsLimit": "Anzahl der erlaubten Quizversuche, bevor die Zeitsperre ausgelöst wird.",
+          "quizCooldownInHours": "Dauer der Quizsperre nach Ausschöpfung aller Versuche."
+        },
+        "validation": {
+          "optionTextRequired": "Optionstext ist erforderlich",
+          "optionTextMaxLength": "Der Text darf nicht länger als 250 Zeichen sein.",
+          "atLeastOneOptionRequired": "Mindestens eine Option ist erforderlich",
+          "imageRequired": "Bild ist erforderlich",
+          "descriptionLength": "Die Beschreibung muss mindestens 10 Zeichen lang sein.",
+          "descriptionMaxLength": "Der Inhalt darf maximal 20.000 Zeichen umfassen.",
+          "atLeastOneOptionCorrect": "Bei der Frage muss mindestens eine Option als richtig markiert sein.",
+          "allOptionsCorrect": "Alle Optionen müssen korrekt sein",
+          "titleRequired": "Titel ist erforderlich",
+          "descriptionRequired": "Beschreibung ist erforderlich",
+          "aiMentorInstructionsRequired": "Anweisungen für den AI-Mentor sind erforderlich",
+          "aiMentorInstructionsMaxLength": "Die Anweisungen für den AI-Mentor sind zu lang (maximal 20.000 Zeichen).",
+          "completionConditionsRequired": "Abschlussbedingungen sind erforderlich",
+          "completionConditionsMaxLength": "Die Abschlussbedingungen sind zu lang (maximal 20.000 Zeichen).",
+          "customTTSReferenceRequired": "Im benutzerdefinierten Modus ist eine benutzerdefinierte TTS-Referenz erforderlich",
+          "taskDescriptionMaxLength": "Die Aufgabenbeschreibung ist zu lang (maximal {{ count }} Zeichen)",
+          "passThresholdMin": "Der Erfolgsschwellenwert muss mindestens 1 betragen",
+          "passThresholdMax": "Der Erfolgsschwellenwert darf 10 nicht überschreiten",
+          "titleMinLength": "Der Titel ist zu kurz (mindestens 2 Zeichen)",
+          "titleMaxLength": "Der Titel ist zu lang (maximal 250 Zeichen)",
+          "maxFileSize": "Die Dateigröße muss unter {{ MAX_MB_PER_FILE }} MB liegen",
+          "maxFileNumber_one": "Sie können nicht mehr als eine Datei hochladen",
+          "maxFileNumber_other": "Sie können nicht mehr als {{ count }} Dateien hochladen",
+          "maxResources_five": "Sie können nicht mehr als 5 Ressourcen hinzufügen",
+          "sourceUrlRequired": "Quell-URL ist erforderlich"
+        },
+        "toast": {
+          "lessonDisplayOrderUpdatedSuccessfully": "Die Anzeigereihenfolge der Lektionen wurde erfolgreich aktualisiert",
+          "errorWhileUpdating": "Beim Aktualisieren ist ein Fehler aufgetreten.",
+          "unexpectedError": "Es ist ein unerwarteter Fehler aufgetreten.",
+          "lessonCreatedSuccessfully": "Lektion erfolgreich erstellt",
+          "fileLessonCreatedSuccessfully": "Dateielement erfolgreich erstellt",
+          "contentLessonCreatedSuccessfully": "Inhaltslektion erfolgreich erstellt",
+          "quizLessonCreatedSuccessfully": "Quiz erfolgreich erstellt",
+          "aiMentorLessonCreatedSuccessfully": "AI-Mentor-Lektion erfolgreich erstellt",
+          "aiMentorLessonUpdatedSuccessfully": "AI-Mentor-Lektion erfolgreich aktualisiert",
+          "aiMentorLessonFileAddedSuccessfully": "AI Mentor-Lektionsdateien wurden erfolgreich hochgeladen",
+          "courseGenerationFileAddedToUploadQueue": "Datei zur Upload-Warteschlange hinzugefügt",
+          "aiMentorLessonFileDeletedSuccessfully": "AI Mentor-Lektionsdateien erfolgreich gelöscht",
+          "lessonUpdatedSuccessfully": "Lektion erfolgreich aktualisiert",
+          "contentLessonUpdatedSuccessfully": "Inhalt der Lektion erfolgreich aktualisiert",
+          "fileLessonUpdatedSuccessfully": "Dateielement erfolgreich aktualisiert",
+          "questionOptionsUpdatedSuccessfully": "Die Frageoptionen wurden erfolgreich aktualisiert",
+          "embedLessonCreatedSuccessfully": "Einbettungslektion erfolgreich erstellt",
+          "embedLessonUpdatedSuccessfully": "Einbettungslektion erfolgreich aktualisiert",
+          "embedLessonCreateError": "Einbettungslektion konnte nicht erstellt werden. Bitte überprüfen Sie alle Felder und versuchen Sie es erneut.",
+          "embedLessonUpdateError": "Die Einbettungslektion konnte nicht aktualisiert werden. Bitte überprüfen Sie alle Felder und versuchen Sie es erneut."
+        },
+        "field": {
+          "title": "Titel",
+          "sourceType": "Quelltyp",
+          "video": "Video hochladen",
+          "presentation": "Präsentation hochladen",
+          "description": "Beschreibung",
+          "questions": "Fragen",
+          "options": "Optionen",
+          "image": "Bild",
+          "type": "Typ",
+          "words": "Worte",
+          "sentence": "Satz",
+          "sourceUrl": "Quell-URL",
+          "aiMentorInstructions": "Anweisungen für KI-Mentoren",
+          "completionConditions": "Abschlussbedingungen",
+          "aiMentor": "KI-Mentor",
+          "mentorName": "Name des Mentors",
+          "taskDescription": "Aufgabenbeschreibung",
+          "passThreshold": "Schwellenwert überschreiten",
+          "additionalContext": "Zusätzlicher Kontext",
+          "aiMentorTypes": "KI-Mentortyp",
+          "voiceConfig": "Sprachkonfiguration",
+          "voiceMode": "Sprachmodus",
+          "ttsPreset": "TTS-Voreinstellung",
+          "customTTSReference": "Benutzerdefinierte TTS-Referenz",
+          "includeFiles_one": "Hängen Sie bis zu 1 Datei mit weniger als {{ MAX_FILE_SIZE }} MB an, um sie als Kontext im Unterricht zu verwenden",
+          "includeFiles_other": "Hängen Sie bis zu {{ count }} Dateien mit weniger als {{ MAX_FILE_SIZE }} MB an, um sie als Kontext in Lektionen zu verwenden"
+        },
+        "placeholder": {
+          "title": "Unterrichtstitel angeben...",
+          "fileDescription": "Geben Sie eine Beschreibung zu {{type}} an...",
+          "option": "Option",
+          "matchedWords": "Passende Wörter",
+          "singleChoice": "Einzelauswahl",
+          "multipleChoice": "Multiple Choice",
+          "enterWord": "Geben Sie ein Wort ein",
+          "enterURL": "URL eingeben…",
+          "sourceUrl": "Geben Sie die Quell-URL ein...",
+          "allowFullscreen": "Vollbild zulassen",
+          "aiMentorInstructions": "Beschreiben Sie, wie sich der KI-Mentor während des Unterrichts verhalten soll ...",
+          "completionConditions": "Listen Sie auf, was der Schüler erreichen muss, um diese Lektion zu bestehen ...",
+          "taskDescription": "Beschreiben Sie die Aufgabe, die der Teilnehmer erledigen muss ...",
+          "passThreshold": "z. B. 70 %",
+          "customTTSReference": "Geben Sie die benutzerdefinierte TTS-Referenz-ID ein...",
+          "aiMentorTypes": "Mentor"
+        },
+        "courseGenerationComposer": {
+          "placeholders": {
+            "topic": "Grundlagen des Arbeitsrechts für Softwareteams, einschließlich Verträge, geistiges Eigentum und Compliance.",
+            "targetAudience": "Entwickler in Produktteams, die mit Rechts- und HR-Stakeholdern zusammenarbeiten.",
+            "currentLevel": "Anfänger bis Fortgeschrittene, keine formelle juristische Ausbildung erforderlich.",
+            "desiredOutcomes": "Identifizieren Sie rechtliche Risiken bei täglichen technischen Entscheidungen sicher und wissen Sie, wann eskalieren muss.",
+            "constraintsPrerequisites": "Vier bis fünf Stunden pro Woche in einer vollständig Remote-Umgebung, wobei grundlegende Softwareerfahrung erforderlich ist.",
+            "preferredFormatAssessment": "Gemischtes Format mit prägnanter Lektüre, praktischen Szenarien und kurzen fallbasierten Bewertungen.",
+            "timeBudget": "Insgesamt ein Monat mit wöchentlichen Meilensteinen und einer abschließenden Zusammenfassung.",
+            "successCriteriaDomainContext": "Die Lernenden können das Thema klar erklären und realistische arbeitsrechtliche Situationen im Kontext eines Technologieunternehmens lösen."
+          }
+        },
+        "other": {
+          "lessonNumber": "Anzahl der Unterrichtsstunden",
+          "chooseType": "Wählen Sie Typ",
+          "content": "Inhalt",
+          "quiz": "Quiz",
+          "aiMentor": "KI-Mentor",
+          "embed": "Einbetten",
+          "correct": "Richtig",
+          "true": "WAHR",
+          "false": "FALSCH",
+          "option": "Option",
+          "singleChoice": "Einzelauswahl",
+          "multipleChoice": "Multiple Choice",
+          "matchWords": "Passend",
+          "trueOrFalse": "Richtig oder falsch",
+          "fillInTheBlanks": "Füllen Sie die Lücken aus",
+          "photoQuestion": "Fotofrage",
+          "fillInTheBlanksText": "Lückenfüllung",
+          "briefResponse": "Kurze Antwort",
+          "detailedResponse": "Freitext",
+          "scale1_5": "Skala 1 bis 5",
+          "selectQuestionType": "Wählen Sie den Fragetyp aus",
+          "contentLessonDescription": "Text mit Multimedia (Bilder, Videos, Präsentationen).",
+          "quizLessonDescription": "Eine Reihe von Fragen zur Überprüfung des Wissens.",
+          "aiMentorLessonDescription": "Interaktives Gespräch mit einem virtuellen KI-Mentor.",
+          "fillInTheBlanksDescription": "Diese Frage enthält einen Satz; Die Schüler müssen das richtige Wort per Drag-and-Drop in die Lücke ziehen.",
+          "gapFillDescription": "Diese Frage enthält Sätze mit fehlenden Wörtern, die die Schüler eingeben müssen.",
+          "embedLessonDescription": "Externe Ressource (z. B. Google Form, Canva-Präsentation oder YouTube-Livestream).",
+          "fillInTheBlanksSentenceTip": "Schreiben Sie einen Satz und fügen Sie Wörter ein.",
+          "fillInTheBlanksWordTip": "Bilden Sie das Wort und fügen Sie es in einen Satz ein.",
+          "leaveContentHeader": "Sind Sie sicher, dass Sie diesen Frageneditor verlassen möchten?",
+          "leaveContentBody": "Dadurch werden alle nicht gespeicherten Fortschritte gelöscht",
+          "dropOrClick": "Legen Sie das Bild hier ab oder klicken Sie zum Hochladen",
+          "allowedFormats": "PNG, JPG oder SVG",
+          "leaveContentBodyValidate": "Wenn Sie die Änderungen speichern möchten, müssen Sie zunächst das Formular validieren",
+          "aiMentorInstructionsTooltip": "Beschreiben Sie, wie sich der KI-Mentor während des Unterrichts verhalten soll. Geben Sie den Kontext, die Rolle oder das Szenario an, dem die KI folgen soll. Dies definiert, wie die KI das Gespräch leiten wird.",
+          "updateAiMentorAvatarDescription": "Laden Sie ein neues Bild für den KI-Mentor hoch oder entfernen Sie das aktuelle.",
+          "updateAiMentorAvatar": "Aktualisieren Sie den Avatar des KI-Mentors",
+          "aiMentorTypesTooltip": "Wählen Sie den Typ „KI-Mentor“: Mentor führt Sie zu Antworten, Lehrer gibt Anweisungen direkt, Rollenspiel simuliert reale Szenarien (z. B. Kunde und Verkäufer).",
+          "aiMentorTypeTooltip": "Verhält sich wie eine Figur in einem Szenario, stellt aber während der Szene Fragen und hilft, Schlussfolgerungen zu ziehen.\nBeispiel: „Was würden Sie jetzt in der Rolle des Managers tun?“",
+          "aiTeacherTypeTooltip": "Erklärt, lehrt und stellt Fragen – wie ein Lehrer.\nBeispiel: „In dieser Situation erhebt der Kunde einen Preiseinwand. Was sollten Sie antworten und warum?“",
+          "aiRoleplayTypeTooltip": "Simuliert einen realistischen Charakter und eine realistische Situation – ohne den Charakter zu zerstören.\nBeispiel: „Dies ist das zweite Mal, dass Ihr Dienst ausgefallen ist. Was werden Sie dagegen tun?“",
+          "completionConditionsTooltip": "Listen Sie auf, was der Schüler erreichen muss, um diese Lektion zu bestehen. Geben Sie klare und messbare Punkte an. Die KI wird diese Liste verwenden, um den Fortschritt zu überprüfen. Sie können auch einen Schwellenwert für das Bestehen festlegen (z. B. einen Prozentsatz oder eine Mindestpunktzahl). Wenn keine Schwelle angegeben ist, müssen alle Bedingungen erfüllt sein, um die Lektion zu bestehen.",
+          "passThresholdTooltip": "Legen Sie den Mindestprozentsatz (1-100 %) fest, der zum Bestehen erforderlich ist. Für keine Schwelle leer lassen.",
+          "voiceConfigFishAudioTooltip": "Der Sprachmodus verwendet Fish Audio. Für eine benutzerdefinierte Stimme öffnen Sie Fish Audio, wählen Sie eine Stimme aus, die Ihnen gefällt, und kopieren Sie deren Sprach-ID hier.",
+          "aiMentorPersonaTooltip": "Dies definiert die Persona der Lektion. Sie können einen Namen und einen Avatar für den KI-Mentor auswählen. Mit diesem Namen identifiziert sich die Persona und der ausgewählte Avatar wird im Unterricht angezeigt.",
+          "suggestedExamples": "Empfohlene Beispiele",
+          "charactersLeft": "Zeichen übrig",
+          "optional": "optional",
+          "overwriteContent": "Inhalte überschreiben",
+          "overwriteContentDescription": "Dadurch wird Ihr aktueller Inhalt durch das ausgewählte Beispiel ersetzt. Sind Sie sicher, dass Sie fortfahren möchten?",
+          "scenarioSimulation": "Szenariosimulation",
+          "problemSolving": "Problemlösung",
+          "creativeTask": "Kreative Aufgabe",
+          "knowledgeSharing": "Dialog zum Wissensaustausch",
+          "voiceModePreset": "Voreingestellt",
+          "voiceModeCustom": "Brauch",
+          "voicePresetMale": "Männlich",
+          "voicePresetFemale": "Weiblich",
+          "emoji": {
+            "search": "Suchen",
+            "loading": "Laden..."
+          },
+          "aiMentorSuggestionExamples": {
+            "instructions": {
+              "scenarioSimulation": "Sie spielen die Rolle eines Geschäftskunden, der einen Anbieter für Softwareentwicklungsdienstleistungen sucht. Sie haben konkrete Anforderungen: Die App muss innerhalb von 3 Monaten fertig sein, Sie haben ein begrenztes Budget und Sie erwarten eine klare Kommunikation. Der Student spielt die Rolle des Vertriebsmitarbeiters, der Ihr Geschäft gewinnen möchte. Der KI-Mentor sollte als Kunde antworten, Fragen stellen und Bedenken äußern.",
+              "problemSolving": "Sie schlüpfen in die Rolle eines Mitarbeiters, der eine Gehaltserhöhung beantragt. Sie glauben, dass Sie es aufgrund Ihrer jüngsten Beiträge verdient haben. Allerdings verfügt das Unternehmen derzeit über kein Budget für Gehaltserhöhungen. Der Student spielt den Manager, der das Gespräch konstruktiv führen, Empathie zeigen und versuchen muss, eine alternative Lösung zu finden.",
+              "creativeTask": "Sie bitten den Studenten, eine Idee für eine neue Dienstleistung vorzuschlagen, die das Unternehmen seinen Kunden anbieten könnte. Ihre Aufgabe besteht darin, die Kreativität zu fördern, Anschlussfragen zu stellen und dem Schüler bei der Verfeinerung seines Konzepts zu helfen.",
+              "knowledgeSharing": "Sie spielen die Rolle eines erfahrenen Mentors, der Wissen über Zeitmanagementtechniken vermittelt. Das Gespräch ist informell: Sie stellen Konzepte vor, geben Beispiele und regen den Schüler zum Nachdenken an. Gelegentlich stellen Sie leichte, offene Fragen, um das Verständnis zu überprüfen. Das Ziel besteht darin, anzuleiten, nicht zu testen."
+            },
+            "conditions": {
+              "scenarioSimulation": "<ul><li>Der Student fragt nach dem Budget des Kunden.</li><li>Der Student fragt nach dem Zeitplan.</li><li>Der Student verwendet SPIN-Verkauf oder eine andere Verkaufstechnik.</li><li>Der Student identifiziert die wichtigsten Schwachstellen des Kunden.</li><li>Der Student unterbreitet einen Vorschlag, der den Einschränkungen des Kunden entspricht.</li></ul><strong>Grenzwert:</strong> Mindestens 3 von 5 Bedingungen müssen erfüllt sein.",
+              "problemSolving": "<ul><li>Der Student erkennt den Beitrag des Mitarbeiters an.</li><li>Der Student erläutert die Budgetsituation ehrlich.</li><li>Der Student schlägt eine nichtfinanzielle Alternative vor (z. B. Zusatzleistungen, Entwicklungsmöglichkeiten).</li><li>Der Student erklärt sich damit einverstanden, das Thema zu einem späteren Zeitpunkt noch einmal aufzugreifen.</li><li>Der Student pflegt einen respektvollen, unterstützenden Umgangston.</li></ul><strong>Grenzwert:</strong> mindestens 3 von 5 Bedingungen muss erfüllt werden.",
+              "creativeTask": "<ul><li>Der Student präsentiert eine originelle Idee.</li><li>Der Student erklärt, wer die Zielgruppe ist.</li><li>Der Student beschreibt, wie der Service den Kunden einen Mehrwert bieten könnte.</li><li>Der Student identifiziert mögliche Herausforderungen.</li></ul><em>(Kein Schwellenwert definiert – alle Bedingungen müssen erfüllt sein.)</em>",
+              "knowledgeSharing": "<ul><li>Der Student beteiligt sich aktiv an der Konversation (stellt Fragen oder tauscht Überlegungen aus).</li><li>Der Student kann mindestens eine im Dialog erwähnte Zeitmanagementtechnik nennen.</li><li>Der Student drückt aus, wie er eine Technik in seiner Arbeit anwenden könnte.</li></ul><em>(Kein Schwellenwert definiert – alle Bedingungen werden empfohlen, sind aber für das Bestehen nicht zwingend erforderlich.)</em>"
+            }
+          },
+          "betaTooltip": "Diese Funktionalität wird in einer Testversion bereitgestellt. Es kann Fehler enthalten oder nicht vollständig wie vorgesehen funktionieren. Die Nutzung erfolgt auf eigenes Risiko.",
+          "dragWord": "Ziehen Sie ein Wort in einen Satz",
+          "taskDescriptionTooltip": "Beschreiben Sie kurz, was der Teilnehmer während des Gesprächs mit dem KI-Mentor tun soll."
+        }
+      }
+    },
+    "status": {
+      "header": "Status",
+      "subHeader": "Status für den Kurs festlegen",
+      "draftHeader": "Entwurf",
+      "draftBody": "Studierende können diesen Kurs weder kaufen noch sich für ihn anmelden. Bei bereits eingeschriebenen Teilnehmern erscheint der Kurs nicht in der Kursliste ihrer Studierenden.",
+      "publishedHeader": "Veröffentlicht",
+      "publishedBody": "Studierende können die Kursinhalte kaufen, sich anmelden und darauf zugreifen. Sobald Sie sich angemeldet haben, wird der Kurs im Studenten-Dashboard angezeigt.",
+      "privateHeader": "Privat",
+      "privateBody": "Studierende können diesen Kurs weder kaufen noch sich für ihn anmelden. Für diejenigen, die sich angemeldet haben (z. B. vom Administrator), wird der Kurs in ihrer Studentenkursliste angezeigt und sie können ihn durchgehen."
+    },
+    "pricing": {
+      "header": "Preise",
+      "subHeader": "Legen Sie die Preise für den Kurs fest",
+      "freeCourseHeader": "Frei",
+      "freeCourseBody": "Studierende können sich anmelden und auf die Kursinhalte zugreifen, ohne dafür etwas zu bezahlen.",
+      "paidCourseHeader": "Bezahlter Kurs",
+      "paidCourseBody": "Studierende können die Kursinhalte erwerben und darauf zugreifen. Nach der Auswahl können Sie Währung und Preis festlegen.",
+      "field": {
+        "price": "Preis"
+      },
+      "placeholder": {
+        "amount": "Menge"
+      },
+      "validation": {
+        "priceInCents": "Der Preis muss mindestens 2,00 betragen oder kostenlos sein"
+      }
+    },
+    "enrolled": {
+      "filters": {
+        "placeholder": {
+          "searchByKeyword": "Suche nach Stichwort...",
+          "groups": "Alle Gruppen"
+        }
+      },
+      "enroll": "Einschreiben",
+      "enrollSelected": "Einschreiben ausgewählt",
+      "unenrollSelected": "Abmelden ausgewählt",
+      "unenrollGroups": "Gruppen abmelden",
+      "table": {
+        "name": "Name",
+        "surname": "Nachname",
+        "email": "E-Mail",
+        "status": "Anmeldestatus",
+        "enrollmentDate": "Datum der Einschreibung"
+      },
+      "statuses": {
+        "enrolled": "Eingeschrieben",
+        "enrolledByGroup": "Nach Gruppe angemeldet",
+        "individuallyEnrolled": "Einzeln angemeldet",
+        "notEnrolled": "Nicht eingeschrieben"
+      },
+      "confirmation": {
+        "title": "Bestätigen Sie die Anmeldung",
+        "description": "Sind Sie sicher, dass Sie die ausgewählten Studenten für diesen Kurs anmelden möchten? Diese Aktion kann nicht rückgängig gemacht werden."
+      },
+      "enrollGroups": "Melden Sie Gruppen an",
+      "enrollGroupsModal": {
+        "title": "Melden Sie Gruppen für den Kurs an",
+        "description": "Wählen Sie Gruppen aus, die Sie anmelden möchten. Alle Mitglieder ausgewählter Gruppen werden automatisch für diesen Kurs angemeldet. Sie können den Kurs als obligatorisch markieren und ein Fälligkeitsdatum festlegen."
+      },
+      "alreadyEnrolled": "Bereits eingeschrieben",
+      "members": "{{count}} Mitglieder",
+      "unenrollConfirmation": {
+        "title": "Abmeldebestätigung",
+        "description": "Sind Sie sicher, dass Sie die ausgewählten Studenten von diesem Kurs abmelden möchten? Diese Aktion kann nicht rückgängig gemacht werden."
+      },
+      "toast": {
+        "someStudentsUnenrolled": "Sie können diese Studenten nicht abmelden, da {{count}} von ihnen nicht eingeschrieben sind.",
+        "studentsEnrolledByGroup": "Sie können diese Studierenden nicht abmelden, da {{count}} von ihnen über eine Gruppe eingeschrieben sind.",
+        "groupsUnenrolledSuccessfully": "Gruppen wurden erfolgreich abgemeldet",
+        "alreadyEnrolledByGroup": {
+          "title": "Einige Benutzer sind bereits nach Gruppen registriert"
+        }
+      },
+      "successResponse": "Dem Kurs wurden Studierende zugeteilt."
+    },
+    "breadcrumbs": {
+      "courses": "Kurse",
+      "back": "Zurück"
+    },
+    "statistics": {
+      "title": "Statistiken",
+      "subtitle": "Übersicht über die Kursleistungen",
+      "details": "Details",
+      "filterByQuiz": "Nach Quiz filtern",
+      "allQuizzes": "Alle Quizze",
+      "filterByLesson": "Nach Lektion filtern",
+      "allLessons": "Alle Lektionen",
+      "tabs": {
+        "progress": "Fortschritt",
+        "quizResults": "Quizergebnisse",
+        "aiMentorResults": "Ergebnisse des KI-Mentors",
+        "learningTime": "Lernzeit"
+      },
+      "field": {
+        "studentName": "Student",
+        "groupName": "Gruppe",
+        "completedLessonsCount": "Abgeschlossene Lektionen",
+        "lastActivity": "Letzte Aktivität",
+        "lastCompletedLesson": "Letzte abgeschlossene Lektion",
+        "quizName": "Quiz",
+        "quizScore": "Punktzahl",
+        "attempts": "Versuche",
+        "lastAttempt": "Letzter Versuch",
+        "lessonName": "Lektion",
+        "lastSession": "Letzte Sitzung",
+        "score": "Punktzahl",
+        "totalTime": "Gesamtzeit"
+      },
+      "overview": {
+        "enrolledCount": "Eingeschriebene Studierende zählen",
+        "enrolledCountTooltip": "Anzahl der für diesen Kurs angemeldeten Benutzer.",
+        "completionRate": "Abschlussrate",
+        "completionRateTooltip": "Prozentsatz der Benutzer, die den gesamten Kurs abgeschlossen haben.",
+        "averageCompletionPercentage": "Durchschnittlicher Fortschritt",
+        "averageCompletionPercentageTooltip": "Durchschnittlicher Kursabschluss aller eingeschriebenen Benutzer.",
+        "averageScorePerQuiz": "Durchschnittliche Punktzahl pro Quiz",
+        "averageScorePerQuizSubtitle": "Sehen Sie sich die durchschnittlichen Ergebnisse der einzelnen Tests im Kurs an",
+        "averageQuizScore": "Durchschnittliche Quizpunktzahl",
+        "completedBy_one": "Abgeschlossen von {{count}} Schüler",
+        "completedBy_other": "Von {{count}} Studenten abgeschlossen",
+        "courseStatusDistribution": "Verteilung des Kursstatus",
+        "courseStatusDistributionTooltip": "Zeigt an, wie viele Benutzer den Kurs abgeschlossen, begonnen oder nicht begonnen haben.",
+        "averageLearningTime": "Durchschnittliche Lernzeit",
+        "averageLearningTimeTooltip": "Durchschnittliche Zeit, die alle Benutzer in diesem Kurs verbracht haben.",
+        "activeStudents": "Aktive Studierende",
+        "activeStudentsTooltip": "Anzahl der Studierenden, die sich mit dem Kurs beschäftigt haben."
+      },
+      "empty": {
+        "noUsers": "Keine Benutzer",
+        "enrolled": "eingeschrieben",
+        "noGroups": "Keine Gruppen"
+      },
+      "groupFilter": {
+        "placeholder": "Alle Gruppen"
+      }
+    },
+    "createLanguage": {
+      "title": "Erstellen Sie eine neue Sprache",
+      "description": "Sind Sie sicher, dass Sie für diesen Kurs eine neue Sprache erstellen möchten?",
+      "success": "Sprache erfolgreich erstellt",
+      "alreadyExists": "Diese Sprache existiert bereits.",
+      "editConstraints": "In anderen Sprachen als {{baseLanguage}} können Sie keine neuen Lektionen oder Kapitel erstellen oder neue Fragen zu Tests hinzufügen."
+    },
+    "deleteLanguage": {
+      "title": "Sprache löschen",
+      "description": "Sind Sie sicher, dass Sie diese Sprache löschen möchten?"
+    },
+    "sharedCourse": {
+      "badgeMaster": "Geteilt",
+      "badgeExported": "Geteilt",
+      "badgeExportedTooltip": "Dieser Kurs wird zentral verwaltet. Sie können es veröffentlichen und Teilnehmer zuweisen, aber Sie können seinen Inhalt nicht bearbeiten.",
+      "exportedNoticeTitle": "Dieser Kurs wurde in diese Organisation exportiert",
+      "exportedNoticeDescription": "Der Inhalt wird in der Quellorganisation verwaltet und ist in dieser Organisation schreibgeschützt.",
+      "exportsTitle": "Teilen",
+      "exportsDescription": "Teilen Sie diesen Kurs mit ausgewählten Organisationen.",
+      "selectTenants": "Organisationen auswählen",
+      "selectedCount": "Ausgewählt:",
+      "exportButton": "Aktie",
+      "exportingButton": "Teilen..."
+    }
+  },
+  "registerView": {
+    "header": "Melden Sie sich an",
+    "subHeader": "Geben Sie Ihre Daten ein, um ein Konto zu erstellen",
+    "subHeaderSSO": "Melden Sie sich mit Ihrem Google-/Microsoft-Konto an",
+    "field": {
+      "firstName": "Vorname",
+      "lastName": "Nachname",
+      "email": "E-Mail",
+      "password": "Passwort",
+      "birthday": "Geburtsdatum",
+      "birthdayPlaceholder": "Datum auswählen",
+      "requiredBadge": "Erforderlich",
+      "optionalBadge": "Optional"
+    },
+    "other": {
+      "alreadyHaveAccount": "Sie haben bereits ein Konto?",
+      "orContinueWith": "Oder fahren Sie fort mit"
+    },
+    "button": {
+      "createAccount": "Ein Konto erstellen",
+      "signIn": "anmelden"
+    },
+    "validation": {
+      "firstName": "Der Vorname ist erforderlich",
+      "lastName": "Nachname ist erforderlich",
+      "email": "Ungültige E-Mail",
+      "birthday": "Sie müssen mindestens {{ageLimit}} Jahre alt sein",
+      "requiredCheckbox": "Diese Einwilligung ist erforderlich."
+    },
+    "toast": {
+      "userAlreadyExists": "Der Benutzer mit dieser E-Mail-Adresse existiert bereits.",
+      "createAccountFailed": "Konto kann nicht erstellt werden. Bitte versuchen Sie es erneut.",
+      "requiredFormFieldMissing": "Bitte akzeptieren Sie alle erforderlichen Einwilligungen.",
+      "invalidFormField": "Eines der übermittelten Registrierungsfelder ist ungültig."
+    }
+  },
+  "courseChapterView": {
+    "other": {
+      "lesson": "Lektion",
+      "lessons": "Unterricht",
+      "quiz": "Quiz",
+      "quizzes": "Quiz",
+      "free": "Frei"
+    }
+  },
+  "forgotPasswordView": {
+    "header": "Passwort vergessen?",
+    "subHeader": "Geben Sie die mit Ihrem Konto verknüpfte E-Mail-Adresse ein und wir senden Ihnen einen Link zum Zurücksetzen Ihres Passworts.",
+    "field": {
+      "email": "E-Mail-Adresse"
+    },
+    "validation": {
+      "email": "Ungültige E-Mail"
+    },
+    "button": {
+      "resetPassword": "Passwort zurücksetzen",
+      "backToLogin": "Zurück zum Login"
+    },
+    "toast": {
+      "resetPassword": "Ein Link zum Zurücksetzen Ihres Passworts wurde an Ihre E-Mail-Adresse gesendet."
+    }
+  },
+  "loginView": {
+    "header": "Login",
+    "subHeader": "Geben Sie unten Ihre E-Mail-Adresse ein, um sich bei Ihrem Konto anzumelden",
+    "subHeaderSSO": "Melden Sie sich mit Ihrem Google-/Microsoft-Konto an",
+    "validation": {
+      "email": "Ungültige E-Mail",
+      "password": "Passwort ist erforderlich"
+    },
+    "other": {
+      "forgotPassword": "Passwort vergessen?",
+      "useMagicLink": "Schicken Sie mir einen Login-Link per E-Mail",
+      "dontHaveAccount": "Sie haben noch kein Konto?",
+      "rememberMe": "Erinnere dich an mich",
+      "signUp": "Melden Sie sich an",
+      "orContinueWith": "Oder fahren Sie fort mit"
+    },
+    "button": {
+      "login": "Login"
+    },
+    "field": {
+      "email": "E-Mail",
+      "password": "Passwort"
+    },
+    "magicLink": {
+      "subHeader": "Wir validieren Ihren Anmeldelink. Dies kann einen Moment dauern.",
+      "checking": "Überprüfen Sie Ihren Anmeldelink...",
+      "success": "Anmeldelink bestätigt. Weiterleitung...",
+      "error": "Der Anmeldelink ist ungültig oder abgelaufen.",
+      "backToLogin": "Zurück zum Login"
+    }
+  },
+  "magicLinkView": {
+    "header": "Holen Sie sich Ihren Login-Link",
+    "subHeader": "Geben Sie Ihre E-Mail-Adresse ein und wir senden Ihnen einen Login-Link zur Anmeldung.",
+    "validation": {
+      "email": "Ungültige E-Mail"
+    },
+    "field": {
+      "email": "E-Mail-Adresse"
+    },
+    "button": {
+      "sendLink": "Holen Sie sich den Login-Link",
+      "backToLogin": "Zurück zum Login"
+    },
+    "toast": {
+      "sent": "Der Anmeldelink wird an Ihre E-Mail-Adresse gesendet."
+    }
+  },
+  "magicLink": {
+    "error": {
+      "createToken": "Anmeldelink konnte nicht generiert werden. Bitte versuchen Sie es erneut.",
+      "invalidToken": "Der Anmeldelink ist ungültig.",
+      "expiredToken": "Der Anmeldelink ist abgelaufen."
+    }
+  },
+  "user": {
+    "error": {
+      "archived": "Ihr Konto wurde archiviert."
+    }
+  },
+  "studentCoursesView": {
+    "other": {
+      "cannotFindCourses": "Wir konnten keine Kurse finden",
+      "changeSearchCriteria": "Bitte ändern Sie die Suchkriterien oder versuchen Sie es später erneut",
+      "freeLessons": "Kostenlose Lektionen!",
+      "successfullyEnrolledToCourse": "Erfolgreich für den Kurs angemeldet"
+    },
+    "breadcrumbs": {
+      "courses": "Kurse"
+    },
+    "button": {
+      "continue": "Weitermachen",
+      "enroll": "Einschreiben",
+      "view": "Sicht",
+      "readMore": "Mehr lesen",
+      "playChapter": "Kapitel abspielen"
+    },
+    "enrolledCourses": {
+      "header": "Ihre Kurse",
+      "subHeader": "Kurse, für die Sie derzeit eingeschrieben sind"
+    },
+    "availableCourses": {
+      "header": "Verfügbare Kurse",
+      "subHeader": "Alle verfügbaren Karrierekurse können angemeldet werden",
+      "filters": {
+        "placeholder": {
+          "title": "Suche nach Titel ...",
+          "categories": "Kategorien",
+          "sort": "Sortieren"
+        }
+      },
+      "headerOptions": {
+        "image": "Bild",
+        "title": "Kursname",
+        "category": "Kategorie",
+        "description": "Beschreibung",
+        "author": "Autor"
+      }
+    },
+    "modernView": {
+      "continueLearning": "Lernen Sie weiter",
+      "topCourses": "Top 5 der beliebtesten Kurse",
+      "hero": {
+        "start": "Start",
+        "moreInfo": "Weitere Informationen",
+        "info": "Info"
+      },
+      "lessonsCount_one": "{{count}} Lektion",
+      "lessonsCount_other": "{{count}} Lektionen"
+    }
+  },
+  "studentQuizSummaryView": {
+    "header": "Glückwunsch!",
+    "subHeader": "Sie haben das Quiz beendet.!",
+    "other": {
+      "yourScore": "Ihr Punktestand:",
+      "tryAgain": "Versuchen Sie es erneut"
+    },
+    "button": {
+      "backToCourse": "Zurück zum Kurs"
+    }
+  },
+  "studentLessonView": {
+    "error": {
+      "lessonIdNotFound": "Lektions-ID nicht gefunden",
+      "notAuthorizedTitle": "Nicht autorisiert",
+      "notAuthorizedDescription": "Sie sind nicht berechtigt, auf diese Lektion zuzugreifen.",
+      "goBackToCourse": "Gehen Sie zurück zum Kurs"
+    },
+    "other": {
+      "lesson": "Lektion",
+      "chapter": "Kapitel",
+      "correctAnswers": "Richtige Antworten:",
+      "correctSentence": "Richtiger Satz:",
+      "question": "Frage",
+      "answers": "Antworten:",
+      "true": "WAHR",
+      "false": "FALSCH",
+      "oneOrTwoWordSentence": "Anleitung: Geben Sie eine kurze Antwort (1-2 Sätze).",
+      "threeOrFiveWordSentence": "Anleitung: Schreiben Sie eine ausführliche Antwort (3-5 Sätze).",
+      "single": "Einzel",
+      "multiple": "Mehrere",
+      "fillInTheBlanks": "Füllen Sie die Lücken aus.",
+      "selectQuestion": "Frage auswählen.",
+      "trueOrFalseQuestion": "Wahre oder falsche Frage.",
+      "multipleChoice": "Multiple-Choice-Frage.",
+      "singleChoice": "Single-Choice-Frage",
+      "passingThreshold": "Bestehensschwelle: {{threshold}} % ({{correct}} von {{questionsNumber}} Fragen)",
+      "score": "Punktzahl: {{score}} % ({{correct}} von {{questionsNumber}} Fragen)",
+      "contentCantBeEmbedded": "Dieser Inhalt kann nicht eingebettet werden.",
+      "openInNewTab": "In neuem Tab öffnen"
+    },
+    "aiMentor": {
+      "title": "KI-Mentor-Sitzung",
+      "description": "Dies ist eine KI-gestützte Mentoring-Sitzung. Die KI führt Sie anhand der Richtlinien des Lehrers durch die Lektion."
+    },
+    "videoProcessing": {
+      "title": "Video wird verarbeitet",
+      "body": "Bitte warten Sie einen Moment. Sobald es fertig ist, wird es hier angezeigt."
+    },
+    "playNext": {
+      "title": "Als nächstes",
+      "description": "Spielt als nächstes in {{seconds}}s",
+      "descriptionNoCountdown": "Als nächstes wird gespielt",
+      "playNow": "Jetzt spielen",
+      "cancel": "Stornieren"
+    },
+    "placeholder": {
+      "openQuestion": "Geben Sie hier Ihre Antwort ein"
+    },
+    "tooltip": {
+      "retakeAvailableIn": "Nach der letzten Wiederholung {{time}} Stunden lang gesperrt.",
+      "cooldown": "Das Quiz wird nach dem letzten Versuch {{time}} Stunden lang gesperrt.",
+      "noCooldown": "Keine Abklingzeit.",
+      "beta": "Diese Funktionalität wird in einer Testversion bereitgestellt. Es kann Fehler enthalten oder nicht vollständig wie vorgesehen funktionieren. Die Nutzung erfolgt auf eigenes Risiko."
+    },
+    "breadcrumbs": {
+      "availableCourses": "Verfügbare Kurse",
+      "yourCourses": "Ihre Kurse",
+      "back": "Zurück"
+    },
+    "button": {
+      "previous": "Vorherige",
+      "complete": "Vollständig",
+      "next": "Nächste",
+      "submit": "Einreichen",
+      "retake": "Wiederholung",
+      "autoplay": "Autoplay"
+    },
+    "sideSection": {
+      "header": "Inhaltsverzeichnis:",
+      "other": {
+        "courseProgress": "Kursverlauf:"
+      }
+    },
+    "validation": {
+      "answerCannotBeEmpty": "Die Antwort darf nicht leer sein.",
+      "atLeastOneOptionMustBeSelected": "Für Frage {{questionId}} muss mindestens eine Option ausgewählt werden.",
+      "answerCannotBeEmptyForDragAndDropQuestion": "Die Antwort für die Drag-and-Drop-Frage {{questionId}} darf nicht leer sein.",
+      "answerCannotBeEmptyForTextQuestion": "Die Antwort für die Textfrage {{questionId}} darf nicht leer sein.",
+      "invalidSelectionForSingleAnswer": "Ungültige Auswahl für eine Frage mit einer Antwort.",
+      "invalidFormatForMultiAnswer": "Ungültiges Format für Fragen mit mehreren Antworten.",
+      "trueOrFalseRequired": "Es ist eine wahre oder falsche Antwort erforderlich.",
+      "photoQuestionMustHaveAnswer": "Für diese Fotofrage ist eine Antwort erforderlich.",
+      "unansweredQuestions": "Anscheinend haben Sie noch nicht alle Antworten überprüft. Bitte überprüfen Sie sie und versuchen Sie es erneut!"
+    }
+  },
+  "studentCourseView": {
+    "header": "Kapitel",
+    "subHeader": "Unten können Sie alle Kapitel dieses Kurses sehen",
+    "recommendedHeader": "Vielleicht sind Sie daran interessiert",
+    "recommendedSubheader": "Unten sehen Sie Kurse mit ähnlichem Thema oder Wissensbereich",
+    "otherAuthorCoursesHeader": "Weitere Kurse von",
+    "otherAuthorCoursesSubheader": "Unten sehen Sie weitere Kurse, die vom selben Autor erstellt wurden",
+    "other": {
+      "cannotFindCourses": "Wir konnten keine Kurse finden",
+      "changeSearchCriteria": "Bitte ändern Sie die Suchkriterien oder versuchen Sie es später erneut"
+    },
+    "lesson": {
+      "missingAnswer": "Fehlende Antwort",
+      "yourAnswer": "Ihre Antwort",
+      "studentsAnswer": "Antwort des Schülers",
+      "singleChoice": "Single-Choice-Frage",
+      "multipleChoice": "Multiple-Choice-Frage",
+      "trueOfFalseChoice": "Wahre oder falsche Frage",
+      "oneOrTwoWordSentence": "Geben Sie eine kurze Antwort (1-2 Sätze).",
+      "threeOrFiveWordSentence": "Schreiben Sie eine ausführliche Antwort (3-5 Sätze).",
+      "aiMentorLesson": {
+        "sendMessage": "Nachricht schreiben...",
+        "check": "Überprüfen",
+        "aiMentorName": "KI-Mentor",
+        "retake": "Wiederholung",
+        "userName": "Benutzer",
+        "typing": "Eine Antwort eingeben...",
+        "send": "Schicken",
+        "addEmoji": "Emoji hinzufügen",
+        "closeVoiceMode": "Sprachmodus schließen",
+        "toggleVoiceInput": "Spracheingabe umschalten",
+        "startVoiceMentor": "Starten Sie den Voice-Mentor",
+        "stopVoiceRecording": "Stoppen Sie die Sprachaufzeichnung",
+        "taskDescription": "Aufgabenbeschreibung",
+        "taskDescriptionExpand": "Klicken Sie zum Erweitern",
+        "taskDescriptionCollapse": "Zum Ausblenden klicken",
+        "voiceOverlay": {
+          "headerEyebrow": "Sprach-Benutzeroberfläche",
+          "exit": "Sprachmodus verlassen",
+          "youSaid": "Du sagtest",
+          "states": {
+            "idle": {
+              "title": "Bereit",
+              "subtitle": "Tippen Sie, um mit dem Sprechen zu beginnen"
+            },
+            "listening": {
+              "title": "Hören",
+              "subtitle": "Deine Stimme einfangen"
+            },
+            "thinking": {
+              "title": "Denken",
+              "subtitle": "Das Model bereitet eine Antwort vor"
+            },
+            "speaking": {
+              "title": "Apropos",
+              "subtitle": "Modellantwort spielt"
+            }
+          },
+          "responsePlaceholder": {
+            "thinking": "Ich denke über Ihr Anliegen nach...",
+            "listening": "Ich lausche auf Ihre nächste Frage ...",
+            "default": "Hier wird eine Antwortvorschau angezeigt."
+          }
+        },
+        "retakeModalTitle": "Sind Sie sicher, dass Sie die Lektion wiederholen möchten?",
+        "retakeModalDescription": "Dadurch wird Ihr Fortschritt in dieser Lektion zurückgesetzt. Diese Aktion kann nicht rückgängig gemacht werden."
+      }
+    },
+    "sideSection": {
+      "optionHeader": "Option",
+      "courseProgressHeader": "courseProgressHeader",
+      "other": {
+        "author": "Autor",
+        "title": "Titel",
+        "about": "Um",
+        "collapse": "Zusammenbruch",
+        "courseProgress": "Kursfortschritt",
+        "options": "Optionen",
+        "remainingChapters": "Verbleibende Kapitel",
+        "completedChapters": "Abgeschlossene Kapitel",
+        "noData": "Keine Daten",
+        "informationText": "Machen Sie schnell dort weiter, wo Sie mit Ihrer letzten Lektion aufgehört haben."
+      },
+      "button": {
+        "shareCourse": "Teilen Sie diesen Kurs",
+        "continueLearning": "Lernen Sie weiter",
+        "startLearning": "Fangen Sie an zu lernen",
+        "enrollCourse": "Melden Sie sich für den Kurs an",
+        "goToContentCreatorPage": "Gehen Sie zur Seite zum Erstellen von Inhalten",
+        "repeatLessons": "Wiederholen Sie die Lektionen",
+        "enrollGroups": "Melden Sie Gruppen an"
+      }
+    },
+    "breadcrumbs": {
+      "availableCourses": "Verfügbare Kurse",
+      "yourCourses": "Ihre Kurse",
+      "back": "Zurück"
+    },
+    "certificate": {
+      "button": {
+        "viewCertificate": "Zertifikat anzeigen"
+      },
+      "courseCompleted": "Glückwunsch! Sie haben den Kurs abgeschlossen! Jetzt haben Sie Zugriff auf Ihr Zertifikat."
+    },
+    "studentMode": {
+      "enter": "Wechseln Sie in den Lernmodus",
+      "exit": "Lernmodus verlassen",
+      "bannerTitle": "Sie nehmen an diesem Kurs im Lernmodus teil",
+      "bannerDescription": "Ihr Lernfortschritt wird verfolgt. Abgeschlossene Lektionen zählen zu Ihrer persönlichen Abschluss- und Kursstatistik.",
+      "exitBanner": "Lernmodus verlassen",
+      "learningModeRequired": "Der Lernmodus ist für diesen Kurs nicht aktiv.",
+      "draftCourseTooltip": "Dieser Kurs befindet sich im Entwurfsstatus. Sie können sich nicht anmelden oder weiter lernen."
+    },
+    "tabs": {
+      "chapters": "Kapitel",
+      "moreFromAuthor": "Mehr vom Autor",
+      "statistics": "Statistiken"
+    }
+  },
+  "studentChapterView": {
+    "chapterProgress": {
+      "header": "Inhaltsverzeichnis:",
+      "courseProgress": "Kursfortschritt"
+    },
+    "button": {
+      "open": "Offen",
+      "continue": "Weitermachen",
+      "playChapter": "Kapitel abspielen"
+    },
+    "other": {
+      "enrollmentRequired": "Melden Sie sich zum Eröffnungskurs an.",
+      "purchaseRequired": "Schalten Sie diese Lektion frei, indem Sie den Kurs kaufen."
+    }
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "buttons": {
+      "cancel": "Stornieren",
+      "save": "Speichern"
+    },
+    "tabs": {
+      "account": "Konto",
+      "organization": "Organisation",
+      "platformCustomization": "Plattformanpassung"
+    },
+    "breadcrumbs": {
+      "settings": "Einstellungen"
+    },
+    "toast": {
+      "error": {
+        "globalNotFound": "Globale Einstellungen nicht gefunden"
+      },
+      "qaSettingUpdatedSuccessfully": "Die QA-Einstellungen wurden erfolgreich aktualisiert",
+      "ageLimitUpdatedSuccessfully": "Altersgrenze erfolgreich aktualisiert",
+      "newsSettingUpdatedSuccessfully": "Nachrichteneinstellungen erfolgreich aktualisiert",
+      "articlesSettingUpdatedSuccessfully": "Die Einstellungen der Wissensdatenbank wurden erfolgreich aktualisiert"
+    }
+  },
+  "certificateBackgroundUpload": {
+    "title": "Hochladen des Zertifikathintergrunds",
+    "description": "Laden Sie ein Hintergrundbild für das Zertifikat hoch.",
+    "button": {
+      "removeCertificateBackgroundImage": "Zertifikathintergrund löschen",
+      "preview": "Vorschau"
+    },
+    "field": {
+      "imageRequirements": "PNG, JPG oder JPEG (max. 20 MB)"
+    },
+    "other": {
+      "uploading": "Hochladen...",
+      "removing": "Entfernen..."
+    },
+    "toast": {
+      "success": "Das Hintergrundbild des Zertifikats wurde erfolgreich geändert",
+      "error": "Fehler beim Ändern des Hintergrundbilds des Zertifikats"
+    }
+  },
+  "adminPreferences": {
+    "header": "Globale Administratoreinstellungen",
+    "subHeader": "Kurseinstellungen konfigurieren",
+    "notificationSettings": "Benachrichtigungseinstellungen",
+    "courseSettings": "Kurseinstellungen",
+    "field": {
+      "newUserNotifications": "Benachrichtigungen für neue Benutzer",
+      "newUserNotificationsDescription": "Erhalten Sie Benachrichtigungen, wenn ein neuer Benutzer erstellt wird",
+      "coursesVisibility": "Zeigen Sie Besuchern Kurse",
+      "coursesVisibilityDescription": "Ermöglichen Sie Besuchern, die Kursliste anzuzeigen und auf kostenlose Lektionen zuzugreifen, ohne sich anzumelden",
+      "modernCourseList": "Nutzen Sie die moderne Kurslistenansicht",
+      "modernCourseListDescription": "Aktivieren Sie das neue Kurslistendesign mit den Abschnitten „Hero“ und „Top-Kurse“.",
+      "finishedCourseNotification": "Benachrichtigungen über abgeschlossene Kurse",
+      "finishedCourseNotificationDescription": "Erhalten Sie Benachrichtigungen, wenn ein Benutzer einen Kurs beendet",
+      "studentsWithOverdueCourseNotification": "Studierende mit Benachrichtigungen über überfällige Kurse",
+      "studentsWithOverdueCourseNotificationDescription": "Erhalten Sie Benachrichtigungen, wenn Studierende Kurse überfällig haben"
+    },
+    "toast": {
+      "newUserNotificationsPreferenceChangeSuccess": "Die Benachrichtigungseinstellungen für neue Benutzer wurden erfolgreich aktualisiert",
+      "coursesVisibilityPreferenceChangeSuccess": "Die Sichtbarkeitseinstellungen für Kurse für nicht authentifizierte Benutzer wurden erfolgreich aktualisiert",
+      "modernCourseListPreferenceChangeSuccess": "Die Voreinstellung für die moderne Kursliste wurde erfolgreich aktualisiert",
+      "finishedCourseNotificationsPreferenceChangeSuccess": "Die Benachrichtigungseinstellungen für abgeschlossene Kurse wurden erfolgreich aktualisiert",
+      "finishedCourseNotificationsPreferenceChangeError": "Die Benachrichtigungseinstellungen für abgeschlossene Kurse konnten nicht aktualisiert werden",
+      "overdueCourseNotificationsPreferenceChangeSuccess": "Die Benachrichtigungseinstellungen für überfällige Kurse wurden erfolgreich aktualisiert",
+      "overdueCourseNotificationsPreferenceChangeError": "Die Benachrichtigungseinstellungen für überfällige Kurse konnten nicht aktualisiert werden"
+    }
+  },
+  "registrationFormBuilder": {
+    "title": "Registrierungsformular-Builder",
+    "description": "Verwalten Sie zusätzliche Kontrollkästchen, die während der Benutzerregistrierung angezeigt werden.",
+    "badge": "Registrieren",
+    "loading": "Kontrollkästchen für Registrierungsformular werden geladen...",
+    "empty": "Noch keine zusätzlichen Registrierungs-Kontrollkästchen.",
+    "addFieldTitle": "Kontrollkästchen-Zustimmung hinzufügen",
+    "addFieldDescription": "Erstellen Sie optionale oder erforderliche Kontrollkästchen für die Registrierung.",
+    "summaryLabel": "Kontrollkästchen",
+    "addField": "Kontrollkästchen hinzufügen",
+    "save": "Anmeldeformular speichern",
+    "validation": {
+      "labelRequired": "Etiketteninhalt ist erforderlich.",
+      "toastLabelRequired": "Bitte fügen Sie vor dem Speichern den Kontrollkästchentext sowohl in Englisch als auch in Polnisch hinzu.",
+      "toastGeneric": "Bitte korrigieren Sie den hervorgehobenen Kontrollkästchentext vor dem Speichern."
+    },
+    "toast": {
+      "saved": "Anmeldeformular erfolgreich gespeichert."
+    },
+    "field": {
+      "heading": "Kontrollkästchen {{index}}",
+      "typeCheckbox": "Kontrollkästchen",
+      "cardDescription": "Konfigurieren Sie Kopie, erforderlichen Status und Bestellung für diese Einwilligung.",
+      "required": "Erforderliches Kontrollkästchen",
+      "requiredDescription": "Benutzer müssen dieses Kontrollkästchen aktivieren, bevor sie ein Konto erstellen.",
+      "requiredBadge": "Erforderlich",
+      "optionalBadge": "Optional",
+      "archivedBadge": "Archiviert",
+      "languageLabel": "Beschriftung in {{language}}",
+      "languageDescription": "Dieser Inhalt wird Benutzern angezeigt, die sich in dieser Sprache registrieren.",
+      "labelPlaceholder": "Geben Sie den Einwilligungstext ein und fügen Sie bei Bedarf Links hinzu.",
+      "linkOnlyHint": "Nur reiner Text mit Links.",
+      "addLink": "Link hinzufügen",
+      "archive": "Archiv",
+      "restore": "Wiederherstellen"
+    }
+  },
+  "mfa": {
+    "setup": {
+      "title": "Richten Sie die Multi-Faktor-Authentifizierung ein",
+      "description": "Führen Sie die folgenden Schritte aus, um die Multi-Faktor-Authentifizierung (MFA) für Ihr Konto einzurichten.",
+      "scanQr": "Scannen Sie den untenstehenden QR-Code mit Ihrer Authentifizierungs-App (Google Authenticator, Authy usw.).",
+      "manualEntry": "Wenn Sie nicht scannen können, geben Sie das Geheimnis manuell in Ihre App ein.",
+      "enterCode": "Geben Sie unten den 6-stelligen Code Ihrer App ein und klicken Sie auf „MFA überprüfen und aktivieren“.",
+      "loadingQr": "Laden Sie Ihren QR-Code...",
+      "secretLabel": "Geheimnis",
+      "tokenLabel": "MFA-Token",
+      "verifyButton": "Überprüfen und aktivieren Sie MFA"
+    },
+    "verify": {
+      "title": "Überprüfen Sie die Multi-Faktor-Authentifizierung",
+      "description": "Führen Sie die folgenden Schritte aus, um die Multi-Faktor-Authentifizierung (MFA) für Ihr Konto zu überprüfen.",
+      "openAuthenticator": "Öffnen Sie Ihre Authentifizierungs-App",
+      "enterCode": "Geben Sie den 6-stelligen Code aus Ihrer App ein",
+      "verifyToken": "Überprüfen Sie Ihr MFA-Token",
+      "tokenLabel": "MFA-Token",
+      "toast": {
+        "success": "MFA wurde erfolgreich überprüft.",
+        "error": "Die MFA-Überprüfung ist fehlgeschlagen."
+      }
+    }
+  },
+  "MFAEnforcementView": {
+    "header": "Rollenbasierte Durchsetzung der Multi-Faktor-Authentifizierung",
+    "subHeader": "Erzwingen Sie MFA für bestimmte Benutzerrollen",
+    "description": "Mit dieser Einstellung können Sie die Multi-Faktor-Authentifizierung (MFA) für bestimmte Benutzerrollen innerhalb Ihrer Organisation erzwingen.",
+    "roles": {
+      "admin": "Administrator",
+      "student": "Student",
+      "content_creator": "Inhaltsersteller"
+    },
+    "switch": {
+      "enabled": "Ermöglicht",
+      "disabled": "Deaktiviert"
+    },
+    "toast": {
+      "mfaEnforcementUpdatedSuccessfully": "Die MFA-Erzwingungseinstellungen wurden erfolgreich aktualisiert.",
+      "mfaEnforcementUpdateFailed": "Die MFA-Erzwingungseinstellungen konnten nicht aktualisiert werden."
+    }
+  },
+  "progressBadge": {
+    "completed": "Vollendet",
+    "inProgress": "Im Gange",
+    "notStarted": "Nicht gestartet",
+    "blocked": "Blockiert"
+  },
+  "studentCertificateView": {
+    "header": "Zertifikate",
+    "informations": {
+      "loading": "Zertifikate werden geladen...",
+      "noCertificates": "Noch keine Zertifikate verfügbar. Absolvieren Sie Kurse, um Zertifikate zu erwerben.",
+      "failedToLoad": "Zertifikate konnten nicht geladen werden. Bitte versuchen Sie es später noch einmal.",
+      "failedToFetch": "Zertifikate konnten nicht abgerufen werden. Bitte versuchen Sie es später noch einmal.",
+      "preparingDownload": "Ihr Zertifikat wird zum Download vorbereitet...",
+      "failedToDownload": "Das Herunterladen des Zertifikats ist fehlgeschlagen. Bitte versuchen Sie es später noch einmal.",
+      "shareFailed": "Der LinkedIn-Freigabelink konnte nicht vorbereitet werden. Bitte versuchen Sie es später noch einmal.",
+      "htmlRequired": "Der Inhalt des Zertifikats fehlt. Bitte aktualisieren Sie und versuchen Sie es erneut.",
+      "pdfGenerationFailed": "Zertifikat-PDF konnte nicht generiert werden. Bitte versuchen Sie es erneut.",
+      "shareImageGenerationFailed": "Das Zertifikatfreigabebild konnte nicht generiert werden. Bitte versuchen Sie es später noch einmal.",
+      "alreadyExists": "Zertifikat existiert bereits.",
+      "createFailed": "Zertifikat konnte nicht erstellt werden. Bitte versuchen Sie es später noch einmal.",
+      "certificateNotFound": "Zertifikat nicht gefunden.",
+      "userNotFound": "Benutzer nicht gefunden.",
+      "courseNotFound": "Kurs nicht gefunden.",
+      "courseCertificateDisabled": "Für diesen Kurs sind Zertifikate deaktiviert.",
+      "courseCompletionRequired": "Sie müssen den Kurs abschließen, bevor Sie ein Zertifikat erstellen können."
+    },
+    "button": {
+      "download": "Herunterladen",
+      "preview": "Vorschau",
+      "shareLinkedIn": "Auf LinkedIn teilen"
+    },
+    "controls": {
+      "languageToggle": "Sprachumschaltung",
+      "fontColor": "Schriftfarbe"
+    }
+  },
+  "announcements": {
+    "breadcrumbs": {
+      "announcements": "Ankündigungen",
+      "createAnnouncement": "Ankündigung erstellen"
+    },
+    "page": {
+      "header": "Ankündigungen",
+      "tooltips": {
+        "markAsRead": "Als gelesen markieren"
+      },
+      "buttons": {
+        "new": "Neu erstellen"
+      }
+    },
+    "createPage": {
+      "header": "Ankündigung erstellen",
+      "subheader": "Geben Sie die Details an, um eine neue Ankündigung einzurichten.",
+      "buttons": {
+        "confirm": "Bestätigen",
+        "cancel": "Stornieren"
+      },
+      "fields": {
+        "title": "Titel",
+        "content": "Inhalt",
+        "group": "Gruppe",
+        "everyone": "Alle"
+      },
+      "placeholders": {
+        "title": "Titel eingeben",
+        "content": "Schreiben Sie hier Ihre Ankündigung...",
+        "group": "Gruppe auswählen",
+        "everyone": "Wählen Sie alle aus"
+      },
+      "validation": {
+        "title": {
+          "required": "Titel ist erforderlich",
+          "maxLength": "Der Titel muss weniger als 120 Zeichen lang sein"
+        },
+        "content": {
+          "required": "Inhalte sind erforderlich"
+        }
+      }
+    },
+    "buttons": {
+      "readMore": "Mehr lesen"
+    },
+    "other": {
+      "noNewAnnouncements": "Für Sie liegen heute keine neuen Ankündigungen vor",
+      "of": "von"
+    },
+    "toast": {
+      "markedAsRead": "Ankündigungen wurden als erfolgreich gelesen markiert",
+      "markAsReadFailed": "Ankündigungen konnten nicht als gelesen markiert werden",
+      "createdSuccessfully": "Ankündigung erfolgreich erstellt",
+      "createFailed": "Ankündigung konnte nicht erstellt werden"
+    }
+  },
+  "platformLogo": {
+    "header": "Plattform-Logo",
+    "subHeader": "Laden Sie ein individuelles Logo für Ihre Plattform hoch. Unterstützte Formate: PNG, SVG",
+    "field": {
+      "uploadLabel": "Logobild",
+      "imageRequirements": "PNG oder SVG (max. 10 MB)"
+    },
+    "button": {
+      "removeLogo": "Plattformlogo löschen"
+    },
+    "toast": {
+      "logoUploadedSuccessfully": "Plattformlogo erfolgreich hochgeladen",
+      "logoRemovedSuccessfully": "Plattformlogo erfolgreich entfernt",
+      "logoFetchError": "Fehler beim Abrufen des Plattformlogos"
+    }
+  },
+  "platformSimpleLogo": {
+    "header": "Plattform einfaches Logo (Symbol)",
+    "subHeader": "Laden Sie ein benutzerdefiniertes Logo hoch, das als Signet und Favicon verwendet wird. Unterstützte Formate: PNG, SVG",
+    "field": {
+      "uploadLabel": "Logobild",
+      "imageRequirements": "PNG oder SVG (max. 10 MB)"
+    },
+    "button": {
+      "removeLogo": "Plattformsymbol-Logo löschen"
+    },
+    "toast": {
+      "logoUploadedSuccessfully": "Das einfache Logo der Plattform wurde erfolgreich hochgeladen",
+      "logoRemovedSuccessfully": "Das einfache Logo der Plattform wurde erfolgreich entfernt",
+      "logoFetchError": "Fehler beim Abrufen des einfachen Logos der Plattform"
+    }
+  },
+  "organizationTheme": {
+    "title": "Organisationsthema",
+    "description": "Passen Sie das Erscheinungsbild Ihrer Plattform an, indem Sie eine Designfarbe auswählen, die das Branding Ihres Unternehmens widerspiegelt."
+  },
+  "organizationLoginBackgroundImageUpload": {
+    "title": "Anmelden Hintergrundbild hochladen",
+    "description": "Laden Sie ein benutzerdefiniertes Hintergrundbild für die Anmeldeseite der Organisation hoch.",
+    "field": {
+      "imageRequirements": "PNG, JPG oder JPEG (max. 20 MB)"
+    },
+    "button": {
+      "removeBackgroundImage": "Login-Hintergrundbild löschen"
+    },
+    "toast": {
+      "success": "Das Hintergrundbild für die Anmeldung wurde erfolgreich geändert",
+      "error": "Beim Ändern des Login-Hintergrundbilds ist ein Fehler aufgetreten"
+    }
+  },
+  "files": {
+    "toast": {
+      "invalidData": "Datei-Upload fehlgeschlagen – ungültige Dateidaten",
+      "contentTypeMismatch": "Der Dateiinhaltstyp stimmt nicht mit dem bereitgestellten Inhaltstyp überein",
+      "invalidFileType": "Ungültiger Dateityp. Bitte laden Sie eine PNG- oder SVG-Datei hoch."
+    },
+    "import": {
+      "noFileUploaded": "Keine Datei hochgeladen",
+      "invalidFileData": "Datei-Upload fehlgeschlagen – ungültige Dateidaten",
+      "fileEmpty": "Die Datei ist leer",
+      "requiredDataMissing": "Import fehlgeschlagen – erforderliche Daten fehlen.",
+      "invalidFileType": "Ungültiger Dateityp. Bitte laden Sie eine gültige Datei hoch.",
+      "userFailReason": {
+        "alreadyExists": "Benutzer mit dieser E-Mail existiert bereits"
+      }
+    }
+  },
+  "defaultCourseCurrencyView": {
+    "header": "Standardkurswährung",
+    "subHeader": "Legen Sie die Standardwährung für alle neuen Kurse fest",
+    "toast": {
+      "defaultCourseCurrencyChangeSuccess": "Die Standardkurswährung wurde erfolgreich aktualisiert",
+      "defaultCourseCurrencyChangeError": "Die Standardkurswährung konnte nicht aktualisiert werden"
+    },
+    "select": {
+      "pln": {
+        "label": "Polnischer Zloty",
+        "sign": "zł"
+      },
+      "eur": {
+        "label": "Euro",
+        "sign": "€"
+      },
+      "usd": {
+        "label": "US-Dollar",
+        "sign": "$"
+      },
+      "gbp": {
+        "label": "Britisches Pfund",
+        "sign": "£"
+      }
+    }
+  },
+  "ageLimitView": {
+    "header": "Altersgrenze festlegen",
+    "subHeader": "Legen Sie eine Altersgrenze für neue Benutzer fest",
+    "select": {
+      "placeholder": "Altersgrenze auswählen",
+      "null": {
+        "label": "Keine Einschränkung"
+      }
+    }
+  },
+  "loginFilesUpload": {
+    "header": "Anmeldeseitendateien",
+    "subHeader": "Fügen Sie bis zu {{count}} Dateien hinzu und benennen Sie jede einzelne.",
+    "emptyState": "Es wurden noch keine Dateien hinzugefügt.",
+    "selectedFile": "Ausgewählte Datei",
+    "unnamedFile": "Unbenannte Datei",
+    "deleteDialog": {
+      "title": "Datei entfernen?",
+      "description": "Dadurch wird „{{name}}“ von der Anmeldeseite entfernt.",
+      "confirm": "Datei löschen"
+    },
+    "previewDialog": {
+      "subtitle": "Vorschau der Anmeldeseitendatei",
+      "loading": "Vorschau wird geladen...",
+      "error": "Für diese Datei konnte keine Vorschau geladen werden."
+    },
+    "fileName": {
+      "label": "Name",
+      "placeholder": "Namen eingeben"
+    },
+    "toast": {
+      "invalidFileType": "Ungültiger Dateityp. Bitte laden Sie eine gültige Datei hoch.",
+      "successfullyUploadedFile": "Datei erfolgreich hochgeladen",
+      "maxResourceCount": "Maximale Ressourcenanzahl erreicht ({{count}})",
+      "resourceNotFound": "Ressource nicht gefunden",
+      "successfullyDeletedFile": "Datei erfolgreich gelöscht"
+    },
+    "addButton": "Neue Datei hinzufügen"
+  },
+  "richTextEditor": {
+    "placeholder": {
+      "lineHint": "Fügen Sie einen YouTube-/Vimeo-/Canva-Link ein, fügen Sie Google Docs hinzu oder laden Sie eine Datei hoch."
+    },
+    "upload": {
+      "videoProgress": "Video wird hochgeladen..."
+    },
+    "toolbar": {
+      "format": {
+        "placeholder": "Format auswählen",
+        "paragraph": "Absatz",
+        "h1": "Überschrift 1",
+        "h2": "Überschrift 2",
+        "h3": "Überschrift 3",
+        "h4": "Überschrift 4"
+      },
+      "link": {
+        "tooltip": "Link: Macht den ausgewählten Text zu einem Hyperlink",
+        "dialog": {
+          "title": "Link einfügen",
+          "urlLabel": "Geben Sie die Link-URL ein",
+          "linkTextLabel": "Geben Sie den Linktext ein",
+          "linkTextPlaceholder": "Linktext...",
+          "urlRequired": "URL ist erforderlich",
+          "urlInvalid": "Ungültiges URL-Format",
+          "linkTextRequired": "Linktext ist erforderlich"
+        }
+      },
+      "upload": {
+        "uploadFailed": "Das Hochladen der Datei ist fehlgeschlagen",
+        "tooltip": "Hochladen: Ermöglicht das Hochladen einer Datei"
+      }
+    }
+  },
+  "richText": {
+    "uploadDisplayModeDialog": {
+      "title": "Wählen Sie aus, wie diese Datei angezeigt werden soll",
+      "description": "Wählen Sie aus, wie „{{name}}“ für Studierende angezeigt werden soll.",
+      "options": {
+        "preview": {
+          "title": "Vorschau",
+          "description": "Zeigen Sie die Datei inline an, damit Schüler sie direkt anzeigen können."
+        },
+        "download": {
+          "title": "Herunterladen",
+          "description": "Als herunterladbare Datei-Link einfügen."
+        }
+      }
+    },
+    "video": {
+      "tooltip": {
+        "bunnyMissing": "Video ist nicht verfügbar. Bitte überprüfen Sie die Bunny CDN-Konfiguration."
+      },
+      "ariaLabel": {
+        "drag": "Video per Drag & Drop einbetten",
+        "remove": "Videoeinbettung entfernen"
+      }
+    },
+    "presentation": {
+      "ariaLabel": {
+        "drag": "Präsentation per Drag & Drop einbetten",
+        "remove": "Präsentationseinbettung entfernen"
+      }
+    },
+    "downloadableFile": {
+      "ariaLabel": {
+        "drag": "Datei ziehen",
+        "remove": "Herunterladbare Datei entfernen"
+      }
+    },
+    "pdfPreview": {
+      "ariaLabel": {
+        "drag": "PDF-Vorschau ziehen",
+        "remove": "PDF-Vorschau entfernen"
+      },
+      "loading": "Vorschau wird geladen...",
+      "openFile": "Datei öffnen",
+      "showingPage": "Seite {{page}} von {{total}} wird angezeigt",
+      "previous": "Vorherige",
+      "next": "Nächste"
+    },
+    "loadingAiAsset": {
+      "processing": "Die Ressource wird derzeit verarbeitet"
+    }
+  },
+  "pages": {
+    "dashboard": "Armaturenbrett",
+    "settings": "Einstellungen",
+    "providerInformation": "Anbieterinformationen",
+    "courses": "Kurse",
+    "profile": "Profil",
+    "lesson": "Lektion",
+    "lessonPreview": "Lektionsvorschau",
+    "register": "Registrieren",
+    "passwordRecovery": "Passwortwiederherstellung",
+    "login": "Login",
+    "magicLink": "Anmeldelink",
+    "createNewPassword": "Neues Passwort erstellen",
+    "createAnnouncement": "Ankündigung erstellen",
+    "announcements": "Ankündigungen",
+    "users": "Benutzer",
+    "userDetails": "Benutzerdetails",
+    "createNewUser": "Neuen Benutzer erstellen",
+    "promotionCodes": "Aktionscodes",
+    "promotionCodeDetails": "Details zum Aktionscode",
+    "createPromotionCode": "Aktionscode erstellen",
+    "groups": "Gruppen",
+    "editGroup": "Gruppe bearbeiten",
+    "createGroup": "Gruppe erstellen",
+    "editCourse": "Kurs bearbeiten",
+    "createNewCategory": "Neue Kategorie erstellen",
+    "categoryDetails": "Kategoriedetails",
+    "categories": "Kategorien",
+    "createNewCourse": "Erstellen Sie einen neuen Kurs",
+    "admin": "Admin",
+    "qa": "Fragen und Antworten",
+    "createQA": "Erstellen Sie neue Fragen und Antworten",
+    "analytics": "Analytik",
+    "progress": "Fortschritt",
+    "tenant": "Organisationsdetails",
+    "createTenant": "Organisation erstellen",
+    "tenants": "Organisationen"
+  },
+  "lessonPreview": {
+    "breadcrumbs": {
+      "browseCourses": "Kurse durchsuchen",
+      "lessonPreview": "Vorschau"
+    },
+    "button": {
+      "back": "Zurück"
+    }
+  },
+  "studentOnboarding": {
+    "dashboard": {
+      "clientStatistics": "Dies ist Ihr Dashboard – hier finden Sie Ihren Fortschritt, Statistiken und aktuelle Aktivitäten.",
+      "dailyStreak": "Machen Sie weiter so – verfolgen Sie hier Ihre täglichen Login-Serien."
+    },
+    "courses": {
+      "yourList": "Hier finden Sie Ihre Kurse...",
+      "availableListFilters": "Und hier können Sie nach verfügbaren Kursen suchen, für die Sie sich anmelden können."
+    },
+    "announcements": {
+      "stayInformed": "Hier finden Sie Ankündigungen von Dozenten oder Kurskoordinatoren."
+    },
+    "settings": {
+      "welcome": "Hier können Sie Ihr Profil verwalten – Details bearbeiten, Präferenzen festlegen und Ihr Passwort ändern.",
+      "language": "Stellen Sie hier Ihre bevorzugte Oberflächensprache ein – passen Sie die Plattform an Ihre Bedürfnisse an.",
+      "password": "Ändern Sie Ihr Passwort regelmäßig, um die Sicherheit Ihres Kontos zu gewährleisten."
+    },
+    "profile": {
+      "info": "Hier können Sie Ihre Profildetails einsehen und bearbeiten.",
+      "certificates": "Hier können Sie die Abschlusszeugnisse Ihrer Kurse einsehen."
+    },
+    "providerInformation": {
+      "welcome": "Erfahren Sie mehr über den Anbieter und dessen Kontaktdaten."
+    }
+  },
+  "pagination": {
+    "showing": "Es werden {{startItem}}-{{endItem}} von {{totalItems}} Ergebnissen angezeigt",
+    "previous": "Vorherige",
+    "next": "Nächste",
+    "noData": "Keine Daten gefunden"
+  },
+  "QA": {
+    "header": "Häufig gestellte Fragen",
+    "subHeader": "Finden Sie Antworten auf häufige Fragen zu unserer Plattform"
+  },
+  "qaPreferences": {
+    "subHeader": "Konfigurieren Sie die Q&A-Einstellungen",
+    "header": "Q&A-Einstellungen",
+    "settings": {
+      "qaEnabled": {
+        "label": "Aktivieren Sie den Abschnitt „Fragen und Antworten“.",
+        "description": "Aktivieren Sie den Abschnitt „Fragen und Antworten“. Wenn diese Option deaktiviert ist, ist der Abschnitt „Fragen und Antworten“ für alle Benutzer ausgeblendet."
+      },
+      "qaPublic": {
+        "label": "Bereich „Fragen und Antworten“ für nicht registrierte Benutzer anzeigen",
+        "description": "Nicht registrierten Benutzern erlauben, den Abschnitt „Fragen und Antworten“ anzuzeigen (kann nur umgeschaltet werden, wenn der Abschnitt „Fragen und Antworten“ aktiviert ist)."
+      }
+    },
+    "toast": {
+      "QANotEnabled": "Der Abschnitt „Fragen und Antworten“ ist nicht aktiviert"
+    },
+    "tooltip": {
+      "disabled": "Um dieses Feld umzuschalten, aktivieren Sie bitte zuerst den Abschnitt „Fragen und Antworten“."
+    }
+  },
+  "newsPreferences": {
+    "subHeader": "Konfigurieren Sie die Nachrichteneinstellungen",
+    "header": "Nachrichteneinstellungen",
+    "settings": {
+      "newsEnabled": {
+        "label": "News-Bereich aktivieren",
+        "description": "Aktivieren Sie den News-Bereich. Wenn die Funktion deaktiviert ist, ist der News-Bereich für alle Benutzer ausgeblendet."
+      },
+      "newsPublic": {
+        "label": "News-Bereich für nicht registrierte Benutzer anzeigen",
+        "description": "Nicht registrierten Benutzern erlauben, den News-Bereich anzuzeigen (kann nur umgeschaltet werden, wenn der News-Bereich aktiviert ist)"
+      }
+    },
+    "toast": {
+      "newsNotEnabled": "Der News-Bereich ist nicht aktiviert"
+    },
+    "tooltip": {
+      "disabled": "Um dieses Feld umzuschalten, aktivieren Sie bitte zuerst den News-Bereich."
+    }
+  },
+  "articlesPreferences": {
+    "subHeader": "Konfigurieren Sie die Wissensdatenbankeinstellungen",
+    "header": "Wissensdatenbank-Einstellungen",
+    "settings": {
+      "articlesEnabled": {
+        "label": "Aktivieren Sie den Wissensdatenbankbereich",
+        "description": "Aktivieren Sie den Wissensdatenbankbereich. Wenn diese Option deaktiviert ist, ist der Wissensdatenbankbereich für alle Benutzer ausgeblendet."
+      },
+      "articlesPublic": {
+        "label": "Wissensdatenbankbereich für nicht registrierte Benutzer anzeigen",
+        "description": "Nicht registrierten Benutzern erlauben, den Wissensdatenbank-Abschnitt anzuzeigen (kann nur umgeschaltet werden, wenn der Wissensdatenbank-Abschnitt aktiviert ist)"
+      }
+    },
+    "toast": {
+      "articlesNotEnabled": "Der Wissensdatenbankbereich ist nicht aktiviert"
+    },
+    "tooltip": {
+      "disabled": "Um dieses Feld umzuschalten, aktivieren Sie bitte zuerst den Abschnitt „Wissensdatenbank“."
+    }
+  },
+  "qaView": {
+    "button": {
+      "createNew": "Erstellen Sie neue Fragen und Antworten"
+    },
+    "toast": {
+      "qaCreatedSuccessfully": "Fragen und Antworten wurden erfolgreich erstellt",
+      "qaUpdatedSuccessfully": "Fragen und Antworten wurden erfolgreich aktualisiert",
+      "languageCreatedSuccessfully": "Die Sprache wurde erfolgreich erstellt",
+      "languageDeletedSuccessfully": "Die Sprache wurde erfolgreich gelöscht",
+      "qaDeletedSuccessfully": "Fragen und Antworten wurden erfolgreich gelöscht",
+      "cannotDeleteLanguage": "Diese Sprache kann nicht gelöscht werden",
+      "languageNotSupported": "Diese Sprache wird nicht unterstützt",
+      "languageAlreadyExists": "Diese Sprache existiert bereits",
+      "notFound": "Fragen und Antworten nicht gefunden",
+      "noDataToUpdate": "Keine Daten zum Aktualisieren"
+    },
+    "aria": {
+      "editQuestion": "Frage bearbeiten"
+    },
+    "edit": {
+      "header": "Bearbeiten Sie Fragen und Antworten",
+      "subheader": "Bearbeiten Sie die Fragen-und-Antwort-Details unten",
+      "language": "Sprache"
+    },
+    "fields": {
+      "title": "Frage",
+      "description": "Antwort"
+    },
+    "create": {
+      "header": "Erstellen Sie Fragen und Antworten",
+      "subheader": "Fügen Sie eine Frage und Antwort für Lernende hinzu.",
+      "baseLanguageTooltip": "Sie können diese Sprache nicht ändern oder entfernen. Dies ist die Standardeinstellung und wird immer Teil der Fragen und Antworten sein."
+    },
+    "delete": {
+      "title": "Fragen und Antworten löschen",
+      "confirm": "Sind Sie sicher, dass Sie Fragen und Antworten löschen möchten?"
+    }
+  },
+  "adminArticleView": {
+    "toc": {
+      "title": "Wissensdatenbank",
+      "actions": {
+        "add": "Hinzufügen",
+        "newLabel": "Neu",
+        "newSection": "Neuer Abschnitt",
+        "newArticle": "Neuer Wissensdatenbankeintrag"
+      }
+    },
+    "dialog": {
+      "createArticle": {
+        "title": "Wissensdatenbankeintrag erstellen",
+        "sectionLabel": "Abschnitt",
+        "sectionPlaceholder": "Wählen Sie einen Abschnitt aus",
+        "create": "Erstellen"
+      }
+    },
+    "toast": {
+      "createSectionError": "Abschnitt konnte nicht erstellt werden",
+      "updateError": "Aktualisierung fehlgeschlagen",
+      "languageAlreadyExists": "Diese Sprache existiert bereits",
+      "createLanguageError": "Sprache konnte nicht hinzugefügt werden",
+      "minimumLanguageError": "Mindestens eine Sprache ist erforderlich",
+      "cannotRemoveBaseLanguage": "Die Basissprache kann nicht entfernt werden",
+      "removeLanguageError": "Die Sprache konnte nicht entfernt werden",
+      "sectionHasAssignedArticles": "Ein Abschnitt mit zugewiesenen Wissensdatenbankeinträgen kann nicht gelöscht werden",
+      "deleteSectionError": "Abschnitt konnte nicht gelöscht werden",
+      "createError": "Wissensdatenbankeintrag konnte nicht erstellt werden",
+      "deleteError": "Wissensdatenbankeintrag konnte nicht gelöscht werden",
+      "notFoundError": "Wissensdatenbankeintrag nicht gefunden",
+      "invalidCoverType": "Ungültiger Deckungstyp",
+      "invalidLanguageError": "Ungültige Sprache"
+    },
+    "section": {
+      "editTitle": "Abschnitt bearbeiten",
+      "editDescription": "Aktualisieren Sie den Abschnittstitel und verwalten Sie Übersetzungen.",
+      "sectionId": "Abschnitts-ID: {{id}}",
+      "cannotDeleteWithArticles": "Sie können keinen Abschnitt löschen, dem Wissensdatenbankeinträge zugewiesen sind.",
+      "languageLabel": "Sprache",
+      "languageHelp": "Wechseln Sie die Sprache, um den Titel zu bearbeiten. Wenn es noch nicht erstellt wurde, werden Sie aufgefordert, es zu erstellen.",
+      "fields": {
+        "title": "Titel",
+        "titleError": "Titel ist erforderlich"
+      },
+      "delete": {
+        "title": "Abschnitt löschen",
+        "description": "Möchten Sie diesen Abschnitt wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden."
+      },
+      "language": {
+        "label": "Sprache",
+        "baseLanguage": "Standard",
+        "notAddedLanguages": "Nicht hinzugefügt",
+        "createTitle": "Sprache erschaffen",
+        "createDescription": "Die Version {{language}} für diesen Abschnitt erstellen?",
+        "deleteTitle": "Sprache löschen",
+        "deleteDescription": "Die Version {{language}} für diesen Abschnitt löschen?"
+      }
+    },
+    "form": {
+      "createTitle": "Wissensdatenbankeintrag erstellen",
+      "editTitle": "Wissensdatenbankeintrag bearbeiten",
+      "createButton": "Erstellen und bearbeiten",
+      "saveButton": "Speichern",
+      "fields": {
+        "title": "Titel",
+        "summary": "Einführung",
+        "content": "Inhalt",
+        "status": "Status",
+        "isPublic": "Öffentlich",
+        "cover": "Titelbild"
+      },
+      "placeholders": {
+        "title": "Titel eingeben",
+        "summary": "Geben Sie die Einleitung ein"
+      },
+      "status": {
+        "draft": "Entwurf",
+        "published": "Veröffentlicht"
+      },
+      "isPublicDescription": "Für alle Benutzer sichtbar",
+      "preview": "Vorschau",
+      "editor": "Editor"
+    }
+  },
+  "articlesView": {
+    "notFound": "Wissensdatenbankeintrag nicht gefunden",
+    "previousArticle": "Vorheriger Wissensdatenbankeintrag",
+    "nextArticle": "Nächster Wissensdatenbankeintrag",
+    "deleteModal": {
+      "title": "Wissensdatenbankeintrag löschen",
+      "description": "Sind Sie sicher, dass Sie diesen Wissensdatenbankeintrag löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden."
+    }
+  },
+  "supportMode": {
+    "banner": {
+      "message": "Sie befinden sich im Support-Modus",
+      "timeLeft": "Noch {{minutes}} Min. übrig",
+      "exit": "Verlassen Sie den Support-Modus"
+    }
+  },
+  "superAdminTenantsView": {
+    "title": "Organisationen",
+    "description": "Verwalten Sie Organisationsnamen, Domains, Status und Verwaltungskennzeichen.",
+    "actions": {
+      "create": "Organisation erstellen"
+    },
+    "search": {
+      "placeholder": "Organisationen suchen..."
+    },
+    "table": {
+      "name": "Name",
+      "host": "Gastgeber",
+      "status": "Status",
+      "managing": "Verwalten",
+      "loading": "Organisationen werden geladen...",
+      "empty": "Keine Organisationen gefunden.",
+      "yes": "Ja",
+      "no": "NEIN",
+      "edit": "Bearbeiten",
+      "actions": {
+        "title": "Aktionen",
+        "enterSupportMode": "Wechseln Sie in den Support-Modus"
+      }
+    },
+    "status": {
+      "active": "Aktiv",
+      "inactive": "Inaktiv"
+    },
+    "create": {
+      "title": "Organisation erstellen",
+      "description": "Erstellen Sie eine neue Organisation und laden Sie den ersten Administrator ein.",
+      "submit": "Organisation erstellen"
+    },
+    "edit": {
+      "title": "Organisation bearbeiten",
+      "description": "Aktualisieren Sie Organisationsdetails und den Status.",
+      "submit": "Änderungen speichern"
+    },
+    "form": {
+      "tenantName": "Organisationsname",
+      "tenantHost": "Organisations-Host (vollständige URL)",
+      "tenantHostPlaceholder": "https://organization.example.com",
+      "status": "Status",
+      "statusPlaceholder": "Status auswählen",
+      "adminFirstName": "Vorname des Administrators",
+      "adminLastName": "Nachname des Administrators",
+      "adminEmail": "Admin-E-Mail"
+    },
+    "validation": {
+      "nameRequired": "Name ist erforderlich",
+      "hostInvalid": "Host muss eine gültige URL sein",
+      "adminEmailRequired": "Admin-E-Mail ist erforderlich",
+      "adminFirstNameRequired": "Der Vorname des Administrators ist erforderlich",
+      "adminLastNameRequired": "Der Nachname des Administrators ist erforderlich"
+    },
+    "toast": {
+      "tenantCreatedSuccessfully": "Organisation erfolgreich erstellt",
+      "tenantUpdatedSuccessfully": "Organisation erfolgreich aktualisiert"
+    }
+  },
+  "superAdminTenants": {
+    "error": {
+      "hostAlreadyExists": "Organisations-Host existiert bereits",
+      "notFound": "Organisation nicht gefunden",
+      "invalidHost": "Ungültige Organisations-Host-URL",
+      "managingTenantRequired": "Verwaltender Organisationsadministrator erforderlich",
+      "currentTenantSupportNotAllowed": "Der Support-Modus ist für die aktuelle Organisation nicht verfügbar"
+    }
+  },
+  "auth": {
+    "error": {
+      "unauthenticated": "Benutzer nicht authentifiziert",
+      "invalidEmailOrPassword": "Ungültige E-Mail-Adresse oder ungültiges Passwort",
+      "adminRoleRequired": "Administratorrolle erforderlich"
+    }
+  },
+  "tenantInactive": {
+    "title": "Organisation deaktiviert",
+    "description": "Dieser Arbeitsbereich ist derzeit inaktiv. Wenn Sie glauben, dass es sich hierbei um einen Fehler handelt, wenden Sie sich an Ihren Administrator, um den Zugriff wiederherzustellen."
+  },
+  "integrationApiKey": {
+    "title": "Integrations-API-Schlüssel",
+    "description": "Generieren Sie einen langlebigen Schlüssel für externe Integrationen. Durch Ersetzen des Schlüssels wird der vorherige sofort widerrufen.",
+    "status": "Status",
+    "active": "Aktiv",
+    "inactive": "Nicht generiert",
+    "prefix": "Schlüsselpräfix",
+    "createdAt": "Erstellt bei",
+    "lastUsedAt": "Zuletzt verwendet um",
+    "loading": "Wichtige Metadaten werden geladen...",
+    "generate": "Schlüssel generieren",
+    "override": "Override-Taste",
+    "copy": "Schlüssel kopieren",
+    "generated": {
+      "title": "Kopieren Sie diesen Schlüssel jetzt. Es wird nicht erneut angezeigt."
+    },
+    "confirm": {
+      "title": "Aktuellen API-Schlüssel überschreiben?",
+      "description": "Durch diese Aktion wird der aktuelle Schlüssel sofort widerrufen. Integrationen, die es verwenden, funktionieren nicht mehr.",
+      "action": "Override-Taste"
+    },
+    "toast": {
+      "fetchSuccess": "Integrations-API-Schlüssel erfolgreich geladen",
+      "rotateSuccess": "Integrations-API-Schlüssel erfolgreich aktualisiert",
+      "rotateError": "Der Integrations-API-Schlüssel konnte nicht aktualisiert werden",
+      "copySuccess": "Integrations-API-Schlüssel kopiert",
+      "copyError": "Der Integrations-API-Schlüssel konnte nicht kopiert werden"
+    },
+    "errors": {
+      "rotateFailed": "Der Integrations-API-Schlüssel konnte nicht rotiert werden",
+      "invalidApiKey": "Ungültiger Integrations-API-Schlüssel",
+      "ownerInactive": "Der Besitzer des API-Schlüssels ist nicht mehr aktiv",
+      "ownerNotAdmin": "Der Besitzer des API-Schlüssels verfügt nicht mehr über Administratorberechtigungen",
+      "missingApiKeyHeader": "Fehlender X-API-Key-Header",
+      "missingTenantIdHeader": "Fehlender X-Tenant-Id-Header"
+    }
+  }
+}

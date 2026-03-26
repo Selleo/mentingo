@@ -411,6 +411,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -1447,6 +1459,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -1482,6 +1506,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -2527,6 +2563,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -2692,6 +2740,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -2980,6 +3040,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -3031,6 +3103,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -3131,6 +3215,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -3174,6 +3270,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -3244,6 +3352,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -3289,6 +3409,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -3333,6 +3465,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -4010,6 +4154,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -4136,6 +4292,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -4272,6 +4440,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -4407,6 +4587,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -4442,6 +4634,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -4491,6 +4695,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -4520,6 +4736,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -4790,6 +5018,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -4936,6 +5176,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -4980,6 +5232,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -5293,7 +5557,10 @@
                     "type": "string",
                     "enum": [
                       "en",
-                      "pl"
+                      "pl",
+                      "de",
+                      "lt",
+                      "cs"
                     ]
                   },
                   "title": {
@@ -5584,6 +5851,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -5628,6 +5907,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -5707,6 +5998,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -6065,6 +6368,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -6856,6 +7171,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -8210,6 +8537,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -8252,6 +8591,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -8311,6 +8662,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -8384,6 +8747,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -8423,6 +8798,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -8452,6 +8839,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -8554,6 +8953,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -8687,6 +9098,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -8774,6 +9197,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -8821,7 +9256,10 @@
                     "type": "string",
                     "enum": [
                       "en",
-                      "pl"
+                      "pl",
+                      "de",
+                      "lt",
+                      "cs"
                     ]
                   },
                   "title": {
@@ -8907,6 +9345,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -9043,6 +9493,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -9072,6 +9534,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -9108,6 +9582,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -9182,6 +9668,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -9280,6 +9778,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -9398,6 +9908,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -9714,6 +10236,18 @@
               },
               {
                 "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
                 "type": "string"
               }
             ]
@@ -10258,7 +10792,28 @@
             "type": "string"
           },
           "language": {
-            "type": "string"
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              }
+            ]
           }
         },
         "required": [
@@ -10927,6 +11482,18 @@
                         {
                           "const": "pl",
                           "type": "string"
+                        },
+                        {
+                          "const": "de",
+                          "type": "string"
+                        },
+                        {
+                          "const": "lt",
+                          "type": "string"
+                        },
+                        {
+                          "const": "cs",
+                          "type": "string"
                         }
                       ]
                     },
@@ -10940,6 +11507,18 @@
                           },
                           {
                             "const": "pl",
+                            "type": "string"
+                          },
+                          {
+                            "const": "de",
+                            "type": "string"
+                          },
+                          {
+                            "const": "lt",
+                            "type": "string"
+                          },
+                          {
+                            "const": "cs",
                             "type": "string"
                           }
                         ]
@@ -10994,7 +11573,28 @@
                 "type": "object",
                 "properties": {
                   "language": {
-                    "type": "string"
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
+                        "type": "string"
+                      }
+                    ]
                   },
                   "isMFAEnabled": {
                     "default": false,
@@ -11022,7 +11622,28 @@
                 "type": "object",
                 "properties": {
                   "language": {
-                    "type": "string"
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
+                        "type": "string"
+                      }
+                    ]
                   },
                   "isMFAEnabled": {
                     "default": false,
@@ -11071,7 +11692,28 @@
             "type": "object",
             "properties": {
               "language": {
-                "type": "string"
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
+                  }
+                ]
               },
               "isMFAEnabled": {
                 "default": false,
@@ -11094,7 +11736,28 @@
             "type": "object",
             "properties": {
               "language": {
-                "type": "string"
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
+                  }
+                ]
               },
               "isMFAEnabled": {
                 "default": false,
@@ -11133,7 +11796,28 @@
                 "type": "object",
                 "properties": {
                   "language": {
-                    "type": "string"
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
+                        "type": "string"
+                      }
+                    ]
                   },
                   "isMFAEnabled": {
                     "default": false,
@@ -11161,7 +11845,28 @@
                 "type": "object",
                 "properties": {
                   "language": {
-                    "type": "string"
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
+                        "type": "string"
+                      }
+                    ]
                   },
                   "isMFAEnabled": {
                     "default": false,
@@ -11211,7 +11916,28 @@
             "type": "object",
             "properties": {
               "language": {
-                "type": "string"
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
+                  }
+                ]
               },
               "isMFAEnabled": {
                 "default": false,
@@ -11982,7 +12708,28 @@
             "type": "object",
             "properties": {
               "language": {
-                "type": "string"
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
+                  }
+                ]
               },
               "isMFAEnabled": {
                 "default": false,
@@ -12030,7 +12777,28 @@
             "type": "object",
             "properties": {
               "language": {
-                "type": "string"
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
+                  }
+                ]
               },
               "isMFAEnabled": {
                 "default": false,
@@ -12358,6 +13126,18 @@
                         "pl": {
                           "minLength": 1,
                           "type": "string"
+                        },
+                        "de": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "lt": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "cs": {
+                          "minLength": 1,
+                          "type": "string"
                         }
                       },
                       "minProperties": 1
@@ -12370,6 +13150,18 @@
                         },
                         {
                           "const": "pl",
+                          "type": "string"
+                        },
+                        {
+                          "const": "de",
+                          "type": "string"
+                        },
+                        {
+                          "const": "lt",
+                          "type": "string"
+                        },
+                        {
+                          "const": "cs",
                           "type": "string"
                         }
                       ]
@@ -12384,6 +13176,18 @@
                           },
                           {
                             "const": "pl",
+                            "type": "string"
+                          },
+                          {
+                            "const": "de",
+                            "type": "string"
+                          },
+                          {
+                            "const": "lt",
+                            "type": "string"
+                          },
+                          {
+                            "const": "cs",
                             "type": "string"
                           }
                         ]
@@ -12455,6 +13259,18 @@
                     "pl": {
                       "minLength": 1,
                       "type": "string"
+                    },
+                    "de": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "lt": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "cs": {
+                      "minLength": 1,
+                      "type": "string"
                     }
                   },
                   "minProperties": 1
@@ -12467,6 +13283,18 @@
                     },
                     {
                       "const": "pl",
+                      "type": "string"
+                    },
+                    {
+                      "const": "de",
+                      "type": "string"
+                    },
+                    {
+                      "const": "lt",
+                      "type": "string"
+                    },
+                    {
+                      "const": "cs",
                       "type": "string"
                     }
                   ]
@@ -12481,6 +13309,18 @@
                       },
                       {
                         "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
                         "type": "string"
                       }
                     ]
@@ -12539,6 +13379,18 @@
                         "pl": {
                           "minLength": 1,
                           "type": "string"
+                        },
+                        "de": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "lt": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "cs": {
+                          "minLength": 1,
+                          "type": "string"
                         }
                       },
                       "minProperties": 1
@@ -12551,6 +13403,18 @@
                         },
                         {
                           "const": "pl",
+                          "type": "string"
+                        },
+                        {
+                          "const": "de",
+                          "type": "string"
+                        },
+                        {
+                          "const": "lt",
+                          "type": "string"
+                        },
+                        {
+                          "const": "cs",
                           "type": "string"
                         }
                       ]
@@ -12565,6 +13429,18 @@
                           },
                           {
                             "const": "pl",
+                            "type": "string"
+                          },
+                          {
+                            "const": "de",
+                            "type": "string"
+                          },
+                          {
+                            "const": "lt",
+                            "type": "string"
+                          },
+                          {
+                            "const": "cs",
                             "type": "string"
                           }
                         ]
@@ -12836,7 +13712,28 @@
             "type": "object",
             "properties": {
               "language": {
-                "type": "string"
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
+                  }
+                ]
               },
               "isMFAEnabled": {
                 "default": false,
@@ -16754,6 +17651,18 @@
                     {
                       "const": "pl",
                       "type": "string"
+                    },
+                    {
+                      "const": "de",
+                      "type": "string"
+                    },
+                    {
+                      "const": "lt",
+                      "type": "string"
+                    },
+                    {
+                      "const": "cs",
+                      "type": "string"
                     }
                   ]
                 }
@@ -16766,6 +17675,18 @@
                   },
                   {
                     "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
                     "type": "string"
                   }
                 ]
@@ -17098,6 +18019,18 @@
                                           {
                                             "const": "pl",
                                             "type": "string"
+                                          },
+                                          {
+                                            "const": "de",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "lt",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "cs",
+                                            "type": "string"
                                           }
                                         ]
                                       }
@@ -17118,6 +18051,18 @@
                                     },
                                     {
                                       "const": "pl",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "de",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "lt",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "cs",
                                       "type": "string"
                                     }
                                   ]
@@ -17419,6 +18364,18 @@
                     {
                       "const": "pl",
                       "type": "string"
+                    },
+                    {
+                      "const": "de",
+                      "type": "string"
+                    },
+                    {
+                      "const": "lt",
+                      "type": "string"
+                    },
+                    {
+                      "const": "cs",
+                      "type": "string"
                     }
                   ]
                 }
@@ -17431,6 +18388,18 @@
                   },
                   {
                     "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
                     "type": "string"
                   }
                 ]
@@ -17534,6 +18503,18 @@
                   },
                   {
                     "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
                     "type": "string"
                   }
                 ]
@@ -17641,6 +18622,18 @@
               },
               {
                 "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
                 "type": "string"
               }
             ]
@@ -19428,6 +20421,18 @@
                             {
                               "const": "pl",
                               "type": "string"
+                            },
+                            {
+                              "const": "de",
+                              "type": "string"
+                            },
+                            {
+                              "const": "lt",
+                              "type": "string"
+                            },
+                            {
+                              "const": "cs",
+                              "type": "string"
                             }
                           ]
                         },
@@ -19581,6 +20586,18 @@
                   },
                   {
                     "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
                     "type": "string"
                   }
                 ]
@@ -19989,6 +21006,18 @@
                               {
                                 "const": "pl",
                                 "type": "string"
+                              },
+                              {
+                                "const": "de",
+                                "type": "string"
+                              },
+                              {
+                                "const": "lt",
+                                "type": "string"
+                              },
+                              {
+                                "const": "cs",
+                                "type": "string"
                               }
                             ]
                           }
@@ -20009,6 +21038,18 @@
                         },
                         {
                           "const": "pl",
+                          "type": "string"
+                        },
+                        {
+                          "const": "de",
+                          "type": "string"
+                        },
+                        {
+                          "const": "lt",
+                          "type": "string"
+                        },
+                        {
+                          "const": "cs",
                           "type": "string"
                         }
                       ]
@@ -20388,6 +21429,18 @@
                               {
                                 "const": "pl",
                                 "type": "string"
+                              },
+                              {
+                                "const": "de",
+                                "type": "string"
+                              },
+                              {
+                                "const": "lt",
+                                "type": "string"
+                              },
+                              {
+                                "const": "cs",
+                                "type": "string"
                               }
                             ]
                           }
@@ -20408,6 +21461,18 @@
                         },
                         {
                           "const": "pl",
+                          "type": "string"
+                        },
+                        {
+                          "const": "de",
+                          "type": "string"
+                        },
+                        {
+                          "const": "lt",
+                          "type": "string"
+                        },
+                        {
+                          "const": "cs",
                           "type": "string"
                         }
                       ]
@@ -20827,6 +21892,18 @@
                                   {
                                     "const": "pl",
                                     "type": "string"
+                                  },
+                                  {
+                                    "const": "de",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "lt",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "cs",
+                                    "type": "string"
                                   }
                                 ]
                               }
@@ -20847,6 +21924,18 @@
                             },
                             {
                               "const": "pl",
+                              "type": "string"
+                            },
+                            {
+                              "const": "de",
+                              "type": "string"
+                            },
+                            {
+                              "const": "lt",
+                              "type": "string"
+                            },
+                            {
+                              "const": "cs",
                               "type": "string"
                             }
                           ]
@@ -21046,6 +22135,18 @@
                   },
                   {
                     "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
                     "type": "string"
                   }
                 ]
@@ -21279,6 +22380,18 @@
                               {
                                 "const": "pl",
                                 "type": "string"
+                              },
+                              {
+                                "const": "de",
+                                "type": "string"
+                              },
+                              {
+                                "const": "lt",
+                                "type": "string"
+                              },
+                              {
+                                "const": "cs",
+                                "type": "string"
                               }
                             ]
                           }
@@ -21299,6 +22412,18 @@
                         },
                         {
                           "const": "pl",
+                          "type": "string"
+                        },
+                        {
+                          "const": "de",
+                          "type": "string"
+                        },
+                        {
+                          "const": "lt",
+                          "type": "string"
+                        },
+                        {
+                          "const": "cs",
                           "type": "string"
                         }
                       ]
@@ -21565,6 +22690,18 @@
                                   {
                                     "const": "pl",
                                     "type": "string"
+                                  },
+                                  {
+                                    "const": "de",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "lt",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "cs",
+                                    "type": "string"
                                   }
                                 ]
                               }
@@ -21585,6 +22722,18 @@
                             },
                             {
                               "const": "pl",
+                              "type": "string"
+                            },
+                            {
+                              "const": "de",
+                              "type": "string"
+                            },
+                            {
+                              "const": "lt",
+                              "type": "string"
+                            },
+                            {
+                              "const": "cs",
                               "type": "string"
                             }
                           ]
@@ -21624,6 +22773,18 @@
                   },
                   {
                     "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
                     "type": "string"
                   }
                 ]
@@ -21874,6 +23035,18 @@
                                   {
                                     "const": "pl",
                                     "type": "string"
+                                  },
+                                  {
+                                    "const": "de",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "lt",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "cs",
+                                    "type": "string"
                                   }
                                 ]
                               }
@@ -21894,6 +23067,18 @@
                             },
                             {
                               "const": "pl",
+                              "type": "string"
+                            },
+                            {
+                              "const": "de",
+                              "type": "string"
+                            },
+                            {
+                              "const": "lt",
+                              "type": "string"
+                            },
+                            {
+                              "const": "cs",
                               "type": "string"
                             }
                           ]
@@ -22037,6 +23222,18 @@
                   {
                     "const": "pl",
                     "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
                   }
                 ]
               }
@@ -22162,6 +23359,18 @@
               },
               {
                 "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
                 "type": "string"
               }
             ]
@@ -22373,6 +23582,18 @@
               },
               {
                 "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
                 "type": "string"
               }
             ]
@@ -22671,6 +23892,18 @@
               {
                 "const": "pl",
                 "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
               }
             ]
           }
@@ -22736,6 +23969,18 @@
                   },
                   {
                     "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
                     "type": "string"
                   }
                 ]
@@ -23365,6 +24610,18 @@
                                     {
                                       "const": "pl",
                                       "type": "string"
+                                    },
+                                    {
+                                      "const": "de",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "lt",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "cs",
+                                      "type": "string"
                                     }
                                   ]
                                 }
@@ -23385,6 +24642,18 @@
                               },
                               {
                                 "const": "pl",
+                                "type": "string"
+                              },
+                              {
+                                "const": "de",
+                                "type": "string"
+                              },
+                              {
+                                "const": "lt",
+                                "type": "string"
+                              },
+                              {
+                                "const": "cs",
                                 "type": "string"
                               }
                             ]
@@ -23821,6 +25090,18 @@
                                         {
                                           "const": "pl",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "de",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "lt",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "cs",
+                                          "type": "string"
                                         }
                                       ]
                                     }
@@ -23841,6 +25122,18 @@
                                   },
                                   {
                                     "const": "pl",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "de",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "lt",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "cs",
                                     "type": "string"
                                   }
                                 ]
@@ -24025,6 +25318,18 @@
                   {
                     "const": "pl",
                     "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
                   }
                 ]
               }
@@ -24182,7 +25487,28 @@
             "type": "string"
           },
           "locale": {
-            "type": "string"
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              }
+            ]
           },
           "priceId": {
             "type": "string"
@@ -24193,6 +25519,7 @@
           "productName",
           "courseId",
           "customerId",
+          "locale",
           "priceId"
         ]
       },
@@ -26349,6 +27676,18 @@
               {
                 "const": "pl",
                 "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
               }
             ]
           },
@@ -26362,6 +27701,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -26414,6 +27765,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             },
@@ -26427,6 +27790,18 @@
                   },
                   {
                     "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
                     "type": "string"
                   }
                 ]
@@ -26459,6 +27834,18 @@
               },
               {
                 "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
                 "type": "string"
               }
             ]
@@ -26517,6 +27904,18 @@
                     {
                       "const": "pl",
                       "type": "string"
+                    },
+                    {
+                      "const": "de",
+                      "type": "string"
+                    },
+                    {
+                      "const": "lt",
+                      "type": "string"
+                    },
+                    {
+                      "const": "cs",
+                      "type": "string"
                     }
                   ]
                 },
@@ -26531,6 +27930,18 @@
                       },
                       {
                         "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
                         "type": "string"
                       }
                     ]
@@ -26805,6 +28216,18 @@
               {
                 "const": "pl",
                 "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
               }
             ]
           },
@@ -26874,6 +28297,18 @@
                   {
                     "const": "pl",
                     "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
                   }
                 ]
               },
@@ -26888,6 +28323,18 @@
                     },
                     {
                       "const": "pl",
+                      "type": "string"
+                    },
+                    {
+                      "const": "de",
+                      "type": "string"
+                    },
+                    {
+                      "const": "lt",
+                      "type": "string"
+                    },
+                    {
+                      "const": "cs",
                       "type": "string"
                     }
                   ]
@@ -27155,6 +28602,18 @@
                     {
                       "const": "pl",
                       "type": "string"
+                    },
+                    {
+                      "const": "de",
+                      "type": "string"
+                    },
+                    {
+                      "const": "lt",
+                      "type": "string"
+                    },
+                    {
+                      "const": "cs",
+                      "type": "string"
                     }
                   ]
                 },
@@ -27169,6 +28628,18 @@
                       },
                       {
                         "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
                         "type": "string"
                       }
                     ]
@@ -27439,6 +28910,18 @@
               {
                 "const": "pl",
                 "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
               }
             ]
           }
@@ -27482,6 +28965,18 @@
               },
               {
                 "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
                 "type": "string"
               }
             ]
@@ -27567,6 +29062,18 @@
               },
               {
                 "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
                 "type": "string"
               }
             ]
@@ -27679,6 +29186,18 @@
               {
                 "const": "pl",
                 "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
               }
             ]
           }
@@ -27733,6 +29252,18 @@
                   {
                     "const": "pl",
                     "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
                   }
                 ]
               },
@@ -27747,6 +29278,18 @@
                     },
                     {
                       "const": "pl",
+                      "type": "string"
+                    },
+                    {
+                      "const": "de",
+                      "type": "string"
+                    },
+                    {
+                      "const": "lt",
+                      "type": "string"
+                    },
+                    {
+                      "const": "cs",
                       "type": "string"
                     }
                   ]
@@ -27781,6 +29324,18 @@
               },
               {
                 "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
                 "type": "string"
               }
             ]
@@ -27828,6 +29383,18 @@
               },
               {
                 "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
                 "type": "string"
               }
             ]
@@ -28203,6 +29770,18 @@
                   {
                     "const": "pl",
                     "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
                   }
                 ]
               },
@@ -28217,6 +29796,18 @@
                     },
                     {
                       "const": "pl",
+                      "type": "string"
+                    },
+                    {
+                      "const": "de",
+                      "type": "string"
+                    },
+                    {
+                      "const": "lt",
+                      "type": "string"
+                    },
+                    {
+                      "const": "cs",
                       "type": "string"
                     }
                   ]
@@ -28729,6 +30320,18 @@
               {
                 "const": "pl",
                 "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
               }
             ]
           },
@@ -28777,6 +30380,18 @@
               },
               {
                 "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
                 "type": "string"
               }
             ]
@@ -28876,6 +30491,18 @@
               {
                 "const": "pl",
                 "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
               }
             ]
           },
@@ -28928,6 +30555,18 @@
               },
               {
                 "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
                 "type": "string"
               }
             ]

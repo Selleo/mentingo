@@ -38,7 +38,10 @@
     },
     "languages": {
       "en": "Angielski",
-      "pl": "Polski"
+      "pl": "Polski",
+      "de": "Niemiecki",
+      "lt": "Litewski",
+      "cs": "Czeski"
     },
     "lessonTypes": {
       "content": "Treść",
@@ -196,7 +199,7 @@
     },
     "qa": "Q&A",
     "articles": "Baza wiedzy",
-    "tenants": "organizacje"
+    "tenants": "Organizacje"
   },
   "newsView": {
     "header": "Aktualności",
@@ -314,7 +317,10 @@
     },
     "options": {
       "english": "Angielski",
-      "polish": "Polski"
+      "polish": "Polski",
+      "german": "Niemiecki",
+      "czech": "Czeski",
+      "lithuanian": "Litewski"
     }
   },
   "resetOnboarding": {

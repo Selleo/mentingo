@@ -1,3 +1,5 @@
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
+
 const DEFAULT_COMPANY_INFORMATION = {
   companyName: "",
   companyShortName: "",
@@ -41,7 +43,7 @@ export const DEFAULT_GLOBAL_SETTINGS = {
 };
 
 export const DEFAULT_STUDENT_SETTINGS = {
-  language: "en",
+  language: SUPPORTED_LANGUAGES.EN,
   isMFAEnabled: false,
   MFASecret: null,
 };

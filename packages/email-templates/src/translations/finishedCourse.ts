@@ -1,11 +1,12 @@
-import { EmailContent, Language } from "types";
+import { SupportedLanguages } from "@repo/shared";
+import { EmailContent } from "types";
 
 export const getFinishedCourseEmailTranslations = (
-  language: Language,
+  language: SupportedLanguages,
   userName: string,
   courseName: string,
 ) => {
-  const emailContent: Record<Language, EmailContent> = {
+  const emailContent: Record<SupportedLanguages, EmailContent> = {
     en: {
       heading: "User finished the course",
       paragraphs: ["Hello! 🧑‍💻", `${userName} completed ${courseName}. Review their progress.`],
@@ -18,6 +19,27 @@ export const getFinishedCourseEmailTranslations = (
         `${userName} ukończył(-a) kurs ${courseName}. Sprawdź jego postępy.`,
       ],
       buttonText: "ZOBACZ POSTĘPY",
+    },
+    de: {
+      heading: "Benutzer hat den Kurs abgeschlossen",
+      paragraphs: [
+        "Hallo! 🧑‍💻",
+        `${userName} hat ${courseName} abgeschlossen. Prüfe den Fortschritt.`,
+      ],
+      buttonText: "FORTSCHRITT ANSEHEN",
+    },
+    lt: {
+      heading: "Naudotojas baigė kursą",
+      paragraphs: ["Sveiki! 🧑‍💻", `${userName} baigė kursą ${courseName}. Peržiūrėk pažangą.`],
+      buttonText: "PERŽIŪRĖTI PAŽANGĄ",
+    },
+    cs: {
+      heading: "Uživatel dokončil kurz",
+      paragraphs: [
+        "Ahoj! 🧑‍💻",
+        `${userName} dokončil(a) kurz ${courseName}. Zkontroluj jeho pokrok.`,
+      ],
+      buttonText: "ZOBRAZIT POKROK",
     },
   };
 

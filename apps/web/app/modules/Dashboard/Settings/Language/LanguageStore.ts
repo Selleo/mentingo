@@ -3,20 +3,15 @@ import { persist } from "zustand/middleware";
 
 import { detectBrowserLanguage, isSupportedLanguage } from "../../../../utils/browser-language";
 
-export const SupportedLanguages = {
-  ENGLISH: "en",
-  POLISH: "pl",
-} as const;
-
-export type Language = (typeof SupportedLanguages)[keyof typeof SupportedLanguages];
+import type { SupportedLanguages } from "@repo/shared";
 
 type LanguageStore = {
-  language: Language;
-  setLanguage: (lang: Language) => void;
-  initializeLanguage: (applicationLang?: string | null) => Language;
+  language: SupportedLanguages;
+  setLanguage: (lang: SupportedLanguages) => void;
+  initializeLanguage: (applicationLang?: string | null) => SupportedLanguages;
 };
 
-function getDefaultLanguage(): Language {
+function getDefaultLanguage(): SupportedLanguages {
   return detectBrowserLanguage();
 }
 
@@ -34,7 +29,7 @@ export const useLanguageStore = create<LanguageStore>()(
         }
 
         if (currentState.language && isSupportedLanguage(currentState.language)) {
-          return currentState.language as Language;
+          return currentState.language;
         }
 
         const browserLang = detectBrowserLanguage();

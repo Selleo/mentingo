@@ -1,4 +1,4 @@
-import type { SUPPORTED_LOCALES } from "./constants";
+import type { SupportedLanguages } from "@repo/shared";
 import type {
   CompanyInformationSchema,
   UserEmailTriggersSchema,
@@ -21,7 +21,7 @@ export type GlobalSettings = {
 };
 
 export type StudentSettings = {
-  language: string;
+  language: SupportedLanguages;
   isMFAEnabled: boolean;
   MFASecret: string | null;
 };
@@ -29,5 +29,3 @@ export type StudentSettings = {
 export type AdminSettings = StudentSettings & { adminNewUserNotification: boolean };
 export type UserSettings = StudentSettings | AdminSettings;
 export type AllSettings = StudentSettings | AdminSettings | GlobalSettings;
-
-export type SupportedLocales = (typeof SUPPORTED_LOCALES)[number];

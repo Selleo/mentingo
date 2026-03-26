@@ -37,7 +37,10 @@
     },
     "languages": {
       "en": "English",
-      "pl": "Polish"
+      "pl": "Polish",
+      "de": "German",
+      "lt": "Lithuanian",
+      "cs": "Czech"
     },
     "lessonTypes": {
       "content": "Content",
@@ -194,7 +197,8 @@
     "ariaLabels": {
       "goToAvailableCourses": "Go to available courses"
     },
-    "qa": "Q&A"
+    "qa": "Q&A",
+    "tenants": "Organizations"
   },
   "newsView": {
     "header": "News",
@@ -310,7 +314,10 @@
     },
     "options": {
       "english": "English",
-      "polish": "Polish"
+      "polish": "Polish",
+      "german": "German",
+      "czech": "Czech",
+      "lithuanian": "Lithuanian"
     }
   },
   "resetOnboarding": {
@@ -1631,11 +1638,11 @@
       "badgeMaster": "Shared",
       "badgeExported": "Shared",
       "badgeExportedTooltip": "This course is managed centrally. You can publish it and assign participants, but you cannot edit its content.",
-      "exportedNoticeTitle": "This course was exported to this tenant",
-      "exportedNoticeDescription": "Content is managed in the source tenant and is read-only in this tenant.",
+      "exportedNoticeTitle": "This course was exported to this organization",
+      "exportedNoticeDescription": "Content is managed in the source organization and is read-only in this organization.",
       "exportsTitle": "Sharing",
-      "exportsDescription": "Share this course with selected tenants.",
-      "selectTenants": "Select tenants",
+      "exportsDescription": "Share this course with selected organizations.",
+      "selectTenants": "Select organizations",
       "selectedCount": "Selected:",
       "exportButton": "Share",
       "exportingButton": "Sharing..."
@@ -2539,9 +2546,9 @@
     "createQA": "Create new Q&A",
     "analytics": "Analytics",
     "progress": "Progress",
-    "tenant": "Tenant Details",
-    "createTenant": "Create Tenant",
-    "tenants": "Tenants"
+    "tenant": "Organization Details",
+    "createTenant": "Create Organization",
+    "tenants": "Organizations"
   },
   "lessonPreview": {
     "breadcrumbs": {
@@ -2787,21 +2794,21 @@
     }
   },
   "superAdminTenantsView": {
-    "title": "Tenants",
-    "description": "Manage tenant names, domains, status, and managing flags.",
+    "title": "Organizations",
+    "description": "Manage organization names, domains, status, and managing flags.",
     "actions": {
-      "create": "Create Tenant"
+      "create": "Create Organization"
     },
     "search": {
-      "placeholder": "Search tenants..."
+      "placeholder": "Search organizations..."
     },
     "table": {
       "name": "Name",
       "host": "Host",
       "status": "Status",
       "managing": "Managing",
-      "loading": "Loading tenants...",
-      "empty": "No tenants found.",
+      "loading": "Loading organizations...",
+      "empty": "No organizations found.",
       "yes": "Yes",
       "no": "No",
       "edit": "Edit",
@@ -2815,19 +2822,19 @@
       "inactive": "Inactive"
     },
     "create": {
-      "title": "Create Tenant",
-      "description": "Create a new tenant and invite the first admin.",
-      "submit": "Create Tenant"
+      "title": "Create Organization",
+      "description": "Create a new organization and invite the first admin.",
+      "submit": "Create Organization"
     },
     "edit": {
-      "title": "Edit Tenant",
-      "description": "Update tenant details and status.",
+      "title": "Edit Organization",
+      "description": "Update organization details and status.",
       "submit": "Save Changes"
     },
     "form": {
-      "tenantName": "Tenant Name",
-      "tenantHost": "Tenant Host (full URL)",
-      "tenantHostPlaceholder": "https://tenant.example.com",
+      "tenantName": "Organization Name",
+      "tenantHost": "Organization Host (full URL)",
+      "tenantHostPlaceholder": "https://organization.example.com",
       "status": "Status",
       "statusPlaceholder": "Select status",
       "adminFirstName": "Admin First Name",
@@ -2842,17 +2849,17 @@
       "adminLastNameRequired": "Admin last name is required"
     },
     "toast": {
-      "tenantCreatedSuccessfully": "Tenant created successfully",
-      "tenantUpdatedSuccessfully": "Tenant updated successfully"
+      "tenantCreatedSuccessfully": "Organization created successfully",
+      "tenantUpdatedSuccessfully": "Organization updated successfully"
     }
   },
   "superAdminTenants": {
     "error": {
-      "hostAlreadyExists": "Tenant host already exists",
-      "notFound": "Tenant not found",
-      "invalidHost": "Invalid tenant host URL",
-      "managingTenantRequired": "Managing tenant admin required",
-      "currentTenantSupportNotAllowed": "Support mode is not available for the current tenant"
+      "hostAlreadyExists": "Organization host already exists",
+      "notFound": "Organization not found",
+      "invalidHost": "Invalid organization host URL",
+      "managingTenantRequired": "Managing organization admin required",
+      "currentTenantSupportNotAllowed": "Support mode is not available for the current organization"
     }
   },
   "auth": {
@@ -2863,7 +2870,7 @@
     }
   },
   "tenantInactive": {
-    "title": "Tenant Disabled",
+    "title": "Organization Disabled",
     "description": "This workspace is currently inactive. If you believe this is a mistake, contact your administrator to restore access."
   },
   "integrationApiKey": {

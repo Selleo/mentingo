@@ -1,4 +1,4 @@
-import { ALLOWED_AGE_LIMITS } from "@repo/shared";
+import { ALLOWED_AGE_LIMITS, SUPPORTED_LANGUAGES } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
@@ -52,7 +52,7 @@ export const globalSettingsJSONSchema = Type.Object({
 });
 
 export const studentSettingsJSONContentSchema = Type.Object({
-  language: Type.String(),
+  language: Type.Enum(SUPPORTED_LANGUAGES),
   isMFAEnabled: Type.Boolean({ default: false }),
   MFASecret: Type.Union([Type.String({ default: null }), Type.Null()]),
 });

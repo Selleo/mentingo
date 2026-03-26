@@ -23,6 +23,7 @@ import {
   ALLOWED_PRESENTATION_FILE_TYPES,
   ALLOWED_VIDEO_FILE_TYPES,
   ALLOWED_WORD_FILE_TYPES,
+  SUPPORTED_LANGUAGES,
   SupportedLanguages,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
@@ -270,7 +271,7 @@ export class NewsController {
         },
         language: {
           type: "string",
-          enum: ["en", "pl"],
+          enum: Object.values(SUPPORTED_LANGUAGES),
         },
         title: {
           type: "string",

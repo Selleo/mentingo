@@ -7,10 +7,7 @@ import type { UpdateRegistrationFormBody } from "~/api/generated-api";
 const fieldSchema = z.object({
   id: z.string().optional(),
   type: z.literal("checkbox"),
-  label: z.object({
-    en: z.string(),
-    pl: z.string(),
-  }),
+  label: z.record(z.nativeEnum(SUPPORTED_LANGUAGES), z.string()),
   required: z.boolean(),
   displayOrder: z.number(),
   archived: z.boolean(),
@@ -41,10 +38,7 @@ export const createEmptyField = (
   required: false,
   displayOrder,
   archived: false,
-  label: {
-    en: "",
-    pl: "",
-  },
+  label: Object.fromEntries(Object.values(SUPPORTED_LANGUAGES).map((lang) => [lang, ""])),
 });
 
 export const buildUpdateRegistrationFormBody = (

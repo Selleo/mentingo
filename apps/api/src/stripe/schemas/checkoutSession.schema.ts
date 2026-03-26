@@ -1,3 +1,4 @@
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
 import type { Static } from "@sinclair/typebox";
@@ -10,7 +11,7 @@ export const checkoutSessionSchema = Type.Object({
   productDescription: Type.Optional(Type.String()),
   courseId: Type.String(),
   customerId: Type.String(),
-  locale: Type.Optional(Type.String()),
+  locale: Type.Enum(SUPPORTED_LANGUAGES),
   priceId: Type.String(),
 });
 

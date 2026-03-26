@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useSearchParams } from "@remix-run/react";
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -14,7 +15,7 @@ import { Label } from "~/components/ui/label";
 import { useToast } from "~/components/ui/use-toast";
 import { cn } from "~/lib/utils";
 import { passwordSchema } from "~/modules/Dashboard/Settings/schema/password.schema";
-import { detectBrowserLanguage, SUPPORTED_LANGUAGES } from "~/utils/browser-language";
+import { detectBrowserLanguage } from "~/utils/browser-language";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import type { MetaFunction } from "@remix-run/react";
@@ -89,9 +90,9 @@ export default function CreateNewPasswordPage() {
           password: data.newPassword,
           createToken,
           email,
-          language: SUPPORTED_LANGUAGES.includes(detectBrowserLanguage())
+          language: Object.values(SUPPORTED_LANGUAGES).includes(detectBrowserLanguage())
             ? detectBrowserLanguage()
-            : "en",
+            : SUPPORTED_LANGUAGES.EN,
         },
       }).then(() => {
         toast({

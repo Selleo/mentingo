@@ -2,9 +2,11 @@ import { useMutation } from "@tanstack/react-query";
 
 import { ApiClient } from "../api-client";
 
+import type { SupportedLanguages } from "@repo/shared";
+
 type PreviewNewsPayload = {
   newsId: string;
-  language: "en" | "pl";
+  language: SupportedLanguages;
   content: string;
 };
 
