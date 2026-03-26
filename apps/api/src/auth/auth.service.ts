@@ -59,12 +59,11 @@ import { ResetPasswordService } from "./reset-password.service";
 import { TokenService } from "./token.service";
 
 import type { CreatePasswordBody } from "./schemas/create-password.schema";
-import type { RegisterUserWithHashedPasswordInput, TokenUser } from "./types";
+import type { AuthFailedData, RegisterUserWithHashedPasswordInput, TokenUser } from "./types";
 import type { Response } from "express";
 import type { ActorUserType } from "src/common/types/actor-user.type";
 import type { CurrentUser } from "src/common/types/current-user.type";
 import type { UserLoginFailedData } from "src/events/user/user-login-failed-event";
-import type { UserLoginMethod } from "src/events/user/user-login.event";
 import type { RegistrationFormField } from "src/settings/schemas/registration-form.schema";
 import type { SupportSession } from "src/support-mode/support-mode.types";
 import type { ProviderLoginUserType } from "src/utils/types/provider-login-user.type";
@@ -224,14 +223,12 @@ export class AuthService {
 
   public async login(data: { email: string; password: string }, MFAEnforcedRoles: UserRole[]) {
     const user = await this.validateUser(data.email, data.password);
-    console.log("user2");
+
     if (!user) {
-      console.log("raise 1");
       throw new UnauthorizedException("Invalid email or password");
     }
 
     if (user.archived) {
-      console.log("raise 2");
       throw new UnauthorizedException("Your account has been archived");
     }
 
@@ -631,8 +628,8 @@ export class AuthService {
           isNull(credentials.userId),
           lte(
             sql`DATE(
-          ${createTokens.expiryDate}
-          )`,
+            ${createTokens.expiryDate}
+            )`,
             sql`CURRENT_DATE`,
           ),
           lt(createTokens.reminderCount, 3),
@@ -1000,7 +997,7 @@ export class AuthService {
     await this.outboxPublisher.publish(new UserLoginFailedEvent(loginFailedData));
   }
 
-  async handleAuthFailed(data: { email: string; method: UserLoginMethod; error?: string }) {
+  async handleAuthFailed(data: AuthFailedData) {
     const [user] = await this.db
       .select({
         id: users.id,
@@ -1011,7 +1008,9 @@ export class AuthService {
       .from(users)
       .where(and(eq(users.email, data.email), isNull(users.deletedAt)))
       .limit(1);
+
     if (!user) return;
+
     await this.handleFailedLogin({
       userId: user.id,
       method: data.method,
