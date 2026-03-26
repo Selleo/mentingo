@@ -25,6 +25,7 @@ export class RealtimePCMStreamerWorklet {
   private workletNode: AudioWorkletNode | null = null;
   private mediaStream: MediaStream | null = null;
   private readonly onLevelChange?: (level: number) => void;
+  private readonly onChunkSent?: (meta: PcmChunkMeta) => void;
 
   private readonly targetSr = 16000;
   private readonly chunkMs = 20;
@@ -35,9 +36,14 @@ export class RealtimePCMStreamerWorklet {
     this.seq = 0;
   };
 
-  constructor(protocol: StreamProtocol<unknown, unknown>, onLevelChange?: (level: number) => void) {
+  constructor(
+    protocol: StreamProtocol<unknown, unknown>,
+    onLevelChange?: (level: number) => void,
+    onChunkSent?: (meta: PcmChunkMeta) => void,
+  ) {
     this.protocol = protocol;
     this.onLevelChange = onLevelChange;
+    this.onChunkSent = onChunkSent;
   }
 
   async start<TStartContext>(context: TStartContext) {
@@ -114,6 +120,7 @@ export class RealtimePCMStreamerWorklet {
       });
 
       this.socket?.emit(chunkEmit.event, ...chunkEmit.args);
+      this.onChunkSent?.(meta);
     };
 
     this.source.connect(this.workletNode);

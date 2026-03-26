@@ -1,4 +1,5 @@
 import type { StreamInitPayload, VoiceAction } from "@repo/shared";
+import type { UUIDType } from "src/common";
 
 export interface AudioProcessor<T = unknown, R = unknown> {
   readonly name: string;
@@ -11,5 +12,6 @@ export type StopAudioMessage = {
 
 export type StartAudioBody = {
   voiceAction: VoiceAction;
+  lessonId?: UUIDType;
   meta: StreamInitPayload;
 };

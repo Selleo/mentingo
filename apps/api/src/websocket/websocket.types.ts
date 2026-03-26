@@ -1,4 +1,5 @@
 import type { Socket } from "socket.io";
+import type { UserRole } from "src/user/schemas/userRoles";
 
 export interface HeartbeatPayload {
   lessonId: string;
@@ -19,7 +20,7 @@ export interface LeaveLessonPayload {
 export interface WsUser {
   userId: string;
   email: string;
-  role: string;
+  role: UserRole;
   tenantId: string;
 }
 

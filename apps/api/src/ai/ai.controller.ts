@@ -20,6 +20,7 @@ import { type BaseResponse, baseResponse, UUIDSchema, UUIDType } from "src/commo
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
+import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { USER_ROLES, UserRole } from "src/user/schemas/userRoles";
 
 @Controller("ai")
@@ -65,10 +66,10 @@ export class AiController {
   })
   async streamChat(
     @Body() data: StreamChatBody,
-    @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
     @Res() res: Response,
   ) {
-    const response = await this.aiService.streamMessage(data, OPENAI_MODELS.BASIC, userId);
+    const response = await this.aiService.streamMessage(data, OPENAI_MODELS.BASIC, currentUser);
     return response.pipeDataStreamToResponse(res);
   }
 

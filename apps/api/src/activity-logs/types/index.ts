@@ -116,6 +116,9 @@ export type LessonActivityLogSnapshot = {
     name?: string | null;
     avatarReference?: string | null;
     type?: string | null;
+    voiceMode?: string | null;
+    ttsPreset?: string | null;
+    customTtsReference?: string | null;
   };
 };
 

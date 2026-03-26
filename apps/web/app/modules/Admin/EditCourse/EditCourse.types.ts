@@ -1,5 +1,5 @@
 import type { Question } from "./CourseLessons/NewLesson/QuizLessonForm/QuizLessonForm.types";
-import type { AiMentorType } from "@repo/shared";
+import type { AiMentorTTSPreset, AiMentorType, AiMentorVoiceMode } from "@repo/shared";
 
 export type NavigationTab = "Settings" | "Curriculum" | "Pricing" | "Status";
 
@@ -10,6 +10,9 @@ type AiMentor = {
   completionConditions: string;
   type: AiMentorType;
   name: string;
+  voiceMode: AiMentorVoiceMode;
+  ttsPreset: AiMentorTTSPreset;
+  customTtsReference?: string | null;
 };
 
 export interface LessonResource {

@@ -1,4 +1,4 @@
-import { Mic, Square } from "lucide-react";
+import { AudioLines, Mic, Square } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 
 import { Icon } from "~/components/Icon";
@@ -6,25 +6,44 @@ import { Button } from "~/components/ui/button";
 
 type LessonComposerRightControlsProps = {
   isVoiceMode: boolean;
+  isVoiceMentorMode: boolean;
   canSubmit: boolean;
+  canUseVoiceMentor: boolean;
   onStartVoiceMode: () => void;
   onStopVoiceMode: () => void;
+  onStartVoiceMentor: () => void;
+  onStopVoiceMentor: () => void;
   onSubmit: () => void;
   sendLabel: string;
   toggleVoiceInputLabel: string;
+  startVoiceMentorLabel: string;
   stopVoiceRecordingLabel: string;
 };
 
 export function LessonComposerRightControls({
   isVoiceMode,
+  isVoiceMentorMode,
   canSubmit,
+  canUseVoiceMentor,
   onStartVoiceMode,
   onStopVoiceMode,
+  onStartVoiceMentor,
+  onStopVoiceMentor,
   onSubmit,
   sendLabel,
   toggleVoiceInputLabel,
+  startVoiceMentorLabel,
   stopVoiceRecordingLabel,
 }: LessonComposerRightControlsProps) {
+  const buttonMode =
+    isVoiceMode || isVoiceMentorMode
+      ? "stop"
+      : canSubmit
+        ? "send"
+        : canUseVoiceMentor
+          ? "voice"
+          : "send";
+
   return (
     <div className="flex items-center gap-2">
       <div className="size-8">
@@ -58,29 +77,45 @@ export function LessonComposerRightControls({
             onStopVoiceMode();
             return;
           }
+          if (isVoiceMentorMode) {
+            onStopVoiceMentor();
+            return;
+          }
+          if (!canSubmit) {
+            onStartVoiceMentor();
+            return;
+          }
           onSubmit();
         }}
-        disabled={!isVoiceMode && !canSubmit}
-        className="flex items-center gap-x-2 rounded-full px-4 py-2 font-semibold text-white disabled:opacity-50"
-        aria-label={isVoiceMode ? stopVoiceRecordingLabel : sendLabel}
+        className="flex items-center gap-x-2 rounded-full px-4 py-2 font-semibold text-white"
+        aria-label={
+          buttonMode === "stop"
+            ? stopVoiceRecordingLabel
+            : buttonMode === "voice"
+              ? startVoiceMentorLabel
+              : sendLabel
+        }
+        disabled={buttonMode === "send" && !canSubmit}
       >
         <AnimatePresence initial={false} mode="wait">
           <motion.span
-            key={isVoiceMode ? "stop" : "send"}
+            key={buttonMode}
             initial={{ opacity: 0, scale: 0.7, rotate: 10 }}
             animate={{ opacity: 1, scale: 1, rotate: 0 }}
             exit={{ opacity: 0, scale: 0.7, rotate: -10 }}
             transition={{ duration: 0.16, ease: "easeOut" }}
             className="inline-flex"
           >
-            {isVoiceMode ? (
+            {buttonMode === "stop" ? (
               <Square className="size-3.5 fill-current" />
+            ) : buttonMode === "voice" ? (
+              <AudioLines className="size-4" />
             ) : (
               <Icon name="Send" className="size-4" />
             )}
           </motion.span>
         </AnimatePresence>
-        {!isVoiceMode && sendLabel}
+        {buttonMode === "send" ? sendLabel : null}
       </Button>
     </div>
   );

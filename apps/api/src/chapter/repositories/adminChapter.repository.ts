@@ -171,7 +171,10 @@ export class AdminChapterRepository {
             'completionConditions', aml.completion_conditions,
             'type', aml.type,
             'name', aml.name,
-            'avatarReference', aml.avatar_reference
+            'avatarReference', aml.avatar_reference,
+            'voiceMode', aml.voice_mode,
+            'ttsPreset', aml.tts_preset,
+            'customTtsReference', COALESCE(aml.custom_tts_reference->>${language}::text, '')
           )
           FROM ${aiMentorLessons} aml
           WHERE lessons.id = aml.lesson_id 

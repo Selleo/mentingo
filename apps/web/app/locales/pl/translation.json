@@ -1292,6 +1292,7 @@
           "aiMentorInstructionsMaxLength": "Instrukcje AI Mentora są zbyt długie (maks. 20000 znaków)",
           "completionConditionsRequired": "Warunki zaliczenia są wymagane",
           "completionConditionsMaxLength": "Warunki zaliczenia są zbyt długie (maks. 20000 znaków)",
+          "customTTSReferenceRequired": "W trybie niestandardowym wymagany jest identyfikator Custom TTS",
           "taskDescriptionMaxLength": "Opis zadania jest zbyt długi (maks. {{ count }} znaków)",
           "passThresholdMin": "Próg zaliczenia musi wynosić co najmniej 1",
           "passThresholdMax": "Próg zaliczenia nie może przekroczyć 10",
@@ -1347,6 +1348,10 @@
           "taskDescription": "Opis zadania",
           "passThreshold": "Próg zaliczenia",
           "aiMentorTypes": "Typ AI Mentora",
+          "voiceConfig": "Konfiguracja głosu",
+          "voiceMode": "Tryb głosu",
+          "ttsPreset": "Preset TTS",
+          "customTTSReference": "Niestandardowy identyfikator TTS",
           "additionalContext": "Dodatkowy kontekst",
           "includeFiles_one": "Dołącz maksymalnie 1 plik, poniżej {{ MAX_FILE_SIZE }} MB, który będzie używany jako kontekst w lekcjach",
           "includeFiles_few": "Dołącz maksymalnie {{ count }} pliki, poniżej {{ MAX_FILE_SIZE }} MB, które będą używane jako kontekst w lekcjach",
@@ -1368,6 +1373,7 @@
           "completionConditions": "Wymień co student musi osiągnąć, aby zaliczyć tę lekcję...",
           "taskDescription": "Opisz zadanie, które uczestnik ma zrealizować w trakcie tej lekcji.",
           "aiMentorTypes": "Mentor",
+          "customTTSReference": "Wpisz niestandardowy identyfikator TTS...",
           "passThreshold": "np. 70%"
         },
         "courseGenerationComposer": {
@@ -1427,6 +1433,7 @@
           "aiRoleplayTypeTooltip": " Symuluje realistyczną postać i sytuację – bez wychodzenia z roli.\n Przykład: „To już drugi raz, kiedy wasza usługa zawiodła. Co zamierzacie z tym zrobić?”",
           "completionConditionsTooltip": "Wypisz, co student musi osiągnąć, aby zaliczyć lekcję. Podaj jasne i mierzalne punkty. AI wykorzysta tę listę do sprawdzania postępów. Możesz także określić próg zaliczenia (np. procentowy lub minimalna liczba spełnionych punktów). Jeśli próg nie zostanie podany, zaliczenie wymaga spełnienia wszystkich warunków.",
           "passThresholdTooltip": "Ustaw minimalny procent (1-100%) wymagany do zaliczenia. Zostaw puste, jeśli nie ma progu.",
+          "voiceConfigFishAudioTooltip": "Tryb głosowy korzysta z Fish Audio. Aby użyć własnego głosu, wejdź do Fish Audio, wybierz głos i skopiuj jego identyfikator tutaj.",
           "aiMentorPersonaTooltip": "Tu określasz personę lekcji. Możesz wybrać imię i awatar dla AI Mentora. Persona będzie przedstawiać się tym imieniem, a wybrany awatar będzie wyświetlany podczas lekcji.",
           "suggestedExamples": "Sugerowane przykłady",
           "charactersLeft": "pozostałe znaki",
@@ -1437,6 +1444,10 @@
           "problemSolving": "Rozwiązywanie problemów",
           "creativeTask": "Zadanie kreatywne",
           "knowledgeSharing": "Dialog dzielenia się wiedzą",
+          "voiceModePreset": "Preset",
+          "voiceModeCustom": "Niestandardowy",
+          "voicePresetMale": "Męski",
+          "voicePresetFemale": "Żeński",
           "emoji": {
             "search": "Szukaj",
             "loading": "Ładowanie..."
@@ -1933,10 +1944,39 @@
         "addEmoji": "Dodaj emoji",
         "closeVoiceMode": "Zamknij tryb głosowy",
         "toggleVoiceInput": "Włącz wejście głosowe",
+        "startVoiceMentor": "Uruchom mentora głosowego",
         "stopVoiceRecording": "Zatrzymaj nagrywanie głosu",
         "taskDescription": "Opis zadania",
         "taskDescriptionExpand": "Kliknij, aby rozwinąć",
         "taskDescriptionCollapse": "Kliknij, aby zwinąć",
+        "voiceOverlay": {
+          "headerEyebrow": "Interfejs głosowy",
+          "exit": "Zamknij tryb głosowy",
+          "youSaid": "Powiedziałeś/aś",
+          "states": {
+            "idle": {
+              "title": "Gotowe",
+              "subtitle": "Dotknij, aby zacząć mówić"
+            },
+            "listening": {
+              "title": "Słucham",
+              "subtitle": "Przechwytuję Twój głos"
+            },
+            "thinking": {
+              "title": "Myślę",
+              "subtitle": "Model przygotowuje odpowiedź"
+            },
+            "speaking": {
+              "title": "Mówię",
+              "subtitle": "Odtwarzana jest odpowiedź modelu"
+            }
+          },
+          "responsePlaceholder": {
+            "thinking": "Przetwarzam Twoją prośbę...",
+            "listening": "Słucham Twojego kolejnego pytania...",
+            "default": "Tutaj pojawi się podgląd odpowiedzi."
+          }
+        },
         "retakeModalTitle": "Czy na pewno chcesz powtórzyć lekcję?",
         "retakeModalDescription": "Spowoduje to zresetowanie Twoich postępów w tej lekcji. Tej akcji nie można cofnąć."
       }

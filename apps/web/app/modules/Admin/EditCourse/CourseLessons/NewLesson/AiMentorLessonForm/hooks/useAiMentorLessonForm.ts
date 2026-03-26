@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "@remix-run/react";
-import { AI_MENTOR_TYPE } from "@repo/shared";
+import { AI_MENTOR_TTS_PRESET, AI_MENTOR_TYPE, AI_MENTOR_VOICE_MODE } from "@repo/shared";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -59,6 +59,9 @@ export const useAiMentorLessonForm = ({
       completionConditions: lessonToEdit?.aiMentor?.completionConditions || "",
       type: lessonToEdit?.aiMentor?.type || AI_MENTOR_TYPE.MENTOR,
       name: lessonToEdit?.aiMentor?.name || "",
+      voiceMode: lessonToEdit?.aiMentor?.voiceMode || AI_MENTOR_VOICE_MODE.PRESET,
+      ttsPreset: lessonToEdit?.aiMentor?.ttsPreset || AI_MENTOR_TTS_PRESET.MALE,
+      customTtsReference: lessonToEdit?.aiMentor?.customTtsReference || "",
     },
   });
 
@@ -73,6 +76,9 @@ export const useAiMentorLessonForm = ({
         completionConditions: lessonToEdit.aiMentor?.completionConditions || "",
         type: lessonToEdit.aiMentor?.type || AI_MENTOR_TYPE.MENTOR,
         name: lessonToEdit.aiMentor?.name || "",
+        voiceMode: lessonToEdit.aiMentor?.voiceMode || AI_MENTOR_VOICE_MODE.PRESET,
+        ttsPreset: lessonToEdit.aiMentor?.ttsPreset || AI_MENTOR_TTS_PRESET.MALE,
+        customTtsReference: lessonToEdit.aiMentor?.customTtsReference || "",
       });
     }
   }, [lessonToEdit, reset]);
@@ -115,10 +121,16 @@ export const useAiMentorLessonForm = ({
   const onSubmit = async (values: AiMentorLessonFormValues, file?: File | null) => {
     if (!chapterToEdit) return;
 
+    const normalizedVoiceValues = {
+      voiceMode: values.voiceMode,
+      ttsPreset: values.ttsPreset,
+      customTtsReference: values.customTtsReference?.trim() || null,
+    };
+
     try {
       if (lessonToEdit) {
         await updateAiMentorLesson({
-          data: { ...values, language },
+          data: { ...values, ...normalizedVoiceValues, language },
           lessonId: lessonToEdit.id,
         });
         if (file !== undefined) {
@@ -126,7 +138,7 @@ export const useAiMentorLessonForm = ({
         }
       } else {
         await createAiMentorLesson({
-          data: { ...values, chapterId: chapterToEdit.id },
+          data: { ...values, ...normalizedVoiceValues, chapterId: chapterToEdit.id },
         });
         setOpenChapter && setOpenChapter(chapterToEdit.id);
       }

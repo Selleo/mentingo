@@ -1,0 +1,4 @@
+import { VOICE_ACTION } from "@repo/shared";
+
+export const SUPPORTED_EXTERNAL_VOICE_ACTIONS = [VOICE_ACTION.VOICE_MENTOR] as const;
+export const SUPPORTED_INTERNAL_VOICE_ACTIONS = [VOICE_ACTION.TRANSCRIPT] as const;

@@ -44,6 +44,12 @@ export const isConfiguredResponseSchema = Type.Object({
   enabled: Type.Boolean(),
 });
 
+export const lumaConfiguredResponseSchema = Type.Object({
+  enabled: Type.Boolean(),
+  courseGenerationEnabled: Type.Boolean(),
+  voiceMentorEnabled: Type.Boolean(),
+});
+
 export const isEnvSetupResponseSchema = Type.Object({
   fullyConfigured: Type.Array(Type.String()),
   partiallyConfigured: Type.Array(

@@ -3581,6 +3581,8 @@ export interface GetAIConfiguredResponse {
 export interface GetLumaConfiguredResponse {
   data: {
     enabled: boolean;
+    courseGenerationEnabled: boolean;
+    voiceMentorEnabled: boolean;
   };
 }
 

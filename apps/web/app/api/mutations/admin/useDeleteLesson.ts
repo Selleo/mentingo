@@ -1,5 +1,4 @@
 import { useMutation } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { useTranslation } from "react-i18next";
 
 import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
@@ -7,6 +6,9 @@ import { queryClient } from "~/api/queryClient";
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../../api-client";
+
+import type { AxiosError } from "axios";
+import type { ApiErrorResponse } from "~/api/types";
 
 type DeleteLessonOptions = {
   chapterId: string;
@@ -31,17 +33,9 @@ export function useDeleteLesson() {
 
       toast({ description: t("adminCourseView.toast.courseUpdatedSuccessfully") });
     },
-    onError: (error) => {
-      if (error instanceof AxiosError) {
-        return toast({
-          description: error.response?.data.message,
-          variant: "destructive",
-        });
-      }
-      toast({
-        description: error.message,
-        variant: "destructive",
-      });
+    onError: (error: AxiosError) => {
+      const { message } = error.response?.data as ApiErrorResponse;
+      toast({ description: t(message), variant: "destructive" });
     },
   });
 }

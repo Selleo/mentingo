@@ -2,6 +2,7 @@ import { Injectable, Logger, UseGuards } from "@nestjs/common";
 import {
   ConnectedSocket,
   MessageBody,
+  type OnGatewayDisconnect,
   type OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
@@ -12,6 +13,7 @@ import { Server } from "socket.io";
 
 import { AudioService } from "src/audio/audio.service";
 import { StartAudioBody } from "src/audio/types/audio.types";
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { AuthenticatedSocket, WsJwtGuard } from "src/websocket";
 
 import type { RealtimePublisher } from "src/websocket/realtime.publisher";
@@ -22,7 +24,7 @@ import type { RealtimePublisher } from "src/websocket/realtime.publisher";
   transports: ["websocket"],
 })
 @Injectable()
-export class AudioGateway implements OnGatewayInit, RealtimePublisher {
+export class AudioGateway implements OnGatewayInit, OnGatewayDisconnect, RealtimePublisher {
   @WebSocketServer()
   server: Server;
 
@@ -30,6 +32,10 @@ export class AudioGateway implements OnGatewayInit, RealtimePublisher {
 
   afterInit(_server: Server) {
     this.logger.log("AudioGateway initialized");
+  }
+
+  async handleDisconnect(client: AuthenticatedSocket) {
+    await this.audioService.handleDisconnect(client.id);
   }
 
   emitToRoom(event: string, roomId: string, payload: unknown) {
@@ -45,7 +51,10 @@ export class AudioGateway implements OnGatewayInit, RealtimePublisher {
     return this.server.to(roomId).timeout(timeoutMs).emitWithAck(event, payload);
   }
 
-  constructor(private readonly audioService: AudioService) {}
+  constructor(
+    private readonly audioService: AudioService,
+    private readonly tenantDbRunner: TenantDbRunnerService,
+  ) {}
 
   @UseGuards(WsJwtGuard)
   @SubscribeMessage(VOICE_SOCKET_EVENT.START_AUDIO)
@@ -53,7 +62,9 @@ export class AudioGateway implements OnGatewayInit, RealtimePublisher {
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() payload: StartAudioBody,
   ) {
-    await this.audioService.startAudio(client.id, payload);
+    await this.tenantDbRunner.runWithTenant(client.data.user.tenantId, async () => {
+      await this.audioService.startAudio(client.id, client.data.user, payload);
+    });
   }
 
   @UseGuards(WsJwtGuard)
