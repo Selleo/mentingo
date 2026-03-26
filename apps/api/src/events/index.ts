@@ -52,3 +52,4 @@ export * from "./articles/delete-articles.event";
 export * from "./articles/create-section.event";
 export * from "./articles/update-section.event";
 export * from "./articles/delete-section.event";
+export * from "./user/user-login-failed-event";

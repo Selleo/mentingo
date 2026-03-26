@@ -30,7 +30,8 @@ import { getEmailSubject } from "src/common/emails/translations";
 import { buildCreateNewPasswordLink } from "src/common/helpers/buildCreateNewPasswordLink";
 import hashPassword from "src/common/helpers/hashPassword";
 import { getSupportModeContext } from "src/common/helpers/support-mode-context";
-import { UserLoginEvent } from "src/events/user/user-login.event";
+import { UserLoginFailedEvent } from "src/events/user/user-login-failed-event";
+import { UserLoginEvent, USER_LOGIN_METHOD } from "src/events/user/user-login.event";
 import { UserPasswordCreatedEvent } from "src/events/user/user-password-created.event";
 import { UserRegisteredEvent } from "src/events/user/user-registered.event";
 import { UserWelcomeEvent } from "src/events/user/user-welcome.event";
@@ -62,6 +63,8 @@ import type { RegisterUserWithHashedPasswordInput, TokenUser } from "./types";
 import type { Response } from "express";
 import type { ActorUserType } from "src/common/types/actor-user.type";
 import type { CurrentUser } from "src/common/types/current-user.type";
+import type { UserLoginFailedData } from "src/events/user/user-login-failed-event";
+import type { UserLoginMethod } from "src/events/user/user-login.event";
 import type { RegistrationFormField } from "src/settings/schemas/registration-form.schema";
 import type { SupportSession } from "src/support-mode/support-mode.types";
 import type { ProviderLoginUserType } from "src/utils/types/provider-login-user.type";
@@ -221,11 +224,14 @@ export class AuthService {
 
   public async login(data: { email: string; password: string }, MFAEnforcedRoles: UserRole[]) {
     const user = await this.validateUser(data.email, data.password);
+    console.log("user2");
     if (!user) {
+      console.log("raise 1");
       throw new UnauthorizedException("Invalid email or password");
     }
 
     if (user.archived) {
+      console.log("raise 2");
       throw new UnauthorizedException("Your account has been archived");
     }
 
@@ -251,7 +257,7 @@ export class AuthService {
     };
 
     await this.outboxPublisher.publish(
-      new UserLoginEvent({ userId: user.id, method: "password", actor }),
+      new UserLoginEvent({ userId: user.id, method: USER_LOGIN_METHOD.PASSWORD, actor }),
     );
 
     if (
@@ -393,7 +399,7 @@ export class AuthService {
       };
 
       await this.outboxPublisher.publish(
-        new UserLoginEvent({ userId: user.id, method: "refresh_token", actor }),
+        new UserLoginEvent({ userId: user.id, method: USER_LOGIN_METHOD.REFRESH_TOKEN, actor }),
       );
 
       return tokens;
@@ -431,11 +437,13 @@ export class AuthService {
       .leftJoin(credentials, eq(users.id, credentials.userId))
       .where(and(eq(users.email, email), isNull(users.deletedAt)));
 
-    if (!userWithCredentials || !userWithCredentials.password) return null;
+    if (!userWithCredentials || !userWithCredentials.password)
+      throw new UnauthorizedException({ message: "auth.error.invalidEmailOrPassword" });
 
     const isPasswordValid = await bcrypt.compare(password, userWithCredentials.password);
 
-    if (!isPasswordValid) return null;
+    if (!isPasswordValid)
+      throw new UnauthorizedException({ message: "auth.error.invalidEmailOrPassword" });
 
     const { password: _, ...user } = userWithCredentials;
 
@@ -621,7 +629,12 @@ export class AuthService {
       .where(
         and(
           isNull(credentials.userId),
-          lte(sql`DATE(${createTokens.expiryDate})`, sql`CURRENT_DATE`),
+          lte(
+            sql`DATE(
+          ${createTokens.expiryDate}
+          )`,
+            sql`CURRENT_DATE`,
+          ),
           lt(createTokens.reminderCount, 3),
         ),
       );
@@ -757,7 +770,7 @@ export class AuthService {
     };
 
     await this.outboxPublisher.publish(
-      new UserLoginEvent({ userId: user.id, method: "provider", actor }),
+      new UserLoginEvent({ userId: user.id, method: USER_LOGIN_METHOD.PROVIDER, actor }),
     );
 
     if (MFAEnforcedRoles.includes(user.role as UserRole) || userSettings.isMFAEnabled) {
@@ -902,7 +915,7 @@ export class AuthService {
     await this.outboxPublisher.publish(
       new UserLoginEvent({
         userId,
-        method: "magic_link",
+        method: USER_LOGIN_METHOD.MAGIC_LINK,
         actor: { userId, email, role: role as UserRole, tenantId: user.tenantId },
       }),
     );
@@ -981,5 +994,34 @@ export class AuthService {
       .returning();
 
     return token;
+  }
+
+  async handleFailedLogin(loginFailedData: UserLoginFailedData) {
+    await this.outboxPublisher.publish(new UserLoginFailedEvent(loginFailedData));
+  }
+
+  async handleAuthFailed(data: { email: string; method: UserLoginMethod; error?: string }) {
+    const [user] = await this.db
+      .select({
+        id: users.id,
+        email: users.email,
+        role: sql<UserRole>`${users.role}`,
+        tenantId: users.tenantId,
+      })
+      .from(users)
+      .where(and(eq(users.email, data.email), isNull(users.deletedAt)))
+      .limit(1);
+    if (!user) return;
+    await this.handleFailedLogin({
+      userId: user.id,
+      method: data.method,
+      actor: {
+        userId: user.id,
+        email: user.email,
+        role: user.role,
+        tenantId: user.tenantId,
+      },
+      error: data.error,
+    });
   }
 }

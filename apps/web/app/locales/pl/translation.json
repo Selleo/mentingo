@@ -2884,6 +2884,7 @@
   "auth": {
     "error": {
       "unauthenticated": "Użytkownik nie jest uwierzytelniony",
+      "invalidEmailOrPassword": "Nieprawidłowy e-mail lub hasło",
       "adminRoleRequired": "Wymagana rola administratora"
     }
   },

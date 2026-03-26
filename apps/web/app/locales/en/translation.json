@@ -2858,6 +2858,7 @@
   "auth": {
     "error": {
       "unauthenticated": "User not authenticated",
+      "invalidEmailOrPassword": "Invalid email or password",
       "adminRoleRequired": "Admin role required"
     }
   },
