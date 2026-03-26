@@ -4,13 +4,14 @@ import { APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import { JwtModule } from "@nestjs/jwt";
 import { MulterModule } from "@nestjs/platform-express";
 import { ScheduleModule } from "@nestjs/schedule";
+import { ThrottlerModule } from "@nestjs/throttler";
 
 import { ActivityLogsModule } from "src/activity-logs/activity-logs.module";
 import { EnvModule } from "src/env/env.module";
 import { LearningTimeModule } from "src/learning-time";
 import { QAModule } from "src/qa/qa.module";
 import { QueueModule } from "src/queue";
-import { RedisClientsModule } from "src/redis";
+import { REDIS_CLIENT, RedisClientsModule } from "src/redis";
 import { WebSocketModule } from "src/websocket";
 
 import { AiModule } from "./ai/ai.module";
@@ -51,6 +52,8 @@ import { LumaModule } from "./luma/luma.module";
 import { NewsModule } from "./news/news.module";
 import { OutboxModule } from "./outbox/outbox.module";
 import { QuestionsModule } from "./questions/question.module";
+import { AppThrottlerGuard } from "./rate-limit/app-throttler.guard";
+import { RedisThrottlerStorage } from "./rate-limit/redis-throttler.storage";
 import { ReportModule } from "./report/report.module";
 import { S3Module } from "./s3/s3.module";
 import { ScormModule } from "./scorm/scorm.module";
@@ -65,6 +68,8 @@ import { SuperAdminModule } from "./super-admin/super-admin.module";
 import { SupportModeModule } from "./support-mode/support-mode.module";
 import { TestConfigModule } from "./test-config/test-config.module";
 import { UserModule } from "./user/user.module";
+
+import type { RedisClient } from "src/redis";
 
 @Module({
   imports: [
@@ -100,6 +105,21 @@ import { UserModule } from "./user/user.module";
       limits: {
         fileSize: 5 * 1024 * 1024 * 1024, // 5GB for videos
       },
+    }),
+    ThrottlerModule.forRootAsync({
+      inject: [REDIS_CLIENT],
+      useFactory: (redisClient: RedisClient) => ({
+        throttlers: [
+          {
+            name: "global",
+            ttl: 60_000,
+            limit: 300,
+            setHeaders: true,
+          },
+        ],
+        storage: new RedisThrottlerStorage(redisClient),
+        setHeaders: true,
+      }),
     }),
     AuthModule,
     HealthModule,
@@ -157,6 +177,10 @@ import { UserModule } from "./user/user.module";
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: AppThrottlerGuard,
     },
     {
       provide: APP_GUARD,

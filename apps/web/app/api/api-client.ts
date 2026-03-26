@@ -1,3 +1,4 @@
+import { t } from "i18next";
 import { get } from "lodash-es";
 import { match, P } from "ts-pattern";
 
@@ -5,6 +6,8 @@ import { authService } from "~/modules/Auth/authService";
 import { useAuthStore } from "~/modules/Auth/authStore";
 
 import { API } from "./generated-api";
+
+import type { ApiErrorResponse } from "./types";
 
 export const requestManager = {
   controller: new AbortController(),
@@ -60,6 +63,20 @@ ApiClient.instance.interceptors.request.use((config) => {
 ApiClient.instance.interceptors.response.use(
   (response) => response,
   async (error) => {
+    if (error.response?.status === 429) {
+      const payload = error.response?.data as ApiErrorResponse | undefined;
+      const isRateLimitMessageKey = payload?.message === "common.toast.tooManyRequests";
+
+      if (isRateLimitMessageKey) {
+        const retryAfterSeconds = payload?.retryAfterSeconds ?? 60;
+
+        error.response.data = {
+          ...payload,
+          message: t("common.toast.tooManyRequests", { seconds: retryAfterSeconds }),
+        };
+      }
+    }
+
     if (
       error.response?.status === 403 &&
       error.response?.data?.message === "tenant.error.inactive" &&

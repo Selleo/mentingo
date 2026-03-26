@@ -24,7 +24,8 @@
       "noAccess": "Nie masz uprawnień do tego zasobu",
       "globalSettingsNotFound": "Ustawienia globalne nie zostały znalezione",
       "somethingWentWrong": "Coś poszło nie tak...",
-      "notFound": "Nie znaleziono zasobu"
+      "notFound": "Nie znaleziono zasobu",
+      "tooManyRequests": "Zbyt wiele prób. Spróbuj ponownie za {{seconds}} sekund."
     },
     "tooltip": {
       "soon": "Dostępne wkrótce"

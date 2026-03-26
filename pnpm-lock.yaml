@@ -119,6 +119,9 @@ importers:
       '@nestjs/terminus':
         specifier: 10.2.3
         version: 10.2.3(@grpc/grpc-js@1.14.0)(@grpc/proto-loader@0.8.0)(@nestjs/common@10.4.17(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.4.17)(reflect-metadata@0.2.0)(rxjs@7.8.1)
+      '@nestjs/throttler':
+        specifier: 6.5.0
+        version: 6.5.0(@nestjs/common@10.4.17(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.4.17)(reflect-metadata@0.2.0)
       '@nestjs/websockets':
         specifier: 10.4.4
         version: 10.4.4(@nestjs/common@10.4.17(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.4.17)(@nestjs/platform-socket.io@10.4.4)(reflect-metadata@0.2.0)(rxjs@7.8.1)
@@ -4043,6 +4046,13 @@ packages:
         optional: true
       '@nestjs/platform-express':
         optional: true
+
+  '@nestjs/throttler@6.5.0':
+    resolution: {integrity: sha512-9j0ZRfH0QE1qyrj9JjIRDz5gQLPqq9yVC2nHsrosDVAfI5HHw08/aUAWx9DZLSdQf4HDkmhTTEGLrRFHENvchQ==}
+    peerDependencies:
+      '@nestjs/common': ^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0 || ^11.0.0
+      '@nestjs/core': ^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0 || ^11.0.0
+      reflect-metadata: ^0.1.13 || ^0.2.0
 
   '@nestjs/websockets@10.4.4':
     resolution: {integrity: sha512-ZHnak04i/iKBS0csjJa7K6D6xdsB0Yz6duJuCR7xGLItchFK+Ne21m9rEF8ffvW74U7UAYkQHBgD5242LBBYiQ==}
@@ -19947,6 +19957,12 @@ snapshots:
       tslib: 2.5.3
     optionalDependencies:
       '@nestjs/platform-express': 10.4.15(@nestjs/common@10.4.17(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.4.17)
+
+  '@nestjs/throttler@6.5.0(@nestjs/common@10.4.17(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.4.17)(reflect-metadata@0.2.0)':
+    dependencies:
+      '@nestjs/common': 10.4.17(reflect-metadata@0.2.0)(rxjs@7.8.1)
+      '@nestjs/core': 10.4.17(@nestjs/common@10.4.17(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/platform-express@10.4.15)(@nestjs/websockets@10.4.4)(reflect-metadata@0.2.0)(rxjs@7.8.1)
+      reflect-metadata: 0.2.0
 
   '@nestjs/websockets@10.4.4(@nestjs/common@10.4.17(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.4.17)(@nestjs/platform-socket.io@10.4.4)(reflect-metadata@0.2.0)(rxjs@7.8.1)':
     dependencies:
