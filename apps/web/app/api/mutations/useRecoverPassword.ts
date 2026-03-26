@@ -1,17 +1,20 @@
 import { useMutation } from "@tanstack/react-query";
-import { AxiosError } from "axios";
+import { useTranslation } from "react-i18next";
 
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../api-client";
 
 import type { ForgotPasswordBody } from "../generated-api";
+import type { ApiErrorResponse } from "../types";
+import type { AxiosError } from "axios";
 
 type LoginUserOptions = {
   data: ForgotPasswordBody;
 };
 
 export function usePasswordRecovery() {
+  const { t } = useTranslation();
   const { toast } = useToast();
 
   return useMutation({
@@ -20,16 +23,12 @@ export function usePasswordRecovery() {
 
       return response.data;
     },
-    onError: (error) => {
-      if (error instanceof AxiosError) {
-        return toast({
-          variant: "destructive",
-          description: error.response?.data.message,
-        });
-      }
+    onError: (error: AxiosError) => {
+      const { message } = (error.response?.data as ApiErrorResponse) || {};
+
       toast({
         variant: "destructive",
-        description: error.message,
+        description: message ? t(message) : t("common.error.somethingWentWrong"),
       });
     },
   });

@@ -513,7 +513,7 @@ export class AuthService {
   public async forgotPassword(email: string) {
     const user = await this.userService.getUserByEmail(email);
 
-    if (!user) throw new BadRequestException("Email not found");
+    if (!user) return;
 
     const resetToken = nanoid(64);
     const hashedResetToken = hashToken(resetToken);
@@ -831,6 +831,8 @@ export class AuthService {
 
   async createMagicLink(email: string) {
     const user = await this.userService.getUserByEmail(email);
+
+    if (!user) return;
 
     if (user.archived) throw new UnauthorizedException("user.error.archived");
 

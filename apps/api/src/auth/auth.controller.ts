@@ -278,7 +278,7 @@ export class AuthController {
     @Body() data: ForgotPasswordBody,
   ): Promise<BaseResponse<{ message: string }>> {
     await this.authService.forgotPassword(data.email);
-    return new BaseResponse({ message: "Password reset link sent" });
+    return new BaseResponse({ message: "forgotPasswordView.toast.resetPassword" });
   }
 
   @Public()

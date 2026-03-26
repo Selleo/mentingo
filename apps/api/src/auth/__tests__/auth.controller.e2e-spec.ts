@@ -404,7 +404,7 @@ describe("AuthController (e2e)", () => {
         .expect(201);
 
       expect(response.body.data).toEqual({
-        message: "Password reset link sent",
+        message: "forgotPasswordView.toast.resetPassword",
       });
     });
 
@@ -580,7 +580,7 @@ describe("AuthController (e2e)", () => {
 
       await db.insert(createTokens).values({
         userId: user.id,
-        createToken: token,
+        createToken: hashToken(token),
         expiryDate,
         reminderCount: 0,
       });
