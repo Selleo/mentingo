@@ -78,21 +78,88 @@ docker-build: docker-build-api docker-build-web
 trivy-scan-api: check-tools
 	@mkdir -p $(TRIVY_REPORTS_DIR)
 	@echo "==> Scanning $(API_IMAGE)"
-	trivy image --severity $(TRIVY_SEVERITY) --ignore-unfixed --exit-code $(TRIVY_EXIT_CODE) $(API_IMAGE)
-	trivy image --severity $(TRIVY_SEVERITY) --ignore-unfixed --exit-code 0 --format json -o $(TRIVY_REPORTS_DIR)/api.json $(API_IMAGE)
-	trivy image --severity $(TRIVY_SEVERITY) --ignore-unfixed --exit-code 0 --format sarif -o $(TRIVY_REPORTS_DIR)/api.sarif $(API_IMAGE)
+	@scan_exit=0; \
+	trivy image --severity $(TRIVY_SEVERITY) --ignore-unfixed --exit-code $(TRIVY_EXIT_CODE) $(API_IMAGE) || scan_exit=$$?; \
+	trivy image --severity $(TRIVY_SEVERITY) --ignore-unfixed --exit-code 0 --format json -o $(TRIVY_REPORTS_DIR)/api.json $(API_IMAGE); \
+	trivy image --severity $(TRIVY_SEVERITY) --ignore-unfixed --exit-code 0 --format sarif -o $(TRIVY_REPORTS_DIR)/api.sarif $(API_IMAGE); \
+	exit $$scan_exit
 
 .PHONY: trivy-scan-web
 trivy-scan-web: check-tools
 	@mkdir -p $(TRIVY_REPORTS_DIR)
 	@echo "==> Scanning $(WEB_IMAGE)"
-	trivy image --severity $(TRIVY_SEVERITY) --ignore-unfixed --exit-code $(TRIVY_EXIT_CODE) $(WEB_IMAGE)
-	trivy image --severity $(TRIVY_SEVERITY) --ignore-unfixed --exit-code 0 --format json -o $(TRIVY_REPORTS_DIR)/web.json $(WEB_IMAGE)
-	trivy image --severity $(TRIVY_SEVERITY) --ignore-unfixed --exit-code 0 --format sarif -o $(TRIVY_REPORTS_DIR)/web.sarif $(WEB_IMAGE)
+	@scan_exit=0; \
+	trivy image --severity $(TRIVY_SEVERITY) --ignore-unfixed --exit-code $(TRIVY_EXIT_CODE) $(WEB_IMAGE) || scan_exit=$$?; \
+	trivy image --severity $(TRIVY_SEVERITY) --ignore-unfixed --exit-code 0 --format json -o $(TRIVY_REPORTS_DIR)/web.json $(WEB_IMAGE); \
+	trivy image --severity $(TRIVY_SEVERITY) --ignore-unfixed --exit-code 0 --format sarif -o $(TRIVY_REPORTS_DIR)/web.sarif $(WEB_IMAGE); \
+	exit $$scan_exit
+
+.PHONY: trivy-summary
+trivy-summary:
+	@echo "==> Filtered vulnerability table (only reports with findings)"
+	@found=0; \
+	for report in $(TRIVY_REPORTS_DIR)/api.json $(TRIVY_REPORTS_DIR)/web.json; do \
+		if [ ! -f "$$report" ]; then \
+			continue; \
+		fi; \
+		if grep -q '"VulnerabilityID"' "$$report"; then \
+			found=1; \
+			report_name=$$(basename "$$report" .json); \
+			echo ""; \
+			echo "### $$report_name"; \
+			trivy convert --format table "$$report"; \
+		fi; \
+	done; \
+	if [ $$found -eq 0 ]; then \
+		echo "No vulnerabilities detected for severity $(TRIVY_SEVERITY)."; \
+	fi
 
 .PHONY: trivy-scan
-trivy-scan: trivy-scan-api trivy-scan-web
-	@echo "Trivy reports generated in $(TRIVY_REPORTS_DIR)"
+trivy-scan: check-tools
+	@api_exit=0; \
+	web_exit=0; \
+	$(MAKE) --no-print-directory trivy-scan-api || api_exit=$$?; \
+	$(MAKE) --no-print-directory trivy-scan-web || web_exit=$$?; \
+	$(MAKE) --no-print-directory trivy-summary; \
+	echo "Trivy reports generated in $(TRIVY_REPORTS_DIR)"; \
+	if [ $$api_exit -ne 0 ] || [ $$web_exit -ne 0 ]; then \
+		exit 1; \
+	fi
+
+.PHONY: trivy-scan-library
+trivy-scan-library: check-tools
+	@mkdir -p $(TRIVY_REPORTS_DIR)
+	@echo "==> Scanning library vulnerabilities in $(API_IMAGE)"
+	@api_exit=0; \
+	trivy image --vuln-type library --severity $(TRIVY_SEVERITY) --ignore-unfixed --exit-code $(TRIVY_EXIT_CODE) $(API_IMAGE) || api_exit=$$?; \
+	trivy image --vuln-type library --severity $(TRIVY_SEVERITY) --ignore-unfixed --exit-code 0 --format json -o $(TRIVY_REPORTS_DIR)/api-library.json $(API_IMAGE); \
+	trivy image --vuln-type library --severity $(TRIVY_SEVERITY) --ignore-unfixed --exit-code 0 --format sarif -o $(TRIVY_REPORTS_DIR)/api-library.sarif $(API_IMAGE); \
+	echo "==> Scanning library vulnerabilities in $(WEB_IMAGE)"; \
+	web_exit=0; \
+	trivy image --vuln-type library --severity $(TRIVY_SEVERITY) --ignore-unfixed --exit-code $(TRIVY_EXIT_CODE) $(WEB_IMAGE) || web_exit=$$?; \
+	trivy image --vuln-type library --severity $(TRIVY_SEVERITY) --ignore-unfixed --exit-code 0 --format json -o $(TRIVY_REPORTS_DIR)/web-library.json $(WEB_IMAGE); \
+	trivy image --vuln-type library --severity $(TRIVY_SEVERITY) --ignore-unfixed --exit-code 0 --format sarif -o $(TRIVY_REPORTS_DIR)/web-library.sarif $(WEB_IMAGE); \
+	echo "==> Filtered library vulnerability table (only reports with findings)"; \
+	found=0; \
+	for report in $(TRIVY_REPORTS_DIR)/api-library.json $(TRIVY_REPORTS_DIR)/web-library.json; do \
+		if [ ! -f "$$report" ]; then \
+			continue; \
+		fi; \
+		if grep -q '"VulnerabilityID"' "$$report"; then \
+			found=1; \
+			report_name=$$(basename "$$report" .json); \
+			echo ""; \
+			echo "### $$report_name"; \
+			trivy convert --format table "$$report"; \
+		fi; \
+	done; \
+	if [ $$found -eq 0 ]; then \
+		echo "No library vulnerabilities detected for severity $(TRIVY_SEVERITY)."; \
+	fi; \
+	echo "Trivy library reports generated in $(TRIVY_REPORTS_DIR)"; \
+	if [ $$api_exit -ne 0 ] || [ $$web_exit -ne 0 ]; then \
+		exit 1; \
+	fi
 
 .PHONY: security-scan
 security-scan: docker-build trivy-scan
