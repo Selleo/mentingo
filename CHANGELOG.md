@@ -1,3 +1,35 @@
+<a name="v4.7.0"></a>
+
+## [v4.7.0] - 27.03.2026
+
+### Features:
+
+- make voice mentors sound more natural with emotion-aware speech ([#1392](https://github.com/Selleo/mentingo/issues/1392))
+
+- add support for German, Lithuanian, and Czech languages ([#1393](https://github.com/Selleo/mentingo/issues/1393))
+
+- enable real-time interaction with voice AI mentor ([#1372](https://github.com/Selleo/mentingo/issues/1372))
+
+- add API rate limiting to keep the app stable during heavy usage ([#1380](https://github.com/Selleo/mentingo/issues/1380))
+
+- automatically log users in after sign-up ([#1374](https://github.com/Selleo/mentingo/issues/1374))
+
+### Bug Fixes:
+
+- make certificate backgrounds load more consistently ([#1371](https://github.com/Selleo/mentingo/issues/1371))
+
+### Chores:
+
+- extend activity logs to include failed login attempts ([#1388](https://github.com/Selleo/mentingo/issues/1388))
+
+- update email footers to show the correct company name ([#1387](https://github.com/Selleo/mentingo/issues/1387))
+
+- load error tracking only when enabled via environment settings ([#1384](https://github.com/Selleo/mentingo/issues/1384))
+
+- improve security for password resets and magic sign-in links ([#1385](https://github.com/Selleo/mentingo/issues/1385))
+
+- improve create and reset password tokens security ([#1378](https://github.com/Selleo/mentingo/issues/1378))
+
 <a name="v4.6.1"></a>
 
 ## [v4.6.1] - 23.03.2026
@@ -11,6 +43,10 @@
 - improved access permissions, signup page background, post-login redirects and certificate download ([#1366](https://github.com/Selleo/mentingo/issues/1366))
 
 - certificate download functionality has correct background ([#1364](https://github.com/Selleo/mentingo/issues/1364))
+
+### Documentation:
+
+- update changelog for version v4.6.1
 
 <a name="v4.6.0"></a>
 
@@ -2542,7 +2578,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.6.1...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.7.0...HEAD
+[v4.7.0]: https://github.com/Selleo/mentingo/compare/v4.6.1...v4.7.0
 [v4.6.1]: https://github.com/Selleo/mentingo/compare/v4.6.0...v4.6.1
 [v4.6.0]: https://github.com/Selleo/mentingo/compare/v4.5.1...v4.6.0
 [v4.5.1]: https://github.com/Selleo/mentingo/compare/v4.5.0...v4.5.1
