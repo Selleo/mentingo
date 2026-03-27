@@ -36,7 +36,7 @@ export const GlobalSearchStudentResults = ({
   const tabsToDisplay = useQueries({
     queries: [
       studentCoursesQueryOptions(
-        { searchQuery: debouncedSearch },
+        { searchQuery: debouncedSearch, language },
         { enabled: debouncedSearch.length >= 3 },
       ),
       availableCoursesQueryOptions(
@@ -48,7 +48,7 @@ export const GlobalSearchStudentResults = ({
         { enabled: debouncedSearch.length >= 3 },
       ),
       lessonsQueryOptions(
-        { searchQuery: debouncedSearch },
+        { searchQuery: debouncedSearch, language },
         { enabled: debouncedSearch.length >= 3 },
       ),
       newsSearchQueryOptions(
