@@ -4,9 +4,11 @@ import { ApiClient } from "../api-client";
 import { NEWS_QUERY_KEY } from "../queries/useNews";
 import { NEWS_LIST_QUERY_KEY } from "../queries/useNewsList";
 
+import type { SupportedLanguages } from "@repo/shared";
+
 type DeleteNewsLanguageOptions = {
   id: string;
-  language: "en" | "pl";
+  language: SupportedLanguages;
 };
 
 export function useDeleteNewsLanguage() {

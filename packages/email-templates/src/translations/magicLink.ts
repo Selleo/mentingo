@@ -1,7 +1,8 @@
-import { EmailContent, Language } from "types";
+import { SupportedLanguages } from "@repo/shared";
+import { EmailContent } from "types";
 
-export const getMagicLinkEmailTranslations = (language: Language) => {
-  const emailContent: Record<Language, EmailContent> = {
+export const getMagicLinkEmailTranslations = (language: SupportedLanguages) => {
+  const emailContent: Record<SupportedLanguages, EmailContent> = {
     en: {
       heading: "Login Link",
       paragraphs: [
@@ -15,6 +16,27 @@ export const getMagicLinkEmailTranslations = (language: Language) => {
         "Otrzymałeś link do logowania do swojego konta. Kliknij przycisk poniżej, aby go otworzyć.",
       ],
       buttonText: "OTWÓRZ LINK DO LOGOWANIA",
+    },
+    de: {
+      heading: "Anmeldelink",
+      paragraphs: [
+        "Du hast einen Anmeldelink für dein Konto erhalten. Klicke auf die Schaltfläche unten, um ihn zu öffnen.",
+      ],
+      buttonText: "ANMELDELINK ÖFFNEN",
+    },
+    lt: {
+      heading: "Prisijungimo nuoroda",
+      paragraphs: [
+        "Gavai prisijungimo nuorodą į savo paskyrą. Paspausk mygtuką žemiau, kad ją atidarytum.",
+      ],
+      buttonText: "ATIDARYTI PRISIJUNGIMO NUORODĄ",
+    },
+    cs: {
+      heading: "Přihlašovací odkaz",
+      paragraphs: [
+        "Obdržel(a) jsi přihlašovací odkaz ke svému účtu. Klikni na tlačítko níže a otevři ho.",
+      ],
+      buttonText: "OTEVŘÍT PŘIHLAŠOVACÍ ODKAZ",
     },
   };
 

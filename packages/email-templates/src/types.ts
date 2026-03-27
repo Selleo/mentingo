@@ -1,9 +1,9 @@
-export type Language = "en" | "pl";
+import { SupportedLanguages } from "@repo/shared";
 
 export type DefaultEmailSettings = {
   primaryColor: string;
   companyName: string;
-  language: Language;
+  language: SupportedLanguages;
 };
 
 export type EmailContent = {

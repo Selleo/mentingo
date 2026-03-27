@@ -551,6 +551,21 @@ export class CertificatesService implements OnModuleDestroy {
         pageTitle: `Course completion certificate for "${context.certificate.courseTitle}"`,
         pageDescription: `${context.certificate.fullName} completed "${context.certificate.courseTitle}" and earned a certificate.`,
       },
+      de: {
+        openLabel: "Platvorm öffnen",
+        pageTitle: `Course completion certificate for "${context.certificate.courseTitle}"`,
+        pageDescription: `${context.certificate.fullName} completed "${context.certificate.courseTitle}" and earned a certificate.`,
+      },
+      lt: {
+        openLabel: "Atidaryti platformą",
+        pageTitle: `Course completion certificate for "${context.certificate.courseTitle}"`,
+        pageDescription: `${context.certificate.fullName} completed "${context.certificate.courseTitle}" and earned a certificate.`,
+      },
+      cs: {
+        openLabel: "Otevřít platformu",
+        pageTitle: `Course completion certificate for "${context.certificate.courseTitle}"`,
+        pageDescription: `${context.certificate.fullName} completed "${context.certificate.courseTitle}" and earned a certificate.`,
+      },
     } as const;
 
     const localizedContent = translations[context.language];

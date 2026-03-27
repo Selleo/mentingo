@@ -719,7 +719,7 @@ describe("AuthController (e2e)", () => {
       expect(settingsResponse.body.data.language).toBe("pl");
     });
 
-    it("should fallback to 'en' when creating password with unsupported language (e.g., 'ar')", async () => {
+    it("should return 400 when creating password with unsupported language (e.g., 'ar')", async () => {
       const user = await userFactory.create({
         email: `createpassword-${nanoid(8)}@example.com`,
       });
@@ -735,41 +735,17 @@ describe("AuthController (e2e)", () => {
         reminderCount: 0,
       });
 
-      const password = "Password123@";
+      const response = await request(app.getHttpServer())
+        .post("/api/auth/create-password")
+        .send({
+          createToken: token,
+          email: user.email,
+          password: "Password123@",
+          language: "ar",
+        })
+        .expect(400);
 
-      await authService.createPassword({
-        createToken: token,
-        email: user.email,
-        password,
-        language: "ar",
-      });
-
-      const loginResponse = await request(app.getHttpServer()).post("/api/auth/login").send({
-        email: user.email,
-        password: password,
-      });
-
-      expect(loginResponse.status).toBe(201);
-
-      const cookies = loginResponse.headers["set-cookie"];
-      let accessToken = "";
-
-      if (Array.isArray(cookies)) {
-        cookies.forEach((cookieString) => {
-          const parsedCookie = cookie.parse(cookieString);
-          if ("access_token" in parsedCookie) {
-            accessToken = parsedCookie.access_token;
-          }
-        });
-      }
-
-      const settingsResponse = await request(app.getHttpServer())
-        .get("/api/settings")
-        .set("Cookie", `access_token=${accessToken};`)
-        .expect(200);
-
-      expect(settingsResponse.body.data).toBeDefined();
-      expect(settingsResponse.body.data.language).toBe("en");
+      expect(response.body.message).toEqual("Validation failed (body)");
     });
 
     it("should create password when create token is stored as hash", async () => {

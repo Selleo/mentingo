@@ -1,3 +1,4 @@
+import { SUPPORTED_LANGUAGES, type SupportedLanguages } from "@repo/shared";
 import { queryOptions, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "../api-client";
@@ -9,6 +10,7 @@ export type EnrolledLessonsParams = {
   description?: string;
   searchQuery?: string;
   lessonCompleted?: boolean;
+  language?: SupportedLanguages;
 };
 
 type QueryOptions = {
@@ -26,6 +28,7 @@ export const lessonsQueryOptions = (
         title: searchParams?.title,
         description: searchParams?.description,
         searchQuery: searchParams?.searchQuery,
+        language: searchParams?.language ?? SUPPORTED_LANGUAGES.EN,
         ...(searchParams?.lessonCompleted !== undefined && {
           lessonCompleted: String(searchParams.lessonCompleted),
         }),

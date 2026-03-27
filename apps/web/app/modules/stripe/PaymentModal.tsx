@@ -11,6 +11,8 @@ import { Button } from "~/components/ui/button";
 import { formatPrice } from "~/lib/formatters/priceFormatter";
 import { getCurrencyLocale } from "~/utils/getCurrencyLocale";
 
+import { useLanguageStore } from "../Dashboard/Settings/Language/LanguageStore";
+
 import { useStripePromise } from "./hooks/useStripePromise";
 
 export const clientLoader = async () => {
@@ -38,7 +40,8 @@ export function PaymentModal({
   const { data: currentUser } = useCurrentUser();
   const [showCheckout, setShowCheckout] = useState(false);
   const stripePromise = useStripePromise();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
+  const { language } = useLanguageStore();
 
   const fetchClientSecret = async () => {
     const response = await ApiClient.api.stripeControllerCreateCheckoutSession({
@@ -48,7 +51,7 @@ export function PaymentModal({
       productDescription: courseDescription,
       courseId: courseId,
       customerId: currentUser?.id as string,
-      locale: i18n.language,
+      locale: language,
       priceId: coursePriceId,
     });
 

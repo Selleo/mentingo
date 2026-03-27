@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "@remix-run/react";
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import * as z from "zod";
@@ -23,11 +24,9 @@ import {
 } from "~/components/ui/select";
 import { USER_ROLE } from "~/config/userRoles";
 import { CreatePageHeader } from "~/modules/Admin/components";
-import { SupportedLanguages } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import type { MetaFunction } from "@remix-run/react";
-import type { Language } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.createNewUser");
 
@@ -38,7 +37,7 @@ const formSchema = z.object({
   role: z.enum([USER_ROLE.admin, USER_ROLE.contentCreator, USER_ROLE.student], {
     required_error: "Please select a role.",
   }),
-  language: z.enum([SupportedLanguages.ENGLISH, SupportedLanguages.POLISH]),
+  language: z.nativeEnum(SUPPORTED_LANGUAGES),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -58,7 +57,7 @@ export default function CreateNewUserPage() {
       lastName: "",
       email: "",
       role: USER_ROLE.student,
-      language: adminsSettings?.language as Language,
+      language: adminsSettings?.language,
     },
   });
 
@@ -161,7 +160,7 @@ export default function CreateNewUserPage() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {Object.values(SupportedLanguages).map((lang) => (
+                      {Object.values(SUPPORTED_LANGUAGES).map((lang) => (
                         <SelectItem key={lang} value={lang}>
                           {t(`common.languages.${lang}`)}
                         </SelectItem>

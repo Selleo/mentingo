@@ -55,6 +55,33 @@ const certificateTranslations = {
     date: "Date",
     signature: "Signature",
   },
+  de: {
+    certificate: "ZERTIFIKAT",
+    courseCompletion: "KURSABSCHLUSS",
+    certifyThat: "HIERMIT WIRD BESTÄTIGT, DASS",
+    successfulCompletion: "hat den Kurs erfolgreich abgeschlossen",
+    confirmation: "und bestätigt damit die Teilnahme am gesamten Schulungsprogramm.",
+    date: "Datum",
+    signature: "Unterschrift",
+  },
+  lt: {
+    certificate: "SERTIFIKATAS",
+    courseCompletion: "KURSO PABAIGOS",
+    certifyThat: "ŠIUO PATVIRTINAMA, KAD",
+    successfulCompletion: "sėkmingai baigė kursą",
+    confirmation: "taip patvirtindamas dalyvavimą visoje mokymo programoje.",
+    date: "Data",
+    signature: "Parašas",
+  },
+  cs: {
+    certificate: "CERTIFIKÁT",
+    courseCompletion: "UKONČENÍ KURZU",
+    certifyThat: "TÍMTO SE POTVRZUJE, ŽE",
+    successfulCompletion: "úspěšně absolvoval/a kurz",
+    confirmation: "čímž potvrzuje účast na celém školicím programu.",
+    date: "Datum",
+    signature: "Podpis",
+  },
 } as const;
 
 export function buildCertificateMarkup(options: BuildCertificateMarkupOptions): string {

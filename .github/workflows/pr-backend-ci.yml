@@ -61,11 +61,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build shared packages
-        run: pnpm --filter="@repo/shared" run build
-
-      - name: Build prompt templates
-        run: pnpm --filter="@repo/prompts" run build
+      - name: Build packages
+        run: pnpm -w packages:build
 
       - name: Run ESLint
         run: pnpm --filter=api lint-tsc
@@ -99,11 +96,8 @@ jobs:
           cache: pnpm
 
       - run: pnpm install
-      - name: Build shared packages
-        run: pnpm --filter="@repo/shared" run build
-
-      - name: Build prompt templates
-        run: pnpm --filter="@repo/prompts" run build
+      - name: Build packages
+        run: pnpm -w packages:build
 
       - name: Build the app
         run: pnpm run build
@@ -221,11 +215,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build shared packages
-        run: pnpm --filter="@repo/shared" run build
-
-      - name: Build prompt templates
-        run: pnpm --filter="@repo/prompts" run build
+      - name: Build packages
+        run: pnpm -w packages:build
 
       - name: Run unit tests
         run: pnpm --filter=api test:ci

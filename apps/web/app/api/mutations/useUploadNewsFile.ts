@@ -2,10 +2,12 @@ import { useMutation } from "@tanstack/react-query";
 
 import { ApiClient } from "../api-client";
 
+import type { SupportedLanguages } from "@repo/shared";
+
 type UploadNewsFileOptions = {
   id: string;
   file: File;
-  language: "en" | "pl";
+  language: SupportedLanguages;
   title: string;
   description: string;
 };
@@ -23,7 +25,7 @@ export function useUploadNewsFile() {
         id,
         formData as unknown as {
           file: File;
-          language: "en" | "pl";
+          language: SupportedLanguages;
           title: string;
           description: string;
         },

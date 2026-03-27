@@ -1,3 +1,4 @@
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { Archive, GripVertical, Pencil, RotateCcw, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Controller } from "react-hook-form";
@@ -17,10 +18,10 @@ import { FormValidationError } from "~/components/ui/form-validation-error";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
 import { cn } from "~/lib/utils";
-import { SUPPORTED_LANGUAGES } from "~/utils/browser-language";
 
 import type { RegistrationFormValues } from "./registrationFormBuilder.utils";
 import type { DraggableAttributes, DraggableSyntheticListeners } from "@dnd-kit/core";
+import type { SupportedLanguages } from "@repo/shared";
 import type { Control, FieldErrors } from "react-hook-form";
 
 type RegistrationFormBuilderFieldProps = {
@@ -59,12 +60,8 @@ export function RegistrationFormBuilderField({
   const headingLabel = t("registrationFormBuilder.field.heading", {
     index: visibleIndex + 1,
   });
-  const languageNames: Record<(typeof SUPPORTED_LANGUAGES)[number], string> = {
-    en: t("changeUserLanguageView.options.english"),
-    pl: t("changeUserLanguageView.options.polish"),
-  };
 
-  const getLabelErrorMessage = (language: (typeof SUPPORTED_LANGUAGES)[number]) => {
+  const getLabelErrorMessage = (language: SupportedLanguages) => {
     const languageError = errors.fields?.[index]?.label?.[language];
 
     if (typeof languageError?.message !== "string") {
@@ -194,14 +191,14 @@ export function RegistrationFormBuilderField({
             </div>
 
             <div className="grid gap-4 xl:grid-cols-2">
-              {SUPPORTED_LANGUAGES.map((language) => (
+              {Object.values(SUPPORTED_LANGUAGES).map((language) => (
                 <div
                   key={language}
                   className="space-y-2 rounded-lg border border-border bg-background/90 p-4"
                 >
                   <Label className="body-base-md text-neutral-900">
                     {t("registrationFormBuilder.field.languageLabel", {
-                      language: languageNames[language],
+                      language: t(`common.languages.${language}`),
                     })}
                   </Label>
                   <Controller

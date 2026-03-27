@@ -34,6 +34,7 @@
       "dependsOn": ["@repo/email-templates#build"]
     },
     "@repo/email-templates#build": {
+      "dependsOn": ["@repo/shared#build"],
       "cache": false,
       "outputs": ["dist/**"]
     },

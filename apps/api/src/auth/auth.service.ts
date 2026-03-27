@@ -587,16 +587,10 @@ export class AuthService {
       .values({ userId: createToken.userId, password: hashedPassword });
     await this.createPasswordService.deleteToken(createToken.id);
 
-    const languageGuard = Object.values(SUPPORTED_LANGUAGES).includes(
-      language as SupportedLanguages,
-    )
-      ? language
-      : "en";
-
     await this.settingsService.createSettingsIfNotExists(
       createToken.userId,
       existingUser.role as UserRole,
-      { language: languageGuard },
+      { language },
     );
 
     await this.outboxPublisher.publish(new UserPasswordCreatedEvent({ ...existingUser }));

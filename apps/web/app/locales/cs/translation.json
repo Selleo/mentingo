@@ -1,0 +1,2913 @@
+{
+  "common": {
+    "button": {
+      "save": "Uložit",
+      "saving": "Ukládání...",
+      "delete": "Vymazat",
+      "create": "Vytvořit",
+      "cancel": "Zrušit",
+      "back": "Zadní",
+      "proceed": "Pokračovat",
+      "add": "Přidat",
+      "close": "Blízko",
+      "goToDashboard": "Přejděte na řídicí panel",
+      "goBack": "Vraťte se",
+      "ignore": "Ignorovat",
+      "clearAll": "Vymazat vše",
+      "validate": "Ověřit",
+      "edit": "Upravit",
+      "uploading": "Nahrávání...",
+      "sending": "Odesílání..."
+    },
+    "toast": {
+      "noAccess": "Nemáte oprávnění pro přístup k tomuto zdroji",
+      "globalSettingsNotFound": "Globální nastavení nenalezeno",
+      "somethingWentWrong": "Něco se pokazilo...",
+      "notFound": "Zdroj nenalezen",
+      "tooManyRequests": "Příliš mnoho požadavků. Zkuste to znovu za {{seconds}} sekund."
+    },
+    "tooltip": {
+      "soon": "Již brzy"
+    },
+    "tableOfContents": "Obsah",
+    "roles": {
+      "admin": "Admin",
+      "contentCreator": "Tvůrce obsahu",
+      "student": "Student"
+    },
+    "languages": {
+      "en": "Angličtina",
+      "pl": "Polština",
+      "de": "Němčina",
+      "lt": "Litevština",
+      "cs": "Čeština"
+    },
+    "lessonTypes": {
+      "content": "Obsah",
+      "quiz": "Kvíz",
+      "ai_mentor": "AI mentor",
+      "embed": "Vložit"
+    },
+    "error": {
+      "somethingWentWrong": "Jejda! Něco se pokazilo."
+    },
+    "loader": {
+      "textSequence": {
+        "aiMentor": {
+          "warmingUp": "Zahřívací mentor AI...",
+          "preparingSimulation": "Simulace se pro vás připravuje...",
+          "buildingContext": "Kontext sestavení scénáře...",
+          "takingLonger": "Trvá to déle než obvykle..."
+        }
+      }
+    },
+    "other": {
+      "active": "Aktivní",
+      "archived": "Archivováno",
+      "selected": "Vybraný",
+      "allStatuses": "Všechny stavy",
+      "draft": "Návrh",
+      "all": "Vše",
+      "search": "Vyhledávání",
+      "published": "Publikováno",
+      "private": "Soukromé",
+      "publish": "Publikovat",
+      "uploadingImage": "Nahrávání obrázku...",
+      "copyUrl": "Adresa URL byla zkopírována do schránky",
+      "dueDate": "Termín: {{date}}",
+      "appVersion": "Verze aplikace: {{version}}"
+    },
+    "continueWithGoogle": "Pokračujte s Googlem",
+    "continueWithMicrosoft": "Pokračujte s Microsoftem",
+    "continueWithSlack": "Pokračujte se Slackem",
+    "enterFullscreen": "Celá obrazovka",
+    "exitFullscreen": "Ukončete celou obrazovku"
+  },
+  "lessons": {
+    "sequenceUpdatedSuccessfully": "Pořadí lekcí bylo úspěšně aktualizováno",
+    "sequenceUpdateFailed": "Pořadí lekcí se nepodařilo aktualizovat",
+    "quizFeedbackUpdatedSuccessfully": "Možnost „Zpětná vazba kvízu“ byla úspěšně aktualizována",
+    "quizFeedbackUpdateFailed": "Aktualizace možnosti „Zpětná vazba ke kvízu“ se nezdařila",
+    "settingsUpdatedSuccessfully": "Nastavení byla úspěšně aktualizována",
+    "settingsUpdateFailed": "Aktualizace nastavení se nezdařila"
+  },
+  "uploadFile": {
+    "header": "Kliknutím nahrajete",
+    "subHeader": "nebo přetáhněte",
+    "replace": "Kliknutím nahradíte",
+    "toast": {
+      "fileUploadedSuccessfully": "Soubor byl úspěšně nahrán",
+      "videoFailed": "Nahrání videa se nezdařilo",
+      "videoReady": "Video je připraveno k použití",
+      "videoUploading": "Nahráváme vaše video. Záložku prosím nezavírejte.",
+      "videoUploadedProcessing": "Vaše nahrávání bylo dokončeno. Nyní se vaše video zpracovává. Neváhejte a zavřete kartu."
+    },
+    "details": {
+      "imageCrop": "PNG, JPG, JPEG nebo SVG",
+      "video": "MP4, MOV, MPEG-2 nebo Hevc (max. do 5 GB)",
+      "presentation": "PPT/PPTX (max. do 100 MB)"
+    },
+    "processing": {
+      "title": "Video se zpracovává",
+      "body": "Můžete pokračovat v úpravách. Až bude připraven, dáme vám vědět."
+    },
+    "remove": {
+      "video": "Odebrat video",
+      "presentation": "Odebrat prezentaci"
+    }
+  },
+  "deleteFile": {
+    "toast": {
+      "success": "Soubor byl úspěšně smazán"
+    }
+  },
+  "adminScorm": {
+    "header": "Nahrajte SCORM",
+    "subHeader": "Nahrajte svůj soubor .zip SCORM.",
+    "field": {
+      "price": "Cena",
+      "title": "Název kurzu",
+      "category": "Kategorie",
+      "description": "Popis",
+      "thumbnail": "Nahrát miniaturu"
+    },
+    "placeholder": {
+      "price": "Množství",
+      "title": "Zadejte název...",
+      "category": "Vyberte kategorii",
+      "description": "Uveďte popis kurzu..."
+    },
+    "other": {
+      "setUpCourse": "Nastavit kurz",
+      "provideDetails": "Zadejte podrobnosti pro vytvoření nového kurzu",
+      "uploadFileHeader": "Kliknutím nahrajte nebo přetáhněte",
+      "uploadFileBody": "SCORM soubor .zip (max. do 500 MB)",
+      "pricing": "Ceny",
+      "status": "Postavení",
+      "setUpPricing": "Stanovte cenu kurzu",
+      "setUpStatus": "Nastavte stav kurzu",
+      "noDescription": "Zatím bez popisu.",
+      "untitled": "Bez názvu",
+      "free": "Uvolnit",
+      "paidCourse": "Placený kurz",
+      "freeCourseBody": "Studenti se mohou přihlásit a získat přístup k obsahu kurzu bez placení.",
+      "paidCourseBody": "Studenti si mohou zakoupit a získat přístup k obsahu kurzu. Po výběru můžete definovat měnu a cenu.",
+      "draftBody": "Tento kurz si studenti nemohou zakoupit ani se do něj zapsat. Pro ty, kteří jsou již zapsáni, se kurz nezobrazí v jejich seznamu studentských kurzů.",
+      "publishBody": "Studenti si mohou zakoupit, zapsat se a získat přístup k obsahu kurzu. Jakmile se zapíšete, kurz se zobrazí na jejich Student Dashboard.",
+      "charactersLeft": "zbývajících znaků"
+    },
+    "button": {
+      "back": "Zadní",
+      "status": "Postavení",
+      "creatingCourse": "Vytváření kurzu...",
+      "createCourse": "Vytvořit kurz"
+    },
+    "toast": {
+      "scormUploadedSuccessfully": "Balíček SCORM byl úspěšně nahrán"
+    }
+  },
+  "studentChapterCardView": {
+    "other": {
+      "chapterProgress": "Průběh kapitoly:"
+    }
+  },
+  "navigationSideBar": {
+    "settings": "Nastavení",
+    "logout": "Odhlášení",
+    "panel": "panel",
+    "menu": "Menu",
+    "close": "Blízko",
+    "profile": "Profil",
+    "dashboard": "Dashboard",
+    "statistics": "Statistika",
+    "analytics": "Analytics",
+    "progress": "Pokrok",
+    "findInApplication": "Najít v aplikaci",
+    "courses": "Kurzy",
+    "content": "Obsah",
+    "categories": "Kategorie",
+    "users": "Uživatelé",
+    "groups": "Skupiny",
+    "articles": "Znalostní základna",
+    "news": "Zprávy",
+    "providerInformation": "Informace",
+    "announcements": "Oznámení",
+    "promotionCodes": "Propagační kódy",
+    "manage": "Spravovat",
+    "ariaLabels": {
+      "goToAvailableCourses": "Přejděte na dostupné kurzy"
+    },
+    "qa": "Otázky a odpovědi",
+    "tenants": "Organizace"
+  },
+  "newsView": {
+    "header": "Zprávy",
+    "notFound": "Novinky nenalezeny.",
+    "previousNews": "Předchozí novinky",
+    "nextNews": "Další novinky",
+    "prompt": {
+      "photoUrl": "URL fotografie",
+      "photoCaption": "Popisek fotky (volitelné)",
+      "videoUrl": "URL videa (mp4 atd.)",
+      "videoCaption": "Popisek videa (volitelné)"
+    },
+    "field": {
+      "title": "Titul",
+      "summary": "Shrnutí",
+      "intro": "Zavedení",
+      "content": "Obsah",
+      "image": "Obraz",
+      "status": "Postavení",
+      "isPublic": "je veřejný"
+    },
+    "placeholder": {
+      "title": "Zadejte název zprávy",
+      "summary": "Přidejte krátké shrnutí",
+      "intro": "Přidejte krátký úvod"
+    },
+    "create": "Vytvořit",
+    "edit": "Upravit",
+    "status": {
+      "draft": "Návrh",
+      "published": "Publikováno",
+      "draftMany": "Koncepty",
+      "publishedMany": "Publikováno"
+    },
+    "button": {
+      "delete": "Vymazat"
+    },
+    "validation": {
+      "titleRequired": "Název je povinný",
+      "introRequired": "Úvod je povinný",
+      "contentRequired": "Obsah je povinný",
+      "imageRequired": "Obrázek je povinný",
+      "statusRequired": "Stav je povinný"
+    },
+    "editor": "Editor",
+    "preview": "Náhled",
+    "isPublicDescription": "Sdílejte tuto novinku i pro nepřihlášené uživatele.",
+    "language": {
+      "label": "Jazyk",
+      "baseLanguage": "Výchozí",
+      "notAddedLanguages": "Jazyky k přidání",
+      "createTitle": "Vytvořit překlad",
+      "createDescription": "Vytvořit překlad těchto zpráv v {{language}}?",
+      "deleteTitle": "Smazat překlad",
+      "deleteDescription": "Smazat překlad {{language}}? Jeho obsah bude odstraněn."
+    }
+  },
+  "globalSearch": {
+    "notFound": "Bohužel se nic nenašlo",
+    "tryAgain": "Zkuste to znovu pomocí jiných klíčových slov",
+    "search": "Vyhledávání...",
+    "searchIn": "Hledat v {{companyName}}",
+    "searchInDescription": "Začněte psát a prohledávejte kurzy, oznámení a další.",
+    "navigate": "Navigovat",
+    "goTo": "Přejít na",
+    "close": "Blízko",
+    "entries": {
+      "users": "Uživatelé",
+      "categories": "Kategorie",
+      "groups": "Skupiny",
+      "allCourses": "Všechny kurzy",
+      "myCourses": "Moje kurzy",
+      "availableCourses": "Dostupné kurzy",
+      "noSearchResults": "Žádné výsledky vyhledávání pro:",
+      "announcements": "Oznámení",
+      "lessons": "Lekce",
+      "news": "Zprávy",
+      "articles": "články",
+      "qa": "Otázky a odpovědi"
+    }
+  },
+  "providerInformation": {
+    "title": "Informace o poskytovateli",
+    "description": "Informace o vaší společnosti, které budou viditelné pro uživatele",
+    "editTitle": "Upravit informace o poskytovateli",
+    "companyName": "Název společnosti",
+    "companyShortName": "Krátký název společnosti",
+    "registeredAddress": "Registrovaná adresa",
+    "taxNumber": "daňové číslo (NIP)",
+    "emailAddress": "E-mailová adresa",
+    "courtRegisterNumber": "Číslo soudního rejstříku (KRS)",
+    "noDataAvailable": "Nejsou k dispozici žádné informace o poskytovateli",
+    "createSuccess": "Informace o poskytovateli byly úspěšně vytvořeny",
+    "updateSuccess": "Informace o poskytovateli byly úspěšně aktualizovány",
+    "createError": "Nepodařilo se vytvořit informace o poskytovateli",
+    "updateError": "Informace o poskytovateli se nepodařilo aktualizovat",
+    "saveError": "Nepodařilo se uložit informace o poskytovateli",
+    "validation": {
+      "nipMustBe10Digits": "NIP musí mít 10 číslic",
+      "krsMustBe10Digits": "KRS musí mít 10 číslic",
+      "invalidEmailFormat": "Neplatný formát e-mailu"
+    },
+    "noCompanyInformationAvailable": "Nejsou k dispozici žádné informace o společnosti",
+    "breadcrumbs": {
+      "providerInformation": "Informace o poskytovateli"
+    }
+  },
+  "changeUserLanguageView": {
+    "header": "Změnit jazyk",
+    "subHeader": "Vyberte preferovaný jazyk",
+    "field": {
+      "language": "Jazyk"
+    },
+    "options": {
+      "english": "angličtina",
+      "polish": "polština",
+      "german": "Němčina",
+      "czech": "Čeština",
+      "lithuanian": "Litevština"
+    }
+  },
+  "resetOnboarding": {
+    "header": "Resetovat úvod",
+    "subHeader": "Zde můžete resetovat úvod aplikace",
+    "button": {
+      "reset": "Resetovat úvod"
+    },
+    "toast": {
+      "success": "Úvod byl úspěšně resetován",
+      "error": "Úvod se nepodařilo resetovat"
+    }
+  },
+  "changeUserEmailView": {
+    "header": "Změňte informace o uživateli",
+    "subHeader": "Zde aktualizujte své uživatelské údaje.",
+    "field": {
+      "email": "E-mail"
+    },
+    "validation": {
+      "email": "E-mail je povinný"
+    }
+  },
+  "ssoEnforcementView": {
+    "header": "Vynucení jednotného přihlášení",
+    "subHeader": "Vynutit přihlášení SSO pro všechny uživatele",
+    "description": "Tento přepínač vynutí přihlášení Google/Microsoft pro všechny uživatele. Pokud je zakázáno, uživatelé se budou moci přihlásit pomocí tradičního přihlašovacího formuláře.",
+    "switch": {
+      "enabled": "Povoleno",
+      "disabled": "Zakázáno"
+    },
+    "toast": {
+      "ssoEnforcementUpdatedSuccessfully": "Vynucení jednotného přihlášení bylo úspěšně aktualizováno",
+      "ssoEnforcementUpdateFailed": "Aktualizace vynucení jednotného přihlášení se nezdařila",
+      "registerRedirect": "Registrace pomocí e-mailu je zakázána, protože je vynuceno jednotné přihlášení."
+    }
+  },
+  "userEmailTriggers": {
+    "header": "Spouštěče e-mailu uživatele",
+    "subHeader": "Spravujte automatická e-mailová upozornění zasílaná uživatelům",
+    "settings": {
+      "userFirstLogin": "První přihlášení",
+      "userFirstLoginDescription": "Po prvním přihlášení do systému odešlete uživateli e-mail.",
+      "userCourseAssignment": "Zápis do kurzu",
+      "userCourseAssignmentDescription": "Pošlete e-mail uživateli poté, co se administrátor zapíše do kurzu.",
+      "userShortInactivity": "Krátká nečinnost (14 dní)",
+      "userShortInactivityDescription": "Odeslat uživateli e-mail po 14 dnech nečinnosti.",
+      "userLongInactivity": "Dlouhá nečinnost (30 dní)",
+      "userLongInactivityDescription": "Odeslat uživateli e-mail po 30 dnech nečinnosti.",
+      "userChapterFinished": "Kapitola dokončena",
+      "userChapterFinishedDescription": "Po dokončení kapitoly odešlete uživateli e-mail.",
+      "userCourseFinished": "Kurz dokončen",
+      "userCourseFinishedDescription": "Po dokončení kurzu odešlete uživateli e-mail."
+    },
+    "switch": {
+      "enabled": "Povoleno",
+      "disabled": "Zakázáno"
+    },
+    "toast": {
+      "userEmailTriggersUpdatedSuccessfully": "E-mailové spouštěče byly úspěšně aktualizovány",
+      "userEmailTriggersUpdateFailed": "Aktualizace e-mailových spouštěčů se nezdařila"
+    }
+  },
+  "inviteOnlyRegistrationView": {
+    "header": "Vymáhání registrace pouze na základě pozvání",
+    "subHeader": "Vyžadovat pozvánku k registraci",
+    "description": "Povolením tohoto nastavení omezíte registraci pouze na pozvané uživatele. Když je deaktivován, může se kdokoli zaregistrovat bez pozvánky.",
+    "switch": {
+      "enabled": "Povoleno",
+      "disabled": "Zakázáno"
+    },
+    "toast": {
+      "inviteOnlyRegistrationUpdatedSuccessfully": "Nastavení registrace pouze pro pozvání bylo úspěšně aktualizováno",
+      "inviteOnlyRegistrationUpdateFailed": "Aktualizace nastavení registrace pouze pro pozvání se nezdařila",
+      "registerRedirect": "Registrace je možná pouze na pozvání."
+    }
+  },
+  "environmentConfigurationView": {
+    "header": "Konfigurace prostředí",
+    "description": "Zobrazte podrobné informace o konfiguraci vašeho prostředí včetně plně nakonfigurovaných služeb, částečně nakonfigurovaných služeb a chybějících proměnných prostředí.",
+    "button": {
+      "viewStatus": "Zobrazit stav",
+      "loading": "Načítání...",
+      "dismissWarning": "Zavřít varování"
+    },
+    "dialog": {
+      "title": "Stav konfigurace prostředí",
+      "fullyConfigured": "Plně nakonfigurováno",
+      "partiallyConfigured": "Částečně nakonfigurováno",
+      "youMightWantToSetThisUp": "Možná to budete chtít nastavit",
+      "noFullyConfigured": "Žádné plně nakonfigurované služby.",
+      "noPartiallyConfigured": "Žádné částečně nakonfigurované služby.",
+      "allConfigured": "Všechny klíče prostředí jsou správně nakonfigurovány.",
+      "dismissWarning": "Propustit",
+      "serviceNames": {
+        "stripe": "Stripe Payment",
+        "bunny": "Králíček CDN",
+        "google_authorization": "Google OAuth",
+        "microsoft_authorization": "Microsoft OAuth",
+        "slack_authorization": "Slack OAuth",
+        "openAI": "OpenAI",
+        "luma": "Luma"
+      },
+      "serviceDescriptions": {
+        "stripe": "Zpracovávejte platby za kurzy a spravujte předplatné",
+        "bunny": "Streamujte videa a dodávejte obsah efektivně",
+        "google_authorization": "Povolit uživatelům přihlášení pomocí jejich účtu Google",
+        "microsoft_authorization": "Umožněte uživatelům přihlásit se pomocí jejich účtu Microsoft",
+        "slack_authorization": "Umožněte uživatelům přihlásit se pomocí účtu Slack",
+        "openAI": "Povolit funkce AI Mentor",
+        "luma": "Povolit funkce generování kurzů AI"
+      }
+    }
+  },
+  "mostPopularCoursesView": {
+    "header": "Nejoblíbenější",
+    "subHeader": "Top 5 kurzů",
+    "other": {
+      "noData": "Nejsou k dispozici žádné údaje",
+      "students": "Studenti"
+    }
+  },
+  "enrollmentChartView": {
+    "header": "Zápis",
+    "subHeader": "Počty přihlášených",
+    "other": {
+      "noData": "Nejsou k dispozici žádné údaje",
+      "enrollments": "Přihlášky"
+    }
+  },
+  "createPasswordView": {
+    "header": "Vytvořte nové heslo",
+    "subHeader": "Zadejte nové heslo pro",
+    "field": {
+      "password": "Heslo",
+      "confirmPassword": "Potvrďte heslo"
+    },
+    "validation": {
+      "passwordsDontMatch": "Hesla se neshodují",
+      "missingEmail": "V odkazu chybí e-mailová adresa. Použijte prosím celý odkaz z vašeho e-mailu."
+    },
+    "button": {
+      "changePassword": "Vytvořte heslo"
+    },
+    "error": {
+      "invalidTokenOrEmail": "Tento odkaz pro nastavení hesla je neplatný, jeho platnost vypršela nebo neodpovídá tomuto e-mailu."
+    }
+  },
+  "changePasswordView": {
+    "header": "Změňte heslo",
+    "subHeader": "Aktualizujte své heslo zde.",
+    "field": {
+      "oldPassword": "Staré heslo",
+      "newPassword": "Nové heslo",
+      "confirmPassword": "Potvrďte heslo"
+    },
+    "validation": {
+      "oldPassword": "Je vyžadováno staré heslo",
+      "newPassword": "Je vyžadováno nové heslo",
+      "passwordsDontMatch": "Hesla se neshodují"
+    },
+    "toast": {
+      "passwordChangedSuccessfully": "Heslo bylo úspěšně změněno",
+      "passwordCreatedSuccessfully": "Heslo bylo úspěšně vytvořeno"
+    }
+  },
+  "passwordValidationDisplay": {
+    "title": "Požadavky na heslo",
+    "header": "Vaše heslo musí obsahovat:",
+    "passwordMinLength": "alespoň 8 znaků",
+    "passwordUppercase": "alespoň jedno velké písmeno",
+    "passwordLowercase": "alespoň jedno malé písmeno",
+    "passwordNumber": "alespoň jedno číslo",
+    "passwordSpecial": "alespoň jeden speciální znak",
+    "passwordsMatch": "Hesla se shodují"
+  },
+  "contentCreatorView": {
+    "button": {
+      "collapse": "Kolaps",
+      "showMore": "Zobrazit více",
+      "edit": "Upravit",
+      "share": "Sdílet profil",
+      "cancel": "Zrušit",
+      "confirm": "Potvrdit",
+      "deleteProfilePicture": "Smazat profilový obrázek"
+    },
+    "field": {
+      "firstName": "Jméno",
+      "firstNamePlaceholder": "Zadejte své jméno",
+      "lastName": "Příjmení",
+      "lastNamePlaceholder": "Zadejte své příjmení",
+      "contactEmail": "E-mailová adresa",
+      "contactEmailPlaceholder": "Zadejte svou e-mailovou adresu",
+      "contactPhone": "Telefonní číslo",
+      "contactPhonePlaceholder": "Zadejte své telefonní číslo",
+      "jobTitle": "Titul",
+      "jobTitlePlaceholder": "Zadejte svůj titul",
+      "description": "Bio-poznámka",
+      "descriptionPlaceholder": "Zadejte krátkou biopoznámku",
+      "uploadThumbnailLabel": "Nahrát miniaturu"
+    },
+    "toast": {
+      "profileLinkCopied": "Odkaz na profil zkopírován!",
+      "profileLinkCopyError": "Chyba při kopírování odkazu na profil!"
+    },
+    "other": {
+      "personalInfoTitle": "Hlavní informace",
+      "personalInfoDescription": "Spravujte základní informace o účtu",
+      "aboutTitle": "O",
+      "aboutDescription": "Řekněte o sobě více",
+      "appearanceTitle": "Vzhled",
+      "appearanceDescription": "Nahrajte svůj profilový obrázek",
+      "pageTitle": "Profil",
+      "about": "O",
+      "contact": "Kontakt",
+      "courses": "Kurzy",
+      "title": "Titul"
+    }
+  },
+  "changeUserInformationView": {
+    "header": "Změňte informace o podrobnostech uživatele",
+    "subHeader": "Aktualizujte svůj životopis zde.",
+    "toast": {
+      "userUpdatedSuccessfully": "Uživatel byl úspěšně aktualizován",
+      "userDetailsUpdatedSuccessfully": "Údaje o uživateli byly úspěšně aktualizovány",
+      "updatedSelectedUsersSuccessfully": "Vybraní uživatelé byli úspěšně aktualizováni",
+      "deletedSelectedUsersSuccessfully": "Vybraní uživatelé byli úspěšně smazáni",
+      "archivedSelectedUsersSuccessfully": "Vybraní uživatelé byli úspěšně archivováni",
+      "archiveSelectedUsersError": "Archivace vybraných uživatelů se nezdařila"
+    },
+    "field": {
+      "description": "Popis",
+      "email": "E-mail",
+      "phoneNumber": "Telefonní číslo",
+      "jobTitle": "Pracovní název"
+    },
+    "placeholder": {
+      "description": "Váš popis",
+      "phoneNumber": "Vaše telefonní číslo",
+      "jobTitle": "Název vaší práce"
+    }
+  },
+  "clientStatisticsView": {
+    "header": "vítej zpět,",
+    "button": {
+      "enroll": "Zapsat",
+      "searchCourses": "Hledat kurzy",
+      "continue": "Pokračovat",
+      "start": "Start",
+      "readMore": "Přečtěte si více",
+      "tryAgain": "Zkuste to znovu",
+      "view": "Pohled"
+    },
+    "other": {
+      "completedCourses": "Absolvované kurzy",
+      "startedCourses": "Zahájené kurzy",
+      "correctAnswers": "Správné odpovědi",
+      "wrongAnswers": "Špatné odpovědi",
+      "avgQuizScorePercentage": "Prům. Percent Score of Quizzes",
+      "avgQuizCompletionPercentage": "Prům. Procento soutěže kurzu",
+      "noData": "Žádná data",
+      "courses": "Kurzy",
+      "lessons": "Lekce",
+      "completed": "Dokončeno",
+      "started": "Zahájeno",
+      "noDataAvailable": "Nejsou k dispozici žádné údaje",
+      "rates": "Sazby",
+      "numberOf": "Počet",
+      "noLessonsToContinue": "Momentálně nejsou žádné lekce, na které by bylo možné pokračovat.",
+      "continueLearning": "Pokračujte v učení v:"
+    }
+  },
+  "profileWithCalendarView": {
+    "header": "Můj profil",
+    "button": {
+      "settings": "Nastavení"
+    },
+    "other": {
+      "dailyStreak": "denní pruh"
+    }
+  },
+  "adminStatisticsView": {
+    "header": "vítej zpět,",
+    "other": {
+      "courseCompletionPercentage": "Procento dokončení kurzu",
+      "conversionsAfterFreemiumLesson": "Konverze po lekci Freemium",
+      "avgQuizScore": "Prům. Skóre ve všech kvízech",
+      "purchasedCourse": "Zakoupený kurz",
+      "remainedOnFreemium": "Zůstal na Freemium",
+      "correct": "Opravit",
+      "incorrect": "Nesprávný",
+      "completed": "Dokončeno",
+      "enrolled": "Zapsáno",
+      "noData": "Žádná data",
+      "downloadReport": "Stáhnout zprávu",
+      "downloadingReport": "Stahování přehledu..."
+    },
+    "toast": {
+      "reportDownloadSuccess": "Přehled byl úspěšně stažen",
+      "reportDownloadError": "Stažení přehledu se nezdařilo. Zkuste to prosím znovu."
+    }
+  },
+  "adminPromotionCodesView": {
+    "notifications": {
+      "createdSuccessfully": "Propagační kód byl úspěšně vytvořen",
+      "updatedSuccessfully": "Propagační kód byl úspěšně aktualizován"
+    },
+    "headers": {
+      "create": "Vytvořte propagační kód",
+      "update": "Aktualizujte propagační kód"
+    },
+    "status": {
+      "active": "Aktivní",
+      "deactivated": "Deaktivováno",
+      "expired": "Platnost vypršela",
+      "usageLimitReached": "Bylo dosaženo limitu využití"
+    },
+    "field": {
+      "code": "Kód",
+      "status": "Postavení",
+      "uses": "Počet použití",
+      "associatedCourses": "Přidružené kurzy",
+      "discountType": "Typ slevy",
+      "discountTypePercent": "procent",
+      "discountTypeFixed": "Opraveno",
+      "discountValue": "Hodnota slevy",
+      "maxRedemptions": "Maximální výkupy",
+      "expiresAt": "Platnost vyprší v",
+      "assignedCourses": "Přidělené kurzy",
+      "type": "Typ",
+      "associateCourse": {
+        "checkAll": "Přihlaste se na všechny kurzy"
+      },
+      "discount": "Sleva",
+      "createdAt": "Vytvořeno v"
+    },
+    "breadcrumbs": {
+      "promotionCodes": "Propagační kódy",
+      "createNew": "Vytvořit nový",
+      "update": "Aktualizovat",
+      "back": "Zadní"
+    },
+    "button": {
+      "createNew": "Vytvořit nový",
+      "createCoupon": "Vytvořte propagační kód",
+      "deactivatePromotionCode": "Tento propagační kód je aktivní",
+      "activatePromotionCode": "Tento propagační kód není aktivní"
+    },
+    "other": {
+      "noCourses": "Žádné kurzy",
+      "usageInfo": "Informace o použití",
+      "usageAmount": "Množství využití",
+      "baseInfo": "Základní informace"
+    }
+  },
+  "adminCoursesView": {
+    "filters": {
+      "placeholder": {
+        "title": "Hledat podle názvu...",
+        "categories": "Kategorie",
+        "states": "států"
+      },
+      "other": {
+        "draft": "Návrh",
+        "published": "Publikováno",
+        "private": "Soukromé"
+      }
+    },
+    "courses": {
+      "header": "Spravovat kurzy",
+      "subHeader": "Všechny kurzy si můžete prohlížet a upravovat"
+    },
+    "field": {
+      "title": "Titul",
+      "author": "Autor",
+      "category": "Kategorie",
+      "price": "Cena",
+      "state": "Stát",
+      "status": "Postavení",
+      "sharedCourse": "Sdíleno",
+      "createdAt": "Vytvořeno v"
+    },
+    "lessonCard": {
+      "mappedTypes": {
+        "video": "Video",
+        "presentation": "Prezentace",
+        "content": "Obsah",
+        "quiz": "Kvíz",
+        "ai_mentor": "AI mentor",
+        "embed": "Vložit"
+      }
+    },
+    "other": {
+      "selected": "Vybraný",
+      "noLessons": "Žádné lekce"
+    },
+    "button": {
+      "uploadScorm": "Nahrajte SCORM",
+      "createNew": "Vytvořit nový",
+      "deleteSelected": "Smazat vybrané"
+    },
+    "deleteModal": {
+      "titleSingle": "Smazat kurz",
+      "titleMultiple": "Smazat kurzy",
+      "descriptionSingle": "Opravdu chcete tento kurz smazat? Tuto akci nelze vrátit zpět.",
+      "descriptionMultiple": "Opravdu chcete smazat {{count}} kurzy? Tuto akci nelze vrátit zpět."
+    },
+    "toast": {
+      "deleteCourseSuccessfully": "Kurz byl úspěšně smazán",
+      "deleteCourseFailed": "Kurz se nepodařilo smazat",
+      "deletePublishedCourseFailed": "Publikovaný kurz nelze smazat. Nejprve nastavte její stav na Koncept."
+    }
+  },
+  "adminCategoriesView": {
+    "filters": {
+      "placeholder": {
+        "title": "Hledat podle názvu..."
+      }
+    },
+    "field": {
+      "title": "Titul",
+      "status": "Postavení",
+      "createdAt": "Vytvořeno v"
+    },
+    "button": {
+      "createNew": "Vytvořit nový",
+      "clearAll": "Vymazat vše",
+      "deleteSelected": "Smazat vybrané"
+    },
+    "deleteModal": {
+      "titleSingle": "Smazat kategorii",
+      "titleMultiple": "Smazat kategorie",
+      "descriptionSingle": "Opravdu chcete smazat tuto kategorii? Tuto akci nelze vrátit zpět.",
+      "descriptionMultiple": "Opravdu chcete smazat {{count}} kategorií? Tuto akci nelze vrátit zpět."
+    },
+    "toast": {
+      "deleteCategorySuccessfully": "Kategorie byla úspěšně smazána",
+      "deleteCategoryFailed": "Kategorii se nepodařilo smazat"
+    },
+    "breadcrumbs": {
+      "categories": "Kategorie",
+      "createNew": "Vytvořit novou kategorii",
+      "back": "Zadní"
+    }
+  },
+  "adminCategoryView": {
+    "header": "Vytvořit novou kategorii",
+    "subHeader": "Zadejte název nové kategorie. Až budete hotovi, klikněte na Uložit.",
+    "editCategoryHeader": "Informace o kategorii",
+    "field": {
+      "title": "Titul",
+      "status": "Postavení",
+      "newCategoryName": "Název nové kategorie"
+    },
+    "placeholder": {
+      "categoryName": "Zadejte název kategorie..."
+    },
+    "button": {
+      "createCategory": "Vytvořit kategorii"
+    },
+    "toast": {
+      "categoryCreatedSuccessfully": "Kategorie byla úspěšně vytvořena",
+      "categoryUpdatedSuccessfully": "Kategorie byla úspěšně aktualizována"
+    },
+    "error": {
+      "categoryNotFound": "Kategorie nenalezena",
+      "categoryIdNotFound": "ID kategorie nenalezeno"
+    },
+    "breadcrumbs": {
+      "categories": "Kategorie",
+      "categoryDetails": "Podrobnosti kategorie",
+      "back": "Zadní"
+    }
+  },
+  "adminUsersView": {
+    "filters": {
+      "placeholder": {
+        "searchByKeyword": "Hledat podle klíčového slova...",
+        "roles": "Role",
+        "groups": "Všechny skupiny"
+      }
+    },
+    "field": {
+      "firstName": "Křestní jméno",
+      "lastName": "Příjmení",
+      "email": "E-mail",
+      "role": "Role",
+      "status": "Postavení",
+      "createdAt": "Vytvořeno v",
+      "group": "Skupina"
+    },
+    "other": {
+      "selected": "Vybraný"
+    },
+    "toast": {
+      "cannotUpdateOwnRole": "Správce nemůže změnit svou vlastní roli",
+      "noUserSelected": "Nebyl vybrán žádný uživatel"
+    },
+    "import": {
+      "toast": {
+        "success": "Import byl úspěšně dokončen.\nPočet importovaných uživatelů: {{ importedUsersAmount }}.\nPřeskočeno {{ skippedUsersAmount }} stávajících uživatelů."
+      }
+    },
+    "button": {
+      "createNew": "Vytvořit nový",
+      "deleteSelected": "Smazat vybrané",
+      "edit": "Upravit",
+      "import": "Importovat uživatele",
+      "bulkEdit": "Hromadná úprava"
+    },
+    "dropdown": {
+      "roles": "Role",
+      "groups": "Skupiny",
+      "delete": "Vymazat",
+      "archive": "Archiv"
+    },
+    "modal": {
+      "title": {
+        "delete": "Chcete tyto účty smazat?",
+        "role": "Upravte role",
+        "group": "Upravte skupiny",
+        "archive": "Archivovat uživatelské účty",
+        "confirmation": "Opravdu chcete pokračovat?",
+        "import": "Importovat uživatele",
+        "importResult": "Výsledek importu"
+      },
+      "button": {
+        "delete": "Vymazat",
+        "role": "Uložit",
+        "group": "Uložit",
+        "archive": "Archiv",
+        "continue": "Potvrdit"
+      },
+      "description": {
+        "delete": "Opravdu chcete tyto účty smazat? Tato akce je nevratná.",
+        "confirmationForGroup_one": "Změníte skupinu na {{ group }} pro 1 uživatele",
+        "confirmationForGroup_other": "Změníte skupinu na {{ group }} pro {{ count }} uživatelů",
+        "confirmationForRole_one": "Změníte roli na {{ role }} pro 1 uživatele.",
+        "confirmationForRole_other": "Změníte roli na {{ role }} pro {{ count }} uživatelů",
+        "archive": "Opravdu chcete tyto účty archivovat?",
+        "import": "Nahrajte soubor .csv nebo .xlsx s následujícími sloupci: jméno, příjmení, email, role (admin, student nebo content_creator), skupiny (\"skupina1,skupina2\"), jazyk (en nebo pl).",
+        "noUsersImported": "Nebyli importováni žádní uživatelé.",
+        "noUsersSkipped": "Nebyli přeskočeni žádní uživatelé."
+      },
+      "placeholder": {
+        "group": "Vyberte skupinu",
+        "role": "Vyberte roli"
+      },
+      "note": {
+        "import": "Poznámka: Stávající uživatelé budou přeskočeni. Pokud je zadaná skupina a neexistuje, nová skupina se nevytvoří. Jazykové pole je nepovinné; pokud není zadán nebo je neplatný, výchozí jazyk bude nastaven na jazyk správce."
+      },
+      "tabs": {
+        "imported": "Importováno",
+        "skipped": "Přeskočeno"
+      }
+    },
+    "breadcrumbs": {
+      "users": "Uživatelé",
+      "createNew": "Vytvořit nového uživatele",
+      "back": "Zadní",
+      "news": "Zprávy"
+    }
+  },
+  "adminUserView": {
+    "header": "Vytvořit nového uživatele",
+    "subHeader": "Chcete-li vytvořit nového uživatele, vyplňte údaje. Až budete hotovi, klikněte na Uložit.",
+    "editUserHeader": "Informace o uživateli",
+    "placeholder": {
+      "role": "Vyberte roli",
+      "groupId": "Vyberte skupinu",
+      "language": "Vyberte jazyk"
+    },
+    "field": {
+      "firstName": "Křestní jméno",
+      "lastName": "Příjmení",
+      "email": "E-mail",
+      "role": "Role",
+      "language": "Jazyk",
+      "status": "Postavení",
+      "groups": "Skupina"
+    },
+    "toast": {
+      "userCreatedSuccessfully": "Uživatel byl úspěšně vytvořen",
+      "userWithAttemptsError": "Uživatele s propojenými výsledky kvízu nelze smazat. K dispozici je pouze anonymizace a archivace.",
+      "userWithCreatedCoursesError": "Nelze smazat uživatele, který je autorem existujících kurzů. K dispozici je pouze anonymizace a archivace."
+    },
+    "button": {
+      "createUser": "Vytvořit uživatele"
+    },
+    "error": {
+      "userNotFound": "Uživatel nenalezen"
+    },
+    "breadcrumbs": {
+      "users": "Uživatelé",
+      "userDetails": "Podrobnosti o uživateli",
+      "back": "Zadní"
+    }
+  },
+  "adminEnvsView": {
+    "name": "Proměnné prostředí",
+    "keysTitle": "Klíče",
+    "updateSuccessful": "Tajemství byla úspěšně aktualizována",
+    "form": {
+      "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "MICROSOFT_CLIENT_ID": {
+        "label": "ID klienta Microsoft"
+      },
+      "MICROSOFT_CLIENT_SECRET": {
+        "label": "Tajný klíč klienta Microsoft"
+      },
+      "MICROSOFT_OAUTH_ENABLED": {
+        "label": "Microsoft OAuth povoleno (pravda/nepravda)"
+      },
+      "VITE_MICROSOFT_OAUTH_ENABLED": {
+        "label": "Vite Microsoft OAuth povoleno (pravda/nepravda)"
+      },
+      "OPENAI_API_KEY": {
+        "label": "Klíč OpenAI API"
+      },
+      "BUNNY_STREAM_API_KEY": {
+        "label": "Klíč API pro Bunny Stream"
+      },
+      "BUNNY_STREAM_SIGNING_KEY": {
+        "label": "Podepisovací klíč Bunny Stream"
+      },
+      "BUNNY_STREAM_LIBRARY_ID": {
+        "label": "ID knihovny Bunny Stream"
+      },
+      "BUNNY_STREAM_TOKEN_SIGNING_KEY": {
+        "label": "Podpisový klíč tokenu Bunny Stream"
+      },
+      "BUNNY_STREAM_CDN_URL": {
+        "label": "Bunny Stream CDN URL"
+      },
+      "GOOGLE_CLIENT_ID": {
+        "label": "ID klienta Google"
+      },
+      "GOOGLE_CLIENT_SECRET": {
+        "label": "Tajný klíč klienta Google"
+      },
+      "GOOGLE_OAUTH_ENABLED": {
+        "label": "Google OAuth povoleno (pravda/nepravda)"
+      },
+      "VITE_GOOGLE_OAUTH_ENABLED": {
+        "label": "Vite Google OAuth povoleno (pravda/nepravda)"
+      },
+      "STRIPE_WEBHOOK_SECRET": {
+        "label": "Tajemství proužkového webhooku"
+      },
+      "STRIPE_SECRET_KEY": {
+        "label": "Tajný klíč Stripe"
+      },
+      "VITE_STRIPE_PUBLISHABLE_KEY": {
+        "label": "Publikovatelný klíč Vite Stripe"
+      },
+      "SLACK_CLIENT_ID": {
+        "label": "Slack Client ID"
+      },
+      "SLACK_CLIENT_SECRET": {
+        "label": "Tajné tajemství klienta Slack"
+      },
+      "SLACK_OAUTH_ENABLED": {
+        "label": "Slack OAuth povoleno (pravda/nepravda)"
+      },
+      "VITE_SLACK_OAUTH_ENABLED": {
+        "label": "Vite Slack OAuth povoleno (pravda/nepravda)"
+      },
+      "LUMA_API_KEY": {
+        "label": "Luma API klíč"
+      },
+      "save": "Uložit"
+    },
+    "breadcrumbs": {
+      "envs": "Proměnné prostředí"
+    }
+  },
+  "adminGroupsView": {
+    "name": "Název skupiny",
+    "characteristic": "Charakteristický",
+    "buttons": {
+      "create": "Vytvořit nový",
+      "deleteSelected": "Smazat vybrané"
+    },
+    "groupSelect": {
+      "label": "Vyberte skupiny",
+      "noGroups": "Nebyly nalezeny žádné skupiny"
+    },
+    "newGroup": {
+      "header": "Vytvořit novou skupinu",
+      "card": {
+        "header": "Podrobné informace",
+        "subheader": "Definujte název své skupiny a její charakteristiku",
+        "footer": "Pamatujte, že AI Mentor jej použije v konverzacích."
+      },
+      "fields": {
+        "name": "Jméno",
+        "characteristic": "Charakteristický"
+      },
+      "cancel": "Zrušit",
+      "submit": "Publikovat"
+    },
+    "updateGroup": {
+      "header": "Aktualizovat skupinu",
+      "fields": {
+        "name": "Jméno",
+        "description": "Popis"
+      },
+      "submit": "Upravit skupinu",
+      "groupUpdatedSuccessfully": "Skupina byla úspěšně aktualizována",
+      "groupNotFound": "Skupina nenalezena"
+    },
+    "deleteGroup": {
+      "title": "Potvrďte smazání",
+      "description": "Opravdu chcete tyto skupiny smazat?",
+      "cancel": "Zrušit",
+      "submit": "Vymazat"
+    },
+    "breadcrumbs": {
+      "groups": "Skupiny",
+      "createNew": "Vytvořit nový",
+      "editGroup": "Upravit skupinu",
+      "back": "Zadní"
+    }
+  },
+  "enrollCourseView": {
+    "toast": {
+      "unenrollCourseSuccessfully": "Kurz byl úspěšně odhlášen"
+    }
+  },
+  "paymentView": {
+    "toast": {
+      "successful": "Platba proběhla úspěšně",
+      "failed": "Vytvoření platebního záměru se nezdařilo",
+      "somethingWentWrong": "Něco se pokazilo"
+    },
+    "other": {
+      "buyFor": "Koupit za",
+      "enrollCourse": "Přihlaste se do kurzu"
+    }
+  },
+  "adminCourseView": {
+    "mandatoryCourse": "Povinný kurz",
+    "mandatoryCourseTooltip": "Označte tento kurz jako povinný pro vybranou skupinu. Musíte stanovit termín dokončení. Po uzávěrce obdrží administrátor emailové upozornění s uvedením účastníků, kteří kurz neabsolvovali.",
+    "deadline": "Lhůta",
+    "selectDate": "Vyberte datum",
+    "deadlineRequired": "U povinného kurzu je nutný termín",
+    "common": {
+      "settings": "Nastavení",
+      "curriculum": "Osnovy",
+      "status": "Postavení",
+      "pricing": "Ceny",
+      "preview": "Náhled",
+      "generateMissingTranslations": "Vygenerujte chybějící překlady",
+      "enrolledStudents": "Zapsaní studenti",
+      "testAiMentor": "Otestujte AI mentora",
+      "aiCourseCreation": "Vytvoření kurzu AI",
+      "notAddedLanguages": "Nepřidáno",
+      "baseLanguage": "Výchozí",
+      "generateMissingTranslationsDescription": "Opravdu chcete vygenerovat chybějící překlady? Tato akce může chvíli trvat."
+    },
+    "toast": {
+      "courseNotFound": "Kurz nenalezen",
+      "candidateNotAvailable": "Vlastnictví kurzu na tohoto uživatele nelze převést",
+      "createCourseSuccessfully": "Kurz úspěšně vytvořen",
+      "courseUpdatedSuccessfully": "Kurz byl úspěšně aktualizován",
+      "courseTrailerUpdatedSuccessfully": "Upoutávka kurzu byla úspěšně aktualizována",
+      "courseTrailerRemovedSuccessfully": "Upoutávka kurzu byla úspěšně odstraněna",
+      "certificateUpdatedSuccessfully": "Certifikát byl úspěšně aktualizován",
+      "certificateUpdateError": "Chyba při aktualizaci certifikátu",
+      "maxTitleLengthExceeded_one": "Název nesmí být delší než {{count}} znaků",
+      "maxTitleLengthExceeded_other": "Název nesmí být delší než {{count}} znaků",
+      "aiMentorAvatarIncorrectType": "Neplatný typ souboru. Nahrajte prosím obrázek JPG, JPEG, PNG nebo SVG.",
+      "languageNotSupported": "Tento kurz tento jazyk nepodporuje.",
+      "updateCourseMissingLanguage": "Nebyl poskytnut žádný jazyk pro překlad",
+      "successfullyDeletedLanguage": "Jazyk byl z kurzu úspěšně odstraněn",
+      "invalidLanguageToDelete": "Tento jazyk nelze smazat.",
+      "cannotModifyQuestionsInNonBaseLanguage": "Nemůžete upravit otázky v jiném než výchozím jazyce.",
+      "noMissingTranslations": "Žádné chybějící překlady",
+      "mismatchContentLength": "Počet překladů neodpovídá počtu vygenerovaných překladů",
+      "translationsGeneratedSuccessfully": "Překlady byly úspěšně vygenerovány",
+      "lumaNotConfigured": "Luma API klíč není nakonfigurován.",
+      "lumaBadRequest": "Požadavek Luma byl neplatný.",
+      "lumaUnauthorized": "Autorizace Luma se nezdařila.",
+      "lumaResourceNotFound": "Požadovaný zdroj Luma nebyl nalezen.",
+      "lumaRequestTimeout": "Vypršel časový limit požadavku Luma.",
+      "lumaConflict": "Luma nahlásil konflikt.",
+      "lumaValidationFailed": "Ověření Luma se nezdařilo.",
+      "lumaRateLimited": "Byl dosažen limit luma rate. Zkuste to za chvíli znovu.",
+      "lumaServiceUnavailable": "Služba Luma je momentálně nedostupná.",
+      "courseHasChapters": "Tento kurz již obsahuje kapitoly.",
+      "courseGeneratedSavedSuccessfully": "Vygenerovaný kurz byl úspěšně uložen.",
+      "maxOneVideoUploaded": "Nemůžete nahrát více než 1 video.",
+      "successfullyTransferredCourseOwnership": "Vlastnictví kurzu bylo úspěšně převedeno"
+    },
+    "thinking": {
+      "PLANNING_NEXT_STEP": "Plánování dalšího kroku...",
+      "USING_TOOLS": "Použití nástrojů k načtení kontextu...",
+      "SUMMARIZING_CONTEXT": "Shrnutí načteného kontextu...",
+      "ANALYZING_OBJECTIVES": "Analýza cílů...",
+      "SCANNING_LEARNING_EVIDENCE": "Skenování důkazů o učení...",
+      "RUNNING_CURRICULUM_DESIGN": "Návrh běžného učebního plánu...",
+      "INITIALIZING_CURRICULUM_PLAN": "Inicializace plánu výuky...",
+      "DESIGNING_CHAPTERS": "Navrhování kapitol...",
+      "DESIGNING_LESSON_BLUEPRINTS": "Navrhování plánů lekcí...",
+      "FINALIZING_COURSE_STRUCTURE": "Dokončování struktury kurzu...",
+      "PREPARING_FINAL_COURSE_SHELL": "Příprava posledního kurzu...",
+      "FINALIZING_LESSON_PAYLOADS": "Dokončování obsahu lekcí...",
+      "COURSE_FINISHED": "Ukládání vygenerovaného kurzu...",
+      "WRITING_RESPONSE": "Psaní odpovědi...",
+      "WAITING_FOR_CONFIRMATION": "Čekání na vaše potvrzení...",
+      "THINKING": "Myslící..."
+    },
+    "generation": {
+      "processingTitle": "Generování kurzu na pozadí",
+      "exitHint": "Nechte tuto stránku otevřenou. Generování může trvat několik minut.",
+      "exitDialogTitle": "Opustit tuto stránku?",
+      "exitWarning": "Probíhá generování kurzu. Opravdu chcete opustit tuto stránku?",
+      "finishedTitle": "Generování kurzu dokončeno",
+      "finishedDescription": "Vaše kapitoly a lekce jsou připraveny ke kontrole.",
+      "preparingStructure": "Příprava struktury kapitol..."
+    },
+    "settings": {
+      "breadcrumbs": {
+        "back": "Zadní",
+        "myCourses": "Moje kurzy",
+        "createNew": "Vytvořit nový"
+      },
+      "button": {
+        "removeThumbnail": "Odebrat miniaturu",
+        "removeTrailer": "Odebrat přívěs",
+        "removeCertificateSignature": "Odebrat podpis",
+        "includesCertificate": "Obsahuje certifikát",
+        "doesNotIncludeCertificate": "Neobsahuje certifikát"
+      },
+      "selectButton": {
+        "uploadFile": "Nahrajte soubor",
+        "External": "Externí (URL)"
+      },
+      "sideSection": {
+        "header": "Náhled karty",
+        "subHeader": "Takto bude váš kurz viditelný pro studenty.",
+        "button": {
+          "enroll": "Zapsat"
+        },
+        "other": {
+          "noDescription": "Zatím bez popisu.",
+          "untitled": "Bez názvu"
+        }
+      },
+      "field": {
+        "title": "Název kurzu",
+        "category": "Kategorie",
+        "description": "Popis",
+        "thumbnail": "Náhled",
+        "trailer": "Trailer kurzu",
+        "baseLanguage": "Základní jazyk"
+      },
+      "placeholder": {
+        "title": "Zadejte název",
+        "category": "Vyberte kategorii",
+        "description": "Uveďte popis kurzu..."
+      },
+      "other": {
+        "charactersLeft": "Postavy odešly",
+        "reachedCharactersLimit": "Dosáhli jste limitu počtu znaků.",
+        "reachedCharactersLimitHtml": "Příliš mnoho formátování. Snižte prosím množství formátování, aby se vešlo do limitu.",
+        "enableCertificate": "Povolit certifikát",
+        "enableCertificateDescription": "Zapněte toto, chcete-li vydávat certifikáty pro tento kurz a níže nakonfigurujte jejich podpis a náhled.",
+        "certificateSignatureRequirements": "PNG nebo SVG (doporučené průhledné pozadí)",
+        "certificatePreviewTitle": "Náhled certifikátu",
+        "certificatePreviewDescription": "Otevřete náhled a upravte jazyk a barvu.",
+        "certificatePreviewButton": "Náhled",
+        "certificatePreviewStudentName": "Jméno studenta",
+        "certificatePreviewCourseName": "Název kurzu",
+        "enforceLessonSequence": "Vynutit pořadí lekcí",
+        "requireSequentialLessons": "Požadovat, aby studenti dokončili lekce v pořadí",
+        "enableQuizFeedback": "Zpětná vazba kvízu",
+        "enableQuizFeedbackDescription": "Po odeslání kvízu student uvidí, které odpovědi byly správné, nesprávné nebo nezodpovězené.",
+        "fallbackLanguageWarningTitle": "Poznámka: chybějící překlady",
+        "fallbackLanguageWarningDescription": "Některá pole v této jazykové verzi jsou prázdná. Na těchto místech studenti uvidí obsah z výchozího jazyka, dokud nepřidáte překlady.",
+        "baseLanguageTooltip": "Tento jazyk nemůžete změnit ani odebrat. Je výchozí a bude vždy součástí kurzu."
+      },
+      "validation": {
+        "titleMinLength": "Název musí mít alespoň 2 znaky.",
+        "titleMaxLength": "Název musí mít maximálně 250 znaků.",
+        "descriptionMinLength": "Popis musí mít alespoň 2 znaky.",
+        "categoryRequired": "Kategorie je povinná"
+      },
+      "header": "Vytvořte nový kurz",
+      "subHeader": "Zadejte podrobnosti pro vytvoření nového kurzu. Později budete mít více možností, jak si jej přizpůsobit.",
+      "editHeader": "Základní nastavení",
+      "editSubHeader": "Pro vytvoření nového kurzu vyplňte údaje.",
+      "transferOwnership": {
+        "title": "Převést vlastnictví",
+        "description": "Převeďte tento kurz na jiného uživatele. Stanou se novým majitelem a budou mít plnou kontrolu nad průběhem.",
+        "label": "Vyberte nového vlastníka",
+        "placeholder": "Vyberte uživatele...",
+        "button": "Převod",
+        "dialog": {
+          "title": "Potvrďte přenos",
+          "description": "Chystáte se převést tento kurz na {{user}}. Tuto akci nelze vrátit zpět.",
+          "confirm": "Potvrďte přenos",
+          "cancel": "Zrušit"
+        }
+      }
+    },
+    "curriculum": {
+      "emptyState": {
+        "header": "Přidejte obsah do své kapitoly",
+        "subHeader": "Pomocí panelu vlevo můžete vytvořit nové nebo aktualizovat stávající kapitoly"
+      },
+      "other": {
+        "lessonNumber": "Počet lekcí",
+        "chapter": "Kapitola",
+        "lesson": "Lekce",
+        "edit": "Upravit",
+        "create": "Vytvořit",
+        "resources": "Zdroje",
+        "removeContentQuestionBody": "Tím se otázka z kvízu odstraní",
+        "removeContentBody": "Tím se odstraní všechna poskytnutá data včetně nahraných médií.",
+        "removeContentLesson": "Opravdu chcete smazat tuto lekci obsahu z kapitoly?",
+        "removeQuizLesson": "Opravdu chcete odstranit tuto kvízovou lekci z kapitoly?",
+        "removeAiMentorLesson": "Opravdu chcete smazat tuto lekci AI Mentor z kapitoly?",
+        "removeEmbedLesson": "Opravdu chcete smazat tuto vloženou lekci z kapitoly?",
+        "removeChapter": "Opravdu chcete smazat tuto kapitolu?",
+        "removeQuestion": "Opravdu chcete smazat otázku?",
+        "removeContent": "Opravdu chcete smazat obsah?"
+      },
+      "chapter": {
+        "button": {
+          "addChapter": "Přidat kapitolu",
+          "addChapterDisabledTooltip": "Nové kapitoly můžete přidávat pouze ve výchozím jazyce.",
+          "generateWithAI": "Generujte pomocí AI"
+        },
+        "toast": {
+          "chapterCreatedSuccessfully": "Kapitola byla úspěšně vytvořena",
+          "chapterUpdatedSuccessfully": "Kapitola byla úspěšně aktualizována",
+          "chapterDisplayOrderUpdatedSuccessfully": "Pořadí zobrazení kapitol bylo úspěšně aktualizováno",
+          "errorWhileUpdating": "Při aktualizaci došlo k chybě.",
+          "unexpectedError": "Došlo k neočekávané chybě."
+        },
+        "field": {
+          "title": "Titul"
+        },
+        "other": {
+          "freemium": "Volná kapitola",
+          "freemiumToolTip": "Studenti mají přístup ke kapitolám freemium, aniž by se do kurzu zapsali."
+        }
+      },
+      "lesson": {
+        "button": {
+          "addLesson": "Přidat lekci",
+          "addQuestion": "Přidat otázku",
+          "addOption": "Přidat možnost",
+          "deleteQuestion": "Smazat otázku",
+          "addWords": "Přidejte slova",
+          "saveLesson": "Uložit",
+          "addResource": "Přidat zdroj",
+          "removeResource": "Odebrat zdroj",
+          "addLessonDisabledTooltip": "Chcete-li vytvořit lekci, musíte být v základním jazyce."
+        },
+        "breadcrumbs": {
+          "back": "Zadní"
+        },
+        "settings": {
+          "title": "Nastavení",
+          "passingThreshold": "Práh pro splnění (%)",
+          "attemptsLimit": "Omezení pokusů",
+          "quizCooldownInHours": "Časový zámek po neúspěšných pokusech (v hodinách)",
+          "numberOfQuestions": "{{count1}} z {{count2}} otázek",
+          "noQuestions": "Žádné otázky"
+        },
+        "tooltip": {
+          "switch": "Pokud je povoleno, má student omezený počet pokusů o kvíz.",
+          "passingThreshold": "Procentuální hranice pro absolvování kvízu. Pokud student dosáhne tohoto skóre, bude kvíz považován za úspěšný.",
+          "attemptsLimit": "Počet povolených pokusů o kvíz před spuštěním časového zámku.",
+          "quizCooldownInHours": "Doba trvání zámku kvízu po použití všech pokusů."
+        },
+        "validation": {
+          "optionTextRequired": "Text možnosti je povinný",
+          "optionTextMaxLength": "Text nesmí být delší než 250 znaků.",
+          "atLeastOneOptionRequired": "Je vyžadována alespoň jedna možnost",
+          "imageRequired": "Obrázek je povinný",
+          "descriptionLength": "Popis musí mít alespoň 10 znaků.",
+          "descriptionMaxLength": "Obsah může mít maximálně 20 000 znaků.",
+          "atLeastOneOptionCorrect": "U otázky musí být označena alespoň jedna možnost jako správná.",
+          "allOptionsCorrect": "Všechny možnosti musí být správné",
+          "titleRequired": "Název je povinný",
+          "descriptionRequired": "Popis je povinný",
+          "aiMentorInstructionsRequired": "Jsou vyžadovány pokyny AI Mentor",
+          "aiMentorInstructionsMaxLength": "Pokyny AI Mentor jsou příliš dlouhé (max. 20 000 znaků)",
+          "completionConditionsRequired": "Podmínky dokončení jsou povinné",
+          "completionConditionsMaxLength": "Podmínky dokončení jsou příliš dlouhé (max. 20 000 znaků)",
+          "customTTSReferenceRequired": "V uživatelském režimu je vyžadována vlastní reference TTS",
+          "taskDescriptionMaxLength": "Popis úkolu je příliš dlouhý (max. {{ count }} znaků)",
+          "passThresholdMin": "Práh pro průchod musí být alespoň 1",
+          "passThresholdMax": "Práh průchodu nesmí překročit 10",
+          "titleMinLength": "Název je příliš krátký (min. 2 znaky)",
+          "titleMaxLength": "Název je příliš dlouhý (max. 250 znaků)",
+          "maxFileSize": "Velikost souboru musí být menší než {{ MAX_MB_PER_FILE }} MB",
+          "maxFileNumber_one": "Nemůžete nahrát více než 1 soubor",
+          "maxFileNumber_other": "Nemůžete nahrát více než {{ count }} souborů",
+          "maxResources_five": "Nemůžete přidat více než 5 zdrojů",
+          "sourceUrlRequired": "Adresa URL zdroje je povinná"
+        },
+        "toast": {
+          "lessonDisplayOrderUpdatedSuccessfully": "Pořadí zobrazení lekce bylo úspěšně aktualizováno",
+          "errorWhileUpdating": "Při aktualizaci došlo k chybě.",
+          "unexpectedError": "Došlo k neočekávané chybě.",
+          "lessonCreatedSuccessfully": "Lekce byla úspěšně vytvořena",
+          "fileLessonCreatedSuccessfully": "Položka souboru byla úspěšně vytvořena",
+          "contentLessonCreatedSuccessfully": "Obsah lekce byl úspěšně vytvořen",
+          "quizLessonCreatedSuccessfully": "Kvíz byl úspěšně vytvořen",
+          "aiMentorLessonCreatedSuccessfully": "Lekce AI Mentor byla úspěšně vytvořena",
+          "aiMentorLessonUpdatedSuccessfully": "Lekce AI Mentor byla úspěšně aktualizována",
+          "aiMentorLessonFileAddedSuccessfully": "Soubory lekcí AI Mentor byly úspěšně nahrány",
+          "courseGenerationFileAddedToUploadQueue": "Soubor byl přidán do fronty nahrávání",
+          "aiMentorLessonFileDeletedSuccessfully": "Soubory lekcí AI Mentor byly úspěšně odstraněny",
+          "lessonUpdatedSuccessfully": "Lekce byla úspěšně aktualizována",
+          "contentLessonUpdatedSuccessfully": "Obsah lekce byl úspěšně aktualizován",
+          "fileLessonUpdatedSuccessfully": "Položka souboru byla úspěšně aktualizována",
+          "questionOptionsUpdatedSuccessfully": "Možnosti otázky byly úspěšně aktualizovány",
+          "embedLessonCreatedSuccessfully": "Vložení lekce bylo úspěšně vytvořeno",
+          "embedLessonUpdatedSuccessfully": "Vložená lekce byla úspěšně aktualizována",
+          "embedLessonCreateError": "Vytvoření vložené lekce se nezdařilo. Zkontrolujte prosím všechna pole a zkuste to znovu.",
+          "embedLessonUpdateError": "Aktualizace lekce vložení se nezdařila. Zkontrolujte prosím všechna pole a zkuste to znovu."
+        },
+        "field": {
+          "title": "Titul",
+          "sourceType": "Typ zdroje",
+          "video": "Nahrajte video",
+          "presentation": "Nahrajte prezentaci",
+          "description": "Popis",
+          "questions": "Otázky",
+          "options": "Možnosti",
+          "image": "Obraz",
+          "type": "Typ",
+          "words": "Slova",
+          "sentence": "Věta",
+          "sourceUrl": "URL zdroje",
+          "aiMentorInstructions": "Pokyny AI Mentor",
+          "completionConditions": "Podmínky dokončení",
+          "aiMentor": "AI mentor",
+          "mentorName": "Jméno mentora",
+          "taskDescription": "Popis úkolu",
+          "passThreshold": "Pass Threshold",
+          "additionalContext": "Další kontext",
+          "aiMentorTypes": "Typ AI Mentor",
+          "voiceConfig": "Hlasová konfigurace",
+          "voiceMode": "Hlasový režim",
+          "ttsPreset": "Předvolba TTS",
+          "customTTSReference": "Vlastní reference TTS",
+          "includeFiles_one": "Připojte až 1 soubor pod {{ MAX_FILE_SIZE }} MB, který bude použit jako kontext v lekcích",
+          "includeFiles_other": "Připojte až {{ count }} soubory menší než {{ MAX_FILE_SIZE }} MB, které budou použity jako kontext v lekcích"
+        },
+        "placeholder": {
+          "title": "Uveďte název lekce...",
+          "fileDescription": "Uveďte popis {{type}}...",
+          "option": "Volba",
+          "matchedWords": "Shodná slova",
+          "singleChoice": "Jediný výběr",
+          "multipleChoice": "Vícenásobný výběr",
+          "enterWord": "Zadejte slovo",
+          "enterURL": "Zadejte URL…",
+          "sourceUrl": "Zadejte zdrojovou URL...",
+          "allowFullscreen": "Povolit celou obrazovku",
+          "aiMentorInstructions": "Popište, jak by se měl AI Mentor chovat během lekce...",
+          "completionConditions": "Uveďte, čeho musí student dosáhnout, aby tuto lekci prošel...",
+          "taskDescription": "Popište úkol, který musí účastník splnit...",
+          "passThreshold": "např. 70 %",
+          "customTTSReference": "Zadejte vlastní referenční ID TTS...",
+          "aiMentorTypes": "Učitel"
+        },
+        "courseGenerationComposer": {
+          "placeholders": {
+            "topic": "Zásady práva na pracovišti pro softwarové týmy včetně smluv, duševního vlastnictví a dodržování předpisů.",
+            "targetAudience": "Vývojáři v produktových týmech, kteří spolupracují s právními a HR zainteresovanými stranami.",
+            "currentLevel": "Začátečník až středně pokročilý bez nutnosti formálního právního vzdělání.",
+            "desiredOutcomes": "S jistotou identifikujte právní riziko v každodenních technických rozhodnutích a uvědomte si, kdy je třeba eskalovat.",
+            "constraintsPrerequisites": "Čtyři až pět hodin týdně v plně vzdáleném prostředí se základními softwarovými zkušenostmi.",
+            "preferredFormatAssessment": "Smíšený formát se stručným čtením, praktickými scénáři a krátkými případovými hodnoceními.",
+            "timeBudget": "Celkem jeden měsíc s týdenními milníky a závěrečnou rekapitulací.",
+            "successCriteriaDomainContext": "Studenti dokážou jasně vysvětlit téma a řešit realistické právní situace na pracovišti v kontextu technologické společnosti."
+          }
+        },
+        "other": {
+          "lessonNumber": "Počet lekcí",
+          "chooseType": "Vyberte typ",
+          "content": "Obsah",
+          "quiz": "Kvíz",
+          "aiMentor": "AI mentor",
+          "embed": "Vložit",
+          "correct": "Opravit",
+          "true": "Věrný",
+          "false": "Falešný",
+          "option": "Volba",
+          "singleChoice": "Jediný výběr",
+          "multipleChoice": "Vícenásobný výběr",
+          "matchWords": "Vhodný",
+          "trueOrFalse": "Pravda nebo nepravda",
+          "fillInTheBlanks": "Vyplňte prázdná místa",
+          "photoQuestion": "Otázka na fotku",
+          "fillInTheBlanksText": "Výplň mezery",
+          "briefResponse": "Krátká odpověď",
+          "detailedResponse": "Volný text",
+          "scale1_5": "Stupnice 1 až 5",
+          "selectQuestionType": "Vyberte typ otázky",
+          "contentLessonDescription": "Text s multimédii (obrázky, videa, prezentace).",
+          "quizLessonDescription": "Sada otázek pro ověření znalostí.",
+          "aiMentorLessonDescription": "Interaktivní rozhovor s virtuálním AI mentorem.",
+          "fillInTheBlanksDescription": "Tato otázka obsahuje větu; studenti musí přetáhnout správné slovo do prázdného místa.",
+          "gapFillDescription": "Tato otázka bude obsahovat větu s chybějícími slovy, která studenti musí zadat.",
+          "embedLessonDescription": "Externí zdroj (např. formulář Google, prezentace Canva nebo živý přenos YouTube).",
+          "fillInTheBlanksSentenceTip": "Napište větu a vložte do ní slova.",
+          "fillInTheBlanksWordTip": "Vytvořte a vložte slovo do věty.",
+          "leaveContentHeader": "Opravdu chcete opustit tento editor otázek?",
+          "leaveContentBody": "Smaže veškerý neuložený postup",
+          "dropOrClick": "Přetáhněte obrázek sem nebo jej nahrajte kliknutím",
+          "allowedFormats": "PNG, JPG nebo SVG",
+          "leaveContentBodyValidate": "Pokud chcete uložit změny, musíte nejprve ověřit formulář",
+          "aiMentorInstructionsTooltip": "Popište, jak by se měl AI Mentor chovat během lekce. Zahrňte kontext, roli nebo scénář, který by AI měla následovat. To určuje, jak bude AI vést konverzaci.",
+          "updateAiMentorAvatarDescription": "Nahrajte nový obrázek pro AI mentora nebo odeberte aktuální.",
+          "updateAiMentorAvatar": "Aktualizujte avatar AI mentora",
+          "aiMentorTypesTooltip": "Vyberte typ AI Mentor: Mentor vás vede k odpovědím, Učitel dává pokyny přímo, Roleplay simuluje skutečné scénáře (např. klient a prodejce).",
+          "aiMentorTypeTooltip": "Chová se jako postava ve scénáři, ale během scény klade otázky a pomáhá vyvozovat závěry.\nPříklad: \"Co byste teď dělal v roli manažera?\"",
+          "aiTeacherTypeTooltip": "Vysvětluje, učí a klade otázky – jako učitel.\nPříklad: \"V této situaci klient vznese cenovou námitku. Co byste měli odpovědět a proč?\"",
+          "aiRoleplayTypeTooltip": "Simuluje realistickou postavu a situaci – bez porušení charakteru.\nPříklad: \"Toto je podruhé, co vaše služba selhala. Co s tím hodláte dělat?\"",
+          "completionConditionsTooltip": "Uveďte, čeho musí student dosáhnout, aby tuto lekci absolvoval. Poskytněte jasné a měřitelné body. Umělá inteligence použije tento seznam ke kontrole pokroku. Můžete také definovat práh pro úspěšné zvládnutí (např. procento nebo minimální počet bodů k pokrytí). Pokud není uveden žádný práh, musí být splněny všechny podmínky pro úspěšné absolvování lekce.",
+          "passThresholdTooltip": "Nastavte minimální procento (1–100 %), které je potřeba k úspěšnému zvládnutí. Nechte prázdné, pokud není nastaven žádný práh.",
+          "voiceConfigFishAudioTooltip": "Hlasový režim používá Fish Audio. Pro vlastní hlas otevřete Fish Audio, vyberte hlas, který se vám líbí, a zkopírujte jeho hlasové ID sem.",
+          "aiMentorPersonaTooltip": "To definuje osobnost lekce. Můžete si vybrat jméno a avatar pro AI Mentora. Osoba se identifikuje tímto jménem a vybraný avatar se bude zobrazovat během lekcí.",
+          "suggestedExamples": "Doporučené příklady",
+          "charactersLeft": "zbývajících znaků",
+          "optional": "volitelný",
+          "overwriteContent": "Přepsat obsah",
+          "overwriteContentDescription": "To nahradí váš aktuální obsah vybraným příkladem. Opravdu chcete pokračovat?",
+          "scenarioSimulation": "Simulace scénáře",
+          "problemSolving": "Řešení problémů",
+          "creativeTask": "Kreativní úkol",
+          "knowledgeSharing": "Dialog sdílení znalostí",
+          "voiceModePreset": "Přednastaveno",
+          "voiceModeCustom": "Zvyk",
+          "voicePresetMale": "Samec",
+          "voicePresetFemale": "Žena",
+          "emoji": {
+            "search": "Vyhledávání",
+            "loading": "Načítání..."
+          },
+          "aiMentorSuggestionExamples": {
+            "instructions": {
+              "scenarioSimulation": "Hrajete roli obchodního klienta, který hledá dodavatele služeb vývoje softwaru. Máte specifické požadavky: aplikace musí být hotová do 3 měsíců, máte omezený rozpočet a očekáváte jasnou komunikaci. Student hraje roli obchodního zástupce, který chce vyhrát váš obchod. Mentor AI by měl odpovídat jako klient, klást otázky a vyjadřovat obavy.",
+              "problemSolving": "Hrajete roli zaměstnance, který žádá o zvýšení platu. Věříte, že si to zasloužíte kvůli svým nedávným příspěvkům. Společnost však v současné době nemá k dispozici žádný rozpočet na zvýšení. Student hraje manažera, který potřebuje vést konverzaci konstruktivně, projevovat empatii a snažit se najít alternativní řešení.",
+              "creativeTask": "Požádáte studenta, aby navrhl nápad na novou službu, kterou by společnost mohla nabídnout svým zákazníkům. Vaší úlohou je podporovat kreativitu, klást doplňující otázky a pomáhat studentovi vylepšit jeho koncept.",
+              "knowledgeSharing": "Hrajete roli zkušeného mentora, který sdílí znalosti o technikách time managementu. Konverzace je neformální: představujete pojmy, uvádíte příklady a povzbuzujete studenta k přemýšlení. Občas položíte lehké, otevřené otázky, abyste si ověřili porozumění. Cílem je vést, ne testovat."
+            },
+            "conditions": {
+              "scenarioSimulation": "<ul><li>Student se zeptá na rozpočet klienta.</li><li>Student se zeptá na časovou osu.</li><li>Student používá prodej SPIN nebo jinou prodejní techniku.</li><li>Student identifikuje klíčová bolestivá místa klienta.</li><li>Student nabídne návrh, který odpovídá klientovým omezením.</li></ul><strong>musí být alespoň 3 splněny podmínky 5.",
+              "problemSolving": "<ul><li>Student uznává příspěvek zaměstnance.</li><li>Student upřímně vysvětlí rozpočtovou situaci.</li><li>Student navrhne nefinanční alternativu (např. další výhody, možnost rozvoje).</li><li>Student souhlasí s tím, že se k tématu vrátí později.</li><li>Student zachovává uctivý a vstřícný tón</strong><strong>3li. Musí být splněno 5 podmínek.",
+              "creativeTask": "<ul><li>Student předloží originální nápad.</li><li>Student vysvětlí, kdo je cílová skupina.</li><li>Student popíše, jak by služba mohla poskytnout hodnotu zákazníkům.</li><li>Student identifikuje potenciální výzvy.</li></ul><em>(Není definován žádný práh – musí být splněny všechny podmínky.)</em>",
+              "knowledgeSharing": "<ul><li>Student se aktivně zapojuje do konverzace (klade otázky nebo sdílí úvahy).</li><li>Student umí vyjmenovat alespoň jednu techniku ​​řízení času zmíněnou v dialogu.</li><li>Student vyjádří, jak by mohl ve své práci použít jednu techniku.</li></ul><em>(Není definován žádný práh – všechny podmínky jsou doporučeny, ale nejsou povinné pro absolvování.)</em>"
+            }
+          },
+          "betaTooltip": "Tato funkce je poskytována v testovací verzi. Může obsahovat chyby nebo nemusí plně fungovat tak, jak bylo zamýšleno, a je používán na vaše vlastní riziko.",
+          "dragWord": "Přetáhněte slovo do věty",
+          "taskDescriptionTooltip": "Stručně popište, co by měl účastník dělat během rozhovoru s mentorem AI."
+        }
+      }
+    },
+    "status": {
+      "header": "Postavení",
+      "subHeader": "Nastavte stav kurzu",
+      "draftHeader": "Návrh",
+      "draftBody": "Tento kurz si studenti nemohou zakoupit ani se do něj zapsat. Pro ty, kteří jsou již zapsáni, se kurz nezobrazí v jejich seznamu studentských kurzů.",
+      "publishedHeader": "Publikováno",
+      "publishedBody": "Studenti si mohou zakoupit, zapsat se a získat přístup k obsahu kurzu. Jakmile se zapíšete, kurz se zobrazí na jejich Student Dashboard.",
+      "privateHeader": "Soukromé",
+      "privateBody": "Tento kurz si studenti nemohou zakoupit ani se do něj zapsat. Zapsaným (např. administrátorem) se kurz objeví v seznamu studentských kurzů a budou si ho moci projít."
+    },
+    "pricing": {
+      "header": "Ceny",
+      "subHeader": "Stanovte cenu kurzu",
+      "freeCourseHeader": "Uvolnit",
+      "freeCourseBody": "Studenti se mohou přihlásit a získat přístup k obsahu kurzu bez placení.",
+      "paidCourseHeader": "Placený kurz",
+      "paidCourseBody": "Studenti si mohou zakoupit a získat přístup k obsahu kurzu. Po výběru můžete definovat měnu a cenu.",
+      "field": {
+        "price": "Cena"
+      },
+      "placeholder": {
+        "amount": "Množství"
+      },
+      "validation": {
+        "priceInCents": "Cena musí být alespoň 2,00 nebo zdarma"
+      }
+    },
+    "enrolled": {
+      "filters": {
+        "placeholder": {
+          "searchByKeyword": "Hledat podle klíčového slova...",
+          "groups": "Všechny skupiny"
+        }
+      },
+      "enroll": "Zapsat",
+      "enrollSelected": "Vybráno přihlášení",
+      "unenrollSelected": "Vybráno zrušit registraci",
+      "unenrollGroups": "Zrušte registraci skupin",
+      "table": {
+        "name": "Jméno",
+        "surname": "Příjmení",
+        "email": "E-mail",
+        "status": "Stav registrace",
+        "enrollmentDate": "Datum zápisu"
+      },
+      "statuses": {
+        "enrolled": "Zapsáno",
+        "enrolledByGroup": "Zapsáno podle skupiny",
+        "individuallyEnrolled": "Individuálně přihlášeni",
+        "notEnrolled": "Nezapsáno"
+      },
+      "confirmation": {
+        "title": "Potvrďte registraci",
+        "description": "Opravdu chcete vybrané studenty zapsat do tohoto kurzu? Tuto akci nelze vrátit zpět."
+      },
+      "enrollGroups": "Zaregistrujte skupiny",
+      "enrollGroupsModal": {
+        "title": "Přihlašte skupiny do kurzu",
+        "description": "Vyberte skupiny, do kterých se chcete přihlásit. Do tohoto kurzu budou automaticky zapsáni všichni členové vybraných skupin. Kurz můžete označit jako povinný a nastavit termín dokončení."
+      },
+      "alreadyEnrolled": "Již zapsáno",
+      "members": "{{count}} členů",
+      "unenrollConfirmation": {
+        "title": "Potvrzení odhlášení",
+        "description": "Opravdu chcete zrušit zápis vybraných studentů z tohoto kurzu? Tuto akci nelze vrátit zpět."
+      },
+      "toast": {
+        "someStudentsUnenrolled": "Tyto studenty nemůžete zrušit, protože {{count}} z nich není zapsáno.",
+        "studentsEnrolledByGroup": "Tyto studenty nemůžete zrušit, protože {{count}} z nich je zapsáno prostřednictvím skupiny.",
+        "groupsUnenrolledSuccessfully": "Skupiny byly úspěšně odhlášeny",
+        "alreadyEnrolledByGroup": {
+          "title": "Někteří uživatelé jsou již zapsáni do skupin"
+        }
+      },
+      "successResponse": "Studenti byli zařazeni do kurzu."
+    },
+    "breadcrumbs": {
+      "courses": "Kurzy",
+      "back": "Zadní"
+    },
+    "statistics": {
+      "title": "Statistika",
+      "subtitle": "Přehled výkonnosti kurzu",
+      "details": "Podrobnosti",
+      "filterByQuiz": "Filtrujte podle kvízu",
+      "allQuizzes": "Všechny kvízy",
+      "filterByLesson": "Filtrujte podle lekce",
+      "allLessons": "Všechny lekce",
+      "tabs": {
+        "progress": "Pokrok",
+        "quizResults": "Výsledky kvízu",
+        "aiMentorResults": "Výsledky AI Mentor",
+        "learningTime": "Čas na učení"
+      },
+      "field": {
+        "studentName": "Student",
+        "groupName": "Skupina",
+        "completedLessonsCount": "Dokončené lekce",
+        "lastActivity": "Poslední aktivita",
+        "lastCompletedLesson": "Poslední dokončená lekce",
+        "quizName": "Kvíz",
+        "quizScore": "Skóre",
+        "attempts": "Pokusy",
+        "lastAttempt": "Poslední pokus",
+        "lessonName": "Lekce",
+        "lastSession": "Poslední relace",
+        "score": "Skóre",
+        "totalTime": "Celkový čas"
+      },
+      "overview": {
+        "enrolledCount": "Zapsaní studenti se počítají",
+        "enrolledCountTooltip": "Počet uživatelů zapsaných do tohoto kurzu.",
+        "completionRate": "Míra dokončení",
+        "completionRateTooltip": "Procento uživatelů, kteří dokončili celý kurz.",
+        "averageCompletionPercentage": "Průměrný pokrok",
+        "averageCompletionPercentageTooltip": "Průměrná úroveň dokončení kurzu u všech zapsaných uživatelů.",
+        "averageScorePerQuiz": "Průměrné skóre za kvíz",
+        "averageScorePerQuizSubtitle": "Podívejte se na průměrné výsledky jednotlivých kvízů v kurzu",
+        "averageQuizScore": "Průměrné skóre kvízu",
+        "completedBy_one": "Dokončeno {{count}} studentem",
+        "completedBy_other": "Dokončeno {{count}} studenty",
+        "courseStatusDistribution": "Distribuce stavu kurzu",
+        "courseStatusDistributionTooltip": "Ukazuje, kolik uživatelů kurz dokončilo, začalo nebo nezačalo.",
+        "averageLearningTime": "Průměrná doba učení",
+        "averageLearningTimeTooltip": "Průměrný čas strávený všemi uživateli v tomto kurzu.",
+        "activeStudents": "Aktivní studenti",
+        "activeStudentsTooltip": "Počet studentů, kteří se zapojili do kurzu."
+      },
+      "empty": {
+        "noUsers": "Žádní uživatelé",
+        "enrolled": "zapsáno",
+        "noGroups": "Žádné skupiny"
+      },
+      "groupFilter": {
+        "placeholder": "Všechny skupiny"
+      }
+    },
+    "createLanguage": {
+      "title": "Vytvořte nový jazyk",
+      "description": "Opravdu chcete pro tento kurz vytvořit nový jazyk?",
+      "success": "Jazyk byl úspěšně vytvořen",
+      "alreadyExists": "Tento jazyk již existuje.",
+      "editConstraints": "V jiných jazycích než {{baseLanguage}} nemůžete vytvářet nové lekce, kapitoly ani přidávat nové otázky do kvízů."
+    },
+    "deleteLanguage": {
+      "title": "Smazat jazyk",
+      "description": "Opravdu chcete tento jazyk smazat?"
+    },
+    "sharedCourse": {
+      "badgeMaster": "Sdíleno",
+      "badgeExported": "Sdíleno",
+      "badgeExportedTooltip": "This course is managed centrally. Můžete ji publikovat a přiřadit k ní účastníky, ale nemůžete upravovat její obsah.",
+      "exportedNoticeTitle": "Tento kurz byl exportován do této organizace",
+      "exportedNoticeDescription": "Obsah je spravován ve zdrojové organizaci a v této organizaci je pouze pro čtení.",
+      "exportsTitle": "Sdílení",
+      "exportsDescription": "Sdílejte tento kurz s vybranými organizacemi.",
+      "selectTenants": "Vyberte organizace",
+      "selectedCount": "Vybraný:",
+      "exportButton": "Podíl",
+      "exportingButton": "Sdílení..."
+    }
+  },
+  "registerView": {
+    "header": "Zaregistrujte se",
+    "subHeader": "Chcete-li vytvořit účet, zadejte své údaje",
+    "subHeaderSSO": "Zaregistrujte se pomocí svého účtu Google/Microsoft",
+    "field": {
+      "firstName": "Křestní jméno",
+      "lastName": "Příjmení",
+      "email": "E-mail",
+      "password": "Heslo",
+      "birthday": "Datum narození",
+      "birthdayPlaceholder": "Vyberte datum",
+      "requiredBadge": "Požadovaný",
+      "optionalBadge": "Volitelný"
+    },
+    "other": {
+      "alreadyHaveAccount": "Už máte účet?",
+      "orContinueWith": "Nebo pokračujte"
+    },
+    "button": {
+      "createAccount": "Vytvořte si účet",
+      "signIn": "Přihlaste se"
+    },
+    "validation": {
+      "firstName": "Jméno je povinné",
+      "lastName": "Příjmení je povinné",
+      "email": "Neplatný email",
+      "birthday": "Musí vám být alespoň {{ageLimit}} let",
+      "requiredCheckbox": "Tento souhlas je vyžadován."
+    },
+    "toast": {
+      "userAlreadyExists": "Uživatel s tímto e-mailem již existuje.",
+      "createAccountFailed": "Nelze vytvořit účet. Zkuste to prosím znovu.",
+      "requiredFormFieldMissing": "Přijměte prosím všechny požadované souhlasy.",
+      "invalidFormField": "Jedno z odeslaných registračních polí je neplatné."
+    }
+  },
+  "courseChapterView": {
+    "other": {
+      "lesson": "Lekce",
+      "lessons": "Lekce",
+      "quiz": "Kvíz",
+      "quizzes": "Kvízy",
+      "free": "Uvolnit"
+    }
+  },
+  "forgotPasswordView": {
+    "header": "Zapomněli jste heslo?",
+    "subHeader": "Zadejte e-mailovou adresu spojenou s vaším účtem a my vám zašleme odkaz pro obnovení hesla.",
+    "field": {
+      "email": "E-mailová adresa"
+    },
+    "validation": {
+      "email": "Neplatný email"
+    },
+    "button": {
+      "resetPassword": "Obnovit heslo",
+      "backToLogin": "Zpět k přihlášení"
+    },
+    "toast": {
+      "resetPassword": "Na váš e-mail byl odeslán odkaz pro obnovení hesla."
+    }
+  },
+  "loginView": {
+    "header": "Přihlášení",
+    "subHeader": "Níže zadejte svůj e-mail a přihlaste se ke svému účtu",
+    "subHeaderSSO": "Přihlaste se pomocí svého účtu Google/Microsoft",
+    "validation": {
+      "email": "Neplatný email",
+      "password": "Je vyžadováno heslo"
+    },
+    "other": {
+      "forgotPassword": "Zapomněli jste heslo?",
+      "useMagicLink": "Zašlete mi e-mail s odkazem na přihlášení",
+      "dontHaveAccount": "Nemáte účet?",
+      "rememberMe": "Pamatuj si mě",
+      "signUp": "Zaregistrujte se",
+      "orContinueWith": "Nebo pokračujte"
+    },
+    "button": {
+      "login": "Přihlášení"
+    },
+    "field": {
+      "email": "E-mail",
+      "password": "Heslo"
+    },
+    "magicLink": {
+      "subHeader": "Ověřujeme váš přihlašovací odkaz. Může to chvíli trvat.",
+      "checking": "Kontrola přihlašovacího odkazu...",
+      "success": "Odkaz na přihlášení ověřen. Přesměrování...",
+      "error": "Odkaz na přihlášení je neplatný nebo jeho platnost vypršela.",
+      "backToLogin": "Zpět k přihlášení"
+    }
+  },
+  "magicLinkView": {
+    "header": "Získejte svůj přihlašovací odkaz",
+    "subHeader": "Zadejte svůj e-mail a my vám zašleme odkaz pro přihlášení.",
+    "validation": {
+      "email": "Neplatný email"
+    },
+    "field": {
+      "email": "E-mailová adresa"
+    },
+    "button": {
+      "sendLink": "Získejte přihlašovací odkaz",
+      "backToLogin": "Zpět k přihlášení"
+    },
+    "toast": {
+      "sent": "Přihlašovací odkaz byl odeslán na váš e-mail."
+    }
+  },
+  "magicLink": {
+    "error": {
+      "createToken": "Nelze vygenerovat přihlašovací odkaz. Zkuste to prosím znovu.",
+      "invalidToken": "Odkaz na přihlášení je neplatný.",
+      "expiredToken": "Platnost přihlašovacího odkazu vypršela."
+    }
+  },
+  "user": {
+    "error": {
+      "archived": "Váš účet byl archivován."
+    }
+  },
+  "studentCoursesView": {
+    "other": {
+      "cannotFindCourses": "Nenašli jsme žádné kurzy",
+      "changeSearchCriteria": "Změňte prosím kritéria vyhledávání nebo to zkuste znovu později",
+      "freeLessons": "Lekce zdarma!",
+      "successfullyEnrolledToCourse": "Úspěšně zapsáni do kurzu"
+    },
+    "breadcrumbs": {
+      "courses": "Kurzy"
+    },
+    "button": {
+      "continue": "Pokračovat",
+      "enroll": "Zapsat",
+      "view": "Pohled",
+      "readMore": "Přečtěte si více",
+      "playChapter": "Přehrát kapitolu"
+    },
+    "enrolledCourses": {
+      "header": "Vaše kurzy",
+      "subHeader": "Kurzy, do kterých jste aktuálně přihlášeni"
+    },
+    "availableCourses": {
+      "header": "Dostupné kurzy",
+      "subHeader": "Všechny dostupné kariérní kurzy dostupné k zápisu",
+      "filters": {
+        "placeholder": {
+          "title": "Hledat podle názvu...",
+          "categories": "Kategorie",
+          "sort": "Seřadit"
+        }
+      },
+      "headerOptions": {
+        "image": "Obraz",
+        "title": "Název kurzu",
+        "category": "Kategorie",
+        "description": "Popis",
+        "author": "Autor"
+      }
+    },
+    "modernView": {
+      "continueLearning": "Pokračujte v učení",
+      "topCourses": "Top 5 nejoblíbenějších kurzů",
+      "hero": {
+        "start": "Start",
+        "moreInfo": "Více informací",
+        "info": "Info"
+      },
+      "lessonsCount_one": "{{count}} lekce",
+      "lessonsCount_other": "{{count}} lekcí"
+    }
+  },
+  "studentQuizSummaryView": {
+    "header": "Gratuluji!",
+    "subHeader": "Dokončili jste kvíz!",
+    "other": {
+      "yourScore": "Vaše skóre:",
+      "tryAgain": "Zkuste to znovu"
+    },
+    "button": {
+      "backToCourse": "Zpět do kurzu"
+    }
+  },
+  "studentLessonView": {
+    "error": {
+      "lessonIdNotFound": "ID lekce nebylo nalezeno",
+      "notAuthorizedTitle": "Neoprávněný",
+      "notAuthorizedDescription": "Nemáte oprávnění k přístupu k této lekci.",
+      "goBackToCourse": "Vraťte se do kurzu"
+    },
+    "other": {
+      "lesson": "Lekce",
+      "chapter": "Kapitola",
+      "correctAnswers": "Správné odpovědi:",
+      "correctSentence": "Správná věta:",
+      "question": "Otázka",
+      "answers": "Odpovědi:",
+      "true": "Věrný",
+      "false": "Falešný",
+      "oneOrTwoWordSentence": "Pokyn: Poskytněte stručnou odpověď (1-2 věty).",
+      "threeOrFiveWordSentence": "Pokyn: Napište podrobnou odpověď (3-5 vět).",
+      "single": "Singl",
+      "multiple": "Násobek",
+      "fillInTheBlanks": "Vyplňte prázdná místa.",
+      "selectQuestion": "vybrat otázku.",
+      "trueOrFalseQuestion": "Správná nebo nepravdivá otázka.",
+      "multipleChoice": "Otázka s výběrem z více možností.",
+      "singleChoice": "Otázka s jednou volbou",
+      "passingThreshold": "Hranice pro splnění: {{threshold}}% ({{correct}} z {{questionsNumber}} otázek)",
+      "score": "Skóre: {{score}}% ({{correct}} z {{questionsNumber}} otázek)",
+      "contentCantBeEmbedded": "Tento obsah nelze vložit.",
+      "openInNewTab": "Otevřít na nové kartě"
+    },
+    "aiMentor": {
+      "title": "Sezení AI Mentor",
+      "description": "Toto je mentorské sezení založené na umělé inteligenci. Umělá inteligence vás provede lekcí na základě pokynů instruktora."
+    },
+    "videoProcessing": {
+      "title": "Video se zpracovává",
+      "body": "Počkejte prosím chvíli. Jakmile bude připraven, objeví se zde."
+    },
+    "playNext": {
+      "title": "Další",
+      "description": "Další přehrání za {{seconds}}s",
+      "descriptionNoCountdown": "Hraje se dál",
+      "playNow": "Hrajte nyní",
+      "cancel": "Zrušit"
+    },
+    "placeholder": {
+      "openQuestion": "Sem napište svou odpověď"
+    },
+    "tooltip": {
+      "retakeAvailableIn": "Uzamčeno na {{time}} hodin po posledním opětovném pořízení.",
+      "cooldown": "Kvíz bude uzamčen na {{time}} hodin po posledním pokusu.",
+      "noCooldown": "Žádná doba ochlazení.",
+      "beta": "Tato funkce je poskytována v testovací verzi. Může obsahovat chyby nebo nemusí plně fungovat tak, jak bylo zamýšleno, a je používán na vaše vlastní riziko."
+    },
+    "breadcrumbs": {
+      "availableCourses": "Dostupné kurzy",
+      "yourCourses": "Vaše kurzy",
+      "back": "Zadní"
+    },
+    "button": {
+      "previous": "Předchozí",
+      "complete": "Kompletní",
+      "next": "Další",
+      "submit": "Předložit",
+      "retake": "Znovudobytí",
+      "autoplay": "Automatické přehrávání"
+    },
+    "sideSection": {
+      "header": "Obsah:",
+      "other": {
+        "courseProgress": "Průběh kurzu:"
+      }
+    },
+    "validation": {
+      "answerCannotBeEmpty": "Odpověď nemůže být prázdná.",
+      "atLeastOneOptionMustBeSelected": "Pro otázku {{questionId}} musí být vybrána alespoň jedna možnost.",
+      "answerCannotBeEmptyForDragAndDropQuestion": "Odpověď nemůže být prázdná pro otázku {{questionId}} přetažením.",
+      "answerCannotBeEmptyForTextQuestion": "Odpověď nemůže být prázdná pro textovou otázku {{questionId}}.",
+      "invalidSelectionForSingleAnswer": "Neplatný výběr pro otázku s jednou odpovědí.",
+      "invalidFormatForMultiAnswer": "Neplatný formát pro otázky s více odpověďmi.",
+      "trueOrFalseRequired": "Vyžaduje se pravdivá nebo nepravdivá odpověď.",
+      "photoQuestionMustHaveAnswer": "Na tuto fotografickou otázku je vyžadována odpověď.",
+      "unansweredQuestions": "Zdá se, že jste ještě nezkontrolovali všechny odpovědi. Zkontrolujte je a zkuste to znovu!"
+    }
+  },
+  "studentCourseView": {
+    "header": "Kapitoly",
+    "subHeader": "Níže si můžete prohlédnout všechny kapitoly v tomto kurzu",
+    "recommendedHeader": "Mohlo by vás zajímat",
+    "recommendedSubheader": "Níže si můžete prohlédnout kurzy s podobným tématem nebo znalostní doménou",
+    "otherAuthorCoursesHeader": "Další kurzy od",
+    "otherAuthorCoursesSubheader": "Níže si můžete prohlédnout další kurzy vytvořené stejným autorem",
+    "other": {
+      "cannotFindCourses": "Nenašli jsme žádné kurzy",
+      "changeSearchCriteria": "Změňte prosím kritéria vyhledávání nebo to zkuste znovu později"
+    },
+    "lesson": {
+      "missingAnswer": "Chybí odpověď",
+      "yourAnswer": "Vaše odpověď",
+      "studentsAnswer": "Odpověď studenta",
+      "singleChoice": "Otázka s jednou volbou",
+      "multipleChoice": "Otázka s výběrem z více možností",
+      "trueOfFalseChoice": "Správná nebo nepravdivá otázka",
+      "oneOrTwoWordSentence": "Uveďte stručnou odpověď (1–2 věty).",
+      "threeOrFiveWordSentence": "Napište podrobnou odpověď (3-5 vět).",
+      "aiMentorLesson": {
+        "sendMessage": "Napište zprávu...",
+        "check": "Kontrola",
+        "aiMentorName": "AI mentor",
+        "retake": "Znovudobytí",
+        "userName": "Uživatel",
+        "typing": "Psaní odpovědi...",
+        "send": "Poslat",
+        "addEmoji": "Přidejte emotikony",
+        "closeVoiceMode": "Zavřete hlasový režim",
+        "toggleVoiceInput": "Přepnout hlasový vstup",
+        "startVoiceMentor": "Spusťte hlasového mentora",
+        "stopVoiceRecording": "Zastavit nahrávání hlasu",
+        "taskDescription": "Popis úkolu",
+        "taskDescriptionExpand": "Kliknutím rozbalíte",
+        "taskDescriptionCollapse": "Kliknutím sbalíte",
+        "voiceOverlay": {
+          "headerEyebrow": "Hlasové uživatelské rozhraní",
+          "exit": "Ukončete hlasový režim",
+          "youSaid": "Řekl jsi",
+          "states": {
+            "idle": {
+              "title": "Připraveno",
+              "subtitle": "Klepnutím začněte mluvit"
+            },
+            "listening": {
+              "title": "Naslouchání",
+              "subtitle": "Zachycení vašeho hlasu"
+            },
+            "thinking": {
+              "title": "Myslící",
+              "subtitle": "Model připravuje odpověď"
+            },
+            "speaking": {
+              "title": "Mluvení",
+              "subtitle": "Odezva modelu se přehrává"
+            }
+          },
+          "responsePlaceholder": {
+            "thinking": "Přemýšlíte o své žádosti...",
+            "listening": "Poslouchám vaši další otázku...",
+            "default": "Zde se zobrazí náhled odpovědi."
+          }
+        },
+        "retakeModalTitle": "Opravdu chcete lekci absolvovat znovu?",
+        "retakeModalDescription": "Tím resetujete svůj pokrok v této lekci. Tuto akci nelze vrátit zpět."
+      }
+    },
+    "sideSection": {
+      "optionHeader": "Volba",
+      "courseProgressHeader": "kurzProgressHeader",
+      "other": {
+        "author": "Autor",
+        "title": "Titul",
+        "about": "O",
+        "collapse": "Kolaps",
+        "courseProgress": "Průběh kurzu",
+        "options": "Možnosti",
+        "remainingChapters": "Zbývající kapitoly",
+        "completedChapters": "Dokončené kapitoly",
+        "noData": "Žádná data",
+        "informationText": "Rychle pokračujte tam, kde jste skončili s poslední lekcí."
+      },
+      "button": {
+        "shareCourse": "Sdílejte tento kurz",
+        "continueLearning": "Pokračujte v učení",
+        "startLearning": "Začněte se učit",
+        "enrollCourse": "Přihlaste se do kurzu",
+        "goToContentCreatorPage": "Přejděte na stránku tvůrce obsahu",
+        "repeatLessons": "Opakujte lekce",
+        "enrollGroups": "Zaregistrujte skupiny"
+      }
+    },
+    "breadcrumbs": {
+      "availableCourses": "Dostupné kurzy",
+      "yourCourses": "Vaše kurzy",
+      "back": "Zadní"
+    },
+    "certificate": {
+      "button": {
+        "viewCertificate": "Zobrazit certifikát"
+      },
+      "courseCompleted": "Gratuluji! Dokončili jste kurz! Nyní máte přístup ke svému certifikátu."
+    },
+    "studentMode": {
+      "enter": "Vstupte do režimu učení",
+      "exit": "Ukončete režim učení",
+      "bannerTitle": "Tento kurz absolvujete v režimu učení",
+      "bannerDescription": "Váš pokrok v učení je sledován. Dokončené lekce se započítávají do vašeho osobního dokončení a statistik kurzu.",
+      "exitBanner": "Ukončete režim učení",
+      "learningModeRequired": "Učební režim není pro tento kurz aktivní.",
+      "draftCourseTooltip": "Tento kurz je ve stavu konceptu. Nemůžete se do něj zapsat ani pokračovat ve studiu."
+    },
+    "tabs": {
+      "chapters": "Kapitoly",
+      "moreFromAuthor": "Více od autora",
+      "statistics": "Statistika"
+    }
+  },
+  "studentChapterView": {
+    "chapterProgress": {
+      "header": "Obsah:",
+      "courseProgress": "Průběh kurzu"
+    },
+    "button": {
+      "open": "OTEVŘENO",
+      "continue": "Pokračovat",
+      "playChapter": "Přehrát kapitolu"
+    },
+    "other": {
+      "enrollmentRequired": "Pro otevření se přihlaste do kurzu.",
+      "purchaseRequired": "Odemkněte tuto lekci zakoupením kurzu."
+    }
+  },
+  "settings": {
+    "title": "Nastavení",
+    "buttons": {
+      "cancel": "Zrušit",
+      "save": "Uložit"
+    },
+    "tabs": {
+      "account": "Účet",
+      "organization": "Organizace",
+      "platformCustomization": "Přizpůsobení platformy"
+    },
+    "breadcrumbs": {
+      "settings": "Nastavení"
+    },
+    "toast": {
+      "error": {
+        "globalNotFound": "Globální nastavení nenalezeno"
+      },
+      "qaSettingUpdatedSuccessfully": "Nastavení QA bylo úspěšně aktualizováno",
+      "ageLimitUpdatedSuccessfully": "Věkový limit byl úspěšně aktualizován",
+      "newsSettingUpdatedSuccessfully": "Nastavení zpráv byla úspěšně aktualizována",
+      "articlesSettingUpdatedSuccessfully": "Nastavení znalostní báze byla úspěšně aktualizována"
+    }
+  },
+  "certificateBackgroundUpload": {
+    "title": "Nahrání certifikátu na pozadí",
+    "description": "Nahrajte obrázek na pozadí certifikátu.",
+    "button": {
+      "removeCertificateBackgroundImage": "Smazat pozadí certifikátu",
+      "preview": "Náhled"
+    },
+    "field": {
+      "imageRequirements": "PNG, JPG nebo JPEG (max. 20 MB)"
+    },
+    "other": {
+      "uploading": "Nahrávání...",
+      "removing": "Odebírání..."
+    },
+    "toast": {
+      "success": "Obrázek na pozadí certifikátu byl úspěšně změněn",
+      "error": "Chyba při změně obrázku na pozadí certifikátu"
+    }
+  },
+  "adminPreferences": {
+    "header": "Globální předvolby správce",
+    "subHeader": "Nakonfigurujte nastavení kurzu",
+    "notificationSettings": "Nastavení oznámení",
+    "courseSettings": "Nastavení kurzu",
+    "field": {
+      "newUserNotifications": "Oznámení nového uživatele",
+      "newUserNotificationsDescription": "Dostávat upozornění, když je vytvořen nový uživatel",
+      "coursesVisibility": "Ukažte kurzy návštěvníkům",
+      "coursesVisibilityDescription": "Umožněte návštěvníkům zobrazit seznam kurzů a přistupovat k bezplatným lekcím bez přihlášení",
+      "modernCourseList": "Použijte moderní zobrazení seznamu kurzů",
+      "modernCourseListDescription": "Povolte nový design seznamu kurzů se sekcemi hrdinů a nejlepších kurzů",
+      "finishedCourseNotification": "Oznámení o dokončeném kurzu",
+      "finishedCourseNotificationDescription": "Dostávat upozornění, když uživatel dokončí kurz",
+      "studentsWithOverdueCourseNotification": "Studenti s oznámeními o pozdních kurzech",
+      "studentsWithOverdueCourseNotificationDescription": "Dostávat upozornění, když mají studenti zpožděné kurzy"
+    },
+    "toast": {
+      "newUserNotificationsPreferenceChangeSuccess": "Předvolby upozornění pro nové uživatele byly úspěšně aktualizovány",
+      "coursesVisibilityPreferenceChangeSuccess": "Předvolby viditelnosti kurzu pro neověřené uživatele byly úspěšně aktualizovány",
+      "modernCourseListPreferenceChangeSuccess": "Předvolba seznamu moderních kurzů byla úspěšně aktualizována",
+      "finishedCourseNotificationsPreferenceChangeSuccess": "Předvolby oznámení o dokončeném kurzu byly úspěšně aktualizovány",
+      "finishedCourseNotificationsPreferenceChangeError": "Aktualizace předvoleb oznámení o dokončeném kurzu se nezdařila",
+      "overdueCourseNotificationsPreferenceChangeSuccess": "Předvolby oznámení o zpoždění kurzu byly úspěšně aktualizovány",
+      "overdueCourseNotificationsPreferenceChangeError": "Aktualizace předvoleb oznámení o zpožděném kurzu se nezdařila"
+    }
+  },
+  "registrationFormBuilder": {
+    "title": "Tvůrce registračního formuláře",
+    "description": "Spravujte další zaškrtávací políčka zobrazená během registrace uživatele.",
+    "badge": "Rejstřík",
+    "loading": "Načítání zaškrtávacích políček registračního formuláře...",
+    "empty": "Zatím žádná další registrační políčka.",
+    "addFieldTitle": "Přidat zaškrtávací políčko souhlas",
+    "addFieldDescription": "Vytvořte volitelná nebo povinná zaškrtávací políčka pro registraci.",
+    "summaryLabel": "Zaškrtávací políčka",
+    "addField": "Přidat zaškrtávací políčko",
+    "save": "Uložit registrační formulář",
+    "validation": {
+      "labelRequired": "Obsah štítku je povinný.",
+      "toastLabelRequired": "Před uložením přidejte text zaškrtávacího políčka v angličtině i polštině.",
+      "toastGeneric": "Před uložením opravte zvýrazněný text zaškrtávacího políčka."
+    },
+    "toast": {
+      "saved": "Registrační formulář byl úspěšně uložen."
+    },
+    "field": {
+      "heading": "Zaškrtávací políčko {{index}}",
+      "typeCheckbox": "Zaškrtávací políčko",
+      "cardDescription": "Pro tento souhlas nakonfigurujte kopii, požadovaný stav a objednávku.",
+      "required": "Povinné zaškrtávací políčko",
+      "requiredDescription": "Uživatelé musí před vytvořením účtu zaškrtnout toto políčko.",
+      "requiredBadge": "Požadovaný",
+      "optionalBadge": "Volitelný",
+      "archivedBadge": "Archivováno",
+      "languageLabel": "Štítek v {{language}}",
+      "languageDescription": "Tento obsah se zobrazuje uživatelům, kteří se zaregistrují v tomto jazyce.",
+      "labelPlaceholder": "Zadejte text souhlasu a v případě potřeby přidejte odkazy.",
+      "linkOnlyHint": "Prostý text pouze s odkazy.",
+      "addLink": "Přidat odkaz",
+      "archive": "Archiv",
+      "restore": "Obnovit"
+    }
+  },
+  "mfa": {
+    "setup": {
+      "title": "Nastavení vícefaktorové autentizace",
+      "description": "Chcete-li pro svůj účet nastavit vícefaktorové ověřování (MFA), postupujte podle následujících kroků.",
+      "scanQr": "Naskenujte níže uvedený QR kód pomocí své ověřovací aplikace (Google Authenticator, Authy atd.).",
+      "manualEntry": "Pokud nemůžete skenovat, zadejte tajemství ručně do aplikace.",
+      "enterCode": "Níže zadejte 6místný kód ze své aplikace a klikněte na „Ověřit a povolit MFA“.",
+      "loadingQr": "Načítání vašeho QR kódu...",
+      "secretLabel": "Tajný",
+      "tokenLabel": "Token MFA",
+      "verifyButton": "Ověřit a povolit MFA"
+    },
+    "verify": {
+      "title": "Ověřte vícefaktorovou autentizaci",
+      "description": "Pro ověření vícefaktorového ověřování (MFA) pro váš účet postupujte podle níže uvedených kroků.",
+      "openAuthenticator": "Otevřete aplikaci pro ověřování",
+      "enterCode": "Zadejte 6místný kód ze své aplikace",
+      "verifyToken": "Ověřte svůj token MFA",
+      "tokenLabel": "Token MFA",
+      "toast": {
+        "success": "MFA byla úspěšně ověřena.",
+        "error": "Ověření MFA se nezdařilo."
+      }
+    }
+  },
+  "MFAEnforcementView": {
+    "header": "Vynucení vícefaktorové autentizace založené na rolích",
+    "subHeader": "Vynutit MFA pro konkrétní uživatelské role",
+    "description": "Toto nastavení vám umožňuje vynutit vícefaktorovou autentizaci (MFA) pro konkrétní uživatelské role ve vaší organizaci.",
+    "roles": {
+      "admin": "Správce",
+      "student": "Student",
+      "content_creator": "Tvůrce obsahu"
+    },
+    "switch": {
+      "enabled": "Povoleno",
+      "disabled": "Zakázáno"
+    },
+    "toast": {
+      "mfaEnforcementUpdatedSuccessfully": "Nastavení vynucení MFA byla úspěšně aktualizována.",
+      "mfaEnforcementUpdateFailed": "Aktualizace nastavení vynucení MFA se nezdařila."
+    }
+  },
+  "progressBadge": {
+    "completed": "Dokončeno",
+    "inProgress": "Probíhá",
+    "notStarted": "Nezahájeno",
+    "blocked": "Blokováno"
+  },
+  "studentCertificateView": {
+    "header": "Certifikáty",
+    "informations": {
+      "loading": "Načítání certifikátů...",
+      "noCertificates": "Zatím nejsou k dispozici žádné certifikáty. Absolvováním kurzů získáte certifikáty.",
+      "failedToLoad": "Načtení certifikátů se nezdařilo. Zkuste to znovu později.",
+      "failedToFetch": "Certifikáty se nepodařilo načíst. Zkuste to znovu později.",
+      "preparingDownload": "Váš certifikát se připravuje ke stažení...",
+      "failedToDownload": "Stažení certifikátu se nezdařilo. Zkuste to znovu později.",
+      "shareFailed": "Nepodařilo se připravit odkaz pro sdílení na LinkedIn. Zkuste to znovu později.",
+      "htmlRequired": "Chybí obsah certifikátu. Obnovte stránku a zkuste to znovu.",
+      "pdfGenerationFailed": "Vygenerování certifikátu PDF se nezdařilo. Zkuste to prosím znovu.",
+      "shareImageGenerationFailed": "Vygenerování sdíleného obrázku certifikátu se nezdařilo. Zkuste to znovu později.",
+      "alreadyExists": "Certifikát již existuje.",
+      "createFailed": "Nepodařilo se vytvořit certifikát. Zkuste to znovu později.",
+      "certificateNotFound": "Certifikát nenalezen.",
+      "userNotFound": "Uživatel nenalezen.",
+      "courseNotFound": "Kurz nenalezen.",
+      "courseCertificateDisabled": "Certifikáty jsou pro tento kurz zakázány.",
+      "courseCompletionRequired": "Před vygenerováním certifikátu musíte kurz dokončit."
+    },
+    "button": {
+      "download": "Stáhnout",
+      "preview": "Náhled",
+      "shareLinkedIn": "Sdílet na LinkedIn"
+    },
+    "controls": {
+      "languageToggle": "Přepínač jazyka",
+      "fontColor": "Barva písma"
+    }
+  },
+  "announcements": {
+    "breadcrumbs": {
+      "announcements": "Oznámení",
+      "createAnnouncement": "Vytvořit oznámení"
+    },
+    "page": {
+      "header": "Oznámení",
+      "tooltips": {
+        "markAsRead": "Označit jako přečtené"
+      },
+      "buttons": {
+        "new": "Vytvořit nový"
+      }
+    },
+    "createPage": {
+      "header": "Vytvořit oznámení",
+      "subheader": "Zadejte podrobnosti pro nastavení nového oznámení.",
+      "buttons": {
+        "confirm": "Potvrdit",
+        "cancel": "Zrušit"
+      },
+      "fields": {
+        "title": "Titul",
+        "content": "Obsah",
+        "group": "Skupina",
+        "everyone": "Každý"
+      },
+      "placeholders": {
+        "title": "Zadejte název",
+        "content": "Sem napište své oznámení...",
+        "group": "Vyberte skupinu",
+        "everyone": "Vyberte všechny"
+      },
+      "validation": {
+        "title": {
+          "required": "Název je povinný",
+          "maxLength": "Název musí mít méně než 120 znaků"
+        },
+        "content": {
+          "required": "Obsah je povinný"
+        }
+      }
+    },
+    "buttons": {
+      "readMore": "Přečtěte si více"
+    },
+    "other": {
+      "noNewAnnouncements": "Dnes pro vás nejsou k dispozici žádná nová oznámení",
+      "of": "z"
+    },
+    "toast": {
+      "markedAsRead": "Oznámení byla označena jako úspěšně přečtená",
+      "markAsReadFailed": "Oznámení se nepodařilo označit jako přečtené",
+      "createdSuccessfully": "Oznámení bylo úspěšně vytvořeno",
+      "createFailed": "Oznámení se nepodařilo vytvořit"
+    }
+  },
+  "platformLogo": {
+    "header": "Logo platformy",
+    "subHeader": "Nahrajte vlastní logo pro vaši platformu. Podporované formáty: PNG, SVG",
+    "field": {
+      "uploadLabel": "Obrázek loga",
+      "imageRequirements": "PNG nebo SVG (max. 10 MB)"
+    },
+    "button": {
+      "removeLogo": "Smazat logo platformy"
+    },
+    "toast": {
+      "logoUploadedSuccessfully": "Logo platformy bylo úspěšně nahráno",
+      "logoRemovedSuccessfully": "Logo platformy bylo úspěšně odstraněno",
+      "logoFetchError": "Při načítání loga platformy došlo k chybě"
+    }
+  },
+  "platformSimpleLogo": {
+    "header": "Jednoduché logo platformy (ikona)",
+    "subHeader": "Nahrajte vlastní logo, které bude použito jako signet a favicon. Podporované formáty: PNG, SVG",
+    "field": {
+      "uploadLabel": "Obrázek loga",
+      "imageRequirements": "PNG nebo SVG (max. 10 MB)"
+    },
+    "button": {
+      "removeLogo": "Odstranit logo ikony platformy"
+    },
+    "toast": {
+      "logoUploadedSuccessfully": "Jednoduché logo platformy bylo úspěšně nahráno",
+      "logoRemovedSuccessfully": "Jednoduché logo platformy bylo úspěšně odstraněno",
+      "logoFetchError": "Chyba při načítání jednoduchého loga platformy"
+    }
+  },
+  "organizationTheme": {
+    "title": "Téma organizace",
+    "description": "Přizpůsobte si vzhled své platformy výběrem barvy motivu, která odráží značku vaší organizace."
+  },
+  "organizationLoginBackgroundImageUpload": {
+    "title": "Nahrání obrázku na pozadí přihlášení",
+    "description": "Nahrajte vlastní obrázek na pozadí pro přihlašovací stránku organizace.",
+    "field": {
+      "imageRequirements": "PNG, JPG nebo JPEG (max. 20 MB)"
+    },
+    "button": {
+      "removeBackgroundImage": "Smazat obrázek na pozadí přihlášení"
+    },
+    "toast": {
+      "success": "Obrázek na pozadí přihlášení byl úspěšně změněn",
+      "error": "Chyba při změně obrázku na pozadí přihlášení"
+    }
+  },
+  "files": {
+    "toast": {
+      "invalidData": "Nahrání souboru se nezdařilo – neplatná data souboru",
+      "contentTypeMismatch": "Typ obsahu souboru neodpovídá poskytnutému typu obsahu",
+      "invalidFileType": "Neplatný typ souboru. Nahrajte soubor PNG nebo SVG."
+    },
+    "import": {
+      "noFileUploaded": "Nebyl nahrán žádný soubor",
+      "invalidFileData": "Nahrání souboru se nezdařilo – neplatná data souboru",
+      "fileEmpty": "Soubor je prázdný",
+      "requiredDataMissing": "Import se nezdařil – chybí požadovaná data.",
+      "invalidFileType": "Neplatný typ souboru. Nahrajte prosím platný soubor.",
+      "userFailReason": {
+        "alreadyExists": "uživatel s tímto e-mailem již existuje"
+      }
+    }
+  },
+  "defaultCourseCurrencyView": {
+    "header": "Výchozí měna kurzu",
+    "subHeader": "Nastavte výchozí měnu pro všechny nové kurzy",
+    "toast": {
+      "defaultCourseCurrencyChangeSuccess": "Výchozí měna kurzu byla úspěšně aktualizována",
+      "defaultCourseCurrencyChangeError": "Aktualizace výchozí měny kurzu se nezdařila"
+    },
+    "select": {
+      "pln": {
+        "label": "Polský zlotý",
+        "sign": "zł"
+      },
+      "eur": {
+        "label": "Euro",
+        "sign": "€"
+      },
+      "usd": {
+        "label": "Americký dolar",
+        "sign": "$"
+      },
+      "gbp": {
+        "label": "Britská libra",
+        "sign": "£"
+      }
+    }
+  },
+  "ageLimitView": {
+    "header": "Nastavte věkovou hranici",
+    "subHeader": "Nastavte věkový limit pro nové uživatele",
+    "select": {
+      "placeholder": "Vyberte věkovou hranici",
+      "null": {
+        "label": "Bez omezení"
+      }
+    }
+  },
+  "loginFilesUpload": {
+    "header": "Soubory přihlašovací stránky",
+    "subHeader": "Přidejte až {{count}} souborů a každý pojmenujte.",
+    "emptyState": "Zatím nebyly přidány žádné soubory.",
+    "selectedFile": "Vybraný soubor",
+    "unnamedFile": "Soubor bez názvu",
+    "deleteDialog": {
+      "title": "Odebrat soubor?",
+      "description": "Tímto odeberete „{{name}}“ z přihlašovací stránky.",
+      "confirm": "Smazat soubor"
+    },
+    "previewDialog": {
+      "subtitle": "Náhled souboru přihlašovací stránky",
+      "loading": "Načítání náhledu...",
+      "error": "Náhled tohoto souboru se nepodařilo načíst."
+    },
+    "fileName": {
+      "label": "Jméno",
+      "placeholder": "Zadejte jméno"
+    },
+    "toast": {
+      "invalidFileType": "Neplatný typ souboru. Nahrajte prosím platný soubor.",
+      "successfullyUploadedFile": "Soubor byl úspěšně nahrán",
+      "maxResourceCount": "Bylo dosaženo maximálního počtu zdrojů ({{count}})",
+      "resourceNotFound": "Zdroj nenalezen",
+      "successfullyDeletedFile": "Soubor byl úspěšně smazán"
+    },
+    "addButton": "Přidat nový soubor"
+  },
+  "richTextEditor": {
+    "placeholder": {
+      "lineHint": "Vložte odkaz na YouTube/Vimeo/Canva, přidejte Dokumenty Google nebo nahrajte soubor."
+    },
+    "upload": {
+      "videoProgress": "Nahrávání videa..."
+    },
+    "toolbar": {
+      "format": {
+        "placeholder": "Vyberte formát",
+        "paragraph": "Odstavec",
+        "h1": "Nadpis 1",
+        "h2": "Nadpis 2",
+        "h3": "Nadpis 3",
+        "h4": "Nadpis 4"
+      },
+      "link": {
+        "tooltip": "Odkaz: Z vybraného textu udělá hypertextový odkaz",
+        "dialog": {
+          "title": "Vložit odkaz",
+          "urlLabel": "Zadejte adresu URL odkazu",
+          "linkTextLabel": "Zadejte text odkazu",
+          "linkTextPlaceholder": "Text odkazu...",
+          "urlRequired": "Adresa URL je povinná",
+          "urlInvalid": "Neplatný formát adresy URL",
+          "linkTextRequired": "Text odkazu je povinný"
+        }
+      },
+      "upload": {
+        "uploadFailed": "Nahrání souboru se nezdařilo",
+        "tooltip": "Upload: Umožňuje nahrát soubor"
+      }
+    }
+  },
+  "richText": {
+    "uploadDisplayModeDialog": {
+      "title": "Vyberte způsob zobrazení tohoto souboru",
+      "description": "Vyberte, jak se má „{{name}}“ zobrazovat studentům.",
+      "options": {
+        "preview": {
+          "title": "Náhled",
+          "description": "Zobrazit soubor vložený, aby jej studenti mohli přímo zobrazit."
+        },
+        "download": {
+          "title": "Stáhnout",
+          "description": "Vložit jako odkaz na soubor ke stažení."
+        }
+      }
+    },
+    "video": {
+      "tooltip": {
+        "bunnyMissing": "Video není k dispozici. Zkontrolujte konfiguraci Bunny CDN."
+      },
+      "ariaLabel": {
+        "drag": "Přetáhněte vložení videa",
+        "remove": "Odebrat vložení videa"
+      }
+    },
+    "presentation": {
+      "ariaLabel": {
+        "drag": "Přetáhněte prezentaci vložit",
+        "remove": "Odebrat vložení prezentace"
+      }
+    },
+    "downloadableFile": {
+      "ariaLabel": {
+        "drag": "Přetáhněte soubor",
+        "remove": "Odstraňte soubor ke stažení"
+      }
+    },
+    "pdfPreview": {
+      "ariaLabel": {
+        "drag": "Přetáhněte náhled PDF",
+        "remove": "Odebrat náhled PDF"
+      },
+      "loading": "Načítání náhledu...",
+      "openFile": "Otevřít soubor",
+      "showingPage": "Zobrazuje se stránka {{page}} z {{total}}",
+      "previous": "Předchozí",
+      "next": "Další"
+    },
+    "loadingAiAsset": {
+      "processing": "Zdroj se právě zpracovává"
+    }
+  },
+  "pages": {
+    "dashboard": "Dashboard",
+    "settings": "Nastavení",
+    "providerInformation": "Informace o poskytovateli",
+    "courses": "Kurzy",
+    "profile": "Profil",
+    "lesson": "Lekce",
+    "lessonPreview": "Náhled lekce",
+    "register": "Rejstřík",
+    "passwordRecovery": "Obnova hesla",
+    "login": "Přihlášení",
+    "magicLink": "Odkaz na přihlášení",
+    "createNewPassword": "Vytvořit nové heslo",
+    "createAnnouncement": "Vytvořit oznámení",
+    "announcements": "Oznámení",
+    "users": "Uživatelé",
+    "userDetails": "Podrobnosti o uživateli",
+    "createNewUser": "Vytvořit nového uživatele",
+    "promotionCodes": "Propagační kódy",
+    "promotionCodeDetails": "Podrobnosti propagačního kódu",
+    "createPromotionCode": "Vytvořte propagační kód",
+    "groups": "Skupiny",
+    "editGroup": "Upravit skupinu",
+    "createGroup": "Vytvořit skupinu",
+    "editCourse": "Upravit kurz",
+    "createNewCategory": "Vytvořit novou kategorii",
+    "categoryDetails": "Podrobnosti kategorie",
+    "categories": "Kategorie",
+    "createNewCourse": "Vytvořte nový kurz",
+    "admin": "Admin",
+    "qa": "Otázky a odpovědi",
+    "createQA": "Vytvořit nové otázky a odpovědi",
+    "analytics": "Analytics",
+    "progress": "Pokrok",
+    "tenant": "Podrobnosti organizace",
+    "createTenant": "Vytvořit organizaci",
+    "tenants": "Organizace"
+  },
+  "lessonPreview": {
+    "breadcrumbs": {
+      "browseCourses": "Procházet kurzy",
+      "lessonPreview": "Náhled"
+    },
+    "button": {
+      "back": "Zadní"
+    }
+  },
+  "studentOnboarding": {
+    "dashboard": {
+      "clientStatistics": "Toto je váš řídicí panel – zde můžete najít svůj pokrok, statistiky a nedávnou aktivitu.",
+      "dailyStreak": "Pokračujte v této sérii – sledujte svou sérii denních přihlášení zde."
+    },
+    "courses": {
+      "yourList": "Zde najdete své kurzy...",
+      "availableListFilters": "A zde si můžete procházet dostupné kurzy, na které se můžete přihlásit."
+    },
+    "announcements": {
+      "stayInformed": "Zde najdete oznámení od instruktorů nebo koordinátorů kurzů."
+    },
+    "settings": {
+      "welcome": "Zde můžete spravovat svůj profil - upravovat podrobnosti, nastavovat preference a měnit heslo.",
+      "language": "Zde nastavte preferovaný jazyk rozhraní – přizpůsobte platformu svým potřebám.",
+      "password": "Pravidelně měňte heslo, abyste zachovali bezpečnost svého účtu."
+    },
+    "profile": {
+      "info": "Zde můžete zobrazit a upravit podrobnosti svého profilu.",
+      "certificates": "Zde si můžete zkontrolovat certifikáty o absolvování vašich kurzů."
+    },
+    "providerInformation": {
+      "welcome": "Přečtěte si o poskytovateli a jeho kontaktních údajích."
+    }
+  },
+  "pagination": {
+    "showing": "Zobrazuje se {{startItem}}-{{endItem}} z {{totalItems}} výsledků",
+    "previous": "Předchozí",
+    "next": "Další",
+    "noData": "Nebyla nalezena žádná data"
+  },
+  "QA": {
+    "header": "Často kladené otázky",
+    "subHeader": "Najděte odpovědi na běžné otázky o naší platformě"
+  },
+  "qaPreferences": {
+    "subHeader": "Nakonfigurujte nastavení Q&A",
+    "header": "Nastavení otázek a odpovědí",
+    "settings": {
+      "qaEnabled": {
+        "label": "Povolit sekci Otázky a odpovědi",
+        "description": "Povolte sekci Otázky a odpovědi. Pokud je tato možnost zakázána, je sekce Otázky a odpovědi pro všechny uživatele skrytá."
+      },
+      "qaPublic": {
+        "label": "Zobrazit sekci Otázky a odpovědi neregistrovaným uživatelům",
+        "description": "Povolit neregistrovaným uživatelům zobrazení sekce Otázky a odpovědi (lze přepnout pouze v případě, že je povolena sekce Otázky a odpovědi)"
+      }
+    },
+    "toast": {
+      "QANotEnabled": "Sekce Otázky a odpovědi není povolena"
+    },
+    "tooltip": {
+      "disabled": "Chcete-li toto pole přepnout, nejprve povolte sekci Otázky a odpovědi."
+    }
+  },
+  "newsPreferences": {
+    "subHeader": "Nakonfigurujte nastavení zpráv",
+    "header": "Nastavení zpráv",
+    "settings": {
+      "newsEnabled": {
+        "label": "Povolit sekci novinek",
+        "description": "Povolit sekci novinek. Je-li zakázáno, sekce zpráv je skryta pro všechny uživatele."
+      },
+      "newsPublic": {
+        "label": "Zobrazit sekci novinek neregistrovaným uživatelům",
+        "description": "Povolit neregistrovaným uživatelům zobrazení sekce novinek (lze přepnout pouze v případě, že je povolena sekce novinek)"
+      }
+    },
+    "toast": {
+      "newsNotEnabled": "Sekce zpráv není povolena"
+    },
+    "tooltip": {
+      "disabled": "Chcete-li toto pole přepnout, nejprve povolte sekci novinek."
+    }
+  },
+  "articlesPreferences": {
+    "subHeader": "Nakonfigurujte nastavení znalostní báze",
+    "header": "Nastavení znalostní báze",
+    "settings": {
+      "articlesEnabled": {
+        "label": "Povolit sekci znalostní báze",
+        "description": "Povolte sekci znalostní báze. Je-li tato funkce zakázána, je sekce znalostní báze skryta pro všechny uživatele."
+      },
+      "articlesPublic": {
+        "label": "Zobrazit sekci znalostní báze neregistrovaným uživatelům",
+        "description": "Povolit neregistrovaným uživatelům zobrazení sekce znalostní báze (lze přepnout pouze v případě, že je povolena sekce znalostní báze)"
+      }
+    },
+    "toast": {
+      "articlesNotEnabled": "Sekce znalostní báze není povolena"
+    },
+    "tooltip": {
+      "disabled": "Chcete-li toto pole přepnout, nejprve povolte sekci znalostní báze."
+    }
+  },
+  "qaView": {
+    "button": {
+      "createNew": "Vytvořit nové otázky a odpovědi"
+    },
+    "toast": {
+      "qaCreatedSuccessfully": "Otázky a odpovědi byly úspěšně vytvořeny",
+      "qaUpdatedSuccessfully": "Otázky a odpovědi byly úspěšně aktualizovány",
+      "languageCreatedSuccessfully": "Jazyk byl úspěšně vytvořen",
+      "languageDeletedSuccessfully": "Jazyk byl úspěšně smazán",
+      "qaDeletedSuccessfully": "Otázky a odpovědi byly úspěšně smazány",
+      "cannotDeleteLanguage": "Tento jazyk nelze smazat",
+      "languageNotSupported": "Tento jazyk není podporován",
+      "languageAlreadyExists": "Tento jazyk již existuje",
+      "notFound": "Otázky a odpovědi nebyly nalezeny",
+      "noDataToUpdate": "Žádná data k aktualizaci"
+    },
+    "aria": {
+      "editQuestion": "Upravit otázku"
+    },
+    "edit": {
+      "header": "Upravit otázky a odpovědi",
+      "subheader": "Upravte podrobnosti otázek a odpovědí níže",
+      "language": "Jazyk"
+    },
+    "fields": {
+      "title": "Otázka",
+      "description": "Odpověď"
+    },
+    "create": {
+      "header": "Vytvořit otázky a odpovědi",
+      "subheader": "Přidejte otázku a odpověď pro studenty.",
+      "baseLanguageTooltip": "Tento jazyk nemůžete změnit ani odebrat. Je výchozí a vždy bude součástí otázek a odpovědí."
+    },
+    "delete": {
+      "title": "Smazat otázky a odpovědi",
+      "confirm": "Opravdu chcete smazat otázky a odpovědi?"
+    }
+  },
+  "adminArticleView": {
+    "toc": {
+      "title": "Znalostní základna",
+      "actions": {
+        "add": "Přidat",
+        "newLabel": "Nový",
+        "newSection": "Nová sekce",
+        "newArticle": "Nový záznam znalostní báze"
+      }
+    },
+    "dialog": {
+      "createArticle": {
+        "title": "Vytvořte položku znalostní báze",
+        "sectionLabel": "Sekce",
+        "sectionPlaceholder": "Vyberte sekci",
+        "create": "Vytvořit"
+      }
+    },
+    "toast": {
+      "createSectionError": "Sekci se nepodařilo vytvořit",
+      "updateError": "Aktualizace se nezdařila",
+      "languageAlreadyExists": "Tento jazyk již existuje",
+      "createLanguageError": "Nepodařilo se přidat jazyk",
+      "minimumLanguageError": "Je vyžadován alespoň jeden jazyk",
+      "cannotRemoveBaseLanguage": "Základní jazyk nelze odstranit",
+      "removeLanguageError": "Jazyk se nepodařilo odebrat",
+      "sectionHasAssignedArticles": "Nelze odstranit sekci s přiřazenými položkami znalostní báze",
+      "deleteSectionError": "Sekci se nepodařilo smazat",
+      "createError": "Nepodařilo se vytvořit položku znalostní báze",
+      "deleteError": "Nepodařilo se odstranit položku znalostní báze",
+      "notFoundError": "Záznam znalostní báze nebyl nalezen",
+      "invalidCoverType": "Neplatný typ krytu",
+      "invalidLanguageError": "Neplatný jazyk"
+    },
+    "section": {
+      "editTitle": "Upravit sekci",
+      "editDescription": "Aktualizujte název sekce a spravujte překlady.",
+      "sectionId": "ID sekce: {{id}}",
+      "cannotDeleteWithArticles": "Nemůžete odstranit sekci, která má přiřazené položky znalostní báze.",
+      "languageLabel": "Jazyk",
+      "languageHelp": "Chcete-li upravit název, přepněte jazyk. Pokud ještě není vytvořen, budete vyzváni k jeho vytvoření.",
+      "fields": {
+        "title": "Titul",
+        "titleError": "Název je povinný"
+      },
+      "delete": {
+        "title": "Smazat sekci",
+        "description": "Opravdu chcete smazat tuto sekci? Tuto akci nelze vrátit zpět."
+      },
+      "language": {
+        "label": "Jazyk",
+        "baseLanguage": "Výchozí",
+        "notAddedLanguages": "Nepřidáno",
+        "createTitle": "Vytvořte jazyk",
+        "createDescription": "Vytvořit verzi {{language}} pro tuto sekci?",
+        "deleteTitle": "Smazat jazyk",
+        "deleteDescription": "Smazat verzi {{language}} pro tuto sekci?"
+      }
+    },
+    "form": {
+      "createTitle": "Vytvořte položku znalostní báze",
+      "editTitle": "Upravit záznam znalostní báze",
+      "createButton": "Vytvářejte a upravujte",
+      "saveButton": "Uložit",
+      "fields": {
+        "title": "Titul",
+        "summary": "Zavedení",
+        "content": "Obsah",
+        "status": "Postavení",
+        "isPublic": "Veřejnost",
+        "cover": "Titulní obrázek"
+      },
+      "placeholders": {
+        "title": "Zadejte název",
+        "summary": "Zadejte úvod"
+      },
+      "status": {
+        "draft": "Návrh",
+        "published": "Publikováno"
+      },
+      "isPublicDescription": "Viditelné pro všechny uživatele",
+      "preview": "Náhled",
+      "editor": "Editor"
+    }
+  },
+  "articlesView": {
+    "notFound": "Záznam znalostní báze nebyl nalezen",
+    "previousArticle": "Předchozí záznam znalostní báze",
+    "nextArticle": "Další záznam znalostní báze",
+    "deleteModal": {
+      "title": "Smazat záznam znalostní báze",
+      "description": "Opravdu chcete smazat tento záznam znalostní báze? Tuto akci nelze vrátit zpět."
+    }
+  },
+  "supportMode": {
+    "banner": {
+      "message": "Jste spuštěni v režimu podpory",
+      "timeLeft": "Zbývá {{minutes}} min",
+      "exit": "Ukončete režim podpory"
+    }
+  },
+  "superAdminTenantsView": {
+    "title": "Organizace",
+    "description": "Spravujte názvy organizací, domény, stav a příznaky správy.",
+    "actions": {
+      "create": "Vytvořit organizaci"
+    },
+    "search": {
+      "placeholder": "Hledat organizace..."
+    },
+    "table": {
+      "name": "Jméno",
+      "host": "Hostitel",
+      "status": "Postavení",
+      "managing": "Správa",
+      "loading": "Načítání organizací...",
+      "empty": "Nebyly nalezeny žádné organizace.",
+      "yes": "Ano",
+      "no": "Žádný",
+      "edit": "Upravit",
+      "actions": {
+        "title": "Akce",
+        "enterSupportMode": "Vstupte do režimu podpory"
+      }
+    },
+    "status": {
+      "active": "Aktivní",
+      "inactive": "Neaktivní"
+    },
+    "create": {
+      "title": "Vytvořit organizaci",
+      "description": "Vytvořte novou organizaci a pozvěte prvního správce.",
+      "submit": "Vytvořit organizaci"
+    },
+    "edit": {
+      "title": "Upravit organizaci",
+      "description": "Aktualizujte podrobnosti a stav organizace.",
+      "submit": "Uložit změny"
+    },
+    "form": {
+      "tenantName": "Název organizace",
+      "tenantHost": "Hostitel organizace (úplná adresa URL)",
+      "tenantHostPlaceholder": "https://organization.example.com",
+      "status": "Postavení",
+      "statusPlaceholder": "Vyberte stav",
+      "adminFirstName": "Jméno správce",
+      "adminLastName": "Příjmení správce",
+      "adminEmail": "E-mail správce"
+    },
+    "validation": {
+      "nameRequired": "Jméno je povinné",
+      "hostInvalid": "Hostitel musí být platná adresa URL",
+      "adminEmailRequired": "Je vyžadován e-mail správce",
+      "adminFirstNameRequired": "Je vyžadováno křestní jméno správce",
+      "adminLastNameRequired": "Je vyžadováno příjmení správce"
+    },
+    "toast": {
+      "tenantCreatedSuccessfully": "Organizace byla úspěšně vytvořena",
+      "tenantUpdatedSuccessfully": "Organizace byla úspěšně aktualizována"
+    }
+  },
+  "superAdminTenants": {
+    "error": {
+      "hostAlreadyExists": "Hostitel organizace již existuje",
+      "notFound": "Organizace nenalezena",
+      "invalidHost": "Neplatná adresa URL hostitele organizace",
+      "managingTenantRequired": "Je vyžadován správce spravující organizaci",
+      "currentTenantSupportNotAllowed": "Režim podpory není pro aktuální organizaci k dispozici"
+    }
+  },
+  "auth": {
+    "error": {
+      "unauthenticated": "Uživatel není ověřen",
+      "invalidEmailOrPassword": "Neplatný e-mail nebo heslo",
+      "adminRoleRequired": "Je vyžadována role správce"
+    }
+  },
+  "tenantInactive": {
+    "title": "Organizace je deaktivována",
+    "description": "Tento pracovní prostor je momentálně neaktivní. Pokud se domníváte, že se jedná o chybu, obraťte se na správce, aby obnovil přístup."
+  },
+  "integrationApiKey": {
+    "title": "Integrační API klíč",
+    "description": "Vygenerujte klíč s dlouhou životností pro externí integrace. Výměna klíče okamžitě zruší předchozí.",
+    "status": "Postavení",
+    "active": "Aktivní",
+    "inactive": "Nevygenerováno",
+    "prefix": "Předpona klíče",
+    "createdAt": "Vytvořeno v",
+    "lastUsedAt": "Naposledy použito v",
+    "loading": "Načítání klíčových metadat...",
+    "generate": "Vygenerovat klíč",
+    "override": "Přepsat klíč",
+    "copy": "Kopírovat klíč",
+    "generated": {
+      "title": "Zkopírujte tento klíč nyní. Již se nebude zobrazovat."
+    },
+    "confirm": {
+      "title": "Přepsat aktuální klíč API?",
+      "description": "Tato akce okamžitě zruší aktuální klíč. Integrace, které ji používají, přestanou fungovat.",
+      "action": "Přepsat klíč"
+    },
+    "toast": {
+      "fetchSuccess": "Klíč Integration API byl úspěšně načten",
+      "rotateSuccess": "Klíč Integration API byl úspěšně aktualizován",
+      "rotateError": "Aktualizace klíče integračního rozhraní API se nezdařila",
+      "copySuccess": "Klíč integračního rozhraní API zkopírován",
+      "copyError": "Klíč integračního rozhraní API se nepodařilo zkopírovat"
+    },
+    "errors": {
+      "rotateFailed": "Nepodařilo se otočit klíč integračního rozhraní API",
+      "invalidApiKey": "Neplatný klíč integračního rozhraní API",
+      "ownerInactive": "Vlastník klíče API již není aktivní",
+      "ownerNotAdmin": "Vlastník klíče API již nemá oprávnění správce",
+      "missingApiKeyHeader": "Chybí hlavička X-API-Key",
+      "missingTenantIdHeader": "Chybí hlavička X-Tenant-Id"
+    }
+  }
+}

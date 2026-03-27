@@ -1,7 +1,8 @@
-import { EmailContent, Language } from "types";
+import { SupportedLanguages } from "@repo/shared";
+import { EmailContent } from "types";
 
-export const getUserFirstLoginEmailTranslations = (language: Language, name: string) => {
-  const emailContent: Record<Language, EmailContent> = {
+export const getUserFirstLoginEmailTranslations = (language: SupportedLanguages, name: string) => {
+  const emailContent: Record<SupportedLanguages, EmailContent> = {
     en: {
       heading: "Welcome",
       paragraphs: [
@@ -17,6 +18,30 @@ export const getUserFirstLoginEmailTranslations = (language: Language, name: str
         `Logowanie przebiegło pomyślnie. ${name}, sprawdź przypisane kursy i rozpocznij naukę.`,
       ],
       buttonText: "MOJE KURSY",
+    },
+    de: {
+      heading: "Willkommen",
+      paragraphs: [
+        "Schön, dass du da bist 🙂",
+        `Deine erste Anmeldung war erfolgreich. ${name}, sieh dir deine zugewiesenen Kurse an.`,
+      ],
+      buttonText: "MEINE KURSE",
+    },
+    lt: {
+      heading: "Sveiki atvykę",
+      paragraphs: [
+        "Džiugu, kad esi čia 🙂",
+        `Pirmasis prisijungimas buvo sėkmingas. ${name}, peržiūrėk tau priskirtus kursus.`,
+      ],
+      buttonText: "MANO KURSAI",
+    },
+    cs: {
+      heading: "Vítejte",
+      paragraphs: [
+        "Rádi tě tu máme 🙂",
+        `Tvé první přihlášení proběhlo úspěšně. ${name}, podívej se na přiřazené kurzy.`,
+      ],
+      buttonText: "MOJE KURZY",
     },
   };
 

@@ -1,0 +1,2913 @@
+{
+  "common": {
+    "button": {
+      "save": "Išsaugoti",
+      "saving": "Išsaugoma...",
+      "delete": "Ištrinti",
+      "create": "Sukurti",
+      "cancel": "Atšaukti",
+      "back": "Atgal",
+      "proceed": "Tęskite",
+      "add": "Pridėti",
+      "close": "Uždaryti",
+      "goToDashboard": "Eikite į prietaisų skydelį",
+      "goBack": "Grįžk atgal",
+      "ignore": "Ignoruoti",
+      "clearAll": "Išvalyti viską",
+      "validate": "Patvirtinti",
+      "edit": "Redaguoti",
+      "uploading": "Įkeliama...",
+      "sending": "Siunčiama..."
+    },
+    "toast": {
+      "noAccess": "Neturite leidimo pasiekti šio šaltinio",
+      "globalSettingsNotFound": "Bendrieji nustatymai nerasta",
+      "somethingWentWrong": "Kažkas ne taip...",
+      "notFound": "Išteklius nerastas",
+      "tooManyRequests": "Per daug prašymų. Bandykite dar kartą po {{seconds}} sekundžių."
+    },
+    "tooltip": {
+      "soon": "Netrukus"
+    },
+    "tableOfContents": "Turinys",
+    "roles": {
+      "admin": "Admin",
+      "contentCreator": "Turinio kūrėjas",
+      "student": "Studentas"
+    },
+    "languages": {
+      "en": "Anglų",
+      "pl": "Lenkų",
+      "de": "Vokiečių",
+      "lt": "Lietuvių",
+      "cs": "Čekų"
+    },
+    "lessonTypes": {
+      "content": "Turinys",
+      "quiz": "Viktorina",
+      "ai_mentor": "AI mentorius",
+      "embed": "Įterpti"
+    },
+    "error": {
+      "somethingWentWrong": "Oi! Kažkas nutiko."
+    },
+    "loader": {
+      "textSequence": {
+        "aiMentor": {
+          "warmingUp": "Apšildomas AI mentorius...",
+          "preparingSimulation": "Ruošiama jums simuliacija...",
+          "buildingContext": "Kurti scenarijų kontekstą...",
+          "takingLonger": "Tai užtrunka ilgiau nei įprastai..."
+        }
+      }
+    },
+    "other": {
+      "active": "Aktyvus",
+      "archived": "Suarchyvuota",
+      "selected": "Pasirinkta",
+      "allStatuses": "Visos būsenos",
+      "draft": "Juodraštis",
+      "all": "Visi",
+      "search": "Ieškoti",
+      "published": "Paskelbta",
+      "private": "Privatus",
+      "publish": "Paskelbti",
+      "uploadingImage": "Įkeliamas vaizdas...",
+      "copyUrl": "URL adresas buvo nukopijuotas į mainų sritį",
+      "dueDate": "Terminas: {{date}}",
+      "appVersion": "Programos versija: {{version}}"
+    },
+    "continueWithGoogle": "Tęskite su Google",
+    "continueWithMicrosoft": "Tęskite su Microsoft",
+    "continueWithSlack": "Tęskite su Slack",
+    "enterFullscreen": "Visas ekranas",
+    "exitFullscreen": "Išeikite per visą ekraną"
+  },
+  "lessons": {
+    "sequenceUpdatedSuccessfully": "Pamokų seka sėkmingai atnaujinta",
+    "sequenceUpdateFailed": "Nepavyko atnaujinti pamokų sekos",
+    "quizFeedbackUpdatedSuccessfully": "Parinktis „Viktorinos atsiliepimai“ sėkmingai atnaujinta",
+    "quizFeedbackUpdateFailed": "Nepavyko atnaujinti parinkties „Viktorinos atsiliepimai“.",
+    "settingsUpdatedSuccessfully": "Nustatymai sėkmingai atnaujinti",
+    "settingsUpdateFailed": "Nepavyko atnaujinti nustatymų"
+  },
+  "uploadFile": {
+    "header": "Spustelėkite norėdami įkelti",
+    "subHeader": "arba vilkite ir numeskite",
+    "replace": "Spustelėkite, kad pakeistumėte",
+    "toast": {
+      "fileUploadedSuccessfully": "Failas sėkmingai įkeltas",
+      "videoFailed": "Vaizdo įrašo įkėlimas nepavyko",
+      "videoReady": "Vaizdo įrašas paruoštas naudoti",
+      "videoUploading": "Įkeliame jūsų vaizdo įrašą. Neuždarykite skirtuko.",
+      "videoUploadedProcessing": "Jūsų įkėlimas baigtas. Dabar jūsų vaizdo įrašas apdorojamas. Nedvejodami uždarykite skirtuką."
+    },
+    "details": {
+      "imageCrop": "PNG, JPG, JPEG arba SVG",
+      "video": "MP4, MOV, MPEG-2 arba Hevc (maks. iki 5 GB)",
+      "presentation": "PPT / PPTX (maks. iki 100 MB)"
+    },
+    "processing": {
+      "title": "Vaizdo įrašas apdorojamas",
+      "body": "Galite tęsti redagavimą. Mes jums pranešime, kai jis bus paruoštas."
+    },
+    "remove": {
+      "video": "Pašalinti vaizdo įrašą",
+      "presentation": "Pašalinti pristatymą"
+    }
+  },
+  "deleteFile": {
+    "toast": {
+      "success": "Failas sėkmingai ištrintas"
+    }
+  },
+  "adminScorm": {
+    "header": "Įkelti SCORM",
+    "subHeader": "Įkelkite SCORM .zip failą.",
+    "field": {
+      "price": "Kaina",
+      "title": "Kurso pavadinimas",
+      "category": "Kategorija",
+      "description": "Aprašymas",
+      "thumbnail": "Įkelti miniatiūrą"
+    },
+    "placeholder": {
+      "price": "Suma",
+      "title": "Įveskite pavadinimą...",
+      "category": "Pasirinkite kategoriją",
+      "description": "Pateikite kurso aprašymą..."
+    },
+    "other": {
+      "setUpCourse": "Nustatykite kursą",
+      "provideDetails": "Pateikite išsamią informaciją, kad nustatytumėte naują kursą",
+      "uploadFileHeader": "Spustelėkite, kad įkeltumėte arba nuvilkite ir numeskite",
+      "uploadFileBody": "SCORM .zip failas (maks. iki 500 MB)",
+      "pricing": "Kainodara",
+      "status": "Būsena",
+      "setUpPricing": "Nustatykite kurso kainą",
+      "setUpStatus": "Nustatykite kurso būseną",
+      "noDescription": "Aprašymo dar nėra.",
+      "untitled": "Be pavadinimo",
+      "free": "Nemokama",
+      "paidCourse": "Mokamas kursas",
+      "freeCourseBody": "Studentai gali užsiregistruoti ir pasiekti kurso turinį nemokėdami.",
+      "paidCourseBody": "Studentai gali įsigyti ir pasiekti kurso turinį. Pasirinkę galite nustatyti valiutą ir kainą.",
+      "draftBody": "Studentai negali pirkti ar užsiregistruoti šiame kurse. Tiems, kurie jau užsiregistravo, kursas nebus rodomas jų studentų kursų sąraše.",
+      "publishBody": "Studentai gali įsigyti, užsiregistruoti ir pasiekti kurso turinį. Užsiregistravus, kursas bus rodomas jų studentų informacijos suvestinėje.",
+      "charactersLeft": "liko simbolių"
+    },
+    "button": {
+      "back": "Atgal",
+      "status": "Būsena",
+      "creatingCourse": "Kuriamas kursas...",
+      "createCourse": "Sukurti kursą"
+    },
+    "toast": {
+      "scormUploadedSuccessfully": "SCORM paketas sėkmingai įkeltas"
+    }
+  },
+  "studentChapterCardView": {
+    "other": {
+      "chapterProgress": "Skyriaus eiga:"
+    }
+  },
+  "navigationSideBar": {
+    "settings": "Nustatymai",
+    "logout": "Atsijungti",
+    "panel": "skydelis",
+    "menu": "Meniu",
+    "close": "Uždaryti",
+    "profile": "Profilis",
+    "dashboard": "Prietaisų skydelis",
+    "statistics": "Statistika",
+    "analytics": "Analizė",
+    "progress": "Pažanga",
+    "findInApplication": "Rasti programoje",
+    "courses": "Kursai",
+    "content": "Turinys",
+    "categories": "Kategorijos",
+    "users": "Vartotojai",
+    "groups": "Grupės",
+    "articles": "Žinių bazė",
+    "news": "Naujienos",
+    "providerInformation": "Informacija",
+    "announcements": "Skelbimai",
+    "promotionCodes": "Reklamos kodai",
+    "manage": "Tvarkyti",
+    "ariaLabels": {
+      "goToAvailableCourses": "Eikite į galimus kursus"
+    },
+    "qa": "Klausimai ir atsakymai",
+    "tenants": "Organizacijos"
+  },
+  "newsView": {
+    "header": "Naujienos",
+    "notFound": "Naujienos nerasta.",
+    "previousNews": "Ankstesnės naujienos",
+    "nextNews": "Kitos naujienos",
+    "prompt": {
+      "photoUrl": "Nuotraukos URL",
+      "photoCaption": "Nuotraukos antraštė (nebūtina)",
+      "videoUrl": "Vaizdo įrašo URL (mp4 ir kt.)",
+      "videoCaption": "Vaizdo įrašo antraštė (pasirenkama)"
+    },
+    "field": {
+      "title": "Pavadinimas",
+      "summary": "Santrauka",
+      "intro": "Įvadas",
+      "content": "Turinys",
+      "image": "Vaizdas",
+      "status": "Būsena",
+      "isPublic": "Yra viešas"
+    },
+    "placeholder": {
+      "title": "Įveskite naujienos pavadinimą",
+      "summary": "Pridėkite trumpą santrauką",
+      "intro": "Pridėkite trumpą įvadą"
+    },
+    "create": "Sukurti",
+    "edit": "Redaguoti",
+    "status": {
+      "draft": "Juodraštis",
+      "published": "Paskelbta",
+      "draftMany": "Juodraščiai",
+      "publishedMany": "Paskelbta"
+    },
+    "button": {
+      "delete": "Ištrinti"
+    },
+    "validation": {
+      "titleRequired": "Pavadinimas būtinas",
+      "introRequired": "Būtinas įvadas",
+      "contentRequired": "Turinys būtinas",
+      "imageRequired": "Būtinas vaizdas",
+      "statusRequired": "Būsena būtina"
+    },
+    "editor": "redaktorius",
+    "preview": "Peržiūra",
+    "isPublicDescription": "Pasidalinkite šia žinia ir neprisijungusiems vartotojams.",
+    "language": {
+      "label": "Kalba",
+      "baseLanguage": "Numatytoji",
+      "notAddedLanguages": "Pridėti kalbos",
+      "createTitle": "Sukurti vertimą",
+      "createDescription": "Sukurti šios naujienos vertimą {{language}}?",
+      "deleteTitle": "Ištrinti vertimą",
+      "deleteDescription": "Ištrinti {{language}} vertimą? Jos turinys bus pašalintas."
+    }
+  },
+  "globalSearch": {
+    "notFound": "Deja, nieko nerasta",
+    "tryAgain": "Bandykite dar kartą naudodami kitus raktinius žodžius",
+    "search": "Ieškoti...",
+    "searchIn": "Ieškoti {{companyName}}",
+    "searchInDescription": "Pradėkite vesti tekstą, kad ieškotumėte kursų, pranešimų ir kt.",
+    "navigate": "Naršyti",
+    "goTo": "Eikite į",
+    "close": "Uždaryti",
+    "entries": {
+      "users": "Vartotojai",
+      "categories": "Kategorijos",
+      "groups": "Grupės",
+      "allCourses": "Visi kursai",
+      "myCourses": "Mano kursai",
+      "availableCourses": "Galimi kursai",
+      "noSearchResults": "Nėra paieškos rezultatų:",
+      "announcements": "Skelbimai",
+      "lessons": "Pamokos",
+      "news": "Naujienos",
+      "articles": "Straipsniai",
+      "qa": "Klausimai ir atsakymai"
+    }
+  },
+  "providerInformation": {
+    "title": "Teikėjo informacija",
+    "description": "Informacija apie jūsų įmonę, kuri bus matoma vartotojams",
+    "editTitle": "Redaguoti teikėjo informaciją",
+    "companyName": "Įmonės pavadinimas",
+    "companyShortName": "Trumpas įmonės pavadinimas",
+    "registeredAddress": "Registruotas adresas",
+    "taxNumber": "Mokesčio numeris (NIP)",
+    "emailAddress": "El. pašto adresas",
+    "courtRegisterNumber": "Teismo registro numeris (KRS)",
+    "noDataAvailable": "Informacijos apie teikėją nėra",
+    "createSuccess": "Teikėjo informacija sėkmingai sukurta",
+    "updateSuccess": "Teikėjo informacija sėkmingai atnaujinta",
+    "createError": "Nepavyko sukurti teikėjo informacijos",
+    "updateError": "Nepavyko atnaujinti teikėjo informacijos",
+    "saveError": "Nepavyko išsaugoti teikėjo informacijos",
+    "validation": {
+      "nipMustBe10Digits": "NIP turi būti 10 skaitmenų",
+      "krsMustBe10Digits": "KRS turi būti 10 skaitmenų",
+      "invalidEmailFormat": "Netinkamas el. pašto formatas"
+    },
+    "noCompanyInformationAvailable": "Nėra informacijos apie įmonę",
+    "breadcrumbs": {
+      "providerInformation": "Teikėjo informacija"
+    }
+  },
+  "changeUserLanguageView": {
+    "header": "Keisti kalbą",
+    "subHeader": "Pasirinkite pageidaujamą kalbą",
+    "field": {
+      "language": "Kalba"
+    },
+    "options": {
+      "english": "anglų kalba",
+      "polish": "lenkų",
+      "german": "Vokiečių",
+      "czech": "Čekų",
+      "lithuanian": "Lietuvių"
+    }
+  },
+  "resetOnboarding": {
+    "header": "Iš naujo nustatyti įvadą",
+    "subHeader": "Čia galite iš naujo nustatyti programos įvadą",
+    "button": {
+      "reset": "Iš naujo nustatyti įvadą"
+    },
+    "toast": {
+      "success": "Įvadas sėkmingai nustatytas iš naujo",
+      "error": "Nepavyko iš naujo nustatyti įvado"
+    }
+  },
+  "changeUserEmailView": {
+    "header": "Keisti vartotojo informaciją",
+    "subHeader": "Atnaujinkite savo vartotojo informaciją čia.",
+    "field": {
+      "email": "El. paštas"
+    },
+    "validation": {
+      "email": "Būtinas el"
+    }
+  },
+  "ssoEnforcementView": {
+    "header": "SSO vykdymas",
+    "subHeader": "Priverskite SSO prisijungimą visiems vartotojams",
+    "description": "Šis jungiklis privers prisijungti prie „Google“ / „Microsoft“ visiems vartotojams. Jei išjungta, vartotojai galės prisijungti naudodami tradicinę prisijungimo formą.",
+    "switch": {
+      "enabled": "Įjungta",
+      "disabled": "Išjungta"
+    },
+    "toast": {
+      "ssoEnforcementUpdatedSuccessfully": "SSO vykdymas sėkmingai atnaujintas",
+      "ssoEnforcementUpdateFailed": "Nepavyko atnaujinti SSO vykdymo",
+      "registerRedirect": "Registracija naudojant el. paštą išjungta, nes SSO vykdomas."
+    }
+  },
+  "userEmailTriggers": {
+    "header": "Vartotojo el. pašto aktyvikliai",
+    "subHeader": "Tvarkykite automatinius el. pašto pranešimus, siunčiamus vartotojams",
+    "settings": {
+      "userFirstLogin": "Pirmas prisijungimas",
+      "userFirstLoginDescription": "Siųsti el. laišką vartotojui po pirmojo prisijungimo prie sistemos.",
+      "userCourseAssignment": "Registracija į kursus",
+      "userCourseAssignmentDescription": "Išsiųskite el. laišką vartotojui, kai administratorius jį užregistravo į kursus.",
+      "userShortInactivity": "Trumpas neveiklumas (14 dienų)",
+      "userShortInactivityDescription": "Išsiųskite el. laišką vartotojui po 14 dienų neveikimo.",
+      "userLongInactivity": "Ilgas neveiklumas (30 dienų)",
+      "userLongInactivityDescription": "Išsiųskite el. laišką vartotojui po 30 dienų neveikimo.",
+      "userChapterFinished": "Skyrius baigtas",
+      "userChapterFinishedDescription": "Išsiųskite el. laišką vartotojui, kai jis užbaigs skyrių.",
+      "userCourseFinished": "Kursas baigtas",
+      "userCourseFinishedDescription": "Išsiųskite el. laišką vartotojui, kai jis baigs kursą."
+    },
+    "switch": {
+      "enabled": "Įjungta",
+      "disabled": "Išjungta"
+    },
+    "toast": {
+      "userEmailTriggersUpdatedSuccessfully": "El. pašto aktyvikliai buvo sėkmingai atnaujinti",
+      "userEmailTriggersUpdateFailed": "Nepavyko atnaujinti el. pašto aktyviklių"
+    }
+  },
+  "inviteOnlyRegistrationView": {
+    "header": "Registracijos vykdymas tik su kvietimu",
+    "subHeader": "Reikalauti kvietimo registruotis",
+    "description": "Įgalinkite šį nustatymą, kad registracija būtų apribota tik pakviestiems naudotojams. Išjungus, bet kas gali užsiregistruoti be kvietimo.",
+    "switch": {
+      "enabled": "Įjungta",
+      "disabled": "Išjungta"
+    },
+    "toast": {
+      "inviteOnlyRegistrationUpdatedSuccessfully": "Registracijos tik su kvietimu nustatymai sėkmingai atnaujinti",
+      "inviteOnlyRegistrationUpdateFailed": "Nepavyko atnaujinti registracijos tik su kvietimu nustatymų",
+      "registerRedirect": "Registracija galima tik gavus kvietimą."
+    }
+  },
+  "environmentConfigurationView": {
+    "header": "Aplinkos konfigūracija",
+    "description": "Peržiūrėkite išsamią informaciją apie savo aplinkos konfigūraciją, įskaitant visiškai sukonfigūruotas paslaugas, iš dalies sukonfigūruotas paslaugas ir trūkstamus aplinkos kintamuosius.",
+    "button": {
+      "viewStatus": "Žiūrėti būseną",
+      "loading": "Įkeliama...",
+      "dismissWarning": "Atmesti įspėjimą"
+    },
+    "dialog": {
+      "title": "Aplinkos konfigūracijos būsena",
+      "fullyConfigured": "Visiškai sukonfigūruota",
+      "partiallyConfigured": "Iš dalies sukonfigūruota",
+      "youMightWantToSetThisUp": "Galbūt norėsite tai nustatyti",
+      "noFullyConfigured": "Nėra visiškai sukonfigūruotų paslaugų.",
+      "noPartiallyConfigured": "Nėra iš dalies sukonfigūruotų paslaugų.",
+      "allConfigured": "Visi aplinkos raktai sukonfigūruoti teisingai.",
+      "dismissWarning": "Atsisakyti",
+      "serviceNames": {
+        "stripe": "Mokėjimas juostelėmis",
+        "bunny": "Bunny CDN",
+        "google_authorization": "Google OAuth",
+        "microsoft_authorization": "Microsoft OAuth",
+        "slack_authorization": "Slack OAuth",
+        "openAI": "OpenAI",
+        "luma": "Luma"
+      },
+      "serviceDescriptions": {
+        "stripe": "Apdorokite kursų mokėjimus ir tvarkykite prenumeratas",
+        "bunny": "Perduokite vaizdo įrašus ir efektyviai pateikite turinį",
+        "google_authorization": "Leisti naudotojams prisijungti naudojant „Google“ paskyrą",
+        "microsoft_authorization": "Leiskite vartotojams prisijungti naudojant „Microsoft“ paskyrą",
+        "slack_authorization": "Leisti vartotojams prisijungti naudojant savo „Slack“ paskyrą",
+        "openAI": "Įgalinti AI Mentor funkcijas",
+        "luma": "Įgalinti AI kursų generavimo funkcijas"
+      }
+    }
+  },
+  "mostPopularCoursesView": {
+    "header": "Populiariausias",
+    "subHeader": "5 geriausi kursai",
+    "other": {
+      "noData": "Nėra duomenų",
+      "students": "Studentai"
+    }
+  },
+  "enrollmentChartView": {
+    "header": "Registracija",
+    "subHeader": "Registracijos numeriai",
+    "other": {
+      "noData": "Nėra duomenų",
+      "enrollments": "Registracijos"
+    }
+  },
+  "createPasswordView": {
+    "header": "Sukurti naują slaptažodį",
+    "subHeader": "Įveskite naują slaptažodį",
+    "field": {
+      "password": "Slaptažodis",
+      "confirmPassword": "Patvirtinkite slaptažodį"
+    },
+    "validation": {
+      "passwordsDontMatch": "Slaptažodžiai nesutampa",
+      "missingEmail": "Nuorodoje trūksta el. pašto adreso. Prašome naudoti visą nuorodą iš savo el. pašto."
+    },
+    "button": {
+      "changePassword": "Sukurti slaptažodį"
+    },
+    "error": {
+      "invalidTokenOrEmail": "Ši slaptažodžio nustatymo nuoroda neteisinga, nebegalioja arba neatitinka šio el. pašto adreso."
+    }
+  },
+  "changePasswordView": {
+    "header": "Keisti slaptažodį",
+    "subHeader": "Atnaujinkite slaptažodį čia.",
+    "field": {
+      "oldPassword": "Senas slaptažodis",
+      "newPassword": "Naujas slaptažodis",
+      "confirmPassword": "Patvirtinkite slaptažodį"
+    },
+    "validation": {
+      "oldPassword": "Reikalingas senas slaptažodis",
+      "newPassword": "Reikalingas naujas slaptažodis",
+      "passwordsDontMatch": "Slaptažodžiai nesutampa"
+    },
+    "toast": {
+      "passwordChangedSuccessfully": "Slaptažodis pakeistas sėkmingai",
+      "passwordCreatedSuccessfully": "Slaptažodis sukurtas sėkmingai"
+    }
+  },
+  "passwordValidationDisplay": {
+    "title": "Slaptažodžio reikalavimai",
+    "header": "Jūsų slaptažodyje turi būti:",
+    "passwordMinLength": "mažiausiai 8 simboliai",
+    "passwordUppercase": "bent viena didžioji raidė",
+    "passwordLowercase": "bent viena mažoji raidė",
+    "passwordNumber": "bent vienas skaičius",
+    "passwordSpecial": "bent vienas specialus veikėjas",
+    "passwordsMatch": "Slaptažodžiai sutampa"
+  },
+  "contentCreatorView": {
+    "button": {
+      "collapse": "Sutraukti",
+      "showMore": "Rodyti daugiau",
+      "edit": "Redaguoti",
+      "share": "Bendrinti profilį",
+      "cancel": "Atšaukti",
+      "confirm": "Patvirtinti",
+      "deleteProfilePicture": "Ištrinti profilio nuotrauką"
+    },
+    "field": {
+      "firstName": "Vardas",
+      "firstNamePlaceholder": "Įveskite savo vardą",
+      "lastName": "Pavardė",
+      "lastNamePlaceholder": "Įveskite savo pavardę",
+      "contactEmail": "El. pašto adresas",
+      "contactEmailPlaceholder": "Įveskite savo el. pašto adresą",
+      "contactPhone": "Telefono numeris",
+      "contactPhonePlaceholder": "Įveskite savo telefono numerį",
+      "jobTitle": "Pavadinimas",
+      "jobTitlePlaceholder": "Įveskite savo pavadinimą",
+      "description": "Biologinis užrašas",
+      "descriptionPlaceholder": "Įveskite trumpą biografinę pastabą",
+      "uploadThumbnailLabel": "Įkelti miniatiūrą"
+    },
+    "toast": {
+      "profileLinkCopied": "Profilio nuoroda nukopijuota!",
+      "profileLinkCopyError": "Kopijuojant profilio nuorodą įvyko klaida!"
+    },
+    "other": {
+      "personalInfoTitle": "Pagrindinė informacija",
+      "personalInfoDescription": "Tvarkykite pagrindinę paskyros informaciją",
+      "aboutTitle": "Apie",
+      "aboutDescription": "Papasakok daugiau apie save",
+      "appearanceTitle": "Išvaizda",
+      "appearanceDescription": "Įkelkite savo profilio nuotrauką",
+      "pageTitle": "Profilis",
+      "about": "Apie",
+      "contact": "Susisiekite",
+      "courses": "Kursai",
+      "title": "Pavadinimas"
+    }
+  },
+  "changeUserInformationView": {
+    "header": "Keisti vartotojo informaciją",
+    "subHeader": "Atnaujinkite savo biografiją čia.",
+    "toast": {
+      "userUpdatedSuccessfully": "Vartotojas sėkmingai atnaujintas",
+      "userDetailsUpdatedSuccessfully": "Informacija apie naudotoją sėkmingai atnaujinta",
+      "updatedSelectedUsersSuccessfully": "Pasirinkti naudotojai sėkmingai atnaujinti",
+      "deletedSelectedUsersSuccessfully": "Pasirinkti naudotojai sėkmingai ištrinti",
+      "archivedSelectedUsersSuccessfully": "Pasirinkti naudotojai sėkmingai suarchyvuoti",
+      "archiveSelectedUsersError": "Nepavyko suarchyvuoti pasirinktų naudotojų"
+    },
+    "field": {
+      "description": "Aprašymas",
+      "email": "El. paštas",
+      "phoneNumber": "Telefono numeris",
+      "jobTitle": "Pareigybės pavadinimas"
+    },
+    "placeholder": {
+      "description": "Jūsų aprašymas",
+      "phoneNumber": "Jūsų telefono numeris",
+      "jobTitle": "Jūsų pareigų pavadinimas"
+    }
+  },
+  "clientStatisticsView": {
+    "header": "Sveiki sugrįžę,",
+    "button": {
+      "enroll": "Užsiregistruoti",
+      "searchCourses": "Ieškoti kursų",
+      "continue": "Tęsti",
+      "start": "Pradėti",
+      "readMore": "Skaityti Daugiau",
+      "tryAgain": "Bandykite dar kartą",
+      "view": "Žiūrėti"
+    },
+    "other": {
+      "completedCourses": "Baigti kursai",
+      "startedCourses": "Pradėti kursai",
+      "correctAnswers": "Teisingi atsakymai",
+      "wrongAnswers": "Klaidingi atsakymai",
+      "avgQuizScorePercentage": "Vid. Viktorinų procentas",
+      "avgQuizCompletionPercentage": "Vid. Kursų konkurso procentas",
+      "noData": "Nėra duomenų",
+      "courses": "Kursai",
+      "lessons": "Pamokos",
+      "completed": "Baigta",
+      "started": "Prasidėjo",
+      "noDataAvailable": "Nėra duomenų",
+      "rates": "Kainos",
+      "numberOf": "Skaičius",
+      "noLessonsToContinue": "Šiuo metu nėra jokių pamokų, kurias būtų galima tęsti.",
+      "continueLearning": "Tęskite mokymąsi:"
+    }
+  },
+  "profileWithCalendarView": {
+    "header": "Mano profilis",
+    "button": {
+      "settings": "Nustatymai"
+    },
+    "other": {
+      "dailyStreak": "dienos serija"
+    }
+  },
+  "adminStatisticsView": {
+    "header": "Sveiki sugrįžę,",
+    "other": {
+      "courseCompletionPercentage": "Kurso baigimo procentas",
+      "conversionsAfterFreemiumLesson": "Konversijos po „Freemium“ pamokos",
+      "avgQuizScore": "Vid. Rezultatas visose viktorinose",
+      "purchasedCourse": "Įsigytas kursas",
+      "remainedOnFreemium": "Liko „Freemium“.",
+      "correct": "Teisingai",
+      "incorrect": "Neteisinga",
+      "completed": "Baigta",
+      "enrolled": "Užsiregistravo",
+      "noData": "Nėra duomenų",
+      "downloadReport": "Atsisiųskite ataskaitą",
+      "downloadingReport": "Atsisiunčiama ataskaita..."
+    },
+    "toast": {
+      "reportDownloadSuccess": "Ataskaita sėkmingai atsisiųsta",
+      "reportDownloadError": "Nepavyko atsisiųsti ataskaitos. Bandykite dar kartą."
+    }
+  },
+  "adminPromotionCodesView": {
+    "notifications": {
+      "createdSuccessfully": "Reklamos kodas sėkmingai sukurtas",
+      "updatedSuccessfully": "Reklamos kodas sėkmingai atnaujintas"
+    },
+    "headers": {
+      "create": "Sukurti reklamos kodą",
+      "update": "Atnaujinkite reklamos kodą"
+    },
+    "status": {
+      "active": "Aktyvus",
+      "deactivated": "Išjungta",
+      "expired": "Baigėsi galiojimo laikas",
+      "usageLimitReached": "Pasiektas naudojimo limitas"
+    },
+    "field": {
+      "code": "Kodas",
+      "status": "Būsena",
+      "uses": "Naudojimų skaičius",
+      "associatedCourses": "Susiję kursai",
+      "discountType": "Nuolaidos tipas",
+      "discountTypePercent": "proc",
+      "discountTypeFixed": "Pataisyta",
+      "discountValue": "Nuolaidos vertė",
+      "maxRedemptions": "Maksimalus išpirkimas",
+      "expiresAt": "Galiojimas baigiasi val",
+      "assignedCourses": "Paskirti kursai",
+      "type": "Tipas",
+      "associateCourse": {
+        "checkAll": "Kreipkitės į visus kursus"
+      },
+      "discount": "Nuolaida",
+      "createdAt": "Sukurta"
+    },
+    "breadcrumbs": {
+      "promotionCodes": "Reklamos kodai",
+      "createNew": "Sukurti naują",
+      "update": "Atnaujinti",
+      "back": "Atgal"
+    },
+    "button": {
+      "createNew": "Sukurti naują",
+      "createCoupon": "Sukurti reklamos kodą",
+      "deactivatePromotionCode": "Šis reklamos kodas aktyvus",
+      "activatePromotionCode": "Šis reklamos kodas neaktyvus"
+    },
+    "other": {
+      "noCourses": "Jokių kursų",
+      "usageInfo": "Naudojimo informacija",
+      "usageAmount": "Naudojimo kiekis",
+      "baseInfo": "Pagrindinė informacija"
+    }
+  },
+  "adminCoursesView": {
+    "filters": {
+      "placeholder": {
+        "title": "Ieškoti pagal pavadinimą...",
+        "categories": "Kategorijos",
+        "states": "valstybėse"
+      },
+      "other": {
+        "draft": "Juodraštis",
+        "published": "Paskelbta",
+        "private": "Privatus"
+      }
+    },
+    "courses": {
+      "header": "Tvarkyti kursus",
+      "subHeader": "Visus kursus galite peržiūrėti ir redaguoti"
+    },
+    "field": {
+      "title": "Pavadinimas",
+      "author": "Autorius",
+      "category": "Kategorija",
+      "price": "Kaina",
+      "state": "valstybė",
+      "status": "Būsena",
+      "sharedCourse": "Bendrinama",
+      "createdAt": "Sukurta"
+    },
+    "lessonCard": {
+      "mappedTypes": {
+        "video": "Vaizdo įrašas",
+        "presentation": "Pristatymas",
+        "content": "Turinys",
+        "quiz": "Viktorina",
+        "ai_mentor": "AI mentorius",
+        "embed": "Įterpti"
+      }
+    },
+    "other": {
+      "selected": "Pasirinkta",
+      "noLessons": "Jokių pamokų"
+    },
+    "button": {
+      "uploadScorm": "Įkelti SCORM",
+      "createNew": "Sukurti naują",
+      "deleteSelected": "Ištrinti pasirinktus"
+    },
+    "deleteModal": {
+      "titleSingle": "Ištrinti kursą",
+      "titleMultiple": "Ištrinti kursus",
+      "descriptionSingle": "Ar tikrai norite ištrinti šį kursą? Šio veiksmo anuliuoti negalima.",
+      "descriptionMultiple": "Ar tikrai norite ištrinti {{count}} kursus? Šio veiksmo anuliuoti negalima."
+    },
+    "toast": {
+      "deleteCourseSuccessfully": "Kursas sėkmingai ištrintas",
+      "deleteCourseFailed": "Nepavyko ištrinti kurso",
+      "deletePublishedCourseFailed": "Negalima ištrinti paskelbto kurso. Pirmiausia nustatykite jo būseną į juodraštį."
+    }
+  },
+  "adminCategoriesView": {
+    "filters": {
+      "placeholder": {
+        "title": "Ieškoti pagal pavadinimą..."
+      }
+    },
+    "field": {
+      "title": "Pavadinimas",
+      "status": "Būsena",
+      "createdAt": "Sukurta"
+    },
+    "button": {
+      "createNew": "Sukurti naują",
+      "clearAll": "Išvalyti viską",
+      "deleteSelected": "Ištrinti pasirinktus"
+    },
+    "deleteModal": {
+      "titleSingle": "Ištrinti kategoriją",
+      "titleMultiple": "Ištrinti kategorijas",
+      "descriptionSingle": "Ar tikrai norite ištrinti šią kategoriją? Šio veiksmo anuliuoti negalima.",
+      "descriptionMultiple": "Ar tikrai norite ištrinti {{count}} kategorijas? Šio veiksmo anuliuoti negalima."
+    },
+    "toast": {
+      "deleteCategorySuccessfully": "Kategorija sėkmingai ištrinta",
+      "deleteCategoryFailed": "Nepavyko ištrinti kategorijos"
+    },
+    "breadcrumbs": {
+      "categories": "Kategorijos",
+      "createNew": "Sukurti naują kategoriją",
+      "back": "Atgal"
+    }
+  },
+  "adminCategoryView": {
+    "header": "Sukurti naują kategoriją",
+    "subHeader": "Įveskite naujos kategorijos pavadinimą. Baigę spustelėkite išsaugoti.",
+    "editCategoryHeader": "Kategorijos informacija",
+    "field": {
+      "title": "Pavadinimas",
+      "status": "Būsena",
+      "newCategoryName": "Naujas kategorijos pavadinimas"
+    },
+    "placeholder": {
+      "categoryName": "Įveskite kategorijos pavadinimą..."
+    },
+    "button": {
+      "createCategory": "Sukurti kategoriją"
+    },
+    "toast": {
+      "categoryCreatedSuccessfully": "Kategorija sėkmingai sukurta",
+      "categoryUpdatedSuccessfully": "Kategorija sėkmingai atnaujinta"
+    },
+    "error": {
+      "categoryNotFound": "Kategorija nerasta",
+      "categoryIdNotFound": "Kategorijos ID nerastas"
+    },
+    "breadcrumbs": {
+      "categories": "Kategorijos",
+      "categoryDetails": "Išsami informacija apie kategoriją",
+      "back": "Atgal"
+    }
+  },
+  "adminUsersView": {
+    "filters": {
+      "placeholder": {
+        "searchByKeyword": "Ieškoti pagal raktinį žodį...",
+        "roles": "Vaidmenys",
+        "groups": "Visos grupės"
+      }
+    },
+    "field": {
+      "firstName": "Vardas",
+      "lastName": "Pavardė",
+      "email": "El. paštas",
+      "role": "Vaidmuo",
+      "status": "Būsena",
+      "createdAt": "Sukurta",
+      "group": "Grupė"
+    },
+    "other": {
+      "selected": "Pasirinkta"
+    },
+    "toast": {
+      "cannotUpdateOwnRole": "Administratorius negali pakeisti savo vaidmens",
+      "noUserSelected": "Nepasirinktas joks vartotojas"
+    },
+    "import": {
+      "toast": {
+        "success": "Importavimas sėkmingai baigtas.\nImportuota {{ importedUsersAmount }} naudotojų.\nPraleista {{ skippedUsersAmount }} esamų naudotojų."
+      }
+    },
+    "button": {
+      "createNew": "Sukurti naują",
+      "deleteSelected": "Ištrinti pasirinktus",
+      "edit": "Redaguoti",
+      "import": "Importuoti vartotojus",
+      "bulkEdit": "Masinis redagavimas"
+    },
+    "dropdown": {
+      "roles": "Vaidmenys",
+      "groups": "Grupės",
+      "delete": "Ištrinti",
+      "archive": "Archyvas"
+    },
+    "modal": {
+      "title": {
+        "delete": "Ar norite ištrinti šias paskyras?",
+        "role": "Keisti vaidmenis",
+        "group": "Keisti grupes",
+        "archive": "Archyvuokite vartotojų paskyras",
+        "confirmation": "Ar tikrai norite tęsti?",
+        "import": "Importuoti vartotojus",
+        "importResult": "Importo rezultatas"
+      },
+      "button": {
+        "delete": "Ištrinti",
+        "role": "Išsaugoti",
+        "group": "Išsaugoti",
+        "archive": "Archyvas",
+        "continue": "Patvirtinti"
+      },
+      "description": {
+        "delete": "Ar tikrai norite ištrinti šias paskyras? Šis veiksmas yra negrįžtamas.",
+        "confirmationForGroup_one": "1 vartotojui grupę pakeisite į {{ group }}",
+        "confirmationForGroup_other": "Jūs pakeisite grupę į {{ group }} {{ count }} naudotojams",
+        "confirmationForRole_one": "1 naudotojo vaidmenį pakeisite į {{ role }}.",
+        "confirmationForRole_other": "{{ count }} naudotojų vaidmenį pakeisite į {{ role }}",
+        "archive": "Ar tikrai norite archyvuoti šias paskyras?",
+        "import": "Įkelkite .csv arba .xlsx failą su šiais stulpeliais: vardas, pavardė, el. pašto adresas, vaidmuo (admin, student arba content_creator), grupės (\"group1,group2\"), kalba (en arba pl).",
+        "noUsersImported": "Naudotojų nebuvo importuota.",
+        "noUsersSkipped": "Nebuvo praleistas nė vienas vartotojas."
+      },
+      "placeholder": {
+        "group": "Pasirinkite grupę",
+        "role": "Pasirinkite vaidmenį"
+      },
+      "note": {
+        "import": "Pastaba: esami vartotojai bus praleisti. Jei grupė nurodyta ir jos nėra, nauja grupė nebus sukurta. Kalbos laukas yra neprivalomas; jei nepateikta arba ji neteisinga, numatytoji kalba bus nustatyta į administratoriaus kalbą."
+      },
+      "tabs": {
+        "imported": "Importuota",
+        "skipped": "Praleistas"
+      }
+    },
+    "breadcrumbs": {
+      "users": "Vartotojai",
+      "createNew": "Sukurti naują vartotoją",
+      "back": "Atgal",
+      "news": "Naujienos"
+    }
+  },
+  "adminUserView": {
+    "header": "Sukurti naują vartotoją",
+    "subHeader": "Norėdami sukurti naują vartotoją, užpildykite informaciją. Baigę spustelėkite išsaugoti.",
+    "editUserHeader": "Vartotojo informacija",
+    "placeholder": {
+      "role": "Pasirinkite vaidmenį",
+      "groupId": "Pasirinkite grupę",
+      "language": "Pasirinkite kalbą"
+    },
+    "field": {
+      "firstName": "Vardas",
+      "lastName": "Pavardė",
+      "email": "El. paštas",
+      "role": "Vaidmuo",
+      "language": "Kalba",
+      "status": "Būsena",
+      "groups": "Grupė"
+    },
+    "toast": {
+      "userCreatedSuccessfully": "Vartotojas sėkmingai sukurtas",
+      "userWithAttemptsError": "Negalima ištrinti vartotojo su susietais viktorinos rezultatais. Galimas tik anonimiškumas ir archyvavimas.",
+      "userWithCreatedCoursesError": "Negalima ištrinti vartotojo, kuris yra esamų kursų autorius. Galimas tik anonimiškumas ir archyvavimas."
+    },
+    "button": {
+      "createUser": "Sukurti vartotoją"
+    },
+    "error": {
+      "userNotFound": "Vartotojas nerastas"
+    },
+    "breadcrumbs": {
+      "users": "Vartotojai",
+      "userDetails": "Vartotojo informacija",
+      "back": "Atgal"
+    }
+  },
+  "adminEnvsView": {
+    "name": "Aplinkos kintamieji",
+    "keysTitle": "Raktai",
+    "updateSuccessful": "Sėkmingai atnaujintos paslaptys",
+    "form": {
+      "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "MICROSOFT_CLIENT_ID": {
+        "label": "„Microsoft“ kliento ID"
+      },
+      "MICROSOFT_CLIENT_SECRET": {
+        "label": "„Microsoft“ kliento paslaptis"
+      },
+      "MICROSOFT_OAUTH_ENABLED": {
+        "label": "„Microsoft OAuth“ įgalinta (teisinga / klaidinga)"
+      },
+      "VITE_MICROSOFT_OAUTH_ENABLED": {
+        "label": "Vite Microsoft OAuth Enabled (teisinga / klaidinga)"
+      },
+      "OPENAI_API_KEY": {
+        "label": "OpenAI API raktas"
+      },
+      "BUNNY_STREAM_API_KEY": {
+        "label": "Bunny Stream API raktas"
+      },
+      "BUNNY_STREAM_SIGNING_KEY": {
+        "label": "Bunny Stream pasirašymo raktas"
+      },
+      "BUNNY_STREAM_LIBRARY_ID": {
+        "label": "Bunny Stream bibliotekos ID"
+      },
+      "BUNNY_STREAM_TOKEN_SIGNING_KEY": {
+        "label": "Bunny Stream žetono pasirašymo raktas"
+      },
+      "BUNNY_STREAM_CDN_URL": {
+        "label": "Bunny Stream CDN URL"
+      },
+      "GOOGLE_CLIENT_ID": {
+        "label": "„Google“ kliento ID"
+      },
+      "GOOGLE_CLIENT_SECRET": {
+        "label": "„Google“ kliento paslaptis"
+      },
+      "GOOGLE_OAUTH_ENABLED": {
+        "label": "„Google OAuth“ įgalinta (teisinga / klaidinga)"
+      },
+      "VITE_GOOGLE_OAUTH_ENABLED": {
+        "label": "Vite „Google OAuth“ įgalinta (teisinga / klaidinga)"
+      },
+      "STRIPE_WEBHOOK_SECRET": {
+        "label": "Stripe Webhook paslaptis"
+      },
+      "STRIPE_SECRET_KEY": {
+        "label": "Stripe slaptasis raktas"
+      },
+      "VITE_STRIPE_PUBLISHABLE_KEY": {
+        "label": "Vite Stripe Publishable Key"
+      },
+      "SLACK_CLIENT_ID": {
+        "label": "„Slack“ kliento ID"
+      },
+      "SLACK_CLIENT_SECRET": {
+        "label": "Slack Client Secret"
+      },
+      "SLACK_OAUTH_ENABLED": {
+        "label": "„Slack OAuth“ įgalinta (tiesa / klaidinga)"
+      },
+      "VITE_SLACK_OAUTH_ENABLED": {
+        "label": "„Vite Slack OAuth“ įgalinta (teisinga / klaidinga)"
+      },
+      "LUMA_API_KEY": {
+        "label": "Luma API raktas"
+      },
+      "save": "Išsaugoti"
+    },
+    "breadcrumbs": {
+      "envs": "Aplinkos kintamieji"
+    }
+  },
+  "adminGroupsView": {
+    "name": "Grupės pavadinimas",
+    "characteristic": "Būdingas",
+    "buttons": {
+      "create": "Sukurti naują",
+      "deleteSelected": "Ištrinti pasirinktus"
+    },
+    "groupSelect": {
+      "label": "Pasirinkite grupes",
+      "noGroups": "Nerasta grupių"
+    },
+    "newGroup": {
+      "header": "Sukurti naują grupę",
+      "card": {
+        "header": "Išsami informacija",
+        "subheader": "Apibrėžkite savo grupės pavadinimą ir jų charakteristikas",
+        "footer": "Atminkite, kad AI Mentor naudos jį pokalbiuose."
+      },
+      "fields": {
+        "name": "Vardas",
+        "characteristic": "Būdingas"
+      },
+      "cancel": "Atšaukti",
+      "submit": "Paskelbti"
+    },
+    "updateGroup": {
+      "header": "Atnaujinti grupę",
+      "fields": {
+        "name": "Vardas",
+        "description": "Aprašymas"
+      },
+      "submit": "Redaguoti grupę",
+      "groupUpdatedSuccessfully": "Grupė sėkmingai atnaujinta",
+      "groupNotFound": "Grupė nerasta"
+    },
+    "deleteGroup": {
+      "title": "Patvirtinti ištrynimą",
+      "description": "Ar tikrai norite ištrinti šias grupes?",
+      "cancel": "Atšaukti",
+      "submit": "Ištrinti"
+    },
+    "breadcrumbs": {
+      "groups": "Grupės",
+      "createNew": "Sukurti naują",
+      "editGroup": "Redaguoti grupę",
+      "back": "Atgal"
+    }
+  },
+  "enrollCourseView": {
+    "toast": {
+      "unenrollCourseSuccessfully": "Kursas sėkmingai išregistruotas"
+    }
+  },
+  "paymentView": {
+    "toast": {
+      "successful": "Mokėjimas sėkmingas",
+      "failed": "Nepavyko sukurti mokėjimo ketinimo",
+      "somethingWentWrong": "Kažkas nutiko"
+    },
+    "other": {
+      "buyFor": "Pirkti už",
+      "enrollCourse": "Užsirašyk į kursą"
+    }
+  },
+  "adminCourseView": {
+    "mandatoryCourse": "Privalomas kursas",
+    "mandatoryCourseTooltip": "Pažymėkite šį kursą kaip privalomą pasirinktai grupei. Turite nustatyti užbaigimo terminą. Pasibaigus terminui, administratorius el. paštu gaus pranešimą su kursų nebaigusių dalyvių sąrašu.",
+    "deadline": "Terminas",
+    "selectDate": "Pasirinkite datą",
+    "deadlineRequired": "Privalomiesiems kursams reikalingas terminas",
+    "common": {
+      "settings": "Nustatymai",
+      "curriculum": "Mokymosi programa",
+      "status": "Būsena",
+      "pricing": "Kainodara",
+      "preview": "Peržiūra",
+      "generateMissingTranslations": "Sukurkite trūkstamus vertimus",
+      "enrolledStudents": "Užsiregistravę studentai",
+      "testAiMentor": "Išbandykite AI mentorių",
+      "aiCourseCreation": "AI kursų kūrimas",
+      "notAddedLanguages": "Nepridėta",
+      "baseLanguage": "Numatytoji",
+      "generateMissingTranslationsDescription": "Ar tikrai norite sugeneruoti trūkstamus vertimus? Šis veiksmas gali užtrukti keletą akimirkų."
+    },
+    "toast": {
+      "courseNotFound": "Kursas nerastas",
+      "candidateNotAvailable": "Kurso nuosavybės teisės negali būti perduotos šiam vartotojui",
+      "createCourseSuccessfully": "Kursas sėkmingai sukurtas",
+      "courseUpdatedSuccessfully": "Kursas sėkmingai atnaujintas",
+      "courseTrailerUpdatedSuccessfully": "Kurso anonsas sėkmingai atnaujintas",
+      "courseTrailerRemovedSuccessfully": "Kurso anonsas sėkmingai pašalintas",
+      "certificateUpdatedSuccessfully": "Sertifikatas sėkmingai atnaujintas",
+      "certificateUpdateError": "Klaida atnaujinant sertifikatą",
+      "maxTitleLengthExceeded_one": "Pavadinimas negali būti ilgesnis nei {{count}} simbolio",
+      "maxTitleLengthExceeded_other": "Pavadinimas negali būti ilgesnis nei {{count}} simbolių",
+      "aiMentorAvatarIncorrectType": "Neteisingas failo tipas. Įkelkite JPG, JPEG, PNG arba SVG vaizdą.",
+      "languageNotSupported": "Šis kursas nepalaiko šios kalbos.",
+      "updateCourseMissingLanguage": "Nėra vertimo kalbos",
+      "successfullyDeletedLanguage": "Kalba sėkmingai ištrinta iš kurso",
+      "invalidLanguageToDelete": "Negalite ištrinti šios kalbos.",
+      "cannotModifyQuestionsInNonBaseLanguage": "Negalite keisti klausimų kita nei numatytoji kalba.",
+      "noMissingTranslations": "Netrūksta vertimų",
+      "mismatchContentLength": "Vertimų skaičius nesutampa su sugeneruotų vertimų skaičiumi",
+      "translationsGeneratedSuccessfully": "Vertimai sėkmingai sugeneruoti",
+      "lumaNotConfigured": "Luma API raktas nesukonfigūruotas.",
+      "lumaBadRequest": "Luma užklausa neteisinga.",
+      "lumaUnauthorized": "Luma autorizacija nepavyko.",
+      "lumaResourceNotFound": "Prašomas Luma šaltinis nerastas.",
+      "lumaRequestTimeout": "Baigėsi „Luma“ užklausos skirtasis laikas.",
+      "lumaConflict": "Luma pranešė apie konfliktą.",
+      "lumaValidationFailed": "Luma patvirtinimas nepavyko.",
+      "lumaRateLimited": "Pasiektas Luma dažnio limitas. Netrukus bandykite dar kartą.",
+      "lumaServiceUnavailable": "„Luma“ paslauga šiuo metu nepasiekiama.",
+      "courseHasChapters": "Šis kursas jau turi skyrių.",
+      "courseGeneratedSavedSuccessfully": "Sugeneruotas kursas sėkmingai išsaugotas.",
+      "maxOneVideoUploaded": "Negalite įkelti daugiau nei 1 vaizdo įrašo.",
+      "successfullyTransferredCourseOwnership": "Kurso nuosavybės teisė sėkmingai perduota"
+    },
+    "thinking": {
+      "PLANNING_NEXT_STEP": "Planuojate kitą žingsnį...",
+      "USING_TOOLS": "Įrankių naudojimas kontekstui gauti...",
+      "SUMMARIZING_CONTEXT": "Apibendrinamas gautas kontekstas...",
+      "ANALYZING_OBJECTIVES": "Analizuojami tikslai...",
+      "SCANNING_LEARNING_EVIDENCE": "Nuskaitomi mokymosi įrodymai...",
+      "RUNNING_CURRICULUM_DESIGN": "Vykdomas mokymo programos kūrimas...",
+      "INITIALIZING_CURRICULUM_PLAN": "Inicijuojamas mokymo programos planas...",
+      "DESIGNING_CHAPTERS": "Kuriame skyrius...",
+      "DESIGNING_LESSON_BLUEPRINTS": "Kuriame pamokų brėžinius...",
+      "FINALIZING_COURSE_STRUCTURE": "Baigiama kurso struktūra...",
+      "PREPARING_FINAL_COURSE_SHELL": "Ruošiamas galutinis kurso apvalkalas...",
+      "FINALIZING_LESSON_PAYLOADS": "Baigiamas pamokų krūvis...",
+      "COURSE_FINISHED": "Išsaugomas sugeneruotas kursas...",
+      "WRITING_RESPONSE": "Rašomas atsakymas...",
+      "WAITING_FOR_CONFIRMATION": "Laukiu jūsų patvirtinimo...",
+      "THINKING": "Galvoju..."
+    },
+    "generation": {
+      "processingTitle": "Kursas generuojamas fone",
+      "exitHint": "Laikykite šį puslapį atidarytą. Sukūrimas gali užtrukti kelias minutes.",
+      "exitDialogTitle": "Palikti šį puslapį?",
+      "exitWarning": "Kurso generavimas vyksta. Ar tikrai norite išeiti iš šio puslapio?",
+      "finishedTitle": "Kurso generavimas baigtas",
+      "finishedDescription": "Jūsų skyriai ir pamokos yra paruošti peržiūrėti.",
+      "preparingStructure": "Ruošiama skyriaus struktūra..."
+    },
+    "settings": {
+      "breadcrumbs": {
+        "back": "Atgal",
+        "myCourses": "Mano kursai",
+        "createNew": "Sukurti naują"
+      },
+      "button": {
+        "removeThumbnail": "Pašalinti miniatiūrą",
+        "removeTrailer": "Pašalinti priekabą",
+        "removeCertificateSignature": "Pašalinti parašą",
+        "includesCertificate": "Apima sertifikatą",
+        "doesNotIncludeCertificate": "Nėra sertifikato"
+      },
+      "selectButton": {
+        "uploadFile": "Įkelti failą",
+        "External": "Išorinis (URL)"
+      },
+      "sideSection": {
+        "header": "Kortelės peržiūra",
+        "subHeader": "Taip jūsų kursas bus matomas studentams.",
+        "button": {
+          "enroll": "Užsiregistruoti"
+        },
+        "other": {
+          "noDescription": "Aprašymo dar nėra.",
+          "untitled": "Be pavadinimo"
+        }
+      },
+      "field": {
+        "title": "Kurso pavadinimas",
+        "category": "Kategorija",
+        "description": "Aprašymas",
+        "thumbnail": "Miniatiūra",
+        "trailer": "Kursų anonsas",
+        "baseLanguage": "Bazinė kalba"
+      },
+      "placeholder": {
+        "title": "Įveskite pavadinimą",
+        "category": "Pasirinkite kategoriją",
+        "description": "Pateikite kurso aprašymą..."
+      },
+      "other": {
+        "charactersLeft": "Liko simbolių",
+        "reachedCharactersLimit": "Pasiekėte simbolių limitą.",
+        "reachedCharactersLimitHtml": "Per daug formatavimo. Sumažinkite formatavimo kiekį, kad tilptų į limitą.",
+        "enableCertificate": "Įgalinti sertifikatą",
+        "enableCertificateDescription": "Įjunkite tai, kad išduotumėte šio kurso sertifikatus ir toliau sukonfigūruotumėte jų parašą bei peržiūrą.",
+        "certificateSignatureRequirements": "PNG arba SVG (rekomenduojamas skaidrus fonas)",
+        "certificatePreviewTitle": "Sertifikato peržiūra",
+        "certificatePreviewDescription": "Atidarykite peržiūrą, kad sureguliuotumėte kalbą ir spalvą.",
+        "certificatePreviewButton": "Peržiūra",
+        "certificatePreviewStudentName": "Mokinio vardas",
+        "certificatePreviewCourseName": "Kurso pavadinimas",
+        "enforceLessonSequence": "Vykdykite pamokų seką",
+        "requireSequentialLessons": "Reikalauti, kad mokiniai baigtų pamokas eilės tvarka",
+        "enableQuizFeedback": "Atsiliepimai apie viktoriną",
+        "enableQuizFeedbackDescription": "Pateikęs viktoriną, mokinys matys, kurie atsakymai buvo teisingi, neteisingi ar neatsakyti.",
+        "fallbackLanguageWarningTitle": "Pastaba: trūksta vertimų",
+        "fallbackLanguageWarningDescription": "Kai kurie šios kalbos versijos laukai yra tušti. Tose vietose mokiniai matys turinį iš numatytosios kalbos, kol nepridėsite vertimų.",
+        "baseLanguageTooltip": "Negalite pakeisti ar pašalinti šios kalbos. Tai yra numatytoji ir visada bus kurso dalis."
+      },
+      "validation": {
+        "titleMinLength": "Pavadinimą turi sudaryti bent 2 simboliai.",
+        "titleMaxLength": "Pavadinimas turi būti ne ilgesnis kaip 250 simbolių.",
+        "descriptionMinLength": "Aprašą turi sudaryti bent 2 simboliai.",
+        "categoryRequired": "Kategorija būtina"
+      },
+      "header": "Sukurti naują kursą",
+      "subHeader": "Pateikite išsamią informaciją, kad nustatytumėte naują kursą. Vėliau turėsite daugiau parinkčių tinkinti.",
+      "editHeader": "Pagrindiniai nustatymai",
+      "editSubHeader": "Norėdami sukurti naują kursą, užpildykite išsamią informaciją.",
+      "transferOwnership": {
+        "title": "Perleisti nuosavybės teises",
+        "description": "Perduokite šį kursą kitam vartotojui. Jie taps naujuoju savininku ir visiškai kontroliuos kursą.",
+        "label": "Pasirinkite naują savininką",
+        "placeholder": "Pasirinkite vartotoją...",
+        "button": "Perdavimas",
+        "dialog": {
+          "title": "Patvirtinkite perkėlimą",
+          "description": "You are about to transfer this course to {{user}}. Šio veiksmo anuliuoti negalima.",
+          "confirm": "Patvirtinkite perkėlimą",
+          "cancel": "Atšaukti"
+        }
+      }
+    },
+    "curriculum": {
+      "emptyState": {
+        "header": "Pridėkite turinį prie savo skyriaus",
+        "subHeader": "Norėdami sukurti naujus arba atnaujinti esamus skyrius, naudokite skydelį kairėje"
+      },
+      "other": {
+        "lessonNumber": "Pamokų skaičius",
+        "chapter": "skyrius",
+        "lesson": "Pamoka",
+        "edit": "Redaguoti",
+        "create": "Sukurti",
+        "resources": "Ištekliai",
+        "removeContentQuestionBody": "Tai pašalins klausimą iš viktorinos",
+        "removeContentBody": "Taip bus pašalinti visi pateikti duomenys, įskaitant įkeltas laikmenas.",
+        "removeContentLesson": "Ar tikrai norite ištrinti šią turinio pamoką iš skyriaus?",
+        "removeQuizLesson": "Ar tikrai norite ištrinti šią viktorinos pamoką iš skyriaus?",
+        "removeAiMentorLesson": "Ar tikrai norite ištrinti šią AI mentoriaus pamoką iš skyriaus?",
+        "removeEmbedLesson": "Ar tikrai norite ištrinti šią įdėjimo pamoką iš skyriaus?",
+        "removeChapter": "Ar tikrai norite ištrinti šį skyrių?",
+        "removeQuestion": "Ar tikrai norite ištrinti klausimą?",
+        "removeContent": "Ar tikrai norite ištrinti turinį?"
+      },
+      "chapter": {
+        "button": {
+          "addChapter": "Pridėti skyrių",
+          "addChapterDisabledTooltip": "Naujus skyrius galite pridėti tik numatyta kalba.",
+          "generateWithAI": "Generuokite naudodami AI"
+        },
+        "toast": {
+          "chapterCreatedSuccessfully": "Skyrius sėkmingai sukurtas",
+          "chapterUpdatedSuccessfully": "Skyrius sėkmingai atnaujintas",
+          "chapterDisplayOrderUpdatedSuccessfully": "Skyriaus rodymo tvarka sėkmingai atnaujinta",
+          "errorWhileUpdating": "Atnaujinant įvyko klaida.",
+          "unexpectedError": "Įvyko netikėta klaida."
+        },
+        "field": {
+          "title": "Pavadinimas"
+        },
+        "other": {
+          "freemium": "Nemokamas skyrius",
+          "freemiumToolTip": "Studentai gali pasiekti nemokamus skyrius neužsiregistravę kurse."
+        }
+      },
+      "lesson": {
+        "button": {
+          "addLesson": "Pridėti pamoką",
+          "addQuestion": "Pridėti klausimą",
+          "addOption": "Pridėti parinktį",
+          "deleteQuestion": "Ištrinti klausimą",
+          "addWords": "Pridėkite žodžių",
+          "saveLesson": "Išsaugoti",
+          "addResource": "Pridėti išteklių",
+          "removeResource": "Pašalinti išteklius",
+          "addLessonDisabledTooltip": "Norėdami sukurti pamoką, turite kalbėti pagrindine kalba."
+        },
+        "breadcrumbs": {
+          "back": "Atgal"
+        },
+        "settings": {
+          "title": "Nustatymai",
+          "passingThreshold": "Peržengimo slenkstis (%)",
+          "attemptsLimit": "Bandymų riba",
+          "quizCooldownInHours": "Laiko užraktas po nesėkmingų bandymų (valandomis)",
+          "numberOfQuestions": "{{count1}} iš {{count2}} klausimų",
+          "noQuestions": "Jokių klausimų"
+        },
+        "tooltip": {
+          "switch": "Jei įjungta, mokinys gali atlikti ribotą testų skaičių.",
+          "passingThreshold": "Procentinė viktorinos išlaikymo riba. Jei mokinys pasiekia šį balą, viktorina bus laikoma išlaikyta.",
+          "attemptsLimit": "Leidžiamas testų bandymų skaičius prieš suveikiant laiko užraktą.",
+          "quizCooldownInHours": "Viktorinos užrakto trukmė išnaudojus visus bandymus."
+        },
+        "validation": {
+          "optionTextRequired": "Būtinas parinkties tekstas",
+          "optionTextMaxLength": "Tekstas negali būti ilgesnis nei 250 simbolių.",
+          "atLeastOneOptionRequired": "Būtina bent viena parinktis",
+          "imageRequired": "Būtinas vaizdas",
+          "descriptionLength": "Aprašą turi sudaryti bent 10 simbolių.",
+          "descriptionMaxLength": "Turinyje gali būti daugiausia 20 000 simbolių.",
+          "atLeastOneOptionCorrect": "Bent vienas klausimo variantas turi būti pažymėtas kaip teisingas.",
+          "allOptionsCorrect": "Visos parinktys turi būti teisingos",
+          "titleRequired": "Pavadinimas būtinas",
+          "descriptionRequired": "Būtinas aprašymas",
+          "aiMentorInstructionsRequired": "Reikalingos AI mentoriaus instrukcijos",
+          "aiMentorInstructionsMaxLength": "AI mentoriaus instrukcijos per ilgos (maks. 20 000 simbolių)",
+          "completionConditionsRequired": "Reikalingos užbaigimo sąlygos",
+          "completionConditionsMaxLength": "Užbaigimo sąlygos per ilgos (maks. 20 000 simbolių)",
+          "customTTSReferenceRequired": "Pasirinktiniame režime reikalinga tinkinta TTS nuoroda",
+          "taskDescriptionMaxLength": "Užduoties aprašymas per ilgas (maks. {{ count }} simbolių)",
+          "passThresholdMin": "Išlaikymo slenkstis turi būti bent 1",
+          "passThresholdMax": "Išlaikymo slenkstis negali viršyti 10",
+          "titleMinLength": "Pavadinimas per trumpas (mažiausiai 2 simboliai)",
+          "titleMaxLength": "Pavadinimas per ilgas (maks. 250 simbolių)",
+          "maxFileSize": "Failo dydis turi būti mažesnis nei {{ MAX_MB_PER_FILE }} MB",
+          "maxFileNumber_one": "Negalite įkelti daugiau nei 1 failo",
+          "maxFileNumber_other": "Negalite įkelti daugiau nei {{ count }} failų",
+          "maxResources_five": "Negalite pridėti daugiau nei 5 išteklių",
+          "sourceUrlRequired": "Būtinas šaltinio URL"
+        },
+        "toast": {
+          "lessonDisplayOrderUpdatedSuccessfully": "Pamokos rodymo tvarka sėkmingai atnaujinta",
+          "errorWhileUpdating": "Atnaujinant įvyko klaida.",
+          "unexpectedError": "Įvyko netikėta klaida.",
+          "lessonCreatedSuccessfully": "Pamoka sėkmingai sukurta",
+          "fileLessonCreatedSuccessfully": "Failo elementas sėkmingai sukurtas",
+          "contentLessonCreatedSuccessfully": "Turinio pamoka sėkmingai sukurta",
+          "quizLessonCreatedSuccessfully": "Viktorina sėkmingai sukurta",
+          "aiMentorLessonCreatedSuccessfully": "AI mentoriaus pamoka sėkmingai sukurta",
+          "aiMentorLessonUpdatedSuccessfully": "AI mentoriaus pamoka sėkmingai atnaujinta",
+          "aiMentorLessonFileAddedSuccessfully": "AI Mentor pamokų failai sėkmingai įkelti",
+          "courseGenerationFileAddedToUploadQueue": "Failas įtrauktas į įkėlimo eilę",
+          "aiMentorLessonFileDeletedSuccessfully": "AI Mentor pamokų failai sėkmingai ištrinti",
+          "lessonUpdatedSuccessfully": "Pamoka sėkmingai atnaujinta",
+          "contentLessonUpdatedSuccessfully": "Turinio pamoka sėkmingai atnaujinta",
+          "fileLessonUpdatedSuccessfully": "Failo elementas sėkmingai atnaujintas",
+          "questionOptionsUpdatedSuccessfully": "Klausimo parinktys sėkmingai atnaujintos",
+          "embedLessonCreatedSuccessfully": "Įdėti pamoka sėkmingai sukurta",
+          "embedLessonUpdatedSuccessfully": "Įterpti pamoką sėkmingai atnaujinta",
+          "embedLessonCreateError": "Nepavyko sukurti įdėjimo pamokos. Patikrinkite visus laukus ir bandykite dar kartą.",
+          "embedLessonUpdateError": "Nepavyko atnaujinti įdėjimo pamokos. Patikrinkite visus laukus ir bandykite dar kartą."
+        },
+        "field": {
+          "title": "Pavadinimas",
+          "sourceType": "Šaltinio tipas",
+          "video": "Įkelti vaizdo įrašą",
+          "presentation": "Įkelti pristatymą",
+          "description": "Aprašymas",
+          "questions": "Klausimai",
+          "options": "Parinktys",
+          "image": "Vaizdas",
+          "type": "Tipas",
+          "words": "Žodžiai",
+          "sentence": "Sakinys",
+          "sourceUrl": "Šaltinio URL",
+          "aiMentorInstructions": "AI mentoriaus instrukcijos",
+          "completionConditions": "Užbaigimo sąlygos",
+          "aiMentor": "AI mentorius",
+          "mentorName": "Mentoriaus vardas",
+          "taskDescription": "Užduoties aprašymas",
+          "passThreshold": "Praeiti slenkstis",
+          "additionalContext": "Papildomas kontekstas",
+          "aiMentorTypes": "AI mentoriaus tipas",
+          "voiceConfig": "Balso konfigūracija",
+          "voiceMode": "Balso režimas",
+          "ttsPreset": "Iš anksto nustatytas TTS",
+          "customTTSReference": "Pasirinktinė TTS nuoroda",
+          "includeFiles_one": "Pridėkite iki 1 failo žemiau {{ MAX_FILE_SIZE }} MB, kad būtų naudojamas kaip kontekstas pamokose",
+          "includeFiles_other": "Pridėkite iki {{ count }} failų, mažesnių nei {{ MAX_FILE_SIZE }} MB, kad galėtumėte naudoti kaip kontekstą pamokose"
+        },
+        "placeholder": {
+          "title": "Pateikite pamokos pavadinimą...",
+          "fileDescription": "Pateikite aprašymą apie {{type}}...",
+          "option": "Parinktis",
+          "matchedWords": "Sutapę žodžiai",
+          "singleChoice": "Vienas pasirinkimas",
+          "multipleChoice": "Kelias pasirinkimas",
+          "enterWord": "Įveskite žodį",
+          "enterURL": "Įveskite URL…",
+          "sourceUrl": "Įveskite šaltinio URL...",
+          "allowFullscreen": "Leisti per visą ekraną",
+          "aiMentorInstructions": "Aprašykite, kaip AI mentorius turėtų elgtis pamokos metu...",
+          "completionConditions": "Išvardinkite, ką mokinys turi pasiekti, kad išlaikytų šią pamoką...",
+          "taskDescription": "Aprašykite užduotį, kurią dalyvis turi atlikti...",
+          "passThreshold": "pvz., 70 proc.",
+          "customTTSReference": "Įveskite tinkintą TTS nuorodos ID...",
+          "aiMentorTypes": "Mentorė"
+        },
+        "courseGenerationComposer": {
+          "placeholders": {
+            "topic": "Darbo teisės pagrindai programinės įrangos komandoms, įskaitant sutartis, intelektinę nuosavybę ir atitiktį.",
+            "targetAudience": "Produktų komandų kūrėjai, bendradarbiaujantys su teisinėmis ir žmogiškųjų išteklių suinteresuotosiomis šalimis.",
+            "currentLevel": "Pradedančiojo iki vidutinio lygio, nereikalaujantis oficialaus teisinio išsilavinimo.",
+            "desiredOutcomes": "Patikimai nustatykite teisinę riziką priimdami kasdienius inžinerinius sprendimus ir žinokite, kada ją didinti.",
+            "constraintsPrerequisites": "Nuo keturių iki penkių valandų per savaitę visiškai nuotoliniu būdu ir reikalinga pagrindinė programinės įrangos patirtis.",
+            "preferredFormatAssessment": "Mišrus formatas su glaustu skaitymu, praktiniais scenarijais ir trumpais atvejais pagrįstais vertinimais.",
+            "timeBudget": "Iš viso vienas mėnuo su savaitės etapais ir paskutine santrauka.",
+            "successCriteriaDomainContext": "Besimokantieji gali aiškiai paaiškinti temą ir išspręsti realias darbo vietos teisės situacijas technologijų įmonės kontekste."
+          }
+        },
+        "other": {
+          "lessonNumber": "Pamokų skaičius",
+          "chooseType": "Pasirinkite tipą",
+          "content": "Turinys",
+          "quiz": "Viktorina",
+          "aiMentor": "AI mentorius",
+          "embed": "Įterpti",
+          "correct": "Teisingai",
+          "true": "Tiesa",
+          "false": "Netiesa",
+          "option": "Parinktis",
+          "singleChoice": "Vienas pasirinkimas",
+          "multipleChoice": "Kelias pasirinkimas",
+          "matchWords": "Derinimas",
+          "trueOrFalse": "Tiesa ar klaidinga",
+          "fillInTheBlanks": "Užpildykite tuščias vietas",
+          "photoQuestion": "Foto klausimas",
+          "fillInTheBlanksText": "Spragų užpildymas",
+          "briefResponse": "Trumpas atsakymas",
+          "detailedResponse": "Laisvas tekstas",
+          "scale1_5": "Skalė nuo 1 iki 5",
+          "selectQuestionType": "Pasirinkite klausimo tipą",
+          "contentLessonDescription": "Tekstas su multimedija (vaizdai, vaizdo įrašai, pristatymai).",
+          "quizLessonDescription": "Klausimų rinkinys žinioms patikrinti.",
+          "aiMentorLessonDescription": "Interaktyvus pokalbis su virtualiu AI mentoriumi.",
+          "fillInTheBlanksDescription": "Šiame klausime yra sakinys; mokiniai turi nuvilkti teisingą žodį į tuščią vietą.",
+          "gapFillDescription": "Šiame klausime bus sakinys, kuriame trūksta žodžių, kuriuos mokiniai turi įvesti.",
+          "embedLessonDescription": "Išorinis šaltinis (pvz., „Google“ forma, „Canva“ pristatymas arba „YouTube“ tiesioginis srautas).",
+          "fillInTheBlanksSentenceTip": "Parašykite sakinį ir įrašykite į jį žodžius.",
+          "fillInTheBlanksWordTip": "Sukurkite ir įmeskite žodį į sakinį.",
+          "leaveContentHeader": "Ar tikrai norite išeiti iš šios klausimų redagavimo priemonės?",
+          "leaveContentBody": "Bus ištrinta visa neišsaugota eiga",
+          "dropOrClick": "Nuvilkite vaizdą čia arba spustelėkite, kad įkeltumėte",
+          "allowedFormats": "PNG, JPG arba SVG",
+          "leaveContentBodyValidate": "Jei norite išsaugoti pakeitimus, pirmiausia turite patvirtinti formą",
+          "aiMentorInstructionsTooltip": "Apibūdinkite, kaip AI mentorius turėtų elgtis pamokos metu. Įtraukite kontekstą, vaidmenį ar scenarijų, kurio AI turėtų laikytis. Tai apibrėžia, kaip AI vadovaus pokalbiui.",
+          "updateAiMentorAvatarDescription": "Įkelkite naują AI mentoriaus vaizdą arba pašalinkite esamą.",
+          "updateAiMentorAvatar": "Atnaujinkite AI mentoriaus avatarą",
+          "aiMentorTypesTooltip": "Pasirinkite AI mentoriaus tipą: mentorius veda į atsakymus, mokytojas tiesiogiai, vaidmenų žaidimas imituoja tikrus scenarijus (pvz., klientas ir pardavėjas).",
+          "aiMentorTypeTooltip": "Scenarijuje elgiasi kaip veikėjas, tačiau scenos metu užduoda klausimus ir padeda daryti išvadas.\nPavyzdys: \"Ką dabar darytumėte eidamas vadovo vaidmenį?\"",
+          "aiTeacherTypeTooltip": "Aiškina, moko ir klausinėja – kaip mokytojas.\nPavyzdys: \"Esant tokiai situacijai, klientas prieštarauja kainai. Ką turėtumėte atsakyti ir kodėl?\"",
+          "aiRoleplayTypeTooltip": "Imituoja tikrovišką charakterį ir situaciją – nepažeidžiant charakterio.\nPavyzdys: \"Tai antras kartas, kai jūsų paslauga sugenda. Ką ketinate dėl to daryti?\"",
+          "completionConditionsTooltip": "Išvardykite, ką mokinys turi pasiekti, kad išlaikytų šią pamoką. Pateikite aiškius ir išmatuojamus taškus. AI naudos šį sąrašą pažangai patikrinti. Taip pat galite nustatyti išlaikymo slenkstį (pvz., procentą arba minimalų taškų skaičių). Jei slenkstis nenurodytas, turi būti įvykdytos visos sąlygos, norint išlaikyti pamoką.",
+          "passThresholdTooltip": "Nustatykite minimalų procentą (1–100 %), reikalingą išlaikyti. Palikite tuščią, kad nebūtų slenksčio.",
+          "voiceConfigFishAudioTooltip": "Balso režimas naudoja Fish Audio. Norėdami pasirinkti pasirinktinį balsą, atidarykite „Fish Audio“, pasirinkite jums patinkantį balsą ir nukopijuokite jo balso ID čia.",
+          "aiMentorPersonaTooltip": "Tai apibrėžia pamokos asmenybę. Galite pasirinkti AI mentoriaus vardą ir pseudoportretą. Asmuo atpažins save šiuo vardu, o pasirinktas avataras bus rodomas pamokų metu.",
+          "suggestedExamples": "Siūlomi pavyzdžiai",
+          "charactersLeft": "liko simbolių",
+          "optional": "neprivaloma",
+          "overwriteContent": "Perrašyti turinį",
+          "overwriteContentDescription": "Tai pakeis jūsų dabartinį turinį pasirinktu pavyzdžiu. Ar tikrai norite tęsti?",
+          "scenarioSimulation": "Scenarijaus modeliavimas",
+          "problemSolving": "Problemų sprendimas",
+          "creativeTask": "Kūrybinė užduotis",
+          "knowledgeSharing": "Dalijimosi žiniomis dialogas",
+          "voiceModePreset": "Iš anksto nustatytas",
+          "voiceModeCustom": "Pasirinktinis",
+          "voicePresetMale": "Vyriška",
+          "voicePresetFemale": "Moteris",
+          "emoji": {
+            "search": "Ieškoti",
+            "loading": "Įkeliama..."
+          },
+          "aiMentorSuggestionExamples": {
+            "instructions": {
+              "scenarioSimulation": "Atliekate verslo kliento, ieškančio programinės įrangos kūrimo paslaugų tiekėjo, vaidmenį. Turite konkrečius reikalavimus: programa turi būti paruošta per 3 mėnesius, jūsų biudžetas ribotas ir tikitės aiškaus bendravimo. Studentas atlieka pardavimo atstovo, norinčio laimėti jūsų verslą, vaidmenį. AI mentorius turėtų atsakyti kaip klientas, užduoti klausimus ir reikšti susirūpinimą.",
+              "problemSolving": "Jūs atliekate darbuotojo, kuris prašo padidinti atlyginimą, vaidmenį. Manote, kad to nusipelnėte dėl pastarojo meto indėlio. Tačiau bendrovė šiuo metu neturi laisvo biudžeto pakėlimams. Studentas vaidina vadybininką, kuriam reikia konstruktyviai tvarkyti pokalbį, parodydamas empatiją ir bandydamas rasti alternatyvų sprendimą.",
+              "creativeTask": "Jūs prašote studento pasiūlyti idėją naujai paslaugai, kurią įmonė galėtų pasiūlyti savo klientams. Jūsų vaidmuo yra skatinti kūrybiškumą, užduoti tolesnius klausimus ir padėti mokiniui patobulinti savo koncepciją.",
+              "knowledgeSharing": "Atliekate patyrusio mentoriaus, kuris dalijasi žiniomis apie laiko valdymo metodus, vaidmenį. Pokalbis neformalus: pristatote sąvokas, pateikiate pavyzdžių, skatinate mokinį apmąstyti. Kartais užduodate lengvus, atvirus klausimus, kad patikrintumėte supratimą. Tikslas yra nukreipti, o ne išbandyti."
+            },
+            "conditions": {
+              "scenarioSimulation": "<ul><li>Mokinys klausia apie kliento biudžetą.</li><li>Mokinys klausia apie laiko juostą.</li><li>Studentas naudoja SPIN pardavimą ar kitą pardavimo metodą.</li><li>Mokinys nustato pagrindinius kliento skausmo taškus.</li><li>Mokinys siūlo pasiūlymą, atitinkantį kliento apribojimus:</li></ul><strong></li></ul><strong></li></ul><strong> turi būti įvykdytas.",
+              "problemSolving": "<ul><li>Studentas pripažįsta darbuotojo indėlį.</li><li>Studentas sąžiningai paaiškina biudžeto situaciją.</li><li>Studentas pasiūlo nefinansinę alternatyvą (pvz., papildomos naudos, tobulėjimo galimybę).</li><li>Studentas sutinka vėl nagrinėti temą.</li><li>Mokinys išlaiko pagarbų, palaikantį toną:</strong></strong></strong>thr/ulhold. turi būti įvykdytos iš 5 sąlygų.",
+              "creativeTask": "<ul><li>Mokinys pateikia originalią idėją.</li><li>Mokinys paaiškina, kas yra tikslinė auditorija.</li><li>Mokinys aprašo, kaip paslauga galėtų suteikti vertės klientams.</li><li>Mokinys įvardija galimus iššūkius.</li></ul><em>(Slenkstis nenustatytas – turi būti įvykdytos visos sąlygos.)</em>",
+              "knowledgeSharing": "<ul><li>Mokinys aktyviai įsitraukia į pokalbį (užduoda klausimus ar dalijasi pamąstymais).</li><li>Mokinys gali įvardyti bent vieną dialoge paminėtą laiko valdymo techniką.</li><li>Mokinys išsako, kaip vieną techniką galėtų pritaikyti savo darbe.</li></ul><em>(Nėra apibrėžtos slenksčio – visos sąlygos rekomenduojamos, bet neprivalomos išlaikyti.)</em>"
+            }
+          },
+          "betaTooltip": "Ši funkcija pateikiama bandomojoje versijoje. Jame gali būti klaidų arba jis gali neveikti visiškai taip, kaip numatyta, ir naudojamas jūsų pačių rizika.",
+          "dragWord": "Vilkite žodį į sakinį",
+          "taskDescriptionTooltip": "Trumpai apibūdinkite, ką dalyvis turėtų daryti pokalbio su AI mentoriumi metu."
+        }
+      }
+    },
+    "status": {
+      "header": "Būsena",
+      "subHeader": "Nustatyti kurso būseną",
+      "draftHeader": "Juodraštis",
+      "draftBody": "Studentai negali pirkti ar užsiregistruoti šiame kurse. Tiems, kurie jau užsiregistravo, kursas nebus rodomas jų studentų kursų sąraše.",
+      "publishedHeader": "Paskelbta",
+      "publishedBody": "Studentai gali įsigyti, užsiregistruoti ir pasiekti kurso turinį. Užsiregistravus, kursas bus rodomas jų studentų informacijos suvestinėje.",
+      "privateHeader": "Privatus",
+      "privateBody": "Studentai negali pirkti ar užsiregistruoti į šį kursą. Tiems, kurie užsiregistravo (pvz., administratorius), kursas bus rodomas jų studentų kursų sąraše ir jie galės jį pereiti."
+    },
+    "pricing": {
+      "header": "Kainodara",
+      "subHeader": "Nustatykite kurso kainą",
+      "freeCourseHeader": "Nemokama",
+      "freeCourseBody": "Studentai gali užsiregistruoti ir pasiekti kurso turinį nemokėdami.",
+      "paidCourseHeader": "Mokamas kursas",
+      "paidCourseBody": "Studentai gali įsigyti ir pasiekti kurso turinį. Pasirinkę galite nustatyti valiutą ir kainą.",
+      "field": {
+        "price": "Kaina"
+      },
+      "placeholder": {
+        "amount": "Suma"
+      },
+      "validation": {
+        "priceInCents": "Kaina turi būti ne mažesnė nei 2,00 arba nemokama"
+      }
+    },
+    "enrolled": {
+      "filters": {
+        "placeholder": {
+          "searchByKeyword": "Ieškoti pagal raktinį žodį...",
+          "groups": "Visos grupės"
+        }
+      },
+      "enroll": "Užsiregistruoti",
+      "enrollSelected": "Užsiregistruoti pasirinkta",
+      "unenrollSelected": "Pasirinkta atšaukti registraciją",
+      "unenrollGroups": "Išregistruoti grupes",
+      "table": {
+        "name": "Vardas",
+        "surname": "Pavardė",
+        "email": "El. paštas",
+        "status": "Registracijos būsena",
+        "enrollmentDate": "Užsiregistravimo data"
+      },
+      "statuses": {
+        "enrolled": "Užsiregistravo",
+        "enrolledByGroup": "Užsiregistravo grupėmis",
+        "individuallyEnrolled": "Individualiai užsiregistravęs",
+        "notEnrolled": "Neužsiregistravęs"
+      },
+      "confirmation": {
+        "title": "Patvirtinti registraciją",
+        "description": "Ar tikrai norite įtraukti pasirinktus studentus į šį kursą? Šio veiksmo anuliuoti negalima."
+      },
+      "enrollGroups": "Registruokitės į grupes",
+      "enrollGroupsModal": {
+        "title": "Užsirašykite grupes į kursus",
+        "description": "Pasirinkite grupes, kurias norite registruoti. Visi pasirinktų grupių nariai bus automatiškai įtraukiami į šį kursą. Galite pažymėti kursą kaip privalomą ir nustatyti datą."
+      },
+      "alreadyEnrolled": "Jau užsiregistravęs",
+      "members": "{{count}} narių",
+      "unenrollConfirmation": {
+        "title": "Išsiregistravimo patvirtinimas",
+        "description": "Ar tikrai norite išregistruoti pasirinktus studentus iš šio kurso? Šio veiksmo anuliuoti negalima."
+      },
+      "toast": {
+        "someStudentsUnenrolled": "Negalite atšaukti šių mokinių registracijos, nes {{count}} iš jų neužregistruoti.",
+        "studentsEnrolledByGroup": "Negalite atšaukti šių mokinių registracijos, nes {{count}} iš jų yra užregistruoti per grupę.",
+        "groupsUnenrolledSuccessfully": "Grupės sėkmingai atšauktos",
+        "alreadyEnrolledByGroup": {
+          "title": "Kai kurie vartotojai jau yra užsiregistravę pagal grupes"
+        }
+      },
+      "successResponse": "Studentai buvo paskirti į kursą."
+    },
+    "breadcrumbs": {
+      "courses": "Kursai",
+      "back": "Atgal"
+    },
+    "statistics": {
+      "title": "Statistika",
+      "subtitle": "Kurso atlikimo apžvalga",
+      "details": "Detalės",
+      "filterByQuiz": "Filtruoti pagal viktoriną",
+      "allQuizzes": "Visos viktorinos",
+      "filterByLesson": "Filtruoti pagal pamoką",
+      "allLessons": "Visos pamokos",
+      "tabs": {
+        "progress": "Pažanga",
+        "quizResults": "Viktorinos rezultatai",
+        "aiMentorResults": "AI mentoriaus rezultatai",
+        "learningTime": "Mokymosi laikas"
+      },
+      "field": {
+        "studentName": "Studentas",
+        "groupName": "Grupė",
+        "completedLessonsCount": "Baigtos pamokos",
+        "lastActivity": "Paskutinė veikla",
+        "lastCompletedLesson": "Paskutinė baigta pamoka",
+        "quizName": "Viktorina",
+        "quizScore": "Rezultatas",
+        "attempts": "Bandymai",
+        "lastAttempt": "Paskutinis bandymas",
+        "lessonName": "Pamoka",
+        "lastSession": "Paskutinė sesija",
+        "score": "Rezultatas",
+        "totalTime": "Visas laikas"
+      },
+      "overview": {
+        "enrolledCount": "Užsiregistravę studentai skaičiuojami",
+        "enrolledCountTooltip": "Į šį kursą užsiregistravusių vartotojų skaičius.",
+        "completionRate": "Užbaigimo rodiklis",
+        "completionRateTooltip": "Naudotojų, kurie baigė visą kursą, procentas.",
+        "averageCompletionPercentage": "Vidutinė pažanga",
+        "averageCompletionPercentageTooltip": "Vidutinis visų užsiregistravusių naudotojų kursų baigimo lygis.",
+        "averageScorePerQuiz": "Vidutinis balas per viktoriną",
+        "averageScorePerQuizSubtitle": "Peržiūrėkite vidutinius atskirų kurso viktorinų rezultatus",
+        "averageQuizScore": "Vidutinis viktorinos rezultatas",
+        "completedBy_one": "Užbaigė {{count}} mokinys",
+        "completedBy_other": "Užbaigė {{count}} mokiniai",
+        "courseStatusDistribution": "Kurso statuso pasiskirstymas",
+        "courseStatusDistributionTooltip": "Rodo, kiek vartotojų baigė, pradėjo ar nepradėjo kursą.",
+        "averageLearningTime": "Vidutinis mokymosi laikas",
+        "averageLearningTimeTooltip": "Vidutinis laikas, kurį visi naudotojai praleidžia šiame kurse.",
+        "activeStudents": "Aktyvūs mokiniai",
+        "activeStudentsTooltip": "Studentų, kurie įsitraukė į kursą, skaičius."
+      },
+      "empty": {
+        "noUsers": "Nėra vartotojų",
+        "enrolled": "įstojo",
+        "noGroups": "Nėra grupių"
+      },
+      "groupFilter": {
+        "placeholder": "Visos grupės"
+      }
+    },
+    "createLanguage": {
+      "title": "Sukurti naują kalbą",
+      "description": "Ar tikrai norite sukurti naują šio kurso kalbą?",
+      "success": "Kalba sėkmingai sukurta",
+      "alreadyExists": "Ši kalba jau egzistuoja.",
+      "editConstraints": "Kitomis kalbomis nei {{baseLanguage}} negalite kurti naujų pamokų, skyrių ar pridėti naujų klausimų prie viktorinų."
+    },
+    "deleteLanguage": {
+      "title": "Ištrinti kalbą",
+      "description": "Ar tikrai norite ištrinti šią kalbą?"
+    },
+    "sharedCourse": {
+      "badgeMaster": "Bendrinama",
+      "badgeExported": "Bendrinama",
+      "badgeExportedTooltip": "Šis kursas valdomas centralizuotai. Galite jį paskelbti ir priskirti dalyvius, bet negalite redaguoti jo turinio.",
+      "exportedNoticeTitle": "Šis kursas buvo eksportuotas į šią organizaciją",
+      "exportedNoticeDescription": "Turinys tvarkomas šaltinio organizacijoje ir šioje organizacijoje yra tik skaitomas.",
+      "exportsTitle": "Dalijimasis",
+      "exportsDescription": "Pasidalykite šiuo kursu su pasirinktomis organizacijomis.",
+      "selectTenants": "Pasirinkite organizacijas",
+      "selectedCount": "Pasirinkta:",
+      "exportButton": "Dalintis",
+      "exportingButton": "Bendrinama..."
+    }
+  },
+  "registerView": {
+    "header": "Registruotis",
+    "subHeader": "Įveskite savo informaciją, kad sukurtumėte paskyrą",
+    "subHeaderSSO": "Prisiregistruokite naudodami „Google“ / „Microsoft“ paskyrą",
+    "field": {
+      "firstName": "Vardas",
+      "lastName": "Pavardė",
+      "email": "El. paštas",
+      "password": "Slaptažodis",
+      "birthday": "Gimimo data",
+      "birthdayPlaceholder": "Pasirinkite datą",
+      "requiredBadge": "Privaloma",
+      "optionalBadge": "Neprivaloma"
+    },
+    "other": {
+      "alreadyHaveAccount": "Jau turite paskyrą?",
+      "orContinueWith": "Arba tęskite"
+    },
+    "button": {
+      "createAccount": "Susikurti paskyrą",
+      "signIn": "Prisijunkite"
+    },
+    "validation": {
+      "firstName": "Vardas būtinas",
+      "lastName": "Būtina nurodyti pavardę",
+      "email": "Neteisingas el",
+      "birthday": "Turite būti bent {{ageLimit}} metų amžiaus",
+      "requiredCheckbox": "Šis sutikimas yra būtinas."
+    },
+    "toast": {
+      "userAlreadyExists": "Vartotojas su šiuo el. pašto adresu jau egzistuoja.",
+      "createAccountFailed": "Nepavyko sukurti paskyros. Bandykite dar kartą.",
+      "requiredFormFieldMissing": "Priimkite visus reikiamus sutikimus.",
+      "invalidFormField": "Vienas iš pateiktų registracijos laukų yra neteisingas."
+    }
+  },
+  "courseChapterView": {
+    "other": {
+      "lesson": "Pamoka",
+      "lessons": "Pamokos",
+      "quiz": "Viktorina",
+      "quizzes": "Viktorinos",
+      "free": "Nemokama"
+    }
+  },
+  "forgotPasswordView": {
+    "header": "Pamiršote slaptažodį?",
+    "subHeader": "Įveskite su paskyra susietą el. pašto adresą ir atsiųsime nuorodą, kad iš naujo nustatytumėte slaptažodį.",
+    "field": {
+      "email": "El. pašto adresas"
+    },
+    "validation": {
+      "email": "Neteisingas el"
+    },
+    "button": {
+      "resetPassword": "Iš naujo nustatyti slaptažodį",
+      "backToLogin": "Grįžti į prisijungimą"
+    },
+    "toast": {
+      "resetPassword": "Slaptažodžio nustatymo iš naujo nuoroda buvo išsiųsta į jūsų el."
+    }
+  },
+  "loginView": {
+    "header": "Prisijungti",
+    "subHeader": "Toliau įveskite savo el. pašto adresą, kad prisijungtumėte prie savo paskyros",
+    "subHeaderSSO": "Prisijunkite naudodami „Google“ / „Microsoft“ paskyrą",
+    "validation": {
+      "email": "Neteisingas el",
+      "password": "Reikalingas slaptažodis"
+    },
+    "other": {
+      "forgotPassword": "Pamiršote slaptažodį?",
+      "useMagicLink": "Atsiųskite man prisijungimo nuorodą",
+      "dontHaveAccount": "Neturite paskyros?",
+      "rememberMe": "Prisimink mane",
+      "signUp": "Užsiregistruoti",
+      "orContinueWith": "Arba tęskite"
+    },
+    "button": {
+      "login": "Prisijungti"
+    },
+    "field": {
+      "email": "El. paštas",
+      "password": "Slaptažodis"
+    },
+    "magicLink": {
+      "subHeader": "Mes tikriname jūsų prisijungimo nuorodą. Tai gali šiek tiek užtrukti.",
+      "checking": "Tikrinama prisijungimo nuoroda...",
+      "success": "Prisijungimo nuoroda patvirtinta. Peradresuojama...",
+      "error": "Prisijungimo nuoroda neteisinga arba pasibaigė.",
+      "backToLogin": "Grįžti į prisijungimą"
+    }
+  },
+  "magicLinkView": {
+    "header": "Gaukite prisijungimo nuorodą",
+    "subHeader": "Įveskite savo el. pašto adresą ir mes atsiųsime jums prisijungimo nuorodą, kad galėtumėte prisijungti.",
+    "validation": {
+      "email": "Neteisingas el"
+    },
+    "field": {
+      "email": "El. pašto adresas"
+    },
+    "button": {
+      "sendLink": "Gaukite prisijungimo nuorodą",
+      "backToLogin": "Grįžti į prisijungimą"
+    },
+    "toast": {
+      "sent": "Prisijungimo nuoroda atsiųsta į jūsų el."
+    }
+  },
+  "magicLink": {
+    "error": {
+      "createToken": "Nepavyko sugeneruoti prisijungimo nuorodos. Bandykite dar kartą.",
+      "invalidToken": "Prisijungimo nuoroda neteisinga.",
+      "expiredToken": "Prisijungimo nuoroda nebegalioja."
+    }
+  },
+  "user": {
+    "error": {
+      "archived": "Jūsų paskyra suarchyvuota."
+    }
+  },
+  "studentCoursesView": {
+    "other": {
+      "cannotFindCourses": "Neradome jokių kursų",
+      "changeSearchCriteria": "Pakeiskite paieškos kriterijus arba bandykite dar kartą vėliau",
+      "freeLessons": "Nemokamos pamokos!",
+      "successfullyEnrolledToCourse": "Sėkmingai įstojo į kursus"
+    },
+    "breadcrumbs": {
+      "courses": "Kursai"
+    },
+    "button": {
+      "continue": "Tęsti",
+      "enroll": "Užsiregistruoti",
+      "view": "Žiūrėti",
+      "readMore": "Skaityti Daugiau",
+      "playChapter": "Groti skyrių"
+    },
+    "enrolledCourses": {
+      "header": "Jūsų kursai",
+      "subHeader": "Kursai, į kuriuos šiuo metu esate užsiregistravę"
+    },
+    "availableCourses": {
+      "header": "Galimi kursai",
+      "subHeader": "Galima registruotis į visus galimus karjeros kursus",
+      "filters": {
+        "placeholder": {
+          "title": "Ieškoti pagal pavadinimą...",
+          "categories": "Kategorijos",
+          "sort": "Rūšiuoti"
+        }
+      },
+      "headerOptions": {
+        "image": "Vaizdas",
+        "title": "Kurso pavadinimas",
+        "category": "Kategorija",
+        "description": "Aprašymas",
+        "author": "Autorius"
+      }
+    },
+    "modernView": {
+      "continueLearning": "Toliau mokytis",
+      "topCourses": "5 populiariausi kursai",
+      "hero": {
+        "start": "Pradėti",
+        "moreInfo": "Daugiau informacijos",
+        "info": "Informacija"
+      },
+      "lessonsCount_one": "{{count}} pamoka",
+      "lessonsCount_other": "{{count}} pamokų"
+    }
+  },
+  "studentQuizSummaryView": {
+    "header": "Sveikiname!",
+    "subHeader": "Jūs baigėte viktoriną!",
+    "other": {
+      "yourScore": "Jūsų balas:",
+      "tryAgain": "Bandykite dar kartą"
+    },
+    "button": {
+      "backToCourse": "Atgal į kursą"
+    }
+  },
+  "studentLessonView": {
+    "error": {
+      "lessonIdNotFound": "Pamokos ID nerastas",
+      "notAuthorizedTitle": "Neįgaliotas",
+      "notAuthorizedDescription": "Jūs neturite teisės pasiekti šios pamokos.",
+      "goBackToCourse": "Grįžkite į kursą"
+    },
+    "other": {
+      "lesson": "Pamoka",
+      "chapter": "skyrius",
+      "correctAnswers": "Teisingi atsakymai:",
+      "correctSentence": "Teisingas sakinys:",
+      "question": "Klausimas",
+      "answers": "Atsakymai:",
+      "true": "Tiesa",
+      "false": "Netiesa",
+      "oneOrTwoWordSentence": "Instrukcija: trumpai atsakykite (1-2 sakiniai).",
+      "threeOrFiveWordSentence": "Instrukcija: Parašykite išsamų atsakymą (3-5 sakiniai).",
+      "single": "Vienišas",
+      "multiple": "Keli",
+      "fillInTheBlanks": "Užpildykite tuščias vietas.",
+      "selectQuestion": "pasirinkti klausimą.",
+      "trueOrFalseQuestion": "Tikras ar klaidingas klausimas.",
+      "multipleChoice": "Klausimas su keliais pasirinkimais.",
+      "singleChoice": "Vieno pasirinkimo klausimas",
+      "passingThreshold": "Išlaikymo slenkstis: {{threshold}} % ({{correct}} iš {{questionsNumber}} klausimų)",
+      "score": "Rezultatas: {{score}}% ({{correct}} iš {{questionsNumber}} klausimų)",
+      "contentCantBeEmbedded": "Šio turinio negalima įterpti.",
+      "openInNewTab": "Atidaryti naujame skirtuke"
+    },
+    "aiMentor": {
+      "title": "AI mentoriaus sesija",
+      "description": "Tai AI pagrįsta mentorystės sesija. AI padės jums per pamoką pagal instruktoriaus nurodymus."
+    },
+    "videoProcessing": {
+      "title": "Vaizdo įrašas apdorojamas",
+      "body": "Šiek tiek palaukite. Jis pasirodys čia, kai bus paruoštas."
+    },
+    "playNext": {
+      "title": "Toliau",
+      "description": "Kitas bus žaidžiamas po {{seconds}}s",
+      "descriptionNoCountdown": "Žaidžiama toliau",
+      "playNow": "Žaisti dabar",
+      "cancel": "Atšaukti"
+    },
+    "placeholder": {
+      "openQuestion": "Įveskite savo atsakymą čia"
+    },
+    "tooltip": {
+      "retakeAvailableIn": "Užrakinta {{time}} valandoms po paskutinio pakartojimo.",
+      "cooldown": "Viktorina bus užrakinta {{time}} valandoms po paskutinio bandymo.",
+      "noCooldown": "Nėra aušinimo laikotarpio.",
+      "beta": "Ši funkcija pateikiama bandomojoje versijoje. Jame gali būti klaidų arba jis gali neveikti visiškai taip, kaip numatyta, ir naudojamas jūsų pačių rizika."
+    },
+    "breadcrumbs": {
+      "availableCourses": "Galimi kursai",
+      "yourCourses": "Jūsų kursai",
+      "back": "Atgal"
+    },
+    "button": {
+      "previous": "Ankstesnis",
+      "complete": "Užbaigti",
+      "next": "Kitas",
+      "submit": "Pateikti",
+      "retake": "Perimti",
+      "autoplay": "Automatinis paleidimas"
+    },
+    "sideSection": {
+      "header": "Turinio lentelė:",
+      "other": {
+        "courseProgress": "Kurso eiga:"
+      }
+    },
+    "validation": {
+      "answerCannotBeEmpty": "Atsakymas negali būti tuščias.",
+      "atLeastOneOptionMustBeSelected": "Turi būti pasirinkta bent viena parinktis {{questionId}} klausimui.",
+      "answerCannotBeEmptyForDragAndDropQuestion": "Vilkite ir numeskite klausimo {{questionId}} atsakymo laukas negali būti tuščias.",
+      "answerCannotBeEmptyForTextQuestion": "Teksto klausimo {{questionId}} atsakymas negali būti tuščias.",
+      "invalidSelectionForSingleAnswer": "Netinkamas vieno atsakymo klausimo pasirinkimas.",
+      "invalidFormatForMultiAnswer": "Netinkamas kelių atsakymų klausimų formatas.",
+      "trueOrFalseRequired": "Reikalingas teisingas arba klaidingas atsakymas.",
+      "photoQuestionMustHaveAnswer": "Atsakymas reikalingas į šį klausimą su nuotrauka.",
+      "unansweredQuestions": "Atrodo, kad dar nepatikrinote visų atsakymų. Peržiūrėkite juos ir bandykite dar kartą!"
+    }
+  },
+  "studentCourseView": {
+    "header": "Skyriai",
+    "subHeader": "Žemiau galite pamatyti visus šio kurso skyrius",
+    "recommendedHeader": "Galbūt jus domina",
+    "recommendedSubheader": "Žemiau galite pamatyti kursus panašiomis temomis ar žinių sritimi",
+    "otherAuthorCoursesHeader": "Daugiau kursų",
+    "otherAuthorCoursesSubheader": "Žemiau galite pamatyti daugiau to paties autoriaus sukurtų kursų",
+    "other": {
+      "cannotFindCourses": "Neradome jokių kursų",
+      "changeSearchCriteria": "Pakeiskite paieškos kriterijus arba bandykite dar kartą vėliau"
+    },
+    "lesson": {
+      "missingAnswer": "Trūksta atsakymo",
+      "yourAnswer": "Jūsų atsakymas",
+      "studentsAnswer": "Mokinio atsakymas",
+      "singleChoice": "Vieno pasirinkimo klausimas",
+      "multipleChoice": "Klausimas su keliais pasirinkimais",
+      "trueOfFalseChoice": "Tikras ar klaidingas klausimas",
+      "oneOrTwoWordSentence": "Pateikite trumpą atsakymą (1–2 sakinius).",
+      "threeOrFiveWordSentence": "Parašykite išsamų atsakymą (3-5 sakiniai).",
+      "aiMentorLesson": {
+        "sendMessage": "Rašyk žinutę...",
+        "check": "Patikrinkite",
+        "aiMentorName": "AI mentorius",
+        "retake": "Perimti",
+        "userName": "Vartotojas",
+        "typing": "Rašomas atsakymas...",
+        "send": "Siųsti",
+        "addEmoji": "Pridėti jaustuką",
+        "closeVoiceMode": "Uždaryti balso režimą",
+        "toggleVoiceInput": "Perjungti balso įvestį",
+        "startVoiceMentor": "Pradėti balso mentorių",
+        "stopVoiceRecording": "Sustabdyti balso įrašymą",
+        "taskDescription": "Užduoties aprašymas",
+        "taskDescriptionExpand": "Spustelėkite norėdami išplėsti",
+        "taskDescriptionCollapse": "Spustelėkite, kad sutrauktumėte",
+        "voiceOverlay": {
+          "headerEyebrow": "Balso vartotojo sąsaja",
+          "exit": "Išeikite iš balso režimo",
+          "youSaid": "Tu sakei",
+          "states": {
+            "idle": {
+              "title": "Paruošta",
+              "subtitle": "Bakstelėkite, kad pradėtumėte kalbėti"
+            },
+            "listening": {
+              "title": "Klausymas",
+              "subtitle": "Jūsų balso užfiksavimas"
+            },
+            "thinking": {
+              "title": "Mąstymas",
+              "subtitle": "Modelis ruošia atsakymą"
+            },
+            "speaking": {
+              "title": "Kalbėdamas",
+              "subtitle": "Groja modelio atsakas"
+            }
+          },
+          "responsePlaceholder": {
+            "thinking": "Galvojant apie tavo prašymą...",
+            "listening": "Klausausi kito klausimo...",
+            "default": "Čia bus rodoma atsakymo peržiūra."
+          }
+        },
+        "retakeModalTitle": "Ar tikrai norite perskaityti pamoką?",
+        "retakeModalDescription": "Tai iš naujo nustatys jūsų pažangą šioje pamokoje. Šio veiksmo anuliuoti negalima."
+      }
+    },
+    "sideSection": {
+      "optionHeader": "Parinktis",
+      "courseProgressHeader": "kursasProgressHeader",
+      "other": {
+        "author": "Autorius",
+        "title": "Pavadinimas",
+        "about": "Apie",
+        "collapse": "Sutraukti",
+        "courseProgress": "Kurso eiga",
+        "options": "Parinktys",
+        "remainingChapters": "Likę skyriai",
+        "completedChapters": "Užbaigti skyriai",
+        "noData": "Nėra duomenų",
+        "informationText": "Greitai tęskite ten, kur baigėte paskutinę pamoką."
+      },
+      "button": {
+        "shareCourse": "Pasidalinkite šiuo kursu",
+        "continueLearning": "Toliau mokytis",
+        "startLearning": "Pradėkite mokytis",
+        "enrollCourse": "Užsirašyk į kursą",
+        "goToContentCreatorPage": "Eikite į turinio kūrėjo puslapį",
+        "repeatLessons": "Pakartokite pamokas",
+        "enrollGroups": "Registruokitės į grupes"
+      }
+    },
+    "breadcrumbs": {
+      "availableCourses": "Galimi kursai",
+      "yourCourses": "Jūsų kursai",
+      "back": "Atgal"
+    },
+    "certificate": {
+      "button": {
+        "viewCertificate": "Žiūrėti sertifikatą"
+      },
+      "courseCompleted": "Sveikiname! Jūs baigėte kursą! Dabar turite prieigą prie savo sertifikato."
+    },
+    "studentMode": {
+      "enter": "Įeikite į mokymosi režimą",
+      "exit": "Išeikite iš mokymosi režimo",
+      "bannerTitle": "Jūs lankote šį kursą mokymosi režimu",
+      "bannerDescription": "Jūsų mokymosi pažanga stebima. Užbaigtos pamokos įskaičiuojamos į jūsų asmeninę baigimo ir kursų statistiką.",
+      "exitBanner": "Išeikite iš mokymosi režimo",
+      "learningModeRequired": "Šiam kursui mokymosi režimas neaktyvus.",
+      "draftCourseTooltip": "Šis kursas yra juodraščio būsenoje. Negalite joje užsiregistruoti ar tęsti mokymosi."
+    },
+    "tabs": {
+      "chapters": "Skyriai",
+      "moreFromAuthor": "Daugiau iš autoriaus",
+      "statistics": "Statistika"
+    }
+  },
+  "studentChapterView": {
+    "chapterProgress": {
+      "header": "Turinio lentelė:",
+      "courseProgress": "Kurso eiga"
+    },
+    "button": {
+      "open": "Atidaryti",
+      "continue": "Tęsti",
+      "playChapter": "Groti skyrių"
+    },
+    "other": {
+      "enrollmentRequired": "Norėdami atidaryti, užsiregistruokite į kursą.",
+      "purchaseRequired": "Atraskite šią pamoką įsigiję kursą."
+    }
+  },
+  "settings": {
+    "title": "Nustatymai",
+    "buttons": {
+      "cancel": "Atšaukti",
+      "save": "Išsaugoti"
+    },
+    "tabs": {
+      "account": "sąskaita",
+      "organization": "Organizacija",
+      "platformCustomization": "Platformos pritaikymas"
+    },
+    "breadcrumbs": {
+      "settings": "Nustatymai"
+    },
+    "toast": {
+      "error": {
+        "globalNotFound": "Bendrieji nustatymai nerasta"
+      },
+      "qaSettingUpdatedSuccessfully": "QA nustatymai sėkmingai atnaujinti",
+      "ageLimitUpdatedSuccessfully": "Amžiaus riba sėkmingai atnaujinta",
+      "newsSettingUpdatedSuccessfully": "Naujienų nustatymai sėkmingai atnaujinti",
+      "articlesSettingUpdatedSuccessfully": "Žinių bazės nustatymai sėkmingai atnaujinti"
+    }
+  },
+  "certificateBackgroundUpload": {
+    "title": "Foninis sertifikato įkėlimas",
+    "description": "Įkelkite sertifikato fono paveikslėlį.",
+    "button": {
+      "removeCertificateBackgroundImage": "Ištrinkite sertifikato foną",
+      "preview": "Peržiūra"
+    },
+    "field": {
+      "imageRequirements": "PNG, JPG arba JPEG (maks. 20 MB)"
+    },
+    "other": {
+      "uploading": "Įkeliama...",
+      "removing": "Pašalinama..."
+    },
+    "toast": {
+      "success": "Sertifikato fono vaizdas sėkmingai pakeistas",
+      "error": "Klaida keičiant sertifikato fono paveikslėlį"
+    }
+  },
+  "adminPreferences": {
+    "header": "Administratoriaus visuotinės nuostatos",
+    "subHeader": "Konfigūruokite kurso nustatymus",
+    "notificationSettings": "Pranešimų nustatymai",
+    "courseSettings": "Kurso nustatymai",
+    "field": {
+      "newUserNotifications": "Nauji vartotojo pranešimai",
+      "newUserNotificationsDescription": "Gaukite pranešimus, kai sukuriamas naujas vartotojas",
+      "coursesVisibility": "Rodyti kursus lankytojams",
+      "coursesVisibilityDescription": "Leiskite lankytojams peržiūrėti kursų sąrašą ir gauti nemokamas pamokas neprisijungus",
+      "modernCourseList": "Naudokite šiuolaikinį kursų sąrašo rodinį",
+      "modernCourseListDescription": "Įgalinkite naują kursų sąrašo dizainą su herojų ir geriausių kursų skiltimis",
+      "finishedCourseNotification": "Pranešimai apie baigtą kursą",
+      "finishedCourseNotificationDescription": "Gaukite pranešimus, kai vartotojas baigia kursą",
+      "studentsWithOverdueCourseNotification": "Studentai su pranešimais apie vėluojančius kursus",
+      "studentsWithOverdueCourseNotificationDescription": "Gaukite pranešimus, kai studentai vėluoja mokytis"
+    },
+    "toast": {
+      "newUserNotificationsPreferenceChangeSuccess": "Naujos vartotojo pranešimų nuostatos sėkmingai atnaujintos",
+      "coursesVisibilityPreferenceChangeSuccess": "Kurso matomumo nuostatos neautentifikuotiems naudotojams sėkmingai atnaujintos",
+      "modernCourseListPreferenceChangeSuccess": "Šiuolaikinės kursų sąrašo nuostatos sėkmingai atnaujintos",
+      "finishedCourseNotificationsPreferenceChangeSuccess": "Pranešimų apie baigtą kursą nuostatos sėkmingai atnaujintos",
+      "finishedCourseNotificationsPreferenceChangeError": "Nepavyko atnaujinti pranešimo apie baigtą kursą nuostatų",
+      "overdueCourseNotificationsPreferenceChangeSuccess": "Pranešimų apie pradelstą kursą nuostatos sėkmingai atnaujintos",
+      "overdueCourseNotificationsPreferenceChangeError": "Nepavyko atnaujinti pranešimų apie pradelstą kursą nuostatų"
+    }
+  },
+  "registrationFormBuilder": {
+    "title": "Registracijos formų kūrėjas",
+    "description": "Tvarkykite papildomus žymimuosius langelius, rodomus vartotojo registracijos metu.",
+    "badge": "Registruotis",
+    "loading": "Įkeliami registracijos formos žymimieji laukeliai...",
+    "empty": "Dar nėra papildomų registracijos žymimųjų laukelių.",
+    "addFieldTitle": "Pridėti žymės langelio sutikimą",
+    "addFieldDescription": "Norėdami užsiregistruoti, sukurkite pasirenkamus arba būtinus žymimuosius laukelius.",
+    "summaryLabel": "Žymės langeliai",
+    "addField": "Pridėti žymimąjį laukelį",
+    "save": "Išsaugoti registracijos formą",
+    "validation": {
+      "labelRequired": "Būtinas etiketės turinys.",
+      "toastLabelRequired": "Prieš išsaugodami pridėkite žymimojo laukelio tekstą anglų ir lenkų kalbomis.",
+      "toastGeneric": "Prieš išsaugodami pataisykite paryškintą žymimąjį laukelį."
+    },
+    "toast": {
+      "saved": "Registracijos forma sėkmingai išsaugota."
+    },
+    "field": {
+      "heading": "Žymimasis laukelis {{index}}",
+      "typeCheckbox": "Žymimasis laukelis",
+      "cardDescription": "Sukonfigūruokite šio sutikimo kopiją, būtiną būseną ir užsakymą.",
+      "required": "Būtinas žymimasis laukelis",
+      "requiredDescription": "Prieš kurdami paskyrą vartotojai turi pažymėti šį laukelį.",
+      "requiredBadge": "Privaloma",
+      "optionalBadge": "Neprivaloma",
+      "archivedBadge": "Suarchyvuota",
+      "languageLabel": "Etiketė {{language}}",
+      "languageDescription": "Šis turinys rodomas naudotojams, kurie užsiregistruoja šia kalba.",
+      "labelPlaceholder": "Įveskite sutikimo tekstą ir prireikus pridėkite nuorodas.",
+      "linkOnlyHint": "Tik paprastas tekstas su nuorodomis.",
+      "addLink": "Pridėti nuorodą",
+      "archive": "Archyvas",
+      "restore": "Atkurti"
+    }
+  },
+  "mfa": {
+    "setup": {
+      "title": "Nustatykite kelių faktorių autentifikavimą",
+      "description": "Atlikite toliau nurodytus veiksmus, kad savo paskyroje nustatytumėte kelių veiksnių autentifikavimą (MFA).",
+      "scanQr": "Nuskaitykite toliau pateiktą QR kodą naudodami autentifikavimo programą („Google Authenticator“, „Authy“ ir kt.).",
+      "manualEntry": "Jei negalite nuskaityti, programoje rankiniu būdu įveskite paslaptį.",
+      "enterCode": "Toliau įveskite 6 skaitmenų kodą iš savo programos ir spustelėkite „Patvirtinti ir įgalinti MFA“.",
+      "loadingQr": "Įkeliamas jūsų QR kodas...",
+      "secretLabel": "Paslaptis",
+      "tokenLabel": "MFA ženklas",
+      "verifyButton": "Patvirtinkite ir įgalinkite MFA"
+    },
+    "verify": {
+      "title": "Patvirtinkite kelių faktorių autentifikavimą",
+      "description": "Atlikite toliau nurodytus veiksmus, kad patvirtintumėte savo paskyros kelių veiksnių autentifikavimą (MFA).",
+      "openAuthenticator": "Atidarykite autentifikavimo programą",
+      "enterCode": "Įveskite 6 skaitmenų kodą iš programos",
+      "verifyToken": "Patvirtinkite savo MFA prieigos raktą",
+      "tokenLabel": "MFA ženklas",
+      "toast": {
+        "success": "MFA sėkmingai patvirtinta.",
+        "error": "MFA patvirtinimas nepavyko."
+      }
+    }
+  },
+  "MFAEnforcementView": {
+    "header": "Vaidmenimis pagrįstas kelių veiksnių autentifikavimo vykdymas",
+    "subHeader": "Įgyvendinti MFA konkretiems naudotojų vaidmenims",
+    "description": "Šis parametras leidžia taikyti kelių veiksnių autentifikavimą (MFA) tam tikriems naudotojų vaidmenims jūsų organizacijoje.",
+    "roles": {
+      "admin": "Administratorius",
+      "student": "Studentas",
+      "content_creator": "Turinio kūrėjas"
+    },
+    "switch": {
+      "enabled": "Įjungta",
+      "disabled": "Išjungta"
+    },
+    "toast": {
+      "mfaEnforcementUpdatedSuccessfully": "MFA vykdymo nustatymai sėkmingai atnaujinti.",
+      "mfaEnforcementUpdateFailed": "Nepavyko atnaujinti MFA vykdymo nustatymų."
+    }
+  },
+  "progressBadge": {
+    "completed": "Baigta",
+    "inProgress": "Vykdoma",
+    "notStarted": "Nepradėtas",
+    "blocked": "Užblokuota"
+  },
+  "studentCertificateView": {
+    "header": "Sertifikatai",
+    "informations": {
+      "loading": "Įkeliami sertifikatai...",
+      "noCertificates": "Kol kas sertifikatų nėra. Baigkite kursus, kad gautumėte sertifikatus.",
+      "failedToLoad": "Nepavyko įkelti sertifikatų. Bandykite dar kartą vėliau.",
+      "failedToFetch": "Nepavyko gauti sertifikatų. Bandykite dar kartą vėliau.",
+      "preparingDownload": "Jūsų sertifikatas ruošiamas atsisiųsti...",
+      "failedToDownload": "Nepavyko atsisiųsti sertifikato. Bandykite dar kartą vėliau.",
+      "shareFailed": "Nepavyko paruošti „LinkedIn“ bendrinimo nuorodos. Bandykite dar kartą vėliau.",
+      "htmlRequired": "Trūksta sertifikato turinio. Atnaujinkite ir bandykite dar kartą.",
+      "pdfGenerationFailed": "Nepavyko sugeneruoti sertifikato PDF. Bandykite dar kartą.",
+      "shareImageGenerationFailed": "Nepavyko sugeneruoti sertifikato bendrinimo vaizdo. Bandykite dar kartą vėliau.",
+      "alreadyExists": "Sertifikatas jau yra.",
+      "createFailed": "Nepavyko sukurti sertifikato. Bandykite dar kartą vėliau.",
+      "certificateNotFound": "Sertifikatas nerastas.",
+      "userNotFound": "Vartotojas nerastas.",
+      "courseNotFound": "Kursas nerastas.",
+      "courseCertificateDisabled": "Šio kurso sertifikatai išjungti.",
+      "courseCompletionRequired": "Prieš generuodami sertifikatą, turite baigti kursą."
+    },
+    "button": {
+      "download": "Atsisiųsti",
+      "preview": "Peržiūra",
+      "shareLinkedIn": "Bendrinkite „LinkedIn“."
+    },
+    "controls": {
+      "languageToggle": "Kalbos perjungimas",
+      "fontColor": "Šrifto spalva"
+    }
+  },
+  "announcements": {
+    "breadcrumbs": {
+      "announcements": "Skelbimai",
+      "createAnnouncement": "Sukurti skelbimą"
+    },
+    "page": {
+      "header": "Skelbimai",
+      "tooltips": {
+        "markAsRead": "Pažymėti kaip skaitytą"
+      },
+      "buttons": {
+        "new": "Sukurti naują"
+      }
+    },
+    "createPage": {
+      "header": "Sukurti skelbimą",
+      "subheader": "Pateikite išsamią informaciją, kad nustatytumėte naują pranešimą.",
+      "buttons": {
+        "confirm": "Patvirtinti",
+        "cancel": "Atšaukti"
+      },
+      "fields": {
+        "title": "Pavadinimas",
+        "content": "Turinys",
+        "group": "Grupė",
+        "everyone": "Visi"
+      },
+      "placeholders": {
+        "title": "Įveskite pavadinimą",
+        "content": "Rašykite savo skelbimą čia...",
+        "group": "Pasirinkite grupę",
+        "everyone": "Pasirinkite visus"
+      },
+      "validation": {
+        "title": {
+          "required": "Pavadinimas būtinas",
+          "maxLength": "Pavadinimas turi būti trumpesnis nei 120 simbolių"
+        },
+        "content": {
+          "required": "Turinys būtinas"
+        }
+      }
+    },
+    "buttons": {
+      "readMore": "Skaityti daugiau"
+    },
+    "other": {
+      "noNewAnnouncements": "Šiandien jums nėra jokių naujų pranešimų",
+      "of": "iš"
+    },
+    "toast": {
+      "markedAsRead": "Pranešimai sėkmingai pažymėti kaip perskaityti",
+      "markAsReadFailed": "Nepavyko pažymėti pranešimų kaip skaitytų",
+      "createdSuccessfully": "Skelbimas sėkmingai sukurtas",
+      "createFailed": "Nepavyko sukurti pranešimo"
+    }
+  },
+  "platformLogo": {
+    "header": "Platformos logotipas",
+    "subHeader": "Įkelkite tinkintą logotipą savo platformai. Palaikomi formatai: PNG, SVG",
+    "field": {
+      "uploadLabel": "Logotipo vaizdas",
+      "imageRequirements": "PNG arba SVG (maks. 10 MB)"
+    },
+    "button": {
+      "removeLogo": "Ištrinti platformos logotipą"
+    },
+    "toast": {
+      "logoUploadedSuccessfully": "Platformos logotipas sėkmingai įkeltas",
+      "logoRemovedSuccessfully": "Platformos logotipas sėkmingai pašalintas",
+      "logoFetchError": "Gaunant platformos logotipą įvyko klaida"
+    }
+  },
+  "platformSimpleLogo": {
+    "header": "Platformos paprastas logotipas (piktograma)",
+    "subHeader": "Įkelkite tinkintą logotipą, kuris bus naudojamas kaip ženklas ir favicon. Palaikomi formatai: PNG, SVG",
+    "field": {
+      "uploadLabel": "Logotipo vaizdas",
+      "imageRequirements": "PNG arba SVG (maks. 10 MB)"
+    },
+    "button": {
+      "removeLogo": "Ištrinti platformos piktogramos logotipą"
+    },
+    "toast": {
+      "logoUploadedSuccessfully": "Paprastas platformos logotipas sėkmingai įkeltas",
+      "logoRemovedSuccessfully": "Paprastas platformos logotipas sėkmingai pašalintas",
+      "logoFetchError": "Gaunant paprastą platformos logotipą įvyko klaida"
+    }
+  },
+  "organizationTheme": {
+    "title": "Organizacijos tema",
+    "description": "Tinkinkite savo platformos išvaizdą pasirinkdami temos spalvą, kuri atspindi jūsų organizacijos prekės ženklą."
+  },
+  "organizationLoginBackgroundImageUpload": {
+    "title": "Prisijungimo fono paveikslėlio įkėlimas",
+    "description": "Įkelkite tinkintą organizacijos prisijungimo puslapio fono paveikslėlį.",
+    "field": {
+      "imageRequirements": "PNG, JPG arba JPEG (maks. 20 MB)"
+    },
+    "button": {
+      "removeBackgroundImage": "Ištrinkite prisijungimo fono paveikslėlį"
+    },
+    "toast": {
+      "success": "Prisijungimo fono vaizdas sėkmingai pakeistas",
+      "error": "Klaida keičiant prisijungimo fono paveikslėlį"
+    }
+  },
+  "files": {
+    "toast": {
+      "invalidData": "Failo įkėlimas nepavyko – neteisingi failo duomenys",
+      "contentTypeMismatch": "Failo turinio tipas neatitinka pateikto turinio tipo",
+      "invalidFileType": "Neteisingas failo tipas. Įkelkite PNG arba SVG failą."
+    },
+    "import": {
+      "noFileUploaded": "Failas neįkeltas",
+      "invalidFileData": "Failo įkėlimas nepavyko – neteisingi failo duomenys",
+      "fileEmpty": "Failas tuščias",
+      "requiredDataMissing": "Nepavyko importuoti – trūksta būtinų duomenų.",
+      "invalidFileType": "Neteisingas failo tipas. Įkelkite tinkamą failą.",
+      "userFailReason": {
+        "alreadyExists": "vartotojas su šiuo el. pašto adresu jau egzistuoja"
+      }
+    }
+  },
+  "defaultCourseCurrencyView": {
+    "header": "Numatytoji kurso valiuta",
+    "subHeader": "Nustatykite numatytąją visų naujų kursų valiutą",
+    "toast": {
+      "defaultCourseCurrencyChangeSuccess": "Numatytoji kurso valiuta sėkmingai atnaujinta",
+      "defaultCourseCurrencyChangeError": "Nepavyko atnaujinti numatytosios kurso valiutos"
+    },
+    "select": {
+      "pln": {
+        "label": "Lenkijos zlotas",
+        "sign": "Lt"
+      },
+      "eur": {
+        "label": "eurų",
+        "sign": "€"
+      },
+      "usd": {
+        "label": "JAV doleris",
+        "sign": "$"
+      },
+      "gbp": {
+        "label": "Didžiosios Britanijos svaras",
+        "sign": "£"
+      }
+    }
+  },
+  "ageLimitView": {
+    "header": "Nustatykite amžiaus ribą",
+    "subHeader": "Nustatykite naujų vartotojų amžiaus ribą",
+    "select": {
+      "placeholder": "Pasirinkite amžiaus ribą",
+      "null": {
+        "label": "Jokio apribojimo"
+      }
+    }
+  },
+  "loginFilesUpload": {
+    "header": "Prisijungimo puslapio failai",
+    "subHeader": "Pridėkite iki {{count}} failų ir pavadinkite kiekvieną.",
+    "emptyState": "Failų dar nepridėta.",
+    "selectedFile": "Pasirinktas failas",
+    "unnamedFile": "Failas be pavadinimo",
+    "deleteDialog": {
+      "title": "Pašalinti failą?",
+      "description": "Tai pašalins „{{name}}“ iš prisijungimo puslapio.",
+      "confirm": "Ištrinti failą"
+    },
+    "previewDialog": {
+      "subtitle": "Prisijungimo puslapio failo peržiūra",
+      "loading": "Įkeliama peržiūra...",
+      "error": "Nepavyko įkelti šio failo peržiūros."
+    },
+    "fileName": {
+      "label": "Vardas",
+      "placeholder": "Įveskite vardą"
+    },
+    "toast": {
+      "invalidFileType": "Neteisingas failo tipas. Įkelkite tinkamą failą.",
+      "successfullyUploadedFile": "Failas sėkmingai įkeltas",
+      "maxResourceCount": "Pasiektas maksimalus išteklių skaičius ({{count}})",
+      "resourceNotFound": "Išteklius nerastas",
+      "successfullyDeletedFile": "Failas sėkmingai ištrintas"
+    },
+    "addButton": "Pridėti naują failą"
+  },
+  "richTextEditor": {
+    "placeholder": {
+      "lineHint": "Įklijuokite „YouTube“ / „Vimeo“ / „Canva“ nuorodą, pridėkite „Google“ dokumentus arba įkelkite failą."
+    },
+    "upload": {
+      "videoProgress": "Įkeliamas vaizdo įrašas..."
+    },
+    "toolbar": {
+      "format": {
+        "placeholder": "Pasirinkite formatą",
+        "paragraph": "Pastraipa",
+        "h1": "1 antraštė",
+        "h2": "2 antraštė",
+        "h3": "3 antraštė",
+        "h4": "4 antraštė"
+      },
+      "link": {
+        "tooltip": "Nuoroda: paverčia pasirinktą tekstą hipersaitu",
+        "dialog": {
+          "title": "Įterpti nuorodą",
+          "urlLabel": "Įveskite nuorodos URL",
+          "linkTextLabel": "Įveskite nuorodos tekstą",
+          "linkTextPlaceholder": "Nuorodos tekstas...",
+          "urlRequired": "URL būtinas",
+          "urlInvalid": "Netinkamas URL formatas",
+          "linkTextRequired": "Būtinas nuorodos tekstas"
+        }
+      },
+      "upload": {
+        "uploadFailed": "Failo įkėlimas nepavyko",
+        "tooltip": "Įkelti: leidžia įkelti failą"
+      }
+    }
+  },
+  "richText": {
+    "uploadDisplayModeDialog": {
+      "title": "Pasirinkite, kaip rodyti šį failą",
+      "description": "Pasirinkite, kaip „{{name}}“ turėtų būti rodoma mokiniams.",
+      "options": {
+        "preview": {
+          "title": "Peržiūra",
+          "description": "Rodyti failą tiesiogiai, kad mokiniai galėtų jį peržiūrėti tiesiogiai."
+        },
+        "download": {
+          "title": "Atsisiųsti",
+          "description": "Įterpti kaip atsisiunčiamo failo nuorodą."
+        }
+      }
+    },
+    "video": {
+      "tooltip": {
+        "bunnyMissing": "Vaizdo įrašas nepasiekiamas. Patikrinkite Bunny CDN konfigūraciją."
+      },
+      "ariaLabel": {
+        "drag": "Vilkite vaizdo įrašo įdėjimą",
+        "remove": "Pašalinti vaizdo įrašo įdėjimą"
+      }
+    },
+    "presentation": {
+      "ariaLabel": {
+        "drag": "Vilkite pristatymo įdėjimą",
+        "remove": "Pašalinti pristatymo įterpimą"
+      }
+    },
+    "downloadableFile": {
+      "ariaLabel": {
+        "drag": "Vilkite failą",
+        "remove": "Pašalinti atsisiunčiamą failą"
+      }
+    },
+    "pdfPreview": {
+      "ariaLabel": {
+        "drag": "Vilkite PDF peržiūrą",
+        "remove": "Pašalinti PDF peržiūrą"
+      },
+      "loading": "Įkeliama peržiūra...",
+      "openFile": "Atidaryti failą",
+      "showingPage": "Rodomas puslapis {{page}} iš {{total}}",
+      "previous": "Ankstesnis",
+      "next": "Kitas"
+    },
+    "loadingAiAsset": {
+      "processing": "Išteklius šiuo metu apdorojamas"
+    }
+  },
+  "pages": {
+    "dashboard": "Prietaisų skydelis",
+    "settings": "Nustatymai",
+    "providerInformation": "Teikėjo informacija",
+    "courses": "Kursai",
+    "profile": "Profilis",
+    "lesson": "Pamoka",
+    "lessonPreview": "Pamokos peržiūra",
+    "register": "Registruotis",
+    "passwordRecovery": "Slaptažodžio atkūrimas",
+    "login": "Prisijungti",
+    "magicLink": "Prisijungimo nuoroda",
+    "createNewPassword": "Sukurti naują slaptažodį",
+    "createAnnouncement": "Sukurti skelbimą",
+    "announcements": "Skelbimai",
+    "users": "Vartotojai",
+    "userDetails": "Vartotojo informacija",
+    "createNewUser": "Sukurti naują vartotoją",
+    "promotionCodes": "Reklamos kodai",
+    "promotionCodeDetails": "Išsami reklamos kredito kodo informacija",
+    "createPromotionCode": "Sukurkite reklamos kodą",
+    "groups": "Grupės",
+    "editGroup": "Redaguoti grupę",
+    "createGroup": "Sukurti grupę",
+    "editCourse": "Redaguoti kursą",
+    "createNewCategory": "Sukurti naują kategoriją",
+    "categoryDetails": "Išsami informacija apie kategoriją",
+    "categories": "Kategorijos",
+    "createNewCourse": "Sukurti naują kursą",
+    "admin": "Admin",
+    "qa": "Klausimai ir atsakymai",
+    "createQA": "Sukurti naujus klausimus ir atsakymus",
+    "analytics": "Analizė",
+    "progress": "Pažanga",
+    "tenant": "Organizacijos informacija",
+    "createTenant": "Sukurti organizaciją",
+    "tenants": "Organizacijos"
+  },
+  "lessonPreview": {
+    "breadcrumbs": {
+      "browseCourses": "Naršyti kursus",
+      "lessonPreview": "Peržiūra"
+    },
+    "button": {
+      "back": "Atgal"
+    }
+  },
+  "studentOnboarding": {
+    "dashboard": {
+      "clientStatistics": "Tai jūsų prietaisų skydelis – čia galite rasti savo pažangą, statistiką ir naujausią veiklą.",
+      "dailyStreak": "Tęskite seką – stebėkite savo kasdienių prisijungimų seriją čia."
+    },
+    "courses": {
+      "yourList": "Čia rasite savo kursus...",
+      "availableListFilters": "Ir čia galite naršyti turimus kursus, į kuriuos galite užsiregistruoti."
+    },
+    "announcements": {
+      "stayInformed": "Čia rasite instruktorių ar kursų koordinatorių pranešimus."
+    },
+    "settings": {
+      "welcome": "Čia galite tvarkyti savo profilį – redaguoti informaciją, nustatyti nuostatas ir pakeisti slaptažodį.",
+      "language": "Čia nustatykite pageidaujamą sąsajos kalbą – pritaikykite platformą pagal savo poreikius.",
+      "password": "Reguliariai keiskite slaptažodį, kad užtikrintumėte paskyros saugumą."
+    },
+    "profile": {
+      "info": "Čia galite peržiūrėti ir redaguoti savo profilio informaciją.",
+      "certificates": "Čia galite patikrinti savo kursų baigimo pažymėjimus."
+    },
+    "providerInformation": {
+      "welcome": "Sužinokite apie paslaugų teikėją ir jo kontaktinę informaciją."
+    }
+  },
+  "pagination": {
+    "showing": "Rodoma {{startItem}}-{{endItem}} iš {{totalItems}} rezultatų",
+    "previous": "Ankstesnis",
+    "next": "Kitas",
+    "noData": "Duomenų nerasta"
+  },
+  "QA": {
+    "header": "Dažnai užduodami klausimai",
+    "subHeader": "Raskite atsakymus į dažniausiai užduodamus klausimus apie mūsų platformą"
+  },
+  "qaPreferences": {
+    "subHeader": "Konfigūruokite klausimų ir atsakymų nustatymus",
+    "header": "Klausimų ir atsakymų nustatymai",
+    "settings": {
+      "qaEnabled": {
+        "label": "Įgalinti klausimų ir atsakymų skiltį",
+        "description": "Įgalinkite klausimų ir atsakymų skyrių. Kai išjungta, klausimų ir atsakymų skiltis yra paslėpta visiems naudotojams."
+      },
+      "qaPublic": {
+        "label": "Rodyti klausimų ir atsakymų skyrių neregistruotiems vartotojams",
+        "description": "Leisti neregistruotiems vartotojams peržiūrėti klausimų ir atsakymų skiltį (galima perjungti tik įjungus klausimų ir atsakymų skiltį)"
+      }
+    },
+    "toast": {
+      "QANotEnabled": "Klausimų ir atsakymų skyrius neįjungtas"
+    },
+    "tooltip": {
+      "disabled": "Norėdami perjungti šį lauką, pirmiausia įjunkite klausimų ir atsakymų skyrių."
+    }
+  },
+  "newsPreferences": {
+    "subHeader": "Konfigūruokite naujienų nustatymus",
+    "header": "Naujienų nustatymai",
+    "settings": {
+      "newsEnabled": {
+        "label": "Įjungti naujienų skiltį",
+        "description": "Įjunkite naujienų skyrių. Kai išjungta, naujienų skyrius yra paslėptas visiems vartotojams."
+      },
+      "newsPublic": {
+        "label": "Rodyti naujienų skiltį neregistruotiems vartotojams",
+        "description": "Leisti neregistruotiems vartotojams peržiūrėti naujienų skiltį (galima perjungti tik įjungus naujienų skiltį)"
+      }
+    },
+    "toast": {
+      "newsNotEnabled": "Naujienų skyrius neįjungtas"
+    },
+    "tooltip": {
+      "disabled": "Norėdami perjungti šį lauką, pirmiausia įjunkite naujienų skiltį."
+    }
+  },
+  "articlesPreferences": {
+    "subHeader": "Konfigūruokite žinių bazės nustatymus",
+    "header": "Žinių bazės nustatymai",
+    "settings": {
+      "articlesEnabled": {
+        "label": "Įgalinti žinių bazės skyrių",
+        "description": "Įgalinkite žinių bazės skyrių. Kai išjungta, žinių bazės skyrius yra paslėptas visiems vartotojams."
+      },
+      "articlesPublic": {
+        "label": "Rodyti žinių bazės skyrių neregistruotiems vartotojams",
+        "description": "Leisti neregistruotiems naudotojams peržiūrėti žinių bazės skyrių (galima perjungti tik įjungus žinių bazės skyrių)"
+      }
+    },
+    "toast": {
+      "articlesNotEnabled": "Žinių bazės skyrius neįjungtas"
+    },
+    "tooltip": {
+      "disabled": "Norėdami perjungti šį lauką, pirmiausia įgalinkite žinių bazės skyrių."
+    }
+  },
+  "qaView": {
+    "button": {
+      "createNew": "Sukurti naujus klausimus ir atsakymus"
+    },
+    "toast": {
+      "qaCreatedSuccessfully": "Klausimai ir atsakymai sėkmingai sukurti",
+      "qaUpdatedSuccessfully": "Klausimai ir atsakymai sėkmingai atnaujinti",
+      "languageCreatedSuccessfully": "Kalba sėkmingai sukurta",
+      "languageDeletedSuccessfully": "Kalba sėkmingai ištrinta",
+      "qaDeletedSuccessfully": "Klausimai sėkmingai ištrinti",
+      "cannotDeleteLanguage": "Šios kalbos ištrinti negalima",
+      "languageNotSupported": "Ši kalba nepalaikoma",
+      "languageAlreadyExists": "Ši kalba jau egzistuoja",
+      "notFound": "Klausimai ir atsakymai nerasta",
+      "noDataToUpdate": "Nėra duomenų, kuriuos reikia atnaujinti"
+    },
+    "aria": {
+      "editQuestion": "Redaguoti klausimą"
+    },
+    "edit": {
+      "header": "Redaguoti klausimus ir atsakymus",
+      "subheader": "Redaguokite toliau pateiktą klausimų ir atsakymų informaciją",
+      "language": "Kalba"
+    },
+    "fields": {
+      "title": "Klausimas",
+      "description": "Atsakymas"
+    },
+    "create": {
+      "header": "Kurti klausimus ir atsakymus",
+      "subheader": "Pridėkite klausimą ir atsakymą besimokantiesiems.",
+      "baseLanguageTooltip": "Negalite pakeisti ar pašalinti šios kalbos. Tai yra numatytoji ir visada bus klausimų ir atsakymų dalis."
+    },
+    "delete": {
+      "title": "Ištrinti klausimus ir atsakymus",
+      "confirm": "Ar tikrai norite ištrinti klausimus ir atsakymus?"
+    }
+  },
+  "adminArticleView": {
+    "toc": {
+      "title": "Žinių bazė",
+      "actions": {
+        "add": "Pridėti",
+        "newLabel": "Nauja",
+        "newSection": "Nauja skiltis",
+        "newArticle": "Naujas žinių bazės įrašas"
+      }
+    },
+    "dialog": {
+      "createArticle": {
+        "title": "Sukurkite žinių bazės įrašą",
+        "sectionLabel": "Skyrius",
+        "sectionPlaceholder": "Pasirinkite skyrių",
+        "create": "Sukurti"
+      }
+    },
+    "toast": {
+      "createSectionError": "Nepavyko sukurti skyriaus",
+      "updateError": "Nepavyko atnaujinti",
+      "languageAlreadyExists": "Ši kalba jau egzistuoja",
+      "createLanguageError": "Nepavyko pridėti kalbos",
+      "minimumLanguageError": "Reikalinga bent viena kalba",
+      "cannotRemoveBaseLanguage": "Negalima pašalinti pagrindinės kalbos",
+      "removeLanguageError": "Nepavyko pašalinti kalbos",
+      "sectionHasAssignedArticles": "Negalima ištrinti skyriaus su priskirtais žinių bazės įrašais",
+      "deleteSectionError": "Nepavyko ištrinti skyriaus",
+      "createError": "Nepavyko sukurti žinių bazės įrašo",
+      "deleteError": "Nepavyko ištrinti žinių bazės įrašo",
+      "notFoundError": "Žinių bazės įrašas nerastas",
+      "invalidCoverType": "Netinkamas viršelio tipas",
+      "invalidLanguageError": "Neteisinga kalba"
+    },
+    "section": {
+      "editTitle": "Redaguoti skyrių",
+      "editDescription": "Atnaujinkite skyriaus pavadinimą ir tvarkykite vertimus.",
+      "sectionId": "Skyriaus ID: {{id}}",
+      "cannotDeleteWithArticles": "Negalite ištrinti skyriaus, kuriam priskirti žinių bazės įrašai.",
+      "languageLabel": "Kalba",
+      "languageHelp": "Norėdami redaguoti pavadinimą, pakeiskite kalbą. Jei jis dar nesukurtas, būsite paraginti jį sukurti.",
+      "fields": {
+        "title": "Pavadinimas",
+        "titleError": "Pavadinimas būtinas"
+      },
+      "delete": {
+        "title": "Ištrinti skyrių",
+        "description": "Ar tikrai norite ištrinti šią skiltį? Šio veiksmo anuliuoti negalima."
+      },
+      "language": {
+        "label": "Kalba",
+        "baseLanguage": "Numatytoji",
+        "notAddedLanguages": "Nepridėta",
+        "createTitle": "Sukurti kalbą",
+        "createDescription": "Sukurti šios skilties {{language}} versiją?",
+        "deleteTitle": "Ištrinti kalbą",
+        "deleteDescription": "Ištrinti šios skilties {{language}} versiją?"
+      }
+    },
+    "form": {
+      "createTitle": "Sukurkite žinių bazės įrašą",
+      "editTitle": "Redaguoti žinių bazės įrašą",
+      "createButton": "Kurti ir redaguoti",
+      "saveButton": "Išsaugoti",
+      "fields": {
+        "title": "Pavadinimas",
+        "summary": "Įvadas",
+        "content": "Turinys",
+        "status": "Būsena",
+        "isPublic": "Viešas",
+        "cover": "Viršelio vaizdas"
+      },
+      "placeholders": {
+        "title": "Įveskite pavadinimą",
+        "summary": "Įveskite įžangą"
+      },
+      "status": {
+        "draft": "Juodraštis",
+        "published": "Paskelbta"
+      },
+      "isPublicDescription": "Matoma visiems vartotojams",
+      "preview": "Peržiūra",
+      "editor": "redaktorius"
+    }
+  },
+  "articlesView": {
+    "notFound": "Žinių bazės įrašas nerastas",
+    "previousArticle": "Ankstesnis žinių bazės įrašas",
+    "nextArticle": "Kitas žinių bazės įrašas",
+    "deleteModal": {
+      "title": "Ištrinkite žinių bazės įrašą",
+      "description": "Ar tikrai norite ištrinti šį žinių bazės įrašą? Šio veiksmo anuliuoti negalima."
+    }
+  },
+  "supportMode": {
+    "banner": {
+      "message": "Jūs veikiate palaikymo režimu",
+      "timeLeft": "Liko {{minutes}} min",
+      "exit": "Išeikite iš palaikymo režimo"
+    }
+  },
+  "superAdminTenantsView": {
+    "title": "Organizacijos",
+    "description": "Tvarkykite organizacijų pavadinimus, domenus, būseną ir valdymo žymas.",
+    "actions": {
+      "create": "Sukurti organizaciją"
+    },
+    "search": {
+      "placeholder": "Ieškoti organizacijų..."
+    },
+    "table": {
+      "name": "Vardas",
+      "host": "Šeimininkas",
+      "status": "Būsena",
+      "managing": "Valdymas",
+      "loading": "Įkeliamos organizacijos...",
+      "empty": "Organizacijų nerasta.",
+      "yes": "Taip",
+      "no": "Nr",
+      "edit": "Redaguoti",
+      "actions": {
+        "title": "Veiksmai",
+        "enterSupportMode": "Įjunkite palaikymo režimą"
+      }
+    },
+    "status": {
+      "active": "Aktyvus",
+      "inactive": "Neaktyvus"
+    },
+    "create": {
+      "title": "Sukurti organizaciją",
+      "description": "Sukurkite naują organizaciją ir pakvieskite pirmąjį administratorių.",
+      "submit": "Sukurti organizaciją"
+    },
+    "edit": {
+      "title": "Redaguoti organizaciją",
+      "description": "Atnaujinkite organizacijos informaciją ir būseną.",
+      "submit": "Išsaugoti pakeitimus"
+    },
+    "form": {
+      "tenantName": "Organizacijos pavadinimas",
+      "tenantHost": "Organizacijos priegloba (pilnas URL)",
+      "tenantHostPlaceholder": "https://organization.example.com",
+      "status": "Būsena",
+      "statusPlaceholder": "Pasirinkite būseną",
+      "adminFirstName": "Administratoriaus vardas",
+      "adminLastName": "Administratoriaus pavardė",
+      "adminEmail": "Administratoriaus el"
+    },
+    "validation": {
+      "nameRequired": "Reikalingas vardas",
+      "hostInvalid": "Priegloba turi būti galiojantis URL",
+      "adminEmailRequired": "Reikalingas administratoriaus el",
+      "adminFirstNameRequired": "Būtinas administratoriaus vardas",
+      "adminLastNameRequired": "Reikalinga administratoriaus pavardė"
+    },
+    "toast": {
+      "tenantCreatedSuccessfully": "Organizacija sėkmingai sukurta",
+      "tenantUpdatedSuccessfully": "Organizacija sėkmingai atnaujinta"
+    }
+  },
+  "superAdminTenants": {
+    "error": {
+      "hostAlreadyExists": "Organizacijos priegloba jau egzistuoja",
+      "notFound": "Organizacija nerasta",
+      "invalidHost": "Netinkamas organizacijos prieglobos URL",
+      "managingTenantRequired": "Reikalingas valdančios organizacijos administratorius",
+      "currentTenantSupportNotAllowed": "Palaikymo režimas dabartinei organizacijai nepasiekiamas"
+    }
+  },
+  "auth": {
+    "error": {
+      "unauthenticated": "Vartotojas neatpažintas",
+      "invalidEmailOrPassword": "Neteisingas el. pašto adresas arba slaptažodis",
+      "adminRoleRequired": "Reikalingas administratoriaus vaidmuo"
+    }
+  },
+  "tenantInactive": {
+    "title": "Organizacija išjungta",
+    "description": "Ši darbo sritis šiuo metu neaktyvi. Jei manote, kad tai klaida, susisiekite su administratoriumi, kad atkurtumėte prieigą."
+  },
+  "integrationApiKey": {
+    "title": "Integravimo API raktas",
+    "description": "Sukurkite ilgalaikį išorinės integracijos raktą. Pakeitus raktą iš karto atšaukiamas ankstesnis.",
+    "status": "Būsena",
+    "active": "Aktyvus",
+    "inactive": "Nesugeneruota",
+    "prefix": "Rakto priešdėlis",
+    "createdAt": "Sukurta",
+    "lastUsedAt": "Paskutinį kartą naudotas",
+    "loading": "Įkeliami rakto metaduomenys...",
+    "generate": "Sukurti raktą",
+    "override": "Nepaisyti klavišo",
+    "copy": "Kopijuoti raktą",
+    "generated": {
+      "title": "Nukopijuokite šį raktą dabar. Daugiau jis nebus rodomas."
+    },
+    "confirm": {
+      "title": "Nepaisyti dabartinio API rakto?",
+      "description": "Šis veiksmas nedelsiant atšaukia dabartinį raktą. Ją naudojantys integracijos nustos veikti.",
+      "action": "Nepaisyti klavišo"
+    },
+    "toast": {
+      "fetchSuccess": "Integravimo API raktas sėkmingai įkeltas",
+      "rotateSuccess": "Integravimo API raktas sėkmingai atnaujintas",
+      "rotateError": "Nepavyko atnaujinti integravimo API rakto",
+      "copySuccess": "Integracijos API raktas nukopijuotas",
+      "copyError": "Nepavyko nukopijuoti integravimo API rakto"
+    },
+    "errors": {
+      "rotateFailed": "Nepavyko pasukti integravimo API rakto",
+      "invalidApiKey": "Netinkamas integravimo API raktas",
+      "ownerInactive": "API rakto savininkas nebėra aktyvus",
+      "ownerNotAdmin": "API rakto savininkas nebeturi administratoriaus teisių",
+      "missingApiKeyHeader": "Trūksta X-API-Key antraštės",
+      "missingTenantIdHeader": "Trūksta X-Tenant-Id antraštės"
+    }
+  }
+}

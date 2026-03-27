@@ -36,15 +36,20 @@ export const GlobalSearchContentCreatorResults = ({
 
   const tabsToDisplay = useQueries({
     queries: [
-      contentCreatorCoursesOptions(currentUser?.id ?? "", { searchQuery: debouncedSearch }, true, {
-        enabled: debouncedSearch.length >= 3,
-      }),
+      contentCreatorCoursesOptions(
+        currentUser?.id ?? "",
+        { searchQuery: debouncedSearch, language },
+        true,
+        {
+          enabled: debouncedSearch.length >= 3,
+        },
+      ),
       availableCoursesQueryOptions(
         { searchQuery: debouncedSearch, language },
         { enabled: debouncedSearch.length >= 3 },
       ),
       lessonsQueryOptions(
-        { searchQuery: debouncedSearch },
+        { searchQuery: debouncedSearch, language },
         { enabled: debouncedSearch.length >= 3 },
       ),
       announcementsForUserOptions(
