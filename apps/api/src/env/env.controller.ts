@@ -59,8 +59,8 @@ export class EnvController {
     return new BaseResponse({ publishableKey: stripePublishableKey });
   }
 
+  @Public()
   @Get("frontend/stripe")
-  @RequirePermission(PERMISSIONS.ENV_READ_STATUS)
   @Validate({
     response: baseResponse(frontendStripeConfiguredResponseSchema),
   })
@@ -68,8 +68,8 @@ export class EnvController {
     return new BaseResponse(await this.envService.getStripeConfigured());
   }
 
+  @Public()
   @Get("ai")
-  @RequirePermission(PERMISSIONS.ENV_READ_STATUS)
   @Validate({
     response: baseResponse(isConfiguredResponseSchema),
   })
@@ -77,8 +77,8 @@ export class EnvController {
     return new BaseResponse(await this.envService.getAIConfigured());
   }
 
+  @Public()
   @Get("luma")
-  @RequirePermission(PERMISSIONS.ENV_READ_STATUS)
   @Validate({
     response: baseResponse(isConfiguredResponseSchema),
   })

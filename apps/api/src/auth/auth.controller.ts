@@ -239,7 +239,7 @@ export class AuthController {
   }
 
   @Post("support/exit")
-  @RequirePermission(PERMISSIONS.ACCOUNT_UPDATE_SELF)
+  @RequirePermission(PERMISSIONS.TENANT_MANAGE)
   @Validate({
     response: baseResponse(Type.Object({ redirectUrl: Type.String() })),
   })
@@ -389,7 +389,6 @@ export class AuthController {
   }
 
   @Post("mfa/setup")
-  @RequirePermission(PERMISSIONS.ACCOUNT_MFA)
   @Validate({
     response: baseResponse(MFASetupResponseSchema),
   })
@@ -403,7 +402,6 @@ export class AuthController {
   }
 
   @Post("mfa/verify")
-  @RequirePermission(PERMISSIONS.ACCOUNT_MFA)
   @Validate({
     request: [{ type: "body", schema: MFAVerifySchema }],
     response: baseResponse(MFAVerifyResponseSchema),

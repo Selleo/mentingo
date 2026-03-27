@@ -46,7 +46,7 @@
 - [x] Replace `report.repository` role-based filtering (`users.role` / `currentUser.role`) with permission-based scope checks
 - [x] Migrate `qa.controller` to `@RequirePermission(PERMISSIONS.QA_MANAGE/QA_READ_PUBLIC)` and remove `RolesGuard`
 - [x] Migrate `env.controller` to `@RequirePermission(PERMISSIONS.ENV_*)` and remove `RolesGuard`
-- [x] Migrate `luma.controller` to `@RequirePermission(PERMISSIONS.LUMA_MANAGE)` and remove `RolesGuard`
+- [x] Migrate `luma.controller` to `@RequirePermission(PERMISSIONS.COURSE_AI_GENERATION)` and remove `RolesGuard`
 - [x] Replace `luma.service` role-based course access call with permission-aware `currentUser` flow
 - [x] Migrate `stripe.controller` to `@RequirePermission(PERMISSIONS.BILLING_CHECKOUT/BILLING_MANAGE)`
 - [x] Migrate `scorm.controller` to `@RequirePermission(PERMISSIONS.SCORM_UPLOAD/SCORM_READ)` and remove `RolesGuard`

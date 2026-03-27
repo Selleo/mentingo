@@ -51,7 +51,7 @@ export class LumaController {
   constructor(private readonly lumaService: LumaService) {}
 
   @Post("course-generation/chat")
-  @RequirePermission(PERMISSIONS.LUMA_MANAGE)
+  @RequirePermission(PERMISSIONS.COURSE_AI_GENERATION)
   @Validate({
     request: [{ type: "body", schema: chatOptionsSchema }],
   })
@@ -87,7 +87,7 @@ export class LumaController {
   }
 
   @Get("course-generation/messages")
-  @RequirePermission(PERMISSIONS.LUMA_MANAGE)
+  @RequirePermission(PERMISSIONS.COURSE_AI_GENERATION)
   @Validate({
     request: [
       {
@@ -108,7 +108,7 @@ export class LumaController {
   }
 
   @Get("course-generation/draft")
-  @RequirePermission(PERMISSIONS.LUMA_MANAGE)
+  @RequirePermission(PERMISSIONS.COURSE_AI_GENERATION)
   @Validate({
     request: [
       {
@@ -137,7 +137,7 @@ export class LumaController {
   }
 
   @Post("course-generation/files/ingest")
-  @RequirePermission(PERMISSIONS.LUMA_MANAGE)
+  @RequirePermission(PERMISSIONS.COURSE_AI_GENERATION)
   @UseInterceptors(FilesInterceptor("files"))
   @ApiConsumes("multipart/form-data")
   @ApiBody({
@@ -174,7 +174,7 @@ export class LumaController {
   }
 
   @Delete("course-generation/files/:integrationId/:documentId")
-  @RequirePermission(PERMISSIONS.LUMA_MANAGE)
+  @RequirePermission(PERMISSIONS.COURSE_AI_GENERATION)
   @Validate({
     request: [
       {
@@ -200,7 +200,7 @@ export class LumaController {
   }
 
   @Get("course-generation/files/:integrationId")
-  @RequirePermission(PERMISSIONS.LUMA_MANAGE)
+  @RequirePermission(PERMISSIONS.COURSE_AI_GENERATION)
   @Validate({
     request: [
       {

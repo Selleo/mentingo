@@ -1025,7 +1025,7 @@ export class CourseController {
   }
 
   @Post("course-ownership/transfer")
-  @RequirePermission(PERMISSIONS.COURSE_OWNERSHIP)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [{ type: "body", schema: transferCourseOwnershipRequestSchema }],
   })
@@ -1097,7 +1097,7 @@ export class CourseController {
   }
 
   @Get("course-ownership/:courseId")
-  @RequirePermission(PERMISSIONS.COURSE_OWNERSHIP)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE)
   @Validate({
     request: [{ type: "param", name: "courseId", schema: UUIDSchema }],
     response: baseResponse(courseOwnershipCandidatesResponseSchema),

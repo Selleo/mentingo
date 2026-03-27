@@ -104,7 +104,14 @@ export class FileController {
     return await this.fileService.uploadFile(file, resource);
   }
 
-  @RequirePermission(PERMISSIONS.FILE_VIDEO)
+  @RequirePermission(
+    PERMISSIONS.COURSE_UPDATE_OWN,
+    PERMISSIONS.COURSE_UPDATE,
+    PERMISSIONS.NEWS_MANAGE_OWN,
+    PERMISSIONS.NEWS_MANAGE,
+    PERMISSIONS.ARTICLE_MANAGE_OWN,
+    PERMISSIONS.ARTICLE_MANAGE,
+  )
   @Post("videos/init")
   @Validate({
     request: [{ type: "body", schema: videoInitSchema }],
@@ -209,7 +216,14 @@ export class FileController {
     return res.status(204).send();
   }
 
-  @RequirePermission(PERMISSIONS.FILE_VIDEO)
+  @RequirePermission(
+    PERMISSIONS.COURSE_UPDATE_OWN,
+    PERMISSIONS.COURSE_UPDATE,
+    PERMISSIONS.NEWS_MANAGE_OWN,
+    PERMISSIONS.NEWS_MANAGE,
+    PERMISSIONS.ARTICLE_MANAGE_OWN,
+    PERMISSIONS.ARTICLE_MANAGE,
+  )
   @Get("videos/:id")
   @Validate({
     request: [{ type: "param", name: "id", schema: UUIDSchema }],
