@@ -108,7 +108,7 @@ describe("IntegrationController (e2e)", () => {
       const admin = await userFactory
         .withCredentials({ password })
         .withAdminSettings(db)
-        .create({ role: USER_ROLES.ADMIN });
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
       const cookies = await cookieFor(admin, app);
 
       for (
