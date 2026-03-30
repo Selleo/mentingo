@@ -9974,10 +9974,6 @@
                 "items": {
                   "anyOf": [
                     {
-                      "const": "account.access_public",
-                      "type": "string"
-                    },
-                    {
                       "const": "account.read_self",
                       "type": "string"
                     },
@@ -9986,19 +9982,11 @@
                       "type": "string"
                     },
                     {
-                      "const": "account.mfa",
-                      "type": "string"
-                    },
-                    {
                       "const": "user.read_self",
                       "type": "string"
                     },
                     {
                       "const": "user.manage",
-                      "type": "string"
-                    },
-                    {
-                      "const": "settings.read_public",
                       "type": "string"
                     },
                     {
@@ -10015,10 +10003,6 @@
                     },
                     {
                       "const": "env.read_public",
-                      "type": "string"
-                    },
-                    {
-                      "const": "env.read_status",
                       "type": "string"
                     },
                     {
@@ -10039,10 +10023,6 @@
                     },
                     {
                       "const": "group.manage",
-                      "type": "string"
-                    },
-                    {
-                      "const": "course.read_public",
                       "type": "string"
                     },
                     {
@@ -10082,10 +10062,6 @@
                       "type": "string"
                     },
                     {
-                      "const": "course.ownership",
-                      "type": "string"
-                    },
-                    {
                       "const": "course.export",
                       "type": "string"
                     },
@@ -10114,31 +10090,11 @@
                       "type": "string"
                     },
                     {
-                      "const": "file.video",
-                      "type": "string"
-                    },
-                    {
                       "const": "file.delete",
                       "type": "string"
                     },
                     {
-                      "const": "file.read_public",
-                      "type": "string"
-                    },
-                    {
                       "const": "ai.use",
-                      "type": "string"
-                    },
-                    {
-                      "const": "luma.manage",
-                      "type": "string"
-                    },
-                    {
-                      "const": "ingestion.manage",
-                      "type": "string"
-                    },
-                    {
-                      "const": "ingestion.manage_own",
                       "type": "string"
                     },
                     {
@@ -10182,6 +10138,10 @@
                       "type": "string"
                     },
                     {
+                      "const": "qa.manage_own",
+                      "type": "string"
+                    },
+                    {
                       "const": "report.read",
                       "type": "string"
                     },
@@ -10222,11 +10182,7 @@
                       "type": "string"
                     },
                     {
-                      "const": "analytics.read",
-                      "type": "string"
-                    },
-                    {
-                      "const": "health.read",
+                      "const": "course.ai_generation",
                       "type": "string"
                     }
                   ]

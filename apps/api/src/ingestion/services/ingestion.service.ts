@@ -8,6 +8,7 @@ import {
 import { PERMISSIONS } from "@repo/shared";
 
 import { DatabasePg } from "src/common";
+import { hasPermission } from "src/common/permissions/permission.utils";
 import { MAX_NUM_OF_FILES } from "src/ingestion/ingestion.config";
 import { DOCUMENT_STATUS } from "src/ingestion/ingestion.constants";
 import { IngestionRepository } from "src/ingestion/repositories/ingestion.repository";
@@ -130,22 +131,17 @@ export class IngestionService {
   }
 
   private canManageAnyLesson(currentUser: CurrentUser) {
-    return (
-      currentUser.permissions.includes(PERMISSIONS.INGESTION_MANAGE) ||
-      currentUser.permissions.includes(PERMISSIONS.COURSE_UPDATE)
-    );
+    return hasPermission(currentUser.permissions, PERMISSIONS.COURSE_UPDATE);
   }
 
   private canManageOwnLesson(currentUser: CurrentUser) {
-    return (
-      currentUser.permissions.includes(PERMISSIONS.INGESTION_MANAGE_OWN) ||
-      currentUser.permissions.includes(PERMISSIONS.COURSE_UPDATE_OWN)
-    );
+    return hasPermission(currentUser.permissions, PERMISSIONS.COURSE_UPDATE_OWN);
   }
 
   private canManageLesson(currentUser: CurrentUser, authorId: UUIDType) {
     const canManageAny = this.canManageAnyLesson(currentUser);
     const canManageOwn = this.canManageOwnLesson(currentUser);
+
     const ownsLesson = currentUser.userId === authorId;
 
     return canManageAny || (canManageOwn && ownsLesson);
