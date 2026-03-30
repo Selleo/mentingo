@@ -26,10 +26,10 @@ env:
   SLACK_OAUTH_ENABLED: "false"
   MASTER_KEY: "+iFu6dFP3uc8WFAB22Ebhh9GJjnmrv/bLxOv3L/n3zw=" # openssl rand --base64 32
   AWS_REGION: "us-east-1"
-  AWS_ACCESS_KEY_ID: "test"
-  AWS_SECRET_ACCESS_KEY: "test"
+  AWS_ACCESS_KEY_ID: "minioadmin"
+  AWS_SECRET_ACCESS_KEY: "minioadmin"
   AWS_BUCKET_NAME: "test-bucket"
-  AWS_ENDPOINT_URL: "http://localhost:4566"
+  AWS_ENDPOINT_URL: "http://localhost:9100"
 
   PUPPETEER_EXECUTABLE_PATH: "/usr/bin/google-chrome"
 
@@ -61,11 +61,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build shared packages
-        run: pnpm --filter="@repo/shared" run build
-
-      - name: Build prompt templates
-        run: pnpm --filter="@repo/prompts" run build
+      - name: Build packages
+        run: pnpm -w packages:build
 
       - name: Run ESLint
         run: pnpm --filter=api lint-tsc
@@ -99,11 +96,8 @@ jobs:
           cache: pnpm
 
       - run: pnpm install
-      - name: Build shared packages
-        run: pnpm --filter="@repo/shared" run build
-
-      - name: Build prompt templates
-        run: pnpm --filter="@repo/prompts" run build
+      - name: Build packages
+        run: pnpm -w packages:build
 
       - name: Build the app
         run: pnpm run build
@@ -163,55 +157,55 @@ jobs:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
 
-      - name: Install and Start LocalStack
-        uses: LocalStack/setup-localstack@v0.2.3
-        with:
-          image-tag: 'latest'
-          install-awslocal: 'true'
-          configuration: |
-            SERVICES=s3
-            DEBUG=0
-            DATA_DIR=/tmp/localstack/data
-            PERSISTENCE=0
-
-      - name: Setup local S3 bucket
+      - name: Start MinIO
         run: |
-          echo "Checking LocalStack setup..."
-          max_attempts=5
-          attempt=0
-          while [ $attempt -lt $max_attempts ]; do
-            if curl -sf http://localhost:4566/_localstack/health >/dev/null 2>&1; then
-              echo "LocalStack is ready"
+          docker run -d --name minio \
+            -p 9100:9000 \
+            -e MINIO_ROOT_USER=minioadmin \
+            -e MINIO_ROOT_PASSWORD=minioadmin \
+            --health-cmd "curl -f http://localhost:9000/minio/health/live || exit 1" \
+            --health-interval 5s \
+            --health-timeout 5s \
+            --health-retries 5 \
+            quay.io/minio/minio:latest server /data --console-address ":9001"
+
+          health_status="starting"
+          for i in {1..30}; do
+            health_status="$(docker inspect --format='{{.State.Health.Status}}' minio)"
+            if [ "$health_status" = "healthy" ]; then
+              echo "MinIO is ready"
               break
             fi
-            attempt=$((attempt + 1))
-            wait_time=$((2 ** (attempt > 4 ? 4 : attempt)))
-            echo "Waiting for LocalStack... (attempt $attempt/$max_attempts, waiting ${wait_time}s)"
-            sleep $wait_time
+            if [ "$health_status" = "unhealthy" ]; then
+              echo "MinIO became unhealthy"
+              docker logs minio || true
+              exit 1
+            fi
+            sleep 2
           done
 
-          if [ $attempt -eq $max_attempts ]; then
-            echo "LocalStack failed to start after $max_attempts attempts"
-            curl -v http://localhost:4566/_localstack/health || true
+          if [ "$health_status" != "healthy" ]; then
+            echo "MinIO failed to become healthy in time"
+            docker logs minio || true
             exit 1
           fi
 
-          echo "Creating S3 bucket..."
-          if ! awslocal s3 mb s3://test-bucket; then
-            echo "Failed to create S3 bucket"
-            exit 1
-          fi
-
-          echo "Configuring bucket CORS..."
-          awslocal s3api put-bucket-cors --bucket test-bucket --cors-configuration '{
-            "CORSRules": [{
-              "AllowedOrigins": ["*"],
-              "AllowedMethods": ["GET", "PUT", "POST", "DELETE"],
-              "AllowedHeaders": ["*"]
-            }]
-          }' || echo "Warning: Failed to set CORS configuration"
-
-          echo "S3 setup completed successfully!"
+      - name: Setup MinIO bucket
+        run: |
+          docker run --rm \
+            --network host \
+            --entrypoint /bin/sh \
+            -e S3_ENDPOINT="$AWS_ENDPOINT_URL" \
+            -e S3_BUCKET_NAME="$AWS_BUCKET_NAME" \
+            -e S3_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" \
+            -e S3_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" \
+            quay.io/minio/mc:latest \
+            -ec '
+              mc alias set local "$S3_ENDPOINT" "$S3_ACCESS_KEY_ID" "$S3_SECRET_ACCESS_KEY"
+              mc mb --ignore-existing "local/$S3_BUCKET_NAME"
+              echo "{\"CORSRules\":[{\"AllowedOrigins\":[\"*\"],\"AllowedMethods\":[\"GET\",\"PUT\",\"POST\",\"DELETE\"],\"AllowedHeaders\":[\"*\"]}]}" > /tmp/cors.json
+              mc cors set "local/$S3_BUCKET_NAME" /tmp/cors.json || true
+            '
 
       - uses: actions/setup-node@v4
         with:
@@ -221,14 +215,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build shared packages
-        run: pnpm --filter="@repo/shared" run build
-
-      - name: Build prompt templates
-        run: pnpm --filter="@repo/prompts" run build
+      - name: Build packages
+        run: pnpm -w packages:build
 
       - name: Run unit tests
         run: pnpm --filter=api test:ci
 
       - name: Run e2e tests
         run: pnpm --filter=api test:e2e
+
+      - name: Stop MinIO
+        if: always()
+        run: docker rm -f minio || true

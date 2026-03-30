@@ -1,3 +1,4 @@
+import { SUPPORTED_LANGUAGES, type SupportedLanguages } from "@repo/shared";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "../api-client";
@@ -5,7 +6,7 @@ import { ApiClient } from "../api-client";
 import type { GetNewsResponse } from "../generated-api";
 
 export type NewsQueryParams = {
-  language?: "en" | "pl";
+  language?: SupportedLanguages;
 };
 
 type QueryOptions = {
@@ -19,10 +20,10 @@ export const newsQueryOptions = (
   params?: NewsQueryParams,
   options: QueryOptions = { enabled: true },
 ) => ({
-  queryKey: [...NEWS_QUERY_KEY, id, params?.language ?? "en"],
+  queryKey: [...NEWS_QUERY_KEY, id, params?.language ?? SUPPORTED_LANGUAGES.EN],
   queryFn: async () => {
     const response = await ApiClient.api.newsControllerGetNews(id, {
-      language: params?.language ?? "en",
+      language: params?.language ?? SUPPORTED_LANGUAGES.EN,
     });
     return response.data;
   },

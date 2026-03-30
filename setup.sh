@@ -53,7 +53,7 @@ fi
 echo ""
 
 # Prerequisites check
-echo -e "${GREEN}[0/11]${NC} Checking prerequisites..."
+echo -e "${GREEN}[1/11]${NC} Checking prerequisites..."
 
 # Check if .tool-versions exists
 if [[ ! -f ".tool-versions" ]]; then
@@ -80,7 +80,7 @@ echo -e "  ${GREEN}✓${NC} All required tools are available"
 echo ""
 
 # Version verification
-echo -e "${GREEN}[1/11]${NC} Verifying tool versions..."
+echo -e "${GREEN}[2/11]${NC} Verifying tool versions..."
 
 # Read required versions from .tool-versions
 REQUIRED_NODE_VERSION=$(grep "nodejs" .tool-versions | awk '{print $2}')
@@ -118,7 +118,7 @@ echo -e "  ${GREEN}✓${NC} pnpm version: $CURRENT_PNPM_VERSION"
 echo ""
 
 # Configure Caddy
-echo -e "${GREEN}[2/11]${NC} Configuring Caddy (first-time setup)..."
+echo -e "${GREEN}[3/11]${NC} Configuring Caddy (first-time setup)..."
 
 # Detect platform and set data directory
 if [ "$IS_MACOS" = true ]; then
@@ -229,13 +229,14 @@ fi
 echo ""
 
 #  Install dependencies
-echo -e "${GREEN}[3/11]${NC} Installing dependencies with pnpm..."
+echo -e "${GREEN}[4/11]${NC} Installing dependencies with pnpm..."
 if ! pnpm install --prefer-offline > /dev/null 2>&1; then
     echo -e "${RED}✗ Failed to install dependencies${NC}"
     exit 1
 fi
+echo ""
 
-echo -e "${GREEN}[4/11]${NC} Installing ffmpeg..."
+echo -e "${GREEN}[5/11]${NC} Installing ffmpeg..."
 if [ "$IS_MACOS" = true ]; then
     if ! command -v ffmpeg > /dev/null 2>&1; then
         echo "  → Installing ffmpeg via Homebrew..."
@@ -244,7 +245,7 @@ if [ "$IS_MACOS" = true ]; then
             exit 1
         fi
     else
-        echo "  ${GREEN}✓${NC} ffmpeg already installed"
+        echo -e "  ${GREEN}✓${NC} ffmpeg already installed"
     fi
 elif [ "$IS_LINUX" = true ]; then
     if ! command -v ffmpeg > /dev/null 2>&1; then
@@ -254,7 +255,7 @@ elif [ "$IS_LINUX" = true ]; then
             exit 1
         fi
     else
-        echo "  ${GREEN}✓${NC} ffmpeg already installed"
+        echo -e "  ${GREEN}✓${NC} ffmpeg already installed"
     fi
 elif [ "$IS_WINDOWS" = true ]; then
     if ! command -v ffmpeg > /dev/null 2>&1; then
@@ -262,22 +263,18 @@ elif [ "$IS_WINDOWS" = true ]; then
         echo "    Add ffmpeg to your PATH and re-run this script."
         exit 1
     else
-        echo "  ${GREEN}✓${NC} ffmpeg already installed"
+        echo -e "  ${GREEN}✓${NC} ffmpeg already installed"
     fi
 fi
+echo ""
 
-#  Build shared package
-echo -e "${GREEN}[5/11]${NC} Building shared package..."
-if ! pnpm --filter="@repo/shared" run build > /dev/null 2>&1; then
-    echo -e "${RED}✗ Failed to build shared package${NC}"
+#  Build workspace packages
+echo -e "${GREEN}[6/11]${NC} Building workspace packages..."
+if ! pnpm -w packages:build > /dev/null 2>&1; then
+    echo -e "${RED}✗ Failed to build workspace packages${NC}"
     exit 1
 fi
-
-echo -e "${GREEN}[6/11]${NC} Building prompt templates..."
-if ! pnpm run --filter=@repo/prompts build > /dev/null 2>&1; then
-    echo -e "${RED}✗ Failed to build prompt templates${NC}"
-    exit 1
-fi
+echo ""
 
 #  Set up environment files
 echo -e "${GREEN}[7/11]${NC} Setting up environment files..."
@@ -302,6 +299,7 @@ fi
 
 echo "  → Copying apps/web/.env.example to apps/web/.env"
 cp apps/web/.env.example apps/web/.env
+echo ""
 
 
 #  Start Docker containers
@@ -340,6 +338,7 @@ if [ "$DB_READY" = false ]; then
     echo -e "${RED}✗ Database failed to start after $MAX_RETRIES attempts${NC}"
     exit 1
 fi
+echo ""
 
 #  Run database migrations
 echo -e "${GREEN}[9/11]${NC} Running database migrations..."
@@ -347,6 +346,7 @@ if ! pnpm db:migrate > /dev/null 2>&1; then
     echo -e "${RED}✗ Failed to run database migrations${NC}"
     exit 1
 fi
+echo ""
 
 #  Seed the database
 echo -e "${GREEN}[10/11]${NC} Seeding the database..."
@@ -354,6 +354,7 @@ if ! pnpm --filter=api run db:seed-prod > /dev/null 2>&1; then
     echo -e "${RED}✗ Failed to seed database${NC}"
     exit 1
 fi
+echo ""
 
 #  Verify setup
 echo -e "${GREEN}[11/11]${NC} Verifying setup..."
@@ -375,6 +376,7 @@ if [ "$ALL_RUNNING" = false ]; then
     echo -e "${RED}✗ Some critical services are not running${NC}"
     exit 1
 fi
+echo ""
 
 # Remove error trap since we succeeded
 trap - ERR
@@ -385,7 +387,8 @@ echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━�
 echo -e "${GREEN}✓ Setup completed successfully!${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
-echo -e "${YELLOW}Created user accounts:${NC}"
+echo -e "${YELLOW}Created user accounts (default tenant):${NC}"
+echo -e "  ${BLUE}Primary host:${NC} ${GREEN}https://tenant1.lms.localhost${NC}"
 echo ""
 echo -e "  ${BLUE}Admin User:${NC}"
 echo -e "    Email:    ${GREEN}admin@example.com${NC}"
@@ -403,6 +406,6 @@ echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━�
 echo ""
 echo -e "${YELLOW}Next steps:${NC}"
 echo -e "  1. Run ${GREEN}pnpm dev${NC} to start the development servers"
-echo -e "  2. Open ${GREEN}https://app.lms.localhost${NC} in your browser"
+echo -e "  2. Open ${GREEN}https://tenant1.lms.localhost${NC} in your browser"
 echo -e "  3. Log in with one of the accounts above"
 echo ""

@@ -38,6 +38,7 @@ import { isEqual } from "lodash";
 import { nanoid } from "nanoid";
 
 import { CreatePasswordService } from "src/auth/create-password.service";
+import { hashToken } from "src/auth/utils/hash-auth-token";
 import { DatabasePg } from "src/common";
 import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterConditions";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
@@ -213,10 +214,6 @@ export class UserService {
       .select()
       .from(users)
       .where(and(eq(users.email, email), isNull(users.deletedAt)));
-
-    if (!user) {
-      throw new NotFoundException("User not found");
-    }
 
     return user;
   }
@@ -718,18 +715,16 @@ export class UserService {
       }
 
       const token = nanoid(64);
+      const hashedCreateToken = hashToken(token);
       const expiryDate = new Date();
       expiryDate.setFullYear(expiryDate.getFullYear() + 1);
 
-      const [{ createToken }] = await trx
-        .insert(createTokens)
-        .values({
-          userId: createdUser.id,
-          createToken: token,
-          expiryDate,
-          reminderCount: 0,
-        })
-        .returning();
+      await trx.insert(createTokens).values({
+        userId: createdUser.id,
+        createToken: hashedCreateToken,
+        expiryDate,
+        reminderCount: 0,
+      });
 
       const rolePermissions = await this.getPermissionsForRoleSlugs(
         roleSlugs,
@@ -747,7 +742,7 @@ export class UserService {
           .values({ userId: createdUser.id, contactEmail: createdUser.email });
       }
 
-      return { createdUser, token: createToken, newUsersLanguage };
+      return { createdUser, token, newUsersLanguage };
     });
   }
 

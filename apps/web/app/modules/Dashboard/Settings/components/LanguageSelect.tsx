@@ -1,3 +1,4 @@
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { useTranslation } from "react-i18next";
 
 import { useChangeLanguage } from "~/api/mutations/useChangeLanguage";
@@ -12,14 +13,14 @@ import {
   SelectItem,
 } from "~/components/ui/select";
 
-import type { Language } from "../Language/LanguageStore";
+import type { SupportedLanguages } from "@repo/shared";
 
 export default function LanguageSelect() {
   const { t } = useTranslation();
   const { mutate: changeLanguage, isPending } = useChangeLanguage();
   const { language: currentLanguage } = useCurrentLanguage();
 
-  const handleLanguageChange = (newLanguage: Language) => {
+  const handleLanguageChange = (newLanguage: SupportedLanguages) => {
     changeLanguage({
       language: newLanguage,
     });
@@ -42,8 +43,11 @@ export default function LanguageSelect() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="en">{t("changeUserLanguageView.options.english")}</SelectItem>
-            <SelectItem value="pl">{t("changeUserLanguageView.options.polish")}</SelectItem>
+            {Object.values(SUPPORTED_LANGUAGES).map((language) => (
+              <SelectItem key={language} value={language}>
+                {t(`common.languages.${language}`)}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </CardContent>

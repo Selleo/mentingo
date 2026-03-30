@@ -17,6 +17,7 @@ import type { OnModuleInit } from "@nestjs/common";
 import type { promptId } from "@repo/prompts";
 import type { Static, TSchema } from "@sinclair/typebox";
 import type { ThreadOwnershipBody } from "src/ai/utils/ai.schema";
+import type { MessageRole } from "src/ai/utils/ai.type";
 import type { UUIDType } from "src/common";
 
 type CompiledTemplate = {
@@ -63,7 +64,12 @@ export class PromptService implements OnModuleInit {
     });
   }
 
-  async buildPrompt(threadId: UUIDType, content: string, tempMessageId?: string) {
+  async buildPrompt(
+    threadId: UUIDType,
+    content: string,
+    isVoiceMentor: boolean = false,
+    tempMessageId?: string,
+  ) {
     const { history } = await this.messageService.findMessageHistory(threadId, false);
 
     const systemPrompt = await this.aiRepository.findFirstMessageByRoleAndThread(
@@ -76,21 +82,42 @@ export class PromptService implements OnModuleInit {
       MESSAGE_ROLE.SUMMARY,
     );
 
-    if (summary)
-      history.unshift({
-        id: summary.id,
-        role: summary.role,
-        userName: null,
-        content: summary.content,
-      });
+    const metaMessages: Array<{
+      id: string;
+      role: MessageRole;
+      userName: null;
+      content: string;
+    }> = [];
 
-    if (systemPrompt)
-      history.unshift({
+    if (systemPrompt) {
+      metaMessages.push({
         id: systemPrompt.id,
         role: systemPrompt.role,
         userName: null,
         content: systemPrompt.content,
       });
+    }
+
+    if (isVoiceMentor) {
+      const voiceMentorAddon = await this.loadPrompt("voiceMentorAddon", {});
+      metaMessages.push({
+        id: "",
+        role: MESSAGE_ROLE.SYSTEM,
+        userName: null,
+        content: voiceMentorAddon,
+      });
+    }
+
+    if (summary) {
+      metaMessages.push({
+        id: summary.id,
+        role: summary.role,
+        userName: null,
+        content: summary.content,
+      });
+    }
+
+    history.unshift(...metaMessages.reverse());
 
     const { lessonId } = await this.aiRepository.findLessonIdByThreadId(threadId);
     const lastHistoryEntry = history[history.length - 1];

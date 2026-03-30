@@ -180,8 +180,14 @@
           }
         },
         "responses": {
-          "201": {
-            "description": ""
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatePasswordResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -404,6 +410,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -1441,6 +1459,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -1476,6 +1506,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -2508,6 +2550,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -2673,6 +2727,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -2961,6 +3027,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -3012,6 +3090,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -3112,6 +3202,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -3155,6 +3257,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -3225,6 +3339,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -3270,6 +3396,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -3314,6 +3452,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -3991,6 +4141,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -4117,6 +4279,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -4253,6 +4427,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -4388,6 +4574,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -4423,6 +4621,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -4472,6 +4682,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -4501,6 +4723,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -4771,6 +5005,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -4917,6 +5163,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -4961,6 +5219,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -5274,7 +5544,10 @@
                     "type": "string",
                     "enum": [
                       "en",
-                      "pl"
+                      "pl",
+                      "de",
+                      "lt",
+                      "cs"
                     ]
                   },
                   "title": {
@@ -5565,6 +5838,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -5609,6 +5894,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -5688,6 +5985,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -6046,6 +6355,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -6837,6 +7158,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -8178,6 +8511,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -8220,6 +8565,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -8279,6 +8636,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -8352,6 +8721,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -8391,6 +8772,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -8420,6 +8813,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -8522,6 +8927,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -8655,6 +9072,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -8742,6 +9171,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -8789,7 +9230,10 @@
                     "type": "string",
                     "enum": [
                       "en",
-                      "pl"
+                      "pl",
+                      "de",
+                      "lt",
+                      "cs"
                     ]
                   },
                   "title": {
@@ -8875,6 +9319,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -9011,6 +9467,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             }
@@ -9040,6 +9508,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -9076,6 +9556,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -9150,6 +9642,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -9248,6 +9752,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -9366,6 +9882,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -9683,6 +10211,18 @@
               {
                 "const": "pl",
                 "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
               }
             ]
           },
@@ -9749,6 +10289,59 @@
                     "type": "null"
                   }
                 ]
+              },
+              "shouldVerifyMFA": {
+                "type": "boolean"
+              },
+              "onboardingStatus": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "createdAt": {
+                    "type": "string"
+                  },
+                  "updatedAt": {
+                    "type": "string"
+                  },
+                  "userId": {
+                    "type": "string"
+                  },
+                  "dashboard": {
+                    "type": "boolean"
+                  },
+                  "courses": {
+                    "type": "boolean"
+                  },
+                  "announcements": {
+                    "type": "boolean"
+                  },
+                  "profile": {
+                    "type": "boolean"
+                  },
+                  "settings": {
+                    "type": "boolean"
+                  },
+                  "providerInformation": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "id",
+                  "createdAt",
+                  "updatedAt",
+                  "userId",
+                  "dashboard",
+                  "courses",
+                  "announcements",
+                  "profile",
+                  "settings",
+                  "providerInformation"
+                ]
+              },
+              "isManagingTenantAdmin": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -9760,7 +10353,10 @@
               "lastName",
               "archived",
               "deletedAt",
-              "profilePictureUrl"
+              "profilePictureUrl",
+              "shouldVerifyMFA",
+              "onboardingStatus",
+              "isManagingTenantAdmin"
             ]
           }
         },
@@ -10385,7 +10981,28 @@
             "type": "string"
           },
           "language": {
-            "type": "string"
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              }
+            ]
           }
         },
         "required": [
@@ -10393,6 +11010,131 @@
           "createToken",
           "email",
           "language"
+        ]
+      },
+      "CreatePasswordResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "firstName": {
+                "type": "string"
+              },
+              "lastName": {
+                "type": "string"
+              },
+              "role": {
+                "type": "string"
+              },
+              "archived": {
+                "type": "boolean"
+              },
+              "deletedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "profilePictureUrl": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "shouldVerifyMFA": {
+                "type": "boolean"
+              },
+              "onboardingStatus": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "createdAt": {
+                    "type": "string"
+                  },
+                  "updatedAt": {
+                    "type": "string"
+                  },
+                  "userId": {
+                    "type": "string"
+                  },
+                  "dashboard": {
+                    "type": "boolean"
+                  },
+                  "courses": {
+                    "type": "boolean"
+                  },
+                  "announcements": {
+                    "type": "boolean"
+                  },
+                  "profile": {
+                    "type": "boolean"
+                  },
+                  "settings": {
+                    "type": "boolean"
+                  },
+                  "providerInformation": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "id",
+                  "createdAt",
+                  "updatedAt",
+                  "userId",
+                  "dashboard",
+                  "courses",
+                  "announcements",
+                  "profile",
+                  "settings",
+                  "providerInformation"
+                ]
+              },
+              "isManagingTenantAdmin": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "createdAt",
+              "updatedAt",
+              "email",
+              "firstName",
+              "lastName",
+              "role",
+              "archived",
+              "deletedAt",
+              "profilePictureUrl",
+              "shouldVerifyMFA",
+              "onboardingStatus",
+              "isManagingTenantAdmin"
+            ]
+          }
+        },
+        "required": [
+          "data"
         ]
       },
       "ResetPasswordBody": {
@@ -10912,6 +11654,18 @@
                         {
                           "const": "pl",
                           "type": "string"
+                        },
+                        {
+                          "const": "de",
+                          "type": "string"
+                        },
+                        {
+                          "const": "lt",
+                          "type": "string"
+                        },
+                        {
+                          "const": "cs",
+                          "type": "string"
                         }
                       ]
                     },
@@ -10925,6 +11679,18 @@
                           },
                           {
                             "const": "pl",
+                            "type": "string"
+                          },
+                          {
+                            "const": "de",
+                            "type": "string"
+                          },
+                          {
+                            "const": "lt",
+                            "type": "string"
+                          },
+                          {
+                            "const": "cs",
                             "type": "string"
                           }
                         ]
@@ -10979,7 +11745,28 @@
                 "type": "object",
                 "properties": {
                   "language": {
-                    "type": "string"
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
+                        "type": "string"
+                      }
+                    ]
                   },
                   "isMFAEnabled": {
                     "default": false,
@@ -11007,7 +11794,28 @@
                 "type": "object",
                 "properties": {
                   "language": {
-                    "type": "string"
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
+                        "type": "string"
+                      }
+                    ]
                   },
                   "isMFAEnabled": {
                     "default": false,
@@ -11056,7 +11864,28 @@
             "type": "object",
             "properties": {
               "language": {
-                "type": "string"
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
+                  }
+                ]
               },
               "isMFAEnabled": {
                 "default": false,
@@ -11079,7 +11908,28 @@
             "type": "object",
             "properties": {
               "language": {
-                "type": "string"
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
+                  }
+                ]
               },
               "isMFAEnabled": {
                 "default": false,
@@ -11118,7 +11968,28 @@
                 "type": "object",
                 "properties": {
                   "language": {
-                    "type": "string"
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
+                        "type": "string"
+                      }
+                    ]
                   },
                   "isMFAEnabled": {
                     "default": false,
@@ -11146,7 +12017,28 @@
                 "type": "object",
                 "properties": {
                   "language": {
-                    "type": "string"
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
+                        "type": "string"
+                      }
+                    ]
                   },
                   "isMFAEnabled": {
                     "default": false,
@@ -11196,7 +12088,28 @@
             "type": "object",
             "properties": {
               "language": {
-                "type": "string"
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
+                  }
+                ]
               },
               "isMFAEnabled": {
                 "default": false,
@@ -11928,7 +12841,28 @@
             "type": "object",
             "properties": {
               "language": {
-                "type": "string"
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
+                  }
+                ]
               },
               "isMFAEnabled": {
                 "default": false,
@@ -11976,7 +12910,28 @@
             "type": "object",
             "properties": {
               "language": {
-                "type": "string"
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
+                  }
+                ]
               },
               "isMFAEnabled": {
                 "default": false,
@@ -12291,6 +13246,18 @@
                         "pl": {
                           "minLength": 1,
                           "type": "string"
+                        },
+                        "de": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "lt": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "cs": {
+                          "minLength": 1,
+                          "type": "string"
                         }
                       },
                       "minProperties": 1
@@ -12303,6 +13270,18 @@
                         },
                         {
                           "const": "pl",
+                          "type": "string"
+                        },
+                        {
+                          "const": "de",
+                          "type": "string"
+                        },
+                        {
+                          "const": "lt",
+                          "type": "string"
+                        },
+                        {
+                          "const": "cs",
                           "type": "string"
                         }
                       ]
@@ -12317,6 +13296,18 @@
                           },
                           {
                             "const": "pl",
+                            "type": "string"
+                          },
+                          {
+                            "const": "de",
+                            "type": "string"
+                          },
+                          {
+                            "const": "lt",
+                            "type": "string"
+                          },
+                          {
+                            "const": "cs",
                             "type": "string"
                           }
                         ]
@@ -12388,6 +13379,18 @@
                     "pl": {
                       "minLength": 1,
                       "type": "string"
+                    },
+                    "de": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "lt": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "cs": {
+                      "minLength": 1,
+                      "type": "string"
                     }
                   },
                   "minProperties": 1
@@ -12400,6 +13403,18 @@
                     },
                     {
                       "const": "pl",
+                      "type": "string"
+                    },
+                    {
+                      "const": "de",
+                      "type": "string"
+                    },
+                    {
+                      "const": "lt",
+                      "type": "string"
+                    },
+                    {
+                      "const": "cs",
                       "type": "string"
                     }
                   ]
@@ -12414,6 +13429,18 @@
                       },
                       {
                         "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
                         "type": "string"
                       }
                     ]
@@ -12472,6 +13499,18 @@
                         "pl": {
                           "minLength": 1,
                           "type": "string"
+                        },
+                        "de": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "lt": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "cs": {
+                          "minLength": 1,
+                          "type": "string"
                         }
                       },
                       "minProperties": 1
@@ -12484,6 +13523,18 @@
                         },
                         {
                           "const": "pl",
+                          "type": "string"
+                        },
+                        {
+                          "const": "de",
+                          "type": "string"
+                        },
+                        {
+                          "const": "lt",
+                          "type": "string"
+                        },
+                        {
+                          "const": "cs",
                           "type": "string"
                         }
                       ]
@@ -12498,6 +13549,18 @@
                           },
                           {
                             "const": "pl",
+                            "type": "string"
+                          },
+                          {
+                            "const": "de",
+                            "type": "string"
+                          },
+                          {
+                            "const": "lt",
+                            "type": "string"
+                          },
+                          {
+                            "const": "cs",
                             "type": "string"
                           }
                         ]
@@ -12763,7 +13826,28 @@
             "type": "object",
             "properties": {
               "language": {
-                "type": "string"
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
+                  }
+                ]
               },
               "isMFAEnabled": {
                 "default": false,
@@ -16606,6 +17690,18 @@
                     {
                       "const": "pl",
                       "type": "string"
+                    },
+                    {
+                      "const": "de",
+                      "type": "string"
+                    },
+                    {
+                      "const": "lt",
+                      "type": "string"
+                    },
+                    {
+                      "const": "cs",
+                      "type": "string"
                     }
                   ]
                 }
@@ -16618,6 +17714,18 @@
                   },
                   {
                     "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
                     "type": "string"
                   }
                 ]
@@ -16950,6 +18058,18 @@
                                           {
                                             "const": "pl",
                                             "type": "string"
+                                          },
+                                          {
+                                            "const": "de",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "lt",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "cs",
+                                            "type": "string"
                                           }
                                         ]
                                       }
@@ -16970,6 +18090,18 @@
                                     },
                                     {
                                       "const": "pl",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "de",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "lt",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "cs",
                                       "type": "string"
                                     }
                                   ]
@@ -17025,6 +18157,40 @@
                                         "type": "null"
                                       }
                                     ]
+                                  },
+                                  "voiceMode": {
+                                    "anyOf": [
+                                      {
+                                        "const": "preset",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "custom",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "ttsPreset": {
+                                    "anyOf": [
+                                      {
+                                        "const": "male",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "female",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "customTtsReference": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
                                   }
                                 },
                                 "required": [
@@ -17033,7 +18199,10 @@
                                   "aiMentorInstructions",
                                   "completionConditions",
                                   "type",
-                                  "avatarReference"
+                                  "avatarReference",
+                                  "voiceMode",
+                                  "ttsPreset",
+                                  "customTtsReference"
                                 ]
                               },
                               {
@@ -17234,6 +18403,18 @@
                     {
                       "const": "pl",
                       "type": "string"
+                    },
+                    {
+                      "const": "de",
+                      "type": "string"
+                    },
+                    {
+                      "const": "lt",
+                      "type": "string"
+                    },
+                    {
+                      "const": "cs",
+                      "type": "string"
                     }
                   ]
                 }
@@ -17246,6 +18427,18 @@
                   },
                   {
                     "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
                     "type": "string"
                   }
                 ]
@@ -17349,6 +18542,18 @@
                   },
                   {
                     "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
                     "type": "string"
                   }
                 ]
@@ -17456,6 +18661,18 @@
               },
               {
                 "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
                 "type": "string"
               }
             ]
@@ -19243,6 +20460,18 @@
                             {
                               "const": "pl",
                               "type": "string"
+                            },
+                            {
+                              "const": "de",
+                              "type": "string"
+                            },
+                            {
+                              "const": "lt",
+                              "type": "string"
+                            },
+                            {
+                              "const": "cs",
+                              "type": "string"
                             }
                           ]
                         },
@@ -19396,6 +20625,18 @@
                   },
                   {
                     "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
                     "type": "string"
                   }
                 ]
@@ -19804,6 +21045,18 @@
                               {
                                 "const": "pl",
                                 "type": "string"
+                              },
+                              {
+                                "const": "de",
+                                "type": "string"
+                              },
+                              {
+                                "const": "lt",
+                                "type": "string"
+                              },
+                              {
+                                "const": "cs",
+                                "type": "string"
                               }
                             ]
                           }
@@ -19824,6 +21077,18 @@
                         },
                         {
                           "const": "pl",
+                          "type": "string"
+                        },
+                        {
+                          "const": "de",
+                          "type": "string"
+                        },
+                        {
+                          "const": "lt",
+                          "type": "string"
+                        },
+                        {
+                          "const": "cs",
                           "type": "string"
                         }
                       ]
@@ -19879,6 +21144,40 @@
                             "type": "null"
                           }
                         ]
+                      },
+                      "voiceMode": {
+                        "anyOf": [
+                          {
+                            "const": "preset",
+                            "type": "string"
+                          },
+                          {
+                            "const": "custom",
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "ttsPreset": {
+                        "anyOf": [
+                          {
+                            "const": "male",
+                            "type": "string"
+                          },
+                          {
+                            "const": "female",
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "customTtsReference": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
                       }
                     },
                     "required": [
@@ -19887,7 +21186,10 @@
                       "aiMentorInstructions",
                       "completionConditions",
                       "type",
-                      "avatarReference"
+                      "avatarReference",
+                      "voiceMode",
+                      "ttsPreset",
+                      "customTtsReference"
                     ]
                   },
                   {
@@ -20166,6 +21468,18 @@
                               {
                                 "const": "pl",
                                 "type": "string"
+                              },
+                              {
+                                "const": "de",
+                                "type": "string"
+                              },
+                              {
+                                "const": "lt",
+                                "type": "string"
+                              },
+                              {
+                                "const": "cs",
+                                "type": "string"
                               }
                             ]
                           }
@@ -20186,6 +21500,18 @@
                         },
                         {
                           "const": "pl",
+                          "type": "string"
+                        },
+                        {
+                          "const": "de",
+                          "type": "string"
+                        },
+                        {
+                          "const": "lt",
+                          "type": "string"
+                        },
+                        {
+                          "const": "cs",
                           "type": "string"
                         }
                       ]
@@ -20241,6 +21567,40 @@
                             "type": "null"
                           }
                         ]
+                      },
+                      "voiceMode": {
+                        "anyOf": [
+                          {
+                            "const": "preset",
+                            "type": "string"
+                          },
+                          {
+                            "const": "custom",
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "ttsPreset": {
+                        "anyOf": [
+                          {
+                            "const": "male",
+                            "type": "string"
+                          },
+                          {
+                            "const": "female",
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "customTtsReference": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
                       }
                     },
                     "required": [
@@ -20249,7 +21609,10 @@
                       "aiMentorInstructions",
                       "completionConditions",
                       "type",
-                      "avatarReference"
+                      "avatarReference",
+                      "voiceMode",
+                      "ttsPreset",
+                      "customTtsReference"
                     ]
                   },
                   {
@@ -20299,6 +21662,40 @@
               },
               "name": {
                 "type": "string"
+              },
+              "voiceMode": {
+                "anyOf": [
+                  {
+                    "const": "preset",
+                    "type": "string"
+                  },
+                  {
+                    "const": "custom",
+                    "type": "string"
+                  }
+                ]
+              },
+              "ttsPreset": {
+                "anyOf": [
+                  {
+                    "const": "male",
+                    "type": "string"
+                  },
+                  {
+                    "const": "female",
+                    "type": "string"
+                  }
+                ]
+              },
+              "customTtsReference": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -20534,6 +21931,18 @@
                                   {
                                     "const": "pl",
                                     "type": "string"
+                                  },
+                                  {
+                                    "const": "de",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "lt",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "cs",
+                                    "type": "string"
                                   }
                                 ]
                               }
@@ -20554,6 +21963,18 @@
                             },
                             {
                               "const": "pl",
+                              "type": "string"
+                            },
+                            {
+                              "const": "de",
+                              "type": "string"
+                            },
+                            {
+                              "const": "lt",
+                              "type": "string"
+                            },
+                            {
+                              "const": "cs",
                               "type": "string"
                             }
                           ]
@@ -20609,6 +22030,40 @@
                                 "type": "null"
                               }
                             ]
+                          },
+                          "voiceMode": {
+                            "anyOf": [
+                              {
+                                "const": "preset",
+                                "type": "string"
+                              },
+                              {
+                                "const": "custom",
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "ttsPreset": {
+                            "anyOf": [
+                              {
+                                "const": "male",
+                                "type": "string"
+                              },
+                              {
+                                "const": "female",
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "customTtsReference": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
                           }
                         },
                         "required": [
@@ -20617,7 +22072,10 @@
                           "aiMentorInstructions",
                           "completionConditions",
                           "type",
-                          "avatarReference"
+                          "avatarReference",
+                          "voiceMode",
+                          "ttsPreset",
+                          "customTtsReference"
                         ]
                       },
                       {
@@ -20660,6 +22118,40 @@
                   },
                   "name": {
                     "type": "string"
+                  },
+                  "voiceMode": {
+                    "anyOf": [
+                      {
+                        "const": "preset",
+                        "type": "string"
+                      },
+                      {
+                        "const": "custom",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "ttsPreset": {
+                    "anyOf": [
+                      {
+                        "const": "male",
+                        "type": "string"
+                      },
+                      {
+                        "const": "female",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "customTtsReference": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
                   }
                 },
                 "required": [
@@ -20682,6 +22174,18 @@
                   },
                   {
                     "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
                     "type": "string"
                   }
                 ]
@@ -20915,6 +22419,18 @@
                               {
                                 "const": "pl",
                                 "type": "string"
+                              },
+                              {
+                                "const": "de",
+                                "type": "string"
+                              },
+                              {
+                                "const": "lt",
+                                "type": "string"
+                              },
+                              {
+                                "const": "cs",
+                                "type": "string"
                               }
                             ]
                           }
@@ -20935,6 +22451,18 @@
                         },
                         {
                           "const": "pl",
+                          "type": "string"
+                        },
+                        {
+                          "const": "de",
+                          "type": "string"
+                        },
+                        {
+                          "const": "lt",
+                          "type": "string"
+                        },
+                        {
+                          "const": "cs",
                           "type": "string"
                         }
                       ]
@@ -21201,6 +22729,18 @@
                                   {
                                     "const": "pl",
                                     "type": "string"
+                                  },
+                                  {
+                                    "const": "de",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "lt",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "cs",
+                                    "type": "string"
                                   }
                                 ]
                               }
@@ -21221,6 +22761,18 @@
                             },
                             {
                               "const": "pl",
+                              "type": "string"
+                            },
+                            {
+                              "const": "de",
+                              "type": "string"
+                            },
+                            {
+                              "const": "lt",
+                              "type": "string"
+                            },
+                            {
+                              "const": "cs",
                               "type": "string"
                             }
                           ]
@@ -21260,6 +22812,18 @@
                   },
                   {
                     "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
                     "type": "string"
                   }
                 ]
@@ -21510,6 +23074,18 @@
                                   {
                                     "const": "pl",
                                     "type": "string"
+                                  },
+                                  {
+                                    "const": "de",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "lt",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "cs",
+                                    "type": "string"
                                   }
                                 ]
                               }
@@ -21530,6 +23106,18 @@
                             },
                             {
                               "const": "pl",
+                              "type": "string"
+                            },
+                            {
+                              "const": "de",
+                              "type": "string"
+                            },
+                            {
+                              "const": "lt",
+                              "type": "string"
+                            },
+                            {
+                              "const": "cs",
                               "type": "string"
                             }
                           ]
@@ -21585,6 +23173,40 @@
                                 "type": "null"
                               }
                             ]
+                          },
+                          "voiceMode": {
+                            "anyOf": [
+                              {
+                                "const": "preset",
+                                "type": "string"
+                              },
+                              {
+                                "const": "custom",
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "ttsPreset": {
+                            "anyOf": [
+                              {
+                                "const": "male",
+                                "type": "string"
+                              },
+                              {
+                                "const": "female",
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "customTtsReference": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
                           }
                         },
                         "required": [
@@ -21593,7 +23215,10 @@
                           "aiMentorInstructions",
                           "completionConditions",
                           "type",
-                          "avatarReference"
+                          "avatarReference",
+                          "voiceMode",
+                          "ttsPreset",
+                          "customTtsReference"
                         ]
                       },
                       {
@@ -21635,6 +23260,18 @@
                   },
                   {
                     "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
                     "type": "string"
                   }
                 ]
@@ -21761,6 +23398,18 @@
               },
               {
                 "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
                 "type": "string"
               }
             ]
@@ -21972,6 +23621,18 @@
               },
               {
                 "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
                 "type": "string"
               }
             ]
@@ -22257,15 +23918,38 @@
       "DownloadCertificateBody": {
         "type": "object",
         "properties": {
-          "html": {
+          "certificateId": {
+            "format": "uuid",
             "type": "string"
           },
-          "filename": {
-            "type": "string"
+          "language": {
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              }
+            ]
           }
         },
         "required": [
-          "html"
+          "certificateId",
+          "language"
         ]
       },
       "CreateCertificateShareLinkBody": {
@@ -22324,6 +24008,18 @@
                   },
                   {
                     "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
                     "type": "string"
                   }
                 ]
@@ -22953,6 +24649,18 @@
                                     {
                                       "const": "pl",
                                       "type": "string"
+                                    },
+                                    {
+                                      "const": "de",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "lt",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "cs",
+                                      "type": "string"
                                     }
                                   ]
                                 }
@@ -22973,6 +24681,18 @@
                               },
                               {
                                 "const": "pl",
+                                "type": "string"
+                              },
+                              {
+                                "const": "de",
+                                "type": "string"
+                              },
+                              {
+                                "const": "lt",
+                                "type": "string"
+                              },
+                              {
+                                "const": "cs",
                                 "type": "string"
                               }
                             ]
@@ -23028,6 +24748,40 @@
                                   "type": "null"
                                 }
                               ]
+                            },
+                            "voiceMode": {
+                              "anyOf": [
+                                {
+                                  "const": "preset",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "custom",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "ttsPreset": {
+                              "anyOf": [
+                                {
+                                  "const": "male",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "female",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "customTtsReference": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
                             }
                           },
                           "required": [
@@ -23036,7 +24790,10 @@
                             "aiMentorInstructions",
                             "completionConditions",
                             "type",
-                            "avatarReference"
+                            "avatarReference",
+                            "voiceMode",
+                            "ttsPreset",
+                            "customTtsReference"
                           ]
                         },
                         {
@@ -23372,6 +25129,18 @@
                                         {
                                           "const": "pl",
                                           "type": "string"
+                                        },
+                                        {
+                                          "const": "de",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "lt",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "cs",
+                                          "type": "string"
                                         }
                                       ]
                                     }
@@ -23392,6 +25161,18 @@
                                   },
                                   {
                                     "const": "pl",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "de",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "lt",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "cs",
                                     "type": "string"
                                   }
                                 ]
@@ -23447,6 +25228,40 @@
                                       "type": "null"
                                     }
                                   ]
+                                },
+                                "voiceMode": {
+                                  "anyOf": [
+                                    {
+                                      "const": "preset",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "custom",
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "ttsPreset": {
+                                  "anyOf": [
+                                    {
+                                      "const": "male",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "female",
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "customTtsReference": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
                                 }
                               },
                               "required": [
@@ -23455,7 +25270,10 @@
                                 "aiMentorInstructions",
                                 "completionConditions",
                                 "type",
-                                "avatarReference"
+                                "avatarReference",
+                                "voiceMode",
+                                "ttsPreset",
+                                "customTtsReference"
                               ]
                             },
                             {
@@ -23538,6 +25356,18 @@
                   },
                   {
                     "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
                     "type": "string"
                   }
                 ]
@@ -23696,7 +25526,28 @@
             "type": "string"
           },
           "locale": {
-            "type": "string"
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              }
+            ]
           },
           "priceId": {
             "type": "string"
@@ -23707,6 +25558,7 @@
           "productName",
           "courseId",
           "customerId",
+          "locale",
           "priceId"
         ]
       },
@@ -25707,10 +27559,18 @@
             "properties": {
               "enabled": {
                 "type": "boolean"
+              },
+              "courseGenerationEnabled": {
+                "type": "boolean"
+              },
+              "voiceMentorEnabled": {
+                "type": "boolean"
               }
             },
             "required": [
-              "enabled"
+              "enabled",
+              "courseGenerationEnabled",
+              "voiceMentorEnabled"
             ]
           }
         },
@@ -25851,6 +27711,18 @@
               {
                 "const": "pl",
                 "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
               }
             ]
           },
@@ -25864,6 +27736,18 @@
                 },
                 {
                   "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
                   "type": "string"
                 }
               ]
@@ -25916,6 +27800,18 @@
                 {
                   "const": "pl",
                   "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
                 }
               ]
             },
@@ -25929,6 +27825,18 @@
                   },
                   {
                     "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
                     "type": "string"
                   }
                 ]
@@ -25961,6 +27869,18 @@
               },
               {
                 "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
                 "type": "string"
               }
             ]
@@ -26019,6 +27939,18 @@
                     {
                       "const": "pl",
                       "type": "string"
+                    },
+                    {
+                      "const": "de",
+                      "type": "string"
+                    },
+                    {
+                      "const": "lt",
+                      "type": "string"
+                    },
+                    {
+                      "const": "cs",
+                      "type": "string"
                     }
                   ]
                 },
@@ -26033,6 +27965,18 @@
                       },
                       {
                         "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
                         "type": "string"
                       }
                     ]
@@ -26307,6 +28251,18 @@
               {
                 "const": "pl",
                 "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
               }
             ]
           },
@@ -26376,6 +28332,18 @@
                   {
                     "const": "pl",
                     "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
                   }
                 ]
               },
@@ -26390,6 +28358,18 @@
                     },
                     {
                       "const": "pl",
+                      "type": "string"
+                    },
+                    {
+                      "const": "de",
+                      "type": "string"
+                    },
+                    {
+                      "const": "lt",
+                      "type": "string"
+                    },
+                    {
+                      "const": "cs",
                       "type": "string"
                     }
                   ]
@@ -26657,6 +28637,18 @@
                     {
                       "const": "pl",
                       "type": "string"
+                    },
+                    {
+                      "const": "de",
+                      "type": "string"
+                    },
+                    {
+                      "const": "lt",
+                      "type": "string"
+                    },
+                    {
+                      "const": "cs",
+                      "type": "string"
                     }
                   ]
                 },
@@ -26671,6 +28663,18 @@
                       },
                       {
                         "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
                         "type": "string"
                       }
                     ]
@@ -26941,6 +28945,18 @@
               {
                 "const": "pl",
                 "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
               }
             ]
           }
@@ -26984,6 +29000,18 @@
               },
               {
                 "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
                 "type": "string"
               }
             ]
@@ -27069,6 +29097,18 @@
               },
               {
                 "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
                 "type": "string"
               }
             ]
@@ -27181,6 +29221,18 @@
               {
                 "const": "pl",
                 "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
               }
             ]
           }
@@ -27235,6 +29287,18 @@
                   {
                     "const": "pl",
                     "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
                   }
                 ]
               },
@@ -27249,6 +29313,18 @@
                     },
                     {
                       "const": "pl",
+                      "type": "string"
+                    },
+                    {
+                      "const": "de",
+                      "type": "string"
+                    },
+                    {
+                      "const": "lt",
+                      "type": "string"
+                    },
+                    {
+                      "const": "cs",
                       "type": "string"
                     }
                   ]
@@ -27283,6 +29359,18 @@
               },
               {
                 "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
                 "type": "string"
               }
             ]
@@ -27330,6 +29418,18 @@
               },
               {
                 "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
                 "type": "string"
               }
             ]
@@ -27705,6 +29805,18 @@
                   {
                     "const": "pl",
                     "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
                   }
                 ]
               },
@@ -27719,6 +29831,18 @@
                     },
                     {
                       "const": "pl",
+                      "type": "string"
+                    },
+                    {
+                      "const": "de",
+                      "type": "string"
+                    },
+                    {
+                      "const": "lt",
+                      "type": "string"
+                    },
+                    {
+                      "const": "cs",
                       "type": "string"
                     }
                   ]
@@ -28231,6 +30355,18 @@
               {
                 "const": "pl",
                 "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
               }
             ]
           },
@@ -28279,6 +30415,18 @@
               },
               {
                 "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
                 "type": "string"
               }
             ]
@@ -28378,6 +30526,18 @@
               {
                 "const": "pl",
                 "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
               }
             ]
           },
@@ -28430,6 +30590,18 @@
               },
               {
                 "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
                 "type": "string"
               }
             ]

@@ -1,7 +1,7 @@
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { z } from "zod";
 
 import { passwordSchema } from "~/modules/Dashboard/Settings/schema/password.schema";
-import { SUPPORTED_LANGUAGES } from "~/utils/browser-language";
 
 import { calculateAge } from "../utils/birthday";
 
@@ -18,7 +18,7 @@ export const makeRegisterSchema = (
       lastName: z.string().min(2, { message: t("registerView.validation.lastName") }),
       email: z.string().email({ message: t("registerView.validation.email") }),
       password: passwordSchema,
-      language: z.enum([...SUPPORTED_LANGUAGES] as [string, ...string[]]),
+      language: z.nativeEnum(SUPPORTED_LANGUAGES),
       birthday: z.string().optional(),
       formAnswers: z.record(z.string(), z.boolean()).default({}),
     })

@@ -62,10 +62,10 @@ export class AiController {
   })
   async streamChat(
     @Body() data: StreamChatBody,
-    @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
     @Res() res: Response,
   ) {
-    const response = await this.aiService.streamMessage(data, OPENAI_MODELS.BASIC, userId);
+    const response = await this.aiService.streamMessage(data, OPENAI_MODELS.BASIC, currentUser);
     return response.pipeDataStreamToResponse(res);
   }
 

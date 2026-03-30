@@ -7,6 +7,7 @@ export const ACTIVITY_LOG_ACTION_TYPES = {
   UPDATE: "update",
   DELETE: "delete",
   LOGIN: "login",
+  LOGIN_FAILED: "login_failed",
   LOGOUT: "logout",
   ENROLL_COURSE: "enroll_course",
   UNENROLL_COURSE: "unenroll_course",
@@ -115,6 +116,9 @@ export type LessonActivityLogSnapshot = {
     name?: string | null;
     avatarReference?: string | null;
     type?: string | null;
+    voiceMode?: string | null;
+    ttsPreset?: string | null;
+    customTtsReference?: string | null;
   };
 };
 

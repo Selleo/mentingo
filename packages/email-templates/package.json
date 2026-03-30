@@ -7,7 +7,6 @@
   "types": "./dist/index.d.cts",
   "private": true,
   "scripts": {
-    "prepare": "pnpm run build",
     "build": "tsup",
     "clean": "rm -rf dist",
     "dev": "email dev -p 3001 --dir ./src/templates",
@@ -16,7 +15,8 @@
   "dependencies": {
     "@react-email/components": "^0.0.17",
     "react": "^18.2.0",
-    "react-email": "^2.1.4"
+    "react-email": "^2.1.4",
+    "@repo/shared": "workspace:*"
   },
   "devDependencies": {
     "@babel/generator": "^7.24.7",

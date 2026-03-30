@@ -12,6 +12,7 @@ export const PasswordRecoveryEmail = ({
   name,
   resetLink,
   primaryColor,
+  companyName,
   language = "en",
 }: PasswordRecoveryEmailProps) => {
   const { heading, paragraphs, buttonText } = getPasswordRecoveryEmailTranslations(language, name);
@@ -22,6 +23,7 @@ export const PasswordRecoveryEmail = ({
     buttonText,
     buttonLink: resetLink,
     primaryColor,
+    companyName,
   });
 };
 

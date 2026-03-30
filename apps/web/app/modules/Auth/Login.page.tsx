@@ -151,7 +151,7 @@ export default function LoginPage() {
     <>
       {loginBackgroundImageS3Key && (
         <div
-          className="absolute inset-0 -z-10"
+          className="fixed inset-0 -z-10"
           style={{
             backgroundImage: `url(${loginBackgroundImageS3Key}) `,
             backgroundSize: "cover",

@@ -1,106 +1,63 @@
-import { buildCertificateMarkup } from "@repo/shared";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useDownloadCertificatePdf } from "~/api/mutations/useDownloadCertificatePdf";
 import { useToast } from "~/components/ui/use-toast";
 
-import type { CertificateColorTheme } from "./certificateTheme";
+import { extractFilenameFromContentDisposition } from "./utils/extractFilenameFromContentDisposition";
 
-interface CertificateToPDFProps {
-  studentName?: string;
-  courseName?: string;
-  completionDate?: string;
-  platformLogo?: string | null;
-  backgroundImageUrl?: string | null;
-  signatureImageUrl?: string | null;
-  lang: "pl" | "en";
-  colorTheme?: CertificateColorTheme;
-}
+import type { SupportedLanguages } from "@repo/shared";
+
+type CertificateToPDFProps = {
+  certificateId?: string;
+  lang: SupportedLanguages;
+};
+
+const triggerPdfDownload = (blob: Blob, filename: string) => {
+  const url = URL.createObjectURL(blob);
+  const linkElement = document.createElement("a");
+
+  linkElement.href = url;
+  linkElement.download = filename;
+  document.body.appendChild(linkElement);
+  linkElement.click();
+  document.body.removeChild(linkElement);
+
+  URL.revokeObjectURL(url);
+};
 
 const useCertificatePDF = () => {
   const { toast } = useToast();
   const { t } = useTranslation();
   const [isPreparingDownload, setIsPreparingDownload] = useState(false);
+  const { mutateAsync: downloadCertificatePdfMutation } = useDownloadCertificatePdf();
 
-  const downloadCertificatePdf = async ({
-    studentName,
-    courseName,
-    completionDate,
-    platformLogo,
-    backgroundImageUrl,
-    signatureImageUrl,
-    lang,
-    colorTheme,
-  }: CertificateToPDFProps) => {
-    if (isPreparingDownload) return;
+  const downloadCertificatePdf = async ({ certificateId, lang }: CertificateToPDFProps) => {
+    if (isPreparingDownload || !certificateId) return;
 
     try {
       setIsPreparingDownload(true);
       toast({ description: t("studentCertificateView.informations.preparingDownload") });
 
-      const filename = `${courseName || "certificate"}.pdf`;
-      const html = buildCertificateMarkup({
-        studentName,
-        courseName,
-        completionDate,
-        platformLogoUrl: platformLogo,
-        backgroundImageUrl,
-        signatureImageUrl,
-        isDownload: true,
-        lang,
-        colorTheme,
+      const response = await downloadCertificatePdfMutation({
+        certificateId,
+        language: lang,
       });
 
-      const response = await fetch("/api/certificates/download", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          html,
-          filename,
-        }),
-      });
+      const blob = response.data;
+      const filename =
+        extractFilenameFromContentDisposition(response.headers["content-disposition"]) ||
+        "certificate.pdf";
 
-      if (!response.ok) {
-        const errorResponse = (await response.json().catch(() => null)) as {
-          message?: string;
-        } | null;
-        const apiMessage = errorResponse?.message;
-
-        if (apiMessage) {
-          throw new Error(
-            t(apiMessage, {
-              defaultValue: t("studentCertificateView.informations.failedToDownload"),
-            }),
-          );
-        }
-
-        throw new Error(t("studentCertificateView.informations.failedToDownload"));
-      }
-
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const linkElement = document.createElement("a");
-      linkElement.href = url;
-      linkElement.download = filename;
-      document.body.appendChild(linkElement);
-      linkElement.click();
-      document.body.removeChild(linkElement);
-      URL.revokeObjectURL(url);
+      triggerPdfDownload(blob, filename);
     } catch (error) {
-      const description =
-        error instanceof Error
-          ? error.message
-          : t("studentCertificateView.informations.failedToDownload");
+      const description = t("studentCertificateView.informations.failedToDownload");
       toast({ description });
     } finally {
       setIsPreparingDownload(false);
     }
   };
 
-  const HiddenCertificate = (_props: CertificateToPDFProps) => null;
-
-  return { downloadCertificatePdf, HiddenCertificate, isPreparingDownload };
+  return { downloadCertificatePdf, isPreparingDownload };
 };
 export default useCertificatePDF;

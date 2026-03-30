@@ -25,7 +25,12 @@ import {
   users,
 } from "src/storage/schema";
 
-import type { SupportedLanguages, AiMentorType } from "@repo/shared";
+import type {
+  AiMentorTTSPreset,
+  AiMentorType,
+  AiMentorVoiceMode,
+  SupportedLanguages,
+} from "@repo/shared";
 import type { SQL } from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type {
@@ -52,6 +57,22 @@ export class AiRepository {
       .where(eq(aiMentorLessons.lessonId, id));
 
     return aiMentorLessonId;
+  }
+
+  async findAiMentorVoiceConfigByLessonId(lessonId: UUIDType, language: SupportedLanguages) {
+    const [voiceConfig] = await this.db
+      .select({
+        voiceMode: sql<AiMentorVoiceMode>`${aiMentorLessons.voiceMode}`,
+        ttsPreset: sql<AiMentorTTSPreset>`${aiMentorLessons.ttsPreset}`,
+        customTtsReference: this.localizationService.getFieldByLanguage(
+          aiMentorLessons.customTtsReference,
+          language,
+        ),
+      })
+      .from(aiMentorLessons)
+      .where(eq(aiMentorLessons.lessonId, lessonId));
+
+    return voiceConfig;
   }
 
   async findThread(conditions: SQL[]) {

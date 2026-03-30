@@ -1,3 +1,75 @@
+<a name="v4.7.0"></a>
+
+## [v4.7.0] - 27.03.2026
+
+### Features:
+
+- make voice mentors sound more natural with emotion-aware speech ([#1392](https://github.com/Selleo/mentingo/issues/1392))
+
+- add support for German, Lithuanian, and Czech languages ([#1393](https://github.com/Selleo/mentingo/issues/1393))
+
+- enable real-time interaction with voice AI mentor ([#1372](https://github.com/Selleo/mentingo/issues/1372))
+
+- add API rate limiting to keep the app stable during heavy usage ([#1380](https://github.com/Selleo/mentingo/issues/1380))
+
+- automatically log users in after sign-up ([#1374](https://github.com/Selleo/mentingo/issues/1374))
+
+### Bug Fixes:
+
+- make certificate backgrounds load more consistently ([#1371](https://github.com/Selleo/mentingo/issues/1371))
+
+### Chores:
+
+- extend activity logs to include failed login attempts ([#1388](https://github.com/Selleo/mentingo/issues/1388))
+
+- update email footers to show the correct company name ([#1387](https://github.com/Selleo/mentingo/issues/1387))
+
+- load error tracking only when enabled via environment settings ([#1384](https://github.com/Selleo/mentingo/issues/1384))
+
+- improve security for password resets and magic sign-in links ([#1385](https://github.com/Selleo/mentingo/issues/1385))
+
+- improve create and reset password tokens security ([#1378](https://github.com/Selleo/mentingo/issues/1378))
+
+<a name="v4.6.1"></a>
+
+## [v4.6.1] - 23.03.2026
+
+### Features:
+
+- add fullscreen mode to PDF previews for easier reading ([#1375](https://github.com/Selleo/mentingo/issues/1375))
+
+### Bug Fixes:
+
+- improved access permissions, signup page background, post-login redirects and certificate download ([#1366](https://github.com/Selleo/mentingo/issues/1366))
+
+- certificate download functionality has correct background ([#1364](https://github.com/Selleo/mentingo/issues/1364))
+
+### Documentation:
+
+- update changelog for version v4.6.1
+
+<a name="v4.6.0"></a>
+
+## [v4.6.0] - 17.03.2026
+
+### Features:
+
+- add option to preview pdf files in lesson content ([#1363](https://github.com/Selleo/mentingo/issues/1363))
+
+- implemented embedding resources to ai course generation ([#1344](https://github.com/Selleo/mentingo/issues/1344))
+
+- implement customizable registration form builder for admins ([#1356](https://github.com/Selleo/mentingo/issues/1356))
+
+- enable admins and content creators to complete courses ([#1340](https://github.com/Selleo/mentingo/issues/1340))
+
+### Bug Fixes:
+
+- video player not working on Firefox ([#1355](https://github.com/Selleo/mentingo/issues/1355))
+
+### Documentation:
+
+- update changelog for version v4.6.0
+
 <a name="v4.5.1"></a>
 
 ## [v4.5.1] - 10.03.2026
@@ -7,6 +79,10 @@
 - improve loading speed by caching platform logos, certificate backgrounds, and login screen images ([#1345](https://github.com/Selleo/mentingo/issues/1345))
 
 - update workflow with new environment variables ([#1339](https://github.com/Selleo/mentingo/issues/1339))
+
+### Documentation:
+
+- update changelog for version v4.5.1
 
 <a name="v4.5.0"></a>
 
@@ -2502,7 +2578,10 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.5.1...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.7.0...HEAD
+[v4.7.0]: https://github.com/Selleo/mentingo/compare/v4.6.1...v4.7.0
+[v4.6.1]: https://github.com/Selleo/mentingo/compare/v4.6.0...v4.6.1
+[v4.6.0]: https://github.com/Selleo/mentingo/compare/v4.5.1...v4.6.0
 [v4.5.1]: https://github.com/Selleo/mentingo/compare/v4.5.0...v4.5.1
 [v4.5.0]: https://github.com/Selleo/mentingo/compare/v4.4.0...v4.5.0
 [v4.4.0]: https://github.com/Selleo/mentingo/compare/v4.3.0...v4.4.0

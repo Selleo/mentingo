@@ -1,14 +1,17 @@
-import { useNavigate } from "@remix-run/react";
 import { useMutation } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { useTranslation } from "react-i18next";
 
 import { useToast } from "~/components/ui/use-toast";
+import { useAuthStore } from "~/modules/Auth/authStore";
+import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
 
 import { ApiClient } from "../api-client";
 
-import type { RegisterBody } from "../generated-api";
+import { handleAuthSuccess } from "./helpers/handleAuthSuccess";
+
+import type { LoginResponse, RegisterBody } from "../generated-api";
 import type { ApiErrorResponse } from "../types";
+import type { AxiosError } from "axios";
 
 type RegisterPayload = RegisterBody & {
   formAnswers?: Record<string, boolean>;
@@ -19,9 +22,11 @@ type RegisterUserOptions = {
 };
 
 export function useRegisterUser() {
-  const navigate = useNavigate();
   const { t } = useTranslation();
   const { toast } = useToast();
+  const setLoggedIn = useAuthStore((state) => state.setLoggedIn);
+  const setCurrentUser = useCurrentUserStore((state) => state.setCurrentUser);
+  const setHasVerifiedMFA = useCurrentUserStore((state) => state.setHasVerifiedMFA);
 
   return useMutation({
     mutationFn: async (options: RegisterUserOptions) => {
@@ -29,22 +34,20 @@ export function useRegisterUser() {
 
       return response.data;
     },
-    onSuccess: () => {
-      navigate("/auth/login");
+    onSuccess: ({ data }) => {
+      handleAuthSuccess({
+        user: data as LoginResponse["data"],
+        setLoggedIn,
+        setCurrentUser,
+        setHasVerifiedMFA,
+      });
     },
-    onError: (error) => {
-      if (error instanceof AxiosError) {
-        const { message } = error.response?.data as ApiErrorResponse;
-
-        return toast({
-          variant: "destructive",
-          description: message ? t(message) : t("common.toast.somethingWentWrong"),
-        });
-      }
+    onError: (error: AxiosError) => {
+      const { message } = error.response?.data as ApiErrorResponse;
 
       toast({
         variant: "destructive",
-        description: t("common.toast.somethingWentWrong"),
+        description: t(message),
       });
     },
   });

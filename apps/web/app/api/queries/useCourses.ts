@@ -1,3 +1,4 @@
+import { SUPPORTED_LANGUAGES, type SupportedLanguages } from "@repo/shared";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "../api-client";
@@ -19,6 +20,7 @@ export type CourseParams = {
   sort?: SortOption;
   authorId?: string;
   archived?: boolean;
+  language?: SupportedLanguages;
 };
 
 type QueryOptions = {
@@ -42,7 +44,7 @@ export const allCoursesQueryOptions = (
       ...(searchParams?.state && { status: searchParams.state }),
       ...(searchParams?.sort && { sort: searchParams.sort }),
       ...(searchParams?.archived && { archived: searchParams.archived }),
-      language: "en",
+      language: searchParams?.language ?? SUPPORTED_LANGUAGES.EN,
       page: 1,
       perPage: 100,
     });

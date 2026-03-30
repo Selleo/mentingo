@@ -34,21 +34,26 @@ applyFormats();
 
 async function bootstrap() {
   startInstrumentation();
-  Sentry.init({
-    dsn: process.env.SENTRY_DSN,
-    integrations: [nodeProfilingIntegration()],
-    tracesSampleRate: 1.0,
-    profilesSampleRate: 1.0,
-    environment: environmentValidation(String(process.env.NODE_ENV)),
-  });
 
-  Sentry.setTags({
-    version,
-  });
+  if (process.env.SENTRY_DSN) {
+    Sentry.init({
+      dsn: process.env.SENTRY_DSN,
+      integrations: [nodeProfilingIntegration()],
+      tracesSampleRate: 1.0,
+      profilesSampleRate: 1.0,
+      environment: environmentValidation(String(process.env.NODE_ENV)),
+    });
+
+    Sentry.setTags({
+      version,
+    });
+  }
 
   const app = await NestFactory.create(AppModule, {
     rawBody: true,
   });
+
+  app.getHttpAdapter().getInstance().set("trust proxy", 1);
 
   setupValidation();
 

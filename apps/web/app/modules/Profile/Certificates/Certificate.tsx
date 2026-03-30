@@ -1,8 +1,6 @@
 import { CertificateTrophy } from "~/assets/svgs";
 import { Button } from "~/components/ui/button";
 
-import useCertificatePDF from "./useCertificatePDF";
-
 import type { CertificateType } from "~/types/certificate";
 interface CertificateProps {
   courseName: string;
@@ -22,12 +20,8 @@ const Certificate = ({
   courseName,
   courseCompletionDate,
   certData,
-  platformLogo,
-  backgroundImageUrl,
   onOpenCertificatePreview,
 }: CertificateProps) => {
-  const { HiddenCertificate } = useCertificatePDF();
-
   const handlePreviewClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     if (onOpenCertificatePreview) {
@@ -42,15 +36,6 @@ const Certificate = ({
 
   return (
     <>
-      <HiddenCertificate
-        studentName={certData?.fullName || ""}
-        courseName={certData?.courseTitle || courseName}
-        completionDate={courseCompletionDate}
-        platformLogo={platformLogo}
-        lang="en"
-        backgroundImageUrl={backgroundImageUrl}
-        signatureImageUrl={certData?.certificateSignatureUrl}
-      />
       <div className="grid grid-cols-1 gap-4">
         <div className="relative">
           <Button

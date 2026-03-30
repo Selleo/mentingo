@@ -9,7 +9,7 @@ import {
   ServiceUnavailableException,
   UnauthorizedException,
 } from "@nestjs/common";
-import { AI_MENTOR_TYPE } from "@repo/shared";
+import { AI_MENTOR_TTS_PRESET, AI_MENTOR_TYPE } from "@repo/shared";
 import { isAxiosError } from "axios";
 import * as cheerio from "cheerio";
 import { eq } from "drizzle-orm";
@@ -93,7 +93,6 @@ export class LumaService {
 
   async getDraft(data: CreateDraftOptions, currentUser: CurrentUser) {
     const luma = await this.getAuthorizedLumaClient(data.integrationId, currentUser);
-
     const draft = await luma.getDraft(data).catch((error) => {
       if (isAxiosError(error) && error.response?.status === 404) {
         return undefined;
@@ -147,7 +146,9 @@ export class LumaService {
     const responses: IngestDraftFileResponse[] = [];
 
     for (const file of files) {
-      const lumaFile = new File([file.buffer], file.originalname, { type: file.mimetype });
+      const lumaFile = new File([new Uint8Array(file.buffer)], file.originalname, {
+        type: file.mimetype,
+      });
 
       responses.push(
         await this.withLumaErrorHandling(() =>
@@ -422,6 +423,7 @@ export class LumaService {
           aiMentorInstructions: this.sanitizeText(aiMentor?.aiMentorInstructions ?? ""),
           completionConditions: this.sanitizeText(aiMentor?.completionConditions ?? ""),
           name: this.sanitizeText(aiMentor?.name ?? "AI Mentor"),
+          ttsPreset: aiMentor?.ttsPreset ?? AI_MENTOR_TTS_PRESET.MALE,
         },
         currentUser,
       );

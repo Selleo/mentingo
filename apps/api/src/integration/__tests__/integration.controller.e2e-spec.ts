@@ -4,6 +4,7 @@ import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { and, eq, isNull } from "drizzle-orm";
 import request from "supertest";
 
+import { RATE_LIMITS } from "src/rate-limit/rate-limit.constants";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { integrationApiKeys, tenants } from "src/storage/schema";
 
@@ -101,6 +102,30 @@ describe("IntegrationController (e2e)", () => {
       expect(storedKey.keyPrefix).toBe(rawKey.slice(0, 16));
       expect(storedKey.keyHash).toHaveLength(64);
       expect(storedKey.keyHash).not.toBe(rawKey);
+    });
+
+    it("returns 429 on integration key rotation request above configured write limit", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: USER_ROLES.ADMIN });
+      const cookies = await cookieFor(admin, app);
+
+      for (
+        let attempt = 1;
+        attempt <= RATE_LIMITS.INTEGRATION_WRITE_REQUESTS_PER_MINUTE;
+        attempt += 1
+      ) {
+        await request(app.getHttpServer())
+          .post("/api/integration/key")
+          .set("Cookie", cookies)
+          .expect(201);
+      }
+
+      await request(app.getHttpServer())
+        .post("/api/integration/key")
+        .set("Cookie", cookies)
+        .expect(429);
     });
   });
 

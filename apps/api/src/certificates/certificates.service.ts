@@ -32,9 +32,7 @@ import type {
 } from "./certificates.types";
 import type { OnModuleDestroy } from "@nestjs/common";
 import type { SupportedLanguages } from "@repo/shared";
-import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import type { PaginatedResponse, UUIDType } from "src/common";
-import type * as schema from "src/storage/schema";
+import type { DatabasePg, PaginatedResponse, UUIDType } from "src/common";
 
 @Injectable()
 export class CertificatesService implements OnModuleDestroy {
@@ -96,15 +94,9 @@ export class CertificatesService implements OnModuleDestroy {
     }
   }
 
-  async createCertificate(
-    userId: UUIDType,
-    courseId: UUIDType,
-    trx?: PostgresJsDatabase<typeof schema>,
-  ) {
+  async createCertificate(userId: UUIDType, courseId: UUIDType, trx?: DatabasePg) {
     try {
-      const executeInTransaction = async (
-        transactionInstance: PostgresJsDatabase<typeof schema>,
-      ) => {
+      const executeInTransaction = async (transactionInstance: DatabasePg) => {
         const { existingUser, existingCourse, completionDate } =
           await this.validateCertificateCreationPreconditions(
             userId,
@@ -203,13 +195,19 @@ export class CertificatesService implements OnModuleDestroy {
     };
   }
 
-  async getPublicSharePage(certificateId: UUIDType, language?: string): Promise<string> {
+  async getPublicSharePage(
+    certificateId: UUIDType,
+    language?: SupportedLanguages,
+  ): Promise<string> {
     const context = await this.buildShareRenderContext(certificateId, language);
     const imageBuffer = await this.getPublicShareImage(certificateId, context.language);
     return this.buildSharePageHtml(context, this.toDataUri(imageBuffer, "image/png"));
   }
 
-  async getPublicShareImage(certificateId: UUIDType, language?: string): Promise<Buffer> {
+  async getPublicShareImage(
+    certificateId: UUIDType,
+    language?: SupportedLanguages,
+  ): Promise<Buffer> {
     const shareLanguage = this.normalizeLanguage(language);
     const imageKey = this.getShareImageKey(certificateId, shareLanguage);
 
@@ -262,13 +260,62 @@ export class CertificatesService implements OnModuleDestroy {
     return this.browserInitialization;
   }
 
-  async downloadCertificate(html: string): Promise<Buffer> {
-    if (!html.trim())
-      throw new BadRequestException("studentCertificateView.informations.htmlRequired");
+  async downloadCertificate(
+    userId: UUIDType,
+    certificateId: UUIDType,
+    language?: SupportedLanguages,
+    baseUrl?: string | null,
+  ): Promise<{ pdfBuffer: Buffer; filename: string }> {
+    const shareLanguage = this.normalizeLanguage(language);
+    const certificate = await this.certificateRepository.findOwnedCertificateByIdForRender(
+      userId,
+      certificateId,
+      shareLanguage,
+    );
 
-    const completeHtml = buildSharedCertificateHtmlDocument(html);
+    if (!certificate?.tenantId) {
+      throw new NotFoundException("studentCertificateView.informations.certificateNotFound");
+    }
 
-    return this.renderPdfFromHtml(completeHtml);
+    const imageSettings = await this.settingsService.getImageS3Keys();
+    const [platformLogoImageUrl, certificateSignatureImageUrl, backgroundImageUrl] =
+      await Promise.all([
+        this.getImageDataUriFromS3Key(imageSettings.platformLogoS3Key),
+        this.getImageDataUriFromS3Key(certificate.certificateSignature),
+        this.getImageDataUriFromS3Key(imageSettings.certificateBackgroundImage),
+      ]);
+
+    const accentColor = certificate.certificateFontColor || imageSettings.primaryColor || "#1f2937";
+    const certificateDate = certificate.completionDate || certificate.createdAt;
+
+    const html = buildCertificateMarkup({
+      studentName: certificate.fullName || "",
+      courseName: certificate.courseTitle || "",
+      completionDate: this.formatDate(certificateDate || null),
+      platformLogoUrl: platformLogoImageUrl,
+      signatureImageUrl: certificateSignatureImageUrl,
+      backgroundImageUrl,
+      lang: shareLanguage,
+      isDownload: true,
+      colorTheme: {
+        titleColor: accentColor,
+        certifyTextColor: accentColor,
+        nameColor: accentColor,
+        courseNameColor: accentColor,
+        bodyTextColor: accentColor,
+        labelTextColor: accentColor,
+        lineColor: accentColor,
+        logoColor: imageSettings.primaryColor || accentColor,
+      },
+    });
+
+    const completeHtml = buildSharedCertificateHtmlDocument(html, { baseUrl });
+    const pdfBuffer = await this.renderPdfFromHtml(completeHtml);
+
+    return {
+      pdfBuffer,
+      filename: this.buildPdfFilename(certificate.courseTitle),
+    };
   }
 
   private async renderPdfFromHtml(completeHtml: string): Promise<Buffer> {
@@ -357,7 +404,7 @@ export class CertificatesService implements OnModuleDestroy {
 
   private async buildShareRenderContext(
     certificateId: UUIDType,
-    language?: string,
+    language?: SupportedLanguages,
   ): Promise<ShareRenderContext> {
     const shareLanguage = this.normalizeLanguage(language);
     const certificate = await this.getPublicShareCertificate(certificateId, shareLanguage);
@@ -504,6 +551,21 @@ export class CertificatesService implements OnModuleDestroy {
         pageTitle: `Course completion certificate for "${context.certificate.courseTitle}"`,
         pageDescription: `${context.certificate.fullName} completed "${context.certificate.courseTitle}" and earned a certificate.`,
       },
+      de: {
+        openLabel: "Platvorm öffnen",
+        pageTitle: `Course completion certificate for "${context.certificate.courseTitle}"`,
+        pageDescription: `${context.certificate.fullName} completed "${context.certificate.courseTitle}" and earned a certificate.`,
+      },
+      lt: {
+        openLabel: "Atidaryti platformą",
+        pageTitle: `Course completion certificate for "${context.certificate.courseTitle}"`,
+        pageDescription: `${context.certificate.fullName} completed "${context.certificate.courseTitle}" and earned a certificate.`,
+      },
+      cs: {
+        openLabel: "Otevřít platformu",
+        pageTitle: `Course completion certificate for "${context.certificate.courseTitle}"`,
+        pageDescription: `${context.certificate.fullName} completed "${context.certificate.courseTitle}" and earned a certificate.`,
+      },
     } as const;
 
     const localizedContent = translations[context.language];
@@ -616,6 +678,18 @@ export class CertificatesService implements OnModuleDestroy {
     return language === "pl" ? "pl" : "en";
   }
 
+  private buildPdfFilename(courseTitle?: string | null): string {
+    const sanitizedTitle = (courseTitle || "")
+      .replace(/[<>:"/\\|?*\u0000-\u001F]/g, "")
+      .replace(/\.+$/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    const safeTitle = sanitizedTitle || "certificate";
+
+    return `${safeTitle}.pdf`;
+  }
+
   private formatDate(inputDate?: string | null): string {
     if (!inputDate) return "";
 
@@ -627,6 +701,28 @@ export class CertificatesService implements OnModuleDestroy {
 
   private toDataUri(buffer: Buffer, mimeType: string): string {
     return `data:${mimeType};base64,${buffer.toString("base64")}`;
+  }
+
+  private async getImageDataUriFromS3Key(s3Key?: string | null): Promise<string | null> {
+    if (!s3Key) {
+      return null;
+    }
+
+    try {
+      const [fileBuffer, contentType] = await Promise.all([
+        this.s3Service.getFileBuffer(s3Key),
+        this.s3Service.getFileContentType(s3Key).catch(() => null),
+      ]);
+
+      if (!fileBuffer.length || !contentType) {
+        return null;
+      }
+
+      return this.toDataUri(fileBuffer, contentType);
+    } catch (error) {
+      this.logger.warn(`Failed to get S3 image buffer for key ${s3Key}: ${error}`);
+      return null;
+    }
   }
 
   private scheduleCertificateImagePrewarm(certificateId: UUIDType): void {
@@ -643,7 +739,7 @@ export class CertificatesService implements OnModuleDestroy {
   private async validateCertificateCreationPreconditions(
     userId: UUIDType,
     courseId: UUIDType,
-    transactionInstance: PostgresJsDatabase<typeof schema>,
+    transactionInstance: DatabasePg,
   ) {
     const existingUser = await this.certificateRepository.findUserById(userId, transactionInstance);
     const existingCourse = await this.certificateRepository.findCourseById(

@@ -1,7 +1,7 @@
-import { Controller, Get, Query, UseGuards, Post, Body, Res } from "@nestjs/common";
+import { Controller, Get, Query, UseGuards, Post, Body, Res, Req } from "@nestjs/common";
 import { PERMISSIONS, SupportedLanguages } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
-import { Response } from "express";
+import { Request, Response } from "express";
 import { Validate } from "nestjs-typebox";
 
 import { PaginatedResponse, paginatedResponse, UUIDSchema, UUIDType } from "src/common";
@@ -9,6 +9,7 @@ import { Public } from "src/common/decorators/public.decorator";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { PermissionsGuard } from "src/common/guards/permissions.guard";
+import { getRequestBaseUrl } from "src/common/helpers/getRequestBaseUrl";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 
@@ -20,7 +21,7 @@ import {
   singleCertificateSchema,
 } from "./certificates.schema";
 import { CertificatesService } from "./certificates.service";
-import { CreateCertificateShareLinkBody } from "./certificates.types";
+import { CreateCertificateShareLinkBody, DownloadCertificateBody } from "./certificates.types";
 
 import type {
   AllCertificatesResponse,
@@ -87,18 +88,36 @@ export class CertificatesController {
     request: [{ type: "body", schema: downloadCertificateSchema }],
   })
   async downloadCertificate(
-    @Body() body: { html: string; filename?: string },
+    @Body() body: DownloadCertificateBody,
+    @CurrentUser() currentUser: CurrentUserType,
+    @Req() req: Request,
     @Res() res: Response,
   ): Promise<void> {
-    const { html, filename = "certificate.pdf" } = body;
+    const { certificateId, language } = body;
+    const requestBaseUrl = getRequestBaseUrl(req);
 
-    const pdfBuffer = await this.certificatesService.downloadCertificate(html);
+    const { pdfBuffer, filename } = await this.certificatesService.downloadCertificate(
+      currentUser.userId,
+      certificateId,
+      language,
+      requestBaseUrl,
+    );
+
+    const asciiFilename =
+      filename
+        .replace(/[^\x20-\x7E]/g, "")
+        .replace(/["\\]/g, "")
+        .trim() || "certificate.pdf";
+    const contentDisposition = `attachment; filename="${asciiFilename}"; filename*=UTF-8''${encodeURIComponent(
+      filename,
+    )}`;
 
     res.set({
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="${filename}"`,
+      "Content-Disposition": contentDisposition,
       "Content-Length": pdfBuffer.length,
     });
+
     res.send(pdfBuffer);
   }
 

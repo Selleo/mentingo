@@ -712,15 +712,29 @@
     {
       "idx": 101,
       "version": "7",
-      "when": 1773732905530,
-      "tag": "0101_add_permissions_schema",
+      "when": 1774007927210,
+      "tag": "0101_added_voice_mode_ai_mentor",
       "breakpoints": true
     },
     {
       "idx": 102,
       "version": "7",
-      "when": 1773732925681,
-      "tag": "0102_enable_tenant_rls_for_permissions_related_tables",
+      "when": 1774521049823,
+      "tag": "0102_add_login_failed_action_type_to_activity_logs",
+      "breakpoints": true
+    },
+    {
+      "idx": 103,
+      "version": "7",
+      "when": 1774860074785,
+      "tag": "0103_add_permissions_schema",
+      "breakpoints": true
+    },
+    {
+      "idx": 104,
+      "version": "7",
+      "when": 1774860082445,
+      "tag": "0104_enable_tenant_rls_for_permissions_related_tables",
       "breakpoints": true
     }
   ]

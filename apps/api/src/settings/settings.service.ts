@@ -99,6 +99,15 @@ export const SETTINGS_IMAGE_ASSET = {
 export type SettingsImageAssetType =
   (typeof SETTINGS_IMAGE_ASSET)[keyof typeof SETTINGS_IMAGE_ASSET];
 
+export type SettingsImageS3Keys = Pick<
+  GlobalSettingsJSONContentSchema,
+  | "platformLogoS3Key"
+  | "platformSimpleLogoS3Key"
+  | "certificateBackgroundImage"
+  | "primaryColor"
+  | "contrastColor"
+>;
+
 @Injectable()
 export class SettingsService {
   constructor(
@@ -163,6 +172,27 @@ export class SettingsService {
       platformSimpleLogoS3Key: platformSimpleLogoUrl,
       loginBackgroundImageS3Key: loginBackgroundSignedUrl,
       certificateBackgroundImage: certificateBackgroundSignedUrl,
+    };
+  }
+
+  public async getImageS3Keys(): Promise<SettingsImageS3Keys> {
+    const [globalSettings] = await this.db
+      .select({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` })
+      .from(settings)
+      .where(isNull(settings.userId));
+
+    if (!globalSettings) {
+      throw new NotFoundException("Global settings not found");
+    }
+
+    const parsedSettings = this.parseGlobalSettings(globalSettings.settings);
+
+    return {
+      platformLogoS3Key: parsedSettings.platformLogoS3Key ?? null,
+      platformSimpleLogoS3Key: parsedSettings.platformSimpleLogoS3Key ?? null,
+      certificateBackgroundImage: parsedSettings.certificateBackgroundImage ?? null,
+      primaryColor: parsedSettings.primaryColor ?? null,
+      contrastColor: parsedSettings.contrastColor ?? null,
     };
   }
 

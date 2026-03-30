@@ -5,6 +5,8 @@ import { isArray, omit } from "lodash";
 import { nanoid } from "nanoid";
 import request from "supertest";
 
+import { hashToken } from "src/auth/utils/hash-auth-token";
+import { RATE_LIMITS } from "src/rate-limit/rate-limit.constants";
 import { SettingsService } from "src/settings/settings.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { createTokens, formFieldAnswers, resetTokens } from "src/storage/schema";
@@ -43,6 +45,7 @@ describe("AuthController (e2e)", () => {
   });
 
   afterEach(async () => {
+    jest.restoreAllMocks();
     await truncateTables(baseDb, ["form_field_answers", "form_fields", "forms", "settings"]);
   });
 
@@ -65,6 +68,11 @@ describe("AuthController (e2e)", () => {
       expect(response.status).toEqual(201);
       expect(response.body.data).toHaveProperty("id");
       expect(response.body.data.email).toBe(user.email);
+      expect(response.body.data).toHaveProperty("shouldVerifyMFA");
+      expect(response.body.data).toHaveProperty("onboardingStatus");
+      expect(response.body.data).toHaveProperty("isManagingTenantAdmin");
+      expect(response.headers["set-cookie"]).toBeDefined();
+      expect(response.headers["set-cookie"].length).toBe(2);
     });
 
     it("should return 409 if user already exists", async () => {
@@ -233,6 +241,67 @@ describe("AuthController (e2e)", () => {
           password: "wrongpassword",
         })
         .expect(401);
+    });
+
+    it("should return 429 after reaching auth login limit for the same email", async () => {
+      const email = `rate-limit-auth-${nanoid()}@example.com`;
+
+      for (
+        let attempt = 1;
+        attempt <= RATE_LIMITS.AUTH_SENSITIVE_ENDPOINTS_REQUESTS_PER_MINUTE;
+        attempt += 1
+      ) {
+        await request(app.getHttpServer())
+          .post("/api/auth/login")
+          .send({
+            email,
+            password: "wrongpassword",
+          })
+          .expect(401);
+      }
+
+      await request(app.getHttpServer())
+        .post("/api/auth/login")
+        .send({
+          email,
+          password: "wrongpassword",
+        })
+        .expect(429);
+    });
+
+    it("should not apply login rate limit from one email to another email", async () => {
+      const rateLimitedEmail = `rate-limit-auth-a-${nanoid()}@example.com`;
+
+      for (
+        let attempt = 1;
+        attempt <= RATE_LIMITS.AUTH_SENSITIVE_ENDPOINTS_REQUESTS_PER_MINUTE;
+        attempt += 1
+      ) {
+        await request(app.getHttpServer())
+          .post("/api/auth/login")
+          .send({
+            email: rateLimitedEmail,
+            password: "wrongpassword",
+          })
+          .expect(401);
+      }
+
+      const allowedUser = await userFactory
+        .withCredentials({
+          password: "Password123@",
+        })
+        .withUserSettings(db)
+        .create({
+          email: `rate-limit-auth-b-${nanoid()}@example.com`,
+        });
+
+      await request(app.getHttpServer())
+        .post("/api/auth/login")
+        .send({
+          email: allowedUser.email,
+          password: "Password123@",
+        })
+        .expect(201);
     });
   });
 
@@ -406,7 +475,7 @@ describe("AuthController (e2e)", () => {
         .expect(201);
 
       expect(response.body.data).toEqual({
-        message: "Password reset link sent",
+        message: "forgotPasswordView.toast.resetPassword",
       });
     });
 
@@ -429,14 +498,17 @@ describe("AuthController (e2e)", () => {
 
   describe("POST /api/auth/reset-password", () => {
     it("should return 404 when reset token email does not match", async () => {
-      const user = await userFactory.withCredentials({ password: "Password123@" }).create();
+      const user = await userFactory
+        .withCredentials({ password: "Password123@" })
+        .withUserSettings(db)
+        .create();
       const anotherUser = await userFactory.withCredentials({ password: "Password123@" }).create();
       const resetToken = nanoid(64);
       const expiryDate = new Date(Date.now() + 60 * 60 * 1000);
 
       await db.insert(resetTokens).values({
         userId: user.id,
-        resetToken,
+        resetToken: hashToken(resetToken),
         expiryDate,
       });
 
@@ -465,6 +537,45 @@ describe("AuthController (e2e)", () => {
       expect(response.body.data).toEqual({
         message: "Password reset successfully",
       });
+    });
+
+    it("should reset password when reset token is stored as hash", async () => {
+      const user = await userFactory
+        .withCredentials({ password: "Password123@" })
+        .withUserSettings(db)
+        .create();
+      const resetToken = nanoid(64);
+      const expiryDate = new Date(Date.now() + 60 * 60 * 1000);
+
+      await db.insert(resetTokens).values({
+        userId: user.id,
+        resetToken: hashToken(resetToken),
+        expiryDate,
+      });
+
+      await request(app.getHttpServer())
+        .post("/api/auth/reset-password")
+        .send({
+          resetToken,
+          newPassword: "Newpassword123@",
+          email: user.email,
+        })
+        .expect(201);
+
+      const [remainingToken] = await db
+        .select()
+        .from(resetTokens)
+        .where(eq(resetTokens.userId, user.id));
+
+      expect(remainingToken).toBeUndefined();
+
+      await request(app.getHttpServer())
+        .post("/api/auth/login")
+        .send({
+          email: user.email,
+          password: "Newpassword123@",
+        })
+        .expect(201);
     });
 
     it("should return 400 if new password does not match criteria", async () => {
@@ -513,7 +624,7 @@ describe("AuthController (e2e)", () => {
 
       await db.insert(createTokens).values({
         userId: user.id,
-        createToken: token,
+        createToken: hashToken(token),
         expiryDate,
         reminderCount: 0,
       });
@@ -529,6 +640,41 @@ describe("AuthController (e2e)", () => {
         .expect(404);
     });
 
+    it("should create password and login user with cookies", async () => {
+      const user = await userFactory.create({
+        email: `createpassword-login-${nanoid(8)}@example.com`,
+      });
+
+      const token = nanoid(64);
+      const expiryDate = new Date();
+      expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+
+      await db.insert(createTokens).values({
+        userId: user.id,
+        createToken: hashToken(token),
+        expiryDate,
+        reminderCount: 0,
+      });
+
+      const response = await request(app.getHttpServer())
+        .post("/api/auth/create-password")
+        .send({
+          createToken: token,
+          email: user.email,
+          password: "Password123@",
+          language: "en",
+        })
+        .expect(201);
+
+      expect(response.body.data).toHaveProperty("id", user.id);
+      expect(response.body.data).toHaveProperty("email", user.email);
+      expect(response.body.data).toHaveProperty("shouldVerifyMFA");
+      expect(response.body.data).toHaveProperty("onboardingStatus");
+      expect(response.body.data).toHaveProperty("isManagingTenantAdmin");
+      expect(response.headers["set-cookie"]).toBeDefined();
+      expect(response.headers["set-cookie"].length).toBe(2);
+    });
+
     it("should save correct language when creating password with supported language other than 'en'", async () => {
       const user = await userFactory.create({
         email: "createpassword@example.com",
@@ -540,7 +686,7 @@ describe("AuthController (e2e)", () => {
 
       await db.insert(createTokens).values({
         userId: user.id,
-        createToken: token,
+        createToken: hashToken(token),
         expiryDate,
         reminderCount: 0,
       });
@@ -582,7 +728,7 @@ describe("AuthController (e2e)", () => {
       expect(settingsResponse.body.data.language).toBe("pl");
     });
 
-    it("should fallback to 'en' when creating password with unsupported language (e.g., 'ar')", async () => {
+    it("should return 400 when creating password with unsupported language (e.g., 'ar')", async () => {
       const user = await userFactory.create({
         email: `createpassword-${nanoid(8)}@example.com`,
       });
@@ -593,46 +739,61 @@ describe("AuthController (e2e)", () => {
 
       await db.insert(createTokens).values({
         userId: user.id,
-        createToken: token,
+        createToken: hashToken(token),
         expiryDate,
         reminderCount: 0,
       });
 
-      const password = "Password123@";
+      const response = await request(app.getHttpServer())
+        .post("/api/auth/create-password")
+        .send({
+          createToken: token,
+          email: user.email,
+          password: "Password123@",
+          language: "ar",
+        })
+        .expect(400);
+
+      expect(response.body.message).toEqual("Validation failed (body)");
+    });
+
+    it("should create password when create token is stored as hash", async () => {
+      const user = await userFactory.create({
+        email: `createpassword-hashed-${nanoid(8)}@example.com`,
+      });
+
+      const token = nanoid(64);
+      const expiryDate = new Date();
+      expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+
+      await db.insert(createTokens).values({
+        userId: user.id,
+        createToken: hashToken(token),
+        expiryDate,
+        reminderCount: 0,
+      });
 
       await authService.createPassword({
         createToken: token,
         email: user.email,
-        password,
-        language: "ar",
+        password: "Password123@",
+        language: "en",
       });
 
-      const loginResponse = await request(app.getHttpServer()).post("/api/auth/login").send({
-        email: user.email,
-        password: password,
-      });
+      const [remainingToken] = await db
+        .select()
+        .from(createTokens)
+        .where(eq(createTokens.userId, user.id));
 
-      expect(loginResponse.status).toBe(201);
+      expect(remainingToken).toBeUndefined();
 
-      const cookies = loginResponse.headers["set-cookie"];
-      let accessToken = "";
-
-      if (Array.isArray(cookies)) {
-        cookies.forEach((cookieString) => {
-          const parsedCookie = cookie.parse(cookieString);
-          if ("access_token" in parsedCookie) {
-            accessToken = parsedCookie.access_token;
-          }
-        });
-      }
-
-      const settingsResponse = await request(app.getHttpServer())
-        .get("/api/settings")
-        .set("Cookie", `access_token=${accessToken};`)
-        .expect(200);
-
-      expect(settingsResponse.body.data).toBeDefined();
-      expect(settingsResponse.body.data.language).toBe("en");
+      await request(app.getHttpServer())
+        .post("/api/auth/login")
+        .send({
+          email: user.email,
+          password: "Password123@",
+        })
+        .expect(201);
     });
   });
 });

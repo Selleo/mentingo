@@ -1,5 +1,3 @@
-import { createHmac } from "node:crypto";
-
 import {
   BadRequestException,
   ConflictException,
@@ -31,13 +29,15 @@ import { nanoid } from "nanoid";
 import { authenticator } from "otplib";
 
 import { CORS_ORIGIN, MAGIC_LINK_EXPIRATION_TIME } from "src/auth/consts";
+import { hashToken } from "src/auth/utils/hash-auth-token";
 import { DatabasePg, type UUIDType } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
 import { getEmailSubject } from "src/common/emails/translations";
 import { buildCreateNewPasswordLink } from "src/common/helpers/buildCreateNewPasswordLink";
 import hashPassword from "src/common/helpers/hashPassword";
 import { getSupportModeContext } from "src/common/helpers/support-mode-context";
-import { UserLoginEvent } from "src/events/user/user-login.event";
+import { UserLoginFailedEvent } from "src/events/user/user-login-failed-event";
+import { UserLoginEvent, USER_LOGIN_METHOD } from "src/events/user/user-login.event";
 import { UserPasswordCreatedEvent } from "src/events/user/user-password-created.event";
 import { UserRegisteredEvent } from "src/events/user/user-registered.event";
 import { UserWelcomeEvent } from "src/events/user/user-welcome.event";
@@ -65,18 +65,17 @@ import { ResetPasswordService } from "./reset-password.service";
 import { TokenService } from "./token.service";
 
 import type { CreatePasswordBody } from "./schemas/create-password.schema";
-import type { RegisterUserWithHashedPasswordInput, TokenUser } from "./types";
+import type { AuthFailedData, RegisterUserWithHashedPasswordInput, TokenUser } from "./types";
 import type { Response } from "express";
 import type { ActorUserType } from "src/common/types/actor-user.type";
 import type { CurrentUser } from "src/common/types/current-user.type";
+import type { UserLoginFailedData } from "src/events/user/user-login-failed-event";
 import type { RegistrationFormField } from "src/settings/schemas/registration-form.schema";
 import type { SupportSession } from "src/support-mode/support-mode.types";
 import type { ProviderLoginUserType } from "src/utils/types/provider-login-user.type";
 
 @Injectable()
 export class AuthService {
-  private readonly ENCRYPTION_KEY: Buffer;
-
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
     @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
@@ -91,9 +90,7 @@ export class AuthService {
     private tokenService: TokenService,
     private readonly supportModeService: SupportModeService,
     private readonly permissionsService: PermissionsService,
-  ) {
-    this.ENCRYPTION_KEY = Buffer.from(process.env.MASTER_KEY!, "base64");
-  }
+  ) {}
 
   public async register({
     email,
@@ -233,6 +230,7 @@ export class AuthService {
 
   public async login(data: { email: string; password: string }, MFAEnforcedRoles: string[]) {
     const user = await this.validateUser(data.email, data.password);
+
     if (!user) {
       throw new UnauthorizedException("Invalid email or password");
     }
@@ -262,7 +260,7 @@ export class AuthService {
     };
 
     await this.outboxPublisher.publish(
-      new UserLoginEvent({ userId: user.id, method: "password", actor }),
+      new UserLoginEvent({ userId: user.id, method: USER_LOGIN_METHOD.PASSWORD, actor }),
     );
 
     if (this.isMfaRoleEnforced(MFAEnforcedRoles, roleSlugs) || userSettings.isMFAEnabled) {
@@ -412,7 +410,7 @@ export class AuthService {
       };
 
       await this.outboxPublisher.publish(
-        new UserLoginEvent({ userId: user.id, method: "refresh_token", actor }),
+        new UserLoginEvent({ userId: user.id, method: USER_LOGIN_METHOD.REFRESH_TOKEN, actor }),
       );
 
       return tokens;
@@ -449,11 +447,13 @@ export class AuthService {
       .leftJoin(credentials, eq(users.id, credentials.userId))
       .where(and(eq(users.email, email), isNull(users.deletedAt)));
 
-    if (!userWithCredentials || !userWithCredentials.password) return null;
+    if (!userWithCredentials || !userWithCredentials.password)
+      throw new UnauthorizedException({ message: "auth.error.invalidEmailOrPassword" });
 
     const isPasswordValid = await bcrypt.compare(password, userWithCredentials.password);
 
-    if (!isPasswordValid) return null;
+    if (!isPasswordValid)
+      throw new UnauthorizedException({ message: "auth.error.invalidEmailOrPassword" });
 
     const { password: _, ...user } = userWithCredentials;
 
@@ -540,15 +540,16 @@ export class AuthService {
   public async forgotPassword(email: string) {
     const user = await this.userService.getUserByEmail(email);
 
-    if (!user) throw new BadRequestException("Email not found");
+    if (!user) return;
 
     const resetToken = nanoid(64);
+    const hashedResetToken = hashToken(resetToken);
     const expiryDate = new Date();
     expiryDate.setHours(expiryDate.getHours() + 1);
 
     await this.db.insert(resetTokens).values({
       userId: user.id,
-      resetToken,
+      resetToken: hashedResetToken,
       expiryDate,
     });
 
@@ -605,18 +606,12 @@ export class AuthService {
     await this.db
       .insert(credentials)
       .values({ userId: createToken.userId, password: hashedPassword });
-    await this.createPasswordService.deleteToken(token);
-
-    const languageGuard = Object.values(SUPPORTED_LANGUAGES).includes(
-      language as SupportedLanguages,
-    )
-      ? language
-      : "en";
+    await this.createPasswordService.deleteToken(createToken.id);
 
     const { roleSlugs } = await this.permissionsService.getUserAccess(createToken.userId);
 
     await this.settingsService.createSettingsIfNotExists(createToken.userId, roleSlugs, {
-      language: languageGuard,
+      language,
     });
 
     await this.outboxPublisher.publish(new UserPasswordCreatedEvent({ ...existingUser }));
@@ -628,7 +623,7 @@ export class AuthService {
     const resetToken = await this.resetPasswordService.getOneByTokenAndEmail(token, email);
 
     await this.userService.resetPassword(resetToken.userId, newPassword);
-    await this.resetPasswordService.deleteToken(token);
+    await this.resetPasswordService.deleteToken(resetToken.id);
   }
 
   private async fetchExpiredTokens() {
@@ -646,7 +641,12 @@ export class AuthService {
       .where(
         and(
           isNull(credentials.userId),
-          lte(sql`DATE(${createTokens.expiryDate})`, sql`CURRENT_DATE`),
+          lte(
+            sql`DATE(
+            ${createTokens.expiryDate}
+            )`,
+            sql`CURRENT_DATE`,
+          ),
           lt(createTokens.reminderCount, 3),
         ),
       );
@@ -683,11 +683,13 @@ export class AuthService {
     expiryDate: Date,
     reminderCount: number,
   ) {
+    const hashedCreateToken = hashToken(createToken);
+
     await this.db.transaction(async (transaction) => {
       try {
         await transaction.insert(createTokens).values({
           userId,
-          createToken,
+          createToken: hashedCreateToken,
           expiryDate,
           reminderCount,
         });
@@ -782,7 +784,7 @@ export class AuthService {
     };
 
     await this.outboxPublisher.publish(
-      new UserLoginEvent({ userId: user.id, method: "provider", actor }),
+      new UserLoginEvent({ userId: user.id, method: USER_LOGIN_METHOD.PROVIDER, actor }),
     );
 
     if (this.isMfaRoleEnforced(MFAEnforcedRoles, roleSlugs) || userSettings.isMFAEnabled) {
@@ -857,6 +859,8 @@ export class AuthService {
   async createMagicLink(email: string) {
     const user = await this.userService.getUserByEmail(email);
 
+    if (!user) return;
+
     if (user.archived) throw new UnauthorizedException("user.error.archived");
 
     const magicLinkToken = await this.createMagicLinkToken(user.id);
@@ -891,7 +895,7 @@ export class AuthService {
 
     const dateNow = new Date();
 
-    const hashedToken = this.hashMagicLinkToken(token);
+    const hashedToken = hashToken(token);
 
     const { user, accessToken, refreshToken } = await this.db.transaction(async (trx) => {
       const [magicLinkToken] = await trx
@@ -926,7 +930,7 @@ export class AuthService {
     await this.outboxPublisher.publish(
       new UserLoginEvent({
         userId,
-        method: "magic_link",
+        method: USER_LOGIN_METHOD.MAGIC_LINK,
         actor: {
           userId,
           email,
@@ -1005,7 +1009,7 @@ export class AuthService {
 
   async createMagicLinkToken(userId: UUIDType): Promise<string> {
     const token = nanoid(64);
-    const hashedToken = this.hashMagicLinkToken(token);
+    const hashedToken = hashToken(token);
 
     const expiryDate = new Date();
     expiryDate.setTime(expiryDate.getTime() + MAGIC_LINK_EXPIRATION_TIME);
@@ -1022,7 +1026,36 @@ export class AuthService {
     return token;
   }
 
-  hashMagicLinkToken(token: string): string {
-    return createHmac("sha256", this.ENCRYPTION_KEY).update(token, "utf8").digest("hex");
+  async handleFailedLogin(loginFailedData: UserLoginFailedData) {
+    await this.outboxPublisher.publish(new UserLoginFailedEvent(loginFailedData));
+  }
+
+  async handleAuthFailed(data: AuthFailedData) {
+    const [user] = await this.db
+      .select({
+        id: users.id,
+        email: users.email,
+        tenantId: users.tenantId,
+      })
+      .from(users)
+      .where(and(eq(users.email, data.email), isNull(users.deletedAt)))
+      .limit(1);
+
+    const userAcesses = await this.permissionsService.getUserAccess(user.id);
+
+    if (!user) return;
+
+    await this.handleFailedLogin({
+      userId: user.id,
+      method: data.method,
+      actor: {
+        userId: user.id,
+        email: user.email,
+        roleSlugs: userAcesses.roleSlugs,
+        permissions: userAcesses.permissions,
+        tenantId: user.tenantId,
+      },
+      error: data.error,
+    });
   }
 }

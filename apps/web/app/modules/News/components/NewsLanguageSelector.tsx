@@ -1,3 +1,4 @@
+import { SUPPORTED_LANGUAGES, type SupportedLanguages } from "@repo/shared";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -22,15 +23,18 @@ import {
 } from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
 
-import type { SupportedLanguages } from "@repo/shared";
+import type { IconName } from "~/types/shared";
 
 const languageOptions: {
   key: SupportedLanguages;
-  iconName: "GB" | "PL";
+  iconName: IconName;
   translationKey: string;
 }[] = [
   { key: "pl", iconName: "PL", translationKey: "changeUserLanguageView.options.polish" },
   { key: "en", iconName: "GB", translationKey: "changeUserLanguageView.options.english" },
+  { key: "de", iconName: "DE", translationKey: "changeUserLanguageView.options.german" },
+  { key: "cs", iconName: "CS", translationKey: "changeUserLanguageView.options.czech" },
+  { key: "lt", iconName: "LT", translationKey: "changeUserLanguageView.options.lithuanian" },
 ];
 
 type NewsLanguageSelectorProps = {
@@ -87,8 +91,8 @@ export const NewsLanguageSelector = ({
 
     const fallback =
       (baseLanguage && baseLanguage !== languageToDelete && baseLanguage) ||
-      (availableLocales?.find((locale) => locale !== languageToDelete) as SupportedLanguages) ||
-      "en";
+      availableLocales?.find((locale) => locale !== languageToDelete) ||
+      SUPPORTED_LANGUAGES.EN;
     onChange(fallback);
     setLanguageToDelete(null);
   };

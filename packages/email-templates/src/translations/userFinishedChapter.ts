@@ -1,11 +1,12 @@
-import { EmailContent, Language } from "types";
+import { SupportedLanguages } from "@repo/shared";
+import { EmailContent } from "types";
 
 export const getUserFinishedChapterEmailTranslations = (
-  language: Language,
+  language: SupportedLanguages,
   chapterName: string,
   courseName: string,
 ) => {
-  const emailContent: Record<Language, EmailContent> = {
+  const emailContent: Record<SupportedLanguages, EmailContent> = {
     en: {
       heading: "Chapter completed",
       paragraphs: [
@@ -21,6 +22,30 @@ export const getUserFinishedChapterEmailTranslations = (
         `Ukończyłeś(-aś) ${chapterName} w kursie ${courseName}. Kolejne materiały są już dostępne.`,
       ],
       buttonText: "NASTĘPNY ROZDZIAŁ",
+    },
+    de: {
+      heading: "Kapitel abgeschlossen",
+      paragraphs: [
+        "Fortschritt aktualisiert 🧩",
+        `Du hast ${chapterName} in ${courseName} abgeschlossen. Die nächsten Materialien sind bereit.`,
+      ],
+      buttonText: "NÄCHSTES KAPITEL",
+    },
+    lt: {
+      heading: "Skyrius baigtas",
+      paragraphs: [
+        "Pažanga atnaujinta 🧩",
+        `Baigei ${chapterName} kurse ${courseName}. Kitos medžiagos jau paruoštos.`,
+      ],
+      buttonText: "KITAS SKYRIUS",
+    },
+    cs: {
+      heading: "Kapitola dokončena",
+      paragraphs: [
+        "Pokrok aktualizován 🧩",
+        `Dokončil(a) jsi ${chapterName} v kurzu ${courseName}. Další materiály jsou připraveny.`,
+      ],
+      buttonText: "DALŠÍ KAPITOLA",
     },
   };
 

@@ -10,6 +10,7 @@ export type CreatePasswordReminderEmailProps = {
 export const CreatePasswordReminderEmail = ({
   createPasswordLink,
   primaryColor,
+  companyName,
   language = "en",
 }: CreatePasswordReminderEmailProps) => {
   const { heading, paragraphs, buttonText } = getCreatePasswordReminderEmailTranslations(language);
@@ -20,6 +21,7 @@ export const CreatePasswordReminderEmail = ({
     buttonText,
     buttonLink: createPasswordLink,
     primaryColor,
+    companyName,
   });
 };
 

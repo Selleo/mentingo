@@ -23,7 +23,8 @@
       "noAccess": "You do not have permission to access this resource",
       "globalSettingsNotFound": "Global settings not found",
       "somethingWentWrong": "Something went wrong...",
-      "notFound": "Resource not found"
+      "notFound": "Resource not found",
+      "tooManyRequests": "Too many requests. Try again in {{seconds}} seconds."
     },
     "tooltip": {
       "soon": "Cooming soon"
@@ -36,7 +37,10 @@
     },
     "languages": {
       "en": "English",
-      "pl": "Polish"
+      "pl": "Polish",
+      "de": "German",
+      "lt": "Lithuanian",
+      "cs": "Czech"
     },
     "lessonTypes": {
       "content": "Content",
@@ -193,7 +197,8 @@
     "ariaLabels": {
       "goToAvailableCourses": "Go to available courses"
     },
-    "qa": "Q&A"
+    "qa": "Q&A",
+    "tenants": "Organizations"
   },
   "newsView": {
     "header": "News",
@@ -309,7 +314,10 @@
     },
     "options": {
       "english": "English",
-      "polish": "Polish"
+      "polish": "Polish",
+      "german": "German",
+      "czech": "Czech",
+      "lithuanian": "Lithuanian"
     }
   },
   "resetOnboarding": {
@@ -1303,6 +1311,7 @@
           "aiMentorInstructionsMaxLength": "AI Mentor Instructions are too long (max 20000 characters)",
           "completionConditionsRequired": "Completion Conditions are required",
           "completionConditionsMaxLength": "Completion Conditions are too long (max 20000 characters)",
+          "customTTSReferenceRequired": "Custom TTS reference is required in custom mode",
           "taskDescriptionMaxLength": "Task description is too long (max {{ count }} characters)",
           "passThresholdMin": "Pass threshold must be at least 1",
           "passThresholdMax": "Pass threshold cannot exceed 10",
@@ -1357,6 +1366,10 @@
           "passThreshold": "Pass Threshold",
           "additionalContext": "Additional context",
           "aiMentorTypes": "AI Mentor Type",
+          "voiceConfig": "Voice Configuration",
+          "voiceMode": "Voice Mode",
+          "ttsPreset": "TTS Preset",
+          "customTTSReference": "Custom TTS Reference",
           "includeFiles_one": "Attach up to 1 file below {{ MAX_FILE_SIZE }} MB to be used as context in lessons",
           "includeFiles_other": "Attach up to {{ count }} files below {{ MAX_FILE_SIZE }} MB to be used as context in lessons"
         },
@@ -1375,6 +1388,7 @@
           "completionConditions": "List what the student must achieve to pass this lesson...",
           "taskDescription": "Describe the task the participant needs to complete...",
           "passThreshold": "e.g., 70%",
+          "customTTSReference": "Enter custom TTS reference ID...",
           "aiMentorTypes": "Mentor"
         },
         "courseGenerationComposer": {
@@ -1433,6 +1447,7 @@
           "aiRoleplayTypeTooltip": "Simulates a realistic character and situation – without breaking character.\nExample: \"This is the second time your service has failed. What are you going to do about it?\"",
           "completionConditionsTooltip": "List what the student must achieve to pass this lesson. Provide clear and measurable points. The AI will use this list to check progress. You can also define a pass threshold (e.g. percentage or minimum number of points to cover). If no threshold is provided, all conditions must be met to pass the lesson.",
           "passThresholdTooltip": "Set the minimum percentage (1-100%) required to pass. Leave empty for no threshold.",
+          "voiceConfigFishAudioTooltip": "Voice mode uses Fish Audio. For a custom voice, open Fish Audio, pick a voice you like, and copy its voice ID here.",
           "aiMentorPersonaTooltip": "This defines the lesson's persona. You can select a name and avatar for the AI Mentor. The persona will identify itself by this name, and the selected avatar will be shown during lessons.",
           "suggestedExamples": "Suggested examples",
           "charactersLeft": "characters left",
@@ -1443,6 +1458,10 @@
           "problemSolving": "Problem Solving",
           "creativeTask": "Creative Task",
           "knowledgeSharing": "Knowledge Sharing Dialogue",
+          "voiceModePreset": "Preset",
+          "voiceModeCustom": "Custom",
+          "voicePresetMale": "Male",
+          "voicePresetFemale": "Female",
           "emoji": {
             "search": "Search",
             "loading": "Loading..."
@@ -1619,11 +1638,11 @@
       "badgeMaster": "Shared",
       "badgeExported": "Shared",
       "badgeExportedTooltip": "This course is managed centrally. You can publish it and assign participants, but you cannot edit its content.",
-      "exportedNoticeTitle": "This course was exported to this tenant",
-      "exportedNoticeDescription": "Content is managed in the source tenant and is read-only in this tenant.",
+      "exportedNoticeTitle": "This course was exported to this organization",
+      "exportedNoticeDescription": "Content is managed in the source organization and is read-only in this organization.",
       "exportsTitle": "Sharing",
-      "exportsDescription": "Share this course with selected tenants.",
-      "selectTenants": "Select tenants",
+      "exportsDescription": "Share this course with selected organizations.",
+      "selectTenants": "Select organizations",
       "selectedCount": "Selected:",
       "exportButton": "Share",
       "exportingButton": "Sharing..."
@@ -1929,10 +1948,39 @@
         "addEmoji": "Add emoji",
         "closeVoiceMode": "Close voice mode",
         "toggleVoiceInput": "Toggle voice input",
+        "startVoiceMentor": "Start voice mentor",
         "stopVoiceRecording": "Stop voice recording",
         "taskDescription": "Task description",
         "taskDescriptionExpand": "Click to expand",
         "taskDescriptionCollapse": "Click to collapse",
+        "voiceOverlay": {
+          "headerEyebrow": "Voice UI",
+          "exit": "Exit voice mode",
+          "youSaid": "You said",
+          "states": {
+            "idle": {
+              "title": "Ready",
+              "subtitle": "Tap to start speaking"
+            },
+            "listening": {
+              "title": "Listening",
+              "subtitle": "Capturing your voice"
+            },
+            "thinking": {
+              "title": "Thinking",
+              "subtitle": "Model is preparing a response"
+            },
+            "speaking": {
+              "title": "Speaking",
+              "subtitle": "Model response is playing"
+            }
+          },
+          "responsePlaceholder": {
+            "thinking": "Thinking about your request...",
+            "listening": "Listening for your next question...",
+            "default": "Response preview will appear here."
+          }
+        },
         "retakeModalTitle": "Are you sure you want to retake the lesson?",
         "retakeModalDescription": "This will reset your progress in this lesson. This action cannot be undone."
       }
@@ -2414,6 +2462,20 @@
     }
   },
   "richText": {
+    "uploadDisplayModeDialog": {
+      "title": "Choose how to display this file",
+      "description": "Select how \"{{name}}\" should appear for students.",
+      "options": {
+        "preview": {
+          "title": "Preview",
+          "description": "Show file inline so students can view it directly."
+        },
+        "download": {
+          "title": "Download",
+          "description": "Insert as a downloadable file link."
+        }
+      }
+    },
     "video": {
       "tooltip": {
         "bunnyMissing": "Video is not available. Please check Bunny CDN configuration."
@@ -2434,6 +2496,17 @@
         "drag": "Drag file",
         "remove": "Remove downloadable file"
       }
+    },
+    "pdfPreview": {
+      "ariaLabel": {
+        "drag": "Drag PDF preview",
+        "remove": "Remove PDF preview"
+      },
+      "loading": "Loading preview...",
+      "openFile": "Open file",
+      "showingPage": "Showing page {{page}} of {{total}}",
+      "previous": "Previous",
+      "next": "Next"
     },
     "loadingAiAsset": {
       "processing": "Resource is currently processing"
@@ -2473,9 +2546,9 @@
     "createQA": "Create new Q&A",
     "analytics": "Analytics",
     "progress": "Progress",
-    "tenant": "Tenant Details",
-    "createTenant": "Create Tenant",
-    "tenants": "Tenants"
+    "tenant": "Organization Details",
+    "createTenant": "Create Organization",
+    "tenants": "Organizations"
   },
   "lessonPreview": {
     "breadcrumbs": {
@@ -2721,21 +2794,21 @@
     }
   },
   "superAdminTenantsView": {
-    "title": "Tenants",
-    "description": "Manage tenant names, domains, status, and managing flags.",
+    "title": "Organizations",
+    "description": "Manage organization names, domains, status, and managing flags.",
     "actions": {
-      "create": "Create Tenant"
+      "create": "Create Organization"
     },
     "search": {
-      "placeholder": "Search tenants..."
+      "placeholder": "Search organizations..."
     },
     "table": {
       "name": "Name",
       "host": "Host",
       "status": "Status",
       "managing": "Managing",
-      "loading": "Loading tenants...",
-      "empty": "No tenants found.",
+      "loading": "Loading organizations...",
+      "empty": "No organizations found.",
       "yes": "Yes",
       "no": "No",
       "edit": "Edit",
@@ -2749,19 +2822,19 @@
       "inactive": "Inactive"
     },
     "create": {
-      "title": "Create Tenant",
-      "description": "Create a new tenant and invite the first admin.",
-      "submit": "Create Tenant"
+      "title": "Create Organization",
+      "description": "Create a new organization and invite the first admin.",
+      "submit": "Create Organization"
     },
     "edit": {
-      "title": "Edit Tenant",
-      "description": "Update tenant details and status.",
+      "title": "Edit Organization",
+      "description": "Update organization details and status.",
       "submit": "Save Changes"
     },
     "form": {
-      "tenantName": "Tenant Name",
-      "tenantHost": "Tenant Host (full URL)",
-      "tenantHostPlaceholder": "https://tenant.example.com",
+      "tenantName": "Organization Name",
+      "tenantHost": "Organization Host (full URL)",
+      "tenantHostPlaceholder": "https://organization.example.com",
       "status": "Status",
       "statusPlaceholder": "Select status",
       "adminFirstName": "Admin First Name",
@@ -2776,27 +2849,28 @@
       "adminLastNameRequired": "Admin last name is required"
     },
     "toast": {
-      "tenantCreatedSuccessfully": "Tenant created successfully",
-      "tenantUpdatedSuccessfully": "Tenant updated successfully"
+      "tenantCreatedSuccessfully": "Organization created successfully",
+      "tenantUpdatedSuccessfully": "Organization updated successfully"
     }
   },
   "superAdminTenants": {
     "error": {
-      "hostAlreadyExists": "Tenant host already exists",
-      "notFound": "Tenant not found",
-      "invalidHost": "Invalid tenant host URL",
-      "managingTenantRequired": "Managing tenant admin required",
-      "currentTenantSupportNotAllowed": "Support mode is not available for the current tenant"
+      "hostAlreadyExists": "Organization host already exists",
+      "notFound": "Organization not found",
+      "invalidHost": "Invalid organization host URL",
+      "managingTenantRequired": "Managing organization admin required",
+      "currentTenantSupportNotAllowed": "Support mode is not available for the current organization"
     }
   },
   "auth": {
     "error": {
       "unauthenticated": "User not authenticated",
+      "invalidEmailOrPassword": "Invalid email or password",
       "adminRoleRequired": "Admin role required"
     }
   },
   "tenantInactive": {
-    "title": "Tenant Disabled",
+    "title": "Organization Disabled",
     "description": "This workspace is currently inactive. If you believe this is a mistake, contact your administrator to restore access."
   },
   "integrationApiKey": {

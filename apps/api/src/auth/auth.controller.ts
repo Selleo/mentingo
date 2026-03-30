@@ -33,10 +33,11 @@ import {
   type SupportModeCurrentUser,
 } from "src/common/types/current-user.type";
 import { SupportModeEnterEvent, UserActivityEvent, UserLogoutEvent } from "src/events";
+import { USER_LOGIN_METHOD } from "src/events/user/user-login.event";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { SettingsService } from "src/settings/settings.service";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
-import { baseUserResponseSchema, currentUserResponseSchema } from "src/user/schemas/user.schema";
+import { currentUserResponseSchema } from "src/user/schemas/user.schema";
 
 import { AuthService } from "./auth.service";
 import { CreateAccountBody, createAccountSchema } from "./schemas/create-account.schema";
@@ -82,11 +83,12 @@ export class AuthController {
   @Post("register")
   @Validate({
     request: [{ type: "body", schema: createAccountSchema }],
-    response: baseResponse(baseUserResponseSchema),
+    response: baseResponse(loginResponseSchema),
   })
   async register(
     data: CreateAccountBody,
-  ): Promise<BaseResponse<Static<typeof baseUserResponseSchema>>> {
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<BaseResponse<Static<typeof loginResponseSchema>>> {
     const { enforceSSO, inviteOnlyRegistration } = await this.settingsService.getGlobalSettings();
 
     if (enforceSSO) throw new UnauthorizedException("ssoEnforcementView.toast.registerRedirect");
@@ -94,9 +96,15 @@ export class AuthController {
     if (inviteOnlyRegistration)
       throw new UnauthorizedException("inviteOnlyRegistrationView.toast.registerRedirect");
 
-    const account = await this.authService.register(data);
+    await this.authService.register(data);
 
-    return new BaseResponse(account);
+    return this.authenticateAndRespond(
+      {
+        email: data.email,
+        password: data.password,
+      },
+      response,
+    );
   }
 
   @Public()
@@ -109,6 +117,13 @@ export class AuthController {
   async login(
     @Body() data: LoginBody,
     @Res({ passthrough: true }) response: Response,
+  ): Promise<BaseResponse<Static<typeof loginResponseSchema>>> {
+    return await this.authenticateAndRespond(data, response);
+  }
+
+  private async authenticateAndRespond(
+    data: LoginBody,
+    response: Response,
   ): Promise<BaseResponse<Static<typeof loginResponseSchema>>> {
     const { enforceSSO, MFAEnforcedRoles } = await this.settingsService.getGlobalSettings();
 
@@ -266,19 +281,28 @@ export class AuthController {
     @Body() data: ForgotPasswordBody,
   ): Promise<BaseResponse<{ message: string }>> {
     await this.authService.forgotPassword(data.email);
-    return new BaseResponse({ message: "Password reset link sent" });
+    return new BaseResponse({ message: "forgotPasswordView.toast.resetPassword" });
   }
 
   @Public()
   @Post("create-password")
   @Validate({
     request: [{ type: "body", schema: createPasswordSchema }],
+    response: baseResponse(loginResponseSchema),
   })
   async createPassword(
     @Body() data: CreatePasswordBody,
-  ): Promise<BaseResponse<{ message: string }>> {
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<BaseResponse<Static<typeof loginResponseSchema>>> {
     await this.authService.createPassword(data);
-    return new BaseResponse({ message: "Password created successfully" });
+
+    return this.authenticateAndRespond(
+      {
+        email: data.email,
+        password: data.password,
+      },
+      response,
+    );
   }
 
   @Public()
@@ -318,6 +342,11 @@ export class AuthController {
 
       response.redirect(this.CORS_ORIGIN);
     } catch (e) {
+      await this.authService.handleAuthFailed({
+        email: googleUser.email,
+        method: USER_LOGIN_METHOD.PROVIDER,
+        error: (e as Error)?.message,
+      });
       response.redirect(
         this.CORS_ORIGIN + "/auth/login?error=" + encodeURIComponent((e as Error).message),
       );
@@ -350,6 +379,11 @@ export class AuthController {
 
       response.redirect(this.CORS_ORIGIN);
     } catch (e) {
+      await this.authService.handleAuthFailed({
+        email: microsoftUser.email,
+        method: USER_LOGIN_METHOD.PROVIDER,
+        error: (e as Error)?.message,
+      });
       response.redirect(
         this.CORS_ORIGIN + "/auth/login?error=" + encodeURIComponent((e as Error).message),
       );
@@ -382,6 +416,11 @@ export class AuthController {
 
       response.redirect(this.CORS_ORIGIN);
     } catch (e) {
+      await this.authService.handleAuthFailed({
+        email: slackUser.email,
+        method: USER_LOGIN_METHOD.PROVIDER,
+        error: (e as Error)?.message,
+      });
       response.redirect(
         this.CORS_ORIGIN + "/auth/login?error=" + encodeURIComponent((e as Error).message),
       );

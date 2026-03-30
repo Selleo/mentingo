@@ -1,5 +1,6 @@
 import crypto from "crypto";
 
+import { createLumaClient } from "@japro/luma-sdk";
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 
@@ -168,8 +169,25 @@ export class EnvService {
     const lumaBaseUrl = process.env.LUMA_BASE_URL;
 
     const enabled = !!lumaKey && !!lumaBaseUrl;
+    if (!enabled) {
+      return {
+        enabled: false,
+        courseGenerationEnabled: false,
+        voiceMentorEnabled: false,
+      };
+    }
 
-    return { enabled };
+    const luma = createLumaClient({
+      apiKey: lumaKey,
+      baseURL: lumaBaseUrl,
+    });
+    const configuration = await luma.getConfiguration().catch(() => null);
+
+    return {
+      enabled: true,
+      courseGenerationEnabled: Boolean(configuration?.courseGeneration),
+      voiceMentorEnabled: Boolean(configuration?.voiceMentor),
+    };
   }
 
   async getEnvSetup(userId: string) {

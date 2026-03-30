@@ -1,7 +1,11 @@
-import { EmailContent, Language } from "types";
+import { SupportedLanguages } from "@repo/shared";
+import { EmailContent } from "types";
 
-export const getPasswordRecoveryEmailTranslations = (language: Language, name: string) => {
-  const emailContent: Record<Language, EmailContent> = {
+export const getPasswordRecoveryEmailTranslations = (
+  language: SupportedLanguages,
+  name: string,
+) => {
+  const emailContent: Record<SupportedLanguages, EmailContent> = {
     en: {
       heading: "Password Recovery",
       paragraphs: [
@@ -17,6 +21,30 @@ export const getPasswordRecoveryEmailTranslations = (language: Language, name: s
         "Możesz zresetować swoje hasło, klikając przycisk poniżej.",
       ],
       buttonText: "ZRESETUJ HASŁO",
+    },
+    de: {
+      heading: "Passwort-Wiederherstellung",
+      paragraphs: [
+        `Hallo ${name}, du hast das Zurücksetzen deines Passworts angefordert 🔑`,
+        "Du kannst dein Passwort über die Schaltfläche unten zurücksetzen.",
+      ],
+      buttonText: "PASSWORT ZURÜCKSETZEN",
+    },
+    lt: {
+      heading: "Slaptažodžio atkūrimas",
+      paragraphs: [
+        `Sveiki ${name}, paprašei atkurti slaptažodį 🔑`,
+        "Gali atkurti slaptažodį paspaudęs mygtuką žemiau.",
+      ],
+      buttonText: "ATKURTI SLAPTAŽODĮ",
+    },
+    cs: {
+      heading: "Obnovení hesla",
+      paragraphs: [
+        `Ahoj ${name}, požádal(a) jsi o reset hesla 🔑`,
+        "Své heslo můžeš obnovit pomocí tlačítka níže.",
+      ],
+      buttonText: "RESETOVAT HESLO",
     },
   };
 

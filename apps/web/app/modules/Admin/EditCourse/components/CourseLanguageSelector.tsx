@@ -41,6 +41,21 @@ export const courseLanguages: {
     iconName: "GB",
     translationKey: "changeUserLanguageView.options.english",
   },
+  {
+    key: "de",
+    iconName: "DE",
+    translationKey: "changeUserLanguageView.options.german",
+  },
+  {
+    key: "cs",
+    iconName: "CS",
+    translationKey: "changeUserLanguageView.options.czech",
+  },
+  {
+    key: "lt",
+    iconName: "LT",
+    translationKey: "changeUserLanguageView.options.lithuanian",
+  },
 ];
 
 type LanguageSelectorProps = {

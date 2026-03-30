@@ -88,8 +88,8 @@ const EditCourse = () => {
   } = useBetaCourseById(id, courseLanguage);
 
   const showCourseGenerationButton = useMemo(
-    () => !!isLumaConfigured?.enabled,
-    [isLumaConfigured?.enabled],
+    () => !!isLumaConfigured?.courseGenerationEnabled,
+    [isLumaConfigured?.courseGenerationEnabled],
   );
 
   const isCourseGenerationDisabled = useMemo(

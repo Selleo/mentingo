@@ -44,10 +44,10 @@ export const GlobalSearchAdminResults = ({
 
   const tabsToDisplay = useQueries({
     queries: [
-      allCoursesQueryOptions({ searchQuery: debouncedSearch }),
+      allCoursesQueryOptions({ searchQuery: debouncedSearch, language }),
       usersQueryOptions({ keyword: debouncedSearch }, { enabled: isAllowed }),
       lessonsQueryOptions(
-        { searchQuery: debouncedSearch },
+        { searchQuery: debouncedSearch, language },
         { enabled: debouncedSearch.length >= 3 },
       ),
       categoriesQueryOptions({ title: debouncedSearch }, { enabled: isAllowed }),

@@ -2,14 +2,12 @@ import { BadRequestException, Injectable, InternalServerErrorException } from "@
 import Stripe from "stripe";
 
 import { EnvService } from "src/env/services/env.service";
-import { isSupportedLocale } from "src/utils/isSupportedLocale";
 
 import type { CreateCheckoutSessionBody } from "./schemas/checkoutSession.schema";
 import type { CreatePromotionCode } from "./schemas/createPromotionCode";
 import type { PromotionCode } from "./schemas/promotionCode.schema";
 import type { UpdatePromotionCode } from "./schemas/updatePromotionCode.schema";
 import type { UUIDType } from "src/common";
-import type { SupportedLocales } from "src/common/types";
 
 @Injectable()
 export class StripeService {
@@ -65,7 +63,6 @@ export class StripeService {
       priceId,
     } = body;
 
-    const finalLocale: SupportedLocales = isSupportedLocale(locale) ? locale : "en";
     const client = await this.getClient();
 
     const session = await client.checkout.sessions.create({
@@ -79,7 +76,7 @@ export class StripeService {
       ui_mode: "embedded",
       allow_promotion_codes: allowPromotionCode,
       redirect_on_completion: "never",
-      locale: finalLocale,
+      locale,
       payment_intent_data: {
         metadata: {
           courseId,

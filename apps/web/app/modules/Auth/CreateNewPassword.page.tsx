@@ -1,10 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useSearchParams } from "@remix-run/react";
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
-import { useCreateNewPassword } from "~/api/mutations/useCreateNewPassword";
+import { useCreatePassword } from "~/api/mutations/useCreatePassword";
+import { useResetPassword } from "~/api/mutations/useResetPassword";
 import PasswordValidationDisplay from "~/components/PasswordValidation/PasswordValidationDisplay";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
@@ -13,7 +15,7 @@ import { Label } from "~/components/ui/label";
 import { useToast } from "~/components/ui/use-toast";
 import { cn } from "~/lib/utils";
 import { passwordSchema } from "~/modules/Dashboard/Settings/schema/password.schema";
-import { detectBrowserLanguage, SUPPORTED_LANGUAGES } from "~/utils/browser-language";
+import { detectBrowserLanguage } from "~/utils/browser-language";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import type { MetaFunction } from "@remix-run/react";
@@ -43,9 +45,8 @@ export default function CreateNewPasswordPage() {
   const resetToken = searchParams.get("resetToken");
   const createToken = searchParams.get("createToken");
   const email = searchParams.get("email");
-  const { mutateAsync: createNewPassword } = useCreateNewPassword({
-    isCreate: !resetToken,
-  });
+  const { mutateAsync: createPassword } = useCreatePassword();
+  const { mutateAsync: resetPassword } = useResetPassword();
   const { t } = useTranslation();
 
   const methods = useForm<CreateNewPasswordFormValues>({
@@ -73,7 +74,7 @@ export default function CreateNewPasswordPage() {
     }
 
     if (resetToken) {
-      createNewPassword({
+      resetPassword({
         data: { newPassword: data.newPassword, resetToken, email },
       }).then(() => {
         toast({
@@ -84,20 +85,19 @@ export default function CreateNewPasswordPage() {
     }
 
     if (createToken) {
-      createNewPassword({
+      createPassword({
         data: {
           password: data.newPassword,
           createToken,
           email,
-          language: SUPPORTED_LANGUAGES.includes(detectBrowserLanguage())
+          language: Object.values(SUPPORTED_LANGUAGES).includes(detectBrowserLanguage())
             ? detectBrowserLanguage()
-            : "en",
+            : SUPPORTED_LANGUAGES.EN,
         },
       }).then(() => {
         toast({
           description: t("changePasswordView.toast.passwordCreatedSuccessfully"),
         });
-        navigate("/auth/login");
       });
     }
   };

@@ -89,7 +89,7 @@ export default function NewsDetailsPage() {
           <div className="flex justify-end gap-2 max-w-6xl mx-auto w-full">
             <Button
               variant="outline"
-              className="w-28 gap-2"
+              className="gap-2"
               onClick={() => {
                 navigate(`/news/${news.id}/edit`);
               }}

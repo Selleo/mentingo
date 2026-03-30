@@ -21,12 +21,10 @@ WORKDIR /app
 COPY . .
 
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install
-RUN pnpm --filter="@repo/shared" run build
+RUN pnpm -w packages:build
 RUN pnpm build --filter=web
 # TODO: Move pnpm deploy to turbo prune workflow
 RUN pnpm deploy --filter=web pnpm-deploy-output --prod
-
-RUN npm run build
 
 FROM nginx:1.27.1
 COPY ./apps/web/nginx.conf /etc/nginx/nginx.conf

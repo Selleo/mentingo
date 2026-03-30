@@ -10,7 +10,6 @@ import { ApiClient } from "../api-client";
 import { userSettingsQueryOptions } from "../queries/useUserSettings";
 
 import type { UpdateUserSettingsBody } from "../generated-api";
-import type { Language } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 export function useChangeLanguage() {
   const { toast } = useToast();
@@ -23,7 +22,9 @@ export function useChangeLanguage() {
 
       return response.data;
     },
-    onSuccess: (data) => {
+    onSuccess: (response) => {
+      const { data } = response;
+
       queryClient.invalidateQueries({
         queryKey: userSettingsQueryOptions.queryKey,
       });
@@ -31,9 +32,9 @@ export function useChangeLanguage() {
       queryClient.invalidateQueries({ queryKey: [COURSE_QUERY_KEY] });
       queryClient.invalidateQueries({ queryKey: [QA_QUERY_KEY] });
 
-      if (data && "language" in data && data.language) {
-        setLanguage(data.language as Language);
-      }
+      const language = data?.language;
+
+      if (language) setLanguage(language);
     },
     onError: (error) => {
       if (error instanceof AxiosError) {

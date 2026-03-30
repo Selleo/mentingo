@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { AI_MENTOR_TYPE } from "@repo/shared";
+import { AI_MENTOR_TTS_PRESET, AI_MENTOR_TYPE, AI_MENTOR_VOICE_MODE } from "@repo/shared";
 import { Factory } from "fishery";
 
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
@@ -44,6 +44,9 @@ export const createAiMentorLessonFactory = (db: DatabasePg) => {
           aiMentorInstructions: aiMentorLesson.aiMentorInstructions,
           completionConditions: aiMentorLesson.completionConditions,
           type: aiMentorLesson.type,
+          voiceMode: aiMentorLesson.voiceMode,
+          ttsPreset: aiMentorLesson.ttsPreset,
+          customTtsReference: aiMentorLesson.customTtsReference,
         })
         .returning();
 
@@ -60,6 +63,9 @@ export const createAiMentorLessonFactory = (db: DatabasePg) => {
       type: AI_MENTOR_TYPE.MENTOR,
       name: "AI Mentor",
       avatarReference: null,
+      voiceMode: AI_MENTOR_VOICE_MODE.PRESET,
+      ttsPreset: AI_MENTOR_TTS_PRESET.MALE,
+      customTtsReference: null,
     };
   });
 };
