@@ -18,7 +18,7 @@
 ## Segment 3: Permission Matrix / Constants Alignment
 
 - [x] Add explicit learning mode permission in shared constants
-- [x] Ensure learning mode permission is granted to Student, Content Creator, Admin system roles
+- [x] Ensure learning mode permission is granted to Content Creator and Admin system roles (student-mode use case)
 - [x] Add learning mode row to `docs/permission-matrix.md`
 - [x] Checkpoint complete
 
