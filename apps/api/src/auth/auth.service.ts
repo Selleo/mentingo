@@ -1041,9 +1041,9 @@ export class AuthService {
       .where(and(eq(users.email, data.email), isNull(users.deletedAt)))
       .limit(1);
 
-    const userAcesses = await this.permissionsService.getUserAccess(user.id);
-
     if (!user) return;
+
+    const userAcesses = await this.permissionsService.getUserAccess(user.id);
 
     await this.handleFailedLogin({
       userId: user.id,

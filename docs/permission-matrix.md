@@ -28,8 +28,8 @@ Legend:
 | `env.manage`           |      No |              No |   Yes | Secrets/configuration management |
 | `category.read`        |     Yes |             Yes |   Yes | Category reads                   |
 | `category.manage`      |      No |             Yes |   Yes | Category CRUD                    |
-| `group.read`           |      No |             Yes |   Yes | Group reads/listing              |
-| `group.manage`         |      No |             Yes |   Yes | Group CRUD/membership            |
+| `group.read`           |      No |              No |   Yes | Group reads/listing              |
+| `group.manage`         |      No |              No |   Yes | Group CRUD/membership            |
 
 ## Courses & Learning
 
