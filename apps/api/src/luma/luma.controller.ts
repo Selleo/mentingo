@@ -27,7 +27,7 @@ import { Validate } from "nestjs-typebox";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { PermissionsGuard } from "src/common/guards/permissions.guard";
-import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
+import { CurrentUserType } from "src/common/types/current-user.type";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
 import { LumaService } from "src/luma/luma.service";
@@ -78,6 +78,8 @@ export class LumaController {
 
         if (transformedChunk) res.write(transformedChunk);
       }
+
+      await this.lumaService.flushPendingIngestions(streamState, currentUser);
 
       res.end();
     } catch (err) {

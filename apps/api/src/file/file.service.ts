@@ -58,7 +58,7 @@ import type {
 } from "./video-storage-provider";
 import type { Static, TSchema } from "@sinclair/typebox";
 import type { UUIDType } from "src/common";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 import type {
   UploadResourceParams,
   CreateResourceForEntityParams,
@@ -724,7 +724,11 @@ export class FileService {
     return { success: true };
   }
 
-  async getThumbnail(sourceUrl: string, provider: VideoProvider, currentUser: CurrentUser | null) {
+  async getThumbnail(
+    sourceUrl: string,
+    provider: VideoProvider,
+    currentUser: CurrentUserType | null,
+  ) {
     return this.thumbnailService.getThumbnail(sourceUrl, provider, currentUser);
   }
 }

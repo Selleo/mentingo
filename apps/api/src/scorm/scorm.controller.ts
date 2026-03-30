@@ -20,7 +20,7 @@ import { Validate } from "nestjs-typebox";
 import { baseResponse, BaseResponse, UUIDSchema, UUIDType } from "src/common";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { PermissionsGuard } from "src/common/guards/permissions.guard";
-import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
+import { CurrentUserType } from "src/common/types/current-user.type";
 
 import { scormMetadataSchema, scormUploadResponseSchema } from "./schemas/scorm.schema";
 import { ScormService } from "./services/scorm.service";

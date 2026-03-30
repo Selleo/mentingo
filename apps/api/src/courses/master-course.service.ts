@@ -26,7 +26,7 @@ import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { chapters, courses, lessons, questionAnswerOptions, questions } from "src/storage/schema";
 
 import type { UUIDType } from "src/common";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 import type {
   MasterCourseExportBody,
   MasterCourseExportCandidatesResponse,
@@ -52,7 +52,7 @@ export class MasterCourseService {
   async exportCourseToTenants(
     sourceCourseId: UUIDType,
     body: MasterCourseExportBody,
-    actor: CurrentUser,
+    actor: CurrentUserType,
   ): Promise<MasterCourseExportResponse> {
     await this.assertManagingTenantAdmin(actor);
 
@@ -102,7 +102,7 @@ export class MasterCourseService {
 
   async getCourseExports(
     sourceCourseId: UUIDType,
-    actor: CurrentUser,
+    actor: CurrentUserType,
   ): Promise<MasterCourseExportLink[]> {
     await this.assertManagingTenantAdmin(actor);
 
@@ -114,7 +114,7 @@ export class MasterCourseService {
 
   async getCourseExportCandidates(
     sourceCourseId: UUIDType,
-    actor: CurrentUser,
+    actor: CurrentUserType,
   ): Promise<MasterCourseExportCandidatesResponse> {
     await this.assertManagingTenantAdmin(actor);
 
@@ -918,7 +918,7 @@ export class MasterCourseService {
     };
   }
 
-  private async assertManagingTenantAdmin(actor: CurrentUser) {
+  private async assertManagingTenantAdmin(actor: CurrentUserType) {
     if (!hasPermission(actor.permissions, PERMISSIONS.TENANT_MANAGE))
       throw new ForbiddenException("auth.error.adminRoleRequired");
 

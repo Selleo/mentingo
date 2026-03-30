@@ -34,7 +34,7 @@ import { Validate } from "nestjs-typebox";
 import { baseResponse, BaseResponse, UUIDSchema, type UUIDType } from "src/common";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
-import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
+import { CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { MAX_VIDEO_SIZE } from "src/file/file.constants";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";

@@ -39,7 +39,7 @@ import {
 import { BASE_THUMBNAIL_CONTENT_TYPE, getVideoThumbnailKey } from "./utils/videoThumbnail";
 
 import type { UUIDType } from "src/common";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 
 @Injectable()
 export class ThumbnailService {
@@ -49,7 +49,11 @@ export class ThumbnailService {
     @Inject("DB") private readonly db: DatabasePg,
   ) {}
 
-  async getThumbnail(sourceUrl: string, provider: VideoProvider, currentUser: CurrentUser | null) {
+  async getThumbnail(
+    sourceUrl: string,
+    provider: VideoProvider,
+    currentUser: CurrentUserType | null,
+  ) {
     if (!sourceUrl) throw new BadRequestException("Missing sourceUrl");
 
     const resolvedProvider =
@@ -62,7 +66,7 @@ export class ThumbnailService {
     return this.getExternalThumbnail(sourceUrl, resolvedProvider);
   }
 
-  private async getInternalThumbnail(sourceUrl: string, currentUser: CurrentUser | null) {
+  private async getInternalThumbnail(sourceUrl: string, currentUser: CurrentUserType | null) {
     const resourceId = extractResourceIdFromSourceUrl(sourceUrl);
     if (!resourceId) throw new BadRequestException("Invalid sourceUrl");
 
@@ -125,7 +129,7 @@ export class ThumbnailService {
 
   private async validateThumbnailAccess(
     resource: { entityType: string; entityId: UUIDType },
-    currentUser: CurrentUser | null,
+    currentUser: CurrentUserType | null,
   ) {
     switch (resource.entityType) {
       case ENTITY_TYPES.ARTICLES:
@@ -151,7 +155,7 @@ export class ThumbnailService {
     return (globalSettings?.settings ?? {}) as Record<string, unknown>;
   }
 
-  private canManagePublishedContent(currentUser: CurrentUser | null) {
+  private canManagePublishedContent(currentUser: CurrentUserType | null) {
     if (!currentUser) return false;
 
     return (
@@ -174,7 +178,7 @@ export class ThumbnailService {
 
   private async validateArticleThumbnailAccess(
     resourceEntityId: UUIDType,
-    currentUser: CurrentUser | null,
+    currentUser: CurrentUserType | null,
   ) {
     const { articlesEnabled, unregisteredUserArticlesAccessibility } =
       await this.getGlobalSettingsFlags();
@@ -212,7 +216,7 @@ export class ThumbnailService {
 
   private async validateNewsThumbnailAccess(
     resourceEntityId: UUIDType,
-    currentUser: CurrentUser | null,
+    currentUser: CurrentUserType | null,
   ) {
     const { newsEnabled, unregisteredUserNewsAccessibility } = await this.getGlobalSettingsFlags();
 
@@ -249,7 +253,7 @@ export class ThumbnailService {
 
   private async validateLessonThumbnailAccess(
     resourceEntityId: UUIDType,
-    currentUser: CurrentUser | null,
+    currentUser: CurrentUserType | null,
   ) {
     const currentUserId = currentUser?.userId;
 

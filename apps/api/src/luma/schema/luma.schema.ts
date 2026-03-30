@@ -68,6 +68,7 @@ export type GeneratedLesson = {
   generation: GeneratedCourseResponse["chapters"][number]["lessons"][number];
   chapterIndex: number;
   lessonIndex: number;
+  relevantContext?: string;
 };
 
 export type GeneratedAssetPayload = {

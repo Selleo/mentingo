@@ -1,8 +1,8 @@
 import type { DatabasePg } from "src/common";
-import type { CurrentUser, SupportModeCurrentUser } from "src/common/types/current-user.type";
+import type { CurrentUserType, SupportModeCurrentUser } from "src/common/types/current-user.type";
 
 export const isSupportModeSession = (
-  currentUser: CurrentUser | null | undefined,
+  currentUser: CurrentUserType | null | undefined,
 ): currentUser is SupportModeCurrentUser => {
   return Boolean(
     currentUser?.isSupportMode &&
@@ -13,7 +13,7 @@ export const isSupportModeSession = (
 };
 
 export const getSupportModeContext = (
-  currentUser: CurrentUser,
+  currentUser: CurrentUserType,
   db: DatabasePg,
   dbAdmin: DatabasePg,
 ): {
@@ -39,6 +39,6 @@ export const getSupportModeContext = (
   };
 };
 
-export const shouldEmitUserScopedEvents = (currentUser: CurrentUser): boolean => {
+export const shouldEmitUserScopedEvents = (currentUser: CurrentUserType): boolean => {
   return !isSupportModeSession(currentUser);
 };

@@ -29,7 +29,7 @@ import type { InferSelectModel } from "drizzle-orm";
 import type { Request, Response } from "express";
 import type { NewsActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 
 // News uses a custom pagination: first page shows up to 7 items, following pages up to 9.
 const FIRST_PAGE_SIZE = 7;
@@ -48,7 +48,7 @@ export class NewsService {
     private readonly settingsService: SettingsService,
   ) {}
 
-  async createNews(createNewsBody: CreateNews, currentUser: CurrentUser) {
+  async createNews(createNewsBody: CreateNews, currentUser: CurrentUserType) {
     await this.checkAccess(currentUser?.userId);
 
     const { language } = createNewsBody;
@@ -85,7 +85,7 @@ export class NewsService {
   async updateNews(
     newsId: UUIDType,
     updateNewsBody: UpdateNews,
-    currentUser?: CurrentUser,
+    currentUser?: CurrentUserType,
     coverFile?: Express.Multer.File,
   ) {
     await this.checkAccess(currentUser?.userId);
@@ -162,7 +162,7 @@ export class NewsService {
   async getNewsList(
     requestedLanguage: SupportedLanguages,
     page = 1,
-    currentUser?: CurrentUser,
+    currentUser?: CurrentUserType,
     searchQuery?: string,
   ) {
     await this.checkAccess(currentUser?.userId);
@@ -226,7 +226,7 @@ export class NewsService {
   async getDraftNewsList(
     requestedLanguage: SupportedLanguages,
     page = 1,
-    currentUser?: CurrentUser,
+    currentUser?: CurrentUserType,
   ) {
     await this.checkAccess(currentUser?.userId);
 
@@ -280,7 +280,7 @@ export class NewsService {
   async deleteNewsLanguage(
     newsId: UUIDType,
     language: SupportedLanguages,
-    currentUser?: CurrentUser,
+    currentUser?: CurrentUserType,
   ) {
     await this.checkAccess(currentUser?.userId);
 
@@ -330,7 +330,7 @@ export class NewsService {
     return updatedNews;
   }
 
-  async deleteNews(newsId: UUIDType, currentUser?: CurrentUser) {
+  async deleteNews(newsId: UUIDType, currentUser?: CurrentUserType) {
     await this.checkAccess(currentUser?.userId);
 
     const existingNews = await this.validateNewsExists(newsId, undefined, false);
@@ -366,7 +366,7 @@ export class NewsService {
   async getNews(
     newsId: UUIDType,
     requestedLanguage: SupportedLanguages,
-    currentUser?: CurrentUser,
+    currentUser?: CurrentUserType,
   ) {
     await this.checkAccess(currentUser?.userId);
 
@@ -493,7 +493,7 @@ export class NewsService {
     currentNewsId: UUIDType,
     referenceDate: string | null,
     language: SupportedLanguages,
-    currentUser?: CurrentUser,
+    currentUser?: CurrentUserType,
   ) {
     if (!referenceDate) {
       return { nextNews: null, previousNews: null };
@@ -529,7 +529,7 @@ export class NewsService {
   async createNewsLanguage(
     newsId: UUIDType,
     createNewsBody: CreateNews,
-    currentUser?: CurrentUser,
+    currentUser?: CurrentUserType,
   ) {
     await this.checkAccess(currentUser?.userId);
 
@@ -579,7 +579,7 @@ export class NewsService {
     language: SupportedLanguages,
     title: string,
     description: string,
-    currentUser?: CurrentUser,
+    currentUser?: CurrentUserType,
   ) {
     await this.checkAccess(currentUser?.userId);
 
@@ -615,7 +615,7 @@ export class NewsService {
     language: SupportedLanguages,
     title: string,
     description: string,
-    currentUser?: CurrentUser,
+    currentUser?: CurrentUserType,
   ) {
     await this.checkAccess(currentUser?.userId);
 
@@ -701,7 +701,7 @@ export class NewsService {
     newsId: UUIDType,
     language: SupportedLanguages,
     content: string,
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
   ): Promise<string> {
     await this.checkAccess(currentUser?.userId);
     await this.validateNewsExists(newsId, language);
@@ -782,7 +782,7 @@ export class NewsService {
 
   private getVisibleNewsConditions(
     language: SupportedLanguages,
-    currentUser?: CurrentUser,
+    currentUser?: CurrentUserType,
     excludedId?: UUIDType,
   ) {
     return this.getNewsAccessConditions(language, currentUser, {
@@ -793,7 +793,7 @@ export class NewsService {
 
   private getNewsAccessConditions(
     language: SupportedLanguages,
-    currentUser?: CurrentUser,
+    currentUser?: CurrentUserType,
     options?: { excludedId?: UUIDType; requirePublished?: boolean },
   ) {
     const isAdminLike = hasAnyPermission(currentUser?.permissions, [

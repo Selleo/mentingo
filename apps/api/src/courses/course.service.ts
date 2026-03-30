@@ -154,7 +154,7 @@ import type { SQL } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import type { CourseActivityLogSnapshot } from "src/activity-logs/types";
 import type { Pagination, UUIDType } from "src/common";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { CourseTranslationType } from "src/courses/types/course.types";
 import type { DurationEstimatesByCourse } from "src/courses/types/duration";
 import type {
@@ -1579,7 +1579,7 @@ export class CourseService {
   async updateHasCertificate(
     courseId: UUIDType,
     hasCertificate: boolean,
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
   ) {
     const [course] = await this.db.select().from(courses).where(eq(courses.id, courseId));
 
@@ -1629,7 +1629,7 @@ export class CourseService {
   async updateCourseSettings(
     courseId: UUIDType,
     settings: UpdateCourseSettings,
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
     certificateSignature?: Express.Multer.File | null,
   ) {
     await this.masterCourseService.assertCourseContentEditable(courseId);
@@ -1721,7 +1721,7 @@ export class CourseService {
 
   async createCourse(
     createCourseBody: CreateCourseBody,
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
     isPlaywrightTest: boolean,
   ) {
     const newCourse = await this.db.transaction(async (trx) => {
@@ -1815,7 +1815,7 @@ export class CourseService {
   async updateCourse(
     id: UUIDType,
     updateCourseBody: UpdateCourseBody,
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
     isPlaywrightTest: boolean,
     image?: Express.Multer.File,
   ) {
@@ -1997,7 +1997,7 @@ export class CourseService {
     return updatedCourse;
   }
 
-  async deleteCourseTrailer(courseId: UUIDType, currentUser: CurrentUser) {
+  async deleteCourseTrailer(courseId: UUIDType, currentUser: CurrentUserType) {
     const [course] = await this.db
       .select({ id: courses.id, authorId: courses.authorId })
       .from(courses)
@@ -2036,7 +2036,7 @@ export class CourseService {
     studentId: UUIDType,
     testKey?: string,
     paymentId?: string,
-    currentUser?: CurrentUser,
+    currentUser?: CurrentUserType,
   ) {
     const [course] = await this.db
       .select({
@@ -2086,7 +2086,11 @@ export class CourseService {
     }
   }
 
-  async enrollCourses(courseId: UUIDType, body: CreateCoursesEnrollment, currentUser: CurrentUser) {
+  async enrollCourses(
+    courseId: UUIDType,
+    body: CreateCoursesEnrollment,
+    currentUser: CurrentUserType,
+  ) {
     const { studentIds } = body;
 
     const courseExists = await this.db.select().from(courses).where(eq(courses.id, courseId));
@@ -4023,7 +4027,7 @@ export class CourseService {
   async generateMissingTranslations(
     courseId: UUIDType,
     language: SupportedLanguages,
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
   ) {
     await this.masterCourseService.assertCourseContentEditable(courseId);
 

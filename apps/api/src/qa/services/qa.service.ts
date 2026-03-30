@@ -11,7 +11,7 @@ import { SettingsService } from "src/settings/settings.service";
 
 import type { SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { CreateQABody, QAUpdateBody } from "src/qa/schemas/qa.schema";
 
 @Injectable()
@@ -23,7 +23,7 @@ export class QAService {
     private readonly outboxPublisher: OutboxPublisher,
   ) {}
 
-  async createQA(data: CreateQABody, currentUser: CurrentUser) {
+  async createQA(data: CreateQABody, currentUser: CurrentUserType) {
     await this.checkAccess(currentUser.userId);
 
     const [qa] = await this.qaRepository.createQA(data, { createdBy: currentUser.userId });
@@ -49,7 +49,7 @@ export class QAService {
     return this.qaRepository.getAllQA(language, searchQuery);
   }
 
-  async createLanguage(qaId: UUIDType, language: SupportedLanguages, currentUser: CurrentUser) {
+  async createLanguage(qaId: UUIDType, language: SupportedLanguages, currentUser: CurrentUserType) {
     await this.checkAccess(currentUser.userId);
 
     const qa = await this.qaRepository.getQA(qaId, language);
@@ -80,7 +80,7 @@ export class QAService {
     data: QAUpdateBody,
     qaId: UUIDType,
     language: SupportedLanguages,
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
   ) {
     await this.checkAccess(currentUser.userId);
 
@@ -107,7 +107,7 @@ export class QAService {
     return updatedQA;
   }
 
-  async deleteQA(qaId: UUIDType, currentUser: CurrentUser) {
+  async deleteQA(qaId: UUIDType, currentUser: CurrentUserType) {
     await this.checkAccess(currentUser.userId);
 
     const { baseLanguage } = await this.localizationService.getBaseLanguage(ENTITY_TYPE.QA, qaId);
@@ -127,7 +127,7 @@ export class QAService {
     return this.qaRepository.deleteQA(qaId);
   }
 
-  async deleteLanguage(qaId: UUIDType, language: SupportedLanguages, currentUser: CurrentUser) {
+  async deleteLanguage(qaId: UUIDType, language: SupportedLanguages, currentUser: CurrentUserType) {
     await this.checkAccess(currentUser.userId);
 
     const qa = await this.qaRepository.getQA(qaId, language);

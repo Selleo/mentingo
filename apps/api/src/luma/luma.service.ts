@@ -1,3 +1,5 @@
+import { Readable } from "stream";
+
 import { createLumaClient } from "@japro/luma-sdk";
 import {
   BadRequestException,
@@ -5,6 +7,7 @@ import {
   HttpException,
   Inject,
   Injectable,
+  Logger,
   NotFoundException,
   ServiceUnavailableException,
   UnauthorizedException,
@@ -20,6 +23,7 @@ import { AdminChapterRepository } from "src/chapter/repositories/adminChapter.re
 import { DatabasePg } from "src/common";
 import { resolveTenantOrigin } from "src/common/helpers/resolveTenantOrigin";
 import { EnvService } from "src/env/services/env.service";
+import { IngestionService } from "src/ingestion/services/ingestion.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
 import { LocalizationService } from "src/localization/localization.service";
@@ -38,7 +42,7 @@ import type {
 } from "@japro/luma-sdk";
 import type { SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { AdminLessonWithContentSchema } from "src/lesson/lesson.schema";
 import type {
   GeneratedAssetPayload,
@@ -53,11 +57,12 @@ type StreamState = {
   chapterByEventKey: Map<string, CreatedChapter>;
   lessonByEventKey: Map<string, { type: string; lesson: Record<string, unknown> }>;
   lessonIdsWithAssets: Set<UUIDType>;
+  pendingIngestions: Array<{ lessonId: UUIDType; relevantContext: string }>;
 };
 
 type ChunkContext = {
   integrationId: UUIDType;
-  currentUser: CurrentUser;
+  currentUser: CurrentUserType;
   state: StreamState;
 };
 
@@ -65,6 +70,8 @@ type LumaClient = ReturnType<typeof createLumaClient>;
 
 @Injectable()
 export class LumaService {
+  private readonly logger = new Logger(LumaService.name);
+
   constructor(
     @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
     private readonly envService: EnvService,
@@ -72,6 +79,7 @@ export class LumaService {
     private readonly adminChapterService: AdminChapterService,
     private readonly adminChapterRepository: AdminChapterRepository,
     private readonly localizationService: LocalizationService,
+    private readonly ingestionService: IngestionService,
   ) {}
 
   async getLumaClient() {
@@ -91,7 +99,7 @@ export class LumaService {
     });
   }
 
-  async getDraft(data: CreateDraftOptions, currentUser: CurrentUser) {
+  async getDraft(data: CreateDraftOptions, currentUser: CurrentUserType) {
     const luma = await this.getAuthorizedLumaClient(data.integrationId, currentUser);
     const draft = await luma.getDraft(data).catch((error) => {
       if (isAxiosError(error) && error.response?.status === 404) {
@@ -120,7 +128,7 @@ export class LumaService {
 
   async chatWithCourseAgent(
     data: ChatOptions,
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
   ): Promise<Awaited<ReturnType<LumaClient["chat"]>>> {
     const luma = await this.getAuthorizedLumaClient(data.integrationId, currentUser, {
       ensureCourseHasNoChapters: true,
@@ -129,7 +137,7 @@ export class LumaService {
     return this.withLumaErrorHandling(() => luma.chat(data));
   }
 
-  async getCourseGenerationMessages(data: IntegrationIdOptions, currentUser: CurrentUser) {
+  async getCourseGenerationMessages(data: IntegrationIdOptions, currentUser: CurrentUserType) {
     const luma = await this.getAuthorizedLumaClient(data.integrationId, currentUser);
 
     return this.withLumaErrorHandling(() => luma.getDraftMessages(data));
@@ -138,7 +146,7 @@ export class LumaService {
   async ingestCourseGenerationFiles(
     data: IntegrationIdOptions,
     files: Express.Multer.File[],
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
   ): Promise<IngestDraftFileResponse[]> {
     const luma = await this.getAuthorizedLumaClient(data.integrationId, currentUser, {
       ensureCourseHasNoChapters: true,
@@ -163,7 +171,10 @@ export class LumaService {
     return responses;
   }
 
-  async deleteCourseGenerationFile(data: DeleteIngestedDocumentOptions, currentUser: CurrentUser) {
+  async deleteCourseGenerationFile(
+    data: DeleteIngestedDocumentOptions,
+    currentUser: CurrentUserType,
+  ) {
     const luma = await this.getAuthorizedLumaClient(data.integrationId, currentUser, {
       ensureCourseHasNoChapters: true,
     });
@@ -171,7 +182,7 @@ export class LumaService {
     return this.withLumaErrorHandling(() => luma.deleteIngestedDocument(data));
   }
 
-  async getCourseGenerationFiles(data: IntegrationIdOptions, currentUser: CurrentUser) {
+  async getCourseGenerationFiles(data: IntegrationIdOptions, currentUser: CurrentUserType) {
     const luma = await this.getAuthorizedLumaClient(data.integrationId, currentUser);
 
     return this.withLumaErrorHandling(() => luma.getDraftFiles(data));
@@ -183,7 +194,28 @@ export class LumaService {
       chapterByEventKey: new Map<string, CreatedChapter>(),
       lessonByEventKey: new Map<string, { type: string; lesson: Record<string, unknown> }>(),
       lessonIdsWithAssets: new Set(),
+      pendingIngestions: [],
     };
+  }
+
+  async flushPendingIngestions(state: StreamState, currentUser: CurrentUserType) {
+    let successfulCount = 0;
+    let failedCount = 0;
+
+    for (const pending of state.pendingIngestions) {
+      const file = this.buildMulterTextFile(pending.relevantContext, "generated-context.txt");
+
+      try {
+        await this.ingestionService.ingestInline(pending.lessonId, [file], currentUser);
+        successfulCount += 1;
+      } catch {
+        failedCount += 1;
+      }
+    }
+
+    this.logger.log(
+      `Deferred ingestion flush completed: successful=${successfulCount}, failed=${failedCount}`,
+    );
   }
 
   async handleChunk(chunk: Buffer, context?: ChunkContext) {
@@ -281,7 +313,7 @@ export class LumaService {
   private async handleLessonGeneratedPayload(payload: GeneratedLesson, context: ChunkContext) {
     const {
       currentUser,
-      state: { chapterIdsByIndex, lessonByEventKey, lessonIdsWithAssets },
+      state: { chapterIdsByIndex, lessonByEventKey, lessonIdsWithAssets, pendingIngestions },
     } = context;
 
     const lessonEventKey = this.buildLessonEventKey(payload);
@@ -291,7 +323,13 @@ export class LumaService {
     const chapterId = chapterIdsByIndex.get(payload.chapterIndex);
     if (!chapterId) return payload;
 
-    const lesson = await this.saveGeneratedLesson(chapterId, payload.generation, currentUser);
+    const lesson = await this.saveGeneratedLesson(
+      chapterId,
+      payload.generation,
+      currentUser,
+      pendingIngestions,
+      payload.relevantContext,
+    );
 
     if (payload.generation.assets.length > 0) {
       lessonIdsWithAssets.add(lesson.id);
@@ -346,7 +384,7 @@ export class LumaService {
     },
     assetMap: Map<string, string>,
     baseUrl: string,
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
   ) {
     if (!lesson.description) return;
 
@@ -405,7 +443,9 @@ export class LumaService {
   private async saveGeneratedLesson(
     chapterId: UUIDType,
     lesson: GeneratedCourseResponse["chapters"][number]["lessons"][number],
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
+    pendingIngestions: Array<{ lessonId: UUIDType; relevantContext: string }>,
+    relevantContext?: string,
   ): Promise<AdminLessonWithContentSchema> {
     const lessonTitle = this.sanitizeText(lesson.title?.trim() || "Generated lesson");
     const lessonType = this.resolveGeneratedLessonType(lesson);
@@ -427,6 +467,10 @@ export class LumaService {
         },
         currentUser,
       );
+
+      if (relevantContext) {
+        pendingIngestions.push({ lessonId, relevantContext });
+      }
     } else if (lessonType === LESSON_TYPES.QUIZ) {
       const questions = (lesson.questions ?? []).map((question, questionIndex) => ({
         type: this.mapQuestionType(question.type),
@@ -518,7 +562,7 @@ export class LumaService {
     chapterId: UUIDType,
     title: string,
     description: string,
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
   ) {
     return this.adminLessonService.createLessonForChapter(
       {
@@ -533,6 +577,23 @@ export class LumaService {
 
   private sanitizeText(value: string): string {
     return value.replace(/\u0000/g, "");
+  }
+
+  private buildMulterTextFile(content: string, filename: string): Express.Multer.File {
+    const buffer = Buffer.from(content, "utf-8");
+
+    return {
+      fieldname: "file",
+      originalname: filename,
+      encoding: "7bit",
+      mimetype: "text/plain",
+      size: buffer.length,
+      buffer,
+      destination: "",
+      filename,
+      path: "",
+      stream: Readable.from(buffer),
+    } as Express.Multer.File;
   }
 
   private parseDataChunk(chunkString: string): unknown[] {
@@ -603,13 +664,13 @@ export class LumaService {
     }
   }
 
-  private async validateCourseAccess(integrationId: string, currentUser: CurrentUser) {
+  private async validateCourseAccess(integrationId: string, currentUser: CurrentUserType) {
     await this.adminLessonService.validateAccess(ENTITY_TYPE.COURSE, currentUser, integrationId);
   }
 
   private async getAuthorizedLumaClient(
     integrationId: UUIDType,
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
     options?: { ensureCourseHasNoChapters?: boolean },
   ) {
     await this.validateCourseAccess(integrationId, currentUser);

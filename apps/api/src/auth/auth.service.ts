@@ -17,10 +17,7 @@ import {
   PasswordRecoveryEmail,
 } from "@repo/email-templates";
 import {
-  PERMISSIONS,
   SUPPORTED_LANGUAGES,
-  SYSTEM_ROLE_SLUGS,
-  type PermissionKey,
   type SupportedLanguages,
 } from "@repo/shared";
 import * as bcrypt from "bcryptjs";
@@ -69,7 +66,6 @@ import type { CreatePasswordBody } from "./schemas/create-password.schema";
 import type { AuthFailedData, RegisterUserWithHashedPasswordInput, TokenUser } from "./types";
 import type { Response } from "express";
 import type { ActorUserType } from "src/common/types/actor-user.type";
-import type { CurrentUser } from "src/common/types/current-user.type";
 import type { UserLoginFailedData } from "src/events/user/user-login-failed-event";
 import type { RegistrationFormField } from "src/settings/schemas/registration-form.schema";
 import type { SupportSession } from "src/support-mode/support-mode.types";
@@ -288,7 +284,7 @@ export class AuthService {
     };
   }
 
-  public async currentUser(currentUser: CurrentUser) {
+  public async currentUser(currentUser: CurrentUserType) {
     const { isSupportMode, dbInstance, sourceUserId, sourceTenantId } = getSupportModeContext(
       currentUser,
       this.db,
@@ -343,7 +339,7 @@ export class AuthService {
   }
 
   private async resolveSupportModeCurrentUser(
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
     sourceUserId: UUIDType,
     sourceTenantId: UUIDType,
     dbInstance: DatabasePg,
@@ -408,7 +404,7 @@ export class AuthService {
 
       const { roleSlugs, permissions } = await this.permissionsService.getUserAccess(user.id);
 
-      const actor: CurrentUser = {
+      const actor: CurrentUserType = {
         userId: user.id,
         email: user.email,
         roleSlugs,

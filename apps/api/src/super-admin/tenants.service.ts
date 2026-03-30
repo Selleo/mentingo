@@ -25,7 +25,7 @@ import type {
   UpdateTenantBody,
 } from "./types";
 import type { PaginatedResponse } from "src/common";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 
 @Injectable()
 export class TenantsService {
@@ -62,7 +62,7 @@ export class TenantsService {
     };
   }
 
-  async createTenant(input: CreateTenantBody, actor: CurrentUser) {
+  async createTenant(input: CreateTenantBody, actor: CurrentUserType) {
     const host = this.normalizeHost(input.host);
 
     const existing = await this.tenantsRepository.findIdByHost(host);

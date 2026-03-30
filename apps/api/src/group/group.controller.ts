@@ -13,7 +13,7 @@ import {
 } from "src/common";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
-import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
+import { CurrentUserType } from "src/common/types/current-user.type";
 import {
   allGroupsSchema,
   baseGroupSchema,

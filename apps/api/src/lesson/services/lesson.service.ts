@@ -55,7 +55,7 @@ import type {
 import type { EnrolledLessonWithSearch } from "../repositories/lesson.repository";
 import type { Request, Response } from "express";
 import type { UUIDType } from "src/common";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 
 @Injectable()
 export class LessonService {
@@ -530,7 +530,7 @@ export class LessonService {
   }
 
   async getLessons(
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
     filters: LessonsFilters,
     language: SupportedLanguages,
   ): Promise<EnrolledLessonWithSearch[]> {

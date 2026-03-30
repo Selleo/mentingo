@@ -30,7 +30,7 @@ import type { INestApplication } from "@nestjs/common";
 import type { Response } from "express";
 import type { CreateChapterBody } from "src/chapter/schemas/chapter.schema";
 import type { DatabasePg, UUIDType } from "src/common";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { CreateCourseBody } from "src/courses/schemas/createCourse.schema";
 import type { UpdateCourseBody } from "src/courses/schemas/updateCourse.schema";
 import type { UpsertGroupBody } from "src/group/group.types";
@@ -57,7 +57,7 @@ describe("Activity Logs E2E", () => {
   let userFactory: ReturnType<typeof createUserFactory>;
 
   let globalSettingsId: UUIDType;
-  let currentAdminUser: CurrentUser;
+  let currentAdminUser: CurrentUserType;
 
   beforeAll(async () => {
     const { app: testAppInstance } = await createE2ETest({ enableActivityLogs: true });
@@ -371,7 +371,7 @@ describe("Activity Logs E2E", () => {
     it("should record ENROLL_COURSE activity log when student self-enrolls", async () => {
       const student = await userFactory.withUserSettings(db).create();
 
-      const currentStudentUser: CurrentUser = {
+      const currentStudentUser: CurrentUserType = {
         userId: student.id,
         email: student.email,
         roleSlugs: [SYSTEM_ROLE_SLUGS.STUDENT],
@@ -442,7 +442,7 @@ describe("Activity Logs E2E", () => {
 
     it("should record VIEW_ANNOUNCEMENT activity log when announcement is read", async () => {
       const student = await userFactory.create();
-      const currentStudentUser: CurrentUser = {
+      const currentStudentUser: CurrentUserType = {
         userId: student.id,
         email: student.email,
         roleSlugs: [SYSTEM_ROLE_SLUGS.STUDENT],
@@ -699,7 +699,7 @@ describe("Activity Logs E2E", () => {
     it("should record LOGOUT activity log when user logs out", async () => {
       const { user } = await createUserWithPassword();
 
-      const currentStudentUser: CurrentUser = {
+      const currentStudentUser: CurrentUserType = {
         userId: user.id,
         email: user.email,
         roleSlugs: [SYSTEM_ROLE_SLUGS.STUDENT],

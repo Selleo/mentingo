@@ -7,16 +7,21 @@ import {
 } from "src/queue";
 
 import type { Job } from "bullmq";
+import type { UUIDType } from "src/common";
 
 @Injectable()
 export class IngestionQueueService {
   constructor(private readonly queueService: GlobalQueueService) {}
 
-  async enqueueDocumentIngestion(file: Express.Multer.File, documentId: string, sha256: string) {
+  async enqueueDocumentIngestion(
+    tenantId: UUIDType,
+    lessonId: UUIDType,
+    file: Express.Multer.File,
+  ) {
     return this.queueService.enqueue<DocumentIngestionJobData>(
       QUEUE_NAMES.DOCUMENT_INGESTION,
       "document-ingestion",
-      { file, documentId, sha256 },
+      { tenantId, lessonId, file },
       { attempts: 3, backoff: { type: "exponential", delay: 1000 }, removeOnComplete: true },
     );
   }

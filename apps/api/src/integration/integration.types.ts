@@ -1,6 +1,6 @@
 import type { IntegrationKeyMetadata } from "./schemas/integration-key.schema";
 import type { Request } from "express";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 
 export type IntegrationKeyMetadataRecord = {
   id: string;
@@ -32,7 +32,7 @@ export type IntegrationApiKeyCandidate = {
 };
 
 export type IntegrationRequest = Request & {
-  user?: CurrentUser;
+  user?: CurrentUserType;
   integrationTenantValidated?: boolean;
   integrationApiKeyId?: string;
 };

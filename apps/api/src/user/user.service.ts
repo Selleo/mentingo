@@ -99,7 +99,7 @@ import type {
 import type { UserDetailsResponse, UserDetailsWithAvatarKey } from "./schemas/user.schema";
 import type { UserActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { ChangePasswordBody } from "src/user/schemas/changePassword.schema";
 import type { CreateUserBody, ImportUserResponse } from "src/user/schemas/createUser.schema";
 import type { CreateUserOptions, CreateUserTransactionResult } from "src/user/user.types";
@@ -314,7 +314,7 @@ export class UserService {
     };
   }
 
-  public async updateUser(id: UUIDType, data: UpdateUserBody, actor?: CurrentUser) {
+  public async updateUser(id: UUIDType, data: UpdateUserBody, actor?: CurrentUserType) {
     const [existingUser] = await this.db
       .select()
       .from(users)
@@ -504,7 +504,7 @@ export class UserService {
       .where(eq(credentials.userId, id));
   }
 
-  public async deleteUser(actor: CurrentUser, id: UUIDType) {
+  public async deleteUser(actor: CurrentUserType, id: UUIDType) {
     if (id === actor.userId) {
       throw new BadRequestException("You cannot delete your own account");
     }
@@ -565,7 +565,7 @@ export class UserService {
     });
   }
 
-  public async deleteBulkUsers(actor: CurrentUser, ids: UUIDType[]) {
+  public async deleteBulkUsers(actor: CurrentUserType, ids: UUIDType[]) {
     if (ids.includes(actor.userId)) {
       throw new BadRequestException("You cannot delete yourself");
     }
@@ -638,7 +638,7 @@ export class UserService {
   public async createUser(
     data: CreateUserBody,
     dbInstance?: DatabasePg,
-    creator?: CurrentUser,
+    creator?: CurrentUserType,
     options?: CreateUserOptions,
   ) {
     const db = dbInstance ?? this.db;
@@ -720,7 +720,7 @@ export class UserService {
   private async createUserTransaction(
     db: DatabasePg,
     data: CreateUserBody,
-    creator?: CurrentUser,
+    creator?: CurrentUserType,
     options?: CreateUserOptions,
   ): Promise<CreateUserTransactionResult> {
     return db.transaction(async (trx) => {
@@ -859,7 +859,7 @@ export class UserService {
       );
   }
 
-  async bulkAssignUsersToGroup(data: BulkAssignUserGroups, actor?: CurrentUser) {
+  async bulkAssignUsersToGroup(data: BulkAssignUserGroups, actor?: CurrentUserType) {
     await this.db.transaction(async (trx) => {
       await Promise.all(
         data.map((user) =>
@@ -895,7 +895,7 @@ export class UserService {
     return adminsWithSettings;
   }
 
-  async importUsers(usersDataFile: Express.Multer.File, creator: CurrentUser) {
+  async importUsers(usersDataFile: Express.Multer.File, creator: CurrentUserType) {
     const importStats: ImportUserResponse = {
       importedUsersAmount: 0,
       skippedUsersAmount: 0,
@@ -1184,7 +1184,7 @@ export class UserService {
     return updatedOnboarding;
   }
 
-  async updateUsersRoles(data: BulkUpdateUsersRolesBody, currentUser: CurrentUser) {
+  async updateUsersRoles(data: BulkUpdateUsersRolesBody, currentUser: CurrentUserType) {
     if (data.userIds.includes(currentUser.userId)) {
       throw new BadRequestException("adminUsersView.toast.cannotUpdateOwnRole");
     }

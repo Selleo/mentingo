@@ -20,7 +20,7 @@ import { OPENAI_MODELS } from "src/ai/utils/ai.type";
 import { type BaseResponse, baseResponse, UUIDSchema, UUIDType } from "src/common";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
-import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
+import { CurrentUserType } from "src/common/types/current-user.type";
 
 @Controller("ai")
 export class AiController {

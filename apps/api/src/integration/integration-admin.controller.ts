@@ -12,7 +12,7 @@ import { baseResponse, BaseResponse } from "src/common";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { PermissionsGuard } from "src/common/guards/permissions.guard";
-import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
+import { CurrentUserType } from "src/common/types/current-user.type";
 import { IntegrationService } from "src/integration/integration.service";
 import {
   integrationCurrentKeyResponseSchema,

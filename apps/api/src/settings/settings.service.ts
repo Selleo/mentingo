@@ -82,7 +82,7 @@ import type {
 import type { Request, Response } from "express";
 import type { SettingsActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { LoginBackgroundResponseBody } from "src/settings/schemas/login-background.schema";
 
 const STATIC_SETTINGS_IMAGE_CACHE_CONTROL = "public, max-age=86400";
@@ -117,7 +117,7 @@ export class SettingsService {
   ) {}
 
   public async getCurrentUserSettings(
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
   ): Promise<SettingsJSONContentSchema> {
     const { dbInstance, sourceUserId } = getSupportModeContext(currentUser, this.db, this.dbAdmin);
 
@@ -558,7 +558,7 @@ export class SettingsService {
   }
 
   public async updateGlobalUnregisteredUserCoursesAccessibility(
-    actor?: CurrentUser,
+    actor?: CurrentUserType,
   ): Promise<GlobalSettingsJSONContentSchema> {
     const previousRecord = await this.getGlobalSettingsRecord();
 
@@ -626,7 +626,7 @@ export class SettingsService {
   public async updateGlobalColorSchema(
     primaryColor: string,
     contrastColor: string,
-    actor?: CurrentUser,
+    actor?: CurrentUserType,
   ): Promise<GlobalSettingsJSONContentSchema> {
     const previousRecord = await this.getGlobalSettingsRecord();
 
@@ -652,7 +652,7 @@ export class SettingsService {
   }
 
   public async updateGlobalEnforceSSO(
-    actor?: CurrentUser,
+    actor?: CurrentUserType,
   ): Promise<GlobalSettingsJSONContentSchema> {
     const previousRecord = await this.getGlobalSettingsRecord();
 
@@ -685,7 +685,7 @@ export class SettingsService {
   }
 
   public async updateGlobalModernCourseListEnabled(
-    actor?: CurrentUser,
+    actor?: CurrentUserType,
   ): Promise<GlobalSettingsJSONContentSchema> {
     const previousRecord = await this.getGlobalSettingsRecord();
 
@@ -721,7 +721,7 @@ export class SettingsService {
 
   public async uploadPlatformLogo(
     file: Express.Multer.File | null | undefined,
-    actor?: CurrentUser,
+    actor?: CurrentUserType,
   ): Promise<void> {
     const previousRecord = await this.getGlobalSettingsRecord();
 
@@ -783,7 +783,7 @@ export class SettingsService {
 
   public async uploadPlatformSimpleLogo(
     file: Express.Multer.File | null | undefined,
-    actor?: CurrentUser,
+    actor?: CurrentUserType,
   ): Promise<void> {
     const previousRecord = await this.getGlobalSettingsRecord();
 
@@ -827,7 +827,7 @@ export class SettingsService {
 
   public async uploadLoginBackgroundImage(
     file: Express.Multer.File | null | undefined,
-    actor?: CurrentUser,
+    actor?: CurrentUserType,
   ): Promise<void> {
     const previousRecord = await this.getGlobalSettingsRecord();
 
@@ -923,7 +923,7 @@ export class SettingsService {
 
   public async updateCompanyInformation(
     companyInfo: CompanyInformaitonJSONSchema,
-    actor?: CurrentUser,
+    actor?: CurrentUserType,
   ): Promise<CompanyInformaitonJSONSchema> {
     const previousRecord = await this.getGlobalSettingsRecord();
 
@@ -965,7 +965,7 @@ export class SettingsService {
 
   async updateMFAEnforcedRoles(
     rolesRequest: UpdateMFAEnforcedRolesRequest,
-    actor?: CurrentUser,
+    actor?: CurrentUserType,
   ): Promise<GlobalSettingsJSONContentSchema> {
     const previousRecord = await this.getGlobalSettingsRecord();
 
@@ -1001,7 +1001,7 @@ export class SettingsService {
 
   async updateCertificateBackground(
     certificateBackground: Express.Multer.File | null,
-    actor?: CurrentUser,
+    actor?: CurrentUserType,
   ): Promise<GlobalSettingsJSONContentSchema> {
     const previousRecord = await this.getGlobalSettingsRecord();
 
@@ -1111,7 +1111,7 @@ export class SettingsService {
 
   async updateDefaultCourseCurrency(
     currency: AllowedCurrency,
-    actor?: CurrentUser,
+    actor?: CurrentUserType,
   ): Promise<GlobalSettingsJSONContentSchema> {
     const previousRecord = await this.getGlobalSettingsRecord();
 
@@ -1139,7 +1139,7 @@ export class SettingsService {
     return updatedSettings;
   }
 
-  async updateGlobalInviteOnlyRegistration(actor?: CurrentUser) {
+  async updateGlobalInviteOnlyRegistration(actor?: CurrentUserType) {
     const previousRecord = await this.getGlobalSettingsRecord();
 
     const globalSettings = previousRecord.settings as GlobalSettingsJSONContentSchema;
@@ -1170,7 +1170,7 @@ export class SettingsService {
     return updatedGlobalSettings;
   }
 
-  async updateUserEmailTriggers(triggerKey: string, actor?: CurrentUser) {
+  async updateUserEmailTriggers(triggerKey: string, actor?: CurrentUserType) {
     if (!Object.keys(DEFAULT_GLOBAL_SETTINGS.userEmailTriggers).includes(triggerKey)) {
       throw new BadRequestException("Invalid trigger key");
     }
@@ -1282,7 +1282,7 @@ export class SettingsService {
 
   async updateAgeLimit(
     ageLimit: AllowedAgeLimit,
-    actor?: CurrentUser,
+    actor?: CurrentUserType,
   ): Promise<GlobalSettingsJSONContentSchema> {
     const previousRecord = await this.getGlobalSettingsRecord();
 
@@ -1338,7 +1338,7 @@ export class SettingsService {
   }
 
   private async recordSettingsUpdate(params: {
-    actor?: CurrentUser;
+    actor?: CurrentUserType;
     previousSnapshot: SettingsActivityLogSnapshot | null;
     updatedSnapshot: SettingsActivityLogSnapshot | null;
     context?: Record<string, string>;
@@ -1460,7 +1460,7 @@ export class SettingsService {
   async uploadLoginPageFile(
     uploadedData: UploadFilesToLoginPageBody,
     file: Express.Multer.File,
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
   ) {
     const existingResources = await this.getExistingLoginPageResourceIds();
 

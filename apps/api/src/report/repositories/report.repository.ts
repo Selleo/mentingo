@@ -17,7 +17,7 @@ import {
 } from "src/storage/schema";
 
 import type { SupportedLanguages } from "@repo/shared";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 
 export interface StudentCourseReportRow {
   studentName: string;
@@ -38,7 +38,7 @@ export class ReportRepository {
 
   async getAllStudentCourseData(
     language: SupportedLanguages,
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
   ): Promise<StudentCourseReportRow[]> {
     const conditions = [
       eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),

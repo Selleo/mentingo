@@ -1,78 +1,70 @@
-import { Injectable, type OnModuleDestroy } from "@nestjs/common";
+import { Injectable, Logger, type OnModuleDestroy } from "@nestjs/common";
 import { Worker } from "bullmq";
 
-import { DOCUMENT_STATUS } from "src/ingestion/ingestion.constants";
-import { DocumentRepository } from "src/ingestion/repositories/document.repository";
-import { ChunkService } from "src/ingestion/services/chunk.service";
-import { DocumentService } from "src/ingestion/services/document.service";
-import { EmbeddingService } from "src/ingestion/services/embedding.service";
+import { IngestionProcessingService } from "src/ingestion/services/ingestion-processing.service";
 import { QUEUE_NAMES, QueueService } from "src/queue";
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import type { Job } from "bullmq";
+import type { DocumentIngestionJobData } from "src/queue/queue.types";
 
 @Injectable()
 export class IngestionWorker implements OnModuleDestroy {
-  private worker: Worker;
+  private readonly logger = new Logger(IngestionWorker.name);
+  private readonly worker: Worker;
 
   constructor(
     private readonly queueService: QueueService,
-    private readonly chunkService: ChunkService,
-    private readonly documentRepository: DocumentRepository,
-    private readonly documentService: DocumentService,
-    private readonly embeddingService: EmbeddingService,
+    private readonly ingestionProcessingService: IngestionProcessingService,
+    private readonly tenantDbRunnerService: TenantDbRunnerService,
   ) {
     const connection = this.queueService.getConnection();
+    this.logger.log(`Initializing worker for queue: ${QUEUE_NAMES.DOCUMENT_INGESTION}`);
 
     this.worker = new Worker(
       QUEUE_NAMES.DOCUMENT_INGESTION,
-      async (job: Job) => {
+      async (job: Job<DocumentIngestionJobData>) => {
         if (job.name === "document-ingestion") {
           await this.handleDocumentIngestion(job);
         }
       },
       { connection, concurrency: Number(process.env.WORKER_CONCURRENCY || 10) },
     );
+
+    this.worker.on("ready", () => {
+      this.logger.log(`Worker ready for queue: ${QUEUE_NAMES.DOCUMENT_INGESTION}`);
+    });
+
+    this.worker.on("active", (job) => {
+      this.logger.log(`Ingestion job started: id=${job.id}, name=${job.name}`);
+    });
+
+    this.worker.on("completed", (job) => {
+      this.logger.log(`Ingestion job completed: id=${job.id}, name=${job.name}`);
+    });
+
+    this.worker.on("failed", (job, error) => {
+      this.logger.error(
+        `Ingestion job failed: id=${job?.id}, name=${job?.name}, reason=${error?.message}`,
+        error?.stack,
+      );
+    });
+
+    this.worker.on("error", (error) => {
+      this.logger.error(`Ingestion worker error: ${error.message}`, error.stack);
+    });
   }
 
-  async handleDocumentIngestion(job: Job) {
-    try {
-      const newFile = {
-        ...job.data.file,
-        buffer: Buffer.from(job.data.file.buffer.data),
-      };
+  async handleDocumentIngestion(job: Job<DocumentIngestionJobData>) {
+    const { tenantId } = job.data;
 
-      const extractedPages = await this.chunkService.extractText(newFile);
-
-      const { loc: _loc, ...rest } = extractedPages[0].metadata;
-      await this.documentRepository.updateDocument(job.data.documentId, {
-        metadata: { ...rest },
-      });
-
-      const chunkedPages = await this.chunkService.chunkPages(extractedPages);
-
-      const embeddings = await this.embeddingService.embedPages(chunkedPages);
-
-      for (let i = 0; i < embeddings.length; i++) {
-        await this.documentRepository.insertDocumentChunk({
-          documentId: job.data.documentId,
-          chunkIndex: i,
-          metadata: chunkedPages[i].metadata?.loc,
-          content: chunkedPages[i].pageContent,
-          embedding: embeddings[i],
-        });
-      }
-
-      await this.documentService.updateDocumentStatus(job.data.documentId, DOCUMENT_STATUS.READY);
-
-      return { ok: true };
-    } catch (e) {
-      await this.documentService.updateDocumentStatus(
-        job.data.documentId,
-        DOCUMENT_STATUS.FAILED,
-        e,
-      );
-      return { ok: false };
+    if (!tenantId) {
+      throw new Error(`Missing tenantId for ingestion job ${job.id}`);
     }
+
+    return this.tenantDbRunnerService.runWithTenant(tenantId, async () =>
+      this.ingestionProcessingService.processDocumentIngestion(job.data),
+    );
   }
 
   async onModuleDestroy() {

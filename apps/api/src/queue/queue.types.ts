@@ -1,3 +1,5 @@
+import type { UUIDType } from "src/common";
+
 export const QUEUE_NAMES = {
   DOCUMENT_INGESTION: "document-ingestion",
   LEARNING_TIME: "learning-time",
@@ -18,9 +20,9 @@ export interface LearningTimeJobData {
 }
 
 export interface DocumentIngestionJobData {
+  tenantId: UUIDType;
+  lessonId: UUIDType;
   file: Express.Multer.File;
-  documentId: string;
-  sha256: string;
 }
 
 export interface MasterCourseExportJobData {

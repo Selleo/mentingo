@@ -1,7 +1,7 @@
 import type { ResourceCategory, ResourceRelationshipType } from "../file.constants";
 import type { EntityType, SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 
 export type CreateResourceForEntityParams = {
   reference: string;
@@ -12,7 +12,7 @@ export type CreateResourceForEntityParams = {
   metadata?: Record<string, unknown>;
   title?: Partial<Record<SupportedLanguages, string>>;
   description?: Partial<Record<SupportedLanguages, string>>;
-  currentUser?: CurrentUser;
+  currentUser?: CurrentUserType;
   contextId?: UUIDType;
 };
 
@@ -25,6 +25,6 @@ export type UploadResourceParams = {
   relationshipType?: ResourceRelationshipType;
   title?: Partial<Record<SupportedLanguages, string>>;
   description?: Partial<Record<SupportedLanguages, string>>;
-  currentUser?: CurrentUser;
+  currentUser?: CurrentUserType;
   options?: { folderIncludesResource?: boolean; contextId?: UUIDType };
 };

@@ -18,7 +18,7 @@ import { SCORM } from "../constants/scorm.consts";
 import { ScormRepository } from "../repositories/scorm.repository";
 
 import type { UUIDType } from "src/common";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { LessonTypes } from "src/lesson/lesson.type";
 
 type ScormChapter = {
@@ -79,7 +79,7 @@ export class ScormService {
   async processScormPackage(
     file: Express.Multer.File,
     courseId: UUIDType,
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
   ) {
     return await this.db.transaction(async (tx) => {
       try {

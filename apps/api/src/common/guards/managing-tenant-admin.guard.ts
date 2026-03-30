@@ -14,7 +14,7 @@ import { hasPermission } from "src/common/permissions/permission.utils";
 import { DB_ADMIN } from "src/storage/db/db.providers";
 import { tenants } from "src/storage/schema";
 
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 
 @Injectable()
 export class ManagingTenantAdminGuard implements CanActivate {
@@ -22,7 +22,7 @@ export class ManagingTenantAdminGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest();
-    const user = req.user as CurrentUser | undefined;
+    const user = req.user as CurrentUserType | undefined;
 
     if (!user) throw new UnauthorizedException("auth.error.unauthenticated");
 

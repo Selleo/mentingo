@@ -56,7 +56,7 @@ import type { EmbedLessonResourceType, LessonTypes } from "../lesson.type";
 import type { SupportedLanguages } from "@repo/shared";
 import type { LessonActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 
 @Injectable()
 export class AdminLessonService {
@@ -75,7 +75,7 @@ export class AdminLessonService {
     @Inject("CACHE_MANAGER") private readonly cache: CacheManagerStore,
   ) {}
 
-  async createLessonForChapter(data: CreateLessonBody, currentUser: CurrentUser) {
+  async createLessonForChapter(data: CreateLessonBody, currentUser: CurrentUserType) {
     await this.masterCourseService.assertCourseContentEditableByChapterId(data.chapterId);
     await this.validateAccess("chapter", currentUser, data.chapterId);
 
@@ -134,7 +134,7 @@ export class AdminLessonService {
     return this.adminLessonRepository.getContentLessonsByIds(lessonIds, language);
   }
 
-  async createAiMentorLesson(data: CreateAiMentorLessonBody, currentUser: CurrentUser) {
+  async createAiMentorLesson(data: CreateAiMentorLessonBody, currentUser: CurrentUserType) {
     await this.masterCourseService.assertCourseContentEditableByChapterId(data.chapterId);
 
     await this.validateAccess("chapter", currentUser, data.chapterId);
@@ -190,7 +190,7 @@ export class AdminLessonService {
     return lesson.id;
   }
 
-  async createQuizLesson(data: CreateQuizLessonBody, currentUser: CurrentUser) {
+  async createQuizLesson(data: CreateQuizLessonBody, currentUser: CurrentUserType) {
     await this.masterCourseService.assertCourseContentEditableByChapterId(data.chapterId);
 
     await this.validateAccess("chapter", currentUser, data.chapterId);
@@ -237,7 +237,7 @@ export class AdminLessonService {
   async updateAiMentorLesson(
     id: UUIDType,
     data: UpdateAiMentorLessonBody,
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
   ) {
     await this.masterCourseService.assertCourseContentEditableByLessonId(id);
 
@@ -288,7 +288,7 @@ export class AdminLessonService {
     return updatedLesson?.id ?? id;
   }
 
-  async updateQuizLesson(id: UUIDType, data: UpdateQuizLessonBody, currentUser: CurrentUser) {
+  async updateQuizLesson(id: UUIDType, data: UpdateQuizLessonBody, currentUser: CurrentUserType) {
     await this.masterCourseService.assertCourseContentEditableByLessonId(id);
 
     await this.validateAccess("lesson", currentUser, id);
@@ -339,7 +339,7 @@ export class AdminLessonService {
     return updatedLessonId;
   }
 
-  async updateLesson(id: UUIDType, data: UpdateLessonBody, currentUser: CurrentUser) {
+  async updateLesson(id: UUIDType, data: UpdateLessonBody, currentUser: CurrentUserType) {
     await this.masterCourseService.assertCourseContentEditableByLessonId(id);
 
     await this.validateAccess("lesson", currentUser, id);
@@ -387,7 +387,7 @@ export class AdminLessonService {
     return updatedLesson.id;
   }
 
-  async removeLesson(lessonId: UUIDType, currentUser: CurrentUser) {
+  async removeLesson(lessonId: UUIDType, currentUser: CurrentUserType) {
     await this.masterCourseService.assertCourseContentEditableByLessonId(lessonId);
 
     await this.validateAccess("lesson", currentUser, lessonId);
@@ -424,7 +424,7 @@ export class AdminLessonService {
   async updateLessonDisplayOrder(lessonObject: {
     lessonId: UUIDType;
     displayOrder: number;
-    currentUser: CurrentUser;
+    currentUser: CurrentUserType;
   }): Promise<void> {
     await this.masterCourseService.assertCourseContentEditableByLessonId(lessonObject.lessonId);
 
@@ -813,7 +813,7 @@ export class AdminLessonService {
     });
   }
 
-  async createEmbedLesson(data: CreateEmbedLessonBody, currentUser: CurrentUser) {
+  async createEmbedLesson(data: CreateEmbedLessonBody, currentUser: CurrentUserType) {
     await this.masterCourseService.assertCourseContentEditableByChapterId(data.chapterId);
 
     await this.validateAccess("chapter", currentUser, data.chapterId);
@@ -873,7 +873,7 @@ export class AdminLessonService {
 
   async updateEmbedLesson(
     lessonId: UUIDType,
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
     data: UpdateEmbedLessonBody,
   ) {
     await this.masterCourseService.assertCourseContentEditableByLessonId(lessonId);
