@@ -2049,7 +2049,8 @@
           }
         },
         "retakeModalTitle": "Opravdu chcete lekci absolvovat znovu?",
-        "retakeModalDescription": "Tím resetujete svůj pokrok v této lekci. Tuto akci nelze vrátit zpět."
+        "retakeModalDescription": "Tím resetujete svůj pokrok v této lekci. Tuto akci nelze vrátit zpět.",
+        "retakeAccessDenied": "Tuto lekci můžete opakovat pouze tehdy, pokud jste do kurzu zapsáni nebo jste autorem kurzu."
       }
     },
     "sideSection": {

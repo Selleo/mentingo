@@ -2049,7 +2049,8 @@
           }
         },
         "retakeModalTitle": "Ar tikrai norite perskaityti pamoką?",
-        "retakeModalDescription": "Tai iš naujo nustatys jūsų pažangą šioje pamokoje. Šio veiksmo anuliuoti negalima."
+        "retakeModalDescription": "Tai iš naujo nustatys jūsų pažangą šioje pamokoje. Šio veiksmo anuliuoti negalima.",
+        "retakeAccessDenied": "Šią pamoką galite kartoti tik jei esate įtrauktas į kursą arba esate kurso autorius."
       }
     },
     "sideSection": {

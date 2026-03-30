@@ -2049,7 +2049,8 @@
           }
         },
         "retakeModalTitle": "Sind Sie sicher, dass Sie die Lektion wiederholen möchten?",
-        "retakeModalDescription": "Dadurch wird Ihr Fortschritt in dieser Lektion zurückgesetzt. Diese Aktion kann nicht rückgängig gemacht werden."
+        "retakeModalDescription": "Dadurch wird Ihr Fortschritt in dieser Lektion zurückgesetzt. Diese Aktion kann nicht rückgängig gemacht werden.",
+        "retakeAccessDenied": "Sie können diese Lektion nur wiederholen, wenn Sie im Kurs eingeschrieben sind oder der Autor des Kurses sind."
       }
     },
     "sideSection": {
