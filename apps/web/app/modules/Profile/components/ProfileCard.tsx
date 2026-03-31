@@ -7,11 +7,11 @@ import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import type { GetUserDetailsResponse } from "~/api/generated-api";
 
 type ProfileCardProps = {
-  isAdminLike: boolean;
+  canManageCourses: boolean;
   userDetails?: GetUserDetailsResponse["data"];
 };
 
-export const ProfileCard = ({ isAdminLike, userDetails }: ProfileCardProps) => {
+export const ProfileCard = ({ canManageCourses, userDetails }: ProfileCardProps) => {
   const { t } = useTranslation();
 
   return (
@@ -30,7 +30,7 @@ export const ProfileCard = ({ isAdminLike, userDetails }: ProfileCardProps) => {
             <h2 className="h6 md:h4 text-neutral-950" data-testid="username">
               {userDetails?.firstName} {userDetails?.lastName}
             </h2>
-            {isAdminLike && userDetails?.jobTitle && (
+            {canManageCourses && userDetails?.jobTitle && (
               <div className="body-sm">
                 <span className="text-neutral-900 body-base-md">
                   {t("contentCreatorView.other.title")}:
@@ -41,7 +41,7 @@ export const ProfileCard = ({ isAdminLike, userDetails }: ProfileCardProps) => {
               </div>
             )}
           </div>
-          {isAdminLike && (
+          {canManageCourses && (
             <div className="flex w-full flex-col gap-3 *:w-full md:flex-row md:*:w-fit">
               {userDetails?.contactPhone && (
                 <a
@@ -65,7 +65,7 @@ export const ProfileCard = ({ isAdminLike, userDetails }: ProfileCardProps) => {
           )}
         </div>
       </div>
-      {isAdminLike && userDetails?.description && (
+      {canManageCourses && userDetails?.description && (
         <div className="flex flex-col gap-y-2">
           <div className="flex items-center gap-x-3">
             <span className="min-w-fit body-base-md md:body-lg-md text-neutral-900">

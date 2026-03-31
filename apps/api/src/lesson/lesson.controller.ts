@@ -299,7 +299,7 @@ export class LessonController {
   }
 
   @Post("evaluation-quiz")
-  @RequirePermission(PERMISSIONS.LEARNING_PROGRESS_UPDATE)
+  @RequirePermission(PERMISSIONS.LEARNING_PROGRESS_UPDATE, PERMISSIONS.LEARNING_MODE_USE)
   @Validate({
     request: [{ type: "body", schema: answerQuestionsForLessonBody, required: true }],
     response: baseResponse(

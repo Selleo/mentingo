@@ -1,9 +1,10 @@
+import { PERMISSIONS } from "@repo/shared";
 import { useTranslation } from "react-i18next";
 
 import { useToggleCourseStudentMode } from "~/api/mutations";
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
-import { useUserRole } from "~/hooks/useUserRole";
+import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
 import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 
@@ -13,12 +14,14 @@ type LearningModeBannerProps = {
 
 export function LearningModeBanner({ className }: LearningModeBannerProps) {
   const { t } = useTranslation();
-  const { isAdminLike } = useUserRole();
+  const { hasAccess: canManageCourses } = usePermissions({
+    required: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
+  });
   const { course, isCourseStudentModeActive } = useCourseAccessProvider();
   const { mutate: toggleLearningMode, isPending: isTogglingLearningMode } =
     useToggleCourseStudentMode(course.id);
 
-  if (!isAdminLike || !isCourseStudentModeActive) return null;
+  if (!canManageCourses || !isCourseStudentModeActive) return null;
 
   const handleExitLearningMode = () => toggleLearningMode({ enabled: false });
 

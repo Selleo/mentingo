@@ -1,3 +1,4 @@
+import { PERMISSIONS } from "@repo/shared";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -13,7 +14,7 @@ import {
   Search,
 } from "../../assets/svgs";
 import { useDebounce } from "../../hooks/useDebounce";
-import { useUserRole } from "../../hooks/useUserRole";
+import { usePermissions } from "../../hooks/usePermissions";
 import { cn } from "../../lib/utils";
 import { SearchInput } from "../SearchInput/SearchInput";
 import { Dialog, DialogContent } from "../ui/dialog";
@@ -37,7 +38,10 @@ export const NavigationGlobalSearchWrapper = ({
   const [searchParams, setSearchParams] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
   const debouncedSearch = useDebounce(searchParams, 300);
-  const { isAdmin, isContentCreator } = useUserRole();
+  const { hasAccess: canManageUsers } = usePermissions({ required: PERMISSIONS.USER_MANAGE });
+  const { hasAccess: canManageOwnCourses } = usePermissions({
+    required: PERMISSIONS.COURSE_UPDATE_OWN,
+  });
   const totalItemsRef = useRef(0);
   const { t } = useTranslation();
   const { data: globalSettings } = useGlobalSettings();
@@ -62,9 +66,9 @@ export const NavigationGlobalSearchWrapper = ({
   const isMac =
     typeof navigator !== "undefined" && navigator.userAgent.toLowerCase().includes("mac");
 
-  const ResultsComponent = isAdmin
+  const ResultsComponent = canManageUsers
     ? GlobalSearchAdminResults
-    : isContentCreator
+    : canManageOwnCourses
       ? GlobalSearchContentCreatorResults
       : GlobalSearchStudentResults;
 

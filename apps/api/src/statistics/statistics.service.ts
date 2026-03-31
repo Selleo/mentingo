@@ -72,7 +72,7 @@ export class StatisticsService {
   }
 
   async getStats(currentUser: CurrentUser, language: SupportedLanguages) {
-    const canReadAll = hasPermission(currentUser.permissions, PERMISSIONS.COURSE_UPDATE_OWN);
+    const canReadAll = hasPermission(currentUser.permissions, PERMISSIONS.COURSE_UPDATE);
     const ownerUserId = canReadAll ? undefined : currentUser.userId;
 
     const fiveMostPopularCourses = await this.statisticsRepository.getFiveMostPopularCourses(

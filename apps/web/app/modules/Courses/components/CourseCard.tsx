@@ -1,4 +1,5 @@
 import { Link, useLocation } from "@remix-run/react";
+import { PERMISSIONS } from "@repo/shared";
 import { useTranslation } from "react-i18next";
 
 import DefaultPhotoCourse from "~/assets/svgs/default-photo-course.svg";
@@ -7,7 +8,7 @@ import CourseProgress from "~/components/CourseProgress";
 import { Icon } from "~/components/Icon";
 import { CategoryChip } from "~/components/ui/CategoryChip";
 import { UserAvatar } from "~/components/UserProfile/UserAvatar";
-import { useUserRole } from "~/hooks/useUserRole";
+import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
 import CourseCardButton from "~/modules/Dashboard/Courses/CourseCardButton";
 
@@ -38,7 +39,7 @@ const CourseCard = ({
   isFirst = false,
   slug,
 }: CourseCardProps) => {
-  const { isAdmin } = useUserRole();
+  const { hasAccess: canManageUsers } = usePermissions({ required: PERMISSIONS.USER_MANAGE });
   const { pathname } = useLocation();
   const isScormCreatePage = pathname.includes("/admin/courses/new-scorm");
   const { t } = useTranslation();
@@ -72,7 +73,7 @@ const CourseCard = ({
             category={category}
             color={cn({
               "text-secondary-600": enrolled,
-              "text-primary-700": isAdmin || !enrolled,
+              "text-primary-700": canManageUsers || !enrolled,
             })}
           />
           {hasFreeChapters && !enrolled && (
@@ -115,7 +116,7 @@ const CourseCard = ({
           <CourseCardButton
             currency={currency}
             enrolled={enrolled}
-            isAdmin={isAdmin}
+            canManageUsers={canManageUsers}
             priceInCents={priceInCents}
             isScormCreatePage={isScormCreatePage}
           />

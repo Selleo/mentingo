@@ -11036,9 +11036,6 @@
               "lastName": {
                 "type": "string"
               },
-              "role": {
-                "type": "string"
-              },
               "archived": {
                 "type": "boolean"
               },
@@ -11123,7 +11120,6 @@
               "email",
               "firstName",
               "lastName",
-              "role",
               "archived",
               "deletedAt",
               "profilePictureUrl",

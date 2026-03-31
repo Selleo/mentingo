@@ -1,7 +1,8 @@
+import { PERMISSIONS } from "@repo/shared";
 import { createContext, useContext, useMemo } from "react";
 
 import { useCurrentUser } from "~/api/queries";
-import { useUserRole } from "~/hooks/useUserRole";
+import { usePermissions } from "~/hooks/usePermissions";
 
 import type { PropsWithChildren } from "react";
 import type { GetCourseResponse } from "~/api/generated-api";
@@ -17,10 +18,10 @@ type CourseExperienceResolverParams = {
   course: GetCourseResponse["data"];
   forcePreviewMode: boolean;
   currentUserId?: string;
-  isAdmin: boolean;
-  isAdminLike: boolean;
-  isContentCreator: boolean;
-  isStudent: boolean;
+  canManageUsers: boolean;
+  canManageCourses: boolean;
+  canManageOwnCourses: boolean;
+  canUpdateLearningProgress: boolean;
   activeLearningModeCourseIds: string[];
 };
 
@@ -35,27 +36,27 @@ function resolveCourseExperienceState({
   course,
   forcePreviewMode,
   currentUserId,
-  isAdmin,
-  isAdminLike,
-  isContentCreator,
-  isStudent,
+  canManageUsers,
+  canManageCourses,
+  canManageOwnCourses,
+  canUpdateLearningProgress,
   activeLearningModeCourseIds,
 }: CourseExperienceResolverParams): CourseExperienceContextValue {
   const isCourseStudentModeActive =
-    !forcePreviewMode && isAdminLike && activeLearningModeCourseIds.includes(course.id);
+    !forcePreviewMode && canManageCourses && activeLearningModeCourseIds.includes(course.id);
 
   const isCourseAuthor = currentUserId === course.authorId;
 
   const canContentCreatorLearn =
-    isContentCreator && (isCourseStudentModeActive || (!isCourseAuthor && !!course.enrolled));
+    canManageOwnCourses && (isCourseStudentModeActive || (!isCourseAuthor && !!course.enrolled));
 
-  const canAdminLearn = isAdmin && isCourseStudentModeActive;
+  const canAdminLearn = canManageUsers && isCourseStudentModeActive;
 
   const isPreviewMode =
-    forcePreviewMode || (isAdminLike && !canAdminLearn && !canContentCreatorLearn);
+    forcePreviewMode || (canManageCourses && !canAdminLearn && !canContentCreatorLearn);
 
   const isEffectiveStudentExperience =
-    !isPreviewMode && (isStudent || canAdminLearn || canContentCreatorLearn);
+    !isPreviewMode && (canUpdateLearningProgress || canAdminLearn || canContentCreatorLearn);
 
   return {
     course,
@@ -71,17 +72,26 @@ export function CourseAccessProvider({
   children,
 }: CourseAccessProviderProps) {
   const { data: currentUser } = useCurrentUser();
-  const { isAdmin, isContentCreator, isAdminLike, isStudent } = useUserRole();
+  const { hasAccess: canManageUsers } = usePermissions({ required: PERMISSIONS.USER_MANAGE });
+  const { hasAccess: canManageOwnCourses } = usePermissions({
+    required: PERMISSIONS.COURSE_UPDATE_OWN,
+  });
+  const { hasAccess: canManageCourses } = usePermissions({
+    required: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
+  });
+  const { hasAccess: canUpdateLearningProgress } = usePermissions({
+    required: PERMISSIONS.LEARNING_PROGRESS_UPDATE,
+  });
 
   const value = useMemo(() => {
     return resolveCourseExperienceState({
       course,
       forcePreviewMode,
       currentUserId: currentUser?.id,
-      isAdmin,
-      isAdminLike,
-      isContentCreator,
-      isStudent,
+      canManageUsers,
+      canManageCourses,
+      canManageOwnCourses,
+      canUpdateLearningProgress,
       activeLearningModeCourseIds: currentUser?.studentModeCourseIds ?? [],
     });
   }, [
@@ -89,10 +99,10 @@ export function CourseAccessProvider({
     currentUser?.id,
     currentUser?.studentModeCourseIds,
     forcePreviewMode,
-    isAdmin,
-    isAdminLike,
-    isContentCreator,
-    isStudent,
+    canManageUsers,
+    canManageCourses,
+    canManageOwnCourses,
+    canUpdateLearningProgress,
   ]);
 
   return (

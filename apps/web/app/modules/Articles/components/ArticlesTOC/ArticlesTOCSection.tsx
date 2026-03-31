@@ -1,6 +1,8 @@
+import { PERMISSIONS } from "@repo/shared";
+
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
-import { useUserRole } from "~/hooks/useUserRole";
+import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
 
 type Article = { id: string; title: string };
@@ -23,7 +25,9 @@ export function ArticlesTOCSection({
   activeArticleId,
   onNavigate,
 }: ArticlesTOCSectionProps) {
-  const { isAdminLike } = useUserRole();
+  const { hasAccess: canManageArticles } = usePermissions({
+    required: [PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN],
+  });
 
   return (
     <div className="py-0.5">
@@ -58,7 +62,7 @@ export function ArticlesTOCSection({
           </span>
         </Button>
 
-        {isAdminLike && (
+        {canManageArticles && (
           <Button
             type="button"
             variant="ghost"

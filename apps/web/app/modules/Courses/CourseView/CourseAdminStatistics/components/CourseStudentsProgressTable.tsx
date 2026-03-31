@@ -1,3 +1,4 @@
+import { PERMISSIONS } from "@repo/shared";
 import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { useCallback, useMemo, useState } from "react";
@@ -18,7 +19,7 @@ import {
 } from "~/components/ui/table";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { UserAvatar } from "~/components/UserProfile/UserAvatar";
-import { useUserRole } from "~/hooks/useUserRole";
+import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { tanstackSortingToParam } from "~/utils/tanstackSortingToParam";
@@ -46,7 +47,9 @@ export function CourseStudentsProgressTable({
 }: CourseStudentsProgressTableProps) {
   const { t } = useTranslation();
 
-  const { isAdminLike } = useUserRole();
+  const { hasAccess: canManageCourses } = usePermissions({
+    required: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
+  });
   const { language } = useLanguageStore();
 
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -58,7 +61,7 @@ export function CourseStudentsProgressTable({
 
   const { data: courseStudentsProgress, isFetching } = useCourseStudentsProgress({
     id: courseId,
-    enabled: isAdminLike,
+    enabled: canManageCourses,
     query,
   });
 

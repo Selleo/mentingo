@@ -1,14 +1,15 @@
 import { useMemo } from "react";
 
+import { matchesRequirement, type PermissionKey } from "~/common/permissions/permission.utils";
+
 import type { MenuItemType } from "~/config/navigationConfig";
-import type { UserRole } from "~/config/userRoles";
 
 interface UseAuthorizedMenuItems {
   menuItems: MenuItemType[] | undefined;
-  userRole: UserRole;
+  permissions: PermissionKey[];
 }
 
-export const useAuthorizedMenuItems = ({ menuItems, userRole }: UseAuthorizedMenuItems) => {
+export const useAuthorizedMenuItems = ({ menuItems, permissions }: UseAuthorizedMenuItems) => {
   return useMemo(() => {
     if (!menuItems || !Array.isArray(menuItems)) {
       return [];
@@ -16,7 +17,7 @@ export const useAuthorizedMenuItems = ({ menuItems, userRole }: UseAuthorizedMen
 
     const filterMenuItems = (items: MenuItemType[]): MenuItemType[] => {
       return items.reduce<MenuItemType[]>((acc, item) => {
-        if (item.roles?.includes(userRole)) {
+        if (matchesRequirement(permissions, item.accessRequirement)) {
           if ("link" in item) {
             acc.push(item);
           }
@@ -27,5 +28,5 @@ export const useAuthorizedMenuItems = ({ menuItems, userRole }: UseAuthorizedMen
     };
 
     return filterMenuItems(menuItems);
-  }, [menuItems, userRole]);
+  }, [menuItems, permissions]);
 };

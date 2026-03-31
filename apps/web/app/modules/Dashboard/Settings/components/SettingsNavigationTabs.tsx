@@ -8,7 +8,7 @@ import { SETTINGS_TABS } from "../constants";
 import type React from "react";
 
 interface SettingsNavigationTabsProps {
-  isAdmin: boolean;
+  canManageSettings: boolean;
   hideAccountTab?: boolean;
   children?: React.ReactNode;
   accountContent?: React.ReactNode;
@@ -18,7 +18,7 @@ interface SettingsNavigationTabsProps {
 }
 
 export function SettingsNavigationTabs({
-  isAdmin,
+  canManageSettings,
   hideAccountTab = false,
   accountContent,
   organizationContent,
@@ -39,12 +39,14 @@ export function SettingsNavigationTabs({
     ...(!hideAccountTab
       ? [{ value: SETTINGS_TABS.ACCOUNT, label: t("settings.tabs.account") }]
       : []),
-    ...(isAdmin ? adminTabs : []),
+    ...(canManageSettings ? adminTabs : []),
   ];
 
   return (
     <Tabs
-      defaultValue={hideAccountTab && isAdmin ? SETTINGS_TABS.ORGANIZATION : SETTINGS_TABS.ACCOUNT}
+      defaultValue={
+        hideAccountTab && canManageSettings ? SETTINGS_TABS.ORGANIZATION : SETTINGS_TABS.ACCOUNT
+      }
       className="w-full bg-transparent flex flex-col gap-y-4"
     >
       <Card id="settings-tabs" className="w-full">

@@ -62,7 +62,9 @@ export default function CreateNewUserPage() {
   });
 
   const onSubmit = (values: FormValues) => {
-    createUser({ data: values }).then(({ data }) => {
+    const { role, ...rest } = values;
+
+    createUser({ data: { ...rest, roleSlugs: [role] } }).then(({ data }) => {
       queryClient.invalidateQueries({ queryKey: ALL_COURSES_QUERY_KEY });
       navigate(`/admin/users/${data.id}`);
     });

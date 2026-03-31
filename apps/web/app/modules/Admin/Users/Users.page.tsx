@@ -47,7 +47,6 @@ import {
 import { setPageTitle } from "~/utils/setPageTitle";
 import { handleRowSelectionRange } from "~/utils/tableRangeSelection";
 import { tanstackSortingToParam } from "~/utils/tanstackSortingToParam";
-import { USER_ROLES } from "~/utils/userRoles";
 
 import { ImportUsersModal } from "./components/ImportUsersModal/ImportUsersModal";
 
@@ -60,6 +59,7 @@ import type { UserRole } from "~/config/userRoles";
 type TUser = GetUsersResponse["data"][number];
 
 type ModalTypes = "group" | "role" | "delete" | "archive" | null;
+const USER_ROLE_VALUES = [USER_ROLE.admin, USER_ROLE.student, USER_ROLE.contentCreator] as const;
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.users");
 
@@ -228,9 +228,14 @@ const Users = () => {
       ),
     },
     {
-      accessorKey: "role",
+      accessorKey: "roleSlugs",
       header: t("adminUsersView.field.role"),
-      cell: ({ row }) => t(`common.roles.${camelCase(row.original.role)}`),
+      cell: ({ row }) => {
+        const roleSlugs = (row.original as TUser & { roleSlugs?: string[] }).roleSlugs ?? [];
+        const primaryRole = roleSlugs[0];
+
+        return primaryRole ? t(`common.roles.${camelCase(primaryRole)}`) : "-";
+      },
     },
     {
       accessorKey: "groups",
@@ -362,7 +367,7 @@ const Users = () => {
   const handleUsersRoles = useCallback(() => {
     updateUsersRoles({
       userIds: selectedUsers.map(({ userId }) => userId),
-      role: selectedValue as UserRole,
+      roleSlugs: [selectedValue as UserRole],
     }).then(() => {
       table.resetRowSelection();
       setShowEditModal(null);
@@ -398,7 +403,7 @@ const Users = () => {
             onConfirm={editMutation[showEditModal]}
             onCancel={() => setShowEditModal(null)}
             groupData={groupData}
-            roleData={Object.values(USER_ROLES)}
+            roleData={[...USER_ROLE_VALUES]}
             selectedUsers={selectedUsers}
             selectedValue={selectedValue}
             setSelectedValue={setSelectedValue}

@@ -1,5 +1,5 @@
 import { useNavigate } from "@remix-run/react";
-import { OnboardingPages } from "@repo/shared";
+import { OnboardingPages, PERMISSIONS } from "@repo/shared";
 import { isEmpty } from "lodash-es";
 import { useMemo, useReducer } from "react";
 import { useTranslation } from "react-i18next";
@@ -10,7 +10,7 @@ import { useAvailableCourses } from "~/api/queries/useAvailableCourses";
 import { ButtonGroup } from "~/components/ButtonGroup/ButtonGroup";
 import { Icon } from "~/components/Icon";
 import { PageWrapper } from "~/components/PageWrapper";
-import { useUserRole } from "~/hooks/useUserRole";
+import { usePermissions } from "~/hooks/usePermissions";
 import Loader from "~/modules/common/Loader/Loader";
 import {
   type FilterConfig,
@@ -29,7 +29,12 @@ import { studentCoursesSteps } from "../Onboarding/routes/student";
 const DEFAULT_STATE = { searchTitle: undefined, sort: "title", category: undefined };
 
 const LegacyCoursesView = () => {
-  const { isStudent, isAdminLike } = useUserRole();
+  const { hasAccess: canUpdateLearningProgress } = usePermissions({
+    required: PERMISSIONS.LEARNING_PROGRESS_UPDATE,
+  });
+  const { hasAccess: canManageCourses } = usePermissions({
+    required: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
+  });
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -77,7 +82,10 @@ const LegacyCoursesView = () => {
 
   const { data: categories, isLoading: isCategoriesLoading } = useCategories();
 
-  const steps = useMemo(() => (isStudent ? studentCoursesSteps(t) : []), [t, isStudent]);
+  const steps = useMemo(
+    () => (canUpdateLearningProgress ? studentCoursesSteps(t) : []),
+    [t, canUpdateLearningProgress],
+  );
 
   useTourSetup({
     steps,
@@ -137,7 +145,7 @@ const LegacyCoursesView = () => {
       ]}
     >
       <div className="flex h-auto flex-1 flex-col gap-y-12">
-        {isStudent && <StudentsCurses />}
+        {canUpdateLearningProgress && <StudentsCurses />}
         <div className="flex flex-col">
           <div className="flex flex-col lg:p-0">
             <h4 className="h4 pb-1 text-neutral-950">
@@ -159,7 +167,7 @@ const LegacyCoursesView = () => {
                 isLoading={isCategoriesLoading}
               />
 
-              {isAdminLike && (
+              {canManageCourses && (
                 <ButtonGroup
                   buttons={[
                     {

@@ -11,24 +11,30 @@ import { ResetOnboarding } from "./ResetOnboarding";
 import type { AdminSettings, UserSettings } from "../types";
 
 interface AccountTabContentProps {
-  isContentCreator: boolean;
-  isAdmin: boolean;
+  canManageCourses: boolean;
+  canManageUsers: boolean;
+  canAccessIntegrationApi: boolean;
+  canResetOnboarding: boolean;
   settings: AdminSettings | UserSettings;
 }
 
 export default function AccountTabContent({
-  isContentCreator,
-  isAdmin,
+  canManageCourses,
+  canManageUsers,
+  canAccessIntegrationApi,
+  canResetOnboarding,
   settings,
 }: AccountTabContentProps) {
   return (
     <>
       <LanguageSelect />
-      {(isContentCreator || isAdmin) && <UserDetailsForm />}
+      {(canManageCourses || canManageUsers) && <UserDetailsForm />}
       <ChangePasswordForm />
-      {isAdmin && isAdminSettings(settings) && <NotificationPreferences adminSettings={settings} />}
-      {isAdmin && <IntegrationApiKeyCard />}
-      {!isAdmin && !isContentCreator && <ResetOnboarding />}
+      {(canManageUsers || canManageCourses) && isAdminSettings(settings) && (
+        <NotificationPreferences adminSettings={settings} />
+      )}
+      {canAccessIntegrationApi && <IntegrationApiKeyCard />}
+      {canResetOnboarding && <ResetOnboarding />}
     </>
   );
 }

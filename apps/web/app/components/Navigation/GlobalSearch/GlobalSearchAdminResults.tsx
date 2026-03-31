@@ -1,3 +1,4 @@
+import { PERMISSIONS } from "@repo/shared";
 import { useQueries } from "@tanstack/react-query";
 
 import {
@@ -12,7 +13,7 @@ import { announcementsForUserOptions } from "~/api/queries/useAnnouncementsForUs
 import { articlesSearchQueryOptions } from "~/api/queries/useArticlesSearch";
 import { newsSearchQueryOptions } from "~/api/queries/useNewsList";
 import { LessonEntry } from "~/components/Navigation/GlobalSearch/LessonEntry";
-import { useUserRole } from "~/hooks/useUserRole";
+import { usePermissions } from "~/hooks/usePermissions";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { AnnouncementEntry } from "./AnnouncementEntry";
@@ -38,8 +39,11 @@ export const GlobalSearchAdminResults = ({
   activeIndex: number;
   setTotalItems: (count: number) => void;
 }) => {
-  const { isAdmin, isContentCreator } = useUserRole();
-  const isAllowed = isAdmin || isContentCreator;
+  const { hasAccess: canManageUsers } = usePermissions({ required: PERMISSIONS.USER_MANAGE });
+  const { hasAccess: canManageOwnCourses } = usePermissions({
+    required: PERMISSIONS.COURSE_UPDATE_OWN,
+  });
+  const isAllowed = canManageUsers || canManageOwnCourses;
   const { language } = useLanguageStore();
 
   const tabsToDisplay = useQueries({

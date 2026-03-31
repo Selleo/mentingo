@@ -1,14 +1,18 @@
+import { PERMISSIONS } from "@repo/shared";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useCurrentUserSuspense } from "~/api/queries";
 import { useStripeConfigured } from "~/api/queries/useStripeConfigured";
-import { useUserRole } from "~/hooks/useUserRole";
+import { usePermissions } from "~/hooks/usePermissions";
 
 export const useEditCourseTabs = () => {
   const { t } = useTranslation();
   const { data: isStripeConfigured } = useStripeConfigured();
 
-  const { isAdmin, isManagingTenantAdmin } = useUserRole();
+  const { hasAccess: canManageUsers } = usePermissions({ required: PERMISSIONS.USER_MANAGE });
+  const { data: currentUser } = useCurrentUserSuspense();
+  const isManagingTenantAdmin = Boolean(currentUser?.isManagingTenantAdmin);
 
   const baseTabs = useMemo(
     () => [
@@ -37,5 +41,5 @@ export const useEditCourseTabs = () => {
     [isManagingTenantAdmin, t],
   );
 
-  return isAdmin ? [...baseTabs, ...adminTabs] : baseTabs;
+  return canManageUsers ? [...baseTabs, ...adminTabs] : baseTabs;
 };

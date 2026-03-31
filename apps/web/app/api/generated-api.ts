@@ -35,7 +35,6 @@ export interface RegisterResponse {
     email: string;
     firstName: string;
     lastName: string;
-    role: string;
     archived: boolean;
     deletedAt: string | null;
     profilePictureUrl: string | null;
@@ -75,7 +74,6 @@ export interface LoginResponse {
     email: string;
     firstName: string;
     lastName: string;
-    role: string;
     archived: boolean;
     deletedAt: string | null;
     profilePictureUrl: string | null;
@@ -108,10 +106,65 @@ export interface CurrentUserResponse {
     email: string;
     firstName: string;
     lastName: string;
-    role: string;
     archived: boolean;
     deletedAt: string | null;
     profilePictureUrl: string | null;
+    roleSlugs: string[];
+    permissions: (
+      | "account.read_self"
+      | "account.update_self"
+      | "user.read_self"
+      | "user.manage"
+      | "settings.read_self"
+      | "settings.update_self"
+      | "settings.manage"
+      | "env.read_public"
+      | "env.manage"
+      | "category.read"
+      | "category.manage"
+      | "group.read"
+      | "group.manage"
+      | "course.read_assigned"
+      | "course.read_manageable"
+      | "course.read"
+      | "course.create"
+      | "course.update"
+      | "course.update_own"
+      | "course.delete"
+      | "course.enrollment"
+      | "course.statistics"
+      | "course.export"
+      | "learning_mode.use"
+      | "learning_progress.update"
+      | "certificate.read"
+      | "certificate.share"
+      | "certificate.render"
+      | "file.upload"
+      | "file.delete"
+      | "ai.use"
+      | "announcement.read"
+      | "announcement.create"
+      | "news.read_public"
+      | "news.manage"
+      | "news.manage_own"
+      | "article.read_public"
+      | "article.manage"
+      | "article.manage_own"
+      | "qa.read_public"
+      | "qa.manage"
+      | "qa.manage_own"
+      | "report.read"
+      | "statistics.read_self"
+      | "statistics.read"
+      | "billing.checkout"
+      | "billing.manage"
+      | "integration_key.manage"
+      | "integration_api.use"
+      | "tenant.manage"
+      | "scorm.upload"
+      | "scorm.read"
+      | "course.ai_generation"
+    )[];
     shouldVerifyMFA: boolean;
     onboardingStatus: {
       id: string;
@@ -175,7 +228,6 @@ export interface CreatePasswordResponse {
     email: string;
     firstName: string;
     lastName: string;
-    role: string;
     archived: boolean;
     deletedAt: string | null;
     profilePictureUrl: string | null;
@@ -242,7 +294,6 @@ export interface HandleMagicLinkResponse {
     email: string;
     firstName: string;
     lastName: string;
-    role: string;
     archived: boolean;
     deletedAt: string | null;
     profilePictureUrl: string | null;
@@ -281,7 +332,7 @@ export interface GetPublicGlobalSettingsResponse {
     platformLogoS3Key: string | null;
     loginBackgroundImageS3Key: string | null;
     platformSimpleLogoS3Key: string | null;
-    MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
+    MFAEnforcedRoles: string[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
     userEmailTriggers: {
@@ -409,7 +460,7 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     platformLogoS3Key: string | null;
     loginBackgroundImageS3Key: string | null;
     platformSimpleLogoS3Key: string | null;
-    MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
+    MFAEnforcedRoles: string[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
     userEmailTriggers: {
@@ -451,7 +502,7 @@ export interface UpdateEnforceSSOResponse {
     platformLogoS3Key: string | null;
     loginBackgroundImageS3Key: string | null;
     platformSimpleLogoS3Key: string | null;
-    MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
+    MFAEnforcedRoles: string[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
     userEmailTriggers: {
@@ -493,7 +544,7 @@ export interface UpdateModernCourseListEnabledResponse {
     platformLogoS3Key: string | null;
     loginBackgroundImageS3Key: string | null;
     platformSimpleLogoS3Key: string | null;
-    MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
+    MFAEnforcedRoles: string[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
     userEmailTriggers: {
@@ -566,7 +617,7 @@ export interface UpdateColorSchemaResponse {
     platformLogoS3Key: string | null;
     loginBackgroundImageS3Key: string | null;
     platformSimpleLogoS3Key: string | null;
-    MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
+    MFAEnforcedRoles: string[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
     userEmailTriggers: {
@@ -725,11 +776,7 @@ export interface UpdateCompanyInformationResponse {
   };
 }
 
-export interface UpdateMFAEnforcedRolesBody {
-  admin?: boolean;
-  student?: boolean;
-  content_creator?: boolean;
-}
+export type UpdateMFAEnforcedRolesBody = object;
 
 export interface UpdateDefaultCourseCurrencyBody {
   defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
@@ -926,7 +973,6 @@ export interface GetUsersResponse {
     email: string;
     firstName: string;
     lastName: string;
-    role: string;
     archived: boolean;
     deletedAt: string | null;
     profilePictureUrl: string | null;
@@ -953,10 +999,10 @@ export interface GetUserByIdResponse {
     email: string;
     firstName: string;
     lastName: string;
-    role: string;
     archived: boolean;
     deletedAt: string | null;
     profilePictureUrl: string | null;
+    roleSlugs: string[];
     groups: {
       /** @format uuid */
       id: string;
@@ -975,7 +1021,6 @@ export interface GetUserDetailsResponse {
     contactEmail: string | null;
     contactPhone: string | null;
     jobTitle: string | null;
-    role: "admin" | "student" | "content_creator";
     profilePictureUrl: string | null;
   };
 }
@@ -986,7 +1031,8 @@ export interface UpdateUserBody {
   groups?: string[] | null;
   /** @format email */
   email?: string;
-  role?: "admin" | "student" | "content_creator";
+  /** @minItems 1 */
+  roleSlugs?: string[];
   archived?: boolean;
 }
 
@@ -998,7 +1044,6 @@ export interface UpdateUserResponse {
     email: string;
     firstName: string;
     lastName: string;
-    role: string;
     archived: boolean;
     deletedAt: string | null;
     profilePictureUrl: string | null;
@@ -1027,7 +1072,8 @@ export interface AdminUpdateUserBody {
   groups?: string[] | null;
   /** @format email */
   email?: string;
-  role?: "admin" | "student" | "content_creator";
+  /** @minItems 1 */
+  roleSlugs?: string[];
   archived?: boolean;
 }
 
@@ -1039,7 +1085,6 @@ export interface AdminUpdateUserResponse {
     email: string;
     firstName: string;
     lastName: string;
-    role: string;
     archived: boolean;
     deletedAt: string | null;
     profilePictureUrl: string | null;
@@ -1083,7 +1128,8 @@ export interface ArchiveBulkUsersResponse {
 
 export interface BulkUpdateUsersRolesBody {
   userIds: string[];
-  role: "admin" | "student" | "content_creator";
+  /** @minItems 1 */
+  roleSlugs: string[];
 }
 
 export interface CreateUserBody {
@@ -1099,7 +1145,7 @@ export interface CreateUserBody {
    * @maxLength 64
    */
   lastName: string;
-  role: "admin" | "student" | "content_creator";
+  roleSlugs: string[];
   language?: string;
 }
 
@@ -1167,7 +1213,6 @@ export interface GetAllGroupsResponse {
       email: string;
       firstName: string;
       lastName: string;
-      role: string;
       archived: boolean;
       deletedAt: string | null;
       profilePictureUrl: string | null;
@@ -1196,7 +1241,6 @@ export interface GetGroupByIdResponse {
       email: string;
       firstName: string;
       lastName: string;
-      role: string;
       archived: boolean;
       deletedAt: string | null;
       profilePictureUrl: string | null;
@@ -1219,7 +1263,6 @@ export interface GetUserGroupsResponse {
       email: string;
       firstName: string;
       lastName: string;
-      role: string;
       archived: boolean;
       deletedAt: string | null;
       profilePictureUrl: string | null;
@@ -3500,7 +3543,6 @@ export interface GetGroupsResponse {
       email: string;
       firstName: string;
       lastName: string;
-      role: string;
       archived: boolean;
       deletedAt: string | null;
       profilePictureUrl: string | null;
@@ -5653,7 +5695,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     userControllerGetUsers: (
       query?: {
         keyword?: string;
-        role?: "admin" | "student" | "content_creator";
+        roleSlug?: string;
         archived?: string;
         /** @min 1 */
         page?: number;
@@ -8535,7 +8577,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     integrationControllerGetUsers: (
       query?: {
         keyword?: string;
-        role?: "admin" | "student" | "content_creator";
+        roleSlug?: string;
         archived?: string;
         /** @min 1 */
         page?: number;

@@ -1,3 +1,4 @@
+import { PERMISSIONS } from "@repo/shared";
 import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { useCallback, useMemo, useState } from "react";
@@ -18,7 +19,7 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { UserAvatar } from "~/components/UserProfile/UserAvatar";
-import { useUserRole } from "~/hooks/useUserRole";
+import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
 import { tanstackSortingToParam } from "~/utils/tanstackSortingToParam";
 
@@ -50,7 +51,9 @@ export function CourseStudentsAiMentorResultsTable({
 }: CourseStudentsAiMentorResultsTableProps) {
   const { t } = useTranslation();
 
-  const { isAdminLike } = useUserRole();
+  const { hasAccess: canManageCourses } = usePermissions({
+    required: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
+  });
 
   const [isPreviewDialogOpen, setIsPreviewDialogOpen] = useState(false);
   const [previewDialogData, setPreviewDialogData] = useState<{
@@ -69,7 +72,7 @@ export function CourseStudentsAiMentorResultsTable({
 
   const { data: courseStudentsAiMentorResults, isFetching } = useCourseStudentsAiMentorResults({
     id: courseId,
-    enabled: isAdminLike,
+    enabled: canManageCourses,
     query,
   });
 

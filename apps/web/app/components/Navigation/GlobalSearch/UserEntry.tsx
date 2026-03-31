@@ -1,13 +1,7 @@
 import { Link } from "@remix-run/react";
-import { replace, upperFirst, toLower } from "lodash-es";
+import { upperFirst, toLower } from "lodash-es";
 
 import type { GetUsersResponse } from "~/api/generated-api";
-
-const normalizeText = (value?: string | null): string => {
-  if (!value) return "";
-  const spaced = replace(value, /[_-]+/g, " ");
-  return upperFirst(toLower(spaced));
-};
 
 export const UserEntry = ({
   item,
@@ -16,6 +10,11 @@ export const UserEntry = ({
   item: GetUsersResponse["data"][number];
   onSelect: () => void;
 }) => {
+  const groupsText = item.groups
+    .map((group) => upperFirst(toLower(group.name)))
+    .slice(0, 2)
+    .join(", ");
+
   return (
     <Link
       to={`/admin/users/${item.id}`}
@@ -31,7 +30,7 @@ export const UserEntry = ({
         <span className="line-clamp-1 flex-1">
           {item.firstName} {item.lastName}
         </span>
-        <span className="text-md ps-3 text-neutral-600">{normalizeText(item.role)}</span>
+        <span className="text-md ps-3 text-neutral-600">{groupsText}</span>
       </li>
     </Link>
   );

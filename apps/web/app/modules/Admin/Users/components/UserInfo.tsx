@@ -56,17 +56,13 @@ export const UserInfo = ({ name, control, isEditing, user }: UserInfoType) => {
           return <span className="font-semibold capitalize">{user[name]?.toString()}</span>;
         }
 
-        if (name === "role") {
+        if (name === "roleSlugs") {
+          const selectedRole = Array.isArray(field.value) ? field.value[0] : undefined;
+
           return (
-            <Select
-              onValueChange={field.onChange}
-              value={field.value as UpdateUserBody["role"] | undefined}
-            >
+            <Select onValueChange={(value) => field.onChange([value])} value={selectedRole}>
               <SelectTrigger className="w-full rounded-md border border-neutral-300 px-2 py-1">
-                <SelectValue
-                  placeholder={capitalize(field.value as string)}
-                  className="capitalize"
-                />
+                <SelectValue placeholder={capitalize(selectedRole)} className="capitalize" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>

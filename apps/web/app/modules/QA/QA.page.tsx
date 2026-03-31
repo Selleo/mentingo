@@ -1,5 +1,5 @@
 import { Link, useSearchParams } from "@remix-run/react";
-import { ACCESS_GUARD } from "@repo/shared";
+import { ACCESS_GUARD, PERMISSIONS } from "@repo/shared";
 import { useEffect, useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -9,7 +9,7 @@ import { PageWrapper } from "~/components/PageWrapper";
 import { Accordion } from "~/components/ui/accordion";
 import { Button } from "~/components/ui/button";
 import { ContentAccessGuard } from "~/Guards/AccessGuard";
-import { useUserRole } from "~/hooks/useUserRole";
+import { usePermissions } from "~/hooks/usePermissions";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import QAItem from "~/modules/QA/components/QAItem";
 import { setPageTitle } from "~/utils/setPageTitle";
@@ -21,7 +21,7 @@ export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.
 export default function QAPage() {
   const { t } = useTranslation();
 
-  const { isAdmin } = useUserRole();
+  const { hasAccess: canManageQA } = usePermissions({ required: PERMISSIONS.QA_MANAGE });
   const { data: settings } = useUserSettings();
 
   const { language } = useLanguageStore();
@@ -48,14 +48,14 @@ export default function QAPage() {
   }, [openItem]);
 
   const filteredQA = useMemo(() => {
-    if (isAdmin) return QA;
+    if (canManageQA) return QA;
 
     return QA?.filter((item) => {
       if (settings?.language !== "en" && settings?.language !== "pl") return false;
 
       return item.availableLocales.includes(settings.language);
     });
-  }, [QA, isAdmin, settings?.language]);
+  }, [QA, canManageQA, settings?.language]);
 
   return (
     <ContentAccessGuard type={ACCESS_GUARD.UNREGISTERED_QA_ACCESS}>
@@ -71,7 +71,7 @@ export default function QAPage() {
                 <h4 className="h4 font-semibold">{t("QA.header")}</h4>
                 <h5 className="text-xl">{t("QA.subHeader")}</h5>
               </div>
-              {isAdmin && (
+              {canManageQA && (
                 <Link to="/qa/new" className="ml-2">
                   <Button>{t("qaView.button.createNew")}</Button>
                 </Link>
@@ -92,7 +92,7 @@ export default function QAPage() {
                       id={item.id}
                       title={item.title}
                       description={item.description}
-                      isAdmin={isAdmin}
+                      canManageQA={canManageQA}
                       availableLocales={item.availableLocales}
                     />
                   ))}

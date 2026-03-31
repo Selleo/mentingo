@@ -1,4 +1,5 @@
 import { TabsList } from "@radix-ui/react-tabs";
+import { PERMISSIONS } from "@repo/shared";
 import { useMemo, useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
@@ -16,7 +17,7 @@ import {
 } from "~/components/ui/select";
 import { Tabs, TabsContent, TabsTrigger } from "~/components/ui/tabs";
 import { TooltipProvider } from "~/components/ui/tooltip";
-import { useUserRole } from "~/hooks/useUserRole";
+import { usePermissions } from "~/hooks/usePermissions";
 import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 import {
   SearchFilter,
@@ -72,7 +73,9 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
   const { t } = useTranslation();
   const courseId = course?.id || "";
 
-  const { isAdminLike } = useUserRole();
+  const { hasAccess: canManageCourses } = usePermissions({
+    required: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
+  });
 
   const [groupId, setGroupId] = useState<string | undefined>(undefined);
 
@@ -121,17 +124,17 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
 
   const { data: learningTimeFilterOptions } = useCourseStatisticsFilter({
     id: courseId,
-    enabled: isAdminLike,
+    enabled: canManageCourses,
   });
 
   const { data: courseStatistics } = useCourseStatistics({
     id: courseId,
-    enabled: isAdminLike,
+    enabled: canManageCourses,
     query: courseStatisticsParams,
   });
   const { data: averageQuizScores } = useCourseAverageScorePerQuiz({
     id: courseId,
-    enabled: isAdminLike,
+    enabled: canManageCourses,
     query: courseStatisticsParams,
   });
 

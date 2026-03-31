@@ -1,5 +1,5 @@
 import { useNavigate, useSearchParams } from "@remix-run/react";
-import { ACCESS_GUARD } from "@repo/shared";
+import { ACCESS_GUARD, PERMISSIONS } from "@repo/shared";
 import { useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { ContentAccessGuard } from "~/Guards/AccessGuard";
-import { useUserRole } from "~/hooks/useUserRole";
+import { usePermissions } from "~/hooks/usePermissions";
 
 import Loader from "../common/Loader/Loader";
 import { useLanguageStore } from "../Dashboard/Settings/Language/LanguageStore";
@@ -37,8 +37,10 @@ function NewsPage() {
 
   const [currentPage, setCurrentPage] = useState<number>(() => parsePageParam());
   const [statusFilter, setStatusFilter] = useState<"published" | "draft">("published");
-  const { isAdminLike } = useUserRole();
-  const isDraftTab = isAdminLike && statusFilter === "draft";
+  const { hasAccess: canManageNews } = usePermissions({
+    required: [PERMISSIONS.NEWS_MANAGE, PERMISSIONS.NEWS_MANAGE_OWN],
+  });
+  const isDraftTab = canManageNews && statusFilter === "draft";
 
   const { mutateAsync: createNews } = useCreateNews();
   const { language } = useLanguageStore();
@@ -107,7 +109,7 @@ function NewsPage() {
           <div className="flex items-center justify-between pb-10">
             <h1 className="h4">{t("newsView.header")}</h1>
             <div className="flex items-center gap-3">
-              {isAdminLike && (
+              {canManageNews && (
                 <Select
                   value={statusFilter}
                   onValueChange={(value) => {
@@ -128,7 +130,7 @@ function NewsPage() {
                   </SelectContent>
                 </Select>
               )}
-              {isAdminLike && (
+              {canManageNews && (
                 <Button
                   className="flex items-center justify-center rounded-full w-12 h-12"
                   variant="outline"
@@ -172,7 +174,7 @@ function NewsPage() {
     displayedNews,
     currentPage,
     t,
-    isAdminLike,
+    canManageCourses,
     statusFilter,
     searchParams,
     setSearchParams,

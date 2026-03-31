@@ -1,4 +1,5 @@
 import { Link } from "@remix-run/react";
+import { PERMISSIONS } from "@repo/shared";
 import { formatDate } from "date-fns";
 import { BookOpen, Clock, Play } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -8,7 +9,7 @@ import DefaultPhotoCourse from "~/assets/svgs/default-photo-course.svg";
 import { CardBadge } from "~/components/CardBadge";
 import { Icon } from "~/components/Icon";
 import { CategoryChip } from "~/components/ui/CategoryChip";
-import { useUserRole } from "~/hooks/useUserRole";
+import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
 import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
@@ -68,7 +69,9 @@ const ModernCourseCard = ({
   popoutEnabled = true,
 }: ModernCourseCardProps) => {
   const { t } = useTranslation();
-  const { isStudent } = useUserRole();
+  const { hasAccess: canUpdateLearningProgress } = usePermissions({
+    required: PERMISSIONS.LEARNING_PROGRESS_UPDATE,
+  });
   const [isHovered, setIsHovered] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const [isIframeLoaded, setIsIframeLoaded] = useState(false);
@@ -243,7 +246,7 @@ const ModernCourseCard = ({
             transitionTimingFunction: SMOOTH_EASE,
           }}
         >
-          {isStudent && (
+          {canUpdateLearningProgress && (
             <div
               className="absolute left-4 right-4 top-4 z-30 flex flex-col gap-y-1 transition-opacity duration-300"
               style={{ opacity: isHovered ? 0 : 1 }}

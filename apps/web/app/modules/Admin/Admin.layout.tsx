@@ -1,4 +1,5 @@
 import { type MetaFunction, Outlet, redirect, useLocation, useNavigate } from "@remix-run/react";
+import { PERMISSIONS } from "@repo/shared";
 import { Suspense, useLayoutEffect } from "react";
 import { match } from "ts-pattern";
 
@@ -6,7 +7,7 @@ import { currentUserQueryOptions } from "~/api/queries";
 import { useLatestUnreadAnnouncements } from "~/api/queries/useLatestUnreadNotifications";
 import { queryClient } from "~/api/queryClient";
 import { RouteGuard } from "~/Guards/RouteGuard";
-import { useUserRole } from "~/hooks/useUserRole";
+import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
 import { saveEntryToNavigationHistory } from "~/utils/saveEntryToNavigationHistory";
 import { setPageTitle } from "~/utils/setPageTitle";
@@ -35,12 +36,15 @@ export const clientLoader = async ({ request }: { request: Request }) => {
 };
 
 const AdminGuard = ({ children }: PropsWithChildren) => {
-  const { isAdmin, isContentCreator } = useUserRole();
+  const { hasAccess: canManageUsers } = usePermissions({ required: PERMISSIONS.USER_MANAGE });
+  const { hasAccess: canManageOwnCourses } = usePermissions({
+    required: PERMISSIONS.COURSE_UPDATE_OWN,
+  });
   const navigate = useNavigate();
 
-  const isAllowed = isAdmin || isContentCreator;
+  const isAllowed = canManageUsers || canManageOwnCourses;
 
-  const { data: latestUnreadAnnouncements } = useLatestUnreadAnnouncements(isContentCreator);
+  const { data: latestUnreadAnnouncements } = useLatestUnreadAnnouncements(canManageOwnCourses);
 
   useLayoutEffect(() => {
     if (!isAllowed) {

@@ -1,13 +1,14 @@
 import { createRemixStub } from "@remix-run/testing";
+import { PERMISSIONS } from "@repo/shared";
 import { screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { useUserRole } from "~/hooks/useUserRole";
+import { useCurrentUserSuspense } from "~/api/queries";
 import { renderWith } from "~/utils/testUtils";
 
 import { RouteGuard } from "../RouteGuard";
 
-vi.mock("~/hooks/useUserRole");
+vi.mock("~/api/queries");
 
 describe("RouteGuard", () => {
   beforeEach(() => {
@@ -15,14 +16,11 @@ describe("RouteGuard", () => {
   });
 
   it("should render children when user has access", async () => {
-    vi.mocked(useUserRole).mockReturnValue({
-      role: "admin",
-      isAdmin: true,
-      isContentCreator: false,
-      isAdminLike: true,
-      isStudent: false,
-      isManagingTenantAdmin: false,
-    });
+    vi.mocked(useCurrentUserSuspense).mockReturnValue({
+      data: {
+        permissions: [PERMISSIONS.USER_MANAGE, PERMISSIONS.COURSE_UPDATE],
+      },
+    } as ReturnType<typeof useCurrentUserSuspense>);
 
     const RemixStub = createRemixStub([
       {
@@ -46,14 +44,11 @@ describe("RouteGuard", () => {
   });
 
   it("should not render when user has no access", async () => {
-    vi.mocked(useUserRole).mockReturnValue({
-      role: "student",
-      isAdmin: false,
-      isContentCreator: false,
-      isAdminLike: false,
-      isStudent: false,
-      isManagingTenantAdmin: false,
-    });
+    vi.mocked(useCurrentUserSuspense).mockReturnValue({
+      data: {
+        permissions: [PERMISSIONS.COURSE_READ],
+      },
+    } as ReturnType<typeof useCurrentUserSuspense>);
 
     const RemixStub = createRemixStub([
       {
