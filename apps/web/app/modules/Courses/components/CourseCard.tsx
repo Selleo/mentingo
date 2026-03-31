@@ -39,7 +39,9 @@ const CourseCard = ({
   isFirst = false,
   slug,
 }: CourseCardProps) => {
-  const { hasAccess: canManageUsers } = usePermissions({ required: PERMISSIONS.USER_MANAGE });
+  const { hasAccess: canManageCourses } = usePermissions({
+    required: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
+  });
   const { pathname } = useLocation();
   const isScormCreatePage = pathname.includes("/admin/courses/new-scorm");
   const { t } = useTranslation();
@@ -73,7 +75,7 @@ const CourseCard = ({
             category={category}
             color={cn({
               "text-secondary-600": enrolled,
-              "text-primary-700": canManageUsers || !enrolled,
+              "text-primary-700": canManageCourses || !enrolled,
             })}
           />
           {hasFreeChapters && !enrolled && (
@@ -116,7 +118,7 @@ const CourseCard = ({
           <CourseCardButton
             currency={currency}
             enrolled={enrolled}
-            canManageUsers={canManageUsers}
+            canManageCourses={canManageCourses}
             priceInCents={priceInCents}
             isScormCreatePage={isScormCreatePage}
           />

@@ -174,11 +174,11 @@ function NewsPage() {
     displayedNews,
     currentPage,
     t,
-    canManageCourses,
     statusFilter,
     searchParams,
     setSearchParams,
     createEmptyNews,
+    canManageNews,
   ]);
 
   const isLoadingNewsList = isDraftTab ? isLoadingDraftNewsList : isLoadingPublishedNewsList;
