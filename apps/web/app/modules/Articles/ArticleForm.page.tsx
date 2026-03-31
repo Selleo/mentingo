@@ -218,7 +218,6 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
 
           editor
             ?.chain()
-            .insertContent("<br />")
             .setVideoEmbed({
               src: resourceUrl,
               sourceType: session.provider === "s3" ? "external" : "internal",

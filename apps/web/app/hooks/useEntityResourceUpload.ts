@@ -52,7 +52,7 @@ export const insertResourceIntoEditor = ({
   displayMode = "preview",
 }: InsertResourceArgs) => {
   const resourceUrl = buildEntityResourceUrl(resourceId, entityType);
-  const chain = editor?.chain().insertContent("<br />");
+  const chain = editor?.chain();
 
   if (resourceType === "presentation") {
     if (displayMode === "download") {
