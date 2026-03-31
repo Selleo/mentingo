@@ -374,8 +374,14 @@ export class CourseController {
     @Query("id") idOrSlug: string,
     @Query("language") language: SupportedLanguages,
     @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser("role") currentUserRole?: UserRole,
   ): Promise<BaseResponse<CommonShowCourse>> {
-    const course = await this.courseService.getCourse(idOrSlug, currentUserId, language);
+    const course = await this.courseService.getCourse(
+      idOrSlug,
+      currentUserId,
+      currentUserRole,
+      language,
+    );
     return new BaseResponse(course);
   }
 
@@ -392,8 +398,14 @@ export class CourseController {
     @Query("id") idOrSlug: string,
     @Query("language") language: SupportedLanguages,
     @CurrentUser("userId") currentUserId?: UUIDType,
+    @CurrentUser("role") currentUserRole?: UserRole,
   ): Promise<BaseResponse<CourseLookupResponse>> {
-    const result = await this.courseService.lookupCourse(idOrSlug, language, currentUserId);
+    const result = await this.courseService.lookupCourse(
+      idOrSlug,
+      language,
+      currentUserId,
+      currentUserRole,
+    );
 
     return new BaseResponse(result);
   }

@@ -1031,6 +1031,7 @@ export class CourseService {
   async getCourse(
     idOrSlug: UUIDType | string,
     userId: UUIDType,
+    userRole: UserRole | undefined,
     language: SupportedLanguages,
   ): Promise<CommonShowCourse> {
     const { courseId: id, slug: currentSlug } = match(
@@ -1091,9 +1092,15 @@ export class CourseService {
 
     const isEnrolled = !!course.enrolled;
     const NON_PUBLIC_STATUSES = ["draft", "private"];
+    const isAdmin = userRole === USER_ROLES.ADMIN;
 
     if (!course) throw new NotFoundException("Course not found");
-    if (userId !== course.authorId && NON_PUBLIC_STATUSES.includes(course.status) && !isEnrolled)
+    if (
+      !isAdmin &&
+      userId !== course.authorId &&
+      NON_PUBLIC_STATUSES.includes(course.status) &&
+      !isEnrolled
+    )
       throw new ForbiddenException("You have no access to this course");
 
     const courseChapterList = await this.db
@@ -1223,6 +1230,7 @@ export class CourseService {
     idOrSlug: string,
     language: SupportedLanguages,
     userId?: UUIDType,
+    userRole?: UserRole,
   ): Promise<CourseLookupResponse> {
     const lookupResult = await this.courseSlugService.getCourseIdBySlug(idOrSlug, language);
 
@@ -1258,9 +1266,11 @@ export class CourseService {
 
     const isEnrolled = !!course.enrolled;
     const NON_PUBLIC_STATUSES = ["draft", "private"];
+    const isAdmin = userRole === USER_ROLES.ADMIN;
 
     if (userId !== undefined) {
       if (
+        !isAdmin &&
         userId !== course.authorId &&
         NON_PUBLIC_STATUSES.includes(course.status) &&
         !isEnrolled
