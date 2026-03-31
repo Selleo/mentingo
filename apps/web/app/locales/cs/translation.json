@@ -814,7 +814,8 @@
     },
     "toast": {
       "cannotUpdateOwnRole": "Správce nemůže změnit svou vlastní roli",
-      "noUserSelected": "Nebyl vybrán žádný uživatel"
+      "noUserSelected": "Nebyl vybrán žádný uživatel",
+      "userMustHaveAtLeastOneRole": "Uživatel musí mít alespoň jednu roli."
     },
     "import": {
       "toast": {

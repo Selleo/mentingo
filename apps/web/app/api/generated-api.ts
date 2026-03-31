@@ -977,6 +977,7 @@ export interface GetUsersResponse {
     deletedAt: string | null;
     profilePictureUrl: string | null;
   } & {
+    roleSlugs: string[];
     groups: {
       /** @format uuid */
       id: string;
@@ -989,6 +990,16 @@ export interface GetUsersResponse {
     perPage: number;
   };
   appliedFilters?: object;
+}
+
+export interface GetRolesResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    slug: string;
+    isSystem: boolean;
+  }[];
 }
 
 export interface GetUserByIdResponse {
@@ -5719,6 +5730,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/user/all`,
         method: "GET",
         query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UserControllerGetRoles
+     * @request GET:/api/user/roles
+     */
+    userControllerGetRoles: (params: RequestParams = {}) =>
+      this.request<GetRolesResponse, any>({
+        path: `/api/user/roles`,
+        method: "GET",
         format: "json",
         ...params,
       }),

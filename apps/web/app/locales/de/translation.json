@@ -814,7 +814,8 @@
     },
     "toast": {
       "cannotUpdateOwnRole": "Der Administrator kann seine eigene Rolle nicht ändern",
-      "noUserSelected": "Kein Benutzer ausgewählt"
+      "noUserSelected": "Kein Benutzer ausgewählt",
+      "userMustHaveAtLeastOneRole": "Ein Benutzer muss mindestens eine Rolle haben."
     },
     "import": {
       "toast": {

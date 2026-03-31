@@ -799,7 +799,8 @@
     },
     "toast": {
       "cannotUpdateOwnRole": "Administrator nie może zmienić własnej roli",
-      "noUserSelected": "Nie wybrano żadnego użytkownika"
+      "noUserSelected": "Nie wybrano żadnego użytkownika",
+      "userMustHaveAtLeastOneRole": "Użytkownik musi mieć co najmniej jedną rolę."
     },
     "other": {
       "selected": "Wybrany"

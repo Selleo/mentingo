@@ -134,6 +134,11 @@ export class UserService {
     const usersData = await this.db
       .select({
         ...getTableColumns(users),
+        roleSlugs: sql<
+          string[]
+        >`COALESCE(json_agg(DISTINCT ${permissionRoles.slug}) FILTER (WHERE ${permissionRoles.slug} IS NOT NULL), '[]')`.as(
+          "roleSlugs",
+        ),
         groups: sql<
           Array<{ id: string; name: string }>
         >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${groups.id}, 'name', ${groups.name})) FILTER (WHERE ${groups.id} IS NOT NULL), '[]')`.as(
@@ -141,6 +146,20 @@ export class UserService {
         ),
       })
       .from(users)
+      .leftJoin(
+        permissionUserRoles,
+        and(
+          eq(users.id, permissionUserRoles.userId),
+          eq(users.tenantId, permissionUserRoles.tenantId),
+        ),
+      )
+      .leftJoin(
+        permissionRoles,
+        and(
+          eq(permissionRoles.id, permissionUserRoles.roleId),
+          eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
+        ),
+      )
       .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
       .leftJoin(groups, eq(groupUsers.groupId, groups.id))
       .where(and(...conditions))
@@ -174,6 +193,16 @@ export class UserService {
         perPage,
       },
     };
+  }
+
+  public async getRoles(tenantId: UUIDType) {
+    return this.db
+      .select({
+        ...getTableColumns(permissionRoles),
+      })
+      .from(permissionRoles)
+      .where(eq(permissionRoles.tenantId, tenantId))
+      .orderBy(asc(permissionRoles.name));
   }
 
   public async getUserById(id: UUIDType, db?: DatabasePg) {
@@ -1142,7 +1171,7 @@ export class UserService {
     const uniqueRoleSlugs = Array.from(new Set(roleSlugs));
 
     if (!uniqueRoleSlugs.length) {
-      throw new BadRequestException("adminUsersView.toast.noUserSelected");
+      throw new BadRequestException("adminUsersView.toast.userMustHaveAtLeastOneRole");
     }
 
     const roles = await dbInstance

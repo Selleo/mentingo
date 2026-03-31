@@ -47,10 +47,6 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
     enabled: canManageEnvs,
   });
 
-  const { hasAccess: canManageAnnouncements } = usePermissions({
-    required: [PERMISSIONS.ANNOUNCEMENT_CREATE],
-  });
-
   const hasConfigurationIssues =
     canManageEnvs && configurationState?.hasIssues && !configurationState?.isWarningDismissed;
 
@@ -76,7 +72,6 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
         globalSettings?.newsEnabled,
         globalSettings?.articlesEnabled,
         isStripeConfigured?.enabled,
-        canManageAnnouncements,
       ),
     );
   }

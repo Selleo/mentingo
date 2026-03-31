@@ -4,7 +4,6 @@ import { ApiClient } from "../api-client";
 
 import type { GetUsersResponse } from "../generated-api";
 import type { Option } from "~/components/ui/multiselect";
-import type { UserRole } from "~/config/userRoles";
 
 const SORTABLE_FIELDS = ["firstName", "lastName", "email", "groupName", "createdAt"] as const;
 
@@ -13,7 +12,7 @@ type UsersSort = UsersSortField | `-${UsersSortField}`;
 
 export type UsersParams = {
   keyword?: string;
-  role?: UserRole;
+  role?: string;
   archived?: boolean;
   sort?: UsersSort;
   groups?: Option[];
@@ -36,7 +35,7 @@ export const usersQueryOptions = (
       page: searchParams?.page || 1,
       perPage: searchParams?.perPage || 10,
       ...(searchParams?.keyword && { keyword: searchParams.keyword }),
-      ...(searchParams?.role && { role: searchParams.role }),
+      ...(searchParams?.role && { roleSlug: searchParams.role }),
       ...(searchParams?.archived !== undefined && {
         archived: String(searchParams.archived),
       }),

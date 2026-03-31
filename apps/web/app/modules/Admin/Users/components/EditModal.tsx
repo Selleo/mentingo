@@ -1,4 +1,3 @@
-import { camelCase } from "lodash-es";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -12,20 +11,13 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 import MultipleSelector from "~/components/ui/multiselect";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
 import { useGroupsOptions } from "~/hooks/useGroupsOptions";
 import { ConfirmationModal } from "~/modules/Admin/Users/components/ConfirmationModal";
+import { getRoleLabel } from "~/modules/Admin/Users/utils/getRoleLabel";
 
 import type { BulkAssignUsersToGroupBody } from "~/api/generated-api";
+import type { RoleOption } from "~/api/queries/admin/useRoles";
 import type { CheckboxState, Option } from "~/components/ui/multiselect";
-import type { UserRole } from "~/config/userRoles";
 
 type GroupData = {
   id: string;
@@ -37,14 +29,12 @@ interface EditModalProps {
   onCancel: () => void;
   type: string;
   groupData: GroupData;
-  roleData: UserRole[];
+  roleData: RoleOption[];
   selectedUsers: BulkAssignUsersToGroupBody;
-  selectedValue: string;
-  setSelectedValue: (value: string) => void;
+  selectedValue: string[];
+  setSelectedValue: (value: string[]) => void;
   checkboxStates?: CheckboxState[];
 }
-
-type RoleItem = UserRole;
 
 const getInitiallySelected = (value: CheckboxState[], groupData: GroupData) => {
   return value
@@ -135,25 +125,13 @@ export const EditModal = ({
     setSelectedGroups(updatedOptions);
   };
 
-  const handleValueChange = (value: string) => {
-    setSelectedValue(value);
-  };
-
-  const items: RoleItem[] | undefined = type === "group" ? undefined : roleData;
-
-  const getLabel = (item: RoleItem) => {
-    if (!item) return "";
-
-    return t(`common.roles.${camelCase(item as string)}`) as string;
-  };
-
   const handleSubmit = () =>
     type === "delete" || type === "archive" ? onConfirm() : setShowConfirmationModal(true);
 
   const confirmationName =
     type === "group"
       ? selectedGroups.map((group) => group.label).join(", ")
-      : getLabel(selectedValue as RoleItem);
+      : selectedValue.map((roleSlug) => getRoleLabel(roleSlug, t, roleData)).join(", ");
 
   const renderContent = () => {
     switch (type) {
@@ -185,23 +163,29 @@ export const EditModal = ({
 
       default:
         return (
-          <Select onValueChange={handleValueChange} value={selectedValue}>
-            <SelectTrigger className="w-full rounded-md border border-neutral-300 px-2 py-1">
-              <SelectValue
-                placeholder={t(`adminUsersView.modal.placeholder.${type}`)}
-                className="capitalize"
-              />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {items?.map((item: RoleItem) => (
-                  <SelectItem className="capitalize" value={item} key={item}>
-                    {getLabel(item)}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          <MultipleSelector
+            value={selectedValue.map((roleSlug) => ({
+              value: roleSlug,
+              label: getRoleLabel(roleSlug, t, roleData),
+            }))}
+            options={roleData.map((role) => ({
+              value: role.slug,
+              label: getRoleLabel(role.slug, t, roleData),
+            }))}
+            onChange={(options) => setSelectedValue(options.map((option) => option.value))}
+            placeholder={t(`adminUsersView.modal.placeholder.${type}`)}
+            hidePlaceholderWhenSelected
+            hideClearAllButton
+            className="w-full bg-background p-2"
+            badgeClassName="bg-accent text-accent-foreground text-sm hover:bg-accent"
+            commandProps={{
+              label: t("adminUsersView.filters.placeholder.roles"),
+            }}
+            inputProps={{
+              className: "w-full outline-none py-0 body-base",
+            }}
+            checkbox={false}
+          />
         );
     }
   };
@@ -236,7 +220,7 @@ export const EditModal = ({
               <Button
                 onClick={handleSubmit}
                 variant={type === "delete" ? "destructive" : "primary"}
-                disabled={!selectedUsers.length || (type === "role" && !selectedValue)}
+                disabled={!selectedUsers.length || (type === "role" && selectedValue.length === 0)}
               >
                 {t(`adminUsersView.modal.button.${type}`)}
               </Button>

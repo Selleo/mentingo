@@ -39,7 +39,6 @@ export const getNavigationConfig = (
   isNewsEnabled = false,
   isArticlesEnabled = false,
   isStripeConfigured = false,
-  canManageAnnouncements = false,
 ): NavigationGroups[] => {
   const isAnyContentFeatureEnabled = isQAEnabled || isNewsEnabled || isArticlesEnabled;
 
@@ -120,22 +119,12 @@ export const getNavigationConfig = (
       restrictedAccessRequirement: {
         anyOf: [
           PERMISSIONS.USER_MANAGE,
-          PERMISSIONS.ANNOUNCEMENT_CREATE,
           PERMISSIONS.GROUP_MANAGE,
           PERMISSIONS.CATEGORY_MANAGE,
           PERMISSIONS.BILLING_MANAGE,
         ],
       },
       items: [
-        ...(canManageAnnouncements
-          ? [
-              {
-                label: t("navigationSideBar.announcements"),
-                path: `announcements`,
-                iconName: "Bell",
-              } as NavigationItem,
-            ]
-          : []),
         {
           label: t("navigationSideBar.users"),
           path: "admin/users",

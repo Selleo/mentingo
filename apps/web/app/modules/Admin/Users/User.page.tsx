@@ -82,7 +82,9 @@ const User = () => {
                 <Label className="font-normal text-neutral-600">
                   {field === "archived"
                     ? t("adminUserView.field.status")
-                    : startCase(t(`adminUserView.field.${field}`))}
+                    : field === "roleSlugs"
+                      ? t("adminUsersView.dropdown.roles")
+                      : startCase(t(`adminUserView.field.${field}`))}
                 </Label>
                 <UserInfo name={field} control={control} isEditing user={user} />
               </div>

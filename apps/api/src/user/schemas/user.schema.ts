@@ -44,6 +44,7 @@ export const allUsersSchema = Type.Array(
   Type.Intersect([
     baseUserResponseSchema,
     Type.Object({
+      roleSlugs: Type.Array(Type.String()),
       groups: Type.Array(
         Type.Object({
           id: UUIDSchema,
@@ -53,6 +54,15 @@ export const allUsersSchema = Type.Array(
     }),
   ]),
 );
+
+export const roleSchema = Type.Object({
+  id: UUIDSchema,
+  name: Type.String(),
+  slug: Type.String(),
+  isSystem: Type.Boolean(),
+});
+
+export const allRolesSchema = Type.Array(roleSchema);
 
 export const userSchema = Type.Composite([
   Type.Omit(commonUserSchema, ["avatarReference"]),
@@ -90,3 +100,5 @@ export type UserDetailsWithAvatarKey = Static<typeof userDetailsSchema> & {
 export type UserDetailsResponse = Static<typeof userDetailsResponseSchema>;
 export type UserResponse = Static<typeof userSchema>;
 export type AllUsersResponse = Static<typeof allUsersSchema>;
+export type RoleResponse = Static<typeof roleSchema>;
+export type AllRolesResponse = Static<typeof allRolesSchema>;

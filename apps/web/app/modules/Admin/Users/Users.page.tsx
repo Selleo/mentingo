@@ -8,7 +8,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { camelCase } from "lodash-es";
 import { Import, KeyRound, Plus, UsersRound } from "lucide-react";
 import React, { useCallback, useMemo, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -18,6 +17,7 @@ import { useBulkDeleteUsers } from "~/api/mutations/admin/useBulkDeleteUsers";
 import { useBulkUpdateUsersGroups } from "~/api/mutations/admin/useBulkUpdateUsersGroups";
 import { useBulkUpdateUsersRoles } from "~/api/mutations/admin/useBulkUpdateUsersRoles";
 import { useGroupsQuerySuspense } from "~/api/queries/admin/useGroups";
+import { useRoles } from "~/api/queries/admin/useRoles";
 import { useAllUsersSuspense, usersQueryOptions } from "~/api/queries/useUsers";
 import { queryClient } from "~/api/queryClient";
 import { PageWrapper } from "~/components/PageWrapper";
@@ -35,10 +35,10 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
-import { USER_ROLE } from "~/config/userRoles";
 import { cn } from "~/lib/utils";
 import { type DropdownItems, EditDropdown } from "~/modules/Admin/Users/components/EditDropdown";
 import { EditModal } from "~/modules/Admin/Users/components/EditModal";
+import { getRoleLabel } from "~/modules/Admin/Users/utils/getRoleLabel";
 import {
   type FilterConfig,
   type FilterValue,
@@ -54,12 +54,10 @@ import type { BulkAssignUsersToGroupBody, GetUsersResponse } from "~/api/generat
 import type { UsersParams } from "~/api/queries/useUsers";
 import type { ITEMS_PER_PAGE_OPTIONS } from "~/components/Pagination/Pagination";
 import type { Option } from "~/components/ui/multiselect";
-import type { UserRole } from "~/config/userRoles";
 
 type TUser = GetUsersResponse["data"][number];
 
 type ModalTypes = "group" | "role" | "delete" | "archive" | null;
-const USER_ROLE_VALUES = [USER_ROLE.admin, USER_ROLE.student, USER_ROLE.contentCreator] as const;
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.users");
 
@@ -76,7 +74,7 @@ const Users = () => {
 
   const [searchParams, setSearchParams] = React.useState<{
     keyword?: string;
-    role?: UserRole;
+    role?: string;
     archived?: boolean;
     status?: string;
     groups?: Option[];
@@ -91,8 +89,9 @@ const Users = () => {
 
   const { data: userData } = useAllUsersSuspense(usersQueryParams);
   const { data: groupData } = useGroupsQuerySuspense();
+  const { data: roles = [] } = useRoles();
 
-  const [selectedValue, setSelectedValue] = React.useState<string>("");
+  const [selectedValue, setSelectedValue] = React.useState<string[]>([]);
 
   const { mutateAsync: deleteUsers } = useBulkDeleteUsers();
   const { mutateAsync: updateUsersGroups } = useBulkUpdateUsersGroups();
@@ -147,11 +146,10 @@ const Users = () => {
       name: "role",
       type: "select",
       placeholder: t("adminUsersView.filters.placeholder.roles"),
-      options: [
-        { value: USER_ROLE.admin, label: t("common.roles.admin") },
-        { value: USER_ROLE.student, label: t("common.roles.student") },
-        { value: USER_ROLE.contentCreator, label: t("common.roles.contentCreator") },
-      ],
+      options: roles.map((role) => ({
+        value: role.slug,
+        label: getRoleLabel(role.slug, t, roles),
+      })),
     },
     {
       name: "archived",
@@ -229,12 +227,43 @@ const Users = () => {
     },
     {
       accessorKey: "roleSlugs",
-      header: t("adminUsersView.field.role"),
+      header: t("adminUsersView.dropdown.roles"),
       cell: ({ row }) => {
         const roleSlugs = (row.original as TUser & { roleSlugs?: string[] }).roleSlugs ?? [];
-        const primaryRole = roleSlugs[0];
+        const visibleRoleSlugs = roleSlugs.slice(0, 2);
+        const remainingCount = roleSlugs.length - visibleRoleSlugs.length;
 
-        return primaryRole ? t(`common.roles.${camelCase(primaryRole)}`) : "-";
+        if (!roleSlugs.length) return "-";
+
+        return (
+          <div className="flex gap-1">
+            {visibleRoleSlugs.map((roleSlug) => (
+              <Badge key={roleSlug} variant="secondary">
+                {getRoleLabel(roleSlug, t, roles)}
+              </Badge>
+            ))}
+            {remainingCount > 0 && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Badge variant="default" className="cursor-help">
+                      +{remainingCount}
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent className="p-2 rounded-lg">
+                    <div className="flex flex-col gap-1 !px-0">
+                      {roleSlugs.slice(2).map((roleSlug) => (
+                        <Badge key={roleSlug} variant="secondary">
+                          {getRoleLabel(roleSlug, t, roles)}
+                        </Badge>
+                      ))}
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </div>
+        );
       },
     },
     {
@@ -367,7 +396,7 @@ const Users = () => {
   const handleUsersRoles = useCallback(() => {
     updateUsersRoles({
       userIds: selectedUsers.map(({ userId }) => userId),
-      roleSlugs: [selectedValue as UserRole],
+      roleSlugs: selectedValue,
     }).then(() => {
       table.resetRowSelection();
       setShowEditModal(null);
@@ -403,7 +432,7 @@ const Users = () => {
             onConfirm={editMutation[showEditModal]}
             onCancel={() => setShowEditModal(null)}
             groupData={groupData}
-            roleData={[...USER_ROLE_VALUES]}
+            roleData={roles}
             selectedUsers={selectedUsers}
             selectedValue={selectedValue}
             setSelectedValue={setSelectedValue}

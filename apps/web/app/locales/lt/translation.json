@@ -814,7 +814,8 @@
     },
     "toast": {
       "cannotUpdateOwnRole": "Administratorius negali pakeisti savo vaidmens",
-      "noUserSelected": "Nepasirinktas joks vartotojas"
+      "noUserSelected": "Nepasirinktas joks vartotojas",
+      "userMustHaveAtLeastOneRole": "Vartotojas turi turėti bent vieną vaidmenį."
     },
     "import": {
       "toast": {

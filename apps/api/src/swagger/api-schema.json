@@ -1656,6 +1656,23 @@
         }
       }
     },
+    "/api/user/roles": {
+      "get": {
+        "operationId": "UserController_getRoles",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetRolesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/user": {
       "get": {
         "operationId": "UserController_getUserById",
@@ -14664,6 +14681,12 @@
                 {
                   "type": "object",
                   "properties": {
+                    "roleSlugs": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
                     "groups": {
                       "type": "array",
                       "items": {
@@ -14685,6 +14708,7 @@
                     }
                   },
                   "required": [
+                    "roleSlugs",
                     "groups"
                   ]
                 }
@@ -14720,6 +14744,41 @@
         "required": [
           "data",
           "pagination"
+        ]
+      },
+      "GetRolesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "slug": {
+                  "type": "string"
+                },
+                "isSystem": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "slug",
+                "isSystem"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
         ]
       },
       "GetUserByIdResponse": {
@@ -14938,7 +14997,6 @@
             "type": "string"
           },
           "roleSlugs": {
-            "minItems": 1,
             "type": "array",
             "items": {
               "type": "string"
@@ -15083,7 +15141,6 @@
             "type": "string"
           },
           "roleSlugs": {
-            "minItems": 1,
             "type": "array",
             "items": {
               "type": "string"
