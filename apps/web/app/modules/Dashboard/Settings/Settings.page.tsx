@@ -6,6 +6,7 @@ import { useCurrentUser } from "~/api/queries";
 import { useConfigurationState } from "~/api/queries/admin/useConfigurationState";
 import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { useUserSettings } from "~/api/queries/useUserSettings";
+import { hasAnyPermission, hasPermission } from "~/common/permissions/permission.utils";
 import { PageWrapper } from "~/components/PageWrapper";
 import { usePermissions } from "~/hooks/usePermissions";
 import Loader from "~/modules/common/Loader/Loader";
@@ -26,20 +27,28 @@ export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.
 export default function SettingsPage() {
   const { t } = useTranslation();
 
-  const { hasAccess: canManageEnvs } = usePermissions({ required: PERMISSIONS.ENV_MANAGE });
-  const { hasAccess: canManageCourses } = usePermissions({
-    required: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
-  });
-  const { hasAccess: canManageIntegrationApi } = usePermissions({
-    required: PERMISSIONS.INTEGRATION_KEY_MANAGE,
-  });
-  const { hasAccess: canUpdateLearningProgress } = usePermissions({
-    required: PERMISSIONS.LEARNING_PROGRESS_UPDATE,
-  });
-  const { hasAccess: canManageUsers } = usePermissions({ required: PERMISSIONS.USER_MANAGE });
-  const { hasAccess: canManageSettings } = usePermissions({
-    required: [PERMISSIONS.SETTINGS_MANAGE],
-  });
+  const { permissions } = usePermissions();
+
+  const {
+    canManageEnvs,
+    canManageCourses,
+    canManageIntegrationApi,
+    canUpdateLearningProgress,
+    canManageUsers,
+    canManageSettings,
+  } = useMemo(() => {
+    return {
+      canManageEnvs: hasPermission(permissions, PERMISSIONS.ENV_MANAGE),
+      canManageCourses: hasAnyPermission(permissions, [
+        PERMISSIONS.COURSE_UPDATE,
+        PERMISSIONS.COURSE_UPDATE_OWN,
+      ]),
+      canManageIntegrationApi: hasPermission(permissions, PERMISSIONS.INTEGRATION_KEY_MANAGE),
+      canUpdateLearningProgress: hasPermission(permissions, PERMISSIONS.LEARNING_PROGRESS_UPDATE),
+      canManageUsers: hasPermission(permissions, PERMISSIONS.USER_MANAGE),
+      canManageSettings: hasPermission(permissions, PERMISSIONS.SETTINGS_MANAGE),
+    };
+  }, [permissions]);
 
   const { data: user, isLoading: isLoadingUser } = useCurrentUser();
   const isSupportMode = Boolean(user?.isSupportMode);

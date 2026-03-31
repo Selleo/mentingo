@@ -41,8 +41,9 @@ export function NavigationFooter({
 
   const { mutate: logout } = useLogoutUser();
   const { data: user } = useCurrentUser();
-  const { hasAccess: canManageAnnouncements } = usePermissions({
-    required: [PERMISSIONS.ANNOUNCEMENT_CREATE],
+  const { hasAccess: canViewAnnouncements } = usePermissions({
+    required: [PERMISSIONS.ANNOUNCEMENT_READ],
+    none: [PERMISSIONS.ANNOUNCEMENT_CREATE],
   });
   const { t } = useTranslation();
 
@@ -50,7 +51,7 @@ export function NavigationFooter({
 
   return (
     <menu className="grid w-full grid-cols-4 gap-3 md:grid-cols-8 2xl:flex 2xl:flex-col 2xl:gap-2 2xl:self-end">
-      {!canManageAnnouncements && (
+      {!canViewAnnouncements && (
         <NavigationMenuItem
           className="col-span-4 md:col-span-8 2xl:block"
           item={{
