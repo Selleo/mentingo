@@ -1,7 +1,7 @@
 import * as Tabs from "@radix-ui/react-tabs";
 import { useTranslation } from "react-i18next";
 
-import type { NavigationTab } from "../EditCourse.types";
+import { EDIT_COURSE_TABS, type NavigationTab } from "../EditCourse.types";
 
 type NavigationTabsProps = {
   setNavigationTabState: (navigationTabState: NavigationTab) => void;
@@ -25,14 +25,22 @@ const NavigationTabs = ({ setNavigationTabState }: NavigationTabsProps) => {
   return (
     <Tabs.Root
       className="flex flex-col"
-      defaultValue="Curriculum"
+      defaultValue={EDIT_COURSE_TABS.CURRICULUM}
       onValueChange={handleValueChange}
     >
       <Tabs.List className="flex items-center gap-5 border-b border-gray-200">
-        <TabTrigger value="Settings">{t("adminCourseView.common.settings")}</TabTrigger>
-        <TabTrigger value="Curriculum">{t("adminCourseView.common.curriculum")}</TabTrigger>
-        <TabTrigger value="Pricing">{t("adminCourseView.common.pricing")}</TabTrigger>
-        <TabTrigger value="Status">{t("adminCourseView.common.status")}</TabTrigger>
+        <TabTrigger value={EDIT_COURSE_TABS.SETTINGS}>
+          {t("adminCourseView.common.settings")}
+        </TabTrigger>
+        <TabTrigger value={EDIT_COURSE_TABS.CURRICULUM}>
+          {t("adminCourseView.common.curriculum")}
+        </TabTrigger>
+        <TabTrigger value={EDIT_COURSE_TABS.PRICING}>
+          {t("adminCourseView.common.pricing")}
+        </TabTrigger>
+        <TabTrigger value={EDIT_COURSE_TABS.STATUS}>
+          {t("adminCourseView.common.status")}
+        </TabTrigger>
       </Tabs.List>
     </Tabs.Root>
   );

@@ -1,7 +1,17 @@
 import type { Question } from "./CourseLessons/NewLesson/QuizLessonForm/QuizLessonForm.types";
 import type { AiMentorTTSPreset, AiMentorType, AiMentorVoiceMode } from "@repo/shared";
 
-export type NavigationTab = "Settings" | "Curriculum" | "Pricing" | "Status";
+export const EDIT_COURSE_TABS = {
+  SETTINGS: "Settings",
+  CURRICULUM: "Curriculum",
+  PRICING: "Pricing",
+  STATUS: "Status",
+  ENROLLED: "Enrolled",
+  EXPORTS: "Exports",
+} as const;
+
+export type EditCourseTab = (typeof EDIT_COURSE_TABS)[keyof typeof EDIT_COURSE_TABS];
+export type NavigationTab = EditCourseTab;
 
 type AiMentor = {
   id: string;
