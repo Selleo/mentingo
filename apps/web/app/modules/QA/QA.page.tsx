@@ -51,7 +51,7 @@ export default function QAPage() {
     if (canManageQA) return QA;
 
     return QA?.filter((item) => {
-      if (settings?.language !== "en" && settings?.language !== "pl") return false;
+      if (!settings?.language) return false;
 
       return item.availableLocales.includes(settings.language);
     });

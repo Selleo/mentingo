@@ -1,4 +1,3 @@
-import { PERMISSIONS } from "@repo/shared";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -14,15 +13,12 @@ import {
   Search,
 } from "../../assets/svgs";
 import { useDebounce } from "../../hooks/useDebounce";
-import { usePermissions } from "../../hooks/usePermissions";
 import { cn } from "../../lib/utils";
 import { SearchInput } from "../SearchInput/SearchInput";
 import { Dialog, DialogContent } from "../ui/dialog";
 import { Separator } from "../ui/separator";
 
-import { GlobalSearchAdminResults } from "./GlobalSearch/GlobalSearchAdminResults";
-import { GlobalSearchContentCreatorResults } from "./GlobalSearch/GlobalSearchContentCreatorResults";
-import { GlobalSearchStudentResults } from "./GlobalSearch/GlobalSearchStudentResults";
+import { GlobalSearchResults } from "./GlobalSearch/GlobalSearchResults";
 import { NavigationMenuButton } from "./NavigationMenuButton";
 
 export type NavigationGlobalSearchWrapperProps = {
@@ -38,10 +34,6 @@ export const NavigationGlobalSearchWrapper = ({
   const [searchParams, setSearchParams] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
   const debouncedSearch = useDebounce(searchParams, 300);
-  const { hasAccess: canManageUsers } = usePermissions({ required: PERMISSIONS.USER_MANAGE });
-  const { hasAccess: canManageOwnCourses } = usePermissions({
-    required: PERMISSIONS.COURSE_UPDATE_OWN,
-  });
   const totalItemsRef = useRef(0);
   const { t } = useTranslation();
   const { data: globalSettings } = useGlobalSettings();
@@ -65,12 +57,6 @@ export const NavigationGlobalSearchWrapper = ({
 
   const isMac =
     typeof navigator !== "undefined" && navigator.userAgent.toLowerCase().includes("mac");
-
-  const ResultsComponent = canManageUsers
-    ? GlobalSearchAdminResults
-    : canManageOwnCourses
-      ? GlobalSearchContentCreatorResults
-      : GlobalSearchStudentResults;
 
   useEffect(() => {
     setActiveIndex(0);
@@ -170,7 +156,7 @@ export const NavigationGlobalSearchWrapper = ({
               </div>
             )}
             {debouncedSearch.length >= 3 && (
-              <ResultsComponent
+              <GlobalSearchResults
                 debouncedSearch={debouncedSearch}
                 onSelect={handleSelect}
                 activeIndex={activeIndex}
