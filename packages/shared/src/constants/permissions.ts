@@ -57,8 +57,6 @@ export const PERMISSIONS = {
   INTEGRATION_KEY_MANAGE: "integration_key.manage",
   INTEGRATION_API_USE: "integration_api.use",
   TENANT_MANAGE: "tenant.manage",
-  SCORM_UPLOAD: "scorm.upload",
-  SCORM_READ: "scorm.read",
   COURSE_AI_GENERATION: "course.ai_generation",
 } as const;
 

@@ -827,7 +827,65 @@
       "deleteSelected": "Ausgewählte löschen",
       "edit": "Bearbeiten",
       "import": "Benutzer importieren",
-      "bulkEdit": "Massenbearbeitung"
+      "bulkEdit": "Massenbearbeitung",
+      "permissionsMatrix": "Berechtigungsmatrix"
+    },
+    "permissionsMatrix": {
+      "title": "Berechtigungsmatrix für Systemrollen",
+      "permission": "Berechtigung",
+      "empty": "Keine Rollen verfügbar.",
+      "descriptionTemplates": {
+        "base": "Erlaubt dem Benutzer, {{resource}} {{action}}.",
+        "withScope": "Erlaubt dem Benutzer, {{scope}} {{resource}} {{action}}."
+      },
+      "actions": {
+        "read": "anzuzeigen",
+        "update": "zu bearbeiten",
+        "manage": "zu verwalten",
+        "create": "zu erstellen",
+        "delete": "zu löschen",
+        "share": "zu teilen",
+        "render": "zu generieren",
+        "upload": "hochzuladen",
+        "use": "zu verwenden",
+        "enrollment": "Einschreibungen für zu verwalten",
+        "statistics": "Statistiken für anzusehen",
+        "export": "zu exportieren",
+        "checkout": "den Checkout für zu verwenden",
+        "ai_generation": "mit KI zu generieren für"
+      },
+      "scopes": {
+        "self": "eigene",
+        "own": "eigene",
+        "public": "öffentliche",
+        "assigned": "zugewiesene",
+        "manageable": "verwaltbare"
+      },
+      "resources": {
+        "account": "Kontodaten",
+        "user": "Benutzerprofile",
+        "settings": "Einstellungen",
+        "env": "Umgebungskonfiguration",
+        "category": "Kategorien",
+        "group": "Gruppen",
+        "course": "Kurse",
+        "learning_mode": "Lernmodus",
+        "learning_progress": "Lernfortschritt",
+        "certificate": "Zertifikate",
+        "file": "Dateien",
+        "ai": "KI-Funktionen",
+        "announcement": "Ankündigungen",
+        "news": "News",
+        "article": "Wissensdatenbank-Artikel",
+        "qa": "Q&A-Einträge",
+        "report": "Berichte",
+        "statistics": "Statistiken",
+        "billing": "Abrechnung",
+        "integration_key": "Integrationsschlüssel",
+        "integration_api": "Integrations-API",
+        "tenant": "Organisationskonfiguration",
+        "other": "Plattformfunktionen"
+      }
     },
     "dropdown": {
       "roles": "Rollen",
@@ -886,6 +944,14 @@
     "header": "Neuen Benutzer erstellen",
     "subHeader": "Geben Sie die Details ein, um einen neuen Benutzer zu erstellen. Klicken Sie auf Speichern, wenn Sie fertig sind.",
     "editUserHeader": "Benutzerinformationen",
+    "tabs": {
+      "information": "Benutzerinformationen",
+      "permissions": "Berechtigungen"
+    },
+    "permissions": {
+      "title": "Effektive Berechtigungen",
+      "effective": "Benutzerunion"
+    },
     "placeholder": {
       "role": "Wählen Sie eine Rolle aus",
       "groupId": "Wählen Sie eine Gruppe aus",

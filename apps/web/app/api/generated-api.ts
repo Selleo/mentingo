@@ -161,8 +161,6 @@ export interface CurrentUserResponse {
       | "integration_key.manage"
       | "integration_api.use"
       | "tenant.manage"
-      | "scorm.upload"
-      | "scorm.read"
       | "course.ai_generation"
     )[];
     shouldVerifyMFA: boolean;
@@ -1042,7 +1040,6 @@ export interface UpdateUserBody {
   groups?: string[] | null;
   /** @format email */
   email?: string;
-  /** @minItems 1 */
   roleSlugs?: string[];
   archived?: boolean;
 }
@@ -1083,7 +1080,6 @@ export interface AdminUpdateUserBody {
   groups?: string[] | null;
   /** @format email */
   email?: string;
-  /** @minItems 1 */
   roleSlugs?: string[];
   archived?: boolean;
 }

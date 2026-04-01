@@ -1,4 +1,5 @@
 import { Link, useNavigate, type MetaFunction } from "@remix-run/react";
+import { PERMISSIONS, SYSTEM_ROLE_PERMISSIONS, SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import {
   type ColumnDef,
   flexRender,
@@ -8,7 +9,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { Import, KeyRound, Plus, UsersRound } from "lucide-react";
+import { Import, KeyRound, Plus, Shield, UsersRound } from "lucide-react";
 import React, { useCallback, useMemo, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -26,6 +27,7 @@ import SortButton from "~/components/TableSortButton/TableSortButton";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "~/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -38,6 +40,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/comp
 import { cn } from "~/lib/utils";
 import { type DropdownItems, EditDropdown } from "~/modules/Admin/Users/components/EditDropdown";
 import { EditModal } from "~/modules/Admin/Users/components/EditModal";
+import { PermissionsMatrix } from "~/modules/Admin/Users/components/PermissionsMatrix";
 import { getRoleLabel } from "~/modules/Admin/Users/utils/getRoleLabel";
 import {
   type FilterConfig,
@@ -50,6 +53,7 @@ import { tanstackSortingToParam } from "~/utils/tanstackSortingToParam";
 
 import { ImportUsersModal } from "./components/ImportUsersModal/ImportUsersModal";
 
+import type { PermissionKey } from "@repo/shared";
 import type { BulkAssignUsersToGroupBody, GetUsersResponse } from "~/api/generated-api";
 import type { UsersParams } from "~/api/queries/useUsers";
 import type { ITEMS_PER_PAGE_OPTIONS } from "~/components/Pagination/Pagination";
@@ -102,8 +106,21 @@ const Users = () => {
 
   const [showEditModal, setShowEditModal] = React.useState<ModalTypes>(null);
   const [isImportModalOpen, setIsImportModalOpen] = React.useState(false);
+  const [isPermissionsMatrixOpen, setIsPermissionsMatrixOpen] = React.useState(false);
 
   const [lastSelectedRowIndex, setLastSelectedRowIndex] = React.useState<number>(0);
+
+  const permissionsOrder = useMemo(() => Object.values(PERMISSIONS) as PermissionKey[], []);
+
+  const systemRolesForMatrix = useMemo(
+    () =>
+      Object.values(SYSTEM_ROLE_SLUGS).map((slug) => ({
+        slug,
+        label: getRoleLabel(slug, t, roles),
+        permissions: SYSTEM_ROLE_PERMISSIONS[slug] ?? [],
+      })),
+    [roles, t],
+  );
 
   const dropdownItems: DropdownItems[] = [
     {
@@ -438,6 +455,16 @@ const Users = () => {
             setSelectedValue={setSelectedValue}
           />
         )}
+        <Dialog open={isPermissionsMatrixOpen} onOpenChange={setIsPermissionsMatrixOpen}>
+          <DialogContent className="max-w-5xl max-h-[85vh] flex flex-col">
+            <DialogHeader>
+              <DialogTitle>{t("adminUsersView.permissionsMatrix.title")}</DialogTitle>
+            </DialogHeader>
+            <div className="overflow-auto">
+              <PermissionsMatrix roles={systemRolesForMatrix} permissionsOrder={permissionsOrder} />
+            </div>
+          </DialogContent>
+        </Dialog>
         {isImportModalOpen && (
           <ImportUsersModal
             open={isImportModalOpen}
@@ -457,6 +484,10 @@ const Users = () => {
             <Button onClick={() => setIsImportModalOpen(true)} className="gap-2">
               <Import className="size-4" />
               {t("adminUsersView.button.import")}
+            </Button>
+            <Button onClick={() => setIsPermissionsMatrixOpen(true)} className="gap-2">
+              <Shield className="size-4" />
+              {t("adminUsersView.button.permissionsMatrix")}
             </Button>
             <EditDropdown dropdownItems={dropdownItems} disabled={!selectedUsers.length} />
           </div>

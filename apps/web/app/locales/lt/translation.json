@@ -827,7 +827,65 @@
       "deleteSelected": "Ištrinti pasirinktus",
       "edit": "Redaguoti",
       "import": "Importuoti vartotojus",
-      "bulkEdit": "Masinis redagavimas"
+      "bulkEdit": "Masinis redagavimas",
+      "permissionsMatrix": "Leidimų matrica"
+    },
+    "permissionsMatrix": {
+      "title": "Sisteminių vaidmenų leidimų matrica",
+      "permission": "Leidimas",
+      "empty": "Nėra pasiekiamų vaidmenų.",
+      "descriptionTemplates": {
+        "base": "Leidžia naudotojui {{action}} {{resource}}.",
+        "withScope": "Leidžia naudotojui {{action}} {{scope}} {{resource}}."
+      },
+      "actions": {
+        "read": "peržiūrėti",
+        "update": "redaguoti",
+        "manage": "valdyti",
+        "create": "kurti",
+        "delete": "trinti",
+        "share": "bendrinti",
+        "render": "generuoti",
+        "upload": "įkelti",
+        "use": "naudoti",
+        "enrollment": "valdyti registracijas į",
+        "statistics": "peržiūrėti statistiką apie",
+        "export": "eksportuoti",
+        "checkout": "naudoti atsiskaitymą už",
+        "ai_generation": "generuoti su AI"
+      },
+      "scopes": {
+        "self": "savo",
+        "own": "savo",
+        "public": "viešus",
+        "assigned": "priskirtus",
+        "manageable": "valdomus"
+      },
+      "resources": {
+        "account": "paskyros duomenis",
+        "user": "naudotojų profilius",
+        "settings": "nustatymus",
+        "env": "aplinkos konfigūraciją",
+        "category": "kategorijas",
+        "group": "grupes",
+        "course": "kursus",
+        "learning_mode": "mokymosi režimą",
+        "learning_progress": "mokymosi pažangą",
+        "certificate": "sertifikatus",
+        "file": "failus",
+        "ai": "AI funkcijas",
+        "announcement": "pranešimus",
+        "news": "naujienas",
+        "article": "žinių bazės straipsnius",
+        "qa": "Q&A įrašus",
+        "report": "ataskaitas",
+        "statistics": "statistiką",
+        "billing": "atsiskaitymą",
+        "integration_key": "integracijos raktus",
+        "integration_api": "integracijos API",
+        "tenant": "organizacijos konfigūraciją",
+        "other": "platformos funkcijas"
+      }
     },
     "dropdown": {
       "roles": "Vaidmenys",
@@ -886,6 +944,14 @@
     "header": "Sukurti naują vartotoją",
     "subHeader": "Norėdami sukurti naują vartotoją, užpildykite informaciją. Baigę spustelėkite išsaugoti.",
     "editUserHeader": "Vartotojo informacija",
+    "tabs": {
+      "information": "Vartotojo informacija",
+      "permissions": "Leidimai"
+    },
+    "permissions": {
+      "title": "Efektyvūs leidimai",
+      "effective": "Vartotojo sąjunga"
+    },
     "placeholder": {
       "role": "Pasirinkite vaidmenį",
       "groupId": "Pasirinkite grupę",

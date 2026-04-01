@@ -827,7 +827,65 @@
       "deleteSelected": "Smazat vybrané",
       "edit": "Upravit",
       "import": "Importovat uživatele",
-      "bulkEdit": "Hromadná úprava"
+      "bulkEdit": "Hromadná úprava",
+      "permissionsMatrix": "Matice oprávnění"
+    },
+    "permissionsMatrix": {
+      "title": "Matice oprávnění systémových rolí",
+      "permission": "Oprávnění",
+      "empty": "Nejsou dostupné žádné role.",
+      "descriptionTemplates": {
+        "base": "Umožňuje uživateli {{action}} {{resource}}.",
+        "withScope": "Umožňuje uživateli {{action}} {{scope}} {{resource}}."
+      },
+      "actions": {
+        "read": "zobrazit",
+        "update": "upravovat",
+        "manage": "spravovat",
+        "create": "vytvářet",
+        "delete": "mazat",
+        "share": "sdílet",
+        "render": "generovat",
+        "upload": "nahrávat",
+        "use": "používat",
+        "enrollment": "spravovat zápisy do",
+        "statistics": "zobrazit statistiky pro",
+        "export": "exportovat",
+        "checkout": "používat checkout pro",
+        "ai_generation": "generovat pomocí AI pro"
+      },
+      "scopes": {
+        "self": "vlastní",
+        "own": "vlastní",
+        "public": "veřejné",
+        "assigned": "přiřazené",
+        "manageable": "spravovatelné"
+      },
+      "resources": {
+        "account": "údaje účtu",
+        "user": "uživatelské profily",
+        "settings": "nastavení",
+        "env": "konfiguraci prostředí",
+        "category": "kategorie",
+        "group": "skupiny",
+        "course": "kurzy",
+        "learning_mode": "režim učení",
+        "learning_progress": "studijní postup",
+        "certificate": "certifikáty",
+        "file": "soubory",
+        "ai": "AI funkce",
+        "announcement": "oznámení",
+        "news": "novinky",
+        "article": "články znalostní báze",
+        "qa": "Q&A záznamy",
+        "report": "reporty",
+        "statistics": "statistiky",
+        "billing": "fakturaci",
+        "integration_key": "integrační klíče",
+        "integration_api": "integrační API",
+        "tenant": "konfiguraci organizace",
+        "other": "funkce platformy"
+      }
     },
     "dropdown": {
       "roles": "Role",
@@ -886,6 +944,14 @@
     "header": "Vytvořit nového uživatele",
     "subHeader": "Chcete-li vytvořit nového uživatele, vyplňte údaje. Až budete hotovi, klikněte na Uložit.",
     "editUserHeader": "Informace o uživateli",
+    "tabs": {
+      "information": "Informace o uživateli",
+      "permissions": "Oprávnění"
+    },
+    "permissions": {
+      "title": "Efektivní oprávnění",
+      "effective": "Sjednocení uživatele"
+    },
     "placeholder": {
       "role": "Vyberte roli",
       "groupId": "Vyberte skupinu",

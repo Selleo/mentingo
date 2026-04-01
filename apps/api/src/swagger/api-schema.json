@@ -10787,14 +10787,6 @@
                       "type": "string"
                     },
                     {
-                      "const": "scorm.upload",
-                      "type": "string"
-                    },
-                    {
-                      "const": "scorm.read",
-                      "type": "string"
-                    },
-                    {
                       "const": "course.ai_generation",
                       "type": "string"
                     }

@@ -14,12 +14,10 @@ import {
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes } from "@nestjs/swagger";
-import { PERMISSIONS } from "@repo/shared";
 import { Request, Response } from "express";
 import { Validate } from "nestjs-typebox";
 
 import { baseResponse, BaseResponse, UUIDSchema, UUIDType } from "src/common";
-import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { PermissionsGuard } from "src/common/guards/permissions.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
@@ -34,7 +32,6 @@ export class ScormController {
 
   @Post("upload")
   @UseInterceptors(FileInterceptor("file"))
-  @RequirePermission(PERMISSIONS.SCORM_UPLOAD)
   @ApiConsumes("multipart/form-data")
   @ApiBody({
     schema: {
@@ -75,7 +72,6 @@ export class ScormController {
     });
   }
 
-  @RequirePermission(PERMISSIONS.SCORM_READ)
   @Get(":courseId/content")
   @Header("Cache-Control", "no-store")
   @Header("X-Frame-Options", "SAMEORIGIN")
@@ -112,7 +108,6 @@ export class ScormController {
   }
 
   @Get(":courseId/metadata")
-  @RequirePermission(PERMISSIONS.SCORM_READ)
   @Validate({
     request: [{ type: "param", name: "courseId", schema: UUIDSchema }],
     response: baseResponse(scormMetadataSchema),
