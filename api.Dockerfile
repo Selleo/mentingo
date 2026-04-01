@@ -1,4 +1,4 @@
-FROM node:20.15.0-alpine AS base
+FROM node:24.14.1-alpine AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN npm install -g pnpm@9.15.2
@@ -13,7 +13,7 @@ RUN pnpm build --filter=api
 # TODO: Move pnpm deploy to turbo prune workflow
 RUN pnpm deploy --filter=api pnpm-deploy-output --prod
 
-FROM node:20.15.0-alpine
+FROM node:24.14.1-alpine
 WORKDIR /app
 COPY --from=base /app/pnpm-deploy-output /app
 
