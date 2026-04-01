@@ -53,6 +53,7 @@
     "@remix-run/node": "2.15.0",
     "@remix-run/react": "2.15.0",
     "@repo/shared": "workspace:*",
+    "@ricky0123/vad-web": "0.0.30",
     "@sentry/react": "8.40.0",
     "@sentry/replay": "7.116.0",
     "@sentry/tracing": "7.114.0",

@@ -99,7 +99,10 @@ export class PromptService implements OnModuleInit {
     }
 
     if (isVoiceMentor) {
-      const voiceMentorAddon = await this.loadPrompt("voiceMentorAddon", {});
+      const thread = await this.aiRepository.findThread([eq(aiMentorThreads.id, threadId)]);
+      const voiceMentorAddon = await this.loadPrompt("voiceMentorAddon", {
+        language: thread.userLanguage,
+      });
       metaMessages.push({
         id: "",
         role: MESSAGE_ROLE.SYSTEM,

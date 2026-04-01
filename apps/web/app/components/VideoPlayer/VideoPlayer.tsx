@@ -59,7 +59,7 @@ const getTypeByProvider = (provider: VideoProvider) =>
     .with(VIDEO_EMBED_PROVIDERS.YOUTUBE, () => "video/youtube")
     .with(VIDEO_EMBED_PROVIDERS.VIMEO, () => "video/vimeo")
     .with(VIDEO_EMBED_PROVIDERS.BUNNY, () => "application/vnd.apple.mpegurl")
-    .with(VIDEO_EMBED_PROVIDERS.SELF, () => "")
+    .with(VIDEO_EMBED_PROVIDERS.SELF, () => "video/mp4")
     .otherwise(() => "");
 
 const getSourceTypes = (url: string, type: string) => {
