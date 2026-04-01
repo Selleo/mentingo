@@ -20,6 +20,7 @@ import ImageUploadInput from "~/components/FileUploadInput/ImageUploadInput";
 import { FormTextField } from "~/components/Form/FormTextField";
 import { PageWrapper } from "~/components/PageWrapper";
 import { ContentEditor } from "~/components/RichText/Editor";
+import { RichTextUploadQueue } from "~/components/RichText/RichTextUploadQueue";
 import Viewer from "~/components/RichText/Viever";
 import { Button } from "~/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "~/components/ui/form";
@@ -33,6 +34,7 @@ import {
 import { useClearVideoOnTabChange } from "~/hooks/useClearVideoOnTabChange";
 import { useEntityResourceUpload } from "~/hooks/useEntityResourceUpload";
 import { useHandleImageUpload } from "~/hooks/useHandleImageUpload";
+import { useRichTextUploadQueue } from "~/hooks/useRichTextUploadQueue";
 import { useTusVideoUpload } from "~/hooks/useTusVideoUpload";
 import { useUploadDisplayModeDialog } from "~/hooks/useUploadDisplayModeDialog";
 import { LanguageSelector } from "~/modules/Articles/LanguageSelector";
@@ -89,7 +91,9 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
 
   const { mutateAsync: previewArticle, isPending: isPreviewLoading } = usePreviewArticle();
   const [previewContent, setPreviewContent] = useState("");
-  const { getSessionForFile, uploadVideo, isUploading, uploadProgress } = useTusVideoUpload();
+  const { getSessionForFile, uploadVideo } = useTusVideoUpload();
+  const { items, enqueue, setStatus, setProgress, attachUploadId, clearFinished, remove } =
+    useRichTextUploadQueue();
   const { askForDisplayMode, dialog: uploadDisplayModeDialog } = useUploadDisplayModeDialog();
 
   const pageTitle = t("adminArticleView.form.editTitle");
@@ -215,6 +219,13 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
         description: t("uploadFile.toast.videoFailed"),
         variant: "destructive",
       });
+    },
+    fallbackUploadErrorMessage: t("uploadFile.toast.videoFailed"),
+    uploadQueue: {
+      enqueue,
+      setStatus,
+      setProgress,
+      attachUploadId,
     },
   });
 
@@ -373,8 +384,12 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
                               allowFiles
                               acceptedFileTypes={RICH_TEXT_ACCEPTED_FILE_TYPES}
                               onUpload={handleFileUpload}
-                              uploadProgress={isUploading ? (uploadProgress ?? 0) : null}
                               onChange={field.onChange}
+                            />
+                            <RichTextUploadQueue
+                              items={items}
+                              onClearFinished={clearFinished}
+                              onRemoveItem={remove}
                             />
                             <FormMessage />
                           </div>

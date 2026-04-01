@@ -19,6 +19,10 @@ type GetSessionArgs = {
 type UploadArgs = {
   file: File;
   session: TusUploadSession;
+  onUploadingStart?: () => void;
+  onProgress?: (progress: number) => void;
+  onUploaded?: () => void;
+  onError?: (error: Error) => void;
 };
 
 const normalizeTusHeaders = (headers: object): Record<string, string> =>
@@ -50,7 +54,7 @@ export const useTusVideoUpload = () => {
   );
 
   const uploadVideo = useCallback(
-    async ({ file, session }: UploadArgs) => {
+    async ({ file, session, onUploadingStart, onProgress, onUploaded, onError }: UploadArgs) => {
       if (!session.tusEndpoint || !session.tusHeaders || !session.expiresAt) {
         throw new Error("Missing upload configuration");
       }
@@ -87,6 +91,7 @@ export const useTusVideoUpload = () => {
             duration: Number.POSITIVE_INFINITY,
             variant: "loading",
           });
+          onUploadingStart?.();
 
           const upload = new tus.Upload(file, {
             endpoint: session.tusEndpoint,
@@ -104,9 +109,11 @@ export const useTusVideoUpload = () => {
               if (bytesTotal === 0) return;
               const progress = Math.round((bytesUploaded / bytesTotal) * 100);
               setUploadProgress(progress);
+              onProgress?.(progress);
             },
             onError: (error) => {
               clearUpload(session.uploadId);
+              onError?.(error);
               reject(error);
             },
             onSuccess: () => {
@@ -116,6 +123,7 @@ export const useTusVideoUpload = () => {
                 duration: Number.POSITIVE_INFINITY,
                 variant: "success",
               });
+              onUploaded?.();
               resolve();
             },
           });

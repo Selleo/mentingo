@@ -16,6 +16,7 @@ import {
 import { useClearVideoOnTabChange } from "~/hooks/useClearVideoOnTabChange";
 import { useEntityResourceUpload } from "~/hooks/useEntityResourceUpload";
 import { useHandleImageUpload } from "~/hooks/useHandleImageUpload";
+import { useRichTextUploadQueue } from "~/hooks/useRichTextUploadQueue";
 import { useTusVideoUpload } from "~/hooks/useTusVideoUpload";
 import { useUploadDisplayModeDialog } from "~/hooks/useUploadDisplayModeDialog";
 
@@ -25,6 +26,7 @@ import ImageUploadInput from "../../components/FileUploadInput/ImageUploadInput"
 import { FormTextField } from "../../components/Form/FormTextField";
 import { PageWrapper } from "../../components/PageWrapper";
 import { ContentEditor } from "../../components/RichText/Editor";
+import { RichTextUploadQueue } from "../../components/RichText/RichTextUploadQueue";
 import Viewer from "../../components/RichText/Viever";
 import { Button } from "../../components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "../../components/ui/form";
@@ -94,7 +96,9 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
   const { mutateAsync: updateNews } = useUpdateNews();
   const { uploadResource } = useEntityResourceUpload();
   const { mutateAsync: initVideoUpload } = useInitVideoUpload();
-  const { getSessionForFile, uploadVideo, isUploading, uploadProgress } = useTusVideoUpload();
+  const { getSessionForFile, uploadVideo } = useTusVideoUpload();
+  const { items, enqueue, setStatus, setProgress, attachUploadId, clearFinished, remove } =
+    useRichTextUploadQueue();
   const { toast } = useToast();
   const { mutateAsync: previewNews, isPending: isPreviewLoading } = usePreviewNews();
   const [previewContent, setPreviewContent] = useState("");
@@ -207,6 +211,13 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
         description: t("uploadFile.toast.videoFailed"),
         variant: "destructive",
       });
+    },
+    fallbackUploadErrorMessage: t("uploadFile.toast.videoFailed"),
+    uploadQueue: {
+      enqueue,
+      setStatus,
+      setProgress,
+      attachUploadId,
     },
   });
 
@@ -420,8 +431,12 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
                               allowFiles
                               acceptedFileTypes={RICH_TEXT_ACCEPTED_FILE_TYPES}
                               onUpload={handleFileUpload}
-                              uploadProgress={isUploading ? (uploadProgress ?? 0) : null}
                               {...field}
+                            />
+                            <RichTextUploadQueue
+                              items={items}
+                              onClearFinished={clearFinished}
+                              onRemoveItem={remove}
                             />
                             <FormMessage />
                           </div>

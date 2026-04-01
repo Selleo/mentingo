@@ -1,4 +1,5 @@
 import { ALLOWED_LESSON_IMAGE_FILE_TYPES } from "@repo/shared";
+import { NodeSelection, TextSelection } from "@tiptap/pm/state";
 import {
   Bold,
   Code,
@@ -33,7 +34,7 @@ import type React from "react";
 type EditorToolbarProps = {
   editor: Editor;
   allowFiles?: boolean;
-  acceptedFileTypes?: string[];
+  acceptedFileTypes?: readonly string[];
   onUpload?: (file?: File, editor?: Editor | null) => Promise<void>;
 };
 
@@ -68,14 +69,28 @@ const EditorToolbar = ({
 
   const acceptedImages = acceptedFileTypes.join(",");
 
+  const moveCursorAfterCurrentSelection = () => {
+    const { state, view } = editor;
+    const { selection } = state;
+
+    const targetPos = selection instanceof NodeSelection ? selection.to + 1 : selection.to;
+
+    const clampedPos = Math.max(1, Math.min(targetPos, state.doc.content.size));
+    const nextSelection = TextSelection.create(state.doc, clampedPos);
+
+    view.dispatch(state.tr.setSelection(nextSelection).scrollIntoView());
+  };
+
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const files = Array.from(e.target.files ?? []);
+    for (const [index, file] of files.entries()) {
+      if (index > 0) moveCursorAfterCurrentSelection();
 
-    onUpload?.(file, editor);
-
-    if (fileUploadRef.current) {
-      fileUploadRef.current.value = "";
+      await onUpload?.(file, editor);
+      moveCursorAfterCurrentSelection();
     }
+
+    if (fileUploadRef.current) fileUploadRef.current.value = "";
   };
 
   return (
@@ -110,6 +125,7 @@ const EditorToolbar = ({
                   ref={fileUploadRef}
                   onChange={handleUpload}
                   accept={acceptedImages}
+                  multiple
                 />
                 <Button
                   size="sm"

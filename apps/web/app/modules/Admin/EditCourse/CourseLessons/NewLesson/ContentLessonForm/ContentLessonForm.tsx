@@ -17,6 +17,7 @@ import {
   RICH_TEXT_ACCEPTED_FILE_TYPES,
 } from "~/hooks/buildRichTextFileUploadHandler";
 import { useEntityResourceUpload } from "~/hooks/useEntityResourceUpload";
+import { useRichTextUploadQueue } from "~/hooks/useRichTextUploadQueue";
 import { useTusVideoUpload } from "~/hooks/useTusVideoUpload";
 import { useUploadDisplayModeDialog } from "~/hooks/useUploadDisplayModeDialog";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
@@ -68,7 +69,8 @@ const ContentLessonForm = ({
   const { mutateAsync: initVideoUpload } = useInitVideoUpload();
   const { uploadResource } = useEntityResourceUpload();
   const { askForDisplayMode, dialog: uploadDisplayModeDialog } = useUploadDisplayModeDialog();
-  const { getSessionForFile, uploadVideo, isUploading, uploadProgress } = useTusVideoUpload();
+  const { getSessionForFile, uploadVideo } = useTusVideoUpload();
+  const { enqueue, setStatus, setProgress, attachUploadId } = useRichTextUploadQueue();
 
   const onCloseModal = () => {
     setIsModalOpen(false);
@@ -110,6 +112,13 @@ const ContentLessonForm = ({
         description: t("uploadFile.toast.videoFailed"),
         variant: "destructive",
       });
+    },
+    fallbackUploadErrorMessage: t("uploadFile.toast.videoFailed"),
+    uploadQueue: {
+      enqueue,
+      setStatus,
+      setProgress,
+      attachUploadId,
     },
   });
 
@@ -210,7 +219,6 @@ const ContentLessonForm = ({
                     allowFiles={!!lessonToEdit?.id || !!contextId}
                     acceptedFileTypes={RICH_TEXT_ACCEPTED_FILE_TYPES}
                     onUpload={handleFileUpload}
-                    uploadProgress={isUploading ? (uploadProgress ?? 0) : null}
                     onCtrlSave={() => form.handleSubmit(onSubmit)()}
                     {...field}
                   />

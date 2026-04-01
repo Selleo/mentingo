@@ -2,7 +2,6 @@ import { ALLOWED_LESSON_IMAGE_FILE_TYPES, detectVideoProviderFromUrl } from "@re
 import { EditorContent, useEditor, type Editor as TiptapEditor } from "@tiptap/react";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
-import { Progress } from "~/components/ui/progress";
 import { cn } from "~/lib/utils";
 
 import { detectPresentationProvider } from "./extensions/utils/presentation";
@@ -22,7 +21,7 @@ type EditorProps = {
   parentClassName?: string;
   lessonId?: string;
   allowFiles?: boolean;
-  acceptedFileTypes?: string[];
+  acceptedFileTypes?: readonly string[];
   variant?: "base" | "content";
 };
 
@@ -34,7 +33,6 @@ const Editor = ({
   onChange,
   onUpload,
   onCtrlSave,
-  uploadProgress,
   id,
   parentClassName,
   allowFiles = false,
@@ -158,11 +156,6 @@ const Editor = ({
         acceptedFileTypes={acceptedFileTypes}
         onUpload={onUpload}
       />
-      {uploadProgress && (
-        <div className="border-t border-neutral-200 relative">
-          <Progress value={uploadProgress} className="h-3 rounded-none" />
-        </div>
-      )}
       <EditorContent id={id} editor={editor} placeholder={placeholder} className={editorClasses} />
     </div>
   );
