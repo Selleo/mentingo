@@ -1,19 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "@remix-run/react";
 import {
-  ALLOWED_EXCEL_FILE_TYPES,
   ALLOWED_LESSON_IMAGE_FILE_TYPES,
-  ALLOWED_PDF_FILE_TYPES,
-  ALLOWED_PRESENTATION_FILE_TYPES,
-  ALLOWED_VIDEO_FILE_TYPES,
-  ALLOWED_WORD_FILE_TYPES,
   ENTITY_TYPES,
   type SupportedLanguages,
 } from "@repo/shared";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { match } from "ts-pattern";
 import { z } from "zod";
 
 import { useAddArticleLanguage } from "~/api/mutations/admin/useAddArticleLanguage";
@@ -32,12 +26,12 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from "~/component
 import { Label } from "~/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { useToast } from "~/components/ui/use-toast";
-import { useClearVideoOnTabChange } from "~/hooks/useClearVideoOnTabChange";
 import {
-  buildEntityResourceUrl,
-  insertResourceIntoEditor,
-  useEntityResourceUpload,
-} from "~/hooks/useEntityResourceUpload";
+  buildRichTextFileUploadHandler,
+  RICH_TEXT_ACCEPTED_FILE_TYPES,
+} from "~/hooks/buildRichTextFileUploadHandler";
+import { useClearVideoOnTabChange } from "~/hooks/useClearVideoOnTabChange";
+import { useEntityResourceUpload } from "~/hooks/useEntityResourceUpload";
 import { useHandleImageUpload } from "~/hooks/useHandleImageUpload";
 import { useTusVideoUpload } from "~/hooks/useTusVideoUpload";
 import { useUploadDisplayModeDialog } from "~/hooks/useUploadDisplayModeDialog";
@@ -48,7 +42,7 @@ import Loader from "../common/Loader/Loader";
 import { useLanguageStore } from "../Dashboard/Settings/Language/LanguageStore";
 
 import type { Editor as TiptapEditor } from "@tiptap/react";
-import type { InitVideoUploadResponse, UpdateArticleBody } from "~/api/generated-api";
+import type { UpdateArticleBody } from "~/api/generated-api";
 
 type ArticleFormValues = {
   title: string;
@@ -191,84 +185,42 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
     navigate(`/articles/${articleId}`);
   };
 
+  const sharedFileUploadHandler = buildRichTextFileUploadHandler({
+    entityType: ENTITY_TYPES.ARTICLES,
+    getVideoSessionForFile: (file) =>
+      getSessionForFile({
+        file,
+        init: () =>
+          initVideoUpload({
+            filename: file.name,
+            sizeBytes: file.size,
+            mimeType: file.type,
+            title: file.name,
+            resource: ENTITY_TYPES.ARTICLES,
+            entityId: articleId,
+            entityType: ENTITY_TYPES.ARTICLES,
+          }),
+      }),
+    uploadVideo,
+    uploadResourceFile: (file) =>
+      uploadResource({
+        file,
+        entityType: ENTITY_TYPES.ARTICLES,
+        entityId: articleId,
+        language: articleLanguage,
+      }),
+    askForDisplayMode,
+    onVideoUploadError: () => {
+      toast({
+        description: t("uploadFile.toast.videoFailed"),
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleFileUpload = async (file?: File, editor?: TiptapEditor | null) => {
     if (!file || !articleId || !articleLanguage) return;
-
-    const isVideo = ALLOWED_VIDEO_FILE_TYPES.includes(file.type);
-    if (isVideo) {
-      try {
-        const session: InitVideoUploadResponse = await getSessionForFile({
-          file,
-          init: () =>
-            initVideoUpload({
-              filename: file.name,
-              sizeBytes: file.size,
-              mimeType: file.type,
-              title: file.name,
-              resource: ENTITY_TYPES.ARTICLES,
-              entityId: articleId,
-              entityType: ENTITY_TYPES.ARTICLES,
-            }),
-        });
-
-        await uploadVideo({ file, session });
-
-        if (session.resourceId) {
-          const resourceUrl = buildEntityResourceUrl(session.resourceId, ENTITY_TYPES.ARTICLES);
-
-          editor
-            ?.chain()
-            .insertContent("<br />")
-            .setVideoEmbed({
-              src: resourceUrl,
-              sourceType: session.provider === "s3" ? "external" : "internal",
-            })
-            .run();
-        }
-      } catch (error) {
-        console.error("Error uploading video:", error);
-        toast({
-          description: t("uploadFile.toast.videoFailed"),
-          variant: "destructive",
-        });
-      }
-      return;
-    }
-
-    const isPresentation = ALLOWED_PRESENTATION_FILE_TYPES.includes(file.type);
-    const isPdf = ALLOWED_PDF_FILE_TYPES.includes(file.type);
-    const isDocument =
-      isPdf ||
-      ALLOWED_EXCEL_FILE_TYPES.includes(file.type) ||
-      ALLOWED_WORD_FILE_TYPES.includes(file.type);
-
-    let displayMode: "preview" | "download" = "preview";
-
-    if (isPresentation || isPdf) {
-      const selectedMode = await askForDisplayMode(file.name);
-      if (!selectedMode) return;
-      displayMode = selectedMode;
-    }
-
-    const resourceId = await uploadResource({
-      file,
-      entityType: ENTITY_TYPES.ARTICLES,
-      entityId: articleId,
-      language: articleLanguage,
-    });
-
-    insertResourceIntoEditor({
-      editor,
-      resourceId,
-      entityType: ENTITY_TYPES.ARTICLES,
-      file,
-      resourceType: match({ isPresentation, isPdf, isDocument })
-        .with({ isPresentation: true }, () => "presentation" as const)
-        .with({ isPdf: true }, () => "pdf" as const)
-        .with({ isDocument: true }, () => "document" as const)
-        .otherwise(() => "other" as const),
-      displayMode: isPresentation || isDocument ? displayMode : "preview",
-    });
+    await sharedFileUploadHandler(file, editor);
   };
 
   const fetchPreview = useCallback(
@@ -419,14 +371,7 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
                               id="content"
                               content={field.value}
                               allowFiles
-                              acceptedFileTypes={[
-                                ...ALLOWED_LESSON_IMAGE_FILE_TYPES,
-                                ...ALLOWED_VIDEO_FILE_TYPES,
-                                ...ALLOWED_EXCEL_FILE_TYPES,
-                                ...ALLOWED_PDF_FILE_TYPES,
-                                ...ALLOWED_WORD_FILE_TYPES,
-                                ...ALLOWED_PRESENTATION_FILE_TYPES,
-                              ]}
+                              acceptedFileTypes={RICH_TEXT_ACCEPTED_FILE_TYPES}
                               onUpload={handleFileUpload}
                               uploadProgress={isUploading ? (uploadProgress ?? 0) : null}
                               onChange={field.onChange}
