@@ -20,6 +20,7 @@ import { Button } from "~/components/ui/button";
 import { Form, FormControl, FormField, FormItem } from "~/components/ui/form";
 import { Label } from "~/components/ui/label";
 import { useToast } from "~/components/ui/use-toast";
+import { useLeaveModal } from "~/context/LeaveModalContext";
 import {
   buildEntityResourceUrl,
   insertResourceIntoEditor,
@@ -28,6 +29,7 @@ import {
 import { useTusVideoUpload } from "~/hooks/useTusVideoUpload";
 import { useUploadDisplayModeDialog } from "~/hooks/useUploadDisplayModeDialog";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
+import LeaveConfirmationModal from "~/modules/Admin/components/LeaveConfirmationModal";
 import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/components/MissingTranslationsAlert";
 
 import { ContentTypes, DeleteContentType } from "../../../EditCourse.types";
@@ -55,6 +57,7 @@ const ContentLessonForm = ({
   language,
 }: ContentLessonProps) => {
   const [contextId, setContextId] = useState<string | undefined>(undefined);
+  const [isValidated, setIsValidated] = useState(false);
 
   const { form, onSubmit, onDelete } = useContentLessonForm({
     chapterToEdit,
@@ -65,6 +68,8 @@ const ContentLessonForm = ({
   });
   const { t } = useTranslation();
   const { toast } = useToast();
+  const { isLeaveModalOpen, closeLeaveModal, setIsCurrectFormDirty, setIsLeavingContent } =
+    useLeaveModal();
 
   const { mutate: initializeLessonContext } = useInitializeLessonContext();
 
@@ -83,6 +88,30 @@ const ContentLessonForm = ({
     setIsModalOpen(true);
   };
 
+  const removeVideoEmbedBySource = (editor: TiptapEditor, src: string) => {
+    editor
+      .chain()
+      .focus()
+      .command(({ state, tr, dispatch }) => {
+        let found = false;
+
+        state.doc.descendants((node, pos) => {
+          if (node.type.name !== "video") return true;
+          if (node.attrs.src !== src) return true;
+
+          tr.delete(pos, pos + node.nodeSize);
+          found = true;
+          return false;
+        });
+
+        if (!found) return false;
+
+        dispatch?.(tr);
+        return true;
+      })
+      .run();
+  };
+
   const handleFileUpload = async (file?: File, editor?: TiptapEditor | null) => {
     if (!file) return;
 
@@ -95,6 +124,8 @@ const ContentLessonForm = ({
       ALLOWED_WORD_FILE_TYPES.includes(file.type);
 
     if (isVideo) {
+      let insertedResourceUrl: string | null = null;
+
       try {
         const session = await getSessionForFile({
           file,
@@ -111,21 +142,23 @@ const ContentLessonForm = ({
             }),
         });
 
-        await uploadVideo({ file, session });
-
-        if (session.resourceId) {
-          const resourceUrl = buildEntityResourceUrl(session.resourceId, ENTITY_TYPES.LESSON);
+        if (session.resourceId && editor) {
+          insertedResourceUrl = buildEntityResourceUrl(session.resourceId, ENTITY_TYPES.LESSON);
 
           editor
-            ?.chain()
+            .chain()
             .insertContent("<br />")
             .setVideoEmbed({
-              src: resourceUrl,
+              src: insertedResourceUrl,
               sourceType: session.provider === "s3" ? "external" : "internal",
             })
             .run();
         }
+
+        await uploadVideo({ file, session });
       } catch (error) {
+        if (editor && insertedResourceUrl) removeVideoEmbedBySource(editor, insertedResourceUrl);
+
         console.error("Error uploading video:", error);
         toast({
           description: t("uploadFile.toast.videoFailed"),
@@ -176,6 +209,37 @@ const ContentLessonForm = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const { isDirty } = form.formState;
+
+  useEffect(() => {
+    setIsCurrectFormDirty(isDirty);
+  }, [isDirty, setIsCurrectFormDirty]);
+
+  const handleValidationSuccess = () => {
+    setIsValidated(true);
+  };
+
+  const handleValidationError = () => {
+    setIsValidated(false);
+    closeLeaveModal();
+  };
+
+  const onValidateLeave = () => {
+    form.handleSubmit(handleValidationSuccess, handleValidationError)();
+  };
+
+  const onCloseLeaveModal = () => {
+    closeLeaveModal();
+    setIsCurrectFormDirty(false);
+    setIsLeavingContent(false);
+  };
+
+  const onSaveLeaveModal = () => {
+    form.handleSubmit(onSubmit)();
+    closeLeaveModal();
+    setIsLeavingContent(false);
+  };
 
   return (
     <div className="flex flex-col gap-y-6 rounded-lg bg-white p-8">
@@ -274,6 +338,13 @@ const ContentLessonForm = ({
         onClose={onCloseModal}
         onDelete={onDelete}
         contentType={DeleteContentType.CONTENT}
+      />
+      <LeaveConfirmationModal
+        open={isLeaveModalOpen || false}
+        onClose={onCloseLeaveModal}
+        onSave={onSaveLeaveModal}
+        onValidate={onValidateLeave}
+        isValidated={isValidated}
       />
       {uploadDisplayModeDialog}
     </div>
