@@ -578,6 +578,9 @@ importers:
       '@repo/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@ricky0123/vad-web':
+        specifier: 0.0.30
+        version: 0.0.30
       '@sentry/react':
         specifier: 8.40.0
         version: 8.40.0(react@18.3.1)
@@ -7139,6 +7142,9 @@ packages:
   '@remix-run/web-stream@1.1.0':
     resolution: {integrity: sha512-KRJtwrjRV5Bb+pM7zxcTJkhIqWWSy+MYsIxHK+0m5atcznsf15YwUBWHWulZerV2+vvHH1Lp1DD7pw6qKW8SgA==}
 
+  '@ricky0123/vad-web@0.0.30':
+    resolution: {integrity: sha512-cJyYrh4YeeUBJcbR9Bic/bFDyB9qBkAepvpuWM3vLxnAi7bC3VHzf51UeNdT+OtY4D7MLAgV8iJMc4z41ZnaWg==}
+
   '@rollup/pluginutils@5.1.3':
     resolution: {integrity: sha512-Pnsb6f32CD2W3uCaLZIzDmeFyQ2b8UWMFI7xtwUezpcGBDVDW6y9XgAWIlARiGAo6eNF5FK5aQTr0LFyNyqq5A==}
     engines: {node: '>=14.0.0'}
@@ -9219,6 +9225,7 @@ packages:
   basic-ftp@5.0.5:
     resolution: {integrity: sha512-4Bcg1P8xhUuqcii/S0Z9wiHIrQVPMermM1any+MX5GeGD7faD3/msQUDGLol9wOcz4/jbg/WJnGqoJF6LiBdtg==}
     engines: {node: '>=10.0.0'}
+    deprecated: Security vulnerability fixed in 5.2.0, please upgrade
 
   bcryptjs@2.4.3:
     resolution: {integrity: sha512-V/Hy/X9Vt7f3BbPJEi8BdVFMByHi+jNXrYkW3huaybV/kQ0KJg0Y6PkEMbn+zeT+i+SiKZ/HMqJGIIt4LZDqNQ==}
@@ -11010,6 +11017,9 @@ packages:
     resolution: {integrity: sha512-b6suED+5/3rTpUBdG1gupIl8MPFCAMA0QXwmljLhvCUKcUvdE4gWky9zpuGCcXHOsz4J9wPGNWq6OKpmIzz3hQ==}
     hasBin: true
 
+  flatbuffers@25.9.23:
+    resolution: {integrity: sha512-MI1qs7Lo4Syw0EOzUl0xjs2lsoeqFku44KpngfIduHBYvzm8h2+7K8YMQh1JtVVVrUvhLpNwqVi4DERegUJhPQ==}
+
   flatted@3.3.2:
     resolution: {integrity: sha512-AiwGJM8YcNOaobumgtng+6NHuOqC3A7MixFeDafM3X9cIUM+xUXoS5Vfgf+OihAYe20fxqNM9yPBXJzRtZ/4eA==}
 
@@ -11363,6 +11373,9 @@ packages:
   graphql@16.9.0:
     resolution: {integrity: sha512-GGTKBX4SD7Wdb8mqeDLni2oaRGYQWjWHGKPQ24ZMnUtKfcsVoiv4uX8+LJr1K6U5VW2Lu1BwJnj7uiori0YtRw==}
     engines: {node: ^12.22.0 || ^14.16.0 || ^16.0.0 || >=17.0.0}
+
+  guid-typescript@1.0.9:
+    resolution: {integrity: sha512-Y8T4vYhEfwJOTbouREvG+3XDsjr8E3kIr7uf+JZ0BYloFsttiHU0WfvANVsR7TxNUJa/WpCnw/Ino/p+DeBhBQ==}
 
   gunzip-maybe@1.4.2:
     resolution: {integrity: sha512-4haO1M4mLO91PW57BMsDFf75UmwoRX0GkdD+Faw+Lr+r/OZrOCS0pIBwOL1xCKQqnQzbNFGgK2V2CpBUPeFNTw==}
@@ -13557,6 +13570,12 @@ packages:
     resolution: {integrity: sha512-VXJjc87FScF88uafS3JllDgvAm+c/Slfz06lorj2uAY34rlUu0Nt+v8wreiImcrgAjjIHp1rXpTDlLOGw29WwQ==}
     engines: {node: '>=18'}
 
+  onnxruntime-common@1.24.3:
+    resolution: {integrity: sha512-GeuPZO6U/LBJXvwdaqHbuUmoXiEdeCjWi/EG7Y1HNnDwJYuk6WUbNXpF6luSUY8yASul3cmUlLGrCCL1ZgVXqA==}
+
+  onnxruntime-web@1.24.3:
+    resolution: {integrity: sha512-41dDq7fxtTm0XzGE7N0d6m8FcOY8EWtUA65GkOixJPB/G7DGzBmiDAnVVXHznRw9bgUZpb+4/1lQK/PNxGpbrQ==}
+
   open@8.4.2:
     resolution: {integrity: sha512-7x81NCL719oNbsq/3mh+hVrAWmFuEYUqrq/Iw3kUzH8ReypT9QQ0BLoJS7/G9k6N81XjW4qHWtjWwe/9eLy1EQ==}
     engines: {node: '>=12'}
@@ -13909,6 +13928,9 @@ packages:
 
   pkg-types@1.2.1:
     resolution: {integrity: sha512-sQoqa8alT3nHjGuTjuKgOnvjo4cljkufdtLMnO2LBP/wRwuDlo1tkaEdMxCRhyGRPacv/ztlZgDPm2b7FAmEvw==}
+
+  platform@1.3.6:
+    resolution: {integrity: sha512-fnWVljUchTro6RiCFvCXBbNhJc2NijN7oIQxbwsyL0buWJPG85v81ehlHI9fXrJsMNgTofEoWIQeClKpgxFLrg==}
 
   playwright-core@1.49.0:
     resolution: {integrity: sha512-R+3KKTQF3npy5GTiKH/T+kdhoJfJojjHESR1YEWhYuEKRVfVaxH3+4+GvXE5xyCngCxhxnykk0Vlah9v8fs3jA==}
@@ -16536,6 +16558,7 @@ packages:
   whatwg-encoding@3.1.1:
     resolution: {integrity: sha512-6qN4hJdMwfYBtE3YBTTHhoeuUrDBPZmbQaxWAqSALV/MeEnR5z1xd8UKud2RAkFoPkmB+hli1TZSnyi84xz1vQ==}
     engines: {node: '>=18'}
+    deprecated: Use @exodus/bytes instead for a more spec-conformant and faster implementation
 
   whatwg-mimetype@4.0.0:
     resolution: {integrity: sha512-QaKxh0eNIi2mE9p2vEdzfagOKHCcj1pJ56EEHGQOVxp8r9/iszLUUV7v89x9O1p/T+NlTM5W7jW6+cz4Fq1YVg==}
@@ -24172,6 +24195,10 @@ snapshots:
     dependencies:
       web-streams-polyfill: 3.3.3
 
+  '@ricky0123/vad-web@0.0.30':
+    dependencies:
+      onnxruntime-web: 1.24.3
+
   '@rollup/pluginutils@5.1.3(rollup@4.27.4)':
     dependencies:
       '@types/estree': 1.0.6
@@ -25747,7 +25774,7 @@ snapshots:
     dependencies:
       '@types/node': 20.17.6
       tapable: 2.2.1
-      webpack: 5.96.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(esbuild@0.24.0)
+      webpack: 5.96.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(esbuild@0.19.11)
     transitivePeerDependencies:
       - '@swc/core'
       - esbuild
@@ -29118,6 +29145,8 @@ snapshots:
 
   flat@5.0.2: {}
 
+  flatbuffers@25.9.23: {}
+
   flatted@3.3.2: {}
 
   follow-redirects@1.15.11(debug@4.4.3):
@@ -29527,6 +29556,8 @@ snapshots:
   graphql@16.11.0: {}
 
   graphql@16.9.0: {}
+
+  guid-typescript@1.0.9: {}
 
   gunzip-maybe@1.4.2:
     dependencies:
@@ -32534,6 +32565,17 @@ snapshots:
     dependencies:
       mimic-function: 5.0.1
 
+  onnxruntime-common@1.24.3: {}
+
+  onnxruntime-web@1.24.3:
+    dependencies:
+      flatbuffers: 25.9.23
+      guid-typescript: 1.0.9
+      long: 5.3.2
+      onnxruntime-common: 1.24.3
+      platform: 1.3.6
+      protobufjs: 7.5.4
+
   open@8.4.2:
     dependencies:
       define-lazy-prop: 2.0.0
@@ -32919,6 +32961,8 @@ snapshots:
       confbox: 0.1.8
       mlly: 1.7.3
       pathe: 1.1.2
+
+  platform@1.3.6: {}
 
   playwright-core@1.49.0: {}
 
@@ -35309,7 +35353,7 @@ snapshots:
       schema-utils: 3.3.0
       serialize-javascript: 6.0.2
       terser: 5.36.0
-      webpack: 5.96.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(esbuild@0.24.0)
+      webpack: 5.96.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(esbuild@0.19.11)
     optionalDependencies:
       '@swc/core': 1.3.101(@swc/helpers@0.5.2)
       esbuild: 0.19.11
@@ -36425,6 +36469,36 @@ snapshots:
       - esbuild
       - uglify-js
 
+  webpack@5.96.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(esbuild@0.19.11):
+    dependencies:
+      '@types/eslint-scope': 3.7.7
+      '@types/estree': 1.0.6
+      '@webassemblyjs/ast': 1.14.1
+      '@webassemblyjs/wasm-edit': 1.14.1
+      '@webassemblyjs/wasm-parser': 1.14.1
+      acorn: 8.14.0
+      browserslist: 4.24.2
+      chrome-trace-event: 1.0.4
+      enhanced-resolve: 5.17.1
+      es-module-lexer: 1.5.4
+      eslint-scope: 5.1.1
+      events: 3.3.0
+      glob-to-regexp: 0.4.1
+      graceful-fs: 4.2.11
+      json-parse-even-better-errors: 2.3.1
+      loader-runner: 4.3.0
+      mime-types: 2.1.35
+      neo-async: 2.6.2
+      schema-utils: 3.3.0
+      tapable: 2.2.1
+      terser-webpack-plugin: 5.3.10(@swc/core@1.3.101(@swc/helpers@0.5.2))(esbuild@0.19.11)(webpack@5.96.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(esbuild@0.19.11))
+      watchpack: 2.4.2
+      webpack-sources: 3.2.3
+    transitivePeerDependencies:
+      - '@swc/core'
+      - esbuild
+      - uglify-js
+
   webpack@5.96.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(esbuild@0.19.12):
     dependencies:
       '@types/eslint-scope': 3.7.7
@@ -36448,36 +36522,6 @@ snapshots:
       schema-utils: 3.3.0
       tapable: 2.2.1
       terser-webpack-plugin: 5.3.10(@swc/core@1.3.101(@swc/helpers@0.5.2))(esbuild@0.19.12)(webpack@5.96.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(esbuild@0.19.12))
-      watchpack: 2.4.2
-      webpack-sources: 3.2.3
-    transitivePeerDependencies:
-      - '@swc/core'
-      - esbuild
-      - uglify-js
-
-  webpack@5.96.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(esbuild@0.24.0):
-    dependencies:
-      '@types/eslint-scope': 3.7.7
-      '@types/estree': 1.0.6
-      '@webassemblyjs/ast': 1.14.1
-      '@webassemblyjs/wasm-edit': 1.14.1
-      '@webassemblyjs/wasm-parser': 1.14.1
-      acorn: 8.14.0
-      browserslist: 4.24.2
-      chrome-trace-event: 1.0.4
-      enhanced-resolve: 5.17.1
-      es-module-lexer: 1.5.4
-      eslint-scope: 5.1.1
-      events: 3.3.0
-      glob-to-regexp: 0.4.1
-      graceful-fs: 4.2.11
-      json-parse-even-better-errors: 2.3.1
-      loader-runner: 4.3.0
-      mime-types: 2.1.35
-      neo-async: 2.6.2
-      schema-utils: 3.3.0
-      tapable: 2.2.1
-      terser-webpack-plugin: 5.3.10(@swc/core@1.3.101(@swc/helpers@0.5.2))(esbuild@0.19.11)(webpack@5.96.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(esbuild@0.19.11))
       watchpack: 2.4.2
       webpack-sources: 3.2.3
     transitivePeerDependencies:
