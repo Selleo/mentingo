@@ -43,6 +43,7 @@ import { UserRegisteredEvent } from "src/events/user/user-registered.event";
 import { UserWelcomeEvent } from "src/events/user/user-welcome.event";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { PermissionsService } from "src/permissions/permissions.service";
+import { SessionRevocationService } from "src/redis";
 import { SettingsService } from "src/settings/settings.service";
 import { DB_ADMIN } from "src/storage/db/db.providers";
 import { SupportModeService } from "src/support-mode/support-mode.service";
@@ -90,6 +91,7 @@ export class AuthService {
     private tokenService: TokenService,
     private readonly supportModeService: SupportModeService,
     private readonly permissionsService: PermissionsService,
+    private readonly sessionRevocationService: SessionRevocationService,
   ) {}
 
   public async register({
@@ -398,7 +400,12 @@ export class AuthService {
         throw new UnauthorizedException("User not found");
       }
 
+      const isRevoked = await this.sessionRevocationService.isUserRevoked(user.id);
+
       const tokens = await this.getTokens(user);
+
+      if (isRevoked) await this.sessionRevocationService.clearUserRevocation(user.id);
+
       const { roleSlugs, permissions } = await this.permissionsService.getUserAccess(user.id);
 
       const actor: CurrentUser = {

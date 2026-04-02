@@ -613,7 +613,7 @@ export class CourseController {
   }
 
   @Post("enroll-course")
-  @RequirePermission(PERMISSIONS.COURSE_ENROLLMENT)
+  @RequirePermission(PERMISSIONS.COURSE_ENROLLMENT, PERMISSIONS.LEARNING_PROGRESS_UPDATE)
   @Validate({
     request: [{ type: "query", name: "id", schema: UUIDSchema }],
     response: baseResponse(Type.Object({ message: Type.String() })),

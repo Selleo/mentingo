@@ -950,7 +950,7 @@
     },
     "permissions": {
       "title": "Efektivní oprávnění",
-      "effective": "Sjednocení uživatele"
+      "effective": "Uživatelská oprávnění"
     },
     "placeholder": {
       "role": "Vyberte roli",
@@ -2933,8 +2933,13 @@
     "error": {
       "unauthenticated": "Uživatel není ověřen",
       "invalidEmailOrPassword": "Neplatný e-mail nebo heslo",
-      "adminRoleRequired": "Je vyžadována role správce"
+      "adminRoleRequired": "Je vyžadována role správce",
+      "sessionRevoked": "Vaše relace byla odvolána. Obnovte prosím relaci."
     }
+  },
+  "sessionRevocation": {
+    "permissionsUpdated": "Vaše oprávnění byla aktualizována. Obnovujeme relaci, aby se použil nový přístup.",
+    "refreshFailed": "Vaše oprávnění byla změněna, ale obnovení relace se nezdařilo. Přihlaste se prosím znovu."
   },
   "tenantInactive": {
     "title": "Organizace je deaktivována",

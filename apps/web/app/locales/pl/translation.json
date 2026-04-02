@@ -990,7 +990,7 @@
     },
     "permissions": {
       "title": "Efektywne uprawnienia",
-      "effective": "Suma uprawnień użytkownika"
+      "effective": "Uprawnienia użytkownika"
     },
     "placeholder": {
       "role": "Wybierz rolę",
@@ -3011,8 +3011,13 @@
     "error": {
       "unauthenticated": "Użytkownik nie jest uwierzytelniony",
       "invalidEmailOrPassword": "Nieprawidłowy e-mail lub hasło",
-      "adminRoleRequired": "Wymagana rola administratora"
+      "adminRoleRequired": "Wymagana rola administratora",
+      "sessionRevoked": "Twoja sesja została unieważniona. Odśwież sesję."
     }
+  },
+  "sessionRevocation": {
+    "permissionsUpdated": "Twoje uprawnienia zostały zaktualizowane. Odświeżamy sesję, aby zastosować nowe dostępy.",
+    "refreshFailed": "Uprawnienia zostały zmienione, ale odświeżenie sesji nie powiodło się. Zaloguj się ponownie."
   },
   "tenantInactive": {
     "title": "Organizacja wyłączona",

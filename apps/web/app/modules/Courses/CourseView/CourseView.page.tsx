@@ -92,8 +92,8 @@ export default function CourseViewPage() {
     navigate(`${url.pathname}${url.search ?? ""}`, { replace: true });
   }, [course?.slug, id, navigate]);
 
-  const { hasAccess: canUpdateLearningProgress } = usePermissions({
-    required: PERMISSIONS.LEARNING_PROGRESS_UPDATE,
+  const { hasAccess: canViewCourseStatistics } = usePermissions({
+    required: PERMISSIONS.COURSE_STATISTICS,
   });
   const { data: currentUser } = useCurrentUser();
 
@@ -138,7 +138,7 @@ export default function CourseViewPage() {
   ];
 
   const canView = (isForAdminLike: boolean, isForUnregistered: boolean) => {
-    const hideForAdmin = isForAdminLike && (canUpdateLearningProgress || !currentUser);
+    const hideForAdmin = isForAdminLike && (!canViewCourseStatistics || !currentUser);
     const hideWhenUnregistered = !isForUnregistered && !currentUser;
 
     return !(hideForAdmin || hideWhenUnregistered);

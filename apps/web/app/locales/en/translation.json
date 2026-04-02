@@ -1003,7 +1003,7 @@
     },
     "permissions": {
       "title": "Effective permissions",
-      "effective": "User union"
+      "effective": "User permissions"
     },
     "placeholder": {
       "role": "Select a role",
@@ -2986,8 +2986,13 @@
     "error": {
       "unauthenticated": "User not authenticated",
       "invalidEmailOrPassword": "Invalid email or password",
-      "adminRoleRequired": "Admin role required"
+      "adminRoleRequired": "Admin role required",
+      "sessionRevoked": "Your session was revoked. Please refresh your session."
     }
+  },
+  "sessionRevocation": {
+    "permissionsUpdated": "Your permissions were updated. Refreshing your session to apply new access.",
+    "refreshFailed": "Your permissions changed, but the session refresh failed. Please sign in again."
   },
   "tenantInactive": {
     "title": "Organization Disabled",

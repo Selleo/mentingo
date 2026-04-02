@@ -1,5 +1,5 @@
 import { Link, useNavigate, type MetaFunction } from "@remix-run/react";
-import { PERMISSIONS, SYSTEM_ROLE_PERMISSIONS, SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import { PERMISSIONS, SYSTEM_ROLE_PERMISSIONS } from "@repo/shared";
 import {
   type ColumnDef,
   flexRender,
@@ -114,11 +114,13 @@ const Users = () => {
 
   const systemRolesForMatrix = useMemo(
     () =>
-      Object.values(SYSTEM_ROLE_SLUGS).map((slug) => ({
-        slug,
-        label: getRoleLabel(slug, t, roles),
-        permissions: SYSTEM_ROLE_PERMISSIONS[slug] ?? [],
-      })),
+      roles
+        .filter((role) => role.isSystem)
+        .map((role) => ({
+          slug: role.slug,
+          label: getRoleLabel(role.slug, t, roles),
+          permissions: SYSTEM_ROLE_PERMISSIONS[role.slug] ?? [],
+        })),
     [roles, t],
   );
 
@@ -485,7 +487,11 @@ const Users = () => {
               <Import className="size-4" />
               {t("adminUsersView.button.import")}
             </Button>
-            <Button onClick={() => setIsPermissionsMatrixOpen(true)} className="gap-2">
+            <Button
+              onClick={() => setIsPermissionsMatrixOpen(true)}
+              className="gap-2"
+              variant="outline"
+            >
               <Shield className="size-4" />
               {t("adminUsersView.button.permissionsMatrix")}
             </Button>

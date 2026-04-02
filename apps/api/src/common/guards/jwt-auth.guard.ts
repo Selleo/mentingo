@@ -8,6 +8,7 @@ import { ConfigService } from "@nestjs/config";
 import { Reflector } from "@nestjs/core";
 import { JwtService } from "@nestjs/jwt";
 
+import { SessionRevocationService } from "src/redis";
 import { extractToken } from "src/utils/extract-token";
 
 @Injectable()
@@ -16,6 +17,7 @@ export class JwtAuthGuard implements CanActivate {
     private jwtService: JwtService,
     private reflector: Reflector,
     private configService: ConfigService,
+    private readonly sessionRevocationService: SessionRevocationService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -34,7 +36,10 @@ export class JwtAuthGuard implements CanActivate {
           const payload = await this.jwtService.verifyAsync(token, {
             secret: this.configService.get<string>("jwt.secret"),
           });
-          request["user"] = payload;
+
+          const isRevoked = await this.sessionRevocationService.isUserRevoked(payload.userId);
+
+          request["user"] = isRevoked ? null : payload;
         } catch {
           // Silently ignore invalid tokens for public endpoints
           request["user"] = null;
@@ -63,10 +68,16 @@ export class JwtAuthGuard implements CanActivate {
         throw new UnauthorizedException("supportMode.errors.sessionExpired");
       }
 
+      const isRevoked = await this.sessionRevocationService.isUserRevoked(payload.userId);
+
+      if (isRevoked) throw new UnauthorizedException("auth.error.sessionRevoked");
+
       request["user"] = payload;
 
       return true;
-    } catch {
+    } catch (error) {
+      if (error instanceof UnauthorizedException) throw error;
+
       throw new UnauthorizedException("Invalid access token");
     }
   }

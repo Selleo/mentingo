@@ -950,7 +950,7 @@
     },
     "permissions": {
       "title": "Effektive Berechtigungen",
-      "effective": "Benutzerunion"
+      "effective": "Benutzerberechtigungen"
     },
     "placeholder": {
       "role": "Wählen Sie eine Rolle aus",
@@ -2933,8 +2933,13 @@
     "error": {
       "unauthenticated": "Benutzer nicht authentifiziert",
       "invalidEmailOrPassword": "Ungültige E-Mail-Adresse oder ungültiges Passwort",
-      "adminRoleRequired": "Administratorrolle erforderlich"
+      "adminRoleRequired": "Administratorrolle erforderlich",
+      "sessionRevoked": "Ihre Sitzung wurde widerrufen. Bitte aktualisieren Sie Ihre Sitzung."
     }
+  },
+  "sessionRevocation": {
+    "permissionsUpdated": "Ihre Berechtigungen wurden aktualisiert. Ihre Sitzung wird aktualisiert, um den neuen Zugriff anzuwenden.",
+    "refreshFailed": "Ihre Berechtigungen wurden geändert, aber die Sitzungsaktualisierung ist fehlgeschlagen. Bitte melden Sie sich erneut an."
   },
   "tenantInactive": {
     "title": "Organisation deaktiviert",

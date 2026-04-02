@@ -950,7 +950,7 @@
     },
     "permissions": {
       "title": "Efektyvūs leidimai",
-      "effective": "Vartotojo sąjunga"
+      "effective": "Vartotojo leidimai"
     },
     "placeholder": {
       "role": "Pasirinkite vaidmenį",
@@ -2933,8 +2933,13 @@
     "error": {
       "unauthenticated": "Vartotojas neatpažintas",
       "invalidEmailOrPassword": "Neteisingas el. pašto adresas arba slaptažodis",
-      "adminRoleRequired": "Reikalingas administratoriaus vaidmuo"
+      "adminRoleRequired": "Reikalingas administratoriaus vaidmuo",
+      "sessionRevoked": "Jūsų sesija buvo atšaukta. Atnaujinkite sesiją."
     }
+  },
+  "sessionRevocation": {
+    "permissionsUpdated": "Jūsų leidimai buvo atnaujinti. Atnaujiname sesiją, kad pritaikytume naują prieigą.",
+    "refreshFailed": "Leidimai pasikeitė, tačiau sesijos atnaujinimas nepavyko. Prisijunkite dar kartą."
   },
   "tenantInactive": {
     "title": "Organizacija išjungta",

@@ -11,6 +11,7 @@ import {
 import {
   OnboardingPages,
   PERMISSIONS,
+  SESSION_REVOCATION_SOCKET,
   SYSTEM_ROLE_PERMISSIONS,
   SYSTEM_ROLE_SLUGS,
   SYSTEM_RULE_SET_SLUGS,
@@ -51,11 +52,13 @@ import { UserPasswordReminderEvent } from "src/events/user/user-password-reminde
 import { FileService } from "src/file/file.service";
 import { GroupService } from "src/group/group.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
+import { SessionRevocationService } from "src/redis";
 import { S3Service } from "src/s3/s3.service";
 import { SettingsService } from "src/settings/settings.service";
 import { StatisticsService } from "src/statistics/statistics.service";
 import { DB_ADMIN } from "src/storage/db/db.providers";
 import { importUserSchema } from "src/user/schemas/createUser.schema";
+import { WsGateway } from "src/websocket/websocket.gateway";
 
 import {
   createTokens,
@@ -106,6 +109,11 @@ export class UserService {
     [SYSTEM_ROLE_SLUGS.CONTENT_CREATOR]: "Content Creator",
     [SYSTEM_ROLE_SLUGS.STUDENT]: "Student",
   };
+  private readonly SYSTEM_ROLE_PRIORITY: Record<string, number> = {
+    [SYSTEM_ROLE_SLUGS.ADMIN]: 0,
+    [SYSTEM_ROLE_SLUGS.CONTENT_CREATOR]: 1,
+    [SYSTEM_ROLE_SLUGS.STUDENT]: 2,
+  };
 
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
@@ -117,6 +125,8 @@ export class UserService {
     private settingsService: SettingsService,
     private readonly groupService: GroupService,
     private statisticsService: StatisticsService,
+    private readonly sessionRevocationService: SessionRevocationService,
+    private readonly wsGateway: WsGateway,
   ) {}
 
   public async getUsers(query: UsersQuery = {}) {
@@ -175,6 +185,7 @@ export class UserService {
 
         return {
           ...userWithoutAvatar,
+          roleSlugs: this.sortRoleSlugs(userWithoutAvatar.roleSlugs),
           profilePictureUrl: usersProfilePictureUrl,
         };
       }),
@@ -202,7 +213,17 @@ export class UserService {
       })
       .from(permissionRoles)
       .where(eq(permissionRoles.tenantId, tenantId))
-      .orderBy(asc(permissionRoles.name));
+      .orderBy(
+        sql<number>`
+          CASE
+            WHEN ${permissionRoles.slug} = ${SYSTEM_ROLE_SLUGS.ADMIN} THEN 0
+            WHEN ${permissionRoles.slug} = ${SYSTEM_ROLE_SLUGS.CONTENT_CREATOR} THEN 1
+            WHEN ${permissionRoles.slug} = ${SYSTEM_ROLE_SLUGS.STUDENT} THEN 2
+            ELSE 999
+          END
+        `,
+        asc(permissionRoles.name),
+      );
   }
 
   public async getUserById(id: UUIDType, db?: DatabasePg) {
@@ -307,7 +328,10 @@ export class UserService {
       throw new NotFoundException("User not found");
     }
 
-    return this.db.transaction(async (trx) => {
+    const shouldRevokeSession =
+      data.roleSlugs && (await this.haveRoleAssignmentsChanged(id, data.roleSlugs));
+
+    const updatedUser = await this.db.transaction(async (trx) => {
       const previousSnapshot = actor ? await this.buildUserActivitySnapshot(id, trx) : null;
 
       const { groups, roleSlugs, ...userData } = data;
@@ -357,6 +381,10 @@ export class UserService {
         groups: updatedGroups,
       };
     });
+
+    if (shouldRevokeSession) await this.revokeSessionsAndNotifyUsers([id]);
+
+    return updatedUser;
   }
 
   async upsertUserDetails(userId: UUIDType, data: UpsertUserDetailsBody) {
@@ -1151,6 +1179,13 @@ export class UserService {
       throw new BadRequestException("adminUsersView.toast.noUserSelected");
     }
 
+    const usersWithChangedRoles = await Promise.all(
+      usersToUpdate.map(async (user) => {
+        const hasChanged = await this.haveRoleAssignmentsChanged(user.id, data.roleSlugs);
+        return hasChanged ? user.id : null;
+      }),
+    );
+
     await this.db.transaction(async (trx) => {
       await Promise.all(
         usersToUpdate.map((user) =>
@@ -1158,6 +1193,39 @@ export class UserService {
         ),
       );
     });
+
+    const usersToRevoke = usersWithChangedRoles.filter((userId): userId is UUIDType =>
+      Boolean(userId),
+    );
+
+    if (usersToRevoke.length) await this.revokeSessionsAndNotifyUsers(usersToRevoke);
+  }
+
+  private async revokeSessionsAndNotifyUsers(userIds: UUIDType[]): Promise<void> {
+    await Promise.all(
+      userIds.map(async (userId) => {
+        await this.sessionRevocationService.revokeUserSessions(userId);
+        this.wsGateway.emitToUser(userId, SESSION_REVOCATION_SOCKET.EVENTS.PERMISSIONS_UPDATED, {
+          reason: SESSION_REVOCATION_SOCKET.REASONS.ROLES_CHANGED,
+          messageKey: SESSION_REVOCATION_SOCKET.MESSAGE_KEYS.PERMISSIONS_UPDATED,
+        });
+      }),
+    );
+  }
+
+  private async haveRoleAssignmentsChanged(userId: UUIDType, nextRoleSlugs: string[]) {
+    const { roleSlugs: currentRoleSlugs } = await this.getUserAccess(userId);
+
+    const uniqueCurrentRoleSlugs = new Set(currentRoleSlugs);
+    const uniqueNextRoleSlugs = new Set(nextRoleSlugs);
+
+    if (uniqueCurrentRoleSlugs.size !== uniqueNextRoleSlugs.size) return true;
+
+    for (const roleSlug of uniqueCurrentRoleSlugs) {
+      if (!uniqueNextRoleSlugs.has(roleSlug)) return true;
+    }
+
+    return false;
   }
 
   private async replaceUserRoleAssignments(
@@ -1358,12 +1426,23 @@ export class UserService {
       )
       .where(eq(permissionUserRoles.userId, userId));
 
-    const roleSlugs = Array.from(new Set(roleRows.map((row) => row.roleSlug)));
+    const roleSlugs = this.sortRoleSlugs(Array.from(new Set(roleRows.map((row) => row.roleSlug))));
     const permissions = Array.from(
       new Set(permissionRows.map((row) => row.permission as PermissionKey)),
     );
 
     return { roleSlugs, permissions };
+  }
+
+  private sortRoleSlugs(roleSlugs: string[]): string[] {
+    return [...roleSlugs].sort((left, right) => {
+      const leftPriority = this.SYSTEM_ROLE_PRIORITY[left] ?? Number.MAX_SAFE_INTEGER;
+      const rightPriority = this.SYSTEM_ROLE_PRIORITY[right] ?? Number.MAX_SAFE_INTEGER;
+
+      if (leftPriority !== rightPriority) return leftPriority - rightPriority;
+
+      return left.localeCompare(right);
+    });
   }
 
   private userHasPermissionCondition(
