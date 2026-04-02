@@ -11,6 +11,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { cn } from "~/lib/utils";
 import { variants } from "~/modules/Courses/Lesson/AiMentorLesson/components/variants";
+
+import type { LessonPreviewUser } from "~/modules/Courses/Lesson/types";
 import "katex/dist/katex.min.css";
 
 interface ChatMessageProps {
@@ -23,6 +25,7 @@ interface ChatMessageProps {
   userName?: string;
   aiName?: string | null;
   avatarUrl?: string;
+  previewUser?: LessonPreviewUser;
   messageMaxWidthClass?: string;
 }
 
@@ -35,6 +38,7 @@ const ChatMessage = ({
   userName,
   aiName,
   avatarUrl,
+  previewUser,
   messageMaxWidthClass = "max-w-[90%]",
 }: ChatMessageProps) => {
   const { t } = useTranslation();
@@ -47,7 +51,9 @@ const ChatMessage = ({
       return aiName ?? t("studentCourseView.lesson.aiMentorLesson.aiMentorName");
     }
 
-    const fallbackName = `${currentUser?.firstName ?? ""} ${currentUser?.lastName ?? ""}`.trim();
+    const previewUserName = `${previewUser?.firstName ?? ""} ${previewUser?.lastName ?? ""}`.trim();
+    const fallbackName =
+      previewUserName || `${currentUser?.firstName ?? ""} ${currentUser?.lastName ?? ""}`.trim();
 
     return (
       userName ||
@@ -85,7 +91,10 @@ const ChatMessage = ({
           </Avatar>
         ) : (
           <div className="flex size-full items-center justify-center rounded-full bg-gray-200">
-            <UserAvatar userName={displayName} profilePictureUrl={currentUser?.profilePictureUrl} />
+            <UserAvatar
+              userName={displayName}
+              profilePictureUrl={previewUser?.profilePictureUrl ?? currentUser?.profilePictureUrl}
+            />
           </div>
         )}
       </div>

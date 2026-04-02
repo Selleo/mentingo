@@ -34,6 +34,12 @@ export type QuizForm = {
   };
 };
 
+export type LessonPreviewUser = {
+  firstName?: string | null;
+  lastName?: string | null;
+  profilePictureUrl?: string | null;
+};
+
 export const LESSON_PROGRESS_STATUSES = {
   NOT_STARTED: "not_started",
   IN_PROGRESS: "in_progress",

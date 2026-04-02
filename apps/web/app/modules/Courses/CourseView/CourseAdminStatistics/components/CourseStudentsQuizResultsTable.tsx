@@ -33,6 +33,9 @@ import type { FilterValue } from "~/modules/common/SearchFilter/SearchFilter";
 
 type CourseStudentsQuizResultsColumn = GetCourseStudentsQuizResultsResponse["data"][number];
 
+export const getCourseStudentsQuizResultsRowId = (row: CourseStudentsQuizResultsColumn) =>
+  `${row.studentId}-${row.lessonId}`;
+
 interface CourseStudentsQuizResultsTableProps {
   courseId: string;
   course?: GetCourseResponse["data"];
@@ -174,7 +177,7 @@ export function CourseStudentsQuizResultsTable({
   );
 
   const table = useReactTable({
-    getRowId: (row) => row.studentId,
+    getRowId: getCourseStudentsQuizResultsRowId,
     data: tableData,
     columns,
     getCoreRowModel: getCoreRowModel(),
@@ -221,7 +224,7 @@ export function CourseStudentsQuizResultsTable({
         <TableBody>
           {table.getRowModel().rows.map((row) => (
             <TableRow
-              key={row.id + row.index}
+              key={row.id}
               data-state={row.getIsSelected() && "selected"}
               className="cursor-pointer hover:bg-neutral-100"
             >

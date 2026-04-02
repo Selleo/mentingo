@@ -22,10 +22,12 @@ import { LessonContentRenderer } from "./LessonContentRenderer";
 import { isNextBlocked, isPreviousBlocked } from "./utils";
 
 import type { GetCourseResponse, GetLessonByIdResponse } from "~/api/generated-api";
+import type { LessonPreviewUser } from "~/modules/Courses/Lesson/types";
 
 type LessonContentProps = {
   lesson: GetLessonByIdResponse["data"];
   course: GetCourseResponse["data"];
+  previewUser?: LessonPreviewUser;
   lessonsAmount: number;
   handlePrevious: () => void;
   handleNext: () => void;
@@ -37,6 +39,7 @@ type LessonContentProps = {
 export const LessonContent = ({
   lesson,
   course,
+  previewUser,
   lessonsAmount,
   handlePrevious,
   handleNext,
@@ -276,6 +279,7 @@ export const LessonContent = ({
           <LessonContentRenderer
             lesson={lesson}
             user={user}
+            previewUser={previewUser}
             lessonLoading={lessonLoading}
             onVideoEnded={handleVideoEnded}
           />
