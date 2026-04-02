@@ -3012,6 +3012,7 @@
       "unauthenticated": "Użytkownik nie jest uwierzytelniony",
       "invalidEmailOrPassword": "Nieprawidłowy e-mail lub hasło",
       "adminRoleRequired": "Wymagana rola administratora",
+      "missingPermission": "Nie masz uprawnień do tego zasobu",
       "sessionRevoked": "Twoja sesja została unieważniona. Odśwież sesję."
     }
   },

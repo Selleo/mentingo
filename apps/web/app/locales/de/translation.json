@@ -2934,6 +2934,7 @@
       "unauthenticated": "Benutzer nicht authentifiziert",
       "invalidEmailOrPassword": "Ungültige E-Mail-Adresse oder ungültiges Passwort",
       "adminRoleRequired": "Administratorrolle erforderlich",
+      "missingPermission": "Sie haben keine Berechtigung, auf diese Ressource zuzugreifen",
       "sessionRevoked": "Ihre Sitzung wurde widerrufen. Bitte aktualisieren Sie Ihre Sitzung."
     }
   },

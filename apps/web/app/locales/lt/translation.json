@@ -2934,6 +2934,7 @@
       "unauthenticated": "Vartotojas neatpažintas",
       "invalidEmailOrPassword": "Neteisingas el. pašto adresas arba slaptažodis",
       "adminRoleRequired": "Reikalingas administratoriaus vaidmuo",
+      "missingPermission": "Neturite leidimo pasiekti šio šaltinio",
       "sessionRevoked": "Jūsų sesija buvo atšaukta. Atnaujinkite sesiją."
     }
   },

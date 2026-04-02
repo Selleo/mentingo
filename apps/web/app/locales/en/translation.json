@@ -2987,6 +2987,7 @@
       "unauthenticated": "User not authenticated",
       "invalidEmailOrPassword": "Invalid email or password",
       "adminRoleRequired": "Admin role required",
+      "missingPermission": "You do not have permission to access this resource",
       "sessionRevoked": "Your session was revoked. Please refresh your session."
     }
   },

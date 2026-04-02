@@ -2,6 +2,7 @@ import { t } from "i18next";
 import { get } from "lodash-es";
 import { match, P } from "ts-pattern";
 
+import { toast } from "~/components/ui/use-toast";
 import { authService } from "~/modules/Auth/authService";
 import { useAuthStore } from "~/modules/Auth/authStore";
 
@@ -37,6 +38,12 @@ const baseURL = (() => {
     .otherwise(() => undefined);
 })();
 
+const API_ERROR_MESSAGE_KEYS = {
+  TENANT_INACTIVE: "tenant.error.inactive",
+  MISSING_PERMISSION: "auth.error.missingPermission",
+  TOO_MANY_REQUESTS: "common.toast.tooManyRequests",
+} as const;
+
 export const ApiClient = new API({
   baseURL,
   secure: true,
@@ -65,25 +72,35 @@ ApiClient.instance.interceptors.response.use(
   async (error) => {
     if (error.response?.status === 429) {
       const payload = error.response?.data as ApiErrorResponse | undefined;
-      const isRateLimitMessageKey = payload?.message === "common.toast.tooManyRequests";
+      const isRateLimitMessageKey = payload?.message === API_ERROR_MESSAGE_KEYS.TOO_MANY_REQUESTS;
 
       if (isRateLimitMessageKey) {
         const retryAfterSeconds = payload?.retryAfterSeconds ?? 60;
 
         error.response.data = {
           ...payload,
-          message: t("common.toast.tooManyRequests", { seconds: retryAfterSeconds }),
+          message: t(API_ERROR_MESSAGE_KEYS.TOO_MANY_REQUESTS, { seconds: retryAfterSeconds }),
         };
       }
     }
 
     if (
       error.response?.status === 403 &&
-      error.response?.data?.message === "tenant.error.inactive" &&
+      error.response?.data?.message === API_ERROR_MESSAGE_KEYS.TENANT_INACTIVE &&
       typeof window !== "undefined" &&
       window.location.pathname !== "/tenant-inactive"
     ) {
       window.location.href = "/tenant-inactive";
+    }
+
+    if (
+      error.response?.status === 403 &&
+      error.response?.data?.message === API_ERROR_MESSAGE_KEYS.MISSING_PERMISSION
+    ) {
+      toast({
+        description: t(API_ERROR_MESSAGE_KEYS.MISSING_PERMISSION),
+        variant: "destructive",
+      });
     }
 
     if (error.config?.url?.includes("/logout")) {
