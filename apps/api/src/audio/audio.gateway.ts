@@ -12,7 +12,7 @@ import { PcmChunkMeta, VOICE_SOCKET_EVENT } from "@repo/shared";
 import { Server } from "socket.io";
 
 import { AudioService } from "src/audio/audio.service";
-import { StartAudioBody } from "src/audio/types/audio.types";
+import { SendTTSTriggerBody, StartAudioBody } from "src/audio/types/audio.types";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { AuthenticatedSocket, WsJwtGuard } from "src/websocket";
 
@@ -87,5 +87,14 @@ export class AudioGateway implements OnGatewayInit, OnGatewayDisconnect, Realtim
   @SubscribeMessage(VOICE_SOCKET_EVENT.CANCEL_AUDIO)
   async cancelAudio(@ConnectedSocket() client: AuthenticatedSocket) {
     return await this.audioService.cancelAudio(client.id);
+  }
+
+  @UseGuards(WsJwtGuard)
+  @SubscribeMessage(VOICE_SOCKET_EVENT.TRIGGER_TTS)
+  async triggerTTS(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody("payload") payload: SendTTSTriggerBody,
+  ) {
+    return await this.audioService.triggerTTS(client.id, payload);
   }
 }

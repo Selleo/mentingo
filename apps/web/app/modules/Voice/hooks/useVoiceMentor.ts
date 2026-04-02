@@ -1,4 +1,4 @@
-import { VOICE_ACTION } from "@repo/shared";
+import { VOICE_ACTION, VOICE_SOCKET_EVENT } from "@repo/shared";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -29,6 +29,7 @@ type VoiceMentorProps = {
   onLevelChange: (level: number) => void;
   onMentorTranscription?: (text: string) => void;
   onMentorResponseCompleted?: (text: string) => void;
+  onAudioStarted?: () => void;
   onAudioOutputCompleted?: () => void;
   onAudioInterrupted?: () => void;
   onSpeechChunkSent?: () => void;
@@ -41,6 +42,7 @@ export function useVoiceMentor({
   onLevelChange,
   onMentorTranscription,
   onMentorResponseCompleted,
+  onAudioStarted,
   onAudioOutputCompleted,
   onAudioInterrupted,
   onSpeechChunkSent,
@@ -55,6 +57,7 @@ export function useVoiceMentor({
   const setInputRef = useRef(setInput);
   const onMentorTranscriptionRef = useRef(onMentorTranscription);
   const onMentorResponseCompletedRef = useRef(onMentorResponseCompleted);
+  const onAudioStartedRef = useRef(onAudioStarted);
   const onAudioOutputCompletedRef = useRef(onAudioOutputCompleted);
   const onAudioInterruptedRef = useRef(onAudioInterrupted);
   const onSpeechChunkSentRef = useRef(onSpeechChunkSent);
@@ -80,6 +83,10 @@ export function useVoiceMentor({
   useEffect(() => {
     onMentorResponseCompletedRef.current = onMentorResponseCompleted;
   }, [onMentorResponseCompleted]);
+
+  useEffect(() => {
+    onAudioStartedRef.current = onAudioStarted;
+  }, [onAudioStarted]);
 
   useEffect(() => {
     onAudioOutputCompletedRef.current = onAudioOutputCompleted;
@@ -195,6 +202,7 @@ export function useVoiceMentor({
       onAudioChunkReceived: () => onAudioChunkReceivedRef.current?.(),
       onMentorTranscription: (text) => onMentorTranscriptionRef.current?.(text),
       onMentorResponseCompleted: (text) => onMentorResponseCompletedRef.current?.(text),
+      onAudioStarted: () => onAudioStartedRef.current?.(),
       onAudioInterrupted: () => onAudioInterruptedRef.current?.(),
     });
 
@@ -253,6 +261,24 @@ export function useVoiceMentor({
     }
   };
 
+  const triggerWelcomeMessage = async (message: string) => {
+    try {
+      const socket = acquireSocket();
+      socket.connect();
+
+      socket.emit(VOICE_SOCKET_EVENT.TRIGGER_TTS, {
+        payload: {
+          content: message,
+        },
+      });
+
+      return true;
+    } catch (error) {
+      console.error("Failed to send trigger for welcome message", error);
+      return false;
+    }
+  };
+
   const cancelVoiceMentor = async () => {
     try {
       await teardownVoiceMentorCapture();
@@ -268,5 +294,6 @@ export function useVoiceMentor({
     startVoiceMentor,
     stopVoiceMentor,
     cancelVoiceMentor,
+    triggerWelcomeMessage,
   };
 }

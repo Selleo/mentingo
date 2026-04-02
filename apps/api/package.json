@@ -39,7 +39,7 @@
     "@aws-sdk/s3-request-presigner": "3.658.1",
     "@faker-js/faker": "8.4.1",
     "@golevelup/nestjs-stripe": "0.8.2",
-    "@japro/luma-sdk": "0.2.6",
+    "@japro/luma-sdk": "0.2.7",
     "@keyv/redis": "4.0.2",
     "@knaadh/nestjs-drizzle-postgres": "1.0.0",
     "@langchain/community": "0.3.56",
