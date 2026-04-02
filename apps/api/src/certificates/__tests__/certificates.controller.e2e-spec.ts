@@ -337,21 +337,24 @@ describe("CertificatesController (e2e)", () => {
           thumbnailS3Key: null,
           hasCertificate: true,
         });
-        await db.insert(certificates).values({
-          userId: student.id,
-          courseId: course.id,
-        });
+        const [createdCertificate] = await db
+          .insert(certificates)
+          .values({
+            userId: student.id,
+            courseId: course.id,
+          })
+          .returning();
 
-        const html = "<div>test</div>";
-        const filename = "test.pdf";
         const response = await request(app.getHttpServer())
           .post("/api/certificates/download")
           .set("Cookie", cookies)
-          .send({ html, filename })
+          .send({ certificateId: createdCertificate.id, language: "en" })
           .expect(201);
 
         expect(response.headers["content-type"]).toBe("application/pdf");
-        expect(response.headers["content-disposition"]).toBe(`attachment; filename="${filename}"`);
+        expect(response.headers["content-disposition"]).toBe(
+          "attachment; filename=\"Python Basics.pdf\"; filename*=UTF-8''Python%20Basics.pdf",
+        );
         expect(response.body instanceof Buffer).toBe(true);
       });
 

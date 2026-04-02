@@ -9,8 +9,10 @@ vi.mock("~/api/queries/useContentCreatorCourses", () => ({
   useContentCreatorCourses: vi.fn().mockReturnValue({ data: [] }),
 }));
 
-vi.mock("~/utils/userRoles", () => ({
-  isAdminLike: vi.fn().mockReturnValue(false),
+vi.mock("~/hooks/usePermissions", () => ({
+  usePermissions: vi.fn().mockReturnValue({
+    hasAccess: false,
+  }),
 }));
 
 vi.mock("~/api/queries/useCurrentUser", async () => {

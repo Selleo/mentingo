@@ -57,8 +57,6 @@ export const PERMISSIONS = {
   INTEGRATION_KEY_MANAGE: "integration_key.manage",
   INTEGRATION_API_USE: "integration_api.use",
   TENANT_MANAGE: "tenant.manage",
-  SCORM_UPLOAD: "scorm.upload",
-  SCORM_READ: "scorm.read",
   COURSE_AI_GENERATION: "course.ai_generation",
 } as const;
 
@@ -96,7 +94,6 @@ export const SYSTEM_ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
     PERMISSIONS.SETTINGS_UPDATE_SELF,
     PERMISSIONS.ENV_READ_PUBLIC,
     PERMISSIONS.CATEGORY_READ,
-    PERMISSIONS.CATEGORY_MANAGE,
     PERMISSIONS.COURSE_READ_ASSIGNED,
     PERMISSIONS.COURSE_READ_MANAGEABLE,
     PERMISSIONS.COURSE_READ,

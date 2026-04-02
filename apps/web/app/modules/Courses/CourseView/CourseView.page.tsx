@@ -1,5 +1,5 @@
 import { redirect, useNavigate, useParams, useSearchParams } from "@remix-run/react";
-import { ACCESS_GUARD, SUPPORTED_LANGUAGES } from "@repo/shared";
+import { ACCESS_GUARD, PERMISSIONS, SUPPORTED_LANGUAGES } from "@repo/shared";
 import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -8,7 +8,7 @@ import { useCourse, useCurrentUser } from "~/api/queries";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { ContentAccessGuard } from "~/Guards/AccessGuard";
-import { useUserRole } from "~/hooks/useUserRole";
+import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
 import { CourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import CourseOverview from "~/modules/Courses/CourseView/CourseOverview";
@@ -92,7 +92,9 @@ export default function CourseViewPage() {
     navigate(`${url.pathname}${url.search ?? ""}`, { replace: true });
   }, [course?.slug, id, navigate]);
 
-  const { isStudent } = useUserRole();
+  const { hasAccess: canViewCourseStatistics } = usePermissions({
+    required: PERMISSIONS.COURSE_STATISTICS,
+  });
   const { data: currentUser } = useCurrentUser();
 
   const courseViewTabs = useMemo(
@@ -136,7 +138,7 @@ export default function CourseViewPage() {
   ];
 
   const canView = (isForAdminLike: boolean, isForUnregistered: boolean) => {
-    const hideForAdmin = isForAdminLike && (isStudent || !currentUser);
+    const hideForAdmin = isForAdminLike && (!canViewCourseStatistics || !currentUser);
     const hideWhenUnregistered = !isForUnregistered && !currentUser;
 
     return !(hideForAdmin || hideWhenUnregistered);

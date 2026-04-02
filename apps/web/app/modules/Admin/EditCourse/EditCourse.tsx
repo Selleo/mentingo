@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 
 import { useExportMasterCourse } from "~/api/mutations/admin/useExportMasterCourse";
 import useGenerateMissingTranslations from "~/api/mutations/admin/useGenerateMissingTranslations";
+import { useCurrentUserSuspense } from "~/api/queries";
 import { useBetaCourseById } from "~/api/queries/admin/useBetaCourse";
 import { useCourseGenerationDraft } from "~/api/queries/admin/useCourseGenerationDraft";
 import { useMissingTranslations } from "~/api/queries/admin/useHasMissingTranslations";
@@ -30,7 +31,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { LeaveModalProvider } from "~/context/LeaveModalContext";
 import { useTrackDataUpdatedAt } from "~/hooks/useTrackDataUpdatedAt";
-import { useUserRole } from "~/hooks/useUserRole";
 import { CourseLanguageSelector } from "~/modules/Admin/EditCourse/components/CourseLanguageSelector";
 import { CourseEnrolled } from "~/modules/Admin/EditCourse/CourseEnrolled/CourseEnrolled";
 import { useEditCourseTabs } from "~/modules/Admin/EditCourse/hooks/useEditCourseTabs";
@@ -60,7 +60,8 @@ const EditCourse = () => {
   const { data: isStripeConfigured } = useStripeConfigured();
   const { data: isAIConfigured } = useAIConfigured();
   const { data: isLumaConfigured } = useLumaConfigured();
-  const { isManagingTenantAdmin } = useUserRole();
+  const { data: currentUser } = useCurrentUserSuspense();
+  const isManagingTenantAdmin = Boolean(currentUser?.isManagingTenantAdmin);
 
   const { language } = useLanguageStore();
 

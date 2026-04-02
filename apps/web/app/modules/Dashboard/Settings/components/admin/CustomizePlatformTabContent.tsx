@@ -12,18 +12,18 @@ import { PlatformSimpleLogoForm } from "~/modules/Dashboard/Settings/forms/Platf
 import type { GlobalSettings } from "~/modules/Dashboard/Settings/types";
 
 interface OrganizationTabContentProps {
-  isAdmin: boolean;
+  canManageUsers: boolean;
   globalSettings: GlobalSettings;
 }
 
 export default function CustomizePlatformTabContent({
-  isAdmin,
+  canManageUsers,
   globalSettings,
 }: OrganizationTabContentProps) {
   return (
     <>
       <AdminPreferences globalSettings={globalSettings} />
-      {isAdmin && <RegistrationFormBuilder />}
+      {canManageUsers && <RegistrationFormBuilder />}
       <QAPreferences globalSettings={globalSettings} />
       <NewsPreferences globalSettings={globalSettings} />
       <ArticlesPreferences globalSettings={globalSettings} />

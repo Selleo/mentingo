@@ -1,7 +1,8 @@
+import { PERMISSIONS } from "@repo/shared";
 import { useEffect, useMemo, useState } from "react";
 
 import { Separator } from "~/components/ui/separator";
-import { useUserRole } from "~/hooks/useUserRole";
+import { usePermissions } from "~/hooks/usePermissions";
 
 import { ArticlesTOCAddFab } from "./ArticlesTOCAddFab";
 import { ArticlesTOCHeader } from "./ArticlesTOCHeader";
@@ -31,7 +32,9 @@ export function ArticlesTOCPanel({
   const [expanded, setExpanded] = useState<string[]>([]);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editSectionId, setEditSectionId] = useState<string | undefined>(undefined);
-  const { isAdminLike } = useUserRole();
+  const { hasAccess: canManageArticles } = usePermissions({
+    required: [PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN],
+  });
 
   useEffect(() => {
     if (!sectionIds.length) return;
@@ -81,7 +84,7 @@ export function ArticlesTOCPanel({
         ))}
       </div>
 
-      {onRequestClose && isAdminLike && (
+      {onRequestClose && canManageArticles && (
         <div className="2xl:hidden">
           <ArticlesTOCAddFab
             onRequestClose={onRequestClose}

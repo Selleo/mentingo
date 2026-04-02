@@ -1,22 +1,22 @@
 import { useLocation, useNavigate } from "@remix-run/react";
 import { useLayoutEffect } from "react";
 
-import { routeAccessConfig } from "../config/routeAccessConfig";
-import { useUserRole } from "../hooks/useUserRole";
+import { useCurrentUserSuspense } from "~/api/queries";
+import { matchesRequirement, type PermissionKey } from "~/common/permissions/permission.utils";
 
-import type { UserRole } from "../config/userRoles";
+import { routeAccessConfig } from "../config/routeAccessConfig";
+
 import type { ReactNode } from "react";
 
-export const checkRouteAccess = (path: string, userRole: UserRole) => {
-  for (const [pattern, roles] of Object.entries(routeAccessConfig)) {
+export const checkRouteAccess = (path: string, permissions: PermissionKey[]) => {
+  for (const [pattern, requirement] of Object.entries(routeAccessConfig)) {
     const patternSegments = pattern.split("/");
     const pathSegments = path.split("/");
-    const hasRoleAccess = roles.includes(userRole);
 
     if (pattern.endsWith("/*")) {
       const prefix = pattern.slice(0, -2);
       if (path.startsWith(prefix)) {
-        return hasRoleAccess;
+        return matchesRequirement(permissions, requirement);
       }
       continue;
     }
@@ -34,7 +34,7 @@ export const checkRouteAccess = (path: string, userRole: UserRole) => {
     });
 
     if (matches) {
-      return hasRoleAccess;
+      return matchesRequirement(permissions, requirement);
     }
   }
 
@@ -42,11 +42,12 @@ export const checkRouteAccess = (path: string, userRole: UserRole) => {
 };
 
 export const RouteGuard = ({ children }: { children: ReactNode }) => {
-  const { role } = useUserRole();
+  const { data } = useCurrentUserSuspense();
+  const permissions = data?.permissions ?? [];
   const navigate = useNavigate();
   const location = useLocation();
 
-  const hasAccess = checkRouteAccess(location.pathname.replace("/", ""), role as UserRole);
+  const hasAccess = checkRouteAccess(location.pathname.replace("/", ""), permissions);
 
   useLayoutEffect(() => {
     if (!hasAccess) {

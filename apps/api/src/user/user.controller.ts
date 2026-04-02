@@ -71,7 +71,9 @@ import {
   upsertUserDetailsSchema,
 } from "./schemas/updateUser.schema";
 import {
+  type AllRolesResponse,
   type AllUsersResponse,
+  allRolesSchema,
   allUsersSchema,
   baseUserResponseSchema,
   type UserDetailsResponse,
@@ -126,6 +128,18 @@ export class UserController {
     const users = await this.usersService.getUsers(query);
 
     return new PaginatedResponse(users);
+  }
+
+  @Get("roles")
+  @RequirePermission(PERMISSIONS.USER_MANAGE)
+  @Validate({
+    response: baseResponse(allRolesSchema),
+  })
+  async getRoles(
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<AllRolesResponse>> {
+    const roles = await this.usersService.getRoles(currentUser.tenantId);
+    return new BaseResponse(roles);
   }
 
   @Get()

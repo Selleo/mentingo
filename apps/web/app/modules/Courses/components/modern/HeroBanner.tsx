@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "@remix-run/react";
+import { PERMISSIONS } from "@repo/shared";
 import { BookOpen, Clock, Info, Play } from "lucide-react";
 import { useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
@@ -14,7 +15,7 @@ import { topCoursesQueryOptions } from "~/api/queries/useTopCourses";
 import { queryClient } from "~/api/queryClient";
 import DefaultPhotoCourse from "~/assets/svgs/default-photo-course.svg";
 import { Button } from "~/components/ui/button";
-import { useUserRole } from "~/hooks/useUserRole";
+import { usePermissions } from "~/hooks/usePermissions";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { findFirstInProgressLessonId, findFirstNotStartedLessonId } from "../../Lesson/utils";
@@ -45,7 +46,12 @@ const HeroBanner = ({
   const { language } = useLanguageStore();
   const navigate = useNavigate();
 
-  const { isAdminLike, isStudent } = useUserRole();
+  const { hasAccess: canUpdateLearningProgress } = usePermissions({
+    required: PERMISSIONS.LEARNING_PROGRESS_UPDATE,
+  });
+  const { hasAccess: canManageCourses } = usePermissions({
+    required: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
+  });
   const { mutateAsync: enrollCourse } = useEnrollCourse();
 
   const durationLabel = formatDuration(estimatedDurationMinutes);
@@ -67,7 +73,7 @@ const HeroBanner = ({
   const handleNavigateToLesson = useCallback(async () => {
     if (!heroCourseData) return;
 
-    if (!heroCourseData.enrolled && isStudent) {
+    if (!heroCourseData.enrolled && canUpdateLearningProgress) {
       await enrollCourse(
         { id: heroCourseData.id },
         {
@@ -83,7 +89,7 @@ const HeroBanner = ({
     }
 
     navigateToNextLesson(heroCourseData, navigate);
-  }, [heroCourseData, navigate, enrollCourse, isStudent, language]);
+  }, [heroCourseData, navigate, enrollCourse, canUpdateLearningProgress, language]);
 
   return (
     <div className="relative h-[50vh] min-h-[400px] w-full overflow-hidden md:h-[70vh] md:min-h-[500px]">
@@ -149,7 +155,7 @@ const HeroBanner = ({
             <Button onClick={handleNavigateToLesson}>
               <Play className="mr-2 h-4 w-4" fill="currentColor" />
               {t(
-                isAdminLike
+                canManageCourses
                   ? "adminCourseView.common.preview"
                   : !hasCourseProgress
                     ? "studentCourseView.sideSection.button.startLearning"

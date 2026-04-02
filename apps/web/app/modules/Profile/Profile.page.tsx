@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Navigate, useParams } from "@remix-run/react";
-import { OnboardingPages } from "@repo/shared";
+import { OnboardingPages, PERMISSIONS } from "@repo/shared";
 import { format } from "date-fns";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -14,12 +14,11 @@ import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { useUserDetails } from "~/api/queries/useUserDetails";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
-import { useUserRole } from "~/hooks/useUserRole";
+import { usePermissions } from "~/hooks/usePermissions";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { copyToClipboard } from "~/utils/copyToClipboard";
 import { filterChangedData } from "~/utils/filterChangedData";
 import { setPageTitle } from "~/utils/setPageTitle";
-import { isAdminLike } from "~/utils/userRoles";
 
 import { LOGIN_REDIRECT_URL } from "../Auth/constants";
 import Loader from "../common/Loader/Loader";
@@ -68,21 +67,26 @@ function ProfilePageContent({ currentUser }: ProfilePageContentProps) {
 
   const { language } = useLanguageStore();
 
-  const { isStudent } = useUserRole();
+  const { hasAccess: canUpdateLearningProgress } = usePermissions({
+    required: PERMISSIONS.LEARNING_PROGRESS_UPDATE,
+  });
+  const { hasAccess: canManageCourses } = usePermissions({
+    required: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
+  });
   const { data: userDetails, error } = useUserDetails(id);
 
   const { data: globalSettings } = useGlobalSettings();
 
-  const { hasPermission, isProfileOwner } = useMemo(() => {
+  const { canViewExtendedProfile, isProfileOwner } = useMemo(() => {
     return {
-      hasPermission: isAdminLike(userDetails?.role ?? ""),
+      canViewExtendedProfile: canManageCourses,
       isProfileOwner: currentUser?.id === userDetails?.id,
     };
-  }, [userDetails, currentUser]);
+  }, [currentUser, canManageCourses, userDetails]);
 
   const steps = useMemo(
-    () => (isStudent && isProfileOwner ? studentProfileSteps(t) : []),
-    [t, isStudent, isProfileOwner],
+    () => (canUpdateLearningProgress && isProfileOwner ? studentProfileSteps(t) : []),
+    [t, canUpdateLearningProgress, isProfileOwner],
   );
 
   useTourSetup({
@@ -92,7 +96,11 @@ function ProfilePageContent({ currentUser }: ProfilePageContentProps) {
     page: OnboardingPages.PROFILE,
   });
 
-  const { data: contentCreatorCourses } = useContentCreatorCourses(id, { language }, hasPermission);
+  const { data: contentCreatorCourses } = useContentCreatorCourses(
+    id,
+    { language },
+    canViewExtendedProfile,
+  );
 
   const toggleEditing = () => setIsEditing((prev) => !prev);
 
@@ -252,17 +260,17 @@ function ProfilePageContent({ currentUser }: ProfilePageContentProps) {
               contactPhone: userDetails?.contactPhone || "",
             }}
             userAvatarUrl={userDetails?.profilePictureUrl}
-            isAdminLike={hasPermission}
+            canManageCourses={canViewExtendedProfile}
           />
         ) : (
           <ProfileCard
-            isAdminLike={hasPermission}
+            canManageCourses={canViewExtendedProfile}
             userDetails={{
               ...userDetails,
             }}
           />
         )}
-        {hasPermission && (
+        {canViewExtendedProfile && (
           <section className="flex w-full max-w-[720px] flex-col gap-y-6 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow">
             <div className="flex flex-col gap-y-2">
               <h2 className="h6 md:h4">{t("contentCreatorView.other.courses")}</h2>

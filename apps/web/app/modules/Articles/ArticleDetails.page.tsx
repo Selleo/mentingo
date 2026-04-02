@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "@remix-run/react";
-import { ACCESS_GUARD } from "@repo/shared";
+import { ACCESS_GUARD, PERMISSIONS } from "@repo/shared";
 import { format } from "date-fns";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -14,7 +14,7 @@ import { TOC } from "~/components/TOC/TOC";
 import { Button } from "~/components/ui/button";
 import { useVideoPlayer } from "~/components/VideoPlayer/VideoPlayerContext";
 import { ContentAccessGuard } from "~/Guards/AccessGuard";
-import { useUserRole } from "~/hooks/useUserRole";
+import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
 
 import Loader from "../common/Loader/Loader";
@@ -34,7 +34,9 @@ export default function ArticleDetailsPage() {
 
   const { data: currentUser } = useCurrentUser();
 
-  const { isAdmin } = useUserRole();
+  const { hasAccess: canManageArticles } = usePermissions({
+    required: [PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN],
+  });
   const { data: article, isLoading: isLoadingArticle } = useArticle(articleId ?? "", language);
   const { mutate: deleteArticle, isPending: isDeleting } = useDeleteArticle();
 
@@ -74,7 +76,7 @@ export default function ArticleDetailsPage() {
     );
   }
 
-  const canEdit = isAdmin || currentUser?.id === article?.authorId;
+  const canEdit = canManageArticles || currentUser?.id === article?.authorId;
 
   const headerImageUrl = article.resources?.coverImage?.fileUrl;
   const publishedDate = article.publishedAt ? new Date(article.publishedAt) : null;

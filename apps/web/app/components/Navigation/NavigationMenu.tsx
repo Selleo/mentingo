@@ -1,15 +1,15 @@
+import { matchesRequirement, type PermissionKey } from "~/common/permissions/permission.utils";
+
 import { ExpandableNavigationMenu } from "./ExpandableNavigationMenu";
 import { NavigationMenuItem } from "./NavigationMenuItem";
 
 import type { Dispatch, SetStateAction } from "react";
 import type { MenuItemType } from "~/config/navigationConfig";
-import type { UserRole } from "~/config/userRoles";
 import type { IconName } from "~/types/shared";
 
 type NavigationMenuProps = {
   menuItems: MenuItemType[];
-  role: string;
-  restrictedRoles?: UserRole[];
+  permissions: PermissionKey[];
   setIsMobileNavOpen: Dispatch<SetStateAction<boolean>>;
   expandableLabel?: string;
   expandableIcon?: IconName;
@@ -21,7 +21,7 @@ type NavigationMenuProps = {
 
 export function NavigationMenu({
   menuItems,
-  role,
+  permissions,
   setIsMobileNavOpen,
   expandableLabel,
   expandableIcon,
@@ -30,8 +30,8 @@ export function NavigationMenu({
   shouldShowTooltips,
   isSidebarCollapsed,
 }: NavigationMenuProps) {
-  const filteredMenuItems = menuItems.filter(
-    (item) => item.roles && item.roles.includes(role as UserRole),
+  const filteredMenuItems = menuItems.filter((item) =>
+    matchesRequirement(permissions, item.accessRequirement),
   );
 
   if (isExpandable) {

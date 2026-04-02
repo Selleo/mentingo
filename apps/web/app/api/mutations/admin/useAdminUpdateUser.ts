@@ -1,5 +1,4 @@
 import { useMutation } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { useTranslation } from "react-i18next";
 
 import { COURSE_OWNERSHIP_CANDIDATES_QUERY_KEY } from "~/api/queries/admin/useCourseOwnershipCandidates";
@@ -11,6 +10,8 @@ import { ApiClient } from "../../api-client";
 import { queryClient } from "../../queryClient";
 
 import type { UpdateUserBody } from "../../generated-api";
+import type { AxiosError } from "axios";
+import type { ApiErrorResponse } from "~/api/types";
 
 type UpdateUserOptions = {
   data: UpdateUserBody;
@@ -41,15 +42,10 @@ export function useAdminUpdateUser() {
 
       await invalidateCourseStatisticsQueries();
     },
-    onError: (error) => {
-      if (error instanceof AxiosError) {
-        return toast({
-          description: error.response?.data.message,
-          variant: "destructive",
-        });
-      }
+    onError: (error: AxiosError) => {
+      const { message } = error.response?.data as ApiErrorResponse;
       toast({
-        description: error.message,
+        description: message ? t(message) : t("common.toast.somethingWentWrong"),
         variant: "destructive",
       });
     },

@@ -25,18 +25,18 @@ type QueryOptions = {
 export const contentCreatorCoursesOptions = (
   authorId?: string,
   searchParams?: SearchParams,
-  isContentCreator?: boolean,
+  canManageOwnCourses?: boolean,
   options: QueryOptions = { enabled: true },
 ) => {
   return {
-    enabled: !!authorId && isContentCreator,
+    enabled: !!authorId && canManageOwnCourses,
     queryKey: ["content-creator-courses", authorId, { language: searchParams?.language }],
     queryFn: async () => {
       if (!authorId) {
         throw new Error("Author ID is required");
       }
 
-      if (!isContentCreator) {
+      if (!canManageOwnCourses) {
         throw new Error("Author must be a content creator");
       }
 
@@ -60,7 +60,7 @@ export const contentCreatorCoursesOptions = (
 export function useContentCreatorCourses(
   authorId?: string,
   searchParams?: SearchParams,
-  isContentCreator?: boolean,
+  canManageOwnCourses?: boolean,
 ) {
-  return useQuery(contentCreatorCoursesOptions(authorId, searchParams, isContentCreator));
+  return useQuery(contentCreatorCoursesOptions(authorId, searchParams, canManageOwnCourses));
 }

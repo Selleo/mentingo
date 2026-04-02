@@ -1,22 +1,14 @@
-import { camelCase, capitalize } from "lodash-es";
 import { useEffect } from "react";
 import { type Control, Controller } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import { useGroupsQuerySuspense } from "~/api/queries/admin/useGroups";
+import { useRoles } from "~/api/queries/admin/useRoles";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Input } from "~/components/ui/input";
 import MultipleSelector from "~/components/ui/multiselect";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
-import { USER_ROLE } from "~/config/userRoles";
 import { useGroupsOptions } from "~/hooks/useGroupsOptions";
+import { getRoleLabel } from "~/modules/Admin/Users/utils/getRoleLabel";
 
 import type { GetUserByIdResponse, UpdateUserBody } from "~/api/generated-api";
 
@@ -30,6 +22,7 @@ interface UserInfoType {
 export const UserInfo = ({ name, control, isEditing, user }: UserInfoType) => {
   const { t } = useTranslation();
   const { data: groups } = useGroupsQuerySuspense();
+  const { data: roles = [] } = useRoles();
 
   const { selectedGroups, setSelectedGroups, filterGroups, options } = useGroupsOptions(groups);
 
@@ -39,11 +32,16 @@ export const UserInfo = ({ name, control, isEditing, user }: UserInfoType) => {
     }
   }, [user, setSelectedGroups]);
 
+  const defaultValue: UpdateUserBody[typeof name] =
+    name === "groups"
+      ? (user.groups.map((group) => group.id) as UpdateUserBody[typeof name])
+      : (user[name] as UpdateUserBody[typeof name]);
+
   return (
     <Controller
       name={name}
       control={control}
-      defaultValue={user[name] as UpdateUserBody[typeof name]}
+      defaultValue={defaultValue}
       render={({ field }) => {
         if (!isEditing) {
           if (name === "archived") {
@@ -56,28 +54,31 @@ export const UserInfo = ({ name, control, isEditing, user }: UserInfoType) => {
           return <span className="font-semibold capitalize">{user[name]?.toString()}</span>;
         }
 
-        if (name === "role") {
+        if (name === "roleSlugs") {
           return (
-            <Select
-              onValueChange={field.onChange}
-              value={field.value as UpdateUserBody["role"] | undefined}
-            >
-              <SelectTrigger className="w-full rounded-md border border-neutral-300 px-2 py-1">
-                <SelectValue
-                  placeholder={capitalize(field.value as string)}
-                  className="capitalize"
-                />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {[USER_ROLE.student, USER_ROLE.admin, USER_ROLE.contentCreator].map((role) => (
-                    <SelectItem className="capitalize" value={role} key={role}>
-                      {t(`common.roles.${camelCase(role)}`)}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+            <MultipleSelector
+              value={((field.value as string[] | undefined) ?? []).map((roleSlug) => ({
+                value: roleSlug,
+                label: getRoleLabel(roleSlug, t, roles),
+              }))}
+              options={roles.map((role) => ({
+                value: role.slug,
+                label: getRoleLabel(role.slug, t, roles),
+              }))}
+              onChange={(options) => field.onChange(options.map((option) => option.value))}
+              placeholder={t("adminUsersView.filters.placeholder.roles")}
+              hidePlaceholderWhenSelected
+              hideClearAllButton
+              className="w-full bg-background p-2"
+              badgeClassName="bg-accent text-accent-foreground text-sm hover:bg-accent"
+              commandProps={{
+                label: t("adminUsersView.filters.placeholder.roles"),
+              }}
+              inputProps={{
+                className: "w-full outline-none py-0 body-base",
+              }}
+              checkbox={false}
+            />
           );
         }
 

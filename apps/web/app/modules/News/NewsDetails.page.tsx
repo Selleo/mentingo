@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "@remix-run/react";
-import { ACCESS_GUARD } from "@repo/shared";
+import { ACCESS_GUARD, PERMISSIONS } from "@repo/shared";
 import { formatDate } from "date-fns";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -13,7 +13,7 @@ import { TOC } from "~/components/TOC/TOC";
 import { Button } from "~/components/ui/button";
 import { useVideoPlayer } from "~/components/VideoPlayer/VideoPlayerContext";
 import { ContentAccessGuard } from "~/Guards/AccessGuard";
-import { useUserRole } from "~/hooks/useUserRole";
+import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
 
 import Loader from "../common/Loader/Loader";
@@ -27,7 +27,9 @@ export default function NewsDetailsPage() {
   const { clearVideo } = useVideoPlayer();
 
   const { language } = useLanguageStore();
-  const { isAdminLike } = useUserRole();
+  const { hasAccess: canManageNews } = usePermissions({
+    required: [PERMISSIONS.NEWS_MANAGE, PERMISSIONS.NEWS_MANAGE_OWN],
+  });
   const { data: news, isLoading: isLoadingNews } = useNews(
     newsId!,
     { language },
@@ -85,7 +87,7 @@ export default function NewsDetailsPage() {
           <TOC contentHtml={news.content} onContentWithIds={handleContentWithIds} />
         }
       >
-        {isAdminLike && (
+        {canManageNews && (
           <div className="flex justify-end gap-2 max-w-6xl mx-auto w-full">
             <Button
               variant="outline"

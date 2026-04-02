@@ -1,4 +1,5 @@
 import { Link, useNavigate, type MetaFunction } from "@remix-run/react";
+import { PERMISSIONS, SYSTEM_ROLE_PERMISSIONS } from "@repo/shared";
 import {
   type ColumnDef,
   flexRender,
@@ -8,8 +9,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { camelCase } from "lodash-es";
-import { Import, KeyRound, Plus, UsersRound } from "lucide-react";
+import { Import, KeyRound, Plus, Shield, UsersRound } from "lucide-react";
 import React, { useCallback, useMemo, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -18,6 +18,7 @@ import { useBulkDeleteUsers } from "~/api/mutations/admin/useBulkDeleteUsers";
 import { useBulkUpdateUsersGroups } from "~/api/mutations/admin/useBulkUpdateUsersGroups";
 import { useBulkUpdateUsersRoles } from "~/api/mutations/admin/useBulkUpdateUsersRoles";
 import { useGroupsQuerySuspense } from "~/api/queries/admin/useGroups";
+import { useRoles } from "~/api/queries/admin/useRoles";
 import { useAllUsersSuspense, usersQueryOptions } from "~/api/queries/useUsers";
 import { queryClient } from "~/api/queryClient";
 import { PageWrapper } from "~/components/PageWrapper";
@@ -26,6 +27,7 @@ import SortButton from "~/components/TableSortButton/TableSortButton";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "~/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -35,10 +37,11 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
-import { USER_ROLE } from "~/config/userRoles";
 import { cn } from "~/lib/utils";
 import { type DropdownItems, EditDropdown } from "~/modules/Admin/Users/components/EditDropdown";
 import { EditModal } from "~/modules/Admin/Users/components/EditModal";
+import { PermissionsMatrix } from "~/modules/Admin/Users/components/PermissionsMatrix";
+import { getRoleLabel } from "~/modules/Admin/Users/utils/getRoleLabel";
 import {
   type FilterConfig,
   type FilterValue,
@@ -47,15 +50,14 @@ import {
 import { setPageTitle } from "~/utils/setPageTitle";
 import { handleRowSelectionRange } from "~/utils/tableRangeSelection";
 import { tanstackSortingToParam } from "~/utils/tanstackSortingToParam";
-import { USER_ROLES } from "~/utils/userRoles";
 
 import { ImportUsersModal } from "./components/ImportUsersModal/ImportUsersModal";
 
+import type { PermissionKey } from "@repo/shared";
 import type { BulkAssignUsersToGroupBody, GetUsersResponse } from "~/api/generated-api";
 import type { UsersParams } from "~/api/queries/useUsers";
 import type { ITEMS_PER_PAGE_OPTIONS } from "~/components/Pagination/Pagination";
 import type { Option } from "~/components/ui/multiselect";
-import type { UserRole } from "~/config/userRoles";
 
 type TUser = GetUsersResponse["data"][number];
 
@@ -76,7 +78,7 @@ const Users = () => {
 
   const [searchParams, setSearchParams] = React.useState<{
     keyword?: string;
-    role?: UserRole;
+    role?: string;
     archived?: boolean;
     status?: string;
     groups?: Option[];
@@ -91,8 +93,9 @@ const Users = () => {
 
   const { data: userData } = useAllUsersSuspense(usersQueryParams);
   const { data: groupData } = useGroupsQuerySuspense();
+  const { data: roles = [] } = useRoles();
 
-  const [selectedValue, setSelectedValue] = React.useState<string>("");
+  const [selectedValue, setSelectedValue] = React.useState<string[]>([]);
 
   const { mutateAsync: deleteUsers } = useBulkDeleteUsers();
   const { mutateAsync: updateUsersGroups } = useBulkUpdateUsersGroups();
@@ -103,8 +106,23 @@ const Users = () => {
 
   const [showEditModal, setShowEditModal] = React.useState<ModalTypes>(null);
   const [isImportModalOpen, setIsImportModalOpen] = React.useState(false);
+  const [isPermissionsMatrixOpen, setIsPermissionsMatrixOpen] = React.useState(false);
 
   const [lastSelectedRowIndex, setLastSelectedRowIndex] = React.useState<number>(0);
+
+  const permissionsOrder = useMemo(() => Object.values(PERMISSIONS) as PermissionKey[], []);
+
+  const systemRolesForMatrix = useMemo(
+    () =>
+      roles
+        .filter((role) => role.isSystem)
+        .map((role) => ({
+          slug: role.slug,
+          label: getRoleLabel(role.slug, t, roles),
+          permissions: SYSTEM_ROLE_PERMISSIONS[role.slug] ?? [],
+        })),
+    [roles, t],
+  );
 
   const dropdownItems: DropdownItems[] = [
     {
@@ -147,11 +165,10 @@ const Users = () => {
       name: "role",
       type: "select",
       placeholder: t("adminUsersView.filters.placeholder.roles"),
-      options: [
-        { value: USER_ROLE.admin, label: t("common.roles.admin") },
-        { value: USER_ROLE.student, label: t("common.roles.student") },
-        { value: USER_ROLE.contentCreator, label: t("common.roles.contentCreator") },
-      ],
+      options: roles.map((role) => ({
+        value: role.slug,
+        label: getRoleLabel(role.slug, t, roles),
+      })),
     },
     {
       name: "archived",
@@ -228,9 +245,45 @@ const Users = () => {
       ),
     },
     {
-      accessorKey: "role",
-      header: t("adminUsersView.field.role"),
-      cell: ({ row }) => t(`common.roles.${camelCase(row.original.role)}`),
+      accessorKey: "roleSlugs",
+      header: t("adminUsersView.dropdown.roles"),
+      cell: ({ row }) => {
+        const roleSlugs = (row.original as TUser & { roleSlugs?: string[] }).roleSlugs ?? [];
+        const visibleRoleSlugs = roleSlugs.slice(0, 2);
+        const remainingCount = roleSlugs.length - visibleRoleSlugs.length;
+
+        if (!roleSlugs.length) return "-";
+
+        return (
+          <div className="flex gap-1">
+            {visibleRoleSlugs.map((roleSlug) => (
+              <Badge key={roleSlug} variant="secondary">
+                {getRoleLabel(roleSlug, t, roles)}
+              </Badge>
+            ))}
+            {remainingCount > 0 && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Badge variant="default" className="cursor-help">
+                      +{remainingCount}
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent className="p-2 rounded-lg">
+                    <div className="flex flex-col gap-1 !px-0">
+                      {roleSlugs.slice(2).map((roleSlug) => (
+                        <Badge key={roleSlug} variant="secondary">
+                          {getRoleLabel(roleSlug, t, roles)}
+                        </Badge>
+                      ))}
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </div>
+        );
+      },
     },
     {
       accessorKey: "groups",
@@ -362,7 +415,7 @@ const Users = () => {
   const handleUsersRoles = useCallback(() => {
     updateUsersRoles({
       userIds: selectedUsers.map(({ userId }) => userId),
-      role: selectedValue as UserRole,
+      roleSlugs: selectedValue,
     }).then(() => {
       table.resetRowSelection();
       setShowEditModal(null);
@@ -398,12 +451,22 @@ const Users = () => {
             onConfirm={editMutation[showEditModal]}
             onCancel={() => setShowEditModal(null)}
             groupData={groupData}
-            roleData={Object.values(USER_ROLES)}
+            roleData={roles}
             selectedUsers={selectedUsers}
             selectedValue={selectedValue}
             setSelectedValue={setSelectedValue}
           />
         )}
+        <Dialog open={isPermissionsMatrixOpen} onOpenChange={setIsPermissionsMatrixOpen}>
+          <DialogContent className="max-w-5xl max-h-[85vh] flex flex-col">
+            <DialogHeader>
+              <DialogTitle>{t("adminUsersView.permissionsMatrix.title")}</DialogTitle>
+            </DialogHeader>
+            <div className="overflow-auto">
+              <PermissionsMatrix roles={systemRolesForMatrix} permissionsOrder={permissionsOrder} />
+            </div>
+          </DialogContent>
+        </Dialog>
         {isImportModalOpen && (
           <ImportUsersModal
             open={isImportModalOpen}
@@ -423,6 +486,14 @@ const Users = () => {
             <Button onClick={() => setIsImportModalOpen(true)} className="gap-2">
               <Import className="size-4" />
               {t("adminUsersView.button.import")}
+            </Button>
+            <Button
+              onClick={() => setIsPermissionsMatrixOpen(true)}
+              className="gap-2"
+              variant="outline"
+            >
+              <Shield className="size-4" />
+              {t("adminUsersView.button.permissionsMatrix")}
             </Button>
             <EditDropdown dropdownItems={dropdownItems} disabled={!selectedUsers.length} />
           </div>

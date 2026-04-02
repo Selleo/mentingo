@@ -7,7 +7,7 @@ export const updateUserSchema = Type.Object({
   lastName: Type.Optional(Type.String()),
   groups: Type.Optional(Type.Union([Type.Array(Type.String()), Type.Null()])),
   email: Type.Optional(Type.String({ format: "email" })),
-  roleSlugs: Type.Optional(Type.Array(Type.String(), { minItems: 1 })),
+  roleSlugs: Type.Optional(Type.Array(Type.String())),
   archived: Type.Optional(Type.Boolean()),
 });
 export const upsertUserDetailsSchema = Type.Object({

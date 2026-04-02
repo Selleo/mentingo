@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import * as z from "zod";
 
 import { useCreateUser } from "~/api/mutations/admin/useCreateUser";
+import { useRoles } from "~/api/queries/admin/useRoles";
 import { ALL_COURSES_QUERY_KEY } from "~/api/queries/useCourses";
 import { useUserSettings } from "~/api/queries/useUserSettings";
 import { queryClient } from "~/api/queryClient";
@@ -15,6 +16,7 @@ import { DialogFooter } from "~/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import MultipleSelector from "~/components/ui/multiselect";
 import {
   Select,
   SelectContent,
@@ -22,8 +24,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { USER_ROLE } from "~/config/userRoles";
 import { CreatePageHeader } from "~/modules/Admin/components";
+import { getRoleLabel } from "~/modules/Admin/Users/utils/getRoleLabel";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import type { MetaFunction } from "@remix-run/react";
@@ -34,9 +36,7 @@ const formSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters."),
   lastName: z.string().min(2, "Last name must be at least 2 characters."),
   email: z.string().email("Please enter a valid email address."),
-  role: z.enum([USER_ROLE.admin, USER_ROLE.contentCreator, USER_ROLE.student], {
-    required_error: "Please select a role.",
-  }),
+  roleSlugs: z.array(z.string()).min(1, "Please select at least one role."),
   language: z.nativeEnum(SUPPORTED_LANGUAGES),
 });
 
@@ -48,6 +48,7 @@ export default function CreateNewUserPage() {
   const { t } = useTranslation();
 
   const { data: adminsSettings } = useUserSettings();
+  const { data: roles = [] } = useRoles();
   const { mutateAsync: createUser } = useCreateUser();
 
   const form = useForm<FormValues>({
@@ -56,7 +57,7 @@ export default function CreateNewUserPage() {
       firstName: "",
       lastName: "",
       email: "",
-      role: USER_ROLE.student,
+      roleSlugs: [],
       language: adminsSettings?.language,
     },
   });
@@ -125,24 +126,35 @@ export default function CreateNewUserPage() {
             />
             <FormField
               control={form.control}
-              name="role"
+              name="roleSlugs"
               render={({ field }) => (
                 <FormItem>
-                  <Label htmlFor="role">{t("adminUserView.field.role")}</Label>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger id="role">
-                        <SelectValue placeholder={t("adminUserView.placeholder.role")} />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value={USER_ROLE.student}>{t("common.roles.student")}</SelectItem>
-                      <SelectItem value={USER_ROLE.admin}>{t("common.roles.admin")}</SelectItem>
-                      <SelectItem value={USER_ROLE.contentCreator}>
-                        {t("common.roles.contentCreator")}
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="role">{t("adminUsersView.dropdown.roles")}</Label>
+                  <FormControl>
+                    <MultipleSelector
+                      value={(field.value ?? []).map((roleSlug) => ({
+                        value: roleSlug,
+                        label: getRoleLabel(roleSlug, t, roles),
+                      }))}
+                      options={roles.map((role) => ({
+                        value: role.slug,
+                        label: getRoleLabel(role.slug, t, roles),
+                      }))}
+                      onChange={(options) => field.onChange(options.map((option) => option.value))}
+                      placeholder={t("adminUsersView.filters.placeholder.roles")}
+                      hidePlaceholderWhenSelected
+                      hideClearAllButton
+                      className="w-full bg-background p-2"
+                      badgeClassName="bg-accent text-accent-foreground text-sm hover:bg-accent"
+                      commandProps={{
+                        label: t("adminUsersView.filters.placeholder.roles"),
+                      }}
+                      inputProps={{
+                        className: "w-full outline-none py-0 body-base",
+                      }}
+                      checkbox={false}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

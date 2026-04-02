@@ -1,4 +1,5 @@
 import { useNavigate } from "@remix-run/react";
+import { PERMISSIONS } from "@repo/shared";
 import { formatDate } from "date-fns";
 import { useTranslation } from "react-i18next";
 
@@ -12,7 +13,7 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { CategoryChip } from "~/components/ui/CategoryChip";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
-import { useUserRole } from "~/hooks/useUserRole";
+import { usePermissions } from "~/hooks/usePermissions";
 import { courseLanguages } from "~/modules/Admin/EditCourse/components/CourseLanguageSelector";
 import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 
@@ -26,7 +27,10 @@ export default function CourseOverview({ course }: CourseOverviewProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  const { isAdminLike, isAdmin } = useUserRole();
+  const { hasAccess: canManageUsers } = usePermissions({ required: PERMISSIONS.USER_MANAGE });
+  const { hasAccess: canManageCourses } = usePermissions({
+    required: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
+  });
   const { data: currentUser } = useCurrentUser();
   const { isCourseStudentModeActive } = useCourseAccessProvider();
   const { mutate: toggleLearningMode, isPending: isTogglingLearningMode } =
@@ -43,7 +47,7 @@ export default function CourseOverview({ course }: CourseOverviewProps) {
   return (
     <Card className="w-full border-none pt-1 drop-shadow-primary lg:pt-0">
       <CardContent className="flex flex-col px-0">
-        {(isAdmin || (isAdminLike && course.authorId === currentUser?.id)) && (
+        {(canManageUsers || (canManageCourses && course.authorId === currentUser?.id)) && (
           <div className="border-b border-1 border-neutral-200 flex items-center justify-between p-4 px-6 mb-8 xl:mb-0">
             <TooltipProvider>
               <Tooltip>

@@ -1,22 +1,12 @@
-import { USER_ROLE } from "./userRoles";
+import { PERMISSIONS } from "@repo/shared";
 
-import type { UserRole } from "./userRoles";
+import type { PermissionRequirement } from "~/common/permissions/permission.utils";
 
 type PathSegment = string;
 type ParamSegment = `:${string}`;
 type WildcardSegment = "*";
 
 type ValidSegment = PathSegment | ParamSegment | WildcardSegment;
-
-/**
- * Type that validates entire paths to ensure they follow routing conventions:
- * - Can contain regular segments
- * - Can contain parameter segments (e.g., `:id`)
- * - Can end with a wildcard `*`
- * - Cannot start or end with `/`
- * - Cannot contain double slashes
- * @template T - String literal type representing the path
- */
 type ValidPath<T extends string = string> = T extends ""
   ? T
   : T extends `${infer First}/${infer Rest}`
@@ -30,30 +20,12 @@ type ValidPath<T extends string = string> = T extends ""
       : never;
 
 type RouteConfig = {
-  [P in string]: P extends ValidPath ? UserRole[] : never;
+  [P in string]: P extends ValidPath ? PermissionRequirement : never;
 };
 
-/**
- * @function createRouteConfig
- * @template T
- * @param {T} config - Route configuration object
- * @returns {RouteConfig} Validated route configuration
- * @throws {Error} If any path violates routing conventions
- *
- * Creates and validates a route configuration object. Throws errors for invalid paths:
- * - Paths starting with `/`
- * - Paths ending with `/`
- * - Paths containing double slashes (`//`)
- * - Paths with wildcards not at the end
- *
- * @example
- * const config = createRouteConfig({
- *   "auth/login": ALL_ROLES,
- *   "course/:id": ADMIN_ONLY,
- *   "admin/users/*": ADMIN_ONLY
- * });
- */
-const createRouteConfig = <T extends Record<string, UserRole[]>>(config: T): RouteConfig => {
+const createRouteConfig = <T extends Record<string, PermissionRequirement>>(
+  config: T,
+): RouteConfig => {
   Object.keys(config).forEach((path) => {
     if (path.startsWith("/")) {
       throw new Error(`Invalid path: ${path} - cannot start with /`);
@@ -72,65 +44,87 @@ const createRouteConfig = <T extends Record<string, UserRole[]>>(config: T): Rou
   return config as RouteConfig;
 };
 
-const defineRoles = <R extends UserRole[]>(roles: [...R]) => roles;
-
-const ALL_ROLES = defineRoles([USER_ROLE.admin, USER_ROLE.contentCreator, USER_ROLE.student]);
-const ADMIN_ONLY = defineRoles([USER_ROLE.admin]);
-const ADMIN_AND_CONTENT_CREATOR = defineRoles([USER_ROLE.admin, USER_ROLE.contentCreator]);
-const STUDENT = defineRoles([USER_ROLE.student]);
+const PUBLIC: PermissionRequirement = {};
+const USER_MANAGEMENT_ACCESS: PermissionRequirement = {
+  allOf: [PERMISSIONS.USER_MANAGE],
+};
+const COURSE_EDIT_ACCESS: PermissionRequirement = {
+  anyOf: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
+};
+const ARTICLE_EDIT_ACCESS: PermissionRequirement = {
+  anyOf: [PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN],
+};
+const NEWS_EDIT_ACCESS: PermissionRequirement = {
+  anyOf: [PERMISSIONS.NEWS_MANAGE, PERMISSIONS.NEWS_MANAGE_OWN],
+};
+const QA_EDIT_ACCESS: PermissionRequirement = {
+  anyOf: [PERMISSIONS.QA_MANAGE, PERMISSIONS.QA_MANAGE_OWN],
+};
+const LEARNING_PROGRESS_ACCESS: PermissionRequirement = {
+  anyOf: [PERMISSIONS.LEARNING_PROGRESS_UPDATE, PERMISSIONS.LEARNING_MODE_USE],
+};
 
 export const routeAccessConfig = createRouteConfig({
-  "auth/login": ALL_ROLES,
-  "auth/register": ALL_ROLES,
-  "auth/create-new-password": ALL_ROLES,
-  "auth/password-recovery": ALL_ROLES,
+  "auth/login": PUBLIC,
+  "auth/register": PUBLIC,
+  "auth/create-new-password": PUBLIC,
+  "auth/password-recovery": PUBLIC,
 
   // Client part
-  "": ALL_ROLES,
-  progress: STUDENT,
-  settings: ALL_ROLES,
-  "profile/:id": ALL_ROLES,
-  "course/:courseId/lesson/:lessonId": ALL_ROLES,
-  announcements: ALL_ROLES,
-  "articles/:articleId/edit": ADMIN_AND_CONTENT_CREATOR,
-  "news/add": ADMIN_AND_CONTENT_CREATOR,
-  "news/:newsId/edit": ADMIN_AND_CONTENT_CREATOR,
-  //Client and public
-  "course/:id": ALL_ROLES,
-  courses: ALL_ROLES,
-  qa: ALL_ROLES,
-  "qa/:id": ADMIN_ONLY,
-  articles: ALL_ROLES,
-  "articles/:articleId": ALL_ROLES,
-  news: ALL_ROLES,
-  "news/:newsId": ALL_ROLES,
+  "": PUBLIC,
+  progress: LEARNING_PROGRESS_ACCESS,
+  settings: PUBLIC,
+  "profile/:id": PUBLIC,
+  "course/:courseId/lesson/:lessonId": PUBLIC,
+  announcements: PUBLIC,
+  "articles/:articleId/edit": ARTICLE_EDIT_ACCESS,
+  "news/add": NEWS_EDIT_ACCESS,
+  "news/:newsId/edit": NEWS_EDIT_ACCESS,
+  // Client and public
+  "course/:id": PUBLIC,
+  courses: PUBLIC,
+  qa: PUBLIC,
+  "qa/:id": QA_EDIT_ACCESS,
+  articles: PUBLIC,
+  "articles/:articleId": PUBLIC,
+  news: PUBLIC,
+  "news/:newsId": PUBLIC,
 
   // Admin part
-  "admin/analytics": ADMIN_AND_CONTENT_CREATOR,
-  "admin/courses": ADMIN_AND_CONTENT_CREATOR,
-  "admin/courses/new": ADMIN_AND_CONTENT_CREATOR,
-  "admin/beta-courses/new": ADMIN_AND_CONTENT_CREATOR,
-  "admin/courses/:id": ADMIN_AND_CONTENT_CREATOR,
-  "admin/beta-courses/:id": ADMIN_AND_CONTENT_CREATOR,
-  "admin/users/*": ADMIN_ONLY,
-  "admin/groups/*": ADMIN_ONLY,
-  "admin/categories": ADMIN_ONLY,
-  "admin/categories/:id": ADMIN_AND_CONTENT_CREATOR,
-  "admin/categories/new": ADMIN_AND_CONTENT_CREATOR,
-  "admin/lessons": ADMIN_AND_CONTENT_CREATOR,
-  "admin/lessons/:id": ADMIN_AND_CONTENT_CREATOR,
-  "admin/lessons/new": ADMIN_AND_CONTENT_CREATOR,
-  "admin/lesson-items": ADMIN_AND_CONTENT_CREATOR,
-  "admin/lesson-items/new-file": ADMIN_AND_CONTENT_CREATOR,
-  "admin/lesson-items/new-text-block": ADMIN_AND_CONTENT_CREATOR,
-  "admin/lesson-items/new-question": ADMIN_AND_CONTENT_CREATOR,
-  "admin/lesson-items/:id": ADMIN_AND_CONTENT_CREATOR,
-  "admin/announcements/new": ADMIN_ONLY,
-  "provider-information": ALL_ROLES,
-  "admin/promotion-codes": ADMIN_ONLY,
-  "admin/promotion-codes/new": ADMIN_ONLY,
-  "admin/promotion-codes/:id": ADMIN_ONLY,
-  "admin/envs": ADMIN_ONLY,
-  "admin/course/:courseId/lesson/:lessonId/preview": ADMIN_AND_CONTENT_CREATOR,
-  "super-admin/*": ADMIN_ONLY,
+  "admin/analytics": {
+    allOf: [PERMISSIONS.STATISTICS_READ],
+  },
+  "admin/courses": COURSE_EDIT_ACCESS,
+  "admin/courses/new": COURSE_EDIT_ACCESS,
+  "admin/course/:courseId/lesson/:lessonId/preview": COURSE_EDIT_ACCESS,
+  "admin/beta-courses/new": {
+    allOf: [PERMISSIONS.COURSE_CREATE],
+  },
+  "admin/courses/:id": COURSE_EDIT_ACCESS,
+  "admin/beta-courses/:id": COURSE_EDIT_ACCESS,
+  "admin/users/*": USER_MANAGEMENT_ACCESS,
+  "admin/groups/*": {
+    allOf: [PERMISSIONS.GROUP_MANAGE],
+  },
+  "admin/categories/*": {
+    allOf: [PERMISSIONS.CATEGORY_MANAGE],
+  },
+  "admin/lessons/*": COURSE_EDIT_ACCESS,
+  "admin/lesson-items/*": COURSE_EDIT_ACCESS,
+  "admin/announcements/new": {
+    allOf: [PERMISSIONS.ANNOUNCEMENT_CREATE],
+  },
+  "provider-information": PUBLIC,
+  "admin/promotion-codes": {
+    allOf: [PERMISSIONS.BILLING_MANAGE],
+  },
+  "admin/promotion-codes/*": {
+    allOf: [PERMISSIONS.BILLING_MANAGE],
+  },
+  "admin/envs": {
+    allOf: [PERMISSIONS.ENV_MANAGE],
+  },
+  "super-admin/*": {
+    allOf: [PERMISSIONS.TENANT_MANAGE],
+  },
 });

@@ -1,3 +1,4 @@
+import { PERMISSIONS } from "@repo/shared";
 import { useTranslation } from "react-i18next";
 
 import { Icon } from "~/components/Icon";
@@ -10,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { useUserRole } from "~/hooks/useUserRole";
+import { usePermissions } from "~/hooks/usePermissions";
 
 type ArticlesTOCHeaderProps = {
   onRequestClose?: () => void;
@@ -24,7 +25,9 @@ export function ArticlesTOCHeader({
   onCreateArticle,
 }: ArticlesTOCHeaderProps) {
   const { t } = useTranslation();
-  const { isAdminLike } = useUserRole();
+  const { hasAccess: canManageArticles } = usePermissions({
+    required: [PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN],
+  });
 
   const menuItemClassName =
     "flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-neutral-900 outline-none focus:bg-accent focus:text-accent-foreground";
@@ -36,7 +39,7 @@ export function ArticlesTOCHeader({
       </h3>
 
       <div className="hidden items-center gap-1 2xl:flex">
-        {isAdminLike && (
+        {canManageArticles && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button

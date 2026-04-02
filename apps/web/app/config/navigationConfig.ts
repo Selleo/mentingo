@@ -1,12 +1,14 @@
+import { PERMISSIONS } from "@repo/shared";
+
 import { routeAccessConfig } from "./routeAccessConfig";
-import { USER_ROLE, type UserRole } from "./userRoles";
 
 import type { TFunction } from "i18next";
+import type { PermissionRequirement } from "~/common/permissions/permission.utils";
 import type { IconName } from "~/types/shared";
 
 export interface BaseMenuItem {
   label: string;
-  roles?: UserRole[];
+  accessRequirement?: PermissionRequirement;
 }
 
 export interface LeafMenuItem extends BaseMenuItem {
@@ -26,7 +28,7 @@ export type NavigationGroups = {
   title: string;
   icon?: IconName;
   isExpandable?: boolean;
-  restrictedRoles?: UserRole[];
+  restrictedAccessRequirement?: PermissionRequirement;
   restrictedManagingTenantAdmin?: boolean;
   items: NavigationItem[];
 };
@@ -68,6 +70,16 @@ export const getNavigationConfig = (
             title: t("navigationSideBar.content"),
             icon: "Library",
             isExpandable: true,
+            restrictedAccessRequirement: {
+              anyOf: [
+                PERMISSIONS.NEWS_MANAGE,
+                PERMISSIONS.NEWS_MANAGE_OWN,
+                PERMISSIONS.ARTICLE_MANAGE,
+                PERMISSIONS.ARTICLE_MANAGE_OWN,
+                PERMISSIONS.QA_MANAGE,
+                PERMISSIONS.QA_MANAGE_OWN,
+              ],
+            },
             items: [
               ...(isNewsEnabled
                 ? ([
@@ -104,13 +116,15 @@ export const getNavigationConfig = (
       title: t("navigationSideBar.manage"),
       icon: "Manage",
       isExpandable: true,
-      restrictedRoles: [USER_ROLE.admin],
+      restrictedAccessRequirement: {
+        anyOf: [
+          PERMISSIONS.USER_MANAGE,
+          PERMISSIONS.GROUP_MANAGE,
+          PERMISSIONS.CATEGORY_MANAGE,
+          PERMISSIONS.BILLING_MANAGE,
+        ],
+      },
       items: [
-        {
-          label: t("navigationSideBar.announcements"),
-          path: `announcements`,
-          iconName: "Bell",
-        },
         {
           label: t("navigationSideBar.users"),
           path: "admin/users",
@@ -141,6 +155,9 @@ export const getNavigationConfig = (
       title: t("navigationSideBar.superAdmin", "Super Admin"),
       icon: "Admin",
       isExpandable: false,
+      restrictedAccessRequirement: {
+        allOf: [PERMISSIONS.TENANT_MANAGE],
+      },
       restrictedManagingTenantAdmin: true,
       items: [
         {
@@ -154,13 +171,13 @@ export const getNavigationConfig = (
 };
 
 /**
- * Finds matching route access roles for a given path by checking different types of routes in order:
+ * Finds matching route access requirements for a given path by checking different types of routes in order:
  * 1. Exact matches (e.g., "courses/new" matches "courses/new")
  * 2. Parameter routes (e.g., "profile/123" matches "profile/:id")
  * 3. Wildcard routes (e.g., "profile/123/settings" matches "profile/*")
  *
  * @param path - The actual URL path to match (e.g., "profile/123")
- * @returns UserRole[] | undefined - Array of user roles that can access this path, or undefined if no match
+ * @returns PermissionRequirement | undefined - Requirement that can access this path, or undefined if no match
  *
  * @example
  * // Exact match
@@ -191,7 +208,7 @@ export const findMatchingRoute = (path: string) => {
     ([route]) => route.includes(":") && !route.includes("*"),
   );
 
-  for (const [route, roles] of paramRoutes) {
+  for (const [route, requirement] of paramRoutes) {
     const routeParts = route.split("/");
     const pathParts = path.split("/");
 
@@ -202,15 +219,15 @@ export const findMatchingRoute = (path: string) => {
       return part === pathParts[index];
     });
 
-    if (matches) return roles;
+    if (matches) return requirement;
   }
 
   const wildcardRoutes = Object.entries(routeAccessConfig).filter(([route]) => route.includes("*"));
 
-  for (const [route, roles] of wildcardRoutes) {
+  for (const [route, requirement] of wildcardRoutes) {
     const routeWithoutWildcard = route.replace("/*", "");
     if (path.startsWith(routeWithoutWildcard)) {
-      return roles;
+      return requirement;
     }
   }
 
@@ -219,12 +236,12 @@ export const findMatchingRoute = (path: string) => {
 
 const mapMenuItemsWithRolesAndLink = (items: NavigationItem[]) => {
   return items.map((item) => {
-    const roles = findMatchingRoute(item.path);
+    const accessRequirement = findMatchingRoute(item.path);
 
     return {
       ...item,
       link: `/${item.path}`,
-      roles,
+      accessRequirement,
     };
   });
 };

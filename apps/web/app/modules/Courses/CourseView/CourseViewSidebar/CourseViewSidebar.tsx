@@ -1,4 +1,5 @@
 import { Link } from "@remix-run/react";
+import { PERMISSIONS } from "@repo/shared";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
@@ -9,7 +10,7 @@ import { useCourseOwnershipCandidates } from "~/api/queries/admin/useCourseOwner
 import { useUserDetails } from "~/api/queries/useUserDetails";
 import { Button } from "~/components/ui/button";
 import { UserAvatar } from "~/components/UserProfile/UserAvatar";
-import { useUserRole } from "~/hooks/useUserRole";
+import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
 import TransferOwnershipSelect from "~/modules/Admin/EditCourse/CourseSettings/components/TransferOwnershipSelect";
 import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
@@ -28,7 +29,16 @@ export const CourseViewSidebar = ({ course }: CourseViewSidebar) => {
 
   const { data: userDetails } = useUserDetails(course?.authorId ?? "");
   const { data: currentUser } = useCurrentUser();
-  const { isAdminLike, isAdmin, isContentCreator, isStudent } = useUserRole();
+  const { hasAccess: canManageUsers } = usePermissions({ required: PERMISSIONS.USER_MANAGE });
+  const { hasAccess: canManageOwnCourses } = usePermissions({
+    required: PERMISSIONS.COURSE_UPDATE_OWN,
+  });
+  const { hasAccess: canManageCourses } = usePermissions({
+    required: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
+  });
+  const { hasAccess: canUpdateLearningProgress } = usePermissions({
+    required: PERMISSIONS.LEARNING_PROGRESS_UPDATE,
+  });
   const { isEffectiveStudentExperience } = useCourseAccessProvider();
 
   const { t } = useTranslation();
@@ -37,17 +47,17 @@ export const CourseViewSidebar = ({ course }: CourseViewSidebar) => {
     useTransferCourseOwnership();
   const { data: courseOwnershipCandidates } = useCourseOwnershipCandidates({
     id: course.id,
-    enabled: isAdmin,
+    enabled: canManageUsers,
   });
 
-  const isNonAuthorContentCreator = isContentCreator && currentUser?.id !== course.authorId;
+  const isNonAuthorContentCreator = canManageOwnCourses && currentUser?.id !== course.authorId;
 
-  const canShowCourseOptionsForRole = !isAdminLike || isNonAuthorContentCreator;
+  const canShowCourseOptionsForRole = !canManageCourses || isNonAuthorContentCreator;
 
   const shouldShowCourseOptions = match({
     isUnenrolled: !course?.enrolled,
     canShowCourseOptionsForRole,
-    isEnrollmentEntryFlow: !currentUser || isStudent,
+    isEnrollmentEntryFlow: !currentUser || canUpdateLearningProgress,
     isEffectiveStudentExperience,
   })
     .with(
@@ -65,7 +75,7 @@ export const CourseViewSidebar = ({ course }: CourseViewSidebar) => {
     .otherwise(() => false);
 
   const canEditOwner =
-    isAdmin && !!course.id && !!courseOwnershipCandidates?.possibleCandidates?.length;
+    canManageUsers && !!course.id && !!courseOwnershipCandidates?.possibleCandidates?.length;
 
   const handleOwnerChange = async (value: string) => {
     if (!course?.id || value === course.authorId) {
