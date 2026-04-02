@@ -22,8 +22,12 @@ export const TextBlank = ({
 }: TextBlankProps) => {
   const { register } = useFormContext<QuizForm>();
   const { isQuizFeedbackRedacted } = useQuizContext();
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const formFieldId = `${index + 1}`;
+
+  const { ref: registerRef, ...registeredField } = register(
+    `fillInTheBlanksText.${questionId}.${formFieldId}`,
+  );
 
   useEffect(() => {
     if (!inputRef?.current) return;
@@ -51,8 +55,7 @@ export const TextBlank = ({
     },
   );
 
-  const isDisabled =
-    studentAnswer?.isCorrect && (!!studentAnswer?.isStudentAnswer || !!studentAnswer?.optionText);
+  const isDisabled = Boolean(isQuizSubmitted);
 
   return (
     <input
@@ -61,7 +64,7 @@ export const TextBlank = ({
       data-testid={`text-blank-${formFieldId}`}
       className={textBlankClasses}
       {...(studentAnswer?.studentAnswer && { defaultValue: studentAnswer.studentAnswer })}
-      disabled={!!isDisabled}
+      disabled={isDisabled}
       draggable={false}
       onDragStart={(event) => event.preventDefault()}
       onDrop={(event) => {
@@ -72,7 +75,11 @@ export const TextBlank = ({
         event.preventDefault();
         event.stopPropagation();
       }}
-      {...register(`fillInTheBlanksText.${questionId}.${formFieldId}`)}
+      {...registeredField}
+      ref={(element) => {
+        inputRef.current = element;
+        registerRef(element);
+      }}
     />
   );
 };

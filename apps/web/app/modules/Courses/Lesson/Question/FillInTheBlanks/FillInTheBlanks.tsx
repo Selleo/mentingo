@@ -29,10 +29,16 @@ export const FillInTheBlanks = ({ question, isCompleted }: FillInTheBlanksProps)
       <FillInTheTextBlanks
         content={question.description}
         replacement={(index) => {
+          const blankDisplayOrder = index + 1;
+
+          const studentAnswerForBlank =
+            question.options?.find((option) => option.displayOrder === blankDisplayOrder) ??
+            question.options?.[index];
+
           return (
             <TextBlank
               questionId={question.id}
-              studentAnswer={question.options?.[index]}
+              studentAnswer={studentAnswerForBlank}
               index={index}
               isQuizSubmitted={isCompleted}
             />

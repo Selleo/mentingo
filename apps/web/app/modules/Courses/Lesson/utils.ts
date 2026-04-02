@@ -15,6 +15,11 @@ type Questions = NonNullable<GetLessonByIdResponse["data"]["quizDetails"]>["ques
 type AnswersMap = Record<string, Record<string, string | null>>;
 type OpenAnswersMap = Record<string, string>;
 
+const getBlankCount = (description?: string | null, fallback = 0) => {
+  const markersCount = description?.match(/\[word]/g)?.length ?? 0;
+  return markersCount > 0 ? markersCount : fallback;
+};
+
 export const getUserAnswers = (questions: Questions): QuizForm => {
   const groupedQuestions = groupQuestionsByType(questions);
 
@@ -91,14 +96,12 @@ function prepareEmptyOptionAnswers(questions: Questions): AnswersMap {
     }
 
     if (question.type === QuestionType.FILL_IN_THE_BLANKS_TEXT) {
-      result[question.id ?? ""] =
-        question?.options?.reduce(
-          (map, _option, index) => {
-            map[`${index + 1}`] = null;
-            return map;
-          },
-          {} as Record<string, string | null>,
-        ) || {};
+      const maxAnswersAmount = getBlankCount(question.description, question?.options?.length ?? 0);
+      const emptyMap: Record<string, string | null> = {};
+      for (let index = 1; index <= maxAnswersAmount; index += 1) {
+        emptyMap[`${index}`] = null;
+      }
+      result[question.id ?? ""] = emptyMap;
 
       return result;
     }
@@ -152,15 +155,12 @@ function prepareOptionAnswers(questions: Questions): AnswersMap {
     }
 
     if (question.type === QuestionType.FILL_IN_THE_BLANKS_TEXT) {
-      result[question.id ?? ""] =
-        question?.options?.reduce(
-          (map, { studentAnswer }, index) => {
-            map[`${index + 1}`] = studentAnswer ?? "";
-
-            return map;
-          },
-          {} as Record<string, string | null>,
-        ) || {};
+      const maxAnswersAmount = getBlankCount(question.description, question?.options?.length ?? 0);
+      const questionMap: Record<string, string | null> = {};
+      for (let index = 0; index < maxAnswersAmount; index += 1) {
+        questionMap[`${index + 1}`] = question?.options?.[index]?.studentAnswer ?? "";
+      }
+      result[question.id ?? ""] = questionMap;
 
       return result;
     }
@@ -230,8 +230,12 @@ export const parseQuizFormData = (input: QuizForm) => {
     for (const questionId in questionMap) {
       const answers = questionMap[questionId];
       const answerArray = Object.entries(answers)
-        .filter(([_, value]) => value)
-        .map(([_, value]) => ({ value, answerId: "" }));
+        .filter((entry): entry is [string, string] => {
+          const value = entry[1];
+
+          return typeof value === "string" && value.trim() !== "";
+        })
+        .map(([_, value]) => ({ value }));
 
       if (answerArray.length > 0) {
         result.push({
