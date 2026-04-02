@@ -38,7 +38,7 @@ import type {
   PcmChunkMeta,
   SupportedLanguages,
 } from "@repo/shared";
-import type { StartAudioBody } from "src/audio/types/audio.types";
+import type { SendTTSTriggerBody, StartAudioBody } from "src/audio/types/audio.types";
 import type { ExternalAudioSession } from "src/audio/types/external-audio-session.types";
 import type { ExternalAudioStartResult } from "src/audio/types/external-audio.types";
 import type { UUIDType } from "src/common";
@@ -46,6 +46,7 @@ import type { WsUser } from "src/websocket/websocket.types";
 
 type VoiceMentorSocketHandlers = {
   disconnect: () => void;
+  audioStarted: () => void;
   mentorTranscription: (payload: MentorTranscriptionPayload) => Promise<void>;
   audioOutputChunk: (payload: { data: AudioSpeechEventPayload }) => void;
   audioOutputInterrupted: () => void;
@@ -127,6 +128,17 @@ export class ExternalAudioService {
     session.socket.removeAllListeners();
     session.socket.disconnect();
     this.sessionStore.delete(sessionId);
+  }
+
+  async triggerTTS(sessionId: string, payload: SendTTSTriggerBody) {
+    const session = this.sessionStore.get(sessionId);
+    if (session) {
+      session.activeTurnId = `tts-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+      session.socket.sendTTSTrigger(payload);
+      return true;
+    }
+
+    return false;
   }
 
   private async startAudioForVoiceMentor(
@@ -214,6 +226,7 @@ export class ExternalAudioService {
     socket.onAudioOutputChunk(handlers.audioOutputChunk);
     socket.onAudioOutputInterrupted(handlers.audioOutputInterrupted);
     socket.onAudioOutputComplete(handlers.audioOutputComplete);
+    socket.onAudioStarted(handlers.audioStarted);
   }
 
   private createVoiceMentorSocketHandlers(
@@ -224,6 +237,9 @@ export class ExternalAudioService {
     return {
       disconnect: () => {
         this.sessionStore.delete(sessionId);
+      },
+      audioStarted: () => {
+        this.realtimePublisher.emitToRoom(VOICE_SOCKET_EVENT.AUDIO_STARTED, sessionId, {});
       },
       mentorTranscription: async (payload) => {
         await this.handleMentorTranscription(sessionId, payload);

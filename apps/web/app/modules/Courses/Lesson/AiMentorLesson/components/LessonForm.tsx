@@ -11,6 +11,7 @@ import { useTranscription } from "~/modules/Voice/hooks/useTranscription";
 import { useVoiceMentor } from "~/modules/Voice/hooks/useVoiceMentor";
 import { useVoiceModeUIState } from "~/modules/Voice/hooks/useVoiceModeUIState";
 
+import type { Message } from "@ai-sdk/react";
 import type { ChangeEvent, Dispatch, SetStateAction } from "react";
 
 interface LessonFormProps {
@@ -25,6 +26,7 @@ interface LessonFormProps {
   input: string;
   handleInputChange: (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>) => void;
   setInput: Dispatch<SetStateAction<string>>;
+  messages: Message[];
 }
 
 export const LessonForm = ({
@@ -39,10 +41,12 @@ export const LessonForm = ({
   input,
   handleInputChange,
   setInput,
+  messages,
 }: LessonFormProps) => {
   const { t } = useTranslation();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isVoiceMode, setIsVoiceMode] = useState(false);
+  const [isVoiceMentorAudioStarted, setIsVoiceMentorAudioStarted] = useState(false);
   const [voiceLevel, setVoiceLevel] = useState(0);
   const [latestTranscript, setLatestTranscript] = useState("");
   const [latestResponse, setLatestResponse] = useState("");
@@ -51,6 +55,8 @@ export const LessonForm = ({
   const voiceModeUI = useVoiceModeUIState();
 
   const emojiRef = useRef<HTMLDivElement | null>(null);
+  const hasTriggeredWelcomeRef = useRef(false);
+  const triggerWelcomeMessageRef = useRef<(message: string) => Promise<boolean>>(async () => false);
   const toggleEmojiPicker = () => setShowEmojiPicker((prev) => !prev);
 
   const { startRecording, stopRecording, cancelTranscription } = useTranscription({
@@ -61,6 +67,7 @@ export const LessonForm = ({
     isRecording: isVoiceMentorMode,
     startVoiceMentor,
     cancelVoiceMentor,
+    triggerWelcomeMessage,
   } = useVoiceMentor({
     lessonId,
     setInput,
@@ -73,6 +80,9 @@ export const LessonForm = ({
     onMentorResponseCompleted: (text) => {
       setLatestResponse(text);
       onMentorResponseCompleted?.(text);
+    },
+    onAudioStarted: () => {
+      setIsVoiceMentorAudioStarted(true);
     },
     onAudioOutputCompleted: () => {
       voiceModeUI.onAudioOutputCompleted(isVoiceMentorMode);
@@ -104,6 +114,27 @@ export const LessonForm = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showEmojiPicker]);
 
+  useEffect(() => {
+    triggerWelcomeMessageRef.current = triggerWelcomeMessage;
+  }, [triggerWelcomeMessage]);
+
+  useEffect(() => {
+    if (!isVoiceMentorMode || !isVoiceMentorAudioStarted) {
+      return;
+    }
+
+    if (hasTriggeredWelcomeRef.current) {
+      return;
+    }
+
+    if (messages.length !== 1 || messages[0]?.role !== "assistant") {
+      return;
+    }
+
+    hasTriggeredWelcomeRef.current = true;
+    void triggerWelcomeMessageRef.current(messages[0].content);
+  }, [isVoiceMentorAudioStarted, isVoiceMentorMode, messages]);
+
   const startVoiceMode = async () => {
     if (isVoiceMentorMode) {
       const canceledMentor = await cancelVoiceMentor();
@@ -114,6 +145,7 @@ export const LessonForm = ({
     setShowEmojiPicker(false);
     const hasStarted = await startRecording();
     if (!hasStarted) return;
+
     setIsVoiceMode(true);
     setLatestTranscript("");
     setLatestResponse("");
@@ -142,6 +174,8 @@ export const LessonForm = ({
     if (isVoiceMode) {
       await cancelVoiceMode();
     }
+    hasTriggeredWelcomeRef.current = false;
+    setIsVoiceMentorAudioStarted(false);
     setShowEmojiPicker(false);
     const started = await startVoiceMentor();
     if (!started) {

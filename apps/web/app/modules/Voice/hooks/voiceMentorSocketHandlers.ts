@@ -30,10 +30,12 @@ type VoiceMentorSocketHandlerDependencies = {
   onAudioChunkReceived?: () => void;
   onMentorTranscription?: (text: string) => void;
   onMentorResponseCompleted?: (text: string) => void;
+  onAudioStarted?: () => void;
   onAudioInterrupted?: () => void;
 };
 
 type SocketEventHandlerMap = {
+  [VOICE_SOCKET_EVENT.AUDIO_STARTED]: () => void;
   [VOICE_SOCKET_EVENT.STOP_AUDIO]: (payload: StopAudioEventPayload) => void;
   [VOICE_SOCKET_EVENT.AUDIO_SPEECH]: (payload: AudioSpeechEventPayload) => Promise<void>;
   [VOICE_SOCKET_EVENT.MENTOR_TRANSCRIPTION]: (payload: MentorTranscriptionEventPayload) => void;
@@ -45,6 +47,7 @@ type SocketEventHandlerMap = {
 };
 
 export const SUPPORTED_VOICE_MENTOR_SOCKET_EVENTS = [
+  VOICE_SOCKET_EVENT.AUDIO_STARTED,
   VOICE_SOCKET_EVENT.STOP_AUDIO,
   VOICE_SOCKET_EVENT.AUDIO_SPEECH,
   VOICE_SOCKET_EVENT.MENTOR_TRANSCRIPTION,
@@ -66,9 +69,13 @@ export function createVoiceMentorSocketHandlers({
   onAudioChunkReceived,
   onMentorTranscription,
   onMentorResponseCompleted,
+  onAudioStarted,
   onAudioInterrupted,
 }: VoiceMentorSocketHandlerDependencies): SocketEventHandlerMap {
   return {
+    [VOICE_SOCKET_EVENT.AUDIO_STARTED]: () => {
+      onAudioStarted?.();
+    },
     [VOICE_SOCKET_EVENT.STOP_AUDIO]: (data) => {
       if (data?.voiceAction !== VOICE_ACTION.VOICE_MENTOR) {
         return;

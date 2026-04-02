@@ -257,6 +257,7 @@ const AiMentorLesson = ({ lesson, lessonLoading }: AiMentorLessonProps) => {
           onAudioInterrupted={invalidateCurrentThreadMessages}
           onAudioOutputCompleted={invalidateCurrentThreadMessages}
           handleInputChange={handleInputChange}
+          messages={messages}
           input={input}
           setInput={setInput}
         />

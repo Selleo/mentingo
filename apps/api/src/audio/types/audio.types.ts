@@ -15,3 +15,7 @@ export type StartAudioBody = {
   lessonId?: UUIDType;
   meta: StreamInitPayload;
 };
+
+export type SendTTSTriggerBody = {
+  content: string;
+};

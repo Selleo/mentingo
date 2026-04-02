@@ -21,7 +21,11 @@ import { ExternalAudioService } from "./external-audio.service";
 
 import type { OnModuleInit } from "@nestjs/common";
 import type { PcmChunkMeta, VoiceAction } from "@repo/shared";
-import type { StartAudioBody, StopAudioMessage } from "src/audio/types/audio.types";
+import type {
+  SendTTSTriggerBody,
+  StartAudioBody,
+  StopAudioMessage,
+} from "src/audio/types/audio.types";
 import type { WsUser } from "src/websocket/websocket.types";
 
 @Injectable()
@@ -138,6 +142,10 @@ export class AudioService implements OnModuleInit {
   async handleDisconnect(sessionId: string) {
     this.externalAudioService.clearSession(sessionId);
     await this.clearAudioState(sessionId);
+  }
+
+  async triggerTTS(sessionId: string, payload: SendTTSTriggerBody) {
+    await this.externalAudioService.triggerTTS(sessionId, payload);
   }
 
   private async setupRedisSubscriber() {
