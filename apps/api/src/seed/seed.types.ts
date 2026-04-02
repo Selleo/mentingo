@@ -4,11 +4,7 @@ import { Type } from "@sinclair/typebox";
 import type { Static } from "@sinclair/typebox";
 
 export const user = Type.Object({
-  roleSlug: Type.Union([
-    Type.Literal(SYSTEM_ROLE_SLUGS.ADMIN),
-    Type.Literal(SYSTEM_ROLE_SLUGS.CONTENT_CREATOR),
-    Type.Literal(SYSTEM_ROLE_SLUGS.STUDENT),
-  ]),
+  roleSlug: Type.Enum(SYSTEM_ROLE_SLUGS),
   email: Type.String(),
   firstName: Type.String(),
   lastName: Type.String(),

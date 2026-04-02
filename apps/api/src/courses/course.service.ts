@@ -40,6 +40,8 @@ import { EmailService } from "src/common/emails/emails.service";
 import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterConditions";
 import { buildJsonbField, deleteJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { canUpdateCourseByAuthor } from "src/common/permissions/course-permission.utils";
+import { userHasAnyPermissionsCondition } from "src/common/permissions/permission-sql.utils";
 import { hasPermission } from "src/common/permissions/permission.utils";
 import { injectResourcesIntoContent } from "src/common/utils/injectResourcesIntoContent";
 import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
@@ -76,9 +78,6 @@ import {
   questionAnswerOptions,
   questions,
   quizAttempts,
-  permissionRoleRuleSets,
-  permissionRuleSetPermissions,
-  permissionUserRoles,
   resourceEntity,
   resources,
   studentChapterProgress,
@@ -144,7 +143,7 @@ import type { CommonShowBetaCourse, CommonShowCourse } from "./schemas/showCours
 import type { UpdateCourseBody } from "./schemas/updateCourse.schema";
 import type { UpdateCourseSettings } from "./schemas/updateCourseSettings.schema";
 import type { CoursesSettings } from "./types/settings";
-import type { PermissionKey, SupportedLanguages } from "@repo/shared";
+import type { SupportedLanguages } from "@repo/shared";
 import type { SQL } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import type { CourseActivityLogSnapshot } from "src/activity-logs/types";
@@ -420,11 +419,12 @@ export class CourseService {
 
     const { sortOrder, sortedField } = getSortOptions(sort);
 
-    const hasCourseUpdatePermissions = sql`(
-      ${this.userHasPermissionCondition(PERMISSIONS.COURSE_UPDATE)}
-      OR
-      ${this.userHasPermissionCondition(PERMISSIONS.COURSE_UPDATE_OWN)}
-    )`;
+    const hasCourseUpdatePermissions = userHasAnyPermissionsCondition(
+      this.db,
+      users.id,
+      users.tenantId,
+      [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
+    );
 
     const conditions = [
       eq(users.archived, false),
@@ -1313,7 +1313,7 @@ export class CourseService {
 
     if (!course) throw new NotFoundException("Course not found");
 
-    if (!this.canUpdateCourse(currentUser, course.authorId)) {
+    if (!canUpdateCourseByAuthor(currentUser, course.authorId)) {
       throw new ForbiddenException("You do not have permission to edit this course");
     }
 
@@ -1830,7 +1830,7 @@ export class CourseService {
           throw new NotFoundException("Course not found");
         }
 
-        if (!this.canUpdateCourse(currentUser, existingCourse.authorId)) {
+        if (!canUpdateCourseByAuthor(currentUser, existingCourse.authorId)) {
           throw new ForbiddenException("You don't have permission to update course");
         }
 
@@ -1987,7 +1987,7 @@ export class CourseService {
       throw new NotFoundException("Course not found");
     }
 
-    if (!this.canUpdateCourse(currentUser, course.authorId)) {
+    if (!canUpdateCourseByAuthor(currentUser, course.authorId)) {
       throw new ForbiddenException("You don't have permission to update course");
     }
 
@@ -2165,7 +2165,7 @@ export class CourseService {
     if (
       currentUser &&
       !hasPermission(currentUser.permissions, PERMISSIONS.COURSE_ENROLLMENT) &&
-      !this.canUpdateCourse(currentUser, course.authorId)
+      !canUpdateCourseByAuthor(currentUser, course.authorId)
     ) {
       throw new ForbiddenException("You don't have permission to enroll groups to this course");
     }
@@ -2222,7 +2222,12 @@ export class CourseService {
         .where(
           and(
             inArray(groupUsers.groupId, groupIds),
-            not(this.hasCourseUpdatePermissions()),
+            not(
+              userHasAnyPermissionsCondition(this.db, users.id, users.tenantId, [
+                PERMISSIONS.COURSE_UPDATE,
+                PERMISSIONS.COURSE_UPDATE_OWN,
+              ]),
+            ),
             isNull(studentCourses.enrolledByGroupId),
           ),
         )
@@ -2264,7 +2269,12 @@ export class CourseService {
         .where(
           and(
             inArray(groupUsers.groupId, groupIds),
-            not(this.hasCourseUpdatePermissions()),
+            not(
+              userHasAnyPermissionsCondition(this.db, users.id, users.tenantId, [
+                PERMISSIONS.COURSE_UPDATE,
+                PERMISSIONS.COURSE_UPDATE_OWN,
+              ]),
+            ),
             isNull(studentCourses.id),
           ),
         )
@@ -2323,7 +2333,12 @@ export class CourseService {
         and(
           eq(studentCourses.courseId, courseId),
           inArray(studentCourses.enrolledByGroupId, groupIds),
-          not(this.hasCourseUpdatePermissions()),
+          not(
+            userHasAnyPermissionsCondition(this.db, users.id, users.tenantId, [
+              PERMISSIONS.COURSE_UPDATE,
+              PERMISSIONS.COURSE_UPDATE_OWN,
+            ]),
+          ),
         ),
       );
 
@@ -3900,7 +3915,12 @@ export class CourseService {
         and(
           isNotNull(groupCourses.dueDate),
           sql`${groupCourses.dueDate} < NOW()`,
-          not(this.hasCourseUpdatePermissions()),
+          not(
+            userHasAnyPermissionsCondition(this.db, users.id, users.tenantId, [
+              PERMISSIONS.COURSE_UPDATE,
+              PERMISSIONS.COURSE_UPDATE_OWN,
+            ]),
+          ),
           isNull(users.deletedAt),
           isNull(studentCourses.completedAt),
         ),
@@ -4079,10 +4099,10 @@ export class CourseService {
         and(
           ne(users.id, course.authorId),
           isNull(users.deletedAt),
-          or(
-            this.userHasPermissionCondition(PERMISSIONS.COURSE_UPDATE),
-            this.userHasPermissionCondition(PERMISSIONS.COURSE_UPDATE_OWN),
-          ),
+          userHasAnyPermissionsCondition(this.db, users.id, users.tenantId, [
+            PERMISSIONS.COURSE_UPDATE,
+            PERMISSIONS.COURSE_UPDATE_OWN,
+          ]),
         ),
       );
 
@@ -4090,24 +4110,6 @@ export class CourseService {
       currentAuthor,
       possibleCandidates: possibleCandidates as CourseOwnershipBody[],
     };
-  }
-
-  private userHasPermissionCondition(permission: PermissionKey): SQL {
-    return sql`
-      EXISTS (
-        SELECT 1
-        FROM ${permissionUserRoles}
-        INNER JOIN ${permissionRoleRuleSets}
-          ON ${permissionRoleRuleSets.roleId} = ${permissionUserRoles.roleId}
-          AND ${permissionRoleRuleSets.tenantId} = ${permissionUserRoles.tenantId}
-        INNER JOIN ${permissionRuleSetPermissions}
-          ON ${permissionRuleSetPermissions.ruleSetId} = ${permissionRoleRuleSets.ruleSetId}
-          AND ${permissionRuleSetPermissions.tenantId} = ${permissionRoleRuleSets.tenantId}
-        WHERE ${permissionUserRoles.userId} = ${users.id}
-          AND ${permissionUserRoles.tenantId} = ${users.tenantId}
-          AND ${permissionRuleSetPermissions.permission} = ${permission}
-      )
-    `;
   }
 
   async transferCourseOwnership(data: TransferCourseOwnershipRequestBody) {
@@ -4634,26 +4636,5 @@ export class CourseService {
     if (!courseExists) throw new NotFoundException("adminCourseView.toast.courseNotFound");
 
     return courseExists;
-  }
-
-  private canUpdateAnyCourse(currentUser: CurrentUser) {
-    return hasPermission(currentUser.permissions, PERMISSIONS.COURSE_UPDATE);
-  }
-
-  private canUpdateOwnCourse(currentUser: CurrentUser) {
-    return hasPermission(currentUser.permissions, PERMISSIONS.COURSE_UPDATE_OWN);
-  }
-
-  private canUpdateCourse(currentUser: CurrentUser, authorId: UUIDType) {
-    if (this.canUpdateAnyCourse(currentUser)) return true;
-    return this.canUpdateOwnCourse(currentUser) && currentUser.userId === authorId;
-  }
-
-  private hasCourseUpdatePermissions() {
-    return sql`(
-      ${this.userHasPermissionCondition(PERMISSIONS.COURSE_UPDATE)}
-      OR
-      ${this.userHasPermissionCondition(PERMISSIONS.COURSE_UPDATE_OWN)}
-    )`;
   }
 }

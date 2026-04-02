@@ -9,6 +9,7 @@ import {
 import { and, asc, eq, getTableColumns, inArray, isNull, ne, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
+import { userHasAnyPermissionsCondition } from "src/common/permissions/permission-sql.utils";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   aiMentorLessons,
@@ -21,9 +22,6 @@ import {
   masterCourseExports,
   questionAnswerOptions,
   questions,
-  permissionRoleRuleSets,
-  permissionRuleSetPermissions,
-  permissionUserRoles,
   resourceEntity,
   resources,
   tenants,
@@ -388,21 +386,10 @@ export class MasterCourseRepository {
       .where(
         and(
           isNull(users.deletedAt),
-          sql`
-            EXISTS (
-              SELECT 1
-              FROM ${permissionUserRoles}
-              INNER JOIN ${permissionRoleRuleSets}
-                ON ${permissionRoleRuleSets.roleId} = ${permissionUserRoles.roleId}
-                AND ${permissionRoleRuleSets.tenantId} = ${permissionUserRoles.tenantId}
-              INNER JOIN ${permissionRuleSetPermissions}
-                ON ${permissionRuleSetPermissions.ruleSetId} = ${permissionRoleRuleSets.ruleSetId}
-                AND ${permissionRuleSetPermissions.tenantId} = ${permissionRoleRuleSets.tenantId}
-              WHERE ${permissionUserRoles.userId} = ${users.id}
-                AND ${permissionUserRoles.tenantId} = ${users.tenantId}
-                AND ${permissionRuleSetPermissions.permission} IN (${PERMISSIONS.COURSE_UPDATE}, ${PERMISSIONS.COURSE_UPDATE_OWN})
-            )
-          `,
+          userHasAnyPermissionsCondition(this.db, users.id, users.tenantId, [
+            PERMISSIONS.COURSE_UPDATE,
+            PERMISSIONS.COURSE_UPDATE_OWN,
+          ]),
         ),
       )
       .limit(1);

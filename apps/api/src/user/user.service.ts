@@ -32,7 +32,6 @@ import {
   isNull,
   not,
   or,
-  type SQL,
   sql,
 } from "drizzle-orm";
 import { isEqual } from "lodash";
@@ -45,6 +44,10 @@ import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterCondi
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import hashPassword from "src/common/helpers/hashPassword";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import {
+  userHasPermissionCondition as buildUserHasPermissionCondition,
+  userLacksAnyPermissionsCondition as buildUserLacksAnyPermissionsCondition,
+} from "src/common/permissions/permission-sql.utils";
 import { hasPermission } from "src/common/permissions/permission.utils";
 import { CreateUserEvent, DeleteUserEvent, UpdateUserEvent } from "src/events";
 import { UserInviteEvent } from "src/events/user/user-invite.event";
@@ -94,7 +97,6 @@ import type {
   BulkUpdateUsersRolesBody,
 } from "./schemas/updateUser.schema";
 import type { UserDetailsResponse, UserDetailsWithAvatarKey } from "./schemas/user.schema";
-import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import type { UserActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
@@ -289,9 +291,7 @@ export class UserService {
       .leftJoin(userDetails, eq(userDetails.userId, users.id))
       .where(and(eq(users.id, userId), isNull(users.deletedAt)));
 
-    if (!userBio) {
-      throw new NotFoundException("User not found");
-    }
+    if (!userBio) throw new NotFoundException("common.toast.notFound");
 
     const canViewSelf = userId === currentUserId;
     const canManageUsers = hasPermission(currentUser.permissions, PERMISSIONS.USER_MANAGE);
@@ -300,9 +300,7 @@ export class UserService {
 
     const canView = canViewSelf || canManageUsers || targetIsAdmin;
 
-    if (!canView) {
-      throw new ForbiddenException("Cannot access user details");
-    }
+    if (!canView) throw new ForbiddenException("common.toast.noAccess");
 
     const { avatarReference, ...user } = userBio;
 
@@ -518,12 +516,13 @@ export class UserService {
         and(
           eq(users.id, id),
           isNull(users.deletedAt),
-          this.userHasPermissionCondition(
+          buildUserHasPermissionCondition(
+            this.db,
             users.id,
             users.tenantId,
             PERMISSIONS.LEARNING_PROGRESS_UPDATE,
           ),
-          this.userLacksAnyPermissionsCondition(users.id, users.tenantId, [
+          buildUserLacksAnyPermissionsCondition(this.db, users.id, users.tenantId, [
             PERMISSIONS.COURSE_UPDATE,
             PERMISSIONS.COURSE_UPDATE_OWN,
           ]),
@@ -577,12 +576,13 @@ export class UserService {
         and(
           inArray(users.id, ids),
           isNull(users.deletedAt),
-          this.userHasPermissionCondition(
+          buildUserHasPermissionCondition(
+            this.db,
             users.id,
             users.tenantId,
             PERMISSIONS.LEARNING_PROGRESS_UPDATE,
           ),
-          this.userLacksAnyPermissionsCondition(users.id, users.tenantId, [
+          buildUserLacksAnyPermissionsCondition(this.db, users.id, users.tenantId, [
             PERMISSIONS.COURSE_UPDATE,
             PERMISSIONS.COURSE_UPDATE_OWN,
           ]),
@@ -820,7 +820,12 @@ export class UserService {
       .where(
         and(
           isNull(users.deletedAt),
-          this.userHasPermissionCondition(users.id, users.tenantId, PERMISSIONS.TENANT_MANAGE),
+          buildUserHasPermissionCondition(
+            this.db,
+            users.id,
+            users.tenantId,
+            PERMISSIONS.TENANT_MANAGE,
+          ),
           sql`${settings.settings}->>'adminNewUserNotification' = 'true'`,
           not(eq(users.email, emailToExclude)),
         ),
@@ -836,12 +841,13 @@ export class UserService {
       .from(users)
       .where(
         and(
-          this.userHasPermissionCondition(
+          buildUserHasPermissionCondition(
+            this.db,
             users.id,
             users.tenantId,
             PERMISSIONS.LEARNING_PROGRESS_UPDATE,
           ),
-          this.userLacksAnyPermissionsCondition(users.id, users.tenantId, [
+          buildUserLacksAnyPermissionsCondition(this.db, users.id, users.tenantId, [
             PERMISSIONS.COURSE_UPDATE,
             PERMISSIONS.COURSE_UPDATE_OWN,
           ]),
@@ -874,7 +880,12 @@ export class UserService {
       .leftJoin(settings, eq(users.id, settings.userId))
       .where(
         and(
-          this.userHasPermissionCondition(users.id, users.tenantId, PERMISSIONS.TENANT_MANAGE),
+          buildUserHasPermissionCondition(
+            this.db,
+            users.id,
+            users.tenantId,
+            PERMISSIONS.TENANT_MANAGE,
+          ),
           isNull(users.deletedAt),
         ),
       );
@@ -1066,7 +1077,12 @@ export class UserService {
       .innerJoin(settings, eq(users.id, settings.userId))
       .where(
         and(
-          this.userHasPermissionCondition(users.id, users.tenantId, PERMISSIONS.TENANT_MANAGE),
+          buildUserHasPermissionCondition(
+            this.db,
+            users.id,
+            users.tenantId,
+            PERMISSIONS.TENANT_MANAGE,
+          ),
           sql`${settings.settings}->>'adminFinishedCourseNotification' = 'true'`,
           isNull(users.deletedAt),
         ),
@@ -1086,7 +1102,12 @@ export class UserService {
       .innerJoin(settings, eq(users.id, settings.userId))
       .where(
         and(
-          this.userHasPermissionCondition(users.id, users.tenantId, PERMISSIONS.TENANT_MANAGE),
+          buildUserHasPermissionCondition(
+            this.db,
+            users.id,
+            users.tenantId,
+            PERMISSIONS.TENANT_MANAGE,
+          ),
           sql`${settings.settings}->>'adminOverdueCourseNotification' = 'true'`,
           isNull(users.deletedAt),
         ),
@@ -1443,50 +1464,6 @@ export class UserService {
 
       return left.localeCompare(right);
     });
-  }
-
-  private userHasPermissionCondition(
-    userIdColumn: AnyPgColumn,
-    tenantIdColumn: AnyPgColumn,
-    permission: PermissionKey,
-  ): SQL {
-    return sql`
-      EXISTS (
-        SELECT 1
-        FROM ${permissionUserRoles}
-        INNER JOIN ${permissionRoleRuleSets}
-          ON ${permissionRoleRuleSets.roleId} = ${permissionUserRoles.roleId}
-          AND ${permissionRoleRuleSets.tenantId} = ${permissionUserRoles.tenantId}
-        INNER JOIN ${permissionRuleSetPermissions}
-          ON ${permissionRuleSetPermissions.ruleSetId} = ${permissionRoleRuleSets.ruleSetId}
-          AND ${permissionRuleSetPermissions.tenantId} = ${permissionRoleRuleSets.tenantId}
-        WHERE ${permissionUserRoles.userId} = ${userIdColumn}
-          AND ${permissionUserRoles.tenantId} = ${tenantIdColumn}
-          AND ${permissionRuleSetPermissions.permission} = ${permission}
-      )
-    `;
-  }
-
-  private userLacksPermissionCondition(
-    userIdColumn: AnyPgColumn,
-    tenantIdColumn: AnyPgColumn,
-    permission: PermissionKey,
-  ): SQL {
-    return sql`NOT (${this.userHasPermissionCondition(userIdColumn, tenantIdColumn, permission)})`;
-  }
-
-  private userLacksAnyPermissionsCondition(
-    userIdColumn: AnyPgColumn,
-    tenantIdColumn: AnyPgColumn,
-    permissions: PermissionKey[],
-  ): SQL {
-    if (!permissions.length) return sql`TRUE`;
-
-    return and(
-      ...permissions.map((permission) =>
-        this.userLacksPermissionCondition(userIdColumn, tenantIdColumn, permission),
-      ),
-    ) as SQL;
   }
 
   private async deflateStatisticsForCourseDeletedUser(userId: UUIDType, trx: DatabasePg = this.db) {

@@ -7,6 +7,7 @@ import {
   courseQueryOptions,
   studentCoursesQueryOptions,
   useCurrentUser,
+  useGlobalSettings,
 } from "~/api/queries";
 import { topCoursesQueryOptions } from "~/api/queries/useTopCourses";
 import { queryClient } from "~/api/queryClient";
@@ -30,6 +31,7 @@ export const CourseOptions = ({ course }: CourseOptionsProps) => {
 
   const { mutateAsync: enrollCourse } = useEnrollCourse();
   const { data: currentUser } = useCurrentUser();
+  const { data: globalSettings } = useGlobalSettings();
 
   const handleEnrollCourse = async () => {
     await enrollCourse({ id: course?.id }).then(() => {
@@ -43,8 +45,12 @@ export const CourseOptions = ({ course }: CourseOptionsProps) => {
 
   const renderEnrollButton = () => {
     if (!currentUser) {
+      const registerPath = globalSettings?.inviteOnlyRegistration
+        ? "/auth/login"
+        : "/auth/register";
+
       return (
-        <Link to="/auth/register">
+        <Link to={registerPath}>
           <Button className="w-full gap-x-2" variant="primary">
             <Enroll />
             <span>{t("studentCourseView.sideSection.button.enrollCourse")}</span>

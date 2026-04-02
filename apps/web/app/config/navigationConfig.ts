@@ -74,10 +74,13 @@ export const getNavigationConfig = (
               anyOf: [
                 PERMISSIONS.NEWS_MANAGE,
                 PERMISSIONS.NEWS_MANAGE_OWN,
+                PERMISSIONS.NEWS_READ_PUBLIC,
                 PERMISSIONS.ARTICLE_MANAGE,
                 PERMISSIONS.ARTICLE_MANAGE_OWN,
+                PERMISSIONS.ARTICLE_READ_PUBLIC,
                 PERMISSIONS.QA_MANAGE,
                 PERMISSIONS.QA_MANAGE_OWN,
+                PERMISSIONS.QA_READ_PUBLIC,
               ],
             },
             items: [

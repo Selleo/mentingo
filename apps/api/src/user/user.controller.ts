@@ -184,18 +184,18 @@ export class UserController {
   ): Promise<BaseResponse<Static<typeof baseUserResponseSchema>>> {
     {
       if (currentUser.userId !== id) {
-        throw new ForbiddenException("You can only update your own account");
+        throw new ForbiddenException("common.toast.noAccess");
       }
 
       const canManageUsers = hasPermission(currentUser.permissions, PERMISSIONS.USER_MANAGE);
       const { roleSlugs, groups, archived } = data;
 
       if ((roleSlugs !== undefined || archived !== undefined) && !canManageUsers) {
-        throw new ForbiddenException("You can only update your own basic account data");
+        throw new ForbiddenException("common.toast.noAccess");
       }
 
       if (groups !== undefined && !canManageUsers) {
-        throw new ForbiddenException("You can only update your own basic account data");
+        throw new ForbiddenException("common.toast.noAccess");
       }
 
       await this.usersService.updateUser(id, data, currentUser);
@@ -308,7 +308,7 @@ export class UserController {
     @CurrentUser("userId") currentUserId: UUIDType,
   ): Promise<null> {
     if (currentUserId !== id) {
-      throw new ForbiddenException("You can only update your own account");
+      throw new ForbiddenException("common.toast.noAccess");
     }
     await this.usersService.changePassword(id, data);
 

@@ -17,6 +17,7 @@ type MobileNavigationDropdownProps = {
   closeLabel: string;
   loginLabel: string;
   signUpLabel: string;
+  showSignUp: boolean;
 };
 
 export function MobileNavigationDropdown({
@@ -25,6 +26,7 @@ export function MobileNavigationDropdown({
   closeLabel,
   loginLabel,
   signUpLabel,
+  showSignUp,
 }: MobileNavigationDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -74,9 +76,11 @@ export function MobileNavigationDropdown({
               {loginLabel}
             </Button>
           </Link>
-          <Link to="/auth/register" onClick={() => setIsOpen(false)}>
-            <Button className="w-full">{signUpLabel}</Button>
-          </Link>
+          {showSignUp && (
+            <Link to="/auth/register" onClick={() => setIsOpen(false)}>
+              <Button className="w-full">{signUpLabel}</Button>
+            </Link>
+          )}
         </div>
       </DropdownMenuContent>
     </DropdownMenu>

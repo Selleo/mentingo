@@ -72,7 +72,6 @@ import type {
   UpdateSettingsBody,
 } from "./schemas/update-settings.schema";
 import type { RegistrationFormFieldDbModel } from "./types/registration-form.types";
-import type * as schema from "../storage/schema";
 import type {
   AllowedArticlesSettings,
   AllowedNewsSettings,
@@ -80,7 +79,6 @@ import type {
   SupportedLanguages,
   PermissionKey,
 } from "@repo/shared";
-import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { Request, Response } from "express";
 import type { SettingsActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
@@ -476,7 +474,7 @@ export class SettingsService {
     userId: UUIDType | null,
     roleSlugs: string[],
     customSettings?: Partial<SettingsJSONContentSchema>,
-    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+    dbInstance: DatabasePg = this.db,
   ): Promise<SettingsJSONContentSchema> {
     if (userId !== null && !userId) {
       throw new UnauthorizedException("User not authenticated");
@@ -1528,7 +1526,7 @@ export class SettingsService {
 
   private async resolvePermissionsForRoleSlugs(
     roleSlugs: string[],
-    dbInstance: PostgresJsDatabase<typeof schema>,
+    dbInstance: DatabasePg,
   ): Promise<PermissionKey[]> {
     if (!roleSlugs.length) return [];
 

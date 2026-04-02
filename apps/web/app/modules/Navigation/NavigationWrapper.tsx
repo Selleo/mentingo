@@ -17,7 +17,7 @@ export default function NavigationWrapper() {
     >
       <SupportModeBanner />
       <div className="flex flex-1 flex-col overflow-hidden 2xl:flex-row">
-        <Navigation />
+        {currentUser && <Navigation />}
         <MFAGuard mode="public">
           <Outlet />
         </MFAGuard>

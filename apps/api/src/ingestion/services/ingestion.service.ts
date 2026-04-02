@@ -5,10 +5,9 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { PERMISSIONS } from "@repo/shared";
 
 import { DatabasePg } from "src/common";
-import { hasPermission } from "src/common/permissions/permission.utils";
+import { canUpdateCourseByAuthor } from "src/common/permissions/course-permission.utils";
 import { MAX_NUM_OF_FILES } from "src/ingestion/ingestion.config";
 import { DOCUMENT_STATUS } from "src/ingestion/ingestion.constants";
 import { IngestionRepository } from "src/ingestion/repositories/ingestion.repository";
@@ -34,7 +33,7 @@ export class IngestionService {
     }
 
     const author = await this.getLessonAuthor(lessonId);
-    if (!this.canManageLesson(currentUser, author)) {
+    if (!canUpdateCourseByAuthor(currentUser, author)) {
       throw new ForbiddenException("You can only upload files to your own lessons");
     }
 
@@ -80,7 +79,7 @@ export class IngestionService {
 
   async findAllDocumentsForLesson(lessonId: UUIDType, currentUser: CurrentUser) {
     const author = await this.getLessonAuthor(lessonId);
-    if (!this.canManageLesson(currentUser, author)) {
+    if (!canUpdateCourseByAuthor(currentUser, author)) {
       throw new ForbiddenException("You are not allowed to view files for this lesson.");
     }
 
@@ -89,7 +88,7 @@ export class IngestionService {
 
   async deleteDocumentLink(documentLinkId: UUIDType, currentUser: CurrentUser) {
     const author = await this.getDocumentLinkAuthor(documentLinkId);
-    if (!this.canManageLesson(currentUser, author)) {
+    if (!canUpdateCourseByAuthor(currentUser, author)) {
       throw new ForbiddenException("You are not allowed to view files for this lesson.");
     }
 
@@ -128,22 +127,5 @@ export class IngestionService {
     }
 
     return aiMentorLesson.id;
-  }
-
-  private canManageAnyLesson(currentUser: CurrentUser) {
-    return hasPermission(currentUser.permissions, PERMISSIONS.COURSE_UPDATE);
-  }
-
-  private canManageOwnLesson(currentUser: CurrentUser) {
-    return hasPermission(currentUser.permissions, PERMISSIONS.COURSE_UPDATE_OWN);
-  }
-
-  private canManageLesson(currentUser: CurrentUser, authorId: UUIDType) {
-    const canManageAny = this.canManageAnyLesson(currentUser);
-    const canManageOwn = this.canManageOwnLesson(currentUser);
-
-    const ownsLesson = currentUser.userId === authorId;
-
-    return canManageAny || (canManageOwn && ownsLesson);
   }
 }
