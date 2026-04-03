@@ -569,9 +569,13 @@ export class CourseService {
 
     await Promise.all(
       trailerReferences.map(async (trailerReference) => {
-        trailerUrls[trailerReference.courseId] = await this.fileService.getFileUrl(
-          trailerReference.reference,
-        );
+        try {
+          trailerUrls[trailerReference.courseId] = await this.fileService.getFileUrl(
+            trailerReference.reference,
+          );
+        } catch {
+          trailerUrls[trailerReference.courseId] = null;
+        }
       }),
     );
 

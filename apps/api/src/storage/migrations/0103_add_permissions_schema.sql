@@ -114,5 +114,4 @@ CREATE UNIQUE INDEX IF NOT EXISTS "permission_rule_set_permissions_rule_set_id_p
 CREATE INDEX IF NOT EXISTS "permission_rule_sets_tenant_id_idx" ON "permission_rule_sets" USING btree ("tenant_id");--> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "permission_rule_sets_tenant_id_slug_unique" ON "permission_rule_sets" USING btree ("tenant_id","slug");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "permission_user_roles_tenant_id_idx" ON "permission_user_roles" USING btree ("tenant_id");--> statement-breakpoint
-CREATE UNIQUE INDEX IF NOT EXISTS "permission_user_roles_user_id_role_id_unique" ON "permission_user_roles" USING btree ("user_id","role_id");--> statement-breakpoint
-ALTER TABLE "users" DROP COLUMN IF EXISTS "role";
+CREATE UNIQUE INDEX IF NOT EXISTS "permission_user_roles_user_id_role_id_unique" ON "permission_user_roles" USING btree ("user_id","role_id");

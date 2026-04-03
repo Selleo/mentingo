@@ -1,5 +1,5 @@
 {
-  "id": "9b2c770c-14f9-4f9e-a510-9e771fededdb",
+  "id": "656d7204-fd82-413e-9ebf-70d49973ad53",
   "prevId": "96e66375-0ba2-4b64-a9a1-5352cc21dd39",
   "version": "7",
   "dialect": "postgresql",
@@ -8213,6 +8213,13 @@
           "type": "varchar(200)",
           "primaryKey": false,
           "notNull": false
+        },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'student'"
         },
         "archived": {
           "name": "archived",

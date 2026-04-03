@@ -7,8 +7,8 @@ import {
   courseQueryOptions,
   studentCoursesQueryOptions,
   useCurrentUser,
-  useGlobalSettings,
 } from "~/api/queries";
+import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { topCoursesQueryOptions } from "~/api/queries/useTopCourses";
 import { queryClient } from "~/api/queryClient";
 import { Enroll } from "~/assets/svgs";
