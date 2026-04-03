@@ -223,7 +223,7 @@ const EditCourse = () => {
   ];
 
   return (
-    <PageWrapper breadcrumbs={breadcrumbs}>
+    <PageWrapper breadcrumbs={breadcrumbs} className="relative">
       <Tabs value={activeTab} className="flex h-full flex-col gap-y-4">
         <div className="flex w-full flex-col gap-y-4 rounded-lg border border-gray-200 bg-white px-8 py-6 shadow-md">
           <div className="flex items-center justify-between">
