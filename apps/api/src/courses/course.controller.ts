@@ -95,10 +95,8 @@ import {
 } from "src/courses/schemas/showCourseCommon.schema";
 import { UpdateCourseBody, updateCourseSchema } from "src/courses/schemas/updateCourse.schema";
 import {
-  updateCourseSettingsMultipartSchema,
   updateCourseSettingsSchema,
   type UpdateCourseSettings,
-  type UpdateCourseSettingsMultipart,
 } from "src/courses/schemas/updateCourseSettings.schema";
 import {
   allCoursesValidation,
@@ -548,14 +546,17 @@ export class CourseController {
   @Validate({
     request: [
       { type: "param", name: "courseId", schema: UUIDSchema },
-      { type: "body", schema: updateCourseSettingsMultipartSchema },
+      {
+        type: "body",
+        schema: updateCourseSettingsSchema,
+        pipes: [new ValidateMultipartPipe(updateCourseSettingsSchema)],
+      },
     ],
     response: baseResponse(Type.Object({ message: Type.String() })),
   })
   async updateCourseSettings(
     @Param("courseId") courseId: UUIDType,
-    @Body(new ValidateMultipartPipe(updateCourseSettingsSchema))
-    body: UpdateCourseSettingsMultipart,
+    @Body() body: UpdateCourseSettings,
     @UploadedFile(
       getBaseFileTypePipe(
         buildFileTypeRegex([...ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES]),
@@ -571,7 +572,7 @@ export class CourseController {
   ): Promise<BaseResponse<{ message: string }>> {
     await this.courseService.updateCourseSettings(
       courseId,
-      body as UpdateCourseSettings,
+      body,
       currentUser,
       certificateSignature,
     );

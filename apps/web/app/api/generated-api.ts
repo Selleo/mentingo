@@ -1832,10 +1832,10 @@ export interface UpdateHasCertificateResponse {
 }
 
 export interface UpdateCourseSettingsBody {
-  lessonSequenceEnabled?: boolean | string;
-  quizFeedbackEnabled?: boolean | string;
+  lessonSequenceEnabled?: boolean;
+  quizFeedbackEnabled?: boolean;
   certificateFontColor?: string;
-  removeCertificateSignature?: boolean | string;
+  removeCertificateSignature?: boolean;
   /** @format binary */
   certificateSignature?: File;
 }
