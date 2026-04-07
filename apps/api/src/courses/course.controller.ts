@@ -22,6 +22,7 @@ import {
   ALLOWED_LESSON_IMAGE_FILE_TYPES,
   PERMISSIONS,
   SupportedLanguages,
+  type PermissionKey,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Request } from "express";
@@ -374,8 +375,14 @@ export class CourseController {
     @Query("id") idOrSlug: string,
     @Query("language") language: SupportedLanguages,
     @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser("permissions") currentUserPermissions: PermissionKey[] = [],
   ): Promise<BaseResponse<CommonShowCourse>> {
-    const course = await this.courseService.getCourse(idOrSlug, currentUserId, language);
+    const course = await this.courseService.getCourse(
+      idOrSlug,
+      currentUserId,
+      currentUserPermissions,
+      language,
+    );
     return new BaseResponse(course);
   }
 
@@ -392,8 +399,14 @@ export class CourseController {
     @Query("id") idOrSlug: string,
     @Query("language") language: SupportedLanguages,
     @CurrentUser("userId") currentUserId?: UUIDType,
+    @CurrentUser("permissions") currentUserPermissions: PermissionKey[] = [],
   ): Promise<BaseResponse<CourseLookupResponse>> {
-    const result = await this.courseService.lookupCourse(idOrSlug, language, currentUserId);
+    const result = await this.courseService.lookupCourse(
+      idOrSlug,
+      language,
+      currentUserId,
+      currentUserPermissions,
+    );
 
     return new BaseResponse(result);
   }

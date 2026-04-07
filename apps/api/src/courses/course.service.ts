@@ -9,7 +9,14 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { BaseEmailTemplate } from "@repo/email-templates";
-import { COURSE_ENROLLMENT, SUPPORTED_LANGUAGES, ENTITY_TYPES, PERMISSIONS } from "@repo/shared";
+import {
+  COURSE_ENROLLMENT,
+  SUPPORTED_LANGUAGES,
+  ENTITY_TYPES,
+  PERMISSIONS,
+  type PermissionKey,
+  type SupportedLanguages,
+} from "@repo/shared";
 import { load as loadHtml } from "cheerio";
 import {
   and,
@@ -143,7 +150,6 @@ import type { CommonShowBetaCourse, CommonShowCourse } from "./schemas/showCours
 import type { UpdateCourseBody } from "./schemas/updateCourse.schema";
 import type { UpdateCourseSettings } from "./schemas/updateCourseSettings.schema";
 import type { CoursesSettings } from "./types/settings";
-import type { SupportedLanguages } from "@repo/shared";
 import type { SQL } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import type { CourseActivityLogSnapshot } from "src/activity-logs/types";
@@ -1031,6 +1037,7 @@ export class CourseService {
   async getCourse(
     idOrSlug: UUIDType | string,
     userId: UUIDType,
+    userPermissions: PermissionKey[] = [],
     language: SupportedLanguages,
   ): Promise<CommonShowCourse> {
     const { courseId: id, slug: currentSlug } = match(
@@ -1091,9 +1098,15 @@ export class CourseService {
 
     const isEnrolled = !!course.enrolled;
     const NON_PUBLIC_STATUSES = ["draft", "private"];
+    const isAdmin = hasPermission(userPermissions, PERMISSIONS.COURSE_UPDATE);
 
     if (!course) throw new NotFoundException("Course not found");
-    if (userId !== course.authorId && NON_PUBLIC_STATUSES.includes(course.status) && !isEnrolled)
+    if (
+      !isAdmin &&
+      userId !== course.authorId &&
+      NON_PUBLIC_STATUSES.includes(course.status) &&
+      !isEnrolled
+    )
       throw new ForbiddenException("You have no access to this course");
 
     const courseChapterList = await this.db
@@ -1223,6 +1236,7 @@ export class CourseService {
     idOrSlug: string,
     language: SupportedLanguages,
     userId?: UUIDType,
+    userPermissions: PermissionKey[] = [],
   ): Promise<CourseLookupResponse> {
     const lookupResult = await this.courseSlugService.getCourseIdBySlug(idOrSlug, language);
 
@@ -1258,9 +1272,11 @@ export class CourseService {
 
     const isEnrolled = !!course.enrolled;
     const NON_PUBLIC_STATUSES = ["draft", "private"];
+    const isAdmin = hasPermission(userPermissions, PERMISSIONS.COURSE_UPDATE);
 
     if (userId !== undefined) {
       if (
+        !isAdmin &&
         userId !== course.authorId &&
         NON_PUBLIC_STATUSES.includes(course.status) &&
         !isEnrolled

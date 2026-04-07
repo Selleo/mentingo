@@ -3292,5 +3292,65 @@ describe("CourseController (e2e)", () => {
         .where(eq(courses.id, course.id));
       expect(courseAfter.shortId).toHaveLength(5);
     });
+
+    it.each([
+      ["draft", "Draft course"],
+      ["private", "Private course"],
+    ] as const)("allows admin to lookup %s course even when not author", async (status, title) => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+      const contentCreator = await userFactory
+        .withCredentials({ password })
+        .withContentCreatorSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+      const category = await categoryFactory.create();
+      const course = await courseFactory.create({
+        authorId: contentCreator.id,
+        categoryId: category.id,
+        status,
+        title,
+      });
+
+      const response = await request(app.getHttpServer())
+        .get("/api/course/lookup")
+        .query({ id: course.id, language: "en" })
+        .set("Cookie", await cookieFor(admin, app))
+        .expect(200);
+
+      expect(response.body.data.status).toBe("found");
+      expect(response.body.data.slug).toBeDefined();
+    });
+
+    it.each([
+      ["draft", "Draft course"],
+      ["private", "Private course"],
+    ] as const)(
+      "allows admin to get %s course details even when not author",
+      async (status, title) => {
+        const admin = await userFactory
+          .withCredentials({ password })
+          .withAdminSettings(db)
+          .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+        const contentCreator = await userFactory
+          .withCredentials({ password })
+          .withContentCreatorSettings(db)
+          .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+        const category = await categoryFactory.create();
+        const course = await courseFactory.create({
+          authorId: contentCreator.id,
+          categoryId: category.id,
+          status,
+          title,
+        });
+
+        await request(app.getHttpServer())
+          .get("/api/course")
+          .query({ id: course.id, language: "en" })
+          .set("Cookie", await cookieFor(admin, app))
+          .expect(200);
+      },
+    );
   });
 });
