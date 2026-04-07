@@ -18,23 +18,20 @@ import { Request, Response } from "express";
 import { Validate } from "nestjs-typebox";
 
 import { baseResponse, BaseResponse, UUIDSchema, UUIDType } from "src/common";
-import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
-import { RolesGuard } from "src/common/guards/roles.guard";
+import { PermissionsGuard } from "src/common/guards/permissions.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { scormMetadataSchema, scormUploadResponseSchema } from "./schemas/scorm.schema";
 import { ScormService } from "./services/scorm.service";
 
 @Controller("scorm")
-@UseGuards(RolesGuard)
+@UseGuards(PermissionsGuard)
 export class ScormController {
   constructor(private readonly scormService: ScormService) {}
 
   @Post("upload")
   @UseInterceptors(FileInterceptor("file"))
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   @ApiConsumes("multipart/form-data")
   @ApiBody({
     schema: {
@@ -75,7 +72,6 @@ export class ScormController {
     });
   }
 
-  @Roles(...Object.values(USER_ROLES))
   @Get(":courseId/content")
   @Header("Cache-Control", "no-store")
   @Header("X-Frame-Options", "SAMEORIGIN")
@@ -112,7 +108,6 @@ export class ScormController {
   }
 
   @Get(":courseId/metadata")
-  @Roles(...Object.values(USER_ROLES))
   @Validate({
     request: [{ type: "param", name: "courseId", schema: UUIDSchema }],
     response: baseResponse(scormMetadataSchema),

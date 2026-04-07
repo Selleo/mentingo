@@ -6,8 +6,16 @@ import { mfaSetupQueryOptions } from "../useSetupMFA";
 
 import type { CurrentUserResponse } from "../../generated-api";
 
-type AuthSuccessUser = Omit<CurrentUserResponse["data"], "isSupportMode" | "studentModeCourseIds"> &
-  Partial<Pick<CurrentUserResponse["data"], "isSupportMode" | "studentModeCourseIds">>;
+type AuthSuccessUser = Omit<
+  CurrentUserResponse["data"],
+  "isSupportMode" | "studentModeCourseIds" | "permissions" | "roleSlugs"
+> &
+  Partial<
+    Pick<
+      CurrentUserResponse["data"],
+      "isSupportMode" | "studentModeCourseIds" | "permissions" | "roleSlugs"
+    >
+  >;
 
 type HandleAuthSuccessOptions = {
   user: AuthSuccessUser;
@@ -26,6 +34,8 @@ export function handleAuthSuccess({
     ...user,
     isSupportMode: user.isSupportMode ?? false,
     studentModeCourseIds: user.studentModeCourseIds ?? [],
+    permissions: user.permissions ?? [],
+    roleSlugs: user.roleSlugs ?? [],
   };
 
   queryClient.setQueryData(currentUserQueryOptions.queryKey, { data: normalizedUser });

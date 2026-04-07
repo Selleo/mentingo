@@ -10,13 +10,12 @@ import {
   Post,
   Query,
   UploadedFile,
-  UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express/multer/interceptors/file.interceptor";
 import { ApiBody } from "@nestjs/swagger";
 import { ApiConsumes } from "@nestjs/swagger/dist/decorators/api-consumes.decorator";
-import { ALLOWED_AVATAR_IMAGE_TYPES, OnboardingPages } from "@repo/shared";
+import { ALLOWED_AVATAR_IMAGE_TYPES, OnboardingPages, PERMISSIONS } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { memoryStorage } from "multer";
 import { Validate } from "nestjs-typebox";
@@ -30,10 +29,9 @@ import {
   UUIDSchema,
   type UUIDType,
 } from "src/common";
-import { Public } from "src/common/decorators/public.decorator";
-import { Roles } from "src/common/decorators/roles.decorator";
+import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
-import { RolesGuard } from "src/common/guards/roles.guard";
+import { hasPermission } from "src/common/permissions/permission.utils";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { ALLOWED_EXCEL_MIME_TYPES, MAX_FILE_SIZE } from "src/file/file.constants";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
@@ -73,7 +71,9 @@ import {
   upsertUserDetailsSchema,
 } from "./schemas/updateUser.schema";
 import {
+  type AllRolesResponse,
   type AllUsersResponse,
+  allRolesSchema,
   allUsersSchema,
   baseUserResponseSchema,
   type UserDetailsResponse,
@@ -83,7 +83,6 @@ import {
   userSchema,
 } from "./schemas/user.schema";
 import { sortUserFieldsOptions, SortUserFieldsOptions } from "./schemas/userQuery";
-import { USER_ROLES, UserRole } from "./schemas/userRoles";
 import { UserService } from "./user.service";
 
 import type { ArchiveUsersSchemaResponse } from "./schemas/archiveUsers.schema";
@@ -91,16 +90,15 @@ import type { UsersFilterSchema } from "./schemas/userQuery";
 import type { Static } from "@sinclair/typebox";
 
 @Controller("user")
-@UseGuards(RolesGuard)
 export class UserController {
   constructor(private readonly usersService: UserService) {}
 
   @Get("all")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.USER_MANAGE)
   @Validate({
     request: [
       { type: "query", name: "keyword", schema: Type.String() },
-      { type: "query", name: "role", schema: Type.Enum(USER_ROLES) },
+      { type: "query", name: "roleSlug", schema: Type.String() },
       { type: "query", name: "archived", schema: Type.String() },
       { type: "query", name: "page", schema: Type.Number({ minimum: 1 }) },
       { type: "query", name: "perPage", schema: Type.Number() },
@@ -111,7 +109,7 @@ export class UserController {
   })
   async getUsers(
     @Query("keyword") keyword: string,
-    @Query("role") role: UserRole,
+    @Query("roleSlug") roleSlug: string,
     @Query("archived") archived: string,
     @Query("page") page: number,
     @Query("perPage") perPage: number,
@@ -120,7 +118,7 @@ export class UserController {
   ): Promise<PaginatedResponse<AllUsersResponse>> {
     const filters: UsersFilterSchema = {
       keyword,
-      role,
+      roleSlug,
       archived: archived ? archived === "true" : undefined,
       groups,
     };
@@ -132,8 +130,20 @@ export class UserController {
     return new PaginatedResponse(users);
   }
 
+  @Get("roles")
+  @RequirePermission(PERMISSIONS.USER_MANAGE)
+  @Validate({
+    response: baseResponse(allRolesSchema),
+  })
+  async getRoles(
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<AllRolesResponse>> {
+    const roles = await this.usersService.getRoles(currentUser.tenantId);
+    return new BaseResponse(roles);
+  }
+
   @Get()
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.USER_MANAGE)
   @Validate({
     request: [{ type: "query", name: "id", schema: UUIDSchema, required: true }],
     response: baseResponse(userSchema),
@@ -145,22 +155,21 @@ export class UserController {
   }
 
   @Get("details")
-  @Public()
+  @RequirePermission(PERMISSIONS.USER_READ_SELF)
   @Validate({
     request: [{ type: "query", name: "userId", schema: UUIDSchema, required: true }],
     response: baseResponse(userDetailsResponseSchema),
   })
   async getUserDetails(
     @Query("userId") userId: UUIDType,
-    @CurrentUser("role") role: UserRole,
-    @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<UserDetailsResponse>> {
-    const userDetails = await this.usersService.getUserDetails(userId, currentUserId, role);
+    const userDetails = await this.usersService.getUserDetails(userId, currentUser);
     return new BaseResponse(userDetails);
   }
 
   @Patch()
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.ACCOUNT_UPDATE_SELF)
   @Validate({
     response: baseResponse(baseUserResponseSchema),
     request: [
@@ -175,7 +184,18 @@ export class UserController {
   ): Promise<BaseResponse<Static<typeof baseUserResponseSchema>>> {
     {
       if (currentUser.userId !== id) {
-        throw new ForbiddenException("You can only update your own account");
+        throw new ForbiddenException("common.toast.noAccess");
+      }
+
+      const canManageUsers = hasPermission(currentUser.permissions, PERMISSIONS.USER_MANAGE);
+      const { roleSlugs, groups, archived } = data;
+
+      if ((roleSlugs !== undefined || archived !== undefined) && !canManageUsers) {
+        throw new ForbiddenException("common.toast.noAccess");
+      }
+
+      if (groups !== undefined && !canManageUsers) {
+        throw new ForbiddenException("common.toast.noAccess");
       }
 
       await this.usersService.updateUser(id, data, currentUser);
@@ -186,7 +206,7 @@ export class UserController {
   }
 
   @Patch("details")
-  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.ACCOUNT_UPDATE_SELF)
   @Validate({
     response: baseResponse(Type.Object({ id: UUIDSchema, message: Type.String() })),
     request: [{ type: "body", schema: upsertUserDetailsSchema }],
@@ -206,6 +226,7 @@ export class UserController {
   }
 
   @Patch("profile")
+  @RequirePermission(PERMISSIONS.ACCOUNT_UPDATE_SELF)
   @UseInterceptors(FileInterceptor("userAvatar", { storage: memoryStorage() }))
   @ApiConsumes("multipart/form-data")
   @ApiBody({
@@ -251,7 +272,7 @@ export class UserController {
   }
 
   @Patch("admin")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.USER_MANAGE)
   @Validate({
     response: baseResponse(baseUserResponseSchema),
     request: [
@@ -273,6 +294,7 @@ export class UserController {
   }
 
   @Patch("change-password")
+  @RequirePermission(PERMISSIONS.ACCOUNT_UPDATE_SELF)
   @Validate({
     response: nullResponse(),
     request: [
@@ -286,7 +308,7 @@ export class UserController {
     @CurrentUser("userId") currentUserId: UUIDType,
   ): Promise<null> {
     if (currentUserId !== id) {
-      throw new ForbiddenException("You can only update your own account");
+      throw new ForbiddenException("common.toast.noAccess");
     }
     await this.usersService.changePassword(id, data);
 
@@ -294,7 +316,7 @@ export class UserController {
   }
 
   @Delete()
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.USER_MANAGE)
   @Validate({
     response: nullResponse(),
     request: [{ type: "body", schema: deleteUsersSchema }],
@@ -309,7 +331,7 @@ export class UserController {
   }
 
   @Patch("bulk/groups")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.USER_MANAGE)
   @Validate({
     request: [{ type: "body", schema: bulkAssignUsersGroupsSchema }],
   })
@@ -325,7 +347,7 @@ export class UserController {
   }
 
   @Patch("bulk/archive")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.USER_MANAGE)
   @Validate({
     request: [{ type: "body", schema: archiveUsersSchema }],
     response: baseResponse(archiveUsersSchemaResponse),
@@ -339,7 +361,7 @@ export class UserController {
   }
 
   @Patch("bulk/roles")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.USER_MANAGE)
   @Validate({
     request: [{ type: "body", schema: bulkUpdateUsersRolesSchema }],
   })
@@ -351,7 +373,7 @@ export class UserController {
   }
 
   @Post()
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.USER_MANAGE)
   @Validate({
     response: baseResponse(Type.Object({ id: UUIDSchema, message: Type.String() })),
     request: [{ type: "body", schema: createUserSchema }],
@@ -369,7 +391,7 @@ export class UserController {
   }
 
   @Post("import")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.USER_MANAGE)
   @UseInterceptors(FileInterceptor("usersFile"))
   @ApiConsumes("multipart/form-data")
   @ApiBody({
@@ -401,7 +423,7 @@ export class UserController {
   }
 
   @Patch("onboarding-status/reset")
-  @Roles(...Object.values(USER_ROLES))
+  @RequirePermission(PERMISSIONS.ACCOUNT_UPDATE_SELF)
   @Validate({
     response: baseResponse(userOnboardingStatusSchema),
   })
@@ -412,7 +434,7 @@ export class UserController {
   }
 
   @Patch("onboarding-status/:page")
-  @Roles(...Object.values(USER_ROLES))
+  @RequirePermission(PERMISSIONS.ACCOUNT_UPDATE_SELF)
   @Validate({
     response: baseResponse(userOnboardingStatusSchema),
   })

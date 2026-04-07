@@ -1,9 +1,9 @@
+import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import request from "supertest";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { THREAD_STATUS } from "src/ai/utils/ai.type";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
@@ -56,7 +56,7 @@ describe("AiController (e2e)", () => {
       threadOwner = await userFactory
         .withCredentials({ password })
         .withUserSettings(db)
-        .create({ role: USER_ROLES.STUDENT });
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
 
       const aiMentorLesson = await aiMentorLessonFactory.create();
 
@@ -88,7 +88,7 @@ describe("AiController (e2e)", () => {
       const user = await userFactory
         .withCredentials({ password })
         .withUserSettings(db)
-        .create({ role: USER_ROLES.STUDENT });
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
 
       const fakeThreadId = "00000000-0000-0000-0000-000000000000";
 
@@ -102,7 +102,7 @@ describe("AiController (e2e)", () => {
       const otherUser = await userFactory
         .withCredentials({ password })
         .withUserSettings(db)
-        .create({ role: USER_ROLES.STUDENT });
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
 
       await request(app.getHttpServer())
         .get(`/api/ai/thread?thread=${threadId}`)
@@ -114,7 +114,7 @@ describe("AiController (e2e)", () => {
       const admin = await userFactory
         .withCredentials({ password })
         .withAdminSettings(db)
-        .create({ role: USER_ROLES.ADMIN });
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
 
       const response = await request(app.getHttpServer())
         .get(`/api/ai/thread?thread=${threadId}`)
@@ -133,7 +133,7 @@ describe("AiController (e2e)", () => {
       threadOwner = await userFactory
         .withCredentials({ password })
         .withUserSettings(db)
-        .create({ role: USER_ROLES.STUDENT });
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
 
       const aiMentorLesson = await aiMentorLessonFactory.create();
 
@@ -175,7 +175,7 @@ describe("AiController (e2e)", () => {
       const otherUser = await userFactory
         .withCredentials({ password })
         .withUserSettings(db)
-        .create({ role: USER_ROLES.STUDENT });
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
 
       await request(app.getHttpServer())
         .get(`/api/ai/thread/messages?thread=${threadId}`)

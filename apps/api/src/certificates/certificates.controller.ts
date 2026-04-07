@@ -1,13 +1,14 @@
 import { Controller, Get, Query, UseGuards, Post, Body, Res, Req } from "@nestjs/common";
-import { SupportedLanguages } from "@repo/shared";
+import { PERMISSIONS, SupportedLanguages } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Request, Response } from "express";
 import { Validate } from "nestjs-typebox";
 
 import { PaginatedResponse, paginatedResponse, UUIDSchema, UUIDType } from "src/common";
 import { Public } from "src/common/decorators/public.decorator";
+import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
-import { RolesGuard } from "src/common/guards/roles.guard";
+import { PermissionsGuard } from "src/common/guards/permissions.guard";
 import { getRequestBaseUrl } from "src/common/helpers/getRequestBaseUrl";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
@@ -29,11 +30,12 @@ import type {
 } from "./certificates.types";
 
 @Controller("certificates")
-@UseGuards(RolesGuard)
+@UseGuards(PermissionsGuard)
 export class CertificatesController {
   constructor(private readonly certificatesService: CertificatesService) {}
 
   @Get("all")
+  @RequirePermission(PERMISSIONS.CERTIFICATE_READ)
   @Validate({
     request: [
       { type: "query", name: "userId", schema: UUIDSchema },
@@ -62,6 +64,7 @@ export class CertificatesController {
   }
 
   @Get("certificate")
+  @RequirePermission(PERMISSIONS.CERTIFICATE_READ)
   @Validate({
     request: [
       { type: "query", name: "userId", schema: UUIDSchema },
@@ -80,6 +83,7 @@ export class CertificatesController {
   }
 
   @Post("download")
+  @RequirePermission(PERMISSIONS.CERTIFICATE_RENDER)
   @Validate({
     request: [{ type: "body", schema: downloadCertificateSchema }],
   })
@@ -118,6 +122,7 @@ export class CertificatesController {
   }
 
   @Post("share-link")
+  @RequirePermission(PERMISSIONS.CERTIFICATE_SHARE)
   @Validate({
     request: [{ type: "body", schema: createCertificateShareLinkSchema }],
     response: certificateShareLinkResponseSchema,

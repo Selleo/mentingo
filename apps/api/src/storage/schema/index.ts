@@ -25,7 +25,6 @@ import {
 
 import { ACTIVITY_LOG_ACTION_TYPES } from "src/activity-logs/types";
 import { coursesSettingsSchema } from "src/courses/types/settings";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 import { safeJsonb } from "src/utils/safe-jsonb";
 
 import {
@@ -46,6 +45,7 @@ import type {
   MasterCourseExportSyncStatus,
   RegistrationFormFieldType,
   SupportedLanguages,
+  PermissionKey,
   SupportSessionStatus,
   TenantStatus,
 } from "@repo/shared";
@@ -61,7 +61,6 @@ export const users = pgTable(
     firstName: text("first_name").notNull(),
     lastName: text("last_name").notNull(),
     avatarReference: varchar("avatar_reference", { length: 200 }),
-    role: text("role").notNull().default(USER_ROLES.STUDENT),
     archived,
     deletedAt: timestamp("deleted_at", {
       mode: "string",
@@ -1324,4 +1323,105 @@ export const magicLinkTokens = pgTable(
     tenantId,
   },
   withTenantIdIndex("magic_link_tokens"),
+);
+
+export const permissionRoles = pgTable(
+  "permission_roles",
+  {
+    ...id,
+    ...timestamps,
+    name: text("name").notNull(),
+    slug: text("slug").notNull(),
+    isSystem: boolean("is_system").notNull().default(false),
+    tenantId,
+  },
+  (table) => ({
+    ...withTenantIdIndex("permission_roles")(table),
+    tenantSlugUniqueIdx: uniqueIndex("permission_roles_tenant_id_slug_unique").on(
+      table.tenantId,
+      table.slug,
+    ),
+  }),
+);
+
+export const permissionRuleSets = pgTable(
+  "permission_rule_sets",
+  {
+    ...id,
+    ...timestamps,
+    name: text("name").notNull(),
+    slug: text("slug").notNull(),
+    isSystem: boolean("is_system").notNull().default(false),
+    tenantId,
+  },
+  (table) => ({
+    ...withTenantIdIndex("permission_rule_sets")(table),
+    tenantSlugUniqueIdx: uniqueIndex("permission_rule_sets_tenant_id_slug_unique").on(
+      table.tenantId,
+      table.slug,
+    ),
+  }),
+);
+
+export const permissionRoleRuleSets = pgTable(
+  "permission_role_rule_sets",
+  {
+    ...id,
+    ...timestamps,
+    roleId: uuid("role_id")
+      .references(() => permissionRoles.id, { onDelete: "cascade" })
+      .notNull(),
+    ruleSetId: uuid("rule_set_id")
+      .references(() => permissionRuleSets.id, { onDelete: "cascade" })
+      .notNull(),
+    tenantId,
+  },
+  (table) => ({
+    ...withTenantIdIndex("permission_role_rule_sets")(table),
+    roleRuleSetUniqueIdx: uniqueIndex("permission_role_rule_sets_role_id_rule_set_id_unique").on(
+      table.roleId,
+      table.ruleSetId,
+    ),
+  }),
+);
+
+export const permissionRuleSetPermissions = pgTable(
+  "permission_rule_set_permissions",
+  {
+    ...id,
+    ...timestamps,
+    ruleSetId: uuid("rule_set_id")
+      .references(() => permissionRuleSets.id, { onDelete: "cascade" })
+      .notNull(),
+    permission: text("permission").$type<PermissionKey>().notNull(),
+    tenantId,
+  },
+  (table) => ({
+    ...withTenantIdIndex("permission_rule_set_permissions")(table),
+    ruleSetPermissionUniqueIdx: uniqueIndex(
+      "permission_rule_set_permissions_rule_set_id_permission_unique",
+    ).on(table.ruleSetId, table.permission),
+  }),
+);
+
+export const permissionUserRoles = pgTable(
+  "permission_user_roles",
+  {
+    ...id,
+    ...timestamps,
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    roleId: uuid("role_id")
+      .references(() => permissionRoles.id, { onDelete: "cascade" })
+      .notNull(),
+    tenantId,
+  },
+  (table) => ({
+    ...withTenantIdIndex("permission_user_roles")(table),
+    userRoleUniqueIdx: uniqueIndex("permission_user_roles_user_id_role_id_unique").on(
+      table.userId,
+      table.roleId,
+    ),
+  }),
 );

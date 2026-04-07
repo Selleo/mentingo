@@ -1,18 +1,17 @@
 import { faker } from "@faker-js/faker";
-
-import { USER_ROLES } from "src/user/schemas/userRoles";
+import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 
 import type { UsersSeed } from "./seed.types";
 
 export const students: UsersSeed = [
   {
-    role: USER_ROLES.STUDENT,
+    roleSlug: SYSTEM_ROLE_SLUGS.STUDENT,
     email: "student@example.com",
     firstName: faker.person.firstName(),
     lastName: "Student",
   },
   {
-    role: USER_ROLES.STUDENT,
+    roleSlug: SYSTEM_ROLE_SLUGS.STUDENT,
     email: "student2@example.com",
     firstName: faker.person.firstName(),
     lastName: "Student",
@@ -21,7 +20,7 @@ export const students: UsersSeed = [
 
 export const admin: UsersSeed = [
   {
-    role: USER_ROLES.ADMIN,
+    roleSlug: SYSTEM_ROLE_SLUGS.ADMIN,
     email: "admin@example.com",
     firstName: faker.person.firstName(),
     lastName: "Admin",
@@ -30,13 +29,13 @@ export const admin: UsersSeed = [
 
 export const contentCreators: UsersSeed = [
   {
-    role: USER_ROLES.CONTENT_CREATOR,
+    roleSlug: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
     email: "contentcreator@example.com",
     firstName: faker.person.firstName(),
     lastName: "Content Creator",
   },
   {
-    role: USER_ROLES.CONTENT_CREATOR,
+    roleSlug: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
     email: "contentcreator2@example.com",
     firstName: faker.person.firstName(),
     lastName: "Content Creator 2",

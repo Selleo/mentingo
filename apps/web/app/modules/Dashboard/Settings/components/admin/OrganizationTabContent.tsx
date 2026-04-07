@@ -16,16 +16,12 @@ const isGoogleOAuthEnabled = import.meta.env.VITE_GOOGLE_OAUTH_ENABLED === "true
 const isMicrosoftOAuthEnabled = import.meta.env.VITE_MICROSOFT_OAUTH_ENABLED === "true";
 
 interface OrganizationTabContentProps {
-  isAdmin: boolean;
   globalSettings: GlobalSettings;
 }
 
-export default function OrganizationTabContent({
-  isAdmin,
-  globalSettings,
-}: OrganizationTabContentProps) {
+export default function OrganizationTabContent({ globalSettings }: OrganizationTabContentProps) {
   const { data: stripeConfigured } = useStripeConfigured();
-  const canEditSSOEnforcement = (isGoogleOAuthEnabled || isMicrosoftOAuthEnabled) && isAdmin;
+  const canEditSSOEnforcement = isGoogleOAuthEnabled || isMicrosoftOAuthEnabled;
 
   return (
     <>

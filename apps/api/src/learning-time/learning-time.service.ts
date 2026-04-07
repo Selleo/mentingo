@@ -1,14 +1,15 @@
 import { Inject, Injectable, Logger, type OnModuleInit } from "@nestjs/common";
+import { PERMISSIONS } from "@repo/shared";
 import { ilike, inArray, or, sql } from "drizzle-orm";
 import { validate as uuidValidate } from "uuid";
 
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { hasPermission } from "src/common/permissions/permission.utils";
 import { LearningTimeRepository } from "src/learning-time/learning-time.repository";
 import { QUEUE_NAMES, QueueService } from "src/queue";
 import { S3Service } from "src/s3/s3.service";
 import { groups, lessonLearningTime, users } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 import { WsGateway } from "src/websocket";
 
 import type { createCache } from "cache-manager";
@@ -105,7 +106,7 @@ export class LearningTimeService implements OnModuleInit {
     socket: AuthenticatedSocket,
     payload: JoinLessonPayload,
   ): Promise<void> {
-    if (socket.data.user.role !== USER_ROLES.STUDENT) {
+    if (!this.canTrackLearningTime(socket)) {
       return;
     }
 
@@ -132,7 +133,7 @@ export class LearningTimeService implements OnModuleInit {
     socket: AuthenticatedSocket,
     payload: LeaveLessonPayload,
   ): Promise<void> {
-    if (socket.data.user.role !== USER_ROLES.STUDENT) {
+    if (!this.canTrackLearningTime(socket)) {
       return;
     }
 
@@ -165,7 +166,7 @@ export class LearningTimeService implements OnModuleInit {
     socket: AuthenticatedSocket,
     payload: HeartbeatPayload,
   ): Promise<void> {
-    if (socket.data.user.role !== USER_ROLES.STUDENT) {
+    if (!this.canTrackLearningTime(socket)) {
       return;
     }
 
@@ -367,5 +368,12 @@ export class LearningTimeService implements OnModuleInit {
       default:
         return sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`;
     }
+  }
+
+  private canTrackLearningTime(socket: AuthenticatedSocket) {
+    return (
+      !hasPermission(socket.data.user.permissions, PERMISSIONS.COURSE_UPDATE) &&
+      !hasPermission(socket.data.user.permissions, PERMISSIONS.COURSE_UPDATE_OWN)
+    );
   }
 }

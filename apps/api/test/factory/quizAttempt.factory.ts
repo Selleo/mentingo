@@ -1,7 +1,6 @@
 import { faker } from "@faker-js/faker";
+import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { Factory } from "fishery";
-
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import {
   quizAttempts,
@@ -11,6 +10,7 @@ import {
   lessons,
   categories,
 } from "../../src/storage/schema";
+import { assignSystemRoleToUserInTests } from "../helpers/permission-role-helpers";
 import { ensureTenant } from "../helpers/tenant-helpers";
 
 import type { InferSelectModel } from "drizzle-orm";
@@ -34,12 +34,18 @@ const ensureUser = async (
       firstName: faker.person.firstName(),
       lastName: faker.person.lastName(),
       avatarReference: faker.image.avatar(),
-      role: isContentCreator ? USER_ROLES.CONTENT_CREATOR : USER_ROLES.STUDENT,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       tenantId,
     })
     .returning();
+
+  await assignSystemRoleToUserInTests(
+    db,
+    user.id,
+    tenantId,
+    isContentCreator ? SYSTEM_ROLE_SLUGS.CONTENT_CREATOR : SYSTEM_ROLE_SLUGS.STUDENT,
+  );
 
   return user.id;
 };

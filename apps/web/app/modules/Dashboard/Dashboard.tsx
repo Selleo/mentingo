@@ -42,9 +42,11 @@ const NavLinkItem = ({ to, label }: { to: string; label: string }) => (
 const PublicHeader = ({
   publicNavigationLinks,
   t,
+  showSignUp,
 }: {
   publicNavigationLinks: Array<{ to: string; label: string }>;
   t: TFunction;
+  showSignUp: boolean;
 }) => (
   <header className="sticky top-0 z-10 w-full">
     <div className="flex w-full items-center justify-between px-4 py-3">
@@ -58,6 +60,7 @@ const PublicHeader = ({
           closeLabel={t("navigationSideBar.close")}
           loginLabel={t("loginView.button.login")}
           signUpLabel={t("loginView.other.signUp")}
+          showSignUp={showSignUp}
         />
         <div className="hidden items-center gap-6 md:flex">
           {publicNavigationLinks.map((link, idx) => (
@@ -71,9 +74,11 @@ const PublicHeader = ({
               {t("loginView.button.login")}
             </Button>
           </Link>
-          <Link to="/auth/register">
-            <Button className="w-full">{t("loginView.other.signUp")}</Button>
-          </Link>
+          {showSignUp && (
+            <Link to="/auth/register">
+              <Button className="w-full">{t("loginView.other.signUp")}</Button>
+            </Link>
+          )}
         </div>
       </div>
     </div>
@@ -117,6 +122,7 @@ export const Dashboard = ({ isAuthenticated }: DashboardProps) => {
   );
 
   const coursesAccessible = Boolean(globalSettings?.unregisteredUserCoursesAccessibility);
+  const showSignUp = !globalSettings?.inviteOnlyRegistration;
   const isArticlesRoute = pathname.startsWith("/articles");
 
   if (!isAuthenticated) {
@@ -142,7 +148,11 @@ export const Dashboard = ({ isAuthenticated }: DashboardProps) => {
 
           {!is2xl && <AllArticlesTOC isMobile={true} />}
 
-          <PublicHeader publicNavigationLinks={publicNavigationLinks} t={t} />
+          <PublicHeader
+            publicNavigationLinks={publicNavigationLinks}
+            t={t}
+            showSignUp={showSignUp}
+          />
 
           <main className="flex-1 min-h-0 overflow-y-auto bg-primary-50 2xl:col-start-2 2xl:row-start-2">
             <Outlet />
@@ -153,7 +163,7 @@ export const Dashboard = ({ isAuthenticated }: DashboardProps) => {
 
     return (
       <div className="flex h-screen flex-col w-full">
-        <PublicHeader publicNavigationLinks={publicNavigationLinks} t={t} />
+        <PublicHeader publicNavigationLinks={publicNavigationLinks} t={t} showSignUp={showSignUp} />
 
         <main className="flex-1 overflow-y-auto bg-primary-50">
           <Outlet />

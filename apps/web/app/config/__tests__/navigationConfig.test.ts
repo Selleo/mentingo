@@ -1,27 +1,32 @@
+import { PERMISSIONS } from "@repo/shared";
+
 import { findMatchingRoute, mapNavigationItems } from "../navigationConfig";
-import { USER_ROLE } from "../userRoles";
 
 import type { NavigationItem, NavigationGroups } from "../navigationConfig";
 
 describe("findMatchingRoute", () => {
   it("should find exact matches", () => {
-    const roles = findMatchingRoute("admin/courses");
-    expect(roles).toEqual([USER_ROLE.admin, USER_ROLE.contentCreator]);
+    const requirement = findMatchingRoute("admin/courses");
+    expect(requirement).toEqual({
+      anyOf: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
+    });
   });
 
   it("should handle wildcard patterns", () => {
-    const roles = findMatchingRoute("admin/users/123");
-    expect(roles).toEqual([USER_ROLE.admin]);
+    const requirement = findMatchingRoute("admin/users/123");
+    expect(requirement).toEqual({
+      allOf: [PERMISSIONS.USER_MANAGE],
+    });
   });
 
   it("should return undefined for non-existing routes", () => {
-    const roles = findMatchingRoute("non/existing/route");
-    expect(roles).toBeUndefined();
+    const requirement = findMatchingRoute("non/existing/route");
+    expect(requirement).toBeUndefined();
   });
 });
 
 describe("mapNavigationItems", () => {
-  it("should correctly map navigation items with roles", () => {
+  it("should correctly map navigation items with access requirements", () => {
     const items: NavigationItem[] = [
       {
         label: "courses",
@@ -45,7 +50,9 @@ describe("mapNavigationItems", () => {
       path: "admin/courses",
       iconName: "Course",
       link: "/admin/courses",
-      roles: [USER_ROLE.admin, USER_ROLE.contentCreator],
+      accessRequirement: {
+        anyOf: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
+      },
     });
   });
 
@@ -68,7 +75,9 @@ describe("mapNavigationItems", () => {
     const mappedGroups = mapNavigationItems(groups);
     const mapped = mappedGroups[0].items;
 
-    expect(mapped[0].roles).toEqual([USER_ROLE.admin]);
+    expect(mapped[0].accessRequirement).toEqual({
+      allOf: [PERMISSIONS.USER_MANAGE],
+    });
   });
 
   it("should preserve all original item properties", () => {
@@ -95,7 +104,7 @@ describe("mapNavigationItems", () => {
       path: "",
       iconName: "Dashboard",
       link: "/",
-      roles: expect.any(Array),
+      accessRequirement: expect.any(Object),
     });
   });
 
@@ -118,6 +127,6 @@ describe("mapNavigationItems", () => {
     const mappedGroups = mapNavigationItems(groups);
     const mapped = mappedGroups[0].items;
 
-    expect(mapped[0].roles).toBeUndefined();
+    expect(mapped[0].accessRequirement).toBeUndefined();
   });
 });

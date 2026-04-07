@@ -1,11 +1,12 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { ENTITY_TYPES, type SupportedLanguages } from "@repo/shared";
+import { ENTITY_TYPES, PERMISSIONS, type SupportedLanguages } from "@repo/shared";
 import { and, count, eq, getTableColumns, gt, lt, ne, sql } from "drizzle-orm";
 import { isEmpty, isEqual } from "lodash";
 import { match } from "ts-pattern";
 
 import { DatabasePg } from "src/common";
 import { buildJsonbField, deleteJsonbField } from "src/common/helpers/sqlHelpers";
+import { hasAnyPermission, hasPermission } from "src/common/permissions/permission.utils";
 import { annotateVideoAutoplayAndBlockIndexesInContent } from "src/common/utils/annotateVideoAutoplayAndBlockIndexesInContent";
 import { injectResourcesIntoContent } from "src/common/utils/injectResourcesIntoContent";
 import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
@@ -18,7 +19,6 @@ import { LocalizationService } from "src/localization/localization.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { SettingsService } from "src/settings/settings.service";
 import { news, resourceEntity, resources, users } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { baseNewsTitle } from "./constants";
 
@@ -30,7 +30,6 @@ import type { Request, Response } from "express";
 import type { NewsActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
-import type { UserRole } from "src/user/schemas/userRoles";
 
 // News uses a custom pagination: first page shows up to 7 items, following pages up to 9.
 const FIRST_PAGE_SIZE = 7;
@@ -371,8 +370,10 @@ export class NewsService {
   ) {
     await this.checkAccess(currentUser?.userId);
 
-    const isAdminLike =
-      currentUser?.role === USER_ROLES.ADMIN || currentUser?.role === USER_ROLES.CONTENT_CREATOR;
+    const isAdminLike = hasAnyPermission(currentUser?.permissions, [
+      PERMISSIONS.NEWS_MANAGE,
+      PERMISSIONS.NEWS_MANAGE_OWN,
+    ]);
 
     const accessConditions = this.getNewsAccessConditions(requestedLanguage, currentUser, {
       requirePublished: !isAdminLike,
@@ -427,10 +428,9 @@ export class NewsService {
     req: Request,
     res: Response,
     resourceId: UUIDType,
-    userId?: UUIDType,
-    role?: UserRole,
+    currentUser?: CurrentUser,
   ) {
-    await this.checkAccess(userId);
+    await this.checkAccess(currentUser?.userId);
 
     const [resource] = await this.db
       .select({
@@ -462,8 +462,15 @@ export class NewsService {
 
     if (!existingNews) throw new NotFoundException("News not found");
 
-    const isAdminLike = role === USER_ROLES.ADMIN || role === USER_ROLES.CONTENT_CREATOR;
-    const isAuthor = Boolean(userId && existingNews.authorId === userId);
+    const isAdminLike = hasAnyPermission(currentUser?.permissions, [
+      PERMISSIONS.NEWS_MANAGE,
+      PERMISSIONS.NEWS_MANAGE_OWN,
+    ]);
+    const isAuthor = Boolean(
+      currentUser?.userId &&
+        hasPermission(currentUser?.permissions, PERMISSIONS.NEWS_MANAGE_OWN) &&
+        existingNews.authorId === currentUser.userId,
+    );
     const isPublic = Boolean(existingNews.isPublic && existingNews.publishedAt !== null);
 
     if (!isAdminLike && !isAuthor && !isPublic) {
@@ -789,8 +796,10 @@ export class NewsService {
     currentUser?: CurrentUser,
     options?: { excludedId?: UUIDType; requirePublished?: boolean },
   ) {
-    const isAdminLike =
-      currentUser?.role === USER_ROLES.ADMIN || currentUser?.role === USER_ROLES.CONTENT_CREATOR;
+    const isAdminLike = hasAnyPermission(currentUser?.permissions, [
+      PERMISSIONS.NEWS_MANAGE,
+      PERMISSIONS.NEWS_MANAGE_OWN,
+    ]);
 
     const conditions = [ne(news.archived, true)];
 

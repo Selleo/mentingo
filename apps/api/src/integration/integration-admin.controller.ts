@@ -5,12 +5,13 @@ import {
   ApiUnauthorizedResponse,
   ApiTags,
 } from "@nestjs/swagger";
+import { PERMISSIONS } from "@repo/shared";
 import { Validate } from "nestjs-typebox";
 
 import { baseResponse, BaseResponse } from "src/common";
-import { Roles } from "src/common/decorators/roles.decorator";
+import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
-import { RolesGuard } from "src/common/guards/roles.guard";
+import { PermissionsGuard } from "src/common/guards/permissions.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { IntegrationService } from "src/integration/integration.service";
 import {
@@ -19,7 +20,6 @@ import {
   type IntegrationCurrentKeyResponse,
   type RotateIntegrationKeyResponse,
 } from "src/integration/schemas/integration-key.schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 @ApiTags("Integration Admin")
 @ApiUnauthorizedResponse({
@@ -29,12 +29,12 @@ import { USER_ROLES } from "src/user/schemas/userRoles";
   description: "Admin role required.",
 })
 @Controller("integration/key")
-@UseGuards(RolesGuard)
+@UseGuards(PermissionsGuard)
 export class IntegrationAdminController {
   constructor(private readonly integrationService: IntegrationService) {}
 
   @Get()
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.INTEGRATION_KEY_MANAGE)
   @ApiOperation({ summary: "Get current integration API key metadata for admin" })
   @Validate({
     response: baseResponse(integrationCurrentKeyResponseSchema),
@@ -46,7 +46,7 @@ export class IntegrationAdminController {
   }
 
   @Post()
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.INTEGRATION_KEY_MANAGE)
   @ApiOperation({ summary: "Rotate integration API key for admin" })
   @Validate({
     response: baseResponse(rotateIntegrationKeyResponseSchema),

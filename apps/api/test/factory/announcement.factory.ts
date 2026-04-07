@@ -2,8 +2,6 @@ import { faker } from "@faker-js/faker";
 import { eq, and, not } from "drizzle-orm";
 import { Factory } from "fishery";
 
-import { USER_ROLES } from "src/user/schemas/userRoles";
-
 import {
   announcements,
   groupAnnouncements,
@@ -11,6 +9,7 @@ import {
   userAnnouncements,
   users,
 } from "../../src/storage/schema";
+import { userLacksPermissionCondition } from "../helpers/permission-role-helpers";
 import { ensureTenant } from "../helpers/tenant-helpers";
 
 import type { InferSelectModel, InferInsertModel } from "drizzle-orm";
@@ -37,7 +36,8 @@ class AnnouncementFactory extends Factory<AnnouncementWithAssoc> {
 export const createAnnouncementFactory = (db: DatabasePg) => {
   return AnnouncementFactory.define(({ onCreate, associations }) => {
     onCreate(async (announcement: AnnouncementInsert) => {
-      const tenantId = await ensureTenant(db, announcement.tenantId as UUIDType | undefined);
+      const tenantId = await ensureTenant(db, announcement.tenantId);
+
       const [inserted] = await db
         .insert(announcements)
         .values({ ...announcement, tenantId })
@@ -78,7 +78,9 @@ async function createUserAnnouncementsForGroup(
     .select({ userId: groupUsers.userId })
     .from(groupUsers)
     .leftJoin(users, eq(groupUsers.userId, users.id))
-    .where(and(eq(groupUsers.groupId, groupId), not(eq(users.role, USER_ROLES.ADMIN))));
+    .where(
+      and(eq(groupUsers.groupId, groupId), userLacksPermissionCondition(users.id, users.tenantId)),
+    );
 
   const userAnnouncementsToInsert = usersRelatedToGroup.map((u) => ({
     userId: u.userId,
@@ -100,7 +102,9 @@ async function createUserAnnouncementsForAll(
   const allUserIds = await db
     .select({ id: users.id })
     .from(users)
-    .where(and(not(eq(users.id, authorId)), not(eq(users.role, USER_ROLES.ADMIN))));
+    .where(
+      and(not(eq(users.id, authorId)), userLacksPermissionCondition(users.id, users.tenantId)),
+    );
 
   const userAnnouncementsToInsert = allUserIds.map((u) => ({
     userId: u.id,

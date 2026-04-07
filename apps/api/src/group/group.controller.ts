@@ -1,14 +1,5 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Query,
-  UseGuards,
-} from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from "@nestjs/common";
+import { PERMISSIONS } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
@@ -20,9 +11,8 @@ import {
   UUIDSchema,
   type UUIDType,
 } from "src/common";
-import { Roles } from "src/common/decorators/roles.decorator";
+import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
-import { RolesGuard } from "src/common/guards/roles.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import {
   allGroupsSchema,
@@ -33,18 +23,16 @@ import {
 } from "src/group/group.schema";
 import { GroupService } from "src/group/group.service";
 import { UpsertGroupBody, GroupSortFieldsOptions } from "src/group/group.types";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import type { GroupKeywordFilterBody } from "src/group/group.schema";
 import type { AllGroupsResponse, GroupResponse } from "src/group/group.types";
 
 @Controller("group")
-@UseGuards(RolesGuard)
 export class GroupController {
   constructor(private readonly groupService: GroupService) {}
 
   @Get("all")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.GROUP_READ)
   @Validate({
     request: [
       { type: "query", name: "keyword", schema: Type.String() },
@@ -71,7 +59,7 @@ export class GroupController {
   }
 
   @Get(":groupId")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.GROUP_READ)
   @Validate({
     request: [{ type: "param", name: "groupId", schema: UUIDSchema }],
     response: baseResponse(groupSchema),
@@ -81,7 +69,7 @@ export class GroupController {
   }
 
   @Get("/user/:userId")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.GROUP_READ)
   @Validate({
     request: [
       { type: "param", name: "userId", schema: UUIDSchema },
@@ -110,7 +98,7 @@ export class GroupController {
   }
 
   @Post()
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.GROUP_MANAGE)
   @Validate({
     request: [{ type: "body", schema: upsertGroupSchema }],
     response: baseResponse(Type.Object({ id: UUIDSchema, message: Type.String() })),
@@ -125,7 +113,7 @@ export class GroupController {
   }
 
   @Patch(":groupId")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.GROUP_MANAGE)
   @Validate({
     request: [
       { type: "param", name: "groupId", schema: Type.String() },
@@ -144,7 +132,7 @@ export class GroupController {
   }
 
   @Delete(":groupId")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.GROUP_MANAGE)
   @Validate({
     request: [{ type: "param", name: "groupId", schema: Type.String() }],
     response: baseResponse(Type.Object({ message: Type.String() })),
@@ -161,7 +149,7 @@ export class GroupController {
   }
 
   @Delete("")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.GROUP_MANAGE)
   @Validate({
     request: [{ type: "body", schema: bulkDeleteGroupsSchema }],
     response: baseResponse(Type.Object({ message: Type.String() })),
@@ -175,7 +163,7 @@ export class GroupController {
   }
 
   @Post("set")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.GROUP_MANAGE)
   @Validate({
     request: [
       { type: "query", name: "userId", schema: UUIDSchema },
@@ -194,7 +182,7 @@ export class GroupController {
   }
 
   @Get("by-course/:courseId")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.GROUP_READ)
   @Validate({
     request: [
       {

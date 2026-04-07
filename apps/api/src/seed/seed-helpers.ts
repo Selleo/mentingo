@@ -1,5 +1,11 @@
 import { faker } from "@faker-js/faker";
 import { ConfigService } from "@nestjs/config";
+import {
+  SYSTEM_ROLE_PERMISSIONS,
+  SYSTEM_ROLE_SLUGS,
+  SYSTEM_RULE_SET_SLUGS,
+  type SystemRoleSlug,
+} from "@repo/shared";
 import { and, eq, sql } from "drizzle-orm/sql";
 
 import { EnvRepository } from "src/env/repositories/env.repository";
@@ -11,6 +17,11 @@ import {
   chapters,
   courses,
   lessons,
+  permissionRoleRuleSets,
+  permissionRoles,
+  permissionRuleSetPermissions,
+  permissionRuleSets,
+  permissionUserRoles,
   questionAnswerOptions,
   questions,
   tenants,
@@ -272,6 +283,111 @@ export function addEmailSuffix(email: string, suffix?: string) {
 export function getTenantEmailSuffix(origin: string) {
   const hostname = new URL(origin).hostname;
   return hostname.split(".")[0] || hostname;
+}
+
+const SYSTEM_ROLE_DISPLAY_NAME: Record<SystemRoleSlug, string> = {
+  [SYSTEM_ROLE_SLUGS.ADMIN]: "Admin",
+  [SYSTEM_ROLE_SLUGS.CONTENT_CREATOR]: "Content Creator",
+  [SYSTEM_ROLE_SLUGS.STUDENT]: "Student",
+};
+
+export async function seedSystemRolesForTenant(db: DatabasePg, tenantId: UUIDType) {
+  for (const roleSlug of Object.values(SYSTEM_ROLE_SLUGS)) {
+    const ruleSetSlug = SYSTEM_RULE_SET_SLUGS[roleSlug];
+    const permissions = SYSTEM_ROLE_PERMISSIONS[roleSlug];
+
+    const [role] = await db
+      .insert(permissionRoles)
+      .values({
+        tenantId,
+        name: SYSTEM_ROLE_DISPLAY_NAME[roleSlug],
+        slug: roleSlug,
+        isSystem: true,
+      })
+      .onConflictDoUpdate({
+        target: [permissionRoles.tenantId, permissionRoles.slug],
+        set: {
+          name: SYSTEM_ROLE_DISPLAY_NAME[roleSlug],
+          isSystem: true,
+          updatedAt: sql`NOW()`,
+        },
+      })
+      .returning({ id: permissionRoles.id });
+
+    const [ruleSet] = await db
+      .insert(permissionRuleSets)
+      .values({
+        tenantId,
+        name: `${SYSTEM_ROLE_DISPLAY_NAME[roleSlug]} Default`,
+        slug: ruleSetSlug,
+        isSystem: true,
+      })
+      .onConflictDoUpdate({
+        target: [permissionRuleSets.tenantId, permissionRuleSets.slug],
+        set: {
+          name: `${SYSTEM_ROLE_DISPLAY_NAME[roleSlug]} Default`,
+          isSystem: true,
+          updatedAt: sql`NOW()`,
+        },
+      })
+      .returning({ id: permissionRuleSets.id });
+
+    await db
+      .insert(permissionRoleRuleSets)
+      .values({
+        tenantId,
+        roleId: role.id,
+        ruleSetId: ruleSet.id,
+      })
+      .onConflictDoNothing({
+        target: [permissionRoleRuleSets.roleId, permissionRoleRuleSets.ruleSetId],
+      });
+
+    await db
+      .delete(permissionRuleSetPermissions)
+      .where(eq(permissionRuleSetPermissions.ruleSetId, ruleSet.id));
+
+    if (permissions.length) {
+      await db.insert(permissionRuleSetPermissions).values(
+        permissions.map((permission) => ({
+          tenantId,
+          ruleSetId: ruleSet.id,
+          permission,
+        })),
+      );
+    }
+  }
+}
+
+export async function assignSystemRoleToUser(
+  db: DatabasePg,
+  userId: UUIDType,
+  tenantId: UUIDType,
+  roleSlug: SystemRoleSlug,
+) {
+  const [role] = await db
+    .select({ id: permissionRoles.id })
+    .from(permissionRoles)
+    .where(and(eq(permissionRoles.tenantId, tenantId), eq(permissionRoles.slug, roleSlug)))
+    .limit(1);
+
+  if (!role) {
+    throw new Error(`System role '${roleSlug}' not found for tenant ${tenantId}`);
+  }
+
+  await db.delete(permissionUserRoles).where(eq(permissionUserRoles.userId, userId));
+
+  await db.insert(permissionUserRoles).values({
+    userId,
+    roleId: role.id,
+    tenantId,
+  });
+}
+
+export async function seedSystemRolesForAllTenants(db: DatabasePg) {
+  const existingTenants = await db.select({ id: tenants.id }).from(tenants);
+
+  await Promise.all(existingTenants.map((tenant) => seedSystemRolesForTenant(db, tenant.id)));
 }
 
 export const seedUserRoleGrantSql = async (db: DatabasePg) => {

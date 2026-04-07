@@ -6,7 +6,7 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { COURSE_ENROLLMENT } from "@repo/shared";
+import { COURSE_ENROLLMENT, PERMISSIONS } from "@repo/shared";
 import {
   and,
   countDistinct,
@@ -23,6 +23,7 @@ import { isEqual } from "lodash";
 import { DatabasePg } from "src/common";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { hasPermission } from "src/common/permissions/permission.utils";
 import { CourseService } from "src/courses/course.service";
 import {
   CreateGroupEvent,
@@ -32,8 +33,8 @@ import {
 } from "src/events";
 import { GroupSortFields } from "src/group/group.schema";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
-import { groups, groupUsers, users, groupCourses, studentCourses } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
+import { PermissionsService } from "src/permissions/permissions.service";
+import { groupCourses, groups, groupUsers, studentCourses, users } from "src/storage/schema";
 
 import type { SQL } from "drizzle-orm";
 import type { GroupActivityLogSnapshot } from "src/activity-logs/types";
@@ -54,6 +55,7 @@ export class GroupService {
     @Inject("DB") private readonly db: DatabasePg,
     @Inject(forwardRef(() => CourseService)) private readonly courseService: CourseService,
     private readonly outboxPublisher: OutboxPublisher,
+    private readonly permissionsService: PermissionsService,
   ) {}
 
   public async getAllGroups(
@@ -84,7 +86,6 @@ export class GroupService {
                     'email', u.email,
                     'firstName', u.first_name,
                     'lastName', u.last_name,
-                    'role', u.role,
                     'archived', u.archived,
                     'profilePictureUrl', u.avatar_reference,
                     'deletedAt', u.deleted_at
@@ -280,6 +281,13 @@ export class GroupService {
         throw new NotFoundException("User not found");
       }
 
+      const { permissions: userPermissions } = await this.permissionsService.getUserAccess(
+        userId,
+        trx,
+      );
+
+      const canManageUsers = hasPermission(userPermissions, PERMISSIONS.USER_MANAGE);
+
       const currentUserGroups = await trx
         .select({ groupId: groupUsers.groupId })
         .from(groupUsers)
@@ -290,7 +298,7 @@ export class GroupService {
 
       await trx.delete(groupUsers).where(eq(groupUsers.userId, userId));
 
-      if (removedGroupIds.length && user.role === USER_ROLES.STUDENT) {
+      if (removedGroupIds.length && !canManageUsers) {
         await trx
           .update(studentCourses)
           .set({
@@ -322,7 +330,7 @@ export class GroupService {
         await trx.insert(groupUsers).values(groupsToAssign);
         assignedGroupIds = groupsToAssign.map(({ groupId }) => groupId);
 
-        if (user.role === USER_ROLES.STUDENT) {
+        if (!canManageUsers) {
           await Promise.all(
             groupsToAssign.map(({ groupId }) =>
               this.enrollUserToCoursesInGroup(groupId, userId, trx),

@@ -18,10 +18,10 @@ interface Props {
   description: string | null;
   id: string;
   availableLocales?: SupportedLanguages[];
-  isAdmin?: boolean;
+  canManageQA?: boolean;
 }
 
-export default function QAItem({ title, description, isAdmin, id, availableLocales }: Props) {
+export default function QAItem({ title, description, canManageQA, id, availableLocales }: Props) {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { mutateAsync: deleteQA, isPending: isDeleting } = useDeleteQA();
@@ -43,7 +43,7 @@ export default function QAItem({ title, description, isAdmin, id, availableLocal
         <div className="flex w-full items-center text-slate-900">
           <span className="text-primary font-semibold">Q:</span>
           <span className="flex-1">&nbsp;{title}</span>
-          {isAdmin && (
+          {canManageQA && (
             <Button
               onClick={handleEdit}
               size="icon"
@@ -55,7 +55,7 @@ export default function QAItem({ title, description, isAdmin, id, availableLocal
               <Pencil className="size-4" />
             </Button>
           )}
-          {isAdmin && <DeleteQADialog onConfirm={onDelete} loading={isDeleting} />}
+          {canManageQA && <DeleteQADialog onConfirm={onDelete} loading={isDeleting} />}
 
           <Badge variant="default" className="flex gap-2 ml-1 mr-3">
             {courseLanguages

@@ -1,10 +1,10 @@
+import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { isNull } from "drizzle-orm";
 import request from "supertest";
 
 import { DEFAULT_GLOBAL_SETTINGS } from "src/settings/constants/settings.constants";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { settings } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
@@ -32,7 +32,7 @@ describe("ArticlesController (e2e)", () => {
 
   const createAdmin = async () => {
     return userFactory.withCredentials({ password }).withAdminSettings(db).create({
-      role: USER_ROLES.ADMIN,
+      role: SYSTEM_ROLE_SLUGS.ADMIN,
     });
   };
 
@@ -202,7 +202,7 @@ describe("ArticlesController (e2e)", () => {
       const user = await userFactory
         .withCredentials({ password })
         .withUserSettings(db)
-        .create({ role: USER_ROLES.STUDENT });
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
 
       await request(app.getHttpServer())
         .post("/api/articles/section")

@@ -19,7 +19,6 @@ import type { CreateChapterBody, UpdateChapterBody } from "./schemas/chapter.sch
 import type { SupportedLanguages } from "@repo/shared";
 import type { ChapterActivityLogSnapshot } from "src/activity-logs/types";
 import type { CurrentUser } from "src/common/types/current-user.type";
-import type { UserRole } from "src/user/schemas/userRoles";
 
 @Injectable()
 export class AdminChapterService {
@@ -36,12 +35,7 @@ export class AdminChapterService {
     await this.masterCourseService.assertCourseContentEditable(body.courseId);
 
     const chapter = await this.db.transaction(async (trx) => {
-      await this.adminLessonService.validateAccess(
-        "course",
-        currentUser.role,
-        currentUser.userId,
-        body.courseId,
-      );
+      await this.adminLessonService.validateAccess("course", currentUser, body.courseId);
 
       const [maxDisplayOrder] = await trx
         .select({ displayOrder: sql<number>`COALESCE(MAX(${chapters.displayOrder}), 0)` })
@@ -95,20 +89,10 @@ export class AdminChapterService {
     return chapter;
   }
 
-  async updateFreemiumStatus(
-    chapterId: UUIDType,
-    isFreemium: boolean,
-    currentUserId: UUIDType,
-    currentUserRole: UserRole,
-  ) {
+  async updateFreemiumStatus(chapterId: UUIDType, isFreemium: boolean, currentUser: CurrentUser) {
     await this.masterCourseService.assertCourseContentEditableByChapterId(chapterId);
 
-    await this.adminLessonService.validateAccess(
-      "chapter",
-      currentUserRole,
-      currentUserId,
-      chapterId,
-    );
+    await this.adminLessonService.validateAccess("chapter", currentUser, chapterId);
 
     return await this.adminChapterRepository.updateFreemiumStatus(chapterId, isFreemium);
   }
@@ -122,8 +106,7 @@ export class AdminChapterService {
 
     await this.adminLessonService.validateAccess(
       "chapter",
-      chapterObject.currentUser.role,
-      chapterObject.currentUser.userId,
+      chapterObject.currentUser,
       chapterObject.chapterId,
     );
 
@@ -178,12 +161,7 @@ export class AdminChapterService {
   async updateChapter(id: UUIDType, body: UpdateChapterBody, currentUser: CurrentUser) {
     await this.masterCourseService.assertCourseContentEditableByChapterId(id);
 
-    await this.adminLessonService.validateAccess(
-      "chapter",
-      currentUser.role,
-      currentUser.userId,
-      id,
-    );
+    await this.adminLessonService.validateAccess("chapter", currentUser, id);
 
     if (body.title && body.title.length > MAX_LESSON_TITLE_LENGTH) {
       throw new BadRequestException({
@@ -222,12 +200,7 @@ export class AdminChapterService {
   async removeChapter(chapterId: UUIDType, currentUser: CurrentUser) {
     await this.masterCourseService.assertCourseContentEditableByChapterId(chapterId);
 
-    await this.adminLessonService.validateAccess(
-      "chapter",
-      currentUser.role,
-      currentUser.userId,
-      chapterId,
-    );
+    await this.adminLessonService.validateAccess("chapter", currentUser, chapterId);
 
     const [chapter] = await this.adminChapterRepository.getChapterById(chapterId);
 

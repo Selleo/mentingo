@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { PERMISSIONS } from "@repo/shared";
 import {
   differenceInDays,
   eachDayOfInterval,
@@ -9,11 +10,11 @@ import {
   subDays,
 } from "date-fns";
 
+import { hasPermission } from "src/common/permissions/permission.utils";
 import { UserFirstLoginEvent } from "src/events/user/user-first-login.event";
 import { FileService } from "src/file/file.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import type {
   CourseStudentsStatsByMonth,
@@ -22,7 +23,7 @@ import type {
 } from "./schemas/userStats.schema";
 import type { SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
-import type { UserRole } from "src/user/schemas/userRoles";
+import type { CurrentUser } from "src/common/types/current-user.type";
 
 @Injectable()
 export class StatisticsService {
@@ -70,24 +71,20 @@ export class StatisticsService {
     };
   }
 
-  async getStats(userId: UUIDType, userRole: UserRole, language: SupportedLanguages) {
+  async getStats(currentUser: CurrentUser, language: SupportedLanguages) {
+    const canReadAll = hasPermission(currentUser.permissions, PERMISSIONS.COURSE_UPDATE);
+    const ownerUserId = canReadAll ? undefined : currentUser.userId;
+
     const fiveMostPopularCourses = await this.statisticsRepository.getFiveMostPopularCourses(
-      userRole !== USER_ROLES.ADMIN ? userId : undefined,
+      ownerUserId,
       language,
     );
-    const [totalCoursesCompletionStats] = await this.statisticsRepository.getTotalCoursesCompletion(
-      userRole !== USER_ROLES.ADMIN ? userId : undefined,
-    );
+    const [totalCoursesCompletionStats] =
+      await this.statisticsRepository.getTotalCoursesCompletion(ownerUserId);
     const [conversionAfterFreemiumLesson] =
-      await this.statisticsRepository.getConversionAfterFreemiumLesson(
-        userRole !== USER_ROLES.ADMIN ? userId : undefined,
-      );
-    const courseStudentsStats = await this.statisticsRepository.getCourseStudentsStats(
-      userRole !== USER_ROLES.ADMIN ? userId : undefined,
-    );
-    const [avgQuizScore] = await this.statisticsRepository.getAvgQuizScore(
-      userRole !== USER_ROLES.ADMIN ? userId : undefined,
-    );
+      await this.statisticsRepository.getConversionAfterFreemiumLesson(ownerUserId);
+    const courseStudentsStats = await this.statisticsRepository.getCourseStudentsStats(ownerUserId);
+    const [avgQuizScore] = await this.statisticsRepository.getAvgQuizScore(ownerUserId);
 
     return {
       fiveMostPopularCourses,

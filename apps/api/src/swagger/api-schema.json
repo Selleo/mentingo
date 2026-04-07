@@ -1550,24 +1550,11 @@
             }
           },
           {
-            "name": "role",
+            "name": "roleSlug",
             "required": false,
             "in": "query",
             "schema": {
-              "anyOf": [
-                {
-                  "const": "admin",
-                  "type": "string"
-                },
-                {
-                  "const": "student",
-                  "type": "string"
-                },
-                {
-                  "const": "content_creator",
-                  "type": "string"
-                }
-              ]
+              "type": "string"
             }
           },
           {
@@ -1662,6 +1649,23 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GetUsersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/roles": {
+      "get": {
+        "operationId": "UserController_getRoles",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetRolesResponse"
                 }
               }
             }
@@ -7528,24 +7532,11 @@
             }
           },
           {
-            "name": "role",
+            "name": "roleSlug",
             "required": false,
             "in": "query",
             "schema": {
-              "anyOf": [
-                {
-                  "const": "admin",
-                  "type": "string"
-                },
-                {
-                  "const": "student",
-                  "type": "string"
-                },
-                {
-                  "const": "content_creator",
-                  "type": "string"
-                }
-              ]
+              "type": "string"
             }
           },
           {
@@ -10293,9 +10284,6 @@
               "lastName": {
                 "type": "string"
               },
-              "role": {
-                "type": "string"
-              },
               "archived": {
                 "type": "boolean"
               },
@@ -10380,7 +10368,6 @@
               "email",
               "firstName",
               "lastName",
-              "role",
               "archived",
               "deletedAt",
               "profilePictureUrl",
@@ -10439,9 +10426,6 @@
               "lastName": {
                 "type": "string"
               },
-              "role": {
-                "type": "string"
-              },
               "archived": {
                 "type": "boolean"
               },
@@ -10526,7 +10510,6 @@
               "email",
               "firstName",
               "lastName",
-              "role",
               "archived",
               "deletedAt",
               "profilePictureUrl",
@@ -10570,9 +10553,6 @@
               "lastName": {
                 "type": "string"
               },
-              "role": {
-                "type": "string"
-              },
               "archived": {
                 "type": "boolean"
               },
@@ -10595,6 +10575,223 @@
                     "type": "null"
                   }
                 ]
+              },
+              "roleSlugs": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "permissions": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "const": "account.read_self",
+                      "type": "string"
+                    },
+                    {
+                      "const": "account.update_self",
+                      "type": "string"
+                    },
+                    {
+                      "const": "user.read_self",
+                      "type": "string"
+                    },
+                    {
+                      "const": "user.manage",
+                      "type": "string"
+                    },
+                    {
+                      "const": "settings.read_self",
+                      "type": "string"
+                    },
+                    {
+                      "const": "settings.update_self",
+                      "type": "string"
+                    },
+                    {
+                      "const": "settings.manage",
+                      "type": "string"
+                    },
+                    {
+                      "const": "env.read_public",
+                      "type": "string"
+                    },
+                    {
+                      "const": "env.manage",
+                      "type": "string"
+                    },
+                    {
+                      "const": "category.read",
+                      "type": "string"
+                    },
+                    {
+                      "const": "category.manage",
+                      "type": "string"
+                    },
+                    {
+                      "const": "group.read",
+                      "type": "string"
+                    },
+                    {
+                      "const": "group.manage",
+                      "type": "string"
+                    },
+                    {
+                      "const": "course.read_assigned",
+                      "type": "string"
+                    },
+                    {
+                      "const": "course.read_manageable",
+                      "type": "string"
+                    },
+                    {
+                      "const": "course.read",
+                      "type": "string"
+                    },
+                    {
+                      "const": "course.create",
+                      "type": "string"
+                    },
+                    {
+                      "const": "course.update",
+                      "type": "string"
+                    },
+                    {
+                      "const": "course.update_own",
+                      "type": "string"
+                    },
+                    {
+                      "const": "course.delete",
+                      "type": "string"
+                    },
+                    {
+                      "const": "course.enrollment",
+                      "type": "string"
+                    },
+                    {
+                      "const": "course.statistics",
+                      "type": "string"
+                    },
+                    {
+                      "const": "course.export",
+                      "type": "string"
+                    },
+                    {
+                      "const": "learning_mode.use",
+                      "type": "string"
+                    },
+                    {
+                      "const": "learning_progress.update",
+                      "type": "string"
+                    },
+                    {
+                      "const": "certificate.read",
+                      "type": "string"
+                    },
+                    {
+                      "const": "certificate.share",
+                      "type": "string"
+                    },
+                    {
+                      "const": "certificate.render",
+                      "type": "string"
+                    },
+                    {
+                      "const": "file.upload",
+                      "type": "string"
+                    },
+                    {
+                      "const": "file.delete",
+                      "type": "string"
+                    },
+                    {
+                      "const": "ai.use",
+                      "type": "string"
+                    },
+                    {
+                      "const": "announcement.read",
+                      "type": "string"
+                    },
+                    {
+                      "const": "announcement.create",
+                      "type": "string"
+                    },
+                    {
+                      "const": "news.read_public",
+                      "type": "string"
+                    },
+                    {
+                      "const": "news.manage",
+                      "type": "string"
+                    },
+                    {
+                      "const": "news.manage_own",
+                      "type": "string"
+                    },
+                    {
+                      "const": "article.read_public",
+                      "type": "string"
+                    },
+                    {
+                      "const": "article.manage",
+                      "type": "string"
+                    },
+                    {
+                      "const": "article.manage_own",
+                      "type": "string"
+                    },
+                    {
+                      "const": "qa.read_public",
+                      "type": "string"
+                    },
+                    {
+                      "const": "qa.manage",
+                      "type": "string"
+                    },
+                    {
+                      "const": "qa.manage_own",
+                      "type": "string"
+                    },
+                    {
+                      "const": "report.read",
+                      "type": "string"
+                    },
+                    {
+                      "const": "statistics.read_self",
+                      "type": "string"
+                    },
+                    {
+                      "const": "statistics.read",
+                      "type": "string"
+                    },
+                    {
+                      "const": "billing.checkout",
+                      "type": "string"
+                    },
+                    {
+                      "const": "billing.manage",
+                      "type": "string"
+                    },
+                    {
+                      "const": "integration_key.manage",
+                      "type": "string"
+                    },
+                    {
+                      "const": "integration_api.use",
+                      "type": "string"
+                    },
+                    {
+                      "const": "tenant.manage",
+                      "type": "string"
+                    },
+                    {
+                      "const": "course.ai_generation",
+                      "type": "string"
+                    }
+                  ]
+                }
               },
               "shouldVerifyMFA": {
                 "type": "boolean"
@@ -10697,10 +10894,11 @@
               "email",
               "firstName",
               "lastName",
-              "role",
               "archived",
               "deletedAt",
               "profilePictureUrl",
+              "roleSlugs",
+              "permissions",
               "shouldVerifyMFA",
               "onboardingStatus",
               "isManagingTenantAdmin",
@@ -10847,9 +11045,6 @@
               "lastName": {
                 "type": "string"
               },
-              "role": {
-                "type": "string"
-              },
               "archived": {
                 "type": "boolean"
               },
@@ -10934,7 +11129,6 @@
               "email",
               "firstName",
               "lastName",
-              "role",
               "archived",
               "deletedAt",
               "profilePictureUrl",
@@ -11108,9 +11302,6 @@
               "lastName": {
                 "type": "string"
               },
-              "role": {
-                "type": "string"
-              },
               "archived": {
                 "type": "boolean"
               },
@@ -11195,7 +11386,6 @@
               "email",
               "firstName",
               "lastName",
-              "role",
               "archived",
               "deletedAt",
               "profilePictureUrl",
@@ -11291,20 +11481,7 @@
               "MFAEnforcedRoles": {
                 "type": "array",
                 "items": {
-                  "anyOf": [
-                    {
-                      "const": "admin",
-                      "type": "string"
-                    },
-                    {
-                      "const": "student",
-                      "type": "string"
-                    },
-                    {
-                      "const": "content_creator",
-                      "type": "string"
-                    }
-                  ]
+                  "type": "string"
                 }
               },
               "defaultCourseCurrency": {
@@ -12060,20 +12237,7 @@
               "MFAEnforcedRoles": {
                 "type": "array",
                 "items": {
-                  "anyOf": [
-                    {
-                      "const": "admin",
-                      "type": "string"
-                    },
-                    {
-                      "const": "student",
-                      "type": "string"
-                    },
-                    {
-                      "const": "content_creator",
-                      "type": "string"
-                    }
-                  ]
+                  "type": "string"
                 }
               },
               "defaultCourseCurrency": {
@@ -12301,20 +12465,7 @@
               "MFAEnforcedRoles": {
                 "type": "array",
                 "items": {
-                  "anyOf": [
-                    {
-                      "const": "admin",
-                      "type": "string"
-                    },
-                    {
-                      "const": "student",
-                      "type": "string"
-                    },
-                    {
-                      "const": "content_creator",
-                      "type": "string"
-                    }
-                  ]
+                  "type": "string"
                 }
               },
               "defaultCourseCurrency": {
@@ -12542,20 +12693,7 @@
               "MFAEnforcedRoles": {
                 "type": "array",
                 "items": {
-                  "anyOf": [
-                    {
-                      "const": "admin",
-                      "type": "string"
-                    },
-                    {
-                      "const": "student",
-                      "type": "string"
-                    },
-                    {
-                      "const": "content_creator",
-                      "type": "string"
-                    }
-                  ]
+                  "type": "string"
                 }
               },
               "defaultCourseCurrency": {
@@ -12938,20 +13076,7 @@
               "MFAEnforcedRoles": {
                 "type": "array",
                 "items": {
-                  "anyOf": [
-                    {
-                      "const": "admin",
-                      "type": "string"
-                    },
-                    {
-                      "const": "student",
-                      "type": "string"
-                    },
-                    {
-                      "const": "content_creator",
-                      "type": "string"
-                    }
-                  ]
+                  "type": "string"
                 }
               },
               "defaultCourseCurrency": {
@@ -13654,14 +13779,8 @@
       },
       "UpdateMFAEnforcedRolesBody": {
         "type": "object",
-        "properties": {
-          "admin": {
-            "type": "boolean"
-          },
-          "student": {
-            "type": "boolean"
-          },
-          "content_creator": {
+        "patternProperties": {
+          "^(.*)$": {
             "type": "boolean"
           }
         }
@@ -14515,9 +14634,6 @@
                     "lastName": {
                       "type": "string"
                     },
-                    "role": {
-                      "type": "string"
-                    },
                     "archived": {
                       "type": "boolean"
                     },
@@ -14549,7 +14665,6 @@
                     "email",
                     "firstName",
                     "lastName",
-                    "role",
                     "archived",
                     "deletedAt",
                     "profilePictureUrl"
@@ -14558,6 +14673,12 @@
                 {
                   "type": "object",
                   "properties": {
+                    "roleSlugs": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
                     "groups": {
                       "type": "array",
                       "items": {
@@ -14579,6 +14700,7 @@
                     }
                   },
                   "required": [
+                    "roleSlugs",
                     "groups"
                   ]
                 }
@@ -14616,6 +14738,41 @@
           "pagination"
         ]
       },
+      "GetRolesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "slug": {
+                  "type": "string"
+                },
+                "isSystem": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "slug",
+                "isSystem"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "GetUserByIdResponse": {
         "type": "object",
         "properties": {
@@ -14640,9 +14797,6 @@
               "lastName": {
                 "type": "string"
               },
-              "role": {
-                "type": "string"
-              },
               "archived": {
                 "type": "boolean"
               },
@@ -14665,6 +14819,12 @@
                     "type": "null"
                   }
                 ]
+              },
+              "roleSlugs": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
               },
               "groups": {
                 "type": "array",
@@ -14693,10 +14853,10 @@
               "email",
               "firstName",
               "lastName",
-              "role",
               "archived",
               "deletedAt",
               "profilePictureUrl",
+              "roleSlugs",
               "groups"
             ]
           }
@@ -14775,22 +14935,6 @@
                   }
                 ]
               },
-              "role": {
-                "anyOf": [
-                  {
-                    "const": "admin",
-                    "type": "string"
-                  },
-                  {
-                    "const": "student",
-                    "type": "string"
-                  },
-                  {
-                    "const": "content_creator",
-                    "type": "string"
-                  }
-                ]
-              },
               "profilePictureUrl": {
                 "anyOf": [
                   {
@@ -14810,7 +14954,6 @@
               "contactEmail",
               "contactPhone",
               "jobTitle",
-              "role",
               "profilePictureUrl"
             ]
           }
@@ -14845,21 +14988,11 @@
             "format": "email",
             "type": "string"
           },
-          "role": {
-            "anyOf": [
-              {
-                "const": "admin",
-                "type": "string"
-              },
-              {
-                "const": "student",
-                "type": "string"
-              },
-              {
-                "const": "content_creator",
-                "type": "string"
-              }
-            ]
+          "roleSlugs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "archived": {
             "type": "boolean"
@@ -14888,9 +15021,6 @@
                 "type": "string"
               },
               "lastName": {
-                "type": "string"
-              },
-              "role": {
                 "type": "string"
               },
               "archived": {
@@ -14924,7 +15054,6 @@
               "email",
               "firstName",
               "lastName",
-              "role",
               "archived",
               "deletedAt",
               "profilePictureUrl"
@@ -15003,21 +15132,11 @@
             "format": "email",
             "type": "string"
           },
-          "role": {
-            "anyOf": [
-              {
-                "const": "admin",
-                "type": "string"
-              },
-              {
-                "const": "student",
-                "type": "string"
-              },
-              {
-                "const": "content_creator",
-                "type": "string"
-              }
-            ]
+          "roleSlugs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "archived": {
             "type": "boolean"
@@ -15046,9 +15165,6 @@
                 "type": "string"
               },
               "lastName": {
-                "type": "string"
-              },
-              "role": {
                 "type": "string"
               },
               "archived": {
@@ -15082,7 +15198,6 @@
               "email",
               "firstName",
               "lastName",
-              "role",
               "archived",
               "deletedAt",
               "profilePictureUrl"
@@ -15235,26 +15350,17 @@
               "type": "string"
             }
           },
-          "role": {
-            "anyOf": [
-              {
-                "const": "admin",
-                "type": "string"
-              },
-              {
-                "const": "student",
-                "type": "string"
-              },
-              {
-                "const": "content_creator",
-                "type": "string"
-              }
-            ]
+          "roleSlugs": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
           "userIds",
-          "role"
+          "roleSlugs"
         ]
       },
       "CreateUserBody": {
@@ -15274,21 +15380,11 @@
             "maxLength": 64,
             "type": "string"
           },
-          "role": {
-            "anyOf": [
-              {
-                "const": "admin",
-                "type": "string"
-              },
-              {
-                "const": "student",
-                "type": "string"
-              },
-              {
-                "const": "content_creator",
-                "type": "string"
-              }
-            ]
+          "roleSlugs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "language": {
             "type": "string"
@@ -15298,7 +15394,7 @@
           "email",
           "firstName",
           "lastName",
-          "role"
+          "roleSlugs"
         ]
       },
       "CreateUserResponse": {
@@ -15534,9 +15630,6 @@
                       "lastName": {
                         "type": "string"
                       },
-                      "role": {
-                        "type": "string"
-                      },
                       "archived": {
                         "type": "boolean"
                       },
@@ -15568,7 +15661,6 @@
                       "email",
                       "firstName",
                       "lastName",
-                      "role",
                       "archived",
                       "deletedAt",
                       "profilePictureUrl"
@@ -15666,9 +15758,6 @@
                     "lastName": {
                       "type": "string"
                     },
-                    "role": {
-                      "type": "string"
-                    },
                     "archived": {
                       "type": "boolean"
                     },
@@ -15700,7 +15789,6 @@
                     "email",
                     "firstName",
                     "lastName",
-                    "role",
                     "archived",
                     "deletedAt",
                     "profilePictureUrl"
@@ -15773,9 +15861,6 @@
                       "lastName": {
                         "type": "string"
                       },
-                      "role": {
-                        "type": "string"
-                      },
                       "archived": {
                         "type": "boolean"
                       },
@@ -15807,7 +15892,6 @@
                       "email",
                       "firstName",
                       "lastName",
-                      "role",
                       "archived",
                       "deletedAt",
                       "profilePictureUrl"
@@ -27040,9 +27124,6 @@
                       "lastName": {
                         "type": "string"
                       },
-                      "role": {
-                        "type": "string"
-                      },
                       "archived": {
                         "type": "boolean"
                       },
@@ -27074,7 +27155,6 @@
                       "email",
                       "firstName",
                       "lastName",
-                      "role",
                       "archived",
                       "deletedAt",
                       "profilePictureUrl"

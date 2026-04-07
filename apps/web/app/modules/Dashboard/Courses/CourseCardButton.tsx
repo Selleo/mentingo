@@ -8,7 +8,7 @@ import { getCurrencyLocale } from "~/utils/getCurrencyLocale";
 type CourseCardButtonProps = {
   currency: string;
   enrolled: boolean;
-  isAdmin: boolean;
+  canManageCourses: boolean;
   priceInCents: number;
   isScormCreatePage?: boolean;
 };
@@ -16,12 +16,12 @@ type CourseCardButtonProps = {
 const CourseCardButton = ({
   currency,
   enrolled,
-  isAdmin,
+  canManageCourses,
   priceInCents,
   isScormCreatePage,
 }: CourseCardButtonProps) => {
   const { t } = useTranslation();
-  const getButtonLabel = (enrolled: boolean, isAdmin: boolean) => {
+  const getButtonLabel = (enrolled: boolean, canManageCourses: boolean) => {
     if (enrolled) {
       return (
         <span className="flex items-center gap-x-2">
@@ -33,7 +33,7 @@ const CourseCardButton = ({
 
     if (isScormCreatePage) return t("studentCoursesView.button.readMore");
 
-    if (isAdmin) return t("studentCoursesView.button.view");
+    if (canManageCourses) return t("studentCoursesView.button.view");
 
     if (priceInCents)
       return `${t("studentCoursesView.button.enroll")} - ${formatPrice(priceInCents, currency, getCurrencyLocale(currency))}`;
@@ -41,7 +41,7 @@ const CourseCardButton = ({
     return t("studentCoursesView.button.enroll");
   };
 
-  const buttonLabel = getButtonLabel(enrolled, isAdmin);
+  const buttonLabel = getButtonLabel(enrolled, canManageCourses);
 
   return (
     <Button variant={enrolled ? "secondary" : "primary"} className="mt-auto w-full">

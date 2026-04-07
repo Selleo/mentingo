@@ -722,6 +722,34 @@
       "when": 1774521049823,
       "tag": "0102_add_login_failed_action_type_to_activity_logs",
       "breakpoints": true
+    },
+    {
+      "idx": 103,
+      "version": "7",
+      "when": 1775175436517,
+      "tag": "0103_add_permissions_schema",
+      "breakpoints": true
+    },
+    {
+      "idx": 104,
+      "version": "7",
+      "when": 1775175486959,
+      "tag": "0104_enable_tenant_rls_for_permissions_related_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 105,
+      "version": "7",
+      "when": 1775175621935,
+      "tag": "0105_backfill_permission_user_roles_from_users_role",
+      "breakpoints": true
+    },
+    {
+      "idx": 106,
+      "version": "7",
+      "when": 1775175761020,
+      "tag": "0106_drop_roles_column_from_users",
+      "breakpoints": true
     }
   ]
 }

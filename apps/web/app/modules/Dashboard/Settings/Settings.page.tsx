@@ -1,4 +1,4 @@
-import { OnboardingPages } from "@repo/shared";
+import { OnboardingPages, PERMISSIONS } from "@repo/shared";
 import { Suspense, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -6,9 +6,9 @@ import { useCurrentUser } from "~/api/queries";
 import { useConfigurationState } from "~/api/queries/admin/useConfigurationState";
 import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { useUserSettings } from "~/api/queries/useUserSettings";
+import { hasAnyPermission, hasPermission } from "~/common/permissions/permission.utils";
 import { PageWrapper } from "~/components/PageWrapper";
-import { USER_ROLE } from "~/config/userRoles";
-import { useUserRole } from "~/hooks/useUserRole";
+import { usePermissions } from "~/hooks/usePermissions";
 import Loader from "~/modules/common/Loader/Loader";
 import CustomizePlatformTabContent from "~/modules/Dashboard/Settings/components/admin/CustomizePlatformTabContent";
 import { setPageTitle } from "~/utils/setPageTitle";
@@ -27,19 +27,44 @@ export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.
 export default function SettingsPage() {
   const { t } = useTranslation();
 
-  const { isContentCreator, isAdmin, isStudent } = useUserRole();
+  const { permissions } = usePermissions();
+
+  const {
+    canManageEnvs,
+    canManageCourses,
+    canManageIntegrationApi,
+    canUpdateLearningProgress,
+    canManageUsers,
+    canManageSettings,
+  } = useMemo(() => {
+    return {
+      canManageEnvs: hasPermission(permissions, PERMISSIONS.ENV_MANAGE),
+      canManageCourses: hasAnyPermission(permissions, [
+        PERMISSIONS.COURSE_UPDATE,
+        PERMISSIONS.COURSE_UPDATE_OWN,
+      ]),
+      canManageIntegrationApi: hasPermission(permissions, PERMISSIONS.INTEGRATION_KEY_MANAGE),
+      canUpdateLearningProgress: hasPermission(permissions, PERMISSIONS.LEARNING_PROGRESS_UPDATE),
+      canManageUsers: hasPermission(permissions, PERMISSIONS.USER_MANAGE),
+      canManageSettings: hasPermission(permissions, PERMISSIONS.SETTINGS_MANAGE),
+    };
+  }, [permissions]);
+
   const { data: user, isLoading: isLoadingUser } = useCurrentUser();
   const isSupportMode = Boolean(user?.isSupportMode);
   const { data: userSettings, isLoading: isLoadingUserSettings } = useUserSettings(!isSupportMode);
   const { data: globalSettings, isLoading: isLoadingGlobalSettings } = useGlobalSettings();
   const { data: configurationState } = useConfigurationState({
-    enabled: user?.role === USER_ROLE.admin,
+    enabled: canManageEnvs,
   });
 
   const isLoading =
     (isSupportMode ? false : isLoadingUserSettings) || isLoadingGlobalSettings || isLoadingUser;
 
-  const steps = useMemo(() => (isStudent ? studentSettingsSteps(t) : []), [isStudent, t]);
+  const steps = useMemo(
+    () => (canUpdateLearningProgress ? studentSettingsSteps(t) : []),
+    [canUpdateLearningProgress, t],
+  );
 
   useTourSetup({
     steps,
@@ -55,9 +80,7 @@ export default function SettingsPage() {
   };
 
   const hasConfigurationIssues =
-    user?.role === USER_ROLE.admin &&
-    configurationState?.hasIssues &&
-    !configurationState?.isWarningDismissed;
+    canManageEnvs && configurationState?.hasIssues && !configurationState?.isWarningDismissed;
 
   return (
     <PageWrapper
@@ -72,26 +95,29 @@ export default function SettingsPage() {
         }
       >
         <SettingsNavigationTabs
-          isAdmin={isAdmin}
+          canManageSettings={canManageSettings}
           hideAccountTab={isSupportMode}
           hasConfigurationIssues={hasConfigurationIssues}
           accountContent={
             !isSupportMode && (
               <AccountTabContent
-                isContentCreator={isContentCreator}
-                isAdmin={isAdmin}
+                canManageCourses={canManageCourses}
+                canAccessIntegrationApi={canManageIntegrationApi}
+                canResetOnboarding={canUpdateLearningProgress}
+                canManageUsers={canManageUsers}
                 settings={isUserSettings(userSettings) ? userSettings : { language: "en" }}
               />
             )
           }
           organizationContent={
-            globalSettings && (
-              <OrganizationTabContent isAdmin={isAdmin} globalSettings={globalSettings} />
-            )
+            globalSettings && <OrganizationTabContent globalSettings={globalSettings} />
           }
           customizePlatformContent={
             globalSettings && (
-              <CustomizePlatformTabContent isAdmin={isAdmin} globalSettings={globalSettings} />
+              <CustomizePlatformTabContent
+                canManageUsers={canManageUsers}
+                globalSettings={globalSettings}
+              />
             )
           }
         />

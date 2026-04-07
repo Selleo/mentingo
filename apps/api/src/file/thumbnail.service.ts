@@ -9,6 +9,7 @@ import {
 } from "@nestjs/common";
 import {
   ENTITY_TYPES,
+  PERMISSIONS,
   VIDEO_EMBED_PROVIDERS,
   detectVideoProviderFromUrl,
   extractResourceIdFromSourceUrl,
@@ -21,6 +22,7 @@ import { and, eq, getTableColumns, isNull, sql } from "drizzle-orm";
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { DatabasePg } from "src/common";
 import { setJsonbField } from "src/common/helpers/sqlHelpers";
+import { hasPermission } from "src/common/permissions/permission.utils";
 import { S3Service } from "src/s3/s3.service";
 import {
   articles,
@@ -33,7 +35,6 @@ import {
   settings,
   studentCourses,
 } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { BASE_THUMBNAIL_CONTENT_TYPE, getVideoThumbnailKey } from "./utils/videoThumbnail";
 
@@ -150,10 +151,25 @@ export class ThumbnailService {
     return (globalSettings?.settings ?? {}) as Record<string, unknown>;
   }
 
-  private isAdminLike(currentUser: CurrentUser | null) {
+  private canManagePublishedContent(currentUser: CurrentUser | null) {
+    if (!currentUser) return false;
+
     return (
-      currentUser?.role === USER_ROLES.ADMIN || currentUser?.role === USER_ROLES.CONTENT_CREATOR
+      hasPermission(currentUser.permissions, PERMISSIONS.ARTICLE_MANAGE) ||
+      hasPermission(currentUser.permissions, PERMISSIONS.NEWS_MANAGE)
     );
+  }
+
+  private canManageOwnArticle(currentUser: CurrentUser | null) {
+    return hasPermission(currentUser?.permissions, PERMISSIONS.ARTICLE_MANAGE_OWN);
+  }
+
+  private canManageOwnNews(currentUser: CurrentUser | null) {
+    return hasPermission(currentUser?.permissions, PERMISSIONS.NEWS_MANAGE_OWN);
+  }
+
+  private canManageOwnCourse(currentUser: CurrentUser | null) {
+    return hasPermission(currentUser?.permissions, PERMISSIONS.COURSE_UPDATE_OWN);
   }
 
   private async validateArticleThumbnailAccess(
@@ -182,10 +198,14 @@ export class ThumbnailService {
 
     if (!article) throw new NotFoundException("Article resource not found");
 
-    const isAuthor = Boolean(currentUser?.userId && article.authorId === currentUser.userId);
+    const isAuthor = Boolean(
+      currentUser?.userId &&
+        this.canManageOwnArticle(currentUser) &&
+        article.authorId === currentUser.userId,
+    );
     const isPublic = Boolean(article.isPublic && article.publishedAt !== null);
 
-    if (!this.isAdminLike(currentUser) && !isAuthor && !isPublic) {
+    if (!this.canManagePublishedContent(currentUser) && !isAuthor && !isPublic) {
       throw new NotFoundException("Article resource not found");
     }
   }
@@ -215,10 +235,14 @@ export class ThumbnailService {
 
     if (!newsItem) throw new NotFoundException("News resource not found");
 
-    const isAuthor = Boolean(currentUser?.userId && newsItem.authorId === currentUser.userId);
+    const isAuthor = Boolean(
+      currentUser?.userId &&
+        this.canManageOwnNews(currentUser) &&
+        newsItem.authorId === currentUser.userId,
+    );
     const isPublic = Boolean(newsItem.isPublic && newsItem.publishedAt !== null);
 
-    if (!this.isAdminLike(currentUser) && !isAuthor && !isPublic) {
+    if (!this.canManagePublishedContent(currentUser) && !isAuthor && !isPublic) {
       throw new NotFoundException("News resource not found");
     }
   }
@@ -252,19 +276,22 @@ export class ThumbnailService {
       throw new NotFoundException("Lesson resource not found");
     }
 
+    const canUseOwnCourseAccess = this.canManageOwnCourse(currentUser);
     const isAuthor = Boolean(
-      currentUserId &&
+      canUseOwnCourseAccess &&
+        currentUserId &&
         (lessonAccess.courseAuthorId === currentUserId ||
           lessonAccess.chapterAuthorId === currentUserId),
     );
 
-    if (this.isAdminLike(currentUser) || isAuthor) {
-      return;
-    }
+    const canManageCourseContent = hasPermission(
+      currentUser?.permissions,
+      PERMISSIONS.COURSE_UPDATE,
+    );
 
-    if (lessonAccess.isFreemium) {
-      return;
-    }
+    if (canManageCourseContent || isAuthor) return;
+
+    if (lessonAccess.isFreemium) return;
 
     if (!lessonAccess.isAssigned) {
       throw new ForbiddenException("You are not allowed to access this lesson!");

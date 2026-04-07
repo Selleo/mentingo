@@ -1,10 +1,10 @@
+import { PERMISSIONS } from "@repo/shared";
 import { type Static, Type } from "@sinclair/typebox";
 import { createSelectSchema } from "drizzle-typebox";
 
 import { UUIDSchema } from "src/common";
 import { commonUserSchema } from "src/common/schemas/common-user.schema";
 import { userOnboarding } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 import { omitTenantId } from "src/utils/omitTenantId";
 
 export const baseUserResponseSchema = Type.Composite([
@@ -19,6 +19,10 @@ export const userOnboardingStatusSchema = omitTenantId(createSelectSchema(userOn
 export const currentUserResponseSchema = Type.Composite([
   baseUserResponseSchema,
   Type.Object({
+    roleSlugs: Type.Array(Type.String()),
+    permissions: Type.Array(
+      Type.Union(Object.values(PERMISSIONS).map((permission) => Type.Literal(permission))),
+    ),
     shouldVerifyMFA: Type.Boolean(),
     onboardingStatus: userOnboardingStatusSchema,
     isManagingTenantAdmin: Type.Boolean(),
@@ -40,6 +44,7 @@ export const allUsersSchema = Type.Array(
   Type.Intersect([
     baseUserResponseSchema,
     Type.Object({
+      roleSlugs: Type.Array(Type.String()),
       groups: Type.Array(
         Type.Object({
           id: UUIDSchema,
@@ -50,10 +55,20 @@ export const allUsersSchema = Type.Array(
   ]),
 );
 
+export const roleSchema = Type.Object({
+  id: UUIDSchema,
+  name: Type.String(),
+  slug: Type.String(),
+  isSystem: Type.Boolean(),
+});
+
+export const allRolesSchema = Type.Array(roleSchema);
+
 export const userSchema = Type.Composite([
   Type.Omit(commonUserSchema, ["avatarReference"]),
   Type.Object({
     profilePictureUrl: Type.Union([Type.String(), Type.Null()]),
+    roleSlugs: Type.Array(Type.String()),
     groups: Type.Array(
       Type.Object({
         id: UUIDSchema,
@@ -71,7 +86,6 @@ export const userDetailsSchema = Type.Object({
   contactEmail: Type.Union([Type.String(), Type.Null()]),
   contactPhone: Type.Union([Type.String(), Type.Null()]),
   jobTitle: Type.Union([Type.String(), Type.Null()]),
-  role: Type.Enum(USER_ROLES),
 });
 
 export const userDetailsResponseSchema = Type.Object({
@@ -84,5 +98,7 @@ export type UserDetailsWithAvatarKey = Static<typeof userDetailsSchema> & {
 };
 
 export type UserDetailsResponse = Static<typeof userDetailsResponseSchema>;
-export type UserResponse = Static<typeof baseUserResponseSchema>;
+export type UserResponse = Static<typeof userSchema>;
 export type AllUsersResponse = Static<typeof allUsersSchema>;
+export type RoleResponse = Static<typeof roleSchema>;
+export type AllRolesResponse = Static<typeof allRolesSchema>;

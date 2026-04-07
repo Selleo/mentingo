@@ -1,3 +1,4 @@
+import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import request from "supertest";
 
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
@@ -10,7 +11,6 @@ import { createUserFactory } from "../../../test/factory/user.factory";
 import { cookieFor, truncateAllTables } from "../../../test/helpers/test-helpers";
 import { DEFAULT_PAGE_SIZE } from "../../common/pagination";
 import { certificates } from "../../storage/schema";
-import { USER_ROLES } from "../../user/schemas/userRoles";
 
 import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg } from "src/common";
@@ -107,11 +107,11 @@ describe("CertificatesController (e2e)", () => {
         const admin = await userFactory
           .withCredentials({ password })
           .withAdminSettings(db)
-          .create({ role: USER_ROLES.ADMIN });
+          .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
         const student = await userFactory
           .withCredentials({ password })
           .withUserSettings(db)
-          .create({ role: USER_ROLES.STUDENT });
+          .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
         const course1 = await courseFactory.create({
@@ -151,11 +151,11 @@ describe("CertificatesController (e2e)", () => {
         const admin = await userFactory
           .withCredentials({ password })
           .withAdminSettings(db)
-          .create({ role: USER_ROLES.ADMIN });
+          .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
         const student = await userFactory
           .withCredentials({ password })
           .withUserSettings(db)
-          .create({ role: USER_ROLES.STUDENT });
+          .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
         const course1 = await courseFactory.create({
@@ -206,11 +206,11 @@ describe("CertificatesController (e2e)", () => {
         const admin = await userFactory
           .withCredentials({ password })
           .withAdminSettings(db)
-          .create({ role: USER_ROLES.ADMIN });
+          .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
         const student = await userFactory
           .withCredentials({ password })
           .withUserSettings(db)
-          .create({ role: USER_ROLES.STUDENT });
+          .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
         const course = await courseFactory.create({
@@ -243,11 +243,11 @@ describe("CertificatesController (e2e)", () => {
         const admin = await userFactory
           .withCredentials({ password })
           .withAdminSettings(db)
-          .create({ role: USER_ROLES.ADMIN });
+          .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
         const student = await userFactory
           .withCredentials({ password })
           .withUserSettings(db)
-          .create({ role: USER_ROLES.STUDENT });
+          .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
         const course = await courseFactory.create({
@@ -281,11 +281,11 @@ describe("CertificatesController (e2e)", () => {
         const admin = await userFactory
           .withCredentials({ password })
           .withAdminSettings(db)
-          .create({ role: USER_ROLES.ADMIN });
+          .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
         const student = await userFactory
           .withCredentials({ password })
           .withUserSettings(db)
-          .create({ role: USER_ROLES.STUDENT });
+          .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
         const course = await courseFactory.create({
@@ -319,11 +319,50 @@ describe("CertificatesController (e2e)", () => {
         expect(response.body instanceof Buffer).toBe(true);
       });
 
-      it("returns 400 when certificateId is missing", async () => {
+      it("returns pdf file with custom filename", async () => {
+        const admin = await userFactory
+          .withCredentials({ password })
+          .withAdminSettings(db)
+          .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
         const student = await userFactory
           .withCredentials({ password })
           .withUserSettings(db)
-          .create({ role: USER_ROLES.STUDENT });
+          .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+        const cookies = await cookieFor(student, app);
+        const category = await categoryFactory.create();
+        const course = await courseFactory.create({
+          title: "Python Basics",
+          authorId: admin.id,
+          categoryId: category.id,
+          thumbnailS3Key: null,
+          hasCertificate: true,
+        });
+        const [createdCertificate] = await db
+          .insert(certificates)
+          .values({
+            userId: student.id,
+            courseId: course.id,
+          })
+          .returning();
+
+        const response = await request(app.getHttpServer())
+          .post("/api/certificates/download")
+          .set("Cookie", cookies)
+          .send({ certificateId: createdCertificate.id, language: "en" })
+          .expect(201);
+
+        expect(response.headers["content-type"]).toBe("application/pdf");
+        expect(response.headers["content-disposition"]).toBe(
+          "attachment; filename=\"Python Basics.pdf\"; filename*=UTF-8''Python%20Basics.pdf",
+        );
+        expect(response.body instanceof Buffer).toBe(true);
+      });
+
+      it("returns 400 when html content is empty", async () => {
+        const student = await userFactory
+          .withCredentials({ password })
+          .withUserSettings(db)
+          .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
         const cookies = await cookieFor(student, app);
 
         await request(app.getHttpServer())

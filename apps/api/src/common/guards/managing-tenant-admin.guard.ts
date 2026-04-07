@@ -6,12 +6,13 @@ import {
   type CanActivate,
   type ExecutionContext,
 } from "@nestjs/common";
+import { PERMISSIONS } from "@repo/shared";
 import { eq } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
+import { hasPermission } from "src/common/permissions/permission.utils";
 import { DB_ADMIN } from "src/storage/db/db.providers";
 import { tenants } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import type { CurrentUser } from "src/common/types/current-user.type";
 
@@ -25,8 +26,8 @@ export class ManagingTenantAdminGuard implements CanActivate {
 
     if (!user) throw new UnauthorizedException("auth.error.unauthenticated");
 
-    if (user.role !== USER_ROLES.ADMIN) {
-      throw new ForbiddenException("auth.error.adminRoleRequired");
+    if (!hasPermission(user.permissions, PERMISSIONS.TENANT_MANAGE)) {
+      throw new ForbiddenException("auth.error.missingPermission");
     }
 
     const [tenant] = await this.dbBase

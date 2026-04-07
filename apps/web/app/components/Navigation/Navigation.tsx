@@ -1,4 +1,5 @@
 import { useLocation } from "@remix-run/react";
+import { PERMISSIONS } from "@repo/shared";
 import { useEffect, useState, Fragment } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -6,12 +7,12 @@ import { useCurrentUser } from "~/api/queries";
 import { useConfigurationState } from "~/api/queries/admin/useConfigurationState";
 import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { useStripeConfigured } from "~/api/queries/useStripeConfigured";
+import { matchesRequirement } from "~/common/permissions/permission.utils";
 import { Icon } from "~/components/Icon";
 import { Separator } from "~/components/ui/separator";
 import { TooltipProvider } from "~/components/ui/tooltip";
 import { getNavigationConfig, mapNavigationItems } from "~/config/navigationConfig";
-import { USER_ROLE } from "~/config/userRoles";
-import { useUserRole } from "~/hooks/useUserRole";
+import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
 import { shouldHideTopbarAndSidebar } from "~/modules/Admin/Admin.layout";
 
@@ -25,13 +26,14 @@ import { useNavigationStore } from "./stores/navigationStore";
 import { useMobileNavigation } from "./useMobileNavigation";
 
 import type { LeafMenuItem, NavigationGroups } from "~/config/navigationConfig";
-import type { UserRole } from "~/utils/userRoles";
 
 type DashboardNavigationProps = { menuItems?: NavigationGroups[] };
 
 export function Navigation({ menuItems }: DashboardNavigationProps) {
   const { isMobileNavOpen, setIsMobileNavOpen } = useMobileNavigation();
-  const { role } = useUserRole();
+  const { hasAccess: canManageEnvs, permissions } = usePermissions({
+    required: [PERMISSIONS.ENV_MANAGE],
+  });
   const { t } = useTranslation();
   const { pathname } = useLocation();
   const [is2xlBreakpoint, setIs2xlBreakpoint] = useState(false);
@@ -42,13 +44,11 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
   const { data: user } = useCurrentUser();
 
   const { data: configurationState } = useConfigurationState({
-    enabled: user?.role === USER_ROLE.admin,
+    enabled: canManageEnvs,
   });
 
   const hasConfigurationIssues =
-    user?.role === USER_ROLE.admin &&
-    configurationState?.hasIssues &&
-    !configurationState?.isWarningDismissed;
+    canManageEnvs && configurationState?.hasIssues && !configurationState?.isWarningDismissed;
 
   const { isSidebarCollapsed, toggleSidebarCollapsed } = useNavigationStore();
 
@@ -75,8 +75,6 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
       ),
     );
   }
-
-  if (!role) return null;
 
   if (shouldHideTopbarAndSidebar(pathname)) return null;
 
@@ -136,9 +134,9 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
         >
           <div className="flex flex-col gap-y-3">
             {menuItems.map((group) => {
-              const { restrictedRoles, restrictedManagingTenantAdmin } = group;
+              const { restrictedAccessRequirement, restrictedManagingTenantAdmin } = group;
 
-              if (restrictedRoles && !restrictedRoles.includes(role as UserRole)) return null;
+              if (!matchesRequirement(permissions, restrictedAccessRequirement)) return null;
               if (
                 restrictedManagingTenantAdmin &&
                 (!user?.isManagingTenantAdmin || user?.isSupportMode)
@@ -149,7 +147,7 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
                 <Fragment key={group.title}>
                   <NavigationMenu
                     menuItems={group.items as unknown as LeafMenuItem[]}
-                    role={role}
+                    permissions={permissions}
                     setIsMobileNavOpen={setIsMobileNavOpen}
                     isExpandable={group.isExpandable}
                     expandableLabel={group.title}

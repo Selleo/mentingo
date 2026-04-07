@@ -7,6 +7,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { trace } from "@opentelemetry/api";
+import { PERMISSIONS } from "@repo/shared";
 import { experimental_transcribe, generateObject, jsonSchema, type Message, streamText } from "ai";
 import { and, eq } from "drizzle-orm";
 import _ from "lodash";
@@ -30,10 +31,8 @@ import {
 } from "src/ai/utils/ai.type";
 import { stripVoiceEmotionBrackets } from "src/ai/utils/voiceEmotionBrackets";
 import { DatabasePg } from "src/common";
-import {
-  canUseLessonProgressAsLearner,
-  LEARNING_MODE_REQUIRED_ERROR_KEY,
-} from "src/common/utils/lessonLearningAccess";
+import { LEARNING_MODE_REQUIRED_ERROR_KEY } from "src/common/utils/lessonLearningAccess";
+import { PermissionsService } from "src/permissions/permissions.service";
 import { dbAls } from "src/storage/db/db-als.store";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import {
@@ -44,9 +43,8 @@ import {
   studentCourses,
 } from "src/storage/schema";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
-import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
-import type { SupportedLanguages } from "@repo/shared";
+import type { PermissionKey, SupportedLanguages } from "@repo/shared";
 import type {
   CreateThreadBody,
   GenerateTranslationBody,
@@ -69,6 +67,7 @@ export class AiService {
     private readonly promptService: PromptService,
     private readonly summaryService: SummaryService,
     private readonly judgeService: JudgeService,
+    private readonly permissionsService: PermissionsService,
     private readonly studentLessonProgressService: StudentLessonProgressService,
     private readonly tenantRunner: TenantDbRunnerService,
     @Inject("DB")
@@ -220,26 +219,33 @@ export class AiService {
     });
   }
 
-  async runJudge(data: ThreadOwnershipBody, userRole: UserRole = USER_ROLES.STUDENT) {
+  async runJudge(data: ThreadOwnershipBody, currentUser?: CurrentUser) {
+    const thread = await this.aiRepository.findThread([eq(aiMentorThreads.id, data.threadId)]);
+    if (!thread) throw new BadRequestException("Thread not found");
+
+    const viewer = await this.resolveJudgeViewer(currentUser, thread.userId);
+
     const judged = await observe(
       async () => {
         updateActiveTrace({
           sessionId: data.threadId,
           userId: dbAls.getStore()?.tenantId,
         });
-        return this.judgeService.runJudge(data);
+        return this.judgeService.runJudge(data, viewer);
       },
       { name: "Thread Evaluator", asType: "evaluator" },
     )();
 
     const { lessonId } = await this.aiRepository.findLessonIdByThreadId(data.threadId);
-
-    const thread = await this.aiRepository.findThread([eq(aiMentorThreads.id, data.threadId)]);
+    const { permissions: learnerPermissions } = await this.permissionsService.getUserAccess(
+      thread.userId,
+    );
 
     await this.markAsCompletedIfJudge(
       lessonId,
-      data.userId,
-      userRole,
+      thread.userId,
+      learnerPermissions,
+      currentUser,
       judged.data,
       thread.userLanguage,
       true,
@@ -272,7 +278,8 @@ export class AiService {
   async markAsCompletedIfJudge(
     lessonId: UUIDType,
     studentId: UUIDType,
-    userRole: UserRole,
+    userPermissions: PermissionKey[],
+    actor: CurrentUser | undefined,
     message: string | ResponseAiJudgeJudgementBody,
     language: SupportedLanguages,
     isJudge?: boolean,
@@ -285,18 +292,21 @@ export class AiService {
     await this.studentLessonProgressService.markLessonAsCompleted({
       id: lessonId,
       studentId,
-      userRole,
+      userPermissions,
+      actor,
       aiMentorLessonData,
       language,
     });
   }
 
-  async retakeLesson(lessonId: UUIDType, userId: UUIDType, userRole: UserRole) {
-    await this.assertStudentProgressMutationAllowed(lessonId, userId, userRole);
+  async retakeLesson(lessonId: UUIDType, currentUser: CurrentUser) {
+    const { userId, permissions } = currentUser;
+
+    await this.assertStudentProgressMutationAllowed(lessonId, userId, permissions);
 
     const [lesson] = await this.aiRepository.checkLessonAssignment(lessonId, userId);
 
-    if (userRole === USER_ROLES.STUDENT && !lesson.isAssigned && !lesson.isFreemium)
+    if (!lesson.isAssigned && !lesson.isFreemium)
       throw new UnauthorizedException("You are not assigned to this lesson");
 
     await this.db.transaction(async (trx) => {
@@ -308,10 +318,8 @@ export class AiService {
   private async assertStudentProgressMutationAllowed(
     lessonId: UUIDType,
     userId: UUIDType,
-    userRole: UserRole,
+    userPermissions: PermissionKey[],
   ) {
-    if (userRole === USER_ROLES.STUDENT) return;
-
     const [access] = await this.db
       .select({
         isAssigned: studentCourses.id,
@@ -332,12 +340,37 @@ export class AiService {
       )
       .where(eq(lessons.id, lessonId));
 
-    const hasLearnerAccess = canUseLessonProgressAsLearner(userRole, {
+    const hasLearnerAccess = this.canUseLearnerProgressByPermissions(userPermissions, {
       hasEnrollment: !!access?.isAssigned,
       isLearningModeActive: !!access?.isStudentMode,
     });
 
     if (!hasLearnerAccess) throw new ForbiddenException(LEARNING_MODE_REQUIRED_ERROR_KEY);
+  }
+
+  private async resolveJudgeViewer(currentUser: CurrentUser | undefined, fallbackUserId: UUIDType) {
+    if (currentUser)
+      return {
+        userId: currentUser.userId,
+        permissions: currentUser.permissions,
+      };
+
+    const { permissions } = await this.permissionsService.getUserAccess(fallbackUserId);
+
+    return {
+      userId: fallbackUserId,
+      permissions,
+    };
+  }
+
+  private canUseLearnerProgressByPermissions(
+    userPermissions: PermissionKey[],
+    access: { hasEnrollment: boolean; isLearningModeActive: boolean },
+  ) {
+    const canUseLearningMode = userPermissions.includes(PERMISSIONS.LEARNING_MODE_USE);
+    if (canUseLearningMode) return access.isLearningModeActive;
+
+    return true;
   }
 
   async transcribe(clientId: string, audio: Buffer) {

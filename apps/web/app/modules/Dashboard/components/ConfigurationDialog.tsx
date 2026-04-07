@@ -31,7 +31,10 @@ export function EnvSetupDialog({ data, isOpen, onOpenChange }: EnvSetupDialogPro
           <Button
             variant="outline"
             size="icon"
-            onClick={() => onOpenChange(false)}
+            onClick={() => {
+              handleDismiss();
+              onOpenChange(false);
+            }}
             className="text-neutral-300 hover:text-primary-500"
           >
             <Icon name="X" className="size-3" />

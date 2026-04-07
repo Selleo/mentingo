@@ -9,7 +9,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { BaseEmailTemplate } from "@repo/email-templates";
-import { COURSE_ENROLLMENT, SUPPORTED_LANGUAGES, ENTITY_TYPES } from "@repo/shared";
+import { COURSE_ENROLLMENT, SUPPORTED_LANGUAGES, ENTITY_TYPES, PERMISSIONS } from "@repo/shared";
 import { load as loadHtml } from "cheerio";
 import {
   and,
@@ -40,6 +40,9 @@ import { EmailService } from "src/common/emails/emails.service";
 import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterConditions";
 import { buildJsonbField, deleteJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { canUpdateCourseByAuthor } from "src/common/permissions/course-permission.utils";
+import { userHasAnyPermissionsCondition } from "src/common/permissions/permission-sql.utils";
+import { hasPermission } from "src/common/permissions/permission.utils";
 import { injectResourcesIntoContent } from "src/common/utils/injectResourcesIntoContent";
 import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
 import { UpdateHasCertificateEvent } from "src/courses/events/updateHasCertificate.event";
@@ -84,7 +87,6 @@ import {
   courseStudentsStats,
 } from "src/storage/schema";
 import { StripeService } from "src/stripe/stripe.service";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 import { UserService } from "src/user/user.service";
 import { hasLocalizableUpdates } from "src/utils/getLocalizableKeys";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
@@ -153,7 +155,6 @@ import type {
   AdminLessonWithContentSchema,
   LessonForChapterSchema,
 } from "src/lesson/lesson.schema";
-import type { UserRole } from "src/user/schemas/userRoles";
 import type { ProgressStatus } from "src/utils/types/progress.type";
 import type Stripe from "stripe";
 
@@ -190,7 +191,7 @@ export class CourseService {
       perPage = DEFAULT_PAGE_SIZE,
       sort = CourseSortFields.title,
       currentUserId,
-      currentUserRole,
+      currentUserPermissions = [],
       language,
     } = query;
 
@@ -199,7 +200,7 @@ export class CourseService {
     const conditions = this.getFiltersConditions(filters, false);
     const orderConditions = this.getOrderConditions(filters);
 
-    if (currentUserRole === USER_ROLES.CONTENT_CREATOR && currentUserId) {
+    if (currentUserId && hasPermission(currentUserPermissions, PERMISSIONS.COURSE_UPDATE_OWN)) {
       conditions.push(eq(courses.authorId, currentUserId));
     }
 
@@ -418,10 +419,17 @@ export class CourseService {
 
     const { sortOrder, sortedField } = getSortOptions(sort);
 
+    const hasCourseUpdatePermissions = userHasAnyPermissionsCondition(
+      this.db,
+      users.id,
+      users.tenantId,
+      [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
+    );
+
     const conditions = [
-      eq(users.role, USER_ROLES.STUDENT),
       eq(users.archived, false),
       isNull(users.deletedAt),
+      not(hasCourseUpdatePermissions),
     ];
 
     if (keyword) {
@@ -561,9 +569,13 @@ export class CourseService {
 
     await Promise.all(
       trailerReferences.map(async (trailerReference) => {
-        trailerUrls[trailerReference.courseId] = await this.fileService.getFileUrl(
-          trailerReference.reference,
-        );
+        try {
+          trailerUrls[trailerReference.courseId] = await this.fileService.getFileUrl(
+            trailerReference.reference,
+          );
+        } catch {
+          trailerUrls[trailerReference.courseId] = null;
+        }
       }),
     );
 
@@ -1276,8 +1288,7 @@ export class CourseService {
   async getBetaCourseById(
     id: UUIDType,
     language: SupportedLanguages,
-    currentUserId: UUIDType,
-    currentUserRole: UserRole,
+    currentUser: CurrentUser,
   ): Promise<CommonShowBetaCourse> {
     const [course] = await this.db
       .select({
@@ -1306,7 +1317,7 @@ export class CourseService {
 
     if (!course) throw new NotFoundException("Course not found");
 
-    if (currentUserRole !== USER_ROLES.ADMIN && course.authorId !== currentUserId) {
+    if (!canUpdateCourseByAuthor(currentUser, course.authorId)) {
       throw new ForbiddenException("You do not have permission to edit this course");
     }
 
@@ -1364,23 +1375,16 @@ export class CourseService {
   async hasMissingTranslations(
     id: UUIDType,
     language: SupportedLanguages,
-    currentUserId: UUIDType,
-    currentUserRole: UserRole,
+    currentUser: CurrentUser,
   ): Promise<boolean> {
-    const courseInRequestedLanguage = await this.getBetaCourseById(
-      id,
-      language,
-      currentUserId,
-      currentUserRole,
-    );
+    const courseInRequestedLanguage = await this.getBetaCourseById(id, language, currentUser);
 
     if (language === courseInRequestedLanguage.baseLanguage) return false;
 
     const courseInBaseLanguage = await this.getBetaCourseById(
       id,
       courseInRequestedLanguage.baseLanguage,
-      currentUserId,
-      currentUserRole,
+      currentUser,
     );
 
     return (
@@ -1809,8 +1813,6 @@ export class CourseService {
       attemptedFieldKeys,
     );
 
-    const { userId: currentUserId, role: currentUserRole } = currentUser;
-
     const { updatedCourse, previousCourseSnapshot, updatedCourseSnapshot } =
       await this.db.transaction(async (trx) => {
         const [existingCourse] = await trx.select().from(courses).where(eq(courses.id, id));
@@ -1832,7 +1834,7 @@ export class CourseService {
           throw new NotFoundException("Course not found");
         }
 
-        if (existingCourse.authorId !== currentUserId && currentUserRole !== USER_ROLES.ADMIN) {
+        if (!canUpdateCourseByAuthor(currentUser, existingCourse.authorId)) {
           throw new ForbiddenException("You don't have permission to update course");
         }
 
@@ -1980,7 +1982,6 @@ export class CourseService {
   }
 
   async deleteCourseTrailer(courseId: UUIDType, currentUser: CurrentUser) {
-    const { userId: currentUserId, role: currentUserRole } = currentUser;
     const [course] = await this.db
       .select({ id: courses.id, authorId: courses.authorId })
       .from(courses)
@@ -1990,7 +1991,7 @@ export class CourseService {
       throw new NotFoundException("Course not found");
     }
 
-    if (course.authorId !== currentUserId && currentUserRole !== USER_ROLES.ADMIN) {
+    if (!canUpdateCourseByAuthor(currentUser, course.authorId)) {
       throw new ForbiddenException("You don't have permission to update course");
     }
 
@@ -2044,7 +2045,8 @@ export class CourseService {
     }
 
     if (
-      currentUser?.role === USER_ROLES.CONTENT_CREATOR &&
+      currentUser &&
+      hasPermission(currentUser.permissions, PERMISSIONS.COURSE_UPDATE_OWN) &&
       currentUser.userId === course.authorId
     ) {
       throw new ForbiddenException("You don't have permission to enroll in your own course");
@@ -2153,8 +2155,7 @@ export class CourseService {
   async enrollGroupsToCourse(
     courseId: UUIDType,
     groupsToEnroll: EnrolledCourseGroupsPayload["groups"],
-    userId?: UUIDType,
-    currentUserRole?: UserRole,
+    currentUser?: CurrentUser,
   ) {
     const groupIds = groupsToEnroll.map((group) => group.id);
     const groupInfoById = new Map(groupsToEnroll.map((group) => [group.id, group]));
@@ -2165,7 +2166,11 @@ export class CourseService {
     const groupExists = await this.db.select().from(groups).where(inArray(groups.id, groupIds));
     if (!groupExists.length) throw new NotFoundException("Groups not found");
 
-    if (currentUserRole === USER_ROLES.CONTENT_CREATOR && userId !== course.authorId) {
+    if (
+      currentUser &&
+      !hasPermission(currentUser.permissions, PERMISSIONS.COURSE_ENROLLMENT) &&
+      !canUpdateCourseByAuthor(currentUser, course.authorId)
+    ) {
       throw new ForbiddenException("You don't have permission to enroll groups to this course");
     }
 
@@ -2183,7 +2188,7 @@ export class CourseService {
         return {
           groupId,
           courseId,
-          enrolledBy: userId || null,
+          enrolledBy: currentUser?.userId || null,
           isMandatory: isMandatory ?? false,
           dueDate: dueDate ? new Date(dueDate) : null,
         };
@@ -2221,7 +2226,12 @@ export class CourseService {
         .where(
           and(
             inArray(groupUsers.groupId, groupIds),
-            eq(users.role, USER_ROLES.STUDENT),
+            not(
+              userHasAnyPermissionsCondition(this.db, users.id, users.tenantId, [
+                PERMISSIONS.COURSE_UPDATE,
+                PERMISSIONS.COURSE_UPDATE_OWN,
+              ]),
+            ),
             isNull(studentCourses.enrolledByGroupId),
           ),
         )
@@ -2263,7 +2273,12 @@ export class CourseService {
         .where(
           and(
             inArray(groupUsers.groupId, groupIds),
-            eq(users.role, USER_ROLES.STUDENT),
+            not(
+              userHasAnyPermissionsCondition(this.db, users.id, users.tenantId, [
+                PERMISSIONS.COURSE_UPDATE,
+                PERMISSIONS.COURSE_UPDATE_OWN,
+              ]),
+            ),
             isNull(studentCourses.id),
           ),
         )
@@ -2322,7 +2337,12 @@ export class CourseService {
         and(
           eq(studentCourses.courseId, courseId),
           inArray(studentCourses.enrolledByGroupId, groupIds),
-          eq(users.role, USER_ROLES.STUDENT),
+          not(
+            userHasAnyPermissionsCondition(this.db, users.id, users.tenantId, [
+              PERMISSIONS.COURSE_UPDATE,
+              PERMISSIONS.COURSE_UPDATE_OWN,
+            ]),
+          ),
         ),
       );
 
@@ -2511,8 +2531,7 @@ export class CourseService {
 
   async setCourseStudentMode(
     courseId: UUIDType,
-    userId: UUIDType,
-    userRole: UserRole,
+    currentUser: CurrentUser,
     enableStudentMode: boolean,
   ) {
     const [course] = await this.db
@@ -2522,17 +2541,18 @@ export class CourseService {
 
     if (!course) throw new NotFoundException("Course not found");
 
-    if (userRole === USER_ROLES.CONTENT_CREATOR && course.authorId !== userId) {
+    if (!hasPermission(currentUser.permissions, PERMISSIONS.LEARNING_MODE_USE)) {
       throw new ForbiddenException("You don't have permission to change student mode");
     }
 
     await this.db.transaction(async (trx) => {
-      if (enableStudentMode) return await this.enableCourseStudentMode(courseId, userId, trx);
+      if (enableStudentMode)
+        return await this.enableCourseStudentMode(courseId, currentUser.userId, trx);
 
-      await this.disableCourseStudentMode(courseId, userId, trx);
+      await this.disableCourseStudentMode(courseId, currentUser.userId, trx);
     });
 
-    const studentModeCourseIds = await this.getStudentModeCourseIds(userId);
+    const studentModeCourseIds = await this.getStudentModeCourseIds(currentUser.userId);
 
     return {
       courseId,
@@ -2595,14 +2615,14 @@ export class CourseService {
     return this.isCourseStudentModeEnabled(lesson.courseId, userId, dbInstance);
   }
 
-  async deleteCourse(id: UUIDType, currentUserRole: UserRole) {
+  async deleteCourse(id: UUIDType, currentUser: CurrentUser) {
     const [course] = await this.db.select().from(courses).where(eq(courses.id, id));
 
     if (!course) {
       throw new NotFoundException("Course not found");
     }
 
-    if (currentUserRole !== USER_ROLES.ADMIN && currentUserRole !== USER_ROLES.CONTENT_CREATOR) {
+    if (!hasPermission(currentUser.permissions, PERMISSIONS.COURSE_DELETE)) {
       throw new ForbiddenException("You don't have permission to delete this course");
     }
 
@@ -2635,12 +2655,12 @@ export class CourseService {
     });
   }
 
-  async deleteManyCourses(ids: UUIDType[], currentUserRole: UserRole) {
+  async deleteManyCourses(ids: UUIDType[], currentUser: CurrentUser) {
     if (!ids.length) {
       throw new BadRequestException("No course ids provided");
     }
 
-    if (currentUserRole !== USER_ROLES.ADMIN && currentUserRole !== USER_ROLES.CONTENT_CREATOR) {
+    if (!hasPermission(currentUser.permissions, PERMISSIONS.COURSE_DELETE)) {
       throw new ForbiddenException("You don't have permission to delete these courses");
     }
 
@@ -3729,15 +3749,10 @@ export class CourseService {
       );
   }
 
-  async createLanguage(
-    courseId: UUIDType,
-    language: SupportedLanguages,
-    userId: UUIDType,
-    role: UserRole,
-  ) {
+  async createLanguage(courseId: UUIDType, language: SupportedLanguages, currentUser: CurrentUser) {
     await this.masterCourseService.assertCourseContentEditable(courseId);
 
-    await this.adminLessonService.validateAccess("course", role, userId, courseId);
+    await this.adminLessonService.validateAccess("course", currentUser, courseId);
 
     const [{ availableLocales }] = await this.db
       .select()
@@ -3756,12 +3771,7 @@ export class CourseService {
       .where(eq(courses.id, courseId));
   }
 
-  async deleteLanguage(
-    courseId: UUIDType,
-    language: SupportedLanguages,
-    role: UserRole,
-    userId: UUIDType,
-  ) {
+  async deleteLanguage(courseId: UUIDType, language: SupportedLanguages, currentUser: CurrentUser) {
     await this.masterCourseService.assertCourseContentEditable(courseId);
 
     const { baseLanguage, availableLocales } = await this.localizationService.getBaseLanguage(
@@ -3773,7 +3783,7 @@ export class CourseService {
       throw new BadRequestException({ message: "adminCourseView.toast.invalidLanguageToDelete" });
     }
 
-    const data = await this.getBetaCourseById(courseId, language, userId, role);
+    const data = await this.getBetaCourseById(courseId, language, currentUser);
 
     return this.db.transaction(async (trx) => {
       const chapterIds = data.chapters.map(({ id }) => id);
@@ -3909,7 +3919,12 @@ export class CourseService {
         and(
           isNotNull(groupCourses.dueDate),
           sql`${groupCourses.dueDate} < NOW()`,
-          eq(users.role, USER_ROLES.STUDENT),
+          not(
+            userHasAnyPermissionsCondition(this.db, users.id, users.tenantId, [
+              PERMISSIONS.COURSE_UPDATE,
+              PERMISSIONS.COURSE_UPDATE_OWN,
+            ]),
+          ),
           isNull(users.deletedAt),
           isNull(studentCourses.completedAt),
         ),
@@ -4005,19 +4020,9 @@ export class CourseService {
       throw new BadRequestException({ message: "adminCourseView.toast.languageNotSupported" });
     }
 
-    const courseInRequestedLanguage = await this.getBetaCourseById(
-      courseId,
-      language,
-      currentUser.userId,
-      currentUser.role,
-    );
+    const courseInRequestedLanguage = await this.getBetaCourseById(courseId, language, currentUser);
 
-    const courseInBaseLanguage = await this.getBetaCourseById(
-      courseId,
-      baseLanguage,
-      currentUser.userId,
-      currentUser.role,
-    );
+    const courseInBaseLanguage = await this.getBetaCourseById(courseId, baseLanguage, currentUser);
 
     const { flat: missingData, withContext } = this.collectMissingTranslationFieldsWithContext(
       courseId,
@@ -4063,37 +4068,52 @@ export class CourseService {
   async getCourseOwnership(courseId: UUIDType) {
     await this.getCourseExists(courseId);
 
-    const [courseOwnership] = await this.db
-      .select({
-        currentAuthor: sql<CourseOwnershipBody>`
-              json_build_object(
-                'id', ${users.id},
-                'name', ${users.firstName} || ' ' || ${users.lastName},
-                'email', ${users.email}
-              )
-            `,
-        possibleCandidates: sql<CourseOwnershipBody[]>`
-              COALESCE(
-                (
-                  SELECT json_agg(json_build_object(
-                    'id', ${users.id},
-                    'name', ${users.firstName} || ' ' || ${users.lastName},
-                    'email', ${users.email}
-                  ))
-                  FROM ${users}
-                  WHERE ${users.role} IN (${USER_ROLES.ADMIN}, ${USER_ROLES.CONTENT_CREATOR})
-                    AND ${users.id} <> ${courses.authorId}
-                ),
-                '[]'::json
-              )
-            `,
-      })
+    const [course] = await this.db
+      .select({ authorId: courses.authorId })
       .from(courses)
-      .innerJoin(users, eq(courses.authorId, users.id))
       .where(eq(courses.id, courseId))
       .limit(1);
 
-    return courseOwnership;
+    if (!course) {
+      throw new NotFoundException("Course not found");
+    }
+
+    const [currentAuthor] = await this.db
+      .select({
+        id: users.id,
+        name: sql<string>`${users.firstName} || ' ' || ${users.lastName}`,
+        email: users.email,
+      })
+      .from(users)
+      .where(eq(users.id, course.authorId))
+      .limit(1);
+
+    if (!currentAuthor) {
+      throw new NotFoundException("Course author not found");
+    }
+
+    const possibleCandidates = await this.db
+      .select({
+        id: users.id,
+        name: sql<string>`${users.firstName} || ' ' || ${users.lastName}`,
+        email: users.email,
+      })
+      .from(users)
+      .where(
+        and(
+          ne(users.id, course.authorId),
+          isNull(users.deletedAt),
+          userHasAnyPermissionsCondition(this.db, users.id, users.tenantId, [
+            PERMISSIONS.COURSE_UPDATE,
+            PERMISSIONS.COURSE_UPDATE_OWN,
+          ]),
+        ),
+      );
+
+    return {
+      currentAuthor,
+      possibleCandidates: possibleCandidates as CourseOwnershipBody[],
+    };
   }
 
   async transferCourseOwnership(data: TransferCourseOwnershipRequestBody) {

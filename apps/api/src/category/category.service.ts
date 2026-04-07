@@ -5,17 +5,18 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from "@nestjs/common";
+import { PERMISSIONS, type PermissionKey } from "@repo/shared";
 import { and, count, eq, ilike, inArray, like } from "drizzle-orm";
 import { isEqual } from "lodash";
 
 import { DatabasePg } from "src/common";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { hasPermission } from "src/common/permissions/permission.utils";
 import { CreateCategoryEvent, DeleteCategoryEvent, UpdateCategoryEvent } from "src/events";
 import { LocalizationService } from "src/localization/localization.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { categories, courses } from "src/storage/schema";
-import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
 import {
   type CategoryFilterSchema,
@@ -41,7 +42,7 @@ export class CategoryService {
 
   public async getCategories(
     query: CategoryQuery,
-    userRole?: UserRole,
+    userPermissions?: PermissionKey[],
   ): Promise<{
     data: AllCategoriesResponse;
     pagination: Pagination;
@@ -55,7 +56,7 @@ export class CategoryService {
 
     const { sortOrder, sortedField } = getSortOptions(sort);
 
-    const isAdmin = userRole === USER_ROLES.ADMIN;
+    const canManageCategories = hasPermission(userPermissions, PERMISSIONS.CATEGORY_MANAGE);
 
     const selectedColumns = {
       id: categories.id,
@@ -70,7 +71,9 @@ export class CategoryService {
         .select(selectedColumns)
         .from(categories)
         .where(and(...conditions))
-        .orderBy(sortOrder(this.getColumnToSortBy(sortedField as CategorySortField, isAdmin)));
+        .orderBy(
+          sortOrder(this.getColumnToSortBy(sortedField as CategorySortField, canManageCategories)),
+        );
 
       const dynamicQuery = queryDB.$dynamic();
 
@@ -84,7 +87,7 @@ export class CategoryService {
         .where(and(...conditions));
 
       return {
-        data: this.serializeCategories(data, isAdmin),
+        data: this.serializeCategories(data, canManageCategories),
         pagination: { totalItems: totalItems, page, perPage },
         appliedFilters: filters,
       };

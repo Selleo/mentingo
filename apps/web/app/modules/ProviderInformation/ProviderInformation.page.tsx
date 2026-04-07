@@ -1,4 +1,4 @@
-import { OnboardingPages } from "@repo/shared";
+import { OnboardingPages, PERMISSIONS } from "@repo/shared";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -6,7 +6,7 @@ import { useUpdateCompanyInformation } from "~/api/mutations/admin/useUpdateComp
 import { useCurrentUser, useCompanyInformation } from "~/api/queries";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
-import { useUserRole } from "~/hooks/useUserRole";
+import { usePermissions } from "~/hooks/usePermissions";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import Loader from "../common/Loader/Loader";
@@ -25,14 +25,19 @@ export default function ProviderInformationPage() {
   const [isEditing, setIsEditing] = useState(false);
   const { t } = useTranslation();
 
-  const { isAdmin, isStudent } = useUserRole();
+  const { hasAccess: canManageSettings } = usePermissions({
+    required: PERMISSIONS.SETTINGS_MANAGE,
+  });
+  const { hasAccess: canUpdateLearningProgress } = usePermissions({
+    required: PERMISSIONS.LEARNING_PROGRESS_UPDATE,
+  });
   const { data: companyInfo, isLoading } = useCompanyInformation();
   const { mutate: updateCompanyInformation, isPending } = useUpdateCompanyInformation();
   const { data: currentUser } = useCurrentUser();
 
   const steps = useMemo(
-    () => (isStudent ? studentProviderInformationSteps(t) : []),
-    [t, isStudent],
+    () => (canUpdateLearningProgress ? studentProviderInformationSteps(t) : []),
+    [t, canUpdateLearningProgress],
   );
 
   useTourSetup({
@@ -84,7 +89,7 @@ export default function ProviderInformationPage() {
           <h2 id="provider-information" className="h5 md:h3 text-neutral-950">
             {t("providerInformation.title")}
           </h2>
-          {isAdmin && (
+          {canManageSettings && (
             <Button variant="outline" onClick={() => setIsEditing(!isEditing)} disabled={isPending}>
               {isEditing ? t("common.button.cancel") : t("common.button.edit")}
             </Button>

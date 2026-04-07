@@ -1,4 +1,4 @@
-import { COURSE_ENROLLMENT } from "@repo/shared";
+import { COURSE_ENROLLMENT, SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { and, eq } from "drizzle-orm";
 import request from "supertest";
 
@@ -8,7 +8,6 @@ import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { lessons, questions, questionAnswerOptions, studentCourses } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCategoryFactory } from "../../../test/factory/category.factory";
@@ -209,11 +208,11 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
   describe("GET /api/lesson/:id - quiz feedback redaction", () => {
     it("should redact quiz feedback for student when quizFeedbackEnabled is false", async () => {
       const category = await categoryFactory.create();
-      const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
+      const contentCreator = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
       const student = await userFactory
         .withCredentials({ password })
         .withUserSettings(db)
-        .create({ role: USER_ROLES.STUDENT });
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
       const cookies = await cookieFor(student, app);
 
       const course = await courseFactory.create({
@@ -252,11 +251,11 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
 
     it("should show full quiz feedback for student when quizFeedbackEnabled is true", async () => {
       const category = await categoryFactory.create();
-      const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
+      const contentCreator = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
       const student = await userFactory
         .withCredentials({ password })
         .withUserSettings(db)
-        .create({ role: USER_ROLES.STUDENT });
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
       const cookies = await cookieFor(student, app);
 
       const course = await courseFactory.create({
@@ -294,7 +293,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
 
     it("should show full quiz feedback for admin regardless of quizFeedbackEnabled", async () => {
       const category = await categoryFactory.create();
-      const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
+      const contentCreator = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
       const admin = await userFactory
         .withCredentials({ password })
         .withAdminSettings(db)
@@ -329,11 +328,11 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
   describe("POST /api/lesson/evaluation-quiz - quiz feedback redaction", () => {
     it("should redact quiz results for student when quizFeedbackEnabled is false", async () => {
       const category = await categoryFactory.create();
-      const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
+      const contentCreator = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
       const student = await userFactory
         .withCredentials({ password })
         .withUserSettings(db)
-        .create({ role: USER_ROLES.STUDENT });
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
       const cookies = await cookieFor(student, app);
 
       const course = await courseFactory.create({
@@ -370,11 +369,11 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
 
     it("should show full quiz results for student when quizFeedbackEnabled is true", async () => {
       const category = await categoryFactory.create();
-      const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
+      const contentCreator = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
       const student = await userFactory
         .withCredentials({ password })
         .withUserSettings(db)
-        .create({ role: USER_ROLES.STUDENT });
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
       const cookies = await cookieFor(student, app);
 
       const course = await courseFactory.create({
@@ -419,7 +418,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       const student = await userFactory
         .withCredentials({ password })
         .withUserSettings(db)
-        .create({ role: USER_ROLES.STUDENT });
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
       const studentCookies = await cookieFor(student, app);
 
       const course = await courseFactory.create({

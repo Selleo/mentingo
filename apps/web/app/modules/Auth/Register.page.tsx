@@ -133,7 +133,7 @@ export default function RegisterPage() {
         description: t("inviteOnlyRegistrationView.toast.registerRedirect"),
         variant: "destructive",
       });
-      return navigate("/auth/login");
+      return navigate("/auth/login", { replace: true });
     }
     // intentional
     // eslint-disable-next-line

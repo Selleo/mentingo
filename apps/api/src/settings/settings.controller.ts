@@ -23,6 +23,7 @@ import {
   ALLOWED_AVATAR_IMAGE_TYPES,
   ALLOWED_LESSON_IMAGE_FILE_TYPES,
   LOGIN_PAGE_DOCUMENTS_FILE_TYPES,
+  PERMISSIONS,
   type AllowedArticlesSettings,
   type AllowedNewsSettings,
   type AllowedQASettings,
@@ -35,15 +36,13 @@ import { Validate } from "nestjs-typebox";
 import { UUIDType, baseResponse, BaseResponse, UUIDSchema } from "src/common";
 import { FILE_SIZE_BASE } from "src/common/constants";
 import { Public } from "src/common/decorators/public.decorator";
-import { Roles } from "src/common/decorators/roles.decorator";
+import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { DisallowInSupportModeGuard } from "src/common/guards/disallow-support-mode.guard";
-import { RolesGuard } from "src/common/guards/roles.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { CompanyInformaitonJSONSchema } from "./schemas/company-information.schema";
 import { loginBackgroundResponseSchema } from "./schemas/login-background.schema";
@@ -88,7 +87,6 @@ import type {
 } from "./schemas/settings.schema";
 
 @Controller("settings")
-@UseGuards(RolesGuard)
 export class SettingsController {
   constructor(private readonly settingsService: SettingsService) {}
 
@@ -136,7 +134,7 @@ export class SettingsController {
 
   @Patch("admin/new-user-notification")
   @UseGuards(DisallowInSupportModeGuard)
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @Validate({
     response: baseResponse(adminSettingsJSONContentSchema),
   })
@@ -148,7 +146,7 @@ export class SettingsController {
   }
 
   @Patch("admin/unregistered-user-courses-accessibility")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @Validate({
     response: baseResponse(globalSettingsJSONSchema),
   })
@@ -161,7 +159,7 @@ export class SettingsController {
   }
 
   @Patch("admin/enforce-sso")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @Validate({
     response: baseResponse(globalSettingsJSONSchema),
   })
@@ -173,7 +171,7 @@ export class SettingsController {
   }
 
   @Patch("admin/modern-course-list")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @Validate({
     response: baseResponse(globalSettingsJSONSchema),
   })
@@ -186,7 +184,7 @@ export class SettingsController {
 
   @Patch("admin/finished-course-notification")
   @UseGuards(DisallowInSupportModeGuard)
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @Validate({
     response: baseResponse(adminSettingsJSONContentSchema),
   })
@@ -199,7 +197,7 @@ export class SettingsController {
 
   @Patch("admin/overdue-course-notification")
   @UseGuards(DisallowInSupportModeGuard)
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @Validate({
     response: baseResponse(adminSettingsJSONContentSchema),
   })
@@ -212,7 +210,7 @@ export class SettingsController {
   }
 
   @Patch("admin/color-schema")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @Validate({
     response: baseResponse(globalSettingsJSONSchema),
     request: [{ type: "body", schema: updateGlobalColorSchema }],
@@ -230,7 +228,7 @@ export class SettingsController {
   }
 
   @Get("admin/registration-form")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @Validate({
     response: baseResponse(registrationFormResponseSchema),
   })
@@ -239,7 +237,7 @@ export class SettingsController {
   }
 
   @Patch("admin/registration-form")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @Validate({
     request: [{ type: "body", schema: updateRegistrationFormSchema }],
     response: baseResponse(registrationFormResponseSchema),
@@ -271,7 +269,7 @@ export class SettingsController {
   }
 
   @Patch("platform-logo")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @UseInterceptors(
     FileInterceptor("logo", {
       limits: {
@@ -326,7 +324,7 @@ export class SettingsController {
   }
 
   @Patch("platform-simple-logo")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @UseInterceptors(
     FileInterceptor("logo", {
       limits: {
@@ -381,7 +379,7 @@ export class SettingsController {
   }
 
   @Patch("login-background")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @UseInterceptors(
     FileInterceptor("login-background", {
       limits: {
@@ -429,7 +427,7 @@ export class SettingsController {
   }
 
   @Patch("company-information")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @Validate({
     request: [{ type: "body", schema: companyInformationJSONSchema }],
     response: baseResponse(companyInformationJSONSchema),
@@ -444,7 +442,7 @@ export class SettingsController {
   }
 
   @Patch("admin/mfa-enforced-roles")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @Validate({
     request: [{ type: "body", schema: updateMFAEnforcedRolesSchema }],
   })
@@ -456,7 +454,7 @@ export class SettingsController {
   }
 
   @Patch("certificate-background")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @UseInterceptors(
     FileInterceptor("certificate-background", {
       limits: {
@@ -506,7 +504,7 @@ export class SettingsController {
   }
 
   @Patch("admin/default-course-currency")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @Validate({
     request: [{ type: "body", schema: updateDefaultCourseCurrencySchema }],
   })
@@ -523,7 +521,7 @@ export class SettingsController {
   }
 
   @Patch("admin/invite-only-registration")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   async updateInviteOnlyRegistration(@CurrentUser() currentUser: CurrentUserType) {
     return new BaseResponse(
       await this.settingsService.updateGlobalInviteOnlyRegistration(currentUser),
@@ -534,7 +532,7 @@ export class SettingsController {
   @Validate({
     request: [{ type: "param", name: "triggerKey", schema: Type.String() }],
   })
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   async updateUserEmailTriggers(
     @Param("triggerKey") triggerKey: string,
     @CurrentUser() currentUser: CurrentUserType,
@@ -545,7 +543,7 @@ export class SettingsController {
   }
 
   @Patch("admin/config-warning-dismissed")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @Validate({
     request: [{ type: "body", schema: updateConfigWarningDismissedSchema }],
     response: baseResponse(adminSettingsJSONContentSchema),
@@ -565,7 +563,7 @@ export class SettingsController {
   @Validate({
     request: [{ type: "param", name: "setting", schema: Type.Enum(ALLOWED_QA_SETTINGS) }],
   })
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   async updateQaSetting(@Param("setting") setting: AllowedQASettings) {
     return new BaseResponse(await this.settingsService.updateQASetting(setting));
   }
@@ -574,7 +572,7 @@ export class SettingsController {
   @Validate({
     request: [{ type: "param", name: "setting", schema: Type.Enum(ALLOWED_NEWS_SETTINGS) }],
   })
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   async updateNewsSetting(@Param("setting") setting: AllowedNewsSettings) {
     return new BaseResponse(await this.settingsService.updateNewsSetting(setting));
   }
@@ -583,13 +581,13 @@ export class SettingsController {
   @Validate({
     request: [{ type: "param", name: "setting", schema: Type.Enum(ALLOWED_ARTICLES_SETTINGS) }],
   })
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   async updateArticlesSetting(@Param("setting") setting: AllowedArticlesSettings) {
     return new BaseResponse(await this.settingsService.updateArticlesSetting(setting));
   }
 
   @Patch("admin/age-limit")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @Validate({
     request: [{ type: "body", schema: updateAgeLimitSchema }],
   })
@@ -606,7 +604,7 @@ export class SettingsController {
   }
 
   @Patch("admin/login-page-files")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @UseInterceptors(FileInterceptor("file"))
   @ApiConsumes("multipart/form-data")
   @ApiBody({
@@ -643,7 +641,7 @@ export class SettingsController {
   }
 
   @Delete("login-page-files/:id")
-  @Roles(USER_ROLES.ADMIN)
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @Validate({
     request: [{ type: "param", name: "id", schema: UUIDSchema }],
   })

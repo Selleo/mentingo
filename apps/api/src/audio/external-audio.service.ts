@@ -12,6 +12,7 @@ import { Inject, Injectable, Logger } from "@nestjs/common";
 import {
   AI_MENTOR_TTS_PRESET,
   AI_MENTOR_VOICE_MODE,
+  PERMISSIONS,
   SUPPORTED_LANGUAGES,
   VOICE_ACTION,
   VOICE_SOCKET_EVENT,
@@ -23,11 +24,11 @@ import { ThreadService } from "src/ai/services/thread.service";
 import { OPENAI_MODELS, THREAD_STATUS } from "src/ai/utils/ai.type";
 import { stripVoiceEmotionBrackets } from "src/ai/utils/voiceEmotionBrackets";
 import { ExternalAudioSessionStore } from "src/audio/external-audio-session.store";
+import { hasAnyPermission } from "src/common/permissions/permission.utils";
 import { EnvService } from "src/env/services/env.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 import { REALTIME_PUBLISHER, type RealtimePublisher } from "src/websocket/realtime.publisher";
 
 import type {
@@ -409,7 +410,12 @@ export class ExternalAudioService {
   }
 
   private async canAccessLesson(lessonId: UUIDType, currentUser: WsUser): Promise<boolean> {
-    if (currentUser.role !== USER_ROLES.STUDENT) {
+    if (
+      hasAnyPermission(currentUser.permissions, [
+        PERMISSIONS.COURSE_UPDATE,
+        PERMISSIONS.COURSE_UPDATE_OWN,
+      ])
+    ) {
       return true;
     }
 

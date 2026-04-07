@@ -12,14 +12,14 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { Switch } from "~/components/ui/switch";
-import { USER_ROLES } from "~/utils/userRoles";
+import { USER_ROLE, type UserRole } from "~/config/userRoles";
 
 import type { GetPublicGlobalSettingsResponse } from "~/api/generated-api";
-import type { UserRole } from "~/utils/userRoles";
 
 interface MFAEnforcementSwitchProps {
   MFAEnforcedRoles: GetPublicGlobalSettingsResponse["data"]["MFAEnforcedRoles"];
 }
+const USER_ROLE_VALUES = [USER_ROLE.admin, USER_ROLE.student, USER_ROLE.contentCreator] as const;
 
 export default function RoleBasedMFAEnforcementSwitch({
   MFAEnforcedRoles,
@@ -28,7 +28,7 @@ export default function RoleBasedMFAEnforcementSwitch({
 
   const [roleStates, setRoleStates] = useState<Record<UserRole, boolean>>(() => {
     const initialState: Record<UserRole, boolean> = {} as Record<UserRole, boolean>;
-    Object.values(USER_ROLES).forEach((role) => {
+    USER_ROLE_VALUES.forEach((role) => {
       initialState[role] = MFAEnforcedRoles.includes(role);
     });
     return initialState;
@@ -44,7 +44,7 @@ export default function RoleBasedMFAEnforcementSwitch({
   };
 
   const hasChanges = () => {
-    return Object.values(USER_ROLES).some((role) => {
+    return USER_ROLE_VALUES.some((role) => {
       const wasEnforced = MFAEnforcedRoles.includes(role);
       const isEnforced = roleStates[role];
       return wasEnforced !== isEnforced;
@@ -54,9 +54,9 @@ export default function RoleBasedMFAEnforcementSwitch({
   const saveMFAEnforcement = () => {
     if (hasChanges()) {
       const updateData = {
-        admin: roleStates[USER_ROLES.ADMIN],
-        student: roleStates[USER_ROLES.STUDENT],
-        content_creator: roleStates[USER_ROLES.CONTENT_CREATOR],
+        admin: roleStates[USER_ROLE.admin],
+        student: roleStates[USER_ROLE.student],
+        content_creator: roleStates[USER_ROLE.contentCreator],
       };
       updateMFAEnforcedRoles(updateData);
     }
@@ -73,7 +73,7 @@ export default function RoleBasedMFAEnforcementSwitch({
       <CardContent className="body-sm-md">
         <div className="mb-4">{t("MFAEnforcementView.description")}</div>
         <div className="space-y-2">
-          {Object.values(USER_ROLES).map((role) => (
+          {USER_ROLE_VALUES.map((role) => (
             <div key={role} className="flex items-center justify-between">
               <p>{t(`MFAEnforcementView.roles.${role}`)}</p>
               <div className="group inline-flex items-center gap-2">

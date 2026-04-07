@@ -18,16 +18,16 @@ import {
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes, ApiQuery, ApiResponse } from "@nestjs/swagger";
-import { VIDEO_EMBED_PROVIDERS, type VideoProvider } from "@repo/shared";
+import { PERMISSIONS, VIDEO_EMBED_PROVIDERS, type VideoProvider } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Request, Response } from "express";
 import { Validate } from "nestjs-typebox";
 
 import { baseResponse, BaseResponse, UUIDSchema, UUIDType } from "src/common";
 import { Public } from "src/common/decorators/public.decorator";
-import { Roles } from "src/common/decorators/roles.decorator";
+import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
-import { RolesGuard } from "src/common/guards/roles.guard";
+import { PermissionsGuard } from "src/common/guards/permissions.guard";
 import {
   ALLOWED_MIME_TYPES,
   MAX_FILE_SIZE,
@@ -35,7 +35,6 @@ import {
   TUS_VERSION,
 } from "src/file/file.constants";
 import { FileGuard } from "src/file/guards/file.guard";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { FileService } from "./file.service";
 import { bunnyWebhookSchema, type BunnyWebhookBody } from "./schemas/bunny-webhook.schema";
@@ -55,7 +54,7 @@ import { TusUploadService } from "./tus/tus-upload.service";
 
 import type { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 
-@UseGuards(RolesGuard)
+@UseGuards(PermissionsGuard)
 @Controller("file")
 export class FileController {
   constructor(
@@ -63,7 +62,7 @@ export class FileController {
     private readonly tusUploadService: TusUploadService,
   ) {}
 
-  @Roles(...Object.values(USER_ROLES))
+  @RequirePermission(PERMISSIONS.FILE_UPLOAD)
   @Post()
   @UseInterceptors(FileInterceptor("file"))
   @ApiConsumes("multipart/form-data")
@@ -105,7 +104,14 @@ export class FileController {
     return await this.fileService.uploadFile(file, resource);
   }
 
-  @Roles(...Object.values(USER_ROLES))
+  @RequirePermission(
+    PERMISSIONS.COURSE_UPDATE_OWN,
+    PERMISSIONS.COURSE_UPDATE,
+    PERMISSIONS.NEWS_MANAGE_OWN,
+    PERMISSIONS.NEWS_MANAGE,
+    PERMISSIONS.ARTICLE_MANAGE_OWN,
+    PERMISSIONS.ARTICLE_MANAGE,
+  )
   @Post("videos/init")
   @Validate({
     request: [{ type: "body", schema: videoInitSchema }],
@@ -210,7 +216,14 @@ export class FileController {
     return res.status(204).send();
   }
 
-  @Roles(...Object.values(USER_ROLES))
+  @RequirePermission(
+    PERMISSIONS.COURSE_UPDATE_OWN,
+    PERMISSIONS.COURSE_UPDATE,
+    PERMISSIONS.NEWS_MANAGE_OWN,
+    PERMISSIONS.NEWS_MANAGE,
+    PERMISSIONS.ARTICLE_MANAGE_OWN,
+    PERMISSIONS.ARTICLE_MANAGE,
+  )
   @Get("videos/:id")
   @Validate({
     request: [{ type: "param", name: "id", schema: UUIDSchema }],
@@ -229,7 +242,7 @@ export class FileController {
     return this.fileService.handleBunnyWebhook(payload);
   }
 
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.FILE_DELETE)
   @Delete()
   @ApiQuery({
     name: "fileKey",

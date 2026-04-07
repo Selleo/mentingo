@@ -1,3 +1,4 @@
+import { SYSTEM_ROLE_SLUGS, PERMISSIONS } from "@repo/shared";
 import * as cookie from "cookie";
 import { eq } from "drizzle-orm";
 import { isArray, omit } from "lodash";
@@ -431,7 +432,7 @@ describe("AuthController (e2e)", () => {
 
       const { onboardingStatus: _, ...currentUser } = response.body.data;
 
-      expect(currentUser).toStrictEqual({
+      expect(currentUser).toMatchObject({
         ...omit(user, "credentials", "avatarReference"),
         profilePictureUrl: null,
         groups: [],
@@ -439,7 +440,15 @@ describe("AuthController (e2e)", () => {
         isSupportMode: false,
         studentModeCourseIds: [],
         shouldVerifyMFA: false,
+        roleSlugs: [SYSTEM_ROLE_SLUGS.STUDENT],
       });
+      expect(currentUser.permissions).toEqual(
+        expect.arrayContaining([
+          PERMISSIONS.COURSE_READ,
+          PERMISSIONS.COURSE_READ_ASSIGNED,
+          PERMISSIONS.LEARNING_PROGRESS_UPDATE,
+        ]),
+      );
     });
 
     it("should return 401 for unauthenticated request", async () => {

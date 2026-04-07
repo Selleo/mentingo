@@ -1,4 +1,5 @@
 import { faker } from "@faker-js/faker";
+import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { format, subMonths } from "date-fns";
 import * as dotenv from "dotenv";
 import { and, count, eq, sql } from "drizzle-orm";
@@ -31,15 +32,16 @@ import {
   userOnboarding,
   users,
 } from "../storage/schema";
-import { USER_ROLES } from "../user/schemas/userRoles";
 
 import { e2eCourses } from "./e2e-data-seeds";
 import { niceCourses } from "./nice-data-seeds";
 import {
   addEmailSuffix,
+  assignSystemRoleToUser,
   createNiceCourses,
   ensureSeedTenant,
   getTenantEmailSuffix,
+  seedSystemRolesForTenant,
   seedTruncateAllTables,
   seedUserRoleGrantSql,
 } from "./seed-helpers";
@@ -74,15 +76,25 @@ async function createUsers(
         email,
         firstName: userData.firstName || faker.person.firstName(),
         lastName: userData.lastName || faker.person.lastName(),
-        role: userData.role || USER_ROLES.STUDENT,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         tenantId,
       };
 
       const user = await createOrFindUser(userToCreate.email, password, userToCreate, tenantId);
+      await assignSystemRoleToUser(
+        db,
+        user.id,
+        tenantId,
+        userData.roleSlug ?? SYSTEM_ROLE_SLUGS.STUDENT,
+      );
 
-      await insertUserSettings(db, user.id, tenantId, user.role === USER_ROLES.ADMIN);
+      await insertUserSettings(
+        db,
+        user.id,
+        tenantId,
+        (userData.roleSlug ?? SYSTEM_ROLE_SLUGS.STUDENT) === SYSTEM_ROLE_SLUGS.ADMIN,
+      );
 
       return user;
     }),
@@ -103,8 +115,7 @@ async function createOrFindUser(
   await insertCredential(newUser.id, tenantId, password);
   await insertOnboardingData(newUser.id, tenantId);
 
-  if (newUser.role === USER_ROLES.ADMIN || newUser.role === USER_ROLES.CONTENT_CREATOR)
-    await insertUserDetails(newUser.id, tenantId);
+  await insertUserDetails(newUser.id, tenantId);
 
   return newUser;
 }
@@ -357,6 +368,7 @@ async function seed() {
         host: origin,
         isManaging: origin === primaryTenantOrigin,
       });
+      await seedSystemRolesForTenant(db, tenantId);
 
       await insertGlobalSettings(db, tenantId);
       console.log(`✨ Created global settings for tenant ${origin}`);
@@ -375,7 +387,7 @@ async function seed() {
             email: "student0@example.com",
             firstName: faker.person.firstName(),
             lastName: "Student",
-            role: USER_ROLES.STUDENT,
+            roleSlug: SYSTEM_ROLE_SLUGS.STUDENT,
           },
         ],
         tenantId,

@@ -9,6 +9,7 @@ import {
   REDIS_SUBSCRIBER_CLIENT,
 } from "src/redis/redis.tokens";
 import { RedisClient } from "src/redis/redis.types";
+import { SessionRevocationService } from "src/redis/session-revocation.service";
 
 import type { OnApplicationShutdown } from "@nestjs/common";
 import type { RedisClientType } from "redis";
@@ -92,6 +93,7 @@ class RedisClientsLifecycle implements OnApplicationShutdown {
         return await connectRedisClient(redisCfg.REDIS_URL);
       },
     },
+    SessionRevocationService,
     RedisClientsLifecycle,
   ],
   exports: [
@@ -99,6 +101,7 @@ class RedisClientsLifecycle implements OnApplicationShutdown {
     REDIS_PUBLISHER_CLIENT,
     REDIS_SUBSCRIBER_CLIENT,
     REDIS_EVENTS_SUBSCRIBER_CLIENT,
+    SessionRevocationService,
   ],
 })
 export class RedisClientsModule {}

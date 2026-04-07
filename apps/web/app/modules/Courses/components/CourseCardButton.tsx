@@ -7,7 +7,7 @@ import { formatPrice } from "~/lib/formatters/priceFormatter";
 type CourseCardButtonProps = {
   currency: string;
   enrolled: boolean;
-  isAdmin: boolean;
+  canManageUsers: boolean;
   priceInCents: number;
   isScormCreatePage?: boolean;
 };
@@ -15,12 +15,12 @@ type CourseCardButtonProps = {
 const CourseCardButton = ({
   currency,
   enrolled,
-  isAdmin,
+  canManageUsers,
   priceInCents,
   isScormCreatePage,
 }: CourseCardButtonProps) => {
   const { t } = useTranslation();
-  const getButtonLabel = (enrolled: boolean, isAdmin: boolean) => {
+  const getButtonLabel = (enrolled: boolean, canManageUsers: boolean) => {
     if (enrolled) {
       return (
         <span className="flex items-center gap-x-2">
@@ -32,7 +32,7 @@ const CourseCardButton = ({
 
     if (isScormCreatePage) return t("clientStatisticsView.button.readMore");
 
-    if (isAdmin) return t("clientStatisticsView.button.view");
+    if (canManageUsers) return t("clientStatisticsView.button.view");
 
     if (priceInCents)
       return `${t("clientStatisticsView.button.enroll")} - ${formatPrice(priceInCents, currency)}`;
@@ -40,7 +40,7 @@ const CourseCardButton = ({
     return t("clientStatisticsView.button.enroll");
   };
 
-  const buttonLabel = getButtonLabel(enrolled, isAdmin);
+  const buttonLabel = getButtonLabel(enrolled, canManageUsers);
 
   return (
     <Button variant={enrolled ? "secondary" : "primary"} className="mt-auto w-full">

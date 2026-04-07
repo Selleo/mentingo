@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { COURSE_ENROLLMENT } from "@repo/shared";
-import { and, desc, eq, gte, inArray, isNull, lt, sql } from "drizzle-orm";
+import { COURSE_ENROLLMENT, PERMISSIONS } from "@repo/shared";
+import { and, desc, eq, exists, gte, inArray, isNull, lt, notExists, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { LocalizationService } from "src/localization/localization.service";
@@ -11,13 +11,16 @@ import {
   courseStudentsStats,
   lessons,
   quizAttempts,
+  permissionRoleRuleSets,
+  permissionRoles,
+  permissionRuleSetPermissions,
+  permissionUserRoles,
   studentChapterProgress,
   studentCourses,
   studentLessonProgress,
   users,
   userStatistics,
 } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
 import type { SupportedLanguages } from "@repo/shared";
@@ -430,13 +433,84 @@ export class StatisticsRepository {
       .orderBy(studentLessonProgress.studentId, desc(studentLessonProgress.createdAt));
   }
   async getInactiveStudents(inactivityDays: number) {
+    const hasProgressPermission = exists(
+      this.db
+        .select({ userId: permissionUserRoles.userId })
+        .from(permissionUserRoles)
+        .innerJoin(
+          permissionRoles,
+          and(
+            eq(permissionRoles.id, permissionUserRoles.roleId),
+            eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
+          ),
+        )
+        .innerJoin(
+          permissionRoleRuleSets,
+          and(
+            eq(permissionRoleRuleSets.roleId, permissionRoles.id),
+            eq(permissionRoleRuleSets.tenantId, permissionRoles.tenantId),
+          ),
+        )
+        .innerJoin(
+          permissionRuleSetPermissions,
+          and(
+            eq(permissionRuleSetPermissions.ruleSetId, permissionRoleRuleSets.ruleSetId),
+            eq(permissionRuleSetPermissions.tenantId, permissionRoleRuleSets.tenantId),
+          ),
+        )
+        .where(
+          and(
+            eq(permissionUserRoles.userId, users.id),
+            inArray(permissionRuleSetPermissions.permission, [
+              PERMISSIONS.LEARNING_MODE_USE,
+              PERMISSIONS.LEARNING_PROGRESS_UPDATE,
+            ]),
+          ),
+        ),
+    );
+
     return this.db
       .select({ userId: users.id, name: users.firstName, email: users.email })
       .from(userStatistics)
       .innerJoin(users, eq(userStatistics.userId, users.id))
       .where(
         and(
-          eq(users.role, USER_ROLES.STUDENT),
+          hasProgressPermission,
+          notExists(
+            this.db
+              .select({ userId: permissionUserRoles.userId })
+              .from(permissionUserRoles)
+              .innerJoin(
+                permissionRoles,
+                and(
+                  eq(permissionRoles.id, permissionUserRoles.roleId),
+                  eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
+                ),
+              )
+              .innerJoin(
+                permissionRoleRuleSets,
+                and(
+                  eq(permissionRoleRuleSets.roleId, permissionRoles.id),
+                  eq(permissionRoleRuleSets.tenantId, permissionRoles.tenantId),
+                ),
+              )
+              .innerJoin(
+                permissionRuleSetPermissions,
+                and(
+                  eq(permissionRuleSetPermissions.ruleSetId, permissionRoleRuleSets.ruleSetId),
+                  eq(permissionRuleSetPermissions.tenantId, permissionRoleRuleSets.tenantId),
+                ),
+              )
+              .where(
+                and(
+                  eq(permissionUserRoles.userId, users.id),
+                  inArray(permissionRuleSetPermissions.permission, [
+                    PERMISSIONS.COURSE_UPDATE,
+                    PERMISSIONS.COURSE_UPDATE_OWN,
+                  ]),
+                ),
+              ),
+          ),
           eq(
             sql`DATE(${userStatistics.lastActivityDate})`,
             sql`CURRENT_DATE - (${inactivityDays}::INTEGER * INTERVAL '1 day')`,

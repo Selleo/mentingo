@@ -19,7 +19,7 @@ const ensureCategory = async (db: DatabasePg, categoryId?: UUIDType): Promise<UU
     .insert(categories)
     .values({
       id: faker.string.uuid(),
-      title: faker.commerce.department(),
+      title: `${faker.commerce.department()}-${faker.string.nanoid(8)}`,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     })

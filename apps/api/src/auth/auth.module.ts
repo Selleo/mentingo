@@ -9,6 +9,7 @@ import { MicrosoftOAuthGuard } from "src/common/guards/microsoft-oauth.guard";
 import { FileModule } from "src/file/files.module";
 import { GroupModule } from "src/group/group.module";
 import { LocalizationModule } from "src/localization/localization.module";
+import { PermissionsModule } from "src/permissions/permissions.module";
 import { S3Service } from "src/s3/s3.service";
 import { SettingsService } from "src/settings/settings.service";
 import { StatisticsModule } from "src/statistics/statistics.module";
@@ -35,6 +36,7 @@ import { TokenService } from "./token.service";
     FileModule,
     GroupModule,
     LocalizationModule,
+    PermissionsModule,
   ],
   controllers: [AuthController],
   providers: [

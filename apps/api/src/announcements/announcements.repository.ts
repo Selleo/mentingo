@@ -1,4 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
+import { PERMISSIONS } from "@repo/shared";
 import {
   eq,
   and,
@@ -14,6 +15,7 @@ import {
 } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
+import { PermissionsService } from "src/permissions/permissions.service";
 import {
   announcements,
   groupAnnouncements,
@@ -21,7 +23,6 @@ import {
   userAnnouncements,
   users,
 } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 import { UserService } from "src/user/user.service";
 
 import { LATEST_ANNOUNCEMENTS_LIMIT } from "./consts";
@@ -38,6 +39,7 @@ export class AnnouncementsRepository {
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
     private readonly userService: UserService,
+    private readonly permissionsService: PermissionsService,
   ) {}
 
   async getAllAnnouncements() {
@@ -105,7 +107,7 @@ export class AnnouncementsRepository {
         .where(
           and(
             eq(groupUsers.groupId, groupId),
-            not(eq(users.role, USER_ROLES.ADMIN)),
+            this.permissionsService.excludeUsersWithPermission(PERMISSIONS.USER_MANAGE),
             isNull(users.deletedAt),
           ),
         );

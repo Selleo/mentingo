@@ -1,5 +1,5 @@
+import type { PermissionKey } from "@repo/shared";
 import type { Socket } from "socket.io";
-import type { UserRole } from "src/user/schemas/userRoles";
 
 export interface HeartbeatPayload {
   lessonId: string;
@@ -20,7 +20,8 @@ export interface LeaveLessonPayload {
 export interface WsUser {
   userId: string;
   email: string;
-  role: UserRole;
+  roleSlugs: string[];
+  permissions: PermissionKey[];
   tenantId: string;
 }
 

@@ -1,3 +1,4 @@
+import { PERMISSIONS } from "@repo/shared";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -6,7 +7,7 @@ import { useAvailableCourses } from "~/api/queries/useAvailableCourses";
 import { useStudentCourses } from "~/api/queries/useStudentCourses";
 import { useTopCourses } from "~/api/queries/useTopCourses";
 import { PageWrapper } from "~/components/PageWrapper";
-import { useUserRole } from "~/hooks/useUserRole";
+import { usePermissions } from "~/hooks/usePermissions";
 import Loader from "~/modules/common/Loader/Loader";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
@@ -22,7 +23,9 @@ const ModernCoursesView = () => {
 
   const { language } = useLanguageStore();
   const { data: currentUser } = useCurrentUser();
-  const { isAdminLike } = useUserRole();
+  const { hasAccess: canManageCourses } = usePermissions({
+    required: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
+  });
 
   const { data: availableCourses, isLoading: isAvailableCoursesLoading } = useAvailableCourses({
     language,
@@ -168,7 +171,7 @@ const ModernCoursesView = () => {
       wrapperClassName="h-full"
     >
       <div className="min-h-screen">
-        {isAdminLike && <CoursesHeader />}
+        {canManageCourses && <CoursesHeader />}
 
         {renderCourses()}
       </div>

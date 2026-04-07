@@ -9,12 +9,14 @@ import {
   COURSE_ORIGIN_TYPES,
   ENTITY_TYPES,
   MASTER_COURSE_ENTITY_TYPES,
+  PERMISSIONS,
   type MasterCourseEntityType,
 } from "@repo/shared";
 import { eq } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { buildJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
+import { hasPermission } from "src/common/permissions/permission.utils";
 import { LESSON_SEQUENCE_ENABLED, QUIZ_FEEDBACK_ENABLED } from "src/courses/constants";
 import { MasterCourseQueueService } from "src/courses/master-course.queue.service";
 import { MasterCourseRepository } from "src/courses/master-course.repository";
@@ -22,7 +24,6 @@ import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { DB } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { chapters, courses, lessons, questionAnswerOptions, questions } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
@@ -918,7 +919,7 @@ export class MasterCourseService {
   }
 
   private async assertManagingTenantAdmin(actor: CurrentUser) {
-    if (actor.role !== USER_ROLES.ADMIN)
+    if (!hasPermission(actor.permissions, PERMISSIONS.TENANT_MANAGE))
       throw new ForbiddenException("auth.error.adminRoleRequired");
 
     const tenant = await this.masterCourseRepository.getTenantManagingStatus(actor.tenantId);

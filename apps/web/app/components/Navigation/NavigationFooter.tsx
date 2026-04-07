@@ -1,3 +1,4 @@
+import { PERMISSIONS } from "@repo/shared";
 import { ChevronDown } from "lucide-react";
 import { type Dispatch, type SetStateAction, startTransition, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -6,7 +7,7 @@ import { useLogoutUser } from "~/api/mutations";
 import { useCurrentUser } from "~/api/queries";
 import { Icon } from "~/components/Icon";
 import { Separator } from "~/components/ui/separator";
-import { USER_ROLE } from "~/config/userRoles";
+import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
 
 import {
@@ -40,13 +41,16 @@ export function NavigationFooter({
 
   const { mutate: logout } = useLogoutUser();
   const { data: user } = useCurrentUser();
+  const { hasAccess: canViewAnnouncements } = usePermissions({
+    required: [PERMISSIONS.ANNOUNCEMENT_READ],
+  });
   const { t } = useTranslation();
 
   const hideLabels = isSidebarCollapsed;
 
   return (
     <menu className="grid w-full grid-cols-4 gap-3 md:grid-cols-8 2xl:flex 2xl:flex-col 2xl:gap-2 2xl:self-end">
-      {user?.role !== USER_ROLE.admin && (
+      {canViewAnnouncements && (
         <NavigationMenuItem
           className="col-span-4 md:col-span-8 2xl:block"
           item={{

@@ -12,6 +12,7 @@ import {
   ENTITY_TYPES,
   FORM_TYPES,
   MAX_LOGIN_PAGE_DOCUMENTS,
+  PERMISSIONS,
   SUPPORTED_LANGUAGES,
 } from "@repo/shared";
 import { and, asc, eq, getTableColumns, inArray, isNull, sql } from "drizzle-orm";
@@ -30,8 +31,16 @@ import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
 import { LocalizationService } from "src/localization/localization.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { formFields, forms, resourceEntity, resources, settings } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
+import {
+  formFields,
+  forms,
+  permissionRoleRuleSets,
+  permissionRoles,
+  permissionRuleSetPermissions,
+  resourceEntity,
+  resources,
+  settings,
+} from "src/storage/schema";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import {
@@ -63,20 +72,18 @@ import type {
   UpdateSettingsBody,
 } from "./schemas/update-settings.schema";
 import type { RegistrationFormFieldDbModel } from "./types/registration-form.types";
-import type * as schema from "../storage/schema";
 import type {
   AllowedArticlesSettings,
   AllowedNewsSettings,
   AllowedQASettings,
   SupportedLanguages,
+  PermissionKey,
 } from "@repo/shared";
-import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { Request, Response } from "express";
 import type { SettingsActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
 import type { LoginBackgroundResponseBody } from "src/settings/schemas/login-background.schema";
-import type { UserRole } from "src/user/schemas/userRoles";
 
 const STATIC_SETTINGS_IMAGE_CACHE_CONTROL = "public, max-age=86400";
 
@@ -465,9 +472,9 @@ export class SettingsService {
 
   public async createSettingsIfNotExists(
     userId: UUIDType | null,
-    userRole: UserRole,
+    roleSlugs: string[],
     customSettings?: Partial<SettingsJSONContentSchema>,
-    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+    dbInstance: DatabasePg = this.db,
   ): Promise<SettingsJSONContentSchema> {
     if (userId !== null && !userId) {
       throw new UnauthorizedException("User not authenticated");
@@ -482,7 +489,8 @@ export class SettingsService {
       return existingSettings.settings;
     }
 
-    const defaultSettings = this.getDefaultSettingsForRole(userRole);
+    const resolvedPermissions = await this.resolvePermissionsForRoleSlugs(roleSlugs, dbInstance);
+    const defaultSettings = this.getDefaultSettingsForPermissions(resolvedPermissions);
 
     const finalSettings = {
       ...defaultSettings,
@@ -961,10 +969,10 @@ export class SettingsService {
   ): Promise<GlobalSettingsJSONContentSchema> {
     const previousRecord = await this.getGlobalSettingsRecord();
 
-    const enforcedRoles: UserRole[] = [];
+    const enforcedRoles: string[] = [];
 
     Object.entries(rolesRequest).forEach(([role, shouldEnforce]) => {
-      if (shouldEnforce === true) enforcedRoles.push(role as UserRole);
+      if (shouldEnforce === true) enforcedRoles.push(role);
     });
 
     const [{ settings: updatedSettings }] = await this.db
@@ -1516,15 +1524,42 @@ export class SettingsService {
     };
   }
 
-  private getDefaultSettingsForRole(role: UserRole): SettingsJSONContentSchema {
-    switch (role) {
-      case USER_ROLES.ADMIN:
-        return DEFAULT_ADMIN_SETTINGS;
-      case USER_ROLES.STUDENT:
-        return DEFAULT_STUDENT_SETTINGS;
-      default:
-        return DEFAULT_STUDENT_SETTINGS;
-    }
+  private async resolvePermissionsForRoleSlugs(
+    roleSlugs: string[],
+    dbInstance: DatabasePg,
+  ): Promise<PermissionKey[]> {
+    if (!roleSlugs.length) return [];
+
+    const permissionRows = await dbInstance
+      .select({
+        permission: permissionRuleSetPermissions.permission,
+      })
+      .from(permissionRoles)
+      .innerJoin(
+        permissionRoleRuleSets,
+        and(
+          eq(permissionRoleRuleSets.roleId, permissionRoles.id),
+          eq(permissionRoleRuleSets.tenantId, permissionRoles.tenantId),
+        ),
+      )
+      .innerJoin(
+        permissionRuleSetPermissions,
+        and(
+          eq(permissionRuleSetPermissions.ruleSetId, permissionRoleRuleSets.ruleSetId),
+          eq(permissionRuleSetPermissions.tenantId, permissionRoleRuleSets.tenantId),
+        ),
+      )
+      .where(inArray(permissionRoles.slug, roleSlugs));
+
+    return Array.from(new Set(permissionRows.map((row) => row.permission as PermissionKey)));
+  }
+
+  private getDefaultSettingsForPermissions(
+    permissions: PermissionKey[],
+  ): SettingsJSONContentSchema {
+    if (permissions.includes(PERMISSIONS.SETTINGS_MANAGE)) return DEFAULT_ADMIN_SETTINGS;
+
+    return DEFAULT_STUDENT_SETTINGS;
   }
 
   async deleteLoginPageFile(id: UUIDType) {

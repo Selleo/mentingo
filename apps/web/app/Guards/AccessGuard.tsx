@@ -1,5 +1,11 @@
 import { useNavigate } from "@remix-run/react";
-import { ACCESS_GUARD } from "@repo/shared";
+import {
+  ACCESS_GUARD,
+  PERMISSIONS,
+  hasAnyPermission,
+  type AccessGuard,
+  type PermissionKey,
+} from "@repo/shared";
 import { useLayoutEffect } from "react";
 import { match } from "ts-pattern";
 
@@ -14,34 +20,34 @@ import { useCurrentUser } from "~/api/queries/useCurrentUser";
 import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { queryClient } from "~/api/queryClient";
 import { PageWrapper } from "~/components/PageWrapper";
-import { USER_ROLE } from "~/config/userRoles";
 import Loader from "~/modules/common/Loader/Loader";
 
-import type { AccessGuard } from "@repo/shared";
 import type React from "react";
 
-const prefetchQueriesForUser = async (userRole: string | undefined) => {
+const prefetchQueriesForUser = async (permissions: PermissionKey[] | undefined) => {
   await queryClient.prefetchQuery(categoriesQueryOptions());
 
-  return match(userRole)
-    .with(USER_ROLE.admin, USER_ROLE.contentCreator, async () => {
-      await queryClient.prefetchQuery(allCoursesQueryOptions());
-    })
-    .with(USER_ROLE.student, async () => {
-      await queryClient.prefetchQuery(availableCoursesQueryOptions());
-      await queryClient.prefetchQuery(studentCoursesQueryOptions());
-    })
-    .otherwise(async () => {
-      await queryClient.prefetchQuery(availableCoursesQueryOptions());
-    });
+  const canManageCourses = hasAnyPermission(permissions, [
+    PERMISSIONS.COURSE_UPDATE,
+    PERMISSIONS.COURSE_UPDATE_OWN,
+  ]);
+
+  if (canManageCourses) {
+    await queryClient.prefetchQuery(allCoursesQueryOptions());
+    return;
+  }
+
+  await queryClient.prefetchQuery(availableCoursesQueryOptions());
+  await queryClient.prefetchQuery(studentCoursesQueryOptions());
 };
 
 export const clientLoader = async () => {
   const currentUser = await queryClient.ensureQueryData(currentUserQueryOptions);
 
-  const userRole = currentUser?.data?.role;
+  const permissions = (currentUser as { data?: { permissions?: PermissionKey[] } } | null)?.data
+    ?.permissions;
 
-  await prefetchQueriesForUser(userRole);
+  await prefetchQueriesForUser(permissions);
 
   return null;
 };

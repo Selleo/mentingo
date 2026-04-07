@@ -1,4 +1,5 @@
 import { faker } from "@faker-js/faker";
+import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { and, eq } from "drizzle-orm";
 import request from "supertest";
 
@@ -6,7 +7,6 @@ import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { FileService } from "src/file/file.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { chapters, courses, lessons, masterCourseExports, tenants } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCategoryFactory } from "../../../test/factory/category.factory";
@@ -198,7 +198,7 @@ describe("Master course export and sync (e2e)", () => {
         .withAdminSettings(db)
         .create({
           email: `admin+source-${faker.string.alphanumeric(8)}@example.com`,
-          role: USER_ROLES.ADMIN,
+          role: SYSTEM_ROLE_SLUGS.ADMIN,
           tenantId: sourceTenantId,
         }),
     );
@@ -209,7 +209,7 @@ describe("Master course export and sync (e2e)", () => {
         .withAdminSettings(db)
         .create({
           email: `admin+target-${faker.string.alphanumeric(8)}@example.com`,
-          role: USER_ROLES.ADMIN,
+          role: SYSTEM_ROLE_SLUGS.ADMIN,
           tenantId: targetTenantId,
         }),
     );
@@ -331,7 +331,7 @@ describe("Master course export and sync (e2e)", () => {
         .withAdminSettings(db)
         .create({
           email: `admin+non-managing-${faker.string.alphanumeric(8)}@example.com`,
-          role: USER_ROLES.ADMIN,
+          role: SYSTEM_ROLE_SLUGS.ADMIN,
           tenantId: targetTenantId,
         }),
     );

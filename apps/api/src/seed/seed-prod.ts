@@ -1,4 +1,5 @@
 import { faker } from "@faker-js/faker";
+import { SYSTEM_ROLE_SLUGS, type SystemRoleSlug } from "@repo/shared";
 import * as dotenv from "dotenv";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
@@ -6,10 +7,14 @@ import postgres from "postgres";
 
 import hashPassword from "../common/helpers/hashPassword";
 import { credentials, userDetails, users } from "../storage/schema";
-import { USER_ROLES } from "../user/schemas/userRoles";
 
 import { insertGlobalSettings, insertOnboardingData, insertUserSettings } from "./seed";
-import { ensureSeedTenant, seedTruncateAllTables } from "./seed-helpers";
+import {
+  assignSystemRoleToUser,
+  ensureSeedTenant,
+  seedSystemRolesForTenant,
+  seedTruncateAllTables,
+} from "./seed-helpers";
 
 import type { DatabasePg, UUIDType } from "../common";
 
@@ -23,16 +28,20 @@ const connectionString = process.env.MIGRATOR_DATABASE_URL || process.env.DATABA
 const sql = postgres(connectionString);
 const db = drizzle(sql) as DatabasePg;
 
-async function createOrFindUser(email: string, password: string, userData: any) {
+async function createOrFindUser(
+  email: string,
+  password: string,
+  userData: any,
+  roleSlug: SystemRoleSlug,
+) {
   const [existingUser] = await db.select().from(users).where(eq(users.email, email));
 
   if (existingUser) {
-    if (
-      existingUser.role === USER_ROLES.ADMIN ||
-      existingUser.role === USER_ROLES.CONTENT_CREATOR
-    ) {
+    if (roleSlug === SYSTEM_ROLE_SLUGS.ADMIN || roleSlug === SYSTEM_ROLE_SLUGS.CONTENT_CREATOR) {
       await insertUserDetailsIfMissing(existingUser.id, existingUser.tenantId, existingUser.email);
     }
+
+    await assignSystemRoleToUser(db, existingUser.id, existingUser.tenantId, roleSlug);
 
     return existingUser;
   }
@@ -41,9 +50,11 @@ async function createOrFindUser(email: string, password: string, userData: any) 
   await insertCredential(newUser.id, userData.tenantId, password);
   await insertOnboardingData(newUser.id, userData.tenantId);
 
-  if (newUser.role === USER_ROLES.ADMIN || newUser.role === USER_ROLES.CONTENT_CREATOR) {
+  if (roleSlug === SYSTEM_ROLE_SLUGS.ADMIN || roleSlug === SYSTEM_ROLE_SLUGS.CONTENT_CREATOR) {
     await insertUserDetailsIfMissing(newUser.id, userData.tenantId, newUser.email);
   }
+
+  await assignSystemRoleToUser(db, newUser.id, userData.tenantId, roleSlug);
 
   return newUser;
 }
@@ -81,45 +92,58 @@ async function seedProduction() {
     });
 
     const tenantId = tenant.id;
+    await seedSystemRolesForTenant(db, tenantId);
 
-    const adminUser = await createOrFindUser("admin@example.com", "password", {
-      id: faker.string.uuid(),
-      email: "admin@example.com",
-      firstName: faker.person.firstName(),
-      lastName: "Admin",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      role: USER_ROLES.ADMIN,
-      tenantId,
-    });
+    const adminUser = await createOrFindUser(
+      "admin@example.com",
+      "password",
+      {
+        id: faker.string.uuid(),
+        email: "admin@example.com",
+        firstName: faker.person.firstName(),
+        lastName: "Admin",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        tenantId,
+      },
+      SYSTEM_ROLE_SLUGS.ADMIN,
+    );
     console.log("Created or found admin user:", adminUser);
     const adminSettings = await insertUserSettings(db, adminUser.id, tenantId, true);
     console.log("Inserted admin user settings:", adminSettings);
 
-    const studentUser = await createOrFindUser("user@example.com", "password", {
-      id: faker.string.uuid(),
-      email: "user@example.com",
-      firstName: faker.person.firstName(),
-      lastName: "Student",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      role: USER_ROLES.STUDENT,
-      tenantId,
-    });
+    const studentUser = await createOrFindUser(
+      "user@example.com",
+      "password",
+      {
+        id: faker.string.uuid(),
+        email: "user@example.com",
+        firstName: faker.person.firstName(),
+        lastName: "Student",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        tenantId,
+      },
+      SYSTEM_ROLE_SLUGS.STUDENT,
+    );
     console.log("Created or found student user:", studentUser);
     const studentSettings = await insertUserSettings(db, studentUser.id, tenantId, false);
     console.log("Inserted student user settings:", studentSettings);
 
-    const contentCreatorUser = await createOrFindUser("contentcreator@example.com", "password", {
-      id: faker.string.uuid(),
-      email: "contentcreator@example.com",
-      firstName: faker.person.firstName(),
-      lastName: "Content Creator",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      role: USER_ROLES.CONTENT_CREATOR,
-      tenantId,
-    });
+    const contentCreatorUser = await createOrFindUser(
+      "contentcreator@example.com",
+      "password",
+      {
+        id: faker.string.uuid(),
+        email: "contentcreator@example.com",
+        firstName: faker.person.firstName(),
+        lastName: "Content Creator",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        tenantId,
+      },
+      SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
+    );
     console.log("Created or found content creator user:", contentCreatorUser);
     const contentCreatorSettings = await insertUserSettings(
       db,

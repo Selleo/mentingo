@@ -6,7 +6,12 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
-import { ENTITY_TYPES } from "@repo/shared";
+import {
+  ENTITY_TYPES,
+  PERMISSIONS,
+  type PermissionKey,
+  type SupportedLanguages,
+} from "@repo/shared";
 import { and, eq, isNotNull } from "drizzle-orm";
 import { isNumber } from "lodash";
 
@@ -14,10 +19,7 @@ import { AiService } from "src/ai/services/ai.service";
 import { THREAD_STATUS } from "src/ai/utils/ai.type";
 import { DatabasePg } from "src/common";
 import { injectResourcesIntoContent } from "src/common/utils/injectResourcesIntoContent";
-import {
-  canUseLessonProgressAsLearner,
-  LEARNING_MODE_REQUIRED_ERROR_KEY,
-} from "src/common/utils/lessonLearningAccess";
+import { LEARNING_MODE_REQUIRED_ERROR_KEY } from "src/common/utils/lessonLearningAccess";
 import { QuizCompletedEvent } from "src/events";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
@@ -26,6 +28,7 @@ import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
+import { PermissionsService } from "src/permissions/permissions.service";
 import { QuestionRepository } from "src/questions/question.repository";
 import { QuestionService } from "src/questions/question.service";
 import {
@@ -36,7 +39,6 @@ import {
   studentLessonProgress,
 } from "src/storage/schema";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
-import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 import { isQuizAccessAllowed } from "src/utils/isQuizAccessAllowed";
 
 import { LESSON_TYPES } from "../lesson.type";
@@ -51,7 +53,6 @@ import type {
   QuestionDetails,
 } from "../lesson.schema";
 import type { EnrolledLessonWithSearch } from "../repositories/lesson.repository";
-import type { SupportedLanguages } from "@repo/shared";
 import type { Request, Response } from "express";
 import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
@@ -68,15 +69,16 @@ export class LessonService {
     private readonly aiService: AiService,
     private readonly outboxPublisher: OutboxPublisher,
     private readonly localizationService: LocalizationService,
+    private readonly permissionsService: PermissionsService,
   ) {}
 
   async getLessonById(
     id: UUIDType,
     userId: UUIDType,
-    userRole: UserRole,
+    currentUser: CurrentUser,
     language?: SupportedLanguages,
   ): Promise<LessonShow> {
-    const isStudent = userRole === USER_ROLES.STUDENT;
+    const isStudent = this.isLearnerOnly(currentUser.permissions);
 
     const hasLessonAccess = await this.lessonRepository.getHasLessonAccess(id, userId, isStudent);
 
@@ -105,7 +107,11 @@ export class LessonService {
       lesson.type === LESSON_TYPES.CONTENT ||
       lesson.type === LESSON_TYPES.AI_MENTOR
     ) {
-      await this.studentLessonProgressService.markLessonAsStarted(lesson.id, userId, userRole);
+      await this.studentLessonProgressService.markLessonAsStarted(
+        lesson.id,
+        userId,
+        currentUser.permissions,
+      );
     }
 
     if (lesson.type === LESSON_TYPES.CONTENT) {
@@ -270,15 +276,16 @@ export class LessonService {
 
   async evaluationQuiz(
     studentQuizAnswers: AnswerQuestionBody,
-    userId: UUIDType,
-    userRole: UserRole,
+    currentUser: CurrentUser,
   ): Promise<{
     correctAnswerCount: number;
     wrongAnswerCount: number;
     questionCount: number;
     score: number;
   }> {
-    await this.assertStudentProgressMutationAllowed(studentQuizAnswers.lessonId, userId, userRole);
+    const { userId } = currentUser;
+
+    await this.assertStudentProgressMutationAllowed(studentQuizAnswers.lessonId, currentUser);
 
     const [accessCourseLessonWithDetails] = await this.lessonRepository.checkLessonAssignment(
       studentQuizAnswers.lessonId,
@@ -346,6 +353,8 @@ export class LessonService {
           await this.studentLessonProgressService.markLessonAsCompleted({
             id: studentQuizAnswers.lessonId,
             studentId: userId,
+            userPermissions: currentUser.permissions,
+            actor: currentUser,
             quizCompleted: true,
             completedQuestionCount:
               evaluationResult.correctAnswerCount + evaluationResult.wrongAnswerCount,
@@ -384,12 +393,10 @@ export class LessonService {
     });
   }
 
-  async deleteStudentQuizAnswers(
-    lessonId: UUIDType,
-    userId: UUIDType,
-    userRole: UserRole,
-  ): Promise<void> {
-    await this.assertStudentProgressMutationAllowed(lessonId, userId, userRole);
+  async deleteStudentQuizAnswers(lessonId: UUIDType, currentUser: CurrentUser): Promise<void> {
+    const { userId } = currentUser;
+
+    await this.assertStudentProgressMutationAllowed(lessonId, currentUser);
 
     const [accessCourseLessonWithDetails] = await this.lessonRepository.checkLessonAssignment(
       lessonId,
@@ -451,12 +458,10 @@ export class LessonService {
     });
   }
 
-  private async assertStudentProgressMutationAllowed(
-    lessonId: UUIDType,
-    userId: UUIDType,
-    userRole: UserRole,
-  ) {
-    if (userRole === USER_ROLES.STUDENT) return;
+  private async assertStudentProgressMutationAllowed(lessonId: UUIDType, currentUser: CurrentUser) {
+    const { permissions } = await this.permissionsService.getUserAccess(currentUser.userId);
+
+    if (this.isLearnerOnly(permissions)) return;
 
     const [access] = await this.db
       .select({
@@ -467,20 +472,23 @@ export class LessonService {
       .innerJoin(chapters, eq(lessons.chapterId, chapters.id))
       .leftJoin(
         studentCourses,
-        and(eq(studentCourses.courseId, chapters.courseId), eq(studentCourses.studentId, userId)),
+        and(
+          eq(studentCourses.courseId, chapters.courseId),
+          eq(studentCourses.studentId, currentUser.userId),
+        ),
       )
       .leftJoin(
         courseStudentMode,
         and(
           eq(courseStudentMode.courseId, chapters.courseId),
-          eq(courseStudentMode.userId, userId),
+          eq(courseStudentMode.userId, currentUser.userId),
         ),
       )
       .where(eq(lessons.id, lessonId));
 
-    const hasLearnerAccess = canUseLessonProgressAsLearner(userRole, {
-      hasEnrollment: Boolean(access?.isAssigned),
-      isLearningModeActive: Boolean(access?.isStudentMode),
+    const hasLearnerAccess = this.canUseLearnerProgress(permissions, {
+      hasEnrollment: !!access?.isAssigned,
+      isLearningModeActive: !!access?.isStudentMode,
     });
 
     if (!hasLearnerAccess) {
@@ -491,11 +499,10 @@ export class LessonService {
   async getLessonResource(
     req: Request,
     res: Response,
-    userId: UUIDType,
-    role: UserRole,
+    currentUser: CurrentUser,
     resourceId: UUIDType,
   ) {
-    const isStudent = role === USER_ROLES.STUDENT;
+    const isStudent = this.isLearnerOnly(currentUser.permissions);
 
     const lessonResource = await this.lessonRepository.getResource(resourceId);
 
@@ -505,7 +512,7 @@ export class LessonService {
 
     const [lesson] = await this.lessonRepository.checkLessonAssignment(
       lessonResource.entityId,
-      userId,
+      currentUser.userId,
     );
 
     if (!lesson.isAssigned && isStudent && !lesson.isFreemium) {
@@ -555,6 +562,20 @@ export class LessonService {
 
   private hasOnlyVideo(contentCount: Record<string, number>) {
     return contentCount.video === 1 && Object.keys(contentCount).length === 1;
+  }
+
+  private isLearnerOnly(permissions: PermissionKey[]) {
+    return !permissions.includes(PERMISSIONS.LEARNING_MODE_USE);
+  }
+
+  private canUseLearnerProgress(
+    permissions: PermissionKey[],
+    access: { hasEnrollment: boolean; isLearningModeActive: boolean },
+  ) {
+    const canUseLearningMode = permissions.includes(PERMISSIONS.LEARNING_MODE_USE);
+    if (canUseLearningMode) return access.isLearningModeActive;
+
+    return true;
   }
 
   // async studentAnswerOnQuestion(

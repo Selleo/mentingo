@@ -16,7 +16,13 @@ import {
   MagicLinkEmail,
   PasswordRecoveryEmail,
 } from "@repo/email-templates";
-import { SUPPORTED_LANGUAGES, type SupportedLanguages } from "@repo/shared";
+import {
+  PERMISSIONS,
+  SUPPORTED_LANGUAGES,
+  SYSTEM_ROLE_SLUGS,
+  type PermissionKey,
+  type SupportedLanguages,
+} from "@repo/shared";
 import * as bcrypt from "bcryptjs";
 import { and, eq, isNull, lt, lte, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
@@ -36,10 +42,11 @@ import { UserPasswordCreatedEvent } from "src/events/user/user-password-created.
 import { UserRegisteredEvent } from "src/events/user/user-registered.event";
 import { UserWelcomeEvent } from "src/events/user/user-welcome.event";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
+import { PermissionsService } from "src/permissions/permissions.service";
+import { SessionRevocationService } from "src/redis";
 import { SettingsService } from "src/settings/settings.service";
 import { DB_ADMIN } from "src/storage/db/db.providers";
 import { SupportModeService } from "src/support-mode/support-mode.service";
-import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
 import {
   courseStudentMode,
@@ -83,6 +90,8 @@ export class AuthService {
     private readonly outboxPublisher: OutboxPublisher,
     private tokenService: TokenService,
     private readonly supportModeService: SupportModeService,
+    private readonly permissionsService: PermissionsService,
+    private readonly sessionRevocationService: SessionRevocationService,
   ) {}
 
   public async register({
@@ -160,7 +169,7 @@ export class AuthService {
         email,
         firstName,
         lastName,
-        role: USER_ROLES.STUDENT,
+        roleSlugs: [SYSTEM_ROLE_SLUGS.STUDENT],
         language,
       },
       dbInstance,
@@ -221,7 +230,7 @@ export class AuthService {
       }));
   }
 
-  public async login(data: { email: string; password: string }, MFAEnforcedRoles: UserRole[]) {
+  public async login(data: { email: string; password: string }, MFAEnforcedRoles: string[]) {
     const user = await this.validateUser(data.email, data.password);
 
     if (!user) {
@@ -239,17 +248,16 @@ export class AuthService {
       await this.userService.getUsersProfilePictureUrl(avatarReference);
 
     const userSettings = await this.settingsService.getUserSettings(user.id);
+    const { permissions, roleSlugs } = await this.permissionsService.getUserAccess(user.id);
 
     const onboardingStatus = await this.userService.getAllOnboardingStatus(user.id);
-    const isManagingTenantAdmin = await this.isManagingTenantAdmin(
-      user.tenantId,
-      user.role as UserRole,
-    );
+    const isManagingTenantAdmin = await this.isManagingTenantAdmin(user.tenantId, permissions);
 
     const actor: ActorUserType = {
       userId: user.id,
       email: user.email,
-      role: user.role as UserRole,
+      roleSlugs,
+      permissions,
       tenantId: user.tenantId,
     };
 
@@ -257,10 +265,7 @@ export class AuthService {
       new UserLoginEvent({ userId: user.id, method: USER_LOGIN_METHOD.PASSWORD, actor }),
     );
 
-    if (
-      MFAEnforcedRoles.includes(userWithoutAvatar.role as UserRole) ||
-      userSettings.isMFAEnabled
-    ) {
+    if (this.isMfaRoleEnforced(MFAEnforcedRoles, roleSlugs) || userSettings.isMFAEnabled) {
       return {
         ...userWithoutAvatar,
         profilePictureUrl: usersProfilePictureUrl,
@@ -307,11 +312,12 @@ export class AuthService {
     const onboardingStatus = await this.getOnboardingStatus(userId);
     const { MFAEnforcedRoles } = await this.settingsService.getGlobalSettings();
     const userSettings = await this.settingsService.getUserSettings(userId);
+    const { roleSlugs, permissions } = await this.permissionsService.getUserAccess(userId);
 
-    const isManagingTenantAdmin = await this.isManagingTenantAdmin(tenantId, user.role as UserRole);
+    const isManagingTenantAdmin = await this.isManagingTenantAdmin(tenantId, permissions);
     const studentModeCourseIds = await this.getStudentModeCourseIds(userId, this.db);
 
-    if (MFAEnforcedRoles.includes(user.role as UserRole) || userSettings.isMFAEnabled) {
+    if (this.isMfaRoleEnforced(MFAEnforcedRoles, roleSlugs) || userSettings.isMFAEnabled) {
       return {
         ...user,
         shouldVerifyMFA: true,
@@ -319,6 +325,8 @@ export class AuthService {
         isManagingTenantAdmin,
         isSupportMode: false,
         studentModeCourseIds,
+        roleSlugs,
+        permissions,
       };
     }
 
@@ -329,6 +337,8 @@ export class AuthService {
       isManagingTenantAdmin,
       isSupportMode: false,
       studentModeCourseIds,
+      roleSlugs,
+      permissions,
     };
   }
 
@@ -347,9 +357,11 @@ export class AuthService {
     const user = await this.userService.getUserById(sourceUserId, dbInstance);
     const onboardingStatus = await this.getOnboardingStatus(sourceUserId, dbInstance);
 
+    const supportPermissions = Object.values(PERMISSIONS) as PermissionKey[];
+
     const isManagingTenantAdmin = await this.isManagingTenantAdmin(
       sourceTenantId,
-      user.role as UserRole,
+      supportPermissions,
     );
     const studentModeCourseIds = await this.getStudentModeCourseIds(sourceUserId, dbInstance);
 
@@ -360,6 +372,8 @@ export class AuthService {
       isManagingTenantAdmin,
       isSupportMode: true,
       studentModeCourseIds,
+      roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN],
+      permissions: supportPermissions,
       supportContext: {
         ...session,
       },
@@ -386,12 +400,19 @@ export class AuthService {
         throw new UnauthorizedException("User not found");
       }
 
+      const isRevoked = await this.sessionRevocationService.isUserRevoked(user.id);
+
       const tokens = await this.getTokens(user);
+
+      if (isRevoked) await this.sessionRevocationService.clearUserRevocation(user.id);
+
+      const { roleSlugs, permissions } = await this.permissionsService.getUserAccess(user.id);
 
       const actor: CurrentUser = {
         userId: user.id,
         email: user.email,
-        role: user.role as UserRole,
+        roleSlugs,
+        permissions,
         tenantId: user.tenantId,
       };
 
@@ -424,7 +445,6 @@ export class AuthService {
         password: credentials.password,
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,
-        role: users.role,
         archived: users.archived,
         avatarReference: users.avatarReference,
         deletedAt: users.deletedAt,
@@ -448,8 +468,16 @@ export class AuthService {
   }
 
   private async getTokens(user: TokenUser) {
-    const { id: userId, email, role, tenantId } = user;
-    return this.signTokens({ userId, email, role, tenantId });
+    const { id: userId, email, tenantId } = user;
+    const { permissions, roleSlugs } = await this.permissionsService.getUserAccess(userId);
+
+    return this.signTokens({
+      userId,
+      email,
+      tenantId,
+      roleSlugs,
+      permissions,
+    });
   }
 
   async getSupportTokensForSession(session: SupportSession) {
@@ -471,7 +499,8 @@ export class AuthService {
     const supportPayload = {
       userId: session.originalUserId,
       email: originalUser.email,
-      role: USER_ROLES.ADMIN,
+      roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN],
+      permissions: Object.values(PERMISSIONS) as PermissionKey[],
       tenantId: session.targetTenantId,
       isSupportMode: true,
       supportSessionId: session.id,
@@ -570,7 +599,6 @@ export class AuthService {
         lastName: users.lastName,
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,
-        role: users.role,
         archived: users.archived,
         avatarReference: users.avatarReference,
         deletedAt: users.deletedAt,
@@ -587,11 +615,11 @@ export class AuthService {
       .values({ userId: createToken.userId, password: hashedPassword });
     await this.createPasswordService.deleteToken(createToken.id);
 
-    await this.settingsService.createSettingsIfNotExists(
-      createToken.userId,
-      existingUser.role as UserRole,
-      { language },
-    );
+    const { roleSlugs } = await this.permissionsService.getUserAccess(createToken.userId);
+
+    await this.settingsService.createSettingsIfNotExists(createToken.userId, roleSlugs, {
+      language,
+    });
 
     await this.outboxPublisher.publish(new UserPasswordCreatedEvent({ ...existingUser }));
 
@@ -744,11 +772,12 @@ export class AuthService {
         email: userCallback.email,
         firstName: userCallback.firstName,
         lastName: userCallback.lastName,
-        role: USER_ROLES.STUDENT,
+        roleSlugs: [SYSTEM_ROLE_SLUGS.STUDENT],
       });
     }
 
     const tokens = await this.getTokens(user);
+    const { roleSlugs, permissions } = await this.permissionsService.getUserAccess(user.id);
 
     const userSettings = await this.settingsService.getUserSettings(user.id);
     const { MFAEnforcedRoles } = await this.settingsService.getGlobalSettings();
@@ -756,7 +785,8 @@ export class AuthService {
     const actor: ActorUserType = {
       userId: user.id,
       email: user.email,
-      role: user.role as UserRole,
+      roleSlugs,
+      permissions,
       tenantId: user.tenantId,
     };
 
@@ -764,7 +794,7 @@ export class AuthService {
       new UserLoginEvent({ userId: user.id, method: USER_LOGIN_METHOD.PROVIDER, actor }),
     );
 
-    if (MFAEnforcedRoles.includes(user.role as UserRole) || userSettings.isMFAEnabled) {
+    if (this.isMfaRoleEnforced(MFAEnforcedRoles, roleSlugs) || userSettings.isMFAEnabled) {
       return {
         ...tokens,
         shouldVerifyMFA: true,
@@ -898,7 +928,8 @@ export class AuthService {
       return { user, accessToken, refreshToken };
     });
 
-    const { id: userId, email, role } = user;
+    const { id: userId, email } = user;
+    const { roleSlugs, permissions } = await this.permissionsService.getUserAccess(userId);
 
     const userSettings = await this.settingsService.getUserSettings(userId);
     const onboardingStatus = await this.userService.getAllOnboardingStatus(userId);
@@ -907,13 +938,19 @@ export class AuthService {
       new UserLoginEvent({
         userId,
         method: USER_LOGIN_METHOD.MAGIC_LINK,
-        actor: { userId, email, role: role as UserRole, tenantId: user.tenantId },
+        actor: {
+          userId,
+          email,
+          roleSlugs,
+          permissions,
+          tenantId: user.tenantId,
+        },
       }),
     );
 
-    const isManagingTenantAdmin = await this.isManagingTenantAdmin(user.tenantId, role as UserRole);
+    const isManagingTenantAdmin = await this.isManagingTenantAdmin(user.tenantId, permissions);
 
-    if (MFAEnforcedRoles.includes(role as UserRole) || userSettings.isMFAEnabled) {
+    if (this.isMfaRoleEnforced(MFAEnforcedRoles, roleSlugs) || userSettings.isMFAEnabled) {
       this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken);
 
       return {
@@ -934,8 +971,11 @@ export class AuthService {
     };
   }
 
-  private async isManagingTenantAdmin(tenantId: UUIDType, role: UserRole): Promise<boolean> {
-    if (role !== USER_ROLES.ADMIN) return false;
+  private async isManagingTenantAdmin(
+    tenantId: UUIDType,
+    permissions: PermissionKey[],
+  ): Promise<boolean> {
+    if (!permissions.includes(PERMISSIONS.TENANT_MANAGE)) return false;
 
     const [tenant] = await this.db
       .select({ isManaging: tenants.isManaging })
@@ -944,6 +984,12 @@ export class AuthService {
       .limit(1);
 
     return Boolean(tenant?.isManaging);
+  }
+
+  private isMfaRoleEnforced(enforcedRoles: string[], roleSlugs: string[]): boolean {
+    if (!enforcedRoles.length || !roleSlugs.length) return false;
+
+    return roleSlugs.some((roleSlug) => enforcedRoles.includes(roleSlug));
   }
 
   private async getOnboardingStatus(userId: UUIDType, db?: DatabasePg) {
@@ -996,7 +1042,6 @@ export class AuthService {
       .select({
         id: users.id,
         email: users.email,
-        role: sql<UserRole>`${users.role}`,
         tenantId: users.tenantId,
       })
       .from(users)
@@ -1005,13 +1050,16 @@ export class AuthService {
 
     if (!user) return;
 
+    const userAcesses = await this.permissionsService.getUserAccess(user.id);
+
     await this.handleFailedLogin({
       userId: user.id,
       method: data.method,
       actor: {
         userId: user.id,
         email: user.email,
-        role: user.role,
+        roleSlugs: userAcesses.roleSlugs,
+        permissions: userAcesses.permissions,
         tenantId: user.tenantId,
       },
       error: data.error,

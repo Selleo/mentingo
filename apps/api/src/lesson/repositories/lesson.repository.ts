@@ -1,9 +1,9 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { COURSE_ENROLLMENT } from "@repo/shared";
+import { COURSE_ENROLLMENT, PERMISSIONS } from "@repo/shared";
 import { and, desc, eq, getTableColumns, type SQL, sql } from "drizzle-orm";
-import { match } from "ts-pattern";
 
 import { DatabasePg, type UUIDType } from "src/common";
+import { hasPermission } from "src/common/permissions/permission.utils";
 import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
 import { getCourseTsVector, getLessonTsVector } from "src/courses/utils/courses.utils";
 import { LocalizationService } from "src/localization/localization.service";
@@ -23,7 +23,6 @@ import {
   resources,
   coursesSettingsHelpers,
 } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import type { LessonTypes } from "../lesson.type";
 import type { SupportedLanguages } from "@repo/shared";
@@ -380,25 +379,31 @@ export class LessonRepository {
   ): Promise<EnrolledLessonWithSearch[]> {
     const conditions: SQL[] = [];
 
-    match(currentUser?.role)
-      .with(USER_ROLES.STUDENT, () => {
-        conditions.push(
-          eq(studentCourses.studentId, currentUser?.userId),
-          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
-        );
-      })
-      .with(USER_ROLES.CONTENT_CREATOR, () =>
-        conditions.push(eq(courses.authorId, currentUser?.userId)),
-      )
-      .otherwise(() => null);
+    const canManageCourseContent = hasPermission(
+      currentUser.permissions,
+      PERMISSIONS.COURSE_UPDATE,
+    );
 
-    if (currentUser?.role)
-      if (filters.title) {
-        conditions.push(
-          sql`EXISTS (SELECT 1 FROM jsonb_each_text(${lessons.title}) AS t(k, v) 
-             WHERE v ILIKE ${`%${filters.title}%`})`,
-        );
-      }
+    const canManageOwnCourseContent = hasPermission(
+      currentUser.permissions,
+      PERMISSIONS.COURSE_UPDATE_OWN,
+    );
+
+    if (!canManageCourseContent && !canManageOwnCourseContent) {
+      conditions.push(
+        eq(studentCourses.studentId, currentUser.userId),
+        eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+      );
+    } else if (canManageOwnCourseContent) {
+      conditions.push(eq(courses.authorId, currentUser.userId));
+    }
+
+    if (filters.title) {
+      conditions.push(
+        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${lessons.title}) AS t(k, v) 
+           WHERE v ILIKE ${`%${filters.title}%`})`,
+      );
+    }
 
     if (filters.description) {
       conditions.push(

@@ -11,13 +11,14 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
+import { PERMISSIONS } from "@repo/shared";
 import { Type, type Static } from "@sinclair/typebox";
 import { type Request, Response } from "express";
 import { Validate } from "nestjs-typebox";
 
 import { baseResponse, BaseResponse, nullResponse, type UUIDType } from "src/common";
 import { Public } from "src/common/decorators/public.decorator";
-import { Roles } from "src/common/decorators/roles.decorator";
+import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { GoogleOAuthGuard } from "src/common/guards/google-oauth.guard";
 import { MicrosoftOAuthGuard } from "src/common/guards/microsoft-oauth.guard";
@@ -37,7 +38,6 @@ import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { SettingsService } from "src/settings/settings.service";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { currentUserResponseSchema } from "src/user/schemas/user.schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { AuthService } from "./auth.service";
 import { CreateAccountBody, createAccountSchema } from "./schemas/create-account.schema";
@@ -144,7 +144,7 @@ export class AuthController {
   }
 
   @Post("logout")
-  @Roles(...Object.values(USER_ROLES))
+  @RequirePermission(PERMISSIONS.ACCOUNT_READ_SELF)
   @Validate({
     response: nullResponse(),
   })
@@ -196,6 +196,7 @@ export class AuthController {
   }
 
   @Get("current-user")
+  @RequirePermission(PERMISSIONS.ACCOUNT_READ_SELF)
   @Validate({
     response: baseResponse(currentUserResponseSchema),
   })
@@ -253,6 +254,7 @@ export class AuthController {
   }
 
   @Post("support/exit")
+  @RequirePermission(PERMISSIONS.TENANT_MANAGE)
   @Validate({
     response: baseResponse(Type.Object({ redirectUrl: Type.String() })),
   })
@@ -426,7 +428,6 @@ export class AuthController {
   }
 
   @Post("mfa/setup")
-  @Roles(...Object.values(USER_ROLES))
   @Validate({
     response: baseResponse(MFASetupResponseSchema),
   })
@@ -440,7 +441,6 @@ export class AuthController {
   }
 
   @Post("mfa/verify")
-  @Roles(...Object.values(USER_ROLES))
   @Validate({
     request: [{ type: "body", schema: MFAVerifySchema }],
     response: baseResponse(MFAVerifyResponseSchema),

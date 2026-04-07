@@ -3,11 +3,13 @@ import {
   COURSE_ORIGIN_TYPES,
   ENTITY_TYPES,
   MASTER_COURSE_EXPORT_SYNC_STATUSES,
+  PERMISSIONS,
   type MasterCourseEntityType,
 } from "@repo/shared";
-import { and, asc, eq, getTableColumns, inArray, ne, sql } from "drizzle-orm";
+import { and, asc, eq, getTableColumns, inArray, isNull, ne, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
+import { userHasAnyPermissionsCondition } from "src/common/permissions/permission-sql.utils";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   aiMentorLessons,
@@ -25,7 +27,6 @@ import {
   tenants,
   users,
 } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import type {
   AiMentorLessonInsert,
@@ -382,7 +383,15 @@ export class MasterCourseRepository {
     const [targetAuthor] = await this.db
       .select({ id: users.id })
       .from(users)
-      .where(inArray(users.role, [USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR]))
+      .where(
+        and(
+          isNull(users.deletedAt),
+          userHasAnyPermissionsCondition(this.db, users.id, users.tenantId, [
+            PERMISSIONS.COURSE_UPDATE,
+            PERMISSIONS.COURSE_UPDATE_OWN,
+          ]),
+        ),
+      )
       .limit(1);
 
     return targetAuthor;

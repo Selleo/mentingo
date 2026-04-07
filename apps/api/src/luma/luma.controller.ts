@@ -16,6 +16,7 @@ import {
 import { FilesInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes } from "@nestjs/swagger";
 import {
+  PERMISSIONS,
   LUMA_FILE_INGESTION_ALLOWED_MIME_TYPES,
   LUMA_FILE_INGESTION_MAX_SIZE_BYTES,
   SupportedLanguages,
@@ -23,9 +24,9 @@ import {
 import { Response } from "express";
 import { Validate } from "nestjs-typebox";
 
-import { Roles } from "src/common/decorators/roles.decorator";
+import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
-import { RolesGuard } from "src/common/guards/roles.guard";
+import { PermissionsGuard } from "src/common/guards/permissions.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
@@ -41,17 +42,16 @@ import {
   integrationDraftSchema,
   integrationIdSchema,
 } from "src/luma/schema/luma.schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import type { CreateDraftOptions, DeleteIngestedDocumentOptions } from "@japro/luma-sdk";
 
 @Controller("luma")
-@UseGuards(RolesGuard)
+@UseGuards(PermissionsGuard)
 export class LumaController {
   constructor(private readonly lumaService: LumaService) {}
 
   @Post("course-generation/chat")
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.COURSE_AI_GENERATION)
   @Validate({
     request: [{ type: "body", schema: chatOptionsSchema }],
   })
@@ -87,7 +87,7 @@ export class LumaController {
   }
 
   @Get("course-generation/messages")
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.COURSE_AI_GENERATION)
   @Validate({
     request: [
       {
@@ -108,7 +108,7 @@ export class LumaController {
   }
 
   @Get("course-generation/draft")
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.COURSE_AI_GENERATION)
   @Validate({
     request: [
       {
@@ -137,7 +137,7 @@ export class LumaController {
   }
 
   @Post("course-generation/files/ingest")
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.COURSE_AI_GENERATION)
   @UseInterceptors(FilesInterceptor("files"))
   @ApiConsumes("multipart/form-data")
   @ApiBody({
@@ -174,7 +174,7 @@ export class LumaController {
   }
 
   @Delete("course-generation/files/:integrationId/:documentId")
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.COURSE_AI_GENERATION)
   @Validate({
     request: [
       {
@@ -200,7 +200,7 @@ export class LumaController {
   }
 
   @Get("course-generation/files/:integrationId")
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @RequirePermission(PERMISSIONS.COURSE_AI_GENERATION)
   @Validate({
     request: [
       {

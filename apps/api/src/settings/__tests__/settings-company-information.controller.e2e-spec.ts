@@ -1,3 +1,4 @@
+import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import request from "supertest";
 
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
@@ -6,7 +7,6 @@ import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory, type UserWithCredentials } from "../../../test/factory/user.factory";
 import { truncateTables } from "../../../test/helpers/test-helpers";
-import { USER_ROLES } from "../../user/schemas/userRoles";
 
 import type { DatabasePg } from "../../common";
 import type { CompanyInformaitonJSONSchema } from "../schemas/company-information.schema";
@@ -61,7 +61,7 @@ describe("SettingsController - Company Information (e2e)", () => {
     studentUser = await userFactory
       .withCredentials({ password: testPassword })
       .withUserSettings(db)
-      .associations({ role: USER_ROLES.STUDENT })
+      .associations({ role: SYSTEM_ROLE_SLUGS.STUDENT })
       .create();
 
     const adminLoginResponse = await request(app.getHttpServer()).post("/api/auth/login").send({

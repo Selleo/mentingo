@@ -4,6 +4,8 @@ import { JwtService } from "@nestjs/jwt";
 import { WsException } from "@nestjs/websockets";
 import { parse } from "cookie";
 
+import { SessionRevocationService } from "src/redis";
+
 import type { AuthenticatedSocket, WsUser } from "src/websocket/websocket.types";
 
 @Injectable()
@@ -13,6 +15,7 @@ export class WsJwtGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly sessionRevocationService: SessionRevocationService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -34,10 +37,15 @@ export class WsJwtGuard implements CanActivate {
         secret: this.configService.get<string>("jwt.secret"),
       });
 
+      const isRevoked = await this.sessionRevocationService.isUserRevoked(payload.userId);
+
+      if (isRevoked) throw new WsException("auth.error.sessionRevoked");
+
       const user: WsUser = {
         userId: payload.userId,
         email: payload.email,
-        role: payload.role,
+        roleSlugs: payload.roleSlugs ?? [],
+        permissions: payload.permissions ?? [],
         tenantId: payload.tenantId,
       };
 
@@ -49,6 +57,8 @@ export class WsJwtGuard implements CanActivate {
 
       return true;
     } catch (error) {
+      if (error instanceof WsException) throw error;
+
       this.logger.debug(`WebSocket authentication failed: ${error}`);
       throw new WsException("Unauthorized: Invalid token");
     }

@@ -31,13 +31,13 @@ type ProfileEditCardProps = {
   setValue: UseFormSetValue<UpdateUserProfileBody>;
   control: Control<UpdateUserProfileBody>;
   userAvatarUrl: string | null;
-  isAdminLike: boolean;
+  canManageCourses: boolean;
 };
 
 export const ProfileEditCard = ({
   user,
   control,
-  isAdminLike,
+  canManageCourses,
   setValue,
   userAvatarUrl: initialUserAvatarUrl,
 }: ProfileEditCardProps) => {
@@ -67,12 +67,12 @@ export const ProfileEditCard = ({
   });
 
   const visiblePersonalFields = useMemo(() => {
-    return isAdminLike
+    return canManageCourses
       ? personalInfoFields
       : personalInfoFields.filter(
           (field) => field.name === "firstName" || field.name === "lastName",
         );
-  }, [isAdminLike]);
+  }, [canManageCourses]);
 
   return (
     <section className="flex w-full max-w-[720px] flex-col gap-y-8 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow">
@@ -93,7 +93,7 @@ export const ProfileEditCard = ({
           />
         ))}
       </div>
-      {isAdminLike && (
+      {canManageCourses && (
         <>
           <hr className="h-px bg-primary-200" />
           <div className="flex flex-col">
