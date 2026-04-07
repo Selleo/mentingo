@@ -7,10 +7,12 @@ import { useTranslation } from "react-i18next";
 import { useCourse, useCurrentUser, useLesson } from "~/api/queries";
 import { queryClient } from "~/api/queryClient";
 import ErrorPage from "~/components/ErrorPage/ErrorPage";
+import { LoaderWithTextSequence } from "~/components/LoaderWithTextSequence";
 import { PageWrapper } from "~/components/PageWrapper";
 import { getNextVideoUrl } from "~/components/VideoPlayer/autoplayFlow";
 import { useVideoPlayer } from "~/components/VideoPlayer/VideoPlayerContext";
 import { useLearningTimeTracker } from "~/hooks/useLearningTimeTracker";
+import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 import Loader from "~/modules/common/Loader/Loader";
 import { useVideoPreferencesStore } from "~/modules/common/store/useVideoPreferencesStore";
 import { CourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
@@ -126,9 +128,17 @@ export default function LessonPage() {
   }
 
   if (!lesson || !course) {
+    const targetLessonType = course?.chapters
+      .flatMap((chapter) => chapter.lessons)
+      .find((courseLesson) => courseLesson.id === lessonId)?.type;
+
     return (
       <div className="fixed inset-0 grid place-items-center">
-        <Loader />
+        {targetLessonType === LessonType.AI_MENTOR ? (
+          <LoaderWithTextSequence preset="aiMentor" />
+        ) : (
+          <Loader />
+        )}
       </div>
     );
   }
