@@ -45,12 +45,17 @@ export const FillInTheBlanks = ({ question, isCompleted }: FillInTheBlanksProps)
           );
         }}
       />
-      {isCompleted && !!question?.solutionExplanation && !isQuizFeedbackRedacted && (
-        <div>
-          <span className="body-base-md text-error-700">Correct sentence:</span>
-          <Viewer content={question.solutionExplanation} />
-        </div>
-      )}
+      {isCompleted &&
+        !!question?.solutionExplanation &&
+        !question.passQuestion &&
+        !isQuizFeedbackRedacted && (
+          <div>
+            <span className="body-base-md text-error-700">
+              {t("studentLessonView.other.correctSentence")}
+            </span>
+            <Viewer content={question.solutionExplanation} />
+          </div>
+        )}
     </Card>
   );
 };
