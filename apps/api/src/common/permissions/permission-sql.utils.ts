@@ -1,4 +1,4 @@
-import { and, eq, exists, or, sql } from "drizzle-orm";
+import { and, eq, exists, not, or, sql } from "drizzle-orm";
 
 import {
   permissionRoleRuleSets,
@@ -66,7 +66,7 @@ export const userLacksPermissionCondition = (
   tenantIdColumn: AnyPgColumn,
   permission: PermissionKey,
 ): SQL => {
-  return sql`NOT (${userHasPermissionCondition(db, userIdColumn, tenantIdColumn, permission)})`;
+  return not(userHasPermissionCondition(db, userIdColumn, tenantIdColumn, permission));
 };
 
 export const userLacksAnyPermissionsCondition = (

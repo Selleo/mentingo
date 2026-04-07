@@ -525,6 +525,7 @@ export class UserService {
           buildUserLacksAnyPermissionsCondition(this.db, users.id, users.tenantId, [
             PERMISSIONS.COURSE_UPDATE,
             PERMISSIONS.COURSE_UPDATE_OWN,
+            PERMISSIONS.LEARNING_MODE_USE,
           ]),
         ),
       );
@@ -585,6 +586,7 @@ export class UserService {
           buildUserLacksAnyPermissionsCondition(this.db, users.id, users.tenantId, [
             PERMISSIONS.COURSE_UPDATE,
             PERMISSIONS.COURSE_UPDATE_OWN,
+            PERMISSIONS.LEARNING_MODE_USE,
           ]),
         ),
       );
