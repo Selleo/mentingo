@@ -4,7 +4,6 @@ import { useEffect, useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import useAllQA from "~/api/queries/useAllQA";
-import { useUserSettings } from "~/api/queries/useUserSettings";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Accordion } from "~/components/ui/accordion";
 import { Button } from "~/components/ui/button";
@@ -22,8 +21,6 @@ export default function QAPage() {
   const { t } = useTranslation();
 
   const { hasAccess: canManageQA } = usePermissions({ required: PERMISSIONS.QA_MANAGE });
-  const { data: settings } = useUserSettings();
-
   const { language } = useLanguageStore();
 
   const { data: QA } = useAllQA(language);
@@ -51,11 +48,9 @@ export default function QAPage() {
     if (canManageQA) return QA;
 
     return QA?.filter((item) => {
-      if (!settings?.language) return false;
-
-      return item.availableLocales.includes(settings.language);
+      return item.availableLocales.includes(language);
     });
-  }, [QA, canManageQA, settings?.language]);
+  }, [QA, canManageQA, language]);
 
   return (
     <ContentAccessGuard type={ACCESS_GUARD.UNREGISTERED_QA_ACCESS}>
