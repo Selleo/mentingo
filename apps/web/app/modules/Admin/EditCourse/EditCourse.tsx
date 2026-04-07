@@ -1,4 +1,4 @@
-import { Link, useNavigate, useParams, useSearchParams } from "@remix-run/react";
+import { Link, type MetaFunction, useNavigate, useParams, useSearchParams } from "@remix-run/react";
 import { COURSE_ORIGIN_TYPES, type SupportedLanguages } from "@repo/shared";
 import { Building } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -45,13 +45,18 @@ import CourseLessons from "./CourseLessons/CourseLessons";
 import CoursePricing from "./CoursePricing/CoursePricing";
 import CourseSettings from "./CourseSettings/CourseSettings";
 import CourseStatus from "./CourseStatus/CourseStatus";
-
-import type { Chapter } from "./EditCourse.types";
-import type { MetaFunction } from "@remix-run/react";
+import { EDIT_COURSE_TABS, type Chapter, type NavigationTab } from "./EditCourse.types";
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.editCourse");
 
-const EXPORTED_COURSE_VISIBLE_TAB_VALUES = ["Status", "Enrolled"];
+const EXPORTED_COURSE_VISIBLE_TAB_VALUES: NavigationTab[] = [
+  EDIT_COURSE_TABS.STATUS,
+  EDIT_COURSE_TABS.ENROLLED,
+];
+const EDIT_COURSE_TAB_VALUES = Object.values(EDIT_COURSE_TABS) as NavigationTab[];
+
+const isEditCourseTab = (value: string | null): value is NavigationTab =>
+  value !== null && EDIT_COURSE_TAB_VALUES.includes(value as NavigationTab);
 
 const EditCourse = () => {
   const { t } = useTranslation();
@@ -146,7 +151,7 @@ const EditCourse = () => {
   }, [language, courseLanguage, course, isFetching]);
 
   const handleTabChange = useCallback(
-    (tabValue: string) => {
+    (tabValue: NavigationTab) => {
       setSearchParams((prevParams) => {
         const nextParams = new URLSearchParams(prevParams);
         nextParams.set("tab", tabValue);
@@ -181,7 +186,7 @@ const EditCourse = () => {
 
   const canRefetchChapterList =
     previousDataUpdatedAt && currentDataUpdatedAt && previousDataUpdatedAt < currentDataUpdatedAt;
-  const selectedTab = searchParams.get("tab") ?? EXPORTED_COURSE_VISIBLE_TAB_VALUES[0];
+  const rawSelectedTab = searchParams.get("tab");
 
   const { isExportedCourse, isMasterCourse } = useMemo(() => {
     const isExportedCourse = course?.originType === COURSE_ORIGIN_TYPES.EXPORTED;
@@ -190,17 +195,27 @@ const EditCourse = () => {
     return { isExportedCourse, isMasterCourse };
   }, [course]);
 
+  const selectedTab = isEditCourseTab(rawSelectedTab)
+    ? rawSelectedTab
+    : isExportedCourse
+      ? EDIT_COURSE_TABS.STATUS
+      : EDIT_COURSE_TABS.CURRICULUM;
+
   const { visibleCourseTabs, activeTab } = useMemo(() => {
-    const visibleCourseTabs = isExportedCourse
-      ? courseTabs.filter((tab) => EXPORTED_COURSE_VISIBLE_TAB_VALUES.includes(tab.value))
-      : courseTabs;
+    const canShowPricingTab = Boolean(isStripeConfigured?.enabled && isMasterCourse);
+
+    const visibleCourseTabs = (
+      isExportedCourse
+        ? courseTabs.filter((tab) => EXPORTED_COURSE_VISIBLE_TAB_VALUES.includes(tab.value))
+        : courseTabs
+    ).filter((tab) => tab.value !== EDIT_COURSE_TABS.PRICING || canShowPricingTab);
 
     const activeTab = visibleCourseTabs.some((tab) => tab.value === selectedTab)
       ? selectedTab
-      : EXPORTED_COURSE_VISIBLE_TAB_VALUES[0];
+      : (visibleCourseTabs[0]?.value ?? EDIT_COURSE_TABS.STATUS);
 
     return { visibleCourseTabs, activeTab };
-  }, [courseTabs, isExportedCourse, selectedTab]);
+  }, [courseTabs, isExportedCourse, isMasterCourse, isStripeConfigured?.enabled, selectedTab]);
 
   useEffect(() => {
     if (error) {
@@ -368,7 +383,7 @@ const EditCourse = () => {
             ))}
           </TabsList>
         </div>
-        <TabsContent value="Settings">
+        <TabsContent value={EDIT_COURSE_TABS.SETTINGS}>
           {isExportedCourse ? (
             <SharedCourseReadonlyNotice
               title={sharedCourseNotice.title}
@@ -390,7 +405,7 @@ const EditCourse = () => {
             />
           )}
         </TabsContent>
-        <TabsContent value="Curriculum" className="h-full">
+        <TabsContent value={EDIT_COURSE_TABS.CURRICULUM} className="h-full">
           {isExportedCourse ? (
             <SharedCourseReadonlyNotice
               title={sharedCourseNotice.title}
@@ -413,7 +428,7 @@ const EditCourse = () => {
           )}
         </TabsContent>
         {isMasterCourse && isStripeConfigured?.enabled && (
-          <TabsContent value="Pricing">
+          <TabsContent value={EDIT_COURSE_TABS.PRICING}>
             <CoursePricing
               courseId={course?.id || ""}
               currency={course?.currency}
@@ -422,18 +437,18 @@ const EditCourse = () => {
             />
           </TabsContent>
         )}
-        <TabsContent value="Status">
+        <TabsContent value={EDIT_COURSE_TABS.STATUS}>
           <CourseStatus
             courseId={course?.id || ""}
             status={course?.status || "draft"}
             language={language}
           />
         </TabsContent>
-        <TabsContent value="Enrolled">
+        <TabsContent value={EDIT_COURSE_TABS.ENROLLED}>
           <CourseEnrolled />
         </TabsContent>
         {isManagingTenantAdmin && (
-          <TabsContent value="Exports">
+          <TabsContent value={EDIT_COURSE_TABS.EXPORTS}>
             <SharedCourseExportsTabContent
               tenants={shareableTenants}
               selectedTenantIds={validSelectedTenantIds}
