@@ -8,22 +8,26 @@ import { EmbedLesson } from "./EmbedLesson/EmbedLesson";
 import { Quiz } from "./Quiz";
 
 import type { CurrentUserResponse, GetLessonByIdResponse } from "~/api/generated-api";
+import type { LessonPreviewUser } from "~/modules/Courses/Lesson/types";
 
 type LessonContentRendererProps = {
   lesson: GetLessonByIdResponse["data"];
   user: CurrentUserResponse["data"] | undefined;
+  previewUser?: LessonPreviewUser;
   lessonLoading: boolean;
   onVideoEnded?: () => void;
 };
 
 export const LessonContentRenderer = memo(
-  ({ lesson, user, lessonLoading, onVideoEnded }: LessonContentRendererProps) => {
+  ({ lesson, user, previewUser, lessonLoading, onVideoEnded }: LessonContentRendererProps) => {
     return match(lesson.type)
       .with("content", () => (
         <Viewer variant="content" content={lesson?.description ?? ""} onVideoEnded={onVideoEnded} />
       ))
       .with("quiz", () => <Quiz lesson={lesson} userId={user?.id || ""} />)
-      .with("ai_mentor", () => <AiMentorLesson lesson={lesson} lessonLoading={lessonLoading} />)
+      .with("ai_mentor", () => (
+        <AiMentorLesson lesson={lesson} lessonLoading={lessonLoading} previewUser={previewUser} />
+      ))
       .with("embed", () => (
         <EmbedLesson lessonResources={lesson.lessonResources ?? []} lesson={lesson} />
       ))

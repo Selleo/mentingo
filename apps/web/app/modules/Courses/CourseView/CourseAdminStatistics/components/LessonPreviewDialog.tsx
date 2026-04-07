@@ -74,6 +74,8 @@ export default function LessonPreviewDialog({
     ? Math.ceil((thresholdPercentage * maxScore) / 100)
     : Math.ceil((thresholdPercentage * maxScore) / 100);
 
+  const { firstName, lastName, profilePictureUrl } = user;
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
@@ -131,6 +133,11 @@ export default function LessonPreviewDialog({
               <LessonContent
                 lesson={lesson}
                 course={course}
+                previewUser={{
+                  firstName,
+                  lastName,
+                  profilePictureUrl,
+                }}
                 lessonsAmount={currentChapter?.lessons.length ?? 0}
                 handleNext={() => {}}
                 handlePrevious={() => {}}

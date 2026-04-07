@@ -52,22 +52,17 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
     () =>
       (lesson.quizDetails?.questions ?? []).map((question) => ({
         ...question,
-        options: question.options?.map((option) => ({
-          ...option,
-          isCorrect: isPreviewMode ? null : option.isCorrect,
-          isStudentAnswer: isPreviewMode ? false : option.isStudentAnswer,
-          studentAnswer: isPreviewMode ? null : option.studentAnswer,
-        })),
+        options: question.options,
       })),
-    [isPreviewMode, lesson.quizDetails?.questions],
+    [lesson.quizDetails?.questions],
   );
-  const isUserSubmittedAnswer = !isPreviewMode && Boolean(lesson.lessonCompleted);
+  const isUserSubmittedAnswer = Boolean(lesson.lessonCompleted);
 
   const methods = useForm<QuizForm>({
     mode: "onSubmit",
-    defaultValues: (isPreviewMode
-      ? getEmptyQuizAnswers(questions)
-      : getUserAnswers(questions)) as QuizForm,
+    defaultValues: (isUserSubmittedAnswer
+      ? getUserAnswers(questions)
+      : getEmptyQuizAnswers(questions)) as QuizForm,
     resolver: zodResolver(QuizFormSchema(t)),
   });
 

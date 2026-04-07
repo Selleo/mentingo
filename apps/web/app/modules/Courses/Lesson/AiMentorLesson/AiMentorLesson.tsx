@@ -29,6 +29,7 @@ import RetakeModal from "~/modules/Courses/Lesson/AiMentorLesson/components/Reta
 import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
 import type { GetLessonByIdResponse } from "~/api/generated-api";
+import type { LessonPreviewUser } from "~/modules/Courses/Lesson/types";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 const chatUrl = apiUrl ? `${apiUrl}/api/ai/chat` : "/api/ai/chat";
@@ -36,9 +37,10 @@ const chatUrl = apiUrl ? `${apiUrl}/api/ai/chat` : "/api/ai/chat";
 interface AiMentorLessonProps {
   lesson: GetLessonByIdResponse["data"];
   lessonLoading: boolean;
+  previewUser?: LessonPreviewUser;
 }
 
-const AiMentorLesson = ({ lesson, lessonLoading }: AiMentorLessonProps) => {
+const AiMentorLesson = ({ lesson, lessonLoading, previewUser }: AiMentorLessonProps) => {
   const { t } = useTranslation();
   const { courseId = "" } = useParams();
   const courseExperience = useOptionalCourseAccessProvider();
@@ -232,6 +234,7 @@ const AiMentorLesson = ({ lesson, lessonLoading }: AiMentorLessonProps) => {
               key={idx}
               aiName={lesson.aiMentor?.name || ""}
               avatarUrl={lesson.aiMentor?.avatarReferenceUrl}
+              previewUser={previewUser}
               {...messages}
             />
           ))}

@@ -36,6 +36,9 @@ import type { FilterValue } from "~/modules/common/SearchFilter/SearchFilter";
 
 type CourseStudentsAiMentorResultsColumn = GetCourseStudentsAiMentorResultsResponse["data"][number];
 
+export const getCourseStudentsAiMentorResultsRowId = (row: CourseStudentsAiMentorResultsColumn) =>
+  `${row.studentId}-${row.lessonId}`;
+
 interface CourseStudentsAiMentorResultsTableProps {
   courseId: string;
   searchParams: CourseStudentsAiMentorResultsQueryParams;
@@ -169,7 +172,7 @@ export function CourseStudentsAiMentorResultsTable({
   );
 
   const table = useReactTable({
-    getRowId: (row) => row.studentId,
+    getRowId: getCourseStudentsAiMentorResultsRowId,
     data: tableData,
     columns,
     getCoreRowModel: getCoreRowModel(),
@@ -208,7 +211,7 @@ export function CourseStudentsAiMentorResultsTable({
         <TableBody>
           {table.getRowModel().rows.map((row) => (
             <TableRow
-              key={row.id + row.index}
+              key={row.id}
               data-state={row.getIsSelected() && "selected"}
               className="cursor-pointer hover:bg-neutral-100"
             >
