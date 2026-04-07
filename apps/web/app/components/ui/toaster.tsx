@@ -1,6 +1,7 @@
 import { Loader2 } from "lucide-react";
 import { match } from "ts-pattern";
 
+import { RichTextUploadQueue } from "~/components/RichText/RichTextUploadQueue";
 import {
   Toast,
   ToastClose,
@@ -10,12 +11,13 @@ import {
   ToastViewport,
 } from "~/components/ui/toast";
 import { useToast } from "~/components/ui/use-toast";
-
+import { useRichTextUploadQueue } from "~/hooks/useRichTextUploadQueue";
 
 import { Icon } from "../Icon";
 
 export function Toaster() {
   const { toasts } = useToast();
+  const { items, clearFinished, remove } = useRichTextUploadQueue();
 
   return (
     <ToastProvider>
@@ -44,7 +46,15 @@ export function Toaster() {
           </Toast>
         );
       })}
-      <ToastViewport />
+      <ToastViewport
+        queueSlot={
+          <RichTextUploadQueue
+            items={items}
+            onClearFinished={clearFinished}
+            onRemoveItem={remove}
+          />
+        }
+      />
     </ToastProvider>
   );
 }

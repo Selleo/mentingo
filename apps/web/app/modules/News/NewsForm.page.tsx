@@ -1,30 +1,22 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "@remix-run/react";
-import {
-  ALLOWED_EXCEL_FILE_TYPES,
-  ALLOWED_LESSON_IMAGE_FILE_TYPES,
-  ALLOWED_PDF_FILE_TYPES,
-  ALLOWED_PRESENTATION_FILE_TYPES,
-  ALLOWED_VIDEO_FILE_TYPES,
-  ALLOWED_WORD_FILE_TYPES,
-  ENTITY_TYPES,
-} from "@repo/shared";
+import { ALLOWED_LESSON_IMAGE_FILE_TYPES, ENTITY_TYPES } from "@repo/shared";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-use";
-import { match } from "ts-pattern";
 import { z } from "zod";
 
 import { useInitVideoUpload } from "~/api/mutations/admin/useInitVideoUpload";
 import { useToast } from "~/components/ui/use-toast";
-import { useClearVideoOnTabChange } from "~/hooks/useClearVideoOnTabChange";
 import {
-  buildEntityResourceUrl,
-  insertResourceIntoEditor,
-  useEntityResourceUpload,
-} from "~/hooks/useEntityResourceUpload";
+  buildRichTextFileUploadHandler,
+  RICH_TEXT_ACCEPTED_FILE_TYPES,
+} from "~/hooks/buildRichTextFileUploadHandler";
+import { useClearVideoOnTabChange } from "~/hooks/useClearVideoOnTabChange";
+import { useEntityResourceUpload } from "~/hooks/useEntityResourceUpload";
 import { useHandleImageUpload } from "~/hooks/useHandleImageUpload";
+import { useRichTextUploadQueue } from "~/hooks/useRichTextUploadQueue";
 import { useTusVideoUpload } from "~/hooks/useTusVideoUpload";
 import { useUploadDisplayModeDialog } from "~/hooks/useUploadDisplayModeDialog";
 
@@ -34,6 +26,7 @@ import ImageUploadInput from "../../components/FileUploadInput/ImageUploadInput"
 import { FormTextField } from "../../components/Form/FormTextField";
 import { PageWrapper } from "../../components/PageWrapper";
 import { ContentEditor } from "../../components/RichText/Editor";
+import { RichTextUploadQueue } from "../../components/RichText/RichTextUploadQueue";
 import Viewer from "../../components/RichText/Viever";
 import { Button } from "../../components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "../../components/ui/form";
@@ -103,7 +96,9 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
   const { mutateAsync: updateNews } = useUpdateNews();
   const { uploadResource } = useEntityResourceUpload();
   const { mutateAsync: initVideoUpload } = useInitVideoUpload();
-  const { getSessionForFile, uploadVideo, isUploading, uploadProgress } = useTusVideoUpload();
+  const { getSessionForFile, uploadVideo } = useTusVideoUpload();
+  const { items, enqueue, setStatus, setProgress, attachUploadId, clearFinished, remove } =
+    useRichTextUploadQueue();
   const { toast } = useToast();
   const { mutateAsync: previewNews, isPending: isPreviewLoading } = usePreviewNews();
   const [previewContent, setPreviewContent] = useState("");
@@ -185,84 +180,50 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
     navigate(`/news/${id}`);
   };
 
+  const sharedFileUploadHandler = buildRichTextFileUploadHandler({
+    entityType: ENTITY_TYPES.NEWS,
+    getVideoSessionForFile: (file) =>
+      getSessionForFile({
+        file,
+        init: () =>
+          initVideoUpload({
+            filename: file.name,
+            sizeBytes: file.size,
+            mimeType: file.type,
+            title: file.name,
+            resource: ENTITY_TYPES.NEWS,
+            entityId: id,
+            entityType: ENTITY_TYPES.NEWS,
+          }),
+      }),
+    uploadVideo,
+    uploadResourceFile: (file) =>
+      uploadResource({
+        file,
+        entityType: ENTITY_TYPES.NEWS,
+        entityId: id,
+        language,
+      }),
+    askForDisplayMode,
+    onVideoUploadError: (error) => {
+      console.error("Error uploading video:", error);
+      toast({
+        description: t("uploadFile.toast.videoFailed"),
+        variant: "destructive",
+      });
+    },
+    fallbackUploadErrorMessage: t("uploadFile.toast.videoFailed"),
+    uploadQueue: {
+      enqueue,
+      setStatus,
+      setProgress,
+      attachUploadId,
+    },
+  });
+
   const handleFileUpload = async (file?: File, editor?: TipTapEditor | null) => {
     if (!file || !id) return;
-
-    const isVideo = ALLOWED_VIDEO_FILE_TYPES.includes(file.type);
-    const isPresentation = ALLOWED_PRESENTATION_FILE_TYPES.includes(file.type);
-    const isPdf = ALLOWED_PDF_FILE_TYPES.includes(file.type);
-    const isDocument =
-      isPdf ||
-      ALLOWED_EXCEL_FILE_TYPES.includes(file.type) ||
-      ALLOWED_WORD_FILE_TYPES.includes(file.type);
-
-    if (isVideo) {
-      try {
-        const session = await getSessionForFile({
-          file,
-          init: () =>
-            initVideoUpload({
-              filename: file.name,
-              sizeBytes: file.size,
-              mimeType: file.type,
-              title: file.name,
-              resource: ENTITY_TYPES.NEWS,
-              entityId: id,
-              entityType: ENTITY_TYPES.NEWS,
-            }),
-        });
-
-        await uploadVideo({ file, session });
-
-        if (session.resourceId) {
-          const resourceUrl = buildEntityResourceUrl(session.resourceId, ENTITY_TYPES.NEWS);
-
-          editor
-            ?.chain()
-            .insertContent("<br />")
-            .setVideoEmbed({
-              src: resourceUrl,
-              sourceType: session.provider === "s3" ? "external" : "internal",
-            })
-            .run();
-        }
-      } catch (error) {
-        console.error("Error uploading video:", error);
-        toast({
-          description: t("uploadFile.toast.videoFailed"),
-          variant: "destructive",
-        });
-      }
-      return;
-    }
-
-    let displayMode: "preview" | "download" = "preview";
-
-    if (isPresentation || isPdf) {
-      const selectedMode = await askForDisplayMode(file.name);
-      if (!selectedMode) return;
-      displayMode = selectedMode;
-    }
-
-    const resourceId = await uploadResource({
-      file,
-      entityType: ENTITY_TYPES.NEWS,
-      entityId: id,
-      language,
-    });
-
-    insertResourceIntoEditor({
-      editor,
-      resourceId,
-      entityType: ENTITY_TYPES.NEWS,
-      file,
-      resourceType: match({ isPresentation, isPdf, isDocument })
-        .with({ isPresentation: true }, () => "presentation" as const)
-        .with({ isPdf: true }, () => "pdf" as const)
-        .with({ isDocument: true }, () => "document" as const)
-        .otherwise(() => "other" as const),
-      displayMode: isPresentation || isDocument ? displayMode : "preview",
-    });
+    await sharedFileUploadHandler(file, editor);
   };
 
   useEffect(() => {
@@ -468,17 +429,14 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
                               id="content"
                               content={field.value}
                               allowFiles
-                              acceptedFileTypes={[
-                                ...ALLOWED_LESSON_IMAGE_FILE_TYPES,
-                                ...ALLOWED_VIDEO_FILE_TYPES,
-                                ...ALLOWED_EXCEL_FILE_TYPES,
-                                ...ALLOWED_PDF_FILE_TYPES,
-                                ...ALLOWED_WORD_FILE_TYPES,
-                                ...ALLOWED_PRESENTATION_FILE_TYPES,
-                              ]}
+                              acceptedFileTypes={RICH_TEXT_ACCEPTED_FILE_TYPES}
                               onUpload={handleFileUpload}
-                              uploadProgress={isUploading ? (uploadProgress ?? 0) : null}
                               {...field}
+                            />
+                            <RichTextUploadQueue
+                              items={items}
+                              onClearFinished={clearFinished}
+                              onRemoveItem={remove}
                             />
                             <FormMessage />
                           </div>

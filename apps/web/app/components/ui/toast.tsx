@@ -9,16 +9,16 @@ const ToastProvider = ToastPrimitives.Provider;
 
 const ToastViewport = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Viewport>,
-  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Viewport>
->(({ className, ...props }, ref) => (
-  <ToastPrimitives.Viewport
-    ref={ref}
-    className={cn(
-      "fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]",
-      className,
-    )}
-    {...props}
-  />
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Viewport> & { queueSlot?: React.ReactNode }
+>(({ className, queueSlot, ...props }, ref) => (
+  <div className="pointer-events-none fixed top-0 z-[100] flex w-full flex-col-reverse gap-3 p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]">
+    {queueSlot}
+    <ToastPrimitives.Viewport
+      ref={ref}
+      className={cn("flex max-h-screen w-full flex-col-reverse gap-2 sm:flex-col", className)}
+      {...props}
+    />
+  </div>
 ));
 ToastViewport.displayName = ToastPrimitives.Viewport.displayName;
 

@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { useCreateBetaContentLesson } from "~/api/mutations/admin/useBetaCreateContentLesson";
 import { useDeleteLesson } from "~/api/mutations/admin/useDeleteLesson";
 import { useUpdateContentLesson } from "~/api/mutations/admin/useUpdateContentLesson";
+import { useLeaveModal } from "~/context/LeaveModalContext";
 import {
   type Chapter,
   ContentTypes,
@@ -38,6 +39,7 @@ export const useContentLessonForm = ({
   const { mutateAsync: createContentLesson } = useCreateBetaContentLesson();
   const { mutateAsync: updateTextBlockItem } = useUpdateContentLesson();
   const { mutateAsync: deleteLesson } = useDeleteLesson();
+  const { isLeavingContent, setIsCurrectFormDirty } = useLeaveModal();
   const { t } = useTranslation();
 
   const form = useForm<ContentLessonFormValues>({
@@ -84,7 +86,9 @@ export const useContentLessonForm = ({
         setOpenChapter && setOpenChapter(chapterToEdit.id);
       }
 
-      setContentTypeToDisplay(ContentTypes.EMPTY);
+      if (!isLeavingContent) setContentTypeToDisplay(ContentTypes.EMPTY);
+
+      setIsCurrectFormDirty(false);
     } catch (error) {
       console.error("Error creating text block:", error);
     }

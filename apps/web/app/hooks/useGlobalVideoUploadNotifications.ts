@@ -5,6 +5,7 @@ import { match } from "ts-pattern";
 
 import { acquireSocket, releaseSocket } from "~/api/socket";
 import { useToast } from "~/components/ui/use-toast";
+import { emitVideoUploadStatusEvent } from "~/hooks/videoUploadStatusBus";
 
 import type { VideoUploadStatus } from "@repo/shared";
 
@@ -34,6 +35,8 @@ export function useGlobalVideoUploadNotifications() {
     }
 
     const handleUploadStatusChange = (notification: UploadNotification) => {
+      emitVideoUploadStatusEvent(notification);
+
       match(notification.status)
         .with(VIDEO_UPLOAD_STATUS.PROCESSED, () =>
           toast({

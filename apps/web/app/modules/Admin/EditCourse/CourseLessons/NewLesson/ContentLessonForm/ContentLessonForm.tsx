@@ -1,15 +1,6 @@
-import {
-  ALLOWED_EXCEL_FILE_TYPES,
-  ALLOWED_LESSON_IMAGE_FILE_TYPES,
-  ALLOWED_PDF_FILE_TYPES,
-  ALLOWED_PRESENTATION_FILE_TYPES,
-  ALLOWED_VIDEO_FILE_TYPES,
-  ALLOWED_WORD_FILE_TYPES,
-  ENTITY_TYPES,
-} from "@repo/shared";
+import { ENTITY_TYPES } from "@repo/shared";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { match } from "ts-pattern";
 
 import { useInitializeLessonContext } from "~/api/mutations/admin/useInitializeLessonContext";
 import { useInitVideoUpload } from "~/api/mutations/admin/useInitVideoUpload";
@@ -20,14 +11,17 @@ import { Button } from "~/components/ui/button";
 import { Form, FormControl, FormField, FormItem } from "~/components/ui/form";
 import { Label } from "~/components/ui/label";
 import { useToast } from "~/components/ui/use-toast";
+import { useLeaveModal } from "~/context/LeaveModalContext";
 import {
-  buildEntityResourceUrl,
-  insertResourceIntoEditor,
-  useEntityResourceUpload,
-} from "~/hooks/useEntityResourceUpload";
+  buildRichTextFileUploadHandler,
+  RICH_TEXT_ACCEPTED_FILE_TYPES,
+} from "~/hooks/buildRichTextFileUploadHandler";
+import { useEntityResourceUpload } from "~/hooks/useEntityResourceUpload";
+import { useRichTextUploadQueue } from "~/hooks/useRichTextUploadQueue";
 import { useTusVideoUpload } from "~/hooks/useTusVideoUpload";
 import { useUploadDisplayModeDialog } from "~/hooks/useUploadDisplayModeDialog";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
+import LeaveConfirmationModal from "~/modules/Admin/components/LeaveConfirmationModal";
 import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/components/MissingTranslationsAlert";
 
 import { ContentTypes, DeleteContentType } from "../../../EditCourse.types";
@@ -37,7 +31,6 @@ import { useContentLessonForm } from "./hooks/useContentLessonForm";
 
 import type { Chapter, Lesson } from "../../../EditCourse.types";
 import type { SupportedLanguages } from "@repo/shared";
-import type { Editor as TiptapEditor } from "@tiptap/react";
 
 type ContentLessonProps = {
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
@@ -55,6 +48,7 @@ const ContentLessonForm = ({
   language,
 }: ContentLessonProps) => {
   const [contextId, setContextId] = useState<string | undefined>(undefined);
+  const [isValidated, setIsValidated] = useState(false);
 
   const { form, onSubmit, onDelete } = useContentLessonForm({
     chapterToEdit,
@@ -65,6 +59,8 @@ const ContentLessonForm = ({
   });
   const { t } = useTranslation();
   const { toast } = useToast();
+  const { isLeaveModalOpen, closeLeaveModal, setIsCurrectFormDirty, setIsLeavingContent } =
+    useLeaveModal();
 
   const { mutate: initializeLessonContext } = useInitializeLessonContext();
 
@@ -73,7 +69,8 @@ const ContentLessonForm = ({
   const { mutateAsync: initVideoUpload } = useInitVideoUpload();
   const { uploadResource } = useEntityResourceUpload();
   const { askForDisplayMode, dialog: uploadDisplayModeDialog } = useUploadDisplayModeDialog();
-  const { getSessionForFile, uploadVideo, isUploading, uploadProgress } = useTusVideoUpload();
+  const { getSessionForFile, uploadVideo } = useTusVideoUpload();
+  const { enqueue, setStatus, setProgress, attachUploadId } = useRichTextUploadQueue();
 
   const onCloseModal = () => {
     setIsModalOpen(false);
@@ -83,87 +80,47 @@ const ContentLessonForm = ({
     setIsModalOpen(true);
   };
 
-  const handleFileUpload = async (file?: File, editor?: TiptapEditor | null) => {
-    if (!file) return;
-
-    const isVideo = ALLOWED_VIDEO_FILE_TYPES.includes(file.type);
-    const isPresentation = ALLOWED_PRESENTATION_FILE_TYPES.includes(file.type);
-    const isPdf = ALLOWED_PDF_FILE_TYPES.includes(file.type);
-    const isDocument =
-      isPdf ||
-      ALLOWED_EXCEL_FILE_TYPES.includes(file.type) ||
-      ALLOWED_WORD_FILE_TYPES.includes(file.type);
-
-    if (isVideo) {
-      try {
-        const session = await getSessionForFile({
-          file,
-          init: () =>
-            initVideoUpload({
-              filename: file.name,
-              sizeBytes: file.size,
-              mimeType: file.type,
-              title: file.name,
-              resource: "lesson-content",
-              contextId,
-              entityId: lessonToEdit?.id,
-              entityType: ENTITY_TYPES.LESSON,
-            }),
-        });
-
-        await uploadVideo({ file, session });
-
-        if (session.resourceId) {
-          const resourceUrl = buildEntityResourceUrl(session.resourceId, ENTITY_TYPES.LESSON);
-
-          editor
-            ?.chain()
-            .insertContent("<br />")
-            .setVideoEmbed({
-              src: resourceUrl,
-              sourceType: session.provider === "s3" ? "external" : "internal",
-            })
-            .run();
-        }
-      } catch (error) {
-        console.error("Error uploading video:", error);
-        toast({
-          description: t("uploadFile.toast.videoFailed"),
-          variant: "destructive",
-        });
-      }
-      return;
-    }
-
-    let displayMode: "preview" | "download" = "preview";
-
-    if (isPresentation || isPdf) {
-      const selectedMode = await askForDisplayMode(file.name);
-      if (!selectedMode) return;
-      displayMode = selectedMode;
-    }
-
-    const resourceId = await uploadResource({
-      file,
-      entityType: ENTITY_TYPES.LESSON,
-      entityId: lessonToEdit?.id,
-      contextId,
-      language,
-    });
-
-    insertResourceIntoEditor({
-      editor,
-      resourceId,
-      entityType: ENTITY_TYPES.LESSON,
-      file,
-      resourceType: match({ isPresentation, isPdf, isDocument })
-        .with({ isPresentation: true }, () => "presentation" as const)
-        .with({ isPdf: true }, () => "pdf" as const)
-        .with({ isDocument: true }, () => "document" as const)
-        .otherwise(() => "other" as const),
-      displayMode: isPresentation || isDocument ? displayMode : "preview",
-    });
-  };
+  const handleFileUpload = buildRichTextFileUploadHandler({
+    entityType: ENTITY_TYPES.LESSON,
+    getVideoSessionForFile: (file) =>
+      getSessionForFile({
+        file,
+        init: () =>
+          initVideoUpload({
+            filename: file.name,
+            sizeBytes: file.size,
+            mimeType: file.type,
+            title: file.name,
+            resource: "lesson-content",
+            contextId,
+            entityId: lessonToEdit?.id,
+            entityType: ENTITY_TYPES.LESSON,
+          }),
+      }),
+    uploadVideo,
+    uploadResourceFile: (file) =>
+      uploadResource({
+        file,
+        entityType: ENTITY_TYPES.LESSON,
+        entityId: lessonToEdit?.id,
+        contextId,
+        language,
+      }),
+    askForDisplayMode,
+    onVideoUploadError: () => {
+      toast({
+        description: t("uploadFile.toast.videoFailed"),
+        variant: "destructive",
+      });
+    },
+    fallbackUploadErrorMessage: t("uploadFile.toast.videoFailed"),
+    uploadQueue: {
+      enqueue,
+      setStatus,
+      setProgress,
+      attachUploadId,
+    },
+  });
 
   const missingTranslations =
     lessonToEdit && !lessonToEdit.title.trim() && !lessonToEdit.description.trim();
@@ -176,6 +133,37 @@ const ContentLessonForm = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const { isDirty } = form.formState;
+
+  useEffect(() => {
+    setIsCurrectFormDirty(isDirty);
+  }, [isDirty, setIsCurrectFormDirty]);
+
+  const handleValidationSuccess = () => {
+    setIsValidated(true);
+  };
+
+  const handleValidationError = () => {
+    setIsValidated(false);
+    closeLeaveModal();
+  };
+
+  const onValidateLeave = () => {
+    form.handleSubmit(handleValidationSuccess, handleValidationError)();
+  };
+
+  const onCloseLeaveModal = () => {
+    closeLeaveModal();
+    setIsCurrectFormDirty(false);
+    setIsLeavingContent(false);
+  };
+
+  const onSaveLeaveModal = () => {
+    form.handleSubmit(onSubmit)();
+    closeLeaveModal();
+    setIsLeavingContent(false);
+  };
 
   return (
     <div className="flex flex-col gap-y-6 rounded-lg bg-white p-8">
@@ -229,16 +217,8 @@ const ContentLessonForm = ({
                     content={field.value}
                     lessonId={lessonToEdit?.id}
                     allowFiles={!!lessonToEdit?.id || !!contextId}
-                    acceptedFileTypes={[
-                      ...ALLOWED_LESSON_IMAGE_FILE_TYPES,
-                      ...ALLOWED_VIDEO_FILE_TYPES,
-                      ...ALLOWED_EXCEL_FILE_TYPES,
-                      ...ALLOWED_PDF_FILE_TYPES,
-                      ...ALLOWED_WORD_FILE_TYPES,
-                      ...ALLOWED_PRESENTATION_FILE_TYPES,
-                    ]}
+                    acceptedFileTypes={RICH_TEXT_ACCEPTED_FILE_TYPES}
                     onUpload={handleFileUpload}
-                    uploadProgress={isUploading ? (uploadProgress ?? 0) : null}
                     onCtrlSave={() => form.handleSubmit(onSubmit)()}
                     {...field}
                   />
@@ -274,6 +254,13 @@ const ContentLessonForm = ({
         onClose={onCloseModal}
         onDelete={onDelete}
         contentType={DeleteContentType.CONTENT}
+      />
+      <LeaveConfirmationModal
+        open={isLeaveModalOpen || false}
+        onClose={onCloseLeaveModal}
+        onSave={onSaveLeaveModal}
+        onValidate={onValidateLeave}
+        isValidated={isValidated}
       />
       {uploadDisplayModeDialog}
     </div>
