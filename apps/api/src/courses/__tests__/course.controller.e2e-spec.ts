@@ -3300,11 +3300,11 @@ describe("CourseController (e2e)", () => {
       const admin = await userFactory
         .withCredentials({ password })
         .withAdminSettings(db)
-        .create({ role: USER_ROLES.ADMIN });
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
       const contentCreator = await userFactory
         .withCredentials({ password })
         .withContentCreatorSettings(db)
-        .create({ role: USER_ROLES.CONTENT_CREATOR });
+        .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
       const category = await categoryFactory.create();
       const course = await courseFactory.create({
         authorId: contentCreator.id,
@@ -3332,11 +3332,11 @@ describe("CourseController (e2e)", () => {
         const admin = await userFactory
           .withCredentials({ password })
           .withAdminSettings(db)
-          .create({ role: USER_ROLES.ADMIN });
+          .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
         const contentCreator = await userFactory
           .withCredentials({ password })
           .withContentCreatorSettings(db)
-          .create({ role: USER_ROLES.CONTENT_CREATOR });
+          .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
         const category = await categoryFactory.create();
         const course = await courseFactory.create({
           authorId: contentCreator.id,

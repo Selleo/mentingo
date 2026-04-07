@@ -28,10 +28,13 @@ importers:
         version: 0.6.9(prettier@3.4.1)
       tsc-files:
         specifier: ^1.1.4
-        version: 1.1.4(typescript@5.9.3)
+        version: 1.1.4(typescript@5.4.5)
       turbo:
         specifier: ^2.2.3
         version: 2.3.3
+      typescript:
+        specifier: 5.4.5
+        version: 5.4.5
 
   apps/api:
     dependencies:
@@ -35573,9 +35576,9 @@ snapshots:
 
   ts-pattern@5.2.0: {}
 
-  tsc-files@1.1.4(typescript@5.9.3):
+  tsc-files@1.1.4(typescript@5.4.5):
     dependencies:
-      typescript: 5.9.3
+      typescript: 5.4.5
 
   tsconfck@3.1.4(typescript@5.4.5):
     optionalDependencies:
