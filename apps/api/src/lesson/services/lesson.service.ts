@@ -246,18 +246,17 @@ export class LessonService {
       : questionListWithUrls;
 
     if (lesson.lessonCompleted && isNumber(lesson.quizScore)) {
-      const [quizResult] = await this.lessonRepository.getQuizResult(
-        lesson.id,
-        lesson.quizScore,
-        userId,
-      );
+      const correctAnswerCount = questionListWithUrls.filter(
+        (question) => question.passQuestion === true,
+      ).length;
 
+      const wrongAnswerCount = questionListWithUrls.length - correctAnswerCount;
       const quizDetails: QuestionDetails = {
         questions: redactedQuestionList,
         questionCount: redactedQuestionList.length,
-        score: quizResult?.score ?? 0,
-        correctAnswerCount: quizResult?.correctAnswerCount ?? 0,
-        wrongAnswerCount: quizResult?.wrongAnswerCount ?? 0,
+        score: lesson.quizScore,
+        correctAnswerCount,
+        wrongAnswerCount,
       };
 
       return { ...lesson, quizDetails, isQuizFeedbackRedacted };

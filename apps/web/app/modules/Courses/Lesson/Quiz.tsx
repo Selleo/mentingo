@@ -5,7 +5,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import { useSubmitQuiz, useRetakeQuiz, useQuizRetakeStatus } from "~/api/mutations";
-import { courseQueryOptions } from "~/api/queries";
+import { courseQueryOptions, lessonQueryOptions } from "~/api/queries";
 import { certificatesQueryOptions } from "~/api/queries/useCertificates";
 import { queryClient } from "~/api/queryClient";
 import { Icon } from "~/components/Icon";
@@ -42,7 +42,7 @@ type QuizProps = {
 };
 
 export const Quiz = ({ lesson, userId }: QuizProps) => {
-  const { lessonId = "", courseId: courseSlug = "" } = useParams();
+  const { courseId: courseSlug = "" } = useParams();
   const { t } = useTranslation();
   const { isPreviewMode } = useCourseAccessProvider();
 
@@ -67,12 +67,14 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
   });
 
   const submitQuiz = useSubmitQuiz({
-    handleOnSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["lesson", lessonId] });
-      queryClient.invalidateQueries({ queryKey: ["lessonProgress", lessonId] });
-      queryClient.invalidateQueries(certificatesQueryOptions({ userId }));
-      queryClient.invalidateQueries({ queryKey: ["certificate", userId] });
-      queryClient.invalidateQueries(courseQueryOptions(courseSlug));
+    handleOnSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries(lessonQueryOptions(lesson.id, language, userId)),
+        queryClient.invalidateQueries({ queryKey: ["lessonProgress", lesson.id] }),
+        queryClient.invalidateQueries(certificatesQueryOptions({ userId })),
+        queryClient.invalidateQueries({ queryKey: ["certificate", userId] }),
+        queryClient.invalidateQueries(courseQueryOptions(courseSlug)),
+      ]);
     },
   });
 
@@ -94,7 +96,13 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
   if (!questions.length) return null;
 
   const handleOnSubmit = async (data: QuizForm) => {
-    submitQuiz.mutate({ lessonId, questionsAnswers: parseQuizFormData(data), language });
+    const parsedQuestionsAnswers = parseQuizFormData(data);
+
+    submitQuiz.mutate({
+      lessonId: lesson.id,
+      questionsAnswers: parsedQuestionsAnswers,
+      language,
+    });
   };
 
   const handleRetake = () => {

@@ -29,22 +29,33 @@ export const FillInTheBlanks = ({ question, isCompleted }: FillInTheBlanksProps)
       <FillInTheTextBlanks
         content={question.description}
         replacement={(index) => {
+          const blankDisplayOrder = index + 1;
+
+          const studentAnswerForBlank =
+            question.options?.find((option) => option.displayOrder === blankDisplayOrder) ??
+            question.options?.[index];
+
           return (
             <TextBlank
               questionId={question.id}
-              studentAnswer={question.options?.[index]}
+              studentAnswer={studentAnswerForBlank}
               index={index}
               isQuizSubmitted={isCompleted}
             />
           );
         }}
       />
-      {isCompleted && !!question?.solutionExplanation && !isQuizFeedbackRedacted && (
-        <div>
-          <span className="body-base-md text-error-700">Correct sentence:</span>
-          <Viewer content={question.solutionExplanation} />
-        </div>
-      )}
+      {isCompleted &&
+        !!question?.solutionExplanation &&
+        !question.passQuestion &&
+        !isQuizFeedbackRedacted && (
+          <div>
+            <span className="body-base-md text-error-700">
+              {t("studentLessonView.other.correctSentence")}
+            </span>
+            <Viewer content={question.solutionExplanation} />
+          </div>
+        )}
     </Card>
   );
 };

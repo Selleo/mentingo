@@ -3,11 +3,15 @@ import { expect, describe, it } from "vitest";
 import {
   findFirstInProgressLessonId,
   findFirstNotStartedLessonId,
+  getEmptyQuizAnswers,
+  getUserAnswers,
   isNextBlocked,
   isPreviousBlocked,
+  parseQuizFormData,
 } from "../utils";
 
 import type { GetCourseResponse } from "~/api/generated-api";
+import type { QuizForm } from "~/modules/Courses/Lesson/types";
 
 describe("findFirstNotStartedLessonId", () => {
   it("returns the first not started lesson id", () => {
@@ -315,6 +319,87 @@ describe("isPreviousBlocked", () => {
         isEnrolled,
       );
       expect(previousBlocked).toBe(false);
+    });
+  });
+});
+
+describe("parseQuizFormData", () => {
+  it("maps fill in the blanks answers as value-only entries", () => {
+    const formData: QuizForm = {
+      briefResponses: {},
+      detailedResponses: {},
+      singleAnswerQuestions: {},
+      multiAnswerQuestions: {},
+      photoQuestionSingleChoice: {},
+      photoQuestionMultipleChoice: {},
+      trueOrFalseQuestions: {},
+      fillInTheBlanksText: {
+        "question-text": {
+          "1": "first",
+          "2": "second",
+        },
+      },
+      fillInTheBlanksDnd: {
+        "question-dnd": {
+          "1": "dragged",
+        },
+      },
+    };
+
+    const parsed = parseQuizFormData(formData);
+
+    expect(parsed).toEqual([
+      {
+        questionId: "question-text",
+        answers: [{ value: "first" }, { value: "second" }],
+      },
+      {
+        questionId: "question-dnd",
+        answers: [{ value: "dragged" }],
+      },
+    ]);
+  });
+});
+
+describe("fill in the blanks text mapping", () => {
+  it("creates only as many fields as [word] placeholders for empty answers", () => {
+    const questions = [
+      {
+        id: "question-text",
+        type: "fill_in_the_blanks_text",
+        description: "I [word] to the park every day.",
+        options: [{ id: "o1" }, { id: "o2" }],
+      },
+    ] as unknown as NonNullable<
+      import("~/api/generated-api").GetLessonByIdResponse["data"]["quizDetails"]
+    >["questions"];
+
+    const emptyAnswers = getEmptyQuizAnswers(questions);
+
+    expect(emptyAnswers.fillInTheBlanksText["question-text"]).toEqual({
+      "1": null,
+    });
+  });
+
+  it("creates user answers only for rendered placeholders", () => {
+    const questions = [
+      {
+        id: "question-text",
+        type: "fill_in_the_blanks_text",
+        description: "I [word] to the park every day.",
+        options: [
+          { id: "o1", studentAnswer: "go" },
+          { id: "o2", studentAnswer: "walk" },
+        ],
+      },
+    ] as unknown as NonNullable<
+      import("~/api/generated-api").GetLessonByIdResponse["data"]["quizDetails"]
+    >["questions"];
+
+    const userAnswers = getUserAnswers(questions);
+
+    expect(userAnswers.fillInTheBlanksText["question-text"]).toEqual({
+      "1": "go",
     });
   });
 });

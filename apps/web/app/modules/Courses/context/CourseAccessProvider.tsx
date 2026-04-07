@@ -18,7 +18,6 @@ type CourseExperienceResolverParams = {
   course: GetCourseResponse["data"];
   forcePreviewMode: boolean;
   currentUserId?: string;
-  canManageUsers: boolean;
   canManageCourses: boolean;
   canManageOwnCourses: boolean;
   canUpdateLearningProgress: boolean;
@@ -36,7 +35,6 @@ function resolveCourseExperienceState({
   course,
   forcePreviewMode,
   currentUserId,
-  canManageUsers,
   canManageCourses,
   canManageOwnCourses,
   canUpdateLearningProgress,
@@ -50,7 +48,7 @@ function resolveCourseExperienceState({
   const canContentCreatorLearn =
     canManageOwnCourses && (isCourseStudentModeActive || (!isCourseAuthor && !!course.enrolled));
 
-  const canAdminLearn = canManageUsers && isCourseStudentModeActive;
+  const canAdminLearn = canManageCourses && isCourseStudentModeActive;
 
   const isPreviewMode =
     forcePreviewMode || (canManageCourses && !canAdminLearn && !canContentCreatorLearn);
@@ -72,7 +70,6 @@ export function CourseAccessProvider({
   children,
 }: CourseAccessProviderProps) {
   const { data: currentUser } = useCurrentUser();
-  const { hasAccess: canManageUsers } = usePermissions({ required: PERMISSIONS.USER_MANAGE });
   const { hasAccess: canManageOwnCourses } = usePermissions({
     required: PERMISSIONS.COURSE_UPDATE_OWN,
   });
@@ -88,7 +85,6 @@ export function CourseAccessProvider({
       course,
       forcePreviewMode,
       currentUserId: currentUser?.id,
-      canManageUsers,
       canManageCourses,
       canManageOwnCourses,
       canUpdateLearningProgress,
@@ -99,7 +95,6 @@ export function CourseAccessProvider({
     currentUser?.id,
     currentUser?.studentModeCourseIds,
     forcePreviewMode,
-    canManageUsers,
     canManageCourses,
     canManageOwnCourses,
     canUpdateLearningProgress,
