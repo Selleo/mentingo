@@ -8,7 +8,7 @@ import { ApiClient } from "../api-client";
 import type { EvaluationQuizBody } from "../generated-api";
 
 type SubmitQuizProps = {
-  handleOnSuccess: () => void;
+  handleOnSuccess: () => Promise<void> | void;
 };
 
 type Answer = EvaluationQuizBody;
@@ -22,8 +22,8 @@ export function useSubmitQuiz({ handleOnSuccess }: SubmitQuizProps) {
 
       return response.data;
     },
-    onSuccess: () => {
-      handleOnSuccess();
+    onSuccess: async () => {
+      await handleOnSuccess();
     },
     onError: (error) => {
       if (error instanceof AxiosError) {

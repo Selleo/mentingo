@@ -420,7 +420,7 @@ export class LessonController {
   }
 
   @Delete("delete-student-quiz-answers")
-  @RequirePermission(PERMISSIONS.LEARNING_PROGRESS_UPDATE)
+  @RequirePermission(PERMISSIONS.LEARNING_PROGRESS_UPDATE, PERMISSIONS.LEARNING_MODE_USE)
   @Validate({
     request: [{ type: "query", name: "lessonId", schema: UUIDSchema, required: true }],
     response: baseResponse(Type.Object({ message: Type.String() })),
