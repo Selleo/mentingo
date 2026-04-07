@@ -18796,37 +18796,16 @@
         "type": "object",
         "properties": {
           "lessonSequenceEnabled": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "string"
-              }
-            ]
+            "type": "boolean"
           },
           "quizFeedbackEnabled": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "string"
-              }
-            ]
+            "type": "boolean"
           },
           "certificateFontColor": {
             "type": "string"
           },
           "removeCertificateSignature": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "string"
-              }
-            ]
+            "type": "boolean"
           },
           "certificateSignature": {
             "format": "binary",
