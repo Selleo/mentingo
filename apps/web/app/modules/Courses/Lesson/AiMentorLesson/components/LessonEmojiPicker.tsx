@@ -10,11 +10,9 @@ interface Props {
 
 export function LessonEmojiPicker({ setInput, input }: Props) {
   const { t } = useTranslation();
+
   return (
-    <EmojiPicker.Root
-      className="isolate flex h-[368px] w-fit flex-col bg-white dark:bg-neutral-900"
-      onEmojiSelect={({ emoji }) => setInput(input + emoji)}
-    >
+    <EmojiPicker.Root className="isolate flex h-[368px] w-fit flex-col bg-white dark:bg-neutral-900">
       <EmojiPicker.Search
         className="z-10 mx-2 mt-2 appearance-none rounded-md bg-neutral-100 px-2.5 py-2 text-sm dark:bg-neutral-800 focus:outline-primary"
         placeholder={t("adminCourseView.curriculum.lesson.other.emoji.search")}
@@ -50,6 +48,7 @@ export function LessonEmojiPicker({ setInput, input }: Props) {
                 variant="ghost"
                 type="button"
                 {...props}
+                onClick={() => setInput(input + emoji.emoji)}
               >
                 {emoji.emoji}
               </Button>
