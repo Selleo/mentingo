@@ -28,10 +28,7 @@ import {
   isSupportModeSession,
   shouldEmitUserScopedEvents,
 } from "src/common/helpers/support-mode-context";
-import {
-  CurrentUser as CurrentUserType,
-  type SupportModeCurrentUser,
-} from "src/common/types/current-user.type";
+import { CurrentUserType, type SupportModeCurrentUser } from "src/common/types/current-user.type";
 import { SupportModeEnterEvent, UserActivityEvent, UserLogoutEvent } from "src/events";
 import { USER_LOGIN_METHOD } from "src/events/user/user-login.event";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";

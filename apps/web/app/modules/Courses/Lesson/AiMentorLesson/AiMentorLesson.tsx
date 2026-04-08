@@ -174,25 +174,28 @@ const AiMentorLesson = ({ lesson, lessonLoading, previewUser }: AiMentorLessonPr
       className={cn(
         "mx-auto flex h-[85vh] max-h-[85vh] w-full flex-col items-center overflow-y-scroll py-4",
         {
-          "h-auto max-h-[65vh]": isPreviewMode,
+          "h-auto max-h-[85vh]": isPreviewMode,
         },
       )}
     >
-      {!isPreviewMode && (
-        <RetakeModal
-          open={showRetakeModal}
-          onOpenChange={setShowRetakeModal}
-          onConfirm={handleRetakeLesson}
-          onCancel={() => setShowRetakeModal(false)}
-        />
-      )}
+      <RetakeModal
+        open={showRetakeModal}
+        onOpenChange={setShowRetakeModal}
+        onConfirm={handleRetakeLesson}
+        onCancel={() => setShowRetakeModal(false)}
+      />
 
       {lessonLoading || isCurrentThreadMessagesLoading ? (
         <LoaderWithTextSequence preset="aiMentor" />
       ) : null}
 
       {!lessonLoading && hasTaskDescription && (
-        <Accordion type="single" collapsible defaultValue="task" className="w-full mb-10">
+        <Accordion
+          type="single"
+          collapsible
+          defaultValue={isPreviewMode ? "" : "task"}
+          className="w-full mb-10"
+        >
           <AccordionItem
             value="task"
             className="rounded-xl border border-l-4 border-primary-600 bg-white shadow-sm"
@@ -218,7 +221,7 @@ const AiMentorLesson = ({ lesson, lessonLoading, previewUser }: AiMentorLessonPr
               />
             </AccordionTrigger>
             <AccordionContent className="px-4 py-4 text-neutral-800 border-t border-neutral-100">
-              <div>{lesson.description}</div>
+              <div className="max-h-24 overflow-y-auto">{lesson.description}</div>
             </AccordionContent>
           </AccordionItem>
         </Accordion>
@@ -266,29 +269,25 @@ const AiMentorLesson = ({ lesson, lessonLoading, previewUser }: AiMentorLessonPr
         />
       )}
 
-      {!isPreviewMode && (
-        <>
-          <hr className="mt-4 w-full border-t border-[#EDEDED]" />
-          <div className="mt-4 flex w-full justify-center">
-            {isThreadActive && !isJudgePending ? (
-              <Button variant="primary" size="lg" className="max-w-fit gap-2" onClick={handleJudge}>
-                {t("studentCourseView.lesson.aiMentorLesson.check")}
-                <Icon name="ArrowRight" className="size-5" />
-              </Button>
-            ) : (
-              <Button
-                variant="outline"
-                size="lg"
-                className="max-w-fit gap-2"
-                onClick={() => setShowRetakeModal(true)}
-              >
-                {t("studentCourseView.lesson.aiMentorLesson.retake")}
-                <Icon name="ArrowRight" className="size-5" />
-              </Button>
-            )}
-          </div>
-        </>
-      )}
+      <hr className="mt-4 w-full border-t border-[#EDEDED]" />
+      <div className="mt-4 flex w-full justify-center">
+        {isThreadActive && !isJudgePending ? (
+          <Button variant="primary" size="lg" className="max-w-fit gap-2" onClick={handleJudge}>
+            {t("studentCourseView.lesson.aiMentorLesson.check")}
+            <Icon name="ArrowRight" className="size-5" />
+          </Button>
+        ) : (
+          <Button
+            variant="outline"
+            size="lg"
+            className="max-w-fit gap-2"
+            onClick={() => setShowRetakeModal(true)}
+          >
+            {t("studentCourseView.lesson.aiMentorLesson.retake")}
+            <Icon name="ArrowRight" className="size-5" />
+          </Button>
+        )}
+      </div>
     </div>
   );
 };

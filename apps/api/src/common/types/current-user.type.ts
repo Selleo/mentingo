@@ -1,7 +1,7 @@
 import type { PermissionKey } from "@repo/shared";
 import type { UUIDType } from "src/common";
 
-export type CurrentUser = {
+export type CurrentUserType = {
   userId: UUIDType;
   email: string;
   roleSlugs: string[];
@@ -17,7 +17,7 @@ export type CurrentUser = {
   exp?: number;
 };
 
-export type SupportModeCurrentUser = CurrentUser & {
+export type SupportModeCurrentUser = CurrentUserType & {
   isSupportMode: true;
   supportSessionId: UUIDType;
   originalUserId: UUIDType;

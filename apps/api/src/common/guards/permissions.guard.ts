@@ -10,7 +10,7 @@ import { REQUIRED_PERMISSIONS_KEY } from "src/common/decorators/require-permissi
 import { hasAnyPermission } from "src/common/permissions/permission.utils";
 
 import type { PermissionKey } from "@repo/shared";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
@@ -30,7 +30,7 @@ export class PermissionsGuard implements CanActivate {
     ]);
 
     const request = context.switchToHttp().getRequest();
-    const user = request.user as CurrentUser | undefined;
+    const user = request.user as CurrentUserType | undefined;
 
     if (isPublic && !user) return true;
 

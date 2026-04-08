@@ -9,7 +9,7 @@ import { EnvRepository } from "src/env/repositories/env.repository";
 import { UpdateEnvEvent } from "src/events";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { BulkUpsertEnvBody, EncryptedEnvBody } from "src/env/env.schema";
 
 @Injectable()
@@ -23,7 +23,7 @@ export class EnvService {
     this.KEY_ENCRYPTION_KEY = Buffer.from(process.env.MASTER_KEY!, "base64");
   }
 
-  async bulkUpsertEnv(data: BulkUpsertEnvBody, actor?: CurrentUser) {
+  async bulkUpsertEnv(data: BulkUpsertEnvBody, actor?: CurrentUserType) {
     const processedEnvs: EncryptedEnvBody[] = [];
     for (const env of data) {
       if (!ALLOWED_SECRETS.includes(env.name)) {

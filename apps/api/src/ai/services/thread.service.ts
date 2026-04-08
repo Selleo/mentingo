@@ -13,9 +13,9 @@ import type {
   ResponseThreadMessageBody,
 } from "src/ai/utils/ai.schema";
 import type { BaseResponse, UUIDType } from "src/common";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 
-type ThreadViewer = Pick<CurrentUser, "userId" | "permissions">;
+type ThreadViewer = Pick<CurrentUserType, "userId" | "permissions">;
 
 @Injectable()
 export class ThreadService {

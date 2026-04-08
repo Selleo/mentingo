@@ -42,7 +42,7 @@ import type { PermissionKey, SupportedLanguages } from "@repo/shared";
 import type { ResponseAiJudgeJudgementBody } from "src/ai/utils/ai.schema";
 import type { UUIDType } from "src/common";
 import type { ActorUserType } from "src/common/types/actor-user.type";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { ProgressStatus } from "src/utils/types/progress.type";
 
 @Injectable()
@@ -70,7 +70,7 @@ export class StudentLessonProgressService {
     id: UUIDType;
     studentId: UUIDType;
     userPermissions?: PermissionKey[];
-    actor?: CurrentUser;
+    actor?: CurrentUserType;
     quizCompleted?: boolean;
     completedQuestionCount?: number;
     dbInstance?: DatabasePg;
@@ -784,7 +784,7 @@ export class StudentLessonProgressService {
 
   private async resolveActor(
     userId: UUIDType,
-    actor: CurrentUser | undefined,
+    actor: CurrentUserType | undefined,
     dbInstance: DatabasePg = this.db,
   ): Promise<ActorUserType> {
     if (actor) return actor;

@@ -6,7 +6,7 @@ import { ReportRepository } from "./repositories/report.repository";
 
 import type { StudentCourseReportRow } from "./repositories/report.repository";
 import type { SupportedLanguages } from "@repo/shared";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { Schema } from "write-excel-file";
 
 @Injectable()
@@ -15,7 +15,7 @@ export class ReportService {
 
   async generateSummaryReport(
     language: SupportedLanguages,
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
   ): Promise<Buffer> {
     const reportData = await this.reportRepository.getAllStudentCourseData(language, currentUser);
 

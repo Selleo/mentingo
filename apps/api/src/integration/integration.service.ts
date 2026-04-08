@@ -13,7 +13,7 @@ import { PermissionsService } from "src/permissions/permissions.service";
 import { IntegrationRepository } from "./integration.repository";
 
 import type { CurrentAdminKeyData, RotateAdminKeyData } from "./integration.types";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 
 @Injectable()
 export class IntegrationService {
@@ -36,7 +36,7 @@ export class IntegrationService {
     };
   }
 
-  async rotateAdminKey(actor: CurrentUser): Promise<RotateAdminKeyData> {
+  async rotateAdminKey(actor: CurrentUserType): Promise<RotateAdminKeyData> {
     const rawKey = this.buildRawApiKey();
     const keyPrefix = this.extractPrefix(rawKey);
     const keyHash = this.hashApiKey(rawKey);
@@ -61,7 +61,7 @@ export class IntegrationService {
     keyId: string;
     keyTenantId: string;
     keyTenantIsManaging: boolean;
-    user: CurrentUser;
+    user: CurrentUserType;
   }> {
     const keyPrefix = this.extractPrefix(apiKey);
 
@@ -106,7 +106,7 @@ export class IntegrationService {
     return this.integrationRepository.getAllTenants();
   }
 
-  async getTenantsForActor(actor: CurrentUser) {
+  async getTenantsForActor(actor: CurrentUserType) {
     const currentTenant = await this.integrationRepository.getTenantById(actor.tenantId);
 
     if (!currentTenant) throw new UnauthorizedException("integrationApiKey.errors.invalidApiKey");

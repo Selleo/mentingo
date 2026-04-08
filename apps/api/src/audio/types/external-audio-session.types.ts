@@ -1,11 +1,11 @@
 import type { LumaSocket } from "@japro/luma-sdk";
 import type { UUIDType } from "src/common";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 
 export type ExternalAudioSession = {
   sessionId: string;
   socket: LumaSocket;
-  currentUser: CurrentUser;
+  currentUser: CurrentUserType;
   threadId: UUIDType;
   lessonId: UUIDType;
   userId: UUIDType;

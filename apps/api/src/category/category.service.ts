@@ -30,7 +30,7 @@ import type { CategoryInsert } from "./schemas/createCategorySchema";
 import type { CategoryUpdateBody } from "./schemas/updateCategorySchema";
 import type { CategoryActivityLogSnapshot } from "src/activity-logs/types";
 import type { Pagination, UUIDType } from "src/common";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 
 @Injectable()
 export class CategoryService {
@@ -103,7 +103,7 @@ export class CategoryService {
     return category;
   }
 
-  public async createCategory(createCategoryBody: CategoryInsert, currentUser: CurrentUser) {
+  public async createCategory(createCategoryBody: CategoryInsert, currentUser: CurrentUserType) {
     const category = await this.db.query.categories.findFirst({
       where: ({ title }) => eq(title, createCategoryBody.title),
     });
@@ -130,7 +130,7 @@ export class CategoryService {
   public async updateCategory(
     id: UUIDType,
     updateCategoryBody: CategoryUpdateBody,
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
   ) {
     const [existingCategory] = await this.db.select().from(categories).where(eq(categories.id, id));
 
@@ -179,7 +179,7 @@ export class CategoryService {
     }
   }
 
-  async deleteCategory(id: UUIDType, currentUser: CurrentUser) {
+  async deleteCategory(id: UUIDType, currentUser: CurrentUserType) {
     try {
       const [category] = await this.db.select().from(categories).where(eq(categories.id, id));
 
@@ -217,7 +217,7 @@ export class CategoryService {
     }
   }
 
-  async deleteManyCategories(categoryIds: string[], currentUser: CurrentUser): Promise<string> {
+  async deleteManyCategories(categoryIds: string[], currentUser: CurrentUserType): Promise<string> {
     let deletedCategories: { id: UUIDType; title: string }[] = [];
 
     const message = await this.db.transaction(async (tx) => {

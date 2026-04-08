@@ -13,7 +13,7 @@ import { nanoid } from "nanoid";
 import { SupportModeRepository } from "./support-mode.repository";
 
 import type { CreateSupportSessionResult, SupportSession } from "./support-mode.types";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 
 @Injectable()
 export class SupportModeService {
@@ -26,7 +26,7 @@ export class SupportModeService {
   ) {}
 
   async createSupportSession(
-    requestingUser: CurrentUser,
+    requestingUser: CurrentUserType,
     targetTenantId: string,
   ): Promise<CreateSupportSessionResult> {
     const [originalTenant, targetTenant] = await Promise.all([

@@ -8,6 +8,7 @@ import { IngestionRepository } from "src/ingestion/repositories/ingestion.reposi
 import { ChunkService } from "src/ingestion/services/chunk.service";
 import { DocumentService } from "src/ingestion/services/document.service";
 import { EmbeddingService } from "src/ingestion/services/embedding.service";
+import { IngestionProcessingService } from "src/ingestion/services/ingestion-processing.service";
 import { IngestionService } from "src/ingestion/services/ingestion.service";
 import { IngestionQueueService } from "src/ingestion/services/queue.service";
 import { IngestionWorker } from "src/ingestion/workers/ingestion.worker";
@@ -22,6 +23,7 @@ import { IngestionController } from "./ingestion.controller";
     IngestionService,
     IngestionRepository,
     DocumentService,
+    IngestionProcessingService,
     DocumentRepository,
     IngestionQueueService,
     IngestionWorker,
@@ -29,6 +31,6 @@ import { IngestionController } from "./ingestion.controller";
     EmbeddingService,
     RagService,
   ],
-  exports: [DocumentService],
+  exports: [DocumentService, IngestionService],
 })
 export class IngestionModule {}

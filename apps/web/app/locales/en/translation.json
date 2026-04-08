@@ -2102,7 +2102,8 @@
           }
         },
         "retakeModalTitle": "Are you sure you want to retake the lesson?",
-        "retakeModalDescription": "This will reset your progress in this lesson. This action cannot be undone."
+        "retakeModalDescription": "This will reset your progress in this lesson. This action cannot be undone.",
+        "retakeAccessDenied": "You can retake this lesson only if you're enrolled in the course or you're the course author."
       }
     },
     "sideSection": {

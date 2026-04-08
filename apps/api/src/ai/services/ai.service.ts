@@ -9,7 +9,7 @@ import {
 import { trace } from "@opentelemetry/api";
 import { PERMISSIONS } from "@repo/shared";
 import { experimental_transcribe, generateObject, jsonSchema, type Message, streamText } from "ai";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import _ from "lodash";
 
 import { MAX_TOKENS } from "src/ai/ai.constants";
@@ -31,17 +31,10 @@ import {
 } from "src/ai/utils/ai.type";
 import { stripVoiceEmotionBrackets } from "src/ai/utils/voiceEmotionBrackets";
 import { DatabasePg } from "src/common";
-import { LEARNING_MODE_REQUIRED_ERROR_KEY } from "src/common/utils/lessonLearningAccess";
 import { PermissionsService } from "src/permissions/permissions.service";
 import { dbAls } from "src/storage/db/db-als.store";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
-import {
-  aiMentorThreads,
-  chapters,
-  courseStudentMode,
-  lessons,
-  studentCourses,
-} from "src/storage/schema";
+import { aiMentorThreads } from "src/storage/schema";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
 
 import type { PermissionKey, SupportedLanguages } from "@repo/shared";
@@ -53,7 +46,7 @@ import type {
   ThreadOwnershipBody,
 } from "src/ai/utils/ai.schema";
 import type { UUIDType } from "src/common";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { CourseTranslationType } from "src/courses/types/course.types";
 
 @Injectable()
@@ -112,7 +105,7 @@ export class AiService {
   async streamMessage(
     data: StreamChatBody,
     model: OpenAIModels,
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
     isVoiceMentor: boolean = false,
   ) {
     return observe(
@@ -219,7 +212,7 @@ export class AiService {
     });
   }
 
-  async runJudge(data: ThreadOwnershipBody, currentUser?: CurrentUser) {
+  async runJudge(data: ThreadOwnershipBody, currentUser?: CurrentUserType) {
     const thread = await this.aiRepository.findThread([eq(aiMentorThreads.id, data.threadId)]);
     if (!thread) throw new BadRequestException("Thread not found");
 
@@ -275,11 +268,29 @@ export class AiService {
     return thread;
   }
 
+  private async resolveJudgeViewer(
+    currentUser: CurrentUserType | undefined,
+    fallbackUserId: UUIDType,
+  ) {
+    if (currentUser)
+      return {
+        userId: currentUser.userId,
+        permissions: currentUser.permissions,
+      };
+
+    const { permissions } = await this.permissionsService.getUserAccess(fallbackUserId);
+
+    return {
+      userId: fallbackUserId,
+      permissions,
+    };
+  }
+
   async markAsCompletedIfJudge(
     lessonId: UUIDType,
     studentId: UUIDType,
     userPermissions: PermissionKey[],
-    actor: CurrentUser | undefined,
+    actor: CurrentUserType | undefined,
     message: string | ResponseAiJudgeJudgementBody,
     language: SupportedLanguages,
     isJudge?: boolean,
@@ -299,78 +310,28 @@ export class AiService {
     });
   }
 
-  async retakeLesson(lessonId: UUIDType, currentUser: CurrentUser) {
+  async retakeLesson(lessonId: UUIDType, currentUser: CurrentUserType) {
     const { userId, permissions } = currentUser;
-
-    await this.assertStudentProgressMutationAllowed(lessonId, userId, permissions);
 
     const [lesson] = await this.aiRepository.checkLessonAssignment(lessonId, userId);
 
     if (!lesson.isAssigned && !lesson.isFreemium)
       throw new UnauthorizedException("You are not assigned to this lesson");
 
+    if (permissions.includes(PERMISSIONS.COURSE_UPDATE_OWN) && !lesson.isAssigned) {
+      const courseAuthorId = await this.aiRepository.getCourseAuthorByLesson(lessonId);
+
+      if (courseAuthorId !== userId) {
+        throw new UnauthorizedException(
+          "studentCourseView.lesson.aiMentorLesson.retakeAccessDenied",
+        );
+      }
+    }
+
     await this.db.transaction(async (trx) => {
       await this.aiRepository.setThreadsToArchived(lessonId, userId, trx);
       await this.aiRepository.resetStudentProgressForLesson(lessonId, userId, trx);
     });
-  }
-
-  private async assertStudentProgressMutationAllowed(
-    lessonId: UUIDType,
-    userId: UUIDType,
-    userPermissions: PermissionKey[],
-  ) {
-    const [access] = await this.db
-      .select({
-        isAssigned: studentCourses.id,
-        isStudentMode: courseStudentMode.id,
-      })
-      .from(lessons)
-      .innerJoin(chapters, eq(lessons.chapterId, chapters.id))
-      .leftJoin(
-        studentCourses,
-        and(eq(studentCourses.courseId, chapters.courseId), eq(studentCourses.studentId, userId)),
-      )
-      .leftJoin(
-        courseStudentMode,
-        and(
-          eq(courseStudentMode.courseId, chapters.courseId),
-          eq(courseStudentMode.userId, userId),
-        ),
-      )
-      .where(eq(lessons.id, lessonId));
-
-    const hasLearnerAccess = this.canUseLearnerProgressByPermissions(userPermissions, {
-      hasEnrollment: !!access?.isAssigned,
-      isLearningModeActive: !!access?.isStudentMode,
-    });
-
-    if (!hasLearnerAccess) throw new ForbiddenException(LEARNING_MODE_REQUIRED_ERROR_KEY);
-  }
-
-  private async resolveJudgeViewer(currentUser: CurrentUser | undefined, fallbackUserId: UUIDType) {
-    if (currentUser)
-      return {
-        userId: currentUser.userId,
-        permissions: currentUser.permissions,
-      };
-
-    const { permissions } = await this.permissionsService.getUserAccess(fallbackUserId);
-
-    return {
-      userId: fallbackUserId,
-      permissions,
-    };
-  }
-
-  private canUseLearnerProgressByPermissions(
-    userPermissions: PermissionKey[],
-    access: { hasEnrollment: boolean; isLearningModeActive: boolean },
-  ) {
-    const canUseLearningMode = userPermissions.includes(PERMISSIONS.LEARNING_MODE_USE);
-    if (canUseLearningMode) return access.isLearningModeActive;
-
-    return true;
   }
 
   async transcribe(clientId: string, audio: Buffer) {

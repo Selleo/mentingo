@@ -52,7 +52,7 @@ import {
 } from "./schemas/video-upload-status.schema";
 import { TusUploadService } from "./tus/tus-upload.service";
 
-import type { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 
 @UseGuards(PermissionsGuard)
 @Controller("file")

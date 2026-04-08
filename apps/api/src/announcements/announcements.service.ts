@@ -7,7 +7,7 @@ import { AnnouncementsRepository } from "./announcements.repository";
 
 import type { CreateAnnouncement, AnnouncementFilters } from "./types/announcement.types";
 import type { UUIDType } from "src/common";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 
 @Injectable()
 export class AnnouncementsService {
@@ -30,7 +30,7 @@ export class AnnouncementsService {
     return unreadCount;
   }
 
-  async markAnnouncementAsRead(announcementId: UUIDType, currentUser: CurrentUser) {
+  async markAnnouncementAsRead(announcementId: UUIDType, currentUser: CurrentUserType) {
     const [announcement] = await this.announcementsRepository.getAnnouncementById(announcementId);
 
     if (!announcement) throw new BadRequestException("Announcement not found");
@@ -59,7 +59,7 @@ export class AnnouncementsService {
     return await this.announcementsRepository.getAnnouncementsForUser(userId, filters);
   }
 
-  async createAnnouncement(createAnnouncementData: CreateAnnouncement, author: CurrentUser) {
+  async createAnnouncement(createAnnouncementData: CreateAnnouncement, author: CurrentUserType) {
     const createdAnnouncement = await this.announcementsRepository.createAnnouncement(
       createAnnouncementData,
       author.userId,

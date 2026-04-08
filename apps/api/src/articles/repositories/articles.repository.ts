@@ -15,7 +15,7 @@ import type { SQL } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import type { ArticleItem } from "src/articles/schemas/articleToc.schema";
 import type { UUIDType } from "src/common";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 
 @Injectable()
 export class ArticlesRepository {
@@ -364,7 +364,7 @@ export class ArticlesRepository {
   async getArticleSections(
     requestedLanguage: SupportedLanguages,
     conditions: SQL<unknown>[],
-    currentUser?: CurrentUser,
+    currentUser?: CurrentUserType,
   ) {
     const sectionTitle = hasAnyPermission(currentUser?.permissions, [
       PERMISSIONS.ARTICLE_MANAGE,
@@ -411,7 +411,7 @@ export class ArticlesRepository {
 
   getVisibleArticleConditions(
     language: SupportedLanguages,
-    currentUser?: CurrentUser,
+    currentUser?: CurrentUserType,
     options?: { isDraftMode?: boolean; excludedId?: UUIDType },
   ): SQL<unknown>[] {
     const isAdminLike = hasAnyPermission(currentUser?.permissions, [

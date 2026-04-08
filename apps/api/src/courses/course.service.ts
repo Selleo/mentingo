@@ -154,7 +154,7 @@ import type { SQL } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import type { CourseActivityLogSnapshot } from "src/activity-logs/types";
 import type { Pagination, UUIDType } from "src/common";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { CourseTranslationType } from "src/courses/types/course.types";
 import type { DurationEstimatesByCourse } from "src/courses/types/duration";
 import type {
@@ -1304,7 +1304,7 @@ export class CourseService {
   async getBetaCourseById(
     id: UUIDType,
     language: SupportedLanguages,
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
   ): Promise<CommonShowBetaCourse> {
     const [course] = await this.db
       .select({
@@ -1391,7 +1391,7 @@ export class CourseService {
   async hasMissingTranslations(
     id: UUIDType,
     language: SupportedLanguages,
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
   ): Promise<boolean> {
     const courseInRequestedLanguage = await this.getBetaCourseById(id, language, currentUser);
 
@@ -1579,7 +1579,7 @@ export class CourseService {
   async updateHasCertificate(
     courseId: UUIDType,
     hasCertificate: boolean,
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
   ) {
     const [course] = await this.db.select().from(courses).where(eq(courses.id, courseId));
 
@@ -1629,7 +1629,7 @@ export class CourseService {
   async updateCourseSettings(
     courseId: UUIDType,
     settings: UpdateCourseSettings,
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
     certificateSignature?: Express.Multer.File | null,
   ) {
     await this.masterCourseService.assertCourseContentEditable(courseId);
@@ -1721,7 +1721,7 @@ export class CourseService {
 
   async createCourse(
     createCourseBody: CreateCourseBody,
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
     isPlaywrightTest: boolean,
   ) {
     const newCourse = await this.db.transaction(async (trx) => {
@@ -1815,7 +1815,7 @@ export class CourseService {
   async updateCourse(
     id: UUIDType,
     updateCourseBody: UpdateCourseBody,
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
     isPlaywrightTest: boolean,
     image?: Express.Multer.File,
   ) {
@@ -1997,7 +1997,7 @@ export class CourseService {
     return updatedCourse;
   }
 
-  async deleteCourseTrailer(courseId: UUIDType, currentUser: CurrentUser) {
+  async deleteCourseTrailer(courseId: UUIDType, currentUser: CurrentUserType) {
     const [course] = await this.db
       .select({ id: courses.id, authorId: courses.authorId })
       .from(courses)
@@ -2036,7 +2036,7 @@ export class CourseService {
     studentId: UUIDType,
     testKey?: string,
     paymentId?: string,
-    currentUser?: CurrentUser,
+    currentUser?: CurrentUserType,
   ) {
     const [course] = await this.db
       .select({
@@ -2086,7 +2086,11 @@ export class CourseService {
     }
   }
 
-  async enrollCourses(courseId: UUIDType, body: CreateCoursesEnrollment, currentUser: CurrentUser) {
+  async enrollCourses(
+    courseId: UUIDType,
+    body: CreateCoursesEnrollment,
+    currentUser: CurrentUserType,
+  ) {
     const { studentIds } = body;
 
     const courseExists = await this.db.select().from(courses).where(eq(courses.id, courseId));
@@ -2171,7 +2175,7 @@ export class CourseService {
   async enrollGroupsToCourse(
     courseId: UUIDType,
     groupsToEnroll: EnrolledCourseGroupsPayload["groups"],
-    currentUser?: CurrentUser,
+    currentUser?: CurrentUserType,
   ) {
     const groupIds = groupsToEnroll.map((group) => group.id);
     const groupInfoById = new Map(groupsToEnroll.map((group) => [group.id, group]));
@@ -2547,7 +2551,7 @@ export class CourseService {
 
   async setCourseStudentMode(
     courseId: UUIDType,
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
     enableStudentMode: boolean,
   ) {
     const [course] = await this.db
@@ -2631,7 +2635,7 @@ export class CourseService {
     return this.isCourseStudentModeEnabled(lesson.courseId, userId, dbInstance);
   }
 
-  async deleteCourse(id: UUIDType, currentUser: CurrentUser) {
+  async deleteCourse(id: UUIDType, currentUser: CurrentUserType) {
     const [course] = await this.db.select().from(courses).where(eq(courses.id, id));
 
     if (!course) {
@@ -2671,7 +2675,7 @@ export class CourseService {
     });
   }
 
-  async deleteManyCourses(ids: UUIDType[], currentUser: CurrentUser) {
+  async deleteManyCourses(ids: UUIDType[], currentUser: CurrentUserType) {
     if (!ids.length) {
       throw new BadRequestException("No course ids provided");
     }
@@ -3765,7 +3769,11 @@ export class CourseService {
       );
   }
 
-  async createLanguage(courseId: UUIDType, language: SupportedLanguages, currentUser: CurrentUser) {
+  async createLanguage(
+    courseId: UUIDType,
+    language: SupportedLanguages,
+    currentUser: CurrentUserType,
+  ) {
     await this.masterCourseService.assertCourseContentEditable(courseId);
 
     await this.adminLessonService.validateAccess("course", currentUser, courseId);
@@ -3787,7 +3795,11 @@ export class CourseService {
       .where(eq(courses.id, courseId));
   }
 
-  async deleteLanguage(courseId: UUIDType, language: SupportedLanguages, currentUser: CurrentUser) {
+  async deleteLanguage(
+    courseId: UUIDType,
+    language: SupportedLanguages,
+    currentUser: CurrentUserType,
+  ) {
     await this.masterCourseService.assertCourseContentEditable(courseId);
 
     const { baseLanguage, availableLocales } = await this.localizationService.getBaseLanguage(
@@ -4023,7 +4035,7 @@ export class CourseService {
   async generateMissingTranslations(
     courseId: UUIDType,
     language: SupportedLanguages,
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
   ) {
     await this.masterCourseService.assertCourseContentEditable(courseId);
 

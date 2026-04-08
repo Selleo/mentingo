@@ -39,7 +39,7 @@ import { groupCourses, groups, groupUsers, studentCourses, users } from "src/sto
 import type { SQL } from "drizzle-orm";
 import type { GroupActivityLogSnapshot } from "src/activity-logs/types";
 import type { PaginatedResponse, Pagination, UUIDType } from "src/common";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { GroupSortField, GroupKeywordFilterBody } from "src/group/group.schema";
 import type {
   AllGroupsResponse,
@@ -183,7 +183,7 @@ export class GroupService {
     });
   }
 
-  public async createGroup(createGroupBody: UpsertGroupBody, currentUser?: CurrentUser) {
+  public async createGroup(createGroupBody: UpsertGroupBody, currentUser?: CurrentUserType) {
     const [createdGroup] = await this.db.insert(groups).values(createGroupBody).returning();
 
     if (!createdGroup) throw new ConflictException("Unable to create group");
@@ -204,7 +204,7 @@ export class GroupService {
   public async updateGroup(
     groupId: UUIDType,
     updateGroupBody: UpsertGroupBody,
-    currentUser?: CurrentUser,
+    currentUser?: CurrentUserType,
   ) {
     const [existingGroup] = await this.db.select().from(groups).where(eq(groups.id, groupId));
 
@@ -236,7 +236,7 @@ export class GroupService {
     return updatedGroup;
   }
 
-  public async deleteGroup(groupId: UUIDType, currentUser?: CurrentUser) {
+  public async deleteGroup(groupId: UUIDType, currentUser?: CurrentUserType) {
     const [deletedGroup] = await this.db.delete(groups).where(eq(groups.id, groupId)).returning();
 
     if (!deletedGroup) {
@@ -265,7 +265,7 @@ export class GroupService {
   async setUserGroups(
     groupIds: UUIDType[],
     userId: UUIDType,
-    options: { actor?: CurrentUser; db?: DatabasePg } = {},
+    options: { actor?: CurrentUserType; db?: DatabasePg } = {},
   ) {
     const actor = options.actor;
     const db = options.db ?? this.db;
