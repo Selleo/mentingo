@@ -7,6 +7,7 @@ import {
   type AudioStopPayload,
   type MentorTranscriptionPayload,
   type StartAudioPayload,
+  TRANSCRIPTION_MODES,
 } from "@japro/luma-sdk";
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import {
@@ -449,6 +450,7 @@ export class ExternalAudioService {
         channels: payload.meta.channels,
         format: LUMA_AUDIO_FORMATS.PCM_S16LE,
       },
+      transcriptionMode: TRANSCRIPTION_MODES.REALTIME_STREAM,
     };
   }
 
