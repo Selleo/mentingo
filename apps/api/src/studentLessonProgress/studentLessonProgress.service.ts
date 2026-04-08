@@ -107,7 +107,6 @@ export class StudentLessonProgressService {
     if (!accessCourseLessonWithDetails.isAssigned && !accessCourseLessonWithDetails.isFreemium)
       throw new UnauthorizedException("You don't have assignment to this lesson");
 
-    if (accessCourseLessonWithDetails.attempts > 1) return;
     const alreadyCompleted = accessCourseLessonWithDetails.lessonIsCompleted;
 
     const { language: actualLanguage } = await this.localizationService.getBaseLanguage(
