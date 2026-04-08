@@ -1304,7 +1304,7 @@ export class CourseService {
   async getBetaCourseById(
     id: UUIDType,
     language: SupportedLanguages,
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
   ): Promise<CommonShowBetaCourse> {
     const [course] = await this.db
       .select({
@@ -1391,7 +1391,7 @@ export class CourseService {
   async hasMissingTranslations(
     id: UUIDType,
     language: SupportedLanguages,
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
   ): Promise<boolean> {
     const courseInRequestedLanguage = await this.getBetaCourseById(id, language, currentUser);
 
@@ -2175,7 +2175,7 @@ export class CourseService {
   async enrollGroupsToCourse(
     courseId: UUIDType,
     groupsToEnroll: EnrolledCourseGroupsPayload["groups"],
-    currentUser?: CurrentUser,
+    currentUser?: CurrentUserType,
   ) {
     const groupIds = groupsToEnroll.map((group) => group.id);
     const groupInfoById = new Map(groupsToEnroll.map((group) => [group.id, group]));
@@ -2551,7 +2551,7 @@ export class CourseService {
 
   async setCourseStudentMode(
     courseId: UUIDType,
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
     enableStudentMode: boolean,
   ) {
     const [course] = await this.db
@@ -2635,7 +2635,7 @@ export class CourseService {
     return this.isCourseStudentModeEnabled(lesson.courseId, userId, dbInstance);
   }
 
-  async deleteCourse(id: UUIDType, currentUser: CurrentUser) {
+  async deleteCourse(id: UUIDType, currentUser: CurrentUserType) {
     const [course] = await this.db.select().from(courses).where(eq(courses.id, id));
 
     if (!course) {
@@ -2675,7 +2675,7 @@ export class CourseService {
     });
   }
 
-  async deleteManyCourses(ids: UUIDType[], currentUser: CurrentUser) {
+  async deleteManyCourses(ids: UUIDType[], currentUser: CurrentUserType) {
     if (!ids.length) {
       throw new BadRequestException("No course ids provided");
     }
@@ -3769,7 +3769,11 @@ export class CourseService {
       );
   }
 
-  async createLanguage(courseId: UUIDType, language: SupportedLanguages, currentUser: CurrentUser) {
+  async createLanguage(
+    courseId: UUIDType,
+    language: SupportedLanguages,
+    currentUser: CurrentUserType,
+  ) {
     await this.masterCourseService.assertCourseContentEditable(courseId);
 
     await this.adminLessonService.validateAccess("course", currentUser, courseId);
@@ -3791,7 +3795,11 @@ export class CourseService {
       .where(eq(courses.id, courseId));
   }
 
-  async deleteLanguage(courseId: UUIDType, language: SupportedLanguages, currentUser: CurrentUser) {
+  async deleteLanguage(
+    courseId: UUIDType,
+    language: SupportedLanguages,
+    currentUser: CurrentUserType,
+  ) {
     await this.masterCourseService.assertCourseContentEditable(courseId);
 
     const { baseLanguage, availableLocales } = await this.localizationService.getBaseLanguage(

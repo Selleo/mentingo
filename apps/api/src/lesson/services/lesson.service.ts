@@ -75,7 +75,7 @@ export class LessonService {
   async getLessonById(
     id: UUIDType,
     userId: UUIDType,
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
     language?: SupportedLanguages,
   ): Promise<LessonShow> {
     const isStudent = this.isLearnerOnly(currentUser.permissions);
@@ -275,7 +275,7 @@ export class LessonService {
 
   async evaluationQuiz(
     studentQuizAnswers: AnswerQuestionBody,
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
   ): Promise<{
     correctAnswerCount: number;
     wrongAnswerCount: number;
@@ -392,7 +392,7 @@ export class LessonService {
     });
   }
 
-  async deleteStudentQuizAnswers(lessonId: UUIDType, currentUser: CurrentUser): Promise<void> {
+  async deleteStudentQuizAnswers(lessonId: UUIDType, currentUser: CurrentUserType): Promise<void> {
     const { userId } = currentUser;
 
     await this.assertStudentProgressMutationAllowed(lessonId, currentUser);
@@ -457,7 +457,10 @@ export class LessonService {
     });
   }
 
-  private async assertStudentProgressMutationAllowed(lessonId: UUIDType, currentUser: CurrentUser) {
+  private async assertStudentProgressMutationAllowed(
+    lessonId: UUIDType,
+    currentUser: CurrentUserType,
+  ) {
     const { permissions } = await this.permissionsService.getUserAccess(currentUser.userId);
 
     if (this.isLearnerOnly(permissions)) return;
@@ -498,7 +501,7 @@ export class LessonService {
   async getLessonResource(
     req: Request,
     res: Response,
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
     resourceId: UUIDType,
   ) {
     const isStudent = this.isLearnerOnly(currentUser.permissions);

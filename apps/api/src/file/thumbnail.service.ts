@@ -164,15 +164,15 @@ export class ThumbnailService {
     );
   }
 
-  private canManageOwnArticle(currentUser: CurrentUser | null) {
+  private canManageOwnArticle(currentUser: CurrentUserType | null) {
     return hasPermission(currentUser?.permissions, PERMISSIONS.ARTICLE_MANAGE_OWN);
   }
 
-  private canManageOwnNews(currentUser: CurrentUser | null) {
+  private canManageOwnNews(currentUser: CurrentUserType | null) {
     return hasPermission(currentUser?.permissions, PERMISSIONS.NEWS_MANAGE_OWN);
   }
 
-  private canManageOwnCourse(currentUser: CurrentUser | null) {
+  private canManageOwnCourse(currentUser: CurrentUserType | null) {
     return hasPermission(currentUser?.permissions, PERMISSIONS.COURSE_UPDATE_OWN);
   }
 

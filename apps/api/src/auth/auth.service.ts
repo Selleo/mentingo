@@ -17,8 +17,11 @@ import {
   PasswordRecoveryEmail,
 } from "@repo/email-templates";
 import {
+  PERMISSIONS,
   SUPPORTED_LANGUAGES,
   type SupportedLanguages,
+  SYSTEM_ROLE_SLUGS,
+  type PermissionKey,
 } from "@repo/shared";
 import * as bcrypt from "bcryptjs";
 import { and, eq, isNull, lt, lte, sql } from "drizzle-orm";
@@ -66,6 +69,7 @@ import type { CreatePasswordBody } from "./schemas/create-password.schema";
 import type { AuthFailedData, RegisterUserWithHashedPasswordInput, TokenUser } from "./types";
 import type { Response } from "express";
 import type { ActorUserType } from "src/common/types/actor-user.type";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { UserLoginFailedData } from "src/events/user/user-login-failed-event";
 import type { RegistrationFormField } from "src/settings/schemas/registration-form.schema";
 import type { SupportSession } from "src/support-mode/support-mode.types";

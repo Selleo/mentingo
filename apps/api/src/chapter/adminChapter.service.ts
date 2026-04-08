@@ -89,7 +89,11 @@ export class AdminChapterService {
     return chapter;
   }
 
-  async updateFreemiumStatus(chapterId: UUIDType, isFreemium: boolean, currentUser: CurrentUser) {
+  async updateFreemiumStatus(
+    chapterId: UUIDType,
+    isFreemium: boolean,
+    currentUser: CurrentUserType,
+  ) {
     await this.masterCourseService.assertCourseContentEditableByChapterId(chapterId);
 
     await this.adminLessonService.validateAccess("chapter", currentUser, chapterId);

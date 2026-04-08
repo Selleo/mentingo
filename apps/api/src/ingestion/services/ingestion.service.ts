@@ -6,8 +6,8 @@ import {
   Logger,
   NotFoundException,
 } from "@nestjs/common";
+import { PERMISSIONS } from "@repo/shared";
 
-import { DatabasePg } from "src/common";
 import { canUpdateCourseByAuthor } from "src/common/permissions/course-permission.utils";
 import { MAX_NUM_OF_FILES } from "src/ingestion/ingestion.config";
 import { IngestionRepository } from "src/ingestion/repositories/ingestion.repository";
@@ -75,7 +75,10 @@ export class IngestionService {
 
     const author = await this.getLessonAuthor(lessonId);
 
-    if (currentUser.role !== USER_ROLES.ADMIN && author !== currentUser.userId) {
+    if (
+      !currentUser.permissions.includes(PERMISSIONS.COURSE_UPDATE) &&
+      author !== currentUser.userId
+    ) {
       throw new ForbiddenException("You can only upload files to your own lessons");
     }
 
@@ -84,7 +87,9 @@ export class IngestionService {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       this.logger.log(
-        `Inline ingestion file start: lessonId=${lessonId}, index=${i + 1}/${files.length}, fileName=${file.originalname}`,
+        `Inline ingestion file start: lessonId=${lessonId}, index=${i + 1}/${
+          files.length
+        }, fileName=${file.originalname}`,
       );
 
       try {
@@ -94,12 +99,16 @@ export class IngestionService {
           file,
         });
         this.logger.log(
-          `Inline ingestion file completed: lessonId=${lessonId}, index=${i + 1}/${files.length}, fileName=${file.originalname}`,
+          `Inline ingestion file completed: lessonId=${lessonId}, index=${i + 1}/${
+            files.length
+          }, fileName=${file.originalname}`,
         );
       } catch (error) {
         failedCount += 1;
         this.logger.error(
-          `Inline ingestion file failed: lessonId=${lessonId}, index=${i + 1}/${files.length}, fileName=${file.originalname}`,
+          `Inline ingestion file failed: lessonId=${lessonId}, index=${i + 1}/${
+            files.length
+          }, fileName=${file.originalname}`,
           error instanceof Error ? error.stack : undefined,
         );
       }
@@ -119,7 +128,7 @@ export class IngestionService {
     return { message: "Ingested files successfully" };
   }
 
-  async findAllDocumentsForLesson(lessonId: UUIDType, currentUser: CurrentUser) {
+  async findAllDocumentsForLesson(lessonId: UUIDType, currentUser: CurrentUserType) {
     const author = await this.getLessonAuthor(lessonId);
     if (!canUpdateCourseByAuthor(currentUser, author)) {
       throw new ForbiddenException("You are not allowed to view files for this lesson.");
@@ -128,7 +137,7 @@ export class IngestionService {
     return this.documentService.findAllDocumentsForLesson(lessonId);
   }
 
-  async deleteDocumentLink(documentLinkId: UUIDType, currentUser: CurrentUser) {
+  async deleteDocumentLink(documentLinkId: UUIDType, currentUser: CurrentUserType) {
     const author = await this.getDocumentLinkAuthor(documentLinkId);
     if (!canUpdateCourseByAuthor(currentUser, author)) {
       throw new ForbiddenException("You are not allowed to view files for this lesson.");

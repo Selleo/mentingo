@@ -23,7 +23,7 @@ import type {
 } from "./schemas/userStats.schema";
 import type { SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
-import type { CurrentUser } from "src/common/types/current-user.type";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 
 @Injectable()
 export class StatisticsService {
@@ -71,7 +71,7 @@ export class StatisticsService {
     };
   }
 
-  async getStats(currentUser: CurrentUser, language: SupportedLanguages) {
+  async getStats(currentUser: CurrentUserType, language: SupportedLanguages) {
     const canReadAll = hasPermission(currentUser.permissions, PERMISSIONS.COURSE_UPDATE);
     const ownerUserId = canReadAll ? undefined : currentUser.userId;
 

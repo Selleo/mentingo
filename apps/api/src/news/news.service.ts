@@ -428,7 +428,7 @@ export class NewsService {
     req: Request,
     res: Response,
     resourceId: UUIDType,
-    currentUser?: CurrentUser,
+    currentUser?: CurrentUserType,
   ) {
     await this.checkAccess(currentUser?.userId);
 

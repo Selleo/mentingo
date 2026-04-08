@@ -976,7 +976,7 @@ export class AdminLessonService {
   }
 
   async uploadFileToLesson(
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
     file: Express.Multer.File,
     language: SupportedLanguages,
     title: string,
@@ -1092,7 +1092,7 @@ export class AdminLessonService {
   }
 
   async uploadAvatarToAiMentorLesson(
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
     lessonId: UUIDType,
     file: Express.Multer.File | null,
   ) {
@@ -1196,7 +1196,7 @@ export class AdminLessonService {
 
   async validateAccess(
     entity: "chapter" | "lesson" | "course",
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
     id: UUIDType,
     throwOnNoAccess: boolean = true,
   ) {

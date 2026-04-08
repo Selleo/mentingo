@@ -31,7 +31,6 @@ import {
 } from "src/ai/utils/ai.type";
 import { stripVoiceEmotionBrackets } from "src/ai/utils/voiceEmotionBrackets";
 import { DatabasePg } from "src/common";
-import { LEARNING_MODE_REQUIRED_ERROR_KEY } from "src/common/utils/lessonLearningAccess";
 import { PermissionsService } from "src/permissions/permissions.service";
 import { dbAls } from "src/storage/db/db-als.store";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
@@ -213,7 +212,7 @@ export class AiService {
     });
   }
 
-  async runJudge(data: ThreadOwnershipBody, currentUser?: CurrentUser) {
+  async runJudge(data: ThreadOwnershipBody, currentUser?: CurrentUserType) {
     const thread = await this.aiRepository.findThread([eq(aiMentorThreads.id, data.threadId)]);
     if (!thread) throw new BadRequestException("Thread not found");
 
@@ -269,11 +268,29 @@ export class AiService {
     return thread;
   }
 
+  private async resolveJudgeViewer(
+    currentUser: CurrentUserType | undefined,
+    fallbackUserId: UUIDType,
+  ) {
+    if (currentUser)
+      return {
+        userId: currentUser.userId,
+        permissions: currentUser.permissions,
+      };
+
+    const { permissions } = await this.permissionsService.getUserAccess(fallbackUserId);
+
+    return {
+      userId: fallbackUserId,
+      permissions,
+    };
+  }
+
   async markAsCompletedIfJudge(
     lessonId: UUIDType,
     studentId: UUIDType,
     userPermissions: PermissionKey[],
-    actor: CurrentUser | undefined,
+    actor: CurrentUserType | undefined,
     message: string | ResponseAiJudgeJudgementBody,
     language: SupportedLanguages,
     isJudge?: boolean,
@@ -293,7 +310,7 @@ export class AiService {
     });
   }
 
-  async retakeLesson(lessonId: UUIDType, currentUser: CurrentUser) {
+  async retakeLesson(lessonId: UUIDType, currentUser: CurrentUserType) {
     const { userId, permissions } = currentUser;
 
     const [lesson] = await this.aiRepository.checkLessonAssignment(lessonId, userId);
@@ -301,7 +318,7 @@ export class AiService {
     if (!lesson.isAssigned && !lesson.isFreemium)
       throw new UnauthorizedException("You are not assigned to this lesson");
 
-    if (userRole === permissions.CAN_UPDATE_OWN_COURSE && !lesson.isAssigned) {
+    if (permissions.includes(PERMISSIONS.COURSE_UPDATE_OWN) && !lesson.isAssigned) {
       const courseAuthorId = await this.aiRepository.getCourseAuthorByLesson(lessonId);
 
       if (courseAuthorId !== userId) {

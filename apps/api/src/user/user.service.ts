@@ -272,7 +272,7 @@ export class UserService {
 
   public async getUserDetails(
     userId: UUIDType,
-    currentUser: CurrentUser,
+    currentUser: CurrentUserType,
   ): Promise<UserDetailsResponse> {
     const { userId: currentUserId } = currentUser;
 
