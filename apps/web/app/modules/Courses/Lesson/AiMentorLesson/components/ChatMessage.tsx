@@ -46,14 +46,21 @@ const ChatMessage = ({
 
   const isAssistant = role === "assistant";
 
+  const previewDisplayName =
+    `${previewUser?.firstName ?? ""} ${previewUser?.lastName ?? ""}`.trim();
+  const currentUserDisplayName =
+    `${currentUser?.firstName ?? ""} ${currentUser?.lastName ?? ""}`.trim();
+
+  const profilePictureUrl = useMemo(() => {
+    return previewUser ? previewUser.profilePictureUrl : currentUser?.profilePictureUrl;
+  }, [previewUser, currentUser?.profilePictureUrl]);
+
   const displayName = useMemo(() => {
     if (isAssistant) {
       return aiName ?? t("studentCourseView.lesson.aiMentorLesson.aiMentorName");
     }
 
-    const previewUserName = `${previewUser?.firstName ?? ""} ${previewUser?.lastName ?? ""}`.trim();
-    const fallbackName =
-      previewUserName || `${currentUser?.firstName ?? ""} ${currentUser?.lastName ?? ""}`.trim();
+    const fallbackName = previewUser ? previewDisplayName : currentUserDisplayName;
 
     return (
       userName ||
@@ -66,8 +73,11 @@ const ChatMessage = ({
     aiName,
     currentUser?.firstName,
     currentUser?.lastName,
+    currentUserDisplayName,
     isAssistant,
     name,
+    previewDisplayName,
+    previewUser,
     t,
     user?.name,
     userName,
@@ -91,10 +101,7 @@ const ChatMessage = ({
           </Avatar>
         ) : (
           <div className="flex size-full items-center justify-center rounded-full bg-gray-200">
-            <UserAvatar
-              userName={displayName}
-              profilePictureUrl={previewUser?.profilePictureUrl ?? currentUser?.profilePictureUrl}
-            />
+            <UserAvatar userName={displayName} profilePictureUrl={profilePictureUrl} />
           </div>
         )}
       </div>
