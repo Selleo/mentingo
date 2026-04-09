@@ -7,12 +7,17 @@ import {
   ALLOWED_WORD_FILE_TYPES,
   type EntityType,
 } from "@repo/shared";
+import { match } from "ts-pattern";
 
 import {
   insertVideoUploadPlaceholder,
   updateVideoUploadNodeById,
 } from "~/components/RichText/extensions/utils/videoUploadNode";
-import { buildEntityResourceUrl, insertResourceIntoEditor } from "~/hooks/useEntityResourceUpload";
+import {
+  RICH_TEXT_RESOURCE_TYPE,
+  buildEntityResourceUrl,
+  insertResourceIntoEditor,
+} from "~/hooks/useEntityResourceUpload";
 import { UPLOAD_STATUS } from "~/hooks/useRichTextUploadQueue";
 
 import type { Editor as TiptapEditor } from "@tiptap/react";
@@ -246,10 +251,11 @@ type BuildRichTextFileUploadHandlerArgs = {
   };
 };
 
-type RichTextResourceType = "presentation" | "pdf" | "document" | "other";
+type RichTextResourceType = (typeof RICH_TEXT_RESOURCE_TYPE)[keyof typeof RICH_TEXT_RESOURCE_TYPE];
 
 type FileCharacteristics = {
   isVideo: boolean;
+  isImage: boolean;
   isPresentation: boolean;
   isPdf: boolean;
   isDocument: boolean;
@@ -257,6 +263,7 @@ type FileCharacteristics = {
 };
 
 const getFileCharacteristics = (file: File): FileCharacteristics => {
+  const isImage = ALLOWED_LESSON_IMAGE_FILE_TYPES.includes(file.type);
   const isVideo = ALLOWED_VIDEO_FILE_TYPES.includes(file.type);
   const isPresentation = ALLOWED_PRESENTATION_FILE_TYPES.includes(file.type);
   const isPdf = ALLOWED_PDF_FILE_TYPES.includes(file.type);
@@ -266,17 +273,22 @@ const getFileCharacteristics = (file: File): FileCharacteristics => {
     ALLOWED_WORD_FILE_TYPES.includes(file.type);
 
   return {
+    isImage,
     isVideo,
     isPresentation,
     isPdf,
     isDocument,
-    resourceType: isPresentation
-      ? "presentation"
-      : isPdf
-        ? "pdf"
-        : isDocument
-          ? "document"
-          : "other",
+    resourceType: match({
+      isImage,
+      isPresentation,
+      isPdf,
+      isDocument,
+    })
+      .with({ isImage: true }, () => RICH_TEXT_RESOURCE_TYPE.IMAGE)
+      .with({ isPresentation: true }, () => RICH_TEXT_RESOURCE_TYPE.PRESENTATION)
+      .with({ isPdf: true }, () => RICH_TEXT_RESOURCE_TYPE.PDF)
+      .with({ isDocument: true }, () => RICH_TEXT_RESOURCE_TYPE.DOCUMENT)
+      .otherwise(() => RICH_TEXT_RESOURCE_TYPE.OTHER),
   };
 };
 

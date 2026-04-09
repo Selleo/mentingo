@@ -18,7 +18,16 @@ type UploadResourceArgs = {
   description?: string;
 };
 
-export type RichTextResourceType = "presentation" | "pdf" | "document" | "other";
+export const RICH_TEXT_RESOURCE_TYPE = {
+  PRESENTATION: "presentation",
+  PDF: "pdf",
+  DOCUMENT: "document",
+  IMAGE: "image",
+  OTHER: "other",
+} as const;
+
+export type RichTextResourceType =
+  (typeof RICH_TEXT_RESOURCE_TYPE)[keyof typeof RICH_TEXT_RESOURCE_TYPE];
 export type RichTextResourceDisplayMode = "preview" | "download";
 
 type InsertResourceArgs = {
@@ -100,7 +109,9 @@ export const insertResourceIntoEditor = ({
   }
 
   chain
-    ?.insertContent(`<a href="${resourceUrl}" data-resource-id="${resourceId}">${resourceUrl}</a>`)
+    ?.insertContent(
+      `<br /><a href="${resourceUrl}" data-resource-id="${resourceId}">${resourceUrl}</a>`,
+    )
     .run();
 };
 
