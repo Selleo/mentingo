@@ -202,7 +202,7 @@ const EditCourse = () => {
       : EDIT_COURSE_TABS.CURRICULUM;
 
   const { visibleCourseTabs, activeTab } = useMemo(() => {
-    const canShowPricingTab = Boolean(isStripeConfigured?.enabled && isMasterCourse);
+    const canShowPricingTab = Boolean(isStripeConfigured?.enabled);
 
     const visibleCourseTabs = (
       isExportedCourse
@@ -215,7 +215,7 @@ const EditCourse = () => {
       : (visibleCourseTabs[0]?.value ?? EDIT_COURSE_TABS.STATUS);
 
     return { visibleCourseTabs, activeTab };
-  }, [courseTabs, isExportedCourse, isMasterCourse, isStripeConfigured?.enabled, selectedTab]);
+  }, [courseTabs, isExportedCourse, isStripeConfigured?.enabled, selectedTab]);
 
   useEffect(() => {
     if (error) {
@@ -427,7 +427,7 @@ const EditCourse = () => {
             </LeaveModalProvider>
           )}
         </TabsContent>
-        {isMasterCourse && isStripeConfigured?.enabled && (
+        {isStripeConfigured?.enabled && (
           <TabsContent value={EDIT_COURSE_TABS.PRICING}>
             <CoursePricing
               courseId={course?.id || ""}
