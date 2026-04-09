@@ -18,6 +18,10 @@ WORKDIR /app
 COPY --from=base /app/pnpm-deploy-output /app
 
 RUN apk add --no-cache \
+    libc6-compat \
+    python3 \
+    make \
+    g++ \
     chromium \
     nss \
     freetype \
@@ -26,7 +30,6 @@ RUN apk add --no-cache \
     ttf-freefont \
     font-noto \
     xvfb \
-    libc6-compat \
     ffmpeg \
     libreoffice \
     && rm -rf /var/cache/apk/*
