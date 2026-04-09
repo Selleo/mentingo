@@ -56,7 +56,7 @@ const findVideoUploadNode = (
   let match: VideoUploadNodeMatch | null = null;
 
   editor.state.doc.descendants((node, pos) => {
-    if ((node.attrs as { uploadId?: unknown }).uploadId !== uploadId) return true;
+    if (node.attrs.uploadId !== uploadId) return true;
 
     match = {
       pos,

@@ -10,6 +10,7 @@ import {
 import { match } from "ts-pattern";
 
 import {
+  VIDEO_UPLOAD_NODE_STATUS,
   insertVideoUploadPlaceholder,
   updateVideoUploadNodeById,
 } from "~/components/RichText/extensions/utils/videoUploadNode";
@@ -137,7 +138,7 @@ const handleVideoUpload = async ({
         }
         updateVideoUploadNodeById(editor, uploadId, {
           hasError: true,
-          uploadStatus: "failed",
+          uploadStatus: VIDEO_UPLOAD_NODE_STATUS.FAILED,
           uploadErrorMessage: error.message,
         });
       },
@@ -149,7 +150,7 @@ const handleVideoUpload = async ({
       });
     }
     updateVideoUploadNodeById(editor, uploadId, {
-      uploadStatus: "failed",
+      uploadStatus: VIDEO_UPLOAD_NODE_STATUS.FAILED,
       uploadErrorMessage: error instanceof Error ? error.message : fallbackUploadErrorMessage,
     });
     onVideoUploadError(error);

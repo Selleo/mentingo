@@ -10,6 +10,10 @@ import {
 } from "@repo/shared";
 import { match } from "ts-pattern";
 
+import { VIDEO_UPLOAD_NODE_STATUS } from "./videoUploadNode";
+
+import type { VideoUploadNodeStatus } from "./videoUploadNode";
+
 export const VIDEO_NODE_TYPE = "video" as const;
 
 export type VideoSourceType = "internal" | "external";
@@ -23,7 +27,7 @@ export type VideoEmbedAttrs = {
   index: number | null;
   uploadId: string | null;
   uploadLabel: string | null;
-  uploadStatus: "uploading" | "failed" | null;
+  uploadStatus: VideoUploadNodeStatus | null;
   uploadErrorMessage: string | null;
 };
 
@@ -76,7 +80,7 @@ type VideoEmbedAttrsInput = {
   index?: number | string | null;
   uploadId?: string | null;
   uploadLabel?: string | null;
-  uploadStatus?: "uploading" | "failed" | null;
+  uploadStatus?: VideoUploadNodeStatus | null;
   uploadErrorMessage?: string | null;
 };
 
@@ -120,7 +124,8 @@ export const normalizeVideoEmbedAttributes = (attrs: VideoEmbedAttrsInput): Vide
     uploadId: typeof attrs.uploadId === "string" ? attrs.uploadId : null,
     uploadLabel: typeof attrs.uploadLabel === "string" ? attrs.uploadLabel : null,
     uploadStatus:
-      attrs.uploadStatus === "uploading" || attrs.uploadStatus === "failed"
+      attrs.uploadStatus === VIDEO_UPLOAD_NODE_STATUS.UPLOADING ||
+      attrs.uploadStatus === VIDEO_UPLOAD_NODE_STATUS.FAILED
         ? attrs.uploadStatus
         : null,
     uploadErrorMessage:
@@ -145,7 +150,7 @@ export const getVideoEmbedAttrsFromElement = (element: HTMLElement): VideoEmbedA
   const uploadId = element.getAttribute("data-upload-id") ?? null;
   const uploadLabel = element.getAttribute("data-upload-label") ?? null;
   const uploadStatus =
-    (element.getAttribute("data-upload-status") as "uploading" | "failed" | null) ?? null;
+    (element.getAttribute("data-upload-status") as VideoUploadNodeStatus | null) ?? null;
   const uploadErrorMessage = element.getAttribute("data-upload-error-message") ?? null;
 
   const sourceType: VideoSourceType = match(sourceTypeAttr)
