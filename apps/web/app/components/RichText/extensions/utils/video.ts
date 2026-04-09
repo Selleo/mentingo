@@ -21,6 +21,10 @@ export type VideoEmbedAttrs = {
   hasError: boolean;
   autoplay: VideoAutoplay;
   index: number | null;
+  uploadId: string | null;
+  uploadLabel: string | null;
+  uploadStatus: "uploading" | "failed" | null;
+  uploadErrorMessage: string | null;
 };
 
 const isVideoSourceType = (value: string | null | undefined): value is VideoSourceType =>
@@ -70,6 +74,10 @@ type VideoEmbedAttrsInput = {
   hasError?: boolean | string | null;
   autoplay?: string | null;
   index?: number | string | null;
+  uploadId?: string | null;
+  uploadLabel?: string | null;
+  uploadStatus?: "uploading" | "failed" | null;
+  uploadErrorMessage?: string | null;
 };
 
 const normalizeVideoIndex = (value: number | string | null | undefined): number | null => {
@@ -109,6 +117,14 @@ export const normalizeVideoEmbedAttributes = (attrs: VideoEmbedAttrsInput): Vide
     hasError,
     autoplay,
     index,
+    uploadId: typeof attrs.uploadId === "string" ? attrs.uploadId : null,
+    uploadLabel: typeof attrs.uploadLabel === "string" ? attrs.uploadLabel : null,
+    uploadStatus:
+      attrs.uploadStatus === "uploading" || attrs.uploadStatus === "failed"
+        ? attrs.uploadStatus
+        : null,
+    uploadErrorMessage:
+      typeof attrs.uploadErrorMessage === "string" ? attrs.uploadErrorMessage : null,
   };
 };
 
@@ -126,6 +142,11 @@ export const getVideoEmbedAttrsFromElement = (element: HTMLElement): VideoEmbedA
   const errorAttr = element.getAttribute("data-error");
   const autoplayAttr = element.getAttribute("data-autoplay");
   const indexAttr = element.getAttribute("data-index");
+  const uploadId = element.getAttribute("data-upload-id") ?? null;
+  const uploadLabel = element.getAttribute("data-upload-label") ?? null;
+  const uploadStatus =
+    (element.getAttribute("data-upload-status") as "uploading" | "failed" | null) ?? null;
+  const uploadErrorMessage = element.getAttribute("data-upload-error-message") ?? null;
 
   const sourceType: VideoSourceType = match(sourceTypeAttr)
     .when(isVideoSourceType, (value) => value)
@@ -142,5 +163,9 @@ export const getVideoEmbedAttrsFromElement = (element: HTMLElement): VideoEmbedA
     autoplay: autoplayAttr,
     hasError: errorAttr,
     index: indexAttr,
+    uploadId,
+    uploadLabel,
+    uploadStatus,
+    uploadErrorMessage,
   });
 };

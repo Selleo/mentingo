@@ -70,7 +70,7 @@ const ContentLessonForm = ({
   const { uploadResource } = useEntityResourceUpload();
   const { askForDisplayMode, dialog: uploadDisplayModeDialog } = useUploadDisplayModeDialog();
   const { getSessionForFile, uploadVideo } = useTusVideoUpload();
-  const { enqueue, setStatus, setProgress, attachUploadId } = useRichTextUploadQueue();
+  const { enqueue, setStatus, setProgress, attachUploadId, remove } = useRichTextUploadQueue();
 
   const onCloseModal = () => {
     setIsModalOpen(false);
@@ -119,6 +119,7 @@ const ContentLessonForm = ({
       setStatus,
       setProgress,
       attachUploadId,
+      remove,
     },
   });
 

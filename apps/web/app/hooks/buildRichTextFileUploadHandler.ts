@@ -7,8 +7,11 @@ import {
   ALLOWED_WORD_FILE_TYPES,
   type EntityType,
 } from "@repo/shared";
-import { match } from "ts-pattern";
 
+import {
+  insertVideoUploadPlaceholder,
+  updateVideoUploadNodeById,
+} from "~/components/RichText/extensions/utils/videoUploadNode";
 import { buildEntityResourceUrl, insertResourceIntoEditor } from "~/hooks/useEntityResourceUpload";
 import { UPLOAD_STATUS } from "~/hooks/useRichTextUploadQueue";
 
@@ -22,6 +25,196 @@ const DISPLAY_MODE = {
 } as const;
 
 type DisplayMode = (typeof DISPLAY_MODE)[keyof typeof DISPLAY_MODE];
+
+const createSerialQueue = () => {
+  let tail = Promise.resolve();
+
+  return <T>(task: () => Promise<T> | T) => {
+    const next = tail.then(task, task);
+    tail = next.then(
+      () => undefined,
+      () => undefined,
+    );
+    return next;
+  };
+};
+
+const displayModePromptQueue = createSerialQueue();
+const videoInsertQueue = createSerialQueue();
+
+const askForDisplayModeSequentially = (
+  askForDisplayMode: (filename: string) => Promise<DisplayMode | null>,
+  filename: string,
+) => {
+  return displayModePromptQueue(() => askForDisplayMode(filename));
+};
+
+const insertPendingVideoNodeSequentially = async (args: {
+  editor?: TiptapEditor | null;
+  file: File;
+  uploadId: string;
+}) => {
+  await videoInsertQueue(() =>
+    insertVideoUploadPlaceholder({
+      editor: args.editor,
+      uploadId: args.uploadId,
+      uploadLabel: args.file.name,
+    }),
+  );
+};
+
+const handleVideoUpload = async ({
+  editor,
+  file,
+  entityType,
+  getVideoSessionForFile,
+  uploadVideo,
+  onVideoUploadError,
+  fallbackUploadErrorMessage,
+  uploadQueue,
+}: {
+  editor?: TiptapEditor | null;
+  file: File;
+  entityType: EntityType;
+  getVideoSessionForFile: (file: File) => Promise<InitVideoUploadResponse>;
+  uploadVideo: (args: VideoUploadArgs) => Promise<void>;
+  onVideoUploadError: (error: unknown) => void;
+  fallbackUploadErrorMessage: string;
+  uploadQueue?: BuildRichTextFileUploadHandlerArgs["uploadQueue"];
+}) => {
+  const queueId = uploadQueue?.enqueue({ fileName: file.name, kind: "video" });
+  const uploadId = queueId ?? crypto.randomUUID();
+
+  if (queueId) {
+    uploadQueue?.setStatus(queueId, UPLOAD_STATUS.QUEUED);
+  }
+
+  await insertPendingVideoNodeSequentially({
+    editor,
+    file,
+    uploadId,
+  });
+
+  try {
+    const session = await getVideoSessionForFile(file);
+    if (queueId) {
+      uploadQueue?.attachUploadId(queueId, session.uploadId);
+    }
+
+    if (session.resourceId) {
+      updateVideoUploadNodeById(editor, uploadId, {
+        src: buildEntityResourceUrl(session.resourceId, entityType),
+        sourceType: session.provider === "s3" ? "external" : "internal",
+        provider: session.provider,
+        hasError: false,
+        uploadStatus: null,
+        uploadErrorMessage: null,
+      });
+    }
+
+    await uploadVideo({
+      file,
+      session,
+      onUploadingStart: () => {
+        if (queueId) uploadQueue?.setStatus(queueId, UPLOAD_STATUS.UPLOADING);
+      },
+      onProgress: (progress) => {
+        if (queueId) uploadQueue?.setProgress(queueId, progress);
+      },
+      onUploaded: () => {
+        if (queueId) uploadQueue?.setStatus(queueId, UPLOAD_STATUS.SUCCESS);
+      },
+      onError: (error) => {
+        if (queueId) {
+          uploadQueue?.setStatus(queueId, UPLOAD_STATUS.FAILED, {
+            errorMessage: error.message,
+          });
+        }
+        updateVideoUploadNodeById(editor, uploadId, {
+          hasError: true,
+          uploadStatus: "failed",
+          uploadErrorMessage: error.message,
+        });
+      },
+    });
+  } catch (error) {
+    if (queueId) {
+      uploadQueue?.setStatus(queueId, UPLOAD_STATUS.FAILED, {
+        errorMessage: error instanceof Error ? error.message : fallbackUploadErrorMessage,
+      });
+    }
+    updateVideoUploadNodeById(editor, uploadId, {
+      uploadStatus: "failed",
+      uploadErrorMessage: error instanceof Error ? error.message : fallbackUploadErrorMessage,
+    });
+    onVideoUploadError(error);
+  }
+};
+
+const handleResourceUpload = async ({
+  editor,
+  file,
+  entityType,
+  resourceType,
+  displayModePrompt,
+  askForDisplayMode,
+  uploadResourceFile,
+  fallbackUploadErrorMessage,
+  uploadQueue,
+}: {
+  editor?: TiptapEditor | null;
+  file: File;
+  entityType: EntityType;
+  resourceType: RichTextResourceType;
+  displayModePrompt: boolean;
+  askForDisplayMode: (filename: string) => Promise<DisplayMode | null>;
+  uploadResourceFile: (file: File) => Promise<string>;
+  fallbackUploadErrorMessage: string;
+  uploadQueue?: BuildRichTextFileUploadHandlerArgs["uploadQueue"];
+}) => {
+  const queueId = uploadQueue?.enqueue({ fileName: file.name, kind: "resource" });
+
+  if (queueId) {
+    uploadQueue?.setStatus(queueId, UPLOAD_STATUS.UPLOADING);
+  }
+
+  let displayMode: DisplayMode = DISPLAY_MODE.PREVIEW;
+
+  if (displayModePrompt) {
+    const selectedMode = await askForDisplayModeSequentially(askForDisplayMode, file.name);
+    if (!selectedMode) {
+      if (queueId) uploadQueue?.remove?.(queueId);
+      return;
+    }
+    displayMode = selectedMode;
+  }
+
+  let resourceId: string;
+  try {
+    resourceId = await uploadResourceFile(file);
+
+    if (queueId) {
+      uploadQueue?.setProgress(queueId, 100);
+      uploadQueue?.setStatus(queueId, UPLOAD_STATUS.SUCCESS);
+    }
+  } catch (error) {
+    if (queueId) {
+      uploadQueue?.setStatus(queueId, UPLOAD_STATUS.FAILED, {
+        errorMessage: error instanceof Error ? error.message : fallbackUploadErrorMessage,
+      });
+    }
+    throw error;
+  }
+
+  insertResourceIntoEditor({
+    editor,
+    resourceId,
+    entityType,
+    file,
+    resourceType,
+    displayMode,
+  });
+};
 
 type VideoUploadArgs = {
   file: File;
@@ -49,6 +242,41 @@ type BuildRichTextFileUploadHandlerArgs = {
     ) => void;
     setProgress: (id: string, progress: number) => void;
     attachUploadId: (id: string, uploadId: string) => void;
+    remove?: (id: string) => void;
+  };
+};
+
+type RichTextResourceType = "presentation" | "pdf" | "document" | "other";
+
+type FileCharacteristics = {
+  isVideo: boolean;
+  isPresentation: boolean;
+  isPdf: boolean;
+  isDocument: boolean;
+  resourceType: RichTextResourceType;
+};
+
+const getFileCharacteristics = (file: File): FileCharacteristics => {
+  const isVideo = ALLOWED_VIDEO_FILE_TYPES.includes(file.type);
+  const isPresentation = ALLOWED_PRESENTATION_FILE_TYPES.includes(file.type);
+  const isPdf = ALLOWED_PDF_FILE_TYPES.includes(file.type);
+  const isDocument =
+    isPdf ||
+    ALLOWED_EXCEL_FILE_TYPES.includes(file.type) ||
+    ALLOWED_WORD_FILE_TYPES.includes(file.type);
+
+  return {
+    isVideo,
+    isPresentation,
+    isPdf,
+    isDocument,
+    resourceType: isPresentation
+      ? "presentation"
+      : isPdf
+        ? "pdf"
+        : isDocument
+          ? "document"
+          : "other",
   };
 };
 
@@ -60,30 +288,6 @@ export const RICH_TEXT_ACCEPTED_FILE_TYPES = [
   ...ALLOWED_WORD_FILE_TYPES,
   ...ALLOWED_PRESENTATION_FILE_TYPES,
 ] as const;
-
-const removeVideoEmbedBySource = (editor: TiptapEditor, src: string) => {
-  editor
-    .chain()
-    .focus()
-    .command(({ state, tr, dispatch }) => {
-      let found = false;
-
-      state.doc.descendants((node, pos) => {
-        if (node.type.name !== "video") return true;
-        if (node.attrs.src !== src) return true;
-
-        tr.delete(pos, pos + node.nodeSize);
-        found = true;
-        return false;
-      });
-
-      if (!found) return false;
-
-      dispatch?.(tr);
-      return true;
-    })
-    .run();
-};
 
 export const buildRichTextFileUploadHandler = ({
   entityType,
@@ -98,116 +302,32 @@ export const buildRichTextFileUploadHandler = ({
   return async (file?: File, editor?: TiptapEditor | null) => {
     if (!file) return;
 
-    const isVideo = ALLOWED_VIDEO_FILE_TYPES.includes(file.type);
-    const isPresentation = ALLOWED_PRESENTATION_FILE_TYPES.includes(file.type);
-    const isPdf = ALLOWED_PDF_FILE_TYPES.includes(file.type);
-    const isDocument =
-      isPdf ||
-      ALLOWED_EXCEL_FILE_TYPES.includes(file.type) ||
-      ALLOWED_WORD_FILE_TYPES.includes(file.type);
+    const { isVideo, isPresentation, isPdf, resourceType } = getFileCharacteristics(file);
 
     if (isVideo) {
-      let insertedResourceUrl: string | null = null;
-      const queueId = uploadQueue?.enqueue({ fileName: file.name, kind: "video" });
-      if (queueId) {
-        uploadQueue?.setStatus(queueId, UPLOAD_STATUS.QUEUED);
-      }
-
-      try {
-        const session = await getVideoSessionForFile(file);
-        if (queueId) {
-          uploadQueue?.attachUploadId(queueId, session.uploadId);
-        }
-
-        if (session.resourceId && editor) {
-          insertedResourceUrl = buildEntityResourceUrl(session.resourceId, entityType);
-
-          editor
-            .chain()
-            .focus()
-            .setVideoEmbed({
-              src: insertedResourceUrl,
-              sourceType: session.provider === "s3" ? "external" : "internal",
-            })
-            .run();
-        }
-
-        await uploadVideo({
-          file,
-          session,
-          onUploadingStart: () => {
-            if (queueId) uploadQueue?.setStatus(queueId, UPLOAD_STATUS.UPLOADING);
-          },
-          onProgress: (progress) => {
-            if (queueId) uploadQueue?.setProgress(queueId, progress);
-          },
-          onUploaded: () => {
-            if (queueId) uploadQueue?.setStatus(queueId, UPLOAD_STATUS.SUCCESS);
-          },
-          onError: (error) => {
-            if (queueId) {
-              uploadQueue?.setStatus(queueId, UPLOAD_STATUS.FAILED, {
-                errorMessage: error.message,
-              });
-            }
-          },
-        });
-      } catch (error) {
-        if (editor && insertedResourceUrl) {
-          removeVideoEmbedBySource(editor, insertedResourceUrl);
-        }
-        if (queueId) {
-          uploadQueue?.setStatus(queueId, UPLOAD_STATUS.FAILED, {
-            errorMessage: error instanceof Error ? error.message : fallbackUploadErrorMessage,
-          });
-        }
-        onVideoUploadError(error);
-      }
+      await handleVideoUpload({
+        editor,
+        file,
+        entityType,
+        getVideoSessionForFile,
+        uploadVideo,
+        onVideoUploadError,
+        fallbackUploadErrorMessage,
+        uploadQueue,
+      });
       return;
     }
 
-    const queueId = uploadQueue?.enqueue({ fileName: file.name, kind: "resource" });
-
-    if (queueId) {
-      uploadQueue?.setStatus(queueId, UPLOAD_STATUS.UPLOADING);
-    }
-
-    let displayMode: DisplayMode = DISPLAY_MODE.PREVIEW;
-
-    if (isPresentation || isPdf) {
-      const selectedMode = await askForDisplayMode(file.name);
-      if (!selectedMode) return;
-      displayMode = selectedMode;
-    }
-
-    let resourceId: string;
-    try {
-      resourceId = await uploadResourceFile(file);
-
-      if (queueId) {
-        uploadQueue?.setProgress(queueId, 100);
-        uploadQueue?.setStatus(queueId, UPLOAD_STATUS.SUCCESS);
-      }
-    } catch (error) {
-      if (queueId) {
-        uploadQueue?.setStatus(queueId, UPLOAD_STATUS.FAILED, {
-          errorMessage: error instanceof Error ? error.message : fallbackUploadErrorMessage,
-        });
-      }
-      throw error;
-    }
-
-    insertResourceIntoEditor({
+    await handleResourceUpload({
       editor,
-      resourceId,
-      entityType,
       file,
-      resourceType: match({ isPresentation, isPdf, isDocument })
-        .with({ isPresentation: true }, () => "presentation" as const)
-        .with({ isPdf: true }, () => "pdf" as const)
-        .with({ isDocument: true }, () => "document" as const)
-        .otherwise(() => "other" as const),
-      displayMode: isPresentation || isDocument ? displayMode : DISPLAY_MODE.PREVIEW,
+      entityType,
+      resourceType,
+      displayModePrompt: isPresentation || isPdf,
+      askForDisplayMode,
+      uploadResourceFile,
+      fallbackUploadErrorMessage,
+      uploadQueue,
     });
   };
 };

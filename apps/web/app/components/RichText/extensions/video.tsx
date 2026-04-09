@@ -4,6 +4,11 @@ import { NodeViewWrapper, ReactNodeViewRenderer } from "@tiptap/react";
 import { GripVertical, Video as VideoIcon, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import {
+  VIDEO_UPLOAD_NODE_STATUS,
+  getVideoUploadNodeDataAttributes,
+  normalizeVideoUploadNodeAttrs,
+} from "~/components/RichText/extensions/utils/videoUploadNode";
 import { Button } from "~/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { Video } from "~/components/VideoPlayer/Video";
@@ -27,6 +32,18 @@ type VideoViewerOptions = {
   resolveAutoplay?: (autoplay: VideoAutoplay) => VideoAutoplay;
 };
 
+const renderUploadCard = (label: string, errorMessage?: string | null) => (
+  <div className="flex w-full flex-col gap-1.5 rounded border border-dashed border-neutral-300 bg-neutral-50 px-3 py-2 text-sm text-neutral-700">
+    <div className="flex items-center gap-2">
+      <span className="inline-flex size-4 items-center justify-center">
+        <span className="size-3 animate-spin rounded-full border-2 border-neutral-400 border-t-transparent" />
+      </span>
+      <span className="truncate font-medium">{label}</span>
+    </div>
+    {errorMessage && <p className="text-xs text-error-700">{errorMessage}</p>}
+  </div>
+);
+
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     video: {
@@ -45,6 +62,7 @@ const getVideoDataAttributes = (attrs: VideoEmbedAttrs) => ({
   "data-autoplay": attrs.autoplay,
   ...(attrs.index !== null ? { "data-index": attrs.index } : {}),
   ...(attrs.hasError ? { "data-error": "true" } : {}),
+  ...getVideoUploadNodeDataAttributes(attrs),
 });
 
 const VideoEditorContent = ({
@@ -100,6 +118,34 @@ const VideoEditorView = ({ node, editor, getPos }: NodeViewProps) => {
   const { t } = useTranslation();
 
   const attrs = normalizeVideoEmbedAttributes(node.attrs);
+  const isPending = !attrs.src && attrs.uploadStatus !== VIDEO_UPLOAD_NODE_STATUS.FAILED;
+  const isFailed = !attrs.src && attrs.uploadStatus === VIDEO_UPLOAD_NODE_STATUS.FAILED;
+
+  if (isPending) {
+    return (
+      <NodeViewWrapper className="video-node block w-full">
+        {renderUploadCard(
+          attrs.uploadLabel ?? t("common.button.uploading"),
+          attrs.uploadErrorMessage,
+        )}
+      </NodeViewWrapper>
+    );
+  }
+
+  if (isFailed) {
+    return (
+      <NodeViewWrapper className="video-node block w-full">
+        <div className="flex w-full flex-col gap-1.5 rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          <span className="truncate font-medium">
+            {attrs.uploadLabel ?? t("common.button.uploading")}
+          </span>
+          <span className="text-xs">
+            {attrs.uploadErrorMessage ?? t("common.toast.somethingWentWrong")}
+          </span>
+        </div>
+      </NodeViewWrapper>
+    );
+  }
 
   if (!attrs.src) return null;
   const videoAttrs = attrs as VideoEmbedAttrs & { src: string };
@@ -199,6 +245,18 @@ const baseVideoNodeConfig: NodeConfig = {
       index: {
         default: null,
       },
+      uploadId: {
+        default: null,
+      },
+      uploadLabel: {
+        default: null,
+      },
+      uploadStatus: {
+        default: null,
+      },
+      uploadErrorMessage: {
+        default: null,
+      },
     };
   },
 
@@ -220,8 +278,19 @@ const baseVideoNodeConfig: NodeConfig = {
   },
 
   renderHTML({ HTMLAttributes }) {
-    const { src, sourceType, provider, hasError, autoplay, index, ...rest } =
-      HTMLAttributes as Record<string, unknown>;
+    const {
+      src,
+      sourceType,
+      provider,
+      hasError,
+      autoplay,
+      index,
+      uploadId,
+      uploadLabel,
+      uploadStatus,
+      uploadErrorMessage,
+      ...rest
+    } = HTMLAttributes as Record<string, unknown>;
 
     const normalized = normalizeVideoEmbedAttributes({
       src: typeof src === "string" ? src : null,
@@ -230,6 +299,16 @@ const baseVideoNodeConfig: NodeConfig = {
       hasError: hasError as boolean,
       autoplay: autoplay as VideoAutoplay,
       index: index as number | string | null,
+      ...normalizeVideoUploadNodeAttrs({
+        uploadId: typeof uploadId === "string" ? uploadId : null,
+        uploadLabel: typeof uploadLabel === "string" ? uploadLabel : null,
+        uploadStatus:
+          uploadStatus === VIDEO_UPLOAD_NODE_STATUS.UPLOADING ||
+          uploadStatus === VIDEO_UPLOAD_NODE_STATUS.FAILED
+            ? uploadStatus
+            : null,
+        uploadErrorMessage: typeof uploadErrorMessage === "string" ? uploadErrorMessage : null,
+      }),
     });
 
     return ["div", mergeAttributes(getVideoDataAttributes(normalized), rest)];
