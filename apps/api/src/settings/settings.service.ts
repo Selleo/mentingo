@@ -728,7 +728,7 @@ export class SettingsService {
     let newValue: string | null = null;
     if (file) {
       const resource = "platform-logos";
-      const { fileKey } = await this.fileService.uploadFile(file, resource);
+      const { fileKey } = await this.fileService.uploadFile(file, resource, actor?.tenantId);
       newValue = fileKey;
     }
 
@@ -790,7 +790,7 @@ export class SettingsService {
     let newValue: string | null = null;
     if (file) {
       const resource = "platform-simple-logos";
-      const { fileKey } = await this.fileService.uploadFile(file, resource);
+      const { fileKey } = await this.fileService.uploadFile(file, resource, actor?.tenantId);
       newValue = fileKey;
     }
 
@@ -834,7 +834,7 @@ export class SettingsService {
     let newValue: string | null = null;
     if (file) {
       const resource = "login-backgrounds";
-      const { fileKey } = await this.fileService.uploadFile(file, resource);
+      const { fileKey } = await this.fileService.uploadFile(file, resource, actor?.tenantId);
       newValue = fileKey;
     }
 
@@ -1011,6 +1011,7 @@ export class SettingsService {
       const { fileKey } = await this.fileService.uploadFile(
         certificateBackground,
         "certificate-backgrounds",
+        actor?.tenantId,
       );
       certificateBackgroundValue = fileKey;
     }

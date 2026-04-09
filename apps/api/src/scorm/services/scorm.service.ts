@@ -87,7 +87,7 @@ export class ScormService {
 
         const chapters = this.parseScormStructure(manifest);
 
-        const s3BaseKey = `scorm/${courseId}/${randomUUID()}`;
+        const s3BaseKey = `${currentUser.tenantId}/scorm/${courseId}/${randomUUID()}`;
         await Promise.all(
           entries
             .filter((entry) => !entry.isDirectory)

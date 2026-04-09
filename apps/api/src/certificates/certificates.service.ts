@@ -209,7 +209,8 @@ export class CertificatesService implements OnModuleDestroy {
     language?: SupportedLanguages,
   ): Promise<Buffer> {
     const shareLanguage = this.normalizeLanguage(language);
-    const imageKey = this.getShareImageKey(certificateId, shareLanguage);
+    const certificate = await this.getPublicShareCertificate(certificateId, shareLanguage);
+    const imageKey = this.getShareImageKey(certificate.tenantId, certificateId, shareLanguage);
 
     const exists = await this.s3Service.getFileExists(imageKey).catch((error) => {
       this.logger.warn(`Certificate share image existence check failed: ${error}`);
@@ -670,8 +671,12 @@ export class CertificatesService implements OnModuleDestroy {
     return url.toString();
   }
 
-  private getShareImageKey(certificateId: UUIDType, language: SupportedLanguages): string {
-    return `certificate-share/${certificateId}/${language}.png`;
+  private getShareImageKey(
+    tenantId: UUIDType,
+    certificateId: UUIDType,
+    language: SupportedLanguages,
+  ): string {
+    return `${tenantId}/certificate-share/${certificateId}/${language}.png`;
   }
 
   private normalizeLanguage(language?: string): SupportedLanguages {
