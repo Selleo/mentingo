@@ -218,6 +218,7 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
       setStatus,
       setProgress,
       attachUploadId,
+      remove,
     },
   });
 

@@ -1,5 +1,4 @@
 import { ALLOWED_LESSON_IMAGE_FILE_TYPES } from "@repo/shared";
-import { NodeSelection, TextSelection } from "@tiptap/pm/state";
 import {
   Bold,
   Code,
@@ -69,28 +68,13 @@ const EditorToolbar = ({
 
   const acceptedImages = acceptedFileTypes.join(",");
 
-  const moveCursorAfterCurrentSelection = () => {
-    const { state, view } = editor;
-    const { selection } = state;
-
-    const targetPos = selection instanceof NodeSelection ? selection.to + 1 : selection.to;
-
-    const clampedPos = Math.max(1, Math.min(targetPos, state.doc.content.size));
-    const nextSelection = TextSelection.create(state.doc, clampedPos);
-
-    view.dispatch(state.tr.setSelection(nextSelection).scrollIntoView());
-  };
-
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
-    for (const [index, file] of files.entries()) {
-      if (index > 0) moveCursorAfterCurrentSelection();
-
-      await onUpload?.(file, editor);
-      moveCursorAfterCurrentSelection();
-    }
+    if (!files.length || !onUpload) return;
 
     if (fileUploadRef.current) fileUploadRef.current.value = "";
+
+    await Promise.allSettled(files.map((file) => onUpload(file, editor)));
   };
 
   return (

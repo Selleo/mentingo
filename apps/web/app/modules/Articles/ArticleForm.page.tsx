@@ -226,6 +226,7 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
       setStatus,
       setProgress,
       attachUploadId,
+      remove,
     },
   });
 

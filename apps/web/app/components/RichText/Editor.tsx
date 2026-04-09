@@ -40,6 +40,7 @@ const Editor = ({
   variant = "content",
 }: EditorProps) => {
   const editorRef = useRef<TiptapEditor | null>(null);
+  const lastEmittedContentRef = useRef(content ?? "");
 
   const extensions = useMemo(
     () => (variant === "base" ? baseEditorPlugins : contentEditorPlugins),
@@ -111,7 +112,9 @@ const Editor = ({
     extensions,
     content: content,
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
+      const nextContent = editor.getHTML();
+      lastEmittedContentRef.current = nextContent;
+      onChange(nextContent);
     },
     onDrop: handleDrop,
     editorProps: {
@@ -128,8 +131,14 @@ const Editor = ({
   }, [editor]);
 
   useEffect(() => {
-    if (editor && content !== editor.getHTML()) {
+    if (
+      editor &&
+      content !== undefined &&
+      content !== editor.getHTML() &&
+      content !== lastEmittedContentRef.current
+    ) {
       editor.commands.setContent(content || "");
+      lastEmittedContentRef.current = content || "";
     }
   }, [content, editor]);
 
