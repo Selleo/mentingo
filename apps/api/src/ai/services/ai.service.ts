@@ -7,7 +7,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { trace } from "@opentelemetry/api";
-import { PERMISSIONS } from "@repo/shared";
+import { PERMISSIONS, hasPermission } from "@repo/shared";
 import { experimental_transcribe, generateObject, jsonSchema, type Message, streamText } from "ai";
 import { eq } from "drizzle-orm";
 import _ from "lodash";
@@ -315,10 +315,15 @@ export class AiService {
 
     const [lesson] = await this.aiRepository.checkLessonAssignment(lessonId, userId);
 
-    if (!lesson.isAssigned && !lesson.isFreemium)
+    if (
+      !lesson.isAssigned &&
+      !lesson.isFreemium &&
+      !hasPermission(permissions, PERMISSIONS.COURSE_UPDATE_OWN) &&
+      !hasPermission(permissions, PERMISSIONS.COURSE_UPDATE)
+    )
       throw new UnauthorizedException("You are not assigned to this lesson");
 
-    if (permissions.includes(PERMISSIONS.COURSE_UPDATE_OWN) && !lesson.isAssigned) {
+    if (hasPermission(permissions, PERMISSIONS.COURSE_UPDATE_OWN) && !lesson.isAssigned) {
       const courseAuthorId = await this.aiRepository.getCourseAuthorByLesson(lessonId);
 
       if (courseAuthorId !== userId) {
