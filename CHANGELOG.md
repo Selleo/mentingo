@@ -1,3 +1,55 @@
+<a name="v4.8.0"></a>
+
+## [v4.8.0] - 09.04.2026
+
+### Features:
+
+- add files with relevant context to ai mentor lessons from course generation ([#1394](https://github.com/Selleo/mentingo/issues/1394))
+
+- add video upload queueing to make uploads smoother and more reliable ([#1404](https://github.com/Selleo/mentingo/issues/1404))
+
+- add flexible roles and permission rules for more precise access control ([#1360](https://github.com/Selleo/mentingo/issues/1360))
+
+### Bug Fixes:
+
+- display the correct avatar in AI mentor lesson previews ([#1422](https://github.com/Selleo/mentingo/issues/1422))
+
+- ensure the pricing tab is visible when available ([#1421](https://github.com/Selleo/mentingo/issues/1421))
+
+- make the emoji picker work properly in AI mentor chat ([#1419](https://github.com/Selleo/mentingo/issues/1419))
+
+- progress not being counted correctly after multiple quiz attempts ([#1417](https://github.com/Selleo/mentingo/issues/1417))
+
+- make Q&A properly visible to users who aren’t logged in ([#1412](https://github.com/Selleo/mentingo/issues/1412))
+
+- make course configuration toggles update correctly when changed ([#1413](https://github.com/Selleo/mentingo/issues/1413))
+
+- prevent crashes when non-authors open draft courses ([#1399](https://github.com/Selleo/mentingo/issues/1399))
+
+- correct the student progress preview shown to admins in the statistics view ([#1409](https://github.com/Selleo/mentingo/issues/1409))
+
+- prevent layout overflow on the course settings page ([#1414](https://github.com/Selleo/mentingo/issues/1414))
+
+### Chores:
+
+- adjust fill in the blanks translations ([#1426](https://github.com/Selleo/mentingo/issues/1426))
+
+- improve video uploads with fully parallel processing for faster performance ([#1425](https://github.com/Selleo/mentingo/issues/1425))
+
+- improve platform security with automated vulnerability scanning ([#1391](https://github.com/Selleo/mentingo/issues/1391))
+
+- make voice conversations with AI mentor feel faster and more responsive ([#1418](https://github.com/Selleo/mentingo/issues/1418))
+
+- improve fill-in-the-blanks answer validation for more accurate results ([#1407](https://github.com/Selleo/mentingo/issues/1407))
+
+- hide the pricing tab when payments aren’t set up ([#1396](https://github.com/Selleo/mentingo/issues/1396))
+
+- show a dedicated AI mentor loading state when moving between lessons ([#1400](https://github.com/Selleo/mentingo/issues/1400))
+
+- automatically play welcome message on voice ai mentor conversation start ([#1408](https://github.com/Selleo/mentingo/issues/1408))
+
+- improve voice mentor quality ([#1405](https://github.com/Selleo/mentingo/issues/1405))
+
 <a name="v4.7.0"></a>
 
 ## [v4.7.0] - 27.03.2026
@@ -29,6 +81,10 @@
 - improve security for password resets and magic sign-in links ([#1385](https://github.com/Selleo/mentingo/issues/1385))
 
 - improve create and reset password tokens security ([#1378](https://github.com/Selleo/mentingo/issues/1378))
+
+### Documentation:
+
+- update changelog for version v4.7.0
 
 <a name="v4.6.1"></a>
 
@@ -2578,7 +2634,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.7.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.8.0...HEAD
+[v4.8.0]: https://github.com/Selleo/mentingo/compare/v4.7.0...v4.8.0
 [v4.7.0]: https://github.com/Selleo/mentingo/compare/v4.6.1...v4.7.0
 [v4.6.1]: https://github.com/Selleo/mentingo/compare/v4.6.0...v4.6.1
 [v4.6.0]: https://github.com/Selleo/mentingo/compare/v4.5.1...v4.6.0
