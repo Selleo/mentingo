@@ -2417,7 +2417,8 @@
     "toast": {
       "invalidData": "Nahrání souboru se nezdařilo – neplatná data souboru",
       "contentTypeMismatch": "Typ obsahu souboru neodpovídá poskytnutému typu obsahu",
-      "invalidFileType": "Neplatný typ souboru. Nahrajte soubor PNG nebo SVG."
+      "invalidFileType": "Neplatný typ souboru. Nahrajte soubor PNG nebo SVG.",
+      "missingTenantContext": "Chybí kontext organizace pro nahrání souboru"
     },
     "import": {
       "noFileUploaded": "Nebyl nahrán žádný soubor",

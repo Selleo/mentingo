@@ -128,7 +128,7 @@ export class FileService {
       throw new BadRequestException("File upload failed - empty file");
     }
 
-    if (!tenantId) throw new BadRequestException("Missing tenant context for file upload");
+    if (!tenantId) throw new BadRequestException("files.toast.missingTenantContext");
 
     const isVideo = file.mimetype.startsWith("video/");
 

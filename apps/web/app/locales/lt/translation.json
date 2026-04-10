@@ -2417,7 +2417,8 @@
     "toast": {
       "invalidData": "Failo įkėlimas nepavyko – neteisingi failo duomenys",
       "contentTypeMismatch": "Failo turinio tipas neatitinka pateikto turinio tipo",
-      "invalidFileType": "Neteisingas failo tipas. Įkelkite PNG arba SVG failą."
+      "invalidFileType": "Neteisingas failo tipas. Įkelkite PNG arba SVG failą.",
+      "missingTenantContext": "Trūksta organizacijos konteksto failo įkėlimui"
     },
     "import": {
       "noFileUploaded": "Failas neįkeltas",

@@ -2470,7 +2470,8 @@
     "toast": {
       "invalidData": "File upload failed - invalid file data",
       "contentTypeMismatch": "File content type does not match the provided content type",
-      "invalidFileType": "Invalid file type. Please upload a PNG or SVG file."
+      "invalidFileType": "Invalid file type. Please upload a PNG or SVG file.",
+      "missingTenantContext": "Missing tenant context for file upload"
     },
     "import": {
       "noFileUploaded": "No file uploaded",

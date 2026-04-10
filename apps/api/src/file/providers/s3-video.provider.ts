@@ -26,7 +26,7 @@ export class S3VideoProvider implements VideoStorageProvider {
   async initVideoUpload(payload: VideoProviderInitPayload): Promise<VideoProviderInitResult> {
     const { filename, mimeType, resource, tenantId } = payload;
 
-    if (!tenantId) throw new BadRequestException("Missing tenant context for video upload");
+    if (!tenantId) throw new BadRequestException("files.toast.missingTenantContext");
 
     const extension = filename.split(".").pop() || "mp4";
     const fileKey = prefixTenantStorageKey(`${resource}/${randomUUID()}.${extension}`, tenantId);
