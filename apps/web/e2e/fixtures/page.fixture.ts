@@ -1,26 +1,18 @@
-import { getReadonlyAuthStatePath, getWorkerAuthStatePath } from "../../../e2e/utils/auth-email";
+import { test as base } from "@playwright/test";
 
-import { dataFixture } from "./data.fixture";
+import { getReadonlyAuthStatePath, getWorkerAuthStatePath } from "../utils/auth-email";
 
-import type { BrowserContext, Page } from "@playwright/test";
+import type { PageHandle } from "./types";
 import type { UserRole } from "~/config/userRoles";
 
-type PageHandle = {
-  context: BrowserContext;
-  page: Page;
-};
+type PageRunner = (handle: PageHandle) => Promise<void>;
 
-type PageFactory = (role: UserRole, run: (handle: PageHandle) => Promise<void>) => Promise<void>;
+type WithAuthPage = (role: UserRole, run: PageRunner) => Promise<void>;
 
-export const pageFixture = dataFixture.extend<{
-  appBasePath: string;
-  withReadonlyPage: PageFactory;
-  withWorkerPage: PageFactory;
+export const pageFixture = base.extend<{
+  withReadonlyPage: WithAuthPage;
+  withWorkerPage: WithAuthPage;
 }>({
-  appBasePath: async (args, use) => {
-    void args;
-    await use("/");
-  },
   withReadonlyPage: async ({ browser }, use) => {
     await use(async (role, run) => {
       const context = await browser.newContext({

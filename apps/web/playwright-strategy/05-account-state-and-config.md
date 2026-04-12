@@ -21,6 +21,7 @@ Why:
 
 1. login readonly account and save `readonly.json`
 2. for each worker index, login writer account and save `writer-worker-{index}.json`
+3. fixtures only select the prebuilt state file for the current test/worker
 
 ## Playwright Project Pattern
 
@@ -31,6 +32,7 @@ Why:
 
 - `withReadonlyPage()` -> new context with readonly storage state
 - `withWriterPage()` -> new context with writer storage state mapped to current worker
+- the fixture does not create the writer state file; setup already did that
 
 ## Practical Rule
 

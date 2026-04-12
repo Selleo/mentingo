@@ -17,6 +17,7 @@ Build a new E2E suite with:
 3. Use [03-capability-coverage.md](./03-capability-coverage.md) as execution checklist
 4. Use [04-tags-and-execution-policy.md](./04-tags-and-execution-policy.md) for CI and tagging rules
 5. Use [05-account-state-and-config.md](./05-account-state-and-config.md) for shared-readonly and per-worker-write setup
+6. Use [06-refactor-flow-example.md](./06-refactor-flow-example.md) for the migration order from config to fixtures to data to flows to specs
 
 ## Key Decisions
 

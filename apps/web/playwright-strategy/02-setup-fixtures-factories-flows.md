@@ -40,6 +40,7 @@ How to generate writer states:
 
 - during `auth.setup.ts`, iterate worker indexes and log in writer accounts for each worker
 - persist deterministic mapping: `workerIndex -> writer state path`
+- no lazy creation needed in the fixture layer if setup already writes the files
 
 ## Fixture Model
 
@@ -61,6 +62,7 @@ Provides page/context defaults and state selection:
 
 - `withReadonlyPage` for read-only scenarios
 - `withWriterPage` for mutating scenarios
+- `withWriterPage` selects the prebuilt file for the current worker index
 
 ### `expectations.fixture.ts`
 
@@ -80,6 +82,27 @@ Composes all fixtures and exports custom `test`.
 Deterministic naming:
 
 - `entity-<runId>-w<worker>-t<test>-n<seq>`
+
+### Usage Example
+
+```ts
+import { USER_ROLE } from "~/config/userRoles";
+
+import { test } from "../e2e/fixtures/test.fixture";
+
+test("admin updates category", async ({ cleanup, factories, withWorkerPage }) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
+    const categoryFactory = factories.createCategoryFactory();
+    const category = await categoryFactory.create({ title: "Original Category" });
+
+    cleanup.add(() => categoryFactory.delete(category.id));
+
+    await page.goto(`/admin/categories/${category.id}`);
+    await page.getByTestId("category-title-input").fill("Updated Category");
+    await page.getByTestId("category-save-button").click();
+  });
+});
+```
 
 ## Flow Model
 

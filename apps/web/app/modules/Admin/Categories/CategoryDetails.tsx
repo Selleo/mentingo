@@ -5,6 +5,8 @@ import { useTranslation } from "react-i18next";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Input } from "~/components/ui/input";
 
+import { CATEGORY_PAGE_HANDLES } from "../../../../e2e/data/categories/handles";
+
 import type { GetCategoryByIdResponse, UpdateCategoryBody } from "~/api/generated-api";
 
 export const CategoryDetails = memo<{
@@ -25,6 +27,7 @@ export const CategoryDetails = memo<{
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="archived"
+                data-testid={CATEGORY_PAGE_HANDLES.ARCHIVED}
                 checked={field.value as boolean | undefined}
                 onCheckedChange={(checked) => field.onChange(checked)}
               />
@@ -41,6 +44,7 @@ export const CategoryDetails = memo<{
         return (
           <Input
             {...field}
+            data-testid={name === "title" ? CATEGORY_PAGE_HANDLES.TITLE : undefined}
             value={field.value as string}
             onChange={(e) => {
               field.onChange(e);

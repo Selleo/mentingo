@@ -82,7 +82,7 @@ async function insertCredential(userId: UUIDType, tenantId: UUIDType, password: 
   return (await db.insert(credentials).values(credentialData).returning())[0];
 }
 
-async function seedProduction() {
+export async function seedProduction() {
   await seedTruncateAllTables(db);
 
   try {

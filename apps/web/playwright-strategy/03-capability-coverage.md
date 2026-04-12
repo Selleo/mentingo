@@ -1,6 +1,6 @@
 # Capability Coverage Checklist
 
-## Auth
+## Auth (Its-Gabo)
 
 - login success/failure
 - register
@@ -9,14 +9,14 @@
 - MFA
 - logout
 
-## Navigation
+## Navigation (Its-Gabo)
 
 - public visibility
 - authenticated visibility
 - manage/super-admin visibility
 - invalid-route redirects
 
-## Courses
+## Courses (Japrolol)
 
 - browse list
 - open details
@@ -31,7 +31,7 @@
 - language add/remove
 - generate missing translations
 
-## Curriculum
+## Curriculum (Japrolol)
 
 - chapter create/update/delete/reorder/freemium
 - lesson create/update/delete/reorder
@@ -39,7 +39,7 @@
 - resource upload
 - initialize lesson context
 
-## Enrollment
+## Enrollment (Japrolol)
 
 - self-enroll
 - bulk user enroll
@@ -47,7 +47,7 @@
 - group unenroll
 - enrolled users/groups verification
 
-## Learning
+## Learning (Its-Gabo)
 
 - lesson open
 - next lesson progression
@@ -57,51 +57,51 @@
 - AI mentor interaction entry
 - blocked/unblocked access
 
-## Users
+## Users (Japrolol)
 
 - create/update/archive
 - bulk archive/delete
 - bulk assign groups/update attributes
 - import users
 
-## Groups
+## Groups (Japrolol)
 
 - create/edit/delete
 - bulk delete
 - membership assignment/verification
 
-## Categories
+## Categories (Japrolol)
 
 - create/update/delete/delete-many
 - list/search
 
-## Announcements
+## Announcements (Its-Gabo)
 
 - create/list
 - unread count
 - mark read
 - feed visibility
 
-## QA
+## QA (Japrolol)
 
 - list/open/create/update/delete
 - language variant create/update/delete
 
-## News
+## News (Its-Gabo)
 
 - list/open/create/update/delete
 - draft/preview
 - language variant add/delete
 - resource upload
 
-## Articles
+## Articles (Its-Gabo)
 
 - list/open/create/update/delete
 - sections + section languages
 - preview
 - TOC
 
-## Settings
+## Settings (Its-Gabo)
 
 - user settings
 - org/company info
@@ -113,21 +113,21 @@
 - default currency
 - feature toggles
 
-## Environment
+## Environment (Japrolol)
 
 - env values load
 - env toggles update
 - frontend env availability checks
 
-## Certificates
+## Certificates (Its-Gabo)
 
 - view/download/share link/share render
 
-## Promotion Codes
+## Promotion Codes (Skip for now)
 
 - list/create/update/delete
 
-## Statistics
+## Statistics (Japrolol)
 
 - learner progress
 - admin analytics
@@ -135,32 +135,32 @@
 - learning time
 - quiz results
 
-## Tenants
+## Tenants (Japrolol)
 
 - list/create/edit
 
-## Onboarding
+## Onboarding (Its-Gabo)
 
 - progression/completion/reset
 
-## Support Mode
+## Support Mode (Its-Gabo)
 
 - entry/exit
 - visibility/badge behavior
 
-## Voice / AI
+## Voice / AI (Japrolol)
 
 - voice entry points
 - AI chat/thread entry points
 - AI course generation availability check
 
-## Stripe / Payments
+## Stripe / Payments (Skip for now)
 
 - paid course checkout entry
 - promo code application
 - payment success/failure handling
 
-## i18n
+## i18n (Its-Gabo)
 
 - language switch
 - localized navigation
