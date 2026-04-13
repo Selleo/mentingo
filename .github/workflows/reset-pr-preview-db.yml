@@ -82,7 +82,7 @@ jobs:
 
           ssh -o BatchMode=yes uncloud-host true
 
-          uc ps --connect "ssh+cli://uncloud-host" > /dev/null 2>&1
+          uc ls --connect "ssh+cli://uncloud-host" > /dev/null 2>&1
           if [ $? -ne 0 ]; then
             echo "Failed to connect to server"
             exit 1
