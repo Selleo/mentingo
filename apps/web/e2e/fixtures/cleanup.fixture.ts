@@ -7,7 +7,8 @@ export const cleanupFixture = base.extend<{
     add: (task: CleanupTask) => void;
   };
 }>({
-  cleanup: async (_, use, testInfo) => {
+  cleanup: async ({ baseURL }, use, testInfo) => {
+    void baseURL;
     const tasks: CleanupTask[] = [];
 
     await use({
@@ -27,7 +28,19 @@ export const cleanupFixture = base.extend<{
     }
 
     if (errors.length > 0) {
-      throw new Error(`Cleanup failed in "${testInfo.title}" with ${errors.length} error(s)`);
+      const message = errors
+        .map((error, index) => {
+          if (error instanceof Error) {
+            return `${index + 1}. ${error.message}`;
+          }
+
+          return `${index + 1}. ${String(error)}`;
+        })
+        .join("\n");
+
+      throw new Error(
+        `Cleanup failed in "${testInfo.title}" with ${errors.length} error(s)\n${message}`,
+      );
     }
   },
 });

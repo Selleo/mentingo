@@ -30,7 +30,7 @@ export const pageFixture = base.extend<{
   withWorkerPage: async ({ browser }, use, testInfo) => {
     await use(async (role, run) => {
       const context = await browser.newContext({
-        storageState: getWorkerAuthStatePath(testInfo.workerIndex, role),
+        storageState: getWorkerAuthStatePath(testInfo.project.name, testInfo.workerIndex, role),
       });
       const page = await context.newPage();
 

@@ -7,7 +7,8 @@ import type { FixtureApiClient } from "../utils/api-client";
 export const apiFixture = base.extend<{
   apiClient: FixtureApiClient;
 }>({
-  apiClient: async (_args, use) => {
+  apiClient: async ({ baseURL }, use) => {
+    void baseURL;
     await use(createFixtureApiClient());
   },
 });

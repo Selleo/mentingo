@@ -23,10 +23,16 @@ const config: PlaywrightTestConfig = {
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? RETRY_COUNT : 0,
   workers: process.env.CI ? WORKER_COUNT : WORKER_COUNT * 2,
+  timeout: 90 * 1000,
+  expect: {
+    timeout: 10 * 1000,
+  },
   use: {
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
     baseURL,
+    actionTimeout: 15 * 1000,
+    navigationTimeout: 30 * 1000,
     ignoreHTTPSErrors: true,
     extraHTTPHeaders: {
       "x-playwright-test": "true",

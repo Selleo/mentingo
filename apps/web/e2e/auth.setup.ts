@@ -5,6 +5,8 @@ import { login } from "./fixtures/auth.actions";
 import { createFixtureApiClient } from "./utils/api-client";
 import { AUTH_ACCOUNT_TEMPLATE, getAuthEmail, getReadonlyAuthStatePath } from "./utils/auth-email";
 
+import type { Browser } from "@playwright/test";
+
 const AUTH_ROLES = [
   SYSTEM_ROLE_SLUGS.STUDENT,
   SYSTEM_ROLE_SLUGS.ADMIN,
@@ -78,10 +80,22 @@ const ensureUserAccount = async (
   return user;
 };
 
-const _READONLY_AUTH_STATES = AUTH_ROLES.map((role) => ({
+const READONLY_AUTH_STATES = AUTH_ROLES.map((role) => ({
   email: getAuthEmail(AUTH_ACCOUNT_TEMPLATE.READONLY, role),
   path: getReadonlyAuthStatePath(role),
 }));
+
+const writeAuthState = async (browser: Browser, email: string, path: string) => {
+  const context = await browser.newContext();
+  const page = await context.newPage();
+
+  try {
+    await login(page, email, ACCOUNT_PASSWORD);
+    await context.storageState({ path });
+  } finally {
+    await context.close();
+  }
+};
 
 setup("authenticate", async ({ browser }) => {
   const adminContext = await browser.newContext();
@@ -104,14 +118,8 @@ setup("authenticate", async ({ browser }) => {
     await adminContext.close();
   }
 
-  // TODO: Fix readonly and worker accounts
   // TODO: Implement the tags like @smoke, @core etc based on docs
-  // for (const { email, path } of READONLY_AUTH_STATES) {
-  //   const context = await browser.newContext();
-  //   const page = await context.newPage();
-  //
-  //   await login(page, email, ACCOUNT_PASSWORD);
-  //   await context.storageState({ path });
-  //   await context.close();
-  // }
+  for (const { email, path } of READONLY_AUTH_STATES) {
+    await writeAuthState(browser, email, path);
+  }
 });

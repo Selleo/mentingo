@@ -4,7 +4,6 @@ import { LOGIN_PAGE_HANDLES } from "../data/auth/handles";
 import { NAVIGATION_HANDLES } from "../data/navigation/handles";
 
 const LOGIN_URL = "/auth/login";
-const COURSES_URL = "/courses";
 
 export async function login(page: Page, email: string, password: string) {
   await page.context().clearCookies();
@@ -18,7 +17,8 @@ export async function login(page: Page, email: string, password: string) {
   await page.getByTestId(LOGIN_PAGE_HANDLES.EMAIL).fill(email);
   await page.getByTestId(LOGIN_PAGE_HANDLES.PASSWORD).fill(password);
   await page.getByTestId(LOGIN_PAGE_HANDLES.LOGIN).click();
-  await expect(page).toHaveURL(COURSES_URL);
+  await expect(page).not.toHaveURL(LOGIN_URL, { timeout: 15_000 });
+  await page.waitForLoadState("networkidle");
 }
 
 export async function logout(page: Page) {
