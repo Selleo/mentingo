@@ -1,5 +1,5 @@
 import { COURSE_ENROLLMENT, SYSTEM_ROLE_SLUGS } from "@repo/shared";
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import request from "supertest";
 
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
@@ -7,7 +7,14 @@ import { FileService } from "src/file/file.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { lessons, questions, questionAnswerOptions, studentCourses } from "src/storage/schema";
+import {
+  lessons,
+  questions,
+  questionAnswerOptions,
+  studentCourses,
+  studentLessonProgress,
+  studentQuestionAnswers,
+} from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCategoryFactory } from "../../../test/factory/category.factory";
@@ -205,6 +212,32 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
     });
   };
 
+  const resetQuizAttemptState = async (studentId: UUIDType, lessonId: UUIDType) => {
+    const quizQuestions = await db
+      .select({ id: questions.id })
+      .from(questions)
+      .where(eq(questions.lessonId, lessonId));
+
+    await db.delete(studentQuestionAnswers).where(
+      and(
+        eq(studentQuestionAnswers.studentId, studentId),
+        inArray(
+          studentQuestionAnswers.questionId,
+          quizQuestions.map((question) => question.id),
+        ),
+      ),
+    );
+
+    await db
+      .delete(studentLessonProgress)
+      .where(
+        and(
+          eq(studentLessonProgress.studentId, studentId),
+          eq(studentLessonProgress.lessonId, lessonId),
+        ),
+      );
+  };
+
   describe("GET /api/lesson/:id - quiz feedback redaction", () => {
     it("should redact quiz feedback for student when quizFeedbackEnabled is false", async () => {
       const category = await categoryFactory.create();
@@ -350,6 +383,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       const { lesson } = await createQuizLesson(course.id, chapter.id, contentCreator.id);
 
       const questionsAnswers = await buildQuizAnswers(lesson.id);
+      await resetQuizAttemptState(student.id, lesson.id);
 
       const response = await request(app.getHttpServer())
         .post("/api/lesson/evaluation-quiz")
@@ -455,11 +489,19 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
 
       expect(updatedResponse.body.data.isQuizFeedbackRedacted).toBe(true);
 
+      const evaluationStudent = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const evaluationStudentCookies = await cookieFor(evaluationStudent, app);
+      await enrollStudentToCourse(evaluationStudent.id, course.id);
+
       const questionsAnswers = await buildQuizAnswers(lesson.id);
+      await resetQuizAttemptState(evaluationStudent.id, lesson.id);
 
       const evaluationResponse = await request(app.getHttpServer())
         .post("/api/lesson/evaluation-quiz")
-        .set("Cookie", studentCookies)
+        .set("Cookie", evaluationStudentCookies)
         .send({
           lessonId: lesson.id,
           language: "en",

@@ -44,6 +44,7 @@ import { BunnyVideoProvider } from "./providers/bunny-video.provider";
 import { S3VideoProvider } from "./providers/s3-video.provider";
 import { ThumbnailService } from "./thumbnail.service";
 import { CONTEXT_TTL, getContextKey } from "./utils/resourceCacheKeys";
+import { prefixTenantStorageKey } from "./utils/tenantStorageKey";
 import { VideoProcessingStateService } from "./video-processing-state.service";
 import { VideoUploadNotificationGateway } from "./video-upload-notification.gateway";
 
@@ -122,10 +123,12 @@ export class FileService {
     }
   }
 
-  async uploadFile(file: Express.Multer.File, resource: string) {
+  async uploadFile(file: Express.Multer.File, resource: string, tenantId?: UUIDType) {
     if (file.size === 0) {
       throw new BadRequestException("File upload failed - empty file");
     }
+
+    if (!tenantId) throw new BadRequestException("files.toast.missingTenantContext");
 
     const isVideo = file.mimetype.startsWith("video/");
 
@@ -135,7 +138,11 @@ export class FileService {
       }
 
       const fileExtension = file.originalname.split(".").pop();
-      const fileKey = `${resource}/${randomUUID()}.${fileExtension}`;
+
+      const fileKey = prefixTenantStorageKey(
+        `${resource}/${randomUUID()}.${fileExtension}`,
+        tenantId,
+      );
 
       try {
         await this.s3Service.uploadFile(file.buffer, fileKey, file.mimetype);
@@ -196,7 +203,7 @@ export class FileService {
     placeholderKey: string,
   ) {
     try {
-      return provider.initVideoUpload(payload);
+      return await provider.initVideoUpload(payload);
     } catch (error) {
       await this.videoProcessingStateService.markFailed(uploadId, placeholderKey, error?.message);
       throw error;
@@ -266,7 +273,7 @@ export class FileService {
     return resourceResult.resourceId;
   }
 
-  async initVideoUpload(data: VideoInitBody, currentUserId?: UUIDType) {
+  async initVideoUpload(data: VideoInitBody, currentUser?: CurrentUserType) {
     const {
       filename,
       sizeBytes,
@@ -312,7 +319,7 @@ export class FileService {
       }
     }
 
-    await this.initializeVideoUploadState(uploadId, placeholderKey, fileType, currentUserId);
+    await this.initializeVideoUploadState(uploadId, placeholderKey, fileType, currentUser?.userId);
 
     const provider = await this.resolveVideoProvider();
     const providerResponse = await this.initProviderUpload(
@@ -322,6 +329,7 @@ export class FileService {
         title,
         mimeType,
         resource,
+        tenantId: currentUser?.tenantId,
       },
       uploadId,
       placeholderKey,
@@ -513,7 +521,7 @@ export class FileService {
 
     const checksum = getChecksum(file);
 
-    const { fileKey } = await this.uploadFile(file, resourceFolder);
+    const { fileKey } = await this.uploadFile(file, resourceFolder, currentUser?.tenantId);
 
     const { insertedResource } = await this.db.transaction(async (trx) => {
       const [insertedResource] = await trx

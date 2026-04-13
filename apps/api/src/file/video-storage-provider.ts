@@ -1,10 +1,12 @@
 import type { VideoProviderType } from "@repo/shared";
+import type { UUIDType } from "src/common";
 
 export type VideoProviderInitPayload = {
   filename: string;
   title?: string;
   mimeType: string;
   resource: string;
+  tenantId?: UUIDType;
 };
 
 export type VideoProviderInitResult = {

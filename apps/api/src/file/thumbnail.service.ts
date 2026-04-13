@@ -89,10 +89,12 @@ export class ThumbnailService {
       return this.bunnyStreamService.getThumbnailUrl(videoId);
     }
 
-    const exists = await this.s3Service.getFileExists(getVideoThumbnailKey(resourceId));
-    if (!exists) await this.extractThumbnail(resource.reference, resourceId);
+    const exists = await this.s3Service.getFileExists(
+      getVideoThumbnailKey(resourceId, resource.tenantId),
+    );
+    if (!exists) await this.extractThumbnail(resource.reference, resourceId, resource.tenantId);
 
-    return this.s3Service.getSignedUrl(getVideoThumbnailKey(resource.id));
+    return this.s3Service.getSignedUrl(getVideoThumbnailKey(resource.id, resource.tenantId));
   }
 
   private async getExternalThumbnail(sourceUrl: string, provider: VideoProvider) {
@@ -302,7 +304,7 @@ export class ThumbnailService {
     }
   }
 
-  private async extractThumbnail(reference: string, resourceId: UUIDType) {
+  private async extractThumbnail(reference: string, resourceId: UUIDType, tenantId?: UUIDType) {
     const signedUrl = await this.s3Service.getSignedUrl(reference);
     const args = [
       "-hide_banner",
@@ -412,7 +414,7 @@ export class ThumbnailService {
     await this.db.transaction(async (trx) => {
       await this.s3Service.uploadFile(
         output,
-        getVideoThumbnailKey(resourceId),
+        getVideoThumbnailKey(resourceId, tenantId),
         BASE_THUMBNAIL_CONTENT_TYPE,
       );
       await trx
@@ -421,7 +423,7 @@ export class ThumbnailService {
           metadata: setJsonbField(
             resources.metadata,
             "thumbnail",
-            getVideoThumbnailKey(resourceId),
+            getVideoThumbnailKey(resourceId, tenantId),
           ),
         })
         .where(eq(resources.id, resourceId));

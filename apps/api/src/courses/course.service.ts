@@ -1655,7 +1655,11 @@ export class CourseService {
     let certificateSignatureReference = course.settings.certificateSignature ?? null;
 
     if (certificateSignature) {
-      const { fileKey } = await this.fileService.uploadFile(certificateSignature, "certificate");
+      const { fileKey } = await this.fileService.uploadFile(
+        certificateSignature,
+        "certificate",
+        currentUser.tenantId,
+      );
       certificateSignatureReference = fileKey;
     }
 
@@ -1877,7 +1881,7 @@ export class CourseService {
           try {
             const fileExtension = image.originalname.split(".").pop();
             const resource = `courses/${crypto.randomUUID()}.${fileExtension}`;
-            imageKey = await this.fileService.uploadFile(image, resource);
+            imageKey = await this.fileService.uploadFile(image, resource, currentUser.tenantId);
           } catch (error) {
             throw new ConflictException("Failed to upload course image");
           }

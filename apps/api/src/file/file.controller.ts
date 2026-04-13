@@ -28,6 +28,7 @@ import { Public } from "src/common/decorators/public.decorator";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { PermissionsGuard } from "src/common/guards/permissions.guard";
+import { CurrentUserType } from "src/common/types/current-user.type";
 import {
   ALLOWED_MIME_TYPES,
   MAX_FILE_SIZE,
@@ -51,8 +52,6 @@ import {
   type VideoUploadStatusResponse,
 } from "./schemas/video-upload-status.schema";
 import { TusUploadService } from "./tus/tus-upload.service";
-
-import type { CurrentUserType } from "src/common/types/current-user.type";
 
 @UseGuards(PermissionsGuard)
 @Controller("file")
@@ -94,6 +93,7 @@ export class FileController {
     @UploadedFile()
     file: Express.Multer.File,
     @Body("resource") resource: string = "file",
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<FileUploadResponse> {
     await FileGuard.validateFile(file, {
       allowedTypes: ALLOWED_MIME_TYPES,
@@ -101,7 +101,7 @@ export class FileController {
       maxVideoSize: MAX_VIDEO_SIZE,
     });
 
-    return await this.fileService.uploadFile(file, resource);
+    return await this.fileService.uploadFile(file, resource, currentUser.tenantId);
   }
 
   @RequirePermission(
@@ -119,9 +119,9 @@ export class FileController {
   })
   async initVideoUpload(
     @Body() payload: VideoInitBody,
-    @CurrentUser("userId") userId?: UUIDType,
+    @CurrentUser() currentUser?: CurrentUserType,
   ): Promise<VideoInitResponse> {
-    return this.fileService.initVideoUpload(payload, userId);
+    return this.fileService.initVideoUpload(payload, currentUser);
   }
 
   @Public()

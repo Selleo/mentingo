@@ -412,7 +412,7 @@ export class LumaService {
       }
 
       const uploaded = await this.adminLessonService.uploadFileToLessonFromSignedUrl(
-        currentUser.userId,
+        currentUser,
         lesson.id,
         signedUrl,
       );

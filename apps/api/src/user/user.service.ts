@@ -417,7 +417,11 @@ export class UserService {
     }
 
     if (userAvatar) {
-      const { fileKey } = await this.fileService.uploadFile(userAvatar, "user-avatars");
+      const { fileKey } = await this.fileService.uploadFile(
+        userAvatar,
+        "user-avatars",
+        existingUser.tenantId,
+      );
       data.userAvatar = fileKey;
     }
 

@@ -1005,6 +1005,7 @@ export class AdminLessonService {
       relationshipType: RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
       title: fileTitle,
       description: fileDescription,
+      currentUser,
       options: { contextId },
     });
 
@@ -1012,7 +1013,7 @@ export class AdminLessonService {
   }
 
   async uploadFileToLessonFromSignedUrl(
-    currentUserId: UUIDType,
+    currentUser: CurrentUserType,
     lessonId: UUIDType,
     signedUrl: string,
     options?: { originalFilename?: string },
@@ -1023,6 +1024,7 @@ export class AdminLessonService {
     const { fileKey, fileUrl } = await this.fileService.uploadFile(
       file,
       `${RESOURCE_CATEGORIES.LESSON}/lesson-content`,
+      currentUser.tenantId,
     );
 
     const [resource] = await this.adminLessonRepository.createLessonResources(lessonId, [
@@ -1034,7 +1036,7 @@ export class AdminLessonService {
           size: file.size,
           sourceUrl: signedUrl,
         },
-        uploadedById: currentUserId,
+        uploadedById: currentUser.userId,
       },
     ]);
 
@@ -1105,7 +1107,11 @@ export class AdminLessonService {
       return;
     }
 
-    const { fileKey } = await this.fileService.uploadFile(file, "lessons/ai-mentor-avatars");
+    const { fileKey } = await this.fileService.uploadFile(
+      file,
+      "lessons/ai-mentor-avatars",
+      currentUser.tenantId,
+    );
 
     await this.adminLessonRepository.updateAiMentorAvatar(lessonId, fileKey);
   }
