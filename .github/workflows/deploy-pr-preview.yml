@@ -88,12 +88,15 @@ jobs:
           echo "::add-mask::$UNCLOUD_USER"
           echo "::add-mask::$UNCLOUD_PORT"
 
-          ssh -o BatchMode=yes uncloud-host true
+          echo "Testing raw SSH connectivity..."
+          if ! ssh -o BatchMode=yes uncloud-host true; then
+            echo "Raw SSH connectivity failed"
+            exit 1
+          fi
 
-          uc ps --connect "ssh+cli://uncloud-host" > /dev/null 2>&1
-
-          if [ $? -ne 0 ]; then
-            echo "Failed to connect to server"
+          echo "Testing Uncloud connectivity..."
+          if ! uc ls --connect "ssh+cli://uncloud-host"; then
+            echo "Uncloud connectivity failed"
             exit 1
           fi
 
