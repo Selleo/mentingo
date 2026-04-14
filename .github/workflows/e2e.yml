@@ -126,7 +126,7 @@ jobs:
             ${{ runner.os }}-playwright
 
       - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps chromium
+        run: pnpm exec playwright install --with-deps chromium firefox
         working-directory: ./apps/web
         env:
           PLAYWRIGHT_BROWSERS_PATH: /home/runner/.cache/ms-playwright
