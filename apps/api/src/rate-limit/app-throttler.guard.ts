@@ -7,13 +7,15 @@ import {
   type ThrottlerRequest,
 } from "@nestjs/throttler";
 
-import { normalizePath, resolveRateLimitPolicy } from "./rate-limit.utils";
+import { isRateLimitingDisabled, normalizePath, resolveRateLimitPolicy } from "./rate-limit.utils";
 
 import type { ExecutionContext } from "@nestjs/common";
 
 @Injectable()
 export class AppThrottlerGuard extends ThrottlerGuard {
   protected async handleRequest(request: ThrottlerRequest): Promise<boolean> {
+    if (isRateLimitingDisabled()) return true;
+
     const { req } = this.getRequestResponse(request.context);
 
     const method = String(req.method || "GET").toUpperCase();

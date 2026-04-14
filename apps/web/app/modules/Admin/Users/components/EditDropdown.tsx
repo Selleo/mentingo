@@ -20,14 +20,16 @@ export type DropdownItems = {
   translationKey: string;
   action: () => void;
   destructive: boolean;
+  testId: string;
 };
 
 interface EditDropdownProps {
   dropdownItems: DropdownItems[];
   disabled: boolean;
+  triggerTestId?: string;
 }
 
-export const EditDropdown = ({ dropdownItems, disabled }: EditDropdownProps) => {
+export const EditDropdown = ({ dropdownItems, disabled, triggerTestId }: EditDropdownProps) => {
   const { t } = useTranslation();
 
   const [openDropdown, setOpenDropdown] = useState(false);
@@ -35,7 +37,12 @@ export const EditDropdown = ({ dropdownItems, disabled }: EditDropdownProps) => 
   return (
     <DropdownMenu onOpenChange={(open) => setOpenDropdown(open)}>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="flex gap-2" disabled={disabled}>
+        <Button
+          data-testid={triggerTestId}
+          variant="outline"
+          className="flex gap-2"
+          disabled={disabled}
+        >
           <CopyCheck className="size-4" />
           {t("adminUsersView.button.bulkEdit")}
           <Icon className="size-4 text-black" name={openDropdown ? "ArrowUp" : "ArrowDown"} />
@@ -47,6 +54,7 @@ export const EditDropdown = ({ dropdownItems, disabled }: EditDropdownProps) => 
           return (
             <DropdownMenuItem key={item.translationKey}>
               <Button
+                data-testid={item.testId}
                 className={cn(
                   "body-sm w-full justify-start gap-2 text-neutral-950 hover:text-neutral-950",
                   { "text-error-700 hover:text-error-700": item.destructive },

@@ -10,6 +10,8 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 
+import { USERS_IMPORT_MODAL_HANDLES } from "../../../../../../e2e/data/users/handles";
+
 interface ImportUsersUploadProps {
   file: File | null;
   setFile: (file: File | null) => void;
@@ -27,7 +29,7 @@ export const ImportUsersUpload = ({
 }: ImportUsersUploadProps) => {
   const { t } = useTranslation();
   return (
-    <DialogContent className="gap-2">
+    <DialogContent data-testid={USERS_IMPORT_MODAL_HANDLES.ROOT} className="gap-2">
       <DialogHeader>
         <DialogTitle>{t("adminUsersView.modal.title.import")}</DialogTitle>
       </DialogHeader>
@@ -38,27 +40,34 @@ export const ImportUsersUpload = ({
       </DialogDescription>
 
       <div className="py-4">
-        <FileUploadInput
-          className="max-w-none"
-          handleFileUpload={async (uploadedFile: File) => {
-            setFile(uploadedFile);
-            setFileUrl(URL.createObjectURL(uploadedFile));
-          }}
-          handleFileDelete={() => {
-            setFile(null);
-            setFileUrl(undefined);
-          }}
-          isUploading={false}
-          contentTypeToDisplay="Spreadsheet"
-          url={fileUrl}
-        />
+        <div data-testid={USERS_IMPORT_MODAL_HANDLES.UPLOAD}>
+          <FileUploadInput
+            className="max-w-none"
+            inputTestId={USERS_IMPORT_MODAL_HANDLES.FILE_INPUT}
+            handleFileUpload={async (uploadedFile: File) => {
+              setFile(uploadedFile);
+              setFileUrl(URL.createObjectURL(uploadedFile));
+            }}
+            handleFileDelete={() => {
+              setFile(null);
+              setFileUrl(undefined);
+            }}
+            isUploading={false}
+            contentTypeToDisplay="Spreadsheet"
+            url={fileUrl}
+          />
+        </div>
         <div className="pt-2 text-sm leading-none text-red-400">
           {t("adminUsersView.modal.note.import")}
         </div>
       </div>
 
       <DialogFooter>
-        <Button disabled={!file} onClick={handleUsersImport}>
+        <Button
+          data-testid={USERS_IMPORT_MODAL_HANDLES.SUBMIT}
+          disabled={!file}
+          onClick={handleUsersImport}
+        >
           {t("adminUsersView.modal.title.import")}
         </Button>
       </DialogFooter>

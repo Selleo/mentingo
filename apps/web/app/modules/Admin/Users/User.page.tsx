@@ -20,6 +20,8 @@ import { buildPermissionsUnionForRoleSlugs } from "~/modules/Admin/Users/utils/p
 import Loader from "~/modules/common/Loader/Loader";
 import { setPageTitle } from "~/utils/setPageTitle";
 
+import { USER_PAGE_HANDLES } from "../../../../e2e/data/users/handles";
+
 import { UserInfo } from "./components/UserInfo";
 
 import type { MetaFunction } from "@remix-run/react";
@@ -101,7 +103,7 @@ const User = () => {
 
   return (
     <PageWrapper breadcrumbs={breadcrumbs}>
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-6" data-testid={USER_PAGE_HANDLES.PAGE}>
         <div className="rounded-xl border bg-gradient-to-r from-neutral-50 to-background p-5 shadow-sm">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
@@ -113,7 +115,11 @@ const User = () => {
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant={user.archived ? "outline" : "secondary"} className="capitalize">
+              <Badge
+                data-testid={USER_PAGE_HANDLES.STATUS_BADGE}
+                variant={user.archived ? "outline" : "secondary"}
+                className="capitalize"
+              >
                 {user.archived ? t("common.other.archived") : t("common.other.active")}
               </Badge>
             </div>
@@ -121,8 +127,12 @@ const User = () => {
         </div>
         <Tabs defaultValue="information" className="w-full">
           <TabsList className="h-auto rounded-lg border bg-neutral-50 p-1">
-            <TabsTrigger value="information">{t("adminUserView.tabs.information")}</TabsTrigger>
-            <TabsTrigger value="permissions">{t("adminUserView.tabs.permissions")}</TabsTrigger>
+            <TabsTrigger data-testid={USER_PAGE_HANDLES.INFORMATION_TAB} value="information">
+              {t("adminUserView.tabs.information")}
+            </TabsTrigger>
+            <TabsTrigger data-testid={USER_PAGE_HANDLES.PERMISSIONS_TAB} value="permissions">
+              {t("adminUserView.tabs.permissions")}
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="information" className="pt-4">
             <form
@@ -133,7 +143,12 @@ const User = () => {
                 <div className="flex items-center gap-2">
                   <h3 className="h5 text-neutral-950">{t("adminUserView.editUserHeader")}</h3>
                 </div>
-                <Button type="submit" disabled={!isDirty} className="min-w-28">
+                <Button
+                  data-testid={USER_PAGE_HANDLES.SAVE_BUTTON}
+                  type="submit"
+                  disabled={!isDirty}
+                  className="min-w-28"
+                >
                   {t("common.button.save")}
                 </Button>
               </div>

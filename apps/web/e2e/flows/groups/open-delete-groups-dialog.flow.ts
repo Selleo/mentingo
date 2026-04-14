@@ -1,0 +1,8 @@
+import { GROUPS_PAGE_HANDLES } from "../../data/groups/handles";
+
+import type { Page } from "@playwright/test";
+
+export const openDeleteGroupsDialogFlow = async (page: Page) => {
+  await page.getByTestId(GROUPS_PAGE_HANDLES.DELETE_SELECTED_BUTTON).click();
+  await page.getByTestId(GROUPS_PAGE_HANDLES.DELETE_DIALOG).waitFor({ state: "visible" });
+};

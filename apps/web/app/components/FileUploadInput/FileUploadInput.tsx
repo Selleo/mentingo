@@ -17,6 +17,7 @@ type FileUploadInputProps = {
   url?: string;
   className?: string;
   onVideoSelected?: () => void;
+  inputTestId?: string;
 };
 
 const ACCEPTED_TYPE_FORMATS: Record<string, Record<string, string[]>> = {
@@ -38,6 +39,7 @@ const FileUploadInput = ({
   contentTypeToDisplay,
   url,
   className,
+  inputTestId = "fileUploadInput",
 }: FileUploadInputProps) => {
   const acceptedTypes = ACCEPTED_TYPE_FORMATS[contentTypeToDisplay] || {};
 
@@ -89,7 +91,7 @@ const FileUploadInput = ({
     return (
       <div {...getRootProps()} className="max-w-[440px]">
         <EmptyStateUpload className={className} />
-        <input {...getInputProps()} className="sr-only" data-testid="fileUploadInput" />
+        <input {...getInputProps()} className="sr-only" data-testid={inputTestId} />
       </div>
     );
   }
@@ -103,7 +105,7 @@ const FileUploadInput = ({
       {...getRootProps()}
     >
       {filePreview}
-      <input {...getInputProps()} className="sr-only" data-testid="fileUploadInput" />
+      <input {...getInputProps()} className="sr-only" data-testid={inputTestId} />
     </div>
   );
 };

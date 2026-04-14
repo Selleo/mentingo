@@ -12,6 +12,8 @@ import { GroupHeader } from "~/modules/Admin/Groups/components/GroupHeader";
 import { groupFormSchema } from "~/modules/Admin/Groups/group.utils";
 import { setPageTitle } from "~/utils/setPageTitle";
 
+import { CREATE_GROUP_PAGE_HANDLES, GROUP_FORM_HANDLES } from "../../../../e2e/data/groups/handles";
+
 import type { MetaFunction } from "@remix-run/react";
 import type { ReactElement } from "react";
 import type { GroupFormValues } from "~/modules/Admin/Groups/group.utils";
@@ -55,12 +57,17 @@ const CreateGroup = (): ReactElement => {
         },
       ]}
     >
-      <GroupHeader
-        title={t("adminGroupsView.newGroup.header")}
-        handlePublish={() => form.handleSubmit(handleSubmit)()}
-        handleCancel={() => navigate("/admin/groups")}
-      />
-      <CreateGroupCard form={form} handleSubmit={handleSubmit} />
+      <div data-testid={CREATE_GROUP_PAGE_HANDLES.PAGE} className="flex h-full flex-col">
+        <GroupHeader
+          title={t("adminGroupsView.newGroup.header")}
+          handlePublish={() => form.handleSubmit(handleSubmit)()}
+          handleCancel={() => navigate("/admin/groups")}
+          headingTestId={CREATE_GROUP_PAGE_HANDLES.HEADING}
+          cancelButtonTestId={GROUP_FORM_HANDLES.CANCEL_BUTTON}
+          submitButtonTestId={GROUP_FORM_HANDLES.SUBMIT_BUTTON}
+        />
+        <CreateGroupCard form={form} handleSubmit={handleSubmit} />
+      </div>
     </PageWrapper>
   );
 };

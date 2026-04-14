@@ -6,6 +6,8 @@ import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
 import { RequiredTick } from "~/modules/Admin/Groups/components/RequiredTick";
 
+import { GROUP_FORM_HANDLES } from "../../../../../e2e/data/groups/handles";
+
 import type { UseFormReturn } from "react-hook-form";
 import type { GroupFormValues } from "~/modules/Admin/Groups/group.utils";
 
@@ -34,7 +36,7 @@ const CreateGroupCard = ({ form, handleSubmit }: CreateGroupProps) => {
                   {t("adminGroupsView.newGroup.fields.name")}
                 </Label>
                 <FormControl>
-                  <Input id="name" {...field} data-testid="groupName" />
+                  <Input id="name" {...field} data-testid={GROUP_FORM_HANDLES.NAME_INPUT} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -53,7 +55,7 @@ const CreateGroupCard = ({ form, handleSubmit }: CreateGroupProps) => {
                     id="characteristic"
                     {...field}
                     className="h-full resize-none"
-                    data-testid="groupCharacteristic"
+                    data-testid={GROUP_FORM_HANDLES.CHARACTERISTIC_INPUT}
                   />
                 </FormControl>
                 <FormMessage />

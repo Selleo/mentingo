@@ -53,6 +53,8 @@ import {
 import { setPageTitle } from "~/utils/setPageTitle";
 import { handleRowSelectionRange } from "~/utils/tableRangeSelection";
 
+import { CATEGORIES_PAGE_HANDLES } from "../../../../e2e/data/categories/handles";
+
 import type { MetaFunction } from "@remix-run/react";
 import type { GetAllCategoriesResponse } from "~/api/generated-api";
 
@@ -87,10 +89,14 @@ const Categories = () => {
       name: "title",
       type: "text",
       placeholder: t("adminCategoriesView.filters.placeholder.title"),
+      testId: CATEGORIES_PAGE_HANDLES.SEARCH_INPUT,
     },
     {
       name: "archived",
       type: "status",
+      testId: CATEGORIES_PAGE_HANDLES.STATUS_FILTER,
+      optionTestId: (option) =>
+        CATEGORIES_PAGE_HANDLES.statusFilterOption(option.value as "all" | "active" | "archived"),
     },
   ];
 
@@ -108,6 +114,7 @@ const Categories = () => {
       id: "select",
       header: ({ table }) => (
         <Checkbox
+          data-testid={CATEGORIES_PAGE_HANDLES.SELECT_ALL_CHECKBOX}
           checked={table.getIsAllPageRowsSelected()}
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
           aria-label="Select all"
@@ -117,6 +124,7 @@ const Categories = () => {
         <Checkbox
           checked={row.getIsSelected()}
           aria-label="Select row"
+          data-testid={CATEGORIES_PAGE_HANDLES.rowCheckbox(row.original.id)}
           onClick={(event) => {
             event.stopPropagation();
             handleRowSelectionRange({
@@ -136,7 +144,9 @@ const Categories = () => {
     {
       accessorKey: "title",
       header: ({ column }) => (
-        <SortButton<TCategory> column={column}>{t("adminCategoriesView.field.title")}</SortButton>
+        <SortButton<TCategory> testId={CATEGORIES_PAGE_HANDLES.SORT_TITLE} column={column}>
+          {t("adminCategoriesView.field.title")}
+        </SortButton>
       ),
       cell: ({ row }) => (
         <div className="max-w-md truncate">{formatHtmlString(row.original.title)}</div>
@@ -157,7 +167,7 @@ const Categories = () => {
     {
       accessorKey: "createdAt",
       header: ({ column }) => (
-        <SortButton<TCategory> column={column}>
+        <SortButton<TCategory> testId={CATEGORIES_PAGE_HANDLES.SORT_CREATED_AT} column={column}>
           {t("adminCategoriesView.field.createdAt")}
         </SortButton>
       ),
@@ -247,10 +257,18 @@ const Categories = () => {
         { title: t("adminCategoriesView.breadcrumbs.categories"), href: "/admin/categories" },
       ]}
     >
-      <div className="flex flex-col">
+      <div className="flex flex-col" data-testid={CATEGORIES_PAGE_HANDLES.PAGE}>
         <div className="flex items-center justify-between gap-2">
+          <h2
+            className="text-2xl font-semibold text-neutral-950"
+            data-testid={CATEGORIES_PAGE_HANDLES.HEADING}
+          >
+            {t("adminCategoriesView.breadcrumbs.categories")}
+          </h2>
           <Link to="new">
-            <Button variant="outline">{t("adminCategoriesView.button.createNew")}</Button>
+            <Button variant="outline" data-testid={CATEGORIES_PAGE_HANDLES.CREATE_BUTTON}>
+              {t("adminCategoriesView.button.createNew")}
+            </Button>
           </Link>
           <SearchFilter
             filters={filterConfig}
@@ -274,6 +292,7 @@ const Categories = () => {
                   size="sm"
                   className="flex items-center gap-x-2"
                   disabled={isEmpty(selectedCategories)}
+                  data-testid={CATEGORIES_PAGE_HANDLES.DELETE_SELECTED_BUTTON}
                 >
                   <Trash className="size-3" />
                   <span className="text-xs">{t("adminCategoriesView.button.deleteSelected")}</span>
@@ -281,7 +300,10 @@ const Categories = () => {
               </DialogTrigger>
               <DialogPortal>
                 <DialogOverlay className="bg-primary-400 opacity-65" />
-                <DialogContent className="max-w-md">
+                <DialogContent
+                  className="max-w-md"
+                  data-testid={CATEGORIES_PAGE_HANDLES.DELETE_DIALOG}
+                >
                   <DialogTitle className="text-xl font-semibold text-neutral-900">
                     {getDeleteModalTitle()}
                   </DialogTitle>
@@ -290,7 +312,11 @@ const Categories = () => {
                   </DialogDescription>
                   <div className="mt-6 flex justify-end gap-4">
                     <DialogClose>
-                      <Button variant="ghost" className="text-primary-800">
+                      <Button
+                        variant="ghost"
+                        className="text-primary-800"
+                        data-testid={CATEGORIES_PAGE_HANDLES.DELETE_DIALOG_CANCEL_BUTTON}
+                      >
                         {t("common.button.cancel")}
                       </Button>
                     </DialogClose>
@@ -298,6 +324,7 @@ const Categories = () => {
                       <Button
                         onClick={handleDelete}
                         className="bg-error-500 text-white hover:bg-error-600"
+                        data-testid={CATEGORIES_PAGE_HANDLES.DELETE_DIALOG_CONFIRM_BUTTON}
                       >
                         {t("common.button.delete")}
                       </Button>
@@ -308,7 +335,7 @@ const Categories = () => {
             </Dialog>
           </div>
         </div>
-        <Table className="border bg-neutral-50">
+        <Table data-testid={CATEGORIES_PAGE_HANDLES.TABLE} className="border bg-neutral-50">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -320,11 +347,12 @@ const Categories = () => {
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
+          <TableBody data-testid={CATEGORIES_PAGE_HANDLES.TABLE_BODY}>
             {table.getRowModel().rows.map((row) => (
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
+                data-testid={CATEGORIES_PAGE_HANDLES.row(row.original.id)}
                 onClick={() => handleRowClick(row.original.id)}
                 className="cursor-pointer hover:bg-neutral-100"
               >

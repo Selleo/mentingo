@@ -5,6 +5,8 @@ import SortButton from "~/components/TableSortButton/TableSortButton";
 import { Checkbox } from "~/components/ui/checkbox";
 import { handleRowSelectionRange } from "~/utils/tableRangeSelection";
 
+import { GROUPS_PAGE_HANDLES } from "../../../../../e2e/data/groups/handles";
+
 import type { ColumnDef } from "@tanstack/react-table";
 import type { GetAllGroupsResponse } from "~/api/generated-api";
 
@@ -20,6 +22,7 @@ export const useGroupTable: () => { columns: ColumnDef<GroupColumns>[] } = () =>
         id: "select",
         header: ({ table }) => (
           <Checkbox
+            data-testid={GROUPS_PAGE_HANDLES.SELECT_ALL_CHECKBOX}
             checked={table.getIsAllPageRowsSelected()}
             onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
             aria-label="Select all"
@@ -29,6 +32,7 @@ export const useGroupTable: () => { columns: ColumnDef<GroupColumns>[] } = () =>
           <Checkbox
             checked={row.getIsSelected()}
             aria-label="Select row"
+            data-testid={GROUPS_PAGE_HANDLES.rowCheckbox(row.original.id)}
             onClick={(event) => {
               event.stopPropagation();
               handleRowSelectionRange({
@@ -48,13 +52,18 @@ export const useGroupTable: () => { columns: ColumnDef<GroupColumns>[] } = () =>
       {
         accessorKey: "name",
         header: ({ column }) => (
-          <SortButton<GroupColumns> column={column}>{t("adminGroupsView.name")}</SortButton>
+          <SortButton<GroupColumns> testId={GROUPS_PAGE_HANDLES.SORT_NAME} column={column}>
+            {t("adminGroupsView.name")}
+          </SortButton>
         ),
       },
       {
         accessorKey: "characteristic",
         header: ({ column }) => (
-          <SortButton<GroupColumns> column={column}>
+          <SortButton<GroupColumns>
+            testId={GROUPS_PAGE_HANDLES.SORT_CHARACTERISTIC}
+            column={column}
+          >
             {t("adminGroupsView.characteristic")}
           </SortButton>
         ),

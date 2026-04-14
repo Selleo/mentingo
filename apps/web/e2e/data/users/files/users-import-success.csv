@@ -1,0 +1,3 @@
+firstName,lastName,email,role,groups,language
+Import,Student,__EMAIL_ONE__,student,__GROUP_ONE__,en
+Import,Creator,__EMAIL_TWO__,content_creator,"__GROUP_ONE__,__GROUP_TWO__",pl

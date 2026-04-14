@@ -4,13 +4,13 @@ import { TEST_DATA } from "../data/test-data/entity-name.data";
 
 import type { FixtureApiClient } from "../utils/api-client";
 import type {
-  CreateCategoryResponse,
+  CreateCategoryBody,
   GetCategoryByIdResponse,
   UpdateCategoryBody,
 } from "~/api/generated-api";
 
-export type CategoryFactoryCreateResult = CreateCategoryResponse["data"];
 export type CategoryFactoryRecord = GetCategoryByIdResponse["data"];
+export type CategoryFactoryCreateResult = CategoryFactoryRecord;
 export type CategoryFactoryUpdateInput = Omit<UpdateCategoryBody, "id">;
 
 const createCategoryTitle = () => {
@@ -20,18 +20,35 @@ const createCategoryTitle = () => {
 export class CategoryFactory {
   constructor(private readonly apiClient: FixtureApiClient) {}
 
-  async create(title?: string): Promise<CategoryFactoryCreateResult> {
+  async create(input?: string | CreateCategoryBody): Promise<CategoryFactoryCreateResult> {
     const response = await this.apiClient.api.categoryControllerCreateCategory({
-      title: title ?? createCategoryTitle(),
+      title: typeof input === "string" ? input : (input?.title ?? createCategoryTitle()),
     });
 
-    return response.data.data;
+    return this.getById(response.data.data.id);
+  }
+
+  async createMany(
+    count: number,
+    build?: (index: number) => string | CreateCategoryBody | undefined,
+  ): Promise<CategoryFactoryCreateResult[]> {
+    return Promise.all(Array.from({ length: count }, (_, index) => this.create(build?.(index))));
   }
 
   async getById(id: string): Promise<CategoryFactoryRecord> {
     const response = await this.apiClient.api.categoryControllerGetCategoryById(id);
 
     return response.data.data;
+  }
+
+  async findByTitle(title: string): Promise<CategoryFactoryRecord | null> {
+    const response = await this.apiClient.api.categoryControllerGetAllCategories({
+      title,
+      page: 1,
+      perPage: 100,
+    });
+
+    return response.data.data.find((category) => category.title === title) ?? null;
   }
 
   async update(id: string, data: CategoryFactoryUpdateInput): Promise<CategoryFactoryRecord> {
@@ -42,5 +59,13 @@ export class CategoryFactory {
 
   async delete(id: string): Promise<void> {
     await this.apiClient.api.categoryControllerDeleteCategory(id);
+  }
+
+  async deleteMany(ids: string[]): Promise<void> {
+    if (ids.length === 0) {
+      return;
+    }
+
+    await this.apiClient.api.categoryControllerDeleteManyCategories(ids);
   }
 }

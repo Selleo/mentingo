@@ -392,16 +392,16 @@ Based on `playwright-strategy/03-capability-coverage.md`:
   - bulk group enroll
   - group unenroll
   - enrolled users/groups verification
-- Users
+- Users -- DONE
   - create/update/archive
   - bulk archive/delete
   - bulk assign groups/update attributes
   - import users
-- Groups
+- Groups -- DONE
   - create/edit/delete
   - bulk delete
   - membership assignment/verification
-- Categories
+- Categories -- DONE
   - create/update/delete/delete-many
   - list/search
 - QA

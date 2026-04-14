@@ -73,7 +73,7 @@ const Category = () => {
 
   return (
     <PageWrapper breadcrumbs={breadcrumbs}>
-      <div className="flex flex-col">
+      <div className="flex flex-col" data-testid={CATEGORY_PAGE_HANDLES.PAGE}>
         <form onSubmit={handleSubmit(onSubmit)} className="h-full rounded-lg">
           <div className="flex items-center justify-between">
             <h2

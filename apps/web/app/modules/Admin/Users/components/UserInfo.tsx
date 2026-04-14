@@ -10,6 +10,8 @@ import MultipleSelector from "~/components/ui/multiselect";
 import { useGroupsOptions } from "~/hooks/useGroupsOptions";
 import { getRoleLabel } from "~/modules/Admin/Users/utils/getRoleLabel";
 
+import { USER_PAGE_HANDLES } from "../../../../../e2e/data/users/handles";
+
 import type { GetUserByIdResponse, UpdateUserBody } from "~/api/generated-api";
 
 interface UserInfoType {
@@ -37,6 +39,19 @@ export const UserInfo = ({ name, control, isEditing, user }: UserInfoType) => {
       ? (user.groups.map((group) => group.id) as UpdateUserBody[typeof name])
       : (user[name] as UpdateUserBody[typeof name]);
 
+  const getInputTestId = () => {
+    switch (name) {
+      case "firstName":
+        return USER_PAGE_HANDLES.FIRST_NAME_INPUT;
+      case "lastName":
+        return USER_PAGE_HANDLES.LAST_NAME_INPUT;
+      case "email":
+        return USER_PAGE_HANDLES.EMAIL_INPUT;
+      default:
+        return undefined;
+    }
+  };
+
   return (
     <Controller
       name={name}
@@ -57,6 +72,8 @@ export const UserInfo = ({ name, control, isEditing, user }: UserInfoType) => {
         if (name === "roleSlugs") {
           return (
             <MultipleSelector
+              testId={USER_PAGE_HANDLES.ROLE_SELECT}
+              getOptionTestId={(option) => USER_PAGE_HANDLES.roleOption(option.value)}
               value={((field.value as string[] | undefined) ?? []).map((roleSlug) => ({
                 value: roleSlug,
                 label: getRoleLabel(roleSlug, t, roles),
@@ -85,11 +102,12 @@ export const UserInfo = ({ name, control, isEditing, user }: UserInfoType) => {
         if (name === "groups") {
           return (
             <MultipleSelector
+              testId={USER_PAGE_HANDLES.GROUPS_SELECT}
+              getOptionTestId={(option) => USER_PAGE_HANDLES.groupOption(option.value)}
               commandProps={{
                 label: t("adminGroupsView.groupSelect.label"),
                 filter: filterGroups,
               }}
-              data-testid="groupSelect"
               onChange={(options) => {
                 setSelectedGroups(options);
                 field.onChange(options.map((option) => option.value));
@@ -115,6 +133,7 @@ export const UserInfo = ({ name, control, isEditing, user }: UserInfoType) => {
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="archived"
+                data-testid={USER_PAGE_HANDLES.ARCHIVED_CHECKBOX}
                 checked={field.value as boolean | undefined}
                 onCheckedChange={(checked) => field.onChange(checked)}
               />
@@ -131,6 +150,7 @@ export const UserInfo = ({ name, control, isEditing, user }: UserInfoType) => {
         return (
           <Input
             {...field}
+            data-testid={getInputTestId()}
             value={field.value as string}
             type={name === "email" ? "email" : "text"}
             className="w-full rounded-md border border-neutral-300 px-2 py-1"

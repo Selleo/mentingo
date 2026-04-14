@@ -8,9 +8,10 @@ import type React from "react";
 interface SortButtonProps<T> {
   column: Column<T, unknown>;
   children: React.ReactNode;
+  testId?: string;
 }
 
-const SortButton = <T,>({ column, children }: SortButtonProps<T>) => {
+const SortButton = <T,>({ column, children, testId }: SortButtonProps<T>) => {
   const renderSortIcon = () => {
     const sortDirection = column.getIsSorted();
 
@@ -25,6 +26,7 @@ const SortButton = <T,>({ column, children }: SortButtonProps<T>) => {
 
   return (
     <Button
+      data-testid={testId}
       variant="ghost"
       onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       className="flex items-center p-0 hover:bg-transparent hover:text-primary-600"

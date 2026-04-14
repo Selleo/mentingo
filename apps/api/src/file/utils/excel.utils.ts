@@ -13,8 +13,15 @@ export function normalizeHeader(h: unknown) {
   const raw = String(h ?? "")
     .trim()
     .replace(/\r/g, " ");
-  if (/[^a-zA-Z0-9]+/.test(raw)) return camelCase(raw);
-  return raw ? `${raw.charAt(0).toLowerCase()}${raw.slice(1)}` : "";
+  let normalized = "";
+
+  if (/[^a-zA-Z0-9]+/.test(raw)) {
+    normalized = camelCase(raw);
+  } else if (raw) {
+    normalized = `${raw.charAt(0).toLowerCase()}${raw.slice(1)}`;
+  }
+
+  return normalized === "role" ? "roleSlugs" : normalized;
 }
 
 export function normalizeCellValue(
@@ -23,7 +30,7 @@ export function normalizeCellValue(
 ): string | string[] | undefined {
   if (cellValue == null) return undefined;
 
-  if (header === "groups" && typeof cellValue === "string") {
+  if ((header === "groups" || header === "roleSlugs") && typeof cellValue === "string") {
     return cellValue
       .split(",")
       .map((s) => s.trim())

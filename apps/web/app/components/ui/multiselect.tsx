@@ -31,6 +31,8 @@ interface MultipleSelectorProps {
   defaultOptions?: Option[];
   /** manually controlled options */
   options?: Option[];
+  testId?: string;
+  getOptionTestId?: (option: Option) => string | undefined;
   placeholder?: string;
   /** Loading component. */
   loadingIndicator?: React.ReactNode;
@@ -190,6 +192,8 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
       maxSelectedVisible = Number.MAX_SAFE_INTEGER,
       textInputDisabled = false,
       checkboxStates,
+      testId,
+      getOptionTestId,
     }: MultipleSelectorProps,
     ref: React.Ref<MultipleSelectorRef>,
   ) => {
@@ -462,6 +466,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
       >
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
         <div
+          data-testid={testId}
           className={cn(
             "relative min-h-[38px] rounded-md border border-input text-sm transition-[color,box-shadow] outline-none focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 has-disabled:pointer-events-none has-disabled:cursor-not-allowed has-disabled:opacity-50 has-aria-invalid:border-destructive has-aria-invalid:ring-destructive/20 dark:has-aria-invalid:ring-destructive/40",
             {
@@ -685,6 +690,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                               <CommandItem
                                 key={option.value}
                                 value={option.value}
+                                data-testid={getOptionTestId?.(option)}
                                 disabled={option.disable}
                                 onMouseDown={(e) => {
                                   e.preventDefault();

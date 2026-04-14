@@ -41,6 +41,8 @@ export type BaseFilterConfig = {
   placeholder?: string;
   default?: FilterValue;
   hideAll?: boolean;
+  testId?: string;
+  optionTestId?: (option: FilterOption) => string;
 };
 
 export type TextFilterConfig = BaseFilterConfig & {
@@ -69,6 +71,7 @@ interface SearchFilterProps {
   onChange: (name: string, value: FilterValue) => void;
   isLoading?: boolean;
   className?: string;
+  clearAllTestId?: string;
 }
 
 export const SearchFilter: React.FC<SearchFilterProps> = ({
@@ -78,6 +81,7 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
   onChange,
   isLoading,
   className,
+  clearAllTestId,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const { t } = useTranslation();
@@ -124,6 +128,7 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
               <Search className="absolute left-2 top-1/2 size-5 -translate-y-1/2 transform text-neutral-800" />
               <Input
                 ref={inputRef}
+                data-testid={filter.testId}
                 type="text"
                 placeholder={filter?.placeholder || `${t("common.other.search")}...`}
                 className="w-full max-w-[320px] border border-neutral-300 py-2 pl-8 pr-4 md:max-w-none"
@@ -138,6 +143,8 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
           return (
             <MultipleSelector
               key={filter?.name}
+              testId={filter.testId}
+              getOptionTestId={filter.optionTestId}
               value={values?.[filter?.name] as Option[]}
               options={filter?.options}
               onChange={(option) => {
@@ -176,17 +183,30 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
               onValueChange={(value) => handleChange(filter?.name, value)}
               disabled={isLoading}
             >
-              <SelectTrigger className="w-full max-w-[320px] border border-neutral-300 sm:w-[180px]">
+              <SelectTrigger
+                data-testid={filter.testId}
+                className="w-full max-w-[320px] border border-neutral-300 sm:w-[180px]"
+              >
                 <SelectValue placeholder={filter?.placeholder || t("common.other.all")} />
               </SelectTrigger>
               <SelectContent>
                 {!filter.hideAll && (
-                  <SelectItem value="all">
+                  <SelectItem
+                    data-testid={filter.optionTestId?.({
+                      value: "all",
+                      label: filter?.placeholder ?? t("common.other.all"),
+                    })}
+                    value="all"
+                  >
                     {filter?.placeholder ?? t("common.other.all")}
                   </SelectItem>
                 )}
                 {filter?.options?.map(({ value, label }) => (
-                  <SelectItem key={value} value={value}>
+                  <SelectItem
+                    key={value}
+                    data-testid={filter.optionTestId?.({ value, label })}
+                    value={value}
+                  >
                     {label}
                   </SelectItem>
                 ))}
@@ -209,15 +229,42 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
               onValueChange={(value) => handleChange(filter?.name, value)}
               disabled={isLoading}
             >
-              <SelectTrigger className="w-full max-w-[320px] border border-neutral-300 sm:w-[180px]">
+              <SelectTrigger
+                data-testid={filter.testId}
+                className="w-full max-w-[320px] border border-neutral-300 sm:w-[180px]"
+              >
                 <SelectValue placeholder={t("common.other.allStatuses")} />
               </SelectTrigger>
               <SelectContent>
                 {!filter.hideAll && (
-                  <SelectItem value="all">{t("common.other.allStatuses")}</SelectItem>
+                  <SelectItem
+                    data-testid={filter.optionTestId?.({
+                      value: "all",
+                      label: t("common.other.allStatuses"),
+                    })}
+                    value="all"
+                  >
+                    {t("common.other.allStatuses")}
+                  </SelectItem>
                 )}
-                <SelectItem value="active">{t("common.other.active")}</SelectItem>
-                <SelectItem value="archived">{t("common.other.archived")}</SelectItem>
+                <SelectItem
+                  data-testid={filter.optionTestId?.({
+                    value: "active",
+                    label: t("common.other.active"),
+                  })}
+                  value="active"
+                >
+                  {t("common.other.active")}
+                </SelectItem>
+                <SelectItem
+                  data-testid={filter.optionTestId?.({
+                    value: "archived",
+                    label: t("common.other.archived"),
+                  })}
+                  value="archived"
+                >
+                  {t("common.other.archived")}
+                </SelectItem>
               </SelectContent>
             </Select>
           );
@@ -226,6 +273,7 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
 
       {isAnyFilterApplied && (
         <Button
+          data-testid={clearAllTestId}
           className="border border-primary-500 bg-transparent text-accent-foreground"
           onClick={handleClearAll}
           disabled={isLoading}
