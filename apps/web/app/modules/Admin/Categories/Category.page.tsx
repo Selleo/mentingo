@@ -12,6 +12,8 @@ import { Label } from "~/components/ui/label";
 import Loader from "~/modules/common/Loader/Loader";
 import { setPageTitle } from "~/utils/setPageTitle";
 
+import { CATEGORY_PAGE_HANDLES } from "../../../../e2e/data/categories/handles";
+
 import { CategoryDetails } from "./CategoryDetails";
 
 import type { MetaFunction } from "@remix-run/react";
@@ -74,10 +76,18 @@ const Category = () => {
       <div className="flex flex-col">
         <form onSubmit={handleSubmit(onSubmit)} className="h-full rounded-lg">
           <div className="flex items-center justify-between">
-            <h2 className="mb-4 text-2xl font-semibold text-neutral-950">
+            <h2
+              className="mb-4 text-2xl font-semibold text-neutral-950"
+              data-testid={CATEGORY_PAGE_HANDLES.HEADING}
+            >
               {t("adminCategoryView.editCategoryHeader")}
             </h2>
-            <Button type="submit" disabled={!isDirty} className="mr-2">
+            <Button
+              type="submit"
+              disabled={!isDirty}
+              className="mr-2"
+              data-testid={CATEGORY_PAGE_HANDLES.SAVE}
+            >
               {t("common.button.save")}
             </Button>
           </div>

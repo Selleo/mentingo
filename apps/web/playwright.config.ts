@@ -4,6 +4,8 @@ import { fileURLToPath } from "url";
 import { defineConfig, devices } from "@playwright/test";
 import dotenv from "dotenv";
 
+import { RETRY_COUNT, WORKER_COUNT } from "./e2e/playwright.constants";
+
 import type { PlaywrightTestConfig } from "@playwright/test";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -17,15 +19,20 @@ const baseURL = process.env.CI
 
 const config: PlaywrightTestConfig = {
   testDir: "./e2e",
-  timeout: 90 * 1000,
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 2 : 4,
+  retries: process.env.CI ? RETRY_COUNT : 0,
+  workers: process.env.CI ? WORKER_COUNT : WORKER_COUNT * 2,
+  timeout: 90 * 1000,
+  expect: {
+    timeout: 10 * 1000,
+  },
   use: {
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
     baseURL,
+    actionTimeout: 15 * 1000,
+    navigationTimeout: 30 * 1000,
     ignoreHTTPSErrors: true,
     extraHTTPHeaders: {
       "x-playwright-test": "true",
@@ -52,62 +59,26 @@ const config: PlaywrightTestConfig = {
       dependencies: ["setup-db"],
     },
     {
-      name: "language-guard",
-      testMatch: /.*\.lang-guard\.ts/,
+      name: "chromium",
+      testDir: "./e2e/specs",
+      testMatch: /.*\.(spec|test)\.ts$/,
       dependencies: ["setup-auth"],
+      fullyParallel: true,
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 1920, height: 1080 },
-        storageState: "e2e/.auth/admin.json",
       },
     },
     {
-      name: "chromium-student",
-      testDir: "./e2e/tests/student",
-      dependencies: ["setup-auth"],
-      use: {
-        ...devices["Desktop Chrome"],
-        viewport: { width: 1920, height: 1080 },
-        storageState: "e2e/.auth/user.json",
-      },
+      name: "firefox",
+      testDir: "./e2e/specs",
       testMatch: /.*\.(spec|test)\.ts$/,
-      fullyParallel: false,
-    },
-    {
-      name: "chromium-admin",
-      testDir: "./e2e/tests/admin",
       dependencies: ["setup-auth"],
+      fullyParallel: true,
       use: {
-        ...devices["Desktop Chrome"],
+        ...devices["Desktop Firefox"],
         viewport: { width: 1920, height: 1080 },
-        storageState: "e2e/.auth/admin.json",
       },
-      testMatch: /.*\.(spec|test)\.ts$/,
-      fullyParallel: false,
-    },
-    {
-      name: "chromium-content-creator",
-      testDir: "./e2e/tests/content-creator",
-      dependencies: ["setup-auth"],
-      use: {
-        ...devices["Desktop Chrome"],
-        viewport: { width: 1920, height: 1080 },
-        storageState: "e2e/.auth/content-creator.json",
-      },
-      testMatch: /.*\.(spec|test)\.ts$/,
-      fullyParallel: false,
-    },
-    {
-      name: "chromium-admin-student",
-      testDir: "./e2e/tests/admin-student",
-      dependencies: ["setup-auth"],
-      use: {
-        ...devices["Desktop Chrome"],
-        viewport: { width: 1920, height: 1080 },
-        storageState: "e2e/.auth/admin.json",
-      },
-      testMatch: /.*\.(spec|test)\.ts$/,
-      fullyParallel: false,
     },
   ],
 };

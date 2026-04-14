@@ -241,7 +241,13 @@ export class AuthService {
       throw new UnauthorizedException("Your account has been archived");
     }
 
+    const isRevoked = await this.sessionRevocationService.isUserRevoked(user.id);
+
     const { accessToken, refreshToken } = await this.getTokens(user);
+
+    if (isRevoked) {
+      await this.sessionRevocationService.clearUserRevocation(user.id);
+    }
 
     const { avatarReference, ...userWithoutAvatar } = user;
     const usersProfilePictureUrl =

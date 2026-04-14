@@ -10,6 +10,7 @@ import { Separator } from "~/components/ui/separator";
 import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
 
+import { NAVIGATION_HANDLES } from "../../../e2e/data/navigation/handles";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -78,6 +79,7 @@ export function NavigationFooter({
       <div className="col-span-1 hidden cursor-pointer select-none items-center justify-center md:col-span-2 2xl:flex">
         <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
           <DropdownMenuTrigger
+            data-testid={NAVIGATION_HANDLES.PROFILE_FOOTER}
             onClick={() => setIsDropdownOpen((prev) => !prev)}
             className={cn("flex w-full items-center justify-between gap-2 p-2 relative", {
               "justify-center": hideLabels,
@@ -150,6 +152,7 @@ export function NavigationFooter({
               <Separator className="my-1 bg-neutral-200" />
 
               <DropdownMenuItem
+                data-testid={NAVIGATION_HANDLES.LOGOUT}
                 onClick={() => {
                   startTransition(() => {
                     logout();

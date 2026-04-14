@@ -23,6 +23,8 @@ import { cn } from "~/lib/utils";
 import { UploadFilesToLoginPagePreviewDialog } from "~/modules/Dashboard/Settings/components/admin/UploadFilesToLoginPagePreviewDialog";
 import { setPageTitle } from "~/utils/setPageTitle";
 
+import { LOGIN_PAGE_HANDLES } from "../../../e2e/data/auth/handles";
+
 import { SocialLogin } from "./components";
 import { MagicLinkVerificationCard } from "./components/MagicLinkVerificationCard";
 
@@ -178,6 +180,7 @@ export default function LoginPage() {
                 <Label htmlFor="email">{t("loginView.field.email")}</Label>
                 <Input
                   id="email"
+                  data-testid={LOGIN_PAGE_HANDLES.EMAIL}
                   type="email"
                   placeholder="user@example.com"
                   className={cn({ "border-red-500": errors.email })}
@@ -197,6 +200,7 @@ export default function LoginPage() {
                 </div>
                 <Input
                   id="password"
+                  data-testid={LOGIN_PAGE_HANDLES.PASSWORD}
                   type="password"
                   className={cn({ "border-red-500": errors.password })}
                   {...register("password")}
@@ -210,7 +214,7 @@ export default function LoginPage() {
                 name="rememberMe"
                 label={t("loginView.other.rememberMe")}
               />
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full" data-testid={LOGIN_PAGE_HANDLES.LOGIN}>
                 {t("loginView.button.login")}
               </Button>
             </form>
