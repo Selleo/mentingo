@@ -1514,7 +1514,7 @@
           "aiRoleplayTypeTooltip": "Simuliert einen realistischen Charakter und eine realistische Situation – ohne den Charakter zu zerstören.\nBeispiel: „Dies ist das zweite Mal, dass Ihr Dienst ausgefallen ist. Was werden Sie dagegen tun?“",
           "completionConditionsTooltip": "Listen Sie auf, was der Schüler erreichen muss, um diese Lektion zu bestehen. Geben Sie klare und messbare Punkte an. Die KI wird diese Liste verwenden, um den Fortschritt zu überprüfen. Sie können auch einen Schwellenwert für das Bestehen festlegen (z. B. einen Prozentsatz oder eine Mindestpunktzahl). Wenn keine Schwelle angegeben ist, müssen alle Bedingungen erfüllt sein, um die Lektion zu bestehen.",
           "passThresholdTooltip": "Legen Sie den Mindestprozentsatz (1-100 %) fest, der zum Bestehen erforderlich ist. Für keine Schwelle leer lassen.",
-          "voiceConfigFishAudioTooltip": "Der Sprachmodus verwendet Fish Audio. Für eine benutzerdefinierte Stimme öffnen Sie Fish Audio, wählen Sie eine Stimme aus, die Ihnen gefällt, und kopieren Sie deren Sprach-ID hier.",
+          "voiceConfigFishAudioTooltip": "Der Sprachmodus verwendet Cartesia. Um eine benutzerdefinierte Stimme zu verwenden, öffnen Sie Cartesia, suchen Sie die gewünschte Stimme und kopieren Sie deren Stimmen-ID hierher.",
           "aiMentorPersonaTooltip": "Dies definiert die Persona der Lektion. Sie können einen Namen und einen Avatar für den KI-Mentor auswählen. Mit diesem Namen identifiziert sich die Persona und der ausgewählte Avatar wird im Unterricht angezeigt.",
           "suggestedExamples": "Empfohlene Beispiele",
           "charactersLeft": "Zeichen übrig",

@@ -23,7 +23,7 @@ import { AiRepository } from "src/ai/repositories/ai.repository";
 import { AiService } from "src/ai/services/ai.service";
 import { ThreadService } from "src/ai/services/thread.service";
 import { OPENAI_MODELS, THREAD_STATUS } from "src/ai/utils/ai.type";
-import { stripVoiceEmotionBrackets } from "src/ai/utils/voiceEmotionBrackets";
+import { stripVoiceControlTags } from "src/ai/utils/voiceControlTags";
 import { ExternalAudioSessionStore } from "src/audio/external-audio-session.store";
 import { hasAnyPermission } from "src/common/permissions/permission.utils";
 import { EnvService } from "src/env/services/env.service";
@@ -343,7 +343,7 @@ export class ExternalAudioService {
         });
 
         this.emitMentorResponseCompleted(sessionId, {
-          text: stripVoiceEmotionBrackets(responseText.trim()),
+          text: stripVoiceControlTags(responseText.trim()),
           jobId: payload.jobId,
           reason: "complete",
         });

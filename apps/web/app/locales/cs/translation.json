@@ -1514,7 +1514,7 @@
           "aiRoleplayTypeTooltip": "Simuluje realistickou postavu a situaci – bez porušení charakteru.\nPříklad: \"Toto je podruhé, co vaše služba selhala. Co s tím hodláte dělat?\"",
           "completionConditionsTooltip": "Uveďte, čeho musí student dosáhnout, aby tuto lekci absolvoval. Poskytněte jasné a měřitelné body. Umělá inteligence použije tento seznam ke kontrole pokroku. Můžete také definovat práh pro úspěšné zvládnutí (např. procento nebo minimální počet bodů k pokrytí). Pokud není uveden žádný práh, musí být splněny všechny podmínky pro úspěšné absolvování lekce.",
           "passThresholdTooltip": "Nastavte minimální procento (1–100 %), které je potřeba k úspěšnému zvládnutí. Nechte prázdné, pokud není nastaven žádný práh.",
-          "voiceConfigFishAudioTooltip": "Hlasový režim používá Fish Audio. Pro vlastní hlas otevřete Fish Audio, vyberte hlas, který se vám líbí, a zkopírujte jeho hlasové ID sem.",
+          "voiceConfigFishAudioTooltip": "Hlasový režim používá Cartesia. Pro vlastní hlas otevřete Cartesia, najděte požadovaný hlas a zkopírujte sem jeho voice ID.",
           "aiMentorPersonaTooltip": "To definuje osobnost lekce. Můžete si vybrat jméno a avatar pro AI Mentora. Osoba se identifikuje tímto jménem a vybraný avatar se bude zobrazovat během lekcí.",
           "suggestedExamples": "Doporučené příklady",
           "charactersLeft": "zbývajících znaků",

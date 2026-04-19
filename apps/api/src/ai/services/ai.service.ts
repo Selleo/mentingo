@@ -29,7 +29,7 @@ import {
   type OpenAIModels,
   THREAD_STATUS,
 } from "src/ai/utils/ai.type";
-import { stripVoiceEmotionBrackets } from "src/ai/utils/voiceEmotionBrackets";
+import { stripVoiceControlTags } from "src/ai/utils/voiceControlTags";
 import { DatabasePg } from "src/common";
 import { PermissionsService } from "src/permissions/permissions.service";
 import { dbAls } from "src/storage/db/db-als.store";
@@ -148,9 +148,7 @@ export class AiService {
           ...generationConfig,
           experimental_telemetry: { isEnabled: true },
           onFinish: async (event) => {
-            const mentorContent = isVoiceMentor
-              ? stripVoiceEmotionBrackets(event.text)
-              : event.text;
+            const mentorContent = isVoiceMentor ? stripVoiceControlTags(event.text) : event.text;
 
             const mentorTokenCount = this.tokenService.countTokens(model, mentorContent);
             const userTokenCount = this.tokenService.countTokens(model, data.content);

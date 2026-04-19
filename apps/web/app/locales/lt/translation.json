@@ -1514,7 +1514,7 @@
           "aiRoleplayTypeTooltip": "Imituoja tikrovišką charakterį ir situaciją – nepažeidžiant charakterio.\nPavyzdys: \"Tai antras kartas, kai jūsų paslauga sugenda. Ką ketinate dėl to daryti?\"",
           "completionConditionsTooltip": "Išvardykite, ką mokinys turi pasiekti, kad išlaikytų šią pamoką. Pateikite aiškius ir išmatuojamus taškus. AI naudos šį sąrašą pažangai patikrinti. Taip pat galite nustatyti išlaikymo slenkstį (pvz., procentą arba minimalų taškų skaičių). Jei slenkstis nenurodytas, turi būti įvykdytos visos sąlygos, norint išlaikyti pamoką.",
           "passThresholdTooltip": "Nustatykite minimalų procentą (1–100 %), reikalingą išlaikyti. Palikite tuščią, kad nebūtų slenksčio.",
-          "voiceConfigFishAudioTooltip": "Balso režimas naudoja Fish Audio. Norėdami pasirinkti pasirinktinį balsą, atidarykite „Fish Audio“, pasirinkite jums patinkantį balsą ir nukopijuokite jo balso ID čia.",
+          "voiceConfigFishAudioTooltip": "Balso režimas naudoja „Cartesia“. Norėdami naudoti pasirinktinį balsą, atidarykite „Cartesia“, raskite norimą balsą ir nukopijuokite jo balso ID čia.",
           "aiMentorPersonaTooltip": "Tai apibrėžia pamokos asmenybę. Galite pasirinkti AI mentoriaus vardą ir pseudoportretą. Asmuo atpažins save šiuo vardu, o pasirinktas avataras bus rodomas pamokų metu.",
           "suggestedExamples": "Siūlomi pavyzdžiai",
           "charactersLeft": "liko simbolių",
