@@ -68,6 +68,8 @@ export default function LessonPage() {
   const { state, clearVideo } = useVideoPlayer();
 
   const { autoplay, setAutoplaySettings, autoplaySettings } = useVideoPreferencesStore();
+  const lessonType = lesson?.type;
+  const lessonHasAutoplayTrigger = lesson?.hasAutoplayTrigger;
 
   useEffect(() => {
     setAutoplaySettings({ currentAction: VIDEO_AUTOPLAY.NO_AUTOPLAY, nextVideoUrl: undefined });
@@ -91,9 +93,9 @@ export default function LessonPage() {
   ]);
 
   useEffect(() => {
-    if (!lesson) return;
+    if (!lessonType) return;
 
-    if (lesson.type !== "content") {
+    if (lessonType !== "content") {
       clearVideo();
       return;
     }
@@ -103,12 +105,10 @@ export default function LessonPage() {
       return;
     }
 
-    const hasAutoplayTrigger = lesson.hasAutoplayTrigger;
-
-    if (!hasAutoplayTrigger) {
+    if (!lessonHasAutoplayTrigger) {
       clearVideo();
     }
-  }, [lesson, autoplay, clearVideo]);
+  }, [lessonId, lessonType, lessonHasAutoplayTrigger, autoplay, clearVideo]);
 
   useEffect(() => {
     if (lessonError) {

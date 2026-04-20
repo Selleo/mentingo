@@ -8,6 +8,7 @@ import { EmbedLesson } from "./EmbedLesson/EmbedLesson";
 import { Quiz } from "./Quiz";
 
 import type { CurrentUserResponse, GetLessonByIdResponse } from "~/api/generated-api";
+import type { VideoEndedHandler } from "~/components/VideoPlayer/VideoPlayer.types";
 import type { LessonPreviewUser } from "~/modules/Courses/Lesson/types";
 
 type LessonContentRendererProps = {
@@ -15,7 +16,7 @@ type LessonContentRendererProps = {
   user: CurrentUserResponse["data"] | undefined;
   previewUser?: LessonPreviewUser;
   lessonLoading: boolean;
-  onVideoEnded?: () => void;
+  onVideoEnded?: VideoEndedHandler;
 };
 
 export const LessonContentRenderer = memo(

@@ -1,6 +1,9 @@
 import { createContext, useContext, useState, useCallback, useRef } from "react";
 
 import type { VideoProvider } from "@repo/shared";
+import type { VideoEndedEvent } from "~/components/VideoPlayer/VideoPlayer.types";
+
+type VideoEndedHandler = (event: VideoEndedEvent) => void;
 
 type VideoState = {
   currentUrl: string | null;
@@ -15,13 +18,13 @@ type VideoContextValue = {
     url: string,
     provider: VideoProvider | null,
     isExternal: boolean,
-    onEnded?: () => void,
+    onEnded?: VideoEndedHandler,
     index?: number | null,
   ) => void;
   clearVideo: () => void;
-  setOnEnded: (onEnded: () => void) => void;
+  setOnEnded: (onEnded: VideoEndedHandler) => void;
   setPlaceholderElement: (el: HTMLElement | null) => void;
-  getOnEnded: () => (() => void) | undefined;
+  getOnEnded: () => VideoEndedHandler | undefined;
   registerVideoActivator: (url: string, activate: () => void) => () => void;
   activateVideoByUrl: (url: string) => boolean;
   state: VideoState;
@@ -46,17 +49,20 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
     index: null,
   });
 
-  const onEndedRef = useRef<(() => void) | undefined>();
+  const onEndedRef = useRef<VideoEndedHandler | undefined>();
   const videoActivatorsRef = useRef(new Map<string, () => void>());
 
-  const setOnEnded = useCallback((onEnded: () => void) => (onEndedRef.current = onEnded), []);
+  const setOnEnded = useCallback(
+    (onEnded: VideoEndedHandler) => (onEndedRef.current = onEnded),
+    [],
+  );
 
   const setVideo = useCallback(
     (
       url: string,
       provider: VideoProvider | null,
       isExternal: boolean,
-      onEnded?: () => void,
+      onEnded?: VideoEndedHandler,
       index?: number | null,
     ) => {
       onEndedRef.current = onEnded;

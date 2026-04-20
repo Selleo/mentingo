@@ -12,6 +12,7 @@ import { usePlaceholderRect } from "./hooks/usePlaceholderRect";
 import { LoaderPlayNext } from "./LoaderPlayNext";
 import { VideoPlayer } from "./VideoPlayer";
 import { PLAY_NEXT_SECONDS } from "./VideoPlayer.constants";
+import { VIDEO_ENDED_SOURCE } from "./VideoPlayer.types";
 import { useVideoPlayer } from "./VideoPlayerContext";
 
 import type React from "react";
@@ -57,14 +58,14 @@ export function VideoPlayerSingleton() {
         const activated = activateVideoByUrl(url);
 
         if (!activated) {
-          getOnEnded()?.();
+          getOnEnded()?.({ source: VIDEO_ENDED_SOURCE.GO_NEXT_LESSON });
         }
       },
       goToNextLesson: () => {
-        getOnEnded()?.();
+        getOnEnded()?.({ source: VIDEO_ENDED_SOURCE.GO_NEXT_LESSON });
       },
       autoplayCurrentVideo: () => {
-        getOnEnded()?.();
+        getOnEnded()?.({ source: VIDEO_ENDED_SOURCE.AUTOPLAY_ACTION });
       },
     });
   }, [activateVideoByUrl, getOnEnded, onAutoplay]);
@@ -76,13 +77,15 @@ export function VideoPlayerSingleton() {
   });
 
   const handleEnded = useCallback(() => {
-    setShowPlayNext(
-      shouldShowPlayNextOverlay({
-        autoplayEnabled: autoplay,
-        action: autoplaySettings.currentAction,
-      }),
-    );
-  }, [autoplay, autoplaySettings]);
+    getOnEnded()?.({ source: VIDEO_ENDED_SOURCE.MEDIA_ENDED });
+
+    const shouldShowOverlay = shouldShowPlayNextOverlay({
+      autoplayEnabled: autoplay,
+      action: autoplaySettings.currentAction,
+    });
+
+    setShowPlayNext(shouldShowOverlay);
+  }, [autoplay, autoplaySettings.currentAction, getOnEnded]);
 
   const activeRect = rect ?? lastRect;
   const canRender = (Boolean(activeRect) || isAnyFullscreen) && (currentUrl || showPlayNext);

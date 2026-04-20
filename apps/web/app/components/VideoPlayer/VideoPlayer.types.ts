@@ -1,6 +1,18 @@
+export const VIDEO_ENDED_SOURCE = {
+  MEDIA_ENDED: "media-ended",
+  AUTOPLAY_ACTION: "autoplay-action",
+  GO_NEXT_LESSON: "go-next-lesson",
+} as const;
+
+export type VideoEndedEvent = {
+  source: (typeof VIDEO_ENDED_SOURCE)[keyof typeof VIDEO_ENDED_SOURCE];
+};
+
+export type VideoEndedHandler = (event: VideoEndedEvent) => void;
+
 export type VideoPlayerProps = {
   url: string | null;
-  onVideoEnded?: () => void;
+  onVideoEnded?: VideoEndedHandler;
   isExternalUrl?: boolean;
 };
 

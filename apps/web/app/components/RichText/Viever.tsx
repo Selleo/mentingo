@@ -16,13 +16,14 @@ import {
 } from "./videoAutoplayPolicy";
 
 import type { VideoAutoplay } from "@repo/shared";
+import type { VideoEndedHandler } from "~/components/VideoPlayer/VideoPlayer.types";
 
 type ViewerProps = {
   content: string;
   style?: "default" | "prose";
   className?: string;
   variant?: "default" | "article" | "news" | "content";
-  onVideoEnded?: () => void;
+  onVideoEnded?: VideoEndedHandler;
   videoAutoplayPolicy?: RichTextVideoAutoplayPolicy;
 };
 
@@ -75,14 +76,14 @@ const Viewer = ({
     selectedVariant.editor,
   );
 
-  const onVideoEndedRef = useRef<(() => void) | undefined>();
+  const onVideoEndedRef = useRef<VideoEndedHandler | undefined>();
 
   useEffect(() => {
     onVideoEndedRef.current = onVideoEnded;
   }, [onVideoEnded]);
 
-  const handleVideoEnded = useCallback(() => {
-    onVideoEndedRef.current?.();
+  const handleVideoEnded = useCallback<VideoEndedHandler>((event) => {
+    onVideoEndedRef.current?.(event);
   }, []);
 
   const extensions = useMemo(
