@@ -1559,7 +1559,7 @@
           "aiRoleplayTypeTooltip": " Symuluje realistyczną postać i sytuację – bez wychodzenia z roli.\n Przykład: „To już drugi raz, kiedy wasza usługa zawiodła. Co zamierzacie z tym zrobić?”",
           "completionConditionsTooltip": "Wypisz, co student musi osiągnąć, aby zaliczyć lekcję. Podaj jasne i mierzalne punkty. AI wykorzysta tę listę do sprawdzania postępów. Możesz także określić próg zaliczenia (np. procentowy lub minimalna liczba spełnionych punktów). Jeśli próg nie zostanie podany, zaliczenie wymaga spełnienia wszystkich warunków.",
           "passThresholdTooltip": "Ustaw minimalny procent (1-100%) wymagany do zaliczenia. Zostaw puste, jeśli nie ma progu.",
-          "voiceConfigFishAudioTooltip": "Tryb głosowy korzysta z Fish Audio. Aby użyć własnego głosu, wejdź do Fish Audio, wybierz głos i skopiuj jego identyfikator tutaj.",
+          "voiceConfigFishAudioTooltip": "Tryb głosowy korzysta z Cartesia. Aby użyć własnego głosu, wejdź do Cartesia, znajdź wybrany głos i skopiuj tutaj jego identyfikator.",
           "aiMentorPersonaTooltip": "Tu określasz personę lekcji. Możesz wybrać imię i awatar dla AI Mentora. Persona będzie przedstawiać się tym imieniem, a wybrany awatar będzie wyświetlany podczas lekcji.",
           "suggestedExamples": "Sugerowane przykłady",
           "charactersLeft": "pozostałe znaki",

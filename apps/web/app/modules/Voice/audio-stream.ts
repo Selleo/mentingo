@@ -23,6 +23,13 @@ const VAD_WEB_VERSION = "0.0.30";
 const ONNX_RUNTIME_WEB_VERSION = "1.24.3";
 const VAD_ASSET_BASE_PATH = `https://cdn.jsdelivr.net/npm/@ricky0123/vad-web@${VAD_WEB_VERSION}/dist/`;
 const ONNX_WASM_BASE_PATH = `https://cdn.jsdelivr.net/npm/onnxruntime-web@${ONNX_RUNTIME_WEB_VERSION}/dist/`;
+const VAD_CONFIG = {
+  positiveSpeechThreshold: 0.42,
+  negativeSpeechThreshold: 0.24,
+  minSpeechMs: 120,
+  redemptionMs: 1400,
+  preSpeechPadMs: 220,
+} as const;
 
 export class RealtimePCMStreamerWorklet {
   private readonly protocol: StreamProtocol<unknown, unknown>;
@@ -35,12 +42,12 @@ export class RealtimePCMStreamerWorklet {
   private readonly chunkMs = 32;
   private readonly channels = 1;
   private readonly chunkSamples = (this.targetSr * this.chunkMs) / 1000;
+  private readonly preSpeechMaxSamples = (this.targetSr * (VAD_CONFIG.preSpeechPadMs + 120)) / 1000;
 
   private seq = 0;
   private pendingSamples: number[] = [];
   private preSpeechSamples: number[] = [];
   private isSpeaking = false;
-  private readonly preSpeechMaxSamples = this.targetSr * 0.3;
   private readonly onSocketConnect = () => {
     this.emitReadyChunks();
   };
@@ -79,11 +86,11 @@ export class RealtimePCMStreamerWorklet {
         model: "v5",
         startOnLoad: false,
         submitUserSpeechOnPause: true,
-        positiveSpeechThreshold: 0.4,
-        negativeSpeechThreshold: 0.3,
-        minSpeechMs: 180,
-        redemptionMs: 800,
-        preSpeechPadMs: 120,
+        positiveSpeechThreshold: VAD_CONFIG.positiveSpeechThreshold,
+        negativeSpeechThreshold: VAD_CONFIG.negativeSpeechThreshold,
+        minSpeechMs: VAD_CONFIG.minSpeechMs,
+        redemptionMs: VAD_CONFIG.redemptionMs,
+        preSpeechPadMs: VAD_CONFIG.preSpeechPadMs,
         baseAssetPath: VAD_ASSET_BASE_PATH,
         onnxWASMBasePath: ONNX_WASM_BASE_PATH,
         getStream: async () => {
