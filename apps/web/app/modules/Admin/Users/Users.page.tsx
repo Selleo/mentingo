@@ -51,6 +51,8 @@ import { setPageTitle } from "~/utils/setPageTitle";
 import { handleRowSelectionRange } from "~/utils/tableRangeSelection";
 import { tanstackSortingToParam } from "~/utils/tanstackSortingToParam";
 
+import { USERS_PAGE_HANDLES } from "../../../../e2e/data/users/handles";
+
 import { ImportUsersModal } from "./components/ImportUsersModal/ImportUsersModal";
 
 import type { PermissionKey } from "@repo/shared";
@@ -131,6 +133,7 @@ const Users = () => {
       translationKey: "adminUsersView.dropdown.roles",
       action: () => setShowEditModal("role"),
       destructive: false,
+      testId: USERS_PAGE_HANDLES.BULK_EDIT_ROLE_ACTION,
     },
     {
       iconName: undefined,
@@ -138,6 +141,7 @@ const Users = () => {
       translationKey: "adminUsersView.dropdown.groups",
       action: () => setShowEditModal("group"),
       destructive: false,
+      testId: USERS_PAGE_HANDLES.BULK_EDIT_GROUP_ACTION,
     },
     {
       iconName: "Archive",
@@ -145,6 +149,7 @@ const Users = () => {
       translationKey: "adminUsersView.dropdown.archive",
       action: () => setShowEditModal("archive"),
       destructive: true,
+      testId: USERS_PAGE_HANDLES.BULK_EDIT_ARCHIVE_ACTION,
     },
     {
       iconName: "TrashIcon",
@@ -152,6 +157,7 @@ const Users = () => {
       translationKey: "adminUsersView.dropdown.delete",
       action: () => setShowEditModal("delete"),
       destructive: true,
+      testId: USERS_PAGE_HANDLES.BULK_EDIT_DELETE_ACTION,
     },
   ];
 
@@ -160,11 +166,14 @@ const Users = () => {
       name: "keyword",
       type: "text",
       placeholder: t("adminUsersView.filters.placeholder.searchByKeyword"),
+      testId: USERS_PAGE_HANDLES.SEARCH_INPUT,
     },
     {
       name: "role",
       type: "select",
       placeholder: t("adminUsersView.filters.placeholder.roles"),
+      testId: USERS_PAGE_HANDLES.ROLE_FILTER,
+      optionTestId: (option) => USERS_PAGE_HANDLES.roleFilterOption(option.value),
       options: roles.map((role) => ({
         value: role.slug,
         label: getRoleLabel(role.slug, t, roles),
@@ -173,11 +182,16 @@ const Users = () => {
     {
       name: "archived",
       type: "status",
+      testId: USERS_PAGE_HANDLES.STATUS_FILTER,
+      optionTestId: (option) =>
+        USERS_PAGE_HANDLES.statusFilterOption(option.value as "all" | "active" | "archived"),
     },
     {
       name: "groups",
       type: "multiselect",
       placeholder: t("adminUsersView.filters.placeholder.groups"),
+      testId: USERS_PAGE_HANDLES.GROUPS_FILTER,
+      optionTestId: (option) => USERS_PAGE_HANDLES.groupFilterOption(option.value),
       options:
         groupData.map((item) => ({
           value: item.id,
@@ -200,6 +214,7 @@ const Users = () => {
       id: "select",
       header: ({ table }) => (
         <Checkbox
+          data-testid={USERS_PAGE_HANDLES.SELECT_ALL_CHECKBOX}
           checked={table.getIsAllPageRowsSelected()}
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
           aria-label="Select all"
@@ -209,7 +224,7 @@ const Users = () => {
         <Checkbox
           checked={row.getIsSelected()}
           aria-label="Select row"
-          data-testid={row.original.email}
+          data-testid={USERS_PAGE_HANDLES.rowCheckbox(row.original.id)}
           onClick={(event) => {
             event.stopPropagation();
             handleRowSelectionRange({
@@ -229,19 +244,25 @@ const Users = () => {
     {
       accessorKey: "firstName",
       header: ({ column }) => (
-        <SortButton<TUser> column={column}>{t("adminUsersView.field.firstName")}</SortButton>
+        <SortButton<TUser> testId={USERS_PAGE_HANDLES.SORT_FIRST_NAME} column={column}>
+          {t("adminUsersView.field.firstName")}
+        </SortButton>
       ),
     },
     {
       accessorKey: "lastName",
       header: ({ column }) => (
-        <SortButton<TUser> column={column}>{t("adminUsersView.field.lastName")}</SortButton>
+        <SortButton<TUser> testId={USERS_PAGE_HANDLES.SORT_LAST_NAME} column={column}>
+          {t("adminUsersView.field.lastName")}
+        </SortButton>
       ),
     },
     {
       accessorKey: "email",
       header: ({ column }) => (
-        <SortButton<TUser> column={column}>{t("adminUsersView.field.email")}</SortButton>
+        <SortButton<TUser> testId={USERS_PAGE_HANDLES.SORT_EMAIL} column={column}>
+          {t("adminUsersView.field.email")}
+        </SortButton>
       ),
     },
     {
@@ -339,7 +360,9 @@ const Users = () => {
     {
       accessorKey: "createdAt",
       header: ({ column }) => (
-        <SortButton<TUser> column={column}>{t("adminUsersView.field.createdAt")}</SortButton>
+        <SortButton<TUser> testId={USERS_PAGE_HANDLES.SORT_CREATED_AT} column={column}>
+          {t("adminUsersView.field.createdAt")}
+        </SortButton>
       ),
       cell: ({ row }) => row.original.createdAt && format(new Date(row.original.createdAt), "PPpp"),
     },
@@ -475,19 +498,30 @@ const Users = () => {
           />
         )}
         <div className="flex flex-wrap justify-between gap-3">
-          <h4 className="h4">{t("navigationSideBar.users")}</h4>
+          <h4 className="h4" data-testid={USERS_PAGE_HANDLES.HEADING}>
+            {t("navigationSideBar.users")}
+          </h4>
           <div className="flex gap-3">
             <Link to="new">
-              <Button variant="primary" className="gap-2">
+              <Button
+                data-testid={USERS_PAGE_HANDLES.CREATE_BUTTON}
+                variant="primary"
+                className="gap-2"
+              >
                 <Plus className="size-4" />
                 {t("adminUsersView.button.createNew")}
               </Button>
             </Link>
-            <Button onClick={() => setIsImportModalOpen(true)} className="gap-2">
+            <Button
+              data-testid={USERS_PAGE_HANDLES.IMPORT_BUTTON}
+              onClick={() => setIsImportModalOpen(true)}
+              className="gap-2"
+            >
               <Import className="size-4" />
               {t("adminUsersView.button.import")}
             </Button>
             <Button
+              data-testid={USERS_PAGE_HANDLES.PERMISSIONS_MATRIX_BUTTON}
               onClick={() => setIsPermissionsMatrixOpen(true)}
               className="gap-2"
               variant="outline"
@@ -495,7 +529,11 @@ const Users = () => {
               <Shield className="size-4" />
               {t("adminUsersView.button.permissionsMatrix")}
             </Button>
-            <EditDropdown dropdownItems={dropdownItems} disabled={!selectedUsers.length} />
+            <EditDropdown
+              dropdownItems={dropdownItems}
+              disabled={!selectedUsers.length}
+              triggerTestId={USERS_PAGE_HANDLES.BULK_EDIT_TRIGGER}
+            />
           </div>
         </div>
         <div className="flex items-center justify-between gap-2">
@@ -507,9 +545,10 @@ const Users = () => {
               handleFilterChange(key, value);
             }}
             isLoading={isPending}
+            clearAllTestId={USERS_PAGE_HANDLES.CLEAR_FILTERS_BUTTON}
           />
         </div>
-        <Table className="border bg-neutral-50">
+        <Table data-testid={USERS_PAGE_HANDLES.TABLE} className="border bg-neutral-50">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -521,10 +560,11 @@ const Users = () => {
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
+          <TableBody data-testid={USERS_PAGE_HANDLES.TABLE_BODY}>
             {table.getRowModel().rows.map((row) => (
               <TableRow
                 key={row.id}
+                data-testid={USERS_PAGE_HANDLES.row(row.original.id)}
                 data-state={row.getIsSelected() && "selected"}
                 onClick={() => handleRowClick(row.original.id)}
                 className="cursor-pointer hover:bg-neutral-100"
@@ -548,6 +588,12 @@ const Users = () => {
           onItemsPerPageChange={(newPerPage) => {
             resetPage();
             handleFilterChange("perPage", newPerPage);
+          }}
+          testIds={{
+            previous: USERS_PAGE_HANDLES.PAGINATION_PREVIOUS,
+            next: USERS_PAGE_HANDLES.PAGINATION_NEXT,
+            page: USERS_PAGE_HANDLES.paginationPage,
+            itemsPerPage: USERS_PAGE_HANDLES.PAGINATION_ITEMS_PER_PAGE,
           }}
         />
       </div>

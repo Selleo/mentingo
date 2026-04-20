@@ -13,6 +13,7 @@ import {
 import { useToast } from "~/components/ui/use-toast";
 import { useRichTextUploadQueue } from "~/hooks/useRichTextUploadQueue";
 
+import { TOAST_HANDLES } from "../../../e2e/data/common/handles";
 import { Icon } from "../Icon";
 
 export function Toaster() {
@@ -23,7 +24,7 @@ export function Toaster() {
     <ToastProvider>
       {toasts.map(function ({ id, title, description, action, ...props }) {
         return (
-          <Toast key={id} {...props}>
+          <Toast key={id} data-testid={TOAST_HANDLES.ROOT} {...props}>
             <div className="flex items-center gap-1">
               {match(props.variant)
                 .with("success", () => (
@@ -37,8 +38,12 @@ export function Toaster() {
                 ))
                 .otherwise(() => null)}
               <div className="flex flex-col">
-                {title && <ToastTitle>{title}</ToastTitle>}
-                {description && <ToastDescription>{description}</ToastDescription>}
+                {title && <ToastTitle data-testid={TOAST_HANDLES.TITLE}>{title}</ToastTitle>}
+                {description && (
+                  <ToastDescription data-testid={TOAST_HANDLES.DESCRIPTION}>
+                    {description}
+                  </ToastDescription>
+                )}
               </div>
             </div>
             {action}
@@ -47,6 +52,7 @@ export function Toaster() {
         );
       })}
       <ToastViewport
+        data-testid={TOAST_HANDLES.VIEWPORT}
         queueSlot={
           <RichTextUploadQueue
             items={items}

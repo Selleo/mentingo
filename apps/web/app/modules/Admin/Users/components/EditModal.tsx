@@ -15,6 +15,8 @@ import { useGroupsOptions } from "~/hooks/useGroupsOptions";
 import { ConfirmationModal } from "~/modules/Admin/Users/components/ConfirmationModal";
 import { getRoleLabel } from "~/modules/Admin/Users/utils/getRoleLabel";
 
+import { USER_BULK_EDIT_MODAL_HANDLES } from "../../../../../e2e/data/users/handles";
+
 import type { BulkAssignUsersToGroupBody } from "~/api/generated-api";
 import type { RoleOption } from "~/api/queries/admin/useRoles";
 import type { CheckboxState, Option } from "~/components/ui/multiselect";
@@ -142,6 +144,8 @@ export const EditModal = ({
       case "group":
         return (
           <MultipleSelector
+            testId={USER_BULK_EDIT_MODAL_HANDLES.GROUPS_SELECT}
+            getOptionTestId={(option) => USER_BULK_EDIT_MODAL_HANDLES.groupOption(option.value)}
             value={selectedGroups}
             options={options}
             checkboxStates={groupCheckboxStates}
@@ -164,6 +168,8 @@ export const EditModal = ({
       default:
         return (
           <MultipleSelector
+            testId={USER_BULK_EDIT_MODAL_HANDLES.ROLE_SELECT}
+            getOptionTestId={(option) => USER_BULK_EDIT_MODAL_HANDLES.roleOption(option.value)}
             value={selectedValue.map((roleSlug) => ({
               value: roleSlug,
               label: getRoleLabel(roleSlug, t, roleData),
@@ -203,7 +209,7 @@ export const EditModal = ({
         />
       )}
       <Dialog open={Boolean(type)} onOpenChange={onCancel}>
-        <DialogContent>
+        <DialogContent data-testid={USER_BULK_EDIT_MODAL_HANDLES.DIALOG}>
           <DialogHeader>
             <DialogTitle>
               {t(`adminUsersView.modal.title.${type}`)} ({selectedUsers.length ?? 0})
@@ -218,6 +224,7 @@ export const EditModal = ({
             </div>
             <DialogFooter className="z-50">
               <Button
+                data-testid={USER_BULK_EDIT_MODAL_HANDLES.SUBMIT_BUTTON}
                 onClick={handleSubmit}
                 variant={type === "delete" ? "destructive" : "primary"}
                 disabled={!selectedUsers.length || (type === "role" && selectedValue.length === 0)}

@@ -1,5 +1,5 @@
 import { RATE_LIMITS, RATE_LIMIT_WINDOW_SEC } from "src/rate-limit/rate-limit.constants";
-import { resolveRateLimitPolicy } from "src/rate-limit/rate-limit.utils";
+import { isRateLimitingDisabled, resolveRateLimitPolicy } from "src/rate-limit/rate-limit.utils";
 
 describe("resolveRateLimitPolicy", () => {
   it("returns strict policy for login", () => {
@@ -45,5 +45,29 @@ describe("resolveRateLimitPolicy", () => {
   it("returns null for technical routes", () => {
     expect(resolveRateLimitPolicy("GET", "/api/healthcheck")).toBeNull();
     expect(resolveRateLimitPolicy("GET", "/api/integration-json")).toBeNull();
+  });
+});
+
+describe("isRateLimitingDisabled", () => {
+  const originalDisableRateLimiting = process.env.DISABLE_RATE_LIMITING;
+
+  afterEach(() => {
+    if (typeof originalDisableRateLimiting === "undefined") {
+      delete process.env.DISABLE_RATE_LIMITING;
+      return;
+    }
+
+    process.env.DISABLE_RATE_LIMITING = originalDisableRateLimiting;
+  });
+
+  it("returns true only when the env flag is explicitly enabled", () => {
+    process.env.DISABLE_RATE_LIMITING = "true";
+    expect(isRateLimitingDisabled()).toBe(true);
+
+    process.env.DISABLE_RATE_LIMITING = "false";
+    expect(isRateLimitingDisabled()).toBe(false);
+
+    delete process.env.DISABLE_RATE_LIMITING;
+    expect(isRateLimitingDisabled()).toBe(false);
   });
 });

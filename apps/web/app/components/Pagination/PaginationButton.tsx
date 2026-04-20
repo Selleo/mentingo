@@ -7,6 +7,7 @@ interface PaginationButtonProps {
   currentPage: number;
   onPageChange: (page: number) => void;
   text?: string | number;
+  testId?: string;
 }
 
 export const PaginationButton = ({
@@ -14,10 +15,12 @@ export const PaginationButton = ({
   currentPage,
   onPageChange,
   text,
+  testId,
 }: PaginationButtonProps) => {
   return (
     <Button
       key={page}
+      data-testid={testId}
       variant="ghost"
       size="sm"
       className={cn("text-neutral-800 aspect-square hover:text-primary-700 hover:bg-primary-200", {

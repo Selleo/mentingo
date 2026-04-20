@@ -28,6 +28,8 @@ import { CreatePageHeader } from "~/modules/Admin/components";
 import { getRoleLabel } from "~/modules/Admin/Users/utils/getRoleLabel";
 import { setPageTitle } from "~/utils/setPageTitle";
 
+import { CREATE_USER_PAGE_HANDLES } from "../../../../e2e/data/users/handles";
+
 import type { MetaFunction } from "@remix-run/react";
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.createNewUser");
@@ -78,7 +80,7 @@ export default function CreateNewUserPage() {
 
   return (
     <PageWrapper breadcrumbs={breadcrumbs}>
-      <div className="flex flex-col gap-y-6">
+      <div className="flex flex-col gap-y-6" data-testid={CREATE_USER_PAGE_HANDLES.PAGE}>
         <CreatePageHeader
           title={t("adminUserView.header")}
           description={t("adminUserView.subHeader")}
@@ -92,7 +94,11 @@ export default function CreateNewUserPage() {
                 <FormItem>
                   <Label htmlFor="firstName">{t("adminUserView.field.firstName")}</Label>
                   <FormControl>
-                    <Input id="firstName" {...field} />
+                    <Input
+                      id="firstName"
+                      data-testid={CREATE_USER_PAGE_HANDLES.FIRST_NAME_INPUT}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -105,7 +111,11 @@ export default function CreateNewUserPage() {
                 <FormItem>
                   <Label htmlFor="lastName">{t("adminUserView.field.lastName")}</Label>
                   <FormControl>
-                    <Input id="lastName" {...field} />
+                    <Input
+                      id="lastName"
+                      data-testid={CREATE_USER_PAGE_HANDLES.LAST_NAME_INPUT}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -118,7 +128,12 @@ export default function CreateNewUserPage() {
                 <FormItem>
                   <Label htmlFor="email">{t("adminUserView.field.email")}</Label>
                   <FormControl>
-                    <Input id="email" type="email" {...field} />
+                    <Input
+                      id="email"
+                      data-testid={CREATE_USER_PAGE_HANDLES.EMAIL_INPUT}
+                      type="email"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -132,6 +147,10 @@ export default function CreateNewUserPage() {
                   <Label htmlFor="role">{t("adminUsersView.dropdown.roles")}</Label>
                   <FormControl>
                     <MultipleSelector
+                      testId={CREATE_USER_PAGE_HANDLES.ROLE_SELECT}
+                      getOptionTestId={(option) =>
+                        CREATE_USER_PAGE_HANDLES.roleOption(option.value)
+                      }
                       value={(field.value ?? []).map((roleSlug) => ({
                         value: roleSlug,
                         label: getRoleLabel(roleSlug, t, roles),
@@ -167,13 +186,20 @@ export default function CreateNewUserPage() {
                   <Label htmlFor="language">{t("adminUserView.field.language")}</Label>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger id="language">
+                      <SelectTrigger
+                        id="language"
+                        data-testid={CREATE_USER_PAGE_HANDLES.LANGUAGE_SELECT}
+                      >
                         <SelectValue placeholder={t("adminUserView.placeholder.language")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {Object.values(SUPPORTED_LANGUAGES).map((lang) => (
-                        <SelectItem key={lang} value={lang}>
+                        <SelectItem
+                          key={lang}
+                          value={lang}
+                          data-testid={CREATE_USER_PAGE_HANDLES.languageOption(lang)}
+                        >
                           {t(`common.languages.${lang}`)}
                         </SelectItem>
                       ))}
@@ -184,7 +210,11 @@ export default function CreateNewUserPage() {
               )}
             />
             <DialogFooter>
-              <Button type="submit" disabled={!isFormValid}>
+              <Button
+                data-testid={CREATE_USER_PAGE_HANDLES.SUBMIT_BUTTON}
+                type="submit"
+                disabled={!isFormValid}
+              >
                 {t("adminUserView.button.createUser")}
               </Button>
             </DialogFooter>

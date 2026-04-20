@@ -1,0 +1,3 @@
+firstName,lastName,email,role,groups,language
+Import,Existing,__EXISTING_EMAIL__,student,__GROUP_ONE__,en
+Import,Fresh,__NEW_EMAIL__,student,__GROUP_ONE__,pl

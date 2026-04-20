@@ -10,6 +10,8 @@ import { Label } from "~/components/ui/label";
 import { CreatePageHeader } from "~/modules/Admin/components";
 import { setPageTitle } from "~/utils/setPageTitle";
 
+import { CREATE_CATEGORY_PAGE_HANDLES } from "../../../../e2e/data/categories/handles";
+
 import { useCreateCategoryForm } from "./hooks/useCreateCategoryForm";
 
 import type { MetaFunction } from "@remix-run/react";
@@ -33,7 +35,7 @@ export default function CreateNewCategoryPage() {
 
   return (
     <PageWrapper breadcrumbs={breadcrumbs}>
-      <div className="flex flex-col gap-y-6">
+      <div className="flex flex-col gap-y-6" data-testid={CREATE_CATEGORY_PAGE_HANDLES.PAGE}>
         <CreatePageHeader
           title={t("adminCategoryView.header")}
           description={t("adminCategoryView.subHeader")}
@@ -49,14 +51,22 @@ export default function CreateNewCategoryPage() {
                     {t("adminCategoryView.field.title")}
                   </Label>
                   <FormControl>
-                    <Input id="title" {...field} />
+                    <Input
+                      id="title"
+                      data-testid={CREATE_CATEGORY_PAGE_HANDLES.TITLE_INPUT}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <DialogFooter>
-              <Button type="submit" disabled={!isFormValid}>
+              <Button
+                type="submit"
+                disabled={!isFormValid}
+                data-testid={CREATE_CATEGORY_PAGE_HANDLES.SUBMIT_BUTTON}
+              >
                 {t("adminCategoryView.button.createCategory")}
               </Button>
             </DialogFooter>

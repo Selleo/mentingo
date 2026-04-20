@@ -18,6 +18,13 @@ interface PaginationProps {
   endItemOverride?: number;
   onPageChange: (page: number) => void;
   onItemsPerPageChange?: (itemsPerPage: string) => void;
+  testIds?: {
+    previous?: string;
+    next?: string;
+    page?: (page: number) => string;
+    itemsPerPage?: string;
+    itemsPerPageOption?: (itemsPerPage: number) => string;
+  };
 }
 
 export const ITEMS_PER_PAGE_OPTIONS = [10, 20, 50, 100] as const;
@@ -39,6 +46,7 @@ export const Pagination = ({
   endItemOverride,
   onPageChange,
   onItemsPerPageChange,
+  testIds,
 }: PaginationProps) => {
   const { t } = useTranslation();
 
@@ -67,7 +75,13 @@ export const Pagination = ({
 
     if (currentPage > 2) {
       buttons.push(
-        <PaginationButton key={1} page={1} currentPage={currentPage} onPageChange={onPageChange} />,
+        <PaginationButton
+          key={1}
+          page={1}
+          currentPage={currentPage}
+          onPageChange={onPageChange}
+          testId={testIds?.page?.(1)}
+        />,
       );
     }
 
@@ -94,6 +108,7 @@ export const Pagination = ({
           page={page}
           currentPage={currentPage}
           onPageChange={onPageChange}
+          testId={testIds?.page?.(page)}
         />,
       );
     }
@@ -117,6 +132,7 @@ export const Pagination = ({
           page={totalPages}
           currentPage={currentPage}
           onPageChange={onPageChange}
+          testId={testIds?.page?.(totalPages)}
         />,
       );
     }
@@ -140,12 +156,16 @@ export const Pagination = ({
         </div>
         {canChangeItemsPerPage && (
           <Select value={String(itemsPerPage)} onValueChange={handleItemsPerPageChange}>
-            <SelectTrigger className="w-fit">
+            <SelectTrigger data-testid={testIds?.itemsPerPage} className="w-fit">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {itemsPerPageOptions.map((option) => (
-                <SelectItem key={option} value={String(option)}>
+                <SelectItem
+                  key={option}
+                  value={String(option)}
+                  data-testid={testIds?.itemsPerPageOption?.(option)}
+                >
                   {option}
                 </SelectItem>
               ))}
@@ -154,11 +174,23 @@ export const Pagination = ({
         )}
       </div>
       <div className="flex items-center space-x-2">
-        <Button variant="ghost" size="sm" onClick={handlePrevious} disabled={currentPage <= 1}>
+        <Button
+          data-testid={testIds?.previous}
+          variant="ghost"
+          size="sm"
+          onClick={handlePrevious}
+          disabled={currentPage <= 1}
+        >
           {t("pagination.previous")}
         </Button>
         {renderPageButtons()}
-        <Button variant="ghost" size="sm" onClick={handleNext} disabled={currentPage >= totalPages}>
+        <Button
+          data-testid={testIds?.next}
+          variant="ghost"
+          size="sm"
+          onClick={handleNext}
+          disabled={currentPage >= totalPages}
+        >
           {t("pagination.next")}
         </Button>
       </div>

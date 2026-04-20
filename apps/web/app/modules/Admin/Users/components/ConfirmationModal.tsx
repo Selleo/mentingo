@@ -11,6 +11,8 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 
+import { USER_BULK_EDIT_MODAL_HANDLES } from "../../../../../e2e/data/users/handles";
+
 interface ConfirmationModalProps {
   open: boolean;
   onCancel: () => void;
@@ -32,7 +34,7 @@ export const ConfirmationModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onCancel}>
-      <DialogContent>
+      <DialogContent data-testid={USER_BULK_EDIT_MODAL_HANDLES.CONFIRMATION_DIALOG}>
         <DialogHeader>
           <DialogTitle>{t(`adminUsersView.modal.title.confirmation`)}</DialogTitle>
 
@@ -44,10 +46,18 @@ export const ConfirmationModal = ({
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="outline" onClick={onCancel}>
+          <Button
+            data-testid={USER_BULK_EDIT_MODAL_HANDLES.CONFIRMATION_CANCEL_BUTTON}
+            variant="outline"
+            onClick={onCancel}
+          >
             {t("common.button.cancel")}
           </Button>
-          <Button onClick={onConfirm} variant="primary">
+          <Button
+            data-testid={USER_BULK_EDIT_MODAL_HANDLES.CONFIRMATION_CONTINUE_BUTTON}
+            onClick={onConfirm}
+            variant="primary"
+          >
             {t(`adminUsersView.modal.button.continue`)}
           </Button>
         </DialogFooter>

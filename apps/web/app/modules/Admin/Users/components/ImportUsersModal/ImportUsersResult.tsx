@@ -5,6 +5,8 @@ import { DialogContent, DialogFooter, DialogHeader, DialogTitle } from "~/compon
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
+import { USERS_IMPORT_MODAL_HANDLES } from "../../../../../../e2e/data/users/handles";
+
 import type { ImportUsersResponse } from "~/api/generated-api";
 
 interface ImportUsersResultProps {
@@ -18,18 +20,26 @@ export const ImportUsersResult = ({ onClose, importResult }: ImportUsersResultPr
   } = importResult;
 
   return (
-    <DialogContent className="gap-2">
+    <DialogContent data-testid={USERS_IMPORT_MODAL_HANDLES.RESULT} className="gap-2">
       <DialogHeader>
         <DialogTitle>{t("adminUsersView.modal.title.importResult")}</DialogTitle>
       </DialogHeader>
 
       <Tabs className="mt-4 w-full" defaultValue="imported">
         <TabsList className="flex">
-          <TabsTrigger value="imported" className="grow">
+          <TabsTrigger
+            data-testid={USERS_IMPORT_MODAL_HANDLES.RESULT_IMPORTED_TAB}
+            value="imported"
+            className="grow"
+          >
             {t("adminUsersView.modal.tabs.imported")}
             <span className="font-semibold"> ({importedUsersAmount})</span>
           </TabsTrigger>
-          <TabsTrigger value="skipped" className="grow">
+          <TabsTrigger
+            data-testid={USERS_IMPORT_MODAL_HANDLES.RESULT_SKIPPED_TAB}
+            value="skipped"
+            className="grow"
+          >
             {t("adminUsersView.modal.tabs.skipped")}
             <span className="font-semibold"> ({skippedUsersAmount})</span>
           </TabsTrigger>
@@ -70,7 +80,9 @@ export const ImportUsersResult = ({ onClose, importResult }: ImportUsersResultPr
       </Tabs>
 
       <DialogFooter className="mt-4">
-        <Button onClick={onClose}>{t("common.button.close")}</Button>
+        <Button data-testid={USERS_IMPORT_MODAL_HANDLES.RESULT_CLOSE} onClick={onClose}>
+          {t("common.button.close")}
+        </Button>
       </DialogFooter>
     </DialogContent>
   );

@@ -23,6 +23,8 @@ export const normalizePath = (path: string) => {
   return withLeadingSlash.toLowerCase();
 };
 
+export const isRateLimitingDisabled = () => process.env.DISABLE_RATE_LIMITING === "true";
+
 const isTechnicalPath = (path: string) =>
   TECHNICAL_PATH_MATCHERS.some((matcher) => matcher.test(path));
 
