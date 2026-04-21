@@ -757,6 +757,13 @@
       "when": 1776758098656,
       "tag": "0107_add_indexes_to_tokens_and_rename_columns_to_token_hash",
       "breakpoints": true
+    },
+    {
+      "idx": 108,
+      "version": "7",
+      "when": 1776759669658,
+      "tag": "0108_extend_references_length_limits",
+      "breakpoints": true
     }
   ]
 }
