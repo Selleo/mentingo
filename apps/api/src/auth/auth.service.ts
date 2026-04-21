@@ -562,7 +562,7 @@ export class AuthService {
 
     await this.db.insert(resetTokens).values({
       userId: user.id,
-      resetToken: hashedResetToken,
+      tokenHash: hashedResetToken,
       expiryDate,
     });
 
@@ -644,7 +644,7 @@ export class AuthService {
       .select({
         userId: createTokens.userId,
         email: users.email,
-        oldCreateToken: createTokens.createToken,
+        oldTokenHash: createTokens.tokenHash,
         tokenExpiryDate: createTokens.expiryDate,
         reminderCount: createTokens.reminderCount,
       })
@@ -690,7 +690,7 @@ export class AuthService {
     tenantId: UUIDType,
     userId: UUIDType,
     email: string,
-    oldCreateToken: string,
+    oldTokenHash: string,
     createToken: string,
     emailTemplate: { text: string; html: string },
     expiryDate: Date,
@@ -702,7 +702,7 @@ export class AuthService {
       try {
         await transaction.insert(createTokens).values({
           userId,
-          createToken: hashedCreateToken,
+          tokenHash: hashedCreateToken,
           expiryDate,
           reminderCount,
         });
@@ -722,7 +722,7 @@ export class AuthService {
           { tenantId },
         );
 
-        await transaction.delete(createTokens).where(eq(createTokens.createToken, oldCreateToken));
+        await transaction.delete(createTokens).where(eq(createTokens.tokenHash, oldTokenHash));
       } catch (error) {
         transaction.rollback();
 
@@ -737,7 +737,7 @@ export class AuthService {
     const expiryDate = new Date();
     expiryDate.setHours(expiryDate.getHours() + 24);
 
-    expiryTokens.map(async ({ userId, email, oldCreateToken, reminderCount }) => {
+    expiryTokens.map(async ({ userId, email, oldTokenHash, reminderCount }) => {
       const user = await this.userService.getUserById(userId);
       const { createToken, emailTemplate } = await this.generateNewTokenAndEmail(userId, email);
 
@@ -745,7 +745,7 @@ export class AuthService {
         user.tenantId,
         userId,
         email,
-        oldCreateToken,
+        oldTokenHash,
         createToken,
         emailTemplate,
         expiryDate,
@@ -914,7 +914,7 @@ export class AuthService {
       const [magicLinkToken] = await trx
         .select()
         .from(magicLinkTokens)
-        .where(eq(magicLinkTokens.token, hashedToken))
+        .where(eq(magicLinkTokens.tokenHash, hashedToken))
         .limit(1)
         .for("update");
 
@@ -1031,7 +1031,7 @@ export class AuthService {
       .insert(magicLinkTokens)
       .values({
         userId,
-        token: hashedToken,
+        tokenHash: hashedToken,
         expiryDate,
       })
       .returning();

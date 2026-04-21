@@ -22,7 +22,7 @@ export class CreatePasswordService {
       .innerJoin(users, eq(users.id, createTokens.userId))
       .where(
         and(
-          eq(createTokens.createToken, hashedToken),
+          eq(createTokens.tokenHash, hashedToken),
           gte(createTokens.expiryDate, new Date()),
           sql`lower(${users.email}) = ${normalizedEmail}`,
         ),

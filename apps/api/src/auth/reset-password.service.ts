@@ -19,7 +19,7 @@ export class ResetPasswordService {
       .innerJoin(users, eq(users.id, resetTokens.userId))
       .where(
         and(
-          eq(resetTokens.resetToken, hashedToken),
+          eq(resetTokens.tokenHash, hashedToken),
           gte(resetTokens.expiryDate, new Date()),
           sql`lower(${users.email}) = ${normalizedEmail}`,
         ),

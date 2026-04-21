@@ -172,7 +172,7 @@ export const createTokens = pgTable(
     userId: uuid("user_id")
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
-    createToken: text("create_token").notNull(),
+    tokenHash: text("token_hash").notNull(),
     expiryDate: timestamp("expiry_date", {
       precision: 3,
       withTimezone: true,
@@ -180,7 +180,10 @@ export const createTokens = pgTable(
     reminderCount: integer("reminder_count").notNull().default(0),
     tenantId,
   },
-  withTenantIdIndex("create_tokens"),
+  (table) => ({
+    ...withTenantIdIndex("create_tokens")(table),
+    tokenHashIdx: index("create_tokens_token_hash_idx").on(table.tokenHash),
+  }),
 );
 
 export const resetTokens = pgTable(
@@ -191,14 +194,17 @@ export const resetTokens = pgTable(
     userId: uuid("user_id")
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
-    resetToken: text("reset_token").notNull(),
+    tokenHash: text("token_hash").notNull(),
     expiryDate: timestamp("expiry_date", {
       precision: 3,
       withTimezone: true,
     }).notNull(),
     tenantId,
   },
-  withTenantIdIndex("reset_tokens"),
+  (table) => ({
+    ...withTenantIdIndex("reset_tokens")(table),
+    tokenHashIdx: index("reset_tokens_token_hash_idx").on(table.tokenHash),
+  }),
 );
 
 export const coursesStatusEnum = pgEnum("status", ["draft", "published", "private"]);
@@ -1315,14 +1321,17 @@ export const magicLinkTokens = pgTable(
     userId: uuid("user_id")
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
-    token: text("token").notNull(),
+    tokenHash: text("token_hash").notNull(),
     expiryDate: timestamp("expiry_date", {
       precision: 3,
       withTimezone: true,
     }).notNull(),
     tenantId,
   },
-  withTenantIdIndex("magic_link_tokens"),
+  (table) => ({
+    ...withTenantIdIndex("magic_link_tokens")(table),
+    tokenHashIdx: index("magic_link_tokens_token_hash_idx").on(table.tokenHash),
+  }),
 );
 
 export const permissionRoles = pgTable(

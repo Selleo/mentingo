@@ -784,7 +784,7 @@ export class UserService {
 
       await trx.insert(createTokens).values({
         userId: createdUser.id,
-        createToken: hashedCreateToken,
+        tokenHash: hashedCreateToken,
         expiryDate,
         reminderCount: 0,
       });

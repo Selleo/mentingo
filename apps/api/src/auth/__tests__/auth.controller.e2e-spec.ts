@@ -6,10 +6,11 @@ import { nanoid } from "nanoid";
 import request from "supertest";
 
 import { hashToken } from "src/auth/utils/hash-auth-token";
+import { EmailAdapter } from "src/common/emails/adapters/email.adapter";
 import { RATE_LIMITS } from "src/rate-limit/rate-limit.constants";
 import { SettingsService } from "src/settings/settings.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { createTokens, formFieldAnswers, resetTokens } from "src/storage/schema";
+import { createTokens, formFieldAnswers, magicLinkTokens, resetTokens } from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
@@ -17,6 +18,7 @@ import { createUserFactory } from "../../../test/factory/user.factory";
 import { truncateTables } from "../../../test/helpers/test-helpers";
 import { AuthService } from "../auth.service";
 
+import type { EmailTestingAdapter } from "../../../test/helpers/test-email.adapter";
 import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg } from "src/common";
 
@@ -46,7 +48,16 @@ describe("AuthController (e2e)", () => {
 
   afterEach(async () => {
     jest.restoreAllMocks();
-    await truncateTables(baseDb, ["form_field_answers", "form_fields", "forms", "settings"]);
+    (app.get(EmailAdapter) as EmailTestingAdapter).clearEmails();
+    await truncateTables(baseDb, [
+      "create_tokens",
+      "form_field_answers",
+      "form_fields",
+      "forms",
+      "magic_link_tokens",
+      "reset_tokens",
+      "settings",
+    ]);
   });
 
   describe("POST /api/auth/register", () => {
@@ -508,7 +519,7 @@ describe("AuthController (e2e)", () => {
 
       await db.insert(resetTokens).values({
         userId: user.id,
-        resetToken: hashToken(resetToken),
+        tokenHash: hashToken(resetToken),
         expiryDate,
       });
 
@@ -549,7 +560,7 @@ describe("AuthController (e2e)", () => {
 
       await db.insert(resetTokens).values({
         userId: user.id,
-        resetToken: hashToken(resetToken),
+        tokenHash: hashToken(resetToken),
         expiryDate,
       });
 
@@ -624,7 +635,7 @@ describe("AuthController (e2e)", () => {
 
       await db.insert(createTokens).values({
         userId: user.id,
-        createToken: hashToken(token),
+        tokenHash: hashToken(token),
         expiryDate,
         reminderCount: 0,
       });
@@ -651,7 +662,7 @@ describe("AuthController (e2e)", () => {
 
       await db.insert(createTokens).values({
         userId: user.id,
-        createToken: hashToken(token),
+        tokenHash: hashToken(token),
         expiryDate,
         reminderCount: 0,
       });
@@ -686,7 +697,7 @@ describe("AuthController (e2e)", () => {
 
       await db.insert(createTokens).values({
         userId: user.id,
-        createToken: hashToken(token),
+        tokenHash: hashToken(token),
         expiryDate,
         reminderCount: 0,
       });
@@ -739,7 +750,7 @@ describe("AuthController (e2e)", () => {
 
       await db.insert(createTokens).values({
         userId: user.id,
-        createToken: hashToken(token),
+        tokenHash: hashToken(token),
         expiryDate,
         reminderCount: 0,
       });
@@ -768,7 +779,7 @@ describe("AuthController (e2e)", () => {
 
       await db.insert(createTokens).values({
         userId: user.id,
-        createToken: hashToken(token),
+        tokenHash: hashToken(token),
         expiryDate,
         reminderCount: 0,
       });
@@ -794,6 +805,85 @@ describe("AuthController (e2e)", () => {
           password: "Password123@",
         })
         .expect(201);
+    });
+  });
+
+  describe("POST /api/auth/magic-link/create", () => {
+    it("should create a magic link token as a hash and send the token in email", async () => {
+      const user = await userFactory
+        .withCredentials({ password: "Password123@" })
+        .withUserSettings(db)
+        .create({
+          email: `magiclink-create-${nanoid(8)}@example.com`,
+        });
+
+      await request(app.getHttpServer())
+        .post("/api/auth/magic-link/create")
+        .send({ email: user.email })
+        .expect(201);
+
+      const emailAdapter = app.get(EmailAdapter) as EmailTestingAdapter;
+      const email = emailAdapter.getLastEmail();
+
+      expect(email).toBeDefined();
+      expect(email?.to).toBe(user.email);
+      expect(email?.subject).toBeDefined();
+      expect(email?.html || email?.text).toContain("/auth/login?token=");
+
+      const tokenMatch = (email?.html ?? email?.text ?? "").match(
+        /\/auth\/login\?token=([^"&\s]+)/,
+      );
+      expect(tokenMatch).not.toBeNull();
+
+      const token = tokenMatch?.[1];
+      expect(token).toBeDefined();
+
+      const [storedToken] = await db
+        .select()
+        .from(magicLinkTokens)
+        .where(eq(magicLinkTokens.userId, user.id));
+
+      expect(storedToken).toBeDefined();
+      expect(storedToken?.tokenHash).toBe(hashToken(token!));
+      expect(storedToken?.expiryDate).toBeDefined();
+    });
+  });
+
+  describe("GET /api/auth/magic-link/verify", () => {
+    it("should log in with a valid magic link and remove the consumed token", async () => {
+      const user = await userFactory
+        .withCredentials({ password: "Password123@" })
+        .withUserSettings(db)
+        .create({
+          email: `magiclink-verify-${nanoid(8)}@example.com`,
+        });
+
+      const token = await authService.createMagicLinkToken(user.id);
+
+      const response = await request(app.getHttpServer())
+        .get("/api/auth/magic-link/verify")
+        .query({ token })
+        .expect(200);
+
+      expect(response.body.data).toHaveProperty("id", user.id);
+      expect(response.body.data).toHaveProperty("email", user.email);
+      expect(response.body.data).toHaveProperty("shouldVerifyMFA", false);
+      expect(response.headers["set-cookie"]).toBeDefined();
+      expect(response.headers["set-cookie"].length).toBe(2);
+
+      const [remainingToken] = await db
+        .select()
+        .from(magicLinkTokens)
+        .where(eq(magicLinkTokens.userId, user.id));
+
+      expect(remainingToken).toBeUndefined();
+    });
+
+    it("should reject an invalid magic link token", async () => {
+      await request(app.getHttpServer())
+        .get("/api/auth/magic-link/verify")
+        .query({ token: "invalid-token" })
+        .expect(401);
     });
   });
 });
