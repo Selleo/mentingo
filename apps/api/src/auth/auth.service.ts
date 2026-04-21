@@ -5,7 +5,6 @@ import {
   forwardRef,
   Inject,
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
@@ -551,46 +550,50 @@ export class AuthService {
   }
 
   public async forgotPassword(email: string) {
-    const user = await this.userService.getUserByEmail(email);
+    try {
+      const user = await this.userService.getUserByEmail(email);
 
-    if (!user) return;
+      if (!user || user.archived) return;
 
-    const resetToken = nanoid(64);
-    const hashedResetToken = hashToken(resetToken);
-    const expiryDate = new Date();
-    expiryDate.setHours(expiryDate.getHours() + 1);
+      const resetToken = nanoid(64);
+      const hashedResetToken = hashToken(resetToken);
+      const expiryDate = new Date();
+      expiryDate.setHours(expiryDate.getHours() + 1);
 
-    await this.db.insert(resetTokens).values({
-      userId: user.id,
-      tokenHash: hashedResetToken,
-      expiryDate,
-    });
+      await this.db.insert(resetTokens).values({
+        userId: user.id,
+        tokenHash: hashedResetToken,
+        expiryDate,
+      });
 
-    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
-      user.tenantId,
-      user.id,
-    );
+      const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
+        user.tenantId,
+        user.id,
+      );
 
-    const tenantOrigin = await this.resolveTenantOrigin(user.tenantId);
+      const tenantOrigin = await this.resolveTenantOrigin(user.tenantId);
 
-    const emailTemplate = new PasswordRecoveryEmail({
-      name: user.firstName,
-      resetLink: buildCreateNewPasswordLink(tenantOrigin, {
-        resetToken,
-        email,
-      }),
-      ...defaultEmailSettings,
-    });
+      const emailTemplate = new PasswordRecoveryEmail({
+        name: user.firstName,
+        resetLink: buildCreateNewPasswordLink(tenantOrigin, {
+          resetToken,
+          email,
+        }),
+        ...defaultEmailSettings,
+      });
 
-    await this.emailService.sendEmailWithLogo(
-      {
-        to: email,
-        subject: getEmailSubject("passwordRecoveryEmail", defaultEmailSettings.language),
-        text: emailTemplate.text,
-        html: emailTemplate.html,
-      },
-      { tenantId: user.tenantId },
-    );
+      await this.emailService.sendEmailWithLogo(
+        {
+          to: email,
+          subject: getEmailSubject("passwordRecoveryEmail", defaultEmailSettings.language),
+          text: emailTemplate.text,
+          html: emailTemplate.html,
+        },
+        { tenantId: user.tenantId },
+      );
+    } catch {
+      return;
+    }
   }
 
   public async createPassword(data: CreatePasswordBody) {
@@ -870,37 +873,39 @@ export class AuthService {
   }
 
   async createMagicLink(email: string) {
-    const user = await this.userService.getUserByEmail(email);
+    try {
+      const user = await this.userService.getUserByEmail(email);
 
-    if (!user) return;
+      if (!user || user.archived) return;
 
-    if (user.archived) throw new UnauthorizedException("user.error.archived");
+      const magicLinkToken = await this.createMagicLinkToken(user.id);
 
-    const magicLinkToken = await this.createMagicLinkToken(user.id);
+      if (!magicLinkToken) return;
 
-    if (!magicLinkToken) throw new InternalServerErrorException("magicLink.error.createToken");
+      const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
+        user.tenantId,
+        user.id,
+      );
 
-    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
-      user.tenantId,
-      user.id,
-    );
+      const magicLinkEmail = new MagicLinkEmail({
+        magicLink: `${CORS_ORIGIN}/auth/login?token=${magicLinkToken}`,
+        ...defaultEmailSettings,
+      });
 
-    const magicLinkEmail = new MagicLinkEmail({
-      magicLink: `${CORS_ORIGIN}/auth/login?token=${magicLinkToken}`,
-      ...defaultEmailSettings,
-    });
+      const { html, text } = magicLinkEmail;
 
-    const { html, text } = magicLinkEmail;
-
-    await this.emailService.sendEmailWithLogo(
-      {
-        to: email,
-        subject: getEmailSubject("magicLinkEmail", defaultEmailSettings.language),
-        text,
-        html,
-      },
-      { tenantId: user.tenantId },
-    );
+      await this.emailService.sendEmailWithLogo(
+        {
+          to: email,
+          subject: getEmailSubject("magicLinkEmail", defaultEmailSettings.language),
+          text,
+          html,
+        },
+        { tenantId: user.tenantId },
+      );
+    } catch {
+      return;
+    }
   }
 
   async handleMagicLinkLogin(response: Response, token: string) {

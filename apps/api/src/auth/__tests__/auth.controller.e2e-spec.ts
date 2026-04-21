@@ -490,6 +490,23 @@ describe("AuthController (e2e)", () => {
       });
     });
 
+    it("should return success for archived users without sending a reset email", async () => {
+      const user = await userFactory.create({
+        email: "archived-forgot-password@example.com",
+        archived: true,
+      });
+
+      const response = await request(app.getHttpServer())
+        .post("/api/auth/forgot-password")
+        .send({ email: user.email })
+        .expect(201);
+
+      expect(response.body.data).toEqual({
+        message: "forgotPasswordView.toast.resetPassword",
+      });
+      expect((app.get(EmailAdapter) as EmailTestingAdapter).getAllEmails()).toHaveLength(0);
+    });
+
     it("should return 404 if email is empty", async () => {
       await userFactory
         .withCredentials({
@@ -846,6 +863,58 @@ describe("AuthController (e2e)", () => {
       expect(storedToken).toBeDefined();
       expect(storedToken?.tokenHash).toBe(hashToken(token!));
       expect(storedToken?.expiryDate).toBeDefined();
+    });
+
+    it("should return success for archived users without sending a magic link", async () => {
+      const user = await userFactory.create({
+        email: `magiclink-archived-${nanoid(8)}@example.com`,
+        archived: true,
+      });
+
+      const response = await request(app.getHttpServer())
+        .post("/api/auth/magic-link/create")
+        .send({ email: user.email })
+        .expect(201);
+
+      expect(response.body.data).toEqual({
+        message: "magicLink.createdSuccessfully",
+      });
+      expect((app.get(EmailAdapter) as EmailTestingAdapter).getAllEmails()).toHaveLength(0);
+
+      const [storedToken] = await db
+        .select()
+        .from(magicLinkTokens)
+        .where(eq(magicLinkTokens.userId, user.id));
+
+      expect(storedToken).toBeUndefined();
+    });
+
+    it("should return success when magic link token creation fails", async () => {
+      const user = await userFactory
+        .withCredentials({ password: "Password123@" })
+        .withUserSettings(db)
+        .create({
+          email: `magiclink-token-failure-${nanoid(8)}@example.com`,
+        });
+
+      jest.spyOn(authService, "createMagicLinkToken").mockRejectedValueOnce(new Error("boom"));
+
+      const response = await request(app.getHttpServer())
+        .post("/api/auth/magic-link/create")
+        .send({ email: user.email })
+        .expect(201);
+
+      expect(response.body.data).toEqual({
+        message: "magicLink.createdSuccessfully",
+      });
+      expect((app.get(EmailAdapter) as EmailTestingAdapter).getAllEmails()).toHaveLength(0);
+
+      const [storedToken] = await db
+        .select()
+        .from(magicLinkTokens)
+        .where(eq(magicLinkTokens.userId, user.id));
+
+      expect(storedToken).toBeUndefined();
     });
   });
 
