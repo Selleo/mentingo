@@ -10984,11 +10984,6 @@
             "minLength": 1,
             "type": "string"
           },
-          "email": {
-            "format": "email",
-            "minLength": 1,
-            "type": "string"
-          },
           "language": {
             "anyOf": [
               {
@@ -11017,7 +11012,6 @@
         "required": [
           "password",
           "createToken",
-          "email",
           "language"
         ]
       },
@@ -11182,17 +11176,11 @@
           "resetToken": {
             "minLength": 1,
             "type": "string"
-          },
-          "email": {
-            "format": "email",
-            "minLength": 1,
-            "type": "string"
           }
         },
         "required": [
           "newPassword",
-          "resetToken",
-          "email"
+          "resetToken"
         ]
       },
       "MFASetupResponse": {

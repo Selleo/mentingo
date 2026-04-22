@@ -291,11 +291,11 @@ export class AuthController {
     @Body() data: CreatePasswordBody,
     @Res({ passthrough: true }) response: Response,
   ): Promise<BaseResponse<Static<typeof loginResponseSchema>>> {
-    await this.authService.createPassword(data);
+    const user = await this.authService.createPassword(data);
 
     return this.authenticateAndRespond(
       {
-        email: data.email,
+        email: user.email,
         password: data.password,
       },
       response,
@@ -308,7 +308,7 @@ export class AuthController {
     request: [{ type: "body", schema: resetPasswordSchema }],
   })
   async resetPassword(@Body() data: ResetPasswordBody): Promise<BaseResponse<{ message: string }>> {
-    await this.authService.resetPassword(data.resetToken, data.newPassword, data.email);
+    await this.authService.resetPassword(data.resetToken, data.newPassword);
     return new BaseResponse({ message: "Password reset successfully" });
   }
 

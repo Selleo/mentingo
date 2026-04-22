@@ -456,14 +456,13 @@
       "confirmPassword": "Patvirtinkite slaptažodį"
     },
     "validation": {
-      "passwordsDontMatch": "Slaptažodžiai nesutampa",
-      "missingEmail": "Nuorodoje trūksta el. pašto adreso. Prašome naudoti visą nuorodą iš savo el. pašto."
+      "passwordsDontMatch": "Slaptažodžiai nesutampa"
     },
     "button": {
       "changePassword": "Sukurti slaptažodį"
     },
     "error": {
-      "invalidTokenOrEmail": "Ši slaptažodžio nustatymo nuoroda neteisinga, nebegalioja arba neatitinka šio el. pašto adreso."
+      "invalidToken": "Ši slaptažodžio nustatymo nuoroda neteisinga arba nebegalioja."
     }
   },
   "changePasswordView": {

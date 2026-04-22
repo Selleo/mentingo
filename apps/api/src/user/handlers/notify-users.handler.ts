@@ -137,7 +137,6 @@ export class NotifyUsersHandler implements IEventHandler {
         process.env.CI ? "http://localhost:5173" : baseOrigin,
         {
           createToken: token,
-          email,
         },
       );
 
@@ -212,8 +211,12 @@ export class NotifyUsersHandler implements IEventHandler {
         language,
       );
 
+      const createPasswordLink = buildCreateNewPasswordLink(baseOrigin, {
+        createToken: token,
+      });
+
       const { text, html } = new CreatePasswordReminderEmail({
-        createPasswordLink: `${baseOrigin}/auth/create-new-password?createToken=${token}&email=${email}`,
+        createPasswordLink,
         ...defaultEmailSettings,
       });
 

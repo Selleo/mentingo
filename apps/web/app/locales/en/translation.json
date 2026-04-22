@@ -450,20 +450,19 @@
   },
   "createPasswordView": {
     "header": "Create new password",
-    "subHeader": "Enter a new password for",
+    "subHeader": "Enter a new password",
     "field": {
       "password": "Password",
       "confirmPassword": "Confirm password"
     },
     "validation": {
-      "passwordsDontMatch": "Passwords do not match",
-      "missingEmail": "Email address is missing from the link. Please use the full link from your email."
+      "passwordsDontMatch": "Passwords do not match"
     },
     "button": {
       "changePassword": "Create password"
     },
     "error": {
-      "invalidTokenOrEmail": "This password setup link is invalid, expired, or does not match this email."
+      "invalidToken": "This password setup link is invalid or expired."
     }
   },
   "changePasswordView": {

@@ -427,20 +427,19 @@
   },
   "createPasswordView": {
     "header": "Utwórz nowe hasło",
-    "subHeader": "Wprowadź nowe hasło dla",
+    "subHeader": "Wprowadź nowe hasło",
     "field": {
       "password": "Hasło",
       "confirmPassword": "Potwierdź hasło"
     },
     "validation": {
-      "passwordsDontMatch": "Hasła nie są takie same",
-      "missingEmail": "W linku brakuje adresu e-mail. Użyj pełnego linku z wiadomości."
+      "passwordsDontMatch": "Hasła nie są takie same"
     },
     "button": {
       "changePassword": "Utwórz hasło"
     },
     "error": {
-      "invalidTokenOrEmail": "Ten link do ustawienia hasła jest nieprawidłowy, wygasł lub nie pasuje do tego adresu e-mail."
+      "invalidToken": "Ten link do ustawienia hasła jest nieprawidłowy lub wygasł."
     }
   },
   "passwordValidationDisplay": {

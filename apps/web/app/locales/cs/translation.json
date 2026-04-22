@@ -450,20 +450,19 @@
   },
   "createPasswordView": {
     "header": "Vytvořte nové heslo",
-    "subHeader": "Zadejte nové heslo pro",
+    "subHeader": "Zadejte nové heslo",
     "field": {
       "password": "Heslo",
       "confirmPassword": "Potvrďte heslo"
     },
     "validation": {
-      "passwordsDontMatch": "Hesla se neshodují",
-      "missingEmail": "V odkazu chybí e-mailová adresa. Použijte prosím celý odkaz z vašeho e-mailu."
+      "passwordsDontMatch": "Hesla se neshodují"
     },
     "button": {
       "changePassword": "Vytvořte heslo"
     },
     "error": {
-      "invalidTokenOrEmail": "Tento odkaz pro nastavení hesla je neplatný, jeho platnost vypršela nebo neodpovídá tomuto e-mailu."
+      "invalidToken": "Tento odkaz pro nastavení hesla je neplatný nebo jeho platnost vypršela."
     }
   },
   "changePasswordView": {

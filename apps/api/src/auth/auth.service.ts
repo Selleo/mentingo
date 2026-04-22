@@ -577,7 +577,6 @@ export class AuthService {
         name: user.firstName,
         resetLink: buildCreateNewPasswordLink(tenantOrigin, {
           resetToken,
-          email,
         }),
         ...defaultEmailSettings,
       });
@@ -597,8 +596,8 @@ export class AuthService {
   }
 
   public async createPassword(data: CreatePasswordBody) {
-    const { createToken: token, password, language, email } = data;
-    const createToken = await this.createPasswordService.getOneByTokenAndEmail(token, email);
+    const { createToken: token, password, language } = data;
+    const createToken = await this.createPasswordService.getOneByToken(token);
 
     const [existingUser] = await this.db
       .select({
@@ -635,8 +634,8 @@ export class AuthService {
     return existingUser;
   }
 
-  public async resetPassword(token: string, newPassword: string, email: string) {
-    const resetToken = await this.resetPasswordService.getOneByTokenAndEmail(token, email);
+  public async resetPassword(token: string, newPassword: string) {
+    const resetToken = await this.resetPasswordService.getOneByToken(token);
 
     await this.userService.resetPassword(resetToken.userId, newPassword);
     await this.resetPasswordService.deleteToken(resetToken.id);
@@ -668,7 +667,7 @@ export class AuthService {
       );
   }
 
-  private async generateNewTokenAndEmail(userId: UUIDType, email: string) {
+  private async generateNewTokenAndEmail(userId: UUIDType) {
     const createToken = nanoid(64);
 
     const user = await this.userService.getUserById(userId);
@@ -681,7 +680,6 @@ export class AuthService {
     const emailTemplate = new CreatePasswordReminderEmail({
       createPasswordLink: buildCreateNewPasswordLink(CORS_ORIGIN, {
         createToken,
-        email,
       }),
       ...defaultEmailSettings,
     });
@@ -742,7 +740,7 @@ export class AuthService {
 
     expiryTokens.map(async ({ userId, email, oldTokenHash, reminderCount }) => {
       const user = await this.userService.getUserById(userId);
-      const { createToken, emailTemplate } = await this.generateNewTokenAndEmail(userId, email);
+      const { createToken, emailTemplate } = await this.generateNewTokenAndEmail(userId);
 
       await this.sendEmailAndUpdateDatabase(
         user.tenantId,

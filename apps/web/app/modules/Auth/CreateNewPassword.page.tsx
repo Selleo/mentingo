@@ -44,7 +44,6 @@ export default function CreateNewPasswordPage() {
   const { toast } = useToast();
   const resetToken = searchParams.get("resetToken");
   const createToken = searchParams.get("createToken");
-  const email = searchParams.get("email");
   const { mutateAsync: createPassword } = useCreatePassword();
   const { mutateAsync: resetPassword } = useResetPassword();
   const { t } = useTranslation();
@@ -65,17 +64,17 @@ export default function CreateNewPasswordPage() {
   } = methods;
 
   const onSubmit = (data: Pick<CreateNewPasswordFormValues, "newPassword">) => {
-    if (!email) {
+    if (!resetToken && !createToken) {
       toast({
         variant: "destructive",
-        description: t("createPasswordView.validation.missingEmail"),
+        description: t("createPasswordView.error.invalidToken"),
       });
       return;
     }
 
     if (resetToken) {
       resetPassword({
-        data: { newPassword: data.newPassword, resetToken, email },
+        data: { newPassword: data.newPassword, resetToken },
       }).then(() => {
         toast({
           description: t("changePasswordView.toast.passwordChangedSuccessfully"),
@@ -89,7 +88,6 @@ export default function CreateNewPasswordPage() {
         data: {
           password: data.newPassword,
           createToken,
-          email,
           language: Object.values(SUPPORTED_LANGUAGES).includes(detectBrowserLanguage())
             ? detectBrowserLanguage()
             : SUPPORTED_LANGUAGES.EN,
@@ -107,9 +105,7 @@ export default function CreateNewPasswordPage() {
       <Card className="mx-auto max-w-sm">
         <CardHeader>
           <CardTitle className="text-2xl">{t("createPasswordView.header")}</CardTitle>
-          <CardDescription>
-            {t("createPasswordView.subHeader")} {email}
-          </CardDescription>
+          <CardDescription>{t("createPasswordView.subHeader")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form className="grid gap-4" onSubmit={handleSubmit(onSubmit)}>
