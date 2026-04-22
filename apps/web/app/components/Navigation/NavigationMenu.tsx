@@ -14,6 +14,7 @@ type NavigationMenuProps = {
   expandableLabel?: string;
   expandableIcon?: IconName;
   isExpandable?: boolean;
+  testId?: string;
   showNavigationLabels: boolean;
   shouldShowTooltips: boolean;
   isSidebarCollapsed: boolean;
@@ -26,6 +27,7 @@ export function NavigationMenu({
   expandableLabel,
   expandableIcon,
   isExpandable = false,
+  testId,
   showNavigationLabels,
   shouldShowTooltips,
   isSidebarCollapsed,
@@ -42,6 +44,7 @@ export function NavigationMenu({
         expandableLabel={expandableLabel}
         expandableIcon={expandableIcon as IconName}
         isExpandable={isExpandable}
+        testId={testId}
         showNavigationLabels={showNavigationLabels}
         shouldShowTooltips={shouldShowTooltips}
         isSidebarCollapsed={isSidebarCollapsed}

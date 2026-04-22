@@ -152,6 +152,7 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
                     isExpandable={group.isExpandable}
                     expandableLabel={group.title}
                     expandableIcon={group.icon}
+                    testId={group.testId}
                     showNavigationLabels={showNavigationLabels}
                     shouldShowTooltips={shouldShowTooltips}
                     isSidebarCollapsed={isSidebarCollapsed}

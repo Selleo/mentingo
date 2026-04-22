@@ -20,6 +20,7 @@ interface ExpandableNavigationMenuProps {
   expandableLabel?: string;
   expandableIcon: IconName;
   isExpandable: boolean;
+  testId?: string;
   closeOnClickOutside?: boolean;
   showNavigationLabels: boolean;
   shouldShowTooltips: boolean;
@@ -31,6 +32,7 @@ export const ExpandableNavigationMenu = ({
   setIsMobileNavOpen,
   expandableLabel,
   expandableIcon,
+  testId,
   closeOnClickOutside = true,
   showNavigationLabels,
   shouldShowTooltips,
@@ -90,6 +92,7 @@ export const ExpandableNavigationMenu = ({
       <DropdownMenuTrigger className="w-full">
         <button
           type="button"
+          data-testid={testId}
           className={cn(
             "text-md flex w-full items-center justify-between gap-x-3 rounded-lg bg-white px-4 py-3.5 text-neutral-900 hover:bg-white hover:text-neutral-900 hover:outline hover:outline-1 hover:outline-primary-200 2xl:p-2 3xl:hover:bg-primary-50 body-sm-md",
           )}

@@ -31,6 +31,7 @@ export function NavigationMenuItem({
       <Tooltip>
         <TooltipTrigger className="w-full">
           <NavLink
+            data-testid={item.testId}
             to={item.link}
             onClick={() => setIsMobileNavOpen(false)}
             className={({ isActive }) =>

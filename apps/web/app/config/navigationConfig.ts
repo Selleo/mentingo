@@ -1,5 +1,7 @@
 import { PERMISSIONS } from "@repo/shared";
 
+import { NAVIGATION_HANDLES } from "../../e2e/data/navigation/handles";
+
 import { routeAccessConfig } from "./routeAccessConfig";
 
 import type { TFunction } from "i18next";
@@ -9,6 +11,7 @@ import type { IconName } from "~/types/shared";
 export interface BaseMenuItem {
   label: string;
   accessRequirement?: PermissionRequirement;
+  testId?: string;
 }
 
 export interface LeafMenuItem extends BaseMenuItem {
@@ -22,6 +25,7 @@ export type NavigationItem = {
   label: string;
   path: string;
   iconName: IconName;
+  testId?: string;
 };
 
 export type NavigationGroups = {
@@ -30,6 +34,7 @@ export type NavigationGroups = {
   isExpandable?: boolean;
   restrictedAccessRequirement?: PermissionRequirement;
   restrictedManagingTenantAdmin?: boolean;
+  testId?: string;
   items: NavigationItem[];
 };
 
@@ -46,21 +51,25 @@ export const getNavigationConfig = (
     {
       title: t("navigationSideBar.courses"),
       isExpandable: false,
+      testId: NAVIGATION_HANDLES.COURSES_GROUP,
       items: [
         {
           label: t("navigationSideBar.courses"),
           path: "courses",
           iconName: "Course",
+          testId: NAVIGATION_HANDLES.COURSES_LINK,
         },
         {
           label: t("navigationSideBar.analytics"),
           path: "admin/analytics",
           iconName: "ChartNoAxes",
+          testId: NAVIGATION_HANDLES.ANALYTICS_LINK,
         },
         {
           label: t("navigationSideBar.progress"),
           path: "progress",
           iconName: "Target",
+          testId: NAVIGATION_HANDLES.PROGRESS_LINK,
         },
       ],
     },
@@ -70,6 +79,7 @@ export const getNavigationConfig = (
             title: t("navigationSideBar.content"),
             icon: "Library",
             isExpandable: true,
+            testId: NAVIGATION_HANDLES.CONTENT_GROUP,
             restrictedAccessRequirement: {
               anyOf: [
                 PERMISSIONS.NEWS_MANAGE,
@@ -119,6 +129,7 @@ export const getNavigationConfig = (
       title: t("navigationSideBar.manage"),
       icon: "Manage",
       isExpandable: true,
+      testId: NAVIGATION_HANDLES.MANAGE_TOGGLE,
       restrictedAccessRequirement: {
         anyOf: [
           PERMISSIONS.USER_MANAGE,
@@ -132,16 +143,19 @@ export const getNavigationConfig = (
           label: t("navigationSideBar.users"),
           path: "admin/users",
           iconName: "Hat",
+          testId: NAVIGATION_HANDLES.USERS_LINK,
         },
         {
           label: t("navigationSideBar.groups"),
           path: "admin/groups",
           iconName: "Share",
+          testId: NAVIGATION_HANDLES.GROUPS_LINK,
         },
         {
           label: t("navigationSideBar.categories"),
           path: "admin/categories",
           iconName: "Category",
+          testId: NAVIGATION_HANDLES.CATEGORIES_LINK,
         },
         ...(isStripeConfigured
           ? [
@@ -149,6 +163,7 @@ export const getNavigationConfig = (
                 label: t("navigationSideBar.promotionCodes", "Promotion Codes"),
                 path: "admin/promotion-codes",
                 iconName: "HandCoins",
+                testId: NAVIGATION_HANDLES.PROMOTION_CODES_LINK,
               } as NavigationItem,
             ]
           : []),
@@ -158,6 +173,7 @@ export const getNavigationConfig = (
       title: t("navigationSideBar.superAdmin", "Super Admin"),
       icon: "Admin",
       isExpandable: false,
+      testId: NAVIGATION_HANDLES.SUPER_ADMIN_GROUP,
       restrictedAccessRequirement: {
         allOf: [PERMISSIONS.TENANT_MANAGE],
       },
@@ -167,6 +183,7 @@ export const getNavigationConfig = (
           label: t("navigationSideBar.tenants", "Tenants"),
           path: "super-admin/tenants",
           iconName: "Admin",
+          testId: NAVIGATION_HANDLES.TENANTS_LINK,
         },
       ],
     },
