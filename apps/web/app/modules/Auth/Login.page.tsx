@@ -161,7 +161,7 @@ export default function LoginPage() {
           }}
         />
       )}
-      <Card className="mx-auto max-w-sm">
+      <Card className="mx-auto max-w-sm" data-testid={LOGIN_PAGE_HANDLES.PAGE}>
         <CardHeader>
           <CardTitle role="heading" className="text-2xl">
             <div className="mb-6 flex justify-center">
@@ -193,6 +193,7 @@ export default function LoginPage() {
                   <Label htmlFor="password">{t("loginView.field.password")}</Label>
                   <Link
                     to="/auth/password-recovery"
+                    data-testid={LOGIN_PAGE_HANDLES.FORGOT_PASSWORD_LINK}
                     className="ml-auto inline-block text-sm underline"
                   >
                     {t("loginView.other.forgotPassword")}
@@ -230,7 +231,11 @@ export default function LoginPage() {
           {!inviteOnlyRegistration && (
             <div className="mt-4 text-center text-sm">
               {t("loginView.other.dontHaveAccount")}{" "}
-              <Link to="/auth/register" className="underline">
+              <Link
+                to="/auth/register"
+                data-testid={LOGIN_PAGE_HANDLES.REGISTER_LINK}
+                className="underline"
+              >
                 {t("loginView.other.signUp")}
               </Link>
             </div>

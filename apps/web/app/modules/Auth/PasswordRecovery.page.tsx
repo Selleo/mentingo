@@ -14,6 +14,8 @@ import { useToast } from "~/components/ui/use-toast";
 import { cn } from "~/lib/utils";
 import { setPageTitle } from "~/utils/setPageTitle";
 
+import { PASSWORD_RECOVERY_PAGE_HANDLES } from "../../../e2e/data/auth/handles";
+
 import type { MetaFunction } from "@remix-run/react";
 import type { ForgotPasswordBody } from "~/api/generated-api";
 
@@ -61,7 +63,7 @@ export default function PasswordRecoveryPage() {
         />
       )}
       <div className="flex min-h-screen flex-col items-center justify-center px-4 py-12">
-        <Card className="mx-auto w-full max-w-md">
+        <Card className="mx-auto w-full max-w-md" data-testid={PASSWORD_RECOVERY_PAGE_HANDLES.PAGE}>
           <CardHeader>
             <CardTitle className="mt-6 text-center text-3xl font-bold tracking-tight">
               {t("forgotPasswordView.header")}
@@ -79,17 +81,26 @@ export default function PasswordRecoveryPage() {
                   type="email"
                   autoComplete="email"
                   placeholder="user@example.com"
+                  data-testid={PASSWORD_RECOVERY_PAGE_HANDLES.EMAIL}
                   className={cn({ "border-red-500": errors.email })}
                   {...register("email")}
                 />
                 {errors.email && <div className="text-sm text-red-500">{errors.email.message}</div>}
               </div>
-              <Button type="submit" className="w-full">
+              <Button
+                type="submit"
+                className="w-full"
+                data-testid={PASSWORD_RECOVERY_PAGE_HANDLES.SUBMIT}
+              >
                 {t("forgotPasswordView.button.resetPassword")}
               </Button>
             </form>
             <div className="mt-8 flex justify-center">
-              <Link to="/auth/login" className="text-sm font-medium text-muted-foreground">
+              <Link
+                to="/auth/login"
+                data-testid={PASSWORD_RECOVERY_PAGE_HANDLES.BACK_TO_LOGIN_LINK}
+                className="text-sm font-medium text-muted-foreground"
+              >
                 {t("forgotPasswordView.button.backToLogin")}
               </Link>
             </div>

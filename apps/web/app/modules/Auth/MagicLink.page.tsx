@@ -13,6 +13,8 @@ import { useToast } from "~/components/ui/use-toast";
 import { cn } from "~/lib/utils";
 import { setPageTitle } from "~/utils/setPageTitle";
 
+import { MAGIC_LINK_PAGE_HANDLES } from "../../../e2e/data/auth/handles";
+
 import { magicLinkSchema } from "./schemas/magicLink.schema";
 
 import type { MetaFunction } from "@remix-run/react";
@@ -58,7 +60,7 @@ export default function MagicLinkPage() {
         />
       )}
       <div className="flex min-h-screen flex-col items-center justify-center px-4 py-12">
-        <Card className="mx-auto w-full max-w-md">
+        <Card className="mx-auto w-full max-w-md" data-testid={MAGIC_LINK_PAGE_HANDLES.PAGE}>
           <CardHeader>
             <CardTitle className="mt-6 text-center text-3xl font-bold tracking-tight">
               {t("magicLinkView.header")}
@@ -76,17 +78,27 @@ export default function MagicLinkPage() {
                   type="email"
                   autoComplete="email"
                   placeholder="user@example.com"
+                  data-testid={MAGIC_LINK_PAGE_HANDLES.EMAIL}
                   className={cn({ "border-red-500": errors.email })}
                   {...register("email")}
                 />
                 {errors.email && <div className="text-sm text-red-500">{errors.email.message}</div>}
               </div>
-              <Button type="submit" className="w-full" disabled={isPending}>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isPending}
+                data-testid={MAGIC_LINK_PAGE_HANDLES.SUBMIT}
+              >
                 {isPending ? t("common.button.saving") : t("magicLinkView.button.sendLink")}
               </Button>
             </form>
             <div className="mt-8 flex justify-center">
-              <Link to="/auth/login" className="text-sm font-medium text-muted-foreground">
+              <Link
+                to="/auth/login"
+                data-testid={MAGIC_LINK_PAGE_HANDLES.BACK_TO_LOGIN_LINK}
+                className="text-sm font-medium text-muted-foreground"
+              >
                 {t("magicLinkView.button.backToLogin")}
               </Link>
             </div>

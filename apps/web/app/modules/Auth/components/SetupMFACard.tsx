@@ -18,6 +18,8 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "~/components/ui/input-otp
 import { Label } from "~/components/ui/label";
 import { Skeleton } from "~/components/ui/skeleton";
 
+import { MFA_PAGE_HANDLES } from "../../../../e2e/data/auth/handles";
+
 const mfaSetupSchema = z.object({
   token: z.string().min(1),
 });
@@ -38,7 +40,7 @@ export function SetupMFACard() {
   };
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className="w-full max-w-md" data-testid={MFA_PAGE_HANDLES.PAGE}>
       <CardHeader className="my-2 text-center">
         <CardTitle>{t("mfa.setup.title")}</CardTitle>
         <CardDescription>{t("mfa.setup.description")}</CardDescription>
@@ -57,7 +59,9 @@ export function SetupMFACard() {
             <QRCodeSVG value={enableMFAData?.data.otpauth ?? ""} className="size-44" />
             <div className="mt-2 text-sm">
               {t("mfa.setup.secretLabel")}:{" "}
-              <span className="font-mono">{enableMFAData?.data.secret ?? ""}</span>
+              <span className="font-mono" data-testid={MFA_PAGE_HANDLES.SECRET}>
+                {enableMFAData?.data.secret ?? ""}
+              </span>
             </div>
           </div>
         )}
@@ -71,6 +75,7 @@ export function SetupMFACard() {
             id="token"
             name="token"
             maxLength={6}
+            data-testid={MFA_PAGE_HANDLES.TOKEN}
             value={watch("token")}
             onChange={(newValue: string) => setValue("token", newValue)}
           >
@@ -80,7 +85,12 @@ export function SetupMFACard() {
               ))}
             </InputOTPGroup>
           </InputOTP>
-          <Button variant="primary" className="mt-4" disabled={isVerifyingMFA}>
+          <Button
+            variant="primary"
+            className="mt-4"
+            disabled={isVerifyingMFA}
+            data-testid={MFA_PAGE_HANDLES.SUBMIT}
+          >
             {t("mfa.setup.verifyButton")}
           </Button>
         </form>

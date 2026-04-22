@@ -6,6 +6,8 @@ import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
 import { baseUrl } from "~/utils/baseUrl";
 
+import { LOGIN_PAGE_HANDLES } from "../../../../e2e/data/auth/handles";
+
 interface SocialLoginProps {
   isSSOEnforced?: boolean;
   isGoogleOAuthEnabled?: boolean;
@@ -40,7 +42,7 @@ export function SocialLogin({
       )}
 
       <Button type="button" variant="outline" className="mt-4 w-full" asChild>
-        <Link to="/auth/magic-link">
+        <Link to="/auth/magic-link" data-testid={LOGIN_PAGE_HANDLES.MAGIC_LINK_LINK}>
           <Icon name="WandSparkles" className="mr-2 size-4" />
           {t("loginView.other.useMagicLink")}
         </Link>

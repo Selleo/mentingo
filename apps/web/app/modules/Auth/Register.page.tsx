@@ -27,6 +27,8 @@ import { cn } from "~/lib/utils";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { setPageTitle } from "~/utils/setPageTitle";
 
+import { REGISTER_PAGE_HANDLES } from "../../../e2e/data/auth/handles";
+
 import { SocialLogin } from "./components";
 import { makeRegisterSchema } from "./schemas/register.schema";
 import { parseBirthday } from "./utils/birthday";
@@ -174,7 +176,7 @@ export default function RegisterPage() {
       <FormProvider {...methods}>
         <div className="relative min-h-screen flex items-center justify-center">
           <div className="flex items-start justify-center px-4 py-6">
-            <Card className="w-full max-w-md">
+            <Card className="w-full max-w-md" data-testid={REGISTER_PAGE_HANDLES.PAGE}>
               <CardHeader>
                 <div className="mb-2 flex justify-center">
                   <PlatformLogo className="h-16 w-auto py-2" alt="Platform Logo" />
@@ -193,6 +195,7 @@ export default function RegisterPage() {
                         id="firstName"
                         type="text"
                         placeholder="John"
+                        data-testid={REGISTER_PAGE_HANDLES.FIRST_NAME}
                         {...register("firstName")}
                       />
                       {errors.firstName?.message && (
@@ -206,6 +209,7 @@ export default function RegisterPage() {
                         id="lastName"
                         type="text"
                         placeholder="Doe"
+                        data-testid={REGISTER_PAGE_HANDLES.LAST_NAME}
                         {...register("lastName")}
                       />
                       {errors.lastName?.message && (
@@ -228,6 +232,7 @@ export default function RegisterPage() {
                                   <Button
                                     id="birthday"
                                     type="button"
+                                    data-testid={REGISTER_PAGE_HANDLES.BIRTHDAY}
                                     variant="outline"
                                     className={cn(
                                       "w-full flex items-center gap-3 font-normal bg-white shadow-sm border-neutral-200",
@@ -279,6 +284,7 @@ export default function RegisterPage() {
                         id="email"
                         type="email"
                         placeholder="user@example.com"
+                        data-testid={REGISTER_PAGE_HANDLES.EMAIL}
                         {...register("email")}
                       />
                       {errors.email?.message && (
@@ -288,7 +294,12 @@ export default function RegisterPage() {
 
                     <div className="grid gap-2">
                       <Label htmlFor="password">{t("registerView.field.password")}</Label>
-                      <Input id="password" type="password" {...register("password")} />
+                      <Input
+                        id="password"
+                        type="password"
+                        data-testid={REGISTER_PAGE_HANDLES.PASSWORD}
+                        {...register("password")}
+                      />
                       <PasswordValidationDisplay fieldName="password" />
                     </div>
 
@@ -336,7 +347,12 @@ export default function RegisterPage() {
                       </div>
                     ) : null}
 
-                    <Button type="submit" className="w-full" disabled={!isValid}>
+                    <Button
+                      type="submit"
+                      className="w-full"
+                      disabled={!isValid}
+                      data-testid={REGISTER_PAGE_HANDLES.SUBMIT}
+                    >
                       {t("registerView.button.createAccount")}
                     </Button>
                   </form>
@@ -353,7 +369,11 @@ export default function RegisterPage() {
 
                 <div className="mt-4 text-center text-sm">
                   {t("registerView.other.alreadyHaveAccount")}{" "}
-                  <Link to="/auth/login" className="underline">
+                  <Link
+                    to="/auth/login"
+                    className="underline"
+                    data-testid={REGISTER_PAGE_HANDLES.SIGN_IN_LINK}
+                  >
                     {t("registerView.button.signIn")}
                   </Link>
                 </div>
