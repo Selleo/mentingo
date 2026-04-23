@@ -20,6 +20,8 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 
+import { EDIT_COURSE_PAGE_HANDLES } from "../../../../../e2e/data/courses/handles";
+
 import { CreateLanguageDialog } from "./CreateNewLanguageModal";
 import { DeleteLanguageDialog } from "./DeleteLanguageDialog";
 
@@ -135,12 +137,20 @@ export const CourseLanguageSelector = ({
       </TooltipProvider>
 
       <Select value={courseLanguage} onValueChange={handleLanguageChange}>
-        <SelectTrigger className="min-w-[200px]">
+        <SelectTrigger
+          data-testid={EDIT_COURSE_PAGE_HANDLES.LANGUAGE_SELECT}
+          className="min-w-[200px]"
+        >
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
           {addedItems.map((item) => (
-            <SelectItem value={item.key} key={item.key} className="w-full">
+            <SelectItem
+              data-testid={EDIT_COURSE_PAGE_HANDLES.languageOption(item.key)}
+              value={item.key}
+              key={item.key}
+              className="w-full"
+            >
               <div className="flex w-full items-center gap-2">
                 <Icon name={item.iconName} className="size-4" />
                 <span className="font-semibold">{t(item.translationKey)}</span>
@@ -161,7 +171,11 @@ export const CourseLanguageSelector = ({
                 {t("adminCourseView.common.notAddedLanguages")}
               </div>
               {notAddedItems.map((item) => (
-                <SelectItem value={item.key} key={item.key}>
+                <SelectItem
+                  data-testid={EDIT_COURSE_PAGE_HANDLES.languageOption(item.key)}
+                  value={item.key}
+                  key={item.key}
+                >
                   <div className="flex w-full items-center gap-2">
                     <Icon name={item.iconName} className="size-4" />
                     <div className="flex flex-col leading-tight">
@@ -177,6 +191,7 @@ export const CourseLanguageSelector = ({
 
       {course?.baseLanguage !== courseLanguage && (
         <Button
+          data-testid={EDIT_COURSE_PAGE_HANDLES.DELETE_LANGUAGE_BUTTON}
           size="icon"
           type="button"
           variant="outline"

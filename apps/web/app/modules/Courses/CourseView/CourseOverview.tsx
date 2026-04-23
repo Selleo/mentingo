@@ -17,6 +17,8 @@ import { usePermissions } from "~/hooks/usePermissions";
 import { courseLanguages } from "~/modules/Admin/EditCourse/components/CourseLanguageSelector";
 import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 
+import { COURSE_OVERVIEW_HANDLES } from "../../../../e2e/data/courses/handles";
+
 import type { GetCourseResponse } from "~/api/generated-api";
 
 type CourseOverviewProps = {
@@ -54,6 +56,7 @@ export default function CourseOverview({ course }: CourseOverviewProps) {
                 <TooltipTrigger asChild>
                   <span className="inline-flex mr-2">
                     <Button
+                      data-testid={COURSE_OVERVIEW_HANDLES.STUDENT_MODE_BUTTON}
                       className="flex gap-2"
                       variant={isCourseStudentModeActive ? "primary" : "outline"}
                       onClick={() => toggleLearningMode({ enabled: !isCourseStudentModeActive })}

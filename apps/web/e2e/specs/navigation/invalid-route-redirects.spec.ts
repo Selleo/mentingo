@@ -25,11 +25,6 @@ const FORBIDDEN_ROUTE_REDIRECT_CASES: ForbiddenRouteRedirectCase[] = [
     path: "/admin/promotion-codes",
   },
   {
-    role: USER_ROLE.student,
-    title: "student",
-    path: "/super-admin/tenants",
-  },
-  {
     role: USER_ROLE.contentCreator,
     title: "content creator",
     path: "/admin/envs",
@@ -45,13 +40,13 @@ const FORBIDDEN_ROUTE_REDIRECT_CASES: ForbiddenRouteRedirectCase[] = [
     path: "/admin/promotion-codes",
   },
   {
-    role: USER_ROLE.contentCreator,
-    title: "content creator",
+    role: USER_ROLE.student,
+    title: "student",
     path: "/super-admin/tenants",
   },
   {
-    role: USER_ROLE.admin,
-    title: "admin",
+    role: USER_ROLE.contentCreator,
+    title: "content creator",
     path: "/super-admin/tenants",
   },
 ];

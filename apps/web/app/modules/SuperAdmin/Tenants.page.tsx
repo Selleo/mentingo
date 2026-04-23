@@ -22,6 +22,8 @@ import { SearchFilter } from "~/modules/common/SearchFilter/SearchFilter";
 import { getTenantsColumns } from "~/modules/SuperAdmin/tenants.columns";
 import { setPageTitle } from "~/utils/setPageTitle";
 
+import { TENANTS_PAGE_HANDLES } from "../../../e2e/data/tenants/handles";
+
 import type { ITEMS_PER_PAGE_OPTIONS } from "~/components/Pagination/Pagination";
 import type { FilterConfig, FilterValue } from "~/modules/common/SearchFilter/SearchFilter";
 
@@ -54,6 +56,7 @@ export default function TenantsPage() {
       {
         name: "search",
         type: "text",
+        testId: TENANTS_PAGE_HANDLES.SEARCH_INPUT,
         placeholder: t("superAdminTenantsView.search.placeholder"),
         default: "",
       },
@@ -69,16 +72,18 @@ export default function TenantsPage() {
 
   return (
     <PageWrapper>
-      <div className="flex flex-col gap-y-4">
+      <div data-testid={TENANTS_PAGE_HANDLES.PAGE} className="flex flex-col gap-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-semibold">{t("superAdminTenantsView.title")}</h1>
+            <h1 data-testid={TENANTS_PAGE_HANDLES.HEADING} className="text-xl font-semibold">
+              {t("superAdminTenantsView.title")}
+            </h1>
             <p className="text-sm text-muted-foreground">
               {t("superAdminTenantsView.description")}
             </p>
           </div>
           <Button asChild className="gap-2">
-            <Link to="/super-admin/tenants/new">
+            <Link data-testid={TENANTS_PAGE_HANDLES.CREATE_BUTTON} to="/super-admin/tenants/new">
               <Plus className="size-4" aria-hidden="true" />
               {t("superAdminTenantsView.actions.create")}
             </Link>
@@ -100,7 +105,7 @@ export default function TenantsPage() {
         </div>
 
         <div>
-          <Table className="border bg-neutral-50">
+          <Table data-testid={TENANTS_PAGE_HANDLES.TABLE} className="border bg-neutral-50">
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
@@ -112,7 +117,7 @@ export default function TenantsPage() {
                 </TableRow>
               ))}
             </TableHeader>
-            <TableBody>
+            <TableBody data-testid={TENANTS_PAGE_HANDLES.TABLE_BODY}>
               {isLoading && (
                 <TableRow>
                   <TableCell colSpan={columns.length} className="text-center text-muted-foreground">
@@ -128,7 +133,11 @@ export default function TenantsPage() {
                 </TableRow>
               )}
               {table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} className="hover:bg-neutral-100">
+                <TableRow
+                  key={row.id}
+                  data-testid={TENANTS_PAGE_HANDLES.row(row.original.id)}
+                  className="hover:bg-neutral-100"
+                >
                   {row.getVisibleCells().map((cell, index) => (
                     <TableCell key={cell.id} className={cn({ "!w-12": index === 0 })}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}

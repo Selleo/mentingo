@@ -4,6 +4,8 @@ import { useUpdateCourseSettings } from "~/api/mutations/useUpdateCourseSettings
 import { useCourseSettings } from "~/api/queries/useCourseSettings";
 import { Switch } from "~/components/ui/switch";
 
+import { COURSE_SETTINGS_HANDLES } from "../../../../../../e2e/data/courses/handles";
+
 type Props = {
   courseId: string;
 };
@@ -53,6 +55,11 @@ export const CourseSettingsSwitches = ({ courseId }: Props) => {
           className="rounded-lg border border-neutral-300 p-4 gap-3 items-center flex"
         >
           <Switch
+            data-testid={
+              setting.key === "lessonSequenceEnabled"
+                ? COURSE_SETTINGS_HANDLES.LESSON_SEQUENCE_SWITCH
+                : COURSE_SETTINGS_HANDLES.QUIZ_FEEDBACK_SWITCH
+            }
             checked={setting.isEnabled}
             onCheckedChange={setting.onToggle}
             disabled={isDisabled}

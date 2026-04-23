@@ -10,6 +10,8 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 
+import { COURSE_LANGUAGE_DIALOG_HANDLES } from "../../../../../e2e/data/courses/handles";
+
 import type { SupportedLanguages } from "@repo/shared";
 
 interface CreateLanguageDialogProps {
@@ -46,14 +48,23 @@ export const CreateLanguageDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent>
+      <DialogContent data-testid={COURSE_LANGUAGE_DIALOG_HANDLES.CREATE_DIALOG}>
         <DialogTitle>{t("adminCourseView.createLanguage.title")}</DialogTitle>
         <DialogDescription>{t("adminCourseView.createLanguage.description")}</DialogDescription>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
+          <Button
+            data-testid={COURSE_LANGUAGE_DIALOG_HANDLES.CREATE_CANCEL_BUTTON}
+            variant="outline"
+            onClick={() => setOpen(false)}
+          >
             {t("contentCreatorView.button.cancel")}
           </Button>
-          <Button onClick={handleConfirm}>{t("contentCreatorView.button.confirm")}</Button>
+          <Button
+            data-testid={COURSE_LANGUAGE_DIALOG_HANDLES.CREATE_CONFIRM_BUTTON}
+            onClick={handleConfirm}
+          >
+            {t("contentCreatorView.button.confirm")}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

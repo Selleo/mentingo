@@ -30,6 +30,7 @@ import { courseLanguages } from "~/modules/Admin/EditCourse/components/CourseLan
 import { setPageTitle } from "~/utils/setPageTitle";
 import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
+import { CREATE_COURSE_PAGE_HANDLES } from "../../../../e2e/data/courses/handles";
 import { InlineCategoryCreationForm } from "../Categories/components/InlineCategoryCreationForm";
 
 import Breadcrumb from "./components/Breadcrumb";
@@ -83,14 +84,19 @@ const AddCourse = () => {
   };
 
   return (
-    <div className="flex h-screen overflow-auto bg-white px-20 py-8">
+    <div
+      data-testid={CREATE_COURSE_PAGE_HANDLES.PAGE}
+      className="flex h-screen overflow-auto bg-white px-20 py-8"
+    >
       <div className="flex w-full items-center justify-center">
         <img src={SplashScreenImage} alt="splashScreenImage" className="rounded" />
       </div>
       <div className="flex w-full max-w-[820px] flex-col gap-y-6 px-8">
         <Breadcrumb />
         <hgroup className="gapy-y-1 flex flex-col">
-          <h1 className="h3 text-neutral-950">{t("adminCourseView.settings.header")}</h1>
+          <h1 data-testid={CREATE_COURSE_PAGE_HANDLES.HEADING} className="h3 text-neutral-950">
+            {t("adminCourseView.settings.header")}
+          </h1>
           <p className="body-lg-md text-neutral-800">{t("adminCourseView.settings.subHeader")}</p>
         </hgroup>
         <Form {...form}>
@@ -107,6 +113,7 @@ const AddCourse = () => {
                     </Label>
                     <FormControl>
                       <Input
+                        data-testid={CREATE_COURSE_PAGE_HANDLES.TITLE_INPUT}
                         id="title"
                         {...field}
                         required
@@ -131,6 +138,7 @@ const AddCourse = () => {
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger
+                            data-testid={CREATE_COURSE_PAGE_HANDLES.CATEGORY_SELECT}
                             id="categoryId"
                             className="data-[placeholder]:body-base rounded-lg border border-neutral-300 focus:border-primary-800 focus:ring-primary-800"
                           >
@@ -144,7 +152,9 @@ const AddCourse = () => {
                             <SelectItem
                               value={category.id}
                               key={category.id}
-                              data-testid={`category-option-${category.title}`}
+                              data-testid={CREATE_COURSE_PAGE_HANDLES.categoryOption(
+                                category.title,
+                              )}
                             >
                               {category.title}
                             </SelectItem>
@@ -195,12 +205,17 @@ const AddCourse = () => {
                     </TooltipProvider>
                   </Label>
                   <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger>
+                    <SelectTrigger data-testid={CREATE_COURSE_PAGE_HANDLES.LANGUAGE_SELECT}>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       {courseLanguages.map((item) => (
-                        <SelectItem value={item.key} key={item.key} className="w-full">
+                        <SelectItem
+                          data-testid={CREATE_COURSE_PAGE_HANDLES.languageOption(item.key)}
+                          value={item.key}
+                          key={item.key}
+                          className="w-full"
+                        >
                           <div className="flex w-full items-center gap-2">
                             <Icon name={item.iconName} className="size-4" />
                             <span className="font-semibold">{t(item.translationKey)}</span>
@@ -222,7 +237,9 @@ const AddCourse = () => {
                     <span className="text-red-500">*</span>{" "}
                     {t("adminCourseView.settings.field.description")}
                   </Label>
-                  <BaseEditor id="description" {...field} />
+                  <div data-testid={CREATE_COURSE_PAGE_HANDLES.DESCRIPTION_EDITOR}>
+                    <BaseEditor id="description" {...field} />
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
@@ -278,13 +295,18 @@ const AddCourse = () => {
             <div className="pb-5">
               <div className="mb-10 mt-5 flex space-x-5">
                 <Button
+                  data-testid={CREATE_COURSE_PAGE_HANDLES.CANCEL_BUTTON}
                   type="button"
                   className="rounded border-2 bg-white px-6 py-2 text-primary-800"
                   onClick={() => navigate("/admin/courses")}
                 >
                   {t("common.button.cancel")}
                 </Button>
-                <Button type="submit" disabled={!isFormValid || isUploading}>
+                <Button
+                  data-testid={CREATE_COURSE_PAGE_HANDLES.SUBMIT_BUTTON}
+                  type="submit"
+                  disabled={!isFormValid || isUploading}
+                >
                   {t("common.button.proceed")}
                 </Button>
               </div>

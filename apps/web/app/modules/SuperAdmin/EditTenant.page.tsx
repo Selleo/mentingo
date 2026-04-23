@@ -24,6 +24,8 @@ import {
 } from "~/modules/SuperAdmin/schemas/tenant.schema";
 import { setPageTitle } from "~/utils/setPageTitle";
 
+import { TENANT_FORM_HANDLES, TENANT_PAGE_HANDLES } from "../../../e2e/data/tenants/handles";
+
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.tenant");
 
 import type { TenantStatus } from "@repo/shared";
@@ -62,16 +64,18 @@ export default function EditTenantPage() {
 
   return (
     <PageWrapper>
-      <div className="flex flex-col gap-y-6">
+      <div data-testid={TENANT_PAGE_HANDLES.PAGE} className="flex flex-col gap-y-6">
         <div>
-          <h1 className="text-xl font-semibold">{t("superAdminTenantsView.edit.title")}</h1>
+          <h1 data-testid={TENANT_PAGE_HANDLES.HEADING} className="text-xl font-semibold">
+            {t("superAdminTenantsView.edit.title")}
+          </h1>
           <p className="text-sm text-muted-foreground">
             {t("superAdminTenantsView.edit.description")}
           </p>
         </div>
 
         {isLoading ? (
-          <div className="text-sm text-muted-foreground">
+          <div data-testid={TENANT_PAGE_HANDLES.LOADING} className="text-sm text-muted-foreground">
             {t("superAdminTenantsView.table.loading")}
           </div>
         ) : (
@@ -84,7 +88,7 @@ export default function EditTenantPage() {
                   <FormItem>
                     <Label htmlFor="name">{t("superAdminTenantsView.form.tenantName")}</Label>
                     <FormControl>
-                      <Input id="name" {...field} />
+                      <Input data-testid={TENANT_FORM_HANDLES.NAME_INPUT} id="name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -99,6 +103,7 @@ export default function EditTenantPage() {
                     <Label htmlFor="host">{t("superAdminTenantsView.form.tenantHost")}</Label>
                     <FormControl>
                       <Input
+                        data-testid={TENANT_FORM_HANDLES.HOST_INPUT}
                         id="host"
                         placeholder={t("superAdminTenantsView.form.tenantHostPlaceholder")}
                         {...field}
@@ -117,17 +122,23 @@ export default function EditTenantPage() {
                     <Label>{t("superAdminTenantsView.form.status")}</Label>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger data-testid={TENANT_FORM_HANDLES.STATUS_SELECT}>
                           <SelectValue
                             placeholder={t("superAdminTenantsView.form.statusPlaceholder")}
                           />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="active">
+                        <SelectItem
+                          data-testid={TENANT_FORM_HANDLES.statusOption("active")}
+                          value="active"
+                        >
                           {t("superAdminTenantsView.status.active")}
                         </SelectItem>
-                        <SelectItem value="inactive">
+                        <SelectItem
+                          data-testid={TENANT_FORM_HANDLES.statusOption("inactive")}
+                          value="inactive"
+                        >
                           {t("superAdminTenantsView.status.inactive")}
                         </SelectItem>
                       </SelectContent>
@@ -138,7 +149,9 @@ export default function EditTenantPage() {
               />
 
               <div className="flex justify-end">
-                <Button type="submit">{t("superAdminTenantsView.edit.submit")}</Button>
+                <Button data-testid={TENANT_FORM_HANDLES.SUBMIT_BUTTON} type="submit">
+                  {t("superAdminTenantsView.edit.submit")}
+                </Button>
               </div>
             </form>
           </Form>

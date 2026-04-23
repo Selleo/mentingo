@@ -367,7 +367,7 @@ Based on `playwright-strategy/03-capability-coverage.md`:
 
 ### Japrolol
 
-- Courses
+- Courses -- DONE
   - browse list
   - open details
   - create/update
@@ -379,8 +379,8 @@ Based on `playwright-strategy/03-capability-coverage.md`:
   - delete many
   - transfer ownership
   - language add/remove
-  - generate missing translations
 - Curriculum
+  - generate missing translations
   - chapter create/update/delete/reorder/freemium
   - lesson create/update/delete/reorder
   - lesson types: content/quiz/AI mentor/embed
@@ -417,7 +417,7 @@ Based on `playwright-strategy/03-capability-coverage.md`:
   - course stats widgets
   - learning time
   - quiz results
-- Tenants
+- Tenants -- DONE
   - list/create/edit
 - Voice / AI
   - voice entry points

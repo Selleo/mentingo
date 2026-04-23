@@ -24,6 +24,8 @@ import {
 } from "~/modules/SuperAdmin/schemas/tenant.schema";
 import { setPageTitle } from "~/utils/setPageTitle";
 
+import { CREATE_TENANT_PAGE_HANDLES, TENANT_FORM_HANDLES } from "../../../e2e/data/tenants/handles";
+
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.createTenant");
 
 export default function CreateTenantPage() {
@@ -51,9 +53,11 @@ export default function CreateTenantPage() {
 
   return (
     <PageWrapper>
-      <div className="flex flex-col gap-y-6">
+      <div data-testid={CREATE_TENANT_PAGE_HANDLES.PAGE} className="flex flex-col gap-y-6">
         <div>
-          <h1 className="text-xl font-semibold">{t("superAdminTenantsView.create.title")}</h1>
+          <h1 data-testid={CREATE_TENANT_PAGE_HANDLES.HEADING} className="text-xl font-semibold">
+            {t("superAdminTenantsView.create.title")}
+          </h1>
           <p className="text-sm text-muted-foreground">
             {t("superAdminTenantsView.create.description")}
           </p>
@@ -68,7 +72,7 @@ export default function CreateTenantPage() {
                 <FormItem>
                   <Label htmlFor="name">{t("superAdminTenantsView.form.tenantName")}</Label>
                   <FormControl>
-                    <Input id="name" {...field} />
+                    <Input data-testid={TENANT_FORM_HANDLES.NAME_INPUT} id="name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -83,6 +87,7 @@ export default function CreateTenantPage() {
                   <Label htmlFor="host">{t("superAdminTenantsView.form.tenantHost")}</Label>
                   <FormControl>
                     <Input
+                      data-testid={TENANT_FORM_HANDLES.HOST_INPUT}
                       id="host"
                       placeholder={t("superAdminTenantsView.form.tenantHostPlaceholder")}
                       {...field}
@@ -101,17 +106,23 @@ export default function CreateTenantPage() {
                   <Label>{t("superAdminTenantsView.form.status")}</Label>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger data-testid={TENANT_FORM_HANDLES.STATUS_SELECT}>
                         <SelectValue
                           placeholder={t("superAdminTenantsView.form.statusPlaceholder")}
                         />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="active">
+                      <SelectItem
+                        data-testid={TENANT_FORM_HANDLES.statusOption("active")}
+                        value="active"
+                      >
                         {t("superAdminTenantsView.status.active")}
                       </SelectItem>
-                      <SelectItem value="inactive">
+                      <SelectItem
+                        data-testid={TENANT_FORM_HANDLES.statusOption("inactive")}
+                        value="inactive"
+                      >
                         {t("superAdminTenantsView.status.inactive")}
                       </SelectItem>
                     </SelectContent>
@@ -131,7 +142,11 @@ export default function CreateTenantPage() {
                       {t("superAdminTenantsView.form.adminFirstName")}
                     </Label>
                     <FormControl>
-                      <Input id="adminFirstName" {...field} />
+                      <Input
+                        data-testid={TENANT_FORM_HANDLES.ADMIN_FIRST_NAME_INPUT}
+                        id="adminFirstName"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -146,7 +161,11 @@ export default function CreateTenantPage() {
                       {t("superAdminTenantsView.form.adminLastName")}
                     </Label>
                     <FormControl>
-                      <Input id="adminLastName" {...field} />
+                      <Input
+                        data-testid={TENANT_FORM_HANDLES.ADMIN_LAST_NAME_INPUT}
+                        id="adminLastName"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -161,7 +180,11 @@ export default function CreateTenantPage() {
                 <FormItem>
                   <Label htmlFor="adminEmail">{t("superAdminTenantsView.form.adminEmail")}</Label>
                   <FormControl>
-                    <Input id="adminEmail" {...field} />
+                    <Input
+                      data-testid={TENANT_FORM_HANDLES.ADMIN_EMAIL_INPUT}
+                      id="adminEmail"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -169,7 +192,9 @@ export default function CreateTenantPage() {
             />
 
             <div className="flex justify-end">
-              <Button type="submit">{t("superAdminTenantsView.create.submit")}</Button>
+              <Button data-testid={TENANT_FORM_HANDLES.SUBMIT_BUTTON} type="submit">
+                {t("superAdminTenantsView.create.submit")}
+              </Button>
             </div>
           </form>
         </Form>

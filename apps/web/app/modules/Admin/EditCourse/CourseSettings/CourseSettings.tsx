@@ -31,6 +31,7 @@ import { useTusVideoUpload } from "~/hooks/useTusVideoUpload";
 import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/components/MissingTranslationsAlert";
 import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
+import { COURSE_SETTINGS_HANDLES } from "../../../../../e2e/data/courses/handles";
 import {
   MAX_COURSE_DESCRIPTION_HTML_LENGTH,
   MAX_COURSE_DESCRIPTION_LENGTH,
@@ -229,6 +230,7 @@ const CourseSettings = ({
               <form className="flex flex-col gap-y-6" onSubmit={form.handleSubmit(onSubmit)}>
                 <div className="flex gap-x-6 *:w-full">
                   <FormTextField
+                    data-testid={COURSE_SETTINGS_HANDLES.TITLE_INPUT}
                     control={form.control}
                     name="title"
                     required
@@ -245,13 +247,20 @@ const CourseSettings = ({
                         </Label>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
-                            <SelectTrigger id="categoryId">
+                            <SelectTrigger
+                              data-testid={COURSE_SETTINGS_HANDLES.CATEGORY_SELECT}
+                              id="categoryId"
+                            >
                               <SelectValue placeholder={t("selectCategory")} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
                             {categories.map((category) => (
-                              <SelectItem value={category.id} key={category.id}>
+                              <SelectItem
+                                data-testid={COURSE_SETTINGS_HANDLES.categoryOption(category.title)}
+                                value={category.id}
+                                key={category.id}
+                              >
                                 {category.title}
                               </SelectItem>
                             ))}
@@ -267,16 +276,18 @@ const CourseSettings = ({
                     )}
                   />
                 </div>
-                <BaseEditor
-                  id="description"
-                  content={description}
-                  onChange={(value) =>
-                    form.setValue("description", value, {
-                      shouldDirty: true,
-                      shouldTouch: true,
-                    })
-                  }
-                />
+                <div data-testid={COURSE_SETTINGS_HANDLES.DESCRIPTION_EDITOR}>
+                  <BaseEditor
+                    id="description"
+                    content={description}
+                    onChange={(value) =>
+                      form.setValue("description", value, {
+                        shouldDirty: true,
+                        shouldTouch: true,
+                      })
+                    }
+                  />
+                </div>
                 {watchedDescription.length > MAX_COURSE_DESCRIPTION_HTML_LENGTH && (
                   <p className="text-sm text-red-500">
                     {t("adminCourseView.settings.other.reachedCharactersLimitHtml")}
@@ -375,7 +386,11 @@ const CourseSettings = ({
                   )}
                 </div>
                 <div className="flex space-x-5">
-                  <Button type="submit" disabled={!isFormValid || isUploading}>
+                  <Button
+                    data-testid={COURSE_SETTINGS_HANDLES.SAVE_BUTTON}
+                    type="submit"
+                    disabled={!isFormValid || isUploading}
+                  >
                     {t("common.button.save")}
                   </Button>
                 </div>
