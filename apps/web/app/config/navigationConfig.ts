@@ -100,6 +100,7 @@ export const getNavigationConfig = (
                       label: t("navigationSideBar.news"),
                       path: `news`,
                       iconName: "News",
+                      testId: NAVIGATION_HANDLES.NEWS_LINK,
                     },
                   ] as NavigationItem[])
                 : []),
@@ -109,6 +110,7 @@ export const getNavigationConfig = (
                       label: t("navigationSideBar.articles"),
                       path: `articles`,
                       iconName: "Articles",
+                      testId: NAVIGATION_HANDLES.ARTICLES_LINK,
                     },
                   ] as NavigationItem[])
                 : []),

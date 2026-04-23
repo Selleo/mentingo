@@ -17,6 +17,7 @@ import { ContentAccessGuard } from "~/Guards/AccessGuard";
 import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
 
+import { ARTICLE_DETAILS_PAGE_HANDLES } from "../../../e2e/data/articles/handles";
 import Loader from "../common/Loader/Loader";
 import { useLanguageStore } from "../Dashboard/Settings/Language/LanguageStore";
 
@@ -84,6 +85,7 @@ export default function ArticleDetailsPage() {
   return (
     <ContentAccessGuard type={ACCESS_GUARD.UNREGISTERED_ARTICLES_ACCESS}>
       <PageWrapper
+        data-testid={ARTICLE_DETAILS_PAGE_HANDLES.PAGE}
         breadcrumbs={[
           { title: t("navigationSideBar.articles"), href: "/articles" },
           { title: article.title, href: `/articles/${article.id}` },
@@ -96,6 +98,7 @@ export default function ArticleDetailsPage() {
         {canEdit && (
           <div className="flex justify-end gap-2 max-w-6xl mx-auto w-full">
             <Button
+              data-testid={ARTICLE_DETAILS_PAGE_HANDLES.EDIT_BUTTON}
               variant="outline"
               className="gap-2"
               onClick={() => {
@@ -122,9 +125,11 @@ export default function ArticleDetailsPage() {
             })}
           >
             <h1 className="text-[40px] font-bold leading-[1.1] text-neutral-950">
-              {article.title}
+              <span data-testid={ARTICLE_DETAILS_PAGE_HANDLES.TITLE}>{article.title}</span>
             </h1>
-            <p className="text-lg font-normal leading-8 text-neutral-700">{article.summary}</p>
+            <p className="text-lg font-normal leading-8 text-neutral-700">
+              <span data-testid={ARTICLE_DETAILS_PAGE_HANDLES.SUMMARY}>{article.summary}</span>
+            </p>
             <div className="flex flex-wrap items-center gap-1 text-sm font-normal leading-5 text-neutral-700">
               <div className="flex items-center gap-2 px-3 py-1">
                 <Icon name="User" className="text-neutral-600 size-4" />
@@ -162,6 +167,7 @@ export default function ArticleDetailsPage() {
 
           <div className="mx-auto flex w-full items-center justify-between pb-6 px-6">
             <Button
+              data-testid={ARTICLE_DETAILS_PAGE_HANDLES.PREVIOUS_BUTTON}
               variant="ghost"
               className="flex items-center gap-2 select-none disabled:opacity-50"
               onClick={() => {
@@ -176,6 +182,7 @@ export default function ArticleDetailsPage() {
               </span>
             </Button>
             <Button
+              data-testid={ARTICLE_DETAILS_PAGE_HANDLES.NEXT_BUTTON}
               variant="ghost"
               className="flex items-center gap-2 select-none disabled:opacity-50"
               onClick={() => {

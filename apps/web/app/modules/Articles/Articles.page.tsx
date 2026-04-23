@@ -8,6 +8,8 @@ import { PageWrapper } from "~/components/PageWrapper";
 import { ContentAccessGuard } from "~/Guards/AccessGuard";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
+import { ARTICLES_PAGE_HANDLES } from "../../../e2e/data/articles/handles";
+
 function ArticlesPage() {
   const { t } = useTranslation();
 
@@ -25,6 +27,7 @@ function ArticlesPage() {
   return (
     <ContentAccessGuard type={ACCESS_GUARD.UNREGISTERED_ARTICLES_ACCESS}>
       <PageWrapper
+        data-testid={ARTICLES_PAGE_HANDLES.PAGE}
         breadcrumbs={[
           {
             title: t("navigationSideBar.articles"),

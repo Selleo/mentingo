@@ -40,6 +40,7 @@ import { useUploadDisplayModeDialog } from "~/hooks/useUploadDisplayModeDialog";
 import { LanguageSelector } from "~/modules/Articles/LanguageSelector";
 import { filterChangedData } from "~/utils/filterChangedData";
 
+import { ARTICLE_FORM_PAGE_HANDLES } from "../../../e2e/data/articles/handles";
 import Loader from "../common/Loader/Loader";
 import { useLanguageStore } from "../Dashboard/Settings/Language/LanguageStore";
 
@@ -263,7 +264,11 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
   }
 
   return (
-    <PageWrapper breadcrumbs={breadcrumbs} className="bg-neutral-50/80">
+    <PageWrapper
+      breadcrumbs={breadcrumbs}
+      className="bg-neutral-50/80"
+      data-testid={ARTICLE_FORM_PAGE_HANDLES.PAGE}
+    >
       <div className="mx-auto w-full max-w-6xl mt-10">
         <div className="flex flex-col gap-8 rounded-3xl bg-white p-8 shadow-sm ring-1 ring-neutral-100">
           <header className="flex flex-col gap-2 border-b border-neutral-200 pb-4">
@@ -306,6 +311,7 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
                     control={form.control}
                     name="title"
                     placeholder={t("adminArticleView.form.placeholders.title")}
+                    data-testid={ARTICLE_FORM_PAGE_HANDLES.TITLE_INPUT}
                   />
                 </div>
 
@@ -317,6 +323,7 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
                     control={form.control}
                     name="summary"
                     placeholder={t("adminArticleView.form.placeholders.summary")}
+                    data-testid={ARTICLE_FORM_PAGE_HANDLES.SUMMARY_INPUT}
                   />
                 </div>
               </div>
@@ -368,10 +375,16 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
                       className="flex flex-col gap-3"
                     >
                       <TabsList className="w-fit bg-primary-50">
-                        <TabsTrigger value="editor">
+                        <TabsTrigger
+                          value="editor"
+                          data-testid={ARTICLE_FORM_PAGE_HANDLES.CONTENT_EDITOR_TAB}
+                        >
                           {t("adminArticleView.form.editor")}
                         </TabsTrigger>
-                        <TabsTrigger value="preview">
+                        <TabsTrigger
+                          value="preview"
+                          data-testid={ARTICLE_FORM_PAGE_HANDLES.CONTENT_PREVIEW_TAB}
+                        >
                           {t("adminArticleView.form.preview")}
                         </TabsTrigger>
                       </TabsList>
@@ -419,6 +432,7 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
 
               <div className="flex items-center justify-end gap-3 border-t border-neutral-200 pt-4">
                 <Button
+                  data-testid={ARTICLE_FORM_PAGE_HANDLES.CANCEL_BUTTON}
                   type="button"
                   variant="ghost"
                   className="border border-transparent text-neutral-700 hover:border-neutral-200 hover:bg-neutral-100"
@@ -428,7 +442,9 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
                 >
                   {t("common.button.cancel")}
                 </Button>
-                <Button type="submit">{t("adminArticleView.form.saveButton")}</Button>
+                <Button data-testid={ARTICLE_FORM_PAGE_HANDLES.SAVE_BUTTON} type="submit">
+                  {t("adminArticleView.form.saveButton")}
+                </Button>
               </div>
             </form>
           </Form>

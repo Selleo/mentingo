@@ -6,6 +6,8 @@ export const NAVIGATION_HANDLES = {
   ANALYTICS_LINK: "navigation-analytics-link",
   PROGRESS_LINK: "navigation-progress-link",
   CONTENT_GROUP: "navigation-content-toggle",
+  NEWS_LINK: "navigation-news-link",
+  ARTICLES_LINK: "navigation-articles-link",
   MANAGE_TOGGLE: "navigation-manage-toggle",
   USERS_LINK: "navigation-users-link",
   GROUPS_LINK: "navigation-groups-link",

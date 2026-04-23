@@ -18,6 +18,8 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 
+import { CREATE_ARTICLE_DIALOG_HANDLES } from "../../../../../e2e/data/articles/handles";
+
 type SectionOption = { id: string; title: string };
 
 type CreateArticleDialogProps = {
@@ -51,7 +53,7 @@ export function CreateArticleDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md" data-testid={CREATE_ARTICLE_DIALOG_HANDLES.DIALOG}>
         <DialogHeader>
           <DialogTitle>{t("adminArticleView.dialog.createArticle.title")}</DialogTitle>
         </DialogHeader>
@@ -61,7 +63,10 @@ export function CreateArticleDialog({
             {t("adminArticleView.dialog.createArticle.sectionLabel")}
           </Label>
           <Select value={sectionId} onValueChange={setSectionId} disabled={!options.length}>
-            <SelectTrigger id="article-section-select">
+            <SelectTrigger
+              id="article-section-select"
+              data-testid={CREATE_ARTICLE_DIALOG_HANDLES.SECTION_SELECT}
+            >
               <SelectValue
                 placeholder={t("adminArticleView.dialog.createArticle.sectionPlaceholder")}
               />
@@ -81,6 +86,7 @@ export function CreateArticleDialog({
             {t("common.button.cancel")}
           </Button>
           <Button
+            data-testid={CREATE_ARTICLE_DIALOG_HANDLES.CREATE_BUTTON}
             type="button"
             onClick={() => onCreate(sectionId)}
             disabled={!canCreate}

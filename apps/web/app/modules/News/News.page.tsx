@@ -19,6 +19,7 @@ import {
 import { ContentAccessGuard } from "~/Guards/AccessGuard";
 import { usePermissions } from "~/hooks/usePermissions";
 
+import { NEWS_PAGE_HANDLES } from "../../../e2e/data/news/handles";
 import Loader from "../common/Loader/Loader";
 import { useLanguageStore } from "../Dashboard/Settings/Language/LanguageStore";
 
@@ -107,7 +108,9 @@ function NewsPage() {
       return (
         <>
           <div className="flex items-center justify-between pb-10">
-            <h1 className="h4">{t("newsView.header")}</h1>
+            <h1 className="h4" data-testid={NEWS_PAGE_HANDLES.HEADING}>
+              {t("newsView.header")}
+            </h1>
             <div className="flex items-center gap-3">
               {canManageNews && (
                 <Select
@@ -121,17 +124,28 @@ function NewsPage() {
                     setCurrentPage(1);
                   }}
                 >
-                  <SelectTrigger className="w-48">
+                  <SelectTrigger className="w-48" data-testid={NEWS_PAGE_HANDLES.STATUS_FILTER}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="published">{t("newsView.status.publishedMany")}</SelectItem>
-                    <SelectItem value="draft">{t("newsView.status.draftMany")}</SelectItem>
+                    <SelectItem
+                      value="published"
+                      data-testid={NEWS_PAGE_HANDLES.statusFilterOption("published")}
+                    >
+                      {t("newsView.status.publishedMany")}
+                    </SelectItem>
+                    <SelectItem
+                      value="draft"
+                      data-testid={NEWS_PAGE_HANDLES.statusFilterOption("draft")}
+                    >
+                      {t("newsView.status.draftMany")}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               )}
               {canManageNews && (
                 <Button
+                  data-testid={NEWS_PAGE_HANDLES.CREATE_BUTTON}
                   className="flex items-center justify-center rounded-full w-12 h-12"
                   variant="outline"
                   onClick={createEmptyNews}
@@ -143,7 +157,7 @@ function NewsPage() {
           </div>
 
           {firstNews || moreNews.length ? (
-            <>
+            <div data-testid={NEWS_PAGE_HANDLES.ITEM_LIST}>
               <NewsItem {...firstNews} isBig className="mb-6" />
 
               {moreNews.length ? (
@@ -153,7 +167,7 @@ function NewsPage() {
                   ))}
                 </div>
               ) : null}
-            </>
+            </div>
           ) : (
             <div className="flex items-center justify-center h-full">
               <h3 className="body-base-md">{t("newsView.notFound")}</h3>
@@ -191,6 +205,7 @@ function NewsPage() {
         </div>
       ) : (
         <PageWrapper
+          data-testid={NEWS_PAGE_HANDLES.PAGE}
           breadcrumbs={[
             {
               title: t("adminUsersView.breadcrumbs.news"),

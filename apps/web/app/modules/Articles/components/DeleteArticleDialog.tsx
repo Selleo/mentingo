@@ -11,6 +11,8 @@ import {
   DialogTrigger,
 } from "~/components/ui/dialog";
 
+import { ARTICLE_DETAILS_PAGE_HANDLES } from "../../../../e2e/data/articles/handles";
+
 type DeleteArticleDialogProps = {
   articleId?: string;
   isDeleting?: boolean;
@@ -27,7 +29,12 @@ export function DeleteArticleDialog({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="gap-2" disabled={isDeleting}>
+        <Button
+          data-testid={ARTICLE_DETAILS_PAGE_HANDLES.DELETE_BUTTON}
+          variant="outline"
+          className="gap-2"
+          disabled={isDeleting}
+        >
           <Icon name="TrashIcon" className="size-4" />
           <span className="text-sm font-semibold leading-5 text-neutral-800">
             {t("common.button.delete")}
@@ -35,7 +42,11 @@ export function DeleteArticleDialog({
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="max-w-md" noCloseButton={isDeleting}>
+      <DialogContent
+        className="max-w-md"
+        noCloseButton={isDeleting}
+        data-testid={ARTICLE_DETAILS_PAGE_HANDLES.DELETE_DIALOG}
+      >
         <DialogTitle>{t("articlesView.deleteModal.title")}</DialogTitle>
         <DialogDescription>{t("articlesView.deleteModal.description")}</DialogDescription>
 
@@ -46,6 +57,7 @@ export function DeleteArticleDialog({
             </Button>
           </DialogClose>
           <Button
+            data-testid={ARTICLE_DETAILS_PAGE_HANDLES.DELETE_CONFIRM_BUTTON}
             onClick={() => {
               if (!articleId) return;
               onDelete(articleId);
