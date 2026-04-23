@@ -833,7 +833,7 @@ export class AuthService {
 
     return {
       secret,
-      otpauth: `otpauth://totp/Mentingo:${user.email}?secret=${secret}&issuer=Mentingo`,
+      otpauth: await this.buildMfaOtpAuthUri(user.email, secret),
     };
   }
 
@@ -999,6 +999,21 @@ export class AuthService {
     if (!enforcedRoles.length || !roleSlugs.length) return false;
 
     return roleSlugs.some((roleSlug) => enforcedRoles.includes(roleSlug));
+  }
+
+  private async getMfaIssuerName(): Promise<string> {
+    const { companyInformation } = await this.settingsService.getGlobalSettings();
+    const companyName = companyInformation?.companyName;
+
+    return companyName || "Mentingo";
+  }
+
+  private async buildMfaOtpAuthUri(email: string, secret: string): Promise<string> {
+    const issuer = await this.getMfaIssuerName();
+
+    return `otpauth://totp/${encodeURIComponent(
+      `${issuer}:${email}`,
+    )}?secret=${secret}&issuer=${encodeURIComponent(issuer)}`;
   }
 
   private async getOnboardingStatus(userId: UUIDType, db?: DatabasePg) {

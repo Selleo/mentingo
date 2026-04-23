@@ -316,6 +316,48 @@ describe("AuthController (e2e)", () => {
     });
   });
 
+  describe("POST /api/auth/mfa/setup", () => {
+    it("should use the company name from global settings as the MFA issuer", async () => {
+      const user = userFactory.build();
+      const password = "Password123@";
+
+      const registeredUser = await authService.register({
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        password,
+        language: "en",
+      });
+
+      await settingsService.updateCompanyInformation({
+        companyName: "Acme Corp",
+      });
+
+      const { otpauth } = await authService.generateMFASecret(registeredUser.id);
+
+      expect(otpauth).toContain("issuer=Acme%20Corp");
+      expect(otpauth).toContain("Acme%20Corp%3A");
+    });
+
+    it("should fallback to mentingo when the company name is missing", async () => {
+      const user = userFactory.build();
+      const password = "Password123@";
+
+      const registeredUser = await authService.register({
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        password,
+        language: "en",
+      });
+
+      const { otpauth } = await authService.generateMFASecret(registeredUser.id);
+
+      expect(otpauth).toContain("issuer=Mentingo");
+      expect(otpauth).toContain("Mentingo%3A");
+    });
+  });
+
   describe("POST /api/auth/logout", () => {
     it("should clear token cookies for a logged-in user", async () => {
       let accessToken = "";
