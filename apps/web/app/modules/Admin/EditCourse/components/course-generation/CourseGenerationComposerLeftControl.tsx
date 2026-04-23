@@ -8,6 +8,7 @@ type CourseGenerationComposerLeftControlProps = {
   isUploadDisabled: boolean;
   onAttachFile: () => void;
   onCloseVoiceMode: () => void;
+  testId?: string;
 };
 
 export function CourseGenerationComposerLeftControl({
@@ -15,9 +16,11 @@ export function CourseGenerationComposerLeftControl({
   isUploadDisabled,
   onAttachFile,
   onCloseVoiceMode,
+  testId,
 }: CourseGenerationComposerLeftControlProps) {
   return (
     <Button
+      data-testid={testId}
       type="button"
       variant="ghost"
       disabled={!isVoiceMode && isUploadDisabled}

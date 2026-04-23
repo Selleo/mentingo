@@ -11,6 +11,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/comp
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
 import { DeleteContentType } from "~/modules/Admin/EditCourse/EditCourse.types";
 
+import { QUIZ_LESSON_FORM_HANDLES } from "../../../../../../../../e2e/data/curriculum/handles";
+
 import type { QuestionOption } from "../QuizLessonForm.types";
 import type { QuizLessonFormValues } from "../validators/quizLessonFormSchema";
 import type { UseFormReturn } from "react-hook-form";
@@ -151,6 +153,7 @@ const TrueOrFalseQuestion = ({
                             </SortableList.DragHandle>
                           )}
                           <Input
+                            data-testid={QUIZ_LESSON_FORM_HANDLES.optionInput(questionIndex, index)}
                             type="text"
                             value={item.optionText}
                             name={`questions.${questionIndex}.options.${index}.optionText`}
@@ -163,6 +166,10 @@ const TrueOrFalseQuestion = ({
                           />
                           <div className="flex items-center">
                             <Input
+                              data-testid={QUIZ_LESSON_FORM_HANDLES.correctOptionControl(
+                                questionIndex,
+                                index,
+                              )}
                               type="radio"
                               name={`questions.${questionIndex}.options.${index}.isCorrect`}
                               checked={item.isCorrect === true}
@@ -234,13 +241,14 @@ const TrueOrFalseQuestion = ({
             <div className="mb-4 ml-14 mt-4 flex gap-2">
               <Button
                 type="button"
-                data-testid={`add-options-button-${questionIndex}`}
+                data-testid={QUIZ_LESSON_FORM_HANDLES.addOptionButton(questionIndex)}
                 className="bg-primary-700"
                 onClick={handleAddOption}
               >
                 {t("adminCourseView.curriculum.lesson.button.addOption")}
               </Button>
               <Button
+                data-testid={QUIZ_LESSON_FORM_HANDLES.questionDeleteButton(questionIndex)}
                 type="button"
                 className="bg-color-white border border-neutral-300 text-error-700"
                 onClick={() => setIsDeleteModalOpen(true)}

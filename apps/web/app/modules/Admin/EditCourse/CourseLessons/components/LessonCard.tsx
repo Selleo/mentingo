@@ -6,6 +6,7 @@ import { cn } from "~/lib/utils";
 import { LessonType, type Lesson } from "~/modules/Admin/EditCourse/EditCourse.types";
 import { getLessonTypeTranslationKey } from "~/modules/Courses/CourseView/lessonTypes";
 
+import { CURRICULUM_HANDLES } from "../../../../../../e2e/data/curriculum/handles";
 import { mapTypeToIcon } from "../CourseLessons.helpers";
 
 import type { ReactNode } from "react";
@@ -40,6 +41,7 @@ const LessonCard = ({ item, onClickLessonCard, dragTrigger, selectedLesson }: Le
   return (
     <div
       key={item.id}
+      data-testid={CURRICULUM_HANDLES.lessonCard(item.id)}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       tabIndex={0}
@@ -57,7 +59,11 @@ const LessonCard = ({ item, onClickLessonCard, dragTrigger, selectedLesson }: Le
       <div className="flex min-w-0 items-start gap-x-2">
         <Icon name={getIcon as IconName} className="size-6 shrink-0 text-primary-700" />
         <hgroup className="min-w-0">
-          <p className="text-l break-words" title={item.title} data-testid="lesson-title">
+          <p
+            className="text-l break-words"
+            title={item.title}
+            data-testid={CURRICULUM_HANDLES.lessonTitle(item.id)}
+          >
             {item.type === LessonType.QUIZ ? (
               <>
                 {item.title}{" "}

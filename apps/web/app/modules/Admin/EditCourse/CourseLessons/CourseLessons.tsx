@@ -18,6 +18,7 @@ import { CourseGenerationCompletedNotice } from "~/modules/Admin/EditCourse/comp
 import { CourseGenerationExitGuard } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationExitGuard";
 import { CourseGenerationProgressStrip } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationProgressStrip";
 
+import { CURRICULUM_HANDLES } from "../../../../../e2e/data/curriculum/handles";
 import { ContentTypes } from "../EditCourse.types";
 
 import ChaptersList from "./components/ChaptersList";
@@ -221,7 +222,10 @@ const CourseLessons = ({
     (isGenerationProcessing || isBackgroundGenerating) && !isCourseGenerated;
 
   return (
-    <div className="flex basis-full gap-x-8 rounded-lg md:items-start">
+    <div
+      data-testid={CURRICULUM_HANDLES.ROOT}
+      className="flex basis-full gap-x-8 rounded-lg md:items-start"
+    >
       <CourseGenerationExitGuard enabled={isExitGuardEnabled} />
       <div className="flex w-full overflow-y-auto flex-col justify-between md:max-w-[480px]">
         <CourseGenerationProgressStrip
@@ -255,7 +259,12 @@ const CourseLessons = ({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span className={cn(shouldShowCourseGenerationButton ? "w-1/2" : "w-full")}>
-                    <Button onClick={addChapter} disabled className="w-full rounded-lg px-4 py-2">
+                    <Button
+                      data-testid={CURRICULUM_HANDLES.ADD_CHAPTER_BUTTON}
+                      onClick={addChapter}
+                      disabled
+                      className="w-full rounded-lg px-4 py-2"
+                    >
                       <Icon name="Plus" className="mr-2" />
                       {t("adminCourseView.curriculum.chapter.button.addChapter")}
                     </Button>
@@ -273,6 +282,7 @@ const CourseLessons = ({
             </TooltipProvider>
           ) : (
             <Button
+              data-testid={CURRICULUM_HANDLES.ADD_CHAPTER_BUTTON}
               onClick={addChapter}
               disabled={!isBaseLanguage}
               className={cn(
@@ -286,6 +296,7 @@ const CourseLessons = ({
           )}
           {shouldShowCourseGenerationButton && (
             <CourseGenerationButton
+              testId={CURRICULUM_HANDLES.COURSE_GENERATION_BUTTON}
               className="w-1/2"
               onClick={() => setIsGenerationDrawerOpen(true)}
             />

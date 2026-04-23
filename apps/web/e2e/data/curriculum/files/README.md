@@ -4,8 +4,8 @@ Replace these placeholder fixture names with real files before enabling upload s
 
 - `content-image.png`
 - `content-video.mp4`
-- `content-file-preview.pdf`
 - `content-file-download.pdf`
+- `content-file-preview.pdf`
 - `content-presentation-preview.pptx`
 - `content-presentation-download.pptx`
 - `quiz-photo-single-choice.png`

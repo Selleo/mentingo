@@ -10,6 +10,7 @@ type CourseGenerationComposerCenterContentProps = {
   voiceLevel: number;
   onInputChange: (value: string) => void;
   onSubmit: () => void;
+  inputTestId?: string;
 };
 
 export function CourseGenerationComposerCenterContent({
@@ -19,6 +20,7 @@ export function CourseGenerationComposerCenterContent({
   voiceLevel,
   onInputChange,
   onSubmit,
+  inputTestId,
 }: CourseGenerationComposerCenterContentProps) {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const layoutTransition = {
@@ -74,6 +76,7 @@ export function CourseGenerationComposerCenterContent({
             className="relative"
           >
             <textarea
+              data-testid={inputTestId}
               ref={textareaRef}
               value={input}
               onChange={(event) => onInputChange(event.target.value)}

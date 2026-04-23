@@ -17,6 +17,7 @@ interface ImageUploadProps {
   accept?: string;
   imageFit?: "cover" | "contain";
   detailsText?: string;
+  inputTestId?: string;
 }
 
 const ImageUploadInput = ({
@@ -32,6 +33,7 @@ const ImageUploadInput = ({
   accept = ".png, .jpg, .jpeg",
   imageFit = "cover",
   detailsText,
+  inputTestId,
 }: ImageUploadProps) => {
   const { t } = useTranslation();
   const fallbackDetails =
@@ -89,7 +91,7 @@ const ImageUploadInput = ({
         <input
           id={inputId}
           ref={fileInputRef}
-          data-testid="imageUpload"
+          data-testid={inputTestId}
           type="file"
           accept={accept}
           onChange={(e) => {

@@ -29,6 +29,7 @@ import { useLeaveModal } from "~/context/LeaveModalContext";
 import { cn } from "~/lib/utils";
 import { LessonCardList } from "~/modules/Admin/EditCourse/CourseLessons/components/LessonCardList";
 
+import { CURRICULUM_HANDLES } from "../../../../../../e2e/data/curriculum/handles";
 import { ContentTypes } from "../../EditCourse.types";
 
 import type { Chapter, Lesson } from "../../EditCourse.types";
@@ -175,6 +176,7 @@ const ChapterCard = ({
   return (
     <AccordionItem key={chapter.id} data-chapter-id={chapter.id} value={chapter.id} className="p-0">
       <Card
+        data-testid={CURRICULUM_HANDLES.chapterCard(chapter.id)}
         className={cn("mb-4 flex h-full border p-4", {
           "border-primary-500": isOpen || selectedChapter?.id === chapter.id,
         })}
@@ -193,7 +195,7 @@ const ChapterCard = ({
               </hgroup>
               <AccordionTrigger
                 className="cursor-pointer p-2"
-                data-testid={`accordion - ${chapter.id}`}
+                data-testid={CURRICULUM_HANDLES.chapterAccordion(chapter.id)}
                 onClick={onAccordionClick}
               >
                 <Icon name={isOpen ? "ArrowUp" : "ArrowDown"} className="text-gray-600" />
@@ -221,7 +223,12 @@ const ChapterCard = ({
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <span>
-                          <Button variant="outline" onClick={handleAddLessonClick} disabled>
+                          <Button
+                            data-testid={CURRICULUM_HANDLES.addLessonButton(chapter.id)}
+                            variant="outline"
+                            onClick={handleAddLessonClick}
+                            disabled
+                          >
                             <Icon name="Plus" className="mr-2 text-primary-800" />
                             {t("adminCourseView.curriculum.lesson.button.addLesson")}
                           </Button>
@@ -239,6 +246,7 @@ const ChapterCard = ({
                   </TooltipProvider>
                 ) : (
                   <Button
+                    data-testid={CURRICULUM_HANDLES.addLessonButton(chapter.id)}
                     variant="outline"
                     onClick={handleAddLessonClick}
                     disabled={!isBaseLanguage}
@@ -251,7 +259,7 @@ const ChapterCard = ({
 
               <div className="flex items-center gap-x-2">
                 <Switch.Root
-                  data-testid={`Freemium - ${chapter.id}`}
+                  data-testid={CURRICULUM_HANDLES.chapterFreemiumSwitch(chapter.id)}
                   className={cn("relative h-6 w-11 rounded-full transition-colors", {
                     "bg-primary-500": chapter.isFree,
                     "bg-gray-200": !chapter.isFree,
@@ -399,6 +407,7 @@ const ChaptersList = ({
 
   return (
     <Accordion
+      data-testid={CURRICULUM_HANDLES.CHAPTER_LIST}
       type="single"
       collapsible
       value={openItem}
@@ -426,7 +435,11 @@ const ChaptersList = ({
               baseLanguage={baseLanguage}
               dragTrigger={
                 <SortableList.DragHandle>
-                  <Icon name="DragAndDropIcon" className="cursor-move" />
+                  <Icon
+                    data-testid={CURRICULUM_HANDLES.chapterDragHandle(chapter.id)}
+                    name="DragAndDropIcon"
+                    className="cursor-move"
+                  />
                 </SortableList.DragHandle>
               }
             />

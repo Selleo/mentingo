@@ -22,6 +22,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/comp
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
 import { DeleteContentType, type Lesson } from "~/modules/Admin/EditCourse/EditCourse.types";
 
+import { QUIZ_LESSON_FORM_HANDLES } from "../../../../../../../../e2e/data/curriculum/handles";
 import { QuestionType } from "../QuizLessonForm.types";
 
 import type { QuestionOption } from "../QuizLessonForm.types";
@@ -173,6 +174,7 @@ const PhotoQuestion = ({
                       handleImageUpload={handleImageUpload}
                       isUploading={isUploading}
                       imageUrl={displayImageUrl}
+                      inputTestId={QUIZ_LESSON_FORM_HANDLES.photoUploadInput(questionIndex)}
                     />
                   </FormControl>
                   {isUploading && <p>{t("common.other.uploadingImage")}</p>}
@@ -201,7 +203,9 @@ const PhotoQuestion = ({
                       defaultValue={QuestionType.PHOTO_QUESTION_SINGLE_CHOICE}
                       value={field.value || QuestionType.PHOTO_QUESTION_SINGLE_CHOICE}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger
+                        data-testid={QUIZ_LESSON_FORM_HANDLES.photoTypeSelect(questionIndex)}
+                      >
                         <SelectValue
                           className="body-base-md text-left"
                           placeholder={t(
@@ -217,12 +221,20 @@ const PhotoQuestion = ({
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem
+                          data-testid={QUIZ_LESSON_FORM_HANDLES.photoTypeOption(
+                            questionIndex,
+                            QuestionType.PHOTO_QUESTION_SINGLE_CHOICE,
+                          )}
                           value={QuestionType.PHOTO_QUESTION_SINGLE_CHOICE}
                           className="body-base-md text-left"
                         >
                           {t("adminCourseView.curriculum.lesson.placeholder.singleChoice")}
                         </SelectItem>
                         <SelectItem
+                          data-testid={QUIZ_LESSON_FORM_HANDLES.photoTypeOption(
+                            questionIndex,
+                            QuestionType.PHOTO_QUESTION_MULTIPLE_CHOICE,
+                          )}
                           value={QuestionType.PHOTO_QUESTION_MULTIPLE_CHOICE}
                           className="body-base-md text-left"
                         >
@@ -269,6 +281,7 @@ const PhotoQuestion = ({
                             </SortableList.DragHandle>
                           )}
                           <Input
+                            data-testid={QUIZ_LESSON_FORM_HANDLES.optionInput(questionIndex, index)}
                             name={`questions.${questionIndex}.options.${index}.optionText`}
                             type="text"
                             value={item.optionText}
@@ -282,6 +295,10 @@ const PhotoQuestion = ({
                           <div className="flex items-center">
                             {questionType === QuestionType.PHOTO_QUESTION_SINGLE_CHOICE ? (
                               <Input
+                                data-testid={QUIZ_LESSON_FORM_HANDLES.correctOptionControl(
+                                  questionIndex,
+                                  index,
+                                )}
                                 type="radio"
                                 className="size-4 cursor-pointer"
                                 name={`questions.${questionIndex}.options.${index}.isCorrect`}
@@ -294,6 +311,10 @@ const PhotoQuestion = ({
                             ) : (
                               <div className="cursor-pointer">
                                 <Checkbox
+                                  data-testid={QUIZ_LESSON_FORM_HANDLES.correctOptionControl(
+                                    questionIndex,
+                                    index,
+                                  )}
                                   id="isCorrect"
                                   name={`questions.${questionIndex}.options.${index}.isCorrect`}
                                   className="mb-2 mt-2"
@@ -357,13 +378,14 @@ const PhotoQuestion = ({
             <div className="my-4 ml-14 flex gap-2">
               <Button
                 className="bg-primary-700"
-                data-testid={`add-options-button-${questionIndex}`}
+                data-testid={QUIZ_LESSON_FORM_HANDLES.addOptionButton(questionIndex)}
                 type="button"
                 onClick={handleAddOption}
               >
                 {t("adminCourseView.curriculum.lesson.button.addOption")}
               </Button>
               <Button
+                data-testid={QUIZ_LESSON_FORM_HANDLES.questionDeleteButton(questionIndex)}
                 type="button"
                 className="bg-color-white border border-neutral-300 text-error-700"
                 onClick={() => setIsDeleteModalOpen(true)}

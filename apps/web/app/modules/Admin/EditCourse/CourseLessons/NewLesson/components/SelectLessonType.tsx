@@ -4,6 +4,7 @@ import { Icon } from "~/components/Icon";
 import { Badge } from "~/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 
+import { CURRICULUM_HANDLES } from "../../../../../../../e2e/data/curriculum/handles";
 import { ContentTypes } from "../../../EditCourse.types";
 
 import type { LessonIcons } from "../../../EditCourse.types";
@@ -39,6 +40,13 @@ const lessonTypes = [
   },
 ];
 
+const lessonTypeHandleByContentType = {
+  [ContentTypes.CONTENT_LESSON_FORM]: "content",
+  [ContentTypes.QUIZ_FORM]: "quiz",
+  [ContentTypes.EMBED_FORM]: "embed",
+  [ContentTypes.AI_MENTOR_FORM]: "ai_mentor",
+} as const;
+
 const SelectLessonType = ({ setContentTypeToDisplay }: SelectLessonTypeProps) => {
   const { t } = useTranslation();
   return (
@@ -52,6 +60,9 @@ const SelectLessonType = ({ setContentTypeToDisplay }: SelectLessonTypeProps) =>
             return (
               <div
                 key={type}
+                data-testid={CURRICULUM_HANDLES.lessonTypeOption(
+                  lessonTypeHandleByContentType[type],
+                )}
                 className="flex flex-col gap-y-6 rounded-lg border border-neutral-200 px-6 py-4 hover:border-primary-500"
                 role="button"
                 onClick={() => setContentTypeToDisplay(type)}

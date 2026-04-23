@@ -20,6 +20,7 @@ import {
 import { FileLoader } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/components/FileLoader";
 import { UploadFileCard } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/components/UploadFileCard";
 
+import { AI_MENTOR_LESSON_FORM_HANDLES } from "../../../../../../../../e2e/data/curriculum/handles";
 import { FILE_TYPES_MAP } from "../utils/AiMentor.constants";
 import {
   type AiMentorLessonContextValues,
@@ -143,6 +144,7 @@ export function MultiFileUploadForm({ lessonId }: { lessonId: string }) {
           )}
 
           <Input
+            data-testid={AI_MENTOR_LESSON_FORM_HANDLES.RESOURCE_FILE_INPUT}
             id="file-upload"
             ref={(el) => {
               inputRef.current = el;

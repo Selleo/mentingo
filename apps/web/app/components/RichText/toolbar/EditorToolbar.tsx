@@ -23,6 +23,7 @@ import { ToggleGroup, Toolbar } from "~/components/ui/toolbar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
 
+import { RICH_TEXT_HANDLES } from "../../../../e2e/data/common/handles";
 import { InsertLinkDialog } from "../components/InsertLinkDialog";
 
 import { FormatType } from "./FormatType";
@@ -104,6 +105,7 @@ const EditorToolbar = ({
             <Tooltip>
               <TooltipTrigger>
                 <Input
+                  data-testid={RICH_TEXT_HANDLES.UPLOAD_FILE_INPUT}
                   type="file"
                   className="hidden"
                   ref={fileUploadRef}
@@ -112,6 +114,7 @@ const EditorToolbar = ({
                   multiple
                 />
                 <Button
+                  data-testid={RICH_TEXT_HANDLES.UPLOAD_BUTTON}
                   size="sm"
                   className={cn("bg-transparent text-black", {
                     "bg-primary-100": editor.isActive("upload"),

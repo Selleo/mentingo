@@ -8,18 +8,21 @@ type CourseGenerationButtonProps = {
   className?: string;
   hidden?: boolean;
   onClick: () => void;
+  testId?: string;
 };
 
 export function CourseGenerationButton({
   className,
   hidden = false,
   onClick,
+  testId,
 }: CourseGenerationButtonProps) {
   const { t } = useTranslation();
 
   return (
     <div className={cn(className, hidden && "invisible pointer-events-none")}>
       <Button
+        data-testid={testId}
         type="button"
         variant="outline"
         onClick={onClick}

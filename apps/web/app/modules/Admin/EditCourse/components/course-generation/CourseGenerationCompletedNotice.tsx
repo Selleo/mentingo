@@ -4,6 +4,8 @@ import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
 
+import { COURSE_GENERATION_HANDLES } from "../../../../../../e2e/data/curriculum/handles";
+
 type CourseGenerationCompletedNoticeProps = {
   onDismiss: () => void;
   visible: boolean;
@@ -19,6 +21,7 @@ export function CourseGenerationCompletedNotice({
     <AnimatePresence initial={false}>
       {visible ? (
         <motion.section
+          data-testid={COURSE_GENERATION_HANDLES.COMPLETED_NOTICE}
           key="course-generation-completed-notice"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}

@@ -24,6 +24,7 @@ import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmati
 import LeaveConfirmationModal from "~/modules/Admin/components/LeaveConfirmationModal";
 import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/components/MissingTranslationsAlert";
 
+import { CONTENT_LESSON_FORM_HANDLES } from "../../../../../../../e2e/data/curriculum/handles";
 import { ContentTypes, DeleteContentType } from "../../../EditCourse.types";
 import Breadcrumb from "../components/Breadcrumb";
 
@@ -167,7 +168,10 @@ const ContentLessonForm = ({
   };
 
   return (
-    <div className="flex flex-col gap-y-6 rounded-lg bg-white p-8">
+    <div
+      data-testid={CONTENT_LESSON_FORM_HANDLES.ROOT}
+      className="flex flex-col gap-y-6 rounded-lg bg-white p-8"
+    >
       {missingTranslations && <MissingTranslationsAlert />}
       <div className="flex flex-col gap-y-1">
         {!lessonToEdit && (
@@ -199,6 +203,7 @@ const ContentLessonForm = ({
             </Label>
           </div>
           <FormTextField
+            data-testid={CONTENT_LESSON_FORM_HANDLES.TITLE_INPUT}
             control={form.control}
             name="title"
             placeholder={t("adminCourseView.curriculum.lesson.placeholder.title")}
@@ -213,16 +218,18 @@ const ContentLessonForm = ({
                   {t("adminCourseView.curriculum.lesson.field.description")}
                 </Label>
                 <FormControl>
-                  <ContentEditor
-                    id="description"
-                    content={field.value}
-                    lessonId={lessonToEdit?.id}
-                    allowFiles={!!lessonToEdit?.id || !!contextId}
-                    acceptedFileTypes={RICH_TEXT_ACCEPTED_FILE_TYPES}
-                    onUpload={handleFileUpload}
-                    onCtrlSave={() => form.handleSubmit(onSubmit)()}
-                    {...field}
-                  />
+                  <div data-testid={CONTENT_LESSON_FORM_HANDLES.DESCRIPTION_EDITOR}>
+                    <ContentEditor
+                      id="description"
+                      content={field.value}
+                      lessonId={lessonToEdit?.id}
+                      allowFiles={!!lessonToEdit?.id || !!contextId}
+                      acceptedFileTypes={RICH_TEXT_ACCEPTED_FILE_TYPES}
+                      onUpload={handleFileUpload}
+                      onCtrlSave={() => form.handleSubmit(onSubmit)()}
+                      {...field}
+                    />
+                  </div>
                 </FormControl>
               </FormItem>
             )}
@@ -235,10 +242,19 @@ const ContentLessonForm = ({
             </p>
           )}
           <div className="flex gap-x-3">
-            <Button type="submit" className="mt-6">
+            <Button
+              data-testid={CONTENT_LESSON_FORM_HANDLES.SAVE_BUTTON}
+              type="submit"
+              className="mt-6"
+            >
               {t("adminCourseView.curriculum.lesson.button.saveLesson")}
             </Button>
             <Button
+              data-testid={
+                lessonToEdit
+                  ? CONTENT_LESSON_FORM_HANDLES.DELETE_BUTTON
+                  : CONTENT_LESSON_FORM_HANDLES.CANCEL_BUTTON
+              }
               type="button"
               onClick={
                 lessonToEdit ? onClickDelete : () => setContentTypeToDisplay(ContentTypes.EMPTY)
