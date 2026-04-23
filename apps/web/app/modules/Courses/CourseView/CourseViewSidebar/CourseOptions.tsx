@@ -18,6 +18,8 @@ import { Button } from "~/components/ui/button";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { PaymentModal } from "~/modules/stripe/PaymentModal";
 
+import { COURSE_OVERVIEW_HANDLES } from "../../../../../e2e/data/courses/handles";
+
 import type { GetCourseResponse } from "~/api/generated-api";
 
 type CourseOptionsProps = {
@@ -50,7 +52,7 @@ export const CourseOptions = ({ course }: CourseOptionsProps) => {
         : "/auth/register";
 
       return (
-        <Link to={registerPath}>
+        <Link data-testid={COURSE_OVERVIEW_HANDLES.LOGIN_ENROLL_LINK} to={registerPath}>
           <Button className="w-full gap-x-2" variant="primary">
             <Enroll />
             <span>{t("studentCourseView.sideSection.button.enrollCourse")}</span>
@@ -60,7 +62,12 @@ export const CourseOptions = ({ course }: CourseOptionsProps) => {
     }
 
     return (
-      <Button onClick={handleEnrollCourse} className="gap-x-2" variant="primary">
+      <Button
+        data-testid={COURSE_OVERVIEW_HANDLES.ENROLL_BUTTON}
+        onClick={handleEnrollCourse}
+        className="gap-x-2"
+        variant="primary"
+      >
         <Enroll />
         <span>{t("studentCourseView.sideSection.button.enrollCourse")}</span>
       </Button>

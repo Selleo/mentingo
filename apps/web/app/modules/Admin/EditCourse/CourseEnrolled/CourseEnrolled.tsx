@@ -48,6 +48,8 @@ import { SearchFilter } from "~/modules/common/SearchFilter/SearchFilter";
 import { handleRowSelectionRange } from "~/utils/tableRangeSelection";
 import { tanstackSortingToParam } from "~/utils/tanstackSortingToParam";
 
+import { COURSE_ENROLLED_HANDLES } from "../../../../../e2e/data/courses/handles";
+
 import { GroupEnrollModal } from "./GroupEnrollModal";
 import { GroupUnenrollModal } from "./GroupUnenrollModal";
 
@@ -116,6 +118,7 @@ export const CourseEnrolled = (): ReactElement => {
       ),
       cell: ({ row }) => (
         <Checkbox
+          data-testid={COURSE_ENROLLED_HANDLES.rowCheckbox(row.original.id)}
           checked={row.getIsSelected()}
           onCheckedChange={(value) => row.toggleSelected(!!value)}
           aria-label="Select row"
@@ -138,7 +141,10 @@ export const CourseEnrolled = (): ReactElement => {
     {
       accessorKey: "firstName",
       header: ({ column }) => (
-        <SortButton<EnrolledStudent> column={column}>
+        <SortButton<EnrolledStudent>
+          column={column}
+          testId={COURSE_ENROLLED_HANDLES.sortButton("firstName")}
+        >
           {t("adminCourseView.enrolled.table.name")}
         </SortButton>
       ),
@@ -149,7 +155,10 @@ export const CourseEnrolled = (): ReactElement => {
     {
       accessorKey: "lastName",
       header: ({ column }) => (
-        <SortButton<EnrolledStudent> column={column}>
+        <SortButton<EnrolledStudent>
+          column={column}
+          testId={COURSE_ENROLLED_HANDLES.sortButton("lastName")}
+        >
           {t("adminCourseView.enrolled.table.surname")}
         </SortButton>
       ),
@@ -160,7 +169,9 @@ export const CourseEnrolled = (): ReactElement => {
     {
       accessorKey: "email",
       header: ({ column }) => (
-        <SortButton column={column}>{t("adminCourseView.enrolled.table.email")}</SortButton>
+        <SortButton column={column} testId={COURSE_ENROLLED_HANDLES.sortButton("email")}>
+          {t("adminCourseView.enrolled.table.email")}
+        </SortButton>
       ),
       cell: ({ row }) => (
         <div className="max-w-md truncate">{formatHtmlString(row.original.email)}</div>
@@ -209,7 +220,10 @@ export const CourseEnrolled = (): ReactElement => {
     {
       accessorKey: "isEnrolledByGroup",
       header: ({ column }) => (
-        <SortButton<EnrolledStudent> column={column}>
+        <SortButton<EnrolledStudent>
+          column={column}
+          testId={COURSE_ENROLLED_HANDLES.sortButton("isEnrolledByGroup")}
+        >
           {t("adminCourseView.enrolled.table.status")}
         </SortButton>
       ),
@@ -226,7 +240,7 @@ export const CourseEnrolled = (): ReactElement => {
           <Badge
             variant={isEnrolled ? "secondary" : "default"}
             className="w-max"
-            data-testid={row.original.email}
+            data-testid={COURSE_ENROLLED_HANDLES.statusBadge(row.original.id, enrollmentStatus)}
           >
             {match(enrollmentStatus)
               .with(COURSE_ENROLLMENT.GROUP_ENROLLED, () =>
@@ -243,7 +257,10 @@ export const CourseEnrolled = (): ReactElement => {
     {
       accessorKey: "enrolledAt",
       header: ({ column }) => (
-        <SortButton<EnrolledStudent> column={column}>
+        <SortButton<EnrolledStudent>
+          column={column}
+          testId={COURSE_ENROLLED_HANDLES.sortButton("enrolledAt")}
+        >
           {t("adminCourseView.enrolled.table.enrollmentDate")}
         </SortButton>
       ),
@@ -258,11 +275,14 @@ export const CourseEnrolled = (): ReactElement => {
       type: "text",
       name: "keyword",
       placeholder: t("adminCourseView.enrolled.filters.placeholder.searchByKeyword"),
+      testId: COURSE_ENROLLED_HANDLES.SEARCH_INPUT,
     },
     {
       name: "groups",
       type: "multiselect",
       placeholder: t("adminUsersView.filters.placeholder.groups"),
+      testId: COURSE_ENROLLED_HANDLES.GROUPS_FILTER,
+      optionTestId: (option) => COURSE_ENROLLED_HANDLES.groupFilterOption(option.value),
       options:
         groupData.map((item) => ({
           value: item.id,
@@ -382,7 +402,7 @@ export const CourseEnrolled = (): ReactElement => {
   }, [page, perPage, searchParams.keyword, searchParams.groups]);
 
   return (
-    <div className="flex flex-col">
+    <div data-testid={COURSE_ENROLLED_HANDLES.ROOT} className="flex flex-col">
       <div className="flex items-center justify-between gap-2">
         <SearchFilter
           filters={filterConfig}
@@ -414,7 +434,11 @@ export const CourseEnrolled = (): ReactElement => {
 
         <DropdownMenu onOpenChange={(open) => setOpenDropdown(open)}>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="flex gap-2">
+            <Button
+              data-testid={COURSE_ENROLLED_HANDLES.USER_ACTIONS_TRIGGER}
+              variant="outline"
+              className="flex gap-2"
+            >
               <User className="size-4" />
               {t("adminCourseView.enrolled.enroll")}
               <Icon className="size-4 text-black" name={openDropdown ? "ArrowUp" : "ArrowDown"} />
@@ -424,6 +448,7 @@ export const CourseEnrolled = (): ReactElement => {
           <DropdownMenuContent className="w-64 rounded bg-white p-2 text-black shadow-lg transition-all duration-200">
             <DropdownMenuItem>
               <Button
+                data-testid={COURSE_ENROLLED_HANDLES.USER_ENROLL_SELECTED_ACTION}
                 className="body-sm w-full justify-start gap-2 text-neutral-950 hover:text-neutral-950"
                 variant="ghost"
                 onClick={handleOpenEnroll}
@@ -435,6 +460,7 @@ export const CourseEnrolled = (): ReactElement => {
 
             <DropdownMenuItem>
               <Button
+                data-testid={COURSE_ENROLLED_HANDLES.USER_UNENROLL_SELECTED_ACTION}
                 onClick={handleOpenUnenroll}
                 variant="ghost"
                 className="body-sm w-full justify-start gap-2 text-error-700 hover:text-error-700"
@@ -447,7 +473,11 @@ export const CourseEnrolled = (): ReactElement => {
         </DropdownMenu>
         <DropdownMenu onOpenChange={(open) => setOpenGroupDropdown(open)}>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="flex gap-2">
+            <Button
+              data-testid={COURSE_ENROLLED_HANDLES.GROUP_ACTIONS_TRIGGER}
+              variant="outline"
+              className="flex gap-2"
+            >
               <Users className="size-4" />
               {t("adminCourseView.enrolled.enrollGroups")}
               <Icon
@@ -460,6 +490,7 @@ export const CourseEnrolled = (): ReactElement => {
           <DropdownMenuContent className="w-64 rounded bg-white p-2 text-black shadow-lg transition-all duration-200">
             <DropdownMenuItem>
               <Button
+                data-testid={COURSE_ENROLLED_HANDLES.GROUP_ENROLL_ACTION}
                 className="body-sm w-full justify-start gap-2 text-neutral-950 hover:text-neutral-950"
                 variant="ghost"
                 onClick={handleOpenGroupEnroll}
@@ -470,6 +501,7 @@ export const CourseEnrolled = (): ReactElement => {
             </DropdownMenuItem>
             <DropdownMenuItem>
               <Button
+                data-testid={COURSE_ENROLLED_HANDLES.GROUP_UNENROLL_ACTION}
                 onClick={handleOpenGroupUnenroll}
                 variant="ghost"
                 className="body-sm w-full justify-start gap-2 text-error-700 hover:text-error-700"
@@ -485,14 +517,19 @@ export const CourseEnrolled = (): ReactElement => {
         <Dialog open={isUnenrollDialogOpen} onOpenChange={setIsUnenrollDialogOpen}>
           <DialogPortal>
             <DialogOverlay />
-            <DialogContent>
+            <DialogContent data-testid={COURSE_ENROLLED_HANDLES.USER_UNENROLL_DIALOG}>
               <DialogTitle>{t("adminCourseView.enrolled.unenrollConfirmation.title")}</DialogTitle>
               <DialogDescription>
                 {t("adminCourseView.enrolled.unenrollConfirmation.description")}
               </DialogDescription>
               <form onSubmit={handleUnenrollFormSubmit}>
                 <div className="flex justify-end">
-                  <Button type="submit">{t("common.button.save")}</Button>
+                  <Button
+                    data-testid={COURSE_ENROLLED_HANDLES.USER_UNENROLL_CONFIRM_BUTTON}
+                    type="submit"
+                  >
+                    {t("common.button.save")}
+                  </Button>
                 </div>
               </form>
             </DialogContent>
@@ -502,21 +539,26 @@ export const CourseEnrolled = (): ReactElement => {
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogPortal>
             <DialogOverlay />
-            <DialogContent>
+            <DialogContent data-testid={COURSE_ENROLLED_HANDLES.USER_ENROLL_DIALOG}>
               <DialogTitle>{t("adminCourseView.enrolled.confirmation.title")}</DialogTitle>
               <DialogDescription>
                 {t("adminCourseView.enrolled.confirmation.description")}
               </DialogDescription>
               <form onSubmit={handleFormSubmit}>
                 <div className="flex justify-end">
-                  <Button type="submit">{t("common.button.save")}</Button>
+                  <Button
+                    data-testid={COURSE_ENROLLED_HANDLES.USER_ENROLL_CONFIRM_BUTTON}
+                    type="submit"
+                  >
+                    {t("common.button.save")}
+                  </Button>
                 </div>
               </form>
             </DialogContent>
           </DialogPortal>
         </Dialog>
       </div>
-      <Table className="border bg-neutral-50">
+      <Table data-testid={COURSE_ENROLLED_HANDLES.TABLE} className="border bg-neutral-50">
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
@@ -533,6 +575,7 @@ export const CourseEnrolled = (): ReactElement => {
             <TableRow
               key={row.id}
               data-course-id={row.original.id}
+              data-testid={COURSE_ENROLLED_HANDLES.row(row.original.id)}
               data-state={row.getIsSelected() && "selected"}
               onClick={handleRowClick(row)}
               className="cursor-pointer hover:bg-neutral-100"

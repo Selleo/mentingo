@@ -379,14 +379,14 @@ Based on `playwright-strategy/03-capability-coverage.md`:
   - delete many
   - transfer ownership
   - language add/remove
-- Curriculum
+- Curriculum -- DONE
   - generate missing translations
   - chapter create/update/delete/reorder/freemium
   - lesson create/update/delete/reorder
   - lesson types: content/quiz/AI mentor/embed
   - resource upload
   - initialize lesson context
-- Enrollment
+- Enrollment -- DONE
   - self-enroll
   - bulk user enroll
   - bulk group enroll

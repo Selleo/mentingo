@@ -9,6 +9,7 @@ import { match } from "ts-pattern";
 import { cn } from "~/lib/utils";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
+import { COURSE_ENROLLED_HANDLES } from "../../../../../e2e/data/courses/handles";
 import { Icon } from "../../../../components/Icon";
 import { Badge } from "../../../../components/ui/badge";
 import { Button } from "../../../../components/ui/button";
@@ -61,6 +62,7 @@ export const GroupEnrollItem = ({ index, id, name, usersCount, isGroupEnrolled }
 
   return (
     <div
+      data-testid={COURSE_ENROLLED_HANDLES.groupEnrollItem(id)}
       className={cn(
         "group rounded-xl flex border bg-white px-4 py-4 gap-4 shadow-sm border-neutral-200 transition-all duration-200 hover:border-neutral-300 hover:shadow-md overflow-visible",
         {
@@ -76,6 +78,7 @@ export const GroupEnrollItem = ({ index, id, name, usersCount, isGroupEnrolled }
             <FormItem>
               <FormControl>
                 <Checkbox
+                  data-testid={COURSE_ENROLLED_HANDLES.groupEnrollCheckbox(id)}
                   checked={!!field.value}
                   onCheckedChange={(currentValue) => field.onChange(Boolean(currentValue))}
                   aria-label={`select-group-${id}`}
@@ -151,6 +154,7 @@ export const GroupEnrollItem = ({ index, id, name, usersCount, isGroupEnrolled }
                     <FormItem>
                       <FormControl>
                         <Switch
+                          data-testid={COURSE_ENROLLED_HANDLES.groupMandatorySwitch(id)}
                           checked={!!field.value}
                           onCheckedChange={(val) => field.onChange(Boolean(val))}
                           disabled={isGroupEnrolled}
@@ -192,6 +196,7 @@ export const GroupEnrollItem = ({ index, id, name, usersCount, isGroupEnrolled }
                         >
                           <PopoverPrimitive.Trigger asChild>
                             <Button
+                              data-testid={COURSE_ENROLLED_HANDLES.groupDeadlineButton(id)}
                               id={`groups.${index}.deadline`}
                               type="button"
                               variant="outline"

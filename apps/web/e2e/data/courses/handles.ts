@@ -1,4 +1,4 @@
-import type { CourseStatus, SupportedLanguages } from "@repo/shared";
+import type { CourseEnrollment, CourseStatus, SupportedLanguages } from "@repo/shared";
 
 export const COURSE_TAB_VALUES = {
   SETTINGS: "Settings",
@@ -99,4 +99,41 @@ export const COURSE_OVERVIEW_HANDLES = {
   AUTHOR_TRANSFER_BUTTON: "course-overview-author-transfer-button",
   TRANSFER_OWNERSHIP_SELECT: "course-transfer-ownership-select",
   transferOwnershipOption: (userId: string) => `course-transfer-ownership-option-${userId}`,
+  ENROLL_BUTTON: "course-overview-enroll-button",
+  LOGIN_ENROLL_LINK: "course-overview-login-enroll-link",
+  START_LEARNING_BUTTON: "course-overview-start-learning-button",
+} as const;
+
+export const COURSE_ENROLLED_HANDLES = {
+  ROOT: "course-enrolled-root",
+  SEARCH_INPUT: "course-enrolled-search-input",
+  GROUPS_FILTER: "course-enrolled-groups-filter",
+  groupFilterOption: (groupId: string) => `course-enrolled-groups-filter-option-${groupId}`,
+  USER_ACTIONS_TRIGGER: "course-enrolled-user-actions-trigger",
+  USER_ENROLL_SELECTED_ACTION: "course-enrolled-user-enroll-selected-action",
+  USER_UNENROLL_SELECTED_ACTION: "course-enrolled-user-unenroll-selected-action",
+  GROUP_ACTIONS_TRIGGER: "course-enrolled-group-actions-trigger",
+  GROUP_ENROLL_ACTION: "course-enrolled-group-enroll-action",
+  GROUP_UNENROLL_ACTION: "course-enrolled-group-unenroll-action",
+  TABLE: "course-enrolled-table",
+  row: (userId: string) => `course-enrolled-row-${userId}`,
+  rowCheckbox: (userId: string) => `course-enrolled-row-checkbox-${userId}`,
+  statusBadge: (userId: string, status: CourseEnrollment) =>
+    `course-enrolled-status-${userId}-${status}`,
+  sortButton: (field: "firstName" | "lastName" | "email" | "isEnrolledByGroup" | "enrolledAt") =>
+    `course-enrolled-sort-${field}`,
+  USER_ENROLL_DIALOG: "course-enrolled-user-enroll-dialog",
+  USER_ENROLL_CONFIRM_BUTTON: "course-enrolled-user-enroll-confirm-button",
+  USER_UNENROLL_DIALOG: "course-enrolled-user-unenroll-dialog",
+  USER_UNENROLL_CONFIRM_BUTTON: "course-enrolled-user-unenroll-confirm-button",
+  GROUP_ENROLL_DIALOG: "course-enrolled-group-enroll-dialog",
+  GROUP_ENROLL_SUBMIT_BUTTON: "course-enrolled-group-enroll-submit-button",
+  groupEnrollItem: (groupId: string) => `course-enrolled-group-enroll-item-${groupId}`,
+  groupEnrollCheckbox: (groupId: string) => `course-enrolled-group-enroll-checkbox-${groupId}`,
+  groupMandatorySwitch: (groupId: string) => `course-enrolled-group-mandatory-switch-${groupId}`,
+  groupDeadlineButton: (groupId: string) => `course-enrolled-group-deadline-button-${groupId}`,
+  GROUP_UNENROLL_DIALOG: "course-enrolled-group-unenroll-dialog",
+  GROUP_UNENROLL_SUBMIT_BUTTON: "course-enrolled-group-unenroll-submit-button",
+  groupUnenrollItem: (groupId: string) => `course-enrolled-group-unenroll-item-${groupId}`,
+  groupUnenrollCheckbox: (groupId: string) => `course-enrolled-group-unenroll-checkbox-${groupId}`,
 } as const;
