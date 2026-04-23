@@ -60,7 +60,7 @@ export const users = pgTable(
     email: text("email").notNull().unique(),
     firstName: text("first_name").notNull(),
     lastName: text("last_name").notNull(),
-    avatarReference: varchar("avatar_reference", { length: 200 }),
+    avatarReference: varchar("avatar_reference", { length: 500 }),
     archived,
     deletedAt: timestamp("deleted_at", {
       mode: "string",
@@ -172,7 +172,7 @@ export const createTokens = pgTable(
     userId: uuid("user_id")
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
-    createToken: text("create_token").notNull(),
+    tokenHash: text("token_hash").notNull(),
     expiryDate: timestamp("expiry_date", {
       precision: 3,
       withTimezone: true,
@@ -180,7 +180,10 @@ export const createTokens = pgTable(
     reminderCount: integer("reminder_count").notNull().default(0),
     tenantId,
   },
-  withTenantIdIndex("create_tokens"),
+  (table) => ({
+    ...withTenantIdIndex("create_tokens")(table),
+    tokenHashIdx: index("create_tokens_token_hash_idx").on(table.tokenHash),
+  }),
 );
 
 export const resetTokens = pgTable(
@@ -191,14 +194,17 @@ export const resetTokens = pgTable(
     userId: uuid("user_id")
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
-    resetToken: text("reset_token").notNull(),
+    tokenHash: text("token_hash").notNull(),
     expiryDate: timestamp("expiry_date", {
       precision: 3,
       withTimezone: true,
     }).notNull(),
     tenantId,
   },
-  withTenantIdIndex("reset_tokens"),
+  (table) => ({
+    ...withTenantIdIndex("reset_tokens")(table),
+    tokenHashIdx: index("reset_tokens_token_hash_idx").on(table.tokenHash),
+  }),
 );
 
 export const coursesStatusEnum = pgEnum("status", ["draft", "published", "private"]);
@@ -212,7 +218,7 @@ export const courses = pgTable(
     ...timestamps,
     title: jsonb("title").default({}).notNull(),
     description: jsonb("description").default({}).notNull(),
-    thumbnailS3Key: varchar("thumbnail_s3_key", { length: 200 }),
+    thumbnailS3Key: varchar("thumbnail_s3_key", { length: 500 }),
     status: coursesStatusEnum("status").notNull().default("draft"),
     hasCertificate: boolean("has_certificate").notNull().default(false),
     priceInCents: integer("price_in_cents").notNull().default(0),
@@ -301,7 +307,7 @@ export const lessons = pgTable(
     attemptsLimit: integer("attempts_limit"),
     quizCooldownInHours: integer("quiz_cooldown_in_hours"),
     displayOrder: integer("display_order"),
-    fileS3Key: varchar("file_s3_key", { length: 200 }),
+    fileS3Key: varchar("file_s3_key", { length: 500 }),
     fileType: varchar("file_type", { length: 20 }),
     isExternal: boolean("is_external").default(false),
     tenantId,
@@ -320,7 +326,7 @@ export const aiMentorLessons = pgTable(
     aiMentorInstructions: text("ai_mentor_instructions").notNull(),
     completionConditions: text("completion_conditions").notNull(),
     name: text("name").notNull().default("AI Mentor"),
-    avatarReference: varchar("avatar_reference", { length: 200 }),
+    avatarReference: varchar("avatar_reference", { length: 500 }),
     type: text("type").notNull().default("mentor"),
     voiceMode: text("voice_mode").notNull().default("preset"),
     ttsPreset: text("tts_preset").notNull().default("male"),
@@ -379,7 +385,7 @@ export const questions = pgTable(
     type: text("type").notNull(),
     title: jsonb("title").default({}).notNull(),
     displayOrder: integer("display_order"),
-    photoS3Key: varchar("photo_s3_key", { length: 200 }),
+    photoS3Key: varchar("photo_s3_key", { length: 500 }),
     description: jsonb("description"),
     solutionExplanation: jsonb("solution_explanation"),
     tenantId,
@@ -1114,7 +1120,7 @@ export const resources = pgTable(
     ...timestamps,
     title: jsonb("title").notNull().default({}),
     description: jsonb("description").notNull().default({}),
-    reference: varchar("reference", { length: 200 }).notNull(),
+    reference: varchar("reference", { length: 500 }).notNull(),
     contentType: varchar("content_type", { length: 100 }).notNull(),
     metadata: jsonb("metadata").default({}),
     uploadedBy: uuid("uploaded_by_id").references(() => users.id, { onDelete: "set null" }),
@@ -1315,14 +1321,17 @@ export const magicLinkTokens = pgTable(
     userId: uuid("user_id")
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
-    token: text("token").notNull(),
+    tokenHash: text("token_hash").notNull(),
     expiryDate: timestamp("expiry_date", {
       precision: 3,
       withTimezone: true,
     }).notNull(),
     tenantId,
   },
-  withTenantIdIndex("magic_link_tokens"),
+  (table) => ({
+    ...withTenantIdIndex("magic_link_tokens")(table),
+    tokenHashIdx: index("magic_link_tokens_token_hash_idx").on(table.tokenHash),
+  }),
 );
 
 export const permissionRoles = pgTable(

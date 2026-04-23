@@ -450,20 +450,19 @@
   },
   "createPasswordView": {
     "header": "Neues Passwort erstellen",
-    "subHeader": "Geben Sie ein neues Passwort für ein",
+    "subHeader": "Geben Sie ein neues Passwort ein",
     "field": {
       "password": "Passwort",
       "confirmPassword": "Passwort bestätigen"
     },
     "validation": {
-      "passwordsDontMatch": "Passwörter stimmen nicht überein",
-      "missingEmail": "Im Link fehlt die E-Mail-Adresse. Bitte verwenden Sie den vollständigen Link aus Ihrer E-Mail."
+      "passwordsDontMatch": "Passwörter stimmen nicht überein"
     },
     "button": {
       "changePassword": "Passwort erstellen"
     },
     "error": {
-      "invalidTokenOrEmail": "Dieser Link zur Passworteinrichtung ist ungültig, abgelaufen oder stimmt nicht mit dieser E-Mail überein."
+      "invalidToken": "Dieser Link zur Passworteinrichtung ist ungültig oder abgelaufen."
     }
   },
   "changePasswordView": {

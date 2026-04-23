@@ -6,10 +6,11 @@ import { nanoid } from "nanoid";
 import request from "supertest";
 
 import { hashToken } from "src/auth/utils/hash-auth-token";
+import { EmailAdapter } from "src/common/emails/adapters/email.adapter";
 import { RATE_LIMITS } from "src/rate-limit/rate-limit.constants";
 import { SettingsService } from "src/settings/settings.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { createTokens, formFieldAnswers, resetTokens } from "src/storage/schema";
+import { createTokens, formFieldAnswers, magicLinkTokens, resetTokens } from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
@@ -17,6 +18,7 @@ import { createUserFactory } from "../../../test/factory/user.factory";
 import { truncateTables } from "../../../test/helpers/test-helpers";
 import { AuthService } from "../auth.service";
 
+import type { EmailTestingAdapter } from "../../../test/helpers/test-email.adapter";
 import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg } from "src/common";
 
@@ -46,7 +48,16 @@ describe("AuthController (e2e)", () => {
 
   afterEach(async () => {
     jest.restoreAllMocks();
-    await truncateTables(baseDb, ["form_field_answers", "form_fields", "forms", "settings"]);
+    (app.get(EmailAdapter) as EmailTestingAdapter).clearEmails();
+    await truncateTables(baseDb, [
+      "create_tokens",
+      "form_field_answers",
+      "form_fields",
+      "forms",
+      "magic_link_tokens",
+      "reset_tokens",
+      "settings",
+    ]);
   });
 
   describe("POST /api/auth/register", () => {
@@ -479,6 +490,23 @@ describe("AuthController (e2e)", () => {
       });
     });
 
+    it("should return success for archived users without sending a reset email", async () => {
+      const user = await userFactory.create({
+        email: "archived-forgot-password@example.com",
+        archived: true,
+      });
+
+      const response = await request(app.getHttpServer())
+        .post("/api/auth/forgot-password")
+        .send({ email: user.email })
+        .expect(201);
+
+      expect(response.body.data).toEqual({
+        message: "forgotPasswordView.toast.resetPassword",
+      });
+      expect((app.get(EmailAdapter) as EmailTestingAdapter).getAllEmails()).toHaveLength(0);
+    });
+
     it("should return 404 if email is empty", async () => {
       await userFactory
         .withCredentials({
@@ -497,49 +525,52 @@ describe("AuthController (e2e)", () => {
   });
 
   describe("POST /api/auth/reset-password", () => {
-    it("should return 404 when reset token email does not match", async () => {
+    it("should return 404 when reset token is invalid", async () => {
       const user = await userFactory
         .withCredentials({ password: "Password123@" })
         .withUserSettings(db)
         .create();
-      const anotherUser = await userFactory.withCredentials({ password: "Password123@" }).create();
-      const resetToken = nanoid(64);
       const expiryDate = new Date(Date.now() + 60 * 60 * 1000);
 
       await db.insert(resetTokens).values({
         userId: user.id,
-        resetToken: hashToken(resetToken),
+        tokenHash: hashToken(nanoid(64)),
         expiryDate,
       });
 
       await request(app.getHttpServer())
         .post("/api/auth/reset-password")
         .send({
-          resetToken,
+          resetToken: nanoid(64),
           newPassword: "Newpassword123@",
-          email: anotherUser.email,
         })
         .expect(404);
     });
 
-    it("should reset the password successfully", async () => {
-      jest.spyOn(authService, "resetPassword").mockImplementation(async () => {});
+    it("should return 404 when reset token is expired", async () => {
+      const user = await userFactory
+        .withCredentials({ password: "Password123@" })
+        .withUserSettings(db)
+        .create();
+      const resetToken = nanoid(64);
+      const expiryDate = new Date(Date.now() - 60 * 60 * 1000);
 
-      const response = await request(app.getHttpServer())
+      await db.insert(resetTokens).values({
+        userId: user.id,
+        tokenHash: hashToken(resetToken),
+        expiryDate,
+      });
+
+      await request(app.getHttpServer())
         .post("/api/auth/reset-password")
         .send({
-          resetToken: "valid-token",
+          resetToken: nanoid(64),
           newPassword: "Newpassword123@",
-          email: "test@example.com",
         })
-        .expect(201);
-
-      expect(response.body.data).toEqual({
-        message: "Password reset successfully",
-      });
+        .expect(404);
     });
 
-    it("should reset password when reset token is stored as hash", async () => {
+    it("should reset password and delete token when reset token is stored as hash", async () => {
       const user = await userFactory
         .withCredentials({ password: "Password123@" })
         .withUserSettings(db)
@@ -549,7 +580,7 @@ describe("AuthController (e2e)", () => {
 
       await db.insert(resetTokens).values({
         userId: user.id,
-        resetToken: hashToken(resetToken),
+        tokenHash: hashToken(resetToken),
         expiryDate,
       });
 
@@ -558,7 +589,6 @@ describe("AuthController (e2e)", () => {
         .send({
           resetToken,
           newPassword: "Newpassword123@",
-          email: user.email,
         })
         .expect(201);
 
@@ -584,7 +614,6 @@ describe("AuthController (e2e)", () => {
         .send({
           resetToken: "valid-token",
           newPassword: "passwordnotmatchcriteria",
-          email: "test@example.com",
         })
         .expect(400);
 
@@ -594,7 +623,7 @@ describe("AuthController (e2e)", () => {
     it("should return 404 if reset token is missing", async () => {
       const response = await request(app.getHttpServer())
         .post("/api/auth/reset-password")
-        .send({ resetToken: "", newPassword: "Newpassword123@", email: "test@example.com" })
+        .send({ resetToken: "", newPassword: "Newpassword123@" })
         .expect(400);
 
       expect(response.body.message).toEqual("Validation failed (body)");
@@ -603,7 +632,7 @@ describe("AuthController (e2e)", () => {
     it("should return 400 if password is too short", async () => {
       const response = await request(app.getHttpServer())
         .post("/api/auth/reset-password")
-        .send({ resetToken: "valid-token", newPassword: "short", email: "test@example.com" })
+        .send({ resetToken: "valid-token", newPassword: "short" })
         .expect(400);
 
       expect(response.body.message).toEqual("Validation failed (body)");
@@ -611,20 +640,40 @@ describe("AuthController (e2e)", () => {
   });
 
   describe("POST /api/auth/create-password", () => {
-    it("should return 404 when create token email does not match", async () => {
+    it("should return 404 when create token is invalid", async () => {
       const user = await userFactory.create({
         email: `createpassword-main-${nanoid(8)}@example.com`,
       });
-      const anotherUser = await userFactory.create({
-        email: `createpassword-other-${nanoid(8)}@example.com`,
-      });
 
-      const token = nanoid(64);
       const expiryDate = new Date(Date.now() + 60 * 60 * 1000);
 
       await db.insert(createTokens).values({
         userId: user.id,
-        createToken: hashToken(token),
+        tokenHash: hashToken(nanoid(64)),
+        expiryDate,
+        reminderCount: 0,
+      });
+
+      await request(app.getHttpServer())
+        .post("/api/auth/create-password")
+        .send({
+          createToken: nanoid(64),
+          password: "Password123@",
+          language: "en",
+        })
+        .expect(404);
+    });
+
+    it("should return 404 when create token is expired", async () => {
+      const user = await userFactory.create({
+        email: `createpassword-expired-${nanoid(8)}@example.com`,
+      });
+      const token = nanoid(64);
+      const expiryDate = new Date(Date.now() - 60 * 60 * 1000);
+
+      await db.insert(createTokens).values({
+        userId: user.id,
+        tokenHash: hashToken(token),
         expiryDate,
         reminderCount: 0,
       });
@@ -633,11 +682,21 @@ describe("AuthController (e2e)", () => {
         .post("/api/auth/create-password")
         .send({
           createToken: token,
-          email: anotherUser.email,
           password: "Password123@",
           language: "en",
         })
         .expect(404);
+    });
+
+    it("should return 400 when create token is missing", async () => {
+      await request(app.getHttpServer())
+        .post("/api/auth/create-password")
+        .send({
+          createToken: "",
+          password: "Password123@",
+          language: "en",
+        })
+        .expect(400);
     });
 
     it("should create password and login user with cookies", async () => {
@@ -651,7 +710,7 @@ describe("AuthController (e2e)", () => {
 
       await db.insert(createTokens).values({
         userId: user.id,
-        createToken: hashToken(token),
+        tokenHash: hashToken(token),
         expiryDate,
         reminderCount: 0,
       });
@@ -660,7 +719,6 @@ describe("AuthController (e2e)", () => {
         .post("/api/auth/create-password")
         .send({
           createToken: token,
-          email: user.email,
           password: "Password123@",
           language: "en",
         })
@@ -673,6 +731,13 @@ describe("AuthController (e2e)", () => {
       expect(response.body.data).toHaveProperty("isManagingTenantAdmin");
       expect(response.headers["set-cookie"]).toBeDefined();
       expect(response.headers["set-cookie"].length).toBe(2);
+
+      const [remainingToken] = await db
+        .select()
+        .from(createTokens)
+        .where(eq(createTokens.userId, user.id));
+
+      expect(remainingToken).toBeUndefined();
     });
 
     it("should save correct language when creating password with supported language other than 'en'", async () => {
@@ -686,7 +751,7 @@ describe("AuthController (e2e)", () => {
 
       await db.insert(createTokens).values({
         userId: user.id,
-        createToken: hashToken(token),
+        tokenHash: hashToken(token),
         expiryDate,
         reminderCount: 0,
       });
@@ -695,7 +760,6 @@ describe("AuthController (e2e)", () => {
 
       await authService.createPassword({
         createToken: token,
-        email: user.email,
         password,
         language: "pl",
       });
@@ -739,7 +803,7 @@ describe("AuthController (e2e)", () => {
 
       await db.insert(createTokens).values({
         userId: user.id,
-        createToken: hashToken(token),
+        tokenHash: hashToken(token),
         expiryDate,
         reminderCount: 0,
       });
@@ -748,7 +812,6 @@ describe("AuthController (e2e)", () => {
         .post("/api/auth/create-password")
         .send({
           createToken: token,
-          email: user.email,
           password: "Password123@",
           language: "ar",
         })
@@ -768,14 +831,13 @@ describe("AuthController (e2e)", () => {
 
       await db.insert(createTokens).values({
         userId: user.id,
-        createToken: hashToken(token),
+        tokenHash: hashToken(token),
         expiryDate,
         reminderCount: 0,
       });
 
       await authService.createPassword({
         createToken: token,
-        email: user.email,
         password: "Password123@",
         language: "en",
       });
@@ -794,6 +856,137 @@ describe("AuthController (e2e)", () => {
           password: "Password123@",
         })
         .expect(201);
+    });
+  });
+
+  describe("POST /api/auth/magic-link/create", () => {
+    it("should create a magic link token as a hash and send the token in email", async () => {
+      const user = await userFactory
+        .withCredentials({ password: "Password123@" })
+        .withUserSettings(db)
+        .create({
+          email: `magiclink-create-${nanoid(8)}@example.com`,
+        });
+
+      await request(app.getHttpServer())
+        .post("/api/auth/magic-link/create")
+        .send({ email: user.email })
+        .expect(201);
+
+      const emailAdapter = app.get(EmailAdapter) as EmailTestingAdapter;
+      const email = emailAdapter.getLastEmail();
+
+      expect(email).toBeDefined();
+      expect(email?.to).toBe(user.email);
+      expect(email?.subject).toBeDefined();
+      expect(email?.html || email?.text).toContain("/auth/login?token=");
+
+      const tokenMatch = (email?.html ?? email?.text ?? "").match(
+        /\/auth\/login\?token=([^"&\s]+)/,
+      );
+      expect(tokenMatch).not.toBeNull();
+
+      const token = tokenMatch?.[1];
+      expect(token).toBeDefined();
+
+      const [storedToken] = await db
+        .select()
+        .from(magicLinkTokens)
+        .where(eq(magicLinkTokens.userId, user.id));
+
+      expect(storedToken).toBeDefined();
+      expect(storedToken?.tokenHash).toBe(hashToken(token!));
+      expect(storedToken?.expiryDate).toBeDefined();
+    });
+
+    it("should return success for archived users without sending a magic link", async () => {
+      const user = await userFactory.create({
+        email: `magiclink-archived-${nanoid(8)}@example.com`,
+        archived: true,
+      });
+
+      const response = await request(app.getHttpServer())
+        .post("/api/auth/magic-link/create")
+        .send({ email: user.email })
+        .expect(201);
+
+      expect(response.body.data).toEqual({
+        message: "magicLink.createdSuccessfully",
+      });
+      expect((app.get(EmailAdapter) as EmailTestingAdapter).getAllEmails()).toHaveLength(0);
+
+      const [storedToken] = await db
+        .select()
+        .from(magicLinkTokens)
+        .where(eq(magicLinkTokens.userId, user.id));
+
+      expect(storedToken).toBeUndefined();
+    });
+
+    it("should return success when magic link token creation fails", async () => {
+      const user = await userFactory
+        .withCredentials({ password: "Password123@" })
+        .withUserSettings(db)
+        .create({
+          email: `magiclink-token-failure-${nanoid(8)}@example.com`,
+        });
+
+      jest.spyOn(authService, "createMagicLinkToken").mockRejectedValueOnce(new Error("boom"));
+
+      const response = await request(app.getHttpServer())
+        .post("/api/auth/magic-link/create")
+        .send({ email: user.email })
+        .expect(201);
+
+      expect(response.body.data).toEqual({
+        message: "magicLink.createdSuccessfully",
+      });
+      expect((app.get(EmailAdapter) as EmailTestingAdapter).getAllEmails()).toHaveLength(0);
+
+      const [storedToken] = await db
+        .select()
+        .from(magicLinkTokens)
+        .where(eq(magicLinkTokens.userId, user.id));
+
+      expect(storedToken).toBeUndefined();
+    });
+  });
+
+  describe("GET /api/auth/magic-link/verify", () => {
+    it("should log in with a valid magic link and remove the consumed token", async () => {
+      const user = await userFactory
+        .withCredentials({ password: "Password123@" })
+        .withUserSettings(db)
+        .create({
+          email: `magiclink-verify-${nanoid(8)}@example.com`,
+        });
+
+      const token = await authService.createMagicLinkToken(user.id);
+
+      const response = await request(app.getHttpServer())
+        .get("/api/auth/magic-link/verify")
+        .query({ token })
+        .expect(200);
+
+      expect(response.body.data).toHaveProperty("id", user.id);
+      expect(response.body.data).toHaveProperty("email", user.email);
+      expect(response.body.data).toHaveProperty("shouldVerifyMFA", false);
+      expect(response.headers["set-cookie"]).toBeDefined();
+      expect(response.headers["set-cookie"].length).toBe(2);
+
+      const [remainingToken] = await db
+        .select()
+        .from(magicLinkTokens)
+        .where(eq(magicLinkTokens.userId, user.id));
+
+      expect(remainingToken).toBeUndefined();
+    });
+
+    it("should reject an invalid magic link token", async () => {
+      await request(app.getHttpServer())
+        .get("/api/auth/magic-link/verify")
+        .query({ token: "invalid-token" })
+        .expect(401);
     });
   });
 });

@@ -5,7 +5,6 @@ import {
   forwardRef,
   Inject,
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
@@ -551,51 +550,54 @@ export class AuthService {
   }
 
   public async forgotPassword(email: string) {
-    const user = await this.userService.getUserByEmail(email);
+    try {
+      const user = await this.userService.getUserByEmail(email);
 
-    if (!user) return;
+      if (!user || user.archived) return;
 
-    const resetToken = nanoid(64);
-    const hashedResetToken = hashToken(resetToken);
-    const expiryDate = new Date();
-    expiryDate.setHours(expiryDate.getHours() + 1);
+      const resetToken = nanoid(64);
+      const hashedResetToken = hashToken(resetToken);
+      const expiryDate = new Date();
+      expiryDate.setHours(expiryDate.getHours() + 1);
 
-    await this.db.insert(resetTokens).values({
-      userId: user.id,
-      resetToken: hashedResetToken,
-      expiryDate,
-    });
+      await this.db.insert(resetTokens).values({
+        userId: user.id,
+        tokenHash: hashedResetToken,
+        expiryDate,
+      });
 
-    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
-      user.tenantId,
-      user.id,
-    );
+      const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
+        user.tenantId,
+        user.id,
+      );
 
-    const tenantOrigin = await this.resolveTenantOrigin(user.tenantId);
+      const tenantOrigin = await this.resolveTenantOrigin(user.tenantId);
 
-    const emailTemplate = new PasswordRecoveryEmail({
-      name: user.firstName,
-      resetLink: buildCreateNewPasswordLink(tenantOrigin, {
-        resetToken,
-        email,
-      }),
-      ...defaultEmailSettings,
-    });
+      const emailTemplate = new PasswordRecoveryEmail({
+        name: user.firstName,
+        resetLink: buildCreateNewPasswordLink(tenantOrigin, {
+          resetToken,
+        }),
+        ...defaultEmailSettings,
+      });
 
-    await this.emailService.sendEmailWithLogo(
-      {
-        to: email,
-        subject: getEmailSubject("passwordRecoveryEmail", defaultEmailSettings.language),
-        text: emailTemplate.text,
-        html: emailTemplate.html,
-      },
-      { tenantId: user.tenantId },
-    );
+      await this.emailService.sendEmailWithLogo(
+        {
+          to: email,
+          subject: getEmailSubject("passwordRecoveryEmail", defaultEmailSettings.language),
+          text: emailTemplate.text,
+          html: emailTemplate.html,
+        },
+        { tenantId: user.tenantId },
+      );
+    } catch {
+      return;
+    }
   }
 
   public async createPassword(data: CreatePasswordBody) {
-    const { createToken: token, password, language, email } = data;
-    const createToken = await this.createPasswordService.getOneByTokenAndEmail(token, email);
+    const { createToken: token, password, language } = data;
+    const createToken = await this.createPasswordService.getOneByToken(token);
 
     const [existingUser] = await this.db
       .select({
@@ -632,8 +634,8 @@ export class AuthService {
     return existingUser;
   }
 
-  public async resetPassword(token: string, newPassword: string, email: string) {
-    const resetToken = await this.resetPasswordService.getOneByTokenAndEmail(token, email);
+  public async resetPassword(token: string, newPassword: string) {
+    const resetToken = await this.resetPasswordService.getOneByToken(token);
 
     await this.userService.resetPassword(resetToken.userId, newPassword);
     await this.resetPasswordService.deleteToken(resetToken.id);
@@ -644,7 +646,7 @@ export class AuthService {
       .select({
         userId: createTokens.userId,
         email: users.email,
-        oldCreateToken: createTokens.createToken,
+        oldTokenHash: createTokens.tokenHash,
         tokenExpiryDate: createTokens.expiryDate,
         reminderCount: createTokens.reminderCount,
       })
@@ -665,7 +667,7 @@ export class AuthService {
       );
   }
 
-  private async generateNewTokenAndEmail(userId: UUIDType, email: string) {
+  private async generateNewTokenAndEmail(userId: UUIDType) {
     const createToken = nanoid(64);
 
     const user = await this.userService.getUserById(userId);
@@ -678,7 +680,6 @@ export class AuthService {
     const emailTemplate = new CreatePasswordReminderEmail({
       createPasswordLink: buildCreateNewPasswordLink(CORS_ORIGIN, {
         createToken,
-        email,
       }),
       ...defaultEmailSettings,
     });
@@ -690,7 +691,7 @@ export class AuthService {
     tenantId: UUIDType,
     userId: UUIDType,
     email: string,
-    oldCreateToken: string,
+    oldTokenHash: string,
     createToken: string,
     emailTemplate: { text: string; html: string },
     expiryDate: Date,
@@ -702,7 +703,7 @@ export class AuthService {
       try {
         await transaction.insert(createTokens).values({
           userId,
-          createToken: hashedCreateToken,
+          tokenHash: hashedCreateToken,
           expiryDate,
           reminderCount,
         });
@@ -722,7 +723,7 @@ export class AuthService {
           { tenantId },
         );
 
-        await transaction.delete(createTokens).where(eq(createTokens.createToken, oldCreateToken));
+        await transaction.delete(createTokens).where(eq(createTokens.tokenHash, oldTokenHash));
       } catch (error) {
         transaction.rollback();
 
@@ -737,15 +738,15 @@ export class AuthService {
     const expiryDate = new Date();
     expiryDate.setHours(expiryDate.getHours() + 24);
 
-    expiryTokens.map(async ({ userId, email, oldCreateToken, reminderCount }) => {
+    expiryTokens.map(async ({ userId, email, oldTokenHash, reminderCount }) => {
       const user = await this.userService.getUserById(userId);
-      const { createToken, emailTemplate } = await this.generateNewTokenAndEmail(userId, email);
+      const { createToken, emailTemplate } = await this.generateNewTokenAndEmail(userId);
 
       await this.sendEmailAndUpdateDatabase(
         user.tenantId,
         userId,
         email,
-        oldCreateToken,
+        oldTokenHash,
         createToken,
         emailTemplate,
         expiryDate,
@@ -870,37 +871,39 @@ export class AuthService {
   }
 
   async createMagicLink(email: string) {
-    const user = await this.userService.getUserByEmail(email);
+    try {
+      const user = await this.userService.getUserByEmail(email);
 
-    if (!user) return;
+      if (!user || user.archived) return;
 
-    if (user.archived) throw new UnauthorizedException("user.error.archived");
+      const magicLinkToken = await this.createMagicLinkToken(user.id);
 
-    const magicLinkToken = await this.createMagicLinkToken(user.id);
+      if (!magicLinkToken) return;
 
-    if (!magicLinkToken) throw new InternalServerErrorException("magicLink.error.createToken");
+      const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
+        user.tenantId,
+        user.id,
+      );
 
-    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
-      user.tenantId,
-      user.id,
-    );
+      const magicLinkEmail = new MagicLinkEmail({
+        magicLink: `${CORS_ORIGIN}/auth/login?token=${magicLinkToken}`,
+        ...defaultEmailSettings,
+      });
 
-    const magicLinkEmail = new MagicLinkEmail({
-      magicLink: `${CORS_ORIGIN}/auth/login?token=${magicLinkToken}`,
-      ...defaultEmailSettings,
-    });
+      const { html, text } = magicLinkEmail;
 
-    const { html, text } = magicLinkEmail;
-
-    await this.emailService.sendEmailWithLogo(
-      {
-        to: email,
-        subject: getEmailSubject("magicLinkEmail", defaultEmailSettings.language),
-        text,
-        html,
-      },
-      { tenantId: user.tenantId },
-    );
+      await this.emailService.sendEmailWithLogo(
+        {
+          to: email,
+          subject: getEmailSubject("magicLinkEmail", defaultEmailSettings.language),
+          text,
+          html,
+        },
+        { tenantId: user.tenantId },
+      );
+    } catch {
+      return;
+    }
   }
 
   async handleMagicLinkLogin(response: Response, token: string) {
@@ -914,7 +917,7 @@ export class AuthService {
       const [magicLinkToken] = await trx
         .select()
         .from(magicLinkTokens)
-        .where(eq(magicLinkTokens.token, hashedToken))
+        .where(eq(magicLinkTokens.tokenHash, hashedToken))
         .limit(1)
         .for("update");
 
@@ -1031,7 +1034,7 @@ export class AuthService {
       .insert(magicLinkTokens)
       .values({
         userId,
-        token: hashedToken,
+        tokenHash: hashedToken,
         expiryDate,
       })
       .returning();
