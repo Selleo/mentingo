@@ -332,12 +332,12 @@ Based on `playwright-strategy/03-capability-coverage.md`:
   - unread count
   - mark read
   - feed visibility
-- News
+- News -- DONE
   - list/open/create/update/delete
   - draft/preview
   - language variant add/delete
   - resource upload
-- Articles
+- Articles -- DONE
   - list/open/create/update/delete
   - sections + section languages
   - preview
