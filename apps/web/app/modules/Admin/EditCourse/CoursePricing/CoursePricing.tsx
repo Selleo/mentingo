@@ -35,6 +35,7 @@ const CoursePricing = ({ courseId, priceInCents, currency, language }: CoursePri
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-y-6">
           <div className="flex flex-col space-y-6">
             <Card
+              data-testid="course-pricing-free-card"
               className={cn(
                 "flex w-[680px] cursor-pointer items-start gap-x-4 rounded-md border px-6 py-4",
                 {
@@ -69,6 +70,7 @@ const CoursePricing = ({ courseId, priceInCents, currency, language }: CoursePri
             </Card>
 
             <Card
+              data-testid="course-pricing-paid-card"
               className={cn(
                 "flex w-[680px] cursor-pointer items-start gap-x-4 rounded-md border px-6 py-4",
                 {
@@ -111,6 +113,7 @@ const CoursePricing = ({ courseId, priceInCents, currency, language }: CoursePri
                     </div>
                     <div className="mb-2">
                       <PriceInput
+                        data-testid="course-pricing-price-input"
                         value={form.getValues("priceInCents")}
                         onChange={(value) => setValue("priceInCents", value)}
                         currency={currency}
@@ -135,7 +138,7 @@ const CoursePricing = ({ courseId, priceInCents, currency, language }: CoursePri
               </div>
             </Card>
           </div>
-          <Button className="w-20" type="submit">
+          <Button data-testid="course-pricing-save-button" className="w-20" type="submit">
             {t("common.button.save")}
           </Button>
         </form>

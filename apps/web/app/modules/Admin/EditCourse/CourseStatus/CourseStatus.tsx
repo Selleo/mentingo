@@ -65,7 +65,9 @@ const CoursePublishStatus = ({ courseId, status, language }: CoursePublishStatus
             )}
           />
           <div className="w-20">
-            <Button type="submit">{t("common.button.save")}</Button>
+            <Button data-testid="course-status-save-button" type="submit">
+              {t("common.button.save")}
+            </Button>
           </div>
         </form>
       </Form>

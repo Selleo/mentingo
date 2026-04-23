@@ -54,6 +54,7 @@ export default function TenantsPage() {
       {
         name: "search",
         type: "text",
+        testId: "tenants-page-search-input",
         placeholder: t("superAdminTenantsView.search.placeholder"),
         default: "",
       },
@@ -69,16 +70,18 @@ export default function TenantsPage() {
 
   return (
     <PageWrapper>
-      <div className="flex flex-col gap-y-4">
+      <div data-testid="tenants-page" className="flex flex-col gap-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-semibold">{t("superAdminTenantsView.title")}</h1>
+            <h1 data-testid="tenants-page-heading" className="text-xl font-semibold">
+              {t("superAdminTenantsView.title")}
+            </h1>
             <p className="text-sm text-muted-foreground">
               {t("superAdminTenantsView.description")}
             </p>
           </div>
           <Button asChild className="gap-2">
-            <Link to="/super-admin/tenants/new">
+            <Link data-testid="tenants-page-create-button" to="/super-admin/tenants/new">
               <Plus className="size-4" aria-hidden="true" />
               {t("superAdminTenantsView.actions.create")}
             </Link>
@@ -100,7 +103,7 @@ export default function TenantsPage() {
         </div>
 
         <div>
-          <Table className="border bg-neutral-50">
+          <Table data-testid="tenants-page-table" className="border bg-neutral-50">
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
@@ -112,7 +115,7 @@ export default function TenantsPage() {
                 </TableRow>
               ))}
             </TableHeader>
-            <TableBody>
+            <TableBody data-testid="tenants-page-table-body">
               {isLoading && (
                 <TableRow>
                   <TableCell colSpan={columns.length} className="text-center text-muted-foreground">
@@ -128,7 +131,11 @@ export default function TenantsPage() {
                 </TableRow>
               )}
               {table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} className="hover:bg-neutral-100">
+                <TableRow
+                  key={row.id}
+                  data-testid={`tenants-page-table-row-${row.original.id}`}
+                  className="hover:bg-neutral-100"
+                >
                   {row.getVisibleCells().map((cell, index) => (
                     <TableCell key={cell.id} className={cn({ "!w-12": index === 0 })}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}

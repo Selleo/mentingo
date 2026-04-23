@@ -36,16 +36,24 @@ export const DeleteLanguageDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent>
+      <DialogContent data-testid="course-language-delete-dialog">
         <DialogHeader>
           <DialogTitle>{t("adminCourseView.deleteLanguage.title")}</DialogTitle>
           <DialogDescription>{t("adminCourseView.deleteLanguage.description")}</DialogDescription>
         </DialogHeader>
         <DialogFooter className="gap-2 sm:gap-0">
-          <Button variant="outline" onClick={() => setOpen(false)}>
+          <Button
+            data-testid="course-language-delete-cancel-button"
+            variant="outline"
+            onClick={() => setOpen(false)}
+          >
             {t("common.button.cancel")}
           </Button>
-          <Button variant="destructive" onClick={handleConfirm}>
+          <Button
+            data-testid="course-language-delete-confirm-button"
+            variant="destructive"
+            onClick={handleConfirm}
+          >
             {t("common.button.proceed")}
           </Button>
         </DialogFooter>

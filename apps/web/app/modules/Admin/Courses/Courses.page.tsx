@@ -99,11 +99,14 @@ const Courses = () => {
     {
       name: "title",
       type: "text",
+      testId: "courses-page-title-filter",
       placeholder: t("adminCoursesView.filters.placeholder.title"),
     },
     {
       name: "category",
       type: "select",
+      testId: "courses-page-category-filter",
+      optionTestId: (option) => `courses-page-category-option-${option.value}`,
       placeholder: t("adminCoursesView.filters.placeholder.categories"),
       options: categories?.map(({ title }) => ({
         value: title,
@@ -113,6 +116,8 @@ const Courses = () => {
     {
       name: "state",
       type: "select",
+      testId: "courses-page-state-filter",
+      optionTestId: (option) => `courses-page-state-option-${option.value}`,
       placeholder: t("adminCoursesView.filters.placeholder.states"),
       options: [
         { value: "draft", label: t("adminCoursesView.filters.other.draft") },
@@ -123,6 +128,8 @@ const Courses = () => {
     {
       name: "archived",
       type: "status",
+      testId: "courses-page-archived-filter",
+      optionTestId: (option) => `courses-page-archived-option-${option.value}`,
     },
   ];
 
@@ -149,7 +156,7 @@ const Courses = () => {
         <Checkbox
           checked={row.getIsSelected()}
           aria-label="Select row"
-          data-testid={row.original.authorEmail}
+          data-testid={`courses-page-table-checkbox-${row.original.id}`}
           onClick={(event) => {
             event.stopPropagation();
             handleRowSelectionRange({
@@ -329,13 +336,15 @@ const Courses = () => {
         },
       ]}
     >
-      <div className="flex flex-col">
+      <div data-testid="courses-page" className="flex flex-col">
         <div className="flex flex-col lg:p-0 mb-6">
-          <h4 className="pb-1 h4 text-neutral-950">{t("adminCoursesView.courses.header")}</h4>
+          <h4 data-testid="courses-page-heading" className="pb-1 h4 text-neutral-950">
+            {t("adminCoursesView.courses.header")}
+          </h4>
           <p className="body-lg-md text-neutral-800">{t("adminCoursesView.courses.subHeader")}</p>
         </div>
         <div className="ml-auto flex gap-3">
-          <Link to="/admin/beta-courses/new">
+          <Link data-testid="courses-page-create-button" to="/admin/beta-courses/new">
             <Button variant="primary">{t("adminCoursesView.button.createNew")}</Button>
           </Link>
 
@@ -375,6 +384,7 @@ const Courses = () => {
             <Dialog>
               <DialogTrigger disabled={isEmpty(selectedCourses)}>
                 <Button
+                  data-testid="courses-page-delete-selected-button"
                   size="sm"
                   className="flex items-center gap-x-2"
                   variant="outline"
@@ -386,7 +396,7 @@ const Courses = () => {
               </DialogTrigger>
               <DialogPortal>
                 <DialogOverlay className="bg-primary-400 opacity-65" />
-                <DialogContent className="max-w-md">
+                <DialogContent data-testid="courses-page-delete-dialog" className="max-w-md">
                   <DialogTitle className="text-xl font-semibold text-neutral-900">
                     {getDeleteModalTitle()}
                   </DialogTitle>
@@ -395,12 +405,17 @@ const Courses = () => {
                   </DialogDescription>
                   <div className="mt-6 flex justify-end gap-4">
                     <DialogClose>
-                      <Button variant="ghost" className="text-primary-800">
+                      <Button
+                        data-testid="courses-page-delete-dialog-cancel-button"
+                        variant="ghost"
+                        className="text-primary-800"
+                      >
                         {t("common.button.cancel")}
                       </Button>
                     </DialogClose>
                     <DialogClose>
                       <Button
+                        data-testid="courses-page-delete-dialog-confirm-button"
                         onClick={handleDeleteCourses}
                         className="bg-error-500 text-white hover:bg-error-600"
                       >
@@ -413,7 +428,7 @@ const Courses = () => {
             </Dialog>
           </div>
         </div>
-        <Table className="border bg-neutral-50">
+        <Table data-testid="courses-page-table" className="border bg-neutral-50">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -425,11 +440,12 @@ const Courses = () => {
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
+          <TableBody data-testid="courses-page-table-body">
             {table.getRowModel().rows.map((row) => (
               <TableRow
                 key={row.id}
                 data-course-id={row.original.id}
+                data-testid={`courses-page-table-row-${row.original.id}`}
                 data-state={row.getIsSelected() && "selected"}
                 onClick={() => handleRowClick(row.original.id)}
                 className="cursor-pointer hover:bg-neutral-100"

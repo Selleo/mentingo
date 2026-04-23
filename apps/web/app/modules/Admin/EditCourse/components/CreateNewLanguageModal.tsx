@@ -46,14 +46,20 @@ export const CreateLanguageDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent>
+      <DialogContent data-testid="course-language-create-dialog">
         <DialogTitle>{t("adminCourseView.createLanguage.title")}</DialogTitle>
         <DialogDescription>{t("adminCourseView.createLanguage.description")}</DialogDescription>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
+          <Button
+            data-testid="course-language-create-cancel-button"
+            variant="outline"
+            onClick={() => setOpen(false)}
+          >
             {t("contentCreatorView.button.cancel")}
           </Button>
-          <Button onClick={handleConfirm}>{t("contentCreatorView.button.confirm")}</Button>
+          <Button data-testid="course-language-create-confirm-button" onClick={handleConfirm}>
+            {t("contentCreatorView.button.confirm")}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -103,6 +103,7 @@ export const CourseViewSidebar = ({ course }: CourseViewSidebar) => {
       <div className="flex flex-col gap-6 md:flex-row md:items-center">
         <div className="relative flex w-full flex-col gap-3">
           <button
+            data-testid="course-overview-author-transfer-button"
             type="button"
             onClick={() => canEditOwner && setIsEditingOwner(true)}
             aria-label={t("adminCourseView.settings.transferOwnership.title")}

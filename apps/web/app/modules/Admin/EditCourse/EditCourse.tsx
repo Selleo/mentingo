@@ -240,10 +240,17 @@ const EditCourse = () => {
 
   return (
     <PageWrapper breadcrumbs={breadcrumbs} className="relative">
-      <Tabs value={activeTab} className="flex h-full flex-col gap-y-4">
+      <Tabs
+        data-testid="edit-course-page"
+        value={activeTab}
+        className="flex h-full flex-col gap-y-4"
+      >
         <div className="flex w-full flex-col gap-y-4 rounded-lg border border-gray-200 bg-white px-8 py-6 shadow-md">
           <div className="flex items-center justify-between">
-            <h4 className="h4 flex items-center text-neutral-950 mr-2">
+            <h4
+              data-testid="edit-course-page-heading"
+              className="h4 flex items-center text-neutral-950 mr-2"
+            >
               {course?.title || ""}
 
               {course?.status === "published" && (
@@ -322,12 +329,16 @@ const EditCourse = () => {
                         onOpenChange={setOpenGenerateTranslationModal}
                       >
                         <DialogTrigger asChild>
-                          <Button variant="outline" className="gap-2">
+                          <Button
+                            data-testid="course-language-generate-button"
+                            variant="outline"
+                            className="gap-2"
+                          >
                             <Icon name="AiMentor" className="size-4" />
                             {t("adminCourseView.common.generateMissingTranslations")}
                           </Button>
                         </DialogTrigger>
-                        <DialogContent>
+                        <DialogContent data-testid="course-language-generate-dialog">
                           <DialogTitle>
                             {t("adminCourseView.common.generateMissingTranslations")}
                           </DialogTitle>
@@ -336,11 +347,15 @@ const EditCourse = () => {
                           </DialogDescription>
                           <DialogFooter>
                             <DialogTrigger asChild>
-                              <Button variant="outline">
+                              <Button
+                                data-testid="course-language-generate-cancel-button"
+                                variant="outline"
+                              >
                                 {t("contentCreatorView.button.cancel")}
                               </Button>
                             </DialogTrigger>
                             <Button
+                              data-testid="course-language-generate-confirm-button"
                               type="button"
                               onClick={handleGenerate}
                               disabled={isGenerationPending}
@@ -368,7 +383,10 @@ const EditCourse = () => {
                 asChild
                 className="border border-neutral-200 bg-transparent text-accent-foreground"
               >
-                <Link to={`/course/${course?.id}?language=${courseLanguage}`}>
+                <Link
+                  data-testid="edit-course-preview-button"
+                  to={`/course/${course?.id}?language=${courseLanguage}`}
+                >
                   <Icon name="Eye" className="mr-2" />
                   {t("adminCourseView.common.preview")}
                 </Link>
@@ -377,7 +395,12 @@ const EditCourse = () => {
           </div>
           <TabsList className="w-min">
             {visibleCourseTabs.map(({ label, value }) => (
-              <TabsTrigger key={value} value={value} onClick={() => handleTabChange(value)}>
+              <TabsTrigger
+                key={value}
+                data-testid={`edit-course-tab-${value}`}
+                value={value}
+                onClick={() => handleTabChange(value)}
+              >
                 {label}
               </TabsTrigger>
             ))}

@@ -89,6 +89,7 @@ export async function seedProduction() {
     const tenant = await ensureSeedTenant(db, {
       name: "Default Tenant",
       host: process.env.CORS_ORIGIN ?? "localhost",
+      isManaging: true,
     });
 
     const tenantId = tenant.id;

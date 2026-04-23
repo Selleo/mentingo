@@ -62,16 +62,18 @@ export default function EditTenantPage() {
 
   return (
     <PageWrapper>
-      <div className="flex flex-col gap-y-6">
+      <div data-testid="tenant-page" className="flex flex-col gap-y-6">
         <div>
-          <h1 className="text-xl font-semibold">{t("superAdminTenantsView.edit.title")}</h1>
+          <h1 data-testid="tenant-page-heading" className="text-xl font-semibold">
+            {t("superAdminTenantsView.edit.title")}
+          </h1>
           <p className="text-sm text-muted-foreground">
             {t("superAdminTenantsView.edit.description")}
           </p>
         </div>
 
         {isLoading ? (
-          <div className="text-sm text-muted-foreground">
+          <div data-testid="tenant-page-loading" className="text-sm text-muted-foreground">
             {t("superAdminTenantsView.table.loading")}
           </div>
         ) : (
@@ -84,7 +86,7 @@ export default function EditTenantPage() {
                   <FormItem>
                     <Label htmlFor="name">{t("superAdminTenantsView.form.tenantName")}</Label>
                     <FormControl>
-                      <Input id="name" {...field} />
+                      <Input data-testid="tenant-form-name-input" id="name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -99,6 +101,7 @@ export default function EditTenantPage() {
                     <Label htmlFor="host">{t("superAdminTenantsView.form.tenantHost")}</Label>
                     <FormControl>
                       <Input
+                        data-testid="tenant-form-host-input"
                         id="host"
                         placeholder={t("superAdminTenantsView.form.tenantHostPlaceholder")}
                         {...field}
@@ -117,17 +120,20 @@ export default function EditTenantPage() {
                     <Label>{t("superAdminTenantsView.form.status")}</Label>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger data-testid="tenant-form-status-select">
                           <SelectValue
                             placeholder={t("superAdminTenantsView.form.statusPlaceholder")}
                           />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="active">
+                        <SelectItem data-testid="tenant-form-status-option-active" value="active">
                           {t("superAdminTenantsView.status.active")}
                         </SelectItem>
-                        <SelectItem value="inactive">
+                        <SelectItem
+                          data-testid="tenant-form-status-option-inactive"
+                          value="inactive"
+                        >
                           {t("superAdminTenantsView.status.inactive")}
                         </SelectItem>
                       </SelectContent>
@@ -138,7 +144,9 @@ export default function EditTenantPage() {
               />
 
               <div className="flex justify-end">
-                <Button type="submit">{t("superAdminTenantsView.edit.submit")}</Button>
+                <Button data-testid="tenant-form-submit-button" type="submit">
+                  {t("superAdminTenantsView.edit.submit")}
+                </Button>
               </div>
             </form>
           </Form>

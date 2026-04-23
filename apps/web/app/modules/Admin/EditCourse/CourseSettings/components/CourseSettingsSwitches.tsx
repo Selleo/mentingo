@@ -53,6 +53,7 @@ export const CourseSettingsSwitches = ({ courseId }: Props) => {
           className="rounded-lg border border-neutral-300 p-4 gap-3 items-center flex"
         >
           <Switch
+            data-testid={`course-settings-${setting.key === "lessonSequenceEnabled" ? "lesson-sequence" : "quiz-feedback"}-switch`}
             checked={setting.isEnabled}
             onCheckedChange={setting.onToggle}
             disabled={isDisabled}

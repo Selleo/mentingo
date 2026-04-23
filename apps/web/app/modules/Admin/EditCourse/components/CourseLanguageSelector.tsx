@@ -135,12 +135,17 @@ export const CourseLanguageSelector = ({
       </TooltipProvider>
 
       <Select value={courseLanguage} onValueChange={handleLanguageChange}>
-        <SelectTrigger className="min-w-[200px]">
+        <SelectTrigger data-testid="edit-course-language-select" className="min-w-[200px]">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
           {addedItems.map((item) => (
-            <SelectItem value={item.key} key={item.key} className="w-full">
+            <SelectItem
+              data-testid={`edit-course-language-option-${item.key}`}
+              value={item.key}
+              key={item.key}
+              className="w-full"
+            >
               <div className="flex w-full items-center gap-2">
                 <Icon name={item.iconName} className="size-4" />
                 <span className="font-semibold">{t(item.translationKey)}</span>
@@ -161,7 +166,11 @@ export const CourseLanguageSelector = ({
                 {t("adminCourseView.common.notAddedLanguages")}
               </div>
               {notAddedItems.map((item) => (
-                <SelectItem value={item.key} key={item.key}>
+                <SelectItem
+                  data-testid={`edit-course-language-option-${item.key}`}
+                  value={item.key}
+                  key={item.key}
+                >
                   <div className="flex w-full items-center gap-2">
                     <Icon name={item.iconName} className="size-4" />
                     <div className="flex flex-col leading-tight">
@@ -177,6 +186,7 @@ export const CourseLanguageSelector = ({
 
       {course?.baseLanguage !== courseLanguage && (
         <Button
+          data-testid="edit-course-delete-language-button"
           size="icon"
           type="button"
           variant="outline"

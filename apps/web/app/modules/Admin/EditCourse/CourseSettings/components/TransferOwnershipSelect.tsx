@@ -32,10 +32,18 @@ const TransferOwnershipSelect = ({
       open={open}
       onOpenChange={onOpenChange}
     >
-      <SelectTrigger id={id} className={cn("w-full", triggerClassName)}></SelectTrigger>
+      <SelectTrigger
+        data-testid="course-transfer-ownership-select"
+        id={id}
+        className={cn("w-full", triggerClassName)}
+      ></SelectTrigger>
       <SelectContent>
         {candidates?.map((user) => (
-          <SelectItem value={user.id} key={user.id}>
+          <SelectItem
+            data-testid={`course-transfer-ownership-option-${user.id}`}
+            value={user.id}
+            key={user.id}
+          >
             <div className="flex flex-col items-start text-left">
               <span className="font-medium">{user.name}</span>
               <span className="text-xs text-neutral-500">{user.email}</span>

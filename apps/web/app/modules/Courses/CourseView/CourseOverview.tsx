@@ -54,6 +54,7 @@ export default function CourseOverview({ course }: CourseOverviewProps) {
                 <TooltipTrigger asChild>
                   <span className="inline-flex mr-2">
                     <Button
+                      data-testid="course-overview-student-mode-button"
                       className="flex gap-2"
                       variant={isCourseStudentModeActive ? "primary" : "outline"}
                       onClick={() => toggleLearningMode({ enabled: !isCourseStudentModeActive })}

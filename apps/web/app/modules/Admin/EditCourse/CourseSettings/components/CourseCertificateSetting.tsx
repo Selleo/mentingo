@@ -145,6 +145,7 @@ const CourseCertificateSetting = ({
         <div className="flex items-center gap-4">
           <div className="flex min-w-0 items-start gap-3">
             <Switch
+              data-testid="course-settings-certificate-switch"
               checked={isCertificateEnabled}
               onCheckedChange={handleCertificateToggle}
               disabled={isUpdatingCertificate}
