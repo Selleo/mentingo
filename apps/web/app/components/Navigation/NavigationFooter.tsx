@@ -120,6 +120,7 @@ export function NavigationFooter({
                     iconName: "Info",
                     label: t("navigationSideBar.providerInformation"),
                     link: "/provider-information",
+                    testId: NAVIGATION_HANDLES.PROVIDER_INFORMATION_LINK,
                   }}
                 />
               </DropdownMenuItem>
@@ -131,6 +132,7 @@ export function NavigationFooter({
                       iconName: "User",
                       label: t("navigationSideBar.profile"),
                       link: `/profile/${user?.id}`,
+                      testId: NAVIGATION_HANDLES.PROFILE_LINK,
                     }}
                   />
                 </DropdownMenuItem>
@@ -142,6 +144,7 @@ export function NavigationFooter({
                     iconName: "Settings",
                     label: t("navigationSideBar.settings"),
                     link: `/settings`,
+                    testId: NAVIGATION_HANDLES.SETTINGS_LINK,
                   }}
                 />
                 {hasConfigurationIssues && (

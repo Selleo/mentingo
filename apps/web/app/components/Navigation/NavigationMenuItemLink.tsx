@@ -13,6 +13,7 @@ interface NavigationMenuItemLinkProps {
 export const NavigationMenuItemLink = ({ item }: NavigationMenuItemLinkProps) => {
   return (
     <NavLink
+      data-testid={item.testId}
       to={item.link}
       className={({ isActive }) =>
         cn(

@@ -307,14 +307,14 @@ Based on `playwright-strategy/03-capability-coverage.md`:
 
 ### Its-Gabo
 
-- Auth
+- Auth -- DONE
   - login success/failure
   - register
   - password recovery/reset
   - magic-link
   - MFA
   - logout
-- Navigation
+- Navigation -- DONE
   - public visibility
   - authenticated visibility
   - manage/super-admin visibility

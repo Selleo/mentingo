@@ -18,6 +18,8 @@ import { passwordSchema } from "~/modules/Dashboard/Settings/schema/password.sch
 import { detectBrowserLanguage } from "~/utils/browser-language";
 import { setPageTitle } from "~/utils/setPageTitle";
 
+import { CREATE_NEW_PASSWORD_PAGE_HANDLES } from "../../../e2e/data/auth/handles";
+
 import type { MetaFunction } from "@remix-run/react";
 
 type CreateNewPasswordFormValues = {
@@ -102,7 +104,7 @@ export default function CreateNewPasswordPage() {
 
   return (
     <FormProvider {...methods}>
-      <Card className="mx-auto max-w-sm">
+      <Card className="mx-auto max-w-sm" data-testid={CREATE_NEW_PASSWORD_PAGE_HANDLES.PAGE}>
         <CardHeader>
           <CardTitle className="text-2xl">{t("createPasswordView.header")}</CardTitle>
           <CardDescription>{t("createPasswordView.subHeader")}</CardDescription>
@@ -115,6 +117,7 @@ export default function CreateNewPasswordPage() {
                 id="newPassword"
                 type="password"
                 className={cn({ "border-red-500": errors.newPassword })}
+                data-testid={CREATE_NEW_PASSWORD_PAGE_HANDLES.NEW_PASSWORD}
                 {...register("newPassword")}
               />
             </div>
@@ -131,6 +134,7 @@ export default function CreateNewPasswordPage() {
                 className={cn({
                   "border-red-500": errors.newPasswordConfirmation,
                 })}
+                data-testid={CREATE_NEW_PASSWORD_PAGE_HANDLES.NEW_PASSWORD_CONFIRMATION}
                 {...register("newPasswordConfirmation")}
               />
               {errors.newPasswordConfirmation && (
@@ -140,7 +144,12 @@ export default function CreateNewPasswordPage() {
 
             <PasswordValidationDisplay fieldName="newPassword" />
 
-            <Button type="submit" className="w-full" disabled={!isValid}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={!isValid}
+              data-testid={CREATE_NEW_PASSWORD_PAGE_HANDLES.SUBMIT}
+            >
               {t("createPasswordView.button.changePassword")}
             </Button>
           </form>

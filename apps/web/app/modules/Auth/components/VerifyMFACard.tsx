@@ -9,6 +9,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/com
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "~/components/ui/input-otp";
 import { Label } from "~/components/ui/label";
 
+import { MFA_PAGE_HANDLES } from "../../../../e2e/data/auth/handles";
+
 const mfaSetupSchema = z.object({
   token: z.string().min(1),
 });
@@ -28,7 +30,7 @@ export function VerifyMFACard() {
   };
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className="w-full max-w-md" data-testid={MFA_PAGE_HANDLES.PAGE}>
       <CardHeader className="my-2 text-center">
         <CardTitle>{t("mfa.verify.title")}</CardTitle>
         <CardDescription>{t("mfa.verify.description")}</CardDescription>
@@ -47,6 +49,7 @@ export function VerifyMFACard() {
             id="token"
             name="token"
             maxLength={6}
+            data-testid={MFA_PAGE_HANDLES.TOKEN}
             value={watch("token")}
             onChange={(newValue: string) => setValue("token", newValue)}
           >
@@ -56,7 +59,12 @@ export function VerifyMFACard() {
               ))}
             </InputOTPGroup>
           </InputOTP>
-          <Button variant="primary" className="mt-4" disabled={isVerifyingMFA}>
+          <Button
+            variant="primary"
+            className="mt-4"
+            disabled={isVerifyingMFA}
+            data-testid={MFA_PAGE_HANDLES.SUBMIT}
+          >
             {t("mfa.verify.verifyToken")}
           </Button>
         </form>
