@@ -11,6 +11,8 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 
+import { ARTICLES_TOC_HANDLES } from "../../../../../e2e/data/articles/handles";
+
 type ArticlesTOCAddFabProps = {
   onRequestClose: () => void;
   onCreateSection?: () => void;
@@ -31,6 +33,7 @@ export function ArticlesTOCAddFab({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
+          data-testid={ARTICLES_TOC_HANDLES.ADD_ACTION}
           type="button"
           variant="primary"
           size="icon"
@@ -47,6 +50,7 @@ export function ArticlesTOCAddFab({
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem
+          data-testid={ARTICLES_TOC_HANDLES.CREATE_SECTION_ACTION}
           className={menuItemClassName}
           onSelect={() => {
             onRequestClose();
@@ -57,6 +61,7 @@ export function ArticlesTOCAddFab({
           {t("adminArticleView.toc.actions.newSection")}
         </DropdownMenuItem>
         <DropdownMenuItem
+          data-testid={ARTICLES_TOC_HANDLES.CREATE_ARTICLE_ACTION}
           className={menuItemClassName}
           onSelect={() => {
             onRequestClose();

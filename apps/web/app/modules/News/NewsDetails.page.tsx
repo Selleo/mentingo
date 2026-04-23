@@ -16,6 +16,7 @@ import { ContentAccessGuard } from "~/Guards/AccessGuard";
 import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
 
+import { NEWS_DETAILS_PAGE_HANDLES } from "../../../e2e/data/news/handles";
 import Loader from "../common/Loader/Loader";
 import { useLanguageStore } from "../Dashboard/Settings/Language/LanguageStore";
 
@@ -78,6 +79,7 @@ export default function NewsDetailsPage() {
   return (
     <ContentAccessGuard type={ACCESS_GUARD.UNREGISTERED_NEWS_ACCESS}>
       <PageWrapper
+        data-testid={NEWS_DETAILS_PAGE_HANDLES.PAGE}
         breadcrumbs={[
           { title: t("navigationSideBar.news"), href: "/news" },
           { title: news.title, href: `/news/${news.id}` },
@@ -90,6 +92,7 @@ export default function NewsDetailsPage() {
         {canManageNews && (
           <div className="flex justify-end gap-2 max-w-6xl mx-auto w-full">
             <Button
+              data-testid={NEWS_DETAILS_PAGE_HANDLES.EDIT_BUTTON}
               variant="outline"
               className="gap-2"
               onClick={() => {
@@ -102,6 +105,7 @@ export default function NewsDetailsPage() {
               </span>
             </Button>
             <Button
+              data-testid={NEWS_DETAILS_PAGE_HANDLES.DELETE_BUTTON}
               variant="outline"
               className="w-28 gap-2"
               onClick={async () => {
@@ -141,8 +145,18 @@ export default function NewsDetailsPage() {
               "pt-10": !headerImageUrl,
             })}
           >
-            <h1 className="text-[40px] font-bold leading-[1.1] text-neutral-950">{news.title}</h1>
-            <p className="text-lg font-normal leading-8 text-neutral-700">{news.summary}</p>
+            <h1
+              className="text-[40px] font-bold leading-[1.1] text-neutral-950"
+              data-testid={NEWS_DETAILS_PAGE_HANDLES.TITLE}
+            >
+              {news.title}
+            </h1>
+            <p
+              className="text-lg font-normal leading-8 text-neutral-700"
+              data-testid={NEWS_DETAILS_PAGE_HANDLES.SUMMARY}
+            >
+              {news.summary}
+            </p>
             <div className="flex flex-wrap items-center gap-3 text-sm font-normal leading-5 text-neutral-700">
               <div className="flex items-center gap-2 rounded-full bg-white px-3 py-1 shadow-sm ring-1 ring-neutral-100">
                 <Icon name="Calendar" className="text-neutral-600 size-4" />
@@ -170,6 +184,7 @@ export default function NewsDetailsPage() {
 
           <div className="mx-auto flex w-full items-center justify-between pb-6 px-6">
             <Button
+              data-testid={NEWS_DETAILS_PAGE_HANDLES.PREVIOUS_BUTTON}
               variant="ghost"
               className="flex items-center gap-2 select-none disabled:opacity-50"
               onClick={() => {
@@ -183,6 +198,7 @@ export default function NewsDetailsPage() {
               </span>
             </Button>
             <Button
+              data-testid={NEWS_DETAILS_PAGE_HANDLES.NEXT_BUTTON}
               variant="ghost"
               className="flex items-center gap-2 select-none disabled:opacity-50"
               onClick={() => {

@@ -13,6 +13,8 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { usePermissions } from "~/hooks/usePermissions";
 
+import { ARTICLES_TOC_HANDLES } from "../../../../../e2e/data/articles/handles";
+
 type ArticlesTOCHeaderProps = {
   onRequestClose?: () => void;
   onCreateSection?: () => void;
@@ -43,6 +45,7 @@ export function ArticlesTOCHeader({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
+                data-testid={ARTICLES_TOC_HANDLES.ADD_ACTION}
                 variant="ghost"
                 size="icon"
                 aria-label={t("adminArticleView.toc.actions.add")}
@@ -57,6 +60,7 @@ export function ArticlesTOCHeader({
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem
+                data-testid={ARTICLES_TOC_HANDLES.CREATE_SECTION_ACTION}
                 className={menuItemClassName}
                 onSelect={() => {
                   onRequestClose?.();
@@ -67,6 +71,7 @@ export function ArticlesTOCHeader({
                 {t("adminArticleView.toc.actions.newSection")}
               </DropdownMenuItem>
               <DropdownMenuItem
+                data-testid={ARTICLES_TOC_HANDLES.CREATE_ARTICLE_ACTION}
                 className={menuItemClassName}
                 onSelect={() => {
                   onRequestClose?.();

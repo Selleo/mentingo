@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Separator } from "~/components/ui/separator";
 import { usePermissions } from "~/hooks/usePermissions";
 
+import { ARTICLES_TOC_HANDLES } from "../../../../../e2e/data/articles/handles";
+
 import { ArticlesTOCAddFab } from "./ArticlesTOCAddFab";
 import { ArticlesTOCHeader } from "./ArticlesTOCHeader";
 import { ArticlesTOCSection } from "./ArticlesTOCSection";
@@ -50,7 +52,10 @@ export function ArticlesTOCPanel({
   }, [sectionIds]);
 
   return (
-    <div className="relative border-l flex size-full min-h-0 flex-col bg-white pt-4">
+    <div
+      className="relative border-l flex size-full min-h-0 flex-col bg-white pt-4"
+      data-testid={ARTICLES_TOC_HANDLES.PANEL}
+    >
       <ArticlesTOCHeader
         onRequestClose={onRequestClose}
         onCreateSection={onCreateSection}

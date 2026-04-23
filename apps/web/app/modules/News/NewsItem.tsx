@@ -1,6 +1,7 @@
 import { useNavigate } from "@remix-run/react";
 import { formatDate } from "date-fns";
 
+import { NEWS_PAGE_HANDLES } from "../../../e2e/data/news/handles";
 import { Icon } from "../../components/Icon";
 import { cn } from "../../lib/utils";
 
@@ -30,6 +31,7 @@ function NewsItem({
 
   return (
     <button
+      data-testid={NEWS_PAGE_HANDLES.item(id)}
       className={cn(
         "relative overflow-hidden rounded-lg py-7 px-6 flex flex-col justify-end min-h-[380px] group",
         className,

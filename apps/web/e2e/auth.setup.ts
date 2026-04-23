@@ -4,6 +4,7 @@ import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { login } from "./fixtures/auth.actions";
 import { createFixtureApiClient } from "./utils/api-client";
 import { AUTH_ACCOUNT_TEMPLATE, getAuthEmail, getReadonlyAuthStatePath } from "./utils/auth-email";
+import { ensureContentModulesEnabled } from "./utils/content-features";
 
 import type { Browser } from "@playwright/test";
 
@@ -105,6 +106,7 @@ setup("authenticate", async ({ browser }) => {
     await login(adminPage, ADMIN_EMAIL, ADMIN_PASSWORD);
     apiClient.syncTenantOrigin(new URL(adminPage.url()).origin);
     apiClient.syncCookies(await adminContext.cookies());
+    await ensureContentModulesEnabled(apiClient);
 
     for (const role of AUTH_ROLES) {
       await ensureUserAccount(

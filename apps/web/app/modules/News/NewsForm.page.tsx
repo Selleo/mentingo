@@ -20,6 +20,7 @@ import { useRichTextUploadQueue } from "~/hooks/useRichTextUploadQueue";
 import { useTusVideoUpload } from "~/hooks/useTusVideoUpload";
 import { useUploadDisplayModeDialog } from "~/hooks/useUploadDisplayModeDialog";
 
+import { NEWS_FORM_PAGE_HANDLES } from "../../../e2e/data/news/handles";
 import { usePreviewNews, useUpdateNews } from "../../api/mutations";
 import { useNews } from "../../api/queries";
 import ImageUploadInput from "../../components/FileUploadInput/ImageUploadInput";
@@ -272,7 +273,11 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
   }
 
   return (
-    <PageWrapper breadcrumbs={breadcrumbs} className="bg-neutral-50/80">
+    <PageWrapper
+      breadcrumbs={breadcrumbs}
+      className="bg-neutral-50/80"
+      data-testid={NEWS_FORM_PAGE_HANDLES.PAGE}
+    >
       <div className="mx-auto w-full max-w-6xl mt-10">
         <div className="flex flex-col gap-8 rounded-3xl bg-white p-8 shadow-sm ring-1 ring-neutral-100">
           <header className="flex flex-col gap-2 border-b border-neutral-200 pb-4">
@@ -308,6 +313,7 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
                     control={form.control}
                     name="title"
                     placeholder={t("newsView.placeholder.title")}
+                    data-testid={NEWS_FORM_PAGE_HANDLES.TITLE_INPUT}
                   />
                 </div>
 
@@ -323,12 +329,23 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
                         value={field.value}
                         onValueChange={(val) => field.onChange(val as "draft" | "published")}
                       >
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger
+                          className="w-full"
+                          data-testid={NEWS_FORM_PAGE_HANDLES.STATUS_SELECT}
+                        >
                           <SelectValue placeholder="Select status" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="draft">{t("newsView.status.draft")}</SelectItem>
-                          <SelectItem value="published">
+                          <SelectItem
+                            value="draft"
+                            data-testid={NEWS_FORM_PAGE_HANDLES.statusOption("draft")}
+                          >
+                            {t("newsView.status.draft")}
+                          </SelectItem>
+                          <SelectItem
+                            value="published"
+                            data-testid={NEWS_FORM_PAGE_HANDLES.statusOption("published")}
+                          >
                             {t("newsView.status.published")}
                           </SelectItem>
                         </SelectContent>
@@ -348,6 +365,7 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
                       <div className="flex items-center gap-3 rounded-xl h-[42px] py-2 px-3 border border-neutral-300">
                         <Switch
                           id="isPublic"
+                          data-testid={NEWS_FORM_PAGE_HANDLES.IS_PUBLIC_SWITCH}
                           checked={field.value}
                           onCheckedChange={field.onChange}
                           aria-label={t("newsView.field.isPublic")}
@@ -368,6 +386,7 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
                     control={form.control}
                     name="summary"
                     placeholder={t("newsView.placeholder.summary")}
+                    data-testid={NEWS_FORM_PAGE_HANDLES.SUMMARY_INPUT}
                   />
                 </div>
               </div>
@@ -419,8 +438,18 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
                       className="flex flex-col gap-3"
                     >
                       <TabsList className="w-fit bg-primary-50">
-                        <TabsTrigger value="editor">{t("newsView.editor")}</TabsTrigger>
-                        <TabsTrigger value="preview">{t("newsView.preview")}</TabsTrigger>
+                        <TabsTrigger
+                          value="editor"
+                          data-testid={NEWS_FORM_PAGE_HANDLES.CONTENT_EDITOR_TAB}
+                        >
+                          {t("newsView.editor")}
+                        </TabsTrigger>
+                        <TabsTrigger
+                          value="preview"
+                          data-testid={NEWS_FORM_PAGE_HANDLES.CONTENT_PREVIEW_TAB}
+                        >
+                          {t("newsView.preview")}
+                        </TabsTrigger>
                       </TabsList>
 
                       <TabsContent value="editor">
@@ -466,6 +495,7 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
 
               <div className="flex items-center justify-end gap-3 border-t border-neutral-200 pt-4">
                 <Button
+                  data-testid={NEWS_FORM_PAGE_HANDLES.CANCEL_BUTTON}
                   type="button"
                   variant="ghost"
                   className="border border-transparent text-neutral-700 hover:border-neutral-200 hover:bg-neutral-100"
@@ -475,7 +505,9 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
                 >
                   {t("common.button.cancel")}
                 </Button>
-                <Button type="submit">{t("common.button.save")}</Button>
+                <Button data-testid={NEWS_FORM_PAGE_HANDLES.SAVE_BUTTON} type="submit">
+                  {t("common.button.save")}
+                </Button>
               </div>
             </form>
           </Form>

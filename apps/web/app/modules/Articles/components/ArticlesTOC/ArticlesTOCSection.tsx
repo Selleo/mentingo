@@ -5,6 +5,8 @@ import { Button } from "~/components/ui/button";
 import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
 
+import { ARTICLES_TOC_HANDLES } from "../../../../../e2e/data/articles/handles";
+
 type Article = { id: string; title: string };
 type Section = { id: string; title: string; articles: Article[] };
 
@@ -30,7 +32,7 @@ export function ArticlesTOCSection({
   });
 
   return (
-    <div className="py-0.5">
+    <div className="py-0.5" data-testid={ARTICLES_TOC_HANDLES.section(section.id)}>
       <div className="group flex w-full items-center gap-1 overflow-hidden rounded-md px-1 py-0.5 text-neutral-700 transition-colors hover:bg-primary-50 hover:text-primary-700">
         <Button
           type="button"
@@ -86,6 +88,7 @@ export function ArticlesTOCSection({
             return (
               <div key={article.id}>
                 <Button
+                  data-testid={ARTICLES_TOC_HANDLES.article(article.id)}
                   type="button"
                   variant="ghost"
                   className={cn(

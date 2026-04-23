@@ -23,6 +23,8 @@ import {
 } from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
 
+import { NEWS_LANGUAGE_SELECTOR_HANDLES } from "../../../../e2e/data/news/handles";
+
 import type { IconName } from "~/types/shared";
 
 const languageOptions: {
@@ -100,7 +102,10 @@ export const NewsLanguageSelector = ({
   return (
     <div className="flex items-center gap-2">
       <Select value={value} onValueChange={(val) => handleChange(val as SupportedLanguages)}>
-        <SelectTrigger className="min-w-[200px]">
+        <SelectTrigger
+          className="min-w-[200px]"
+          data-testid={NEWS_LANGUAGE_SELECTOR_HANDLES.SELECT}
+        >
           <SelectValue placeholder={t("newsView.language.label")} />
         </SelectTrigger>
         <SelectContent>
@@ -142,6 +147,7 @@ export const NewsLanguageSelector = ({
 
       {baseLanguage && baseLanguage !== value && (
         <Button
+          data-testid={NEWS_LANGUAGE_SELECTOR_HANDLES.DELETE_BUTTON}
           size="icon"
           type="button"
           variant="outline"
@@ -156,7 +162,7 @@ export const NewsLanguageSelector = ({
       )}
 
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent>
+        <DialogContent data-testid={NEWS_LANGUAGE_SELECTOR_HANDLES.CREATE_DIALOG}>
           <DialogHeader>
             <DialogTitle>{t("newsView.language.createTitle")}</DialogTitle>
             <DialogDescription>
@@ -172,13 +178,18 @@ export const NewsLanguageSelector = ({
             <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
               {t("common.button.cancel")}
             </Button>
-            <Button onClick={handleCreateLanguage}>{t("contentCreatorView.button.confirm")}</Button>
+            <Button
+              data-testid={NEWS_LANGUAGE_SELECTOR_HANDLES.CREATE_CONFIRM_BUTTON}
+              onClick={handleCreateLanguage}
+            >
+              {t("contentCreatorView.button.confirm")}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <DialogContent>
+        <DialogContent data-testid={NEWS_LANGUAGE_SELECTOR_HANDLES.DELETE_DIALOG}>
           <DialogHeader>
             <DialogTitle>{t("newsView.language.deleteTitle")}</DialogTitle>
             <DialogDescription>
@@ -194,7 +205,11 @@ export const NewsLanguageSelector = ({
             <Button variant="outline" onClick={() => setIsDeleteOpen(false)}>
               {t("common.button.cancel")}
             </Button>
-            <Button variant="destructive" onClick={handleDeleteLanguage}>
+            <Button
+              data-testid={NEWS_LANGUAGE_SELECTOR_HANDLES.DELETE_CONFIRM_BUTTON}
+              variant="destructive"
+              onClick={handleDeleteLanguage}
+            >
               {t("common.button.proceed")}
             </Button>
           </DialogFooter>
