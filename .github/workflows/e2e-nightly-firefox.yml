@@ -1,14 +1,18 @@
+name: Nightly Firefox E2E
+
+env:
+  HUSKY: 0
+
 on:
-  pull_request:
-    types: [labeled]
-  workflow_call:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
 
 jobs:
   e2e:
-    if: ${{ (github.event_name == 'pull_request' && github.event.label != null && github.event.label.name == 'run E2E tests ⚙️') || github.event_name == 'workflow_call' }}
     uses: ./.github/workflows/e2e.yml
     with:
-      browser: chromium
+      browser: firefox
     secrets:
       STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
       STRIPE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_PUBLISHABLE_KEY }}
