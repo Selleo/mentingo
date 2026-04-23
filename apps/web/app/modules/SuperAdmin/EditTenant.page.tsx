@@ -24,6 +24,8 @@ import {
 } from "~/modules/SuperAdmin/schemas/tenant.schema";
 import { setPageTitle } from "~/utils/setPageTitle";
 
+import { TENANT_FORM_HANDLES, TENANT_PAGE_HANDLES } from "../../../e2e/data/tenants/handles";
+
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.tenant");
 
 import type { TenantStatus } from "@repo/shared";
@@ -62,9 +64,9 @@ export default function EditTenantPage() {
 
   return (
     <PageWrapper>
-      <div data-testid="tenant-page" className="flex flex-col gap-y-6">
+      <div data-testid={TENANT_PAGE_HANDLES.PAGE} className="flex flex-col gap-y-6">
         <div>
-          <h1 data-testid="tenant-page-heading" className="text-xl font-semibold">
+          <h1 data-testid={TENANT_PAGE_HANDLES.HEADING} className="text-xl font-semibold">
             {t("superAdminTenantsView.edit.title")}
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -73,7 +75,7 @@ export default function EditTenantPage() {
         </div>
 
         {isLoading ? (
-          <div data-testid="tenant-page-loading" className="text-sm text-muted-foreground">
+          <div data-testid={TENANT_PAGE_HANDLES.LOADING} className="text-sm text-muted-foreground">
             {t("superAdminTenantsView.table.loading")}
           </div>
         ) : (
@@ -86,7 +88,7 @@ export default function EditTenantPage() {
                   <FormItem>
                     <Label htmlFor="name">{t("superAdminTenantsView.form.tenantName")}</Label>
                     <FormControl>
-                      <Input data-testid="tenant-form-name-input" id="name" {...field} />
+                      <Input data-testid={TENANT_FORM_HANDLES.NAME_INPUT} id="name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -101,7 +103,7 @@ export default function EditTenantPage() {
                     <Label htmlFor="host">{t("superAdminTenantsView.form.tenantHost")}</Label>
                     <FormControl>
                       <Input
-                        data-testid="tenant-form-host-input"
+                        data-testid={TENANT_FORM_HANDLES.HOST_INPUT}
                         id="host"
                         placeholder={t("superAdminTenantsView.form.tenantHostPlaceholder")}
                         {...field}
@@ -120,18 +122,21 @@ export default function EditTenantPage() {
                     <Label>{t("superAdminTenantsView.form.status")}</Label>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger data-testid="tenant-form-status-select">
+                        <SelectTrigger data-testid={TENANT_FORM_HANDLES.STATUS_SELECT}>
                           <SelectValue
                             placeholder={t("superAdminTenantsView.form.statusPlaceholder")}
                           />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem data-testid="tenant-form-status-option-active" value="active">
+                        <SelectItem
+                          data-testid={TENANT_FORM_HANDLES.statusOption("active")}
+                          value="active"
+                        >
                           {t("superAdminTenantsView.status.active")}
                         </SelectItem>
                         <SelectItem
-                          data-testid="tenant-form-status-option-inactive"
+                          data-testid={TENANT_FORM_HANDLES.statusOption("inactive")}
                           value="inactive"
                         >
                           {t("superAdminTenantsView.status.inactive")}
@@ -144,7 +149,7 @@ export default function EditTenantPage() {
               />
 
               <div className="flex justify-end">
-                <Button data-testid="tenant-form-submit-button" type="submit">
+                <Button data-testid={TENANT_FORM_HANDLES.SUBMIT_BUTTON} type="submit">
                   {t("superAdminTenantsView.edit.submit")}
                 </Button>
               </div>

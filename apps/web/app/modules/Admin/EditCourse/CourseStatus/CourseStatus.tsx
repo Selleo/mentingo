@@ -1,8 +1,10 @@
+import { COURSE_STATUSES } from "@repo/shared";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
 import { Form, FormField, FormItem, FormMessage } from "~/components/ui/form";
 
+import { COURSE_STATUS_HANDLES } from "../../../../../e2e/data/courses/handles";
 import { useCourseStatusFlags } from "../hooks/useCourseStatusFlags";
 
 import CourseStatusCard from "./CourseStatusCard";
@@ -40,24 +42,24 @@ const CoursePublishStatus = ({ courseId, status, language }: CoursePublishStatus
                 <div className="flex flex-col space-y-6">
                   <CourseStatusCard
                     checked={isDraft}
-                    onChange={() => field.onChange("draft")}
+                    onChange={() => field.onChange(COURSE_STATUSES.DRAFT)}
                     headerKey="adminCourseView.status.draftHeader"
                     bodyKey="adminCourseView.status.draftBody"
-                    id="draft"
+                    id={COURSE_STATUSES.DRAFT}
                   />
                   <CourseStatusCard
                     checked={isPrivate}
-                    onChange={() => field.onChange("private")}
+                    onChange={() => field.onChange(COURSE_STATUSES.PRIVATE)}
                     headerKey="adminCourseView.status.privateHeader"
                     bodyKey="adminCourseView.status.privateBody"
-                    id="private"
+                    id={COURSE_STATUSES.PRIVATE}
                   />
                   <CourseStatusCard
                     checked={isPublished}
-                    onChange={() => field.onChange("published")}
+                    onChange={() => field.onChange(COURSE_STATUSES.PUBLISHED)}
                     headerKey="adminCourseView.status.publishedHeader"
                     bodyKey="adminCourseView.status.publishedBody"
-                    id="published"
+                    id={COURSE_STATUSES.PUBLISHED}
                   />
                 </div>
                 <FormMessage />
@@ -65,7 +67,7 @@ const CoursePublishStatus = ({ courseId, status, language }: CoursePublishStatus
             )}
           />
           <div className="w-20">
-            <Button data-testid="course-status-save-button" type="submit">
+            <Button data-testid={COURSE_STATUS_HANDLES.SAVE_BUTTON} type="submit">
               {t("common.button.save")}
             </Button>
           </div>

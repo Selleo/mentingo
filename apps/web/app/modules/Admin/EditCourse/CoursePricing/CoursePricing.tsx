@@ -8,6 +8,8 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { cn } from "~/lib/utils";
 
+import { COURSE_PRICING_HANDLES } from "../../../../../e2e/data/courses/handles";
+
 import { useCoursePricingForm } from "./hooks/useCoursePricingForm";
 
 import type { SupportedLanguages } from "@repo/shared";
@@ -35,7 +37,7 @@ const CoursePricing = ({ courseId, priceInCents, currency, language }: CoursePri
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-y-6">
           <div className="flex flex-col space-y-6">
             <Card
-              data-testid="course-pricing-free-card"
+              data-testid={COURSE_PRICING_HANDLES.FREE_CARD}
               className={cn(
                 "flex w-[680px] cursor-pointer items-start gap-x-4 rounded-md border px-6 py-4",
                 {
@@ -70,7 +72,7 @@ const CoursePricing = ({ courseId, priceInCents, currency, language }: CoursePri
             </Card>
 
             <Card
-              data-testid="course-pricing-paid-card"
+              data-testid={COURSE_PRICING_HANDLES.PAID_CARD}
               className={cn(
                 "flex w-[680px] cursor-pointer items-start gap-x-4 rounded-md border px-6 py-4",
                 {
@@ -113,7 +115,7 @@ const CoursePricing = ({ courseId, priceInCents, currency, language }: CoursePri
                     </div>
                     <div className="mb-2">
                       <PriceInput
-                        data-testid="course-pricing-price-input"
+                        data-testid={COURSE_PRICING_HANDLES.PRICE_INPUT}
                         value={form.getValues("priceInCents")}
                         onChange={(value) => setValue("priceInCents", value)}
                         currency={currency}
@@ -138,7 +140,7 @@ const CoursePricing = ({ courseId, priceInCents, currency, language }: CoursePri
               </div>
             </Card>
           </div>
-          <Button data-testid="course-pricing-save-button" className="w-20" type="submit">
+          <Button data-testid={COURSE_PRICING_HANDLES.SAVE_BUTTON} className="w-20" type="submit">
             {t("common.button.save")}
           </Button>
         </form>

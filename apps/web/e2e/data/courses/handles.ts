@@ -1,3 +1,5 @@
+import type { CourseStatus, SupportedLanguages } from "@repo/shared";
+
 export const COURSE_TAB_VALUES = {
   SETTINGS: "Settings",
   CURRICULUM: "Curriculum",
@@ -8,6 +10,7 @@ export const COURSE_TAB_VALUES = {
 } as const;
 
 export type CourseTabValue = (typeof COURSE_TAB_VALUES)[keyof typeof COURSE_TAB_VALUES];
+export type CourseStatusFilterValue = CourseStatus | "all";
 
 export const COURSES_PAGE_HANDLES = {
   PAGE: "courses-page",
@@ -17,8 +20,7 @@ export const COURSES_PAGE_HANDLES = {
   CATEGORY_FILTER: "courses-page-category-filter",
   categoryFilterOption: (categoryTitle: string) => `courses-page-category-option-${categoryTitle}`,
   STATE_FILTER: "courses-page-state-filter",
-  stateFilterOption: (state: "all" | "draft" | "published" | "private") =>
-    `courses-page-state-option-${state}`,
+  stateFilterOption: (state: CourseStatusFilterValue) => `courses-page-state-option-${state}`,
   ARCHIVED_FILTER: "courses-page-archived-filter",
   archivedFilterOption: (status: "all" | "active" | "archived") =>
     `courses-page-archived-option-${status}`,
@@ -39,8 +41,7 @@ export const CREATE_COURSE_PAGE_HANDLES = {
   CATEGORY_SELECT: "create-course-category-select",
   categoryOption: (categoryTitle: string) => `create-course-category-option-${categoryTitle}`,
   LANGUAGE_SELECT: "create-course-language-select",
-  languageOption: (language: "en" | "pl" | "de" | "lt" | "cs") =>
-    `create-course-language-option-${language}`,
+  languageOption: (language: SupportedLanguages) => `create-course-language-option-${language}`,
   DESCRIPTION_EDITOR: "create-course-description-editor",
   CANCEL_BUTTON: "create-course-cancel-button",
   SUBMIT_BUTTON: "create-course-submit-button",
@@ -51,8 +52,7 @@ export const EDIT_COURSE_PAGE_HANDLES = {
   HEADING: "edit-course-page-heading",
   PREVIEW_BUTTON: "edit-course-preview-button",
   LANGUAGE_SELECT: "edit-course-language-select",
-  languageOption: (language: "en" | "pl" | "de" | "lt" | "cs") =>
-    `edit-course-language-option-${language}`,
+  languageOption: (language: SupportedLanguages) => `edit-course-language-option-${language}`,
   DELETE_LANGUAGE_BUTTON: "edit-course-delete-language-button",
   tab: (tab: CourseTabValue) => `edit-course-tab-${tab}`,
 } as const;
@@ -70,7 +70,7 @@ export const COURSE_SETTINGS_HANDLES = {
 
 export const COURSE_STATUS_HANDLES = {
   CARD: "course-status-card",
-  statusCard: (status: "draft" | "private" | "published") => `course-status-card-${status}`,
+  statusCard: (status: CourseStatus) => `course-status-card-${status}`,
   SAVE_BUTTON: "course-status-save-button",
 } as const;
 

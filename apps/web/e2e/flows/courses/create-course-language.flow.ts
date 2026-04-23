@@ -4,11 +4,9 @@ import {
 } from "../../data/courses/handles";
 
 import type { Page } from "@playwright/test";
+import type { SupportedLanguages } from "@repo/shared";
 
-export const createCourseLanguageFlow = async (
-  page: Page,
-  language: "en" | "pl" | "de" | "lt" | "cs",
-) => {
+export const createCourseLanguageFlow = async (page: Page, language: SupportedLanguages) => {
   await page.getByTestId(EDIT_COURSE_PAGE_HANDLES.LANGUAGE_SELECT).click();
   await page.getByTestId(EDIT_COURSE_PAGE_HANDLES.languageOption(language)).click();
   await page.getByTestId(COURSE_LANGUAGE_DIALOG_HANDLES.CREATE_DIALOG).waitFor();

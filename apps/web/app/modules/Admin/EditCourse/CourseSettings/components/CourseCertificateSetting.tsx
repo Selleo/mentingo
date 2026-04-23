@@ -16,6 +16,8 @@ import { Switch } from "~/components/ui/switch";
 import { useToast } from "~/components/ui/use-toast";
 import CertificatePreview from "~/modules/Profile/Certificates/CertificatePreview";
 
+import { COURSE_SETTINGS_HANDLES } from "../../../../../../e2e/data/courses/handles";
+
 interface CourseCertificateSettingProps {
   courseId: string;
   hasCertificate: boolean;
@@ -145,7 +147,7 @@ const CourseCertificateSetting = ({
         <div className="flex items-center gap-4">
           <div className="flex min-w-0 items-start gap-3">
             <Switch
-              data-testid="course-settings-certificate-switch"
+              data-testid={COURSE_SETTINGS_HANDLES.CERTIFICATE_SWITCH}
               checked={isCertificateEnabled}
               onCheckedChange={handleCertificateToggle}
               disabled={isUpdatingCertificate}

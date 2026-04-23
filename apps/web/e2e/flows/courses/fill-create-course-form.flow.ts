@@ -3,11 +3,12 @@ import { CREATE_COURSE_PAGE_HANDLES } from "../../data/courses/handles";
 import { fillRichTextEditorFlow } from "./editor.flow";
 
 import type { Page } from "@playwright/test";
+import type { SupportedLanguages } from "@repo/shared";
 
 type FillCreateCourseFormFlowInput = {
   title?: string;
   categoryTitle?: string;
-  language?: "en" | "pl" | "de" | "lt" | "cs";
+  language?: SupportedLanguages;
   description?: string;
 };
 

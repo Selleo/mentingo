@@ -3,6 +3,8 @@ import { HandHelping, Pencil } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
 
+import { TENANTS_PAGE_HANDLES } from "../../../e2e/data/tenants/handles";
+
 import type { ColumnDef } from "@tanstack/react-table";
 import type i18next from "i18next";
 import type { FindAllTenantsResponse } from "~/api/generated-api";
@@ -47,7 +49,7 @@ export const getTenantsColumns = (
       <div className="text-right flex items-center justify-end gap-2">
         {!row.original.isCurrentTenant && (
           <Button
-            data-testid={`tenants-page-support-mode-button-${row.original.id}`}
+            data-testid={TENANTS_PAGE_HANDLES.supportModeButton(row.original.id)}
             size="sm"
             className="gap-2"
             onClick={() => onSupportLogin(row.original.id)}
@@ -59,7 +61,7 @@ export const getTenantsColumns = (
         )}
         <Button asChild variant="outline" size="sm" className="gap-2">
           <Link
-            data-testid={`tenants-page-edit-button-${row.original.id}`}
+            data-testid={TENANTS_PAGE_HANDLES.editButton(row.original.id)}
             to={`/super-admin/tenants/${row.original.id}`}
           >
             <Pencil className="size-4" aria-hidden="true" />

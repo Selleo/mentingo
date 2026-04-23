@@ -17,6 +17,8 @@ import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessP
 import { CourseOptions } from "~/modules/Courses/CourseView/CourseViewSidebar/CourseOptions";
 import { CourseProgress } from "~/modules/Courses/CourseView/CourseViewSidebar/CourseProgress";
 
+import { COURSE_OVERVIEW_HANDLES } from "../../../../../e2e/data/courses/handles";
+
 import type { GetCourseResponse } from "~/api/generated-api";
 
 type CourseViewSidebar = {
@@ -103,7 +105,7 @@ export const CourseViewSidebar = ({ course }: CourseViewSidebar) => {
       <div className="flex flex-col gap-6 md:flex-row md:items-center">
         <div className="relative flex w-full flex-col gap-3">
           <button
-            data-testid="course-overview-author-transfer-button"
+            data-testid={COURSE_OVERVIEW_HANDLES.AUTHOR_TRANSFER_BUTTON}
             type="button"
             onClick={() => canEditOwner && setIsEditingOwner(true)}
             aria-label={t("adminCourseView.settings.transferOwnership.title")}

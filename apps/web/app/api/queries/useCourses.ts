@@ -1,4 +1,4 @@
-import { SUPPORTED_LANGUAGES, type SupportedLanguages } from "@repo/shared";
+import { SUPPORTED_LANGUAGES, type CourseStatus, type SupportedLanguages } from "@repo/shared";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "../api-client";
@@ -6,7 +6,7 @@ import { ApiClient } from "../api-client";
 import type { GetAllCoursesResponse } from "../generated-api";
 import type { SortOption } from "~/types/sorting";
 
-export type CourseStatus = "published" | "draft" | "private";
+export type { CourseStatus };
 
 export type CourseParams = {
   /** Filter by course title only */

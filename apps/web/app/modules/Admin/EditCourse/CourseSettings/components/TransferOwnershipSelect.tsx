@@ -1,6 +1,8 @@
 import { Select, SelectContent, SelectItem, SelectTrigger } from "~/components/ui/select";
 import { cn } from "~/lib/utils";
 
+import { COURSE_OVERVIEW_HANDLES } from "../../../../../../e2e/data/courses/handles";
+
 import type { GetCourseOwnershipResponse } from "~/api/generated-api";
 
 type TransferOwnershipSelectProps = {
@@ -33,14 +35,14 @@ const TransferOwnershipSelect = ({
       onOpenChange={onOpenChange}
     >
       <SelectTrigger
-        data-testid="course-transfer-ownership-select"
+        data-testid={COURSE_OVERVIEW_HANDLES.TRANSFER_OWNERSHIP_SELECT}
         id={id}
         className={cn("w-full", triggerClassName)}
       ></SelectTrigger>
       <SelectContent>
         {candidates?.map((user) => (
           <SelectItem
-            data-testid={`course-transfer-ownership-option-${user.id}`}
+            data-testid={COURSE_OVERVIEW_HANDLES.transferOwnershipOption(user.id)}
             value={user.id}
             key={user.id}
           >

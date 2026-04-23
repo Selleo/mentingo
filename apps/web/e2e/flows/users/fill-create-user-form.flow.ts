@@ -3,13 +3,14 @@ import { CREATE_USER_PAGE_HANDLES } from "../../data/users/handles";
 import { closeMultiselectFlow } from "./close-multiselect.flow";
 
 import type { Page } from "@playwright/test";
+import type { SupportedLanguages } from "@repo/shared";
 
 type FillCreateUserFormFlowInput = {
   firstName?: string;
   lastName?: string;
   email?: string;
   roleSlugs?: string[];
-  language?: string;
+  language?: SupportedLanguages;
 };
 
 export const fillCreateUserFormFlow = async (

@@ -1,5 +1,5 @@
 import { Link, type MetaFunction, useNavigate, useParams, useSearchParams } from "@remix-run/react";
-import { COURSE_ORIGIN_TYPES, type SupportedLanguages } from "@repo/shared";
+import { COURSE_ORIGIN_TYPES, COURSE_STATUSES, type SupportedLanguages } from "@repo/shared";
 import { Building } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -37,6 +37,10 @@ import { useEditCourseTabs } from "~/modules/Admin/EditCourse/hooks/useEditCours
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { setPageTitle } from "~/utils/setPageTitle";
 
+import {
+  COURSE_LANGUAGE_DIALOG_HANDLES,
+  EDIT_COURSE_PAGE_HANDLES,
+} from "../../../../e2e/data/courses/handles";
 import { getCourseBadgeVariant } from "../Courses/utils";
 
 import { SharedCourseExportsTabContent } from "./components/SharedCourseExportsTabContent";
@@ -241,19 +245,19 @@ const EditCourse = () => {
   return (
     <PageWrapper breadcrumbs={breadcrumbs} className="relative">
       <Tabs
-        data-testid="edit-course-page"
+        data-testid={EDIT_COURSE_PAGE_HANDLES.PAGE}
         value={activeTab}
         className="flex h-full flex-col gap-y-4"
       >
         <div className="flex w-full flex-col gap-y-4 rounded-lg border border-gray-200 bg-white px-8 py-6 shadow-md">
           <div className="flex items-center justify-between">
             <h4
-              data-testid="edit-course-page-heading"
+              data-testid={EDIT_COURSE_PAGE_HANDLES.HEADING}
               className="h4 flex items-center text-neutral-950 mr-2"
             >
               {course?.title || ""}
 
-              {course?.status === "published" && (
+              {course?.status === COURSE_STATUSES.PUBLISHED && (
                 <Badge
                   variant={getCourseBadgeVariant(course?.status)}
                   fontWeight="bold"
@@ -263,7 +267,7 @@ const EditCourse = () => {
                   {t("common.other.published")}
                 </Badge>
               )}
-              {course?.status === "draft" && (
+              {course?.status === COURSE_STATUSES.DRAFT && (
                 <Badge
                   variant={getCourseBadgeVariant(course?.status)}
                   fontWeight="bold"
@@ -273,7 +277,7 @@ const EditCourse = () => {
                   {t("common.other.draft")}
                 </Badge>
               )}
-              {course?.status === "private" && (
+              {course?.status === COURSE_STATUSES.PRIVATE && (
                 <Badge
                   variant={getCourseBadgeVariant(course?.status)}
                   fontWeight="bold"
@@ -330,7 +334,7 @@ const EditCourse = () => {
                       >
                         <DialogTrigger asChild>
                           <Button
-                            data-testid="course-language-generate-button"
+                            data-testid={COURSE_LANGUAGE_DIALOG_HANDLES.GENERATE_BUTTON}
                             variant="outline"
                             className="gap-2"
                           >
@@ -338,7 +342,7 @@ const EditCourse = () => {
                             {t("adminCourseView.common.generateMissingTranslations")}
                           </Button>
                         </DialogTrigger>
-                        <DialogContent data-testid="course-language-generate-dialog">
+                        <DialogContent data-testid={COURSE_LANGUAGE_DIALOG_HANDLES.GENERATE_DIALOG}>
                           <DialogTitle>
                             {t("adminCourseView.common.generateMissingTranslations")}
                           </DialogTitle>
@@ -348,14 +352,14 @@ const EditCourse = () => {
                           <DialogFooter>
                             <DialogTrigger asChild>
                               <Button
-                                data-testid="course-language-generate-cancel-button"
+                                data-testid={COURSE_LANGUAGE_DIALOG_HANDLES.GENERATE_CANCEL_BUTTON}
                                 variant="outline"
                               >
                                 {t("contentCreatorView.button.cancel")}
                               </Button>
                             </DialogTrigger>
                             <Button
-                              data-testid="course-language-generate-confirm-button"
+                              data-testid={COURSE_LANGUAGE_DIALOG_HANDLES.GENERATE_CONFIRM_BUTTON}
                               type="button"
                               onClick={handleGenerate}
                               disabled={isGenerationPending}
@@ -384,7 +388,7 @@ const EditCourse = () => {
                 className="border border-neutral-200 bg-transparent text-accent-foreground"
               >
                 <Link
-                  data-testid="edit-course-preview-button"
+                  data-testid={EDIT_COURSE_PAGE_HANDLES.PREVIEW_BUTTON}
                   to={`/course/${course?.id}?language=${courseLanguage}`}
                 >
                   <Icon name="Eye" className="mr-2" />
@@ -397,7 +401,7 @@ const EditCourse = () => {
             {visibleCourseTabs.map(({ label, value }) => (
               <TabsTrigger
                 key={value}
-                data-testid={`edit-course-tab-${value}`}
+                data-testid={EDIT_COURSE_PAGE_HANDLES.tab(value)}
                 value={value}
                 onClick={() => handleTabChange(value)}
               >
@@ -463,7 +467,7 @@ const EditCourse = () => {
         <TabsContent value={EDIT_COURSE_TABS.STATUS}>
           <CourseStatus
             courseId={course?.id || ""}
-            status={course?.status || "draft"}
+            status={course?.status || COURSE_STATUSES.DRAFT}
             language={language}
           />
         </TabsContent>

@@ -1,11 +1,12 @@
 import { COURSES_PAGE_HANDLES } from "../../data/courses/handles";
 
+import type { CourseStatusFilterValue } from "../../data/courses/handles";
 import type { Page } from "@playwright/test";
 
 type FilterCoursesFlowInput = {
   title?: string;
   categoryTitle?: string;
-  state?: "all" | "draft" | "published" | "private";
+  state?: CourseStatusFilterValue;
   archivedStatus?: "all" | "active" | "archived";
 };
 

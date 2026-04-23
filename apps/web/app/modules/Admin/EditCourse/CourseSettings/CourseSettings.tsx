@@ -31,6 +31,7 @@ import { useTusVideoUpload } from "~/hooks/useTusVideoUpload";
 import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/components/MissingTranslationsAlert";
 import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
+import { COURSE_SETTINGS_HANDLES } from "../../../../../e2e/data/courses/handles";
 import {
   MAX_COURSE_DESCRIPTION_HTML_LENGTH,
   MAX_COURSE_DESCRIPTION_LENGTH,
@@ -229,7 +230,7 @@ const CourseSettings = ({
               <form className="flex flex-col gap-y-6" onSubmit={form.handleSubmit(onSubmit)}>
                 <div className="flex gap-x-6 *:w-full">
                   <FormTextField
-                    data-testid="course-settings-title-input"
+                    data-testid={COURSE_SETTINGS_HANDLES.TITLE_INPUT}
                     control={form.control}
                     name="title"
                     required
@@ -247,7 +248,7 @@ const CourseSettings = ({
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger
-                              data-testid="course-settings-category-select"
+                              data-testid={COURSE_SETTINGS_HANDLES.CATEGORY_SELECT}
                               id="categoryId"
                             >
                               <SelectValue placeholder={t("selectCategory")} />
@@ -256,7 +257,7 @@ const CourseSettings = ({
                           <SelectContent>
                             {categories.map((category) => (
                               <SelectItem
-                                data-testid={`course-settings-category-option-${category.title}`}
+                                data-testid={COURSE_SETTINGS_HANDLES.categoryOption(category.title)}
                                 value={category.id}
                                 key={category.id}
                               >
@@ -275,7 +276,7 @@ const CourseSettings = ({
                     )}
                   />
                 </div>
-                <div data-testid="course-settings-description-editor">
+                <div data-testid={COURSE_SETTINGS_HANDLES.DESCRIPTION_EDITOR}>
                   <BaseEditor
                     id="description"
                     content={description}
@@ -386,7 +387,7 @@ const CourseSettings = ({
                 </div>
                 <div className="flex space-x-5">
                   <Button
-                    data-testid="course-settings-save-button"
+                    data-testid={COURSE_SETTINGS_HANDLES.SAVE_BUTTON}
                     type="submit"
                     disabled={!isFormValid || isUploading}
                   >

@@ -4,12 +4,16 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { cn } from "~/lib/utils";
 
+import { COURSE_STATUS_HANDLES } from "../../../../../e2e/data/courses/handles";
+
+import type { CourseStatus } from "@repo/shared";
+
 type CourseStatusCardProps = {
   checked: boolean;
   onChange: () => void;
   headerKey: string;
   bodyKey: string;
-  id: string;
+  id: CourseStatus;
 };
 
 const CourseStatusCard = ({ checked, onChange, headerKey, bodyKey, id }: CourseStatusCardProps) => {
@@ -17,7 +21,7 @@ const CourseStatusCard = ({ checked, onChange, headerKey, bodyKey, id }: CourseS
 
   return (
     <button
-      data-testid={`course-status-card-${id}`}
+      data-testid={COURSE_STATUS_HANDLES.statusCard(id)}
       className={cn(
         "flex cursor-pointer items-start gap-x-4 rounded-md border px-6 py-4 text-left",
         {

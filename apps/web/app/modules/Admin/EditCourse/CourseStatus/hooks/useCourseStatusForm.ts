@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { COURSE_STATUSES } from "@repo/shared";
 import { useForm } from "react-hook-form";
 
 import { useUpdateCourse } from "~/api/mutations/admin/useUpdateCourse";
@@ -25,7 +26,7 @@ export const useCourseStatusForm = ({ courseId, status, language }: UseCourseSta
   const form = useForm<CourseStatusFormValues>({
     resolver: zodResolver(courseStatusFormSchema),
     defaultValues: {
-      status: status || "draft",
+      status: status || COURSE_STATUSES.DRAFT,
     },
   });
   const onSubmit = async (data: UpdateCourseBody) => {

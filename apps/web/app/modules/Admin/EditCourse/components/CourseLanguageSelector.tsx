@@ -20,6 +20,8 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 
+import { EDIT_COURSE_PAGE_HANDLES } from "../../../../../e2e/data/courses/handles";
+
 import { CreateLanguageDialog } from "./CreateNewLanguageModal";
 import { DeleteLanguageDialog } from "./DeleteLanguageDialog";
 
@@ -135,13 +137,16 @@ export const CourseLanguageSelector = ({
       </TooltipProvider>
 
       <Select value={courseLanguage} onValueChange={handleLanguageChange}>
-        <SelectTrigger data-testid="edit-course-language-select" className="min-w-[200px]">
+        <SelectTrigger
+          data-testid={EDIT_COURSE_PAGE_HANDLES.LANGUAGE_SELECT}
+          className="min-w-[200px]"
+        >
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
           {addedItems.map((item) => (
             <SelectItem
-              data-testid={`edit-course-language-option-${item.key}`}
+              data-testid={EDIT_COURSE_PAGE_HANDLES.languageOption(item.key)}
               value={item.key}
               key={item.key}
               className="w-full"
@@ -167,7 +172,7 @@ export const CourseLanguageSelector = ({
               </div>
               {notAddedItems.map((item) => (
                 <SelectItem
-                  data-testid={`edit-course-language-option-${item.key}`}
+                  data-testid={EDIT_COURSE_PAGE_HANDLES.languageOption(item.key)}
                   value={item.key}
                   key={item.key}
                 >
@@ -186,7 +191,7 @@ export const CourseLanguageSelector = ({
 
       {course?.baseLanguage !== courseLanguage && (
         <Button
-          data-testid="edit-course-delete-language-button"
+          data-testid={EDIT_COURSE_PAGE_HANDLES.DELETE_LANGUAGE_BUTTON}
           size="icon"
           type="button"
           variant="outline"

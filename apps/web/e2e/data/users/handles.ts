@@ -1,3 +1,5 @@
+import type { SupportedLanguages } from "@repo/shared";
+
 export const USERS_PAGE_HANDLES = {
   HEADING: "users-page-heading",
   CREATE_BUTTON: "users-page-create-button",
@@ -42,7 +44,7 @@ export const CREATE_USER_PAGE_HANDLES = {
   ROLE_SELECT: "create-user-role-select",
   roleOption: (roleSlug: string) => `create-user-role-option-${roleSlug}`,
   LANGUAGE_SELECT: "create-user-language-select",
-  languageOption: (language: string) => `create-user-language-option-${language}`,
+  languageOption: (language: SupportedLanguages) => `create-user-language-option-${language}`,
   SUBMIT_BUTTON: "create-user-submit-button",
 } as const;
 
