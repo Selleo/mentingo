@@ -10,6 +10,7 @@ import { useVideoPlayer } from "./VideoPlayerContext";
 import type { VideoAutoplay } from "@repo/shared";
 import type { KeyboardEvent } from "react";
 import type { VideoProvider } from "~/components/RichText/extensions/utils/video";
+import type { VideoEndedHandler } from "~/components/VideoPlayer/VideoPlayer.types";
 
 type Props = {
   src?: string | null;
@@ -19,7 +20,7 @@ type Props = {
   index?: number | null;
   isExternal?: boolean;
   isExternalUrl?: boolean;
-  onVideoEnded?: () => void;
+  onVideoEnded?: VideoEndedHandler;
 };
 
 export function Video({

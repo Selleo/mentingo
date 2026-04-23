@@ -9,7 +9,7 @@ import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Switch } from "~/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
-import { shouldAutoAdvanceLessonWithoutNextVideo } from "~/components/VideoPlayer/autoplayFlow";
+import { VIDEO_ENDED_SOURCE } from "~/components/VideoPlayer/VideoPlayer.types";
 import { useVideoPlayer } from "~/components/VideoPlayer/VideoPlayerContext";
 import { useLessonsSequence } from "~/hooks/useLessonsSequence";
 import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
@@ -22,6 +22,7 @@ import { LessonContentRenderer } from "./LessonContentRenderer";
 import { isNextBlocked, isPreviousBlocked } from "./utils";
 
 import type { GetCourseResponse, GetLessonByIdResponse } from "~/api/generated-api";
+import type { VideoEndedEvent } from "~/components/VideoPlayer/VideoPlayer.types";
 import type { LessonPreviewUser } from "~/modules/Courses/Lesson/types";
 
 type LessonContentProps = {
@@ -183,31 +184,39 @@ export const LessonContent = ({
     }
   }, [lesson.id, lesson.hasVideo, clearVideo]);
 
-  const handleVideoEnded = useCallback(() => {
-    setIsNextDisabled(false);
+  const handleVideoEnded = useCallback(
+    (event: VideoEndedEvent) => {
+      const isMediaEnded = event.source === VIDEO_ENDED_SOURCE.MEDIA_ENDED;
 
-    if (
-      shouldAutoAdvanceLessonWithoutNextVideo({
-        autoplayEnabled: autoplay,
-        action: autoplaySettings.currentAction,
-        nextVideoUrl: autoplaySettings.nextVideoUrl,
-      })
-    ) {
-      if (isEffectiveStudentExperience) {
+      setIsNextDisabled(false);
+
+      const isLastVideoInLesson = !autoplaySettings.nextVideoUrl;
+
+      if (
+        isMediaEnded &&
+        isEffectiveStudentExperience &&
+        lesson.hasVideo &&
+        !lesson.lessonCompleted &&
+        isLastVideoInLesson
+      ) {
         markLessonAsCompleted({ lessonId: lesson.id, language });
       }
-      handleNext();
-    }
-  }, [
-    autoplay,
-    autoplaySettings.currentAction,
-    autoplaySettings.nextVideoUrl,
-    isEffectiveStudentExperience,
-    markLessonAsCompleted,
-    lesson.id,
-    language,
-    handleNext,
-  ]);
+
+      if (event.source === VIDEO_ENDED_SOURCE.GO_NEXT_LESSON) {
+        handleNext();
+      }
+    },
+    [
+      autoplaySettings.nextVideoUrl,
+      isEffectiveStudentExperience,
+      markLessonAsCompleted,
+      lesson.id,
+      lesson.hasVideo,
+      lesson.lessonCompleted,
+      language,
+      handleNext,
+    ],
+  );
 
   useEffect(() => {
     setOnEnded(handleVideoEnded);

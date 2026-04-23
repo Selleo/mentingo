@@ -26,9 +26,10 @@ import {
 import type { VideoAutoplay } from "@repo/shared";
 import type { NodeConfig } from "@tiptap/core";
 import type { NodeViewProps } from "@tiptap/react";
+import type { VideoEndedHandler } from "~/components/VideoPlayer/VideoPlayer.types";
 
 type VideoViewerOptions = {
-  onVideoEnded?: () => void;
+  onVideoEnded?: VideoEndedHandler;
   resolveAutoplay?: (autoplay: VideoAutoplay) => VideoAutoplay;
 };
 

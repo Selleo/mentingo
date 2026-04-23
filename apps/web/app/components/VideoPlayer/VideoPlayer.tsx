@@ -197,7 +197,7 @@ export const VideoPlayer = ({
     <div
       data-vjs-player
       className={cn(
-        "relative w-full overflow-hidden rounded-lg bg-black shadow-[0_8px_30px_rgba(18,21,33,0.28)]",
+        "relative w-full overflow-hidden bg-black shadow-[0_8px_30px_rgba(18,21,33,0.28)]",
         fill ? "h-full" : "aspect-video",
         className,
       )}
