@@ -7,12 +7,14 @@ type FormCheckboxProps<T extends FieldValues> = {
   control: Control<T>;
   name: Path<T>;
   label: string;
+  testId?: string;
 };
 
 export const FormCheckbox = <T extends FieldValues>({
   control,
   name,
   label,
+  testId,
 }: FormCheckboxProps<T>) => {
   return (
     <Controller
@@ -20,7 +22,12 @@ export const FormCheckbox = <T extends FieldValues>({
       name={name}
       render={({ field }) => (
         <div className="flex items-center space-x-2">
-          <Checkbox id={name} checked={field.value} onCheckedChange={field.onChange} />
+          <Checkbox
+            data-testid={testId}
+            id={name}
+            checked={field.value}
+            onCheckedChange={field.onChange}
+          />
           <Label
             htmlFor={name}
             className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"

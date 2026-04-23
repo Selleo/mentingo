@@ -12,6 +12,8 @@ import { useLeaveModal } from "~/context/LeaveModalContext";
 import { getContentTypeByLessonType } from "~/modules/Admin/EditCourse/CourseLessons/components/courseLessonContentType.utils";
 import LessonCard from "~/modules/Admin/EditCourse/CourseLessons/components/LessonCard";
 
+import { CURRICULUM_HANDLES } from "../../../../../../e2e/data/curriculum/handles";
+
 import type { SupportedLanguages } from "@repo/shared";
 import type { Sortable } from "~/components/SortableList/SortableList";
 import type { Chapter, Lesson } from "~/modules/Admin/EditCourse/EditCourse.types";
@@ -121,7 +123,11 @@ export const LessonCardList = ({
             selectedLesson={selectedLesson}
             dragTrigger={
               <SortableList.DragHandle>
-                <Icon name="DragAndDropIcon" className="cursor-move" />
+                <Icon
+                  data-testid={CURRICULUM_HANDLES.lessonDragHandle(item.id)}
+                  name="DragAndDropIcon"
+                  className="cursor-move"
+                />
               </SortableList.DragHandle>
             }
           />

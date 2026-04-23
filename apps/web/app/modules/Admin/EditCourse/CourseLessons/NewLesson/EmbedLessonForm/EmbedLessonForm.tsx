@@ -10,6 +10,7 @@ import { Label } from "~/components/ui/label";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
 import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/components/MissingTranslationsAlert";
 
+import { EMBED_LESSON_FORM_HANDLES } from "../../../../../../../e2e/data/curriculum/handles";
 import { ContentTypes, DeleteContentType } from "../../../EditCourse.types";
 import Breadcrumb from "../components/Breadcrumb";
 
@@ -71,7 +72,7 @@ export const EmbedLessonForm = ({
   const missingTranslations = lessonToEdit && !lessonToEdit.title.trim();
 
   return (
-    <Card>
+    <Card data-testid={EMBED_LESSON_FORM_HANDLES.ROOT}>
       <CardHeader className="px-8 pb-6 pt-8">
         {missingTranslations && <MissingTranslationsAlert />}
         {!lessonToEdit && (
@@ -99,6 +100,7 @@ export const EmbedLessonForm = ({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-y-5">
             <FormTextField
+              data-testid={EMBED_LESSON_FORM_HANDLES.TITLE_INPUT}
               name="title"
               control={form.control}
               label={t("adminCourseView.curriculum.lesson.field.title")}
@@ -121,8 +123,11 @@ export const EmbedLessonForm = ({
               })}
             </div>
             <div className="flex gap-x-3">
-              <Button type="submit">{t("common.button.save")}</Button>
+              <Button data-testid={EMBED_LESSON_FORM_HANDLES.SAVE_BUTTON} type="submit">
+                {t("common.button.save")}
+              </Button>
               <Button
+                data-testid={EMBED_LESSON_FORM_HANDLES.ADD_RESOURCE_BUTTON}
                 type="button"
                 variant="outline"
                 className="w-fit"
@@ -132,6 +137,11 @@ export const EmbedLessonForm = ({
                 {t("adminCourseView.curriculum.lesson.button.addResource")}
               </Button>
               <Button
+                data-testid={
+                  lessonToEdit
+                    ? EMBED_LESSON_FORM_HANDLES.DELETE_BUTTON
+                    : EMBED_LESSON_FORM_HANDLES.CANCEL_BUTTON
+                }
                 type="button"
                 onClick={handleDeleteLesson}
                 className="border border-red-500 bg-transparent text-red-500 hover:bg-red-100"

@@ -9,6 +9,7 @@ import { Label } from "~/components/ui/label";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
 import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/components/MissingTranslationsAlert";
 
+import { CHAPTER_FORM_HANDLES } from "../../../../../../e2e/data/curriculum/handles";
 import { ContentTypes, DeleteContentType } from "../../EditCourse.types";
 
 import { useNewChapterForm } from "./hooks/useNewChapterForm";
@@ -50,7 +51,10 @@ const NewChapter = ({ setContentTypeToDisplay, chapter, language }: NewChapterPr
   const buttonStyles = "bg-transparent text-red-500 border border-red-500 hover:bg-red-100";
 
   return (
-    <div className="flex h-min w-full flex-col gap-y-6 rounded-lg bg-white p-8">
+    <div
+      data-testid={CHAPTER_FORM_HANDLES.ROOT}
+      className="flex h-min w-full flex-col gap-y-6 rounded-lg bg-white p-8"
+    >
       {chapter && !chapter?.title.trim() && <MissingTranslationsAlert />}
       <hgroup className="flex w-full flex-col-reverse gap-y-1">
         <div className="h5 text-neutral-950">
@@ -83,16 +87,24 @@ const NewChapter = ({ setContentTypeToDisplay, chapter, language }: NewChapterPr
                   {t("adminCourseView.curriculum.chapter.field.title")}
                 </Label>
                 <FormControl>
-                  <Input id="title" {...field} required />
+                  <Input
+                    data-testid={CHAPTER_FORM_HANDLES.TITLE_INPUT}
+                    id="title"
+                    {...field}
+                    required
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
           <div className="mt-4 flex space-x-4">
-            <Button type="submit">{t("common.button.save")}</Button>
+            <Button data-testid={CHAPTER_FORM_HANDLES.SAVE_BUTTON} type="submit">
+              {t("common.button.save")}
+            </Button>
             {chapter ? (
               <Button
+                data-testid={CHAPTER_FORM_HANDLES.DELETE_BUTTON}
                 aria-label="Delete chapter"
                 type="button"
                 className={buttonStyles}
@@ -102,6 +114,7 @@ const NewChapter = ({ setContentTypeToDisplay, chapter, language }: NewChapterPr
               </Button>
             ) : (
               <Button
+                data-testid={CHAPTER_FORM_HANDLES.CANCEL_BUTTON}
                 aria-label="Cancel editing"
                 className={buttonStyles}
                 onClick={() => setContentTypeToDisplay(ContentTypes.EMPTY)}

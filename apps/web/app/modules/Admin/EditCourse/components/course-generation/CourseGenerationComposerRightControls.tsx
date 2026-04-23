@@ -9,6 +9,8 @@ type CourseGenerationComposerRightControlsProps = {
   onStartVoiceMode: () => void;
   onStopVoiceMode: () => void;
   onSubmit: () => void;
+  voiceButtonTestId?: string;
+  sendButtonTestId?: string;
 };
 
 export function CourseGenerationComposerRightControls({
@@ -16,6 +18,8 @@ export function CourseGenerationComposerRightControls({
   onStartVoiceMode,
   onStopVoiceMode,
   onSubmit,
+  voiceButtonTestId,
+  sendButtonTestId,
 }: CourseGenerationComposerRightControlsProps) {
   return (
     <>
@@ -29,6 +33,7 @@ export function CourseGenerationComposerRightControls({
             transition={{ duration: 0.12, ease: "easeOut" }}
           >
             <Button
+              data-testid={voiceButtonTestId}
               type="button"
               variant="ghost"
               onClick={onStartVoiceMode}
@@ -42,6 +47,7 @@ export function CourseGenerationComposerRightControls({
       </div>
 
       <Button
+        data-testid={sendButtonTestId}
         type="button"
         variant="default"
         onClick={() => {

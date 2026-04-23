@@ -13,6 +13,8 @@ import {
 import { UploadFileCard } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/components/UploadFileCard";
 import ChatMessage from "~/modules/Courses/Lesson/AiMentorLesson/components/ChatMessage";
 
+import { COURSE_GENERATION_HANDLES } from "../../../../../../e2e/data/curriculum/handles";
+
 type CourseGenerationMessage = {
   id: string;
   role: string;
@@ -149,6 +151,7 @@ export function CourseGenerationChatPanel({
         <div className="flex items-center gap-3">
           {messages.length > 0 && (
             <button
+              data-testid={COURSE_GENERATION_HANDLES.CLOSE_BUTTON}
               type="button"
               onClick={onClose}
               aria-label="Close drawer"

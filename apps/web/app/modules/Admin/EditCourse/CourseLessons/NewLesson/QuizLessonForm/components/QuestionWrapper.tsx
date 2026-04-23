@@ -1,6 +1,7 @@
 import { Accordion, AccordionContent, AccordionItem } from "~/components/ui/accordion";
 import { cn } from "~/lib/utils";
 
+import { QUIZ_LESSON_FORM_HANDLES } from "../../../../../../../../e2e/data/curriculum/handles";
 import { QuestionType } from "../QuizLessonForm.types";
 
 import QuestionTitle from "./QuestionTitle";
@@ -41,6 +42,7 @@ const QuestionWrapper = ({
     <Accordion type="single" collapsible value={isOpen ? `item-${item.sortableId}` : undefined}>
       <AccordionItem value={`item-${item.sortableId}`}>
         <div
+          data-testid={QUIZ_LESSON_FORM_HANDLES.questionCard(questionIndex)}
           className={cn(
             "mt-4 rounded-xl border p-2 transition-all duration-300",
             errors?.questions?.[questionIndex]

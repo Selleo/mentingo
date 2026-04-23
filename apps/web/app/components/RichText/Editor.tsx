@@ -4,6 +4,8 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import { cn } from "~/lib/utils";
 
+import { RICH_TEXT_HANDLES } from "../../../e2e/data/common/handles";
+
 import { detectPresentationProvider } from "./extensions/utils/presentation";
 import { extractUrlFromClipboard } from "./extensions/utils/video";
 import { baseEditorPlugins, contentEditorPlugins } from "./plugins";
@@ -154,6 +156,7 @@ const Editor = ({
 
   return (
     <div
+      data-testid={RICH_TEXT_HANDLES.ROOT}
       className={cn(
         "prose w-full max-w-none overflow-hidden rounded-lg border border-neutral-300 bg-background dark:prose-invert [&_.ProseMirror]:leading-tight",
         parentClassName,
@@ -165,7 +168,13 @@ const Editor = ({
         acceptedFileTypes={acceptedFileTypes}
         onUpload={onUpload}
       />
-      <EditorContent id={id} editor={editor} placeholder={placeholder} className={editorClasses} />
+      <EditorContent
+        data-testid={RICH_TEXT_HANDLES.CONTENT}
+        id={id}
+        editor={editor}
+        placeholder={placeholder}
+        className={editorClasses}
+      />
     </div>
   );
 };

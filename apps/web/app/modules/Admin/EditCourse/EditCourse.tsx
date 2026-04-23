@@ -20,6 +20,7 @@ import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -350,14 +351,14 @@ const EditCourse = () => {
                             {t("adminCourseView.common.generateMissingTranslationsDescription")}
                           </DialogDescription>
                           <DialogFooter>
-                            <DialogTrigger asChild>
+                            <DialogClose asChild>
                               <Button
                                 data-testid={COURSE_LANGUAGE_DIALOG_HANDLES.GENERATE_CANCEL_BUTTON}
                                 variant="outline"
                               >
                                 {t("contentCreatorView.button.cancel")}
                               </Button>
-                            </DialogTrigger>
+                            </DialogClose>
                             <Button
                               data-testid={COURSE_LANGUAGE_DIALOG_HANDLES.GENERATE_CONFIRM_BUTTON}
                               type="button"

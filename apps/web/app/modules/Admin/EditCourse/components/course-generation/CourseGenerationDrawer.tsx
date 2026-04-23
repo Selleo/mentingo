@@ -10,6 +10,8 @@ import { Drawer, DrawerContent } from "~/components/ui/drawer";
 import { cn } from "~/lib/utils";
 import { CourseGenerationChatPanel } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationChatPanel";
 
+import { COURSE_GENERATION_HANDLES } from "../../../../../../e2e/data/curriculum/handles";
+
 import type { GetCourseGenerationDraftResponse } from "~/api/generated-api";
 
 const MIN_DRAWER_HEIGHT = 220;
@@ -108,6 +110,7 @@ export function CourseGenerationDrawer({
         }}
       >
         <DrawerContent
+          data-testid={COURSE_GENERATION_HANDLES.DRAWER}
           style={{
             height: `${drawerHeight}px`,
             visibility: isBackgroundGenerating ? "hidden" : "visible",

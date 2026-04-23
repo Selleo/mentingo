@@ -16,6 +16,7 @@ import { cn } from "~/lib/utils";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
 import { DeleteContentType } from "~/modules/Admin/EditCourse/EditCourse.types";
 
+import { QUIZ_LESSON_FORM_HANDLES } from "../../../../../../../../e2e/data/curriculum/handles";
 import { QuestionType } from "../QuizLessonForm.types";
 
 import { FillInTheBlanksButtonNode } from "./FillInTheBlanksButtonNode";
@@ -294,6 +295,7 @@ const FillInTheBlanksQuestion = ({
                   </Label>
                   <FormControl>
                     <EditorContent
+                      data-testid={QUIZ_LESSON_FORM_HANDLES.fillBlanksEditor(questionIndex)}
                       editor={editor}
                       className="h-full min-h-[200px] w-full overflow-y-auto rounded-lg border border-gray-300 bg-white p-4 text-black focus:border-none focus:outline-none focus:ring-0"
                       onDrop={handleDrop}
@@ -332,7 +334,10 @@ const FillInTheBlanksQuestion = ({
                     <div className="flex items-center">
                       <button
                         type="button"
-                        data-testid={`drag-${option.optionText}`}
+                        data-testid={QUIZ_LESSON_FORM_HANDLES.dragWordButton(
+                          questionIndex,
+                          option.optionText,
+                        )}
                         className="pl-1.5 pr-1"
                         draggable={isDraggable}
                         onDragStart={(event) => handleDragStart(option.optionText, event)}
@@ -366,6 +371,7 @@ const FillInTheBlanksQuestion = ({
                 <div className="flex items-center">
                   {!isAddingWord && (
                     <Button
+                      data-testid={QUIZ_LESSON_FORM_HANDLES.addWordButton(questionIndex)}
                       onClick={() => setIsAddingWord(true)}
                       type="button"
                       className="my-4 flex items-center gap-2"
@@ -385,7 +391,7 @@ const FillInTheBlanksQuestion = ({
                 )}
               >
                 <Input
-                  data-testid="new-word-input"
+                  data-testid={QUIZ_LESSON_FORM_HANDLES.newWordInput(questionIndex)}
                   type="text"
                   value={newWord}
                   onChange={(event) => setNewWord(event.target.value)}
@@ -393,7 +399,11 @@ const FillInTheBlanksQuestion = ({
                   className="grow"
                   disabled={isStructureLocked}
                 />
-                <Button onClick={handleAddWord} data-testid="add-word" type="button">
+                <Button
+                  onClick={handleAddWord}
+                  data-testid={QUIZ_LESSON_FORM_HANDLES.saveWordButton(questionIndex)}
+                  type="button"
+                >
                   {t("common.button.add")}
                 </Button>
                 <Button
@@ -412,6 +422,7 @@ const FillInTheBlanksQuestion = ({
             )}
             {!isStructureLocked && (
               <Button
+                data-testid={QUIZ_LESSON_FORM_HANDLES.questionDeleteButton(questionIndex)}
                 type="button"
                 className="bg-color-white my-4 border border-neutral-300 text-error-700"
                 onClick={() => setIsDeleteModalOpen(true)}

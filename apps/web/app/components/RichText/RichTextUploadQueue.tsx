@@ -17,6 +17,8 @@ import { Progress } from "~/components/ui/progress";
 import { ACTIVE_UPLOAD_STATUSES, UPLOAD_STATUS } from "~/hooks/useRichTextUploadQueue";
 import { cn } from "~/lib/utils";
 
+import { RICH_TEXT_HANDLES } from "../../../e2e/data/common/handles";
+
 import type { RichTextUploadQueueItem, RichTextUploadStatus } from "~/hooks/useRichTextUploadQueue";
 
 type RichTextUploadQueueProps = {
@@ -87,6 +89,7 @@ export const RichTextUploadQueue = ({
 
   return (
     <section
+      data-testid={RICH_TEXT_HANDLES.UPLOAD_QUEUE}
       className="pointer-events-auto w-full overflow-hidden rounded-xl border border-neutral-200 bg-white"
       aria-label="Upload queue"
     >
@@ -149,6 +152,7 @@ export const RichTextUploadQueue = ({
             return (
               <article
                 key={id}
+                data-testid={RICH_TEXT_HANDLES.uploadQueueItem(fileName)}
                 className="rounded-xl border border-neutral-200 bg-white px-3.5 py-3 shadow-[0_2px_10px_-8px_rgba(15,23,42,0.5)]"
               >
                 <div className="flex items-start gap-3">

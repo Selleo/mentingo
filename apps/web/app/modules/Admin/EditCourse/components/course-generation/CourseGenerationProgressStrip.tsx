@@ -3,6 +3,8 @@ import { AnimatePresence, motion } from "motion/react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
+import { COURSE_GENERATION_HANDLES } from "../../../../../../e2e/data/curriculum/handles";
+
 type CourseGenerationProgressStripProps = {
   currentMessageKey: string | null;
   visible: boolean;
@@ -29,6 +31,7 @@ export function CourseGenerationProgressStrip({
     <AnimatePresence initial={false}>
       {visible ? (
         <motion.section
+          data-testid={COURSE_GENERATION_HANDLES.PROGRESS_STRIP}
           key="generation-progress-strip"
           variants={stripVariants}
           initial="hidden"

@@ -12,6 +12,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/comp
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
 import { DeleteContentType } from "~/modules/Admin/EditCourse/EditCourse.types";
 
+import { QUIZ_LESSON_FORM_HANDLES } from "../../../../../../../../e2e/data/curriculum/handles";
 import { QuestionType } from "../QuizLessonForm.types";
 
 import type { QuestionOption } from "../QuizLessonForm.types";
@@ -147,6 +148,7 @@ const AnswerSelectQuestion = ({
                             </SortableList.DragHandle>
                           )}
                           <Input
+                            data-testid={QUIZ_LESSON_FORM_HANDLES.optionInput(questionIndex, index)}
                             type="text"
                             name={`questions.${questionIndex}.options.${index}.optionText`}
                             value={item.optionText}
@@ -160,6 +162,10 @@ const AnswerSelectQuestion = ({
                           <div className="flex items-center">
                             {questionType === QuestionType.SINGLE_CHOICE ? (
                               <Input
+                                data-testid={QUIZ_LESSON_FORM_HANDLES.correctOptionControl(
+                                  questionIndex,
+                                  index,
+                                )}
                                 type="radio"
                                 name={`questions.${questionIndex}.options.${index}.isCorrect`}
                                 checked={item.isCorrect === true}
@@ -170,6 +176,10 @@ const AnswerSelectQuestion = ({
                             ) : (
                               <div className="cursor-pointer">
                                 <Checkbox
+                                  data-testid={QUIZ_LESSON_FORM_HANDLES.correctOptionControl(
+                                    questionIndex,
+                                    index,
+                                  )}
                                   id="isCorrect"
                                   name={`questions.${questionIndex}.options.${index}.isCorrect`}
                                   checked={item.isCorrect}
@@ -233,13 +243,14 @@ const AnswerSelectQuestion = ({
               <>
                 <Button
                   type="button"
-                  data-testid={`add-options-button-${questionIndex}`}
+                  data-testid={QUIZ_LESSON_FORM_HANDLES.addOptionButton(questionIndex)}
                   className="bg-primary-700"
                   onClick={handleAddOption}
                 >
                   {t("adminCourseView.curriculum.lesson.button.addOption")}
                 </Button>
                 <Button
+                  data-testid={QUIZ_LESSON_FORM_HANDLES.questionDeleteButton(questionIndex)}
                   type="button"
                   className="bg-color-white border border-neutral-300 text-error-700"
                   onClick={() => setIsDeleteModalOpen(true)}

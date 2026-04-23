@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 
+import { QUIZ_LESSON_FORM_HANDLES } from "../../../../../../../../e2e/data/curriculum/handles";
 import { QuestionIcons, QuestionType } from "../QuizLessonForm.types";
 
 type QuestionSelectorProps = {
@@ -90,7 +91,12 @@ const QuestionSelector = ({ addQuestion, disabled = false }: QuestionSelectorPro
   return (
     <DropdownMenu onOpenChange={(open) => !disabled && setShowOptions(open)}>
       <DropdownMenuTrigger asChild>
-        <Button type="button" className="mb-4 mt-3 bg-primary-700" disabled={disabled}>
+        <Button
+          data-testid={QUIZ_LESSON_FORM_HANDLES.ADD_QUESTION_BUTTON}
+          type="button"
+          className="mb-4 mt-3 bg-primary-700"
+          disabled={disabled}
+        >
           {t("adminCourseView.curriculum.lesson.button.addQuestion")}{" "}
           <Icon name={showOptions ? "ArrowUp" : "ArrowDown"} className="text-color-white ml-2" />
         </Button>
@@ -105,6 +111,7 @@ const QuestionSelector = ({ addQuestion, disabled = false }: QuestionSelectorPro
             return (
               <DropdownMenuItem key={label}>
                 <Button
+                  data-testid={QUIZ_LESSON_FORM_HANDLES.questionTypeOption(type)}
                   key={type}
                   className="body-base-md w-full justify-start bg-white text-left text-black hover:bg-gray-100"
                   type="button"

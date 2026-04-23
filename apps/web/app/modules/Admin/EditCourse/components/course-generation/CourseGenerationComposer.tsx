@@ -19,6 +19,8 @@ import { CourseGenerationComposerLeftControl } from "~/modules/Admin/EditCourse/
 import { CourseGenerationComposerRightControls } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationComposerRightControls";
 import { useTranscription } from "~/modules/Voice/hooks/useTranscription";
 
+import { COURSE_GENERATION_HANDLES } from "../../../../../../e2e/data/curriculum/handles";
+
 const PLACEHOLDER_KEYS = [
   "adminCourseView.curriculum.lesson.courseGenerationComposer.placeholders.topic",
   "adminCourseView.curriculum.lesson.courseGenerationComposer.placeholders.targetAudience",
@@ -129,6 +131,7 @@ export function CourseGenerationComposer({
       <div className="rounded-2xl border border-neutral-200 bg-white px-3 py-3 shadow-md">
         <div className="grid grid-cols-[2rem_1fr_2rem_2rem] items-end gap-2">
           <CourseGenerationComposerLeftControl
+            testId={COURSE_GENERATION_HANDLES.ATTACH_FILE_BUTTON}
             isVoiceMode={isVoiceMode}
             isUploadDisabled={isUploadDisabled}
             onAttachFile={() => fileInputRef.current?.click()}
@@ -136,6 +139,7 @@ export function CourseGenerationComposer({
           />
 
           <CourseGenerationComposerCenterContent
+            inputTestId={COURSE_GENERATION_HANDLES.PROMPT_INPUT}
             isVoiceMode={isVoiceMode}
             input={input}
             currentPlaceholder={currentPlaceholder}
@@ -145,6 +149,8 @@ export function CourseGenerationComposer({
           />
 
           <CourseGenerationComposerRightControls
+            voiceButtonTestId={COURSE_GENERATION_HANDLES.VOICE_BUTTON}
+            sendButtonTestId={COURSE_GENERATION_HANDLES.SEND_BUTTON}
             isVoiceMode={isVoiceMode}
             onStartVoiceMode={() => void startVoiceMode()}
             onStopVoiceMode={() => void stopVoiceMode()}
@@ -153,6 +159,7 @@ export function CourseGenerationComposer({
         </div>
 
         <input
+          data-testid={COURSE_GENERATION_HANDLES.FILE_INPUT}
           ref={fileInputRef}
           type="file"
           multiple

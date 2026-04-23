@@ -13,6 +13,8 @@ import { Label } from "~/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { cn } from "~/lib/utils";
 
+import { RICH_TEXT_HANDLES } from "../../../../e2e/data/common/handles";
+
 import type { RichTextResourceDisplayMode } from "~/hooks/useEntityResourceUpload";
 
 type UploadDisplayModeDialogProps = {
@@ -36,7 +38,7 @@ export const UploadDisplayModeDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => (!isOpen ? onCancel() : undefined)}>
-      <DialogContent>
+      <DialogContent data-testid={RICH_TEXT_HANDLES.UPLOAD_DISPLAY_MODE_DIALOG}>
         <DialogHeader>
           <DialogTitle>{t("richText.uploadDisplayModeDialog.title")}</DialogTitle>
           <DialogDescription>
@@ -59,6 +61,7 @@ export const UploadDisplayModeDialog = ({
               )}
             >
               <RadioGroupItem
+                data-testid={RICH_TEXT_HANDLES.uploadDisplayModeOption(option)}
                 id={`upload-display-mode-${option}`}
                 value={option}
                 className="mt-0.5"
@@ -76,10 +79,19 @@ export const UploadDisplayModeDialog = ({
         </RadioGroup>
 
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={onCancel}>
+          <Button
+            data-testid={RICH_TEXT_HANDLES.UPLOAD_DISPLAY_MODE_CANCEL_BUTTON}
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+          >
             {t("common.button.cancel")}
           </Button>
-          <Button type="button" onClick={onConfirm}>
+          <Button
+            data-testid={RICH_TEXT_HANDLES.UPLOAD_DISPLAY_MODE_CONFIRM_BUTTON}
+            type="button"
+            onClick={onConfirm}
+          >
             {t("common.button.proceed")}
           </Button>
         </DialogFooter>

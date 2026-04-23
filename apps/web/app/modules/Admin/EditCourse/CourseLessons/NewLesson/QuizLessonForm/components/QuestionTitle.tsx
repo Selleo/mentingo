@@ -6,6 +6,7 @@ import { Icon } from "~/components/Icon";
 import { Input } from "~/components/ui/input";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 
+import { QUIZ_LESSON_FORM_HANDLES } from "../../../../../../../../e2e/data/curriculum/handles";
 import { mapQuestionTypeToLabel } from "../../../CourseLessons.helpers";
 import { QuestionIcons, QuestionType } from "../QuizLessonForm.types";
 
@@ -94,6 +95,7 @@ const QuestionTitle = ({
         </Tooltip>
       </TooltipProvider>
       <Input
+        data-testid={QUIZ_LESSON_FORM_HANDLES.questionTitleInput(questionIndex)}
         type="text"
         name={`questions.${questionIndex}.title`}
         value={item.title}
@@ -107,6 +109,7 @@ const QuestionTitle = ({
             <TooltipTrigger asChild>
               <div className="group">
                 <Icon
+                  data-testid={QUIZ_LESSON_FORM_HANDLES.questionDeleteButton(questionIndex)}
                   name="TrashIcon"
                   className="ml-3 size-7 cursor-pointer rounded-lg bg-error-50 p-1 text-error-500 group-hover:bg-error-600 group-hover:text-white"
                   onClick={handleRemoveQuestion}
@@ -125,7 +128,11 @@ const QuestionTitle = ({
       )}
 
       {handleToggle && !isOpenQuestion && (
-        <AccordionTrigger className="ml-2 mr-2 text-primary-800" onClick={handleToggle}>
+        <AccordionTrigger
+          data-testid={QUIZ_LESSON_FORM_HANDLES.questionToggle(questionIndex)}
+          className="ml-2 mr-2 text-primary-800"
+          onClick={handleToggle}
+        >
           <Icon name={!isOpen ? "ArrowDown" : "ArrowUp"} />
         </AccordionTrigger>
       )}

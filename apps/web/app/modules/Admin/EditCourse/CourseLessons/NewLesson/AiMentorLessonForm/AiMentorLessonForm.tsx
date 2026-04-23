@@ -53,6 +53,7 @@ import { MultiFileUploadForm } from "~/modules/Admin/EditCourse/CourseLessons/Ne
 import AiMentorLessonPreview from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/hooks/AiMentorLessonPreview";
 import { SuggestionExamples } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/utils/AiMentor.constants";
 
+import { AI_MENTOR_LESSON_FORM_HANDLES } from "../../../../../../../e2e/data/curriculum/handles";
 import { DeleteContentType } from "../../../EditCourse.types";
 import Breadcrumb from "../components/Breadcrumb";
 
@@ -188,7 +189,10 @@ const AiMentorLessonForm = ({
         <AiMentorLessonPreview lesson={lessonToEdit} onClose={onClosePreview} />
       )}
       <TooltipProvider delayDuration={0}>
-        <div className="relative flex flex-col gap-y-6 rounded-lg bg-white p-8">
+        <div
+          data-testid={AI_MENTOR_LESSON_FORM_HANDLES.ROOT}
+          className="relative flex flex-col gap-y-6 rounded-lg bg-white p-8"
+        >
           {lessonToEdit && !lessonToEdit.title.trim() && <MissingTranslationsAlert />}
           <div className="flex flex-col gap-y-1">
             {!lessonToEdit && (
@@ -227,6 +231,7 @@ const AiMentorLessonForm = ({
                     </Label>
                   </div>
                   <FormTextField
+                    data-testid={AI_MENTOR_LESSON_FORM_HANDLES.TITLE_INPUT}
                     control={form.control}
                     name="title"
                     id="title"
@@ -308,6 +313,7 @@ const AiMentorLessonForm = ({
                           </div>
 
                           <input
+                            data-testid={AI_MENTOR_LESSON_FORM_HANDLES.NAME_INPUT}
                             type="text"
                             className="outline-0 text-sm bg-transparent border-b"
                             value={field.value}
@@ -347,6 +353,7 @@ const AiMentorLessonForm = ({
                       </Label>
                       <FormControl>
                         <Textarea
+                          data-testid={AI_MENTOR_LESSON_FORM_HANDLES.DESCRIPTION_INPUT}
                           {...field}
                           id="description"
                           className="placeholder:body-base h-[164px] resize-none placeholder:text-neutral-600"
@@ -400,7 +407,7 @@ const AiMentorLessonForm = ({
                     </div>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger data-testid={AI_MENTOR_LESSON_FORM_HANDLES.TYPE_SELECT}>
                           <SelectValue />
                         </SelectTrigger>
                       </FormControl>
@@ -566,14 +573,16 @@ const AiMentorLessonForm = ({
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
-                          <BaseEditor
-                            content={field.value}
-                            placeholder={t(
-                              "adminCourseView.curriculum.lesson.placeholder.aiMentorInstructions",
-                            )}
-                            parentClassName="lg:rounded-r-none"
-                            {...field}
-                          />
+                          <div data-testid={AI_MENTOR_LESSON_FORM_HANDLES.INSTRUCTIONS_INPUT}>
+                            <BaseEditor
+                              parentClassName="lg:rounded-r-none"
+                              content={field.value}
+                              placeholder={t(
+                                "adminCourseView.curriculum.lesson.placeholder.aiMentorInstructions",
+                              )}
+                              {...field}
+                            />
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -614,14 +623,18 @@ const AiMentorLessonForm = ({
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
-                          <BaseEditor
-                            content={field.value}
-                            placeholder={t(
-                              "adminCourseView.curriculum.lesson.placeholder.completionConditions",
-                            )}
-                            parentClassName="lg:rounded-l-none"
-                            {...field}
-                          />
+                          <div
+                            data-testid={AI_MENTOR_LESSON_FORM_HANDLES.COMPLETION_CONDITIONS_INPUT}
+                          >
+                            <BaseEditor
+                              parentClassName="lg:rounded-l-none"
+                              content={field.value}
+                              placeholder={t(
+                                "adminCourseView.curriculum.lesson.placeholder.completionConditions",
+                              )}
+                              {...field}
+                            />
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -656,9 +669,12 @@ const AiMentorLessonForm = ({
 
               <div className="flex justify-between">
                 <div className="flex gap-x-4">
-                  <Button type="submit">{t("common.button.save")}</Button>
+                  <Button data-testid={AI_MENTOR_LESSON_FORM_HANDLES.SAVE_BUTTON} type="submit">
+                    {t("common.button.save")}
+                  </Button>
                   {lessonToEdit && (
                     <Button
+                      data-testid={AI_MENTOR_LESSON_FORM_HANDLES.DELETE_BUTTON}
                       type="button"
                       onClick={onClickDelete}
                       className="bg-color-white border border-neutral-300 text-error-700"
@@ -668,7 +684,12 @@ const AiMentorLessonForm = ({
                   )}
                 </div>
                 {lessonToEdit && (
-                  <Button type="button" onClick={onOpenPreview} variant="primary">
+                  <Button
+                    data-testid={AI_MENTOR_LESSON_FORM_HANDLES.PREVIEW_BUTTON}
+                    type="button"
+                    onClick={onOpenPreview}
+                    variant="primary"
+                  >
                     {t("adminCourseView.common.testAiMentor")}
                   </Button>
                 )}

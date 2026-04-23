@@ -14,6 +14,7 @@ import LeaveConfirmationModal from "~/modules/Admin/components/LeaveConfirmation
 import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/components/MissingTranslationsAlert";
 import { QuestionType } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/QuizLessonForm/QuizLessonForm.types";
 
+import { QUIZ_LESSON_FORM_HANDLES } from "../../../../../../../e2e/data/curriculum/handles";
 import { ContentTypes, DeleteContentType } from "../../../EditCourse.types";
 import Breadcrumb from "../components/Breadcrumb";
 
@@ -341,7 +342,7 @@ const QuizLessonForm = ({
   };
 
   return (
-    <div className="w-full max-w-full">
+    <div data-testid={QUIZ_LESSON_FORM_HANDLES.ROOT} className="w-full max-w-full">
       <div className="w-full max-w-full rounded-lg bg-white p-8 shadow-lg">
         {hasMissingTranslations && <MissingTranslationsAlert />}
         {!lessonToEdit && (
@@ -375,7 +376,12 @@ const QuizLessonForm = ({
                     {t("adminCourseView.curriculum.lesson.field.title")}
                   </Label>
                   <FormControl>
-                    <Input id="title" {...field} required />
+                    <Input
+                      data-testid={QUIZ_LESSON_FORM_HANDLES.TITLE_INPUT}
+                      id="title"
+                      {...field}
+                      required
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -424,9 +430,12 @@ const QuizLessonForm = ({
 
             <QuestionSelector addQuestion={addQuestion} disabled={isStructureLocked} />
             <div className="mt-4 flex space-x-4">
-              <Button type="submit">{t("common.button.save")}</Button>
+              <Button data-testid={QUIZ_LESSON_FORM_HANDLES.SAVE_BUTTON} type="submit">
+                {t("common.button.save")}
+              </Button>
               {lessonToEdit ? (
                 <Button
+                  data-testid={QUIZ_LESSON_FORM_HANDLES.DELETE_BUTTON}
                   type="button"
                   onClick={onClickDelete}
                   className="bg-color-white border border-neutral-300 text-error-700"
@@ -435,6 +444,7 @@ const QuizLessonForm = ({
                 </Button>
               ) : (
                 <Button
+                  data-testid={QUIZ_LESSON_FORM_HANDLES.CANCEL_BUTTON}
                   className="bg-color-white border border-neutral-300 text-error-700"
                   type="button"
                   onClick={onCancel}
