@@ -85,7 +85,7 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
     <TooltipProvider>
       <header
         className={cn(
-          "sticky top-0 h-min w-full transition-all duration-300 ease-in-out",
+          "sticky top-0 h-min max-h-[100dvh] w-full overflow-hidden transition-all duration-300 ease-in-out",
           "2xl:flex 2xl:h-full 2xl:flex-col 2xl:gap-y-4",
           "3xl:static",
           isSidebarCollapsed
@@ -126,13 +126,13 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
 
         <Separator className="sr-only bg-neutral-200 2xl:not-sr-only 2xl:h-px" />
         <nav
-          className={cn("2xl:flex 2xl:h-full 2xl:flex-col 2xl:justify-between", {
-            "flex h-[calc(100dvh-4rem)] flex-col justify-between gap-y-3 bg-primary-50 px-4 pb-4 pt-7 2xl:bg-transparent 2xl:p-0":
+          className={cn("2xl:flex 2xl:h-full 2xl:min-h-0 2xl:flex-col 2xl:justify-between", {
+            "flex h-[calc(100dvh-4rem)] min-h-0 flex-col overflow-hidden bg-primary-50 px-4 pb-4 pt-7 2xl:bg-transparent 2xl:p-0 2xl:overflow-hidden":
               isMobileNavOpen,
             "sr-only 2xl:not-sr-only": !isMobileNavOpen,
           })}
         >
-          <div className="flex flex-col gap-y-3">
+          <div className="scrollbar-hide flex min-h-0 flex-1 flex-col gap-y-3 overflow-y-auto overscroll-contain">
             {menuItems.map((group) => {
               const { restrictedAccessRequirement, restrictedManagingTenantAdmin } = group;
 
@@ -163,13 +163,15 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
             })}
           </div>
 
-          <NavigationFooter
-            setIsMobileNavOpen={setIsMobileNavOpen}
-            hasConfigurationIssues={hasConfigurationIssues}
-            showNavigationLabels={showNavigationLabels}
-            shouldShowTooltips={shouldShowTooltips}
-            isSidebarCollapsed={isSidebarCollapsed}
-          />
+          <div className="shrink-0 mt-3">
+            <NavigationFooter
+              setIsMobileNavOpen={setIsMobileNavOpen}
+              hasConfigurationIssues={hasConfigurationIssues}
+              showNavigationLabels={showNavigationLabels}
+              shouldShowTooltips={shouldShowTooltips}
+              isSidebarCollapsed={isSidebarCollapsed}
+            />
+          </div>
         </nav>
       </header>
     </TooltipProvider>
