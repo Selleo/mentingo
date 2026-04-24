@@ -89,8 +89,8 @@ test("admin can bulk update roles for selected users", async ({
 });
 
 test("admin cannot bulk update their own role", async ({
-  browser,
   cleanup,
+  createWorkspacePage,
   factories,
   withWorkerPage,
 }) => {
@@ -98,8 +98,8 @@ test("admin cannot bulk update their own role", async ({
     const userFactory = factories.createUserFactory();
     const prefix = `bulk-roles-self-${Date.now()}`;
     const { page, user: disposableAdmin } = await createDisposableAdminSession({
-      browser,
       cleanup,
+      createWorkspacePage,
       userFactory,
       email: `${prefix}-admin@example.com`,
     });

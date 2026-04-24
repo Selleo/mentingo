@@ -3,7 +3,8 @@ import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { login } from "../fixtures/auth.actions";
 
 import type { UserFactory, UserFactoryRecord } from "../factories/user.factory";
-import type { Browser, BrowserContext, Page } from "@playwright/test";
+import type { CreateWorkspacePage } from "../fixtures/test.fixture";
+import type { BrowserContext, Page } from "@playwright/test";
 
 const DISPOSABLE_ADMIN_PASSWORD = "Password123@";
 
@@ -12,15 +13,15 @@ type CleanupHandle = {
 };
 
 export const createDisposableAdminSession = async ({
-  browser,
+  createWorkspacePage,
   cleanup,
   userFactory,
   email,
 }: {
-  browser: Browser;
   cleanup: CleanupHandle;
-  userFactory: UserFactory;
+  createWorkspacePage: CreateWorkspacePage;
   email: string;
+  userFactory: UserFactory;
 }): Promise<{ context: BrowserContext; page: Page; user: UserFactoryRecord }> => {
   const registeredUser = await userFactory.register({
     email,
@@ -37,8 +38,7 @@ export const createDisposableAdminSession = async ({
     await userFactory.delete(adminUser.id);
   });
 
-  const context = await browser.newContext();
-  const page = await context.newPage();
+  const { context, page } = await createWorkspacePage();
 
   cleanup.add(async () => {
     await context.close();

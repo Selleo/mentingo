@@ -7,11 +7,12 @@ import { expect, test } from "./article-test.fixture";
 
 test("visitor cannot see private article when public articles access is enabled", async ({
   cleanup,
+  createWorkspaceContext,
   factories,
   apiClient,
   withReadonlyPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+  await withReadonlyPage(USER_ROLE.admin, async () => {
     const restoreContentFeatures = await ensureContentFeaturesEnabled(apiClient, {
       publicArticles: true,
     });
@@ -38,14 +39,7 @@ test("visitor cannot see private article when public articles access is enabled"
       }
     });
 
-    const browser = page.context().browser();
-
-    if (!browser) {
-      throw new Error("Expected browser instance for public context");
-    }
-
-    await page.goto("/");
-    const publicContext = await browser.newContext({ baseURL: new URL(page.url()).origin });
+    const { context: publicContext } = await createWorkspaceContext();
     await publicContext.addInitScript(() => {
       localStorage.setItem(
         "language-storage",

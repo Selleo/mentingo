@@ -13,9 +13,9 @@ const NEW_PASSWORD = "ChangedPassword123@";
 
 test("visitor can create a password from the invite email", async ({
   cleanup,
+  createWorkspacePage,
   factories,
   withWorkerPage,
-  page,
 }) => {
   let email = "";
 
@@ -41,19 +41,25 @@ test("visitor can create a password from the invite email", async ({
 
   const inviteLink = extractLinkFromMailhogMessage(message, "/auth/create-new-password");
 
-  await openCreateNewPasswordPageFlow(page, {
-    email,
-    resetToken: new URL(inviteLink).searchParams.get("resetToken") ?? undefined,
-    createToken: new URL(inviteLink).searchParams.get("createToken") ?? undefined,
-  });
+  const { context, page } = await createWorkspacePage();
 
-  await fillCreateNewPasswordFormFlow(page, {
-    newPassword: NEW_PASSWORD,
-  });
-  await submitCreateNewPasswordFormFlow(page);
+  try {
+    await openCreateNewPasswordPageFlow(page, {
+      email,
+      resetToken: new URL(inviteLink).searchParams.get("resetToken") ?? undefined,
+      createToken: new URL(inviteLink).searchParams.get("createToken") ?? undefined,
+    });
 
-  await expect(page).toHaveURL("/auth/login");
+    await fillCreateNewPasswordFormFlow(page, {
+      newPassword: NEW_PASSWORD,
+    });
+    await submitCreateNewPasswordFormFlow(page);
 
-  await login(page, email, NEW_PASSWORD);
-  await expect(page).toHaveURL("/courses");
+    await expect(page).toHaveURL("/auth/login");
+
+    await login(page, email, NEW_PASSWORD);
+    await expect(page).toHaveURL("/courses");
+  } finally {
+    await context.close();
+  }
 });

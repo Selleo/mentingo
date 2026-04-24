@@ -1,6 +1,14 @@
 import { randomUUID } from "node:crypto";
 
-import { expect, mergeTests, type Browser, type BrowserContext, type Page } from "@playwright/test";
+import {
+  expect,
+  mergeTests,
+  type Browser,
+  type BrowserContext,
+  type BrowserContextOptions,
+  type Page,
+  type TestInfo,
+} from "@playwright/test";
 import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 
 import { createFixtureFactories } from "../factories";
@@ -35,6 +43,18 @@ type WithAuthPage = (
   run: (handle: PageHandle) => Promise<void>,
   options?: WithAuthPageOptions,
 ) => Promise<void>;
+type WorkspaceContextOptions = {
+  root?: boolean;
+  storageState?: BrowserContextOptions["storageState"];
+};
+export type WorkspaceContextHandle = {
+  context: BrowserContext;
+  origin: string;
+};
+export type CreateWorkspaceContext = (
+  options?: WorkspaceContextOptions,
+) => Promise<WorkspaceContextHandle>;
+export type CreateWorkspacePage = (options?: WorkspaceContextOptions) => Promise<PageHandle>;
 type CreateIsolatedWorkspace = (options?: {
   role?: UserRole;
   tenant?: TenantFactoryCreateInput;
@@ -163,6 +183,21 @@ const addWorkspaceInitScript = async (context: BrowserContext, origin: string) =
   );
 };
 
+const createWorkspaceBrowserContext = async (
+  browser: Browser,
+  origin: string,
+  options: WorkspaceContextOptions = {},
+) => {
+  const context = await browser.newContext({
+    baseURL: origin,
+    storageState: options.storageState,
+  });
+
+  await addWorkspaceInitScript(context, origin);
+
+  return context;
+};
+
 const findUserByEmail = async (
   apiClient: ReturnType<typeof createFixtureApiClient>,
   email: string,
@@ -279,6 +314,8 @@ const mergedFixture = mergeTests(pageFixture, factoryFixture, cleanupFixture);
 
 export const test = mergedFixture.extend<
   {
+    createWorkspaceContext: CreateWorkspaceContext;
+    createWorkspacePage: CreateWorkspacePage;
     withReadonlyPage: WithAuthPage;
     withWorkerPage: WithAuthPage;
     createIsolatedWorkspace: CreateIsolatedWorkspace;
@@ -435,23 +472,54 @@ export const test = mergedFixture.extend<
     },
     { scope: "worker", timeout: 120 * 1000 },
   ],
+  createWorkspaceContext: async (
+    {
+      _getWorkerTenantWorkspace,
+      browser,
+    }: {
+      _getWorkerTenantWorkspace: () => Promise<WorkerTenantWorkspace>;
+      browser: Browser;
+    },
+    use: (value: CreateWorkspaceContext) => Promise<void>,
+  ) => {
+    await use(async (options = {}) => {
+      const origin = options.root
+        ? new URL(DEFAULT_BASE_URL).origin
+        : (await _getWorkerTenantWorkspace()).origin;
+      const context = await createWorkspaceBrowserContext(browser, origin, options);
+
+      return { context, origin };
+    });
+  },
+  createWorkspacePage: async (
+    {
+      createWorkspaceContext,
+    }: {
+      createWorkspaceContext: CreateWorkspaceContext;
+    },
+    use: (value: CreateWorkspacePage) => Promise<void>,
+  ) => {
+    await use(async (options = {}) => {
+      const { context, origin } = await createWorkspaceContext(options);
+      const page = await context.newPage();
+
+      return { context, origin, page };
+    });
+  },
   withWorkerPage: async (
     {
       _ensureWorkerAuthReady,
       _getWorkerTenantWorkspace,
       apiClient,
-      baseURL,
       browser,
-      withWorkerPage,
     }: {
       _ensureWorkerAuthReady: () => Promise<void>;
       _getWorkerTenantWorkspace: () => Promise<WorkerTenantWorkspace>;
       apiClient: FixtureApiClient;
-      baseURL?: string;
       browser: Browser;
-      withWorkerPage: WithAuthPage;
     },
     use: (value: WithAuthPage) => Promise<void>,
+    testInfo: TestInfo,
   ) => {
     await use(
       async (
@@ -461,30 +529,35 @@ export const test = mergedFixture.extend<
       ) => {
         if (options?.root) {
           await _ensureWorkerAuthReady();
-          await withWorkerPage(role, async (handle) => {
-            const origin = new URL(baseURL!).origin;
-
-            await apiClient.syncFromContext(handle.context, origin);
-
-            await run(handle);
+          const origin = new URL(DEFAULT_BASE_URL).origin;
+          const context = await createWorkspaceBrowserContext(browser, origin, {
+            storageState: getWorkerAuthStatePath(testInfo.project.name, testInfo.workerIndex, role),
           });
+
+          try {
+            const page = await context.newPage();
+
+            await apiClient.syncFromContext(context, origin);
+
+            await run({ context, origin, page });
+          } finally {
+            await context.close();
+          }
 
           return;
         }
 
         const workerTenantWorkspace = await _getWorkerTenantWorkspace();
-        const context = await browser.newContext({
-          baseURL: workerTenantWorkspace.origin,
+        const context = await createWorkspaceBrowserContext(browser, workerTenantWorkspace.origin, {
           storageState: workerTenantWorkspace.authStatePaths[role],
         });
 
         try {
-          await addWorkspaceInitScript(context, workerTenantWorkspace.origin);
           const page = await context.newPage();
 
           await apiClient.syncFromContext(context, workerTenantWorkspace.origin);
 
-          await run({ context, page });
+          await run({ context, origin: workerTenantWorkspace.origin, page });
         } finally {
           await context.close();
         }
