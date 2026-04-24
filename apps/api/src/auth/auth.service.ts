@@ -677,8 +677,10 @@ export class AuthService {
       userId,
     );
 
+    const tenantOrigin = await this.resolveTenantOrigin(user.tenantId);
+
     const emailTemplate = new CreatePasswordReminderEmail({
-      createPasswordLink: buildCreateNewPasswordLink(CORS_ORIGIN, {
+      createPasswordLink: buildCreateNewPasswordLink(tenantOrigin, {
         createToken,
       }),
       ...defaultEmailSettings,
