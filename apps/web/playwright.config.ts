@@ -20,6 +20,8 @@ const TEST_LMS_DATABASE_URL =
 process.env.DATABASE_URL ||= TEST_DATABASE_URL;
 process.env.LMS_DATABASE_URL ||= TEST_LMS_DATABASE_URL;
 
+if (process.env.CI === "true") process.env.SEED_MANAGE_DB_ROLE ||= "true";
+
 const baseURL = process.env.CI
   ? "http://localhost:5173"
   : process.env.VITE_APP_URL || "https://tenant1.lms.localhost";
