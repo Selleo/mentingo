@@ -76,6 +76,14 @@ export const ensureContentModulesEnabled = async (apiClient: FixtureApiClient) =
   await setContentModule(apiClient, "articlesEnabled", true);
 };
 
+export const ensureNewsModuleEnabled = async (apiClient: FixtureApiClient) => {
+  await setContentModule(apiClient, "newsEnabled", true);
+};
+
+export const ensureArticlesModuleEnabled = async (apiClient: FixtureApiClient) => {
+  await setContentModule(apiClient, "articlesEnabled", true);
+};
+
 export const ensureContentFeaturesEnabled = async (
   apiClient: FixtureApiClient,
   options: {

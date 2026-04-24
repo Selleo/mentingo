@@ -4,16 +4,16 @@ import { expect, mergeTests, type Browser, type BrowserContext, type Page } from
 import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 
 import { createFixtureFactories } from "../factories";
-import { fillCreateNewPasswordFormFlow } from "../flows/auth/fill-create-new-password-form.flow";
-import { submitCreateNewPasswordFormFlow } from "../flows/auth/submit-create-new-password-form.flow";
 import { createFixtureApiClient } from "../utils/api-client";
 import {
   AUTH_ACCOUNT_TEMPLATE,
   getAuthEmail,
   getWorkerAuthStatePath,
+  getWorkerTenantAuthEmail,
   getWorkerTenantAuthStatePath,
 } from "../utils/auth-email";
 import { extractLinkFromMailhogMessage, waitForMailhogMessage } from "../utils/mailhog";
+import { markAllOnboardingComplete } from "../utils/onboarding";
 
 import { login } from "./auth.actions";
 import { cleanupFixture } from "./cleanup.fixture";
@@ -27,7 +27,14 @@ import type { UserFactoryRecord } from "../factories/user.factory";
 import type { FixtureApiClient } from "../utils/api-client";
 import type { UserRole } from "~/config/userRoles";
 
-type WithAuthPage = (role: UserRole, run: (handle: PageHandle) => Promise<void>) => Promise<void>;
+type WithAuthPageOptions = {
+  root?: boolean;
+};
+type WithAuthPage = (
+  role: UserRole,
+  run: (handle: PageHandle) => Promise<void>,
+  options?: WithAuthPageOptions,
+) => Promise<void>;
 type CreateIsolatedWorkspace = (options?: {
   role?: UserRole;
   tenant?: TenantFactoryCreateInput;
@@ -61,6 +68,12 @@ export type TenantUserHandle = {
   user: UserFactoryRecord;
 };
 
+type WorkerTenantWorkspace = {
+  authStatePaths: Record<UserRole, string>;
+  origin: string;
+  tenant: TenantFactoryRecord;
+};
+
 const AUTH_ROLES = [
   SYSTEM_ROLE_SLUGS.STUDENT,
   SYSTEM_ROLE_SLUGS.ADMIN,
@@ -70,6 +83,9 @@ const AUTH_ROLES = [
 const ADMIN_EMAIL = "admin@example.com";
 const ADMIN_PASSWORD = "password";
 const ACCOUNT_PASSWORD = "Password123@";
+const DEFAULT_BASE_URL = process.env.CI
+  ? "http://localhost:5173"
+  : process.env.VITE_APP_URL || "https://tenant1.lms.localhost";
 
 const roleLabelBySlug: Record<UserRole, string> = {
   [SYSTEM_ROLE_SLUGS.STUDENT]: "Student",
@@ -93,18 +109,44 @@ const createIsolatedTenantInput = (
   }
 
   const slug = randomUUID().slice(0, 8);
-  const protocol = new URL(baseURL).protocol;
+  const baseUrl = new URL(baseURL);
+  const port = baseUrl.port ? `:${baseUrl.port}` : "";
 
   return {
     ...input,
     name: input?.name ?? `Isolated Workspace ${slug}`,
-    host: `${protocol}//${"e2e-tenant"}-${slug}.lms.localhost`,
+    host: `${baseUrl.protocol}//${"e2e-tenant"}-${slug}.lms.localhost${port}`,
     adminEmail: input?.adminEmail ?? `e2e-admin-${slug}@example.com`,
     adminFirstName: input?.adminFirstName ?? "Tenant",
     adminLastName: input?.adminLastName ?? "Admin",
     adminLanguage: input?.adminLanguage ?? "en",
     status: input?.status ?? "active",
   };
+};
+
+const completeCreatePasswordFromInvite = async (
+  origin: string,
+  inviteLink: string,
+  password: string,
+) => {
+  const createToken = new URL(inviteLink, origin).searchParams.get("createToken");
+
+  if (!createToken) {
+    throw new Error("Could not find createToken in tenant invitation link");
+  }
+
+  const apiClient = createFixtureApiClient();
+  apiClient.syncTenantOrigin(origin);
+
+  try {
+    await apiClient.api.authControllerCreatePassword({
+      createToken,
+      password,
+      language: "en",
+    });
+  } finally {
+    apiClient.clearCookies();
+  }
 };
 
 const addWorkspaceInitScript = async (context: BrowserContext, origin: string) => {
@@ -166,16 +208,71 @@ const ensureWorkerUserAccount = async (
   return { email, path: getWorkerAuthStatePath(projectName, workerIndex, role) };
 };
 
-const writeWorkerAuthState = async (browser: Browser, email: string, path: string) => {
-  const context = await browser.newContext();
-  const page = await context.newPage();
+const writeWorkerAuthState = async (
+  browser: Browser,
+  email: string,
+  path: string,
+  origin?: string,
+) => {
+  const context = await browser.newContext(origin ? { baseURL: origin } : undefined);
+  const apiClient = createFixtureApiClient();
 
   try {
-    await login(page, email, ACCOUNT_PASSWORD);
+    if (origin) await addWorkspaceInitScript(context, origin);
+
+    const page = await context.newPage();
+    await login(page, email, ACCOUNT_PASSWORD, origin ? { origin } : undefined);
+    await apiClient.syncFromContext(context, origin ?? new URL(page.url()).origin);
+    await markAllOnboardingComplete(apiClient);
     await context.storageState({ path });
   } finally {
+    apiClient.clearCookies();
     await context.close();
   }
+};
+
+const createTenantRoleUserAuthState = async (options: {
+  browser: Browser;
+  factories: FixtureFactories;
+  origin: string;
+  password: string;
+  projectName: string;
+  role: UserRole;
+  tenantId: string;
+  workerIndex: number;
+}) => {
+  const email = getWorkerTenantAuthEmail(
+    options.projectName,
+    options.workerIndex,
+    options.tenantId,
+    options.role,
+  );
+  const registrationClient = createFixtureApiClient();
+  registrationClient.syncTenantOrigin(options.origin);
+
+  const userRegisterResponse = await registrationClient.api.authControllerRegister({
+    email,
+    firstName: getSeedName(options.role, options.workerIndex).firstName,
+    lastName: getSeedName(options.role, options.workerIndex).lastName,
+    password: options.password,
+    language: "en",
+  });
+
+  const userFactory = options.factories.createUserFactory();
+  await userFactory.update(userRegisterResponse.data.data.id, {
+    roleSlugs: [options.role],
+  });
+
+  const authStatePath = getWorkerTenantAuthStatePath(
+    options.projectName,
+    options.workerIndex,
+    options.tenantId,
+    options.role,
+  );
+
+  await writeWorkerAuthState(options.browser, email, authStatePath, options.origin);
+
+  return authStatePath;
 };
 
 const mergedFixture = mergeTests(pageFixture, factoryFixture, cleanupFixture);
@@ -188,67 +285,229 @@ export const test = mergedFixture.extend<
     withIsolatedWorkerPage: WithIsolatedWorkspace;
   },
   {
-    _workerAuthReady: void;
+    _ensureWorkerAuthReady: () => Promise<void>;
+    _getWorkerTenantWorkspace: () => Promise<WorkerTenantWorkspace>;
   }
 >({
-  _workerAuthReady: [
+  _ensureWorkerAuthReady: [
     async ({ browser }, use, workerInfo) => {
-      const apiClient = createFixtureApiClient();
-      const adminContext = await browser.newContext();
-      const adminPage = await adminContext.newPage();
-      const workerAuthStates: { email: string; path: string }[] = [];
+      let setupPromise: Promise<void> | undefined;
 
-      try {
-        await login(adminPage, ADMIN_EMAIL, ADMIN_PASSWORD);
+      await use(async () => {
+        setupPromise ??= (async () => {
+          const apiClient = createFixtureApiClient();
+          const origin = new URL(DEFAULT_BASE_URL).origin;
+          const adminContext = await browser.newContext({ baseURL: origin });
+          const adminPage = await adminContext.newPage();
+          const workerAuthStates: { email: string; path: string }[] = [];
 
-        const origin = new URL(adminPage.url()).origin;
-        await apiClient.syncFromContext(adminContext, origin);
+          try {
+            await addWorkspaceInitScript(adminContext, origin);
+            await login(adminPage, ADMIN_EMAIL, ADMIN_PASSWORD, { origin });
 
-        for (const role of AUTH_ROLES) {
-          workerAuthStates.push(
-            await ensureWorkerUserAccount(
-              apiClient,
-              workerInfo.project.name,
-              workerInfo.workerIndex,
-              role,
-            ),
-          );
-        }
-      } finally {
-        apiClient.clearCookies();
-        await adminContext.close();
-      }
+            await apiClient.syncFromContext(adminContext, origin);
 
-      for (const { email, path } of workerAuthStates) {
-        await writeWorkerAuthState(browser, email, path);
-      }
+            for (const role of AUTH_ROLES) {
+              workerAuthStates.push(
+                await ensureWorkerUserAccount(
+                  apiClient,
+                  workerInfo.project.name,
+                  workerInfo.workerIndex,
+                  role,
+                ),
+              );
+            }
+          } finally {
+            apiClient.clearCookies();
+            await adminContext.close();
+          }
 
-      await use();
+          for (const { email, path } of workerAuthStates) {
+            await writeWorkerAuthState(browser, email, path, origin);
+          }
+        })();
+
+        await setupPromise;
+      });
     },
     { scope: "worker", timeout: 90 * 1000 },
   ],
-  withReadonlyPage: async ({ apiClient, baseURL, withReadonlyPage }, use) => {
-    await use(async (role, run) => {
-      await withReadonlyPage(role, async (handle) => {
-        const origin = new URL(baseURL!).origin;
+  _getWorkerTenantWorkspace: [
+    async ({ browser }, use, workerInfo) => {
+      let setupPromise: Promise<WorkerTenantWorkspace> | undefined;
+      let cleanupApiClient: FixtureApiClient | undefined;
+      let tenant: TenantFactoryRecord | undefined;
 
-        await apiClient.syncFromContext(handle.context, origin);
+      await use(async () => {
+        setupPromise ??= (async () => {
+          const origin = new URL(DEFAULT_BASE_URL).origin;
+          const adminContext = await browser.newContext({ baseURL: origin });
+          const adminPage = await adminContext.newPage();
+          const apiClient = createFixtureApiClient();
+          cleanupApiClient = createFixtureApiClient();
 
-        await run(handle);
+          try {
+            await addWorkspaceInitScript(adminContext, origin);
+            await login(adminPage, ADMIN_EMAIL, ADMIN_PASSWORD);
+            await apiClient.syncFromContext(adminContext, origin);
+            await cleanupApiClient.syncFromContext(adminContext, origin);
+
+            const rootFactories = createFixtureFactories(apiClient);
+            const tenantFactory = rootFactories.createTenantFactory();
+            const tenantInput = createIsolatedTenantInput(DEFAULT_BASE_URL, {
+              name: `Worker Workspace ${workerInfo.project.name} ${workerInfo.workerIndex}`,
+            });
+
+            tenant = await tenantFactory.create(tenantInput);
+
+            const workspaceOrigin = new URL(tenant.host).origin;
+            const tenantAdminEmail = tenantInput.adminEmail!;
+            const tenantAdminPassword = ACCOUNT_PASSWORD;
+
+            const invitationMessage = await waitForMailhogMessage({
+              recipient: tenantAdminEmail,
+              subjectIncludes: "You're invited to the platform!",
+            });
+            const inviteLink = extractLinkFromMailhogMessage(
+              invitationMessage,
+              "/auth/create-new-password",
+            );
+
+            await completeCreatePasswordFromInvite(
+              workspaceOrigin,
+              inviteLink,
+              tenantAdminPassword,
+            );
+
+            const tenantAdminContext = await browser.newContext({ baseURL: workspaceOrigin });
+            await addWorkspaceInitScript(tenantAdminContext, workspaceOrigin);
+            const tenantAdminPage = await tenantAdminContext.newPage();
+
+            try {
+              await login(tenantAdminPage, tenantAdminEmail, tenantAdminPassword, {
+                origin: workspaceOrigin,
+              });
+              await apiClient.syncFromContext(tenantAdminContext, workspaceOrigin);
+              await markAllOnboardingComplete(apiClient);
+
+              const tenantFactories = createFixtureFactories(apiClient);
+              const authStatePaths = {} as Record<UserRole, string>;
+
+              for (const role of AUTH_ROLES) {
+                authStatePaths[role] = await createTenantRoleUserAuthState({
+                  browser,
+                  factories: tenantFactories,
+                  origin: workspaceOrigin,
+                  password: ACCOUNT_PASSWORD,
+                  projectName: workerInfo.project.name,
+                  role,
+                  tenantId: tenant.id,
+                  workerIndex: workerInfo.workerIndex,
+                });
+              }
+
+              return {
+                authStatePaths,
+                origin: workspaceOrigin,
+                tenant,
+              };
+            } finally {
+              await tenantAdminContext.close();
+            }
+          } finally {
+            apiClient.clearCookies();
+            await adminContext.close();
+          }
+        })();
+
+        return setupPromise;
       });
-    });
+
+      if (cleanupApiClient) {
+        if (tenant) {
+          const cleanupTenantFactory =
+            createFixtureFactories(cleanupApiClient).createTenantFactory();
+          await cleanupTenantFactory.deactivate(tenant.id);
+        }
+
+        cleanupApiClient.clearCookies();
+      }
+    },
+    { scope: "worker", timeout: 120 * 1000 },
+  ],
+  withWorkerPage: async (
+    {
+      _ensureWorkerAuthReady,
+      _getWorkerTenantWorkspace,
+      apiClient,
+      baseURL,
+      browser,
+      withWorkerPage,
+    }: {
+      _ensureWorkerAuthReady: () => Promise<void>;
+      _getWorkerTenantWorkspace: () => Promise<WorkerTenantWorkspace>;
+      apiClient: FixtureApiClient;
+      baseURL?: string;
+      browser: Browser;
+      withWorkerPage: WithAuthPage;
+    },
+    use: (value: WithAuthPage) => Promise<void>,
+  ) => {
+    await use(
+      async (
+        role: UserRole,
+        run: (handle: PageHandle) => Promise<void>,
+        options?: WithAuthPageOptions,
+      ) => {
+        if (options?.root) {
+          await _ensureWorkerAuthReady();
+          await withWorkerPage(role, async (handle) => {
+            const origin = new URL(baseURL!).origin;
+
+            await apiClient.syncFromContext(handle.context, origin);
+
+            await run(handle);
+          });
+
+          return;
+        }
+
+        const workerTenantWorkspace = await _getWorkerTenantWorkspace();
+        const context = await browser.newContext({
+          baseURL: workerTenantWorkspace.origin,
+          storageState: workerTenantWorkspace.authStatePaths[role],
+        });
+
+        try {
+          await addWorkspaceInitScript(context, workerTenantWorkspace.origin);
+          const page = await context.newPage();
+
+          await apiClient.syncFromContext(context, workerTenantWorkspace.origin);
+
+          await run({ context, page });
+        } finally {
+          await context.close();
+        }
+      },
+    );
   },
-  withWorkerPage: async ({ _workerAuthReady, apiClient, baseURL, withWorkerPage }, use) => {
-    void _workerAuthReady;
-    await use(async (role, run) => {
-      await withWorkerPage(role, async (handle) => {
-        const origin = new URL(baseURL!).origin;
-
-        await apiClient.syncFromContext(handle.context, origin);
-
-        await run(handle);
-      });
-    });
+  withReadonlyPage: async (
+    {
+      withWorkerPage,
+    }: {
+      withWorkerPage: WithAuthPage;
+    },
+    use: (value: WithAuthPage) => Promise<void>,
+  ) => {
+    await use(
+      async (
+        role: UserRole,
+        run: (handle: PageHandle) => Promise<void>,
+        options?: WithAuthPageOptions,
+      ) => {
+        await withWorkerPage(role, run, options);
+      },
+    );
   },
   createIsolatedWorkspace: async ({ browser, baseURL, cleanup }, use, workerInfo) => {
     await use(async (options = {}) => {
@@ -266,7 +525,6 @@ export const test = mergedFixture.extend<
       });
 
       await addWorkspaceInitScript(adminContext, origin);
-      await addWorkspaceInitScript(tenantContext, origin);
 
       await adminPage.addInitScript(() => {
         localStorage.clear();
@@ -291,6 +549,7 @@ export const test = mergedFixture.extend<
       const workspaceOrigin = new URL(tenant.host).origin;
       const tenantAdminEmail = tenantInput.adminEmail!;
       const tenantAdminPassword = ACCOUNT_PASSWORD;
+      await addWorkspaceInitScript(tenantContext, workspaceOrigin);
 
       const invitationMessage = await waitForMailhogMessage({
         recipient: tenantAdminEmail,
@@ -300,17 +559,12 @@ export const test = mergedFixture.extend<
         invitationMessage,
         "/auth/create-new-password",
       );
-      const inviteUrl = new URL(inviteLink, workspaceOrigin).toString();
 
-      await tenantPage.goto(inviteUrl);
-      await expect(tenantPage).toHaveURL(/\/auth\/create-new-password\?/);
-      await expect(tenantPage.getByTestId("create-new-password-page")).toBeVisible();
-
-      await fillCreateNewPasswordFormFlow(tenantPage, { newPassword: tenantAdminPassword });
-      await submitCreateNewPasswordFormFlow(tenantPage);
-      await expect(tenantPage).toHaveURL(/\/auth\/login(?:\?.*)?$/);
+      await completeCreatePasswordFromInvite(workspaceOrigin, inviteLink, tenantAdminPassword);
+      await login(tenantPage, tenantAdminEmail, tenantAdminPassword, { origin: workspaceOrigin });
 
       await apiClient.syncFromContext(tenantContext, workspaceOrigin);
+      await markAllOnboardingComplete(apiClient);
 
       const createTenantUserWithPasswordAndRole = async (input: {
         email?: string;
@@ -353,6 +607,7 @@ export const test = mergedFixture.extend<
         await addWorkspaceInitScript(userContext, workspaceOrigin);
         await login(userPage, email, password, { origin: workspaceOrigin });
         await userApiClient.syncFromContext(userContext, workspaceOrigin);
+        await markAllOnboardingComplete(userApiClient);
         await userContext.storageState({ path: authStatePath });
 
         return {

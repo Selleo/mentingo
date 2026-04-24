@@ -1,9 +1,10 @@
 import { USER_ROLE } from "~/config/userRoles";
 
 import { NEWS_DETAILS_PAGE_HANDLES } from "../../data/news/handles";
-import { expect, test } from "../../fixtures/test.fixture";
 import { openNewsDetailsFromListFlow } from "../../flows/news/open-news-details-from-list.flow";
 import { openNewsPageFlow } from "../../flows/news/open-news-page.flow";
+
+import { expect, test } from "./news-test.fixture";
 
 test("admin can open news details from news list", async ({
   cleanup,

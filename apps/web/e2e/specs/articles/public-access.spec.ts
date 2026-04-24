@@ -1,8 +1,9 @@
 import { USER_ROLE } from "~/config/userRoles";
 
 import { ARTICLE_DETAILS_PAGE_HANDLES, ARTICLES_TOC_HANDLES } from "../../data/articles/handles";
-import { expect, test } from "../../fixtures/test.fixture";
 import { ensureContentFeaturesEnabled } from "../../utils/content-features";
+
+import { expect, test } from "./article-test.fixture";
 
 test("visitor cannot see private article when public articles access is enabled", async ({
   cleanup,
@@ -43,7 +44,8 @@ test("visitor cannot see private article when public articles access is enabled"
       throw new Error("Expected browser instance for public context");
     }
 
-    const publicContext = await browser.newContext();
+    await page.goto("/");
+    const publicContext = await browser.newContext({ baseURL: new URL(page.url()).origin });
     await publicContext.addInitScript(() => {
       localStorage.setItem(
         "language-storage",

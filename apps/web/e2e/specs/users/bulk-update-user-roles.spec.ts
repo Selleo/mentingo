@@ -3,7 +3,6 @@ import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { USER_ROLE } from "~/config/userRoles";
 
 import { USER_BULK_EDIT_MODAL_HANDLES, USERS_PAGE_HANDLES } from "../../data/users/handles";
-import { getReadonlyAuthEmail } from "../../fixtures/auth.actions";
 import { expect, test } from "../../fixtures/test.fixture";
 import { confirmBulkEditFlow } from "../../flows/users/confirm-bulk-edit.flow";
 import { fillBulkUserRolesFlow } from "../../flows/users/fill-bulk-user-roles.flow";
@@ -25,20 +24,24 @@ test("admin cannot open bulk edit actions without selecting users", async ({
 });
 
 test("admin cannot submit a bulk role update without choosing a role", async ({
+  cleanup,
   factories,
   withReadonlyPage,
 }) => {
   await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
     const userFactory = factories.createUserFactory();
-    const readonlyStudent = await userFactory.getByEmail(getReadonlyAuthEmail(USER_ROLE.student));
+    const student = await userFactory.create({
+      email: `bulk-role-no-choice-${Date.now()}@example.com`,
+      roleSlugs: [SYSTEM_ROLE_SLUGS.STUDENT],
+    });
 
-    if (!readonlyStudent) {
-      throw new Error("Readonly student user not found");
-    }
+    cleanup.add(async () => {
+      await userFactory.delete(student.id);
+    });
 
     await openUsersPageFlow(page);
-    await filterUsersFlow(page, { keyword: readonlyStudent.email });
-    await selectUsersFlow(page, [readonlyStudent.id]);
+    await filterUsersFlow(page, { keyword: student.email });
+    await selectUsersFlow(page, [student.id]);
     await openBulkEditActionFlow(page, "role");
 
     await expect(page.getByTestId(USER_BULK_EDIT_MODAL_HANDLES.SUBMIT_BUTTON)).toBeDisabled();

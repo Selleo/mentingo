@@ -1,9 +1,10 @@
 import { USER_ROLE } from "~/config/userRoles";
 
 import { NEWS_DETAILS_PAGE_HANDLES, NEWS_PAGE_HANDLES } from "../../data/news/handles";
-import { expect, test } from "../../fixtures/test.fixture";
 import { openNewsPageFlow } from "../../flows/news/open-news-page.flow";
 import { ensureContentFeaturesEnabled } from "../../utils/content-features";
+
+import { expect, test } from "./news-test.fixture";
 
 test("visitor can access published news list and details when public news access is enabled", async ({
   cleanup,
@@ -40,7 +41,8 @@ test("visitor can access published news list and details when public news access
       throw new Error("Expected browser instance for public context");
     }
 
-    const publicContext = await browser.newContext();
+    await page.goto("/");
+    const publicContext = await browser.newContext({ baseURL: new URL(page.url()).origin });
     const publicPage = await publicContext.newPage();
 
     try {
@@ -91,7 +93,8 @@ test("visitor cannot see private news when public news access is enabled", async
       throw new Error("Expected browser instance for public context");
     }
 
-    const publicContext = await browser.newContext();
+    await page.goto("/");
+    const publicContext = await browser.newContext({ baseURL: new URL(page.url()).origin });
     const publicPage = await publicContext.newPage();
 
     try {
