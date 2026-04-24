@@ -34,6 +34,15 @@ export const getWorkerAuthStatePath = (
   return `e2e/.auth/worker-${projectKey}-${workerIndex}-${role}.json`;
 };
 
+export const getWorkerTenantAuthStatePath = (
+  projectName: string,
+  workerIndex: number,
+  tenantId: string,
+) => {
+  const projectKey = normalizeProjectName(projectName);
+  return `e2e/.auth/worker-tenant-${projectKey}-${workerIndex}-${tenantId}.json`;
+};
+
 export const getAuthEmail = (
   template: AuthAccountTemplate,
   role: UserRole,

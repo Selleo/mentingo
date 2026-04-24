@@ -1,4 +1,4 @@
-import { NEWS_FORM_PAGE_HANDLES } from "../../data/news/handles";
+import { NEWS_DETAILS_PAGE_HANDLES, NEWS_FORM_PAGE_HANDLES } from "../../data/news/handles";
 
 import { fillNewsFormFlow } from "./fill-news-form.flow";
 import { submitNewsFormFlow } from "./submit-news-form.flow";
@@ -20,4 +20,8 @@ export const updateNewsFlow = async (
   await page.getByTestId(NEWS_FORM_PAGE_HANDLES.PAGE).waitFor({ state: "visible" });
   await fillNewsFormFlow(page, { title, summary, status });
   await submitNewsFormFlow(page);
+  if (page.url().endsWith("/edit")) {
+    await page.goto(`/news/${newsId}`);
+  }
+  await page.getByTestId(NEWS_DETAILS_PAGE_HANDLES.PAGE).waitFor({ state: "visible" });
 };

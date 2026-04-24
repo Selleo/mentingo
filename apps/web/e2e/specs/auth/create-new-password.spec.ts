@@ -2,7 +2,7 @@ import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 
 import { USER_ROLE } from "~/config/userRoles";
 
-import { login, logout } from "../../fixtures/auth.actions";
+import { login } from "../../fixtures/auth.actions";
 import { expect, test } from "../../fixtures/test.fixture";
 import { fillCreateNewPasswordFormFlow } from "../../flows/auth/fill-create-new-password-form.flow";
 import { openCreateNewPasswordPageFlow } from "../../flows/auth/open-create-new-password-page.flow";
@@ -52,9 +52,8 @@ test("visitor can create a password from the invite email", async ({
   });
   await submitCreateNewPasswordFormFlow(page);
 
-  await expect(page).toHaveURL("/courses");
+  await expect(page).toHaveURL("/auth/login");
 
-  await logout(page);
   await login(page, email, NEW_PASSWORD);
   await expect(page).toHaveURL("/courses");
 });

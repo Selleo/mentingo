@@ -90,6 +90,26 @@ So worker identity is keyed by:
 - worker index
 - role
 
+### Isolated workspaces
+
+- opt-in per test or per worker
+- create a fresh tenant and enter it through support mode
+- return a workspace handle with its own page, API client, factories, and tenant metadata
+- in E2E runtime, outbox-driven side effects should publish immediately so setup does not wait on background dispatch
+
+Use isolated workspaces for:
+
+- tests that must prove a change stays within one tenant
+- tests that compare tenant-local data against the shared baseline
+- scenarios that need a dedicated tenant without changing the rest of the suite
+
+### Worker-owned tenant workspaces
+
+- provision one tenant per Playwright worker
+- reuse that tenant for the lifetime of the worker
+- create fresh user sessions inside that tenant when a test needs a different role
+- prefer this for flows that need stable tenant identity across multiple pages in the same worker
+
 ## Fixture Model
 
 The suite uses layered fixtures.
@@ -127,6 +147,8 @@ These select the correct storage state and create a new browser context for the 
 ### `factory.fixture.ts`
 
 Provides factories built on top of the shared `apiClient`.
+
+Prefer factories for setup when the test only needs the final entity state.
 
 ### `test.fixture.ts`
 

@@ -16,6 +16,8 @@ import {
 } from "~/components/ui/select";
 import { Textarea } from "~/components/ui/textarea";
 
+import { CREATE_ANNOUNCEMENT_PAGE_HANDLES } from "../handles";
+
 import type { Control, FieldErrors } from "react-hook-form";
 import type { CreateAnnouncementBody } from "~/api/generated-api";
 
@@ -57,6 +59,7 @@ export default function CreateAnnouncementForm({ control, errors }: CreateAnnoun
                   id={field.name}
                   type="text"
                   placeholder={t(`announcements.createPage.placeholders.${field.name}`)}
+                  data-testid={CREATE_ANNOUNCEMENT_PAGE_HANDLES.TITLE_INPUT}
                   {...field}
                 />
                 {errors[field.name] && (
@@ -78,7 +81,11 @@ export default function CreateAnnouncementForm({ control, errors }: CreateAnnoun
                   onValueChange={(value) => field.onChange(value === "everyone" ? null : value)}
                   value={field.value || "everyone"}
                 >
-                  <SelectTrigger id={field.name} className="w-full">
+                  <SelectTrigger
+                    id={field.name}
+                    className="w-full"
+                    data-testid={CREATE_ANNOUNCEMENT_PAGE_HANDLES.GROUP_SELECT}
+                  >
                     <SelectValue placeholder={t(`announcements.createPage.placeholders.group`)} />
                   </SelectTrigger>
                   <SelectContent>
@@ -110,6 +117,7 @@ export default function CreateAnnouncementForm({ control, errors }: CreateAnnoun
                   id={field.name}
                   className="min-h-[300px]"
                   placeholder={t(`announcements.createPage.placeholders.${field.name}`)}
+                  data-testid={CREATE_ANNOUNCEMENT_PAGE_HANDLES.CONTENT_INPUT}
                   {...field}
                 />
                 {errors[field.name] && (

@@ -2,7 +2,7 @@ import { AxiosHeaders } from "axios";
 
 import { API } from "~/api/generated-api";
 
-import type { Cookie } from "@playwright/test";
+import type { BrowserContext, Cookie } from "@playwright/test";
 
 const DEFAULT_API_URL = "http://localhost:3000";
 
@@ -39,15 +39,18 @@ export class FixtureApiClient {
     this.api = this.client.api;
 
     this.client.instance.interceptors.request.use((config) => {
-      if (this.cookieHeader) {
-        const headers = AxiosHeaders.from(config.headers);
-        headers.set("Cookie", this.cookieHeader);
-        if (this.tenantOrigin) {
-          headers.set("Origin", this.tenantOrigin);
-          headers.set("Referer", `${this.tenantOrigin}/`);
-        }
-        config.headers = headers;
+      const headers = AxiosHeaders.from(config.headers);
+
+      if (this.tenantOrigin) {
+        headers.set("Origin", this.tenantOrigin);
+        headers.set("Referer", `${this.tenantOrigin}/`);
       }
+
+      if (this.cookieHeader) {
+        headers.set("Cookie", this.cookieHeader);
+      }
+
+      config.headers = headers;
 
       return config;
     });
@@ -59,6 +62,11 @@ export class FixtureApiClient {
 
   syncTenantOrigin(origin: string) {
     this.tenantOrigin = normalizeOrigin(origin);
+  }
+
+  async syncFromContext(context: BrowserContext, origin: string) {
+    this.syncTenantOrigin(origin);
+    this.syncCookies(await context.cookies());
   }
 
   clearCookies() {

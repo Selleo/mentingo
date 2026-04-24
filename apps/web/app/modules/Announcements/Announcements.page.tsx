@@ -16,6 +16,7 @@ import { studentAnnouncementsSteps } from "../Onboarding/routes/student";
 
 import { AdminAnnouncements, UserAnnouncements } from "./components";
 import { getAnnouncementsPageBreadcrumbs } from "./components/getAnnouncementsBreadcrumbs";
+import { ANNOUNCEMENTS_PAGE_HANDLES } from "./handles";
 
 import type { MetaFunction } from "@remix-run/react";
 
@@ -46,10 +47,14 @@ export default function AnnouncementsPage() {
     <PageWrapper breadcrumbs={getAnnouncementsPageBreadcrumbs(t)}>
       <TooltipProvider>
         <div className="mt-4 flex justify-center">
-          <section className="flex w-full max-w-[720px] flex-col items-center gap-4">
+          <section
+            className="flex w-full max-w-[720px] flex-col items-center gap-4"
+            data-testid={ANNOUNCEMENTS_PAGE_HANDLES.PAGE}
+          >
             <div className="flex w-full flex-wrap items-center justify-between gap-x-4">
               <h1
                 id="announcements"
+                data-testid={ANNOUNCEMENTS_PAGE_HANDLES.HEADING}
                 className={cn("h5 md:h3 text-center text-neutral-950", {
                   "w-full": !canManageUsers,
                 })}
@@ -59,7 +64,12 @@ export default function AnnouncementsPage() {
               <div className="flex items-center gap-4">
                 {canManageUsers && (
                   <Link to="/admin/announcements/new">
-                    <Button variant="default">{t("announcements.page.buttons.new")}</Button>
+                    <Button
+                      variant="default"
+                      data-testid={ANNOUNCEMENTS_PAGE_HANDLES.CREATE_BUTTON}
+                    >
+                      {t("announcements.page.buttons.new")}
+                    </Button>
                   </Link>
                 )}
               </div>

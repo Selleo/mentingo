@@ -98,6 +98,7 @@ export default function CreateNewPasswordPage() {
         toast({
           description: t("changePasswordView.toast.passwordCreatedSuccessfully"),
         });
+        navigate("/auth/login");
       });
     }
   };

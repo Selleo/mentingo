@@ -5,6 +5,7 @@ import { useMarkAnnouncementAsRead } from "~/api/mutations/useMarkAnnouncementAs
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "~/components/ui/card";
+import { LATEST_ANNOUNCEMENTS_POPUP_HANDLES } from "~/modules/Announcements/handles";
 
 import type { GetLatestUnreadAnnouncementsResponse } from "~/api/generated-api";
 
@@ -47,7 +48,11 @@ export default function LatestAnnouncementCard({
   const { mutate: markAsRead } = useMarkAnnouncementAsRead();
 
   return (
-    <Card key={announcement.id} className="mx-1 md:mx-4">
+    <Card
+      key={announcement.id}
+      className="mx-1 md:mx-4"
+      data-testid={LATEST_ANNOUNCEMENTS_POPUP_HANDLES.card(announcement.id)}
+    >
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -65,6 +70,7 @@ export default function LatestAnnouncementCard({
               variant="ghost"
               className="grid size-10 place-items-center rounded-lg border border-neutral-900 p-2"
               onClick={() => handleMarkAsRead(announcement.id)}
+              data-testid={LATEST_ANNOUNCEMENTS_POPUP_HANDLES.markAsReadButton(announcement.id)}
             >
               <Icon name="X" className="text-neutral-950" />
             </Button>
@@ -85,6 +91,7 @@ export default function LatestAnnouncementCard({
             handleMarkAsRead(announcement.id);
             handleReadMore();
           }}
+          data-testid={LATEST_ANNOUNCEMENTS_POPUP_HANDLES.readMoreButton(announcement.id)}
         >
           {t("announcements.buttons.readMore")}
         </Button>
