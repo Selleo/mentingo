@@ -8,6 +8,7 @@ import { Button } from "~/components/ui/button";
 import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import { CourseProgressChart } from "~/modules/Courses/CourseView/components/CourseProgressChart";
 
+import { COURSE_OVERVIEW_HANDLES } from "../../../../../e2e/data/courses/handles";
 import { findFirstInProgressLessonId, findFirstNotStartedLessonId } from "../../Lesson/utils";
 import { navigateToNextLesson } from "../../utils/navigateToNextLesson";
 
@@ -52,7 +53,12 @@ export const CourseProgress = ({ course }: CourseProgressProps) => {
           <span>{t("studentCourseView.sideSection.button.shareCourse")}</span>
         </CopyUrlButton>
         <>
-          <Button className="gap-x-2" onClick={handleNavigateToLesson} disabled={isCourseEmpty}>
+          <Button
+            data-testid={COURSE_OVERVIEW_HANDLES.START_LEARNING_BUTTON}
+            className="gap-x-2"
+            onClick={handleNavigateToLesson}
+            disabled={isCourseEmpty}
+          >
             <Icon name="Play" className="text-contrast h-auto w-6" />
             <span>
               {t(

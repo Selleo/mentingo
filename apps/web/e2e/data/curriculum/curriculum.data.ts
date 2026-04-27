@@ -6,7 +6,7 @@ const webRoot = process.cwd().endsWith("apps/web")
 const fixturePath = (filename: string) => join(webRoot, "e2e/data/curriculum/files", filename);
 
 export const CURRICULUM_TEST_DATA = {
-  youtubeVideoUrl: "https://www.youtube.com/watch?v=PvB0kWs2IPQ",
+  youtubeVideoUrl: "https://www.youtube.com/watch?v=oHg5SJYRHA0",
   files: {
     image: fixturePath("content-image.png"),
     video: fixturePath("content-video.mp4"),

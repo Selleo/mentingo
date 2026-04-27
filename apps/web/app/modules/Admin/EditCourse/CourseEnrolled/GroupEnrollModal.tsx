@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { ScrollArea } from "~/components/ui/scroll-area";
 
+import { COURSE_ENROLLED_HANDLES } from "../../../../../e2e/data/courses/handles";
 import { useBulkGroupCourseEnroll } from "../../../../api/mutations/admin/useBulkGroupCourseEnroll";
 import { Button } from "../../../../components/ui/button";
 import {
@@ -143,7 +144,10 @@ export const GroupEnrollModal = ({
       )}
       <DialogPortal>
         <DialogOverlay />
-        <DialogContent className="max-w-2xl gap-2">
+        <DialogContent
+          data-testid={COURSE_ENROLLED_HANDLES.GROUP_ENROLL_DIALOG}
+          className="max-w-2xl gap-2"
+        >
           <DialogTitle>{t("adminCourseView.enrolled.enrollGroupsModal.title")}</DialogTitle>
           <DialogDescription className="leading-5">
             {t("adminCourseView.enrolled.enrollGroupsModal.description")}
@@ -169,7 +173,12 @@ export const GroupEnrollModal = ({
                 </div>
               </ScrollArea>
               <div className="flex justify-end mt-6">
-                <Button type="submit" variant="primary" disabled={!selectedCount}>
+                <Button
+                  data-testid={COURSE_ENROLLED_HANDLES.GROUP_ENROLL_SUBMIT_BUTTON}
+                  type="submit"
+                  variant="primary"
+                  disabled={!selectedCount}
+                >
                   {t("adminCourseView.enrolled.enrollGroups")} ({selectedCount})
                 </Button>
               </div>

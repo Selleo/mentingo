@@ -17,6 +17,8 @@ import {
   DialogTrigger,
 } from "~/components/ui/dialog";
 
+import { COURSE_ENROLLED_HANDLES } from "../../../../../e2e/data/courses/handles";
+
 import type { FormEvent } from "react";
 import type { GetGroupsByCourseResponse } from "~/api/generated-api";
 
@@ -75,7 +77,10 @@ export const GroupUnenrollModal = ({
       )}
       <DialogPortal>
         <DialogOverlay />
-        <DialogContent className="max-w-2xl">
+        <DialogContent
+          data-testid={COURSE_ENROLLED_HANDLES.GROUP_UNENROLL_DIALOG}
+          className="max-w-2xl"
+        >
           <DialogTitle>{t("adminCourseView.enrolled.unenrollConfirmation.title")}</DialogTitle>
           <DialogDescription>
             {t("adminCourseView.enrolled.unenrollConfirmation.description")}
@@ -88,10 +93,12 @@ export const GroupUnenrollModal = ({
               return (
                 <div
                   key={group.id}
+                  data-testid={COURSE_ENROLLED_HANDLES.groupUnenrollItem(group.id)}
                   className="flex items-center justify-between gap-4 rounded-lg border bg-white px-4 py-3 shadow-sm"
                 >
                   <div className="flex items-center gap-4">
                     <Checkbox
+                      data-testid={COURSE_ENROLLED_HANDLES.groupUnenrollCheckbox(group.id)}
                       checked={isChecked}
                       onCheckedChange={(currentValue) =>
                         toggleGroupSelection(group.id, !!currentValue)
@@ -126,6 +133,7 @@ export const GroupUnenrollModal = ({
           <form onSubmit={handleSubmit}>
             <div className="mt-6 flex justify-end">
               <Button
+                data-testid={COURSE_ENROLLED_HANDLES.GROUP_UNENROLL_SUBMIT_BUTTON}
                 type="submit"
                 variant="destructive"
                 disabled={!selectedGroupIds.length || isPending}
