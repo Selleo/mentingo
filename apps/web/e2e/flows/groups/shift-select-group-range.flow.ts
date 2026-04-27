@@ -7,8 +7,14 @@ export const shiftSelectGroupRangeFlow = async (
   firstGroupId: string,
   lastGroupId: string,
 ) => {
-  await page.getByTestId(GROUPS_PAGE_HANDLES.rowCheckbox(firstGroupId)).click();
-  await page.getByTestId(GROUPS_PAGE_HANDLES.rowCheckbox(lastGroupId)).click({
-    modifiers: ["Shift"],
-  });
+  const firstRowCheckbox = page.getByTestId(GROUPS_PAGE_HANDLES.rowCheckbox(firstGroupId));
+  const lastRowCheckbox = page.getByTestId(GROUPS_PAGE_HANDLES.rowCheckbox(lastGroupId));
+
+  await firstRowCheckbox.click();
+  await page.keyboard.down("Shift");
+  try {
+    await lastRowCheckbox.click();
+  } finally {
+    await page.keyboard.up("Shift");
+  }
 };
