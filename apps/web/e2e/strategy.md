@@ -349,7 +349,7 @@ Based on `playwright-strategy/03-capability-coverage.md`:
   - quiz submit/retake
   - AI mentor interaction entry
   - blocked/unblocked access
-- Announcements
+- Announcements -- DONE
   - create/list
   - unread count
   - mark read
@@ -381,7 +381,7 @@ Based on `playwright-strategy/03-capability-coverage.md`:
 - Support Mode
   - entry/exit
   - visibility/badge behavior
-- i18n
+- i18n -- DONE
   - language switch
   - localized navigation
   - localized validation/copy

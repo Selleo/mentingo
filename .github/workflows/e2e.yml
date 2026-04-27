@@ -47,12 +47,17 @@ on:
 
 jobs:
   playwright:
-    name: Playwright Tests
+    name: Playwright Tests (shard ${{ matrix.shard }}/2)
     runs-on: ubuntu-latest
     environment:
       name: e2e
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
     env:
       E2E_BROWSER: ${{ github.event_name == 'push' && github.ref_name == 'staging' && 'chromium' || (github.event_name == 'push' && 'all' || (inputs.browser || 'all')) }}
+      PLAYWRIGHT_SHARD: ${{ matrix.shard }}
 
     services:
       postgres:
@@ -210,13 +215,13 @@ jobs:
         run: |
           case "$E2E_BROWSER" in
             chromium)
-              VITE_TEST=true pnpm playwright test --project chromium
+              VITE_TEST=true pnpm playwright test --project chromium --shard="${PLAYWRIGHT_SHARD}/2"
               ;;
             firefox)
-              VITE_TEST=true pnpm playwright test --project firefox
+              VITE_TEST=true pnpm playwright test --project firefox --shard="${PLAYWRIGHT_SHARD}/2"
               ;;
             all)
-              VITE_TEST=true pnpm playwright test
+              VITE_TEST=true pnpm playwright test --shard="${PLAYWRIGHT_SHARD}/2"
               ;;
             *)
               echo "Unsupported E2E_BROWSER value: $E2E_BROWSER" >&2
@@ -240,7 +245,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-artifacts
+          name: playwright-artifacts-shard-${{ matrix.shard }}
           path: |
             playwright-report
             test-results
