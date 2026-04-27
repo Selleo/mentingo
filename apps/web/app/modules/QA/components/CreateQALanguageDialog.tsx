@@ -10,6 +10,8 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 
+import { QA_LANGUAGE_SELECTOR_HANDLES } from "../../../../e2e/data/qa/handles";
+
 import type { SupportedLanguages } from "@repo/shared";
 
 type CreateQALanguageDialogProps = {
@@ -41,14 +43,19 @@ export const CreateQALanguageDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent>
+      <DialogContent data-testid={QA_LANGUAGE_SELECTOR_HANDLES.CREATE_DIALOG}>
         <DialogTitle>{t("adminCourseView.createLanguage.title")}</DialogTitle>
         <DialogDescription>{t("adminCourseView.createLanguage.description")}</DialogDescription>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>
             {t("contentCreatorView.button.cancel")}
           </Button>
-          <Button onClick={handleConfirm}>{t("contentCreatorView.button.confirm")}</Button>
+          <Button
+            onClick={handleConfirm}
+            data-testid={QA_LANGUAGE_SELECTOR_HANDLES.CREATE_CONFIRM_BUTTON}
+          >
+            {t("contentCreatorView.button.confirm")}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -21,6 +21,7 @@ interface SettingItemProps {
   icon?: ReactNode;
   disabled?: boolean;
   tooltipTranslationKey?: string;
+  testId?: string;
 }
 export function SettingItem({
   id,
@@ -29,6 +30,7 @@ export function SettingItem({
   checked,
   onCheckedChange,
   icon,
+  testId,
   tooltipTranslationKey = "",
   disabled = false,
 }: SettingItemProps) {
@@ -53,7 +55,7 @@ export function SettingItem({
         <TooltipProvider delayDuration={0}>
           <Tooltip>
             <TooltipTrigger>
-              <Switch disabled />
+              <Switch disabled data-testid={testId} />
             </TooltipTrigger>
             <TooltipContent
               side="top"
@@ -66,7 +68,7 @@ export function SettingItem({
           </Tooltip>
         </TooltipProvider>
       ) : (
-        <Switch id={id} checked={checked} onCheckedChange={onCheckedChange} />
+        <Switch id={id} checked={checked} onCheckedChange={onCheckedChange} data-testid={testId} />
       )}
     </div>
   );

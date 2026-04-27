@@ -31,6 +31,8 @@ import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/Language
 import { qaFormSchema, type QAFormValues } from "~/modules/QA/qa.types";
 import { setPageTitle } from "~/utils/setPageTitle";
 
+import { QA_FORM_PAGE_HANDLES } from "../../../e2e/data/qa/handles";
+
 import type { MetaFunction } from "@remix-run/react";
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.qa");
@@ -67,14 +69,21 @@ export default function CreateQAPage() {
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="flex w-full max-w-[720px] flex-col gap-6"
+          data-testid={QA_FORM_PAGE_HANDLES.PAGE}
         >
           <div className="flex flex-wrap items-start justify-between gap-4 px-1">
             <h1 className="h5 md:h3">{t("qaView.create.header")}</h1>
             <div className="flex items-center gap-3">
               <Link to="/qa">
-                <Button variant="outline">{t("common.button.cancel")}</Button>
+                <Button variant="outline" data-testid={QA_FORM_PAGE_HANDLES.CANCEL_BUTTON}>
+                  {t("common.button.cancel")}
+                </Button>
               </Link>
-              <Button type="submit" disabled={!isValid || isPending}>
+              <Button
+                type="submit"
+                disabled={!isValid || isPending}
+                data-testid={QA_FORM_PAGE_HANDLES.SAVE_BUTTON}
+              >
                 {t("qaView.button.createNew")}
               </Button>
             </div>
@@ -120,12 +129,17 @@ export default function CreateQAPage() {
                           </TooltipProvider>
                         </Label>
                         <Select value={field.value} onValueChange={field.onChange}>
-                          <SelectTrigger>
+                          <SelectTrigger data-testid={QA_FORM_PAGE_HANDLES.LANGUAGE_SELECT}>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
                             {courseLanguages.map((item) => (
-                              <SelectItem value={item.key} key={item.key} className="w-full">
+                              <SelectItem
+                                value={item.key}
+                                key={item.key}
+                                className="w-full"
+                                data-testid={QA_FORM_PAGE_HANDLES.languageOption(item.key)}
+                              >
                                 <div className="flex w-full items-center gap-2">
                                   <Icon name={item.iconName} className="size-4" />
                                   <span className="font-semibold">{t(item.translationKey)}</span>
@@ -147,7 +161,11 @@ export default function CreateQAPage() {
                   <span className="mr-1 text-error-600">*</span>
                   {t("qaView.fields.title")}
                 </Label>
-                <Input id="title" {...register("title")} />
+                <Input
+                  id="title"
+                  data-testid={QA_FORM_PAGE_HANDLES.TITLE_INPUT}
+                  {...register("title")}
+                />
                 {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
               </div>
               <div className="space-y-2">
@@ -155,7 +173,12 @@ export default function CreateQAPage() {
                   <span className="mr-1 text-error-600">*</span>
                   {t("qaView.fields.description")}
                 </Label>
-                <Textarea id="description" className="min-h-[180px]" {...register("description")} />
+                <Textarea
+                  id="description"
+                  className="min-h-[180px]"
+                  data-testid={QA_FORM_PAGE_HANDLES.DESCRIPTION_INPUT}
+                  {...register("description")}
+                />
                 {errors.description && (
                   <p className="text-sm text-destructive">{errors.description.message}</p>
                 )}

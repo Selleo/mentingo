@@ -8,6 +8,7 @@ export const NAVIGATION_HANDLES = {
   CONTENT_GROUP: "navigation-content-toggle",
   NEWS_LINK: "navigation-news-link",
   ARTICLES_LINK: "navigation-articles-link",
+  QA_LINK: "navigation-qa-link",
   MANAGE_TOGGLE: "navigation-manage-toggle",
   USERS_LINK: "navigation-users-link",
   GROUPS_LINK: "navigation-groups-link",
