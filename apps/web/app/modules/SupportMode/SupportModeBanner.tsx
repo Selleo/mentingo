@@ -5,6 +5,8 @@ import { useExitSupportMode } from "~/api/mutations/useExitSupportMode";
 import { useCurrentUser } from "~/api/queries";
 import { Button } from "~/components/ui/button";
 
+import { SUPPORT_MODE_HANDLES } from "../../../e2e/data/support-mode/handles";
+
 const MINUTE = 60_000;
 
 const getMinutesLeft = (expiresAt?: string) => {
@@ -45,15 +47,19 @@ export function SupportModeBanner() {
   }
 
   return (
-    <div className="bg-warning-500 text-warning-950 px-4 py-2 text-sm flex items-center justify-between gap-3 border-b border-warning-600">
-      <p>{t("supportMode.banner.message")}</p>
+    <div
+      data-testid={SUPPORT_MODE_HANDLES.BANNER}
+      className="bg-warning-500 text-warning-950 px-4 py-2 text-sm flex items-center justify-between gap-3 border-b border-warning-600"
+    >
+      <p data-testid={SUPPORT_MODE_HANDLES.MESSAGE}>{t("supportMode.banner.message")}</p>
       <div className="flex items-center gap-3">
-        <span>
+        <span data-testid={SUPPORT_MODE_HANDLES.TIME_LEFT}>
           {t("supportMode.banner.timeLeft", "{{minutes}} min left", {
             minutes: minutesLeft,
           })}
         </span>
         <Button
+          data-testid={SUPPORT_MODE_HANDLES.EXIT_BUTTON}
           size="sm"
           className="bg-warning-600 hover:bg-warning-700 text-warning-50 border border-warning-700"
           onClick={() => exitSupportMode()}

@@ -173,10 +173,12 @@ const addWorkspaceInitScript = async (context: BrowserContext, origin: string) =
   await context.addInitScript(
     ({ apiUrl, appUrl }: { apiUrl: string; appUrl: string }) => {
       const targetWindow = window as Window & { ENV?: Record<string, string> };
+      const currentOrigin = window.location.origin;
+
       targetWindow.ENV = {
         ...(targetWindow.ENV ?? {}),
-        VITE_API_URL: apiUrl,
-        VITE_APP_URL: appUrl,
+        VITE_API_URL: currentOrigin || apiUrl,
+        VITE_APP_URL: currentOrigin || appUrl,
       };
     },
     { apiUrl: origin, appUrl: origin },
