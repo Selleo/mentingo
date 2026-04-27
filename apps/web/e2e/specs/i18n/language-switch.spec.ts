@@ -7,9 +7,21 @@ import { prepareNavigationPageFlow } from "../../flows/navigation/prepare-naviga
 import { openSettingsPageFlow } from "../../flows/settings/open-settings-page.flow";
 
 test("admin can switch the UI language and see localized navigation", async ({
+  apiClient,
+  cleanup,
   withWorkerPage,
 }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
+    const originalSettingsResponse = await apiClient.api.settingsControllerGetUserSettings();
+    const originalLanguage = originalSettingsResponse.data.data?.language;
+
+    cleanup.add(async () => {
+      if (originalLanguage)
+        await apiClient.api.settingsControllerUpdateUserSettings({
+          language: originalLanguage,
+        });
+    });
+
     await openSettingsPageFlow(page);
 
     const languageSelect = page.locator(SETTINGS_PAGE_SELECTORS.LANGUAGE_CARD);
@@ -29,8 +41,22 @@ test("admin can switch the UI language and see localized navigation", async ({
   });
 });
 
-test("admin language selection persists after reload", async ({ withWorkerPage }) => {
+test("admin language selection persists after reload", async ({
+  apiClient,
+  cleanup,
+  withWorkerPage,
+}) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
+    const originalSettingsResponse = await apiClient.api.settingsControllerGetUserSettings();
+    const originalLanguage = originalSettingsResponse.data.data?.language;
+
+    cleanup.add(async () => {
+      if (originalLanguage)
+        await apiClient.api.settingsControllerUpdateUserSettings({
+          language: originalLanguage,
+        });
+    });
+
     await openSettingsPageFlow(page);
 
     const languageSelect = page.locator(SETTINGS_PAGE_SELECTORS.LANGUAGE_CARD);
