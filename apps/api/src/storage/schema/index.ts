@@ -939,7 +939,7 @@ export const secrets = pgTable(
     tenantId,
   },
   withTenantIdIndex("secrets", (t) => ({
-    nameUnique: uniqueIndex("secrets_name_uq").on(t.secretName),
+    nameUnique: uniqueIndex("secrets_tenant_secret_name_uq").on(t.tenantId, t.secretName),
     nameIdx: index("secrets_name_idx").on(t.secretName),
   })),
 );

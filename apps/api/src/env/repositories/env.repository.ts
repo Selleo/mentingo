@@ -27,7 +27,7 @@ export class EnvRepository {
         })),
       )
       .onConflictDoUpdate({
-        target: secrets.secretName,
+        target: [secrets.tenantId, secrets.secretName],
         set: {
           ciphertext: sql.raw(`excluded.${secrets.ciphertext.name}`),
           iv: sql.raw(`excluded.${secrets.iv.name}`),

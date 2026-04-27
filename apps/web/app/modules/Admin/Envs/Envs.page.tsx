@@ -14,6 +14,8 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { SECRET_METADATA } from "~/modules/Admin/Envs/Envs.constants";
 
+import { ENV_PAGE_HANDLES } from "../../../../e2e/data/environment/handles";
+
 import type React from "react";
 
 type SecretKey = keyof typeof SECRET_METADATA;
@@ -43,13 +45,13 @@ const SecretField = ({ name, labelKey, placeholderKey, register, setValue }: Sec
   }, [viewSecret, secretData?.data?.value, name, setValue]);
 
   return (
-    <div className="w-full" data-testid={name}>
+    <div className="w-full" data-testid={ENV_PAGE_HANDLES.field(name)}>
       <Label className="text-xl" htmlFor={name}>
         {t(labelKey)}
       </Label>
       <div className="relative">
         <Input
-          data-testid={`${name}-input`}
+          data-testid={ENV_PAGE_HANDLES.input(name)}
           id={name}
           {...register(name)}
           disabled={!viewSecret || isFetching}
@@ -60,7 +62,7 @@ const SecretField = ({ name, labelKey, placeholderKey, register, setValue }: Sec
         <Button
           type="button"
           variant="ghost"
-          data-testid={`${name}-toggle`}
+          data-testid={ENV_PAGE_HANDLES.toggle(name)}
           onClick={() => setViewSecret((v) => !v)}
           className="absolute right-0 top-1/2 -translate-y-1/2 rounded-l-none"
           aria-label={viewSecret ? t("adminEnvsView.form.hide") : t("adminEnvsView.form.show")}
@@ -104,15 +106,23 @@ const Envs = (): React.ReactElement => {
         },
       ]}
     >
-      <div className="flex flex-col gap-16">
+      <div className="flex flex-col gap-16" data-testid={ENV_PAGE_HANDLES.PAGE}>
         <div className="mx-auto flex h-auto w-full max-w-4xl flex-col gap-6">
           <h4 className="h4 font-bold">{t("adminEnvsView.name")}</h4>
           <div className="rounded-2xl bg-white p-6 drop-shadow">
-            <form onSubmit={handleSubmit(onSubmit)} className="flex size-full flex-col gap-8">
+            <form
+              data-testid={ENV_PAGE_HANDLES.FORM}
+              onSubmit={handleSubmit(onSubmit)}
+              className="flex size-full flex-col gap-8"
+            >
               <div className="flex w-full items-center justify-between">
                 <h4 className="h4">{t("adminEnvsView.keysTitle")}</h4>
                 {hasAnyValue ? (
-                  <Button type="submit" data-testid="env-submit" className="flex gap-2">
+                  <Button
+                    type="submit"
+                    data-testid={ENV_PAGE_HANDLES.SUBMIT}
+                    className="flex gap-2"
+                  >
                     <Icon name="Checkmark" className="size-4" />
                     {t("adminEnvsView.form.save")}
                   </Button>

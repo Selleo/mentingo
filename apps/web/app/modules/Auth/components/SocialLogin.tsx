@@ -7,6 +7,7 @@ import { Button } from "~/components/ui/button";
 import { baseUrl } from "~/utils/baseUrl";
 
 import { LOGIN_PAGE_HANDLES } from "../../../../e2e/data/auth/handles";
+import { SSO_LOGIN_HANDLES } from "../../../../e2e/data/environment/handles";
 
 interface SocialLoginProps {
   isSSOEnforced?: boolean;
@@ -53,7 +54,7 @@ export function SocialLogin({
           iconName="Google"
           buttonTextTranslationKey="common.continueWithGoogle"
           handleSignIn={handleProviderSignIn("google")}
-          testId="google-sso"
+          testId={SSO_LOGIN_HANDLES.GOOGLE}
         />
       )}
       {isMicrosoftOAuthEnabled && (
@@ -61,7 +62,7 @@ export function SocialLogin({
           iconName="Microsoft"
           buttonTextTranslationKey="common.continueWithMicrosoft"
           handleSignIn={handleProviderSignIn("microsoft")}
-          testId="microsoft-sso"
+          testId={SSO_LOGIN_HANDLES.MICROSOFT}
         />
       )}
       {isSlackOAuthEnabled && (
@@ -69,7 +70,7 @@ export function SocialLogin({
           iconName="Slack"
           buttonTextTranslationKey="common.continueWithSlack"
           handleSignIn={handleProviderSignIn("slack")}
-          testId="slack-sso"
+          testId={SSO_LOGIN_HANDLES.SLACK}
         />
       )}
     </>

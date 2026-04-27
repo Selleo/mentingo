@@ -401,14 +401,14 @@ Based on `playwright-strategy/03-capability-coverage.md`:
   - delete many
   - transfer ownership
   - language add/remove
-- Curriculum
+- Curriculum -- DONE
   - generate missing translations
   - chapter create/update/delete/reorder/freemium
   - lesson create/update/delete/reorder
   - lesson types: content/quiz/AI mentor/embed
   - resource upload
   - initialize lesson context
-- Enrollment
+- Enrollment -- DONE
   - self-enroll
   - bulk user enroll
   - bulk group enroll
@@ -426,10 +426,10 @@ Based on `playwright-strategy/03-capability-coverage.md`:
 - Categories -- DONE
   - create/update/delete/delete-many
   - list/search
-- QA
+- QA -- DONE
   - list/open/create/update/delete
   - language variant create/update/delete
-- Environment
+- Environment -- DONE
   - env values load
   - env toggles update
   - frontend env availability checks
