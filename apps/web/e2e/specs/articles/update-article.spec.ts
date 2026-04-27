@@ -1,8 +1,9 @@
 import { USER_ROLE } from "~/config/userRoles";
 
 import { ARTICLE_DETAILS_PAGE_HANDLES } from "../../data/articles/handles";
-import { expect, test } from "../../fixtures/test.fixture";
 import { updateArticleFlow } from "../../flows/articles/update-article.flow";
+
+import { expect, test } from "./article-test.fixture";
 
 test("admin can update article title and summary", async ({
   cleanup,

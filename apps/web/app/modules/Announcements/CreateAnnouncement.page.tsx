@@ -11,6 +11,7 @@ import { setPageTitle } from "~/utils/setPageTitle";
 
 import { CreateAnnouncementForm } from "./components";
 import { getAnnouncementsPageBreadcrumbs } from "./components/getAnnouncementsBreadcrumbs";
+import { CREATE_ANNOUNCEMENT_PAGE_HANDLES } from "./handles";
 import { createAnnouncementSchema } from "./schemas/createAnnouncement.schema";
 
 import type { MetaFunction } from "@remix-run/react";
@@ -50,14 +51,31 @@ export default function AnnouncementsPage() {
     <PageWrapper breadcrumbs={getAnnouncementsPageBreadcrumbs(t, true)}>
       <TooltipProvider>
         <div className="mt-4 flex justify-center">
-          <section className="flex w-full max-w-[720px] flex-col items-center gap-4">
+          <section
+            className="flex w-full max-w-[720px] flex-col items-center gap-4"
+            data-testid={CREATE_ANNOUNCEMENT_PAGE_HANDLES.PAGE}
+          >
             <div className="flex w-full flex-wrap items-center justify-between gap-x-4">
-              <h1 className="h5 md:h3 text-neutral-950">{t("announcements.createPage.header")}</h1>
+              <h1
+                className="h5 md:h3 text-neutral-950"
+                data-testid={CREATE_ANNOUNCEMENT_PAGE_HANDLES.HEADING}
+              >
+                {t("announcements.createPage.header")}
+              </h1>
               <div className="flex items-center gap-3">
                 <Link to="/announcements">
-                  <Button variant="outline">{t("announcements.createPage.buttons.cancel")}</Button>
+                  <Button
+                    variant="outline"
+                    data-testid={CREATE_ANNOUNCEMENT_PAGE_HANDLES.CANCEL_BUTTON}
+                  >
+                    {t("announcements.createPage.buttons.cancel")}
+                  </Button>
                 </Link>
-                <Button variant="default" onClick={handleSubmit(onSubmit)}>
+                <Button
+                  variant="default"
+                  onClick={handleSubmit(onSubmit)}
+                  data-testid={CREATE_ANNOUNCEMENT_PAGE_HANDLES.SUBMIT_BUTTON}
+                >
                   {t("announcements.createPage.buttons.confirm")}
                 </Button>
               </div>

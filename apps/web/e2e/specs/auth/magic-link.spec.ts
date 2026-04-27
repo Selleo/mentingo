@@ -62,8 +62,10 @@ test("visitor can log in from the magic link email", async ({
     });
 
     const magicLink = extractLinkFromMailhogMessage(message, "/auth/login?token=");
+    const magicLinkUrl = new URL(magicLink);
 
-    await page.goto(magicLink);
+    await page.goto(`${magicLinkUrl.pathname}${magicLinkUrl.search}`);
+    await page.waitForURL("/courses");
     await expect(page).toHaveURL("/courses");
 
     await logout(page);

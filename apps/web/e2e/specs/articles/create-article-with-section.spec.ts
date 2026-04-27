@@ -1,9 +1,11 @@
 import { USER_ROLE } from "~/config/userRoles";
 
 import { ARTICLES_TOC_HANDLES, CREATE_ARTICLE_DIALOG_HANDLES } from "../../data/articles/handles";
-import { expect, test } from "../../fixtures/test.fixture";
 import { openArticleDetailsPageFlow } from "../../flows/articles/open-article-details-page.flow";
 import { openCreateArticleDialogFlow } from "../../flows/articles/open-create-article-dialog.flow";
+import { clickVisibleTestIdFlow } from "../../flows/click-visible-testid.flow";
+
+import { expect, test } from "./article-test.fixture";
 
 test("admin can create section and article from articles TOC", async ({
   cleanup,
@@ -49,8 +51,8 @@ test("admin can create section and article from articles TOC", async ({
     const beforeSections = await articleFactory.getToc("en");
     const beforeSectionIds = new Set(beforeSections.map((section) => section.id));
 
-    await page.getByTestId(ARTICLES_TOC_HANDLES.ADD_ACTION).click();
-    await page.getByTestId(ARTICLES_TOC_HANDLES.CREATE_SECTION_ACTION).click();
+    await clickVisibleTestIdFlow(page, ARTICLES_TOC_HANDLES.ADD_ACTION);
+    await clickVisibleTestIdFlow(page, ARTICLES_TOC_HANDLES.CREATE_SECTION_ACTION);
 
     await expect
       .poll(async () => {

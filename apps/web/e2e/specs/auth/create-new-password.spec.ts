@@ -2,7 +2,7 @@ import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 
 import { USER_ROLE } from "~/config/userRoles";
 
-import { login, logout } from "../../fixtures/auth.actions";
+import { login } from "../../fixtures/auth.actions";
 import { expect, test } from "../../fixtures/test.fixture";
 import { fillCreateNewPasswordFormFlow } from "../../flows/auth/fill-create-new-password-form.flow";
 import { openCreateNewPasswordPageFlow } from "../../flows/auth/open-create-new-password-page.flow";
@@ -13,9 +13,9 @@ const NEW_PASSWORD = "ChangedPassword123@";
 
 test("visitor can create a password from the invite email", async ({
   cleanup,
+  createWorkspacePage,
   factories,
   withWorkerPage,
-  page,
 }) => {
   let email = "";
 
@@ -41,20 +41,25 @@ test("visitor can create a password from the invite email", async ({
 
   const inviteLink = extractLinkFromMailhogMessage(message, "/auth/create-new-password");
 
-  await openCreateNewPasswordPageFlow(page, {
-    email,
-    resetToken: new URL(inviteLink).searchParams.get("resetToken") ?? undefined,
-    createToken: new URL(inviteLink).searchParams.get("createToken") ?? undefined,
-  });
+  const { context, page } = await createWorkspacePage();
 
-  await fillCreateNewPasswordFormFlow(page, {
-    newPassword: NEW_PASSWORD,
-  });
-  await submitCreateNewPasswordFormFlow(page);
+  try {
+    await openCreateNewPasswordPageFlow(page, {
+      email,
+      resetToken: new URL(inviteLink).searchParams.get("resetToken") ?? undefined,
+      createToken: new URL(inviteLink).searchParams.get("createToken") ?? undefined,
+    });
 
-  await expect(page).toHaveURL("/courses");
+    await fillCreateNewPasswordFormFlow(page, {
+      newPassword: NEW_PASSWORD,
+    });
+    await submitCreateNewPasswordFormFlow(page);
 
-  await logout(page);
-  await login(page, email, NEW_PASSWORD);
-  await expect(page).toHaveURL("/courses");
+    await expect(page).toHaveURL("/auth/login");
+
+    await login(page, email, NEW_PASSWORD);
+    await expect(page).toHaveURL("/courses");
+  } finally {
+    await context.close();
+  }
 });

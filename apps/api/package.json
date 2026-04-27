@@ -29,6 +29,7 @@
     "db:seed": "tsx ./src/seed/seed.ts",
     "db:seed-staging": "node dist/src/seed/seed.js",
     "db:seed-prod": "tsx ./src/seed/seed-prod.ts",
+    "db:seed-e2e": "tsx ./src/seed/e2e-seed.ts",
     "db:seed-bulk": "tsx ./src/seed/bulk-users-seed.ts",
     "db:truncate-tables": "tsx ./src/seed/truncateTables.ts"
   },

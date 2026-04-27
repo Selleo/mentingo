@@ -8,18 +8,18 @@ import {
 } from "../../data/auth/handles";
 import { NAVIGATION_HANDLES } from "../../data/navigation/handles";
 import { USERS_PAGE_HANDLES } from "../../data/users/handles";
-import { getReadonlyAuthEmail, login } from "../../fixtures/auth.actions";
+import { login } from "../../fixtures/auth.actions";
 import { expect, test } from "../../fixtures/test.fixture";
 import { fillLoginFormFlow } from "../../flows/auth/fill-login-form.flow";
 import { openLoginPageFlow } from "../../flows/auth/open-login-page.flow";
 import { submitLoginFormFlow } from "../../flows/auth/submit-login-form.flow";
 import { assertToastVisible } from "../../utils/assert-toast-visible";
 
-test("admin can sign in and sign out", async ({ withReadonlyPage }) => {
+test("admin can sign in and sign out", async ({ apiClient, withReadonlyPage }) => {
   await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
-    const email = getReadonlyAuthEmail(USER_ROLE.admin);
+    const currentUser = await apiClient.api.authControllerCurrentUser();
 
-    await login(page, email, "Password123@");
+    await login(page, currentUser.data.data.email, "Password123@");
     await page.goto("/admin/users");
 
     await expect(page.getByTestId(LOGIN_PAGE_HANDLES.PAGE)).toHaveCount(0);

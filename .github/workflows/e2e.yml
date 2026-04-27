@@ -19,6 +19,7 @@ env:
   AWS_BUCKET_NAME: "test-bucket"
   AWS_ENDPOINT_URL: "http://localhost:9100"
   SMTP_EMAIL_FROM: "noreply@lms.selleo.app"
+  SEED_MANAGE_DB_ROLE: "true"
 
 on:
   workflow_call:

@@ -12,6 +12,8 @@ import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { cn } from "~/lib/utils";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
+import { ANNOUNCEMENT_CARD_HANDLES } from "../handles";
+
 import type { GetAnnouncementsForUserResponse } from "~/api/generated-api";
 
 interface AnnouncementCardProps {
@@ -34,7 +36,11 @@ export default function AnnouncementCard({ announcement, isAdminView }: Announce
   };
 
   return (
-    <Card className={cn(!isRead && "border-2 border-primary-800")} id={id}>
+    <Card
+      className={cn(!isRead && "border-2 border-primary-800")}
+      id={id}
+      data-testid={ANNOUNCEMENT_CARD_HANDLES.card(id)}
+    >
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <div className="size-10 rounded-lg bg-primary-100 p-2">
@@ -42,7 +48,11 @@ export default function AnnouncementCard({ announcement, isAdminView }: Announce
           </div>
           {!isRead && !isAdminView && (
             <Tooltip>
-              <TooltipTrigger onClick={handleMarkAsRead} className="cursor-pointer">
+              <TooltipTrigger
+                onClick={handleMarkAsRead}
+                className="cursor-pointer"
+                data-testid={ANNOUNCEMENT_CARD_HANDLES.markAsReadButton(id)}
+              >
                 <BookmarkCheck className="size-7 text-primary-800" />
               </TooltipTrigger>
               <TooltipContent side="bottom" className="max-w-xs">{`Mark as read`}</TooltipContent>

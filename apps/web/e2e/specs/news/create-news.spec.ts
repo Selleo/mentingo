@@ -1,10 +1,11 @@
 import { USER_ROLE } from "~/config/userRoles";
 
 import { NEWS_DETAILS_PAGE_HANDLES } from "../../data/news/handles";
-import { expect, test } from "../../fixtures/test.fixture";
 import { fillNewsFormFlow } from "../../flows/news/fill-news-form.flow";
 import { openCreateNewsPageFlow } from "../../flows/news/open-create-news-page.flow";
 import { submitNewsFormFlow } from "../../flows/news/submit-news-form.flow";
+
+import { expect, test } from "./news-test.fixture";
 
 test("admin can create news from the news page", async ({ cleanup, factories, withWorkerPage }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {

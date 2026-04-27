@@ -21,6 +21,18 @@ export const getWorkerAuthEmail = (projectName: string, workerIndex: number, rol
   return `${AUTH_ACCOUNT_TEMPLATE.WORKER}-${projectKey}-${workerIndex}+${role}@example.com`;
 };
 
+export const getWorkerTenantAuthEmail = (
+  projectName: string,
+  workerIndex: number,
+  tenantId: string,
+  role: UserRole,
+) => {
+  const projectKey = normalizeProjectName(projectName);
+  const tenantKey = tenantId.slice(0, 8);
+
+  return `${AUTH_ACCOUNT_TEMPLATE.WORKER}-tenant-${projectKey}-${workerIndex}-${tenantKey}+${role}@example.com`;
+};
+
 export const getReadonlyAuthStatePath = (role: UserRole) => {
   return `e2e/.auth/readonly-${role}.json`;
 };
@@ -32,6 +44,16 @@ export const getWorkerAuthStatePath = (
 ) => {
   const projectKey = normalizeProjectName(projectName);
   return `e2e/.auth/worker-${projectKey}-${workerIndex}-${role}.json`;
+};
+
+export const getWorkerTenantAuthStatePath = (
+  projectName: string,
+  workerIndex: number,
+  tenantId: string,
+  key = "session",
+) => {
+  const projectKey = normalizeProjectName(projectName);
+  return `e2e/.auth/worker-tenant-${projectKey}-${workerIndex}-${tenantId}-${key}.json`;
 };
 
 export const getAuthEmail = (

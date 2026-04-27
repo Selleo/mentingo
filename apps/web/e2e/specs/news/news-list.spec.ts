@@ -1,8 +1,9 @@
 import { USER_ROLE } from "~/config/userRoles";
 
 import { NEWS_PAGE_HANDLES } from "../../data/news/handles";
-import { expect, test } from "../../fixtures/test.fixture";
 import { openNewsPageFlow } from "../../flows/news/open-news-page.flow";
+
+import { expect, test } from "./news-test.fixture";
 
 test("admin can browse news list", async ({ cleanup, factories, withReadonlyPage }) => {
   await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {

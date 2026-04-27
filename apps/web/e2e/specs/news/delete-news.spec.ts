@@ -1,8 +1,9 @@
 import { USER_ROLE } from "~/config/userRoles";
 
 import { NEWS_DETAILS_PAGE_HANDLES } from "../../data/news/handles";
-import { expect, test } from "../../fixtures/test.fixture";
 import { openNewsDetailsPageFlow } from "../../flows/news/open-news-details-page.flow";
+
+import { expect, test } from "./news-test.fixture";
 
 test("admin can delete news from details page", async ({ cleanup, factories, withWorkerPage }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {

@@ -1,17 +1,19 @@
 import { USER_ROLE } from "~/config/userRoles";
 
 import { NEWS_DETAILS_PAGE_HANDLES, NEWS_PAGE_HANDLES } from "../../data/news/handles";
-import { expect, test } from "../../fixtures/test.fixture";
 import { openNewsPageFlow } from "../../flows/news/open-news-page.flow";
 import { ensureContentFeaturesEnabled } from "../../utils/content-features";
 
+import { expect, test } from "./news-test.fixture";
+
 test("visitor can access published news list and details when public news access is enabled", async ({
   cleanup,
+  createWorkspacePage,
   factories,
   apiClient,
   withReadonlyPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+  await withReadonlyPage(USER_ROLE.admin, async () => {
     const restoreContentFeatures = await ensureContentFeaturesEnabled(apiClient, {
       publicNews: true,
     });
@@ -34,14 +36,7 @@ test("visitor can access published news list and details when public news access
       }
     });
 
-    const browser = page.context().browser();
-
-    if (!browser) {
-      throw new Error("Expected browser instance for public context");
-    }
-
-    const publicContext = await browser.newContext();
-    const publicPage = await publicContext.newPage();
+    const { context: publicContext, page: publicPage } = await createWorkspacePage();
 
     try {
       await openNewsPageFlow(publicPage);
@@ -58,11 +53,12 @@ test("visitor can access published news list and details when public news access
 
 test("visitor cannot see private news when public news access is enabled", async ({
   cleanup,
+  createWorkspacePage,
   factories,
   apiClient,
   withReadonlyPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+  await withReadonlyPage(USER_ROLE.admin, async () => {
     const restoreContentFeatures = await ensureContentFeaturesEnabled(apiClient, {
       publicNews: true,
     });
@@ -85,14 +81,7 @@ test("visitor cannot see private news when public news access is enabled", async
       }
     });
 
-    const browser = page.context().browser();
-
-    if (!browser) {
-      throw new Error("Expected browser instance for public context");
-    }
-
-    const publicContext = await browser.newContext();
-    const publicPage = await publicContext.newPage();
+    const { context: publicContext, page: publicPage } = await createWorkspacePage();
 
     try {
       await openNewsPageFlow(publicPage);

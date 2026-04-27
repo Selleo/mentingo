@@ -12,64 +12,72 @@ test("managing admin can create a tenant from the create page", async ({
   factories,
   withWorkerPage,
 }) => {
-  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
-    const tenantFactory = factories.createTenantFactory();
-    const suffix = Date.now();
-    const name = `create-tenant-${suffix}`;
-    const host = `http://create-tenant-${suffix}.local`;
+  await withWorkerPage(
+    USER_ROLE.admin,
+    async ({ page }) => {
+      const tenantFactory = factories.createTenantFactory();
+      const suffix = Date.now();
+      const name = `create-tenant-${suffix}`;
+      const host = `http://create-tenant-${suffix}.local`;
 
-    await openCreateTenantPageFlow(page);
-    await fillTenantFormFlow(page, {
-      name,
-      host,
-      status: "active",
-      adminFirstName: "Create",
-      adminLastName: "Tenant",
-      adminEmail: `create-tenant-admin-${suffix}@example.com`,
-    });
-    await submitTenantFormFlow(page);
+      await openCreateTenantPageFlow(page);
+      await fillTenantFormFlow(page, {
+        name,
+        host,
+        status: "active",
+        adminFirstName: "Create",
+        adminLastName: "Tenant",
+        adminEmail: `create-tenant-admin-${suffix}@example.com`,
+      });
+      await submitTenantFormFlow(page);
 
-    await expect
-      .poll(async () => {
-        const createdTenant = await tenantFactory.findByHost(host);
-        return createdTenant?.id ?? null;
-      })
-      .not.toBeNull();
+      await expect
+        .poll(async () => {
+          const createdTenant = await tenantFactory.findByHost(host);
+          return createdTenant?.id ?? null;
+        })
+        .not.toBeNull();
 
-    const createdTenant = await tenantFactory.findByHost(host);
+      const createdTenant = await tenantFactory.findByHost(host);
 
-    cleanup.add(async () => {
-      if (createdTenant) {
-        await tenantFactory.deactivate(createdTenant.id);
-      }
-    });
+      cleanup.add(async () => {
+        if (createdTenant) {
+          await tenantFactory.deactivate(createdTenant.id);
+        }
+      });
 
-    await expect(page).toHaveURL(/\/super-admin\/tenants$/);
-    await filterTenantsFlow(page, host);
-    await expect(page.getByTestId(TENANTS_PAGE_HANDLES.row(createdTenant!.id))).toBeVisible();
-  });
+      await expect(page).toHaveURL(/\/super-admin\/tenants$/);
+      await filterTenantsFlow(page, host);
+      await expect(page.getByTestId(TENANTS_PAGE_HANDLES.row(createdTenant!.id))).toBeVisible();
+    },
+    { root: true },
+  );
 });
 
 test("managing admin cannot submit invalid tenant data", async ({
   factories,
   withReadonlyPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
-    const tenantFactory = factories.createTenantFactory();
-    const name = `invalid-tenant-${Date.now()}`;
+  await withReadonlyPage(
+    USER_ROLE.admin,
+    async ({ page }) => {
+      const tenantFactory = factories.createTenantFactory();
+      const name = `invalid-tenant-${Date.now()}`;
 
-    await openCreateTenantPageFlow(page);
-    await fillTenantFormFlow(page, {
-      name,
-      host: "not-a-url",
-      adminFirstName: "Invalid",
-      adminLastName: "Tenant",
-      adminEmail: "not-an-email",
-    });
-    await submitTenantFormFlow(page);
+      await openCreateTenantPageFlow(page);
+      await fillTenantFormFlow(page, {
+        name,
+        host: "not-a-url",
+        adminFirstName: "Invalid",
+        adminLastName: "Tenant",
+        adminEmail: "not-an-email",
+      });
+      await submitTenantFormFlow(page);
 
-    await expect(page).toHaveURL(/\/super-admin\/tenants\/new$/);
-    await expect(page.getByTestId(CREATE_TENANT_PAGE_HANDLES.PAGE)).toBeVisible();
-    await expect(await tenantFactory.findByName(name)).toBeNull();
-  });
+      await expect(page).toHaveURL(/\/super-admin\/tenants\/new$/);
+      await expect(page.getByTestId(CREATE_TENANT_PAGE_HANDLES.PAGE)).toBeVisible();
+      await expect(await tenantFactory.findByName(name)).toBeNull();
+    },
+    { root: true },
+  );
 });

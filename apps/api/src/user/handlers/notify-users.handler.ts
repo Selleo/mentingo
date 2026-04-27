@@ -133,12 +133,9 @@ export class NotifyUsersHandler implements IEventHandler {
     await this.tenantRunner.runWithTenant(tenantId, async () => {
       const baseOrigin = await resolveTenantOrigin(this.dbAdmin, tenantId, origin);
 
-      const url = buildCreateNewPasswordLink(
-        process.env.CI ? "http://localhost:5173" : baseOrigin,
-        {
-          createToken: token,
-        },
-      );
+      const url = buildCreateNewPasswordLink(baseOrigin, {
+        createToken: token,
+      });
 
       const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
         tenantId,

@@ -36,9 +36,9 @@ export function NavigationMenuItem({
             onClick={() => setIsMobileNavOpen(false)}
             className={({ isActive }) =>
               cn(
-                "relative flex items-center gap-x-3 rounded-lg px-4 py-3.5 hover:outline hover:outline-1 hover:outline-primary-200 2xl:p-2 2xl:hover:bg-primary-50 body-sm-md",
+                "relative flex items-center gap-x-3 rounded-lg border border-transparent px-4 py-3.5 hover:border-primary-200 2xl:p-2 2xl:hover:bg-primary-50 body-sm-md",
                 {
-                  "border border-primary-200 bg-white text-primary-800 2xl:bg-primary-50": isActive,
+                  "border-primary-200 bg-white text-primary-800 2xl:bg-primary-50": isActive,
                   "bg-white text-neutral-900": !isActive,
                   "flex-col sm:flex-row gap-y-1 sm:gap-y-0": isFooter,
                   "justify-center": !showLabel,

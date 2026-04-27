@@ -22,7 +22,9 @@ export const openCreateNewPasswordPageFlow = async (
   if (params.createToken) searchParams.set("createToken", params.createToken);
   if (params.resetToken) searchParams.set("resetToken", params.resetToken);
 
-  await page.goto(`/auth/create-new-password?${searchParams.toString()}`);
+  const path = `/auth/create-new-password?${searchParams.toString()}`;
+
+  await page.goto(path);
   await expect(page).toHaveURL(/\/auth\/create-new-password\?/);
   await expect(page.getByTestId(CREATE_NEW_PASSWORD_PAGE_HANDLES.PAGE)).toBeVisible();
 };

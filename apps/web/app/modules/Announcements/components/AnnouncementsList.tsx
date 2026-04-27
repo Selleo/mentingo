@@ -1,5 +1,7 @@
 import { useTranslation } from "react-i18next";
 
+import { ANNOUNCEMENTS_PAGE_HANDLES } from "../handles";
+
 import AnnouncementCard from "./AnnouncementCard";
 
 import type { GetAnnouncementsForUserResponse } from "~/api/generated-api";
@@ -13,7 +15,7 @@ export default function AnnouncementsList({ announcements, isAdminView }: Announ
   const { t } = useTranslation();
 
   return (
-    <div className="flex w-full flex-col gap-6">
+    <div className="flex w-full flex-col gap-6" data-testid={ANNOUNCEMENTS_PAGE_HANDLES.LIST}>
       {announcements.length ? (
         announcements.map((announcement) => (
           <AnnouncementCard
@@ -23,7 +25,10 @@ export default function AnnouncementsList({ announcements, isAdminView }: Announ
           />
         ))
       ) : (
-        <div className="flex justify-center mt-8 body-base-md">
+        <div
+          className="mt-8 flex justify-center body-base-md"
+          data-testid={ANNOUNCEMENTS_PAGE_HANDLES.EMPTY_STATE}
+        >
           {t("announcements.other.noNewAnnouncements")}
         </div>
       )}

@@ -23,6 +23,10 @@ export const TEST_DATA = {
     titlePrefix: "E2E News",
     summaryPrefix: "E2E News Summary",
   },
+  announcement: {
+    titlePrefix: "E2E Announcement",
+    contentPrefix: "E2E Announcement Content",
+  },
   article: {
     titlePrefix: "E2E Article",
     summaryPrefix: "E2E Article Summary",

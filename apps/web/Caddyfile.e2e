@@ -2,14 +2,14 @@
     admin :2020
 }
 
-:5173
+:5173 {
+    handle /api/* {
+        reverse_proxy http://localhost:3000
+    }
 
-handle /api/* {
-    reverse_proxy http://localhost:3000
-}
-
-handle {
-    root * ./build/client
-    try_files {path} /index.html
-    file_server
+    handle {
+        root * ./build/client
+        try_files {path} /index.html
+        file_server
+    }
 }

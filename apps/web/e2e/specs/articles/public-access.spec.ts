@@ -1,16 +1,18 @@
 import { USER_ROLE } from "~/config/userRoles";
 
 import { ARTICLE_DETAILS_PAGE_HANDLES, ARTICLES_TOC_HANDLES } from "../../data/articles/handles";
-import { expect, test } from "../../fixtures/test.fixture";
 import { ensureContentFeaturesEnabled } from "../../utils/content-features";
+
+import { expect, test } from "./article-test.fixture";
 
 test("visitor cannot see private article when public articles access is enabled", async ({
   cleanup,
+  createWorkspaceContext,
   factories,
   apiClient,
   withReadonlyPage,
 }) => {
-  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+  await withReadonlyPage(USER_ROLE.admin, async () => {
     const restoreContentFeatures = await ensureContentFeaturesEnabled(apiClient, {
       publicArticles: true,
     });
@@ -37,13 +39,7 @@ test("visitor cannot see private article when public articles access is enabled"
       }
     });
 
-    const browser = page.context().browser();
-
-    if (!browser) {
-      throw new Error("Expected browser instance for public context");
-    }
-
-    const publicContext = await browser.newContext();
+    const { context: publicContext } = await createWorkspaceContext();
     await publicContext.addInitScript(() => {
       localStorage.setItem(
         "language-storage",

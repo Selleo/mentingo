@@ -3,8 +3,9 @@ import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { USER_ROLE } from "~/config/userRoles";
 
 import { ARTICLE_DETAILS_PAGE_HANDLES, ARTICLES_TOC_HANDLES } from "../../data/articles/handles";
-import { expect, test } from "../../fixtures/test.fixture";
 import { openArticleDetailsPageFlow } from "../../flows/articles/open-article-details-page.flow";
+
+import { expect, test } from "./article-test.fixture";
 
 import type { ArticleFactory } from "../../factories/article.factory";
 import type { FixtureApiClient } from "../../utils/api-client";

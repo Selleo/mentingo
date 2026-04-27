@@ -87,8 +87,8 @@ test("admin cannot bulk delete non-student users", async ({
 });
 
 test("admin cannot bulk delete themselves", async ({
-  browser,
   cleanup,
+  createWorkspacePage,
   factories,
   withWorkerPage,
 }) => {
@@ -100,8 +100,8 @@ test("admin cannot bulk delete themselves", async ({
       roleSlugs: [SYSTEM_ROLE_SLUGS.STUDENT],
     });
     const { page, user: disposableAdmin } = await createDisposableAdminSession({
-      browser,
       cleanup,
+      createWorkspacePage,
       userFactory,
       email: `${prefix}-admin@example.com`,
     });

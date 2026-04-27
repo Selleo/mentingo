@@ -13,6 +13,15 @@ const __dirname = path.dirname(__filename);
 
 dotenv.config({ path: path.resolve(__dirname, ".env") });
 
+const TEST_DATABASE_URL = "postgresql://test_user:test_password@localhost:54321/test_db";
+const TEST_LMS_DATABASE_URL =
+  "postgresql://lms_app_user:replace_with_strong_password@localhost:54321/test_db";
+
+process.env.DATABASE_URL ||= TEST_DATABASE_URL;
+process.env.LMS_DATABASE_URL ||= TEST_LMS_DATABASE_URL;
+
+if (process.env.CI === "true") process.env.SEED_MANAGE_DB_ROLE ||= "true";
+
 const baseURL = process.env.CI
   ? "http://localhost:5173"
   : process.env.VITE_APP_URL || "https://tenant1.lms.localhost";
@@ -89,7 +98,8 @@ if (process.env.CI) {
       command: "cd ../api && pnpm run build && pnpm db:migrate && pnpm db:seed",
       env: {
         ...process.env,
-        DATABASE_URL: `postgresql://test_user:test_password@localhost:54321/test_db`,
+        DATABASE_URL: TEST_DATABASE_URL,
+        LMS_DATABASE_URL: TEST_LMS_DATABASE_URL,
         MODE: "test",
         DISABLE_RATE_LIMITING: "true",
         OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
@@ -106,9 +116,11 @@ if (process.env.CI) {
       reuseExistingServer: false,
       env: {
         ...process.env,
-        DATABASE_URL: `postgresql://test_user:test_password@localhost:54321/test_db`,
+        DATABASE_URL: TEST_DATABASE_URL,
+        LMS_DATABASE_URL: TEST_LMS_DATABASE_URL,
         REDIS_URL: "redis://localhost:6380",
         MODE: "test",
+        E2E: "true",
         DISABLE_RATE_LIMITING: "true",
         OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
         CORS_ORIGIN: process.env.CORS_ORIGIN || "http://localhost:5173",
