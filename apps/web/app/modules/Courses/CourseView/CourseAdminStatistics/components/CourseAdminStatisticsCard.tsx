@@ -2,6 +2,7 @@ import { Info } from "~/assets/svgs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip";
 
 interface CourseAdminStatisticsCardProps {
+  "data-testid"?: string;
   title: string;
   statistic: number | string;
   tooltipText: string;
@@ -9,6 +10,7 @@ interface CourseAdminStatisticsCardProps {
 }
 
 export function CourseAdminStatisticsCard({
+  "data-testid": testId,
   title,
   statistic,
   tooltipText,
@@ -22,7 +24,10 @@ export function CourseAdminStatisticsCard({
   };
 
   return (
-    <div className="rounded-sm p-6 outline outline-1 outline-neutral-200 flex flex-col justify-center">
+    <div
+      data-testid={testId}
+      className="rounded-sm p-6 outline outline-1 outline-neutral-200 flex flex-col justify-center"
+    >
       <div className="flex items-center gap-2">
         <p className="body-sm-md">{title}</p>
         <Tooltip>

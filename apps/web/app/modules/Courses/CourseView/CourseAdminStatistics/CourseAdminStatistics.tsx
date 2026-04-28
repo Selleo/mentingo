@@ -26,6 +26,8 @@ import {
 } from "~/modules/common/SearchFilter/SearchFilter";
 import { CourseStudentsLearningTimeTable } from "~/modules/Courses/CourseView/CourseAdminStatistics/components/CourseStudentsLearningTimeTable";
 
+import { COURSE_STATISTICS_HANDLES } from "../../../../../e2e/data/statistics/handles";
+
 import {
   CourseAdminStatisticsCard,
   CourseStatusDistributionChart,
@@ -142,6 +144,7 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
     {
       name: "search",
       type: "text",
+      testId: COURSE_STATISTICS_HANDLES.DETAILS_SEARCH_INPUT,
     },
   ];
 
@@ -154,6 +157,8 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
         value: group.id,
       })),
       placeholder: t("adminCourseView.statistics.groupFilter.placeholder"),
+      testId: COURSE_STATISTICS_HANDLES.GROUP_FILTER,
+      optionTestId: (option) => COURSE_STATISTICS_HANDLES.groupFilterOption(option.value),
     },
   ];
 
@@ -254,7 +259,7 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
 
   return (
     <TooltipProvider>
-      <Card>
+      <Card data-testid={COURSE_STATISTICS_HANDLES.ROOT}>
         <CardHeader>
           <h6 className="h6">{t("adminCourseView.statistics.title")}</h6>
           <p className="body-base-md title-neutral-800">
@@ -275,17 +280,20 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 grid-rows-auto md:grid-rows-4">
             <CourseAdminStatisticsCard
+              data-testid={COURSE_STATISTICS_HANDLES.OVERVIEW_ENROLLED_COUNT_CARD}
               title={t("adminCourseView.statistics.overview.enrolledCount")}
               tooltipText={t("adminCourseView.statistics.overview.enrolledCountTooltip")}
               statistic={courseStatistics?.enrolledCount ?? 0}
             />
             <CourseAdminStatisticsCard
+              data-testid={COURSE_STATISTICS_HANDLES.OVERVIEW_COMPLETION_RATE_CARD}
               title={t("adminCourseView.statistics.overview.completionRate")}
               tooltipText={t("adminCourseView.statistics.overview.completionRateTooltip")}
               statistic={courseStatistics?.completionPercentage ?? 0}
               type="percentage"
             />
             <CourseAdminStatisticsCard
+              data-testid={COURSE_STATISTICS_HANDLES.OVERVIEW_AVERAGE_COMPLETION_CARD}
               title={t("adminCourseView.statistics.overview.averageCompletionPercentage")}
               tooltipText={t(
                 "adminCourseView.statistics.overview.averageCompletionPercentageTooltip",
@@ -294,6 +302,7 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
               type="percentage"
             />
             <CourseAdminStatisticsCard
+              data-testid={COURSE_STATISTICS_HANDLES.OVERVIEW_AVERAGE_LEARNING_TIME_CARD}
               title={t("adminCourseView.statistics.overview.averageLearningTime")}
               tooltipText={t("adminCourseView.statistics.overview.averageLearningTimeTooltip")}
               statistic={formatLearningTime(courseStatistics?.averageSeconds ?? 0)}
@@ -327,15 +336,25 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
                         value={(quizSearchParams.quizId as string) || "all"}
                         onValueChange={(value) => handleQuizFilterChange("quizId", value)}
                       >
-                        <SelectTrigger className="max-w-52">
+                        <SelectTrigger
+                          data-testid={COURSE_STATISTICS_HANDLES.QUIZ_FILTER}
+                          className="max-w-52"
+                        >
                           <SelectValue placeholder={t("adminCourseView.statistics.filterByQuiz")} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="all">
+                          <SelectItem
+                            data-testid={COURSE_STATISTICS_HANDLES.quizFilterOption("all")}
+                            value="all"
+                          >
                             {t("adminCourseView.statistics.allQuizzes")}
                           </SelectItem>
                           {quizOptions.map((quiz) => (
-                            <SelectItem key={quiz.id} value={quiz.id}>
+                            <SelectItem
+                              key={quiz.id}
+                              data-testid={COURSE_STATISTICS_HANDLES.quizFilterOption(quiz.id)}
+                              value={quiz.id}
+                            >
                               {quiz.title}
                             </SelectItem>
                           ))}
@@ -347,17 +366,31 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
                         value={(aiMentorSearchParams.lessonId as string) || "all"}
                         onValueChange={(value) => handleAiMentorFilterChange("lessonId", value)}
                       >
-                        <SelectTrigger className="max-w-52">
+                        <SelectTrigger
+                          data-testid={COURSE_STATISTICS_HANDLES.AI_MENTOR_LESSON_FILTER}
+                          className="max-w-52"
+                        >
                           <SelectValue
                             placeholder={t("adminCourseView.statistics.filterByLesson")}
                           />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="all">
+                          <SelectItem
+                            data-testid={COURSE_STATISTICS_HANDLES.aiMentorLessonFilterOption(
+                              "all",
+                            )}
+                            value="all"
+                          >
                             {t("adminCourseView.statistics.allLessons")}
                           </SelectItem>
                           {aiMentorLessons.map((aiMentorLesson) => (
-                            <SelectItem key={aiMentorLesson.id} value={aiMentorLesson.id}>
+                            <SelectItem
+                              key={aiMentorLesson.id}
+                              data-testid={COURSE_STATISTICS_HANDLES.aiMentorLessonFilterOption(
+                                aiMentorLesson.id,
+                              )}
+                              value={aiMentorLesson.id}
+                            >
                               {aiMentorLesson.title}
                             </SelectItem>
                           ))}
@@ -370,6 +403,14 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
                   {Object.values(StatisticsTabs).map((tab) => (
                     <TabsTrigger
                       key={tab}
+                      data-testid={
+                        {
+                          progress: COURSE_STATISTICS_HANDLES.PROGRESS_TAB,
+                          quizResults: COURSE_STATISTICS_HANDLES.QUIZ_RESULTS_TAB,
+                          aiMentorResults: COURSE_STATISTICS_HANDLES.AI_MENTOR_RESULTS_TAB,
+                          learningTime: COURSE_STATISTICS_HANDLES.LEARNING_TIME_TAB,
+                        }[tab]
+                      }
                       className="h-full grow md:w-fit"
                       value={tab}
                       onClick={() => setActiveTab(tab)}

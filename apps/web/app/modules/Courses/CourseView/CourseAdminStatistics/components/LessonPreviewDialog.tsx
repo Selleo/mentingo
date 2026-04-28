@@ -14,6 +14,8 @@ import { CourseAccessProvider } from "~/modules/Courses/context/CourseAccessProv
 import { LessonContent } from "~/modules/Courses/Lesson/LessonContent";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
+import { COURSE_STATISTICS_HANDLES } from "../../../../../../e2e/data/statistics/handles";
+
 import type { GetCourseResponse } from "~/api/generated-api";
 
 interface LessonPreviewDialogProps {
@@ -79,6 +81,7 @@ export default function LessonPreviewDialog({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
+        data-testid={COURSE_STATISTICS_HANDLES.LESSON_PREVIEW_DIALOG}
         className="max-h-[90vh] w-[90%] max-w-screen-2xl 3xl:max-w-[1024px] p-0 gap-0 flex flex-col"
         noCloseButton
       >

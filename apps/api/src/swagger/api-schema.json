@@ -6942,6 +6942,27 @@
         }
       }
     },
+    "/api/test-config/ai-mentor-statistics-progress": {
+      "post": {
+        "operationId": "TestConfigController_prepareAiMentorStatisticsProgress",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PrepareAiMentorStatisticsProgressBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/category": {
       "get": {
         "operationId": "CategoryController_getAllCategories",
@@ -26288,6 +26309,48 @@
         },
         "required": [
           "data"
+        ]
+      },
+      "PrepareAiMentorStatisticsProgressBody": {
+        "type": "object",
+        "properties": {
+          "lessonId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "studentId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "language": {
+            "default": "en",
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "required": [
+          "lessonId",
+          "studentId"
         ]
       },
       "GetAllCategoriesResponse": {
