@@ -86,7 +86,7 @@ export class LumaService {
     const apiKey = await this.envService
       .getEnv("LUMA_API_KEY")
       .then((r) => r.value)
-      .catch(() => undefined);
+      .catch(() => process.env.LUMA_API_KEY);
     const baseURL = process.env.LUMA_BASE_URL;
 
     if (!baseURL || !apiKey) {

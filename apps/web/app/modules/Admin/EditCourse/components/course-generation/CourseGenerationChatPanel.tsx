@@ -89,6 +89,7 @@ export function CourseGenerationChatPanel({
             content={message.text}
             aiName={t("adminCourseView.common.aiCourseCreation")}
             messageMaxWidthClass="max-w-[80%]"
+            contentTestId={COURSE_GENERATION_HANDLES.messageRole(message.role)}
           />
         )),
     [messages, t],

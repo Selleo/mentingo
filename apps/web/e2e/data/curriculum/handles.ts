@@ -115,4 +115,5 @@ export const COURSE_GENERATION_HANDLES = {
   FILE_CARD: "course-generation-file-card",
   PROGRESS_STRIP: "course-generation-progress-strip",
   COMPLETED_NOTICE: "course-generation-completed-notice",
+  messageRole: (role: string) => `course-generation-message-${role}`,
 } as const;

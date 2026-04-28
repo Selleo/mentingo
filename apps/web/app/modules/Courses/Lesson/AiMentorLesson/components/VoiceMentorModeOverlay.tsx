@@ -8,6 +8,8 @@ import { Card } from "~/components/ui/card";
 import { cn } from "~/lib/utils";
 import { VoiceLevelBars } from "~/modules/Voice/components/VoiceLevelBars";
 
+import { LEARNING_HANDLES } from "../../../../../../e2e/data/learning/handles";
+
 type VoiceMentorModeOverlayProps = {
   open: boolean;
   state: VoiceModeState;
@@ -59,6 +61,7 @@ export function VoiceMentorModeOverlay({
       {open ? (
         <motion.div
           key="voice-mentor-overlay"
+          data-testid={LEARNING_HANDLES.AI_MENTOR_VOICE_OVERLAY}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -73,7 +76,12 @@ export function VoiceMentorModeOverlay({
                 </p>
                 <h2 className="text-lg font-semibold text-neutral-900">{mentorName}</h2>
               </div>
-              <Button variant="outline" onClick={onExit} className="gap-2 rounded-xl bg-white/85">
+              <Button
+                data-testid={LEARNING_HANDLES.AI_MENTOR_VOICE_OVERLAY_EXIT_BUTTON}
+                variant="outline"
+                onClick={onExit}
+                className="gap-2 rounded-xl bg-white/85"
+              >
                 <X className="size-4" />
                 {t("studentCourseView.lesson.aiMentorLesson.voiceOverlay.exit")}
               </Button>

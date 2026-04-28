@@ -164,7 +164,7 @@ export class ExternalAudioService {
     const apiKey = await this.envService
       .getEnv("LUMA_API_KEY")
       .then((result) => result.value)
-      .catch(() => undefined);
+      .catch(() => process.env.LUMA_API_KEY);
     const baseURL = process.env.LUMA_BASE_URL;
 
     if (!apiKey || !baseURL) {

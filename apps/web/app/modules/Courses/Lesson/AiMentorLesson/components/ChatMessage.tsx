@@ -27,6 +27,8 @@ interface ChatMessageProps {
   avatarUrl?: string;
   previewUser?: LessonPreviewUser;
   messageMaxWidthClass?: string;
+  testId?: string;
+  contentTestId?: string;
 }
 
 const ChatMessage = ({
@@ -40,6 +42,8 @@ const ChatMessage = ({
   avatarUrl,
   previewUser,
   messageMaxWidthClass = "max-w-[90%]",
+  testId,
+  contentTestId,
 }: ChatMessageProps) => {
   const { t } = useTranslation();
   const { data: currentUser } = useCurrentUserSuspense();
@@ -86,6 +90,7 @@ const ChatMessage = ({
   return (
     <div
       key={id}
+      data-testid={testId}
       className={cn(
         "flex max-w-full gap-3",
         isAssistant ? "flex-row items-start" : "flex-row-reverse items-end",
@@ -116,6 +121,7 @@ const ChatMessage = ({
         <span className="text-sm font-semibold text-primary-900">{displayName}</span>
 
         <div
+          data-testid={contentTestId}
           className={cn(
             "w-fit max-w-full rounded-xl text-sm leading-relaxed break-words text-gray-800",
             { "px-4 py-2 bg-primary-100": !isAssistant },
