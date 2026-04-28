@@ -18,6 +18,7 @@ type LessonComposerRightControlsProps = {
   toggleVoiceInputLabel: string;
   startVoiceMentorLabel: string;
   stopVoiceRecordingLabel: string;
+  primaryActionTestId?: string;
 };
 
 export function LessonComposerRightControls({
@@ -34,6 +35,7 @@ export function LessonComposerRightControls({
   toggleVoiceInputLabel,
   startVoiceMentorLabel,
   stopVoiceRecordingLabel,
+  primaryActionTestId,
 }: LessonComposerRightControlsProps) {
   const buttonMode =
     isVoiceMode || isVoiceMentorMode
@@ -69,6 +71,7 @@ export function LessonComposerRightControls({
       </div>
 
       <Button
+        data-testid={primaryActionTestId}
         type="button"
         variant="primary"
         size="sm"

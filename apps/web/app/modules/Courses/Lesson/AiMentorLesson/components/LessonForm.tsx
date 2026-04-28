@@ -11,6 +11,8 @@ import { useTranscription } from "~/modules/Voice/hooks/useTranscription";
 import { useVoiceMentor } from "~/modules/Voice/hooks/useVoiceMentor";
 import { useVoiceModeUIState } from "~/modules/Voice/hooks/useVoiceModeUIState";
 
+import { LEARNING_HANDLES } from "../../../../../../e2e/data/learning/handles";
+
 import type { Message } from "@ai-sdk/react";
 import type { ChangeEvent, Dispatch, SetStateAction } from "react";
 
@@ -229,6 +231,7 @@ export const LessonForm = ({
               voiceLevel={voiceLevel}
               onInputChange={handleInputChange as (e: ChangeEvent<HTMLTextAreaElement>) => void}
               onSubmit={handleSubmit}
+              textInputTestId={LEARNING_HANDLES.AI_MENTOR_MESSAGE_INPUT}
             />
           </div>
 
@@ -258,6 +261,7 @@ export const LessonForm = ({
               stopVoiceRecordingLabel={t(
                 "studentCourseView.lesson.aiMentorLesson.stopVoiceRecording",
               )}
+              primaryActionTestId={LEARNING_HANDLES.AI_MENTOR_MESSAGE_ACTION_BUTTON}
             />
           </div>
 

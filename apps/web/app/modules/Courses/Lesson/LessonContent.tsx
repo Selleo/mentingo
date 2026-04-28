@@ -18,6 +18,8 @@ import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessP
 import { getLessonTypeTranslationKey } from "~/modules/Courses/CourseView/lessonTypes";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
+import { LEARNING_HANDLES } from "../../../../e2e/data/learning/handles";
+
 import { LessonContentRenderer } from "./LessonContentRenderer";
 import { isNextBlocked, isPreviousBlocked } from "./utils";
 
@@ -231,9 +233,11 @@ export const LessonContent = ({
               <div className="flex items-center gap-x-2">
                 <p className="body-sm-md text-neutral-800">
                   {t("studentLessonView.other.lesson")}{" "}
-                  <span data-testid="current-lesson-number">{lesson.displayOrder}</span>/
-                  <span data-testid="lessons-count">{lessonsAmount}</span> –{" "}
-                  <span data-testid="lesson-type">
+                  <span data-testid={LEARNING_HANDLES.CURRENT_LESSON_NUMBER}>
+                    {lesson.displayOrder}
+                  </span>
+                  /<span data-testid={LEARNING_HANDLES.LESSONS_COUNT}>{lessonsAmount}</span> –{" "}
+                  <span data-testid={LEARNING_HANDLES.LESSON_TYPE}>
                     {t(getLessonTypeTranslationKey(lesson.type), { defaultValue: lesson.type })}
                   </span>
                 </p>
@@ -250,7 +254,12 @@ export const LessonContent = ({
                   </Tooltip>
                 )}
               </div>
-              <p className="h4 text-neutral-950 break-words min-w-0">{lesson.title}</p>
+              <p
+                data-testid={LEARNING_HANDLES.LESSON_TITLE}
+                className="h4 text-neutral-950 break-words min-w-0"
+              >
+                {lesson.title}
+              </p>
             </div>
             {!isPreviewMode && (
               <div className="mt-4 flex flex-col gap-2 sm:ml-8 sm:mt-0 sm:items-end">
@@ -272,7 +281,7 @@ export const LessonContent = ({
                     <Icon name="ArrowRight" className="h-auto w-4 rotate-180" />
                   </Button>
                   <Button
-                    data-testid="next-lesson-button"
+                    data-testid={LEARNING_HANDLES.NEXT_LESSON_BUTTON}
                     variant="outline"
                     disabled={isNextDisabled}
                     className="w-full gap-x-1 sm:w-auto disabled:opacity-0"

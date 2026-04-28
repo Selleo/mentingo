@@ -28,6 +28,8 @@ import { LessonForm } from "~/modules/Courses/Lesson/AiMentorLesson/components/L
 import RetakeModal from "~/modules/Courses/Lesson/AiMentorLesson/components/RetakeModal";
 import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
+import { LEARNING_HANDLES } from "../../../../../e2e/data/learning/handles";
+
 import type { GetLessonByIdResponse } from "~/api/generated-api";
 import type { LessonPreviewUser } from "~/modules/Courses/Lesson/types";
 
@@ -191,6 +193,7 @@ const AiMentorLesson = ({ lesson, lessonLoading, previewUser }: AiMentorLessonPr
 
       {!lessonLoading && hasTaskDescription && (
         <Accordion
+          data-testid={LEARNING_HANDLES.AI_MENTOR_TASK_DESCRIPTION}
           type="single"
           collapsible
           defaultValue={isPreviewMode ? "" : "task"}
@@ -228,6 +231,7 @@ const AiMentorLesson = ({ lesson, lessonLoading, previewUser }: AiMentorLessonPr
       )}
 
       <div
+        data-testid={LEARNING_HANDLES.AI_MENTOR_MESSAGES}
         ref={messagesContainerRef}
         className="flex w-full grow max-w-full relative flex-col gap-y-4 overflow-y-scroll"
       >
@@ -272,12 +276,19 @@ const AiMentorLesson = ({ lesson, lessonLoading, previewUser }: AiMentorLessonPr
       <hr className="mt-4 w-full border-t border-[#EDEDED]" />
       <div className="mt-4 flex w-full justify-center">
         {isThreadActive && !isJudgePending ? (
-          <Button variant="primary" size="lg" className="max-w-fit gap-2" onClick={handleJudge}>
+          <Button
+            data-testid={LEARNING_HANDLES.AI_MENTOR_CHECK_BUTTON}
+            variant="primary"
+            size="lg"
+            className="max-w-fit gap-2"
+            onClick={handleJudge}
+          >
             {t("studentCourseView.lesson.aiMentorLesson.check")}
             <Icon name="ArrowRight" className="size-5" />
           </Button>
         ) : (
           <Button
+            data-testid={LEARNING_HANDLES.AI_MENTOR_RETAKE_BUTTON}
             variant="outline"
             size="lg"
             className="max-w-fit gap-2"

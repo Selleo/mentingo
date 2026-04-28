@@ -22,6 +22,7 @@ import {
   LessonTypesIcons,
 } from "~/modules/Courses/CourseView/lessonTypes";
 
+import { LEARNING_HANDLES } from "../../../../e2e/data/learning/handles";
 import { getChaptersWithAccess } from "../utils";
 
 import { LESSON_PROGRESS_STATUSES } from "./types";
@@ -71,7 +72,10 @@ export const LessonSidebar = ({ course, lessonId }: LessonSidebarProps) => {
   if (!course) return null;
 
   return (
-    <div className="sticky top-0 h-auto max-h-fit min-h-screen overflow-y-scroll rounded-lg bg-white">
+    <div
+      data-testid={LEARNING_HANDLES.LESSON_SIDEBAR}
+      className="sticky top-0 h-auto max-h-fit min-h-screen overflow-y-scroll rounded-lg bg-white"
+    >
       <div className="flex flex-col gap-y-12">
         <div className="flex flex-col gap-y-4 px-8 pt-8">
           <div className="flex justify-between">
@@ -144,6 +148,7 @@ export const LessonSidebar = ({ course, lessonId }: LessonSidebarProps) => {
                             <Link
                               key={id}
                               to={isBlocked ? "#" : `/course/${course.slug}/lesson/${id}`}
+                              data-testid={LEARNING_HANDLES.lessonSidebarLessonItem(id)}
                               className={cn("flex gap-x-4 px-6 py-2 hover:bg-neutral-50 pl-10", {
                                 "cursor-not-allowed hover:bg-transparent opacity-30": isBlocked,
                                 "border-l-2 border-l-primary-600 bg-primary-50 last:rounded-es-lg":
@@ -151,6 +156,11 @@ export const LessonSidebar = ({ course, lessonId }: LessonSidebarProps) => {
                               })}
                             >
                               <Badge
+                                data-testid={
+                                  isBlocked
+                                    ? LEARNING_HANDLES.lessonSidebarBlockedIndicator(id)
+                                    : undefined
+                                }
                                 variant="icon"
                                 icon={
                                   isPreviewMode
