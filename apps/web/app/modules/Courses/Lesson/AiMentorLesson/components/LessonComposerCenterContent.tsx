@@ -12,6 +12,7 @@ type LessonComposerCenterContentProps = {
   voiceLevel: number;
   onInputChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
   onSubmit: () => void;
+  textInputTestId?: string;
 };
 
 export function LessonComposerCenterContent({
@@ -21,6 +22,7 @@ export function LessonComposerCenterContent({
   voiceLevel,
   onInputChange,
   onSubmit,
+  textInputTestId,
 }: LessonComposerCenterContentProps) {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
@@ -61,6 +63,7 @@ export function LessonComposerCenterContent({
           <motion.textarea
             key="text-content"
             ref={textareaRef}
+            data-testid={textInputTestId}
             value={input}
             onChange={onInputChange}
             onKeyDown={(e) => {

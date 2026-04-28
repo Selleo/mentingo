@@ -1,0 +1,22 @@
+export const LEARNING_HANDLES = {
+  CURRENT_LESSON_NUMBER: "learning-current-lesson-number",
+  LESSONS_COUNT: "learning-lessons-count",
+  LESSON_TYPE: "learning-lesson-type",
+  LESSON_TITLE: "learning-lesson-title",
+  NEXT_LESSON_BUTTON: "learning-next-lesson-button",
+  QUIZ_FORM: "learning-quiz-form",
+  QUIZ_SCORE: "learning-quiz-score",
+  QUIZ_PASSING_THRESHOLD: "learning-quiz-passing-threshold",
+  QUIZ_SUBMIT_BUTTON: "learning-quiz-submit-button",
+  QUIZ_RETAKE_BUTTON: "learning-quiz-retake-button",
+  AI_MENTOR_TASK_DESCRIPTION: "learning-ai-mentor-task-description",
+  AI_MENTOR_MESSAGES: "learning-ai-mentor-messages",
+  AI_MENTOR_MESSAGE_INPUT: "learning-ai-mentor-message-input",
+  AI_MENTOR_MESSAGE_ACTION_BUTTON: "learning-ai-mentor-message-action-button",
+  AI_MENTOR_CHECK_BUTTON: "learning-ai-mentor-check-button",
+  AI_MENTOR_RETAKE_BUTTON: "learning-ai-mentor-retake-button",
+  LESSON_SIDEBAR: "learning-lesson-sidebar",
+  lessonSidebarLessonItem: (lessonId: string) => `learning-lesson-sidebar-item-${lessonId}`,
+  lessonSidebarBlockedIndicator: (lessonId: string) =>
+    `learning-lesson-sidebar-blocked-indicator-${lessonId}`,
+} as const;

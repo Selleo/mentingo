@@ -21,6 +21,7 @@ import { toast } from "~/components/ui/use-toast";
 import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
+import { LEARNING_HANDLES } from "../../../../e2e/data/learning/handles";
 import { QuizContextProvider } from "../components/QuizContextProvider";
 
 import { Questions } from "./Questions";
@@ -118,6 +119,7 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
         isQuizSubmitted={isUserSubmittedAnswer}
       >
         <form
+          data-testid={LEARNING_HANDLES.QUIZ_FORM}
           className="flex w-full flex-col gap-y-4"
           onSubmit={methods.handleSubmit(handleOnSubmit, () => {
             toast({
@@ -129,13 +131,15 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
           {!isPreviewMode && (
             <div className="flex w-full justify-between">
               <span className="group relative">
-                {t("studentLessonView.other.score", {
-                  score: lesson.quizDetails?.score ?? 0,
-                  correct: lesson.quizDetails?.correctAnswerCount ?? 0,
-                  questionsNumber: questions.length,
-                })}
+                <span data-testid={LEARNING_HANDLES.QUIZ_SCORE}>
+                  {t("studentLessonView.other.score", {
+                    score: lesson.quizDetails?.score ?? 0,
+                    correct: lesson.quizDetails?.correctAnswerCount ?? 0,
+                    questionsNumber: questions.length,
+                  })}
+                </span>
               </span>
-              <span>
+              <span data-testid={LEARNING_HANDLES.QUIZ_PASSING_THRESHOLD}>
                 {t("studentLessonView.other.passingThreshold", {
                   threshold: lesson.thresholdScore,
                   correct: requiredCorrect,
@@ -158,6 +162,7 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
                     <TooltipTrigger asChild>
                       <div className="inline-block">
                         <Button
+                          data-testid={LEARNING_HANDLES.QUIZ_RETAKE_BUTTON}
                           variant="outline"
                           type="button"
                           onClick={handleRetake}
@@ -192,6 +197,7 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
                 </TooltipProvider>
               </div>
               <Button
+                data-testid={LEARNING_HANDLES.QUIZ_SUBMIT_BUTTON}
                 type="submit"
                 className="flex items-center gap-x-2"
                 disabled={isUserSubmittedAnswer}

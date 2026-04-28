@@ -341,7 +341,7 @@ Based on `playwright-strategy/03-capability-coverage.md`:
   - authenticated visibility
   - manage/super-admin visibility
   - invalid-route redirects
-- Learning
+- Learning -- DONE
   - lesson open
   - next lesson progression
   - mark complete
@@ -376,9 +376,9 @@ Based on `playwright-strategy/03-capability-coverage.md`:
   - feature toggles
 - Certificates
   - view/download/share link/share render
-- Onboarding
+- Onboarding -- SKIP
   - progression/completion/reset
-- Support Mode
+- Support Mode -- DONE
   - entry/exit
   - visibility/badge behavior
 - i18n -- DONE
