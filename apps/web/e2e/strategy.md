@@ -426,10 +426,10 @@ Based on `playwright-strategy/03-capability-coverage.md`:
 - Categories -- DONE
   - create/update/delete/delete-many
   - list/search
-- QA
+- QA -- DONE
   - list/open/create/update/delete
   - language variant create/update/delete
-- Environment
+- Environment -- DONE
   - env values load
   - env toggles update
   - frontend env availability checks
