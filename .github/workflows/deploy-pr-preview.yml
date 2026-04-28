@@ -295,7 +295,7 @@ jobs:
             IdentityFile ~/.ssh/id_ecdsa
             StrictHostKeyChecking no
             ControlMaster auto
-            ControlPersist 10m
+            ControlPersist 15m
             ControlPath ~/.ssh/control-%r@%h:%p
           EOF
           chmod 600 ~/.ssh/config
@@ -306,7 +306,8 @@ jobs:
 
           ssh -o BatchMode=yes uncloud-host true
 
-          uc ps --connect "ssh+cli://uncloud-host" > /dev/null 2>&1
+          uc ls --connect "ssh+cli://uncloud-host" > /dev/null 2>&1
+
           if [ $? -ne 0 ]; then
             echo "Failed to connect to server"
             exit 1
@@ -343,4 +344,4 @@ jobs:
         run: |
           set -euo pipefail
 
-          ssh -i ~/.ssh/id_ecdsa uncloud-host "docker image prune -f -a"
+          ssh uncloud-host "docker image prune -f -a"
