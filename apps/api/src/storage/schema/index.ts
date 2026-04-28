@@ -103,11 +103,43 @@ export const userStatistics = pgTable(
     currentStreak: integer("current_streak").notNull().default(0),
     longestStreak: integer("longest_streak").notNull().default(0),
     lastActivityDate: timestamp("last_activity_date", { withTimezone: true }),
+    totalPoints: integer("total_points").notNull().default(0),
+    lastPointAt: timestamp("last_point_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
 
     activityHistory: jsonb("activity_history").$type<ActivityHistory>().default({}),
     tenantId,
   },
   withTenantIdIndex("user_statistics"),
+);
+
+export const pointEvents = pgTable(
+  "point_events",
+  {
+    ...id,
+    ...timestamps,
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    eventType: text("event_type").notNull(),
+    entityId: uuid("entity_id").notNull(),
+    points: integer("points").notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("point_events", (table) => ({
+    userEventEntityUniqueIdx: uniqueIndex("point_events_user_event_entity_unique_idx").on(
+      table.userId,
+      table.eventType,
+      table.entityId,
+    ),
+    tenantCreatedAtIdx: index("point_events_tenant_created_at_idx").on(
+      table.tenantId,
+      table.createdAt,
+    ),
+  })),
 );
 
 export const quizAttempts = pgTable(

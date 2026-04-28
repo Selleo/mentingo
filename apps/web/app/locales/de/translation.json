@@ -534,7 +534,9 @@
       "about": "Um",
       "contact": "Kontakt",
       "courses": "Kurse",
-      "title": "Titel"
+      "title": "Titel",
+      "gamification": "Gamification",
+      "lifetimePoints": "Punkte insgesamt"
     }
   },
   "changeUserInformationView": {

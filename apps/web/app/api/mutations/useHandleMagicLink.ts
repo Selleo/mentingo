@@ -41,6 +41,7 @@ export function useHandleMagicLink() {
         ...data,
         isSupportMode: false,
         studentModeCourseIds: [],
+        gamification: { totalPoints: 0, lastPointAt: null },
         roleSlugs: [],
         permissions: [],
       };

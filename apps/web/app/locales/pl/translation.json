@@ -511,7 +511,9 @@
       "about": "O",
       "contact": "Kontakt",
       "courses": "Kursy",
-      "title": "Tytuł"
+      "title": "Tytuł",
+      "gamification": "Grywalizacja",
+      "lifetimePoints": "punktów łącznie"
     }
   },
   "changeUserInformationView": {

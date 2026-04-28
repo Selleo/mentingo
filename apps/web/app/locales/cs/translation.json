@@ -534,7 +534,9 @@
       "about": "O",
       "contact": "Kontakt",
       "courses": "Kurzy",
-      "title": "Titul"
+      "title": "Titul",
+      "gamification": "Gamifikace",
+      "lifetimePoints": "bodů celkem"
     }
   },
   "changeUserInformationView": {

@@ -270,6 +270,19 @@ function ProfilePageContent({ currentUser }: ProfilePageContentProps) {
             }}
           />
         )}
+        {isProfileOwner && (
+          <section className="flex w-full max-w-[720px] flex-col gap-y-3 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow">
+            <p className="body-2 text-neutral-500">{t("contentCreatorView.other.gamification")}</p>
+            <div className="flex items-end gap-x-2">
+              <strong className="h3 text-primary-700">
+                {currentUser?.gamification.totalPoints ?? 0}
+              </strong>
+              <span className="body-2 pb-1 text-neutral-700">
+                {t("contentCreatorView.other.lifetimePoints")}
+              </span>
+            </div>
+          </section>
+        )}
         {canViewExtendedProfile && (
           <section className="flex w-full max-w-[720px] flex-col gap-y-6 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow">
             <div className="flex flex-col gap-y-2">

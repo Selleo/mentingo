@@ -178,6 +178,10 @@ export interface CurrentUserResponse {
     };
     isManagingTenantAdmin: boolean;
     isSupportMode: boolean;
+    gamification: {
+      totalPoints: number;
+      lastPointAt: string | null;
+    };
     studentModeCourseIds: string[];
     supportContext?: {
       /** @format uuid */

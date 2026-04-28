@@ -8,12 +8,12 @@ import type { CurrentUserResponse } from "../../generated-api";
 
 type AuthSuccessUser = Omit<
   CurrentUserResponse["data"],
-  "isSupportMode" | "studentModeCourseIds" | "permissions" | "roleSlugs"
+  "isSupportMode" | "studentModeCourseIds" | "permissions" | "roleSlugs" | "gamification"
 > &
   Partial<
     Pick<
       CurrentUserResponse["data"],
-      "isSupportMode" | "studentModeCourseIds" | "permissions" | "roleSlugs"
+      "isSupportMode" | "studentModeCourseIds" | "permissions" | "roleSlugs" | "gamification"
     >
   >;
 
@@ -34,6 +34,7 @@ export function handleAuthSuccess({
     ...user,
     isSupportMode: user.isSupportMode ?? false,
     studentModeCourseIds: user.studentModeCourseIds ?? [],
+    gamification: user.gamification ?? { totalPoints: 0, lastPointAt: null },
     permissions: user.permissions ?? [],
     roleSlugs: user.roleSlugs ?? [],
   };

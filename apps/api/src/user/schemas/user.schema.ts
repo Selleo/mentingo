@@ -27,6 +27,10 @@ export const currentUserResponseSchema = Type.Composite([
     onboardingStatus: userOnboardingStatusSchema,
     isManagingTenantAdmin: Type.Boolean(),
     isSupportMode: Type.Boolean(),
+    gamification: Type.Object({
+      totalPoints: Type.Number(),
+      lastPointAt: Type.Union([Type.String(), Type.Null()]),
+    }),
     studentModeCourseIds: Type.Array(UUIDSchema),
     supportContext: Type.Optional(
       Type.Object({

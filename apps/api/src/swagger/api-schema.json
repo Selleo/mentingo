@@ -10849,6 +10849,28 @@
               "isSupportMode": {
                 "type": "boolean"
               },
+              "gamification": {
+                "type": "object",
+                "properties": {
+                  "totalPoints": {
+                    "type": "number"
+                  },
+                  "lastPointAt": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "totalPoints",
+                  "lastPointAt"
+                ]
+              },
               "studentModeCourseIds": {
                 "type": "array",
                 "items": {
@@ -10903,6 +10925,7 @@
               "onboardingStatus",
               "isManagingTenantAdmin",
               "isSupportMode",
+              "gamification",
               "studentModeCourseIds"
             ]
           }

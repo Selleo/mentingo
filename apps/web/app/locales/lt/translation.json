@@ -534,7 +534,9 @@
       "about": "Apie",
       "contact": "Susisiekite",
       "courses": "Kursai",
-      "title": "Pavadinimas"
+      "title": "Pavadinimas",
+      "gamification": "Žaidybinimas",
+      "lifetimePoints": "taškai iš viso"
     }
   },
   "changeUserInformationView": {
