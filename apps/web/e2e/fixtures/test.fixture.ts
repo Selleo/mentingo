@@ -22,6 +22,7 @@ import {
 } from "../utils/auth-email";
 import { extractLinkFromMailhogMessage, waitForMailhogMessage } from "../utils/mailhog";
 import { markAllOnboardingComplete } from "../utils/onboarding";
+import { buildLmsLocalhostTenantHost } from "../utils/tenant-host";
 
 import { login } from "./auth.actions";
 import { cleanupFixture } from "./cleanup.fixture";
@@ -129,13 +130,11 @@ const createIsolatedTenantInput = (
   }
 
   const slug = randomUUID().slice(0, 8);
-  const baseUrl = new URL(baseURL);
-  const port = baseUrl.port ? `:${baseUrl.port}` : "";
 
   return {
     ...input,
     name: input?.name ?? `Isolated Workspace ${slug}`,
-    host: `${baseUrl.protocol}//${"e2e-tenant"}-${slug}.lms.localhost${port}`,
+    host: buildLmsLocalhostTenantHost(baseURL, `e2e-tenant-${slug}`),
     adminEmail: input?.adminEmail ?? `e2e-admin-${slug}@example.com`,
     adminFirstName: input?.adminFirstName ?? "Tenant",
     adminLastName: input?.adminLastName ?? "Admin",
@@ -173,10 +172,12 @@ const addWorkspaceInitScript = async (context: BrowserContext, origin: string) =
   await context.addInitScript(
     ({ apiUrl, appUrl }: { apiUrl: string; appUrl: string }) => {
       const targetWindow = window as Window & { ENV?: Record<string, string> };
+      const currentOrigin = window.location.origin;
+
       targetWindow.ENV = {
         ...(targetWindow.ENV ?? {}),
-        VITE_API_URL: apiUrl,
-        VITE_APP_URL: appUrl,
+        VITE_API_URL: currentOrigin || apiUrl,
+        VITE_APP_URL: currentOrigin || appUrl,
       };
     },
     { apiUrl: origin, appUrl: origin },
