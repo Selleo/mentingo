@@ -11,6 +11,8 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 
+import { QA_LANGUAGE_SELECTOR_HANDLES } from "../../../../e2e/data/qa/handles";
+
 import type { SupportedLanguages } from "@repo/shared";
 
 type DeleteQALanguageDialogProps = {
@@ -42,7 +44,7 @@ export const DeleteQALanguageDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent>
+      <DialogContent data-testid={QA_LANGUAGE_SELECTOR_HANDLES.DELETE_DIALOG}>
         <DialogHeader>
           <DialogTitle>{t("adminCourseView.deleteLanguage.title")}</DialogTitle>
           <DialogDescription>{t("adminCourseView.deleteLanguage.description")}</DialogDescription>
@@ -51,7 +53,11 @@ export const DeleteQALanguageDialog = ({
           <Button variant="outline" onClick={() => setOpen(false)}>
             {t("common.button.cancel")}
           </Button>
-          <Button variant="destructive" onClick={handleConfirm}>
+          <Button
+            variant="destructive"
+            onClick={handleConfirm}
+            data-testid={QA_LANGUAGE_SELECTOR_HANDLES.DELETE_CONFIRM_BUTTON}
+          >
             {t("common.button.proceed")}
           </Button>
         </DialogFooter>

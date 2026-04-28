@@ -13,6 +13,8 @@ import {
 import { Separator } from "~/components/ui/separator";
 import { courseLanguages } from "~/modules/Admin/EditCourse/components/CourseLanguageSelector";
 
+import { QA_LANGUAGE_SELECTOR_HANDLES } from "../../../../e2e/data/qa/handles";
+
 import { CreateQALanguageDialog } from "./CreateQALanguageDialog";
 import { DeleteQALanguageDialog } from "./DeleteQALanguageDialog";
 
@@ -64,12 +66,17 @@ export const QALanguageSelector = ({ qaLanguage, qa, onChange }: QALanguageSelec
   return (
     <div className="flex gap-2 items-center">
       <Select value={qaLanguage} onValueChange={handleLanguageChange}>
-        <SelectTrigger className="min-w-[200px]">
+        <SelectTrigger className="min-w-[200px]" data-testid={QA_LANGUAGE_SELECTOR_HANDLES.SELECT}>
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
           {addedItems.map((item) => (
-            <SelectItem value={item.key} key={item.key} className="w-full">
+            <SelectItem
+              value={item.key}
+              key={item.key}
+              className="w-full"
+              data-testid={QA_LANGUAGE_SELECTOR_HANDLES.option(item.key)}
+            >
               <div className="flex w-full items-center gap-2">
                 <Icon name={item.iconName} className="size-4" />
                 <span className="font-semibold">{t(item.translationKey)}</span>
@@ -90,7 +97,11 @@ export const QALanguageSelector = ({ qaLanguage, qa, onChange }: QALanguageSelec
                 {t("adminCourseView.common.notAddedLanguages")}
               </div>
               {notAddedItems.map((item) => (
-                <SelectItem value={item.key} key={item.key}>
+                <SelectItem
+                  value={item.key}
+                  key={item.key}
+                  data-testid={QA_LANGUAGE_SELECTOR_HANDLES.option(item.key)}
+                >
                   <div className="flex w-full items-center gap-2">
                     <Icon name={item.iconName} className="size-4" />
                     <div className="flex flex-col leading-tight">
@@ -114,6 +125,7 @@ export const QALanguageSelector = ({ qaLanguage, qa, onChange }: QALanguageSelec
             setLanguageToDelete(qaLanguage);
             setIsDeleteDialogOpen(true);
           }}
+          data-testid={QA_LANGUAGE_SELECTOR_HANDLES.DELETE_BUTTON}
         >
           <Icon name="TrashIcon" className="size-5" />
         </Button>

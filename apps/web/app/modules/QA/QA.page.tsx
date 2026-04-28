@@ -13,6 +13,8 @@ import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/Language
 import QAItem from "~/modules/QA/components/QAItem";
 import { setPageTitle } from "~/utils/setPageTitle";
 
+import { QA_PAGE_HANDLES } from "../../../e2e/data/qa/handles";
+
 import type { MetaFunction } from "@remix-run/react";
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.qa");
@@ -56,6 +58,7 @@ export default function QAPage() {
     <ContentAccessGuard type={ACCESS_GUARD.UNREGISTERED_QA_ACCESS}>
       <PageWrapper
         role="main"
+        data-testid={QA_PAGE_HANDLES.PAGE}
         className="!w-full !max-w-none"
         breadcrumbs={[{ title: t("navigationSideBar.qa"), href: "/qa" }]}
       >
@@ -63,17 +66,24 @@ export default function QAPage() {
           <div className="flex h-auto w-full flex-col gap-6">
             <div className="flex justify-between items-center">
               <div className="flex flex-col gap-2">
-                <h4 className="h4 font-semibold">{t("QA.header")}</h4>
+                <h4 className="h4 font-semibold" data-testid={QA_PAGE_HANDLES.HEADING}>
+                  {t("QA.header")}
+                </h4>
                 <h5 className="text-xl">{t("QA.subHeader")}</h5>
               </div>
               {canManageQA && (
                 <Link to="/qa/new" className="ml-2">
-                  <Button>{t("qaView.button.createNew")}</Button>
+                  <Button data-testid={QA_PAGE_HANDLES.CREATE_BUTTON}>
+                    {t("qaView.button.createNew")}
+                  </Button>
                 </Link>
               )}
             </div>
             {filteredQA && filteredQA.length > 0 && (
-              <div className="rounded-2xl bg-white border-border border overflow-hidden">
+              <div
+                className="rounded-2xl bg-white border-border border overflow-hidden"
+                data-testid={QA_PAGE_HANDLES.ITEM_LIST}
+              >
                 <Accordion
                   type="single"
                   collapsible

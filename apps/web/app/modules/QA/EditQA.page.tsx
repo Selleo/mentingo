@@ -18,6 +18,8 @@ import { QALanguageSelector } from "~/modules/QA/components/QALanguageSelector";
 import { qaFormSchema, type QAFormValues } from "~/modules/QA/qa.types";
 import { setPageTitle } from "~/utils/setPageTitle";
 
+import { QA_FORM_PAGE_HANDLES } from "../../../e2e/data/qa/handles";
+
 import type { MetaFunction } from "@remix-run/react";
 import type { SupportedLanguages } from "@repo/shared";
 
@@ -86,6 +88,7 @@ export default function EditQAPage() {
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="flex w-full max-w-[720px] flex-col gap-6"
+          data-testid={QA_FORM_PAGE_HANDLES.PAGE}
         >
           <div className="flex flex-wrap items-start justify-between gap-4 px-1">
             <div className="space-y-2">
@@ -94,9 +97,15 @@ export default function EditQAPage() {
             <div className="flex w-full items-center gap-3 md:w-auto">
               <div className="ml-auto flex items-center gap-3">
                 <Link to="/qa">
-                  <Button variant="outline">{t("common.button.cancel")}</Button>
+                  <Button variant="outline" data-testid={QA_FORM_PAGE_HANDLES.CANCEL_BUTTON}>
+                    {t("common.button.cancel")}
+                  </Button>
                 </Link>
-                <Button type="submit" disabled={!isValid || isUpdating || isLoading}>
+                <Button
+                  type="submit"
+                  disabled={!isValid || isUpdating || isLoading}
+                  data-testid={QA_FORM_PAGE_HANDLES.SAVE_BUTTON}
+                >
                   {t("common.button.save")}
                 </Button>
               </div>
@@ -122,7 +131,11 @@ export default function EditQAPage() {
                   <span className="mr-1 text-error-600">*</span>
                   {t("qaView.fields.title")}
                 </Label>
-                <Input id="title" {...register("title")} />
+                <Input
+                  id="title"
+                  data-testid={QA_FORM_PAGE_HANDLES.TITLE_INPUT}
+                  {...register("title")}
+                />
                 {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
               </div>
               <div className="space-y-2">
@@ -130,7 +143,12 @@ export default function EditQAPage() {
                   <span className="mr-1 text-error-600">*</span>
                   {t("qaView.fields.description")}
                 </Label>
-                <Textarea id="description" className="min-h-[180px]" {...register("description")} />
+                <Textarea
+                  id="description"
+                  className="min-h-[180px]"
+                  data-testid={QA_FORM_PAGE_HANDLES.DESCRIPTION_INPUT}
+                  {...register("description")}
+                />
                 {errors.description && (
                   <p className="text-sm text-destructive">{errors.description.message}</p>
                 )}

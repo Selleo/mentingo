@@ -120,6 +120,7 @@ export const getNavigationConfig = (
                       label: t("navigationSideBar.qa"),
                       path: "qa",
                       iconName: "Quiz",
+                      testId: NAVIGATION_HANDLES.QA_LINK,
                     },
                   ] as NavigationItem[])
                 : []),

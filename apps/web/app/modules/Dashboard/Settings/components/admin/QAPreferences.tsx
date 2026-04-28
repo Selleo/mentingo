@@ -5,6 +5,8 @@ import { useChangeQASetting } from "~/api/mutations/admin/useChangeQASetting";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { SettingItem } from "~/modules/Dashboard/Settings/components/SettingItem";
 
+import { QA_SETTINGS_HANDLES } from "../../../../../../e2e/data/qa/handles";
+
 import type { GlobalSettings } from "../../types";
 
 interface QAPreferencesProps {
@@ -16,7 +18,7 @@ export default function QAPreferences({ globalSettings }: QAPreferencesProps) {
   const { mutate: updateQAPreference } = useChangeQASetting();
 
   return (
-    <Card id="qa-preferences">
+    <Card id="qa-preferences" data-testid={QA_SETTINGS_HANDLES.PREFERENCES_CARD}>
       <CardHeader>
         <CardTitle className="h5">{t("qaPreferences.header")}</CardTitle>
         <CardDescription className="body-lg-md">{t("qaPreferences.subHeader")}</CardDescription>
@@ -28,6 +30,7 @@ export default function QAPreferences({ globalSettings }: QAPreferencesProps) {
           description={t(`qaPreferences.settings.qaEnabled.description`)}
           checked={globalSettings.QAEnabled}
           onCheckedChange={() => updateQAPreference(ALLOWED_QA_SETTINGS.QA_ENABLED)}
+          testId={QA_SETTINGS_HANDLES.ENABLED_SWITCH}
         />
         <SettingItem
           id="qa-public"
@@ -39,6 +42,7 @@ export default function QAPreferences({ globalSettings }: QAPreferencesProps) {
           }
           disabled={!globalSettings.QAEnabled}
           tooltipTranslationKey="qaPreferences.tooltip.disabled"
+          testId={QA_SETTINGS_HANDLES.PUBLIC_SWITCH}
         />
       </CardContent>
     </Card>

@@ -10,6 +10,8 @@ import { Button } from "~/components/ui/button";
 import { courseLanguages } from "~/modules/Admin/EditCourse/components/CourseLanguageSelector";
 import DeleteQADialog from "~/modules/QA/components/DeleteQADialog";
 
+import { QA_PAGE_HANDLES } from "../../../../e2e/data/qa/handles";
+
 import type { SupportedLanguages } from "@repo/shared";
 import type React from "react";
 
@@ -38,11 +40,21 @@ export default function QAItem({ title, description, canManageQA, id, availableL
   };
 
   return (
-    <AccordionItem value={id} id={`qa-${id}`} className="border-b border-border rounded-none">
-      <AccordionTrigger className="group w-full px-6 p-5 text-left text-base font-semibold hover:no-underline focus-visible:outline-none focus-visible:ring-0">
+    <AccordionItem
+      value={id}
+      id={`qa-${id}`}
+      className="border-b border-border rounded-none"
+      data-testid={QA_PAGE_HANDLES.item(id)}
+    >
+      <AccordionTrigger
+        className="group w-full px-6 p-5 text-left text-base font-semibold hover:no-underline focus-visible:outline-none focus-visible:ring-0"
+        data-testid={QA_PAGE_HANDLES.itemTrigger(id)}
+      >
         <div className="flex w-full items-center text-slate-900">
           <span className="text-primary font-semibold">Q:</span>
-          <span className="flex-1">&nbsp;{title}</span>
+          <span className="flex-1" data-testid={QA_PAGE_HANDLES.itemTitle(id)}>
+            &nbsp;{title}
+          </span>
           {canManageQA && (
             <Button
               onClick={handleEdit}
@@ -51,11 +63,12 @@ export default function QAItem({ title, description, canManageQA, id, availableL
               onKeyDown={(e) => e.key === "Enter" && handleEdit(e)}
               className="flex size-8 text-slate-500"
               aria-label={t("qaView.aria.editQuestion")}
+              data-testid={QA_PAGE_HANDLES.itemEditButton(id)}
             >
               <Pencil className="size-4" />
             </Button>
           )}
-          {canManageQA && <DeleteQADialog onConfirm={onDelete} loading={isDeleting} />}
+          {canManageQA && <DeleteQADialog qaId={id} onConfirm={onDelete} loading={isDeleting} />}
 
           <Badge variant="default" className="flex gap-2 ml-1 mr-3">
             {courseLanguages
@@ -67,10 +80,15 @@ export default function QAItem({ title, description, canManageQA, id, availableL
           <ChevronDown className="size-4 shrink-0 text-slate-500 transition-transform duration-200 group-data-[state=open]:rotate-180" />
         </div>
       </AccordionTrigger>
-      <AccordionContent className="px-6 text-base pb-4 leading-relaxed text-slate-700">
+      <AccordionContent
+        className="px-6 text-base pb-4 leading-relaxed text-slate-700"
+        data-testid={QA_PAGE_HANDLES.itemContent(id)}
+      >
         <div className="flex gap-2">
           <span className="text-primary font-semibold">A:</span>
-          <p className="flex-1">{description}</p>
+          <p className="flex-1" data-testid={QA_PAGE_HANDLES.itemDescription(id)}>
+            {description}
+          </p>
         </div>
       </AccordionContent>
     </AccordionItem>
