@@ -96,6 +96,8 @@ class FakeDb {
 const userId = "00000000-0000-0000-0000-000000000001" as UUIDType;
 const chapterId = "00000000-0000-0000-0000-000000000002" as UUIDType;
 const tenantId = "00000000-0000-0000-0000-000000000003" as UUIDType;
+const courseId = "00000000-0000-0000-0000-000000000004" as UUIDType;
+const lessonId = "00000000-0000-0000-0000-000000000005" as UUIDType;
 
 const createService = (roleSlugs: string[] = [SYSTEM_ROLE_SLUGS.STUDENT]) => {
   const db = new FakeDb();
@@ -131,6 +133,28 @@ describe("PointsService", () => {
     expect(duplicateAward).toEqual({ pointsAwarded: 0 });
     expect(db.pointEvents).toHaveLength(1);
     expect(db.userStatistics.get(userId)?.totalPoints).toBe(10);
+  });
+
+  it("awards hardcoded course and AI mentor pass points", async () => {
+    const { db, service } = createService();
+
+    const courseAward = await service.award(
+      userId,
+      POINT_EVENT_TYPES.COURSE_COMPLETED,
+      courseId,
+      tenantId,
+    );
+    const aiMentorAward = await service.award(
+      userId,
+      POINT_EVENT_TYPES.AI_MENTOR_PASSED,
+      lessonId,
+      tenantId,
+    );
+
+    expect(courseAward).toEqual({ pointsAwarded: 50 });
+    expect(aiMentorAward).toEqual({ pointsAwarded: 30 });
+    expect(db.pointEvents).toHaveLength(2);
+    expect(db.userStatistics.get(userId)?.totalPoints).toBe(80);
   });
 
   it("does not write ledger rows or totals for non-student users", async () => {

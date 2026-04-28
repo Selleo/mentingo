@@ -1,6 +1,6 @@
 export const POINT_EVENT_TYPES = {
   CHAPTER_COMPLETED: "chapter_completed",
-  AI_MENTOR_PASSED: "ai_mentor_passed",
+  AI_MENTOR_PASSED: "ai_pass",
   COURSE_COMPLETED: "course_completed",
 } as const;
 

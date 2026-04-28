@@ -12,6 +12,7 @@ import { CertificatesService } from "src/certificates/certificates.service";
 import { DatabasePg } from "src/common";
 import { setJsonbField } from "src/common/helpers/sqlHelpers";
 import { CourseCompletedEvent, LessonCompletedEvent } from "src/events";
+import { UserAiMentorLessonPassedEvent } from "src/events/user/user-ai-mentor-lesson-passed.event";
 import { UserChapterFinishedEvent } from "src/events/user/user-chapter-finished.event";
 import { UserCourseFinishedEvent } from "src/events/user/user-course-finished.event";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
@@ -37,6 +38,11 @@ import {
   users,
 } from "src/storage/schema";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
+
+import {
+  resolveStoredAiMentorPassed,
+  shouldEmitAiMentorLessonPassedEvent,
+} from "./ai-mentor-pass-event.utils";
 
 import type { PermissionKey, SupportedLanguages } from "@repo/shared";
 import type { ResponseAiJudgeJudgementBody } from "src/ai/utils/ai.schema";
@@ -176,6 +182,7 @@ export class StudentLessonProgressService {
         : !!aiMentorLessonData?.passed);
 
     let lessonCompleted = false;
+    let aiMentorLessonPassed = false;
 
     if (shouldUpdate) {
       const updated = await dbInstance
@@ -203,15 +210,26 @@ export class StudentLessonProgressService {
         .from(aiMentorStudentLessonProgress)
         .where(eq(aiMentorStudentLessonProgress.studentLessonProgressId, currentLessonProgress.id));
 
+      const previousPassed = existingAiMentorLesson?.passed;
+      const aiMentorProgressData = {
+        ...aiMentorLessonData,
+        passed: resolveStoredAiMentorPassed(previousPassed, aiMentorLessonData.passed),
+      };
+
+      aiMentorLessonPassed = shouldEmitAiMentorLessonPassedEvent(
+        previousPassed,
+        aiMentorLessonData.passed,
+      );
+
       if (!existingAiMentorLesson) {
         await dbInstance.insert(aiMentorStudentLessonProgress).values({
-          ...aiMentorLessonData,
+          ...aiMentorProgressData,
           studentLessonProgressId: currentLessonProgress.id,
         });
       } else {
         await dbInstance
           .update(aiMentorStudentLessonProgress)
-          .set(aiMentorLessonData)
+          .set(aiMentorProgressData)
           .where(
             eq(aiMentorStudentLessonProgress.studentLessonProgressId, currentLessonProgress.id),
           );
@@ -222,6 +240,17 @@ export class StudentLessonProgressService {
       !accessCourseLessonWithDetails.isAssigned && accessCourseLessonWithDetails.isFreemium;
 
     const resolvedActor = await this.resolveActor(studentId, actor, dbInstance);
+
+    if (aiMentorLessonPassed) {
+      await this.outboxPublisher.publish(
+        new UserAiMentorLessonPassedEvent({
+          userId: studentId,
+          lessonId: lesson.id,
+          actor: resolvedActor,
+        }),
+        dbInstance,
+      );
+    }
 
     if (lessonCompleted || isQuizPassed) {
       await this.outboxPublisher.publish(
