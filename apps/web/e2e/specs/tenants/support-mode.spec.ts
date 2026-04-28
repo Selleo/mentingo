@@ -7,6 +7,7 @@ import { expect, test } from "../../fixtures/test.fixture";
 import { enterSupportModeFromListFlow } from "../../flows/tenants/enter-support-mode-from-list.flow";
 import { filterTenantsFlow } from "../../flows/tenants/filter-tenants.flow";
 import { openTenantsPageFlow } from "../../flows/tenants/open-tenants-page.flow";
+import { buildLmsLocalhostTenantHost } from "../../utils/tenant-host";
 
 const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -29,10 +30,9 @@ test("managing admin can enter support mode and see the support banner", async (
       const tenantFactory = factories.createTenantFactory();
       const tenantSlug = Date.now();
       const tenantName = `support-mode-${tenantSlug}`;
-      const appProtocol = new URL(requireOrigin(origin)).protocol;
       const tenant = await tenantFactory.create({
         name: tenantName,
-        host: `${appProtocol}//support-mode-${tenantSlug}.lms.localhost`,
+        host: buildLmsLocalhostTenantHost(requireOrigin(origin), tenantName),
       });
 
       cleanup.add(async () => {
@@ -70,10 +70,9 @@ test("support mode blocks super-admin access and can be exited", async ({
       const tenantFactory = factories.createTenantFactory();
       const tenantSlug = Date.now();
       const tenantName = `support-mode-exit-${tenantSlug}`;
-      const appProtocol = new URL(requireOrigin(origin)).protocol;
       const tenant = await tenantFactory.create({
         name: tenantName,
-        host: `${appProtocol}//support-mode-exit-${tenantSlug}.lms.localhost`,
+        host: buildLmsLocalhostTenantHost(requireOrigin(origin), tenantName),
       });
 
       cleanup.add(async () => {
