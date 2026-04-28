@@ -11,6 +11,8 @@ import {
   DialogOverlay,
 } from "~/components/ui/dialog";
 
+import { LEARNING_HANDLES } from "../../../../../../e2e/data/learning/handles";
+
 import type React from "react";
 
 type RetakeModalProps = {
@@ -26,7 +28,7 @@ const RetakeModal: React.FC<RetakeModalProps> = ({ open, onOpenChange, onConfirm
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogOverlay className="z-[110]" />
-      <DialogContent className="z-[120]">
+      <DialogContent data-testid={LEARNING_HANDLES.AI_MENTOR_RETAKE_MODAL} className="z-[120]">
         <DialogHeader>
           <DialogTitle>{t("studentCourseView.lesson.aiMentorLesson.retakeModalTitle")}</DialogTitle>
           <DialogDescription>
@@ -34,10 +36,18 @@ const RetakeModal: React.FC<RetakeModalProps> = ({ open, onOpenChange, onConfirm
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="outline" onClick={onCancel}>
+          <Button
+            data-testid={LEARNING_HANDLES.AI_MENTOR_RETAKE_CANCEL_BUTTON}
+            variant="outline"
+            onClick={onCancel}
+          >
             {t("common.button.cancel")}
           </Button>
-          <Button onClick={onConfirm} className="bg-primary-700">
+          <Button
+            data-testid={LEARNING_HANDLES.AI_MENTOR_RETAKE_CONFIRM_BUTTON}
+            onClick={onConfirm}
+            className="bg-primary-700"
+          >
             {t("clientStatisticsView.button.continue")}
           </Button>
         </DialogFooter>

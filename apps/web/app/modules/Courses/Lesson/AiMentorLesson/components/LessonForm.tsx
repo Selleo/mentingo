@@ -262,6 +262,7 @@ export const LessonForm = ({
                 "studentCourseView.lesson.aiMentorLesson.stopVoiceRecording",
               )}
               primaryActionTestId={LEARNING_HANDLES.AI_MENTOR_MESSAGE_ACTION_BUTTON}
+              micButtonTestId={LEARNING_HANDLES.AI_MENTOR_MIC_BUTTON}
             />
           </div>
 

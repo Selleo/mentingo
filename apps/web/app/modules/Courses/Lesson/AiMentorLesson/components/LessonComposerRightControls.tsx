@@ -19,6 +19,7 @@ type LessonComposerRightControlsProps = {
   startVoiceMentorLabel: string;
   stopVoiceRecordingLabel: string;
   primaryActionTestId?: string;
+  micButtonTestId?: string;
 };
 
 export function LessonComposerRightControls({
@@ -36,6 +37,7 @@ export function LessonComposerRightControls({
   startVoiceMentorLabel,
   stopVoiceRecordingLabel,
   primaryActionTestId,
+  micButtonTestId,
 }: LessonComposerRightControlsProps) {
   const buttonMode =
     isVoiceMode || isVoiceMentorMode
@@ -58,6 +60,7 @@ export function LessonComposerRightControls({
             transition={{ duration: 0.12, ease: "easeOut" }}
           >
             <Button
+              data-testid={micButtonTestId}
               type="button"
               variant="ghost"
               onClick={onStartVoiceMode}
@@ -72,6 +75,7 @@ export function LessonComposerRightControls({
 
       <Button
         data-testid={primaryActionTestId}
+        data-mode={buttonMode}
         type="button"
         variant="primary"
         size="sm"

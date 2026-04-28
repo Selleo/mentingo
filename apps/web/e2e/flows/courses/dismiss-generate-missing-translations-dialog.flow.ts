@@ -4,13 +4,18 @@ import { waitForDialogOverlaysHiddenFlow } from "../common/wait-for-dialog-overl
 import type { Page } from "@playwright/test";
 
 export const dismissGenerateMissingTranslationsDialogFlow = async (page: Page) => {
-  const generateDialog = page.getByTestId(COURSE_LANGUAGE_DIALOG_HANDLES.GENERATE_DIALOG);
+  const generateCancelButton = page.getByTestId(
+    COURSE_LANGUAGE_DIALOG_HANDLES.GENERATE_CANCEL_BUTTON,
+  );
 
-  if (!(await generateDialog.isVisible({ timeout: 3_000 }).catch(() => false))) {
+  if (!(await generateCancelButton.isVisible({ timeout: 10_000 }).catch(() => false))) {
+    await waitForDialogOverlaysHiddenFlow(page);
     return;
   }
 
-  await page.getByTestId(COURSE_LANGUAGE_DIALOG_HANDLES.GENERATE_CANCEL_BUTTON).click();
-  await generateDialog.waitFor({ state: "hidden" });
+  await generateCancelButton.click();
+  await page.getByTestId(COURSE_LANGUAGE_DIALOG_HANDLES.GENERATE_DIALOG).waitFor({
+    state: "hidden",
+  });
   await waitForDialogOverlaysHiddenFlow(page);
 };

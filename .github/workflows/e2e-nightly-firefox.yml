@@ -19,3 +19,5 @@ jobs:
       STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
       MASTER_KEY: ${{ secrets.MASTER_KEY }}
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      LUMA_API_KEY: ${{ secrets.LUMA_API_KEY }}
+      LUMA_BASE_URL: ${{ secrets.LUMA_BASE_URL }}

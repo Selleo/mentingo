@@ -13,8 +13,18 @@ export const LEARNING_HANDLES = {
   AI_MENTOR_MESSAGES: "learning-ai-mentor-messages",
   AI_MENTOR_MESSAGE_INPUT: "learning-ai-mentor-message-input",
   AI_MENTOR_MESSAGE_ACTION_BUTTON: "learning-ai-mentor-message-action-button",
+  AI_MENTOR_MIC_BUTTON: "learning-ai-mentor-mic-button",
+  AI_MENTOR_MESSAGE: "learning-ai-mentor-message",
+  aiMentorMessage: (messageId: string) => `learning-ai-mentor-message-${messageId}`,
+  aiMentorMessageRole: (role: "assistant" | "user" | "data" | "system") =>
+    `learning-ai-mentor-message-${role}`,
   AI_MENTOR_CHECK_BUTTON: "learning-ai-mentor-check-button",
   AI_MENTOR_RETAKE_BUTTON: "learning-ai-mentor-retake-button",
+  AI_MENTOR_RETAKE_MODAL: "learning-ai-mentor-retake-modal",
+  AI_MENTOR_RETAKE_CONFIRM_BUTTON: "learning-ai-mentor-retake-confirm-button",
+  AI_MENTOR_RETAKE_CANCEL_BUTTON: "learning-ai-mentor-retake-cancel-button",
+  AI_MENTOR_VOICE_OVERLAY: "learning-ai-mentor-voice-overlay",
+  AI_MENTOR_VOICE_OVERLAY_EXIT_BUTTON: "learning-ai-mentor-voice-overlay-exit-button",
   LESSON_SIDEBAR: "learning-lesson-sidebar",
   lessonSidebarLessonItem: (lessonId: string) => `learning-lesson-sidebar-item-${lessonId}`,
   lessonSidebarBlockedIndicator: (lessonId: string) =>

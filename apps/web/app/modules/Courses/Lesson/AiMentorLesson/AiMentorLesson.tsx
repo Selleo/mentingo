@@ -242,6 +242,8 @@ const AiMentorLesson = ({ lesson, lessonLoading, previewUser }: AiMentorLessonPr
               aiName={lesson.aiMentor?.name || ""}
               avatarUrl={lesson.aiMentor?.avatarReferenceUrl}
               previewUser={previewUser}
+              testId={LEARNING_HANDLES.aiMentorMessage(messages.id)}
+              contentTestId={LEARNING_HANDLES.aiMentorMessageRole(messages.role)}
               {...messages}
             />
           ))}

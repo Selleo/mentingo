@@ -40,6 +40,10 @@ on:
           required: true
         OPENAI_API_KEY:
           required: true
+        LUMA_API_KEY:
+          required: false
+        LUMA_BASE_URL:
+          required: false
   push:
     branches:
       - main
@@ -240,6 +244,8 @@ jobs:
           STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
           MASTER_KEY: ${{ secrets.MASTER_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          LUMA_API_KEY: ${{ secrets.LUMA_API_KEY }}
+          LUMA_BASE_URL: ${{ secrets.LUMA_BASE_URL }}
 
       - name: Upload artifacts on failure
         if: failure()
