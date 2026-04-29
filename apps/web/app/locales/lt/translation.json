@@ -586,7 +586,10 @@
       "rates": "Kainos",
       "numberOf": "Skaičius",
       "noLessonsToContinue": "Šiuo metu nėra jokių pamokų, kurias būtų galima tęsti.",
-      "continueLearning": "Tęskite mokymąsi:"
+      "continueLearning": "Tęskite mokymąsi:",
+      "rewardPoints": "Atlygio taškai",
+      "rewardPointsByDay": "Atlygio taškai pagal dieną",
+      "rewardPointsByDayDescription": "Kiekvieną dieną gauti taškai"
     }
   },
   "profileWithCalendarView": {

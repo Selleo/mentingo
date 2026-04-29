@@ -586,7 +586,10 @@
       "rates": "Preise",
       "numberOf": "Anzahl",
       "noLessonsToContinue": "Derzeit gibt es keinen Unterricht, der fortgesetzt werden kann.",
-      "continueLearning": "Lernen Sie weiter in:"
+      "continueLearning": "Lernen Sie weiter in:",
+      "rewardPoints": "Belohnungspunkte",
+      "rewardPointsByDay": "Belohnungspunkte pro Tag",
+      "rewardPointsByDayDescription": "Pro Tag gesammelte Punkte"
     }
   },
   "profileWithCalendarView": {

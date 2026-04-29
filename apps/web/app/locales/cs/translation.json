@@ -586,7 +586,10 @@
       "rates": "Sazby",
       "numberOf": "Počet",
       "noLessonsToContinue": "Momentálně nejsou žádné lekce, na které by bylo možné pokračovat.",
-      "continueLearning": "Pokračujte v učení v:"
+      "continueLearning": "Pokračujte v učení v:",
+      "rewardPoints": "Body odměn",
+      "rewardPointsByDay": "Body odměn podle dne",
+      "rewardPointsByDayDescription": "Body získané každý den"
     }
   },
   "profileWithCalendarView": {

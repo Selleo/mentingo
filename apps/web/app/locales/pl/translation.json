@@ -563,7 +563,10 @@
       "rates": "Oceny",
       "numberOf": "Liczba",
       "noLessonsToContinue": "Brak lekcji do kontynuacji.",
-      "continueLearning": "Kontynuuj naukę w:"
+      "continueLearning": "Kontynuuj naukę w:",
+      "rewardPoints": "Punkty nagród",
+      "rewardPointsByDay": "Punkty nagród według dnia",
+      "rewardPointsByDayDescription": "Punkty zdobyte każdego dnia"
     }
   },
   "profileWithCalendarView": {

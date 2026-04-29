@@ -586,7 +586,10 @@
       "rates": "Rates",
       "numberOf": "Number of",
       "noLessonsToContinue": "Currently have no lessons to continue.",
-      "continueLearning": "Continue learning in:"
+      "continueLearning": "Continue learning in:",
+      "rewardPoints": "Reward points",
+      "rewardPointsByDay": "Reward points by day",
+      "rewardPointsByDayDescription": "Points gained each day"
     }
   },
   "profileWithCalendarView": {

@@ -1,4 +1,4 @@
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 import { Bar, BarChart, CartesianGrid, Customized, Text, XAxis, YAxis } from "recharts";
 
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "~/components/ui/chart";
@@ -7,13 +7,6 @@ import { ChartLegendBadge } from "~/modules/Statistics/Client/components/ChartLe
 
 import type { RewardPointsByDay } from "~/api/queries/rewards/useRewardPointsByDay";
 import type { ChartConfig } from "~/components/ui/chart";
-
-const chartConfig = {
-  points: {
-    label: t("clientStatisticsView.other.rewardPoints", "Reward points"),
-    color: "var(--primary-700)",
-  },
-} satisfies ChartConfig;
 
 type RewardPointsByDayChartProps = {
   chartData: RewardPointsByDay[];
@@ -24,9 +17,21 @@ export function RewardPointsByDayChart({
   chartData,
   isLoading = false,
 }: RewardPointsByDayChartProps) {
+  const { i18n, t } = useTranslation();
   const dataMax = Math.max(...chartData.map(({ points }) => points), 0);
   const yAxisMax = Math.max(dataMax, 1);
   const isEmptyChart = chartData.every(({ points }) => !points);
+  const chartConfig = {
+    points: {
+      label: t("clientStatisticsView.other.rewardPoints"),
+      color: "var(--primary-700)",
+    },
+  } satisfies ChartConfig;
+
+  const formatDate = (value: string) =>
+    new Intl.DateTimeFormat(i18n.language, { day: "numeric", month: "short" }).format(
+      new Date(`${value}T00:00:00`),
+    );
 
   if (isLoading) {
     return (
@@ -44,10 +49,10 @@ export function RewardPointsByDayChart({
     <div className="flex w-full flex-col gap-4 rounded-lg bg-white p-8 drop-shadow-card">
       <hgroup>
         <h2 className="body-lg-md text-center text-neutral-950">
-          {t("clientStatisticsView.other.rewardPointsByDay", "Reward points by day")}
+          {t("clientStatisticsView.other.rewardPointsByDay")}
         </h2>
         <p className="body-sm-md text-center text-neutral-800">
-          {t("clientStatisticsView.other.rewardPointsByDayDescription", "Points gained each day")}
+          {t("clientStatisticsView.other.rewardPointsByDayDescription")}
         </p>
       </hgroup>
       <div className="mt-2 grid h-full place-items-center">
@@ -84,16 +89,21 @@ export function RewardPointsByDayChart({
               tickLine={false}
               tickMargin={10}
               axisLine={false}
-              tickFormatter={(value: string) => value.slice(5)}
+              tickFormatter={formatDate}
             />
-            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+            <ChartTooltip
+              cursor={false}
+              content={
+                <ChartTooltipContent labelFormatter={(value) => formatDate(String(value))} />
+              }
+            />
             <Bar dataKey="points" fill="var(--color-points)" />
           </BarChart>
         </ChartContainer>
       </div>
       <div className="flex justify-center gap-2">
         <ChartLegendBadge
-          label={t("clientStatisticsView.other.rewardPoints", "Reward points")}
+          label={t("clientStatisticsView.other.rewardPoints")}
           dotColor="var(--primary-700)"
         />
       </div>
