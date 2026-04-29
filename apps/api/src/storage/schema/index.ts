@@ -541,9 +541,7 @@ export const rewardRules = pgTable(
   {
     ...id,
     ...timestamps,
-    actionType: varchar("action_type", { length: 100 })
-      .$type<RewardActionType>()
-      .notNull(),
+    actionType: varchar("action_type", { length: 100 }).$type<RewardActionType>().notNull(),
     points: integer("points").notNull(),
     enabled: boolean("enabled").notNull().default(true),
     tenantId,
@@ -561,9 +559,7 @@ export const rewardPointLedger = pgTable(
     userId: uuid("user_id")
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
-    actionType: varchar("action_type", { length: 100 })
-      .$type<RewardActionType>()
-      .notNull(),
+    actionType: varchar("action_type", { length: 100 }).$type<RewardActionType>().notNull(),
     sourceEntityType: varchar("source_entity_type", { length: 100 })
       .$type<RewardSourceEntityType>()
       .notNull(),
