@@ -16,6 +16,7 @@ import {
 import type {
   CreateCourseDiscussionBody,
   CreateCourseDiscussionCommentBody,
+  ModerateCourseDiscussionBody,
   UpdateCourseDiscussionBody,
 } from "./schemas/course-discussion.schema";
 import type { CurrentUserType } from "src/common/types/current-user.type";
@@ -56,6 +57,16 @@ export class CourseDiscussionsRepository {
       )
       .limit(1);
     return !!enrollment;
+  }
+
+  async canModerateCourse(courseId: UUIDType, user: CurrentUserType) {
+    const [course] = await this.db
+      .select({ authorId: courses.authorId })
+      .from(courses)
+      .where(eq(courses.id, courseId))
+      .limit(1);
+    if (!course) return false;
+    return user.roleSlugs.includes(SYSTEM_ROLE_SLUGS.ADMIN) || course.authorId === user.userId;
   }
 
   listThreads(courseId: UUIDType) {
@@ -150,6 +161,12 @@ export class CourseDiscussionsRepository {
     return { ...thread, comments };
   }
 
+  async getThreadDetailForUser(threadId: UUIDType, canModerate: boolean) {
+    const detail = await this.getThreadDetail(threadId);
+    if (!detail) return null;
+    return canModerate ? detail : { ...detail, comments: detail.comments.map((c) => c) };
+  }
+
   async updateThread(threadId: UUIDType, data: UpdateCourseDiscussionBody) {
     const values: Record<string, unknown> = { updatedAt: sql`CURRENT_TIMESTAMP` };
     if (data.title !== undefined) values.title = data.title;
@@ -217,6 +234,52 @@ export class CourseDiscussionsRepository {
         deletedById: userId,
         updatedAt: sql`CURRENT_TIMESTAMP`,
       })
+      .where(eq(courseDiscussionComments.id, commentId))
+      .returning();
+    return row ?? null;
+  }
+
+  async moderateThread(threadId: UUIDType, userId: UUIDType, data: ModerateCourseDiscussionBody) {
+    const [row] = await this.db
+      .update(courseDiscussionThreads)
+      .set(
+        data.hidden
+          ? {
+              status: "hidden_by_staff",
+              hiddenAt: sql`CURRENT_TIMESTAMP`,
+              hiddenById: userId,
+              updatedAt: sql`CURRENT_TIMESTAMP`,
+            }
+          : {
+              status: "visible",
+              hiddenAt: null,
+              hiddenById: null,
+              updatedAt: sql`CURRENT_TIMESTAMP`,
+            },
+      )
+      .where(eq(courseDiscussionThreads.id, threadId))
+      .returning();
+    return row ?? null;
+  }
+
+  async moderateComment(commentId: UUIDType, userId: UUIDType, data: ModerateCourseDiscussionBody) {
+    const [row] = await this.db
+      .update(courseDiscussionComments)
+      .set(
+        data.hidden
+          ? {
+              status: "hidden_by_staff",
+              hiddenAt: sql`CURRENT_TIMESTAMP`,
+              hiddenById: userId,
+              updatedAt: sql`CURRENT_TIMESTAMP`,
+            }
+          : {
+              status: "visible",
+              hiddenAt: null,
+              hiddenById: null,
+              updatedAt: sql`CURRENT_TIMESTAMP`,
+            },
+      )
       .where(eq(courseDiscussionComments.id, commentId))
       .returning();
     return row ?? null;

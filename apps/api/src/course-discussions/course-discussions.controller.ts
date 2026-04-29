@@ -13,6 +13,7 @@ import {
   courseDiscussionThreadSchema,
   createCourseDiscussionCommentBodySchema,
   createCourseDiscussionBodySchema,
+  moderateCourseDiscussionBodySchema,
   updateCourseDiscussionBodySchema,
 } from "./schemas/course-discussion.schema";
 
@@ -54,6 +55,22 @@ export class DiscussionDetailsController {
     return new BaseResponse(await this.service.deleteThread(threadId, user));
   }
 
+  @Patch(":threadId/moderation")
+  @Validate({
+    request: [
+      { type: "param", name: "threadId", schema: UUIDSchema, required: true },
+      { type: "body", schema: moderateCourseDiscussionBodySchema, required: true },
+    ],
+    response: baseResponse(courseDiscussionThreadSchema),
+  })
+  async moderateThread(
+    @Param("threadId") threadId: UUIDType,
+    @Body() body: { hidden: boolean },
+    @CurrentUser() user: CurrentUserType,
+  ) {
+    return new BaseResponse(await this.service.moderateThread(threadId, user, body));
+  }
+
   @Post(":threadId/comments")
   @Validate({
     request: [
@@ -89,6 +106,22 @@ export class DiscussionCommentsController {
     @CurrentUser() user: CurrentUserType,
   ) {
     return new BaseResponse(await this.service.updateComment(commentId, user, body));
+  }
+
+  @Patch(":commentId/moderation")
+  @Validate({
+    request: [
+      { type: "param", name: "commentId", schema: UUIDSchema, required: true },
+      { type: "body", schema: moderateCourseDiscussionBodySchema, required: true },
+    ],
+    response: baseResponse(courseDiscussionCommentSchema),
+  })
+  async moderateComment(
+    @Param("commentId") commentId: UUIDType,
+    @Body() body: { hidden: boolean },
+    @CurrentUser() user: CurrentUserType,
+  ) {
+    return new BaseResponse(await this.service.moderateComment(commentId, user, body));
   }
 
   @Delete(":commentId")

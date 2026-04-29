@@ -1,7 +1,16 @@
-import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 
 import { CourseDiscussionsRepository } from "./course-discussions.repository";
-import { sanitizeDiscussionText } from "./course-discussions.utils";
+import {
+  applyCommentVisibility,
+  applyThreadVisibility,
+  sanitizeDiscussionText,
+} from "./course-discussions.utils";
 
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
@@ -13,7 +22,10 @@ export class CourseDiscussionsService {
   async list(courseId: UUIDType, user: CurrentUserType) {
     if (!(await this.repo.isCohortLearningEnabled())) throw new ForbiddenException();
     if (!(await this.repo.canAccessCourse(courseId, user))) throw new ForbiddenException();
-    return this.repo.listThreads(courseId);
+    const canModerate = await this.repo.canModerateCourse(courseId, user);
+    return (await this.repo.listThreads(courseId)).map((thread) =>
+      applyThreadVisibility(thread, canModerate),
+    );
   }
 
   async create(
@@ -34,7 +46,10 @@ export class CourseDiscussionsService {
     if (!(await this.repo.canAccessCourse(courseId, user))) throw new ForbiddenException();
     if (!(await this.repo.lessonBelongsToCourse(courseId, lessonId)))
       throw new NotFoundException("Lesson not found");
-    return this.repo.listLessonThreads(courseId, lessonId);
+    const canModerate = await this.repo.canModerateCourse(courseId, user);
+    return (await this.repo.listLessonThreads(courseId, lessonId)).map((thread) =>
+      applyThreadVisibility(thread, canModerate),
+    );
   }
 
   async createLesson(
@@ -58,7 +73,13 @@ export class CourseDiscussionsService {
     const thread = await this.repo.findThreadById(threadId);
     if (!thread) throw new NotFoundException();
     if (!(await this.repo.canAccessCourse(thread.courseId, user))) throw new ForbiddenException();
-    return this.repo.getThreadDetail(threadId);
+    const canModerate = await this.repo.canModerateCourse(thread.courseId, user);
+    const detail = await this.repo.getThreadDetail(threadId);
+    if (!detail) throw new NotFoundException();
+    return {
+      ...applyThreadVisibility(detail, canModerate),
+      comments: detail.comments.map((comment) => applyCommentVisibility(comment, canModerate)),
+    };
   }
 
   async updateThread(
@@ -118,5 +139,25 @@ export class CourseDiscussionsService {
     if (!(await this.repo.canAccessCourse(thread.courseId, user))) throw new ForbiddenException();
     if (comment.authorId !== user.userId) throw new ForbiddenException();
     return this.repo.softDeleteComment(commentId, user.userId);
+  }
+
+  async moderateThread(threadId: UUIDType, user: CurrentUserType, data: { hidden: boolean }) {
+    if (!(await this.repo.isCohortLearningEnabled())) throw new ForbiddenException();
+    const thread = await this.repo.findThreadById(threadId);
+    if (!thread) throw new NotFoundException();
+    if (thread.status === "deleted_by_author") throw new ConflictException("deleted_by_author");
+    if (!(await this.repo.canModerateCourse(thread.courseId, user))) throw new ForbiddenException();
+    return this.repo.moderateThread(threadId, user.userId, data);
+  }
+
+  async moderateComment(commentId: UUIDType, user: CurrentUserType, data: { hidden: boolean }) {
+    if (!(await this.repo.isCohortLearningEnabled())) throw new ForbiddenException();
+    const comment = await this.repo.findCommentById(commentId);
+    if (!comment) throw new NotFoundException();
+    if (comment.status === "deleted_by_author") throw new ConflictException("deleted_by_author");
+    const thread = await this.repo.findThreadById(comment.threadId);
+    if (!thread) throw new NotFoundException();
+    if (!(await this.repo.canModerateCourse(thread.courseId, user))) throw new ForbiddenException();
+    return this.repo.moderateComment(commentId, user.userId, data);
   }
 }

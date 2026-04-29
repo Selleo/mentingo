@@ -47,6 +47,10 @@ export const createCourseDiscussionCommentBodySchema = Type.Object({
   content: Type.String({ minLength: 1, maxLength: 10_000 }),
 });
 
+export const moderateCourseDiscussionBodySchema = Type.Object({
+  hidden: Type.Boolean(),
+});
+
 export const listCourseDiscussionsParamsSchema = Type.Object({
   courseId: UUIDSchema,
 });
@@ -65,3 +69,4 @@ export type UpdateCourseDiscussionBody = Static<typeof updateCourseDiscussionBod
 export type CreateCourseDiscussionCommentBody = Static<
   typeof createCourseDiscussionCommentBodySchema
 >;
+export type ModerateCourseDiscussionBody = Static<typeof moderateCourseDiscussionBodySchema>;

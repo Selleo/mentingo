@@ -174,6 +174,154 @@ describe("CourseDiscussionsController (e2e)", () => {
       .expect(201);
   });
 
+  it("admin can hide and unhide thread", async () => {
+    await enableCohortLearning(true);
+    const admin = await userFactory
+      .withCredentials({ password: "password123" })
+      .withAdminSettings(db)
+      .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+    const course = await courseFactory.create({ authorId: admin.id });
+    const [thread] = await db
+      .insert(courseDiscussionThreads)
+      .values({
+        courseId: course.id,
+        lessonId: null,
+        authorId: admin.id,
+        title: "Title",
+        content: "Body",
+        status: "visible",
+        lastActivityAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      })
+      .returning();
+    const cookies = authCookies(admin, SYSTEM_ROLE_SLUGS.ADMIN);
+    await request(app.getHttpServer())
+      .patch(`/api/discussions/${thread.id}/moderation`)
+      .set("Cookie", cookies)
+      .send({ hidden: true })
+      .expect(200);
+    let row = await db
+      .select()
+      .from(courseDiscussionThreads)
+      .where(sql`${courseDiscussionThreads.id} = ${thread.id}`);
+    expect(row[0].status).toBe("hidden_by_staff");
+    expect(row[0].hiddenById).toBe(admin.id);
+    await request(app.getHttpServer())
+      .patch(`/api/discussions/${thread.id}/moderation`)
+      .set("Cookie", cookies)
+      .send({ hidden: false })
+      .expect(200);
+    row = await db
+      .select()
+      .from(courseDiscussionThreads)
+      .where(sql`${courseDiscussionThreads.id} = ${thread.id}`);
+    expect(row[0].status).toBe("visible");
+    expect(row[0].hiddenAt).toBeNull();
+  });
+
+  it("course author can hide and unhide thread in own course", async () => {
+    await enableCohortLearning(true);
+    const author = await userFactory
+      .withCredentials({ password: "password123" })
+      .withContentCreatorSettings(db)
+      .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+    const course = await courseFactory.create({ authorId: author.id });
+    const [thread] = await db
+      .insert(courseDiscussionThreads)
+      .values({
+        courseId: course.id,
+        lessonId: null,
+        authorId: author.id,
+        title: "Title",
+        content: "Body",
+        status: "visible",
+        lastActivityAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      })
+      .returning();
+    const cookies = authCookies(author, SYSTEM_ROLE_SLUGS.CONTENT_CREATOR);
+    await request(app.getHttpServer())
+      .patch(`/api/discussions/${thread.id}/moderation`)
+      .set("Cookie", cookies)
+      .send({ hidden: true })
+      .expect(200);
+    await request(app.getHttpServer())
+      .patch(`/api/discussions/${thread.id}/moderation`)
+      .set("Cookie", cookies)
+      .send({ hidden: false })
+      .expect(200);
+  });
+
+  it("non-staff enrolled student cannot moderate thread", async () => {
+    await enableCohortLearning(true);
+    const author = await userFactory
+      .withCredentials({ password: "password123" })
+      .withUserSettings(db)
+      .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+    const student = await userFactory
+      .withCredentials({ password: "password123" })
+      .withUserSettings(db)
+      .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+    const course = await courseFactory.create({ authorId: author.id });
+    await db.insert(studentCourses).values({
+      studentId: student.id,
+      courseId: course.id,
+      status: COURSE_ENROLLMENT.ENROLLED,
+      enrolledAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+    const [thread] = await db
+      .insert(courseDiscussionThreads)
+      .values({
+        courseId: course.id,
+        lessonId: null,
+        authorId: author.id,
+        title: "Title",
+        content: "Body",
+        status: "visible",
+        lastActivityAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      })
+      .returning();
+    await request(app.getHttpServer())
+      .patch(`/api/discussions/${thread.id}/moderation`)
+      .set("Cookie", authCookies(student, SYSTEM_ROLE_SLUGS.STUDENT))
+      .send({ hidden: true })
+      .expect(403);
+  });
+
+  it("moderation forbidden when switch off", async () => {
+    await enableCohortLearning(false);
+    const admin = await userFactory
+      .withCredentials({ password: "password123" })
+      .withAdminSettings(db)
+      .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+    const course = await courseFactory.create({ authorId: admin.id });
+    const [thread] = await db
+      .insert(courseDiscussionThreads)
+      .values({
+        courseId: course.id,
+        lessonId: null,
+        authorId: admin.id,
+        title: "Title",
+        content: "Body",
+        status: "visible",
+        lastActivityAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      })
+      .returning();
+    await request(app.getHttpServer())
+      .patch(`/api/discussions/${thread.id}/moderation`)
+      .set("Cookie", authCookies(admin, SYSTEM_ROLE_SLUGS.ADMIN))
+      .send({ hidden: true })
+      .expect(403);
+  });
+
   it("course author can list/create own course discussions", async () => {
     await enableCohortLearning(true);
     const creator = await userFactory
@@ -349,6 +497,177 @@ describe("CourseDiscussionsController (e2e)", () => {
       .set("Cookie", authCookies(student, SYSTEM_ROLE_SLUGS.STUDENT))
       .expect(200);
     expect(res.body.data.comments.map((c: any) => c.content)).toEqual(["A", "B"]);
+  });
+
+  it("student detail and list get placeholders for hidden content", async () => {
+    await enableCohortLearning(true);
+    const author = await userFactory
+      .withCredentials({ password: "password123" })
+      .withUserSettings(db)
+      .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+    const student = await userFactory
+      .withCredentials({ password: "password123" })
+      .withUserSettings(db)
+      .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+    const course = await courseFactory.create({ authorId: author.id });
+    for (const u of [author, student])
+      await db.insert(studentCourses).values({
+        studentId: u.id,
+        courseId: course.id,
+        status: COURSE_ENROLLMENT.ENROLLED,
+        enrolledAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+    const [thread] = await db
+      .insert(courseDiscussionThreads)
+      .values({
+        courseId: course.id,
+        lessonId: null,
+        authorId: author.id,
+        title: "Secret",
+        content: "Secret body",
+        status: "hidden_by_staff",
+        hiddenAt: new Date().toISOString(),
+        hiddenById: author.id,
+        lastActivityAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      })
+      .returning();
+    await db.insert(courseDiscussionComments).values({
+      threadId: thread.id,
+      authorId: author.id,
+      content: "Hidden comment",
+      status: "hidden_by_staff",
+      hiddenAt: new Date().toISOString(),
+      hiddenById: author.id,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+    const detail = await request(app.getHttpServer())
+      .get(`/api/discussions/${thread.id}`)
+      .set("Cookie", authCookies(student, SYSTEM_ROLE_SLUGS.STUDENT))
+      .expect(200);
+    expect(detail.body.data.title).toBe("Comment unavailable");
+    expect(detail.body.data.content).toBe("This content is unavailable.");
+    expect(detail.body.data.comments[0].content).toBe("This content is unavailable.");
+    const list = await request(app.getHttpServer())
+      .get(`/api/courses/${course.id}/discussions`)
+      .set("Cookie", authCookies(student, SYSTEM_ROLE_SLUGS.STUDENT))
+      .expect(200);
+    expect(list.body.data[0].title).toBe("Comment unavailable");
+  });
+
+  it("student detail gets placeholder for hidden comment", async () => {
+    await enableCohortLearning(true);
+    const author = await userFactory
+      .withCredentials({ password: "password123" })
+      .withUserSettings(db)
+      .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+    const student = await userFactory
+      .withCredentials({ password: "password123" })
+      .withUserSettings(db)
+      .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+    const course = await courseFactory.create({ authorId: author.id });
+    for (const u of [author, student])
+      await db.insert(studentCourses).values({
+        studentId: u.id,
+        courseId: course.id,
+        status: COURSE_ENROLLMENT.ENROLLED,
+        enrolledAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+    const [thread] = await db
+      .insert(courseDiscussionThreads)
+      .values({
+        courseId: course.id,
+        lessonId: null,
+        authorId: author.id,
+        title: "Visible",
+        content: "Visible",
+        status: "visible",
+        lastActivityAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      })
+      .returning();
+    await db.insert(courseDiscussionComments).values({
+      threadId: thread.id,
+      authorId: author.id,
+      content: "Hidden comment",
+      status: "hidden_by_staff",
+      hiddenAt: new Date().toISOString(),
+      hiddenById: author.id,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+    const detail = await request(app.getHttpServer())
+      .get(`/api/discussions/${thread.id}`)
+      .set("Cookie", authCookies(student, SYSTEM_ROLE_SLUGS.STUDENT))
+      .expect(200);
+    expect(detail.body.data.comments[0].content).toBe("This content is unavailable.");
+  });
+
+  it("moderator sees original hidden content", async () => {
+    await enableCohortLearning(true);
+    const admin = await userFactory
+      .withCredentials({ password: "password123" })
+      .withAdminSettings(db)
+      .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+    const course = await courseFactory.create({ authorId: admin.id });
+    const [thread] = await db
+      .insert(courseDiscussionThreads)
+      .values({
+        courseId: course.id,
+        lessonId: null,
+        authorId: admin.id,
+        title: "Secret",
+        content: "Secret body",
+        status: "hidden_by_staff",
+        hiddenAt: new Date().toISOString(),
+        hiddenById: admin.id,
+        lastActivityAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      })
+      .returning();
+    const detail = await request(app.getHttpServer())
+      .get(`/api/discussions/${thread.id}`)
+      .set("Cookie", authCookies(admin, SYSTEM_ROLE_SLUGS.ADMIN))
+      .expect(200);
+    expect(detail.body.data.title).toBe("Secret");
+  });
+
+  it("moderation on deleted_by_author content is rejected", async () => {
+    await enableCohortLearning(true);
+    const admin = await userFactory
+      .withCredentials({ password: "password123" })
+      .withAdminSettings(db)
+      .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+    const course = await courseFactory.create({ authorId: admin.id });
+    const [thread] = await db
+      .insert(courseDiscussionThreads)
+      .values({
+        courseId: course.id,
+        lessonId: null,
+        authorId: admin.id,
+        title: "Title",
+        content: "Body",
+        status: "deleted_by_author",
+        deletedAt: new Date().toISOString(),
+        deletedById: admin.id,
+        lastActivityAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      })
+      .returning();
+    await request(app.getHttpServer())
+      .patch(`/api/discussions/${thread.id}/moderation`)
+      .set("Cookie", authCookies(admin, SYSTEM_ROLE_SLUGS.ADMIN))
+      .send({ hidden: true })
+      .expect(409);
   });
 
   it("authorized user denied when switch off", async () => {
@@ -612,6 +931,102 @@ describe("CourseDiscussionsController (e2e)", () => {
       .set("Cookie", authCookies(author, SYSTEM_ROLE_SLUGS.STUDENT))
       .expect(200);
     expect(res.body.data.status).toBe("deleted_by_author");
+  });
+
+  it("admin can hide and unhide comment", async () => {
+    await enableCohortLearning(true);
+    const admin = await userFactory
+      .withCredentials({ password: "password123" })
+      .withAdminSettings(db)
+      .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+    const course = await courseFactory.create({ authorId: admin.id });
+    const [thread] = await db
+      .insert(courseDiscussionThreads)
+      .values({
+        courseId: course.id,
+        lessonId: null,
+        authorId: admin.id,
+        title: "T",
+        content: "C",
+        status: "visible",
+        lastActivityAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      })
+      .returning();
+    const [comment] = await db
+      .insert(courseDiscussionComments)
+      .values({
+        threadId: thread.id,
+        authorId: admin.id,
+        content: "Comment",
+        status: "visible",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      })
+      .returning();
+    const cookies = authCookies(admin, SYSTEM_ROLE_SLUGS.ADMIN);
+    await request(app.getHttpServer())
+      .patch(`/api/discussion-comments/${comment.id}/moderation`)
+      .set("Cookie", cookies)
+      .send({ hidden: true })
+      .expect(200);
+    await request(app.getHttpServer())
+      .patch(`/api/discussion-comments/${comment.id}/moderation`)
+      .set("Cookie", cookies)
+      .send({ hidden: false })
+      .expect(200);
+  });
+
+  it("non-staff cannot moderate comment", async () => {
+    await enableCohortLearning(true);
+    const author = await userFactory
+      .withCredentials({ password: "password123" })
+      .withUserSettings(db)
+      .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+    const student = await userFactory
+      .withCredentials({ password: "password123" })
+      .withUserSettings(db)
+      .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+    const course = await courseFactory.create({ authorId: author.id });
+    await db.insert(studentCourses).values({
+      studentId: student.id,
+      courseId: course.id,
+      status: COURSE_ENROLLMENT.ENROLLED,
+      enrolledAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+    const [thread] = await db
+      .insert(courseDiscussionThreads)
+      .values({
+        courseId: course.id,
+        lessonId: null,
+        authorId: author.id,
+        title: "T",
+        content: "C",
+        status: "visible",
+        lastActivityAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      })
+      .returning();
+    const [comment] = await db
+      .insert(courseDiscussionComments)
+      .values({
+        threadId: thread.id,
+        authorId: author.id,
+        content: "Comment",
+        status: "visible",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      })
+      .returning();
+    await request(app.getHttpServer())
+      .patch(`/api/discussion-comments/${comment.id}/moderation`)
+      .set("Cookie", authCookies(student, SYSTEM_ROLE_SLUGS.STUDENT))
+      .send({ hidden: true })
+      .expect(403);
   });
 
   it("unauthorized or unenrolled cannot read thread detail", async () => {
