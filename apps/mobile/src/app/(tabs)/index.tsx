@@ -1,5 +1,5 @@
 import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
+import { Platform, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AnimatedIcon } from '@/components/animated-icon';
@@ -8,6 +8,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { WebBadge } from '@/components/web-badge';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { useAuth } from '@/lib/auth/auth-context';
 
 function getDevMenuHint() {
   if (Platform.OS === 'web') {
@@ -29,14 +30,21 @@ function getDevMenuHint() {
 }
 
 export default function HomeScreen() {
+  const { user, logout } = useAuth();
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <ThemedView style={styles.heroSection}>
           <AnimatedIcon />
           <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
+            Welcome{user?.email ? `, ${user.email}` : ' to Expo'}
           </ThemedText>
+          <Pressable
+            accessibilityRole="button"
+            onPress={logout}
+            style={({ pressed }) => [styles.logoutButton, pressed && styles.logoutPressed]}>
+            <ThemedText type="smallBold">Sign out</ThemedText>
+          </Pressable>
         </ThemedView>
 
         <ThemedText type="code" style={styles.code}>
@@ -95,4 +103,12 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.four,
     borderRadius: Spacing.four,
   },
+  logoutButton: {
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two,
+    borderRadius: Spacing.two,
+    borderWidth: 1,
+    borderColor: '#3c87f7',
+  },
+  logoutPressed: { opacity: 0.7 },
 });
