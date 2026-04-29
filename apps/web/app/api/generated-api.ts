@@ -1021,6 +1021,8 @@ export interface GetUserDetailsResponse {
     contactPhone: string | null;
     jobTitle: string | null;
     profilePictureUrl: string | null;
+    /** @min 0 */
+    points: number;
   };
 }
 
@@ -1631,6 +1633,8 @@ export interface GetCourseResponse {
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
     baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
     dueDate: string | null;
+    /** @min 0 */
+    pointsValue: number;
   };
 }
 
@@ -2843,6 +2847,8 @@ export interface GetAllCertificatesResponse {
     fullName?: string | null;
     certificateSignatureUrl?: string | null;
     certificateFontColor?: string | null;
+    /** @min 0 */
+    pointsValue?: number;
     createdAt: string;
   }[];
   pagination: {
@@ -2865,6 +2871,8 @@ export type GetCertificateResponse = {
   fullName?: string | null;
   certificateSignatureUrl?: string | null;
   certificateFontColor?: string | null;
+  /** @min 0 */
+  pointsValue?: number;
   createdAt: string;
 } | null;
 

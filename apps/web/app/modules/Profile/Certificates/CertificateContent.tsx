@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Icon } from "~/components/Icon";
 import { cn } from "~/lib/utils";
@@ -18,6 +19,7 @@ interface CertificateContentProps {
   signatureImageUrl?: string | null;
   lang?: "pl" | "en";
   colorTheme?: CertificateColorTheme;
+  pointsValue?: number;
 }
 
 const translations = {
@@ -53,7 +55,9 @@ const CertificateContent = ({
   signatureImageUrl,
   lang = "en",
   colorTheme = defaultCertificateColorTheme,
+  pointsValue,
 }: CertificateContentProps) => {
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
 
@@ -124,6 +128,11 @@ const CertificateContent = ({
         <p className={text2Classes} style={{ color: colorTheme.bodyTextColor }}>
           {translations[lang].confirmation}
         </p>
+        {pointsValue != null && (
+          <p className="mt-2 text-[20px]" style={{ color: colorTheme.bodyTextColor }}>
+            {t("studentCertificate.other.pointsAwarded", { count: pointsValue })}
+          </p>
+        )}
       </div>
 
       <div className="flex items-end gap-x-52">

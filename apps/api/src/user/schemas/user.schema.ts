@@ -91,6 +91,7 @@ export const userDetailsSchema = Type.Object({
 export const userDetailsResponseSchema = Type.Object({
   ...userDetailsSchema.properties,
   profilePictureUrl: Type.Union([Type.String(), Type.Null()]),
+  points: Type.Integer({ minimum: 0 }),
 });
 
 export type UserDetailsWithAvatarKey = Static<typeof userDetailsSchema> & {

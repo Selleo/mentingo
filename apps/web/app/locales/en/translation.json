@@ -533,7 +533,8 @@
       "about": "About",
       "contact": "Contact",
       "courses": "Courses",
-      "title": "Title"
+      "title": "Title",
+      "points": "{{count}} pts"
     }
   },
   "changeUserInformationView": {
@@ -2045,7 +2046,8 @@
     "otherAuthorCoursesSubheader": "Below you can see more courses created by the same author",
     "other": {
       "cannotFindCourses": "We could not find any courses",
-      "changeSearchCriteria": "Please change the search criteria or try again later"
+      "changeSearchCriteria": "Please change the search criteria or try again later",
+      "pointsValue": "Worth up to {{count}} pts"
     },
     "lesson": {
       "missingAnswer": "Missing answer",
@@ -2326,6 +2328,11 @@
     "inProgress": "In Progress",
     "notStarted": "Not Started",
     "blocked": "Blocked"
+  },
+  "studentCertificate": {
+    "other": {
+      "pointsAwarded": "Awarded with {{count}} points"
+    }
   },
   "studentCertificateView": {
     "header": "Certificates",

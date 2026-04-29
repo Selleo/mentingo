@@ -3,13 +3,40 @@ import { eq, and, countDistinct, sql, isNull } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { addPagination } from "src/common/pagination";
+import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { LocalizationService } from "src/localization/localization.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { certificates, users, courses, studentCourses, tenants } from "src/storage/schema";
+import {
+  certificates,
+  users,
+  courses,
+  chapters,
+  lessons,
+  studentCourses,
+  tenants,
+} from "src/storage/schema";
 
 import type { SupportedLanguages } from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type * as schema from "src/storage/schema";
+
+const POINTS_PER_CHAPTER = 10;
+const POINTS_PER_AI_PASS = 30;
+const POINTS_PER_COURSE = 50;
+
+const coursePointsValueSql = sql<number>`(
+  ${POINTS_PER_COURSE}
+  + (
+    SELECT COUNT(*)::INTEGER FROM ${chapters}
+    WHERE ${chapters.courseId} = ${courses.id}
+  ) * ${POINTS_PER_CHAPTER}
+  + (
+    SELECT COUNT(*)::INTEGER FROM ${lessons}
+    INNER JOIN ${chapters} ON ${chapters.id} = ${lessons.chapterId}
+    WHERE ${chapters.courseId} = ${courses.id}
+      AND ${lessons.type} = ${LESSON_TYPES.AI_MENTOR}
+  ) * ${POINTS_PER_AI_PASS}
+)::INTEGER`;
 
 @Injectable()
 export class CertificateRepository {
@@ -38,6 +65,7 @@ export class CertificateRepository {
         fullName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
         certificateSignature: sql<string | null>`(${courses.settings} ->> 'certificateSignature')`,
         certificateFontColor: sql<string | null>`(${courses.settings} ->> 'certificateFontColor')`,
+        pointsValue: coursePointsValueSql,
         userId: certificates.userId,
         createdAt: certificates.createdAt,
         updatedAt: certificates.updatedAt,
@@ -139,6 +167,7 @@ export class CertificateRepository {
         fullName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
         certificateSignature: sql<string | null>`(${courses.settings} ->> 'certificateSignature')`,
         certificateFontColor: sql<string | null>`(${courses.settings} ->> 'certificateFontColor')`,
+        pointsValue: coursePointsValueSql,
         userId: certificates.userId,
         createdAt: certificates.createdAt,
         updatedAt: certificates.updatedAt,
@@ -199,6 +228,7 @@ export class CertificateRepository {
         fullName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
         certificateSignature: sql<string | null>`(${courses.settings} ->> 'certificateSignature')`,
         certificateFontColor: sql<string | null>`(${courses.settings} ->> 'certificateFontColor')`,
+        pointsValue: coursePointsValueSql,
       })
       .from(certificates)
       .innerJoin(users, eq(users.id, certificates.userId))
@@ -234,6 +264,7 @@ export class CertificateRepository {
         fullName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
         certificateSignature: sql<string | null>`(${courses.settings} ->> 'certificateSignature')`,
         certificateFontColor: sql<string | null>`(${courses.settings} ->> 'certificateFontColor')`,
+        pointsValue: coursePointsValueSql,
       })
       .from(certificates)
       .innerJoin(users, eq(users.id, certificates.userId))

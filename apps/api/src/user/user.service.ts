@@ -64,6 +64,7 @@ import { importUserSchema } from "src/user/schemas/createUser.schema";
 import { WsGateway } from "src/websocket/websocket.gateway";
 
 import {
+  aiMentorStudentLessonProgress,
   createTokens,
   credentials,
   groups,
@@ -73,6 +74,8 @@ import {
   permissionRuleSetPermissions,
   permissionRuleSets,
   permissionUserRoles,
+  studentChapterProgress,
+  studentLessonProgress,
   userDetails,
   users,
   settings,
@@ -103,6 +106,10 @@ import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { ChangePasswordBody } from "src/user/schemas/changePassword.schema";
 import type { CreateUserBody, ImportUserResponse } from "src/user/schemas/createUser.schema";
 import type { CreateUserOptions, CreateUserTransactionResult } from "src/user/user.types";
+
+const POINTS_PER_CHAPTER = 10;
+const POINTS_PER_AI_PASS = 30;
+const POINTS_PER_COURSE = 50;
 
 @Injectable()
 export class UserService {
@@ -276,7 +283,7 @@ export class UserService {
   ): Promise<UserDetailsResponse> {
     const { userId: currentUserId } = currentUser;
 
-    const [userBio]: UserDetailsWithAvatarKey[] = await this.db
+    const userBioQuery: Promise<UserDetailsWithAvatarKey[]> = this.db
       .select({
         firstName: users.firstName,
         lastName: users.lastName,
@@ -290,6 +297,8 @@ export class UserService {
       .from(users)
       .leftJoin(userDetails, eq(userDetails.userId, users.id))
       .where(and(eq(users.id, userId), isNull(users.deletedAt)));
+
+    const [[userBio], points] = await Promise.all([userBioQuery, this.getUserPoints(userId)]);
 
     if (!userBio) throw new NotFoundException("common.toast.notFound");
 
@@ -311,7 +320,29 @@ export class UserService {
     return {
       ...user,
       profilePictureUrl,
+      points,
     };
+  }
+
+  private async getUserPoints(userId: UUIDType): Promise<number> {
+    const result = await this.db.execute(sql`
+      SELECT (
+        (SELECT COUNT(*) FROM ${studentChapterProgress}
+          WHERE ${studentChapterProgress.studentId} = ${userId}
+            AND ${studentChapterProgress.completedAt} IS NOT NULL) * ${POINTS_PER_CHAPTER}
+        + (SELECT COUNT(*) FROM ${aiMentorStudentLessonProgress}
+          INNER JOIN ${studentLessonProgress}
+            ON ${studentLessonProgress.id} = ${aiMentorStudentLessonProgress.studentLessonProgressId}
+          WHERE ${studentLessonProgress.studentId} = ${userId}
+            AND ${aiMentorStudentLessonProgress.passed} = TRUE) * ${POINTS_PER_AI_PASS}
+        + (SELECT COUNT(*) FROM ${studentCourses}
+          WHERE ${studentCourses.studentId} = ${userId}
+            AND ${studentCourses.completedAt} IS NOT NULL) * ${POINTS_PER_COURSE}
+      )::int AS points
+    `);
+
+    const rows = result as unknown as Array<{ points: number | string | null }>;
+    return Number(rows[0]?.points ?? 0);
   }
 
   public async updateUser(id: UUIDType, data: UpdateUserBody, actor?: CurrentUserType) {

@@ -533,7 +533,8 @@
       "about": "Apie",
       "contact": "Susisiekite",
       "courses": "Kursai",
-      "title": "Pavadinimas"
+      "title": "Pavadinimas",
+      "points": "{{count}} tšk."
     }
   },
   "changeUserInformationView": {
@@ -1992,7 +1993,8 @@
     "otherAuthorCoursesSubheader": "Žemiau galite pamatyti daugiau to paties autoriaus sukurtų kursų",
     "other": {
       "cannotFindCourses": "Neradome jokių kursų",
-      "changeSearchCriteria": "Pakeiskite paieškos kriterijus arba bandykite dar kartą vėliau"
+      "changeSearchCriteria": "Pakeiskite paieškos kriterijus arba bandykite dar kartą vėliau",
+      "pointsValue": "Galima gauti {{count}} tšk."
     },
     "lesson": {
       "missingAnswer": "Trūksta atsakymo",
@@ -2273,6 +2275,11 @@
     "inProgress": "Vykdoma",
     "notStarted": "Nepradėtas",
     "blocked": "Užblokuota"
+  },
+  "studentCertificate": {
+    "other": {
+      "pointsAwarded": "Suteikta {{count}} taškų"
+    }
   },
   "studentCertificateView": {
     "header": "Sertifikatai",

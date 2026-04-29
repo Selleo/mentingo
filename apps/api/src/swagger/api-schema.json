@@ -14932,6 +14932,10 @@
                     "type": "null"
                   }
                 ]
+              },
+              "points": {
+                "minimum": 0,
+                "type": "integer"
               }
             },
             "required": [
@@ -14942,7 +14946,8 @@
               "contactEmail",
               "contactPhone",
               "jobTitle",
-              "profilePictureUrl"
+              "profilePictureUrl",
+              "points"
             ]
           }
         },
@@ -17772,6 +17777,10 @@
                     "type": "null"
                   }
                 ]
+              },
+              "pointsValue": {
+                "minimum": 0,
+                "type": "integer"
               }
             },
             "required": [
@@ -17793,7 +17802,8 @@
               "stripePriceId",
               "availableLocales",
               "baseLanguage",
-              "dueDate"
+              "dueDate",
+              "pointsValue"
             ]
           }
         },
@@ -23801,6 +23811,10 @@
                     }
                   ]
                 },
+                "pointsValue": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
                 "createdAt": {
                   "type": "string"
                 }
@@ -23910,6 +23924,10 @@
                     "type": "null"
                   }
                 ]
+              },
+              "pointsValue": {
+                "minimum": 0,
+                "type": "integer"
               },
               "createdAt": {
                 "type": "string"

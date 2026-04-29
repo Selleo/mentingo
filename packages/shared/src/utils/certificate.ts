@@ -34,6 +34,8 @@ export type BuildCertificateMarkupOptions = {
   colorTheme?: CertificateRenderTheme;
   isModal?: boolean;
   isDownload?: boolean;
+  pointsValue?: number;
+  pointsLabel?: string;
 };
 
 const certificateTranslations = {
@@ -95,6 +97,8 @@ export function buildCertificateMarkup(options: BuildCertificateMarkupOptions): 
     lang = "en",
     colorTheme = defaultCertificateRenderTheme,
     isDownload = false,
+    pointsValue,
+    pointsLabel,
   } = options;
 
   const t = certificateTranslations[lang];
@@ -157,6 +161,16 @@ export function buildCertificateMarkup(options: BuildCertificateMarkupOptions): 
       >
         ${escapeHtml(t.confirmation)}
       </p>
+      ${
+        pointsValue != null && pointsLabel
+          ? `<p
+        class="mt-2 text-[20px]"
+        style="color:${escapeHtml(colorTheme.bodyTextColor)};"
+      >
+        ${escapeHtml(pointsLabel)}
+      </p>`
+          : ""
+      }
     </div>
 
     <div class="flex items-end gap-x-52">

@@ -30,6 +30,12 @@ export const ProfileCard = ({ canManageCourses, userDetails }: ProfileCardProps)
             <h2 className="h6 md:h4 text-neutral-950" data-testid="username">
               {userDetails?.firstName} {userDetails?.lastName}
             </h2>
+            <span
+              className="body-sm-md w-fit rounded-full bg-primary-50 px-3 py-1 text-accent-foreground"
+              data-testid="userPoints"
+            >
+              {t("contentCreatorView.other.points", { count: userDetails?.points ?? 0 })}
+            </span>
             {canManageCourses && userDetails?.jobTitle && (
               <div className="body-sm">
                 <span className="text-neutral-900 body-base-md">

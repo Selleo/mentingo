@@ -164,6 +164,10 @@ import type {
 import type { ProgressStatus } from "src/utils/types/progress.type";
 import type Stripe from "stripe";
 
+const POINTS_PER_CHAPTER = 10;
+const POINTS_PER_AI_PASS = 30;
+const POINTS_PER_COURSE = 50;
+
 @Injectable()
 export class CourseService {
   constructor(
@@ -1080,6 +1084,19 @@ export class CourseService {
         isContentReadonly: sql<boolean>`${courses.originType} = 'exported'`,
         sourceCourseId: courses.sourceCourseId,
         sourceTenantId: courses.sourceTenantId,
+        pointsValue: sql<number>`(
+          ${POINTS_PER_COURSE}
+          + (
+            SELECT COUNT(*)::INTEGER FROM ${chapters}
+            WHERE ${chapters.courseId} = ${courses.id}
+          ) * ${POINTS_PER_CHAPTER}
+          + (
+            SELECT COUNT(*)::INTEGER FROM ${lessons}
+            INNER JOIN ${chapters} ON ${chapters.id} = ${lessons.chapterId}
+            WHERE ${chapters.courseId} = ${courses.id}
+              AND ${lessons.type} = ${LESSON_TYPES.AI_MENTOR}
+          ) * ${POINTS_PER_AI_PASS}
+        )::INTEGER`,
       })
       .from(courses)
       .leftJoin(categories, eq(courses.categoryId, categories.id))
