@@ -44,6 +44,8 @@ import type {
   MasterCourseEntityType,
   MasterCourseExportSyncStatus,
   RegistrationFormFieldType,
+  RewardActionType,
+  RewardSourceEntityType,
   SupportedLanguages,
   PermissionKey,
   SupportSessionStatus,
@@ -532,6 +534,127 @@ export const aiMentorStudentLessonProgress = pgTable(
     tenantId,
   },
   withTenantIdIndex("ai_mentor_student_lesson_progress"),
+);
+
+export const rewardRules = pgTable(
+  "reward_rules",
+  {
+    ...id,
+    ...timestamps,
+    actionType: varchar("action_type", { length: 100 })
+      .$type<RewardActionType>()
+      .notNull(),
+    points: integer("points").notNull(),
+    enabled: boolean("enabled").notNull().default(true),
+    tenantId,
+  },
+  withTenantIdIndex("reward_rules", (table) => ({
+    unq: unique().on(table.tenantId, table.actionType),
+  })),
+);
+
+export const rewardPointLedger = pgTable(
+  "reward_point_ledger",
+  {
+    ...id,
+    ...timestamps,
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    actionType: varchar("action_type", { length: 100 })
+      .$type<RewardActionType>()
+      .notNull(),
+    sourceEntityType: varchar("source_entity_type", { length: 100 })
+      .$type<RewardSourceEntityType>()
+      .notNull(),
+    sourceEntityId: uuid("source_entity_id").notNull(),
+    points: integer("points").notNull(),
+    ruleId: uuid("rule_id").references(() => rewardRules.id, { onDelete: "set null" }),
+    metadata: jsonb("metadata").notNull().default({}),
+    awardedAt: timestamp("awarded_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("reward_point_ledger", (table) => ({
+    userIdx: index("reward_point_ledger_user_idx").on(table.userId),
+    sourceIdx: index("reward_point_ledger_source_idx").on(
+      table.sourceEntityType,
+      table.sourceEntityId,
+    ),
+    unq: unique().on(
+      table.tenantId,
+      table.userId,
+      table.actionType,
+      table.sourceEntityType,
+      table.sourceEntityId,
+    ),
+  })),
+);
+
+export const userRewardTotals = pgTable(
+  "user_reward_totals",
+  {
+    ...id,
+    ...timestamps,
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    totalPoints: integer("total_points").notNull().default(0),
+    tenantId,
+  },
+  withTenantIdIndex("user_reward_totals", (table) => ({
+    userUnq: unique().on(table.tenantId, table.userId),
+    pointsIdx: index("user_reward_totals_points_idx").on(table.totalPoints),
+  })),
+);
+
+export const rewardAchievements = pgTable(
+  "reward_achievements",
+  {
+    ...id,
+    ...timestamps,
+    title: jsonb("title").$type<LocalizedText>().notNull().default({}),
+    description: jsonb("description").$type<LocalizedText>().notNull().default({}),
+    pointThreshold: integer("point_threshold").notNull(),
+    sortOrder: integer("sort_order").notNull().default(0),
+    archived,
+    tenantId,
+  },
+  withTenantIdIndex("reward_achievements", (table) => ({
+    thresholdIdx: index("reward_achievements_threshold_idx").on(table.pointThreshold),
+  })),
+);
+
+export const userRewardAchievements = pgTable(
+  "user_reward_achievements",
+  {
+    ...id,
+    ...timestamps,
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    achievementId: uuid("achievement_id")
+      .references(() => rewardAchievements.id, { onDelete: "cascade" })
+      .notNull(),
+    earnedAt: timestamp("earned_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    pointTotalAtEarn: integer("point_total_at_earn").notNull(),
+    thresholdAtEarn: integer("threshold_at_earn").notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("user_reward_achievements", (table) => ({
+    unq: unique().on(table.tenantId, table.userId, table.achievementId),
+  })),
 );
 
 export const studentChapterProgress = pgTable(
