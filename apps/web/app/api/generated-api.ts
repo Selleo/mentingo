@@ -1648,6 +1648,8 @@ export interface GetCourseResponse {
     dueDate: string | null;
     commentCount: number;
     discussionsEnabled: boolean;
+    completerAvatars: (string | null)[];
+    completerCount: number;
   };
 }
 

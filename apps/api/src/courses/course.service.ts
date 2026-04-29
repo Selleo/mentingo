@@ -1229,6 +1229,25 @@ export class CourseService {
       .from(courseComments)
       .where(and(eq(courseComments.courseId, course.id), isNull(courseComments.deletedAt)));
 
+    const [{ count: completerCount } = { count: 0 }] = await this.db
+      .select({ count: sql<number>`COUNT(*)::int` })
+      .from(studentCourses)
+      .where(and(eq(studentCourses.courseId, course.id), isNotNull(studentCourses.completedAt)));
+
+    const recentCompleters = await this.db
+      .select({ avatarReference: users.avatarReference })
+      .from(studentCourses)
+      .innerJoin(users, eq(users.id, studentCourses.studentId))
+      .where(and(eq(studentCourses.courseId, course.id), isNotNull(studentCourses.completedAt)))
+      .orderBy(sql`${studentCourses.completedAt} DESC NULLS LAST`)
+      .limit(3);
+
+    const completerAvatars = await Promise.all(
+      recentCompleters.map(({ avatarReference }) =>
+        avatarReference ? this.fileService.getFileUrl(avatarReference) : Promise.resolve(null),
+      ),
+    );
+
     const globalSettings = await this.settingsService.getGlobalSettings();
 
     return {
@@ -1239,6 +1258,8 @@ export class CourseService {
       slug: currentSlug,
       commentCount: commentCount ?? 0,
       discussionsEnabled: globalSettings.discussionsEnabled ?? true,
+      completerAvatars,
+      completerCount: completerCount ?? 0,
     };
   }
 

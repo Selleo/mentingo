@@ -2156,6 +2156,11 @@
       "moreFromAuthor": "More from author",
       "statistics": "Statistics",
       "discussion": "Discussion"
+    },
+    "completed": {
+      "label": "Completed:",
+      "avatarAlt": "Course completer",
+      "overflow": "+{{count}}"
     }
   },
   "courseDiscussion": {

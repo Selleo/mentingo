@@ -8,6 +8,7 @@ import { useCurrentUser } from "~/api/queries";
 import CardPlaceholder from "~/assets/placeholders/card-placeholder.jpg";
 import { Icon } from "~/components/Icon";
 import Viewer from "~/components/RichText/Viever";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
@@ -41,6 +42,10 @@ export default function CourseOverview({ course }: CourseOverviewProps) {
   const description = course?.description || "";
   const isDraftCourse = course.status === "draft";
   const isEnterLearningModeDisabled = isDraftCourse && !isCourseStudentModeActive;
+
+  const completerAvatars = course.completerAvatars ?? [];
+  const completerCount = course.completerCount ?? 0;
+  const overflowCount = completerCount > 3 ? completerCount - 3 : 0;
 
   const navigateToEditCourse = () => navigate(`/admin/beta-courses/${course.id}`);
 
@@ -123,6 +128,35 @@ export default function CourseOverview({ course }: CourseOverviewProps) {
               className="body-base mt-2 text-neutral-900"
               variant="content"
             />
+            {completerCount > 0 && (
+              <div className="mt-3 flex items-center gap-2">
+                <span className="body-sm text-neutral-700">
+                  {t("studentCourseView.completed.label")}
+                </span>
+                <div className="flex -space-x-2">
+                  {completerAvatars.slice(0, 3).map((avatarUrl, index) => (
+                    <Avatar key={index} className="size-8 border-2 border-white ring-0">
+                      {avatarUrl ? (
+                        <AvatarImage
+                          src={avatarUrl}
+                          alt={t("studentCourseView.completed.avatarAlt")}
+                        />
+                      ) : null}
+                      <AvatarFallback>
+                        <Icon name="User" className="size-4 text-neutral-500" />
+                      </AvatarFallback>
+                    </Avatar>
+                  ))}
+                  {overflowCount > 0 && (
+                    <div className="flex size-8 items-center justify-center rounded-full border-2 border-white bg-neutral-200 text-xs font-medium text-neutral-800">
+                      {t("studentCourseView.completed.overflow", {
+                        count: overflowCount,
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </CardContent>

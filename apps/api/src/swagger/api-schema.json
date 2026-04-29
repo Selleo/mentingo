@@ -18001,6 +18001,22 @@
               },
               "discussionsEnabled": {
                 "type": "boolean"
+              },
+              "completerAvatars": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "completerCount": {
+                "type": "number"
               }
             },
             "required": [
@@ -18024,7 +18040,9 @@
               "baseLanguage",
               "dueDate",
               "commentCount",
-              "discussionsEnabled"
+              "discussionsEnabled",
+              "completerAvatars",
+              "completerCount"
             ]
           }
         },
