@@ -2161,7 +2161,30 @@
       "completed": "Completed:",
       "avatarAlt": "Completed student avatar",
       "enrollmentRequired": "Join the course to view student discussions.",
-      "empty": "Discussion is enabled. Students can start sharing questions and progress updates here."
+      "empty": "No posts yet.",
+      "loading": "Loading discussion...",
+      "postCreated": "Post added successfully.",
+      "filters": {
+        "all": "All",
+        "questions": "Questions",
+        "latest": "Latest",
+        "pinned": "Pinned"
+      },
+      "form": {
+        "type": "Type",
+        "contentPlaceholder": "Write your post...",
+        "submit": "Add post",
+        "types": {
+          "question": "Question",
+          "discussion": "Discussion",
+          "progress": "Progress"
+        }
+      },
+      "post": {
+        "pinned": "Pinned",
+        "comments_one": "{{count}} comment",
+        "comments_other": "{{count}} comments"
+      }
     }
   },
   "studentChapterView": {

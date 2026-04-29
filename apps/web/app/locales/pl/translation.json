@@ -2163,7 +2163,32 @@
       "completed": "Ukończyło:",
       "avatarAlt": "Avatar studenta, który ukończył kurs",
       "enrollmentRequired": "Dołącz do kursu, aby zobaczyć dyskusję studentów.",
-      "empty": "Dyskusja jest włączona. Studenci mogą tutaj zadawać pytania i dzielić się postępami."
+      "empty": "Brak postów.",
+      "loading": "Ładowanie dyskusji...",
+      "postCreated": "Post został dodany.",
+      "filters": {
+        "all": "Wszystko",
+        "questions": "Pytania",
+        "latest": "Najnowsze",
+        "pinned": "Przypięte"
+      },
+      "form": {
+        "type": "Typ",
+        "contentPlaceholder": "Napisz post...",
+        "submit": "Dodaj post",
+        "types": {
+          "question": "Pytanie",
+          "discussion": "Dyskusja",
+          "progress": "Postęp"
+        }
+      },
+      "post": {
+        "pinned": "Przypięty",
+        "comments_one": "{{count}} komentarz",
+        "comments_few": "{{count}} komentarze",
+        "comments_many": "{{count}} komentarzy",
+        "comments_other": "{{count}} komentarza"
+      }
     }
   },
   "studentChapterView": {

@@ -62,6 +62,13 @@ import {
   courseOwnershipCandidatesResponseSchema,
 } from "src/courses/schemas/course.schema";
 import {
+  courseDiscussionPostsSchema,
+  createCourseDiscussionPostSchema,
+  discussionFilterSchema,
+  CreateCourseDiscussionPostBody,
+  DiscussionFilter,
+} from "src/courses/schemas/courseDiscussion.schema";
+import {
   COURSE_ENROLLMENT_SCOPES,
   CourseEnrollmentScope,
   SortCourseFieldsOptions,
@@ -799,6 +806,46 @@ export class CourseController {
     @Param("courseId") courseId: UUIDType,
   ): Promise<BaseResponse<CourseDiscussionSummaryResponse>> {
     const data = await this.courseService.getCourseDiscussionSummary(courseId);
+
+    return new BaseResponse(data);
+  }
+
+  @Get(":courseId/discussion/posts")
+  @Validate({
+    request: [
+      { type: "param", name: "courseId", schema: UUIDSchema },
+      { type: "query", name: "filter", schema: Type.Optional(discussionFilterSchema) },
+    ],
+    response: baseResponse(courseDiscussionPostsSchema),
+  })
+  async getCourseDiscussionPosts(
+    @Param("courseId") courseId: UUIDType,
+    @Query("filter") filter: DiscussionFilter,
+    @CurrentUser() currentUser: CurrentUserType,
+  ) {
+    const data = await this.courseService.getCourseDiscussionPosts(
+      courseId,
+      filter ?? "all",
+      currentUser,
+    );
+
+    return new BaseResponse(data);
+  }
+
+  @Post(":courseId/discussion/posts")
+  @Validate({
+    request: [
+      { type: "param", name: "courseId", schema: UUIDSchema },
+      { type: "body", schema: createCourseDiscussionPostSchema },
+    ],
+    response: baseResponse(courseDiscussionPostsSchema.items),
+  })
+  async createCourseDiscussionPost(
+    @Param("courseId") courseId: UUIDType,
+    @Body() body: CreateCourseDiscussionPostBody,
+    @CurrentUser() currentUser: CurrentUserType,
+  ) {
+    const data = await this.courseService.createCourseDiscussionPost(courseId, body, currentUser);
 
     return new BaseResponse(data);
   }

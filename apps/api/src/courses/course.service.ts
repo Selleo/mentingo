@@ -73,6 +73,9 @@ import {
   groupCourses,
   aiMentorStudentLessonProgress,
   categories,
+  courseDiscussionComments,
+  courseDiscussionPosts,
+  courseDiscussionReactions,
   certificates,
   chapters,
   courseStudentMode,
@@ -128,6 +131,11 @@ import type {
   LessonSequenceEnabledResponse,
   TransferCourseOwnershipRequestBody,
 } from "./schemas/course.schema";
+import type {
+  CourseDiscussionPostResponse,
+  CreateCourseDiscussionPostBody,
+  DiscussionFilter,
+} from "./schemas/courseDiscussion.schema";
 import type { CourseLookupResponse } from "./schemas/courseLookupResponse.schema";
 import type {
   CourseEnrollmentScope,
@@ -360,6 +368,169 @@ export class CourseService {
       activeStudentsCount: null,
       completedStudentAvatars,
     };
+  }
+
+  async getCourseDiscussionPosts(
+    courseId: UUIDType,
+    filter: DiscussionFilter,
+    currentUser: CurrentUserType,
+  ): Promise<CourseDiscussionPostResponse[]> {
+    await this.assertCourseDiscussionAccess(courseId, currentUser);
+
+    const whereConditions: SQL[] = [eq(courseDiscussionPosts.courseId, courseId)];
+
+    if (filter === "questions") {
+      whereConditions.push(eq(courseDiscussionPosts.type, "question"));
+    }
+
+    if (filter === "pinned") {
+      whereConditions.push(eq(courseDiscussionPosts.isPinned, true));
+    }
+
+    const orderBy =
+      filter === "latest"
+        ? [desc(courseDiscussionPosts.createdAt)]
+        : [
+            desc(sql`CASE WHEN ${courseDiscussionPosts.isPinned} THEN 1 ELSE 0 END`),
+            desc(courseDiscussionPosts.pinnedAt),
+            desc(courseDiscussionPosts.createdAt),
+          ];
+
+    const posts = await this.db
+      .select({
+        id: courseDiscussionPosts.id,
+        authorId: courseDiscussionPosts.authorId,
+        authorName: sql<string>`TRIM(CONCAT(${users.firstName}, ' ', ${users.lastName}))`,
+        authorAvatarReference: users.avatarReference,
+        type: courseDiscussionPosts.type,
+        content: courseDiscussionPosts.content,
+        createdAt: courseDiscussionPosts.createdAt,
+        isPinned: courseDiscussionPosts.isPinned,
+        commentsCount: sql<number>`(
+          SELECT COUNT(*)::int
+          FROM ${courseDiscussionComments} cdc
+          WHERE cdc.post_id = ${courseDiscussionPosts.id}
+        )`,
+        likeCount: sql<number>`(
+          SELECT COUNT(*)::int
+          FROM ${courseDiscussionReactions} cdr
+          WHERE cdr.entity_type = 'post'
+            AND cdr.entity_id = ${courseDiscussionPosts.id}
+            AND cdr.reaction_type = 'like'
+        )`,
+        heartCount: sql<number>`(
+          SELECT COUNT(*)::int
+          FROM ${courseDiscussionReactions} cdr
+          WHERE cdr.entity_type = 'post'
+            AND cdr.entity_id = ${courseDiscussionPosts.id}
+            AND cdr.reaction_type = 'heart'
+        )`,
+        celebrateCount: sql<number>`(
+          SELECT COUNT(*)::int
+          FROM ${courseDiscussionReactions} cdr
+          WHERE cdr.entity_type = 'post'
+            AND cdr.entity_id = ${courseDiscussionPosts.id}
+            AND cdr.reaction_type = 'celebrate'
+        )`,
+      })
+      .from(courseDiscussionPosts)
+      .innerJoin(users, eq(users.id, courseDiscussionPosts.authorId))
+      .where(and(...whereConditions))
+      .orderBy(...orderBy);
+
+    return Promise.all(
+      posts.map(async (post) => {
+        const authorAvatarUrl = post.authorAvatarReference
+          ? await this.userService.getUsersProfilePictureUrl(post.authorAvatarReference)
+          : null;
+
+        return {
+          id: post.id,
+          authorId: post.authorId,
+          authorName: post.authorName,
+          authorAvatarUrl,
+          type: post.type,
+          content: post.content,
+          createdAt: post.createdAt,
+          commentsCount: post.commentsCount,
+          reactions: {
+            like: post.likeCount,
+            heart: post.heartCount,
+            celebrate: post.celebrateCount,
+          },
+          isPinned: post.isPinned,
+        };
+      }),
+    );
+  }
+
+  async createCourseDiscussionPost(
+    courseId: UUIDType,
+    body: CreateCourseDiscussionPostBody,
+    currentUser: CurrentUserType,
+  ): Promise<CourseDiscussionPostResponse> {
+    await this.assertCourseDiscussionAccess(courseId, currentUser);
+
+    const [createdPost] = await this.db
+      .insert(courseDiscussionPosts)
+      .values({
+        courseId,
+        authorId: currentUser.userId,
+        type: body.type,
+        content: body.content.trim(),
+      })
+      .returning({ id: courseDiscussionPosts.id });
+
+    const [post] = await this.getCourseDiscussionPosts(courseId, "latest", currentUser);
+
+    if (!post || post.id !== createdPost.id) {
+      throw new InternalServerErrorException("Failed to create discussion post");
+    }
+
+    return post;
+  }
+
+  private async assertCourseDiscussionAccess(courseId: UUIDType, currentUser: CurrentUserType) {
+    const { cohortLearningEnabled } = await this.settingsService.getGlobalSettings();
+
+    if (!cohortLearningEnabled) {
+      throw new BadRequestException("common.toast.noAccess");
+    }
+
+    const [courseAccess] = await this.db
+      .select({
+        courseId: courses.id,
+        authorId: courses.authorId,
+        isEnrolled: sql<boolean>`CASE WHEN ${studentCourses.id} IS NULL THEN FALSE ELSE TRUE END`,
+      })
+      .from(courses)
+      .leftJoin(
+        studentCourses,
+        and(
+          eq(studentCourses.courseId, courses.id),
+          eq(studentCourses.studentId, currentUser.userId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+        ),
+      )
+      .where(eq(courses.id, courseId));
+
+    if (!courseAccess) {
+      throw new NotFoundException("Course not found");
+    }
+
+    const canManageCourses = hasPermission(currentUser.permissions, PERMISSIONS.COURSE_UPDATE);
+    const canManageOwnCourses = hasPermission(
+      currentUser.permissions,
+      PERMISSIONS.COURSE_UPDATE_OWN,
+    );
+    const isOwnCourse = courseAccess.authorId === currentUser.userId;
+
+    const hasAccess =
+      courseAccess.isEnrolled || canManageCourses || (canManageOwnCourses && isOwnCourse);
+
+    if (!hasAccess) {
+      throw new ForbiddenException("common.toast.noAccess");
+    }
   }
 
   async getCoursesForUser(

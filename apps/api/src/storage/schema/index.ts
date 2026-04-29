@@ -1107,6 +1107,85 @@ export const questionsAndAnswers = pgTable(
   withTenantIdIndex("questions_and_answers"),
 );
 
+export const courseDiscussionPostTypeEnum = pgEnum("course_discussion_post_type", [
+  "question",
+  "discussion",
+  "progress",
+]);
+
+export const courseDiscussionPosts = pgTable(
+  "course_discussion_posts",
+  {
+    ...id,
+    ...timestamps,
+    courseId: uuid("course_id")
+      .references(() => courses.id, { onDelete: "cascade" })
+      .notNull(),
+    authorId: uuid("author_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    type: courseDiscussionPostTypeEnum("type").notNull(),
+    content: text("content").notNull(),
+    isPinned: boolean("is_pinned").notNull().default(false),
+    pinnedAt: timestamp("pinned_at", { mode: "string", withTimezone: true, precision: 3 }),
+    tenantId,
+  },
+  withTenantIdIndex("course_discussion_posts"),
+);
+
+export const courseDiscussionComments = pgTable(
+  "course_discussion_comments",
+  {
+    ...id,
+    ...timestamps,
+    postId: uuid("post_id")
+      .references(() => courseDiscussionPosts.id, { onDelete: "cascade" })
+      .notNull(),
+    authorId: uuid("author_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    parentCommentId: uuid("parent_comment_id"),
+    content: text("content").notNull(),
+    isHelpfulAnswer: boolean("is_helpful_answer").notNull().default(false),
+    tenantId,
+  },
+  withTenantIdIndex("course_discussion_comments"),
+);
+
+export const courseDiscussionReactionTypeEnum = pgEnum("course_discussion_reaction_type", [
+  "like",
+  "heart",
+  "celebrate",
+]);
+
+export const courseDiscussionEntityTypeEnum = pgEnum("course_discussion_entity_type", [
+  "post",
+  "comment",
+]);
+
+export const courseDiscussionReactions = pgTable(
+  "course_discussion_reactions",
+  {
+    ...id,
+    ...timestamps,
+    entityType: courseDiscussionEntityTypeEnum("entity_type").notNull(),
+    entityId: uuid("entity_id").notNull(),
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    reactionType: courseDiscussionReactionTypeEnum("reaction_type").notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("course_discussion_reactions", (table) => ({
+    uniquePerUserAndType: unique().on(
+      table.entityType,
+      table.entityId,
+      table.userId,
+      table.reactionType,
+    ),
+  })),
+);
+
 export const resources = pgTable(
   "resources",
   {
