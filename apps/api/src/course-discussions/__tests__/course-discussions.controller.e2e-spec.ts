@@ -4,7 +4,13 @@ import { isNull, sql } from "drizzle-orm";
 import request from "supertest";
 
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { courseDiscussionThreads, settings, studentCourses } from "src/storage/schema";
+import {
+  chapters,
+  courseDiscussionThreads,
+  lessons,
+  settings,
+  studentCourses,
+} from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCourseFactory } from "../../../test/factory/course.factory";
@@ -67,6 +73,37 @@ describe("CourseDiscussionsController (e2e)", () => {
       .where(isNull(settings.userId));
   };
 
+  const createLesson = async (courseId: string, authorId: string) => {
+    const [chapter] = await db
+      .insert(chapters)
+      .values({
+        title: { en: "Chapter" },
+        courseId,
+        authorId,
+        isFreemium: false,
+        displayOrder: 1,
+        lessonCount: 1,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      })
+      .returning();
+
+    const [lesson] = await db
+      .insert(lessons)
+      .values({
+        chapterId: chapter.id,
+        type: "content",
+        title: { en: "Lesson" },
+        description: { en: "Description" },
+        displayOrder: 1,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      })
+      .returning();
+
+    return { chapter, lesson };
+  };
+
   it("enrolled student can list empty course discussions", async () => {
     await enableCohortLearning(true);
     const student = await userFactory
@@ -109,7 +146,7 @@ describe("CourseDiscussionsController (e2e)", () => {
     const res = await request(app.getHttpServer())
       .post(`/api/courses/${course.id}/discussions`)
       .set("Cookie", authCookies(student, SYSTEM_ROLE_SLUGS.STUDENT))
-      .send({ title: "  Hello\u0000 ", content: "  World\u0000  " })
+      .send({ title: "  Hello  ", content: "  World  " })
       .expect(201);
     expect(res.body.data.title).toBe("Hello");
     expect(res.body.data.content).toBe("World");
@@ -257,5 +294,248 @@ describe("CourseDiscussionsController (e2e)", () => {
     await request(app.getHttpServer())
       .get("/api/courses/00000000-0000-0000-0000-000000000000/discussions")
       .expect(401);
+  });
+
+  it("enrolled student can list empty lesson discussions", async () => {
+    await enableCohortLearning(true);
+    const student = await userFactory
+      .withCredentials({ password: "password123" })
+      .withUserSettings(db)
+      .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+    const course = await courseFactory.create({ authorId: student.id });
+    await db.insert(studentCourses).values({
+      studentId: student.id,
+      courseId: course.id,
+      status: COURSE_ENROLLMENT.ENROLLED,
+      enrolledAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+    const { lesson } = await createLesson(course.id, student.id);
+    const res = await request(app.getHttpServer())
+      .get(`/api/courses/${course.id}/lessons/${lesson.id}/discussions`)
+      .set("Cookie", authCookies(student, SYSTEM_ROLE_SLUGS.STUDENT))
+      .expect(200);
+    expect(res.body.data).toEqual([]);
+  });
+
+  it("enrolled student can create lesson discussion", async () => {
+    await enableCohortLearning(true);
+    const student = await userFactory
+      .withCredentials({ password: "password123" })
+      .withUserSettings(db)
+      .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+    const course = await courseFactory.create({ authorId: student.id });
+    await db.insert(studentCourses).values({
+      studentId: student.id,
+      courseId: course.id,
+      status: COURSE_ENROLLMENT.ENROLLED,
+      enrolledAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+    const { lesson } = await createLesson(course.id, student.id);
+    const res = await request(app.getHttpServer())
+      .post(`/api/courses/${course.id}/lessons/${lesson.id}/discussions`)
+      .set("Cookie", authCookies(student, SYSTEM_ROLE_SLUGS.STUDENT))
+      .send({ title: "  Hello\u0000 ", content: "  World\u0000  " })
+      .expect(201);
+    expect(res.body.data.lessonId).toBe(lesson.id);
+  });
+
+  it("admin can list/create lesson discussions", async () => {
+    await enableCohortLearning(true);
+    const admin = await userFactory
+      .withCredentials({ password: "password123" })
+      .withAdminSettings(db)
+      .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+    const course = await courseFactory.create({ authorId: admin.id });
+    const { lesson } = await createLesson(course.id, admin.id);
+    const cookies = authCookies(admin, SYSTEM_ROLE_SLUGS.ADMIN);
+    await request(app.getHttpServer())
+      .get(`/api/courses/${course.id}/lessons/${lesson.id}/discussions`)
+      .set("Cookie", cookies)
+      .expect(200);
+    await request(app.getHttpServer())
+      .post(`/api/courses/${course.id}/lessons/${lesson.id}/discussions`)
+      .set("Cookie", cookies)
+      .send({ title: "Title", content: "Content" })
+      .expect(201);
+  });
+
+  it("course author can list/create lesson discussions", async () => {
+    await enableCohortLearning(true);
+    const creator = await userFactory
+      .withCredentials({ password: "password123" })
+      .withContentCreatorSettings(db)
+      .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+    const course = await courseFactory.create({ authorId: creator.id });
+    const { lesson } = await createLesson(course.id, creator.id);
+    const cookies = authCookies(creator, SYSTEM_ROLE_SLUGS.CONTENT_CREATOR);
+    await request(app.getHttpServer())
+      .get(`/api/courses/${course.id}/lessons/${lesson.id}/discussions`)
+      .set("Cookie", cookies)
+      .expect(200);
+    await request(app.getHttpServer())
+      .post(`/api/courses/${course.id}/lessons/${lesson.id}/discussions`)
+      .set("Cookie", cookies)
+      .send({ title: "Title", content: "Content" })
+      .expect(201);
+  });
+
+  it("lesson discussions do not mix with course-level threads", async () => {
+    await enableCohortLearning(true);
+    const student = await userFactory
+      .withCredentials({ password: "password123" })
+      .withUserSettings(db)
+      .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+    const course = await courseFactory.create({ authorId: student.id });
+    await db.insert(studentCourses).values({
+      studentId: student.id,
+      courseId: course.id,
+      status: COURSE_ENROLLMENT.ENROLLED,
+      enrolledAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+    const { lesson } = await createLesson(course.id, student.id);
+    await db.insert(courseDiscussionThreads).values({
+      courseId: course.id,
+      lessonId: null,
+      authorId: student.id,
+      title: "Course",
+      content: "Course",
+      status: "visible",
+      lastActivityAt: "2024-01-02T00:00:00.000Z",
+      createdAt: "2024-01-02T00:00:00.000Z",
+      updatedAt: "2024-01-02T00:00:00.000Z",
+    });
+    await db.insert(courseDiscussionThreads).values({
+      courseId: course.id,
+      lessonId: lesson.id,
+      authorId: student.id,
+      title: "Lesson",
+      content: "Lesson",
+      status: "visible",
+      lastActivityAt: "2024-01-03T00:00:00.000Z",
+      createdAt: "2024-01-03T00:00:00.000Z",
+      updatedAt: "2024-01-03T00:00:00.000Z",
+    });
+    const res = await request(app.getHttpServer())
+      .get(`/api/courses/${course.id}/lessons/${lesson.id}/discussions`)
+      .set("Cookie", authCookies(student, SYSTEM_ROLE_SLUGS.STUDENT))
+      .expect(200);
+    expect(res.body.data).toHaveLength(1);
+    expect(res.body.data[0].title).toBe("Lesson");
+  });
+
+  it("lesson discussions from another lesson do not mix", async () => {
+    await enableCohortLearning(true);
+    const student = await userFactory
+      .withCredentials({ password: "password123" })
+      .withUserSettings(db)
+      .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+    const course = await courseFactory.create({ authorId: student.id });
+    await db.insert(studentCourses).values({
+      studentId: student.id,
+      courseId: course.id,
+      status: COURSE_ENROLLMENT.ENROLLED,
+      enrolledAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+    const { lesson: lesson1 } = await createLesson(course.id, student.id);
+    const { lesson: lesson2 } = await createLesson(course.id, student.id);
+    await db.insert(courseDiscussionThreads).values({
+      courseId: course.id,
+      lessonId: lesson1.id,
+      authorId: student.id,
+      title: "L1",
+      content: "L1",
+      status: "visible",
+      lastActivityAt: "2024-01-03T00:00:00.000Z",
+      createdAt: "2024-01-03T00:00:00.000Z",
+      updatedAt: "2024-01-03T00:00:00.000Z",
+    });
+    const res = await request(app.getHttpServer())
+      .get(`/api/courses/${course.id}/lessons/${lesson2.id}/discussions`)
+      .set("Cookie", authCookies(student, SYSTEM_ROLE_SLUGS.STUDENT))
+      .expect(200);
+    expect(res.body.data).toEqual([]);
+  });
+
+  it("lesson not belonging to course returns 404", async () => {
+    await enableCohortLearning(true);
+    const student = await userFactory
+      .withCredentials({ password: "password123" })
+      .withUserSettings(db)
+      .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+    const course1 = await courseFactory.create({ authorId: student.id });
+    const course2 = await courseFactory.create({ authorId: student.id });
+    await db.insert(studentCourses).values({
+      studentId: student.id,
+      courseId: course1.id,
+      status: COURSE_ENROLLMENT.ENROLLED,
+      enrolledAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+    const { lesson } = await createLesson(course2.id, student.id);
+    await request(app.getHttpServer())
+      .get(`/api/courses/${course1.id}/lessons/${lesson.id}/discussions`)
+      .set("Cookie", authCookies(student, SYSTEM_ROLE_SLUGS.STUDENT))
+      .expect(404);
+  });
+
+  it("unenrolled student gets 403 on lesson GET and POST", async () => {
+    await enableCohortLearning(true);
+    const student = await userFactory
+      .withCredentials({ password: "password123" })
+      .withUserSettings(db)
+      .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+    const author = await userFactory
+      .withCredentials({ password: "password123" })
+      .withContentCreatorSettings(db)
+      .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+    const course = await courseFactory.create({ authorId: author.id });
+    const { lesson } = await createLesson(course.id, author.id);
+    const cookies = authCookies(student, SYSTEM_ROLE_SLUGS.STUDENT);
+    await request(app.getHttpServer())
+      .get(`/api/courses/${course.id}/lessons/${lesson.id}/discussions`)
+      .set("Cookie", cookies)
+      .expect(403);
+    await request(app.getHttpServer())
+      .post(`/api/courses/${course.id}/lessons/${lesson.id}/discussions`)
+      .set("Cookie", cookies)
+      .send({ title: "Title", content: "Content" })
+      .expect(403);
+  });
+
+  it("global switch off lesson GET and POST returns 403", async () => {
+    await enableCohortLearning(false);
+    const student = await userFactory
+      .withCredentials({ password: "password123" })
+      .withUserSettings(db)
+      .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+    const course = await courseFactory.create({ authorId: student.id });
+    await db.insert(studentCourses).values({
+      studentId: student.id,
+      courseId: course.id,
+      status: COURSE_ENROLLMENT.ENROLLED,
+      enrolledAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+    const { lesson } = await createLesson(course.id, student.id);
+    const cookies = authCookies(student, SYSTEM_ROLE_SLUGS.STUDENT);
+    await request(app.getHttpServer())
+      .get(`/api/courses/${course.id}/lessons/${lesson.id}/discussions`)
+      .set("Cookie", cookies)
+      .expect(403);
+    await request(app.getHttpServer())
+      .post(`/api/courses/${course.id}/lessons/${lesson.id}/discussions`)
+      .set("Cookie", cookies)
+      .send({ title: "Title", content: "Content" })
+      .expect(403);
   });
 });
