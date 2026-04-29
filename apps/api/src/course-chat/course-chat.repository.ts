@@ -6,6 +6,7 @@ import { DatabasePg } from "src/common";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import {
   courses,
+  courseChatMessageReactions,
   courseChatMessages,
   courseChatThreads,
   studentCourses,
@@ -15,6 +16,7 @@ import {
 import type { UUIDType } from "src/common";
 import type {
   CourseChatMessageResponse,
+  CourseChatMessageReactionResponse,
   CourseChatThreadResponse,
   CourseChatUserResponse,
 } from "src/course-chat/schemas/course-chat.schema";
@@ -47,6 +49,12 @@ export type CourseChatEmailContext = {
   baseLanguage: string;
 };
 
+export type CourseChatMessageContext = {
+  id: UUIDType;
+  threadId: UUIDType;
+  courseId: UUIDType;
+};
+
 @Injectable()
 export class CourseChatRepository {
   constructor(@Inject("DB") private readonly db: DatabasePg) {}
@@ -67,7 +75,12 @@ export class CourseChatRepository {
     return Boolean(enrollment);
   }
 
-  async getThreads(courseId: UUIDType, page = 1, perPage = DEFAULT_PAGE_SIZE) {
+  async getThreads(
+    courseId: UUIDType,
+    viewerUserId: UUIDType,
+    page = 1,
+    perPage = DEFAULT_PAGE_SIZE,
+  ) {
     const data = await this.db
       .select({
         id: courseChatThreads.id,
@@ -102,8 +115,8 @@ export class CourseChatRepository {
     const threads = await Promise.all(
       data.map(async (thread): Promise<CourseChatThreadResponse> => {
         const [rootMessage, latestMessage] = await Promise.all([
-          this.getRootMessage(thread.id),
-          this.getLatestMessage(thread.id),
+          this.getRootMessage(thread.id, viewerUserId),
+          this.getLatestMessage(thread.id, viewerUserId),
         ]);
 
         if (!rootMessage) {
@@ -195,7 +208,10 @@ export class CourseChatRepository {
     return course ? (course as CourseChatEmailContext) : null;
   }
 
-  async getThreadById(threadId: UUIDType): Promise<CourseChatThreadResponse | null> {
+  async getThreadById(
+    threadId: UUIDType,
+    viewerUserId: UUIDType,
+  ): Promise<CourseChatThreadResponse | null> {
     const [thread] = await this.db
       .select({
         id: courseChatThreads.id,
@@ -223,8 +239,8 @@ export class CourseChatRepository {
     if (!thread) return null;
 
     const [rootMessage, latestMessage] = await Promise.all([
-      this.getRootMessage(thread.id),
-      this.getLatestMessage(thread.id),
+      this.getRootMessage(thread.id, viewerUserId),
+      this.getLatestMessage(thread.id, viewerUserId),
     ]);
 
     if (!rootMessage) {
@@ -234,7 +250,12 @@ export class CourseChatRepository {
     return this.mapThread(thread, rootMessage, latestMessage);
   }
 
-  async getMessages(threadId: UUIDType, page = 1, perPage = DEFAULT_PAGE_SIZE) {
+  async getMessages(
+    threadId: UUIDType,
+    viewerUserId: UUIDType,
+    page = 1,
+    perPage = DEFAULT_PAGE_SIZE,
+  ) {
     const data = await this.db
       .select(this.messageSelect())
       .from(courseChatMessages)
@@ -250,12 +271,15 @@ export class CourseChatRepository {
       .where(and(eq(courseChatMessages.threadId, threadId), isNull(courseChatMessages.deletedAt)));
 
     return {
-      data: data.map((message) => this.mapMessage(message)),
+      data: await Promise.all(data.map((message) => this.mapMessage(message, viewerUserId))),
       pagination: { totalItems, page, perPage },
     };
   }
 
-  async getMessageById(messageId: UUIDType): Promise<CourseChatMessageResponse | null> {
+  async getMessageById(
+    messageId: UUIDType,
+    viewerUserId: UUIDType,
+  ): Promise<CourseChatMessageResponse | null> {
     const [message] = await this.db
       .select(this.messageSelect())
       .from(courseChatMessages)
@@ -263,7 +287,7 @@ export class CourseChatRepository {
       .where(eq(courseChatMessages.id, messageId))
       .limit(1);
 
-    return message ? this.mapMessage(message) : null;
+    return message ? this.mapMessage(message, viewerUserId) : null;
   }
 
   async createThreadWithMessage(courseId: UUIDType, userId: UUIDType, content: string) {
@@ -320,7 +344,64 @@ export class CourseChatRepository {
     return Boolean(message);
   }
 
-  private async getLatestMessage(threadId: UUIDType): Promise<CourseChatMessageResponse | null> {
+  async getMessageContext(messageId: UUIDType): Promise<CourseChatMessageContext | null> {
+    const [message] = await this.db
+      .select({
+        id: courseChatMessages.id,
+        threadId: courseChatMessages.threadId,
+        courseId: courseChatMessages.courseId,
+      })
+      .from(courseChatMessages)
+      .where(and(eq(courseChatMessages.id, messageId), isNull(courseChatMessages.deletedAt)))
+      .limit(1);
+
+    return message ?? null;
+  }
+
+  async toggleMessageReaction(params: {
+    messageId: UUIDType;
+    courseId: UUIDType;
+    userId: UUIDType;
+    reaction: string;
+  }) {
+    await this.db.transaction(async (trx) => {
+      const deleted = await trx
+        .delete(courseChatMessageReactions)
+        .where(
+          and(
+            eq(courseChatMessageReactions.messageId, params.messageId),
+            eq(courseChatMessageReactions.userId, params.userId),
+            eq(courseChatMessageReactions.reaction, params.reaction),
+          ),
+        )
+        .returning({ id: courseChatMessageReactions.id });
+
+      if (deleted.length) return;
+
+      await trx.insert(courseChatMessageReactions).values(params);
+    });
+  }
+
+  async getMessageReactions(
+    messageId: UUIDType,
+    viewerUserId: UUIDType,
+  ): Promise<CourseChatMessageReactionResponse[]> {
+    return this.db
+      .select({
+        reaction: courseChatMessageReactions.reaction,
+        count: sql<number>`COUNT(*)::int`,
+        reactedByCurrentUser: sql<boolean>`BOOL_OR(${courseChatMessageReactions.userId} = ${viewerUserId})`,
+      })
+      .from(courseChatMessageReactions)
+      .where(eq(courseChatMessageReactions.messageId, messageId))
+      .groupBy(courseChatMessageReactions.reaction)
+      .orderBy(courseChatMessageReactions.reaction);
+  }
+
+  private async getLatestMessage(
+    threadId: UUIDType,
+    viewerUserId: UUIDType,
+  ): Promise<CourseChatMessageResponse | null> {
     const [message] = await this.db
       .select(this.messageSelect())
       .from(courseChatMessages)
@@ -329,10 +410,13 @@ export class CourseChatRepository {
       .orderBy(desc(courseChatMessages.createdAt))
       .limit(1);
 
-    return message ? this.mapMessage(message) : null;
+    return message ? this.mapMessage(message, viewerUserId) : null;
   }
 
-  private async getRootMessage(threadId: UUIDType): Promise<CourseChatMessageResponse | null> {
+  private async getRootMessage(
+    threadId: UUIDType,
+    viewerUserId: UUIDType,
+  ): Promise<CourseChatMessageResponse | null> {
     const [message] = await this.db
       .select(this.messageSelect())
       .from(courseChatMessages)
@@ -341,7 +425,7 @@ export class CourseChatRepository {
       .orderBy(courseChatMessages.createdAt)
       .limit(1);
 
-    return message ? this.mapMessage(message) : null;
+    return message ? this.mapMessage(message, viewerUserId) : null;
   }
 
   private messageSelect() {
@@ -398,7 +482,10 @@ export class CourseChatRepository {
     };
   }
 
-  private mapMessage(message: CourseChatMessageRow): CourseChatMessageResponse {
+  private async mapMessage(
+    message: CourseChatMessageRow,
+    viewerUserId: UUIDType,
+  ): Promise<CourseChatMessageResponse> {
     return {
       id: message.id,
       threadId: message.threadId,
@@ -415,6 +502,7 @@ export class CourseChatRepository {
         lastName: message.userLastName,
         avatarReference: message.userAvatarReference,
       },
+      reactions: await this.getMessageReactions(message.id, viewerUserId),
     };
   }
 }

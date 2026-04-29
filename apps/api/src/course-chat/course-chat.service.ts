@@ -13,6 +13,7 @@ import { EmailService } from "src/common/emails/emails.service";
 import { getEmailSubject } from "src/common/emails/translations";
 import { CourseChatPresenceService } from "src/course-chat/course-chat-presence.service";
 import {
+  COURSE_CHAT_ALLOWED_REACTIONS,
   COURSE_CHAT_SOCKET_EVENTS,
   getCourseChatRoom,
 } from "src/course-chat/course-chat.constants";
@@ -28,6 +29,7 @@ import type {
   CreateCourseChatMessageBody,
   CreateCourseChatThreadBody,
   CreateCourseChatThreadResponse,
+  ToggleCourseChatMessageReactionBody,
 } from "src/course-chat/schemas/course-chat.schema";
 
 type CourseChatRealtimePublisher = {
@@ -61,6 +63,7 @@ export class CourseChatService {
 
     const threads = await this.courseChatRepository.getThreads(
       params.courseId,
+      params.userId,
       params.page,
       params.perPage,
     );
@@ -77,6 +80,7 @@ export class CourseChatService {
     const thread = await this.getAccessibleThread(params.threadId, params.userId);
     const messages = await this.courseChatRepository.getMessages(
       thread.id,
+      params.userId,
       params.page,
       params.perPage,
     );
@@ -115,8 +119,8 @@ export class CourseChatService {
     );
 
     const [thread, message] = await Promise.all([
-      this.courseChatRepository.getThreadById(threadId),
-      this.courseChatRepository.getMessageById(messageId),
+      this.courseChatRepository.getThreadById(threadId, userId),
+      this.courseChatRepository.getMessageById(messageId, userId),
     ]);
 
     if (!thread || !message) throw new NotFoundException("courseChat.errors.notFound");
@@ -161,7 +165,7 @@ export class CourseChatService {
       parentMessageId: body.parentMessageId,
     });
 
-    const message = await this.courseChatRepository.getMessageById(messageId);
+    const message = await this.courseChatRepository.getMessageById(messageId, userId);
     if (!message) throw new NotFoundException("courseChat.errors.notFound");
 
     this.realtimePublisher.emitToRoom(
@@ -179,8 +183,46 @@ export class CourseChatService {
     return new BaseResponse(message);
   }
 
+  async toggleMessageReaction(
+    messageId: UUIDType,
+    userId: UUIDType,
+    body: ToggleCourseChatMessageReactionBody,
+  ) {
+    if (!this.isAllowedReaction(body.reaction)) {
+      throw new BadRequestException("courseChat.errors.invalidReaction");
+    }
+
+    const message = await this.courseChatRepository.getMessageContext(messageId);
+    if (!message) throw new NotFoundException("courseChat.errors.messageNotFound");
+
+    await this.assertUserEnrolledInCourse(message.courseId, userId);
+
+    await this.courseChatRepository.toggleMessageReaction({
+      messageId,
+      courseId: message.courseId,
+      userId,
+      reaction: body.reaction,
+    });
+
+    const reactions = await this.courseChatRepository.getMessageReactions(messageId, userId);
+    const payload = {
+      courseId: message.courseId,
+      threadId: message.threadId,
+      messageId,
+      reactions,
+    };
+
+    this.realtimePublisher.emitToRoom(
+      COURSE_CHAT_SOCKET_EVENTS.MESSAGE_REACTIONS_UPDATED,
+      getCourseChatRoom(message.courseId),
+      payload,
+    );
+
+    return new BaseResponse(payload);
+  }
+
   private async getAccessibleThread(threadId: UUIDType, userId: UUIDType) {
-    const thread = await this.courseChatRepository.getThreadById(threadId);
+    const thread = await this.courseChatRepository.getThreadById(threadId, userId);
 
     if (!thread || thread.archived) {
       throw new NotFoundException("courseChat.errors.threadNotFound");
@@ -199,6 +241,10 @@ export class CourseChatService {
     }
 
     return normalized;
+  }
+
+  private isAllowedReaction(reaction: string) {
+    return (COURSE_CHAT_ALLOWED_REACTIONS as readonly string[]).includes(reaction);
   }
 
   private async emitMentionNotifications(params: {

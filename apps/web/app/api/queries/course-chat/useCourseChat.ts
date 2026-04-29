@@ -10,6 +10,12 @@ export type CourseChatUserProfile = {
   avatarReference: string | null;
 };
 
+export type CourseChatMessageReaction = {
+  reaction: string;
+  count: number;
+  reactedByCurrentUser: boolean;
+};
+
 export type CourseChatMessage = {
   id: string;
   threadId: string;
@@ -21,6 +27,7 @@ export type CourseChatMessage = {
   createdAt: string;
   updatedAt: string;
   user: CourseChatUserProfile;
+  reactions?: CourseChatMessageReaction[];
 };
 
 export type CourseChatThread = {
@@ -62,6 +69,15 @@ export type CreateCourseChatPayload = {
   content: string;
   mentionedUserIds?: string[];
 };
+
+export type CourseChatMessageReactionsUpdated = {
+  courseId: string;
+  threadId: string;
+  messageId: string;
+  reactions: CourseChatMessageReaction[];
+};
+
+export const COURSE_CHAT_REACTIONS = ["👍", "❤️", "😂", "🎉", "😮"] as const;
 
 export const COURSE_CHAT_THREADS_QUERY_KEY = ["course-chat", "threads"];
 export const COURSE_CHAT_MESSAGES_QUERY_KEY = ["course-chat", "messages"];
@@ -182,6 +198,27 @@ export function useCreateCourseChatMessage(threadId?: string) {
   });
 }
 
+export function useToggleCourseChatMessageReaction() {
+  return useMutation({
+    mutationFn: async ({ messageId, reaction }: { messageId: string; reaction: string }) => {
+      const response = await ApiClient.request<
+        BaseResponse<CourseChatMessageReactionsUpdated>,
+        unknown
+      >({
+        path: `/api/course-chat/messages/${messageId}/reactions`,
+        method: "POST",
+        body: { reaction },
+        secure: true,
+      });
+
+      return response.data.data;
+    },
+    onSuccess: (payload) => {
+      updateMessageReactionsInCache(payload);
+    },
+  });
+}
+
 export function upsertThreadInCache(thread: CourseChatThread) {
   queryClient.setQueryData<Paginated<CourseChatThread[]>>(
     getCourseChatThreadsQueryKey(thread.courseId),
@@ -260,5 +297,42 @@ export function updateCourseChatUserPresence(params: {
       current?.map((user) =>
         user.id === params.userId ? { ...user, isOnline: params.isOnline } : user,
       ),
+  );
+}
+
+export function updateMessageReactionsInCache(payload: CourseChatMessageReactionsUpdated) {
+  const updateMessage = (message: CourseChatMessage): CourseChatMessage =>
+    message.id === payload.messageId ? { ...message, reactions: payload.reactions } : message;
+
+  queryClient.setQueryData<Paginated<CourseChatMessage[]>>(
+    getCourseChatMessagesQueryKey(payload.threadId),
+    (current) =>
+      current
+        ? {
+            ...current,
+            data: current.data.map(updateMessage),
+          }
+        : current,
+  );
+
+  queryClient.setQueryData<Paginated<CourseChatThread[]>>(
+    getCourseChatThreadsQueryKey(payload.courseId),
+    (current) =>
+      current
+        ? {
+            ...current,
+            data: current.data.map((thread) =>
+              thread.id === payload.threadId
+                ? {
+                    ...thread,
+                    rootMessage: updateMessage(thread.rootMessage),
+                    latestMessage: thread.latestMessage
+                      ? updateMessage(thread.latestMessage)
+                      : null,
+                  }
+                : thread,
+            ),
+          }
+        : current,
   );
 }

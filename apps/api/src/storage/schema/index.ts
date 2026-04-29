@@ -436,6 +436,34 @@ export const courseChatMessages = pgTable(
   })),
 );
 
+export const courseChatMessageReactions = pgTable(
+  "course_chat_message_reactions",
+  {
+    ...id,
+    ...timestamps,
+    messageId: uuid("message_id")
+      .references(() => courseChatMessages.id, { onDelete: "cascade" })
+      .notNull(),
+    courseId: uuid("course_id")
+      .references(() => courses.id, { onDelete: "cascade" })
+      .notNull(),
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    reaction: text("reaction").notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("course_chat_message_reactions", (table) => ({
+    messageReactionIdx: index("course_chat_message_reactions_message_id_reaction_idx").on(
+      table.messageId,
+      table.reaction,
+    ),
+    userMessageReactionUniqueIdx: uniqueIndex(
+      "course_chat_message_reactions_user_message_reaction_unique_idx",
+    ).on(table.userId, table.messageId, table.reaction),
+  })),
+);
+
 export const questions = pgTable(
   "questions",
   {

@@ -11,6 +11,12 @@ const userSchema = Type.Object({
   avatarReference: Type.Union([Type.String(), Type.Null()]),
 });
 
+export const courseChatMessageReactionSchema = Type.Object({
+  reaction: Type.String(),
+  count: Type.Number(),
+  reactedByCurrentUser: Type.Boolean(),
+});
+
 export const courseChatMessageSchema = Type.Object({
   id: UUIDSchema,
   threadId: UUIDSchema,
@@ -22,6 +28,7 @@ export const courseChatMessageSchema = Type.Object({
   createdAt: Type.String(),
   updatedAt: Type.String(),
   user: userSchema,
+  reactions: Type.Array(courseChatMessageReactionSchema),
 });
 
 export const courseChatThreadSchema = Type.Object({
@@ -56,6 +63,17 @@ export const createCourseChatMessageSchema = Type.Object({
   mentionedUserIds: Type.Optional(Type.Array(UUIDSchema)),
 });
 
+export const toggleCourseChatMessageReactionSchema = Type.Object({
+  reaction: Type.String({ minLength: 1, maxLength: 16 }),
+});
+
+export const courseChatMessageReactionsUpdatedSchema = Type.Object({
+  courseId: UUIDSchema,
+  threadId: UUIDSchema,
+  messageId: UUIDSchema,
+  reactions: Type.Array(courseChatMessageReactionSchema),
+});
+
 export const courseChatPaginationQuerySchema = Type.Optional(Type.Number({ minimum: 1 }));
 
 export const courseChatThreadsResponseSchema = Type.Array(courseChatThreadSchema);
@@ -68,8 +86,15 @@ export const createCourseChatThreadResponseSchema = Type.Object({
 });
 
 export type CourseChatMessageResponse = Static<typeof courseChatMessageSchema>;
+export type CourseChatMessageReactionResponse = Static<typeof courseChatMessageReactionSchema>;
+export type CourseChatMessageReactionsUpdatedResponse = Static<
+  typeof courseChatMessageReactionsUpdatedSchema
+>;
 export type CourseChatThreadResponse = Static<typeof courseChatThreadSchema>;
 export type CourseChatUserResponse = Static<typeof courseChatUserSchema>;
 export type CreateCourseChatThreadBody = Static<typeof createCourseChatThreadSchema>;
 export type CreateCourseChatMessageBody = Static<typeof createCourseChatMessageSchema>;
+export type ToggleCourseChatMessageReactionBody = Static<
+  typeof toggleCourseChatMessageReactionSchema
+>;
 export type CreateCourseChatThreadResponse = Static<typeof createCourseChatThreadResponseSchema>;

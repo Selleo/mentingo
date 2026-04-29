@@ -35,6 +35,7 @@ const message: CourseChatMessageResponse = {
   createdAt: "2026-04-29T12:00:00.000Z",
   updatedAt: "2026-04-29T12:00:00.000Z",
   user,
+  reactions: [],
 };
 
 const thread: CourseChatThreadResponse = {
@@ -69,6 +70,9 @@ describe("CourseChatService", () => {
       messageBelongsToThread: jest.fn(),
       getMentionEmailRecipients: jest.fn(),
       getCourseEmailContext: jest.fn(),
+      getMessageContext: jest.fn(),
+      toggleMessageReaction: jest.fn(),
+      getMessageReactions: jest.fn(),
     } as unknown as jest.Mocked<CourseChatRepository>;
 
     presenceService = {
@@ -173,6 +177,34 @@ describe("CourseChatService", () => {
         subject: "You were mentioned in Algorithms",
       }),
       { tenantId: "00000000-0000-0000-0000-000000000006" },
+    );
+  });
+
+  it("toggles message reactions for enrolled users", async () => {
+    repository.getMessageContext.mockResolvedValue({ id: messageId, threadId, courseId });
+    repository.isUserEnrolledInCourse.mockResolvedValue(true);
+    repository.getMessageReactions.mockResolvedValue([
+      { reaction: "👍", count: 1, reactedByCurrentUser: true },
+    ]);
+
+    const result = await service.toggleMessageReaction(messageId, userId, { reaction: "👍" });
+
+    expect(repository.toggleMessageReaction).toHaveBeenCalledWith({
+      messageId,
+      courseId,
+      userId,
+      reaction: "👍",
+    });
+    expect(result.data).toEqual({
+      courseId,
+      threadId,
+      messageId,
+      reactions: [{ reaction: "👍", count: 1, reactedByCurrentUser: true }],
+    });
+    expect(realtimePublisher.emitToRoom).toHaveBeenCalledWith(
+      "course-chat:message-reactions-updated",
+      `course-chat:${courseId}`,
+      result.data,
     );
   });
 });

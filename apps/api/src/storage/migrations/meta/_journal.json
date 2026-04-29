@@ -778,6 +778,13 @@
       "when": 1777464066471,
       "tag": "0110_add_chat_to_course",
       "breakpoints": true
+    },
+    {
+      "idx": 111,
+      "version": "7",
+      "when": 1777465560000,
+      "tag": "0111_add_course_chat_reactions",
+      "breakpoints": true
     }
   ]
 }

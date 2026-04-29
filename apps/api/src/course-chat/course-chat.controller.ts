@@ -13,6 +13,7 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 import { CourseChatService } from "src/course-chat/course-chat.service";
 import {
   courseChatMessageSchema,
+  courseChatMessageReactionsUpdatedSchema,
   courseChatMessagesResponseSchema,
   courseChatPaginationQuerySchema,
   courseChatThreadsResponseSchema,
@@ -20,12 +21,15 @@ import {
   createCourseChatMessageSchema,
   createCourseChatThreadResponseSchema,
   createCourseChatThreadSchema,
+  toggleCourseChatMessageReactionSchema,
   type CourseChatMessageResponse,
+  type CourseChatMessageReactionsUpdatedResponse,
   type CourseChatThreadResponse,
   type CourseChatUserResponse,
   type CreateCourseChatMessageBody,
   type CreateCourseChatThreadBody,
   type CreateCourseChatThreadResponse,
+  type ToggleCourseChatMessageReactionBody,
 } from "src/course-chat/schemas/course-chat.schema";
 
 @Controller("course-chat")
@@ -110,5 +114,21 @@ export class CourseChatController {
     @CurrentUser("userId") userId: UUIDType,
   ): Promise<BaseResponse<CourseChatMessageResponse>> {
     return this.courseChatService.createMessage(threadId, userId, body);
+  }
+
+  @Post("messages/:messageId/reactions")
+  @Validate({
+    request: [
+      { type: "param", name: "messageId", schema: UUIDSchema },
+      { type: "body", schema: toggleCourseChatMessageReactionSchema },
+    ],
+    response: baseResponse(courseChatMessageReactionsUpdatedSchema),
+  })
+  async toggleMessageReaction(
+    @Param("messageId") messageId: UUIDType,
+    @Body() body: ToggleCourseChatMessageReactionBody,
+    @CurrentUser("userId") userId: UUIDType,
+  ): Promise<BaseResponse<CourseChatMessageReactionsUpdatedResponse>> {
+    return this.courseChatService.toggleMessageReaction(messageId, userId, body);
   }
 }
