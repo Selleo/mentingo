@@ -206,6 +206,7 @@ describe("SettingsController (e2e)", () => {
         expect(response.body).toBeDefined();
         expect(response.body.data).toBeDefined();
         expect(response.body.data.unregisteredUserCoursesAccessibility).toBeDefined();
+        expect(response.body.data.cohortLearningEnabled).toBe(false);
       });
 
       it("should return updated global settings after admin changes via PATCH endpoint", async () => {
@@ -232,6 +233,32 @@ describe("SettingsController (e2e)", () => {
           .expect(200);
 
         expect(updatedResponse.body.data.unregisteredUserCoursesAccessibility).toBe(!initialValue);
+      });
+
+      it("should return updated cohort learning setting after admin changes via PATCH endpoint", async () => {
+        const adminUser = await userFactory
+          .withCredentials({ password: testPassword })
+          .withAdminSettings(db)
+          .create();
+
+        const adminCookies = await cookieFor(adminUser, app);
+
+        const initialResponse = await request(app.getHttpServer())
+          .get("/api/settings/global")
+          .expect(200);
+
+        const initialValue = initialResponse.body.data.cohortLearningEnabled;
+
+        await request(app.getHttpServer())
+          .patch("/api/settings/admin/cohort-learning")
+          .set("Cookie", adminCookies)
+          .expect(200);
+
+        const updatedResponse = await request(app.getHttpServer())
+          .get("/api/settings/global")
+          .expect(200);
+
+        expect(updatedResponse.body.data.cohortLearningEnabled).toBe(!initialValue);
       });
 
       it("should return versioned settings image URLs for configured assets", async () => {
@@ -410,6 +437,68 @@ describe("SettingsController (e2e)", () => {
 
       it("should return 401 if not authenticated", async () => {
         await request(app.getHttpServer()).patch("/api/settings/admin/enforce-sso").expect(401);
+      });
+    });
+
+    describe("PATCH /api/settings/admin/cohort-learning", () => {
+      let adminUser: UserWithCredentials;
+      let adminCookies: string;
+
+      beforeEach(async () => {
+        await truncateTables(db, ["settings"]);
+        await globalSettingsFactory.create({ userId: null });
+
+        adminUser = await userFactory
+          .withCredentials({ password: testPassword })
+          .withAdminSettings(db)
+          .create();
+
+        adminCookies = await cookieFor(adminUser, app);
+      });
+
+      afterEach(async () => {
+        await truncateTables(db, ["settings"]);
+      });
+
+      it("should toggle the global cohort learning setting (as Admin)", async () => {
+        const initialGlobalSettings = await db.query.settings.findFirst({
+          where: (s, { isNull }) => isNull(s.userId),
+        });
+
+        const globalSettings = initialGlobalSettings?.settings as GlobalSettings;
+        const initialValue = globalSettings?.cohortLearningEnabled ?? false;
+
+        const response = await request(app.getHttpServer())
+          .patch("/api/settings/admin/cohort-learning")
+          .set("Cookie", adminCookies)
+          .expect(200);
+
+        expect(response.body.data.cohortLearningEnabled).toBe(!initialValue);
+
+        const toggleResponse = await request(app.getHttpServer())
+          .patch("/api/settings/admin/cohort-learning")
+          .set("Cookie", adminCookies)
+          .expect(200);
+
+        expect(toggleResponse.body.data.cohortLearningEnabled).toBe(initialValue);
+      });
+
+      it("should return 403 if user is not an admin", async () => {
+        const nonAdminUser = await userFactory
+          .withCredentials({ password: testPassword })
+          .withUserSettings(db)
+          .create();
+
+        const nonAdminCookies = await cookieFor(nonAdminUser, app);
+
+        await request(app.getHttpServer())
+          .patch("/api/settings/admin/cohort-learning")
+          .set("Cookie", nonAdminCookies)
+          .expect(403);
+      });
+
+      it("should return 401 if not authenticated", async () => {
+        await request(app.getHttpServer()).patch("/api/settings/admin/cohort-learning").expect(401);
       });
     });
 

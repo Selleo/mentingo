@@ -306,6 +306,7 @@ export interface GetPublicGlobalSettingsResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     modernCourseListEnabled: boolean;
+    cohortLearningEnabled: boolean;
     enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
@@ -434,6 +435,7 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     modernCourseListEnabled: boolean;
+    cohortLearningEnabled: boolean;
     enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
@@ -476,6 +478,7 @@ export interface UpdateEnforceSSOResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     modernCourseListEnabled: boolean;
+    cohortLearningEnabled: boolean;
     enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
@@ -518,6 +521,50 @@ export interface UpdateModernCourseListEnabledResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     modernCourseListEnabled: boolean;
+    cohortLearningEnabled: boolean;
+    enforceSSO: boolean;
+    certificateBackgroundImage: string | null;
+    companyInformation?: {
+      companyName?: string;
+      /** @maxLength 10 */
+      companyShortName?: string;
+      registeredAddress?: string;
+      taxNumber?: string;
+      emailAddress?: string;
+      courtRegisterNumber?: string;
+    };
+    platformLogoS3Key: string | null;
+    loginBackgroundImageS3Key: string | null;
+    platformSimpleLogoS3Key: string | null;
+    MFAEnforcedRoles: string[];
+    defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+    inviteOnlyRegistration: boolean;
+    userEmailTriggers: {
+      userFirstLogin: boolean;
+      userCourseAssignment: boolean;
+      userShortInactivity: boolean;
+      userLongInactivity: boolean;
+      userChapterFinished: boolean;
+      userCourseFinished: boolean;
+    };
+    primaryColor: string | null;
+    contrastColor: string | null;
+    unregisteredUserQAAccessibility: boolean;
+    QAEnabled: boolean;
+    unregisteredUserNewsAccessibility: boolean;
+    newsEnabled: boolean;
+    unregisteredUserArticlesAccessibility: boolean;
+    articlesEnabled: boolean;
+    ageLimit: 13 | 16 | null;
+    loginPageFiles: string[];
+  };
+}
+
+export interface UpdateCohortLearningEnabledResponse {
+  data: {
+    unregisteredUserCoursesAccessibility: boolean;
+    modernCourseListEnabled: boolean;
+    cohortLearningEnabled: boolean;
     enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
@@ -591,6 +638,7 @@ export interface UpdateColorSchemaResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     modernCourseListEnabled: boolean;
+    cohortLearningEnabled: boolean;
     enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
@@ -4971,6 +5019,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     settingsControllerUpdateModernCourseListEnabled: (params: RequestParams = {}) =>
       this.request<UpdateModernCourseListEnabledResponse, any>({
         path: `/api/settings/admin/modern-course-list`,
+        method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateCohortLearningEnabled
+     * @request PATCH:/api/settings/admin/cohort-learning
+     */
+    settingsControllerUpdateCohortLearningEnabled: (params: RequestParams = {}) =>
+      this.request<UpdateCohortLearningEnabledResponse, any>({
+        path: `/api/settings/admin/cohort-learning`,
         method: "PATCH",
         format: "json",
         ...params,

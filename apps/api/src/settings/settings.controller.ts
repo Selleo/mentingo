@@ -182,6 +182,18 @@ export class SettingsController {
     return new BaseResponse(result);
   }
 
+  @Patch("admin/cohort-learning")
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
+  @Validate({
+    response: baseResponse(globalSettingsJSONSchema),
+  })
+  async updateCohortLearningEnabled(
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
+    const result = await this.settingsService.updateGlobalCohortLearningEnabled(currentUser);
+    return new BaseResponse(result);
+  }
+
   @Patch("admin/finished-course-notification")
   @UseGuards(DisallowInSupportModeGuard)
   @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
