@@ -2099,8 +2099,29 @@
     },
     "tabs": {
       "chapters": "Kapitoly",
+      "chat": "Chat",
       "moreFromAuthor": "Více od autora",
       "statistics": "Statistika"
+    },
+    "courseChat": {
+      "title": "Chat kurzu",
+      "newThreadPlaceholder": "Zahajte novou diskuzi...",
+      "startThread": "Zahájit vlákno",
+      "messagesTitle": "Zprávy",
+      "noThreadSelected": "Vyberte vlákno",
+      "emptyThreads": "Zatím zde nejsou žádné konverzace. Zahajte první vlákno.",
+      "emptyMessages": "Zatím zde nejsou žádné zprávy.",
+      "replyPlaceholder": "Napište odpověď...",
+      "reply": "Odpovědět",
+      "repliesCount": "{{count}} odpovědí",
+      "send": "Odeslat",
+      "selectThread": "Vyberte vlákno pro čtení zpráv.",
+      "users": "Uživatelé",
+      "onlineCount": "{{online}}/{{total}} online",
+      "online": "Online",
+      "offline": "Offline",
+      "emptyUsers": "Zatím nejsou zapsáni žádní uživatelé.",
+      "mentionedToast": "Někdo vás zmínil v chatu kurzu."
     }
   },
   "studentChapterView": {

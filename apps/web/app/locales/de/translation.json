@@ -2099,8 +2099,29 @@
     },
     "tabs": {
       "chapters": "Kapitel",
+      "chat": "Chat",
       "moreFromAuthor": "Mehr vom Autor",
       "statistics": "Statistiken"
+    },
+    "courseChat": {
+      "title": "Kurschat",
+      "newThreadPlaceholder": "Neue Diskussion starten...",
+      "startThread": "Thread starten",
+      "messagesTitle": "Nachrichten",
+      "noThreadSelected": "Thread auswählen",
+      "emptyThreads": "Noch keine Gespräche. Starten Sie den ersten Thread.",
+      "emptyMessages": "Noch keine Nachrichten.",
+      "replyPlaceholder": "Antwort schreiben...",
+      "reply": "Antworten",
+      "repliesCount": "{{count}} Antworten",
+      "send": "Senden",
+      "selectThread": "Wählen Sie einen Thread, um Nachrichten zu lesen.",
+      "users": "Benutzer",
+      "onlineCount": "{{online}}/{{total}} online",
+      "online": "Online",
+      "offline": "Offline",
+      "emptyUsers": "Noch keine eingeschriebenen Benutzer.",
+      "mentionedToast": "Jemand hat Sie im Kurschat erwähnt."
     }
   },
   "studentChapterView": {

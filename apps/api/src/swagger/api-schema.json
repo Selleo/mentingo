@@ -7158,6 +7158,230 @@
         }
       }
     },
+    "/api/course-chat/{courseId}/threads": {
+      "get": {
+        "operationId": "CourseChatController_getThreads",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetThreadsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "CourseChatController_createThread",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateThreadBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateThreadResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/course-chat/{courseId}/users": {
+      "get": {
+        "operationId": "CourseChatController_getUsers",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUsersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/course-chat/threads/{threadId}/messages": {
+      "get": {
+        "operationId": "CourseChatController_getMessages",
+        "parameters": [
+          {
+            "name": "threadId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMessagesResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "CourseChatController_createMessage",
+        "parameters": [
+          {
+            "name": "threadId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMessageBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateMessageResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/course-chat/messages/{messageId}/reactions": {
+      "post": {
+        "operationId": "CourseChatController_toggleMessageReaction",
+        "parameters": [
+          {
+            "name": "messageId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ToggleMessageReactionBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToggleMessageReactionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/report/summary": {
       "get": {
         "operationId": "ReportController_downloadSummaryReport",
@@ -26545,6 +26769,1192 @@
             },
             "required": [
               "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetThreadsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "courseId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "createdByUserId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "archived": {
+                  "type": "boolean"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                },
+                "messageCount": {
+                  "type": "number"
+                },
+                "createdBy": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "firstName": {
+                      "type": "string"
+                    },
+                    "lastName": {
+                      "type": "string"
+                    },
+                    "avatarReference": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "firstName",
+                    "lastName",
+                    "avatarReference"
+                  ]
+                },
+                "rootMessage": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "threadId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "courseId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "userId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "content": {
+                      "type": "string"
+                    },
+                    "parentMessageId": {
+                      "anyOf": [
+                        {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "deletedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "firstName": {
+                          "type": "string"
+                        },
+                        "lastName": {
+                          "type": "string"
+                        },
+                        "avatarReference": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "firstName",
+                        "lastName",
+                        "avatarReference"
+                      ]
+                    },
+                    "reactions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "reaction": {
+                            "type": "string"
+                          },
+                          "count": {
+                            "type": "number"
+                          },
+                          "reactedByCurrentUser": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "reaction",
+                          "count",
+                          "reactedByCurrentUser"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "threadId",
+                    "courseId",
+                    "userId",
+                    "content",
+                    "parentMessageId",
+                    "deletedAt",
+                    "createdAt",
+                    "updatedAt",
+                    "user",
+                    "reactions"
+                  ]
+                },
+                "latestMessage": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "threadId": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "courseId": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "userId": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "content": {
+                          "type": "string"
+                        },
+                        "parentMessageId": {
+                          "anyOf": [
+                            {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "deletedAt": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "updatedAt": {
+                          "type": "string"
+                        },
+                        "user": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "firstName": {
+                              "type": "string"
+                            },
+                            "lastName": {
+                              "type": "string"
+                            },
+                            "avatarReference": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "firstName",
+                            "lastName",
+                            "avatarReference"
+                          ]
+                        },
+                        "reactions": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "reaction": {
+                                "type": "string"
+                              },
+                              "count": {
+                                "type": "number"
+                              },
+                              "reactedByCurrentUser": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "reaction",
+                              "count",
+                              "reactedByCurrentUser"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "threadId",
+                        "courseId",
+                        "userId",
+                        "content",
+                        "parentMessageId",
+                        "deletedAt",
+                        "createdAt",
+                        "updatedAt",
+                        "user",
+                        "reactions"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "courseId",
+                "createdByUserId",
+                "archived",
+                "createdAt",
+                "updatedAt",
+                "messageCount",
+                "createdBy",
+                "rootMessage",
+                "latestMessage"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
+      },
+      "CreateThreadBody": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "minLength": 1,
+            "maxLength": 5000,
+            "type": "string"
+          },
+          "mentionedUserIds": {
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "content"
+        ]
+      },
+      "CreateThreadResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "thread": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "courseId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "createdByUserId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "archived": {
+                    "type": "boolean"
+                  },
+                  "createdAt": {
+                    "type": "string"
+                  },
+                  "updatedAt": {
+                    "type": "string"
+                  },
+                  "messageCount": {
+                    "type": "number"
+                  },
+                  "createdBy": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "firstName": {
+                        "type": "string"
+                      },
+                      "lastName": {
+                        "type": "string"
+                      },
+                      "avatarReference": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "firstName",
+                      "lastName",
+                      "avatarReference"
+                    ]
+                  },
+                  "rootMessage": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "threadId": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "courseId": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "userId": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "content": {
+                        "type": "string"
+                      },
+                      "parentMessageId": {
+                        "anyOf": [
+                          {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "deletedAt": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "updatedAt": {
+                        "type": "string"
+                      },
+                      "user": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "firstName": {
+                            "type": "string"
+                          },
+                          "lastName": {
+                            "type": "string"
+                          },
+                          "avatarReference": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "firstName",
+                          "lastName",
+                          "avatarReference"
+                        ]
+                      },
+                      "reactions": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "reaction": {
+                              "type": "string"
+                            },
+                            "count": {
+                              "type": "number"
+                            },
+                            "reactedByCurrentUser": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "reaction",
+                            "count",
+                            "reactedByCurrentUser"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "threadId",
+                      "courseId",
+                      "userId",
+                      "content",
+                      "parentMessageId",
+                      "deletedAt",
+                      "createdAt",
+                      "updatedAt",
+                      "user",
+                      "reactions"
+                    ]
+                  },
+                  "latestMessage": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "threadId": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "courseId": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "userId": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "content": {
+                            "type": "string"
+                          },
+                          "parentMessageId": {
+                            "anyOf": [
+                              {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "deletedAt": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "createdAt": {
+                            "type": "string"
+                          },
+                          "updatedAt": {
+                            "type": "string"
+                          },
+                          "user": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              "firstName": {
+                                "type": "string"
+                              },
+                              "lastName": {
+                                "type": "string"
+                              },
+                              "avatarReference": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "firstName",
+                              "lastName",
+                              "avatarReference"
+                            ]
+                          },
+                          "reactions": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "reaction": {
+                                  "type": "string"
+                                },
+                                "count": {
+                                  "type": "number"
+                                },
+                                "reactedByCurrentUser": {
+                                  "type": "boolean"
+                                }
+                              },
+                              "required": [
+                                "reaction",
+                                "count",
+                                "reactedByCurrentUser"
+                              ]
+                            }
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "threadId",
+                          "courseId",
+                          "userId",
+                          "content",
+                          "parentMessageId",
+                          "deletedAt",
+                          "createdAt",
+                          "updatedAt",
+                          "user",
+                          "reactions"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "courseId",
+                  "createdByUserId",
+                  "archived",
+                  "createdAt",
+                  "updatedAt",
+                  "messageCount",
+                  "createdBy",
+                  "rootMessage",
+                  "latestMessage"
+                ]
+              },
+              "message": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "threadId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "courseId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "userId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "content": {
+                    "type": "string"
+                  },
+                  "parentMessageId": {
+                    "anyOf": [
+                      {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "deletedAt": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "createdAt": {
+                    "type": "string"
+                  },
+                  "updatedAt": {
+                    "type": "string"
+                  },
+                  "user": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "firstName": {
+                        "type": "string"
+                      },
+                      "lastName": {
+                        "type": "string"
+                      },
+                      "avatarReference": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "firstName",
+                      "lastName",
+                      "avatarReference"
+                    ]
+                  },
+                  "reactions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "reaction": {
+                          "type": "string"
+                        },
+                        "count": {
+                          "type": "number"
+                        },
+                        "reactedByCurrentUser": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "reaction",
+                        "count",
+                        "reactedByCurrentUser"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "id",
+                  "threadId",
+                  "courseId",
+                  "userId",
+                  "content",
+                  "parentMessageId",
+                  "deletedAt",
+                  "createdAt",
+                  "updatedAt",
+                  "user",
+                  "reactions"
+                ]
+              }
+            },
+            "required": [
+              "thread",
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetMessagesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "threadId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "courseId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "userId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "content": {
+                  "type": "string"
+                },
+                "parentMessageId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "deletedAt": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                },
+                "user": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "firstName": {
+                      "type": "string"
+                    },
+                    "lastName": {
+                      "type": "string"
+                    },
+                    "avatarReference": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "firstName",
+                    "lastName",
+                    "avatarReference"
+                  ]
+                },
+                "reactions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "reaction": {
+                        "type": "string"
+                      },
+                      "count": {
+                        "type": "number"
+                      },
+                      "reactedByCurrentUser": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "reaction",
+                      "count",
+                      "reactedByCurrentUser"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "threadId",
+                "courseId",
+                "userId",
+                "content",
+                "parentMessageId",
+                "deletedAt",
+                "createdAt",
+                "updatedAt",
+                "user",
+                "reactions"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
+      },
+      "CreateMessageBody": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "minLength": 1,
+            "maxLength": 5000,
+            "type": "string"
+          },
+          "parentMessageId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "mentionedUserIds": {
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "content"
+        ]
+      },
+      "CreateMessageResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "threadId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "courseId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "userId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "content": {
+                "type": "string"
+              },
+              "parentMessageId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "deletedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              },
+              "user": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "firstName": {
+                    "type": "string"
+                  },
+                  "lastName": {
+                    "type": "string"
+                  },
+                  "avatarReference": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "firstName",
+                  "lastName",
+                  "avatarReference"
+                ]
+              },
+              "reactions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "reaction": {
+                      "type": "string"
+                    },
+                    "count": {
+                      "type": "number"
+                    },
+                    "reactedByCurrentUser": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "reaction",
+                    "count",
+                    "reactedByCurrentUser"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "id",
+              "threadId",
+              "courseId",
+              "userId",
+              "content",
+              "parentMessageId",
+              "deletedAt",
+              "createdAt",
+              "updatedAt",
+              "user",
+              "reactions"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ToggleMessageReactionBody": {
+        "type": "object",
+        "properties": {
+          "reaction": {
+            "minLength": 1,
+            "maxLength": 16,
+            "type": "string"
+          }
+        },
+        "required": [
+          "reaction"
+        ]
+      },
+      "ToggleMessageReactionResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "courseId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "threadId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "messageId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "reactions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "reaction": {
+                      "type": "string"
+                    },
+                    "count": {
+                      "type": "number"
+                    },
+                    "reactedByCurrentUser": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "reaction",
+                    "count",
+                    "reactedByCurrentUser"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "courseId",
+              "threadId",
+              "messageId",
+              "reactions"
             ]
           }
         },

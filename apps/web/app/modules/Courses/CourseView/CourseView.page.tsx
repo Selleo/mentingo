@@ -22,6 +22,7 @@ import { isSupportedLanguage } from "~/utils/browser-language";
 import { ChapterListOverview } from "./components/ChapterListOverview";
 import { CourseAdminStatistics } from "./CourseAdminStatistics/CourseAdminStatistics";
 import CourseCertificate from "./CourseCertificate";
+import { CourseChatTab } from "./CourseChat/CourseChatTab";
 
 import type { SupportedLanguages } from "@repo/shared";
 
@@ -100,13 +101,26 @@ export default function CourseViewPage() {
   const courseViewTabs = useMemo(
     () => [
       {
+        value: "chapters",
         title: t("studentCourseView.tabs.chapters"),
         itemCount: course?.chapters?.length,
         content: <ChapterListOverview />,
         isForAdminLike: false,
         isForUnregistered: true,
+        isForEnrolled: false,
       },
       {
+        value: "chat",
+        title: t("studentCourseView.tabs.chat"),
+        content: (
+          <CourseChatTab courseId={course?.id ?? ""} currentUserId={currentUser?.id ?? ""} />
+        ),
+        isForAdminLike: false,
+        isForUnregistered: false,
+        isForEnrolled: true,
+      },
+      {
+        value: "moreFromAuthor",
         title: t("studentCourseView.tabs.moreFromAuthor"),
         content: (
           <div className="flex flex-col gap-6">
@@ -116,15 +130,18 @@ export default function CourseViewPage() {
         ),
         isForAdminLike: false,
         isForUnregistered: false,
+        isForEnrolled: false,
       },
       {
+        value: "statistics",
         title: t("studentCourseView.tabs.statistics"),
         content: <CourseAdminStatistics course={course} />,
         isForAdminLike: true,
         isForUnregistered: false,
+        isForEnrolled: false,
       },
     ],
-    [t, course],
+    [t, course, currentUser?.id],
   );
 
   if (!course) return null;
@@ -137,11 +154,12 @@ export default function CourseViewPage() {
     { title: course.title, href: `/course/${id}` },
   ];
 
-  const canView = (isForAdminLike: boolean, isForUnregistered: boolean) => {
+  const canView = (isForAdminLike: boolean, isForUnregistered: boolean, isForEnrolled: boolean) => {
     const hideForAdmin = isForAdminLike && (!canViewCourseStatistics || !currentUser);
     const hideWhenUnregistered = !isForUnregistered && !currentUser;
+    const hideWhenNotEnrolled = isForEnrolled && !course.enrolled;
 
-    return !(hideForAdmin || hideWhenUnregistered);
+    return !(hideForAdmin || hideWhenUnregistered || hideWhenNotEnrolled);
   };
 
   return (
@@ -154,17 +172,17 @@ export default function CourseViewPage() {
 
               <CourseCertificate courseId={course.id} />
 
-              <Tabs defaultValue={courseViewTabs[0].title} className="w-full">
+              <Tabs defaultValue={courseViewTabs[0].value} className="w-full">
                 <TabsList className="bg-card w-full justify-start gap-4 p-0 overflow-hidden">
                   {courseViewTabs.map((tab) => {
-                    const { title, isForAdminLike, isForUnregistered } = tab;
+                    const { value, title, isForAdminLike, isForUnregistered, isForEnrolled } = tab;
 
-                    if (!canView(isForAdminLike, isForUnregistered)) return null;
+                    if (!canView(isForAdminLike, isForUnregistered, isForEnrolled)) return null;
 
                     return (
                       <TabsTrigger
-                        key={title}
-                        value={title}
+                        key={value}
+                        value={value}
                         className="flex h-full rounded-none items-center gap-1.5 data-[state=active]:shadow-none text-neutral-900 data-[state=active]:text-primary-700 data-[state=active]:border-b-2 data-[state=active]:border-b-primary-700"
                       >
                         <span className="body-sm">{title}</span>{" "}
@@ -178,14 +196,14 @@ export default function CourseViewPage() {
                   })}
                 </TabsList>
                 {courseViewTabs.map((tab) => {
-                  const { title, isForAdminLike, content, isForUnregistered } = tab;
+                  const { value, isForAdminLike, content, isForUnregistered, isForEnrolled } = tab;
 
-                  if (!canView(isForAdminLike, isForUnregistered)) return null;
+                  if (!canView(isForAdminLike, isForUnregistered, isForEnrolled)) return null;
 
                   return (
                     <TabsContent
-                      key={title}
-                      value={title}
+                      key={value}
+                      value={value}
                       className={cn({
                         "data-[state=active]:mt-6": true,
                       })}

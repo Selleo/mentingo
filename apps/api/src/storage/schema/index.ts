@@ -18,6 +18,7 @@ import {
   timestamp,
   unique,
   uniqueIndex,
+  type AnyPgColumn,
   uuid,
   varchar,
   vector,
@@ -369,6 +370,98 @@ export const aiMentorThreadMessages = pgTable(
     tenantId,
   },
   withTenantIdIndex("ai_mentor_thread_messages"),
+);
+
+export const courseChatThreads = pgTable(
+  "course_chat_threads",
+  {
+    ...id,
+    ...timestamps,
+    courseId: uuid("course_id")
+      .references(() => courses.id, { onDelete: "cascade" })
+      .notNull(),
+    createdByUserId: uuid("created_by_user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    archived,
+    tenantId,
+  },
+  withTenantIdIndex("course_chat_threads", (table) => ({
+    courseCreatedAtIdx: index("course_chat_threads_course_id_created_at_idx").on(
+      table.courseId,
+      table.createdAt,
+    ),
+    courseUpdatedAtIdx: index("course_chat_threads_course_id_updated_at_idx").on(
+      table.courseId,
+      table.updatedAt,
+    ),
+  })),
+);
+
+export const courseChatMessages = pgTable(
+  "course_chat_messages",
+  {
+    ...id,
+    ...timestamps,
+    threadId: uuid("thread_id")
+      .references(() => courseChatThreads.id, { onDelete: "cascade" })
+      .notNull(),
+    courseId: uuid("course_id")
+      .references(() => courses.id, { onDelete: "cascade" })
+      .notNull(),
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    content: text("content").notNull(),
+    parentMessageId: uuid("parent_message_id").references(
+      (): AnyPgColumn => courseChatMessages.id,
+      { onDelete: "set null" },
+    ),
+    deletedAt: timestamp("deleted_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    tenantId,
+  },
+  withTenantIdIndex("course_chat_messages", (table) => ({
+    courseCreatedAtIdx: index("course_chat_messages_course_id_created_at_idx").on(
+      table.courseId,
+      table.createdAt,
+    ),
+    threadCreatedAtIdx: index("course_chat_messages_thread_id_created_at_idx").on(
+      table.threadId,
+      table.createdAt,
+    ),
+  })),
+);
+
+export const courseChatMessageReactions = pgTable(
+  "course_chat_message_reactions",
+  {
+    ...id,
+    ...timestamps,
+    messageId: uuid("message_id")
+      .references(() => courseChatMessages.id, { onDelete: "cascade" })
+      .notNull(),
+    courseId: uuid("course_id")
+      .references(() => courses.id, { onDelete: "cascade" })
+      .notNull(),
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    reaction: text("reaction").notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("course_chat_message_reactions", (table) => ({
+    messageReactionIdx: index("course_chat_message_reactions_message_id_reaction_idx").on(
+      table.messageId,
+      table.reaction,
+    ),
+    userMessageReactionUniqueIdx: uniqueIndex(
+      "course_chat_message_reactions_user_message_reaction_unique_idx",
+    ).on(table.userId, table.messageId, table.reaction),
+  })),
 );
 
 export const questions = pgTable(
