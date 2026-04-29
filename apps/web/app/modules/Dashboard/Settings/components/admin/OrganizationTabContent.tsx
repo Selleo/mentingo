@@ -8,6 +8,7 @@ import SSOEnforceSwitch from "../SSOEnforceSwitch";
 
 import { ConfigurationStatus } from "./ConfigurationStatus";
 import { DefaultCourseCurrencySelect } from "./DefaultCourseCurrencySelect";
+import { GamificationPointDefaults } from "./GamificationPointDefaults";
 import RoleBasedMFAEnforcementSwitch from "./RoleBasedMFAEnforcementSwitch";
 
 import type { GlobalSettings } from "../../types";
@@ -33,6 +34,7 @@ export default function OrganizationTabContent({ globalSettings }: OrganizationT
       {stripeConfigured?.enabled && (
         <DefaultCourseCurrencySelect currentCurrency={globalSettings.defaultCourseCurrency} />
       )}
+      <GamificationPointDefaults globalSettings={globalSettings} />
       <AgeLimitSelect limit={globalSettings.ageLimit} />
       <UploadFilesToLoginPage />
     </>

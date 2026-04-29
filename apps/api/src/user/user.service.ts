@@ -77,6 +77,7 @@ import {
   users,
   settings,
   userOnboarding,
+  userStatistics,
   studentCourses,
   coursesSummaryStats,
 } from "../storage/schema";
@@ -258,6 +259,23 @@ export class UserService {
       ...userWithoutAvatar,
       profilePictureUrl: usersProfilePictureUrl,
       roleSlugs,
+    };
+  }
+
+  public async getGamificationSummary(userId: UUIDType, db?: DatabasePg) {
+    const dbInstance = db ?? this.db;
+
+    const [summary] = await dbInstance
+      .select({
+        totalPoints: userStatistics.totalPoints,
+        lastPointAt: userStatistics.lastPointAt,
+      })
+      .from(userStatistics)
+      .where(eq(userStatistics.userId, userId));
+
+    return {
+      totalPoints: summary?.totalPoints ?? 0,
+      lastPointAt: summary?.lastPointAt ?? null,
     };
   }
 

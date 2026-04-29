@@ -29,6 +29,7 @@ import {
 } from "~/components/ui/select";
 import { useTusVideoUpload } from "~/hooks/useTusVideoUpload";
 import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/components/MissingTranslationsAlert";
+import { PointsOverrideField } from "~/modules/Admin/EditCourse/components/PointsOverrideField";
 import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
 import {
@@ -59,6 +60,7 @@ type CourseSettingsProps = {
   thumbnailS3Key?: string;
   trailerUrl?: string | null;
   hasCertificate?: boolean;
+  pointsOverride?: number | null;
   courseLanguage: SupportedLanguages;
 };
 
@@ -72,6 +74,7 @@ const CourseSettings = ({
   thumbnailS3Key,
   trailerUrl,
   hasCertificate = false,
+  pointsOverride,
   courseLanguage,
 }: CourseSettingsProps) => {
   const { t } = useTranslation();
@@ -82,6 +85,7 @@ const CourseSettings = ({
     categoryId,
     thumbnailS3Key,
     courseLanguage,
+    pointsOverride,
     courseId: courseId || "",
   });
 
@@ -295,6 +299,7 @@ const CourseSettings = ({
                   />
                 )}
                 {courseId && <CourseSettingsSwitches courseId={courseId} />}
+                <PointsOverrideField form={form} name="pointsOverride" />
                 <FormField
                   control={form.control}
                   name="thumbnailS3Key"

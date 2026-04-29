@@ -198,7 +198,9 @@
       "goToAvailableCourses": "Go to available courses"
     },
     "qa": "Q&A",
-    "tenants": "Organizations"
+    "tenants": "Organizations",
+    "achievements": "Achievements",
+    "leaderboard": "Leaderboard"
   },
   "newsView": {
     "header": "News",
@@ -534,7 +536,12 @@
       "about": "About",
       "contact": "Contact",
       "courses": "Courses",
-      "title": "Title"
+      "title": "Title",
+      "gamification": "Gamification",
+      "lifetimePoints": "lifetime points",
+      "points": "points",
+      "achievementProgress": "{{current}} / {{threshold}} points • {{remaining}} remaining",
+      "achievementUnlockedAt": "Unlocked on {{date}}"
     }
   },
   "changeUserInformationView": {
@@ -1766,6 +1773,14 @@
       "selectedCount": "Selected:",
       "exportButton": "Share",
       "exportingButton": "Sharing..."
+    },
+    "gamification": {
+      "pointsOverride": {
+        "useTenantDefault": "Use tenant default",
+        "description": "Turn this off to set a custom point value. Zero is allowed.",
+        "pointsLabel": "Points override",
+        "defaultPlaceholder": "Tenant default"
+      }
     }
   },
   "registerView": {
@@ -2669,7 +2684,11 @@
     "progress": "Progress",
     "tenant": "Organization Details",
     "createTenant": "Create Organization",
-    "tenants": "Organizations"
+    "tenants": "Organizations",
+    "achievements": "Achievements",
+    "createAchievement": "Create achievement",
+    "achievementDetails": "Achievement details",
+    "leaderboard": "Leaderboard"
   },
   "lessonPreview": {
     "breadcrumbs": {
@@ -3035,6 +3054,83 @@
       "ownerNotAdmin": "API key owner no longer has admin permissions",
       "missingApiKeyHeader": "Missing X-API-Key header",
       "missingTenantIdHeader": "Missing X-Tenant-Id header"
+    }
+  },
+  "gamificationPointDefaults": {
+    "title": "Gamification point defaults",
+    "fields": {
+      "defaultChapterPoints": "Chapter completion",
+      "defaultCoursePoints": "Course completion",
+      "defaultAiPassPoints": "AI mentor pass"
+    },
+    "toast": {
+      "updateSuccess": "Gamification point defaults updated",
+      "updateError": "Could not update gamification point defaults"
+    }
+  },
+  "adminAchievementsView": {
+    "title": "Achievements",
+    "createTitle": "Create achievement",
+    "editTitle": "Edit achievement",
+    "description": "Manage the badge catalog students can unlock with gamification points.",
+    "empty": "No achievements found.",
+    "breadcrumbs": {
+      "achievements": "Achievements",
+      "create": "Create",
+      "details": "Details"
+    },
+    "button": {
+      "createNew": "Create achievement"
+    },
+    "filters": {
+      "includeInactive": "Show inactive achievements"
+    },
+    "table": {
+      "image": "Image",
+      "name": "Name",
+      "threshold": "Threshold",
+      "status": "Status",
+      "createdAt": "Created at"
+    },
+    "form": {
+      "image": "Badge image",
+      "noImage": "Upload an image",
+      "pointThreshold": "Point threshold",
+      "active": "Active",
+      "name": "Name",
+      "description": "Description",
+      "namePlaceholder": "e.g. Course Champion",
+      "descriptionPlaceholder": "e.g. Awarded after earning 100 points by completing courses."
+    },
+    "toast": {
+      "created": "Achievement created successfully.",
+      "updated": "Achievement updated successfully.",
+      "deleted": "Achievement deactivated successfully."
+    },
+    "error": {
+      "notFound": "Achievement not found."
+    }
+  },
+  "gamification": {
+    "toast": {
+      "achievementUnlockedTitle": "Achievement unlocked!",
+      "achievementUnlockedDescription": "You unlocked {{name}}."
+    }
+  },
+  "leaderboardView": {
+    "title": "Leaderboard",
+    "subtitle": "Compare student points across the whole company or a selected group.",
+    "tabs": {
+      "allTime": "All-time",
+      "thisMonth": "This month"
+    },
+    "you": "You",
+    "points": "points",
+    "emptyTitle": "No points yet",
+    "emptyDescription": "Once students earn points, the top 10 will appear here.",
+    "filters": {
+      "group": "Group",
+      "allGroups": "Whole company"
     }
   }
 }

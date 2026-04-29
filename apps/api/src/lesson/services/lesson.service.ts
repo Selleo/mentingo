@@ -56,6 +56,7 @@ import type { EnrolledLessonWithSearch } from "../repositories/lesson.repository
 import type { Request, Response } from "express";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
+import type { AwardPointsResult } from "src/gamification/points.service";
 
 @Injectable()
 export class LessonService {
@@ -281,6 +282,7 @@ export class LessonService {
     wrongAnswerCount: number;
     questionCount: number;
     score: number;
+    gamification: AwardPointsResult;
   }> {
     const { userId } = currentUser;
 
@@ -348,8 +350,10 @@ export class LessonService {
           studentQuizAnswers.language,
         );
 
+        let gamification: AwardPointsResult = { pointsAwarded: 0, newlyUnlocked: [] };
+
         if (isQuizPassed) {
-          await this.studentLessonProgressService.markLessonAsCompleted({
+          gamification = await this.studentLessonProgressService.markLessonAsCompleted({
             id: studentQuizAnswers.lessonId,
             studentId: userId,
             userPermissions: currentUser.permissions,
@@ -380,6 +384,7 @@ export class LessonService {
           wrongAnswerCount: evaluationResult.wrongAnswerCount,
           questionCount: evaluationResult.wrongAnswerCount + evaluationResult.correctAnswerCount,
           score: quizScore,
+          gamification,
         };
       } catch (error) {
         throw new ConflictException(

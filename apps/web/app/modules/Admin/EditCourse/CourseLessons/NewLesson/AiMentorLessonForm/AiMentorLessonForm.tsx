@@ -49,6 +49,7 @@ import {
 import { cn } from "~/lib/utils";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
 import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/components/MissingTranslationsAlert";
+import { PointsOverrideField } from "~/modules/Admin/EditCourse/components/PointsOverrideField";
 import { MultiFileUploadForm } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/components/MultiFileUploadForm";
 import AiMentorLessonPreview from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/hooks/AiMentorLessonPreview";
 import { SuggestionExamples } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/utils/AiMentor.constants";
@@ -417,6 +418,10 @@ const AiMentorLessonForm = ({
                 control={form.control}
                 name="type"
               ></FormField>
+
+              <div className="mb-4">
+                <PointsOverrideField form={form} name="pointsOverride" />
+              </div>
 
               {canConfigureVoiceMentor ? (
                 <div className="mb-4 rounded-lg border border-input bg-background p-4">

@@ -198,7 +198,9 @@
       "goToAvailableCourses": "Gehen Sie zu den verfügbaren Kursen"
     },
     "qa": "Fragen und Antworten",
-    "tenants": "Organisationen"
+    "tenants": "Organisationen",
+    "achievements": "Achievements",
+    "leaderboard": "Bestenliste"
   },
   "newsView": {
     "header": "Nachricht",
@@ -534,7 +536,12 @@
       "about": "Um",
       "contact": "Kontakt",
       "courses": "Kurse",
-      "title": "Titel"
+      "title": "Titel",
+      "gamification": "Gamification",
+      "lifetimePoints": "Punkte insgesamt",
+      "points": "points",
+      "achievementProgress": "{{current}} / {{threshold}} points • {{remaining}} remaining",
+      "achievementUnlockedAt": "Unlocked on {{date}}"
     }
   },
   "changeUserInformationView": {
@@ -1713,6 +1720,14 @@
       "selectedCount": "Ausgewählt:",
       "exportButton": "Aktie",
       "exportingButton": "Teilen..."
+    },
+    "gamification": {
+      "pointsOverride": {
+        "useTenantDefault": "Mandantenstandard verwenden",
+        "description": "Deaktivieren, um einen eigenen Punktewert festzulegen. Null ist erlaubt.",
+        "pointsLabel": "Punkteüberschreibung",
+        "defaultPlaceholder": "Mandantenstandard"
+      }
     }
   },
   "registerView": {
@@ -2616,7 +2631,11 @@
     "progress": "Fortschritt",
     "tenant": "Organisationsdetails",
     "createTenant": "Organisation erstellen",
-    "tenants": "Organisationen"
+    "tenants": "Organisationen",
+    "achievements": "Achievements",
+    "createAchievement": "Create achievement",
+    "achievementDetails": "Achievement details",
+    "leaderboard": "Bestenliste"
   },
   "lessonPreview": {
     "breadcrumbs": {
@@ -2982,6 +3001,83 @@
       "ownerNotAdmin": "Der Besitzer des API-Schlüssels verfügt nicht mehr über Administratorberechtigungen",
       "missingApiKeyHeader": "Fehlender X-API-Key-Header",
       "missingTenantIdHeader": "Fehlender X-Tenant-Id-Header"
+    }
+  },
+  "gamificationPointDefaults": {
+    "title": "Gamification-Punktestandards",
+    "fields": {
+      "defaultChapterPoints": "Kapitelabschluss",
+      "defaultCoursePoints": "Kursabschluss",
+      "defaultAiPassPoints": "AI-Mentor bestanden"
+    },
+    "toast": {
+      "updateSuccess": "Gamification-Punktestandards aktualisiert",
+      "updateError": "Gamification-Punktestandards konnten nicht aktualisiert werden"
+    }
+  },
+  "adminAchievementsView": {
+    "title": "Achievements",
+    "createTitle": "Create achievement",
+    "editTitle": "Edit achievement",
+    "description": "Manage the badge catalog students can unlock with gamification points.",
+    "empty": "No achievements found.",
+    "breadcrumbs": {
+      "achievements": "Achievements",
+      "create": "Create",
+      "details": "Details"
+    },
+    "button": {
+      "createNew": "Create achievement"
+    },
+    "filters": {
+      "includeInactive": "Show inactive achievements"
+    },
+    "table": {
+      "image": "Image",
+      "name": "Name",
+      "threshold": "Threshold",
+      "status": "Status",
+      "createdAt": "Created at"
+    },
+    "form": {
+      "image": "Badge image",
+      "noImage": "Upload an image",
+      "pointThreshold": "Point threshold",
+      "active": "Active",
+      "name": "Name",
+      "description": "Description",
+      "namePlaceholder": "z. B. Kurs-Champion",
+      "descriptionPlaceholder": "z. B. Verliehen nach 100 Punkten für abgeschlossene Kurse."
+    },
+    "toast": {
+      "created": "Achievement created successfully.",
+      "updated": "Achievement updated successfully.",
+      "deleted": "Achievement deactivated successfully."
+    },
+    "error": {
+      "notFound": "Achievement not found."
+    }
+  },
+  "gamification": {
+    "toast": {
+      "achievementUnlockedTitle": "Achievement unlocked!",
+      "achievementUnlockedDescription": "You unlocked {{name}}."
+    }
+  },
+  "leaderboardView": {
+    "title": "Bestenliste",
+    "subtitle": "Vergleiche die Punkte der Lernenden im gesamten Unternehmen oder in einer ausgewählten Gruppe.",
+    "tabs": {
+      "allTime": "Gesamt",
+      "thisMonth": "Dieser Monat"
+    },
+    "you": "Du",
+    "points": "Punkte",
+    "emptyTitle": "Noch keine Punkte",
+    "emptyDescription": "Sobald Lernende Punkte sammeln, erscheint hier die Top 10.",
+    "filters": {
+      "group": "Gruppe",
+      "allGroups": "Ganzes Unternehmen"
     }
   }
 }

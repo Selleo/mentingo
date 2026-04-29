@@ -61,3 +61,6 @@ apps/web/app/components/ui
 # Test files
 **/test-results
 **/playwright-report
+
+# Local working docs
+CURRENT-WORK

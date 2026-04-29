@@ -7,6 +7,10 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import { flatMap, sampleSize } from "lodash";
 import postgres from "postgres";
 
+import {
+  GAMIFICATION_POINT_DEFAULTS,
+  POINT_EVENT_TYPES,
+} from "src/gamification/gamification.constants";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import {
   DEFAULT_GLOBAL_SETTINGS,
@@ -23,6 +27,7 @@ import {
   courseStudentsStats,
   credentials,
   lessons,
+  pointEvents,
   questions,
   quizAttempts,
   settings,
@@ -31,6 +36,7 @@ import {
   userDetails,
   userOnboarding,
   users,
+  userStatistics,
 } from "../storage/schema";
 
 import { e2eCourses } from "./e2e-data-seeds";
@@ -337,6 +343,59 @@ async function createCourseStudentsStats(tenantId: UUIDType) {
     });
 }
 
+async function seedGamificationPoints(studentIds: UUIDType[], tenantId: UUIDType) {
+  if (studentIds.length === 0) return;
+
+  const eventTypes = Object.values(POINT_EVENT_TYPES);
+  const pointsByType: Record<(typeof eventTypes)[number], number> = {
+    [POINT_EVENT_TYPES.CHAPTER_COMPLETED]: GAMIFICATION_POINT_DEFAULTS.CHAPTER_COMPLETED,
+    [POINT_EVENT_TYPES.AI_MENTOR_PASSED]: GAMIFICATION_POINT_DEFAULTS.AI_MENTOR_PASSED,
+    [POINT_EVENT_TYPES.COURSE_COMPLETED]: GAMIFICATION_POINT_DEFAULTS.COURSE_COMPLETED,
+  };
+
+  const now = Date.now();
+  const dayMs = 24 * 60 * 60 * 1000;
+
+  for (const [index, userId] of studentIds.entries()) {
+    const eventCount = faker.number.int({ min: 6, max: 22 }) + index * 2;
+    const events = Array.from({ length: eventCount }, () => {
+      const eventType = faker.helpers.arrayElement(eventTypes);
+      const daysAgo = faker.number.int({ min: 0, max: 75 });
+      const createdAt = new Date(now - daysAgo * dayMs).toISOString();
+
+      return {
+        userId,
+        tenantId,
+        eventType,
+        entityId: faker.string.uuid(),
+        points: pointsByType[eventType],
+        createdAt,
+        updatedAt: createdAt,
+      };
+    });
+
+    await db.insert(pointEvents).values(events);
+
+    const totalPoints = events.reduce((sum, event) => sum + event.points, 0);
+    const lastPointAt = events.reduce(
+      (latest, event) => (event.createdAt > latest ? event.createdAt : latest),
+      events[0].createdAt,
+    );
+
+    await db
+      .insert(userStatistics)
+      .values({ userId, tenantId, totalPoints, lastPointAt })
+      .onConflictDoUpdate({
+        target: userStatistics.userId,
+        set: {
+          totalPoints,
+          lastPointAt,
+          updatedAt: sql`now()`,
+        },
+      });
+  }
+}
+
 async function seed() {
   await seedUserRoleGrantSql(db);
 
@@ -381,19 +440,6 @@ async function seed() {
         "password",
         emailSuffix,
       );
-      await createUsers(
-        [
-          {
-            email: "student0@example.com",
-            firstName: faker.person.firstName(),
-            lastName: "Student",
-            roleSlug: SYSTEM_ROLE_SLUGS.STUDENT,
-          },
-        ],
-        tenantId,
-        "password",
-        emailSuffix,
-      );
 
       const createdStudentIds = createdStudents.map((student) => student.id);
       const creatorCourseIds = [
@@ -430,6 +476,9 @@ async function seed() {
       );
       await createCourseStudentsStats(tenantId);
       console.log("Created student course students stats");
+
+      await seedGamificationPoints(createdStudentIds, tenantId);
+      console.log("Created gamification point events and user statistics");
       console.log(`Seeding completed successfully for tenant ${origin}`);
     }
   } catch (error) {

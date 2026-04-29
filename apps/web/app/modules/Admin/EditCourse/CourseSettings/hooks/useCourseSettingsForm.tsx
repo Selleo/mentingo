@@ -16,6 +16,7 @@ type CourseSettingsProps = {
   description?: string;
   categoryId?: string;
   thumbnailS3Key?: string;
+  pointsOverride?: number | null;
   courseId: string;
   courseLanguage: SupportedLanguages;
 };
@@ -25,6 +26,7 @@ export const useCourseSettingsForm = ({
   description,
   categoryId,
   thumbnailS3Key,
+  pointsOverride,
   courseId,
   courseLanguage,
 }: CourseSettingsProps) => {
@@ -38,6 +40,7 @@ export const useCourseSettingsForm = ({
       description: description || "",
       categoryId: categoryId || "",
       thumbnailS3Key: thumbnailS3Key || "",
+      pointsOverride: pointsOverride ?? null,
       language: courseLanguage,
     },
   });

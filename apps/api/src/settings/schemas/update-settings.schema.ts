@@ -26,6 +26,12 @@ export const updateDefaultCourseCurrencySchema = Type.Object({
   defaultCourseCurrency: Type.Union(ALLOWED_CURRENCIES.map((currency) => Type.Literal(currency))),
 });
 
+export const updateGamificationPointDefaultsSchema = Type.Object({
+  defaultChapterPoints: Type.Integer({ minimum: 0 }),
+  defaultCoursePoints: Type.Integer({ minimum: 0 }),
+  defaultAiPassPoints: Type.Integer({ minimum: 0 }),
+});
+
 export const updateGlobalColorSchema = Type.Object({
   primaryColor: Type.String({
     pattern: HEX_COLOR_REGEX.source,
@@ -46,6 +52,9 @@ export const updateAgeLimitSchema = Type.Object({
 export type UpdateSettingsBody = Static<typeof updateSettingsBodySchema>;
 export type UpdateMFAEnforcedRolesRequest = Static<typeof updateMFAEnforcedRolesSchema>;
 export type UpdateDefaultCourseCurrencyBody = Static<typeof updateDefaultCourseCurrencySchema>;
+export type UpdateGamificationPointDefaultsBody = Static<
+  typeof updateGamificationPointDefaultsSchema
+>;
 export type UpdateGlobalColorSchemaBody = Static<typeof updateGlobalColorSchema>;
 export type UpdateConfigWarningDismissedBody = Static<typeof updateConfigWarningDismissedSchema>;
 export type UpdateAgeLimitBody = Static<typeof updateAgeLimitSchema>;

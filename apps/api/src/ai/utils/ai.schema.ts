@@ -3,6 +3,7 @@ import { type Static, Type } from "@sinclair/typebox";
 
 import { THREAD_STATUS, MESSAGE_ROLE } from "src/ai/utils/ai.type";
 import { UUIDSchema } from "src/common";
+import { gamificationAwardSchema } from "src/gamification/schemas/achievement.schema";
 
 export const requestThreadSchema = Type.Object({
   lessonId: UUIDSchema,
@@ -104,6 +105,7 @@ export const threadOwnershipSchema = Type.Object({
 export const responseJudgeSchema = Type.Object({
   summary: Type.String(),
   passed: Type.Boolean(),
+  gamification: gamificationAwardSchema,
 });
 
 export const streamChatSchema = Type.Object({

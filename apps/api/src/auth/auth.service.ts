@@ -316,6 +316,7 @@ export class AuthService {
 
     const isManagingTenantAdmin = await this.isManagingTenantAdmin(tenantId, permissions);
     const studentModeCourseIds = await this.getStudentModeCourseIds(userId, this.db);
+    const gamification = await this.userService.getGamificationSummary(userId);
 
     if (this.isMfaRoleEnforced(MFAEnforcedRoles, roleSlugs) || userSettings.isMFAEnabled) {
       return {
@@ -324,6 +325,7 @@ export class AuthService {
         onboardingStatus,
         isManagingTenantAdmin,
         isSupportMode: false,
+        gamification,
         studentModeCourseIds,
         roleSlugs,
         permissions,
@@ -336,6 +338,7 @@ export class AuthService {
       onboardingStatus,
       isManagingTenantAdmin,
       isSupportMode: false,
+      gamification,
       studentModeCourseIds,
       roleSlugs,
       permissions,
@@ -364,6 +367,7 @@ export class AuthService {
       supportPermissions,
     );
     const studentModeCourseIds = await this.getStudentModeCourseIds(sourceUserId, dbInstance);
+    const gamification = await this.userService.getGamificationSummary(sourceUserId, dbInstance);
 
     return {
       ...user,
@@ -371,6 +375,7 @@ export class AuthService {
       onboardingStatus,
       isManagingTenantAdmin,
       isSupportMode: true,
+      gamification,
       studentModeCourseIds,
       roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN],
       permissions: supportPermissions,

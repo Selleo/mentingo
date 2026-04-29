@@ -23,6 +23,7 @@ type AiMentor = {
   voiceMode: AiMentorVoiceMode;
   ttsPreset: AiMentorTTSPreset;
   customTtsReference?: string | null;
+  pointsOverride?: number | null;
 };
 
 export interface LessonResource {
@@ -63,6 +64,7 @@ export interface Chapter {
   // imageUrl: string | null;
   displayOrder: number;
   isFree: boolean;
+  pointsOverride?: number | null;
   lessonCount: number;
   lessons: Lesson[];
 }

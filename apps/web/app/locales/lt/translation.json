@@ -198,7 +198,9 @@
       "goToAvailableCourses": "Eikite į galimus kursus"
     },
     "qa": "Klausimai ir atsakymai",
-    "tenants": "Organizacijos"
+    "tenants": "Organizacijos",
+    "achievements": "Achievements",
+    "leaderboard": "Lyderių lentelė"
   },
   "newsView": {
     "header": "Naujienos",
@@ -534,7 +536,12 @@
       "about": "Apie",
       "contact": "Susisiekite",
       "courses": "Kursai",
-      "title": "Pavadinimas"
+      "title": "Pavadinimas",
+      "gamification": "Žaidybinimas",
+      "lifetimePoints": "taškai iš viso",
+      "points": "points",
+      "achievementProgress": "{{current}} / {{threshold}} points • {{remaining}} remaining",
+      "achievementUnlockedAt": "Unlocked on {{date}}"
     }
   },
   "changeUserInformationView": {
@@ -1713,6 +1720,14 @@
       "selectedCount": "Pasirinkta:",
       "exportButton": "Dalintis",
       "exportingButton": "Bendrinama..."
+    },
+    "gamification": {
+      "pointsOverride": {
+        "useTenantDefault": "Naudoti organizacijos numatytąją reikšmę",
+        "description": "Išjunkite, jei norite nustatyti individualią taškų reikšmę. Nulis leidžiamas.",
+        "pointsLabel": "Taškų perrašymas",
+        "defaultPlaceholder": "Organizacijos numatytoji reikšmė"
+      }
     }
   },
   "registerView": {
@@ -2616,7 +2631,11 @@
     "progress": "Pažanga",
     "tenant": "Organizacijos informacija",
     "createTenant": "Sukurti organizaciją",
-    "tenants": "Organizacijos"
+    "tenants": "Organizacijos",
+    "achievements": "Achievements",
+    "createAchievement": "Create achievement",
+    "achievementDetails": "Achievement details",
+    "leaderboard": "Lyderių lentelė"
   },
   "lessonPreview": {
     "breadcrumbs": {
@@ -2982,6 +3001,83 @@
       "ownerNotAdmin": "API rakto savininkas nebeturi administratoriaus teisių",
       "missingApiKeyHeader": "Trūksta X-API-Key antraštės",
       "missingTenantIdHeader": "Trūksta X-Tenant-Id antraštės"
+    }
+  },
+  "gamificationPointDefaults": {
+    "title": "Gamifikacijos taškų numatytosios reikšmės",
+    "fields": {
+      "defaultChapterPoints": "Skyriaus užbaigimas",
+      "defaultCoursePoints": "Kurso užbaigimas",
+      "defaultAiPassPoints": "AI mentoriaus išlaikymas"
+    },
+    "toast": {
+      "updateSuccess": "Gamifikacijos taškų numatytosios reikšmės atnaujintos",
+      "updateError": "Nepavyko atnaujinti gamifikacijos taškų numatytųjų reikšmių"
+    }
+  },
+  "adminAchievementsView": {
+    "title": "Achievements",
+    "createTitle": "Create achievement",
+    "editTitle": "Edit achievement",
+    "description": "Manage the badge catalog students can unlock with gamification points.",
+    "empty": "No achievements found.",
+    "breadcrumbs": {
+      "achievements": "Achievements",
+      "create": "Create",
+      "details": "Details"
+    },
+    "button": {
+      "createNew": "Create achievement"
+    },
+    "filters": {
+      "includeInactive": "Show inactive achievements"
+    },
+    "table": {
+      "image": "Image",
+      "name": "Name",
+      "threshold": "Threshold",
+      "status": "Status",
+      "createdAt": "Created at"
+    },
+    "form": {
+      "image": "Badge image",
+      "noImage": "Upload an image",
+      "pointThreshold": "Point threshold",
+      "active": "Active",
+      "name": "Name",
+      "description": "Description",
+      "namePlaceholder": "pvz. Kurso čempionas",
+      "descriptionPlaceholder": "pvz. Skiriama surinkus 100 taškų už baigtus kursus."
+    },
+    "toast": {
+      "created": "Achievement created successfully.",
+      "updated": "Achievement updated successfully.",
+      "deleted": "Achievement deactivated successfully."
+    },
+    "error": {
+      "notFound": "Achievement not found."
+    }
+  },
+  "gamification": {
+    "toast": {
+      "achievementUnlockedTitle": "Achievement unlocked!",
+      "achievementUnlockedDescription": "You unlocked {{name}}."
+    }
+  },
+  "leaderboardView": {
+    "title": "Lyderių lentelė",
+    "subtitle": "Palyginkite studentų taškus visoje įmonėje arba pasirinktoje grupėje.",
+    "tabs": {
+      "allTime": "Visas laikas",
+      "thisMonth": "Šis mėnuo"
+    },
+    "you": "Jūs",
+    "points": "taškai",
+    "emptyTitle": "Taškų dar nėra",
+    "emptyDescription": "Kai studentai surinks taškų, čia bus rodoma geriausiųjų dešimtukas.",
+    "filters": {
+      "group": "Grupė",
+      "allGroups": "Visa įmonė"
     }
   }
 }

@@ -68,6 +68,7 @@ import type {
 import type {
   AllowedAgeLimit,
   AllowedCurrency,
+  UpdateGamificationPointDefaultsBody,
   UpdateMFAEnforcedRolesRequest,
   UpdateSettingsBody,
 } from "./schemas/update-settings.schema";
@@ -1109,6 +1110,33 @@ export class SettingsService {
     return updatedUserSettings;
   }
 
+  async updateGamificationPointDefaults(
+    pointDefaults: UpdateGamificationPointDefaultsBody,
+    actor?: CurrentUserType,
+  ): Promise<GlobalSettingsJSONContentSchema> {
+    const previousRecord = await this.getGlobalSettingsRecord();
+
+    const [{ settings: updatedSettings }] = await this.db
+      .update(settings)
+      .set({
+        settings: sql`
+          settings.settings || to_jsonb(${pointDefaults}::jsonb)
+        `,
+      })
+      .where(isNull(settings.userId))
+      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+
+    const updatedRecord = await this.getGlobalSettingsRecord();
+
+    await this.recordSettingsUpdate({
+      actor,
+      previousSnapshot: this.buildSettingsSnapshot(previousRecord),
+      updatedSnapshot: this.buildSettingsSnapshot(updatedRecord),
+    });
+
+    return this.parseGlobalSettings(updatedSettings);
+  }
+
   async updateDefaultCourseCurrency(
     currency: AllowedCurrency,
     actor?: CurrentUserType,
@@ -1625,6 +1653,12 @@ export class SettingsService {
       loginPageFiles: Array.isArray(settings.loginPageFiles)
         ? settings.loginPageFiles
         : JSON.parse(settings.loginPageFiles ?? "[]"),
+      defaultChapterPoints:
+        settings.defaultChapterPoints ?? DEFAULT_GLOBAL_SETTINGS.defaultChapterPoints,
+      defaultCoursePoints:
+        settings.defaultCoursePoints ?? DEFAULT_GLOBAL_SETTINGS.defaultCoursePoints,
+      defaultAiPassPoints:
+        settings.defaultAiPassPoints ?? DEFAULT_GLOBAL_SETTINGS.defaultAiPassPoints,
       ageLimit: settings.ageLimit ?? null,
     };
   }

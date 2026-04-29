@@ -174,7 +174,8 @@ export class AdminChapterRepository {
             'avatarReference', aml.avatar_reference,
             'voiceMode', aml.voice_mode,
             'ttsPreset', aml.tts_preset,
-            'customTtsReference', COALESCE(aml.custom_tts_reference->>${language}::text, '')
+            'customTtsReference', COALESCE(aml.custom_tts_reference->>${language}::text, ''),
+            'pointsOverride', aml.points_override
           )
           FROM ${aiMentorLessons} aml
           WHERE lessons.id = aml.lesson_id 
@@ -217,7 +218,7 @@ export class AdminChapterRepository {
       .update(chapters)
       .set({
         ...body,
-        title: setJsonbField(chapters.title, body.language, body.title),
+        title: body.title ? setJsonbField(chapters.title, body.language, body.title) : undefined,
       })
       .where(eq(chapters.id, id))
       .returning({

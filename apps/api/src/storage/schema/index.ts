@@ -103,11 +103,101 @@ export const userStatistics = pgTable(
     currentStreak: integer("current_streak").notNull().default(0),
     longestStreak: integer("longest_streak").notNull().default(0),
     lastActivityDate: timestamp("last_activity_date", { withTimezone: true }),
+    totalPoints: integer("total_points").notNull().default(0),
+    lastPointAt: timestamp("last_point_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
 
     activityHistory: jsonb("activity_history").$type<ActivityHistory>().default({}),
     tenantId,
   },
   withTenantIdIndex("user_statistics"),
+);
+
+export const pointEvents = pgTable(
+  "point_events",
+  {
+    ...id,
+    ...timestamps,
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    eventType: text("event_type").notNull(),
+    entityId: uuid("entity_id").notNull(),
+    points: integer("points").notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("point_events", (table) => ({
+    userEventEntityUniqueIdx: uniqueIndex("point_events_user_event_entity_unique_idx").on(
+      table.userId,
+      table.eventType,
+      table.entityId,
+    ),
+    tenantCreatedAtIdx: index("point_events_tenant_created_at_idx").on(
+      table.tenantId,
+      table.createdAt,
+    ),
+  })),
+);
+
+export const achievements = pgTable(
+  "achievements",
+  {
+    ...id,
+    ...timestamps,
+    imageReference: text("image_reference").notNull(),
+    pointThreshold: integer("point_threshold").notNull(),
+    isActive: boolean("is_active").notNull().default(true),
+    tenantId,
+  },
+  withTenantIdIndex("achievements"),
+);
+
+export const achievementTranslations = pgTable(
+  "achievement_translations",
+  {
+    achievementId: uuid("achievement_id")
+      .references(() => achievements.id, { onDelete: "cascade" })
+      .notNull(),
+    locale: text("locale").$type<SupportedLanguages>().notNull(),
+    name: text("name").notNull(),
+    description: text("description").notNull(),
+  },
+  (table) => ({
+    achievementLocaleUniqueIdx: uniqueIndex("achievement_translations_achievement_locale_idx").on(
+      table.achievementId,
+      table.locale,
+    ),
+  }),
+);
+
+export const userAchievements = pgTable(
+  "user_achievements",
+  {
+    ...id,
+    unlockedAt: timestamp("unlocked_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    achievementId: uuid("achievement_id")
+      .references(() => achievements.id, { onDelete: "cascade" })
+      .notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("user_achievements", (table) => ({
+    userAchievementUniqueIdx: uniqueIndex("user_achievements_user_achievement_unique_idx").on(
+      table.userId,
+      table.achievementId,
+    ),
+  })),
 );
 
 export const quizAttempts = pgTable(
@@ -239,6 +329,7 @@ export const courses = pgTable(
       .array()
       .notNull()
       .default(sql`ARRAY['en']::text[]`),
+    pointsOverride: integer("points_override"),
     tenantId,
   },
   withTenantIdIndex("courses", (table) => ({
@@ -281,6 +372,7 @@ export const chapters = pgTable(
     isFreemium: boolean("is_freemium").notNull().default(false),
     displayOrder: integer("display_order"),
     lessonCount: integer("lesson_count").notNull().default(0),
+    pointsOverride: integer("points_override"),
     tenantId,
   },
   withTenantIdIndex("chapters"),
@@ -325,6 +417,7 @@ export const aiMentorLessons = pgTable(
     voiceMode: text("voice_mode").notNull().default("preset"),
     ttsPreset: text("tts_preset").notNull().default("male"),
     customTtsReference: jsonb("custom_tts_reference"),
+    pointsOverride: integer("points_override"),
     tenantId,
   },
   withTenantIdIndex("ai_mentor_lessons"),

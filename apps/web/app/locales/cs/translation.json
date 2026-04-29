@@ -198,7 +198,9 @@
       "goToAvailableCourses": "Přejděte na dostupné kurzy"
     },
     "qa": "Otázky a odpovědi",
-    "tenants": "Organizace"
+    "tenants": "Organizace",
+    "achievements": "Achievements",
+    "leaderboard": "Žebříček"
   },
   "newsView": {
     "header": "Zprávy",
@@ -534,7 +536,12 @@
       "about": "O",
       "contact": "Kontakt",
       "courses": "Kurzy",
-      "title": "Titul"
+      "title": "Titul",
+      "gamification": "Gamifikace",
+      "lifetimePoints": "bodů celkem",
+      "points": "points",
+      "achievementProgress": "{{current}} / {{threshold}} points • {{remaining}} remaining",
+      "achievementUnlockedAt": "Unlocked on {{date}}"
     }
   },
   "changeUserInformationView": {
@@ -1713,6 +1720,14 @@
       "selectedCount": "Vybraný:",
       "exportButton": "Podíl",
       "exportingButton": "Sdílení..."
+    },
+    "gamification": {
+      "pointsOverride": {
+        "useTenantDefault": "Použít výchozí hodnotu organizace",
+        "description": "Vypněte pro nastavení vlastní bodové hodnoty. Nula je povolena.",
+        "pointsLabel": "Přepsání bodů",
+        "defaultPlaceholder": "Výchozí hodnota organizace"
+      }
     }
   },
   "registerView": {
@@ -2616,7 +2631,11 @@
     "progress": "Pokrok",
     "tenant": "Podrobnosti organizace",
     "createTenant": "Vytvořit organizaci",
-    "tenants": "Organizace"
+    "tenants": "Organizace",
+    "achievements": "Achievements",
+    "createAchievement": "Create achievement",
+    "achievementDetails": "Achievement details",
+    "leaderboard": "Žebříček"
   },
   "lessonPreview": {
     "breadcrumbs": {
@@ -2982,6 +3001,83 @@
       "ownerNotAdmin": "Vlastník klíče API již nemá oprávnění správce",
       "missingApiKeyHeader": "Chybí hlavička X-API-Key",
       "missingTenantIdHeader": "Chybí hlavička X-Tenant-Id"
+    }
+  },
+  "gamificationPointDefaults": {
+    "title": "Výchozí body gamifikace",
+    "fields": {
+      "defaultChapterPoints": "Dokončení kapitoly",
+      "defaultCoursePoints": "Dokončení kurzu",
+      "defaultAiPassPoints": "Splnění AI mentora"
+    },
+    "toast": {
+      "updateSuccess": "Výchozí body gamifikace byly aktualizovány",
+      "updateError": "Nepodařilo se aktualizovat výchozí body gamifikace"
+    }
+  },
+  "adminAchievementsView": {
+    "title": "Achievements",
+    "createTitle": "Create achievement",
+    "editTitle": "Edit achievement",
+    "description": "Manage the badge catalog students can unlock with gamification points.",
+    "empty": "No achievements found.",
+    "breadcrumbs": {
+      "achievements": "Achievements",
+      "create": "Create",
+      "details": "Details"
+    },
+    "button": {
+      "createNew": "Create achievement"
+    },
+    "filters": {
+      "includeInactive": "Show inactive achievements"
+    },
+    "table": {
+      "image": "Image",
+      "name": "Name",
+      "threshold": "Threshold",
+      "status": "Status",
+      "createdAt": "Created at"
+    },
+    "form": {
+      "image": "Badge image",
+      "noImage": "Upload an image",
+      "pointThreshold": "Point threshold",
+      "active": "Active",
+      "name": "Name",
+      "description": "Description",
+      "namePlaceholder": "např. Mistr kurzu",
+      "descriptionPlaceholder": "např. Uděleno po získání 100 bodů za dokončené kurzy."
+    },
+    "toast": {
+      "created": "Achievement created successfully.",
+      "updated": "Achievement updated successfully.",
+      "deleted": "Achievement deactivated successfully."
+    },
+    "error": {
+      "notFound": "Achievement not found."
+    }
+  },
+  "gamification": {
+    "toast": {
+      "achievementUnlockedTitle": "Achievement unlocked!",
+      "achievementUnlockedDescription": "You unlocked {{name}}."
+    }
+  },
+  "leaderboardView": {
+    "title": "Žebříček",
+    "subtitle": "Porovnejte body studentů v celé firmě nebo ve vybrané skupině.",
+    "tabs": {
+      "allTime": "Celkově",
+      "thisMonth": "Tento měsíc"
+    },
+    "you": "Vy",
+    "points": "body",
+    "emptyTitle": "Zatím žádné body",
+    "emptyDescription": "Jakmile studenti získají body, zobrazí se zde nejlepší desítka.",
+    "filters": {
+      "group": "Skupina",
+      "allGroups": "Celá firma"
     }
   }
 }

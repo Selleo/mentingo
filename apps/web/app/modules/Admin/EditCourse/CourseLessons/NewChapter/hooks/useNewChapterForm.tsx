@@ -35,6 +35,7 @@ export const useNewChapterForm = ({
     resolver: zodResolver(newChapterFormSchema),
     defaultValues: {
       title: chapter?.title || "",
+      pointsOverride: chapter?.pointsOverride ?? null,
     },
   });
 
@@ -43,6 +44,7 @@ export const useNewChapterForm = ({
   useEffect(() => {
     reset({
       title: chapter?.title || "",
+      pointsOverride: chapter?.pointsOverride ?? null,
     });
   }, [chapter, reset]);
 

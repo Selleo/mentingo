@@ -47,6 +47,7 @@ export const createAiMentorLessonFactory = (db: DatabasePg) => {
           voiceMode: aiMentorLesson.voiceMode,
           ttsPreset: aiMentorLesson.ttsPreset,
           customTtsReference: aiMentorLesson.customTtsReference,
+          pointsOverride: aiMentorLesson.pointsOverride,
         })
         .returning();
 
@@ -66,6 +67,7 @@ export const createAiMentorLessonFactory = (db: DatabasePg) => {
       voiceMode: AI_MENTOR_VOICE_MODE.PRESET,
       ttsPreset: AI_MENTOR_TTS_PRESET.MALE,
       customTtsReference: null,
+      pointsOverride: null,
     };
   });
 };

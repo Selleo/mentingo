@@ -43,6 +43,7 @@ import { StagingGuard } from "./common/guards/staging.guard";
 import { CourseModule } from "./courses/course.module";
 import { EventsModule } from "./events/events.module";
 import { FileModule } from "./file/files.module";
+import { GamificationModule } from "./gamification/gamification.module";
 import { GroupModule } from "./group/group.module";
 import { HealthModule } from "./health/health.module";
 import { IngestionModule } from "./ingestion/ingestion.module";
@@ -131,6 +132,7 @@ import type { RedisClient } from "src/redis";
     ConditionalModule.registerWhen(ScheduleModule.forRoot(), (env) => !env.JEST_WORKER_ID),
     CourseModule,
     GroupModule,
+    GamificationModule,
     LessonModule,
     QuestionsModule,
     StudentLessonProgressModule,

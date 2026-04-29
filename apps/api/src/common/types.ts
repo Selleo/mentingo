@@ -18,6 +18,9 @@ export type GlobalSettings = {
   primaryColor: string | null;
   contrastColor: string | null;
   loginBackgroundImageS3Key: string | null;
+  defaultChapterPoints: number;
+  defaultCoursePoints: number;
+  defaultAiPassPoints: number;
 };
 
 export type StudentSettings = {

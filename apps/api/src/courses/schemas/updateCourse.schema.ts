@@ -15,6 +15,7 @@ export const updateCourseSchema = Type.Partial(
     categoryId: Type.String({ format: "uuid" }),
     chapters: Type.Array(Type.String({ format: "uuid" })),
     archived: Type.Optional(Type.Boolean()),
+    pointsOverride: Type.Optional(Type.Union([Type.Integer({ minimum: 0 }), Type.Null()])),
     language: supportedLanguagesSchema,
   }),
 );

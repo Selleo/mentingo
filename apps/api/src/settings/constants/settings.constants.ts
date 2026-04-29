@@ -1,5 +1,7 @@
 import { SUPPORTED_LANGUAGES } from "@repo/shared";
 
+import { GAMIFICATION_POINT_DEFAULTS } from "src/gamification/gamification.constants";
+
 const DEFAULT_COMPANY_INFORMATION = {
   companyName: "",
   companyShortName: "",
@@ -35,6 +37,9 @@ export const DEFAULT_GLOBAL_SETTINGS = {
   platformSimpleLogoS3Key: null,
   MFAEnforcedRoles: [],
   defaultCourseCurrency: "pln",
+  defaultChapterPoints: GAMIFICATION_POINT_DEFAULTS.CHAPTER_COMPLETED,
+  defaultCoursePoints: GAMIFICATION_POINT_DEFAULTS.COURSE_COMPLETED,
+  defaultAiPassPoints: GAMIFICATION_POINT_DEFAULTS.AI_MENTOR_PASSED,
   inviteOnlyRegistration: false,
   userEmailTriggers: DEFAULT_EMAIL_TRIGGERS,
   primaryColor: null,
