@@ -592,6 +592,14 @@
       "rewardPointsByDayDescription": "Pro Tag gesammelte Punkte"
     }
   },
+  "rewards": {
+    "notifications": {
+      "chapterCompleted": "Kapitel abgeschlossen",
+      "courseCompleted": "Kurs abgeschlossen",
+      "pointsAwarded_one": "Du hast {{count}} Belohnungspunkt erhalten.",
+      "pointsAwarded_other": "Du hast {{count}} Belohnungspunkte erhalten."
+    }
+  },
   "profileWithCalendarView": {
     "header": "Mein Profil",
     "button": {

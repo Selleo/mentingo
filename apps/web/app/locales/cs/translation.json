@@ -592,6 +592,16 @@
       "rewardPointsByDayDescription": "Body získané každý den"
     }
   },
+  "rewards": {
+    "notifications": {
+      "chapterCompleted": "Kapitola dokončena",
+      "courseCompleted": "Kurz dokončen",
+      "pointsAwarded_one": "Získali jste {{count}} bod odměn.",
+      "pointsAwarded_few": "Získali jste {{count}} body odměn.",
+      "pointsAwarded_many": "Získali jste {{count}} bodů odměn.",
+      "pointsAwarded_other": "Získali jste {{count}} bodu odměn."
+    }
+  },
   "profileWithCalendarView": {
     "header": "Můj profil",
     "button": {

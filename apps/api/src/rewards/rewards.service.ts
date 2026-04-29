@@ -37,6 +37,7 @@ type RewardGrantInput = {
   sourceEntityType: RewardSourceEntityType;
   sourceEntityId: UUIDType;
   metadata?: Record<string, unknown>;
+  notify?: boolean;
 };
 
 type LeaderboardEntry = {
@@ -315,10 +316,14 @@ export class RewardsService {
       dbInstance,
     );
 
-    this.wsGateway.emitToUser(input.userId, REWARDS_SOCKET_EVENTS.UPDATED, {
-      totalPoints,
-      earnedAchievementIds: earnedAchievements.map((achievement) => achievement.id),
-    });
+    if (input.notify ?? true) {
+      this.wsGateway.emitToUser(input.userId, REWARDS_SOCKET_EVENTS.UPDATED, {
+        actionType: input.actionType,
+        pointsAwarded: rule.points,
+        totalPoints,
+        earnedAchievementIds: earnedAchievements.map((achievement) => achievement.id),
+      });
+    }
 
     return { ledgerEntry, totalPoints, earnedAchievements };
   }
@@ -346,6 +351,7 @@ export class RewardsService {
         sourceEntityType: REWARD_SOURCE_ENTITY_TYPES.CHAPTER,
         sourceEntityId: row.chapterId,
         metadata: { courseId: row.courseId },
+        notify: false,
       });
 
       if (grant) chapterGrants += 1;
@@ -372,6 +378,7 @@ export class RewardsService {
         sourceEntityType: REWARD_SOURCE_ENTITY_TYPES.LESSON,
         sourceEntityId: row.lessonId,
         metadata: { courseId: row.courseId },
+        notify: false,
       });
 
       if (grant) aiConversationGrants += 1;
@@ -391,6 +398,7 @@ export class RewardsService {
         actionType: REWARD_ACTION_TYPES.COURSE_COMPLETED,
         sourceEntityType: REWARD_SOURCE_ENTITY_TYPES.COURSE,
         sourceEntityId: row.courseId,
+        notify: false,
       });
 
       if (grant) courseGrants += 1;

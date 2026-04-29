@@ -569,6 +569,16 @@
       "rewardPointsByDayDescription": "Punkty zdobyte każdego dnia"
     }
   },
+  "rewards": {
+    "notifications": {
+      "chapterCompleted": "Rozdział ukończony",
+      "courseCompleted": "Kurs ukończony",
+      "pointsAwarded_one": "Zdobyto {{count}} punkt nagrody.",
+      "pointsAwarded_few": "Zdobyto {{count}} punkty nagród.",
+      "pointsAwarded_many": "Zdobyto {{count}} punktów nagród.",
+      "pointsAwarded_other": "Zdobyto {{count}} punktu nagrody."
+    }
+  },
   "profileWithCalendarView": {
     "header": "Mój profil",
     "button": {

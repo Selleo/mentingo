@@ -592,6 +592,16 @@
       "rewardPointsByDayDescription": "Kiekvieną dieną gauti taškai"
     }
   },
+  "rewards": {
+    "notifications": {
+      "chapterCompleted": "Skyrius baigtas",
+      "courseCompleted": "Kursas baigtas",
+      "pointsAwarded_one": "Gavote {{count}} atlygio tašką.",
+      "pointsAwarded_few": "Gavote {{count}} atlygio taškus.",
+      "pointsAwarded_many": "Gavote {{count}} atlygio taškų.",
+      "pointsAwarded_other": "Gavote {{count}} atlygio taško."
+    }
+  },
   "profileWithCalendarView": {
     "header": "Mano profilis",
     "button": {
