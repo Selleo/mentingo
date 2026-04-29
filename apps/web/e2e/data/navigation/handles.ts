@@ -19,4 +19,5 @@ export const NAVIGATION_HANDLES = {
   PROVIDER_INFORMATION_LINK: "navigation-provider-information-link",
   PROFILE_LINK: "navigation-profile-link",
   SETTINGS_LINK: "navigation-settings-link",
+  ACTIVITY_LOGS_LINK: "navigation-activity-logs-link",
 };

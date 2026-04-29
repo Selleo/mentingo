@@ -130,6 +130,9 @@ export const routeAccessConfig = createRouteConfig({
   "admin/envs": {
     allOf: [PERMISSIONS.ENV_MANAGE],
   },
+  "admin/activity-logs": {
+    allOf: [PERMISSIONS.ACTIVITY_LOG_READ],
+  },
   "super-admin/*": {
     allOf: [PERMISSIONS.TENANT_MANAGE],
   },

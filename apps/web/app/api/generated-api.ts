@@ -3811,6 +3811,41 @@ export interface GetEnvKeyResponse {
   };
 }
 
+export interface GetActivityLogsResponse {
+  data: {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    actorId: string;
+    actorEmail: string;
+    actorRole: string;
+    actionType:
+      | "create"
+      | "update"
+      | "delete"
+      | "login"
+      | "login_failed"
+      | "logout"
+      | "enroll_course"
+      | "unenroll_course"
+      | "start_course"
+      | "group_assignment"
+      | "complete_lesson"
+      | "complete_course"
+      | "complete_chapter"
+      | "view_announcement";
+    resourceType: (string | null) | null;
+    resourceId: (string | null) | null;
+    metadata: any;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
 export interface GetQAResponse {
   /** @format uuid */
   id: string;
@@ -9195,6 +9230,29 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<GetEnvKeyResponse, any>({
         path: `/api/env/${envName}`,
         method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ActivityLogsControllerGetActivityLogs
+     * @request GET:/api/activity-logs
+     */
+    activityLogsControllerGetActivityLogs: (
+      query?: {
+        /** @min 1 */
+        page?: number;
+        /** @min 1 */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetActivityLogsResponse, any>({
+        path: `/api/activity-logs`,
+        method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),
