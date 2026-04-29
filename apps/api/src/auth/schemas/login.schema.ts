@@ -13,6 +13,14 @@ export const loginResponseSchema = Type.Object({
   shouldVerifyMFA: Type.Boolean(),
   onboardingStatus: userOnboardingStatusSchema,
   isManagingTenantAdmin: Type.Boolean(),
+  accessToken: Type.Optional(Type.String()),
+  refreshToken: Type.Optional(Type.String()),
+  mfaChallengeToken: Type.Optional(Type.String()),
+});
+
+export const refreshTokensResponseSchema = Type.Object({
+  accessToken: Type.String(),
+  refreshToken: Type.String(),
 });
 
 export type LoginBody = Static<typeof loginSchema>;

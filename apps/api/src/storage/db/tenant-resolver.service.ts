@@ -41,6 +41,7 @@ export class TenantResolverService {
     }
 
     const origin = this.getRequestOrigin(req);
+    const tenantHostHeader = this.getTenantHostHeader(req);
     const allowInactive = this.isInactiveAllowed(req);
 
     if (user?.tenantId) {
@@ -57,12 +58,14 @@ export class TenantResolverService {
       return user.tenantId;
     }
 
-    if (!origin) return null;
+    const lookupHost = tenantHostHeader ?? origin;
+
+    if (!lookupHost) return null;
 
     const [tenant] = await this.dbBase
       .select({ id: tenants.id, status: tenants.status })
       .from(tenants)
-      .where(eq(tenants.host, origin))
+      .where(eq(tenants.host, lookupHost))
       .limit(1);
 
     if (tenant?.status === TENANT_STATUSES.INACTIVE && !allowInactive) {
@@ -70,6 +73,18 @@ export class TenantResolverService {
     }
 
     return tenant?.id ?? null;
+  }
+
+  private getTenantHostHeader(req: Request): string | null {
+    const raw = req.headers["x-tenant-host"];
+    const value = Array.isArray(raw) ? raw[0] : raw;
+    if (!value || typeof value !== "string") return null;
+
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+
+    const withProtocol = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+    return this.safeParseOrigin(withProtocol);
   }
 
   private async resolveFromState(req: Request): Promise<string | null> {

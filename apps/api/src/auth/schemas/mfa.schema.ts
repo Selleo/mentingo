@@ -13,6 +13,8 @@ export const MFASetupResponseSchema = Type.Object({
 
 export const MFAVerifyResponseSchema = Type.Object({
   isValid: Type.Boolean(),
+  accessToken: Type.Optional(Type.String()),
+  refreshToken: Type.Optional(Type.String()),
 });
 
 export type MFAVerifyBody = Static<typeof MFAVerifySchema>;

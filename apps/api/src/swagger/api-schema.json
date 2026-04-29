@@ -10359,6 +10359,15 @@
               },
               "isManagingTenantAdmin": {
                 "type": "boolean"
+              },
+              "accessToken": {
+                "type": "string"
+              },
+              "refreshToken": {
+                "type": "string"
+              },
+              "mfaChallengeToken": {
+                "type": "string"
               }
             },
             "required": [
@@ -10501,6 +10510,15 @@
               },
               "isManagingTenantAdmin": {
                 "type": "boolean"
+              },
+              "accessToken": {
+                "type": "string"
+              },
+              "refreshToken": {
+                "type": "string"
+              },
+              "mfaChallengeToken": {
+                "type": "string"
               }
             },
             "required": [
@@ -10527,7 +10545,27 @@
         "type": "null"
       },
       "RefreshTokensResponse": {
-        "type": "null"
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "accessToken": {
+                "type": "string"
+              },
+              "refreshToken": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "accessToken",
+              "refreshToken"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
       },
       "CurrentUserResponse": {
         "type": "object",
@@ -11114,6 +11152,15 @@
               },
               "isManagingTenantAdmin": {
                 "type": "boolean"
+              },
+              "accessToken": {
+                "type": "string"
+              },
+              "refreshToken": {
+                "type": "string"
+              },
+              "mfaChallengeToken": {
+                "type": "string"
               }
             },
             "required": [
@@ -11225,6 +11272,12 @@
             "properties": {
               "isValid": {
                 "type": "boolean"
+              },
+              "accessToken": {
+                "type": "string"
+              },
+              "refreshToken": {
+                "type": "string"
               }
             },
             "required": [
@@ -11365,6 +11418,15 @@
               },
               "isManagingTenantAdmin": {
                 "type": "boolean"
+              },
+              "accessToken": {
+                "type": "string"
+              },
+              "refreshToken": {
+                "type": "string"
+              },
+              "mfaChallengeToken": {
+                "type": "string"
               }
             },
             "required": [
