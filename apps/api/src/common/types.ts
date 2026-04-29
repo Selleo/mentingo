@@ -10,6 +10,7 @@ export type ActivityHistory = {
 
 export type GlobalSettings = {
   unregisteredUserCoursesAccessibility: boolean;
+  cohortLearningEnabled: boolean;
   enforceSSO: boolean;
   companyInformation?: CompanyInformationSchema;
   userEmailTriggers?: UserEmailTriggersSchema;

@@ -371,6 +371,92 @@ export const aiMentorThreadMessages = pgTable(
   withTenantIdIndex("ai_mentor_thread_messages"),
 );
 
+export const courseDiscussionContentStatusEnum = pgEnum("course_discussion_content_status", [
+  "visible",
+  "deleted_by_author",
+  "hidden_by_staff",
+]);
+
+export const courseDiscussionThreads = pgTable(
+  "course_discussion_threads",
+  {
+    ...id,
+    ...timestamps,
+    courseId: uuid("course_id")
+      .references(() => courses.id, { onDelete: "cascade" })
+      .notNull(),
+    lessonId: uuid("lesson_id").references(() => lessons.id, { onDelete: "cascade" }),
+    authorId: uuid("author_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    title: text("title").notNull(),
+    content: text("content").notNull(),
+    status: courseDiscussionContentStatusEnum("status").notNull().default("visible"),
+    lastActivityAt: timestamp("last_activity_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    deletedAt: timestamp("deleted_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    deletedById: uuid("deleted_by_id").references(() => users.id, { onDelete: "set null" }),
+    hiddenAt: timestamp("hidden_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    hiddenById: uuid("hidden_by_id").references(() => users.id, { onDelete: "set null" }),
+    tenantId,
+  },
+  withTenantIdIndex("course_discussion_threads", (table) => ({
+    courseLessonActivityIdx: index("course_discussion_threads_course_lesson_activity_idx").on(
+      table.courseId,
+      table.lessonId,
+      table.lastActivityAt,
+    ),
+  })),
+);
+
+export const courseDiscussionComments = pgTable(
+  "course_discussion_comments",
+  {
+    ...id,
+    ...timestamps,
+    threadId: uuid("thread_id")
+      .references(() => courseDiscussionThreads.id, { onDelete: "cascade" })
+      .notNull(),
+    authorId: uuid("author_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    content: text("content").notNull(),
+    status: courseDiscussionContentStatusEnum("status").notNull().default("visible"),
+    deletedAt: timestamp("deleted_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    deletedById: uuid("deleted_by_id").references(() => users.id, { onDelete: "set null" }),
+    hiddenAt: timestamp("hidden_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    hiddenById: uuid("hidden_by_id").references(() => users.id, { onDelete: "set null" }),
+    tenantId,
+  },
+  withTenantIdIndex("course_discussion_comments", (table) => ({
+    threadCreatedAtIdx: index("course_discussion_comments_thread_created_at_idx").on(
+      table.threadId,
+      table.createdAt,
+    ),
+  })),
+);
+
 export const questions = pgTable(
   "questions",
   {

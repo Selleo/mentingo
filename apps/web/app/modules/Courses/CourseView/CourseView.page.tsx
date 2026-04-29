@@ -1,10 +1,10 @@
 import { redirect, useNavigate, useParams, useSearchParams } from "@remix-run/react";
-import { ACCESS_GUARD, PERMISSIONS, SUPPORTED_LANGUAGES } from "@repo/shared";
+import { ACCESS_GUARD, PERMISSIONS, SUPPORTED_LANGUAGES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { ApiClient } from "~/api/api-client";
-import { useCourse, useCurrentUser } from "~/api/queries";
+import { useCourse, useCurrentUser, useGlobalSettings } from "~/api/queries";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { ContentAccessGuard } from "~/Guards/AccessGuard";
@@ -22,6 +22,7 @@ import { isSupportedLanguage } from "~/utils/browser-language";
 import { ChapterListOverview } from "./components/ChapterListOverview";
 import { CourseAdminStatistics } from "./CourseAdminStatistics/CourseAdminStatistics";
 import CourseCertificate from "./CourseCertificate";
+import { CourseDiscussions } from "./CourseDiscussions";
 
 import type { SupportedLanguages } from "@repo/shared";
 
@@ -69,6 +70,28 @@ export const clientLoader = async ({
   return null;
 };
 
+export function canViewCourseDiscussionsTab({
+  cohortLearningEnabled,
+  currentUserId,
+  currentUserRoleSlugs,
+  courseAuthorId,
+  isEnrolled,
+}: {
+  cohortLearningEnabled: boolean;
+  currentUserId?: string;
+  currentUserRoleSlugs?: string[];
+  courseAuthorId?: string;
+  isEnrolled?: boolean;
+}) {
+  if (!cohortLearningEnabled || !currentUserId) return false;
+
+  return (
+    Boolean(isEnrolled) ||
+    currentUserId === courseAuthorId ||
+    currentUserRoleSlugs?.includes(SYSTEM_ROLE_SLUGS.ADMIN) === true
+  );
+}
+
 export default function CourseViewPage() {
   const { t } = useTranslation();
   const { id = "" } = useParams();
@@ -97,8 +120,10 @@ export default function CourseViewPage() {
   });
   const { data: currentUser } = useCurrentUser();
 
-  const courseViewTabs = useMemo(
-    () => [
+  const { data: globalSettings } = useGlobalSettings();
+
+  const courseViewTabs = useMemo(() => {
+    const tabs = [
       {
         title: t("studentCourseView.tabs.chapters"),
         itemCount: course?.chapters?.length,
@@ -123,9 +148,30 @@ export default function CourseViewPage() {
         isForAdminLike: true,
         isForUnregistered: false,
       },
-    ],
-    [t, course],
-  );
+    ];
+
+    // Discussion tab: only when cohortLearningEnabled and (enrolled OR author OR admin)
+    const canViewDiscussions =
+      course &&
+      canViewCourseDiscussionsTab({
+        cohortLearningEnabled: Boolean(globalSettings?.cohortLearningEnabled),
+        currentUserId: currentUser?.id,
+        currentUserRoleSlugs: currentUser?.roleSlugs,
+        courseAuthorId: course.authorId,
+        isEnrolled: course.enrolled,
+      });
+
+    if (canViewDiscussions) {
+      tabs.push({
+        title: t("studentCourseView.tabs.discussions"),
+        content: <CourseDiscussions courseId={course.id} courseAuthorId={course.authorId ?? ""} />,
+        isForAdminLike: false,
+        isForUnregistered: false,
+      });
+    }
+
+    return tabs;
+  }, [t, course, currentUser, globalSettings]);
 
   if (!course) return null;
 

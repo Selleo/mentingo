@@ -2100,7 +2100,27 @@
     "tabs": {
       "chapters": "Skyriai",
       "moreFromAuthor": "Daugiau iš autoriaus",
-      "statistics": "Statistika"
+      "statistics": "Statistika",
+      "discussions": "Diskusijos"
+    },
+    "discussions": {
+      "loading": "Diskusijos kraunamos...",
+      "empty": "Kol kas diskusijų nėra. Būkite pirmas ir pradėkite!",
+      "comingSoon": "Diskusijų funkcija bus netrukus.",
+      "form": {
+        "title": "Temos pavadinimas",
+        "submit": "Sukurti temą",
+        "comment": "Parašykite komentarą...",
+        "commentSubmit": "Pridėti komentarą"
+      },
+      "actions": {
+        "edit": "Redaguoti",
+        "delete": "Ištrinti",
+        "hide": "Slėpti",
+        "unhide": "Rodyti",
+        "save": "Išsaugoti",
+        "cancel": "Atšaukti"
+      }
     }
   },
   "studentChapterView": {
@@ -2173,6 +2193,8 @@
       "coursesVisibilityDescription": "Leiskite lankytojams peržiūrėti kursų sąrašą ir gauti nemokamas pamokas neprisijungus",
       "modernCourseList": "Naudokite šiuolaikinį kursų sąrašo rodinį",
       "modernCourseListDescription": "Įgalinkite naują kursų sąrašo dizainą su herojų ir geriausių kursų skiltimis",
+      "cohortLearning": "Įjungti kohortinį mokymąsi",
+      "cohortLearningDescription": "Leiskite įrašytiems studentams ir kurso personalui naudoti kurso ir pamokų diskusijas, kai funkcija įjungta",
       "finishedCourseNotification": "Pranešimai apie baigtą kursą",
       "finishedCourseNotificationDescription": "Gaukite pranešimus, kai vartotojas baigia kursą",
       "studentsWithOverdueCourseNotification": "Studentai su pranešimais apie vėluojančius kursus",
@@ -2182,6 +2204,7 @@
       "newUserNotificationsPreferenceChangeSuccess": "Naujos vartotojo pranešimų nuostatos sėkmingai atnaujintos",
       "coursesVisibilityPreferenceChangeSuccess": "Kurso matomumo nuostatos neautentifikuotiems naudotojams sėkmingai atnaujintos",
       "modernCourseListPreferenceChangeSuccess": "Šiuolaikinės kursų sąrašo nuostatos sėkmingai atnaujintos",
+      "cohortLearningPreferenceChangeSuccess": "Kohortinio mokymosi nuostata sėkmingai atnaujinta",
       "finishedCourseNotificationsPreferenceChangeSuccess": "Pranešimų apie baigtą kursą nuostatos sėkmingai atnaujintos",
       "finishedCourseNotificationsPreferenceChangeError": "Nepavyko atnaujinti pranešimo apie baigtą kursą nuostatų",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Pranešimų apie pradelstą kursą nuostatos sėkmingai atnaujintos",

@@ -719,6 +719,41 @@ export class SettingsService {
     return this.parseGlobalSettings(updatedGlobalSettings);
   }
 
+  public async updateGlobalCohortLearningEnabled(
+    actor?: CurrentUserType,
+  ): Promise<GlobalSettingsJSONContentSchema> {
+    const previousRecord = await this.getGlobalSettingsRecord();
+
+    const current =
+      previousRecord.settings.cohortLearningEnabled ??
+      DEFAULT_GLOBAL_SETTINGS.cohortLearningEnabled;
+
+    const [{ settings: updatedGlobalSettings }] = await this.db
+      .update(settings)
+      .set({
+        settings: sql`
+          jsonb_set(
+            settings.settings,
+            '{cohortLearningEnabled}',
+            to_jsonb(${!current}::boolean),
+            true
+          )
+        `,
+      })
+      .where(isNull(settings.userId))
+      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+
+    const updatedRecord = await this.getGlobalSettingsRecord();
+
+    await this.recordSettingsUpdate({
+      actor,
+      previousSnapshot: this.buildSettingsSnapshot(previousRecord),
+      updatedSnapshot: updatedRecord ? this.buildSettingsSnapshot(updatedRecord) : null,
+    });
+
+    return this.parseGlobalSettings(updatedGlobalSettings);
+  }
+
   public async uploadPlatformLogo(
     file: Express.Multer.File | null | undefined,
     actor?: CurrentUserType,
@@ -1620,6 +1655,8 @@ export class SettingsService {
       ...settings,
       modernCourseListEnabled:
         settings.modernCourseListEnabled ?? DEFAULT_GLOBAL_SETTINGS.modernCourseListEnabled,
+      cohortLearningEnabled:
+        settings.cohortLearningEnabled ?? DEFAULT_GLOBAL_SETTINGS.cohortLearningEnabled,
       MFAEnforcedRoles: Array.isArray(settings.MFAEnforcedRoles)
         ? settings.MFAEnforcedRoles
         : JSON.parse(settings.MFAEnforcedRoles ?? "[]"),

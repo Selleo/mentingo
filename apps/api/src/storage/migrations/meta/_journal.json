@@ -771,6 +771,13 @@
       "when": 1777303796631,
       "tag": "0109_secret_name_unique_per_tenant",
       "breakpoints": true
+    },
+    {
+      "idx": 110,
+      "version": "7",
+      "when": 1777466874308,
+      "tag": "0110_purple_wiccan",
+      "breakpoints": true
     }
   ]
 }

@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 
+import { useToggleCohortLearning } from "~/api/mutations/admin/useToggleCohortLearning";
 import { useToggleModernCourseList } from "~/api/mutations/admin/useToggleModernCourseList";
 import { useUnregisteredUserCoursesAccessibility } from "~/api/mutations/admin/useUnregisteredUserCoursesAccessibility";
 
@@ -19,6 +20,7 @@ export default function CoursesAccessibilityPreferences({
   const { mutate: changeUnregisteredUserCoursesAccessibility } =
     useUnregisteredUserCoursesAccessibility();
   const { mutate: toggleModernCourseList } = useToggleModernCourseList();
+  const { mutate: toggleCohortLearning } = useToggleCohortLearning();
 
   const handleCoursesAccessibilityChange = () => {
     changeUnregisteredUserCoursesAccessibility();
@@ -39,6 +41,13 @@ export default function CoursesAccessibilityPreferences({
         description={t("adminPreferences.field.modernCourseListDescription")}
         checked={globalSettings.modernCourseListEnabled}
         onCheckedChange={toggleModernCourseList}
+      />
+      <SettingItem
+        id="cohortLearning"
+        label={t("adminPreferences.field.cohortLearning")}
+        description={t("adminPreferences.field.cohortLearningDescription")}
+        checked={globalSettings.cohortLearningEnabled}
+        onCheckedChange={toggleCohortLearning}
       />
     </div>
   );

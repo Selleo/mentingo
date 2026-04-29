@@ -2155,7 +2155,27 @@
     "tabs": {
       "chapters": "Rozdziały",
       "moreFromAuthor": "Więcej od autora",
-      "statistics": "Statystyki"
+      "statistics": "Statystyki",
+      "discussions": "Dyskusje"
+    },
+    "discussions": {
+      "loading": "Ładowanie dyskusji...",
+      "empty": "Brak dyskusji. Bądź pierwszy i rozpocznij!",
+      "comingSoon": "Funkcja dyskusji już wkrótce.",
+      "form": {
+        "title": "Tytuł wątku",
+        "submit": "Dodaj wątek",
+        "comment": "Napisz komentarz...",
+        "commentSubmit": "Dodaj komentarz"
+      },
+      "actions": {
+        "edit": "Edytuj",
+        "delete": "Usuń",
+        "hide": "Ukryj",
+        "unhide": "Pokaż",
+        "save": "Zapisz",
+        "cancel": "Anuluj"
+      }
     }
   },
   "studentChapterView": {
@@ -2266,6 +2286,8 @@
       "coursesVisibilityDescription": "Pozwól odwiedzającym przeglądać listę kursów i korzystać z darmowych lekcji bez logowania",
       "modernCourseList": "Używaj nowoczesnej listy kursów",
       "modernCourseListDescription": "Włącz nowy wygląd listy kursów z sekcją hero i top kursami",
+      "cohortLearning": "Włącz uczenie kohortowe",
+      "cohortLearningDescription": "Pozwól zapisanym uczniom i personelowi kursu korzystać z dyskusji kursowych i lekcyjnych, gdy funkcja jest włączona",
       "finishedCourseNotification": "Powiadomienia o ukończonych kursach",
       "finishedCourseNotificationDescription": "Otrzymuj powiadomienia, gdy użytkownik ukończy kurs",
       "studentsWithOverdueCourseNotification": "Powiadomienia o studentach z zaległymi kursami",
@@ -2275,6 +2297,7 @@
       "newUserNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o nowych użytkownikach zostały pomyślnie zaktualizowane",
       "coursesVisibilityPreferenceChangeSuccess": "Preferencje widoczności kursów dla niezalogowanych użytkowników zostały zaktualizowane",
       "modernCourseListPreferenceChangeSuccess": "Preferencje nowoczesnej listy kursów zostały pomyślnie zaktualizowane",
+      "cohortLearningPreferenceChangeSuccess": "Preferencja uczenia kohortowego została pomyślnie zaktualizowana",
       "finishedCourseNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o ukończonych kursach zostały pomyślnie zaktualizowane",
       "finishedCourseNotificationsPreferenceChangeError": "Nie udało się zaktualizować preferencji powiadomień o ukończonych kursach",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o zaległych kursach zostały pomyślnie zaktualizowane",

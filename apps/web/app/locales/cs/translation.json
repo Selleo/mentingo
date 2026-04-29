@@ -2100,7 +2100,27 @@
     "tabs": {
       "chapters": "Kapitoly",
       "moreFromAuthor": "Více od autora",
-      "statistics": "Statistika"
+      "statistics": "Statistika",
+      "discussions": "Diskuze"
+    },
+    "discussions": {
+      "loading": "Načítání diskuzí...",
+      "empty": "Zatím žádné diskuze. Buďte první a začněte!",
+      "comingSoon": "Funkce diskuzí brzy přijde.",
+      "form": {
+        "title": "Název vlákna",
+        "submit": "Vytvořit vlákno",
+        "comment": "Napište komentář...",
+        "commentSubmit": "Přidat komentář"
+      },
+      "actions": {
+        "edit": "Upravit",
+        "delete": "Smazat",
+        "hide": "Skrýt",
+        "unhide": "Zobrazit",
+        "save": "Uložit",
+        "cancel": "Zrušit"
+      }
     }
   },
   "studentChapterView": {
@@ -2173,6 +2193,8 @@
       "coursesVisibilityDescription": "Umožněte návštěvníkům zobrazit seznam kurzů a přistupovat k bezplatným lekcím bez přihlášení",
       "modernCourseList": "Použijte moderní zobrazení seznamu kurzů",
       "modernCourseListDescription": "Povolte nový design seznamu kurzů se sekcemi hrdinů a nejlepších kurzů",
+      "cohortLearning": "Povolit kohortové učení",
+      "cohortLearningDescription": "Povolte zapsaným studentům a personálu kurzu používat diskuse kurzu a lekcí, když je funkce zapnutá",
       "finishedCourseNotification": "Oznámení o dokončeném kurzu",
       "finishedCourseNotificationDescription": "Dostávat upozornění, když uživatel dokončí kurz",
       "studentsWithOverdueCourseNotification": "Studenti s oznámeními o pozdních kurzech",
@@ -2182,6 +2204,7 @@
       "newUserNotificationsPreferenceChangeSuccess": "Předvolby upozornění pro nové uživatele byly úspěšně aktualizovány",
       "coursesVisibilityPreferenceChangeSuccess": "Předvolby viditelnosti kurzu pro neověřené uživatele byly úspěšně aktualizovány",
       "modernCourseListPreferenceChangeSuccess": "Předvolba seznamu moderních kurzů byla úspěšně aktualizována",
+      "cohortLearningPreferenceChangeSuccess": "Předvolba kohortového učení byla úspěšně aktualizována",
       "finishedCourseNotificationsPreferenceChangeSuccess": "Předvolby oznámení o dokončeném kurzu byly úspěšně aktualizovány",
       "finishedCourseNotificationsPreferenceChangeError": "Aktualizace předvoleb oznámení o dokončeném kurzu se nezdařila",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Předvolby oznámení o zpoždění kurzu byly úspěšně aktualizovány",

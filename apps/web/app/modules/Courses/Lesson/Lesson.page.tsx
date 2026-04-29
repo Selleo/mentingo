@@ -4,7 +4,7 @@ import { first, get, last, orderBy } from "lodash-es";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useCourse, useCurrentUser, useLesson } from "~/api/queries";
+import { useCourse, useCurrentUser, useGlobalSettings, useLesson } from "~/api/queries";
 import { queryClient } from "~/api/queryClient";
 import ErrorPage from "~/components/ErrorPage/ErrorPage";
 import { LoaderWithTextSequence } from "~/components/LoaderWithTextSequence";
@@ -16,6 +16,8 @@ import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 import Loader from "~/modules/common/Loader/Loader";
 import { useVideoPreferencesStore } from "~/modules/common/store/useVideoPreferencesStore";
 import { CourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
+import { CourseDiscussions } from "~/modules/Courses/CourseView/CourseDiscussions";
+import { canViewCourseDiscussionsTab } from "~/modules/Courses/CourseView/CourseView.page";
 import { LearningModeBanner } from "~/modules/Courses/Lesson/LearningModeBanner";
 import { LessonContent } from "~/modules/Courses/Lesson/LessonContent";
 import { LessonSidebar } from "~/modules/Courses/Lesson/LessonSidebar";
@@ -49,6 +51,7 @@ export default function LessonPage() {
 
   const { language } = useLanguageStore();
   const { data: user } = useCurrentUser();
+  const { data: globalSettings } = useGlobalSettings();
 
   const [error, setError] = useState(false);
 
@@ -228,6 +231,14 @@ export default function LessonPage() {
     },
   ];
 
+  const canViewLessonDiscussions = canViewCourseDiscussionsTab({
+    cohortLearningEnabled: Boolean(globalSettings?.cohortLearningEnabled),
+    currentUserId: user?.id,
+    currentUserRoleSlugs: user?.roleSlugs,
+    courseAuthorId: course.authorId,
+    isEnrolled: course.enrolled,
+  });
+
   return (
     <CourseAccessProvider course={course}>
       <PageWrapper
@@ -256,6 +267,15 @@ export default function LessonPage() {
                 isLastLesson={isLast}
                 lessonLoading={lessonLoading}
               />
+              {canViewLessonDiscussions && (
+                <div className="border-t border-neutral-200 p-6 sm:px-10 3xl:px-8">
+                  <CourseDiscussions
+                    courseId={course.id}
+                    courseAuthorId={course.authorId ?? ""}
+                    lessonId={lesson.id}
+                  />
+                </div>
+              )}
             </div>
             <LessonSidebar course={course} lessonId={lessonId} />
           </div>

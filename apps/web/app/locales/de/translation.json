@@ -2100,7 +2100,27 @@
     "tabs": {
       "chapters": "Kapitel",
       "moreFromAuthor": "Mehr vom Autor",
-      "statistics": "Statistiken"
+      "statistics": "Statistiken",
+      "discussions": "Diskussionen"
+    },
+    "discussions": {
+      "loading": "Diskussionen werden geladen...",
+      "empty": "Noch keine Diskussionen. Sei der Erste und starte eine!",
+      "comingSoon": "Diskussionsfunktion kommt bald.",
+      "form": {
+        "title": "Titel des Themas",
+        "submit": "Thema erstellen",
+        "comment": "Schreibe einen Kommentar...",
+        "commentSubmit": "Kommentar hinzufügen"
+      },
+      "actions": {
+        "edit": "Bearbeiten",
+        "delete": "Löschen",
+        "hide": "Ausblenden",
+        "unhide": "Einblenden",
+        "save": "Speichern",
+        "cancel": "Abbrechen"
+      }
     }
   },
   "studentChapterView": {
@@ -2173,6 +2193,8 @@
       "coursesVisibilityDescription": "Ermöglichen Sie Besuchern, die Kursliste anzuzeigen und auf kostenlose Lektionen zuzugreifen, ohne sich anzumelden",
       "modernCourseList": "Nutzen Sie die moderne Kurslistenansicht",
       "modernCourseListDescription": "Aktivieren Sie das neue Kurslistendesign mit den Abschnitten „Hero“ und „Top-Kurse“.",
+      "cohortLearning": "Kohortenlernen aktivieren",
+      "cohortLearningDescription": "Erlauben Sie eingeschriebenen Lernenden und Kurspersonal, Kurs- und Lektionendiskussionen zu nutzen, wenn Funktion aktiv ist",
       "finishedCourseNotification": "Benachrichtigungen über abgeschlossene Kurse",
       "finishedCourseNotificationDescription": "Erhalten Sie Benachrichtigungen, wenn ein Benutzer einen Kurs beendet",
       "studentsWithOverdueCourseNotification": "Studierende mit Benachrichtigungen über überfällige Kurse",
@@ -2182,6 +2204,7 @@
       "newUserNotificationsPreferenceChangeSuccess": "Die Benachrichtigungseinstellungen für neue Benutzer wurden erfolgreich aktualisiert",
       "coursesVisibilityPreferenceChangeSuccess": "Die Sichtbarkeitseinstellungen für Kurse für nicht authentifizierte Benutzer wurden erfolgreich aktualisiert",
       "modernCourseListPreferenceChangeSuccess": "Die Voreinstellung für die moderne Kursliste wurde erfolgreich aktualisiert",
+      "cohortLearningPreferenceChangeSuccess": "Die Einstellung für Kohortenlernen wurde erfolgreich aktualisiert",
       "finishedCourseNotificationsPreferenceChangeSuccess": "Die Benachrichtigungseinstellungen für abgeschlossene Kurse wurden erfolgreich aktualisiert",
       "finishedCourseNotificationsPreferenceChangeError": "Die Benachrichtigungseinstellungen für abgeschlossene Kurse konnten nicht aktualisiert werden",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Die Benachrichtigungseinstellungen für überfällige Kurse wurden erfolgreich aktualisiert",
