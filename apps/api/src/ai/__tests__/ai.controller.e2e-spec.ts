@@ -161,8 +161,14 @@ describe("AiController (e2e)", () => {
         .set("Cookie", await cookieFor(threadOwner, app))
         .expect(200);
 
-      expect(response.body.data).toBeDefined();
-      expect(Array.isArray(response.body.data)).toBe(true);
+      expect(response.body.data).toHaveLength(1);
+      expect(response.body.data[0]).toEqual(
+        expect.objectContaining({
+          role: "user",
+          content: "Test message",
+        }),
+      );
+      expect(typeof response.body.data[0].id).toBe("string");
     });
 
     it("returns 401 when not authenticated", async () => {
@@ -181,6 +187,34 @@ describe("AiController (e2e)", () => {
         .get(`/api/ai/thread/messages?thread=${threadId}`)
         .set("Cookie", await cookieFor(otherUser, app))
         .expect(403);
+    });
+  });
+
+  describe("POST /api/ai/chat", () => {
+    it("returns 401 when not authenticated", async () => {
+      await request(app.getHttpServer())
+        .post("/api/ai/chat")
+        .send({
+          threadId: "00000000-0000-0000-0000-000000000000",
+          content: "Hello AI mentor",
+        })
+        .expect(401);
+    });
+  });
+
+  describe("POST /api/ai/judge/:threadId", () => {
+    it("returns 401 when not authenticated", async () => {
+      await request(app.getHttpServer())
+        .post("/api/ai/judge/00000000-0000-0000-0000-000000000000")
+        .expect(401);
+    });
+  });
+
+  describe("POST /api/ai/retake/:lessonId", () => {
+    it("returns 401 when not authenticated", async () => {
+      await request(app.getHttpServer())
+        .post("/api/ai/retake/00000000-0000-0000-0000-000000000000")
+        .expect(401);
     });
   });
 });

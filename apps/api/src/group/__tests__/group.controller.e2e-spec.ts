@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { groupUsers, lessons, studentCourses } from "src/storage/schema";
+import { groupCourses, groupUsers, lessons, studentCourses } from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCategoryFactory } from "../../../test/factory/category.factory";
@@ -797,6 +797,73 @@ describe("groupController (e2e)", () => {
 
       expect(enrollment.length).toBe(1);
       expect(enrollment[0]?.enrolledByGroupId).toBe(group.id);
+    });
+  });
+
+  describe("GET /api/group/by-course/:courseId", () => {
+    it("returns 401 if user is not logged in", async () => {
+      await request(app.getHttpServer())
+        .get("/api/group/by-course/00000000-0000-0000-0000-000000000000")
+        .expect(401);
+    });
+
+    it("returns groups list for admin", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+
+      const category = await categoryFactory.create();
+      const course = await courseFactory.create({
+        authorId: admin.id,
+        categoryId: category.id,
+        status: "published",
+      });
+      const groupA = await groupFactory.create({ name: "Group A" });
+      const groupB = await groupFactory.create({ name: "Group B" });
+
+      await db.insert(groupCourses).values([
+        { courseId: course.id, groupId: groupA.id, isMandatory: true, dueDate: null },
+        { courseId: course.id, groupId: groupB.id, isMandatory: false, dueDate: null },
+      ]);
+
+      const response = await request(app.getHttpServer())
+        .get(`/api/group/by-course/${course.id}`)
+        .set("Cookie", await cookieFor(admin, app))
+        .expect(200);
+
+      expect(response.body.data).toHaveLength(2);
+
+      const byId = new Map(response.body.data.map((item: (typeof response.body.data)[number]) => [item.id, item]));
+
+      expect(byId.get(groupA.id)).toEqual(
+        expect.objectContaining({
+          id: groupA.id,
+          name: groupA.name,
+          isMandatory: true,
+          dueDate: null,
+        }),
+      );
+      expect(byId.get(groupB.id)).toEqual(
+        expect.objectContaining({
+          id: groupB.id,
+          name: groupB.name,
+          isMandatory: false,
+          dueDate: null,
+        }),
+      );
+
+      const dbAssignments = await db
+        .select({ groupId: groupCourses.groupId, isMandatory: groupCourses.isMandatory })
+        .from(groupCourses)
+        .where(eq(groupCourses.courseId, course.id));
+
+      expect(dbAssignments).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ groupId: groupA.id, isMandatory: true }),
+          expect.objectContaining({ groupId: groupB.id, isMandatory: false }),
+        ]),
+      );
     });
   });
 });

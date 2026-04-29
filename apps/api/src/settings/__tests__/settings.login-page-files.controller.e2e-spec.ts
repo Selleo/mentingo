@@ -1,6 +1,10 @@
+import { eq } from "drizzle-orm";
 import request from "supertest";
 
+import { FileGuard } from "src/file/guards/file.guard";
+import { FileService } from "src/file/file.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
+import { resourceEntity, resources } from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
@@ -11,14 +15,15 @@ import type { DatabasePg } from "../../common";
 import type { INestApplication } from "@nestjs/common";
 
 const validPdfBuffer = Buffer.from(
-  "JVBERi0xLjQKMSAwIG9iago8PC9UeXBlL0NhdGFsb2cvUGFnZXMgMiAwIFI+PgplbmRvYmoKMiAwIG9iago8PC9UeXBlL1BhZ2VzL0NvdW50IDAvS2lkc1tdPj4KZW5kb2JqCnhyZWYKMCAzCjAwMDAwMDAwMDAgNjU1MzUgZgowMDAwMDAwMDA5IDAwMDAwIG4KMDAwMDAwMDA1OCAwMDAwMCBuCnRyYWlsZXI8PC9TaXplIDMvUm9vdCAxIDAgUj4+CnN0YXJ0eHJlZgoxMTYKJSVFT0Y=",
-  "base64",
+  "%PDF-1.7\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n2 0 obj\n<< /Type /Pages /Count 0 /Kids [] >>\nendobj\ntrailer\n<< /Root 1 0 R >>\n%%EOF",
+  "utf8",
 );
 
 describe("SettingsController - login page files (e2e)", () => {
   let app: INestApplication;
   let db: DatabasePg;
   let baseDb: DatabasePg;
+  let fileService: FileService;
   let userFactory: ReturnType<typeof createUserFactory>;
   let globalSettingsFactory: ReturnType<typeof createSettingsFactory>;
   const testPassword = "Password123@@";
@@ -28,6 +33,7 @@ describe("SettingsController - login page files (e2e)", () => {
     app = testApp;
     db = app.get(DB);
     baseDb = app.get(DB_ADMIN);
+    fileService = app.get(FileService);
     userFactory = createUserFactory(db);
     globalSettingsFactory = createSettingsFactory(db, null);
   }, 20000);
@@ -90,7 +96,42 @@ describe("SettingsController - login page files (e2e)", () => {
         .expect(403);
     });
 
-    it.skip("should allow admins to upload and list login page files", async () => {
+    it("should allow admins to upload login page file and persist linked resource id", async () => {
+      const fileTypeSpy = jest.spyOn(FileGuard, "getFileType").mockResolvedValue({
+        ext: "pdf",
+        mime: "application/pdf",
+      });
+      const uploadResourceSpy = jest
+        .spyOn(fileService, "uploadResource")
+        .mockImplementation(async ({ entityId, entityType, relationshipType, title, file, currentUser }: any) => {
+          const [createdResource] = await db
+            .insert(resources)
+            .values({
+              title: title ?? { en: "Untitled" },
+              description: {},
+              reference: `settings/login/${Date.now()}-${file.originalname}`,
+              contentType: file.mimetype,
+              uploadedBy: currentUser.userId,
+            })
+            .returning();
+
+          await db.insert(resourceEntity).values({
+            resourceId: createdResource.id,
+            entityId,
+            entityType,
+            relationshipType,
+          });
+
+          return {
+            resourceId: createdResource.id,
+            fileKey: createdResource.reference,
+            fileUrl: `https://cdn.test/${createdResource.reference}`,
+          };
+        });
+      const getFileUrlSpy = jest
+        .spyOn(fileService, "getFileUrl")
+        .mockImplementation(async (reference: string) => `https://cdn.test/${reference}`);
+
       await request(app.getHttpServer())
         .patch("/api/settings/admin/login-page-files")
         .set("Cookie", Array.isArray(adminCookies) ? adminCookies : [adminCookies])
@@ -101,16 +142,6 @@ describe("SettingsController - login page files (e2e)", () => {
         })
         .expect(200);
 
-      const listResponse = await request(app.getHttpServer())
-        .get("/api/settings/login-page-files")
-        .expect(200);
-
-      expect(listResponse.body).toBeDefined();
-      expect(listResponse.body.resources).toHaveLength(1);
-      expect(listResponse.body.resources[0]).toMatchObject({
-        name: "Login page info",
-      });
-
       const settingsRow = await db.query.settings.findFirst({
         where: (s, { isNull }) => isNull(s.userId),
       });
@@ -118,7 +149,12 @@ describe("SettingsController - login page files (e2e)", () => {
         ?.loginPageFiles;
 
       expect(Array.isArray(loginPageFiles)).toBe(true);
-      expect(loginPageFiles).toContain(listResponse.body.resources[0].id);
+      expect(loginPageFiles).toHaveLength(1);
+      expect(typeof loginPageFiles?.[0]).toBe("string");
+
+      fileTypeSpy.mockRestore();
+      uploadResourceSpy.mockRestore();
+      getFileUrlSpy.mockRestore();
     });
   });
 
@@ -142,7 +178,42 @@ describe("SettingsController - login page files (e2e)", () => {
       adminCookies = loginResponse.headers["set-cookie"];
     });
 
-    it.skip("should delete a login page file and remove it from settings", async () => {
+    it("should delete a login page file and remove it from settings", async () => {
+      const fileTypeSpy = jest.spyOn(FileGuard, "getFileType").mockResolvedValue({
+        ext: "pdf",
+        mime: "application/pdf",
+      });
+      const uploadResourceSpy = jest
+        .spyOn(fileService, "uploadResource")
+        .mockImplementation(async ({ entityId, entityType, relationshipType, title, file, currentUser }: any) => {
+          const [createdResource] = await db
+            .insert(resources)
+            .values({
+              title: title ?? { en: "Untitled" },
+              description: {},
+              reference: `settings/login/${Date.now()}-${file.originalname}`,
+              contentType: file.mimetype,
+              uploadedBy: currentUser.userId,
+            })
+            .returning();
+
+          await db.insert(resourceEntity).values({
+            resourceId: createdResource.id,
+            entityId,
+            entityType,
+            relationshipType,
+          });
+
+          return {
+            resourceId: createdResource.id,
+            fileKey: createdResource.reference,
+            fileUrl: `https://cdn.test/${createdResource.reference}`,
+          };
+        });
+      const getFileUrlSpy = jest
+        .spyOn(fileService, "getFileUrl")
+        .mockImplementation(async (reference: string) => `https://cdn.test/${reference}`);
+
       await request(app.getHttpServer())
         .patch("/api/settings/admin/login-page-files")
         .set("Cookie", Array.isArray(adminCookies) ? adminCookies : [adminCookies])
@@ -153,15 +224,17 @@ describe("SettingsController - login page files (e2e)", () => {
         })
         .expect(200);
 
-      const listResponse = await request(app.getHttpServer())
-        .get("/api/settings/login-page-files")
-        .expect(200);
-
-      const resourceId = listResponse.body.resources[0]?.id;
+      const settingsBeforeDelete = await db.query.settings.findFirst({
+        where: (s, { isNull }) => isNull(s.userId),
+      });
+      const loginPageFilesBeforeDelete = (settingsBeforeDelete?.settings as { loginPageFiles?: string[] })
+        ?.loginPageFiles;
+      const resourceId = loginPageFilesBeforeDelete?.[0];
       expect(resourceId).toBeDefined();
+      const persistedResourceId = resourceId as string;
 
       await request(app.getHttpServer())
-        .delete(`/api/settings/login-page-files/${resourceId}`)
+        .delete(`/api/settings/login-page-files/${persistedResourceId}`)
         .set("Cookie", Array.isArray(adminCookies) ? adminCookies : [adminCookies])
         .expect(200);
 
@@ -178,6 +251,26 @@ describe("SettingsController - login page files (e2e)", () => {
         ?.loginPageFiles;
 
       expect(loginPageFiles ?? []).not.toContain(resourceId);
+
+      const relations = await db
+        .select({ resourceId: resourceEntity.resourceId })
+        .from(resourceEntity)
+        .where(eq(resourceEntity.resourceId, persistedResourceId));
+
+      expect(relations).toEqual([]);
+
+      fileTypeSpy.mockRestore();
+      uploadResourceSpy.mockRestore();
+      getFileUrlSpy.mockRestore();
+    });
+
+    it("should return 400 when deleting a non-existent login page file resource", async () => {
+      const response = await request(app.getHttpServer())
+        .delete(`/api/settings/login-page-files/${crypto.randomUUID()}`)
+        .set("Cookie", Array.isArray(adminCookies) ? adminCookies : [adminCookies])
+        .expect(400);
+
+      expect(response.body.message).toBe("loginFilesUpload.toast.resourceNotFound");
     });
   });
 });

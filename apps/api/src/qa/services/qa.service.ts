@@ -110,7 +110,12 @@ export class QAService {
   async deleteQA(qaId: UUIDType, currentUser: CurrentUserType) {
     await this.checkAccess(currentUser.userId);
 
-    const { baseLanguage } = await this.localizationService.getBaseLanguage(ENTITY_TYPE.QA, qaId);
+    let baseLanguage: SupportedLanguages;
+    try {
+      ({ baseLanguage } = await this.localizationService.getBaseLanguage(ENTITY_TYPE.QA, qaId));
+    } catch {
+      throw new BadRequestException({ message: "qaView.toast.notFound" });
+    }
 
     const qa = await this.qaRepository.getQA(qaId, baseLanguage);
 

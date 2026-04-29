@@ -125,4 +125,108 @@ describe("CategoryController (e2e)", () => {
       });
     });
   });
+
+  describe("GET /api/category/:id", () => {
+    it("returns category for admin", async () => {
+      const category = await categoryFactory.create({ title: "Category For ID" });
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+
+      const response = await request(app.getHttpServer())
+        .get(`/api/category/${category.id}`)
+        .set("Cookie", await cookieFor(admin, app))
+        .expect(200);
+
+      expect(response.body.data.id).toBe(category.id);
+      expect(response.body.data.title).toBe("Category For ID");
+    });
+
+    it("returns 403 for student", async () => {
+      const category = await categoryFactory.create({ title: "Student Forbidden Category" });
+      const student = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+
+      await request(app.getHttpServer())
+        .get(`/api/category/${category.id}`)
+        .set("Cookie", await cookieFor(student, app))
+        .expect(403);
+    });
+  });
+
+  describe("POST /api/category", () => {
+    it("creates category for admin", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+
+      const response = await request(app.getHttpServer())
+        .post("/api/category")
+        .set("Cookie", await cookieFor(admin, app))
+        .send({ title: "Created Category" })
+        .expect(201);
+
+      expect(response.body.data.id).toBeDefined();
+      expect(response.body.data.message).toBe("Category created");
+    });
+  });
+
+  describe("PATCH /api/category/:id", () => {
+    it("updates category for admin", async () => {
+      const category = await categoryFactory.create({ title: "Before Update" });
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+
+      const response = await request(app.getHttpServer())
+        .patch(`/api/category/${category.id}`)
+        .set("Cookie", await cookieFor(admin, app))
+        .send({ title: "After Update" })
+        .expect(200);
+
+      expect(response.body.data.id).toBe(category.id);
+      expect(response.body.data.title).toBe("After Update");
+    });
+  });
+
+  describe("DELETE /api/category/deleteCategory/:id", () => {
+    it("deletes category for admin", async () => {
+      const category = await categoryFactory.create({ title: "Delete Single Category" });
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+
+      const response = await request(app.getHttpServer())
+        .delete(`/api/category/deleteCategory/${category.id}`)
+        .set("Cookie", await cookieFor(admin, app))
+        .expect(200);
+
+      expect(response.body.data.message).toBe("Category deleted successfully");
+    });
+  });
+
+  describe("DELETE /api/category/deleteManyCategories", () => {
+    it("deletes multiple categories for admin", async () => {
+      const first = await categoryFactory.create({ title: "Bulk Delete Category 1" });
+      const second = await categoryFactory.create({ title: "Bulk Delete Category 2" });
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+
+      const response = await request(app.getHttpServer())
+        .delete("/api/category/deleteManyCategories")
+        .set("Cookie", await cookieFor(admin, app))
+        .send([first.id, second.id])
+        .expect(200);
+
+      expect(response.body.data.message).toBe("Categories deleted successfully");
+    });
+  });
 });

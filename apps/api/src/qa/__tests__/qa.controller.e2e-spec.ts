@@ -80,16 +80,31 @@ describe("QAController (e2e)", () => {
     it("returns QA list for authenticated user when QA is enabled", async () => {
       await seedGlobalSettings({ QAEnabled: true });
       const { cookie } = await createAdminWithCookie();
-      const qa = await qaFactory.create({ baseLanguage: "en", availableLocales: ["en"] });
+      const qa = await qaFactory.create({
+        baseLanguage: "en",
+        availableLocales: ["en"],
+        title: "How to enroll?",
+        description: "Use the enroll button on the course page.",
+      });
 
       const response = await request(app.getHttpServer())
         .get("/api/qa?language=en")
         .set("Cookie", cookie)
         .expect(200);
 
-      expect(Array.isArray(response.body)).toBe(true);
+      const [stored] = await db
+        .select()
+        .from(questionsAndAnswers)
+        .where(eq(questionsAndAnswers.id, qa.id));
+
       expect(response.body).toHaveLength(1);
-      expect(response.body[0].id).toBe(qa.id);
+      expect(response.body[0]).toMatchObject({
+        id: qa.id,
+        baseLanguage: "en",
+        availableLocales: ["en"],
+        title: (stored.title as Record<string, string>).en,
+        description: (stored.description as Record<string, string>).en,
+      });
     });
 
     it("returns QA list for unauthenticated user when guest access is allowed", async () => {
@@ -100,6 +115,37 @@ describe("QAController (e2e)", () => {
 
       expect(response.body).toHaveLength(1);
       expect(response.body[0].id).toBe(qa.id);
+    });
+
+    it("filters QA list by searchQuery when length is at least 3", async () => {
+      await seedGlobalSettings({ QAEnabled: true, unregisteredUserQAAccessibility: true });
+      await qaFactory.create({
+        title: "Reset password flow",
+        description: "Use forgot password from login page.",
+      });
+      await qaFactory.create({
+        title: "Course certificate",
+        description: "Certificate appears after course completion.",
+      });
+
+      const response = await request(app.getHttpServer())
+        .get("/api/qa?language=en&searchQuery=cert")
+        .expect(200);
+
+      expect(response.body).toHaveLength(1);
+      expect(response.body[0].title).toBe("Course certificate");
+    });
+
+    it("does not apply full-text filtering for short searchQuery values", async () => {
+      await seedGlobalSettings({ QAEnabled: true, unregisteredUserQAAccessibility: true });
+      await qaFactory.create({ title: "First question" });
+      await qaFactory.create({ title: "Second question" });
+
+      const response = await request(app.getHttpServer())
+        .get("/api/qa?language=en&searchQuery=ab")
+        .expect(200);
+
+      expect(response.body).toHaveLength(2);
     });
 
     it("returns 400 when QA is disabled", async () => {
@@ -129,15 +175,25 @@ describe("QAController (e2e)", () => {
     it("returns QA in requested language for admin", async () => {
       await seedGlobalSettings({ QAEnabled: true });
       const { cookie } = await createAdminWithCookie();
-      const qa = await qaFactory.create({ baseLanguage: "en", availableLocales: ["en"] });
+      const qa = await qaFactory.create({
+        baseLanguage: "en",
+        availableLocales: ["en", "pl"],
+        title: "English title",
+        description: "English description",
+      });
 
       const response = await request(app.getHttpServer())
-        .get(`/api/qa/${qa.id}?language=en`)
+        .get(`/api/qa/${qa.id}?language=pl`)
         .set("Cookie", cookie)
         .expect(200);
 
-      expect(response.body.id).toBe(qa.id);
-      expect(response.body.baseLanguage).toBe("en");
+      expect(response.body).toMatchObject({
+        id: qa.id,
+        baseLanguage: "en",
+        availableLocales: ["en", "pl"],
+        title: "",
+        description: "",
+      });
     });
 
     it("returns 401 when user is not authenticated", async () => {
@@ -151,7 +207,7 @@ describe("QAController (e2e)", () => {
   describe("POST /api/qa", () => {
     it("creates QA for admin", async () => {
       await seedGlobalSettings({ QAEnabled: true });
-      const { cookie } = await createAdminWithCookie();
+      const { admin, cookie } = await createAdminWithCookie();
 
       const payload = { title: "Question", description: "Answer", language: "en" };
 
@@ -168,6 +224,10 @@ describe("QAController (e2e)", () => {
 
       expect(created).toBeDefined();
       expect(created.availableLocales).toContain("en");
+      expect(created.baseLanguage).toBe("en");
+      expect(created.title).toEqual({ en: payload.title });
+      expect(created.description).toEqual({ en: payload.description });
+      expect(created.metadata).toMatchObject({ createdBy: admin.id });
     });
 
     it("returns 403 for non-admin users", async () => {
@@ -208,6 +268,13 @@ describe("QAController (e2e)", () => {
         .expect(201);
 
       expect(response.body.availableLocales).toEqual(expect.arrayContaining(["en", "pl"]));
+
+      const [stored] = await db
+        .select()
+        .from(questionsAndAnswers)
+        .where(eq(questionsAndAnswers.id, qa.id));
+      expect(stored.availableLocales).toEqual(expect.arrayContaining(["en", "pl"]));
+      expect(stored.baseLanguage).toBe("en");
     });
 
     it("returns 400 if language already exists", async () => {
@@ -236,10 +303,15 @@ describe("QAController (e2e)", () => {
   });
 
   describe("PATCH /api/qa/:qaId", () => {
-    it("updates QA for given language", async () => {
+    it("updates QA for given language and keeps locale metadata intact", async () => {
       await seedGlobalSettings({ QAEnabled: true });
       const { cookie } = await createAdminWithCookie();
-      const qa = await qaFactory.create({ baseLanguage: "en", availableLocales: ["en", "pl"] });
+      const qa = await qaFactory.create({
+        baseLanguage: "en",
+        availableLocales: ["en", "pl"],
+        title: "English title",
+        description: "English description",
+      });
 
       const response = await request(app.getHttpServer())
         .patch(`/api/qa/${qa.id}?language=en`)
@@ -247,7 +319,18 @@ describe("QAController (e2e)", () => {
         .send({ title: "Updated title" })
         .expect(200);
 
-      expect(response.body).toBeDefined();
+      expect(response.body.title).toBe("Updated title");
+      expect(response.body.description).toBe("English description");
+
+      const [stored] = await db
+        .select()
+        .from(questionsAndAnswers)
+        .where(eq(questionsAndAnswers.id, qa.id));
+      expect(stored.title).toEqual({
+        en: "Updated title",
+      });
+      expect(stored.description).toEqual({ en: "English description" });
+      expect(stored.availableLocales).toEqual(["en", "pl"]);
     });
 
     it("returns 400 when no data to update", async () => {
@@ -297,6 +380,19 @@ describe("QAController (e2e)", () => {
 
       expect(deleted).toBeUndefined();
     });
+
+    it("returns 400 when deleting non-existent QA", async () => {
+      await seedGlobalSettings({ QAEnabled: true });
+      const { cookie } = await createAdminWithCookie();
+      const randomId = faker.string.uuid();
+
+      const response = await request(app.getHttpServer())
+        .delete(`/api/qa/${randomId}`)
+        .set("Cookie", cookie)
+        .expect(400);
+
+      expect(response.body.message).toBe("qaView.toast.notFound");
+    });
   });
 
   describe("DELETE /api/qa/language/:qaId", () => {
@@ -314,6 +410,14 @@ describe("QAController (e2e)", () => {
         .expect(200);
 
       expect(response.body.availableLocales).toEqual(["en"]);
+
+      const [stored] = await db
+        .select()
+        .from(questionsAndAnswers)
+        .where(eq(questionsAndAnswers.id, qa.id));
+      expect(stored.availableLocales).toEqual(["en"]);
+      expect((stored.title as Record<string, string>).pl).toBeUndefined();
+      expect((stored.description as Record<string, string>).pl).toBeUndefined();
     });
 
     it("returns 400 when trying to remove base language", async () => {
