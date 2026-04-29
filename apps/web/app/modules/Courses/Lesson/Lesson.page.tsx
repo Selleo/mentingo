@@ -251,9 +251,10 @@ export default function LessonPage() {
   return (
     <CourseAccessProvider course={course}>
       <PageWrapper
-        className="h-auto"
-        breadcrumbs={breadcrumbs}
-        aboveBreadcrumbs={<LearningModeBanner />}
+        className={cn("h-auto", isFocusMode && "p-4 md:p-6 3xl:p-8")}
+        breadcrumbs={isFocusMode ? undefined : breadcrumbs}
+        aboveBreadcrumbs={isFocusMode ? null : <LearningModeBanner />}
+        isBarebones={isFocusMode}
       >
         <div className="flex w-full max-w-full flex-col gap-6">
           <div
