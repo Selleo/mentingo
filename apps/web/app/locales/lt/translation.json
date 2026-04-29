@@ -533,7 +533,8 @@
       "about": "Apie",
       "contact": "Susisiekite",
       "courses": "Kursai",
-      "title": "Pavadinimas"
+      "title": "Pavadinimas",
+      "points": "{{count}} tšk."
     }
   },
   "changeUserInformationView": {

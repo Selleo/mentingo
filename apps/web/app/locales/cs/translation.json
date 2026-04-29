@@ -533,7 +533,8 @@
       "about": "O",
       "contact": "Kontakt",
       "courses": "Kurzy",
-      "title": "Titul"
+      "title": "Titul",
+      "points": "{{count}} b."
     }
   },
   "changeUserInformationView": {

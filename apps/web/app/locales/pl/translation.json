@@ -510,7 +510,8 @@
       "about": "O",
       "contact": "Kontakt",
       "courses": "Kursy",
-      "title": "Tytuł"
+      "title": "Tytuł",
+      "points": "{{count}} pkt"
     }
   },
   "changeUserInformationView": {
