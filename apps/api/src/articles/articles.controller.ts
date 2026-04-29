@@ -210,16 +210,23 @@ export class ArticlesController {
   @Validate({
     request: [
       { type: "query", name: "language", schema: supportedLanguagesSchema },
-      { type: "query", name: "isDraftMode", schema: Type.Optional(Type.Boolean()) },
+      {
+        type: "query",
+        name: "isDraftMode",
+        schema: Type.Optional(
+          Type.Union([Type.Boolean(), Type.Literal("true"), Type.Literal("false")]),
+        ),
+      },
     ],
     response: baseResponse(getArticleSectionResponseSchema),
   })
   async getArticleToc(
     @Query("language") language: SupportedLanguages,
-    @Query("isDraftMode") isDraftMode?: boolean,
+    @Query("isDraftMode") isDraftMode?: boolean | "true" | "false",
     @CurrentUser() currentUser?: CurrentUserType,
   ): Promise<BaseResponse<GetArticleTocResponse>> {
-    const toc = await this.articlesService.getArticlesToc(language, isDraftMode, currentUser);
+    const draftMode = isDraftMode === true || isDraftMode === "true";
+    const toc = await this.articlesService.getArticlesToc(language, draftMode, currentUser);
 
     return new BaseResponse(toc);
   }
@@ -244,17 +251,24 @@ export class ArticlesController {
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
       { type: "query", name: "language", schema: supportedLanguagesSchema },
-      { type: "query", name: "isDraftMode", schema: Type.Optional(Type.Boolean()) },
+      {
+        type: "query",
+        name: "isDraftMode",
+        schema: Type.Optional(
+          Type.Union([Type.Boolean(), Type.Literal("true"), Type.Literal("false")]),
+        ),
+      },
     ],
     response: baseResponse(getArticleResponseSchema),
   })
   async getArticle(
     @Param("id") id: string,
     @Query("language") language: SupportedLanguages,
-    @Query("isDraftMode") isDraftMode?: boolean,
+    @Query("isDraftMode") isDraftMode?: boolean | "true" | "false",
     @CurrentUser() currentUser?: CurrentUserType,
   ): Promise<BaseResponse<GetArticleResponse>> {
-    const article = await this.articlesService.getArticle(id, language, isDraftMode, currentUser);
+    const draftMode = isDraftMode === true || isDraftMode === "true";
+    const article = await this.articlesService.getArticle(id, language, draftMode, currentUser);
 
     return new BaseResponse(article);
   }

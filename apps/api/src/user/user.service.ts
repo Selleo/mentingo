@@ -392,13 +392,23 @@ export class UserService {
       throw new NotFoundException("User not found");
     }
 
-    const [updatedUserDetails] = await this.db
-      .update(userDetails)
-      .set(data)
-      .where(eq(userDetails.userId, userId))
+    const [upsertedUserDetails] = await this.db
+      .insert(userDetails)
+      .values({
+        userId,
+        tenantId: existingUser.tenantId,
+        ...data,
+      })
+      .onConflictDoUpdate({
+        target: [userDetails.userId],
+        set: {
+          ...data,
+          updatedAt: sql`NOW()`,
+        },
+      })
       .returning();
 
-    return updatedUserDetails;
+    return upsertedUserDetails;
   }
 
   async updateUserProfile(

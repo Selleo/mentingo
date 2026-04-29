@@ -382,9 +382,9 @@ Minimum scenario matrix per endpoint class:
   - auth/header checks/happy path/retry-replay behavior/partial-failure behavior
 
 ## 9. Tracking Checklist (Controller Completion)
-- [ ] AuthController
-- [ ] UserController
-- [ ] SettingsController
+- [x] AuthController
+- [x] UserController
+- [x] SettingsController
 - [ ] CourseController
 - [ ] LessonController
 - [ ] ChapterController
@@ -392,12 +392,12 @@ Minimum scenario matrix per endpoint class:
 - [ ] GroupController
 - [ ] IntegrationAdminController
 - [ ] IntegrationController
-- [ ] AnnouncementsController
-- [ ] NewsController
-- [ ] ArticlesController
-- [ ] QAController
+- [x] AnnouncementsController
+- [x] NewsController
+- [x] ArticlesController
+- [x] QAController
 - [ ] CertificatesController
-- [ ] StatisticsController
+- [x] StatisticsController
 - [ ] ReportController
 - [ ] StudentLessonProgressController
 - [ ] AIController
@@ -412,7 +412,27 @@ Minimum scenario matrix per endpoint class:
 - [ ] HealthController
 - [ ] TestConfigController
 
-## 10. Success Exit Criteria
+## 10. Execution Log
+- 2026-04-29:
+  - Completed `AuthController` E2E deepening (MFA setup/verify edge cases, support-mode edge paths, stronger cookie assertions).
+  - Added full `NewsController` E2E module (all routes with draft/public visibility, localization lifecycle, soft-delete assertions, preview/upload auth).
+  - Reworked `AnnouncementsController` E2E to DB-backed assertions (ordering/limit/read-state transitions, recipient fan-out, idempotent mark-as-read).
+  - Extended `QAController` E2E with search behavior, localization edge behavior, and stronger DB assertions.
+  - Fixed implementation bug in `QAService.deleteQA` for non-existent IDs (now returns domain `qaView.toast.notFound` instead of 500).
+  - Replaced `ArticlesController` E2E with full route-family coverage (sections/articles/languages/toc/resource/preview/upload) and DB-backed assertions.
+  - Fixed implementation bug in `ArticlesService.getArticle` where `isDraftMode` was ignored in visibility filtering.
+  - Improved `ArticlesController` query validation for `isDraftMode` to accept boolean query-string values consistently.
+  - Hardened file type validation (`MagicFileTypeValidator`) to gracefully handle file-type detection failures and return validation errors.
+  - Extended `UserController` E2E with deep business assertions (details upsert persistence, self-restriction role enforcement, non-student delete guard, bulk-group rollback semantics, mixed archive counters, invalid bulk-role handling, duplicate-create prevention, authenticated import validation, role+archived filtering, password mismatch behavior).
+  - Fixed implementation bug in `UserService.upsertUserDetails` (now true upsert with insert-or-update semantics; previously update-only path returned 500 for users without pre-existing `user_details` row).
+  - Expanded `StatisticsController` E2E from auth-only smoke to full endpoint contracts (authz matrix, invalid-language validation, DB-backed streak retrieval via `user_statistics`, and empty-tenant aggregate payload invariants for `/statistics/stats`).
+  - Completed `SettingsController` deepening across all existing settings E2E modules:
+    - Added settings asset endpoint coverage (`platform-logo`, `platform-simple-logo`, `certificate-background`) with public URL + cache header assertions and role protection checks.
+    - Re-enabled and stabilized login-page-files upload/delete coverage with deterministic file type and storage-resource test doubles plus DB assertions on `loginPageFiles` and `resource_entity`.
+    - Re-enabled login-background admin write-path coverage (clear behavior) with DB-backed assertions.
+    - Hardened settings suite cleanup by truncating `outbox_events` alongside settings in high-write scenarios to prevent deadlock flakes.
+
+## 11. Success Exit Criteria
 This plan is complete when:
 - Every controller in this document is checked complete.
 - Every endpoint has route + business + edge coverage per matrix.

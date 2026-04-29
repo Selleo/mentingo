@@ -1,6 +1,11 @@
+import { Readable } from "stream";
+
 import { isNull, sql } from "drizzle-orm";
+import sharp from "sharp";
 import request from "supertest";
 
+import { FileService } from "src/file/file.service";
+import { FILE_DELIVERY_TYPE } from "src/file/types/file-delivery.type";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { settings } from "src/storage/schema";
 
@@ -17,8 +22,10 @@ describe("SettingsController (e2e)", () => {
   let app: INestApplication;
   let db: DatabasePg;
   let baseDb: DatabasePg;
+  let fileService: FileService;
   let userFactory: ReturnType<typeof createUserFactory>;
   let globalSettingsFactory: ReturnType<typeof createSettingsFactory>;
+  let validPngBuffer: Buffer;
   const testPassword = "Password123@@";
 
   beforeAll(async () => {
@@ -26,8 +33,19 @@ describe("SettingsController (e2e)", () => {
     app = testApp;
     db = app.get(DB);
     baseDb = app.get(DB_ADMIN);
+    fileService = app.get(FileService);
     userFactory = createUserFactory(db);
     globalSettingsFactory = createSettingsFactory(db, null);
+    validPngBuffer = await sharp({
+      create: {
+        width: 16,
+        height: 16,
+        channels: 3,
+        background: { r: 255, g: 255, b: 255 },
+      },
+    })
+      .png()
+      .toBuffer();
   });
 
   afterAll(async () => {
@@ -40,7 +58,7 @@ describe("SettingsController (e2e)", () => {
 
     describe("PUT /api/settings", () => {
       beforeEach(async () => {
-        await truncateTables(baseDb, ["settings"]);
+        await truncateTables(baseDb, ["settings", "outbox_events"]);
         await globalSettingsFactory.create({ userId: null });
 
         testUser = await userFactory
@@ -101,7 +119,7 @@ describe("SettingsController (e2e)", () => {
       let adminCookies: string;
 
       beforeEach(async () => {
-        await truncateTables(baseDb, ["settings"]);
+        await truncateTables(baseDb, ["settings", "outbox_events"]);
         await globalSettingsFactory.create({ userId: null });
 
         adminUser = await userFactory
@@ -170,7 +188,7 @@ describe("SettingsController (e2e)", () => {
 
     describe("GET /settings", () => {
       beforeEach(async () => {
-        await truncateTables(db, ["settings"]);
+        await truncateTables(db, ["settings", "outbox_events"]);
         await globalSettingsFactory.create({ userId: null });
 
         testUser = await userFactory
@@ -291,7 +309,7 @@ describe("SettingsController (e2e)", () => {
       let adminCookies: string;
 
       beforeEach(async () => {
-        await truncateTables(db, ["settings"]);
+        await truncateTables(db, ["settings", "outbox_events"]);
         await globalSettingsFactory.create({ userId: null });
 
         adminUser = await userFactory
@@ -304,7 +322,7 @@ describe("SettingsController (e2e)", () => {
       });
 
       afterEach(async () => {
-        await truncateTables(db, ["settings"]);
+        await truncateTables(db, ["settings", "outbox_events"]);
       });
 
       it("should toggle the global unregistered user courses accessibility setting (as Admin)", async () => {
@@ -356,7 +374,7 @@ describe("SettingsController (e2e)", () => {
       let adminCookies: string;
 
       beforeEach(async () => {
-        await truncateTables(db, ["settings"]);
+        await truncateTables(db, ["settings", "outbox_events"]);
         await globalSettingsFactory.create({ userId: null });
 
         adminUser = await userFactory
@@ -368,7 +386,7 @@ describe("SettingsController (e2e)", () => {
       });
 
       afterEach(async () => {
-        await truncateTables(db, ["settings"]);
+        await truncateTables(db, ["settings", "outbox_events"]);
       });
 
       it("should toggle the global enforce SSO setting (as Admin)", async () => {
@@ -418,7 +436,7 @@ describe("SettingsController (e2e)", () => {
       let adminCookies: string;
 
       beforeEach(async () => {
-        await truncateTables(db, ["settings"]);
+        await truncateTables(db, ["settings", "outbox_events"]);
         await globalSettingsFactory.create({ userId: null });
 
         adminUser = await userFactory
@@ -430,7 +448,7 @@ describe("SettingsController (e2e)", () => {
       });
 
       afterEach(async () => {
-        await truncateTables(db, ["settings"]);
+        await truncateTables(db, ["settings", "outbox_events"]);
       });
 
       it("should update the global color schema setting (as Admin)", async () => {
@@ -498,6 +516,170 @@ describe("SettingsController (e2e)", () => {
           .patch("/api/settings/admin/color-schema")
           .send({ primaryColor: "#123456", contrastColor: "#654321" })
           .expect(401);
+      });
+    });
+
+    describe("Settings image asset endpoints", () => {
+      let adminUser: UserWithCredentials;
+      let adminCookies: string;
+
+      beforeEach(async () => {
+        await truncateTables(baseDb, ["settings", "outbox_events"]);
+        await globalSettingsFactory.create({ userId: null });
+
+        adminUser = await userFactory
+          .withCredentials({ password: testPassword })
+          .withAdminSettings(db)
+          .create();
+
+        adminCookies = await cookieFor(adminUser, app);
+      });
+
+      afterEach(() => {
+        jest.restoreAllMocks();
+      });
+
+      it("should return versioned platform logo url when global key is configured", async () => {
+        const fileKey = "platform-logos/logo.png";
+        await db
+          .update(settings)
+          .set({
+            settings: sql`
+              jsonb_set(
+                settings.settings,
+                '{platformLogoS3Key}',
+                to_jsonb(${fileKey}::text),
+                true
+              )
+            `,
+          })
+          .where(isNull(settings.userId));
+
+        const publicResponse = await request(app.getHttpServer())
+          .get("/api/settings/platform-logo")
+          .expect(200);
+
+        expect(publicResponse.body.data.url).toBe(
+          `/api/settings/platform-logo/image?v=${encodeURIComponent(fileKey)}`,
+        );
+      });
+
+      it("should clear platform logo when PATCH is called without file", async () => {
+        await db
+          .update(settings)
+          .set({
+            settings: sql`
+              jsonb_set(
+                settings.settings,
+                '{platformLogoS3Key}',
+                to_jsonb(${"platform-logos/old-logo.png"}::text),
+                true
+              )
+            `,
+          })
+          .where(isNull(settings.userId));
+
+        await request(app.getHttpServer())
+          .patch("/api/settings/platform-logo")
+          .set("Cookie", adminCookies)
+          .expect(200);
+
+        const row = await db.query.settings.findFirst({ where: (s, { isNull }) => isNull(s.userId) });
+        expect((row?.settings as GlobalSettings)?.platformLogoS3Key).toBeNull();
+      });
+
+      it("should return versioned platform simple logo url when global key is configured", async () => {
+        const fileKey = "platform-simple-logos/logo-simple.png";
+        await db
+          .update(settings)
+          .set({
+            settings: sql`
+              jsonb_set(
+                settings.settings,
+                '{platformSimpleLogoS3Key}',
+                to_jsonb(${fileKey}::text),
+                true
+              )
+            `,
+          })
+          .where(isNull(settings.userId));
+
+        const response = await request(app.getHttpServer())
+          .get("/api/settings/platform-simple-logo")
+          .expect(200);
+
+        expect(response.body.data.url).toBe(
+          `/api/settings/platform-simple-logo/image?v=${encodeURIComponent(fileKey)}`,
+        );
+      });
+
+      it("should reject non-admin upload attempts for settings images", async () => {
+        const student = await userFactory
+          .withCredentials({ password: testPassword })
+          .withUserSettings(db)
+          .create();
+        const studentCookies = await cookieFor(student, app);
+
+        await request(app.getHttpServer())
+          .patch("/api/settings/platform-logo")
+          .set("Cookie", studentCookies)
+          .attach("logo", validPngBuffer, { filename: "logo.png", contentType: "image/png" })
+          .expect(403);
+
+        await request(app.getHttpServer())
+          .patch("/api/settings/certificate-background")
+          .set("Cookie", studentCookies)
+          .attach("certificate-background", validPngBuffer, {
+            filename: "certificate.png",
+            contentType: "image/png",
+          })
+          .expect(403);
+      });
+
+      it("should stream certificate background image with caching headers", async () => {
+        const fileKey = "certificate-backgrounds/background.png";
+        const etag = "\"certificate-etag\"";
+
+        await db
+          .update(settings)
+          .set({
+            settings: sql`
+              jsonb_set(
+                settings.settings,
+                '{certificateBackgroundImage}',
+                to_jsonb(${fileKey}::text),
+                true
+              )
+            `,
+          })
+          .where(isNull(settings.userId));
+
+        jest.spyOn(fileService, "getFileDelivery").mockResolvedValue({
+          type: FILE_DELIVERY_TYPE.STREAM,
+          stream: Readable.from(validPngBuffer),
+          contentType: "image/png",
+          contentLength: validPngBuffer.length,
+          acceptRanges: "bytes",
+          etag,
+        });
+
+        const response = await request(app.getHttpServer())
+          .get("/api/settings/certificate-background/image")
+          .expect(200);
+
+        expect(response.headers["cache-control"]).toBe("public, max-age=86400");
+        expect(response.headers["content-type"]).toContain("image/png");
+
+        const cachedResponse = await request(app.getHttpServer())
+          .get("/api/settings/certificate-background/image")
+          .set("If-None-Match", etag)
+          .expect(304);
+
+        expect(cachedResponse.headers.etag).toBe(etag);
+      });
+
+      it("should return 404 when certificate background image is not configured", async () => {
+        await request(app.getHttpServer()).get("/api/settings/certificate-background/image").expect(404);
       });
     });
   });

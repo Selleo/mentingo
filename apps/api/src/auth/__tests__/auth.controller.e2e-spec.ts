@@ -3,6 +3,7 @@ import * as cookie from "cookie";
 import { eq } from "drizzle-orm";
 import { isArray, omit } from "lodash";
 import { nanoid } from "nanoid";
+import { authenticator } from "otplib";
 import request from "supertest";
 
 import { hashToken } from "src/auth/utils/hash-auth-token";
@@ -1029,6 +1030,129 @@ describe("AuthController (e2e)", () => {
         .get("/api/auth/magic-link/verify")
         .query({ token: "invalid-token" })
         .expect(401);
+    });
+  });
+
+  describe("POST /api/auth/mfa/setup", () => {
+    it("should return 401 for unauthenticated request", async () => {
+      await request(app.getHttpServer()).post("/api/auth/mfa/setup").expect(401);
+    });
+
+    it("should create MFA secret and return otpauth payload", async () => {
+      const user = await userFactory
+        .withCredentials({ password: "Password123@" })
+        .withUserSettings(db)
+        .create();
+
+      const loginResponse = await request(app.getHttpServer()).post("/api/auth/login").send({
+        email: user.email,
+        password: "Password123@",
+      });
+
+      const response = await request(app.getHttpServer())
+        .post("/api/auth/mfa/setup")
+        .set("Cookie", loginResponse.headers["set-cookie"])
+        .expect(201);
+
+      expect(response.body.data.secret).toBeTruthy();
+      expect(response.body.data.otpauth).toContain("otpauth://");
+
+      const userSettings = await settingsService.getUserSettings(user.id);
+      expect(userSettings.MFASecret).toBe(response.body.data.secret);
+    });
+  });
+
+  describe("POST /api/auth/mfa/verify", () => {
+    it("should reject invalid MFA token", async () => {
+      const user = await userFactory
+        .withCredentials({ password: "Password123@" })
+        .withUserSettings(db)
+        .create();
+
+      const loginResponse = await request(app.getHttpServer()).post("/api/auth/login").send({
+        email: user.email,
+        password: "Password123@",
+      });
+
+      await request(app.getHttpServer())
+        .post("/api/auth/mfa/setup")
+        .set("Cookie", loginResponse.headers["set-cookie"])
+        .expect(201);
+
+      await request(app.getHttpServer())
+        .post("/api/auth/mfa/verify")
+        .set("Cookie", loginResponse.headers["set-cookie"])
+        .send({ token: "000000" })
+        .expect(400);
+    });
+
+    it("should verify valid MFA token and enable MFA in user settings", async () => {
+      const user = await userFactory
+        .withCredentials({ password: "Password123@" })
+        .withUserSettings(db)
+        .create();
+
+      const loginResponse = await request(app.getHttpServer()).post("/api/auth/login").send({
+        email: user.email,
+        password: "Password123@",
+      });
+
+      const setupResponse = await request(app.getHttpServer())
+        .post("/api/auth/mfa/setup")
+        .set("Cookie", loginResponse.headers["set-cookie"])
+        .expect(201);
+
+      const token = authenticator.generate(setupResponse.body.data.secret);
+
+      const verifyResponse = await request(app.getHttpServer())
+        .post("/api/auth/mfa/verify")
+        .set("Cookie", loginResponse.headers["set-cookie"])
+        .send({ token })
+        .expect(201);
+
+      expect(verifyResponse.body.data.isValid).toBe(true);
+      expect(verifyResponse.headers["set-cookie"]).toBeDefined();
+      const setCookies = verifyResponse.headers["set-cookie"];
+      expect(Array.isArray(setCookies)).toBe(true);
+
+      if (Array.isArray(setCookies)) {
+        expect(setCookies.length).toBeGreaterThanOrEqual(2);
+        expect(setCookies.some((cookieValue: string) => cookieValue.startsWith("access_token="))).toBe(
+          true,
+        );
+        expect(
+          setCookies.some((cookieValue: string) => cookieValue.startsWith("refresh_token=")),
+        ).toBe(true);
+      }
+
+      const userSettings = await settingsService.getUserSettings(user.id);
+      expect(userSettings.isMFAEnabled).toBe(true);
+    });
+  });
+
+  describe("support mode endpoints", () => {
+    it("POST /api/auth/support/exit returns 400 when user is not in support mode", async () => {
+      const admin = await userFactory
+        .withCredentials({ password: "Password123@" })
+        .withAdminSettings(db)
+        .create();
+
+      const loginResponse = await request(app.getHttpServer()).post("/api/auth/login").send({
+        email: admin.email,
+        password: "Password123@",
+      });
+
+      await request(app.getHttpServer())
+        .post("/api/auth/support/exit")
+        .set("Cookie", loginResponse.headers["set-cookie"])
+        .expect(400);
+    });
+
+    it("GET /api/auth/support/callback returns 400 when grant query param is empty", async () => {
+      await request(app.getHttpServer())
+        .get("/api/auth/support/callback")
+        .query({ grant: "" })
+        .expect(400);
     });
   });
 });
