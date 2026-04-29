@@ -295,7 +295,8 @@
       "goToAvailableCourses": "Go to available courses"
     },
     "qa": "Q&A",
-    "tenants": "Organizations"
+    "tenants": "Organizations",
+    "activityLogs": "Activity Logs"
   },
   "newsView": {
     "header": "News",
@@ -2798,6 +2799,7 @@
     "createQA": "Create new Q&A",
     "analytics": "Analytics",
     "progress": "Progress",
+    "activityLogs": "Activity Logs",
     "tenant": "Organization Details",
     "createTenant": "Create Organization",
     "tenants": "Organizations"
@@ -3166,6 +3168,77 @@
       "ownerNotAdmin": "API key owner no longer has admin permissions",
       "missingApiKeyHeader": "Missing X-API-Key header",
       "missingTenantIdHeader": "Missing X-Tenant-Id header"
+    }
+  },
+  "activityLogsView": {
+    "filters": {
+      "placeholder": {
+        "searchByEmail": "Search by email...",
+        "from": "From date",
+        "to": "To date"
+      }
+    },
+
+    "description": "Timeline of changes across the platform, grouped as a simple expandable feed.",
+    "breadcrumbs": {
+      "activityLogs": "Activity Logs"
+    },
+    "emptyState": {
+      "title": "No activity logs found.",
+      "description": "When actions happen in the platform, they will appear here."
+    },
+    "details": {
+      "before": "Before",
+      "after": "After",
+      "context": "Context",
+      "noMetadata": "No metadata available."
+    },
+    "fallbacks": {
+      "unknown": "Unknown",
+      "notAvailable": "n/a"
+    },
+    "labels": {
+      "action": "Action:",
+      "entity": "Resource:",
+      "resource": "Resource:"
+    },
+    "actions": {
+      "create": "Created",
+      "update": "Updated",
+      "delete": "Deleted",
+      "login": "Logged in",
+      "login_failed": "Login failed",
+      "logout": "Logged out",
+      "enroll_course": "Enrolled",
+      "unenroll_course": "Unenrolled",
+      "start_course": "Started",
+      "group_assignment": "Assigned",
+      "complete_lesson": "Completed",
+      "complete_course": "Completed",
+      "complete_chapter": "Completed",
+      "view_announcement": "Viewed"
+    },
+    "entity": {
+      "course": "Course",
+      "chapter": "Chapter",
+      "lesson": "Lesson",
+      "question": "Question",
+      "news": "News",
+      "articles": "Article",
+      "user": "User",
+      "category": "Category",
+      "announcement": "Announcement",
+      "global_settings": "Settings"
+    },
+    "table": {
+      "datetime": "Datetime",
+      "email": "Email",
+      "action": "Action",
+      "resource": "Resource",
+      "details": "Details",
+      "showDetails": "Show details",
+      "loading": "Loading activity logs...",
+      "empty": "No activity logs found."
     }
   }
 }

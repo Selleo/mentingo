@@ -1,11 +1,15 @@
+import { format, isAfter, isBefore, parseISO } from "date-fns";
+import { enUS, pl } from "date-fns/locale";
 import { debounce } from "lodash-es";
-import { Search } from "lucide-react";
+import { CalendarDays, Search } from "lucide-react";
 import { useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
+import { Calendar } from "~/components/ui/calendar";
 import { Input } from "~/components/ui/input";
 import MultipleSelector from "~/components/ui/multiselect";
+import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -18,7 +22,7 @@ import { cn } from "~/lib/utils";
 import type React from "react";
 import type { Option } from "~/components/ui/multiselect";
 
-export type FilterType = "text" | "select" | "state" | "status" | "multiselect";
+export type FilterType = "text" | "select" | "state" | "status" | "multiselect" | "date";
 
 export type TextFilterValue = string | undefined;
 export type SelectFilterValue = string | undefined;
@@ -43,6 +47,8 @@ export type BaseFilterConfig = {
   hideAll?: boolean;
   testId?: string;
   optionTestId?: (option: FilterOption) => string;
+  minDate?: Date;
+  maxDate?: Date;
 };
 
 export type TextFilterConfig = BaseFilterConfig & {
@@ -54,11 +60,19 @@ export type SelectFilterConfig = BaseFilterConfig & {
   options: FilterOption[] | undefined;
 };
 
+export type DateFilterConfig = BaseFilterConfig & {
+  type: "date";
+};
+
 export type StatusFilterConfig = BaseFilterConfig & {
   type: "status";
 };
 
-export type FilterConfig = TextFilterConfig | SelectFilterConfig | StatusFilterConfig;
+export type FilterConfig =
+  | TextFilterConfig
+  | SelectFilterConfig
+  | DateFilterConfig
+  | StatusFilterConfig;
 
 export type FilterValues = Partial<{
   [key: string]: FilterValue;
@@ -84,7 +98,8 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
   clearAllTestId,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const calendarLocale = i18n.language.startsWith("pl") ? pl : enUS;
 
   const debouncedSearchTitle = debounce(onChange, 300);
 
@@ -170,6 +185,65 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
               searchFilter
               textInputDisabled
             />
+          );
+        }
+
+        if (filter?.type === "date") {
+          const value = values?.[filter?.name];
+          const selectedDate = typeof value === "string" && value ? parseISO(value) : undefined;
+
+          return (
+            <Popover key={filter?.name}>
+              <PopoverTrigger asChild>
+                <Button
+                  data-testid={filter.testId}
+                  type="button"
+                  variant="outline"
+                  className={cn(
+                    "w-full max-w-[320px] flex items-center gap-3 bg-white font-normal border-neutral-300 shadow-sm sm:w-[180px]",
+                    selectedDate
+                      ? "text-neutral-900 hover:text-neutral-900"
+                      : "text-neutral-500 hover:text-neutral-500",
+                  )}
+                >
+                  <CalendarDays className="size-4 shrink-0 text-neutral-500" aria-hidden="true" />
+                  <span className="grow truncate text-left">
+                    {selectedDate && !Number.isNaN(selectedDate.getTime())
+                      ? format(selectedDate, "PPP", { locale: calendarLocale })
+                      : filter?.placeholder ||
+                        t("common.other.selectDate", { defaultValue: "Select date" })}
+                  </span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="w-auto p-2">
+                <Calendar
+                  variant="default"
+                  mode="single"
+                  captionLayout="dropdown-buttons"
+                  selected={
+                    selectedDate && !Number.isNaN(selectedDate.getTime()) ? selectedDate : undefined
+                  }
+                  onSelect={(date) => {
+                    if (!date) {
+                      return onChange(filter.name, undefined);
+                    }
+
+                    onChange(filter.name, format(date, "yyyy-MM-dd"));
+                  }}
+                  disabled={(date) =>
+                    Boolean(
+                      (filter.minDate && isBefore(date, filter.minDate)) ||
+                        (filter.maxDate && isAfter(date, filter.maxDate)),
+                    )
+                  }
+                  fromYear={2000}
+                  toYear={new Date().getFullYear() + 1}
+                  initialFocus
+                  weekStartsOn={1}
+                  locale={calendarLocale}
+                />
+              </PopoverContent>
+            </Popover>
           );
         }
 

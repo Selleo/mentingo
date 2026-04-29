@@ -58,6 +58,7 @@ export const PERMISSIONS = {
   INTEGRATION_API_USE: "integration_api.use",
   TENANT_MANAGE: "tenant.manage",
   COURSE_AI_GENERATION: "course.ai_generation",
+  ACTIVITY_LOG_READ: "activity_log.read",
 } as const;
 
 export type PermissionKey = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -169,6 +170,7 @@ export const SYSTEM_ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
     PERMISSIONS.INTEGRATION_API_USE,
     PERMISSIONS.TENANT_MANAGE,
     PERMISSIONS.COURSE_EXPORT,
+    PERMISSIONS.ACTIVITY_LOG_READ,
   ],
 };
 

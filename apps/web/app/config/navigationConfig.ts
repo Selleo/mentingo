@@ -190,6 +190,24 @@ export const getNavigationConfig = (
         },
       ],
     },
+    {
+      title: t("navigationSideBar.activityLogs"),
+      icon: "Timeline",
+      isExpandable: false,
+      testId: NAVIGATION_HANDLES.ACTIVITY_LOGS_LINK,
+      restrictedAccessRequirement: {
+        allOf: [PERMISSIONS.ACTIVITY_LOG_READ],
+      },
+      restrictedManagingTenantAdmin: false,
+      items: [
+        {
+          label: t("navigationSideBar.activityLogs"),
+          path: "admin/activity-logs",
+          iconName: "Timeline",
+          testId: NAVIGATION_HANDLES.ACTIVITY_LOGS_LINK,
+        },
+      ],
+    },
   ];
 };
 

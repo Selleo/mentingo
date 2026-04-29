@@ -4,6 +4,7 @@ import { CqrsModule } from "@nestjs/cqrs";
 import { ArticlesActivityHandler } from "src/activity-logs/handlers/articles-activity.handler";
 import { QAActivityHandler } from "src/activity-logs/handlers/qa-activity.handler";
 
+import { ActivityLogsController } from "./activity-logs.controller";
 import { ActivityLogsQueueService } from "./activity-logs.queue.service";
 import { ActivityLogsService } from "./activity-logs.service";
 import { AnnouncementActivityHandler } from "./handlers/announcement-activity.handler";
@@ -22,6 +23,7 @@ import { ActivityLogsWorker } from "./workers/activity-logs.worker";
 @Global()
 @Module({
   imports: [CqrsModule],
+  controllers: [ActivityLogsController],
   providers: [
     ActivityLogsService,
     ChapterActivityHandler,
