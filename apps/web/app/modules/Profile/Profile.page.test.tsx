@@ -9,6 +9,10 @@ vi.mock("~/api/queries/useContentCreatorCourses", () => ({
   useContentCreatorCourses: vi.fn().mockReturnValue({ data: [] }),
 }));
 
+vi.mock("~/api/queries/useProfileAchievements", () => ({
+  useProfileAchievements: vi.fn().mockReturnValue({ data: { totalPoints: 0, achievements: [] } }),
+}));
+
 vi.mock("~/hooks/usePermissions", () => ({
   usePermissions: vi.fn().mockReturnValue({
     hasAccess: false,

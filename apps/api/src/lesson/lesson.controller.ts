@@ -39,6 +39,7 @@ import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { MAX_VIDEO_SIZE } from "src/file/file.constants";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
+import { gamificationAwardSchema } from "src/gamification/schemas/achievement.schema";
 
 import {
   AnswerQuestionBody,
@@ -310,6 +311,7 @@ export class LessonController {
           wrongAnswerCount: Type.Number(),
           questionCount: Type.Number(),
           score: Type.Number(),
+          gamification: gamificationAwardSchema,
         }),
       }),
     ),

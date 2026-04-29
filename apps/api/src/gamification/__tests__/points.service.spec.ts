@@ -145,10 +145,19 @@ const createService = (roleSlugs: string[] = [SYSTEM_ROLE_SLUGS.STUDENT]) => {
     getUserAccess: jest.fn(async () => ({ roleSlugs, permissions: [] })),
   };
 
+  const achievementsRepository = {
+    unlockEligibleAchievements: jest.fn(async () => []),
+  };
+
   return {
     db,
     permissionsService,
-    service: new PointsService(db as never, permissionsService as never),
+    achievementsRepository,
+    service: new PointsService(
+      db as never,
+      permissionsService as never,
+      achievementsRepository as never,
+    ),
   };
 };
 
@@ -169,8 +178,8 @@ describe("PointsService", () => {
       tenantId,
     );
 
-    expect(firstAward).toEqual({ pointsAwarded: 10 });
-    expect(duplicateAward).toEqual({ pointsAwarded: 0 });
+    expect(firstAward).toEqual({ pointsAwarded: 10, newlyUnlocked: [] });
+    expect(duplicateAward).toEqual({ pointsAwarded: 0, newlyUnlocked: [] });
     expect(db.pointEvents).toHaveLength(1);
     expect(db.userStatistics.get(userId)?.totalPoints).toBe(10);
   });
@@ -186,7 +195,7 @@ describe("PointsService", () => {
       tenantId,
     );
 
-    expect(result).toEqual({ pointsAwarded: 25 });
+    expect(result).toEqual({ pointsAwarded: 25, newlyUnlocked: [] });
     expect(db.pointEvents[0]?.points).toBe(25);
     expect(db.userStatistics.get(userId)?.totalPoints).toBe(25);
   });
@@ -203,7 +212,7 @@ describe("PointsService", () => {
       tenantId,
     );
 
-    expect(result).toEqual({ pointsAwarded: 42 });
+    expect(result).toEqual({ pointsAwarded: 42, newlyUnlocked: [] });
     expect(db.pointEvents[0]?.points).toBe(42);
     expect(db.userStatistics.get(userId)?.totalPoints).toBe(42);
   });
@@ -220,7 +229,7 @@ describe("PointsService", () => {
       tenantId,
     );
 
-    expect(result).toEqual({ pointsAwarded: 0 });
+    expect(result).toEqual({ pointsAwarded: 0, newlyUnlocked: [] });
     expect(db.pointEvents).toHaveLength(1);
     expect(db.pointEvents[0]?.points).toBe(0);
     expect(db.userStatistics.has(userId)).toBe(false);
@@ -242,8 +251,8 @@ describe("PointsService", () => {
       tenantId,
     );
 
-    expect(courseAward).toEqual({ pointsAwarded: 50 });
-    expect(aiMentorAward).toEqual({ pointsAwarded: 30 });
+    expect(courseAward).toEqual({ pointsAwarded: 50, newlyUnlocked: [] });
+    expect(aiMentorAward).toEqual({ pointsAwarded: 30, newlyUnlocked: [] });
     expect(db.pointEvents).toHaveLength(2);
     expect(db.userStatistics.get(userId)?.totalPoints).toBe(80);
   });
@@ -258,7 +267,7 @@ describe("PointsService", () => {
       tenantId,
     );
 
-    expect(result).toEqual({ pointsAwarded: 0 });
+    expect(result).toEqual({ pointsAwarded: 0, newlyUnlocked: [] });
     expect(db.pointEvents).toHaveLength(0);
     expect(db.userStatistics.has(userId)).toBe(false);
   });
@@ -273,6 +282,35 @@ describe("PointsService", () => {
 
     expect(db.pointEvents).toHaveLength(0);
     expect(db.userStatistics.has(userId)).toBe(false);
+  });
+
+  it("returns newly unlocked achievements from the evaluator repository", async () => {
+    const { achievementsRepository, service } = createService();
+    const newlyUnlocked = [
+      {
+        id: "00000000-0000-0000-0000-000000000010",
+        pointThreshold: 10,
+        unlockedAt: "2026-04-29T00:00:00.000Z",
+      },
+      {
+        id: "00000000-0000-0000-0000-000000000011",
+        pointThreshold: 10,
+        unlockedAt: "2026-04-29T00:00:00.000Z",
+      },
+    ];
+    achievementsRepository.unlockEligibleAchievements.mockResolvedValueOnce(newlyUnlocked as never);
+
+    const result = await service.award(
+      userId,
+      POINT_EVENT_TYPES.CHAPTER_COMPLETED,
+      chapterId,
+      tenantId,
+    );
+
+    expect(result).toEqual({ pointsAwarded: 10, newlyUnlocked });
+    expect(achievementsRepository.unlockEligibleAchievements).toHaveBeenCalledWith(
+      expect.objectContaining({ currentTotal: 10, userId, tenantId }),
+    );
   });
 
   it("keeps point events append-only across chapter resets", async () => {
@@ -291,7 +329,7 @@ describe("PointsService", () => {
     );
 
     expect(pointEventsAfterReset).toHaveLength(1);
-    expect(resultAfterRecompletion).toEqual({ pointsAwarded: 0 });
+    expect(resultAfterRecompletion).toEqual({ pointsAwarded: 0, newlyUnlocked: [] });
     expect(db.pointEvents).toEqual(pointEventsAfterReset);
     expect(db.userStatistics.get(userId)?.totalPoints).toBe(10);
   });

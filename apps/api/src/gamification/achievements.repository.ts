@@ -4,12 +4,21 @@ import { and, asc, eq, getTableColumns, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import { DB } from "src/storage/db/db.providers";
-import { achievements, achievementTranslations } from "src/storage/schema";
+import {
+  achievements,
+  achievementTranslations,
+  userAchievements,
+  userStatistics,
+} from "src/storage/schema";
+
+import { evaluateAchievementUnlocks } from "./achievement.evaluator";
 
 import type {
   Achievement,
   AchievementTranslationsInput,
+  AchievementUnlock,
   CreateAchievementBody,
+  ProfileAchievementsResponse,
   UpdateAchievementBody,
 } from "./schemas/achievement.schema";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
@@ -61,6 +70,142 @@ export class AchievementsRepository {
       .where(and(eq(achievements.id, params.id), eq(achievements.tenantId, params.tenantId)));
 
     return this.mapRows(rows, params.language)[0] ?? null;
+  }
+
+  async unlockEligibleAchievements(params: {
+    trx: Transaction;
+    userId: UUIDType;
+    tenantId: UUIDType;
+    currentTotal: number;
+    language: SupportedLanguages;
+  }): Promise<AchievementUnlock[]> {
+    const rows = await this.selectAchievementRows({
+      db: params.trx,
+      tenantId: params.tenantId,
+      activeOnly: true,
+    });
+    const activeCatalog = this.mapRows(rows, params.language);
+
+    const heldRows = await params.trx
+      .select({ achievementId: userAchievements.achievementId })
+      .from(userAchievements)
+      .where(
+        and(
+          eq(userAchievements.userId, params.userId),
+          eq(userAchievements.tenantId, params.tenantId),
+        ),
+      );
+
+    const newlyUnlockedIds = evaluateAchievementUnlocks(
+      params.currentTotal,
+      heldRows.map((row) => row.achievementId),
+      activeCatalog,
+    );
+
+    if (newlyUnlockedIds.length === 0) return [];
+
+    const inserted = await params.trx
+      .insert(userAchievements)
+      .values(
+        newlyUnlockedIds.map((achievementId) => ({
+          achievementId,
+          userId: params.userId,
+          tenantId: params.tenantId,
+        })),
+      )
+      .onConflictDoNothing({
+        target: [userAchievements.userId, userAchievements.achievementId],
+      })
+      .returning({
+        achievementId: userAchievements.achievementId,
+        unlockedAt: userAchievements.unlockedAt,
+      });
+
+    const unlockedAtById = new Map(
+      inserted.map((row) => [row.achievementId, row.unlockedAt] as const),
+    );
+
+    return activeCatalog
+      .filter((achievement) => unlockedAtById.has(achievement.id))
+      .map((achievement) => ({
+        ...achievement,
+        unlockedAt: unlockedAtById.get(achievement.id) ?? new Date().toISOString(),
+      }));
+  }
+
+  async findProfileAchievements(params: {
+    userId: UUIDType;
+    tenantId: UUIDType;
+    language: SupportedLanguages;
+  }): Promise<ProfileAchievementsResponse> {
+    const [statistics] = await this.db
+      .select({ totalPoints: sql<number>`COALESCE(${userStatistics.totalPoints}, 0)` })
+      .from(userStatistics)
+      .where(
+        and(eq(userStatistics.userId, params.userId), eq(userStatistics.tenantId, params.tenantId)),
+      );
+    const totalPoints = statistics?.totalPoints ?? 0;
+
+    const rows = await this.db
+      .select({
+        achievement: getTableColumns(achievements),
+        translation: getTableColumns(achievementTranslations),
+        unlockedAt: userAchievements.unlockedAt,
+      })
+      .from(achievements)
+      .leftJoin(achievementTranslations, eq(achievementTranslations.achievementId, achievements.id))
+      .leftJoin(
+        userAchievements,
+        and(
+          eq(userAchievements.achievementId, achievements.id),
+          eq(userAchievements.userId, params.userId),
+          eq(userAchievements.tenantId, params.tenantId),
+        ),
+      )
+      .where(and(eq(achievements.tenantId, params.tenantId), eq(achievements.isActive, true)))
+      .orderBy(asc(achievements.pointThreshold), asc(achievements.createdAt));
+
+    const byId = new Map<
+      UUIDType,
+      AchievementRow & {
+        translations: AchievementTranslationRow[];
+        unlockedAt: string | null;
+      }
+    >();
+
+    for (const row of rows) {
+      const existing = byId.get(row.achievement.id) ?? {
+        ...row.achievement,
+        translations: [],
+        unlockedAt: row.unlockedAt,
+      };
+      if (row.translation) existing.translations.push(row.translation);
+      byId.set(row.achievement.id, existing);
+    }
+
+    const achievementsGrid = [...byId.values()].map((achievement) => {
+      const [localized] = this.mapRows(
+        [
+          { achievement, translation: null },
+          ...achievement.translations.map((translation) => ({ achievement, translation })),
+        ],
+        params.language,
+      );
+      const pointsRemaining = Math.max(achievement.pointThreshold - totalPoints, 0);
+
+      return {
+        ...localized,
+        unlockedAt: achievement.unlockedAt,
+        progress: {
+          currentTotal: totalPoints,
+          threshold: achievement.pointThreshold,
+          pointsRemaining,
+          percentage: Math.min(100, Math.floor((totalPoints / achievement.pointThreshold) * 100)),
+        },
+      };
+    });
+
+    return { totalPoints, achievements: achievementsGrid };
   }
 
   async create(tenantId: UUIDType, payload: CreateAchievementBody): Promise<AchievementRow> {
@@ -146,6 +291,27 @@ export class AchievementsRepository {
           description: sql`EXCLUDED.description`,
         },
       });
+  }
+
+  private selectAchievementRows(params: {
+    db: Transaction | DatabasePg;
+    tenantId: UUIDType;
+    activeOnly: boolean;
+  }) {
+    return params.db
+      .select({
+        achievement: getTableColumns(achievements),
+        translation: getTableColumns(achievementTranslations),
+      })
+      .from(achievements)
+      .leftJoin(achievementTranslations, eq(achievementTranslations.achievementId, achievements.id))
+      .where(
+        and(
+          eq(achievements.tenantId, params.tenantId),
+          params.activeOnly ? eq(achievements.isActive, true) : undefined,
+        ),
+      )
+      .orderBy(asc(achievements.pointThreshold), asc(achievements.createdAt));
   }
 
   private mapRows(

@@ -537,7 +537,10 @@
       "courses": "Kursai",
       "title": "Pavadinimas",
       "gamification": "Žaidybinimas",
-      "lifetimePoints": "taškai iš viso"
+      "lifetimePoints": "taškai iš viso",
+      "points": "points",
+      "achievementProgress": "{{current}} / {{threshold}} points • {{remaining}} remaining",
+      "achievementUnlockedAt": "Unlocked on {{date}}"
     }
   },
   "changeUserInformationView": {
@@ -3049,6 +3052,12 @@
     },
     "error": {
       "notFound": "Achievement not found."
+    }
+  },
+  "gamification": {
+    "toast": {
+      "achievementUnlockedTitle": "Achievement unlocked!",
+      "achievementUnlockedDescription": "You unlocked {{name}}."
     }
   }
 }

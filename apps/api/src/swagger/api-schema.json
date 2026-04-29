@@ -6158,6 +6158,282 @@
         }
       }
     },
+    "/api/achievements/admin": {
+      "get": {
+        "operationId": "AchievementsController_findAll",
+        "parameters": [
+          {
+            "name": "includeInactive",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FindAllResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "AchievementsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/achievements/admin/{id}": {
+      "get": {
+        "operationId": "AchievementsController_findById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FindByIdResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "AchievementsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "AchievementsController_softDelete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SoftDeleteResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/achievements/admin/image": {
+      "post": {
+        "operationId": "AchievementsController_uploadImage",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "image": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadImageResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/achievements/me": {
+      "get": {
+        "operationId": "ProfileAchievementsController_findMine",
+        "parameters": [
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FindMineResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/ai/thread": {
       "get": {
         "operationId": "AiController_getThread",
@@ -7172,235 +7448,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/DeleteManyCategoriesResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/achievements/admin": {
-      "get": {
-        "operationId": "AchievementsController_findAll",
-        "parameters": [
-          {
-            "name": "includeInactive",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "language",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "anyOf": [
-                {
-                  "const": "en",
-                  "type": "string"
-                },
-                {
-                  "const": "pl",
-                  "type": "string"
-                },
-                {
-                  "const": "de",
-                  "type": "string"
-                },
-                {
-                  "const": "lt",
-                  "type": "string"
-                },
-                {
-                  "const": "cs",
-                  "type": "string"
-                }
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FindAllResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "operationId": "AchievementsController_create",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/achievements/admin/{id}": {
-      "get": {
-        "operationId": "AchievementsController_findById",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "language",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "anyOf": [
-                {
-                  "const": "en",
-                  "type": "string"
-                },
-                {
-                  "const": "pl",
-                  "type": "string"
-                },
-                {
-                  "const": "de",
-                  "type": "string"
-                },
-                {
-                  "const": "lt",
-                  "type": "string"
-                },
-                {
-                  "const": "cs",
-                  "type": "string"
-                }
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FindByIdResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "operationId": "AchievementsController_update",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UpdateResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "operationId": "AchievementsController_softDelete",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SoftDeleteResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/achievements/admin/image": {
-      "post": {
-        "operationId": "AchievementsController_uploadImage",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "image": {
-                    "type": "string",
-                    "format": "binary"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UploadImageResponse"
                 }
               }
             }
@@ -23981,13 +24028,139 @@
                   },
                   "score": {
                     "type": "number"
+                  },
+                  "gamification": {
+                    "type": "object",
+                    "properties": {
+                      "pointsAwarded": {
+                        "minimum": 0,
+                        "type": "integer"
+                      },
+                      "newlyUnlocked": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "allOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                "tenantId": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                "imageReference": {
+                                  "type": "string"
+                                },
+                                "imageUrl": {
+                                  "type": "string"
+                                },
+                                "pointThreshold": {
+                                  "minimum": 1,
+                                  "type": "integer"
+                                },
+                                "isActive": {
+                                  "type": "boolean"
+                                },
+                                "createdAt": {
+                                  "type": "string"
+                                },
+                                "updatedAt": {
+                                  "type": "string"
+                                },
+                                "localizedName": {
+                                  "type": "string"
+                                },
+                                "localizedDescription": {
+                                  "type": "string"
+                                },
+                                "translations": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "locale": {
+                                        "anyOf": [
+                                          {
+                                            "const": "en",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "pl",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "de",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "lt",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "cs",
+                                            "type": "string"
+                                          }
+                                        ]
+                                      },
+                                      "name": {
+                                        "type": "string"
+                                      },
+                                      "description": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "locale",
+                                      "name",
+                                      "description"
+                                    ]
+                                  }
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "tenantId",
+                                "imageReference",
+                                "pointThreshold",
+                                "isActive",
+                                "createdAt",
+                                "updatedAt",
+                                "localizedName",
+                                "localizedDescription",
+                                "translations"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "unlockedAt": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "unlockedAt"
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "pointsAwarded",
+                      "newlyUnlocked"
+                    ]
                   }
                 },
                 "required": [
                   "correctAnswerCount",
                   "wrongAnswerCount",
                   "questionCount",
-                  "score"
+                  "score",
+                  "gamification"
                 ]
               }
             },
@@ -24245,10 +24418,136 @@
             "properties": {
               "message": {
                 "type": "string"
+              },
+              "gamification": {
+                "type": "object",
+                "properties": {
+                  "pointsAwarded": {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "newlyUnlocked": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "allOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "tenantId": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "imageReference": {
+                              "type": "string"
+                            },
+                            "imageUrl": {
+                              "type": "string"
+                            },
+                            "pointThreshold": {
+                              "minimum": 1,
+                              "type": "integer"
+                            },
+                            "isActive": {
+                              "type": "boolean"
+                            },
+                            "createdAt": {
+                              "type": "string"
+                            },
+                            "updatedAt": {
+                              "type": "string"
+                            },
+                            "localizedName": {
+                              "type": "string"
+                            },
+                            "localizedDescription": {
+                              "type": "string"
+                            },
+                            "translations": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "locale": {
+                                    "anyOf": [
+                                      {
+                                        "const": "en",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "pl",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "de",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "lt",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "cs",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "description": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "locale",
+                                  "name",
+                                  "description"
+                                ]
+                              }
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "tenantId",
+                            "imageReference",
+                            "pointThreshold",
+                            "isActive",
+                            "createdAt",
+                            "updatedAt",
+                            "localizedName",
+                            "localizedDescription",
+                            "translations"
+                          ]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "unlockedAt": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "unlockedAt"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "pointsAwarded",
+                  "newlyUnlocked"
+                ]
               }
             },
             "required": [
-              "message"
+              "message",
+              "gamification"
             ]
           }
         },
@@ -24519,6 +24818,937 @@
           "linkedinShareUrl"
         ]
       },
+      "FindAllResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "tenantId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "imageReference": {
+                  "type": "string"
+                },
+                "imageUrl": {
+                  "type": "string"
+                },
+                "pointThreshold": {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "isActive": {
+                  "type": "boolean"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                },
+                "localizedName": {
+                  "type": "string"
+                },
+                "localizedDescription": {
+                  "type": "string"
+                },
+                "translations": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "locale": {
+                        "anyOf": [
+                          {
+                            "const": "en",
+                            "type": "string"
+                          },
+                          {
+                            "const": "pl",
+                            "type": "string"
+                          },
+                          {
+                            "const": "de",
+                            "type": "string"
+                          },
+                          {
+                            "const": "lt",
+                            "type": "string"
+                          },
+                          {
+                            "const": "cs",
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "locale",
+                      "name",
+                      "description"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "tenantId",
+                "imageReference",
+                "pointThreshold",
+                "isActive",
+                "createdAt",
+                "updatedAt",
+                "localizedName",
+                "localizedDescription",
+                "translations"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "FindByIdResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "tenantId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "imageReference": {
+                "type": "string"
+              },
+              "imageUrl": {
+                "type": "string"
+              },
+              "pointThreshold": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "isActive": {
+                "type": "boolean"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              },
+              "localizedName": {
+                "type": "string"
+              },
+              "localizedDescription": {
+                "type": "string"
+              },
+              "translations": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "locale": {
+                      "anyOf": [
+                        {
+                          "const": "en",
+                          "type": "string"
+                        },
+                        {
+                          "const": "pl",
+                          "type": "string"
+                        },
+                        {
+                          "const": "de",
+                          "type": "string"
+                        },
+                        {
+                          "const": "lt",
+                          "type": "string"
+                        },
+                        {
+                          "const": "cs",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "locale",
+                    "name",
+                    "description"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "id",
+              "tenantId",
+              "imageReference",
+              "pointThreshold",
+              "isActive",
+              "createdAt",
+              "updatedAt",
+              "localizedName",
+              "localizedDescription",
+              "translations"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CreateBody": {
+        "type": "object",
+        "properties": {
+          "imageReference": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "pointThreshold": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "translations": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "description": {
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "description"
+                ]
+              },
+              "pl": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "description": {
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "description"
+                ]
+              },
+              "de": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "description": {
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "description"
+                ]
+              },
+              "lt": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "description": {
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "description"
+                ]
+              },
+              "cs": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "description": {
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "description"
+                ]
+              }
+            },
+            "required": [
+              "en",
+              "pl",
+              "de",
+              "lt",
+              "cs"
+            ]
+          }
+        },
+        "required": [
+          "imageReference",
+          "pointThreshold",
+          "translations"
+        ]
+      },
+      "CreateResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "tenantId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "imageReference": {
+                "type": "string"
+              },
+              "imageUrl": {
+                "type": "string"
+              },
+              "pointThreshold": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "isActive": {
+                "type": "boolean"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              },
+              "localizedName": {
+                "type": "string"
+              },
+              "localizedDescription": {
+                "type": "string"
+              },
+              "translations": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "locale": {
+                      "anyOf": [
+                        {
+                          "const": "en",
+                          "type": "string"
+                        },
+                        {
+                          "const": "pl",
+                          "type": "string"
+                        },
+                        {
+                          "const": "de",
+                          "type": "string"
+                        },
+                        {
+                          "const": "lt",
+                          "type": "string"
+                        },
+                        {
+                          "const": "cs",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "locale",
+                    "name",
+                    "description"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "id",
+              "tenantId",
+              "imageReference",
+              "pointThreshold",
+              "isActive",
+              "createdAt",
+              "updatedAt",
+              "localizedName",
+              "localizedDescription",
+              "translations"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateBody": {
+        "type": "object",
+        "properties": {
+          "imageReference": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "pointThreshold": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "translations": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "description": {
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "description"
+                ]
+              },
+              "pl": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "description": {
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "description"
+                ]
+              },
+              "de": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "description": {
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "description"
+                ]
+              },
+              "lt": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "description": {
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "description"
+                ]
+              },
+              "cs": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "description": {
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "description"
+                ]
+              }
+            },
+            "required": [
+              "en",
+              "pl",
+              "de",
+              "lt",
+              "cs"
+            ]
+          }
+        },
+        "minProperties": 1
+      },
+      "UpdateResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "tenantId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "imageReference": {
+                "type": "string"
+              },
+              "imageUrl": {
+                "type": "string"
+              },
+              "pointThreshold": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "isActive": {
+                "type": "boolean"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              },
+              "localizedName": {
+                "type": "string"
+              },
+              "localizedDescription": {
+                "type": "string"
+              },
+              "translations": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "locale": {
+                      "anyOf": [
+                        {
+                          "const": "en",
+                          "type": "string"
+                        },
+                        {
+                          "const": "pl",
+                          "type": "string"
+                        },
+                        {
+                          "const": "de",
+                          "type": "string"
+                        },
+                        {
+                          "const": "lt",
+                          "type": "string"
+                        },
+                        {
+                          "const": "cs",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "locale",
+                    "name",
+                    "description"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "id",
+              "tenantId",
+              "imageReference",
+              "pointThreshold",
+              "isActive",
+              "createdAt",
+              "updatedAt",
+              "localizedName",
+              "localizedDescription",
+              "translations"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "SoftDeleteResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "tenantId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "imageReference": {
+                "type": "string"
+              },
+              "imageUrl": {
+                "type": "string"
+              },
+              "pointThreshold": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "isActive": {
+                "type": "boolean"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              },
+              "localizedName": {
+                "type": "string"
+              },
+              "localizedDescription": {
+                "type": "string"
+              },
+              "translations": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "locale": {
+                      "anyOf": [
+                        {
+                          "const": "en",
+                          "type": "string"
+                        },
+                        {
+                          "const": "pl",
+                          "type": "string"
+                        },
+                        {
+                          "const": "de",
+                          "type": "string"
+                        },
+                        {
+                          "const": "lt",
+                          "type": "string"
+                        },
+                        {
+                          "const": "cs",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "locale",
+                    "name",
+                    "description"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "id",
+              "tenantId",
+              "imageReference",
+              "pointThreshold",
+              "isActive",
+              "createdAt",
+              "updatedAt",
+              "localizedName",
+              "localizedDescription",
+              "translations"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UploadImageResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "fileKey": {
+                "type": "string"
+              },
+              "fileUrl": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "fileKey"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "FindMineResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "totalPoints": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "achievements": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "tenantId": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "imageReference": {
+                          "type": "string"
+                        },
+                        "imageUrl": {
+                          "type": "string"
+                        },
+                        "pointThreshold": {
+                          "minimum": 1,
+                          "type": "integer"
+                        },
+                        "isActive": {
+                          "type": "boolean"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "updatedAt": {
+                          "type": "string"
+                        },
+                        "localizedName": {
+                          "type": "string"
+                        },
+                        "localizedDescription": {
+                          "type": "string"
+                        },
+                        "translations": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "locale": {
+                                "anyOf": [
+                                  {
+                                    "const": "en",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "pl",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "de",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "lt",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "cs",
+                                    "type": "string"
+                                  }
+                                ]
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "description": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "locale",
+                              "name",
+                              "description"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "tenantId",
+                        "imageReference",
+                        "pointThreshold",
+                        "isActive",
+                        "createdAt",
+                        "updatedAt",
+                        "localizedName",
+                        "localizedDescription",
+                        "translations"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "unlockedAt": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "progress": {
+                          "type": "object",
+                          "properties": {
+                            "currentTotal": {
+                              "minimum": 0,
+                              "type": "integer"
+                            },
+                            "threshold": {
+                              "minimum": 1,
+                              "type": "integer"
+                            },
+                            "pointsRemaining": {
+                              "minimum": 0,
+                              "type": "integer"
+                            },
+                            "percentage": {
+                              "minimum": 0,
+                              "maximum": 100,
+                              "type": "integer"
+                            }
+                          },
+                          "required": [
+                            "currentTotal",
+                            "threshold",
+                            "pointsRemaining",
+                            "percentage"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "unlockedAt",
+                        "progress"
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "required": [
+              "totalPoints",
+              "achievements"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "GetThreadResponse": {
         "type": "object",
         "properties": {
@@ -24718,11 +25948,137 @@
               },
               "passed": {
                 "type": "boolean"
+              },
+              "gamification": {
+                "type": "object",
+                "properties": {
+                  "pointsAwarded": {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "newlyUnlocked": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "allOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "tenantId": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "imageReference": {
+                              "type": "string"
+                            },
+                            "imageUrl": {
+                              "type": "string"
+                            },
+                            "pointThreshold": {
+                              "minimum": 1,
+                              "type": "integer"
+                            },
+                            "isActive": {
+                              "type": "boolean"
+                            },
+                            "createdAt": {
+                              "type": "string"
+                            },
+                            "updatedAt": {
+                              "type": "string"
+                            },
+                            "localizedName": {
+                              "type": "string"
+                            },
+                            "localizedDescription": {
+                              "type": "string"
+                            },
+                            "translations": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "locale": {
+                                    "anyOf": [
+                                      {
+                                        "const": "en",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "pl",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "de",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "lt",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "cs",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "description": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "locale",
+                                  "name",
+                                  "description"
+                                ]
+                              }
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "tenantId",
+                            "imageReference",
+                            "pointThreshold",
+                            "isActive",
+                            "createdAt",
+                            "updatedAt",
+                            "localizedName",
+                            "localizedDescription",
+                            "translations"
+                          ]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "unlockedAt": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "unlockedAt"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "pointsAwarded",
+                  "newlyUnlocked"
+                ]
               }
             },
             "required": [
               "summary",
-              "passed"
+              "passed",
+              "gamification"
             ]
           }
         },
@@ -27125,768 +28481,6 @@
             },
             "required": [
               "message"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "FindAllResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                "tenantId": {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                "imageReference": {
-                  "type": "string"
-                },
-                "imageUrl": {
-                  "type": "string"
-                },
-                "pointThreshold": {
-                  "minimum": 1,
-                  "type": "integer"
-                },
-                "isActive": {
-                  "type": "boolean"
-                },
-                "createdAt": {
-                  "type": "string"
-                },
-                "updatedAt": {
-                  "type": "string"
-                },
-                "localizedName": {
-                  "type": "string"
-                },
-                "localizedDescription": {
-                  "type": "string"
-                },
-                "translations": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "locale": {
-                        "anyOf": [
-                          {
-                            "const": "en",
-                            "type": "string"
-                          },
-                          {
-                            "const": "pl",
-                            "type": "string"
-                          },
-                          {
-                            "const": "de",
-                            "type": "string"
-                          },
-                          {
-                            "const": "lt",
-                            "type": "string"
-                          },
-                          {
-                            "const": "cs",
-                            "type": "string"
-                          }
-                        ]
-                      },
-                      "name": {
-                        "type": "string"
-                      },
-                      "description": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "locale",
-                      "name",
-                      "description"
-                    ]
-                  }
-                }
-              },
-              "required": [
-                "id",
-                "tenantId",
-                "imageReference",
-                "pointThreshold",
-                "isActive",
-                "createdAt",
-                "updatedAt",
-                "localizedName",
-                "localizedDescription",
-                "translations"
-              ]
-            }
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "FindByIdResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "tenantId": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "imageReference": {
-                "type": "string"
-              },
-              "imageUrl": {
-                "type": "string"
-              },
-              "pointThreshold": {
-                "minimum": 1,
-                "type": "integer"
-              },
-              "isActive": {
-                "type": "boolean"
-              },
-              "createdAt": {
-                "type": "string"
-              },
-              "updatedAt": {
-                "type": "string"
-              },
-              "localizedName": {
-                "type": "string"
-              },
-              "localizedDescription": {
-                "type": "string"
-              },
-              "translations": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "locale": {
-                      "anyOf": [
-                        {
-                          "const": "en",
-                          "type": "string"
-                        },
-                        {
-                          "const": "pl",
-                          "type": "string"
-                        },
-                        {
-                          "const": "de",
-                          "type": "string"
-                        },
-                        {
-                          "const": "lt",
-                          "type": "string"
-                        },
-                        {
-                          "const": "cs",
-                          "type": "string"
-                        }
-                      ]
-                    },
-                    "name": {
-                      "type": "string"
-                    },
-                    "description": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "locale",
-                    "name",
-                    "description"
-                  ]
-                }
-              }
-            },
-            "required": [
-              "id",
-              "tenantId",
-              "imageReference",
-              "pointThreshold",
-              "isActive",
-              "createdAt",
-              "updatedAt",
-              "localizedName",
-              "localizedDescription",
-              "translations"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "CreateBody": {
-        "type": "object",
-        "properties": {
-          "imageReference": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "pointThreshold": {
-            "minimum": 1,
-            "type": "integer"
-          },
-          "isActive": {
-            "type": "boolean"
-          },
-          "translations": {
-            "type": "object",
-            "properties": {
-              "en": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "minLength": 1,
-                    "type": "string"
-                  },
-                  "description": {
-                    "minLength": 1,
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "name",
-                  "description"
-                ]
-              },
-              "pl": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "minLength": 1,
-                    "type": "string"
-                  },
-                  "description": {
-                    "minLength": 1,
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "name",
-                  "description"
-                ]
-              },
-              "de": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "minLength": 1,
-                    "type": "string"
-                  },
-                  "description": {
-                    "minLength": 1,
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "name",
-                  "description"
-                ]
-              },
-              "lt": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "minLength": 1,
-                    "type": "string"
-                  },
-                  "description": {
-                    "minLength": 1,
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "name",
-                  "description"
-                ]
-              },
-              "cs": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "minLength": 1,
-                    "type": "string"
-                  },
-                  "description": {
-                    "minLength": 1,
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "name",
-                  "description"
-                ]
-              }
-            },
-            "required": [
-              "en",
-              "pl",
-              "de",
-              "lt",
-              "cs"
-            ]
-          }
-        },
-        "required": [
-          "imageReference",
-          "pointThreshold",
-          "translations"
-        ]
-      },
-      "CreateResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "tenantId": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "imageReference": {
-                "type": "string"
-              },
-              "imageUrl": {
-                "type": "string"
-              },
-              "pointThreshold": {
-                "minimum": 1,
-                "type": "integer"
-              },
-              "isActive": {
-                "type": "boolean"
-              },
-              "createdAt": {
-                "type": "string"
-              },
-              "updatedAt": {
-                "type": "string"
-              },
-              "localizedName": {
-                "type": "string"
-              },
-              "localizedDescription": {
-                "type": "string"
-              },
-              "translations": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "locale": {
-                      "anyOf": [
-                        {
-                          "const": "en",
-                          "type": "string"
-                        },
-                        {
-                          "const": "pl",
-                          "type": "string"
-                        },
-                        {
-                          "const": "de",
-                          "type": "string"
-                        },
-                        {
-                          "const": "lt",
-                          "type": "string"
-                        },
-                        {
-                          "const": "cs",
-                          "type": "string"
-                        }
-                      ]
-                    },
-                    "name": {
-                      "type": "string"
-                    },
-                    "description": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "locale",
-                    "name",
-                    "description"
-                  ]
-                }
-              }
-            },
-            "required": [
-              "id",
-              "tenantId",
-              "imageReference",
-              "pointThreshold",
-              "isActive",
-              "createdAt",
-              "updatedAt",
-              "localizedName",
-              "localizedDescription",
-              "translations"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "UpdateBody": {
-        "type": "object",
-        "properties": {
-          "imageReference": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "pointThreshold": {
-            "minimum": 1,
-            "type": "integer"
-          },
-          "isActive": {
-            "type": "boolean"
-          },
-          "translations": {
-            "type": "object",
-            "properties": {
-              "en": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "minLength": 1,
-                    "type": "string"
-                  },
-                  "description": {
-                    "minLength": 1,
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "name",
-                  "description"
-                ]
-              },
-              "pl": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "minLength": 1,
-                    "type": "string"
-                  },
-                  "description": {
-                    "minLength": 1,
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "name",
-                  "description"
-                ]
-              },
-              "de": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "minLength": 1,
-                    "type": "string"
-                  },
-                  "description": {
-                    "minLength": 1,
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "name",
-                  "description"
-                ]
-              },
-              "lt": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "minLength": 1,
-                    "type": "string"
-                  },
-                  "description": {
-                    "minLength": 1,
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "name",
-                  "description"
-                ]
-              },
-              "cs": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "minLength": 1,
-                    "type": "string"
-                  },
-                  "description": {
-                    "minLength": 1,
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "name",
-                  "description"
-                ]
-              }
-            },
-            "required": [
-              "en",
-              "pl",
-              "de",
-              "lt",
-              "cs"
-            ]
-          }
-        },
-        "minProperties": 1
-      },
-      "UpdateResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "tenantId": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "imageReference": {
-                "type": "string"
-              },
-              "imageUrl": {
-                "type": "string"
-              },
-              "pointThreshold": {
-                "minimum": 1,
-                "type": "integer"
-              },
-              "isActive": {
-                "type": "boolean"
-              },
-              "createdAt": {
-                "type": "string"
-              },
-              "updatedAt": {
-                "type": "string"
-              },
-              "localizedName": {
-                "type": "string"
-              },
-              "localizedDescription": {
-                "type": "string"
-              },
-              "translations": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "locale": {
-                      "anyOf": [
-                        {
-                          "const": "en",
-                          "type": "string"
-                        },
-                        {
-                          "const": "pl",
-                          "type": "string"
-                        },
-                        {
-                          "const": "de",
-                          "type": "string"
-                        },
-                        {
-                          "const": "lt",
-                          "type": "string"
-                        },
-                        {
-                          "const": "cs",
-                          "type": "string"
-                        }
-                      ]
-                    },
-                    "name": {
-                      "type": "string"
-                    },
-                    "description": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "locale",
-                    "name",
-                    "description"
-                  ]
-                }
-              }
-            },
-            "required": [
-              "id",
-              "tenantId",
-              "imageReference",
-              "pointThreshold",
-              "isActive",
-              "createdAt",
-              "updatedAt",
-              "localizedName",
-              "localizedDescription",
-              "translations"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "SoftDeleteResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "tenantId": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "imageReference": {
-                "type": "string"
-              },
-              "imageUrl": {
-                "type": "string"
-              },
-              "pointThreshold": {
-                "minimum": 1,
-                "type": "integer"
-              },
-              "isActive": {
-                "type": "boolean"
-              },
-              "createdAt": {
-                "type": "string"
-              },
-              "updatedAt": {
-                "type": "string"
-              },
-              "localizedName": {
-                "type": "string"
-              },
-              "localizedDescription": {
-                "type": "string"
-              },
-              "translations": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "locale": {
-                      "anyOf": [
-                        {
-                          "const": "en",
-                          "type": "string"
-                        },
-                        {
-                          "const": "pl",
-                          "type": "string"
-                        },
-                        {
-                          "const": "de",
-                          "type": "string"
-                        },
-                        {
-                          "const": "lt",
-                          "type": "string"
-                        },
-                        {
-                          "const": "cs",
-                          "type": "string"
-                        }
-                      ]
-                    },
-                    "name": {
-                      "type": "string"
-                    },
-                    "description": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "locale",
-                    "name",
-                    "description"
-                  ]
-                }
-              }
-            },
-            "required": [
-              "id",
-              "tenantId",
-              "imageReference",
-              "pointThreshold",
-              "isActive",
-              "createdAt",
-              "updatedAt",
-              "localizedName",
-              "localizedDescription",
-              "translations"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "UploadImageResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "fileKey": {
-                "type": "string"
-              },
-              "fileUrl": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "fileKey"
             ]
           }
         },

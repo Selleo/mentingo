@@ -40,6 +40,34 @@ export const achievementSchema = Type.Object({
 
 export const achievementsListSchema = Type.Array(achievementSchema);
 
+export const achievementUnlockSchema = Type.Intersect([
+  achievementSchema,
+  Type.Object({ unlockedAt: Type.String() }),
+]);
+
+export const gamificationAwardSchema = Type.Object({
+  pointsAwarded: Type.Integer({ minimum: 0 }),
+  newlyUnlocked: Type.Array(achievementUnlockSchema),
+});
+
+export const profileAchievementSchema = Type.Intersect([
+  achievementSchema,
+  Type.Object({
+    unlockedAt: Type.Union([Type.String(), Type.Null()]),
+    progress: Type.Object({
+      currentTotal: Type.Integer({ minimum: 0 }),
+      threshold: Type.Integer({ minimum: 1 }),
+      pointsRemaining: Type.Integer({ minimum: 0 }),
+      percentage: Type.Integer({ minimum: 0, maximum: 100 }),
+    }),
+  }),
+]);
+
+export const profileAchievementsSchema = Type.Object({
+  totalPoints: Type.Integer({ minimum: 0 }),
+  achievements: Type.Array(profileAchievementSchema),
+});
+
 export const createAchievementSchema = Type.Object({
   imageReference: Type.String({ minLength: 1 }),
   pointThreshold: Type.Integer({ minimum: 1 }),
@@ -63,6 +91,10 @@ export const achievementImageUploadResponseSchema = Type.Object({
 });
 
 export type Achievement = Static<typeof achievementSchema>;
+export type AchievementUnlock = Static<typeof achievementUnlockSchema>;
+export type GamificationAward = Static<typeof gamificationAwardSchema>;
+export type ProfileAchievement = Static<typeof profileAchievementSchema>;
+export type ProfileAchievementsResponse = Static<typeof profileAchievementsSchema>;
 export type CreateAchievementBody = Static<typeof createAchievementSchema>;
 export type UpdateAchievementBody = Static<typeof updateAchievementSchema>;
 export type AchievementTranslationsInput = Static<typeof achievementTranslationsInputSchema>;

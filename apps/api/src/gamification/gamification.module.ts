@@ -11,6 +11,7 @@ import { UserAiMentorLessonPassedPointsHandler } from "./handlers/user-ai-mentor
 import { UserChapterFinishedPointsHandler } from "./handlers/user-chapter-finished-points.handler";
 import { UserCourseFinishedPointsHandler } from "./handlers/user-course-finished-points.handler";
 import { PointsService } from "./points.service";
+import { ProfileAchievementsController } from "./profile-achievements.controller";
 
 const gamificationEventHandlers = [
   UserAiMentorLessonPassedPointsHandler,
@@ -20,7 +21,7 @@ const gamificationEventHandlers = [
 
 @Module({
   imports: [CqrsModule, FileModule, PermissionsModule],
-  controllers: [AchievementsController],
+  controllers: [AchievementsController, ProfileAchievementsController],
   providers: [
     AchievementsService,
     AchievementsRepository,

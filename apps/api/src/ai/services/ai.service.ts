@@ -48,6 +48,7 @@ import type {
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { CourseTranslationType } from "src/courses/types/course.types";
+import type { AwardPointsResult } from "src/gamification/points.service";
 
 @Injectable()
 export class AiService {
@@ -234,7 +235,7 @@ export class AiService {
       thread.userId,
     );
 
-    await this.markAsCompletedIfJudge(
+    const gamification = await this.markAsCompletedIfJudge(
       lessonId,
       thread.userId,
       learnerPermissions,
@@ -253,7 +254,7 @@ export class AiService {
       tokenCount,
     });
 
-    return { data: { summary: judged.data.summary, passed: judged.data.passed } };
+    return { data: { summary: judged.data.summary, passed: judged.data.passed, gamification } };
   }
 
   async isThreadActive(threadId: UUIDType, userId?: UUIDType) {
@@ -294,13 +295,13 @@ export class AiService {
     message: string | ResponseAiJudgeJudgementBody,
     language: SupportedLanguages,
     isJudge?: boolean,
-  ) {
-    if (!isJudge) return;
+  ): Promise<AwardPointsResult> {
+    if (!isJudge) return { pointsAwarded: 0, newlyUnlocked: [] };
 
     const aiMentorLessonData: ResponseAiJudgeJudgementBody =
       typeof message === "string" ? JSON.parse(message) : message;
 
-    await this.studentLessonProgressService.markLessonAsCompleted({
+    return await this.studentLessonProgressService.markLessonAsCompleted({
       id: lessonId,
       studentId,
       userPermissions,

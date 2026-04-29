@@ -537,7 +537,10 @@
       "courses": "Kurzy",
       "title": "Titul",
       "gamification": "Gamifikace",
-      "lifetimePoints": "bodů celkem"
+      "lifetimePoints": "bodů celkem",
+      "points": "points",
+      "achievementProgress": "{{current}} / {{threshold}} points • {{remaining}} remaining",
+      "achievementUnlockedAt": "Unlocked on {{date}}"
     }
   },
   "changeUserInformationView": {
@@ -3049,6 +3052,12 @@
     },
     "error": {
       "notFound": "Achievement not found."
+    }
+  },
+  "gamification": {
+    "toast": {
+      "achievementUnlockedTitle": "Achievement unlocked!",
+      "achievementUnlockedDescription": "You unlocked {{name}}."
     }
   }
 }

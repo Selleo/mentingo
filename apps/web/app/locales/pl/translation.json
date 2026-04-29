@@ -514,7 +514,10 @@
       "courses": "Kursy",
       "title": "Tytuł",
       "gamification": "Grywalizacja",
-      "lifetimePoints": "punktów łącznie"
+      "lifetimePoints": "punktów łącznie",
+      "points": "points",
+      "achievementProgress": "{{current}} / {{threshold}} points • {{remaining}} remaining",
+      "achievementUnlockedAt": "Unlocked on {{date}}"
     }
   },
   "changeUserInformationView": {
@@ -3127,6 +3130,12 @@
     },
     "error": {
       "notFound": "Achievement not found."
+    }
+  },
+  "gamification": {
+    "toast": {
+      "achievementUnlockedTitle": "Achievement unlocked!",
+      "achievementUnlockedDescription": "You unlocked {{name}}."
     }
   }
 }

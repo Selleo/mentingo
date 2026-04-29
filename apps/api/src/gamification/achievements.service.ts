@@ -52,6 +52,25 @@ export class AchievementsService {
     return await this.withImageUrl(achievement);
   }
 
+  async findProfileAchievements(params: {
+    userId: UUIDType;
+    tenantId: UUIDType;
+    language?: SupportedLanguages;
+  }) {
+    const profileAchievements = await this.achievementsRepository.findProfileAchievements({
+      userId: params.userId,
+      tenantId: params.tenantId,
+      language: params.language ?? SUPPORTED_LANGUAGES.EN,
+    });
+
+    return {
+      ...profileAchievements,
+      achievements: await Promise.all(
+        profileAchievements.achievements.map((achievement) => this.withImageUrl(achievement)),
+      ),
+    };
+  }
+
   async create(tenantId: UUIDType, payload: CreateAchievementBody): Promise<Achievement> {
     const created = await this.achievementsRepository.create(tenantId, payload);
 
@@ -78,7 +97,7 @@ export class AchievementsService {
     return await this.findById({ id: updated.id, tenantId });
   }
 
-  private async withImageUrl(achievement: Achievement): Promise<Achievement> {
+  private async withImageUrl<T extends Achievement>(achievement: T): Promise<T> {
     return {
       ...achievement,
       imageUrl: await this.fileService.getFileUrl(achievement.imageReference),

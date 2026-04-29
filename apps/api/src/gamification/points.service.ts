@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import { SUPPORTED_LANGUAGES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { and, eq, isNull, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
@@ -14,14 +14,17 @@ import {
   userStatistics,
 } from "src/storage/schema";
 
+import { AchievementsRepository } from "./achievements.repository";
 import { POINT_DEFAULT_SETTING_KEYS, POINT_EVENT_TYPES } from "./gamification.constants";
 
 import type { PointEventType } from "./gamification.constants";
+import type { AchievementUnlock } from "./schemas/achievement.schema";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type * as schema from "src/storage/schema";
 
 export type AwardPointsResult = {
   pointsAwarded: number;
+  newlyUnlocked: AchievementUnlock[];
 };
 
 type Transaction = PostgresJsDatabase<typeof schema>;
@@ -31,6 +34,7 @@ export class PointsService {
   constructor(
     @Inject(DB) private readonly db: DatabasePg,
     private readonly permissionsService: PermissionsService,
+    private readonly achievementsRepository: AchievementsRepository,
   ) {}
 
   async award(
@@ -43,7 +47,7 @@ export class PointsService {
       const { roleSlugs } = await this.permissionsService.getUserAccess(userId, trx);
 
       if (!roleSlugs.includes(SYSTEM_ROLE_SLUGS.STUDENT)) {
-        return { pointsAwarded: 0 };
+        return { pointsAwarded: 0, newlyUnlocked: [] };
       }
 
       const points = await this.resolveEffectivePoints(
@@ -68,14 +72,14 @@ export class PointsService {
         .returning({ id: pointEvents.id });
 
       if (insertedEvents.length === 0) {
-        return { pointsAwarded: 0 };
+        return { pointsAwarded: 0, newlyUnlocked: [] };
       }
 
       if (points === 0) {
-        return { pointsAwarded: 0 };
+        return { pointsAwarded: 0, newlyUnlocked: [] };
       }
 
-      await trx
+      const [statistics] = await trx
         .insert(userStatistics)
         .values({
           tenantId,
@@ -90,9 +94,18 @@ export class PointsService {
             lastPointAt: sql`now()`,
             updatedAt: sql`now()`,
           },
-        });
+        })
+        .returning({ totalPoints: userStatistics.totalPoints });
 
-      return { pointsAwarded: points };
+      const newlyUnlocked = await this.achievementsRepository.unlockEligibleAchievements({
+        trx: trx as Transaction,
+        userId,
+        tenantId,
+        currentTotal: statistics?.totalPoints ?? points,
+        language: SUPPORTED_LANGUAGES.EN,
+      });
+
+      return { pointsAwarded: points, newlyUnlocked };
     });
   }
 

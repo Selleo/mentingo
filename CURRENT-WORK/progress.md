@@ -185,3 +185,52 @@
 - `pnpm test:api:e2e` was attempted and failed in the existing lesson quiz feedback redaction suite (`expected 201 Created, got 409 Conflict`); 19/20 suites passed, matching the previously observed suite-isolation/flakiness area.
 - `pnpm test:web:e2e` was attempted and still fails because the local Playwright Chromium executable is not installed (`pnpm exec playwright install` required); DB setup completed before browser launch.
 - `pnpm format:check` still fails on pre-existing formatting issues in `.bmad-core/`, `.claude/`, `.serena/`, untracked CURRENT-WORK issue docs, and `docs/gamification.md`; changed source/test files were formatted with Prettier.
+
+## 2026-04-29 — Slice 5: Unlock evaluator + profile grid + toasts — DONE
+
+### Key decisions
+
+- Added a pure `AchievementEvaluator` for threshold-based unlock decisions, keeping all database reads/writes in the repository layer.
+- Wired achievement unlock persistence into `PointsService.award()` so new `user_achievements` rows are inserted in the same transaction as the point ledger insert and `user_statistics` total bump.
+- Kept existing outbox event handlers for idempotent asynchronous compatibility, but invoked `PointsService.award()` directly from completion mutation paths so HTTP responses can include `gamification: { pointsAwarded, newlyUnlocked }` immediately.
+- Added an authenticated `/achievements/me` profile endpoint that returns the active tenant catalog merged with the current user's unlocks, progress, and signed badge image URLs.
+- Rendered the profile achievement grid only for the profile owner, with earned badge tooltips and locked badge grayscale/progress rendering.
+- Added a shared frontend toast helper and attached it to content lesson completion, quiz completion, and AI mentor judge completion flows; each newly unlocked achievement produces one toast.
+
+### Files changed
+
+- `apps/api/src/gamification/achievement.evaluator.ts`
+- `apps/api/src/gamification/__tests__/achievement.evaluator.spec.ts`
+- `apps/api/src/gamification/achievements.repository.ts`
+- `apps/api/src/gamification/achievements.service.ts`
+- `apps/api/src/gamification/profile-achievements.controller.ts`
+- `apps/api/src/gamification/gamification.module.ts`
+- `apps/api/src/gamification/points.service.ts`
+- `apps/api/src/gamification/__tests__/points.service.spec.ts`
+- `apps/api/src/gamification/schemas/achievement.schema.ts`
+- `apps/api/src/studentLessonProgress/studentLessonProgress.service.ts`
+- `apps/api/src/studentLessonProgress/studentLessonProgress.module.ts`
+- `apps/api/src/studentLessonProgress/studentLessonProgress.controller.ts`
+- `apps/api/src/lesson/lesson.controller.ts`
+- `apps/api/src/lesson/services/lesson.service.ts`
+- `apps/api/src/ai/utils/ai.schema.ts`
+- `apps/api/src/ai/services/ai.service.ts`
+- `apps/api/src/swagger/api-schema.json`
+- `apps/web/app/api/generated-api.ts`
+- `apps/web/app/api/queries/useProfileAchievements.ts`
+- `apps/web/app/api/mutations/helpers/showAchievementUnlockToasts.ts`
+- `apps/web/app/api/mutations/useMarkLessonAsCompleted.ts`
+- `apps/web/app/api/mutations/useSubmitQuiz.ts`
+- `apps/web/app/api/mutations/useJudgeLesson.ts`
+- `apps/web/app/modules/Profile/Profile.page.tsx`
+- `apps/web/app/modules/Profile/Profile.page.test.tsx`
+- `apps/web/app/locales/{cs,de,en,lt,pl}/translation.json`
+- `CURRENT-WORK/progress.md`
+
+### Blockers / notes for next iteration
+
+- Retroactive unlocks on achievement creation/threshold edits and leaderboard work remain deferred to later slices.
+- Existing outbox-based points handlers remain registered; direct completion mutation awards run first and later handler invocations are idempotent duplicate no-ops.
+- `pnpm lint-tsc-api`, `pnpm lint-tsc-web`, `pnpm lint`, `pnpm test:api`, `pnpm test:web`, and `pnpm test:api:e2e` pass; web lint still reports the pre-existing `ChatMessage.tsx` React hook dependency warning without failing.
+- `pnpm test:web:e2e` was attempted and still fails because the local Playwright Chromium executable is not installed (`pnpm exec playwright install` required); DB setup completed before browser launch.
+- `pnpm format:check` still fails on pre-existing formatting issues in `.claude/`, untracked CURRENT-WORK issue docs, and `docs/gamification.md`; changed source/test/locale files were formatted with Prettier.

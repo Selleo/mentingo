@@ -11,9 +11,11 @@ import { useUpdateUserProfile } from "~/api/mutations";
 import { useCurrentUser } from "~/api/queries";
 import { useContentCreatorCourses } from "~/api/queries/useContentCreatorCourses";
 import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
+import { useProfileAchievements } from "~/api/queries/useProfileAchievements";
 import { useUserDetails } from "~/api/queries/useUserDetails";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { usePermissions } from "~/hooks/usePermissions";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { copyToClipboard } from "~/utils/copyToClipboard";
@@ -33,6 +35,7 @@ import { ProfileActionButtons, ProfileCard, ProfileEditCard } from "./components
 import type { UpdateUserProfileBody } from "./types";
 import type { MetaFunction } from "@remix-run/react";
 import type { CurrentUserResponse } from "~/api/generated-api";
+import type { ProfileAchievement } from "~/api/queries/useProfileAchievements";
 import type { CertificateType } from "~/types/certificate";
 
 const updateUserProfileSchema = z.object({
@@ -59,6 +62,78 @@ type ProfilePageContentProps = {
   currentUser?: CurrentUserResponse["data"];
 };
 
+type ProfileAchievementsGridProps = {
+  achievements: ProfileAchievement[];
+};
+
+function ProfileAchievementsGrid({ achievements }: ProfileAchievementsGridProps) {
+  const { t } = useTranslation();
+
+  if (achievements.length === 0) return null;
+
+  return (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      {achievements.map((achievement) => {
+        const isUnlocked = Boolean(achievement.unlockedAt);
+        const unlockedDate = achievement.unlockedAt
+          ? format(new Date(achievement.unlockedAt), "dd.MM.yyyy")
+          : null;
+
+        return (
+          <TooltipProvider key={achievement.id} delayDuration={0}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <article className="flex gap-x-3 rounded-lg border border-neutral-100 p-3">
+                  <img
+                    src={achievement.imageUrl}
+                    alt={achievement.localizedName}
+                    className={`h-14 w-14 rounded-md object-cover ${isUnlocked ? "" : "grayscale"}`}
+                  />
+                  <div className="flex min-w-0 flex-1 flex-col gap-y-1">
+                    <div className="flex items-start justify-between gap-x-2">
+                      <h3 className="body-2 truncate font-semibold text-neutral-950">
+                        {achievement.localizedName}
+                      </h3>
+                      <span className="caption whitespace-nowrap text-neutral-500">
+                        {achievement.pointThreshold} {t("contentCreatorView.other.points")}
+                      </span>
+                    </div>
+                    <p className="caption line-clamp-2 text-neutral-500">
+                      {achievement.localizedDescription}
+                    </p>
+                    {!isUnlocked && (
+                      <div className="mt-1 flex flex-col gap-y-1">
+                        <div className="h-2 overflow-hidden rounded-full bg-neutral-100">
+                          <div
+                            className="h-full rounded-full bg-primary-600"
+                            style={{ width: `${achievement.progress.percentage}%` }}
+                          />
+                        </div>
+                        <span className="caption text-neutral-500">
+                          {t("contentCreatorView.other.achievementProgress", {
+                            current: achievement.progress.currentTotal,
+                            threshold: achievement.progress.threshold,
+                            remaining: achievement.progress.pointsRemaining,
+                          })}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </article>
+              </TooltipTrigger>
+              {isUnlocked && unlockedDate && (
+                <TooltipContent>
+                  {t("contentCreatorView.other.achievementUnlockedAt", { date: unlockedDate })}
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
+        );
+      })}
+    </div>
+  );
+}
+
 function ProfilePageContent({ currentUser }: ProfilePageContentProps) {
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
@@ -83,6 +158,8 @@ function ProfilePageContent({ currentUser }: ProfilePageContentProps) {
       isProfileOwner: currentUser?.id === userDetails?.id,
     };
   }, [currentUser, canManageCourses, userDetails]);
+
+  const { data: profileAchievements } = useProfileAchievements(language, Boolean(isProfileOwner));
 
   const steps = useMemo(
     () => (canUpdateLearningProgress && isProfileOwner ? studentProfileSteps(t) : []),
@@ -271,16 +348,21 @@ function ProfilePageContent({ currentUser }: ProfilePageContentProps) {
           />
         )}
         {isProfileOwner && (
-          <section className="flex w-full max-w-[720px] flex-col gap-y-3 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow">
-            <p className="body-2 text-neutral-500">{t("contentCreatorView.other.gamification")}</p>
-            <div className="flex items-end gap-x-2">
-              <strong className="h3 text-primary-700">
-                {currentUser?.gamification.totalPoints ?? 0}
-              </strong>
-              <span className="body-2 pb-1 text-neutral-700">
-                {t("contentCreatorView.other.lifetimePoints")}
-              </span>
+          <section className="flex w-full max-w-[720px] flex-col gap-y-5 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow">
+            <div className="flex flex-col gap-y-3">
+              <p className="body-2 text-neutral-500">
+                {t("contentCreatorView.other.gamification")}
+              </p>
+              <div className="flex items-end gap-x-2">
+                <strong className="h3 text-primary-700">
+                  {profileAchievements?.totalPoints ?? currentUser?.gamification.totalPoints ?? 0}
+                </strong>
+                <span className="body-2 pb-1 text-neutral-700">
+                  {t("contentCreatorView.other.lifetimePoints")}
+                </span>
+              </div>
             </div>
+            <ProfileAchievementsGrid achievements={profileAchievements?.achievements ?? []} />
           </section>
         )}
         {canViewExtendedProfile && (

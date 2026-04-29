@@ -15,6 +15,8 @@ import { CourseCompletedEvent, LessonCompletedEvent } from "src/events";
 import { UserAiMentorLessonPassedEvent } from "src/events/user/user-ai-mentor-lesson-passed.event";
 import { UserChapterFinishedEvent } from "src/events/user/user-chapter-finished.event";
 import { UserCourseFinishedEvent } from "src/events/user/user-course-finished.event";
+import { POINT_EVENT_TYPES } from "src/gamification/gamification.constants";
+import { PointsService, type AwardPointsResult } from "src/gamification/points.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
@@ -51,6 +53,13 @@ import type { ActorUserType } from "src/common/types/actor-user.type";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { ProgressStatus } from "src/utils/types/progress.type";
 
+const EMPTY_GAMIFICATION_AWARD: AwardPointsResult = { pointsAwarded: 0, newlyUnlocked: [] };
+
+const mergeGamificationAwards = (...awards: AwardPointsResult[]): AwardPointsResult => ({
+  pointsAwarded: awards.reduce((sum, award) => sum + award.pointsAwarded, 0),
+  newlyUnlocked: awards.flatMap((award) => award.newlyUnlocked),
+});
+
 @Injectable()
 export class StudentLessonProgressService {
   constructor(
@@ -59,6 +68,7 @@ export class StudentLessonProgressService {
     private readonly certificatesService: CertificatesService,
     private readonly outboxPublisher: OutboxPublisher,
     private readonly localizationService: LocalizationService,
+    private readonly pointsService: PointsService,
   ) {}
 
   async markLessonAsCompleted({
@@ -98,7 +108,7 @@ export class StudentLessonProgressService {
       isLearningModeActive,
     });
 
-    if (!canTrackProgress) return;
+    if (!canTrackProgress) return EMPTY_GAMIFICATION_AWARD;
 
     if (isLearningModeActive && !accessCourseLessonWithDetails.isAssigned) {
       await this.ensureStudentCourseEnrollment(
@@ -240,8 +250,17 @@ export class StudentLessonProgressService {
       !accessCourseLessonWithDetails.isAssigned && accessCourseLessonWithDetails.isFreemium;
 
     const resolvedActor = await this.resolveActor(studentId, actor, dbInstance);
+    let gamification = EMPTY_GAMIFICATION_AWARD;
 
     if (aiMentorLessonPassed) {
+      const aiPassGamification = await this.pointsService.award(
+        studentId,
+        POINT_EVENT_TYPES.AI_MENTOR_PASSED,
+        lesson.id,
+        resolvedActor.tenantId,
+      );
+      gamification = mergeGamificationAwards(gamification, aiPassGamification);
+
       await this.outboxPublisher.publish(
         new UserAiMentorLessonPassedEvent({
           userId: studentId,
@@ -265,7 +284,7 @@ export class StudentLessonProgressService {
     }
 
     if (lessonCompleted || isQuizPassed || alreadyCompleted) {
-      await this.updateChapterProgress(
+      const chapterGamification = await this.updateChapterProgress(
         lesson.courseId,
         lesson.chapterId,
         studentId,
@@ -274,17 +293,21 @@ export class StudentLessonProgressService {
         resolvedActor,
         dbInstance,
       );
+      gamification = mergeGamificationAwards(gamification, chapterGamification);
 
-      if (isCompletedAsFreemium) return;
+      if (isCompletedAsFreemium) return gamification;
 
-      await this.checkCourseIsCompletedForUser(
+      const courseGamification = await this.checkCourseIsCompletedForUser(
         lesson.courseId,
         studentId,
         resolvedActor,
         dbInstance,
         actualLanguage,
       );
+      gamification = mergeGamificationAwards(gamification, courseGamification);
     }
+
+    return gamification;
   }
 
   async markLessonAsStarted(
@@ -549,12 +572,19 @@ export class StudentLessonProgressService {
       );
 
     if (completedLessonCount.count === lessonCount) {
+      const gamification = await this.pointsService.award(
+        studentId,
+        POINT_EVENT_TYPES.CHAPTER_COMPLETED,
+        chapterId,
+        actor.tenantId,
+      );
+
       await this.outboxPublisher.publish(
         new UserChapterFinishedEvent({ chapterId, courseId, userId: studentId, actor }),
         dbInstance,
       );
 
-      return dbInstance
+      await dbInstance
         .insert(studentChapterProgress)
         .values({
           completedLessonCount: completedLessonCount.count,
@@ -577,9 +607,11 @@ export class StudentLessonProgressService {
           },
         })
         .returning();
+
+      return gamification;
     }
 
-    return dbInstance
+    await dbInstance
       .insert(studentChapterProgress)
       .values({
         completedLessonCount: completedLessonCount.count,
@@ -597,6 +629,8 @@ export class StudentLessonProgressService {
           completedLessonCount: completedLessonCount.count,
         },
       });
+
+    return EMPTY_GAMIFICATION_AWARD;
   }
 
   private async checkCourseIsCompletedForUser(
@@ -619,7 +653,7 @@ export class StudentLessonProgressService {
     );
 
     if (courseProgress.courseIsCompleted) {
-      await this.updateStudentCourseStats(
+      const gamification = await this.updateStudentCourseStats(
         studentId,
         courseId,
         PROGRESS_STATUSES.COMPLETED,
@@ -635,16 +669,17 @@ export class StudentLessonProgressService {
         .from(courses)
         .where(eq(courses.id, courseId));
 
-      if (course?.hasCertificate)
-        return (
-          await this.statisticsRepository.updateCompletedAsFreemiumCoursesStats(courseId),
-          await this.certificatesService.createCertificate(studentId, courseId, trx)
-        );
+      if (course?.hasCertificate) {
+        await this.statisticsRepository.updateCompletedAsFreemiumCoursesStats(courseId);
+        await this.certificatesService.createCertificate(studentId, courseId, trx);
+        return gamification;
+      }
 
-      return await this.statisticsRepository.updatePaidPurchasedCoursesStats(courseId);
+      await this.statisticsRepository.updatePaidPurchasedCoursesStats(courseId);
+      return gamification;
     }
 
-    return await this.updateStudentCourseStats(
+    await this.updateStudentCourseStats(
       studentId,
       courseId,
       PROGRESS_STATUSES.IN_PROGRESS,
@@ -653,6 +688,8 @@ export class StudentLessonProgressService {
       trx,
       language,
     );
+
+    return EMPTY_GAMIFICATION_AWARD;
   }
 
   private async getCourseFinishedChapterCount(
@@ -707,7 +744,7 @@ export class StudentLessonProgressService {
     language?: SupportedLanguages,
   ) {
     if (progress === PROGRESS_STATUSES.COMPLETED) {
-      const [studentCourse] = await dbInstance
+      await dbInstance
         .update(studentCourses)
         .set({
           progress,
@@ -732,6 +769,12 @@ export class StudentLessonProgressService {
         studentId,
         courseId,
       );
+      const gamification = await this.pointsService.award(
+        studentId,
+        POINT_EVENT_TYPES.COURSE_COMPLETED,
+        courseId,
+        actor.tenantId,
+      );
 
       await this.outboxPublisher.publish(
         new CourseCompletedEvent(courseCompletionDetails),
@@ -742,13 +785,15 @@ export class StudentLessonProgressService {
         dbInstance,
       );
 
-      return studentCourse;
+      return gamification;
     }
 
-    return dbInstance
+    await dbInstance
       .update(studentCourses)
       .set({ progress, finishedChapterCount })
       .where(and(eq(studentCourses.studentId, studentId), eq(studentCourses.courseId, courseId)));
+
+    return EMPTY_GAMIFICATION_AWARD;
   }
 
   private async checkLessonAssignment(
