@@ -77,7 +77,15 @@ function ThreadList({
   );
 }
 
-function CreateThreadForm({ courseId, onCancel }: { courseId: string; onCancel: () => void }) {
+function CreateThreadForm({
+  courseId,
+  lessonId,
+  onCancel,
+}: {
+  courseId: string;
+  lessonId?: string;
+  onCancel: () => void;
+}) {
   const { t } = useTranslation();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -97,7 +105,7 @@ function CreateThreadForm({ courseId, onCancel }: { courseId: string; onCancel: 
     }
 
     createThread.mutate(
-      { courseId, data: { title: title.trim(), content } },
+      { courseId, lessonId, data: { title: title.trim(), content } },
       {
         onSuccess: () => {
           toast({ description: t("studentCourseView.discussions.threadCreated") });
@@ -232,12 +240,14 @@ function CommentItem({
 function ThreadDetail({
   thread,
   courseId,
+  lessonId,
   onBack,
   currentUserId,
   isModerator,
 }: {
   thread: CourseDiscussionThread;
   courseId: string;
+  lessonId?: string;
   onBack: () => void;
   currentUserId?: string;
   isModerator: boolean;
@@ -293,7 +303,12 @@ function ThreadDetail({
 
   const handleUpdateThread = () => {
     updateThread.mutate(
-      { threadId: thread.id, courseId, data: { title: editingTitle, content: editingContent } },
+      {
+        threadId: thread.id,
+        courseId,
+        lessonId,
+        data: { title: editingTitle, content: editingContent },
+      },
       {
         onSuccess: () => {
           setShowEditForm(false);
@@ -304,11 +319,11 @@ function ThreadDetail({
   };
 
   const handleDeleteThread = () => {
-    deleteThread.mutate({ threadId: thread.id, courseId }, { onSuccess: () => onBack() });
+    deleteThread.mutate({ threadId: thread.id, courseId, lessonId }, { onSuccess: () => onBack() });
   };
 
   const handleHideThread = (hidden: boolean) => {
-    moderateThread.mutate({ threadId: thread.id, courseId, hidden });
+    moderateThread.mutate({ threadId: thread.id, courseId, lessonId, hidden });
   };
 
   if (isLoading) {
@@ -439,12 +454,14 @@ function ThreadDetail({
 export function CourseDiscussions({
   courseId,
   courseAuthorId,
+  lessonId,
 }: {
   courseId: string;
   courseAuthorId: string;
+  lessonId?: string;
 }) {
   const { t } = useTranslation();
-  const { data: threads, isLoading } = useDiscussions(courseId);
+  const { data: threads, isLoading } = useDiscussions(courseId, lessonId);
   const { data: currentUser } = useCurrentUser();
 
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
@@ -470,7 +487,11 @@ export function CourseDiscussions({
             {t("studentCourseView.discussions.createFirstThread")}
           </Button>
         ) : (
-          <CreateThreadForm courseId={courseId} onCancel={() => setShowCreateForm(false)} />
+          <CreateThreadForm
+            courseId={courseId}
+            lessonId={lessonId}
+            onCancel={() => setShowCreateForm(false)}
+          />
         )}
       </div>
     );
@@ -485,7 +506,11 @@ export function CourseDiscussions({
               {t("studentCourseView.discussions.createThread")}
             </Button>
             {showCreateForm && (
-              <CreateThreadForm courseId={courseId} onCancel={() => setShowCreateForm(false)} />
+              <CreateThreadForm
+                courseId={courseId}
+                lessonId={lessonId}
+                onCancel={() => setShowCreateForm(false)}
+              />
             )}
             <ThreadList
               threads={threads ?? []}
@@ -499,6 +524,7 @@ export function CourseDiscussions({
           <ThreadDetail
             thread={selectedThread}
             courseId={courseId}
+            lessonId={lessonId}
             onBack={() => setSelectedThreadId(null)}
             currentUserId={currentUser?.id}
             isModerator={isModerator}

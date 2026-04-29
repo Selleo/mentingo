@@ -26,6 +26,7 @@ export function useDiscussionDetail(threadId: string) {
 
 type CreateThreadOptions = {
   courseId: string;
+  lessonId?: string;
   data: {
     title: string;
     content: string;
@@ -36,13 +37,21 @@ export function useCreateThread() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ courseId, data }: CreateThreadOptions) => {
+    mutationFn: async ({ courseId, lessonId, data }: CreateThreadOptions) => {
+      if (lessonId) {
+        const response = await ApiClient.api.courseDiscussionsControllerCreateLesson(
+          courseId,
+          lessonId,
+          data,
+        );
+        return response.data.data as CourseDiscussionThread;
+      }
       const response = await ApiClient.api.courseDiscussionsControllerCreate(courseId, data);
       return response.data.data as CourseDiscussionThread;
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
-        queryKey: discussionsQueryOptions(variables.courseId).queryKey,
+        queryKey: discussionsQueryOptions(variables.courseId, variables.lessonId).queryKey,
       });
     },
   });
@@ -51,6 +60,7 @@ export function useCreateThread() {
 type UpdateThreadOptions = {
   threadId: string;
   courseId: string;
+  lessonId?: string;
   data: {
     title?: string;
     content?: string;
@@ -70,7 +80,7 @@ export function useUpdateThread() {
         queryKey: [...DISCUSSION_DETAIL_QUERY_KEY, variables.threadId],
       });
       queryClient.invalidateQueries({
-        queryKey: discussionsQueryOptions(variables.courseId).queryKey,
+        queryKey: discussionsQueryOptions(variables.courseId, variables.lessonId).queryKey,
       });
     },
   });
@@ -79,6 +89,7 @@ export function useUpdateThread() {
 type DeleteThreadOptions = {
   threadId: string;
   courseId: string;
+  lessonId?: string;
 };
 
 export function useDeleteThread() {
@@ -93,7 +104,7 @@ export function useDeleteThread() {
         queryKey: [...DISCUSSION_DETAIL_QUERY_KEY, variables.threadId],
       });
       queryClient.invalidateQueries({
-        queryKey: discussionsQueryOptions(variables.courseId).queryKey,
+        queryKey: discussionsQueryOptions(variables.courseId, variables.lessonId).queryKey,
       });
     },
   });
@@ -102,6 +113,7 @@ export function useDeleteThread() {
 type ModerateThreadOptions = {
   threadId: string;
   courseId: string;
+  lessonId?: string;
   hidden: boolean;
 };
 
@@ -120,7 +132,7 @@ export function useModerateThread() {
         queryKey: [...DISCUSSION_DETAIL_QUERY_KEY, variables.threadId],
       });
       queryClient.invalidateQueries({
-        queryKey: discussionsQueryOptions(variables.courseId).queryKey,
+        queryKey: discussionsQueryOptions(variables.courseId, variables.lessonId).queryKey,
       });
     },
   });

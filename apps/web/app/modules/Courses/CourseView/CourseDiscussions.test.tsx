@@ -79,6 +79,49 @@ describe("CourseDiscussions", () => {
     expect(screen.getByTestId("discussions-empty")).toBeInTheDocument();
   });
 
+  it("passes lessonId to scoped discussions query", () => {
+    mockUseDiscussions.mockReturnValue({ data: [], isLoading: false });
+
+    renderWith().render(
+      <CourseDiscussions courseId="course-1" courseAuthorId="author-1" lessonId="lesson-1" />,
+    );
+
+    expect(mockUseDiscussions).toHaveBeenCalledWith("course-1", "lesson-1");
+  });
+
+  it("passes lessonId to create thread mutation", async () => {
+    const user = userEvent.setup();
+    mockUseDiscussions.mockReturnValue({ data: [], isLoading: false });
+
+    renderWith().render(
+      <CourseDiscussions courseId="course-1" courseAuthorId="author-1" lessonId="lesson-1" />,
+    );
+
+    // Click create button to show form
+    await user.click(screen.getByText(/createFirstThread/i));
+
+    // Fill in title
+    await user.type(screen.getByTestId("create-thread-title"), "New Thread");
+
+    // Fill in content via ContentEditor (mocked as textarea)
+    const contentArea = document.querySelector(
+      'textarea[aria-label*="contentPlaceholder"]',
+    ) as HTMLTextAreaElement;
+    await user.type(contentArea!, "Thread content here");
+
+    // Submit the form
+    await user.click(screen.getByRole("button", { name: /createThread/i }));
+
+    expect(mockCreateThreadMutate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        courseId: "course-1",
+        lessonId: "lesson-1",
+        data: expect.objectContaining({ title: "New Thread" }),
+      }),
+      expect.any(Function),
+    );
+  });
+
   it("shows create button and thread list when threads exist", () => {
     mockUseDiscussions.mockReturnValue({ data: [threadFixture], isLoading: false });
 
