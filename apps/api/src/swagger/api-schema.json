@@ -23811,6 +23811,10 @@
                     }
                   ]
                 },
+                "pointsValue": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
                 "createdAt": {
                   "type": "string"
                 }
@@ -23920,6 +23924,10 @@
                     "type": "null"
                   }
                 ]
+              },
+              "pointsValue": {
+                "minimum": 0,
+                "type": "integer"
               },
               "createdAt": {
                 "type": "string"

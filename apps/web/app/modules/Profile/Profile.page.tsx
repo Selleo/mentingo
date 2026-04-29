@@ -228,6 +228,7 @@ function ProfilePageContent({ currentUser }: ProfilePageContentProps) {
               initialColor={certificatePreview.certData?.certificateFontColor || null}
               showDownloadButton={isProfileOwner}
               showShareButton={Boolean(certificatePreview.certData?.id)}
+              pointsValue={certificatePreview.certData?.pointsValue}
             />
           </div>
         </div>

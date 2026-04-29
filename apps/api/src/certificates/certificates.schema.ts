@@ -12,6 +12,7 @@ export const certificateSchema = Type.Object({
   fullName: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   certificateSignatureUrl: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   certificateFontColor: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  pointsValue: Type.Optional(Type.Integer({ minimum: 0 })),
   createdAt: Type.String(),
 });
 

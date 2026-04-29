@@ -7,6 +7,7 @@ export interface CertificateType {
   fullName?: string | null;
   certificateSignatureUrl?: string | null;
   certificateFontColor?: string | null;
+  pointsValue?: number;
   createdAt: string;
 }
 
