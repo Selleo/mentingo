@@ -11,10 +11,10 @@ export const LEARNING_HANDLES = {
   QUIZ_RETAKE_BUTTON: "learning-quiz-retake-button",
   AI_MENTOR_TASK_DESCRIPTION: "learning-ai-mentor-task-description",
   AI_MENTOR_MESSAGES: "learning-ai-mentor-messages",
+  AI_MENTOR_MESSAGE: "learning-ai-mentor-message",
   AI_MENTOR_MESSAGE_INPUT: "learning-ai-mentor-message-input",
   AI_MENTOR_MESSAGE_ACTION_BUTTON: "learning-ai-mentor-message-action-button",
   AI_MENTOR_MIC_BUTTON: "learning-ai-mentor-mic-button",
-  AI_MENTOR_MESSAGE: "learning-ai-mentor-message",
   aiMentorMessage: (messageId: string) => `learning-ai-mentor-message-${messageId}`,
   aiMentorMessageRole: (role: "assistant" | "user" | "data" | "system") =>
     `learning-ai-mentor-message-${role}`,

@@ -10,6 +10,8 @@ import { ConversionsAfterFreemiumLessonChart } from "~/modules/Statistics/Admin/
 import { EnrollmentChart } from "~/modules/Statistics/Admin/components/EnrollmentChart";
 import { useDownloadSummaryReport } from "~/modules/Statistics/Admin/hooks/useDownloadSummaryReport";
 
+import { ADMIN_STATISTICS_HANDLES } from "../../../../e2e/data/statistics/handles";
+
 import { CourseCompletionPercentageChart, FiveMostPopularCoursesChart } from "./components";
 
 import type { ChartConfig } from "~/components/ui/chart";
@@ -119,39 +121,56 @@ export const AdminStatistics = () => {
       className="flex flex-col gap-y-6 xl:!h-full xl:gap-y-8 2xl:!h-auto"
     >
       <div className="flex items-center justify-end gap-x-4">
-        <Button onClick={downloadReport} disabled={isDownloading}>
+        <Button
+          data-testid={ADMIN_STATISTICS_HANDLES.DOWNLOAD_REPORT_BUTTON}
+          onClick={downloadReport}
+          disabled={isDownloading}
+        >
           {isDownloading
             ? t("adminStatisticsView.other.downloadingReport")
             : t("adminStatisticsView.other.downloadReport")}
         </Button>
       </div>
-      <div className="grid grid-cols-1 gap-y-4 md:grid-cols-2 md:gap-x-4 md:gap-y-6 xl:h-full xl:grid-cols-4 xl:grid-rows-[minmax(min-content,_auto)]">
-        <FiveMostPopularCoursesChart
-          data={statistics?.fiveMostPopularCourses}
-          isLoading={isLoading}
-        />
-        <CourseCompletionPercentageChart
-          isLoading={isLoading}
-          label={`${statistics?.totalCoursesCompletionStats.completionPercentage}`}
-          title={t("adminStatisticsView.other.courseCompletionPercentage")}
-          chartConfig={coursesCompletionChartConfig}
-          chartData={coursesCompletionChartData}
-        />
-        <ConversionsAfterFreemiumLessonChart
-          isLoading={isLoading}
-          label={`${statistics?.conversionAfterFreemiumLesson.conversionPercentage}`}
-          title={t("adminStatisticsView.other.conversionsAfterFreemiumLesson")}
-          chartConfig={conversionsChartConfig}
-          chartData={conversionsChartData}
-        />
-        <EnrollmentChart isLoading={isLoading} data={statistics?.courseStudentsStats} />
-        <AvgScoreAcrossAllQuizzesChart
-          isLoading={isLoading}
-          label={`${correctAnswers}/${totalAnswers}`}
-          title={t("adminStatisticsView.other.avgQuizScore")}
-          chartConfig={avgQuizScoreChartConfig}
-          chartData={avgQuizScoreChartData}
-        />
+      <div
+        data-testid={ADMIN_STATISTICS_HANDLES.PAGE}
+        className="grid grid-cols-1 gap-y-4 md:grid-cols-2 md:gap-x-4 md:gap-y-6 xl:h-full xl:grid-cols-4 xl:grid-rows-[minmax(min-content,_auto)]"
+      >
+        <div data-testid={ADMIN_STATISTICS_HANDLES.MOST_POPULAR_COURSES_CHART}>
+          <FiveMostPopularCoursesChart
+            data={statistics?.fiveMostPopularCourses}
+            isLoading={isLoading}
+          />
+        </div>
+        <div data-testid={ADMIN_STATISTICS_HANDLES.COURSE_COMPLETION_CHART}>
+          <CourseCompletionPercentageChart
+            isLoading={isLoading}
+            label={`${statistics?.totalCoursesCompletionStats.completionPercentage}`}
+            title={t("adminStatisticsView.other.courseCompletionPercentage")}
+            chartConfig={coursesCompletionChartConfig}
+            chartData={coursesCompletionChartData}
+          />
+        </div>
+        <div data-testid={ADMIN_STATISTICS_HANDLES.FREEMIUM_CONVERSION_CHART}>
+          <ConversionsAfterFreemiumLessonChart
+            isLoading={isLoading}
+            label={`${statistics?.conversionAfterFreemiumLesson.conversionPercentage}`}
+            title={t("adminStatisticsView.other.conversionsAfterFreemiumLesson")}
+            chartConfig={conversionsChartConfig}
+            chartData={conversionsChartData}
+          />
+        </div>
+        <div data-testid={ADMIN_STATISTICS_HANDLES.ENROLLMENT_CHART}>
+          <EnrollmentChart isLoading={isLoading} data={statistics?.courseStudentsStats} />
+        </div>
+        <div data-testid={ADMIN_STATISTICS_HANDLES.AVERAGE_QUIZ_SCORE_CHART}>
+          <AvgScoreAcrossAllQuizzesChart
+            isLoading={isLoading}
+            label={`${correctAnswers}/${totalAnswers}`}
+            title={t("adminStatisticsView.other.avgQuizScore")}
+            chartConfig={avgQuizScoreChartConfig}
+            chartData={avgQuizScoreChartData}
+          />
+        </div>
       </div>
     </PageWrapper>
   );
