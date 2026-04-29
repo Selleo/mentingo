@@ -1,18 +1,23 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
-import { and, desc, eq, isNull, sql } from "drizzle-orm";
+import { and, asc, desc, eq, isNull, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import {
   chapters,
   courseDiscussionThreads,
+  courseDiscussionComments,
   courses,
   lessons,
   settings,
   studentCourses,
 } from "src/storage/schema";
 
-import type { CreateCourseDiscussionBody } from "./schemas/course-discussion.schema";
+import type {
+  CreateCourseDiscussionBody,
+  CreateCourseDiscussionCommentBody,
+  UpdateCourseDiscussionBody,
+} from "./schemas/course-discussion.schema";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
 @Injectable()
@@ -123,5 +128,97 @@ export class CourseDiscussionsRepository {
         lastActivityAt: sql`CURRENT_TIMESTAMP`,
       })
       .returning();
+  }
+
+  async findThreadById(threadId: UUIDType) {
+    const [thread] = await this.db
+      .select()
+      .from(courseDiscussionThreads)
+      .where(eq(courseDiscussionThreads.id, threadId))
+      .limit(1);
+    return thread ?? null;
+  }
+
+  async getThreadDetail(threadId: UUIDType) {
+    const thread = await this.findThreadById(threadId);
+    if (!thread) return null;
+    const comments = await this.db
+      .select()
+      .from(courseDiscussionComments)
+      .where(eq(courseDiscussionComments.threadId, threadId))
+      .orderBy(asc(courseDiscussionComments.createdAt));
+    return { ...thread, comments };
+  }
+
+  async updateThread(threadId: UUIDType, data: UpdateCourseDiscussionBody) {
+    const values: Record<string, unknown> = { updatedAt: sql`CURRENT_TIMESTAMP` };
+    if (data.title !== undefined) values.title = data.title;
+    if (data.content !== undefined) values.content = data.content;
+    const [row] = await this.db
+      .update(courseDiscussionThreads)
+      .set(values)
+      .where(eq(courseDiscussionThreads.id, threadId))
+      .returning();
+    return row ?? null;
+  }
+
+  async softDeleteThread(threadId: UUIDType, userId: UUIDType) {
+    const [row] = await this.db
+      .update(courseDiscussionThreads)
+      .set({
+        status: "deleted_by_author",
+        deletedAt: sql`CURRENT_TIMESTAMP`,
+        deletedById: userId,
+        updatedAt: sql`CURRENT_TIMESTAMP`,
+      })
+      .where(eq(courseDiscussionThreads.id, threadId))
+      .returning();
+    return row ?? null;
+  }
+
+  createComment(threadId: UUIDType, authorId: UUIDType, data: CreateCourseDiscussionCommentBody) {
+    return this.db
+      .insert(courseDiscussionComments)
+      .values({ threadId, authorId, content: data.content, status: "visible" })
+      .returning();
+  }
+
+  async updateThreadLastActivity(threadId: UUIDType) {
+    await this.db
+      .update(courseDiscussionThreads)
+      .set({ lastActivityAt: sql`CURRENT_TIMESTAMP`, updatedAt: sql`CURRENT_TIMESTAMP` })
+      .where(eq(courseDiscussionThreads.id, threadId));
+  }
+
+  async findCommentById(commentId: UUIDType) {
+    const [comment] = await this.db
+      .select()
+      .from(courseDiscussionComments)
+      .where(eq(courseDiscussionComments.id, commentId))
+      .limit(1);
+    return comment ?? null;
+  }
+
+  async updateComment(commentId: UUIDType, data: { content: string }) {
+    const [row] = await this.db
+      .update(courseDiscussionComments)
+      .set({ content: data.content, updatedAt: sql`CURRENT_TIMESTAMP` })
+      .where(eq(courseDiscussionComments.id, commentId))
+      .returning();
+    return row ?? null;
+  }
+
+  async softDeleteComment(commentId: UUIDType, userId: UUIDType) {
+    const [row] = await this.db
+      .update(courseDiscussionComments)
+      .set({
+        status: "deleted_by_author",
+        deletedAt: sql`CURRENT_TIMESTAMP`,
+        deletedById: userId,
+        updatedAt: sql`CURRENT_TIMESTAMP`,
+      })
+      .where(eq(courseDiscussionComments.id, commentId))
+      .returning();
+    return row ?? null;
   }
 }

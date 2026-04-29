@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Patch, Post } from "@nestjs/common";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
@@ -8,9 +8,101 @@ import { CurrentUserType } from "src/common/types/current-user.type";
 
 import { CourseDiscussionsService } from "./course-discussions.service";
 import {
+  courseDiscussionCommentSchema,
+  courseDiscussionThreadDetailSchema,
   courseDiscussionThreadSchema,
+  createCourseDiscussionCommentBodySchema,
   createCourseDiscussionBodySchema,
+  updateCourseDiscussionBodySchema,
 } from "./schemas/course-discussion.schema";
+
+@Controller("discussions")
+export class DiscussionDetailsController {
+  constructor(private readonly service: CourseDiscussionsService) {}
+
+  @Get(":threadId")
+  @Validate({
+    request: [{ type: "param", name: "threadId", schema: UUIDSchema, required: true }],
+    response: baseResponse(courseDiscussionThreadDetailSchema),
+  })
+  async detail(@Param("threadId") threadId: UUIDType, @CurrentUser() user: CurrentUserType) {
+    return new BaseResponse(await this.service.detail(threadId, user));
+  }
+
+  @Patch(":threadId")
+  @Validate({
+    request: [
+      { type: "param", name: "threadId", schema: UUIDSchema, required: true },
+      { type: "body", schema: updateCourseDiscussionBodySchema, required: true },
+    ],
+    response: baseResponse(courseDiscussionThreadSchema),
+  })
+  async update(
+    @Param("threadId") threadId: UUIDType,
+    @Body() body: { title?: string; content?: string },
+    @CurrentUser() user: CurrentUserType,
+  ) {
+    return new BaseResponse(await this.service.updateThread(threadId, user, body));
+  }
+
+  @Delete(":threadId")
+  @Validate({
+    request: [{ type: "param", name: "threadId", schema: UUIDSchema, required: true }],
+    response: baseResponse(courseDiscussionThreadSchema),
+  })
+  async delete(@Param("threadId") threadId: UUIDType, @CurrentUser() user: CurrentUserType) {
+    return new BaseResponse(await this.service.deleteThread(threadId, user));
+  }
+
+  @Post(":threadId/comments")
+  @Validate({
+    request: [
+      { type: "param", name: "threadId", schema: UUIDSchema, required: true },
+      { type: "body", schema: createCourseDiscussionCommentBodySchema, required: true },
+    ],
+    response: baseResponse(courseDiscussionCommentSchema),
+  })
+  async createComment(
+    @Param("threadId") threadId: UUIDType,
+    @Body() body: { content: string },
+    @CurrentUser() user: CurrentUserType,
+  ) {
+    return new BaseResponse(await this.service.createComment(threadId, user, body));
+  }
+}
+
+@Controller("discussion-comments")
+export class DiscussionCommentsController {
+  constructor(private readonly service: CourseDiscussionsService) {}
+
+  @Patch(":commentId")
+  @Validate({
+    request: [
+      { type: "param", name: "commentId", schema: UUIDSchema, required: true },
+      { type: "body", schema: createCourseDiscussionCommentBodySchema, required: true },
+    ],
+    response: baseResponse(courseDiscussionCommentSchema),
+  })
+  async updateComment(
+    @Param("commentId") commentId: UUIDType,
+    @Body() body: { content: string },
+    @CurrentUser() user: CurrentUserType,
+  ) {
+    return new BaseResponse(await this.service.updateComment(commentId, user, body));
+  }
+
+  @Delete(":commentId")
+  @Validate({
+    request: [{ type: "param", name: "commentId", schema: UUIDSchema, required: true }],
+    response: baseResponse(courseDiscussionCommentSchema),
+  })
+  async deleteComment(
+    @Param("commentId") commentId: UUIDType,
+    @CurrentUser() user: CurrentUserType,
+  ) {
+    return new BaseResponse(await this.service.deleteComment(commentId, user));
+  }
+}
 
 @Controller("courses")
 export class CourseDiscussionsController {

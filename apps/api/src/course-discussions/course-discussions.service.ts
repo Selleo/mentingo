@@ -52,4 +52,71 @@ export class CourseDiscussionsService {
       content: sanitizeDiscussionText(data.content),
     });
   }
+
+  async detail(threadId: UUIDType, user: CurrentUserType) {
+    if (!(await this.repo.isCohortLearningEnabled())) throw new ForbiddenException();
+    const thread = await this.repo.findThreadById(threadId);
+    if (!thread) throw new NotFoundException();
+    if (!(await this.repo.canAccessCourse(thread.courseId, user))) throw new ForbiddenException();
+    return this.repo.getThreadDetail(threadId);
+  }
+
+  async updateThread(
+    threadId: UUIDType,
+    user: CurrentUserType,
+    data: { title?: string; content?: string },
+  ) {
+    if (!(await this.repo.isCohortLearningEnabled())) throw new ForbiddenException();
+    const thread = await this.repo.findThreadById(threadId);
+    if (!thread) throw new NotFoundException();
+    if (!(await this.repo.canAccessCourse(thread.courseId, user))) throw new ForbiddenException();
+    if (thread.authorId !== user.userId) throw new ForbiddenException();
+    return this.repo.updateThread(threadId, {
+      title: data.title !== undefined ? sanitizeDiscussionText(data.title) : undefined,
+      content: data.content !== undefined ? sanitizeDiscussionText(data.content) : undefined,
+    });
+  }
+
+  async deleteThread(threadId: UUIDType, user: CurrentUserType) {
+    if (!(await this.repo.isCohortLearningEnabled())) throw new ForbiddenException();
+    const thread = await this.repo.findThreadById(threadId);
+    if (!thread) throw new NotFoundException();
+    if (!(await this.repo.canAccessCourse(thread.courseId, user))) throw new ForbiddenException();
+    if (thread.authorId !== user.userId) throw new ForbiddenException();
+    return this.repo.softDeleteThread(threadId, user.userId);
+  }
+
+  async createComment(threadId: UUIDType, user: CurrentUserType, data: { content: string }) {
+    if (!(await this.repo.isCohortLearningEnabled())) throw new ForbiddenException();
+    const thread = await this.repo.findThreadById(threadId);
+    if (!thread) throw new NotFoundException();
+    if (!(await this.repo.canAccessCourse(thread.courseId, user))) throw new ForbiddenException();
+    const [comment] = await this.repo.createComment(threadId, user.userId, {
+      content: sanitizeDiscussionText(data.content),
+    });
+    await this.repo.updateThreadLastActivity(threadId);
+    return comment;
+  }
+
+  async updateComment(commentId: UUIDType, user: CurrentUserType, data: { content: string }) {
+    if (!(await this.repo.isCohortLearningEnabled())) throw new ForbiddenException();
+    const comment = await this.repo.findCommentById(commentId);
+    if (!comment) throw new NotFoundException();
+    const thread = await this.repo.findThreadById(comment.threadId);
+    if (!thread) throw new NotFoundException();
+    if (!(await this.repo.canAccessCourse(thread.courseId, user))) throw new ForbiddenException();
+    if (comment.authorId !== user.userId) throw new ForbiddenException();
+    return this.repo.updateComment(commentId, { content: sanitizeDiscussionText(data.content) });
+  }
+
+  async deleteComment(commentId: UUIDType, user: CurrentUserType) {
+    if (!(await this.repo.isCohortLearningEnabled())) throw new ForbiddenException();
+    const comment = await this.repo.findCommentById(commentId);
+    if (!comment) throw new NotFoundException();
+    const thread = await this.repo.findThreadById(comment.threadId);
+    if (!thread) throw new NotFoundException();
+    if (!(await this.repo.canAccessCourse(thread.courseId, user))) throw new ForbiddenException();
+    if (comment.authorId !== user.userId) throw new ForbiddenException();
+    return this.repo.softDeleteComment(commentId, user.userId);
+  }
 }
