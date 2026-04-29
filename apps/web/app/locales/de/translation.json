@@ -593,6 +593,9 @@
     }
   },
   "rewards": {
+    "admin": {
+      "rateUpdated": "Belohnungspunkte-Rate wurde erfolgreich aktualisiert."
+    },
     "notifications": {
       "chapterCompleted": "Kapitel abgeschlossen",
       "courseCompleted": "Kurs abgeschlossen",

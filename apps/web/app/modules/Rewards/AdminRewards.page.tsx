@@ -1,5 +1,5 @@
 import { REWARD_ACTION_TYPES } from "@repo/shared";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -14,7 +14,8 @@ import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 
-import type { RewardAchievement } from "~/api/queries/rewards/types";
+import type { RewardActionType } from "@repo/shared";
+import type { RewardAchievement, RewardRule } from "~/api/queries/rewards/types";
 
 const actionLabels: Record<string, string> = {
   [REWARD_ACTION_TYPES.CHAPTER_COMPLETED]: "Chapter completion",
@@ -29,6 +30,68 @@ const emptyAchievement = {
   sortOrder: 0,
   iconResourceId: "",
 };
+
+type RewardRuleFormProps = {
+  rule: RewardRule;
+  updateRule: {
+    isPending: boolean;
+    mutate: (input: { actionType: RewardActionType; points: number; enabled: boolean }) => void;
+  };
+};
+
+function RewardRuleForm({ rule, updateRule }: RewardRuleFormProps) {
+  const { t } = useTranslation();
+  const [points, setPoints] = useState(rule.points);
+  const [enabled, setEnabled] = useState(rule.enabled);
+
+  useEffect(() => {
+    setPoints(rule.points);
+    setEnabled(rule.enabled);
+  }, [rule.enabled, rule.points]);
+
+  const hasChanges = points !== rule.points || enabled !== rule.enabled;
+
+  return (
+    <form
+      className="flex flex-col gap-3 rounded-lg border border-neutral-200 p-4"
+      onSubmit={(event) => {
+        event.preventDefault();
+
+        if (!hasChanges) return;
+
+        updateRule.mutate({
+          actionType: rule.actionType,
+          points,
+          enabled,
+        });
+      }}
+    >
+      <h2 className="body-base-md text-neutral-950">{actionLabels[rule.actionType]}</h2>
+      <label className="body-sm flex flex-col gap-1 text-neutral-700">
+        {t("rewards.admin.points", "Points")}
+        <Input
+          name="points"
+          type="number"
+          min={0}
+          value={points}
+          onChange={(event) => setPoints(Number(event.target.value))}
+        />
+      </label>
+      <label className="body-sm flex items-center gap-2 text-neutral-700">
+        <input
+          name="enabled"
+          type="checkbox"
+          checked={enabled}
+          onChange={(event) => setEnabled(event.target.checked)}
+        />
+        {t("rewards.admin.enabled", "Enabled")}
+      </label>
+      <Button type="submit" disabled={!hasChanges || updateRule.isPending}>
+        {t("common.save", "Save")}
+      </Button>
+    </form>
+  );
+}
 
 export default function AdminRewardsPage() {
   const { t } = useTranslation();
@@ -67,30 +130,7 @@ export default function AdminRewardsPage() {
           </div>
           <div className="grid gap-3 md:grid-cols-3">
             {rules?.map((rule) => (
-              <form
-                key={rule.actionType}
-                className="flex flex-col gap-3 rounded-lg border border-neutral-200 p-4"
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  const form = new FormData(event.currentTarget);
-                  updateRule.mutate({
-                    actionType: rule.actionType,
-                    points: Number(form.get("points") ?? rule.points),
-                    enabled: form.get("enabled") === "on",
-                  });
-                }}
-              >
-                <h2 className="body-base-md text-neutral-950">{actionLabels[rule.actionType]}</h2>
-                <label className="body-sm flex flex-col gap-1 text-neutral-700">
-                  {t("rewards.admin.points", "Points")}
-                  <Input name="points" type="number" min={0} defaultValue={rule.points} />
-                </label>
-                <label className="body-sm flex items-center gap-2 text-neutral-700">
-                  <input name="enabled" type="checkbox" defaultChecked={rule.enabled} />
-                  {t("rewards.admin.enabled", "Enabled")}
-                </label>
-                <Button type="submit">{t("common.save", "Save")}</Button>
-              </form>
+              <RewardRuleForm key={rule.actionType} rule={rule} updateRule={updateRule} />
             ))}
           </div>
         </section>

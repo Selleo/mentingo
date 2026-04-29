@@ -593,6 +593,9 @@
     }
   },
   "rewards": {
+    "admin": {
+      "rateUpdated": "Reward point rate updated successfully."
+    },
     "notifications": {
       "chapterCompleted": "Chapter completed",
       "courseCompleted": "Course completed",

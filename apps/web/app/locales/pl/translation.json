@@ -570,6 +570,9 @@
     }
   },
   "rewards": {
+    "admin": {
+      "rateUpdated": "Stawka punktów nagród została zaktualizowana."
+    },
     "notifications": {
       "chapterCompleted": "Rozdział ukończony",
       "courseCompleted": "Kurs ukończony",

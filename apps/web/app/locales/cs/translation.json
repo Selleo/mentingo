@@ -593,6 +593,9 @@
     }
   },
   "rewards": {
+    "admin": {
+      "rateUpdated": "Sazba bodů odměn byla úspěšně aktualizována."
+    },
     "notifications": {
       "chapterCompleted": "Kapitola dokončena",
       "courseCompleted": "Kurz dokončen",

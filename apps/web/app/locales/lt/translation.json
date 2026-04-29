@@ -593,6 +593,9 @@
     }
   },
   "rewards": {
+    "admin": {
+      "rateUpdated": "Atlygio taškų norma sėkmingai atnaujinta."
+    },
     "notifications": {
       "chapterCompleted": "Skyrius baigtas",
       "courseCompleted": "Kursas baigtas",
