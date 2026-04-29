@@ -20,6 +20,7 @@ import { StripeModule } from "src/stripe/stripe.module";
 import { UserModule } from "src/user/user.module";
 
 import { CourseSlugService } from "./course-slug.service";
+import { CourseTakeawayService } from "./course-takeaway.service";
 import { CourseController } from "./course.controller";
 import { CourseCron } from "./course.cron";
 import { CourseService } from "./course.service";
@@ -48,6 +49,7 @@ import { MasterCourseWorker } from "./master-course.worker";
   controllers: [CourseController],
   providers: [
     CourseService,
+    CourseTakeawayService,
     CourseSlugService,
     CourseHandler,
     LocalizationService,

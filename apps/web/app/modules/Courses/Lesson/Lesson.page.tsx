@@ -19,6 +19,11 @@ import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 import Loader from "~/modules/common/Loader/Loader";
 import { useVideoPreferencesStore } from "~/modules/common/store/useVideoPreferencesStore";
 import { CourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
+import {
+  fetchCourseTakeaway,
+  getCourseTakeawayLocalFallback,
+  saveCourseTakeaway,
+} from "~/modules/Courses/learning/courseTakeaway";
 import { saveCourseResumeProgress } from "~/modules/Courses/learning/resumeProgress";
 import { LearningModeBanner } from "~/modules/Courses/Lesson/LearningModeBanner";
 import { LessonContent } from "~/modules/Courses/Lesson/LessonContent";
@@ -56,6 +61,7 @@ export default function LessonPage() {
 
   const [error, setError] = useState(false);
   const [isFocusMode, setIsFocusMode] = useState(false);
+  const [takeaway, setTakeaway] = useState("");
 
   const {
     data: lesson,
@@ -135,6 +141,41 @@ export default function LessonPage() {
       chapterId,
     });
   }, [course?.id, course?.chapters, lessonId, user?.id]);
+
+  useEffect(() => {
+    if (!course?.id) return;
+
+    setTakeaway(getCourseTakeawayLocalFallback({ userId: user?.id, courseId: course.id }));
+
+    let cancelled = false;
+    void fetchCourseTakeaway({ courseId: course.id })
+      .then((content) => {
+        if (cancelled) return;
+        setTakeaway(content);
+      })
+      .catch(() => {
+        // keep local fallback
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [course?.id, user?.id]);
+
+  useEffect(() => {
+    if (!isFocusMode) return;
+    if (!course?.id) return;
+
+    const timer = window.setTimeout(() => {
+      void saveCourseTakeaway({ userId: user?.id, courseId: course.id, value: takeaway }).catch(() => {
+        // local cache still persists
+      });
+    }, 800);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [course?.id, isFocusMode, takeaway, user?.id]);
 
   if (error) {
     return (
@@ -283,6 +324,32 @@ export default function LessonPage() {
                     : t("common.actions.focusMode", { defaultValue: "Tryb skupienia" })}
                 </Button>
               </div>
+              {isFocusMode && (
+                <div className="border-b border-neutral-200 px-6 py-4 sm:px-10 3xl:px-8">
+                  <div className="rounded-lg border border-primary-200 bg-primary-50 p-4">
+                    <p className="body-sm-md text-neutral-950">
+                      {t("studentCourseView.takeaway.title", {
+                        defaultValue: "Co wyniosłeś dotychczas z kursu",
+                      })}
+                    </p>
+                    <p className="mt-1 text-xs text-neutral-700">
+                      {t("studentCourseView.takeaway.subtitle", {
+                        defaultValue:
+                          "Zapisuj własnymi słowami wnioski i notatki. Możesz używać Markdown. Autosave do bazy.",
+                      })}
+                    </p>
+                    <textarea
+                      className="mt-3 w-full min-h-28 rounded-md border border-primary-200 bg-white p-3 text-sm text-neutral-950 outline-none focus:ring-2 focus:ring-primary-300"
+                      value={takeaway}
+                      onChange={(e) => setTakeaway(e.target.value)}
+                      placeholder={t("studentCourseView.takeaway.placeholder", {
+                        defaultValue:
+                          "Np.\n- 3 najważniejsze rzeczy…\n- co wdrażam od jutra…\n- pytania do wyjaśnienia…",
+                      })}
+                    />
+                  </div>
+                </div>
+              )}
               <LessonContent
                 lesson={lesson}
                 course={course}
