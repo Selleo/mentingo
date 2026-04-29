@@ -852,7 +852,7 @@ export class AuthService {
 
     const settings = await this.settingsService.getUserSettings(userId);
 
-    if (!settings.MFASecret) return false;
+    if (!settings.MFASecret) return { isValid: false };
 
     const isValid = authenticator.check(token, settings.MFASecret);
 
@@ -869,7 +869,7 @@ export class AuthService {
       isMFAEnabled: true,
     });
 
-    return isValid;
+    return { isValid, accessToken, refreshToken };
   }
 
   async createMagicLink(email: string) {

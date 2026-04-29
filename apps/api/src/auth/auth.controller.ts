@@ -39,7 +39,12 @@ import { currentUserResponseSchema } from "src/user/schemas/user.schema";
 import { AuthService } from "./auth.service";
 import { CreateAccountBody, createAccountSchema } from "./schemas/create-account.schema";
 import { type CreatePasswordBody, createPasswordSchema } from "./schemas/create-password.schema";
-import { LoginBody, loginResponseSchema, loginSchema } from "./schemas/login.schema";
+import {
+  LoginBody,
+  loginResponseSchema,
+  loginSchema,
+  refreshTokensResponseSchema,
+} from "./schemas/login.schema";
 import {
   CreateMagicLinkBody,
   createMagicLinkResponseSchema,
@@ -137,7 +142,11 @@ export class AuthController {
       ? this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken)
       : this.tokenService.setTokenCookies(response, accessToken, refreshToken, data.rememberMe);
 
-    return new BaseResponse({ ...account, shouldVerifyMFA });
+    return new BaseResponse({
+      ...account,
+      shouldVerifyMFA,
+      ...(shouldVerifyMFA ? { mfaChallengeToken: accessToken } : { accessToken, refreshToken }),
+    });
   }
 
   @Post("logout")
@@ -167,12 +176,12 @@ export class AuthController {
   @UseGuards(RefreshTokenGuard)
   @Post("refresh")
   @Validate({
-    response: nullResponse(),
+    response: baseResponse(refreshTokensResponseSchema),
   })
   async refreshTokens(
     @Res({ passthrough: true }) response: Response,
     @Req() request: Request & { refreshToken: UUIDType },
-  ): Promise<null> {
+  ): Promise<BaseResponse<Static<typeof refreshTokensResponseSchema>>> {
     const refreshToken = request["refreshToken"];
 
     if (!refreshToken) {
@@ -185,7 +194,7 @@ export class AuthController {
 
       this.tokenService.setTokenCookies(response, accessToken, newRefreshToken);
 
-      return null;
+      return new BaseResponse({ accessToken, refreshToken: newRefreshToken });
     } catch (error) {
       console.error(error);
       throw new UnauthorizedException("Invalid refresh token");
@@ -447,9 +456,9 @@ export class AuthController {
     @CurrentUser("userId") userId: UUIDType,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const isValid = await this.authService.verifyMFACode(userId, body.token, response);
+    const result = await this.authService.verifyMFACode(userId, body.token, response);
 
-    return new BaseResponse({ isValid });
+    return new BaseResponse(result);
   }
 
   @Public()
