@@ -253,6 +253,35 @@ export class RewardsService {
       .orderBy(asc(groups.name));
   }
 
+  async getPointsByDay(userId: UUIDType, days = 30) {
+    const safeDays = Math.min(Math.max(Math.trunc(days) || 30, 1), 90);
+    const rows = await this.db
+      .select({
+        date: sql<string>`to_char(${rewardPointLedger.awardedAt}::date, 'YYYY-MM-DD')`,
+        points: sql<number>`sum(${rewardPointLedger.points})::integer`,
+      })
+      .from(rewardPointLedger)
+      .where(
+        and(
+          eq(rewardPointLedger.userId, userId),
+          sql`${rewardPointLedger.awardedAt} >= CURRENT_DATE - (${safeDays - 1} * INTERVAL '1 day')`,
+        ),
+      )
+      .groupBy(sql`${rewardPointLedger.awardedAt}::date`)
+      .orderBy(sql`${rewardPointLedger.awardedAt}::date`);
+
+    const pointsByDate = new Map(rows.map((row) => [row.date, row.points]));
+    const today = new Date();
+
+    return Array.from({ length: safeDays }, (_, index) => {
+      const date = new Date(today);
+      date.setDate(today.getDate() - (safeDays - 1 - index));
+      const key = date.toISOString().slice(0, 10);
+
+      return { date: key, points: pointsByDate.get(key) ?? 0 };
+    });
+  }
+
   async grantPoints(input: RewardGrantInput, dbInstance: DatabasePg = this.db) {
     await this.ensureDefaultRules();
 

@@ -13,6 +13,7 @@ import {
   leaderboardSchema,
   rewardAchievementSchema,
   rewardGroupSchema,
+  rewardPointsByDaySchema,
   rewardRuleSchema,
   rewardsBackfillSchema,
   rewardsProfileSchema,
@@ -57,6 +58,18 @@ export class RewardsController {
   })
   async getGroups() {
     return new BaseResponse(await this.rewardsService.getGroups());
+  }
+
+  @Get("points-by-day")
+  @RequirePermission(PERMISSIONS.REWARDS_READ)
+  @Validate({
+    request: [{ type: "query", name: "days", schema: Type.Optional(Type.Number({ minimum: 1 })) }],
+    response: baseResponse(Type.Array(rewardPointsByDaySchema)),
+  })
+  async getPointsByDay(@Query("days") days?: number, @CurrentUser() currentUser?: CurrentUserType) {
+    return new BaseResponse(
+      await this.rewardsService.getPointsByDay(currentUser?.userId as UUIDType, days),
+    );
   }
 
   @Get("rules")

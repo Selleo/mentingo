@@ -7271,6 +7271,33 @@
         }
       }
     },
+    "/api/rewards/points-by-day": {
+      "get": {
+        "operationId": "RewardsController_getPointsByDay",
+        "parameters": [
+          {
+            "name": "days",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPointsByDayResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/rewards/rules": {
       "get": {
         "operationId": "RewardsController_getRules",
@@ -27202,6 +27229,32 @@
         "required": [
           "data",
           "pagination"
+        ]
+      },
+      "GetPointsByDayResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "date": {
+                  "type": "string"
+                },
+                "points": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "date",
+                "points"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
         ]
       },
       "GetRulesResponse": {

@@ -81,6 +81,11 @@ export const rewardGroupSchema = Type.Object({
   name: Type.String(),
 });
 
+export const rewardPointsByDaySchema = Type.Object({
+  date: Type.String(),
+  points: Type.Number(),
+});
+
 export const rewardsBackfillSchema = Type.Object({
   chapterGrants: Type.Number(),
   aiConversationGrants: Type.Number(),
