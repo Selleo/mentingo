@@ -4,8 +4,8 @@ import { NestFactory } from "@nestjs/core";
 import { JwtService } from "@nestjs/jwt";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { DEFAULT_TUS_CHUNK_SIZE } from "@repo/shared";
-import * as Sentry from "@sentry/node";
-import { nodeProfilingIntegration } from "@sentry/profiling-node";
+// import * as Sentry from "@sentry/node";
+// import { nodeProfilingIntegration } from "@sentry/profiling-node";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -35,19 +35,19 @@ applyFormats();
 async function bootstrap() {
   startInstrumentation();
 
-  if (process.env.SENTRY_DSN) {
-    Sentry.init({
-      dsn: process.env.SENTRY_DSN,
-      integrations: [nodeProfilingIntegration()],
-      tracesSampleRate: 1.0,
-      profilesSampleRate: 1.0,
-      environment: environmentValidation(String(process.env.NODE_ENV)),
-    });
+  // if (process.env.SENTRY_DSN) {
+  //   Sentry.init({
+  //     dsn: process.env.SENTRY_DSN,
+  //     integrations: [nodeProfilingIntegration()],
+  //     tracesSampleRate: 1.0,
+  //     profilesSampleRate: 1.0,
+  //     environment: environmentValidation(String(process.env.NODE_ENV)),
+  //   });
 
-    Sentry.setTags({
-      version,
-    });
-  }
+  //   Sentry.setTags({
+  //     version,
+  //   });
+  // }
 
   const app = await NestFactory.create(AppModule, {
     rawBody: true,
