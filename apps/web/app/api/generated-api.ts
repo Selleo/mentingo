@@ -3392,6 +3392,242 @@ export interface DeleteManyCategoriesResponse {
   };
 }
 
+export interface GetThreadsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    courseId: string;
+    /** @format uuid */
+    createdByUserId: string;
+    archived: boolean;
+    createdAt: string;
+    updatedAt: string;
+    messageCount: number;
+    createdBy: {
+      /** @format uuid */
+      id: string;
+      firstName: string;
+      lastName: string;
+      avatarReference: string | null;
+    };
+    rootMessage: {
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      threadId: string;
+      /** @format uuid */
+      courseId: string;
+      /** @format uuid */
+      userId: string;
+      content: string;
+      parentMessageId: string | null;
+      deletedAt: string | null;
+      createdAt: string;
+      updatedAt: string;
+      user: {
+        /** @format uuid */
+        id: string;
+        firstName: string;
+        lastName: string;
+        avatarReference: string | null;
+      };
+    };
+    latestMessage: {
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      threadId: string;
+      /** @format uuid */
+      courseId: string;
+      /** @format uuid */
+      userId: string;
+      content: string;
+      parentMessageId: string | null;
+      deletedAt: string | null;
+      createdAt: string;
+      updatedAt: string;
+      user: {
+        /** @format uuid */
+        id: string;
+        firstName: string;
+        lastName: string;
+        avatarReference: string | null;
+      };
+    } | null;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface CreateThreadBody {
+  /**
+   * @minLength 1
+   * @maxLength 5000
+   */
+  content: string;
+}
+
+export interface CreateThreadResponse {
+  data: {
+    thread: {
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      courseId: string;
+      /** @format uuid */
+      createdByUserId: string;
+      archived: boolean;
+      createdAt: string;
+      updatedAt: string;
+      messageCount: number;
+      createdBy: {
+        /** @format uuid */
+        id: string;
+        firstName: string;
+        lastName: string;
+        avatarReference: string | null;
+      };
+      rootMessage: {
+        /** @format uuid */
+        id: string;
+        /** @format uuid */
+        threadId: string;
+        /** @format uuid */
+        courseId: string;
+        /** @format uuid */
+        userId: string;
+        content: string;
+        parentMessageId: string | null;
+        deletedAt: string | null;
+        createdAt: string;
+        updatedAt: string;
+        user: {
+          /** @format uuid */
+          id: string;
+          firstName: string;
+          lastName: string;
+          avatarReference: string | null;
+        };
+      };
+      latestMessage: {
+        /** @format uuid */
+        id: string;
+        /** @format uuid */
+        threadId: string;
+        /** @format uuid */
+        courseId: string;
+        /** @format uuid */
+        userId: string;
+        content: string;
+        parentMessageId: string | null;
+        deletedAt: string | null;
+        createdAt: string;
+        updatedAt: string;
+        user: {
+          /** @format uuid */
+          id: string;
+          firstName: string;
+          lastName: string;
+          avatarReference: string | null;
+        };
+      } | null;
+    };
+    message: {
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      threadId: string;
+      /** @format uuid */
+      courseId: string;
+      /** @format uuid */
+      userId: string;
+      content: string;
+      parentMessageId: string | null;
+      deletedAt: string | null;
+      createdAt: string;
+      updatedAt: string;
+      user: {
+        /** @format uuid */
+        id: string;
+        firstName: string;
+        lastName: string;
+        avatarReference: string | null;
+      };
+    };
+  };
+}
+
+export interface GetMessagesResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    threadId: string;
+    /** @format uuid */
+    courseId: string;
+    /** @format uuid */
+    userId: string;
+    content: string;
+    parentMessageId: string | null;
+    deletedAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+    user: {
+      /** @format uuid */
+      id: string;
+      firstName: string;
+      lastName: string;
+      avatarReference: string | null;
+    };
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface CreateMessageBody {
+  /**
+   * @minLength 1
+   * @maxLength 5000
+   */
+  content: string;
+  /** @format uuid */
+  parentMessageId?: string;
+}
+
+export interface CreateMessageResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    threadId: string;
+    /** @format uuid */
+    courseId: string;
+    /** @format uuid */
+    userId: string;
+    content: string;
+    parentMessageId: string | null;
+    deletedAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+    user: {
+      /** @format uuid */
+      id: string;
+      firstName: string;
+      lastName: string;
+      avatarReference: string | null;
+    };
+  };
+}
+
 export interface UploadScormPackageResponse {
   data: {
     message: string;
@@ -8374,6 +8610,94 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<DeleteManyCategoriesResponse, any>({
         path: `/api/category/deleteManyCategories`,
         method: "DELETE",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseChatControllerGetThreads
+     * @request GET:/api/course-chat/{courseId}/threads
+     */
+    courseChatControllerGetThreads: (
+      courseId: string,
+      query?: {
+        /** @min 1 */
+        page?: number;
+        /** @min 1 */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetThreadsResponse, any>({
+        path: `/api/course-chat/${courseId}/threads`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseChatControllerCreateThread
+     * @request POST:/api/course-chat/{courseId}/threads
+     */
+    courseChatControllerCreateThread: (
+      courseId: string,
+      data: CreateThreadBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateThreadResponse, any>({
+        path: `/api/course-chat/${courseId}/threads`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseChatControllerGetMessages
+     * @request GET:/api/course-chat/threads/{threadId}/messages
+     */
+    courseChatControllerGetMessages: (
+      threadId: string,
+      query?: {
+        /** @min 1 */
+        page?: number;
+        /** @min 1 */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetMessagesResponse, any>({
+        path: `/api/course-chat/threads/${threadId}/messages`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseChatControllerCreateMessage
+     * @request POST:/api/course-chat/threads/{threadId}/messages
+     */
+    courseChatControllerCreateMessage: (
+      threadId: string,
+      data: CreateMessageBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateMessageResponse, any>({
+        path: `/api/course-chat/threads/${threadId}/messages`,
+        method: "POST",
         body: data,
         type: ContentType.Json,
         format: "json",

@@ -2152,8 +2152,29 @@
     },
     "tabs": {
       "chapters": "Chapters",
+      "chat": "Chat",
       "moreFromAuthor": "More from author",
       "statistics": "Statistics"
+    },
+    "courseChat": {
+      "title": "Course chat",
+      "newThreadPlaceholder": "Start a new discussion...",
+      "startThread": "Start thread",
+      "messagesTitle": "Messages",
+      "noThreadSelected": "Select a thread",
+      "emptyThreads": "No conversations yet. Start the first thread.",
+      "emptyMessages": "No messages yet.",
+      "replyPlaceholder": "Write a reply...",
+      "reply": "Reply",
+      "repliesCount": "{{count}} replies",
+      "send": "Send",
+      "selectThread": "Select a thread to read messages.",
+      "users": "Users",
+      "onlineCount": "{{online}}/{{total}} online",
+      "online": "Online",
+      "offline": "Offline",
+      "emptyUsers": "No enrolled users yet.",
+      "mentionedToast": "Someone mentioned you in course chat."
     }
   },
   "studentChapterView": {

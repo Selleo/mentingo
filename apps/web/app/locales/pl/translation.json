@@ -2154,8 +2154,29 @@
     },
     "tabs": {
       "chapters": "Rozdziały",
+      "chat": "Chat",
       "moreFromAuthor": "Więcej od autora",
       "statistics": "Statystyki"
+    },
+    "courseChat": {
+      "title": "Chat kursu",
+      "newThreadPlaceholder": "Rozpocznij nową dyskusję...",
+      "startThread": "Rozpocznij wątek",
+      "messagesTitle": "Wiadomości",
+      "noThreadSelected": "Wybierz wątek",
+      "emptyThreads": "Nie ma jeszcze rozmów. Rozpocznij pierwszy wątek.",
+      "emptyMessages": "Nie ma jeszcze wiadomości.",
+      "replyPlaceholder": "Napisz odpowiedź...",
+      "reply": "Odpowiedz",
+      "repliesCount": "{{count}} odpowiedzi",
+      "send": "Wyślij",
+      "selectThread": "Wybierz wątek, aby przeczytać wiadomości.",
+      "users": "Użytkownicy",
+      "onlineCount": "{{online}}/{{total}} online",
+      "online": "Online",
+      "offline": "Offline",
+      "emptyUsers": "Brak zapisanych użytkowników.",
+      "mentionedToast": "Ktoś oznaczył Cię na czacie kursu."
     }
   },
   "studentChapterView": {

@@ -771,6 +771,13 @@
       "when": 1777303796631,
       "tag": "0109_secret_name_unique_per_tenant",
       "breakpoints": true
+    },
+    {
+      "idx": 110,
+      "version": "7",
+      "when": 1777464066471,
+      "tag": "0110_add_chat_to_course",
+      "breakpoints": true
     }
   ]
 }

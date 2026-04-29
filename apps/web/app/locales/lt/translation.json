@@ -2099,8 +2099,29 @@
     },
     "tabs": {
       "chapters": "Skyriai",
+      "chat": "Pokalbis",
       "moreFromAuthor": "Daugiau iš autoriaus",
       "statistics": "Statistika"
+    },
+    "courseChat": {
+      "title": "Kurso pokalbis",
+      "newThreadPlaceholder": "Pradėkite naują diskusiją...",
+      "startThread": "Pradėti temą",
+      "messagesTitle": "Žinutės",
+      "noThreadSelected": "Pasirinkite temą",
+      "emptyThreads": "Pokalbių dar nėra. Pradėkite pirmą temą.",
+      "emptyMessages": "Žinučių dar nėra.",
+      "replyPlaceholder": "Parašykite atsakymą...",
+      "reply": "Atsakyti",
+      "repliesCount": "{{count}} atsakymai",
+      "send": "Siųsti",
+      "selectThread": "Pasirinkite temą, kad skaitytumėte žinutes.",
+      "users": "Vartotojai",
+      "onlineCount": "{{online}}/{{total}} online",
+      "online": "Online",
+      "offline": "Offline",
+      "emptyUsers": "Dar nėra užsiregistravusių vartotojų.",
+      "mentionedToast": "Kažkas paminėjo jus kurso pokalbyje."
     }
   },
   "studentChapterView": {
