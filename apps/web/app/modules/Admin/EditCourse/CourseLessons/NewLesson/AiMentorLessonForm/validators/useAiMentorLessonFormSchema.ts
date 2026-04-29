@@ -87,6 +87,7 @@ export const aiMentorLessonFormSchema = (t: TFunction) =>
       voiceMode: z.nativeEnum(AI_MENTOR_VOICE_MODE).default(AI_MENTOR_VOICE_MODE.PRESET),
       ttsPreset: z.nativeEnum(AI_MENTOR_TTS_PRESET).default(AI_MENTOR_TTS_PRESET.MALE),
       customTtsReference: z.string().nullable().optional(),
+      pointsOverride: z.number().int().min(0).nullable().optional(),
     })
     .superRefine((values, ctx) => {
       if (values.voiceMode === AI_MENTOR_VOICE_MODE.CUSTOM && !values.customTtsReference?.trim()) {

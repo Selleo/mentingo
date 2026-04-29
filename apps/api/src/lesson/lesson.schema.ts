@@ -83,6 +83,7 @@ export const aiMentorLessonSchema = Type.Object({
   voiceMode: Type.Enum(AI_MENTOR_VOICE_MODE),
   ttsPreset: Type.Enum(AI_MENTOR_TTS_PRESET),
   customTtsReference: Type.Union([Type.String(), Type.Null()]),
+  pointsOverride: Type.Optional(Type.Union([Type.Integer({ minimum: 0 }), Type.Null()])),
 });
 
 export const lessonResourceSchema = Type.Object({
@@ -138,6 +139,7 @@ export const createAiMentorLessonSchema = Type.Intersect([
     voiceMode: Type.Optional(Type.Enum(AI_MENTOR_VOICE_MODE)),
     ttsPreset: Type.Optional(Type.Enum(AI_MENTOR_TTS_PRESET)),
     customTtsReference: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+    pointsOverride: Type.Optional(Type.Union([Type.Integer({ minimum: 0 }), Type.Null()])),
   }),
 ]);
 export const updateAiMentorLessonSchema = Type.Intersect([

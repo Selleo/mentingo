@@ -757,6 +757,13 @@
       "when": 1777408370114,
       "tag": "0107_add_gamification_points_tracer",
       "breakpoints": true
+    },
+    {
+      "idx": 108,
+      "version": "7",
+      "when": 1777434849963,
+      "tag": "0108_add_gamification_points_config",
+      "breakpoints": true
     }
   ]
 }

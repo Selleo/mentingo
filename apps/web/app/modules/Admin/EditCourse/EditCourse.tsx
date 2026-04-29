@@ -401,6 +401,7 @@ const EditCourse = () => {
               thumbnailS3Key={course?.thumbnailS3Key}
               trailerUrl={course?.trailerUrl}
               hasCertificate={course?.hasCertificate || false}
+              pointsOverride={course?.pointsOverride ?? null}
               courseLanguage={courseLanguage}
             />
           )}

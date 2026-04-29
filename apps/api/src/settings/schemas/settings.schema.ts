@@ -25,6 +25,8 @@ export const userEmailTriggersJSONSchema = Type.Object({
   userCourseFinished: Type.Boolean(),
 });
 
+const nonNegativeIntegerSchema = Type.Integer({ minimum: 0 });
+
 export const globalSettingsJSONSchema = Type.Object({
   unregisteredUserCoursesAccessibility: Type.Boolean(),
   modernCourseListEnabled: Type.Boolean(),
@@ -36,6 +38,9 @@ export const globalSettingsJSONSchema = Type.Object({
   platformSimpleLogoS3Key: Type.Union([Type.String(), Type.Null()]),
   MFAEnforcedRoles: Type.Array(Type.String()),
   defaultCourseCurrency: Type.Union(ALLOWED_CURRENCIES.map((currency) => Type.Literal(currency))),
+  defaultChapterPoints: nonNegativeIntegerSchema,
+  defaultCoursePoints: nonNegativeIntegerSchema,
+  defaultAiPassPoints: nonNegativeIntegerSchema,
   inviteOnlyRegistration: Type.Boolean(),
   userEmailTriggers: userEmailTriggersJSONSchema,
   primaryColor: Type.Union([Type.String(), Type.Null()]),

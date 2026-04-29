@@ -93,6 +93,7 @@ export const createCourseFactory = (db: DatabasePg) => {
       originType: "regular",
       sourceCourseId: null,
       sourceTenantId: null,
+      pointsOverride: null,
       baseLanguage: "en",
       availableLocales: ["en"],
       settings: {

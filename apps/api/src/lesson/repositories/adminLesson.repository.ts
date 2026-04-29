@@ -62,6 +62,7 @@ export class AdminLessonRepository {
           aiMentorLessons.customTtsReference,
           language,
         ),
+        aiMentorPointsOverride: aiMentorLessons.pointsOverride,
       })
       .from(lessons)
       .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
@@ -305,6 +306,7 @@ export class AdminLessonRepository {
       voiceMode: AiMentorVoiceMode;
       ttsPreset: AiMentorTTSPreset;
       customTtsReference?: string | null;
+      pointsOverride?: number | null;
       language: SupportedLanguages;
     },
     dbInstance: DatabasePg = this.db,
@@ -330,6 +332,7 @@ export class AdminLessonRepository {
         voiceMode: data.voiceMode,
         ttsPreset: data.ttsPreset,
         customTtsReference,
+        pointsOverride: data.pointsOverride,
       })
       .where(eq(aiMentorLessons.lessonId, lessonId));
   }
@@ -344,6 +347,7 @@ export class AdminLessonRepository {
       voiceMode: AiMentorVoiceMode;
       ttsPreset: AiMentorTTSPreset;
       customTtsReference?: string | null;
+      pointsOverride?: number | null;
       language: SupportedLanguages;
     },
     dbInstance: DatabasePg = this.db,
@@ -364,6 +368,7 @@ export class AdminLessonRepository {
         voiceMode: data.voiceMode,
         ttsPreset: data.ttsPreset,
         customTtsReference,
+        pointsOverride: data.pointsOverride,
       })
       .returning();
   }

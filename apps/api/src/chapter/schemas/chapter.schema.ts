@@ -19,6 +19,7 @@ export const chapterSchema = Type.Object({
   updatedAt: Type.Optional(Type.String()),
   quizCount: Type.Optional(Type.Number()),
   displayOrder: Type.Number(),
+  pointsOverride: Type.Optional(Type.Union([Type.Integer({ minimum: 0 }), Type.Null()])),
 });
 
 export const createChapterSchema = Type.Intersect([

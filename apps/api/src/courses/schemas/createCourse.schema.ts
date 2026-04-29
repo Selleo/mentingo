@@ -14,6 +14,7 @@ export const baseCourseSchema = Type.Object({
   categoryId: Type.String({ format: "uuid" }),
   isScorm: Type.Optional(Type.Boolean()),
   hasCertificate: Type.Optional(Type.Boolean()),
+  pointsOverride: Type.Optional(Type.Union([Type.Integer({ minimum: 0 }), Type.Null()])),
   language: supportedLanguagesSchema,
 });
 

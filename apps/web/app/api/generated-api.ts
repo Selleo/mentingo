@@ -336,6 +336,9 @@ export interface GetPublicGlobalSettingsResponse {
     platformSimpleLogoS3Key: string | null;
     MFAEnforcedRoles: string[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+    defaultChapterPoints: number;
+    defaultCoursePoints: number;
+    defaultAiPassPoints: number;
     inviteOnlyRegistration: boolean;
     userEmailTriggers: {
       userFirstLogin: boolean;
@@ -464,6 +467,9 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     platformSimpleLogoS3Key: string | null;
     MFAEnforcedRoles: string[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+    defaultChapterPoints: number;
+    defaultCoursePoints: number;
+    defaultAiPassPoints: number;
     inviteOnlyRegistration: boolean;
     userEmailTriggers: {
       userFirstLogin: boolean;
@@ -506,6 +512,9 @@ export interface UpdateEnforceSSOResponse {
     platformSimpleLogoS3Key: string | null;
     MFAEnforcedRoles: string[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+    defaultChapterPoints: number;
+    defaultCoursePoints: number;
+    defaultAiPassPoints: number;
     inviteOnlyRegistration: boolean;
     userEmailTriggers: {
       userFirstLogin: boolean;
@@ -548,6 +557,9 @@ export interface UpdateModernCourseListEnabledResponse {
     platformSimpleLogoS3Key: string | null;
     MFAEnforcedRoles: string[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+    defaultChapterPoints: number;
+    defaultCoursePoints: number;
+    defaultAiPassPoints: number;
     inviteOnlyRegistration: boolean;
     userEmailTriggers: {
       userFirstLogin: boolean;
@@ -621,6 +633,9 @@ export interface UpdateColorSchemaResponse {
     platformSimpleLogoS3Key: string | null;
     MFAEnforcedRoles: string[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+    defaultChapterPoints: number;
+    defaultCoursePoints: number;
+    defaultAiPassPoints: number;
     inviteOnlyRegistration: boolean;
     userEmailTriggers: {
       userFirstLogin: boolean;
@@ -782,6 +797,12 @@ export type UpdateMFAEnforcedRolesBody = object;
 
 export interface UpdateDefaultCourseCurrencyBody {
   defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+}
+
+export interface UpdateGamificationPointDefaultsBody {
+  defaultChapterPoints: number;
+  defaultCoursePoints: number;
+  defaultAiPassPoints: number;
 }
 
 export interface UpdateConfigWarningDismissedBody {
@@ -1619,6 +1640,7 @@ export interface GetCourseResponse {
       updatedAt?: string;
       quizCount?: number;
       displayOrder: number;
+      pointsOverride?: number | null;
     }[];
     completedChapterCount?: number;
     courseChapterCount: number;
@@ -1636,6 +1658,7 @@ export interface GetCourseResponse {
     sourceTenantId: string | null;
     isScorm?: boolean;
     priceInCents: number;
+    pointsOverride?: number | null;
     thumbnailUrl?: string;
     trailerUrl?: string | null;
     title: string;
@@ -1728,6 +1751,7 @@ export interface GetBetaCourseByIdResponse {
           voiceMode: "preset" | "custom";
           ttsPreset: "male" | "female";
           customTtsReference: string | null;
+          pointsOverride?: number | null;
         } | null;
         updatedAt?: string;
       }[];
@@ -1740,6 +1764,7 @@ export interface GetBetaCourseByIdResponse {
       updatedAt?: string;
       quizCount?: number;
       displayOrder: number;
+      pointsOverride?: number | null;
     }[];
     completedChapterCount?: number;
     courseChapterCount: number;
@@ -1757,6 +1782,7 @@ export interface GetBetaCourseByIdResponse {
     sourceTenantId: string | null;
     isScorm?: boolean;
     priceInCents: number;
+    pointsOverride?: number | null;
     thumbnailUrl?: string;
     thumbnailS3Key?: string;
     thumbnailS3SingedUrl?: string | null;
@@ -1784,6 +1810,7 @@ export type CreateCourseBody = {
   categoryId: string;
   isScorm?: boolean;
   hasCertificate?: boolean;
+  pointsOverride?: number | null;
   /** @default "en" */
   language: "en" | "pl" | "de" | "lt" | "cs";
 } & {
@@ -1809,6 +1836,7 @@ export interface UpdateCourseBody {
   categoryId?: string;
   chapters?: string[];
   archived?: boolean;
+  pointsOverride?: number | null;
   /** @default "en" */
   language?: "en" | "pl" | "de" | "lt" | "cs";
 }
@@ -2358,6 +2386,7 @@ export type BetaCreateLessonBody = {
     voiceMode: "preset" | "custom";
     ttsPreset: "male" | "female";
     customTtsReference: string | null;
+    pointsOverride?: number | null;
   } | null;
   updatedAt?: string;
 } & {
@@ -2438,6 +2467,7 @@ export type BetaCreateAiMentorLessonBody = {
     voiceMode: "preset" | "custom";
     ttsPreset: "male" | "female";
     customTtsReference: string | null;
+    pointsOverride?: number | null;
   } | null;
   updatedAt?: string;
 } & {
@@ -2451,6 +2481,7 @@ export type BetaCreateAiMentorLessonBody = {
   voiceMode?: "preset" | "custom";
   ttsPreset?: "male" | "female";
   customTtsReference?: string | null;
+  pointsOverride?: number | null;
 };
 
 export interface BetaCreateAiMentorLessonResponse {
@@ -2517,6 +2548,7 @@ export type BetaUpdateAiMentorLessonBody = ({
     voiceMode: "preset" | "custom";
     ttsPreset: "male" | "female";
     customTtsReference: string | null;
+    pointsOverride?: number | null;
   } | null;
   updatedAt?: string;
 } & {
@@ -2527,6 +2559,7 @@ export type BetaUpdateAiMentorLessonBody = ({
   voiceMode?: "preset" | "custom";
   ttsPreset?: "male" | "female";
   customTtsReference?: string | null;
+  pointsOverride?: number | null;
 }) & {
   /** @default "en" */
   language: "en" | "pl" | "de" | "lt" | "cs";
@@ -2720,6 +2753,7 @@ export type BetaUpdateLessonBody = ({
     voiceMode: "preset" | "custom";
     ttsPreset: "male" | "female";
     customTtsReference: string | null;
+    pointsOverride?: number | null;
   } | null;
   updatedAt?: string;
 } & {
@@ -2992,6 +3026,7 @@ export interface GetChapterWithLessonResponse {
 
 export type BetaCreateChapterBody = {
   title: string;
+  pointsOverride?: number | null;
   lessons?: {
     /** @format uuid */
     id: string;
@@ -3077,6 +3112,7 @@ export interface BetaCreateChapterResponse {
 
 export type UpdateChapterBody = ({
   title?: string;
+  pointsOverride?: number | null;
   lessons?: {
     /** @format uuid */
     id: string;
@@ -5296,6 +5332,24 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<void, any>({
         path: `/api/settings/certificate-background/image`,
         method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateGamificationPointDefaults
+     * @request PATCH:/api/settings/admin/points-defaults
+     */
+    settingsControllerUpdateGamificationPointDefaults: (
+      data: UpdateGamificationPointDefaultsBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/settings/admin/points-defaults`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
 

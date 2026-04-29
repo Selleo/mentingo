@@ -496,6 +496,7 @@ export class AdminLessonService {
           voiceMode: data.voiceMode ?? AI_MENTOR_VOICE_MODE.PRESET,
           ttsPreset: data.ttsPreset ?? AI_MENTOR_TTS_PRESET.MALE,
           customTtsReference: data.customTtsReference,
+          pointsOverride: data.pointsOverride,
           language,
         },
         trx,
@@ -511,7 +512,14 @@ export class AdminLessonService {
     userId: UUIDType,
   ) {
     return await this.db.transaction(async (trx) => {
-      const { type: _type, aiMentorInstructions, completionConditions, name, ...lessonData } = data;
+      const {
+        type: _type,
+        aiMentorInstructions,
+        completionConditions,
+        name,
+        pointsOverride,
+        ...lessonData
+      } = data;
 
       const { availableLocales } = await this.localizationService.getBaseLanguage(
         ENTITY_TYPE.LESSON,
@@ -556,6 +564,7 @@ export class AdminLessonService {
           voiceMode,
           ttsPreset: data.ttsPreset ?? AI_MENTOR_TTS_PRESET.MALE,
           customTtsReference,
+          pointsOverride,
           language: data.language,
         },
         trx,

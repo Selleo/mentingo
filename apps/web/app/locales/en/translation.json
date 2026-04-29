@@ -1768,6 +1768,14 @@
       "selectedCount": "Selected:",
       "exportButton": "Share",
       "exportingButton": "Sharing..."
+    },
+    "gamification": {
+      "pointsOverride": {
+        "useTenantDefault": "Use tenant default",
+        "description": "Turn this off to set a custom point value. Zero is allowed.",
+        "pointsLabel": "Points override",
+        "defaultPlaceholder": "Tenant default"
+      }
     }
   },
   "registerView": {
@@ -3037,6 +3045,18 @@
       "ownerNotAdmin": "API key owner no longer has admin permissions",
       "missingApiKeyHeader": "Missing X-API-Key header",
       "missingTenantIdHeader": "Missing X-Tenant-Id header"
+    }
+  },
+  "gamificationPointDefaults": {
+    "title": "Gamification point defaults",
+    "fields": {
+      "defaultChapterPoints": "Chapter completion",
+      "defaultCoursePoints": "Course completion",
+      "defaultAiPassPoints": "AI mentor pass"
+    },
+    "toast": {
+      "updateSuccess": "Gamification point defaults updated",
+      "updateError": "Could not update gamification point defaults"
     }
   }
 }

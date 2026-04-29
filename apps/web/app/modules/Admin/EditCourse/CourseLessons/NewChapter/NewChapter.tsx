@@ -8,6 +8,7 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
 import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/components/MissingTranslationsAlert";
+import { PointsOverrideField } from "~/modules/Admin/EditCourse/components/PointsOverrideField";
 
 import { ContentTypes, DeleteContentType } from "../../EditCourse.types";
 
@@ -89,6 +90,9 @@ const NewChapter = ({ setContentTypeToDisplay, chapter, language }: NewChapterPr
               </FormItem>
             )}
           />
+          <div className="mt-4">
+            <PointsOverrideField form={form} name="pointsOverride" />
+          </div>
           <div className="mt-4 flex space-x-4">
             <Button type="submit">{t("common.button.save")}</Button>
             {chapter ? (

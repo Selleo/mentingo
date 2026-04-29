@@ -62,6 +62,7 @@ export const useAiMentorLessonForm = ({
       voiceMode: lessonToEdit?.aiMentor?.voiceMode || AI_MENTOR_VOICE_MODE.PRESET,
       ttsPreset: lessonToEdit?.aiMentor?.ttsPreset || AI_MENTOR_TTS_PRESET.MALE,
       customTtsReference: lessonToEdit?.aiMentor?.customTtsReference || "",
+      pointsOverride: lessonToEdit?.aiMentor?.pointsOverride ?? null,
     },
   });
 
@@ -79,6 +80,7 @@ export const useAiMentorLessonForm = ({
         voiceMode: lessonToEdit.aiMentor?.voiceMode || AI_MENTOR_VOICE_MODE.PRESET,
         ttsPreset: lessonToEdit.aiMentor?.ttsPreset || AI_MENTOR_TTS_PRESET.MALE,
         customTtsReference: lessonToEdit.aiMentor?.customTtsReference || "",
+        pointsOverride: lessonToEdit.aiMentor?.pointsOverride ?? null,
       });
     }
   }, [lessonToEdit, reset]);

@@ -1767,6 +1767,14 @@
       "selectedCount": "Wybrano:",
       "exportButton": "Udostępnij",
       "exportingButton": "Udostępnianie..."
+    },
+    "gamification": {
+      "pointsOverride": {
+        "useTenantDefault": "Użyj domyślnej wartości organizacji",
+        "description": "Wyłącz, aby ustawić własną liczbę punktów. Zero jest dozwolone.",
+        "pointsLabel": "Nadpisanie punktów",
+        "defaultPlaceholder": "Domyślna wartość organizacji"
+      }
     }
   },
   "registerView": {
@@ -3062,6 +3070,18 @@
       "ownerNotAdmin": "Właściciel klucza API nie ma już uprawnień administratora",
       "missingApiKeyHeader": "Brak nagłówka X-API-Key",
       "missingTenantIdHeader": "Brak nagłówka X-Tenant-Id"
+    }
+  },
+  "gamificationPointDefaults": {
+    "title": "Domyślne punkty gamifikacji",
+    "fields": {
+      "defaultChapterPoints": "Ukończenie rozdziału",
+      "defaultCoursePoints": "Ukończenie kursu",
+      "defaultAiPassPoints": "Zaliczenie AI mentora"
+    },
+    "toast": {
+      "updateSuccess": "Zaktualizowano domyślne punkty gamifikacji",
+      "updateError": "Nie udało się zaktualizować domyślnych punktów gamifikacji"
     }
   }
 }

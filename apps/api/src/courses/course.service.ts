@@ -1326,6 +1326,7 @@ export class CourseService {
         isContentReadonly: sql<boolean>`${courses.originType} = 'exported'`,
         sourceCourseId: courses.sourceCourseId,
         sourceTenantId: courses.sourceTenantId,
+        pointsOverride: courses.pointsOverride,
       })
       .from(courses)
       .innerJoin(categories, eq(courses.categoryId, categories.id))
@@ -1345,6 +1346,7 @@ export class CourseService {
         lessonCount: chapters.lessonCount,
         updatedAt: chapters.updatedAt,
         isFree: chapters.isFreemium,
+        pointsOverride: chapters.pointsOverride,
         lessons: sql<LessonForChapterSchema>`
           COALESCE(
             (
@@ -1781,6 +1783,7 @@ export class CourseService {
           categoryId: createCourseBody.categoryId,
           stripeProductId: productId,
           stripePriceId: priceId,
+          pointsOverride: createCourseBody.pointsOverride,
           settings: settingsToJSONBuildObject(settings),
         })
         .returning();

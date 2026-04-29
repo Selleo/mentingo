@@ -69,6 +69,8 @@ import {
   updateDefaultCourseCurrencySchema,
   updateGlobalColorSchema,
   UpdateGlobalColorSchemaBody,
+  UpdateGamificationPointDefaultsBody,
+  updateGamificationPointDefaultsSchema,
   UpdateMFAEnforcedRolesRequest,
   updateMFAEnforcedRolesSchema,
   UpdateSettingsBody,
@@ -501,6 +503,23 @@ export class SettingsController {
       res,
       SETTINGS_IMAGE_ASSET.CERTIFICATE_BACKGROUND,
     );
+  }
+
+  @Patch("admin/points-defaults")
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
+  @Validate({
+    request: [{ type: "body", schema: updateGamificationPointDefaultsSchema }],
+  })
+  async updateGamificationPointDefaults(
+    @Body() newSettings: UpdateGamificationPointDefaultsBody,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
+    const updatedGlobalSettings = await this.settingsService.updateGamificationPointDefaults(
+      newSettings,
+      currentUser,
+    );
+
+    return new BaseResponse(updatedGlobalSettings);
   }
 
   @Patch("admin/default-course-currency")

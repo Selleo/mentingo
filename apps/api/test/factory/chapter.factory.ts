@@ -71,6 +71,7 @@ export const createChapterFactory = (db: DatabasePg) => {
       isFreemium: false,
       displayOrder: faker.number.int({ min: 1, max: 100 }),
       lessonCount: faker.number.int({ min: 0, max: 20 }),
+      pointsOverride: null,
     };
   });
 };

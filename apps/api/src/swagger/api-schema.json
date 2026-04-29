@@ -918,6 +918,27 @@
         }
       }
     },
+    "/api/settings/admin/points-defaults": {
+      "patch": {
+        "operationId": "SettingsController_updateGamificationPointDefaults",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateGamificationPointDefaultsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/settings/admin/default-course-currency": {
       "patch": {
         "operationId": "SettingsController_updateDefaultCourseCurrency",
@@ -11527,6 +11548,18 @@
                   }
                 ]
               },
+              "defaultChapterPoints": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "defaultCoursePoints": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "defaultAiPassPoints": {
+                "minimum": 0,
+                "type": "integer"
+              },
               "inviteOnlyRegistration": {
                 "type": "boolean"
               },
@@ -11631,6 +11664,9 @@
               "platformSimpleLogoS3Key",
               "MFAEnforcedRoles",
               "defaultCourseCurrency",
+              "defaultChapterPoints",
+              "defaultCoursePoints",
+              "defaultAiPassPoints",
               "inviteOnlyRegistration",
               "userEmailTriggers",
               "primaryColor",
@@ -12283,6 +12319,18 @@
                   }
                 ]
               },
+              "defaultChapterPoints": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "defaultCoursePoints": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "defaultAiPassPoints": {
+                "minimum": 0,
+                "type": "integer"
+              },
               "inviteOnlyRegistration": {
                 "type": "boolean"
               },
@@ -12387,6 +12435,9 @@
               "platformSimpleLogoS3Key",
               "MFAEnforcedRoles",
               "defaultCourseCurrency",
+              "defaultChapterPoints",
+              "defaultCoursePoints",
+              "defaultAiPassPoints",
               "inviteOnlyRegistration",
               "userEmailTriggers",
               "primaryColor",
@@ -12511,6 +12562,18 @@
                   }
                 ]
               },
+              "defaultChapterPoints": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "defaultCoursePoints": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "defaultAiPassPoints": {
+                "minimum": 0,
+                "type": "integer"
+              },
               "inviteOnlyRegistration": {
                 "type": "boolean"
               },
@@ -12615,6 +12678,9 @@
               "platformSimpleLogoS3Key",
               "MFAEnforcedRoles",
               "defaultCourseCurrency",
+              "defaultChapterPoints",
+              "defaultCoursePoints",
+              "defaultAiPassPoints",
               "inviteOnlyRegistration",
               "userEmailTriggers",
               "primaryColor",
@@ -12739,6 +12805,18 @@
                   }
                 ]
               },
+              "defaultChapterPoints": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "defaultCoursePoints": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "defaultAiPassPoints": {
+                "minimum": 0,
+                "type": "integer"
+              },
               "inviteOnlyRegistration": {
                 "type": "boolean"
               },
@@ -12843,6 +12921,9 @@
               "platformSimpleLogoS3Key",
               "MFAEnforcedRoles",
               "defaultCourseCurrency",
+              "defaultChapterPoints",
+              "defaultCoursePoints",
+              "defaultAiPassPoints",
               "inviteOnlyRegistration",
               "userEmailTriggers",
               "primaryColor",
@@ -13122,6 +13203,18 @@
                   }
                 ]
               },
+              "defaultChapterPoints": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "defaultCoursePoints": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "defaultAiPassPoints": {
+                "minimum": 0,
+                "type": "integer"
+              },
               "inviteOnlyRegistration": {
                 "type": "boolean"
               },
@@ -13226,6 +13319,9 @@
               "platformSimpleLogoS3Key",
               "MFAEnforcedRoles",
               "defaultCourseCurrency",
+              "defaultChapterPoints",
+              "defaultCoursePoints",
+              "defaultAiPassPoints",
               "inviteOnlyRegistration",
               "userEmailTriggers",
               "primaryColor",
@@ -13807,6 +13903,28 @@
             "type": "boolean"
           }
         }
+      },
+      "UpdateGamificationPointDefaultsBody": {
+        "type": "object",
+        "properties": {
+          "defaultChapterPoints": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "defaultCoursePoints": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "defaultAiPassPoints": {
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "defaultChapterPoints",
+          "defaultCoursePoints",
+          "defaultAiPassPoints"
+        ]
       },
       "UpdateDefaultCourseCurrencyBody": {
         "type": "object",
@@ -17609,6 +17727,17 @@
                     },
                     "displayOrder": {
                       "type": "number"
+                    },
+                    "pointsOverride": {
+                      "anyOf": [
+                        {
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     }
                   },
                   "required": [
@@ -17707,6 +17836,17 @@
               },
               "priceInCents": {
                 "type": "number"
+              },
+              "pointsOverride": {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
               "thumbnailUrl": {
                 "type": "string"
@@ -18259,6 +18399,17 @@
                                         "type": "null"
                                       }
                                     ]
+                                  },
+                                  "pointsOverride": {
+                                    "anyOf": [
+                                      {
+                                        "minimum": 0,
+                                        "type": "integer"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
                                   }
                                 },
                                 "required": [
@@ -18333,6 +18484,17 @@
                     },
                     "displayOrder": {
                       "type": "number"
+                    },
+                    "pointsOverride": {
+                      "anyOf": [
+                        {
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     }
                   },
                   "required": [
@@ -18430,6 +18592,17 @@
               },
               "priceInCents": {
                 "type": "number"
+              },
+              "pointsOverride": {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
               "thumbnailUrl": {
                 "type": "string"
@@ -18601,6 +18774,17 @@
               "hasCertificate": {
                 "type": "boolean"
               },
+              "pointsOverride": {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "language": {
                 "default": "en",
                 "anyOf": [
@@ -18719,6 +18903,17 @@
           },
           "archived": {
             "type": "boolean"
+          },
+          "pointsOverride": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "language": {
             "default": "en",
@@ -21225,6 +21420,17 @@
                             "type": "null"
                           }
                         ]
+                      },
+                      "pointsOverride": {
+                        "anyOf": [
+                          {
+                            "minimum": 0,
+                            "type": "integer"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
                       }
                     },
                     "required": [
@@ -21648,6 +21854,17 @@
                             "type": "null"
                           }
                         ]
+                      },
+                      "pointsOverride": {
+                        "anyOf": [
+                          {
+                            "minimum": 0,
+                            "type": "integer"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
                       }
                     },
                     "required": [
@@ -21738,6 +21955,17 @@
                 "anyOf": [
                   {
                     "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "pointsOverride": {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "integer"
                   },
                   {
                     "type": "null"
@@ -22111,6 +22339,17 @@
                                 "type": "null"
                               }
                             ]
+                          },
+                          "pointsOverride": {
+                            "anyOf": [
+                              {
+                                "minimum": 0,
+                                "type": "integer"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
                           }
                         },
                         "required": [
@@ -22194,6 +22433,17 @@
                     "anyOf": [
                       {
                         "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "pointsOverride": {
+                    "anyOf": [
+                      {
+                        "minimum": 0,
+                        "type": "integer"
                       },
                       {
                         "type": "null"
@@ -23249,6 +23499,17 @@
                             "anyOf": [
                               {
                                 "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "pointsOverride": {
+                            "anyOf": [
+                              {
+                                "minimum": 0,
+                                "type": "integer"
                               },
                               {
                                 "type": "null"
@@ -24448,6 +24709,17 @@
               },
               "displayOrder": {
                 "type": "number"
+              },
+              "pointsOverride": {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -24829,6 +25101,17 @@
                                   "type": "null"
                                 }
                               ]
+                            },
+                            "pointsOverride": {
+                              "anyOf": [
+                                {
+                                  "minimum": 0,
+                                  "type": "integer"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
                             }
                           },
                           "required": [
@@ -24897,6 +25180,17 @@
               },
               "quizCount": {
                 "type": "number"
+              },
+              "pointsOverride": {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -25309,6 +25603,17 @@
                                       "type": "null"
                                     }
                                   ]
+                                },
+                                "pointsOverride": {
+                                  "anyOf": [
+                                    {
+                                      "minimum": 0,
+                                      "type": "integer"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
                                 }
                               },
                               "required": [
@@ -25377,6 +25682,17 @@
                   },
                   "quizCount": {
                     "type": "number"
+                  },
+                  "pointsOverride": {
+                    "anyOf": [
+                      {
+                        "minimum": 0,
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
                   }
                 }
               },

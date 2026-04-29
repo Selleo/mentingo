@@ -2,7 +2,13 @@ import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 
 import { POINT_EVENT_TYPES } from "src/gamification/gamification.constants";
 import { PointsService } from "src/gamification/points.service";
-import { pointEvents, userStatistics } from "src/storage/schema";
+import {
+  aiMentorLessons,
+  chapters,
+  courses,
+  pointEvents,
+  userStatistics,
+} from "src/storage/schema";
 
 import type { UUIDType } from "src/common";
 
@@ -21,8 +27,24 @@ type UserStatisticRecord = {
   lastPointAt: string | null;
 };
 
+type PointConfigurationTable = typeof chapters | typeof courses | typeof aiMentorLessons;
+
 class FakeTransaction {
   constructor(private readonly state: FakeDb) {}
+
+  select() {
+    const operation = {
+      sourceTable: undefined as PointConfigurationTable | undefined,
+      from: (table: PointConfigurationTable) => {
+        operation.sourceTable = table;
+        return operation;
+      },
+      innerJoin: () => operation,
+      where: async () => [{ points: this.state.resolvePoints(operation.sourceTable) }],
+    };
+
+    return operation;
+  }
 
   insert(table: unknown) {
     const operation = {
@@ -76,6 +98,24 @@ class FakeDb {
   pointEventUniqueKeys = new Set<string>();
   userStatistics = new Map<UUIDType, UserStatisticRecord>();
   failStatisticsUpsert = false;
+  defaults = {
+    chapter: 10,
+    course: 50,
+    aiPass: 30,
+  };
+  overrides = {
+    chapter: undefined as number | null | undefined,
+    course: undefined as number | null | undefined,
+    aiPass: undefined as number | null | undefined,
+  };
+
+  resolvePoints(table?: PointConfigurationTable) {
+    if (table === chapters) return this.overrides.chapter ?? this.defaults.chapter ?? 0;
+    if (table === courses) return this.overrides.course ?? this.defaults.course ?? 0;
+    if (table === aiMentorLessons) return this.overrides.aiPass ?? this.defaults.aiPass ?? 0;
+
+    return 0;
+  }
 
   async transaction<T>(callback: (trx: FakeTransaction) => Promise<T>): Promise<T> {
     const pointEventsSnapshot = [...this.pointEvents];
@@ -135,7 +175,58 @@ describe("PointsService", () => {
     expect(db.userStatistics.get(userId)?.totalPoints).toBe(10);
   });
 
-  it("awards hardcoded course and AI mentor pass points", async () => {
+  it("resolves points from per-entity overrides when present", async () => {
+    const { db, service } = createService();
+    db.overrides.chapter = 25;
+
+    const result = await service.award(
+      userId,
+      POINT_EVENT_TYPES.CHAPTER_COMPLETED,
+      chapterId,
+      tenantId,
+    );
+
+    expect(result).toEqual({ pointsAwarded: 25 });
+    expect(db.pointEvents[0]?.points).toBe(25);
+    expect(db.userStatistics.get(userId)?.totalPoints).toBe(25);
+  });
+
+  it("falls back to tenant defaults when an override is null", async () => {
+    const { db, service } = createService();
+    db.overrides.course = null;
+    db.defaults.course = 42;
+
+    const result = await service.award(
+      userId,
+      POINT_EVENT_TYPES.COURSE_COMPLETED,
+      courseId,
+      tenantId,
+    );
+
+    expect(result).toEqual({ pointsAwarded: 42 });
+    expect(db.pointEvents[0]?.points).toBe(42);
+    expect(db.userStatistics.get(userId)?.totalPoints).toBe(42);
+  });
+
+  it("snapshots zero-point events without bumping totals", async () => {
+    const { db, service } = createService();
+    db.overrides.aiPass = null;
+    db.defaults.aiPass = 0;
+
+    const result = await service.award(
+      userId,
+      POINT_EVENT_TYPES.AI_MENTOR_PASSED,
+      lessonId,
+      tenantId,
+    );
+
+    expect(result).toEqual({ pointsAwarded: 0 });
+    expect(db.pointEvents).toHaveLength(1);
+    expect(db.pointEvents[0]?.points).toBe(0);
+    expect(db.userStatistics.has(userId)).toBe(false);
+  });
+
+  it("awards configured course and AI mentor pass points", async () => {
     const { db, service } = createService();
 
     const courseAward = await service.award(

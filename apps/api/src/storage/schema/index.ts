@@ -271,6 +271,7 @@ export const courses = pgTable(
       .array()
       .notNull()
       .default(sql`ARRAY['en']::text[]`),
+    pointsOverride: integer("points_override"),
     tenantId,
   },
   withTenantIdIndex("courses", (table) => ({
@@ -313,6 +314,7 @@ export const chapters = pgTable(
     isFreemium: boolean("is_freemium").notNull().default(false),
     displayOrder: integer("display_order"),
     lessonCount: integer("lesson_count").notNull().default(0),
+    pointsOverride: integer("points_override"),
     tenantId,
   },
   withTenantIdIndex("chapters"),
@@ -357,6 +359,7 @@ export const aiMentorLessons = pgTable(
     voiceMode: text("voice_mode").notNull().default("preset"),
     ttsPreset: text("tts_preset").notNull().default("male"),
     customTtsReference: jsonb("custom_tts_reference"),
+    pointsOverride: integer("points_override"),
     tenantId,
   },
   withTenantIdIndex("ai_mentor_lessons"),

@@ -1715,6 +1715,14 @@
       "selectedCount": "Pasirinkta:",
       "exportButton": "Dalintis",
       "exportingButton": "Bendrinama..."
+    },
+    "gamification": {
+      "pointsOverride": {
+        "useTenantDefault": "Naudoti organizacijos numatytąją reikšmę",
+        "description": "Išjunkite, jei norite nustatyti individualią taškų reikšmę. Nulis leidžiamas.",
+        "pointsLabel": "Taškų perrašymas",
+        "defaultPlaceholder": "Organizacijos numatytoji reikšmė"
+      }
     }
   },
   "registerView": {
@@ -2984,6 +2992,18 @@
       "ownerNotAdmin": "API rakto savininkas nebeturi administratoriaus teisių",
       "missingApiKeyHeader": "Trūksta X-API-Key antraštės",
       "missingTenantIdHeader": "Trūksta X-Tenant-Id antraštės"
+    }
+  },
+  "gamificationPointDefaults": {
+    "title": "Gamifikacijos taškų numatytosios reikšmės",
+    "fields": {
+      "defaultChapterPoints": "Skyriaus užbaigimas",
+      "defaultCoursePoints": "Kurso užbaigimas",
+      "defaultAiPassPoints": "AI mentoriaus išlaikymas"
+    },
+    "toast": {
+      "updateSuccess": "Gamifikacijos taškų numatytosios reikšmės atnaujintos",
+      "updateError": "Nepavyko atnaujinti gamifikacijos taškų numatytųjų reikšmių"
     }
   }
 }

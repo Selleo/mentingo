@@ -1715,6 +1715,14 @@
       "selectedCount": "Vybraný:",
       "exportButton": "Podíl",
       "exportingButton": "Sdílení..."
+    },
+    "gamification": {
+      "pointsOverride": {
+        "useTenantDefault": "Použít výchozí hodnotu organizace",
+        "description": "Vypněte pro nastavení vlastní bodové hodnoty. Nula je povolena.",
+        "pointsLabel": "Přepsání bodů",
+        "defaultPlaceholder": "Výchozí hodnota organizace"
+      }
     }
   },
   "registerView": {
@@ -2984,6 +2992,18 @@
       "ownerNotAdmin": "Vlastník klíče API již nemá oprávnění správce",
       "missingApiKeyHeader": "Chybí hlavička X-API-Key",
       "missingTenantIdHeader": "Chybí hlavička X-Tenant-Id"
+    }
+  },
+  "gamificationPointDefaults": {
+    "title": "Výchozí body gamifikace",
+    "fields": {
+      "defaultChapterPoints": "Dokončení kapitoly",
+      "defaultCoursePoints": "Dokončení kurzu",
+      "defaultAiPassPoints": "Splnění AI mentora"
+    },
+    "toast": {
+      "updateSuccess": "Výchozí body gamifikace byly aktualizovány",
+      "updateError": "Nepodařilo se aktualizovat výchozí body gamifikace"
     }
   }
 }

@@ -75,3 +75,67 @@
 - `pnpm test:api:e2e` was attempted and failed in the pre-existing `group.controller.e2e-spec.ts` student-cookie setup path (`Invalid value "undefined" for header "Cookie"`) plus an `afterAll` timeout; 19/20 suites passed.
 - `pnpm test:web:e2e` was attempted and failed because the Playwright Chromium executable is not installed locally (`pnpm exec playwright install` required); DB setup completed before browser launch.
 - `pnpm format:check` still fails on pre-existing formatting issues in `.bmad-core/`, `.claude/`, `.serena/`, untracked `CURRENT-WORK` issue docs, and `docs/gamification.md`; changed source/test files were formatted with Prettier.
+
+## 2026-04-29 — Slice 3: Tenant point defaults + per-entity overrides — DONE
+
+### Key decisions
+
+- Replaced hardcoded gamification point values with tenant-configured defaults stored on the existing global settings JSONB blob (`defaultChapterPoints`, `defaultCoursePoints`, `defaultAiPassPoints`) seeded to 10 / 50 / 30.
+- Added nullable `pointsOverride` columns to courses, chapters, and AI mentor lessons; `null` means use the tenant default while an explicit integer, including `0`, overrides it.
+- Updated `PointsService.award()` to resolve points at award time via override → tenant default → 0 and snapshot the resolved value into `point_events.points`; zero-point events still write the idempotency ledger row but do not bump `user_statistics.totalPoints`.
+- Added tenant-admin settings UI/API for editing gamification defaults and per-entity editor controls with a "Use tenant default" switch plus enabled/disabled number input.
+- Kept all new admin writes behind the existing settings/course/chapter/lesson permissions; no new permission entries were introduced.
+
+### Files changed
+
+- `apps/api/src/storage/schema/index.ts`
+- `apps/api/src/storage/migrations/0108_add_gamification_points_config.sql`
+- `apps/api/src/storage/migrations/meta/_journal.json`
+- `apps/api/src/gamification/gamification.constants.ts`
+- `apps/api/src/gamification/points.service.ts`
+- `apps/api/src/gamification/__tests__/points.service.spec.ts`
+- `apps/api/src/settings/constants/settings.constants.ts`
+- `apps/api/src/settings/schemas/settings.schema.ts`
+- `apps/api/src/settings/schemas/update-settings.schema.ts`
+- `apps/api/src/settings/settings.controller.ts`
+- `apps/api/src/settings/settings.service.ts`
+- `apps/api/src/common/types.ts`
+- `apps/api/src/courses/course.service.ts`
+- `apps/api/src/courses/schemas/createCourse.schema.ts`
+- `apps/api/src/courses/schemas/updateCourse.schema.ts`
+- `apps/api/src/courses/schemas/showCourseCommon.schema.ts`
+- `apps/api/src/chapter/repositories/adminChapter.repository.ts`
+- `apps/api/src/chapter/schemas/chapter.schema.ts`
+- `apps/api/src/lesson/lesson.schema.ts`
+- `apps/api/src/lesson/repositories/adminLesson.repository.ts`
+- `apps/api/src/lesson/services/adminLesson.service.ts`
+- `apps/api/src/ai/__tests__/createAiMentorLesson.ts`
+- `apps/api/test/factory/chapter.factory.ts`
+- `apps/api/test/factory/course.factory.ts`
+- `apps/api/src/swagger/api-schema.json`
+- `apps/web/app/api/generated-api.ts`
+- `apps/web/app/api/mutations/admin/useUpdateGamificationPointDefaults.ts`
+- `apps/web/app/modules/Dashboard/Settings/components/admin/GamificationPointDefaults.tsx`
+- `apps/web/app/modules/Dashboard/Settings/components/admin/OrganizationTabContent.tsx`
+- `apps/web/app/modules/Admin/EditCourse/components/PointsOverrideField.tsx`
+- `apps/web/app/modules/Admin/EditCourse/CourseSettings/CourseSettings.tsx`
+- `apps/web/app/modules/Admin/EditCourse/CourseSettings/hooks/useCourseSettingsForm.tsx`
+- `apps/web/app/modules/Admin/EditCourse/CourseSettings/validators/courseSettingsFormSchema.ts`
+- `apps/web/app/modules/Admin/EditCourse/EditCourse.tsx`
+- `apps/web/app/modules/Admin/EditCourse/EditCourse.types.ts`
+- `apps/web/app/modules/Admin/EditCourse/CourseLessons/NewChapter/NewChapter.tsx`
+- `apps/web/app/modules/Admin/EditCourse/CourseLessons/NewChapter/hooks/useNewChapterForm.tsx`
+- `apps/web/app/modules/Admin/EditCourse/CourseLessons/NewChapter/validators/newChapterFormSchema.ts`
+- `apps/web/app/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/AiMentorLessonForm.tsx`
+- `apps/web/app/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/hooks/useAiMentorLessonForm.ts`
+- `apps/web/app/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/validators/useAiMentorLessonFormSchema.ts`
+- `apps/web/app/locales/{cs,de,en,lt,pl}/translation.json`
+- `CURRENT-WORK/progress.md`
+
+### Blockers / notes for next iteration
+
+- Achievement unlocks, profile achievement grid, leaderboard, and retroactive admin flows remain deferred to later slices.
+- `pnpm lint-tsc-api`, `pnpm lint-tsc-web`, `pnpm lint`, `pnpm test:api`, and `pnpm test:web` pass; web lint still reports the pre-existing `ChatMessage.tsx` React hook dependency warning without failing.
+- `pnpm test:api:e2e` was attempted twice. The full parallel run reached 18/20 passing suites before failing with Postgres `sorry, too many clients already`; a sequential rerun also hit connection exhaustion in settings login-background/login-page-files suites. This appears environmental/resource related rather than slice-specific.
+- `pnpm test:web:e2e` was attempted and still fails because the local Playwright Chromium executable is not installed (`pnpm exec playwright install` required); DB setup completed before browser launch.
+- `pnpm format:check` still fails on pre-existing formatting issues in `.bmad-core/`, `.claude/`, `.serena/`, untracked `CURRENT-WORK` issue docs, and `docs/gamification.md`; changed source/test files were formatted with Prettier.

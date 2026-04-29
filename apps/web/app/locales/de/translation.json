@@ -1715,6 +1715,14 @@
       "selectedCount": "Ausgewählt:",
       "exportButton": "Aktie",
       "exportingButton": "Teilen..."
+    },
+    "gamification": {
+      "pointsOverride": {
+        "useTenantDefault": "Mandantenstandard verwenden",
+        "description": "Deaktivieren, um einen eigenen Punktewert festzulegen. Null ist erlaubt.",
+        "pointsLabel": "Punkteüberschreibung",
+        "defaultPlaceholder": "Mandantenstandard"
+      }
     }
   },
   "registerView": {
@@ -2984,6 +2992,18 @@
       "ownerNotAdmin": "Der Besitzer des API-Schlüssels verfügt nicht mehr über Administratorberechtigungen",
       "missingApiKeyHeader": "Fehlender X-API-Key-Header",
       "missingTenantIdHeader": "Fehlender X-Tenant-Id-Header"
+    }
+  },
+  "gamificationPointDefaults": {
+    "title": "Gamification-Punktestandards",
+    "fields": {
+      "defaultChapterPoints": "Kapitelabschluss",
+      "defaultCoursePoints": "Kursabschluss",
+      "defaultAiPassPoints": "AI-Mentor bestanden"
+    },
+    "toast": {
+      "updateSuccess": "Gamification-Punktestandards aktualisiert",
+      "updateError": "Gamification-Punktestandards konnten nicht aktualisiert werden"
     }
   }
 }
