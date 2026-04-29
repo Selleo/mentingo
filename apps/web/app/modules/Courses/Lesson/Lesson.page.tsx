@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "@remix-run/react";
+import { useNavigate, useParams, useSearchParams } from "@remix-run/react";
 import { VIDEO_AUTOPLAY } from "@repo/shared";
 import { first, get, last, orderBy } from "lodash-es";
 import { useEffect, useState } from "react";
@@ -7,12 +7,12 @@ import { useTranslation } from "react-i18next";
 import { useCourse, useCurrentUser, useLesson } from "~/api/queries";
 import { queryClient } from "~/api/queryClient";
 import ErrorPage from "~/components/ErrorPage/ErrorPage";
+import { Icon } from "~/components/Icon";
 import { LoaderWithTextSequence } from "~/components/LoaderWithTextSequence";
 import { PageWrapper } from "~/components/PageWrapper";
-import { Icon } from "~/components/Icon";
+import { Button } from "~/components/ui/button";
 import { getNextVideoUrl } from "~/components/VideoPlayer/autoplayFlow";
 import { useVideoPlayer } from "~/components/VideoPlayer/VideoPlayerContext";
-import { Button } from "~/components/ui/button";
 import { useLearningTimeTracker } from "~/hooks/useLearningTimeTracker";
 import { cn } from "~/lib/utils";
 import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
@@ -55,12 +55,14 @@ export default function LessonPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { courseId = "", lessonId = "" } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const { language } = useLanguageStore();
   const { data: user } = useCurrentUser();
 
   const [error, setError] = useState(false);
-  const [isFocusMode, setIsFocusMode] = useState(false);
+  const isFocusMode = searchParams.get("focus") === "1";
+  const focusSearch = isFocusMode ? `?${new URLSearchParams({ focus: "1" }).toString()}` : "";
   const [takeaway, setTakeaway] = useState("");
 
   const {
@@ -219,7 +221,7 @@ export default function LessonPage() {
 
   function handleNextLesson(currentLessonId: string, chapters: Chapters) {
     if (isLast) {
-      navigate(`/course/${courseId}`);
+      navigate(`/course/${courseId}${focusSearch}`);
       return;
     }
 
@@ -229,7 +231,7 @@ export default function LessonPage() {
         if (lessonIndex + 1 < chapter.lessons.length) {
           const nextLessonId = chapter.lessons[lessonIndex + 1].id;
           queryClient.invalidateQueries({ queryKey: ["course", { id: courseId }] });
-          navigate(`/course/${courseId}/lesson/${nextLessonId}`, {
+          navigate(`/course/${courseId}/lesson/${nextLessonId}${focusSearch}`, {
             state: { chapterId: chapter.id },
           });
         } else {
@@ -237,7 +239,7 @@ export default function LessonPage() {
           if (currentChapterIndex + 1 < chapters.length) {
             const nextLessonId = chapters[currentChapterIndex + 1].lessons[0].id;
             queryClient.invalidateQueries({ queryKey: ["course", { id: courseId }] });
-            navigate(`/course/${courseId}/lesson/${nextLessonId}`, {
+            navigate(`/course/${courseId}/lesson/${nextLessonId}${focusSearch}`, {
               state: { chapterId: chapters[currentChapterIndex + 1].id },
             });
           }
@@ -257,7 +259,7 @@ export default function LessonPage() {
       if (lessonIndex !== -1) {
         if (lessonIndex > 0) {
           const prevLessonId = chapter.lessons[lessonIndex - 1].id;
-          navigate(`/course/${courseId}/lesson/${prevLessonId}`, {
+          navigate(`/course/${courseId}/lesson/${prevLessonId}${focusSearch}`, {
             state: { chapterId: chapter.id },
           });
         } else {
@@ -266,7 +268,7 @@ export default function LessonPage() {
             const prevChapter = chapters[currentChapterIndex - 1];
             const prevLessonId = prevChapter.lessons[prevChapter.lessons.length - 1].id;
 
-            navigate(`/course/${courseId}/lesson/${prevLessonId}`, {
+            navigate(`/course/${courseId}/lesson/${prevLessonId}${focusSearch}`, {
               state: { chapterId: prevChapter.id },
             });
           }
@@ -316,12 +318,19 @@ export default function LessonPage() {
                   type="button"
                   variant={isFocusMode ? "primary" : "outline"}
                   className="shrink-0 flex items-center gap-2"
-                  onClick={() => setIsFocusMode((v) => !v)}
+                  onClick={() => {
+                    const next = new URLSearchParams(searchParams);
+                    if (isFocusMode) next.delete("focus");
+                    else next.set("focus", "1");
+                    setSearchParams(next, { replace: true });
+                  }}
                 >
                   <Icon name={isFocusMode ? "X" : "Target"} className="size-4" />
                   {isFocusMode
-                    ? t("common.actions.exit", { defaultValue: "Wyjdź" })
-                    : t("common.actions.focusMode", { defaultValue: "Tryb skupienia" })}
+                    ? t("common.actions.exitFocusMode", { defaultValue: "Wyjdź z trybu skupienia" })
+                    : t("common.actions.enterFocusMode", {
+                        defaultValue: "Wejdź w tryb skupienia",
+                      })}
                 </Button>
               </div>
               {isFocusMode && (

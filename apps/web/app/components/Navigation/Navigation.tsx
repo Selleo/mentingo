@@ -35,7 +35,7 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
     required: [PERMISSIONS.ENV_MANAGE],
   });
   const { t } = useTranslation();
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   const [is2xlBreakpoint, setIs2xlBreakpoint] = useState(false);
   const { data: isStripeConfigured } = useStripeConfigured();
 
@@ -76,7 +76,7 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
     );
   }
 
-  if (shouldHideTopbarAndSidebar(pathname)) return null;
+  if (shouldHideTopbarAndSidebar({ pathname, search })) return null;
 
   const showNavigationLabels = !isSidebarCollapsed || !is2xlBreakpoint;
   const shouldShowTooltips = isSidebarCollapsed && is2xlBreakpoint;

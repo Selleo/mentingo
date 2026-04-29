@@ -62,19 +62,27 @@ const AdminGuard = ({ children }: PropsWithChildren) => {
   );
 };
 
-export const shouldHideTopbarAndSidebar = (pathname: string) =>
-  match(pathname)
-    .with("/admin/beta-courses/new", () => true)
-    .with("/admin/courses/new-scorm", () => true)
-    .otherwise(() => false);
+export const shouldHideTopbarAndSidebar = (location: { pathname: string; search?: string }) => {
+  const focusModeActive = Boolean(
+    location.search && new URLSearchParams(location.search).get("focus") === "1",
+  );
+
+  return (
+    focusModeActive ||
+    match(location.pathname)
+      .with("/admin/beta-courses/new", () => true)
+      .with("/admin/courses/new-scorm", () => true)
+      .otherwise(() => false)
+  );
+};
 
 const AdminLayout = () => {
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
 
   return (
     <main
       className={cn("max-h-dvh flex-1 overflow-y-auto bg-primary-50", {
-        "bg-white p-0": shouldHideTopbarAndSidebar(pathname),
+        "bg-white p-0": shouldHideTopbarAndSidebar({ pathname, search }),
       })}
     >
       <Suspense fallback={<Loader />}>
