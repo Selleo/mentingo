@@ -1,114 +1,133 @@
-import * as Device from 'expo-device';
-import { Platform, Pressable, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useAuth } from '@/lib/auth/auth-context';
-
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+import { getUserStatistics, type UserStatistics } from '@/lib/stats/stats-service';
 
 export default function HomeScreen() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
+  const [stats, setStats] = useState<UserStatistics | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await getUserStatistics();
+        if (!cancelled) setStats(data);
+      } catch (e) {
+        if (!cancelled) {
+          setError(e instanceof Error ? e.message : 'Failed to load statistics');
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome{user?.email ? `, ${user.email}` : ' to Expo'}
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}>
+          <ThemedText type="subtitle">
+            Welcome{user?.firstName ? `, ${user.firstName}` : ''}
           </ThemedText>
-          <Pressable
-            accessibilityRole="button"
-            onPress={logout}
-            style={({ pressed }) => [styles.logoutButton, pressed && styles.logoutPressed]}>
-            <ThemedText type="smallBold">Sign out</ThemedText>
-          </Pressable>
-        </ThemedView>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+          {loading && <ActivityIndicator style={styles.loader} />}
+          {error && (
+            <ThemedText type="small" themeColor="textSecondary">
+              {error}
+            </ThemedText>
+          )}
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
+          {stats && (
+            <ThemedView style={styles.cardsGrid}>
+              <StatCard label="Daily streak" value={`${stats.streak.current} days`} />
+              <StatCard label="Longest streak" value={`${stats.streak.longest} days`} />
+              <StatCard
+                label="Avg. quiz score"
+                value={formatPercent(stats.quizzes.averageScore)}
+              />
+              <StatCard
+                label="Avg. course completion"
+                value={formatPercent(stats.averageStats.courseStats.completionRate)}
+              />
+              <StatCard
+                label="Avg. lesson completion"
+                value={formatPercent(stats.averageStats.lessonStats.completionRate)}
+              />
+              <StatCard
+                label="Courses completed"
+                value={`${stats.averageStats.courseStats.completed} / ${stats.averageStats.courseStats.started}`}
+              />
+              <StatCard label="Quizzes taken" value={`${stats.quizzes.uniqueQuizzesTaken}`} />
+              <StatCard
+                label="Correct answers"
+                value={`${stats.quizzes.totalCorrectAnswers} / ${stats.quizzes.totalQuestions}`}
+              />
+            </ThemedView>
+          )}
+        </ScrollView>
       </SafeAreaView>
     </ThemedView>
   );
 }
 
+function StatCard({ label, value }: { label: string; value: string }) {
+  return (
+    <ThemedView type="backgroundElement" style={styles.card}>
+      <ThemedText type="small" themeColor="textSecondary">
+        {label.toUpperCase()}
+      </ThemedText>
+      <ThemedText type="subtitle">{value}</ThemedText>
+    </ThemedView>
+  );
+}
+
+function formatPercent(value: number): string {
+  if (!Number.isFinite(value)) return '—';
+  return `${Math.round(value)}%`;
+}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
   },
   safeArea: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
+    alignSelf: 'center',
+    width: '100%',
     maxWidth: MaxContentWidth,
   },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
+  scrollContent: {
     paddingHorizontal: Spacing.four,
+    paddingTop: Spacing.four,
+    paddingBottom: BottomTabInset + Spacing.four,
     gap: Spacing.four,
   },
-  title: {
-    textAlign: 'center',
+  loader: {
+    marginTop: Spacing.four,
   },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
+  cardsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
   },
-  logoutButton: {
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.two,
-    borderRadius: Spacing.two,
-    borderWidth: 1,
-    borderColor: '#3c87f7',
+  card: {
+    flexBasis: '47%',
+    flexGrow: 1,
+    padding: Spacing.three,
+    borderRadius: Spacing.three,
+    gap: Spacing.one,
   },
-  logoutPressed: { opacity: 0.7 },
 });
