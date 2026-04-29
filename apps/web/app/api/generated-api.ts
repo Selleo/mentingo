@@ -158,6 +158,8 @@ export interface CurrentUserResponse {
       | "statistics.read"
       | "billing.checkout"
       | "billing.manage"
+      | "rewards.read"
+      | "rewards.manage"
       | "integration_key.manage"
       | "integration_api.use"
       | "tenant.manage"
@@ -829,7 +831,8 @@ export interface InitVideoUploadBody {
     | "user"
     | "category"
     | "announcement"
-    | "global_settings";
+    | "global_settings"
+    | "reward_achievement";
   relationshipType?: string;
 }
 
@@ -3392,6 +3395,287 @@ export interface DeleteManyCategoriesResponse {
   };
 }
 
+export interface GetProfileResponse {
+  data: {
+    /** @format uuid */
+    userId: string;
+    totalPoints: number;
+    achievements: {
+      /** @format uuid */
+      id: string;
+      title: {
+        en?: string;
+        pl?: string;
+        de?: string;
+        lt?: string;
+        cs?: string;
+      };
+      description: {
+        en?: string;
+        pl?: string;
+        de?: string;
+        lt?: string;
+        cs?: string;
+      };
+      pointThreshold: number;
+      pointsRequired: number;
+      earnedAt: string | null;
+      iconResourceId: string | null;
+      iconUrl: string | null;
+    }[];
+  };
+}
+
+export interface GetLeaderboardResponse {
+  data: {
+    groupId: string | null;
+    entries: {
+      /** @format uuid */
+      userId: string;
+      firstName: string;
+      lastName: string;
+      profilePictureUrl: string | null;
+      totalPoints: number;
+      rank: number;
+    }[];
+    currentUserRank: {
+      /** @format uuid */
+      userId: string;
+      firstName: string;
+      lastName: string;
+      profilePictureUrl: string | null;
+      totalPoints: number;
+      rank: number;
+    } | null;
+  };
+}
+
+export interface GetGroupsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    characteristic: string | null;
+    users?: {
+      id: string;
+      createdAt: string;
+      updatedAt: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      archived: boolean;
+      deletedAt: string | null;
+      profilePictureUrl: string | null;
+    }[];
+    createdAt?: string;
+    updatedAt?: string;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface GetRulesResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    actionType: "chapter_completed" | "ai_conversation_passed" | "course_completed";
+    /** @min 0 */
+    points: number;
+    enabled: boolean;
+    createdAt: string;
+    updatedAt: string;
+  }[];
+}
+
+export interface UpdateRuleBody {
+  /** @min 0 */
+  points: number;
+  enabled: boolean;
+}
+
+export interface UpdateRuleResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    actionType: "chapter_completed" | "ai_conversation_passed" | "course_completed";
+    /** @min 0 */
+    points: number;
+    enabled: boolean;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface GetAchievementsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    title: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+    };
+    description: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+    };
+    /** @min 0 */
+    pointThreshold: number;
+    sortOrder: number;
+    archived: boolean;
+    iconResourceId: string | null;
+    iconUrl: string | null;
+    createdAt: string;
+    updatedAt: string;
+  }[];
+}
+
+export interface CreateAchievementBody {
+  title: {
+    en?: string;
+    pl?: string;
+    de?: string;
+    lt?: string;
+    cs?: string;
+  };
+  description: {
+    en?: string;
+    pl?: string;
+    de?: string;
+    lt?: string;
+    cs?: string;
+  };
+  /** @min 0 */
+  pointThreshold: number;
+  sortOrder?: number;
+  iconResourceId?: string | null;
+}
+
+export interface CreateAchievementResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    title: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+    };
+    description: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+    };
+    /** @min 0 */
+    pointThreshold: number;
+    sortOrder: number;
+    archived: boolean;
+    iconResourceId: string | null;
+    iconUrl: string | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface UpdateAchievementBody {
+  title: {
+    en?: string;
+    pl?: string;
+    de?: string;
+    lt?: string;
+    cs?: string;
+  };
+  description: {
+    en?: string;
+    pl?: string;
+    de?: string;
+    lt?: string;
+    cs?: string;
+  };
+  /** @min 0 */
+  pointThreshold: number;
+  sortOrder?: number;
+  iconResourceId?: string | null;
+}
+
+export interface UpdateAchievementResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    title: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+    };
+    description: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+    };
+    /** @min 0 */
+    pointThreshold: number;
+    sortOrder: number;
+    archived: boolean;
+    iconResourceId: string | null;
+    iconUrl: string | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface ArchiveAchievementResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    title: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+    };
+    description: {
+      en?: string;
+      pl?: string;
+      de?: string;
+      lt?: string;
+      cs?: string;
+    };
+    /** @min 0 */
+    pointThreshold: number;
+    sortOrder: number;
+    archived: boolean;
+    iconResourceId: string | null;
+    iconUrl: string | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface BackfillCurrentTenantResponse {
+  data: {
+    chapterGrants: number;
+    aiConversationGrants: number;
+    courseGrants: number;
+  };
+}
+
 export interface UploadScormPackageResponse {
   data: {
     message: string;
@@ -3525,34 +3809,6 @@ export interface DeleteUserResponse {
   data: {
     message: string;
   };
-}
-
-export interface GetGroupsResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    name: string;
-    characteristic: string | null;
-    users?: {
-      id: string;
-      createdAt: string;
-      updatedAt: string;
-      email: string;
-      firstName: string;
-      lastName: string;
-      archived: boolean;
-      deletedAt: string | null;
-      profilePictureUrl: string | null;
-    }[];
-    createdAt?: string;
-    updatedAt?: string;
-  }[];
-  pagination: {
-    totalItems: number;
-    page: number;
-    perPage: number;
-  };
-  appliedFilters?: object;
 }
 
 export interface SetUserGroupsBody {
@@ -8397,6 +8653,173 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/report/summary`,
         method: "GET",
         query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name RewardsControllerGetProfile
+     * @request GET:/api/rewards/profile/{userId}
+     */
+    rewardsControllerGetProfile: (userId: string, params: RequestParams = {}) =>
+      this.request<GetProfileResponse, any>({
+        path: `/api/rewards/profile/${userId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name RewardsControllerGetLeaderboard
+     * @request GET:/api/rewards/leaderboard
+     */
+    rewardsControllerGetLeaderboard: (
+      query?: {
+        /** @format uuid */
+        groupId?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetLeaderboardResponse, any>({
+        path: `/api/rewards/leaderboard`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name RewardsControllerGetGroups
+     * @request GET:/api/rewards/groups
+     */
+    rewardsControllerGetGroups: (params: RequestParams = {}) =>
+      this.request<GetGroupsResponse, any>({
+        path: `/api/rewards/groups`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name RewardsControllerGetRules
+     * @request GET:/api/rewards/rules
+     */
+    rewardsControllerGetRules: (params: RequestParams = {}) =>
+      this.request<GetRulesResponse, any>({
+        path: `/api/rewards/rules`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name RewardsControllerUpdateRule
+     * @request PATCH:/api/rewards/rules/{actionType}
+     */
+    rewardsControllerUpdateRule: (
+      actionType: "chapter_completed" | "ai_conversation_passed" | "course_completed",
+      data: UpdateRuleBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateRuleResponse, any>({
+        path: `/api/rewards/rules/${actionType}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name RewardsControllerGetAchievements
+     * @request GET:/api/rewards/achievements
+     */
+    rewardsControllerGetAchievements: (
+      query?: {
+        includeArchived?: boolean;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAchievementsResponse, any>({
+        path: `/api/rewards/achievements`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name RewardsControllerCreateAchievement
+     * @request POST:/api/rewards/achievements
+     */
+    rewardsControllerCreateAchievement: (data: CreateAchievementBody, params: RequestParams = {}) =>
+      this.request<CreateAchievementResponse, any>({
+        path: `/api/rewards/achievements`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name RewardsControllerUpdateAchievement
+     * @request PATCH:/api/rewards/achievements/{achievementId}
+     */
+    rewardsControllerUpdateAchievement: (
+      achievementId: string,
+      data: UpdateAchievementBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateAchievementResponse, any>({
+        path: `/api/rewards/achievements/${achievementId}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name RewardsControllerArchiveAchievement
+     * @request PATCH:/api/rewards/achievements/{achievementId}/archive
+     */
+    rewardsControllerArchiveAchievement: (achievementId: string, params: RequestParams = {}) =>
+      this.request<ArchiveAchievementResponse, any>({
+        path: `/api/rewards/achievements/${achievementId}/archive`,
+        method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name RewardsControllerBackfillCurrentTenant
+     * @request POST:/api/rewards/backfill
+     */
+    rewardsControllerBackfillCurrentTenant: (params: RequestParams = {}) =>
+      this.request<BackfillCurrentTenantResponse, any>({
+        path: `/api/rewards/backfill`,
+        method: "POST",
+        format: "json",
         ...params,
       }),
 

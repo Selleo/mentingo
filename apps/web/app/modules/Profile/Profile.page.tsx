@@ -25,6 +25,7 @@ import Loader from "../common/Loader/Loader";
 import { CoursesCarousel } from "../Dashboard/Courses/CoursesCarousel";
 import { useTourSetup } from "../Onboarding/hooks/useTourSetup";
 import { studentProfileSteps } from "../Onboarding/routes/student";
+import { RewardsPanel } from "../Rewards/RewardsPanel";
 
 import CertificatePreview from "./Certificates/CertificatePreview";
 import Certificates from "./Certificates/Certificates";
@@ -270,6 +271,7 @@ function ProfilePageContent({ currentUser }: ProfilePageContentProps) {
             }}
           />
         )}
+        <RewardsPanel userId={id} />
         {canViewExtendedProfile && (
           <section className="flex w-full max-w-[720px] flex-col gap-y-6 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow">
             <div className="flex flex-col gap-y-2">

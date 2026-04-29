@@ -3,3 +3,4 @@ export { ChartLegendBadge } from "./ChartLegendBadge";
 export { ContinueLearningCard } from "./ContinueLearningCard";
 export { ActivityCalendar } from "./ActivityCalendar";
 export { RatesChart } from "./RatesChart";
+export { RewardPointsByDayChart } from "./RewardPointsByDayChart";

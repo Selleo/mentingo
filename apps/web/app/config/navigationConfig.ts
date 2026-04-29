@@ -139,6 +139,7 @@ export const getNavigationConfig = (
           PERMISSIONS.GROUP_MANAGE,
           PERMISSIONS.CATEGORY_MANAGE,
           PERMISSIONS.BILLING_MANAGE,
+          PERMISSIONS.REWARDS_MANAGE,
         ],
       },
       items: [
@@ -159,6 +160,11 @@ export const getNavigationConfig = (
           path: "admin/categories",
           iconName: "Category",
           testId: NAVIGATION_HANDLES.CATEGORIES_LINK,
+        },
+        {
+          label: t("navigationSideBar.rewards", "Rewards"),
+          path: "admin/rewards",
+          iconName: "Ribbon",
         },
         ...(isStripeConfigured
           ? [

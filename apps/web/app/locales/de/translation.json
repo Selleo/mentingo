@@ -586,7 +586,25 @@
       "rates": "Preise",
       "numberOf": "Anzahl",
       "noLessonsToContinue": "Derzeit gibt es keinen Unterricht, der fortgesetzt werden kann.",
-      "continueLearning": "Lernen Sie weiter in:"
+      "continueLearning": "Lernen Sie weiter in:",
+      "rewardPoints": "Belohnungspunkte",
+      "rewardPointsByDay": "Belohnungspunkte pro Tag",
+      "rewardPointsByDayDescription": "Pro Tag gesammelte Punkte"
+    }
+  },
+  "rewards": {
+    "admin": {
+      "backfill": "Punkte nachtragen",
+      "backfilling": "Punkte werden nachgetragen...",
+      "backfillFailed": "Nachtragen der Belohnungspunkte konnte nicht gestartet werden.",
+      "backfillSuccess": "Nachtragen der Belohnungspunkte abgeschlossen. {{chapterGrants}} Kapitelgutschriften, {{aiConversationGrants}} KI-Gesprächsgutschriften und {{courseGrants}} Kursgutschriften wurden hinzugefügt.",
+      "rateUpdated": "Belohnungspunkte-Rate wurde erfolgreich aktualisiert."
+    },
+    "notifications": {
+      "chapterCompleted": "Kapitel abgeschlossen",
+      "courseCompleted": "Kurs abgeschlossen",
+      "pointsAwarded_one": "Du hast {{count}} Belohnungspunkt erhalten.",
+      "pointsAwarded_other": "Du hast {{count}} Belohnungspunkte erhalten."
     }
   },
   "profileWithCalendarView": {

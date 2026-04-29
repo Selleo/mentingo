@@ -586,7 +586,27 @@
       "rates": "Kainos",
       "numberOf": "Skaičius",
       "noLessonsToContinue": "Šiuo metu nėra jokių pamokų, kurias būtų galima tęsti.",
-      "continueLearning": "Tęskite mokymąsi:"
+      "continueLearning": "Tęskite mokymąsi:",
+      "rewardPoints": "Atlygio taškai",
+      "rewardPointsByDay": "Atlygio taškai pagal dieną",
+      "rewardPointsByDayDescription": "Kiekvieną dieną gauti taškai"
+    }
+  },
+  "rewards": {
+    "admin": {
+      "backfill": "Papildyti taškus",
+      "backfilling": "Taškai papildomi...",
+      "backfillFailed": "Nepavyko paleisti atlygio taškų papildymo.",
+      "backfillSuccess": "Atlygio taškų papildymas baigtas. Pridėta {{chapterGrants}} skyrių įrašų, {{aiConversationGrants}} AI pokalbių įrašų ir {{courseGrants}} kursų įrašų.",
+      "rateUpdated": "Atlygio taškų norma sėkmingai atnaujinta."
+    },
+    "notifications": {
+      "chapterCompleted": "Skyrius baigtas",
+      "courseCompleted": "Kursas baigtas",
+      "pointsAwarded_one": "Gavote {{count}} atlygio tašką.",
+      "pointsAwarded_few": "Gavote {{count}} atlygio taškus.",
+      "pointsAwarded_many": "Gavote {{count}} atlygio taškų.",
+      "pointsAwarded_other": "Gavote {{count}} atlygio taško."
     }
   },
   "profileWithCalendarView": {

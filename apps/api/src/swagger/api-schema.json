@@ -7200,6 +7200,302 @@
         }
       }
     },
+    "/api/rewards/profile/{userId}": {
+      "get": {
+        "operationId": "RewardsController_getProfile",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetProfileResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rewards/leaderboard": {
+      "get": {
+        "operationId": "RewardsController_getLeaderboard",
+        "parameters": [
+          {
+            "name": "groupId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetLeaderboardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rewards/groups": {
+      "get": {
+        "operationId": "RewardsController_getGroups",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetGroupsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rewards/points-by-day": {
+      "get": {
+        "operationId": "RewardsController_getPointsByDay",
+        "parameters": [
+          {
+            "name": "days",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPointsByDayResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rewards/rules": {
+      "get": {
+        "operationId": "RewardsController_getRules",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetRulesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rewards/rules/{actionType}": {
+      "patch": {
+        "operationId": "RewardsController_updateRule",
+        "parameters": [
+          {
+            "name": "actionType",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "chapter_completed",
+                  "type": "string"
+                },
+                {
+                  "const": "ai_conversation_passed",
+                  "type": "string"
+                },
+                {
+                  "const": "course_completed",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRuleBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateRuleResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rewards/achievements": {
+      "get": {
+        "operationId": "RewardsController_getAchievements",
+        "parameters": [
+          {
+            "name": "includeArchived",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAchievementsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "RewardsController_createAchievement",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAchievementBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateAchievementResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rewards/achievements/{achievementId}": {
+      "patch": {
+        "operationId": "RewardsController_updateAchievement",
+        "parameters": [
+          {
+            "name": "achievementId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAchievementBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateAchievementResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rewards/achievements/{achievementId}/archive": {
+      "patch": {
+        "operationId": "RewardsController_archiveAchievement",
+        "parameters": [
+          {
+            "name": "achievementId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArchiveAchievementResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rewards/backfill": {
+      "post": {
+        "operationId": "RewardsController_backfillCurrentTenant",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackfillCurrentTenantResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/scorm/upload": {
       "post": {
         "operationId": "ScormController_uploadScormPackage",
@@ -10775,6 +11071,14 @@
                       "type": "string"
                     },
                     {
+                      "const": "rewards.read",
+                      "type": "string"
+                    },
+                    {
+                      "const": "rewards.manage",
+                      "type": "string"
+                    },
+                    {
                       "const": "integration_key.manage",
                       "type": "string"
                     },
@@ -14024,6 +14328,10 @@
               },
               {
                 "const": "global_settings",
+                "type": "string"
+              },
+              {
+                "const": "reward_achievement",
                 "type": "string"
               }
             ]
@@ -26552,6 +26860,1120 @@
           "data"
         ]
       },
+      "GetProfileResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "userId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "totalPoints": {
+                "type": "number"
+              },
+              "achievements": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "object",
+                      "properties": {
+                        "en": {
+                          "type": "string"
+                        },
+                        "pl": {
+                          "type": "string"
+                        },
+                        "de": {
+                          "type": "string"
+                        },
+                        "lt": {
+                          "type": "string"
+                        },
+                        "cs": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "description": {
+                      "type": "object",
+                      "properties": {
+                        "en": {
+                          "type": "string"
+                        },
+                        "pl": {
+                          "type": "string"
+                        },
+                        "de": {
+                          "type": "string"
+                        },
+                        "lt": {
+                          "type": "string"
+                        },
+                        "cs": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "pointThreshold": {
+                      "type": "number"
+                    },
+                    "pointsRequired": {
+                      "type": "number"
+                    },
+                    "earnedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "iconResourceId": {
+                      "anyOf": [
+                        {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "iconUrl": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "title",
+                    "description",
+                    "pointThreshold",
+                    "pointsRequired",
+                    "earnedAt",
+                    "iconResourceId",
+                    "iconUrl"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "userId",
+              "totalPoints",
+              "achievements"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetLeaderboardResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "groupId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "entries": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "userId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "firstName": {
+                      "type": "string"
+                    },
+                    "lastName": {
+                      "type": "string"
+                    },
+                    "profilePictureUrl": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "totalPoints": {
+                      "type": "number"
+                    },
+                    "rank": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "userId",
+                    "firstName",
+                    "lastName",
+                    "profilePictureUrl",
+                    "totalPoints",
+                    "rank"
+                  ]
+                }
+              },
+              "currentUserRank": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "userId": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "firstName": {
+                        "type": "string"
+                      },
+                      "lastName": {
+                        "type": "string"
+                      },
+                      "profilePictureUrl": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "totalPoints": {
+                        "type": "number"
+                      },
+                      "rank": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "userId",
+                      "firstName",
+                      "lastName",
+                      "profilePictureUrl",
+                      "totalPoints",
+                      "rank"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "groupId",
+              "entries",
+              "currentUserRank"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetGroupsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "characteristic": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "users": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "updatedAt": {
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string"
+                      },
+                      "firstName": {
+                        "type": "string"
+                      },
+                      "lastName": {
+                        "type": "string"
+                      },
+                      "archived": {
+                        "type": "boolean"
+                      },
+                      "deletedAt": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "profilePictureUrl": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "createdAt",
+                      "updatedAt",
+                      "email",
+                      "firstName",
+                      "lastName",
+                      "archived",
+                      "deletedAt",
+                      "profilePictureUrl"
+                    ]
+                  }
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "characteristic"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
+      },
+      "GetPointsByDayResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "date": {
+                  "type": "string"
+                },
+                "points": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "date",
+                "points"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetRulesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "actionType": {
+                  "anyOf": [
+                    {
+                      "const": "chapter_completed",
+                      "type": "string"
+                    },
+                    {
+                      "const": "ai_conversation_passed",
+                      "type": "string"
+                    },
+                    {
+                      "const": "course_completed",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "points": {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                "enabled": {
+                  "type": "boolean"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "actionType",
+                "points",
+                "enabled",
+                "createdAt",
+                "updatedAt"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateRuleBody": {
+        "type": "object",
+        "properties": {
+          "points": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "points",
+          "enabled"
+        ]
+      },
+      "UpdateRuleResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "actionType": {
+                "anyOf": [
+                  {
+                    "const": "chapter_completed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "ai_conversation_passed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "course_completed",
+                    "type": "string"
+                  }
+                ]
+              },
+              "points": {
+                "minimum": 0,
+                "type": "number"
+              },
+              "enabled": {
+                "type": "boolean"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "actionType",
+              "points",
+              "enabled",
+              "createdAt",
+              "updatedAt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetAchievementsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "title": {
+                  "type": "object",
+                  "properties": {
+                    "en": {
+                      "type": "string"
+                    },
+                    "pl": {
+                      "type": "string"
+                    },
+                    "de": {
+                      "type": "string"
+                    },
+                    "lt": {
+                      "type": "string"
+                    },
+                    "cs": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "description": {
+                  "type": "object",
+                  "properties": {
+                    "en": {
+                      "type": "string"
+                    },
+                    "pl": {
+                      "type": "string"
+                    },
+                    "de": {
+                      "type": "string"
+                    },
+                    "lt": {
+                      "type": "string"
+                    },
+                    "cs": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "pointThreshold": {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                "sortOrder": {
+                  "type": "number"
+                },
+                "archived": {
+                  "type": "boolean"
+                },
+                "iconResourceId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "iconUrl": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "title",
+                "description",
+                "pointThreshold",
+                "sortOrder",
+                "archived",
+                "iconResourceId",
+                "iconUrl",
+                "createdAt",
+                "updatedAt"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CreateAchievementBody": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string"
+              },
+              "pl": {
+                "type": "string"
+              },
+              "de": {
+                "type": "string"
+              },
+              "lt": {
+                "type": "string"
+              },
+              "cs": {
+                "type": "string"
+              }
+            }
+          },
+          "description": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string"
+              },
+              "pl": {
+                "type": "string"
+              },
+              "de": {
+                "type": "string"
+              },
+              "lt": {
+                "type": "string"
+              },
+              "cs": {
+                "type": "string"
+              }
+            }
+          },
+          "pointThreshold": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "sortOrder": {
+            "type": "number"
+          },
+          "iconResourceId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "title",
+          "description",
+          "pointThreshold"
+        ]
+      },
+      "CreateAchievementResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "title": {
+                "type": "object",
+                "properties": {
+                  "en": {
+                    "type": "string"
+                  },
+                  "pl": {
+                    "type": "string"
+                  },
+                  "de": {
+                    "type": "string"
+                  },
+                  "lt": {
+                    "type": "string"
+                  },
+                  "cs": {
+                    "type": "string"
+                  }
+                }
+              },
+              "description": {
+                "type": "object",
+                "properties": {
+                  "en": {
+                    "type": "string"
+                  },
+                  "pl": {
+                    "type": "string"
+                  },
+                  "de": {
+                    "type": "string"
+                  },
+                  "lt": {
+                    "type": "string"
+                  },
+                  "cs": {
+                    "type": "string"
+                  }
+                }
+              },
+              "pointThreshold": {
+                "minimum": 0,
+                "type": "number"
+              },
+              "sortOrder": {
+                "type": "number"
+              },
+              "archived": {
+                "type": "boolean"
+              },
+              "iconResourceId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "iconUrl": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "title",
+              "description",
+              "pointThreshold",
+              "sortOrder",
+              "archived",
+              "iconResourceId",
+              "iconUrl",
+              "createdAt",
+              "updatedAt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateAchievementBody": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string"
+              },
+              "pl": {
+                "type": "string"
+              },
+              "de": {
+                "type": "string"
+              },
+              "lt": {
+                "type": "string"
+              },
+              "cs": {
+                "type": "string"
+              }
+            }
+          },
+          "description": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string"
+              },
+              "pl": {
+                "type": "string"
+              },
+              "de": {
+                "type": "string"
+              },
+              "lt": {
+                "type": "string"
+              },
+              "cs": {
+                "type": "string"
+              }
+            }
+          },
+          "pointThreshold": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "sortOrder": {
+            "type": "number"
+          },
+          "iconResourceId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "title",
+          "description",
+          "pointThreshold"
+        ]
+      },
+      "UpdateAchievementResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "title": {
+                "type": "object",
+                "properties": {
+                  "en": {
+                    "type": "string"
+                  },
+                  "pl": {
+                    "type": "string"
+                  },
+                  "de": {
+                    "type": "string"
+                  },
+                  "lt": {
+                    "type": "string"
+                  },
+                  "cs": {
+                    "type": "string"
+                  }
+                }
+              },
+              "description": {
+                "type": "object",
+                "properties": {
+                  "en": {
+                    "type": "string"
+                  },
+                  "pl": {
+                    "type": "string"
+                  },
+                  "de": {
+                    "type": "string"
+                  },
+                  "lt": {
+                    "type": "string"
+                  },
+                  "cs": {
+                    "type": "string"
+                  }
+                }
+              },
+              "pointThreshold": {
+                "minimum": 0,
+                "type": "number"
+              },
+              "sortOrder": {
+                "type": "number"
+              },
+              "archived": {
+                "type": "boolean"
+              },
+              "iconResourceId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "iconUrl": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "title",
+              "description",
+              "pointThreshold",
+              "sortOrder",
+              "archived",
+              "iconResourceId",
+              "iconUrl",
+              "createdAt",
+              "updatedAt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ArchiveAchievementResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "title": {
+                "type": "object",
+                "properties": {
+                  "en": {
+                    "type": "string"
+                  },
+                  "pl": {
+                    "type": "string"
+                  },
+                  "de": {
+                    "type": "string"
+                  },
+                  "lt": {
+                    "type": "string"
+                  },
+                  "cs": {
+                    "type": "string"
+                  }
+                }
+              },
+              "description": {
+                "type": "object",
+                "properties": {
+                  "en": {
+                    "type": "string"
+                  },
+                  "pl": {
+                    "type": "string"
+                  },
+                  "de": {
+                    "type": "string"
+                  },
+                  "lt": {
+                    "type": "string"
+                  },
+                  "cs": {
+                    "type": "string"
+                  }
+                }
+              },
+              "pointThreshold": {
+                "minimum": 0,
+                "type": "number"
+              },
+              "sortOrder": {
+                "type": "number"
+              },
+              "archived": {
+                "type": "boolean"
+              },
+              "iconResourceId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "iconUrl": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "title",
+              "description",
+              "pointThreshold",
+              "sortOrder",
+              "archived",
+              "iconResourceId",
+              "iconUrl",
+              "createdAt",
+              "updatedAt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "BackfillCurrentTenantResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "chapterGrants": {
+                "type": "number"
+              },
+              "aiConversationGrants": {
+                "type": "number"
+              },
+              "courseGrants": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "chapterGrants",
+              "aiConversationGrants",
+              "courseGrants"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "UploadScormPackageResponse": {
         "type": "object",
         "properties": {
@@ -27041,136 +28463,6 @@
         },
         "required": [
           "data"
-        ]
-      },
-      "GetGroupsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "characteristic": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "users": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "createdAt": {
-                        "type": "string"
-                      },
-                      "updatedAt": {
-                        "type": "string"
-                      },
-                      "email": {
-                        "type": "string"
-                      },
-                      "firstName": {
-                        "type": "string"
-                      },
-                      "lastName": {
-                        "type": "string"
-                      },
-                      "archived": {
-                        "type": "boolean"
-                      },
-                      "deletedAt": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "profilePictureUrl": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      }
-                    },
-                    "required": [
-                      "id",
-                      "createdAt",
-                      "updatedAt",
-                      "email",
-                      "firstName",
-                      "lastName",
-                      "archived",
-                      "deletedAt",
-                      "profilePictureUrl"
-                    ]
-                  }
-                },
-                "createdAt": {
-                  "type": "string"
-                },
-                "updatedAt": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "id",
-                "name",
-                "characteristic"
-              ]
-            }
-          },
-          "pagination": {
-            "type": "object",
-            "properties": {
-              "totalItems": {
-                "type": "number"
-              },
-              "page": {
-                "type": "number"
-              },
-              "perPage": {
-                "type": "number"
-              }
-            },
-            "required": [
-              "totalItems",
-              "page",
-              "perPage"
-            ]
-          },
-          "appliedFilters": {
-            "type": "object",
-            "patternProperties": {
-              "^(.*)$": {}
-            }
-          }
-        },
-        "required": [
-          "data",
-          "pagination"
         ]
       },
       "SetUserGroupsBody": {

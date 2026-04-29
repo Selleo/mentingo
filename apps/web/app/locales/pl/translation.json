@@ -563,7 +563,27 @@
       "rates": "Oceny",
       "numberOf": "Liczba",
       "noLessonsToContinue": "Brak lekcji do kontynuacji.",
-      "continueLearning": "Kontynuuj naukę w:"
+      "continueLearning": "Kontynuuj naukę w:",
+      "rewardPoints": "Punkty nagród",
+      "rewardPointsByDay": "Punkty nagród według dnia",
+      "rewardPointsByDayDescription": "Punkty zdobyte każdego dnia"
+    }
+  },
+  "rewards": {
+    "admin": {
+      "backfill": "Uzupełnij punkty",
+      "backfilling": "Uzupełnianie punktów...",
+      "backfillFailed": "Nie udało się uruchomić uzupełniania punktów nagród.",
+      "backfillSuccess": "Uzupełnianie punktów nagród zakończone. Dodano {{chapterGrants}} nagród za rozdziały, {{aiConversationGrants}} nagród za rozmowy AI i {{courseGrants}} nagród za kursy.",
+      "rateUpdated": "Stawka punktów nagród została zaktualizowana."
+    },
+    "notifications": {
+      "chapterCompleted": "Rozdział ukończony",
+      "courseCompleted": "Kurs ukończony",
+      "pointsAwarded_one": "Zdobyto {{count}} punkt nagrody.",
+      "pointsAwarded_few": "Zdobyto {{count}} punkty nagród.",
+      "pointsAwarded_many": "Zdobyto {{count}} punktów nagród.",
+      "pointsAwarded_other": "Zdobyto {{count}} punktu nagrody."
     }
   },
   "profileWithCalendarView": {

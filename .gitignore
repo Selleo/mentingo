@@ -47,3 +47,7 @@ yarn-error.log*
 .vscode
 .cursor
 .gitnexus
+
+# AI Agents
+AGENTS.md
+CONTEXT.md

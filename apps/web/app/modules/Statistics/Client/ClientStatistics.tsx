@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useCurrentUser } from "~/api/queries";
+import { useRewardPointsByDay } from "~/api/queries/rewards/useRewardPointsByDay";
 import { useUserStatistics } from "~/api/queries/useUserStatistics";
 import { PageWrapper } from "~/components/PageWrapper";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
@@ -10,7 +11,12 @@ import { useTourSetup } from "~/modules/Onboarding/hooks/useTourSetup";
 import { studentDashboardSteps } from "~/modules/Onboarding/routes/student";
 import { parseRatesChartData } from "~/modules/Statistics/utils";
 
-import { AvgPercentScoreChart, ActivityCalendar, RatesChart } from "./components";
+import {
+  ActivityCalendar,
+  AvgPercentScoreChart,
+  RatesChart,
+  RewardPointsByDayChart,
+} from "./components";
 
 import type { ChartConfig } from "~/components/ui/chart";
 
@@ -20,6 +26,8 @@ export default function ClientStatistics() {
   const { language } = useLanguageStore();
 
   const { data: userStatistics, isLoading } = useUserStatistics(language);
+  const { data: rewardPointsByDay = [], isLoading: areRewardPointsLoading } =
+    useRewardPointsByDay();
   const { t } = useTranslation();
 
   const steps = useMemo(() => studentDashboardSteps(t), [t]);
@@ -126,6 +134,10 @@ export default function ClientStatistics() {
             resourceName={t("clientStatisticsView.other.lessons")}
             chartData={lessonRatesChartData}
             isLoading={isLoading}
+          />
+          <RewardPointsByDayChart
+            chartData={rewardPointsByDay}
+            isLoading={areRewardPointsLoading}
           />
         </div>
       </div>

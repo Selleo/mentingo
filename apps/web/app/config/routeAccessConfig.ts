@@ -109,6 +109,9 @@ export const routeAccessConfig = createRouteConfig({
   "admin/categories/*": {
     allOf: [PERMISSIONS.CATEGORY_MANAGE],
   },
+  "admin/rewards": {
+    allOf: [PERMISSIONS.REWARDS_MANAGE],
+  },
   "admin/lessons/*": COURSE_EDIT_ACCESS,
   "admin/lesson-items/*": COURSE_EDIT_ACCESS,
   "admin/announcements/new": {

@@ -586,7 +586,25 @@
       "rates": "Rates",
       "numberOf": "Number of",
       "noLessonsToContinue": "Currently have no lessons to continue.",
-      "continueLearning": "Continue learning in:"
+      "continueLearning": "Continue learning in:",
+      "rewardPoints": "Reward points",
+      "rewardPointsByDay": "Reward points by day",
+      "rewardPointsByDayDescription": "Points gained each day"
+    }
+  },
+  "rewards": {
+    "admin": {
+      "backfill": "Backfill points",
+      "backfilling": "Backfilling...",
+      "backfillFailed": "Failed to run reward backfill.",
+      "backfillSuccess": "Reward backfill completed. Added {{chapterGrants}} chapter grants, {{aiConversationGrants}} AI conversation grants, and {{courseGrants}} course grants.",
+      "rateUpdated": "Reward point rate updated successfully."
+    },
+    "notifications": {
+      "chapterCompleted": "Chapter completed",
+      "courseCompleted": "Course completed",
+      "pointsAwarded_one": "You earned {{count}} reward point.",
+      "pointsAwarded_other": "You earned {{count}} reward points."
     }
   },
   "profileWithCalendarView": {

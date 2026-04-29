@@ -586,7 +586,27 @@
       "rates": "Sazby",
       "numberOf": "Počet",
       "noLessonsToContinue": "Momentálně nejsou žádné lekce, na které by bylo možné pokračovat.",
-      "continueLearning": "Pokračujte v učení v:"
+      "continueLearning": "Pokračujte v učení v:",
+      "rewardPoints": "Body odměn",
+      "rewardPointsByDay": "Body odměn podle dne",
+      "rewardPointsByDayDescription": "Body získané každý den"
+    }
+  },
+  "rewards": {
+    "admin": {
+      "backfill": "Doplnit body",
+      "backfilling": "Doplňují se body...",
+      "backfillFailed": "Nepodařilo se spustit doplnění bodů odměn.",
+      "backfillSuccess": "Doplnění bodů odměn dokončeno. Přidáno {{chapterGrants}} odměn za kapitoly, {{aiConversationGrants}} odměn za AI konverzace a {{courseGrants}} odměn za kurzy.",
+      "rateUpdated": "Sazba bodů odměn byla úspěšně aktualizována."
+    },
+    "notifications": {
+      "chapterCompleted": "Kapitola dokončena",
+      "courseCompleted": "Kurz dokončen",
+      "pointsAwarded_one": "Získali jste {{count}} bod odměn.",
+      "pointsAwarded_few": "Získali jste {{count}} body odměn.",
+      "pointsAwarded_many": "Získali jste {{count}} bodů odměn.",
+      "pointsAwarded_other": "Získali jste {{count}} bodu odměn."
     }
   },
   "profileWithCalendarView": {
