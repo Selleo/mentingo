@@ -2100,7 +2100,13 @@
     "tabs": {
       "chapters": "Skyriai",
       "moreFromAuthor": "Daugiau iš autoriaus",
-      "statistics": "Statistika"
+      "statistics": "Statistika",
+      "discussions": "Diskusijos"
+    },
+    "discussions": {
+      "loading": "Diskusijos kraunamos...",
+      "empty": "Kol kas diskusijų nėra. Būkite pirmas ir pradėkite!",
+      "comingSoon": "Diskusijų funkcija bus netrukus."
     }
   },
   "studentChapterView": {

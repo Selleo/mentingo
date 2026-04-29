@@ -2100,7 +2100,13 @@
     "tabs": {
       "chapters": "Kapitel",
       "moreFromAuthor": "Mehr vom Autor",
-      "statistics": "Statistiken"
+      "statistics": "Statistiken",
+      "discussions": "Diskussionen"
+    },
+    "discussions": {
+      "loading": "Diskussionen werden geladen...",
+      "empty": "Noch keine Diskussionen. Sei der Erste und starte eine!",
+      "comingSoon": "Diskussionsfunktion kommt bald."
     }
   },
   "studentChapterView": {

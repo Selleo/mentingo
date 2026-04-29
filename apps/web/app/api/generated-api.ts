@@ -1659,6 +1659,12 @@ export interface GetCourseResponse {
     currency: string;
     description: string;
     enrolled?: boolean;
+    completedStudentsCount?: number;
+    completedStudentAvatars?: {
+      /** @format uuid */
+      userId: string;
+      avatarUrl: string | null;
+    }[];
     hasFreeChapter?: boolean;
     hasCertificate?: boolean;
     /** @format uuid */
@@ -3437,6 +3443,369 @@ export type DeleteManyCategoriesBody = string[];
 export interface DeleteManyCategoriesResponse {
   data: {
     message: string;
+  };
+}
+
+export interface ListResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    courseId: string;
+    lessonId: string | null;
+    /** @format uuid */
+    authorId: string;
+    /**
+     * @minLength 3
+     * @maxLength 150
+     */
+    title: string;
+    /**
+     * @minLength 1
+     * @maxLength 10000
+     */
+    content: string;
+    status: "visible" | "deleted_by_author" | "hidden_by_staff";
+    lastActivityAt: string;
+    createdAt: string;
+    updatedAt: string;
+  }[];
+}
+
+export interface CreateBody {
+  /**
+   * @minLength 3
+   * @maxLength 150
+   */
+  title: string;
+  /**
+   * @minLength 1
+   * @maxLength 10000
+   */
+  content: string;
+}
+
+export interface CreateResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    courseId: string;
+    lessonId: string | null;
+    /** @format uuid */
+    authorId: string;
+    /**
+     * @minLength 3
+     * @maxLength 150
+     */
+    title: string;
+    /**
+     * @minLength 1
+     * @maxLength 10000
+     */
+    content: string;
+    status: "visible" | "deleted_by_author" | "hidden_by_staff";
+    lastActivityAt: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface ListLessonResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    courseId: string;
+    lessonId: string | null;
+    /** @format uuid */
+    authorId: string;
+    /**
+     * @minLength 3
+     * @maxLength 150
+     */
+    title: string;
+    /**
+     * @minLength 1
+     * @maxLength 10000
+     */
+    content: string;
+    status: "visible" | "deleted_by_author" | "hidden_by_staff";
+    lastActivityAt: string;
+    createdAt: string;
+    updatedAt: string;
+  }[];
+}
+
+export interface CreateLessonBody {
+  /**
+   * @minLength 3
+   * @maxLength 150
+   */
+  title: string;
+  /**
+   * @minLength 1
+   * @maxLength 10000
+   */
+  content: string;
+}
+
+export interface CreateLessonResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    courseId: string;
+    lessonId: string | null;
+    /** @format uuid */
+    authorId: string;
+    /**
+     * @minLength 3
+     * @maxLength 150
+     */
+    title: string;
+    /**
+     * @minLength 1
+     * @maxLength 10000
+     */
+    content: string;
+    status: "visible" | "deleted_by_author" | "hidden_by_staff";
+    lastActivityAt: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface DetailResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    courseId: string;
+    lessonId: string | null;
+    /** @format uuid */
+    authorId: string;
+    /**
+     * @minLength 3
+     * @maxLength 150
+     */
+    title: string;
+    /**
+     * @minLength 1
+     * @maxLength 10000
+     */
+    content: string;
+    status: "visible" | "deleted_by_author" | "hidden_by_staff";
+    lastActivityAt: string;
+    createdAt: string;
+    updatedAt: string;
+    comments: {
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      threadId: string;
+      /** @format uuid */
+      authorId: string;
+      /**
+       * @minLength 1
+       * @maxLength 10000
+       */
+      content: string;
+      status: "visible" | "deleted_by_author" | "hidden_by_staff";
+      createdAt: string;
+      updatedAt: string;
+    }[];
+  };
+}
+
+export interface UpdateBody {
+  /**
+   * @minLength 3
+   * @maxLength 150
+   */
+  title?: string;
+  /**
+   * @minLength 1
+   * @maxLength 10000
+   */
+  content?: string;
+}
+
+export interface UpdateResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    courseId: string;
+    lessonId: string | null;
+    /** @format uuid */
+    authorId: string;
+    /**
+     * @minLength 3
+     * @maxLength 150
+     */
+    title: string;
+    /**
+     * @minLength 1
+     * @maxLength 10000
+     */
+    content: string;
+    status: "visible" | "deleted_by_author" | "hidden_by_staff";
+    lastActivityAt: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface DeleteResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    courseId: string;
+    lessonId: string | null;
+    /** @format uuid */
+    authorId: string;
+    /**
+     * @minLength 3
+     * @maxLength 150
+     */
+    title: string;
+    /**
+     * @minLength 1
+     * @maxLength 10000
+     */
+    content: string;
+    status: "visible" | "deleted_by_author" | "hidden_by_staff";
+    lastActivityAt: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface ModerateThreadBody {
+  hidden: boolean;
+}
+
+export interface ModerateThreadResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    courseId: string;
+    lessonId: string | null;
+    /** @format uuid */
+    authorId: string;
+    /**
+     * @minLength 3
+     * @maxLength 150
+     */
+    title: string;
+    /**
+     * @minLength 1
+     * @maxLength 10000
+     */
+    content: string;
+    status: "visible" | "deleted_by_author" | "hidden_by_staff";
+    lastActivityAt: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface CreateCommentBody {
+  /**
+   * @minLength 1
+   * @maxLength 10000
+   */
+  content: string;
+}
+
+export interface CreateCommentResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    threadId: string;
+    /** @format uuid */
+    authorId: string;
+    /**
+     * @minLength 1
+     * @maxLength 10000
+     */
+    content: string;
+    status: "visible" | "deleted_by_author" | "hidden_by_staff";
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface UpdateCommentBody {
+  /**
+   * @minLength 1
+   * @maxLength 10000
+   */
+  content: string;
+}
+
+export interface UpdateCommentResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    threadId: string;
+    /** @format uuid */
+    authorId: string;
+    /**
+     * @minLength 1
+     * @maxLength 10000
+     */
+    content: string;
+    status: "visible" | "deleted_by_author" | "hidden_by_staff";
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface ModerateCommentBody {
+  hidden: boolean;
+}
+
+export interface ModerateCommentResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    threadId: string;
+    /** @format uuid */
+    authorId: string;
+    /**
+     * @minLength 1
+     * @maxLength 10000
+     */
+    content: string;
+    status: "visible" | "deleted_by_author" | "hidden_by_staff";
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface DeleteCommentResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    threadId: string;
+    /** @format uuid */
+    authorId: string;
+    /**
+     * @minLength 1
+     * @maxLength 10000
+     */
+    content: string;
+    status: "visible" | "deleted_by_author" | "hidden_by_staff";
+    createdAt: string;
+    updatedAt: string;
   };
 }
 
@@ -8436,6 +8805,221 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<DeleteManyCategoriesResponse, any>({
         path: `/api/category/deleteManyCategories`,
         method: "DELETE",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseDiscussionsControllerList
+     * @request GET:/api/courses/{courseId}/discussions
+     */
+    courseDiscussionsControllerList: (courseId: string, params: RequestParams = {}) =>
+      this.request<ListResponse, any>({
+        path: `/api/courses/${courseId}/discussions`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseDiscussionsControllerCreate
+     * @request POST:/api/courses/{courseId}/discussions
+     */
+    courseDiscussionsControllerCreate: (
+      courseId: string,
+      data: CreateBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateResponse, any>({
+        path: `/api/courses/${courseId}/discussions`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseDiscussionsControllerListLesson
+     * @request GET:/api/courses/{courseId}/lessons/{lessonId}/discussions
+     */
+    courseDiscussionsControllerListLesson: (
+      courseId: string,
+      lessonId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<ListLessonResponse, any>({
+        path: `/api/courses/${courseId}/lessons/${lessonId}/discussions`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseDiscussionsControllerCreateLesson
+     * @request POST:/api/courses/{courseId}/lessons/{lessonId}/discussions
+     */
+    courseDiscussionsControllerCreateLesson: (
+      courseId: string,
+      lessonId: string,
+      data: CreateLessonBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateLessonResponse, any>({
+        path: `/api/courses/${courseId}/lessons/${lessonId}/discussions`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name DiscussionDetailsControllerDetail
+     * @request GET:/api/discussions/{threadId}
+     */
+    discussionDetailsControllerDetail: (threadId: string, params: RequestParams = {}) =>
+      this.request<DetailResponse, any>({
+        path: `/api/discussions/${threadId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name DiscussionDetailsControllerUpdate
+     * @request PATCH:/api/discussions/{threadId}
+     */
+    discussionDetailsControllerUpdate: (
+      threadId: string,
+      data: UpdateBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateResponse, any>({
+        path: `/api/discussions/${threadId}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name DiscussionDetailsControllerDelete
+     * @request DELETE:/api/discussions/{threadId}
+     */
+    discussionDetailsControllerDelete: (threadId: string, params: RequestParams = {}) =>
+      this.request<DeleteResponse, any>({
+        path: `/api/discussions/${threadId}`,
+        method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name DiscussionDetailsControllerModerateThread
+     * @request PATCH:/api/discussions/{threadId}/moderation
+     */
+    discussionDetailsControllerModerateThread: (
+      threadId: string,
+      data: ModerateThreadBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<ModerateThreadResponse, any>({
+        path: `/api/discussions/${threadId}/moderation`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name DiscussionDetailsControllerCreateComment
+     * @request POST:/api/discussions/{threadId}/comments
+     */
+    discussionDetailsControllerCreateComment: (
+      threadId: string,
+      data: CreateCommentBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateCommentResponse, any>({
+        path: `/api/discussions/${threadId}/comments`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name DiscussionCommentsControllerUpdateComment
+     * @request PATCH:/api/discussion-comments/{commentId}
+     */
+    discussionCommentsControllerUpdateComment: (
+      commentId: string,
+      data: UpdateCommentBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateCommentResponse, any>({
+        path: `/api/discussion-comments/${commentId}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name DiscussionCommentsControllerDeleteComment
+     * @request DELETE:/api/discussion-comments/{commentId}
+     */
+    discussionCommentsControllerDeleteComment: (commentId: string, params: RequestParams = {}) =>
+      this.request<DeleteCommentResponse, any>({
+        path: `/api/discussion-comments/${commentId}`,
+        method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name DiscussionCommentsControllerModerateComment
+     * @request PATCH:/api/discussion-comments/{commentId}/moderation
+     */
+    discussionCommentsControllerModerateComment: (
+      commentId: string,
+      data: ModerateCommentBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<ModerateCommentResponse, any>({
+        path: `/api/discussion-comments/${commentId}/moderation`,
+        method: "PATCH",
         body: data,
         type: ContentType.Json,
         format: "json",

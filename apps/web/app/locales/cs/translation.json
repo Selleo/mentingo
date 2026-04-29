@@ -2100,7 +2100,13 @@
     "tabs": {
       "chapters": "Kapitoly",
       "moreFromAuthor": "Více od autora",
-      "statistics": "Statistika"
+      "statistics": "Statistika",
+      "discussions": "Diskuze"
+    },
+    "discussions": {
+      "loading": "Načítání diskuzí...",
+      "empty": "Zatím žádné diskuze. Buďte první a začněte!",
+      "comingSoon": "Funkce diskuzí brzy přijde."
     }
   },
   "studentChapterView": {

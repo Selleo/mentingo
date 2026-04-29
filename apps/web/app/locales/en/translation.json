@@ -2153,7 +2153,13 @@
     "tabs": {
       "chapters": "Chapters",
       "moreFromAuthor": "More from author",
-      "statistics": "Statistics"
+      "statistics": "Statistics",
+      "discussions": "Discussions"
+    },
+    "discussions": {
+      "loading": "Loading discussions...",
+      "empty": "No discussions yet. Be the first to start one!",
+      "comingSoon": "Discussion feature coming soon."
     }
   },
   "studentChapterView": {

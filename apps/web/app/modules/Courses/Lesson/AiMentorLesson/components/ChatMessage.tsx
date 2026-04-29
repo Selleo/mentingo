@@ -75,8 +75,6 @@ const ChatMessage = ({
     );
   }, [
     aiName,
-    currentUser?.firstName,
-    currentUser?.lastName,
     currentUserDisplayName,
     isAssistant,
     name,
