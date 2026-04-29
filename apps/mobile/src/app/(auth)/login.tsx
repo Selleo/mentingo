@@ -1,6 +1,6 @@
-import { isAxiosError } from 'axios';
-import { router, type Href } from 'expo-router';
-import React, { useState } from 'react';
+import { isAxiosError } from "axios";
+import { router, type Href } from "expo-router";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -8,19 +8,19 @@ import {
   Pressable,
   StyleSheet,
   TextInput,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
-import { useAuth } from '@/lib/auth/auth-context';
+import { ThemedText } from "@/components/themed-text";
+import { ThemedView } from "@/components/themed-view";
+import { Spacing } from "@/constants/theme";
+import { useAuth } from "@/lib/auth/auth-context";
 
 export default function LoginScreen() {
   const { login } = useAuth();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("student+tenant1@example.com");
+  const [password, setPassword] = useState("password");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,7 +31,7 @@ export default function LoginScreen() {
     try {
       const { mfaRequired } = await login(email.trim(), password);
       if (mfaRequired) {
-        router.replace('/mfa' as Href);
+        router.replace("/mfa" as Href);
       }
       // For non-MFA logins the (auth) layout redirects to /(tabs) on its own.
     } catch (e) {
@@ -39,7 +39,7 @@ export default function LoginScreen() {
         ? ((e.response?.data as { message?: string })?.message ?? e.message)
         : e instanceof Error
           ? e.message
-          : 'Login failed';
+          : "Login failed";
       setError(message);
     } finally {
       setSubmitting(false);
@@ -50,8 +50,9 @@ export default function LoginScreen() {
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          style={styles.form}>
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          style={styles.form}
+        >
           <ThemedText type="title" style={styles.title}>
             Sign in
           </ThemedText>
@@ -97,7 +98,8 @@ export default function LoginScreen() {
               styles.button,
               (submitting || !email || !password) && styles.buttonDisabled,
               pressed && styles.buttonPressed,
-            ]}>
+            ]}
+          >
             {submitting ? (
               <ActivityIndicator color="#ffffff" />
             ) : (
@@ -106,7 +108,6 @@ export default function LoginScreen() {
               </ThemedText>
             )}
           </Pressable>
-
         </KeyboardAvoidingView>
       </SafeAreaView>
     </ThemedView>
@@ -118,7 +119,7 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     paddingHorizontal: Spacing.four,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   form: { gap: Spacing.three },
   title: { marginBottom: Spacing.three },
@@ -127,15 +128,15 @@ const styles = StyleSheet.create({
     height: 48,
     fontSize: 16,
   },
-  error: { color: '#d92d20' },
+  error: { color: "#d92d20" },
   button: {
-    backgroundColor: '#3c87f7',
+    backgroundColor: "#3c87f7",
     height: 48,
     borderRadius: Spacing.two,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   buttonDisabled: { opacity: 0.5 },
   buttonPressed: { opacity: 0.85 },
-  buttonText: { color: '#ffffff' },
+  buttonText: { color: "#ffffff" },
 });

@@ -37,7 +37,6 @@ type LoginResponseData = {
 
 export async function login(input: LoginInput): Promise<LoginResult> {
   const { data } = await apiClient.post<{ data: LoginResponseData }>("/auth/login", input);
-  console.log(data);
   const payload = data.data;
   const { shouldVerifyMFA, accessToken, refreshToken, mfaChallengeToken, ...user } = payload;
 
