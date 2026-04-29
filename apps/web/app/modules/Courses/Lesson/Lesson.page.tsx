@@ -9,13 +9,17 @@ import { queryClient } from "~/api/queryClient";
 import ErrorPage from "~/components/ErrorPage/ErrorPage";
 import { LoaderWithTextSequence } from "~/components/LoaderWithTextSequence";
 import { PageWrapper } from "~/components/PageWrapper";
+import { Icon } from "~/components/Icon";
 import { getNextVideoUrl } from "~/components/VideoPlayer/autoplayFlow";
 import { useVideoPlayer } from "~/components/VideoPlayer/VideoPlayerContext";
+import { Button } from "~/components/ui/button";
 import { useLearningTimeTracker } from "~/hooks/useLearningTimeTracker";
+import { cn } from "~/lib/utils";
 import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 import Loader from "~/modules/common/Loader/Loader";
 import { useVideoPreferencesStore } from "~/modules/common/store/useVideoPreferencesStore";
 import { CourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
+import { saveCourseResumeProgress } from "~/modules/Courses/learning/resumeProgress";
 import { LearningModeBanner } from "~/modules/Courses/Lesson/LearningModeBanner";
 import { LessonContent } from "~/modules/Courses/Lesson/LessonContent";
 import { LessonSidebar } from "~/modules/Courses/Lesson/LessonSidebar";
@@ -51,6 +55,7 @@ export default function LessonPage() {
   const { data: user } = useCurrentUser();
 
   const [error, setError] = useState(false);
+  const [isFocusMode, setIsFocusMode] = useState(false);
 
   const {
     data: lesson,
@@ -115,6 +120,21 @@ export default function LessonPage() {
       setError(true);
     }
   }, [lessonError]);
+
+  useEffect(() => {
+    if (!course?.id || !lessonId) return;
+
+    const chapterId =
+      course.chapters.find((chapter) => chapter?.lessons.some((l) => l.id === lessonId))?.id ??
+      undefined;
+
+    saveCourseResumeProgress({
+      userId: user?.id,
+      courseId: course.id,
+      lessonId,
+      chapterId,
+    });
+  }, [course?.id, course?.chapters, lessonId, user?.id]);
 
   if (error) {
     return (
@@ -236,15 +256,31 @@ export default function LessonPage() {
         aboveBreadcrumbs={<LearningModeBanner />}
       >
         <div className="flex w-full max-w-full flex-col gap-6">
-          <div className="flex w-full max-w-full flex-col gap-6 lg:grid lg:grid-cols-[1fr_480px] lg:items-start">
+          <div
+            className={cn(
+              "flex w-full max-w-full flex-col gap-6 lg:items-start",
+              !isFocusMode && "lg:grid lg:grid-cols-[1fr_480px]",
+            )}
+          >
             <div className="flex w-full min-w-0 flex-col divide-y rounded-lg bg-white">
-              <div className="flex items-center p-6 sm:px-10 3xl:px-8">
+              <div className="flex items-center justify-between gap-4 p-6 sm:px-10 3xl:px-8">
                 <p className="h6 text-neutral-950">
                   <span className="text-neutral-800">
                     {t("studentLessonView.other.chapter")} {currentChapter?.displayOrder}:
                   </span>{" "}
                   {currentChapter?.title}
                 </p>
+                <Button
+                  type="button"
+                  variant={isFocusMode ? "primary" : "outline"}
+                  className="shrink-0 flex items-center gap-2"
+                  onClick={() => setIsFocusMode((v) => !v)}
+                >
+                  <Icon name={isFocusMode ? "X" : "Target"} className="size-4" />
+                  {isFocusMode
+                    ? t("common.actions.exit", { defaultValue: "Wyjdź" })
+                    : t("common.actions.focusMode", { defaultValue: "Tryb skupienia" })}
+                </Button>
               </div>
               <LessonContent
                 lesson={lesson}
@@ -257,7 +293,7 @@ export default function LessonPage() {
                 lessonLoading={lessonLoading}
               />
             </div>
-            <LessonSidebar course={course} lessonId={lessonId} />
+            {!isFocusMode && <LessonSidebar course={course} lessonId={lessonId} />}
           </div>
         </div>
       </PageWrapper>

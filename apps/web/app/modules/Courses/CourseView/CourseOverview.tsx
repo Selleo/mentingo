@@ -1,6 +1,7 @@
 import { useNavigate } from "@remix-run/react";
 import { PERMISSIONS } from "@repo/shared";
 import { formatDate } from "date-fns";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useToggleCourseStudentMode } from "~/api/mutations";
@@ -16,6 +17,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/comp
 import { usePermissions } from "~/hooks/usePermissions";
 import { courseLanguages } from "~/modules/Admin/EditCourse/components/CourseLanguageSelector";
 import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
+import { getCourseResumeProgress } from "~/modules/Courses/learning/resumeProgress";
 
 import { COURSE_OVERVIEW_HANDLES } from "../../../../e2e/data/courses/handles";
 
@@ -45,6 +47,35 @@ export default function CourseOverview({ course }: CourseOverviewProps) {
   const isEnterLearningModeDisabled = isDraftCourse && !isCourseStudentModeActive;
 
   const navigateToEditCourse = () => navigate(`/admin/beta-courses/${course.id}`);
+
+  const resume = useMemo(() => {
+    if (typeof window === "undefined") return undefined;
+    return getCourseResumeProgress({ userId: currentUser?.id, courseId: course.id });
+  }, [course.id, currentUser?.id]);
+
+  const resumeMeta = useMemo(() => {
+    if (!resume?.lessonId) return undefined;
+
+    for (const chapter of course.chapters ?? []) {
+      const lesson = chapter.lessons?.find((l) => l.id === resume.lessonId);
+      if (!lesson) continue;
+
+      return {
+        chapterTitle: chapter.title,
+        chapterOrder: chapter.displayOrder,
+        lessonTitle: lesson.title,
+      };
+    }
+
+    return undefined;
+  }, [course.chapters, resume?.lessonId]);
+
+  const handleResume = () => {
+    if (!resume?.lessonId) return;
+    navigate(`/course/${course.slug}/lesson/${resume.lessonId}`, {
+      state: resume.chapterId ? { chapterId: resume.chapterId } : undefined,
+    });
+  };
 
   return (
     <Card className="w-full border-none pt-1 drop-shadow-primary lg:pt-0">
@@ -121,6 +152,33 @@ export default function CourseOverview({ course }: CourseOverviewProps) {
               </Badge>
             </div>
             <h5 className="h5">{title}</h5>
+            {!!resume?.lessonId && (
+              <div className="mt-2 flex flex-col gap-2 rounded-lg border border-primary-200 bg-primary-50 p-4">
+                <div className="flex flex-col gap-1">
+                  <p className="body-sm-md text-neutral-950">
+                    {t("studentCourseView.resume.title", { defaultValue: "Wznów naukę" })}
+                  </p>
+                  <p className="text-xs text-neutral-700">
+                    {resumeMeta
+                      ? `${t("studentLessonView.other.chapter", { defaultValue: "Rozdział" })} ${resumeMeta.chapterOrder}: ${resumeMeta.chapterTitle} — ${resumeMeta.lessonTitle}`
+                      : t("studentCourseView.resume.subtitle", {
+                          defaultValue: "Wróć do ostatnio otwartej lekcji.",
+                        })}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="primary"
+                    className="flex items-center gap-2"
+                    onClick={handleResume}
+                  >
+                    <Icon name="BookOpen" className="size-4" />
+                    {t("studentCourseView.resume.cta", { defaultValue: "Wznów" })}
+                  </Button>
+                </div>
+              </div>
+            )}
             <Viewer
               content={description}
               className="body-base mt-2 text-neutral-900"
