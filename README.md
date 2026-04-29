@@ -125,7 +125,7 @@ The setup script will automatically:
 - ✓ Set up environment files (.env)
 - ✓ Start Docker containers
 - ✓ Run database migrations
-- ✓ Seed the database with test data
+- ✓ Seed the database
 
 > [!NOTE]
 > On Linux, Caddy needs permission to bind to port 443. The script will automatically handle this, but you may be prompted for your sudo password.
@@ -134,31 +134,26 @@ The setup script will automatically:
 
 After setup completes, the following default accounts are available:
 
-| Role            | Email                      | Password |
-| --------------- | -------------------------- | -------- |
-| Admin           | admin@example.com          | password |
-| Student         | user@example.com           | password |
-| Content Creator | contentcreator@example.com | password |
+| Role            | Email                              | Password |
+| --------------- | ---------------------------------- | -------- |
+| Admin           | admin+tenant1@example.com          | password |
+| Student         | student+tenant1@example.com        | password |
+| Content Creator | contentcreator+tenant1@example.com | password |
 
 > [!NOTE]
-> The setup script creates a minimal production-like environment with only these three essential accounts.
+> The setup script seeds the default multi-tenant development environment. The primary tenant uses the accounts above.
+
+> Default tenant hosts:
+>
+> - `https://tenant1.lms.localhost`
+> - `https://tenant2.lms.localhost`
+> - `https://tenant3.lms.localhost`
+
+> [!TIP]
+> If you open one of the other seeded hosts, log in with `admin+tenant<number>@example.com` and the same password.
 
 > [!TIP]
 > If you need a populated environment with sample courses, lessons, and additional test users for development, you can run the development seed instead:
->
-> ```bash
-> pnpm db:seed
-> ```
->
-> This will create accounts:
->
-> | Role            | Email                       | Password |
-> | --------------- | --------------------------- | -------- |
-> | Student         | student@example.com         | password |
-> | Student         | student2@example.com        | password |
-> | Content Creator | contentcreator@example.com  | password |
-> | Content Creator | contentcreator2@example.com | password |
-> | Admin           | admin@example.com           | password |
 
 > [!NOTE]
 > All accounts are intended for development and testing purposes only.

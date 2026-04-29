@@ -14,6 +14,7 @@ import {
   ensureSeedTenant,
   seedSystemRolesForTenant,
   seedTruncateAllTables,
+  seedUserRoleGrantSql,
 } from "./seed-helpers";
 
 import type { DatabasePg, UUIDType } from "../common";
@@ -83,6 +84,8 @@ async function insertCredential(userId: UUIDType, tenantId: UUIDType, password: 
 }
 
 export async function seedProduction() {
+  await seedUserRoleGrantSql(db);
+
   await seedTruncateAllTables(db);
 
   try {
