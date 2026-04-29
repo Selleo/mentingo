@@ -2157,6 +2157,11 @@
       "chapters": "Rozdziały",
       "moreFromAuthor": "Więcej od autora",
       "statistics": "Statystyki"
+    },
+    "completed": {
+      "label": "Ukończyli:",
+      "avatarAlt": "Kursant, który ukończył kurs",
+      "overflow": "+{{count}}"
     }
   },
   "studentChapterView": {

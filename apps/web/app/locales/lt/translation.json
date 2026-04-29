@@ -2102,6 +2102,11 @@
       "chapters": "Skyriai",
       "moreFromAuthor": "Daugiau iš autoriaus",
       "statistics": "Statistika"
+    },
+    "completed": {
+      "label": "Užbaigė:",
+      "avatarAlt": "Kursą baigęs studentas",
+      "overflow": "+{{count}}"
     }
   },
   "studentChapterView": {

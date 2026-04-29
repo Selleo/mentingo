@@ -1084,6 +1084,27 @@
         }
       }
     },
+    "/api/settings/admin/discussions/{setting}": {
+      "patch": {
+        "operationId": "SettingsController_updateDiscussionsSetting",
+        "parameters": [
+          {
+            "name": "setting",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "const": "discussionsEnabled",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/settings/admin/age-limit": {
       "patch": {
         "operationId": "SettingsController_updateAgeLimit",
@@ -7158,6 +7179,176 @@
         }
       }
     },
+    "/api/courses/{courseId}/comments": {
+      "get": {
+        "operationId": "CourseCommentsController_listComments",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListCommentsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "CourseCommentsController_createComment",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCommentBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateCommentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/courses/{courseId}/comments/{commentId}/replies": {
+      "get": {
+        "operationId": "CourseCommentsController_listReplies",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "commentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListRepliesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/comments/{commentId}": {
+      "patch": {
+        "operationId": "CourseCommentsController_updateComment",
+        "parameters": [
+          {
+            "name": "commentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCommentBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateCommentResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "CourseCommentsController_deleteComment",
+        "parameters": [
+          {
+            "name": "commentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/report/summary": {
       "get": {
         "operationId": "ReportController_downloadSummaryReport",
@@ -11576,6 +11767,9 @@
               "articlesEnabled": {
                 "type": "boolean"
               },
+              "discussionsEnabled": {
+                "type": "boolean"
+              },
               "ageLimit": {
                 "anyOf": [
                   {
@@ -11618,6 +11812,7 @@
               "newsEnabled",
               "unregisteredUserArticlesAccessibility",
               "articlesEnabled",
+              "discussionsEnabled",
               "ageLimit",
               "loginPageFiles"
             ]
@@ -12332,6 +12527,9 @@
               "articlesEnabled": {
                 "type": "boolean"
               },
+              "discussionsEnabled": {
+                "type": "boolean"
+              },
               "ageLimit": {
                 "anyOf": [
                   {
@@ -12374,6 +12572,7 @@
               "newsEnabled",
               "unregisteredUserArticlesAccessibility",
               "articlesEnabled",
+              "discussionsEnabled",
               "ageLimit",
               "loginPageFiles"
             ]
@@ -12560,6 +12759,9 @@
               "articlesEnabled": {
                 "type": "boolean"
               },
+              "discussionsEnabled": {
+                "type": "boolean"
+              },
               "ageLimit": {
                 "anyOf": [
                   {
@@ -12602,6 +12804,7 @@
               "newsEnabled",
               "unregisteredUserArticlesAccessibility",
               "articlesEnabled",
+              "discussionsEnabled",
               "ageLimit",
               "loginPageFiles"
             ]
@@ -12788,6 +12991,9 @@
               "articlesEnabled": {
                 "type": "boolean"
               },
+              "discussionsEnabled": {
+                "type": "boolean"
+              },
               "ageLimit": {
                 "anyOf": [
                   {
@@ -12830,6 +13036,7 @@
               "newsEnabled",
               "unregisteredUserArticlesAccessibility",
               "articlesEnabled",
+              "discussionsEnabled",
               "ageLimit",
               "loginPageFiles"
             ]
@@ -13171,6 +13378,9 @@
               "articlesEnabled": {
                 "type": "boolean"
               },
+              "discussionsEnabled": {
+                "type": "boolean"
+              },
               "ageLimit": {
                 "anyOf": [
                   {
@@ -13213,6 +13423,7 @@
               "newsEnabled",
               "unregisteredUserArticlesAccessibility",
               "articlesEnabled",
+              "discussionsEnabled",
               "ageLimit",
               "loginPageFiles"
             ]
@@ -17784,6 +17995,28 @@
                     "type": "null"
                   }
                 ]
+              },
+              "commentCount": {
+                "type": "number"
+              },
+              "discussionsEnabled": {
+                "type": "boolean"
+              },
+              "completerAvatars": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "completerCount": {
+                "type": "number"
               }
             },
             "required": [
@@ -17805,7 +18038,11 @@
               "stripePriceId",
               "availableLocales",
               "baseLanguage",
-              "dueDate"
+              "dueDate",
+              "commentCount",
+              "discussionsEnabled",
+              "completerAvatars",
+              "completerCount"
             ]
           }
         },
@@ -26557,6 +26794,568 @@
             },
             "required": [
               "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ListCommentsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "courseId": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "parentCommentId": {
+                          "anyOf": [
+                            {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "content": {
+                          "type": "string"
+                        },
+                        "isDeleted": {
+                          "type": "boolean"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "updatedAt": {
+                          "type": "string"
+                        },
+                        "replyCount": {
+                          "type": "number"
+                        },
+                        "author": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                "firstName": {
+                                  "type": "string"
+                                },
+                                "lastName": {
+                                  "type": "string"
+                                },
+                                "profilePictureUrl": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "firstName",
+                                "lastName",
+                                "profilePictureUrl"
+                              ]
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "courseId",
+                        "parentCommentId",
+                        "content",
+                        "isDeleted",
+                        "createdAt",
+                        "updatedAt",
+                        "replyCount",
+                        "author"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "replies": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              "courseId": {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              "parentCommentId": {
+                                "anyOf": [
+                                  {
+                                    "format": "uuid",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "content": {
+                                "type": "string"
+                              },
+                              "isDeleted": {
+                                "type": "boolean"
+                              },
+                              "createdAt": {
+                                "type": "string"
+                              },
+                              "updatedAt": {
+                                "type": "string"
+                              },
+                              "replyCount": {
+                                "type": "number"
+                              },
+                              "author": {
+                                "anyOf": [
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "id": {
+                                        "format": "uuid",
+                                        "type": "string"
+                                      },
+                                      "firstName": {
+                                        "type": "string"
+                                      },
+                                      "lastName": {
+                                        "type": "string"
+                                      },
+                                      "profilePictureUrl": {
+                                        "anyOf": [
+                                          {
+                                            "type": "string"
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "firstName",
+                                      "lastName",
+                                      "profilePictureUrl"
+                                    ]
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "courseId",
+                              "parentCommentId",
+                              "content",
+                              "isDeleted",
+                              "createdAt",
+                              "updatedAt",
+                              "replyCount",
+                              "author"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "replies"
+                      ]
+                    }
+                  ]
+                }
+              },
+              "nextCursor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "data",
+              "nextCursor"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ListRepliesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "courseId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "parentCommentId": {
+                      "anyOf": [
+                        {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "content": {
+                      "type": "string"
+                    },
+                    "isDeleted": {
+                      "type": "boolean"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    },
+                    "replyCount": {
+                      "type": "number"
+                    },
+                    "author": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "firstName": {
+                              "type": "string"
+                            },
+                            "lastName": {
+                              "type": "string"
+                            },
+                            "profilePictureUrl": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "firstName",
+                            "lastName",
+                            "profilePictureUrl"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "courseId",
+                    "parentCommentId",
+                    "content",
+                    "isDeleted",
+                    "createdAt",
+                    "updatedAt",
+                    "replyCount",
+                    "author"
+                  ]
+                }
+              },
+              "nextCursor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "data",
+              "nextCursor"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CreateCommentBody": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "minLength": 1,
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "parentCommentId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "content"
+        ]
+      },
+      "CreateCommentResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "courseId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "parentCommentId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "content": {
+                "type": "string"
+              },
+              "isDeleted": {
+                "type": "boolean"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              },
+              "replyCount": {
+                "type": "number"
+              },
+              "author": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "firstName": {
+                        "type": "string"
+                      },
+                      "lastName": {
+                        "type": "string"
+                      },
+                      "profilePictureUrl": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "firstName",
+                      "lastName",
+                      "profilePictureUrl"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "courseId",
+              "parentCommentId",
+              "content",
+              "isDeleted",
+              "createdAt",
+              "updatedAt",
+              "replyCount",
+              "author"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateCommentBody": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "minLength": 1,
+            "maxLength": 2000,
+            "type": "string"
+          }
+        },
+        "required": [
+          "content"
+        ]
+      },
+      "UpdateCommentResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "courseId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "parentCommentId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "content": {
+                "type": "string"
+              },
+              "isDeleted": {
+                "type": "boolean"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              },
+              "replyCount": {
+                "type": "number"
+              },
+              "author": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "firstName": {
+                        "type": "string"
+                      },
+                      "lastName": {
+                        "type": "string"
+                      },
+                      "profilePictureUrl": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "firstName",
+                      "lastName",
+                      "profilePictureUrl"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "courseId",
+              "parentCommentId",
+              "content",
+              "isDeleted",
+              "createdAt",
+              "updatedAt",
+              "replyCount",
+              "author"
             ]
           }
         },

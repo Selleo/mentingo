@@ -750,6 +750,20 @@
       "when": 1775175761020,
       "tag": "0106_drop_roles_column_from_users",
       "breakpoints": true
+    },
+    {
+      "idx": 107,
+      "version": "7",
+      "when": 1777468613226,
+      "tag": "0107_add_course_comments_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 108,
+      "version": "7",
+      "when": 1777468700000,
+      "tag": "0108_enable_tenant_rls_for_course_comments",
+      "breakpoints": true
     }
   ]
 }
