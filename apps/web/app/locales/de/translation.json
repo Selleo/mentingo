@@ -594,6 +594,10 @@
   },
   "rewards": {
     "admin": {
+      "backfill": "Punkte nachtragen",
+      "backfilling": "Punkte werden nachgetragen...",
+      "backfillFailed": "Nachtragen der Belohnungspunkte konnte nicht gestartet werden.",
+      "backfillSuccess": "Nachtragen der Belohnungspunkte abgeschlossen. {{chapterGrants}} Kapitelgutschriften, {{aiConversationGrants}} KI-Gesprächsgutschriften und {{courseGrants}} Kursgutschriften wurden hinzugefügt.",
       "rateUpdated": "Belohnungspunkte-Rate wurde erfolgreich aktualisiert."
     },
     "notifications": {

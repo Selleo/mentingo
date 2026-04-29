@@ -594,6 +594,10 @@
   },
   "rewards": {
     "admin": {
+      "backfill": "Doplnit body",
+      "backfilling": "Doplňují se body...",
+      "backfillFailed": "Nepodařilo se spustit doplnění bodů odměn.",
+      "backfillSuccess": "Doplnění bodů odměn dokončeno. Přidáno {{chapterGrants}} odměn za kapitoly, {{aiConversationGrants}} odměn za AI konverzace a {{courseGrants}} odměn za kurzy.",
       "rateUpdated": "Sazba bodů odměn byla úspěšně aktualizována."
     },
     "notifications": {

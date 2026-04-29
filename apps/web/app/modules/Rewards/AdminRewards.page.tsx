@@ -124,8 +124,14 @@ export default function AdminRewardsPage() {
         <section className="flex flex-col gap-4 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <h1 className="h5 text-neutral-950">{t("rewards.admin.title", "Rewards")}</h1>
-            <Button variant="outline" onClick={() => backfillRewards.mutate()}>
-              {t("rewards.admin.backfill", "Backfill points")}
+            <Button
+              variant="outline"
+              disabled={backfillRewards.isPending}
+              onClick={() => backfillRewards.mutate()}
+            >
+              {backfillRewards.isPending
+                ? t("rewards.admin.backfilling", "Backfilling...")
+                : t("rewards.admin.backfill", "Backfill points")}
             </Button>
           </div>
           <div className="grid gap-3 md:grid-cols-3">

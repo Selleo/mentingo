@@ -571,6 +571,10 @@
   },
   "rewards": {
     "admin": {
+      "backfill": "Uzupełnij punkty",
+      "backfilling": "Uzupełnianie punktów...",
+      "backfillFailed": "Nie udało się uruchomić uzupełniania punktów nagród.",
+      "backfillSuccess": "Uzupełnianie punktów nagród zakończone. Dodano {{chapterGrants}} nagród za rozdziały, {{aiConversationGrants}} nagród za rozmowy AI i {{courseGrants}} nagród za kursy.",
       "rateUpdated": "Stawka punktów nagród została zaktualizowana."
     },
     "notifications": {

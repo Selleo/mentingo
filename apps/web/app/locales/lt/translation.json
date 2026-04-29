@@ -594,6 +594,10 @@
   },
   "rewards": {
     "admin": {
+      "backfill": "Papildyti taškus",
+      "backfilling": "Taškai papildomi...",
+      "backfillFailed": "Nepavyko paleisti atlygio taškų papildymo.",
+      "backfillSuccess": "Atlygio taškų papildymas baigtas. Pridėta {{chapterGrants}} skyrių įrašų, {{aiConversationGrants}} AI pokalbių įrašų ir {{courseGrants}} kursų įrašų.",
       "rateUpdated": "Atlygio taškų norma sėkmingai atnaujinta."
     },
     "notifications": {

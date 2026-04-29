@@ -16,6 +16,14 @@ type UpdateRuleInput = {
   enabled: boolean;
 };
 
+type BackfillRewardsResponse = {
+  data: {
+    chapterGrants: number;
+    aiConversationGrants: number;
+    courseGrants: number;
+  };
+};
+
 export type UpsertAchievementInput = {
   id?: string;
   title: LocalizedText;
@@ -70,12 +78,30 @@ export function useArchiveRewardAchievement() {
 }
 
 export function useBackfillRewards() {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+
   return useMutation({
     mutationFn: async () => {
       const response = await ApiClient.instance.post("/api/rewards/backfill");
 
-      return response.data;
+      return response.data as BackfillRewardsResponse;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["rewards"] }),
+    onSuccess: ({ data }) => {
+      queryClient.invalidateQueries({ queryKey: ["rewards"] });
+      toast({
+        description: t("rewards.admin.backfillSuccess", {
+          chapterGrants: data.chapterGrants,
+          aiConversationGrants: data.aiConversationGrants,
+          courseGrants: data.courseGrants,
+        }),
+      });
+    },
+    onError: () => {
+      toast({
+        description: t("rewards.admin.backfillFailed"),
+        variant: "destructive",
+      });
+    },
   });
 }

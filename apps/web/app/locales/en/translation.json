@@ -594,6 +594,10 @@
   },
   "rewards": {
     "admin": {
+      "backfill": "Backfill points",
+      "backfilling": "Backfilling...",
+      "backfillFailed": "Failed to run reward backfill.",
+      "backfillSuccess": "Reward backfill completed. Added {{chapterGrants}} chapter grants, {{aiConversationGrants}} AI conversation grants, and {{courseGrants}} course grants.",
       "rateUpdated": "Reward point rate updated successfully."
     },
     "notifications": {
