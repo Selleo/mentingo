@@ -100,7 +100,7 @@ export default function CourseViewPage() {
   const isCohortLearningEnabled = Boolean(
     (course as unknown as { cohortLearningEnabled?: boolean })?.cohortLearningEnabled,
   );
-  console.log("isCohortLearningEnabled", isCohortLearningEnabled);
+
   const courseViewTabs = useMemo(
     () => [
       {
@@ -131,7 +131,12 @@ export default function CourseViewPage() {
         ? [
             {
               title: t("studentCourseView.tabs.discussion"),
-              content: <CourseDiscussion isEnrolled={Boolean(course?.enrolled)} />,
+              content: (
+                <CourseDiscussion
+                  courseId={course?.id ?? ""}
+                  isEnrolled={Boolean(course?.enrolled)}
+                />
+              ),
               isForAdminLike: false,
               isForUnregistered: true,
             },

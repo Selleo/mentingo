@@ -125,6 +125,12 @@ export const courseStatisticsQuerySchema = Type.Object({
 });
 
 export const supportedLanguagesSchema = Type.Enum(SUPPORTED_LANGUAGES, { default: "en" });
+
+export const courseDiscussionSummarySchema = Type.Object({
+  completedCount: Type.Number(),
+  activeStudentsCount: Type.Union([Type.Number(), Type.Null()]),
+  completedStudentAvatars: Type.Array(Type.String()),
+});
 export const enrolledCourseGroupsPayload = Type.Object({
   groups: Type.Array(
     Type.Object({
@@ -184,3 +190,4 @@ export type AllStudentQuizResultsResponse = Static<typeof allStudentQuizResultsS
 export type AllStudentAiMentorResultsResponse = Static<typeof allStudentAiMentorResultsSchema>;
 export type SupportedLanguagesBody = Static<typeof supportedLanguagesSchema>;
 export type EnrolledCourseGroupsPayload = Static<typeof enrolledCourseGroupsPayload>;
+export type CourseDiscussionSummaryResponse = Static<typeof courseDiscussionSummarySchema>;

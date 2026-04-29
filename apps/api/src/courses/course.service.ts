@@ -302,6 +302,66 @@ export class CourseService {
     };
   }
 
+  async getCourseDiscussionSummary(courseId: UUIDType): Promise<{
+    completedCount: number;
+    activeStudentsCount: number | null;
+    completedStudentAvatars: string[];
+  }> {
+    const [course] = await this.db
+      .select({ id: courses.id })
+      .from(courses)
+      .where(eq(courses.id, courseId));
+
+    if (!course) {
+      throw new NotFoundException("Course not found");
+    }
+
+    const [summary] = await this.db
+      .select({
+        completedCount: count(studentCourses.id),
+      })
+      .from(studentCourses)
+      .where(
+        and(
+          eq(studentCourses.courseId, courseId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+          isNotNull(studentCourses.completedAt),
+        ),
+      );
+
+    const completedStudents = await this.db
+      .select({
+        avatarReference: users.avatarReference,
+      })
+      .from(studentCourses)
+      .innerJoin(users, eq(studentCourses.studentId, users.id))
+      .where(
+        and(
+          eq(studentCourses.courseId, courseId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+          isNotNull(studentCourses.completedAt),
+        ),
+      )
+      .orderBy(desc(studentCourses.completedAt))
+      .limit(3);
+
+    const completedStudentAvatars = (
+      await Promise.all(
+        completedStudents.map(async ({ avatarReference }) => {
+          if (!avatarReference) return null;
+
+          return this.userService.getUsersProfilePictureUrl(avatarReference);
+        }),
+      )
+    ).filter((avatarUrl): avatarUrl is string => Boolean(avatarUrl));
+
+    return {
+      completedCount: summary?.completedCount ?? 0,
+      activeStudentsCount: null,
+      completedStudentAvatars,
+    };
+  }
+
   async getCoursesForUser(
     query: CoursesQuery,
     userId: UUIDType,

@@ -50,6 +50,7 @@ import {
   allStudentAiMentorResultsSchema,
   allStudentCourseProgressionSchema,
   allStudentQuizResultsSchema,
+  courseDiscussionSummarySchema,
   courseAverageQuizScoresSchema,
   enrolledCourseGroupsPayload,
   getCourseStatisticsSchema,
@@ -139,6 +140,7 @@ import type {
   CourseStatisticsResponse,
   LessonSequenceEnabledResponse,
   CourseOwnershipCandidatesResponseBody,
+  CourseDiscussionSummaryResponse,
 } from "src/courses/schemas/course.schema";
 import type {
   CoursesFilterSchema,
@@ -783,6 +785,20 @@ export class CourseController {
     const query = { groupId };
 
     const data = await this.courseService.getCourseStatistics(courseId, query);
+
+    return new BaseResponse(data);
+  }
+
+  @Public()
+  @Get(":courseId/discussion-summary")
+  @Validate({
+    request: [{ type: "param", name: "courseId", schema: UUIDSchema }],
+    response: baseResponse(courseDiscussionSummarySchema),
+  })
+  async getCourseDiscussionSummary(
+    @Param("courseId") courseId: UUIDType,
+  ): Promise<BaseResponse<CourseDiscussionSummaryResponse>> {
+    const data = await this.courseService.getCourseDiscussionSummary(courseId);
 
     return new BaseResponse(data);
   }

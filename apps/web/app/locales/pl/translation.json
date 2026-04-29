@@ -2160,6 +2160,8 @@
       "discussion": "Dyskusja"
     },
     "discussion": {
+      "completed": "Ukończyło:",
+      "avatarAlt": "Avatar studenta, który ukończył kurs",
       "enrollmentRequired": "Dołącz do kursu, aby zobaczyć dyskusję studentów.",
       "empty": "Dyskusja jest włączona. Studenci mogą tutaj zadawać pytania i dzielić się postępami."
     }
