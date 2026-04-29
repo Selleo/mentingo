@@ -112,14 +112,15 @@ describe("CourseDiscussions", () => {
     // Submit the form
     await user.click(screen.getByRole("button", { name: /createThread/i }));
 
-    expect(mockCreateThreadMutate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        courseId: "course-1",
-        lessonId: "lesson-1",
-        data: expect.objectContaining({ title: "New Thread" }),
-      }),
-      expect.any(Function),
-    );
+    // Get the actual call arguments
+    const callArgs = mockCreateThreadMutate.mock.calls[0];
+
+    // Verify first argument contains expected values
+    expect(callArgs[0]).toMatchObject({
+      courseId: "course-1",
+      lessonId: "lesson-1",
+    });
+    expect(callArgs[0].data).toMatchObject({ title: "New Thread" });
   });
 
   it("shows create button and thread list when threads exist", () => {

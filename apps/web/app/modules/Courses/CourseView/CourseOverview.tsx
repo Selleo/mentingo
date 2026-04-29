@@ -13,6 +13,7 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { CategoryChip } from "~/components/ui/CategoryChip";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
+import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { usePermissions } from "~/hooks/usePermissions";
 import { courseLanguages } from "~/modules/Admin/EditCourse/components/CourseLanguageSelector";
 import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
@@ -41,6 +42,12 @@ export default function CourseOverview({ course }: CourseOverviewProps) {
   const imageUrl = course?.thumbnailUrl ?? CardPlaceholder;
   const title = course?.title;
   const description = course?.description || "";
+  const completedStudentAvatars = course.completedStudentAvatars ?? [];
+  const completedStudentsCount = course.completedStudentsCount ?? 0;
+  const hiddenCompletedStudentsCount = Math.max(
+    completedStudentsCount - completedStudentAvatars.length,
+    0,
+  );
   const isDraftCourse = course.status === "draft";
   const isEnterLearningModeDisabled = isDraftCourse && !isCourseStudentModeActive;
 
@@ -126,6 +133,32 @@ export default function CourseOverview({ course }: CourseOverviewProps) {
               className="body-base mt-2 text-neutral-900"
               variant="content"
             />
+            {completedStudentsCount > 0 && (
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <span className="body-sm-md text-neutral-700">Completed by</span>
+                <div className="flex items-center">
+                  {completedStudentAvatars.map((student, index) => (
+                    <div
+                      key={student.userId}
+                      data-testid="completed-student-avatar"
+                      className="-ml-2 first:ml-0"
+                      style={{ zIndex: completedStudentAvatars.length - index }}
+                    >
+                      <UserAvatar
+                        userName="Completed student"
+                        profilePictureUrl={student.avatarUrl}
+                        className="size-9 border-2 border-white"
+                      />
+                    </div>
+                  ))}
+                  {hiddenCompletedStudentsCount > 0 && (
+                    <span className="body-sm-md ml-3 text-neutral-700">
+                      +{hiddenCompletedStudentsCount}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </CardContent>
