@@ -37,6 +37,7 @@ type RewardGrantInput = {
   sourceEntityType: RewardSourceEntityType;
   sourceEntityId: UUIDType;
   metadata?: Record<string, unknown>;
+  awardedAt?: string;
   notify?: boolean;
 };
 
@@ -303,6 +304,7 @@ export class RewardsService {
         points: rule.points,
         ruleId: rule.id,
         metadata: input.metadata ?? {},
+        ...(input.awardedAt ? { awardedAt: input.awardedAt } : {}),
       })
       .onConflictDoNothing()
       .returning();
@@ -340,6 +342,7 @@ export class RewardsService {
         userId: studentChapterProgress.studentId,
         courseId: studentChapterProgress.courseId,
         chapterId: studentChapterProgress.chapterId,
+        awardedAt: studentChapterProgress.completedAt,
       })
       .from(studentChapterProgress)
       .where(isNotNull(studentChapterProgress.completedAt));
@@ -351,6 +354,7 @@ export class RewardsService {
         sourceEntityType: REWARD_SOURCE_ENTITY_TYPES.CHAPTER,
         sourceEntityId: row.chapterId,
         metadata: { courseId: row.courseId },
+        awardedAt: row.awardedAt ?? undefined,
         notify: false,
       });
 
@@ -362,6 +366,10 @@ export class RewardsService {
         userId: studentLessonProgress.studentId,
         courseId: chapters.courseId,
         lessonId: studentLessonProgress.lessonId,
+        awardedAt: sql<string>`COALESCE(
+          ${studentLessonProgress.completedAt},
+          ${aiMentorStudentLessonProgress.updatedAt}
+        )`,
       })
       .from(studentLessonProgress)
       .innerJoin(
@@ -378,6 +386,7 @@ export class RewardsService {
         sourceEntityType: REWARD_SOURCE_ENTITY_TYPES.LESSON,
         sourceEntityId: row.lessonId,
         metadata: { courseId: row.courseId },
+        awardedAt: row.awardedAt ?? undefined,
         notify: false,
       });
 
@@ -388,6 +397,7 @@ export class RewardsService {
       .select({
         userId: studentCourses.studentId,
         courseId: studentCourses.courseId,
+        awardedAt: studentCourses.completedAt,
       })
       .from(studentCourses)
       .where(isNotNull(studentCourses.completedAt));
@@ -398,6 +408,7 @@ export class RewardsService {
         actionType: REWARD_ACTION_TYPES.COURSE_COMPLETED,
         sourceEntityType: REWARD_SOURCE_ENTITY_TYPES.COURSE,
         sourceEntityId: row.courseId,
+        awardedAt: row.awardedAt ?? undefined,
         notify: false,
       });
 
