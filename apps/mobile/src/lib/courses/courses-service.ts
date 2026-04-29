@@ -31,3 +31,28 @@ export async function getTopCourses(): Promise<CourseSummary[]> {
   });
   return data.data;
 }
+
+export type LessonSummary = {
+  id: string;
+  title: string;
+  type: "content" | "quiz" | "ai_mentor" | "embed";
+};
+
+export type ChapterDetail = {
+  id: string;
+  title: string;
+  lessons: LessonSummary[];
+};
+
+export type CourseDetail = {
+  id: string;
+  title: string;
+  chapters: ChapterDetail[];
+};
+
+export async function getCourse(idOrSlug: string): Promise<CourseDetail> {
+  const { data } = await apiClient.get<{ data: CourseDetail }>("/course", {
+    params: { id: idOrSlug, language: "en" },
+  });
+  return data.data;
+}

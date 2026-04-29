@@ -1,5 +1,6 @@
+import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
@@ -86,9 +87,12 @@ function CourseSection({ title, courses }: { title: string; courses: CourseSumma
         </ThemedText>
       ) : (
         courses.map((course) => (
-          <ThemedText key={course.id} type="default">
-            {course.title}
-          </ThemedText>
+          <Pressable
+            key={course.id}
+            onPress={() => router.push(`/courses/${course.id}`)}
+            style={({ pressed }) => pressed && styles.pressed}>
+            <ThemedText type="default">{course.title}</ThemedText>
+          </Pressable>
         ))
       )}
     </ThemedView>
@@ -114,5 +118,8 @@ const styles = StyleSheet.create({
   },
   section: {
     gap: Spacing.two,
+  },
+  pressed: {
+    opacity: 0.6,
   },
 });
