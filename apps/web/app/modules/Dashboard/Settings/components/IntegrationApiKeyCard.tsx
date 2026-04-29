@@ -23,6 +23,8 @@ import {
 } from "~/components/ui/dialog";
 import { copyToClipboard } from "~/utils/copyToClipboard";
 
+import { SETTINGS_PAGE_HANDLES } from "../../../../../e2e/data/settings/handles";
+
 function formatDate(value: string | null) {
   if (!value) return "-";
 
@@ -49,7 +51,7 @@ export function IntegrationApiKeyCard() {
   };
 
   return (
-    <Card id="integration-api-key">
+    <Card id="integration-api-key" data-testid={SETTINGS_PAGE_HANDLES.INTEGRATION_API_KEY_CARD}>
       <CardHeader>
         <CardTitle className="h5">{t("integrationApiKey.title")}</CardTitle>
         <CardDescription className="body-lg-md">
@@ -79,7 +81,10 @@ export function IntegrationApiKeyCard() {
         </div>
 
         {generatedKey && (
-          <div className="rounded-lg border border-primary-200 bg-primary-50 p-4 space-y-3">
+          <div
+            className="rounded-lg border border-primary-200 bg-primary-50 p-4 space-y-3"
+            data-testid={SETTINGS_PAGE_HANDLES.INTEGRATION_API_KEY_GENERATED}
+          >
             <p className="text-sm font-medium">{t("integrationApiKey.generated.title")}</p>
             <p className="break-all text-xs md:text-sm">{generatedKey}</p>
             <Button
@@ -106,7 +111,12 @@ export function IntegrationApiKeyCard() {
         {activeKey ? (
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button disabled={isPending}>{t("integrationApiKey.override")}</Button>
+              <Button
+                disabled={isPending}
+                data-testid={SETTINGS_PAGE_HANDLES.INTEGRATION_API_KEY_OVERRIDE}
+              >
+                {t("integrationApiKey.override")}
+              </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
@@ -117,14 +127,22 @@ export function IntegrationApiKeyCard() {
                 <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
                   {t("common.button.cancel")}
                 </Button>
-                <Button onClick={rotate} disabled={isPending}>
+                <Button
+                  onClick={rotate}
+                  disabled={isPending}
+                  data-testid={SETTINGS_PAGE_HANDLES.INTEGRATION_API_KEY_CONFIRM_ROTATE}
+                >
                   {t("integrationApiKey.confirm.action")}
                 </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
         ) : (
-          <Button disabled={isPending} onClick={rotate}>
+          <Button
+            disabled={isPending}
+            onClick={rotate}
+            data-testid={SETTINGS_PAGE_HANDLES.INTEGRATION_API_KEY_GENERATE}
+          >
             {t("integrationApiKey.generate")}
           </Button>
         )}

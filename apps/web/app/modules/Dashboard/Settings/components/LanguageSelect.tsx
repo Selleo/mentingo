@@ -13,6 +13,8 @@ import {
   SelectItem,
 } from "~/components/ui/select";
 
+import { SETTINGS_PAGE_HANDLES } from "../../../../../e2e/data/settings/handles";
+
 import type { SupportedLanguages } from "@repo/shared";
 
 export default function LanguageSelect() {
@@ -39,7 +41,7 @@ export default function LanguageSelect() {
           {t("changeUserLanguageView.field.language")}
         </Label>
         <Select value={currentLanguage} onValueChange={handleLanguageChange} disabled={isPending}>
-          <SelectTrigger>
+          <SelectTrigger data-testid={SETTINGS_PAGE_HANDLES.LANGUAGE_SELECT}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

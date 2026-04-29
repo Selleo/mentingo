@@ -10,6 +10,8 @@ import { Dialog, DialogContent } from "~/components/ui/dialog";
 import { useHandleImageUpload } from "~/hooks/useHandleImageUpload";
 import CertificatePreview from "~/modules/Profile/Certificates/CertificatePreview";
 
+import { SETTINGS_PAGE_HANDLES } from "../../../../../../e2e/data/settings/handles";
+
 interface CertificateBackgroundUploadProps {
   certificateBackgroundImage: string | null;
   platformLogo: string | null;
@@ -57,6 +59,7 @@ export function CertificateBackgroundUpload({
       <Card
         id="certificate-background-upload"
         className="flex h-full flex-col border-neutral-200 bg-white shadow-sm"
+        data-testid={SETTINGS_PAGE_HANDLES.CERTIFICATE_BACKGROUND_CARD}
       >
         <CardHeader className="min-h-24 space-y-1 pb-2">
           <CardTitle className="text-base font-semibold">
@@ -75,6 +78,7 @@ export function CertificateBackgroundUpload({
             fileInputRef={fileInputRef}
             variant="video"
             detailsText={t("certificateBackgroundUpload.field.imageRequirements")}
+            inputTestId={SETTINGS_PAGE_HANDLES.CERTIFICATE_BACKGROUND_INPUT}
           />
           {isUploading && (
             <p className="text-xs font-medium text-neutral-500">
@@ -83,7 +87,12 @@ export function CertificateBackgroundUpload({
           )}
           <div className="flex flex-wrap gap-2">
             {certificateBackgroundImage && (
-              <Button onClick={removeImage} variant="destructive" size="sm">
+              <Button
+                onClick={removeImage}
+                variant="destructive"
+                size="sm"
+                data-testid={SETTINGS_PAGE_HANDLES.CERTIFICATE_BACKGROUND_REMOVE}
+              >
                 <Icon name="TrashIcon" className="mr-2" />
                 {t("certificateBackgroundUpload.button.removeCertificateBackgroundImage")}
               </Button>
