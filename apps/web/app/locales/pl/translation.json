@@ -2156,7 +2156,12 @@
     "tabs": {
       "chapters": "Rozdziały",
       "moreFromAuthor": "Więcej od autora",
-      "statistics": "Statystyki"
+      "statistics": "Statystyki",
+      "discussion": "Dyskusja"
+    },
+    "discussion": {
+      "enrollmentRequired": "Dołącz do kursu, aby zobaczyć dyskusję studentów.",
+      "empty": "Dyskusja jest włączona. Studenci mogą tutaj zadawać pytania i dzielić się postępami."
     }
   },
   "studentChapterView": {

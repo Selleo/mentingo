@@ -2154,7 +2154,12 @@
     "tabs": {
       "chapters": "Chapters",
       "moreFromAuthor": "More from author",
-      "statistics": "Statistics"
+      "statistics": "Statistics",
+      "discussion": "Discussion"
+    },
+    "discussion": {
+      "enrollmentRequired": "Join the course to view student discussions.",
+      "empty": "Discussion is enabled. Students can start sharing questions and progress updates here."
     }
   },
   "studentChapterView": {

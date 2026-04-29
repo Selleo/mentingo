@@ -22,6 +22,7 @@ import { isSupportedLanguage } from "~/utils/browser-language";
 import { ChapterListOverview } from "./components/ChapterListOverview";
 import { CourseAdminStatistics } from "./CourseAdminStatistics/CourseAdminStatistics";
 import CourseCertificate from "./CourseCertificate";
+import { CourseDiscussion } from "./CourseDiscussion";
 
 import type { SupportedLanguages } from "@repo/shared";
 
@@ -96,7 +97,10 @@ export default function CourseViewPage() {
     required: PERMISSIONS.COURSE_STATISTICS,
   });
   const { data: currentUser } = useCurrentUser();
-
+  const isCohortLearningEnabled = Boolean(
+    (course as unknown as { cohortLearningEnabled?: boolean })?.cohortLearningEnabled,
+  );
+  console.log("isCohortLearningEnabled", isCohortLearningEnabled);
   const courseViewTabs = useMemo(
     () => [
       {
@@ -123,8 +127,18 @@ export default function CourseViewPage() {
         isForAdminLike: true,
         isForUnregistered: false,
       },
+      ...(isCohortLearningEnabled
+        ? [
+            {
+              title: t("studentCourseView.tabs.discussion"),
+              content: <CourseDiscussion isEnrolled={Boolean(course?.enrolled)} />,
+              isForAdminLike: false,
+              isForUnregistered: true,
+            },
+          ]
+        : []),
     ],
-    [t, course],
+    [t, course, isCohortLearningEnabled],
   );
 
   if (!course) return null;
