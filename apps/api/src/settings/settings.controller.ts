@@ -17,6 +17,7 @@ import {
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes } from "@nestjs/swagger";
 import {
+  ALLOWED_COHORT_SETTINGS,
   ALLOWED_ARTICLES_SETTINGS,
   ALLOWED_NEWS_SETTINGS,
   ALLOWED_QA_SETTINGS,
@@ -25,6 +26,7 @@ import {
   LOGIN_PAGE_DOCUMENTS_FILE_TYPES,
   PERMISSIONS,
   type AllowedArticlesSettings,
+  type AllowedCohortSettings,
   type AllowedNewsSettings,
   type AllowedQASettings,
   SupportedLanguages,
@@ -584,6 +586,15 @@ export class SettingsController {
   @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   async updateArticlesSetting(@Param("setting") setting: AllowedArticlesSettings) {
     return new BaseResponse(await this.settingsService.updateArticlesSetting(setting));
+  }
+
+  @Patch("admin/cohort/:setting")
+  @Validate({
+    request: [{ type: "param", name: "setting", schema: Type.Enum(ALLOWED_COHORT_SETTINGS) }],
+  })
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
+  async updateCohortSetting(@Param("setting") setting: AllowedCohortSettings) {
+    return new BaseResponse(await this.settingsService.updateCohortSetting(setting));
   }
 
   @Patch("admin/age-limit")

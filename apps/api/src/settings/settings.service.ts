@@ -6,6 +6,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import {
+  ALLOWED_COHORT_SETTINGS,
   ALLOWED_ARTICLES_SETTINGS,
   ALLOWED_NEWS_SETTINGS,
   ALLOWED_QA_SETTINGS,
@@ -74,6 +75,7 @@ import type {
 import type { RegistrationFormFieldDbModel } from "./types/registration-form.types";
 import type {
   AllowedArticlesSettings,
+  AllowedCohortSettings,
   AllowedNewsSettings,
   AllowedQASettings,
   SupportedLanguages,
@@ -1457,6 +1459,34 @@ export class SettingsService {
     return updatedGlobalSettings;
   }
 
+  async updateCohortSetting(setting: AllowedCohortSettings) {
+    const [globalSettings] = await this.db
+      .select({
+        setting: sql<boolean>`(settings.settings->>(${setting}::text))::boolean`,
+      })
+      .from(settings)
+      .where(isNull(settings.userId));
+
+    if (!globalSettings) throw new NotFoundException("Global settings not found");
+
+    const [{ settings: updatedGlobalSettings }] = await this.db
+      .update(settings)
+      .set({
+        settings: sql`
+          jsonb_set(
+            settings.settings,
+            ARRAY[${ALLOWED_COHORT_SETTINGS.COHORT_LEARNING_ENABLED}]::text[],
+            to_jsonb(${!globalSettings.setting}::boolean),
+            true
+          )
+        `,
+      })
+      .where(isNull(settings.userId))
+      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+
+    return updatedGlobalSettings;
+  }
+
   async uploadLoginPageFile(
     uploadedData: UploadFilesToLoginPageBody,
     file: Express.Multer.File,
@@ -1617,6 +1647,8 @@ export class SettingsService {
   ): GlobalSettingsJSONContentSchema {
     return {
       ...settings,
+      cohortLearningEnabled:
+        settings.cohortLearningEnabled ?? DEFAULT_GLOBAL_SETTINGS.cohortLearningEnabled,
       modernCourseListEnabled:
         settings.modernCourseListEnabled ?? DEFAULT_GLOBAL_SETTINGS.modernCourseListEnabled,
       MFAEnforcedRoles: Array.isArray(settings.MFAEnforcedRoles)

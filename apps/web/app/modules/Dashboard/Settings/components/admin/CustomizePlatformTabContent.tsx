@@ -1,5 +1,6 @@
 import ArticlesPreferences from "~/modules/Dashboard/Settings/components/admin/ArticlesPreferences";
 import { CertificateBackgroundUpload } from "~/modules/Dashboard/Settings/components/admin/CertificateBackgroundUpload";
+import CohortLearningPreferences from "~/modules/Dashboard/Settings/components/admin/CohortLearningPreferences";
 import NewsPreferences from "~/modules/Dashboard/Settings/components/admin/NewsPreferences";
 import { OrganizationLoginBackgroundUpload } from "~/modules/Dashboard/Settings/components/admin/OrganizationLoginBackgroundUpload";
 import { OrganizationTheme } from "~/modules/Dashboard/Settings/components/admin/OrganizationTheme";
@@ -25,6 +26,7 @@ export default function CustomizePlatformTabContent({
       <AdminPreferences globalSettings={globalSettings} />
       {canManageUsers && <RegistrationFormBuilder />}
       <QAPreferences globalSettings={globalSettings} />
+      <CohortLearningPreferences globalSettings={globalSettings} />
       <NewsPreferences globalSettings={globalSettings} />
       <ArticlesPreferences globalSettings={globalSettings} />
       <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">

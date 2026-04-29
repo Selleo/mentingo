@@ -2190,6 +2190,7 @@
     },
     "toast": {
       "qaSettingUpdatedSuccessfully": "Ustawienia QA zostały pomyślnie zaktualizowane",
+      "cohortLearningSettingUpdatedSuccessfully": "Ustawienia uczenia kohortowego zostały pomyślnie zaktualizowane",
       "ageLimitUpdatedSuccessfully": "Limit wieku został pomyślnie zaktualizowany",
       "newsSettingUpdatedSuccessfully": "Ustawienia aktualności zostały pomyślnie zaktualizowane",
       "articlesSettingUpdatedSuccessfully": "Ustawienia bazy wiedzy zostały pomyślnie zaktualizowane"
@@ -2798,6 +2799,16 @@
     },
     "tooltip": {
       "disabled": "Aby przełączyć to pole, najpierw włącz sekcję bazy wiedzy."
+    }
+  },
+  "cohortLearningPreferences": {
+    "subHeader": "Skonfiguruj ustawienia uczenia kohortowego",
+    "header": "Ustawienia uczenia kohortowego",
+    "settings": {
+      "cohortLearningEnabled": {
+        "label": "Włącz uczenie kohortowe",
+        "description": "Włącz dyskusje kursowe dla uczestników. Gdy wyłączone, sekcja dyskusji w widoku kursu jest ukryta."
+      }
     }
   },
   "qaView": {

@@ -2191,6 +2191,7 @@
         "globalNotFound": "Global settings not found"
       },
       "qaSettingUpdatedSuccessfully": "QA settings updated successfully",
+      "cohortLearningSettingUpdatedSuccessfully": "Cohort learning settings updated successfully",
       "ageLimitUpdatedSuccessfully": "Age limit updated successfully",
       "newsSettingUpdatedSuccessfully": "News settings updated successfully",
       "articlesSettingUpdatedSuccessfully": "Knowledge base settings updated successfully"
@@ -2773,6 +2774,16 @@
     },
     "tooltip": {
       "disabled": "To toggle this field, please enable the knowledge base section first."
+    }
+  },
+  "cohortLearningPreferences": {
+    "subHeader": "Configure cohort learning settings",
+    "header": "Cohort Learning Settings",
+    "settings": {
+      "cohortLearningEnabled": {
+        "label": "Enable cohort learning",
+        "description": "Enable course discussions for learners. When disabled, the discussion experience is hidden in course view."
+      }
     }
   },
   "qaView": {
