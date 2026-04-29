@@ -5,6 +5,8 @@ import { useChangeArticlesSetting } from "~/api/mutations/admin/useChangeArticle
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { SettingItem } from "~/modules/Dashboard/Settings/components/SettingItem";
 
+import { SETTINGS_PAGE_HANDLES } from "../../../../../../e2e/data/settings/handles";
+
 import type { GlobalSettings } from "../../types";
 
 interface ArticlesPreferencesProps {
@@ -16,7 +18,7 @@ export default function ArticlesPreferences({ globalSettings }: ArticlesPreferen
   const { mutate: updateArticlesPreference } = useChangeArticlesSetting();
 
   return (
-    <Card id="articles-preferences">
+    <Card id="articles-preferences" data-testid={SETTINGS_PAGE_HANDLES.ARTICLES_PREFERENCES_CARD}>
       <CardHeader>
         <CardTitle className="h5">{t("articlesPreferences.header")}</CardTitle>
         <CardDescription className="body-lg-md">
@@ -32,6 +34,7 @@ export default function ArticlesPreferences({ globalSettings }: ArticlesPreferen
           onCheckedChange={() =>
             updateArticlesPreference(ALLOWED_ARTICLES_SETTINGS.ARTICLES_ENABLED)
           }
+          testId={SETTINGS_PAGE_HANDLES.ARTICLES_ENABLED_SWITCH}
         />
         <SettingItem
           id="articles-public"
@@ -45,6 +48,7 @@ export default function ArticlesPreferences({ globalSettings }: ArticlesPreferen
           }
           disabled={!globalSettings.articlesEnabled}
           tooltipTranslationKey="articlesPreferences.tooltip.disabled"
+          testId={SETTINGS_PAGE_HANDLES.ARTICLES_PUBLIC_SWITCH}
         />
       </CardContent>
     </Card>

@@ -19,6 +19,7 @@ type LinkOnlyEditorProps = {
   placeholder?: string;
   className?: string;
   enableLinkClick?: boolean;
+  editorTestId?: string;
 };
 
 export function LinkOnlyEditor({
@@ -27,6 +28,7 @@ export function LinkOnlyEditor({
   placeholder,
   className,
   enableLinkClick = false,
+  editorTestId,
 }: LinkOnlyEditorProps) {
   const { t } = useTranslation();
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
@@ -54,6 +56,7 @@ export function LinkOnlyEditor({
     },
     editorProps: {
       attributes: {
+        "data-testid": editorTestId ?? "",
         class:
           "min-h-[120px] max-w-full p-4 focus:outline-none prose prose-sm max-w-none [&_p]:my-0 [&_a]:cursor-pointer [&_a]:pointer-events-auto",
       },

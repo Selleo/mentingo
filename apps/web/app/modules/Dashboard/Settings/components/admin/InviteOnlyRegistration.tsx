@@ -13,6 +13,8 @@ import {
 } from "~/components/ui/card";
 import { Switch } from "~/components/ui/switch";
 
+import { SETTINGS_PAGE_HANDLES } from "../../../../../../e2e/data/settings/handles";
+
 interface InviteOnlyRegistrationSwitchProps {
   inviteOnlyRegistration: boolean;
 }
@@ -33,7 +35,10 @@ export const InviteOnlyRegistration = ({
   };
 
   return (
-    <Card id="invite-only-registration">
+    <Card
+      id="invite-only-registration"
+      data-testid={SETTINGS_PAGE_HANDLES.INVITE_ONLY_REGISTRATION_CARD}
+    >
       <CardHeader>
         <CardTitle className="h5">{t("inviteOnlyRegistrationView.header")}</CardTitle>
         <CardDescription className="body-lg-md">
@@ -46,14 +51,23 @@ export const InviteOnlyRegistration = ({
           <span className="flex-1 text-right details">
             {t("inviteOnlyRegistrationView.switch.disabled")}
           </span>
-          <Switch checked={isChecked} onCheckedChange={toggleSwitch} />
+          <Switch
+            checked={isChecked}
+            onCheckedChange={toggleSwitch}
+            data-testid={SETTINGS_PAGE_HANDLES.INVITE_ONLY_REGISTRATION_SWITCH}
+          />
           <span className="flex-1 text-left details">
             {t("inviteOnlyRegistrationView.switch.enabled")}
           </span>
         </div>
       </CardContent>
       <CardFooter className="border-t px-6 py-4">
-        <Button disabled={isPending} type="submit" onClick={saveInviteOnlyRegistration}>
+        <Button
+          disabled={isPending}
+          type="submit"
+          onClick={saveInviteOnlyRegistration}
+          data-testid={SETTINGS_PAGE_HANDLES.INVITE_ONLY_REGISTRATION_SAVE}
+        >
           {t("common.button.save")}
         </Button>
       </CardFooter>

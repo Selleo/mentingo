@@ -13,6 +13,8 @@ import {
 } from "~/components/ui/card";
 import { Switch } from "~/components/ui/switch";
 
+import { SETTINGS_PAGE_HANDLES } from "../../../../../e2e/data/settings/handles";
+
 interface SSOEnforceSwitchProps {
   enforceSSO: boolean;
 }
@@ -32,7 +34,7 @@ export default function SSOEnforceSwitch({ enforceSSO }: SSOEnforceSwitchProps) 
   };
 
   return (
-    <Card id="sso-enforcement">
+    <Card id="sso-enforcement" data-testid={SETTINGS_PAGE_HANDLES.SSO_ENFORCEMENT_CARD}>
       <CardHeader>
         <CardTitle className="h5">{t("ssoEnforcementView.header")}</CardTitle>
         <CardDescription className="body-lg-md">
@@ -45,12 +47,21 @@ export default function SSOEnforceSwitch({ enforceSSO }: SSOEnforceSwitchProps) 
           <span className="flex-1 text-right details">
             {t("ssoEnforcementView.switch.disabled")}
           </span>
-          <Switch checked={isChecked} onCheckedChange={toggleSwitch} />
+          <Switch
+            checked={isChecked}
+            onCheckedChange={toggleSwitch}
+            data-testid={SETTINGS_PAGE_HANDLES.SSO_ENFORCEMENT_SWITCH}
+          />
           <span className="flex-1 text-left details">{t("ssoEnforcementView.switch.enabled")}</span>
         </div>
       </CardContent>
       <CardFooter className="border-t px-6 py-4">
-        <Button disabled={isPending} type="submit" onClick={saveSSOEnforcement}>
+        <Button
+          disabled={isPending}
+          type="submit"
+          onClick={saveSSOEnforcement}
+          data-testid={SETTINGS_PAGE_HANDLES.SSO_ENFORCEMENT_SAVE}
+        >
           {t("common.button.save")}
         </Button>
       </CardFooter>

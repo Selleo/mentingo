@@ -12,6 +12,8 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { useToast } from "~/components/ui/use-toast";
 
+import { SETTINGS_PAGE_HANDLES } from "../../../../../../e2e/data/settings/handles";
+
 import {
   buildUpdateRegistrationFormBody,
   createEmptyField,
@@ -187,7 +189,7 @@ export function RegistrationFormBuilder() {
   };
 
   return (
-    <Card>
+    <Card data-testid={SETTINGS_PAGE_HANDLES.REGISTRATION_FORM_BUILDER_CARD}>
       <CardHeader>
         <CardTitle className="h5">{t("registrationFormBuilder.title")}</CardTitle>
         <CardDescription className="body-lg-md">
@@ -196,7 +198,11 @@ export function RegistrationFormBuilder() {
       </CardHeader>
       <CardContent className="space-y-5">
         <form className="space-y-4" onSubmit={handleSubmit(onSubmit, onInvalidSubmit)}>
-          <Button type="button" onClick={() => append(createEmptyField(fields.length))}>
+          <Button
+            type="button"
+            onClick={() => append(createEmptyField(fields.length))}
+            data-testid={SETTINGS_PAGE_HANDLES.REGISTRATION_FORM_ADD_FIELD}
+          >
             <Plus className="mr-2 size-4" />
             {t("registrationFormBuilder.addField")}
           </Button>
@@ -251,7 +257,11 @@ export function RegistrationFormBuilder() {
           </DndContext>
 
           <div className="flex justify-end">
-            <Button type="submit" disabled={isPending}>
+            <Button
+              type="submit"
+              disabled={isPending}
+              data-testid={SETTINGS_PAGE_HANDLES.REGISTRATION_FORM_SAVE}
+            >
               {t("registrationFormBuilder.save")}
             </Button>
           </div>

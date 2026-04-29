@@ -21,6 +21,8 @@ import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
 import { cn } from "~/lib/utils";
 
+import { SETTINGS_PAGE_HANDLES } from "../../../../../e2e/data/settings/handles";
+
 import type { UpsertUserDetailsBody } from "~/api/generated-api";
 
 export const clientLoader = async () => {
@@ -69,6 +71,7 @@ export default function UserForm() {
               {t("changeUserInformationView.field.description")}
             </Label>
             <Textarea
+              data-testid={SETTINGS_PAGE_HANDLES.USER_DETAILS_DESCRIPTION}
               placeholder={t("changeUserInformationView.placeholder.description")}
               {...(currentUserDetails?.description && {
                 defaultValue: currentUserDetails.description,
@@ -87,6 +90,7 @@ export default function UserForm() {
               {t("changeUserInformationView.field.email")}
             </Label>
             <Input
+              data-testid={SETTINGS_PAGE_HANDLES.USER_DETAILS_CONTACT_EMAIL}
               {...(currentUser?.email && {
                 defaultValue: currentUser.email,
               })}
@@ -97,7 +101,12 @@ export default function UserForm() {
               {...register("contactEmail")}
             />
             {errors.contactEmail && (
-              <p className="mt-1 text-xs text-red-500">{errors.contactEmail.message}</p>
+              <p
+                className="mt-1 text-xs text-red-500"
+                data-testid={SETTINGS_PAGE_HANDLES.USER_DETAILS_CONTACT_EMAIL_ERROR}
+              >
+                {errors.contactEmail.message}
+              </p>
             )}
           </div>
           <div>
@@ -105,6 +114,7 @@ export default function UserForm() {
               {t("changeUserInformationView.field.phoneNumber")}
             </Label>
             <Input
+              data-testid={SETTINGS_PAGE_HANDLES.USER_DETAILS_CONTACT_PHONE}
               {...(currentUserDetails?.contactPhone && {
                 defaultValue: currentUserDetails.contactPhone,
               })}
@@ -123,6 +133,7 @@ export default function UserForm() {
               {t("changeUserInformationView.field.jobTitle")}
             </Label>
             <Input
+              data-testid={SETTINGS_PAGE_HANDLES.USER_DETAILS_JOB_TITLE}
               {...(currentUserDetails?.jobTitle && {
                 defaultValue: currentUserDetails.jobTitle,
               })}
@@ -138,7 +149,9 @@ export default function UserForm() {
           </div>
         </CardContent>
         <CardFooter className="border-t px-6 py-4">
-          <Button type="submit">{t("common.button.save")}</Button>
+          <Button type="submit" data-testid={SETTINGS_PAGE_HANDLES.USER_DETAILS_SAVE}>
+            {t("common.button.save")}
+          </Button>
         </CardFooter>
       </form>
     </Card>

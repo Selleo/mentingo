@@ -30,9 +30,7 @@ export default function AccountTabContent({
       <LanguageSelect />
       {(canManageCourses || canManageUsers) && <UserDetailsForm />}
       <ChangePasswordForm />
-      {(canManageUsers || canManageCourses) && isAdminSettings(settings) && (
-        <NotificationPreferences adminSettings={settings} />
-      )}
+      {isAdminSettings(settings) && <NotificationPreferences adminSettings={settings} />}
       {canAccessIntegrationApi && <IntegrationApiKeyCard />}
       {canResetOnboarding && <ResetOnboarding />}
     </>

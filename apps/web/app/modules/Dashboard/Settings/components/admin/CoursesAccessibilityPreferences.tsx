@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useToggleModernCourseList } from "~/api/mutations/admin/useToggleModernCourseList";
 import { useUnregisteredUserCoursesAccessibility } from "~/api/mutations/admin/useUnregisteredUserCoursesAccessibility";
 
+import { SETTINGS_PAGE_HANDLES } from "../../../../../../e2e/data/settings/handles";
 import { SettingItem } from "../SettingItem";
 
 import type { GlobalSettings } from "../../types";
@@ -32,6 +33,7 @@ export default function CoursesAccessibilityPreferences({
         description={t("adminPreferences.field.coursesVisibilityDescription")}
         checked={globalSettings.unregisteredUserCoursesAccessibility}
         onCheckedChange={handleCoursesAccessibilityChange}
+        testId={SETTINGS_PAGE_HANDLES.COURSES_VISIBILITY_SWITCH}
       />
       <SettingItem
         id="modernCourseList"
@@ -39,6 +41,7 @@ export default function CoursesAccessibilityPreferences({
         description={t("adminPreferences.field.modernCourseListDescription")}
         checked={globalSettings.modernCourseListEnabled}
         onCheckedChange={toggleModernCourseList}
+        testId={SETTINGS_PAGE_HANDLES.MODERN_COURSE_LIST_SWITCH}
       />
     </div>
   );

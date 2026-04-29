@@ -4,6 +4,8 @@ import useChangeUserEmailTrigger from "~/api/mutations/admin/useChangeUserEmailT
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { SettingItem } from "~/modules/Dashboard/Settings/components/SettingItem";
 
+import { SETTINGS_PAGE_HANDLES } from "../../../../../../e2e/data/settings/handles";
+
 import type { GetPublicGlobalSettingsResponse } from "~/api/generated-api";
 
 interface UserEmailTriggersProps {
@@ -15,7 +17,7 @@ export default function UserEmailTriggers({ userEmailTriggers }: UserEmailTrigge
   const { mutate: changeUserEmailTrigger } = useChangeUserEmailTrigger();
 
   return (
-    <Card id="user-email-triggers">
+    <Card id="user-email-triggers" data-testid={SETTINGS_PAGE_HANDLES.USER_EMAIL_TRIGGERS_CARD}>
       <CardHeader>
         <CardTitle className="h5">{t("userEmailTriggers.header")}</CardTitle>
         <CardDescription>{t("userEmailTriggers.subHeader")}</CardDescription>
@@ -29,6 +31,7 @@ export default function UserEmailTriggers({ userEmailTriggers }: UserEmailTrigge
             description={t(`userEmailTriggers.settings.${emailTrigger}Description`)}
             checked={userEmailTriggers[emailTrigger as keyof typeof userEmailTriggers]}
             onCheckedChange={() => changeUserEmailTrigger({ triggerKey: emailTrigger })}
+            testId={SETTINGS_PAGE_HANDLES.userEmailTriggerSwitch(emailTrigger)}
           />
         ))}
       </CardContent>
