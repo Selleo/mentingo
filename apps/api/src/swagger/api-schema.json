@@ -14932,6 +14932,10 @@
                     "type": "null"
                   }
                 ]
+              },
+              "points": {
+                "minimum": 0,
+                "type": "integer"
               }
             },
             "required": [
@@ -14942,7 +14946,8 @@
               "contactEmail",
               "contactPhone",
               "jobTitle",
-              "profilePictureUrl"
+              "profilePictureUrl",
+              "points"
             ]
           }
         },

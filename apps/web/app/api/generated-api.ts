@@ -1021,6 +1021,8 @@ export interface GetUserDetailsResponse {
     contactPhone: string | null;
     jobTitle: string | null;
     profilePictureUrl: string | null;
+    /** @min 0 */
+    points: number;
   };
 }
 
