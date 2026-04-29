@@ -121,6 +121,12 @@ export default function CourseOverview({ course }: CourseOverviewProps) {
               </Badge>
             </div>
             <h5 className="h5">{title}</h5>
+            <p className="body-sm text-neutral-700">
+              🏆{" "}
+              {t("studentCourseView.other.pointsValue", {
+                count: course.pointsValue,
+              })}
+            </p>
             <Viewer
               content={description}
               className="body-base mt-2 text-neutral-900"

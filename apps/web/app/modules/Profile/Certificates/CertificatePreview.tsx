@@ -25,6 +25,7 @@ interface CertificatePreviewProps {
   minimalFrame?: boolean;
   initialColor?: string | null;
   onColorChange?: (color: string) => void;
+  pointsValue?: number;
 }
 
 const CertificatePreview = ({
@@ -42,6 +43,7 @@ const CertificatePreview = ({
   minimalFrame = false,
   initialColor,
   onColorChange,
+  pointsValue,
 }: CertificatePreviewProps) => {
   const { downloadCertificatePdf, isPreparingDownload } = useCertificatePDF();
   const { mutateAsync: createCertificateShareLink, isPending: isPreparingShare } =
@@ -118,6 +120,7 @@ const CertificatePreview = ({
             signatureImageUrl={certificateSignatureUrl}
             lang={lang}
             colorTheme={colorTheme}
+            pointsValue={pointsValue}
           />
         </div>
       </div>

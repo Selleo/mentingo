@@ -1993,7 +1993,8 @@
     "otherAuthorCoursesSubheader": "Níže si můžete prohlédnout další kurzy vytvořené stejným autorem",
     "other": {
       "cannotFindCourses": "Nenašli jsme žádné kurzy",
-      "changeSearchCriteria": "Změňte prosím kritéria vyhledávání nebo to zkuste znovu později"
+      "changeSearchCriteria": "Změňte prosím kritéria vyhledávání nebo to zkuste znovu později",
+      "pointsValue": "Až {{count}} b. k získání"
     },
     "lesson": {
       "missingAnswer": "Chybí odpověď",
@@ -2274,6 +2275,11 @@
     "inProgress": "Probíhá",
     "notStarted": "Nezahájeno",
     "blocked": "Blokováno"
+  },
+  "studentCertificate": {
+    "other": {
+      "pointsAwarded": "Uděleno {{count}} bodů"
+    }
   },
   "studentCertificateView": {
     "header": "Certifikáty",

@@ -1993,7 +1993,8 @@
     "otherAuthorCoursesSubheader": "Unten sehen Sie weitere Kurse, die vom selben Autor erstellt wurden",
     "other": {
       "cannotFindCourses": "Wir konnten keine Kurse finden",
-      "changeSearchCriteria": "Bitte ändern Sie die Suchkriterien oder versuchen Sie es später erneut"
+      "changeSearchCriteria": "Bitte ändern Sie die Suchkriterien oder versuchen Sie es später erneut",
+      "pointsValue": "Bis zu {{count}} Pkt erreichbar"
     },
     "lesson": {
       "missingAnswer": "Fehlende Antwort",
@@ -2274,6 +2275,11 @@
     "inProgress": "Im Gange",
     "notStarted": "Nicht gestartet",
     "blocked": "Blockiert"
+  },
+  "studentCertificate": {
+    "other": {
+      "pointsAwarded": "Mit {{count}} Punkten ausgezeichnet"
+    }
   },
   "studentCertificateView": {
     "header": "Zertifikate",

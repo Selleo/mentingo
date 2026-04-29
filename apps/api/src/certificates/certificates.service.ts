@@ -23,6 +23,18 @@ import { SettingsService } from "src/settings/settings.service";
 import { CertificateRepository } from "./certificate.repository";
 import { SHARE_IMAGE_HEIGHT, SHARE_IMAGE_WIDTH } from "./certificates.constants";
 
+const POINTS_AWARDED_TRANSLATIONS: Record<SupportedLanguages, (count: number) => string> = {
+  en: (count) => `Awarded with ${count} points`,
+  pl: (count) => `Zdobyto ${count} punktów`,
+  de: (count) => `Mit ${count} Punkten ausgezeichnet`,
+  lt: (count) => `Suteikta ${count} taškų`,
+  cs: (count) => `Uděleno ${count} bodů`,
+};
+
+function buildPointsAwardedLabel(count: number, language: SupportedLanguages): string {
+  return (POINTS_AWARDED_TRANSLATIONS[language] ?? POINTS_AWARDED_TRANSLATIONS.en)(count);
+}
+
 import type { ShareCertificateRecord, ShareRenderContext } from "./certificates.share.types";
 import type {
   CertificatesQuery,
@@ -298,6 +310,11 @@ export class CertificatesService implements OnModuleDestroy {
       backgroundImageUrl,
       lang: shareLanguage,
       isDownload: true,
+      pointsValue: certificate.pointsValue,
+      pointsLabel:
+        certificate.pointsValue != null
+          ? buildPointsAwardedLabel(certificate.pointsValue, shareLanguage)
+          : undefined,
       colorTheme: {
         titleColor: accentColor,
         certifyTextColor: accentColor,
@@ -610,6 +627,11 @@ export class CertificatesService implements OnModuleDestroy {
       signatureImageUrl: context.certificateSignatureUrl,
       backgroundImageUrl: context.settings.certificateBackgroundImage,
       lang: context.language,
+      pointsValue: context.certificate.pointsValue,
+      pointsLabel:
+        context.certificate.pointsValue != null
+          ? buildPointsAwardedLabel(context.certificate.pointsValue, context.language)
+          : undefined,
       colorTheme: {
         titleColor: accentColor,
         certifyTextColor: accentColor,

@@ -90,6 +90,7 @@ const CourseCertificate = ({ courseId }: { courseId: string }) => {
               certificateSignatureUrl={certificate?.certificateSignatureUrl}
               initialColor={certificate?.certificateFontColor}
               showShareButton={Boolean(certificate?.id)}
+              pointsValue={course?.pointsValue}
             />
           </div>
         </div>
