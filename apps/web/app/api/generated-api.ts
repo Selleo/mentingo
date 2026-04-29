@@ -4786,6 +4786,23 @@ export interface CreateSupportSessionResponse {
   };
 }
 
+export interface QueryResponse {
+  data: {
+    top10: LeaderboardRow[];
+    ownRank: number | null;
+    ownRow: LeaderboardRow | null;
+  };
+}
+
+export interface LeaderboardRow {
+  /** @format uuid */
+  userId: string;
+  fullName: string;
+  avatarUrl: string | null;
+  /** @min 0 */
+  points: number;
+}
+
 import type {
   AxiosInstance,
   AxiosRequestConfig,
@@ -10308,6 +10325,26 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<CreateSupportSessionResponse, any>({
         path: `/api/super-admin/tenants/${id}/support-session`,
         method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LeaderboardControllerQuery
+     * @request GET:/api/leaderboard
+     */
+    leaderboardControllerQuery: (
+      query?: {
+        scope?: "all-time";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<QueryResponse, any>({
+        path: `/api/leaderboard`,
+        method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),

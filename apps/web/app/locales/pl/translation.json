@@ -200,7 +200,8 @@
     "qa": "Q&A",
     "articles": "Baza wiedzy",
     "tenants": "Organizacje",
-    "achievements": "Achievements"
+    "achievements": "Achievements",
+    "leaderboard": "Ranking"
   },
   "newsView": {
     "header": "Aktualności",
@@ -2711,7 +2712,8 @@
     "tenants": "Organizacje",
     "achievements": "Achievements",
     "createAchievement": "Create achievement",
-    "achievementDetails": "Achievement details"
+    "achievementDetails": "Achievement details",
+    "leaderboard": "Ranking"
   },
   "lessonPreview": {
     "breadcrumbs": {
@@ -3137,5 +3139,16 @@
       "achievementUnlockedTitle": "Achievement unlocked!",
       "achievementUnlockedDescription": "You unlocked {{name}}."
     }
+  },
+  "leaderboardView": {
+    "title": "Ranking",
+    "subtitle": "Zobacz najlepszych kursantów według punktów zdobytych od początku.",
+    "tabs": {
+      "allTime": "Cały okres"
+    },
+    "you": "Ty",
+    "points": "punkty",
+    "emptyTitle": "Brak punktów",
+    "emptyDescription": "Gdy kursanci zdobędą punkty, pojawi się tutaj pierwsza dziesiątka."
   }
 }

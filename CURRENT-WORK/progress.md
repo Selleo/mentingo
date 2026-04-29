@@ -259,3 +259,37 @@
 - Added an API e2e spec for the admin threshold-lowering path, but did not run API e2e tests per the current instruction to avoid web and API e2e feedback loops.
 - `pnpm lint-tsc-api`, `pnpm lint-tsc-web`, `pnpm lint`, `pnpm test:api`, `pnpm test:web`, and `pnpm format:check` pass; web lint still reports the pre-existing `ChatMessage.tsx` React hook dependency warning without failing.
 - `pnpm --filter api test -- achievement.evaluator.spec.ts achievements.service.spec.ts --runInBand` passes for focused iteration.
+
+## 2026-04-29 — Slice 7: Leaderboard all-time + own rank — DONE
+
+### Key decisions
+
+- Implemented the first leaderboard slice for the all-time scope only; monthly scope and group filtering remain deferred to slice 8.
+- Added `LeaderboardQueryService.query()` as the backend read path, scoped by tenant and restricted to users with the student system role.
+- Ranked all-time results from `user_statistics.totalPoints` using the required `totalPoints DESC, lastPointAt ASC` ordering and a separate `RANK()` window query for the viewer's full-tenant rank outside the top 10.
+- Kept leaderboard rows limited to students with positive lifetime points for the top-10 empty-state behavior, while returning the viewer's own row when they have a recorded point event.
+- Added an authenticated student-only `/leaderboard?scope=all-time` API endpoint and a student dashboard Leaderboard page with the all-time tab, top-10 rows, highlighted viewer row, sticky outside-top-10 row, and empty state.
+- Updated OpenAPI and the generated web client so the new endpoint is available through the standard API client.
+
+### Files changed
+
+- `apps/api/src/gamification/gamification.module.ts`
+- `apps/api/src/gamification/leaderboard-query.service.ts`
+- `apps/api/src/gamification/leaderboard.controller.ts`
+- `apps/api/src/gamification/schemas/leaderboard.schema.ts`
+- `apps/api/src/gamification/__tests__/leaderboard.controller.e2e-spec.ts`
+- `apps/api/src/swagger/api-schema.json`
+- `apps/web/app/api/generated-api.ts`
+- `apps/web/app/api/queries/useLeaderboard.ts`
+- `apps/web/app/modules/Leaderboard/Leaderboard.page.tsx`
+- `apps/web/app/config/navigationConfig.ts`
+- `apps/web/app/config/routeAccessConfig.ts`
+- `apps/web/routes.ts`
+- `apps/web/app/locales/{cs,de,en,lt,pl}/translation.json`
+- `CURRENT-WORK/progress.md`
+
+### Blockers / notes for next iteration
+
+- Monthly leaderboard aggregation and group filtering remain deferred to slice 8.
+- Added an API e2e spec for all-time ordering, tie-breaking, own-rank behavior outside the top 10, staff filtering, and non-student rejection, but did not run API e2e tests per the current instruction to avoid web and API e2e feedback loops.
+- `pnpm lint-tsc-api`, `pnpm lint-tsc-web`, `pnpm lint`, `pnpm test:api`, `pnpm test:web`, and `pnpm format:check` pass; web lint still reports the pre-existing `ChatMessage.tsx` React hook dependency warning without failing.

@@ -62,6 +62,11 @@ export const getNavigationConfig = (
           path: "progress",
           iconName: "Target",
         },
+        {
+          label: t("navigationSideBar.leaderboard"),
+          path: "leaderboard",
+          iconName: "Ribbon",
+        },
       ],
     },
     ...(isAnyContentFeatureEnabled

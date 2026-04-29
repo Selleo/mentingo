@@ -10,6 +10,8 @@ import { AchievementsService } from "./achievements.service";
 import { UserAiMentorLessonPassedPointsHandler } from "./handlers/user-ai-mentor-lesson-passed-points.handler";
 import { UserChapterFinishedPointsHandler } from "./handlers/user-chapter-finished-points.handler";
 import { UserCourseFinishedPointsHandler } from "./handlers/user-course-finished-points.handler";
+import { LeaderboardQueryService } from "./leaderboard-query.service";
+import { LeaderboardController } from "./leaderboard.controller";
 import { PointsService } from "./points.service";
 import { ProfileAchievementsController } from "./profile-achievements.controller";
 
@@ -21,11 +23,12 @@ const gamificationEventHandlers = [
 
 @Module({
   imports: [CqrsModule, FileModule, PermissionsModule],
-  controllers: [AchievementsController, ProfileAchievementsController],
+  controllers: [AchievementsController, ProfileAchievementsController, LeaderboardController],
   providers: [
     AchievementsService,
     AchievementsRepository,
     PointsService,
+    LeaderboardQueryService,
     ...gamificationEventHandlers,
   ],
   exports: [AchievementsService, PointsService],

@@ -199,7 +199,8 @@
     },
     "qa": "Otázky a odpovědi",
     "tenants": "Organizace",
-    "achievements": "Achievements"
+    "achievements": "Achievements",
+    "leaderboard": "Žebříček"
   },
   "newsView": {
     "header": "Zprávy",
@@ -2633,7 +2634,8 @@
     "tenants": "Organizace",
     "achievements": "Achievements",
     "createAchievement": "Create achievement",
-    "achievementDetails": "Achievement details"
+    "achievementDetails": "Achievement details",
+    "leaderboard": "Žebříček"
   },
   "lessonPreview": {
     "breadcrumbs": {
@@ -3059,5 +3061,16 @@
       "achievementUnlockedTitle": "Achievement unlocked!",
       "achievementUnlockedDescription": "You unlocked {{name}}."
     }
+  },
+  "leaderboardView": {
+    "title": "Žebříček",
+    "subtitle": "Podívejte se na nejlepší studenty podle celkového počtu bodů.",
+    "tabs": {
+      "allTime": "Celkově"
+    },
+    "you": "Vy",
+    "points": "body",
+    "emptyTitle": "Zatím žádné body",
+    "emptyDescription": "Jakmile studenti získají body, zobrazí se zde nejlepší desítka."
   }
 }

@@ -199,7 +199,8 @@
     },
     "qa": "Q&A",
     "tenants": "Organizations",
-    "achievements": "Achievements"
+    "achievements": "Achievements",
+    "leaderboard": "Leaderboard"
   },
   "newsView": {
     "header": "News",
@@ -2686,7 +2687,8 @@
     "tenants": "Organizations",
     "achievements": "Achievements",
     "createAchievement": "Create achievement",
-    "achievementDetails": "Achievement details"
+    "achievementDetails": "Achievement details",
+    "leaderboard": "Leaderboard"
   },
   "lessonPreview": {
     "breadcrumbs": {
@@ -3112,5 +3114,16 @@
       "achievementUnlockedTitle": "Achievement unlocked!",
       "achievementUnlockedDescription": "You unlocked {{name}}."
     }
+  },
+  "leaderboardView": {
+    "title": "Leaderboard",
+    "subtitle": "See the top students by lifetime points.",
+    "tabs": {
+      "allTime": "All-time"
+    },
+    "you": "You",
+    "points": "points",
+    "emptyTitle": "No points yet",
+    "emptyDescription": "Once students earn points, the top 10 will appear here."
   }
 }

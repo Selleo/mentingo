@@ -76,6 +76,7 @@ export const routeAccessConfig = createRouteConfig({
   // Client part
   "": PUBLIC,
   progress: LEARNING_PROGRESS_ACCESS,
+  leaderboard: PUBLIC,
   settings: PUBLIC,
   "profile/:id": PUBLIC,
   "course/:courseId/lesson/:lessonId": PUBLIC,

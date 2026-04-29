@@ -10453,6 +10453,33 @@
           }
         }
       }
+    },
+    "/api/leaderboard": {
+      "get": {
+        "operationId": "LeaderboardController_query",
+        "parameters": [
+          {
+            "name": "scope",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "const": "all-time",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "info": {
@@ -32935,6 +32962,83 @@
         },
         "required": [
           "data"
+        ]
+      },
+      "QueryResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "top10": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/LeaderboardRow"
+                }
+              },
+              "ownRank": {
+                "anyOf": [
+                  {
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "ownRow": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/LeaderboardRow"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "top10",
+              "ownRank",
+              "ownRow"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "LeaderboardRow": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "fullName": {
+            "type": "string"
+          },
+          "avatarUrl": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "points": {
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "userId",
+          "fullName",
+          "avatarUrl",
+          "points"
         ]
       }
     }

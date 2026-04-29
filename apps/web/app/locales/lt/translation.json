@@ -199,7 +199,8 @@
     },
     "qa": "Klausimai ir atsakymai",
     "tenants": "Organizacijos",
-    "achievements": "Achievements"
+    "achievements": "Achievements",
+    "leaderboard": "Lyderių lentelė"
   },
   "newsView": {
     "header": "Naujienos",
@@ -2633,7 +2634,8 @@
     "tenants": "Organizacijos",
     "achievements": "Achievements",
     "createAchievement": "Create achievement",
-    "achievementDetails": "Achievement details"
+    "achievementDetails": "Achievement details",
+    "leaderboard": "Lyderių lentelė"
   },
   "lessonPreview": {
     "breadcrumbs": {
@@ -3059,5 +3061,16 @@
       "achievementUnlockedTitle": "Achievement unlocked!",
       "achievementUnlockedDescription": "You unlocked {{name}}."
     }
+  },
+  "leaderboardView": {
+    "title": "Lyderių lentelė",
+    "subtitle": "Peržiūrėkite geriausius studentus pagal visus surinktus taškus.",
+    "tabs": {
+      "allTime": "Visas laikas"
+    },
+    "you": "Jūs",
+    "points": "taškai",
+    "emptyTitle": "Taškų dar nėra",
+    "emptyDescription": "Kai studentai surinks taškų, čia bus rodoma geriausiųjų dešimtukas."
   }
 }

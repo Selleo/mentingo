@@ -199,7 +199,8 @@
     },
     "qa": "Fragen und Antworten",
     "tenants": "Organisationen",
-    "achievements": "Achievements"
+    "achievements": "Achievements",
+    "leaderboard": "Bestenliste"
   },
   "newsView": {
     "header": "Nachricht",
@@ -2633,7 +2634,8 @@
     "tenants": "Organisationen",
     "achievements": "Achievements",
     "createAchievement": "Create achievement",
-    "achievementDetails": "Achievement details"
+    "achievementDetails": "Achievement details",
+    "leaderboard": "Bestenliste"
   },
   "lessonPreview": {
     "breadcrumbs": {
@@ -3059,5 +3061,16 @@
       "achievementUnlockedTitle": "Achievement unlocked!",
       "achievementUnlockedDescription": "You unlocked {{name}}."
     }
+  },
+  "leaderboardView": {
+    "title": "Bestenliste",
+    "subtitle": "Sieh die besten Lernenden nach Gesamtpunktzahl.",
+    "tabs": {
+      "allTime": "Gesamt"
+    },
+    "you": "Du",
+    "points": "Punkte",
+    "emptyTitle": "Noch keine Punkte",
+    "emptyDescription": "Sobald Lernende Punkte sammeln, erscheint hier die Top 10."
   }
 }
