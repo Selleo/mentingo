@@ -17777,6 +17777,10 @@
                     "type": "null"
                   }
                 ]
+              },
+              "pointsValue": {
+                "minimum": 0,
+                "type": "integer"
               }
             },
             "required": [
@@ -17798,7 +17802,8 @@
               "stripePriceId",
               "availableLocales",
               "baseLanguage",
-              "dueDate"
+              "dueDate",
+              "pointsValue"
             ]
           }
         },
