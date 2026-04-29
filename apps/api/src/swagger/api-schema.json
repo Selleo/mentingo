@@ -10454,6 +10454,23 @@
         }
       }
     },
+    "/api/leaderboard/groups": {
+      "get": {
+        "operationId": "LeaderboardController_listGroups",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListGroupsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/leaderboard": {
       "get": {
         "operationId": "LeaderboardController_query",
@@ -10463,7 +10480,24 @@
             "required": false,
             "in": "query",
             "schema": {
-              "const": "all-time",
+              "anyOf": [
+                {
+                  "const": "all-time",
+                  "type": "string"
+                },
+                {
+                  "const": "month",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "groupId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
               "type": "string"
             }
           }
@@ -33007,6 +33041,36 @@
         },
         "required": [
           "data"
+        ]
+      },
+      "ListGroupsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LeaderboardGroup"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "LeaderboardGroup": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
         ]
       },
       "LeaderboardRow": {

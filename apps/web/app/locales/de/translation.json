@@ -3064,13 +3064,18 @@
   },
   "leaderboardView": {
     "title": "Bestenliste",
-    "subtitle": "Sieh die besten Lernenden nach Gesamtpunktzahl.",
+    "subtitle": "Vergleiche die Punkte der Lernenden im gesamten Unternehmen oder in einer ausgewählten Gruppe.",
     "tabs": {
-      "allTime": "Gesamt"
+      "allTime": "Gesamt",
+      "thisMonth": "Dieser Monat"
     },
     "you": "Du",
     "points": "Punkte",
     "emptyTitle": "Noch keine Punkte",
-    "emptyDescription": "Sobald Lernende Punkte sammeln, erscheint hier die Top 10."
+    "emptyDescription": "Sobald Lernende Punkte sammeln, erscheint hier die Top 10.",
+    "filters": {
+      "group": "Gruppe",
+      "allGroups": "Ganzes Unternehmen"
+    }
   }
 }

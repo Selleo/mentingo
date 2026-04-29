@@ -2,22 +2,41 @@ import { useQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "../api-client";
 
-import type { LeaderboardRow, QueryResponse } from "../generated-api";
+import type { LeaderboardGroup, LeaderboardRow, QueryResponse } from "../generated-api";
 
-type LeaderboardScope = "all-time";
+type LeaderboardScope = "all-time" | "month";
 
-export type { LeaderboardRow };
+export type { LeaderboardGroup, LeaderboardRow };
 export type LeaderboardResponse = QueryResponse["data"];
 
-export const leaderboardQueryOptions = (scope: LeaderboardScope = "all-time") => ({
-  queryKey: ["leaderboard", scope] as const,
+export const leaderboardQueryOptions = (
+  scope: LeaderboardScope = "all-time",
+  groupId?: string | null,
+) => ({
+  queryKey: ["leaderboard", scope, groupId ?? null] as const,
   queryFn: async () => {
-    const response = await ApiClient.api.leaderboardControllerQuery({ scope });
+    const response = await ApiClient.api.leaderboardControllerQuery({
+      scope,
+      ...(groupId ? { groupId } : {}),
+    });
 
     return response.data.data;
   },
 });
 
-export function useLeaderboard(scope: LeaderboardScope = "all-time") {
-  return useQuery(leaderboardQueryOptions(scope));
+export const leaderboardGroupsQueryOptions = () => ({
+  queryKey: ["leaderboard", "groups"] as const,
+  queryFn: async () => {
+    const response = await ApiClient.api.leaderboardControllerListGroups();
+
+    return response.data.data;
+  },
+});
+
+export function useLeaderboard(scope: LeaderboardScope = "all-time", groupId?: string | null) {
+  return useQuery(leaderboardQueryOptions(scope, groupId));
+}
+
+export function useLeaderboardGroups() {
+  return useQuery(leaderboardGroupsQueryOptions());
 }

@@ -3142,13 +3142,18 @@
   },
   "leaderboardView": {
     "title": "Ranking",
-    "subtitle": "Zobacz najlepszych kursantów według punktów zdobytych od początku.",
+    "subtitle": "Porównuj punkty studentów w całej firmie lub wybranej grupie.",
     "tabs": {
-      "allTime": "Cały okres"
+      "allTime": "Cały okres",
+      "thisMonth": "Ten miesiąc"
     },
     "you": "Ty",
     "points": "punkty",
     "emptyTitle": "Brak punktów",
-    "emptyDescription": "Gdy kursanci zdobędą punkty, pojawi się tutaj pierwsza dziesiątka."
+    "emptyDescription": "Gdy kursanci zdobędą punkty, pojawi się tutaj pierwsza dziesiątka.",
+    "filters": {
+      "group": "Grupa",
+      "allGroups": "Cała firma"
+    }
   }
 }

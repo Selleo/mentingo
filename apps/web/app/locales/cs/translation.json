@@ -3064,13 +3064,18 @@
   },
   "leaderboardView": {
     "title": "Žebříček",
-    "subtitle": "Podívejte se na nejlepší studenty podle celkového počtu bodů.",
+    "subtitle": "Porovnejte body studentů v celé firmě nebo ve vybrané skupině.",
     "tabs": {
-      "allTime": "Celkově"
+      "allTime": "Celkově",
+      "thisMonth": "Tento měsíc"
     },
     "you": "Vy",
     "points": "body",
     "emptyTitle": "Zatím žádné body",
-    "emptyDescription": "Jakmile studenti získají body, zobrazí se zde nejlepší desítka."
+    "emptyDescription": "Jakmile studenti získají body, zobrazí se zde nejlepší desítka.",
+    "filters": {
+      "group": "Skupina",
+      "allGroups": "Celá firma"
+    }
   }
 }

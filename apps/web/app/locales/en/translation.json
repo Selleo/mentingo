@@ -3117,13 +3117,18 @@
   },
   "leaderboardView": {
     "title": "Leaderboard",
-    "subtitle": "See the top students by lifetime points.",
+    "subtitle": "Compare student points across the whole company or a selected group.",
     "tabs": {
-      "allTime": "All-time"
+      "allTime": "All-time",
+      "thisMonth": "This month"
     },
     "you": "You",
     "points": "points",
     "emptyTitle": "No points yet",
-    "emptyDescription": "Once students earn points, the top 10 will appear here."
+    "emptyDescription": "Once students earn points, the top 10 will appear here.",
+    "filters": {
+      "group": "Group",
+      "allGroups": "Whole company"
+    }
   }
 }

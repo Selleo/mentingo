@@ -293,3 +293,32 @@
 - Monthly leaderboard aggregation and group filtering remain deferred to slice 8.
 - Added an API e2e spec for all-time ordering, tie-breaking, own-rank behavior outside the top 10, staff filtering, and non-student rejection, but did not run API e2e tests per the current instruction to avoid web and API e2e feedback loops.
 - `pnpm lint-tsc-api`, `pnpm lint-tsc-web`, `pnpm lint`, `pnpm test:api`, `pnpm test:web`, and `pnpm format:check` pass; web lint still reports the pre-existing `ChatMessage.tsx` React hook dependency warning without failing.
+
+## 2026-04-29 — Slice 8: Leaderboard monthly tab + group filter — DONE
+
+### Key decisions
+
+- Extended `LeaderboardQueryService.query()` to support both `all-time` and `month` scopes plus an optional `groupId`, keeping student role filtering and tenant scoping centralized in the SQL read model.
+- Implemented the monthly leaderboard from `point_events` using current UTC calendar-month aggregation with `SUM(points) DESC, MAX(createdAt) ASC` ordering and the same filtered `RANK()` approach for `ownRank`.
+- Applied group filtering to all-time and monthly queries via `group_users`, with `ownRank`/`ownRow` calculated against the same filtered population.
+- Added a student-only `/leaderboard/groups` endpoint so the frontend can list every group in the tenant, including groups the viewer is not a member of, without reusing admin group permissions.
+- Updated the leaderboard page to keep the group filter persistent while switching between All-time and This month tabs, defaulting to All-time and the whole-company filter.
+
+### Files changed
+
+- `apps/api/src/gamification/leaderboard-query.service.ts`
+- `apps/api/src/gamification/leaderboard.controller.ts`
+- `apps/api/src/gamification/schemas/leaderboard.schema.ts`
+- `apps/api/src/gamification/__tests__/leaderboard.controller.e2e-spec.ts`
+- `apps/api/src/swagger/api-schema.json`
+- `apps/web/app/api/generated-api.ts`
+- `apps/web/app/api/queries/useLeaderboard.ts`
+- `apps/web/app/modules/Leaderboard/Leaderboard.page.tsx`
+- `apps/web/app/locales/{cs,de,en,lt,pl}/translation.json`
+- `CURRENT-WORK/progress.md`
+
+### Blockers / notes for next iteration
+
+- Final QA remains as the next slice; the core gamification feature slices are now implemented.
+- Added API e2e coverage for monthly aggregation, monthly tiebreaking, tenant-wide group listing, group filtering, and monthly own-rank outside the top 10, but did not run API e2e tests per the current instruction to avoid web and API e2e feedback loops.
+- `pnpm lint-tsc-api`, `pnpm lint-tsc-web`, `pnpm lint`, `pnpm test:api`, `pnpm test:web`, and `pnpm format:check` pass; web lint still reports the pre-existing `ChatMessage.tsx` React hook dependency warning without failing.

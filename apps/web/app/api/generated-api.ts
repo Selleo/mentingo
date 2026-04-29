@@ -4794,6 +4794,16 @@ export interface QueryResponse {
   };
 }
 
+export interface ListGroupsResponse {
+  data: LeaderboardGroup[];
+}
+
+export interface LeaderboardGroup {
+  /** @format uuid */
+  id: string;
+  name: string;
+}
+
 export interface LeaderboardRow {
   /** @format uuid */
   userId: string;
@@ -10332,12 +10342,28 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name LeaderboardControllerListGroups
+     * @request GET:/api/leaderboard/groups
+     */
+    leaderboardControllerListGroups: (params: RequestParams = {}) =>
+      this.request<ListGroupsResponse, any>({
+        path: `/api/leaderboard/groups`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name LeaderboardControllerQuery
      * @request GET:/api/leaderboard
      */
     leaderboardControllerQuery: (
       query?: {
-        scope?: "all-time";
+        scope?: "all-time" | "month";
+        /** @format uuid */
+        groupId?: string;
       },
       params: RequestParams = {},
     ) =>

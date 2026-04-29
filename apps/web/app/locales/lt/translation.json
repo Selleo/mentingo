@@ -3064,13 +3064,18 @@
   },
   "leaderboardView": {
     "title": "Lyderių lentelė",
-    "subtitle": "Peržiūrėkite geriausius studentus pagal visus surinktus taškus.",
+    "subtitle": "Palyginkite studentų taškus visoje įmonėje arba pasirinktoje grupėje.",
     "tabs": {
-      "allTime": "Visas laikas"
+      "allTime": "Visas laikas",
+      "thisMonth": "Šis mėnuo"
     },
     "you": "Jūs",
     "points": "taškai",
     "emptyTitle": "Taškų dar nėra",
-    "emptyDescription": "Kai studentai surinks taškų, čia bus rodoma geriausiųjų dešimtukas."
+    "emptyDescription": "Kai studentai surinks taškų, čia bus rodoma geriausiųjų dešimtukas.",
+    "filters": {
+      "group": "Grupė",
+      "allGroups": "Visa įmonė"
+    }
   }
 }
