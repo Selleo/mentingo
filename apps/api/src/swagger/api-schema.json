@@ -6434,6 +6434,67 @@
         }
       }
     },
+    "/api/leaderboard/groups": {
+      "get": {
+        "operationId": "LeaderboardController_listGroups",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListGroupsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/leaderboard": {
+      "get": {
+        "operationId": "LeaderboardController_query",
+        "parameters": [
+          {
+            "name": "scope",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "all-time",
+                  "type": "string"
+                },
+                {
+                  "const": "month",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "groupId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/ai/thread": {
       "get": {
         "operationId": "AiController_getThread",
@@ -10447,67 +10508,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CreateSupportSessionResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/leaderboard/groups": {
-      "get": {
-        "operationId": "LeaderboardController_listGroups",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ListGroupsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/leaderboard": {
-      "get": {
-        "operationId": "LeaderboardController_query",
-        "parameters": [
-          {
-            "name": "scope",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "anyOf": [
-                {
-                  "const": "all-time",
-                  "type": "string"
-                },
-                {
-                  "const": "month",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          {
-            "name": "groupId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/QueryResponse"
                 }
               }
             }
@@ -25810,6 +25810,136 @@
           "data"
         ]
       },
+      "ListGroupsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "name"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "QueryResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "top10": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "userId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "fullName": {
+                      "type": "string"
+                    },
+                    "avatarUrl": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "points": {
+                      "minimum": 0,
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "userId",
+                    "fullName",
+                    "avatarUrl",
+                    "points"
+                  ]
+                }
+              },
+              "ownRank": {
+                "anyOf": [
+                  {
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "ownRow": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "userId": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "fullName": {
+                        "type": "string"
+                      },
+                      "avatarUrl": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "points": {
+                        "minimum": 0,
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "userId",
+                      "fullName",
+                      "avatarUrl",
+                      "points"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "top10",
+              "ownRank",
+              "ownRow"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "GetThreadResponse": {
         "type": "object",
         "properties": {
@@ -32996,113 +33126,6 @@
         },
         "required": [
           "data"
-        ]
-      },
-      "QueryResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "top10": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/LeaderboardRow"
-                }
-              },
-              "ownRank": {
-                "anyOf": [
-                  {
-                    "minimum": 1,
-                    "type": "integer"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "ownRow": {
-                "anyOf": [
-                  {
-                    "$ref": "#/components/schemas/LeaderboardRow"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
-            "required": [
-              "top10",
-              "ownRank",
-              "ownRow"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "ListGroupsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/LeaderboardGroup"
-            }
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "LeaderboardGroup": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "name"
-        ]
-      },
-      "LeaderboardRow": {
-        "type": "object",
-        "properties": {
-          "userId": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "fullName": {
-            "type": "string"
-          },
-          "avatarUrl": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "points": {
-            "minimum": 0,
-            "type": "integer"
-          }
-        },
-        "required": [
-          "userId",
-          "fullName",
-          "avatarUrl",
-          "points"
         ]
       }
     }
