@@ -343,8 +343,7 @@ export default function LessonPage() {
                     </p>
                     <p className="mt-1 text-xs text-neutral-700">
                       {t("studentCourseView.takeaway.subtitle", {
-                        defaultValue:
-                          "Zapisuj własnymi słowami wnioski i notatki. Możesz używać Markdown. Autosave do bazy.",
+                        defaultValue: "Zapisuj własnymi słowami wnioski i notatki.",
                       })}
                     </p>
                     <textarea
