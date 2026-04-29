@@ -161,7 +161,6 @@ jobs:
         run: |
           set -euo pipefail
 
-          uc --connect "ssh+cli://uncloud-host" exec api-preview-pr-${PR_ID} npm i -g tsx drizzle-kit drizzle-orm
           uc --connect "ssh+cli://uncloud-host" exec api-preview-pr-${PR_ID} npm run db:migrate
 
       - name: Restart API after database reset
@@ -179,8 +178,7 @@ jobs:
           PR_ID: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
-
-          uc --connect "ssh+cli://uncloud-host" exec api-preview-pr-${PR_ID} npm i -g tsx drizzle-kit drizzle-orm
+          
           uc --connect "ssh+cli://uncloud-host" exec api-preview-pr-${PR_ID} npm run db:seed || true
 
       - name: Comment PR - send message to PR preview link
