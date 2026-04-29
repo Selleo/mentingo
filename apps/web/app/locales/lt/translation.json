@@ -3045,7 +3045,9 @@
       "pointThreshold": "Point threshold",
       "active": "Active",
       "name": "Name",
-      "description": "Description"
+      "description": "Description",
+      "namePlaceholder": "pvz. Kurso čempionas",
+      "descriptionPlaceholder": "pvz. Skiriama surinkus 100 taškų už baigtus kursus."
     },
     "toast": {
       "created": "Achievement created successfully.",

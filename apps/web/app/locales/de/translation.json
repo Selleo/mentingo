@@ -3045,7 +3045,9 @@
       "pointThreshold": "Point threshold",
       "active": "Active",
       "name": "Name",
-      "description": "Description"
+      "description": "Description",
+      "namePlaceholder": "z. B. Kurs-Champion",
+      "descriptionPlaceholder": "z. B. Verliehen nach 100 Punkten für abgeschlossene Kurse."
     },
     "toast": {
       "created": "Achievement created successfully.",

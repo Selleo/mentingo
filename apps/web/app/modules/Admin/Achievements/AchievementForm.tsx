@@ -17,6 +17,28 @@ import type {
 
 const SUPPORTED_LOCALES: SupportedLocale[] = ["en", "pl", "de", "lt", "cs"];
 
+const NON_ENGLISH_MOCK_TRANSLATIONS: Record<
+  Exclude<SupportedLocale, "en">,
+  { name: string; description: string }
+> = {
+  pl: {
+    name: "Mistrz Kursu",
+    description: "Przyznawane po zdobyciu 100 punktów za ukończone kursy.",
+  },
+  de: {
+    name: "Kurs-Champion",
+    description: "Verliehen nach 100 Punkten für abgeschlossene Kurse.",
+  },
+  lt: {
+    name: "Kurso čempionas",
+    description: "Skiriama surinkus 100 taškų už baigtus kursus.",
+  },
+  cs: {
+    name: "Mistr kurzu",
+    description: "Uděleno po získání 100 bodů za dokončené kurzy.",
+  },
+};
+
 type AchievementFormState = {
   imageReference: string;
   imageUrl?: string;
@@ -32,14 +54,18 @@ type AchievementFormProps = {
   onSubmit: (payload: Required<UpsertAchievementPayload>) => void;
 };
 
-const emptyTranslations = (): AchievementTranslationsInput =>
+const buildDefaultTranslations = (isCreating: boolean): AchievementTranslationsInput =>
   SUPPORTED_LOCALES.reduce((acc, locale) => {
-    acc[locale] = { name: "", description: "" };
+    if (isCreating && locale !== "en") {
+      acc[locale] = { ...NON_ENGLISH_MOCK_TRANSLATIONS[locale] };
+    } else {
+      acc[locale] = { name: "", description: "" };
+    }
     return acc;
   }, {} as AchievementTranslationsInput);
 
 const buildInitialState = (achievement?: Achievement): AchievementFormState => {
-  const translations = emptyTranslations();
+  const translations = buildDefaultTranslations(!achievement);
 
   achievement?.translations.forEach((translation) => {
     translations[translation.locale] = {
@@ -187,6 +213,7 @@ export function AchievementForm({
               <Label>{t("adminAchievementsView.form.name")}</Label>
               <Input
                 value={formState.translations[locale].name}
+                placeholder={t("adminAchievementsView.form.namePlaceholder")}
                 onChange={(event) => updateTranslation(locale, "name", event.target.value)}
               />
             </div>
@@ -194,6 +221,7 @@ export function AchievementForm({
               <Label>{t("adminAchievementsView.form.description")}</Label>
               <Textarea
                 value={formState.translations[locale].description}
+                placeholder={t("adminAchievementsView.form.descriptionPlaceholder")}
                 onChange={(event) => updateTranslation(locale, "description", event.target.value)}
               />
             </div>

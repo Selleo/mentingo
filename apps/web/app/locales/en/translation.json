@@ -3098,7 +3098,9 @@
       "pointThreshold": "Point threshold",
       "active": "Active",
       "name": "Name",
-      "description": "Description"
+      "description": "Description",
+      "namePlaceholder": "e.g. Course Champion",
+      "descriptionPlaceholder": "e.g. Awarded after earning 100 points by completing courses."
     },
     "toast": {
       "created": "Achievement created successfully.",

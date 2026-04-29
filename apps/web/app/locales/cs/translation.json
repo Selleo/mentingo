@@ -3045,7 +3045,9 @@
       "pointThreshold": "Point threshold",
       "active": "Active",
       "name": "Name",
-      "description": "Description"
+      "description": "Description",
+      "namePlaceholder": "např. Mistr kurzu",
+      "descriptionPlaceholder": "např. Uděleno po získání 100 bodů za dokončené kurzy."
     },
     "toast": {
       "created": "Achievement created successfully.",

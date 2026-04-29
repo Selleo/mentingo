@@ -3123,7 +3123,9 @@
       "pointThreshold": "Point threshold",
       "active": "Active",
       "name": "Name",
-      "description": "Description"
+      "description": "Description",
+      "namePlaceholder": "np. Mistrz Kursu",
+      "descriptionPlaceholder": "np. Przyznawane po zdobyciu 100 punktów za ukończone kursy."
     },
     "toast": {
       "created": "Achievement created successfully.",
