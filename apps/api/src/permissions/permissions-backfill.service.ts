@@ -25,7 +25,8 @@ export class PermissionsBackfillService implements OnApplicationBootstrap {
   ) {}
 
   async onApplicationBootstrap() {
-    if (process.env.JEST_WORKER_ID) return;
+    // Skip bootstrap backfill only for build verification, where the app starts without Postgres.
+    if (process.env.JEST_WORKER_ID || process.env.BUILD_VERIFICATION === "true") return;
 
     const { insertedCount, tenantCount } = await this.backfillMissingPermissionsForAllTenants();
 

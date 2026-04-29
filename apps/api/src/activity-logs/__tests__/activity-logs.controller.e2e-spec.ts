@@ -1,4 +1,5 @@
 import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import { format } from "date-fns";
 import request from "supertest";
 
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
@@ -93,26 +94,50 @@ describe("ActivityLogsController (e2e)", () => {
       .withAdminSettings(db)
       .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
 
-    await db.insert(activityLogs).values({
-      actorId: admin.id,
-      actorEmail: admin.email,
-      actorRole: SYSTEM_ROLE_SLUGS.ADMIN,
-      actionType: ACTIVITY_LOG_ACTION_TYPES.CREATE,
-      resourceType: "category",
-      createdAt: "2026-04-29T23:59:59.999Z",
-      updatedAt: "2026-04-29T23:59:59.999Z",
-      metadata: { operation: ACTIVITY_LOG_ACTION_TYPES.CREATE, after: { title: "Late log" } },
-    });
+    const toDate = format(new Date("2026-04-29T00:00:00.000Z"), "yyyy-MM-dd");
+
+    const [includedLog] = await db
+      .insert(activityLogs)
+      .values({
+        actorId: admin.id,
+        actorEmail: admin.email,
+        actorRole: SYSTEM_ROLE_SLUGS.ADMIN,
+        actionType: ACTIVITY_LOG_ACTION_TYPES.CREATE,
+        resourceType: "category",
+        createdAt: "2026-04-29T12:00:00.000Z",
+        updatedAt: "2026-04-29T12:00:00.000Z",
+        metadata: { operation: ACTIVITY_LOG_ACTION_TYPES.CREATE, after: { title: "Late log" } },
+      })
+      .returning({ id: activityLogs.id });
+
+    const [excludedLog] = await db
+      .insert(activityLogs)
+      .values({
+        actorId: admin.id,
+        actorEmail: admin.email,
+        actorRole: SYSTEM_ROLE_SLUGS.ADMIN,
+        actionType: ACTIVITY_LOG_ACTION_TYPES.CREATE,
+        resourceType: "category",
+        createdAt: "2026-04-30T00:00:00.000Z",
+        updatedAt: "2026-04-30T00:00:00.000Z",
+        metadata: { operation: ACTIVITY_LOG_ACTION_TYPES.CREATE, after: { title: "Next day log" } },
+      })
+      .returning({ id: activityLogs.id });
 
     const response = await request(app.getHttpServer())
-      .get("/api/activity-logs?to=2026-04-29")
+      .get(`/api/activity-logs?to=${toDate}`)
       .set("Cookie", await cookieFor(admin, app))
       .expect(200);
 
-    expect(response.body.data).toHaveLength(1);
-    expect(response.body.data[0]).toHaveProperty("createdAt");
-    expect(new Date(response.body.data[0].createdAt).toISOString().startsWith("2026-04-29")).toBe(
-      true,
+    const returnedIds = response.body.data.map((log: { id: string }) => log.id);
+
+    expect(returnedIds).toContain(includedLog.id);
+    expect(returnedIds).not.toContain(excludedLog.id);
+
+    const returnedDates = response.body.data.map((log: { createdAt: string }) =>
+      format(new Date(log.createdAt), "yyyy-MM-dd"),
     );
+
+    expect(returnedDates.every((date: string) => date === toDate)).toBe(true);
   });
 });
