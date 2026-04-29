@@ -199,7 +199,8 @@
     },
     "qa": "Q&A",
     "articles": "Baza wiedzy",
-    "tenants": "Organizacje"
+    "tenants": "Organizacje",
+    "activityLogs": "Dziennik zdarzeń"
   },
   "newsView": {
     "header": "Aktualności",
@@ -2692,6 +2693,7 @@
     "createQA": "Utwórz nowe Q&A",
     "analytics": "Analityka",
     "progress": "Postępy",
+    "activityLogs": "Dziennik zdarzeń",
     "tenant": "Szczegóły organizacji",
     "createTenant": "Utwórz organizację",
     "tenants": "Organizacje"
@@ -3060,6 +3062,77 @@
       "ownerNotAdmin": "Właściciel klucza API nie ma już uprawnień administratora",
       "missingApiKeyHeader": "Brak nagłówka X-API-Key",
       "missingTenantIdHeader": "Brak nagłówka X-Tenant-Id"
+    }
+  },
+  "activityLogsView": {
+    "filters": {
+      "placeholder": {
+        "searchByEmail": "Szukaj według e-mail...",
+        "from": "Od daty",
+        "to": "Do daty"
+      }
+    },
+
+    "description": "Oś czasu zmian w platformie w formie prostego, rozwijanego strumienia.",
+    "breadcrumbs": {
+      "activityLogs": "Dziennik zdarzeń"
+    },
+    "emptyState": {
+      "title": "Nie znaleziono dziennika zdarzeń.",
+      "description": "Gdy w platformie pojawią się akcje, zobaczysz je tutaj."
+    },
+    "details": {
+      "before": "Przed",
+      "after": "Po",
+      "context": "Kontekst",
+      "noMetadata": "Brak dostępnych metadanych."
+    },
+    "fallbacks": {
+      "unknown": "Nieznane",
+      "notAvailable": "b.d."
+    },
+    "labels": {
+      "action": "Akcja:",
+      "entity": "Zasób:",
+      "resource": "Zasób:"
+    },
+    "actions": {
+      "create": "Utworzono",
+      "update": "Zaktualizowano",
+      "delete": "Usunięto",
+      "login": "Zalogowano",
+      "login_failed": "Nieudane logowanie",
+      "logout": "Wylogowano",
+      "enroll_course": "Zapisano",
+      "unenroll_course": "Wypisano",
+      "start_course": "Rozpoczęto",
+      "group_assignment": "Przypisano",
+      "complete_lesson": "Ukończono",
+      "complete_course": "Ukończono",
+      "complete_chapter": "Ukończono",
+      "view_announcement": "Wyświetlono"
+    },
+    "entity": {
+      "course": "Kurs",
+      "chapter": "Rozdział",
+      "lesson": "Lekcja",
+      "question": "Pytanie",
+      "news": "Aktualności",
+      "articles": "Artykuły",
+      "user": "Użytkownik",
+      "category": "Kategoria",
+      "announcement": "Ogłoszenie",
+      "global_settings": "Ustawienia"
+    },
+    "table": {
+      "datetime": "Data i godzina",
+      "email": "E-mail",
+      "action": "Akcja",
+      "resource": "Zasób",
+      "details": "Szczegóły",
+      "showDetails": "Pokaż szczegóły",
+      "loading": "Ładowanie dziennika zdarzeń...",
+      "empty": "Nie znaleziono dziennika zdarzeń."
     }
   }
 }

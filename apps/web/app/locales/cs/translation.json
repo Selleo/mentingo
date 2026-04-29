@@ -2616,7 +2616,79 @@
     "progress": "Pokrok",
     "tenant": "Podrobnosti organizace",
     "createTenant": "Vytvořit organizaci",
-    "tenants": "Organizace"
+    "tenants": "Organizace",
+    "activityLogs": "Log aktivit"
+  },
+  "activityLogsView": {
+    "filters": {
+      "placeholder": {
+        "searchByEmail": "Hledat podle e-mailu...",
+        "from": "Od data",
+        "to": "Do data"
+      }
+    },
+
+    "description": "Časová osa změn v platformě jako jednoduchý rozbalovací feed.",
+    "breadcrumbs": {
+      "activityLogs": "Log aktivit"
+    },
+    "emptyState": {
+      "title": "Žádné záznamy o aktivitě nebyly nalezeny.",
+      "description": "Jakmile se na platformě něco stane, zobrazí se to zde."
+    },
+    "details": {
+      "before": "Před",
+      "after": "Po",
+      "context": "Kontext",
+      "noMetadata": "Žádná metadata nejsou k dispozici."
+    },
+    "fallbacks": {
+      "unknown": "Neznámé",
+      "notAvailable": "n/a"
+    },
+    "labels": {
+      "action": "Akce:",
+      "entity": "Zdroj:",
+      "resource": "Zdroj:"
+    },
+    "actions": {
+      "create": "Vytvořeno",
+      "update": "Aktualizováno",
+      "delete": "Smazáno",
+      "login": "Přihlášeno",
+      "login_failed": "Neúspěšné přihlášení",
+      "logout": "Odhlášeno",
+      "enroll_course": "Zapsáno",
+      "unenroll_course": "Odregistrováno",
+      "start_course": "Spuštěno",
+      "group_assignment": "Přiřazeno",
+      "complete_lesson": "Dokončeno",
+      "complete_course": "Dokončeno",
+      "complete_chapter": "Dokončeno",
+      "view_announcement": "Zobrazeno"
+    },
+    "entity": {
+      "course": "Kurz",
+      "chapter": "Kapitola",
+      "lesson": "Lekce",
+      "question": "Otázka",
+      "news": "Novinky",
+      "articles": "Články",
+      "user": "Uživatel",
+      "category": "Kategorie",
+      "announcement": "Oznámení",
+      "global_settings": "Nastavení"
+    },
+    "table": {
+      "datetime": "Datum a čas",
+      "email": "E-mail",
+      "action": "Akce",
+      "resource": "Zdroj",
+      "details": "Detaily",
+      "showDetails": "Zobrazit detaily",
+      "loading": "Načítání záznamů aktivit...",
+      "empty": "Žádné záznamy o aktivitě nebyly nalezeny."
+    }
   },
   "lessonPreview": {
     "breadcrumbs": {

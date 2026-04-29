@@ -2616,7 +2616,79 @@
     "progress": "Pažanga",
     "tenant": "Organizacijos informacija",
     "createTenant": "Sukurti organizaciją",
-    "tenants": "Organizacijos"
+    "tenants": "Organizacijos",
+    "activityLogs": "Veiklos žurnalas"
+  },
+  "activityLogsView": {
+    "filters": {
+      "placeholder": {
+        "searchByEmail": "Ieškoti pagal el. paštą...",
+        "from": "Nuo datos",
+        "to": "Iki datos"
+      }
+    },
+
+    "description": "Platformos pakeitimų laiko juosta paprasto išskleidžiamo srauto pavidalu.",
+    "breadcrumbs": {
+      "activityLogs": "Veiklos žurnalas"
+    },
+    "emptyState": {
+      "title": "Veiklos žurnalų nerasta.",
+      "description": "Kai platformoje įvyks veiksmai, jie bus rodomi čia."
+    },
+    "details": {
+      "before": "Prieš",
+      "after": "Po",
+      "context": "Kontekstas",
+      "noMetadata": "Nėra galimų metaduomenų."
+    },
+    "fallbacks": {
+      "unknown": "Nežinoma",
+      "notAvailable": "nėra"
+    },
+    "labels": {
+      "action": "Veiksmas:",
+      "entity": "Išteklius:",
+      "resource": "Išteklius:"
+    },
+    "actions": {
+      "create": "Sukurta",
+      "update": "Atnaujinta",
+      "delete": "Ištrinta",
+      "login": "Prisijungta",
+      "login_failed": "Prisijungti nepavyko",
+      "logout": "Atsijungta",
+      "enroll_course": "Užsirašyta",
+      "unenroll_course": "Atsisakyta",
+      "start_course": "Pradėta",
+      "group_assignment": "Priskirta",
+      "complete_lesson": "Užbaigta",
+      "complete_course": "Užbaigta",
+      "complete_chapter": "Užbaigta",
+      "view_announcement": "Peržiūrėta"
+    },
+    "entity": {
+      "course": "Kursas",
+      "chapter": "Skyrius",
+      "lesson": "Pamoka",
+      "question": "Klausimas",
+      "news": "Naujienos",
+      "articles": "Straipsniai",
+      "user": "Vartotojas",
+      "category": "Kategorija",
+      "announcement": "Pranešimas",
+      "global_settings": "Nustatymai"
+    },
+    "table": {
+      "datetime": "Data ir laikas",
+      "email": "El. paštas",
+      "action": "Veiksmas",
+      "resource": "Išteklius",
+      "details": "Išsamiai",
+      "showDetails": "Rodyti detales",
+      "loading": "Įkeliami veiklos žurnalai...",
+      "empty": "Veiklos žurnalų nerasta."
+    }
   },
   "lessonPreview": {
     "breadcrumbs": {

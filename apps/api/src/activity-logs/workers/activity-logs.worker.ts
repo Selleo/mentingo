@@ -7,7 +7,7 @@ import { buildRedisConnection } from "src/common/configuration/redis";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import type { Job } from "bullmq";
-import type { RecordActivityLogInput } from "src/activity-logs/activity-logs.service";
+import type { RecordActivityLogInput } from "src/activity-logs/activity-logs.types";
 import type { RedisConfigSchema } from "src/common/configuration/redis";
 
 @Injectable()
