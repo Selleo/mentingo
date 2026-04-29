@@ -11,6 +11,18 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
+read_env_value() {
+    local key="$1"
+    local file="$2"
+    local value
+
+    value=$(grep -E "^${key}=" "$file" | tail -n1 | cut -d= -f2- || true)
+    value="${value%\"}"
+    value="${value#\"}"
+
+    echo "$value"
+}
+
 # Determine the script's directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
@@ -350,7 +362,7 @@ echo ""
 
 #  Seed the database
 echo -e "${GREEN}[10/11]${NC} Seeding the database..."
-if ! pnpm --filter=api run db:seed-prod > /dev/null 2>&1; then
+if ! pnpm --filter=api run db:seed > /dev/null 2>&1; then
     echo -e "${RED}✗ Failed to seed database${NC}"
     exit 1
 fi
@@ -382,30 +394,62 @@ echo ""
 trap - ERR
 
 # Display success message with credentials
+DEV_TENANT_ORIGINS=$(read_env_value "DEV_TENANT_ORIGINS" "apps/api/.env")
+IFS=',' read -r -a TENANT_HOSTS_RAW <<< "$DEV_TENANT_ORIGINS"
+
+TENANT_HOSTS=()
+for host in "${TENANT_HOSTS_RAW[@]}"; do
+    host="${host//[[:space:]]/}"
+    if [ -n "$host" ]; then
+        TENANT_HOSTS+=("$host")
+    fi
+done
+
+PRIMARY_HOST="https://tenant1.lms.localhost"
+if [ "${#TENANT_HOSTS[@]}" -gt 0 ]; then
+    PRIMARY_HOST="${TENANT_HOSTS[0]}"
+fi
+
+OTHER_HOSTS=()
+if [ "${#TENANT_HOSTS[@]}" -gt 1 ]; then
+    OTHER_HOSTS=("${TENANT_HOSTS[@]:1}")
+fi
+
 echo ""
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "${GREEN}✓ Setup completed successfully!${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
-echo -e "${YELLOW}Created user accounts (default tenant):${NC}"
-echo -e "  ${BLUE}Primary host:${NC} ${GREEN}https://tenant1.lms.localhost${NC}"
+echo -e "${YELLOW}Created tenant hosts:${NC}"
+echo -e "  ${BLUE}Primary host:${NC} ${GREEN}${PRIMARY_HOST}${NC}"
+
+if [ "${#OTHER_HOSTS[@]}" -gt 0 ]; then
+    echo -e "  ${BLUE}Other hosts:${NC}"
+    for host in "${OTHER_HOSTS[@]}"; do
+        echo -e "    ${GREEN}${host}${NC}"
+    done
+    echo -e "  ${BLUE}Other host login:${NC} ${GREEN}admin+tenant<number>@example.com${NC}"
+fi
+
+echo ""
+echo -e "${YELLOW}Created user accounts (primary tenant):${NC}"
 echo ""
 echo -e "  ${BLUE}Admin User:${NC}"
-echo -e "    Email:    ${GREEN}admin@example.com${NC}"
+echo -e "    Email:    ${GREEN}admin+tenant1@example.com${NC}"
 echo -e "    Password: ${GREEN}password${NC}"
 echo ""
 echo -e "  ${BLUE}Student User:${NC}"
-echo -e "    Email:    ${GREEN}user@example.com${NC}"
+echo -e "    Email:    ${GREEN}user+tenant1@example.com${NC}"
 echo -e "    Password: ${GREEN}password${NC}"
 echo ""
 echo -e "  ${BLUE}Content Creator:${NC}"
-echo -e "    Email:    ${GREEN}contentcreator@example.com${NC}"
+echo -e "    Email:    ${GREEN}contentcreator+tenant1@example.com${NC}"
 echo -e "    Password: ${GREEN}password${NC}"
 echo ""
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 echo -e "${YELLOW}Next steps:${NC}"
 echo -e "  1. Run ${GREEN}pnpm dev${NC} to start the development servers"
-echo -e "  2. Open ${GREEN}https://tenant1.lms.localhost${NC} in your browser"
+echo -e "  2. Open ${GREEN}${PRIMARY_HOST}${NC} in your browser"
 echo -e "  3. Log in with one of the accounts above"
 echo ""
