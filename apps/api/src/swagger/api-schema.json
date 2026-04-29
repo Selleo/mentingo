@@ -1084,6 +1084,27 @@
         }
       }
     },
+    "/api/settings/admin/discussions/{setting}": {
+      "patch": {
+        "operationId": "SettingsController_updateDiscussionsSetting",
+        "parameters": [
+          {
+            "name": "setting",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "const": "discussionsEnabled",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/settings/admin/age-limit": {
       "patch": {
         "operationId": "SettingsController_updateAgeLimit",
@@ -11746,6 +11767,9 @@
               "articlesEnabled": {
                 "type": "boolean"
               },
+              "discussionsEnabled": {
+                "type": "boolean"
+              },
               "ageLimit": {
                 "anyOf": [
                   {
@@ -11788,6 +11812,7 @@
               "newsEnabled",
               "unregisteredUserArticlesAccessibility",
               "articlesEnabled",
+              "discussionsEnabled",
               "ageLimit",
               "loginPageFiles"
             ]
@@ -12502,6 +12527,9 @@
               "articlesEnabled": {
                 "type": "boolean"
               },
+              "discussionsEnabled": {
+                "type": "boolean"
+              },
               "ageLimit": {
                 "anyOf": [
                   {
@@ -12544,6 +12572,7 @@
               "newsEnabled",
               "unregisteredUserArticlesAccessibility",
               "articlesEnabled",
+              "discussionsEnabled",
               "ageLimit",
               "loginPageFiles"
             ]
@@ -12730,6 +12759,9 @@
               "articlesEnabled": {
                 "type": "boolean"
               },
+              "discussionsEnabled": {
+                "type": "boolean"
+              },
               "ageLimit": {
                 "anyOf": [
                   {
@@ -12772,6 +12804,7 @@
               "newsEnabled",
               "unregisteredUserArticlesAccessibility",
               "articlesEnabled",
+              "discussionsEnabled",
               "ageLimit",
               "loginPageFiles"
             ]
@@ -12958,6 +12991,9 @@
               "articlesEnabled": {
                 "type": "boolean"
               },
+              "discussionsEnabled": {
+                "type": "boolean"
+              },
               "ageLimit": {
                 "anyOf": [
                   {
@@ -13000,6 +13036,7 @@
               "newsEnabled",
               "unregisteredUserArticlesAccessibility",
               "articlesEnabled",
+              "discussionsEnabled",
               "ageLimit",
               "loginPageFiles"
             ]
@@ -13341,6 +13378,9 @@
               "articlesEnabled": {
                 "type": "boolean"
               },
+              "discussionsEnabled": {
+                "type": "boolean"
+              },
               "ageLimit": {
                 "anyOf": [
                   {
@@ -13383,6 +13423,7 @@
               "newsEnabled",
               "unregisteredUserArticlesAccessibility",
               "articlesEnabled",
+              "discussionsEnabled",
               "ageLimit",
               "loginPageFiles"
             ]
@@ -17957,6 +17998,9 @@
               },
               "commentCount": {
                 "type": "number"
+              },
+              "discussionsEnabled": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -17979,7 +18023,8 @@
               "availableLocales",
               "baseLanguage",
               "dueDate",
-              "commentCount"
+              "commentCount",
+              "discussionsEnabled"
             ]
           }
         },

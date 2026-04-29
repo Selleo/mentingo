@@ -2237,7 +2237,8 @@
       "qaSettingUpdatedSuccessfully": "QA settings updated successfully",
       "ageLimitUpdatedSuccessfully": "Age limit updated successfully",
       "newsSettingUpdatedSuccessfully": "News settings updated successfully",
-      "articlesSettingUpdatedSuccessfully": "Knowledge base settings updated successfully"
+      "articlesSettingUpdatedSuccessfully": "Knowledge base settings updated successfully",
+      "discussionsSettingUpdatedSuccessfully": "Discussions settings updated successfully"
     }
   },
   "certificateBackgroundUpload": {
@@ -2817,6 +2818,16 @@
     },
     "tooltip": {
       "disabled": "To toggle this field, please enable the knowledge base section first."
+    }
+  },
+  "discussionsPreferences": {
+    "subHeader": "Configure course discussions",
+    "header": "Course Discussions",
+    "settings": {
+      "discussionsEnabled": {
+        "label": "Enable course discussions",
+        "description": "Show the Discussion tab on every course. When disabled, the tab is hidden for all users."
+      }
     }
   },
   "qaView": {

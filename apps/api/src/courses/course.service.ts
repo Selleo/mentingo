@@ -1229,6 +1229,8 @@ export class CourseService {
       .from(courseComments)
       .where(and(eq(courseComments.courseId, course.id), isNull(courseComments.deletedAt)));
 
+    const globalSettings = await this.settingsService.getGlobalSettings();
+
     return {
       ...course,
       thumbnailUrl,
@@ -1236,6 +1238,7 @@ export class CourseService {
       chapters: courseChapterList,
       slug: currentSlug,
       commentCount: commentCount ?? 0,
+      discussionsEnabled: globalSettings.discussionsEnabled ?? true,
     };
   }
 

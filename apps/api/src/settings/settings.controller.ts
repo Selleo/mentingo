@@ -18,6 +18,7 @@ import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes } from "@nestjs/swagger";
 import {
   ALLOWED_ARTICLES_SETTINGS,
+  ALLOWED_DISCUSSIONS_SETTINGS,
   ALLOWED_NEWS_SETTINGS,
   ALLOWED_QA_SETTINGS,
   ALLOWED_AVATAR_IMAGE_TYPES,
@@ -25,6 +26,7 @@ import {
   LOGIN_PAGE_DOCUMENTS_FILE_TYPES,
   PERMISSIONS,
   type AllowedArticlesSettings,
+  type AllowedDiscussionsSettings,
   type AllowedNewsSettings,
   type AllowedQASettings,
   SupportedLanguages,
@@ -584,6 +586,15 @@ export class SettingsController {
   @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   async updateArticlesSetting(@Param("setting") setting: AllowedArticlesSettings) {
     return new BaseResponse(await this.settingsService.updateArticlesSetting(setting));
+  }
+
+  @Patch("admin/discussions/:setting")
+  @Validate({
+    request: [{ type: "param", name: "setting", schema: Type.Enum(ALLOWED_DISCUSSIONS_SETTINGS) }],
+  })
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
+  async updateDiscussionsSetting(@Param("setting") setting: AllowedDiscussionsSettings) {
+    return new BaseResponse(await this.settingsService.updateDiscussionsSetting(setting));
   }
 
   @Patch("admin/age-limit")

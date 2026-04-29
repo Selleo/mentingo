@@ -103,7 +103,9 @@ export default function CourseViewPage() {
   const { data: currentUser } = useCurrentUser();
   const isCourseAuthor = !!course?.authorId && currentUser?.id === course.authorId;
   const isEnrolled = !!course?.enrolled;
-  const canSeeDiscussionTab = !!currentUser && (isEnrolled || isCourseAuthor || canModerateCourses);
+  const discussionsEnabled = course?.discussionsEnabled ?? true;
+  const canSeeDiscussionTab =
+    discussionsEnabled && !!currentUser && (isEnrolled || isCourseAuthor || canModerateCourses);
 
   const courseViewTabs = useMemo(
     () => [

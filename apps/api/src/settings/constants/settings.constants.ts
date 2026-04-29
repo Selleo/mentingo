@@ -25,6 +25,7 @@ export const DEFAULT_GLOBAL_SETTINGS = {
   newsEnabled: false,
   unregisteredUserArticlesAccessibility: false,
   articlesEnabled: false,
+  discussionsEnabled: true,
   unregisteredUserCoursesAccessibility: false,
   modernCourseListEnabled: true,
   companyInformation: DEFAULT_COMPANY_INFORMATION,

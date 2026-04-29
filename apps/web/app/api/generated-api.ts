@@ -349,6 +349,7 @@ export interface GetPublicGlobalSettingsResponse {
     newsEnabled: boolean;
     unregisteredUserArticlesAccessibility: boolean;
     articlesEnabled: boolean;
+    discussionsEnabled: boolean;
     ageLimit: 13 | 16 | null;
     loginPageFiles: string[];
   };
@@ -477,6 +478,7 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     newsEnabled: boolean;
     unregisteredUserArticlesAccessibility: boolean;
     articlesEnabled: boolean;
+    discussionsEnabled: boolean;
     ageLimit: 13 | 16 | null;
     loginPageFiles: string[];
   };
@@ -519,6 +521,7 @@ export interface UpdateEnforceSSOResponse {
     newsEnabled: boolean;
     unregisteredUserArticlesAccessibility: boolean;
     articlesEnabled: boolean;
+    discussionsEnabled: boolean;
     ageLimit: 13 | 16 | null;
     loginPageFiles: string[];
   };
@@ -561,6 +564,7 @@ export interface UpdateModernCourseListEnabledResponse {
     newsEnabled: boolean;
     unregisteredUserArticlesAccessibility: boolean;
     articlesEnabled: boolean;
+    discussionsEnabled: boolean;
     ageLimit: 13 | 16 | null;
     loginPageFiles: string[];
   };
@@ -634,6 +638,7 @@ export interface UpdateColorSchemaResponse {
     newsEnabled: boolean;
     unregisteredUserArticlesAccessibility: boolean;
     articlesEnabled: boolean;
+    discussionsEnabled: boolean;
     ageLimit: 13 | 16 | null;
     loginPageFiles: string[];
   };
@@ -1642,6 +1647,7 @@ export interface GetCourseResponse {
     baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
     dueDate: string | null;
     commentCount: number;
+    discussionsEnabled: boolean;
   };
 }
 
@@ -5403,6 +5409,22 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     ) =>
       this.request<void, any>({
         path: `/api/settings/admin/articles/${setting}`,
+        method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateDiscussionsSetting
+     * @request PATCH:/api/settings/admin/discussions/{setting}
+     */
+    settingsControllerUpdateDiscussionsSetting: (
+      setting: "discussionsEnabled",
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/settings/admin/discussions/${setting}`,
         method: "PATCH",
         ...params,
       }),

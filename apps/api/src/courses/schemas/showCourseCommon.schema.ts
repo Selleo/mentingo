@@ -37,6 +37,7 @@ export const commonShowCourseSchema = Type.Object({
   baseLanguage: Type.Enum(SUPPORTED_LANGUAGES),
   dueDate: Type.Union([Type.String(), Type.Null()]),
   commentCount: Type.Number(),
+  discussionsEnabled: Type.Boolean(),
 });
 
 export const commonShowBetaCourseSchema = Type.Object({
