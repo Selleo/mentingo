@@ -26,6 +26,18 @@ describe("evaluateAchievementUnlocks", () => {
     expect(evaluateAchievementUnlocks(30, [], catalog)).toEqual(["a"]);
   });
 
+  it("supports retroactive threshold lowers by evaluating the lowered active catalog item", () => {
+    const loweredCatalog = [achievement("lowered", 40)];
+
+    expect(evaluateAchievementUnlocks(75, [], loweredCatalog)).toEqual(["lowered"]);
+  });
+
+  it("no-ops after threshold raises when the user is below the raised threshold", () => {
+    const raisedCatalog = [achievement("raised", 100)];
+
+    expect(evaluateAchievementUnlocks(75, [], raisedCatalog)).toEqual([]);
+  });
+
   it("cannot unlock soft-deleted achievements when they are excluded from the active catalog", () => {
     const activeCatalog = [achievement("active", 10)];
 

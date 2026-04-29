@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { SUPPORTED_LANGUAGES, type SupportedLanguages } from "@repo/shared";
-import { and, asc, eq, getTableColumns, sql } from "drizzle-orm";
+import { and, asc, eq, getTableColumns, gte, isNotNull, isNull, or, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import { DB } from "src/storage/db/db.providers";
@@ -162,7 +162,12 @@ export class AchievementsRepository {
           eq(userAchievements.tenantId, params.tenantId),
         ),
       )
-      .where(and(eq(achievements.tenantId, params.tenantId), eq(achievements.isActive, true)))
+      .where(
+        and(
+          eq(achievements.tenantId, params.tenantId),
+          or(eq(achievements.isActive, true), isNotNull(userAchievements.id)),
+        ),
+      )
       .orderBy(asc(achievements.pointThreshold), asc(achievements.createdAt));
 
     const byId = new Map<
@@ -222,6 +227,10 @@ export class AchievementsRepository {
 
       await this.upsertTranslations(trx as Transaction, created.id, payload.translations);
 
+      if (created.isActive) {
+        await this.retroactivelyUnlockAchievement(trx as Transaction, created);
+      }
+
       return created;
     });
   }
@@ -232,6 +241,13 @@ export class AchievementsRepository {
     payload: UpdateAchievementBody;
   }): Promise<AchievementRow | null> {
     return await this.db.transaction(async (trx) => {
+      const [previous] = await trx
+        .select()
+        .from(achievements)
+        .where(and(eq(achievements.id, params.id), eq(achievements.tenantId, params.tenantId)));
+
+      if (!previous) return null;
+
       const updatePayload = {
         updatedAt: sql`now()`,
         ...(params.payload.imageReference !== undefined && {
@@ -255,6 +271,14 @@ export class AchievementsRepository {
         await this.upsertTranslations(trx as Transaction, updated.id, params.payload.translations);
       }
 
+      const thresholdWasLowered =
+        params.payload.pointThreshold !== undefined &&
+        params.payload.pointThreshold < previous.pointThreshold;
+
+      if (updated.isActive && thresholdWasLowered) {
+        await this.retroactivelyUnlockAchievement(trx as Transaction, updated);
+      }
+
       return updated;
     });
   }
@@ -267,6 +291,50 @@ export class AchievementsRepository {
       .returning();
 
     return updated ?? null;
+  }
+
+  private async retroactivelyUnlockAchievement(trx: Transaction, achievement: AchievementRow) {
+    const candidates = await trx
+      .select({ userId: userStatistics.userId, totalPoints: userStatistics.totalPoints })
+      .from(userStatistics)
+      .leftJoin(
+        userAchievements,
+        and(
+          eq(userAchievements.userId, userStatistics.userId),
+          eq(userAchievements.achievementId, achievement.id),
+          eq(userAchievements.tenantId, achievement.tenantId),
+        ),
+      )
+      .where(
+        and(
+          eq(userStatistics.tenantId, achievement.tenantId),
+          gte(userStatistics.totalPoints, achievement.pointThreshold),
+          isNull(userAchievements.id),
+        ),
+      );
+
+    const userIdsToUnlock = candidates
+      .filter((candidate) =>
+        evaluateAchievementUnlocks(candidate.totalPoints, [], [achievement]).includes(
+          achievement.id,
+        ),
+      )
+      .map((candidate) => candidate.userId);
+
+    if (userIdsToUnlock.length === 0) return;
+
+    await trx
+      .insert(userAchievements)
+      .values(
+        userIdsToUnlock.map((userId) => ({
+          achievementId: achievement.id,
+          userId,
+          tenantId: achievement.tenantId,
+        })),
+      )
+      .onConflictDoNothing({
+        target: [userAchievements.userId, userAchievements.achievementId],
+      });
   }
 
   private async upsertTranslations(

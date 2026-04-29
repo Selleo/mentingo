@@ -234,3 +234,28 @@
 - `pnpm lint-tsc-api`, `pnpm lint-tsc-web`, `pnpm lint`, `pnpm test:api`, `pnpm test:web`, and `pnpm test:api:e2e` pass; web lint still reports the pre-existing `ChatMessage.tsx` React hook dependency warning without failing.
 - `pnpm test:web:e2e` was attempted and still fails because the local Playwright Chromium executable is not installed (`pnpm exec playwright install` required); DB setup completed before browser launch.
 - `pnpm format:check` still fails on pre-existing formatting issues in `.claude/`, untracked CURRENT-WORK issue docs, and `docs/gamification.md`; changed source/test/locale files were formatted with Prettier.
+
+## 2026-04-29 — Slice 6: Retroactive achievement unlocks — DONE
+
+### Key decisions
+
+- Wired admin achievement creation and threshold-lowering updates to synchronously insert retroactive `user_achievements` rows inside the same repository transaction as the catalog write.
+- Reused `evaluateAchievementUnlocks()` for each qualifying candidate user while pre-filtering by tenant, `totalPoints >= pointThreshold`, and missing user-achievement rows.
+- Kept threshold raises non-destructive: existing unlock rows are never revoked and no retroactive insert pass runs for raises.
+- Preserved soft-delete history by keeping `user_achievements` untouched and updating profile achievement reads to include inactive achievements only when the viewer already holds them.
+- Left admin default listing behavior unchanged so inactive achievements remain hidden unless `includeInactive=true` is requested.
+
+### Files changed
+
+- `apps/api/src/gamification/achievements.repository.ts`
+- `apps/api/src/gamification/__tests__/achievement.evaluator.spec.ts`
+- `apps/api/src/gamification/__tests__/achievements.service.spec.ts`
+- `apps/api/src/gamification/__tests__/achievements.controller.e2e-spec.ts`
+- `CURRENT-WORK/progress.md`
+
+### Blockers / notes for next iteration
+
+- Leaderboard all-time and monthly/group leaderboard slices remain deferred to later work.
+- Added an API e2e spec for the admin threshold-lowering path, but did not run API e2e tests per the current instruction to avoid web and API e2e feedback loops.
+- `pnpm lint-tsc-api`, `pnpm lint-tsc-web`, `pnpm lint`, `pnpm test:api`, `pnpm test:web`, and `pnpm format:check` pass; web lint still reports the pre-existing `ChatMessage.tsx` React hook dependency warning without failing.
+- `pnpm --filter api test -- achievement.evaluator.spec.ts achievements.service.spec.ts --runInBand` passes for focused iteration.
