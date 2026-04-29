@@ -18,13 +18,13 @@ Stack: Drizzle ORM + Postgres, Jest (api), Vitest + Playwright (web), Tailwind, 
 workspace packages under `@repo/*`.
 
 Before committing, run the feedback loops from the repo root:
+**DO NOT RUN WEB AND API E2E TESTS**
 
 - `pnpm lint-tsc-api` — `tsc --noEmit` + ESLint for the api workspace
 - `pnpm lint-tsc-web` — `tsc --noEmit` + ESLint for the web workspace
 - `pnpm lint` — run ESLint across all workspaces via Turbo
 - `pnpm test:api` — run api Jest unit tests (fast; use this for iteration)
 - `pnpm test:web` — run web Vitest unit tests
-- `pnpm test:api:e2e` / `pnpm test:web:e2e` — run e2e suites (slower, run before commit)
 - `pnpm format:check` — verify Prettier formatting
 
 Per-workspace when scoping:
