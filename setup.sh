@@ -199,7 +199,7 @@ if [[ ! -d "$CADDY_DATA_DIR" ]] || [[ ! -d "$CADDY_DATA_DIR/certificates" ]]; th
     fi
 
     # Start Caddy in background
-    (cd apps/reverse-proxy && caddy run > /dev/null 2>&1 &)
+    (cd apps/reverse-proxy && caddy run > /dev/null 2>&1) &
     CADDY_PID=$!
 
     echo -e "  ${YELLOW}→${NC} Waiting for Caddy to initialize..."
