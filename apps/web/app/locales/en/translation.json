@@ -2159,7 +2159,21 @@
     "discussions": {
       "loading": "Loading discussions...",
       "empty": "No discussions yet. Be the first to start one!",
-      "comingSoon": "Discussion feature coming soon."
+      "comingSoon": "Discussion feature coming soon.",
+      "form": {
+        "title": "Thread title",
+        "submit": "Create thread",
+        "comment": "Write a comment...",
+        "commentSubmit": "Add comment"
+      },
+      "actions": {
+        "edit": "Edit",
+        "delete": "Delete",
+        "hide": "Hide",
+        "unhide": "Unhide",
+        "save": "Save",
+        "cancel": "Cancel"
+      }
     }
   },
   "studentChapterView": {

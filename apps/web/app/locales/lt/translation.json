@@ -2106,7 +2106,21 @@
     "discussions": {
       "loading": "Diskusijos kraunamos...",
       "empty": "Kol kas diskusijų nėra. Būkite pirmas ir pradėkite!",
-      "comingSoon": "Diskusijų funkcija bus netrukus."
+      "comingSoon": "Diskusijų funkcija bus netrukus.",
+      "form": {
+        "title": "Temos pavadinimas",
+        "submit": "Sukurti temą",
+        "comment": "Parašykite komentarą...",
+        "commentSubmit": "Pridėti komentarą"
+      },
+      "actions": {
+        "edit": "Redaguoti",
+        "delete": "Ištrinti",
+        "hide": "Slėpti",
+        "unhide": "Rodyti",
+        "save": "Išsaugoti",
+        "cancel": "Atšaukti"
+      }
     }
   },
   "studentChapterView": {

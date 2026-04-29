@@ -2106,7 +2106,21 @@
     "discussions": {
       "loading": "Načítání diskuzí...",
       "empty": "Zatím žádné diskuze. Buďte první a začněte!",
-      "comingSoon": "Funkce diskuzí brzy přijde."
+      "comingSoon": "Funkce diskuzí brzy přijde.",
+      "form": {
+        "title": "Název vlákna",
+        "submit": "Vytvořit vlákno",
+        "comment": "Napište komentář...",
+        "commentSubmit": "Přidat komentář"
+      },
+      "actions": {
+        "edit": "Upravit",
+        "delete": "Smazat",
+        "hide": "Skrýt",
+        "unhide": "Zobrazit",
+        "save": "Uložit",
+        "cancel": "Zrušit"
+      }
     }
   },
   "studentChapterView": {

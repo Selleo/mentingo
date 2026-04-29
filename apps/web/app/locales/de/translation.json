@@ -2106,7 +2106,21 @@
     "discussions": {
       "loading": "Diskussionen werden geladen...",
       "empty": "Noch keine Diskussionen. Sei der Erste und starte eine!",
-      "comingSoon": "Diskussionsfunktion kommt bald."
+      "comingSoon": "Diskussionsfunktion kommt bald.",
+      "form": {
+        "title": "Titel des Themas",
+        "submit": "Thema erstellen",
+        "comment": "Schreibe einen Kommentar...",
+        "commentSubmit": "Kommentar hinzufügen"
+      },
+      "actions": {
+        "edit": "Bearbeiten",
+        "delete": "Löschen",
+        "hide": "Ausblenden",
+        "unhide": "Einblenden",
+        "save": "Speichern",
+        "cancel": "Abbrechen"
+      }
     }
   },
   "studentChapterView": {

@@ -2161,7 +2161,21 @@
     "discussions": {
       "loading": "Ładowanie dyskusji...",
       "empty": "Brak dyskusji. Bądź pierwszy i rozpocznij!",
-      "comingSoon": "Funkcja dyskusji już wkrótce."
+      "comingSoon": "Funkcja dyskusji już wkrótce.",
+      "form": {
+        "title": "Tytuł wątku",
+        "submit": "Dodaj wątek",
+        "comment": "Napisz komentarz...",
+        "commentSubmit": "Dodaj komentarz"
+      },
+      "actions": {
+        "edit": "Edytuj",
+        "delete": "Usuń",
+        "hide": "Ukryj",
+        "unhide": "Pokaż",
+        "save": "Zapisz",
+        "cancel": "Anuluj"
+      }
     }
   },
   "studentChapterView": {

@@ -164,7 +164,7 @@ export default function CourseViewPage() {
     if (canViewDiscussions) {
       tabs.push({
         title: t("studentCourseView.tabs.discussions"),
-        content: <CourseDiscussions courseId={course.id} />,
+        content: <CourseDiscussions courseId={course.id} courseAuthorId={course.authorId ?? ""} />,
         isForAdminLike: false,
         isForUnregistered: false,
       });
