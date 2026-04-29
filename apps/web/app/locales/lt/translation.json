@@ -198,7 +198,8 @@
       "goToAvailableCourses": "Eikite į galimus kursus"
     },
     "qa": "Klausimai ir atsakymai",
-    "tenants": "Organizacijos"
+    "tenants": "Organizacijos",
+    "achievements": "Achievements"
   },
   "newsView": {
     "header": "Naujienos",
@@ -2626,7 +2627,10 @@
     "progress": "Pažanga",
     "tenant": "Organizacijos informacija",
     "createTenant": "Sukurti organizaciją",
-    "tenants": "Organizacijos"
+    "tenants": "Organizacijos",
+    "achievements": "Achievements",
+    "createAchievement": "Create achievement",
+    "achievementDetails": "Achievement details"
   },
   "lessonPreview": {
     "breadcrumbs": {
@@ -3004,6 +3008,47 @@
     "toast": {
       "updateSuccess": "Gamifikacijos taškų numatytosios reikšmės atnaujintos",
       "updateError": "Nepavyko atnaujinti gamifikacijos taškų numatytųjų reikšmių"
+    }
+  },
+  "adminAchievementsView": {
+    "title": "Achievements",
+    "createTitle": "Create achievement",
+    "editTitle": "Edit achievement",
+    "description": "Manage the badge catalog students can unlock with gamification points.",
+    "empty": "No achievements found.",
+    "breadcrumbs": {
+      "achievements": "Achievements",
+      "create": "Create",
+      "details": "Details"
+    },
+    "button": {
+      "createNew": "Create achievement"
+    },
+    "filters": {
+      "includeInactive": "Show inactive achievements"
+    },
+    "table": {
+      "image": "Image",
+      "name": "Name",
+      "threshold": "Threshold",
+      "status": "Status",
+      "createdAt": "Created at"
+    },
+    "form": {
+      "image": "Badge image",
+      "noImage": "Upload an image",
+      "pointThreshold": "Point threshold",
+      "active": "Active",
+      "name": "Name",
+      "description": "Description"
+    },
+    "toast": {
+      "created": "Achievement created successfully.",
+      "updated": "Achievement updated successfully.",
+      "deleted": "Achievement deactivated successfully."
+    },
+    "error": {
+      "notFound": "Achievement not found."
     }
   }
 }

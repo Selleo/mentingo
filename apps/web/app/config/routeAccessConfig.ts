@@ -48,6 +48,9 @@ const PUBLIC: PermissionRequirement = {};
 const USER_MANAGEMENT_ACCESS: PermissionRequirement = {
   allOf: [PERMISSIONS.USER_MANAGE],
 };
+const TENANT_MANAGEMENT_ACCESS: PermissionRequirement = {
+  allOf: [PERMISSIONS.TENANT_MANAGE],
+};
 const COURSE_EDIT_ACCESS: PermissionRequirement = {
   anyOf: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
 };
@@ -109,6 +112,8 @@ export const routeAccessConfig = createRouteConfig({
   "admin/categories/*": {
     allOf: [PERMISSIONS.CATEGORY_MANAGE],
   },
+  "admin/achievements": TENANT_MANAGEMENT_ACCESS,
+  "admin/achievements/*": TENANT_MANAGEMENT_ACCESS,
   "admin/lessons/*": COURSE_EDIT_ACCESS,
   "admin/lesson-items/*": COURSE_EDIT_ACCESS,
   "admin/announcements/new": {

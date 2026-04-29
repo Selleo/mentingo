@@ -764,6 +764,13 @@
       "when": 1777434849963,
       "tag": "0108_add_gamification_points_config",
       "breakpoints": true
+    },
+    {
+      "idx": 109,
+      "version": "7",
+      "when": 1777482000000,
+      "tag": "0109_add_achievements_catalog",
+      "breakpoints": true
     }
   ]
 }

@@ -139,3 +139,49 @@
 - `pnpm test:api:e2e` was attempted twice. The full parallel run reached 18/20 passing suites before failing with Postgres `sorry, too many clients already`; a sequential rerun also hit connection exhaustion in settings login-background/login-page-files suites. This appears environmental/resource related rather than slice-specific.
 - `pnpm test:web:e2e` was attempted and still fails because the local Playwright Chromium executable is not installed (`pnpm exec playwright install` required); DB setup completed before browser launch.
 - `pnpm format:check` still fails on pre-existing formatting issues in `.bmad-core/`, `.claude/`, `.serena/`, untracked `CURRENT-WORK` issue docs, and `docs/gamification.md`; changed source/test files were formatted with Prettier.
+
+## 2026-04-29 — Slice 4: Achievements catalog + admin CRUD — DONE
+
+### Key decisions
+
+- Added the achievements catalog data model with tenant-scoped `achievements`, localized `achievement_translations`, and empty `user_achievements` unlock rows reserved for the next slice.
+- Implemented tenant-admin CRUD under `/achievements/admin`, reusing the existing tenant management permission instead of adding a new permission.
+- Kept deletes soft-only by setting `isActive = false`; inactive achievements are hidden by default but can be included via the admin list filter.
+- Required a full translation set for every supported locale and intentionally allowed duplicate point thresholds.
+- Reused the existing `FileService` S3 upload path for achievement badge images and returned signed image URLs in admin reads for table/form previews.
+- Added a new admin Achievements navigation section and create/edit/list UI with multilingual fields, threshold validation, active toggle, image upload, and inactive filtering.
+
+### Files changed
+
+- `apps/api/src/storage/schema/index.ts`
+- `apps/api/src/storage/migrations/0109_add_achievements_catalog.sql`
+- `apps/api/src/storage/migrations/meta/_journal.json`
+- `apps/api/src/gamification/achievements.controller.ts`
+- `apps/api/src/gamification/achievements.repository.ts`
+- `apps/api/src/gamification/achievements.service.ts`
+- `apps/api/src/gamification/schemas/achievement.schema.ts`
+- `apps/api/src/gamification/gamification.module.ts`
+- `apps/api/src/gamification/__tests__/achievements.service.spec.ts`
+- `apps/api/src/swagger/api-schema.json`
+- `apps/web/app/api/generated-api.ts`
+- `apps/web/app/api/queries/admin/useAchievements.ts`
+- `apps/web/app/api/mutations/admin/useAchievementMutations.ts`
+- `apps/web/app/modules/Admin/Achievements/Achievements.page.tsx`
+- `apps/web/app/modules/Admin/Achievements/CreateAchievement.page.tsx`
+- `apps/web/app/modules/Admin/Achievements/Achievement.page.tsx`
+- `apps/web/app/modules/Admin/Achievements/AchievementForm.tsx`
+- `apps/web/app/modules/Admin/Admin.layout.tsx`
+- `apps/web/app/config/navigationConfig.ts`
+- `apps/web/app/config/routeAccessConfig.ts`
+- `apps/web/routes.ts`
+- `apps/web/app/locales/{cs,de,en,lt,pl}/translation.json`
+- `CURRENT-WORK/progress.md`
+
+### Blockers / notes for next iteration
+
+- Achievement unlock evaluation, profile achievement grid, toasts, retroactive threshold unlocks, and leaderboard remain deferred to later slices.
+- `user_achievements` is created for the future unlock pipeline but no completion event inserts rows in this slice.
+- `pnpm lint-tsc-api`, `pnpm lint-tsc-web`, `pnpm lint`, `pnpm test:api`, and `pnpm test:web` pass; web lint still reports the pre-existing `ChatMessage.tsx` React hook dependency warning without failing.
+- `pnpm test:api:e2e` was attempted and failed in the existing lesson quiz feedback redaction suite (`expected 201 Created, got 409 Conflict`); 19/20 suites passed, matching the previously observed suite-isolation/flakiness area.
+- `pnpm test:web:e2e` was attempted and still fails because the local Playwright Chromium executable is not installed (`pnpm exec playwright install` required); DB setup completed before browser launch.
+- `pnpm format:check` still fails on pre-existing formatting issues in `.bmad-core/`, `.claude/`, `.serena/`, untracked CURRENT-WORK issue docs, and `docs/gamification.md`; changed source/test files were formatted with Prettier.

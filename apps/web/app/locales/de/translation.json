@@ -198,7 +198,8 @@
       "goToAvailableCourses": "Gehen Sie zu den verfügbaren Kursen"
     },
     "qa": "Fragen und Antworten",
-    "tenants": "Organisationen"
+    "tenants": "Organisationen",
+    "achievements": "Achievements"
   },
   "newsView": {
     "header": "Nachricht",
@@ -2626,7 +2627,10 @@
     "progress": "Fortschritt",
     "tenant": "Organisationsdetails",
     "createTenant": "Organisation erstellen",
-    "tenants": "Organisationen"
+    "tenants": "Organisationen",
+    "achievements": "Achievements",
+    "createAchievement": "Create achievement",
+    "achievementDetails": "Achievement details"
   },
   "lessonPreview": {
     "breadcrumbs": {
@@ -3004,6 +3008,47 @@
     "toast": {
       "updateSuccess": "Gamification-Punktestandards aktualisiert",
       "updateError": "Gamification-Punktestandards konnten nicht aktualisiert werden"
+    }
+  },
+  "adminAchievementsView": {
+    "title": "Achievements",
+    "createTitle": "Create achievement",
+    "editTitle": "Edit achievement",
+    "description": "Manage the badge catalog students can unlock with gamification points.",
+    "empty": "No achievements found.",
+    "breadcrumbs": {
+      "achievements": "Achievements",
+      "create": "Create",
+      "details": "Details"
+    },
+    "button": {
+      "createNew": "Create achievement"
+    },
+    "filters": {
+      "includeInactive": "Show inactive achievements"
+    },
+    "table": {
+      "image": "Image",
+      "name": "Name",
+      "threshold": "Threshold",
+      "status": "Status",
+      "createdAt": "Created at"
+    },
+    "form": {
+      "image": "Badge image",
+      "noImage": "Upload an image",
+      "pointThreshold": "Point threshold",
+      "active": "Active",
+      "name": "Name",
+      "description": "Description"
+    },
+    "toast": {
+      "created": "Achievement created successfully.",
+      "updated": "Achievement updated successfully.",
+      "deleted": "Achievement deactivated successfully."
+    },
+    "error": {
+      "notFound": "Achievement not found."
     }
   }
 }

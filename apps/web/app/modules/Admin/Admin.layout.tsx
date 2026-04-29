@@ -40,9 +40,10 @@ const AdminGuard = ({ children }: PropsWithChildren) => {
   const { hasAccess: canManageOwnCourses } = usePermissions({
     required: PERMISSIONS.COURSE_UPDATE_OWN,
   });
+  const { hasAccess: canManageTenant } = usePermissions({ required: PERMISSIONS.TENANT_MANAGE });
   const navigate = useNavigate();
 
-  const isAllowed = canManageUsers || canManageOwnCourses;
+  const isAllowed = canManageUsers || canManageOwnCourses || canManageTenant;
 
   const { data: latestUnreadAnnouncements } = useLatestUnreadAnnouncements(canManageOwnCourses);
 

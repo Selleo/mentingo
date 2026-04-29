@@ -125,6 +125,7 @@ export const getNavigationConfig = (
           PERMISSIONS.GROUP_MANAGE,
           PERMISSIONS.CATEGORY_MANAGE,
           PERMISSIONS.BILLING_MANAGE,
+          PERMISSIONS.TENANT_MANAGE,
         ],
       },
       items: [
@@ -142,6 +143,11 @@ export const getNavigationConfig = (
           label: t("navigationSideBar.categories"),
           path: "admin/categories",
           iconName: "Category",
+        },
+        {
+          label: t("navigationSideBar.achievements"),
+          path: "admin/achievements",
+          iconName: "Ribbon",
         },
         ...(isStripeConfigured
           ? [

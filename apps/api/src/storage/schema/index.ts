@@ -142,6 +142,64 @@ export const pointEvents = pgTable(
   })),
 );
 
+export const achievements = pgTable(
+  "achievements",
+  {
+    ...id,
+    ...timestamps,
+    imageReference: text("image_reference").notNull(),
+    pointThreshold: integer("point_threshold").notNull(),
+    isActive: boolean("is_active").notNull().default(true),
+    tenantId,
+  },
+  withTenantIdIndex("achievements"),
+);
+
+export const achievementTranslations = pgTable(
+  "achievement_translations",
+  {
+    achievementId: uuid("achievement_id")
+      .references(() => achievements.id, { onDelete: "cascade" })
+      .notNull(),
+    locale: text("locale").$type<SupportedLanguages>().notNull(),
+    name: text("name").notNull(),
+    description: text("description").notNull(),
+  },
+  (table) => ({
+    achievementLocaleUniqueIdx: uniqueIndex("achievement_translations_achievement_locale_idx").on(
+      table.achievementId,
+      table.locale,
+    ),
+  }),
+);
+
+export const userAchievements = pgTable(
+  "user_achievements",
+  {
+    ...id,
+    unlockedAt: timestamp("unlocked_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    achievementId: uuid("achievement_id")
+      .references(() => achievements.id, { onDelete: "cascade" })
+      .notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("user_achievements", (table) => ({
+    userAchievementUniqueIdx: uniqueIndex("user_achievements_user_achievement_unique_idx").on(
+      table.userId,
+      table.achievementId,
+    ),
+  })),
+);
+
 export const quizAttempts = pgTable(
   "quiz_attempts",
   {

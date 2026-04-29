@@ -336,8 +336,11 @@ export interface GetPublicGlobalSettingsResponse {
     platformSimpleLogoS3Key: string | null;
     MFAEnforcedRoles: string[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+    /** @min 0 */
     defaultChapterPoints: number;
+    /** @min 0 */
     defaultCoursePoints: number;
+    /** @min 0 */
     defaultAiPassPoints: number;
     inviteOnlyRegistration: boolean;
     userEmailTriggers: {
@@ -467,8 +470,11 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     platformSimpleLogoS3Key: string | null;
     MFAEnforcedRoles: string[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+    /** @min 0 */
     defaultChapterPoints: number;
+    /** @min 0 */
     defaultCoursePoints: number;
+    /** @min 0 */
     defaultAiPassPoints: number;
     inviteOnlyRegistration: boolean;
     userEmailTriggers: {
@@ -512,8 +518,11 @@ export interface UpdateEnforceSSOResponse {
     platformSimpleLogoS3Key: string | null;
     MFAEnforcedRoles: string[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+    /** @min 0 */
     defaultChapterPoints: number;
+    /** @min 0 */
     defaultCoursePoints: number;
+    /** @min 0 */
     defaultAiPassPoints: number;
     inviteOnlyRegistration: boolean;
     userEmailTriggers: {
@@ -557,8 +566,11 @@ export interface UpdateModernCourseListEnabledResponse {
     platformSimpleLogoS3Key: string | null;
     MFAEnforcedRoles: string[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+    /** @min 0 */
     defaultChapterPoints: number;
+    /** @min 0 */
     defaultCoursePoints: number;
+    /** @min 0 */
     defaultAiPassPoints: number;
     inviteOnlyRegistration: boolean;
     userEmailTriggers: {
@@ -633,8 +645,11 @@ export interface UpdateColorSchemaResponse {
     platformSimpleLogoS3Key: string | null;
     MFAEnforcedRoles: string[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+    /** @min 0 */
     defaultChapterPoints: number;
+    /** @min 0 */
     defaultCoursePoints: number;
+    /** @min 0 */
     defaultAiPassPoints: number;
     inviteOnlyRegistration: boolean;
     userEmailTriggers: {
@@ -795,14 +810,17 @@ export interface UpdateCompanyInformationResponse {
 
 export type UpdateMFAEnforcedRolesBody = object;
 
-export interface UpdateDefaultCourseCurrencyBody {
-  defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+export interface UpdateGamificationPointDefaultsBody {
+  /** @min 0 */
+  defaultChapterPoints: number;
+  /** @min 0 */
+  defaultCoursePoints: number;
+  /** @min 0 */
+  defaultAiPassPoints: number;
 }
 
-export interface UpdateGamificationPointDefaultsBody {
-  defaultChapterPoints: number;
-  defaultCoursePoints: number;
-  defaultAiPassPoints: number;
+export interface UpdateDefaultCourseCurrencyBody {
+  defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
 }
 
 export interface UpdateConfigWarningDismissedBody {
@@ -3021,12 +3039,12 @@ export interface GetChapterWithLessonResponse {
     updatedAt?: string;
     quizCount?: number;
     displayOrder: number;
+    pointsOverride?: number | null;
   };
 }
 
 export type BetaCreateChapterBody = {
   title: string;
-  pointsOverride?: number | null;
   lessons?: {
     /** @format uuid */
     id: string;
@@ -3087,6 +3105,7 @@ export type BetaCreateChapterBody = {
       voiceMode: "preset" | "custom";
       ttsPreset: "male" | "female";
       customTtsReference: string | null;
+      pointsOverride?: number | null;
     } | null;
     updatedAt?: string;
   }[];
@@ -3097,6 +3116,7 @@ export type BetaCreateChapterBody = {
   createdAt?: string;
   updatedAt?: string;
   quizCount?: number;
+  pointsOverride?: number | null;
 } & {
   /** @format uuid */
   courseId: string;
@@ -3112,7 +3132,6 @@ export interface BetaCreateChapterResponse {
 
 export type UpdateChapterBody = ({
   title?: string;
-  pointsOverride?: number | null;
   lessons?: {
     /** @format uuid */
     id: string;
@@ -3173,6 +3192,7 @@ export type UpdateChapterBody = ({
       voiceMode: "preset" | "custom";
       ttsPreset: "male" | "female";
       customTtsReference: string | null;
+      pointsOverride?: number | null;
     } | null;
     updatedAt?: string;
   }[];
@@ -3183,6 +3203,7 @@ export type UpdateChapterBody = ({
   createdAt?: string;
   updatedAt?: string;
   quizCount?: number;
+  pointsOverride?: number | null;
 } & {
   /** @format uuid */
   courseId?: string;
@@ -3439,6 +3460,208 @@ export type DeleteManyCategoriesBody = string[];
 export interface DeleteManyCategoriesResponse {
   data: {
     message: string;
+  };
+}
+
+export interface FindAllResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    tenantId: string;
+    imageReference: string;
+    imageUrl?: string;
+    /** @min 1 */
+    pointThreshold: number;
+    isActive: boolean;
+    createdAt: string;
+    updatedAt: string;
+    localizedName: string;
+    localizedDescription: string;
+    translations: {
+      locale: "en" | "pl" | "de" | "lt" | "cs";
+      name: string;
+      description: string;
+    }[];
+  }[];
+}
+
+export interface FindByIdResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    tenantId: string;
+    imageReference: string;
+    imageUrl?: string;
+    /** @min 1 */
+    pointThreshold: number;
+    isActive: boolean;
+    createdAt: string;
+    updatedAt: string;
+    localizedName: string;
+    localizedDescription: string;
+    translations: {
+      locale: "en" | "pl" | "de" | "lt" | "cs";
+      name: string;
+      description: string;
+    }[];
+  };
+}
+
+export interface CreateBody {
+  /** @minLength 1 */
+  imageReference: string;
+  /** @min 1 */
+  pointThreshold: number;
+  isActive?: boolean;
+  translations: {
+    en: {
+      /** @minLength 1 */
+      name: string;
+      /** @minLength 1 */
+      description: string;
+    };
+    pl: {
+      /** @minLength 1 */
+      name: string;
+      /** @minLength 1 */
+      description: string;
+    };
+    de: {
+      /** @minLength 1 */
+      name: string;
+      /** @minLength 1 */
+      description: string;
+    };
+    lt: {
+      /** @minLength 1 */
+      name: string;
+      /** @minLength 1 */
+      description: string;
+    };
+    cs: {
+      /** @minLength 1 */
+      name: string;
+      /** @minLength 1 */
+      description: string;
+    };
+  };
+}
+
+export interface CreateResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    tenantId: string;
+    imageReference: string;
+    imageUrl?: string;
+    /** @min 1 */
+    pointThreshold: number;
+    isActive: boolean;
+    createdAt: string;
+    updatedAt: string;
+    localizedName: string;
+    localizedDescription: string;
+    translations: {
+      locale: "en" | "pl" | "de" | "lt" | "cs";
+      name: string;
+      description: string;
+    }[];
+  };
+}
+
+export interface UpdateBody {
+  /** @minLength 1 */
+  imageReference?: string;
+  /** @min 1 */
+  pointThreshold?: number;
+  isActive?: boolean;
+  translations?: {
+    en: {
+      /** @minLength 1 */
+      name: string;
+      /** @minLength 1 */
+      description: string;
+    };
+    pl: {
+      /** @minLength 1 */
+      name: string;
+      /** @minLength 1 */
+      description: string;
+    };
+    de: {
+      /** @minLength 1 */
+      name: string;
+      /** @minLength 1 */
+      description: string;
+    };
+    lt: {
+      /** @minLength 1 */
+      name: string;
+      /** @minLength 1 */
+      description: string;
+    };
+    cs: {
+      /** @minLength 1 */
+      name: string;
+      /** @minLength 1 */
+      description: string;
+    };
+  };
+}
+
+export interface UpdateResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    tenantId: string;
+    imageReference: string;
+    imageUrl?: string;
+    /** @min 1 */
+    pointThreshold: number;
+    isActive: boolean;
+    createdAt: string;
+    updatedAt: string;
+    localizedName: string;
+    localizedDescription: string;
+    translations: {
+      locale: "en" | "pl" | "de" | "lt" | "cs";
+      name: string;
+      description: string;
+    }[];
+  };
+}
+
+export interface SoftDeleteResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    tenantId: string;
+    imageReference: string;
+    imageUrl?: string;
+    /** @min 1 */
+    pointThreshold: number;
+    isActive: boolean;
+    createdAt: string;
+    updatedAt: string;
+    localizedName: string;
+    localizedDescription: string;
+    translations: {
+      locale: "en" | "pl" | "de" | "lt" | "cs";
+      name: string;
+      description: string;
+    }[];
+  };
+}
+
+export interface UploadImageResponse {
+  data: {
+    fileKey: string;
+    fileUrl?: string;
   };
 }
 
@@ -8444,6 +8667,116 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "DELETE",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AchievementsControllerFindAll
+     * @request GET:/api/achievements/admin
+     */
+    achievementsControllerFindAll: (
+      query?: {
+        includeInactive?: string;
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<FindAllResponse, any>({
+        path: `/api/achievements/admin`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AchievementsControllerCreate
+     * @request POST:/api/achievements/admin
+     */
+    achievementsControllerCreate: (data: CreateBody, params: RequestParams = {}) =>
+      this.request<CreateResponse, any>({
+        path: `/api/achievements/admin`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AchievementsControllerFindById
+     * @request GET:/api/achievements/admin/{id}
+     */
+    achievementsControllerFindById: (
+      id: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<FindByIdResponse, any>({
+        path: `/api/achievements/admin/${id}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AchievementsControllerUpdate
+     * @request PATCH:/api/achievements/admin/{id}
+     */
+    achievementsControllerUpdate: (id: string, data: UpdateBody, params: RequestParams = {}) =>
+      this.request<UpdateResponse, any>({
+        path: `/api/achievements/admin/${id}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AchievementsControllerSoftDelete
+     * @request DELETE:/api/achievements/admin/{id}
+     */
+    achievementsControllerSoftDelete: (id: string, params: RequestParams = {}) =>
+      this.request<SoftDeleteResponse, any>({
+        path: `/api/achievements/admin/${id}`,
+        method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AchievementsControllerUploadImage
+     * @request POST:/api/achievements/admin/image
+     */
+    achievementsControllerUploadImage: (
+      data: {
+        /** @format binary */
+        image?: File;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<UploadImageResponse, any>({
+        path: `/api/achievements/admin/image`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
         format: "json",
         ...params,
       }),
