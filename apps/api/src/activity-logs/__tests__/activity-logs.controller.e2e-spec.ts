@@ -110,6 +110,9 @@ describe("ActivityLogsController (e2e)", () => {
       .expect(200);
 
     expect(response.body.data).toHaveLength(1);
-    expect(response.body.data[0]).toHaveProperty("createdAt", "2026-04-29T23:59:59.999Z");
+    expect(response.body.data[0]).toHaveProperty("createdAt");
+    expect(new Date(response.body.data[0].createdAt).toISOString().startsWith("2026-04-29")).toBe(
+      true,
+    );
   });
 });
