@@ -52,6 +52,7 @@ import { LocalizationModule } from "./localization/localization.module";
 import { LumaModule } from "./luma/luma.module";
 import { NewsModule } from "./news/news.module";
 import { OutboxModule } from "./outbox/outbox.module";
+import { PermissionsModule } from "./permissions/permissions.module";
 import { QuestionsModule } from "./questions/question.module";
 import { AppThrottlerGuard } from "./rate-limit/app-throttler.guard";
 import { RedisThrottlerStorage } from "./rate-limit/redis-throttler.storage";
@@ -155,6 +156,7 @@ import type { RedisClient } from "src/redis";
     LearningTimeModule,
     EnvModule,
     LocalizationModule,
+    PermissionsModule,
     ActivityLogsModule,
     QAModule,
     NewsModule,
