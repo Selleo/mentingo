@@ -373,4 +373,40 @@ describe("CertificatesController (e2e)", () => {
       });
     });
   });
+
+  describe("POST /api/certificates/share-link", () => {
+    it("returns 401 if user is not logged in", async () => {
+      await request(app.getHttpServer())
+        .post("/api/certificates/share-link")
+        .send({
+          certificateId: "00000000-0000-0000-0000-000000000000",
+          language: "en",
+        })
+        .expect(401);
+    });
+  });
+
+  describe("GET /api/certificates/share", () => {
+    it("returns 404 for non-existent certificate", async () => {
+      await request(app.getHttpServer())
+        .get("/api/certificates/share")
+        .query({
+          certificateId: "00000000-0000-0000-0000-000000000000",
+          lang: "en",
+        })
+        .expect(404);
+    });
+  });
+
+  describe("GET /api/certificates/share-image", () => {
+    it("returns 404 for non-existent certificate", async () => {
+      await request(app.getHttpServer())
+        .get("/api/certificates/share-image")
+        .query({
+          certificateId: "00000000-0000-0000-0000-000000000000",
+          lang: "en",
+        })
+        .expect(404);
+    });
+  });
 });

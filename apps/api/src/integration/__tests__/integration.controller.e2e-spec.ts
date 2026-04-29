@@ -241,15 +241,19 @@ describe("IntegrationController (e2e)", () => {
         .set("X-API-Key", apiKey)
         .expect(200);
 
-      expect(Array.isArray(response.body.data)).toBe(true);
-      expect(response.body.data).toHaveLength(1);
-      expect(response.body.data[0]).toEqual(
+      const [ownTenant] = await dbAdmin
+        .select({ id: tenants.id, name: tenants.name, host: tenants.host })
+        .from(tenants)
+        .where(eq(tenants.id, admin.tenantId))
+        .limit(1);
+
+      expect(response.body.data).toEqual([
         expect.objectContaining({
-          id: admin.tenantId,
-          name: expect.any(String),
-          host: expect.any(String),
+          id: ownTenant.id,
+          name: ownTenant.name,
+          host: ownTenant.host,
         }),
-      );
+      ]);
     });
 
     it("returns all tenants for managing admin", async () => {
@@ -343,6 +347,79 @@ describe("IntegrationController (e2e)", () => {
         .set("X-API-Key", apiKey)
         .set("X-Tenant-Id", otherTenantId)
         .expect(200);
+    });
+  });
+
+  describe("integration users and enrollments require API key", () => {
+    it("returns 401 for GET /api/integration/users without API key", async () => {
+      await request(app.getHttpServer()).get("/api/integration/users").expect(401);
+    });
+
+    it("returns 401 for GET /api/integration/users/:userId without API key", async () => {
+      await request(app.getHttpServer())
+        .get("/api/integration/users/00000000-0000-0000-0000-000000000000")
+        .expect(401);
+    });
+
+    it("returns 401 for POST /api/integration/users without API key", async () => {
+      await request(app.getHttpServer())
+        .post("/api/integration/users")
+        .send({
+          email: "integration-user@example.com",
+          firstName: "Integration",
+          lastName: "User",
+          language: "en",
+          roleSlugs: [SYSTEM_ROLE_SLUGS.STUDENT],
+        })
+        .expect(401);
+    });
+
+    it("returns 401 for PATCH /api/integration/users/:userId without API key", async () => {
+      await request(app.getHttpServer())
+        .patch("/api/integration/users/00000000-0000-0000-0000-000000000000")
+        .send({ firstName: "Updated" })
+        .expect(401);
+    });
+
+    it("returns 401 for DELETE /api/integration/users/:userId without API key", async () => {
+      await request(app.getHttpServer())
+        .delete("/api/integration/users/00000000-0000-0000-0000-000000000000")
+        .expect(401);
+    });
+
+    it("returns 401 for PUT /api/integration/users/:userId/groups without API key", async () => {
+      await request(app.getHttpServer())
+        .put("/api/integration/users/00000000-0000-0000-0000-000000000000/groups")
+        .send({ groupIds: [] })
+        .expect(401);
+    });
+
+    it("returns 401 for POST /api/integration/courses/:courseId/enroll-users without API key", async () => {
+      await request(app.getHttpServer())
+        .post("/api/integration/courses/00000000-0000-0000-0000-000000000000/enroll-users")
+        .send({ studentIds: [] })
+        .expect(401);
+    });
+
+    it("returns 401 for DELETE /api/integration/courses/:courseId/enroll-users without API key", async () => {
+      await request(app.getHttpServer())
+        .delete("/api/integration/courses/00000000-0000-0000-0000-000000000000/enroll-users")
+        .send({ studentIds: [] })
+        .expect(401);
+    });
+
+    it("returns 401 for POST /api/integration/courses/:courseId/enroll-groups without API key", async () => {
+      await request(app.getHttpServer())
+        .post("/api/integration/courses/00000000-0000-0000-0000-000000000000/enroll-groups")
+        .send({ groups: [] })
+        .expect(401);
+    });
+
+    it("returns 401 for DELETE /api/integration/courses/:courseId/enroll-groups without API key", async () => {
+      await request(app.getHttpServer())
+        .delete("/api/integration/courses/00000000-0000-0000-0000-000000000000/enroll-groups")
+        .send({ groupIds: [] })
+        .expect(401);
     });
   });
 });

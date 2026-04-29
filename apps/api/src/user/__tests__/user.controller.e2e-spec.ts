@@ -1,10 +1,12 @@
 import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import { eq } from "drizzle-orm";
 import { omit } from "lodash";
 import request from "supertest";
 
 import { AuthService } from "src/auth/auth.service";
 import { GroupService } from "src/group/group.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
+import { userOnboarding, users } from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
@@ -68,7 +70,7 @@ describe("UsersController (e2e)", () => {
           }),
         ]),
       );
-      expect(Array.isArray(response.body.data)).toBe(true);
+      expect(response.body.data.length).toBeGreaterThan(0);
     });
   });
 
@@ -217,7 +219,7 @@ describe("UsersController (e2e)", () => {
         .expect(200);
 
       await request(app.getHttpServer())
-        .get(`/api/user/user?id=${anotherUser.id}`)
+        .get(`/api/user?id=${anotherUser.id}`)
         .set("Cookie", testCookies)
         .expect(404);
     });
@@ -439,6 +441,187 @@ describe("UsersController (e2e)", () => {
         .set("Cookie", cookies)
         .send({ userIds: [regularUser.id], roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN] })
         .expect(403);
+    });
+  });
+
+  describe("Additional user endpoints coverage", () => {
+    it("should return available roles", async () => {
+      const response = await request(app.getHttpServer())
+        .get("/api/user/roles")
+        .set("Cookie", testCookies)
+        .expect(200);
+
+      expect(response.body.data).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: expect.any(String),
+            name: expect.any(String),
+            slug: SYSTEM_ROLE_SLUGS.ADMIN,
+            isSystem: expect.any(Boolean),
+          }),
+          expect.objectContaining({
+            id: expect.any(String),
+            name: expect.any(String),
+            slug: SYSTEM_ROLE_SLUGS.STUDENT,
+            isSystem: expect.any(Boolean),
+          }),
+        ]),
+      );
+    });
+
+    it("should return 401 for PATCH /api/user/details when unauthenticated", async () => {
+      await request(app.getHttpServer())
+        .patch("/api/user/details")
+        .send({ jobTitle: "Engineer" })
+        .expect(401);
+    });
+
+    it("should return 401 for PATCH /api/user/profile when unauthenticated", async () => {
+      await request(app.getHttpServer())
+        .patch("/api/user/profile")
+        .field("data", JSON.stringify({ firstName: "Anonymous" }))
+        .expect(401);
+    });
+
+    it("should allow admin to update another user via PATCH /api/user/admin", async () => {
+      const anotherUser = await authService.register({
+        email: "admin-update-target@example.com",
+        password: testPassword,
+        firstName: "Target",
+        lastName: "User",
+        language: "en",
+      });
+
+      const response = await request(app.getHttpServer())
+        .patch(`/api/user/admin?id=${anotherUser.id}`)
+        .set("Cookie", testCookies)
+        .send({ firstName: "UpdatedByAdmin" })
+        .expect(200);
+
+      expect(response.body.data.id).toBe(anotherUser.id);
+      expect(response.body.data.firstName).toBe("UpdatedByAdmin");
+
+      const [storedUser] = await db
+        .select({ id: users.id, firstName: users.firstName })
+        .from(users)
+        .where(eq(users.id, anotherUser.id))
+        .limit(1);
+
+      expect(storedUser).toEqual({
+        id: anotherUser.id,
+        firstName: "UpdatedByAdmin",
+      });
+    });
+
+    it("should archive users in bulk", async () => {
+      const userToArchive = await authService.register({
+        email: "archive-target@example.com",
+        password: testPassword,
+        firstName: "Archive",
+        lastName: "Target",
+        language: "en",
+      });
+
+      const response = await request(app.getHttpServer())
+        .patch("/api/user/bulk/archive")
+        .set("Cookie", testCookies)
+        .send({ userIds: [userToArchive.id] })
+        .expect(200);
+
+      expect(response.body.data.archivedUsersCount).toBe(1);
+
+      const [storedUser] = await db
+        .select({ id: users.id, archived: users.archived })
+        .from(users)
+        .where(eq(users.id, userToArchive.id))
+        .limit(1);
+
+      expect(storedUser).toEqual({
+        id: userToArchive.id,
+        archived: true,
+      });
+    });
+
+    it("should create user via POST /api/user", async () => {
+      const response = await request(app.getHttpServer())
+        .post("/api/user")
+        .set("Cookie", testCookies)
+        .send({
+          email: "created-through-endpoint@example.com",
+          firstName: "Created",
+          lastName: "User",
+          roleSlugs: [SYSTEM_ROLE_SLUGS.STUDENT],
+          language: "en",
+        })
+        .expect(201);
+
+      expect(response.body.data.id).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+      );
+      expect(response.body.data.message).toBe("User created successfully");
+
+      const [storedUser] = await db
+        .select({ id: users.id, email: users.email, firstName: users.firstName, lastName: users.lastName })
+        .from(users)
+        .where(eq(users.id, response.body.data.id))
+        .limit(1);
+
+      expect(storedUser).toEqual({
+        id: response.body.data.id,
+        email: "created-through-endpoint@example.com",
+        firstName: "Created",
+        lastName: "User",
+      });
+    });
+
+    it("should return 401 for POST /api/user/import when unauthenticated", async () => {
+      await request(app.getHttpServer()).post("/api/user/import").expect(401);
+    });
+
+    it("should reset onboarding status for current user", async () => {
+      await request(app.getHttpServer())
+        .patch("/api/user/onboarding-status/dashboard")
+        .set("Cookie", testCookies)
+        .expect(200);
+
+      const response = await request(app.getHttpServer())
+        .patch("/api/user/onboarding-status/reset")
+        .set("Cookie", testCookies)
+        .expect(200);
+
+      expect(response.body.data.dashboard).toBe(false);
+      expect(response.body.data.courses).toBe(false);
+      expect(response.body.data.announcements).toBe(false);
+      expect(response.body.data.profile).toBe(false);
+      expect(response.body.data.settings).toBe(false);
+      expect(response.body.data.providerInformation).toBe(false);
+
+      const [storedOnboarding] = await db
+        .select()
+        .from(userOnboarding)
+        .where(eq(userOnboarding.userId, testUser.id))
+        .limit(1);
+
+      expect(storedOnboarding?.dashboard).toBe(false);
+      expect(storedOnboarding?.courses).toBe(false);
+      expect(storedOnboarding?.announcements).toBe(false);
+    });
+
+    it("should mark onboarding page as completed", async () => {
+      const response = await request(app.getHttpServer())
+        .patch("/api/user/onboarding-status/dashboard")
+        .set("Cookie", testCookies)
+        .expect(200);
+
+      expect(response.body.data.dashboard).toBe(true);
+
+      const [storedOnboarding] = await db
+        .select({ dashboard: userOnboarding.dashboard })
+        .from(userOnboarding)
+        .where(eq(userOnboarding.userId, testUser.id))
+        .limit(1);
+
+      expect(storedOnboarding?.dashboard).toBe(true);
     });
   });
 });
