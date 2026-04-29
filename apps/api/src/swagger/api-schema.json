@@ -7175,6 +7175,68 @@
         }
       }
     },
+    "/api/courses/{courseId}/discussions": {
+      "get": {
+        "operationId": "CourseDiscussionsController_list",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "CourseDiscussionsController_create",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/report/summary": {
       "get": {
         "operationId": "ReportController_downloadSummaryReport",
@@ -26814,6 +26876,194 @@
             },
             "required": [
               "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "courseId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "lessonId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "authorId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "title": {
+                  "minLength": 3,
+                  "maxLength": 150,
+                  "type": "string"
+                },
+                "content": {
+                  "minLength": 1,
+                  "maxLength": 10000,
+                  "type": "string"
+                },
+                "status": {
+                  "anyOf": [
+                    {
+                      "const": "visible",
+                      "type": "string"
+                    },
+                    {
+                      "const": "deleted_by_author",
+                      "type": "string"
+                    },
+                    {
+                      "const": "hidden_by_staff",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "lastActivityAt": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "courseId",
+                "lessonId",
+                "authorId",
+                "title",
+                "content",
+                "status",
+                "lastActivityAt",
+                "createdAt",
+                "updatedAt"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CreateBody": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "minLength": 3,
+            "maxLength": 150,
+            "type": "string"
+          },
+          "content": {
+            "minLength": 1,
+            "maxLength": 10000,
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "content"
+        ]
+      },
+      "CreateResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "courseId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "lessonId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "authorId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "title": {
+                "minLength": 3,
+                "maxLength": 150,
+                "type": "string"
+              },
+              "content": {
+                "minLength": 1,
+                "maxLength": 10000,
+                "type": "string"
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "visible",
+                    "type": "string"
+                  },
+                  {
+                    "const": "deleted_by_author",
+                    "type": "string"
+                  },
+                  {
+                    "const": "hidden_by_staff",
+                    "type": "string"
+                  }
+                ]
+              },
+              "lastActivityAt": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "courseId",
+              "lessonId",
+              "authorId",
+              "title",
+              "content",
+              "status",
+              "lastActivityAt",
+              "createdAt",
+              "updatedAt"
             ]
           }
         },
