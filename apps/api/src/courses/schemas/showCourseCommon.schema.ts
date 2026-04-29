@@ -17,6 +17,15 @@ export const commonShowCourseSchema = Type.Object({
   currency: Type.String(),
   description: Type.String(),
   enrolled: Type.Optional(Type.Boolean()),
+  completedStudentsCount: Type.Optional(Type.Number()),
+  completedStudentAvatars: Type.Optional(
+    Type.Array(
+      Type.Object({
+        userId: UUIDSchema,
+        avatarUrl: Type.Union([Type.String(), Type.Null()]),
+      }),
+    ),
+  ),
   hasFreeChapter: Type.Optional(Type.Boolean()),
   hasCertificate: Type.Optional(Type.Boolean()),
   id: Type.String({ format: "uuid" }),

@@ -1096,6 +1096,34 @@ export class CourseService {
       )
       .where(eq(courses.id, id));
 
+    const [completedStudentsCountRow] = await this.db
+      .select({ completedStudentsCount: count() })
+      .from(studentCourses)
+      .where(
+        and(
+          eq(studentCourses.courseId, id),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+          isNotNull(studentCourses.completedAt),
+        ),
+      );
+
+    const completedStudentAvatars = await this.db
+      .select({
+        userId: studentCourses.studentId,
+        avatarReference: users.avatarReference,
+      })
+      .from(studentCourses)
+      .innerJoin(users, eq(studentCourses.studentId, users.id))
+      .where(
+        and(
+          eq(studentCourses.courseId, id),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+          isNotNull(studentCourses.completedAt),
+        ),
+      )
+      .orderBy(desc(studentCourses.completedAt))
+      .limit(3);
+
     const isEnrolled = !!course.enrolled;
     const NON_PUBLIC_STATUSES = ["draft", "private"];
     const isAdmin = hasPermission(userPermissions, PERMISSIONS.COURSE_UPDATE);
@@ -1225,6 +1253,13 @@ export class CourseService {
 
     return {
       ...course,
+      completedStudentsCount: completedStudentsCountRow?.completedStudentsCount ?? 0,
+      completedStudentAvatars: await Promise.all(
+        completedStudentAvatars.map(async (student) => ({
+          userId: student.userId,
+          avatarUrl: await this.userService.getUsersProfilePictureUrl(student.avatarReference),
+        })),
+      ),
       thumbnailUrl,
       trailerUrl,
       chapters: courseChapterList,

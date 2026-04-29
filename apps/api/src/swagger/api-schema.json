@@ -18271,6 +18271,35 @@
               "enrolled": {
                 "type": "boolean"
               },
+              "completedStudentsCount": {
+                "type": "number"
+              },
+              "completedStudentAvatars": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "userId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "avatarUrl": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "userId",
+                    "avatarUrl"
+                  ]
+                }
+              },
               "hasFreeChapter": {
                 "type": "boolean"
               },
