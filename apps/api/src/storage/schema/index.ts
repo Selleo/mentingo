@@ -1404,6 +1404,37 @@ export const permissionRuleSetPermissions = pgTable(
   }),
 );
 
+export const courseComments = pgTable(
+  "course_comments",
+  {
+    ...id,
+    ...timestamps,
+    courseId: uuid("course_id")
+      .references(() => courses.id, { onDelete: "cascade" })
+      .notNull(),
+    authorId: uuid("author_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    parentCommentId: uuid("parent_comment_id"),
+    content: text("content").notNull(),
+    replyCount: integer("reply_count").notNull().default(0),
+    deletedAt: timestamp("deleted_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    tenantId,
+  },
+  withTenantIdIndex("course_comments", (table) => ({
+    listingIdx: index("course_comments_listing_idx").on(
+      table.tenantId,
+      table.courseId,
+      table.parentCommentId,
+      table.createdAt,
+    ),
+  })),
+);
+
 export const permissionUserRoles = pgTable(
   "permission_user_roles",
   {

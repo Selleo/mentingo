@@ -1641,6 +1641,7 @@ export interface GetCourseResponse {
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
     baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
     dueDate: string | null;
+    commentCount: number;
   };
 }
 

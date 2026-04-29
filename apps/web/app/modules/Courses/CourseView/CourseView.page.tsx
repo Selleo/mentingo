@@ -19,6 +19,8 @@ import { LearningModeBanner } from "~/modules/Courses/Lesson/LearningModeBanner"
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { isSupportedLanguage } from "~/utils/browser-language";
 
+import { DiscussionTab } from "../Discussion/DiscussionTab";
+
 import { ChapterListOverview } from "./components/ChapterListOverview";
 import { CourseAdminStatistics } from "./CourseAdminStatistics/CourseAdminStatistics";
 import CourseCertificate from "./CourseCertificate";
@@ -95,7 +97,13 @@ export default function CourseViewPage() {
   const { hasAccess: canViewCourseStatistics } = usePermissions({
     required: PERMISSIONS.COURSE_STATISTICS,
   });
+  const { hasAccess: canModerateCourses } = usePermissions({
+    required: PERMISSIONS.COURSE_UPDATE,
+  });
   const { data: currentUser } = useCurrentUser();
+  const isCourseAuthor = !!course?.authorId && currentUser?.id === course.authorId;
+  const isEnrolled = !!course?.enrolled;
+  const canSeeDiscussionTab = !!currentUser && (isEnrolled || isCourseAuthor || canModerateCourses);
 
   const courseViewTabs = useMemo(
     () => [
@@ -123,8 +131,19 @@ export default function CourseViewPage() {
         isForAdminLike: true,
         isForUnregistered: false,
       },
+      {
+        title: t("studentCourseView.tabs.discussion"),
+        itemCount:
+          course?.commentCount && course.commentCount > 0 ? course.commentCount : undefined,
+        content: course ? (
+          <DiscussionTab courseId={course.id} courseAuthorId={course.authorId} />
+        ) : null,
+        isForAdminLike: false,
+        isForUnregistered: false,
+        isHidden: !canSeeDiscussionTab,
+      },
     ],
-    [t, course],
+    [t, course, canSeeDiscussionTab],
   );
 
   if (!course) return null;
@@ -137,7 +156,8 @@ export default function CourseViewPage() {
     { title: course.title, href: `/course/${id}` },
   ];
 
-  const canView = (isForAdminLike: boolean, isForUnregistered: boolean) => {
+  const canView = (isForAdminLike: boolean, isForUnregistered: boolean, isHidden?: boolean) => {
+    if (isHidden) return false;
     const hideForAdmin = isForAdminLike && (!canViewCourseStatistics || !currentUser);
     const hideWhenUnregistered = !isForUnregistered && !currentUser;
 
@@ -157,9 +177,9 @@ export default function CourseViewPage() {
               <Tabs defaultValue={courseViewTabs[0].title} className="w-full">
                 <TabsList className="bg-card w-full justify-start gap-4 p-0 overflow-hidden">
                   {courseViewTabs.map((tab) => {
-                    const { title, isForAdminLike, isForUnregistered } = tab;
+                    const { title, isForAdminLike, isForUnregistered, isHidden } = tab;
 
-                    if (!canView(isForAdminLike, isForUnregistered)) return null;
+                    if (!canView(isForAdminLike, isForUnregistered, isHidden)) return null;
 
                     return (
                       <TabsTrigger
@@ -178,9 +198,9 @@ export default function CourseViewPage() {
                   })}
                 </TabsList>
                 {courseViewTabs.map((tab) => {
-                  const { title, isForAdminLike, content, isForUnregistered } = tab;
+                  const { title, isForAdminLike, content, isForUnregistered, isHidden } = tab;
 
-                  if (!canView(isForAdminLike, isForUnregistered)) return null;
+                  if (!canView(isForAdminLike, isForUnregistered, isHidden)) return null;
 
                   return (
                     <TabsContent

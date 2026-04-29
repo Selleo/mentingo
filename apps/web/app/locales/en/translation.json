@@ -2154,8 +2154,52 @@
     "tabs": {
       "chapters": "Chapters",
       "moreFromAuthor": "More from author",
-      "statistics": "Statistics"
+      "statistics": "Statistics",
+      "discussion": "Discussion"
     }
+  },
+  "courseDiscussion": {
+    "composer": {
+      "placeholder": "Share something with the cohort...",
+      "submit": "Post",
+      "submitting": "Posting..."
+    },
+    "replyComposer": {
+      "placeholder": "Write a reply...",
+      "submit": "Reply",
+      "cancel": "Cancel"
+    },
+    "actions": {
+      "reply": "Reply",
+      "edit": "Edit",
+      "delete": "Delete",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "list": {
+      "viewMoreReplies_one": "View {{count}} more reply",
+      "viewMoreReplies_other": "View {{count}} more replies",
+      "loadMore": "Load more comments",
+      "loading": "Loading..."
+    },
+    "empty": {
+      "title": "Start the conversation",
+      "description": "Be the first to post in this course's discussion."
+    },
+    "deleted": "[deleted]",
+    "toast": {
+      "courseNotFound": "Course not found",
+      "commentNotFound": "Comment not found",
+      "notEnrolled": "You don't have access to this course discussion",
+      "notAuthorized": "You are not authorized to perform this action",
+      "contentRequired": "Comment cannot be empty",
+      "repliesToRepliesNotAllowed": "Replies cannot be nested deeper than one level",
+      "createSuccess": "Comment posted",
+      "updateSuccess": "Comment updated",
+      "deleteSuccess": "Comment deleted",
+      "genericError": "Something went wrong"
+    },
+    "deleteConfirm": "Are you sure you want to delete this comment?"
   },
   "studentChapterView": {
     "chapterProgress": {

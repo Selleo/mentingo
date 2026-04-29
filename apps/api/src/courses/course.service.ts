@@ -75,6 +75,7 @@ import {
   categories,
   certificates,
   chapters,
+  courseComments,
   courseStudentMode,
   courses,
   coursesSummaryStats,
@@ -1223,12 +1224,18 @@ export class CourseService {
     const thumbnailUrl = await this.fileService.getFileUrl(course.thumbnailS3Key);
     const trailerUrl = await this.getCourseTrailerUrl(course.id);
 
+    const [{ count: commentCount } = { count: 0 }] = await this.db
+      .select({ count: sql<number>`COUNT(*)::int` })
+      .from(courseComments)
+      .where(and(eq(courseComments.courseId, course.id), isNull(courseComments.deletedAt)));
+
     return {
       ...course,
       thumbnailUrl,
       trailerUrl,
       chapters: courseChapterList,
       slug: currentSlug,
+      commentCount: commentCount ?? 0,
     };
   }
 
