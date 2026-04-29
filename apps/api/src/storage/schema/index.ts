@@ -515,6 +515,30 @@ export const studentLessonProgress = pgTable(
   })),
 );
 
+export const studentCourseTakeaways = pgTable(
+  "student_course_takeaways",
+  {
+    ...id,
+    ...timestamps,
+    studentId: uuid("student_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    courseId: uuid("course_id")
+      .references(() => courses.id, { onDelete: "cascade" })
+      .notNull(),
+    content: text("content").notNull().default(""),
+    tenantId,
+  },
+  withTenantIdIndex("student_course_takeaways", (table) => ({
+    unq: uniqueIndex("student_course_takeaways_unique_idx").on(
+      table.tenantId,
+      table.studentId,
+      table.courseId,
+    ),
+    courseIdx: index("student_course_takeaways_course_idx").on(table.tenantId, table.courseId),
+  })),
+);
+
 export const aiMentorStudentLessonProgress = pgTable(
   "ai_mentor_student_lesson_progress",
   {

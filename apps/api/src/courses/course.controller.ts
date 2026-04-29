@@ -42,6 +42,7 @@ import { RequirePermission } from "src/common/decorators/require-permission.deco
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { ManagingTenantAdminGuard } from "src/common/guards/managing-tenant-admin.guard";
 import { CurrentUserType } from "src/common/types/current-user.type";
+import { CourseTakeawayService } from "src/courses/course-takeaway.service";
 import { CourseService } from "src/courses/course.service";
 import { MasterCourseService } from "src/courses/master-course.service";
 import {
@@ -155,7 +156,45 @@ export class CourseController {
     private readonly courseService: CourseService,
     private readonly learningTimeService: LearningTimeService,
     private readonly masterCourseService: MasterCourseService,
+    private readonly courseTakeawayService: CourseTakeawayService,
   ) {}
+
+  @Get("takeaway")
+  @RequirePermission(PERMISSIONS.COURSE_READ)
+  @Validate({
+    request: [{ type: "query", name: "courseId", schema: UUIDSchema, required: true }],
+    response: baseResponse(Type.Object({ content: Type.String() })),
+  })
+  async getCourseTakeaway(
+    @Query("courseId") courseId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<{ content: string }>> {
+    const content = await this.courseTakeawayService.getTakeaway(courseId, currentUser);
+    return new BaseResponse({ content });
+  }
+
+  @Post("takeaway")
+  @RequirePermission(PERMISSIONS.COURSE_READ)
+  @Validate({
+    request: [
+      {
+        type: "body",
+        schema: Type.Object({
+          courseId: UUIDSchema,
+          content: Type.String(),
+        }),
+        required: true,
+      },
+    ],
+    response: baseResponse(Type.Object({ message: Type.String() })),
+  })
+  async upsertCourseTakeaway(
+    @Body() body: { courseId: UUIDType; content: string },
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<{ message: string }>> {
+    await this.courseTakeawayService.upsertTakeaway(body.courseId, body.content, currentUser);
+    return new BaseResponse({ message: "Course takeaway saved" });
+  }
 
   @Get("all")
   @RequirePermission(PERMISSIONS.COURSE_READ_MANAGEABLE)
