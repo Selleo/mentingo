@@ -3521,6 +3521,59 @@ export interface GetTenantsResponse {
   }[];
 }
 
+export interface GetTrainingResultsResponse {
+  data: {
+    scope: "tenant" | "student" | "course";
+    /** @format uuid */
+    tenantId: string;
+    student: {
+      /** @format uuid */
+      id: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      fullName: string;
+    };
+    courses: {
+      /** @format uuid */
+      id: string;
+      title: string;
+      lessons: {
+        /** @format uuid */
+        lessonId: string;
+        /** @format uuid */
+        chapterId: string;
+        title: string;
+        type: string;
+        completed: boolean;
+        completedAt: string | null;
+      }[];
+      quizzes: {
+        /** @format uuid */
+        lessonId: string;
+        /** @format uuid */
+        chapterId: string;
+        title: string;
+        score: number | null;
+        passed: boolean | null;
+        attempts: number | null;
+        completedAt: string | null;
+      }[];
+      certificate: {
+        enabled: boolean;
+        status: "issued" | "not_issued" | "not_applicable";
+        issuedAt: string | null;
+      };
+    }[];
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
 export interface DeleteUserResponse {
   data: {
     message: string;
@@ -8630,6 +8683,35 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "POST",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Returns training results in JSON for the tenant selected by X-Tenant-Id. Each response row represents one student-course pair. Use scope=tenant to list all rows for the tenant, scope=student to list rows for a specific student (studentId required), and scope=course to list rows for a specific course (courseId required). Optional extra filter can further narrow results.
+     *
+     * @tags Integration
+     * @name IntegrationControllerGetTrainingResults
+     * @summary Get training results for integration reporting
+     * @request GET:/api/integration/training-results
+     */
+    integrationControllerGetTrainingResults: (
+      query: {
+        scope: "tenant" | "student" | "course";
+        /** @format uuid */
+        studentId?: string;
+        /** @format uuid */
+        courseId?: string;
+        /** @min 1 */
+        page?: number;
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetTrainingResultsResponse, void>({
+        path: `/api/integration/training-results`,
+        method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),
