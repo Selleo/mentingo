@@ -636,6 +636,20 @@ describe("IntegrationController (e2e)", () => {
         perPage: 1,
       });
 
+      const tenantStudentFilterResponse = await request(app.getHttpServer())
+        .get("/api/integration/training-results")
+        .set("X-API-Key", apiKey)
+        .set("X-Tenant-Id", admin.tenantId)
+        .query({ scope: "tenant", studentId: studentOne.id })
+        .expect(200);
+
+      expect(tenantStudentFilterResponse.body.data).toHaveLength(1);
+      expect(tenantStudentFilterResponse.body.pagination).toEqual({
+        totalItems: 1,
+        page: 1,
+        perPage: 20,
+      });
+
       const studentResponse = await request(app.getHttpServer())
         .get("/api/integration/training-results")
         .set("X-API-Key", apiKey)
@@ -698,6 +712,40 @@ describe("IntegrationController (e2e)", () => {
               certificate: expect.objectContaining({ status: "not_issued" }),
             }),
           ],
+        }),
+      );
+
+      const courseStudentFilterResponse = await request(app.getHttpServer())
+        .get("/api/integration/training-results")
+        .set("X-API-Key", apiKey)
+        .set("X-Tenant-Id", admin.tenantId)
+        .query({ scope: "course", courseId, studentId: studentOne.id })
+        .expect(200);
+
+      expect(courseStudentFilterResponse.body.data).toHaveLength(1);
+      expect(courseStudentFilterResponse.body.data[0]).toEqual(
+        expect.objectContaining({
+          scope: "course",
+          tenantId: admin.tenantId,
+          student: expect.objectContaining({ id: studentOne.id }),
+          courses: [expect.objectContaining({ id: courseId })],
+        }),
+      );
+
+      const courseStudentTwoFilterResponse = await request(app.getHttpServer())
+        .get("/api/integration/training-results")
+        .set("X-API-Key", apiKey)
+        .set("X-Tenant-Id", admin.tenantId)
+        .query({ scope: "student", studentId: studentTwo.id, courseId })
+        .expect(200);
+
+      expect(courseStudentTwoFilterResponse.body.data).toHaveLength(1);
+      expect(courseStudentTwoFilterResponse.body.data[0]).toEqual(
+        expect.objectContaining({
+          scope: "student",
+          tenantId: admin.tenantId,
+          student: expect.objectContaining({ id: studentTwo.id }),
+          courses: [expect.objectContaining({ id: courseId })],
         }),
       );
     });
