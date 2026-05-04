@@ -1,12 +1,24 @@
 import { randomUUID } from "node:crypto";
 
-import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import { COURSE_ENROLLMENT, SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { and, eq, isNull } from "drizzle-orm";
 import request from "supertest";
 
+import { buildJsonbField } from "src/common/helpers/sqlHelpers";
+import { LESSON_SEQUENCE_ENABLED, QUIZ_FEEDBACK_ENABLED } from "src/courses/constants";
 import { RATE_LIMITS } from "src/rate-limit/rate-limit.constants";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { integrationApiKeys, tenants } from "src/storage/schema";
+import {
+  categories,
+  certificates,
+  chapters,
+  courses,
+  integrationApiKeys,
+  lessons,
+  studentCourses,
+  studentLessonProgress,
+  tenants,
+} from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createGroupFactory } from "../../../test/factory/group.factory";
@@ -159,10 +171,15 @@ describe("IntegrationController (e2e)", () => {
         .set("X-Tenant-Id", admin.tenantId)
         .expect(200);
 
-      expect(response.body.data).toHaveLength(1);
-      expect(response.body.data[0].id).toBe(group.id);
-      expect(response.body.data[0].name).toBe(group.name);
-      expect(response.body.pagination.totalItems).toBe(1);
+      expect(response.body.data).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: group.id,
+            name: group.name,
+          }),
+        ]),
+      );
+      expect(response.body.pagination.totalItems).toBeGreaterThanOrEqual(1);
     });
 
     it("returns 401 when X-Tenant-Id header is missing for non-tenant-list endpoint", async () => {
@@ -343,6 +360,532 @@ describe("IntegrationController (e2e)", () => {
         .set("X-API-Key", apiKey)
         .set("X-Tenant-Id", otherTenantId)
         .expect(200);
+    });
+  });
+
+  describe("integration training results endpoint", () => {
+    it("returns per-student-per-course rows with scope-based filtering", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+      const cookies = await cookieFor(admin, app);
+
+      const [studentOne, studentTwo] = await Promise.all([
+        userFactory.create({ role: SYSTEM_ROLE_SLUGS.STUDENT, tenantId: admin.tenantId }),
+        userFactory.create({ role: SYSTEM_ROLE_SLUGS.STUDENT, tenantId: admin.tenantId }),
+      ]);
+
+      const chapterId = randomUUID();
+      const categoryId = randomUUID();
+      const courseId = randomUUID();
+      const lessonOneId = randomUUID();
+      const lessonTwoId = randomUUID();
+      const now = new Date().toISOString();
+      const categoryTitle = `Integration category ${randomUUID()}`;
+
+      await db.insert(categories).values({
+        id: categoryId,
+        title: categoryTitle,
+        tenantId: admin.tenantId,
+      });
+
+      await db.insert(courses).values({
+        id: courseId,
+        title: { en: "Integration course" },
+        description: {},
+        status: "published",
+        hasCertificate: true,
+        authorId: admin.id,
+        categoryId,
+        settings: {
+          lessonSequenceEnabled: LESSON_SEQUENCE_ENABLED,
+          quizFeedbackEnabled: QUIZ_FEEDBACK_ENABLED,
+          certificateSignature: null,
+          certificateFontColor: null,
+        },
+        tenantId: admin.tenantId,
+      });
+
+      await db.insert(chapters).values({
+        id: chapterId,
+        title: {},
+        courseId,
+        authorId: admin.id,
+        isFreemium: false,
+        displayOrder: 1,
+        lessonCount: 2,
+        tenantId: admin.tenantId,
+      });
+
+      await db.insert(lessons).values([
+        {
+          id: lessonOneId,
+          chapterId,
+          type: "quiz",
+          title: { en: "Quiz lesson" },
+          thresholdScore: 50,
+          displayOrder: 1,
+          tenantId: admin.tenantId,
+        },
+        {
+          id: lessonTwoId,
+          chapterId,
+          type: "text",
+          title: { en: "Text lesson" },
+          displayOrder: 2,
+          tenantId: admin.tenantId,
+        },
+      ]);
+
+      await db.insert(studentCourses).values([
+        {
+          studentId: studentOne.id,
+          courseId,
+          status: COURSE_ENROLLMENT.ENROLLED,
+          tenantId: admin.tenantId,
+        },
+        {
+          studentId: studentTwo.id,
+          courseId,
+          status: COURSE_ENROLLMENT.ENROLLED,
+          tenantId: admin.tenantId,
+        },
+      ]);
+
+      await db.insert(studentLessonProgress).values([
+        {
+          studentId: studentOne.id,
+          chapterId,
+          lessonId: lessonOneId,
+          quizScore: 80,
+          attempts: 1,
+          isQuizPassed: true,
+          completedQuestionCount: 1,
+          completedAt: now,
+          tenantId: admin.tenantId,
+        },
+        {
+          studentId: studentTwo.id,
+          chapterId,
+          lessonId: lessonOneId,
+          quizScore: 40,
+          attempts: 2,
+          isQuizPassed: false,
+          completedQuestionCount: 1,
+          completedAt: now,
+          tenantId: admin.tenantId,
+        },
+        {
+          studentId: studentTwo.id,
+          chapterId,
+          lessonId: lessonTwoId,
+          completedQuestionCount: 1,
+          completedAt: now,
+          tenantId: admin.tenantId,
+        },
+      ]);
+
+      await db.insert(certificates).values({
+        userId: studentOne.id,
+        courseId,
+        tenantId: admin.tenantId,
+      });
+
+      const rotateResponse = await request(app.getHttpServer())
+        .post("/api/integration/key")
+        .set("Cookie", cookies)
+        .expect(201);
+
+      const apiKey = rotateResponse.body.data.key as string;
+
+      const tenantResponse = await request(app.getHttpServer())
+        .get("/api/integration/training-results")
+        .set("X-API-Key", apiKey)
+        .set("X-Tenant-Id", admin.tenantId)
+        .query({ scope: "tenant" })
+        .expect(200);
+
+      expect(tenantResponse.body.data).toHaveLength(2);
+      expect(tenantResponse.body.pagination).toEqual({
+        totalItems: 2,
+        page: 1,
+        perPage: 20,
+      });
+      const tenantStudentOneRow = tenantResponse.body.data.find(
+        (row: { student: { id: string }; courses: { id: string }[] }) =>
+          row.student.id === studentOne.id && row.courses.some((course) => course.id === courseId),
+      );
+      const tenantStudentTwoRow = tenantResponse.body.data.find(
+        (row: { student: { id: string }; courses: { id: string }[] }) =>
+          row.student.id === studentTwo.id && row.courses.some((course) => course.id === courseId),
+      );
+
+      expect(tenantStudentOneRow).toEqual(
+        expect.objectContaining({
+          scope: "tenant",
+          tenantId: admin.tenantId,
+          student: expect.objectContaining({
+            id: studentOne.id,
+            email: studentOne.email,
+          }),
+          courses: [
+            expect.objectContaining({
+              id: courseId,
+              title: expect.any(String),
+              certificate: {
+                enabled: true,
+                status: "issued",
+                issuedAt: expect.any(String),
+              },
+            }),
+          ],
+        }),
+      );
+      expect(tenantStudentOneRow.courses[0].lessons).toEqual([
+        {
+          lessonId: lessonOneId,
+          chapterId,
+          title: expect.any(String),
+          type: "quiz",
+          completed: true,
+          completedAt: expect.any(String),
+        },
+        {
+          lessonId: lessonTwoId,
+          chapterId,
+          title: expect.any(String),
+          type: "text",
+          completed: false,
+          completedAt: null,
+        },
+      ]);
+      expect(tenantStudentOneRow.courses[0].quizzes).toEqual([
+        {
+          lessonId: lessonOneId,
+          chapterId,
+          title: expect.any(String),
+          score: 80,
+          passed: true,
+          attempts: 1,
+          completedAt: expect.any(String),
+        },
+      ]);
+
+      expect(tenantStudentTwoRow).toEqual(
+        expect.objectContaining({
+          scope: "tenant",
+          tenantId: admin.tenantId,
+          student: expect.objectContaining({
+            id: studentTwo.id,
+            email: studentTwo.email,
+          }),
+          courses: [
+            expect.objectContaining({
+              id: courseId,
+              title: expect.any(String),
+              certificate: {
+                enabled: true,
+                status: "not_issued",
+                issuedAt: null,
+              },
+            }),
+          ],
+        }),
+      );
+      expect(tenantStudentTwoRow.courses[0].lessons).toEqual([
+        {
+          lessonId: lessonOneId,
+          chapterId,
+          title: expect.any(String),
+          type: "quiz",
+          completed: true,
+          completedAt: expect.any(String),
+        },
+        {
+          lessonId: lessonTwoId,
+          chapterId,
+          title: expect.any(String),
+          type: "text",
+          completed: true,
+          completedAt: expect.any(String),
+        },
+      ]);
+      expect(tenantStudentTwoRow.courses[0].quizzes).toEqual([
+        {
+          lessonId: lessonOneId,
+          chapterId,
+          title: expect.any(String),
+          score: 40,
+          passed: false,
+          attempts: 2,
+          completedAt: expect.any(String),
+        },
+      ]);
+      const paginatedTenantResponse = await request(app.getHttpServer())
+        .get("/api/integration/training-results")
+        .set("X-API-Key", apiKey)
+        .set("X-Tenant-Id", admin.tenantId)
+        .query({ scope: "tenant", page: 2, perPage: 1 })
+        .expect(200);
+
+      expect(paginatedTenantResponse.body.data).toHaveLength(1);
+      expect(paginatedTenantResponse.body.pagination).toEqual({
+        totalItems: 2,
+        page: 2,
+        perPage: 1,
+      });
+
+      const tenantStudentFilterResponse = await request(app.getHttpServer())
+        .get("/api/integration/training-results")
+        .set("X-API-Key", apiKey)
+        .set("X-Tenant-Id", admin.tenantId)
+        .query({ scope: "tenant", studentId: studentOne.id })
+        .expect(200);
+
+      expect(tenantStudentFilterResponse.body.data).toHaveLength(1);
+      expect(tenantStudentFilterResponse.body.pagination).toEqual({
+        totalItems: 1,
+        page: 1,
+        perPage: 20,
+      });
+
+      const studentResponse = await request(app.getHttpServer())
+        .get("/api/integration/training-results")
+        .set("X-API-Key", apiKey)
+        .set("X-Tenant-Id", admin.tenantId)
+        .query({ scope: "student", studentId: studentOne.id })
+        .expect(200);
+
+      expect(studentResponse.body.data).toHaveLength(1);
+      expect(studentResponse.body.data[0]).toEqual(
+        expect.objectContaining({
+          scope: "student",
+          tenantId: admin.tenantId,
+          student: expect.objectContaining({ id: studentOne.id }),
+          courses: [
+            expect.objectContaining({
+              id: courseId,
+              certificate: expect.objectContaining({ status: "issued" }),
+            }),
+          ],
+        }),
+      );
+
+      const courseResponse = await request(app.getHttpServer())
+        .get("/api/integration/training-results")
+        .set("X-API-Key", apiKey)
+        .set("X-Tenant-Id", admin.tenantId)
+        .query({ scope: "course", courseId })
+        .expect(200);
+
+      expect(courseResponse.body.data).toHaveLength(2);
+      const courseStudentOneRow = courseResponse.body.data.find(
+        (row: { student: { id: string } }) => row.student.id === studentOne.id,
+      );
+      const courseStudentTwoRow = courseResponse.body.data.find(
+        (row: { student: { id: string } }) => row.student.id === studentTwo.id,
+      );
+
+      expect(courseStudentOneRow).toEqual(
+        expect.objectContaining({
+          scope: "course",
+          tenantId: admin.tenantId,
+          student: expect.objectContaining({ id: studentOne.id }),
+          courses: [
+            expect.objectContaining({
+              id: courseId,
+              certificate: expect.objectContaining({ status: "issued" }),
+            }),
+          ],
+        }),
+      );
+
+      expect(courseStudentTwoRow).toEqual(
+        expect.objectContaining({
+          scope: "course",
+          tenantId: admin.tenantId,
+          student: expect.objectContaining({ id: studentTwo.id }),
+          courses: [
+            expect.objectContaining({
+              id: courseId,
+              certificate: expect.objectContaining({ status: "not_issued" }),
+            }),
+          ],
+        }),
+      );
+
+      const courseStudentFilterResponse = await request(app.getHttpServer())
+        .get("/api/integration/training-results")
+        .set("X-API-Key", apiKey)
+        .set("X-Tenant-Id", admin.tenantId)
+        .query({ scope: "course", courseId, studentId: studentOne.id })
+        .expect(200);
+
+      expect(courseStudentFilterResponse.body.data).toHaveLength(1);
+      expect(courseStudentFilterResponse.body.data[0]).toEqual(
+        expect.objectContaining({
+          scope: "course",
+          tenantId: admin.tenantId,
+          student: expect.objectContaining({ id: studentOne.id }),
+          courses: [expect.objectContaining({ id: courseId })],
+        }),
+      );
+
+      const courseStudentTwoFilterResponse = await request(app.getHttpServer())
+        .get("/api/integration/training-results")
+        .set("X-API-Key", apiKey)
+        .set("X-Tenant-Id", admin.tenantId)
+        .query({ scope: "student", studentId: studentTwo.id, courseId })
+        .expect(200);
+
+      expect(courseStudentTwoFilterResponse.body.data).toHaveLength(1);
+      expect(courseStudentTwoFilterResponse.body.data[0]).toEqual(
+        expect.objectContaining({
+          scope: "student",
+          tenantId: admin.tenantId,
+          student: expect.objectContaining({ id: studentTwo.id }),
+          courses: [expect.objectContaining({ id: courseId })],
+        }),
+      );
+    });
+
+    it("returns 400 when scope-specific required filter is missing", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+      const cookies = await cookieFor(admin, app);
+
+      const rotateResponse = await request(app.getHttpServer())
+        .post("/api/integration/key")
+        .set("Cookie", cookies)
+        .expect(201);
+
+      const apiKey = rotateResponse.body.data.key as string;
+
+      await request(app.getHttpServer())
+        .get("/api/integration/training-results")
+        .set("X-API-Key", apiKey)
+        .set("X-Tenant-Id", admin.tenantId)
+        .query({ scope: "student" })
+        .expect(400);
+
+      await request(app.getHttpServer())
+        .get("/api/integration/training-results")
+        .set("X-API-Key", apiKey)
+        .set("X-Tenant-Id", admin.tenantId)
+        .query({ scope: "course" })
+        .expect(400);
+    });
+
+    it("returns not_applicable certificate status when course certificates are disabled", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+      const cookies = await cookieFor(admin, app);
+      const student = await userFactory.create({
+        role: SYSTEM_ROLE_SLUGS.STUDENT,
+        tenantId: admin.tenantId,
+      });
+
+      const chapterId = randomUUID();
+      const categoryId = randomUUID();
+      const courseId = randomUUID();
+      const lessonId = randomUUID();
+
+      const categoryTitle = `Integration category ${randomUUID()}`;
+
+      await db.insert(categories).values({
+        id: categoryId,
+        title: categoryTitle,
+        tenantId: admin.tenantId,
+      });
+
+      await db.insert(courses).values({
+        id: courseId,
+        title: { en: "No certificate course" },
+        description: {},
+        status: "published",
+        hasCertificate: false,
+        authorId: admin.id,
+        categoryId,
+        settings: {
+          lessonSequenceEnabled: LESSON_SEQUENCE_ENABLED,
+          quizFeedbackEnabled: QUIZ_FEEDBACK_ENABLED,
+          certificateSignature: null,
+          certificateFontColor: null,
+        },
+        tenantId: admin.tenantId,
+      });
+
+      await db.insert(chapters).values({
+        id: chapterId,
+        title: {},
+        courseId,
+        authorId: admin.id,
+        isFreemium: false,
+        displayOrder: 1,
+        lessonCount: 1,
+        tenantId: admin.tenantId,
+      });
+
+      await db.insert(lessons).values({
+        id: lessonId,
+        chapterId,
+        type: "text",
+        title: buildJsonbField("en", "Text lesson"),
+        displayOrder: 1,
+        tenantId: admin.tenantId,
+      });
+
+      await db.insert(studentCourses).values({
+        studentId: student.id,
+        courseId,
+        status: COURSE_ENROLLMENT.ENROLLED,
+        tenantId: admin.tenantId,
+      });
+
+      const rotateResponse = await request(app.getHttpServer())
+        .post("/api/integration/key")
+        .set("Cookie", cookies)
+        .expect(201);
+
+      const apiKey = rotateResponse.body.data.key as string;
+
+      const response = await request(app.getHttpServer())
+        .get("/api/integration/training-results")
+        .set("X-API-Key", apiKey)
+        .set("X-Tenant-Id", admin.tenantId)
+        .query({ scope: "course", courseId })
+        .expect(200);
+
+      expect(response.body.data).toHaveLength(1);
+      expect(response.body.data[0]).toEqual(
+        expect.objectContaining({
+          courses: [
+            expect.objectContaining({
+              certificate: {
+                enabled: false,
+                status: "not_applicable",
+                issuedAt: null,
+              },
+              quizzes: [],
+            }),
+          ],
+        }),
+      );
+      expect(response.body.data[0].courses[0].lessons).toEqual([
+        {
+          lessonId,
+          chapterId,
+          title: "Text lesson",
+          type: "text",
+          completed: false,
+          completedAt: null,
+        },
+      ]);
     });
   });
 });

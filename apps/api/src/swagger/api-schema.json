@@ -7732,6 +7732,109 @@
         ]
       }
     },
+    "/api/integration/training-results": {
+      "get": {
+        "operationId": "IntegrationController_getTrainingResults",
+        "summary": "Get training results for integration reporting",
+        "description": "Returns training results in JSON for the tenant selected by X-Tenant-Id.\n\nEach response row represents one student-course pair.\n\nUse scope=tenant to list all rows for the tenant, scope=student to list rows for a specific student (studentId required), and scope=course to list rows for a specific course (courseId required). Optional extra filter can further narrow results.",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scope",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "tenant",
+                  "type": "string"
+                },
+                {
+                  "const": "student",
+                  "type": "string"
+                },
+                {
+                  "const": "course",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "studentId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "courseId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "description": "Target tenant context for this request. Must be one of the tenant IDs returned by GET /integration/tenants.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTrainingResultsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      }
+    },
     "/api/integration/users/{userId}": {
       "get": {
         "operationId": "IntegrationController_getUserById",
@@ -27085,6 +27188,274 @@
         },
         "required": [
           "data"
+        ]
+      },
+      "GetTrainingResultsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "scope": {
+                  "anyOf": [
+                    {
+                      "const": "tenant",
+                      "type": "string"
+                    },
+                    {
+                      "const": "student",
+                      "type": "string"
+                    },
+                    {
+                      "const": "course",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "tenantId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "student": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "firstName": {
+                      "type": "string"
+                    },
+                    "lastName": {
+                      "type": "string"
+                    },
+                    "fullName": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "email",
+                    "firstName",
+                    "lastName",
+                    "fullName"
+                  ]
+                },
+                "courses": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "lessons": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "lessonId": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "chapterId": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "title": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string"
+                            },
+                            "completed": {
+                              "type": "boolean"
+                            },
+                            "completedAt": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "lessonId",
+                            "chapterId",
+                            "title",
+                            "type",
+                            "completed",
+                            "completedAt"
+                          ]
+                        }
+                      },
+                      "quizzes": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "lessonId": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "chapterId": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "title": {
+                              "type": "string"
+                            },
+                            "score": {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "passed": {
+                              "anyOf": [
+                                {
+                                  "type": "boolean"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "attempts": {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "completedAt": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "lessonId",
+                            "chapterId",
+                            "title",
+                            "score",
+                            "passed",
+                            "attempts",
+                            "completedAt"
+                          ]
+                        }
+                      },
+                      "certificate": {
+                        "type": "object",
+                        "properties": {
+                          "enabled": {
+                            "type": "boolean"
+                          },
+                          "status": {
+                            "anyOf": [
+                              {
+                                "const": "issued",
+                                "type": "string"
+                              },
+                              {
+                                "const": "not_issued",
+                                "type": "string"
+                              },
+                              {
+                                "const": "not_applicable",
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "issuedAt": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "enabled",
+                          "status",
+                          "issuedAt"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "title",
+                      "lessons",
+                      "quizzes",
+                      "certificate"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "scope",
+                "tenantId",
+                "student",
+                "courses"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
         ]
       },
       "DeleteUserResponse": {

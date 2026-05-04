@@ -46,8 +46,12 @@ import {
   integrationDeleteUserResponseSchema,
   integrationMessageResponseSchema,
   integrationTenantsSchema,
+  integrationTrainingResultsSchema,
+  integrationTrainingResultsScopeSchema,
   setUserGroupsSchema,
   unenrollGroupsPayloadSchema,
+  type IntegrationTrainingResult,
+  type IntegrationTrainingResultsScope,
   type IntegrationTenant,
   type SetUserGroupsBody,
   type UnenrollGroupsPayload,
@@ -158,6 +162,48 @@ export class IntegrationController {
     const users = await this.userService.getUsers(query);
 
     return new PaginatedResponse(users);
+  }
+
+  @Get("training-results")
+  @RequirePermission(PERMISSIONS.INTEGRATION_API_USE)
+  @ApiEndpointDocs({
+    summary: "Get training results for integration reporting",
+    description:
+      "Returns training results in JSON for the tenant selected by X-Tenant-Id.\n\nEach response row represents one student-course pair.\n\nUse scope=tenant to list all rows for the tenant, scope=student to list rows for a specific student (studentId required), and scope=course to list rows for a specific course (courseId required). Optional extra filter can further narrow results.",
+    headers: [API_HEADERS.X_TENANT_ID],
+  })
+  @Validate({
+    request: [
+      {
+        type: "query",
+        name: "scope",
+        schema: integrationTrainingResultsScopeSchema,
+        required: true,
+      },
+      { type: "query", name: "studentId", schema: UUIDSchema },
+      { type: "query", name: "courseId", schema: UUIDSchema },
+      { type: "query", name: "page", schema: Type.Number({ minimum: 1 }) },
+      { type: "query", name: "perPage", schema: Type.Number() },
+    ],
+    response: paginatedResponse(integrationTrainingResultsSchema),
+  })
+  async getTrainingResults(
+    @Query("scope") scope: IntegrationTrainingResultsScope,
+    @Query("studentId") studentId: UUIDType | undefined,
+    @Query("courseId") courseId: UUIDType | undefined,
+    @Query("page") page: number | undefined,
+    @Query("perPage") perPage: number | undefined,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<PaginatedResponse<IntegrationTrainingResult[]>> {
+    return new PaginatedResponse(
+      await this.integrationService.getTrainingResults(currentUser, {
+        scope,
+        studentId,
+        courseId,
+        page,
+        perPage,
+      }),
+    );
   }
 
   @Get("users/:userId")
