@@ -1,6 +1,10 @@
 import {
   COURSE_ORIGIN_TYPES,
   MASTER_COURSE_EXPORT_SYNC_STATUSES,
+  LEARNING_PATH_ENROLLMENT_TYPES,
+  LEARNING_PATH_CERTIFICATE_STATUSES,
+  LEARNING_PATH_PROGRESS_STATUSES,
+  LEARNING_PATH_STATUSES,
   SUPPORTED_LANGUAGES,
   SUPPORT_SESSION_STATUSES,
   TENANT_STATUSES,
@@ -43,11 +47,16 @@ import type {
   LocalizedText,
   MasterCourseEntityType,
   MasterCourseExportSyncStatus,
+  LearningPathEntityType,
+  LearningPathCertificateStatus,
   RegistrationFormFieldType,
   SupportedLanguages,
   PermissionKey,
   SupportSessionStatus,
   TenantStatus,
+  LearningPathEnrollmentType,
+  LearningPathProgressStatus,
+  LearningPathStatus,
 } from "@repo/shared";
 import type { ActivityLogMetadata } from "src/activity-logs/types";
 import type { ActivityHistory, AllSettings } from "src/common/types";
@@ -1431,6 +1440,247 @@ export const permissionUserRoles = pgTable(
     userRoleUniqueIdx: uniqueIndex("permission_user_roles_user_id_role_id_unique").on(
       table.userId,
       table.roleId,
+    ),
+  }),
+);
+
+export const learningPaths = pgTable(
+  "learning_paths",
+  {
+    ...id,
+    ...timestamps,
+    title: jsonb("title").default({}).notNull().$type<LocalizedText>(),
+    description: jsonb("description").default({}).notNull().$type<LocalizedText>(),
+    thumbnailReference: varchar("thumbnail_reference", { length: 500 }),
+    status: text("status")
+      .notNull()
+      .$type<LearningPathStatus>()
+      .default(LEARNING_PATH_STATUSES.DRAFT),
+    includesCertificate: boolean("includes_certificate").notNull().default(false),
+    sequenceEnabled: boolean("sequence_enabled").notNull().default(false),
+    authorId: uuid("author_id")
+      .references(() => users.id)
+      .notNull(),
+    originType: text("origin_type")
+      .notNull()
+      .$type<CourseOriginType>()
+      .default(COURSE_ORIGIN_TYPES.REGULAR),
+    sourceLearningPathId: uuid("source_learning_path_id"),
+    sourceTenantId: uuid("source_tenant_id"),
+    baseLanguage,
+    availableLocales,
+    tenantId,
+  },
+  withTenantIdIndex("learning_paths"),
+);
+
+export const learningPathCourses = pgTable(
+  "learning_path_courses",
+  {
+    ...id,
+    ...timestamps,
+    learningPathId: uuid("learning_path_id")
+      .references(() => learningPaths.id, { onDelete: "cascade" })
+      .notNull(),
+    courseId: uuid("course_id")
+      .references(() => courses.id, { onDelete: "cascade" })
+      .notNull(),
+    displayOrder: integer("display_order").notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("learning_path_courses", (table) => ({
+    pathCourseUniqueIdx: uniqueIndex("learning_path_courses_path_id_course_id_unique_idx").on(
+      table.learningPathId,
+      table.courseId,
+    ),
+    pathOrderUniqueIdx: uniqueIndex("learning_path_courses_path_id_display_order_unique_idx").on(
+      table.learningPathId,
+      table.displayOrder,
+    ),
+    pathOrderIdx: index("learning_path_courses_path_id_display_order_idx").on(
+      table.learningPathId,
+      table.displayOrder,
+    ),
+  })),
+);
+
+export const studentLearningPaths = pgTable(
+  "student_learning_paths",
+  {
+    ...id,
+    ...timestamps,
+    studentId: uuid("student_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    learningPathId: uuid("learning_path_id")
+      .references(() => learningPaths.id, { onDelete: "cascade" })
+      .notNull(),
+    progress: text("progress")
+      .notNull()
+      .$type<LearningPathProgressStatus>()
+      .default(LEARNING_PATH_PROGRESS_STATUSES.NOT_STARTED),
+    completedAt: timestamp("completed_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    enrolledAt: timestamp("enrolled_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }).defaultNow(),
+    enrollmentType: text("enrollment_type")
+      .notNull()
+      .$type<LearningPathEnrollmentType>()
+      .default(LEARNING_PATH_ENROLLMENT_TYPES.DIRECT),
+    tenantId,
+  },
+  withTenantIdIndex("student_learning_paths", (table) => ({
+    unq: unique().on(table.studentId, table.learningPathId),
+  })),
+);
+
+export const studentLearningPathCourses = pgTable(
+  "student_learning_path_courses",
+  {
+    ...id,
+    ...timestamps,
+    studentId: uuid("student_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    learningPathId: uuid("learning_path_id")
+      .references(() => learningPaths.id, { onDelete: "cascade" })
+      .notNull(),
+    courseId: uuid("course_id")
+      .references(() => courses.id, { onDelete: "cascade" })
+      .notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("student_learning_path_courses", (table) => ({
+    unq: unique().on(table.studentId, table.learningPathId, table.courseId),
+    studentPathIdx: index("student_learning_path_courses_student_path_idx").on(
+      table.studentId,
+      table.learningPathId,
+    ),
+    courseIdx: index("student_learning_path_courses_course_idx").on(table.courseId),
+  })),
+);
+
+export const groupLearningPaths = pgTable(
+  "group_learning_paths",
+  {
+    ...id,
+    ...timestamps,
+    groupId: uuid("group_id")
+      .references(() => groups.id, { onDelete: "cascade" })
+      .notNull(),
+    learningPathId: uuid("learning_path_id")
+      .references(() => learningPaths.id, { onDelete: "cascade" })
+      .notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("group_learning_paths", (table) => ({
+    unq: unique().on(table.groupId, table.learningPathId),
+    learningPathIdx: index("group_learning_paths_learning_path_idx").on(table.learningPathId),
+  })),
+);
+
+export const learningPathCertificates = pgTable(
+  "learning_path_certificates",
+  {
+    ...id,
+    ...timestamps,
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    learningPathId: uuid("learning_path_id")
+      .references(() => learningPaths.id, { onDelete: "cascade" })
+      .notNull(),
+    status: text("status")
+      .notNull()
+      .$type<LearningPathCertificateStatus>()
+      .default(LEARNING_PATH_CERTIFICATE_STATUSES.ACTIVE),
+    issuedAt: timestamp("issued_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    })
+      .notNull()
+      .defaultNow(),
+    expiresAt: timestamp("expires_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    tenantId,
+  },
+  withTenantIdIndex("learning_path_certificates"),
+);
+
+export const learningPathExports = pgTable(
+  "learning_path_exports",
+  {
+    ...id,
+    ...timestamps,
+    sourceTenantId: uuid("source_tenant_id")
+      .references(() => tenants.id, { onDelete: "cascade" })
+      .notNull(),
+    sourceLearningPathId: uuid("source_learning_path_id").notNull(),
+    targetTenantId: uuid("target_tenant_id")
+      .references(() => tenants.id, { onDelete: "cascade" })
+      .notNull(),
+    targetLearningPathId: uuid("target_learning_path_id").references(() => learningPaths.id, {
+      onDelete: "cascade",
+    }),
+    syncStatus: text("sync_status")
+      .notNull()
+      .$type<MasterCourseExportSyncStatus>()
+      .default(MASTER_COURSE_EXPORT_SYNC_STATUSES.ACTIVE),
+    lastSyncedAt: timestamp("last_synced_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+  },
+  (table) => ({
+    sourceLearningPathIdx: index("learning_path_exports_source_learning_path_idx").on(
+      table.sourceTenantId,
+      table.sourceLearningPathId,
+    ),
+    targetLearningPathIdx: index("learning_path_exports_target_learning_path_idx").on(
+      table.targetTenantId,
+      table.targetLearningPathId,
+    ),
+    sourceTargetUniqueIdx: uniqueIndex("learning_path_exports_source_target_unique_idx").on(
+      table.sourceTenantId,
+      table.sourceLearningPathId,
+      table.targetTenantId,
+    ),
+  }),
+);
+
+export const learningPathEntityMap = pgTable(
+  "learning_path_entity_map",
+  {
+    ...id,
+    ...timestamps,
+    exportId: uuid("export_id")
+      .references(() => learningPathExports.id, { onDelete: "cascade" })
+      .notNull(),
+    entityType: text("entity_type").notNull().$type<LearningPathEntityType>(),
+    sourceEntityId: uuid("source_entity_id").notNull(),
+    targetEntityId: uuid("target_entity_id").notNull(),
+  },
+  (table) => ({
+    exportIdx: index("learning_path_entity_map_export_idx").on(table.exportId),
+    sourceEntityIdx: index("learning_path_entity_map_source_entity_idx").on(
+      table.entityType,
+      table.sourceEntityId,
+    ),
+    sourceUniqueIdx: uniqueIndex("learning_path_entity_map_source_unique_idx").on(
+      table.exportId,
+      table.entityType,
+      table.sourceEntityId,
     ),
   }),
 );
