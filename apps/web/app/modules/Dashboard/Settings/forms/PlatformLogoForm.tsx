@@ -9,6 +9,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/com
 import { useHandleImageUpload } from "~/hooks/useHandleImageUpload";
 import { usePlatformLogo } from "~/hooks/usePlatformLogo";
 
+import { SETTINGS_PAGE_HANDLES } from "../../../../../e2e/data/settings/handles";
+
 export const PlatformLogoForm = () => {
   const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -38,7 +40,10 @@ export const PlatformLogoForm = () => {
   });
 
   return (
-    <Card className="flex h-full flex-col border-neutral-200 bg-white shadow-sm">
+    <Card
+      className="flex h-full flex-col border-neutral-200 bg-white shadow-sm"
+      data-testid={SETTINGS_PAGE_HANDLES.PLATFORM_LOGO_CARD}
+    >
       <CardHeader className="min-h-24 space-y-1 pb-2">
         <CardTitle className="text-base font-semibold">{t("platformLogo.header")}</CardTitle>
         <CardDescription className="text-sm leading-5 text-neutral-700">
@@ -58,6 +63,7 @@ export const PlatformLogoForm = () => {
             accept=".png, .svg"
             imageFit="contain"
             detailsText={t("platformLogo.field.imageRequirements")}
+            inputTestId={SETTINGS_PAGE_HANDLES.PLATFORM_LOGO_INPUT}
           />
           {isUploading && (
             <p className="text-xs font-medium text-neutral-500">
@@ -66,7 +72,13 @@ export const PlatformLogoForm = () => {
           )}
         </div>
         {logoUrl && (
-          <Button type="button" onClick={removeImage} variant="destructive" size="sm">
+          <Button
+            type="button"
+            onClick={removeImage}
+            variant="destructive"
+            size="sm"
+            data-testid={SETTINGS_PAGE_HANDLES.PLATFORM_LOGO_REMOVE}
+          >
             <Icon name="TrashIcon" className="mr-2" />
             {t("platformLogo.button.removeLogo")}
           </Button>

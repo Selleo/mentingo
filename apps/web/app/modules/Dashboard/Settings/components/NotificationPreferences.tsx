@@ -5,6 +5,8 @@ import { useChangeNewUserEmailNotification } from "~/api/mutations/admin/useChan
 import { useChangeOverdueCourseNotification } from "~/api/mutations/admin/useChangeOverdueCourseNotification";
 import { Card, CardHeader, CardTitle, CardContent } from "~/components/ui/card";
 
+import { SETTINGS_PAGE_HANDLES } from "../../../../../e2e/data/settings/handles";
+
 import { SettingItem } from "./SettingItem";
 
 import type { AdminSettings } from "../types";
@@ -25,7 +27,10 @@ export default function NotificationPreferences({ adminSettings }: NotificationP
   };
 
   return (
-    <Card id="admin-notifications-preferences">
+    <Card
+      id="admin-notifications-preferences"
+      data-testid={SETTINGS_PAGE_HANDLES.NOTIFICATION_PREFERENCES_CARD}
+    >
       <CardHeader>
         <CardTitle className="h5">{t("adminPreferences.notificationSettings")}</CardTitle>
       </CardHeader>

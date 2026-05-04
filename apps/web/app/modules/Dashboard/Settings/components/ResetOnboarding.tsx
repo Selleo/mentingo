@@ -4,6 +4,8 @@ import { useResetOnboarding } from "~/api/mutations/useResetOnboarding";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardTitle } from "~/components/ui/card";
 
+import { SETTINGS_PAGE_HANDLES } from "../../../../../e2e/data/settings/handles";
+
 export function ResetOnboarding() {
   const { t } = useTranslation();
 
@@ -18,7 +20,12 @@ export function ResetOnboarding() {
           <CardTitle className="h5">{t("resetOnboarding.header")}</CardTitle>
           <CardDescription className="body-lg-md">{t("resetOnboarding.subHeader")}</CardDescription>
         </div>
-        <Button variant="outline" onClick={handleResetOnboarding} disabled={isResetting}>
+        <Button
+          variant="outline"
+          onClick={handleResetOnboarding}
+          disabled={isResetting}
+          data-testid={SETTINGS_PAGE_HANDLES.RESET_ONBOARDING_BUTTON}
+        >
           {t("resetOnboarding.button.reset")}
         </Button>
       </CardContent>

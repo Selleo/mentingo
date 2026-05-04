@@ -6,5 +6,6 @@ export const isAdminSettings = (settings: AllSettings): settings is AdminSetting
   return hasKeys<AdminSettings>(settings, [
     "adminNewUserNotification",
     "adminFinishedCourseNotification",
+    "adminOverdueCourseNotification",
   ]);
 };

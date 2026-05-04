@@ -16,6 +16,8 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
+import { SETTINGS_PAGE_HANDLES } from "../../../../../../e2e/data/settings/handles";
+
 import {
   uploadLoginPageFileDialogSchema,
   type UploadLoginPageFileDialogValues,
@@ -78,18 +80,31 @@ export const UploadFilesToLoginPageDialog = ({
             <Input
               id="login-page-file-name"
               placeholder={t("loginFilesUpload.fileName.placeholder")}
+              data-testid={SETTINGS_PAGE_HANDLES.LOGIN_PAGE_FILE_NAME_INPUT}
               {...register("name", { required: true })}
             />
-            {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
+            {errors.name && (
+              <p
+                className="text-xs text-red-500"
+                data-testid={SETTINGS_PAGE_HANDLES.LOGIN_PAGE_FILE_NAME_ERROR}
+              >
+                {errors.name.message}
+              </p>
+            )}
           </div>
           <DialogFooter>
-            <Button type="submit" disabled={isPending || !file}>
+            <Button
+              type="submit"
+              disabled={isPending || !file}
+              data-testid={SETTINGS_PAGE_HANDLES.LOGIN_PAGE_FILE_SAVE}
+            >
               {isPending ? t("common.button.saving") : t("common.button.save")}
             </Button>
             <Button
               type="button"
               className="border border-red-500 bg-transparent text-red-500 hover:bg-red-100"
               onClick={onClose}
+              data-testid={SETTINGS_PAGE_HANDLES.LOGIN_PAGE_FILE_CANCEL}
             >
               {t("common.button.cancel")}
             </Button>

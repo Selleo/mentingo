@@ -20,6 +20,7 @@ import {
 } from "~/components/ui/select";
 import { cn } from "~/lib/utils";
 
+import { SETTINGS_PAGE_HANDLES } from "../../../../../../e2e/data/settings/handles";
 import { ALLOWED_CURRENCIES } from "../../constants";
 
 import type { AllowedCurrency } from "../../types";
@@ -47,7 +48,7 @@ export const DefaultCourseCurrencySelect = ({
   };
 
   return (
-    <Card id="default-course-currency">
+    <Card id="default-course-currency" data-testid={SETTINGS_PAGE_HANDLES.DEFAULT_CURRENCY_CARD}>
       <CardHeader>
         <CardTitle className="h5">{t("defaultCourseCurrencyView.header")}</CardTitle>
         <CardDescription className="body-lg-md">
@@ -56,7 +57,10 @@ export const DefaultCourseCurrencySelect = ({
       </CardHeader>
       <CardContent>
         <Select value={selectedCurrency} onValueChange={handleCurrencyChange}>
-          <SelectTrigger className="body-sm-md">
+          <SelectTrigger
+            className="body-sm-md"
+            data-testid={SETTINGS_PAGE_HANDLES.DEFAULT_CURRENCY_SELECT}
+          >
             <SelectValue
               placeholder={t(`defaultCourseCurrencyView.select.${selectedCurrency}.placeholder`)}
             />
@@ -68,6 +72,7 @@ export const DefaultCourseCurrencySelect = ({
                   key={currency}
                   value={currency}
                   className={cn({ "body-sm-md": selectedCurrency === currency })}
+                  data-testid={SETTINGS_PAGE_HANDLES.defaultCurrencyOption(currency)}
                 >
                   {t(`defaultCourseCurrencyView.select.${currency}.label`)} -{" "}
                   {t(`defaultCourseCurrencyView.select.${currency}.sign`)}
@@ -82,6 +87,7 @@ export const DefaultCourseCurrencySelect = ({
           disabled={isPending || selectedCurrency === currentCurrency}
           type="submit"
           onClick={handleSaveDefaultCurrency}
+          data-testid={SETTINGS_PAGE_HANDLES.DEFAULT_CURRENCY_SAVE}
         >
           {t("common.button.save")}
         </Button>

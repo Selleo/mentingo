@@ -16,7 +16,7 @@ const normalizeOrigin = (value: string) => {
 };
 
 const resolveApiBaseUrl = () => {
-  return normalizeApiBaseUrl(process.env.API_URL ?? process.env.VITE_API_URL ?? DEFAULT_API_URL);
+  return normalizeApiBaseUrl(process.env.API_URL ?? DEFAULT_API_URL);
 };
 
 const cookieHeaderFromCookies = (cookies: Cookie[]) => {
