@@ -2,20 +2,42 @@
 
 ## Overview
 
-This document describes the technical design for SCORM 1.2 support in Mentingo with a storage model that can support SCORM 2004 later. The first implementation supports SCORM 1.2 package import, launch, runtime commit, and completion mapping.
+This document describes the technical design for SCORM 1.2 support in Mentingo with a storage model that can support SCORM 2004 later. The current implementation supports SCORM 1.2 package import first. Launch, runtime commit, content serving, and completion mapping are the remaining major work items.
+
+## Current Implementation Status
+
+Done:
+
+- Shared course, lesson, and SCORM enums/types exist.
+- `course_type = default | scorm` is in place and frontend/backend behavior uses course type instead of `isScorm`.
+- `scorm_packages`, `scorm_scos`, `scorm_attempts`, and `scorm_runtime_state` schema exists.
+- SCORM course creation accepts multipart form data, validates the ZIP, parses the manifest, stores the original ZIP, stores extracted files, creates one package row, creates one chapter per SCO, creates one `scorm` lesson per generated chapter, and links each lesson to its SCO.
+- SCORM lesson creation accepts multipart form data, validates the ZIP, parses the manifest, stores the original ZIP, stores extracted files, creates one `scorm` lesson, and links all package SCOs to that lesson.
+- SCORM lesson delete uses the normal lesson delete flow.
+- SCORM lesson package replacement is intentionally not available; admins delete the lesson and create a new SCORM lesson for a different package.
+- Admin UI includes SCORM course creation, SCORM lesson creation, course type badges, SCORM course feature hiding, and SCORM lesson delete.
+
+Remaining:
+
+- SCORM player.
+- Launch metadata endpoint.
+- Extracted SCORM content/asset serving endpoint.
+- Attempt creation/resume.
+- Runtime CMI commit handling.
+- Completion mapping from SCORM status to Mentingo lesson progress.
 
 The repository already has useful foundations:
 
 - `courses -> chapters -> lessons` maps well to SCORM course imports.
 - Existing progress rollup can mark chapters and courses complete after lessons complete.
-- `courses.isScorm` exists and should be migrated toward an explicit course type.
-- `apps/api/src/scorm` already parses `imsmanifest.xml`, extracts files, uploads to S3, stores metadata, and creates chapters/lessons.
-
-The current SCORM code should be refactored, not treated as final. In particular, SCOs should create `scorm` lessons, not ordinary content lessons.
+- `course_type` now identifies default and SCORM courses.
+- `apps/api/src/scorm` parses `imsmanifest.xml`, extracts files, uploads to S3, stores metadata, and creates SCORM chapters/lessons.
 
 ## Schema Design
 
 ### Course Type
+
+Status: done.
 
 Add a backend-enforced course type:
 
@@ -31,6 +53,8 @@ Recommended DB shape:
 
 ### Lesson Type
 
+Status: done.
+
 Extend lesson types with:
 
 - `scorm`
@@ -38,6 +62,8 @@ Extend lesson types with:
 SCORM lessons should render with the SCORM player and should not use the content, quiz, AI mentor, or embed renderers.
 
 ### SCORM Package Tables
+
+Status: done. The implemented column names use `reference` terminology instead of `s3_key`/`s3_prefix`.
 
 Add package-level storage. Suggested table: `scorm_packages`.
 
@@ -49,8 +75,8 @@ Fields:
 - `standard`: `scorm_1_2 | scorm_2004`
 - `entity_type`: `course | lesson`
 - `entity_id`: the owning course ID or lesson ID, depending on `entity_type`
-- `original_file_s3_key`
-- `extracted_s3_prefix`
+- `original_file_reference`
+- `extracted_files_reference`
 - `manifest_entry_point`
 - `manifest_json`
 - `status`: at minimum `ready`; optional `processing` and `failed` if import becomes asynchronous
@@ -63,6 +89,8 @@ Store both the original ZIP and extracted files. The ZIP is useful for audit/deb
 - `entity_type = lesson` points to an existing lesson.
 
 ### SCO Tables
+
+Status: done.
 
 Add SCO-level storage. Suggested table: `scorm_scos`.
 
@@ -89,6 +117,8 @@ Each SCO should have a stable record. SCORM course import creates one chapter an
 Do not make `scorm_scos.lesson_id` unique. Multi-SCO lesson imports require multiple SCO rows to point to the same Mentingo lesson.
 
 ### Runtime Tables
+
+Status: schema exists; launch/commit behavior is not implemented yet.
 
 Add attempt storage. Suggested table: `scorm_attempts`.
 
@@ -135,6 +165,8 @@ The normalized fields support reporting and progress mapping. `raw_cmi_json` pre
 
 ### Shared Validation
 
+Status: done for import.
+
 Both import modes should:
 
 - Accept a ZIP file.
@@ -147,6 +179,8 @@ Both import modes should:
 - Store the original ZIP and extracted files.
 
 ### Course Import
+
+Status: done for upload/import and package/SCO/lesson/chapter persistence.
 
 Course import should run in a transaction for DB changes.
 
@@ -163,27 +197,31 @@ Flow:
 
 Course package replacement is not supported. If a SCORM course needs a different package, the admin deletes the course and creates a new one.
 
-### Lesson Import And Replacement
+### Lesson Import And Deletion
 
 Lesson import is available inside normal courses.
+
+Status: lesson import and deletion are done. In-place package replacement is not supported by current product decision.
 
 Flow:
 
 1. Validate and parse package.
-2. Create a `scorm` lesson in the selected chapter, or replace the selected SCORM lesson.
+2. Create a `scorm` lesson in the selected chapter.
 3. Store package and SCO metadata.
 4. Link every SCO in the package to the same Mentingo lesson.
 
 Lesson import supports one or many SCOs. If multiple SCOs are present, the SCORM lesson player uses manifest order and provides simple previous/next navigation inside the lesson.
 
-Lesson replacement follows normal lesson editing semantics:
+SCORM lesson editing semantics:
 
-- If a learner already completed the lesson, that Mentingo completion remains completed.
-- Old SCORM CMI state is not migrated into the new package.
-- New launches use the new package/SCO runtime state.
+- The lesson title can be edited.
+- The attached SCORM package is locked after creation.
+- If an admin wants a different SCORM package, they delete the lesson and create a new one.
 - Deleting the SCORM lesson deletes its SCORM package/SCO records by cascade where appropriate.
 
 ## Runtime Behavior
+
+Status: not implemented yet.
 
 Use `scorm-again` in the web player.
 
@@ -242,11 +280,10 @@ Scores should be stored in SCORM runtime state. Do not treat SCORM scores as qui
 
 ## API Surface
 
-Suggested backend endpoints:
+Status: import endpoints are implemented as `POST /api/scorm/course` and `POST /api/scorm/lesson`. Launch, commit, and content endpoints remain.
 
-- `POST /api/scorm/course/import`
-- `POST /api/scorm/lesson/import`
-- `POST /api/scorm/lesson/:lessonId/replace`
+Remaining suggested backend endpoints:
+
 - `GET /api/scorm/lessons/:lessonId/launch`
 - `POST /api/scorm/attempts/:attemptId/commit`
 - `GET /api/scorm/packages/:packageId/content?path=...`
@@ -260,6 +297,8 @@ Endpoint names can be adapted to existing controller conventions, but the respon
 
 ## Admin Restrictions
 
+Status: UI restrictions and shared feature flags exist; continue enforcing backend guards as new endpoints are added.
+
 For `course.type = scorm`:
 
 - Hide Curriculum tab in the admin course editor.
@@ -272,6 +311,8 @@ Backend restrictions are required. UI restrictions alone are not sufficient.
 
 ## Asset Serving
 
+Status: not implemented yet.
+
 SCORM content must be able to find the SCORM API in the parent window and load package assets with original relative paths.
 
 Requirements:
@@ -283,6 +324,8 @@ Requirements:
 - Avoid breaking package-relative navigation.
 
 ## Testing
+
+Status: API and web type checks pass for the implemented upload/admin work. Dedicated SCORM import/player tests still need to be added.
 
 Backend tests:
 

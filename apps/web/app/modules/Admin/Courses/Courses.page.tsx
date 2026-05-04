@@ -68,7 +68,9 @@ import type { CourseType } from "@repo/shared";
 import type { GetAllCoursesResponse } from "~/api/generated-api";
 import type { CourseParams, CourseStatus } from "~/api/queries/useCourses";
 
-type TCourse = GetAllCoursesResponse["data"][number];
+type TCourse = GetAllCoursesResponse["data"][number] & {
+  courseType?: CourseType;
+};
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.courses");
 

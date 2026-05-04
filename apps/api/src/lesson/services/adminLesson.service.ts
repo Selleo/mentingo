@@ -79,6 +79,20 @@ export class AdminLessonService {
   ) {}
 
   async createLessonForChapter(data: CreateLessonBody, currentUser: CurrentUserType) {
+    const { lessonId, language } = await this.db.transaction((trx) =>
+      this.createLessonForChapterInTransaction(data, currentUser, trx),
+    );
+
+    await this.publishCreateLessonEvent(lessonId, language, currentUser);
+
+    return lessonId;
+  }
+
+  async createLessonForChapterInTransaction(
+    data: CreateLessonBody,
+    currentUser: CurrentUserType,
+    dbInstance: DatabasePg,
+  ) {
     await this.masterCourseService.assertCourseContentEditableByChapterId(data.chapterId);
     await this.courseFeaturePolicyService.assertCourseFeatureEnabledByChapterId(
       data.chapterId,
@@ -98,7 +112,10 @@ export class AdminLessonService {
       });
     }
 
-    const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(data.chapterId);
+    const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(
+      data.chapterId,
+      dbInstance,
+    );
 
     const lesson = await this.adminLessonRepository.createLessonForChapter(
       {
@@ -106,31 +123,38 @@ export class AdminLessonService {
         displayOrder: maxDisplayOrder + 1,
       },
       language,
+      dbInstance,
     );
 
     if (data.contextId) {
       const resourceIds = await this.getResourcesByContextId(data.contextId);
 
       if (resourceIds.length) {
-        await this.adminLessonRepository.linkResourcesToLesson(lesson.id, resourceIds);
+        await this.adminLessonRepository.linkResourcesToLesson(lesson.id, resourceIds, dbInstance);
       }
 
       await this.cache.del(getContextKey(data.contextId));
     }
 
-    await this.adminLessonRepository.updateLessonCountForChapter(lesson.chapterId);
+    await this.adminLessonRepository.updateLessonCountForChapter(lesson.chapterId, dbInstance);
 
-    const createdLessonSnapshot = await this.buildLessonActivitySnapshot(lesson.id, language);
+    return { lessonId: lesson.id, language };
+  }
+
+  async publishCreateLessonEvent(
+    lessonId: UUIDType,
+    language: SupportedLanguages,
+    currentUser: CurrentUserType,
+  ) {
+    const createdLessonSnapshot = await this.buildLessonActivitySnapshot(lessonId, language);
 
     await this.outboxPublisher.publish(
       new CreateLessonEvent({
-        lessonId: lesson.id,
+        lessonId,
         actor: currentUser,
         createdLesson: createdLessonSnapshot,
       }),
     );
-
-    return lesson.id;
   }
 
   async getResourcesByContextId(contextId: UUIDType) {

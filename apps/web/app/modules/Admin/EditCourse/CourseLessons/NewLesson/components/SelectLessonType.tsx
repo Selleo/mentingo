@@ -56,7 +56,7 @@ const lessonTypes: readonly LessonTypeConfig[] = [
     description: "adminCourseView.curriculum.lesson.other.aiMentorLessonDescription",
   },
   {
-    contentType: ContentTypes.CONTENT_LESSON_FORM,
+    contentType: ContentTypes.SCORM_LESSON_FORM,
     handle: "scorm",
     lucideIcon: PackageOpen,
     title: "adminCourseView.curriculum.lesson.other.scorm",

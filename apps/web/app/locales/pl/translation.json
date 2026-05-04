@@ -47,7 +47,8 @@
       "content": "Treść",
       "quiz": "Quiz",
       "ai_mentor": "AI Mentor",
-      "embed": "Osadzenie"
+      "embed": "Osadzenie",
+      "scorm": "SCORM"
     },
     "error": {
       "somethingWentWrong": "Ups! Coś poszło nie tak."
@@ -200,6 +201,17 @@
       "submit": "Utwórz kurs SCORM",
       "creating": "Tworzenie kursu SCORM...",
       "toastDraftReady": "Formularz kursu SCORM jest gotowy do integracji z API"
+    },
+    "lesson": {
+      "packageSection": "Pakiet SCORM",
+      "packageAttached": "Pakiet SCORM jest dodany",
+      "packageLocked": "Tego pakietu nie można zastąpić po utworzeniu lekcji.",
+      "replacePackageTooltip": "Jeśli chcesz dodać inny pakiet SCORM, usuń tę lekcję i utwórz nową.",
+      "validation": {
+        "packageRequired": "Pakiet SCORM jest wymagany",
+        "packageTooLarge": "Pakiet SCORM musi mieć mniej niż 500MB",
+        "packageInvalidType": "Pakiet SCORM musi być plikiem .zip"
+      }
     }
   },
   "adminCourseTypeSelector": {
@@ -1418,6 +1430,7 @@
         "removeQuizLesson": "Czy na pewno chcesz usunąć tę lekcję quizową z rozdziału?",
         "removeAiMentorLesson": "Czy na pewno chcesz usunąć tę lekcję AI Mentora z rozdziału?",
         "removeEmbedLesson": "Czy na pewno chcesz usunąć tę lekcję z osadzeniem z rozdziału?",
+        "removeScormLesson": "Czy na pewno chcesz usunąć tę lekcję SCORM z rozdziału?",
         "removeChapter": "Czy na pewno chcesz usunąć ten rozdział?",
         "removeQuestion": "Czy na pewno chcesz usunąć pytanie?",
         "removeContent": "Czy na pewno chcesz usunąć treść?"
@@ -1508,6 +1521,7 @@
           "lessonCreatedSuccessfully": "Lekcja utworzona pomyślnie",
           "fileLessonCreatedSuccessfully": "Plik utworzony pomyślnie",
           "contentLessonCreatedSuccessfully": "Lekcja utworzona pomyślnie",
+          "scormLessonCreatedSuccessfully": "Lekcja SCORM utworzona pomyślnie",
           "quizLessonCreatedSuccessfully": "Quiz utworzony pomyślnie",
           "aiMentorLessonCreatedSuccessfully": "Lekcja AI Mentora utworzona pomyślnie",
           "aiMentorLessonUpdatedSuccessfully": "Lekcja AI Mentora zaktualizowana pomyślnie",

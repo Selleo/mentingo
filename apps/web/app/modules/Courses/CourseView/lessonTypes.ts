@@ -3,6 +3,7 @@ export const LessonTypesIcons = {
   quiz: "Quiz",
   ai_mentor: "AiMentor",
   embed: "Embed",
+  scorm: "Content",
 } as const;
 
 const lessonTypeTranslationSuffix = {
@@ -10,6 +11,7 @@ const lessonTypeTranslationSuffix = {
   quiz: "quiz",
   ai_mentor: "ai_mentor",
   embed: "embed",
+  scorm: "scorm",
 } as const;
 
 type LessonTypeTranslationKey = keyof typeof lessonTypeTranslationSuffix;

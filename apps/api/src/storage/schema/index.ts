@@ -685,7 +685,7 @@ export const scormPackages = pgTable(
     status: scormPackageStatusEnum("status")
       .$type<ScormPackageStatus>()
       .notNull()
-      .default(SCORM_PACKAGE_STATUS.READY),
+      .default(SCORM_PACKAGE_STATUS.PROCESSING),
     tenantId,
   },
   withTenantIdIndex("scorm_packages", (table) => ({

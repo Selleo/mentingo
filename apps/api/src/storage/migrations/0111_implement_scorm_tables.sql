@@ -17,7 +17,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- CREATE TYPE "public"."scorm_package_status" AS ENUM('ready', 'failed');
+ CREATE TYPE "public"."scorm_package_status" AS ENUM('processing', 'ready', 'failed');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS "scorm_packages" (
 	"extracted_files_reference" text NOT NULL,
 	"manifest_entry_point" text NOT NULL,
 	"manifest_json" jsonb DEFAULT '{}'::jsonb NOT NULL,
-	"status" "scorm_package_status" DEFAULT 'ready' NOT NULL,
+	"status" "scorm_package_status" DEFAULT 'processing' NOT NULL,
 	"tenant_id" uuid DEFAULT current_setting('app.tenant_id', true)::uuid NOT NULL
 );
 --> statement-breakpoint

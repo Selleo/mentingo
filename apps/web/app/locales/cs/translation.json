@@ -46,7 +46,8 @@
       "content": "Obsah",
       "quiz": "Kvíz",
       "ai_mentor": "AI mentor",
-      "embed": "Vložit"
+      "embed": "Vložit",
+      "scorm": "SCORM"
     },
     "error": {
       "somethingWentWrong": "Jejda! Něco se pokazilo."
@@ -199,6 +200,17 @@
       "submit": "Vytvořit kurz SCORM",
       "creating": "Vytváření kurzu SCORM...",
       "toastDraftReady": "Formulář kurzu SCORM je připraven pro integraci API"
+    },
+    "lesson": {
+      "packageSection": "Balíček SCORM",
+      "packageAttached": "Balíček SCORM je připojen",
+      "packageLocked": "Tento balíček nelze po vytvoření lekce nahradit.",
+      "replacePackageTooltip": "Pokud chcete přidat jiný balíček SCORM, odstraňte tuto lekci a vytvořte novou.",
+      "validation": {
+        "packageRequired": "Balíček SCORM je povinný",
+        "packageTooLarge": "Balíček SCORM musí být menší než 500MB",
+        "packageInvalidType": "Balíček SCORM musí být soubor .zip"
+      }
     }
   },
   "adminCourseTypeSelector": {
@@ -1378,6 +1390,7 @@
         "removeQuizLesson": "Opravdu chcete odstranit tuto kvízovou lekci z kapitoly?",
         "removeAiMentorLesson": "Opravdu chcete smazat tuto lekci AI Mentor z kapitoly?",
         "removeEmbedLesson": "Opravdu chcete smazat tuto vloženou lekci z kapitoly?",
+        "removeScormLesson": "Opravdu chcete smazat tuto lekci SCORM z kapitoly?",
         "removeChapter": "Opravdu chcete smazat tuto kapitolu?",
         "removeQuestion": "Opravdu chcete smazat otázku?",
         "removeContent": "Opravdu chcete smazat obsah?"
@@ -1466,6 +1479,7 @@
           "lessonCreatedSuccessfully": "Lekce byla úspěšně vytvořena",
           "fileLessonCreatedSuccessfully": "Položka souboru byla úspěšně vytvořena",
           "contentLessonCreatedSuccessfully": "Obsah lekce byl úspěšně vytvořen",
+          "scormLessonCreatedSuccessfully": "Lekce SCORM byla úspěšně vytvořena",
           "quizLessonCreatedSuccessfully": "Kvíz byl úspěšně vytvořen",
           "aiMentorLessonCreatedSuccessfully": "Lekce AI Mentor byla úspěšně vytvořena",
           "aiMentorLessonUpdatedSuccessfully": "Lekce AI Mentor byla úspěšně aktualizována",

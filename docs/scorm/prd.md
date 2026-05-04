@@ -11,6 +11,30 @@ SCORM content can be imported in two ways:
 
 SCORM 2004 runtime, sequencing, navigation rules, and detailed interaction analytics are out of scope for the first release.
 
+## Current Implementation Status
+
+Done:
+
+- SCORM course creation flow exists.
+- SCORM lesson creation flow exists.
+- SCORM package upload accepts multipart form data.
+- SCORM ZIP validation, manifest parsing, original ZIP storage, and extracted file storage are implemented.
+- Course import creates one chapter per SCO.
+- Each generated chapter gets one `scorm` lesson.
+- Each generated SCORM lesson is linked to its corresponding SCO through SCORM package/SCO metadata.
+- Lesson import creates one `scorm` lesson and links all package SCOs to that lesson.
+- SCORM lesson delete is available through the normal lesson delete flow.
+- SCORM lesson package replacement is intentionally not available in the UI; admins delete the lesson and create a new one for a different package.
+- SCORM course admin restrictions are partially implemented: curriculum/settings UI is hidden or guarded, and backend feature flags/guards exist for restricted course features.
+
+Remaining:
+
+- SCORM player.
+- SCORM launch metadata endpoint.
+- SCORM content/asset serving endpoint.
+- SCORM runtime attempt and CMI commit handling.
+- Completion mapping from SCORM status to Mentingo lesson progress.
+
 ## Goals
 
 - Allow admins to import a SCORM package as a single lesson.
@@ -45,8 +69,9 @@ Expected behavior:
 - If the package contains multiple SCOs, the lesson player uses the manifest order and lets the student move between SCOs inside the same Mentingo lesson.
 - The lesson is completed when all SCOs attached to the lesson are completed.
 - If the SCORM lesson is deleted, it is gone like any other lesson.
-- If the SCORM lesson is replaced after a learner has already completed it, the existing Mentingo completion remains completed.
-- New SCORM runtime state belongs to the new uploaded package. Old SCORM CMI state is not migrated.
+- SCORM lesson package replacement is not supported in-place.
+- If an admin wants a different SCORM package, they delete the SCORM lesson and create a new one.
+- The SCORM lesson title can be edited after creation, but the attached package stays locked.
 
 ### SCORM Course Import
 
@@ -85,10 +110,10 @@ SCORM course content is locked after import:
 ### Admin Imports SCORM As Lesson
 
 1. Admin opens the curriculum editor of a normal course.
-2. Admin creates or replaces a SCORM lesson in a chapter.
+2. Admin creates a SCORM lesson in a chapter.
 3. System validates the SCORM ZIP package.
 4. System stores the original ZIP and extracted package files.
-5. System creates or updates one SCORM lesson.
+5. System creates one SCORM lesson.
 6. System attaches all package SCOs to that one lesson.
 7. Existing Mentingo progress follows normal lesson behavior.
 
@@ -150,7 +175,7 @@ The v1 product should preserve manifest hierarchy and raw runtime data, but it s
 - SCORM lesson import accepts one or many SCOs and keeps them inside one Mentingo lesson.
 - SCORM course curriculum editing is hidden in the UI and blocked in the backend.
 - SCORM course package replacement is not available.
-- SCORM lesson replacement is allowed and follows normal lesson editing semantics.
+- SCORM lesson package replacement is not available; admins delete the lesson and create a new one for a different package.
 - Multi-SCO lessons mark the Mentingo lesson complete only after all attached SCOs complete.
 - Student SCORM runtime state is committed and can be resumed.
 - SCORM `completed` and `passed` statuses mark the current SCO completed.

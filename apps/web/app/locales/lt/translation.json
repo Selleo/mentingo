@@ -46,7 +46,8 @@
       "content": "Turinys",
       "quiz": "Viktorina",
       "ai_mentor": "AI mentorius",
-      "embed": "Įterpti"
+      "embed": "Įterpti",
+      "scorm": "SCORM"
     },
     "error": {
       "somethingWentWrong": "Oi! Kažkas nutiko."
@@ -199,6 +200,17 @@
       "submit": "Sukurti SCORM kursą",
       "creating": "Kuriamas SCORM kursas...",
       "toastDraftReady": "SCORM kurso forma paruošta API integracijai"
+    },
+    "lesson": {
+      "packageSection": "SCORM paketas",
+      "packageAttached": "SCORM paketas pridėtas",
+      "packageLocked": "Šio paketo negalima pakeisti sukūrus pamoką.",
+      "replacePackageTooltip": "Jei norite pridėti kitą SCORM paketą, ištrinkite šią pamoką ir sukurkite naują.",
+      "validation": {
+        "packageRequired": "SCORM paketas yra privalomas",
+        "packageTooLarge": "SCORM paketas turi būti mažesnis nei 500MB",
+        "packageInvalidType": "SCORM paketas turi būti .zip failas"
+      }
     }
   },
   "adminCourseTypeSelector": {
@@ -1378,6 +1390,7 @@
         "removeQuizLesson": "Ar tikrai norite ištrinti šią viktorinos pamoką iš skyriaus?",
         "removeAiMentorLesson": "Ar tikrai norite ištrinti šią AI mentoriaus pamoką iš skyriaus?",
         "removeEmbedLesson": "Ar tikrai norite ištrinti šią įdėjimo pamoką iš skyriaus?",
+        "removeScormLesson": "Ar tikrai norite ištrinti šią SCORM pamoką iš skyriaus?",
         "removeChapter": "Ar tikrai norite ištrinti šį skyrių?",
         "removeQuestion": "Ar tikrai norite ištrinti klausimą?",
         "removeContent": "Ar tikrai norite ištrinti turinį?"
@@ -1466,6 +1479,7 @@
           "lessonCreatedSuccessfully": "Pamoka sėkmingai sukurta",
           "fileLessonCreatedSuccessfully": "Failo elementas sėkmingai sukurtas",
           "contentLessonCreatedSuccessfully": "Turinio pamoka sėkmingai sukurta",
+          "scormLessonCreatedSuccessfully": "SCORM pamoka sėkmingai sukurta",
           "quizLessonCreatedSuccessfully": "Viktorina sėkmingai sukurta",
           "aiMentorLessonCreatedSuccessfully": "AI mentoriaus pamoka sėkmingai sukurta",
           "aiMentorLessonUpdatedSuccessfully": "AI mentoriaus pamoka sėkmingai atnaujinta",

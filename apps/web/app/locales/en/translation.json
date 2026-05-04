@@ -46,7 +46,8 @@
       "content": "Content",
       "quiz": "Quiz",
       "ai_mentor": "AI Mentor",
-      "embed": "Embed"
+      "embed": "Embed",
+      "scorm": "SCORM"
     },
     "error": {
       "somethingWentWrong": "Oops! Something went wrong."
@@ -199,6 +200,17 @@
       "submit": "Create SCORM course",
       "creating": "Creating SCORM course...",
       "toastDraftReady": "SCORM course form is ready for API integration"
+    },
+    "lesson": {
+      "packageSection": "SCORM package",
+      "packageAttached": "SCORM package attached",
+      "packageLocked": "This package cannot be replaced after the lesson is created.",
+      "replacePackageTooltip": "If you want to add a different SCORM package, delete this lesson and create a new one.",
+      "validation": {
+        "packageRequired": "SCORM package is required",
+        "packageTooLarge": "SCORM package must be less than 500MB",
+        "packageInvalidType": "SCORM package must be a .zip file"
+      }
     }
   },
   "adminCourseTypeSelector": {
@@ -1431,6 +1443,7 @@
         "removeQuizLesson": "Are you sure you want to delete this quiz lesson from chapter?",
         "removeAiMentorLesson": "Are you sure you want to delete this AI Mentor lesson from chapter?",
         "removeEmbedLesson": "Are you sure you want to delete this embed lesson from chapter?",
+        "removeScormLesson": "Are you sure you want to delete this SCORM lesson from chapter?",
         "removeChapter": "Are you sure you want to delete this chapter?",
         "removeQuestion": "Are you sure you want to delete question?",
         "removeContent": "Are you sure you want to delete content?"
@@ -1519,6 +1532,7 @@
           "lessonCreatedSuccessfully": "Lesson created successfully",
           "fileLessonCreatedSuccessfully": "File item created successfully",
           "contentLessonCreatedSuccessfully": "Content lesson created successfully",
+          "scormLessonCreatedSuccessfully": "SCORM lesson created successfully",
           "quizLessonCreatedSuccessfully": "Quiz created successfully",
           "aiMentorLessonCreatedSuccessfully": "AI Mentor lesson created successfully",
           "aiMentorLessonUpdatedSuccessfully": "AI Mentor lesson updated successfully",

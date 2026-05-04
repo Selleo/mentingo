@@ -14,6 +14,7 @@ export type ScormPackageEntityType =
   (typeof SCORM_PACKAGE_ENTITY_TYPE)[keyof typeof SCORM_PACKAGE_ENTITY_TYPE];
 
 export const SCORM_PACKAGE_STATUS = {
+  PROCESSING: "processing",
   READY: "ready",
   FAILED: "failed",
 } as const;

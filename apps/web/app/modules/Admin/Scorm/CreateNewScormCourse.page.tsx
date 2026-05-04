@@ -15,6 +15,7 @@ import { CourseMetadataFields } from "~/modules/Admin/AddCourse/components/Cours
 import { CourseThumbnailUploadField } from "~/modules/Admin/AddCourse/components/CourseThumbnailUploadField";
 import { useObjectUrl } from "~/modules/Admin/AddCourse/hooks/useObjectUrl";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
+import { isBrowserFile } from "~/utils/isBrowserFile";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import Breadcrumb from "../AddCourse/components/Breadcrumb";
@@ -24,9 +25,6 @@ import { scormCourseFormSchema } from "./validators/scormCourseFormSchema";
 
 import type { ScormCourseFormValues } from "./validators/scormCourseFormSchema";
 import type { MetaFunction } from "@remix-run/react";
-
-const isBrowserFile = (value: unknown): value is File =>
-  typeof File !== "undefined" && value instanceof File;
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.createNewCourse");
 

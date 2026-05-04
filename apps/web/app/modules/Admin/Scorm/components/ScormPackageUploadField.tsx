@@ -8,6 +8,9 @@ import { cn } from "~/lib/utils";
 type ScormPackageUploadFieldProps = {
   file?: File;
   error?: string;
+  disabled?: boolean;
+  readonlyTitle?: string;
+  readonlyDescription?: string;
   onChange: (file: File) => void;
   onClear: () => void;
 };
@@ -21,6 +24,9 @@ const formatFileSize = (size: number) => {
 export const ScormPackageUploadField = ({
   file,
   error,
+  disabled = false,
+  readonlyTitle,
+  readonlyDescription,
   onChange,
   onClear,
 }: ScormPackageUploadFieldProps) => {
@@ -32,7 +38,8 @@ export const ScormPackageUploadField = ({
       "application/x-zip-compressed": [".zip"],
     },
     multiple: false,
-    noClick: Boolean(file),
+    disabled,
+    noClick: Boolean(file) || disabled,
     onDropAccepted: ([acceptedFile]) => {
       if (acceptedFile) onChange(acceptedFile);
     },
@@ -43,14 +50,30 @@ export const ScormPackageUploadField = ({
       <div
         {...getRootProps()}
         className={cn(
-          "group rounded-lg border-2 border-dashed bg-white p-6 transition-colors",
+          "group cursor-pointer rounded-lg border-2 border-dashed bg-white p-6 transition-colors",
           file ? "border-primary-200" : "border-neutral-300 hover:border-primary-400",
           isDragActive && "border-primary-600 bg-primary-50",
           error && "border-red-400 bg-red-50/40",
+          disabled &&
+            "cursor-not-allowed border-neutral-200 bg-neutral-50 opacity-75 hover:border-neutral-200",
         )}
       >
         <input {...getInputProps()} />
-        {file ? (
+        {disabled ? (
+          <div className="flex items-start gap-4">
+            <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-neutral-100 text-neutral-600">
+              <FileArchive className="size-6" aria-hidden="true" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="body-base-md text-neutral-950">
+                {readonlyTitle ?? t("adminScorm.lesson.packageAttached")}
+              </p>
+              <p className="body-sm mt-1 text-neutral-700">
+                {readonlyDescription ?? t("adminScorm.lesson.packageLocked")}
+              </p>
+            </div>
+          </div>
+        ) : file ? (
           <div className="flex flex-col gap-5">
             <div className="flex items-start gap-4">
               <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-800">

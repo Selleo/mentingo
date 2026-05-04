@@ -1,3 +1,4 @@
+import { PackageOpen } from "lucide-react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -57,7 +58,11 @@ const LessonCard = ({ item, onClickLessonCard, dragTrigger, selectedLesson }: Le
     >
       {dragTrigger}
       <div className="flex min-w-0 items-start gap-x-2">
-        <Icon name={getIcon as IconName} className="size-6 shrink-0 text-primary-700" />
+        {item.type === LessonType.SCORM ? (
+          <PackageOpen className="size-6 shrink-0 text-primary-700" aria-hidden="true" />
+        ) : (
+          <Icon name={getIcon as IconName} className="size-6 shrink-0 text-primary-700" />
+        )}
         <hgroup className="min-w-0">
           <p
             className="text-l break-words"

@@ -46,7 +46,8 @@
       "content": "Inhalt",
       "quiz": "Quiz",
       "ai_mentor": "KI-Mentor",
-      "embed": "Einbetten"
+      "embed": "Einbetten",
+      "scorm": "SCORM"
     },
     "error": {
       "somethingWentWrong": "Hoppla! Etwas ist schief gelaufen."
@@ -199,6 +200,17 @@
       "submit": "SCORM-Kurs erstellen",
       "creating": "SCORM-Kurs wird erstellt...",
       "toastDraftReady": "Das SCORM-Kursformular ist bereit für die API-Integration"
+    },
+    "lesson": {
+      "packageSection": "SCORM-Paket",
+      "packageAttached": "SCORM-Paket angehängt",
+      "packageLocked": "Dieses Paket kann nach dem Erstellen der Lektion nicht ersetzt werden.",
+      "replacePackageTooltip": "Wenn Sie ein anderes SCORM-Paket hinzufügen möchten, löschen Sie diese Lektion und erstellen Sie eine neue.",
+      "validation": {
+        "packageRequired": "SCORM-Paket ist erforderlich",
+        "packageTooLarge": "SCORM-Paket muss kleiner als 500MB sein",
+        "packageInvalidType": "SCORM-Paket muss eine .zip-Datei sein"
+      }
     }
   },
   "adminCourseTypeSelector": {
@@ -1378,6 +1390,7 @@
         "removeQuizLesson": "Sind Sie sicher, dass Sie diese Quizlektion aus dem Kapitel löschen möchten?",
         "removeAiMentorLesson": "Sind Sie sicher, dass Sie diese AI Mentor-Lektion aus dem Kapitel löschen möchten?",
         "removeEmbedLesson": "Sind Sie sicher, dass Sie diese Einbettungslektion aus dem Kapitel löschen möchten?",
+        "removeScormLesson": "Sind Sie sicher, dass Sie diese SCORM-Lektion aus dem Kapitel löschen möchten?",
         "removeChapter": "Sind Sie sicher, dass Sie dieses Kapitel löschen möchten?",
         "removeQuestion": "Sind Sie sicher, dass Sie die Frage löschen möchten?",
         "removeContent": "Sind Sie sicher, dass Sie Inhalte löschen möchten?"
@@ -1466,6 +1479,7 @@
           "lessonCreatedSuccessfully": "Lektion erfolgreich erstellt",
           "fileLessonCreatedSuccessfully": "Dateielement erfolgreich erstellt",
           "contentLessonCreatedSuccessfully": "Inhaltslektion erfolgreich erstellt",
+          "scormLessonCreatedSuccessfully": "SCORM-Lektion erfolgreich erstellt",
           "quizLessonCreatedSuccessfully": "Quiz erfolgreich erstellt",
           "aiMentorLessonCreatedSuccessfully": "AI-Mentor-Lektion erfolgreich erstellt",
           "aiMentorLessonUpdatedSuccessfully": "AI-Mentor-Lektion erfolgreich aktualisiert",

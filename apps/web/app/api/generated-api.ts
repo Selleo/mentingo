@@ -1363,6 +1363,7 @@ export interface GetAllCoursesResponse {
     priceInCents: number;
     currency: string;
     status?: "draft" | "published" | "private";
+    courseType?: "default" | "scorm";
     createdAt?: string;
     hasFreeChapters?: boolean;
     stripeProductId?: string | null;
@@ -1371,7 +1372,6 @@ export interface GetAllCoursesResponse {
     isContentReadonly?: boolean;
     sourceCourseId?: string | null;
     sourceTenantId?: string | null;
-    courseType?: "default" | "scorm";
   }[];
   pagination: {
     totalItems: number;
@@ -1403,6 +1403,7 @@ export interface GetStudentCoursesResponse {
     priceInCents: number;
     currency: string;
     status?: "draft" | "published" | "private";
+    courseType?: "default" | "scorm";
     createdAt?: string;
     hasFreeChapters?: boolean;
     stripeProductId?: string | null;
@@ -1469,6 +1470,7 @@ export interface GetAvailableCoursesResponse {
     priceInCents: number;
     currency: string;
     status?: "draft" | "published" | "private";
+    courseType?: "default" | "scorm";
     createdAt?: string;
     hasFreeChapters?: boolean;
     stripeProductId?: string | null;
@@ -1512,6 +1514,7 @@ export interface GetTopCoursesResponse {
     priceInCents: number;
     currency: string;
     status?: "draft" | "published" | "private";
+    courseType?: "default" | "scorm";
     createdAt?: string;
     hasFreeChapters?: boolean;
     stripeProductId?: string | null;
@@ -1549,6 +1552,7 @@ export interface GetContentCreatorCoursesResponse {
     priceInCents: number;
     currency: string;
     status?: "draft" | "published" | "private";
+    courseType?: "default" | "scorm";
     createdAt?: string;
     hasFreeChapters?: boolean;
     stripeProductId?: string | null;
@@ -1581,7 +1585,7 @@ export interface GetCourseResponse {
         /** @format uuid */
         id: string;
         title: string;
-        type: "content" | "quiz" | "ai_mentor" | "embed";
+        type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm";
         displayOrder: number;
         status: "not_started" | "in_progress" | "completed" | "blocked";
         quizQuestionCount: number | null;
@@ -1659,7 +1663,7 @@ export interface GetBetaCourseByIdResponse {
         /** @format uuid */
         id: string;
         title: string;
-        type: "content" | "quiz" | "ai_mentor" | "embed";
+        type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm";
         description?: string | null;
         displayOrder: number;
         fileS3Key?: string | null;
@@ -2180,7 +2184,7 @@ export interface GetLessonsResponse {
     /** @format uuid */
     id: string;
     title: string;
-    type: "content" | "quiz" | "ai_mentor" | "embed";
+    type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm";
     description: string | null;
     displayOrder: number;
     lessonCompleted?: boolean;
@@ -2200,7 +2204,7 @@ export interface GetLessonByIdResponse {
     /** @format uuid */
     id: string;
     title: string;
-    type: "content" | "quiz" | "ai_mentor" | "embed";
+    type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm";
     description: string | null;
     fileType: string | null;
     fileUrl: string | null;
@@ -2290,7 +2294,7 @@ export interface GetLessonByIdResponse {
 
 export type BetaCreateLessonBody = {
   title: string;
-  type: "content" | "quiz" | "ai_mentor" | "embed";
+  type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm";
   description?: string | null;
   fileS3Key?: string | null;
   avatarReferenceUrl?: string;
@@ -2652,7 +2656,7 @@ export interface BetaUpdateQuizLessonResponse {
 
 export type BetaUpdateLessonBody = ({
   title?: string;
-  type?: "content" | "quiz" | "ai_mentor" | "embed";
+  type?: "content" | "quiz" | "ai_mentor" | "embed" | "scorm";
   description?: string | null;
   fileS3Key?: string | null;
   avatarReferenceUrl?: string;
@@ -2775,7 +2779,7 @@ export interface DeleteStudentQuizAnswersResponse {
 
 export interface CreateEmbedLessonBody {
   title: string;
-  type: "content" | "quiz" | "ai_mentor" | "embed";
+  type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm";
   /** @format uuid */
   chapterId: string;
   resources: {
@@ -2794,7 +2798,7 @@ export interface CreateEmbedLessonResponse {
 
 export interface UpdateEmbedLessonBody {
   title: string;
-  type: "content" | "quiz" | "ai_mentor" | "embed";
+  type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm";
   resources: {
     /** @format uuid */
     id?: string;
@@ -2949,7 +2953,7 @@ export interface GetChapterWithLessonResponse {
       /** @format uuid */
       id: string;
       title: string;
-      type: "content" | "quiz" | "ai_mentor" | "embed";
+      type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm";
       displayOrder: number;
       status: "not_started" | "in_progress" | "completed" | "blocked";
       quizQuestionCount: number | null;
@@ -2983,7 +2987,7 @@ export type BetaCreateChapterBody = {
     /** @format uuid */
     id: string;
     title: string;
-    type: "content" | "quiz" | "ai_mentor" | "embed";
+    type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm";
     description?: string | null;
     displayOrder: number;
     fileS3Key?: string | null;
@@ -3068,7 +3072,7 @@ export type UpdateChapterBody = ({
     /** @format uuid */
     id: string;
     title: string;
-    type: "content" | "quiz" | "ai_mentor" | "embed";
+    type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm";
     description?: string | null;
     displayOrder: number;
     fileS3Key?: string | null;
@@ -3403,6 +3407,14 @@ export interface DeleteManyCategoriesResponse {
 }
 
 export interface CreateScormCourseResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    message: string;
+  };
+}
+
+export interface CreateScormLessonResponse {
   data: {
     /** @format uuid */
     id: string;
@@ -8481,6 +8493,31 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     ) =>
       this.request<CreateScormCourseResponse, any>({
         path: `/api/scorm/course`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ScormControllerCreateScormLesson
+     * @request POST:/api/scorm/lesson
+     */
+    scormControllerCreateScormLesson: (
+      data: {
+        /** @format uuid */
+        chapterId: string;
+        title: string;
+        /** @format binary */
+        scormPackage: File;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateScormLessonResponse, any>({
+        path: `/api/scorm/lesson`,
         method: "POST",
         body: data,
         type: ContentType.FormData,

@@ -1748,93 +1748,107 @@ export class CourseService {
     currentUser: CurrentUserType,
     isPlaywrightTest: boolean,
   ) {
-    const newCourse = await this.db.transaction(async (trx) => {
-      const [category] = await trx
-        .select()
-        .from(categories)
-        .where(eq(categories.id, createCourseBody.categoryId));
-
-      const { enabled: isStripeConfigured } = await this.envService.getStripeConfigured();
-
-      if (!category) {
-        throw new NotFoundException("Category not found");
-      }
-      const globalSettings = await this.settingsService.getGlobalSettings();
-
-      const finalCurrency = globalSettings.defaultCourseCurrency || "usd";
-
-      let productId: string | null = null;
-      let priceId: string | null = null;
-
-      if (!isPlaywrightTest && isStripeConfigured) {
-        const stripeResult = await this.stripeService.createProduct({
-          name: createCourseBody.title,
-          description: createCourseBody?.description ?? "",
-          currency: finalCurrency,
-          amountInCents: createCourseBody?.priceInCents ?? 0,
-        });
-
-        productId = stripeResult.productId;
-        priceId = stripeResult.priceId;
-
-        if (!productId || !priceId) {
-          throw new InternalServerErrorException("Failed to create product");
-        }
-      }
-
-      const isScormCourse = createCourseBody.isScorm === true;
-      const settings = sql`json_build_object(
-        'lessonSequenceEnabled', ${isScormCourse ? false : LESSON_SEQUENCE_ENABLED}::boolean,
-        'quizFeedbackEnabled', ${isScormCourse ? false : QUIZ_FEEDBACK_ENABLED}::boolean,
-        'certificateSignature', NULL,
-        'certificateFontColor', NULL
-      )`;
-
-      const [newCourse] = await trx
-        .insert(courses)
-        .values({
-          title: buildJsonbField(createCourseBody.language, createCourseBody.title),
-          description: buildJsonbField(createCourseBody.language, createCourseBody.description),
-          baseLanguage: createCourseBody.language,
-          availableLocales: [createCourseBody.language],
-          thumbnailS3Key: createCourseBody.thumbnailS3Key,
-          status: createCourseBody.status,
-          priceInCents: createCourseBody.priceInCents,
-          currency: finalCurrency,
-          courseType: isScormCourse ? COURSE_TYPE.SCORM : COURSE_TYPE.DEFAULT,
-          authorId: currentUser.userId,
-          categoryId: createCourseBody.categoryId,
-          stripeProductId: productId,
-          stripePriceId: priceId,
-          settings: settingsToJSONBuildObject(settings),
-        })
-        .returning();
-
-      if (!newCourse) {
-        throw new ConflictException("Failed to create course");
-      }
-
-      await trx
-        .insert(coursesSummaryStats)
-        .values({ courseId: newCourse.id, authorId: currentUser.userId });
-
-      return newCourse;
-    });
-
-    const createdCourseSnapshot = await this.buildCourseActivitySnapshot(
-      newCourse.id,
-      createCourseBody.language,
+    const newCourse = await this.db.transaction((trx) =>
+      this.createCourseInTransaction(createCourseBody, currentUser, isPlaywrightTest, trx),
     );
+
+    await this.publishCreateCourseEvent(newCourse.id, createCourseBody.language, currentUser);
+
+    return newCourse;
+  }
+
+  async createCourseInTransaction(
+    createCourseBody: CreateCourseBody,
+    currentUser: CurrentUserType,
+    isPlaywrightTest: boolean,
+    dbInstance: DatabasePg,
+  ) {
+    const [category] = await dbInstance
+      .select()
+      .from(categories)
+      .where(eq(categories.id, createCourseBody.categoryId));
+
+    const { enabled: isStripeConfigured } = await this.envService.getStripeConfigured();
+
+    if (!category) {
+      throw new NotFoundException("Category not found");
+    }
+    const globalSettings = await this.settingsService.getGlobalSettings();
+
+    const finalCurrency = globalSettings.defaultCourseCurrency || "usd";
+
+    let productId: string | null = null;
+    let priceId: string | null = null;
+
+    if (!isPlaywrightTest && isStripeConfigured) {
+      const stripeResult = await this.stripeService.createProduct({
+        name: createCourseBody.title,
+        description: createCourseBody?.description ?? "",
+        currency: finalCurrency,
+        amountInCents: createCourseBody?.priceInCents ?? 0,
+      });
+
+      productId = stripeResult.productId;
+      priceId = stripeResult.priceId;
+
+      if (!productId || !priceId) {
+        throw new InternalServerErrorException("Failed to create product");
+      }
+    }
+
+    const isScormCourse = createCourseBody.isScorm === true;
+    const settings = sql`json_build_object(
+      'lessonSequenceEnabled', ${isScormCourse ? false : LESSON_SEQUENCE_ENABLED}::boolean,
+      'quizFeedbackEnabled', ${isScormCourse ? false : QUIZ_FEEDBACK_ENABLED}::boolean,
+      'certificateSignature', NULL,
+      'certificateFontColor', NULL
+    )`;
+
+    const [newCourse] = await dbInstance
+      .insert(courses)
+      .values({
+        title: buildJsonbField(createCourseBody.language, createCourseBody.title),
+        description: buildJsonbField(createCourseBody.language, createCourseBody.description),
+        baseLanguage: createCourseBody.language,
+        availableLocales: [createCourseBody.language],
+        thumbnailS3Key: createCourseBody.thumbnailS3Key,
+        status: createCourseBody.status,
+        priceInCents: createCourseBody.priceInCents,
+        currency: finalCurrency,
+        courseType: isScormCourse ? COURSE_TYPE.SCORM : COURSE_TYPE.DEFAULT,
+        authorId: currentUser.userId,
+        categoryId: createCourseBody.categoryId,
+        stripeProductId: productId,
+        stripePriceId: priceId,
+        settings: settingsToJSONBuildObject(settings),
+      })
+      .returning();
+
+    if (!newCourse) {
+      throw new ConflictException("Failed to create course");
+    }
+
+    await dbInstance
+      .insert(coursesSummaryStats)
+      .values({ courseId: newCourse.id, authorId: currentUser.userId });
+
+    return newCourse;
+  }
+
+  async publishCreateCourseEvent(
+    courseId: UUIDType,
+    language: SupportedLanguages,
+    currentUser: CurrentUserType,
+  ) {
+    const createdCourseSnapshot = await this.buildCourseActivitySnapshot(courseId, language);
 
     await this.outboxPublisher.publish(
       new CreateCourseEvent({
-        courseId: newCourse.id,
+        courseId,
         actor: currentUser,
         createdCourse: createdCourseSnapshot,
       }),
     );
-
-    return newCourse;
   }
 
   async updateCourse(

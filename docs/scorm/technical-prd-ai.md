@@ -12,14 +12,44 @@ The implementation must support:
 - Mentingo lesson completion from SCORM completion status.
 - Version-neutral SCORM package, SCO, attempt, and runtime state storage.
 
+## Current Implementation Status
+
+Done:
+
+- Shared constants/types for course type, lesson type, SCORM standards, and SCORM package entity types.
+- DB schema for course type and SCORM package/SCO/attempt/runtime state tables.
+- Generated API/client types for SCORM course and lesson creation.
+- `POST /api/scorm/course`.
+- `POST /api/scorm/lesson`.
+- Multipart validation for SCORM ZIP and optional course thumbnail.
+- ZIP validation, manifest discovery, manifest parsing, SCO extraction, original ZIP upload, extracted file upload, and MIME resolution.
+- `scorm_packages` persistence for course and lesson owners.
+- `scorm_scos` persistence with package-to-lesson-to-SCO links.
+- Course import maps each SCO to one generated chapter and one generated `scorm` lesson.
+- Lesson import maps all SCOs in the package to one generated `scorm` lesson.
+- SCORM lesson delete uses existing lesson delete behavior.
+- SCORM lesson package replacement is intentionally not implemented; admins delete the SCORM lesson and create a new one for a different package.
+- Admin frontend for course type selection, SCORM course creation, SCORM lesson creation, read-only attached package display, delete modal, translations, and course type badges.
+- Frontend/backend feature flags and UI guards for SCORM course-restricted features.
+
+Remaining:
+
+- SCORM player and `useScormPlayer`.
+- Launch metadata endpoint.
+- Extracted asset/content serving endpoint.
+- Attempt creation/resume logic.
+- Runtime CMI commit endpoint.
+- SCORM 1.2 completion mapping to Mentingo lesson progress.
+- Dedicated SCORM import/player tests.
+
 ## Hard Requirements
 
 - Do not implement SCORM 2004 runtime in v1.
 - Do not implement SCORM 2004 sequencing/navigation in v1.
 - Do not normalize objectives/interactions into separate reporting tables in v1.
 - Do not allow SCORM course package replacement.
-- Do allow SCORM lesson replacement and deletion using normal lesson behavior.
-- Do preserve completed Mentingo lesson progress if a completed SCORM lesson is replaced.
+- Do allow SCORM lesson deletion using normal lesson behavior.
+- Do not allow in-place SCORM lesson package replacement; create a new SCORM lesson instead.
 - Do store original ZIP and extracted package files in S3-compatible storage.
 - Do preserve extracted package-relative file paths.
 - Do store raw CMI JSON on runtime commits.
@@ -44,6 +74,8 @@ Existing SCORM code parses manifests and uploads extracted files. Reuse and refa
 
 ### 1. Shared Constants And Types
 
+Status: done.
+
 Add shared/backend constants for:
 
 - Course types: `default`, `scorm`
@@ -54,6 +86,8 @@ Add shared/backend constants for:
 Use existing repo patterns for constants and generated API schemas.
 
 ### 2. DB Schema And Migration
+
+Status: done.
 
 Add course type:
 
@@ -69,14 +103,14 @@ Add SCORM tables:
 - `scorm_attempts`
 - `scorm_runtime_state`
 
-Required package fields:
+Implemented package fields:
 
 - tenant ID
 - standard
 - entity type: `course | lesson`
 - entity ID: owning course ID or lesson ID depending on entity type
-- original ZIP S3 key
-- extracted S3 prefix
+- original ZIP reference
+- extracted files reference
 - manifest entry point
 - manifest JSON
 - status
@@ -143,6 +177,8 @@ Do not add a unique constraint on `scorm_scos.lesson_id`. Multi-SCO lesson impor
 
 ### 3. Manifest Parser Refactor
 
+Status: done for SCORM 1.2 import.
+
 Refactor current SCORM parsing into reusable functions/services:
 
 - Validate ZIP.
@@ -161,6 +197,8 @@ For v1:
 
 ### 4. Course Import Flow
 
+Status: done.
+
 Create a SCORM course import flow:
 
 1. Upload original ZIP to S3.
@@ -177,30 +215,33 @@ Create a SCORM course import flow:
 
 Do not support course package replacement. Any replacement request for a SCORM course must fail with a clear validation error.
 
-### 5. Lesson Import And Replacement Flow
+### 5. Lesson Import And Deletion Flow
+
+Status: lesson import and deletion are done. In-place package replacement is intentionally not supported.
 
 Create a SCORM lesson import flow:
 
 1. Upload original ZIP to S3.
 2. Extract package files to S3.
-3. Create or replace a lesson with type `scorm`.
+3. Create a lesson with type `scorm`.
 4. Create package and SCO metadata.
 5. Link every SCO in the package to the same lesson.
 
 Lesson import supports one or many SCOs. Multi-SCO lesson import uses the same parser/storage as course import; it only differs in mapping all SCOs to one Mentingo lesson instead of generating one lesson per SCO.
 
-Replacement behavior:
+Editing behavior:
 
-- Treat replacement like normal lesson editing.
-- Do not clear existing completed Mentingo `student_lesson_progress`.
-- Do not migrate old SCORM runtime state.
-- New launches use the new package/SCO.
+- The lesson title can be edited.
+- The attached SCORM package is locked after creation.
+- To use a different SCORM package, delete the lesson and create a new SCORM lesson.
 
 Deletion behavior:
 
 - Deleting the lesson should remove SCORM package/SCO data by FK/cascade or explicit cleanup consistent with existing deletion patterns.
 
 ### 6. Runtime Launch And Commit
+
+Status: not implemented yet.
 
 Add launch endpoint:
 
@@ -238,6 +279,8 @@ Do not create quiz attempts from SCORM scores in v1.
 
 ### 7. Asset Serving
 
+Status: not implemented yet.
+
 Expose a stable LMS-origin asset route for extracted package files.
 
 Requirements:
@@ -249,6 +292,8 @@ Requirements:
 - Reuse existing asset rewrite/proxy logic if possible, but expand MIME type support beyond only HTML/JS/CSS/JPG/PNG.
 
 ### 8. Frontend Player
+
+Status: not implemented yet.
 
 Install/use `scorm-again` if not already present.
 
@@ -280,6 +325,8 @@ Responsibilities:
 
 ### 9. Admin UI
 
+Status: done for import/admin management. Player UI remains under frontend player work.
+
 Course type `scorm` behavior:
 
 - Hide Curriculum tab.
@@ -291,9 +338,12 @@ Lesson-level SCORM behavior:
 
 - Add SCORM as a lesson type in normal curriculum editor.
 - Provide upload UI.
-- Allow replacement/deletion like other lessons.
+- Allow deletion like other lessons.
+- Do not allow package replacement; show the attached package as read-only after creation.
 
 ### 10. Backend Guards
+
+Status: partially done. Course feature flags and UI guards exist; keep adding backend enforcement as new mutation endpoints touch SCORM courses.
 
 Backend must enforce SCORM course restrictions.
 
@@ -319,7 +369,7 @@ A correct implementation satisfies all checks below:
 - Backend rejects SCORM course package replacement.
 - Importing SCORM as lesson creates one `scorm` lesson in the selected chapter.
 - A multi-SCO lesson import links all package SCOs to that same lesson.
-- Replacing a completed SCORM lesson does not remove existing Mentingo completion.
+- SCORM lesson package replacement is not available; deleting and creating a new lesson is the supported flow.
 - Launch endpoint returns attempt ID, launch URL, standard, selected SCO ID, ordered SCO list, package ID, and saved CMI state.
 - Commit endpoint stores raw CMI JSON.
 - Commit endpoint stores normalized status, score, time, location, and suspend data.
@@ -340,7 +390,8 @@ Backend tests:
 - No-SCO manifest rejection.
 - SCORM course curriculum mutation rejection.
 - SCORM course replacement rejection.
-- SCORM lesson replacement keeps completed progress.
+- SCORM lesson package replacement is not available in the UI.
+- SCORM lesson delete removes the SCORM lesson through normal lesson deletion behavior.
 - Runtime commit maps completion correctly.
 - Multi-SCO lesson completion waits for all SCOs.
 
@@ -362,7 +413,7 @@ Integration/E2E:
 - Do not bypass tenant ID conventions.
 - Do not break existing regular course imports or lesson types.
 - Do not couple persistence only to SCORM 1.2 field names.
-- Do not delete unrelated learner progress during SCORM lesson replacement.
+- Do not add in-place SCORM lesson package replacement unless the product decision changes.
 - Do not rely only on UI hiding for SCORM course restrictions.
 - Do not use string manipulation for XML when a parser is available.
 - Do not discard raw manifest or raw CMI payloads.

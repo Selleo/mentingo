@@ -39,6 +39,7 @@ const DeleteConfirmationModal = ({
       .with(DeleteContentType.CHAPTER, () => t("adminCourseView.curriculum.other.removeChapter"))
       .with(DeleteContentType.QUESTION, () => t("adminCourseView.curriculum.other.removeQuestion"))
       .with(DeleteContentType.EMBED, () => t("adminCourseView.curriculum.other.removeEmbedLesson"))
+      .with(DeleteContentType.SCORM, () => t("adminCourseView.curriculum.other.removeScormLesson"))
       .otherwise(() => t("adminCourseView.curriculum.other.removeContent"));
   };
 
