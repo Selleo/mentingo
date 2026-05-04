@@ -1,9 +1,11 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { COURSE_FEATURE } from "@repo/shared";
 import { eq, getTableColumns, sql } from "drizzle-orm";
 import { isEqual } from "lodash";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
+import { CourseFeaturePolicyService } from "src/courses/course-feature-policy.service";
 import { MasterCourseService } from "src/courses/master-course.service";
 import { CreateChapterEvent, DeleteChapterEvent, UpdateChapterEvent } from "src/events";
 import { MAX_LESSON_TITLE_LENGTH } from "src/lesson/repositories/lesson.constants";
@@ -27,12 +29,17 @@ export class AdminChapterService {
     private readonly adminChapterRepository: AdminChapterRepository,
     private readonly adminLessonService: AdminLessonService,
     private readonly masterCourseService: MasterCourseService,
+    private readonly courseFeaturePolicyService: CourseFeaturePolicyService,
     private readonly localizationService: LocalizationService,
     private readonly outboxPublisher: OutboxPublisher,
   ) {}
 
   async createChapterForCourse(body: CreateChapterBody, currentUser: CurrentUserType) {
     await this.masterCourseService.assertCourseContentEditable(body.courseId);
+    await this.courseFeaturePolicyService.assertCourseFeatureEnabled(
+      body.courseId,
+      COURSE_FEATURE.CURRICULUM_EDITING,
+    );
 
     const chapter = await this.db.transaction(async (trx) => {
       await this.adminLessonService.validateAccess("course", currentUser, body.courseId);
@@ -95,6 +102,10 @@ export class AdminChapterService {
     currentUser: CurrentUserType,
   ) {
     await this.masterCourseService.assertCourseContentEditableByChapterId(chapterId);
+    await this.courseFeaturePolicyService.assertCourseFeatureEnabledByChapterId(
+      chapterId,
+      COURSE_FEATURE.CURRICULUM_EDITING,
+    );
 
     await this.adminLessonService.validateAccess("chapter", currentUser, chapterId);
 
@@ -107,6 +118,10 @@ export class AdminChapterService {
     currentUser: CurrentUserType;
   }): Promise<void> {
     await this.masterCourseService.assertCourseContentEditableByChapterId(chapterObject.chapterId);
+    await this.courseFeaturePolicyService.assertCourseFeatureEnabledByChapterId(
+      chapterObject.chapterId,
+      COURSE_FEATURE.CURRICULUM_EDITING,
+    );
 
     await this.adminLessonService.validateAccess(
       "chapter",
@@ -164,6 +179,10 @@ export class AdminChapterService {
 
   async updateChapter(id: UUIDType, body: UpdateChapterBody, currentUser: CurrentUserType) {
     await this.masterCourseService.assertCourseContentEditableByChapterId(id);
+    await this.courseFeaturePolicyService.assertCourseFeatureEnabledByChapterId(
+      id,
+      COURSE_FEATURE.CURRICULUM_EDITING,
+    );
 
     await this.adminLessonService.validateAccess("chapter", currentUser, id);
 
@@ -203,6 +222,10 @@ export class AdminChapterService {
 
   async removeChapter(chapterId: UUIDType, currentUser: CurrentUserType) {
     await this.masterCourseService.assertCourseContentEditableByChapterId(chapterId);
+    await this.courseFeaturePolicyService.assertCourseFeatureEnabledByChapterId(
+      chapterId,
+      COURSE_FEATURE.CURRICULUM_EDITING,
+    );
 
     await this.adminLessonService.validateAccess("chapter", currentUser, chapterId);
 

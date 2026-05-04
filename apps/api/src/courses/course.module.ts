@@ -19,6 +19,7 @@ import { StatisticsModule } from "src/statistics/statistics.module";
 import { StripeModule } from "src/stripe/stripe.module";
 import { UserModule } from "src/user/user.module";
 
+import { CourseFeaturePolicyService } from "./course-feature-policy.service";
 import { CourseSlugService } from "./course-slug.service";
 import { CourseController } from "./course.controller";
 import { CourseCron } from "./course.cron";
@@ -48,6 +49,7 @@ import { MasterCourseWorker } from "./master-course.worker";
   controllers: [CourseController],
   providers: [
     CourseService,
+    CourseFeaturePolicyService,
     CourseSlugService,
     CourseHandler,
     LocalizationService,
@@ -59,6 +61,6 @@ import { MasterCourseWorker } from "./master-course.worker";
     MasterCourseSyncHandler,
     ManagingTenantAdminGuard,
   ],
-  exports: [CourseService, CourseSlugService, MasterCourseService],
+  exports: [CourseService, CourseFeaturePolicyService, CourseSlugService, MasterCourseService],
 })
 export class CourseModule {}

@@ -1371,6 +1371,7 @@ export interface GetAllCoursesResponse {
     isContentReadonly?: boolean;
     sourceCourseId?: string | null;
     sourceTenantId?: string | null;
+    courseType?: "default" | "scorm";
   }[];
   pagination: {
     totalItems: number;
@@ -1620,7 +1621,7 @@ export interface GetCourseResponse {
     isContentReadonly: boolean;
     sourceCourseId: string | null;
     sourceTenantId: string | null;
-    isScorm?: boolean;
+    courseType: "default" | "scorm";
     priceInCents: number;
     thumbnailUrl?: string;
     trailerUrl?: string | null;
@@ -1741,7 +1742,7 @@ export interface GetBetaCourseByIdResponse {
     isContentReadonly: boolean;
     sourceCourseId: string | null;
     sourceTenantId: string | null;
-    isScorm?: boolean;
+    courseType: "default" | "scorm";
     priceInCents: number;
     thumbnailUrl?: string;
     thumbnailS3Key?: string;
@@ -3401,38 +3402,11 @@ export interface DeleteManyCategoriesResponse {
   };
 }
 
-export interface UploadScormPackageResponse {
-  data: {
-    message: string;
-    metadata: {
-      /** @format uuid */
-      id: string;
-      createdAt: string;
-      updatedAt: string;
-      /** @format uuid */
-      courseId: string;
-      /** @format uuid */
-      fileId: string;
-      version: string;
-      entryPoint: string;
-      s3Key: string;
-    };
-  };
-}
-
-export interface GetScormMetadataResponse {
+export interface CreateScormCourseResponse {
   data: {
     /** @format uuid */
     id: string;
-    createdAt: string;
-    updatedAt: string;
-    /** @format uuid */
-    courseId: string;
-    /** @format uuid */
-    fileId: string;
-    version: string;
-    entryPoint: string;
-    s3Key: string;
+    message: string;
   };
 }
 
@@ -8483,61 +8457,33 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name ScormControllerUploadScormPackage
-     * @request POST:/api/scorm/upload
+     * @name ScormControllerCreateScormCourse
+     * @request POST:/api/scorm/course
      */
-    scormControllerUploadScormPackage: (
-      query: {
-        courseId: string;
-      },
+    scormControllerCreateScormCourse: (
       data: {
+        title: string;
+        description: string;
+        /** @format uuid */
+        categoryId: string;
+        language: string;
+        status?: "draft" | "published" | "private";
+        thumbnailS3Key?: string;
+        priceInCents?: number;
+        currency?: string;
+        hasCertificate?: boolean;
         /** @format binary */
-        file?: File;
-        /** Optional resource type */
-        resource?: string;
+        scormPackage: File;
+        /** @format binary */
+        thumbnail?: File;
       },
       params: RequestParams = {},
     ) =>
-      this.request<UploadScormPackageResponse, any>({
-        path: `/api/scorm/upload`,
+      this.request<CreateScormCourseResponse, any>({
+        path: `/api/scorm/course`,
         method: "POST",
-        query: query,
         body: data,
         type: ContentType.FormData,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name ScormControllerServeScormContent
-     * @request GET:/api/scorm/{courseId}/content
-     */
-    scormControllerServeScormContent: (
-      courseId: string,
-      query: {
-        path: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<void, any>({
-        path: `/api/scorm/${courseId}/content`,
-        method: "GET",
-        query: query,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name ScormControllerGetScormMetadata
-     * @request GET:/api/scorm/{courseId}/metadata
-     */
-    scormControllerGetScormMetadata: (courseId: string, params: RequestParams = {}) =>
-      this.request<GetScormMetadataResponse, any>({
-        path: `/api/scorm/${courseId}/metadata`,
-        method: "GET",
         format: "json",
         ...params,
       }),

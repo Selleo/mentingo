@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next";
 
 import { useCreateCourse } from "~/api/mutations";
 import { useUploadFile } from "~/api/mutations/admin/useUploadFile";
-import { useUploadScormPackage } from "~/api/mutations/admin/useUploadScormPackage";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { Label } from "~/components/ui/label";
@@ -21,8 +20,6 @@ export function StatusStep({ handleBack, handleNext: _ }: StepComponentProps) {
   const { setValue, watch, handleSubmit } = useFormContext<CourseFormData>();
   const { mutateAsync: createCourse, isPending: isCreateCoursePending } = useCreateCourse();
   const { mutateAsync: uploadFile, isPending: isUploadFilePending } = useUploadFile();
-  const { mutateAsync: uploadScormPackage, isPending: isUploadScormPending } =
-    useUploadScormPackage();
 
   const status = watch("status");
   const { t } = useTranslation();
@@ -54,14 +51,8 @@ export function StatusStep({ handleBack, handleNext: _ }: StepComponentProps) {
         throw new Error("Course creation failed - no course ID received");
       }
 
-      if (!data.scorm.file) {
-        throw new Error("No SCORM file provided");
-      }
-
-      await uploadScormPackage({
-        file: data.scorm.file,
-        courseId: courseResult.data.id,
-      });
+      // Legacy stepper is no longer routed. SCORM package upload now goes through
+      // the SCORM course creation endpoint.
 
       resetForm();
       navigate("/courses");
@@ -118,9 +109,9 @@ export function StatusStep({ handleBack, handleNext: _ }: StepComponentProps) {
           onClick={() => {
             handleSubmit(onSubmit)();
           }}
-          disabled={isCreateCoursePending || isUploadFilePending || isUploadScormPending}
+          disabled={isCreateCoursePending || isUploadFilePending}
         >
-          {isCreateCoursePending || isUploadFilePending || isUploadScormPending
+          {isCreateCoursePending || isUploadFilePending
             ? t("adminScorm.button.creatingCourse")
             : t("adminScorm.button.createCourse")}
         </Button>

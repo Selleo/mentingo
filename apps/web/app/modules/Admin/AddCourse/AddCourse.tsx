@@ -5,36 +5,17 @@ import { useTranslation } from "react-i18next";
 import { useUploadFile } from "~/api/mutations/admin/useUploadFile";
 import { useCategoriesSuspense } from "~/api/queries/useCategories";
 import SplashScreenImage from "~/assets/svgs/splash-screen-image.svg";
-import ImageUploadInput from "~/components/FileUploadInput/ImageUploadInput";
-import { Icon } from "~/components/Icon";
-import { BaseEditor } from "~/components/RichText/Editor";
 import { Button } from "~/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "~/components/ui/form";
-import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
-import {
-  Tooltip,
-  TooltipArrow,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "~/components/ui/tooltip";
-import { courseLanguages } from "~/modules/Admin/EditCourse/components/CourseLanguageSelector";
 import { setPageTitle } from "~/utils/setPageTitle";
-import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
 import { CREATE_COURSE_PAGE_HANDLES } from "../../../../e2e/data/courses/handles";
-import { InlineCategoryCreationForm } from "../Categories/components/InlineCategoryCreationForm";
 
 import Breadcrumb from "./components/Breadcrumb";
-import { MAX_COURSE_DESCRIPTION_HTML_LENGTH, MAX_COURSE_DESCRIPTION_LENGTH } from "./constants";
+import { CourseDescriptionLimitMessage } from "./components/CourseDescriptionLimitMessage";
+import { CourseMetadataFields } from "./components/CourseMetadataFields";
+import { CourseThumbnailUploadField } from "./components/CourseThumbnailUploadField";
 import { useAddCourseForm } from "./hooks/useAddCourseForm";
 
 import type { MetaFunction } from "@remix-run/react";
@@ -53,10 +34,6 @@ const AddCourse = () => {
   const [displayThumbnailUrl, setDisplayThumbnailUrl] = useState<string | undefined>(undefined);
 
   const watchedDescription = form.watch("description");
-
-  const strippedDescriptionTextLength = stripHtmlTags(watchedDescription).length;
-  const descriptionFieldCharactersLeft =
-    MAX_COURSE_DESCRIPTION_LENGTH - strippedDescriptionTextLength;
 
   const handleImageUpload = useCallback(
     async (file: File) => {
@@ -92,7 +69,10 @@ const AddCourse = () => {
         <img src={SplashScreenImage} alt="splashScreenImage" className="rounded" />
       </div>
       <div className="flex w-full max-w-[820px] flex-col gap-y-6 px-8">
-        <Breadcrumb />
+        <Breadcrumb
+          backTo="/admin/beta-courses/new"
+          currentLabel={t("adminCourseTypeSelector.standard.title")}
+        />
         <hgroup className="gapy-y-1 flex flex-col">
           <h1 data-testid={CREATE_COURSE_PAGE_HANDLES.HEADING} className="h3 text-neutral-950">
             {t("adminCourseView.settings.header")}
@@ -101,164 +81,30 @@ const AddCourse = () => {
         </hgroup>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <div className="flex space-x-5">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <Label htmlFor="title" className="body-base-md">
-                      <span className="text-red-500">*</span>{" "}
-                      {t("adminCourseView.settings.field.title")}
-                    </Label>
-                    <FormControl>
-                      <Input
-                        data-testid={CREATE_COURSE_PAGE_HANDLES.TITLE_INPUT}
-                        id="title"
-                        {...field}
-                        required
-                        placeholder={t("adminCourseView.settings.placeholder.title")}
-                        className="placeholder:body-base"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="categoryId"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <Label htmlFor="categoryId">
-                      <span className="text-red-500">*</span>{" "}
-                      {t("adminCourseView.settings.field.category")}
-                    </Label>
-                    <FormControl>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger
-                            data-testid={CREATE_COURSE_PAGE_HANDLES.CATEGORY_SELECT}
-                            id="categoryId"
-                            className="data-[placeholder]:body-base rounded-lg border border-neutral-300 focus:border-primary-800 focus:ring-primary-800"
-                          >
-                            <SelectValue
-                              placeholder={t("adminCourseView.settings.placeholder.category")}
-                            />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {categories.map((category) => (
-                            <SelectItem
-                              value={category.id}
-                              key={category.id}
-                              data-testid={CREATE_COURSE_PAGE_HANDLES.categoryOption(
-                                category.title,
-                              )}
-                            >
-                              {category.title}
-                            </SelectItem>
-                          ))}
-                          <InlineCategoryCreationForm
-                            onCategoryCreated={(categoryId) => {
-                              form.setValue("categoryId", categoryId, { shouldValidate: true });
-                            }}
-                          />
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <FormField
+            <CourseMetadataFields
               control={form.control}
-              name="language"
-              render={({ field }) => (
-                <FormItem>
-                  <Label className="flex gap-4 items-center mt-5">
-                    <div>
-                      <span className="text-red-500">*</span>{" "}
-                      {t("adminCourseView.settings.field.baseLanguage")}
-                    </div>
-                    <TooltipProvider delayDuration={0}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span>
-                            <Icon
-                              name="Info"
-                              className="h-auto w-5 cursor-default text-neutral-400"
-                            />
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent
-                          side="top"
-                          align="center"
-                          className="max-w-xs whitespace-pre-line break-words rounded bg-black px-2 py-1 text-sm text-white shadow-md"
-                        >
-                          {t("adminCourseView.settings.other.baseLanguageTooltip")}
-                          <TooltipArrow className="fill-black" />
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </Label>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger data-testid={CREATE_COURSE_PAGE_HANDLES.LANGUAGE_SELECT}>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {courseLanguages.map((item) => (
-                        <SelectItem
-                          data-testid={CREATE_COURSE_PAGE_HANDLES.languageOption(item.key)}
-                          value={item.key}
-                          key={item.key}
-                          className="w-full"
-                        >
-                          <div className="flex w-full items-center gap-2">
-                            <Icon name={item.iconName} className="size-4" />
-                            <span className="font-semibold">{t(item.translationKey)}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormItem>
+              setValue={form.setValue}
+              categories={categories}
+              showBaseLanguageTooltip
+              testIds={{
+                titleInput: CREATE_COURSE_PAGE_HANDLES.TITLE_INPUT,
+                categorySelect: CREATE_COURSE_PAGE_HANDLES.CATEGORY_SELECT,
+                categoryOption: CREATE_COURSE_PAGE_HANDLES.categoryOption,
+                languageSelect: CREATE_COURSE_PAGE_HANDLES.LANGUAGE_SELECT,
+                languageOption: CREATE_COURSE_PAGE_HANDLES.languageOption,
+                descriptionEditor: CREATE_COURSE_PAGE_HANDLES.DESCRIPTION_EDITOR,
+              }}
+            />
+            <CourseDescriptionLimitMessage
+              description={watchedDescription}
+              charactersLeftLabel={t("adminCourseView.settings.other.charactersLeft")}
+              reachedCharactersLimitLabel={t(
+                "adminCourseView.settings.other.reachedCharactersLimit",
               )}
-            ></FormField>
-
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem className="mt-5">
-                  <Label htmlFor="description">
-                    <span className="text-red-500">*</span>{" "}
-                    {t("adminCourseView.settings.field.description")}
-                  </Label>
-                  <div data-testid={CREATE_COURSE_PAGE_HANDLES.DESCRIPTION_EDITOR}>
-                    <BaseEditor id="description" {...field} />
-                  </div>
-                  <FormMessage />
-                </FormItem>
+              reachedCharactersLimitHtmlLabel={t(
+                "adminCourseView.settings.other.reachedCharactersLimitHtml",
               )}
             />
-            {watchedDescription.length > MAX_COURSE_DESCRIPTION_HTML_LENGTH && (
-              <p className="text-sm text-red-500">
-                {t("adminCourseView.settings.other.reachedCharactersLimitHtml")}
-              </p>
-            )}
-            {descriptionFieldCharactersLeft <= 0 ? (
-              <p className="text-sm text-red-500">
-                {t("adminCourseView.settings.other.reachedCharactersLimit")}
-              </p>
-            ) : (
-              <p className="mt-1 text-neutral-800">
-                {descriptionFieldCharactersLeft}{" "}
-                {t("adminCourseView.settings.other.charactersLeft")}
-              </p>
-            )}
 
             <FormField
               control={form.control}
@@ -267,30 +113,19 @@ const AddCourse = () => {
                 <FormItem className="mt-5">
                   <Label htmlFor="fileUrl">{t("adminCourseView.settings.field.thumbnail")}</Label>
                   <FormControl>
-                    <ImageUploadInput
-                      field={field}
-                      handleImageUpload={handleImageUpload}
+                    <CourseThumbnailUploadField
+                      inputId="fileUrl"
+                      imageUrl={displayThumbnailUrl || field.value}
                       isUploading={isUploading}
-                      imageUrl={displayThumbnailUrl}
-                      fileInputRef={fileInputRef}
+                      inputRef={fileInputRef}
+                      onFileSelect={handleImageUpload}
+                      onClear={removeThumbnail}
                     />
                   </FormControl>
-
-                  {isUploading && <p>{t("common.other.uploadingImage")}</p>}
                   <FormMessage />
                 </FormItem>
               )}
             />
-            {displayThumbnailUrl && (
-              <Button
-                name="thumbnail"
-                onClick={removeThumbnail}
-                className="mb-4 mt-4 rounded bg-red-500 px-6 py-2 text-white"
-              >
-                <Icon name="TrashIcon" className="mr-2" />
-                {t("adminCourseView.settings.button.removeThumbnail")}
-              </Button>
-            )}
 
             <div className="pb-5">
               <div className="mb-10 mt-5 flex space-x-5">
@@ -298,7 +133,7 @@ const AddCourse = () => {
                   data-testid={CREATE_COURSE_PAGE_HANDLES.CANCEL_BUTTON}
                   type="button"
                   className="rounded border-2 bg-white px-6 py-2 text-primary-800"
-                  onClick={() => navigate("/admin/courses")}
+                  onClick={() => navigate("/admin/beta-courses/new")}
                 >
                   {t("common.button.cancel")}
                 </Button>

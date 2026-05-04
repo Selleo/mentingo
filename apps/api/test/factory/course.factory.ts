@@ -1,4 +1,5 @@
 import { faker } from "@faker-js/faker";
+import { COURSE_TYPE } from "@repo/shared";
 import { getTableColumns, sql } from "drizzle-orm";
 import { Factory } from "fishery";
 
@@ -87,7 +88,7 @@ export const createCourseFactory = (db: DatabasePg) => {
       chapterCount: faker.number.int({ min: 1, max: 20 }),
       authorId: "", // Will be auto-created if empty
       categoryId: "", // Will be auto-created if empty
-      isScorm: false,
+      courseType: COURSE_TYPE.DEFAULT,
       stripeProductId: null,
       stripePriceId: null,
       originType: "regular",

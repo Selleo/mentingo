@@ -47,6 +47,13 @@ export const CREATE_COURSE_PAGE_HANDLES = {
   SUBMIT_BUTTON: "create-course-submit-button",
 } as const;
 
+export const COURSE_TYPE_SELECTOR_HANDLES = {
+  PAGE: "course-type-selector-page",
+  STANDARD_CARD: "course-type-selector-standard-card",
+  SCORM_CARD: "course-type-selector-scorm-card",
+  BACK_BUTTON: "course-type-selector-back-button",
+} as const;
+
 export const EDIT_COURSE_PAGE_HANDLES = {
   PAGE: "edit-course-page",
   HEADING: "edit-course-page-heading",

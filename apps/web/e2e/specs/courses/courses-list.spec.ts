@@ -54,6 +54,6 @@ test("admin can open create course page from course list", async ({ withReadonly
     await openCoursesPageFlow(page);
     await openCreateCourseFromListFlow(page);
 
-    await expect(page).toHaveURL(/\/admin\/beta-courses\/new$/);
+    await expect(page).toHaveURL(/\/admin\/beta-courses\/new\/standard$/);
   });
 });

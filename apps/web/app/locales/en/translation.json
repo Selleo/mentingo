@@ -164,6 +164,68 @@
     },
     "toast": {
       "scormUploadedSuccessfully": "SCORM package uploaded successfully"
+    },
+    "coursePlaceholder": {
+      "back": "Back to course type",
+      "status": "SCORM course import",
+      "title": "SCORM course creation is coming next",
+      "description": "This entry point is ready, but the course-level SCORM import flow is still being implemented. Create a standard course for now or return to the course list.",
+      "createStandard": "Create standard course",
+      "viewCourses": "View courses"
+    },
+    "create": {
+      "eyebrow": "SCORM 1.2",
+      "title": "Create SCORM Course",
+      "subtitle": "Add the course metadata and attach the SCORM package that will become the course content.",
+      "requirements": {
+        "title": "Package requirements",
+        "version": "SCORM 1.2 package",
+        "archive": ".zip archive up to 500MB",
+        "metadata": "Course metadata can be edited before import"
+      },
+      "packageSection": "SCORM package",
+      "packageSectionDescription": "Attach the package now. The file is only validated in the form until the upload API is connected.",
+      "metadataSection": "Course details",
+      "metadataSectionDescription": "These fields match the standard course setup and will be used as the base course metadata.",
+      "uploadPackage": "Upload SCORM package",
+      "dropPackage": "Drop the SCORM package here",
+      "uploadPackageDescription": "Drag and drop a SCORM 1.2 .zip file, or click to choose it from your device.",
+      "packageReady": "ready to import",
+      "replacePackage": "Replace package",
+      "removePackage": "Remove package",
+      "uploadThumbnail": "Upload thumbnail",
+      "uploadThumbnailDescription": "PNG, JPG or JPEG up to 20MB",
+      "thumbnailPreviewAlt": "Course thumbnail preview",
+      "submit": "Create SCORM course",
+      "creating": "Creating SCORM course...",
+      "toastDraftReady": "SCORM course form is ready for API integration"
+    }
+  },
+  "adminCourseTypeSelector": {
+    "back": "Back",
+    "eyebrow": "Course setup",
+    "title": "Create New Course",
+    "subtitle": "Choose whether to build the course with the standard editor or create it from a SCORM package.",
+    "standard": {
+      "title": "Standard",
+      "description": "Create a course with the built-in curriculum, lessons, quizzes, and settings.",
+      "features": {
+        "authoring": "Built with the native course editor",
+        "curriculum": "Chapters, lessons, and quizzes managed in Mentingo",
+        "translations": "Course languages and translations supported",
+        "settings": "Pricing, status, and certificates included"
+      }
+    },
+    "scorm": {
+      "title": "SCORM",
+      "description": "Create a course from a SCORM 1.2 package.",
+      "badge": "Placeholder",
+      "features": {
+        "import": "Built from a SCORM 1.2 .zip package",
+        "tracking": "SCO completion and runtime tracking supported",
+        "structure": "Imported package structure preserved",
+        "future": "Pricing, status, and certificates included"
+      }
     }
   },
   "studentChapterCardView": {
@@ -694,6 +756,7 @@
       "author": "Author",
       "category": "Category",
       "price": "Price",
+      "type": "Type",
       "state": "State",
       "status": "Status",
       "sharedCourse": "Shared",
@@ -1231,6 +1294,13 @@
       "maxOneVideoUploaded": "You cannot upload more than 1 video.",
       "successfullyTransferredCourseOwnership": "Course ownership transferred successfully"
     },
+    "errors": {
+      "featureUnavailable": {
+        "curriculum": "Curriculum editing is not available for SCORM courses.",
+        "lessonSequence": "Lesson sequence enforcement is not available for SCORM courses.",
+        "quizFeedback": "Quiz feedback settings are not available for SCORM courses."
+      }
+    },
     "thinking": {
       "PLANNING_NEXT_STEP": "Planning next step...",
       "USING_TOOLS": "Using tools to fetch context...",
@@ -1529,6 +1599,7 @@
           "quiz": "Quiz",
           "aiMentor": "AI Mentor",
           "embed": "Embed",
+          "scorm": "SCORM",
           "correct": "Correct",
           "true": "True",
           "false": "False",
@@ -1547,6 +1618,7 @@
           "contentLessonDescription": "Text with multimedia (images, videos, presentations).",
           "quizLessonDescription": "A set of questions to check knowledge.",
           "aiMentorLessonDescription": "Interactive conversation with a virtual AI mentor.",
+          "scormLessonDescription": "SCORM package lesson content.",
           "fillInTheBlanksDescription": "This question contains a sentence; students must drag and drop the correct word into the blank.",
           "gapFillDescription": "This question will have sentence with missing words that students need to type in.",
           "embedLessonDescription": "External resource (e.g. Google Form, Canva presentation, or YouTube live stream).",

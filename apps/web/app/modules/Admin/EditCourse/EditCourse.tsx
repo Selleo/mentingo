@@ -1,5 +1,12 @@
 import { Link, type MetaFunction, useNavigate, useParams, useSearchParams } from "@remix-run/react";
-import { COURSE_ORIGIN_TYPES, COURSE_STATUSES, type SupportedLanguages } from "@repo/shared";
+import {
+  COURSE_FEATURE,
+  COURSE_ORIGIN_TYPES,
+  COURSE_STATUSES,
+  COURSE_TYPE,
+  isCourseFeatureEnabledForCourseType,
+  type SupportedLanguages,
+} from "@repo/shared";
 import { Building } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -42,7 +49,7 @@ import {
   COURSE_LANGUAGE_DIALOG_HANDLES,
   EDIT_COURSE_PAGE_HANDLES,
 } from "../../../../e2e/data/courses/handles";
-import { getCourseBadgeVariant } from "../Courses/utils";
+import { getCourseBadgeVariant, getCourseTypeLabel } from "../Courses/utils";
 
 import { SharedCourseExportsTabContent } from "./components/SharedCourseExportsTabContent";
 import { SharedCourseReadonlyNotice } from "./components/SharedCourseReadonlyNotice";
@@ -85,7 +92,6 @@ const EditCourse = () => {
   const { mutateAsync: exportMasterCourse, isPending: isExportPending } = useExportMasterCourse();
 
   const [searchParams, setSearchParams] = useSearchParams();
-  const courseTabs = useEditCourseTabs();
   const navigate = useNavigate();
 
   if (!id) throw new Error("Course ID not found");
@@ -97,6 +103,12 @@ const EditCourse = () => {
     dataUpdatedAt,
     error,
   } = useBetaCourseById(id, courseLanguage);
+  const courseType = course?.courseType ?? COURSE_TYPE.DEFAULT;
+  const courseTabs = useEditCourseTabs({ courseType });
+  const canEditCurriculum = isCourseFeatureEnabledForCourseType(
+    courseType,
+    COURSE_FEATURE.CURRICULUM_EDITING,
+  );
 
   const showCourseGenerationButton = useMemo(
     () => !!isLumaConfigured?.courseGenerationEnabled,
@@ -223,6 +235,16 @@ const EditCourse = () => {
   }, [courseTabs, isExportedCourse, isStripeConfigured?.enabled, selectedTab]);
 
   useEffect(() => {
+    if (!course || rawSelectedTab === activeTab) return;
+
+    setSearchParams((prevParams) => {
+      const nextParams = new URLSearchParams(prevParams);
+      nextParams.set("tab", activeTab);
+      return nextParams;
+    });
+  }, [activeTab, course, rawSelectedTab, setSearchParams]);
+
+  useEffect(() => {
     if (error) {
       navigate("/");
     }
@@ -287,6 +309,13 @@ const EditCourse = () => {
                   {t("common.other.private")}
                 </Badge>
               )}
+              <Badge
+                variant={courseType === COURSE_TYPE.SCORM ? "success" : "secondaryWithOutline"}
+                fontWeight="bold"
+                className="ml-2"
+              >
+                {getCourseTypeLabel(courseType, t)}
+              </Badge>
               {isMasterCourse && (
                 <Badge variant="secondaryWithOutline" fontWeight="bold" className="ml-2">
                   <Building className="size-3.5" />
@@ -430,31 +459,34 @@ const EditCourse = () => {
               trailerUrl={course?.trailerUrl}
               hasCertificate={course?.hasCertificate || false}
               courseLanguage={courseLanguage}
+              courseType={courseType}
             />
           )}
         </TabsContent>
-        <TabsContent value={EDIT_COURSE_TABS.CURRICULUM} className="h-full">
-          {isExportedCourse ? (
-            <SharedCourseReadonlyNotice
-              title={sharedCourseNotice.title}
-              description={sharedCourseNotice.description}
-            />
-          ) : (
-            <LeaveModalProvider>
-              <CourseLessons
-                showCourseGenerationButton={showCourseGenerationButton}
-                isCourseGenerationDisabled={isCourseGenerationDisabled}
-                draft={draft}
-                isCourseGenerated={isCourseGenerated}
-                onCourseGenerationFinished={handleCourseGenerationFinished}
-                chapters={course?.chapters as Chapter[]}
-                canRefetchChapterList={!!canRefetchChapterList}
-                language={courseLanguage}
-                baseLanguage={course?.baseLanguage ?? courseLanguage}
+        {canEditCurriculum && (
+          <TabsContent value={EDIT_COURSE_TABS.CURRICULUM} className="h-full">
+            {isExportedCourse ? (
+              <SharedCourseReadonlyNotice
+                title={sharedCourseNotice.title}
+                description={sharedCourseNotice.description}
               />
-            </LeaveModalProvider>
-          )}
-        </TabsContent>
+            ) : (
+              <LeaveModalProvider>
+                <CourseLessons
+                  showCourseGenerationButton={showCourseGenerationButton}
+                  isCourseGenerationDisabled={isCourseGenerationDisabled}
+                  draft={draft}
+                  isCourseGenerated={isCourseGenerated}
+                  onCourseGenerationFinished={handleCourseGenerationFinished}
+                  chapters={course?.chapters as Chapter[]}
+                  canRefetchChapterList={!!canRefetchChapterList}
+                  language={courseLanguage}
+                  baseLanguage={course?.baseLanguage ?? courseLanguage}
+                />
+              </LeaveModalProvider>
+            )}
+          </TabsContent>
+        )}
         {isStripeConfigured?.enabled && (
           <TabsContent value={EDIT_COURSE_TABS.PRICING}>
             <CoursePricing

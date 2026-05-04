@@ -10,6 +10,8 @@ import {
 } from "@nestjs/common";
 import { BaseEmailTemplate } from "@repo/email-templates";
 import {
+  COURSE_FEATURE,
+  COURSE_TYPE,
   COURSE_ENROLLMENT,
   SUPPORTED_LANGUAGES,
   ENTITY_TYPES,
@@ -103,6 +105,7 @@ import { getSortOptions } from "../common/helpers/getSortOptions";
 
 import { LESSON_SEQUENCE_ENABLED, QUIZ_FEEDBACK_ENABLED } from "./constants";
 import { DURATION_DEFAULTS } from "./constants/duration-defaults";
+import { CourseFeaturePolicyService } from "./course-feature-policy.service";
 import { CourseSlugService } from "./course-slug.service";
 import { MasterCourseService } from "./master-course.service";
 import {
@@ -184,6 +187,7 @@ export class CourseService {
     private readonly emailService: EmailService,
     private readonly courseSlugService: CourseSlugService,
     private readonly masterCourseService: MasterCourseService,
+    private readonly courseFeaturePolicyService: CourseFeaturePolicyService,
     private readonly lumaService: LumaService,
   ) {}
 
@@ -229,6 +233,7 @@ export class CourseService {
         stripePriceId: courses.stripePriceId,
         originType: courses.originType,
         isContentReadonly: sql<boolean>`${courses.originType} = 'exported'`,
+        courseType: courses.courseType,
         sourceCourseId: courses.sourceCourseId,
         sourceTenantId: courses.sourceTenantId,
       })
@@ -1059,7 +1064,7 @@ export class CourseService {
         completedChapterCount: sql<number>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN COALESCE(${studentCourses.finishedChapterCount}, 0) ELSE 0 END`,
         enrolled: sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN TRUE ELSE FALSE END`,
         status: courses.status,
-        isScorm: courses.isScorm,
+        courseType: courses.courseType,
         priceInCents: courses.priceInCents,
         currency: courses.currency,
         authorId: courses.authorId,
@@ -1324,6 +1329,7 @@ export class CourseService {
         baseLanguage: sql<SupportedLanguages>`${courses.baseLanguage}`,
         originType: courses.originType,
         isContentReadonly: sql<boolean>`${courses.originType} = 'exported'`,
+        courseType: courses.courseType,
         sourceCourseId: courses.sourceCourseId,
         sourceTenantId: courses.sourceTenantId,
       })
@@ -1640,6 +1646,20 @@ export class CourseService {
       throw new NotFoundException("Course not found");
     }
 
+    if (settings.lessonSequenceEnabled !== undefined) {
+      this.courseFeaturePolicyService.assertFeatureEnabled(
+        course.courseType,
+        COURSE_FEATURE.LESSON_SEQUENCE_SETTING,
+      );
+    }
+
+    if (settings.quizFeedbackEnabled !== undefined) {
+      this.courseFeaturePolicyService.assertFeatureEnabled(
+        course.courseType,
+        COURSE_FEATURE.QUIZ_FEEDBACK_SETTING,
+      );
+    }
+
     const { language: resolvedLanguage } = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.COURSE,
       courseId,
@@ -1762,9 +1782,10 @@ export class CourseService {
         }
       }
 
+      const isScormCourse = createCourseBody.isScorm === true;
       const settings = sql`json_build_object(
-        'lessonSequenceEnabled', ${LESSON_SEQUENCE_ENABLED}::boolean,
-        'quizFeedbackEnabled', ${QUIZ_FEEDBACK_ENABLED}::boolean,
+        'lessonSequenceEnabled', ${isScormCourse ? false : LESSON_SEQUENCE_ENABLED}::boolean,
+        'quizFeedbackEnabled', ${isScormCourse ? false : QUIZ_FEEDBACK_ENABLED}::boolean,
         'certificateSignature', NULL,
         'certificateFontColor', NULL
       )`;
@@ -1780,7 +1801,7 @@ export class CourseService {
           status: createCourseBody.status,
           priceInCents: createCourseBody.priceInCents,
           currency: finalCurrency,
-          isScorm: createCourseBody.isScorm,
+          courseType: isScormCourse ? COURSE_TYPE.SCORM : COURSE_TYPE.DEFAULT,
           authorId: currentUser.userId,
           categoryId: createCourseBody.categoryId,
           stripeProductId: productId,
@@ -3721,7 +3742,7 @@ export class CourseService {
         priceInCents: courses.priceInCents,
         currency: courses.currency,
         hasCertificate: courses.hasCertificate,
-        isScorm: courses.isScorm,
+        courseType: courses.courseType,
         categoryId: courses.categoryId,
         authorId: courses.authorId,
         thumbnailS3Key: courses.thumbnailS3Key,

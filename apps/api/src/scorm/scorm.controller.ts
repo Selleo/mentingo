@@ -1,119 +1,148 @@
 import {
   BadRequestException,
+  Body,
   Controller,
-  Get,
-  Header,
-  Param,
   Post,
-  Query,
   Req,
-  Res,
-  UploadedFile,
-  UseGuards,
+  UploadedFiles,
   UseInterceptors,
 } from "@nestjs/common";
-import { FileInterceptor } from "@nestjs/platform-express";
+import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes } from "@nestjs/swagger";
-import { Request, Response } from "express";
+import { COURSE_TYPE, PERMISSIONS } from "@repo/shared";
+import { Type } from "@sinclair/typebox";
+import { Request } from "express";
 import { Validate } from "nestjs-typebox";
 
-import { baseResponse, BaseResponse, UUIDSchema, UUIDType } from "src/common";
+import { baseResponse, BaseResponse, UUIDSchema, type UUIDType } from "src/common";
+import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
-import { PermissionsGuard } from "src/common/guards/permissions.guard";
 import { CurrentUserType } from "src/common/types/current-user.type";
+import { CourseService } from "src/courses/course.service";
+import { FileService } from "src/file/file.service";
+import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
-import { scormMetadataSchema, scormUploadResponseSchema } from "./schemas/scorm.schema";
-import { ScormService } from "./services/scorm.service";
+import { CreateScormCourseBody, createScormCourseSchema } from "./schemas/createScormCourse.schema";
+import { ScormService } from "./scorm.service";
+
+const SCORM_PACKAGE_FIELD = "scormPackage";
+const THUMBNAIL_FIELD = "thumbnail";
+const MAX_SCORM_PACKAGE_SIZE = 500 * 1024 * 1024;
+const MAX_THUMBNAIL_SIZE = 20 * 1024 * 1024;
+const ALLOWED_THUMBNAIL_MIME_TYPES = ["image/jpeg", "image/png", "image/svg+xml"];
+
+type CreateScormCourseFiles = {
+  [SCORM_PACKAGE_FIELD]?: Express.Multer.File[];
+  [THUMBNAIL_FIELD]?: Express.Multer.File[];
+};
 
 @Controller("scorm")
-@UseGuards(PermissionsGuard)
 export class ScormController {
-  constructor(private readonly scormService: ScormService) {}
+  constructor(
+    private readonly courseService: CourseService,
+    private readonly scormService: ScormService,
+    private readonly fileService: FileService,
+  ) {}
 
-  @Post("upload")
-  @UseInterceptors(FileInterceptor("file"))
+  @Post("course")
+  @RequirePermission(PERMISSIONS.COURSE_CREATE)
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: SCORM_PACKAGE_FIELD, maxCount: 1 },
+      { name: THUMBNAIL_FIELD, maxCount: 1 },
+    ]),
+  )
   @ApiConsumes("multipart/form-data")
   @ApiBody({
     schema: {
       type: "object",
       properties: {
-        file: {
-          type: "string",
-          format: "binary",
-        },
-        resource: {
-          type: "string",
-          description: "Optional resource type",
-        },
+        title: { type: "string" },
+        description: { type: "string" },
+        categoryId: { type: "string", format: "uuid" },
+        language: { type: "string" },
+        status: { type: "string", enum: ["draft", "published", "private"] },
+        thumbnailS3Key: { type: "string" },
+        priceInCents: { type: "number" },
+        currency: { type: "string" },
+        hasCertificate: { type: "boolean" },
+        scormPackage: { type: "string", format: "binary" },
+        thumbnail: { type: "string", format: "binary" },
       },
+      required: ["title", "description", "categoryId", "language", "scormPackage"],
     },
   })
   @Validate({
-    response: baseResponse(scormUploadResponseSchema),
+    response: baseResponse(Type.Object({ id: UUIDSchema, message: Type.String() })),
   })
-  async uploadScormPackage(
-    @UploadedFile() file: Express.Multer.File,
-    @Query("courseId") courseId: UUIDType,
+  async createScormCourse(
+    @Body(new ValidateMultipartPipe(createScormCourseSchema))
+    createScormCourseBody: CreateScormCourseBody,
+    @UploadedFiles() files: CreateScormCourseFiles,
     @CurrentUser() currentUser: CurrentUserType,
-  ) {
-    if (!courseId) {
-      throw new BadRequestException("courseId is required");
-    }
+    @Req() request: Request,
+  ): Promise<BaseResponse<{ id: UUIDType; message: string }>> {
+    const scormPackage = files?.[SCORM_PACKAGE_FIELD]?.[0];
+    const thumbnail = files?.[THUMBNAIL_FIELD]?.[0];
 
-    if (!file) {
-      throw new BadRequestException("file is required");
-    }
+    this.validateScormPackage(scormPackage);
+    this.validateThumbnail(thumbnail);
 
-    const metadata = await this.scormService.processScormPackage(file, courseId, currentUser);
+    const thumbnailS3Key =
+      createScormCourseBody.thumbnailS3Key ??
+      (thumbnail
+        ? (await this.fileService.uploadFile(thumbnail, "course", currentUser.tenantId)).fileKey
+        : undefined);
+
+    const isPlaywrightTest = request.headers["x-playwright-test"];
+    const { id } = await this.courseService.createCourse(
+      {
+        ...createScormCourseBody,
+        status: createScormCourseBody.status ?? "draft",
+        thumbnailS3Key,
+        isScorm: true,
+      },
+      currentUser,
+      !!isPlaywrightTest,
+    );
+
+    await this.scormService.prepareCoursePackage({
+      courseId: id,
+      scormPackage: scormPackage!,
+      thumbnail,
+      metadata: createScormCourseBody,
+      currentUser,
+    });
 
     return new BaseResponse({
-      message: "SCORM package uploaded successfully",
-      metadata,
+      id,
+      message: `${COURSE_TYPE.SCORM} course created successfully`,
     });
   }
 
-  @Get(":courseId/content")
-  @Header("Cache-Control", "no-store")
-  @Header("X-Frame-Options", "SAMEORIGIN")
-  @Header(
-    "Content-Security-Policy",
-    "frame-ancestors 'self' https://*.lms.localhost https://*.selleo.app",
-  )
-  async serveScormContent(
-    @Param("courseId") courseId: UUIDType,
-    @Query("path") filePath: string,
-    @Res() res: Response,
-    @Req() req: Request,
-  ) {
-    if (!filePath) {
-      throw new BadRequestException("filePath is required");
+  private validateScormPackage(file?: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException("SCORM package is required");
     }
 
-    const baseUrl = `${req.protocol}://${req.get("host")}`;
-    const content = await this.scormService.serveContent(courseId, filePath, baseUrl);
-
-    if (filePath.endsWith(".html")) {
-      res.setHeader("Content-Type", "text/html");
-      return res.send(content);
+    if (file.size > MAX_SCORM_PACKAGE_SIZE) {
+      throw new BadRequestException("SCORM package must be less than 500MB");
     }
 
-    const contentType = this.scormService.getContentType(filePath);
-    res.setHeader("Content-Type", contentType);
-
-    if (typeof content === "string") {
-      return res.redirect(content);
+    if (!file.originalname.toLowerCase().endsWith(".zip")) {
+      throw new BadRequestException("SCORM package must be a .zip file");
     }
-
-    return res.send(content);
   }
 
-  @Get(":courseId/metadata")
-  @Validate({
-    request: [{ type: "param", name: "courseId", schema: UUIDSchema }],
-    response: baseResponse(scormMetadataSchema),
-  })
-  async getScormMetadata(@Param("courseId") courseId: UUIDType) {
-    const metadata = await this.scormService.getCourseScormMetadata(courseId);
-    return new BaseResponse(metadata);
+  private validateThumbnail(file?: Express.Multer.File) {
+    if (!file) return;
+
+    if (file.size > MAX_THUMBNAIL_SIZE) {
+      throw new BadRequestException("Thumbnail must be less than 20MB");
+    }
+
+    if (!ALLOWED_THUMBNAIL_MIME_TYPES.includes(file.mimetype)) {
+      throw new BadRequestException("Thumbnail must be an image file");
+    }
   }
 }

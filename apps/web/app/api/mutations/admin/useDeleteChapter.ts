@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useTranslation } from "react-i18next";
 
+import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../../api-client";
@@ -28,7 +29,11 @@ export function useDeleteChapter() {
     onError: (error) => {
       if (error instanceof AxiosError) {
         return toast({
-          description: error.response?.data.message,
+          description: getTranslatedApiErrorMessage(
+            error,
+            t,
+            t("adminCourseView.curriculum.chapter.toast.unexpectedError"),
+          ),
           variant: "destructive",
         });
       }

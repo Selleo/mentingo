@@ -1,6 +1,12 @@
 import {
+  COURSE_TYPE,
   COURSE_ORIGIN_TYPES,
   MASTER_COURSE_EXPORT_SYNC_STATUSES,
+  SCORM_COMPLETION_STATUS,
+  SCORM_PACKAGE_ENTITY_TYPE,
+  SCORM_PACKAGE_STATUS,
+  SCORM_STANDARD,
+  SCORM_SUCCESS_STATUS,
   SUPPORTED_LANGUAGES,
   SUPPORT_SESSION_STATUSES,
   TENANT_STATUSES,
@@ -12,6 +18,7 @@ import {
   index,
   integer,
   jsonb,
+  numeric,
   pgEnum,
   pgTable,
   text,
@@ -38,12 +45,18 @@ import {
 } from "./utils";
 
 import type {
+  CourseType,
   CourseOriginType,
   FormType,
   LocalizedText,
   MasterCourseEntityType,
   MasterCourseExportSyncStatus,
   RegistrationFormFieldType,
+  ScormCompletionStatus,
+  ScormPackageEntityType,
+  ScormPackageStatus,
+  ScormStandard,
+  ScormSuccessStatus,
   SupportedLanguages,
   PermissionKey,
   SupportSessionStatus,
@@ -207,7 +220,31 @@ export const resetTokens = pgTable(
   }),
 );
 
+export const courseTypeEnum = pgEnum(
+  "course_type",
+  Object.values(COURSE_TYPE) as [string, ...string[]],
+);
 export const coursesStatusEnum = pgEnum("status", ["draft", "published", "private"]);
+export const scormStandardEnum = pgEnum(
+  "scorm_standard",
+  Object.values(SCORM_STANDARD) as [string, ...string[]],
+);
+export const scormPackageEntityTypeEnum = pgEnum(
+  "scorm_package_entity_type",
+  Object.values(SCORM_PACKAGE_ENTITY_TYPE) as [string, ...string[]],
+);
+export const scormPackageStatusEnum = pgEnum(
+  "scorm_package_status",
+  Object.values(SCORM_PACKAGE_STATUS) as [string, ...string[]],
+);
+export const scormCompletionStatusEnum = pgEnum(
+  "scorm_completion_status",
+  Object.values(SCORM_COMPLETION_STATUS) as [string, ...string[]],
+);
+export const scormSuccessStatusEnum = pgEnum(
+  "scorm_success_status",
+  Object.values(SCORM_SUCCESS_STATUS) as [string, ...string[]],
+);
 
 const coursesSettings = safeJsonb("settings", coursesSettingsSchema);
 export const courses = pgTable(
@@ -224,7 +261,10 @@ export const courses = pgTable(
     priceInCents: integer("price_in_cents").notNull().default(0),
     currency: varchar("currency").notNull().default("usd"),
     chapterCount: integer("chapter_count").notNull().default(0),
-    isScorm: boolean("is_scorm").notNull().default(false),
+    courseType: courseTypeEnum("course_type")
+      .$type<CourseType>()
+      .notNull()
+      .default(COURSE_TYPE.DEFAULT),
     authorId: uuid("author_id")
       .references(() => users.id)
       .notNull(),
@@ -630,36 +670,155 @@ export const lessonLearningTime = pgTable(
   })),
 );
 
-export const scormMetadata = pgTable(
-  "scorm_metadata",
+export const scormPackages = pgTable(
+  "scorm_packages",
   {
     ...id,
     ...timestamps,
-    courseId: uuid("course_id")
-      .references(() => courses.id)
-      .notNull(),
-    fileId: uuid("file_id")
-      .references(() => scormFiles.id)
-      .notNull(),
-    version: text("version").notNull(),
-    entryPoint: text("entry_point").notNull(),
-    s3Key: text("s3_key").notNull(),
+    entityType: scormPackageEntityTypeEnum("entity_type").$type<ScormPackageEntityType>().notNull(),
+    entityId: uuid("entity_id").notNull(),
+    standard: scormStandardEnum("standard").$type<ScormStandard>().notNull(),
+    originalFileReference: text("original_file_reference").notNull(),
+    extractedFilesReference: text("extracted_files_reference").notNull(),
+    manifestEntryPoint: text("manifest_entry_point").notNull(),
+    manifestJson: jsonb("manifest_json").default({}).notNull(),
+    status: scormPackageStatusEnum("status")
+      .$type<ScormPackageStatus>()
+      .notNull()
+      .default(SCORM_PACKAGE_STATUS.READY),
     tenantId,
   },
-  withTenantIdIndex("scorm_metadata"),
+  withTenantIdIndex("scorm_packages", (table) => ({
+    entityIdx: index("scorm_packages_entity_idx").on(table.entityType, table.entityId),
+    entityUniqueIdx: uniqueIndex("scorm_packages_entity_unique_idx").on(
+      table.entityType,
+      table.entityId,
+    ),
+  })),
 );
 
-export const scormFiles = pgTable(
-  "scorm_files",
+export const scormScos = pgTable(
+  "scorm_scos",
   {
     ...id,
     ...timestamps,
+    packageId: uuid("package_id")
+      .references(() => scormPackages.id, { onDelete: "cascade" })
+      .notNull(),
+    lessonId: uuid("lesson_id")
+      .references(() => lessons.id, { onDelete: "cascade" })
+      .notNull(),
+    organizationIdentifier: text("organization_identifier"),
+    identifier: text("identifier").notNull(),
+    identifierRef: text("identifier_ref"),
+    resourceIdentifier: text("resource_identifier"),
+    resourceType: text("resource_type"),
+    scormType: text("scorm_type"),
     title: text("title").notNull(),
-    type: text("type").notNull(),
-    s3KeyPath: text("s3_key_path").notNull(),
+    href: text("href"),
+    launchPath: text("launch_path").notNull(),
+    parameters: text("parameters"),
+    displayOrder: integer("display_order").notNull(),
+    parentIdentifier: text("parent_identifier"),
+    isVisible: boolean("is_visible").notNull().default(true),
+    itemMetadataJson: jsonb("item_metadata_json"),
+    resourceMetadataJson: jsonb("resource_metadata_json"),
     tenantId,
   },
-  withTenantIdIndex("scorm_files"),
+  withTenantIdIndex("scorm_scos", (table) => ({
+    packageIdx: index("scorm_scos_package_id_idx").on(table.packageId),
+    lessonIdx: index("scorm_scos_lesson_id_idx").on(table.lessonId),
+    packageIdentifierUniqueIdx: uniqueIndex("scorm_scos_package_identifier_unique_idx").on(
+      table.packageId,
+      table.identifier,
+    ),
+  })),
+);
+
+export const scormAttempts = pgTable(
+  "scorm_attempts",
+  {
+    ...id,
+    ...timestamps,
+    studentId: uuid("student_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    courseId: uuid("course_id")
+      .references(() => courses.id, { onDelete: "cascade" })
+      .notNull(),
+    lessonId: uuid("lesson_id")
+      .references(() => lessons.id, { onDelete: "cascade" })
+      .notNull(),
+    packageId: uuid("package_id")
+      .references(() => scormPackages.id, { onDelete: "cascade" })
+      .notNull(),
+    scoId: uuid("sco_id")
+      .references(() => scormScos.id, { onDelete: "cascade" })
+      .notNull(),
+    attemptNumber: integer("attempt_number").notNull().default(1),
+    startedAt: timestamp("started_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    completedAt: timestamp("completed_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    tenantId,
+  },
+  withTenantIdIndex("scorm_attempts", (table) => ({
+    studentLessonIdx: index("scorm_attempts_student_lesson_idx").on(
+      table.studentId,
+      table.lessonId,
+    ),
+    studentPackageIdx: index("scorm_attempts_student_package_idx").on(
+      table.studentId,
+      table.packageId,
+    ),
+    scoIdx: index("scorm_attempts_sco_id_idx").on(table.scoId),
+    studentPackageScoAttemptUniqueIdx: uniqueIndex(
+      "scorm_attempts_student_package_sco_attempt_unique_idx",
+    ).on(table.studentId, table.packageId, table.scoId, table.attemptNumber),
+  })),
+);
+
+export const scormRuntimeState = pgTable(
+  "scorm_runtime_state",
+  {
+    ...id,
+    ...timestamps,
+    attemptId: uuid("attempt_id")
+      .references(() => scormAttempts.id, { onDelete: "cascade" })
+      .notNull(),
+    completionStatus: scormCompletionStatusEnum("completion_status")
+      .$type<ScormCompletionStatus>()
+      .notNull()
+      .default(SCORM_COMPLETION_STATUS.UNKNOWN),
+    successStatus: scormSuccessStatusEnum("success_status")
+      .$type<ScormSuccessStatus>()
+      .notNull()
+      .default(SCORM_SUCCESS_STATUS.UNKNOWN),
+    scoreRaw: numeric("score_raw", { precision: 10, scale: 4 }),
+    scoreMin: numeric("score_min", { precision: 10, scale: 4 }),
+    scoreMax: numeric("score_max", { precision: 10, scale: 4 }),
+    scoreScaled: numeric("score_scaled", { precision: 10, scale: 4 }),
+    lessonLocation: text("lesson_location"),
+    suspendData: text("suspend_data"),
+    sessionTime: text("session_time"),
+    totalTime: text("total_time"),
+    progressMeasure: numeric("progress_measure", { precision: 10, scale: 4 }),
+    entry: text("entry"),
+    exit: text("exit"),
+    rawCmiJson: jsonb("raw_cmi_json").default({}).notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("scorm_runtime_state", (table) => ({
+    attemptUniqueIdx: uniqueIndex("scorm_runtime_state_attempt_id_unique_idx").on(table.attemptId),
+  })),
 );
 
 export const groups = pgTable(

@@ -771,6 +771,20 @@
       "when": 1777303796631,
       "tag": "0109_secret_name_unique_per_tenant",
       "breakpoints": true
+    },
+    {
+      "idx": 110,
+      "version": "7",
+      "when": 1777884464530,
+      "tag": "0110_drop_scorm_foreign_keys",
+      "breakpoints": true
+    },
+    {
+      "idx": 111,
+      "version": "7",
+      "when": 1777884640666,
+      "tag": "0111_implement_scorm_tables",
+      "breakpoints": true
     }
   ]
 }

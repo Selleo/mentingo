@@ -164,6 +164,68 @@
     },
     "toast": {
       "scormUploadedSuccessfully": "SCORM paketas sėkmingai įkeltas"
+    },
+    "coursePlaceholder": {
+      "back": "Grįžti į kurso tipą",
+      "status": "SCORM kurso importas",
+      "title": "SCORM kurso kūrimas bus įjungtas vėliau",
+      "description": "Šis įėjimo taškas paruoštas, bet SCORM kurso importavimo eiga dar įgyvendinama. Kol kas sukurkite standartinį kursą arba grįžkite į kursų sąrašą.",
+      "createStandard": "Sukurti standartinį kursą",
+      "viewCourses": "Peržiūrėti kursus"
+    },
+    "create": {
+      "eyebrow": "SCORM 1.2",
+      "title": "Sukurti SCORM kursą",
+      "subtitle": "Pridėkite kurso metaduomenis ir pridėkite SCORM paketą, kuris taps kurso turiniu.",
+      "requirements": {
+        "title": "Paketo reikalavimai",
+        "version": "SCORM 1.2 paketas",
+        "archive": ".zip archyvas iki 500MB",
+        "metadata": "Kurso metaduomenis galima redaguoti prieš importą"
+      },
+      "packageSection": "SCORM paketas",
+      "packageSectionDescription": "Pridėkite paketą dabar. Failas tik patikrinamas formoje, kol upload API dar neprijungtas.",
+      "metadataSection": "Kurso informacija",
+      "metadataSectionDescription": "Šie laukai atitinka standartinį kurso nustatymą ir bus naudojami kaip baziniai kurso metaduomenys.",
+      "uploadPackage": "Įkelti SCORM paketą",
+      "dropPackage": "Numeskite SCORM paketą čia",
+      "uploadPackageDescription": "Nuvilkite SCORM 1.2 .zip failą arba pasirinkite jį iš įrenginio.",
+      "packageReady": "paruošta importui",
+      "replacePackage": "Pakeisti paketą",
+      "removePackage": "Pašalinti paketą",
+      "uploadThumbnail": "Įkelti miniatiūrą",
+      "uploadThumbnailDescription": "PNG, JPG arba JPEG iki 20MB",
+      "thumbnailPreviewAlt": "Kurso miniatiūros peržiūra",
+      "submit": "Sukurti SCORM kursą",
+      "creating": "Kuriamas SCORM kursas...",
+      "toastDraftReady": "SCORM kurso forma paruošta API integracijai"
+    }
+  },
+  "adminCourseTypeSelector": {
+    "back": "Atgal",
+    "eyebrow": "Kurso nustatymas",
+    "title": "Sukurti naują kursą",
+    "subtitle": "Pasirinkite, ar kursą kurti standartiniame redaktoriuje, ar iš SCORM paketo.",
+    "standard": {
+      "title": "Standartinis",
+      "description": "Sukurkite kursą su integruota programa, pamokomis, testais ir nustatymais.",
+      "features": {
+        "authoring": "Kuriama vietiniame kursų redaktoriuje",
+        "curriculum": "Skyriai, pamokos ir testai valdomi Mentingo",
+        "translations": "Palaikomos kurso kalbos ir vertimai",
+        "settings": "Kainodara, būsena ir sertifikatai įtraukti"
+      }
+    },
+    "scorm": {
+      "title": "SCORM",
+      "description": "Sukurkite kursą iš SCORM 1.2 paketo.",
+      "badge": "Placeholder",
+      "features": {
+        "import": "Kuriama iš SCORM 1.2 .zip paketo",
+        "tracking": "Palaikomas SCO užbaigimo ir vykdymo būsenos sekimas",
+        "structure": "Importuoto paketo struktūra išsaugoma",
+        "future": "Kainodara, būsena ir sertifikatai įtraukti"
+      }
     }
   },
   "studentChapterCardView": {
@@ -694,6 +756,7 @@
       "author": "Autorius",
       "category": "Kategorija",
       "price": "Kaina",
+      "type": "Tipas",
       "state": "valstybė",
       "status": "Būsena",
       "sharedCourse": "Bendrinama",
@@ -1178,6 +1241,13 @@
       "maxOneVideoUploaded": "Negalite įkelti daugiau nei 1 vaizdo įrašo.",
       "successfullyTransferredCourseOwnership": "Kurso nuosavybės teisė sėkmingai perduota"
     },
+    "errors": {
+      "featureUnavailable": {
+        "curriculum": "SCORM kursuose mokymo programos redagavimas nepasiekiamas.",
+        "lessonSequence": "SCORM kursuose pamokų eigos privalomas laikymasis nepasiekiamas.",
+        "quizFeedback": "SCORM kursuose viktorinos grįžtamojo ryšio nustatymai nepasiekiami."
+      }
+    },
     "thinking": {
       "PLANNING_NEXT_STEP": "Planuojate kitą žingsnį...",
       "USING_TOOLS": "Įrankių naudojimas kontekstui gauti...",
@@ -1476,6 +1546,7 @@
           "quiz": "Viktorina",
           "aiMentor": "AI mentorius",
           "embed": "Įterpti",
+          "scorm": "SCORM",
           "correct": "Teisingai",
           "true": "Tiesa",
           "false": "Netiesa",
@@ -1494,6 +1565,7 @@
           "contentLessonDescription": "Tekstas su multimedija (vaizdai, vaizdo įrašai, pristatymai).",
           "quizLessonDescription": "Klausimų rinkinys žinioms patikrinti.",
           "aiMentorLessonDescription": "Interaktyvus pokalbis su virtualiu AI mentoriumi.",
+          "scormLessonDescription": "Pamokos turinys SCORM pakete.",
           "fillInTheBlanksDescription": "Šiame klausime yra sakinys; mokiniai turi nuvilkti teisingą žodį į tuščią vietą.",
           "gapFillDescription": "Šiame klausime bus sakinys, kuriame trūksta žodžių, kuriuos mokiniai turi įvesti.",
           "embedLessonDescription": "Išorinis šaltinis (pvz., „Google“ forma, „Canva“ pristatymas arba „YouTube“ tiesioginis srautas).",

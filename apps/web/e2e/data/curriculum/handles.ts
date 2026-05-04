@@ -13,7 +13,7 @@ export const CURRICULUM_HANDLES = {
   lessonCard: (lessonId: string) => `curriculum-lesson-card-${lessonId}`,
   lessonDragHandle: (lessonId: string) => `curriculum-lesson-drag-handle-${lessonId}`,
   lessonTitle: (lessonId: string) => `curriculum-lesson-title-${lessonId}`,
-  lessonTypeOption: (type: "content" | "quiz" | "ai_mentor" | "embed") =>
+  lessonTypeOption: (type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm") =>
     `curriculum-lesson-type-option-${type}`,
 } as const;
 
