@@ -15,6 +15,10 @@ import { PROMISE_SETTLED_STATUS } from "./promise-settled-status";
 import { ScormRepository } from "./repositories/scorm.repository";
 import { resolveScormContentType } from "./scorm-content-type";
 import {
+  MAX_SCORM_EXTRACTED_FILE_COUNT,
+  MAX_SCORM_TOTAL_UNCOMPRESSED_SIZE_BYTES,
+} from "./scorm-package-limits";
+import {
   getScormExtractedFileReference,
   getScormExtractedFilesReference,
   getScormManifestReference,
@@ -25,46 +29,20 @@ import {
 
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
-import type { CreateScormCourseBody } from "src/scorm/schemas/createScormCourse.schema";
-import type { CreateScormLessonBody } from "src/scorm/schemas/createScormLesson.schema";
 import type {
+  CreateScormCourseImportParams,
+  CreateScormLessonImportParams,
   ParsedScormManifest,
+  PreparedPackageArtifacts,
   ScormItemManifest,
   ScormResourceManifest,
   ScormScoManifest,
 } from "src/scorm/scorm.types";
 
-type CreateScormCourseImportParams = {
-  scormPackage: Express.Multer.File;
-  metadata: CreateScormCourseBody;
-  currentUser: CurrentUserType;
-  isPlaywrightTest: boolean;
-};
-
-type CreateScormLessonImportParams = {
-  scormPackage: Express.Multer.File;
-  metadata: CreateScormLessonBody;
-  currentUser: CurrentUserType;
-};
-
-type PreparedPackageArtifacts = {
-  packageId: UUIDType;
-  entries: AdmZip.IZipEntry[];
-  manifest: ParsedScormManifest;
-  originalFileReference: string;
-  extractedFilesReference: string;
-  manifestReference: string;
-  originalFile: Express.Multer.File;
-};
-
-const MAX_EXTRACTED_FILE_COUNT = 10_000;
-const MAX_TOTAL_UNCOMPRESSED_SIZE = 2 * 1024 * 1024 * 1024;
-
 @Injectable()
 export class ScormService {
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
-    @Inject(ScormRepository)
     private readonly scormRepository: ScormRepository,
     private readonly s3Service: S3Service,
     private readonly courseService: CourseService,
@@ -78,7 +56,7 @@ export class ScormService {
     isPlaywrightTest,
   }: CreateScormCourseImportParams) {
     if (!scormPackage?.buffer?.length) {
-      throw new BadRequestException("SCORM package is required");
+      throw new BadRequestException("adminScorm.errors.packageRequired");
     }
 
     const artifacts = this.preparePackageArtifacts(scormPackage, currentUser);
@@ -137,7 +115,7 @@ export class ScormService {
 
   async createLessonImport({ scormPackage, metadata, currentUser }: CreateScormLessonImportParams) {
     if (!scormPackage?.buffer?.length) {
-      throw new BadRequestException("SCORM package is required");
+      throw new BadRequestException("adminScorm.errors.packageRequired");
     }
 
     const artifacts = this.preparePackageArtifacts(scormPackage, currentUser);
@@ -245,7 +223,7 @@ export class ScormService {
 
     const fileEntries = entries.filter((entry) => !entry.isDirectory);
 
-    if (fileEntries.length > MAX_EXTRACTED_FILE_COUNT) {
+    if (fileEntries.length > MAX_SCORM_EXTRACTED_FILE_COUNT) {
       throw new BadRequestException("adminScorm.errors.tooManyFiles");
     }
 
@@ -256,7 +234,7 @@ export class ScormService {
       totalUncompressedSize += entry.header.size;
     }
 
-    if (totalUncompressedSize > MAX_TOTAL_UNCOMPRESSED_SIZE) {
+    if (totalUncompressedSize > MAX_SCORM_TOTAL_UNCOMPRESSED_SIZE_BYTES) {
       throw new BadRequestException("adminScorm.errors.packageTooLarge");
     }
 

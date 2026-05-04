@@ -166,6 +166,21 @@
     "toast": {
       "scormUploadedSuccessfully": "SCORM-Paket erfolgreich hochgeladen"
     },
+    "errors": {
+      "packageRequired": "SCORM-Paket ist erforderlich.",
+      "emptyPackage": "SCORM-Paket ist leer.",
+      "tooManyFiles": "SCORM-Paket enthält zu viele Dateien.",
+      "packageTooLarge": "SCORM-Paket ist nach dem Entpacken zu groß.",
+      "manifestMissing": "SCORM-Manifestdatei fehlt.",
+      "manifestInvalid": "SCORM-Manifestdatei ist ungültig.",
+      "organizationMissing": "SCORM-Manifest enthält keine Organisation.",
+      "scoMissing": "SCORM-Manifest enthält keine startbaren SCOs.",
+      "resourceIdentifierMissing": "SCORM-Ressourcenkennung fehlt.",
+      "itemIdentifierMissing": "SCORM-Elementkennung fehlt.",
+      "launchFileMissing": "SCORM-Startdatei fehlt.",
+      "invalidPackagePath": "SCORM-Paket enthält einen ungültigen Dateipfad.",
+      "externalPackagePath": "SCORM-Paket enthält einen externen Dateipfad."
+    },
     "coursePlaceholder": {
       "back": "Zurück zur Kursart",
       "status": "SCORM-Kursimport",
@@ -1258,6 +1273,16 @@
         "curriculum": "Die Bearbeitung des Lehrplans ist für SCORM-Kurse nicht verfügbar.",
         "lessonSequence": "Die erzwungene Lektionenreihenfolge ist für SCORM-Kurse nicht verfügbar.",
         "quizFeedback": "Quiz-Feedback-Einstellungen sind für SCORM-Kurse nicht verfügbar."
+      },
+      "notFound": {
+        "course": "Kurs nicht gefunden.",
+        "category": "Kategorie nicht gefunden.",
+        "chapter": "Kapitel nicht gefunden.",
+        "lesson": "Lektion nicht gefunden."
+      },
+      "create": {
+        "courseFailed": "Kurs konnte nicht erstellt werden.",
+        "stripeProductFailed": "Zahlungsprodukt für den Kurs konnte nicht erstellt werden."
       }
     },
     "thinking": {

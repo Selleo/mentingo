@@ -166,6 +166,21 @@
     "toast": {
       "scormUploadedSuccessfully": "SCORM package uploaded successfully"
     },
+    "errors": {
+      "packageRequired": "SCORM package is required.",
+      "emptyPackage": "SCORM package is empty.",
+      "tooManyFiles": "SCORM package contains too many files.",
+      "packageTooLarge": "SCORM package is too large after extraction.",
+      "manifestMissing": "SCORM manifest file is missing.",
+      "manifestInvalid": "SCORM manifest file is invalid.",
+      "organizationMissing": "SCORM manifest does not contain an organization.",
+      "scoMissing": "SCORM manifest does not contain any launchable SCOs.",
+      "resourceIdentifierMissing": "SCORM resource identifier is missing.",
+      "itemIdentifierMissing": "SCORM item identifier is missing.",
+      "launchFileMissing": "SCORM launch file is missing.",
+      "invalidPackagePath": "SCORM package contains an invalid file path.",
+      "externalPackagePath": "SCORM package contains an external file path."
+    },
     "coursePlaceholder": {
       "back": "Back to course type",
       "status": "SCORM course import",
@@ -1311,6 +1326,16 @@
         "curriculum": "Curriculum editing is not available for SCORM courses.",
         "lessonSequence": "Lesson sequence enforcement is not available for SCORM courses.",
         "quizFeedback": "Quiz feedback settings are not available for SCORM courses."
+      },
+      "notFound": {
+        "course": "Course not found.",
+        "category": "Category not found.",
+        "chapter": "Chapter not found.",
+        "lesson": "Lesson not found."
+      },
+      "create": {
+        "courseFailed": "Failed to create course.",
+        "stripeProductFailed": "Failed to create course payment product."
       }
     },
     "thinking": {

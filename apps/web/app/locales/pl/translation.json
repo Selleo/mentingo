@@ -167,6 +167,21 @@
     "toast": {
       "scormUploadedSuccessfully": "Pakiet SCORM został pomyślnie przesłany"
     },
+    "errors": {
+      "packageRequired": "Pakiet SCORM jest wymagany.",
+      "emptyPackage": "Pakiet SCORM jest pusty.",
+      "tooManyFiles": "Pakiet SCORM zawiera zbyt wiele plików.",
+      "packageTooLarge": "Pakiet SCORM jest zbyt duży po rozpakowaniu.",
+      "manifestMissing": "Brakuje pliku manifestu SCORM.",
+      "manifestInvalid": "Plik manifestu SCORM jest nieprawidłowy.",
+      "organizationMissing": "Manifest SCORM nie zawiera organizacji.",
+      "scoMissing": "Manifest SCORM nie zawiera żadnych uruchamialnych SCO.",
+      "resourceIdentifierMissing": "Brakuje identyfikatora zasobu SCORM.",
+      "itemIdentifierMissing": "Brakuje identyfikatora elementu SCORM.",
+      "launchFileMissing": "Brakuje pliku uruchomieniowego SCORM.",
+      "invalidPackagePath": "Pakiet SCORM zawiera nieprawidłową ścieżkę pliku.",
+      "externalPackagePath": "Pakiet SCORM zawiera zewnętrzną ścieżkę pliku."
+    },
     "coursePlaceholder": {
       "back": "Wróć do typu kursu",
       "status": "Import kursu SCORM",
@@ -1297,6 +1312,16 @@
         "curriculum": "Edycja programu nie jest dostępna dla kursów SCORM.",
         "lessonSequence": "Wymuszanie kolejności lekcji nie jest dostępne dla kursów SCORM.",
         "quizFeedback": "Ustawienia informacji zwrotnej quizu nie są dostępne dla kursów SCORM."
+      },
+      "notFound": {
+        "course": "Nie znaleziono kursu.",
+        "category": "Nie znaleziono kategorii.",
+        "chapter": "Nie znaleziono rozdziału.",
+        "lesson": "Nie znaleziono lekcji."
+      },
+      "create": {
+        "courseFailed": "Nie udało się utworzyć kursu.",
+        "stripeProductFailed": "Nie udało się utworzyć produktu płatności dla kursu."
       }
     },
     "thinking": {

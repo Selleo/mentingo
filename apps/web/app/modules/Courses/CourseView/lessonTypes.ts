@@ -3,7 +3,7 @@ export const LessonTypesIcons = {
   quiz: "Quiz",
   ai_mentor: "AiMentor",
   embed: "Embed",
-  scorm: "Content",
+  scorm: "Archive",
 } as const;
 
 const lessonTypeTranslationSuffix = {

@@ -166,6 +166,21 @@
     "toast": {
       "scormUploadedSuccessfully": "SCORM paketas sėkmingai įkeltas"
     },
+    "errors": {
+      "packageRequired": "SCORM paketas yra privalomas.",
+      "emptyPackage": "SCORM paketas yra tuščias.",
+      "tooManyFiles": "SCORM pakete yra per daug failų.",
+      "packageTooLarge": "SCORM paketas po išskleidimo yra per didelis.",
+      "manifestMissing": "Trūksta SCORM manifesto failo.",
+      "manifestInvalid": "SCORM manifesto failas neteisingas.",
+      "organizationMissing": "SCORM manifeste nėra organizacijos.",
+      "scoMissing": "SCORM manifeste nėra paleidžiamų SCO.",
+      "resourceIdentifierMissing": "Trūksta SCORM ištekliaus identifikatoriaus.",
+      "itemIdentifierMissing": "Trūksta SCORM elemento identifikatoriaus.",
+      "launchFileMissing": "Trūksta SCORM paleidimo failo.",
+      "invalidPackagePath": "SCORM pakete yra neteisingas failo kelias.",
+      "externalPackagePath": "SCORM pakete yra išorinis failo kelias."
+    },
     "coursePlaceholder": {
       "back": "Grįžti į kurso tipą",
       "status": "SCORM kurso importas",
@@ -1258,6 +1273,16 @@
         "curriculum": "SCORM kursuose mokymo programos redagavimas nepasiekiamas.",
         "lessonSequence": "SCORM kursuose pamokų eigos privalomas laikymasis nepasiekiamas.",
         "quizFeedback": "SCORM kursuose viktorinos grįžtamojo ryšio nustatymai nepasiekiami."
+      },
+      "notFound": {
+        "course": "Kursas nerastas.",
+        "category": "Kategorija nerasta.",
+        "chapter": "Skyrius nerastas.",
+        "lesson": "Pamoka nerasta."
+      },
+      "create": {
+        "courseFailed": "Nepavyko sukurti kurso.",
+        "stripeProductFailed": "Nepavyko sukurti kurso mokėjimo produkto."
       }
     },
     "thinking": {

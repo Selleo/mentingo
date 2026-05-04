@@ -1,6 +1,21 @@
+import type AdmZip from "adm-zip";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { CreateScormCourseBody } from "src/scorm/schemas/createScormCourse.schema";
+import type { CreateScormLessonBody } from "src/scorm/schemas/createScormLesson.schema";
+
+export type CreateScormCourseImportParams = {
+  scormPackage: Express.Multer.File;
+  metadata: CreateScormCourseBody;
+  currentUser: CurrentUserType;
+  isPlaywrightTest: boolean;
+};
+
+export type CreateScormLessonImportParams = {
+  scormPackage: Express.Multer.File;
+  metadata: CreateScormLessonBody;
+  currentUser: CurrentUserType;
+};
 
 export type ScormResourceManifest = {
   identifier: string;
@@ -41,6 +56,16 @@ export type ParsedScormManifest = {
   resources: ScormResourceManifest[];
   items: ScormItemManifest[];
   scos: ScormScoManifest[];
+};
+
+export type PreparedPackageArtifacts = {
+  packageId: UUIDType;
+  entries: AdmZip.IZipEntry[];
+  manifest: ParsedScormManifest;
+  originalFileReference: string;
+  extractedFilesReference: string;
+  manifestReference: string;
+  originalFile: Express.Multer.File;
 };
 
 type PersistPackageParamsBase = {

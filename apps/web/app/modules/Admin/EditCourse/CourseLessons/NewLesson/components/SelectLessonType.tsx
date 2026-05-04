@@ -5,7 +5,10 @@ import { Icon } from "~/components/Icon";
 import { Badge } from "~/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 
-import { CURRICULUM_HANDLES } from "../../../../../../../e2e/data/curriculum/handles";
+import {
+  CURRICULUM_HANDLES,
+  LESSON_TYPE_OPTION_HANDLES,
+} from "../../../../../../../e2e/data/curriculum/handles";
 import { ContentTypes } from "../../../EditCourse.types";
 
 import type { LessonIcons } from "../../../EditCourse.types";
@@ -29,35 +32,35 @@ type LessonTypeConfig = {
 const lessonTypes: readonly LessonTypeConfig[] = [
   {
     contentType: ContentTypes.CONTENT_LESSON_FORM,
-    handle: "content",
+    handle: LESSON_TYPE_OPTION_HANDLES.CONTENT,
     icon: "Content",
     title: "adminCourseView.curriculum.lesson.other.content",
     description: "adminCourseView.curriculum.lesson.other.contentLessonDescription",
   },
   {
     contentType: ContentTypes.QUIZ_FORM,
-    handle: "quiz",
+    handle: LESSON_TYPE_OPTION_HANDLES.QUIZ,
     icon: "Quiz",
     title: "adminCourseView.curriculum.lesson.other.quiz",
     description: "adminCourseView.curriculum.lesson.other.quizLessonDescription",
   },
   {
     contentType: ContentTypes.EMBED_FORM,
-    handle: "embed",
+    handle: LESSON_TYPE_OPTION_HANDLES.EMBED,
     icon: "Embed",
     title: "adminCourseView.curriculum.lesson.other.embed",
     description: "adminCourseView.curriculum.lesson.other.embedLessonDescription",
   },
   {
     contentType: ContentTypes.AI_MENTOR_FORM,
-    handle: "ai_mentor",
+    handle: LESSON_TYPE_OPTION_HANDLES.AI_MENTOR,
     icon: "AiMentor",
     title: "adminCourseView.curriculum.lesson.other.aiMentor",
     description: "adminCourseView.curriculum.lesson.other.aiMentorLessonDescription",
   },
   {
     contentType: ContentTypes.SCORM_LESSON_FORM,
-    handle: "scorm",
+    handle: LESSON_TYPE_OPTION_HANDLES.SCORM,
     lucideIcon: PackageOpen,
     title: "adminCourseView.curriculum.lesson.other.scorm",
     description: "adminCourseView.curriculum.lesson.other.scormLessonDescription",

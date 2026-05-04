@@ -26,7 +26,7 @@ export class CourseFeaturePolicyService {
       .from(courses)
       .where(eq(courses.id, courseId));
 
-    if (!course) throw new NotFoundException("Course not found");
+    if (!course) throw new NotFoundException("adminCourseView.errors.notFound.course");
 
     this.assertFeatureEnabled(course.courseType, feature);
   }
@@ -38,7 +38,7 @@ export class CourseFeaturePolicyService {
       .innerJoin(courses, eq(courses.id, chapters.courseId))
       .where(eq(chapters.id, chapterId));
 
-    if (!course) throw new NotFoundException("Chapter not found");
+    if (!course) throw new NotFoundException("adminCourseView.errors.notFound.chapter");
 
     this.assertFeatureEnabled(course.courseType, feature);
   }
@@ -51,7 +51,7 @@ export class CourseFeaturePolicyService {
       .innerJoin(courses, eq(courses.id, chapters.courseId))
       .where(eq(lessons.id, lessonId));
 
-    if (!course) throw new NotFoundException("Lesson not found");
+    if (!course) throw new NotFoundException("adminCourseView.errors.notFound.lesson");
 
     this.assertFeatureEnabled(course.courseType, feature);
   }

@@ -166,6 +166,21 @@
     "toast": {
       "scormUploadedSuccessfully": "Balíček SCORM byl úspěšně nahrán"
     },
+    "errors": {
+      "packageRequired": "Balíček SCORM je povinný.",
+      "emptyPackage": "Balíček SCORM je prázdný.",
+      "tooManyFiles": "Balíček SCORM obsahuje příliš mnoho souborů.",
+      "packageTooLarge": "Balíček SCORM je po rozbalení příliš velký.",
+      "manifestMissing": "Chybí soubor manifestu SCORM.",
+      "manifestInvalid": "Soubor manifestu SCORM je neplatný.",
+      "organizationMissing": "Manifest SCORM neobsahuje organizaci.",
+      "scoMissing": "Manifest SCORM neobsahuje žádné spustitelné SCO.",
+      "resourceIdentifierMissing": "Chybí identifikátor zdroje SCORM.",
+      "itemIdentifierMissing": "Chybí identifikátor položky SCORM.",
+      "launchFileMissing": "Chybí spouštěcí soubor SCORM.",
+      "invalidPackagePath": "Balíček SCORM obsahuje neplatnou cestu k souboru.",
+      "externalPackagePath": "Balíček SCORM obsahuje externí cestu k souboru."
+    },
     "coursePlaceholder": {
       "back": "Zpět na typ kurzu",
       "status": "Import kurzu SCORM",
@@ -1258,6 +1273,16 @@
         "curriculum": "Úprava osnovy není pro kurzy SCORM dostupná.",
         "lessonSequence": "Vynucení pořadí lekcí není pro kurzy SCORM dostupné.",
         "quizFeedback": "Nastavení zpětné vazby kvízu není pro kurzy SCORM dostupné."
+      },
+      "notFound": {
+        "course": "Kurz nenalezen.",
+        "category": "Kategorie nenalezena.",
+        "chapter": "Kapitola nenalezena.",
+        "lesson": "Lekce nenalezena."
+      },
+      "create": {
+        "courseFailed": "Kurz se nepodařilo vytvořit.",
+        "stripeProductFailed": "Platební produkt kurzu se nepodařilo vytvořit."
       }
     },
     "thinking": {

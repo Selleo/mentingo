@@ -1,5 +1,13 @@
 import type { QuestionType } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/QuizLessonForm/QuizLessonForm.types";
 
+export const LESSON_TYPE_OPTION_HANDLES = {
+  CONTENT: "content",
+  QUIZ: "quiz",
+  AI_MENTOR: "ai_mentor",
+  EMBED: "embed",
+  SCORM: "scorm",
+} as const;
+
 export const CURRICULUM_HANDLES = {
   ROOT: "curriculum-root",
   CHAPTER_LIST: "curriculum-chapter-list",
@@ -13,8 +21,9 @@ export const CURRICULUM_HANDLES = {
   lessonCard: (lessonId: string) => `curriculum-lesson-card-${lessonId}`,
   lessonDragHandle: (lessonId: string) => `curriculum-lesson-drag-handle-${lessonId}`,
   lessonTitle: (lessonId: string) => `curriculum-lesson-title-${lessonId}`,
-  lessonTypeOption: (type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm") =>
-    `curriculum-lesson-type-option-${type}`,
+  lessonTypeOption: (
+    type: (typeof LESSON_TYPE_OPTION_HANDLES)[keyof typeof LESSON_TYPE_OPTION_HANDLES],
+  ) => `curriculum-lesson-type-option-${type}`,
 } as const;
 
 export const CHAPTER_FORM_HANDLES = {

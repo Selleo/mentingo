@@ -1,5 +1,4 @@
 import { useMutation } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { useTranslation } from "react-i18next";
 
 import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
@@ -8,6 +7,8 @@ import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorM
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../../api-client";
+
+import type { AxiosError } from "axios";
 
 type CreateScormLessonOptions = {
   data: Parameters<typeof ApiClient.api.scormControllerCreateScormLesson>[0];
@@ -29,21 +30,14 @@ export function useCreateScormLesson() {
 
       toast({ description: t(data.data.message) });
     },
-    onError: (error) => {
-      if (error instanceof AxiosError) {
-        return toast({
-          variant: "destructive",
-          description: getTranslatedApiErrorMessage(
-            error,
-            t,
-            t("adminCourseView.curriculum.lesson.toast.unexpectedError"),
-          ),
-        });
-      }
-
+    onError: (error: AxiosError) => {
       toast({
         variant: "destructive",
-        description: error.message,
+        description: getTranslatedApiErrorMessage(
+          error,
+          t,
+          t("adminCourseView.curriculum.lesson.toast.unexpectedError"),
+        ),
       });
     },
   });

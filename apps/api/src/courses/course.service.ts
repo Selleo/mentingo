@@ -1771,7 +1771,7 @@ export class CourseService {
     const { enabled: isStripeConfigured } = await this.envService.getStripeConfigured();
 
     if (!category) {
-      throw new NotFoundException("Category not found");
+      throw new NotFoundException("adminCourseView.errors.notFound.category");
     }
     const globalSettings = await this.settingsService.getGlobalSettings();
 
@@ -1792,7 +1792,7 @@ export class CourseService {
       priceId = stripeResult.priceId;
 
       if (!productId || !priceId) {
-        throw new InternalServerErrorException("Failed to create product");
+        throw new InternalServerErrorException("adminCourseView.errors.create.stripeProductFailed");
       }
     }
 
@@ -1825,7 +1825,7 @@ export class CourseService {
       .returning();
 
     if (!newCourse) {
-      throw new ConflictException("Failed to create course");
+      throw new ConflictException("adminCourseView.errors.create.courseFailed");
     }
 
     await dbInstance
