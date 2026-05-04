@@ -23,6 +23,8 @@ import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
 import { tanstackSortingToParam } from "~/utils/tanstackSortingToParam";
 
+import { COURSE_STATISTICS_HANDLES } from "../../../../../../e2e/data/statistics/handles";
+
 import LessonPreviewDialog from "./LessonPreviewDialog";
 
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
@@ -145,6 +147,10 @@ export function CourseStudentsAiMentorResultsTable({
         cell: ({ row }) => (
           <div className="flex justify-center">
             <Button
+              data-testid={COURSE_STATISTICS_HANDLES.aiMentorResultsPreviewButton(
+                row.original.studentId,
+                row.original.lessonId,
+              )}
               variant="outline"
               size="icon"
               onClick={() => {
@@ -191,6 +197,7 @@ export function CourseStudentsAiMentorResultsTable({
 
   return (
     <div
+      data-testid={COURSE_STATISTICS_HANDLES.AI_MENTOR_RESULTS_TABLE}
       className={cn(
         "rounded-lg overflow-hidden border border-neutral-200 relative",
         isFetching && "shimmer-45",
@@ -212,6 +219,10 @@ export function CourseStudentsAiMentorResultsTable({
           {table.getRowModel().rows.map((row) => (
             <TableRow
               key={row.id}
+              data-testid={COURSE_STATISTICS_HANDLES.aiMentorResultsRow(
+                row.original.studentId,
+                row.original.lessonId,
+              )}
               data-state={row.getIsSelected() && "selected"}
               className="cursor-pointer hover:bg-neutral-100"
             >

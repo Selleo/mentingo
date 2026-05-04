@@ -3323,6 +3323,15 @@ export interface UpdatePromotionCodeResponse {
   };
 }
 
+export interface PrepareAiMentorStatisticsProgressBody {
+  /** @format uuid */
+  lessonId: string;
+  /** @format uuid */
+  studentId: string;
+  /** @default "en" */
+  language?: "en" | "pl" | "de" | "lt" | "cs";
+}
+
 export interface GetAllCategoriesResponse {
   data: {
     /** @format uuid */
@@ -8269,6 +8278,24 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<void, any>({
         path: `/api/test-config/teardown`,
         method: "POST",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name TestConfigControllerPrepareAiMentorStatisticsProgress
+     * @request POST:/api/test-config/ai-mentor-statistics-progress
+     */
+    testConfigControllerPrepareAiMentorStatisticsProgress: (
+      data: PrepareAiMentorStatisticsProgressBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/test-config/ai-mentor-statistics-progress`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
 

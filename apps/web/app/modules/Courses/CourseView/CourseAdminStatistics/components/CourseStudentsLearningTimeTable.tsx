@@ -22,6 +22,8 @@ import { cn } from "~/lib/utils";
 import { formatLearningTime } from "~/modules/Courses/CourseView/CourseAdminStatistics/CourseAdminStatistics";
 import { tanstackSortingToParam } from "~/utils/tanstackSortingToParam";
 
+import { COURSE_STATISTICS_HANDLES } from "../../../../../../e2e/data/statistics/handles";
+
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import type { GetCourseLearningTimeStatisticsResponse } from "~/api/generated-api";
 import type { CourseLearningTimeFilterQuery } from "~/api/queries/admin/useCourseLearningTimeStatistics";
@@ -181,6 +183,7 @@ export function CourseStudentsLearningTimeTable({
 
   return (
     <div
+      data-testid={COURSE_STATISTICS_HANDLES.LEARNING_TIME_TABLE}
       className={cn(
         "rounded-lg overflow-hidden border border-neutral-200 relative",
         isFetching && "shimmer-45",
@@ -202,6 +205,7 @@ export function CourseStudentsLearningTimeTable({
           {table.getRowModel().rows.map((row) => (
             <TableRow
               key={row.id}
+              data-testid={COURSE_STATISTICS_HANDLES.learningTimeRow(row.original.id)}
               data-course-id={row.original.id}
               data-state={row.getIsSelected() && "selected"}
               className="cursor-pointer hover:bg-neutral-100"
