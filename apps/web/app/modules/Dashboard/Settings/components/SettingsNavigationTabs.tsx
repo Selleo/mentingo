@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { match } from "ts-pattern";
 
 import { Card, CardContent } from "~/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "~/components/ui/tabs";
@@ -61,13 +62,10 @@ export function SettingsNavigationTabs({
                 <TabsTrigger
                   key={tab.value}
                   value={tab.value}
-                  data-testid={
-                    tab.value === SETTINGS_TABS.ACCOUNT
-                      ? SETTINGS_PAGE_HANDLES.ACCOUNT_TAB
-                      : tab.value === SETTINGS_TABS.ORGANIZATION
-                        ? SETTINGS_PAGE_HANDLES.ORGANIZATION_TAB
-                        : SETTINGS_PAGE_HANDLES.PLATFORM_CUSTOMIZATION_TAB
-                  }
+                  data-testid={match(tab.value)
+                    .with(SETTINGS_TABS.ACCOUNT, () => SETTINGS_PAGE_HANDLES.ACCOUNT_TAB)
+                    .with(SETTINGS_TABS.ORGANIZATION, () => SETTINGS_PAGE_HANDLES.ORGANIZATION_TAB)
+                    .otherwise(() => SETTINGS_PAGE_HANDLES.PLATFORM_CUSTOMIZATION_TAB)}
                   className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium text-neutral-900 ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm relative"
                 >
                   {tab.label}
