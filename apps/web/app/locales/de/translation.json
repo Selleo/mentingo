@@ -1589,6 +1589,7 @@
         "other": {
           "lessonNumber": "Anzahl der Unterrichtsstunden",
           "chooseType": "Wählen Sie Typ",
+          "chooseLessonTypeAriaLabel": "Lektionstyp {{type}} auswählen",
           "content": "Inhalt",
           "quiz": "Quiz",
           "aiMentor": "KI-Mentor",
@@ -2060,8 +2061,6 @@
       "previousSco": "Vorheriger Abschnitt",
       "nextSco": "Nächster Abschnitt",
       "tryAgain": "Erneut versuchen",
-      "packageDialogTitle": "SCORM-Inhalt",
-      "packageDialogOk": "OK",
       "lessonFinished": "SCORM-Lektion abgeschlossen."
     },
     "videoProcessing": {

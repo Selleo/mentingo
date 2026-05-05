@@ -1633,6 +1633,7 @@
         "other": {
           "lessonNumber": "Liczba lekcji",
           "chooseType": "Wybierz typ",
+          "chooseLessonTypeAriaLabel": "Wybierz typ lekcji {{type}}",
           "content": "Treść",
           "quiz": "Quiz",
           "aiMentor": "AI Mentor",
@@ -2115,8 +2116,6 @@
       "previousSco": "Poprzednia sekcja",
       "nextSco": "Następna sekcja",
       "tryAgain": "Spróbuj ponownie",
-      "packageDialogTitle": "Treść SCORM",
-      "packageDialogOk": "OK",
       "lessonFinished": "Lekcja SCORM została zakończona."
     },
     "videoProcessing": {

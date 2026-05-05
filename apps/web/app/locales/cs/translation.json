@@ -1589,6 +1589,7 @@
         "other": {
           "lessonNumber": "Počet lekcí",
           "chooseType": "Vyberte typ",
+          "chooseLessonTypeAriaLabel": "Vybrat typ lekce {{type}}",
           "content": "Obsah",
           "quiz": "Kvíz",
           "aiMentor": "AI mentor",
@@ -2060,8 +2061,6 @@
       "previousSco": "Předchozí část",
       "nextSco": "Další část",
       "tryAgain": "Zkuste to znovu",
-      "packageDialogTitle": "Obsah SCORM",
-      "packageDialogOk": "OK",
       "lessonFinished": "Lekce SCORM byla dokončena."
     },
     "videoProcessing": {

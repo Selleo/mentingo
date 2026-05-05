@@ -207,10 +207,6 @@ test("student can launch, resume, fullscreen, and finish a SCORM lesson", async 
       await page.reload();
       await expect(scormFrame(page).getByTestId(SCORM_PACKAGE_HANDLES.ENTRY)).toHaveText("resume");
 
-      await clickScormIframeButtonFlow(page, SCORM_PACKAGE_HANDLES.PACKAGE_CONFIRM_BUTTON);
-      await expect(page.getByTestId(LEARNING_HANDLES.SCORM_PACKAGE_DIALOG)).toBeVisible();
-      await page.getByTestId(LEARNING_HANDLES.SCORM_PACKAGE_DIALOG_OK_BUTTON).click();
-
       await page.getByTestId(LEARNING_HANDLES.SCORM_FULLSCREEN_BUTTON).click();
       await expect(page.getByTestId(LEARNING_HANDLES.SCORM_ROOT)).toHaveAttribute(
         "data-fullscreen",

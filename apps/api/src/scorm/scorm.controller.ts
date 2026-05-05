@@ -50,8 +50,6 @@ import type {
   ScormRuntimeCommitResponse,
   ScormRuntimeFinishResponse,
 } from "./schemas/scormRuntime.schema";
-import type { Readable } from "stream";
-
 @Controller("scorm")
 export class ScormController {
   constructor(
@@ -235,59 +233,6 @@ export class ScormController {
       currentUser,
     });
 
-    if (this.isHtmlScormContent(file.contentType)) {
-      const html = await this.streamToString(file.stream);
-
-      response.setHeader("Content-Type", file.contentType ?? "text/html; charset=utf-8");
-      response.status(200).send(this.injectScormDialogBridge(html));
-      return;
-    }
-
     streamFileToResponse(response, file);
-  }
-
-  private isHtmlScormContent(contentType?: string) {
-    return Boolean(contentType?.toLowerCase().includes("text/html"));
-  }
-
-  private injectScormDialogBridge(html: string) {
-    const bridgeScript = `<script>
-(function () {
-  function postScormDialog(kind, message) {
-    try {
-      window.parent.postMessage({
-        type: "mentingo:scorm-dialog",
-        kind: kind,
-        message: String(message || "")
-      }, window.location.origin);
-    } catch (error) {}
-  }
-
-  window.alert = function (message) {
-    postScormDialog("alert", message);
-  };
-
-  window.confirm = function (message) {
-    postScormDialog("confirm", message);
-    return false;
-  };
-})();
-</script>`;
-
-    if (html.includes("<head>")) {
-      return html.replace("<head>", `<head>${bridgeScript}`);
-    }
-
-    return `${bridgeScript}${html}`;
-  }
-
-  private async streamToString(stream: Readable) {
-    const chunks: Buffer[] = [];
-
-    for await (const chunk of stream) {
-      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
-    }
-
-    return Buffer.concat(chunks).toString("utf-8");
   }
 }

@@ -35,9 +35,6 @@ export const LEARNING_HANDLES = {
   SCORM_NEXT_SECTION_BUTTON: "learning-scorm-next-section-button",
   SCORM_FULLSCREEN_BUTTON: "learning-scorm-fullscreen-button",
   SCORM_IFRAME: "learning-scorm-iframe",
-  SCORM_PACKAGE_DIALOG: "learning-scorm-package-dialog",
-  SCORM_PACKAGE_DIALOG_OK_BUTTON: "learning-scorm-package-dialog-ok-button",
-  SCORM_PACKAGE_DIALOG_CANCEL_BUTTON: "learning-scorm-package-dialog-cancel-button",
   SCORM_LAUNCH_FAILED_DIALOG: "learning-scorm-launch-failed-dialog",
   SCORM_LAUNCH_RETRY_BUTTON: "learning-scorm-launch-retry-button",
 } as const;

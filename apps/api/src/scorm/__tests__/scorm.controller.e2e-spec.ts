@@ -475,7 +475,7 @@ describe("ScormController (e2e)", () => {
         .expect(200);
 
       expect(adminResponse.text).toContain("SCORM index");
-      expect(adminResponse.text).toContain("mentingo:scorm-dialog");
+      expect(adminResponse.text).not.toContain("mentingo:scorm-dialog");
     });
 
     it("denies content access for an unenrolled learner", async () => {

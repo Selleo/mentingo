@@ -1642,6 +1642,7 @@
         "other": {
           "lessonNumber": "Number of lessons",
           "chooseType": "Choose type",
+          "chooseLessonTypeAriaLabel": "Choose {{type}} lesson type",
           "content": "Content",
           "quiz": "Quiz",
           "aiMentor": "AI Mentor",
@@ -2113,8 +2114,6 @@
       "previousSco": "Previous section",
       "nextSco": "Next section",
       "tryAgain": "Try again",
-      "packageDialogTitle": "SCORM content",
-      "packageDialogOk": "OK",
       "lessonFinished": "SCORM lesson finished."
     },
     "videoProcessing": {

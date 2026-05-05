@@ -1589,6 +1589,7 @@
         "other": {
           "lessonNumber": "Pamokų skaičius",
           "chooseType": "Pasirinkite tipą",
+          "chooseLessonTypeAriaLabel": "Pasirinkti {{type}} pamokos tipą",
           "content": "Turinys",
           "quiz": "Viktorina",
           "aiMentor": "AI mentorius",
@@ -2060,8 +2061,6 @@
       "previousSco": "Ankstesnė dalis",
       "nextSco": "Kita dalis",
       "tryAgain": "Bandykite dar kartą",
-      "packageDialogTitle": "SCORM turinys",
-      "packageDialogOk": "OK",
       "lessonFinished": "SCORM pamoka baigta."
     },
     "videoProcessing": {

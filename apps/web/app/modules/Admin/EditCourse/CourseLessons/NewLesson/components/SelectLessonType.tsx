@@ -91,7 +91,12 @@ const SelectLessonType = ({ setContentTypeToDisplay }: SelectLessonTypeProps) =>
                     }
                   }}
                   tabIndex={0}
-                  aria-label={`Choose ${title} lesson type`}
+                  aria-label={t(
+                    "adminCourseView.curriculum.lesson.other.chooseLessonTypeAriaLabel",
+                    {
+                      type: t(title),
+                    },
+                  )}
                 >
                   {LucideIcon ? (
                     <LucideIcon className="mb-6 size-8 text-primary-700" aria-hidden="true" />

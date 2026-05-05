@@ -152,14 +152,14 @@ export class ScormRepository {
     await this.db.transaction(persist);
   }
 
-  async markPackageReady(packageId: string, _tenantId: string) {
+  async markPackageReady(packageId: string) {
     await this.db
       .update(scormPackages)
       .set({ status: SCORM_PACKAGE_STATUS.READY })
       .where(eq(scormPackages.id, packageId));
   }
 
-  async findLaunchableSco(params: { lessonId: string; scoId?: string; tenantId: string }) {
+  async findLaunchableSco(params: { lessonId: string; scoId?: string }) {
     const conditions = [
       eq(scormScos.lessonId, params.lessonId),
       eq(scormPackages.status, SCORM_PACKAGE_STATUS.READY),
@@ -240,7 +240,6 @@ export class ScormRepository {
     lessonId: string;
     packageId: string;
     scoId: string;
-    tenantId: string;
   }) {
     const [existingAttempt] = await this.db
       .select()
@@ -285,7 +284,7 @@ export class ScormRepository {
     };
   }
 
-  async findRuntimeState(attemptId: string, _tenantId: string) {
+  async findRuntimeState(attemptId: string) {
     const [runtimeState] = await this.db
       .select()
       .from(scormRuntimeState)
@@ -295,7 +294,7 @@ export class ScormRepository {
     return runtimeState;
   }
 
-  async findAttemptContext(params: { attemptId: string; tenantId: string }) {
+  async findAttemptContext(attemptId: string) {
     const [attempt] = await this.db
       .select({
         attemptId: scormAttempts.id,
@@ -310,7 +309,7 @@ export class ScormRepository {
       .from(scormAttempts)
       .innerJoin(scormPackages, eq(scormPackages.id, scormAttempts.packageId))
       .innerJoin(scormScos, eq(scormScos.id, scormAttempts.scoId))
-      .where(eq(scormAttempts.id, params.attemptId))
+      .where(eq(scormAttempts.id, attemptId))
       .limit(1);
 
     return attempt;
@@ -318,7 +317,6 @@ export class ScormRepository {
 
   async upsertRuntimeState(params: {
     attemptId: string;
-    tenantId: string;
     rawCmiJson: Record<string, string>;
     completionStatus: ScormCompletionStatus;
     successStatus: ScormSuccessStatus;
@@ -372,7 +370,7 @@ export class ScormRepository {
     return runtimeState;
   }
 
-  async markAttemptCompleted(attemptId: string, _tenantId: string) {
+  async markAttemptCompleted(attemptId: string) {
     await this.db
       .update(scormAttempts)
       .set({ completedAt: sql`now()` })
@@ -383,7 +381,6 @@ export class ScormRepository {
     studentId: string;
     packageId: string;
     lessonId: string;
-    tenantId: string;
     completedStatuses: ScormCompletionStatus[];
   }) {
     const [completion] = await this.db
@@ -404,7 +401,7 @@ export class ScormRepository {
     return completion.totalCount > 0 && completion.totalCount === completion.completedCount;
   }
 
-  async findPackageById(packageId: string, _tenantId: string) {
+  async findPackageById(packageId: string) {
     const [scormPackage] = await this.db
       .select()
       .from(scormPackages)
@@ -437,7 +434,7 @@ export class ScormRepository {
     return access;
   }
 
-  async deleteImportedCourse(courseId: string, _tenantId: string) {
+  async deleteImportedCourse(courseId: string) {
     await this.db
       .delete(scormPackages)
       .where(
@@ -450,7 +447,7 @@ export class ScormRepository {
     await this.db.delete(courses).where(eq(courses.id, courseId));
   }
 
-  async deleteImportedLesson(lessonId: string, _tenantId: string) {
+  async deleteImportedLesson(lessonId: string) {
     await this.db
       .delete(scormPackages)
       .where(

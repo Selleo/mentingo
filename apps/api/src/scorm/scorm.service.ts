@@ -122,10 +122,10 @@ export class ScormService {
 
     try {
       uploadedReferences = await this.uploadPackageFiles(artifacts, currentUser.tenantId);
-      await this.scormRepository.markPackageReady(artifacts.packageId, currentUser.tenantId);
+      await this.scormRepository.markPackageReady(artifacts.packageId);
     } catch (error) {
       await this.deleteUploadedPackageFiles(uploadedReferences);
-      await this.scormRepository.deleteImportedCourse(course.id, currentUser.tenantId);
+      await this.scormRepository.deleteImportedCourse(course.id);
       throw error;
     }
 
@@ -180,10 +180,10 @@ export class ScormService {
 
     try {
       uploadedReferences = await this.uploadPackageFiles(artifacts, currentUser.tenantId);
-      await this.scormRepository.markPackageReady(artifacts.packageId, currentUser.tenantId);
+      await this.scormRepository.markPackageReady(artifacts.packageId);
     } catch (error) {
       await this.deleteUploadedPackageFiles(uploadedReferences);
-      await this.scormRepository.deleteImportedLesson(createdLesson.lessonId, currentUser.tenantId);
+      await this.scormRepository.deleteImportedLesson(createdLesson.lessonId);
       throw error;
     }
 
@@ -207,7 +207,6 @@ export class ScormService {
     const launchableSco = await this.scormRepository.findLaunchableSco({
       lessonId,
       scoId,
-      tenantId: currentUser.tenantId,
     });
 
     if (!launchableSco || launchableSco.lessonType !== LESSON_TYPES.SCORM) {
@@ -230,12 +229,8 @@ export class ScormService {
       lessonId: launchableSco.lessonId,
       packageId: launchableSco.packageId,
       scoId: launchableSco.scoId,
-      tenantId: currentUser.tenantId,
     });
-    const runtimeState = await this.scormRepository.findRuntimeState(
-      attempt.id,
-      currentUser.tenantId,
-    );
+    const runtimeState = await this.scormRepository.findRuntimeState(attempt.id);
     const navigation = await this.scormRepository.findScoNavigation({
       packageId: launchableSco.packageId,
       lessonId: launchableSco.lessonId,
@@ -262,10 +257,7 @@ export class ScormService {
   async commitRuntime(params: ScormRuntimeCommitParams | ScormRuntimeFinishParams) {
     const { body, currentUser, finish } = params;
 
-    const attemptContext = await this.scormRepository.findAttemptContext({
-      attemptId: body.attemptId,
-      tenantId: currentUser.tenantId,
-    });
+    const attemptContext = await this.scormRepository.findAttemptContext(body.attemptId);
 
     if (
       !attemptContext ||
@@ -281,10 +273,7 @@ export class ScormService {
 
     this.assertRuntimeValues(body.values);
 
-    const existingRuntimeState = await this.scormRepository.findRuntimeState(
-      body.attemptId,
-      currentUser.tenantId,
-    );
+    const existingRuntimeState = await this.scormRepository.findRuntimeState(body.attemptId);
     const mergedCmiJson = {
       ...this.asRuntimeJson(existingRuntimeState?.rawCmiJson),
       ...body.values,
@@ -302,7 +291,6 @@ export class ScormService {
 
     await this.scormRepository.upsertRuntimeState({
       attemptId: body.attemptId,
-      tenantId: currentUser.tenantId,
       rawCmiJson: mergedCmiJson,
       ...normalizedRuntimeState,
     });
@@ -311,7 +299,7 @@ export class ScormService {
       normalizedRuntimeState.completionStatus === SCORM_COMPLETION_STATUS.COMPLETED;
 
     if (finish || scoCompleted) {
-      await this.scormRepository.markAttemptCompleted(body.attemptId, currentUser.tenantId);
+      await this.scormRepository.markAttemptCompleted(body.attemptId);
     }
 
     let lessonCompleted = false;
@@ -321,7 +309,6 @@ export class ScormService {
         studentId: currentUser.userId,
         packageId: body.packageId,
         lessonId: body.lessonId,
-        tenantId: currentUser.tenantId,
         completedStatuses: [SCORM_COMPLETION_STATUS.COMPLETED],
       });
 
@@ -355,10 +342,7 @@ export class ScormService {
     currentUser: CurrentUserType;
     range?: string;
   }) {
-    const scormPackage = await this.scormRepository.findPackageById(
-      params.packageId,
-      params.currentUser.tenantId,
-    );
+    const scormPackage = await this.scormRepository.findPackageById(params.packageId);
 
     if (!scormPackage || scormPackage.status !== SCORM_PACKAGE_STATUS.READY) {
       throw new NotFoundException("adminScorm.errors.runtime.contentNotFound");
