@@ -180,7 +180,15 @@
       "itemIdentifierMissing": "Brakuje identyfikatora elementu SCORM.",
       "launchFileMissing": "Brakuje pliku uruchomieniowego SCORM.",
       "invalidPackagePath": "Pakiet SCORM zawiera nieprawidłową ścieżkę pliku.",
-      "externalPackagePath": "Pakiet SCORM zawiera zewnętrzną ścieżkę pliku."
+      "externalPackagePath": "Pakiet SCORM zawiera zewnętrzną ścieżkę pliku.",
+      "runtime": {
+        "launchNotFound": "Nie znaleziono treści startowej SCORM.",
+        "unsupportedStandard": "Ten standard SCORM nie jest jeszcze obsługiwany.",
+        "invalidAttempt": "Próba SCORM jest nieprawidłowa.",
+        "invalidCmiValue": "Dane runtime SCORM są nieprawidłowe.",
+        "contentNotFound": "Nie znaleziono treści SCORM.",
+        "contentForbidden": "Nie masz dostępu do tej treści SCORM."
+      }
     },
     "coursePlaceholder": {
       "back": "Wróć do typu kursu",
@@ -2097,6 +2105,19 @@
     "aiMentor": {
       "title": "Sesja AI Mentora",
       "description": "To jest sesja mentoringu z AI. AI poprowadzi Cię przez lekcję zgodnie z wytycznymi instruktora."
+    },
+    "scorm": {
+      "loading": "Ładowanie treści SCORM...",
+      "launchFailed": "Nie udało się uruchomić treści SCORM.",
+      "launchFailedBody": "Spróbuj ponownie. Jeśli problem będzie się powtarzał, pakiet SCORM może wymagać ponownego przesłania.",
+      "saveFailed": "Nie udało się zapisać postępu SCORM.",
+      "saving": "Zapisywanie postępu",
+      "previousSco": "Poprzednia sekcja",
+      "nextSco": "Następna sekcja",
+      "tryAgain": "Spróbuj ponownie",
+      "packageDialogTitle": "Treść SCORM",
+      "packageDialogOk": "OK",
+      "lessonFinished": "Lekcja SCORM została zakończona."
     },
     "videoProcessing": {
       "title": "Wideo jest przetwarzane",

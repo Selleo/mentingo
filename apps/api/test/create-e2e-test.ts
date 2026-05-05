@@ -60,6 +60,27 @@ export async function createE2ETest(optionsOrProviders: E2ETestOptions | Provide
     });
   }
 
+  for (const provider of customProviders) {
+    if (typeof provider !== "object" || provider === null || !("provide" in provider)) {
+      continue;
+    }
+
+    if ("useValue" in provider) {
+      testModuleBuilder = testModuleBuilder
+        .overrideProvider(provider.provide)
+        .useValue(provider.useValue);
+    } else if ("useClass" in provider) {
+      testModuleBuilder = testModuleBuilder
+        .overrideProvider(provider.provide)
+        .useClass(provider.useClass);
+    } else if ("useFactory" in provider) {
+      testModuleBuilder = testModuleBuilder.overrideProvider(provider.provide).useFactory({
+        factory: provider.useFactory,
+        inject: provider.inject,
+      });
+    }
+  }
+
   const moduleFixture: TestingModule = await testModuleBuilder.compile();
 
   const app = moduleFixture.createNestApplication({

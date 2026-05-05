@@ -179,7 +179,15 @@
       "itemIdentifierMissing": "Trūksta SCORM elemento identifikatoriaus.",
       "launchFileMissing": "Trūksta SCORM paleidimo failo.",
       "invalidPackagePath": "SCORM pakete yra neteisingas failo kelias.",
-      "externalPackagePath": "SCORM pakete yra išorinis failo kelias."
+      "externalPackagePath": "SCORM pakete yra išorinis failo kelias.",
+      "runtime": {
+        "launchNotFound": "SCORM paleidimo turinys nerastas.",
+        "unsupportedStandard": "Šis SCORM standartas dar nepalaikomas.",
+        "invalidAttempt": "SCORM bandymas neteisingas.",
+        "invalidCmiValue": "SCORM vykdymo duomenys neteisingi.",
+        "contentNotFound": "SCORM turinys nerastas.",
+        "contentForbidden": "Neturite prieigos prie šio SCORM turinio."
+      }
     },
     "coursePlaceholder": {
       "back": "Grįžti į kurso tipą",
@@ -2042,6 +2050,19 @@
     "aiMentor": {
       "title": "AI mentoriaus sesija",
       "description": "Tai AI pagrįsta mentorystės sesija. AI padės jums per pamoką pagal instruktoriaus nurodymus."
+    },
+    "scorm": {
+      "loading": "Įkeliamas SCORM turinys...",
+      "launchFailed": "Nepavyko paleisti SCORM turinio.",
+      "launchFailedBody": "Bandykite dar kartą. Jei problema išlieka, SCORM paketą gali reikėti įkelti iš naujo.",
+      "saveFailed": "Nepavyko išsaugoti SCORM pažangos.",
+      "saving": "Išsaugoma pažanga",
+      "previousSco": "Ankstesnė dalis",
+      "nextSco": "Kita dalis",
+      "tryAgain": "Bandykite dar kartą",
+      "packageDialogTitle": "SCORM turinys",
+      "packageDialogOk": "OK",
+      "lessonFinished": "SCORM pamoka baigta."
     },
     "videoProcessing": {
       "title": "Vaizdo įrašas apdorojamas",

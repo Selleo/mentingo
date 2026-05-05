@@ -1,14 +1,29 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { SCORM_PACKAGE_ENTITY_TYPE, SCORM_PACKAGE_STATUS, SCORM_STANDARD } from "@repo/shared";
-import { and, eq } from "drizzle-orm";
+import {
+  COURSE_ENROLLMENT,
+  SCORM_PACKAGE_ENTITY_TYPE,
+  SCORM_PACKAGE_STATUS,
+  SCORM_STANDARD,
+} from "@repo/shared";
+import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
-import { chapters, courses, lessons, scormPackages, scormScos } from "src/storage/schema";
+import {
+  chapters,
+  courses,
+  lessons,
+  scormAttempts,
+  scormPackages,
+  scormRuntimeState,
+  scormScos,
+  studentCourses,
+} from "src/storage/schema";
 
 import { getScormExtractedFileReference, getScormScoLaunchReference } from "../scorm-storage-paths";
 
+import type { ScormCompletionStatus, ScormSuccessStatus } from "@repo/shared";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type {
   PersistCoursePackageParams,
@@ -41,7 +56,6 @@ export class ScormRepository {
             manifestReference: params.manifestReference,
           },
           status: SCORM_PACKAGE_STATUS.PROCESSING,
-          tenantId: params.currentUser.tenantId,
         })
         .returning();
 
@@ -54,7 +68,6 @@ export class ScormRepository {
             title: buildJsonbField(params.metadata.language, sco.item.title),
             displayOrder: sco.displayOrder,
             lessonCount: 1,
-            tenantId: params.currentUser.tenantId,
           })
           .returning();
 
@@ -66,7 +79,6 @@ export class ScormRepository {
             title: buildJsonbField(params.metadata.language, sco.item.title),
             description: buildJsonbField(params.metadata.language, ""),
             displayOrder: 1,
-            tenantId: params.currentUser.tenantId,
           })
           .returning();
 
@@ -116,7 +128,6 @@ export class ScormRepository {
             manifestReference: params.manifestReference,
           },
           status: SCORM_PACKAGE_STATUS.PROCESSING,
-          tenantId: params.currentUser.tenantId,
         })
         .returning();
 
@@ -141,43 +152,315 @@ export class ScormRepository {
     await this.db.transaction(persist);
   }
 
-  async markPackageReady(packageId: string, tenantId: string) {
+  async markPackageReady(packageId: string, _tenantId: string) {
     await this.db
       .update(scormPackages)
       .set({ status: SCORM_PACKAGE_STATUS.READY })
-      .where(and(eq(scormPackages.id, packageId), eq(scormPackages.tenantId, tenantId)));
+      .where(eq(scormPackages.id, packageId));
   }
 
-  async deleteImportedCourse(courseId: string, tenantId: string) {
+  async findLaunchableSco(params: { lessonId: string; scoId?: string; tenantId: string }) {
+    const conditions = [
+      eq(scormScos.lessonId, params.lessonId),
+      eq(scormPackages.status, SCORM_PACKAGE_STATUS.READY),
+    ];
+
+    if (params.scoId) {
+      conditions.push(eq(scormScos.id, params.scoId));
+    }
+
+    const [sco] = await this.db
+      .select({
+        packageId: scormPackages.id,
+        packageEntityType: scormPackages.entityType,
+        packageEntityId: scormPackages.entityId,
+        standard: scormPackages.standard,
+        extractedFilesReference: scormPackages.extractedFilesReference,
+        scoId: scormScos.id,
+        lessonId: scormScos.lessonId,
+        launchPath: scormScos.launchPath,
+        scoTitle: scormScos.title,
+        displayOrder: scormScos.displayOrder,
+        courseId: chapters.courseId,
+        lessonType: lessons.type,
+      })
+      .from(scormScos)
+      .innerJoin(scormPackages, eq(scormPackages.id, scormScos.packageId))
+      .innerJoin(lessons, eq(lessons.id, scormScos.lessonId))
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .where(and(...conditions))
+      .orderBy(asc(scormScos.displayOrder))
+      .limit(1);
+
+    return sco;
+  }
+
+  async findScoNavigation(params: { packageId: string; lessonId: string; scoId: string }) {
+    const packageScos = await this.db
+      .select({
+        id: scormScos.id,
+        displayOrder: scormScos.displayOrder,
+      })
+      .from(scormScos)
+      .where(
+        and(eq(scormScos.packageId, params.packageId), eq(scormScos.lessonId, params.lessonId)),
+      )
+      .orderBy(asc(scormScos.displayOrder));
+
+    const currentIndex = packageScos.findIndex((sco) => sco.id === params.scoId);
+
+    return {
+      previousScoId: this.getPreviousScoId(packageScos, currentIndex),
+      nextScoId: this.getNextScoId(packageScos, currentIndex),
+    };
+  }
+
+  private getPreviousScoId(scos: { id: string }[], currentIndex: number) {
+    if (currentIndex <= 0) {
+      return null;
+    }
+
+    return scos[currentIndex - 1].id;
+  }
+
+  private getNextScoId(scos: { id: string }[], currentIndex: number) {
+    const currentScoNotFound = currentIndex < 0;
+    const currentScoIsLast = currentIndex >= scos.length - 1;
+
+    if (currentScoNotFound || currentScoIsLast) {
+      return null;
+    }
+
+    return scos[currentIndex + 1].id;
+  }
+
+  async findOrCreateAttempt(params: {
+    studentId: string;
+    courseId: string;
+    lessonId: string;
+    packageId: string;
+    scoId: string;
+    tenantId: string;
+  }) {
+    const [existingAttempt] = await this.db
+      .select()
+      .from(scormAttempts)
+      .where(
+        and(
+          eq(scormAttempts.studentId, params.studentId),
+          eq(scormAttempts.packageId, params.packageId),
+          eq(scormAttempts.scoId, params.scoId),
+        ),
+      )
+      .orderBy(desc(scormAttempts.attemptNumber))
+      .limit(1);
+
+    if (existingAttempt) {
+      return {
+        attempt: existingAttempt,
+        isNewAttempt: false,
+      };
+    }
+
+    const [createdAttempt] = await this.db
+      .insert(scormAttempts)
+      .values({
+        studentId: params.studentId,
+        courseId: params.courseId,
+        lessonId: params.lessonId,
+        packageId: params.packageId,
+        scoId: params.scoId,
+        attemptNumber: 1,
+      })
+      .returning();
+
+    await this.db.insert(scormRuntimeState).values({
+      attemptId: createdAttempt.id,
+      rawCmiJson: {},
+    });
+
+    return {
+      attempt: createdAttempt,
+      isNewAttempt: true,
+    };
+  }
+
+  async findRuntimeState(attemptId: string, _tenantId: string) {
+    const [runtimeState] = await this.db
+      .select()
+      .from(scormRuntimeState)
+      .where(eq(scormRuntimeState.attemptId, attemptId))
+      .limit(1);
+
+    return runtimeState;
+  }
+
+  async findAttemptContext(params: { attemptId: string; tenantId: string }) {
+    const [attempt] = await this.db
+      .select({
+        attemptId: scormAttempts.id,
+        studentId: scormAttempts.studentId,
+        courseId: scormAttempts.courseId,
+        lessonId: scormAttempts.lessonId,
+        packageId: scormAttempts.packageId,
+        scoId: scormAttempts.scoId,
+        completedAt: scormAttempts.completedAt,
+        scoLessonId: scormScos.lessonId,
+      })
+      .from(scormAttempts)
+      .innerJoin(scormPackages, eq(scormPackages.id, scormAttempts.packageId))
+      .innerJoin(scormScos, eq(scormScos.id, scormAttempts.scoId))
+      .where(eq(scormAttempts.id, params.attemptId))
+      .limit(1);
+
+    return attempt;
+  }
+
+  async upsertRuntimeState(params: {
+    attemptId: string;
+    tenantId: string;
+    rawCmiJson: Record<string, string>;
+    completionStatus: ScormCompletionStatus;
+    successStatus: ScormSuccessStatus;
+    scoreRaw?: string | null;
+    scoreMin?: string | null;
+    scoreMax?: string | null;
+    lessonLocation?: string | null;
+    suspendData?: string | null;
+    sessionTime?: string | null;
+    totalTime?: string | null;
+    entry?: string | null;
+    exit?: string | null;
+  }) {
+    const [runtimeState] = await this.db
+      .insert(scormRuntimeState)
+      .values({
+        attemptId: params.attemptId,
+        completionStatus: params.completionStatus,
+        successStatus: params.successStatus,
+        scoreRaw: params.scoreRaw,
+        scoreMin: params.scoreMin,
+        scoreMax: params.scoreMax,
+        lessonLocation: params.lessonLocation,
+        suspendData: params.suspendData,
+        sessionTime: params.sessionTime,
+        totalTime: params.totalTime,
+        entry: params.entry,
+        exit: params.exit,
+        rawCmiJson: params.rawCmiJson,
+      })
+      .onConflictDoUpdate({
+        target: [scormRuntimeState.attemptId],
+        set: {
+          completionStatus: params.completionStatus,
+          successStatus: params.successStatus,
+          scoreRaw: params.scoreRaw,
+          scoreMin: params.scoreMin,
+          scoreMax: params.scoreMax,
+          lessonLocation: params.lessonLocation,
+          suspendData: params.suspendData,
+          sessionTime: params.sessionTime,
+          totalTime: params.totalTime,
+          entry: params.entry,
+          exit: params.exit,
+          rawCmiJson: params.rawCmiJson,
+          updatedAt: sql`now()`,
+        },
+      })
+      .returning();
+
+    return runtimeState;
+  }
+
+  async markAttemptCompleted(attemptId: string, _tenantId: string) {
+    await this.db
+      .update(scormAttempts)
+      .set({ completedAt: sql`now()` })
+      .where(eq(scormAttempts.id, attemptId));
+  }
+
+  async areAllLessonScosCompleted(params: {
+    studentId: string;
+    packageId: string;
+    lessonId: string;
+    tenantId: string;
+    completedStatuses: ScormCompletionStatus[];
+  }) {
+    const [completion] = await this.db
+      .select({
+        totalCount: sql<number>`COUNT(DISTINCT ${scormScos.id})::int`,
+        completedCount: sql<number>`COUNT(DISTINCT CASE WHEN ${inArray(scormRuntimeState.completionStatus, params.completedStatuses)} THEN ${scormScos.id} END)::int`,
+      })
+      .from(scormScos)
+      .leftJoin(
+        scormAttempts,
+        and(eq(scormAttempts.scoId, scormScos.id), eq(scormAttempts.studentId, params.studentId)),
+      )
+      .leftJoin(scormRuntimeState, eq(scormRuntimeState.attemptId, scormAttempts.id))
+      .where(
+        and(eq(scormScos.packageId, params.packageId), eq(scormScos.lessonId, params.lessonId)),
+      );
+
+    return completion.totalCount > 0 && completion.totalCount === completion.completedCount;
+  }
+
+  async findPackageById(packageId: string, _tenantId: string) {
+    const [scormPackage] = await this.db
+      .select()
+      .from(scormPackages)
+      .where(eq(scormPackages.id, packageId))
+      .limit(1);
+
+    return scormPackage;
+  }
+
+  async findPackageAccess(packageId: string, userId: string) {
+    const [access] = await this.db
+      .select({
+        packageId: scormPackages.id,
+        courseId: chapters.courseId,
+        isAssigned: sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN TRUE ELSE FALSE END`,
+        isFreemium: sql<boolean>`BOOL_OR(${chapters.isFreemium})`,
+      })
+      .from(scormPackages)
+      .innerJoin(scormScos, eq(scormScos.packageId, scormPackages.id))
+      .innerJoin(lessons, eq(lessons.id, scormScos.lessonId))
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .leftJoin(
+        studentCourses,
+        and(eq(studentCourses.courseId, chapters.courseId), eq(studentCourses.studentId, userId)),
+      )
+      .where(eq(scormPackages.id, packageId))
+      .groupBy(scormPackages.id, chapters.courseId, studentCourses.status)
+      .limit(1);
+
+    return access;
+  }
+
+  async deleteImportedCourse(courseId: string, _tenantId: string) {
     await this.db
       .delete(scormPackages)
       .where(
         and(
           eq(scormPackages.entityType, SCORM_PACKAGE_ENTITY_TYPE.COURSE),
           eq(scormPackages.entityId, courseId),
-          eq(scormPackages.tenantId, tenantId),
         ),
       );
 
-    await this.db
-      .delete(courses)
-      .where(and(eq(courses.id, courseId), eq(courses.tenantId, tenantId)));
+    await this.db.delete(courses).where(eq(courses.id, courseId));
   }
 
-  async deleteImportedLesson(lessonId: string, tenantId: string) {
+  async deleteImportedLesson(lessonId: string, _tenantId: string) {
     await this.db
       .delete(scormPackages)
       .where(
         and(
           eq(scormPackages.entityType, SCORM_PACKAGE_ENTITY_TYPE.LESSON),
           eq(scormPackages.entityId, lessonId),
-          eq(scormPackages.tenantId, tenantId),
         ),
       );
 
-    await this.db
-      .delete(lessons)
-      .where(and(eq(lessons.id, lessonId), eq(lessons.tenantId, tenantId)));
+    await this.db.delete(lessons).where(eq(lessons.id, lessonId));
   }
 
   private buildScoLessonLink(params: {
@@ -201,7 +484,7 @@ export class ScormRepository {
       launchPath: getScormScoLaunchReference(
         params.currentUser.tenantId,
         params.packageId,
-        params.sco.href,
+        params.sco.launchPath,
       ),
       parameters: params.sco.item.parameters,
       displayOrder: params.sco.displayOrder,
@@ -215,7 +498,6 @@ export class ScormRepository {
           getScormExtractedFileReference(params.currentUser.tenantId, params.packageId, file),
         ),
       },
-      tenantId: params.currentUser.tenantId,
     };
   }
 }

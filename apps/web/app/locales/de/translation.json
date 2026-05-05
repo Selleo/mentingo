@@ -179,7 +179,15 @@
       "itemIdentifierMissing": "SCORM-Elementkennung fehlt.",
       "launchFileMissing": "SCORM-Startdatei fehlt.",
       "invalidPackagePath": "SCORM-Paket enthält einen ungültigen Dateipfad.",
-      "externalPackagePath": "SCORM-Paket enthält einen externen Dateipfad."
+      "externalPackagePath": "SCORM-Paket enthält einen externen Dateipfad.",
+      "runtime": {
+        "launchNotFound": "SCORM-Startinhalt wurde nicht gefunden.",
+        "unsupportedStandard": "Dieser SCORM-Standard wird noch nicht unterstützt.",
+        "invalidAttempt": "SCORM-Versuch ist ungültig.",
+        "invalidCmiValue": "SCORM-Laufzeitdaten sind ungültig.",
+        "contentNotFound": "SCORM-Inhalt wurde nicht gefunden.",
+        "contentForbidden": "Sie haben keinen Zugriff auf diesen SCORM-Inhalt."
+      }
     },
     "coursePlaceholder": {
       "back": "Zurück zur Kursart",
@@ -2042,6 +2050,19 @@
     "aiMentor": {
       "title": "KI-Mentor-Sitzung",
       "description": "Dies ist eine KI-gestützte Mentoring-Sitzung. Die KI führt Sie anhand der Richtlinien des Lehrers durch die Lektion."
+    },
+    "scorm": {
+      "loading": "SCORM-Inhalt wird geladen...",
+      "launchFailed": "SCORM-Inhalt konnte nicht gestartet werden.",
+      "launchFailedBody": "Bitte versuchen Sie es erneut. Wenn das Problem weiterhin besteht, muss das SCORM-Paket möglicherweise erneut hochgeladen werden.",
+      "saveFailed": "SCORM-Fortschritt konnte nicht gespeichert werden.",
+      "saving": "Fortschritt wird gespeichert",
+      "previousSco": "Vorheriger Abschnitt",
+      "nextSco": "Nächster Abschnitt",
+      "tryAgain": "Erneut versuchen",
+      "packageDialogTitle": "SCORM-Inhalt",
+      "packageDialogOk": "OK",
+      "lessonFinished": "SCORM-Lektion abgeschlossen."
     },
     "videoProcessing": {
       "title": "Video wird verarbeitet",

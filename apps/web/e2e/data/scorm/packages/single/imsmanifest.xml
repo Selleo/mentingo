@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest identifier="mentingo-single-scorm" version="1.2"
+  xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2"
+  xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2">
+  <metadata>
+    <schema>ADL SCORM</schema>
+    <schemaversion>1.2</schemaversion>
+  </metadata>
+  <organizations default="single-org">
+    <organization identifier="single-org">
+      <title>SCORM E2E Single Package</title>
+      <item identifier="single-item" identifierref="single-resource">
+        <title>SCORM E2E Single SCO</title>
+      </item>
+    </organization>
+  </organizations>
+  <resources>
+    <resource identifier="single-resource" type="webcontent" adlcp:scormtype="sco" href="launch.html">
+      <file href="launch.html" />
+      <file href="scorm-test.js" />
+    </resource>
+  </resources>
+</manifest>

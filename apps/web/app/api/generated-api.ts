@@ -3422,6 +3422,76 @@ export interface CreateScormLessonResponse {
   };
 }
 
+export interface LaunchScormAttemptResponse {
+  data: {
+    /** @format uuid */
+    attemptId: string;
+    /** @format uuid */
+    packageId: string;
+    /** @format uuid */
+    scoId: string;
+    /** @format uuid */
+    lessonId: string;
+    /** @format uuid */
+    courseId: string;
+    launchUrl: string;
+    scoTitle: string;
+    navigation: {
+      previousScoId: string | null;
+      nextScoId: string | null;
+    };
+    runtime: object;
+  };
+}
+
+export interface CommitScormAttemptBody {
+  /** @format uuid */
+  attemptId: string;
+  /** @format uuid */
+  packageId: string;
+  /** @format uuid */
+  scoId: string;
+  /** @format uuid */
+  lessonId: string;
+  /** @format uuid */
+  courseId: string;
+  values: object;
+  language?: "en" | "pl" | "de" | "lt" | "cs";
+}
+
+export interface CommitScormAttemptResponse {
+  data: {
+    committed: boolean;
+    lessonCompleted: boolean;
+    scormStatus: string | null;
+    nextScoId: string | null;
+  };
+}
+
+export interface FinishScormAttemptBody {
+  /** @format uuid */
+  attemptId: string;
+  /** @format uuid */
+  packageId: string;
+  /** @format uuid */
+  scoId: string;
+  /** @format uuid */
+  lessonId: string;
+  /** @format uuid */
+  courseId: string;
+  values: object;
+  language?: "en" | "pl" | "de" | "lt" | "cs";
+}
+
+export interface FinishScormAttemptResponse {
+  data: {
+    finished: boolean;
+    lessonCompleted: boolean;
+    scormStatus: string | null;
+    nextScoId: string | null;
+  };
+}
+
 export interface GetAllAnnouncementsResponse {
   data: {
     id: string;
@@ -8522,6 +8592,74 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         body: data,
         type: ContentType.FormData,
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ScormControllerLaunchScormAttempt
+     * @request GET:/api/scorm/runtime/launch
+     */
+    scormControllerLaunchScormAttempt: (
+      query?: {
+        /** @format uuid */
+        lessonId?: string;
+        /** @format uuid */
+        scoId?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<LaunchScormAttemptResponse, any>({
+        path: `/api/scorm/runtime/launch`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ScormControllerCommitScormAttempt
+     * @request POST:/api/scorm/runtime/commit
+     */
+    scormControllerCommitScormAttempt: (data: CommitScormAttemptBody, params: RequestParams = {}) =>
+      this.request<CommitScormAttemptResponse, any>({
+        path: `/api/scorm/runtime/commit`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ScormControllerFinishScormAttempt
+     * @request POST:/api/scorm/runtime/finish
+     */
+    scormControllerFinishScormAttempt: (data: FinishScormAttemptBody, params: RequestParams = {}) =>
+      this.request<FinishScormAttemptResponse, any>({
+        path: `/api/scorm/runtime/finish`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ScormControllerRedirectScormContent
+     * @request GET:/api/scorm/content/{packageId}/*
+     */
+    scormControllerRedirectScormContent: (packageId: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/scorm/content/${packageId}/*`,
+        method: "GET",
         ...params,
       }),
 

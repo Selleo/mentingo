@@ -18,6 +18,7 @@ import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/Language
 import { isBrowserFile } from "~/utils/isBrowserFile";
 import { setPageTitle } from "~/utils/setPageTitle";
 
+import { CREATE_SCORM_COURSE_PAGE_HANDLES } from "../../../../e2e/data/courses/handles";
 import Breadcrumb from "../AddCourse/components/Breadcrumb";
 
 import { ScormPackageUploadField } from "./components/ScormPackageUploadField";
@@ -79,7 +80,10 @@ const CreateNewScormCourse = () => {
   };
 
   return (
-    <div className="flex h-screen overflow-auto bg-white px-20 py-8">
+    <div
+      data-testid={CREATE_SCORM_COURSE_PAGE_HANDLES.PAGE}
+      className="flex h-screen overflow-auto bg-white px-20 py-8"
+    >
       <div className="flex w-full items-center justify-center">
         <img src={SplashScreenImage} alt="splashScreenImage" className="rounded" />
       </div>
@@ -90,7 +94,12 @@ const CreateNewScormCourse = () => {
         />
         <hgroup className="gapy-y-1 flex flex-col">
           <p className="body-base-md text-emerald-700">{t("adminScorm.create.eyebrow")}</p>
-          <h1 className="h3 text-neutral-950">{t("adminScorm.create.title")}</h1>
+          <h1
+            data-testid={CREATE_SCORM_COURSE_PAGE_HANDLES.HEADING}
+            className="h3 text-neutral-950"
+          >
+            {t("adminScorm.create.title")}
+          </h1>
           <p className="body-lg-md text-neutral-800">{t("adminScorm.create.subtitle")}</p>
         </hgroup>
 
@@ -112,6 +121,13 @@ const CreateNewScormCourse = () => {
                       <ScormPackageUploadField
                         file={isBrowserFile(field.value) ? field.value : undefined}
                         error={fieldState.error?.message}
+                        testIds={{
+                          root: CREATE_SCORM_COURSE_PAGE_HANDLES.PACKAGE_UPLOAD,
+                          input: CREATE_SCORM_COURSE_PAGE_HANDLES.PACKAGE_INPUT,
+                          selectedFile: CREATE_SCORM_COURSE_PAGE_HANDLES.PACKAGE_SELECTED_FILE,
+                          replaceButton: CREATE_SCORM_COURSE_PAGE_HANDLES.PACKAGE_REPLACE_BUTTON,
+                          removeButton: CREATE_SCORM_COURSE_PAGE_HANDLES.PACKAGE_REMOVE_BUTTON,
+                        }}
                         onChange={(file) => field.onChange(file)}
                         onClear={() => field.onChange(undefined)}
                       />
@@ -126,6 +142,14 @@ const CreateNewScormCourse = () => {
                 control={form.control}
                 setValue={form.setValue}
                 categories={categories}
+                testIds={{
+                  titleInput: CREATE_SCORM_COURSE_PAGE_HANDLES.TITLE_INPUT,
+                  categorySelect: CREATE_SCORM_COURSE_PAGE_HANDLES.CATEGORY_SELECT,
+                  categoryOption: CREATE_SCORM_COURSE_PAGE_HANDLES.categoryOption,
+                  languageSelect: CREATE_SCORM_COURSE_PAGE_HANDLES.LANGUAGE_SELECT,
+                  languageOption: CREATE_SCORM_COURSE_PAGE_HANDLES.languageOption,
+                  descriptionEditor: CREATE_SCORM_COURSE_PAGE_HANDLES.DESCRIPTION_EDITOR,
+                }}
               />
             </div>
             <CourseDescriptionLimitMessage
@@ -151,6 +175,7 @@ const CreateNewScormCourse = () => {
                     <CourseThumbnailUploadField
                       inputId="thumbnailFile"
                       inputRef={thumbnailInputRef}
+                      inputTestId={CREATE_SCORM_COURSE_PAGE_HANDLES.THUMBNAIL_INPUT}
                       imageUrl={thumbnailPreviewUrl}
                       onFileSelect={field.onChange}
                       onClear={removeThumbnail}
@@ -164,6 +189,7 @@ const CreateNewScormCourse = () => {
             <div className="pb-5">
               <div className="mb-10 mt-5 flex space-x-5">
                 <Button
+                  data-testid={CREATE_SCORM_COURSE_PAGE_HANDLES.CANCEL_BUTTON}
                   type="button"
                   className="rounded border-2 bg-white px-6 py-2 text-primary-800"
                   asChild
@@ -171,6 +197,7 @@ const CreateNewScormCourse = () => {
                   <Link to="/admin/beta-courses/new">{t("common.button.cancel")}</Link>
                 </Button>
                 <Button
+                  data-testid={CREATE_SCORM_COURSE_PAGE_HANDLES.SUBMIT_BUTTON}
                   type="submit"
                   disabled={!form.formState.isValid || !scormFile || isCreatingScormCourse}
                 >

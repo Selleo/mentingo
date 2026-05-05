@@ -7343,6 +7343,117 @@
         }
       }
     },
+    "/api/scorm/runtime/launch": {
+      "get": {
+        "operationId": "ScormController_launchScormAttempt",
+        "parameters": [
+          {
+            "name": "lessonId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "scoId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LaunchScormAttemptResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scorm/runtime/commit": {
+      "post": {
+        "operationId": "ScormController_commitScormAttempt",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CommitScormAttemptBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommitScormAttemptResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scorm/runtime/finish": {
+      "post": {
+        "operationId": "ScormController_finishScormAttempt",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinishScormAttemptBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinishScormAttemptResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scorm/content/{packageId}/*": {
+      "get": {
+        "operationId": "ScormController_streamScormContent",
+        "parameters": [
+          {
+            "name": "packageId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/announcements": {
       "get": {
         "operationId": "AnnouncementsController_getAllAnnouncements",
@@ -26904,6 +27015,317 @@
             "required": [
               "id",
               "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "LaunchScormAttemptResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "attemptId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "packageId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "scoId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "lessonId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "courseId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "launchUrl": {
+                "type": "string"
+              },
+              "scoTitle": {
+                "type": "string"
+              },
+              "navigation": {
+                "type": "object",
+                "properties": {
+                  "previousScoId": {
+                    "anyOf": [
+                      {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "nextScoId": {
+                    "anyOf": [
+                      {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "previousScoId",
+                  "nextScoId"
+                ]
+              },
+              "runtime": {
+                "type": "object",
+                "patternProperties": {
+                  "^(.*)$": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": [
+              "attemptId",
+              "packageId",
+              "scoId",
+              "lessonId",
+              "courseId",
+              "launchUrl",
+              "scoTitle",
+              "navigation",
+              "runtime"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CommitScormAttemptBody": {
+        "type": "object",
+        "properties": {
+          "attemptId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "packageId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "scoId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lessonId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "courseId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "values": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {
+                "type": "string"
+              }
+            }
+          },
+          "language": {
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "required": [
+          "attemptId",
+          "packageId",
+          "scoId",
+          "lessonId",
+          "courseId",
+          "values"
+        ]
+      },
+      "CommitScormAttemptResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "committed": {
+                "type": "boolean"
+              },
+              "lessonCompleted": {
+                "type": "boolean"
+              },
+              "scormStatus": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "nextScoId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "committed",
+              "lessonCompleted",
+              "scormStatus",
+              "nextScoId"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "FinishScormAttemptBody": {
+        "type": "object",
+        "properties": {
+          "attemptId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "packageId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "scoId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lessonId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "courseId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "values": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {
+                "type": "string"
+              }
+            }
+          },
+          "language": {
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "required": [
+          "attemptId",
+          "packageId",
+          "scoId",
+          "lessonId",
+          "courseId",
+          "values"
+        ]
+      },
+      "FinishScormAttemptResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "finished": {
+                "type": "boolean"
+              },
+              "lessonCompleted": {
+                "type": "boolean"
+              },
+              "scormStatus": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "nextScoId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "finished",
+              "lessonCompleted",
+              "scormStatus",
+              "nextScoId"
             ]
           }
         },

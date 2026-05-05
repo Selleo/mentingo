@@ -9,6 +9,7 @@ type CourseThumbnailUploadFieldProps = {
   imageUrl?: string | null;
   isUploading?: boolean;
   inputRef?: React.RefObject<HTMLInputElement>;
+  inputTestId?: string;
   onFileSelect: (file: File) => void;
   onClear?: () => void;
   error?: string;
@@ -19,6 +20,7 @@ export const CourseThumbnailUploadField = ({
   imageUrl,
   isUploading = false,
   inputRef,
+  inputTestId,
   onFileSelect,
   onClear,
   error,
@@ -56,6 +58,7 @@ export const CourseThumbnailUploadField = ({
           </div>
         )}
         <input
+          data-testid={inputTestId}
           id={inputId}
           ref={inputRef}
           type="file"

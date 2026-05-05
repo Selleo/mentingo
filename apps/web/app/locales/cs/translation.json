@@ -179,7 +179,15 @@
       "itemIdentifierMissing": "Chybí identifikátor položky SCORM.",
       "launchFileMissing": "Chybí spouštěcí soubor SCORM.",
       "invalidPackagePath": "Balíček SCORM obsahuje neplatnou cestu k souboru.",
-      "externalPackagePath": "Balíček SCORM obsahuje externí cestu k souboru."
+      "externalPackagePath": "Balíček SCORM obsahuje externí cestu k souboru.",
+      "runtime": {
+        "launchNotFound": "Spouštěcí obsah SCORM nebyl nalezen.",
+        "unsupportedStandard": "Tento standard SCORM zatím není podporován.",
+        "invalidAttempt": "Pokus SCORM je neplatný.",
+        "invalidCmiValue": "Runtime data SCORM jsou neplatná.",
+        "contentNotFound": "Obsah SCORM nebyl nalezen.",
+        "contentForbidden": "K tomuto obsahu SCORM nemáte přístup."
+      }
     },
     "coursePlaceholder": {
       "back": "Zpět na typ kurzu",
@@ -2042,6 +2050,19 @@
     "aiMentor": {
       "title": "Sezení AI Mentor",
       "description": "Toto je mentorské sezení založené na umělé inteligenci. Umělá inteligence vás provede lekcí na základě pokynů instruktora."
+    },
+    "scorm": {
+      "loading": "Načítání obsahu SCORM...",
+      "launchFailed": "Obsah SCORM se nepodařilo spustit.",
+      "launchFailedBody": "Zkuste to znovu. Pokud problém přetrvává, může být potřeba balíček SCORM znovu nahrát.",
+      "saveFailed": "Postup SCORM se nepodařilo uložit.",
+      "saving": "Ukládání postupu",
+      "previousSco": "Předchozí část",
+      "nextSco": "Další část",
+      "tryAgain": "Zkuste to znovu",
+      "packageDialogTitle": "Obsah SCORM",
+      "packageDialogOk": "OK",
+      "lessonFinished": "Lekce SCORM byla dokončena."
     },
     "videoProcessing": {
       "title": "Video se zpracovává",

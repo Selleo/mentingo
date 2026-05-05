@@ -32,6 +32,7 @@ export const COURSES_PAGE_HANDLES = {
   TABLE_BODY: "courses-page-table-body",
   row: (courseId: string) => `courses-page-table-row-${courseId}`,
   rowCheckbox: (courseId: string) => `courses-page-table-checkbox-${courseId}`,
+  rowTypeBadge: (courseId: string) => `courses-page-table-type-badge-${courseId}`,
 } as const;
 
 export const CREATE_COURSE_PAGE_HANDLES = {
@@ -47,6 +48,26 @@ export const CREATE_COURSE_PAGE_HANDLES = {
   SUBMIT_BUTTON: "create-course-submit-button",
 } as const;
 
+export const CREATE_SCORM_COURSE_PAGE_HANDLES = {
+  PAGE: "create-scorm-course-page",
+  HEADING: "create-scorm-course-page-heading",
+  PACKAGE_UPLOAD: "create-scorm-course-package-upload",
+  PACKAGE_INPUT: "create-scorm-course-package-input",
+  PACKAGE_SELECTED_FILE: "create-scorm-course-package-selected-file",
+  PACKAGE_REMOVE_BUTTON: "create-scorm-course-package-remove-button",
+  PACKAGE_REPLACE_BUTTON: "create-scorm-course-package-replace-button",
+  TITLE_INPUT: "create-scorm-course-title-input",
+  CATEGORY_SELECT: "create-scorm-course-category-select",
+  categoryOption: (categoryTitle: string) => `create-scorm-course-category-option-${categoryTitle}`,
+  LANGUAGE_SELECT: "create-scorm-course-language-select",
+  languageOption: (language: SupportedLanguages) =>
+    `create-scorm-course-language-option-${language}`,
+  DESCRIPTION_EDITOR: "create-scorm-course-description-editor",
+  THUMBNAIL_INPUT: "create-scorm-course-thumbnail-input",
+  CANCEL_BUTTON: "create-scorm-course-cancel-button",
+  SUBMIT_BUTTON: "create-scorm-course-submit-button",
+} as const;
+
 export const COURSE_TYPE_SELECTOR_HANDLES = {
   PAGE: "course-type-selector-page",
   STANDARD_CARD: "course-type-selector-standard-card",
@@ -58,6 +79,7 @@ export const EDIT_COURSE_PAGE_HANDLES = {
   PAGE: "edit-course-page",
   HEADING: "edit-course-page-heading",
   PREVIEW_BUTTON: "edit-course-preview-button",
+  COURSE_TYPE_BADGE: "edit-course-type-badge",
   LANGUAGE_SELECT: "edit-course-language-select",
   languageOption: (language: SupportedLanguages) => `edit-course-language-option-${language}`,
   DELETE_LANGUAGE_BUTTON: "edit-course-delete-language-button",

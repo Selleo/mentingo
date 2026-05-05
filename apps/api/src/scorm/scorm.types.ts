@@ -3,6 +3,10 @@ import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { CreateScormCourseBody } from "src/scorm/schemas/createScormCourse.schema";
 import type { CreateScormLessonBody } from "src/scorm/schemas/createScormLesson.schema";
+import type {
+  ScormRuntimeCommitBody,
+  ScormRuntimeFinishBody,
+} from "src/scorm/schemas/scormRuntime.schema";
 
 export type CreateScormCourseImportParams = {
   scormPackage: Express.Multer.File;
@@ -85,4 +89,22 @@ export type PersistCoursePackageParams = PersistPackageParamsBase & {
 
 export type PersistLessonPackageParams = PersistPackageParamsBase & {
   lessonId: UUIDType;
+};
+
+export type ScormRuntimeLaunchParams = {
+  lessonId: UUIDType;
+  scoId?: UUIDType;
+  currentUser: CurrentUserType;
+};
+
+export type ScormRuntimeCommitParams = {
+  body: ScormRuntimeCommitBody;
+  currentUser: CurrentUserType;
+  finish: false;
+};
+
+export type ScormRuntimeFinishParams = {
+  body: ScormRuntimeFinishBody;
+  currentUser: CurrentUserType;
+  finish: true;
 };

@@ -18,6 +18,11 @@ type DeleteConfirmationModalProps = {
   onClose: () => void;
   onDelete: () => void;
   contentType?: DeleteContentType;
+  testIds?: {
+    dialog?: string;
+    confirmButton?: string;
+    cancelButton?: string;
+  };
 };
 
 const DeleteConfirmationModal = ({
@@ -25,6 +30,7 @@ const DeleteConfirmationModal = ({
   onClose,
   onDelete,
   contentType,
+  testIds,
 }: DeleteConfirmationModalProps) => {
   const { t } = useTranslation();
   const getDialogTitleText = (): string => {
@@ -46,7 +52,7 @@ const DeleteConfirmationModal = ({
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogOverlay className="bg-primary-400 opacity-65" />
-      <DialogContent className="max-w-[40%] p-12">
+      <DialogContent data-testid={testIds?.dialog} className="max-w-[40%] p-12">
         <div className="flex items-start gap-4">
           <Icon name="Warning" className="mt-0.5 size-5 text-red-500" />
           <div>
@@ -61,12 +67,14 @@ const DeleteConfirmationModal = ({
 
             <div className="mt-8 flex gap-4">
               <Button
+                data-testid={testIds?.confirmButton}
                 onClick={onDelete}
                 className="rounded bg-error-500 px-4 py-2 text-white hover:bg-error-600"
               >
                 {t("common.button.delete")}
               </Button>
               <Button
+                data-testid={testIds?.cancelButton}
                 onClick={onClose}
                 className="bg-neutrals-200 rounded border border-neutral-300 px-4 py-2 text-primary-800"
               >

@@ -209,6 +209,7 @@ const Courses = () => {
 
         return (
           <Badge
+            data-testid={COURSES_PAGE_HANDLES.rowTypeBadge(row.original.id)}
             variant={courseType === COURSE_TYPE.SCORM ? "success" : "secondaryWithOutline"}
             className="w-max"
           >

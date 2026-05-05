@@ -11,6 +11,14 @@ type ScormPackageUploadFieldProps = {
   disabled?: boolean;
   readonlyTitle?: string;
   readonlyDescription?: string;
+  testIds?: {
+    root?: string;
+    input?: string;
+    selectedFile?: string;
+    readonly?: string;
+    replaceButton?: string;
+    removeButton?: string;
+  };
   onChange: (file: File) => void;
   onClear: () => void;
 };
@@ -27,6 +35,7 @@ export const ScormPackageUploadField = ({
   disabled = false,
   readonlyTitle,
   readonlyDescription,
+  testIds,
   onChange,
   onClear,
 }: ScormPackageUploadFieldProps) => {
@@ -48,7 +57,7 @@ export const ScormPackageUploadField = ({
   return (
     <div>
       <div
-        {...getRootProps()}
+        {...getRootProps({ "data-testid": testIds?.root })}
         className={cn(
           "group cursor-pointer rounded-lg border-2 border-dashed bg-white p-6 transition-colors",
           file ? "border-primary-200" : "border-neutral-300 hover:border-primary-400",
@@ -58,9 +67,9 @@ export const ScormPackageUploadField = ({
             "cursor-not-allowed border-neutral-200 bg-neutral-50 opacity-75 hover:border-neutral-200",
         )}
       >
-        <input {...getInputProps()} />
+        <input {...getInputProps()} data-testid={testIds?.input} />
         {disabled ? (
-          <div className="flex items-start gap-4">
+          <div data-testid={testIds?.readonly} className="flex items-start gap-4">
             <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-neutral-100 text-neutral-600">
               <FileArchive className="size-6" aria-hidden="true" />
             </div>
@@ -74,7 +83,7 @@ export const ScormPackageUploadField = ({
             </div>
           </div>
         ) : file ? (
-          <div className="flex flex-col gap-5">
+          <div data-testid={testIds?.selectedFile} className="flex flex-col gap-5">
             <div className="flex items-start gap-4">
               <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-800">
                 <FileArchive className="size-6" aria-hidden="true" />
@@ -87,11 +96,21 @@ export const ScormPackageUploadField = ({
               </div>
             </div>
             <div className="flex flex-wrap gap-3">
-              <Button type="button" variant="outline" onClick={open}>
+              <Button
+                type="button"
+                variant="outline"
+                data-testid={testIds?.replaceButton}
+                onClick={open}
+              >
                 <Replace className="mr-2 size-4" />
                 {t("adminScorm.create.replacePackage")}
               </Button>
-              <Button type="button" variant="outline" onClick={onClear}>
+              <Button
+                type="button"
+                variant="outline"
+                data-testid={testIds?.removeButton}
+                onClick={onClear}
+              >
                 <Trash2 className="mr-2 size-4" />
                 {t("adminScorm.create.removePackage")}
               </Button>

@@ -23,6 +23,7 @@ import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmati
 import { ScormPackageUploadField } from "~/modules/Admin/Scorm/components/ScormPackageUploadField";
 import { isBrowserFile } from "~/utils/isBrowserFile";
 
+import { SCORM_LESSON_FORM_HANDLES } from "../../../../../../../e2e/data/curriculum/handles";
 import { ContentTypes, DeleteContentType } from "../../../EditCourse.types";
 import Breadcrumb from "../components/Breadcrumb";
 
@@ -123,7 +124,10 @@ export const ScormLessonForm = ({
   };
 
   return (
-    <div className="flex w-full flex-col gap-y-8 rounded-lg bg-white p-8">
+    <div
+      data-testid={SCORM_LESSON_FORM_HANDLES.ROOT}
+      className="flex w-full flex-col gap-y-8 rounded-lg bg-white p-8"
+    >
       <Breadcrumb
         lessonLabel={t("common.lessonTypes.scorm")}
         setContentTypeToDisplay={setContentTypeToDisplay}
@@ -137,6 +141,7 @@ export const ScormLessonForm = ({
             name="title"
             label={t("adminCourseView.curriculum.lesson.field.title")}
             placeholder={t("adminCourseView.settings.placeholder.title")}
+            data-testid={SCORM_LESSON_FORM_HANDLES.TITLE_INPUT}
             required
           />
 
@@ -154,7 +159,9 @@ export const ScormLessonForm = ({
                     <TooltipProvider delayDuration={0}>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <span>
+                          <span
+                            data-testid={SCORM_LESSON_FORM_HANDLES.PACKAGE_INFO_TOOLTIP_TRIGGER}
+                          >
                             <Icon
                               name="Info"
                               className="h-auto w-6 cursor-default text-neutral-800"
@@ -178,6 +185,11 @@ export const ScormLessonForm = ({
                     <ScormPackageUploadField
                       disabled
                       readonlyDescription={t("adminScorm.lesson.packageLocked")}
+                      testIds={{
+                        root: SCORM_LESSON_FORM_HANDLES.PACKAGE_UPLOAD,
+                        input: SCORM_LESSON_FORM_HANDLES.PACKAGE_INPUT,
+                        readonly: SCORM_LESSON_FORM_HANDLES.PACKAGE_READONLY,
+                      }}
                       onChange={() => undefined}
                       onClear={() => undefined}
                     />
@@ -185,6 +197,13 @@ export const ScormLessonForm = ({
                     <ScormPackageUploadField
                       file={selectedFile}
                       error={fieldState.error?.message}
+                      testIds={{
+                        root: SCORM_LESSON_FORM_HANDLES.PACKAGE_UPLOAD,
+                        input: SCORM_LESSON_FORM_HANDLES.PACKAGE_INPUT,
+                        selectedFile: SCORM_LESSON_FORM_HANDLES.PACKAGE_SELECTED_FILE,
+                        replaceButton: SCORM_LESSON_FORM_HANDLES.PACKAGE_REPLACE_BUTTON,
+                        removeButton: SCORM_LESSON_FORM_HANDLES.PACKAGE_REMOVE_BUTTON,
+                      }}
                       onChange={(file) => {
                         setSelectedFile(file);
                         field.onChange(file);
@@ -200,12 +219,18 @@ export const ScormLessonForm = ({
           <div className="flex gap-3">
             <Button
               type="submit"
+              data-testid={SCORM_LESSON_FORM_HANDLES.SAVE_BUTTON}
               disabled={!form.formState.isValid || isCreatingScormLesson || isUpdatingScormLesson}
             >
               {t("common.button.save")}
             </Button>
             <Button
               type="button"
+              data-testid={
+                lessonToEdit
+                  ? SCORM_LESSON_FORM_HANDLES.DELETE_BUTTON
+                  : SCORM_LESSON_FORM_HANDLES.CANCEL_BUTTON
+              }
               variant="outline"
               onClick={
                 lessonToEdit
@@ -228,6 +253,11 @@ export const ScormLessonForm = ({
         onClose={() => setIsDeleteModalOpen(false)}
         onDelete={handleDelete}
         contentType={DeleteContentType.SCORM}
+        testIds={{
+          dialog: SCORM_LESSON_FORM_HANDLES.DELETE_DIALOG,
+          confirmButton: SCORM_LESSON_FORM_HANDLES.DELETE_DIALOG_CONFIRM_BUTTON,
+          cancelButton: SCORM_LESSON_FORM_HANDLES.DELETE_DIALOG_CANCEL_BUTTON,
+        }}
       />
     </div>
   );

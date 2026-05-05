@@ -179,7 +179,15 @@
       "itemIdentifierMissing": "SCORM item identifier is missing.",
       "launchFileMissing": "SCORM launch file is missing.",
       "invalidPackagePath": "SCORM package contains an invalid file path.",
-      "externalPackagePath": "SCORM package contains an external file path."
+      "externalPackagePath": "SCORM package contains an external file path.",
+      "runtime": {
+        "launchNotFound": "SCORM launch content was not found.",
+        "unsupportedStandard": "This SCORM standard is not supported yet.",
+        "invalidAttempt": "SCORM attempt is invalid.",
+        "invalidCmiValue": "SCORM runtime data is invalid.",
+        "contentNotFound": "SCORM content was not found.",
+        "contentForbidden": "You do not have access to this SCORM content."
+      }
     },
     "coursePlaceholder": {
       "back": "Back to course type",
@@ -2095,6 +2103,19 @@
     "aiMentor": {
       "title": "AI Mentor Session",
       "description": "This is an AI-powered mentoring session. The AI will guide you through the lesson based on the instructor's guidelines."
+    },
+    "scorm": {
+      "loading": "Loading SCORM content...",
+      "launchFailed": "SCORM content could not be launched.",
+      "launchFailedBody": "Please try again. If the problem continues, the SCORM package may need to be reuploaded.",
+      "saveFailed": "SCORM progress could not be saved.",
+      "saving": "Saving progress",
+      "previousSco": "Previous section",
+      "nextSco": "Next section",
+      "tryAgain": "Try again",
+      "packageDialogTitle": "SCORM content",
+      "packageDialogOk": "OK",
+      "lessonFinished": "SCORM lesson finished."
     },
     "videoProcessing": {
       "title": "Video is being processed",

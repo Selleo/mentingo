@@ -310,6 +310,7 @@ const EditCourse = () => {
                 </Badge>
               )}
               <Badge
+                data-testid={EDIT_COURSE_PAGE_HANDLES.COURSE_TYPE_BADGE}
                 variant={courseType === COURSE_TYPE.SCORM ? "success" : "secondaryWithOutline"}
                 fontWeight="bold"
                 className="ml-2"
