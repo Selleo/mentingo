@@ -1,3 +1,4 @@
+import type { ScormCompletionStatus, ScormSuccessStatus } from "@repo/shared";
 import type AdmZip from "adm-zip";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
@@ -107,4 +108,20 @@ export type ScormRuntimeFinishParams = {
   body: ScormRuntimeFinishBody;
   currentUser: CurrentUserType;
   finish: true;
+};
+
+export type UpsertScormRuntimeState = {
+  attemptId: string;
+  rawCmiJson: Record<string, string>;
+  completionStatus: ScormCompletionStatus;
+  successStatus: ScormSuccessStatus;
+  scoreRaw?: string | null;
+  scoreMin?: string | null;
+  scoreMax?: string | null;
+  lessonLocation?: string | null;
+  suspendData?: string | null;
+  sessionTime?: string | null;
+  totalTime?: string | null;
+  entry?: string | null;
+  exit?: string | null;
 };

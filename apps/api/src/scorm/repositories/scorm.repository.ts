@@ -5,7 +5,7 @@ import {
   SCORM_PACKAGE_STATUS,
   SCORM_STANDARD,
 } from "@repo/shared";
-import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, asc, desc, eq, getTableColumns, inArray, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
@@ -23,12 +23,13 @@ import {
 
 import { getScormExtractedFileReference, getScormScoLaunchReference } from "../scorm-storage-paths";
 
-import type { ScormCompletionStatus, ScormSuccessStatus } from "@repo/shared";
+import type { ScormCompletionStatus } from "@repo/shared";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type {
   PersistCoursePackageParams,
   PersistLessonPackageParams,
   ScormScoManifest,
+  UpsertScormRuntimeState,
 } from "src/scorm/scorm.types";
 
 @Injectable()
@@ -297,13 +298,7 @@ export class ScormRepository {
   async findAttemptContext(attemptId: string) {
     const [attempt] = await this.db
       .select({
-        attemptId: scormAttempts.id,
-        studentId: scormAttempts.studentId,
-        courseId: scormAttempts.courseId,
-        lessonId: scormAttempts.lessonId,
-        packageId: scormAttempts.packageId,
-        scoId: scormAttempts.scoId,
-        completedAt: scormAttempts.completedAt,
+        ...getTableColumns(scormAttempts),
         scoLessonId: scormScos.lessonId,
       })
       .from(scormAttempts)
@@ -315,53 +310,14 @@ export class ScormRepository {
     return attempt;
   }
 
-  async upsertRuntimeState(params: {
-    attemptId: string;
-    rawCmiJson: Record<string, string>;
-    completionStatus: ScormCompletionStatus;
-    successStatus: ScormSuccessStatus;
-    scoreRaw?: string | null;
-    scoreMin?: string | null;
-    scoreMax?: string | null;
-    lessonLocation?: string | null;
-    suspendData?: string | null;
-    sessionTime?: string | null;
-    totalTime?: string | null;
-    entry?: string | null;
-    exit?: string | null;
-  }) {
+  async upsertRuntimeState(params: UpsertScormRuntimeState) {
     const [runtimeState] = await this.db
       .insert(scormRuntimeState)
-      .values({
-        attemptId: params.attemptId,
-        completionStatus: params.completionStatus,
-        successStatus: params.successStatus,
-        scoreRaw: params.scoreRaw,
-        scoreMin: params.scoreMin,
-        scoreMax: params.scoreMax,
-        lessonLocation: params.lessonLocation,
-        suspendData: params.suspendData,
-        sessionTime: params.sessionTime,
-        totalTime: params.totalTime,
-        entry: params.entry,
-        exit: params.exit,
-        rawCmiJson: params.rawCmiJson,
-      })
+      .values(params)
       .onConflictDoUpdate({
         target: [scormRuntimeState.attemptId],
         set: {
-          completionStatus: params.completionStatus,
-          successStatus: params.successStatus,
-          scoreRaw: params.scoreRaw,
-          scoreMin: params.scoreMin,
-          scoreMax: params.scoreMax,
-          lessonLocation: params.lessonLocation,
-          suspendData: params.suspendData,
-          sessionTime: params.sessionTime,
-          totalTime: params.totalTime,
-          entry: params.entry,
-          exit: params.exit,
-          rawCmiJson: params.rawCmiJson,
+          ...params,
           updatedAt: sql`now()`,
         },
       })
@@ -386,7 +342,10 @@ export class ScormRepository {
     const [completion] = await this.db
       .select({
         totalCount: sql<number>`COUNT(DISTINCT ${scormScos.id})::int`,
-        completedCount: sql<number>`COUNT(DISTINCT CASE WHEN ${inArray(scormRuntimeState.completionStatus, params.completedStatuses)} THEN ${scormScos.id} END)::int`,
+        completedCount: sql<number>`COUNT(DISTINCT CASE WHEN ${inArray(
+          scormRuntimeState.completionStatus,
+          params.completedStatuses,
+        )} THEN ${scormScos.id} END)::int`,
       })
       .from(scormScos)
       .leftJoin(
