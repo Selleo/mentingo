@@ -8,6 +8,7 @@ import { ThrottlerModule } from "@nestjs/throttler";
 
 import { ActivityLogsModule } from "src/activity-logs/activity-logs.module";
 import { EnvModule } from "src/env/env.module";
+import { LearningPathModule } from "src/learning-path/learning-path.module";
 import { LearningTimeModule } from "src/learning-time";
 import { QAModule } from "src/qa/qa.module";
 import { QueueModule } from "src/queue";
@@ -130,6 +131,7 @@ import type { RedisClient } from "src/redis";
     CategoryModule,
     ConditionalModule.registerWhen(ScheduleModule.forRoot(), (env) => !env.JEST_WORKER_ID),
     CourseModule,
+    LearningPathModule,
     GroupModule,
     LessonModule,
     QuestionsModule,
