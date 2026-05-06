@@ -901,6 +901,31 @@ export class CourseController {
     return new BaseResponse(data);
   }
 
+  @Patch(":courseId/discussion/posts/:postId/comments/:commentId/helpful")
+  @Validate({
+    request: [
+      { type: "param", name: "courseId", schema: UUIDSchema },
+      { type: "param", name: "postId", schema: UUIDSchema },
+      { type: "param", name: "commentId", schema: UUIDSchema },
+    ],
+    response: baseResponse(courseDiscussionCommentSchema),
+  })
+  async setCourseDiscussionHelpfulAnswer(
+    @Param("courseId") courseId: UUIDType,
+    @Param("postId") postId: UUIDType,
+    @Param("commentId") commentId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
+  ) {
+    const data = await this.courseService.setCourseDiscussionHelpfulAnswer(
+      courseId,
+      postId,
+      commentId,
+      currentUser,
+    );
+
+    return new BaseResponse(data);
+  }
+
   @Get(":courseId/statistics/learning-time")
   @RequirePermission(PERMISSIONS.COURSE_STATISTICS)
   @Validate({

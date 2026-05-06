@@ -4216,6 +4216,51 @@
         }
       }
     },
+    "/api/course/{courseId}/discussion/posts/{postId}/comments/{commentId}/helpful": {
+      "patch": {
+        "operationId": "CourseController_setCourseDiscussionHelpfulAnswer",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "postId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "commentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetCourseDiscussionHelpfulAnswerResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/course/{courseId}/statistics/learning-time": {
       "get": {
         "operationId": "CourseController_getCourseLearningTimeStatistics",
@@ -16264,9 +16309,6 @@
                     "type": "null"
                   }
                 ]
-              },
-              "cohortLearningEnabled": {
-                "type": "boolean"
               }
             },
             "required": [
@@ -18022,6 +18064,9 @@
                     "type": "null"
                   }
                 ]
+              },
+              "cohortLearningEnabled": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -18043,8 +18088,7 @@
               "stripePriceId",
               "availableLocales",
               "baseLanguage",
-              "dueDate",
-              "cohortLearningEnabled"
+              "dueDate"
             ]
           }
         },
@@ -19777,6 +19821,79 @@
         ]
       },
       "CreateCourseDiscussionCommentResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "postId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "authorId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "authorName": {
+                "type": "string"
+              },
+              "authorAvatarUrl": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "parentCommentId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "content": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "isHelpfulAnswer": {
+                "type": "boolean"
+              },
+              "depth": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "id",
+              "postId",
+              "authorId",
+              "authorName",
+              "authorAvatarUrl",
+              "parentCommentId",
+              "content",
+              "createdAt",
+              "isHelpfulAnswer",
+              "depth"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "SetCourseDiscussionHelpfulAnswerResponse": {
         "type": "object",
         "properties": {
           "data": {

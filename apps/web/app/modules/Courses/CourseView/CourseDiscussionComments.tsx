@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useCreateCourseDiscussionComment } from "~/api/mutations/useCreateCourseDiscussionComment";
+import { useMarkCourseDiscussionCommentHelpful } from "~/api/mutations/useMarkCourseDiscussionCommentHelpful";
+import { useCurrentUser } from "~/api/queries";
 import {
   useCourseDiscussionComments,
   type CourseDiscussionComment,
@@ -25,25 +27,44 @@ type CommentDraftState = {
 
 export function CourseDiscussionComments({ courseId, post }: CourseDiscussionCommentsProps) {
   const { t } = useTranslation();
+  const { data: currentUser } = useCurrentUser();
   const { data: comments = [], isLoading } = useCourseDiscussionComments(courseId, post.id);
   const { mutate: createComment, isPending: isCreatingComment } = useCreateCourseDiscussionComment(
     courseId,
     post.id,
   );
+  const { mutate: markHelpful, isPending: isMarkingHelpful } =
+    useMarkCourseDiscussionCommentHelpful(courseId, post.id);
   const [drafts, setDrafts] = useState<CommentDraftState>({ root: "", replies: {} });
   const [openReplyFor, setOpenReplyFor] = useState<string | null>(null);
+  const canMarkHelpful = post.type === "question" && currentUser?.id === post.authorId;
 
   const commentsByParentId = useMemo(() => {
-    const rootComments = comments.filter((comment) => comment.parentCommentId === null);
-    const repliesByParentId = comments.reduce<Record<string, typeof comments>>((acc, comment) => {
-      if (!comment.parentCommentId) return acc;
+    const orderedComments = [...comments].sort((left, right) => {
+      if (left.isHelpfulAnswer !== right.isHelpfulAnswer) {
+        return Number(right.isHelpfulAnswer) - Number(left.isHelpfulAnswer);
+      }
 
-      acc[comment.parentCommentId] = [...(acc[comment.parentCommentId] ?? []), comment];
-      return acc;
-    }, {});
+      return new Date(left.createdAt).getTime() - new Date(right.createdAt).getTime();
+    });
+
+    const rootComments = orderedComments.filter((comment) => comment.parentCommentId === null);
+    const repliesByParentId = orderedComments.reduce<Record<string, typeof comments>>(
+      (acc, comment) => {
+        if (!comment.parentCommentId) return acc;
+
+        acc[comment.parentCommentId] = [...(acc[comment.parentCommentId] ?? []), comment];
+        return acc;
+      },
+      {},
+    );
 
     return { rootComments, repliesByParentId };
   }, [comments]);
+
+  const handleMarkHelpful = (commentId: string) => {
+    markHelpful(commentId);
+  };
 
   const submitRootComment = () => {
     const content = drafts.root.trim();
@@ -103,11 +124,22 @@ export function CourseDiscussionComments({ courseId, post }: CourseDiscussionCom
         <div className="space-y-4">
           {commentsByParentId.rootComments.map((comment) => (
             <div key={comment.id} className="space-y-3 rounded-lg border border-neutral-200 p-4">
-              <CommentRow comment={comment} />
+              <CommentRow
+                comment={comment}
+                canMarkHelpful={canMarkHelpful}
+                isMarkingHelpful={isMarkingHelpful}
+                onMarkHelpful={handleMarkHelpful}
+              />
               {commentsByParentId.repliesByParentId[comment.id]?.length ? (
                 <div className="space-y-3 border-l-2 border-neutral-200 pl-4">
                   {commentsByParentId.repliesByParentId[comment.id].map((reply) => (
-                    <CommentRow key={reply.id} comment={reply} />
+                    <CommentRow
+                      key={reply.id}
+                      comment={reply}
+                      canMarkHelpful={canMarkHelpful}
+                      isMarkingHelpful={isMarkingHelpful}
+                      onMarkHelpful={handleMarkHelpful}
+                    />
                   ))}
                 </div>
               ) : null}
@@ -156,7 +188,17 @@ export function CourseDiscussionComments({ courseId, post }: CourseDiscussionCom
   );
 }
 
-function CommentRow({ comment }: { comment: CourseDiscussionComment }) {
+function CommentRow({
+  comment,
+  canMarkHelpful,
+  isMarkingHelpful,
+  onMarkHelpful,
+}: {
+  comment: CourseDiscussionComment;
+  canMarkHelpful: boolean;
+  isMarkingHelpful: boolean;
+  onMarkHelpful: (commentId: string) => void;
+}) {
   const { t } = useTranslation();
 
   return (
@@ -177,6 +219,20 @@ function CommentRow({ comment }: { comment: CourseDiscussionComment }) {
             )}
           </div>
           <p className="body-sm text-neutral-900 whitespace-pre-wrap">{comment.content}</p>
+          {canMarkHelpful && (
+            <div className="flex justify-end">
+              <Button
+                variant={comment.isHelpfulAnswer ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => onMarkHelpful(comment.id)}
+                disabled={isMarkingHelpful}
+              >
+                {comment.isHelpfulAnswer
+                  ? t("studentCourseView.discussion.comment.unmarkHelpful")
+                  : t("studentCourseView.discussion.comment.markHelpful")}
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </div>

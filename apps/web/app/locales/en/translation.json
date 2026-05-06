@@ -2193,7 +2193,10 @@
         "submit": "Comment",
         "submitReply": "Reply",
         "reply": "Reply",
-        "helpful": "Helpful answer"
+        "helpful": "Helpful answer",
+        "markHelpful": "Mark as helpful",
+        "unmarkHelpful": "Remove helpful",
+        "helpfulUpdated": "Helpful answer updated."
       }
     }
   },

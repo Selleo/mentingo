@@ -515,28 +515,9 @@ export class CourseService {
       .from(courseDiscussionComments)
       .innerJoin(users, eq(users.id, courseDiscussionComments.authorId))
       .where(eq(courseDiscussionComments.postId, postId))
-      .orderBy(courseDiscussionComments.createdAt);
+      .orderBy(desc(courseDiscussionComments.isHelpfulAnswer), courseDiscussionComments.createdAt);
 
-    return Promise.all(
-      comments.map(async (comment) => {
-        const authorAvatarUrl = comment.authorAvatarReference
-          ? await this.userService.getUsersProfilePictureUrl(comment.authorAvatarReference)
-          : null;
-
-        return {
-          id: comment.id,
-          postId: comment.postId,
-          authorId: comment.authorId,
-          authorName: comment.authorName,
-          authorAvatarUrl,
-          parentCommentId: comment.parentCommentId,
-          content: comment.content,
-          createdAt: comment.createdAt,
-          isHelpfulAnswer: comment.isHelpfulAnswer,
-          depth: comment.parentCommentId ? 1 : 0,
-        };
-      }),
-    );
+    return Promise.all(comments.map((comment) => this.serializeCourseDiscussionComment(comment)));
   }
 
   async createCourseDiscussionComment(
@@ -600,22 +581,111 @@ export class CourseService {
       throw new InternalServerErrorException("Failed to create discussion comment");
     }
 
-    const authorAvatarUrl = comment.authorAvatarReference
-      ? await this.userService.getUsersProfilePictureUrl(comment.authorAvatarReference)
-      : null;
+    return this.serializeCourseDiscussionComment(comment);
+  }
 
-    return {
-      id: comment.id,
-      postId: comment.postId,
-      authorId: comment.authorId,
-      authorName: comment.authorName,
-      authorAvatarUrl,
-      parentCommentId: comment.parentCommentId,
-      content: comment.content,
-      createdAt: comment.createdAt,
-      isHelpfulAnswer: comment.isHelpfulAnswer,
-      depth: comment.parentCommentId ? 1 : 0,
-    };
+  async setCourseDiscussionHelpfulAnswer(
+    courseId: UUIDType,
+    postId: UUIDType,
+    commentId: UUIDType,
+    currentUser: CurrentUserType,
+  ): Promise<CourseDiscussionCommentResponse> {
+    await this.assertCourseDiscussionAccess(courseId, currentUser);
+
+    const [post] = await this.db
+      .select({
+        id: courseDiscussionPosts.id,
+        authorId: courseDiscussionPosts.authorId,
+        type: courseDiscussionPosts.type,
+      })
+      .from(courseDiscussionPosts)
+      .where(
+        and(eq(courseDiscussionPosts.id, postId), eq(courseDiscussionPosts.courseId, courseId)),
+      );
+
+    if (!post) {
+      throw new NotFoundException("Post not found");
+    }
+
+    if (post.type !== "question") {
+      throw new BadRequestException("Helpful answer is available only for question posts");
+    }
+
+    if (post.authorId !== currentUser.userId) {
+      throw new ForbiddenException("Only the post author can mark a helpful answer");
+    }
+
+    const [comment] = await this.db
+      .select({
+        id: courseDiscussionComments.id,
+        postId: courseDiscussionComments.postId,
+        authorId: courseDiscussionComments.authorId,
+        authorName: sql<string>`TRIM(CONCAT(${users.firstName}, ' ', ${users.lastName}))`,
+        authorAvatarReference: users.avatarReference,
+        parentCommentId: courseDiscussionComments.parentCommentId,
+        content: courseDiscussionComments.content,
+        createdAt: courseDiscussionComments.createdAt,
+        isHelpfulAnswer: courseDiscussionComments.isHelpfulAnswer,
+      })
+      .from(courseDiscussionComments)
+      .innerJoin(users, eq(users.id, courseDiscussionComments.authorId))
+      .where(
+        and(
+          eq(courseDiscussionComments.id, commentId),
+          eq(courseDiscussionComments.postId, postId),
+        ),
+      );
+
+    if (!comment) {
+      throw new NotFoundException("Comment not found");
+    }
+
+    await this.db.transaction(async (trx) => {
+      if (comment.isHelpfulAnswer) {
+        await trx
+          .update(courseDiscussionComments)
+          .set({ isHelpfulAnswer: false })
+          .where(eq(courseDiscussionComments.id, commentId));
+        return;
+      }
+
+      await trx
+        .update(courseDiscussionComments)
+        .set({ isHelpfulAnswer: false })
+        .where(
+          and(
+            eq(courseDiscussionComments.postId, postId),
+            eq(courseDiscussionComments.isHelpfulAnswer, true),
+          ),
+        );
+
+      await trx
+        .update(courseDiscussionComments)
+        .set({ isHelpfulAnswer: true })
+        .where(eq(courseDiscussionComments.id, commentId));
+    });
+
+    const [updatedComment] = await this.db
+      .select({
+        id: courseDiscussionComments.id,
+        postId: courseDiscussionComments.postId,
+        authorId: courseDiscussionComments.authorId,
+        authorName: sql<string>`TRIM(CONCAT(${users.firstName}, ' ', ${users.lastName}))`,
+        authorAvatarReference: users.avatarReference,
+        parentCommentId: courseDiscussionComments.parentCommentId,
+        content: courseDiscussionComments.content,
+        createdAt: courseDiscussionComments.createdAt,
+        isHelpfulAnswer: courseDiscussionComments.isHelpfulAnswer,
+      })
+      .from(courseDiscussionComments)
+      .innerJoin(users, eq(users.id, courseDiscussionComments.authorId))
+      .where(eq(courseDiscussionComments.id, commentId));
+
+    if (!updatedComment) {
+      throw new InternalServerErrorException("Failed to update discussion comment");
+    }
+
+    return this.serializeCourseDiscussionComment(updatedComment);
   }
 
   private async assertCourseDiscussionAccess(courseId: UUIDType, currentUser: CurrentUserType) {
@@ -672,6 +742,35 @@ export class CourseService {
     if (!post) {
       throw new NotFoundException("Post not found");
     }
+  }
+
+  private async serializeCourseDiscussionComment(comment: {
+    id: UUIDType;
+    postId: UUIDType;
+    authorId: UUIDType;
+    authorName: string;
+    authorAvatarReference: string | null;
+    parentCommentId: UUIDType | null;
+    content: string;
+    createdAt: string;
+    isHelpfulAnswer: boolean;
+  }): Promise<CourseDiscussionCommentResponse> {
+    const authorAvatarUrl = comment.authorAvatarReference
+      ? await this.userService.getUsersProfilePictureUrl(comment.authorAvatarReference)
+      : null;
+
+    return {
+      id: comment.id,
+      postId: comment.postId,
+      authorId: comment.authorId,
+      authorName: comment.authorName,
+      authorAvatarUrl,
+      parentCommentId: comment.parentCommentId,
+      content: comment.content,
+      createdAt: comment.createdAt,
+      isHelpfulAnswer: comment.isHelpfulAnswer,
+      depth: comment.parentCommentId ? 1 : 0,
+    };
   }
 
   async getCoursesForUser(

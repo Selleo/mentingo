@@ -2197,7 +2197,10 @@
         "submit": "Komentuj",
         "submitReply": "Odpowiedz",
         "reply": "Odpowiedz",
-        "helpful": "Pomocna odpowiedź"
+        "helpful": "Pomocna odpowiedź",
+        "markHelpful": "Oznacz jako pomocne",
+        "unmarkHelpful": "Usuń oznaczenie",
+        "helpfulUpdated": "Zaktualizowano pomocną odpowiedź."
       }
     }
   },
