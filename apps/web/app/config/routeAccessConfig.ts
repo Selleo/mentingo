@@ -100,6 +100,12 @@ export const routeAccessConfig = createRouteConfig({
   "admin/beta-courses/new": {
     allOf: [PERMISSIONS.COURSE_CREATE],
   },
+  "admin/beta-courses/new/standard": {
+    allOf: [PERMISSIONS.COURSE_CREATE],
+  },
+  "admin/courses/new-scorm": {
+    allOf: [PERMISSIONS.COURSE_CREATE],
+  },
   "admin/courses/:id": COURSE_EDIT_ACCESS,
   "admin/beta-courses/:id": COURSE_EDIT_ACCESS,
   "admin/users/*": USER_MANAGEMENT_ACCESS,

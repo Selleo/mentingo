@@ -83,6 +83,7 @@ describe("Master course export and sync (e2e)", () => {
   beforeAll(async () => {
     const mockFileService = {
       getFileUrl: jest.fn().mockResolvedValue("http://example.com/file"),
+      isBunnyConfigured: jest.fn().mockResolvedValue(false),
       uploadFile: jest.fn(),
       deleteFileByPath: jest.fn(),
     };

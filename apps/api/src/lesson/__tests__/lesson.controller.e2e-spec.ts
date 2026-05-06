@@ -41,6 +41,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
   beforeAll(async () => {
     const mockFileService = {
       getFileUrl: jest.fn().mockResolvedValue("http://example.com/file"),
+      isBunnyConfigured: jest.fn().mockResolvedValue(false),
     };
 
     const mockCacheManager = {

@@ -6,6 +6,7 @@ import Viewer from "~/components/RichText/Viever";
 import AiMentorLesson from "./AiMentorLesson/AiMentorLesson";
 import { EmbedLesson } from "./EmbedLesson/EmbedLesson";
 import { Quiz } from "./Quiz";
+import { ScormLesson } from "./ScormLesson/ScormLesson";
 
 import type { CurrentUserResponse, GetLessonByIdResponse } from "~/api/generated-api";
 import type { VideoEndedHandler } from "~/components/VideoPlayer/VideoPlayer.types";
@@ -32,6 +33,7 @@ export const LessonContentRenderer = memo(
       .with("embed", () => (
         <EmbedLesson lessonResources={lesson.lessonResources ?? []} lesson={lesson} />
       ))
+      .with("scorm", () => <ScormLesson lessonId={lesson.id} />)
       .otherwise(() => null);
   },
 );

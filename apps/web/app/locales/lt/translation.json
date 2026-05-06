@@ -46,7 +46,8 @@
       "content": "Turinys",
       "quiz": "Viktorina",
       "ai_mentor": "AI mentorius",
-      "embed": "Įterpti"
+      "embed": "Įterpti",
+      "scorm": "SCORM"
     },
     "error": {
       "somethingWentWrong": "Oi! Kažkas nutiko."
@@ -164,6 +165,102 @@
     },
     "toast": {
       "scormUploadedSuccessfully": "SCORM paketas sėkmingai įkeltas"
+    },
+    "errors": {
+      "packageRequired": "SCORM paketas yra privalomas.",
+      "emptyPackage": "SCORM paketas yra tuščias.",
+      "tooManyFiles": "SCORM pakete yra per daug failų.",
+      "packageTooLarge": "SCORM paketas po išskleidimo yra per didelis.",
+      "manifestMissing": "Trūksta SCORM manifesto failo.",
+      "manifestInvalid": "SCORM manifesto failas neteisingas.",
+      "organizationMissing": "SCORM manifeste nėra organizacijos.",
+      "scoMissing": "SCORM manifeste nėra paleidžiamų SCO.",
+      "resourceIdentifierMissing": "Trūksta SCORM ištekliaus identifikatoriaus.",
+      "itemIdentifierMissing": "Trūksta SCORM elemento identifikatoriaus.",
+      "launchFileMissing": "Trūksta SCORM paleidimo failo.",
+      "invalidPackagePath": "SCORM pakete yra neteisingas failo kelias.",
+      "externalPackagePath": "SCORM pakete yra išorinis failo kelias.",
+      "runtime": {
+        "launchNotFound": "SCORM paleidimo turinys nerastas.",
+        "unsupportedStandard": "Šis SCORM standartas dar nepalaikomas.",
+        "invalidAttempt": "SCORM bandymas neteisingas.",
+        "invalidCmiValue": "SCORM vykdymo duomenys neteisingi.",
+        "contentNotFound": "SCORM turinys nerastas.",
+        "contentForbidden": "Neturite prieigos prie šio SCORM turinio."
+      }
+    },
+    "coursePlaceholder": {
+      "back": "Grįžti į kurso tipą",
+      "status": "SCORM kurso importas",
+      "title": "SCORM kurso kūrimas bus įjungtas vėliau",
+      "description": "Šis įėjimo taškas paruoštas, bet SCORM kurso importavimo eiga dar įgyvendinama. Kol kas sukurkite standartinį kursą arba grįžkite į kursų sąrašą.",
+      "createStandard": "Sukurti standartinį kursą",
+      "viewCourses": "Peržiūrėti kursus"
+    },
+    "create": {
+      "eyebrow": "SCORM 1.2",
+      "title": "Sukurti SCORM kursą",
+      "subtitle": "Pridėkite kurso metaduomenis ir pridėkite SCORM paketą, kuris taps kurso turiniu.",
+      "requirements": {
+        "title": "Paketo reikalavimai",
+        "version": "SCORM 1.2 paketas",
+        "archive": ".zip archyvas iki 500MB",
+        "metadata": "Kurso metaduomenis galima redaguoti prieš importą"
+      },
+      "packageSection": "SCORM paketas",
+      "packageSectionDescription": "Pridėkite paketą dabar. Failas tik patikrinamas formoje, kol upload API dar neprijungtas.",
+      "metadataSection": "Kurso informacija",
+      "metadataSectionDescription": "Šie laukai atitinka standartinį kurso nustatymą ir bus naudojami kaip baziniai kurso metaduomenys.",
+      "uploadPackage": "Įkelti SCORM paketą",
+      "dropPackage": "Numeskite SCORM paketą čia",
+      "uploadPackageDescription": "Nuvilkite SCORM 1.2 .zip failą arba pasirinkite jį iš įrenginio.",
+      "packageReady": "paruošta importui",
+      "replacePackage": "Pakeisti paketą",
+      "removePackage": "Pašalinti paketą",
+      "uploadThumbnail": "Įkelti miniatiūrą",
+      "uploadThumbnailDescription": "PNG, JPG arba JPEG iki 20MB",
+      "thumbnailPreviewAlt": "Kurso miniatiūros peržiūra",
+      "submit": "Sukurti SCORM kursą",
+      "creating": "Kuriamas SCORM kursas...",
+      "toastDraftReady": "SCORM kurso forma paruošta API integracijai"
+    },
+    "lesson": {
+      "packageSection": "SCORM paketas",
+      "packageAttached": "SCORM paketas pridėtas",
+      "packageLocked": "Šio paketo negalima pakeisti sukūrus pamoką.",
+      "replacePackageTooltip": "Jei norite pridėti kitą SCORM paketą, ištrinkite šią pamoką ir sukurkite naują.",
+      "validation": {
+        "packageRequired": "SCORM paketas yra privalomas",
+        "packageTooLarge": "SCORM paketas turi būti mažesnis nei 500MB",
+        "packageInvalidType": "SCORM paketas turi būti .zip failas"
+      }
+    }
+  },
+  "adminCourseTypeSelector": {
+    "back": "Atgal",
+    "eyebrow": "Kurso nustatymas",
+    "title": "Sukurti naują kursą",
+    "subtitle": "Pasirinkite, ar kursą kurti standartiniame redaktoriuje, ar iš SCORM paketo.",
+    "standard": {
+      "title": "Standartinis",
+      "description": "Sukurkite kursą su integruota programa, pamokomis, testais ir nustatymais.",
+      "features": {
+        "authoring": "Kuriama vietiniame kursų redaktoriuje",
+        "curriculum": "Skyriai, pamokos ir testai valdomi Mentingo",
+        "translations": "Palaikomos kurso kalbos ir vertimai",
+        "settings": "Kainodara, būsena ir sertifikatai įtraukti"
+      }
+    },
+    "scorm": {
+      "title": "SCORM",
+      "description": "Sukurkite kursą iš SCORM 1.2 paketo.",
+      "badge": "Placeholder",
+      "features": {
+        "import": "Kuriama iš SCORM 1.2 .zip paketo",
+        "tracking": "Palaikomas SCO užbaigimo ir vykdymo būsenos sekimas",
+        "structure": "Importuoto paketo struktūra išsaugoma",
+        "future": "Kainodara, būsena ir sertifikatai įtraukti"
+      }
     }
   },
   "studentChapterCardView": {
@@ -694,6 +791,7 @@
       "author": "Autorius",
       "category": "Kategorija",
       "price": "Kaina",
+      "type": "Tipas",
       "state": "valstybė",
       "status": "Būsena",
       "sharedCourse": "Bendrinama",
@@ -1178,6 +1276,23 @@
       "maxOneVideoUploaded": "Negalite įkelti daugiau nei 1 vaizdo įrašo.",
       "successfullyTransferredCourseOwnership": "Kurso nuosavybės teisė sėkmingai perduota"
     },
+    "errors": {
+      "featureUnavailable": {
+        "curriculum": "SCORM kursuose mokymo programos redagavimas nepasiekiamas.",
+        "lessonSequence": "SCORM kursuose pamokų eigos privalomas laikymasis nepasiekiamas.",
+        "quizFeedback": "SCORM kursuose viktorinos grįžtamojo ryšio nustatymai nepasiekiami."
+      },
+      "notFound": {
+        "course": "Kursas nerastas.",
+        "category": "Kategorija nerasta.",
+        "chapter": "Skyrius nerastas.",
+        "lesson": "Pamoka nerasta."
+      },
+      "create": {
+        "courseFailed": "Nepavyko sukurti kurso.",
+        "stripeProductFailed": "Nepavyko sukurti kurso mokėjimo produkto."
+      }
+    },
     "thinking": {
       "PLANNING_NEXT_STEP": "Planuojate kitą žingsnį...",
       "USING_TOOLS": "Įrankių naudojimas kontekstui gauti...",
@@ -1308,6 +1423,7 @@
         "removeQuizLesson": "Ar tikrai norite ištrinti šią viktorinos pamoką iš skyriaus?",
         "removeAiMentorLesson": "Ar tikrai norite ištrinti šią AI mentoriaus pamoką iš skyriaus?",
         "removeEmbedLesson": "Ar tikrai norite ištrinti šią įdėjimo pamoką iš skyriaus?",
+        "removeScormLesson": "Ar tikrai norite ištrinti šią SCORM pamoką iš skyriaus?",
         "removeChapter": "Ar tikrai norite ištrinti šį skyrių?",
         "removeQuestion": "Ar tikrai norite ištrinti klausimą?",
         "removeContent": "Ar tikrai norite ištrinti turinį?"
@@ -1396,6 +1512,7 @@
           "lessonCreatedSuccessfully": "Pamoka sėkmingai sukurta",
           "fileLessonCreatedSuccessfully": "Failo elementas sėkmingai sukurtas",
           "contentLessonCreatedSuccessfully": "Turinio pamoka sėkmingai sukurta",
+          "scormLessonCreatedSuccessfully": "SCORM pamoka sėkmingai sukurta",
           "quizLessonCreatedSuccessfully": "Viktorina sėkmingai sukurta",
           "aiMentorLessonCreatedSuccessfully": "AI mentoriaus pamoka sėkmingai sukurta",
           "aiMentorLessonUpdatedSuccessfully": "AI mentoriaus pamoka sėkmingai atnaujinta",
@@ -1472,10 +1589,12 @@
         "other": {
           "lessonNumber": "Pamokų skaičius",
           "chooseType": "Pasirinkite tipą",
+          "chooseLessonTypeAriaLabel": "Pasirinkti {{type}} pamokos tipą",
           "content": "Turinys",
           "quiz": "Viktorina",
           "aiMentor": "AI mentorius",
           "embed": "Įterpti",
+          "scorm": "SCORM",
           "correct": "Teisingai",
           "true": "Tiesa",
           "false": "Netiesa",
@@ -1494,6 +1613,7 @@
           "contentLessonDescription": "Tekstas su multimedija (vaizdai, vaizdo įrašai, pristatymai).",
           "quizLessonDescription": "Klausimų rinkinys žinioms patikrinti.",
           "aiMentorLessonDescription": "Interaktyvus pokalbis su virtualiu AI mentoriumi.",
+          "scormLessonDescription": "Pamokos turinys SCORM pakete.",
           "fillInTheBlanksDescription": "Šiame klausime yra sakinys; mokiniai turi nuvilkti teisingą žodį į tuščią vietą.",
           "gapFillDescription": "Šiame klausime bus sakinys, kuriame trūksta žodžių, kuriuos mokiniai turi įvesti.",
           "embedLessonDescription": "Išorinis šaltinis (pvz., „Google“ forma, „Canva“ pristatymas arba „YouTube“ tiesioginis srautas).",
@@ -1931,6 +2051,17 @@
     "aiMentor": {
       "title": "AI mentoriaus sesija",
       "description": "Tai AI pagrįsta mentorystės sesija. AI padės jums per pamoką pagal instruktoriaus nurodymus."
+    },
+    "scorm": {
+      "loading": "Įkeliamas SCORM turinys...",
+      "launchFailed": "Nepavyko paleisti SCORM turinio.",
+      "launchFailedBody": "Bandykite dar kartą. Jei problema išlieka, SCORM paketą gali reikėti įkelti iš naujo.",
+      "saveFailed": "Nepavyko išsaugoti SCORM pažangos.",
+      "saving": "Išsaugoma pažanga",
+      "previousSco": "Ankstesnė dalis",
+      "nextSco": "Kita dalis",
+      "tryAgain": "Bandykite dar kartą",
+      "lessonFinished": "SCORM pamoka baigta."
     },
     "videoProcessing": {
       "title": "Vaizdo įrašas apdorojamas",

@@ -29,4 +29,12 @@ export const LEARNING_HANDLES = {
   lessonSidebarLessonItem: (lessonId: string) => `learning-lesson-sidebar-item-${lessonId}`,
   lessonSidebarBlockedIndicator: (lessonId: string) =>
     `learning-lesson-sidebar-blocked-indicator-${lessonId}`,
+  SCORM_ROOT: "learning-scorm-root",
+  SCORM_NAVIGATION: "learning-scorm-navigation",
+  SCORM_PREVIOUS_SECTION_BUTTON: "learning-scorm-previous-section-button",
+  SCORM_NEXT_SECTION_BUTTON: "learning-scorm-next-section-button",
+  SCORM_FULLSCREEN_BUTTON: "learning-scorm-fullscreen-button",
+  SCORM_IFRAME: "learning-scorm-iframe",
+  SCORM_LAUNCH_FAILED_DIALOG: "learning-scorm-launch-failed-dialog",
+  SCORM_LAUNCH_RETRY_BUTTON: "learning-scorm-launch-retry-button",
 } as const;

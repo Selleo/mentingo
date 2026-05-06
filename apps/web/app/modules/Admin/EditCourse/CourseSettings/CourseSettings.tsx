@@ -1,4 +1,4 @@
-import { ALLOWED_VIDEO_FILE_TYPES, ENTITY_TYPES } from "@repo/shared";
+import { ALLOWED_VIDEO_FILE_TYPES, COURSE_TYPE, ENTITY_TYPES } from "@repo/shared";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -43,7 +43,7 @@ import CourseCertificateSetting from "./components/CourseCertificateSetting";
 import { CourseSettingsSwitches } from "./components/CourseSettingsSwitches";
 import { useCourseSettingsForm } from "./hooks/useCourseSettingsForm";
 
-import type { SupportedLanguages } from "@repo/shared";
+import type { CourseType, SupportedLanguages } from "@repo/shared";
 
 const isEmbedUrl = (url?: string) => {
   if (!url) return false;
@@ -61,6 +61,7 @@ type CourseSettingsProps = {
   trailerUrl?: string | null;
   hasCertificate?: boolean;
   courseLanguage: SupportedLanguages;
+  courseType?: CourseType;
 };
 
 const CourseSettings = ({
@@ -74,6 +75,7 @@ const CourseSettings = ({
   trailerUrl,
   hasCertificate = false,
   courseLanguage,
+  courseType = COURSE_TYPE.DEFAULT,
 }: CourseSettingsProps) => {
   const { t } = useTranslation();
 
@@ -305,7 +307,7 @@ const CourseSettings = ({
                     courseTitle={watchedTitle || title}
                   />
                 )}
-                {courseId && <CourseSettingsSwitches courseId={courseId} />}
+                {courseId && <CourseSettingsSwitches courseId={courseId} courseType={courseType} />}
                 <FormField
                   control={form.control}
                   name="thumbnailS3Key"

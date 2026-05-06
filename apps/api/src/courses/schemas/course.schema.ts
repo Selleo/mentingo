@@ -1,4 +1,4 @@
-import { COURSE_ORIGIN_TYPES, SUPPORTED_LANGUAGES } from "@repo/shared";
+import { COURSE_ORIGIN_TYPES, COURSE_TYPE, SUPPORTED_LANGUAGES } from "@repo/shared";
 import { type Static, Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
@@ -26,6 +26,7 @@ export const courseSchema = Type.Object({
   priceInCents: Type.Number(),
   currency: Type.String(),
   status: Type.Optional(coursesStatusOptions),
+  courseType: Type.Optional(Type.Enum(COURSE_TYPE)),
   createdAt: Type.Optional(Type.String()),
   hasFreeChapters: Type.Optional(Type.Boolean()),
   stripeProductId: Type.Optional(Type.Union([Type.String(), Type.Null()])),

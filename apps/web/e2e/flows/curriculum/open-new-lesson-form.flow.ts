@@ -4,7 +4,7 @@ import { expandChapterFlow } from "./expand-chapter.flow";
 
 import type { Page } from "@playwright/test";
 
-type CurriculumLessonType = "content" | "quiz" | "ai_mentor" | "embed";
+type CurriculumLessonType = "content" | "quiz" | "ai_mentor" | "embed" | "scorm";
 
 export const openNewLessonFormFlow = async (
   page: Page,

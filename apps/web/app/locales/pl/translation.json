@@ -47,7 +47,8 @@
       "content": "Treść",
       "quiz": "Quiz",
       "ai_mentor": "AI Mentor",
-      "embed": "Osadzenie"
+      "embed": "Osadzenie",
+      "scorm": "SCORM"
     },
     "error": {
       "somethingWentWrong": "Ups! Coś poszło nie tak."
@@ -165,6 +166,102 @@
     },
     "toast": {
       "scormUploadedSuccessfully": "Pakiet SCORM został pomyślnie przesłany"
+    },
+    "errors": {
+      "packageRequired": "Pakiet SCORM jest wymagany.",
+      "emptyPackage": "Pakiet SCORM jest pusty.",
+      "tooManyFiles": "Pakiet SCORM zawiera zbyt wiele plików.",
+      "packageTooLarge": "Pakiet SCORM jest zbyt duży po rozpakowaniu.",
+      "manifestMissing": "Brakuje pliku manifestu SCORM.",
+      "manifestInvalid": "Plik manifestu SCORM jest nieprawidłowy.",
+      "organizationMissing": "Manifest SCORM nie zawiera organizacji.",
+      "scoMissing": "Manifest SCORM nie zawiera żadnych uruchamialnych SCO.",
+      "resourceIdentifierMissing": "Brakuje identyfikatora zasobu SCORM.",
+      "itemIdentifierMissing": "Brakuje identyfikatora elementu SCORM.",
+      "launchFileMissing": "Brakuje pliku uruchomieniowego SCORM.",
+      "invalidPackagePath": "Pakiet SCORM zawiera nieprawidłową ścieżkę pliku.",
+      "externalPackagePath": "Pakiet SCORM zawiera zewnętrzną ścieżkę pliku.",
+      "runtime": {
+        "launchNotFound": "Nie znaleziono treści startowej SCORM.",
+        "unsupportedStandard": "Ten standard SCORM nie jest jeszcze obsługiwany.",
+        "invalidAttempt": "Próba SCORM jest nieprawidłowa.",
+        "invalidCmiValue": "Dane runtime SCORM są nieprawidłowe.",
+        "contentNotFound": "Nie znaleziono treści SCORM.",
+        "contentForbidden": "Nie masz dostępu do tej treści SCORM."
+      }
+    },
+    "coursePlaceholder": {
+      "back": "Wróć do typu kursu",
+      "status": "Import kursu SCORM",
+      "title": "Tworzenie kursu SCORM będzie dostępne później",
+      "description": "Ten punkt wejścia jest gotowy, ale import kursów SCORM jest jeszcze wdrażany. Na razie utwórz kurs standardowy albo wróć do listy kursów.",
+      "createStandard": "Utwórz kurs standardowy",
+      "viewCourses": "Zobacz kursy"
+    },
+    "create": {
+      "eyebrow": "SCORM 1.2",
+      "title": "Utwórz kurs SCORM",
+      "subtitle": "Dodaj metadane kursu i dołącz pakiet SCORM, który stanie się treścią kursu.",
+      "requirements": {
+        "title": "Wymagania pakietu",
+        "version": "Pakiet SCORM 1.2",
+        "archive": "Archiwum .zip do 500MB",
+        "metadata": "Metadane kursu można edytować przed importem"
+      },
+      "packageSection": "Pakiet SCORM",
+      "packageSectionDescription": "Dołącz pakiet teraz. Plik jest tylko walidowany w formularzu, dopóki API uploadu nie zostanie podłączone.",
+      "metadataSection": "Szczegóły kursu",
+      "metadataSectionDescription": "Te pola odpowiadają standardowej konfiguracji kursu i będą użyte jako bazowe metadane kursu.",
+      "uploadPackage": "Prześlij pakiet SCORM",
+      "dropPackage": "Upuść pakiet SCORM tutaj",
+      "uploadPackageDescription": "Przeciągnij i upuść plik SCORM 1.2 .zip albo wybierz go z urządzenia.",
+      "packageReady": "gotowy do importu",
+      "replacePackage": "Zastąp pakiet",
+      "removePackage": "Usuń pakiet",
+      "uploadThumbnail": "Prześlij miniaturę",
+      "uploadThumbnailDescription": "PNG, JPG lub JPEG do 20MB",
+      "thumbnailPreviewAlt": "Podgląd miniatury kursu",
+      "submit": "Utwórz kurs SCORM",
+      "creating": "Tworzenie kursu SCORM...",
+      "toastDraftReady": "Formularz kursu SCORM jest gotowy do integracji z API"
+    },
+    "lesson": {
+      "packageSection": "Pakiet SCORM",
+      "packageAttached": "Pakiet SCORM jest dodany",
+      "packageLocked": "Tego pakietu nie można zastąpić po utworzeniu lekcji.",
+      "replacePackageTooltip": "Jeśli chcesz dodać inny pakiet SCORM, usuń tę lekcję i utwórz nową.",
+      "validation": {
+        "packageRequired": "Pakiet SCORM jest wymagany",
+        "packageTooLarge": "Pakiet SCORM musi mieć mniej niż 500MB",
+        "packageInvalidType": "Pakiet SCORM musi być plikiem .zip"
+      }
+    }
+  },
+  "adminCourseTypeSelector": {
+    "back": "Wstecz",
+    "eyebrow": "Konfiguracja kursu",
+    "title": "Utwórz nowy kurs",
+    "subtitle": "Wybierz, czy chcesz zbudować kurs w standardowym edytorze, czy utworzyć go z pakietu SCORM.",
+    "standard": {
+      "title": "Standardowy",
+      "description": "Utwórz kurs z wbudowanym programem, lekcjami, quizami i ustawieniami.",
+      "features": {
+        "authoring": "Tworzony w natywnym edytorze kursów",
+        "curriculum": "Rozdziały, lekcje i quizy zarządzane w Mentingo",
+        "translations": "Obsługa języków i tłumaczeń kursu",
+        "settings": "Ceny, status i certyfikaty wliczone"
+      }
+    },
+    "scorm": {
+      "title": "SCORM",
+      "description": "Utwórz kurs z pakietu SCORM 1.2.",
+      "badge": "Placeholder",
+      "features": {
+        "import": "Tworzony z pakietu SCORM 1.2 .zip",
+        "tracking": "Obsługa śledzenia ukończenia SCO i stanu uruchomieniowego",
+        "structure": "Zachowana struktura importowanego pakietu",
+        "future": "Ceny, status i certyfikaty wliczone"
+      }
     }
   },
   "studentChapterCardView": {
@@ -676,6 +773,7 @@
       "author": "Autor",
       "category": "Kategoria",
       "price": "Cena",
+      "type": "Typ",
       "state": "Stan",
       "status": "Status",
       "sharedCourse": "Udostępniony",
@@ -1217,6 +1315,23 @@
       "maxOneVideoUploaded": "Nie możesz przesłać więcej niż 1 wideo.",
       "successfullyTransferredCourseOwnership": "Własność kursu została pomyślnie przeniesiona"
     },
+    "errors": {
+      "featureUnavailable": {
+        "curriculum": "Edycja programu nie jest dostępna dla kursów SCORM.",
+        "lessonSequence": "Wymuszanie kolejności lekcji nie jest dostępne dla kursów SCORM.",
+        "quizFeedback": "Ustawienia informacji zwrotnej quizu nie są dostępne dla kursów SCORM."
+      },
+      "notFound": {
+        "course": "Nie znaleziono kursu.",
+        "category": "Nie znaleziono kategorii.",
+        "chapter": "Nie znaleziono rozdziału.",
+        "lesson": "Nie znaleziono lekcji."
+      },
+      "create": {
+        "courseFailed": "Nie udało się utworzyć kursu.",
+        "stripeProductFailed": "Nie udało się utworzyć produktu płatności dla kursu."
+      }
+    },
     "thinking": {
       "PLANNING_NEXT_STEP": "Wybieranie następnego kroku...",
       "USING_TOOLS": "Używanie narzędzi do pobrania kontekstu...",
@@ -1348,6 +1463,7 @@
         "removeQuizLesson": "Czy na pewno chcesz usunąć tę lekcję quizową z rozdziału?",
         "removeAiMentorLesson": "Czy na pewno chcesz usunąć tę lekcję AI Mentora z rozdziału?",
         "removeEmbedLesson": "Czy na pewno chcesz usunąć tę lekcję z osadzeniem z rozdziału?",
+        "removeScormLesson": "Czy na pewno chcesz usunąć tę lekcję SCORM z rozdziału?",
         "removeChapter": "Czy na pewno chcesz usunąć ten rozdział?",
         "removeQuestion": "Czy na pewno chcesz usunąć pytanie?",
         "removeContent": "Czy na pewno chcesz usunąć treść?"
@@ -1438,6 +1554,7 @@
           "lessonCreatedSuccessfully": "Lekcja utworzona pomyślnie",
           "fileLessonCreatedSuccessfully": "Plik utworzony pomyślnie",
           "contentLessonCreatedSuccessfully": "Lekcja utworzona pomyślnie",
+          "scormLessonCreatedSuccessfully": "Lekcja SCORM utworzona pomyślnie",
           "quizLessonCreatedSuccessfully": "Quiz utworzony pomyślnie",
           "aiMentorLessonCreatedSuccessfully": "Lekcja AI Mentora utworzona pomyślnie",
           "aiMentorLessonUpdatedSuccessfully": "Lekcja AI Mentora zaktualizowana pomyślnie",
@@ -1516,10 +1633,12 @@
         "other": {
           "lessonNumber": "Liczba lekcji",
           "chooseType": "Wybierz typ",
+          "chooseLessonTypeAriaLabel": "Wybierz typ lekcji {{type}}",
           "content": "Treść",
           "quiz": "Quiz",
           "aiMentor": "AI Mentor",
           "embed": "Osadzenie",
+          "scorm": "SCORM",
           "correct": "Poprawna",
           "true": "Prawda",
           "false": "Fałsz",
@@ -1544,6 +1663,7 @@
           "contentLessonDescription": "Tekst z multimediami (obrazki, wideo, prezentacje).",
           "quizLessonDescription": "Zestaw pytań do sprawdzenia wiedzy.",
           "aiMentorLessonDescription": "Interaktywna rozmowa z wirtualnym mentorem AI.",
+          "scormLessonDescription": "Treść lekcji w pakiecie SCORM.",
           "embedLessonDescription": "Zewnętrzna zawartość (np. formularz Google, prezentacja Canva lub transmisja live z YouTube).",
           "fillInTheBlanksDescription": "To pytanie zawiera zdanie, a studenci będą musieli przeciągnąć i upuścić słowo w odpowiednie miejsce.",
           "gapFillDescription": "To pytanie będzie miało zdanie z brakującymi słowami, które studenci muszą wpisać.",
@@ -1986,6 +2106,17 @@
     "aiMentor": {
       "title": "Sesja AI Mentora",
       "description": "To jest sesja mentoringu z AI. AI poprowadzi Cię przez lekcję zgodnie z wytycznymi instruktora."
+    },
+    "scorm": {
+      "loading": "Ładowanie treści SCORM...",
+      "launchFailed": "Nie udało się uruchomić treści SCORM.",
+      "launchFailedBody": "Spróbuj ponownie. Jeśli problem będzie się powtarzał, pakiet SCORM może wymagać ponownego przesłania.",
+      "saveFailed": "Nie udało się zapisać postępu SCORM.",
+      "saving": "Zapisywanie postępu",
+      "previousSco": "Poprzednia sekcja",
+      "nextSco": "Następna sekcja",
+      "tryAgain": "Spróbuj ponownie",
+      "lessonFinished": "Lekcja SCORM została zakończona."
     },
     "videoProcessing": {
       "title": "Wideo jest przetwarzane",

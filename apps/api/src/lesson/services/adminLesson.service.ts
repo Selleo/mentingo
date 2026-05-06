@@ -11,6 +11,7 @@ import {
 import {
   AI_MENTOR_TTS_PRESET,
   AI_MENTOR_VOICE_MODE,
+  COURSE_FEATURE,
   ENTITY_TYPES,
   PERMISSIONS,
 } from "@repo/shared";
@@ -22,6 +23,7 @@ import { DatabasePg } from "src/common";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { hasPermission } from "src/common/permissions/permission.utils";
 import { annotateVideoAutoplayAndBlockIndexesInContent } from "src/common/utils/annotateVideoAutoplayAndBlockIndexesInContent";
+import { CourseFeaturePolicyService } from "src/courses/course-feature-policy.service";
 import { MasterCourseService } from "src/courses/master-course.service";
 import { CreateLessonEvent, DeleteLessonEvent, UpdateLessonEvent } from "src/events";
 import { RESOURCE_CATEGORIES, RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
@@ -72,11 +74,30 @@ export class AdminLessonService {
     private lessonService: LessonService,
     private readonly studentLessonProgressService: StudentLessonProgressService,
     private readonly masterCourseService: MasterCourseService,
+    private readonly courseFeaturePolicyService: CourseFeaturePolicyService,
     @Inject("CACHE_MANAGER") private readonly cache: CacheManagerStore,
   ) {}
 
   async createLessonForChapter(data: CreateLessonBody, currentUser: CurrentUserType) {
+    const { lessonId, language } = await this.db.transaction((trx) =>
+      this.createLessonForChapterInTransaction(data, currentUser, trx),
+    );
+
+    await this.publishCreateLessonEvent(lessonId, language, currentUser);
+
+    return lessonId;
+  }
+
+  async createLessonForChapterInTransaction(
+    data: CreateLessonBody,
+    currentUser: CurrentUserType,
+    dbInstance: DatabasePg,
+  ) {
     await this.masterCourseService.assertCourseContentEditableByChapterId(data.chapterId);
+    await this.courseFeaturePolicyService.assertCourseFeatureEnabledByChapterId(
+      data.chapterId,
+      COURSE_FEATURE.CURRICULUM_EDITING,
+    );
     await this.validateAccess("chapter", currentUser, data.chapterId);
 
     const { language } = await this.localizationService.getBaseLanguage(
@@ -91,7 +112,10 @@ export class AdminLessonService {
       });
     }
 
-    const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(data.chapterId);
+    const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(
+      data.chapterId,
+      dbInstance,
+    );
 
     const lesson = await this.adminLessonRepository.createLessonForChapter(
       {
@@ -99,31 +123,38 @@ export class AdminLessonService {
         displayOrder: maxDisplayOrder + 1,
       },
       language,
+      dbInstance,
     );
 
     if (data.contextId) {
       const resourceIds = await this.getResourcesByContextId(data.contextId);
 
       if (resourceIds.length) {
-        await this.adminLessonRepository.linkResourcesToLesson(lesson.id, resourceIds);
+        await this.adminLessonRepository.linkResourcesToLesson(lesson.id, resourceIds, dbInstance);
       }
 
       await this.cache.del(getContextKey(data.contextId));
     }
 
-    await this.adminLessonRepository.updateLessonCountForChapter(lesson.chapterId);
+    await this.adminLessonRepository.updateLessonCountForChapter(lesson.chapterId, dbInstance);
 
-    const createdLessonSnapshot = await this.buildLessonActivitySnapshot(lesson.id, language);
+    return { lessonId: lesson.id, language };
+  }
+
+  async publishCreateLessonEvent(
+    lessonId: UUIDType,
+    language: SupportedLanguages,
+    currentUser: CurrentUserType,
+  ) {
+    const createdLessonSnapshot = await this.buildLessonActivitySnapshot(lessonId, language);
 
     await this.outboxPublisher.publish(
       new CreateLessonEvent({
-        lessonId: lesson.id,
+        lessonId,
         actor: currentUser,
         createdLesson: createdLessonSnapshot,
       }),
     );
-
-    return lesson.id;
   }
 
   async getResourcesByContextId(contextId: UUIDType) {
@@ -136,6 +167,10 @@ export class AdminLessonService {
 
   async createAiMentorLesson(data: CreateAiMentorLessonBody, currentUser: CurrentUserType) {
     await this.masterCourseService.assertCourseContentEditableByChapterId(data.chapterId);
+    await this.courseFeaturePolicyService.assertCourseFeatureEnabledByChapterId(
+      data.chapterId,
+      COURSE_FEATURE.CURRICULUM_EDITING,
+    );
 
     await this.validateAccess("chapter", currentUser, data.chapterId);
 
@@ -192,6 +227,10 @@ export class AdminLessonService {
 
   async createQuizLesson(data: CreateQuizLessonBody, currentUser: CurrentUserType) {
     await this.masterCourseService.assertCourseContentEditableByChapterId(data.chapterId);
+    await this.courseFeaturePolicyService.assertCourseFeatureEnabledByChapterId(
+      data.chapterId,
+      COURSE_FEATURE.CURRICULUM_EDITING,
+    );
 
     await this.validateAccess("chapter", currentUser, data.chapterId);
 
@@ -240,6 +279,10 @@ export class AdminLessonService {
     currentUser: CurrentUserType,
   ) {
     await this.masterCourseService.assertCourseContentEditableByLessonId(id);
+    await this.courseFeaturePolicyService.assertCourseFeatureEnabledByLessonId(
+      id,
+      COURSE_FEATURE.CURRICULUM_EDITING,
+    );
 
     await this.validateAccess("lesson", currentUser, id);
 
@@ -290,6 +333,10 @@ export class AdminLessonService {
 
   async updateQuizLesson(id: UUIDType, data: UpdateQuizLessonBody, currentUser: CurrentUserType) {
     await this.masterCourseService.assertCourseContentEditableByLessonId(id);
+    await this.courseFeaturePolicyService.assertCourseFeatureEnabledByLessonId(
+      id,
+      COURSE_FEATURE.CURRICULUM_EDITING,
+    );
 
     await this.validateAccess("lesson", currentUser, id);
 
@@ -341,6 +388,10 @@ export class AdminLessonService {
 
   async updateLesson(id: UUIDType, data: UpdateLessonBody, currentUser: CurrentUserType) {
     await this.masterCourseService.assertCourseContentEditableByLessonId(id);
+    await this.courseFeaturePolicyService.assertCourseFeatureEnabledByLessonId(
+      id,
+      COURSE_FEATURE.CURRICULUM_EDITING,
+    );
 
     await this.validateAccess("lesson", currentUser, id);
 
@@ -389,6 +440,10 @@ export class AdminLessonService {
 
   async removeLesson(lessonId: UUIDType, currentUser: CurrentUserType) {
     await this.masterCourseService.assertCourseContentEditableByLessonId(lessonId);
+    await this.courseFeaturePolicyService.assertCourseFeatureEnabledByLessonId(
+      lessonId,
+      COURSE_FEATURE.CURRICULUM_EDITING,
+    );
 
     await this.validateAccess("lesson", currentUser, lessonId);
 
@@ -427,6 +482,10 @@ export class AdminLessonService {
     currentUser: CurrentUserType;
   }): Promise<void> {
     await this.masterCourseService.assertCourseContentEditableByLessonId(lessonObject.lessonId);
+    await this.courseFeaturePolicyService.assertCourseFeatureEnabledByLessonId(
+      lessonObject.lessonId,
+      COURSE_FEATURE.CURRICULUM_EDITING,
+    );
 
     await this.validateAccess("lesson", lessonObject.currentUser, lessonObject.lessonId);
 
@@ -815,6 +874,10 @@ export class AdminLessonService {
 
   async createEmbedLesson(data: CreateEmbedLessonBody, currentUser: CurrentUserType) {
     await this.masterCourseService.assertCourseContentEditableByChapterId(data.chapterId);
+    await this.courseFeaturePolicyService.assertCourseFeatureEnabledByChapterId(
+      data.chapterId,
+      COURSE_FEATURE.CURRICULUM_EDITING,
+    );
 
     await this.validateAccess("chapter", currentUser, data.chapterId);
 
@@ -877,6 +940,10 @@ export class AdminLessonService {
     data: UpdateEmbedLessonBody,
   ) {
     await this.masterCourseService.assertCourseContentEditableByLessonId(lessonId);
+    await this.courseFeaturePolicyService.assertCourseFeatureEnabledByLessonId(
+      lessonId,
+      COURSE_FEATURE.CURRICULUM_EDITING,
+    );
 
     await this.validateAccess("lesson", currentUser, lessonId);
 
@@ -986,6 +1053,10 @@ export class AdminLessonService {
   ) {
     if (lessonId) {
       await this.masterCourseService.assertCourseContentEditableByLessonId(lessonId);
+      await this.courseFeaturePolicyService.assertCourseFeatureEnabledByLessonId(
+        lessonId,
+        COURSE_FEATURE.CURRICULUM_EDITING,
+      );
       await this.validateAccess("lesson", currentUser, lessonId);
     }
     const fileTitle = {
@@ -1019,6 +1090,10 @@ export class AdminLessonService {
     options?: { originalFilename?: string },
   ) {
     await this.masterCourseService.assertCourseContentEditableByLessonId(lessonId);
+    await this.courseFeaturePolicyService.assertCourseFeatureEnabledByLessonId(
+      lessonId,
+      COURSE_FEATURE.CURRICULUM_EDITING,
+    );
 
     const file = await this.buildMulterFileFromSignedUrl(signedUrl, options?.originalFilename);
     const { fileKey, fileUrl } = await this.fileService.uploadFile(
@@ -1099,6 +1174,10 @@ export class AdminLessonService {
     file: Express.Multer.File | null,
   ) {
     await this.masterCourseService.assertCourseContentEditableByLessonId(lessonId);
+    await this.courseFeaturePolicyService.assertCourseFeatureEnabledByLessonId(
+      lessonId,
+      COURSE_FEATURE.CURRICULUM_EDITING,
+    );
 
     await this.validateAccess("lesson", currentUser, lessonId);
 

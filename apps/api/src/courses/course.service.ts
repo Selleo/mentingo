@@ -10,6 +10,8 @@ import {
 } from "@nestjs/common";
 import { BaseEmailTemplate } from "@repo/email-templates";
 import {
+  COURSE_FEATURE,
+  COURSE_TYPE,
   COURSE_ENROLLMENT,
   SUPPORTED_LANGUAGES,
   ENTITY_TYPES,
@@ -103,6 +105,7 @@ import { getSortOptions } from "../common/helpers/getSortOptions";
 
 import { LESSON_SEQUENCE_ENABLED, QUIZ_FEEDBACK_ENABLED } from "./constants";
 import { DURATION_DEFAULTS } from "./constants/duration-defaults";
+import { CourseFeaturePolicyService } from "./course-feature-policy.service";
 import { CourseSlugService } from "./course-slug.service";
 import { MasterCourseService } from "./master-course.service";
 import {
@@ -184,6 +187,7 @@ export class CourseService {
     private readonly emailService: EmailService,
     private readonly courseSlugService: CourseSlugService,
     private readonly masterCourseService: MasterCourseService,
+    private readonly courseFeaturePolicyService: CourseFeaturePolicyService,
     private readonly lumaService: LumaService,
   ) {}
 
@@ -229,6 +233,7 @@ export class CourseService {
         stripePriceId: courses.stripePriceId,
         originType: courses.originType,
         isContentReadonly: sql<boolean>`${courses.originType} = 'exported'`,
+        courseType: courses.courseType,
         sourceCourseId: courses.sourceCourseId,
         sourceTenantId: courses.sourceTenantId,
       })
@@ -1059,7 +1064,7 @@ export class CourseService {
         completedChapterCount: sql<number>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN COALESCE(${studentCourses.finishedChapterCount}, 0) ELSE 0 END`,
         enrolled: sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN TRUE ELSE FALSE END`,
         status: courses.status,
-        isScorm: courses.isScorm,
+        courseType: courses.courseType,
         priceInCents: courses.priceInCents,
         currency: courses.currency,
         authorId: courses.authorId,
@@ -1324,6 +1329,7 @@ export class CourseService {
         baseLanguage: sql<SupportedLanguages>`${courses.baseLanguage}`,
         originType: courses.originType,
         isContentReadonly: sql<boolean>`${courses.originType} = 'exported'`,
+        courseType: courses.courseType,
         sourceCourseId: courses.sourceCourseId,
         sourceTenantId: courses.sourceTenantId,
       })
@@ -1640,6 +1646,20 @@ export class CourseService {
       throw new NotFoundException("Course not found");
     }
 
+    if (settings.lessonSequenceEnabled !== undefined) {
+      this.courseFeaturePolicyService.assertFeatureEnabled(
+        course.courseType,
+        COURSE_FEATURE.LESSON_SEQUENCE_SETTING,
+      );
+    }
+
+    if (settings.quizFeedbackEnabled !== undefined) {
+      this.courseFeaturePolicyService.assertFeatureEnabled(
+        course.courseType,
+        COURSE_FEATURE.QUIZ_FEEDBACK_SETTING,
+      );
+    }
+
     const { language: resolvedLanguage } = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.COURSE,
       courseId,
@@ -1728,92 +1748,107 @@ export class CourseService {
     currentUser: CurrentUserType,
     isPlaywrightTest: boolean,
   ) {
-    const newCourse = await this.db.transaction(async (trx) => {
-      const [category] = await trx
-        .select()
-        .from(categories)
-        .where(eq(categories.id, createCourseBody.categoryId));
-
-      const { enabled: isStripeConfigured } = await this.envService.getStripeConfigured();
-
-      if (!category) {
-        throw new NotFoundException("Category not found");
-      }
-      const globalSettings = await this.settingsService.getGlobalSettings();
-
-      const finalCurrency = globalSettings.defaultCourseCurrency || "usd";
-
-      let productId: string | null = null;
-      let priceId: string | null = null;
-
-      if (!isPlaywrightTest && isStripeConfigured) {
-        const stripeResult = await this.stripeService.createProduct({
-          name: createCourseBody.title,
-          description: createCourseBody?.description ?? "",
-          currency: finalCurrency,
-          amountInCents: createCourseBody?.priceInCents ?? 0,
-        });
-
-        productId = stripeResult.productId;
-        priceId = stripeResult.priceId;
-
-        if (!productId || !priceId) {
-          throw new InternalServerErrorException("Failed to create product");
-        }
-      }
-
-      const settings = sql`json_build_object(
-        'lessonSequenceEnabled', ${LESSON_SEQUENCE_ENABLED}::boolean,
-        'quizFeedbackEnabled', ${QUIZ_FEEDBACK_ENABLED}::boolean,
-        'certificateSignature', NULL,
-        'certificateFontColor', NULL
-      )`;
-
-      const [newCourse] = await trx
-        .insert(courses)
-        .values({
-          title: buildJsonbField(createCourseBody.language, createCourseBody.title),
-          description: buildJsonbField(createCourseBody.language, createCourseBody.description),
-          baseLanguage: createCourseBody.language,
-          availableLocales: [createCourseBody.language],
-          thumbnailS3Key: createCourseBody.thumbnailS3Key,
-          status: createCourseBody.status,
-          priceInCents: createCourseBody.priceInCents,
-          currency: finalCurrency,
-          isScorm: createCourseBody.isScorm,
-          authorId: currentUser.userId,
-          categoryId: createCourseBody.categoryId,
-          stripeProductId: productId,
-          stripePriceId: priceId,
-          settings: settingsToJSONBuildObject(settings),
-        })
-        .returning();
-
-      if (!newCourse) {
-        throw new ConflictException("Failed to create course");
-      }
-
-      await trx
-        .insert(coursesSummaryStats)
-        .values({ courseId: newCourse.id, authorId: currentUser.userId });
-
-      return newCourse;
-    });
-
-    const createdCourseSnapshot = await this.buildCourseActivitySnapshot(
-      newCourse.id,
-      createCourseBody.language,
+    const newCourse = await this.db.transaction((trx) =>
+      this.createCourseInTransaction(createCourseBody, currentUser, isPlaywrightTest, trx),
     );
+
+    await this.publishCreateCourseEvent(newCourse.id, createCourseBody.language, currentUser);
+
+    return newCourse;
+  }
+
+  async createCourseInTransaction(
+    createCourseBody: CreateCourseBody,
+    currentUser: CurrentUserType,
+    isPlaywrightTest: boolean,
+    dbInstance: DatabasePg,
+  ) {
+    const [category] = await dbInstance
+      .select()
+      .from(categories)
+      .where(eq(categories.id, createCourseBody.categoryId));
+
+    const { enabled: isStripeConfigured } = await this.envService.getStripeConfigured();
+
+    if (!category) {
+      throw new NotFoundException("adminCourseView.errors.notFound.category");
+    }
+    const globalSettings = await this.settingsService.getGlobalSettings();
+
+    const finalCurrency = globalSettings.defaultCourseCurrency || "usd";
+
+    let productId: string | null = null;
+    let priceId: string | null = null;
+
+    if (!isPlaywrightTest && isStripeConfigured) {
+      const stripeResult = await this.stripeService.createProduct({
+        name: createCourseBody.title,
+        description: createCourseBody?.description ?? "",
+        currency: finalCurrency,
+        amountInCents: createCourseBody?.priceInCents ?? 0,
+      });
+
+      productId = stripeResult.productId;
+      priceId = stripeResult.priceId;
+
+      if (!productId || !priceId) {
+        throw new InternalServerErrorException("adminCourseView.errors.create.stripeProductFailed");
+      }
+    }
+
+    const isScormCourse = createCourseBody.isScorm === true;
+    const settings = sql`json_build_object(
+      'lessonSequenceEnabled', ${isScormCourse ? false : LESSON_SEQUENCE_ENABLED}::boolean,
+      'quizFeedbackEnabled', ${isScormCourse ? false : QUIZ_FEEDBACK_ENABLED}::boolean,
+      'certificateSignature', NULL,
+      'certificateFontColor', NULL
+    )`;
+
+    const [newCourse] = await dbInstance
+      .insert(courses)
+      .values({
+        title: buildJsonbField(createCourseBody.language, createCourseBody.title),
+        description: buildJsonbField(createCourseBody.language, createCourseBody.description),
+        baseLanguage: createCourseBody.language,
+        availableLocales: [createCourseBody.language],
+        thumbnailS3Key: createCourseBody.thumbnailS3Key,
+        status: createCourseBody.status,
+        priceInCents: createCourseBody.priceInCents,
+        currency: finalCurrency,
+        courseType: isScormCourse ? COURSE_TYPE.SCORM : COURSE_TYPE.DEFAULT,
+        authorId: currentUser.userId,
+        categoryId: createCourseBody.categoryId,
+        stripeProductId: productId,
+        stripePriceId: priceId,
+        settings: settingsToJSONBuildObject(settings),
+      })
+      .returning();
+
+    if (!newCourse) {
+      throw new ConflictException("adminCourseView.errors.create.courseFailed");
+    }
+
+    await dbInstance
+      .insert(coursesSummaryStats)
+      .values({ courseId: newCourse.id, authorId: currentUser.userId });
+
+    return newCourse;
+  }
+
+  async publishCreateCourseEvent(
+    courseId: UUIDType,
+    language: SupportedLanguages,
+    currentUser: CurrentUserType,
+  ) {
+    const createdCourseSnapshot = await this.buildCourseActivitySnapshot(courseId, language);
 
     await this.outboxPublisher.publish(
       new CreateCourseEvent({
-        courseId: newCourse.id,
+        courseId,
         actor: currentUser,
         createdCourse: createdCourseSnapshot,
       }),
     );
-
-    return newCourse;
   }
 
   async updateCourse(
@@ -3721,7 +3756,7 @@ export class CourseService {
         priceInCents: courses.priceInCents,
         currency: courses.currency,
         hasCertificate: courses.hasCertificate,
-        isScorm: courses.isScorm,
+        courseType: courses.courseType,
         categoryId: courses.categoryId,
         authorId: courses.authorId,
         thumbnailS3Key: courses.thumbnailS3Key,

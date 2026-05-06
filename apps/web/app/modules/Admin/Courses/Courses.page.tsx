@@ -1,5 +1,5 @@
 import { Link, useLoaderData, useNavigate } from "@remix-run/react";
-import { COURSE_ORIGIN_TYPES, COURSE_STATUSES } from "@repo/shared";
+import { COURSE_ORIGIN_TYPES, COURSE_STATUSES, COURSE_TYPE } from "@repo/shared";
 import {
   type ColumnDef,
   flexRender,
@@ -61,13 +61,16 @@ import { handleRowSelectionRange } from "~/utils/tableRangeSelection";
 
 import { COURSES_PAGE_HANDLES } from "../../../../e2e/data/courses/handles";
 
-import { getCourseBadgeVariant, getCourseStatus } from "./utils";
+import { getCourseBadgeVariant, getCourseStatus, getCourseTypeLabel } from "./utils";
 
 import type { ClientLoaderFunctionArgs, MetaFunction } from "@remix-run/react";
+import type { CourseType } from "@repo/shared";
 import type { GetAllCoursesResponse } from "~/api/generated-api";
 import type { CourseParams, CourseStatus } from "~/api/queries/useCourses";
 
-type TCourse = GetAllCoursesResponse["data"][number];
+type TCourse = GetAllCoursesResponse["data"][number] & {
+  courseType?: CourseType;
+};
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.courses");
 
@@ -197,6 +200,23 @@ const Courses = () => {
       header: ({ column }) => (
         <SortButton<TCourse> column={column}>{t("adminCoursesView.field.category")}</SortButton>
       ),
+    },
+    {
+      accessorKey: "courseType",
+      header: t("adminCoursesView.field.type"),
+      cell: ({ row }) => {
+        const courseType = row.original.courseType ?? COURSE_TYPE.DEFAULT;
+
+        return (
+          <Badge
+            data-testid={COURSES_PAGE_HANDLES.rowTypeBadge(row.original.id)}
+            variant={courseType === COURSE_TYPE.SCORM ? "success" : "secondaryWithOutline"}
+            className="w-max"
+          >
+            {getCourseTypeLabel(courseType as CourseType, t)}
+          </Badge>
+        );
+      },
     },
     {
       accessorKey: "priceInCents",

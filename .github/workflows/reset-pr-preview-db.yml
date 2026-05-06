@@ -124,30 +124,22 @@ jobs:
             -c "GRANT ALL PRIVILEGES ON DATABASE guidebook TO postgres;" \
             -c "GRANT CONNECT ON DATABASE guidebook TO public;"
 
-      - name: Run database migrations
-        env:
-          PR_ID: ${{ inputs.pr_number }}
-        run: |
-          set -euo pipefail
-
-          uc --connect "ssh+cli://uncloud-host" exec api-preview-pr-${PR_ID} npm i -g tsx drizzle-kit drizzle-orm
-          uc --connect "ssh+cli://uncloud-host" exec api-preview-pr-${PR_ID} npm run db:migrate
-
-      - name: Restart API after database reset
-        env:
-          PR_ID: ${{ inputs.pr_number }}
-        run: |
-          set -euo pipefail
-
-          uc --connect "ssh+cli://uncloud-host" service stop api-preview-pr-${PR_ID}
-          uc --connect "ssh+cli://uncloud-host" service start api-preview-pr-${PR_ID}
-
       - name: Seed database
         continue-on-error: true
         env:
           PR_ID: ${{ inputs.pr_number }}
         run: |
           set -euo pipefail
-          
-          uc --connect "ssh+cli://uncloud-host" exec api-preview-pr-${PR_ID} npm i -g tsx drizzle-kit drizzle-orm
-          uc --connect "ssh+cli://uncloud-host" exec api-preview-pr-${PR_ID} npm run db:seed || true
+
+          for attempt in 1 2 3 4 5; do
+            if uc --connect "ssh+cli://uncloud-host" exec api-preview-pr-${PR_ID} npm i -g tsx drizzle-kit drizzle-orm && \
+              uc --connect "ssh+cli://uncloud-host" exec api-preview-pr-${PR_ID} npm run db:seed; then
+              exit 0
+            fi
+
+            echo "Seed attempt ${attempt} failed; retrying..."
+            sleep 10
+          done
+
+          echo "Seed step skipped after repeated failures"
+          exit 0

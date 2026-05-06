@@ -1,5 +1,13 @@
 import type { QuestionType } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/QuizLessonForm/QuizLessonForm.types";
 
+export const LESSON_TYPE_OPTION_HANDLES = {
+  CONTENT: "content",
+  QUIZ: "quiz",
+  AI_MENTOR: "ai_mentor",
+  EMBED: "embed",
+  SCORM: "scorm",
+} as const;
+
 export const CURRICULUM_HANDLES = {
   ROOT: "curriculum-root",
   CHAPTER_LIST: "curriculum-chapter-list",
@@ -13,8 +21,9 @@ export const CURRICULUM_HANDLES = {
   lessonCard: (lessonId: string) => `curriculum-lesson-card-${lessonId}`,
   lessonDragHandle: (lessonId: string) => `curriculum-lesson-drag-handle-${lessonId}`,
   lessonTitle: (lessonId: string) => `curriculum-lesson-title-${lessonId}`,
-  lessonTypeOption: (type: "content" | "quiz" | "ai_mentor" | "embed") =>
-    `curriculum-lesson-type-option-${type}`,
+  lessonTypeOption: (
+    type: (typeof LESSON_TYPE_OPTION_HANDLES)[keyof typeof LESSON_TYPE_OPTION_HANDLES],
+  ) => `curriculum-lesson-type-option-${type}`,
 } as const;
 
 export const CHAPTER_FORM_HANDLES = {
@@ -86,6 +95,24 @@ export const EMBED_LESSON_FORM_HANDLES = {
     `curriculum-embed-resource-${resourceIndex}-fullscreen-checkbox`,
   removeResourceButton: (resourceIndex: number) =>
     `curriculum-embed-resource-${resourceIndex}-remove-button`,
+} as const;
+
+export const SCORM_LESSON_FORM_HANDLES = {
+  ROOT: "curriculum-scorm-lesson-form",
+  TITLE_INPUT: "curriculum-scorm-lesson-title-input",
+  PACKAGE_UPLOAD: "curriculum-scorm-lesson-package-upload",
+  PACKAGE_INPUT: "curriculum-scorm-lesson-package-input",
+  PACKAGE_SELECTED_FILE: "curriculum-scorm-lesson-package-selected-file",
+  PACKAGE_READONLY: "curriculum-scorm-lesson-package-readonly",
+  PACKAGE_INFO_TOOLTIP_TRIGGER: "curriculum-scorm-lesson-package-info-tooltip-trigger",
+  PACKAGE_REMOVE_BUTTON: "curriculum-scorm-lesson-package-remove-button",
+  PACKAGE_REPLACE_BUTTON: "curriculum-scorm-lesson-package-replace-button",
+  SAVE_BUTTON: "curriculum-scorm-lesson-save-button",
+  DELETE_BUTTON: "curriculum-scorm-lesson-delete-button",
+  CANCEL_BUTTON: "curriculum-scorm-lesson-cancel-button",
+  DELETE_DIALOG: "curriculum-scorm-lesson-delete-dialog",
+  DELETE_DIALOG_CONFIRM_BUTTON: "curriculum-scorm-lesson-delete-dialog-confirm-button",
+  DELETE_DIALOG_CANCEL_BUTTON: "curriculum-scorm-lesson-delete-dialog-cancel-button",
 } as const;
 
 export const AI_MENTOR_LESSON_FORM_HANDLES = {

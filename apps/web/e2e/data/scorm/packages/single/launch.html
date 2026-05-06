@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>SCORM E2E Single SCO</title>
+    <script src="scorm-test.js"></script>
+  </head>
+  <body>
+    <h1 data-testid="scorm-package-single-title">SCORM E2E Single SCO</h1>
+    <p id="entry" data-testid="scorm-package-entry"></p>
+    <button id="commit-progress" data-testid="scorm-package-commit-progress-button" type="button">
+      Commit progress
+    </button>
+    <button id="finish-lesson" data-testid="scorm-package-finish-lesson-button" type="button">
+      Finish lesson
+    </button>
+    <button id="package-confirm" data-testid="scorm-package-confirm-button" type="button">
+      Package confirm
+    </button>
+    <script>
+      window.MentingoScormTest.boot("single");
+    </script>
+  </body>
+</html>

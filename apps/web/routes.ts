@@ -56,7 +56,8 @@ export const routes: (
           });
           route("analytics", "modules/Statistics/Analytics.page.tsx");
           route("envs", "modules/Admin/Envs/Envs.page.tsx");
-          route("beta-courses/new", "modules/Admin/AddCourse/AddCourse.tsx");
+          route("beta-courses/new", "modules/Admin/AddCourse/CourseTypeSelector.page.tsx");
+          route("beta-courses/new/standard", "modules/Admin/AddCourse/AddCourse.tsx");
           route("courses/new-scorm", "modules/Admin/Scorm/CreateNewScormCourse.page.tsx");
           route("beta-courses/:id", "modules/Admin/EditCourse/EditCourse.tsx");
           route("users", "modules/Admin/Users/Users.page.tsx");

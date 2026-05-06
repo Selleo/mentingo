@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
 import { queryClient } from "~/api/queryClient";
+import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../../api-client";
@@ -37,7 +38,11 @@ export function useCreateBetaContentLesson() {
       if (error instanceof AxiosError) {
         return toast({
           variant: "destructive",
-          description: error.response?.data.message,
+          description: getTranslatedApiErrorMessage(
+            error,
+            t,
+            t("adminCourseView.curriculum.lesson.toast.unexpectedError"),
+          ),
         });
       }
       toast({

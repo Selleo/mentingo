@@ -47,6 +47,7 @@ describe("CourseController (e2e)", () => {
     // It can be crashed, test and reapir it later
     const mockFileService = {
       getFileUrl: jest.fn().mockResolvedValue("http://example.com/file"),
+      isBunnyConfigured: jest.fn().mockResolvedValue(false),
     };
 
     const mockCacheManager = {

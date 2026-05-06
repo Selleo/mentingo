@@ -46,7 +46,8 @@
       "content": "Obsah",
       "quiz": "Kvíz",
       "ai_mentor": "AI mentor",
-      "embed": "Vložit"
+      "embed": "Vložit",
+      "scorm": "SCORM"
     },
     "error": {
       "somethingWentWrong": "Jejda! Něco se pokazilo."
@@ -164,6 +165,102 @@
     },
     "toast": {
       "scormUploadedSuccessfully": "Balíček SCORM byl úspěšně nahrán"
+    },
+    "errors": {
+      "packageRequired": "Balíček SCORM je povinný.",
+      "emptyPackage": "Balíček SCORM je prázdný.",
+      "tooManyFiles": "Balíček SCORM obsahuje příliš mnoho souborů.",
+      "packageTooLarge": "Balíček SCORM je po rozbalení příliš velký.",
+      "manifestMissing": "Chybí soubor manifestu SCORM.",
+      "manifestInvalid": "Soubor manifestu SCORM je neplatný.",
+      "organizationMissing": "Manifest SCORM neobsahuje organizaci.",
+      "scoMissing": "Manifest SCORM neobsahuje žádné spustitelné SCO.",
+      "resourceIdentifierMissing": "Chybí identifikátor zdroje SCORM.",
+      "itemIdentifierMissing": "Chybí identifikátor položky SCORM.",
+      "launchFileMissing": "Chybí spouštěcí soubor SCORM.",
+      "invalidPackagePath": "Balíček SCORM obsahuje neplatnou cestu k souboru.",
+      "externalPackagePath": "Balíček SCORM obsahuje externí cestu k souboru.",
+      "runtime": {
+        "launchNotFound": "Spouštěcí obsah SCORM nebyl nalezen.",
+        "unsupportedStandard": "Tento standard SCORM zatím není podporován.",
+        "invalidAttempt": "Pokus SCORM je neplatný.",
+        "invalidCmiValue": "Runtime data SCORM jsou neplatná.",
+        "contentNotFound": "Obsah SCORM nebyl nalezen.",
+        "contentForbidden": "K tomuto obsahu SCORM nemáte přístup."
+      }
+    },
+    "coursePlaceholder": {
+      "back": "Zpět na typ kurzu",
+      "status": "Import kurzu SCORM",
+      "title": "Vytvoření kurzu SCORM bude následovat",
+      "description": "Tento vstupní bod je připravený, ale import kurzů SCORM se stále implementuje. Zatím vytvořte standardní kurz nebo se vraťte na seznam kurzů.",
+      "createStandard": "Vytvořit standardní kurz",
+      "viewCourses": "Zobrazit kurzy"
+    },
+    "create": {
+      "eyebrow": "SCORM 1.2",
+      "title": "Vytvořit kurz SCORM",
+      "subtitle": "Přidejte metadata kurzu a přiložte balíček SCORM, který se stane obsahem kurzu.",
+      "requirements": {
+        "title": "Požadavky na balíček",
+        "version": "Balíček SCORM 1.2",
+        "archive": "Archiv .zip do 500MB",
+        "metadata": "Metadata kurzu lze upravit před importem"
+      },
+      "packageSection": "Balíček SCORM",
+      "packageSectionDescription": "Přiložte balíček nyní. Soubor se pouze validuje ve formuláři, dokud nebude připojeno upload API.",
+      "metadataSection": "Detaily kurzu",
+      "metadataSectionDescription": "Tato pole odpovídají standardnímu nastavení kurzu a použijí se jako základní metadata kurzu.",
+      "uploadPackage": "Nahrát balíček SCORM",
+      "dropPackage": "Přetáhněte balíček SCORM sem",
+      "uploadPackageDescription": "Přetáhněte soubor SCORM 1.2 .zip nebo jej vyberte ze zařízení.",
+      "packageReady": "připraveno k importu",
+      "replacePackage": "Nahradit balíček",
+      "removePackage": "Odebrat balíček",
+      "uploadThumbnail": "Nahrát miniaturu",
+      "uploadThumbnailDescription": "PNG, JPG nebo JPEG do 20MB",
+      "thumbnailPreviewAlt": "Náhled miniatury kurzu",
+      "submit": "Vytvořit kurz SCORM",
+      "creating": "Vytváření kurzu SCORM...",
+      "toastDraftReady": "Formulář kurzu SCORM je připraven pro integraci API"
+    },
+    "lesson": {
+      "packageSection": "Balíček SCORM",
+      "packageAttached": "Balíček SCORM je připojen",
+      "packageLocked": "Tento balíček nelze po vytvoření lekce nahradit.",
+      "replacePackageTooltip": "Pokud chcete přidat jiný balíček SCORM, odstraňte tuto lekci a vytvořte novou.",
+      "validation": {
+        "packageRequired": "Balíček SCORM je povinný",
+        "packageTooLarge": "Balíček SCORM musí být menší než 500MB",
+        "packageInvalidType": "Balíček SCORM musí být soubor .zip"
+      }
+    }
+  },
+  "adminCourseTypeSelector": {
+    "back": "Zpět",
+    "eyebrow": "Nastavení kurzu",
+    "title": "Vytvořit nový kurz",
+    "subtitle": "Vyberte, zda chcete kurz vytvořit ve standardním editoru, nebo z balíčku SCORM.",
+    "standard": {
+      "title": "Standardní",
+      "description": "Vytvořte kurz s vestavěným plánem, lekcemi, kvízy a nastavením.",
+      "features": {
+        "authoring": "Vytvořeno v nativním editoru kurzů",
+        "curriculum": "Kapitoly, lekce a kvízy spravované v Mentingu",
+        "translations": "Podpora jazyků a překladů kurzu",
+        "settings": "Ceny, stav a certifikáty jsou součástí"
+      }
+    },
+    "scorm": {
+      "title": "SCORM",
+      "description": "Vytvořte kurz z balíčku SCORM 1.2.",
+      "badge": "Placeholder",
+      "features": {
+        "import": "Vytvořeno z balíčku SCORM 1.2 .zip",
+        "tracking": "Podpora dokončení SCO a runtime stavu",
+        "structure": "Struktura importovaného balíčku zachována",
+        "future": "Ceny, stav a certifikáty jsou součástí"
+      }
     }
   },
   "studentChapterCardView": {
@@ -694,6 +791,7 @@
       "author": "Autor",
       "category": "Kategorie",
       "price": "Cena",
+      "type": "Typ",
       "state": "Stát",
       "status": "Postavení",
       "sharedCourse": "Sdíleno",
@@ -1178,6 +1276,23 @@
       "maxOneVideoUploaded": "Nemůžete nahrát více než 1 video.",
       "successfullyTransferredCourseOwnership": "Vlastnictví kurzu bylo úspěšně převedeno"
     },
+    "errors": {
+      "featureUnavailable": {
+        "curriculum": "Úprava osnovy není pro kurzy SCORM dostupná.",
+        "lessonSequence": "Vynucení pořadí lekcí není pro kurzy SCORM dostupné.",
+        "quizFeedback": "Nastavení zpětné vazby kvízu není pro kurzy SCORM dostupné."
+      },
+      "notFound": {
+        "course": "Kurz nenalezen.",
+        "category": "Kategorie nenalezena.",
+        "chapter": "Kapitola nenalezena.",
+        "lesson": "Lekce nenalezena."
+      },
+      "create": {
+        "courseFailed": "Kurz se nepodařilo vytvořit.",
+        "stripeProductFailed": "Platební produkt kurzu se nepodařilo vytvořit."
+      }
+    },
     "thinking": {
       "PLANNING_NEXT_STEP": "Plánování dalšího kroku...",
       "USING_TOOLS": "Použití nástrojů k načtení kontextu...",
@@ -1308,6 +1423,7 @@
         "removeQuizLesson": "Opravdu chcete odstranit tuto kvízovou lekci z kapitoly?",
         "removeAiMentorLesson": "Opravdu chcete smazat tuto lekci AI Mentor z kapitoly?",
         "removeEmbedLesson": "Opravdu chcete smazat tuto vloženou lekci z kapitoly?",
+        "removeScormLesson": "Opravdu chcete smazat tuto lekci SCORM z kapitoly?",
         "removeChapter": "Opravdu chcete smazat tuto kapitolu?",
         "removeQuestion": "Opravdu chcete smazat otázku?",
         "removeContent": "Opravdu chcete smazat obsah?"
@@ -1396,6 +1512,7 @@
           "lessonCreatedSuccessfully": "Lekce byla úspěšně vytvořena",
           "fileLessonCreatedSuccessfully": "Položka souboru byla úspěšně vytvořena",
           "contentLessonCreatedSuccessfully": "Obsah lekce byl úspěšně vytvořen",
+          "scormLessonCreatedSuccessfully": "Lekce SCORM byla úspěšně vytvořena",
           "quizLessonCreatedSuccessfully": "Kvíz byl úspěšně vytvořen",
           "aiMentorLessonCreatedSuccessfully": "Lekce AI Mentor byla úspěšně vytvořena",
           "aiMentorLessonUpdatedSuccessfully": "Lekce AI Mentor byla úspěšně aktualizována",
@@ -1472,10 +1589,12 @@
         "other": {
           "lessonNumber": "Počet lekcí",
           "chooseType": "Vyberte typ",
+          "chooseLessonTypeAriaLabel": "Vybrat typ lekce {{type}}",
           "content": "Obsah",
           "quiz": "Kvíz",
           "aiMentor": "AI mentor",
           "embed": "Vložit",
+          "scorm": "SCORM",
           "correct": "Opravit",
           "true": "Věrný",
           "false": "Falešný",
@@ -1494,6 +1613,7 @@
           "contentLessonDescription": "Text s multimédii (obrázky, videa, prezentace).",
           "quizLessonDescription": "Sada otázek pro ověření znalostí.",
           "aiMentorLessonDescription": "Interaktivní rozhovor s virtuálním AI mentorem.",
+          "scormLessonDescription": "Obsah lekce v balíčku SCORM.",
           "fillInTheBlanksDescription": "Tato otázka obsahuje větu; studenti musí přetáhnout správné slovo do prázdného místa.",
           "gapFillDescription": "Tato otázka bude obsahovat větu s chybějícími slovy, která studenti musí zadat.",
           "embedLessonDescription": "Externí zdroj (např. formulář Google, prezentace Canva nebo živý přenos YouTube).",
@@ -1931,6 +2051,17 @@
     "aiMentor": {
       "title": "Sezení AI Mentor",
       "description": "Toto je mentorské sezení založené na umělé inteligenci. Umělá inteligence vás provede lekcí na základě pokynů instruktora."
+    },
+    "scorm": {
+      "loading": "Načítání obsahu SCORM...",
+      "launchFailed": "Obsah SCORM se nepodařilo spustit.",
+      "launchFailedBody": "Zkuste to znovu. Pokud problém přetrvává, může být potřeba balíček SCORM znovu nahrát.",
+      "saveFailed": "Postup SCORM se nepodařilo uložit.",
+      "saving": "Ukládání postupu",
+      "previousSco": "Předchozí část",
+      "nextSco": "Další část",
+      "tryAgain": "Zkuste to znovu",
+      "lessonFinished": "Lekce SCORM byla dokončena."
     },
     "videoProcessing": {
       "title": "Video se zpracovává",
