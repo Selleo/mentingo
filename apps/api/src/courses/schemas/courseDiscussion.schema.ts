@@ -25,6 +25,10 @@ export const createCourseDiscussionCommentSchema = Type.Object({
   parentCommentId: Type.Optional(UUIDSchema),
 });
 
+export const setCourseDiscussionPinSchema = Type.Object({
+  isPinned: Type.Boolean(),
+});
+
 export const courseDiscussionPostSchema = Type.Object({
   id: UUIDSchema,
   authorId: UUIDSchema,
@@ -63,5 +67,6 @@ export type DiscussionFilter = Static<typeof discussionFilterSchema>;
 export type DiscussionPostType = Static<typeof discussionPostTypeSchema>;
 export type CreateCourseDiscussionPostBody = Static<typeof createCourseDiscussionPostSchema>;
 export type CreateCourseDiscussionCommentBody = Static<typeof createCourseDiscussionCommentSchema>;
+export type SetCourseDiscussionPinBody = Static<typeof setCourseDiscussionPinSchema>;
 export type CourseDiscussionPostResponse = Static<typeof courseDiscussionPostSchema>;
 export type CourseDiscussionCommentResponse = Static<typeof courseDiscussionCommentSchema>;

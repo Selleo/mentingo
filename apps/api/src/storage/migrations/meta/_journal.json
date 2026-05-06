@@ -750,6 +750,13 @@
       "when": 1775175761020,
       "tag": "0106_drop_roles_column_from_users",
       "breakpoints": true
+    },
+    {
+      "idx": 107,
+      "version": "7",
+      "when": 1778078818990,
+      "tag": "0107_add_course_discussion_tables",
+      "breakpoints": true
     }
   ]
 }

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useCreateCourseDiscussionPost } from "~/api/mutations/useCreateCourseDiscussionPost";
+import { useSetCourseDiscussionPostPinState } from "~/api/mutations/useSetCourseDiscussionPostPinState";
 import {
   useCourseDiscussionPosts,
   type DiscussionFilter,
@@ -24,9 +25,14 @@ import { CourseDiscussionComments } from "~/modules/Courses/CourseView/CourseDis
 type CourseDiscussionProps = {
   courseId: string;
   isEnrolled: boolean;
+  canManageDiscussion: boolean;
 };
 
-export function CourseDiscussion({ courseId, isEnrolled }: CourseDiscussionProps) {
+export function CourseDiscussion({
+  courseId,
+  isEnrolled,
+  canManageDiscussion,
+}: CourseDiscussionProps) {
   const { t } = useTranslation();
   const [filter, setFilter] = useState<DiscussionFilter>("all");
   const [postType, setPostType] = useState<"question" | "discussion" | "progress">("question");
@@ -38,10 +44,13 @@ export function CourseDiscussion({ courseId, isEnrolled }: CourseDiscussionProps
     filter,
   );
   const { mutate: createPost, isPending: isCreatingPost } = useCreateCourseDiscussionPost(courseId);
+  const { mutate: setPostPinState, isPending: isSettingPostPinState } =
+    useSetCourseDiscussionPostPinState(courseId);
 
   const completedCount = summary?.completedCount ?? 0;
   const visibleAvatars = summary?.completedStudentAvatars ?? [];
   const extraCompletedCount = Math.max(completedCount - visibleAvatars.length, 0);
+  const canAccessDiscussion = isEnrolled || canManageDiscussion;
 
   const handleCreatePost = () => {
     const trimmedContent = content.trim();
@@ -61,6 +70,10 @@ export function CourseDiscussion({ courseId, isEnrolled }: CourseDiscussionProps
     );
   };
 
+  const handleTogglePostPinState = (postId: string, isPinned: boolean) => {
+    setPostPinState({ postId, isPinned });
+  };
+
   const filters: { key: DiscussionFilter; label: string }[] = [
     { key: "all", label: t("studentCourseView.discussion.filters.all") },
     { key: "questions", label: t("studentCourseView.discussion.filters.questions") },
@@ -68,7 +81,7 @@ export function CourseDiscussion({ courseId, isEnrolled }: CourseDiscussionProps
     { key: "pinned", label: t("studentCourseView.discussion.filters.pinned") },
   ];
 
-  if (!isEnrolled) {
+  if (!canAccessDiscussion) {
     return (
       <div className="space-y-4">
         <Card>
@@ -194,28 +207,42 @@ export function CourseDiscussion({ courseId, isEnrolled }: CourseDiscussionProps
                 {posts.map((post) => (
                   <Card key={post.id} className="border-neutral-200">
                     <CardContent className="p-4 space-y-3">
-                      <div className="flex items-center gap-2">
-                        <Avatar className="size-8">
-                          <AvatarImage
-                            src={post.authorAvatarUrl ?? undefined}
-                            alt={post.authorName}
-                          />
-                          <AvatarFallback>
-                            {post.authorName.slice(0, 1).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="body-sm-md text-neutral-900">{post.authorName}</span>
-                          <span className="body-sm text-neutral-600">
-                            {new Date(post.createdAt).toLocaleDateString()}
-                          </span>
-                          {post.isPinned && (
-                            <Badge variant="secondary">
-                              {t("studentCourseView.discussion.post.pinned")}
-                            </Badge>
-                          )}
-                          <Badge variant="outline">{post.type}</Badge>
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-2">
+                          <Avatar className="size-8">
+                            <AvatarImage
+                              src={post.authorAvatarUrl ?? undefined}
+                              alt={post.authorName}
+                            />
+                            <AvatarFallback>
+                              {post.authorName.slice(0, 1).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="body-sm-md text-neutral-900">{post.authorName}</span>
+                            <span className="body-sm text-neutral-600">
+                              {new Date(post.createdAt).toLocaleDateString()}
+                            </span>
+                            {post.isPinned && (
+                              <Badge variant="secondary">
+                                {t("studentCourseView.discussion.post.pinned")}
+                              </Badge>
+                            )}
+                            <Badge variant="outline">{post.type}</Badge>
+                          </div>
                         </div>
+                        {canManageDiscussion && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleTogglePostPinState(post.id, !post.isPinned)}
+                            disabled={isSettingPostPinState}
+                          >
+                            {post.isPinned
+                              ? t("studentCourseView.discussion.post.unpin")
+                              : t("studentCourseView.discussion.post.pin")}
+                          </Button>
+                        )}
                       </div>
                       <p className="body-base text-neutral-900 whitespace-pre-wrap">
                         {post.content}

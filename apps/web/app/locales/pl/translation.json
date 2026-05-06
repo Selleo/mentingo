@@ -2177,7 +2177,7 @@
       "form": {
         "type": "Typ",
         "contentPlaceholder": "Napisz post...",
-        "submit": "Dodaj post",
+        "submit": "Opublikuj",
         "types": {
           "question": "Pytanie",
           "discussion": "Dyskusja",
@@ -2186,6 +2186,10 @@
       },
       "post": {
         "pinned": "Przypięty",
+        "pin": "Przypnij",
+        "unpin": "Odepnij",
+        "pinnedUpdated": "Post został przypięty.",
+        "unpinnedUpdated": "Post został odpięty.",
         "comments_one": "{{count}} komentarz",
         "comments_few": "{{count}} komentarze",
         "comments_many": "{{count}} komentarzy",

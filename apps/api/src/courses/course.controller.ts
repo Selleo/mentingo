@@ -128,6 +128,8 @@ import {
   CreateCourseDiscussionCommentBody,
   CreateCourseDiscussionPostBody,
   DiscussionFilter,
+  setCourseDiscussionPinSchema,
+  type SetCourseDiscussionPinBody,
 } from "./schemas/courseDiscussion.schema";
 import {
   courseLookupResponseSchema,
@@ -850,6 +852,31 @@ export class CourseController {
     @CurrentUser() currentUser: CurrentUserType,
   ) {
     const data = await this.courseService.createCourseDiscussionPost(courseId, body, currentUser);
+
+    return new BaseResponse(data);
+  }
+
+  @Patch(":courseId/discussion/posts/:postId/pin")
+  @Validate({
+    request: [
+      { type: "param", name: "courseId", schema: UUIDSchema },
+      { type: "param", name: "postId", schema: UUIDSchema },
+      { type: "body", schema: setCourseDiscussionPinSchema },
+    ],
+    response: baseResponse(courseDiscussionPostsSchema.items),
+  })
+  async setCourseDiscussionPostPinState(
+    @Param("courseId") courseId: UUIDType,
+    @Param("postId") postId: UUIDType,
+    @Body() body: SetCourseDiscussionPinBody,
+    @CurrentUser() currentUser: CurrentUserType,
+  ) {
+    const data = await this.courseService.setCourseDiscussionPostPinState(
+      courseId,
+      postId,
+      body,
+      currentUser,
+    );
 
     return new BaseResponse(data);
   }

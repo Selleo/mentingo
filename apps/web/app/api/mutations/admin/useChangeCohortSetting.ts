@@ -23,6 +23,7 @@ export function useChangeCohortSetting() {
       toast({ description: t("settings.toast.cohortLearningSettingUpdatedSuccessfully") });
 
       queryClient.invalidateQueries({ queryKey: globalSettingsQueryOptions.queryKey });
+      queryClient.invalidateQueries({ queryKey: ["course"] });
     },
     onError: (error: AxiosError) => {
       const { message } = error.response?.data as { message: string };

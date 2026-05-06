@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import { ApiClient } from "~/api/api-client";
 import { useCourse, useCurrentUser } from "~/api/queries";
+import { hasPermission } from "~/common/permissions/permission.utils";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { ContentAccessGuard } from "~/Guards/AccessGuard";
@@ -100,6 +101,17 @@ export default function CourseViewPage() {
   const isCohortLearningEnabled = Boolean(
     (course as unknown as { cohortLearningEnabled?: boolean })?.cohortLearningEnabled,
   );
+  const canManageDiscussion = useMemo(() => {
+    if (!currentUser || !course?.authorId) return false;
+
+    const permissions = currentUser.permissions ?? [];
+
+    return (
+      hasPermission(permissions, PERMISSIONS.COURSE_UPDATE) ||
+      (hasPermission(permissions, PERMISSIONS.COURSE_UPDATE_OWN) &&
+        currentUser.id === course.authorId)
+    );
+  }, [course?.authorId, currentUser]);
 
   const courseViewTabs = useMemo(
     () => [
@@ -135,6 +147,7 @@ export default function CourseViewPage() {
                 <CourseDiscussion
                   courseId={course?.id ?? ""}
                   isEnrolled={Boolean(course?.enrolled)}
+                  canManageDiscussion={canManageDiscussion}
                 />
               ),
               isForAdminLike: false,
@@ -143,7 +156,7 @@ export default function CourseViewPage() {
           ]
         : []),
     ],
-    [t, course, isCohortLearningEnabled],
+    [t, course, isCohortLearningEnabled, canManageDiscussion],
   );
 
   if (!course) return null;

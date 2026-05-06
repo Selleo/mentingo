@@ -483,10 +483,36 @@ export class CourseService {
       })
       .returning({ id: courseDiscussionPosts.id });
 
-    const [post] = await this.getCourseDiscussionPosts(courseId, "latest", currentUser);
+    const post = await this.getCourseDiscussionPostResponse(courseId, createdPost.id);
 
-    if (!post || post.id !== createdPost.id) {
+    if (!post) {
       throw new InternalServerErrorException("Failed to create discussion post");
+    }
+
+    return post;
+  }
+
+  async setCourseDiscussionPostPinState(
+    courseId: UUIDType,
+    postId: UUIDType,
+    body: { isPinned: boolean },
+    currentUser: CurrentUserType,
+  ): Promise<CourseDiscussionPostResponse> {
+    await this.assertCourseDiscussionModerationAccess(courseId, currentUser);
+    await this.assertCourseDiscussionPostBelongsToCourse(courseId, postId);
+
+    await this.db
+      .update(courseDiscussionPosts)
+      .set({
+        isPinned: body.isPinned,
+        pinnedAt: body.isPinned ? sql`now()` : null,
+      })
+      .where(eq(courseDiscussionPosts.id, postId));
+
+    const post = await this.getCourseDiscussionPostResponse(courseId, postId);
+
+    if (!post) {
+      throw new InternalServerErrorException("Failed to update discussion post pin state");
     }
 
     return post;
@@ -731,6 +757,26 @@ export class CourseService {
     }
   }
 
+  private async assertCourseDiscussionModerationAccess(
+    courseId: UUIDType,
+    currentUser: CurrentUserType,
+  ) {
+    const [course] = await this.db
+      .select({
+        authorId: courses.authorId,
+      })
+      .from(courses)
+      .where(eq(courses.id, courseId));
+
+    if (!course) {
+      throw new NotFoundException("Course not found");
+    }
+
+    if (!canUpdateCourseByAuthor(currentUser, course.authorId)) {
+      throw new ForbiddenException("common.toast.noAccess");
+    }
+  }
+
   private async assertCourseDiscussionPostBelongsToCourse(courseId: UUIDType, postId: UUIDType) {
     const [post] = await this.db
       .select({ id: courseDiscussionPosts.id })
@@ -742,6 +788,79 @@ export class CourseService {
     if (!post) {
       throw new NotFoundException("Post not found");
     }
+  }
+
+  private async getCourseDiscussionPostResponse(
+    courseId: UUIDType,
+    postId: UUIDType,
+  ): Promise<CourseDiscussionPostResponse | null> {
+    const [post] = await this.db
+      .select({
+        id: courseDiscussionPosts.id,
+        authorId: courseDiscussionPosts.authorId,
+        authorName: sql<string>`TRIM(CONCAT(${users.firstName}, ' ', ${users.lastName}))`,
+        authorAvatarReference: users.avatarReference,
+        type: courseDiscussionPosts.type,
+        content: courseDiscussionPosts.content,
+        createdAt: courseDiscussionPosts.createdAt,
+        isPinned: courseDiscussionPosts.isPinned,
+        commentsCount: sql<number>`(
+          SELECT COUNT(*)::int
+          FROM ${courseDiscussionComments} cdc
+          WHERE cdc.post_id = ${courseDiscussionPosts.id}
+        )`,
+        likeCount: sql<number>`(
+          SELECT COUNT(*)::int
+          FROM ${courseDiscussionReactions} cdr
+          WHERE cdr.entity_type = 'post'
+            AND cdr.entity_id = ${courseDiscussionPosts.id}
+            AND cdr.reaction_type = 'like'
+        )`,
+        heartCount: sql<number>`(
+          SELECT COUNT(*)::int
+          FROM ${courseDiscussionReactions} cdr
+          WHERE cdr.entity_type = 'post'
+            AND cdr.entity_id = ${courseDiscussionPosts.id}
+            AND cdr.reaction_type = 'heart'
+        )`,
+        celebrateCount: sql<number>`(
+          SELECT COUNT(*)::int
+          FROM ${courseDiscussionReactions} cdr
+          WHERE cdr.entity_type = 'post'
+            AND cdr.entity_id = ${courseDiscussionPosts.id}
+            AND cdr.reaction_type = 'celebrate'
+        )`,
+      })
+      .from(courseDiscussionPosts)
+      .innerJoin(users, eq(users.id, courseDiscussionPosts.authorId))
+      .where(
+        and(eq(courseDiscussionPosts.id, postId), eq(courseDiscussionPosts.courseId, courseId)),
+      );
+
+    if (!post) {
+      return null;
+    }
+
+    const authorAvatarUrl = post.authorAvatarReference
+      ? await this.userService.getUsersProfilePictureUrl(post.authorAvatarReference)
+      : null;
+
+    return {
+      id: post.id,
+      authorId: post.authorId,
+      authorName: post.authorName,
+      authorAvatarUrl,
+      type: post.type,
+      content: post.content,
+      createdAt: post.createdAt,
+      commentsCount: post.commentsCount,
+      reactions: {
+        like: post.likeCount,
+        heart: post.heartCount,
+        celebrate: post.celebrateCount,
+      },
+      isPinned: post.isPinned,
+    };
   }
 
   private async serializeCourseDiscussionComment(comment: {

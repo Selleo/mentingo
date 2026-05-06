@@ -2175,7 +2175,7 @@
       "form": {
         "type": "Type",
         "contentPlaceholder": "Write your post...",
-        "submit": "Add post",
+        "submit": "Post",
         "types": {
           "question": "Question",
           "discussion": "Discussion",
@@ -2184,6 +2184,10 @@
       },
       "post": {
         "pinned": "Pinned",
+        "pin": "Pin",
+        "unpin": "Unpin",
+        "pinnedUpdated": "Post pinned.",
+        "unpinnedUpdated": "Post unpinned.",
         "comments_one": "{{count}} comment",
         "comments_other": "{{count}} comments"
       },

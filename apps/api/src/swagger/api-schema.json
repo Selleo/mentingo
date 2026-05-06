@@ -4136,6 +4136,52 @@
         }
       }
     },
+    "/api/course/{courseId}/discussion/posts/{postId}/pin": {
+      "patch": {
+        "operationId": "CourseController_setCourseDiscussionPostPinState",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "postId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetCourseDiscussionPostPinStateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetCourseDiscussionPostPinStateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/course/{courseId}/discussion/posts/{postId}/comments": {
       "get": {
         "operationId": "CourseController_getCourseDiscussionComments",
@@ -19635,6 +19681,110 @@
         ]
       },
       "CreateCourseDiscussionPostResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "authorId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "authorName": {
+                "type": "string"
+              },
+              "authorAvatarUrl": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "type": {
+                "anyOf": [
+                  {
+                    "const": "question",
+                    "type": "string"
+                  },
+                  {
+                    "const": "discussion",
+                    "type": "string"
+                  },
+                  {
+                    "const": "progress",
+                    "type": "string"
+                  }
+                ]
+              },
+              "content": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "commentsCount": {
+                "type": "number"
+              },
+              "reactions": {
+                "type": "object",
+                "properties": {
+                  "like": {
+                    "type": "number"
+                  },
+                  "heart": {
+                    "type": "number"
+                  },
+                  "celebrate": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "like",
+                  "heart",
+                  "celebrate"
+                ]
+              },
+              "isPinned": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "authorId",
+              "authorName",
+              "authorAvatarUrl",
+              "type",
+              "content",
+              "createdAt",
+              "commentsCount",
+              "reactions",
+              "isPinned"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "SetCourseDiscussionPostPinStateBody": {
+        "type": "object",
+        "properties": {
+          "isPinned": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "isPinned"
+        ]
+      },
+      "SetCourseDiscussionPostPinStateResponse": {
         "type": "object",
         "properties": {
           "data": {
