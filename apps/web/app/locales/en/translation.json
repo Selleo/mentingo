@@ -2163,6 +2163,8 @@
       "enrollmentRequired": "Join the course to view student discussions.",
       "empty": "No posts yet.",
       "loading": "Loading discussion...",
+      "loadingComments": "Loading comments...",
+      "noComments": "No comments yet.",
       "postCreated": "Post added successfully.",
       "filters": {
         "all": "All",
@@ -2184,6 +2186,14 @@
         "pinned": "Pinned",
         "comments_one": "{{count}} comment",
         "comments_other": "{{count}} comments"
+      },
+      "comment": {
+        "placeholder": "Write a comment...",
+        "replyPlaceholder": "Write a reply...",
+        "submit": "Comment",
+        "submitReply": "Reply",
+        "reply": "Reply",
+        "helpful": "Helpful answer"
       }
     }
   },

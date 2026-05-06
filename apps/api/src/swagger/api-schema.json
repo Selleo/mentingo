@@ -4136,6 +4136,86 @@
         }
       }
     },
+    "/api/course/{courseId}/discussion/posts/{postId}/comments": {
+      "get": {
+        "operationId": "CourseController_getCourseDiscussionComments",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "postId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCourseDiscussionCommentsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "CourseController_createCourseDiscussionComment",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "postId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCourseDiscussionCommentBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateCourseDiscussionCommentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/course/{courseId}/statistics/learning-time": {
       "get": {
         "operationId": "CourseController_getCourseLearningTimeStatistics",
@@ -16184,6 +16264,9 @@
                     "type": "null"
                   }
                 ]
+              },
+              "cohortLearningEnabled": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -17960,7 +18043,8 @@
               "stripePriceId",
               "availableLocales",
               "baseLanguage",
-              "dueDate"
+              "dueDate",
+              "cohortLearningEnabled"
             ]
           }
         },
@@ -19592,6 +19676,172 @@
               "commentsCount",
               "reactions",
               "isPinned"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetCourseDiscussionCommentsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "postId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "authorId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "authorName": {
+                  "type": "string"
+                },
+                "authorAvatarUrl": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "parentCommentId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "content": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "isHelpfulAnswer": {
+                  "type": "boolean"
+                },
+                "depth": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "id",
+                "postId",
+                "authorId",
+                "authorName",
+                "authorAvatarUrl",
+                "parentCommentId",
+                "content",
+                "createdAt",
+                "isHelpfulAnswer",
+                "depth"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CreateCourseDiscussionCommentBody": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "minLength": 1,
+            "maxLength": 5000,
+            "type": "string"
+          },
+          "parentCommentId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "content"
+        ]
+      },
+      "CreateCourseDiscussionCommentResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "postId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "authorId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "authorName": {
+                "type": "string"
+              },
+              "authorAvatarUrl": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "parentCommentId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "content": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "isHelpfulAnswer": {
+                "type": "boolean"
+              },
+              "depth": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "id",
+              "postId",
+              "authorId",
+              "authorName",
+              "authorAvatarUrl",
+              "parentCommentId",
+              "content",
+              "createdAt",
+              "isHelpfulAnswer",
+              "depth"
             ]
           }
         },

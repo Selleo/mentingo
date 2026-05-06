@@ -62,13 +62,6 @@ import {
   courseOwnershipCandidatesResponseSchema,
 } from "src/courses/schemas/course.schema";
 import {
-  courseDiscussionPostsSchema,
-  createCourseDiscussionPostSchema,
-  discussionFilterSchema,
-  CreateCourseDiscussionPostBody,
-  DiscussionFilter,
-} from "src/courses/schemas/courseDiscussion.schema";
-import {
   COURSE_ENROLLMENT_SCOPES,
   CourseEnrollmentScope,
   SortCourseFieldsOptions,
@@ -125,6 +118,17 @@ import {
 } from "src/learning-time";
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
+import {
+  courseDiscussionCommentSchema,
+  courseDiscussionCommentsSchema,
+  courseDiscussionPostsSchema,
+  createCourseDiscussionCommentSchema,
+  createCourseDiscussionPostSchema,
+  discussionFilterSchema,
+  CreateCourseDiscussionCommentBody,
+  CreateCourseDiscussionPostBody,
+  DiscussionFilter,
+} from "./schemas/courseDiscussion.schema";
 import {
   courseLookupResponseSchema,
   type CourseLookupResponse,
@@ -846,6 +850,53 @@ export class CourseController {
     @CurrentUser() currentUser: CurrentUserType,
   ) {
     const data = await this.courseService.createCourseDiscussionPost(courseId, body, currentUser);
+
+    return new BaseResponse(data);
+  }
+
+  @Get(":courseId/discussion/posts/:postId/comments")
+  @Validate({
+    request: [
+      { type: "param", name: "courseId", schema: UUIDSchema },
+      { type: "param", name: "postId", schema: UUIDSchema },
+    ],
+    response: baseResponse(courseDiscussionCommentsSchema),
+  })
+  async getCourseDiscussionComments(
+    @Param("courseId") courseId: UUIDType,
+    @Param("postId") postId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
+  ) {
+    const data = await this.courseService.getCourseDiscussionComments(
+      courseId,
+      postId,
+      currentUser,
+    );
+
+    return new BaseResponse(data);
+  }
+
+  @Post(":courseId/discussion/posts/:postId/comments")
+  @Validate({
+    request: [
+      { type: "param", name: "courseId", schema: UUIDSchema },
+      { type: "param", name: "postId", schema: UUIDSchema },
+      { type: "body", schema: createCourseDiscussionCommentSchema },
+    ],
+    response: baseResponse(courseDiscussionCommentSchema),
+  })
+  async createCourseDiscussionComment(
+    @Param("courseId") courseId: UUIDType,
+    @Param("postId") postId: UUIDType,
+    @Body() body: CreateCourseDiscussionCommentBody,
+    @CurrentUser() currentUser: CurrentUserType,
+  ) {
+    const data = await this.courseService.createCourseDiscussionComment(
+      courseId,
+      postId,
+      body,
+      currentUser,
+    );
 
     return new BaseResponse(data);
   }

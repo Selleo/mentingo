@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Textarea } from "~/components/ui/textarea";
+import { CourseDiscussionComments } from "~/modules/Courses/CourseView/CourseDiscussionComments";
 
 type CourseDiscussionProps = {
   courseId: string;
@@ -229,6 +230,7 @@ export function CourseDiscussion({ courseId, isEnrolled }: CourseDiscussionProps
                         <span>❤️ {post.reactions.heart}</span>
                         <span>🎉 {post.reactions.celebrate}</span>
                       </div>
+                      <CourseDiscussionComments courseId={courseId} post={post} />
                     </CardContent>
                   </Card>
                 ))}

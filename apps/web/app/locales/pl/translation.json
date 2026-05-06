@@ -2165,6 +2165,8 @@
       "enrollmentRequired": "Dołącz do kursu, aby zobaczyć dyskusję studentów.",
       "empty": "Brak postów.",
       "loading": "Ładowanie dyskusji...",
+      "loadingComments": "Ładowanie komentarzy...",
+      "noComments": "Brak komentarzy.",
       "postCreated": "Post został dodany.",
       "filters": {
         "all": "Wszystko",
@@ -2188,6 +2190,14 @@
         "comments_few": "{{count}} komentarze",
         "comments_many": "{{count}} komentarzy",
         "comments_other": "{{count}} komentarza"
+      },
+      "comment": {
+        "placeholder": "Napisz komentarz...",
+        "replyPlaceholder": "Napisz odpowiedź...",
+        "submit": "Komentuj",
+        "submitReply": "Odpowiedz",
+        "reply": "Odpowiedz",
+        "helpful": "Pomocna odpowiedź"
       }
     }
   },

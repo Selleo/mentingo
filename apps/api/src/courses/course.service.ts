@@ -132,7 +132,9 @@ import type {
   TransferCourseOwnershipRequestBody,
 } from "./schemas/course.schema";
 import type {
+  CourseDiscussionCommentResponse,
   CourseDiscussionPostResponse,
+  CreateCourseDiscussionCommentBody,
   CreateCourseDiscussionPostBody,
   DiscussionFilter,
 } from "./schemas/courseDiscussion.schema";
@@ -490,6 +492,132 @@ export class CourseService {
     return post;
   }
 
+  async getCourseDiscussionComments(
+    courseId: UUIDType,
+    postId: UUIDType,
+    currentUser: CurrentUserType,
+  ): Promise<CourseDiscussionCommentResponse[]> {
+    await this.assertCourseDiscussionAccess(courseId, currentUser);
+    await this.assertCourseDiscussionPostBelongsToCourse(courseId, postId);
+
+    const comments = await this.db
+      .select({
+        id: courseDiscussionComments.id,
+        postId: courseDiscussionComments.postId,
+        authorId: courseDiscussionComments.authorId,
+        authorName: sql<string>`TRIM(CONCAT(${users.firstName}, ' ', ${users.lastName}))`,
+        authorAvatarReference: users.avatarReference,
+        parentCommentId: courseDiscussionComments.parentCommentId,
+        content: courseDiscussionComments.content,
+        createdAt: courseDiscussionComments.createdAt,
+        isHelpfulAnswer: courseDiscussionComments.isHelpfulAnswer,
+      })
+      .from(courseDiscussionComments)
+      .innerJoin(users, eq(users.id, courseDiscussionComments.authorId))
+      .where(eq(courseDiscussionComments.postId, postId))
+      .orderBy(courseDiscussionComments.createdAt);
+
+    return Promise.all(
+      comments.map(async (comment) => {
+        const authorAvatarUrl = comment.authorAvatarReference
+          ? await this.userService.getUsersProfilePictureUrl(comment.authorAvatarReference)
+          : null;
+
+        return {
+          id: comment.id,
+          postId: comment.postId,
+          authorId: comment.authorId,
+          authorName: comment.authorName,
+          authorAvatarUrl,
+          parentCommentId: comment.parentCommentId,
+          content: comment.content,
+          createdAt: comment.createdAt,
+          isHelpfulAnswer: comment.isHelpfulAnswer,
+          depth: comment.parentCommentId ? 1 : 0,
+        };
+      }),
+    );
+  }
+
+  async createCourseDiscussionComment(
+    courseId: UUIDType,
+    postId: UUIDType,
+    body: CreateCourseDiscussionCommentBody,
+    currentUser: CurrentUserType,
+  ): Promise<CourseDiscussionCommentResponse> {
+    await this.assertCourseDiscussionAccess(courseId, currentUser);
+    await this.assertCourseDiscussionPostBelongsToCourse(courseId, postId);
+
+    if (body.parentCommentId) {
+      const [parentComment] = await this.db
+        .select({
+          id: courseDiscussionComments.id,
+          postId: courseDiscussionComments.postId,
+          parentCommentId: courseDiscussionComments.parentCommentId,
+        })
+        .from(courseDiscussionComments)
+        .where(eq(courseDiscussionComments.id, body.parentCommentId));
+
+      if (!parentComment || parentComment.postId !== postId) {
+        throw new NotFoundException("Comment not found");
+      }
+
+      if (parentComment.parentCommentId) {
+        throw new BadRequestException("Only 2 comment levels are allowed");
+      }
+    }
+
+    const [createdComment] = await this.db
+      .insert(courseDiscussionComments)
+      .values({
+        postId,
+        authorId: currentUser.userId,
+        parentCommentId: body.parentCommentId ?? null,
+        content: body.content.trim(),
+      })
+      .returning({
+        id: courseDiscussionComments.id,
+        postId: courseDiscussionComments.postId,
+      });
+
+    const [comment] = await this.db
+      .select({
+        id: courseDiscussionComments.id,
+        postId: courseDiscussionComments.postId,
+        authorId: courseDiscussionComments.authorId,
+        authorName: sql<string>`TRIM(CONCAT(${users.firstName}, ' ', ${users.lastName}))`,
+        authorAvatarReference: users.avatarReference,
+        parentCommentId: courseDiscussionComments.parentCommentId,
+        content: courseDiscussionComments.content,
+        createdAt: courseDiscussionComments.createdAt,
+        isHelpfulAnswer: courseDiscussionComments.isHelpfulAnswer,
+      })
+      .from(courseDiscussionComments)
+      .innerJoin(users, eq(users.id, courseDiscussionComments.authorId))
+      .where(eq(courseDiscussionComments.id, createdComment.id));
+
+    if (!comment) {
+      throw new InternalServerErrorException("Failed to create discussion comment");
+    }
+
+    const authorAvatarUrl = comment.authorAvatarReference
+      ? await this.userService.getUsersProfilePictureUrl(comment.authorAvatarReference)
+      : null;
+
+    return {
+      id: comment.id,
+      postId: comment.postId,
+      authorId: comment.authorId,
+      authorName: comment.authorName,
+      authorAvatarUrl,
+      parentCommentId: comment.parentCommentId,
+      content: comment.content,
+      createdAt: comment.createdAt,
+      isHelpfulAnswer: comment.isHelpfulAnswer,
+      depth: comment.parentCommentId ? 1 : 0,
+    };
+  }
+
   private async assertCourseDiscussionAccess(courseId: UUIDType, currentUser: CurrentUserType) {
     const { cohortLearningEnabled } = await this.settingsService.getGlobalSettings();
 
@@ -530,6 +658,19 @@ export class CourseService {
 
     if (!hasAccess) {
       throw new ForbiddenException("common.toast.noAccess");
+    }
+  }
+
+  private async assertCourseDiscussionPostBelongsToCourse(courseId: UUIDType, postId: UUIDType) {
+    const [post] = await this.db
+      .select({ id: courseDiscussionPosts.id })
+      .from(courseDiscussionPosts)
+      .where(
+        and(eq(courseDiscussionPosts.id, postId), eq(courseDiscussionPosts.courseId, courseId)),
+      );
+
+    if (!post) {
+      throw new NotFoundException("Post not found");
     }
   }
 
@@ -1453,6 +1594,7 @@ export class CourseService {
 
     const thumbnailUrl = await this.fileService.getFileUrl(course.thumbnailS3Key);
     const trailerUrl = await this.getCourseTrailerUrl(course.id);
+    const { cohortLearningEnabled } = await this.settingsService.getGlobalSettings();
 
     return {
       ...course,
@@ -1460,6 +1602,7 @@ export class CourseService {
       trailerUrl,
       chapters: courseChapterList,
       slug: currentSlug,
+      cohortLearningEnabled,
     };
   }
 

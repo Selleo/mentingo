@@ -13,6 +13,7 @@ export type GlobalSettings = {
   enforceSSO: boolean;
   companyInformation?: CompanyInformationSchema;
   userEmailTriggers?: UserEmailTriggersSchema;
+  cohortLearningEnabled: boolean;
   platformLogoS3Key: string | null;
   platformSimpleLogoS3Key: string | null;
   primaryColor: string | null;

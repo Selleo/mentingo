@@ -20,6 +20,11 @@ export const createCourseDiscussionPostSchema = Type.Object({
   content: Type.String({ minLength: 1, maxLength: 5000 }),
 });
 
+export const createCourseDiscussionCommentSchema = Type.Object({
+  content: Type.String({ minLength: 1, maxLength: 5000 }),
+  parentCommentId: Type.Optional(UUIDSchema),
+});
+
 export const courseDiscussionPostSchema = Type.Object({
   id: UUIDSchema,
   authorId: UUIDSchema,
@@ -39,7 +44,24 @@ export const courseDiscussionPostSchema = Type.Object({
 
 export const courseDiscussionPostsSchema = Type.Array(courseDiscussionPostSchema);
 
+export const courseDiscussionCommentSchema = Type.Object({
+  id: UUIDSchema,
+  postId: UUIDSchema,
+  authorId: UUIDSchema,
+  authorName: Type.String(),
+  authorAvatarUrl: Type.Union([Type.String(), Type.Null()]),
+  parentCommentId: Type.Union([UUIDSchema, Type.Null()]),
+  content: Type.String(),
+  createdAt: Type.String(),
+  isHelpfulAnswer: Type.Boolean(),
+  depth: Type.Number(),
+});
+
+export const courseDiscussionCommentsSchema = Type.Array(courseDiscussionCommentSchema);
+
 export type DiscussionFilter = Static<typeof discussionFilterSchema>;
 export type DiscussionPostType = Static<typeof discussionPostTypeSchema>;
 export type CreateCourseDiscussionPostBody = Static<typeof createCourseDiscussionPostSchema>;
+export type CreateCourseDiscussionCommentBody = Static<typeof createCourseDiscussionCommentSchema>;
 export type CourseDiscussionPostResponse = Static<typeof courseDiscussionPostSchema>;
+export type CourseDiscussionCommentResponse = Static<typeof courseDiscussionCommentSchema>;
