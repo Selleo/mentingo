@@ -74,6 +74,25 @@ services:
           echo "Bucket '$${S3_BUCKET_NAME}' created"
         fi
 
+  migrate-preview-pr-${PR_ID}:
+    image: api-preview-pr-${PR_ID}:${VERSION_TAG}
+    depends_on:
+      db-preview-pr-${PR_ID}:
+        condition: service_healthy
+      redis-preview-pr-${PR_ID}:
+        condition: service_healthy
+      minio-preview-pr-${PR_ID}:
+        condition: service_healthy
+      create-minio-bucket-preview-pr-${PR_ID}:
+        condition: service_completed_successfully
+    restart: "no"
+    entrypoint:
+      - /bin/sh
+      - -ec
+      - |
+        npm i -g tsx drizzle-kit drizzle-orm
+        npm run db:migrate
+
   api-preview-pr-${PR_ID}:
     build:
       context: .
@@ -92,6 +111,8 @@ services:
       minio-preview-pr-${PR_ID}:
         condition: service_healthy
       create-minio-bucket-preview-pr-${PR_ID}:
+        condition: service_completed_successfully
+      migrate-preview-pr-${PR_ID}:
         condition: service_completed_successfully
     command: server
     environment:
