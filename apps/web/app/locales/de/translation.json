@@ -178,11 +178,12 @@
       "resourceIdentifierMissing": "SCORM-Ressourcenkennung fehlt.",
       "itemIdentifierMissing": "SCORM-Elementkennung fehlt.",
       "launchFileMissing": "SCORM-Startdatei fehlt.",
+      "packageAlreadyAttached": "Diese SCORM-Lektion hat bereits ein Paket für die ausgewählte Sprache.",
       "invalidPackagePath": "SCORM-Paket enthält einen ungültigen Dateipfad.",
       "externalPackagePath": "SCORM-Paket enthält einen externen Dateipfad.",
       "runtime": {
         "launchNotFound": "SCORM-Startinhalt wurde nicht gefunden.",
-        "unsupportedStandard": "Dieser SCORM-Standard wird noch nicht unterstützt.",
+        "unsupportedStandard": "Dieser SCORM-Standard wird nicht unterstützt.",
         "invalidAttempt": "SCORM-Versuch ist ungültig.",
         "invalidCmiValue": "SCORM-Laufzeitdaten sind ungültig.",
         "contentNotFound": "SCORM-Inhalt wurde nicht gefunden.",
@@ -208,7 +209,8 @@
         "metadata": "Kursmetadaten können vor dem Import bearbeitet werden"
       },
       "packageSection": "SCORM-Paket",
-      "packageSectionDescription": "Hängen Sie das Paket jetzt an. Die Datei wird nur im Formular validiert, bis die Upload-API verbunden ist.",
+      "packageSectionDescription": "Hängen Sie das SCORM-1.2-Paket an, das als Kursinhalt importiert werden soll.",
+      "importNotice": "Der Import großer SCORM-Pakete kann einige Minuten dauern. Lassen Sie diese Seite geöffnet, bis der Upload abgeschlossen ist.",
       "metadataSection": "Kursdetails",
       "metadataSectionDescription": "Diese Felder entsprechen der Standardkurseinrichtung und werden als Basismetadaten verwendet.",
       "uploadPackage": "SCORM-Paket hochladen",
@@ -228,8 +230,11 @@
       "packageSection": "SCORM-Paket",
       "packageAttached": "SCORM-Paket angehängt",
       "packageLocked": "Dieses Paket kann nach dem Erstellen der Lektion nicht ersetzt werden.",
+      "importNotice": "Der Import großer SCORM-Pakete kann einige Minuten dauern. Lassen Sie diese Seite geöffnet, bis der Upload abgeschlossen ist.",
       "replacePackageTooltip": "Wenn Sie ein anderes SCORM-Paket hinzufügen möchten, löschen Sie diese Lektion und erstellen Sie eine neue.",
+      "languagePackageTooltip": "Laden Sie ein SCORM-Paket für die ausgewählte Sprache hoch. Vorhandene Sprachpakete können nicht ersetzt werden.",
       "validation": {
+        "titleRequired": "Titel ist erforderlich",
         "packageRequired": "SCORM-Paket ist erforderlich",
         "packageTooLarge": "SCORM-Paket muss kleiner als 500MB sein",
         "packageInvalidType": "SCORM-Paket muss eine .zip-Datei sein"
@@ -1513,6 +1518,7 @@
           "fileLessonCreatedSuccessfully": "Dateielement erfolgreich erstellt",
           "contentLessonCreatedSuccessfully": "Inhaltslektion erfolgreich erstellt",
           "scormLessonCreatedSuccessfully": "SCORM-Lektion erfolgreich erstellt",
+          "scormLessonPackageAttachedSuccessfully": "SCORM-Paket erfolgreich angehängt",
           "quizLessonCreatedSuccessfully": "Quiz erfolgreich erstellt",
           "aiMentorLessonCreatedSuccessfully": "AI-Mentor-Lektion erfolgreich erstellt",
           "aiMentorLessonUpdatedSuccessfully": "AI-Mentor-Lektion erfolgreich aktualisiert",
@@ -1832,6 +1838,29 @@
       "selectedCount": "Ausgewählt:",
       "exportButton": "Aktie",
       "exportingButton": "Teilen..."
+    },
+    "scormExport": {
+      "title": "SCORM-Paket",
+      "description": "Exportieren Sie diesen Kurs als eigenständiges SCORM-1.2-Paket für ein anderes LMS.",
+      "versionBadge": "SCORM 1.2",
+      "button": "SCORM-Paket exportieren",
+      "exportingButton": "Exportieren...",
+      "success": "Der Download des SCORM-Pakets wurde gestartet.",
+      "warning": {
+        "title": "AI Mentor-Lektionen werden übersprungen",
+        "description": "Dieser Kurs enthält {{count}} AI Mentor-Lektion. AI Mentor-Lektionen werden in SCORM-Paketen nicht unterstützt. Möchten Sie fortfahren?",
+        "description_other": "Dieser Kurs enthält {{count}} AI Mentor-Lektionen. AI Mentor-Lektionen werden in SCORM-Paketen nicht unterstützt. Möchten Sie fortfahren?",
+        "confirm": "Trotzdem exportieren"
+      },
+      "error": {
+        "courseNotFound": "Der Kurs wurde nicht gefunden.",
+        "accessDenied": "Sie haben keine Berechtigung, diesen Kurs zu exportieren.",
+        "noExportableLessons": "Dieser Kurs enthält keine Lektionen, die nach SCORM exportiert werden können.",
+        "unsupportedLessonType": "Dieser Kurs enthält einen Lektionstyp, der nicht nach SCORM exportiert werden kann.",
+        "missingAsset": "Dieser Kurs enthält eine Datei oder Ressource, die für den Export nicht aufgelöst werden konnte.",
+        "invalidSnapshot": "Dieser Kurs konnte nicht für den SCORM-Export vorbereitet werden.",
+        "fallback": "Der SCORM-Export ist fehlgeschlagen."
+      }
     }
   },
   "registerView": {

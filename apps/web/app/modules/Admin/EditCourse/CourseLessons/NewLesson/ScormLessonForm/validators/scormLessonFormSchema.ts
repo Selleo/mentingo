@@ -9,9 +9,7 @@ const isFile = (value: unknown): value is File =>
 
 export const scormLessonFormSchema = (t: typeof i18next.t, isEditing = false) =>
   z.object({
-    title: z
-      .string()
-      .min(1, { message: t("adminCourseView.curriculum.lesson.validation.titleRequired") }),
+    title: z.string().min(1, { message: t("adminScorm.lesson.validation.titleRequired") }),
     scormFile: isEditing
       ? z.unknown().optional()
       : z

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
+import { useAttachScormLessonPackage } from "~/api/mutations/admin/useAttachScormLessonPackage";
 import { useCreateScormLesson } from "~/api/mutations/admin/useCreateScormLesson";
 import { useDeleteLesson } from "~/api/mutations/admin/useDeleteLesson";
 import { useUpdateContentLesson } from "~/api/mutations/admin/useUpdateContentLesson";
@@ -51,12 +52,17 @@ export const ScormLessonForm = ({
   const { t } = useTranslation();
   const { mutateAsync: createScormLesson, isPending: isCreatingScormLesson } =
     useCreateScormLesson();
+  const { mutateAsync: attachScormLessonPackage, isPending: isAttachingScormLessonPackage } =
+    useAttachScormLessonPackage();
   const { mutateAsync: updateScormLesson, isPending: isUpdatingScormLesson } =
     useUpdateContentLesson();
   const { mutateAsync: deleteLesson } = useDeleteLesson();
   const { setIsCurrectFormDirty } = useLeaveModal();
   const [selectedFile, setSelectedFile] = useState<File | undefined>();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const currentLanguageHasPackage = Boolean(
+    lessonToEdit?.scormPackageLanguages?.includes(language),
+  );
 
   const form = useForm<ScormLessonFormValues>({
     resolver: zodResolver(scormLessonFormSchema(t, Boolean(lessonToEdit))),
@@ -85,6 +91,17 @@ export const ScormLessonForm = ({
         },
       });
 
+      if (isBrowserFile(values.scormFile)) {
+        await attachScormLessonPackage({
+          lessonId: lessonToEdit.id,
+          data: {
+            title: values.title,
+            language,
+            scormPackage: values.scormFile,
+          },
+        });
+      }
+
       setIsCurrectFormDirty(false);
       setContentTypeToDisplay(ContentTypes.EMPTY);
       return;
@@ -96,6 +113,7 @@ export const ScormLessonForm = ({
       data: {
         chapterId: chapterToEdit.id,
         title: values.title,
+        language,
         scormPackage: values.scormFile,
       },
     });
@@ -173,7 +191,7 @@ export const ScormLessonForm = ({
                           align="center"
                           className="rounded bg-black px-2 py-1 text-sm text-white shadow-md"
                         >
-                          {t("adminScorm.lesson.replacePackageTooltip")}
+                          {t("adminScorm.lesson.languagePackageTooltip")}
                           <TooltipArrow className="fill-black" />
                         </TooltipContent>
                       </Tooltip>
@@ -181,10 +199,10 @@ export const ScormLessonForm = ({
                   ) : null}
                 </div>
                 <FormControl>
-                  {lessonToEdit ? (
+                  {currentLanguageHasPackage ? (
                     <ScormPackageUploadField
                       disabled
-                      readonlyDescription={t("adminScorm.lesson.packageLocked")}
+                      readonlyDescription={t("adminScorm.lesson.packageAttached")}
                       testIds={{
                         root: SCORM_LESSON_FORM_HANDLES.PACKAGE_UPLOAD,
                         input: SCORM_LESSON_FORM_HANDLES.PACKAGE_INPUT,
@@ -197,6 +215,7 @@ export const ScormLessonForm = ({
                     <ScormPackageUploadField
                       file={selectedFile}
                       error={fieldState.error?.message}
+                      importNotice={t("adminScorm.lesson.importNotice")}
                       testIds={{
                         root: SCORM_LESSON_FORM_HANDLES.PACKAGE_UPLOAD,
                         input: SCORM_LESSON_FORM_HANDLES.PACKAGE_INPUT,
@@ -220,7 +239,12 @@ export const ScormLessonForm = ({
             <Button
               type="submit"
               data-testid={SCORM_LESSON_FORM_HANDLES.SAVE_BUTTON}
-              disabled={!form.formState.isValid || isCreatingScormLesson || isUpdatingScormLesson}
+              disabled={
+                !form.formState.isValid ||
+                isCreatingScormLesson ||
+                isUpdatingScormLesson ||
+                isAttachingScormLessonPackage
+              }
             >
               {t("common.button.save")}
             </Button>

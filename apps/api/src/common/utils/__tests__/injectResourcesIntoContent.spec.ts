@@ -1,6 +1,8 @@
 import { VIDEO_AUTOPLAY } from "@repo/shared";
 import { load as loadHtml } from "cheerio";
 
+import { createLessonResourceIdRegex } from "src/lesson/lesson-resource-references";
+
 import { injectResourcesIntoContent } from "../injectResourcesIntoContent";
 
 const resourceA = "11111111-1111-1111-1111-111111111111";
@@ -29,7 +31,7 @@ describe("injectResourcesIntoContent", () => {
         { id: resourceB, fileUrl: "https://cdn.example.com/b.mp4", contentType: "video/mp4" },
       ],
       {
-        resourceIdRegex: /lesson-resource\/([0-9a-fA-F-]{36})/,
+        resourceIdRegex: createLessonResourceIdRegex(),
         trackNodeTypes: ["video"],
       },
     );

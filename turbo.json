@@ -38,6 +38,15 @@
       "cache": false,
       "outputs": ["dist/**"]
     },
+    "@repo/scorm-export-generator#build": {
+      "dependsOn": ["@repo/scorm-export-runtime#build", "@repo/shared#build"],
+      "cache": false,
+      "outputs": ["dist/**"]
+    },
+    "@repo/scorm-export-runtime#build": {
+      "cache": false,
+      "outputs": ["dist/**"]
+    },
     "@repo/shared#build": {
       "cache": false,
       "outputs": ["dist/**"]

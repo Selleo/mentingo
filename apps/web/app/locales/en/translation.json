@@ -178,11 +178,12 @@
       "resourceIdentifierMissing": "SCORM resource identifier is missing.",
       "itemIdentifierMissing": "SCORM item identifier is missing.",
       "launchFileMissing": "SCORM launch file is missing.",
+      "packageAlreadyAttached": "This SCORM lesson already has a package for the selected language.",
       "invalidPackagePath": "SCORM package contains an invalid file path.",
       "externalPackagePath": "SCORM package contains an external file path.",
       "runtime": {
         "launchNotFound": "SCORM launch content was not found.",
-        "unsupportedStandard": "This SCORM standard is not supported yet.",
+        "unsupportedStandard": "This SCORM standard is not supported.",
         "invalidAttempt": "SCORM attempt is invalid.",
         "invalidCmiValue": "SCORM runtime data is invalid.",
         "contentNotFound": "SCORM content was not found.",
@@ -208,7 +209,8 @@
         "metadata": "Course metadata can be edited before import"
       },
       "packageSection": "SCORM package",
-      "packageSectionDescription": "Attach the package now. The file is only validated in the form until the upload API is connected.",
+      "packageSectionDescription": "Attach the SCORM 1.2 package that should be imported as this course content.",
+      "importNotice": "Large SCORM packages can take a few minutes to import. Keep this page open until the upload finishes.",
       "metadataSection": "Course details",
       "metadataSectionDescription": "These fields match the standard course setup and will be used as the base course metadata.",
       "uploadPackage": "Upload SCORM package",
@@ -228,8 +230,11 @@
       "packageSection": "SCORM package",
       "packageAttached": "SCORM package attached",
       "packageLocked": "This package cannot be replaced after the lesson is created.",
+      "importNotice": "Large SCORM packages can take a few minutes to import. Keep this page open until the upload finishes.",
       "replacePackageTooltip": "If you want to add a different SCORM package, delete this lesson and create a new one.",
+      "languagePackageTooltip": "Upload a SCORM package for the selected language. Existing language packages cannot be replaced.",
       "validation": {
+        "titleRequired": "Title is required",
         "packageRequired": "SCORM package is required",
         "packageTooLarge": "SCORM package must be less than 500MB",
         "packageInvalidType": "SCORM package must be a .zip file"
@@ -1566,6 +1571,7 @@
           "fileLessonCreatedSuccessfully": "File item created successfully",
           "contentLessonCreatedSuccessfully": "Content lesson created successfully",
           "scormLessonCreatedSuccessfully": "SCORM lesson created successfully",
+          "scormLessonPackageAttachedSuccessfully": "SCORM package attached successfully",
           "quizLessonCreatedSuccessfully": "Quiz created successfully",
           "aiMentorLessonCreatedSuccessfully": "AI Mentor lesson created successfully",
           "aiMentorLessonUpdatedSuccessfully": "AI Mentor lesson updated successfully",
@@ -1885,6 +1891,29 @@
       "selectedCount": "Selected:",
       "exportButton": "Share",
       "exportingButton": "Sharing..."
+    },
+    "scormExport": {
+      "title": "SCORM package",
+      "description": "Export this course as a self-contained SCORM 1.2 package for another LMS.",
+      "versionBadge": "SCORM 1.2",
+      "button": "Export SCORM package",
+      "exportingButton": "Exporting...",
+      "success": "SCORM package download started.",
+      "warning": {
+        "title": "AI Mentor lessons will be skipped",
+        "description": "This course contains {{count}} AI Mentor lesson. AI Mentor lessons are not supported in SCORM packages. Do you want to continue?",
+        "description_other": "This course contains {{count}} AI Mentor lessons. AI Mentor lessons are not supported in SCORM packages. Do you want to continue?",
+        "confirm": "Export anyway"
+      },
+      "error": {
+        "courseNotFound": "Course was not found.",
+        "accessDenied": "You do not have permission to export this course.",
+        "noExportableLessons": "This course has no lessons that can be exported to SCORM.",
+        "unsupportedLessonType": "This course contains a lesson type that cannot be exported to SCORM.",
+        "missingAsset": "This course contains a file or resource that could not be resolved for export.",
+        "invalidSnapshot": "This course could not be prepared for SCORM export.",
+        "fallback": "SCORM export failed."
+      }
     }
   },
   "registerView": {
