@@ -7,7 +7,7 @@ import { OutboxDispatcherService } from "./outbox-dispatcher.service";
 export class OutboxDispatcherCron {
   constructor(private readonly outboxDispatcherService: OutboxDispatcherService) {}
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_5_MINUTES)
   async dispatchOutboxEvents() {
     await this.outboxDispatcherService.dispatchPendingEvents();
   }
