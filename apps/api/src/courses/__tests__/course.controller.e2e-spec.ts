@@ -1,9 +1,12 @@
 import { faker } from "@faker-js/faker";
-import { COURSE_ENROLLMENT, SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import { COURSE_ENROLLMENT, ENTITY_TYPES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import AdmZip from "adm-zip";
 import { and, eq, inArray } from "drizzle-orm";
 import request from "supertest";
 
+import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
@@ -13,6 +16,8 @@ import {
   courseStudentsStats,
   groupCourses,
   lessons,
+  resourceEntity,
+  resources,
   studentChapterProgress,
   studentCourses,
   studentLessonProgress,
@@ -41,12 +46,18 @@ describe("CourseController (e2e)", () => {
   let chapterFactory: ReturnType<typeof createChapterFactory>;
   let groupFactory: ReturnType<typeof createGroupFactory>;
   let settingsFactory: ReturnType<typeof createSettingsFactory>;
+  let mockFileService: {
+    getFileUrl: jest.Mock;
+    getRawFileBuffer: jest.Mock;
+    isBunnyConfigured: jest.Mock;
+  };
   const password = "password123";
 
   beforeAll(async () => {
     // It can be crashed, test and reapir it later
-    const mockFileService = {
+    mockFileService = {
       getFileUrl: jest.fn().mockResolvedValue("http://example.com/file"),
+      getRawFileBuffer: jest.fn().mockResolvedValue(Buffer.from("mock-file-content")),
       isBunnyConfigured: jest.fn().mockResolvedValue(false),
     };
 
@@ -94,6 +105,8 @@ describe("CourseController (e2e)", () => {
       "users",
       "categories",
       "settings",
+      "resource_entity",
+      "resources",
       "group_users",
       "groups",
     ]);
@@ -101,6 +114,135 @@ describe("CourseController (e2e)", () => {
 
   beforeEach(async () => {
     await settingsFactory.create({ userId: null });
+  });
+
+  describe("POST /api/course/:courseId/scorm-export", () => {
+    it("exports a SCORM zip and rewrites reused lesson assets to the packaged file", async () => {
+      const category = await categoryFactory.create();
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+      const course = await courseFactory.create({
+        authorId: admin.id,
+        categoryId: category.id,
+        title: "SCORM Export Course",
+        description: "SCORM export test course",
+        thumbnailS3Key: null,
+        chapterCount: 1,
+      });
+      const chapter = await chapterFactory.create({
+        authorId: admin.id,
+        courseId: course.id,
+        title: "SCORM Export Chapter",
+        displayOrder: 1,
+        lessonCount: 2,
+      });
+      const sharedReference = "exports/shared-image.png";
+      const sharedFileBuffer = Buffer.from("shared image bytes");
+
+      mockFileService.getRawFileBuffer.mockImplementation(async (reference: string) => {
+        if (reference === sharedReference) return sharedFileBuffer;
+        return null;
+      });
+
+      const [firstLesson, secondLesson] = await db
+        .insert(lessons)
+        .values([
+          {
+            chapterId: chapter.id,
+            type: LESSON_TYPES.CONTENT,
+            title: buildJsonbField("en", "First content lesson"),
+            description: buildJsonbField("en", ""),
+            displayOrder: 1,
+          },
+          {
+            chapterId: chapter.id,
+            type: LESSON_TYPES.CONTENT,
+            title: buildJsonbField("en", "Second content lesson"),
+            description: buildJsonbField("en", ""),
+            displayOrder: 2,
+          },
+        ])
+        .returning();
+
+      const [firstResource, secondResource] = await db
+        .insert(resources)
+        .values([
+          {
+            title: buildJsonbField("en", "Shared image first use"),
+            reference: sharedReference,
+            contentType: "image/png",
+            uploadedBy: admin.id,
+          },
+          {
+            title: buildJsonbField("en", "Shared image second use"),
+            reference: sharedReference,
+            contentType: "image/png",
+            uploadedBy: admin.id,
+          },
+        ])
+        .returning();
+
+      await db.insert(resourceEntity).values([
+        {
+          resourceId: firstResource.id,
+          entityId: firstLesson.id,
+          entityType: ENTITY_TYPES.LESSON,
+          relationshipType: RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+        },
+        {
+          resourceId: secondResource.id,
+          entityId: secondLesson.id,
+          entityType: ENTITY_TYPES.LESSON,
+          relationshipType: RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+        },
+      ]);
+
+      await db
+        .update(lessons)
+        .set({
+          description: buildJsonbField(
+            "en",
+            `<p><img src="/api/lesson/lesson-resource/${firstResource.id}" /></p>`,
+          ),
+        })
+        .where(eq(lessons.id, firstLesson.id));
+      await db
+        .update(lessons)
+        .set({
+          description: buildJsonbField(
+            "en",
+            `<p><img src="/api/lesson/lesson-resource/${secondResource.id}" /></p>`,
+          ),
+        })
+        .where(eq(lessons.id, secondLesson.id));
+
+      const response = await request(app.getHttpServer())
+        .post(`/api/course/${course.id}/scorm-export?language=en`)
+        .set("Cookie", await cookieFor(admin, app))
+        .responseType("arraybuffer")
+        .expect(201);
+
+      expect(response.headers["content-type"]).toContain("application/zip");
+
+      const zip = new AdmZip(response.body);
+      const courseJsonEntry = zip.getEntry("data/course.json");
+      const manifestEntry = zip.getEntry("imsmanifest.xml");
+      expect(courseJsonEntry).toBeDefined();
+      expect(manifestEntry).toBeDefined();
+
+      const courseJson = JSON.parse(courseJsonEntry!.getData().toString("utf8"));
+      const canonicalAssetPath = `assets/lessons/${firstLesson.id}/shared-image.png`;
+      const duplicateAssetPath = `assets/lessons/${secondLesson.id}/shared-image.png`;
+      const runtimeAssetPath = `../${canonicalAssetPath}`;
+
+      expect(zip.getEntry(canonicalAssetPath)).toBeDefined();
+      expect(zip.getEntry(duplicateAssetPath)).toBeNull();
+      expect(courseJson.lessons[firstLesson.id].html).toContain(runtimeAssetPath);
+      expect(courseJson.lessons[secondLesson.id].html).toContain(runtimeAssetPath);
+      expect(manifestEntry!.getData().toString("utf8")).toContain(canonicalAssetPath);
+    });
   });
 
   describe("GET /api/course/all", () => {

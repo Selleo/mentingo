@@ -15,6 +15,8 @@ import {
   DialogTrigger,
 } from "~/components/ui/dialog";
 
+import { SCORM_EXPORT_CARD_HANDLES } from "../../../../../e2e/data/courses/handles";
+
 import type { SupportedLanguages } from "@repo/shared";
 
 type ScormExportCardProps = {
@@ -37,7 +39,7 @@ export const ScormExportCard = ({
     : t("adminCourseView.scormExport.button");
 
   return (
-    <Card className="border-neutral-200 shadow-sm">
+    <Card data-testid={SCORM_EXPORT_CARD_HANDLES.ROOT} className="border-neutral-200 shadow-sm">
       <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0 px-6 pb-4 pt-6">
         <div className="flex items-start gap-3">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-md border border-neutral-200 bg-neutral-50 text-neutral-900">
@@ -61,12 +63,17 @@ export const ScormExportCard = ({
           {hasUnsupportedLessons ? (
             <Dialog>
               <DialogTrigger asChild>
-                <Button type="button" disabled={isPending} className="gap-2">
+                <Button
+                  type="button"
+                  data-testid={SCORM_EXPORT_CARD_HANDLES.EXPORT_BUTTON}
+                  disabled={isPending}
+                  className="gap-2"
+                >
                   <Download className="size-4" />
                   {buttonLabel}
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent data-testid={SCORM_EXPORT_CARD_HANDLES.WARNING_DIALOG}>
                 <DialogTitle>{t("adminCourseView.scormExport.warning.title")}</DialogTitle>
                 <DialogDescription>
                   {t("adminCourseView.scormExport.warning.description", {
@@ -75,12 +82,20 @@ export const ScormExportCard = ({
                 </DialogDescription>
                 <DialogFooter>
                   <DialogClose asChild>
-                    <Button type="button" variant="outline">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      data-testid={SCORM_EXPORT_CARD_HANDLES.WARNING_CANCEL_BUTTON}
+                    >
                       {t("common.button.cancel")}
                     </Button>
                   </DialogClose>
                   <DialogClose asChild>
-                    <Button type="button" onClick={handleExport}>
+                    <Button
+                      type="button"
+                      data-testid={SCORM_EXPORT_CARD_HANDLES.WARNING_CONFIRM_BUTTON}
+                      onClick={handleExport}
+                    >
                       {t("adminCourseView.scormExport.warning.confirm")}
                     </Button>
                   </DialogClose>
@@ -88,7 +103,13 @@ export const ScormExportCard = ({
               </DialogContent>
             </Dialog>
           ) : (
-            <Button type="button" disabled={isPending} className="gap-2" onClick={handleExport}>
+            <Button
+              type="button"
+              data-testid={SCORM_EXPORT_CARD_HANDLES.EXPORT_BUTTON}
+              disabled={isPending}
+              className="gap-2"
+              onClick={handleExport}
+            >
               <Download className="size-4" />
               {buttonLabel}
             </Button>
