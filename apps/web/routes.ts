@@ -76,6 +76,7 @@ export const routes: (
             "promotion-codes/:id",
             "modules/Admin/PromotionCodes/PromotionCodeDetails.page.tsx",
           );
+          route("activity-logs", "modules/ActivityLogs/ActivityLogs.page.tsx");
         });
         route("super-admin", "modules/SuperAdmin/SuperAdmin.layout.tsx", () => {
           route("tenants", "modules/SuperAdmin/Tenants.page.tsx", { index: true });

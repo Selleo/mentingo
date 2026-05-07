@@ -2747,7 +2747,79 @@
     "progress": "Fortschritt",
     "tenant": "Organisationsdetails",
     "createTenant": "Organisation erstellen",
-    "tenants": "Organisationen"
+    "tenants": "Organisationen",
+    "activityLogs": "Aktivitätsprotokoll"
+  },
+  "activityLogsView": {
+    "filters": {
+      "placeholder": {
+        "searchByEmail": "Suche nach E-Mail...",
+        "from": "Ab Datum",
+        "to": "Bis Datum"
+      }
+    },
+
+    "description": "Zeitachse der Änderungen auf der Plattform als einfacher aufklappbarer Feed.",
+    "breadcrumbs": {
+      "activityLogs": "Aktivitätsprotokoll"
+    },
+    "emptyState": {
+      "title": "Keine Aktivitätsprotokolle gefunden.",
+      "description": "Wenn auf der Plattform Aktionen stattfinden, werden sie hier angezeigt."
+    },
+    "details": {
+      "before": "Vorher",
+      "after": "Nachher",
+      "context": "Kontext",
+      "noMetadata": "Keine Metadaten verfügbar."
+    },
+    "fallbacks": {
+      "unknown": "Unbekannt",
+      "notAvailable": "k. A."
+    },
+    "labels": {
+      "action": "Aktion:",
+      "entity": "Ressource:",
+      "resource": "Ressource:"
+    },
+    "actions": {
+      "create": "Erstellt",
+      "update": "Aktualisiert",
+      "delete": "Gelöscht",
+      "login": "Angemeldet",
+      "login_failed": "Anmeldung fehlgeschlagen",
+      "logout": "Abgemeldet",
+      "enroll_course": "Eingeschrieben",
+      "unenroll_course": "Ausgeschrieben",
+      "start_course": "Gestartet",
+      "group_assignment": "Zugewiesen",
+      "complete_lesson": "Abgeschlossen",
+      "complete_course": "Abgeschlossen",
+      "complete_chapter": "Abgeschlossen",
+      "view_announcement": "Angezeigt"
+    },
+    "entity": {
+      "course": "Kurs",
+      "chapter": "Kapitel",
+      "lesson": "Lektion",
+      "question": "Frage",
+      "news": "Neuigkeiten",
+      "articles": "Artikel",
+      "user": "Benutzer",
+      "category": "Kategorie",
+      "announcement": "Ankündigung",
+      "global_settings": "Einstellungen"
+    },
+    "table": {
+      "datetime": "Datum und Uhrzeit",
+      "email": "E-Mail",
+      "action": "Aktion",
+      "resource": "Ressource",
+      "details": "Details",
+      "showDetails": "Details anzeigen",
+      "loading": "Aktivitätsprotokoll wird geladen...",
+      "empty": "Keine Aktivitätsprotokolle gefunden."
+    }
   },
   "lessonPreview": {
     "breadcrumbs": {
