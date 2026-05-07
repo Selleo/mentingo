@@ -677,6 +677,10 @@ export const scormPackages = pgTable(
     ...timestamps,
     entityType: scormPackageEntityTypeEnum("entity_type").$type<ScormPackageEntityType>().notNull(),
     entityId: uuid("entity_id").notNull(),
+    language: text("language")
+      .$type<SupportedLanguages>()
+      .notNull()
+      .default(SUPPORTED_LANGUAGES.EN),
     standard: scormStandardEnum("standard").$type<ScormStandard>().notNull(),
     originalFileReference: text("original_file_reference").notNull(),
     extractedFilesReference: text("extracted_files_reference").notNull(),
@@ -689,10 +693,15 @@ export const scormPackages = pgTable(
     tenantId,
   },
   withTenantIdIndex("scorm_packages", (table) => ({
-    entityIdx: index("scorm_packages_entity_idx").on(table.entityType, table.entityId),
+    entityIdx: index("scorm_packages_entity_idx").on(
+      table.entityType,
+      table.entityId,
+      table.language,
+    ),
     entityUniqueIdx: uniqueIndex("scorm_packages_entity_unique_idx").on(
       table.entityType,
       table.entityId,
+      table.language,
     ),
   })),
 );

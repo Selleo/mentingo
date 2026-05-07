@@ -1,0 +1,36 @@
+{
+  "name": "@repo/scorm-export-generator",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Node-side SCORM 1.2 export package generator",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "private": true,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@repo/scorm-export-runtime": "workspace:*",
+    "@repo/shared": "workspace:*",
+    "archiver": "7.0.1"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/archiver": "6.0.3",
+    "@types/node": "^20.17.6",
+    "tsup": "^8.0.2",
+    "typescript": "^5.9.3"
+  }
+}

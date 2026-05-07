@@ -192,8 +192,8 @@ describe("ScormController (e2e)", () => {
       .from(scormPackages)
       .where(
         and(
-          eq(scormPackages.entityType, SCORM_PACKAGE_ENTITY_TYPE.COURSE),
-          eq(scormPackages.entityId, courseId),
+          eq(scormPackages.entityType, SCORM_PACKAGE_ENTITY_TYPE.LESSON),
+          eq(scormPackages.language, "en"),
         ),
       );
     const [sco] = await db.select().from(scormScos).where(eq(scormScos.packageId, scormPackage.id));
@@ -267,7 +267,9 @@ describe("ScormController (e2e)", () => {
       expect(importedChapters).toHaveLength(1);
       expect(importedLessons).toHaveLength(1);
       expect(importedLessons[0].type).toBe("scorm");
-      expect(scormPackage.entityType).toBe(SCORM_PACKAGE_ENTITY_TYPE.COURSE);
+      expect(scormPackage.entityType).toBe(SCORM_PACKAGE_ENTITY_TYPE.LESSON);
+      expect(scormPackage.entityId).toBe(importedLessons[0].id);
+      expect(scormPackage.language).toBe("en");
       expect(scormPackage.status).toBe("ready");
       expect(sco.title).toBe("Launchable SCO");
       expect(sco.href).toBe("index.html");
@@ -309,7 +311,8 @@ describe("ScormController (e2e)", () => {
           .post("/api/scorm/lesson")
           .set("Cookie", await cookieFor(admin, app))
           .field("chapterId", chapter.id)
-          .field("title", "Imported SCORM Lesson"),
+          .field("title", "Imported SCORM Lesson")
+          .field("language", "en"),
       ).expect(201);
 
       const lessonId = response.body.data.id as string;
@@ -330,6 +333,7 @@ describe("ScormController (e2e)", () => {
 
       expect(lesson.chapterId).toBe(chapter.id);
       expect(lesson.type).toBe("scorm");
+      expect(scormPackage.language).toBe("en");
       expect(scormPackage.status).toBe("ready");
       expect(sco.lessonId).toBe(lessonId);
       expect(sco.resourceIdentifier).toBe("RES-1");
@@ -339,6 +343,64 @@ describe("ScormController (e2e)", () => {
           files: expect.arrayContaining(["index.html", "scripts/runtime.js"]),
         }),
       );
+    });
+
+    it("attaches a separate SCORM package to an existing lesson language", async () => {
+      const admin = await createAdmin();
+      const course = await courseFactory.create({
+        authorId: admin.id,
+        availableLocales: ["en", "pl"],
+        thumbnailS3Key: null,
+      });
+      const chapter = await chapterFactory.create({
+        authorId: admin.id,
+        courseId: course.id,
+        lessonCount: 0,
+      });
+
+      const createResponse = await attachScormPackage(
+        request(app.getHttpServer())
+          .post("/api/scorm/lesson")
+          .set("Cookie", await cookieFor(admin, app))
+          .field("chapterId", chapter.id)
+          .field("title", "Imported SCORM Lesson")
+          .field("language", "en"),
+      ).expect(201);
+
+      const lessonId = createResponse.body.data.id as string;
+
+      await attachScormPackage(
+        request(app.getHttpServer())
+          .patch(`/api/scorm/lesson/${lessonId}/package`)
+          .set("Cookie", await cookieFor(admin, app))
+          .field("title", "Lekcja SCORM")
+          .field("language", "pl"),
+      ).expect(200);
+
+      const packages = await db
+        .select()
+        .from(scormPackages)
+        .where(
+          and(
+            eq(scormPackages.entityType, SCORM_PACKAGE_ENTITY_TYPE.LESSON),
+            eq(scormPackages.entityId, lessonId),
+          ),
+        );
+
+      expect(packages).toHaveLength(2);
+      expect(packages.map((scormPackage) => scormPackage.language).sort()).toEqual(["en", "pl"]);
+      expect(packages.every((scormPackage) => scormPackage.status === "ready")).toBe(true);
+
+      const courseResponse = await request(app.getHttpServer())
+        .get(`/api/course/beta-course-by-id?id=${course.id}&language=en`)
+        .set("Cookie", await cookieFor(admin, app));
+
+      expect(courseResponse.status).toBe(200);
+
+      expect(courseResponse.body.data.chapters[0].lessons[0].scormPackageLanguages).toEqual([
+        "en",
+        "pl",
+      ]);
     });
   });
 
@@ -351,7 +413,7 @@ describe("ScormController (e2e)", () => {
 
       const studentCookies = await cookieFor(student, app);
       const launchResponse = await request(app.getHttpServer())
-        .get(`/api/scorm/runtime/launch?lessonId=${imported.lessonId}`)
+        .get(`/api/scorm/runtime/launch?lessonId=${imported.lessonId}&language=en`)
         .set("Cookie", studentCookies)
         .expect(200);
       const launch = launchResponse.body.data;
@@ -401,7 +463,7 @@ describe("ScormController (e2e)", () => {
       expect(committedState.scoreRaw).toBe("75.0000");
 
       const resumeResponse = await request(app.getHttpServer())
-        .get(`/api/scorm/runtime/launch?lessonId=${imported.lessonId}`)
+        .get(`/api/scorm/runtime/launch?lessonId=${imported.lessonId}&language=en`)
         .set("Cookie", studentCookies)
         .expect(200);
 

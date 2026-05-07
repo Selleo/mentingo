@@ -8,6 +8,9 @@ import { BUNNY_CDN_TOKEN_EXPIRY } from "src/bunny/bunnyStream.constants";
 import { EnvService } from "src/env/services/env.service";
 
 import type { AxiosInstance } from "axios";
+import type { Readable } from "node:stream";
+
+const BUNNY_MP4_FALLBACK_RESOLUTIONS = [720, 480, 360, 240] as const;
 
 type BunnyConfig = {
   apiKey: string;
@@ -16,6 +19,8 @@ type BunnyConfig = {
   cdnUrl: string | null;
   tokenSigningKey: string;
 };
+
+export type BunnyMp4FallbackResolution = (typeof BUNNY_MP4_FALLBACK_RESOLUTIONS)[number];
 
 @Injectable()
 export class BunnyStreamService {
@@ -223,6 +228,83 @@ export class BunnyStreamService {
     const expiresAt = Math.floor(Date.now() / 1000) + BUNNY_CDN_TOKEN_EXPIRY;
 
     return this.signBunnyUrl(url, expiresAt, cfg.tokenSigningKey);
+  }
+
+  async downloadMp4Fallback(
+    videoId: string,
+    preferredResolution: BunnyMp4FallbackResolution = 720,
+    referer?: string | null,
+  ): Promise<{
+    stream: Readable;
+    contentType: string;
+    filename: string;
+    resolution: BunnyMp4FallbackResolution;
+  }> {
+    const cfg = await this.getConfig();
+    const resolutions = this.getMp4FallbackResolutionOrder(preferredResolution);
+
+    for (const resolution of resolutions) {
+      const downloaded = await this.tryDownloadMp4Fallback(videoId, resolution, cfg, referer);
+      if (downloaded) return downloaded;
+    }
+
+    throw new Error(`No MP4 fallback was available for Bunny video ${videoId}.`);
+  }
+
+  private getMp4FallbackResolutionOrder(preferredResolution: BunnyMp4FallbackResolution) {
+    return [
+      preferredResolution,
+      ...BUNNY_MP4_FALLBACK_RESOLUTIONS.filter((resolution) => resolution !== preferredResolution),
+    ];
+  }
+
+  private async tryDownloadMp4Fallback(
+    videoId: string,
+    resolution: BunnyMp4FallbackResolution,
+    cfg: BunnyConfig,
+    referer?: string | null,
+  ): Promise<{
+    stream: Readable;
+    contentType: string;
+    filename: string;
+    resolution: BunnyMp4FallbackResolution;
+  } | null> {
+    const fallbackUrl = `https://${cfg.cdnUrl}/${videoId}/play_${resolution}p.mp4`;
+    const expiresAt = Math.floor(Date.now() / 1000) + BUNNY_CDN_TOKEN_EXPIRY;
+    const signedUrl = await this.signBunnyUrl(fallbackUrl, expiresAt, cfg.tokenSigningKey, {
+      pathAllowed: this.getTokenPath(new URL(fallbackUrl).pathname),
+      outputFormat: "path",
+    });
+
+    try {
+      const response = await axios.get<Readable>(signedUrl, {
+        responseType: "stream",
+        headers: this.buildMp4FallbackHeaders(referer),
+        timeout: 120000,
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity,
+      });
+
+      return {
+        stream: response.data,
+        contentType: response.headers["content-type"] ?? "video/mp4",
+        filename: `play_${resolution}p.mp4`,
+        resolution,
+      };
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 404) return null;
+
+      throw error;
+    }
+  }
+
+  private buildMp4FallbackHeaders(referer?: string | null) {
+    if (!referer) return undefined;
+
+    return {
+      Referer: referer,
+      Origin: new URL(referer).origin,
+    };
   }
 
   async signBunnyUrl(

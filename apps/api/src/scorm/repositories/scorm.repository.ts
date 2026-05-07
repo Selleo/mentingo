@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { Inject, Injectable } from "@nestjs/common";
 import {
   COURSE_ENROLLMENT,
@@ -21,10 +23,7 @@ import {
   studentCourses,
 } from "src/storage/schema";
 
-import { getScormExtractedFileReference, getScormScoLaunchReference } from "../scorm-storage-paths";
-
-import type { ScormCompletionStatus } from "@repo/shared";
-import type { CurrentUserType } from "src/common/types/current-user.type";
+import type { ScormCompletionStatus, SupportedLanguages } from "@repo/shared";
 import type {
   PersistCoursePackageParams,
   PersistLessonPackageParams,
@@ -38,27 +37,7 @@ export class ScormRepository {
 
   async persistCoursePackage(params: PersistCoursePackageParams, dbInstance?: DatabasePg) {
     const persist = async (trx: DatabasePg) => {
-      const [createdPackage] = await trx
-        .insert(scormPackages)
-        .values({
-          id: params.packageId,
-          entityType: SCORM_PACKAGE_ENTITY_TYPE.COURSE,
-          entityId: params.courseId,
-          standard: SCORM_STANDARD.SCORM_1_2,
-          originalFileReference: params.originalFileReference,
-          extractedFilesReference: params.extractedFilesReference,
-          manifestEntryPoint: getScormScoLaunchReference(
-            params.currentUser.tenantId,
-            params.packageId,
-            params.manifestEntryPoint,
-          ),
-          manifestJson: {
-            ...params.manifest,
-            manifestReference: params.manifestReference,
-          },
-          status: SCORM_PACKAGE_STATUS.PROCESSING,
-        })
-        .returning();
+      const createdPackageIds: string[] = [];
 
       for (const sco of params.manifest.scos) {
         const [chapter] = await trx
@@ -83,13 +62,37 @@ export class ScormRepository {
           })
           .returning();
 
+        const packageId = randomUUID();
+        const [createdPackage] = await trx
+          .insert(scormPackages)
+          .values({
+            id: packageId,
+            entityType: SCORM_PACKAGE_ENTITY_TYPE.LESSON,
+            entityId: lesson.id,
+            language: params.metadata.language,
+            standard: SCORM_STANDARD.SCORM_1_2,
+            originalFileReference: params.originalFileReference,
+            extractedFilesReference: params.extractedFilesReference,
+            manifestEntryPoint: this.buildExtractedFileReference(
+              params.extractedFilesReference,
+              sco.launchPath,
+            ),
+            manifestJson: {
+              ...params.manifest,
+              manifestReference: params.manifestReference,
+            },
+            status: SCORM_PACKAGE_STATUS.PROCESSING,
+          })
+          .returning();
+        createdPackageIds.push(createdPackage.id);
+
         await trx.insert(scormScos).values(
           this.buildScoLessonLink({
             packageId: createdPackage.id,
             lessonId: lesson.id,
             organizationIdentifier: params.manifest.organizationIdentifier,
             sco,
-            currentUser: params.currentUser,
+            extractedFilesReference: params.extractedFilesReference,
           }),
         );
       }
@@ -98,14 +101,15 @@ export class ScormRepository {
         .update(courses)
         .set({ chapterCount: params.manifest.scos.length })
         .where(eq(courses.id, params.courseId));
+
+      return createdPackageIds;
     };
 
     if (dbInstance) {
-      await persist(dbInstance);
-      return;
+      return persist(dbInstance);
     }
 
-    await this.db.transaction(persist);
+    return this.db.transaction(persist);
   }
 
   async persistLessonPackage(params: PersistLessonPackageParams, dbInstance?: DatabasePg) {
@@ -116,12 +120,12 @@ export class ScormRepository {
           id: params.packageId,
           entityType: SCORM_PACKAGE_ENTITY_TYPE.LESSON,
           entityId: params.lessonId,
+          language: params.language,
           standard: SCORM_STANDARD.SCORM_1_2,
           originalFileReference: params.originalFileReference,
           extractedFilesReference: params.extractedFilesReference,
-          manifestEntryPoint: getScormScoLaunchReference(
-            params.currentUser.tenantId,
-            params.packageId,
+          manifestEntryPoint: this.buildExtractedFileReference(
+            params.extractedFilesReference,
             params.manifestEntryPoint,
           ),
           manifestJson: {
@@ -139,7 +143,7 @@ export class ScormRepository {
             lessonId: params.lessonId,
             organizationIdentifier: params.manifest.organizationIdentifier,
             sco,
-            currentUser: params.currentUser,
+            extractedFilesReference: params.extractedFilesReference,
           }),
         );
       }
@@ -153,6 +157,22 @@ export class ScormRepository {
     await this.db.transaction(persist);
   }
 
+  async findLessonPackage(params: { lessonId: string; language: SupportedLanguages }) {
+    const [scormPackage] = await this.db
+      .select()
+      .from(scormPackages)
+      .where(
+        and(
+          eq(scormPackages.entityType, SCORM_PACKAGE_ENTITY_TYPE.LESSON),
+          eq(scormPackages.entityId, params.lessonId),
+          eq(scormPackages.language, params.language),
+        ),
+      )
+      .limit(1);
+
+    return scormPackage;
+  }
+
   async markPackageReady(packageId: string) {
     await this.db
       .update(scormPackages)
@@ -160,10 +180,26 @@ export class ScormRepository {
       .where(eq(scormPackages.id, packageId));
   }
 
-  async findLaunchableSco(params: { lessonId: string; scoId?: string }) {
+  async markPackagesReady(packageIds: string[]) {
+    if (!packageIds.length) return;
+
+    await this.db
+      .update(scormPackages)
+      .set({ status: SCORM_PACKAGE_STATUS.READY })
+      .where(inArray(scormPackages.id, packageIds));
+  }
+
+  async findLaunchableSco(params: {
+    lessonId: string;
+    scoId?: string;
+    language: SupportedLanguages;
+  }) {
     const conditions = [
       eq(scormScos.lessonId, params.lessonId),
+      eq(scormPackages.entityType, SCORM_PACKAGE_ENTITY_TYPE.LESSON),
+      eq(scormPackages.entityId, params.lessonId),
       eq(scormPackages.status, SCORM_PACKAGE_STATUS.READY),
+      sql`(${scormPackages.language} = ${params.language} OR ${scormPackages.language} = ${courses.baseLanguage})`,
     ];
 
     if (params.scoId) {
@@ -175,6 +211,7 @@ export class ScormRepository {
         packageId: scormPackages.id,
         packageEntityType: scormPackages.entityType,
         packageEntityId: scormPackages.entityId,
+        packageLanguage: scormPackages.language,
         standard: scormPackages.standard,
         extractedFilesReference: scormPackages.extractedFilesReference,
         scoId: scormScos.id,
@@ -189,8 +226,12 @@ export class ScormRepository {
       .innerJoin(scormPackages, eq(scormPackages.id, scormScos.packageId))
       .innerJoin(lessons, eq(lessons.id, scormScos.lessonId))
       .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
       .where(and(...conditions))
-      .orderBy(asc(scormScos.displayOrder))
+      .orderBy(
+        sql`CASE WHEN ${scormPackages.language} = ${params.language} THEN 0 ELSE 1 END`,
+        asc(scormScos.displayOrder),
+      )
       .limit(1);
 
     return sco;
@@ -394,16 +435,37 @@ export class ScormRepository {
   }
 
   async deleteImportedCourse(courseId: string) {
-    await this.db
-      .delete(scormPackages)
-      .where(
-        and(
-          eq(scormPackages.entityType, SCORM_PACKAGE_ENTITY_TYPE.COURSE),
-          eq(scormPackages.entityId, courseId),
-        ),
-      );
+    await this.db.transaction(async (trx) => {
+      const importedCourseLessons = await trx
+        .select({ id: lessons.id })
+        .from(lessons)
+        .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+        .where(eq(chapters.courseId, courseId));
 
-    await this.db.delete(courses).where(eq(courses.id, courseId));
+      const lessonIds = importedCourseLessons.map((lesson) => lesson.id);
+
+      if (lessonIds.length) {
+        await trx
+          .delete(scormPackages)
+          .where(
+            and(
+              eq(scormPackages.entityType, SCORM_PACKAGE_ENTITY_TYPE.LESSON),
+              inArray(scormPackages.entityId, lessonIds),
+            ),
+          );
+      }
+
+      await trx
+        .delete(scormPackages)
+        .where(
+          and(
+            eq(scormPackages.entityType, SCORM_PACKAGE_ENTITY_TYPE.COURSE),
+            eq(scormPackages.entityId, courseId),
+          ),
+        );
+
+      await trx.delete(courses).where(eq(courses.id, courseId));
+    });
   }
 
   async deleteImportedLesson(lessonId: string) {
@@ -419,12 +481,24 @@ export class ScormRepository {
     await this.db.delete(lessons).where(eq(lessons.id, lessonId));
   }
 
+  async deleteImportedLessonPackage(params: { lessonId: string; language: SupportedLanguages }) {
+    await this.db
+      .delete(scormPackages)
+      .where(
+        and(
+          eq(scormPackages.entityType, SCORM_PACKAGE_ENTITY_TYPE.LESSON),
+          eq(scormPackages.entityId, params.lessonId),
+          eq(scormPackages.language, params.language),
+        ),
+      );
+  }
+
   private buildScoLessonLink(params: {
     packageId: string;
     lessonId: string;
     organizationIdentifier?: string;
     sco: ScormScoManifest;
-    currentUser: CurrentUserType;
+    extractedFilesReference: string;
   }): typeof scormScos.$inferInsert {
     return {
       packageId: params.packageId,
@@ -437,9 +511,8 @@ export class ScormRepository {
       scormType: params.sco.resource.scormType,
       title: params.sco.item.title,
       href: params.sco.href,
-      launchPath: getScormScoLaunchReference(
-        params.currentUser.tenantId,
-        params.packageId,
+      launchPath: this.buildExtractedFileReference(
+        params.extractedFilesReference,
         params.sco.launchPath,
       ),
       parameters: params.sco.item.parameters,
@@ -451,9 +524,13 @@ export class ScormRepository {
         ...params.sco.resource,
         files: params.sco.files,
         fileReferences: params.sco.files.map((file) =>
-          getScormExtractedFileReference(params.currentUser.tenantId, params.packageId, file),
+          this.buildExtractedFileReference(params.extractedFilesReference, file),
         ),
       },
     };
+  }
+
+  private buildExtractedFileReference(extractedFilesReference: string, relativePath: string) {
+    return `${extractedFilesReference}/${relativePath}`;
   }
 }

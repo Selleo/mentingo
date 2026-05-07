@@ -70,6 +70,7 @@
     "@opentelemetry/sdk-trace-node": "2.1.0",
     "@repo/email-templates": "workspace:*",
     "@repo/prompts": "workspace:*",
+    "@repo/scorm-export-generator": "workspace:*",
     "@repo/shared": "workspace:*",
     "@sentry/integrations": "^7.114.0",
     "@sentry/node": "^9.3.0",

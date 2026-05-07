@@ -110,6 +110,7 @@ export const adminLessonSchema = Type.Object({
   questions: Type.Optional(Type.Array(adminQuestionSchema)),
   lessonResources: Type.Optional(Type.Array(lessonResourceSchema)),
   aiMentor: Type.Union([aiMentorLessonSchema, Type.Null()]),
+  scormPackageLanguages: Type.Optional(Type.Array(supportedLanguagesSchema)),
 });
 
 export const lessonSchema = Type.Object({

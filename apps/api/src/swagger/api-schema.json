@@ -4774,6 +4774,57 @@
         }
       }
     },
+    "/api/course/{courseId}/scorm-export": {
+      "post": {
+        "operationId": "CourseController_exportCourseAsScorm",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/course/course-ownership/transfer": {
       "post": {
         "operationId": "CourseController_transferCourseOwnership",
@@ -7316,6 +7367,9 @@
                   "title": {
                     "type": "string"
                   },
+                  "language": {
+                    "type": "string"
+                  },
                   "scormPackage": {
                     "type": "string",
                     "format": "binary"
@@ -7324,6 +7378,7 @@
                 "required": [
                   "chapterId",
                   "title",
+                  "language",
                   "scormPackage"
                 ]
               }
@@ -7343,6 +7398,60 @@
         }
       }
     },
+    "/api/scorm/lesson/{lessonId}/package": {
+      "patch": {
+        "operationId": "ScormController_attachScormLessonPackage",
+        "parameters": [
+          {
+            "name": "lessonId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string"
+                  },
+                  "language": {
+                    "type": "string"
+                  },
+                  "scormPackage": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "title",
+                  "language",
+                  "scormPackage"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttachScormLessonPackageResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/scorm/runtime/launch": {
       "get": {
         "operationId": "ScormController_launchScormAttempt",
@@ -7354,6 +7463,36 @@
             "schema": {
               "format": "uuid",
               "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                }
+              ]
             }
           },
           {
@@ -26999,6 +27138,30 @@
         ]
       },
       "CreateScormLessonResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "AttachScormLessonPackageResponse": {
         "type": "object",
         "properties": {
           "data": {

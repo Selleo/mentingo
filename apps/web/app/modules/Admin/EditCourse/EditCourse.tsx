@@ -51,13 +51,13 @@ import {
 } from "../../../../e2e/data/courses/handles";
 import { getCourseBadgeVariant, getCourseTypeLabel } from "../Courses/utils";
 
-import { SharedCourseExportsTabContent } from "./components/SharedCourseExportsTabContent";
+import { CourseSharingTabContent } from "./components/CourseSharingTabContent";
 import { SharedCourseReadonlyNotice } from "./components/SharedCourseReadonlyNotice";
 import CourseLessons from "./CourseLessons/CourseLessons";
 import CoursePricing from "./CoursePricing/CoursePricing";
 import CourseSettings from "./CourseSettings/CourseSettings";
 import CourseStatus from "./CourseStatus/CourseStatus";
-import { EDIT_COURSE_TABS, type Chapter, type NavigationTab } from "./EditCourse.types";
+import { EDIT_COURSE_TABS, LessonType, type Chapter, type NavigationTab } from "./EditCourse.types";
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.editCourse");
 
@@ -78,7 +78,9 @@ const EditCourse = () => {
   const { data: isAIConfigured } = useAIConfigured();
   const { data: isLumaConfigured } = useLumaConfigured();
   const { data: currentUser } = useCurrentUserSuspense();
-  const isManagingTenantAdmin = Boolean(currentUser?.isManagingTenantAdmin);
+  const canShowTenantSharing = Boolean(
+    currentUser?.isManagingTenantAdmin && !currentUser?.isSupportMode,
+  );
 
   const { language } = useLanguageStore();
 
@@ -133,7 +135,7 @@ const EditCourse = () => {
   const isCourseGenerated = Boolean(draft?.isCourseGenerated) || isCourseGeneratedOverride;
 
   const { data: hasMissingTranslations } = useMissingTranslations(id, courseLanguage);
-  const { data: exportCandidates } = useMasterCourseExportCandidates(id, isManagingTenantAdmin);
+  const { data: exportCandidates } = useMasterCourseExportCandidates(id, canShowTenantSharing);
   const { previousDataUpdatedAt, currentDataUpdatedAt } = useTrackDataUpdatedAt(dataUpdatedAt);
 
   const hasMissingCourseTranslations =
@@ -143,6 +145,23 @@ const EditCourse = () => {
   const { remainingCount } = summary ?? { remainingCount: 0 };
 
   const canExportMore = remainingCount > 0;
+  const unsupportedScormExportLessonCount = useMemo(() => {
+    const supportedLessonTypes = new Set<LessonType>([
+      LessonType.CONTENT,
+      LessonType.QUIZ,
+      LessonType.EMBED,
+      LessonType.SCORM,
+    ]);
+
+    return (
+      course?.chapters.reduce(
+        (total, chapter) =>
+          total +
+          (chapter.lessons ?? []).filter((lesson) => !supportedLessonTypes.has(lesson.type)).length,
+        0,
+      ) ?? 0
+    );
+  }, [course?.chapters]);
 
   const validSelectedTenantIds = useMemo(
     () =>
@@ -508,18 +527,20 @@ const EditCourse = () => {
         <TabsContent value={EDIT_COURSE_TABS.ENROLLED}>
           <CourseEnrolled />
         </TabsContent>
-        {isManagingTenantAdmin && (
-          <TabsContent value={EDIT_COURSE_TABS.EXPORTS}>
-            <SharedCourseExportsTabContent
-              tenants={shareableTenants}
-              selectedTenantIds={validSelectedTenantIds}
-              canExportMore={canExportMore}
-              isExportPending={isExportPending}
-              onToggleTenantSelection={toggleTenantSelection}
-              onExport={handleExport}
-            />
-          </TabsContent>
-        )}
+        <TabsContent value={EDIT_COURSE_TABS.EXPORTS}>
+          <CourseSharingTabContent
+            courseId={id}
+            language={courseLanguage}
+            unsupportedLessonCount={unsupportedScormExportLessonCount}
+            showTenantSharing={canShowTenantSharing}
+            tenants={shareableTenants}
+            selectedTenantIds={validSelectedTenantIds}
+            canExportMore={canExportMore}
+            isExportPending={isExportPending}
+            onToggleTenantSelection={toggleTenantSelection}
+            onExport={handleExport}
+          />
+        </TabsContent>
       </Tabs>
     </PageWrapper>
   );

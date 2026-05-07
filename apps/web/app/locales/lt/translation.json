@@ -178,11 +178,12 @@
       "resourceIdentifierMissing": "Trūksta SCORM ištekliaus identifikatoriaus.",
       "itemIdentifierMissing": "Trūksta SCORM elemento identifikatoriaus.",
       "launchFileMissing": "Trūksta SCORM paleidimo failo.",
+      "packageAlreadyAttached": "Ši SCORM pamoka jau turi paketą pasirinktai kalbai.",
       "invalidPackagePath": "SCORM pakete yra neteisingas failo kelias.",
       "externalPackagePath": "SCORM pakete yra išorinis failo kelias.",
       "runtime": {
         "launchNotFound": "SCORM paleidimo turinys nerastas.",
-        "unsupportedStandard": "Šis SCORM standartas dar nepalaikomas.",
+        "unsupportedStandard": "Šis SCORM standartas nepalaikomas.",
         "invalidAttempt": "SCORM bandymas neteisingas.",
         "invalidCmiValue": "SCORM vykdymo duomenys neteisingi.",
         "contentNotFound": "SCORM turinys nerastas.",
@@ -208,7 +209,8 @@
         "metadata": "Kurso metaduomenis galima redaguoti prieš importą"
       },
       "packageSection": "SCORM paketas",
-      "packageSectionDescription": "Pridėkite paketą dabar. Failas tik patikrinamas formoje, kol upload API dar neprijungtas.",
+      "packageSectionDescription": "Pridėkite SCORM 1.2 paketą, kuris bus importuotas kaip šio kurso turinys.",
+      "importNotice": "Didelių SCORM paketų importas gali užtrukti kelias minutes. Likite šiame puslapyje, kol įkėlimas bus baigtas.",
       "metadataSection": "Kurso informacija",
       "metadataSectionDescription": "Šie laukai atitinka standartinį kurso nustatymą ir bus naudojami kaip baziniai kurso metaduomenys.",
       "uploadPackage": "Įkelti SCORM paketą",
@@ -228,8 +230,11 @@
       "packageSection": "SCORM paketas",
       "packageAttached": "SCORM paketas pridėtas",
       "packageLocked": "Šio paketo negalima pakeisti sukūrus pamoką.",
+      "importNotice": "Didelių SCORM paketų importas gali užtrukti kelias minutes. Likite šiame puslapyje, kol įkėlimas bus baigtas.",
       "replacePackageTooltip": "Jei norite pridėti kitą SCORM paketą, ištrinkite šią pamoką ir sukurkite naują.",
+      "languagePackageTooltip": "Įkelkite SCORM paketą pasirinktai kalbai. Esamų kalbos paketų pakeisti negalima.",
       "validation": {
+        "titleRequired": "Pavadinimas būtinas",
         "packageRequired": "SCORM paketas yra privalomas",
         "packageTooLarge": "SCORM paketas turi būti mažesnis nei 500MB",
         "packageInvalidType": "SCORM paketas turi būti .zip failas"
@@ -1513,6 +1518,7 @@
           "fileLessonCreatedSuccessfully": "Failo elementas sėkmingai sukurtas",
           "contentLessonCreatedSuccessfully": "Turinio pamoka sėkmingai sukurta",
           "scormLessonCreatedSuccessfully": "SCORM pamoka sėkmingai sukurta",
+          "scormLessonPackageAttachedSuccessfully": "SCORM paketas sėkmingai pridėtas",
           "quizLessonCreatedSuccessfully": "Viktorina sėkmingai sukurta",
           "aiMentorLessonCreatedSuccessfully": "AI mentoriaus pamoka sėkmingai sukurta",
           "aiMentorLessonUpdatedSuccessfully": "AI mentoriaus pamoka sėkmingai atnaujinta",
@@ -1832,6 +1838,29 @@
       "selectedCount": "Pasirinkta:",
       "exportButton": "Dalintis",
       "exportingButton": "Bendrinama..."
+    },
+    "scormExport": {
+      "title": "SCORM paketas",
+      "description": "Eksportuokite šį kursą kaip savarankišką SCORM 1.2 paketą kitai LMS.",
+      "versionBadge": "SCORM 1.2",
+      "button": "Eksportuoti SCORM paketą",
+      "exportingButton": "Eksportuojama...",
+      "success": "SCORM paketo atsisiuntimas pradėtas.",
+      "warning": {
+        "title": "AI Mentor pamokos bus praleistos",
+        "description": "Šiame kurse yra {{count}} AI Mentor pamoka. AI Mentor pamokos nėra palaikomos SCORM paketuose. Ar norite tęsti?",
+        "description_other": "Šiame kurse yra {{count}} AI Mentor pamokos. AI Mentor pamokos nėra palaikomos SCORM paketuose. Ar norite tęsti?",
+        "confirm": "Vis tiek eksportuoti"
+      },
+      "error": {
+        "courseNotFound": "Kursas nerastas.",
+        "accessDenied": "Neturite teisės eksportuoti šio kurso.",
+        "noExportableLessons": "Šiame kurse nėra pamokų, kurias galima eksportuoti į SCORM.",
+        "unsupportedLessonType": "Šiame kurse yra pamokos tipas, kurio negalima eksportuoti į SCORM.",
+        "missingAsset": "Šiame kurse yra failas arba išteklius, kurio nepavyko paruošti eksportui.",
+        "invalidSnapshot": "Nepavyko paruošti šio kurso SCORM eksportui.",
+        "fallback": "SCORM eksportas nepavyko."
+      }
     }
   },
   "registerView": {
