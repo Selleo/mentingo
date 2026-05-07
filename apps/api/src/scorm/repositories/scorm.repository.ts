@@ -1,5 +1,3 @@
-import { randomUUID } from "node:crypto";
-
 import { Inject, Injectable } from "@nestjs/common";
 import {
   COURSE_ENROLLMENT,
@@ -37,7 +35,27 @@ export class ScormRepository {
 
   async persistCoursePackage(params: PersistCoursePackageParams, dbInstance?: DatabasePg) {
     const persist = async (trx: DatabasePg) => {
-      const createdPackageIds: string[] = [];
+      const [createdPackage] = await trx
+        .insert(scormPackages)
+        .values({
+          id: params.packageId,
+          entityType: SCORM_PACKAGE_ENTITY_TYPE.COURSE,
+          entityId: params.courseId,
+          language: params.metadata.language,
+          standard: SCORM_STANDARD.SCORM_1_2,
+          originalFileReference: params.originalFileReference,
+          extractedFilesReference: params.extractedFilesReference,
+          manifestEntryPoint: this.buildExtractedFileReference(
+            params.extractedFilesReference,
+            params.manifestEntryPoint,
+          ),
+          manifestJson: {
+            ...params.manifest,
+            manifestReference: params.manifestReference,
+          },
+          status: SCORM_PACKAGE_STATUS.PROCESSING,
+        })
+        .returning();
 
       for (const sco of params.manifest.scos) {
         const [chapter] = await trx
@@ -62,30 +80,6 @@ export class ScormRepository {
           })
           .returning();
 
-        const packageId = randomUUID();
-        const [createdPackage] = await trx
-          .insert(scormPackages)
-          .values({
-            id: packageId,
-            entityType: SCORM_PACKAGE_ENTITY_TYPE.LESSON,
-            entityId: lesson.id,
-            language: params.metadata.language,
-            standard: SCORM_STANDARD.SCORM_1_2,
-            originalFileReference: params.originalFileReference,
-            extractedFilesReference: params.extractedFilesReference,
-            manifestEntryPoint: this.buildExtractedFileReference(
-              params.extractedFilesReference,
-              sco.launchPath,
-            ),
-            manifestJson: {
-              ...params.manifest,
-              manifestReference: params.manifestReference,
-            },
-            status: SCORM_PACKAGE_STATUS.PROCESSING,
-          })
-          .returning();
-        createdPackageIds.push(createdPackage.id);
-
         await trx.insert(scormScos).values(
           this.buildScoLessonLink({
             packageId: createdPackage.id,
@@ -102,7 +96,7 @@ export class ScormRepository {
         .set({ chapterCount: params.manifest.scos.length })
         .where(eq(courses.id, params.courseId));
 
-      return createdPackageIds;
+      return [createdPackage.id];
     };
 
     if (dbInstance) {
@@ -196,8 +190,10 @@ export class ScormRepository {
   }) {
     const conditions = [
       eq(scormScos.lessonId, params.lessonId),
-      eq(scormPackages.entityType, SCORM_PACKAGE_ENTITY_TYPE.LESSON),
-      eq(scormPackages.entityId, params.lessonId),
+      sql`(
+        (${scormPackages.entityType} = ${SCORM_PACKAGE_ENTITY_TYPE.LESSON} AND ${scormPackages.entityId} = ${params.lessonId})
+        OR (${scormPackages.entityType} = ${SCORM_PACKAGE_ENTITY_TYPE.COURSE} AND ${scormPackages.entityId} = ${chapters.courseId})
+      )`,
       eq(scormPackages.status, SCORM_PACKAGE_STATUS.READY),
       sql`(${scormPackages.language} = ${params.language} OR ${scormPackages.language} = ${courses.baseLanguage})`,
     ];

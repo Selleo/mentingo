@@ -192,7 +192,8 @@ describe("ScormController (e2e)", () => {
       .from(scormPackages)
       .where(
         and(
-          eq(scormPackages.entityType, SCORM_PACKAGE_ENTITY_TYPE.LESSON),
+          eq(scormPackages.entityType, SCORM_PACKAGE_ENTITY_TYPE.COURSE),
+          eq(scormPackages.entityId, courseId),
           eq(scormPackages.language, "en"),
         ),
       );
@@ -267,8 +268,8 @@ describe("ScormController (e2e)", () => {
       expect(importedChapters).toHaveLength(1);
       expect(importedLessons).toHaveLength(1);
       expect(importedLessons[0].type).toBe("scorm");
-      expect(scormPackage.entityType).toBe(SCORM_PACKAGE_ENTITY_TYPE.LESSON);
-      expect(scormPackage.entityId).toBe(importedLessons[0].id);
+      expect(scormPackage.entityType).toBe(SCORM_PACKAGE_ENTITY_TYPE.COURSE);
+      expect(scormPackage.entityId).toBe(imported.courseId);
       expect(scormPackage.language).toBe("en");
       expect(scormPackage.status).toBe("ready");
       expect(sco.title).toBe("Launchable SCO");

@@ -152,7 +152,7 @@ export class CourseScormAssetsService {
     lesson: ScormExportLessonSnapshot,
     resolutionByAssetId: Map<string, AssetResolution>,
   ): ScormExportLessonSnapshot {
-    if (lesson.type === "content") {
+    if (lesson.type === LESSON_TYPES.CONTENT) {
       const assets = lesson.assets.map((asset) => this.rewriteAsset(asset, resolutionByAssetId));
 
       return {
@@ -162,7 +162,7 @@ export class CourseScormAssetsService {
       };
     }
 
-    if (lesson.type === "quiz") {
+    if (lesson.type === LESSON_TYPES.QUIZ) {
       return {
         ...lesson,
         questions: lesson.questions.map((question) => ({
@@ -209,8 +209,10 @@ export class CourseScormAssetsService {
   }
 
   private getLessonAssets(lesson: ScormExportLessonSnapshot) {
-    if (lesson.type === "content") return lesson.assets;
-    if (lesson.type === "quiz") return lesson.questions.flatMap((question) => question.assets);
+    if (lesson.type === LESSON_TYPES.CONTENT) return lesson.assets;
+    if (lesson.type === LESSON_TYPES.QUIZ) {
+      return lesson.questions.flatMap((question) => question.assets);
+    }
     return [];
   }
 

@@ -206,8 +206,10 @@ export class AdminChapterRepository {
           ARRAY(
             SELECT ${scormPackages.language}
             FROM ${scormPackages}
-            WHERE ${scormPackages.entityType} = ${SCORM_PACKAGE_ENTITY_TYPE.LESSON}
-              AND ${scormPackages.entityId} = ${lessons.id}
+            WHERE (
+                (${scormPackages.entityType} = ${SCORM_PACKAGE_ENTITY_TYPE.LESSON} AND ${scormPackages.entityId} = ${lessons.id})
+                OR (${scormPackages.entityType} = ${SCORM_PACKAGE_ENTITY_TYPE.COURSE} AND ${scormPackages.entityId} = ${courses.id})
+              )
               AND ${scormPackages.status} = ${SCORM_PACKAGE_STATUS.READY}
             ORDER BY ${scormPackages.language}
           )

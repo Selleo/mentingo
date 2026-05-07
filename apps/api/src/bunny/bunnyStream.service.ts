@@ -9,8 +9,12 @@ import { EnvService } from "src/env/services/env.service";
 
 import type { AxiosInstance } from "axios";
 import type { Readable } from "node:stream";
+import type {
+  BunnyMp4DownloadResult,
+  BunnyMp4FallbackResolution,
+} from "src/bunny/bunnyStream.types";
 
-const BUNNY_MP4_FALLBACK_RESOLUTIONS = [720, 480, 360, 240] as const;
+const BUNNY_MP4_FALLBACK_RESOLUTIONS: BunnyMp4FallbackResolution[] = [720, 480, 360, 240];
 
 type BunnyConfig = {
   apiKey: string;
@@ -19,8 +23,6 @@ type BunnyConfig = {
   cdnUrl: string | null;
   tokenSigningKey: string;
 };
-
-export type BunnyMp4FallbackResolution = (typeof BUNNY_MP4_FALLBACK_RESOLUTIONS)[number];
 
 @Injectable()
 export class BunnyStreamService {
@@ -234,12 +236,7 @@ export class BunnyStreamService {
     videoId: string,
     preferredResolution: BunnyMp4FallbackResolution = 720,
     referer?: string | null,
-  ): Promise<{
-    stream: Readable;
-    contentType: string;
-    filename: string;
-    resolution: BunnyMp4FallbackResolution;
-  }> {
+  ): Promise<BunnyMp4DownloadResult> {
     const cfg = await this.getConfig();
     const resolutions = this.getMp4FallbackResolutionOrder(preferredResolution);
 
@@ -263,12 +260,7 @@ export class BunnyStreamService {
     resolution: BunnyMp4FallbackResolution,
     cfg: BunnyConfig,
     referer?: string | null,
-  ): Promise<{
-    stream: Readable;
-    contentType: string;
-    filename: string;
-    resolution: BunnyMp4FallbackResolution;
-  } | null> {
+  ): Promise<BunnyMp4DownloadResult | null> {
     const fallbackUrl = `https://${cfg.cdnUrl}/${videoId}/play_${resolution}p.mp4`;
     const expiresAt = Math.floor(Date.now() / 1000) + BUNNY_CDN_TOKEN_EXPIRY;
     const signedUrl = await this.signBunnyUrl(fallbackUrl, expiresAt, cfg.tokenSigningKey, {

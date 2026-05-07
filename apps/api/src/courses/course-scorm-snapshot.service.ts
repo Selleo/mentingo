@@ -297,7 +297,10 @@ export class CourseScormSnapshotService {
       .where(
         and(
           inArray(scormScos.lessonId, lessonIds),
-          eq(scormPackages.entityType, SCORM_PACKAGE_ENTITY_TYPE.LESSON),
+          sql`(
+            (${scormPackages.entityType} = ${SCORM_PACKAGE_ENTITY_TYPE.LESSON} AND ${scormPackages.entityId} = ${lessons.id})
+            OR (${scormPackages.entityType} = ${SCORM_PACKAGE_ENTITY_TYPE.COURSE} AND ${scormPackages.entityId} = ${courses.id})
+          )`,
           eq(scormPackages.status, SCORM_PACKAGE_STATUS.READY),
           sql`(${scormPackages.language} = ${language} OR ${scormPackages.language} = ${courses.baseLanguage})`,
         ),
