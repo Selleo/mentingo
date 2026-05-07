@@ -1,9 +1,12 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
+import { sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { DB } from "src/storage/db/db.providers";
 import { outboxEvents } from "src/storage/schema";
+
+import { OUTBOX_NOTIFY_CHANNEL } from "./outbox.constants";
 
 @Injectable()
 export class OutboxPublisher {
@@ -29,6 +32,8 @@ export class OutboxPublisher {
       status: "pending",
       attemptCount: 0,
     });
+
+    await db.execute(sql`SELECT pg_notify(${OUTBOX_NOTIFY_CHANNEL}, '')`);
   }
 
   private getEventType(event: object): string {
