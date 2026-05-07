@@ -4,6 +4,7 @@ import { CqrsModule } from "@nestjs/cqrs";
 import { OutboxDispatcherCron } from "./outbox-dispatcher.cron";
 import { OutboxDispatcherService } from "./outbox-dispatcher.service";
 import { OutboxListenerService } from "./outbox-listener.service";
+import { isOutboxProcessingEnabled } from "./outbox.constants";
 import { OutboxPublisher } from "./outbox.publisher";
 import { OutboxRepository } from "./outbox.repository";
 
@@ -14,7 +15,7 @@ import { OutboxRepository } from "./outbox.repository";
     OutboxRepository,
     OutboxPublisher,
     OutboxDispatcherService,
-    ...(process.env.JEST_WORKER_ID ? [] : [OutboxDispatcherCron, OutboxListenerService]),
+    ...(isOutboxProcessingEnabled() ? [OutboxDispatcherCron, OutboxListenerService] : []),
   ],
   exports: [OutboxPublisher],
 })

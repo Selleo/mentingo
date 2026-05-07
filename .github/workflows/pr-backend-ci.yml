@@ -103,6 +103,8 @@ jobs:
         run: pnpm run build
 
       - name: Verify build output
+        env:
+          DISABLE_OUTBOX_PROCESSING: "true"
         run: |
           pnpm start:prod &
           APP_PID=$!

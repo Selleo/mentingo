@@ -6,7 +6,7 @@ import { DatabasePg } from "src/common";
 import { DB } from "src/storage/db/db.providers";
 import { outboxEvents } from "src/storage/schema";
 
-import { OUTBOX_NOTIFY_CHANNEL } from "./outbox.constants";
+import { isOutboxProcessingEnabled, OUTBOX_NOTIFY_CHANNEL } from "./outbox.constants";
 
 @Injectable()
 export class OutboxPublisher {
@@ -16,7 +16,7 @@ export class OutboxPublisher {
   ) {}
 
   async publish(event: object, dbInstance?: DatabasePg): Promise<void> {
-    if (process.env.JEST_WORKER_ID) {
+    if (!isOutboxProcessingEnabled()) {
       await this.eventBus.publish(event);
       return;
     }
