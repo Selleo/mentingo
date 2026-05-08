@@ -84,6 +84,9 @@ export default function AdminLearningPathsPage() {
     permissions,
     PERMISSIONS.LEARNING_PATH_COURSE_UPDATE_OWN,
   );
+  const canExportLearningPath =
+    hasPermission(permissions, PERMISSIONS.LEARNING_PATH_EXPORT) &&
+    Boolean(currentUser?.isManagingTenantAdmin);
   const { data: learningPaths = loaderLearningPaths } = useLearningPaths({ language: appLanguage });
   const { data: groups = [] } = useGroupsQuery();
   const [pathLanguages, setPathLanguages] = useState<Record<string, SupportedLanguages>>({});
@@ -291,6 +294,7 @@ export default function AdminLearningPathsPage() {
               }
               canDelete={canDeleteLearningPaths}
               canManageEnrollment={canManageLearningPathEnrollment}
+              canExport={canExportLearningPath}
               currentLanguage={appLanguage}
               selectedLanguage={pathLanguages[learningPath.id] ?? appLanguage}
               onLanguageChange={(language) =>

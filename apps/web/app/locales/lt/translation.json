@@ -2824,6 +2824,16 @@
       "saveFirst": "Išsaugokite mokymosi kelią prieš pridėdami kursus.",
       "unknownCourse": "Kurso informacija nepasiekiama"
     },
+    "sharedLearningPath": {
+      "badgeExported": "Dalinamas",
+      "exportButton": "Dalintis",
+      "exportSuccess": "Mokymosi kelias buvo bendrinamas",
+      "exportsDescription": "Dalinkitės šiuo mokymosi keliu su pasirinktomis organizacijomis.",
+      "exportsTitle": "Dalijimasis",
+      "exportingButton": "Bendrinama...",
+      "selectTenants": "Pasirinkite organizacijas",
+      "selectedCount": "Pasirinkta:"
+    },
     "deleteModal": {
       "title": "Ištrinti mokymosi kelią",
       "description": "Tai ištrins mokymosi kelią ir pašalins per jį suteiktą prieigą prie kursų."

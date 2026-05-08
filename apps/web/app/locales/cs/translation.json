@@ -2824,6 +2824,16 @@
       "saveFirst": "Před přidáním kurzů vzdělávací cestu uložte.",
       "unknownCourse": "Podrobnosti kurzu nejsou dostupné"
     },
+    "sharedLearningPath": {
+      "badgeExported": "Sdíleno",
+      "exportButton": "Sdílet",
+      "exportSuccess": "Vzdělávací cesta byla sdílena",
+      "exportsDescription": "Sdílejte tuto vzdělávací cestu s vybranými organizacemi.",
+      "exportsTitle": "Sdílení",
+      "exportingButton": "Sdílení...",
+      "selectTenants": "Vyberte organizace",
+      "selectedCount": "Vybráno:"
+    },
     "deleteModal": {
       "title": "Smazat vzdělávací cestu",
       "description": "Tím se smaže vzdělávací cesta a odebere přístup ke kurzům udělený touto cestou."

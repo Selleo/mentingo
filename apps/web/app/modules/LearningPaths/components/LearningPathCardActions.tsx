@@ -24,6 +24,7 @@ type LearningPathListItem = GetLearningPathsResponse["data"][number];
 
 type LearningPathCardActionsProps = {
   canEdit: boolean;
+  canExport?: boolean;
   canDelete: boolean;
   canManageEnrollment: boolean;
   learningPathId: string;
@@ -53,6 +54,7 @@ type LearningPathCardActionsProps = {
 
 export function LearningPathCardActions({
   canEdit,
+  canExport = false,
   canDelete,
   canManageEnrollment,
   learningPathId,
@@ -88,7 +90,7 @@ export function LearningPathCardActions({
 
   return (
     <div className="flex shrink-0 flex-col items-start gap-2 sm:items-end">
-      {canEdit || canDelete || canManageEnrollment ? (
+      {canEdit || canExport || canDelete || canManageEnrollment ? (
         <div className="flex flex-wrap items-center gap-2 sm:justify-end">
           {canManageEnrollment &&
             !!onEnrollStudents &&
@@ -105,8 +107,11 @@ export function LearningPathCardActions({
                 onUnenrollGroups={onUnenrollGroups}
               />
             )}
-          {canEdit && (
+          {(canEdit || canExport) && (
             <LearningPathSettingsDrawer
+              canEdit={canEdit}
+              canExport={canExport}
+              learningPathId={learningPathId}
               title={title}
               status={status}
               sequenceEnabled={sequenceEnabled}

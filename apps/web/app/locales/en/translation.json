@@ -2888,6 +2888,16 @@
       "saveFirst": "Save the learning path before adding courses.",
       "unknownCourse": "Course details unavailable"
     },
+    "sharedLearningPath": {
+      "badgeExported": "Shared",
+      "exportButton": "Share",
+      "exportSuccess": "Learning path was exported",
+      "exportsDescription": "Share this learning path with selected organizations.",
+      "exportsTitle": "Sharing",
+      "exportingButton": "Sharing...",
+      "selectTenants": "Select organizations",
+      "selectedCount": "Selected:"
+    },
     "deleteModal": {
       "title": "Delete learning path",
       "description": "This will delete the learning path and remove its path-based course access."

@@ -408,6 +408,16 @@
       "saveFirst": "Zapisz ścieżkę przed dodaniem kursów.",
       "unknownCourse": "Szczegóły kursu niedostępne"
     },
+    "sharedLearningPath": {
+      "badgeExported": "Udostępniony",
+      "exportButton": "Udostępnij",
+      "exportSuccess": "Ścieżka została udostępniona",
+      "exportsDescription": "Udostępnij tę ścieżkę wybranym organizacjom.",
+      "exportsTitle": "Udostępnianie",
+      "exportingButton": "Udostępnianie...",
+      "selectTenants": "Wybierz organizacje",
+      "selectedCount": "Wybrano:"
+    },
     "deleteModal": {
       "title": "Usuń ścieżkę edukacyjną",
       "description": "Spowoduje to usunięcie ścieżki i dostępu do kursów przyznanego przez tę ścieżkę."

@@ -2824,6 +2824,16 @@
       "saveFirst": "Speichern Sie den Lernpfad, bevor Sie Kurse hinzufügen.",
       "unknownCourse": "Kursdetails nicht verfügbar"
     },
+    "sharedLearningPath": {
+      "badgeExported": "Geteilt",
+      "exportButton": "Teilen",
+      "exportSuccess": "Lernpfad wurde geteilt",
+      "exportsDescription": "Teilen Sie diesen Lernpfad mit ausgewählten Organisationen.",
+      "exportsTitle": "Teilen",
+      "exportingButton": "Teilen...",
+      "selectTenants": "Organisationen auswählen",
+      "selectedCount": "Ausgewählt:"
+    },
     "deleteModal": {
       "title": "Lernpfad löschen",
       "description": "Dadurch wird der Lernpfad gelöscht und der pfadbasierte Kurszugriff entfernt."

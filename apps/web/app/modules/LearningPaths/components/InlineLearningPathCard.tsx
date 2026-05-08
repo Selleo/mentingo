@@ -26,6 +26,7 @@ type InlineLearningPathCardProps = {
   canUpdateCourses: boolean;
   canDelete: boolean;
   canManageEnrollment: boolean;
+  canExport?: boolean;
   currentLanguage: "en" | "pl" | "de" | "lt" | "cs";
   selectedLanguage: "en" | "pl" | "de" | "lt" | "cs";
   onLanguageChange: (language: "en" | "pl" | "de" | "lt" | "cs") => void;
@@ -78,6 +79,7 @@ export function InlineLearningPathCard({
   canUpdateCourses,
   canDelete,
   canManageEnrollment,
+  canExport = false,
   currentLanguage,
   selectedLanguage,
   onLanguageChange,
@@ -280,6 +282,7 @@ export function InlineLearningPathCard({
             )}
             <LearningPathCardActions
               canEdit={canEdit}
+              canExport={canExport}
               canDelete={canDelete}
               canManageEnrollment={canManageEnrollment}
               learningPathId={learningPath.id}
