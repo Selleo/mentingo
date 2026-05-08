@@ -104,6 +104,7 @@ jobs:
 
       - name: Verify build output
         env:
+          BUILD_VERIFICATION: "true"
           DISABLE_OUTBOX_PROCESSING: "true"
         run: |
           pnpm start:prod &

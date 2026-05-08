@@ -8757,6 +8757,66 @@
         }
       }
     },
+    "/api/activity-logs": {
+      "get": {
+        "operationId": "ActivityLogsController_getActivityLogs",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "email",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetActivityLogsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/qa/{qaId}": {
       "get": {
         "operationId": "QAController_getQA",
@@ -11044,6 +11104,10 @@
                     },
                     {
                       "const": "course.ai_generation",
+                      "type": "string"
+                    },
+                    {
+                      "const": "activity_log.read",
                       "type": "string"
                     }
                   ]
@@ -28622,6 +28686,174 @@
         },
         "required": [
           "data"
+        ]
+      },
+      "GetActivityLogsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                },
+                "actorId": {
+                  "type": "string"
+                },
+                "actorEmail": {
+                  "type": "string"
+                },
+                "actorRole": {
+                  "type": "string"
+                },
+                "actionType": {
+                  "anyOf": [
+                    {
+                      "const": "create",
+                      "type": "string"
+                    },
+                    {
+                      "const": "update",
+                      "type": "string"
+                    },
+                    {
+                      "const": "delete",
+                      "type": "string"
+                    },
+                    {
+                      "const": "login",
+                      "type": "string"
+                    },
+                    {
+                      "const": "login_failed",
+                      "type": "string"
+                    },
+                    {
+                      "const": "logout",
+                      "type": "string"
+                    },
+                    {
+                      "const": "enroll_course",
+                      "type": "string"
+                    },
+                    {
+                      "const": "unenroll_course",
+                      "type": "string"
+                    },
+                    {
+                      "const": "start_course",
+                      "type": "string"
+                    },
+                    {
+                      "const": "group_assignment",
+                      "type": "string"
+                    },
+                    {
+                      "const": "complete_lesson",
+                      "type": "string"
+                    },
+                    {
+                      "const": "complete_course",
+                      "type": "string"
+                    },
+                    {
+                      "const": "complete_chapter",
+                      "type": "string"
+                    },
+                    {
+                      "const": "view_announcement",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "resourceType": {
+                  "anyOf": [
+                    {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "resourceId": {
+                  "anyOf": [
+                    {
+                      "anyOf": [
+                        {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "metadata": {}
+              },
+              "required": [
+                "id",
+                "createdAt",
+                "updatedAt",
+                "actorId",
+                "actorEmail",
+                "actorRole",
+                "actionType",
+                "resourceType",
+                "resourceId",
+                "metadata"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
         ]
       },
       "GetQAResponse": {
