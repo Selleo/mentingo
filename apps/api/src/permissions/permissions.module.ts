@@ -4,7 +4,7 @@ import { PermissionsBackfillService } from "./permissions-backfill.service";
 import { PermissionsService } from "./permissions.service";
 
 @Module({
-  providers: [PermissionsBackfillService, PermissionsService],
+  providers: [PermissionsService, PermissionsBackfillService],
   exports: [PermissionsService],
 })
 export class PermissionsModule {}

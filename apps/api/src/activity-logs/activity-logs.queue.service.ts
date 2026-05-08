@@ -4,7 +4,7 @@ import { Queue } from "bullmq";
 
 import { buildRedisConnection } from "src/common/configuration/redis";
 
-import type { RecordActivityLogInput } from "./activity-logs.service";
+import type { RecordActivityLogInput } from "./activity-logs.types";
 import type { OnModuleDestroy } from "@nestjs/common";
 import type { RedisConfigSchema } from "src/common/configuration/redis";
 
