@@ -1,4 +1,4 @@
-import type { CourseChatUser } from "~/api/queries/course-chat/useCourseChat";
+import type { CourseChatUser } from "~/api/queries/course-chat/courseChatTypes";
 
 export function getUserDisplayName(user: CourseChatUser) {
   return `${user.firstName} ${user.lastName}`;

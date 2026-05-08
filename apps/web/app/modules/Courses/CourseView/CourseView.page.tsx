@@ -1,10 +1,11 @@
 import { redirect, useNavigate, useParams, useSearchParams } from "@remix-run/react";
 import { ACCESS_GUARD, PERMISSIONS, SUPPORTED_LANGUAGES } from "@repo/shared";
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { ApiClient } from "~/api/api-client";
 import { useCourse, useCurrentUser } from "~/api/queries";
+import { hasPermission } from "~/common/permissions/permission.utils";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { ContentAccessGuard } from "~/Guards/AccessGuard";
@@ -25,6 +26,13 @@ import CourseCertificate from "./CourseCertificate";
 import { CourseChatTab } from "./CourseChat/CourseChatTab";
 
 import type { SupportedLanguages } from "@repo/shared";
+
+const COURSE_VIEW_TAB_QUERY_VALUES = {
+  CHAPTERS: "Chapters",
+  DISCUSSION: "Discussion",
+  MORE_FROM_AUTHOR: "MoreFromAuthor",
+  STATISTICS: "Statistics",
+} as const;
 
 const resolvePreferredLanguage = (url: URL): SupportedLanguages => {
   const languageFromQuery = url.searchParams.get("language");
@@ -76,7 +84,7 @@ export default function CourseViewPage() {
   const navigate = useNavigate();
 
   const { language: defaultLanguage } = useLanguageStore();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const previewLanguage = searchParams.get("language");
   const language =
     previewLanguage && isSupportedLanguage(previewLanguage) ? previewLanguage : defaultLanguage;
@@ -102,6 +110,7 @@ export default function CourseViewPage() {
     () => [
       {
         value: "chapters",
+        queryValue: COURSE_VIEW_TAB_QUERY_VALUES.CHAPTERS,
         title: t("studentCourseView.tabs.chapters"),
         itemCount: course?.chapters?.length,
         content: <ChapterListOverview />,
@@ -111,9 +120,17 @@ export default function CourseViewPage() {
       },
       {
         value: "chat",
+        queryValue: COURSE_VIEW_TAB_QUERY_VALUES.DISCUSSION,
         title: t("studentCourseView.tabs.chat"),
         content: (
-          <CourseChatTab courseId={course?.id ?? ""} currentUserId={currentUser?.id ?? ""} />
+          <CourseChatTab
+            courseId={course?.id ?? ""}
+            currentUserId={currentUser?.id ?? ""}
+            canDeleteAnyMessage={hasPermission(
+              currentUser?.permissions ?? [],
+              PERMISSIONS.COURSE_DISCUSSION_MESSAGE_DELETE,
+            )}
+          />
         ),
         isForAdminLike: false,
         isForUnregistered: false,
@@ -121,6 +138,7 @@ export default function CourseViewPage() {
       },
       {
         value: "moreFromAuthor",
+        queryValue: COURSE_VIEW_TAB_QUERY_VALUES.MORE_FROM_AUTHOR,
         title: t("studentCourseView.tabs.moreFromAuthor"),
         content: (
           <div className="flex flex-col gap-6">
@@ -134,6 +152,7 @@ export default function CourseViewPage() {
       },
       {
         value: "statistics",
+        queryValue: COURSE_VIEW_TAB_QUERY_VALUES.STATISTICS,
         title: t("studentCourseView.tabs.statistics"),
         content: <CourseAdminStatistics course={course} />,
         isForAdminLike: true,
@@ -141,7 +160,21 @@ export default function CourseViewPage() {
         isForEnrolled: false,
       },
     ],
-    [t, course, currentUser?.id],
+    [t, course, currentUser?.id, currentUser?.permissions],
+  );
+
+  const handleTabChange = useCallback(
+    (tabValue: string) => {
+      const tabQueryValue = courseViewTabs.find((tab) => tab.value === tabValue)?.queryValue;
+      if (!tabQueryValue) return;
+
+      setSearchParams((prevParams) => {
+        const nextParams = new URLSearchParams(prevParams);
+        nextParams.set("tab", tabQueryValue);
+        return nextParams;
+      });
+    },
+    [courseViewTabs, setSearchParams],
   );
 
   if (!course) return null;
@@ -162,6 +195,18 @@ export default function CourseViewPage() {
     return !(hideForAdmin || hideWhenUnregistered || hideWhenNotEnrolled);
   };
 
+  const visibleCourseTabs = courseViewTabs.filter(
+    ({ isForAdminLike, isForUnregistered, isForEnrolled }) =>
+      canView(isForAdminLike, isForUnregistered, isForEnrolled),
+  );
+  const selectedTabQuery = searchParams.get("tab");
+  const activeTab =
+    visibleCourseTabs.find(
+      (tab) =>
+        tab.queryValue.toLowerCase() === selectedTabQuery?.toLowerCase() ||
+        tab.value.toLowerCase() === selectedTabQuery?.toLowerCase(),
+    )?.value ?? visibleCourseTabs[0]?.value;
+
   return (
     <ContentAccessGuard type={ACCESS_GUARD.UNREGISTERED_COURSE_ACCESS}>
       <CourseAccessProvider course={course}>
@@ -172,46 +217,34 @@ export default function CourseViewPage() {
 
               <CourseCertificate courseId={course.id} />
 
-              <Tabs defaultValue={courseViewTabs[0].value} className="w-full">
+              <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
                 <TabsList className="bg-card w-full justify-start gap-4 p-0 overflow-hidden">
-                  {courseViewTabs.map((tab) => {
-                    const { value, title, isForAdminLike, isForUnregistered, isForEnrolled } = tab;
-
-                    if (!canView(isForAdminLike, isForUnregistered, isForEnrolled)) return null;
-
-                    return (
-                      <TabsTrigger
-                        key={value}
-                        value={value}
-                        className="flex h-full rounded-none items-center gap-1.5 data-[state=active]:shadow-none text-neutral-900 data-[state=active]:text-primary-700 data-[state=active]:border-b-2 data-[state=active]:border-b-primary-700"
-                      >
-                        <span className="body-sm">{title}</span>{" "}
-                        {tab.itemCount && (
-                          <span className="body-sm bg-neutral-200 px-2 rounded-lg">
-                            {tab.itemCount}
-                          </span>
-                        )}
-                      </TabsTrigger>
-                    );
-                  })}
-                </TabsList>
-                {courseViewTabs.map((tab) => {
-                  const { value, isForAdminLike, content, isForUnregistered, isForEnrolled } = tab;
-
-                  if (!canView(isForAdminLike, isForUnregistered, isForEnrolled)) return null;
-
-                  return (
-                    <TabsContent
-                      key={value}
-                      value={value}
-                      className={cn({
-                        "data-[state=active]:mt-6": true,
-                      })}
+                  {visibleCourseTabs.map((tab) => (
+                    <TabsTrigger
+                      key={tab.value}
+                      value={tab.value}
+                      className="flex h-full rounded-none items-center gap-1.5 data-[state=active]:shadow-none text-neutral-900 data-[state=active]:text-primary-700 data-[state=active]:border-b-2 data-[state=active]:border-b-primary-700"
                     >
-                      {content}
-                    </TabsContent>
-                  );
-                })}
+                      <span className="body-sm">{tab.title}</span>{" "}
+                      {tab.itemCount && (
+                        <span className="body-sm bg-neutral-200 px-2 rounded-lg">
+                          {tab.itemCount}
+                        </span>
+                      )}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+                {visibleCourseTabs.map((tab) => (
+                  <TabsContent
+                    key={tab.value}
+                    value={tab.value}
+                    className={cn({
+                      "data-[state=active]:mt-6": true,
+                    })}
+                  >
+                    {tab.content}
+                  </TabsContent>
+                ))}
               </Tabs>
             </div>
             <CourseViewSidebar course={course} />

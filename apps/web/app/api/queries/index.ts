@@ -39,9 +39,8 @@ export { articleQueryOptions, useArticle, useArticleSuspense } from "./useArticl
 export { articlesTocQueryOptions, useArticlesToc, useArticlesTocSuspense } from "./useArticlesToc";
 export {
   courseChatMessagesQueryOptions,
-  courseChatThreadsQueryOptions,
-  useCourseChatThreadMessages,
-  useCourseChatThreads,
+  courseChatRepliesQueryOptions,
+  useCourseChatMessages,
+  useCourseChatReplies,
   useCreateCourseChatMessage,
-  useCreateCourseChatThread,
 } from "./course-chat/useCourseChat";

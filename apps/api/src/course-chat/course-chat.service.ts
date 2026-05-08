@@ -5,30 +5,38 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { BaseEmailTemplate } from "@repo/email-templates";
-import { SUPPORTED_LANGUAGES } from "@repo/shared";
-
-import { BaseResponse, PaginatedResponse } from "src/common";
-import { EmailService } from "src/common/emails/emails.service";
-import { getEmailSubject } from "src/common/emails/translations";
-import { CourseChatPresenceService } from "src/course-chat/course-chat-presence.service";
 import {
   COURSE_CHAT_ALLOWED_REACTIONS,
   COURSE_CHAT_SOCKET_EVENTS,
+  PERMISSIONS,
   getCourseChatRoom,
-} from "src/course-chat/course-chat.constants";
-import { CourseChatRepository } from "src/course-chat/course-chat.repository";
+} from "@repo/shared";
+
+import { BaseResponse, PaginatedResponse, DatabasePg } from "src/common";
+import { CourseChatPresenceService } from "src/course-chat/course-chat-presence.service";
+import {
+  CourseChatRepository,
+  type CourseChatMessageReactionSummaryRow,
+  type CourseChatMessageRow,
+  type CourseChatReplyParticipantRow,
+  type CourseChatReplySummaryRow,
+} from "src/course-chat/course-chat.repository";
+import { CourseChatMessageCreatedEvent } from "src/events/course-chat/course-chat-message-created.event";
+import { CourseChatReplyCreatedEvent } from "src/events/course-chat/course-chat-reply-created.event";
+import { CourseChatUserMentionedEvent } from "src/events/course-chat/course-chat-user-mentioned.event";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
+import { S3Service } from "src/s3/s3.service";
 import { REALTIME_PUBLISHER } from "src/websocket/realtime.publisher";
 
-import type { SupportedLanguages } from "@repo/shared";
+import type { PermissionKey } from "@repo/shared";
 import type { UUIDType } from "src/common";
 import type {
+  CourseChatMessagePreviewResponse,
+  CourseChatMessageReactionResponse,
   CourseChatMessageResponse,
-  CourseChatThreadResponse,
   CourseChatUserResponse,
   CreateCourseChatMessageBody,
-  CreateCourseChatThreadBody,
-  CreateCourseChatThreadResponse,
+  DeleteCourseChatMessageResponse,
   ToggleCourseChatMessageReactionBody,
 } from "src/course-chat/schemas/course-chat.schema";
 
@@ -41,8 +49,10 @@ export class CourseChatService {
   constructor(
     private readonly courseChatRepository: CourseChatRepository,
     private readonly courseChatPresenceService: CourseChatPresenceService,
-    private readonly emailService: EmailService,
+    private readonly outboxPublisher: OutboxPublisher,
+    @Inject("DB") private readonly db: DatabasePg,
     @Inject(REALTIME_PUBLISHER) private readonly realtimePublisher: CourseChatRealtimePublisher,
+    private readonly s3Service?: S3Service,
   ) {}
 
   async assertUserEnrolledInCourse(courseId: UUIDType, userId: UUIDType) {
@@ -53,39 +63,43 @@ export class CourseChatService {
     }
   }
 
-  async getThreads(params: {
+  async getMessages(params: {
     courseId: UUIDType;
     userId: UUIDType;
     page?: number;
     perPage?: number;
-  }): Promise<PaginatedResponse<CourseChatThreadResponse[]>> {
+  }): Promise<PaginatedResponse<CourseChatMessageResponse[]>> {
     await this.assertUserEnrolledInCourse(params.courseId, params.userId);
 
-    const threads = await this.courseChatRepository.getThreads(
+    const messages = await this.courseChatRepository.getTopLevelMessages(
       params.courseId,
-      params.userId,
       params.page,
       params.perPage,
     );
 
-    return new PaginatedResponse(threads);
+    return new PaginatedResponse({
+      ...messages,
+      data: await this.mapMessages(messages.data, params.userId, { includeReplySummary: true }),
+    });
   }
 
-  async getMessages(params: {
-    threadId: UUIDType;
+  async getReplies(params: {
+    messageId: UUIDType;
     userId: UUIDType;
     page?: number;
     perPage?: number;
   }): Promise<PaginatedResponse<CourseChatMessageResponse[]>> {
-    const thread = await this.getAccessibleThread(params.threadId, params.userId);
-    const messages = await this.courseChatRepository.getMessages(
-      thread.id,
-      params.userId,
+    const message = await this.getAccessibleMessage(params.messageId, params.userId);
+    const replies = await this.courseChatRepository.getReplies(
+      message.id,
       params.page,
       params.perPage,
     );
 
-    return new PaginatedResponse(messages);
+    return new PaginatedResponse({
+      ...replies,
+      data: await this.mapMessages(replies.data, params.userId, { includeReplySummary: false }),
+    });
   }
 
   async getUsers(
@@ -95,89 +109,94 @@ export class CourseChatService {
     await this.assertUserEnrolledInCourse(courseId, userId);
 
     const users = await this.courseChatRepository.getEnrolledUsers(courseId);
+    const avatarUrlByReference = await this.getAvatarUrlByReference(
+      users.map((user) => user.avatarReference),
+    );
+    const onlineUserIds = await this.courseChatPresenceService.getOnlineUserIds(
+      courseId,
+      users.map((user) => user.id),
+    );
 
     return new BaseResponse(
       users.map((user) => ({
         ...user,
-        isOnline: this.courseChatPresenceService.isOnline(courseId, user.id),
+        avatarReference: this.getMappedAvatarReference(user.avatarReference, avatarUrlByReference),
+        isOnline: onlineUserIds.has(user.id),
       })),
     );
   }
 
-  async createThread(
-    courseId: UUIDType,
-    userId: UUIDType,
-    body: CreateCourseChatThreadBody,
-  ): Promise<BaseResponse<CreateCourseChatThreadResponse>> {
-    await this.assertUserEnrolledInCourse(courseId, userId);
-
-    const content = this.normalizeContent(body.content);
-    const { threadId, messageId } = await this.courseChatRepository.createThreadWithMessage(
-      courseId,
-      userId,
-      content,
-    );
-
-    const [thread, message] = await Promise.all([
-      this.courseChatRepository.getThreadById(threadId, userId),
-      this.courseChatRepository.getMessageById(messageId, userId),
-    ]);
-
-    if (!thread || !message) throw new NotFoundException("courseChat.errors.notFound");
-
-    const payload = { thread, message };
-    const room = getCourseChatRoom(courseId);
-    this.realtimePublisher.emitToRoom(COURSE_CHAT_SOCKET_EVENTS.THREAD_CREATED, room, payload);
-    this.realtimePublisher.emitToRoom(COURSE_CHAT_SOCKET_EVENTS.MESSAGE_CREATED, room, message);
-    await this.emitMentionNotifications({
-      courseId,
-      actorUserId: userId,
-      message,
-      mentionedUserIds: body.mentionedUserIds,
-    });
-
-    return new BaseResponse(payload);
-  }
-
   async createMessage(
-    threadId: UUIDType,
+    courseId: UUIDType,
     userId: UUIDType,
     body: CreateCourseChatMessageBody,
   ): Promise<BaseResponse<CourseChatMessageResponse>> {
-    const thread = await this.getAccessibleThread(threadId, userId);
+    await this.assertUserEnrolledInCourse(courseId, userId);
 
+    let parentMessage: Awaited<ReturnType<CourseChatRepository["getMessageContext"]>> = null;
     if (body.parentMessageId) {
-      const parentBelongsToThread = await this.courseChatRepository.messageBelongsToThread(
-        body.parentMessageId,
-        thread.id,
-      );
+      parentMessage = await this.courseChatRepository.getMessageContext(body.parentMessageId);
 
-      if (!parentBelongsToThread) {
+      if (
+        !parentMessage ||
+        parentMessage.courseId !== courseId ||
+        parentMessage.deletedAt ||
+        parentMessage.parentMessageId
+      ) {
         throw new BadRequestException("courseChat.errors.invalidParentMessage");
       }
     }
 
-    const messageId = await this.courseChatRepository.createMessage({
-      threadId: thread.id,
-      courseId: thread.courseId,
-      userId,
-      content: this.normalizeContent(body.content),
-      parentMessageId: body.parentMessageId,
+    const mentionedUserIds = await this.getMentionedEnrolledUserIds({
+      courseId,
+      actorUserId: userId,
+      mentionedUserIds: body.mentionedUserIds,
     });
 
-    const message = await this.courseChatRepository.getMessageById(messageId, userId);
-    if (!message) throw new NotFoundException("courseChat.errors.notFound");
+    const messageId = await this.db.transaction(async (trx) => {
+      const createdMessageId = await this.courseChatRepository.createMessage({
+        courseId,
+        userId,
+        content: this.normalizeContent(body.content),
+        parentMessageId: body.parentMessageId,
+        parentMessage: parentMessage ?? undefined,
+        dbInstance: trx,
+      });
+
+      await this.publishMessageCreatedEvent(
+        {
+          courseId,
+          actorUserId: userId,
+          messageId: createdMessageId,
+          parentMessageId: body.parentMessageId,
+        },
+        trx,
+      );
+
+      await this.publishMentionEvent(
+        {
+          courseId,
+          actorUserId: userId,
+          messageId: createdMessageId,
+          mentionedUserIds,
+        },
+        trx,
+      );
+
+      return createdMessageId;
+    });
+
+    const message = await this.getMessageResponse(messageId, userId);
 
     this.realtimePublisher.emitToRoom(
       COURSE_CHAT_SOCKET_EVENTS.MESSAGE_CREATED,
-      getCourseChatRoom(thread.courseId),
+      getCourseChatRoom(courseId),
       message,
     );
-    await this.emitMentionNotifications({
-      courseId: thread.courseId,
-      actorUserId: userId,
+    this.emitMentionRealtimeNotifications({
+      courseId,
       message,
-      mentionedUserIds: body.mentionedUserIds,
+      mentionedUserIds,
     });
 
     return new BaseResponse(message);
@@ -193,7 +212,9 @@ export class CourseChatService {
     }
 
     const message = await this.courseChatRepository.getMessageContext(messageId);
-    if (!message) throw new NotFoundException("courseChat.errors.messageNotFound");
+    if (!message || message.deletedAt || !message.userId) {
+      throw new NotFoundException("courseChat.errors.messageNotFound");
+    }
 
     await this.assertUserEnrolledInCourse(message.courseId, userId);
 
@@ -204,10 +225,11 @@ export class CourseChatService {
       reaction: body.reaction,
     });
 
-    const reactions = await this.courseChatRepository.getMessageReactions(messageId, userId);
+    const reactions = this.mapReactions(
+      await this.courseChatRepository.getMessageReactions(messageId, userId),
+    );
     const payload = {
       courseId: message.courseId,
-      threadId: message.threadId,
       messageId,
       reactions,
     };
@@ -221,16 +243,231 @@ export class CourseChatService {
     return new BaseResponse(payload);
   }
 
-  private async getAccessibleThread(threadId: UUIDType, userId: UUIDType) {
-    const thread = await this.courseChatRepository.getThreadById(threadId, userId);
-
-    if (!thread || thread.archived) {
-      throw new NotFoundException("courseChat.errors.threadNotFound");
+  async deleteMessage(
+    messageId: UUIDType,
+    userId: UUIDType,
+    permissions: PermissionKey[],
+  ): Promise<BaseResponse<DeleteCourseChatMessageResponse>> {
+    const message = await this.courseChatRepository.getMessageContext(messageId);
+    if (!message || message.deletedAt || !message.userId) {
+      throw new NotFoundException("courseChat.errors.messageNotFound");
     }
 
-    await this.assertUserEnrolledInCourse(thread.courseId, userId);
+    await this.assertUserEnrolledInCourse(message.courseId, userId);
 
-    return thread;
+    const canDeleteAnyMessage = permissions.includes(PERMISSIONS.COURSE_DISCUSSION_MESSAGE_DELETE);
+    const canDeleteOwnMessage =
+      message.userId === userId &&
+      permissions.includes(PERMISSIONS.COURSE_DISCUSSION_MESSAGE_DELETE_OWN);
+    const canDeleteMessage = canDeleteAnyMessage || canDeleteOwnMessage;
+    if (!canDeleteMessage) {
+      throw new ForbiddenException("courseChat.errors.cannotDeleteMessage");
+    }
+
+    const replyCount = message.parentMessageId
+      ? 0
+      : await this.courseChatRepository.countReplies(message.id);
+    const deletedAt = await this.courseChatRepository.softDeleteMessage(message.id);
+    const payload = {
+      courseId: message.courseId,
+      messageId: message.id,
+      parentMessageId: message.parentMessageId,
+      removed: Boolean(message.parentMessageId || replyCount === 0),
+      deletedAt,
+    };
+
+    this.realtimePublisher.emitToRoom(
+      COURSE_CHAT_SOCKET_EVENTS.MESSAGE_DELETED,
+      getCourseChatRoom(message.courseId),
+      payload,
+    );
+
+    return new BaseResponse(payload);
+  }
+
+  private async getAccessibleMessage(messageId: UUIDType, userId: UUIDType) {
+    const message = await this.courseChatRepository.getMessageContext(messageId);
+
+    if (!message) {
+      throw new NotFoundException("courseChat.errors.messageNotFound");
+    }
+
+    await this.assertUserEnrolledInCourse(message.courseId, userId);
+
+    return message;
+  }
+
+  private async getMessageResponse(messageId: UUIDType, viewerUserId: UUIDType) {
+    const message = await this.courseChatRepository.getMessageById(messageId);
+    if (!message) throw new NotFoundException("courseChat.errors.notFound");
+
+    const [mappedMessage] = await this.mapMessages([message], viewerUserId, {
+      includeReplySummary: true,
+    });
+
+    return mappedMessage;
+  }
+
+  private async mapMessages(
+    messages: CourseChatMessageRow[],
+    viewerUserId: UUIDType,
+    options: { includeReplySummary: boolean },
+  ): Promise<CourseChatMessageResponse[]> {
+    const messageIds = messages.map((message) => message.id);
+    const [reactionRows, replySummaries, replyParticipants] = await Promise.all([
+      this.courseChatRepository.getMessageReactionsForMessages(messageIds, viewerUserId),
+      options.includeReplySummary
+        ? this.courseChatRepository.getReplySummaries(messageIds)
+        : Promise.resolve([]),
+      options.includeReplySummary
+        ? this.courseChatRepository.getReplyParticipants(messageIds)
+        : Promise.resolve([]),
+    ]);
+    const latestReplies = replySummaries
+      .map((summary) => summary.latestReply)
+      .filter((message): message is CourseChatMessageRow => Boolean(message));
+    const avatarUrlByReference = await this.getAvatarUrlByReference([
+      ...messages.map((message) => message.userAvatarReference),
+      ...latestReplies.map((message) => message.userAvatarReference),
+      ...replyParticipants.map((participant) => participant.avatarReference),
+    ]);
+    const latestReplyReactionRows = await this.courseChatRepository.getMessageReactionsForMessages(
+      latestReplies.map((reply) => reply.id),
+      viewerUserId,
+    );
+
+    const reactionsByMessageId = this.groupReactions([...reactionRows, ...latestReplyReactionRows]);
+    const replySummaryByMessageId = new Map(
+      replySummaries.map((summary) => [summary.parentMessageId, summary]),
+    );
+    const replyParticipantsByMessageId = this.groupReplyParticipants(replyParticipants);
+
+    return messages.map((message) =>
+      this.mapMessage(
+        message,
+        reactionsByMessageId,
+        replySummaryByMessageId,
+        replyParticipantsByMessageId,
+        avatarUrlByReference,
+      ),
+    );
+  }
+
+  private mapMessage(
+    message: CourseChatMessageRow,
+    reactionsByMessageId: Map<UUIDType, CourseChatMessageReactionResponse[]>,
+    replySummaryByMessageId: Map<UUIDType, CourseChatReplySummaryRow>,
+    replyParticipantsByMessageId: Map<UUIDType, CourseChatReplyParticipantRow[]>,
+    avatarUrlByReference: Map<string, string>,
+  ): CourseChatMessageResponse {
+    const replySummary = replySummaryByMessageId.get(message.id);
+
+    return {
+      ...this.mapMessagePreview(message, reactionsByMessageId, avatarUrlByReference),
+      replyCount: replySummary?.replyCount ?? 0,
+      replyParticipants: (replyParticipantsByMessageId.get(message.id) ?? []).map((user) => ({
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        avatarReference: this.getMappedAvatarReference(user.avatarReference, avatarUrlByReference),
+      })),
+      latestReply: replySummary?.latestReply
+        ? this.mapMessagePreview(
+            replySummary.latestReply,
+            reactionsByMessageId,
+            avatarUrlByReference,
+          )
+        : null,
+    };
+  }
+
+  private mapMessagePreview(
+    message: CourseChatMessageRow,
+    reactionsByMessageId: Map<UUIDType, CourseChatMessageReactionResponse[]>,
+    avatarUrlByReference: Map<string, string>,
+  ): CourseChatMessagePreviewResponse {
+    return {
+      id: message.id,
+      courseId: message.courseId,
+      userId: message.userId,
+      content: message.deletedAt ? "" : message.content,
+      parentMessageId: message.parentMessageId,
+      deletedAt: message.deletedAt,
+      createdAt: message.createdAt,
+      updatedAt: message.updatedAt,
+      user: {
+        id: message.userIdForProfile,
+        firstName: message.userFirstName,
+        lastName: message.userLastName,
+        avatarReference: this.getMappedAvatarReference(
+          message.userAvatarReference,
+          avatarUrlByReference,
+        ),
+      },
+      reactions: message.deletedAt ? [] : (reactionsByMessageId.get(message.id) ?? []),
+    };
+  }
+
+  private groupReplyParticipants(participants: CourseChatReplyParticipantRow[]) {
+    const participantsByMessageId = new Map<UUIDType, CourseChatReplyParticipantRow[]>();
+
+    for (const participant of participants) {
+      const current = participantsByMessageId.get(participant.parentMessageId) ?? [];
+      current.push(participant);
+      participantsByMessageId.set(participant.parentMessageId, current);
+    }
+
+    return participantsByMessageId;
+  }
+
+  private async getAvatarUrlByReference(avatarReferences: (string | null)[]) {
+    if (!this.s3Service) return new Map<string, string>();
+    const s3Service = this.s3Service;
+
+    const uniqueAvatarReferences = Array.from(
+      new Set(avatarReferences.filter((reference): reference is string => Boolean(reference))),
+    );
+
+    const avatarEntries = await Promise.all(
+      uniqueAvatarReferences.map(
+        async (avatarReference): Promise<[string, string]> => [
+          avatarReference,
+          await s3Service.getSignedUrl(avatarReference),
+        ],
+      ),
+    );
+
+    return new Map(avatarEntries);
+  }
+
+  private getMappedAvatarReference(
+    avatarReference: string | null,
+    avatarUrlByReference: Map<string, string>,
+  ) {
+    if (!avatarReference) return null;
+    return avatarUrlByReference.get(avatarReference) ?? avatarReference;
+  }
+
+  private groupReactions(reactions: CourseChatMessageReactionSummaryRow[]) {
+    const reactionsByMessageId = new Map<UUIDType, CourseChatMessageReactionResponse[]>();
+
+    for (const reaction of reactions) {
+      const current = reactionsByMessageId.get(reaction.messageId) ?? [];
+      current.push(...this.mapReactions([reaction]));
+      reactionsByMessageId.set(reaction.messageId, current);
+    }
+
+    return reactionsByMessageId;
+  }
+
+  private mapReactions(
+    reactions: CourseChatMessageReactionSummaryRow[],
+  ): CourseChatMessageReactionResponse[] {
+    return reactions.map(({ reaction, count, reactedByCurrentUser }) => ({
+      reaction,
+      count,
+      reactedByCurrentUser,
+    }));
   }
 
   private normalizeContent(content: string) {
@@ -247,140 +484,90 @@ export class CourseChatService {
     return (COURSE_CHAT_ALLOWED_REACTIONS as readonly string[]).includes(reaction);
   }
 
-  private async emitMentionNotifications(params: {
+  private async publishMessageCreatedEvent(
+    params: {
+      courseId: UUIDType;
+      actorUserId: UUIDType;
+      messageId: UUIDType;
+      parentMessageId?: UUIDType;
+    },
+    dbInstance?: DatabasePg,
+  ) {
+    if (params.parentMessageId) {
+      await this.outboxPublisher.publish(
+        new CourseChatReplyCreatedEvent({
+          courseId: params.courseId,
+          actorUserId: params.actorUserId,
+          messageId: params.messageId,
+          parentMessageId: params.parentMessageId,
+        }),
+        dbInstance,
+      );
+      return;
+    }
+
+    await this.outboxPublisher.publish(
+      new CourseChatMessageCreatedEvent({
+        courseId: params.courseId,
+        actorUserId: params.actorUserId,
+        messageId: params.messageId,
+      }),
+      dbInstance,
+    );
+  }
+
+  private async getMentionedEnrolledUserIds(params: {
     courseId: UUIDType;
     actorUserId: UUIDType;
-    message: CourseChatMessageResponse;
     mentionedUserIds?: UUIDType[];
   }) {
     const uniqueMentionedUserIds = Array.from(new Set(params.mentionedUserIds ?? [])).filter(
       (mentionedUserId) => mentionedUserId !== params.actorUserId,
     );
 
-    if (!uniqueMentionedUserIds.length) return;
+    if (!uniqueMentionedUserIds.length) return [];
 
-    const [recipients, courseContext] = await Promise.all([
-      this.courseChatRepository.getMentionEmailRecipients(params.courseId, uniqueMentionedUserIds),
-      this.courseChatRepository.getCourseEmailContext(params.courseId),
-    ]);
+    return this.courseChatRepository.getEnrolledUserIds(params.courseId, uniqueMentionedUserIds);
+  }
 
-    for (const recipient of recipients) {
+  private emitMentionRealtimeNotifications(params: {
+    courseId: UUIDType;
+    message: CourseChatMessageResponse;
+    mentionedUserIds: UUIDType[];
+  }) {
+    if (!params.mentionedUserIds.length) return;
+
+    for (const mentionedUserId of params.mentionedUserIds) {
       this.realtimePublisher.emitToRoom(
         COURSE_CHAT_SOCKET_EVENTS.USER_MENTIONED,
-        `user:${recipient.id}`,
+        `user:${mentionedUserId}`,
         {
           courseId: params.courseId,
           message: params.message,
         },
       );
     }
-
-    if (!courseContext) return;
-
-    await Promise.allSettled(
-      recipients.map(async (recipient) => {
-        const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
-          recipient.tenantId,
-          recipient.id,
-        );
-        const courseName = this.getLocalizedCourseTitle(
-          courseContext.title,
-          defaultEmailSettings.language,
-          courseContext.baseLanguage,
-        );
-        const authorName = `${params.message.user.firstName} ${params.message.user.lastName}`;
-        const { text, html } = new BaseEmailTemplate({
-          heading: this.getMentionEmailHeading(defaultEmailSettings.language),
-          paragraphs: this.getMentionEmailParagraphs(defaultEmailSettings.language, {
-            recipientName: recipient.firstName,
-            authorName,
-            courseName,
-            messageContent: params.message.content,
-          }),
-          buttonText: this.getMentionEmailButtonText(defaultEmailSettings.language),
-          buttonLink: `${process.env.CORS_ORIGIN}/course/${params.courseId}`,
-          ...defaultEmailSettings,
-        });
-
-        await this.emailService.sendEmailWithLogo(
-          {
-            to: recipient.email,
-            subject: getEmailSubject("courseChatMentionEmail", defaultEmailSettings.language, {
-              courseName,
-            }),
-            text,
-            html,
-          },
-          { tenantId: recipient.tenantId },
-        );
-      }),
-    );
   }
 
-  private getLocalizedCourseTitle(
-    title: Record<string, string>,
-    language: SupportedLanguages,
-    baseLanguage: string,
-  ) {
-    return title[language] ?? title[baseLanguage] ?? title[SUPPORTED_LANGUAGES.EN] ?? "Course";
-  }
-
-  private getMentionEmailHeading(language: SupportedLanguages) {
-    return (
-      {
-        en: "You were mentioned in course chat",
-        pl: "Oznaczono Cię na czacie kursu",
-        de: "Du wurdest im Kurschat erwähnt",
-        lt: "Buvote paminėti kurso pokalbyje",
-        cs: "Byl(a) jste zmíněn(a) v chatu kurzu",
-      } satisfies Record<SupportedLanguages, string>
-    )[language];
-  }
-
-  private getMentionEmailButtonText(language: SupportedLanguages) {
-    return (
-      {
-        en: "Open course chat",
-        pl: "Otwórz czat kursu",
-        de: "Kurschat öffnen",
-        lt: "Atidaryti kurso pokalbį",
-        cs: "Otevřít chat kurzu",
-      } satisfies Record<SupportedLanguages, string>
-    )[language];
-  }
-
-  private getMentionEmailParagraphs(
-    language: SupportedLanguages,
+  private async publishMentionEvent(
     params: {
-      recipientName: string;
-      authorName: string;
-      courseName: string;
-      messageContent: string;
+      courseId: UUIDType;
+      actorUserId: UUIDType;
+      messageId: UUIDType;
+      mentionedUserIds: UUIDType[];
     },
+    dbInstance?: DatabasePg,
   ) {
-    const translations = {
-      en: [
-        `Hi ${params.recipientName}, ${params.authorName} mentioned you in ${params.courseName}.`,
-        `"${params.messageContent}"`,
-      ],
-      pl: [
-        `Cześć ${params.recipientName}, ${params.authorName} oznaczył(a) Cię w kursie ${params.courseName}.`,
-        `"${params.messageContent}"`,
-      ],
-      de: [
-        `Hallo ${params.recipientName}, ${params.authorName} hat dich in ${params.courseName} erwähnt.`,
-        `"${params.messageContent}"`,
-      ],
-      lt: [
-        `Sveiki, ${params.recipientName}, ${params.authorName} paminėjo jus kurse ${params.courseName}.`,
-        `"${params.messageContent}"`,
-      ],
-      cs: [
-        `Ahoj ${params.recipientName}, ${params.authorName} vás zmínil(a) v kurzu ${params.courseName}.`,
-        `"${params.messageContent}"`,
-      ],
-    } satisfies Record<SupportedLanguages, string[]>;
+    if (!params.mentionedUserIds.length) return;
 
-    return translations[language];
+    await this.outboxPublisher.publish(
+      new CourseChatUserMentionedEvent({
+        courseId: params.courseId,
+        actorUserId: params.actorUserId,
+        messageId: params.messageId,
+        mentionedUserIds: params.mentionedUserIds,
+      }),
+      dbInstance,
+    );
   }
 }

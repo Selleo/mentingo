@@ -2099,21 +2099,28 @@
     },
     "tabs": {
       "chapters": "Kapitel",
-      "chat": "Chat",
+      "chat": "Diskussion",
       "moreFromAuthor": "Mehr vom Autor",
       "statistics": "Statistiken"
     },
     "courseChat": {
-      "title": "Kurschat",
+      "title": "Kursdiskussion",
       "newThreadPlaceholder": "Neue Diskussion starten...",
       "startThread": "Thread starten",
       "messagesTitle": "Nachrichten",
       "noThreadSelected": "Thread auswählen",
-      "emptyThreads": "Noch keine Gespräche. Starten Sie den ersten Thread.",
+      "emptyThreads": "Noch keine Diskussionen. Starten Sie die erste.",
       "emptyMessages": "Noch keine Nachrichten.",
       "replyPlaceholder": "Antwort schreiben...",
       "reply": "Antworten",
-      "repliesCount": "{{count}} Antworten",
+      "reactWith": "Mit {{reaction}} reagieren",
+      "deleteMessage": "Nachricht löschen",
+      "deleteMessageConfirmationTitle": "Nachricht löschen?",
+      "deleteMessageConfirmationDescription": "Diese Nachricht wird aus der Diskussion entfernt. Antworten können einen gelöschten Platzhalter behalten, damit die Unterhaltung lesbar bleibt.",
+      "deletedMessage": "Diese Nachricht wurde gelöscht.",
+      "repliesCount_one": "{{countLabel}} Antwort",
+      "repliesCount_other": "{{countLabel}} Antworten",
+      "loadMoreReplies": "Weitere Antworten laden",
       "send": "Senden",
       "selectThread": "Wählen Sie einen Thread, um Nachrichten zu lesen.",
       "users": "Benutzer",
@@ -2121,7 +2128,7 @@
       "online": "Online",
       "offline": "Offline",
       "emptyUsers": "Noch keine eingeschriebenen Benutzer.",
-      "mentionedToast": "Jemand hat Sie im Kurschat erwähnt."
+      "mentionedToast": "Jemand hat Sie in der Kursdiskussion erwähnt."
     }
   },
   "studentChapterView": {

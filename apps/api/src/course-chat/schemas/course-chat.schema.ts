@@ -17,9 +17,8 @@ export const courseChatMessageReactionSchema = Type.Object({
   reactedByCurrentUser: Type.Boolean(),
 });
 
-export const courseChatMessageSchema = Type.Object({
+const courseChatMessageBaseSchema = Type.Object({
   id: UUIDSchema,
-  threadId: UUIDSchema,
   courseId: UUIDSchema,
   userId: UUIDSchema,
   content: Type.String(),
@@ -31,18 +30,16 @@ export const courseChatMessageSchema = Type.Object({
   reactions: Type.Array(courseChatMessageReactionSchema),
 });
 
-export const courseChatThreadSchema = Type.Object({
-  id: UUIDSchema,
-  courseId: UUIDSchema,
-  createdByUserId: UUIDSchema,
-  archived: Type.Boolean(),
-  createdAt: Type.String(),
-  updatedAt: Type.String(),
-  messageCount: Type.Number(),
-  createdBy: userSchema,
-  rootMessage: courseChatMessageSchema,
-  latestMessage: Type.Union([courseChatMessageSchema, Type.Null()]),
-});
+export const courseChatMessagePreviewSchema = courseChatMessageBaseSchema;
+
+export const courseChatMessageSchema = Type.Composite([
+  courseChatMessageBaseSchema,
+  Type.Object({
+    replyCount: Type.Number(),
+    latestReply: Type.Union([courseChatMessagePreviewSchema, Type.Null()]),
+    replyParticipants: Type.Array(userSchema),
+  }),
+]);
 
 export const courseChatUserSchema = Type.Object({
   id: UUIDSchema,
@@ -50,11 +47,6 @@ export const courseChatUserSchema = Type.Object({
   lastName: Type.String(),
   avatarReference: Type.Union([Type.String(), Type.Null()]),
   isOnline: Type.Boolean(),
-});
-
-export const createCourseChatThreadSchema = Type.Object({
-  content: Type.String({ minLength: 1, maxLength: 5000 }),
-  mentionedUserIds: Type.Optional(Type.Array(UUIDSchema)),
 });
 
 export const createCourseChatMessageSchema = Type.Object({
@@ -69,32 +61,33 @@ export const toggleCourseChatMessageReactionSchema = Type.Object({
 
 export const courseChatMessageReactionsUpdatedSchema = Type.Object({
   courseId: UUIDSchema,
-  threadId: UUIDSchema,
   messageId: UUIDSchema,
   reactions: Type.Array(courseChatMessageReactionSchema),
 });
 
-export const courseChatPaginationQuerySchema = Type.Optional(Type.Number({ minimum: 1 }));
-
-export const courseChatThreadsResponseSchema = Type.Array(courseChatThreadSchema);
-export const courseChatMessagesResponseSchema = Type.Array(courseChatMessageSchema);
-export const courseChatUsersResponseSchema = Type.Array(courseChatUserSchema);
-
-export const createCourseChatThreadResponseSchema = Type.Object({
-  thread: courseChatThreadSchema,
-  message: courseChatMessageSchema,
+export const deleteCourseChatMessageResponseSchema = Type.Object({
+  courseId: UUIDSchema,
+  messageId: UUIDSchema,
+  parentMessageId: Type.Union([UUIDSchema, Type.Null()]),
+  removed: Type.Boolean(),
+  deletedAt: Type.Union([Type.String(), Type.Null()]),
 });
 
+export const courseChatPaginationQuerySchema = Type.Optional(Type.Number({ minimum: 1 }));
+
+export const courseChatMessagesResponseSchema = Type.Array(courseChatMessageSchema);
+export const courseChatRepliesResponseSchema = Type.Array(courseChatMessageSchema);
+export const courseChatUsersResponseSchema = Type.Array(courseChatUserSchema);
+
+export type CourseChatMessagePreviewResponse = Static<typeof courseChatMessagePreviewSchema>;
 export type CourseChatMessageResponse = Static<typeof courseChatMessageSchema>;
 export type CourseChatMessageReactionResponse = Static<typeof courseChatMessageReactionSchema>;
 export type CourseChatMessageReactionsUpdatedResponse = Static<
   typeof courseChatMessageReactionsUpdatedSchema
 >;
-export type CourseChatThreadResponse = Static<typeof courseChatThreadSchema>;
+export type DeleteCourseChatMessageResponse = Static<typeof deleteCourseChatMessageResponseSchema>;
 export type CourseChatUserResponse = Static<typeof courseChatUserSchema>;
-export type CreateCourseChatThreadBody = Static<typeof createCourseChatThreadSchema>;
 export type CreateCourseChatMessageBody = Static<typeof createCourseChatMessageSchema>;
 export type ToggleCourseChatMessageReactionBody = Static<
   typeof toggleCourseChatMessageReactionSchema
 >;
-export type CreateCourseChatThreadResponse = Static<typeof createCourseChatThreadResponseSchema>;

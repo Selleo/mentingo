@@ -7,13 +7,10 @@ import {
   WebSocketServer,
   WsException,
 } from "@nestjs/websockets";
+import { COURSE_CHAT_SOCKET_EVENTS, getCourseChatRoom } from "@repo/shared";
 import { Server } from "socket.io";
 
 import { CourseChatPresenceService } from "src/course-chat/course-chat-presence.service";
-import {
-  COURSE_CHAT_SOCKET_EVENTS,
-  getCourseChatRoom,
-} from "src/course-chat/course-chat.constants";
 import { CourseChatService } from "src/course-chat/course-chat.service";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { WsJwtGuard } from "src/websocket/guards/ws-jwt.guard";
@@ -43,8 +40,8 @@ export class CourseChatGateway implements OnGatewayDisconnect {
     private readonly tenantDbRunnerService: TenantDbRunnerService,
   ) {}
 
-  handleDisconnect(client: AuthenticatedSocket) {
-    const changes = this.courseChatPresenceService.disconnect(client.id);
+  async handleDisconnect(client: AuthenticatedSocket) {
+    const changes = await this.courseChatPresenceService.disconnect(client.id);
     for (const change of changes) {
       this.emitPresenceChange(change.courseId, change.userId, change.isOnline);
     }
@@ -72,7 +69,11 @@ export class CourseChatGateway implements OnGatewayDisconnect {
 
     const room = getCourseChatRoom(courseId);
     await client.join(room);
-    const presenceChange = this.courseChatPresenceService.join(courseId, user.userId, client.id);
+    const presenceChange = await this.courseChatPresenceService.join(
+      courseId,
+      user.userId,
+      client.id,
+    );
     if (presenceChange) {
       this.emitPresenceChange(courseId, user.userId, presenceChange.isOnline);
     }
@@ -90,19 +91,20 @@ export class CourseChatGateway implements OnGatewayDisconnect {
   ) {
     const { courseId } = payload;
     if (!courseId) throw new WsException("courseChat.errors.courseIdRequired");
+    const user = client.data.user;
 
     const room = getCourseChatRoom(courseId);
     await client.leave(room);
-    const presenceChange = this.courseChatPresenceService.leave(
+    const presenceChange = await this.courseChatPresenceService.leave(
       courseId,
-      client.data.user.userId,
+      user.userId,
       client.id,
     );
     if (presenceChange) {
-      this.emitPresenceChange(courseId, client.data.user.userId, presenceChange.isOnline);
+      this.emitPresenceChange(courseId, user.userId, presenceChange.isOnline);
     }
 
-    this.logger.debug(`User ${client.data.user.userId} left course chat room: ${room}`);
+    this.logger.debug(`User ${user.userId} left course chat room: ${room}`);
 
     return { success: true };
   }

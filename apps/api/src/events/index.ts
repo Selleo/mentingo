@@ -1,4 +1,7 @@
 export * from "./course/course-activity.event";
+export * from "./course-chat/course-chat-message-created.event";
+export * from "./course-chat/course-chat-reply-created.event";
+export * from "./course-chat/course-chat-user-mentioned.event";
 export * from "./chapter/create-chapter.event";
 export * from "./chapter/update-chapter.event";
 export * from "./chapter/delete-chapter.event";

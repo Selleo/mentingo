@@ -2099,21 +2099,30 @@
     },
     "tabs": {
       "chapters": "Kapitoly",
-      "chat": "Chat",
+      "chat": "Diskuze",
       "moreFromAuthor": "Více od autora",
       "statistics": "Statistika"
     },
     "courseChat": {
-      "title": "Chat kurzu",
+      "title": "Diskuze kurzu",
       "newThreadPlaceholder": "Zahajte novou diskuzi...",
       "startThread": "Zahájit vlákno",
       "messagesTitle": "Zprávy",
       "noThreadSelected": "Vyberte vlákno",
-      "emptyThreads": "Zatím zde nejsou žádné konverzace. Zahajte první vlákno.",
+      "emptyThreads": "Zatím zde nejsou žádné diskuze. Zahajte první.",
       "emptyMessages": "Zatím zde nejsou žádné zprávy.",
       "replyPlaceholder": "Napište odpověď...",
       "reply": "Odpovědět",
-      "repliesCount": "{{count}} odpovědí",
+      "reactWith": "Reagovat {{reaction}}",
+      "deleteMessage": "Smazat zprávu",
+      "deleteMessageConfirmationTitle": "Smazat zprávu?",
+      "deleteMessageConfirmationDescription": "Zpráva bude z diskuze odstraněna. Odpovědi mohou ponechat zástupný záznam, aby konverzace zůstala čitelná.",
+      "deletedMessage": "Tato zpráva byla smazána.",
+      "repliesCount_one": "{{countLabel}} odpověď",
+      "repliesCount_few": "{{countLabel}} odpovědi",
+      "repliesCount_many": "{{countLabel}} odpovědí",
+      "repliesCount_other": "{{countLabel}} odpovědí",
+      "loadMoreReplies": "Načíst další odpovědi",
       "send": "Odeslat",
       "selectThread": "Vyberte vlákno pro čtení zpráv.",
       "users": "Uživatelé",
@@ -2121,7 +2130,7 @@
       "online": "Online",
       "offline": "Offline",
       "emptyUsers": "Zatím nejsou zapsáni žádní uživatelé.",
-      "mentionedToast": "Někdo vás zmínil v chatu kurzu."
+      "mentionedToast": "Někdo vás zmínil v diskuzi kurzu."
     }
   },
   "studentChapterView": {

@@ -1,56 +1,68 @@
-import { MessageSquare, PanelRightClose, PanelRightOpen, Send } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
-  useCourseChatThreadMessages,
-  useCourseChatThreads,
+  COURSE_CHAT_MESSAGES_PER_PAGE,
+  useInfiniteCourseChatReplies,
+  useCourseChatMessages,
   useCourseChatUsers,
   useCreateCourseChatMessage,
-  useCreateCourseChatThread,
 } from "~/api/queries/course-chat/useCourseChat";
-import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Pagination } from "~/components/Pagination/Pagination";
+import { Card, CardContent } from "~/components/ui/card";
 import { useToast } from "~/components/ui/use-toast";
 
-import { ChatUsersPanel } from "./ChatUsersPanel";
+import { CourseChatMessageForm } from "./CourseChatMessageForm";
 import { EmptyState, MainFeedSkeleton } from "./CourseChatStates";
 import { getMentionedUserIds } from "./courseChatUtils";
 import { MainThreadMessage } from "./MainThreadMessage";
-import { MentionTextarea } from "./MentionTextarea";
 import { useCourseChatSocket } from "./useCourseChatSocket";
-
-import type { FormEvent, KeyboardEvent } from "react";
+import { useCourseChatState } from "./useCourseChatState";
 
 type CourseChatTabProps = {
   courseId: string;
   currentUserId: string;
+  canDeleteAnyMessage: boolean;
 };
 
-export function CourseChatTab({ courseId, currentUserId }: CourseChatTabProps) {
+export function CourseChatTab({
+  courseId,
+  currentUserId,
+  canDeleteAnyMessage,
+}: CourseChatTabProps) {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const [openThreadId, setOpenThreadId] = useState<string | undefined>();
-  const [isRosterOpen, setIsRosterOpen] = useState(true);
-  const [newThreadContent, setNewThreadContent] = useState("");
-  const [replyContent, setReplyContent] = useState("");
+  const { openMessageId, page, setOpenMessage, setPage, toggleOpenMessage } = useCourseChatState();
 
-  const { data: threadsResponse, isLoading: isLoadingThreads } = useCourseChatThreads(courseId);
-  const { data: chatUsers = [], isLoading: isLoadingUsers } = useCourseChatUsers(courseId);
+  const { data: messagesResponse, isLoading: isLoadingMessages } = useCourseChatMessages(
+    courseId,
+    page,
+  );
+  const { data: chatUsers = [] } = useCourseChatUsers(courseId);
+  const chatUsersById = useMemo(
+    () => new Map(chatUsers.map((user) => [user.id, user])),
+    [chatUsers],
+  );
   const mentionableUsers = useMemo(
     () => chatUsers.filter((user) => user.id !== currentUserId),
     [chatUsers, currentUserId],
   );
-  const threads = useMemo(() => threadsResponse?.data ?? [], [threadsResponse?.data]);
-  const openThread = threads.find((thread) => thread.id === openThreadId);
+  const messages = useMemo(() => messagesResponse?.data ?? [], [messagesResponse?.data]);
 
-  const { data: messagesResponse, isLoading: isLoadingMessages } =
-    useCourseChatThreadMessages(openThreadId);
-  const replies =
-    messagesResponse?.data.filter((message) => message.id !== openThread?.rootMessage.id) ?? [];
+  const {
+    data: repliesResponse,
+    fetchNextPage: fetchNextRepliesPage,
+    hasNextPage: hasMoreReplies,
+    isFetchingNextPage: isFetchingMoreReplies,
+    isLoading: isLoadingReplies,
+  } = useInfiniteCourseChatReplies(openMessageId);
+  const replies = useMemo(
+    () => repliesResponse?.pages.flatMap((page) => page.data) ?? [],
+    [repliesResponse?.pages],
+  );
 
-  const createThread = useCreateCourseChatThread(courseId);
-  const createMessage = useCreateCourseChatMessage(openThreadId);
+  const { mutate: createCourseChatMessage, isPending: isCreatingMessage } =
+    useCreateCourseChatMessage(courseId);
 
   const handleMentioned = useCallback(() => {
     toast({ description: t("studentCourseView.courseChat.mentionedToast") });
@@ -59,89 +71,60 @@ export function CourseChatTab({ courseId, currentUserId }: CourseChatTabProps) {
   useCourseChatSocket({ courseId, enabled: Boolean(courseId), onMentioned: handleMentioned });
 
   useEffect(() => {
-    if (openThreadId && !threads.some((thread) => thread.id === openThreadId)) {
-      setOpenThreadId(undefined);
+    if (openMessageId && !messages.some((message) => message.id === openMessageId)) {
+      setOpenMessage();
     }
-  }, [openThreadId, threads]);
+  }, [openMessageId, messages, setOpenMessage]);
 
-  const handleCreateThread = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const content = newThreadContent.trim();
-    if (!content) return;
-
-    const result = await createThread.mutateAsync({
-      content,
-      mentionedUserIds: getMentionedUserIds(content, mentionableUsers),
-    });
-    setNewThreadContent("");
-    setOpenThreadId(result.thread.id);
+  const handleCreateMessage = (content: string, options: { onSuccess: () => void }) => {
+    createCourseChatMessage(
+      {
+        content,
+        mentionedUserIds: getMentionedUserIds(content, mentionableUsers),
+      },
+      { onSuccess: options.onSuccess },
+    );
   };
 
-  const handleCreateMessage = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const content = replyContent.trim();
-    if (!content || !openThreadId) return;
+  const handleCreateReply = (content: string, options: { onSuccess: () => void }) => {
+    if (!openMessageId) return;
 
-    await createMessage.mutateAsync({
-      content,
-      mentionedUserIds: getMentionedUserIds(content, mentionableUsers),
-    });
-    setReplyContent("");
-  };
-
-  const handleNewThreadKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.key !== "Enter" || event.shiftKey) return;
-
-    event.preventDefault();
-    event.currentTarget.form?.requestSubmit();
+    createCourseChatMessage(
+      {
+        content,
+        parentMessageId: openMessageId,
+        mentionedUserIds: getMentionedUserIds(content, mentionableUsers),
+      },
+      { onSuccess: options.onSuccess },
+    );
   };
 
   return (
-    <Card className="overflow-hidden">
-      <CardHeader className="border-b border-neutral-200">
-        <div className="flex items-center justify-between gap-3">
-          <CardTitle className="h5 flex items-center gap-2">
-            <MessageSquare className="size-5 text-primary-700" />
-            {t("studentCourseView.courseChat.title")}
-          </CardTitle>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="gap-2"
-            onClick={() => setIsRosterOpen((current) => !current)}
-          >
-            {isRosterOpen ? (
-              <PanelRightClose className="size-4" />
-            ) : (
-              <PanelRightOpen className="size-4" />
-            )}
-            {t("studentCourseView.courseChat.users")}
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent className="grid min-h-[640px] bg-neutral-50 p-0 lg:grid-cols-[minmax(0,1fr)_auto]">
-        <div className="flex min-w-0 flex-col gap-6">
-          <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-4 py-6 md:px-6">
-            {isLoadingThreads ? (
+    <Card className="overflow-hidden border-neutral-200 shadow-sm">
+      <CardContent className="min-h-[560px] bg-neutral-50 p-0">
+        <div className="flex min-w-0 flex-col">
+          <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-3 py-4 md:px-5">
+            {isLoadingMessages ? (
               <MainFeedSkeleton />
-            ) : threads.length ? (
-              threads.map((thread) => (
+            ) : messages.length ? (
+              messages.map((message) => (
                 <MainThreadMessage
-                  key={thread.id}
-                  thread={thread}
-                  isOpen={thread.id === openThreadId}
-                  isLoadingReplies={isLoadingMessages && thread.id === openThreadId}
-                  replies={thread.id === openThreadId ? replies : []}
+                  key={message.id}
+                  message={message}
+                  isOpen={message.id === openMessageId}
+                  isLoadingReplies={isLoadingReplies && message.id === openMessageId}
+                  hasMoreReplies={Boolean(hasMoreReplies)}
+                  isFetchingMoreReplies={isFetchingMoreReplies}
+                  replies={message.id === openMessageId ? replies : []}
                   users={chatUsers}
+                  usersById={chatUsersById}
                   mentionableUsers={mentionableUsers}
-                  replyContent={thread.id === openThreadId ? replyContent : ""}
-                  isSendingReply={createMessage.isPending && thread.id === openThreadId}
-                  onToggle={() =>
-                    setOpenThreadId((current) => (current === thread.id ? undefined : thread.id))
-                  }
-                  onReplyChange={setReplyContent}
-                  onReplySubmit={handleCreateMessage}
+                  currentUserId={currentUserId}
+                  canDeleteAnyMessage={canDeleteAnyMessage}
+                  isSendingReply={isCreatingMessage && message.id === openMessageId}
+                  onToggle={() => toggleOpenMessage(message.id)}
+                  onReplySubmit={handleCreateReply}
+                  onLoadMoreReplies={() => fetchNextRepliesPage()}
                 />
               ))
             ) : (
@@ -149,34 +132,46 @@ export function CourseChatTab({ courseId, currentUserId }: CourseChatTabProps) {
             )}
           </div>
 
-          <form
-            className="border-t border-neutral-200 bg-background p-4 md:p-6"
-            onSubmit={handleCreateThread}
-          >
-            <div className="flex flex-col gap-3 rounded-xl border border-neutral-200 bg-background p-3 shadow-sm">
-              <MentionTextarea
-                value={newThreadContent}
-                onChange={setNewThreadContent}
-                onKeyDown={handleNewThreadKeyDown}
-                users={mentionableUsers}
-                placeholder={t("studentCourseView.courseChat.newThreadPlaceholder")}
-                maxLength={5000}
-                className="min-h-[96px] resize-none border-0 px-0 shadow-none focus-visible:ring-0"
-              />
-              <Button
-                type="submit"
-                className="self-end gap-2"
-                disabled={!newThreadContent.trim() || createThread.isPending}
-              >
-                <Send className="size-4" />
-                {t("studentCourseView.courseChat.send")}
-              </Button>
-            </div>
-          </form>
-        </div>
+          {messagesResponse?.pagination && messagesResponse.pagination.totalItems > 0 && (
+            <CourseChatPagination
+              totalItems={messagesResponse.pagination.totalItems}
+              currentPage={messagesResponse.pagination.page}
+              onPageChange={setPage}
+            />
+          )}
 
-        {isRosterOpen && <ChatUsersPanel users={chatUsers} isLoading={isLoadingUsers} />}
+          <CourseChatMessageForm
+            users={mentionableUsers}
+            placeholder={t("studentCourseView.courseChat.newThreadPlaceholder")}
+            isSubmitting={isCreatingMessage}
+            onSubmit={handleCreateMessage}
+            formClassName="border-t border-neutral-200 bg-background p-3 md:px-5"
+            wrapperClassName="flex flex-col gap-1.5 rounded-lg border border-neutral-200 bg-background p-1.5 shadow-sm transition focus-within:border-primary-300 focus-within:ring-2 focus-within:ring-primary-100"
+            textareaClassName="min-h-6 resize-none overflow-hidden border-0 px-1 py-0.5 text-sm leading-5 shadow-none focus-visible:ring-0"
+          />
+        </div>
       </CardContent>
     </Card>
+  );
+}
+
+function CourseChatPagination({
+  currentPage,
+  onPageChange,
+  totalItems,
+}: {
+  currentPage: number;
+  onPageChange: (page: number) => void;
+  totalItems: number;
+}) {
+  return (
+    <Pagination
+      totalItems={totalItems}
+      itemsPerPage={COURSE_CHAT_MESSAGES_PER_PAGE}
+      currentPage={currentPage}
+      canChangeItemsPerPage={false}
+      onPageChange={onPageChange}
+      className="border-t border-neutral-200 bg-background px-3 py-2"
+    />
   );
 }

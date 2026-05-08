@@ -1,101 +1,88 @@
 import { Injectable } from "@nestjs/common";
 
-import type { UUIDType } from "src/common";
+import { CourseChatPresenceStore } from "src/course-chat/course-chat-presence.store";
 
-type PresenceChange = {
-  courseId: UUIDType;
-  userId: UUIDType;
-  isOnline: boolean;
-};
+import type { UUIDType } from "src/common";
+import type {
+  CourseChatPresenceChange,
+  CourseChatPresenceMembership,
+} from "src/course-chat/course-chat-presence.types";
 
 @Injectable()
 export class CourseChatPresenceService {
-  private readonly courseUsers = new Map<UUIDType, Map<UUIDType, Set<string>>>();
-  private readonly socketMemberships = new Map<string, Set<string>>();
+  constructor(private readonly presenceStore: CourseChatPresenceStore) {}
 
-  join(courseId: UUIDType, userId: UUIDType, socketId: string): PresenceChange | null {
-    const userSockets = this.getUserSockets(courseId, userId);
-    const wasOnline = userSockets.size > 0;
+  async join(
+    courseId: UUIDType,
+    userId: UUIDType,
+    socketId: string,
+  ): Promise<CourseChatPresenceChange | null> {
+    const becameOnline = await this.presenceStore.addMembership(courseId, userId, socketId);
 
-    userSockets.add(socketId);
-    this.getSocketMemberships(socketId).add(this.getMembershipKey(courseId, userId));
-
-    if (wasOnline) return null;
+    if (!becameOnline) return null;
 
     return { courseId, userId, isOnline: true };
   }
 
-  leave(courseId: UUIDType, userId: UUIDType, socketId: string): PresenceChange | null {
-    const userSockets = this.courseUsers.get(courseId)?.get(userId);
-    if (!userSockets?.has(socketId)) return null;
+  async leave(
+    courseId: UUIDType,
+    userId: UUIDType,
+    socketId: string,
+  ): Promise<CourseChatPresenceChange | null> {
+    const becameOffline = await this.removeMembership(courseId, userId, socketId);
 
-    userSockets.delete(socketId);
-    this.socketMemberships.get(socketId)?.delete(this.getMembershipKey(courseId, userId));
-    this.cleanupSocket(socketId);
+    if (becameOffline !== 1) return null;
 
-    if (userSockets.size > 0) return null;
-
-    this.courseUsers.get(courseId)?.delete(userId);
-    this.cleanupCourse(courseId);
+    await this.cleanupSocketMemberships(socketId);
 
     return { courseId, userId, isOnline: false };
   }
 
-  disconnect(socketId: string): PresenceChange[] {
-    const memberships = Array.from(this.socketMemberships.get(socketId) ?? []);
-    const changes: PresenceChange[] = [];
+  async disconnect(socketId: string): Promise<CourseChatPresenceChange[]> {
+    const memberships = await this.getSocketMemberships(socketId);
+    const changes: CourseChatPresenceChange[] = [];
 
     for (const membership of memberships) {
-      const [courseId, userId] = membership.split(":") as [UUIDType, UUIDType];
-      const change = this.leave(courseId, userId, socketId);
+      const change = await this.leave(membership.courseId, membership.userId, socketId);
       if (change) changes.push(change);
     }
 
-    this.socketMemberships.delete(socketId);
+    await this.presenceStore.deleteSocketMemberships(socketId);
+
     return changes;
   }
 
-  isOnline(courseId: UUIDType, userId: UUIDType): boolean {
-    return Boolean(this.courseUsers.get(courseId)?.get(userId)?.size);
+  async isOnline(courseId: UUIDType, userId: UUIDType): Promise<boolean> {
+    return Boolean(await this.presenceStore.isOnline(courseId, userId));
   }
 
-  private getUserSockets(courseId: UUIDType, userId: UUIDType) {
-    let users = this.courseUsers.get(courseId);
-    if (!users) {
-      users = new Map();
-      this.courseUsers.set(courseId, users);
-    }
+  async getOnlineUserIds(courseId: UUIDType, userIds: UUIDType[]): Promise<Set<UUIDType>> {
+    if (!userIds.length) return new Set();
 
-    let sockets = users.get(userId);
-    if (!sockets) {
-      sockets = new Set();
-      users.set(userId, sockets);
-    }
-
-    return sockets;
+    return this.presenceStore.getOnlineUserIds(courseId, userIds);
   }
 
-  private getSocketMemberships(socketId: string) {
-    let memberships = this.socketMemberships.get(socketId);
-    if (!memberships) {
-      memberships = new Set();
-      this.socketMemberships.set(socketId, memberships);
-    }
-
-    return memberships;
+  private async removeMembership(courseId: UUIDType, userId: UUIDType, socketId: string) {
+    return this.presenceStore.removeMembership(courseId, userId, socketId);
   }
 
-  private getMembershipKey(courseId: UUIDType, userId: UUIDType) {
-    return `${courseId}:${userId}`;
+  private async getSocketMemberships(socketId: string): Promise<CourseChatPresenceMembership[]> {
+    const memberships = await this.presenceStore.getSocketMemberships(socketId);
+
+    return memberships
+      .map((membership) => this.parseMembershipKey(membership))
+      .filter((membership): membership is CourseChatPresenceMembership => Boolean(membership));
   }
 
-  private cleanupSocket(socketId: string) {
-    const memberships = this.socketMemberships.get(socketId);
-    if (memberships && memberships.size === 0) this.socketMemberships.delete(socketId);
+  private async cleanupSocketMemberships(socketId: string) {
+    await this.presenceStore.deleteSocketMembershipsIfEmpty(socketId);
   }
 
-  private cleanupCourse(courseId: UUIDType) {
-    const users = this.courseUsers.get(courseId);
-    if (users && users.size === 0) this.courseUsers.delete(courseId);
+  private parseMembershipKey(membershipKey: string): CourseChatPresenceMembership | null {
+    const [courseId, userId] = membershipKey.split(":");
+
+    if (!courseId || !userId) return null;
+
+    return { courseId, userId } as CourseChatPresenceMembership;
   }
 }

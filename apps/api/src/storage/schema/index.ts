@@ -433,6 +433,10 @@ export const courseChatMessages = pgTable(
       table.threadId,
       table.createdAt,
     ),
+    parentCreatedAtIdx: index("course_chat_messages_parent_message_id_created_at_idx").on(
+      table.parentMessageId,
+      table.createdAt,
+    ),
   })),
 );
 

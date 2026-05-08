@@ -2154,21 +2154,30 @@
     },
     "tabs": {
       "chapters": "Rozdziały",
-      "chat": "Chat",
+      "chat": "Dyskusja",
       "moreFromAuthor": "Więcej od autora",
       "statistics": "Statystyki"
     },
     "courseChat": {
-      "title": "Chat kursu",
+      "title": "Dyskusja kursu",
       "newThreadPlaceholder": "Rozpocznij nową dyskusję...",
       "startThread": "Rozpocznij wątek",
       "messagesTitle": "Wiadomości",
       "noThreadSelected": "Wybierz wątek",
-      "emptyThreads": "Nie ma jeszcze rozmów. Rozpocznij pierwszy wątek.",
+      "emptyThreads": "Nie ma jeszcze dyskusji. Rozpocznij pierwszą.",
       "emptyMessages": "Nie ma jeszcze wiadomości.",
       "replyPlaceholder": "Napisz odpowiedź...",
       "reply": "Odpowiedz",
-      "repliesCount": "{{count}} odpowiedzi",
+      "reactWith": "Zareaguj {{reaction}}",
+      "deleteMessage": "Usuń wiadomość",
+      "deleteMessageConfirmationTitle": "Usunąć wiadomość?",
+      "deleteMessageConfirmationDescription": "Wiadomość zostanie usunięta z dyskusji. Odpowiedzi mogą zachować zastępczy wpis, żeby rozmowa pozostała czytelna.",
+      "deletedMessage": "Ta wiadomość została usunięta.",
+      "repliesCount_one": "{{countLabel}} odpowiedź",
+      "repliesCount_few": "{{countLabel}} odpowiedzi",
+      "repliesCount_many": "{{countLabel}} odpowiedzi",
+      "repliesCount_other": "{{countLabel}} odpowiedzi",
+      "loadMoreReplies": "Załaduj więcej odpowiedzi",
       "send": "Wyślij",
       "selectThread": "Wybierz wątek, aby przeczytać wiadomości.",
       "users": "Użytkownicy",
@@ -2176,7 +2185,7 @@
       "online": "Online",
       "offline": "Offline",
       "emptyUsers": "Brak zapisanych użytkowników.",
-      "mentionedToast": "Ktoś oznaczył Cię na czacie kursu."
+      "mentionedToast": "Ktoś oznaczył Cię w dyskusji kursu."
     }
   },
   "studentChapterView": {

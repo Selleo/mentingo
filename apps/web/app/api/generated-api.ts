@@ -134,6 +134,11 @@ export interface CurrentUserResponse {
       | "course.enrollment"
       | "course.statistics"
       | "course.export"
+      | "course_discussion.read"
+      | "course_discussion.message.create"
+      | "course_discussion.message.react"
+      | "course_discussion.message.delete_own"
+      | "course_discussion.message.delete"
       | "learning_mode.use"
       | "learning_progress.update"
       | "certificate.read"
@@ -3392,182 +3397,10 @@ export interface DeleteManyCategoriesResponse {
   };
 }
 
-export interface GetThreadsResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    /** @format uuid */
-    courseId: string;
-    /** @format uuid */
-    createdByUserId: string;
-    archived: boolean;
-    createdAt: string;
-    updatedAt: string;
-    messageCount: number;
-    createdBy: {
-      /** @format uuid */
-      id: string;
-      firstName: string;
-      lastName: string;
-      avatarReference: string | null;
-    };
-    rootMessage: {
-      /** @format uuid */
-      id: string;
-      /** @format uuid */
-      threadId: string;
-      /** @format uuid */
-      courseId: string;
-      /** @format uuid */
-      userId: string;
-      content: string;
-      parentMessageId: string | null;
-      deletedAt: string | null;
-      createdAt: string;
-      updatedAt: string;
-      user: {
-        /** @format uuid */
-        id: string;
-        firstName: string;
-        lastName: string;
-        avatarReference: string | null;
-      };
-    };
-    latestMessage: {
-      /** @format uuid */
-      id: string;
-      /** @format uuid */
-      threadId: string;
-      /** @format uuid */
-      courseId: string;
-      /** @format uuid */
-      userId: string;
-      content: string;
-      parentMessageId: string | null;
-      deletedAt: string | null;
-      createdAt: string;
-      updatedAt: string;
-      user: {
-        /** @format uuid */
-        id: string;
-        firstName: string;
-        lastName: string;
-        avatarReference: string | null;
-      };
-    } | null;
-  }[];
-  pagination: {
-    totalItems: number;
-    page: number;
-    perPage: number;
-  };
-  appliedFilters?: object;
-}
-
-export interface CreateThreadBody {
-  /**
-   * @minLength 1
-   * @maxLength 5000
-   */
-  content: string;
-}
-
-export interface CreateThreadResponse {
-  data: {
-    thread: {
-      /** @format uuid */
-      id: string;
-      /** @format uuid */
-      courseId: string;
-      /** @format uuid */
-      createdByUserId: string;
-      archived: boolean;
-      createdAt: string;
-      updatedAt: string;
-      messageCount: number;
-      createdBy: {
-        /** @format uuid */
-        id: string;
-        firstName: string;
-        lastName: string;
-        avatarReference: string | null;
-      };
-      rootMessage: {
-        /** @format uuid */
-        id: string;
-        /** @format uuid */
-        threadId: string;
-        /** @format uuid */
-        courseId: string;
-        /** @format uuid */
-        userId: string;
-        content: string;
-        parentMessageId: string | null;
-        deletedAt: string | null;
-        createdAt: string;
-        updatedAt: string;
-        user: {
-          /** @format uuid */
-          id: string;
-          firstName: string;
-          lastName: string;
-          avatarReference: string | null;
-        };
-      };
-      latestMessage: {
-        /** @format uuid */
-        id: string;
-        /** @format uuid */
-        threadId: string;
-        /** @format uuid */
-        courseId: string;
-        /** @format uuid */
-        userId: string;
-        content: string;
-        parentMessageId: string | null;
-        deletedAt: string | null;
-        createdAt: string;
-        updatedAt: string;
-        user: {
-          /** @format uuid */
-          id: string;
-          firstName: string;
-          lastName: string;
-          avatarReference: string | null;
-        };
-      } | null;
-    };
-    message: {
-      /** @format uuid */
-      id: string;
-      /** @format uuid */
-      threadId: string;
-      /** @format uuid */
-      courseId: string;
-      /** @format uuid */
-      userId: string;
-      content: string;
-      parentMessageId: string | null;
-      deletedAt: string | null;
-      createdAt: string;
-      updatedAt: string;
-      user: {
-        /** @format uuid */
-        id: string;
-        firstName: string;
-        lastName: string;
-        avatarReference: string | null;
-      };
-    };
-  };
-}
-
 export interface GetMessagesResponse {
   data: {
     /** @format uuid */
     id: string;
-    /** @format uuid */
-    threadId: string;
     /** @format uuid */
     courseId: string;
     /** @format uuid */
@@ -3584,6 +3417,44 @@ export interface GetMessagesResponse {
       lastName: string;
       avatarReference: string | null;
     };
+    reactions: {
+      reaction: string;
+      count: number;
+      reactedByCurrentUser: boolean;
+    }[];
+    replyCount: number;
+    latestReply: {
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      courseId: string;
+      /** @format uuid */
+      userId: string;
+      content: string;
+      parentMessageId: string | null;
+      deletedAt: string | null;
+      createdAt: string;
+      updatedAt: string;
+      user: {
+        /** @format uuid */
+        id: string;
+        firstName: string;
+        lastName: string;
+        avatarReference: string | null;
+      };
+      reactions: {
+        reaction: string;
+        count: number;
+        reactedByCurrentUser: boolean;
+      }[];
+    } | null;
+    replyParticipants: {
+      /** @format uuid */
+      id: string;
+      firstName: string;
+      lastName: string;
+      avatarReference: string | null;
+    }[];
   }[];
   pagination: {
     totalItems: number;
@@ -3591,6 +3462,17 @@ export interface GetMessagesResponse {
     perPage: number;
   };
   appliedFilters?: object;
+}
+
+export interface GetCourseChatUsersResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatarReference: string | null;
+    isOnline: boolean;
+  }[];
 }
 
 export interface CreateMessageBody {
@@ -3601,14 +3483,13 @@ export interface CreateMessageBody {
   content: string;
   /** @format uuid */
   parentMessageId?: string;
+  mentionedUserIds?: string[];
 }
 
 export interface CreateMessageResponse {
   data: {
     /** @format uuid */
     id: string;
-    /** @format uuid */
-    threadId: string;
     /** @format uuid */
     courseId: string;
     /** @format uuid */
@@ -3625,6 +3506,145 @@ export interface CreateMessageResponse {
       lastName: string;
       avatarReference: string | null;
     };
+    reactions: {
+      reaction: string;
+      count: number;
+      reactedByCurrentUser: boolean;
+    }[];
+    replyCount: number;
+    latestReply: {
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      courseId: string;
+      /** @format uuid */
+      userId: string;
+      content: string;
+      parentMessageId: string | null;
+      deletedAt: string | null;
+      createdAt: string;
+      updatedAt: string;
+      user: {
+        /** @format uuid */
+        id: string;
+        firstName: string;
+        lastName: string;
+        avatarReference: string | null;
+      };
+      reactions: {
+        reaction: string;
+        count: number;
+        reactedByCurrentUser: boolean;
+      }[];
+    } | null;
+    replyParticipants: {
+      /** @format uuid */
+      id: string;
+      firstName: string;
+      lastName: string;
+      avatarReference: string | null;
+    }[];
+  };
+}
+
+export interface GetRepliesResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    courseId: string;
+    /** @format uuid */
+    userId: string;
+    content: string;
+    parentMessageId: string | null;
+    deletedAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+    user: {
+      /** @format uuid */
+      id: string;
+      firstName: string;
+      lastName: string;
+      avatarReference: string | null;
+    };
+    reactions: {
+      reaction: string;
+      count: number;
+      reactedByCurrentUser: boolean;
+    }[];
+    replyCount: number;
+    latestReply: {
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      courseId: string;
+      /** @format uuid */
+      userId: string;
+      content: string;
+      parentMessageId: string | null;
+      deletedAt: string | null;
+      createdAt: string;
+      updatedAt: string;
+      user: {
+        /** @format uuid */
+        id: string;
+        firstName: string;
+        lastName: string;
+        avatarReference: string | null;
+      };
+      reactions: {
+        reaction: string;
+        count: number;
+        reactedByCurrentUser: boolean;
+      }[];
+    } | null;
+    replyParticipants: {
+      /** @format uuid */
+      id: string;
+      firstName: string;
+      lastName: string;
+      avatarReference: string | null;
+    }[];
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface ToggleMessageReactionBody {
+  /**
+   * @minLength 1
+   * @maxLength 16
+   */
+  reaction: string;
+}
+
+export interface ToggleMessageReactionResponse {
+  data: {
+    /** @format uuid */
+    courseId: string;
+    /** @format uuid */
+    messageId: string;
+    reactions: {
+      reaction: string;
+      count: number;
+      reactedByCurrentUser: boolean;
+    }[];
+  };
+}
+
+export interface DeleteMessageResponse {
+  data: {
+    /** @format uuid */
+    courseId: string;
+    /** @format uuid */
+    messageId: string;
+    parentMessageId: string | null;
+    removed: boolean;
+    deletedAt: string | null;
   };
 }
 
@@ -8619,55 +8639,11 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name CourseChatControllerGetThreads
-     * @request GET:/api/course-chat/{courseId}/threads
-     */
-    courseChatControllerGetThreads: (
-      courseId: string,
-      query?: {
-        /** @min 1 */
-        page?: number;
-        /** @min 1 */
-        perPage?: number;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetThreadsResponse, any>({
-        path: `/api/course-chat/${courseId}/threads`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name CourseChatControllerCreateThread
-     * @request POST:/api/course-chat/{courseId}/threads
-     */
-    courseChatControllerCreateThread: (
-      courseId: string,
-      data: CreateThreadBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<CreateThreadResponse, any>({
-        path: `/api/course-chat/${courseId}/threads`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name CourseChatControllerGetMessages
-     * @request GET:/api/course-chat/threads/{threadId}/messages
+     * @request GET:/api/course-chat/{courseId}/messages
      */
     courseChatControllerGetMessages: (
-      threadId: string,
+      courseId: string,
       query?: {
         /** @min 1 */
         page?: number;
@@ -8677,7 +8653,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       params: RequestParams = {},
     ) =>
       this.request<GetMessagesResponse, any>({
-        path: `/api/course-chat/threads/${threadId}/messages`,
+        path: `/api/course-chat/${courseId}/messages`,
         method: "GET",
         query: query,
         format: "json",
@@ -8688,18 +8664,90 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @name CourseChatControllerCreateMessage
-     * @request POST:/api/course-chat/threads/{threadId}/messages
+     * @request POST:/api/course-chat/{courseId}/messages
      */
     courseChatControllerCreateMessage: (
-      threadId: string,
+      courseId: string,
       data: CreateMessageBody,
       params: RequestParams = {},
     ) =>
       this.request<CreateMessageResponse, any>({
-        path: `/api/course-chat/threads/${threadId}/messages`,
+        path: `/api/course-chat/${courseId}/messages`,
         method: "POST",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseChatControllerGetCourseChatUsers
+     * @request GET:/api/course-chat/{courseId}/users
+     */
+    courseChatControllerGetCourseChatUsers: (courseId: string, params: RequestParams = {}) =>
+      this.request<GetCourseChatUsersResponse, any>({
+        path: `/api/course-chat/${courseId}/users`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseChatControllerGetReplies
+     * @request GET:/api/course-chat/messages/{messageId}/replies
+     */
+    courseChatControllerGetReplies: (
+      messageId: string,
+      query?: {
+        /** @min 1 */
+        page?: number;
+        /** @min 1 */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetRepliesResponse, any>({
+        path: `/api/course-chat/messages/${messageId}/replies`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseChatControllerToggleMessageReaction
+     * @request POST:/api/course-chat/messages/{messageId}/reactions
+     */
+    courseChatControllerToggleMessageReaction: (
+      messageId: string,
+      data: ToggleMessageReactionBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<ToggleMessageReactionResponse, any>({
+        path: `/api/course-chat/messages/${messageId}/reactions`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseChatControllerDeleteMessage
+     * @request DELETE:/api/course-chat/messages/{messageId}
+     */
+    courseChatControllerDeleteMessage: (messageId: string, params: RequestParams = {}) =>
+      this.request<DeleteMessageResponse, any>({
+        path: `/api/course-chat/messages/${messageId}`,
+        method: "DELETE",
         format: "json",
         ...params,
       }),

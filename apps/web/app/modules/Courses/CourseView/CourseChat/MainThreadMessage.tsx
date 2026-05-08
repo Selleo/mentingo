@@ -1,100 +1,231 @@
-import { format } from "date-fns";
-import { MessagesSquare, Send } from "lucide-react";
+import { formatDistanceToNow, isSameMinute } from "date-fns";
+import { cs, de, enUS, lt, pl } from "date-fns/locale";
+import { MessagesSquare } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
+import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 
 import { ChatMessage } from "./ChatMessage";
+import { CourseChatMessageForm } from "./CourseChatMessageForm";
 import { MessagesSkeleton } from "./CourseChatStates";
-import { MentionTextarea } from "./MentionTextarea";
 
-import type { FormEvent } from "react";
 import type {
-  CourseChatMessage as CourseChatMessageType,
-  CourseChatThread,
+  CourseChatMessage,
+  CourseChatMessagePreview,
   CourseChatUser,
-} from "~/api/queries/course-chat/useCourseChat";
+  CourseChatUserProfile,
+} from "~/api/queries/course-chat/courseChatTypes";
 
 type MainThreadMessageProps = {
-  thread: CourseChatThread;
+  message: CourseChatMessage;
   isOpen: boolean;
   isLoadingReplies: boolean;
-  replies: CourseChatMessageType[];
+  replies: CourseChatMessage[];
   users: CourseChatUser[];
+  usersById: Map<string, CourseChatUser>;
   mentionableUsers: CourseChatUser[];
-  replyContent: string;
+  currentUserId: string;
+  canDeleteAnyMessage: boolean;
   isSendingReply: boolean;
+  hasMoreReplies: boolean;
+  isFetchingMoreReplies: boolean;
   onToggle: () => void;
-  onReplyChange: (value: string) => void;
-  onReplySubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onReplySubmit: (content: string, options: { onSuccess: () => void }) => void;
+  onLoadMoreReplies: () => void;
 };
 
 export function MainThreadMessage({
-  thread,
+  message,
   isOpen,
   isLoadingReplies,
   replies,
   users,
+  usersById,
   mentionableUsers,
-  replyContent,
+  currentUserId,
+  canDeleteAnyMessage,
   isSendingReply,
+  hasMoreReplies,
+  isFetchingMoreReplies,
   onToggle,
-  onReplyChange,
   onReplySubmit,
+  onLoadMoreReplies,
 }: MainThreadMessageProps) {
-  const { t } = useTranslation();
-  const replyCount = Math.max(thread.messageCount - 1, 0);
+  const { i18n, t } = useTranslation();
+  const replyCount = message.replyCount;
+  const displayedReplyCountText = replyCount
+    ? t("studentCourseView.courseChat.repliesCount", {
+        count: Math.min(replyCount, 99),
+        countLabel: getCappedReplyCountLabel(replyCount),
+      })
+    : null;
+  const latestReplyDistance = message.latestReply
+    ? formatDistanceToNow(new Date(message.latestReply.createdAt), {
+        addSuffix: true,
+        locale: getDateLocale(i18n.language),
+      })
+    : null;
 
   return (
-    <article className="rounded-xl border border-neutral-200 bg-background p-4 shadow-sm">
-      <ChatMessage message={thread.rootMessage} users={users} />
+    <article className="rounded-2xl bg-transparent">
+      <ChatMessage
+        message={message}
+        users={users}
+        usersById={usersById}
+        currentUserId={currentUserId}
+        canDeleteAnyMessage={canDeleteAnyMessage}
+        onReply={message.deletedAt ? undefined : onToggle}
+      />
 
-      <div className="mt-3 flex flex-wrap items-center gap-3 pl-11">
-        <Button type="button" variant="ghost" size="sm" className="gap-2" onClick={onToggle}>
-          <MessagesSquare className="size-4" />
-          {replyCount
-            ? t("studentCourseView.courseChat.repliesCount", { count: replyCount })
-            : t("studentCourseView.courseChat.reply")}
+      <div className="mt-1 flex items-center gap-2 pl-10">
+        {message.latestReply ? (
+          <LatestReplyAvatars
+            replies={replies.length ? replies : message.replyParticipants}
+            usersById={usersById}
+          />
+        ) : null}
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="h-6 gap-1.5 px-2 text-xs text-neutral-600"
+          onClick={onToggle}
+        >
+          <MessagesSquare className="size-3.5" />
+          {replyCount ? displayedReplyCountText : t("studentCourseView.courseChat.reply")}
         </Button>
-        {thread.latestMessage && thread.latestMessage.id !== thread.rootMessage.id && (
-          <span className="caption text-neutral-500">
-            {format(new Date(thread.latestMessage.createdAt), "dd.MM.yyyy HH:mm")}
-          </span>
-        )}
+        {latestReplyDistance ? (
+          <span className="text-[11px] leading-4 text-neutral-500">{latestReplyDistance}</span>
+        ) : null}
       </div>
 
       {isOpen && (
-        <div className="mt-4 border-l-2 border-primary-100 pl-4 md:ml-11">
-          <div className="flex flex-col gap-4">
+        <div className="mt-1.5 border-l border-primary-100 pl-3 md:ml-10">
+          <div className="flex flex-col gap-2.5 pr-2">
             {isLoadingReplies ? (
               <MessagesSkeleton />
             ) : replies.length ? (
-              replies.map((message) => (
-                <ChatMessage key={message.id} message={message} users={users} />
-              ))
+              replies.map((message, index) => {
+                const previousMessage = replies[index - 1];
+                const isChained =
+                  previousMessage?.userId === message.userId &&
+                  isSameMinute(new Date(previousMessage.createdAt), new Date(message.createdAt));
+
+                return (
+                  <ChatMessage
+                    key={message.id}
+                    message={message}
+                    users={users}
+                    usersById={usersById}
+                    currentUserId={currentUserId}
+                    canDeleteAnyMessage={canDeleteAnyMessage}
+                    showAvatar={!isChained}
+                    showMeta={!isChained}
+                  />
+                );
+              })
             ) : null}
 
-            <form className="flex flex-col gap-3" onSubmit={onReplySubmit}>
-              <MentionTextarea
-                value={replyContent}
-                onChange={onReplyChange}
+            {hasMoreReplies && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-7 self-start px-2 text-xs text-neutral-600"
+                disabled={isFetchingMoreReplies}
+                onClick={onLoadMoreReplies}
+              >
+                {t("studentCourseView.courseChat.loadMoreReplies")}
+              </Button>
+            )}
+
+            {!message.deletedAt && (
+              <CourseChatMessageForm
                 users={mentionableUsers}
                 placeholder={t("studentCourseView.courseChat.replyPlaceholder")}
-                maxLength={5000}
-                className="min-h-[80px] resize-none"
+                isSubmitting={isSendingReply}
+                onSubmit={onReplySubmit}
+                formClassName="flex flex-col gap-2"
+                wrapperClassName="flex flex-col gap-1.5 rounded-lg border border-neutral-200 bg-background p-1.5 shadow-sm transition focus-within:border-primary-300 focus-within:ring-2 focus-within:ring-primary-100"
+                textareaClassName="min-h-6 resize-none overflow-hidden border-0 px-1 py-0.5 text-sm leading-5 shadow-none focus-visible:ring-0"
               />
-              <Button
-                type="submit"
-                className="self-end gap-2"
-                disabled={!replyContent.trim() || isSendingReply}
-              >
-                <Send className="size-4" />
-                {t("studentCourseView.courseChat.send")}
-              </Button>
-            </form>
+            )}
           </div>
         </div>
       )}
     </article>
   );
+}
+
+function LatestReplyAvatars({
+  replies,
+  usersById,
+}: {
+  replies: CourseChatMessagePreview[] | CourseChatUserProfile[];
+  usersById: Map<string, CourseChatUser>;
+}) {
+  const orderedReplies = areMessagePreviews(replies)
+    ? [...replies].sort(
+        (firstReply, secondReply) =>
+          new Date(secondReply.createdAt).getTime() - new Date(firstReply.createdAt).getTime(),
+      )
+    : replies;
+
+  const participants = orderedReplies.reduce<CourseChatUserProfile[]>((acc, reply) => {
+    const replyUser = "user" in reply ? reply.user : reply;
+
+    if (acc.some((user) => user.id === replyUser.id)) return acc;
+
+    const user = usersById.get(replyUser.id) ?? replyUser;
+    acc.push(user);
+
+    return acc;
+  }, []);
+
+  if (!participants.length) return null;
+
+  return (
+    <div className="flex -space-x-1">
+      {participants.slice(0, 3).map((user) => {
+        const userName = `${user.firstName} ${user.lastName}`;
+
+        return (
+          <UserAvatar
+            key={user.id}
+            className="size-4 bg-neutral-100 ring-1 ring-background"
+            userName={userName}
+            profilePictureUrl={user.avatarReference}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+function getCappedReplyCountLabel(replyCount: number) {
+  return replyCount > 99 ? "99+" : String(replyCount);
+}
+
+function areMessagePreviews(
+  replies: CourseChatMessagePreview[] | CourseChatUserProfile[],
+): replies is CourseChatMessagePreview[] {
+  return replies.some((reply) => "user" in reply);
+}
+
+function getDateLocale(language: string) {
+  const locale = language.split("-")[0];
+
+  switch (locale) {
+    case "pl":
+      return pl;
+    case "de":
+      return de;
+    case "cs":
+      return cs;
+    case "lt":
+      return lt;
+    default:
+      return enUS;
+  }
 }
