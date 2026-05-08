@@ -20,6 +20,7 @@ import {
 import { match } from "ts-pattern";
 
 import { DatabasePg, type Pagination, type UUIDType } from "src/common";
+import { setJsonbField } from "src/common/helpers/sqlHelpers";
 import { hasAnyPermission, hasPermission } from "src/common/permissions/permission.utils";
 import {
   LearningPathCourseAddedEvent,
@@ -28,8 +29,8 @@ import {
 } from "src/events";
 import { MAX_FILE_SIZE } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
-import { LocalizationService } from "src/localization/localization.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
+import { learningPaths } from "src/storage/schema";
 import { hasDataToUpdate } from "src/utils/hasDataToUpdate";
 import { PROGRESS_STATUSES, type ProgressStatus } from "src/utils/types/progress.type";
 
@@ -69,7 +70,6 @@ export class LearningPathService {
     @Inject("DB") private readonly db: DatabasePg,
     private readonly learningPathRepository: LearningPathRepository,
     private readonly outboxPublisher: OutboxPublisher,
-    private readonly localizationService: LocalizationService,
     private readonly fileService: FileService,
     private readonly learningPathCourseSyncService: LearningPathCourseSyncService,
     private readonly learningPathExportService: LearningPathExportService,
@@ -167,8 +167,6 @@ export class LearningPathService {
     },
     language?: SupportedLanguages,
   ): LearningPathUpdateData {
-    const localizableFields = ["title", "description"] as const;
-
     const directFields: Array<
       keyof Omit<UpdateLearningPathBody, "language" | "title" | "description">
     > = ["thumbnailReference", "status", "includesCertificate", "sequenceEnabled"];
@@ -176,15 +174,19 @@ export class LearningPathService {
     const updateData: LearningPathUpdateData = {};
 
     if (language) {
-      Object.assign(
-        updateData,
-        this.localizationService.updateLocalizableFields(
-          localizableFields,
-          existingLearningPath,
-          updateLearningPathData,
-          language,
-        ),
+      const titleUpdate = setJsonbField(
+        learningPaths.title,
+        language,
+        updateLearningPathData.title,
       );
+      const descriptionUpdate = setJsonbField(
+        learningPaths.description,
+        language,
+        updateLearningPathData.description,
+      );
+
+      if (titleUpdate) updateData.title = titleUpdate;
+      if (descriptionUpdate) updateData.description = descriptionUpdate;
     }
 
     directFields.forEach((field) => {

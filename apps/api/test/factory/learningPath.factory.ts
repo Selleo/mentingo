@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { Factory } from "fishery";
 
+import { buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelpers";
 import { learningPaths, users } from "src/storage/schema";
 
 import type { InferSelectModel } from "drizzle-orm";
@@ -35,6 +36,8 @@ export const createLearningPathFactory = (db: DatabasePg) => {
         .insert(learningPaths)
         .values({
           ...learningPath,
+          title: buildJsonbFieldWithMultipleEntries(learningPath.title),
+          description: buildJsonbFieldWithMultipleEntries(learningPath.description),
           authorId,
         })
         .returning();

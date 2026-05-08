@@ -160,7 +160,7 @@ export function LearningPathSettingsDrawer({
               </Button>
             </DrawerClose>
           </div>
-          <div className="grid min-h-0 flex-1 gap-6 overflow-y-auto px-6 py-6">
+          <div className="grid min-h-0 flex-1 content-start gap-6 overflow-y-auto px-6 py-6">
             {canEdit && (
               <>
                 <div className="grid gap-2">

@@ -28,15 +28,18 @@ import {
   not,
   or,
   sql,
+  type SQL,
 } from "drizzle-orm";
-import { alias } from "drizzle-orm/pg-core";
+import { alias, type AnyPgColumn } from "drizzle-orm/pg-core";
 
 import { DatabasePg } from "src/common";
 import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterConditions";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
+import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { userHasAnyPermissionsCondition } from "src/common/permissions/permission-sql.utils";
 import { LocalizationService } from "src/localization/localization.service";
+import { DB_ADMIN } from "src/storage/db/db.providers";
 import {
   courses,
   groupLearningPaths,
@@ -95,6 +98,7 @@ type LearningPathListQuery = {
 export class LearningPathRepository {
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
+    @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
     private readonly localizationService: LocalizationService,
   ) {}
 
@@ -113,8 +117,11 @@ export class LearningPathRepository {
       certificateSignature: learningPathBody.certificateSignature ?? null,
     };
     const values: typeof learningPaths.$inferInsert = {
-      title: { [body.language]: body.title },
-      description: { [body.language]: body.description },
+      title: buildJsonbField(body.language, body.title) as typeof learningPaths.$inferInsert.title,
+      description: buildJsonbField(
+        body.language,
+        body.description,
+      ) as typeof learningPaths.$inferInsert.description,
       authorId: currentUser.userId,
       baseLanguage: body.language,
       availableLocales: [body.language],
@@ -134,6 +141,40 @@ export class LearningPathRepository {
     return values;
   }
 
+  private buildLearningPathFieldSearchCondition(
+    fieldColumn: AnyPgColumn,
+    searchPattern: string,
+    language?: SupportedLanguages,
+  ): SQL<unknown> {
+    const localizedField = this.localizationService.getLocalizedSqlField(
+      fieldColumn,
+      language,
+      learningPaths,
+    );
+
+    return sql`${localizedField} ILIKE ${searchPattern}`;
+  }
+
+  private buildLearningPathSearchCondition(
+    searchQuery?: string,
+    language?: SupportedLanguages,
+  ): SQL<unknown> | undefined {
+    const trimmedSearchQuery = searchQuery?.trim();
+
+    if (!trimmedSearchQuery) return undefined;
+
+    const searchPattern = `%${trimmedSearchQuery}%`;
+
+    return or(
+      this.buildLearningPathFieldSearchCondition(learningPaths.title, searchPattern, language),
+      this.buildLearningPathFieldSearchCondition(
+        learningPaths.description,
+        searchPattern,
+        language,
+      ),
+    );
+  }
+
   findLearningPathById(id: UUIDType, dbInstance: DatabasePg = this.db) {
     return dbInstance.query.learningPaths.findFirst({
       where: eq(learningPaths.id, id),
@@ -142,6 +183,7 @@ export class LearningPathRepository {
 
   async getLearningPaths(query: LearningPathListQuery = {}, dbInstance: DatabasePg = this.db) {
     const { page = 1, perPage = DEFAULT_PAGE_SIZE, language, searchQuery, visibility } = query;
+
     const visibilityCondition = visibility?.canReadAll
       ? undefined
       : or(
@@ -149,18 +191,8 @@ export class LearningPathRepository {
           isNotNull(studentLearningPaths.id),
           visibility?.canReadOwn ? eq(learningPaths.authorId, visibility.studentId) : undefined,
         );
-    const title = this.localizationService.getLocalizedSqlField(learningPaths.title, language);
-    const description = this.localizationService.getLocalizedSqlField(
-      learningPaths.description,
-      language,
-    );
-    const trimmedSearchQuery = searchQuery?.trim();
-    const searchCondition = trimmedSearchQuery
-      ? or(
-          sql`${title} ILIKE ${`%${trimmedSearchQuery}%`}`,
-          sql`${description} ILIKE ${`%${trimmedSearchQuery}%`}`,
-        )
-      : undefined;
+
+    const searchCondition = this.buildLearningPathSearchCondition(searchQuery, language);
     const whereCondition = and(visibilityCondition, searchCondition);
 
     const queriedLearningPaths = await dbInstance
@@ -664,6 +696,37 @@ export class LearningPathRepository {
     return { learningPath, courseLinks };
   }
 
+  async getLearningPathExportSourceSnapshot(sourceTenantId: UUIDType, learningPathId: UUIDType) {
+    const [learningPath] = await this.dbAdmin
+      .select({
+        ...getTableColumns(learningPaths),
+      })
+      .from(learningPaths)
+      .where(and(eq(learningPaths.id, learningPathId), eq(learningPaths.tenantId, sourceTenantId)))
+      .limit(1);
+
+    if (!learningPath) return null;
+
+    const courseLinks = await this.dbAdmin
+      .select({
+        id: learningPathCourses.id,
+        learningPathId: learningPathCourses.learningPathId,
+        courseId: learningPathCourses.courseId,
+        displayOrder: learningPathCourses.displayOrder,
+        createdAt: learningPathCourses.createdAt,
+        updatedAt: learningPathCourses.updatedAt,
+      })
+      .from(learningPathCourses)
+      .innerJoin(
+        courses,
+        and(eq(courses.id, learningPathCourses.courseId), eq(courses.tenantId, sourceTenantId)),
+      )
+      .where(eq(learningPathCourses.learningPathId, learningPathId))
+      .orderBy(learningPathCourses.displayOrder);
+
+    return { learningPath, courseLinks };
+  }
+
   async findLearningPathExportByPair(
     sourceTenantId: UUIDType,
     sourceLearningPathId: UUIDType,
@@ -818,6 +881,13 @@ export class LearningPathRepository {
       .update(courses)
       .set({ originType: COURSE_ORIGIN_TYPES.MASTER })
       .where(eq(courses.id, courseId));
+  }
+
+  async markLearningPathAsMaster(learningPathId: UUIDType, dbInstance: DatabasePg = this.db) {
+    await dbInstance
+      .update(learningPaths)
+      .set({ originType: COURSE_ORIGIN_TYPES.MASTER })
+      .where(eq(learningPaths.id, learningPathId));
   }
 
   async findMasterCourseExportByPair(

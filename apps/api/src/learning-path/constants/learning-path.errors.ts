@@ -16,6 +16,7 @@ export const LEARNING_PATH_ERRORS = {
   GROUP_IDS_EMPTY: "learningPathView.toast.groupIdsEmpty",
   EXPORT_NO_TARGET_TENANTS: "learningPathExport.error.noTargetTenants",
   EXPORT_LINK_MISSING: "learningPathExport.error.exportLinkMissing",
+  EXPORT_NO_COURSES: "learningPathExport.error.noCourses",
   EXPORT_COURSE_FAILED: "learningPathExport.error.courseExportFailed",
   EXPORT_TARGET_AUTHOR_MISSING: "learningPathExport.error.targetAuthorMissing",
   EXPORT_JOB_NOT_FOUND: "learningPathExport.error.jobNotFound",

@@ -87,12 +87,15 @@ export default function AdminLearningPathsPage() {
   const canExportLearningPath =
     hasPermission(permissions, PERMISSIONS.LEARNING_PATH_EXPORT) &&
     Boolean(currentUser?.isManagingTenantAdmin);
-  const { data: learningPaths = loaderLearningPaths } = useLearningPaths({ language: appLanguage });
+  const [searchValue, setSearchValue] = useState("");
+  const { data: learningPaths = loaderLearningPaths } = useLearningPaths({
+    language: appLanguage,
+    searchQuery: searchValue.trim() || undefined,
+  });
   const { data: groups = [] } = useGroupsQuery();
   const [pathLanguages, setPathLanguages] = useState<Record<string, SupportedLanguages>>({});
   const [createLanguage, setCreateLanguage] = useState<SupportedLanguages>(appLanguage);
   const [isCreateOpen, setIsCreateOpen] = useState(searchParams.get("create") === "1");
-  const [searchValue, setSearchValue] = useState("");
   const createCardRef = useRef<HTMLDivElement | null>(null);
 
   const { mutateAsync: createLearningPath, isPending: isCreatePending } = useCreateLearningPath();
@@ -221,17 +224,6 @@ export default function AdminLearningPathsPage() {
   };
 
   const totalPaths = learningPaths.pagination.totalItems;
-  const visibleLearningPaths = useMemo(() => {
-    const normalizedSearchValue = searchValue.trim().toLowerCase();
-
-    return learningPaths.data.filter((learningPath) => {
-      if (!normalizedSearchValue) return true;
-
-      return `${learningPath.title} ${learningPath.description}`
-        .toLowerCase()
-        .includes(normalizedSearchValue);
-    });
-  }, [learningPaths.data, searchValue]);
 
   return (
     <PageWrapper
@@ -280,7 +272,7 @@ export default function AdminLearningPathsPage() {
         </div>
 
         <div className="flex flex-col gap-4">
-          {visibleLearningPaths.map((learningPath) => (
+          {learningPaths.data.map((learningPath) => (
             <InlineLearningPathCard
               key={learningPath.id}
               learningPath={learningPath}

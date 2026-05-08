@@ -212,28 +212,28 @@ describe("LearningPathController (e2e)", () => {
       it("should search learning paths by localized title and description", async () => {
         const titleMatch = await learningPathFactory.create({
           authorId: adminUser.id,
-          title: { pl: "Ścieżka sprzedażowa", en: "Sales path" },
-          description: { pl: "Opis", en: "Description" },
-          baseLanguage: "pl",
-          availableLocales: ["pl", "en"],
+          title: { en: "Sales path" },
+          description: { en: "Description" },
+          baseLanguage: "en",
+          availableLocales: ["en"],
         });
         const descriptionMatch = await learningPathFactory.create({
           authorId: adminUser.id,
-          title: { pl: "Obsługa klienta", en: "Customer support" },
-          description: { pl: "Negocjacje i sprzedaż", en: "Negotiation" },
-          baseLanguage: "pl",
-          availableLocales: ["pl", "en"],
+          title: { en: "Customer support" },
+          description: { en: "Negotiation and sales" },
+          baseLanguage: "en",
+          availableLocales: ["en"],
         });
         const miss = await learningPathFactory.create({
           authorId: adminUser.id,
-          title: { pl: "Bezpieczeństwo", en: "Security" },
-          description: { pl: "Procedury", en: "Procedures" },
-          baseLanguage: "pl",
-          availableLocales: ["pl", "en"],
+          title: { en: "Security" },
+          description: { en: "Procedures" },
+          baseLanguage: "en",
+          availableLocales: ["en"],
         });
 
         const response = await request(app.getHttpServer())
-          .get("/api/learning-path?page=1&perPage=10&language=pl&searchQuery=sprzedaż")
+          .get("/api/learning-path?page=1&perPage=10&language=en&searchQuery=sales")
           .set("Cookie", adminCookies)
           .expect(200);
 
@@ -245,6 +245,51 @@ describe("LearningPathController (e2e)", () => {
         );
         expect(returnedPathIds).not.toContain(miss.id);
         expect(response.body.pagination.totalItems).toBe(2);
+      });
+
+      it("should search learning paths created and updated through the API", async () => {
+        const createdSearchTerm = `created-${faker.string.alphanumeric(8)}`;
+        const updatedSearchTerm = `updated-${faker.string.alphanumeric(8)}`;
+
+        const createResponse = await request(app.getHttpServer())
+          .post("/api/learning-path")
+          .set("Cookie", adminCookies)
+          .send({
+            language: "en",
+            title: `Learning path ${createdSearchTerm}`,
+            description: "Created through the API",
+          })
+          .expect(201);
+
+        const learningPathId = createResponse.body.data.id;
+
+        const createdSearchResponse = await request(app.getHttpServer())
+          .get(`/api/learning-path?page=1&perPage=10&language=en&searchQuery=${createdSearchTerm}`)
+          .set("Cookie", adminCookies)
+          .expect(200);
+
+        expect(
+          createdSearchResponse.body.data.map((learningPath: { id: string }) => learningPath.id),
+        ).toContain(learningPathId);
+
+        await request(app.getHttpServer())
+          .patch(`/api/learning-path/${learningPathId}`)
+          .set("Cookie", adminCookies)
+          .send({
+            language: "en",
+            title: `Learning path ${updatedSearchTerm}`,
+            description: "Updated through the API",
+          })
+          .expect(200);
+
+        const updatedSearchResponse = await request(app.getHttpServer())
+          .get(`/api/learning-path?page=1&perPage=10&language=en&searchQuery=${updatedSearchTerm}`)
+          .set("Cookie", adminCookies)
+          .expect(200);
+
+        expect(
+          updatedSearchResponse.body.data.map((learningPath: { id: string }) => learningPath.id),
+        ).toContain(learningPathId);
       });
     });
 

@@ -6,14 +6,18 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { COURSE_ORIGIN_TYPES, PERMISSIONS } from "@repo/shared";
+import { eq } from "drizzle-orm";
+import { validate as uuidValidate } from "uuid";
 
 import { DatabasePg, type UUIDType } from "src/common";
+import { buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelpers";
 import { hasPermission } from "src/common/permissions/permission.utils";
 import { MasterCourseService } from "src/courses/master-course.service";
-import { QUEUE_NAMES, QueueService } from "src/queue";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
+import { learningPaths } from "src/storage/schema";
 
 import { LEARNING_PATH_ERRORS } from "../constants/learning-path.errors";
+import { LearningPathQueueService } from "../learning-path.queue.service";
 import { LearningPathRepository } from "../learning-path.repository";
 
 import type { CurrentUserType } from "src/common/types/current-user.type";
@@ -32,7 +36,7 @@ export class LearningPathExportService {
     @Inject("DB") private readonly db: DatabasePg,
     private readonly learningPathRepository: LearningPathRepository,
     private readonly masterCourseService: MasterCourseService,
-    private readonly queueService: QueueService,
+    private readonly queueService: LearningPathQueueService,
     private readonly tenantRunner: TenantDbRunnerService,
   ) {}
 
@@ -43,21 +47,27 @@ export class LearningPathExportService {
   ): Promise<{ sourceLearningPathId: UUIDType; jobs: ExportQueueItem[] }> {
     this.assertManagingTenantAdmin(actor);
 
-    const uniqueTargetTenantIds = Array.from(new Set(targetTenantIds)).filter(
-      (tenantId) => tenantId !== actor.tenantId,
+    const uniqueTargetTenantIds = await this.getUniqueTargetTenantIds(
+      actor.tenantId,
+      sourceLearningPathId,
+      targetTenantIds,
     );
 
     if (!uniqueTargetTenantIds.length) {
       throw new BadRequestException(LEARNING_PATH_ERRORS.EXPORT_NO_TARGET_TENANTS);
     }
 
-    const sourceSnapshot = await this.learningPathRepository.getLearningPathSourceSnapshot(
+    const sourceSnapshot = await this.learningPathRepository.getLearningPathExportSourceSnapshot(
+      actor.tenantId,
       sourceLearningPathId,
-      this.db,
     );
 
     if (!sourceSnapshot) {
       throw new NotFoundException(LEARNING_PATH_ERRORS.NOT_FOUND);
+    }
+
+    if (!sourceSnapshot.courseLinks.length) {
+      throw new BadRequestException(LEARNING_PATH_ERRORS.EXPORT_NO_COURSES);
     }
 
     const jobs: ExportQueueItem[] = [];
@@ -87,18 +97,13 @@ export class LearningPathExportService {
         this.db,
       );
 
-      const queuedJob = await this.queueService.enqueue<LearningPathExportJobData>(
-        QUEUE_NAMES.LEARNING_PATH_EXPORT,
-        "learning-path-export",
-        {
-          exportId: exportLink.id,
-          sourceLearningPathId,
-          sourceTenantId: actor.tenantId,
-          targetTenantId,
-          actorId: actor.userId,
-        },
-        { attempts: 3, backoff: { type: "exponential", delay: 1000 } },
-      );
+      const queuedJob = await this.queueService.enqueueExport({
+        exportId: exportLink.id,
+        sourceLearningPathId,
+        sourceTenantId: actor.tenantId,
+        targetTenantId,
+        actorId: actor.userId,
+      });
 
       jobs.push({
         targetTenantId,
@@ -107,6 +112,8 @@ export class LearningPathExportService {
         exportId: exportLink.id,
       });
     }
+
+    await this.learningPathRepository.markLearningPathAsMaster(sourceLearningPathId, this.db);
 
     return {
       sourceLearningPathId,
@@ -157,34 +164,23 @@ export class LearningPathExportService {
   }
 
   async getJobStatus(jobId: string) {
-    const [exportJob, syncJob] = await Promise.all([
-      this.queueService.getQueue(QUEUE_NAMES.LEARNING_PATH_EXPORT).getJob(jobId),
-      this.queueService.getQueue(QUEUE_NAMES.LEARNING_PATH_SYNC).getJob(jobId),
-    ]);
-
-    const job = exportJob ?? syncJob;
-    if (!job) return null;
-
-    return {
-      id: String(job.id),
-      name: job.name,
-      state: await job.getState(),
-      attemptsMade: job.attemptsMade,
-      failedReason: job.failedReason ?? null,
-    };
+    return this.queueService.getJobStatus(jobId);
   }
 
   async processExportJob(data: LearningPathExportJobData) {
-    const exportLink = await this.learningPathRepository.getLearningPathExportById(
-      data.exportId,
-      this.db,
-    );
-
-    if (!exportLink) {
-      throw new NotFoundException(LEARNING_PATH_ERRORS.EXPORT_LINK_MISSING);
+    if (
+      !uuidValidate(data.exportId) ||
+      !uuidValidate(data.sourceLearningPathId) ||
+      !uuidValidate(data.sourceTenantId) ||
+      !uuidValidate(data.targetTenantId) ||
+      !uuidValidate(data.actorId)
+    ) {
+      throw new BadRequestException("Invalid learning path export job data");
     }
 
-    await this.syncLearningPathExport(exportLink.id);
+    const exportId = await this.resolveExportIdForJob(data);
+
+    await this.syncLearningPathExport(exportId);
   }
 
   async processSyncJob(data: LearningPathSyncJobData) {
@@ -192,50 +188,101 @@ export class LearningPathExportService {
   }
 
   async queueSyncForSourceLearningPath(sourceLearningPathId: UUIDType, triggerEventType: string) {
+    const [sourcePath] = await this.db
+      .select({ originType: learningPaths.originType })
+      .from(learningPaths)
+      .where(eq(learningPaths.id, sourceLearningPathId))
+      .limit(1);
+
+    if (!sourcePath) {
+      return;
+    }
+
     const exportLinks = await this.learningPathRepository.getActiveLearningPathExportsBySourcePath(
       sourceLearningPathId,
       this.db,
     );
 
+    if (sourcePath.originType !== COURSE_ORIGIN_TYPES.MASTER && exportLinks.length === 0) {
+      return;
+    }
+
+    if (sourcePath.originType !== COURSE_ORIGIN_TYPES.MASTER) {
+      await this.learningPathRepository.markLearningPathAsMaster(sourceLearningPathId, this.db);
+    }
+
     for (const exportLink of exportLinks) {
-      await this.queueService.enqueue<LearningPathSyncJobData>(
-        QUEUE_NAMES.LEARNING_PATH_SYNC,
-        "learning-path-sync",
-        {
-          exportId: exportLink.id,
-          sourceLearningPathId: exportLink.sourceLearningPathId,
-          sourceTenantId: exportLink.sourceTenantId,
-          targetTenantId: exportLink.targetTenantId,
-          triggerEventType,
-        },
-        { attempts: 3, backoff: { type: "exponential", delay: 1000 } },
-      );
+      if (
+        !uuidValidate(exportLink.targetTenantId) ||
+        !uuidValidate(exportLink.sourceTenantId) ||
+        !uuidValidate(exportLink.sourceLearningPathId)
+      ) {
+        await this.learningPathRepository.markLearningPathExportSyncFailed(exportLink.id, this.db);
+        continue;
+      }
+
+      await this.queueService.enqueueSync({
+        exportId: exportLink.id,
+        sourceLearningPathId: exportLink.sourceLearningPathId,
+        sourceTenantId: exportLink.sourceTenantId,
+        targetTenantId: exportLink.targetTenantId,
+        triggerEventType,
+      });
     }
   }
 
   private async syncLearningPathExport(exportId: UUIDType) {
-    const exportLink = await this.learningPathRepository.getLearningPathExportById(
-      exportId,
-      this.db,
-    );
-
-    if (!exportLink) {
-      throw new NotFoundException(LEARNING_PATH_ERRORS.EXPORT_LINK_MISSING);
-    }
-
-    const sourceSnapshot = await this.learningPathRepository.getLearningPathSourceSnapshot(
-      exportLink.sourceLearningPathId,
-      this.db,
-    );
-
-    if (!sourceSnapshot) {
-      throw new NotFoundException(LEARNING_PATH_ERRORS.NOT_FOUND);
-    }
-
     try {
+      const trimmedExportId = String(exportId ?? "").trim();
+
+      if (!uuidValidate(trimmedExportId)) {
+        throw new BadRequestException("Invalid learning path export id");
+      }
+
+      const exportLink = await this.learningPathRepository.getLearningPathExportById(
+        trimmedExportId,
+        this.db,
+      );
+
+      if (!exportLink) {
+        throw new NotFoundException(LEARNING_PATH_ERRORS.EXPORT_LINK_MISSING);
+      }
+
+      const syncExportLink = {
+        ...exportLink,
+        sourceTenantId: String(exportLink.sourceTenantId ?? "").trim(),
+        sourceLearningPathId: String(exportLink.sourceLearningPathId ?? "").trim(),
+        targetTenantId: String(exportLink.targetTenantId ?? "").trim(),
+      };
+
+      if (
+        !uuidValidate(syncExportLink.sourceTenantId) ||
+        !uuidValidate(syncExportLink.targetTenantId) ||
+        !uuidValidate(syncExportLink.sourceLearningPathId)
+      ) {
+        await this.learningPathRepository.markLearningPathExportSyncFailed(
+          trimmedExportId,
+          this.db,
+        );
+        throw new BadRequestException("Invalid learning path export link");
+      }
+
+      const sourceSnapshot = await this.learningPathRepository.getLearningPathExportSourceSnapshot(
+        syncExportLink.sourceTenantId,
+        syncExportLink.sourceLearningPathId,
+      );
+
+      if (!sourceSnapshot) {
+        throw new NotFoundException(LEARNING_PATH_ERRORS.NOT_FOUND);
+      }
+
+      if (!sourceSnapshot.courseLinks.length) {
+        throw new BadRequestException(LEARNING_PATH_ERRORS.EXPORT_NO_COURSES);
+      }
+
       const targetLearningPathId = await this.tenantRunner.runWithTenant(
-        exportLink.targetTenantId,
-        () => this.syncSourceSnapshotToTarget(exportLink, sourceSnapshot),
+        syncExportLink.targetTenantId,
+        async () => this.syncSourceSnapshotToTarget(syncExportLink, sourceSnapshot),
       );
 
       await this.learningPathRepository.markLearningPathExportSyncSuccess(
@@ -244,9 +291,55 @@ export class LearningPathExportService {
         this.db,
       );
     } catch (error) {
-      await this.learningPathRepository.markLearningPathExportSyncFailed(exportId, this.db);
+      if (exportId) {
+        await this.learningPathRepository.markLearningPathExportSyncFailed(exportId, this.db);
+      }
       throw error;
     }
+  }
+
+  private async resolveExportIdForJob(data: LearningPathExportJobData): Promise<UUIDType> {
+    const exportLinkById = await this.learningPathRepository.getLearningPathExportById(
+      data.exportId,
+      this.db,
+    );
+
+    if (exportLinkById) {
+      return exportLinkById.id;
+    }
+
+    const exportLinkByPair = await this.learningPathRepository.findLearningPathExportByPair(
+      data.sourceTenantId,
+      data.sourceLearningPathId,
+      data.targetTenantId,
+      this.db,
+    );
+
+    if (exportLinkByPair) {
+      return exportLinkByPair.id;
+    }
+
+    const sourceSnapshot = await this.learningPathRepository.getLearningPathExportSourceSnapshot(
+      data.sourceTenantId,
+      data.sourceLearningPathId,
+    );
+
+    if (!sourceSnapshot) {
+      throw new NotFoundException(LEARNING_PATH_ERRORS.NOT_FOUND);
+    }
+
+    if (!sourceSnapshot.courseLinks.length) {
+      throw new BadRequestException(LEARNING_PATH_ERRORS.EXPORT_NO_COURSES);
+    }
+
+    const recreatedExport = await this.learningPathRepository.createLearningPathExport(
+      data.sourceTenantId,
+      data.sourceLearningPathId,
+      data.targetTenantId,
+      this.db,
+    );
+
+    return recreatedExport.id;
   }
 
   private async syncSourceSnapshotToTarget(
@@ -257,7 +350,7 @@ export class LearningPathExportService {
       sourceLearningPathId: UUIDType;
     },
     sourceSnapshot: NonNullable<
-      Awaited<ReturnType<LearningPathRepository["getLearningPathSourceSnapshot"]>>
+      Awaited<ReturnType<LearningPathRepository["getLearningPathExportSourceSnapshot"]>>
     >,
   ) {
     const { learningPath, courseLinks } = sourceSnapshot;
@@ -266,6 +359,30 @@ export class LearningPathExportService {
 
     if (!targetAuthor) {
       throw new BadRequestException(LEARNING_PATH_ERRORS.EXPORT_TARGET_AUTHOR_MISSING);
+    }
+
+    const targetCourseIds: UUIDType[] = [];
+
+    for (const courseLink of courseLinks) {
+      const targetCourseId = await this.masterCourseService.ensureCourseExportSynced({
+        sourceCourseId: courseLink.courseId,
+        sourceTenantId: learningPath.tenantId,
+        targetTenantId,
+      });
+
+      if (!targetCourseId) {
+        throw new BadRequestException(LEARNING_PATH_ERRORS.EXPORT_COURSE_FAILED);
+      }
+
+      targetCourseIds.push(targetCourseId);
+
+      await this.learningPathRepository.upsertLearningPathEntityMap(
+        exportLink.id,
+        "course",
+        courseLink.courseId,
+        targetCourseId,
+        this.db,
+      );
     }
 
     const existingTargetLearningPath =
@@ -277,8 +394,12 @@ export class LearningPathExportService {
       );
 
     const targetValues = {
-      title: learningPath.title,
-      description: learningPath.description,
+      title: buildJsonbFieldWithMultipleEntries(
+        learningPath.title,
+      ) as typeof learningPaths.$inferInsert.title,
+      description: buildJsonbFieldWithMultipleEntries(
+        learningPath.description,
+      ) as typeof learningPaths.$inferInsert.description,
       thumbnailReference: learningPath.thumbnailReference,
       status: learningPath.status,
       includesCertificate: learningPath.includesCertificate,
@@ -305,58 +426,6 @@ export class LearningPathExportService {
       );
     }
 
-    const targetCourseIds: UUIDType[] = [];
-
-    for (const courseLink of courseLinks) {
-      const existingCourseExport = await this.learningPathRepository.findMasterCourseExportByPair(
-        learningPath.tenantId,
-        courseLink.courseId,
-        targetTenantId,
-        this.db,
-      );
-
-      let targetCourseId = existingCourseExport?.targetCourseId ?? null;
-
-      if (!targetCourseId) {
-        const createdExport =
-          existingCourseExport ??
-          (await this.learningPathRepository.createMasterCourseExportLink(
-            learningPath.tenantId,
-            courseLink.courseId,
-            targetTenantId,
-            this.db,
-          ));
-
-        await this.masterCourseService.processExportJob({
-          sourceCourseId: courseLink.courseId,
-          sourceTenantId: learningPath.tenantId,
-          targetTenantId,
-          actorId: learningPath.authorId,
-        });
-
-        const syncedExport = await this.learningPathRepository.findMasterCourseExportByPair(
-          learningPath.tenantId,
-          courseLink.courseId,
-          targetTenantId,
-          this.db,
-        );
-
-        targetCourseId = syncedExport?.targetCourseId ?? createdExport.targetCourseId ?? null;
-      }
-
-      if (!targetCourseId) throw new BadRequestException(LEARNING_PATH_ERRORS.EXPORT_COURSE_FAILED);
-
-      targetCourseIds.push(targetCourseId);
-
-      await this.learningPathRepository.upsertLearningPathEntityMap(
-        exportLink.id,
-        "course",
-        courseLink.courseId,
-        targetCourseId,
-        this.db,
-      );
-    }
-
     await this.learningPathRepository.deleteLearningPathCoursesByPathId(
       targetLearningPath.id,
       this.db,
@@ -371,6 +440,25 @@ export class LearningPathExportService {
     );
 
     return targetLearningPath.id;
+  }
+
+  private async getUniqueTargetTenantIds(
+    sourceTenantId: UUIDType,
+    sourceLearningPathId: UUIDType,
+    targetTenantIds: UUIDType[],
+  ): Promise<UUIDType[]> {
+    const candidates = await this.learningPathRepository.getLearningPathExportCandidates(
+      sourceTenantId,
+      sourceLearningPathId,
+      this.db,
+    );
+
+    const candidateTenantIds = new Set(candidates.map((candidate) => candidate.id));
+
+    return Array.from(new Set(targetTenantIds.map((tenantId) => tenantId.trim()))).filter(
+      (tenantId) =>
+        uuidValidate(tenantId) && tenantId !== sourceTenantId && candidateTenantIds.has(tenantId),
+    );
   }
 
   private assertManagingTenantAdmin(currentUser: CurrentUserType) {

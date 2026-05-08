@@ -133,8 +133,8 @@ export class LearningPathController {
     const learningPath = await this.learningPathService.createLearningPath(
       body,
       currentUser,
-      files.thumbnail?.[0],
-      files.certificateSignature?.[0],
+      files?.thumbnail?.[0],
+      files?.certificateSignature?.[0],
     );
 
     return new BaseResponse(learningPath);
@@ -166,8 +166,8 @@ export class LearningPathController {
       learningPathId,
       body,
       currentUser,
-      files.thumbnail?.[0],
-      files.certificateSignature?.[0],
+      files?.thumbnail?.[0],
+      files?.certificateSignature?.[0],
     );
 
     return new BaseResponse(learningPath);

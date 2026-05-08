@@ -1434,7 +1434,7 @@ export interface GetStudentCoursesResponse {
 
 export interface GetStudentsWithEnrollmentDateResponse {
   data: {
-    name: string;
+    name?: string;
     firstName: string;
     lastName: string;
     email: string;
@@ -3423,13 +3423,8 @@ export interface GetLearningPathsResponse {
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
     createdAt: string;
     updatedAt: string;
-    availableCourseOptions: {
-      value: string;
-      label: string;
-      imageUrl: string | null;
-    }[];
   } & {
-    courses: {
+    courses: ({
       /** @format uuid */
       id: string;
       /** @format uuid */
@@ -3437,13 +3432,21 @@ export interface GetLearningPathsResponse {
       /** @format uuid */
       courseId: string;
       displayOrder: number;
+    } & {
       title: string;
       description: string;
       thumbnailUrl: string | null;
       courseChapterCount: number;
+    } & {
       progress: "not_started" | "in_progress" | "completed" | "blocked";
       isLocked: boolean;
       completedAt: string | null;
+    })[];
+    availableCourseOptions: {
+      /** @format uuid */
+      value: string;
+      label: string;
+      imageUrl: string | null;
     }[];
   })[];
   pagination: {
@@ -3475,18 +3478,19 @@ export interface GetLearningPathByIdResponse {
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
     createdAt: string;
     updatedAt: string;
+  } & {
     availableCourseOptions: {
+      /** @format uuid */
       value: string;
       label: string;
       imageUrl: string | null;
     }[];
-  } & {
     progress: "not_started" | "in_progress" | "completed";
     progressValue: number;
     completedCourseCount: number;
     totalCourseCount: number;
     certificateReady: boolean;
-    courses: ({
+    courses: (({
       /** @format uuid */
       id: string;
       /** @format uuid */
@@ -3494,8 +3498,14 @@ export interface GetLearningPathByIdResponse {
       /** @format uuid */
       courseId: string;
       displayOrder: number;
+    } & {
       createdAt: string;
       updatedAt: string;
+    }) & {
+      title: string;
+      description: string;
+      thumbnailUrl: string | null;
+      courseChapterCount: number;
     } & {
       progress: "not_started" | "in_progress" | "completed" | "blocked";
       isLocked: boolean;
@@ -3532,7 +3542,9 @@ export interface CreateLearningPathResponse {
     status: "draft" | "published" | "private";
     includesCertificate: boolean;
     settings: {
+      /** @default null */
       certificateSignature: string | null;
+      /** @default null */
       certificateFontColor: string | null;
     };
     sequenceEnabled: boolean;
@@ -3573,7 +3585,9 @@ export interface UpdateLearningPathResponse {
     status: "draft" | "published" | "private";
     includesCertificate: boolean;
     settings: {
+      /** @default null */
       certificateSignature: string | null;
+      /** @default null */
       certificateFontColor: string | null;
     };
     sequenceEnabled: boolean;
@@ -3596,7 +3610,9 @@ export interface CreateLanguageResponse {
     status: "draft" | "published" | "private";
     includesCertificate: boolean;
     settings: {
+      /** @default null */
       certificateSignature: string | null;
+      /** @default null */
       certificateFontColor: string | null;
     };
     sequenceEnabled: boolean;
@@ -8924,23 +8940,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name LearningPathEnrollmentControllerEnrollCurrentUserToLearningPath
-     * @request POST:/api/learning-path/{learningPathId}/enroll
-     */
-    learningPathEnrollmentControllerEnrollCurrentUserToLearningPath: (
-      learningPathId: string,
-      params: RequestParams = {},
-    ) =>
-      this.request<EnrollCurrentUserToLearningPathResponse, any>({
-        path: `/api/learning-path/${learningPathId}/enroll`,
-        method: "POST",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name LearningPathEnrollmentControllerGetStudentsWithEnrollmentDate
      * @request GET:/api/learning-path/{learningPathId}/enroll-users
      */
@@ -9010,6 +9009,23 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "DELETE",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LearningPathEnrollmentControllerEnrollCurrentUserToLearningPath
+     * @request POST:/api/learning-path/{learningPathId}/enroll
+     */
+    learningPathEnrollmentControllerEnrollCurrentUserToLearningPath: (
+      learningPathId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<EnrollCurrentUserToLearningPathResponse, any>({
+        path: `/api/learning-path/${learningPathId}/enroll`,
+        method: "POST",
         format: "json",
         ...params,
       }),

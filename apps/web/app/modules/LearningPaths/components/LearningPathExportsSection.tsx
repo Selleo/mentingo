@@ -27,10 +27,15 @@ export function LearningPathExportsSection({ learningPathId }: LearningPathExpor
 
   const validSelectedTenantIds = useMemo(
     () =>
-      selectedTenantIds.filter((tenantId) => {
-        const tenant = shareableTenants.find((candidateTenant) => candidateTenant.id === tenantId);
-        return Boolean(tenant) && !tenant?.isExported;
-      }),
+      selectedTenantIds
+        .map((tenantId) => tenantId.trim())
+        .filter(Boolean)
+        .filter((tenantId) => {
+          const tenant = shareableTenants.find(
+            (candidateTenant) => candidateTenant.id === tenantId,
+          );
+          return Boolean(tenant) && !tenant?.isExported;
+        }),
     [selectedTenantIds, shareableTenants],
   );
 

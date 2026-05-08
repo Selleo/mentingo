@@ -1,11 +1,22 @@
 import { faker } from "@faker-js/faker";
-import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
-import { and, eq } from "drizzle-orm";
+import {
+  COURSE_ORIGIN_TYPES,
+  MASTER_COURSE_EXPORT_SYNC_STATUSES,
+  SYSTEM_ROLE_SLUGS,
+} from "@repo/shared";
+import { and, eq, inArray } from "drizzle-orm";
 import request from "supertest";
 
 import { FileService } from "src/file/file.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { learningPathExports, learningPaths, tenants } from "src/storage/schema";
+import {
+  courses,
+  learningPathCourses,
+  learningPathExports,
+  learningPaths,
+  masterCourseExports,
+  tenants,
+} from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCourseFactory } from "../../../test/factory/course.factory";
@@ -13,6 +24,7 @@ import { createLearningPathFactory } from "../../../test/factory/learningPath.fa
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
 import { cookieFor, truncateTables } from "../../../test/helpers/test-helpers";
+import { LearningPathExportService } from "../services/learning-path-export.service";
 
 import {
   createLearningPathExportTestUtils,
@@ -40,6 +52,7 @@ describe("LearningPathExportController (e2e)", () => {
   let settingsFactory: ReturnType<typeof createSettingsFactory>;
   let courseFactory: ReturnType<typeof createCourseFactory>;
   let learningPathFactory: ReturnType<typeof createLearningPathFactory>;
+  let learningPathExportService: LearningPathExportService;
   let exportPath: ReturnType<typeof createLearningPathExportTestUtils>["exportPath"];
   let getExportedLearningPath: ReturnType<
     typeof createLearningPathExportTestUtils
@@ -81,6 +94,7 @@ describe("LearningPathExportController (e2e)", () => {
     settingsFactory = createSettingsFactory(db);
     courseFactory = createCourseFactory(db);
     learningPathFactory = createLearningPathFactory(db);
+    learningPathExportService = app.get(LearningPathExportService);
 
     await baseDb
       .update(tenants)
@@ -145,7 +159,7 @@ describe("LearningPathExportController (e2e)", () => {
     await app.close();
   });
 
-  const setupSourcePath = async () => {
+  const setupSourcePath = async ({ addCourses = true }: { addCourses?: boolean } = {}) => {
     const sourceAdmin = await runAsTenant(sourceTenantId, async () =>
       userFactory
         .withCredentials({ password: PASSWORD })
@@ -199,13 +213,15 @@ describe("LearningPathExportController (e2e)", () => {
       };
     });
 
-    await withTenantHost(
-      request(app.getHttpServer())
-        .post(`/api/learning-path/${learningPathId}/courses`)
-        .set("Cookie", sourceCookie)
-        .send({ courseIds }),
-      SOURCE_HOST,
-    ).expect(201);
+    if (addCourses) {
+      await withTenantHost(
+        request(app.getHttpServer())
+          .post(`/api/learning-path/${learningPathId}/courses`)
+          .set("Cookie", sourceCookie)
+          .send({ courseIds }),
+        SOURCE_HOST,
+      ).expect(201);
+    }
 
     return {
       learningPathId,
@@ -218,7 +234,7 @@ describe("LearningPathExportController (e2e)", () => {
   };
 
   it("exports a learning path to a target tenant and syncs the target copy", async () => {
-    const { learningPathId, sourceCookie, targetCookie } = await setupSourcePath();
+    const { learningPathId, sourceCookie, targetCookie, courseIds } = await setupSourcePath();
 
     const exportResponse = await exportPath(learningPathId, sourceCookie, [targetTenantId]);
     const exportId = exportResponse.jobs[0].exportId;
@@ -290,6 +306,45 @@ describe("LearningPathExportController (e2e)", () => {
     expect(targetCourseLinks).toHaveLength(2);
     expect(targetCourseLinks.map(({ displayOrder }) => displayOrder)).toEqual([1, 2]);
 
+    const courseExportRows = await baseDb
+      .select({
+        sourceCourseId: masterCourseExports.sourceCourseId,
+        targetCourseId: masterCourseExports.targetCourseId,
+        syncStatus: masterCourseExports.syncStatus,
+      })
+      .from(masterCourseExports)
+      .where(
+        and(
+          eq(masterCourseExports.sourceTenantId, sourceTenantId),
+          eq(masterCourseExports.targetTenantId, targetTenantId),
+          inArray(masterCourseExports.sourceCourseId, courseIds),
+        ),
+      );
+
+    expect(courseExportRows).toHaveLength(2);
+    expect(courseExportRows.map(({ sourceCourseId }) => sourceCourseId).sort()).toEqual(
+      [...courseIds].sort(),
+    );
+    expect(courseExportRows.map(({ targetCourseId }) => targetCourseId).sort()).toEqual(
+      targetCourseLinks.map(({ courseId }) => courseId).sort(),
+    );
+    expect(
+      courseExportRows.every(
+        ({ syncStatus, targetCourseId }) =>
+          syncStatus === MASTER_COURSE_EXPORT_SYNC_STATUSES.ACTIVE && Boolean(targetCourseId),
+      ),
+    ).toBe(true);
+
+    const sourceCourses = await baseDb
+      .select({ id: courses.id, originType: courses.originType })
+      .from(courses)
+      .where(inArray(courses.id, courseIds));
+
+    expect(sourceCourses).toHaveLength(2);
+    expect(sourceCourses.every(({ originType }) => originType === COURSE_ORIGIN_TYPES.MASTER)).toBe(
+      true,
+    );
+
     for (const { courseId } of targetCourseLinks) {
       const targetCourseResponse = await withTenantHost(
         request(app.getHttpServer())
@@ -303,6 +358,64 @@ describe("LearningPathExportController (e2e)", () => {
       expect(targetCourseResponse.body.data.originType).toBe("exported");
       expect(targetCourseResponse.body.data.sourceTenantId).toBe(sourceTenantId);
     }
+  });
+
+  it("exports linked source courses even when learning path course tenant ids are stale", async () => {
+    const { learningPathId, sourceCookie, courseIds } = await setupSourcePath();
+
+    await baseDb
+      .update(learningPathCourses)
+      .set({ tenantId: targetTenantId })
+      .where(eq(learningPathCourses.learningPathId, learningPathId));
+
+    await exportPath(learningPathId, sourceCookie, [targetTenantId]);
+
+    const exportedLearningPath = await getExportedLearningPath(learningPathId, sourceCookie);
+    const targetCourseLinks = await getLearningPathCourseLinks(
+      exportedLearningPath.targetLearningPathId as string,
+    );
+
+    expect(targetCourseLinks).toHaveLength(courseIds.length);
+
+    const courseExportRows = await baseDb
+      .select({ sourceCourseId: masterCourseExports.sourceCourseId })
+      .from(masterCourseExports)
+      .where(
+        and(
+          eq(masterCourseExports.sourceTenantId, sourceTenantId),
+          eq(masterCourseExports.targetTenantId, targetTenantId),
+          inArray(masterCourseExports.sourceCourseId, courseIds),
+        ),
+      );
+
+    expect(courseExportRows.map(({ sourceCourseId }) => sourceCourseId).sort()).toEqual(
+      [...courseIds].sort(),
+    );
+  });
+
+  it("does not create an empty target learning path when source path has no courses", async () => {
+    const { learningPathId, sourceCookie } = await setupSourcePath({ addCourses: false });
+
+    await withTenantHost(
+      request(app.getHttpServer())
+        .post(`/api/learning-path/master/${learningPathId}/export`)
+        .set("Cookie", sourceCookie)
+        .send({ targetTenantIds: [targetTenantId] }),
+      SOURCE_HOST,
+    ).expect(400);
+
+    const exportRows = await baseDb
+      .select({ id: learningPathExports.id })
+      .from(learningPathExports)
+      .where(
+        and(
+          eq(learningPathExports.sourceTenantId, sourceTenantId),
+          eq(learningPathExports.sourceLearningPathId, learningPathId),
+          eq(learningPathExports.targetTenantId, targetTenantId),
+        ),
+      );
+
+    expect(exportRows).toHaveLength(0);
   });
 
   it("syncs target learning path metadata after the source path is updated", async () => {
@@ -447,6 +560,85 @@ describe("LearningPathExportController (e2e)", () => {
 
     expect(reusedCourseResponse.body.data.id).toBe(reusedTargetCourseId);
     expect(reusedCourseResponse.body.data.sourceCourseId).toBe(courseIds[0]);
+  });
+
+  it("resyncs an existing course export link without a target course before exporting a learning path", async () => {
+    const { learningPathId, sourceCookie, courseIds } = await setupSourcePath();
+
+    const [failedCourseExport] = await baseDb
+      .insert(masterCourseExports)
+      .values({
+        sourceTenantId,
+        sourceCourseId: courseIds[0],
+        targetTenantId,
+        targetCourseId: null,
+        syncStatus: MASTER_COURSE_EXPORT_SYNC_STATUSES.FAILED,
+      })
+      .returning({ id: masterCourseExports.id });
+
+    await exportPath(learningPathId, sourceCookie, [targetTenantId]);
+
+    const [resyncedCourseExport] = await baseDb
+      .select({
+        id: masterCourseExports.id,
+        targetCourseId: masterCourseExports.targetCourseId,
+        syncStatus: masterCourseExports.syncStatus,
+      })
+      .from(masterCourseExports)
+      .where(eq(masterCourseExports.id, failedCourseExport.id))
+      .limit(1);
+
+    expect(resyncedCourseExport).toEqual(
+      expect.objectContaining({
+        id: failedCourseExport.id,
+        targetCourseId: expect.any(String),
+        syncStatus: MASTER_COURSE_EXPORT_SYNC_STATUSES.ACTIVE,
+      }),
+    );
+
+    const exportedLearningPath = await getExportedLearningPath(learningPathId, sourceCookie);
+    const targetCourseLinks = await getLearningPathCourseLinks(
+      exportedLearningPath.targetLearningPathId as string,
+    );
+
+    expect(targetCourseLinks.map(({ courseId }) => courseId)).toContain(
+      resyncedCourseExport.targetCourseId,
+    );
+  });
+
+  it("recovers a learning path export job when the queued export id no longer exists", async () => {
+    const { learningPathId, sourceAdmin, sourceCookie } = await setupSourcePath();
+    const staleExportId = faker.string.uuid();
+
+    await learningPathExportService.processExportJob({
+      exportId: staleExportId,
+      sourceLearningPathId: learningPathId,
+      sourceTenantId,
+      targetTenantId,
+      actorId: sourceAdmin.id,
+    });
+
+    const exportedLearningPath = await getExportedLearningPath(learningPathId, sourceCookie);
+
+    expect(exportedLearningPath.targetLearningPathId).toEqual(expect.any(String));
+
+    const exportRows = await baseDb
+      .select({
+        id: learningPathExports.id,
+        targetLearningPathId: learningPathExports.targetLearningPathId,
+      })
+      .from(learningPathExports)
+      .where(
+        and(
+          eq(learningPathExports.sourceTenantId, sourceTenantId),
+          eq(learningPathExports.sourceLearningPathId, learningPathId),
+          eq(learningPathExports.targetTenantId, targetTenantId),
+        ),
+      );
+
+    expect(exportRows).toHaveLength(1);
+    expect(exportRows[0].id).not.toBe(staleExportId);
+    expect(exportRows[0].targetLearningPathId).toBe(exportedLearningPath.targetLearningPathId);
   });
 
   it("reuses the same export link when exporting the same learning path twice", async () => {
