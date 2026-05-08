@@ -14,25 +14,22 @@ import { format } from "date-fns";
 import { escape } from "lodash";
 import puppeteer, { type Browser, type Page } from "puppeteer";
 
+import { FileService } from "src/file/file.service";
 import { S3Service } from "src/s3/s3.service";
 import { SettingsService } from "src/settings/settings.service";
 
 import { LEARNING_PATH_ERRORS } from "../constants/learning-path.errors";
 import { LearningPathRepository } from "../learning-path.repository";
 
+import type {
+  LearningPathCertificateRenderRecord,
+  LearningPathCertificateShareRecord,
+} from "./learning-path-certificate.types";
 import type { SupportedLanguages } from "@repo/shared";
 import type { UUIDType, DatabasePg } from "src/common";
 
 const SHARE_IMAGE_WIDTH = 1600;
 const SHARE_IMAGE_HEIGHT = 900;
-
-type LearningPathCertificateShareRecord = NonNullable<
-  Awaited<ReturnType<LearningPathRepository["findPublicLearningPathCertificateById"]>>
->;
-
-type LearningPathCertificateRenderRecord = NonNullable<
-  Awaited<ReturnType<LearningPathRepository["findLearningPathCertificateByIdForRender"]>>
->;
 
 @Injectable()
 export class LearningPathCertificateService {
@@ -44,6 +41,7 @@ export class LearningPathCertificateService {
     private readonly learningPathRepository: LearningPathRepository,
     private readonly settingsService: SettingsService,
     private readonly s3Service: S3Service,
+    private readonly fileService: FileService,
   ) {}
 
   async onModuleDestroy() {
@@ -216,10 +214,14 @@ export class LearningPathCertificateService {
     }
 
     const imageSettings = await this.settingsService.getImageS3Keys();
-    const [platformLogoImageUrl, backgroundImageUrl] = await Promise.all([
-      this.getImageDataUriFromS3Key(imageSettings.platformLogoS3Key),
-      this.getImageDataUriFromS3Key(imageSettings.certificateBackgroundImage),
-    ]);
+    const [platformLogoImageUrl, backgroundImageUrl, certificateSignatureImageUrl] =
+      await Promise.all([
+        this.getImageDataUriFromS3Key(imageSettings.platformLogoS3Key),
+        this.getImageDataUriFromS3Key(imageSettings.certificateBackgroundImage),
+        this.getImageDataUriFromS3Key(certificate.certificateSignature),
+      ]);
+
+    const accentColor = certificate.certificateFontColor || imageSettings.primaryColor || "#1f2937";
 
     const html = buildCertificateMarkup({
       studentName: certificate.fullName || "",
@@ -228,19 +230,20 @@ export class LearningPathCertificateService {
         : "",
       completionDate: this.formatDate(certificate.issuedAt || null),
       platformLogoUrl: platformLogoImageUrl,
+      signatureImageUrl: certificateSignatureImageUrl,
       backgroundImageUrl,
       lang: shareLanguage,
       isDownload: true,
       certificateKind: CERTIFICATE_KIND.LEARNING_PATH,
       colorTheme: {
-        titleColor: imageSettings.primaryColor || "#1f2937",
-        certifyTextColor: imageSettings.primaryColor || "#1f2937",
-        nameColor: imageSettings.primaryColor || "#1f2937",
-        courseNameColor: imageSettings.primaryColor || "#1f2937",
-        bodyTextColor: imageSettings.primaryColor || "#1f2937",
-        labelTextColor: imageSettings.primaryColor || "#1f2937",
-        lineColor: imageSettings.primaryColor || "#1f2937",
-        logoColor: imageSettings.primaryColor || "#1f2937",
+        titleColor: accentColor,
+        certifyTextColor: accentColor,
+        nameColor: accentColor,
+        courseNameColor: accentColor,
+        bodyTextColor: accentColor,
+        labelTextColor: accentColor,
+        lineColor: accentColor,
+        logoColor: accentColor,
       },
     });
 
@@ -266,8 +269,10 @@ export class LearningPathCertificateService {
       courseTitle: this.getLocalizedText(certificate.pathTitle, language),
       completionDate: this.formatDate(certificate.issuedAt || null),
       fullName: certificate.fullName,
-      certificateSignatureUrl: null,
-      certificateFontColor: null,
+      certificateSignatureUrl: certificate.certificateSignature
+        ? await this.fileService.getFileUrl(certificate.certificateSignature)
+        : null,
+      certificateFontColor: certificate.certificateFontColor,
       createdAt: certificate.createdAt,
     };
   }
@@ -295,12 +300,16 @@ export class LearningPathCertificateService {
       },
     );
 
+    const certificateSignatureUrl = certificate.certificateSignature
+      ? await this.fileService.getFileUrl(certificate.certificateSignature)
+      : null;
+
     return {
       certificate,
       shareUrl,
       shareImageUrl,
       settings,
-      certificateSignatureUrl: null,
+      certificateSignatureUrl,
       formattedDate: this.formatDate(certificate.issuedAt || null),
       language: shareLanguage,
     };
@@ -403,23 +412,27 @@ export class LearningPathCertificateService {
   }
 
   private buildShareImageMarkup(context: any) {
+    const accentColor =
+      context.certificate.certificateFontColor || context.settings.primaryColor || "#1f2937";
+
     return buildCertificateMarkup({
       studentName: context.certificate.fullName || "",
       courseName: this.getLocalizedText(context.certificate.pathTitle, context.language),
       completionDate: context.formattedDate,
       platformLogoUrl: null,
+      signatureImageUrl: context.certificateSignatureUrl,
       backgroundImageUrl: null,
       lang: context.language,
       certificateKind: CERTIFICATE_KIND.LEARNING_PATH,
       colorTheme: {
-        titleColor: context.settings.primaryColor || "#1f2937",
-        certifyTextColor: context.settings.primaryColor || "#1f2937",
-        nameColor: context.settings.primaryColor || "#1f2937",
-        courseNameColor: context.settings.primaryColor || "#1f2937",
-        bodyTextColor: context.settings.primaryColor || "#1f2937",
-        labelTextColor: context.settings.primaryColor || "#1f2937",
-        lineColor: context.settings.primaryColor || "#1f2937",
-        logoColor: context.settings.primaryColor || "#1f2937",
+        titleColor: accentColor,
+        certifyTextColor: accentColor,
+        nameColor: accentColor,
+        courseNameColor: accentColor,
+        bodyTextColor: accentColor,
+        labelTextColor: accentColor,
+        lineColor: accentColor,
+        logoColor: accentColor,
       },
     });
   }

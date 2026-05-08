@@ -17,6 +17,9 @@ export type LearningPathEditorFormValues = {
   description: string;
   thumbnailReference: string | null;
   thumbnail?: File | null;
+  certificateSignature?: File | null;
+  removeCertificateSignature?: boolean;
+  certificateFontColor?: string | null;
   status: LearningPathEditorStatus;
   includesCertificate: boolean;
   sequenceEnabled: boolean;

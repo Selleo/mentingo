@@ -48,10 +48,7 @@ const AiMentorLesson = ({ lesson, lessonLoading, previewUser }: AiMentorLessonPr
   const courseExperience = useOptionalCourseAccessProvider();
   const isPreviewMode = courseExperience?.isPreviewMode ?? true;
 
-  const { mutateAsync: judgeLesson, isPending: isJudgePending } = useJudgeLesson(
-    lesson.id,
-    courseId,
-  );
+  const { mutateAsync: judgeLesson, isPending: isJudgePending } = useJudgeLesson(lesson.id);
   const { mutateAsync: retakeLesson } = useRetakeLesson(lesson.id, courseId);
 
   const { data: currentThreadMessages, isLoading: isCurrentThreadMessagesLoading } =

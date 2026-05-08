@@ -3,17 +3,16 @@ import {
   Controller,
   Delete,
   Get,
-  HttpStatus,
   Param,
   Patch,
   Post,
   Query,
-  UploadedFile,
+  UploadedFiles,
   UseInterceptors,
 } from "@nestjs/common";
-import { FileInterceptor } from "@nestjs/platform-express";
+import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { ApiConsumes } from "@nestjs/swagger";
-import { ALLOWED_LESSON_IMAGE_FILE_TYPES, PERMISSIONS, SupportedLanguages } from "@repo/shared";
+import { PERMISSIONS, SupportedLanguages } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
@@ -28,9 +27,6 @@ import {
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { CurrentUserType } from "src/common/types/current-user.type";
-import { MAX_FILE_SIZE } from "src/file/file.constants";
-import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
-import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
 import { LEARNING_PATH_SUCCESS_MESSAGES } from "../constants/learning-path.success-messages";
@@ -48,6 +44,16 @@ import {
   supportedLanguagesOptions,
 } from "../learning-path.schema";
 import { LearningPathService } from "../services/learning-path.service";
+
+type LearningPathUploadFiles = {
+  thumbnail?: Express.Multer.File[];
+  certificateSignature?: Express.Multer.File[];
+};
+
+const learningPathFileFields = FileFieldsInterceptor([
+  { name: "thumbnail", maxCount: 1 },
+  { name: "certificateSignature", maxCount: 1 },
+]);
 @Controller("learning-path")
 export class LearningPathController {
   constructor(private readonly learningPathService: LearningPathService) {}
@@ -59,6 +65,7 @@ export class LearningPathController {
       { type: "query", name: "page", schema: Type.Number({ minimum: 1 }) },
       { type: "query", name: "perPage", schema: Type.Number() },
       { type: "query", name: "language", schema: Type.Optional(supportedLanguagesOptions) },
+      { type: "query", name: "searchQuery", schema: Type.Optional(Type.String()) },
     ],
     response: paginatedResponse(Type.Array(learningPathListItemSchema)),
   })
@@ -66,6 +73,7 @@ export class LearningPathController {
     @Query("page") page: number,
     @Query("perPage") perPage: number,
     @Query("language") language: SupportedLanguages,
+    @Query("searchQuery") searchQuery: string | undefined,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<PaginatedResponse<LearningPathListItemSchema[]>> {
     const learningPaths = await this.learningPathService.getLearningPaths(
@@ -73,6 +81,7 @@ export class LearningPathController {
       page,
       perPage,
       language,
+      searchQuery,
     );
 
     return new PaginatedResponse(learningPaths);
@@ -102,7 +111,7 @@ export class LearningPathController {
   }
 
   @Post()
-  @UseInterceptors(FileInterceptor("thumbnail"))
+  @UseInterceptors(learningPathFileFields)
   @ApiConsumes("multipart/form-data")
   @RequirePermission(PERMISSIONS.LEARNING_PATH_CREATE)
   @Validate({
@@ -117,30 +126,22 @@ export class LearningPathController {
   })
   async createLearningPath(
     @Body() body: CreateLearningPathBody,
-    @UploadedFile(
-      getBaseFileTypePipe(
-        buildFileTypeRegex([...ALLOWED_LESSON_IMAGE_FILE_TYPES]),
-        MAX_FILE_SIZE,
-        true,
-      ).build({
-        fileIsRequired: false,
-        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
-      }),
-    )
-    thumbnail: Express.Multer.File | null,
+    @UploadedFiles()
+    files: LearningPathUploadFiles,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<LearningPathSchema>> {
     const learningPath = await this.learningPathService.createLearningPath(
       body,
       currentUser,
-      thumbnail,
+      files.thumbnail?.[0],
+      files.certificateSignature?.[0],
     );
 
     return new BaseResponse(learningPath);
   }
 
   @Patch(":learningPathId")
-  @UseInterceptors(FileInterceptor("thumbnail"))
+  @UseInterceptors(learningPathFileFields)
   @ApiConsumes("multipart/form-data")
   @RequirePermission(PERMISSIONS.LEARNING_PATH_UPDATE, PERMISSIONS.LEARNING_PATH_UPDATE_OWN)
   @Validate({
@@ -157,24 +158,16 @@ export class LearningPathController {
   async updateLearningPath(
     @Param("learningPathId") learningPathId: UUIDType,
     @Body() body: UpdateLearningPathBody,
-    @UploadedFile(
-      getBaseFileTypePipe(
-        buildFileTypeRegex([...ALLOWED_LESSON_IMAGE_FILE_TYPES]),
-        MAX_FILE_SIZE,
-        true,
-      ).build({
-        fileIsRequired: false,
-        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
-      }),
-    )
-    thumbnail: Express.Multer.File | null,
+    @UploadedFiles()
+    files: LearningPathUploadFiles,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<LearningPathSchema>> {
     const learningPath = await this.learningPathService.updateLearningPath(
       learningPathId,
       body,
       currentUser,
-      thumbnail,
+      files.thumbnail?.[0],
+      files.certificateSignature?.[0],
     );
 
     return new BaseResponse(learningPath);

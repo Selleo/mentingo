@@ -8,6 +8,8 @@ import {
   UnprocessableEntityException,
 } from "@nestjs/common";
 import {
+  ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES,
+  ALLOWED_LESSON_IMAGE_FILE_TYPES,
   LEARNING_PATH_ENROLLMENT_TYPES,
   LEARNING_PATH_PROGRESS_STATUSES,
   LEARNING_PATH_STATUSES,
@@ -24,6 +26,7 @@ import {
   LearningPathCourseRemovedEvent,
   LearningPathCourseSyncEvent,
 } from "src/events";
+import { MAX_FILE_SIZE } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
@@ -32,6 +35,7 @@ import { PROGRESS_STATUSES, type ProgressStatus } from "src/utils/types/progress
 
 import { LEARNING_PATH_ERRORS } from "../constants/learning-path.errors";
 import { LearningPathRepository } from "../learning-path.repository";
+import { DEFAULT_LEARNING_PATH_SETTINGS } from "../types/learning-path-settings.types";
 
 import { LearningPathCourseSyncService } from "./learning-path-course-sync.service";
 import { LearningPathExportService } from "./learning-path-export.service";
@@ -156,7 +160,11 @@ export class LearningPathService {
 
   private buildUpdateData(
     existingLearningPath: ExistingLearningPath,
-    updateLearningPathData: Partial<Omit<UpdateLearningPathBody, "language">>,
+    updateLearningPathData: Partial<
+      Omit<UpdateLearningPathBody, "language" | "certificateSignature">
+    > & {
+      certificateSignature?: string | null;
+    },
     language?: SupportedLanguages,
   ): LearningPathUpdateData {
     const localizableFields = ["title", "description"] as const;
@@ -185,7 +193,39 @@ export class LearningPathService {
       }
     });
 
+    const settingsUpdates = updateLearningPathData.settings ?? {};
+    const hasSettingsUpdate =
+      updateLearningPathData.certificateSignature !== undefined ||
+      settingsUpdates.certificateFontColor !== undefined ||
+      settingsUpdates.removeCertificateSignature !== undefined;
+
+    if (hasSettingsUpdate) {
+      const currentSettings = existingLearningPath.settings ?? DEFAULT_LEARNING_PATH_SETTINGS;
+      updateData.settings = {
+        ...DEFAULT_LEARNING_PATH_SETTINGS,
+        ...currentSettings,
+        ...(settingsUpdates.certificateFontColor !== undefined
+          ? { certificateFontColor: settingsUpdates.certificateFontColor }
+          : {}),
+        ...(updateLearningPathData.certificateSignature !== undefined
+          ? { certificateSignature: updateLearningPathData.certificateSignature }
+          : {}),
+        ...(settingsUpdates.removeCertificateSignature ? { certificateSignature: null } : {}),
+      };
+    }
+
     return updateData;
+  }
+
+  private validateUploadFile(
+    file: Express.Multer.File | null | undefined,
+    allowedTypes: readonly string[],
+  ) {
+    if (!file) return;
+
+    if (file.size > MAX_FILE_SIZE || !allowedTypes.includes(file.mimetype)) {
+      throw new BadRequestException(LEARNING_PATH_ERRORS.UPDATE_FAILED);
+    }
   }
 
   private async publishLearningPathCourseSyncEvent(
@@ -238,10 +278,21 @@ export class LearningPathService {
     body: CreateLearningPathBody,
     currentUser: CurrentUserType,
     thumbnail?: Express.Multer.File | null,
+    certificateSignature?: Express.Multer.File | null,
   ) {
     this.assertPermission(currentUser, PERMISSIONS.LEARNING_PATH_CREATE);
 
-    const { thumbnail: _thumbnailField, ...createData } = body;
+    const {
+      thumbnail: _thumbnailField,
+      certificateSignature: _signatureField,
+      ...rawCreateData
+    } = body;
+    const createData = rawCreateData as typeof rawCreateData & {
+      certificateSignature?: string;
+    };
+
+    this.validateUploadFile(thumbnail, ALLOWED_LESSON_IMAGE_FILE_TYPES);
+    this.validateUploadFile(certificateSignature, ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES);
 
     if (thumbnail) {
       const { fileKey } = await this.fileService.uploadFile(
@@ -250,6 +301,15 @@ export class LearningPathService {
         currentUser.tenantId,
       );
       createData.thumbnailReference = fileKey;
+    }
+
+    if (certificateSignature) {
+      const { fileKey } = await this.fileService.uploadFile(
+        certificateSignature,
+        "learning-path-certificate",
+        currentUser.tenantId,
+      );
+      createData.certificateSignature = fileKey;
     }
 
     const createdLearningPath = await this.learningPathRepository.createLearningPath(
@@ -269,15 +329,22 @@ export class LearningPathService {
     page?: number,
     perPage?: number,
     language?: SupportedLanguages,
+    searchQuery?: string,
   ): Promise<{ data: LearningPathListItemSchema[]; pagination: Pagination }> {
     this.assertReadPermission(currentUser);
 
     const canReadAll = this.canReadAllLearningPaths(currentUser);
     const canReadOwn = this.canReadOwnLearningPaths(currentUser);
-    const learningPaths = await this.learningPathRepository.getLearningPaths(page, perPage, {
-      canReadAll,
-      canReadOwn,
-      studentId: currentUser.userId,
+    const learningPaths = await this.learningPathRepository.getLearningPaths({
+      page,
+      perPage,
+      language,
+      searchQuery,
+      visibility: {
+        canReadAll,
+        canReadOwn,
+        studentId: currentUser.userId,
+      },
     });
     const learningPathIds = learningPaths.data.map((learningPath) => learningPath.id);
     const enrolledLearningPathIds = new Set(
@@ -373,11 +440,23 @@ export class LearningPathService {
     body: UpdateLearningPathBody,
     currentUser: CurrentUserType,
     thumbnail?: Express.Multer.File | null,
+    certificateSignature?: Express.Multer.File | null,
   ) {
     const existingLearningPath = await this.ensureLearningPathExists(learningPathId);
     this.assertUpdatePermission(currentUser, existingLearningPath);
 
-    const { language, thumbnail: _thumbnailField, ...updateLearningPathData } = body;
+    const {
+      language,
+      thumbnail: _thumbnailField,
+      certificateSignature: _signatureField,
+      ...rawUpdateLearningPathData
+    } = body;
+    const updateLearningPathData = rawUpdateLearningPathData as typeof rawUpdateLearningPathData & {
+      certificateSignature?: string | null;
+    };
+
+    this.validateUploadFile(thumbnail, ALLOWED_LESSON_IMAGE_FILE_TYPES);
+    this.validateUploadFile(certificateSignature, ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES);
 
     if (thumbnail) {
       const { fileKey } = await this.fileService.uploadFile(
@@ -386,6 +465,15 @@ export class LearningPathService {
         currentUser.tenantId,
       );
       updateLearningPathData.thumbnailReference = fileKey;
+    }
+
+    if (certificateSignature) {
+      const { fileKey } = await this.fileService.uploadFile(
+        certificateSignature,
+        "learning-path-certificate",
+        currentUser.tenantId,
+      );
+      updateLearningPathData.certificateSignature = fileKey;
     }
 
     const hasLocalizedUpdates =
@@ -958,6 +1046,12 @@ export class LearningPathService {
     return {
       ...learningPath,
       thumbnailReference: await this.resolveFileUrl(learningPath.thumbnailReference),
+      settings: {
+        certificateSignatureUrl: await this.resolveFileUrl(
+          learningPath.settings?.certificateSignature,
+        ),
+        certificateFontColor: learningPath.settings?.certificateFontColor ?? null,
+      },
       isEnrolled,
       title: this.resolveLocalizedText(learningPath.title, language, learningPath.baseLanguage),
       description: this.resolveLocalizedText(

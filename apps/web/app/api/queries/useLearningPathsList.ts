@@ -10,6 +10,7 @@ export type LearningPathListParams = {
   page?: number;
   perPage?: number;
   language?: SupportedLanguages;
+  searchQuery?: string;
 };
 
 type QueryOptions = {
@@ -26,6 +27,7 @@ export const learningPathsQueryOptions = (
       page: params.page ?? 1,
       perPage: params.perPage ?? 100,
       language: params.language,
+      searchQuery: params.searchQuery,
     });
 
     return response.data;

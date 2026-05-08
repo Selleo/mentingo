@@ -29,6 +29,10 @@ import {
 
 import { ACTIVITY_LOG_ACTION_TYPES } from "src/activity-logs/types";
 import { coursesSettingsSchema } from "src/courses/types/settings";
+import {
+  DEFAULT_LEARNING_PATH_SETTINGS,
+  type LearningPathSettings,
+} from "src/learning-path/types/learning-path-settings.types";
 import { safeJsonb } from "src/utils/safe-jsonb";
 
 import {
@@ -1457,6 +1461,10 @@ export const learningPaths = pgTable(
       .$type<LearningPathStatus>()
       .default(LEARNING_PATH_STATUSES.DRAFT),
     includesCertificate: boolean("includes_certificate").notNull().default(false),
+    settings: jsonb("settings")
+      .default(DEFAULT_LEARNING_PATH_SETTINGS)
+      .notNull()
+      .$type<LearningPathSettings>(),
     sequenceEnabled: boolean("sequence_enabled").notNull().default(false),
     authorId: uuid("author_id")
       .references(() => users.id)

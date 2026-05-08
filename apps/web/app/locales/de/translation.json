@@ -2787,7 +2787,13 @@
       "sequenceEnabled": "Sequenzielles Lernen",
       "sequenceEnabledDescription": "Teilnehmer müssen Kurse in der angezeigten Reihenfolge abschließen.",
       "includesCertificate": "Zertifikat",
-      "includesCertificateDescription": "Teilnehmer können nach Abschluss des Lernpfads ein Zertifikat erhalten."
+      "includesCertificateDescription": "Teilnehmer können nach Abschluss des Lernpfads ein Zertifikat erhalten.",
+      "certificateSignature": "Zertifikatssignatur",
+      "certificateSignatureDescription": "Laden Sie die Signatur hoch, die auf Zertifikaten für diesen Lernpfad angezeigt wird.",
+      "certificateFontColor": "Schriftfarbe des Zertifikats",
+      "certificateFontColorDescription": "Verwenden Sie den Farbwähler in der Vorschau, um die Text- und Linienfarbe des Zertifikats zu ändern.",
+      "certificatePreview": "Zertifikatsvorschau",
+      "certificatePreviewDescription": "Zeigen Sie das Zertifikat in der Vorschau an und passen Sie die Schriftfarbe an."
     },
     "detailsContent": {
       "title": "Lernpfaddetails",
@@ -2825,7 +2831,11 @@
     "toast": {
       "created": "Lernpfad erfolgreich erstellt",
       "updated": "Lernpfad erfolgreich aktualisiert",
-      "deleted": "Lernpfad erfolgreich gelöscht"
+      "deleted": "Lernpfad erfolgreich gelöscht",
+      "languageCreated": "Lernpfadsprache erfolgreich erstellt",
+      "coursesAdded": "Kurse erfolgreich zum Lernpfad hinzugefügt",
+      "courseRemoved": "Kurs erfolgreich aus dem Lernpfad entfernt",
+      "coursesReordered": "Lernpfadkurse erfolgreich neu sortiert"
     }
   },
   "lessonPreview": {

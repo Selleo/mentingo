@@ -91,7 +91,9 @@ const CertificatePreview = ({
       <div className="w-full origin-center scale-100 md:scale-[0.8]">
         <div
           className={cn("mx-auto w-full bg-white", {
-            "max-w-[98vw] overflow-hidden rounded-t-lg sm:max-w-[95vw]": !minimalFrame,
+            "max-w-[98vw] rounded-t-lg sm:max-w-[95vw]": !minimalFrame,
+            "overflow-hidden": !minimalFrame && !showColorPicker,
+            "overflow-visible": !minimalFrame && showColorPicker,
           })}
         >
           <div

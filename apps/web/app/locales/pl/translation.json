@@ -369,7 +369,13 @@
       "sequenceEnabled": "Nauka sekwencyjna",
       "sequenceEnabledDescription": "Uczestnicy muszą ukończyć kursy w podanej kolejności.",
       "includesCertificate": "Certyfikat",
-      "includesCertificateDescription": "Uczestnicy mogą otrzymać certyfikat po ukończeniu ścieżki."
+      "includesCertificateDescription": "Uczestnicy mogą otrzymać certyfikat po ukończeniu ścieżki.",
+      "certificateSignature": "Podpis na certyfikacie",
+      "certificateSignatureDescription": "Prześlij podpis widoczny na certyfikatach tej ścieżki edukacyjnej.",
+      "certificateFontColor": "Kolor tekstu certyfikatu",
+      "certificateFontColorDescription": "Użyj próbnika kolorów w podglądzie, aby zmienić kolor tekstu i linii certyfikatu.",
+      "certificatePreview": "Podgląd certyfikatu",
+      "certificatePreviewDescription": "Podejrzyj certyfikat i dostosuj kolor tekstu."
     },
     "detailsContent": {
       "title": "Szczegóły ścieżki",
@@ -409,7 +415,11 @@
     "toast": {
       "created": "Ścieżka edukacyjna została utworzona",
       "updated": "Ścieżka edukacyjna została zaktualizowana",
-      "deleted": "Ścieżka edukacyjna została usunięta"
+      "deleted": "Ścieżka edukacyjna została usunięta",
+      "languageCreated": "Język ścieżki edukacyjnej został utworzony",
+      "coursesAdded": "Kursy zostały dodane do ścieżki edukacyjnej",
+      "courseRemoved": "Kurs został usunięty ze ścieżki edukacyjnej",
+      "coursesReordered": "Kolejność kursów w ścieżce edukacyjnej została zaktualizowana"
     }
   },
   "newsView": {

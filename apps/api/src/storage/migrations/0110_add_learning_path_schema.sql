@@ -61,6 +61,7 @@ CREATE TABLE IF NOT EXISTS "learning_paths" (
 	"thumbnail_reference" varchar(500),
 	"status" text DEFAULT 'draft' NOT NULL,
 	"includes_certificate" boolean DEFAULT false NOT NULL,
+	"settings" jsonb DEFAULT '{"certificateSignature":null,"certificateFontColor":null}'::jsonb NOT NULL,
 	"sequence_enabled" boolean DEFAULT false NOT NULL,
 	"author_id" uuid NOT NULL,
 	"origin_type" text DEFAULT 'regular' NOT NULL,

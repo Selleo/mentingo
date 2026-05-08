@@ -282,6 +282,7 @@ export class LearningPathExportService {
       thumbnailReference: learningPath.thumbnailReference,
       status: learningPath.status,
       includesCertificate: learningPath.includesCertificate,
+      settings: learningPath.settings,
       sequenceEnabled: learningPath.sequenceEnabled,
       authorId: targetAuthor.id,
       originType: COURSE_ORIGIN_TYPES.EXPORTED,

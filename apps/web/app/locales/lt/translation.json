@@ -2787,7 +2787,13 @@
       "sequenceEnabled": "Nuoseklus mokymasis",
       "sequenceEnabledDescription": "Dalyviai turi baigti kursus rodoma tvarka.",
       "includesCertificate": "Sertifikatas",
-      "includesCertificateDescription": "Dalyviai gali gauti sertifikatą baigę mokymosi kelią."
+      "includesCertificateDescription": "Dalyviai gali gauti sertifikatą baigę mokymosi kelią.",
+      "certificateSignature": "Sertifikato parašas",
+      "certificateSignatureDescription": "Įkelkite parašą, rodomą šio mokymosi kelio sertifikatuose.",
+      "certificateFontColor": "Sertifikato šrifto spalva",
+      "certificateFontColorDescription": "Naudokite peržiūros spalvų parinkiklį, kad pakeistumėte sertifikato teksto ir linijų spalvą.",
+      "certificatePreview": "Sertifikato peržiūra",
+      "certificatePreviewDescription": "Peržiūrėkite sertifikatą ir pakoreguokite šrifto spalvą."
     },
     "detailsContent": {
       "title": "Mokymosi kelio informacija",
@@ -2825,7 +2831,11 @@
     "toast": {
       "created": "Mokymosi kelias sukurtas",
       "updated": "Mokymosi kelias atnaujintas",
-      "deleted": "Mokymosi kelias ištrintas"
+      "deleted": "Mokymosi kelias ištrintas",
+      "languageCreated": "Mokymosi kelio kalba sukurta",
+      "coursesAdded": "Kursai pridėti prie mokymosi kelio",
+      "courseRemoved": "Kursas pašalintas iš mokymosi kelio",
+      "coursesReordered": "Mokymosi kelio kursų tvarka atnaujinta"
     }
   },
   "lessonPreview": {

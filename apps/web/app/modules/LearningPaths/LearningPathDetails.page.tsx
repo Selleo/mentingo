@@ -191,6 +191,8 @@ export default function LearningPathDetailsPage() {
             learningPathId={learningPath.data.id}
             title={learningPath.data.title || t("learningPathsView.detailsTitle")}
             certificateReady={learningPath.data.certificateReady}
+            certificateSignatureUrl={learningPath.data.settings.certificateSignatureUrl}
+            certificateFontColor={learningPath.data.settings.certificateFontColor}
           />
         )}
 

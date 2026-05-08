@@ -1,10 +1,11 @@
-import { useLoaderData } from "@remix-run/react";
+import { redirect, useLoaderData } from "@remix-run/react";
 import { PERMISSIONS } from "@repo/shared";
 import { Search } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useEnrollCurrentUserToLearningPath } from "~/api/mutations/useLearningPathMutations";
+import { currentUserQueryOptions } from "~/api/queries";
 import { learningPathsQueryOptions, useLearningPaths } from "~/api/queries/useLearningPaths";
 import { queryClient } from "~/api/queryClient";
 import { hasAnyPermission } from "~/common/permissions/permission.utils";
@@ -15,6 +16,7 @@ import { useToast } from "~/components/ui/use-toast";
 import { usePermissions } from "~/hooks/usePermissions";
 import AdminLearningPathsPage from "~/modules/Admin/LearningPaths/LearningPaths.page";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
+import { saveEntryToNavigationHistory } from "~/utils/saveEntryToNavigationHistory";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import { LEARNING_PATHS_PAGE_HANDLES } from "../../../e2e/data/learning-paths/handles";
@@ -25,7 +27,19 @@ import type { ClientLoaderFunctionArgs, MetaFunction } from "@remix-run/react";
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.learningPaths");
 
-export const clientLoader = async (_: ClientLoaderFunctionArgs) => {
+export const clientLoader = async ({ request }: ClientLoaderFunctionArgs) => {
+  try {
+    const user = await queryClient.ensureQueryData(currentUserQueryOptions);
+
+    if (!user) {
+      saveEntryToNavigationHistory(request);
+
+      throw redirect("/auth/login");
+    }
+  } catch {
+    throw redirect("/auth/login");
+  }
+
   const { language } = useLanguageStore.getState();
 
   return queryClient.fetchQuery(learningPathsQueryOptions({ language }));
@@ -36,22 +50,13 @@ function StudentLearningPathsPage() {
   const loaderLearningPaths = useLoaderData<typeof clientLoader>();
   const { toast } = useToast();
   const { language } = useLanguageStore.getState();
-  const { data: learningPaths = loaderLearningPaths } = useLearningPaths({ language });
+  const [searchValue, setSearchValue] = useState("");
+  const { data: learningPaths = loaderLearningPaths } = useLearningPaths({
+    language,
+    searchQuery: searchValue.trim() || undefined,
+  });
   const { mutateAsync: enrollCurrentUserToLearningPath, isPending: isEnrollPending } =
     useEnrollCurrentUserToLearningPath();
-  const [searchValue, setSearchValue] = useState("");
-
-  const visibleLearningPaths = useMemo(() => {
-    const normalizedSearchValue = searchValue.trim().toLowerCase();
-
-    return learningPaths.data.filter((learningPath) => {
-      if (!normalizedSearchValue) return true;
-
-      return `${learningPath.title} ${learningPath.description}`
-        .toLowerCase()
-        .includes(normalizedSearchValue);
-    });
-  }, [learningPaths.data, searchValue]);
 
   const handleEnrollLearningPath = async (learningPathId: string) => {
     await enrollCurrentUserToLearningPath(learningPathId);
@@ -97,7 +102,7 @@ function StudentLearningPathsPage() {
         </div>
 
         <div className="flex flex-col gap-4">
-          {visibleLearningPaths.map((learningPath) => (
+          {learningPaths.data.map((learningPath) => (
             <InlineLearningPathCard
               key={learningPath.id}
               learningPath={learningPath}
@@ -121,7 +126,7 @@ function StudentLearningPathsPage() {
           ))}
         </div>
 
-        {!visibleLearningPaths.length && (
+        {!learningPaths.data.length && (
           <div className="rounded-[2rem] border border-dashed border-neutral-300 bg-neutral-50 p-8">
             <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
               <div className="rounded-2xl border border-neutral-200 bg-white p-4">

@@ -2849,7 +2849,13 @@
       "sequenceEnabled": "Sequential learning",
       "sequenceEnabledDescription": "Students must complete courses in display order.",
       "includesCertificate": "Certificate",
-      "includesCertificateDescription": "Students can receive a certificate after completing the path."
+      "includesCertificateDescription": "Students can receive a certificate after completing the path.",
+      "certificateSignature": "Certificate signature",
+      "certificateSignatureDescription": "Upload the signature shown on certificates for this learning path.",
+      "certificateFontColor": "Certificate font color",
+      "certificateFontColorDescription": "Use the preview color picker to update the certificate text and line color.",
+      "certificatePreview": "Certificate preview",
+      "certificatePreviewDescription": "Preview the certificate and adjust its font color."
     },
     "detailsContent": {
       "title": "Learning path details",
@@ -2889,7 +2895,11 @@
     "toast": {
       "created": "Learning path created successfully",
       "updated": "Learning path updated successfully",
-      "deleted": "Learning path deleted successfully"
+      "deleted": "Learning path deleted successfully",
+      "languageCreated": "Learning path language created successfully",
+      "coursesAdded": "Courses added to learning path successfully",
+      "courseRemoved": "Course removed from learning path successfully",
+      "coursesReordered": "Learning path courses reordered successfully"
     }
   },
   "lessonPreview": {

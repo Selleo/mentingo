@@ -7207,6 +7207,14 @@
                 }
               ]
             }
+          },
+          {
+            "name": "searchQuery",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -27583,6 +27591,36 @@
                     "includesCertificate": {
                       "type": "boolean"
                     },
+                    "settings": {
+                      "additionalProperties": false,
+                      "type": "object",
+                      "properties": {
+                        "certificateSignatureUrl": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "certificateFontColor": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "certificateSignatureUrl",
+                        "certificateFontColor"
+                      ]
+                    },
                     "sequenceEnabled": {
                       "type": "boolean"
                     },
@@ -27656,6 +27694,7 @@
                     "isEnrolled",
                     "status",
                     "includesCertificate",
+                    "settings",
                     "sequenceEnabled",
                     "authorId",
                     "baseLanguage",
@@ -27895,6 +27934,36 @@
                   "includesCertificate": {
                     "type": "boolean"
                   },
+                  "settings": {
+                    "additionalProperties": false,
+                    "type": "object",
+                    "properties": {
+                      "certificateSignatureUrl": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "certificateFontColor": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "certificateSignatureUrl",
+                      "certificateFontColor"
+                    ]
+                  },
                   "sequenceEnabled": {
                     "type": "boolean"
                   },
@@ -27968,6 +28037,7 @@
                   "isEnrolled",
                   "status",
                   "includesCertificate",
+                  "settings",
                   "sequenceEnabled",
                   "authorId",
                   "baseLanguage",
@@ -28247,6 +28317,29 @@
           "includesCertificate": {
             "type": "boolean"
           },
+          "settings": {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "certificateFontColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "removeCertificateSignature": {
+                "type": "boolean"
+              }
+            }
+          },
+          "certificateSignature": {
+            "format": "binary",
+            "type": "string"
+          },
           "sequenceEnabled": {
             "type": "boolean"
           }
@@ -28311,6 +28404,38 @@
               },
               "includesCertificate": {
                 "type": "boolean"
+              },
+              "settings": {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "certificateSignature": {
+                    "default": null,
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "certificateFontColor": {
+                    "default": null,
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "certificateSignature",
+                  "certificateFontColor"
+                ]
               },
               "sequenceEnabled": {
                 "type": "boolean"
@@ -28384,6 +28509,7 @@
               "thumbnailReference",
               "status",
               "includesCertificate",
+              "settings",
               "sequenceEnabled",
               "authorId",
               "baseLanguage",
@@ -28463,6 +28589,29 @@
           "includesCertificate": {
             "type": "boolean"
           },
+          "settings": {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "certificateFontColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "removeCertificateSignature": {
+                "type": "boolean"
+              }
+            }
+          },
+          "certificateSignature": {
+            "format": "binary",
+            "type": "string"
+          },
           "sequenceEnabled": {
             "type": "boolean"
           }
@@ -28522,6 +28671,38 @@
               },
               "includesCertificate": {
                 "type": "boolean"
+              },
+              "settings": {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "certificateSignature": {
+                    "default": null,
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "certificateFontColor": {
+                    "default": null,
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "certificateSignature",
+                  "certificateFontColor"
+                ]
               },
               "sequenceEnabled": {
                 "type": "boolean"
@@ -28595,6 +28776,7 @@
               "thumbnailReference",
               "status",
               "includesCertificate",
+              "settings",
               "sequenceEnabled",
               "authorId",
               "baseLanguage",
@@ -28663,6 +28845,38 @@
               "includesCertificate": {
                 "type": "boolean"
               },
+              "settings": {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "certificateSignature": {
+                    "default": null,
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "certificateFontColor": {
+                    "default": null,
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "certificateSignature",
+                  "certificateFontColor"
+                ]
+              },
               "sequenceEnabled": {
                 "type": "boolean"
               },
@@ -28735,6 +28949,7 @@
               "thumbnailReference",
               "status",
               "includesCertificate",
+              "settings",
               "sequenceEnabled",
               "authorId",
               "baseLanguage",

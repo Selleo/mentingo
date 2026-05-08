@@ -31,9 +31,12 @@ type LearningPathCardActionsProps = {
   isPending: boolean;
   isEnrolled: boolean;
   groupOptions: Option[];
+  title: string;
   status: LearningPathListItem["status"];
   sequenceEnabled: boolean;
   includesCertificate: boolean;
+  certificateSignatureUrl?: string | null;
+  certificateFontColor?: string | null;
   onEnrollCurrentUser?: () => Promise<void>;
   onDelete: () => Promise<void> | void;
   onEnrollStudents?: (studentIds: string[]) => Promise<void>;
@@ -43,6 +46,9 @@ type LearningPathCardActionsProps = {
   onStatusChange: (status: UpdateLearningPathBody["status"]) => Promise<void> | void;
   onSequenceEnabledChange: (sequenceEnabled: boolean) => Promise<void> | void;
   onCertificateChange: (includesCertificate: boolean) => Promise<void> | void;
+  onCertificateSignatureUpload: (file: File) => Promise<void> | void;
+  onRemoveCertificateSignature: () => Promise<void> | void;
+  onCertificateFontColorChange: (color: string) => Promise<void> | void;
 };
 
 export function LearningPathCardActions({
@@ -54,9 +60,12 @@ export function LearningPathCardActions({
   isPending,
   isEnrolled,
   groupOptions,
+  title,
   status,
   sequenceEnabled,
   includesCertificate,
+  certificateSignatureUrl,
+  certificateFontColor,
   onEnrollCurrentUser,
   onDelete,
   onEnrollStudents,
@@ -66,6 +75,9 @@ export function LearningPathCardActions({
   onStatusChange,
   onSequenceEnabledChange,
   onCertificateChange,
+  onCertificateSignatureUpload,
+  onRemoveCertificateSignature,
+  onCertificateFontColorChange,
 }: LearningPathCardActionsProps) {
   const { t } = useTranslation();
 
@@ -95,13 +107,19 @@ export function LearningPathCardActions({
             )}
           {canEdit && (
             <LearningPathSettingsDrawer
+              title={title}
               status={status}
               sequenceEnabled={sequenceEnabled}
               includesCertificate={includesCertificate}
+              certificateSignatureUrl={certificateSignatureUrl}
+              certificateFontColor={certificateFontColor}
               isPending={isPending}
               onStatusChange={onStatusChange}
               onSequenceEnabledChange={onSequenceEnabledChange}
               onCertificateChange={onCertificateChange}
+              onCertificateSignatureUpload={onCertificateSignatureUpload}
+              onRemoveCertificateSignature={onRemoveCertificateSignature}
+              onCertificateFontColorChange={onCertificateFontColorChange}
             />
           )}
           {canDelete && (

@@ -775,8 +775,15 @@
     {
       "idx": 110,
       "version": "7",
-      "when": 1777905694465,
+      "when": 1778239215860,
       "tag": "0110_add_learning_path_schema",
+      "breakpoints": true
+    },
+    {
+      "idx": 111,
+      "version": "7",
+      "when": 1778239243161,
+      "tag": "0111_enable_tenant_rls_for_learning_paths_related_tables",
       "breakpoints": true
     }
   ]

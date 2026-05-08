@@ -172,6 +172,7 @@ export default function AdminLearningPathsPage() {
       data,
     });
     await invalidateLearningPaths();
+    toast({ description: t("adminLearningPathsView.toast.updated") });
   };
 
   const handleDeleteLearningPath = async (learningPathId: string) => {
@@ -296,7 +297,10 @@ export default function AdminLearningPathsPage() {
                 setPathLanguages((current) => ({ ...current, [learningPath.id]: language }))
               }
               onUpdate={(data) => handleUpdateLearningPath(learningPath, data)}
-              onLanguageCreated={invalidateLearningPaths}
+              onLanguageCreated={async () => {
+                await invalidateLearningPaths();
+                toast({ description: t("adminLearningPathsView.toast.languageCreated") });
+              }}
               onDelete={() => handleDeleteLearningPath(learningPath.id)}
               onAddCourses={async (courseIds) => {
                 await addCoursesToLearningPath({
@@ -304,10 +308,12 @@ export default function AdminLearningPathsPage() {
                   data: { courseIds },
                 });
                 await Promise.all([invalidateLearningPaths(), invalidateCourses()]);
+                toast({ description: t("adminLearningPathsView.toast.coursesAdded") });
               }}
               onRemoveCourse={async (courseId) => {
                 await removeCourseFromLearningPath({ learningPathId: learningPath.id, courseId });
                 await invalidateLearningPaths();
+                toast({ description: t("adminLearningPathsView.toast.courseRemoved") });
               }}
               onReorderCourses={async (courseIds) => {
                 await reorderLearningPathCourses({
@@ -315,6 +321,7 @@ export default function AdminLearningPathsPage() {
                   data: { courseIds },
                 });
                 await invalidateLearningPaths();
+                toast({ description: t("adminLearningPathsView.toast.coursesReordered") });
               }}
               onEnrollStudents={(studentIds) => handleEnrollStudents(learningPath.id, studentIds)}
               onEnrollGroups={(groupIds) => handleEnrollGroups(learningPath.id, groupIds)}
@@ -324,6 +331,7 @@ export default function AdminLearningPathsPage() {
               onUnenrollGroups={(groupIds) => handleUnenrollGroups(learningPath.id, groupIds)}
               groupOptions={groupOptions}
               isPending={isMutationPending}
+              showCourseProgress={false}
             />
           ))}
 

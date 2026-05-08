@@ -32,6 +32,7 @@ type LearningPathCoursesSectionProps = {
   isPending: boolean;
   canManage: boolean;
   canPlayCourses: boolean;
+  showProgress?: boolean;
   onAddCourses: (courseIds: string[]) => Promise<void>;
   onReorderCourses: (courseIds: string[]) => Promise<void>;
   onRemoveCourse: (courseId: string) => Promise<void>;
@@ -58,6 +59,7 @@ export function LearningPathCoursesSection({
   isPending,
   canManage,
   canPlayCourses,
+  showProgress = true,
   onAddCourses,
   onReorderCourses,
   onRemoveCourse,
@@ -131,10 +133,15 @@ export function LearningPathCoursesSection({
                 })}
               </p>
             )}
-            <Badge variant={courseStateConfig.badgeVariant} className="gap-1 px-1.5 py-0.5 text-xs">
-              {courseStateConfig.icon}
-              {courseStateConfig.label}
-            </Badge>
+            {showProgress && (
+              <Badge
+                variant={courseStateConfig.badgeVariant}
+                className="gap-1 px-1.5 py-0.5 text-xs"
+              >
+                {courseStateConfig.icon}
+                {courseStateConfig.label}
+              </Badge>
+            )}
           </div>
         </div>
       </div>

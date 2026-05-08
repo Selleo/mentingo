@@ -208,6 +208,44 @@ describe("LearningPathController (e2e)", () => {
         expect(returnedPathIds).toContain(ownDraft.id);
         expect(returnedPathIds).not.toContain(otherDraft.id);
       });
+
+      it("should search learning paths by localized title and description", async () => {
+        const titleMatch = await learningPathFactory.create({
+          authorId: adminUser.id,
+          title: { pl: "Ścieżka sprzedażowa", en: "Sales path" },
+          description: { pl: "Opis", en: "Description" },
+          baseLanguage: "pl",
+          availableLocales: ["pl", "en"],
+        });
+        const descriptionMatch = await learningPathFactory.create({
+          authorId: adminUser.id,
+          title: { pl: "Obsługa klienta", en: "Customer support" },
+          description: { pl: "Negocjacje i sprzedaż", en: "Negotiation" },
+          baseLanguage: "pl",
+          availableLocales: ["pl", "en"],
+        });
+        const miss = await learningPathFactory.create({
+          authorId: adminUser.id,
+          title: { pl: "Bezpieczeństwo", en: "Security" },
+          description: { pl: "Procedury", en: "Procedures" },
+          baseLanguage: "pl",
+          availableLocales: ["pl", "en"],
+        });
+
+        const response = await request(app.getHttpServer())
+          .get("/api/learning-path?page=1&perPage=10&language=pl&searchQuery=sprzedaż")
+          .set("Cookie", adminCookies)
+          .expect(200);
+
+        const returnedPathIds = response.body.data.map(
+          (learningPath: { id: string }) => learningPath.id,
+        );
+        expect(returnedPathIds).toEqual(
+          expect.arrayContaining([titleMatch.id, descriptionMatch.id]),
+        );
+        expect(returnedPathIds).not.toContain(miss.id);
+        expect(response.body.pagination.totalItems).toBe(2);
+      });
     });
 
     describe("GET /api/learning-path/:learningPathId", () => {
@@ -260,12 +298,23 @@ describe("LearningPathController (e2e)", () => {
             title: "Updated title",
             includesCertificate: false,
             sequenceEnabled: false,
+            settings: {
+              certificateFontColor: "#123456",
+            },
           })
           .expect(200);
 
         expect(response.body.data.includesCertificate).toBe(false);
         expect(response.body.data.sequenceEnabled).toBe(false);
         expect(response.body.data.title.pl).toBe("Updated title");
+
+        const updatedLearningPath = await baseDb.query.learningPaths.findFirst({
+          where: eq(learningPaths.id, learningPath.id),
+        });
+        expect(updatedLearningPath?.settings).toMatchObject({
+          certificateSignature: null,
+          certificateFontColor: "#123456",
+        });
       });
 
       it("should allow content creators to update own learning paths only", async () => {

@@ -43,6 +43,7 @@ type InlineLearningPathCardProps = {
   groupOptions: Option[];
   isPending?: boolean;
   showCertificate?: boolean;
+  showCourseProgress?: boolean;
 };
 
 const getDisplayLearningPath = (
@@ -94,6 +95,7 @@ export function InlineLearningPathCard({
   groupOptions,
   isPending = false,
   showCertificate = false,
+  showCourseProgress = true,
 }: InlineLearningPathCardProps) {
   const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -285,9 +287,12 @@ export function InlineLearningPathCard({
               isPending={isPending}
               isEnrolled={learningPath.isEnrolled}
               groupOptions={groupOptions}
+              title={optimisticDisplayLearningPath.title}
               status={displayLearningPath.status}
               sequenceEnabled={displayLearningPath.sequenceEnabled}
               includesCertificate={displayLearningPath.includesCertificate}
+              certificateSignatureUrl={learningPath.settings.certificateSignatureUrl}
+              certificateFontColor={learningPath.settings.certificateFontColor}
               onEnrollCurrentUser={onEnrollCurrentUser}
               onDelete={onDelete}
               onEnrollStudents={onEnrollStudents}
@@ -297,6 +302,15 @@ export function InlineLearningPathCard({
               onStatusChange={(status) => onUpdate({ status })}
               onSequenceEnabledChange={(sequenceEnabled) => onUpdate({ sequenceEnabled })}
               onCertificateChange={(includesCertificate) => onUpdate({ includesCertificate })}
+              onCertificateSignatureUpload={(certificateSignature) =>
+                onUpdate({ certificateSignature })
+              }
+              onRemoveCertificateSignature={() =>
+                onUpdate({ settings: { removeCertificateSignature: true } })
+              }
+              onCertificateFontColorChange={(certificateFontColor) =>
+                onUpdate({ settings: { certificateFontColor } })
+              }
             />
           </div>
         </div>
@@ -307,6 +321,7 @@ export function InlineLearningPathCard({
           isPending={isPending}
           canManage={canUpdateCourses}
           canPlayCourses={learningPath.isEnrolled}
+          showProgress={showCourseProgress}
           onAddCourses={onAddCourses}
           onReorderCourses={onReorderCourses}
           onRemoveCourse={onRemoveCourse}
@@ -317,6 +332,8 @@ export function InlineLearningPathCard({
             learningPathId={learningPath.id}
             title={optimisticDisplayLearningPath.title || t("learningPathsView.detailsTitle")}
             certificateReady={isCertificateReady}
+            certificateSignatureUrl={learningPath.settings.certificateSignatureUrl}
+            certificateFontColor={learningPath.settings.certificateFontColor}
             className="mt-5"
           />
         )}

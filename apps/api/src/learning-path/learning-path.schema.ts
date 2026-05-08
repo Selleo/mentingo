@@ -10,6 +10,12 @@ import { type Static, Type } from "@sinclair/typebox";
 import { UUIDSchema } from "src/common";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
+import {
+  learningPathSettingsResponseSchema,
+  learningPathSettingsSchema,
+  updateLearningPathSettingsSchema,
+} from "./types/learning-path-settings.types";
+
 export const learningPathStatusOptions = Type.Enum(LEARNING_PATH_STATUSES);
 export const supportedLanguagesOptions = Type.Enum(SUPPORTED_LANGUAGES);
 export const localizedTextSchema = Type.Record(Type.String(), Type.String());
@@ -26,6 +32,7 @@ export const learningPathSchema = Type.Object({
   thumbnailReference: Type.Union([Type.String(), Type.Null()]),
   status: learningPathStatusOptions,
   includesCertificate: Type.Boolean(),
+  settings: learningPathSettingsSchema,
   sequenceEnabled: Type.Boolean(),
   authorId: UUIDSchema,
   baseLanguage: supportedLanguagesOptions,
@@ -42,6 +49,7 @@ export const learningPathDisplaySchema = Type.Object({
   isEnrolled: Type.Boolean(),
   status: learningPathStatusOptions,
   includesCertificate: Type.Boolean(),
+  settings: learningPathSettingsResponseSchema,
   sequenceEnabled: Type.Boolean(),
   authorId: UUIDSchema,
   baseLanguage: supportedLanguagesOptions,
@@ -127,6 +135,8 @@ export const createLearningPathSchema = Type.Object({
   thumbnail: Type.Optional(Type.String({ format: "binary" })),
   status: Type.Optional(learningPathStatusOptions),
   includesCertificate: Type.Optional(Type.Boolean()),
+  settings: Type.Optional(updateLearningPathSettingsSchema),
+  certificateSignature: Type.Optional(Type.String({ format: "binary" })),
   sequenceEnabled: Type.Optional(Type.Boolean()),
 });
 
@@ -139,6 +149,8 @@ export const updateLearningPathSchema = Type.Partial(
     thumbnail: Type.String({ format: "binary" }),
     status: learningPathStatusOptions,
     includesCertificate: Type.Boolean(),
+    settings: updateLearningPathSettingsSchema,
+    certificateSignature: Type.String({ format: "binary" }),
     sequenceEnabled: Type.Boolean(),
   }),
 );
@@ -247,6 +259,7 @@ export type LearningPathSchema = {
   thumbnailReference: string | null;
   status: Static<typeof learningPathStatusOptions>;
   includesCertificate: boolean;
+  settings: Static<typeof learningPathSettingsSchema>;
   sequenceEnabled: boolean;
   authorId: string;
   baseLanguage: Static<typeof supportedLanguagesOptions>;
@@ -258,9 +271,13 @@ export type LearningPathCourseSchema = Static<typeof learningPathCourseSchema>;
 export type LearningPathCourseDetailSchema = Static<typeof learningPathCourseDetailSchema>;
 export type LearningPathCourseOptionSchema = Static<typeof learningPathCourseOptionSchema>;
 export type LearningPathCoursePreviewSchema = Static<typeof learningPathCoursePreviewSchema>;
-export type LearningPathDisplaySchema = Omit<LearningPathSchema, "title" | "description"> & {
+export type LearningPathDisplaySchema = Omit<
+  LearningPathSchema,
+  "title" | "description" | "settings"
+> & {
   title: string;
   description: string;
+  settings: Static<typeof learningPathSettingsResponseSchema>;
   isEnrolled: boolean;
 };
 export type LearningPathListItemSchema = LearningPathDisplaySchema & {

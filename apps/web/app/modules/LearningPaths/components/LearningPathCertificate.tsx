@@ -16,6 +16,8 @@ type LearningPathCertificateProps = {
   learningPathId: string;
   title: string;
   certificateReady: boolean;
+  certificateSignatureUrl?: string | null;
+  certificateFontColor?: string | null;
   className?: string;
 };
 
@@ -23,6 +25,8 @@ export function LearningPathCertificate({
   learningPathId,
   title,
   certificateReady,
+  certificateSignatureUrl,
+  certificateFontColor,
   className,
 }: LearningPathCertificateProps) {
   const { t } = useTranslation();
@@ -94,8 +98,10 @@ export function LearningPathCertificate({
               onClose={() => setCertificatePreviewOpen(false)}
               platformLogo={globalSettings?.platformLogoS3Key}
               certificateBackgroundImageUrl={globalSettings?.certificateBackgroundImage}
-              certificateSignatureUrl={certificate.certificateSignatureUrl}
-              initialColor={certificate.certificateFontColor}
+              certificateSignatureUrl={
+                certificateSignatureUrl ?? certificate.certificateSignatureUrl
+              }
+              initialColor={certificateFontColor ?? certificate.certificateFontColor}
               showShareButton={Boolean(certificate.id)}
               certificateKind={CERTIFICATE_KIND.LEARNING_PATH}
             />

@@ -2787,7 +2787,13 @@
       "sequenceEnabled": "Sekvenční učení",
       "sequenceEnabledDescription": "Studenti musí dokončit kurzy v zobrazeném pořadí.",
       "includesCertificate": "Certifikát",
-      "includesCertificateDescription": "Studenti mohou po dokončení cesty získat certifikát."
+      "includesCertificateDescription": "Studenti mohou po dokončení cesty získat certifikát.",
+      "certificateSignature": "Podpis na certifikátu",
+      "certificateSignatureDescription": "Nahrajte podpis zobrazený na certifikátech pro tuto vzdělávací cestu.",
+      "certificateFontColor": "Barva písma certifikátu",
+      "certificateFontColorDescription": "Pomocí výběru barvy v náhledu změňte barvu textu a linek certifikátu.",
+      "certificatePreview": "Náhled certifikátu",
+      "certificatePreviewDescription": "Zobrazte náhled certifikátu a upravte barvu písma."
     },
     "detailsContent": {
       "title": "Podrobnosti cesty",
@@ -2825,7 +2831,11 @@
     "toast": {
       "created": "Vzdělávací cesta byla vytvořena",
       "updated": "Vzdělávací cesta byla aktualizována",
-      "deleted": "Vzdělávací cesta byla smazána"
+      "deleted": "Vzdělávací cesta byla smazána",
+      "languageCreated": "Jazyk vzdělávací cesty byl vytvořen",
+      "coursesAdded": "Kurzy byly přidány do vzdělávací cesty",
+      "courseRemoved": "Kurz byl odebrán ze vzdělávací cesty",
+      "coursesReordered": "Pořadí kurzů ve vzdělávací cestě bylo aktualizováno"
     }
   },
   "lessonPreview": {

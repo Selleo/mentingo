@@ -1,4 +1,8 @@
-import { LEARNING_PATH_STATUSES, type SupportedLanguages } from "@repo/shared";
+import {
+  ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES,
+  LEARNING_PATH_STATUSES,
+  type SupportedLanguages,
+} from "@repo/shared";
 import { useTranslation } from "react-i18next";
 
 import ImageUploadInput from "~/components/FileUploadInput/ImageUploadInput";
@@ -31,6 +35,10 @@ type LearningPathEditorDetailsSectionProps = {
   fileInputRef: React.RefObject<HTMLInputElement>;
   onImageUpload: (file: File) => void;
   onRemoveThumbnail: () => void;
+  certificateSignatureUrl: string | null;
+  certificateSignatureFileInputRef: React.RefObject<HTMLInputElement>;
+  onCertificateSignatureUpload: (file: File) => void;
+  onRemoveCertificateSignature: () => void;
   onLanguageChange: (language: SupportedLanguages) => void;
   canEdit: boolean;
 };
@@ -76,10 +84,15 @@ export function LearningPathEditorDetailsSection({
   fileInputRef,
   onImageUpload,
   onRemoveThumbnail,
+  certificateSignatureUrl,
+  certificateSignatureFileInputRef,
+  onCertificateSignatureUpload,
+  onRemoveCertificateSignature,
   onLanguageChange,
   canEdit,
 }: LearningPathEditorDetailsSectionProps) {
   const { t } = useTranslation();
+  const includesCertificate = form.watch("includesCertificate");
 
   return (
     <div className="rounded-[2rem] border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
@@ -290,6 +303,52 @@ export function LearningPathEditorDetailsSection({
                   </FormItem>
                 )}
               />
+              {includesCertificate && (
+                <>
+                  <CompactSeparator />
+                  <div
+                    className={`rounded-2xl border border-neutral-200 bg-neutral-50 p-4 transition-opacity ${
+                      canEdit ? "opacity-100" : "opacity-50"
+                    }`}
+                    aria-disabled={!canEdit}
+                  >
+                    <div className="mb-3">
+                      <p className="body-sm-md text-neutral-950">
+                        {t("adminLearningPathsView.form.certificateSignature")}
+                      </p>
+                      <p className="details-md mt-1 text-neutral-600">
+                        {t("adminLearningPathsView.form.certificateSignatureDescription")}
+                      </p>
+                    </div>
+                    <ImageUploadInput
+                      field={{ value: certificateSignatureUrl ?? undefined }}
+                      handleImageUpload={onCertificateSignatureUpload}
+                      isUploading={false}
+                      disabled={!canEdit}
+                      imageUrl={certificateSignatureUrl}
+                      fileInputRef={certificateSignatureFileInputRef}
+                      variant="video"
+                      accept={[...ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES].join(",")}
+                      imageFit="contain"
+                      detailsText={t(
+                        "adminCourseView.settings.other.certificateSignatureRequirements",
+                      )}
+                      inputId="learning-path-certificate-signature"
+                    />
+                    {certificateSignatureUrl && canEdit && (
+                      <Button
+                        type="button"
+                        variant="link"
+                        size="sm"
+                        className="mt-2 h-auto px-0 py-0 text-error-600"
+                        onClick={onRemoveCertificateSignature}
+                      >
+                        {t("adminCourseView.settings.button.removeCertificateSignature")}
+                      </Button>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>

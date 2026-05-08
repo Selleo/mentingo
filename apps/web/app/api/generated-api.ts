@@ -3412,6 +3412,10 @@ export interface GetLearningPathsResponse {
     isEnrolled: boolean;
     status: "draft" | "published" | "private";
     includesCertificate: boolean;
+    settings: {
+      certificateSignatureUrl: string | null;
+      certificateFontColor: string | null;
+    };
     sequenceEnabled: boolean;
     /** @format uuid */
     authorId: string;
@@ -3460,6 +3464,10 @@ export interface GetLearningPathByIdResponse {
     isEnrolled: boolean;
     status: "draft" | "published" | "private";
     includesCertificate: boolean;
+    settings: {
+      certificateSignatureUrl: string | null;
+      certificateFontColor: string | null;
+    };
     sequenceEnabled: boolean;
     /** @format uuid */
     authorId: string;
@@ -3505,6 +3513,12 @@ export interface CreateLearningPathBody {
   thumbnail?: File;
   status?: "draft" | "published" | "private";
   includesCertificate?: boolean;
+  settings?: {
+    certificateFontColor?: string | null;
+    removeCertificateSignature?: boolean;
+  };
+  /** @format binary */
+  certificateSignature?: File;
   sequenceEnabled?: boolean;
 }
 
@@ -3517,6 +3531,10 @@ export interface CreateLearningPathResponse {
     thumbnailReference: string | null;
     status: "draft" | "published" | "private";
     includesCertificate: boolean;
+    settings: {
+      certificateSignature: string | null;
+      certificateFontColor: string | null;
+    };
     sequenceEnabled: boolean;
     /** @format uuid */
     authorId: string;
@@ -3536,6 +3554,12 @@ export interface UpdateLearningPathBody {
   thumbnail?: File;
   status?: "draft" | "published" | "private";
   includesCertificate?: boolean;
+  settings?: {
+    certificateFontColor?: string | null;
+    removeCertificateSignature?: boolean;
+  };
+  /** @format binary */
+  certificateSignature?: File;
   sequenceEnabled?: boolean;
 }
 
@@ -3548,6 +3572,10 @@ export interface UpdateLearningPathResponse {
     thumbnailReference: string | null;
     status: "draft" | "published" | "private";
     includesCertificate: boolean;
+    settings: {
+      certificateSignature: string | null;
+      certificateFontColor: string | null;
+    };
     sequenceEnabled: boolean;
     /** @format uuid */
     authorId: string;
@@ -3567,6 +3595,10 @@ export interface CreateLanguageResponse {
     thumbnailReference: string | null;
     status: "draft" | "published" | "private";
     includesCertificate: boolean;
+    settings: {
+      certificateSignature: string | null;
+      certificateFontColor: string | null;
+    };
     sequenceEnabled: boolean;
     /** @format uuid */
     authorId: string;
@@ -8721,6 +8753,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         page?: number;
         perPage?: number;
         language?: "en" | "pl" | "de" | "lt" | "cs";
+        searchQuery?: string;
       },
       params: RequestParams = {},
     ) =>

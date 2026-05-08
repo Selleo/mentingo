@@ -55,6 +55,11 @@ import {
   users,
 } from "src/storage/schema";
 
+import {
+  DEFAULT_LEARNING_PATH_SETTINGS,
+  type LearningPathSettings,
+} from "./types/learning-path-settings.types";
+
 import type { CreateLearningPathBody } from "./learning-path.schema";
 import type {
   LearningPathCourseLink,
@@ -78,6 +83,14 @@ type LearningPathEnrolledStudentsQuery = {
   perPage?: number;
 };
 
+type LearningPathListQuery = {
+  page?: number;
+  perPage?: number;
+  language?: SupportedLanguages;
+  searchQuery?: string;
+  visibility?: { canReadAll: boolean; canReadOwn: boolean; studentId: UUIDType };
+};
+
 @Injectable()
 export class LearningPathRepository {
   constructor(
@@ -89,12 +102,23 @@ export class LearningPathRepository {
     body: CreateLearningPathBody,
     currentUser: CurrentUserType,
   ) {
+    const learningPathBody = body as CreateLearningPathBody & {
+      certificateSignature?: string;
+    };
+    const settings: LearningPathSettings = {
+      ...DEFAULT_LEARNING_PATH_SETTINGS,
+      ...(body.settings?.certificateFontColor !== undefined
+        ? { certificateFontColor: body.settings.certificateFontColor }
+        : {}),
+      certificateSignature: learningPathBody.certificateSignature ?? null,
+    };
     const values: typeof learningPaths.$inferInsert = {
       title: { [body.language]: body.title },
       description: { [body.language]: body.description },
       authorId: currentUser.userId,
       baseLanguage: body.language,
       availableLocales: [body.language],
+      settings,
     };
 
     if (body.thumbnailReference !== undefined) values.thumbnailReference = body.thumbnailReference;
@@ -116,12 +140,8 @@ export class LearningPathRepository {
     });
   }
 
-  async getLearningPaths(
-    page: number = 1,
-    perPage: number = DEFAULT_PAGE_SIZE,
-    visibility?: { canReadAll: boolean; canReadOwn: boolean; studentId: UUIDType },
-    dbInstance: DatabasePg = this.db,
-  ) {
+  async getLearningPaths(query: LearningPathListQuery = {}, dbInstance: DatabasePg = this.db) {
+    const { page = 1, perPage = DEFAULT_PAGE_SIZE, language, searchQuery, visibility } = query;
     const visibilityCondition = visibility?.canReadAll
       ? undefined
       : or(
@@ -129,6 +149,19 @@ export class LearningPathRepository {
           isNotNull(studentLearningPaths.id),
           visibility?.canReadOwn ? eq(learningPaths.authorId, visibility.studentId) : undefined,
         );
+    const title = this.localizationService.getLocalizedSqlField(learningPaths.title, language);
+    const description = this.localizationService.getLocalizedSqlField(
+      learningPaths.description,
+      language,
+    );
+    const trimmedSearchQuery = searchQuery?.trim();
+    const searchCondition = trimmedSearchQuery
+      ? or(
+          sql`${title} ILIKE ${`%${trimmedSearchQuery}%`}`,
+          sql`${description} ILIKE ${`%${trimmedSearchQuery}%`}`,
+        )
+      : undefined;
+    const whereCondition = and(visibilityCondition, searchCondition);
 
     const queriedLearningPaths = await dbInstance
       .select(getTableColumns(learningPaths))
@@ -140,7 +173,7 @@ export class LearningPathRepository {
           visibility ? eq(studentLearningPaths.studentId, visibility.studentId) : undefined,
         ),
       )
-      .where(visibilityCondition)
+      .where(whereCondition)
       .orderBy(desc(learningPaths.createdAt))
       .limit(perPage)
       .offset((page - 1) * perPage);
@@ -155,7 +188,7 @@ export class LearningPathRepository {
           visibility ? eq(studentLearningPaths.studentId, visibility.studentId) : undefined,
         ),
       )
-      .where(visibilityCondition);
+      .where(whereCondition);
 
     return {
       data: queriedLearningPaths,
@@ -597,6 +630,7 @@ export class LearningPathRepository {
         thumbnailReference: learningPaths.thumbnailReference,
         status: learningPaths.status,
         includesCertificate: learningPaths.includesCertificate,
+        settings: learningPaths.settings,
         sequenceEnabled: learningPaths.sequenceEnabled,
         authorId: learningPaths.authorId,
         originType: learningPaths.originType,
@@ -1777,6 +1811,12 @@ export class LearningPathRepository {
         ...getTableColumns(learningPathCertificates),
         fullName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
         pathTitle: learningPaths.title,
+        certificateSignature: sql<string | null>`
+          ${learningPaths.settings} ->> 'certificateSignature'
+        `,
+        certificateFontColor: sql<string | null>`
+          ${learningPaths.settings} ->> 'certificateFontColor'
+        `,
       })
       .from(learningPathCertificates)
       .innerJoin(users, eq(users.id, learningPathCertificates.userId))
@@ -1803,6 +1843,12 @@ export class LearningPathRepository {
         tenantName: tenants.name,
         fullName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
         pathTitle: learningPaths.title,
+        certificateSignature: sql<string | null>`
+          ${learningPaths.settings} ->> 'certificateSignature'
+        `,
+        certificateFontColor: sql<string | null>`
+          ${learningPaths.settings} ->> 'certificateFontColor'
+        `,
       })
       .from(learningPathCertificates)
       .innerJoin(users, eq(users.id, learningPathCertificates.userId))

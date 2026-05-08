@@ -51,6 +51,10 @@ export const createLearningPathFactory = (db: DatabasePg) => {
       thumbnailReference: null,
       status: "published",
       includesCertificate: false,
+      settings: {
+        certificateSignature: null,
+        certificateFontColor: null,
+      },
       sequenceEnabled: false,
       authorId: "",
       originType: "regular",

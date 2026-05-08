@@ -1,4 +1,5 @@
 import type { LearningPathCoursePreviewSchema, LearningPathSchema } from "./learning-path.schema";
+import type { LearningPathSettings } from "./types/learning-path-settings.types";
 import type {
   LearningPathCertificateStatus,
   LearningPathEntityType,
@@ -85,6 +86,7 @@ export type LearningPathUpdateData = {
   thumbnailReference?: string | null;
   status?: LearningPathStatus;
   includesCertificate?: boolean;
+  settings?: LearningPathSettings | SQL<unknown>;
   sequenceEnabled?: boolean;
   availableLocales?: LearningPathSchema["availableLocales"];
 };
