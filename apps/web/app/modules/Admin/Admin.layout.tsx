@@ -40,9 +40,21 @@ const AdminGuard = ({ children }: PropsWithChildren) => {
   const { hasAccess: canManageOwnCourses } = usePermissions({
     required: PERMISSIONS.COURSE_UPDATE_OWN,
   });
+  const { hasAccess: canAccessLearningPathAdmin } = usePermissions({
+    required: [
+      PERMISSIONS.LEARNING_PATH_CREATE,
+      PERMISSIONS.LEARNING_PATH_UPDATE,
+      PERMISSIONS.LEARNING_PATH_UPDATE_OWN,
+      PERMISSIONS.LEARNING_PATH_COURSE_UPDATE,
+      PERMISSIONS.LEARNING_PATH_COURSE_UPDATE_OWN,
+      PERMISSIONS.LEARNING_PATH_DELETE,
+      PERMISSIONS.LEARNING_PATH_ENROLLMENT,
+      PERMISSIONS.LEARNING_PATH_EXPORT,
+    ],
+  });
   const navigate = useNavigate();
 
-  const isAllowed = canManageUsers || canManageOwnCourses;
+  const isAllowed = canManageUsers || canManageOwnCourses || canAccessLearningPathAdmin;
 
   const { data: latestUnreadAnnouncements } = useLatestUnreadAnnouncements(canManageOwnCourses);
 

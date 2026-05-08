@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
+import { match } from "ts-pattern";
 
 import { useCreateCertificateShareLink } from "~/api/mutations/useCreateCertificateShareLink";
+import { useCreateLearningPathCertificateShareLink } from "~/api/mutations/useCreateLearningPathCertificateShareLink";
 import { cn } from "~/lib/utils";
 
 import CertificateContent from "./CertificateContent";
 import CertificateControls from "./CertificateControls";
+import { CERTIFICATE_KIND } from "./certificateKind";
 import { getCertificateColorTheme } from "./certificateTheme";
 import useCertificatePDF from "./useCertificatePDF";
 
+import type { CertificateKind } from "./certificateKind";
 import type { CertificateColorTheme } from "./certificateTheme";
 
 interface CertificatePreviewProps {
@@ -25,6 +29,7 @@ interface CertificatePreviewProps {
   minimalFrame?: boolean;
   initialColor?: string | null;
   onColorChange?: (color: string) => void;
+  certificateKind?: CertificateKind;
 }
 
 const CertificatePreview = ({
@@ -42,10 +47,15 @@ const CertificatePreview = ({
   minimalFrame = false,
   initialColor,
   onColorChange,
+  certificateKind = CERTIFICATE_KIND.COURSE,
 }: CertificatePreviewProps) => {
-  const { downloadCertificatePdf, isPreparingDownload } = useCertificatePDF();
+  const { downloadCertificatePdf, isPreparingDownload } = useCertificatePDF(certificateKind);
   const { mutateAsync: createCertificateShareLink, isPending: isPreparingShare } =
     useCreateCertificateShareLink();
+  const {
+    mutateAsync: createLearningPathCertificateShareLink,
+    isPending: isPreparingLearningPathShare,
+  } = useCreateLearningPathCertificateShareLink();
   const [toggled, setToggled] = useState<boolean>(false);
   const [colorTheme, setColorTheme] = useState<CertificateColorTheme>(
     getCertificateColorTheme(initialColor),
@@ -58,9 +68,13 @@ const CertificatePreview = ({
   const lang = toggled ? "pl" : "en";
 
   const handleShareToLinkedIn = async () => {
-    if (!certificateId || isPreparingShare) return;
+    if (!certificateId || isPreparingShare || isPreparingLearningPathShare) return;
 
-    const { linkedinShareUrl } = await createCertificateShareLink({
+    const createShareLink = match(certificateKind)
+      .with(CERTIFICATE_KIND.LEARNING_PATH, () => createLearningPathCertificateShareLink)
+      .with(CERTIFICATE_KIND.COURSE, () => createCertificateShareLink)
+      .exhaustive();
+    const { linkedinShareUrl } = await createShareLink({
       certificateId,
       language: lang,
     });
@@ -98,7 +112,7 @@ const CertificatePreview = ({
               downloadCertificatePdf={handleDownloadCertificate}
               isPreparingDownload={isPreparingDownload}
               onShareToLinkedIn={handleShareToLinkedIn}
-              isPreparingShare={isPreparingShare}
+              isPreparingShare={isPreparingShare || isPreparingLearningPathShare}
               colorTheme={colorTheme}
               setColorTheme={setColorTheme}
               onColorChange={onColorChange}
@@ -118,6 +132,7 @@ const CertificatePreview = ({
             signatureImageUrl={certificateSignatureUrl}
             lang={lang}
             colorTheme={colorTheme}
+            certificateKind={certificateKind}
           />
         </div>
       </div>

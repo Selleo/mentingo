@@ -14,6 +14,7 @@ import { cn } from "~/lib/utils";
 export interface Option {
   value: string;
   label: string;
+  imageUrl?: string;
   disable?: boolean;
   /** fixed option that can't be removed. */
   fixed?: boolean;
@@ -493,6 +494,13 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                   data-fixed={option.fixed}
                   data-disabled={disabled || undefined}
                 >
+                  {option.imageUrl && (
+                    <img
+                      src={option.imageUrl}
+                      alt=""
+                      className="h-5 w-7 shrink-0 rounded object-cover"
+                    />
+                  )}
                   <span className="truncate">{option.label}</span>
                   <button
                     className="absolute -inset-y-px -end-px flex size-7 items-center justify-center rounded-e-md border border-transparent p-0 text-muted-foreground/80 outline-hidden transition-[color,box-shadow] outline-none hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
@@ -537,6 +545,13 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                           data-fixed={option.fixed}
                           data-disabled={disabled || undefined}
                         >
+                          {option.imageUrl && (
+                            <img
+                              src={option.imageUrl}
+                              alt=""
+                              className="h-5 w-7 shrink-0 rounded object-cover"
+                            />
+                          )}
                           <span className="truncate max-w-[160px]">{option.label}</span>
                           <button
                             className="absolute -inset-y-px -end-px flex size-7 items-center justify-center rounded-e-md border border-transparent p-0 text-muted-foreground/80 outline-hidden transition-[color,box-shadow] outline-none hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
@@ -690,6 +705,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                               <CommandItem
                                 key={option.value}
                                 value={option.value}
+                                keywords={[option.label]}
                                 data-testid={getOptionTestId?.(option)}
                                 disabled={option.disable}
                                 onMouseDown={(e) => {
@@ -728,6 +744,13 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                                   <Checkbox
                                     checked={checkedState}
                                     className="pointer-events-none"
+                                  />
+                                )}
+                                {option.imageUrl && (
+                                  <img
+                                    src={option.imageUrl}
+                                    alt=""
+                                    className="h-8 w-12 shrink-0 rounded object-cover"
                                   />
                                 )}
                                 <span className="flex-1 truncate">{option.label}</span>

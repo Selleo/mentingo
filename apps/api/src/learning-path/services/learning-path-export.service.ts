@@ -63,19 +63,29 @@ export class LearningPathExportService {
     const jobs: ExportQueueItem[] = [];
 
     for (const targetTenantId of uniqueTargetTenantIds) {
-      const exportLink =
-        (await this.learningPathRepository.findLearningPathExportByPair(
-          actor.tenantId,
-          sourceLearningPathId,
+      const existingExportLink = await this.learningPathRepository.findLearningPathExportByPair(
+        actor.tenantId,
+        sourceLearningPathId,
+        targetTenantId,
+        this.db,
+      );
+
+      if (existingExportLink) {
+        jobs.push({
           targetTenantId,
-          this.db,
-        )) ??
-        (await this.learningPathRepository.createLearningPathExport(
-          actor.tenantId,
-          sourceLearningPathId,
-          targetTenantId,
-          this.db,
-        ));
+          queued: false,
+          reason: "already-linked",
+          exportId: existingExportLink.id,
+        });
+        continue;
+      }
+
+      const exportLink = await this.learningPathRepository.createLearningPathExport(
+        actor.tenantId,
+        sourceLearningPathId,
+        targetTenantId,
+        this.db,
+      );
 
       const queuedJob = await this.queueService.enqueue<LearningPathExportJobData>(
         QUEUE_NAMES.LEARNING_PATH_EXPORT,
@@ -363,7 +373,7 @@ export class LearningPathExportService {
   }
 
   private assertManagingTenantAdmin(currentUser: CurrentUserType) {
-    if (!hasPermission(currentUser.permissions, PERMISSIONS.LEARNING_PATH_MANAGE)) {
+    if (!hasPermission(currentUser.permissions, PERMISSIONS.LEARNING_PATH_EXPORT)) {
       throw new ForbiddenException(LEARNING_PATH_ERRORS.MISSING_PERMISSION);
     }
   }

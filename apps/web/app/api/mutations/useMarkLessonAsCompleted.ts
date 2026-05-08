@@ -2,15 +2,15 @@ import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 
 import { queryClient } from "~/api/queryClient";
+import { invalidateLearningPathProgressionData } from "~/api/utils/invalidateLearningPathProgressionData";
 import { toast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../api-client";
-import { courseQueryOptions } from "../queries";
 import { certificatesQueryOptions } from "../queries/useCertificates";
 
 import type { SupportedLanguages } from "@repo/shared";
 
-export const useMarkLessonAsCompleted = (userId: string, courseSlug: string) => {
+export const useMarkLessonAsCompleted = (userId: string) => {
   return useMutation({
     mutationFn: async ({
       lessonId,
@@ -25,12 +25,12 @@ export const useMarkLessonAsCompleted = (userId: string, courseSlug: string) => 
       });
       return response.data;
     },
-    onSuccess: (_, variables) => {
+    onSuccess: async (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["lesson", variables.lessonId] });
       queryClient.invalidateQueries({ queryKey: ["lessonProgress", variables.lessonId] });
       queryClient.invalidateQueries(certificatesQueryOptions({ userId }));
       queryClient.invalidateQueries({ queryKey: ["certificate", userId] });
-      queryClient.invalidateQueries(courseQueryOptions(courseSlug));
+      await invalidateLearningPathProgressionData();
     },
     onError: (error) => {
       if (error instanceof AxiosError) {

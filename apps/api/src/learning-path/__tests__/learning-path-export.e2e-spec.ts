@@ -464,7 +464,8 @@ describe("LearningPathExportController (e2e)", () => {
     ).expect(201);
 
     expect(secondExportResponse.body.data.jobs).toHaveLength(1);
-    expect(secondExportResponse.body.data.jobs[0].queued).toBe(true);
+    expect(secondExportResponse.body.data.jobs[0].queued).toBe(false);
+    expect(secondExportResponse.body.data.jobs[0].reason).toBe("already-linked");
     expect(secondExportResponse.body.data.jobs[0].exportId).toBe(firstExportId);
 
     await waitFor(

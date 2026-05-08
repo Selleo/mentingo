@@ -136,23 +136,77 @@ describe("LearningPathController (e2e)", () => {
           })
           .expect(403);
       });
+
+      it("should allow content creators to create learning paths", async () => {
+        const contentCreator = await userFactory
+          .withCredentials({ password: testPassword })
+          .withContentCreatorSettings(db)
+          .create();
+        const contentCreatorCookies = await cookieFor(contentCreator, app);
+
+        await request(app.getHttpServer())
+          .post("/api/learning-path")
+          .set("Cookie", contentCreatorCookies)
+          .send({
+            language: "pl",
+            title: "Creator path",
+            description: "Creator description",
+          })
+          .expect(201);
+      });
     });
 
     describe("GET /api/learning-path", () => {
-      it("should return paginated learning paths", async () => {
-        await learningPathFactory.create({ authorId: adminUser.id });
+      it("should return paginated learning paths localized by request language", async () => {
+        await learningPathFactory.create({
+          authorId: adminUser.id,
+          title: { pl: "Tytuł ścieżki", en: "Path title" },
+          description: { pl: "Opis ścieżki", en: "Path description" },
+          baseLanguage: "pl",
+          availableLocales: ["pl", "en"],
+        });
 
         const response = await request(app.getHttpServer())
-          .get("/api/learning-path?page=1&perPage=10")
+          .get("/api/learning-path?page=1&perPage=10&language=en")
           .set("Cookie", adminCookies)
           .expect(200);
 
         expect(response.body.data).toHaveLength(1);
+        expect(response.body.data[0].title).toBe("Path title");
+        expect(response.body.data[0].description).toBe("Path description");
         expect(response.body.pagination).toEqual({
           totalItems: 1,
           page: 1,
           perPage: 10,
         });
+      });
+
+      it("should allow content creators to see their own draft paths", async () => {
+        const contentCreator = await userFactory
+          .withCredentials({ password: testPassword })
+          .withContentCreatorSettings(db)
+          .create();
+        const contentCreatorCookies = await cookieFor(contentCreator, app);
+
+        const ownDraft = await learningPathFactory.create({
+          authorId: contentCreator.id,
+          status: "draft",
+        });
+        const otherDraft = await learningPathFactory.create({
+          authorId: adminUser.id,
+          status: "draft",
+        });
+
+        const response = await request(app.getHttpServer())
+          .get("/api/learning-path?page=1&perPage=10&language=pl")
+          .set("Cookie", contentCreatorCookies)
+          .expect(200);
+
+        const returnedPathIds = response.body.data.map(
+          (learningPath: { id: string }) => learningPath.id,
+        );
+        expect(returnedPathIds).toContain(ownDraft.id);
+        expect(returnedPathIds).not.toContain(otherDraft.id);
       });
     });
 
@@ -173,6 +227,13 @@ describe("LearningPathController (e2e)", () => {
           .expect(200);
 
         expect(response.body.data.id).toBe(learningPath.id);
+        expect(response.body.data.title).toBe("Path title");
+        expect(response.body.data.description).toBe("Path description");
+        expect(response.body.data.progress).toBe("not_started");
+        expect(response.body.data.progressValue).toBe(0);
+        expect(response.body.data.completedCourseCount).toBe(0);
+        expect(response.body.data.totalCourseCount).toBe(2);
+        expect(response.body.data.certificateReady).toBe(false);
         expect(response.body.data.courses).toEqual([
           expect.objectContaining({ courseId: courseOne.id, displayOrder: 1 }),
           expect.objectContaining({ courseId: courseTwo.id, displayOrder: 2 }),
@@ -205,6 +266,34 @@ describe("LearningPathController (e2e)", () => {
         expect(response.body.data.includesCertificate).toBe(false);
         expect(response.body.data.sequenceEnabled).toBe(false);
         expect(response.body.data.title.pl).toBe("Updated title");
+      });
+
+      it("should allow content creators to update own learning paths only", async () => {
+        const contentCreator = await userFactory
+          .withCredentials({ password: testPassword })
+          .withContentCreatorSettings(db)
+          .create();
+        const contentCreatorCookies = await cookieFor(contentCreator, app);
+        const ownLearningPath = await learningPathFactory.create({ authorId: contentCreator.id });
+        const otherLearningPath = await learningPathFactory.create({ authorId: adminUser.id });
+
+        await request(app.getHttpServer())
+          .patch(`/api/learning-path/${ownLearningPath.id}`)
+          .set("Cookie", contentCreatorCookies)
+          .send({
+            language: "pl",
+            title: "Updated own title",
+          })
+          .expect(200);
+
+        await request(app.getHttpServer())
+          .patch(`/api/learning-path/${otherLearningPath.id}`)
+          .set("Cookie", contentCreatorCookies)
+          .send({
+            language: "pl",
+            title: "Updated other title",
+          })
+          .expect(403);
       });
 
       it("should publish course sync when sequence setting changes", async () => {
@@ -279,6 +368,29 @@ describe("LearningPathController (e2e)", () => {
           { courseId: courseOne.id, displayOrder: 1 },
           { courseId: courseTwo.id, displayOrder: 2 },
         ]);
+      });
+
+      it("should allow content creators to update courses on own learning paths only", async () => {
+        const contentCreator = await userFactory
+          .withCredentials({ password: testPassword })
+          .withContentCreatorSettings(db)
+          .create();
+        const contentCreatorCookies = await cookieFor(contentCreator, app);
+        const ownLearningPath = await learningPathFactory.create({ authorId: contentCreator.id });
+        const otherLearningPath = await learningPathFactory.create({ authorId: adminUser.id });
+        const { courseOne, courseTwo } = await createCourses(contentCreator.id);
+
+        await request(app.getHttpServer())
+          .post(`/api/learning-path/${ownLearningPath.id}/courses`)
+          .set("Cookie", contentCreatorCookies)
+          .send({ courseIds: [courseOne.id] })
+          .expect(201);
+
+        await request(app.getHttpServer())
+          .post(`/api/learning-path/${otherLearningPath.id}/courses`)
+          .set("Cookie", contentCreatorCookies)
+          .send({ courseIds: [courseTwo.id] })
+          .expect(403);
       });
 
       it("should return bad request for duplicate course ids", async () => {

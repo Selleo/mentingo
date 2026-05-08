@@ -125,7 +125,14 @@ export interface CurrentUserResponse {
       | "group.read"
       | "group.manage"
       | "learning_path.read"
-      | "learning_path.manage"
+      | "learning_path.create"
+      | "learning_path.update"
+      | "learning_path.update_own"
+      | "learning_path.delete"
+      | "learning_path.course_update"
+      | "learning_path.course_update_own"
+      | "learning_path.enrollment"
+      | "learning_path.export"
       | "course.read_assigned"
       | "course.read_manageable"
       | "course.read"
@@ -1427,6 +1434,7 @@ export interface GetStudentCoursesResponse {
 
 export interface GetStudentsWithEnrollmentDateResponse {
   data: {
+    name: string;
     firstName: string;
     lastName: string;
     email: string;
@@ -3395,12 +3403,13 @@ export interface DeleteManyCategoriesResponse {
 }
 
 export interface GetLearningPathsResponse {
-  data: {
+  data: ({
     /** @format uuid */
     id: string;
-    title: object;
-    description: object;
+    title: string;
+    description: string;
     thumbnailReference: string | null;
+    isEnrolled: boolean;
     status: "draft" | "published" | "private";
     includesCertificate: boolean;
     sequenceEnabled: boolean;
@@ -3410,7 +3419,29 @@ export interface GetLearningPathsResponse {
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
     createdAt: string;
     updatedAt: string;
-  }[];
+    availableCourseOptions: {
+      value: string;
+      label: string;
+      imageUrl: string | null;
+    }[];
+  } & {
+    courses: {
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      learningPathId: string;
+      /** @format uuid */
+      courseId: string;
+      displayOrder: number;
+      title: string;
+      description: string;
+      thumbnailUrl: string | null;
+      courseChapterCount: number;
+      progress: "not_started" | "in_progress" | "completed" | "blocked";
+      isLocked: boolean;
+      completedAt: string | null;
+    }[];
+  })[];
   pagination: {
     totalItems: number;
     page: number;
@@ -3423,9 +3454,10 @@ export interface GetLearningPathByIdResponse {
   data: {
     /** @format uuid */
     id: string;
-    title: object;
-    description: object;
+    title: string;
+    description: string;
     thumbnailReference: string | null;
+    isEnrolled: boolean;
     status: "draft" | "published" | "private";
     includesCertificate: boolean;
     sequenceEnabled: boolean;
@@ -3435,8 +3467,17 @@ export interface GetLearningPathByIdResponse {
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
     createdAt: string;
     updatedAt: string;
+    availableCourseOptions: {
+      value: string;
+      label: string;
+      imageUrl: string | null;
+    }[];
   } & {
     progress: "not_started" | "in_progress" | "completed";
+    progressValue: number;
+    completedCourseCount: number;
+    totalCourseCount: number;
+    certificateReady: boolean;
     courses: ({
       /** @format uuid */
       id: string;
@@ -3460,6 +3501,8 @@ export interface CreateLearningPathBody {
   title: string;
   description: string;
   thumbnailReference?: string | null;
+  /** @format binary */
+  thumbnail?: File;
   status?: "draft" | "published" | "private";
   includesCertificate?: boolean;
   sequenceEnabled?: boolean;
@@ -3489,12 +3532,33 @@ export interface UpdateLearningPathBody {
   title?: string;
   description?: string;
   thumbnailReference?: string | null;
+  /** @format binary */
+  thumbnail?: File;
   status?: "draft" | "published" | "private";
   includesCertificate?: boolean;
   sequenceEnabled?: boolean;
 }
 
 export interface UpdateLearningPathResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    title: object;
+    description: object;
+    thumbnailReference: string | null;
+    status: "draft" | "published" | "private";
+    includesCertificate: boolean;
+    sequenceEnabled: boolean;
+    /** @format uuid */
+    authorId: string;
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface CreateLanguageResponse {
   data: {
     /** @format uuid */
     id: string;
@@ -3540,6 +3604,12 @@ export interface ReorderLearningPathCoursesBody {
 }
 
 export interface ReorderLearningPathCoursesResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface EnrollCurrentUserToLearningPathResponse {
   data: {
     message: string;
   };
@@ -8650,6 +8720,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @min 1 */
         page?: number;
         perPage?: number;
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -8675,7 +8746,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/learning-path`,
         method: "POST",
         body: data,
-        type: ContentType.Json,
+        type: ContentType.FormData,
         format: "json",
         ...params,
       }),
@@ -8688,11 +8759,15 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     learningPathControllerGetLearningPathById: (
       learningPathId: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
       params: RequestParams = {},
     ) =>
       this.request<GetLearningPathByIdResponse, any>({
         path: `/api/learning-path/${learningPathId}`,
         method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),
@@ -8712,7 +8787,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/learning-path/${learningPathId}`,
         method: "PATCH",
         body: data,
-        type: ContentType.Json,
+        type: ContentType.FormData,
         format: "json",
         ...params,
       }),
@@ -8730,6 +8805,27 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<DeleteLearningPathResponse, any>({
         path: `/api/learning-path/${learningPathId}`,
         method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LearningPathControllerCreateLanguage
+     * @request POST:/api/learning-path/{learningPathId}/language
+     */
+    learningPathControllerCreateLanguage: (
+      learningPathId: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateLanguageResponse, any>({
+        path: `/api/learning-path/${learningPathId}/language`,
+        method: "POST",
+        query: query,
         format: "json",
         ...params,
       }),
@@ -8788,6 +8884,59 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "PATCH",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LearningPathEnrollmentControllerEnrollCurrentUserToLearningPath
+     * @request POST:/api/learning-path/{learningPathId}/enroll
+     */
+    learningPathEnrollmentControllerEnrollCurrentUserToLearningPath: (
+      learningPathId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<EnrollCurrentUserToLearningPathResponse, any>({
+        path: `/api/learning-path/${learningPathId}/enroll`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LearningPathEnrollmentControllerGetStudentsWithEnrollmentDate
+     * @request GET:/api/learning-path/{learningPathId}/enroll-users
+     */
+    learningPathEnrollmentControllerGetStudentsWithEnrollmentDate: (
+      learningPathId: string,
+      query?: {
+        keyword?: string;
+        sort?:
+          | "enrolledAt"
+          | "firstName"
+          | "lastName"
+          | "email"
+          | "isEnrolledByGroup"
+          | "-enrolledAt"
+          | "-firstName"
+          | "-lastName"
+          | "-email"
+          | "-isEnrolledByGroup";
+        groups?: string[];
+        /** @min 1 */
+        page?: number;
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetStudentsWithEnrollmentDateResponse, any>({
+        path: `/api/learning-path/${learningPathId}/enroll-users`,
+        method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),

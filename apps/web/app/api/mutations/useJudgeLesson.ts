@@ -3,12 +3,13 @@ import { AxiosError } from "axios";
 
 import { ApiClient } from "~/api/api-client";
 import { queryClient } from "~/api/queryClient";
+import { invalidateLearningPathProgressionData } from "~/api/utils/invalidateLearningPathProgressionData";
 import { toast } from "~/components/ui/use-toast";
 
 import { COURSE_STUDENTS_AI_MENTOR_RESULTS_QUERY_KEY } from "../queries/admin/useCourseStudentsAiMentorResults";
 import { getCurrentThreadMessagesQueryKey } from "../queries/useCurrentThreadMessages";
 
-export const useJudgeLesson = (lessonId: string, courseId: string) => {
+export const useJudgeLesson = (lessonId: string) => {
   return useMutation({
     mutationFn: async ({ threadId }: { threadId: string }) => {
       const response = await ApiClient.api.aiControllerJudgeThread(threadId);
@@ -32,7 +33,7 @@ export const useJudgeLesson = (lessonId: string, courseId: string) => {
         queryKey: getCurrentThreadMessagesQueryKey(threadId),
       });
 
-      await queryClient.invalidateQueries({ queryKey: ["course", { id: courseId }] });
+      await invalidateLearningPathProgressionData();
       await queryClient.invalidateQueries({
         queryKey: COURSE_STUDENTS_AI_MENTOR_RESULTS_QUERY_KEY,
       });

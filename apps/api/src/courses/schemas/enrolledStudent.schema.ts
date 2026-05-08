@@ -9,6 +9,7 @@ import type { studentCourses } from "src/storage/schema";
 export type StudentCourseSelect = InferSelectModel<typeof studentCourses>;
 
 export const enrolledStudentSchema = Type.Object({
+  name: Type.Optional(Type.String()),
   firstName: Type.String(),
   lastName: Type.String(),
   email: Type.String(),

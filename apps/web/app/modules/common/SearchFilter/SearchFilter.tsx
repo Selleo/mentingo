@@ -41,6 +41,7 @@ export type BaseFilterConfig = {
   placeholder?: string;
   default?: FilterValue;
   hideAll?: boolean;
+  disabled?: boolean;
   testId?: string;
   optionTestId?: (option: FilterOption) => string;
 };
@@ -147,6 +148,7 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
               getOptionTestId={filter.optionTestId}
               value={values?.[filter?.name] as Option[]}
               options={filter?.options}
+              disabled={isLoading || filter.disabled}
               onChange={(option) => {
                 if (option.length == 0) {
                   return handleChange(filter?.name, undefined);
@@ -181,7 +183,7 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
               key={filter?.name}
               value={(value as string) ?? "all"}
               onValueChange={(value) => handleChange(filter?.name, value)}
-              disabled={isLoading}
+              disabled={isLoading || filter.disabled}
             >
               <SelectTrigger
                 data-testid={filter.testId}
@@ -227,7 +229,7 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
                     : "active"
               }
               onValueChange={(value) => handleChange(filter?.name, value)}
-              disabled={isLoading}
+              disabled={isLoading || filter.disabled}
             >
               <SelectTrigger
                 data-testid={filter.testId}

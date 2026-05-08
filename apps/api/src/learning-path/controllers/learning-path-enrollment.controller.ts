@@ -1,12 +1,26 @@
-import { Body, Controller, Delete, Param, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Query } from "@nestjs/common";
 import { PERMISSIONS } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
-import { BaseResponse, baseResponse, UUIDSchema, type UUIDType } from "src/common";
+import {
+  BaseResponse,
+  baseResponse,
+  PaginatedResponse,
+  paginatedResponse,
+  UUIDSchema,
+  type UUIDType,
+} from "src/common";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { CurrentUserType } from "src/common/types/current-user.type";
+import {
+  sortEnrolledStudentsOptions,
+  type SortEnrolledStudentsOptions,
+} from "src/courses/schemas/courseQuery";
+import { enrolledStudentSchema } from "src/courses/schemas/enrolledStudent.schema";
+import { groupsFilterSchema } from "src/group/group.schema";
+import { GroupsFilterSchema } from "src/group/group.types";
 
 import { LEARNING_PATH_SUCCESS_MESSAGES } from "../constants/learning-path.success-messages";
 import {
@@ -17,12 +31,60 @@ import {
 } from "../learning-path.schema";
 import { LearningPathService } from "../services/learning-path.service";
 
+import type { EnrolledStudent } from "src/courses/schemas/enrolledStudent.schema";
+
 @Controller("learning-path")
 export class LearningPathEnrollmentController {
   constructor(private readonly learningPathService: LearningPathService) {}
 
+  @Get(":learningPathId/enroll-users")
+  @RequirePermission(PERMISSIONS.LEARNING_PATH_ENROLLMENT)
+  @Validate({
+    request: [
+      { type: "param", name: "learningPathId", schema: UUIDSchema },
+      { type: "query", name: "keyword", schema: Type.String() },
+      { type: "query", name: "sort", schema: sortEnrolledStudentsOptions },
+      { type: "query", name: "groups", schema: groupsFilterSchema },
+      { type: "query", name: "page", schema: Type.Number({ minimum: 1 }) },
+      { type: "query", name: "perPage", schema: Type.Number() },
+    ],
+    response: paginatedResponse(Type.Array(enrolledStudentSchema)),
+  })
+  async getStudentsWithEnrollmentDate(
+    @Param("learningPathId") learningPathId: UUIDType,
+    @Query("keyword") keyword: string,
+    @Query("sort") sort: SortEnrolledStudentsOptions,
+    @Query("groups") groups: GroupsFilterSchema,
+    @Query("page") page: number,
+    @Query("perPage") perPage: number,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<PaginatedResponse<EnrolledStudent[]>> {
+    const enrolledStudents = await this.learningPathService.getStudentsWithEnrollmentDate(
+      learningPathId,
+      { keyword, sort, groups, page, perPage },
+      currentUser,
+    );
+
+    return new PaginatedResponse(enrolledStudents);
+  }
+
+  @Post(":learningPathId/enroll")
+  @RequirePermission(PERMISSIONS.LEARNING_PATH_READ, PERMISSIONS.LEARNING_PROGRESS_UPDATE)
+  @Validate({
+    request: [{ type: "param", name: "learningPathId", schema: UUIDSchema }],
+    response: baseResponse(Type.Object({ message: Type.String() })),
+  })
+  async enrollCurrentUserToLearningPath(
+    @Param("learningPathId") learningPathId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<{ message: string }>> {
+    await this.learningPathService.enrollCurrentUserToLearningPath(learningPathId, currentUser);
+
+    return new BaseResponse({ message: LEARNING_PATH_SUCCESS_MESSAGES.USERS_ENROLLED });
+  }
+
   @Post(":learningPathId/enroll-users")
-  @RequirePermission(PERMISSIONS.LEARNING_PATH_MANAGE)
+  @RequirePermission(PERMISSIONS.LEARNING_PATH_ENROLLMENT)
   @Validate({
     request: [
       { type: "param", name: "learningPathId", schema: UUIDSchema },
@@ -41,7 +103,7 @@ export class LearningPathEnrollmentController {
   }
 
   @Delete(":learningPathId/enroll-users")
-  @RequirePermission(PERMISSIONS.LEARNING_PATH_MANAGE)
+  @RequirePermission(PERMISSIONS.LEARNING_PATH_ENROLLMENT)
   @Validate({
     request: [
       { type: "param", name: "learningPathId", schema: UUIDSchema },
@@ -60,7 +122,7 @@ export class LearningPathEnrollmentController {
   }
 
   @Post(":learningPathId/enroll-groups")
-  @RequirePermission(PERMISSIONS.LEARNING_PATH_MANAGE)
+  @RequirePermission(PERMISSIONS.LEARNING_PATH_ENROLLMENT)
   @Validate({
     request: [
       { type: "param", name: "learningPathId", schema: UUIDSchema },
@@ -79,7 +141,7 @@ export class LearningPathEnrollmentController {
   }
 
   @Delete(":learningPathId/enroll-groups")
-  @RequirePermission(PERMISSIONS.LEARNING_PATH_MANAGE)
+  @RequirePermission(PERMISSIONS.LEARNING_PATH_ENROLLMENT)
   @Validate({
     request: [
       { type: "param", name: "learningPathId", schema: UUIDSchema },

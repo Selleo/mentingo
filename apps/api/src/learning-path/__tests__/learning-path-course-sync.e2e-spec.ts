@@ -237,14 +237,14 @@ describe("LearningPathCourseSyncHandler (e2e)", () => {
       thumbnailS3Key: null,
     });
 
-    await baseDb
-      .update(studentCourses)
-      .set({
-        enrolledAt: new Date(Date.now() + 60_000).toISOString(),
-        status: COURSE_ENROLLMENT.ENROLLED,
-        enrolledByGroupId: null,
-      })
-      .where(and(eq(studentCourses.studentId, student.id), eq(studentCourses.courseId, course.id)));
+    await baseDb.insert(studentCourses).values({
+      studentId: student.id,
+      courseId: course.id,
+      tenantId: adminUser.tenantId,
+      enrolledAt: new Date(Date.now() + 60_000).toISOString(),
+      status: COURSE_ENROLLMENT.ENROLLED,
+      enrolledByGroupId: null,
+    });
 
     await request(app.getHttpServer())
       .post(`/api/learning-path/${learningPath.id}/enroll-users`)
@@ -524,6 +524,374 @@ describe("LearningPathCourseSyncHandler (e2e)", () => {
     await expectStudentCourseStatus(student.id, secondCourse.id, COURSE_ENROLLMENT.NOT_ENROLLED);
   });
 
+  it("enrolls the next sequenced course when an incomplete middle course is removed", async () => {
+    const adminUser = await createAdminUser();
+    const adminCookies = await cookieFor(adminUser, app);
+    const learningPath = await learningPathFactory.create({
+      authorId: adminUser.id,
+      sequenceEnabled: true,
+    });
+    const student = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+    const firstCourse = await createPublishedCourse(adminUser.id);
+    const secondCourse = await createPublishedCourse(adminUser.id);
+    const thirdCourse = await createPublishedCourse(adminUser.id);
+
+    await request(app.getHttpServer())
+      .post(`/api/learning-path/${learningPath.id}/courses`)
+      .set("Cookie", adminCookies)
+      .send({ courseIds: [firstCourse.id, secondCourse.id, thirdCourse.id] })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post(`/api/learning-path/${learningPath.id}/enroll-users`)
+      .set("Cookie", adminCookies)
+      .send({ studentIds: [student.id] })
+      .expect(201);
+
+    await handleSync(adminUser.tenantId, learningPath.id);
+    await completeStudentCourse(student.id, firstCourse.id);
+
+    await app.get(LearningPathCourseSyncHandler).handle(
+      new UserCourseFinishedEvent({
+        userId: student.id,
+        courseId: firstCourse.id,
+        actor: buildActor(adminUser),
+      }),
+    );
+
+    await expectStudentCourseStatus(student.id, secondCourse.id, COURSE_ENROLLMENT.ENROLLED);
+    await expectStudentCourseStatus(student.id, thirdCourse.id, COURSE_ENROLLMENT.NOT_ENROLLED);
+
+    await request(app.getHttpServer())
+      .delete(`/api/learning-path/${learningPath.id}/courses/${secondCourse.id}`)
+      .set("Cookie", adminCookies)
+      .expect(200);
+
+    await app.get(LearningPathCourseSyncHandler).handle(
+      new LearningPathCourseRemovedEvent({
+        tenantId: adminUser.tenantId,
+        learningPathId: learningPath.id,
+        courseId: secondCourse.id,
+      }),
+    );
+
+    await expectStudentCourseStatus(student.id, secondCourse.id, COURSE_ENROLLMENT.NOT_ENROLLED);
+    await expectStudentCourseStatus(student.id, thirdCourse.id, COURSE_ENROLLMENT.ENROLLED);
+    await expectStudentLearningPathProgress(
+      student.id,
+      learningPath.id,
+      PROGRESS_STATUSES.IN_PROGRESS,
+      false,
+    );
+  });
+
+  it("completes a learning path when removing the only unfinished remaining course", async () => {
+    const adminUser = await createAdminUser();
+    const adminCookies = await cookieFor(adminUser, app);
+    const learningPath = await learningPathFactory.create({
+      authorId: adminUser.id,
+      sequenceEnabled: true,
+    });
+    const student = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+    const firstCourse = await createPublishedCourse(adminUser.id);
+    const secondCourse = await createPublishedCourse(adminUser.id);
+    const thirdCourse = await createPublishedCourse(adminUser.id);
+
+    await request(app.getHttpServer())
+      .post(`/api/learning-path/${learningPath.id}/courses`)
+      .set("Cookie", adminCookies)
+      .send({ courseIds: [firstCourse.id, secondCourse.id, thirdCourse.id] })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post(`/api/learning-path/${learningPath.id}/enroll-users`)
+      .set("Cookie", adminCookies)
+      .send({ studentIds: [student.id] })
+      .expect(201);
+
+    await handleSync(adminUser.tenantId, learningPath.id);
+    await completeStudentCourse(student.id, firstCourse.id);
+    await completeStudentCourse(student.id, secondCourse.id);
+
+    await request(app.getHttpServer())
+      .delete(`/api/learning-path/${learningPath.id}/courses/${thirdCourse.id}`)
+      .set("Cookie", adminCookies)
+      .expect(200);
+
+    await app.get(LearningPathCourseSyncHandler).handle(
+      new LearningPathCourseRemovedEvent({
+        tenantId: adminUser.tenantId,
+        learningPathId: learningPath.id,
+        courseId: thirdCourse.id,
+      }),
+    );
+
+    await expectStudentCourseStatus(student.id, thirdCourse.id, COURSE_ENROLLMENT.NOT_ENROLLED);
+    await expectStudentLearningPathProgress(
+      student.id,
+      learningPath.id,
+      PROGRESS_STATUSES.COMPLETED,
+      true,
+    );
+  });
+
+  it("moves a completed learning path back to in progress when a new course is added", async () => {
+    const adminUser = await createAdminUser();
+    const adminCookies = await cookieFor(adminUser, app);
+    const learningPath = await learningPathFactory.create({
+      authorId: adminUser.id,
+      sequenceEnabled: true,
+    });
+    const student = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+    const firstCourse = await createPublishedCourse(adminUser.id);
+    const secondCourse = await createPublishedCourse(adminUser.id);
+    const thirdCourse = await createPublishedCourse(adminUser.id);
+
+    await request(app.getHttpServer())
+      .post(`/api/learning-path/${learningPath.id}/courses`)
+      .set("Cookie", adminCookies)
+      .send({ courseIds: [firstCourse.id, secondCourse.id] })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post(`/api/learning-path/${learningPath.id}/enroll-users`)
+      .set("Cookie", adminCookies)
+      .send({ studentIds: [student.id] })
+      .expect(201);
+
+    await handleSync(adminUser.tenantId, learningPath.id);
+    await completeStudentCourse(student.id, firstCourse.id);
+    await completeStudentCourse(student.id, secondCourse.id);
+
+    await app.get(LearningPathCourseSyncHandler).handle(
+      new UserCourseFinishedEvent({
+        userId: student.id,
+        courseId: secondCourse.id,
+        actor: buildActor(adminUser),
+      }),
+    );
+
+    await expectStudentLearningPathProgress(
+      student.id,
+      learningPath.id,
+      PROGRESS_STATUSES.COMPLETED,
+      true,
+    );
+
+    await request(app.getHttpServer())
+      .post(`/api/learning-path/${learningPath.id}/courses`)
+      .set("Cookie", adminCookies)
+      .send({ courseIds: [thirdCourse.id] })
+      .expect(201);
+
+    await app.get(LearningPathCourseSyncHandler).handle(
+      new LearningPathCourseAddedEvent({
+        tenantId: adminUser.tenantId,
+        learningPathId: learningPath.id,
+        courseId: thirdCourse.id,
+      }),
+    );
+
+    await expectStudentCourseStatus(student.id, thirdCourse.id, COURSE_ENROLLMENT.ENROLLED);
+    await expectStudentLearningPathProgress(
+      student.id,
+      learningPath.id,
+      PROGRESS_STATUSES.IN_PROGRESS,
+      false,
+    );
+  });
+
+  it("resets learning path progress when the last course is removed", async () => {
+    const adminUser = await createAdminUser();
+    const adminCookies = await cookieFor(adminUser, app);
+    const learningPath = await learningPathFactory.create({ authorId: adminUser.id });
+    const student = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+    const course = await createPublishedCourse(adminUser.id);
+
+    await request(app.getHttpServer())
+      .post(`/api/learning-path/${learningPath.id}/courses`)
+      .set("Cookie", adminCookies)
+      .send({ courseIds: [course.id] })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post(`/api/learning-path/${learningPath.id}/enroll-users`)
+      .set("Cookie", adminCookies)
+      .send({ studentIds: [student.id] })
+      .expect(201);
+
+    await handleSync(adminUser.tenantId, learningPath.id);
+    await completeStudentCourse(student.id, course.id);
+
+    await app.get(LearningPathCourseSyncHandler).handle(
+      new UserCourseFinishedEvent({
+        userId: student.id,
+        courseId: course.id,
+        actor: buildActor(adminUser),
+      }),
+    );
+
+    await expectStudentLearningPathProgress(
+      student.id,
+      learningPath.id,
+      PROGRESS_STATUSES.COMPLETED,
+      true,
+    );
+
+    await request(app.getHttpServer())
+      .delete(`/api/learning-path/${learningPath.id}/courses/${course.id}`)
+      .set("Cookie", adminCookies)
+      .expect(200);
+
+    await app.get(LearningPathCourseSyncHandler).handle(
+      new LearningPathCourseRemovedEvent({
+        tenantId: adminUser.tenantId,
+        learningPathId: learningPath.id,
+        courseId: course.id,
+      }),
+    );
+
+    await expectStudentCourseStatus(student.id, course.id, COURSE_ENROLLMENT.NOT_ENROLLED);
+    await expectStudentLearningPathProgress(
+      student.id,
+      learningPath.id,
+      PROGRESS_STATUSES.NOT_STARTED,
+      false,
+    );
+  });
+
+  it("keeps course access when another learning path actively grants the same course", async () => {
+    const adminUser = await createAdminUser();
+    const adminCookies = await cookieFor(adminUser, app);
+    const firstPath = await learningPathFactory.create({ authorId: adminUser.id });
+    const secondPath = await learningPathFactory.create({ authorId: adminUser.id });
+    const student = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+    const sharedCourse = await createPublishedCourse(adminUser.id);
+
+    for (const learningPath of [firstPath, secondPath]) {
+      await request(app.getHttpServer())
+        .post(`/api/learning-path/${learningPath.id}/courses`)
+        .set("Cookie", adminCookies)
+        .send({ courseIds: [sharedCourse.id] })
+        .expect(201);
+
+      await request(app.getHttpServer())
+        .post(`/api/learning-path/${learningPath.id}/enroll-users`)
+        .set("Cookie", adminCookies)
+        .send({ studentIds: [student.id] })
+        .expect(201);
+
+      await handleSync(adminUser.tenantId, learningPath.id);
+    }
+
+    await request(app.getHttpServer())
+      .delete(`/api/learning-path/${firstPath.id}/courses/${sharedCourse.id}`)
+      .set("Cookie", adminCookies)
+      .expect(200);
+
+    await app.get(LearningPathCourseSyncHandler).handle(
+      new LearningPathCourseRemovedEvent({
+        tenantId: adminUser.tenantId,
+        learningPathId: firstPath.id,
+        courseId: sharedCourse.id,
+      }),
+    );
+
+    await expectStudentCourseStatus(student.id, sharedCourse.id, COURSE_ENROLLMENT.ENROLLED);
+  });
+
+  it("removes course access when the only other learning path reference is locked", async () => {
+    const adminUser = await createAdminUser();
+    const adminCookies = await cookieFor(adminUser, app);
+    const activePath = await learningPathFactory.create({ authorId: adminUser.id });
+    const lockedPath = await learningPathFactory.create({
+      authorId: adminUser.id,
+      sequenceEnabled: true,
+    });
+    const student = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+    const prerequisiteCourse = await createPublishedCourse(adminUser.id);
+    const sharedCourse = await createPublishedCourse(adminUser.id);
+
+    await request(app.getHttpServer())
+      .post(`/api/learning-path/${activePath.id}/courses`)
+      .set("Cookie", adminCookies)
+      .send({ courseIds: [sharedCourse.id] })
+      .expect(201);
+    await request(app.getHttpServer())
+      .post(`/api/learning-path/${activePath.id}/enroll-users`)
+      .set("Cookie", adminCookies)
+      .send({ studentIds: [student.id] })
+      .expect(201);
+    await handleSync(adminUser.tenantId, activePath.id);
+
+    await request(app.getHttpServer())
+      .post(`/api/learning-path/${lockedPath.id}/courses`)
+      .set("Cookie", adminCookies)
+      .send({ courseIds: [prerequisiteCourse.id, sharedCourse.id] })
+      .expect(201);
+    await request(app.getHttpServer())
+      .post(`/api/learning-path/${lockedPath.id}/enroll-users`)
+      .set("Cookie", adminCookies)
+      .send({ studentIds: [student.id] })
+      .expect(201);
+    await handleSync(adminUser.tenantId, lockedPath.id);
+
+    await expectStudentCourseStatus(student.id, prerequisiteCourse.id, COURSE_ENROLLMENT.ENROLLED);
+    await expectStudentCourseStatus(student.id, sharedCourse.id, COURSE_ENROLLMENT.ENROLLED);
+
+    await request(app.getHttpServer())
+      .delete(`/api/learning-path/${activePath.id}/courses/${sharedCourse.id}`)
+      .set("Cookie", adminCookies)
+      .expect(200);
+
+    await app.get(LearningPathCourseSyncHandler).handle(
+      new LearningPathCourseRemovedEvent({
+        tenantId: adminUser.tenantId,
+        learningPathId: activePath.id,
+        courseId: sharedCourse.id,
+      }),
+    );
+
+    await expectStudentCourseStatus(student.id, sharedCourse.id, COURSE_ENROLLMENT.NOT_ENROLLED);
+  });
+
+  it("handles duplicate learning path sync events without duplicating links", async () => {
+    const adminUser = await createAdminUser();
+    const adminCookies = await cookieFor(adminUser, app);
+    const learningPath = await learningPathFactory.create({ authorId: adminUser.id });
+    const student = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+    const course = await createPublishedCourse(adminUser.id);
+
+    await request(app.getHttpServer())
+      .post(`/api/learning-path/${learningPath.id}/courses`)
+      .set("Cookie", adminCookies)
+      .send({ courseIds: [course.id] })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post(`/api/learning-path/${learningPath.id}/enroll-users`)
+      .set("Cookie", adminCookies)
+      .send({ studentIds: [student.id] })
+      .expect(201);
+
+    await handleSync(adminUser.tenantId, learningPath.id);
+    await handleSync(adminUser.tenantId, learningPath.id);
+
+    const pathCourseLinks = await baseDb
+      .select()
+      .from(studentLearningPathCourses)
+      .where(
+        and(
+          eq(studentLearningPathCourses.studentId, student.id),
+          eq(studentLearningPathCourses.learningPathId, learningPath.id),
+          eq(studentLearningPathCourses.courseId, course.id),
+        ),
+      );
+
+    expect(pathCourseLinks).toHaveLength(1);
+    await expectStudentCourseStatus(student.id, course.id, COURSE_ENROLLMENT.ENROLLED);
+  });
+
   it("removes path-granted course access when a direct learning path enrollment is removed", async () => {
     const adminUser = await createAdminUser();
     const adminCookies = await cookieFor(adminUser, app);
@@ -753,5 +1121,33 @@ describe("LearningPathCourseSyncHandler (e2e)", () => {
       .where(and(eq(studentCourses.studentId, studentId), eq(studentCourses.courseId, courseId)));
 
     expect(studentCourse?.status).toBe(expectedStatus);
+  }
+
+  async function expectStudentLearningPathProgress(
+    studentId: string,
+    learningPathId: string,
+    expectedProgress: string,
+    expectCompletedAt: boolean,
+  ) {
+    const [studentPath] = await baseDb
+      .select({
+        progress: studentLearningPaths.progress,
+        completedAt: studentLearningPaths.completedAt,
+      })
+      .from(studentLearningPaths)
+      .where(
+        and(
+          eq(studentLearningPaths.studentId, studentId),
+          eq(studentLearningPaths.learningPathId, learningPathId),
+        ),
+      );
+
+    expect(studentPath?.progress).toBe(expectedProgress);
+
+    if (expectCompletedAt) {
+      expect(studentPath?.completedAt).not.toBeNull();
+    } else {
+      expect(studentPath?.completedAt).toBeNull();
+    }
   }
 });

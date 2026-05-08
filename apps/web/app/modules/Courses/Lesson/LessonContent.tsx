@@ -62,7 +62,7 @@ export const LessonContent = ({
   const { language } = useLanguageStore();
 
   const { data: user } = useCurrentUser();
-  const { mutate: markLessonAsCompleted } = useMarkLessonAsCompleted(user?.id || "", course.slug);
+  const { mutate: markLessonAsCompleted } = useMarkLessonAsCompleted(user?.id || "");
   const { sequenceEnabled } = useLessonsSequence(course.id);
 
   const currentChapterIndex = course.chapters.findIndex((chapter) =>

@@ -34,17 +34,53 @@ export const learningPathSchema = Type.Object({
   updatedAt: Type.String(),
 });
 
-export const learningPathCourseSchema = Type.Object({
+export const learningPathDisplaySchema = Type.Object({
   id: UUIDSchema,
-  learningPathId: UUIDSchema,
-  courseId: UUIDSchema,
-  displayOrder: Type.Number(),
+  title: Type.String(),
+  description: Type.String(),
+  thumbnailReference: Type.Union([Type.String(), Type.Null()]),
+  isEnrolled: Type.Boolean(),
+  status: learningPathStatusOptions,
+  includesCertificate: Type.Boolean(),
+  sequenceEnabled: Type.Boolean(),
+  authorId: UUIDSchema,
+  baseLanguage: supportedLanguagesOptions,
+  availableLocales: Type.Array(supportedLanguagesOptions),
   createdAt: Type.String(),
   updatedAt: Type.String(),
 });
 
-export const learningPathCourseDetailSchema = Type.Intersect([
-  learningPathCourseSchema,
+export const learningPathCourseOptionSchema = Type.Object({
+  value: UUIDSchema,
+  label: Type.String(),
+  imageUrl: Type.Union([Type.String(), Type.Null()]),
+});
+
+const learningPathCourseMetadataSchema = Type.Object({
+  title: Type.String(),
+  description: Type.String(),
+  thumbnailUrl: Type.Union([Type.String(), Type.Null()]),
+  courseChapterCount: Type.Number(),
+});
+
+const learningPathCourseBaseSchema = Type.Object({
+  id: UUIDSchema,
+  learningPathId: UUIDSchema,
+  courseId: UUIDSchema,
+  displayOrder: Type.Number(),
+});
+
+export const learningPathCourseSchema = Type.Intersect([
+  learningPathCourseBaseSchema,
+  Type.Object({
+    createdAt: Type.String(),
+    updatedAt: Type.String(),
+  }),
+]);
+
+export const learningPathCoursePreviewSchema = Type.Intersect([
+  learningPathCourseBaseSchema,
+  learningPathCourseMetadataSchema,
   Type.Object({
     progress: Type.Enum(PROGRESS_STATUSES),
     isLocked: Type.Boolean(),
@@ -52,10 +88,33 @@ export const learningPathCourseDetailSchema = Type.Intersect([
   }),
 ]);
 
-export const learningPathDetailSchema = Type.Intersect([
-  learningPathSchema,
+export const learningPathCourseDetailSchema = Type.Intersect([
+  learningPathCourseSchema,
+  learningPathCourseMetadataSchema,
   Type.Object({
+    progress: Type.Enum(PROGRESS_STATUSES),
+    isLocked: Type.Boolean(),
+    completedAt: Type.Union([Type.String(), Type.Null()]),
+  }),
+]);
+
+export const learningPathListItemSchema = Type.Intersect([
+  learningPathDisplaySchema,
+  Type.Object({
+    courses: Type.Array(learningPathCoursePreviewSchema),
+    availableCourseOptions: Type.Array(learningPathCourseOptionSchema),
+  }),
+]);
+
+export const learningPathDetailSchema = Type.Intersect([
+  learningPathDisplaySchema,
+  Type.Object({
+    availableCourseOptions: Type.Array(learningPathCourseOptionSchema),
     progress: learningPathProgressStatusOptions,
+    progressValue: Type.Number(),
+    completedCourseCount: Type.Number(),
+    totalCourseCount: Type.Number(),
+    certificateReady: Type.Boolean(),
     courses: Type.Array(learningPathCourseDetailSchema),
   }),
 ]);
@@ -65,6 +124,7 @@ export const createLearningPathSchema = Type.Object({
   title: Type.String(),
   description: Type.String(),
   thumbnailReference: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  thumbnail: Type.Optional(Type.String({ format: "binary" })),
   status: Type.Optional(learningPathStatusOptions),
   includesCertificate: Type.Optional(Type.Boolean()),
   sequenceEnabled: Type.Optional(Type.Boolean()),
@@ -76,6 +136,7 @@ export const updateLearningPathSchema = Type.Partial(
     title: Type.String(),
     description: Type.String(),
     thumbnailReference: Type.Union([Type.String(), Type.Null()]),
+    thumbnail: Type.String({ format: "binary" }),
     status: learningPathStatusOptions,
     includesCertificate: Type.Boolean(),
     sequenceEnabled: Type.Boolean(),
@@ -195,8 +256,24 @@ export type LearningPathSchema = {
 };
 export type LearningPathCourseSchema = Static<typeof learningPathCourseSchema>;
 export type LearningPathCourseDetailSchema = Static<typeof learningPathCourseDetailSchema>;
-export type LearningPathDetailSchema = LearningPathSchema & {
+export type LearningPathCourseOptionSchema = Static<typeof learningPathCourseOptionSchema>;
+export type LearningPathCoursePreviewSchema = Static<typeof learningPathCoursePreviewSchema>;
+export type LearningPathDisplaySchema = Omit<LearningPathSchema, "title" | "description"> & {
+  title: string;
+  description: string;
+  isEnrolled: boolean;
+};
+export type LearningPathListItemSchema = LearningPathDisplaySchema & {
+  availableCourseOptions: LearningPathCourseOptionSchema[];
+  courses: LearningPathCoursePreviewSchema[];
+};
+export type LearningPathDetailSchema = LearningPathDisplaySchema & {
+  availableCourseOptions: LearningPathCourseOptionSchema[];
   progress: Static<typeof learningPathProgressStatusOptions>;
+  progressValue: number;
+  completedCourseCount: number;
+  totalCourseCount: number;
+  certificateReady: boolean;
   courses: LearningPathCourseDetailSchema[];
 };
 export type CreateLearningPathBody = Static<typeof createLearningPathSchema>;

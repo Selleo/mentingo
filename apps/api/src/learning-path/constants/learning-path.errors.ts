@@ -5,6 +5,7 @@ export const LEARNING_PATH_ERRORS = {
   UPDATE_FAILED: "learningPathView.toast.updateError",
   UPDATE_MISSING_LANGUAGE: "learningPathView.toast.updateMissingLanguage",
   LANGUAGE_NOT_SUPPORTED: "learningPathView.toast.languageNotSupported",
+  LANGUAGE_ALREADY_EXISTS: "adminCourseView.createLanguage.alreadyExists",
   COURSE_NOT_FOUND: "learningPathView.toast.courseNotFound",
   COURSE_ALREADY_EXISTS: "learningPathView.toast.courseAlreadyExists",
   COURSE_IDS_UNIQUE: "learningPathView.toast.courseIdsMustBeUnique",

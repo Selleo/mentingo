@@ -26,7 +26,7 @@ export class LearningPathExportController {
   constructor(private readonly learningPathExportService: LearningPathExportService) {}
 
   @Post(":learningPathId/export")
-  @RequirePermission(PERMISSIONS.LEARNING_PATH_MANAGE)
+  @RequirePermission(PERMISSIONS.LEARNING_PATH_EXPORT)
   @Validate({
     request: [
       { type: "param", name: "learningPathId", schema: UUIDSchema, required: true },
@@ -49,7 +49,7 @@ export class LearningPathExportController {
   }
 
   @Get(":learningPathId/exports")
-  @RequirePermission(PERMISSIONS.LEARNING_PATH_MANAGE)
+  @RequirePermission(PERMISSIONS.LEARNING_PATH_EXPORT)
   @Validate({
     request: [{ type: "param", name: "learningPathId", schema: UUIDSchema, required: true }],
     response: baseResponse(Type.Array(learningPathExportLinkSchema)),
@@ -64,7 +64,7 @@ export class LearningPathExportController {
   }
 
   @Get(":learningPathId/export-candidates")
-  @RequirePermission(PERMISSIONS.LEARNING_PATH_MANAGE)
+  @RequirePermission(PERMISSIONS.LEARNING_PATH_EXPORT)
   @Validate({
     request: [{ type: "param", name: "learningPathId", schema: UUIDSchema, required: true }],
     response: baseResponse(learningPathExportCandidatesResponseSchema),
@@ -79,7 +79,7 @@ export class LearningPathExportController {
   }
 
   @Get("export-jobs/:jobId")
-  @RequirePermission(PERMISSIONS.LEARNING_PATH_MANAGE)
+  @RequirePermission(PERMISSIONS.LEARNING_PATH_EXPORT)
   @Validate({
     request: [{ type: "param", name: "jobId", schema: Type.String(), required: true }],
     response: baseResponse(learningPathJobStatusSchema),

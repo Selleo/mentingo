@@ -10,18 +10,21 @@ import {
 import {
   LEARNING_PATH_ENROLLMENT_TYPES,
   LEARNING_PATH_PROGRESS_STATUSES,
+  LEARNING_PATH_STATUSES,
   PERMISSIONS,
+  type PermissionKey,
   type SupportedLanguages,
 } from "@repo/shared";
 import { match } from "ts-pattern";
 
 import { DatabasePg, type Pagination, type UUIDType } from "src/common";
-import { hasPermission } from "src/common/permissions/permission.utils";
+import { hasAnyPermission, hasPermission } from "src/common/permissions/permission.utils";
 import {
   LearningPathCourseAddedEvent,
   LearningPathCourseRemovedEvent,
   LearningPathCourseSyncEvent,
 } from "src/events";
+import { FileService } from "src/file/file.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { hasDataToUpdate } from "src/utils/hasDataToUpdate";
@@ -37,7 +40,10 @@ import type {
   CreateLearningPathBody,
   LearningPathCourseIdsBody,
   LearningPathCourseDetailSchema,
+  LearningPathCourseOptionSchema,
   LearningPathDetailSchema,
+  LearningPathDisplaySchema,
+  LearningPathListItemSchema,
   LearningPathGroupIdsBody,
   LearningPathSchema,
   LearningPathStudentIdsBody,
@@ -46,10 +52,12 @@ import type {
 import type {
   ExistingLearningPath,
   LearningPathCourseProgressRow,
+  LearningPathCoursePreviewGroup,
   LearningPathProgressState,
   LearningPathUpdateData,
 } from "../learning-path.types";
 import type { CurrentUserType } from "src/common/types/current-user.type";
+import type { SortEnrolledStudentsOptions } from "src/courses/schemas/courseQuery";
 
 @Injectable()
 export class LearningPathService {
@@ -58,20 +66,76 @@ export class LearningPathService {
     private readonly learningPathRepository: LearningPathRepository,
     private readonly outboxPublisher: OutboxPublisher,
     private readonly localizationService: LocalizationService,
+    private readonly fileService: FileService,
     private readonly learningPathCourseSyncService: LearningPathCourseSyncService,
     private readonly learningPathExportService: LearningPathExportService,
   ) {}
 
-  private assertManagePermission(currentUser: CurrentUserType) {
-    if (!hasPermission(currentUser.permissions, PERMISSIONS.LEARNING_PATH_MANAGE)) {
+  private assertPermission(currentUser: CurrentUserType, permission: PermissionKey) {
+    if (!hasPermission(currentUser.permissions, permission)) {
       throw new ForbiddenException(LEARNING_PATH_ERRORS.MISSING_PERMISSION);
     }
   }
 
   private assertReadPermission(currentUser: CurrentUserType) {
-    if (!hasPermission(currentUser.permissions, PERMISSIONS.LEARNING_PATH_READ)) {
-      throw new ForbiddenException(LEARNING_PATH_ERRORS.MISSING_PERMISSION);
+    this.assertPermission(currentUser, PERMISSIONS.LEARNING_PATH_READ);
+  }
+
+  private assertUpdatePermission(currentUser: CurrentUserType, learningPath: ExistingLearningPath) {
+    if (hasPermission(currentUser.permissions, PERMISSIONS.LEARNING_PATH_UPDATE)) return;
+
+    if (
+      hasPermission(currentUser.permissions, PERMISSIONS.LEARNING_PATH_UPDATE_OWN) &&
+      learningPath.authorId === currentUser.userId
+    ) {
+      return;
     }
+
+    throw new ForbiddenException(LEARNING_PATH_ERRORS.MISSING_PERMISSION);
+  }
+
+  private assertCourseUpdatePermission(
+    currentUser: CurrentUserType,
+    learningPath: ExistingLearningPath,
+  ) {
+    if (hasPermission(currentUser.permissions, PERMISSIONS.LEARNING_PATH_COURSE_UPDATE)) return;
+
+    if (
+      hasPermission(currentUser.permissions, PERMISSIONS.LEARNING_PATH_COURSE_UPDATE_OWN) &&
+      learningPath.authorId === currentUser.userId
+    ) {
+      return;
+    }
+
+    throw new ForbiddenException(LEARNING_PATH_ERRORS.MISSING_PERMISSION);
+  }
+
+  private canReadAllLearningPaths(currentUser: CurrentUserType) {
+    return hasAnyPermission(currentUser.permissions, [
+      PERMISSIONS.LEARNING_PATH_UPDATE,
+      PERMISSIONS.LEARNING_PATH_DELETE,
+      PERMISSIONS.LEARNING_PATH_COURSE_UPDATE,
+      PERMISSIONS.LEARNING_PATH_ENROLLMENT,
+      PERMISSIONS.LEARNING_PATH_EXPORT,
+    ]);
+  }
+
+  private canReadOwnLearningPaths(currentUser: CurrentUserType) {
+    return hasAnyPermission(currentUser.permissions, [
+      PERMISSIONS.LEARNING_PATH_UPDATE_OWN,
+      PERMISSIONS.LEARNING_PATH_COURSE_UPDATE_OWN,
+    ]);
+  }
+
+  private canUpdateLearningPathCourses(
+    currentUser: CurrentUserType,
+    learningPath: ExistingLearningPath,
+  ) {
+    return (
+      hasPermission(currentUser.permissions, PERMISSIONS.LEARNING_PATH_COURSE_UPDATE) ||
+      (hasPermission(currentUser.permissions, PERMISSIONS.LEARNING_PATH_COURSE_UPDATE_OWN) &&
+        learningPath.authorId === currentUser.userId)
+    );
   }
 
   private async ensureLearningPathExists(
@@ -170,11 +234,26 @@ export class LearningPathService {
     );
   }
 
-  async createLearningPath(body: CreateLearningPathBody, currentUser: CurrentUserType) {
-    this.assertManagePermission(currentUser);
+  async createLearningPath(
+    body: CreateLearningPathBody,
+    currentUser: CurrentUserType,
+    thumbnail?: Express.Multer.File | null,
+  ) {
+    this.assertPermission(currentUser, PERMISSIONS.LEARNING_PATH_CREATE);
+
+    const { thumbnail: _thumbnailField, ...createData } = body;
+
+    if (thumbnail) {
+      const { fileKey } = await this.fileService.uploadFile(
+        thumbnail,
+        "learning-path",
+        currentUser.tenantId,
+      );
+      createData.thumbnailReference = fileKey;
+    }
 
     const createdLearningPath = await this.learningPathRepository.createLearningPath(
-      body,
+      createData,
       currentUser,
     );
 
@@ -189,15 +268,64 @@ export class LearningPathService {
     currentUser: CurrentUserType,
     page?: number,
     perPage?: number,
-  ): Promise<{ data: LearningPathSchema[]; pagination: Pagination }> {
+    language?: SupportedLanguages,
+  ): Promise<{ data: LearningPathListItemSchema[]; pagination: Pagination }> {
     this.assertReadPermission(currentUser);
 
-    return this.learningPathRepository.getLearningPaths(page, perPage);
+    const canReadAll = this.canReadAllLearningPaths(currentUser);
+    const canReadOwn = this.canReadOwnLearningPaths(currentUser);
+    const learningPaths = await this.learningPathRepository.getLearningPaths(page, perPage, {
+      canReadAll,
+      canReadOwn,
+      studentId: currentUser.userId,
+    });
+    const learningPathIds = learningPaths.data.map((learningPath) => learningPath.id);
+    const enrolledLearningPathIds = new Set(
+      await this.learningPathRepository.getEnrolledLearningPathIds(
+        learningPathIds,
+        currentUser.userId,
+      ),
+    );
+    const editableCourseLearningPathIds = learningPaths.data
+      .filter((learningPath) => this.canUpdateLearningPathCourses(currentUser, learningPath))
+      .map((learningPath) => learningPath.id);
+    const availableCourseOptionsByPathId =
+      editableCourseLearningPathIds.length > 0
+        ? await this.buildLearningPathAvailableCourseOptions(
+            editableCourseLearningPathIds,
+            language,
+          )
+        : new Map();
+
+    const coursePreviews = await this.learningPathRepository.getLearningPathCoursePreviews(
+      learningPathIds,
+      currentUser.userId,
+      language,
+    );
+
+    const coursePreviewsByPathId =
+      await this.buildLearningPathCoursePreviewsByPathId(coursePreviews);
+
+    return {
+      ...learningPaths,
+      data: await Promise.all(
+        learningPaths.data.map(async (learningPath) => ({
+          ...(await this.buildLearningPathDisplay(
+            learningPath,
+            language,
+            enrolledLearningPathIds.has(learningPath.id),
+          )),
+          courses: coursePreviewsByPathId.get(learningPath.id) ?? [],
+          availableCourseOptions: availableCourseOptionsByPathId.get(learningPath.id) ?? [],
+        })),
+      ),
+    };
   }
 
   async getLearningPathById(
     learningPathId: UUIDType,
     currentUser: CurrentUserType,
+    language?: SupportedLanguages,
   ): Promise<LearningPathDetailSchema> {
     this.assertReadPermission(currentUser);
 
@@ -207,9 +335,30 @@ export class LearningPathService {
       currentUser.userId,
     );
 
+    if (
+      !this.canReadAllLearningPaths(currentUser) &&
+      !(
+        this.canReadOwnLearningPaths(currentUser) && learningPath.authorId === currentUser.userId
+      ) &&
+      learningPath.status !== LEARNING_PATH_STATUSES.PUBLISHED &&
+      !progressState.isEnrolled
+    ) {
+      throw new NotFoundException(LEARNING_PATH_ERRORS.NOT_FOUND);
+    }
+
+    const progressSummary = this.buildLearningPathProgressSummary(progressState);
+    const canUpdateCourses = this.canUpdateLearningPathCourses(currentUser, learningPath);
+    const availableCourseOptionsByPathId = canUpdateCourses
+      ? await this.buildLearningPathAvailableCourseOptions([learningPathId], language)
+      : new Map();
+
     return {
-      ...learningPath,
-      progress: this.resolveLearningPathProgress(progressState),
+      ...(await this.buildLearningPathDisplay(learningPath, language, progressState.isEnrolled)),
+      ...progressSummary,
+      availableCourseOptions: availableCourseOptionsByPathId.get(learningPathId) ?? [],
+      certificateReady:
+        learningPath.includesCertificate &&
+        progressSummary.progress === LEARNING_PATH_PROGRESS_STATUSES.COMPLETED,
       courses: this.buildLearningPathCourseDetail(
         progressState.courses,
         progressState.studentCourseProgressRows,
@@ -223,12 +372,21 @@ export class LearningPathService {
     learningPathId: UUIDType,
     body: UpdateLearningPathBody,
     currentUser: CurrentUserType,
+    thumbnail?: Express.Multer.File | null,
   ) {
-    this.assertManagePermission(currentUser);
-
     const existingLearningPath = await this.ensureLearningPathExists(learningPathId);
+    this.assertUpdatePermission(currentUser, existingLearningPath);
 
-    const { language, ...updateLearningPathData } = body;
+    const { language, thumbnail: _thumbnailField, ...updateLearningPathData } = body;
+
+    if (thumbnail) {
+      const { fileKey } = await this.fileService.uploadFile(
+        thumbnail,
+        "learning-path",
+        currentUser.tenantId,
+      );
+      updateLearningPathData.thumbnailReference = fileKey;
+    }
 
     const hasLocalizedUpdates =
       updateLearningPathData.title !== undefined ||
@@ -285,8 +443,25 @@ export class LearningPathService {
     return updatedLearningPath;
   }
 
+  async createLanguage(
+    learningPathId: UUIDType,
+    language: SupportedLanguages,
+    currentUser: CurrentUserType,
+  ) {
+    const learningPath = await this.ensureLearningPathExists(learningPathId);
+    this.assertUpdatePermission(currentUser, learningPath);
+
+    if (learningPath.availableLocales.includes(language)) {
+      throw new BadRequestException(LEARNING_PATH_ERRORS.LANGUAGE_ALREADY_EXISTS);
+    }
+
+    return this.learningPathRepository.updateLearningPath(learningPathId, {
+      availableLocales: [...learningPath.availableLocales, language],
+    });
+  }
+
   async deleteLearningPath(learningPathId: UUIDType, currentUser: CurrentUserType) {
-    this.assertManagePermission(currentUser);
+    this.assertPermission(currentUser, PERMISSIONS.LEARNING_PATH_DELETE);
 
     const [deletedLearningPath] = await this.db.transaction(async (trx) => {
       await this.ensureLearningPathExists(learningPathId, trx);
@@ -315,14 +490,13 @@ export class LearningPathService {
     body: LearningPathCourseIdsBody,
     currentUser: CurrentUserType,
   ) {
-    this.assertManagePermission(currentUser);
-
     if (body.courseIds.length === 0) {
       throw new BadRequestException(LEARNING_PATH_ERRORS.COURSE_IDS_EMPTY);
     }
 
     const addedCourses = await this.db.transaction(async (trx) => {
-      await this.ensureLearningPathExists(learningPathId, trx);
+      const learningPath = await this.ensureLearningPathExists(learningPathId, trx);
+      this.assertCourseUpdatePermission(currentUser, learningPath);
 
       const uniqueCourseIds = Array.from(new Set(body.courseIds));
 
@@ -392,7 +566,7 @@ export class LearningPathService {
     body: LearningPathStudentIdsBody,
     currentUser: CurrentUserType,
   ) {
-    this.assertManagePermission(currentUser);
+    this.assertPermission(currentUser, PERMISSIONS.LEARNING_PATH_ENROLLMENT);
 
     if (body.studentIds.length === 0) {
       throw new BadRequestException(LEARNING_PATH_ERRORS.STUDENT_IDS_EMPTY);
@@ -400,12 +574,44 @@ export class LearningPathService {
 
     const uniqueStudentIds = Array.from(new Set(body.studentIds));
 
+    return this.enrollStudentIdsToLearningPath(
+      learningPathId,
+      uniqueStudentIds,
+      currentUser.tenantId,
+    );
+  }
+
+  async enrollCurrentUserToLearningPath(learningPathId: UUIDType, currentUser: CurrentUserType) {
+    this.assertReadPermission(currentUser);
+
+    const learningPath = await this.ensureLearningPathExists(learningPathId);
+
+    if (learningPath.status !== LEARNING_PATH_STATUSES.PUBLISHED) {
+      throw new ForbiddenException(LEARNING_PATH_ERRORS.MISSING_PERMISSION);
+    }
+
+    return this.enrollStudentIdsToLearningPath(
+      learningPathId,
+      [currentUser.userId],
+      currentUser.tenantId,
+    );
+  }
+
+  private async enrollStudentIdsToLearningPath(
+    learningPathId: UUIDType,
+    studentIds: UUIDType[],
+    tenantId: UUIDType,
+  ) {
+    if (studentIds.length === 0) {
+      throw new BadRequestException(LEARNING_PATH_ERRORS.STUDENT_IDS_EMPTY);
+    }
+
     return this.db.transaction(async (trx) => {
       await this.ensureLearningPathExists(learningPathId, trx);
 
       const newStudentIds = await this.learningPathRepository.getNotEnrolledUserIds(
         learningPathId,
-        uniqueStudentIds,
+        studentIds,
         trx,
       );
 
@@ -418,7 +624,7 @@ export class LearningPathService {
         learningPathId,
         newStudentIds,
         LEARNING_PATH_ENROLLMENT_TYPES.DIRECT,
-        currentUser.tenantId,
+        tenantId,
         trx,
       );
 
@@ -426,11 +632,11 @@ export class LearningPathService {
         learningPathId,
         newStudentIds,
         courseIds,
-        currentUser.tenantId,
+        tenantId,
         trx,
       );
 
-      await this.publishLearningPathCourseSyncEvent(learningPathId, currentUser.tenantId, trx);
+      await this.publishLearningPathCourseSyncEvent(learningPathId, tenantId, trx);
 
       return {
         learningPathId,
@@ -439,12 +645,32 @@ export class LearningPathService {
     });
   }
 
+  async getStudentsWithEnrollmentDate(
+    learningPathId: UUIDType,
+    query: {
+      keyword?: string;
+      sort?: SortEnrolledStudentsOptions;
+      groups?: string[];
+      page?: number;
+      perPage?: number;
+    },
+    currentUser: CurrentUserType,
+  ) {
+    this.assertPermission(currentUser, PERMISSIONS.LEARNING_PATH_ENROLLMENT);
+    await this.ensureLearningPathExists(learningPathId);
+
+    return this.learningPathRepository.getStudentsWithEnrollmentDate({
+      learningPathId,
+      ...query,
+    });
+  }
+
   async unenrollUsersFromLearningPath(
     learningPathId: UUIDType,
     body: LearningPathStudentIdsBody,
     currentUser: CurrentUserType,
   ) {
-    this.assertManagePermission(currentUser);
+    this.assertPermission(currentUser, PERMISSIONS.LEARNING_PATH_ENROLLMENT);
 
     if (body.studentIds.length === 0) {
       throw new BadRequestException(LEARNING_PATH_ERRORS.STUDENT_IDS_EMPTY);
@@ -500,7 +726,7 @@ export class LearningPathService {
     body: LearningPathGroupIdsBody,
     currentUser: CurrentUserType,
   ) {
-    this.assertManagePermission(currentUser);
+    this.assertPermission(currentUser, PERMISSIONS.LEARNING_PATH_ENROLLMENT);
 
     if (body.groupIds.length === 0) {
       throw new BadRequestException(LEARNING_PATH_ERRORS.GROUP_IDS_EMPTY);
@@ -565,7 +791,7 @@ export class LearningPathService {
     body: LearningPathGroupIdsBody,
     currentUser: CurrentUserType,
   ) {
-    this.assertManagePermission(currentUser);
+    this.assertPermission(currentUser, PERMISSIONS.LEARNING_PATH_ENROLLMENT);
 
     if (body.groupIds.length === 0) {
       throw new BadRequestException(LEARNING_PATH_ERRORS.GROUP_IDS_EMPTY);
@@ -625,10 +851,9 @@ export class LearningPathService {
     courseId: UUIDType,
     currentUser: CurrentUserType,
   ) {
-    this.assertManagePermission(currentUser);
-
     const removedCourse = await this.db.transaction(async (trx) => {
-      await this.ensureLearningPathExists(learningPathId, trx);
+      const learningPath = await this.ensureLearningPathExists(learningPathId, trx);
+      this.assertCourseUpdatePermission(currentUser, learningPath);
 
       const removedCourse = await this.learningPathRepository.removeLearningPathCourse(
         learningPathId,
@@ -669,14 +894,13 @@ export class LearningPathService {
     body: LearningPathCourseIdsBody,
     currentUser: CurrentUserType,
   ) {
-    this.assertManagePermission(currentUser);
-
     if (body.courseIds.length === 0) {
       throw new BadRequestException(LEARNING_PATH_ERRORS.COURSE_IDS_EMPTY);
     }
 
     const result = await this.db.transaction(async (trx) => {
       const learningPath = await this.ensureLearningPathExists(learningPathId, trx);
+      this.assertCourseUpdatePermission(currentUser, learningPath);
 
       const currentCourseIds = await this.learningPathRepository.getLearningPathCourseIds(
         learningPathId,
@@ -726,19 +950,128 @@ export class LearningPathService {
     return result;
   }
 
-  private resolveLearningPathProgress(progressState: LearningPathProgressState) {
+  private async buildLearningPathDisplay(
+    learningPath: LearningPathSchema,
+    language?: SupportedLanguages,
+    isEnrolled = false,
+  ): Promise<LearningPathDisplaySchema> {
+    return {
+      ...learningPath,
+      thumbnailReference: await this.resolveFileUrl(learningPath.thumbnailReference),
+      isEnrolled,
+      title: this.resolveLocalizedText(learningPath.title, language, learningPath.baseLanguage),
+      description: this.resolveLocalizedText(
+        learningPath.description,
+        language,
+        learningPath.baseLanguage,
+      ),
+    };
+  }
+
+  private async buildLearningPathAvailableCourseOptions(
+    learningPathIds: UUIDType[],
+    language?: SupportedLanguages,
+  ): Promise<Map<string, LearningPathCourseOptionSchema[]>> {
+    if (learningPathIds.length === 0) return new Map();
+
+    const [linkedCourseRows, courseOptions] = await Promise.all([
+      this.learningPathRepository.getLearningPathCourseIdsForPaths(learningPathIds),
+      this.learningPathRepository.getLearningPathCourseOptions(language),
+    ]);
+
+    const linkedCourseIdsByPath = new Map<string, Set<string>>();
+    for (const row of linkedCourseRows) {
+      const currentSet = linkedCourseIdsByPath.get(row.learningPathId);
+      if (currentSet) {
+        currentSet.add(row.courseId);
+      } else {
+        linkedCourseIdsByPath.set(row.learningPathId, new Set([row.courseId]));
+      }
+    }
+
+    const resolvedCourseOptions = await Promise.all(
+      courseOptions.map(async (courseOption) => ({
+        ...courseOption,
+        imageUrl: await this.resolveFileUrl(courseOption.imageUrl),
+      })),
+    );
+
+    const result = new Map<string, LearningPathCourseOptionSchema[]>();
+
+    for (const learningPathId of learningPathIds) {
+      const linkedCourseIds = linkedCourseIdsByPath.get(learningPathId) ?? new Set();
+      result.set(
+        learningPathId,
+        resolvedCourseOptions.filter((option) => !linkedCourseIds.has(option.value)),
+      );
+    }
+
+    return result;
+  }
+
+  private async buildLearningPathCoursePreviewsByPathId(groups: LearningPathCoursePreviewGroup[]) {
+    const result = new Map<string, LearningPathCoursePreviewGroup["courses"]>();
+
+    for (const group of groups) {
+      result.set(
+        group.learningPathId,
+        await Promise.all(
+          group.courses.map(async (course) => ({
+            ...course,
+            thumbnailUrl: await this.resolveFileUrl(course.thumbnailUrl),
+          })),
+        ),
+      );
+    }
+
+    return result;
+  }
+
+  private async resolveFileUrl(reference: string | null) {
+    if (!reference) return null;
+
+    try {
+      return await this.fileService.getFileUrl(reference);
+    } catch (error) {
+      console.error(`Failed to get signed URL for ${reference}:`, error);
+      return reference;
+    }
+  }
+
+  private resolveLocalizedText(
+    localizedText: LearningPathSchema["title"],
+    language: SupportedLanguages | undefined,
+    baseLanguage: SupportedLanguages,
+  ) {
+    const requestedValue = language ? localizedText[language] : undefined;
+    const baseValue = localizedText[baseLanguage];
+
+    return requestedValue ?? baseValue ?? Object.values(localizedText)[0] ?? "";
+  }
+
+  private buildLearningPathProgressSummary(progressState: LearningPathProgressState) {
     const completedCourseCount = progressState.studentCourseProgressRows.filter(
       (row) => row.completedAt !== null,
     ).length;
+    const totalCourseCount = progressState.courses.length;
 
-    return match({
-      courseCount: progressState.courses.length,
+    const progress = match({
+      courseCount: totalCourseCount,
       completedCourseCount,
     })
       .with({ courseCount: 0 }, () => LEARNING_PATH_PROGRESS_STATUSES.NOT_STARTED)
       .with({ completedCourseCount: 0 }, () => LEARNING_PATH_PROGRESS_STATUSES.NOT_STARTED)
       .with({ courseCount: completedCourseCount }, () => LEARNING_PATH_PROGRESS_STATUSES.COMPLETED)
       .otherwise(() => LEARNING_PATH_PROGRESS_STATUSES.IN_PROGRESS);
+
+    return {
+      progress,
+      progressValue: totalCourseCount
+        ? Math.round((completedCourseCount / totalCourseCount) * 100)
+        : 0,
+      completedCourseCount,
+      totalCourseCount,
+    };
   }
 
   private buildLearningPathCourseDetail(

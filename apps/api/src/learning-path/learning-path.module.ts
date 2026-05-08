@@ -1,6 +1,7 @@
 import { forwardRef, Module } from "@nestjs/common";
 
 import { CourseModule } from "src/courses/course.module";
+import { FileModule } from "src/file/files.module";
 import { LocalizationModule } from "src/localization/localization.module";
 import { S3Module } from "src/s3/s3.module";
 import { SettingsModule } from "src/settings/settings.module";
@@ -19,7 +20,13 @@ import { LearningPathExportService } from "./services/learning-path-export.servi
 import { LearningPathService } from "./services/learning-path.service";
 
 @Module({
-  imports: [forwardRef(() => CourseModule), LocalizationModule, SettingsModule, S3Module],
+  imports: [
+    forwardRef(() => CourseModule),
+    FileModule,
+    LocalizationModule,
+    SettingsModule,
+    S3Module,
+  ],
   controllers: [
     LearningPathController,
     LearningPathCourseController,

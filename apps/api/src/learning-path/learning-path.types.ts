@@ -1,4 +1,4 @@
-import type { LearningPathCourseSchema, LearningPathSchema } from "./learning-path.schema";
+import type { LearningPathCoursePreviewSchema, LearningPathSchema } from "./learning-path.schema";
 import type {
   LearningPathCertificateStatus,
   LearningPathEntityType,
@@ -24,6 +24,18 @@ export type LearningPathCourseLink = {
   displayOrder: number;
   createdAt: string;
   updatedAt: string;
+};
+
+export type LearningPathProgressCourseLink = LearningPathCourseLink & {
+  title: string;
+  description: string;
+  thumbnailUrl: string | null;
+  courseChapterCount: number;
+};
+
+export type LearningPathCoursePreviewGroup = {
+  learningPathId: UUIDType;
+  courses: LearningPathCoursePreviewSchema[];
 };
 
 export type LearningPathExportRecord = {
@@ -57,7 +69,7 @@ export type LearningPathCertificateRecord = {
 };
 
 export type LearningPathProgressState = {
-  courses: LearningPathCourseSchema[];
+  courses: LearningPathProgressCourseLink[];
   studentCourseProgressRows: LearningPathCourseProgressRow[];
   isEnrolled: boolean;
 };
@@ -74,4 +86,5 @@ export type LearningPathUpdateData = {
   status?: LearningPathStatus;
   includesCertificate?: boolean;
   sequenceEnabled?: boolean;
+  availableLocales?: LearningPathSchema["availableLocales"];
 };

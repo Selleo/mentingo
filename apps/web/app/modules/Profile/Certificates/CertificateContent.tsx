@@ -3,8 +3,10 @@ import { useEffect, useRef, useState } from "react";
 import { Icon } from "~/components/Icon";
 import { cn } from "~/lib/utils";
 
+import { CERTIFICATE_KIND } from "./certificateKind";
 import { defaultCertificateColorTheme } from "./certificateTheme";
 
+import type { CertificateKind } from "./certificateKind";
 import type { CertificateColorTheme } from "./certificateTheme";
 
 interface CertificateContentProps {
@@ -18,13 +20,17 @@ interface CertificateContentProps {
   signatureImageUrl?: string | null;
   lang?: "pl" | "en";
   colorTheme?: CertificateColorTheme;
+  certificateKind?: CertificateKind;
 }
 
 const translations = {
   pl: {
     certificate: "CERTYFIKAT",
     certifyThat: "NINIEJSZYM ZAŚWIADCZA SIĘ, ŻE",
-    successfulCompletion: "ukończył/a kurs",
+    successfulCompletion: {
+      [CERTIFICATE_KIND.COURSE]: "ukończył/a kurs",
+      [CERTIFICATE_KIND.LEARNING_PATH]: "ukończył/a ścieżkę edukacyjną",
+    },
     confirmation: "potwierdzając tym samym realizację programu szkoleniowego.",
     date: "Data",
     signature: "Podpis",
@@ -32,7 +38,10 @@ const translations = {
   en: {
     certificate: "CERTIFICATE",
     certifyThat: "THIS IS TO CERTIFY THAT",
-    successfulCompletion: "has successfully completed the course",
+    successfulCompletion: {
+      [CERTIFICATE_KIND.COURSE]: "has successfully completed the course",
+      [CERTIFICATE_KIND.LEARNING_PATH]: "has successfully completed the learning path",
+    },
     confirmation: "thereby confirming participation in the full training program.",
     date: "Date",
     signature: "Signature",
@@ -53,6 +62,7 @@ const CertificateContent = ({
   signatureImageUrl,
   lang = "en",
   colorTheme = defaultCertificateColorTheme,
+  certificateKind = CERTIFICATE_KIND.COURSE,
 }: CertificateContentProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
@@ -116,7 +126,7 @@ const CertificateContent = ({
           {studentName}
         </p>
         <p className={text2Classes} style={{ color: colorTheme.bodyTextColor }}>
-          {translations[lang].successfulCompletion}
+          {translations[lang].successfulCompletion[certificateKind]}
         </p>
         <p className="text-[24px]" style={{ color: colorTheme.courseNameColor }}>
           &quot;{courseName}&quot;

@@ -6,6 +6,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import {
+  CERTIFICATE_KIND,
   buildCertificateHtmlDocument as buildSharedCertificateHtmlDocument,
   buildCertificateMarkup,
 } from "@repo/shared";
@@ -230,6 +231,7 @@ export class LearningPathCertificateService {
       backgroundImageUrl,
       lang: shareLanguage,
       isDownload: true,
+      certificateKind: CERTIFICATE_KIND.LEARNING_PATH,
       colorTheme: {
         titleColor: imageSettings.primaryColor || "#1f2937",
         certifyTextColor: imageSettings.primaryColor || "#1f2937",
@@ -408,6 +410,7 @@ export class LearningPathCertificateService {
       platformLogoUrl: null,
       backgroundImageUrl: null,
       lang: context.language,
+      certificateKind: CERTIFICATE_KIND.LEARNING_PATH,
       colorTheme: {
         titleColor: context.settings.primaryColor || "#1f2937",
         certifyTextColor: context.settings.primaryColor || "#1f2937",

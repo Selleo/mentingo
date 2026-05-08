@@ -20,7 +20,10 @@ export class LearningPathCourseController {
   constructor(private readonly learningPathService: LearningPathService) {}
 
   @Post(":learningPathId/courses")
-  @RequirePermission(PERMISSIONS.LEARNING_PATH_MANAGE)
+  @RequirePermission(
+    PERMISSIONS.LEARNING_PATH_COURSE_UPDATE,
+    PERMISSIONS.LEARNING_PATH_COURSE_UPDATE_OWN,
+  )
   @Validate({
     request: [
       { type: "param", name: "learningPathId", schema: UUIDSchema },
@@ -39,7 +42,10 @@ export class LearningPathCourseController {
   }
 
   @Delete(":learningPathId/courses/:courseId")
-  @RequirePermission(PERMISSIONS.LEARNING_PATH_MANAGE)
+  @RequirePermission(
+    PERMISSIONS.LEARNING_PATH_COURSE_UPDATE,
+    PERMISSIONS.LEARNING_PATH_COURSE_UPDATE_OWN,
+  )
   @Validate({
     request: [
       { type: "param", name: "learningPathId", schema: UUIDSchema },
@@ -62,7 +68,10 @@ export class LearningPathCourseController {
   }
 
   @Patch(":learningPathId/courses/reorder")
-  @RequirePermission(PERMISSIONS.LEARNING_PATH_MANAGE)
+  @RequirePermission(
+    PERMISSIONS.LEARNING_PATH_COURSE_UPDATE,
+    PERMISSIONS.LEARNING_PATH_COURSE_UPDATE_OWN,
+  )
   @Validate({
     request: [
       { type: "param", name: "learningPathId", schema: UUIDSchema },

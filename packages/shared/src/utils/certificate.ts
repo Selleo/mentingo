@@ -34,14 +34,25 @@ export type BuildCertificateMarkupOptions = {
   colorTheme?: CertificateRenderTheme;
   isModal?: boolean;
   isDownload?: boolean;
+  certificateKind?: CertificateKind;
 };
+
+export const CERTIFICATE_KIND = {
+  COURSE: "course",
+  LEARNING_PATH: "learningPath",
+} as const;
+
+export type CertificateKind = (typeof CERTIFICATE_KIND)[keyof typeof CERTIFICATE_KIND];
 
 const certificateTranslations = {
   pl: {
     certificate: "CERTYFIKAT",
     courseCompletion: "UKOŃCZENIA KURSU",
     certifyThat: "NINIEJSZYM ZAŚWIADCZA SIĘ, ŻE",
-    successfulCompletion: "ukończył/a kurs",
+    successfulCompletion: {
+      [CERTIFICATE_KIND.COURSE]: "ukończył/a kurs",
+      [CERTIFICATE_KIND.LEARNING_PATH]: "ukończył/a ścieżkę edukacyjną",
+    },
     confirmation: "potwierdzając tym samym realizację programu szkoleniowego.",
     date: "Data",
     signature: "Podpis",
@@ -50,7 +61,10 @@ const certificateTranslations = {
     certificate: "CERTIFICATE",
     courseCompletion: "OF COURSE COMPLETION",
     certifyThat: "THIS IS TO CERTIFY THAT",
-    successfulCompletion: "has successfully completed the course",
+    successfulCompletion: {
+      [CERTIFICATE_KIND.COURSE]: "has successfully completed the course",
+      [CERTIFICATE_KIND.LEARNING_PATH]: "has successfully completed the learning path",
+    },
     confirmation: "thereby confirming participation in the full training program.",
     date: "Date",
     signature: "Signature",
@@ -59,7 +73,10 @@ const certificateTranslations = {
     certificate: "ZERTIFIKAT",
     courseCompletion: "KURSABSCHLUSS",
     certifyThat: "HIERMIT WIRD BESTÄTIGT, DASS",
-    successfulCompletion: "hat den Kurs erfolgreich abgeschlossen",
+    successfulCompletion: {
+      [CERTIFICATE_KIND.COURSE]: "hat den Kurs erfolgreich abgeschlossen",
+      [CERTIFICATE_KIND.LEARNING_PATH]: "hat den Lernpfad erfolgreich abgeschlossen",
+    },
     confirmation: "und bestätigt damit die Teilnahme am gesamten Schulungsprogramm.",
     date: "Datum",
     signature: "Unterschrift",
@@ -68,7 +85,10 @@ const certificateTranslations = {
     certificate: "SERTIFIKATAS",
     courseCompletion: "KURSO PABAIGOS",
     certifyThat: "ŠIUO PATVIRTINAMA, KAD",
-    successfulCompletion: "sėkmingai baigė kursą",
+    successfulCompletion: {
+      [CERTIFICATE_KIND.COURSE]: "sėkmingai baigė kursą",
+      [CERTIFICATE_KIND.LEARNING_PATH]: "sėkmingai baigė mokymosi kelią",
+    },
     confirmation: "taip patvirtindamas dalyvavimą visoje mokymo programoje.",
     date: "Data",
     signature: "Parašas",
@@ -77,7 +97,10 @@ const certificateTranslations = {
     certificate: "CERTIFIKÁT",
     courseCompletion: "UKONČENÍ KURZU",
     certifyThat: "TÍMTO SE POTVRZUJE, ŽE",
-    successfulCompletion: "úspěšně absolvoval/a kurz",
+    successfulCompletion: {
+      [CERTIFICATE_KIND.COURSE]: "úspěšně absolvoval/a kurz",
+      [CERTIFICATE_KIND.LEARNING_PATH]: "úspěšně dokončil/a vzdělávací cestu",
+    },
     confirmation: "čímž potvrzuje účast na celém školicím programu.",
     date: "Datum",
     signature: "Podpis",
@@ -95,6 +118,7 @@ export function buildCertificateMarkup(options: BuildCertificateMarkupOptions): 
     lang = "en",
     colorTheme = defaultCertificateRenderTheme,
     isDownload = false,
+    certificateKind = CERTIFICATE_KIND.COURSE,
   } = options;
 
   const t = certificateTranslations[lang];
@@ -143,7 +167,7 @@ export function buildCertificateMarkup(options: BuildCertificateMarkupOptions): 
         class="text-[18px] text-gray-600"
         style="color:${escapeHtml(colorTheme.bodyTextColor)};"
       >
-        ${escapeHtml(t.successfulCompletion)}
+        ${escapeHtml(t.successfulCompletion[certificateKind])}
       </p>
       <p
         class="text-[24px]"

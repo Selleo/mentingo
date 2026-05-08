@@ -42,7 +42,10 @@ export class LearningPathCourseSyncService {
 
     if (!courseLinks.length) {
       await Promise.all(
-        studentIds.map((studentId) => this.clearLearningPathEnrollment(learningPathId, studentId)),
+        studentIds.map(async (studentId) => {
+          await this.clearLearningPathEnrollment(learningPathId, studentId);
+          await this.recalculateStudentLearningPathProgress(learningPathId, studentId);
+        }),
       );
 
       return;
