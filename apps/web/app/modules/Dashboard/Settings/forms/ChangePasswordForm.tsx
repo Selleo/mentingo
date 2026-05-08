@@ -19,6 +19,7 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { cn } from "~/lib/utils";
 
+import { SETTINGS_PAGE_HANDLES } from "../../../../../e2e/data/settings/handles";
 import { passwordSchema } from "../schema/password.schema";
 
 import type { ChangePasswordBody } from "~/api/generated-api";
@@ -76,6 +77,7 @@ export default function ChangePasswordForm() {
             <Input
               id="oldPassword"
               type="password"
+              data-testid={SETTINGS_PAGE_HANDLES.PASSWORD_OLD}
               className={cn({
                 "border-red-500 focus:!ring-red-500": errors.oldPassword,
               })}
@@ -92,6 +94,7 @@ export default function ChangePasswordForm() {
               <Input
                 id="newPassword"
                 type="password"
+                data-testid={SETTINGS_PAGE_HANDLES.PASSWORD_NEW}
                 className={cn({
                   "border-red-500 focus:!ring-red-500": errors.newPassword,
                 })}
@@ -104,6 +107,7 @@ export default function ChangePasswordForm() {
               <Input
                 id="confirmPassword"
                 type="password"
+                data-testid={SETTINGS_PAGE_HANDLES.PASSWORD_CONFIRM}
                 className={cn({
                   "border-red-500 focus:!ring-red-500": errors.confirmPassword,
                 })}
@@ -119,7 +123,11 @@ export default function ChangePasswordForm() {
             </div>
           </CardContent>
           <CardFooter className="border-t px-6 py-4">
-            <Button disabled={!isValid} type="submit">
+            <Button
+              disabled={!isValid}
+              type="submit"
+              data-testid={SETTINGS_PAGE_HANDLES.PASSWORD_SAVE}
+            >
               {t("common.button.save")}
             </Button>
           </CardFooter>

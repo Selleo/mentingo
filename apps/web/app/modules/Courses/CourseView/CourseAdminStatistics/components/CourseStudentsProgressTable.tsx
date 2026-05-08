@@ -24,6 +24,8 @@ import { cn } from "~/lib/utils";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { tanstackSortingToParam } from "~/utils/tanstackSortingToParam";
 
+import { COURSE_STATISTICS_HANDLES } from "../../../../../../e2e/data/statistics/handles";
+
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import type { GetCourseStudentsProgressResponse } from "~/api/generated-api";
 import type { CourseStudentsProgressQueryParams } from "~/api/queries/admin/useCourseStudentsProgress";
@@ -230,6 +232,7 @@ export function CourseStudentsProgressTable({
 
   return (
     <div
+      data-testid={COURSE_STATISTICS_HANDLES.PROGRESS_TABLE}
       className={cn(
         "rounded-lg overflow-hidden border border-neutral-200 relative",
         isFetching && "shimmer-45",
@@ -251,6 +254,7 @@ export function CourseStudentsProgressTable({
           {table.getRowModel().rows.map((row) => (
             <TableRow
               key={row.id}
+              data-testid={COURSE_STATISTICS_HANDLES.progressRow(row.original.studentId)}
               data-course-id={row.original.studentId}
               data-state={row.getIsSelected() && "selected"}
               className="cursor-pointer hover:bg-neutral-100"

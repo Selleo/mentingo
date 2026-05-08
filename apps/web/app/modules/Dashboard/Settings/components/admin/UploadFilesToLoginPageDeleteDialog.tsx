@@ -11,6 +11,8 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 
+import { SETTINGS_PAGE_HANDLES } from "../../../../../../e2e/data/settings/handles";
+
 interface UploadFilesToLoginPageDeleteDialogProps {
   open: boolean;
   resourceId: string | null;
@@ -50,7 +52,13 @@ export const UploadFilesToLoginPageDeleteDialog = ({
           <Button type="button" variant="outline" onClick={onClose} disabled={isDeleting}>
             {t("common.button.cancel")}
           </Button>
-          <Button type="button" variant="destructive" onClick={handleConfirm} disabled={isDeleting}>
+          <Button
+            type="button"
+            variant="destructive"
+            onClick={handleConfirm}
+            disabled={isDeleting}
+            data-testid={SETTINGS_PAGE_HANDLES.LOGIN_PAGE_FILE_DELETE_CONFIRM}
+          >
             {isDeleting ? t("common.button.saving") : t("loginFilesUpload.deleteDialog.confirm")}
           </Button>
         </DialogFooter>

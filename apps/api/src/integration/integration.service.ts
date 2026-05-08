@@ -2,17 +2,25 @@ import { randomBytes, createHmac, timingSafeEqual } from "node:crypto";
 
 import {
   ForbiddenException,
+  Inject,
   Injectable,
   InternalServerErrorException,
   UnauthorizedException,
 } from "@nestjs/common";
 import { PERMISSIONS } from "@repo/shared";
 
+import { DatabasePg } from "src/common";
 import { PermissionsService } from "src/permissions/permissions.service";
+import { DB_ADMIN } from "src/storage/db/db.providers";
 
 import { IntegrationRepository } from "./integration.repository";
 
-import type { CurrentAdminKeyData, RotateAdminKeyData } from "./integration.types";
+import type {
+  CurrentAdminKeyData,
+  IntegrationTrainingResultsData,
+  IntegrationTrainingResultsQuery,
+  RotateAdminKeyData,
+} from "./integration.types";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
 @Injectable()
@@ -22,6 +30,7 @@ export class IntegrationService {
   constructor(
     private readonly integrationRepository: IntegrationRepository,
     private readonly permissionsService: PermissionsService,
+    @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
   ) {
     if (!process.env.MASTER_KEY) throw new Error("MASTER_KEY is required for integration API keys");
 
@@ -76,7 +85,10 @@ export class IntegrationService {
 
     if (key.userDeletedAt) throw new ForbiddenException("integrationApiKey.errors.ownerInactive");
 
-    const { roleSlugs, permissions } = await this.permissionsService.getUserAccess(key.userId);
+    const { roleSlugs, permissions } = await this.permissionsService.getUserAccess(
+      key.userId,
+      this.dbAdmin,
+    );
 
     if (!permissions.includes(PERMISSIONS.INTEGRATION_API_USE)) {
       throw new ForbiddenException("integrationApiKey.errors.ownerNotAdmin");
@@ -122,6 +134,13 @@ export class IntegrationService {
     }
 
     return this.integrationRepository.getAllTenants();
+  }
+
+  async getTrainingResults(
+    actor: CurrentUserType,
+    query: IntegrationTrainingResultsQuery,
+  ): Promise<IntegrationTrainingResultsData> {
+    return this.integrationRepository.getTrainingResults(actor.tenantId, query);
   }
 
   private buildRawApiKey() {

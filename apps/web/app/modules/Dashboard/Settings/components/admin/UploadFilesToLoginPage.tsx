@@ -14,6 +14,8 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 
+import { SETTINGS_PAGE_HANDLES } from "../../../../../../e2e/data/settings/handles";
+
 import { UploadFilesToLoginPageDeleteDialog } from "./UploadFilesToLoginPageDeleteDialog";
 import { UploadFilesToLoginPageDialog } from "./UploadFilesToLoginPageDialog";
 import { UploadFilesToLoginPageItem } from "./UploadFilesToLoginPageItem";
@@ -73,7 +75,7 @@ export const UploadFilesToLoginPage = () => {
   };
 
   return (
-    <Card id="default-course-currency">
+    <Card id="login-page-files" data-testid={SETTINGS_PAGE_HANDLES.LOGIN_PAGE_FILES_CARD}>
       <CardHeader>
         <CardTitle className="h5">{t("loginFilesUpload.header")}</CardTitle>
         <CardDescription className="body-lg-md flex items-center justify-between">
@@ -103,6 +105,7 @@ export const UploadFilesToLoginPage = () => {
           variant="outline"
           disabled={resources.length >= MAX_LOGIN_PAGE_DOCUMENTS}
           onClick={handleAddClick}
+          data-testid={SETTINGS_PAGE_HANDLES.LOGIN_PAGE_FILES_ADD}
         >
           {t("loginFilesUpload.addButton")}
         </Button>
@@ -112,6 +115,7 @@ export const UploadFilesToLoginPage = () => {
           className="sr-only"
           accept={LOGIN_PAGE_DOCUMENTS_FILE_TYPES.join(",")}
           onChange={handleFileChange}
+          data-testid={SETTINGS_PAGE_HANDLES.LOGIN_PAGE_FILES_INPUT}
         />
       </CardFooter>
       <UploadFilesToLoginPageDialog

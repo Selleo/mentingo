@@ -822,29 +822,7 @@ export class LearningPathRepository {
   async getCourseById(courseId: UUIDType, dbInstance: DatabasePg = this.db) {
     const [course] = await dbInstance
       .select({
-        id: courses.id,
-        title: courses.title,
-        description: courses.description,
-        thumbnailS3Key: courses.thumbnailS3Key,
-        status: courses.status,
-        hasCertificate: courses.hasCertificate,
-        priceInCents: courses.priceInCents,
-        currency: courses.currency,
-        chapterCount: courses.chapterCount,
-        isScorm: courses.isScorm,
-        authorId: courses.authorId,
-        categoryId: courses.categoryId,
-        stripeProductId: courses.stripeProductId,
-        stripePriceId: courses.stripePriceId,
-        settings: courses.settings,
-        baseLanguage: courses.baseLanguage,
-        availableLocales: courses.availableLocales,
-        originType: courses.originType,
-        sourceCourseId: courses.sourceCourseId,
-        sourceTenantId: courses.sourceTenantId,
-        tenantId: courses.tenantId,
-        createdAt: courses.createdAt,
-        updatedAt: courses.updatedAt,
+        ...getTableColumns(courses),
       })
       .from(courses)
       .where(eq(courses.id, courseId))

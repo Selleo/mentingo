@@ -86,8 +86,12 @@ export class AdminLessonRepository {
       .where(and(inArray(lessons.id, lessonIds), eq(lessons.type, LESSON_TYPES.CONTENT)));
   }
 
-  async createLessonForChapter(data: CreateLessonBody, language: SupportedLanguages) {
-    const [lesson] = await this.db
+  async createLessonForChapter(
+    data: CreateLessonBody,
+    language: SupportedLanguages,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    const [lesson] = await dbInstance
       .insert(lessons)
       .values({
         ...data,
@@ -368,8 +372,8 @@ export class AdminLessonRepository {
       .returning();
   }
 
-  async getMaxDisplayOrder(chapterId: UUIDType) {
-    const [result] = await this.db
+  async getMaxDisplayOrder(chapterId: UUIDType, dbInstance: DatabasePg = this.db) {
+    const [result] = await dbInstance
       .select({
         maxOrder: sql<number>`COALESCE(max(${lessons.displayOrder}), 0)`,
       })
@@ -701,8 +705,12 @@ export class AdminLessonRepository {
       .where(eq(aiMentorLessons.lessonId, lessonId));
   }
 
-  async linkResourcesToLesson(lessonId: UUIDType, resourceIds: UUIDType[]) {
-    return this.db.insert(resourceEntity).values(
+  async linkResourcesToLesson(
+    lessonId: UUIDType,
+    resourceIds: UUIDType[],
+    dbInstance: DatabasePg = this.db,
+  ) {
+    return dbInstance.insert(resourceEntity).values(
       resourceIds.map((resourceId) => ({
         resourceId,
         entityType: ENTITY_TYPE.LESSON,

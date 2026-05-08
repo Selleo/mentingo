@@ -19,6 +19,8 @@ import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
 import { cn } from "~/lib/utils";
 
+import { SETTINGS_PAGE_HANDLES } from "../../../../../../../e2e/data/settings/handles";
+
 import type { RegistrationFormValues } from "./registrationFormBuilder.utils";
 import type { DraggableAttributes, DraggableSyntheticListeners } from "@dnd-kit/core";
 import type { SupportedLanguages } from "@repo/shared";
@@ -86,6 +88,7 @@ export function RegistrationFormBuilderField({
           variant="outline"
           disabled={isArchiving}
           onClick={() => onDelete(index)}
+          data-testid={SETTINGS_PAGE_HANDLES.registrationFormFieldDelete(index)}
         >
           <Trash2 className="mr-2 size-4" />
           {t("common.button.delete")}
@@ -100,6 +103,7 @@ export function RegistrationFormBuilderField({
           variant="outline"
           disabled={isArchiving}
           onClick={() => onRestore(index)}
+          data-testid={SETTINGS_PAGE_HANDLES.registrationFormFieldRestore(index)}
         >
           <RotateCcw className="mr-2 size-4" />
           {t("registrationFormBuilder.field.restore")}
@@ -113,6 +117,7 @@ export function RegistrationFormBuilderField({
         variant="outline"
         disabled={isArchiving}
         onClick={() => onArchive(index)}
+        data-testid={SETTINGS_PAGE_HANDLES.registrationFormFieldArchive(index)}
       >
         <Archive className="mr-2 size-4" />
         {t("registrationFormBuilder.field.archive")}
@@ -126,6 +131,7 @@ export function RegistrationFormBuilderField({
         "space-y-4 rounded-xl border bg-background p-4 transition-colors",
         hasFieldError ? "border-red-500" : "border-border",
       )}
+      data-testid={SETTINGS_PAGE_HANDLES.registrationFormField(index)}
     >
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div className="flex items-center gap-3">
@@ -154,6 +160,7 @@ export function RegistrationFormBuilderField({
             variant="outline"
             disabled={isArchiving || isArchived}
             onClick={() => setIsEditDialogOpen(true)}
+            data-testid={SETTINGS_PAGE_HANDLES.registrationFormFieldEdit(index)}
           >
             <Pencil className="mr-2 size-4" />
             {t("common.button.edit")}
@@ -163,7 +170,10 @@ export function RegistrationFormBuilderField({
       </div>
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-5xl border-neutral-200 bg-gradient-to-b from-background to-muted/10 p-0">
+        <DialogContent
+          className="max-w-5xl border-neutral-200 bg-gradient-to-b from-background to-muted/10 p-0"
+          data-testid={SETTINGS_PAGE_HANDLES.registrationFormFieldDialog(index)}
+        >
           <DialogHeader className="border-b border-border px-6 pb-4 pt-6">
             <DialogTitle className="h5 text-neutral-900">{headingLabel}</DialogTitle>
             <DialogDescription className="body-sm text-muted-foreground">
@@ -185,7 +195,11 @@ export function RegistrationFormBuilderField({
                 control={control}
                 name={`fields.${index}.required`}
                 render={({ field }) => (
-                  <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    data-testid={SETTINGS_PAGE_HANDLES.registrationFormFieldRequired(index)}
+                  />
                 )}
               />
             </div>
@@ -210,16 +224,31 @@ export function RegistrationFormBuilderField({
                         enableLinkClick
                         onChange={field.onChange}
                         placeholder={t("registrationFormBuilder.field.labelPlaceholder")}
+                        editorTestId={SETTINGS_PAGE_HANDLES.registrationFormFieldLabel(
+                          index,
+                          language,
+                        )}
                       />
                     )}
                   />
-                  <FormValidationError message={getLabelErrorMessage(language)} />
+                  <div
+                    data-testid={SETTINGS_PAGE_HANDLES.registrationFormFieldLabelError(
+                      index,
+                      language,
+                    )}
+                  >
+                    <FormValidationError message={getLabelErrorMessage(language)} />
+                  </div>
                 </div>
               ))}
             </div>
 
             <div className="flex justify-end">
-              <Button type="button" onClick={() => setIsEditDialogOpen(false)}>
+              <Button
+                type="button"
+                onClick={() => setIsEditDialogOpen(false)}
+                data-testid={SETTINGS_PAGE_HANDLES.registrationFormFieldClose(index)}
+              >
                 {t("common.button.close")}
               </Button>
             </div>

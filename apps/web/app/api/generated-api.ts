@@ -1372,6 +1372,7 @@ export interface GetAllCoursesResponse {
     priceInCents: number;
     currency: string;
     status?: "draft" | "published" | "private";
+    courseType?: "default" | "scorm";
     createdAt?: string;
     hasFreeChapters?: boolean;
     stripeProductId?: string | null;
@@ -1411,6 +1412,7 @@ export interface GetStudentCoursesResponse {
     priceInCents: number;
     currency: string;
     status?: "draft" | "published" | "private";
+    courseType?: "default" | "scorm";
     createdAt?: string;
     hasFreeChapters?: boolean;
     stripeProductId?: string | null;
@@ -1478,6 +1480,7 @@ export interface GetAvailableCoursesResponse {
     priceInCents: number;
     currency: string;
     status?: "draft" | "published" | "private";
+    courseType?: "default" | "scorm";
     createdAt?: string;
     hasFreeChapters?: boolean;
     stripeProductId?: string | null;
@@ -1521,6 +1524,7 @@ export interface GetTopCoursesResponse {
     priceInCents: number;
     currency: string;
     status?: "draft" | "published" | "private";
+    courseType?: "default" | "scorm";
     createdAt?: string;
     hasFreeChapters?: boolean;
     stripeProductId?: string | null;
@@ -1558,6 +1562,7 @@ export interface GetContentCreatorCoursesResponse {
     priceInCents: number;
     currency: string;
     status?: "draft" | "published" | "private";
+    courseType?: "default" | "scorm";
     createdAt?: string;
     hasFreeChapters?: boolean;
     stripeProductId?: string | null;
@@ -1590,7 +1595,7 @@ export interface GetCourseResponse {
         /** @format uuid */
         id: string;
         title: string;
-        type: "content" | "quiz" | "ai_mentor" | "embed";
+        type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm";
         displayOrder: number;
         status: "not_started" | "in_progress" | "completed" | "blocked";
         quizQuestionCount: number | null;
@@ -1630,7 +1635,7 @@ export interface GetCourseResponse {
     isContentReadonly: boolean;
     sourceCourseId: string | null;
     sourceTenantId: string | null;
-    isScorm?: boolean;
+    courseType: "default" | "scorm";
     priceInCents: number;
     thumbnailUrl?: string;
     trailerUrl?: string | null;
@@ -1668,7 +1673,7 @@ export interface GetBetaCourseByIdResponse {
         /** @format uuid */
         id: string;
         title: string;
-        type: "content" | "quiz" | "ai_mentor" | "embed";
+        type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm";
         description?: string | null;
         displayOrder: number;
         fileS3Key?: string | null;
@@ -1751,7 +1756,7 @@ export interface GetBetaCourseByIdResponse {
     isContentReadonly: boolean;
     sourceCourseId: string | null;
     sourceTenantId: string | null;
-    isScorm?: boolean;
+    courseType: "default" | "scorm";
     priceInCents: number;
     thumbnailUrl?: string;
     thumbnailS3Key?: string;
@@ -2189,7 +2194,7 @@ export interface GetLessonsResponse {
     /** @format uuid */
     id: string;
     title: string;
-    type: "content" | "quiz" | "ai_mentor" | "embed";
+    type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm";
     description: string | null;
     displayOrder: number;
     lessonCompleted?: boolean;
@@ -2209,7 +2214,7 @@ export interface GetLessonByIdResponse {
     /** @format uuid */
     id: string;
     title: string;
-    type: "content" | "quiz" | "ai_mentor" | "embed";
+    type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm";
     description: string | null;
     fileType: string | null;
     fileUrl: string | null;
@@ -2299,7 +2304,7 @@ export interface GetLessonByIdResponse {
 
 export type BetaCreateLessonBody = {
   title: string;
-  type: "content" | "quiz" | "ai_mentor" | "embed";
+  type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm";
   description?: string | null;
   fileS3Key?: string | null;
   avatarReferenceUrl?: string;
@@ -2661,7 +2666,7 @@ export interface BetaUpdateQuizLessonResponse {
 
 export type BetaUpdateLessonBody = ({
   title?: string;
-  type?: "content" | "quiz" | "ai_mentor" | "embed";
+  type?: "content" | "quiz" | "ai_mentor" | "embed" | "scorm";
   description?: string | null;
   fileS3Key?: string | null;
   avatarReferenceUrl?: string;
@@ -2784,7 +2789,7 @@ export interface DeleteStudentQuizAnswersResponse {
 
 export interface CreateEmbedLessonBody {
   title: string;
-  type: "content" | "quiz" | "ai_mentor" | "embed";
+  type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm";
   /** @format uuid */
   chapterId: string;
   resources: {
@@ -2803,7 +2808,7 @@ export interface CreateEmbedLessonResponse {
 
 export interface UpdateEmbedLessonBody {
   title: string;
-  type: "content" | "quiz" | "ai_mentor" | "embed";
+  type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm";
   resources: {
     /** @format uuid */
     id?: string;
@@ -2958,7 +2963,7 @@ export interface GetChapterWithLessonResponse {
       /** @format uuid */
       id: string;
       title: string;
-      type: "content" | "quiz" | "ai_mentor" | "embed";
+      type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm";
       displayOrder: number;
       status: "not_started" | "in_progress" | "completed" | "blocked";
       quizQuestionCount: number | null;
@@ -2992,7 +2997,7 @@ export type BetaCreateChapterBody = {
     /** @format uuid */
     id: string;
     title: string;
-    type: "content" | "quiz" | "ai_mentor" | "embed";
+    type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm";
     description?: string | null;
     displayOrder: number;
     fileS3Key?: string | null;
@@ -3077,7 +3082,7 @@ export type UpdateChapterBody = ({
     /** @format uuid */
     id: string;
     title: string;
-    type: "content" | "quiz" | "ai_mentor" | "embed";
+    type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm";
     description?: string | null;
     displayOrder: number;
     fileS3Key?: string | null;
@@ -3331,6 +3336,15 @@ export interface UpdatePromotionCodeResponse {
     };
     timesRedeemed: number;
   };
+}
+
+export interface PrepareAiMentorStatisticsProgressBody {
+  /** @format uuid */
+  lessonId: string;
+  /** @format uuid */
+  studentId: string;
+  /** @default "en" */
+  language?: "en" | "pl" | "de" | "lt" | "cs";
 }
 
 export interface GetAllCategoriesResponse {
@@ -3769,38 +3783,89 @@ export interface GetLearningPathJobStatusResponse {
   };
 }
 
-export interface UploadScormPackageResponse {
-  data: {
-    message: string;
-    metadata: {
-      /** @format uuid */
-      id: string;
-      createdAt: string;
-      updatedAt: string;
-      /** @format uuid */
-      courseId: string;
-      /** @format uuid */
-      fileId: string;
-      version: string;
-      entryPoint: string;
-      s3Key: string;
-    };
-  };
-}
-
-export interface GetScormMetadataResponse {
+export interface CreateScormCourseResponse {
   data: {
     /** @format uuid */
     id: string;
-    createdAt: string;
-    updatedAt: string;
+    message: string;
+  };
+}
+
+export interface CreateScormLessonResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    message: string;
+  };
+}
+
+export interface LaunchScormAttemptResponse {
+  data: {
+    /** @format uuid */
+    attemptId: string;
+    /** @format uuid */
+    packageId: string;
+    /** @format uuid */
+    scoId: string;
+    /** @format uuid */
+    lessonId: string;
     /** @format uuid */
     courseId: string;
-    /** @format uuid */
-    fileId: string;
-    version: string;
-    entryPoint: string;
-    s3Key: string;
+    launchUrl: string;
+    scoTitle: string;
+    navigation: {
+      previousScoId: string | null;
+      nextScoId: string | null;
+    };
+    runtime: object;
+  };
+}
+
+export interface CommitScormAttemptBody {
+  /** @format uuid */
+  attemptId: string;
+  /** @format uuid */
+  packageId: string;
+  /** @format uuid */
+  scoId: string;
+  /** @format uuid */
+  lessonId: string;
+  /** @format uuid */
+  courseId: string;
+  values: object;
+  language?: "en" | "pl" | "de" | "lt" | "cs";
+}
+
+export interface CommitScormAttemptResponse {
+  data: {
+    committed: boolean;
+    lessonCompleted: boolean;
+    scormStatus: string | null;
+    nextScoId: string | null;
+  };
+}
+
+export interface FinishScormAttemptBody {
+  /** @format uuid */
+  attemptId: string;
+  /** @format uuid */
+  packageId: string;
+  /** @format uuid */
+  scoId: string;
+  /** @format uuid */
+  lessonId: string;
+  /** @format uuid */
+  courseId: string;
+  values: object;
+  language?: "en" | "pl" | "de" | "lt" | "cs";
+}
+
+export interface FinishScormAttemptResponse {
+  data: {
+    finished: boolean;
+    lessonCompleted: boolean;
+    scormStatus: string | null;
+    nextScoId: string | null;
   };
 }
 
@@ -3896,6 +3961,59 @@ export interface GetTenantsResponse {
     name: string;
     host: string;
   }[];
+}
+
+export interface GetTrainingResultsResponse {
+  data: {
+    scope: "tenant" | "student" | "course";
+    /** @format uuid */
+    tenantId: string;
+    student: {
+      /** @format uuid */
+      id: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      fullName: string;
+    };
+    courses: {
+      /** @format uuid */
+      id: string;
+      title: string;
+      lessons: {
+        /** @format uuid */
+        lessonId: string;
+        /** @format uuid */
+        chapterId: string;
+        title: string;
+        type: string;
+        completed: boolean;
+        completedAt: string | null;
+      }[];
+      quizzes: {
+        /** @format uuid */
+        lessonId: string;
+        /** @format uuid */
+        chapterId: string;
+        title: string;
+        score: number | null;
+        passed: boolean | null;
+        attempts: number | null;
+        completedAt: string | null;
+      }[];
+      certificate: {
+        enabled: boolean;
+        status: "issued" | "not_issued" | "not_applicable";
+        issuedAt: string | null;
+      };
+    }[];
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
 }
 
 export interface DeleteUserResponse {
@@ -8652,6 +8770,24 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name TestConfigControllerPrepareAiMentorStatisticsProgress
+     * @request POST:/api/test-config/ai-mentor-statistics-progress
+     */
+    testConfigControllerPrepareAiMentorStatisticsProgress: (
+      data: PrepareAiMentorStatisticsProgressBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/test-config/ai-mentor-statistics-progress`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name CategoryControllerGetAllCategories
      * @request GET:/api/category
      */
@@ -9266,25 +9402,31 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name ScormControllerUploadScormPackage
-     * @request POST:/api/scorm/upload
+     * @name ScormControllerCreateScormCourse
+     * @request POST:/api/scorm/course
      */
-    scormControllerUploadScormPackage: (
-      query: {
-        courseId: string;
-      },
+    scormControllerCreateScormCourse: (
       data: {
+        title: string;
+        description: string;
+        /** @format uuid */
+        categoryId: string;
+        language: string;
+        status?: "draft" | "published" | "private";
+        thumbnailS3Key?: string;
+        priceInCents?: number;
+        currency?: string;
+        hasCertificate?: boolean;
         /** @format binary */
-        file?: File;
-        /** Optional resource type */
-        resource?: string;
+        scormPackage: File;
+        /** @format binary */
+        thumbnail?: File;
       },
       params: RequestParams = {},
     ) =>
-      this.request<UploadScormPackageResponse, any>({
-        path: `/api/scorm/upload`,
+      this.request<CreateScormCourseResponse, any>({
+        path: `/api/scorm/course`,
         method: "POST",
-        query: query,
         body: data,
         type: ContentType.FormData,
         format: "json",
@@ -9294,34 +9436,93 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name ScormControllerServeScormContent
-     * @request GET:/api/scorm/{courseId}/content
+     * @name ScormControllerCreateScormLesson
+     * @request POST:/api/scorm/lesson
      */
-    scormControllerServeScormContent: (
-      courseId: string,
-      query: {
-        path: string;
+    scormControllerCreateScormLesson: (
+      data: {
+        /** @format uuid */
+        chapterId: string;
+        title: string;
+        /** @format binary */
+        scormPackage: File;
       },
       params: RequestParams = {},
     ) =>
-      this.request<void, any>({
-        path: `/api/scorm/${courseId}/content`,
-        method: "GET",
-        query: query,
+      this.request<CreateScormLessonResponse, any>({
+        path: `/api/scorm/lesson`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
+        format: "json",
         ...params,
       }),
 
     /**
      * No description
      *
-     * @name ScormControllerGetScormMetadata
-     * @request GET:/api/scorm/{courseId}/metadata
+     * @name ScormControllerLaunchScormAttempt
+     * @request GET:/api/scorm/runtime/launch
      */
-    scormControllerGetScormMetadata: (courseId: string, params: RequestParams = {}) =>
-      this.request<GetScormMetadataResponse, any>({
-        path: `/api/scorm/${courseId}/metadata`,
+    scormControllerLaunchScormAttempt: (
+      query?: {
+        /** @format uuid */
+        lessonId?: string;
+        /** @format uuid */
+        scoId?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<LaunchScormAttemptResponse, any>({
+        path: `/api/scorm/runtime/launch`,
         method: "GET",
+        query: query,
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ScormControllerCommitScormAttempt
+     * @request POST:/api/scorm/runtime/commit
+     */
+    scormControllerCommitScormAttempt: (data: CommitScormAttemptBody, params: RequestParams = {}) =>
+      this.request<CommitScormAttemptResponse, any>({
+        path: `/api/scorm/runtime/commit`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ScormControllerFinishScormAttempt
+     * @request POST:/api/scorm/runtime/finish
+     */
+    scormControllerFinishScormAttempt: (data: FinishScormAttemptBody, params: RequestParams = {}) =>
+      this.request<FinishScormAttemptResponse, any>({
+        path: `/api/scorm/runtime/finish`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ScormControllerStreamScormContent
+     * @request GET:/api/scorm/content/{packageId}/*
+     */
+    scormControllerStreamScormContent: (packageId: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/scorm/content/${packageId}/*`,
+        method: "GET",
         ...params,
       }),
 
@@ -9493,6 +9694,35 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "POST",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Returns training results in JSON for the tenant selected by X-Tenant-Id. Each response row represents one student-course pair. Use scope=tenant to list all rows for the tenant, scope=student to list rows for a specific student (studentId required), and scope=course to list rows for a specific course (courseId required). Optional extra filter can further narrow results.
+     *
+     * @tags Integration
+     * @name IntegrationControllerGetTrainingResults
+     * @summary Get training results for integration reporting
+     * @request GET:/api/integration/training-results
+     */
+    integrationControllerGetTrainingResults: (
+      query: {
+        scope: "tenant" | "student" | "course";
+        /** @format uuid */
+        studentId?: string;
+        /** @format uuid */
+        courseId?: string;
+        /** @min 1 */
+        page?: number;
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetTrainingResultsResponse, void>({
+        path: `/api/integration/training-results`,
+        method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),

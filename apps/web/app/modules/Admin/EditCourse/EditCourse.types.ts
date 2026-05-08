@@ -75,6 +75,7 @@ export const ContentTypes = {
   QUIZ_FORM: "QUIZ_FORM",
   AI_MENTOR_FORM: "AI_MENTOR_FORM",
   EMBED_FORM: "EMBED_FORM",
+  SCORM_LESSON_FORM: "SCORM_LESSON_FORM",
 };
 
 export type LessonIcons = "Content" | "Quiz" | "AiMentor" | "Embed";
@@ -84,6 +85,7 @@ export const LessonType = {
   QUIZ: "quiz",
   AI_MENTOR: "ai_mentor",
   EMBED: "embed",
+  SCORM: "scorm",
 } as const;
 
 export type LessonType = (typeof LessonType)[keyof typeof LessonType];

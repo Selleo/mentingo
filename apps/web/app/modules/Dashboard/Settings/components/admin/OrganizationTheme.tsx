@@ -18,6 +18,8 @@ import {
 import { Input } from "~/components/ui/input";
 import { useTheme } from "~/modules/Theme";
 
+import { SETTINGS_PAGE_HANDLES } from "../../../../../../e2e/data/settings/handles";
+
 export const OrganizationTheme = () => {
   const { t } = useTranslation();
 
@@ -35,7 +37,7 @@ export const OrganizationTheme = () => {
   });
 
   return (
-    <Card>
+    <Card data-testid={SETTINGS_PAGE_HANDLES.THEME_CARD}>
       <CardHeader>
         <CardTitle className="h5">{t("organizationTheme.title")}</CardTitle>
         <CardDescription className="body-lg-md">
@@ -65,6 +67,7 @@ export const OrganizationTheme = () => {
                   }
                 }}
                 className="w-24"
+                data-testid={SETTINGS_PAGE_HANDLES.THEME_PRIMARY_INPUT}
               />
             </div>
           </div>
@@ -89,6 +92,7 @@ export const OrganizationTheme = () => {
                   }
                 }}
                 className="w-24"
+                data-testid={SETTINGS_PAGE_HANDLES.THEME_CONTRAST_INPUT}
               />
             </div>
           </div>
@@ -96,7 +100,7 @@ export const OrganizationTheme = () => {
       </CardContent>
       <CardFooter className="flex gap-4 border-t py-4">
         <Button
-          data-testid="save-theme-colors"
+          data-testid={SETTINGS_PAGE_HANDLES.THEME_SAVE}
           disabled={disableSubmit}
           onClick={() => {
             updateColorSchema(
@@ -120,6 +124,7 @@ export const OrganizationTheme = () => {
         <Button
           variant="outline"
           disabled={disableSubmit}
+          data-testid={SETTINGS_PAGE_HANDLES.THEME_CANCEL}
           onClick={() => {
             setColorSchema(currentPrimaryColor.current, currentContrastColor.current);
           }}

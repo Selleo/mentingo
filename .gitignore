@@ -47,3 +47,5 @@ yarn-error.log*
 .vscode
 .cursor
 .gitnexus
+
+.pnpm-store

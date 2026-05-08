@@ -10,7 +10,12 @@ import {
 } from "~/components/ui/breadcrumb";
 import { Button } from "~/components/ui/button";
 
-const Breadcrumb = () => {
+type BreadcrumbProps = {
+  backTo?: string;
+  currentLabel?: string;
+};
+
+const Breadcrumb = ({ backTo = "/admin/courses", currentLabel }: BreadcrumbProps) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -18,11 +23,7 @@ const Breadcrumb = () => {
     <BreadcrumbList>
       <BreadcrumbItem>
         <BreadcrumbLink className="body-base-md cursor-pointer text-primary-800">
-          <Button
-            variant="outline"
-            onClick={() => navigate("/admin/courses")}
-            className="mr-2 w-min"
-          >
+          <Button variant="outline" onClick={() => navigate(backTo)} className="mr-2 w-min">
             <Icon name="ArrowLeft" className="mr-2 size-3" />
             {t("adminCourseView.settings.breadcrumbs.back")}
           </Button>
@@ -37,6 +38,12 @@ const Breadcrumb = () => {
       <BreadcrumbItem className="body-base-md text-neutral-950">
         {t("adminCourseView.settings.breadcrumbs.createNew")}
       </BreadcrumbItem>
+      {currentLabel ? (
+        <>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem className="body-base-md text-neutral-950">{currentLabel}</BreadcrumbItem>
+        </>
+      ) : null}
     </BreadcrumbList>
   );
 };

@@ -1,4 +1,5 @@
 import { faker } from "@faker-js/faker";
+import { COURSE_TYPE } from "@repo/shared";
 import { Factory } from "fishery";
 
 import {
@@ -64,7 +65,7 @@ const ensureCourse = async (db: DatabasePg, courseId?: UUIDType | null): Promise
       priceInCents: faker.number.int({ min: 1000, max: 100000 }),
       currency: "usd",
       chapterCount: 1,
-      isScorm: false,
+      courseType: COURSE_TYPE.DEFAULT,
       authorId,
       categoryId,
       createdAt: new Date().toISOString(),

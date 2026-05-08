@@ -77,6 +77,7 @@ const AdminGuard = ({ children }: PropsWithChildren) => {
 export const shouldHideTopbarAndSidebar = (pathname: string) =>
   match(pathname)
     .with("/admin/beta-courses/new", () => true)
+    .with("/admin/beta-courses/new/standard", () => true)
     .with("/admin/courses/new-scorm", () => true)
     .otherwise(() => false);
 

@@ -775,15 +775,22 @@
     {
       "idx": 110,
       "version": "7",
-      "when": 1778239215860,
-      "tag": "0110_add_learning_path_schema",
+      "when": 1777884464530,
+      "tag": "0110_drop_scorm_foreign_keys",
       "breakpoints": true
     },
     {
       "idx": 111,
       "version": "7",
-      "when": 1778239243161,
-      "tag": "0111_enable_tenant_rls_for_learning_paths_related_tables",
+      "when": 1778270538981,
+      "tag": "0111_add_learning_path_and_scorm_schema",
+      "breakpoints": true
+    },
+    {
+      "idx": 112,
+      "version": "7",
+      "when": 1778270600293,
+      "tag": "0112_enable_tenant_rls_for_learning_paths_related_tables",
       "breakpoints": true
     }
   ]

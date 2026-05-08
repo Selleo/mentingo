@@ -19,6 +19,8 @@ import { LearningModeBanner } from "~/modules/Courses/Lesson/LearningModeBanner"
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { isSupportedLanguage } from "~/utils/browser-language";
 
+import { COURSE_STATISTICS_HANDLES } from "../../../../e2e/data/statistics/handles";
+
 import { ChapterListOverview } from "./components/ChapterListOverview";
 import { CourseAdminStatistics } from "./CourseAdminStatistics/CourseAdminStatistics";
 import CourseCertificate from "./CourseCertificate";
@@ -100,6 +102,7 @@ export default function CourseViewPage() {
   const courseViewTabs = useMemo(
     () => [
       {
+        key: "chapters",
         title: t("studentCourseView.tabs.chapters"),
         itemCount: course?.chapters?.length,
         content: <ChapterListOverview />,
@@ -107,6 +110,7 @@ export default function CourseViewPage() {
         isForUnregistered: true,
       },
       {
+        key: "moreFromAuthor",
         title: t("studentCourseView.tabs.moreFromAuthor"),
         content: (
           <div className="flex flex-col gap-6">
@@ -118,6 +122,7 @@ export default function CourseViewPage() {
         isForUnregistered: false,
       },
       {
+        key: "statistics",
         title: t("studentCourseView.tabs.statistics"),
         content: <CourseAdminStatistics course={course} />,
         isForAdminLike: true,
@@ -157,13 +162,18 @@ export default function CourseViewPage() {
               <Tabs defaultValue={courseViewTabs[0].title} className="w-full">
                 <TabsList className="bg-card w-full justify-start gap-4 p-0 overflow-hidden">
                   {courseViewTabs.map((tab) => {
-                    const { title, isForAdminLike, isForUnregistered } = tab;
+                    const { key, title, isForAdminLike, isForUnregistered } = tab;
 
                     if (!canView(isForAdminLike, isForUnregistered)) return null;
 
                     return (
                       <TabsTrigger
                         key={title}
+                        data-testid={
+                          key === "statistics"
+                            ? COURSE_STATISTICS_HANDLES.COURSE_VIEW_STATISTICS_TAB
+                            : undefined
+                        }
                         value={title}
                         className="flex h-full rounded-none items-center gap-1.5 data-[state=active]:shadow-none text-neutral-900 data-[state=active]:text-primary-700 data-[state=active]:border-b-2 data-[state=active]:border-b-primary-700"
                       >

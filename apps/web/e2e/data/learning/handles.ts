@@ -11,10 +11,10 @@ export const LEARNING_HANDLES = {
   QUIZ_RETAKE_BUTTON: "learning-quiz-retake-button",
   AI_MENTOR_TASK_DESCRIPTION: "learning-ai-mentor-task-description",
   AI_MENTOR_MESSAGES: "learning-ai-mentor-messages",
+  AI_MENTOR_MESSAGE: "learning-ai-mentor-message",
   AI_MENTOR_MESSAGE_INPUT: "learning-ai-mentor-message-input",
   AI_MENTOR_MESSAGE_ACTION_BUTTON: "learning-ai-mentor-message-action-button",
   AI_MENTOR_MIC_BUTTON: "learning-ai-mentor-mic-button",
-  AI_MENTOR_MESSAGE: "learning-ai-mentor-message",
   aiMentorMessage: (messageId: string) => `learning-ai-mentor-message-${messageId}`,
   aiMentorMessageRole: (role: "assistant" | "user" | "data" | "system") =>
     `learning-ai-mentor-message-${role}`,
@@ -29,4 +29,12 @@ export const LEARNING_HANDLES = {
   lessonSidebarLessonItem: (lessonId: string) => `learning-lesson-sidebar-item-${lessonId}`,
   lessonSidebarBlockedIndicator: (lessonId: string) =>
     `learning-lesson-sidebar-blocked-indicator-${lessonId}`,
+  SCORM_ROOT: "learning-scorm-root",
+  SCORM_NAVIGATION: "learning-scorm-navigation",
+  SCORM_PREVIOUS_SECTION_BUTTON: "learning-scorm-previous-section-button",
+  SCORM_NEXT_SECTION_BUTTON: "learning-scorm-next-section-button",
+  SCORM_FULLSCREEN_BUTTON: "learning-scorm-fullscreen-button",
+  SCORM_IFRAME: "learning-scorm-iframe",
+  SCORM_LAUNCH_FAILED_DIALOG: "learning-scorm-launch-failed-dialog",
+  SCORM_LAUNCH_RETRY_BUTTON: "learning-scorm-launch-retry-button",
 } as const;

@@ -18,6 +18,7 @@ export * from "./constants/newsSettings";
 export * from "./constants/permissions";
 export * from "./constants/qaSettings";
 export * from "./constants/registrationForm";
+export * from "./constants/scorm";
 export * from "./constants/sessionRevocation";
 export * from "./constants/supportMode";
 export * from "./constants/tenant";
