@@ -67,7 +67,9 @@ export function LearningPathEnrollmentTable({
                 disabled={isPending}
               />
             </TableCell>
-            <TableCell>{formatHtmlString(user.name)}</TableCell>
+            <TableCell>
+              {formatHtmlString(user.name ?? `${user.firstName} ${user.lastName}`)}
+            </TableCell>
             <TableCell>{formatHtmlString(user.email)}</TableCell>
             <TableCell>
               <div className="flex flex-wrap gap-1">
