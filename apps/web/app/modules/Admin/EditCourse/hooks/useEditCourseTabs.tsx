@@ -26,8 +26,13 @@ export const useEditCourseTabs = ({
   const { data: isStripeConfigured } = useStripeConfigured();
 
   const { hasAccess: canManageUsers } = usePermissions({ required: PERMISSIONS.USER_MANAGE });
+  const { hasAccess: canManageCourses } = usePermissions({
+    required: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
+  });
   const { data: currentUser } = useCurrentUserSuspense();
-  const isManagingTenantAdmin = Boolean(currentUser?.isManagingTenantAdmin);
+  const canShowTenantSharing = Boolean(
+    currentUser?.isManagingTenantAdmin && !currentUser?.isSupportMode,
+  );
 
   const baseTabs = useMemo(() => {
     const canEditCurriculum = isCourseFeatureEnabledForCourseType(
@@ -55,17 +60,22 @@ export const useEditCourseTabs = ({
   const adminTabs = useMemo(
     () => [
       { label: t("adminCourseView.common.enrolledStudents"), value: EDIT_COURSE_TABS.ENROLLED },
-      ...(isManagingTenantAdmin
+    ],
+    [t],
+  );
+
+  const exportTabs = useMemo(
+    () =>
+      canManageCourses || canShowTenantSharing
         ? [
             {
               label: t("adminCourseView.sharedCourse.exportsTitle"),
               value: EDIT_COURSE_TABS.EXPORTS,
             },
           ]
-        : []),
-    ],
-    [isManagingTenantAdmin, t],
+        : [],
+    [canManageCourses, canShowTenantSharing, t],
   );
 
-  return canManageUsers ? [...baseTabs, ...adminTabs] : baseTabs;
+  return [...baseTabs, ...(canManageUsers ? adminTabs : []), ...exportTabs];
 };

@@ -123,6 +123,26 @@ export class FileService {
     }
   }
 
+  async getRawFileBuffer(fileKey: string): Promise<Buffer | null> {
+    if (!fileKey) return null;
+
+    try {
+      if (fileKey.startsWith("https://") || fileKey.startsWith("http://")) {
+        const response = await fetch(fileKey);
+
+        if (!response.ok) {
+          throw new Error(`Failed to download remote file: ${response.status}`);
+        }
+
+        return Buffer.from(await response.arrayBuffer());
+      }
+
+      return await this.s3Service.getFileBuffer(fileKey);
+    } catch {
+      return null;
+    }
+  }
+
   async uploadFile(file: Express.Multer.File, resource: string, tenantId?: UUIDType) {
     if (file.size === 0) {
       throw new BadRequestException("File upload failed - empty file");
@@ -380,6 +400,10 @@ export class FileService {
     } catch (error) {
       throw new BadRequestException("Failed to retrieve file");
     }
+  }
+
+  async listFileReferencesByPrefix(prefix: string) {
+    return this.s3Service.listFileKeysByPrefix(prefix);
   }
 
   async getFileDelivery(fileKey: string, range?: string): Promise<FileDeliveryResult> {

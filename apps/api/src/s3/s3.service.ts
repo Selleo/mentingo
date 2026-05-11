@@ -7,6 +7,7 @@ import {
   UploadPartCommand,
   CompleteMultipartUploadCommand,
   HeadObjectCommand,
+  ListObjectsV2Command,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Injectable } from "@nestjs/common";
@@ -225,6 +226,25 @@ export class S3Service {
       lastModified: response.LastModified,
       statusCode: response.$metadata.httpStatusCode,
     };
+  }
+
+  async listFileKeysByPrefix(prefix: string): Promise<string[]> {
+    const keys: string[] = [];
+    let continuationToken: string | undefined;
+
+    do {
+      const command = new ListObjectsV2Command({
+        Bucket: this.bucketName,
+        Prefix: prefix,
+        ContinuationToken: continuationToken,
+      });
+
+      const response = await this.s3Client.send(command);
+      keys.push(...(response.Contents ?? []).flatMap((object) => (object.Key ? [object.Key] : [])));
+      continuationToken = response.NextContinuationToken;
+    } while (continuationToken);
+
+    return keys;
   }
 
   async getFileExists(key: string) {

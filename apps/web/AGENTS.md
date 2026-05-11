@@ -109,6 +109,11 @@ Frontend-specific instructions for `apps/web`. Preserve generated API usage, rou
 - E2E setup uses `e2e/fixtures`, `e2e/factories`, and `e2e/flows`.
 - E2E API setup uses `e2e/utils/api-client.ts`, which wraps the generated API.
 - Prefer readonly fixtures for assertions and worker/isolated fixtures for mutations.
+- Keep to the conventions in `e2e/strategy.md`:
+  - use `withReadonlyPage` for non-mutating specs;
+  - use `withWorkerPage` for mutating specs;
+  - register cleanup for created entities unless test purpose is persistence validation;
+  - keep UI assertions in specs and backend consistency checks through `expect.poll(...)`.
 
 ## Safety Boundaries
 

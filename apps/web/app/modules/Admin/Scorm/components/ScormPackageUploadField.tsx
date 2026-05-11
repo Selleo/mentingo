@@ -1,4 +1,4 @@
-import { FileArchive, Replace, Trash2, UploadCloud } from "lucide-react";
+import { FileArchive, Info, Replace, Trash2, UploadCloud } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { useTranslation } from "react-i18next";
 
@@ -11,6 +11,7 @@ type ScormPackageUploadFieldProps = {
   disabled?: boolean;
   readonlyTitle?: string;
   readonlyDescription?: string;
+  importNotice?: string;
   testIds?: {
     root?: string;
     input?: string;
@@ -35,6 +36,7 @@ export const ScormPackageUploadField = ({
   disabled = false,
   readonlyTitle,
   readonlyDescription,
+  importNotice,
   testIds,
   onChange,
   onClear,
@@ -132,6 +134,12 @@ export const ScormPackageUploadField = ({
           </div>
         )}
       </div>
+      {importNotice ? (
+        <div className="mt-3 flex items-start gap-2 rounded-lg border border-primary-100 bg-primary-50 px-3 py-2 text-primary-900">
+          <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+          <p className="body-sm">{importNotice}</p>
+        </div>
+      ) : null}
       {error ? <p className="mt-2 text-sm text-red-500">{error}</p> : null}
     </div>
   );

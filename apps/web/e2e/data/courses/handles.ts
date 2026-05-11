@@ -123,6 +123,14 @@ export const COURSE_LANGUAGE_DIALOG_HANDLES = {
   GENERATE_CONFIRM_BUTTON: "course-language-generate-confirm-button",
 } as const;
 
+export const SCORM_EXPORT_CARD_HANDLES = {
+  ROOT: "scorm-export-card",
+  EXPORT_BUTTON: "scorm-export-card-export-button",
+  WARNING_DIALOG: "scorm-export-warning-dialog",
+  WARNING_CANCEL_BUTTON: "scorm-export-warning-cancel-button",
+  WARNING_CONFIRM_BUTTON: "scorm-export-warning-confirm-button",
+} as const;
+
 export const COURSE_OVERVIEW_HANDLES = {
   STUDENT_MODE_BUTTON: "course-overview-student-mode-button",
   AUTHOR_TRANSFER_BUTTON: "course-overview-author-transfer-button",

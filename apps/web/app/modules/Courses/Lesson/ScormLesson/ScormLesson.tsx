@@ -74,6 +74,7 @@ export function ScormLesson({ lessonId }: ScormLessonProps) {
   } = useScormLaunch({
     lessonId,
     scoId: selectedScoId,
+    language,
   });
 
   if (isLoading) {

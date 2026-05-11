@@ -44,6 +44,8 @@ const resourceCases: ResourceCase[] = [
   },
 ];
 
+const multiResourceFiles = CURRICULUM_TEST_DATA.resourceUploads.multi;
+
 for (const resourceCase of resourceCases) {
   const resourceTest = existsSync(resourceCase.path) ? test : test.skip;
 
@@ -94,6 +96,54 @@ for (const resourceCase of resourceCases) {
     },
   );
 }
+
+test("admin can save content lesson with multiple files in one upload", async ({
+  cleanup,
+  factories,
+  withWorkerPage,
+}) => {
+  await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
+    const { category, course, categoryFactory, courseFactory } = await createCurriculumCourse(
+      factories,
+      `curriculum-resource-${Date.now()}`,
+    );
+    const curriculumFactory = factories.createCurriculumFactory();
+    const chapter = await curriculumFactory.createChapter({
+      courseId: course.id,
+      title: `resource-chapter-${Date.now()}`,
+    });
+    const lessonTitle = `resource-lesson-${Date.now()}`;
+
+    cleanup.add(async () => {
+      await courseFactory.delete(course.id);
+      await categoryFactory.delete(category.id);
+    });
+
+    await openCurriculumPageFlow(page, course.id);
+    await openNewLessonFormFlow(page, chapter.id, "content");
+    await fillContentLessonFormFlow(page, {
+      title: lessonTitle,
+      description: `Resource lesson ${Date.now()}`,
+    });
+    await uploadContentResourceFlow(page, {
+      path: multiResourceFiles.map((file) => file.path),
+    });
+    await expect(page.getByTestId(RICH_TEXT_HANDLES.UPLOAD_QUEUE)).toBeVisible({
+      timeout: 30_000,
+    });
+    for (const { fileName } of multiResourceFiles) {
+      await expect(page.getByTestId(RICH_TEXT_HANDLES.uploadQueueItem(fileName))).toBeVisible();
+    }
+    await saveContentLessonFormFlow(page);
+
+    await expect
+      .poll(async () => {
+        const updatedCourse = await courseFactory.getById(course.id);
+        return updatedCourse.chapters[0]?.lessons?.some((lesson) => lesson.title === lessonTitle);
+      })
+      .toBe(true);
+  });
+});
 
 test("admin can save content lesson with a YouTube video embed", async ({
   cleanup,

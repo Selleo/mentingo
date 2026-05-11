@@ -4,6 +4,7 @@ import {
   Get,
   Headers,
   Param,
+  Patch,
   Post,
   Query,
   Req,
@@ -13,7 +14,7 @@ import {
 } from "@nestjs/common";
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes } from "@nestjs/swagger";
-import { PERMISSIONS } from "@repo/shared";
+import { PERMISSIONS, SupportedLanguages } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Request, Response } from "express";
 import { Validate } from "nestjs-typebox";
@@ -22,6 +23,7 @@ import { baseResponse, BaseResponse, UUIDSchema, type UUIDType } from "src/commo
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { CurrentUserType } from "src/common/types/current-user.type";
+import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { FileService } from "src/file/file.service";
 import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
@@ -33,7 +35,12 @@ import {
   ValidateScormCourseFilesPipe,
 } from "./pipes/validate-scorm-course-files.pipe";
 import { CreateScormCourseBody, createScormCourseSchema } from "./schemas/createScormCourse.schema";
-import { CreateScormLessonBody, createScormLessonSchema } from "./schemas/createScormLesson.schema";
+import {
+  AttachScormLessonPackageBody,
+  attachScormLessonPackageSchema,
+  CreateScormLessonBody,
+  createScormLessonSchema,
+} from "./schemas/createScormLesson.schema";
 import {
   scormLaunchResponseSchema,
   ScormRuntimeCommitBody,
@@ -131,9 +138,10 @@ export class ScormController {
       properties: {
         chapterId: { type: "string", format: "uuid" },
         title: { type: "string" },
+        language: { type: "string" },
         scormPackage: { type: "string", format: "binary" },
       },
-      required: ["chapterId", "title", "scormPackage"],
+      required: ["chapterId", "title", "language", "scormPackage"],
     },
   })
   @Validate({
@@ -158,22 +166,69 @@ export class ScormController {
     });
   }
 
+  @Patch("lesson/:lessonId/package")
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: SCORM_PACKAGE_FIELD, maxCount: 1 },
+      { name: SCORM_THUMBNAIL_FIELD, maxCount: 1 },
+    ]),
+  )
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({
+    schema: {
+      type: "object",
+      properties: {
+        title: { type: "string" },
+        language: { type: "string" },
+        scormPackage: { type: "string", format: "binary" },
+      },
+      required: ["title", "language", "scormPackage"],
+    },
+  })
+  @Validate({
+    request: [{ type: "param", name: "lessonId", schema: UUIDSchema }],
+    response: baseResponse(Type.Object({ id: UUIDSchema, message: Type.String() })),
+  })
+  async attachScormLessonPackage(
+    @Param("lessonId") lessonId: UUIDType,
+    @Body(new ValidateMultipartPipe(attachScormLessonPackageSchema))
+    attachScormLessonPackageBody: AttachScormLessonPackageBody,
+    @UploadedFiles(new ValidateScormCourseFilesPipe()) files: CreateScormCourseFiles,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<{ id: UUIDType; message: string }>> {
+    const scormPackage = files?.[SCORM_PACKAGE_FIELD]?.[0];
+    const { id } = await this.scormService.attachLessonPackage({
+      lessonId,
+      scormPackage: scormPackage!,
+      metadata: attachScormLessonPackageBody,
+      currentUser,
+    });
+
+    return new BaseResponse({
+      id,
+      message: "adminCourseView.curriculum.lesson.toast.scormLessonPackageAttachedSuccessfully",
+    });
+  }
+
   @Get("runtime/launch")
   @RequirePermission(PERMISSIONS.COURSE_READ)
   @Validate({
     request: [
       { type: "query" as const, name: "lessonId", schema: UUIDSchema },
       { type: "query" as const, name: "scoId", schema: Type.Optional(UUIDSchema) },
+      { type: "query" as const, name: "language", schema: supportedLanguagesSchema },
     ],
     response: baseResponse(scormLaunchResponseSchema),
   })
   async launchScormAttempt(
     @Query("lessonId") lessonId: UUIDType,
     @Query("scoId") scoId: UUIDType | undefined,
+    @Query("language") language: SupportedLanguages,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<ScormLaunchResponse>> {
     return new BaseResponse(
-      await this.scormService.launchRuntime({ lessonId, scoId, currentUser }),
+      await this.scormService.launchRuntime({ lessonId, scoId, language, currentUser }),
     );
   }
 
