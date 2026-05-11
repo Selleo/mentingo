@@ -1,6 +1,6 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { ENTITY_TYPES, SCORM_PACKAGE_ENTITY_TYPE, SCORM_PACKAGE_STATUS } from "@repo/shared";
-import { and, asc, eq, inArray, sql } from "drizzle-orm";
+import { and, asc, eq, getTableColumns, inArray, sql } from "drizzle-orm";
 import { groupBy } from "lodash";
 
 import { DatabasePg } from "src/common";
@@ -24,20 +24,15 @@ import {
   scormScos,
 } from "src/storage/schema";
 
+import type { CourseScormScoRow, CourseScormSnapshotResult } from "./types/scorm-export.types";
 import type { CoursesSettings } from "./types/settings";
 import type {
   ScormExportAssetReference,
   ScormExportChapterSnapshot,
-  ScormExportCourseSnapshot,
   ScormExportLessonSnapshot,
 } from "@repo/scorm-export-generator";
 import type { SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
-
-export type CourseScormSnapshotResult = {
-  snapshot: ScormExportCourseSnapshot;
-  authorId: UUIDType;
-};
 
 @Injectable()
 export class CourseScormSnapshotService {
@@ -269,25 +264,17 @@ export class CourseScormSnapshotService {
       .orderBy(questionAnswerOptions.displayOrder);
   }
 
-  private async getScormScoRows(lessonIds: UUIDType[], language: SupportedLanguages) {
+  private async getScormScoRows(
+    lessonIds: UUIDType[],
+    language: SupportedLanguages,
+  ): Promise<CourseScormScoRow[]> {
     if (!lessonIds.length) return [];
 
     return this.db
       .select({
-        lessonId: scormScos.lessonId,
-        packageId: scormPackages.id,
+        ...getTableColumns(scormScos),
         packageLanguage: scormPackages.language,
         extractedFilesReference: scormPackages.extractedFilesReference,
-        scoId: scormScos.id,
-        identifier: scormScos.identifier,
-        identifierRef: scormScos.identifierRef,
-        resourceIdentifier: scormScos.resourceIdentifier,
-        title: scormScos.title,
-        href: scormScos.href,
-        launchPath: scormScos.launchPath,
-        displayOrder: scormScos.displayOrder,
-        isVisible: scormScos.isVisible,
-        resourceMetadataJson: scormScos.resourceMetadataJson,
       })
       .from(scormPackages)
       .innerJoin(scormScos, eq(scormScos.packageId, scormPackages.id))
@@ -323,7 +310,7 @@ export class CourseScormSnapshotService {
     lessonAssets: Awaited<ReturnType<CourseScormSnapshotService["getLessonAssets"]>>;
     quizQuestions: Awaited<ReturnType<CourseScormSnapshotService["getQuizQuestions"]>>;
     quizOptions: Awaited<ReturnType<CourseScormSnapshotService["getQuizOptions"]>>;
-    scormScoRows: Awaited<ReturnType<CourseScormSnapshotService["getScormScoRows"]>>;
+    scormScoRows: CourseScormScoRow[];
     language: SupportedLanguages;
   }): Record<string, ScormExportLessonSnapshot> {
     const assetsByLessonId = groupBy(lessonAssets, (asset) => asset.lessonId);
@@ -409,7 +396,7 @@ export class CourseScormSnapshotService {
           packageId: packageMetadata.packageId,
           extractedFilesReference: packageMetadata.extractedFilesReference,
           scos: lessonScos.map((sco) => ({
-            id: sco.scoId,
+            id: sco.id,
             title: sco.title,
             identifier: sco.identifier,
             identifierRef: sco.identifierRef,
@@ -486,7 +473,7 @@ export class CourseScormSnapshotService {
     lessonRows: Awaited<ReturnType<CourseScormSnapshotService["getCourseLessons"]>>;
     lessonAssets: Awaited<ReturnType<CourseScormSnapshotService["getLessonAssets"]>>;
     quizQuestions: Awaited<ReturnType<CourseScormSnapshotService["getQuizQuestions"]>>;
-    scormScoRows: Awaited<ReturnType<CourseScormSnapshotService["getScormScoRows"]>>;
+    scormScoRows: CourseScormScoRow[];
   }) {
     const lessonAssetsByLessonId = groupBy(lessonAssets, (asset) => asset.lessonId);
     const scormScosByLessonId = groupBy(scormScoRows, (sco) => sco.lessonId);

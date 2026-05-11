@@ -7,19 +7,13 @@ import { canUpdateCourseByAuthor } from "src/common/permissions/course-permissio
 import { CourseScormAssetsService } from "./course-scorm-assets.service";
 import { CourseScormSnapshotService } from "./course-scorm-snapshot.service";
 
+import type { CourseScormExportResult } from "./types/scorm-export.types";
 import type { SupportedLanguages } from "@repo/shared";
-import type { Readable } from "node:stream";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
 const SCORM_EXPORT_CONTENT_TYPE = "application/zip";
 const SCORM_EXPORT_FILENAME_VERSION = "scorm-1-2";
-
-export type CourseScormExportResult = {
-  stream: Readable;
-  filename: string;
-  contentType: string;
-};
 
 @Injectable()
 export class CourseScormExportService {

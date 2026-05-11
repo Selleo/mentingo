@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { ApiClient } from "~/api/api-client";
+import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
 import { useToast } from "~/components/ui/use-toast";
 import {
   extractFilenameFromContentDisposition,
@@ -10,7 +11,6 @@ import {
 
 import type { SupportedLanguages } from "@repo/shared";
 import type { AxiosError, AxiosResponse } from "axios";
-import type { ApiErrorResponse } from "~/api/types";
 
 type ExportScormCoursePayload = {
   courseId: string;
@@ -38,10 +38,14 @@ export function useExportScormCourse() {
       toast({ description: t("adminCourseView.scormExport.success") });
     },
     onError: (error: AxiosError) => {
-      const payload = error.response?.data as ApiErrorResponse | undefined;
-      const message = payload?.message ?? "adminCourseView.scormExport.error.fallback";
-
-      toast({ description: t(message), variant: "destructive" });
+      toast({
+        description: getTranslatedApiErrorMessage(
+          error,
+          t,
+          t("adminCourseView.scormExport.error.fallback"),
+        ),
+        variant: "destructive",
+      });
     },
   });
 }

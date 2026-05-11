@@ -6,27 +6,17 @@ import { FileService } from "src/file/file.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 
 import type {
+  CourseScormAssetCollectionResult,
+  CourseScormAssetResolution,
+  CourseScormCollectAssetsOptions,
+} from "./types/scorm-export.types";
+import type {
   ScormExportAssetReference,
   ScormExportCourseSnapshot,
   ScormExportImportedScormLessonSnapshot,
   ScormExportLessonSnapshot,
   ScormExportPackageFile,
 } from "@repo/scorm-export-generator";
-
-export type CourseScormAssetCollectionResult = {
-  snapshot: ScormExportCourseSnapshot;
-  files: ScormExportPackageFile[];
-};
-
-type AssetResolution = {
-  asset: ScormExportAssetReference;
-  packagePath: string;
-  file?: ScormExportPackageFile;
-};
-
-type CollectAssetsOptions = {
-  tenantOrigin?: string | null;
-};
 
 @Injectable()
 export class CourseScormAssetsService {
@@ -37,7 +27,7 @@ export class CourseScormAssetsService {
 
   async collectAssets(
     snapshot: ScormExportCourseSnapshot,
-    options: CollectAssetsOptions = {},
+    options: CourseScormCollectAssetsOptions = {},
   ): Promise<CourseScormAssetCollectionResult> {
     const assetResolutions = await this.resolveAssets(this.getSnapshotAssets(snapshot), options);
     const importedScormPackageFiles = await this.collectImportedScormPackageFiles(snapshot);
@@ -56,8 +46,8 @@ export class CourseScormAssetsService {
 
   private async resolveAssets(
     assets: ScormExportAssetReference[],
-    options: CollectAssetsOptions,
-  ): Promise<AssetResolution[]> {
+    options: CourseScormCollectAssetsOptions,
+  ): Promise<CourseScormAssetResolution[]> {
     const groupedAssets = this.groupAssetsBySourceReference(assets);
     const groupedResolutions = await Promise.all(
       Array.from(groupedAssets.values()).map(async ([canonicalAsset, ...reusedAssets]) => {
@@ -76,8 +66,8 @@ export class CourseScormAssetsService {
 
   private async resolveAsset(
     asset: ScormExportAssetReference,
-    options: CollectAssetsOptions,
-  ): Promise<AssetResolution> {
+    options: CourseScormCollectAssetsOptions,
+  ): Promise<CourseScormAssetResolution> {
     if (this.isBunnyReference(asset.sourceReference)) {
       return this.resolveBunnyVideoAsset(asset, options);
     }
@@ -107,8 +97,8 @@ export class CourseScormAssetsService {
 
   private async resolveBunnyVideoAsset(
     asset: ScormExportAssetReference,
-    options: CollectAssetsOptions,
-  ): Promise<AssetResolution> {
+    options: CourseScormCollectAssetsOptions,
+  ): Promise<CourseScormAssetResolution> {
     const videoId = asset.sourceReference.replace("bunny-", "");
 
     try {
@@ -133,7 +123,7 @@ export class CourseScormAssetsService {
 
   private rewriteSnapshotAssetReferences(
     snapshot: ScormExportCourseSnapshot,
-    resolutionByAssetId: Map<string, AssetResolution>,
+    resolutionByAssetId: Map<string, CourseScormAssetResolution>,
   ): ScormExportCourseSnapshot {
     return {
       ...snapshot,
@@ -150,7 +140,7 @@ export class CourseScormAssetsService {
 
   private rewriteLesson(
     lesson: ScormExportLessonSnapshot,
-    resolutionByAssetId: Map<string, AssetResolution>,
+    resolutionByAssetId: Map<string, CourseScormAssetResolution>,
   ): ScormExportLessonSnapshot {
     if (lesson.type === LESSON_TYPES.CONTENT) {
       const assets = lesson.assets.map((asset) => this.rewriteAsset(asset, resolutionByAssetId));
@@ -177,7 +167,7 @@ export class CourseScormAssetsService {
 
   private rewriteAsset<T extends ScormExportAssetReference | null>(
     asset: T,
-    resolutionByAssetId: Map<string, AssetResolution>,
+    resolutionByAssetId: Map<string, CourseScormAssetResolution>,
   ): T {
     if (!asset) return asset;
 
