@@ -77,7 +77,6 @@ export class LearningPathExportService {
         actor.tenantId,
         sourceLearningPathId,
         targetTenantId,
-        this.db,
       );
 
       if (existingExportLink) {
@@ -94,7 +93,6 @@ export class LearningPathExportService {
         actor.tenantId,
         sourceLearningPathId,
         targetTenantId,
-        this.db,
       );
 
       const queuedJob = await this.queueService.enqueueExport({
@@ -113,7 +111,7 @@ export class LearningPathExportService {
       });
     }
 
-    await this.learningPathRepository.markLearningPathAsMaster(sourceLearningPathId, this.db);
+    await this.learningPathRepository.markLearningPathAsMaster(sourceLearningPathId);
 
     return {
       sourceLearningPathId,
@@ -127,7 +125,6 @@ export class LearningPathExportService {
     return this.learningPathRepository.getLearningPathExportsForManagingTenant(
       actor.tenantId,
       sourceLearningPathId,
-      this.db,
     );
   }
 
@@ -137,7 +134,6 @@ export class LearningPathExportService {
     const candidates = await this.learningPathRepository.getLearningPathExportCandidates(
       actor.tenantId,
       sourceLearningPathId,
-      this.db,
     );
 
     const tenants = candidates.map((candidate) => ({
@@ -198,17 +194,17 @@ export class LearningPathExportService {
       return;
     }
 
-    const exportLinks = await this.learningPathRepository.getActiveLearningPathExportsBySourcePath(
-      sourceLearningPathId,
-      this.db,
-    );
+    const exportLinks =
+      await this.learningPathRepository.getActiveLearningPathExportsBySourcePath(
+        sourceLearningPathId,
+      );
 
     if (sourcePath.originType !== COURSE_ORIGIN_TYPES.MASTER && exportLinks.length === 0) {
       return;
     }
 
     if (sourcePath.originType !== COURSE_ORIGIN_TYPES.MASTER) {
-      await this.learningPathRepository.markLearningPathAsMaster(sourceLearningPathId, this.db);
+      await this.learningPathRepository.markLearningPathAsMaster(sourceLearningPathId);
     }
 
     for (const exportLink of exportLinks) {
@@ -217,7 +213,7 @@ export class LearningPathExportService {
         !uuidValidate(exportLink.sourceTenantId) ||
         !uuidValidate(exportLink.sourceLearningPathId)
       ) {
-        await this.learningPathRepository.markLearningPathExportSyncFailed(exportLink.id, this.db);
+        await this.learningPathRepository.markLearningPathExportSyncFailed(exportLink.id);
         continue;
       }
 
@@ -239,10 +235,8 @@ export class LearningPathExportService {
         throw new BadRequestException(LEARNING_PATH_ERRORS.EXPORT_ID_INVALID);
       }
 
-      const exportLink = await this.learningPathRepository.getLearningPathExportById(
-        trimmedExportId,
-        this.db,
-      );
+      const exportLink =
+        await this.learningPathRepository.getLearningPathExportById(trimmedExportId);
 
       if (!exportLink) {
         throw new NotFoundException(LEARNING_PATH_ERRORS.EXPORT_LINK_MISSING);
@@ -260,10 +254,7 @@ export class LearningPathExportService {
         !uuidValidate(syncExportLink.targetTenantId) ||
         !uuidValidate(syncExportLink.sourceLearningPathId)
       ) {
-        await this.learningPathRepository.markLearningPathExportSyncFailed(
-          trimmedExportId,
-          this.db,
-        );
+        await this.learningPathRepository.markLearningPathExportSyncFailed(trimmedExportId);
         throw new BadRequestException(LEARNING_PATH_ERRORS.EXPORT_LINK_INVALID);
       }
 
@@ -288,11 +279,10 @@ export class LearningPathExportService {
       await this.learningPathRepository.markLearningPathExportSyncSuccess(
         exportId,
         targetLearningPathId,
-        this.db,
       );
     } catch (error) {
       if (exportId) {
-        await this.learningPathRepository.markLearningPathExportSyncFailed(exportId, this.db);
+        await this.learningPathRepository.markLearningPathExportSyncFailed(exportId);
       }
       throw error;
     }
@@ -301,7 +291,6 @@ export class LearningPathExportService {
   private async resolveExportIdForJob(data: LearningPathExportJobData): Promise<UUIDType> {
     const exportLinkById = await this.learningPathRepository.getLearningPathExportById(
       data.exportId,
-      this.db,
     );
 
     if (exportLinkById) {
@@ -312,7 +301,6 @@ export class LearningPathExportService {
       data.sourceTenantId,
       data.sourceLearningPathId,
       data.targetTenantId,
-      this.db,
     );
 
     if (exportLinkByPair) {
@@ -336,7 +324,6 @@ export class LearningPathExportService {
       data.sourceTenantId,
       data.sourceLearningPathId,
       data.targetTenantId,
-      this.db,
     );
 
     return recreatedExport.id;
@@ -355,7 +342,7 @@ export class LearningPathExportService {
   ) {
     const { learningPath, courseLinks } = sourceSnapshot;
     const targetTenantId = exportLink.targetTenantId;
-    const targetAuthor = await this.learningPathRepository.findTargetAuthor(this.db);
+    const targetAuthor = await this.learningPathRepository.findTargetAuthor();
 
     if (!targetAuthor) {
       throw new BadRequestException(LEARNING_PATH_ERRORS.EXPORT_TARGET_AUTHOR_MISSING);
@@ -381,7 +368,6 @@ export class LearningPathExportService {
         "course",
         courseLink.courseId,
         targetCourseId,
-        this.db,
       );
     }
 
@@ -390,7 +376,6 @@ export class LearningPathExportService {
         exportLink.sourceTenantId,
         exportLink.sourceLearningPathId,
         targetTenantId,
-        this.db,
       );
 
     const targetValues = {
@@ -416,27 +401,22 @@ export class LearningPathExportService {
 
     const targetLearningPath =
       existingTargetLearningPath ??
-      (await this.learningPathRepository.createTargetLearningPath(targetValues, this.db));
+      (await this.learningPathRepository.createTargetLearningPath(targetValues));
 
     if (existingTargetLearningPath) {
       await this.learningPathRepository.updateTargetLearningPath(
         targetLearningPath.id,
         targetValues,
-        this.db,
       );
     }
 
-    await this.learningPathRepository.deleteLearningPathCoursesByPathId(
-      targetLearningPath.id,
-      this.db,
-    );
+    await this.learningPathRepository.deleteLearningPathCoursesByPathId(targetLearningPath.id);
 
     await this.learningPathRepository.insertLearningPathCourses(
       targetLearningPath.id,
       targetCourseIds,
       0,
       targetTenantId,
-      this.db,
     );
 
     return targetLearningPath.id;
@@ -450,7 +430,6 @@ export class LearningPathExportService {
     const candidates = await this.learningPathRepository.getLearningPathExportCandidates(
       sourceTenantId,
       sourceLearningPathId,
-      this.db,
     );
 
     const candidateTenantIds = new Set(candidates.map((candidate) => candidate.id));
