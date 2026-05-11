@@ -1,4 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
+import { SCORM_PACKAGE_ENTITY_TYPE, SCORM_PACKAGE_STATUS } from "@repo/shared";
 import { and, eq, getTableColumns, gte, lte, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
@@ -12,6 +13,7 @@ import {
   lessons,
   questionAnswerOptions,
   questions,
+  scormPackages,
 } from "src/storage/schema";
 
 import type { UpdateChapterBody } from "../schemas/chapter.schema";
@@ -200,6 +202,18 @@ export class AdminChapterRepository {
               ORDER BY r.created_at
             )
       `,
+        scormPackageLanguages: sql<SupportedLanguages[]>`
+          ARRAY(
+            SELECT ${scormPackages.language}
+            FROM ${scormPackages}
+            WHERE (
+                (${scormPackages.entityType} = ${SCORM_PACKAGE_ENTITY_TYPE.LESSON} AND ${scormPackages.entityId} = ${lessons.id})
+                OR (${scormPackages.entityType} = ${SCORM_PACKAGE_ENTITY_TYPE.COURSE} AND ${scormPackages.entityId} = ${courses.id})
+              )
+              AND ${scormPackages.status} = ${SCORM_PACKAGE_STATUS.READY}
+            ORDER BY ${scormPackages.language}
+          )
+        `,
       })
       .from(lessons)
       .innerJoin(chapters, eq(chapters.id, lessons.chapterId))

@@ -121,6 +121,7 @@ const CreateNewScormCourse = () => {
                       <ScormPackageUploadField
                         file={isBrowserFile(field.value) ? field.value : undefined}
                         error={fieldState.error?.message}
+                        importNotice={t("adminScorm.create.importNotice")}
                         testIds={{
                           root: CREATE_SCORM_COURSE_PAGE_HANDLES.PACKAGE_UPLOAD,
                           input: CREATE_SCORM_COURSE_PAGE_HANDLES.PACKAGE_INPUT,

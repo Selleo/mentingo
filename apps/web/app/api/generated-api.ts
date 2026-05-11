@@ -3422,6 +3422,14 @@ export interface CreateScormLessonResponse {
   };
 }
 
+export interface AttachScormLessonPackageResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    message: string;
+  };
+}
+
 export interface LaunchScormAttemptResponse {
   data: {
     /** @format uuid */
@@ -7197,6 +7205,27 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name CourseControllerExportCourseAsScorm
+     * @request POST:/api/course/{courseId}/scorm-export
+     */
+    courseControllerExportCourseAsScorm: (
+      courseId: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/course/${courseId}/scorm-export`,
+        method: "POST",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name CourseControllerTransferCourseOwnership
      * @request POST:/api/course/course-ownership/transfer
      */
@@ -8616,6 +8645,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @format uuid */
         chapterId: string;
         title: string;
+        language: string;
         /** @format binary */
         scormPackage: File;
       },
@@ -8633,6 +8663,31 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name ScormControllerAttachScormLessonPackage
+     * @request PATCH:/api/scorm/lesson/{lessonId}/package
+     */
+    scormControllerAttachScormLessonPackage: (
+      lessonId: string,
+      data: {
+        title: string;
+        language: string;
+        /** @format binary */
+        scormPackage: File;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<AttachScormLessonPackageResponse, any>({
+        path: `/api/scorm/lesson/${lessonId}/package`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name ScormControllerLaunchScormAttempt
      * @request GET:/api/scorm/runtime/launch
      */
@@ -8640,6 +8695,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         /** @format uuid */
         lessonId?: string;
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs";
         /** @format uuid */
         scoId?: string;
       },
@@ -8688,10 +8745,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name ScormControllerRedirectScormContent
+     * @name ScormControllerStreamScormContent
      * @request GET:/api/scorm/content/{packageId}/*
      */
-    scormControllerRedirectScormContent: (packageId: string, params: RequestParams = {}) =>
+    scormControllerStreamScormContent: (packageId: string, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/scorm/content/${packageId}/*`,
         method: "GET",

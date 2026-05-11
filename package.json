@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "build": "turbo build",
-    "packages:build": "pnpm --filter @repo/shared build && pnpm --filter @repo/email-templates build && pnpm --filter @repo/prompts build",
+    "packages:build": "pnpm --filter @repo/shared build && pnpm --filter @repo/email-templates build && pnpm --filter @repo/prompts build && pnpm --filter @repo/scorm-export-runtime build && pnpm --filter @repo/scorm-export-generator build",
     "dev": "turbo dev",
     "dev:test": "turbo dev:test",
     "setup:unix": "chmod +x setup.sh && ./setup.sh",

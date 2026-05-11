@@ -178,11 +178,12 @@
       "resourceIdentifierMissing": "Chybí identifikátor zdroje SCORM.",
       "itemIdentifierMissing": "Chybí identifikátor položky SCORM.",
       "launchFileMissing": "Chybí spouštěcí soubor SCORM.",
+      "packageAlreadyAttached": "Tato lekce SCORM již má balíček pro vybraný jazyk.",
       "invalidPackagePath": "Balíček SCORM obsahuje neplatnou cestu k souboru.",
       "externalPackagePath": "Balíček SCORM obsahuje externí cestu k souboru.",
       "runtime": {
         "launchNotFound": "Spouštěcí obsah SCORM nebyl nalezen.",
-        "unsupportedStandard": "Tento standard SCORM zatím není podporován.",
+        "unsupportedStandard": "Tento standard SCORM není podporován.",
         "invalidAttempt": "Pokus SCORM je neplatný.",
         "invalidCmiValue": "Runtime data SCORM jsou neplatná.",
         "contentNotFound": "Obsah SCORM nebyl nalezen.",
@@ -208,7 +209,8 @@
         "metadata": "Metadata kurzu lze upravit před importem"
       },
       "packageSection": "Balíček SCORM",
-      "packageSectionDescription": "Přiložte balíček nyní. Soubor se pouze validuje ve formuláři, dokud nebude připojeno upload API.",
+      "packageSectionDescription": "Přiložte balíček SCORM 1.2, který se má importovat jako obsah tohoto kurzu.",
+      "importNotice": "Import velkých balíčků SCORM může trvat několik minut. Zůstaňte na této stránce, dokud se nahrávání nedokončí.",
       "metadataSection": "Detaily kurzu",
       "metadataSectionDescription": "Tato pole odpovídají standardnímu nastavení kurzu a použijí se jako základní metadata kurzu.",
       "uploadPackage": "Nahrát balíček SCORM",
@@ -228,8 +230,11 @@
       "packageSection": "Balíček SCORM",
       "packageAttached": "Balíček SCORM je připojen",
       "packageLocked": "Tento balíček nelze po vytvoření lekce nahradit.",
+      "importNotice": "Import velkých balíčků SCORM může trvat několik minut. Zůstaňte na této stránce, dokud se nahrávání nedokončí.",
       "replacePackageTooltip": "Pokud chcete přidat jiný balíček SCORM, odstraňte tuto lekci a vytvořte novou.",
+      "languagePackageTooltip": "Nahrajte balíček SCORM pro vybraný jazyk. Existující jazykové balíčky nelze nahradit.",
       "validation": {
+        "titleRequired": "Název je povinný",
         "packageRequired": "Balíček SCORM je povinný",
         "packageTooLarge": "Balíček SCORM musí být menší než 500MB",
         "packageInvalidType": "Balíček SCORM musí být soubor .zip"
@@ -1513,6 +1518,7 @@
           "fileLessonCreatedSuccessfully": "Položka souboru byla úspěšně vytvořena",
           "contentLessonCreatedSuccessfully": "Obsah lekce byl úspěšně vytvořen",
           "scormLessonCreatedSuccessfully": "Lekce SCORM byla úspěšně vytvořena",
+          "scormLessonPackageAttachedSuccessfully": "Balíček SCORM byl úspěšně připojen",
           "quizLessonCreatedSuccessfully": "Kvíz byl úspěšně vytvořen",
           "aiMentorLessonCreatedSuccessfully": "Lekce AI Mentor byla úspěšně vytvořena",
           "aiMentorLessonUpdatedSuccessfully": "Lekce AI Mentor byla úspěšně aktualizována",
@@ -1832,6 +1838,29 @@
       "selectedCount": "Vybraný:",
       "exportButton": "Podíl",
       "exportingButton": "Sdílení..."
+    },
+    "scormExport": {
+      "title": "Balíček SCORM",
+      "description": "Exportujte tento kurz jako samostatný balíček SCORM 1.2 pro jiný LMS.",
+      "versionBadge": "SCORM 1.2",
+      "button": "Exportovat balíček SCORM",
+      "exportingButton": "Exportování...",
+      "success": "Stahování balíčku SCORM bylo zahájeno.",
+      "warning": {
+        "title": "Lekce AI Mentor budou přeskočeny",
+        "description": "Tento kurz obsahuje {{count}} lekci AI Mentor. Lekce AI Mentor nejsou v balíčcích SCORM podporovány. Chcete pokračovat?",
+        "description_other": "Tento kurz obsahuje {{count}} lekce AI Mentor. Lekce AI Mentor nejsou v balíčcích SCORM podporovány. Chcete pokračovat?",
+        "confirm": "Přesto exportovat"
+      },
+      "error": {
+        "courseNotFound": "Kurz nebyl nalezen.",
+        "accessDenied": "Nemáte oprávnění exportovat tento kurz.",
+        "noExportableLessons": "Tento kurz neobsahuje lekce, které lze exportovat do SCORM.",
+        "unsupportedLessonType": "Tento kurz obsahuje typ lekce, který nelze exportovat do SCORM.",
+        "missingAsset": "Tento kurz obsahuje soubor nebo zdroj, který se nepodařilo připravit pro export.",
+        "invalidSnapshot": "Tento kurz se nepodařilo připravit pro export SCORM.",
+        "fallback": "Export SCORM se nezdařil."
+      }
     }
   },
   "registerView": {

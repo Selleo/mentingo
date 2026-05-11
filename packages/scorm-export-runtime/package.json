@@ -1,0 +1,37 @@
+{
+  "name": "@repo/scorm-export-runtime",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Standalone browser runtime for exported SCORM packages",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "private": true,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./player/*": "./dist/player/*"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup && node scripts/copy-player-assets.mjs",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@fontsource/open-sans": "5.1.1",
+    "@vimeo/player": "2.30.2",
+    "video.js": "8.23.6",
+    "videojs-youtube": "3.0.1"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^20.17.6",
+    "tsup": "^8.0.2",
+    "typescript": "^5.9.3"
+  }
+}

@@ -62,6 +62,7 @@ import { UsersAssignedToCourseEvent } from "src/events/user/user-assigned-to-cou
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { LearningTimeRepository } from "src/learning-time";
+import { createLessonResourceIdRegex } from "src/lesson/lesson-resource-references";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { LessonRepository } from "src/lesson/repositories/lesson.repository";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
@@ -644,7 +645,7 @@ export class CourseService {
     const supportedNodeTypes = ["video", "downloadable-file", "presentation"];
 
     const { contentCount } = injectResourcesIntoContent(content, [], {
-      resourceIdRegex: /lesson-resource\/([0-9a-fA-F-]{36})/,
+      resourceIdRegex: createLessonResourceIdRegex(),
       trackNodeTypes: supportedNodeTypes,
     });
     const videoCount = Number(contentCount.video) || 0;
@@ -2979,7 +2980,7 @@ export class CourseService {
       const src = $(element).attr("data-src");
       if (!src) return;
 
-      const resourceIdMatch = src.match(/lesson-resource\/([0-9a-fA-F-]{36})/);
+      const resourceIdMatch = src.match(createLessonResourceIdRegex());
       const resourceId = resourceIdMatch?.[1];
       if (!resourceId) return;
 

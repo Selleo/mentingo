@@ -1,4 +1,4 @@
-import type { ScormCompletionStatus, ScormSuccessStatus } from "@repo/shared";
+import type { ScormCompletionStatus, ScormSuccessStatus, SupportedLanguages } from "@repo/shared";
 import type AdmZip from "adm-zip";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
@@ -19,6 +19,13 @@ export type CreateScormCourseImportParams = {
 export type CreateScormLessonImportParams = {
   scormPackage: Express.Multer.File;
   metadata: CreateScormLessonBody;
+  currentUser: CurrentUserType;
+};
+
+export type AttachScormLessonPackageParams = {
+  lessonId: UUIDType;
+  scormPackage: Express.Multer.File;
+  metadata: Omit<CreateScormLessonBody, "chapterId">;
   currentUser: CurrentUserType;
 };
 
@@ -90,11 +97,13 @@ export type PersistCoursePackageParams = PersistPackageParamsBase & {
 
 export type PersistLessonPackageParams = PersistPackageParamsBase & {
   lessonId: UUIDType;
+  language: SupportedLanguages;
 };
 
 export type ScormRuntimeLaunchParams = {
   lessonId: UUIDType;
   scoId?: UUIDType;
+  language: SupportedLanguages;
   currentUser: CurrentUserType;
 };
 

@@ -1,5 +1,10 @@
 import type { Question } from "./CourseLessons/NewLesson/QuizLessonForm/QuizLessonForm.types";
-import type { AiMentorTTSPreset, AiMentorType, AiMentorVoiceMode } from "@repo/shared";
+import type {
+  AiMentorTTSPreset,
+  AiMentorType,
+  AiMentorVoiceMode,
+  SupportedLanguages,
+} from "@repo/shared";
 
 export const EDIT_COURSE_TABS = {
   SETTINGS: "Settings",
@@ -53,6 +58,7 @@ export interface Lesson {
   lessonResources?: LessonResource[];
   isExternal?: boolean;
   aiMentor?: AiMentor;
+  scormPackageLanguages?: SupportedLanguages[];
 }
 
 export interface Chapter {
