@@ -24,7 +24,15 @@ import {
   scormScos,
 } from "src/storage/schema";
 
-import type { CourseScormScoRow, CourseScormSnapshotResult } from "./types/scorm-export.types";
+import type {
+  CourseScormBuildLessonsByIdOptions,
+  CourseScormLessonAssetRow,
+  CourseScormLessonRow,
+  CourseScormQuizQuestionRow,
+  CourseScormScoRow,
+  CourseScormSnapshotResult,
+  CourseScormValidateRequiredAssetsOptions,
+} from "./types/scorm-export.types";
 import type { CoursesSettings } from "./types/settings";
 import type {
   ScormExportAssetReference,
@@ -305,14 +313,7 @@ export class CourseScormSnapshotService {
     quizOptions,
     scormScoRows,
     language,
-  }: {
-    lessonRows: Awaited<ReturnType<CourseScormSnapshotService["getCourseLessons"]>>;
-    lessonAssets: Awaited<ReturnType<CourseScormSnapshotService["getLessonAssets"]>>;
-    quizQuestions: Awaited<ReturnType<CourseScormSnapshotService["getQuizQuestions"]>>;
-    quizOptions: Awaited<ReturnType<CourseScormSnapshotService["getQuizOptions"]>>;
-    scormScoRows: CourseScormScoRow[];
-    language: SupportedLanguages;
-  }): Record<string, ScormExportLessonSnapshot> {
+  }: CourseScormBuildLessonsByIdOptions): Record<string, ScormExportLessonSnapshot> {
     const assetsByLessonId = groupBy(lessonAssets, (asset) => asset.lessonId);
     const questionsByLessonId = groupBy(quizQuestions, (question) => question.lessonId);
     const optionsByQuestionId = groupBy(quizOptions, (option) => option.questionId);
@@ -439,9 +440,7 @@ export class CourseScormSnapshotService {
     };
   }
 
-  private buildLessonAssetReference(
-    asset: Awaited<ReturnType<CourseScormSnapshotService["getLessonAssets"]>>[number],
-  ): ScormExportAssetReference {
+  private buildLessonAssetReference(asset: CourseScormLessonAssetRow): ScormExportAssetReference {
     return {
       id: asset.id,
       type: this.isVideoAsset(asset) ? "video" : "contentResource",
@@ -452,7 +451,7 @@ export class CourseScormSnapshotService {
   }
 
   private buildQuestionAssetReference(
-    question: Awaited<ReturnType<CourseScormSnapshotService["getQuizQuestions"]>>[number],
+    question: CourseScormQuizQuestionRow,
   ): ScormExportAssetReference {
     return {
       id: `${question.id}-image`,
@@ -469,12 +468,7 @@ export class CourseScormSnapshotService {
     lessonAssets,
     quizQuestions,
     scormScoRows,
-  }: {
-    lessonRows: Awaited<ReturnType<CourseScormSnapshotService["getCourseLessons"]>>;
-    lessonAssets: Awaited<ReturnType<CourseScormSnapshotService["getLessonAssets"]>>;
-    quizQuestions: Awaited<ReturnType<CourseScormSnapshotService["getQuizQuestions"]>>;
-    scormScoRows: CourseScormScoRow[];
-  }) {
+  }: CourseScormValidateRequiredAssetsOptions) {
     const lessonAssetsByLessonId = groupBy(lessonAssets, (asset) => asset.lessonId);
     const scormScosByLessonId = groupBy(scormScoRows, (sco) => sco.lessonId);
 
@@ -509,8 +503,8 @@ export class CourseScormSnapshotService {
   }
 
   private validateContentLessonResources(
-    lesson: Awaited<ReturnType<CourseScormSnapshotService["getCourseLessons"]>>[number],
-    lessonAssets: Awaited<ReturnType<CourseScormSnapshotService["getLessonAssets"]>>,
+    lesson: CourseScormLessonRow,
+    lessonAssets: CourseScormLessonAssetRow[],
   ) {
     const referencedResourceIds = extractLessonResourceIds(lesson.description ?? "");
     if (!referencedResourceIds.length) return;
@@ -539,9 +533,7 @@ export class CourseScormSnapshotService {
     return metadata as { allowFullscreen?: boolean };
   }
 
-  private assetPackageFilename(
-    asset: Awaited<ReturnType<CourseScormSnapshotService["getLessonAssets"]>>[number],
-  ) {
+  private assetPackageFilename(asset: CourseScormLessonAssetRow) {
     if (this.isBunnyReference(asset.reference)) {
       return `${asset.id}.mp4`;
     }
@@ -549,9 +541,7 @@ export class CourseScormSnapshotService {
     return this.referenceFilename(asset.reference);
   }
 
-  private isVideoAsset(
-    asset: Awaited<ReturnType<CourseScormSnapshotService["getLessonAssets"]>>[number],
-  ) {
+  private isVideoAsset(asset: CourseScormLessonAssetRow) {
     return this.isBunnyReference(asset.reference) || asset.contentType.startsWith("video/");
   }
 

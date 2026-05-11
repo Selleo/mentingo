@@ -24,6 +24,61 @@ export type CourseScormScoRow = typeof scormScos.$inferSelect & {
   extractedFilesReference: string;
 };
 
+export type CourseScormLessonRow = {
+  id: UUIDType;
+  chapterId: UUIDType;
+  title: string;
+  description: string | null;
+  type: string;
+  displayOrder: number | null;
+  thresholdScore: number | null;
+};
+
+export type CourseScormLessonAssetRow = {
+  lessonId: UUIDType;
+  id: UUIDType;
+  reference: string;
+  contentType: string;
+  metadata: unknown;
+  title: string;
+};
+
+export type CourseScormQuizQuestionRow = {
+  id: UUIDType;
+  lessonId: UUIDType;
+  type: string;
+  title: string;
+  description: string | null;
+  solutionExplanation: string | null;
+  displayOrder: number | null;
+  photoS3Key: string | null;
+};
+
+export type CourseScormQuizOptionRow = {
+  id: UUIDType;
+  questionId: UUIDType;
+  title: string;
+  isCorrect: boolean;
+  displayOrder: number | null;
+  matchedWord: string | null;
+};
+
+export type CourseScormBuildLessonsByIdOptions = {
+  lessonRows: CourseScormLessonRow[];
+  lessonAssets: CourseScormLessonAssetRow[];
+  quizQuestions: CourseScormQuizQuestionRow[];
+  quizOptions: CourseScormQuizOptionRow[];
+  scormScoRows: CourseScormScoRow[];
+  language: SupportedLanguages;
+};
+
+export type CourseScormValidateRequiredAssetsOptions = {
+  lessonRows: CourseScormLessonRow[];
+  lessonAssets: CourseScormLessonAssetRow[];
+  quizQuestions: CourseScormQuizQuestionRow[];
+  scormScoRows: CourseScormScoRow[];
+};
+
 export type CourseScormAssetCollectionResult = {
   snapshot: ScormExportCourseSnapshot;
   files: ScormExportPackageFile[];
