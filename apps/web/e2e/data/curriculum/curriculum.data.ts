@@ -19,4 +19,16 @@ export const CURRICULUM_TEST_DATA = {
     aiMentorResource: fixturePath("ai-mentor-resource.pdf"),
     aiMentorAvatar: fixturePath("ai-mentor-avatar.png"),
   },
+  resourceUploads: {
+    multi: [
+      {
+        path: fixturePath("content-image.png"),
+        fileName: "content-image.png",
+      },
+      {
+        path: fixturePath("content-video.mp4"),
+        fileName: "content-video.mp4",
+      },
+    ],
+  },
 } as const;

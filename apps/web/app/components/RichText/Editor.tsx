@@ -52,11 +52,11 @@ const Editor = ({
   const handleDrop = useCallback(
     async (event: DragEvent) => {
       const activeEditor = editorRef.current;
-      const file = event.dataTransfer?.files[0];
-      if (!file) return false;
+      const files = Array.from(event.dataTransfer?.files ?? []);
+      if (!files.length) return false;
 
       event.preventDefault();
-      await onUpload?.(file, activeEditor);
+      await Promise.allSettled(files.map((file) => onUpload?.(file, activeEditor)));
       return true;
     },
     [onUpload],
