@@ -1,4 +1,5 @@
 import { Link } from "@remix-run/react";
+import { COURSE_PROGRESS_STATUSES } from "@repo/shared";
 import {
   CheckCircle2,
   CircleDashed,
@@ -65,6 +66,7 @@ export function LearningPathCoursesSection({
   onRemoveCourse,
 }: LearningPathCoursesSectionProps) {
   const { t } = useTranslation();
+
   const normalizedCourseOptions = useMemo(
     () => availableCourseOptions.map(getNormalizedCourseOption),
     [availableCourseOptions],
@@ -82,26 +84,32 @@ export function LearningPathCoursesSection({
 
   const renderCourse = (course: SortableLearningPathCourse, index: number, sortable = false) => {
     const title = course.title || t("adminLearningPathsView.courses.unknownCourse");
-    const isPlayable = canPlayCourses && !course.isLocked && course.progress !== "blocked";
+
+    const isPlayable =
+      canPlayCourses && !course.isLocked && course.progress !== COURSE_PROGRESS_STATUSES.BLOCKED;
+
     const courseState =
-      course.isLocked || course.progress === "blocked" ? "locked" : course.progress;
+      course.isLocked || course.progress === COURSE_PROGRESS_STATUSES.BLOCKED
+        ? COURSE_PROGRESS_STATUSES.BLOCKED
+        : course.progress;
+
     const courseStateConfig = match(courseState)
-      .with("completed", () => ({
+      .with(COURSE_PROGRESS_STATUSES.COMPLETED, () => ({
         badgeVariant: "success" as const,
         icon: <CheckCircle2 className="size-3.5" />,
         label: t("learningPathsView.courseState.completed"),
       }))
-      .with("in_progress", () => ({
+      .with(COURSE_PROGRESS_STATUSES.IN_PROGRESS, () => ({
         badgeVariant: "inProgress" as const,
         icon: <Clock3 className="size-3.5" />,
         label: t("learningPathsView.courseState.inProgress"),
       }))
-      .with("not_started", () => ({
+      .with(COURSE_PROGRESS_STATUSES.NOT_STARTED, () => ({
         badgeVariant: "notStarted" as const,
         icon: <CircleDashed className="size-3.5" />,
         label: t("learningPathsView.courseState.notStarted"),
       }))
-      .with("locked", () => ({
+      .with(COURSE_PROGRESS_STATUSES.BLOCKED, () => ({
         badgeVariant: "blocked" as const,
         icon: <Lock className="size-3.5" />,
         label: t("learningPathsView.courseState.locked"),

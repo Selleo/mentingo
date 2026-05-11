@@ -107,6 +107,18 @@ describe("ValidateMultipartPipe", () => {
     expect(result.age).toBe(42);
   });
 
+  it("should keep numeric-looking strings as strings for string schema fields", () => {
+    const multipartData = {
+      name: "123123",
+      age: "42",
+      isActive: "true",
+    };
+
+    const result = pipe.transform(multipartData);
+
+    expect(result.name).toBe("123123");
+  });
+
   it("should parse boolean strings correctly", () => {
     const multipartData = {
       name: "Eve",

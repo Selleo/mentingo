@@ -6,6 +6,16 @@ export const COURSE_STATUSES = {
 
 export type CourseStatus = (typeof COURSE_STATUSES)[keyof typeof COURSE_STATUSES];
 
+export const COURSE_PROGRESS_STATUSES = {
+  NOT_STARTED: "not_started",
+  IN_PROGRESS: "in_progress",
+  COMPLETED: "completed",
+  BLOCKED: "blocked",
+} as const;
+
+export type CourseProgressStatus =
+  (typeof COURSE_PROGRESS_STATUSES)[keyof typeof COURSE_PROGRESS_STATUSES];
+
 export const COURSE_TYPE = {
   DEFAULT: "default",
   SCORM: "scorm",

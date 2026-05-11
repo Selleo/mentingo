@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
 
@@ -49,27 +50,25 @@ export const LearningPathEditableText = ({
     setIsEditing(false);
   };
 
-  if (!canEdit || !isEditing) {
+  if (!canEdit) {
+    return <span className={cn("block", className)}>{value || fallback}</span>;
+  }
+
+  if (!isEditing) {
     return (
-      <button
+      <Button
         type="button"
+        variant="ghost"
         className={cn(
-          "block w-full text-left",
-          canEdit &&
-            "rounded-xl border-[1.5px] border-dashed border-transparent px-3 py-2 transition hover:border-primary-300 hover:bg-primary-50 focus:outline-none focus-visible:border-primary-300 focus-visible:ring-2 focus-visible:ring-primary-300",
+          "h-auto w-full justify-start whitespace-normal rounded-xl border-[1.5px] border-dashed border-transparent px-3 py-2 text-left hover:border-primary-300 hover:bg-primary-50 focus-visible:border-primary-300 focus-visible:ring-primary-300",
           className,
         )}
-        disabled={!canEdit}
-        onClick={() => canEdit && setIsEditing(true)}
+        onClick={() => setIsEditing(true)}
       >
-        {canEdit ? (
-          <span className="inline-flex max-w-full align-top">
-            <span className="min-w-0 truncate">{value || fallback}</span>
-          </span>
-        ) : (
-          value || fallback
-        )}
-      </button>
+        <span className="inline-flex max-w-full align-top">
+          <span className="min-w-0 truncate">{value || fallback}</span>
+        </span>
+      </Button>
     );
   }
 

@@ -1,23 +1,33 @@
+import {
+  COURSE_PROGRESS_STATUSES,
+  LEARNING_PATH_PROGRESS_STATUSES,
+  LEARNING_PATH_STATUSES,
+  type CourseProgressStatus,
+  type LearningPathProgressStatus,
+  type LearningPathStatus,
+} from "@repo/shared";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "~/components/ui/badge";
 
-type LearningPathStatus = "draft" | "published" | "private";
-type LearningPathProgress = "not_started" | "in_progress" | "completed" | "blocked";
+type LearningPathStatusBadgeValue =
+  | LearningPathStatus
+  | LearningPathProgressStatus
+  | CourseProgressStatus;
 
 type LearningPathStatusBadgeProps = {
-  status: LearningPathStatus | LearningPathProgress;
+  status: LearningPathStatusBadgeValue;
 };
 
 const statusVariant = {
-  draft: "draft",
-  published: "success",
-  private: "secondary",
-  not_started: "notStarted",
-  in_progress: "inProgress",
-  completed: "success",
-  blocked: "blocked",
-} as const;
+  [LEARNING_PATH_STATUSES.DRAFT]: "draft",
+  [LEARNING_PATH_STATUSES.PUBLISHED]: "success",
+  [LEARNING_PATH_STATUSES.PRIVATE]: "secondary",
+  [LEARNING_PATH_PROGRESS_STATUSES.NOT_STARTED]: "notStarted",
+  [LEARNING_PATH_PROGRESS_STATUSES.IN_PROGRESS]: "inProgress",
+  [LEARNING_PATH_PROGRESS_STATUSES.COMPLETED]: "success",
+  [COURSE_PROGRESS_STATUSES.BLOCKED]: "blocked",
+} as const satisfies Record<LearningPathStatusBadgeValue, string>;
 
 export function LearningPathStatusBadge({ status }: LearningPathStatusBadgeProps) {
   const { t } = useTranslation();

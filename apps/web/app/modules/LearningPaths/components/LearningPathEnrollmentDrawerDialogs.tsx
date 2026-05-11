@@ -11,7 +11,9 @@ import {
 } from "~/components/ui/dialog";
 import MultipleSelector, { type Option } from "~/components/ui/multiselect";
 
-type GroupAction = "enroll" | "unenroll" | null;
+import { LEARNING_PATH_GROUP_ACTIONS } from "./learningPathEnrollment.types";
+
+import type { LearningPathGroupAction } from "./learningPathEnrollment.types";
 
 type LearningPathEnrollmentDrawerDialogsProps = {
   hasGroups: boolean;
@@ -20,7 +22,7 @@ type LearningPathEnrollmentDrawerDialogsProps = {
   selectedEnrolledCount: number;
   selectedGroups: Option[];
   groupOptions: Option[];
-  groupAction: GroupAction;
+  groupAction: LearningPathGroupAction | null;
   isEnrollUsersDialogOpen: boolean;
   isUnenrollUsersDialogOpen: boolean;
   onEnrollUsersOpenChange: (open: boolean) => void;
@@ -108,12 +110,12 @@ export function LearningPathEnrollmentDrawerDialogs({
           <DialogOverlay className="bg-primary-400 opacity-65" />
           <DialogContent>
             <DialogTitle>
-              {groupAction === "unenroll"
+              {groupAction === LEARNING_PATH_GROUP_ACTIONS.UNENROLL
                 ? t("learningPathsView.enrollment.unenrollGroups")
                 : t("learningPathsView.enrollment.enrollGroups")}
             </DialogTitle>
             <DialogDescription>
-              {groupAction === "unenroll"
+              {groupAction === LEARNING_PATH_GROUP_ACTIONS.UNENROLL
                 ? t("learningPathsView.enrollment.unenrollGroupsDescription")
                 : t("learningPathsView.enrollment.enrollGroupsDescription")}
             </DialogDescription>

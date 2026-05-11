@@ -1,3 +1,4 @@
+import { COURSE_PROGRESS_STATUSES, type SupportedLanguages } from "@repo/shared";
 import { Award, ListOrdered } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -27,9 +28,9 @@ type InlineLearningPathCardProps = {
   canDelete: boolean;
   canManageEnrollment: boolean;
   canExport?: boolean;
-  currentLanguage: "en" | "pl" | "de" | "lt" | "cs";
-  selectedLanguage: "en" | "pl" | "de" | "lt" | "cs";
-  onLanguageChange: (language: "en" | "pl" | "de" | "lt" | "cs") => void;
+  currentLanguage: SupportedLanguages;
+  selectedLanguage: SupportedLanguages;
+  onLanguageChange: (language: SupportedLanguages) => void;
   onUpdate: (data: UpdateLearningPathBody) => Promise<void>;
   onLanguageCreated?: () => Promise<void> | void;
   onDelete: () => void;
@@ -46,32 +47,6 @@ type InlineLearningPathCardProps = {
   showCertificate?: boolean;
   showCourseProgress?: boolean;
 };
-
-const getDisplayLearningPath = (
-  learningPath: LearningPathListItem,
-  localizedLearningPath:
-    | Partial<
-        Pick<
-          LearningPathListItem,
-          | "title"
-          | "description"
-          | "thumbnailReference"
-          | "status"
-          | "includesCertificate"
-          | "sequenceEnabled"
-        >
-      >
-    | undefined,
-) => ({
-  ...learningPath,
-  title: localizedLearningPath?.title ?? learningPath.title,
-  description: localizedLearningPath?.description ?? learningPath.description,
-  thumbnailReference: localizedLearningPath?.thumbnailReference ?? learningPath.thumbnailReference,
-  status: localizedLearningPath?.status ?? learningPath.status,
-  includesCertificate:
-    localizedLearningPath?.includesCertificate ?? learningPath.includesCertificate,
-  sequenceEnabled: localizedLearningPath?.sequenceEnabled ?? learningPath.sequenceEnabled,
-});
 
 export function InlineLearningPathCard({
   learningPath,
@@ -118,11 +93,11 @@ export function InlineLearningPathCard({
     { enabled: canEdit && selectedLanguage !== currentLanguage },
   );
   const localizedLearningPath = localizedLearningPathResponse?.data;
-  const displayLearningPath = getDisplayLearningPath(learningPath, localizedLearningPath);
+  const displayLearningPath = localizedLearningPath ?? learningPath;
   const isCertificateReady =
     displayLearningPath.includesCertificate &&
     learningPath.courses.length > 0 &&
-    learningPath.courses.every((course) => course.progress === "completed");
+    learningPath.courses.every((course) => course.progress === COURSE_PROGRESS_STATUSES.COMPLETED);
   const optimisticDisplayLearningPath =
     optimisticText.language === selectedLanguage
       ? {

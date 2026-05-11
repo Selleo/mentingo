@@ -18,7 +18,6 @@ type CertificateToPDFProps = {
 };
 
 const triggerPdfDownload = (blob: Blob, filename: string) => {
-  console.log(filename);
   const url = URL.createObjectURL(blob);
   const linkElement = document.createElement("a");
 

@@ -99,7 +99,6 @@ export const routeAccessConfig = createRouteConfig({
   "course/:id": PUBLIC,
   courses: PUBLIC,
   "learning-paths": LEARNING_PATH_READ_ACCESS,
-  "learning-paths/:id": LEARNING_PATH_READ_ACCESS,
   qa: PUBLIC,
   "qa/:id": QA_EDIT_ACCESS,
   articles: PUBLIC,

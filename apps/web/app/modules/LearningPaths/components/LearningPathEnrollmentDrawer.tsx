@@ -26,6 +26,9 @@ import { LearningPathEnrollmentControls } from "~/modules/LearningPaths/componen
 import { LearningPathEnrollmentDrawerDialogs } from "~/modules/LearningPaths/components/LearningPathEnrollmentDrawerDialogs";
 import { LearningPathEnrollmentTable } from "~/modules/LearningPaths/components/LearningPathEnrollmentTable";
 
+import { LEARNING_PATH_GROUP_ACTIONS } from "./learningPathEnrollment.types";
+
+import type { LearningPathGroupAction } from "./learningPathEnrollment.types";
 import type { Option } from "~/components/ui/multiselect";
 import type { FilterConfig, FilterValue } from "~/modules/common/SearchFilter/SearchFilter";
 
@@ -51,7 +54,7 @@ export function LearningPathEnrollmentDrawer({
   const { t } = useTranslation();
   const [selectedRows, setSelectedRows] = useState<Record<string, boolean>>({});
   const [selectedGroups, setSelectedGroups] = useState<Option[]>([]);
-  const [groupAction, setGroupAction] = useState<"enroll" | "unenroll" | null>(null);
+  const [groupAction, setGroupAction] = useState<LearningPathGroupAction | null>(null);
   const [isEnrollUsersDialogOpen, setIsEnrollUsersDialogOpen] = useState(false);
   const [isUnenrollUsersDialogOpen, setIsUnenrollUsersDialogOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
@@ -144,13 +147,9 @@ export function LearningPathEnrollmentDrawer({
 
     const groupIds = selectedGroups.map((group) => group.value);
 
-    if (groupAction === "enroll") {
-      await onEnrollGroups(groupIds);
-    }
+    if (groupAction === LEARNING_PATH_GROUP_ACTIONS.ENROLL) await onEnrollGroups(groupIds);
 
-    if (groupAction === "unenroll") {
-      await onUnenrollGroups(groupIds);
-    }
+    if (groupAction === LEARNING_PATH_GROUP_ACTIONS.UNENROLL) await onUnenrollGroups(groupIds);
 
     setSelectedGroups([]);
     setGroupAction(null);
@@ -232,8 +231,8 @@ export function LearningPathEnrollmentDrawer({
             setIsGroupDropdownOpen={setIsGroupDropdownOpen}
             onOpenUserEnroll={() => setIsEnrollUsersDialogOpen(true)}
             onOpenUserUnenroll={() => setIsUnenrollUsersDialogOpen(true)}
-            onOpenGroupEnroll={() => setGroupAction("enroll")}
-            onOpenGroupUnenroll={() => setGroupAction("unenroll")}
+            onOpenGroupEnroll={() => setGroupAction(LEARNING_PATH_GROUP_ACTIONS.ENROLL)}
+            onOpenGroupUnenroll={() => setGroupAction(LEARNING_PATH_GROUP_ACTIONS.UNENROLL)}
           />
 
           <div className="min-h-0 flex-1 overflow-auto rounded-xl border border-neutral-200">

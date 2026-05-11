@@ -1,5 +1,4 @@
 import { useNavigate } from "@remix-run/react";
-import { useTranslation } from "react-i18next";
 
 import {
   useAddCoursesToLearningPath,
@@ -8,8 +7,6 @@ import {
   useReorderLearningPathCourses,
   useUpdateLearningPath,
 } from "~/api/mutations/useLearningPathMutations";
-import { queryClient } from "~/api/queryClient";
-import { useToast } from "~/components/ui/use-toast";
 
 import type { LearningPathEditorFormValues } from "../types";
 import type { SupportedLanguages } from "@repo/shared";
@@ -25,9 +22,7 @@ export function useLearningPathEditorActions({
   isCreateMode,
   editorLanguage,
 }: UseLearningPathEditorActionsParams) {
-  const { t } = useTranslation();
   const navigate = useNavigate();
-  const { toast } = useToast();
   const { mutateAsync: createLearningPath, isPending: isCreatePending } = useCreateLearningPath();
   const { mutateAsync: updateLearningPath, isPending: isUpdatePending } = useUpdateLearningPath();
   const { mutateAsync: addCoursesToLearningPath, isPending: isAddCoursePending } =
@@ -36,10 +31,6 @@ export function useLearningPathEditorActions({
     useRemoveCourseFromLearningPath();
   const { mutateAsync: reorderLearningPathCourses, isPending: isReorderPending } =
     useReorderLearningPathCourses();
-
-  const invalidateLearningPaths = async () => {
-    await queryClient.invalidateQueries({ queryKey: ["learning-paths"] });
-  };
 
   const buildPayload = (values: LearningPathEditorFormValues) => {
     const {
@@ -67,8 +58,6 @@ export function useLearningPathEditorActions({
     if (isCreateMode) {
       const createdLearningPath = await createLearningPath(payload);
 
-      await invalidateLearningPaths();
-      toast({ description: t("adminLearningPathsView.toast.created") });
       navigate(`/admin/learning-paths/${createdLearningPath.data.id}`);
       return;
     }
@@ -82,8 +71,6 @@ export function useLearningPathEditorActions({
         language: editorLanguage,
       },
     });
-    await invalidateLearningPaths();
-    toast({ description: t("adminLearningPathsView.toast.updated") });
   };
 
   const handleAddCourse = async (courseId: string) => {
@@ -93,16 +80,12 @@ export function useLearningPathEditorActions({
       learningPathId,
       data: { courseIds: [courseId] },
     });
-    await invalidateLearningPaths();
-    toast({ description: t("adminLearningPathsView.toast.coursesAdded") });
   };
 
   const handleRemoveCourse = async (courseId: string) => {
     if (!learningPathId) return;
 
     await removeCourseFromLearningPath({ learningPathId, courseId });
-    await invalidateLearningPaths();
-    toast({ description: t("adminLearningPathsView.toast.courseRemoved") });
   };
 
   const handleReorderCourses = async (courseIds: string[]) => {
@@ -112,8 +95,6 @@ export function useLearningPathEditorActions({
       learningPathId,
       data: { courseIds },
     });
-    await invalidateLearningPaths();
-    toast({ description: t("adminLearningPathsView.toast.coursesReordered") });
   };
 
   return {

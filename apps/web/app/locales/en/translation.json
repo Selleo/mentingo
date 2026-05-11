@@ -2815,7 +2815,6 @@
     "createTenant": "Create Organization",
     "tenants": "Organizations",
     "learningPaths": "Learning Paths",
-    "learningPathDetails": "Learning Path Details",
     "adminLearningPaths": "Learning Paths",
     "adminLearningPathEditor": "Learning Path Editor"
   },
