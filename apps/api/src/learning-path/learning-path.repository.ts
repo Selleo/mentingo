@@ -66,9 +66,8 @@ import {
 import type {
   LearningPathEnrolledStudentsQuery,
   LearningPathListQuery,
-  LocalizedLearningPath,
 } from "./learning-path.repository.types";
-import type { CreateLearningPathBody } from "./learning-path.schema";
+import type { CreateLearningPathBody, LearningPathSchema } from "./learning-path.schema";
 import type {
   LearningPathCourseLink,
   LearningPathCoursePreviewGroup,
@@ -171,7 +170,7 @@ export class LearningPathRepository {
     id: UUIDType,
     language?: SupportedLanguages,
     dbInstance: DatabasePg = this.db,
-  ): Promise<LocalizedLearningPath | null> {
+  ): Promise<LearningPathSchema | null> {
     const [learningPath] = await dbInstance
       .select({
         ...getTableColumns(learningPaths),

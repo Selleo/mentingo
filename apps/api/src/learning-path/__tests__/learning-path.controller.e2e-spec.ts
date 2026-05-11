@@ -102,8 +102,8 @@ describe("LearningPathController (e2e)", () => {
 
         expect(response.body.data.baseLanguage).toBe("pl");
         expect(response.body.data.availableLocales).toEqual(["pl"]);
-        expect(response.body.data.title.pl).toBe("Path title");
-        expect(response.body.data.description.pl).toBe("Path description");
+        expect(response.body.data.title).toBe("Path title");
+        expect(response.body.data.description).toBe("Path description");
         expect(response.body.data.includesCertificate).toBe(true);
         expect(response.body.data.sequenceEnabled).toBe(true);
       });
@@ -351,7 +351,7 @@ describe("LearningPathController (e2e)", () => {
 
         expect(response.body.data.includesCertificate).toBe(false);
         expect(response.body.data.sequenceEnabled).toBe(false);
-        expect(response.body.data.title.pl).toBe("Updated title");
+        expect(response.body.data.title).toBe("Updated title");
 
         const updatedLearningPath = await baseDb.query.learningPaths.findFirst({
           where: eq(learningPaths.id, learningPath.id),

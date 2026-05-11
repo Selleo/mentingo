@@ -41,7 +41,6 @@ import { DEFAULT_LEARNING_PATH_SETTINGS } from "../types/learning-path-settings.
 import { LearningPathCourseSyncService } from "./learning-path-course-sync.service";
 import { LearningPathExportService } from "./learning-path-export.service";
 
-import type { LocalizedLearningPath } from "../learning-path.repository.types";
 import type {
   CreateLearningPathBody,
   LearningPathCourseIdsBody,
@@ -150,6 +149,22 @@ export class LearningPathService {
     const learningPath = await this.learningPathRepository.findLearningPathById(
       learningPathId,
       dbInstance,
+    );
+
+    if (!learningPath) {
+      throw new NotFoundException(LEARNING_PATH_ERRORS.NOT_FOUND);
+    }
+
+    return learningPath;
+  }
+
+  private async ensureLocalizedLearningPathExists(
+    learningPathId: UUIDType,
+    language?: SupportedLanguages,
+  ): Promise<LearningPathSchema> {
+    const learningPath = await this.learningPathRepository.findLocalizedLearningPathById(
+      learningPathId,
+      language,
     );
 
     if (!learningPath) {
@@ -324,7 +339,7 @@ export class LearningPathService {
       throw new UnprocessableEntityException(LEARNING_PATH_ERRORS.CREATE_FAILED);
     }
 
-    return createdLearningPath;
+    return this.ensureLocalizedLearningPathExists(createdLearningPath.id, body.language);
   }
 
   async getLearningPaths(
@@ -338,6 +353,7 @@ export class LearningPathService {
 
     const canReadAll = this.canReadAllLearningPaths(currentUser);
     const canReadOwn = this.canReadOwnLearningPaths(currentUser);
+
     const learningPaths = await this.learningPathRepository.getLearningPaths({
       page,
       perPage,
@@ -382,7 +398,6 @@ export class LearningPathService {
         learningPaths.data.map(async (learningPath) => ({
           ...(await this.buildLearningPathDisplay(
             learningPath,
-            language,
             enrolledLearningPathIds.has(learningPath.id),
           )),
           courses: coursePreviewsByPathId.get(learningPath.id) ?? [],
@@ -430,11 +445,7 @@ export class LearningPathService {
     if (!localizedLearningPath) throw new NotFoundException(LEARNING_PATH_ERRORS.NOT_FOUND);
 
     return {
-      ...(await this.buildLearningPathDisplay(
-        localizedLearningPath,
-        language,
-        progressState.isEnrolled,
-      )),
+      ...(await this.buildLearningPathDisplay(localizedLearningPath, progressState.isEnrolled)),
       ...progressSummary,
       availableCourseOptions: availableCourseOptionsByPathId.get(learningPathId) ?? [],
       certificateReady:
@@ -542,7 +553,10 @@ export class LearningPathService {
       "update-learning-path",
     );
 
-    return updatedLearningPath;
+    return this.ensureLocalizedLearningPathExists(
+      updatedLearningPath.id,
+      language ?? updatedLearningPath.baseLanguage,
+    );
   }
 
   async createLanguage(
@@ -557,9 +571,18 @@ export class LearningPathService {
       throw new BadRequestException(LEARNING_PATH_ERRORS.LANGUAGE_ALREADY_EXISTS);
     }
 
-    return this.learningPathRepository.updateLearningPath(learningPathId, {
-      availableLocales: [...learningPath.availableLocales, language],
-    });
+    const updatedLearningPath = await this.learningPathRepository.updateLearningPath(
+      learningPathId,
+      {
+        availableLocales: [...learningPath.availableLocales, language],
+      },
+    );
+
+    if (!updatedLearningPath) {
+      throw new UnprocessableEntityException(LEARNING_PATH_ERRORS.UPDATE_FAILED);
+    }
+
+    return this.ensureLocalizedLearningPathExists(updatedLearningPath.id, language);
   }
 
   async deleteLearningPath(learningPathId: UUIDType, currentUser: CurrentUserType) {
@@ -1053,8 +1076,7 @@ export class LearningPathService {
   }
 
   private async buildLearningPathDisplay(
-    learningPath: LearningPathSchema | LocalizedLearningPath,
-    language?: SupportedLanguages,
+    learningPath: LearningPathSchema,
     isEnrolled = false,
   ): Promise<LearningPathDisplaySchema> {
     return {
@@ -1067,12 +1089,8 @@ export class LearningPathService {
         certificateFontColor: learningPath.settings?.certificateFontColor ?? null,
       },
       isEnrolled,
-      title: this.resolveLocalizedText(learningPath.title, language, learningPath.baseLanguage),
-      description: this.resolveLocalizedText(
-        learningPath.description,
-        language,
-        learningPath.baseLanguage,
-      ),
+      title: learningPath.title,
+      description: learningPath.description,
     };
   }
 
@@ -1144,19 +1162,6 @@ export class LearningPathService {
       console.error(`Failed to get signed URL for ${reference}:`, error);
       return reference;
     }
-  }
-
-  private resolveLocalizedText(
-    localizedText: LearningPathSchema["title"] | string,
-    language: SupportedLanguages | undefined,
-    baseLanguage: SupportedLanguages,
-  ) {
-    if (typeof localizedText === "string") return localizedText;
-
-    const requestedValue = language ? localizedText[language] : undefined;
-    const baseValue = localizedText[baseLanguage];
-
-    return requestedValue ?? baseValue ?? Object.values(localizedText)[0] ?? "";
   }
 
   private buildLearningPathProgressSummary(progressState: LearningPathProgressState) {

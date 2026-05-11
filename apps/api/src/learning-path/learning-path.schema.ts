@@ -3,7 +3,6 @@ import {
   LEARNING_PATH_PROGRESS_STATUSES,
   LEARNING_PATH_STATUSES,
   SUPPORTED_LANGUAGES,
-  type LocalizedText,
 } from "@repo/shared";
 import { type Static, Type } from "@sinclair/typebox";
 
@@ -18,7 +17,6 @@ import {
 
 export const learningPathStatusOptions = Type.Enum(LEARNING_PATH_STATUSES);
 export const supportedLanguagesOptions = Type.Enum(SUPPORTED_LANGUAGES);
-export const localizedTextSchema = Type.Record(Type.String(), Type.String());
 export const learningPathProgressStatusOptions = Type.Union([
   Type.Literal(LEARNING_PATH_PROGRESS_STATUSES.NOT_STARTED),
   Type.Literal(LEARNING_PATH_PROGRESS_STATUSES.IN_PROGRESS),
@@ -27,8 +25,8 @@ export const learningPathProgressStatusOptions = Type.Union([
 
 export const learningPathSchema = Type.Object({
   id: UUIDSchema,
-  title: localizedTextSchema,
-  description: localizedTextSchema,
+  title: Type.String(),
+  description: Type.String(),
   thumbnailReference: Type.Union([Type.String(), Type.Null()]),
   status: learningPathStatusOptions,
   includesCertificate: Type.Boolean(),
@@ -254,47 +252,14 @@ export const learningPathCertificateShareSchema = Type.Union([
   Type.Null(),
 ]);
 
-export type LearningPathSchema = {
-  id: string;
-  title: LocalizedText;
-  description: LocalizedText;
-  thumbnailReference: string | null;
-  status: Static<typeof learningPathStatusOptions>;
-  includesCertificate: boolean;
-  settings: Static<typeof learningPathSettingsSchema>;
-  sequenceEnabled: boolean;
-  authorId: string;
-  baseLanguage: Static<typeof supportedLanguagesOptions>;
-  availableLocales: Static<typeof supportedLanguagesOptions>[];
-  createdAt: string;
-  updatedAt: string;
-};
+export type LearningPathSchema = Static<typeof learningPathSchema>;
 export type LearningPathCourseSchema = Static<typeof learningPathCourseSchema>;
 export type LearningPathCourseDetailSchema = Static<typeof learningPathCourseDetailSchema>;
 export type LearningPathCourseOptionSchema = Static<typeof learningPathCourseOptionSchema>;
 export type LearningPathCoursePreviewSchema = Static<typeof learningPathCoursePreviewSchema>;
-export type LearningPathDisplaySchema = Omit<
-  LearningPathSchema,
-  "title" | "description" | "settings"
-> & {
-  title: string;
-  description: string;
-  settings: Static<typeof learningPathSettingsResponseSchema>;
-  isEnrolled: boolean;
-};
-export type LearningPathListItemSchema = LearningPathDisplaySchema & {
-  availableCourseOptions: LearningPathCourseOptionSchema[];
-  courses: LearningPathCoursePreviewSchema[];
-};
-export type LearningPathDetailSchema = LearningPathDisplaySchema & {
-  availableCourseOptions: LearningPathCourseOptionSchema[];
-  progress: Static<typeof learningPathProgressStatusOptions>;
-  progressValue: number;
-  completedCourseCount: number;
-  totalCourseCount: number;
-  certificateReady: boolean;
-  courses: LearningPathCourseDetailSchema[];
-};
+export type LearningPathDisplaySchema = Static<typeof learningPathDisplaySchema>;
+export type LearningPathListItemSchema = Static<typeof learningPathListItemSchema>;
+export type LearningPathDetailSchema = Static<typeof learningPathDetailSchema>;
 export type CreateLearningPathBody = Static<typeof createLearningPathSchema>;
 export type UpdateLearningPathBody = Static<typeof updateLearningPathSchema>;
 export type LearningPathCourseIdsBody = Static<typeof learningPathCourseIdsSchema>;

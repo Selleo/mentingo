@@ -171,6 +171,7 @@ export interface CurrentUserResponse {
       | "integration_api.use"
       | "tenant.manage"
       | "course.ai_generation"
+      | "activity_log.read"
     )[];
     shouldVerifyMFA: boolean;
     onboardingStatus: {
@@ -3550,8 +3551,8 @@ export interface CreateLearningPathResponse {
   data: {
     /** @format uuid */
     id: string;
-    title: object;
-    description: object;
+    title: string;
+    description: string;
     thumbnailReference: string | null;
     status: "draft" | "published" | "private";
     includesCertificate: boolean;
@@ -3593,8 +3594,8 @@ export interface UpdateLearningPathResponse {
   data: {
     /** @format uuid */
     id: string;
-    title: object;
-    description: object;
+    title: string;
+    description: string;
     thumbnailReference: string | null;
     status: "draft" | "published" | "private";
     includesCertificate: boolean;
@@ -3618,8 +3619,8 @@ export interface CreateLanguageResponse {
   data: {
     /** @format uuid */
     id: string;
-    title: object;
-    description: object;
+    title: string;
+    description: string;
     thumbnailReference: string | null;
     status: "draft" | "published" | "private";
     includesCertificate: boolean;
@@ -10109,6 +10110,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         page?: number;
         /** @min 1 */
         perPage?: number;
+        email?: string;
+        from?: string;
+        to?: string;
       },
       params: RequestParams = {},
     ) =>

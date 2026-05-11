@@ -1,16 +1,16 @@
-import type { LearningPathCoursePreviewSchema, LearningPathSchema } from "./learning-path.schema";
+import type { LearningPathCoursePreviewSchema } from "./learning-path.schema";
 import type { LearningPathSettings } from "./types/learning-path-settings.types";
 import type {
   LearningPathCertificateStatus,
   LearningPathEntityType,
   LearningPathStatus,
-  LocalizedText,
 } from "@repo/shared";
-import type { SQL } from "drizzle-orm";
+import type { InferSelectModel, SQL } from "drizzle-orm";
 import type { UUIDType } from "src/common";
+import type { learningPaths } from "src/storage/schema";
 import type { ProgressStatus } from "src/utils/types/progress.type";
 
-export type ExistingLearningPath = LearningPathSchema;
+export type ExistingLearningPath = InferSelectModel<typeof learningPaths>;
 
 export type LearningPathCourseProgressRow = {
   courseId: UUIDType;
@@ -81,12 +81,12 @@ export type LearningPathSourceSnapshot = {
 };
 
 export type LearningPathUpdateData = {
-  title?: LocalizedText | SQL<unknown>;
-  description?: LocalizedText | SQL<unknown>;
+  title?: SQL<unknown>;
+  description?: SQL<unknown>;
   thumbnailReference?: string | null;
   status?: LearningPathStatus;
   includesCertificate?: boolean;
   settings?: LearningPathSettings | SQL<unknown>;
   sequenceEnabled?: boolean;
-  availableLocales?: LearningPathSchema["availableLocales"];
+  availableLocales?: ExistingLearningPath["availableLocales"];
 };

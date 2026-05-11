@@ -1,4 +1,3 @@
-import type { LearningPathSchema } from "./learning-path.schema";
 import type { SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
 import type { SortEnrolledStudentsOptions } from "src/courses/schemas/courseQuery";
@@ -19,9 +18,4 @@ export type LearningPathListQuery = {
   language?: SupportedLanguages;
   searchQuery?: string;
   visibility?: { canReadAll: boolean; canReadOwn: boolean; studentId: UUIDType };
-};
-
-export type LocalizedLearningPath = Omit<LearningPathSchema, "title" | "description"> & {
-  title: string;
-  description: string;
 };

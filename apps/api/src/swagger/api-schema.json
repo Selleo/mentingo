@@ -28847,20 +28847,10 @@
                 "type": "string"
               },
               "title": {
-                "type": "object",
-                "patternProperties": {
-                  "^(.*)$": {
-                    "type": "string"
-                  }
-                }
+                "type": "string"
               },
               "description": {
-                "type": "object",
-                "patternProperties": {
-                  "^(.*)$": {
-                    "type": "string"
-                  }
-                }
+                "type": "string"
               },
               "thumbnailReference": {
                 "anyOf": [
@@ -29114,20 +29104,10 @@
                 "type": "string"
               },
               "title": {
-                "type": "object",
-                "patternProperties": {
-                  "^(.*)$": {
-                    "type": "string"
-                  }
-                }
+                "type": "string"
               },
               "description": {
-                "type": "object",
-                "patternProperties": {
-                  "^(.*)$": {
-                    "type": "string"
-                  }
-                }
+                "type": "string"
               },
               "thumbnailReference": {
                 "anyOf": [
@@ -29287,20 +29267,10 @@
                 "type": "string"
               },
               "title": {
-                "type": "object",
-                "patternProperties": {
-                  "^(.*)$": {
-                    "type": "string"
-                  }
-                }
+                "type": "string"
               },
               "description": {
-                "type": "object",
-                "patternProperties": {
-                  "^(.*)$": {
-                    "type": "string"
-                  }
-                }
+                "type": "string"
               },
               "thumbnailReference": {
                 "anyOf": [
