@@ -39,7 +39,7 @@ import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { userHasAnyPermissionsCondition } from "src/common/permissions/permission-sql.utils";
 import { LocalizationService } from "src/localization/localization.service";
-import { DB_ADMIN } from "src/storage/db/db.providers";
+import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   courses,
   groupLearningPaths,
@@ -63,6 +63,11 @@ import {
   type LearningPathSettings,
 } from "./types/learning-path-settings.types";
 
+import type {
+  LearningPathEnrolledStudentsQuery,
+  LearningPathListQuery,
+  LocalizedLearningPath,
+} from "./learning-path.repository.types";
 import type { CreateLearningPathBody } from "./learning-path.schema";
 import type {
   LearningPathCourseLink,
@@ -73,31 +78,12 @@ import type {
 } from "./learning-path.types";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
-import type { SortEnrolledStudentsOptions } from "src/courses/schemas/courseQuery";
-import type { GroupsFilterSchema } from "src/group/group.types";
 import type { ProgressStatus } from "src/utils/types/progress.type";
-
-type LearningPathEnrolledStudentsQuery = {
-  learningPathId: UUIDType;
-  keyword?: string;
-  sort?: SortEnrolledStudentsOptions;
-  groups?: GroupsFilterSchema;
-  page?: number;
-  perPage?: number;
-};
-
-type LearningPathListQuery = {
-  page?: number;
-  perPage?: number;
-  language?: SupportedLanguages;
-  searchQuery?: string;
-  visibility?: { canReadAll: boolean; canReadOwn: boolean; studentId: UUIDType };
-};
 
 @Injectable()
 export class LearningPathRepository {
   constructor(
-    @Inject("DB") private readonly db: DatabasePg,
+    @Inject(DB) private readonly db: DatabasePg,
     @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
     private readonly localizationService: LocalizationService,
   ) {}
@@ -181,6 +167,32 @@ export class LearningPathRepository {
     });
   }
 
+  async findLocalizedLearningPathById(
+    id: UUIDType,
+    language?: SupportedLanguages,
+    dbInstance: DatabasePg = this.db,
+  ): Promise<LocalizedLearningPath | null> {
+    const [learningPath] = await dbInstance
+      .select({
+        ...getTableColumns(learningPaths),
+        title: this.localizationService.getLocalizedSqlField(
+          learningPaths.title,
+          language,
+          learningPaths,
+        ),
+        description: this.localizationService.getLocalizedSqlField(
+          learningPaths.description,
+          language,
+          learningPaths,
+        ),
+      })
+      .from(learningPaths)
+      .where(eq(learningPaths.id, id))
+      .limit(1);
+
+    return learningPath ?? null;
+  }
+
   async getLearningPaths(query: LearningPathListQuery = {}, dbInstance: DatabasePg = this.db) {
     const { page = 1, perPage = DEFAULT_PAGE_SIZE, language, searchQuery, visibility } = query;
 
@@ -196,7 +208,19 @@ export class LearningPathRepository {
     const whereCondition = and(visibilityCondition, searchCondition);
 
     const queriedLearningPaths = await dbInstance
-      .select(getTableColumns(learningPaths))
+      .select({
+        ...getTableColumns(learningPaths),
+        title: this.localizationService.getLocalizedSqlField(
+          learningPaths.title,
+          language,
+          learningPaths,
+        ),
+        description: this.localizationService.getLocalizedSqlField(
+          learningPaths.description,
+          language,
+          learningPaths,
+        ),
+      })
       .from(learningPaths)
       .leftJoin(
         studentLearningPaths,
@@ -655,25 +679,7 @@ export class LearningPathRepository {
 
   async getLearningPathSourceSnapshot(learningPathId: UUIDType, dbInstance: DatabasePg = this.db) {
     const [learningPath] = await dbInstance
-      .select({
-        id: learningPaths.id,
-        title: learningPaths.title,
-        description: learningPaths.description,
-        thumbnailReference: learningPaths.thumbnailReference,
-        status: learningPaths.status,
-        includesCertificate: learningPaths.includesCertificate,
-        settings: learningPaths.settings,
-        sequenceEnabled: learningPaths.sequenceEnabled,
-        authorId: learningPaths.authorId,
-        originType: learningPaths.originType,
-        sourceLearningPathId: learningPaths.sourceLearningPathId,
-        sourceTenantId: learningPaths.sourceTenantId,
-        baseLanguage: learningPaths.baseLanguage,
-        availableLocales: learningPaths.availableLocales,
-        tenantId: learningPaths.tenantId,
-        createdAt: learningPaths.createdAt,
-        updatedAt: learningPaths.updatedAt,
-      })
+      .select()
       .from(learningPaths)
       .where(eq(learningPaths.id, learningPathId))
       .limit(1);
@@ -681,14 +687,7 @@ export class LearningPathRepository {
     if (!learningPath) return null;
 
     const courseLinks = await dbInstance
-      .select({
-        id: learningPathCourses.id,
-        learningPathId: learningPathCourses.learningPathId,
-        courseId: learningPathCourses.courseId,
-        displayOrder: learningPathCourses.displayOrder,
-        createdAt: learningPathCourses.createdAt,
-        updatedAt: learningPathCourses.updatedAt,
-      })
+      .select()
       .from(learningPathCourses)
       .where(eq(learningPathCourses.learningPathId, learningPathId))
       .orderBy(learningPathCourses.displayOrder);
@@ -821,9 +820,7 @@ export class LearningPathRepository {
 
   async getCourseById(courseId: UUIDType, dbInstance: DatabasePg = this.db) {
     const [course] = await dbInstance
-      .select({
-        ...getTableColumns(courses),
-      })
+      .select()
       .from(courses)
       .where(eq(courses.id, courseId))
       .limit(1);
@@ -1817,7 +1814,7 @@ export class LearningPathRepository {
     dbInstance: DatabasePg = this.db,
   ) {
     const [certificate] = await dbInstance
-      .select({ ...getTableColumns(learningPathCertificates) })
+      .select()
       .from(learningPathCertificates)
       .where(
         and(
@@ -1836,7 +1833,7 @@ export class LearningPathRepository {
     dbInstance: DatabasePg = this.db,
   ) {
     const [certificate] = await dbInstance
-      .select({ ...getTableColumns(learningPathCertificates) })
+      .select()
       .from(learningPathCertificates)
       .where(
         and(
@@ -1852,13 +1849,18 @@ export class LearningPathRepository {
   async findLearningPathCertificateByIdForRender(
     userId: UUIDType,
     certificateId: UUIDType,
+    language?: SupportedLanguages,
     dbInstance: DatabasePg = this.db,
   ) {
     const [certificate] = await dbInstance
       .select({
         ...getTableColumns(learningPathCertificates),
         fullName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
-        pathTitle: learningPaths.title,
+        pathTitle: this.localizationService.getLocalizedSqlField(
+          learningPaths.title,
+          language,
+          learningPaths,
+        ),
         certificateSignature: sql<string | null>`
           ${learningPaths.settings} ->> 'certificateSignature'
         `,
@@ -1882,6 +1884,7 @@ export class LearningPathRepository {
 
   async findPublicLearningPathCertificateById(
     certificateId: UUIDType,
+    language?: SupportedLanguages,
     dbInstance: DatabasePg = this.db,
   ) {
     const [certificate] = await dbInstance
@@ -1890,7 +1893,11 @@ export class LearningPathRepository {
         tenantHost: tenants.host,
         tenantName: tenants.name,
         fullName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
-        pathTitle: learningPaths.title,
+        pathTitle: this.localizationService.getLocalizedSqlField(
+          learningPaths.title,
+          language,
+          learningPaths,
+        ),
         certificateSignature: sql<string | null>`
           ${learningPaths.settings} ->> 'certificateSignature'
         `,

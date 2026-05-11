@@ -20,5 +20,8 @@ export const LEARNING_PATH_ERRORS = {
   EXPORT_COURSE_FAILED: "learningPathExport.error.courseExportFailed",
   EXPORT_TARGET_AUTHOR_MISSING: "learningPathExport.error.targetAuthorMissing",
   EXPORT_JOB_NOT_FOUND: "learningPathExport.error.jobNotFound",
+  EXPORT_JOB_DATA_INVALID: "learningPathExport.error.invalidJobData",
+  EXPORT_ID_INVALID: "learningPathExport.error.invalidExportId",
+  EXPORT_LINK_INVALID: "learningPathExport.error.invalidExportLink",
   CERTIFICATE_DISABLED: "learningPathCertificate.error.disabled",
 } as const;

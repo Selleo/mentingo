@@ -2582,7 +2582,7 @@ export class CourseService {
     courseId: UUIDType,
     studentId: UUIDType,
     paymentId: string | null = null,
-    trx: DatabasePg,
+    trx: DatabasePg = this.db,
   ) {
     const alreadyHasEnrollmentRecord = Boolean(
       (

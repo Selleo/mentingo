@@ -1,6 +1,5 @@
 import { Body, Controller, Delete, Param, Patch, Post } from "@nestjs/common";
 import { PERMISSIONS } from "@repo/shared";
-import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
 import { BaseResponse, baseResponse, UUIDSchema, type UUIDType } from "src/common";
@@ -11,7 +10,9 @@ import { CurrentUserType } from "src/common/types/current-user.type";
 import { LEARNING_PATH_SUCCESS_MESSAGES } from "../constants/learning-path.success-messages";
 import {
   learningPathCourseIdsSchema,
+  learningPathMessageResponseSchema,
   type LearningPathCourseIdsBody,
+  type LearningPathMessageResponse,
 } from "../learning-path.schema";
 import { LearningPathService } from "../services/learning-path.service";
 
@@ -29,13 +30,13 @@ export class LearningPathCourseController {
       { type: "param", name: "learningPathId", schema: UUIDSchema },
       { type: "body", schema: learningPathCourseIdsSchema },
     ],
-    response: baseResponse(Type.Object({ message: Type.String() })),
+    response: baseResponse(learningPathMessageResponseSchema),
   })
   async addCoursesToLearningPath(
     @Param("learningPathId") learningPathId: UUIDType,
     @Body() body: LearningPathCourseIdsBody,
     @CurrentUser() currentUser: CurrentUserType,
-  ): Promise<BaseResponse<{ message: string }>> {
+  ): Promise<BaseResponse<LearningPathMessageResponse>> {
     await this.learningPathService.addCoursesToLearningPath(learningPathId, body, currentUser);
 
     return new BaseResponse({ message: LEARNING_PATH_SUCCESS_MESSAGES.COURSES_ADDED });
@@ -51,13 +52,13 @@ export class LearningPathCourseController {
       { type: "param", name: "learningPathId", schema: UUIDSchema },
       { type: "param", name: "courseId", schema: UUIDSchema },
     ],
-    response: baseResponse(Type.Object({ message: Type.String() })),
+    response: baseResponse(learningPathMessageResponseSchema),
   })
   async removeCourseFromLearningPath(
     @Param("learningPathId") learningPathId: UUIDType,
     @Param("courseId") courseId: UUIDType,
     @CurrentUser() currentUser: CurrentUserType,
-  ): Promise<BaseResponse<{ message: string }>> {
+  ): Promise<BaseResponse<LearningPathMessageResponse>> {
     await this.learningPathService.removeCourseFromLearningPath(
       learningPathId,
       courseId,
@@ -77,13 +78,13 @@ export class LearningPathCourseController {
       { type: "param", name: "learningPathId", schema: UUIDSchema },
       { type: "body", schema: learningPathCourseIdsSchema },
     ],
-    response: baseResponse(Type.Object({ message: Type.String() })),
+    response: baseResponse(learningPathMessageResponseSchema),
   })
   async reorderLearningPathCourses(
     @Param("learningPathId") learningPathId: UUIDType,
     @Body() body: LearningPathCourseIdsBody,
     @CurrentUser() currentUser: CurrentUserType,
-  ): Promise<BaseResponse<{ message: string }>> {
+  ): Promise<BaseResponse<LearningPathMessageResponse>> {
     await this.learningPathService.reorderLearningPathCourses(learningPathId, body, currentUser);
 
     return new BaseResponse({ message: LEARNING_PATH_SUCCESS_MESSAGES.COURSES_REORDERED });

@@ -34,10 +34,12 @@ import {
   createLearningPathSchema,
   learningPathDetailSchema,
   learningPathListItemSchema,
+  learningPathMessageResponseSchema,
   learningPathSchema,
   type CreateLearningPathBody,
   type LearningPathDetailSchema,
   type LearningPathListItemSchema,
+  type LearningPathMessageResponse,
   type LearningPathSchema,
   type UpdateLearningPathBody,
   updateLearningPathSchema,
@@ -200,12 +202,12 @@ export class LearningPathController {
   @RequirePermission(PERMISSIONS.LEARNING_PATH_DELETE)
   @Validate({
     request: [{ type: "param", name: "learningPathId", schema: UUIDSchema }],
-    response: baseResponse(Type.Object({ message: Type.String() })),
+    response: baseResponse(learningPathMessageResponseSchema),
   })
   async deleteLearningPath(
     @Param("learningPathId") learningPathId: UUIDType,
     @CurrentUser() currentUser: CurrentUserType,
-  ): Promise<BaseResponse<{ message: string }>> {
+  ): Promise<BaseResponse<LearningPathMessageResponse>> {
     await this.learningPathService.deleteLearningPath(learningPathId, currentUser);
 
     return new BaseResponse({ message: LEARNING_PATH_SUCCESS_MESSAGES.DELETED });

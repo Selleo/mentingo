@@ -41,6 +41,7 @@ import { DEFAULT_LEARNING_PATH_SETTINGS } from "../types/learning-path-settings.
 import { LearningPathCourseSyncService } from "./learning-path-course-sync.service";
 import { LearningPathExportService } from "./learning-path-export.service";
 
+import type { LocalizedLearningPath } from "../learning-path.repository.types";
 import type {
   CreateLearningPathBody,
   LearningPathCourseIdsBody,
@@ -133,7 +134,7 @@ export class LearningPathService {
 
   private canUpdateLearningPathCourses(
     currentUser: CurrentUserType,
-    learningPath: ExistingLearningPath,
+    learningPath: Pick<ExistingLearningPath, "authorId">,
   ) {
     return (
       hasPermission(currentUser.permissions, PERMISSIONS.LEARNING_PATH_COURSE_UPDATE) ||
@@ -421,8 +422,19 @@ export class LearningPathService {
       ? await this.buildLearningPathAvailableCourseOptions([learningPathId], language)
       : new Map();
 
+    const localizedLearningPath = await this.learningPathRepository.findLocalizedLearningPathById(
+      learningPathId,
+      language,
+    );
+
+    if (!localizedLearningPath) throw new NotFoundException(LEARNING_PATH_ERRORS.NOT_FOUND);
+
     return {
-      ...(await this.buildLearningPathDisplay(learningPath, language, progressState.isEnrolled)),
+      ...(await this.buildLearningPathDisplay(
+        localizedLearningPath,
+        language,
+        progressState.isEnrolled,
+      )),
       ...progressSummary,
       availableCourseOptions: availableCourseOptionsByPathId.get(learningPathId) ?? [],
       certificateReady:
@@ -1041,7 +1053,7 @@ export class LearningPathService {
   }
 
   private async buildLearningPathDisplay(
-    learningPath: LearningPathSchema,
+    learningPath: LearningPathSchema | LocalizedLearningPath,
     language?: SupportedLanguages,
     isEnrolled = false,
   ): Promise<LearningPathDisplaySchema> {
@@ -1135,10 +1147,12 @@ export class LearningPathService {
   }
 
   private resolveLocalizedText(
-    localizedText: LearningPathSchema["title"],
+    localizedText: LearningPathSchema["title"] | string,
     language: SupportedLanguages | undefined,
     baseLanguage: SupportedLanguages,
   ) {
+    if (typeof localizedText === "string") return localizedText;
+
     const requestedValue = language ? localizedText[language] : undefined;
     const baseValue = localizedText[baseLanguage];
 

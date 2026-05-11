@@ -25,8 +25,10 @@ import { GroupsFilterSchema } from "src/group/group.types";
 import { LEARNING_PATH_SUCCESS_MESSAGES } from "../constants/learning-path.success-messages";
 import {
   learningPathGroupIdsSchema,
+  learningPathMessageResponseSchema,
   learningPathStudentIdsSchema,
   type LearningPathGroupIdsBody,
+  type LearningPathMessageResponse,
   type LearningPathStudentIdsBody,
 } from "../learning-path.schema";
 import { LearningPathService } from "../services/learning-path.service";
@@ -72,12 +74,12 @@ export class LearningPathEnrollmentController {
   @RequirePermission(PERMISSIONS.LEARNING_PATH_READ, PERMISSIONS.LEARNING_PROGRESS_UPDATE)
   @Validate({
     request: [{ type: "param", name: "learningPathId", schema: UUIDSchema }],
-    response: baseResponse(Type.Object({ message: Type.String() })),
+    response: baseResponse(learningPathMessageResponseSchema),
   })
   async enrollCurrentUserToLearningPath(
     @Param("learningPathId") learningPathId: UUIDType,
     @CurrentUser() currentUser: CurrentUserType,
-  ): Promise<BaseResponse<{ message: string }>> {
+  ): Promise<BaseResponse<LearningPathMessageResponse>> {
     await this.learningPathService.enrollCurrentUserToLearningPath(learningPathId, currentUser);
 
     return new BaseResponse({ message: LEARNING_PATH_SUCCESS_MESSAGES.USERS_ENROLLED });
@@ -90,13 +92,13 @@ export class LearningPathEnrollmentController {
       { type: "param", name: "learningPathId", schema: UUIDSchema },
       { type: "body", schema: learningPathStudentIdsSchema },
     ],
-    response: baseResponse(Type.Object({ message: Type.String() })),
+    response: baseResponse(learningPathMessageResponseSchema),
   })
   async enrollUsersToLearningPath(
     @Param("learningPathId") learningPathId: UUIDType,
     @Body() body: LearningPathStudentIdsBody,
     @CurrentUser() currentUser: CurrentUserType,
-  ): Promise<BaseResponse<{ message: string }>> {
+  ): Promise<BaseResponse<LearningPathMessageResponse>> {
     await this.learningPathService.enrollUsersToLearningPath(learningPathId, body, currentUser);
 
     return new BaseResponse({ message: LEARNING_PATH_SUCCESS_MESSAGES.USERS_ENROLLED });
@@ -109,13 +111,13 @@ export class LearningPathEnrollmentController {
       { type: "param", name: "learningPathId", schema: UUIDSchema },
       { type: "body", schema: learningPathStudentIdsSchema },
     ],
-    response: baseResponse(Type.Object({ message: Type.String() })),
+    response: baseResponse(learningPathMessageResponseSchema),
   })
   async unenrollUsersFromLearningPath(
     @Param("learningPathId") learningPathId: UUIDType,
     @Body() body: LearningPathStudentIdsBody,
     @CurrentUser() currentUser: CurrentUserType,
-  ): Promise<BaseResponse<{ message: string }>> {
+  ): Promise<BaseResponse<LearningPathMessageResponse>> {
     await this.learningPathService.unenrollUsersFromLearningPath(learningPathId, body, currentUser);
 
     return new BaseResponse({ message: LEARNING_PATH_SUCCESS_MESSAGES.USERS_UNENROLLED });
@@ -128,13 +130,13 @@ export class LearningPathEnrollmentController {
       { type: "param", name: "learningPathId", schema: UUIDSchema },
       { type: "body", schema: learningPathGroupIdsSchema },
     ],
-    response: baseResponse(Type.Object({ message: Type.String() })),
+    response: baseResponse(learningPathMessageResponseSchema),
   })
   async enrollGroupsToLearningPath(
     @Param("learningPathId") learningPathId: UUIDType,
     @Body() body: LearningPathGroupIdsBody,
     @CurrentUser() currentUser: CurrentUserType,
-  ): Promise<BaseResponse<{ message: string }>> {
+  ): Promise<BaseResponse<LearningPathMessageResponse>> {
     await this.learningPathService.enrollGroupsToLearningPath(learningPathId, body, currentUser);
 
     return new BaseResponse({ message: LEARNING_PATH_SUCCESS_MESSAGES.GROUPS_ENROLLED });
@@ -147,13 +149,13 @@ export class LearningPathEnrollmentController {
       { type: "param", name: "learningPathId", schema: UUIDSchema },
       { type: "body", schema: learningPathGroupIdsSchema },
     ],
-    response: baseResponse(Type.Object({ message: Type.String() })),
+    response: baseResponse(learningPathMessageResponseSchema),
   })
   async unenrollGroupsFromLearningPath(
     @Param("learningPathId") learningPathId: UUIDType,
     @Body() body: LearningPathGroupIdsBody,
     @CurrentUser() currentUser: CurrentUserType,
-  ): Promise<BaseResponse<{ message: string }>> {
+  ): Promise<BaseResponse<LearningPathMessageResponse>> {
     await this.learningPathService.unenrollGroupsFromLearningPath(
       learningPathId,
       body,

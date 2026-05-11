@@ -2756,6 +2756,36 @@
     "adminLearningPaths": "Lernpfade",
     "adminLearningPathEditor": "Lernpfad Editor"
   },
+  "masterCourse": {
+    "error": {
+      "sourceCourseNotFound": "Quellkurs nicht gefunden",
+      "noTargetTenants": "Waehlen Sie mindestens einen Ziel-Tenant aus",
+      "exportedCourseCannotBeSource": "Ein exportierter Kurs kann nicht als Quelle verwendet werden",
+      "exportLinkMissing": "Kurs-Exportverknuepfung nicht gefunden",
+      "jobNotFound": "Kurs-Exportauftrag nicht gefunden",
+      "targetAuthorMissing": "Autor im Ziel-Tenant nicht gefunden",
+      "targetCourseMissing": "Zielkurs nicht gefunden",
+      "exportedCourseReadonly": "Exportierter Kurs ist schreibgeschuetzt"
+    }
+  },
+  "learningPathExport": {
+    "error": {
+      "noTargetTenants": "Waehlen Sie mindestens einen Ziel-Tenant aus",
+      "exportLinkMissing": "Lernpfad-Exportverknuepfung nicht gefunden",
+      "noCourses": "Der Lernpfad muss vor dem Export mindestens einen Kurs enthalten",
+      "courseExportFailed": "Einer der Lernpfadkurse konnte nicht exportiert werden",
+      "targetAuthorMissing": "Autor im Ziel-Tenant nicht gefunden",
+      "jobNotFound": "Lernpfad-Exportauftrag nicht gefunden",
+      "invalidJobData": "Ungueltige Daten fuer den Lernpfad-Exportauftrag",
+      "invalidExportId": "Ungueltige Lernpfad-Export-ID",
+      "invalidExportLink": "Ungueltige Lernpfad-Exportverknuepfung"
+    }
+  },
+  "learningPathCertificate": {
+    "error": {
+      "disabled": "Lernpfad-Zertifikate sind deaktiviert"
+    }
+  },
   "activityLogsView": {
     "filters": {
       "placeholder": {

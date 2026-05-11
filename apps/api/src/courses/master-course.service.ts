@@ -62,7 +62,7 @@ export class MasterCourseService {
       throw new BadRequestException("masterCourse.error.noTargetTenants");
 
     const sourceCourse = await this.masterCourseRepository.getCourseById(sourceCourseId);
-    if (!sourceCourse) throw new NotFoundException("Course not found");
+    if (!sourceCourse) throw new NotFoundException("masterCourse.error.sourceCourseNotFound");
 
     if (sourceCourse.originType === COURSE_ORIGIN_TYPES.EXPORTED) {
       throw new BadRequestException("masterCourse.error.exportedCourseCannotBeSource");
@@ -246,7 +246,7 @@ export class MasterCourseService {
     );
 
     if (!sourceCourse) {
-      throw new NotFoundException("Course not found");
+      throw new NotFoundException("masterCourse.error.sourceCourseNotFound");
     }
 
     if (sourceCourse.originType === COURSE_ORIGIN_TYPES.EXPORTED) {

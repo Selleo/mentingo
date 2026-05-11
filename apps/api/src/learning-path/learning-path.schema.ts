@@ -159,6 +159,8 @@ export const learningPathCourseIdsSchema = Type.Object({
   courseIds: Type.Array(UUIDSchema),
 });
 
+export const learningPathMessageResponseSchema = Type.Object({ message: Type.String() });
+
 export const learningPathStudentIdsSchema = Type.Object({
   studentIds: Type.Array(UUIDSchema),
 });
@@ -296,6 +298,7 @@ export type LearningPathDetailSchema = LearningPathDisplaySchema & {
 export type CreateLearningPathBody = Static<typeof createLearningPathSchema>;
 export type UpdateLearningPathBody = Static<typeof updateLearningPathSchema>;
 export type LearningPathCourseIdsBody = Static<typeof learningPathCourseIdsSchema>;
+export type LearningPathMessageResponse = Static<typeof learningPathMessageResponseSchema>;
 export type LearningPathStudentIdsBody = Static<typeof learningPathStudentIdsSchema>;
 export type LearningPathGroupIdsBody = Static<typeof learningPathGroupIdsSchema>;
 export type LearningPathExportBody = Static<typeof learningPathExportBodySchema>;

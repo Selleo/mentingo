@@ -3411,6 +3411,36 @@
       "missingTenantIdHeader": "Missing X-Tenant-Id header"
     }
   },
+  "masterCourse": {
+    "error": {
+      "sourceCourseNotFound": "Source course not found",
+      "noTargetTenants": "Select at least one target tenant",
+      "exportedCourseCannotBeSource": "Exported course cannot be used as a source",
+      "exportLinkMissing": "Course export link not found",
+      "jobNotFound": "Course export job not found",
+      "targetAuthorMissing": "Target tenant author not found",
+      "targetCourseMissing": "Target course not found",
+      "exportedCourseReadonly": "Exported course is read-only"
+    }
+  },
+  "learningPathExport": {
+    "error": {
+      "noTargetTenants": "Select at least one target tenant",
+      "exportLinkMissing": "Learning path export link not found",
+      "noCourses": "Learning path must include at least one course before export",
+      "courseExportFailed": "Failed to export one of the learning path courses",
+      "targetAuthorMissing": "Target tenant author not found",
+      "jobNotFound": "Learning path export job not found",
+      "invalidJobData": "Invalid learning path export job data",
+      "invalidExportId": "Invalid learning path export id",
+      "invalidExportLink": "Invalid learning path export link"
+    }
+  },
+  "learningPathCertificate": {
+    "error": {
+      "disabled": "Learning path certificates are disabled"
+    }
+  },
   "activityLogsView": {
     "filters": {
       "placeholder": {

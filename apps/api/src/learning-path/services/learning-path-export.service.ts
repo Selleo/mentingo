@@ -175,7 +175,7 @@ export class LearningPathExportService {
       !uuidValidate(data.targetTenantId) ||
       !uuidValidate(data.actorId)
     ) {
-      throw new BadRequestException("Invalid learning path export job data");
+      throw new BadRequestException(LEARNING_PATH_ERRORS.EXPORT_JOB_DATA_INVALID);
     }
 
     const exportId = await this.resolveExportIdForJob(data);
@@ -236,7 +236,7 @@ export class LearningPathExportService {
       const trimmedExportId = String(exportId ?? "").trim();
 
       if (!uuidValidate(trimmedExportId)) {
-        throw new BadRequestException("Invalid learning path export id");
+        throw new BadRequestException(LEARNING_PATH_ERRORS.EXPORT_ID_INVALID);
       }
 
       const exportLink = await this.learningPathRepository.getLearningPathExportById(
@@ -264,7 +264,7 @@ export class LearningPathExportService {
           trimmedExportId,
           this.db,
         );
-        throw new BadRequestException("Invalid learning path export link");
+        throw new BadRequestException(LEARNING_PATH_ERRORS.EXPORT_LINK_INVALID);
       }
 
       const sourceSnapshot = await this.learningPathRepository.getLearningPathExportSourceSnapshot(

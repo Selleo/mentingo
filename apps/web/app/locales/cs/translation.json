@@ -2756,6 +2756,36 @@
     "adminLearningPaths": "Vzdělávací cesty",
     "adminLearningPathEditor": "Editor vzdělávací cesty"
   },
+  "masterCourse": {
+    "error": {
+      "sourceCourseNotFound": "Zdrojovy kurz nebyl nalezen",
+      "noTargetTenants": "Vyberte alespon jednoho ciloveho tenanta",
+      "exportedCourseCannotBeSource": "Exportovany kurz nelze pouzit jako zdroj",
+      "exportLinkMissing": "Vazba exportu kurzu nebyla nalezena",
+      "jobNotFound": "Uloha exportu kurzu nebyla nalezena",
+      "targetAuthorMissing": "Autor v cilovem tenantovi nebyl nalezen",
+      "targetCourseMissing": "Cilovy kurz nebyl nalezen",
+      "exportedCourseReadonly": "Exportovany kurz je jen pro cteni"
+    }
+  },
+  "learningPathExport": {
+    "error": {
+      "noTargetTenants": "Vyberte alespon jednoho ciloveho tenanta",
+      "exportLinkMissing": "Vazba exportu vzdelavaci cesty nebyla nalezena",
+      "noCourses": "Vzdelavaci cesta musi pred exportem obsahovat alespon jeden kurz",
+      "courseExportFailed": "Nepodarilo se exportovat jeden z kurzu vzdelavaci cesty",
+      "targetAuthorMissing": "Autor v cilovem tenantovi nebyl nalezen",
+      "jobNotFound": "Uloha exportu vzdelavaci cesty nebyla nalezena",
+      "invalidJobData": "Neplatna data ulohy exportu vzdelavaci cesty",
+      "invalidExportId": "Neplatne ID exportu vzdelavaci cesty",
+      "invalidExportLink": "Neplatna vazba exportu vzdelavaci cesty"
+    }
+  },
+  "learningPathCertificate": {
+    "error": {
+      "disabled": "Certifikaty vzdelavacich cest jsou vypnute"
+    }
+  },
   "activityLogsView": {
     "filters": {
       "placeholder": {

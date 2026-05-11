@@ -128,8 +128,8 @@ export class LearningPathCertificateService {
       (await this.learningPathRepository.findLearningPathCertificateByIdForRender(
         userId,
         certificate.id,
+        language,
       )) as LearningPathCertificateRenderRecord,
-      language,
     );
   }
 
@@ -148,7 +148,7 @@ export class LearningPathCertificateService {
     }
 
     const shareLanguage = this.normalizeLanguage(language);
-    const publicCertificate = await this.getPublicShareCertificate(certificateId);
+    const publicCertificate = await this.getPublicShareCertificate(certificateId, shareLanguage);
     await this.getPublicShareImage(certificateId, shareLanguage);
 
     const shareUrl = this.buildTenantUrl(
@@ -175,7 +175,7 @@ export class LearningPathCertificateService {
 
   async getPublicShareImage(certificateId: UUIDType, language?: SupportedLanguages) {
     const shareLanguage = this.normalizeLanguage(language);
-    const certificate = await this.getPublicShareCertificate(certificateId);
+    const certificate = await this.getPublicShareCertificate(certificateId, shareLanguage);
     const imageKey = this.getShareImageKey(certificate.tenantId, certificateId, shareLanguage);
 
     const exists = await this.s3Service.getFileExists(imageKey).catch((error) => {
@@ -207,6 +207,7 @@ export class LearningPathCertificateService {
     const certificate = await this.learningPathRepository.findLearningPathCertificateByIdForRender(
       userId,
       certificateId,
+      shareLanguage,
     );
 
     if (!certificate?.tenantId) {
@@ -225,9 +226,7 @@ export class LearningPathCertificateService {
 
     const html = buildCertificateMarkup({
       studentName: certificate.fullName || "",
-      courseName: certificate.pathTitle
-        ? this.getLocalizedText(certificate.pathTitle, shareLanguage)
-        : "",
+      courseName: certificate.pathTitle ?? "",
       completionDate: this.formatDate(certificate.issuedAt || null),
       platformLogoUrl: platformLogoImageUrl,
       signatureImageUrl: certificateSignatureImageUrl,
@@ -252,21 +251,16 @@ export class LearningPathCertificateService {
 
     return {
       pdfBuffer,
-      filename: this.buildPdfFilename(
-        certificate.pathTitle ? this.getLocalizedText(certificate.pathTitle, shareLanguage) : null,
-      ),
+      filename: this.buildPdfFilename(certificate.pathTitle),
     };
   }
 
-  private async mapCertificateWithSignatureUrl(
-    certificate: LearningPathCertificateRenderRecord,
-    language: SupportedLanguages,
-  ) {
+  private async mapCertificateWithSignatureUrl(certificate: LearningPathCertificateRenderRecord) {
     return {
       id: certificate.id,
       userId: certificate.userId,
       learningPathId: certificate.learningPathId,
-      courseTitle: this.getLocalizedText(certificate.pathTitle, language),
+      courseTitle: certificate.pathTitle,
       completionDate: this.formatDate(certificate.issuedAt || null),
       fullName: certificate.fullName,
       certificateSignatureUrl: certificate.certificateSignature
@@ -279,7 +273,7 @@ export class LearningPathCertificateService {
 
   private async buildShareRenderContext(certificateId: UUIDType, language?: SupportedLanguages) {
     const shareLanguage = this.normalizeLanguage(language);
-    const certificate = await this.getPublicShareCertificate(certificateId);
+    const certificate = await this.getPublicShareCertificate(certificateId, shareLanguage);
     const settings = await this.settingsService.getGlobalSettingsByTenantId(certificate.tenantId);
 
     const shareUrl = this.buildTenantUrl(
@@ -317,9 +311,12 @@ export class LearningPathCertificateService {
 
   private async getPublicShareCertificate(
     certificateId: UUIDType,
+    language?: SupportedLanguages,
   ): Promise<LearningPathCertificateShareRecord> {
-    const certificate =
-      await this.learningPathRepository.findPublicLearningPathCertificateById(certificateId);
+    const certificate = await this.learningPathRepository.findPublicLearningPathCertificateById(
+      certificateId,
+      language,
+    );
 
     if (!certificate?.tenantId) {
       throw new NotFoundException("studentCertificateView.informations.certificateNotFound");
@@ -391,7 +388,7 @@ export class LearningPathCertificateService {
   }
 
   private getSharePageContent(context: any, embeddedImageSrc: string) {
-    const title = this.getLocalizedText(context.certificate.pathTitle, context.language);
+    const title = context.certificate.pathTitle ?? "";
     const pageTitle = `Learning path completion certificate for "${title}"`;
     const pageDescription = `${context.certificate.fullName} completed "${title}" and earned a certificate.`;
 
@@ -417,7 +414,7 @@ export class LearningPathCertificateService {
 
     return buildCertificateMarkup({
       studentName: context.certificate.fullName || "",
-      courseName: this.getLocalizedText(context.certificate.pathTitle, context.language),
+      courseName: context.certificate.pathTitle ?? "",
       completionDate: context.formattedDate,
       platformLogoUrl: null,
       signatureImageUrl: context.certificateSignatureUrl,
@@ -630,12 +627,5 @@ export class LearningPathCertificateService {
     language: SupportedLanguages,
   ) {
     return `${tenantId}/learning-path-certificate-share/${certificateId}/${language}.png`;
-  }
-
-  private getLocalizedText(
-    text: Record<string, string> | null | undefined,
-    language: SupportedLanguages,
-  ) {
-    return text?.[language] ?? text?.en ?? "";
   }
 }

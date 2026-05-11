@@ -2756,6 +2756,36 @@
     "adminLearningPaths": "Mokymosi keliai",
     "adminLearningPathEditor": "Mokymosi kelio redaktorius"
   },
+  "masterCourse": {
+    "error": {
+      "sourceCourseNotFound": "Saltinio kursas nerastas",
+      "noTargetTenants": "Pasirinkite bent viena tiksline organizacija",
+      "exportedCourseCannotBeSource": "Eksportuotas kursas negali buti naudojamas kaip saltinis",
+      "exportLinkMissing": "Kurso eksporto rysys nerastas",
+      "jobNotFound": "Kurso eksporto uzduotis nerasta",
+      "targetAuthorMissing": "Tikslines organizacijos autorius nerastas",
+      "targetCourseMissing": "Tikslinis kursas nerastas",
+      "exportedCourseReadonly": "Eksportuotas kursas yra tik skaitomas"
+    }
+  },
+  "learningPathExport": {
+    "error": {
+      "noTargetTenants": "Pasirinkite bent viena tiksline organizacija",
+      "exportLinkMissing": "Mokymosi kelio eksporto rysys nerastas",
+      "noCourses": "Pries eksportuojant mokymosi kelyje turi buti bent vienas kursas",
+      "courseExportFailed": "Nepavyko eksportuoti vieno is mokymosi kelio kursu",
+      "targetAuthorMissing": "Tikslines organizacijos autorius nerastas",
+      "jobNotFound": "Mokymosi kelio eksporto uzduotis nerasta",
+      "invalidJobData": "Neteisingi mokymosi kelio eksporto uzduoties duomenys",
+      "invalidExportId": "Neteisingas mokymosi kelio eksporto ID",
+      "invalidExportLink": "Neteisingas mokymosi kelio eksporto rysys"
+    }
+  },
+  "learningPathCertificate": {
+    "error": {
+      "disabled": "Mokymosi kelio sertifikatai isjungti"
+    }
+  },
   "activityLogsView": {
     "filters": {
       "placeholder": {

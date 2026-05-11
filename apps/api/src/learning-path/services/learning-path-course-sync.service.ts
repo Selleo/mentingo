@@ -5,37 +5,36 @@ import {
   LEARNING_PATH_PROGRESS_STATUSES,
 } from "@repo/shared";
 
-import { DatabasePg, type UUIDType } from "src/common";
+import { DatabasePg } from "src/common";
 import { CourseService } from "src/courses/course.service";
+import { DB } from "src/storage/db/db.providers";
 
 import { LearningPathRepository } from "../learning-path.repository";
 
 import { LearningPathCertificateService } from "./learning-path-certificate.service";
 
 import type { LearningPathCourseLink } from "../learning-path.types";
+import type { UUIDType } from "src/common";
 
 const PATH_LINK_ENROLLMENT_TIME_TOLERANCE_MS = 1000;
 
 @Injectable()
 export class LearningPathCourseSyncService {
   constructor(
-    @Inject("DB") private readonly db: DatabasePg,
+    @Inject(DB) private readonly db: DatabasePg,
     private readonly learningPathRepository: LearningPathRepository,
     private readonly courseService: CourseService,
     private readonly learningPathCertificateService: LearningPathCertificateService,
   ) {}
 
   async syncLearningPathEnrollments(learningPathId: string) {
-    const learningPath = await this.learningPathRepository.findLearningPathById(
-      learningPathId,
-      this.db,
-    );
+    const learningPath = await this.learningPathRepository.findLearningPathById(learningPathId);
 
     if (!learningPath) return;
 
     const [studentIds, courseLinks] = await Promise.all([
-      this.learningPathRepository.getLearningPathStudentIds(learningPathId, this.db),
-      this.learningPathRepository.getLearningPathCourses(learningPathId, this.db),
+      this.learningPathRepository.getLearningPathStudentIds(learningPathId),
+      this.learningPathRepository.getLearningPathCourses(learningPathId),
     ]);
 
     if (!studentIds.length) return;
@@ -65,7 +64,6 @@ export class LearningPathCourseSyncService {
     const pathIds = await this.learningPathRepository.getLearningPathIdsForStudentCourse(
       studentId,
       courseId,
-      this.db,
     );
 
     for (const { learningPathId } of pathIds) {
@@ -78,34 +76,29 @@ export class LearningPathCourseSyncService {
     studentId: string,
     tenantId: string,
   ) {
-    const pathIds = await this.learningPathRepository.getLearningPathIdsByGroupId(groupId, this.db);
+    const pathIds = await this.learningPathRepository.getLearningPathIdsByGroupId(groupId);
 
     for (const { learningPathId } of pathIds) {
       const newStudentIds = await this.learningPathRepository.getNotEnrolledUserIds(
         learningPathId,
         [studentId],
-        this.db,
       );
 
       if (newStudentIds.length) {
-        const courseIds = await this.learningPathRepository.getLearningPathCourseIds(
-          learningPathId,
-          this.db,
-        );
+        const courseIds =
+          await this.learningPathRepository.getLearningPathCourseIds(learningPathId);
 
         await this.learningPathRepository.insertStudentLearningPaths(
           learningPathId,
           newStudentIds,
           LEARNING_PATH_ENROLLMENT_TYPES.GROUP,
           tenantId,
-          this.db,
         );
         await this.learningPathRepository.insertStudentLearningPathCourses(
           learningPathId,
           newStudentIds,
           courseIds,
           tenantId,
-          this.db,
         );
       }
 
@@ -131,24 +124,18 @@ export class LearningPathCourseSyncService {
   ) {
     const learningPath =
       sequenceEnabled === undefined
-        ? await this.learningPathRepository.findLearningPathById(learningPathId, this.db)
+        ? await this.learningPathRepository.findLearningPathById(learningPathId)
         : null;
     const currentCourseLinks =
-      courseLinks ??
-      (await this.learningPathRepository.getLearningPathCourses(learningPathId, this.db));
+      courseLinks ?? (await this.learningPathRepository.getLearningPathCourses(learningPathId));
     const shouldUseSequence = sequenceEnabled ?? learningPath?.sequenceEnabled ?? false;
 
     const [studentCourseRows, existingPathLinks] = await Promise.all([
       this.learningPathRepository.getStudentCourseProgressByCourseIds(
         studentId,
         currentCourseLinks.map(({ courseId }) => courseId),
-        this.db,
       ),
-      this.learningPathRepository.getStudentLearningPathCourseLinks(
-        learningPathId,
-        studentId,
-        this.db,
-      ),
+      this.learningPathRepository.getStudentLearningPathCourseLinks(learningPathId, studentId),
     ]);
 
     const existingPathCourseIds = new Set(existingPathLinks.map(({ courseId }) => courseId));
@@ -162,12 +149,7 @@ export class LearningPathCourseSyncService {
       .filter((courseId) => !existingPathCourseIds.has(courseId));
 
     if (removedCourseIds.length) {
-      await this.removeStudentLearningPathCourseLinks(
-        learningPathId,
-        studentId,
-        removedCourseIds,
-        this.db,
-      );
+      await this.removeStudentLearningPathCourseLinks(learningPathId, studentId, removedCourseIds);
     }
 
     const insertedPathLinks = await this.addStudentLearningPathCourseLinks(
@@ -200,7 +182,6 @@ export class LearningPathCourseSyncService {
       learningPathId,
       studentId,
       courseIds,
-      this.db,
     );
   }
 
@@ -257,12 +238,7 @@ export class LearningPathCourseSyncService {
 
       if (shouldEnroll) {
         await this.enrollStudentCourse(studentId, courseLink.courseId);
-        await this.courseService.createCourseDependencies(
-          courseLink.courseId,
-          studentId,
-          null,
-          this.db,
-        );
+        await this.courseService.createCourseDependencies(courseLink.courseId, studentId, null);
       } else {
         await this.unenrollStudentCourse(
           learningPathId,
@@ -334,23 +310,21 @@ export class LearningPathCourseSyncService {
   }
 
   private async enrollStudentCourse(studentId: string, courseId: string) {
-    const [existingEnrollment] = await this.courseService.getStudentCourseEnrollments(
-      studentId,
-      [courseId],
-      this.db,
-    );
+    const [existingEnrollment] = await this.courseService.getStudentCourseEnrollments(studentId, [
+      courseId,
+    ]);
 
     if (existingEnrollment?.status === COURSE_ENROLLMENT.ENROLLED) {
       return;
     }
 
     if (existingEnrollment?.enrolledByGroupId) {
-      await this.courseService.activateStudentCourseEnrollment(courseId, studentId, this.db);
+      await this.courseService.activateStudentCourseEnrollment(courseId, studentId);
 
       return;
     }
 
-    await this.courseService.createStudentCourse(courseId, studentId, null, null, this.db);
+    await this.courseService.createStudentCourse(courseId, studentId, null, null);
   }
 
   private async unenrollStudentCourse(
@@ -368,7 +342,7 @@ export class LearningPathCourseSyncService {
 
     if (!removableCourseIds.length) return;
 
-    await this.courseService.markStudentCoursesNotEnrolled(studentId, removableCourseIds, this.db);
+    await this.courseService.markStudentCoursesNotEnrolled(studentId, removableCourseIds);
   }
 
   private async clearLearningPathEnrollment(
@@ -393,14 +367,10 @@ export class LearningPathCourseSyncService {
   }
 
   private async recalculateStudentLearningPathProgress(learningPathId: string, studentId: string) {
-    const learningPath = await this.learningPathRepository.findLearningPathById(
-      learningPathId,
-      this.db,
-    );
+    const learningPath = await this.learningPathRepository.findLearningPathById(learningPathId);
     const progressState = await this.learningPathRepository.getLearningPathProgressState(
       learningPathId,
       studentId,
-      this.db,
     );
 
     const completedCourses = progressState.studentCourseProgressRows.filter(
@@ -412,7 +382,6 @@ export class LearningPathCourseSyncService {
       studentId,
       this.resolveLearningPathProgress(progressState.courses.length, completedCourses.length),
       this.resolveLearningPathCompletedAt(progressState.courses.length, completedCourses),
-      this.db,
     );
 
     if (
@@ -424,14 +393,12 @@ export class LearningPathCourseSyncService {
         await this.learningPathRepository.findLearningPathCertificateByUserAndPath(
           studentId,
           learningPathId,
-          this.db,
         );
 
       if (!existingCertificate) {
         await this.learningPathCertificateService.createLearningPathCertificate(
           studentId,
           learningPathId,
-          this.db,
         );
       }
     }

@@ -3435,6 +3435,36 @@
       "missingTenantIdHeader": "Brak nagłówka X-Tenant-Id"
     }
   },
+  "masterCourse": {
+    "error": {
+      "sourceCourseNotFound": "Nie znaleziono kursu źródłowego",
+      "noTargetTenants": "Wybierz co najmniej jednego docelowego tenanta",
+      "exportedCourseCannotBeSource": "Wyeksportowany kurs nie może być użyty jako źródło",
+      "exportLinkMissing": "Nie znaleziono powiązania eksportu kursu",
+      "jobNotFound": "Nie znaleziono zadania eksportu kursu",
+      "targetAuthorMissing": "Nie znaleziono autora w docelowym tenancie",
+      "targetCourseMissing": "Nie znaleziono kursu docelowego",
+      "exportedCourseReadonly": "Wyeksportowany kurs jest tylko do odczytu"
+    }
+  },
+  "learningPathExport": {
+    "error": {
+      "noTargetTenants": "Wybierz co najmniej jednego docelowego tenanta",
+      "exportLinkMissing": "Nie znaleziono powiązania eksportu ścieżki edukacyjnej",
+      "noCourses": "Ścieżka edukacyjna musi zawierać co najmniej jeden kurs przed eksportem",
+      "courseExportFailed": "Nie udało się wyeksportować jednego z kursów ścieżki edukacyjnej",
+      "targetAuthorMissing": "Nie znaleziono autora w docelowym tenancie",
+      "jobNotFound": "Nie znaleziono zadania eksportu ścieżki edukacyjnej",
+      "invalidJobData": "Nieprawidłowe dane zadania eksportu ścieżki edukacyjnej",
+      "invalidExportId": "Nieprawidłowy identyfikator eksportu ścieżki edukacyjnej",
+      "invalidExportLink": "Nieprawidłowe powiązanie eksportu ścieżki edukacyjnej"
+    }
+  },
+  "learningPathCertificate": {
+    "error": {
+      "disabled": "Certyfikaty ścieżek edukacyjnych są wyłączone"
+    }
+  },
   "activityLogsView": {
     "filters": {
       "placeholder": {
