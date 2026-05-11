@@ -1,4 +1,5 @@
 import { ENTITY_TYPES, type EntityType, type SupportedLanguages } from "@repo/shared";
+import { TextSelection } from "@tiptap/pm/state";
 import { match } from "ts-pattern";
 
 import { useLessonFileUpload } from "~/api/mutations/admin/useLessonFileUpload";
@@ -22,7 +23,6 @@ export const RICH_TEXT_RESOURCE_TYPE = {
   PRESENTATION: "presentation",
   PDF: "pdf",
   DOCUMENT: "document",
-  IMAGE: "image",
   OTHER: "other",
 } as const;
 
@@ -52,6 +52,21 @@ export const buildEntityResourceUrl = (resourceId: string, entityType: EntityTyp
   }
 };
 
+const insertContentIntoEditor = (
+  editor: TiptapEditor | null | undefined,
+  content: Parameters<TiptapEditor["commands"]["insertContentAt"]>[1],
+) => {
+  if (!editor) return;
+
+  editor.chain().focus().insertContent(content).run();
+
+  const { state, view } = editor;
+  const clampedPos = Math.max(0, Math.min(state.selection.to, state.doc.content.size));
+  const nextSelection = TextSelection.near(state.doc.resolve(clampedPos), 1);
+
+  view.dispatch(state.tr.setSelection(nextSelection).scrollIntoView());
+};
+
 export const insertResourceIntoEditor = ({
   editor,
   resourceId,
@@ -61,58 +76,63 @@ export const insertResourceIntoEditor = ({
   displayMode = "preview",
 }: InsertResourceArgs) => {
   const resourceUrl = buildEntityResourceUrl(resourceId, entityType);
-  const chain = editor?.chain().focus();
 
   if (resourceType === "presentation") {
     if (displayMode === "download") {
-      chain
-        ?.setDownloadableFile({
+      insertContentIntoEditor(editor, {
+        type: "downloadableFile",
+        attrs: {
           src: resourceUrl,
           name: file.name,
-        })
-        .run();
+        },
+      });
       return;
     }
 
-    chain?.setPresentationEmbed({ src: resourceUrl, sourceType: "internal" }).run();
+    insertContentIntoEditor(editor, {
+      type: "presentation",
+      attrs: { src: resourceUrl, sourceType: "internal" },
+    });
     return;
   }
 
   if (resourceType === "pdf") {
     if (displayMode === "preview") {
-      chain
-        ?.setPdfPreviewEmbed({
+      insertContentIntoEditor(editor, {
+        type: "pdfPreview",
+        attrs: {
           src: resourceUrl,
           name: file.name,
-        })
-        .run();
+        },
+      });
       return;
     }
 
-    chain
-      ?.setDownloadableFile({
+    insertContentIntoEditor(editor, {
+      type: "downloadableFile",
+      attrs: {
         src: resourceUrl,
         name: file.name,
-      })
-      .run();
+      },
+    });
     return;
   }
 
   if (resourceType === "document") {
-    chain
-      ?.setDownloadableFile({
+    insertContentIntoEditor(editor, {
+      type: "downloadableFile",
+      attrs: {
         src: resourceUrl,
         name: file.name,
-      })
-      .run();
+      },
+    });
     return;
   }
 
-  chain
-    ?.insertContent(
-      `<br /><a href="${resourceUrl}" data-resource-id="${resourceId}">${resourceUrl}</a>`,
-    )
-    .run();
+  insertContentIntoEditor(
+    editor,
+    `<br /><a href="${resourceUrl}" data-resource-id="${resourceId}">${resourceUrl}</a>`,
+  );
 };
 
 export const useEntityResourceUpload = () => {

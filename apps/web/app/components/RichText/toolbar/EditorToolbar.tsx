@@ -69,13 +69,13 @@ const EditorToolbar = ({
 
   const acceptedImages = acceptedFileTypes.join(",");
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
     if (!files.length || !onUpload) return;
 
     if (fileUploadRef.current) fileUploadRef.current.value = "";
 
-    await Promise.allSettled(files.map((file) => onUpload(file, editor)));
+    void Promise.allSettled(files.map((file) => onUpload(file, editor)));
   };
 
   return (

@@ -46,7 +46,7 @@ const createSerialQueue = () => {
 };
 
 const displayModePromptQueue = createSerialQueue();
-const videoInsertQueue = createSerialQueue();
+const editorMutationQueue = createSerialQueue();
 
 const askForDisplayModeSequentially = (
   askForDisplayMode: (filename: string) => Promise<DisplayMode | null>,
@@ -55,19 +55,21 @@ const askForDisplayModeSequentially = (
   return displayModePromptQueue(() => askForDisplayMode(filename));
 };
 
-const insertPendingVideoNodeSequentially = async (args: {
+const insertPendingVideoNode = (args: {
   editor?: TiptapEditor | null;
   file: File;
   uploadId: string;
-}) => {
-  await videoInsertQueue(() =>
+}) =>
+  editorMutationQueue(() =>
     insertVideoUploadPlaceholder({
       editor: args.editor,
       uploadId: args.uploadId,
       uploadLabel: args.file.name,
     }),
   );
-};
+
+const insertResourceNode = (args: Parameters<typeof insertResourceIntoEditor>[0]) =>
+  editorMutationQueue(() => insertResourceIntoEditor(args));
 
 const handleVideoUpload = async ({
   editor,
@@ -95,66 +97,70 @@ const handleVideoUpload = async ({
     uploadQueue?.setStatus(queueId, UPLOAD_STATUS.QUEUED);
   }
 
-  await insertPendingVideoNodeSequentially({
+  await insertPendingVideoNode({
     editor,
     file,
     uploadId,
   });
 
-  try {
-    const session = await getVideoSessionForFile(file);
-    if (queueId) {
-      uploadQueue?.attachUploadId(queueId, session.uploadId);
-    }
+  const processVideoUpload = async () => {
+    try {
+      const session = await getVideoSessionForFile(file);
+      if (queueId) {
+        uploadQueue?.attachUploadId(queueId, session.uploadId);
+      }
 
-    if (session.resourceId) {
-      updateVideoUploadNodeById(editor, uploadId, {
-        src: buildEntityResourceUrl(session.resourceId, entityType),
-        sourceType: session.provider === "s3" ? "external" : "internal",
-        provider: session.provider,
-        hasError: false,
-        uploadStatus: null,
-        uploadErrorMessage: null,
-      });
-    }
-
-    await uploadVideo({
-      file,
-      session,
-      onUploadingStart: () => {
-        if (queueId) uploadQueue?.setStatus(queueId, UPLOAD_STATUS.UPLOADING);
-      },
-      onProgress: (progress) => {
-        if (queueId) uploadQueue?.setProgress(queueId, progress);
-      },
-      onUploaded: () => {
-        if (queueId) uploadQueue?.setStatus(queueId, UPLOAD_STATUS.SUCCESS);
-      },
-      onError: (error) => {
-        if (queueId) {
-          uploadQueue?.setStatus(queueId, UPLOAD_STATUS.FAILED, {
-            errorMessage: error.message,
-          });
-        }
+      if (session.resourceId) {
         updateVideoUploadNodeById(editor, uploadId, {
-          hasError: true,
-          uploadStatus: VIDEO_UPLOAD_NODE_STATUS.FAILED,
-          uploadErrorMessage: error.message,
+          src: buildEntityResourceUrl(session.resourceId, entityType),
+          sourceType: session.provider === "s3" ? "external" : "internal",
+          provider: session.provider,
+          hasError: false,
+          uploadStatus: null,
+          uploadErrorMessage: null,
         });
-      },
-    });
-  } catch (error) {
-    if (queueId) {
-      uploadQueue?.setStatus(queueId, UPLOAD_STATUS.FAILED, {
-        errorMessage: error instanceof Error ? error.message : fallbackUploadErrorMessage,
+      }
+
+      await uploadVideo({
+        file,
+        session,
+        onUploadingStart: () => {
+          if (queueId) uploadQueue?.setStatus(queueId, UPLOAD_STATUS.UPLOADING);
+        },
+        onProgress: (progress) => {
+          if (queueId) uploadQueue?.setProgress(queueId, progress);
+        },
+        onUploaded: () => {
+          if (queueId) uploadQueue?.setStatus(queueId, UPLOAD_STATUS.SUCCESS);
+        },
+        onError: (error) => {
+          if (queueId) {
+            uploadQueue?.setStatus(queueId, UPLOAD_STATUS.FAILED, {
+              errorMessage: error.message,
+            });
+          }
+          updateVideoUploadNodeById(editor, uploadId, {
+            hasError: true,
+            uploadStatus: VIDEO_UPLOAD_NODE_STATUS.FAILED,
+            uploadErrorMessage: error.message,
+          });
+        },
       });
+    } catch (error) {
+      if (queueId) {
+        uploadQueue?.setStatus(queueId, UPLOAD_STATUS.FAILED, {
+          errorMessage: error instanceof Error ? error.message : fallbackUploadErrorMessage,
+        });
+      }
+      updateVideoUploadNodeById(editor, uploadId, {
+        uploadStatus: VIDEO_UPLOAD_NODE_STATUS.FAILED,
+        uploadErrorMessage: error instanceof Error ? error.message : fallbackUploadErrorMessage,
+      });
+      onVideoUploadError(error);
     }
-    updateVideoUploadNodeById(editor, uploadId, {
-      uploadStatus: VIDEO_UPLOAD_NODE_STATUS.FAILED,
-      uploadErrorMessage: error instanceof Error ? error.message : fallbackUploadErrorMessage,
-    });
-    onVideoUploadError(error);
-  }
+  };
+
+  void processVideoUpload();
 };
 
 const handleResourceUpload = async ({
@@ -212,7 +218,7 @@ const handleResourceUpload = async ({
     throw error;
   }
 
-  insertResourceIntoEditor({
+  await insertResourceNode({
     editor,
     resourceId,
     entityType,
@@ -256,7 +262,6 @@ type RichTextResourceType = (typeof RICH_TEXT_RESOURCE_TYPE)[keyof typeof RICH_T
 
 type FileCharacteristics = {
   isVideo: boolean;
-  isImage: boolean;
   isPresentation: boolean;
   isPdf: boolean;
   isDocument: boolean;
@@ -264,7 +269,6 @@ type FileCharacteristics = {
 };
 
 const getFileCharacteristics = (file: File): FileCharacteristics => {
-  const isImage = ALLOWED_LESSON_IMAGE_FILE_TYPES.includes(file.type);
   const isVideo = ALLOWED_VIDEO_FILE_TYPES.includes(file.type);
   const isPresentation = ALLOWED_PRESENTATION_FILE_TYPES.includes(file.type);
   const isPdf = ALLOWED_PDF_FILE_TYPES.includes(file.type);
@@ -274,18 +278,15 @@ const getFileCharacteristics = (file: File): FileCharacteristics => {
     ALLOWED_WORD_FILE_TYPES.includes(file.type);
 
   return {
-    isImage,
     isVideo,
     isPresentation,
     isPdf,
     isDocument,
     resourceType: match({
-      isImage,
       isPresentation,
       isPdf,
       isDocument,
     })
-      .with({ isImage: true }, () => RICH_TEXT_RESOURCE_TYPE.IMAGE)
       .with({ isPresentation: true }, () => RICH_TEXT_RESOURCE_TYPE.PRESENTATION)
       .with({ isPdf: true }, () => RICH_TEXT_RESOURCE_TYPE.PDF)
       .with({ isDocument: true }, () => RICH_TEXT_RESOURCE_TYPE.DOCUMENT)
