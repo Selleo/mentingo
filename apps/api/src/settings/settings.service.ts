@@ -1620,6 +1620,9 @@ export class SettingsService {
       ...settings,
       modernCourseListEnabled:
         settings.modernCourseListEnabled ?? DEFAULT_GLOBAL_SETTINGS.modernCourseListEnabled,
+      calendarEnabled: settings.calendarEnabled ?? DEFAULT_GLOBAL_SETTINGS.calendarEnabled,
+      liveTrainingEnabled:
+        settings.liveTrainingEnabled ?? DEFAULT_GLOBAL_SETTINGS.liveTrainingEnabled,
       MFAEnforcedRoles: Array.isArray(settings.MFAEnforcedRoles)
         ? settings.MFAEnforcedRoles
         : JSON.parse(settings.MFAEnforcedRoles ?? "[]"),

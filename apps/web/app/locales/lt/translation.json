@@ -47,7 +47,8 @@
       "quiz": "Viktorina",
       "ai_mentor": "AI mentorius",
       "embed": "Įterpti",
-      "scorm": "SCORM"
+      "scorm": "SCORM",
+      "live_training": "Live Training"
     },
     "error": {
       "somethingWentWrong": "Oi! Kažkas nutiko."

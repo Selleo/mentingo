@@ -38,6 +38,7 @@ import redisConfig from "./common/configuration/redis";
 import s3Config from "./common/configuration/s3";
 import stripeConfig from "./common/configuration/stripe";
 import { EmailModule } from "./common/emails/emails.module";
+import { FeaturesGuard } from "./common/guards/features.guard";
 import { JwtAuthGuard } from "./common/guards/jwt-auth.guard";
 import { PermissionsGuard } from "./common/guards/permissions.guard";
 import { StagingGuard } from "./common/guards/staging.guard";
@@ -49,6 +50,7 @@ import { HealthModule } from "./health/health.module";
 import { IngestionModule } from "./ingestion/ingestion.module";
 import { IntegrationModule } from "./integration/integration.module";
 import { LessonModule } from "./lesson/lesson.module";
+import { LiveTrainingModule } from "./live-training/live-training.module";
 import { LocalizationModule } from "./localization/localization.module";
 import { LumaModule } from "./luma/luma.module";
 import { NewsModule } from "./news/news.module";
@@ -168,6 +170,7 @@ import type { RedisClient } from "src/redis";
     OutboxModule,
     AudioModule,
     LumaModule,
+    LiveTrainingModule,
   ],
   controllers: [],
   providers: [
@@ -190,6 +193,10 @@ import type { RedisClient } from "src/redis";
     {
       provide: APP_GUARD,
       useClass: StagingGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: FeaturesGuard,
     },
     {
       provide: APP_GUARD,

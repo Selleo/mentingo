@@ -47,7 +47,8 @@
       "quiz": "Kvíz",
       "ai_mentor": "AI mentor",
       "embed": "Vložit",
-      "scorm": "SCORM"
+      "scorm": "SCORM",
+      "live_training": "Live Training"
     },
     "error": {
       "somethingWentWrong": "Jejda! Něco se pokazilo."

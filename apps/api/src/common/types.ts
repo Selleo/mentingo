@@ -11,6 +11,9 @@ export type ActivityHistory = {
 export type GlobalSettings = {
   unregisteredUserCoursesAccessibility: boolean;
   enforceSSO: boolean;
+  modernCourseListEnabled: boolean;
+  calendarEnabled: boolean;
+  liveTrainingEnabled: boolean;
   companyInformation?: CompanyInformationSchema;
   userEmailTriggers?: UserEmailTriggersSchema;
   platformLogoS3Key: string | null;

@@ -47,7 +47,8 @@
       "quiz": "Quiz",
       "ai_mentor": "AI Mentor",
       "embed": "Embed",
-      "scorm": "SCORM"
+      "scorm": "SCORM",
+      "live_training": "Live Training"
     },
     "error": {
       "somethingWentWrong": "Oops! Something went wrong."

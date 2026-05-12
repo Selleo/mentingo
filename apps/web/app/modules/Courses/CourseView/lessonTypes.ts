@@ -4,6 +4,7 @@ export const LessonTypesIcons = {
   ai_mentor: "AiMentor",
   embed: "Embed",
   scorm: "Archive",
+  live_training: "LiveTraining",
 } as const;
 
 const lessonTypeTranslationSuffix = {
@@ -12,6 +13,7 @@ const lessonTypeTranslationSuffix = {
   ai_mentor: "ai_mentor",
   embed: "embed",
   scorm: "scorm",
+  live_training: "live_training",
 } as const;
 
 type LessonTypeTranslationKey = keyof typeof lessonTypeTranslationSuffix;

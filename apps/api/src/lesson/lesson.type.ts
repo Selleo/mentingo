@@ -1,12 +1,4 @@
-export const LESSON_TYPES = {
-  CONTENT: "content",
-  QUIZ: "quiz",
-  AI_MENTOR: "ai_mentor",
-  EMBED: "embed",
-  SCORM: "scorm",
-} as const;
-
-export type LessonTypes = (typeof LESSON_TYPES)[keyof typeof LESSON_TYPES];
+export { LESSON_TYPES, type LessonTypes } from "@repo/shared";
 
 export type EmbedLessonResourceType = {
   id: string;

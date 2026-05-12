@@ -9,6 +9,7 @@ export const ENTITY_TYPES = {
   CATEGORY: "category",
   ANNOUNCEMENT: "announcement",
   GLOBAL_SETTINGS: "global_settings",
+  LIVE_TRAINING: "live_training",
 } as const;
 
 export type EntityType = (typeof ENTITY_TYPES)[keyof typeof ENTITY_TYPES];

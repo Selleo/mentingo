@@ -1,11 +1,37 @@
 # LT-01 Domain Model And DB
 
-> Status: Implementation-ready v1 spec.
+> Status: Partially implemented.
 >
 > This document defines the v1 Live Training domain model, shared constants, permissions, socket
 > contract, resource handling, database structure, and lifecycle rules. It is not a migration file;
 > implementation should happen through normal shared constants, NestJS services/controllers,
 > Drizzle schema, and generated migrations.
+
+## Implementation Progress
+
+Completed:
+
+- Shared Live Training domain constants.
+- Shared `LESSON_TYPES.LIVE_TRAINING` constant.
+- Shared `ENTITY_TYPES.LIVE_TRAINING` constant.
+- Shared Live Training resource relationship constants for before/after files.
+- Live Training permissions and system role mapping.
+- Drizzle schema for `calendar_events`, `live_trainings`, `live_training_members`,
+  `live_training_links`, `live_lessons`, `live_training_sessions`,
+  `live_training_session_participants`, and `live_training_attendance`.
+- Generated Drizzle migration for the v1 schema.
+- Custom migration enabling tenant RLS for Live Training and calendar tables.
+- Frontend lesson type value, label, and icon mapping for `live_training`.
+- Shared Live Training socket room, client event, and server event constants.
+
+Still open:
+
+- Calendar API and React FullCalendar implementation.
+- Live Training service/repository behavior on top of the schema.
+- Course lesson creation/rendering behavior for Live Training.
+- LiveKit room/token/session implementation.
+- Attendance webhook/session lifecycle implementation.
+- API and web E2E coverage.
 
 ## Purpose
 

@@ -84,7 +84,7 @@ export const ContentTypes = {
   SCORM_LESSON_FORM: "SCORM_LESSON_FORM",
 };
 
-export type LessonIcons = "Content" | "Quiz" | "AiMentor" | "Embed";
+export type LessonIcons = "Content" | "Quiz" | "AiMentor" | "Embed" | "LiveTraining";
 
 export const LessonType = {
   CONTENT: "content",
@@ -92,6 +92,7 @@ export const LessonType = {
   AI_MENTOR: "ai_mentor",
   EMBED: "embed",
   SCORM: "scorm",
+  LIVE_TRAINING: "live_training",
 } as const;
 
 export type LessonType = (typeof LessonType)[keyof typeof LessonType];

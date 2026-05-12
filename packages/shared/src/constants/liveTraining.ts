@@ -69,3 +69,56 @@ export const LIVE_TRAINING_LINK_ENTITY_TYPES = {
 
 export type LiveTrainingLinkEntityType =
   (typeof LIVE_TRAINING_LINK_ENTITY_TYPES)[keyof typeof LIVE_TRAINING_LINK_ENTITY_TYPES];
+
+export const LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES = {
+  BEFORE: "live_training_before",
+  AFTER: "live_training_after",
+} as const;
+
+export type LiveTrainingResourceRelationshipType =
+  (typeof LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES)[keyof typeof LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES];
+
+export const LIVE_TRAINING_SOCKET_ROOMS = {
+  LIVE_TRAINING: "live-training",
+  LIVE_TRAINING_SESSION: "live-training-session",
+  LIVE_TRAINING_USER: "live-training-user",
+} as const;
+
+export type LiveTrainingSocketRoom =
+  (typeof LIVE_TRAINING_SOCKET_ROOMS)[keyof typeof LIVE_TRAINING_SOCKET_ROOMS];
+
+export const LIVE_TRAINING_SOCKET_CLIENT_EVENTS = {
+  SUBSCRIBE: "liveTraining:subscribe",
+  UNSUBSCRIBE: "liveTraining:unsubscribe",
+  SESSION_START: "liveTraining:session:start",
+  SESSION_END: "liveTraining:session:end",
+  PARTICIPANT_HEARTBEAT: "liveTraining:participant:heartbeat",
+  PARTICIPANT_LEAVE: "liveTraining:participant:leave",
+} as const;
+
+export type LiveTrainingSocketClientEvent =
+  (typeof LIVE_TRAINING_SOCKET_CLIENT_EVENTS)[keyof typeof LIVE_TRAINING_SOCKET_CLIENT_EVENTS];
+
+export const LIVE_TRAINING_SOCKET_SERVER_EVENTS = {
+  SESSION_STARTED: "liveTraining:session:started",
+  SESSION_ENDED: "liveTraining:session:ended",
+  SESSION_STATUS_CHANGED: "liveTraining:session:statusChanged",
+  PARTICIPANT_JOINED: "liveTraining:participant:joined",
+  PARTICIPANT_LEFT: "liveTraining:participant:left",
+  PARTICIPANT_UPDATED: "liveTraining:participant:updated",
+  ATTENDANCE_UPDATED: "liveTraining:attendance:updated",
+  POPUP_AVAILABLE: "liveTraining:popup:available",
+  ERROR: "liveTraining:error",
+} as const;
+
+export type LiveTrainingSocketServerEvent =
+  (typeof LIVE_TRAINING_SOCKET_SERVER_EVENTS)[keyof typeof LIVE_TRAINING_SOCKET_SERVER_EVENTS];
+
+export const LIVE_TRAINING_SOCKET_ROOM_BUILDERS = {
+  liveTraining: (liveTrainingId: string) =>
+    `${LIVE_TRAINING_SOCKET_ROOMS.LIVE_TRAINING}:${liveTrainingId}`,
+  liveTrainingSession: (sessionId: string) =>
+    `${LIVE_TRAINING_SOCKET_ROOMS.LIVE_TRAINING_SESSION}:${sessionId}`,
+  liveTrainingUser: (userId: string) =>
+    `${LIVE_TRAINING_SOCKET_ROOMS.LIVE_TRAINING_USER}:${userId}`,
+} as const;
