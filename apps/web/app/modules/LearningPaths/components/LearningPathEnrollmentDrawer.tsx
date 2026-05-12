@@ -3,11 +3,10 @@ import { startTransition, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
-  LEARNING_PATH_ENROLLED_USERS_QUERY_KEY,
   useLearningPathEnrolledUsers,
   type LearningPathEnrolledUsersSearchParams,
 } from "~/api/queries/useLearningPathEnrolledUsers";
-import { queryClient } from "~/api/queryClient";
+import { invalidateLearningPathEnrollmentData } from "~/api/utils/invalidateLearningPathEnrollmentData";
 import {
   ITEMS_PER_PAGE_OPTIONS,
   Pagination,
@@ -117,20 +116,13 @@ export function LearningPathEnrollmentDrawer({
     });
   };
 
-  const invalidateEnrollment = async () => {
-    await Promise.all([
-      queryClient.invalidateQueries({ queryKey: [LEARNING_PATH_ENROLLED_USERS_QUERY_KEY] }),
-      queryClient.invalidateQueries({ queryKey: ["learning-paths"] }),
-    ]);
-  };
-
   const handleEnrollSelectedStudents = async () => {
     if (!selectedNotEnrolledIds.length) return;
 
     await onEnrollStudents(selectedNotEnrolledIds);
     setSelectedRows({});
     setIsEnrollUsersDialogOpen(false);
-    await invalidateEnrollment();
+    await invalidateLearningPathEnrollmentData();
   };
 
   const handleUnenrollSelectedStudents = async () => {
@@ -139,7 +131,7 @@ export function LearningPathEnrollmentDrawer({
     await onUnenrollStudents(selectedEnrolledIds);
     setSelectedRows({});
     setIsUnenrollUsersDialogOpen(false);
-    await invalidateEnrollment();
+    await invalidateLearningPathEnrollmentData();
   };
 
   const handleGroupAction = async () => {
@@ -153,7 +145,7 @@ export function LearningPathEnrollmentDrawer({
 
     setSelectedGroups([]);
     setGroupAction(null);
-    await invalidateEnrollment();
+    await invalidateLearningPathEnrollmentData();
   };
 
   const handleToggleAllRows = (checked: boolean) => {

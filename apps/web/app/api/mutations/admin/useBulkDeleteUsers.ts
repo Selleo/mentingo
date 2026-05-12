@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useTranslation } from "react-i18next";
 
+import { invalidateLearningPathEnrollmentData } from "~/api/utils/invalidateLearningPathEnrollmentData";
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../../api-client";
@@ -24,6 +25,7 @@ export function useBulkDeleteUsers() {
       });
 
       await queryClient.invalidateQueries({ queryKey: ["users"] });
+      await invalidateLearningPathEnrollmentData();
 
       return response.data;
     },

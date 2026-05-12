@@ -4,8 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../api-client";
-import { LEARNING_PATHS_QUERY_KEY } from "../queries/useLearningPaths";
-import { queryClient } from "../queryClient";
+import { invalidateLearningPathEnrollmentData } from "../utils/invalidateLearningPathEnrollmentData";
 
 export function useEnrollCurrentUserToLearningPath() {
   const { t } = useTranslation();
@@ -21,7 +20,7 @@ export function useEnrollCurrentUserToLearningPath() {
       return response.data;
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: LEARNING_PATHS_QUERY_KEY });
+      await invalidateLearningPathEnrollmentData();
       toast({ description: t("learningPathsView.enrollment.enrolledSuccessfully") });
     },
   });

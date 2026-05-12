@@ -3,6 +3,7 @@ import { AxiosError } from "axios";
 
 import { GROUPS_QUERY_KEY } from "~/api/queries/admin/useGroups";
 import { queryClient } from "~/api/queryClient";
+import { invalidateLearningPathEnrollmentData } from "~/api/utils/invalidateLearningPathEnrollmentData";
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../../api-client";
@@ -15,6 +16,7 @@ export function useBulkDeleteGroups() {
       const { data } = await ApiClient.api.groupControllerBulkDeleteGroups(groupIds);
 
       await queryClient.invalidateQueries({ queryKey: [GROUPS_QUERY_KEY] });
+      await invalidateLearningPathEnrollmentData();
 
       return data;
     },
