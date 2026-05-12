@@ -806,6 +806,20 @@
       "when": 1778507748466,
       "tag": "0114_enable_tenant_rls_for_learning_paths_related_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 115,
+      "version": "7",
+      "when": 1778596727973,
+      "tag": "0115_add_live_training_schema",
+      "breakpoints": true
+    },
+    {
+      "idx": 116,
+      "version": "7",
+      "when": 1778596737102,
+      "tag": "0116_enable_tenant_rls_for_live_training_tables",
+      "breakpoints": true
     }
   ]
 }
