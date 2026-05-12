@@ -286,6 +286,7 @@
     "progress": "Pažanga",
     "findInApplication": "Rasti programoje",
     "courses": "Kursai",
+    "learningPaths": "Mokymosi keliai",
     "content": "Turinys",
     "categories": "Kategorijos",
     "users": "Vartotojai",
@@ -971,6 +972,7 @@
         "category": "kategorijas",
         "group": "grupes",
         "course": "kursus",
+        "learning_path": "mokymosi kelius",
         "learning_mode": "mokymosi režimą",
         "learning_progress": "mokymosi pažangą",
         "certificate": "sertifikatus",
@@ -2777,7 +2779,40 @@
     "tenant": "Organizacijos informacija",
     "createTenant": "Sukurti organizaciją",
     "tenants": "Organizacijos",
-    "activityLogs": "Veiklos žurnalas"
+    "activityLogs": "Veiklos žurnalas",
+    "learningPaths": "Mokymosi keliai",
+    "adminLearningPaths": "Mokymosi keliai",
+    "adminLearningPathEditor": "Mokymosi kelio redaktorius"
+  },
+  "masterCourse": {
+    "error": {
+      "sourceCourseNotFound": "Saltinio kursas nerastas",
+      "noTargetTenants": "Pasirinkite bent viena tiksline organizacija",
+      "exportedCourseCannotBeSource": "Eksportuotas kursas negali buti naudojamas kaip saltinis",
+      "exportLinkMissing": "Kurso eksporto rysys nerastas",
+      "jobNotFound": "Kurso eksporto uzduotis nerasta",
+      "targetAuthorMissing": "Tikslines organizacijos autorius nerastas",
+      "targetCourseMissing": "Tikslinis kursas nerastas",
+      "exportedCourseReadonly": "Eksportuotas kursas yra tik skaitomas"
+    }
+  },
+  "learningPathExport": {
+    "error": {
+      "noTargetTenants": "Pasirinkite bent viena tiksline organizacija",
+      "exportLinkMissing": "Mokymosi kelio eksporto rysys nerastas",
+      "noCourses": "Pries eksportuojant mokymosi kelyje turi buti bent vienas kursas",
+      "courseExportFailed": "Nepavyko eksportuoti vieno is mokymosi kelio kursu",
+      "targetAuthorMissing": "Tikslines organizacijos autorius nerastas",
+      "jobNotFound": "Mokymosi kelio eksporto uzduotis nerasta",
+      "invalidJobData": "Neteisingi mokymosi kelio eksporto uzduoties duomenys",
+      "invalidExportId": "Neteisingas mokymosi kelio eksporto ID",
+      "invalidExportLink": "Neteisingas mokymosi kelio eksporto rysys"
+    }
+  },
+  "learningPathCertificate": {
+    "error": {
+      "disabled": "Mokymosi kelio sertifikatai isjungti"
+    }
   },
   "activityLogsView": {
     "filters": {
@@ -2848,6 +2883,230 @@
       "showDetails": "Rodyti detales",
       "loading": "Įkeliami veiklos žurnalai...",
       "empty": "Veiklos žurnalų nerasta."
+    }
+  },
+  "learningPathsView": {
+    "title": "Mokymosi keliai",
+    "description": "Naršykite priskirtus mokymosi kelius ir tęskite sutvarkytas kursų sekas.",
+    "searchPlaceholder": "Ieškoti mokymosi kelių",
+    "summary": "{{count}} mokymosi keliai yra pasiekiami.",
+    "detailsTitle": "Mokymosi kelias",
+    "detailsDescription": "Peržiūrėkite kursų seką, pažangą, užraktus ir sertifikato būseną.",
+    "detailsSummary": "Šiame kelyje yra {{count}} kursų. Dabartinė pažanga: {{progress}}.",
+    "emptyDescription": "Aprašymas dar nepridėtas.",
+    "status": {
+      "draft": "Juodraštis",
+      "published": "Paskelbta",
+      "private": "Privatu",
+      "not_started": "Nepradėta",
+      "in_progress": "Vykdoma",
+      "completed": "Baigta",
+      "blocked": "Užblokuota"
+    },
+    "badges": {
+      "sequenceEnabled": "Nuoseklu",
+      "freeOrder": "Lanksti tvarka",
+      "certificate": "Sertifikatas"
+    },
+    "card": {
+      "openPath": "Atidaryti mokymosi kelią"
+    },
+    "empty": {
+      "title": "Mokymosi kelių nerasta",
+      "description": "Pakeiskite paiešką arba grįžkite, kai keliai bus priskirti."
+    },
+    "progress": {
+      "title": "Kelio pažanga",
+      "summary": "Baigta {{completed}} iš {{total}} kursų"
+    },
+    "certificate": {
+      "available": "Sertifikatas pasiekiamas",
+      "ready": "Sertifikatas paruoštas",
+      "pathCompleted": "Mokymosi kelias baigtas. Jūsų sertifikatas paruoštas."
+    },
+    "courseState": {
+      "completed": "Baigta",
+      "inProgress": "Vykdoma",
+      "inProgressDescription": "Jūs pradėjote šį kursą.",
+      "notStarted": "Nepradėta",
+      "notStartedDescription": "Šį kursą galima pradėti.",
+      "locked": "Užrakinta",
+      "lockedDescription": "Baikite ankstesnį kursą, kad jį atrakintumėte."
+    },
+    "detail": {
+      "courses": "Šio kelio kursai",
+      "courseTitle": "Kursas {{number}}",
+      "completedAt": "Baigta {{date}}",
+      "emptyCourses": "Šiame mokymosi kelyje dar nėra kursų."
+    },
+    "enrollment": {
+      "manage": "Registruoti",
+      "title": "Registruoti besimokančiuosius",
+      "description": "Tvarkykite studentų ir grupių registraciją į šį mokymosi kelią.",
+      "students": "Studentai",
+      "selectStudents": "Pasirinkti studentus",
+      "groups": "Grupės",
+      "selectGroups": "Pasirinkti grupes",
+      "filters": {
+        "placeholder": {
+          "searchByKeyword": "Ieškoti pagal raktažodį..."
+        }
+      },
+      "enrollSelected": "Registruoti pasirinktus",
+      "unenrollSelected": "Išregistruoti pasirinktus",
+      "enrollGroups": "Registruoti grupes",
+      "unenrollGroups": "Išregistruoti grupes",
+      "enrolled": "Užregistruota",
+      "enroll": "Registruoti",
+      "studentsEnrolled": "Studentai užregistruoti",
+      "groupsEnrolled": "Grupės užregistruotos",
+      "studentsUnenrolled": "Studentai išregistruoti",
+      "groupsUnenrolled": "Grupės išregistruotos",
+      "enrolledSuccessfully": "Užregistruota į mokymosi kelią",
+      "enrollGroupsDescription": "Pasirinkite grupes, kurias norite registruoti į šį mokymosi kelią.",
+      "unenrollGroupsDescription": "Pasirinkite grupes, kurias norite išregistruoti iš šio mokymosi kelio.",
+      "table": {
+        "selectAll": "Pasirinkti visus besimokančiuosius",
+        "select": "Pasirinkti besimokantįjį",
+        "name": "Vardas",
+        "email": "El. paštas",
+        "status": "Registracijos būsena",
+        "enrollmentDate": "Registracijos data"
+      },
+      "statuses": {
+        "enrolledByGroup": "Užregistruota per grupę",
+        "individuallyEnrolled": "Užregistruota individualiai",
+        "notEnrolled": "Neužregistruota"
+      },
+      "confirmation": {
+        "title": "Patvirtinti registraciją",
+        "description": "Ar tikrai norite užregistruoti pasirinktus studentus į šį mokymosi kelią? Šio veiksmo negalima atšaukti."
+      },
+      "unenrollConfirmation": {
+        "title": "Patvirtinti išregistravimą",
+        "description": "Ar tikrai norite išregistruoti pasirinktus studentus iš šio mokymosi kelio? Šio veiksmo negalima atšaukti."
+      },
+      "noGroups": "Nėra pasiekiamų grupių"
+    },
+    "breadcrumbs": {
+      "learningPaths": "Mokymosi keliai",
+      "details": "Informacija"
+    },
+    "buttons": {
+      "openFirst": "Atidaryti pirmą kelią"
+    }
+  },
+  "adminLearningPathsView": {
+    "title": "Mokymosi keliai",
+    "description": "Tvarkykite metaduomenis, sekos nustatymus, kursus, registracijas, eksportą ir sertifikatus.",
+    "summary": "{{count}} mokymosi keliai yra pasiekiami šioje darbo srityje.",
+    "breadcrumbs": {
+      "learningPaths": "Mokymosi keliai",
+      "create": "Sukurti",
+      "edit": "Redaguoti"
+    },
+    "buttons": {
+      "create": "Sukurti mokymosi kelią",
+      "edit": "Redaguoti",
+      "save": "Išsaugoti pakeitimus",
+      "removeImage": "Pašalinti paveikslėlį"
+    },
+    "editor": {
+      "createTitle": "Sukurti mokymosi kelią",
+      "editTitle": "Redaguoti mokymosi kelią",
+      "description": "Nustatykite mokymosi kelio informaciją, seką, kursus ir publikavimo būseną.",
+      "createSummary": "Pradėkite nuo mokymosi kelio informacijos.",
+      "editSummary": "Šiame mokymosi kelyje šiuo metu yra {{coursesCount}} kursų.",
+      "details": "Informacija",
+      "courses": "Kursai",
+      "image": "Paveikslėlis",
+      "settings": "Nustatymai"
+    },
+    "table": {
+      "title": "Pavadinimas",
+      "status": "Būsena",
+      "settings": "Nustatymai",
+      "language": "Kalba",
+      "createdAt": "Sukurta",
+      "actions": "Veiksmai",
+      "untitled": "Mokymosi kelias be pavadinimo",
+      "emptyDescription": "Nėra aprašymo",
+      "sequential": "Nuoseklus",
+      "flexible": "Laisva tvarka",
+      "certificate": "Sertifikatas",
+      "empty": "Dar nėra sukurtų mokymosi kelių."
+    },
+    "form": {
+      "language": "Kalba",
+      "status": "Būsena",
+      "statusDescription": "Nustato, ar kelias matomas, juodraštis, ar privatus.",
+      "title": "Pavadinimas",
+      "titlePlaceholder": "Pavadinkite mokymosi kelią",
+      "description": "Aprašymas",
+      "descriptionPlaceholder": "Aprašykite, ką dalyviai atliks šiame mokymosi kelyje",
+      "imageHint": "PNG, JPG arba JPEG (maks. 20 MB, rekomenduojama 1200x1200 ar didesnė)",
+      "sequenceEnabled": "Nuoseklus mokymasis",
+      "sequenceEnabledDescription": "Dalyviai turi baigti kursus rodoma tvarka.",
+      "includesCertificate": "Sertifikatas",
+      "includesCertificateDescription": "Dalyviai gali gauti sertifikatą baigę mokymosi kelią.",
+      "certificateSignature": "Sertifikato parašas",
+      "certificateSignatureDescription": "Įkelkite parašą, rodomą šio mokymosi kelio sertifikatuose.",
+      "certificateFontColor": "Sertifikato šrifto spalva",
+      "certificateFontColorDescription": "Naudokite peržiūros spalvų parinkiklį, kad pakeistumėte sertifikato teksto ir linijų spalvą.",
+      "certificatePreview": "Sertifikato peržiūra",
+      "certificatePreviewDescription": "Peržiūrėkite sertifikatą ir pakoreguokite šrifto spalvą."
+    },
+    "detailsContent": {
+      "title": "Mokymosi kelio informacija",
+      "description": "Nustatykite lokalizuotą pavadinimą ir dalyviams matomą aprašymą."
+    },
+    "detailsImage": {
+      "title": "Viršelio paveikslėlis",
+      "description": "Naudokite paveikslėlį, kuris padeda atpažinti šį kelią."
+    },
+    "detailsSettings": {
+      "title": "Publikavimas ir veikimas",
+      "description": "Vienoje vietoje grupuokite matomumą, kursų eilę ir sertifikatą."
+    },
+    "common": {
+      "baseLanguage": "Pagrindinė kalba"
+    },
+    "languageSelector": {
+      "tooltip": "Šio mokymosi kelio pagrindinė kalba yra {{baseLanguage}}."
+    },
+    "courses": {
+      "select": "Pasirinkite kursą",
+      "add": "Pridėti kursą",
+      "drag": "Tempkite, kad pakeistumėte kurso tvarką",
+      "delete": "Ištrinti kursą",
+      "order": "Eilė",
+      "course": "Kursas",
+      "empty": "Į šį mokymosi kelią dar nepridėta kursų.",
+      "saveFirst": "Išsaugokite mokymosi kelią prieš pridėdami kursus.",
+      "unknownCourse": "Kurso informacija nepasiekiama"
+    },
+    "sharedLearningPath": {
+      "badgeExported": "Dalinamas",
+      "exportButton": "Dalintis",
+      "exportSuccess": "Mokymosi kelias buvo bendrinamas",
+      "exportsDescription": "Dalinkitės šiuo mokymosi keliu su pasirinktomis organizacijomis.",
+      "exportsTitle": "Dalijimasis",
+      "exportingButton": "Bendrinama...",
+      "selectTenants": "Pasirinkite organizacijas",
+      "selectedCount": "Pasirinkta:"
+    },
+    "deleteModal": {
+      "title": "Ištrinti mokymosi kelią",
+      "description": "Tai ištrins mokymosi kelią ir pašalins per jį suteiktą prieigą prie kursų."
+    },
+    "toast": {
+      "created": "Mokymosi kelias sukurtas",
+      "updated": "Mokymosi kelias atnaujintas",
+      "deleted": "Mokymosi kelias ištrintas",
+      "languageCreated": "Mokymosi kelio kalba sukurta",
+      "coursesAdded": "Kursai pridėti prie mokymosi kelio",
+      "courseRemoved": "Kursas pašalintas iš mokymosi kelio",
+      "coursesReordered": "Mokymosi kelio kursų tvarka atnaujinta"
     }
   },
   "lessonPreview": {

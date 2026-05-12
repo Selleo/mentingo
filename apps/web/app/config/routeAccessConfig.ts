@@ -63,6 +63,21 @@ const QA_EDIT_ACCESS: PermissionRequirement = {
 const LEARNING_PROGRESS_ACCESS: PermissionRequirement = {
   anyOf: [PERMISSIONS.LEARNING_PROGRESS_UPDATE, PERMISSIONS.LEARNING_MODE_USE],
 };
+const LEARNING_PATH_READ_ACCESS: PermissionRequirement = {
+  anyOf: [PERMISSIONS.LEARNING_PATH_READ],
+};
+const LEARNING_PATH_ADMIN_ACCESS: PermissionRequirement = {
+  anyOf: [
+    PERMISSIONS.LEARNING_PATH_CREATE,
+    PERMISSIONS.LEARNING_PATH_UPDATE,
+    PERMISSIONS.LEARNING_PATH_UPDATE_OWN,
+    PERMISSIONS.LEARNING_PATH_COURSE_UPDATE,
+    PERMISSIONS.LEARNING_PATH_COURSE_UPDATE_OWN,
+    PERMISSIONS.LEARNING_PATH_DELETE,
+    PERMISSIONS.LEARNING_PATH_ENROLLMENT,
+    PERMISSIONS.LEARNING_PATH_EXPORT,
+  ],
+};
 
 export const routeAccessConfig = createRouteConfig({
   "auth/login": PUBLIC,
@@ -83,6 +98,7 @@ export const routeAccessConfig = createRouteConfig({
   // Client and public
   "course/:id": PUBLIC,
   courses: PUBLIC,
+  "learning-paths": LEARNING_PATH_READ_ACCESS,
   qa: PUBLIC,
   "qa/:id": QA_EDIT_ACCESS,
   articles: PUBLIC,
@@ -108,6 +124,11 @@ export const routeAccessConfig = createRouteConfig({
   },
   "admin/courses/:id": COURSE_EDIT_ACCESS,
   "admin/beta-courses/:id": COURSE_EDIT_ACCESS,
+  "admin/learning-paths": LEARNING_PATH_ADMIN_ACCESS,
+  "admin/learning-paths/new": {
+    allOf: [PERMISSIONS.LEARNING_PATH_CREATE],
+  },
+  "admin/learning-paths/:id": LEARNING_PATH_ADMIN_ACCESS,
   "admin/users/*": USER_MANAGEMENT_ACCESS,
   "admin/groups/*": {
     allOf: [PERMISSIONS.GROUP_MANAGE],

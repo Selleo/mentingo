@@ -286,6 +286,7 @@
     "progress": "Pokrok",
     "findInApplication": "Najít v aplikaci",
     "courses": "Kurzy",
+    "learningPaths": "Vzdělávací cesty",
     "content": "Obsah",
     "categories": "Kategorie",
     "users": "Uživatelé",
@@ -971,6 +972,7 @@
         "category": "kategorie",
         "group": "skupiny",
         "course": "kurzy",
+        "learning_path": "vzdělávací cesty",
         "learning_mode": "režim učení",
         "learning_progress": "studijní postup",
         "certificate": "certifikáty",
@@ -2777,7 +2779,40 @@
     "tenant": "Podrobnosti organizace",
     "createTenant": "Vytvořit organizaci",
     "tenants": "Organizace",
-    "activityLogs": "Log aktivit"
+    "activityLogs": "Log aktivit",
+    "learningPaths": "Vzdělávací cesty",
+    "adminLearningPaths": "Vzdělávací cesty",
+    "adminLearningPathEditor": "Editor vzdělávací cesty"
+  },
+  "masterCourse": {
+    "error": {
+      "sourceCourseNotFound": "Zdrojovy kurz nebyl nalezen",
+      "noTargetTenants": "Vyberte alespon jednoho ciloveho tenanta",
+      "exportedCourseCannotBeSource": "Exportovany kurz nelze pouzit jako zdroj",
+      "exportLinkMissing": "Vazba exportu kurzu nebyla nalezena",
+      "jobNotFound": "Uloha exportu kurzu nebyla nalezena",
+      "targetAuthorMissing": "Autor v cilovem tenantovi nebyl nalezen",
+      "targetCourseMissing": "Cilovy kurz nebyl nalezen",
+      "exportedCourseReadonly": "Exportovany kurz je jen pro cteni"
+    }
+  },
+  "learningPathExport": {
+    "error": {
+      "noTargetTenants": "Vyberte alespon jednoho ciloveho tenanta",
+      "exportLinkMissing": "Vazba exportu vzdelavaci cesty nebyla nalezena",
+      "noCourses": "Vzdelavaci cesta musi pred exportem obsahovat alespon jeden kurz",
+      "courseExportFailed": "Nepodarilo se exportovat jeden z kurzu vzdelavaci cesty",
+      "targetAuthorMissing": "Autor v cilovem tenantovi nebyl nalezen",
+      "jobNotFound": "Uloha exportu vzdelavaci cesty nebyla nalezena",
+      "invalidJobData": "Neplatna data ulohy exportu vzdelavaci cesty",
+      "invalidExportId": "Neplatne ID exportu vzdelavaci cesty",
+      "invalidExportLink": "Neplatna vazba exportu vzdelavaci cesty"
+    }
+  },
+  "learningPathCertificate": {
+    "error": {
+      "disabled": "Certifikaty vzdelavacich cest jsou vypnute"
+    }
   },
   "activityLogsView": {
     "filters": {
@@ -2787,7 +2822,6 @@
         "to": "Do data"
       }
     },
-
     "description": "Časová osa změn v platformě jako jednoduchý rozbalovací feed.",
     "breadcrumbs": {
       "activityLogs": "Log aktivit"
@@ -2848,6 +2882,230 @@
       "showDetails": "Zobrazit detaily",
       "loading": "Načítání záznamů aktivit...",
       "empty": "Žádné záznamy o aktivitě nebyly nalezeny."
+    }
+  },
+  "learningPathsView": {
+    "title": "Vzdělávací cesty",
+    "description": "Procházejte přiřazené vzdělávací cesty a pokračujte v uspořádaných sekvencích kurzů.",
+    "searchPlaceholder": "Hledat vzdělávací cesty",
+    "summary": "{{count}} vzdělávacích cest je dostupných.",
+    "detailsTitle": "Vzdělávací cesta",
+    "detailsDescription": "Zkontrolujte pořadí kurzů, pokrok, uzamčení a stav certifikátu.",
+    "detailsSummary": "Tato cesta obsahuje {{count}} kurzů. Aktuální pokrok: {{progress}}.",
+    "emptyDescription": "Popis zatím nebyl přidán.",
+    "status": {
+      "draft": "Koncept",
+      "published": "Publikováno",
+      "private": "Soukromé",
+      "not_started": "Nezahájeno",
+      "in_progress": "Probíhá",
+      "completed": "Dokončeno",
+      "blocked": "Blokováno"
+    },
+    "badges": {
+      "sequenceEnabled": "Sekvenční",
+      "freeOrder": "Volné pořadí",
+      "certificate": "Certifikát"
+    },
+    "card": {
+      "openPath": "Otevřít vzdělávací cestu"
+    },
+    "empty": {
+      "title": "Nebyly nalezeny žádné cesty",
+      "description": "Upravte vyhledávání nebo se vraťte po přiřazení cest."
+    },
+    "progress": {
+      "title": "Pokrok cesty",
+      "summary": "Dokončeno {{completed}} z {{total}} kurzů"
+    },
+    "certificate": {
+      "available": "Certifikát dostupný",
+      "ready": "Certifikát připraven",
+      "pathCompleted": "Vzdělávací cesta dokončena. Váš certifikát je připraven."
+    },
+    "courseState": {
+      "completed": "Dokončeno",
+      "inProgress": "Probíhá",
+      "inProgressDescription": "Tento kurz jste již zahájili.",
+      "notStarted": "Nezahájeno",
+      "notStartedDescription": "Tento kurz je možné zahájit.",
+      "locked": "Uzamčeno",
+      "lockedDescription": "Dokončete předchozí kurz, aby se odemkl."
+    },
+    "detail": {
+      "courses": "Kurzy v této cestě",
+      "courseTitle": "Kurz {{number}}",
+      "completedAt": "Dokončeno {{date}}",
+      "emptyCourses": "Tato vzdělávací cesta zatím neobsahuje žádné kurzy."
+    },
+    "enrollment": {
+      "manage": "Zapsat",
+      "title": "Zapsat účastníky",
+      "description": "Spravujte zápisy studentů a skupin do této vzdělávací cesty.",
+      "students": "Studenti",
+      "selectStudents": "Vyberte studenty",
+      "groups": "Skupiny",
+      "selectGroups": "Vyberte skupiny",
+      "filters": {
+        "placeholder": {
+          "searchByKeyword": "Hledat podle klíčového slova..."
+        }
+      },
+      "enrollSelected": "Zapsat vybrané",
+      "unenrollSelected": "Odebrat vybrané ze zápisu",
+      "enrollGroups": "Zapsat skupiny",
+      "unenrollGroups": "Odebrat skupiny ze zápisu",
+      "enrolled": "Zapsáno",
+      "enroll": "Zapsat",
+      "studentsEnrolled": "Studenti zapsáni",
+      "groupsEnrolled": "Skupiny zapsány",
+      "studentsUnenrolled": "Studenti odebráni ze zápisu",
+      "groupsUnenrolled": "Skupiny odebrány ze zápisu",
+      "enrolledSuccessfully": "Zapsáno do vzdělávací cesty",
+      "enrollGroupsDescription": "Vyberte skupiny, které chcete zapsat do této vzdělávací cesty.",
+      "unenrollGroupsDescription": "Vyberte skupiny, které chcete odebrat ze zápisu do této vzdělávací cesty.",
+      "table": {
+        "selectAll": "Vybrat všechny účastníky",
+        "select": "Vybrat účastníka",
+        "name": "Jméno",
+        "email": "E-mail",
+        "status": "Stav zápisu",
+        "enrollmentDate": "Datum zápisu"
+      },
+      "statuses": {
+        "enrolledByGroup": "Zapsáno přes skupinu",
+        "individuallyEnrolled": "Zapsáno individuálně",
+        "notEnrolled": "Nezapsáno"
+      },
+      "confirmation": {
+        "title": "Potvrdit zápis",
+        "description": "Opravdu chcete zapsat vybrané studenty do této vzdělávací cesty? Tuto akci nelze vrátit zpět."
+      },
+      "unenrollConfirmation": {
+        "title": "Potvrdit odebrání ze zápisu",
+        "description": "Opravdu chcete odebrat vybrané studenty ze zápisu do této vzdělávací cesty? Tuto akci nelze vrátit zpět."
+      },
+      "noGroups": "Nejsou dostupné žádné skupiny"
+    },
+    "breadcrumbs": {
+      "learningPaths": "Vzdělávací cesty",
+      "details": "Detail"
+    },
+    "buttons": {
+      "openFirst": "Otevřít první cestu"
+    }
+  },
+  "adminLearningPathsView": {
+    "title": "Vzdělávací cesty",
+    "description": "Spravujte metadata, nastavení sekvence, kurzy, zápisy, exporty a certifikáty.",
+    "summary": "{{count}} vzdělávacích cest je dostupných v tomto prostoru.",
+    "breadcrumbs": {
+      "learningPaths": "Vzdělávací cesty",
+      "create": "Vytvořit",
+      "edit": "Upravit"
+    },
+    "buttons": {
+      "create": "Vytvořit vzdělávací cestu",
+      "edit": "Upravit",
+      "save": "Uložit změny",
+      "removeImage": "Odebrat obrázek"
+    },
+    "editor": {
+      "createTitle": "Vytvořit vzdělávací cestu",
+      "editTitle": "Upravit vzdělávací cestu",
+      "description": "Nastavte podrobnosti cesty, sekvenci, kurzy a stav publikování.",
+      "createSummary": "Začněte podrobnostmi vzdělávací cesty.",
+      "editSummary": "Tato vzdělávací cesta má aktuálně {{coursesCount}} kurzů.",
+      "details": "Podrobnosti",
+      "courses": "Kurzy",
+      "image": "Obrázek",
+      "settings": "Nastavení"
+    },
+    "table": {
+      "title": "Název",
+      "status": "Stav",
+      "settings": "Nastavení",
+      "language": "Jazyk",
+      "createdAt": "Vytvořeno",
+      "actions": "Akce",
+      "untitled": "Vzdělávací cesta bez názvu",
+      "emptyDescription": "Bez popisu",
+      "sequential": "Sekvenční",
+      "flexible": "Volné pořadí",
+      "certificate": "Certifikát",
+      "empty": "Zatím nebyly vytvořeny žádné vzdělávací cesty."
+    },
+    "form": {
+      "language": "Jazyk",
+      "status": "Stav",
+      "statusDescription": "Určuje, zda je cesta viditelná, jako koncept nebo soukromá.",
+      "title": "Název",
+      "titlePlaceholder": "Pojmenujte vzdělávací cestu",
+      "description": "Popis",
+      "descriptionPlaceholder": "Popište, co studenti v této cestě dokončí",
+      "imageHint": "PNG, JPG nebo JPEG (max. 20 MB, doporučeno 1200x1200 nebo vyšší)",
+      "sequenceEnabled": "Sekvenční učení",
+      "sequenceEnabledDescription": "Studenti musí dokončit kurzy v zobrazeném pořadí.",
+      "includesCertificate": "Certifikát",
+      "includesCertificateDescription": "Studenti mohou po dokončení cesty získat certifikát.",
+      "certificateSignature": "Podpis na certifikátu",
+      "certificateSignatureDescription": "Nahrajte podpis zobrazený na certifikátech pro tuto vzdělávací cestu.",
+      "certificateFontColor": "Barva písma certifikátu",
+      "certificateFontColorDescription": "Pomocí výběru barvy v náhledu změňte barvu textu a linek certifikátu.",
+      "certificatePreview": "Náhled certifikátu",
+      "certificatePreviewDescription": "Zobrazte náhled certifikátu a upravte barvu písma."
+    },
+    "detailsContent": {
+      "title": "Podrobnosti cesty",
+      "description": "Definujte lokalizovaný název a popis viditelný pro studenty."
+    },
+    "detailsImage": {
+      "title": "Obrázek obálky",
+      "description": "Použijte obrázek, podle kterého bude cesta snadno rozpoznatelná."
+    },
+    "detailsSettings": {
+      "title": "Publikování a chování",
+      "description": "Seskupte viditelnost, pořadí kurzů a certifikát na jednom místě."
+    },
+    "common": {
+      "baseLanguage": "Základní jazyk"
+    },
+    "languageSelector": {
+      "tooltip": "Základní jazyk této cesty je {{baseLanguage}}."
+    },
+    "courses": {
+      "select": "Vyberte kurz",
+      "add": "Přidat kurz",
+      "drag": "Přetáhněte pro změnu pořadí kurzu",
+      "delete": "Smazat kurz",
+      "order": "Pořadí",
+      "course": "Kurz",
+      "empty": "Do této vzdělávací cesty zatím nebyly přidány žádné kurzy.",
+      "saveFirst": "Před přidáním kurzů vzdělávací cestu uložte.",
+      "unknownCourse": "Podrobnosti kurzu nejsou dostupné"
+    },
+    "sharedLearningPath": {
+      "badgeExported": "Sdíleno",
+      "exportButton": "Sdílet",
+      "exportSuccess": "Vzdělávací cesta byla sdílena",
+      "exportsDescription": "Sdílejte tuto vzdělávací cestu s vybranými organizacemi.",
+      "exportsTitle": "Sdílení",
+      "exportingButton": "Sdílení...",
+      "selectTenants": "Vyberte organizace",
+      "selectedCount": "Vybráno:"
+    },
+    "deleteModal": {
+      "title": "Smazat vzdělávací cestu",
+      "description": "Tím se smaže vzdělávací cesta a odebere přístup ke kurzům udělený touto cestou."
+    },
+    "toast": {
+      "created": "Vzdělávací cesta byla vytvořena",
+      "updated": "Vzdělávací cesta byla aktualizována",
+      "deleted": "Vzdělávací cesta byla smazána",
+      "languageCreated": "Jazyk vzdělávací cesty byl vytvořen",
+      "coursesAdded": "Kurzy byly přidány do vzdělávací cesty",
+      "courseRemoved": "Kurz byl odebrán ze vzdělávací cesty",
+      "coursesReordered": "Pořadí kurzů ve vzdělávací cestě bylo aktualizováno"
     }
   },
   "lessonPreview": {

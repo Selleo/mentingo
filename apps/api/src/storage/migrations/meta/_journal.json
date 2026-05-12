@@ -792,6 +792,20 @@
       "when": 1778147276275,
       "tag": "0112_scorm_packages_language",
       "breakpoints": true
+    },
+    {
+      "idx": 113,
+      "version": "7",
+      "when": 1778507684737,
+      "tag": "0113_add_learning_path_schema",
+      "breakpoints": true
+    },
+    {
+      "idx": 114,
+      "version": "7",
+      "when": 1778507748466,
+      "tag": "0114_enable_tenant_rls_for_learning_paths_related_tables",
+      "breakpoints": true
     }
   ]
 }

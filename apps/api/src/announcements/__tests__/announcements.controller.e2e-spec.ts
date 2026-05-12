@@ -40,6 +40,7 @@ describe("AnnouncementsController (e2e)", () => {
 
   afterAll(async () => {
     await truncateAllTables(baseDb, db);
+    await app.close();
   });
 
   describe("GET /api/announcements", () => {

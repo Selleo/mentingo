@@ -5,6 +5,8 @@ export const QUEUE_NAMES = {
   LEARNING_TIME: "learning-time",
   MASTER_COURSE_EXPORT: "master-course-export",
   MASTER_COURSE_SYNC: "master-course-sync",
+  LEARNING_PATH_EXPORT: "learning-path-export",
+  LEARNING_PATH_SYNC: "learning-path-sync",
   AUDIO: "audio",
 } as const;
 
@@ -35,6 +37,22 @@ export interface MasterCourseExportJobData {
 export interface MasterCourseSyncJobData {
   exportId: string;
   sourceCourseId: string;
+  sourceTenantId: string;
+  targetTenantId: string;
+  triggerEventType: string;
+}
+
+export interface LearningPathExportJobData {
+  exportId: string;
+  sourceLearningPathId: string;
+  sourceTenantId: string;
+  targetTenantId: string;
+  actorId: string;
+}
+
+export interface LearningPathSyncJobData {
+  exportId: string;
+  sourceLearningPathId: string;
   sourceTenantId: string;
   targetTenantId: string;
   triggerEventType: string;

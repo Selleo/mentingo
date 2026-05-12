@@ -5,6 +5,7 @@ import type {
   articles,
   articleSections,
   formFields,
+  learningPaths,
 } from "src/storage/schema";
 
 export const ENTITY_TYPE = {
@@ -32,4 +33,5 @@ export type BaseTable =
   | typeof articles
   | typeof news
   | typeof articleSections
-  | typeof formFields;
+  | typeof formFields
+  | typeof learningPaths;

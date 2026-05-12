@@ -124,6 +124,15 @@ export interface CurrentUserResponse {
       | "category.manage"
       | "group.read"
       | "group.manage"
+      | "learning_path.read"
+      | "learning_path.create"
+      | "learning_path.update"
+      | "learning_path.update_own"
+      | "learning_path.delete"
+      | "learning_path.course_update"
+      | "learning_path.course_update_own"
+      | "learning_path.enrollment"
+      | "learning_path.export"
       | "course.read_assigned"
       | "course.read_manageable"
       | "course.read"
@@ -162,6 +171,7 @@ export interface CurrentUserResponse {
       | "integration_api.use"
       | "tenant.manage"
       | "course.ai_generation"
+      | "activity_log.read"
     )[];
     shouldVerifyMFA: boolean;
     onboardingStatus: {
@@ -1427,6 +1437,7 @@ export interface GetStudentCoursesResponse {
 
 export interface GetStudentsWithEnrollmentDateResponse {
   data: {
+    name?: string;
     firstName: string;
     lastName: string;
     email: string;
@@ -2864,7 +2875,7 @@ export type GetCertificateResponse = {
   /** @format uuid */
   userId: string;
   /** @format uuid */
-  courseId: string;
+  learningPathId: string;
   courseTitle?: string | null;
   completionDate?: string | null;
   fullName?: string | null;
@@ -3403,6 +3414,373 @@ export type DeleteManyCategoriesBody = string[];
 export interface DeleteManyCategoriesResponse {
   data: {
     message: string;
+  };
+}
+
+export interface GetLearningPathsResponse {
+  data: ({
+    /** @format uuid */
+    id: string;
+    title: string;
+    description: string;
+    thumbnailReference: string | null;
+    isEnrolled: boolean;
+    status: "draft" | "published" | "private";
+    includesCertificate: boolean;
+    settings: {
+      certificateSignatureUrl: string | null;
+      certificateFontColor: string | null;
+    };
+    sequenceEnabled: boolean;
+    /** @format uuid */
+    authorId: string;
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
+    createdAt: string;
+    updatedAt: string;
+  } & {
+    courses: ({
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      learningPathId: string;
+      /** @format uuid */
+      courseId: string;
+      displayOrder: number;
+    } & {
+      title: string;
+      description: string;
+      thumbnailUrl: string | null;
+      courseChapterCount: number;
+    } & {
+      progress: "not_started" | "in_progress" | "completed" | "blocked";
+      isLocked: boolean;
+      completedAt: string | null;
+    })[];
+    availableCourseOptions: {
+      /** @format uuid */
+      value: string;
+      label: string;
+      imageUrl: string | null;
+    }[];
+  })[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface GetLearningPathByIdResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    title: string;
+    description: string;
+    thumbnailReference: string | null;
+    isEnrolled: boolean;
+    status: "draft" | "published" | "private";
+    includesCertificate: boolean;
+    settings: {
+      certificateSignatureUrl: string | null;
+      certificateFontColor: string | null;
+    };
+    sequenceEnabled: boolean;
+    /** @format uuid */
+    authorId: string;
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
+    createdAt: string;
+    updatedAt: string;
+  } & {
+    availableCourseOptions: {
+      /** @format uuid */
+      value: string;
+      label: string;
+      imageUrl: string | null;
+    }[];
+    progress: "not_started" | "in_progress" | "completed";
+    progressValue: number;
+    completedCourseCount: number;
+    totalCourseCount: number;
+    certificateReady: boolean;
+    courses: (({
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      learningPathId: string;
+      /** @format uuid */
+      courseId: string;
+      displayOrder: number;
+    } & {
+      createdAt: string;
+      updatedAt: string;
+    }) & {
+      title: string;
+      description: string;
+      thumbnailUrl: string | null;
+      courseChapterCount: number;
+    } & {
+      progress: "not_started" | "in_progress" | "completed" | "blocked";
+      isLocked: boolean;
+      completedAt: string | null;
+    })[];
+  };
+}
+
+export interface CreateLearningPathBody {
+  language: "en" | "pl" | "de" | "lt" | "cs";
+  title: string;
+  description: string;
+  thumbnailReference?: string | null;
+  /** @format binary */
+  thumbnail?: File;
+  status?: "draft" | "published" | "private";
+  includesCertificate?: boolean;
+  settings?: {
+    certificateFontColor?: string | null;
+    removeCertificateSignature?: boolean;
+  };
+  /** @format binary */
+  certificateSignature?: File;
+  sequenceEnabled?: boolean;
+}
+
+export interface CreateLearningPathResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    title: string;
+    description: string;
+    thumbnailReference: string | null;
+    status: "draft" | "published" | "private";
+    includesCertificate: boolean;
+    settings: {
+      /** @default null */
+      certificateSignature: string | null;
+      /** @default null */
+      certificateFontColor: string | null;
+    };
+    sequenceEnabled: boolean;
+    /** @format uuid */
+    authorId: string;
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface UpdateLearningPathBody {
+  language?: "en" | "pl" | "de" | "lt" | "cs";
+  title?: string;
+  description?: string;
+  thumbnailReference?: string | null;
+  /** @format binary */
+  thumbnail?: File;
+  status?: "draft" | "published" | "private";
+  includesCertificate?: boolean;
+  settings?: {
+    certificateFontColor?: string | null;
+    removeCertificateSignature?: boolean;
+  };
+  /** @format binary */
+  certificateSignature?: File;
+  sequenceEnabled?: boolean;
+}
+
+export interface UpdateLearningPathResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    title: string;
+    description: string;
+    thumbnailReference: string | null;
+    status: "draft" | "published" | "private";
+    includesCertificate: boolean;
+    settings: {
+      /** @default null */
+      certificateSignature: string | null;
+      /** @default null */
+      certificateFontColor: string | null;
+    };
+    sequenceEnabled: boolean;
+    /** @format uuid */
+    authorId: string;
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface CreateLanguageResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    title: string;
+    description: string;
+    thumbnailReference: string | null;
+    status: "draft" | "published" | "private";
+    includesCertificate: boolean;
+    settings: {
+      /** @default null */
+      certificateSignature: string | null;
+      /** @default null */
+      certificateFontColor: string | null;
+    };
+    sequenceEnabled: boolean;
+    /** @format uuid */
+    authorId: string;
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface DeleteLearningPathResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface AddCoursesToLearningPathBody {
+  courseIds: string[];
+}
+
+export interface AddCoursesToLearningPathResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface RemoveCourseFromLearningPathResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface ReorderLearningPathCoursesBody {
+  courseIds: string[];
+}
+
+export interface ReorderLearningPathCoursesResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface EnrollCurrentUserToLearningPathResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface EnrollUsersToLearningPathBody {
+  studentIds: string[];
+}
+
+export interface EnrollUsersToLearningPathResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface UnenrollUsersFromLearningPathBody {
+  studentIds: string[];
+}
+
+export interface UnenrollUsersFromLearningPathResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface EnrollGroupsToLearningPathBody {
+  groupIds: string[];
+}
+
+export interface EnrollGroupsToLearningPathResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface UnenrollGroupsFromLearningPathBody {
+  groupIds: string[];
+}
+
+export interface UnenrollGroupsFromLearningPathResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface ExportLearningPathBody {
+  /** @minItems 1 */
+  targetTenantIds: string[];
+}
+
+export interface ExportLearningPathResponse {
+  data: {
+    /** @format uuid */
+    sourceLearningPathId: string;
+    jobs: {
+      /** @format uuid */
+      targetTenantId: string;
+      queued: boolean;
+      reason?: string;
+      /** @format uuid */
+      exportId?: string;
+    }[];
+  };
+}
+
+export interface GetLearningPathExportsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    sourceTenantId: string;
+    /** @format uuid */
+    sourceLearningPathId: string;
+    /** @format uuid */
+    targetTenantId: string;
+    targetLearningPathId: string | null;
+    syncStatus: "active" | "failed" | "paused";
+    lastSyncedAt: string | null;
+  }[];
+}
+
+export interface GetLearningPathExportCandidatesResponse {
+  data: {
+    tenants: {
+      /** @format uuid */
+      id: string;
+      name: string;
+      host: string;
+      isExported: boolean;
+      targetLearningPathId: string | null;
+      syncStatus: ("active" | "failed" | "paused") | null;
+      lastSyncedAt: string | null;
+    }[];
+    summary: {
+      totalTenants: number;
+      exportedCount: number;
+      remainingCount: number;
+    };
+  };
+}
+
+export interface GetLearningPathJobStatusResponse {
+  data: {
+    id: string;
+    name: string;
+    state: string;
+    attemptsMade: number;
+    failedReason: string | null;
   };
 }
 
@@ -8583,6 +8961,492 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name LearningPathControllerGetLearningPaths
+     * @request GET:/api/learning-path
+     */
+    learningPathControllerGetLearningPaths: (
+      query?: {
+        /** @min 1 */
+        page?: number;
+        perPage?: number;
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+        searchQuery?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetLearningPathsResponse, any>({
+        path: `/api/learning-path`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LearningPathControllerCreateLearningPath
+     * @request POST:/api/learning-path
+     */
+    learningPathControllerCreateLearningPath: (
+      data: CreateLearningPathBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateLearningPathResponse, any>({
+        path: `/api/learning-path`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LearningPathControllerGetLearningPathById
+     * @request GET:/api/learning-path/{learningPathId}
+     */
+    learningPathControllerGetLearningPathById: (
+      learningPathId: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetLearningPathByIdResponse, any>({
+        path: `/api/learning-path/${learningPathId}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LearningPathControllerUpdateLearningPath
+     * @request PATCH:/api/learning-path/{learningPathId}
+     */
+    learningPathControllerUpdateLearningPath: (
+      learningPathId: string,
+      data: UpdateLearningPathBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateLearningPathResponse, any>({
+        path: `/api/learning-path/${learningPathId}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LearningPathControllerDeleteLearningPath
+     * @request DELETE:/api/learning-path/{learningPathId}
+     */
+    learningPathControllerDeleteLearningPath: (
+      learningPathId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<DeleteLearningPathResponse, any>({
+        path: `/api/learning-path/${learningPathId}`,
+        method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LearningPathControllerCreateLanguage
+     * @request POST:/api/learning-path/{learningPathId}/language
+     */
+    learningPathControllerCreateLanguage: (
+      learningPathId: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateLanguageResponse, any>({
+        path: `/api/learning-path/${learningPathId}/language`,
+        method: "POST",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LearningPathCourseControllerAddCoursesToLearningPath
+     * @request POST:/api/learning-path/{learningPathId}/courses
+     */
+    learningPathCourseControllerAddCoursesToLearningPath: (
+      learningPathId: string,
+      data: AddCoursesToLearningPathBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<AddCoursesToLearningPathResponse, any>({
+        path: `/api/learning-path/${learningPathId}/courses`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LearningPathCourseControllerRemoveCourseFromLearningPath
+     * @request DELETE:/api/learning-path/{learningPathId}/courses/{courseId}
+     */
+    learningPathCourseControllerRemoveCourseFromLearningPath: (
+      learningPathId: string,
+      courseId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<RemoveCourseFromLearningPathResponse, any>({
+        path: `/api/learning-path/${learningPathId}/courses/${courseId}`,
+        method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LearningPathCourseControllerReorderLearningPathCourses
+     * @request PATCH:/api/learning-path/{learningPathId}/courses/reorder
+     */
+    learningPathCourseControllerReorderLearningPathCourses: (
+      learningPathId: string,
+      data: ReorderLearningPathCoursesBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<ReorderLearningPathCoursesResponse, any>({
+        path: `/api/learning-path/${learningPathId}/courses/reorder`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LearningPathEnrollmentControllerGetStudentsWithEnrollmentDate
+     * @request GET:/api/learning-path/{learningPathId}/enroll-users
+     */
+    learningPathEnrollmentControllerGetStudentsWithEnrollmentDate: (
+      learningPathId: string,
+      query?: {
+        keyword?: string;
+        sort?:
+          | "enrolledAt"
+          | "firstName"
+          | "lastName"
+          | "email"
+          | "isEnrolledByGroup"
+          | "-enrolledAt"
+          | "-firstName"
+          | "-lastName"
+          | "-email"
+          | "-isEnrolledByGroup";
+        groups?: string[];
+        /** @min 1 */
+        page?: number;
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetStudentsWithEnrollmentDateResponse, any>({
+        path: `/api/learning-path/${learningPathId}/enroll-users`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LearningPathEnrollmentControllerEnrollUsersToLearningPath
+     * @request POST:/api/learning-path/{learningPathId}/enroll-users
+     */
+    learningPathEnrollmentControllerEnrollUsersToLearningPath: (
+      learningPathId: string,
+      data: EnrollUsersToLearningPathBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<EnrollUsersToLearningPathResponse, any>({
+        path: `/api/learning-path/${learningPathId}/enroll-users`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LearningPathEnrollmentControllerUnenrollUsersFromLearningPath
+     * @request DELETE:/api/learning-path/{learningPathId}/enroll-users
+     */
+    learningPathEnrollmentControllerUnenrollUsersFromLearningPath: (
+      learningPathId: string,
+      data: UnenrollUsersFromLearningPathBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UnenrollUsersFromLearningPathResponse, any>({
+        path: `/api/learning-path/${learningPathId}/enroll-users`,
+        method: "DELETE",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LearningPathEnrollmentControllerEnrollCurrentUserToLearningPath
+     * @request POST:/api/learning-path/{learningPathId}/enroll
+     */
+    learningPathEnrollmentControllerEnrollCurrentUserToLearningPath: (
+      learningPathId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<EnrollCurrentUserToLearningPathResponse, any>({
+        path: `/api/learning-path/${learningPathId}/enroll`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LearningPathEnrollmentControllerEnrollGroupsToLearningPath
+     * @request POST:/api/learning-path/{learningPathId}/enroll-groups
+     */
+    learningPathEnrollmentControllerEnrollGroupsToLearningPath: (
+      learningPathId: string,
+      data: EnrollGroupsToLearningPathBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<EnrollGroupsToLearningPathResponse, any>({
+        path: `/api/learning-path/${learningPathId}/enroll-groups`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LearningPathEnrollmentControllerUnenrollGroupsFromLearningPath
+     * @request DELETE:/api/learning-path/{learningPathId}/enroll-groups
+     */
+    learningPathEnrollmentControllerUnenrollGroupsFromLearningPath: (
+      learningPathId: string,
+      data: UnenrollGroupsFromLearningPathBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UnenrollGroupsFromLearningPathResponse, any>({
+        path: `/api/learning-path/${learningPathId}/enroll-groups`,
+        method: "DELETE",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LearningPathExportControllerExportLearningPath
+     * @request POST:/api/learning-path/master/{learningPathId}/export
+     */
+    learningPathExportControllerExportLearningPath: (
+      learningPathId: string,
+      data: ExportLearningPathBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<ExportLearningPathResponse, any>({
+        path: `/api/learning-path/master/${learningPathId}/export`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LearningPathExportControllerGetLearningPathExports
+     * @request GET:/api/learning-path/master/{learningPathId}/exports
+     */
+    learningPathExportControllerGetLearningPathExports: (
+      learningPathId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<GetLearningPathExportsResponse, any>({
+        path: `/api/learning-path/master/${learningPathId}/exports`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LearningPathExportControllerGetLearningPathExportCandidates
+     * @request GET:/api/learning-path/master/{learningPathId}/export-candidates
+     */
+    learningPathExportControllerGetLearningPathExportCandidates: (
+      learningPathId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<GetLearningPathExportCandidatesResponse, any>({
+        path: `/api/learning-path/master/${learningPathId}/export-candidates`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LearningPathExportControllerGetLearningPathJobStatus
+     * @request GET:/api/learning-path/master/export-jobs/{jobId}
+     */
+    learningPathExportControllerGetLearningPathJobStatus: (
+      jobId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<GetLearningPathJobStatusResponse, any>({
+        path: `/api/learning-path/master/export-jobs/${jobId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LearningPathCertificateControllerGetCertificate
+     * @request GET:/api/learning-path/certificates/certificate
+     */
+    learningPathCertificateControllerGetCertificate: (
+      query?: {
+        /** @format uuid */
+        userId?: string;
+        /** @format uuid */
+        learningPathId?: string;
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCertificateResponse, any>({
+        path: `/api/learning-path/certificates/certificate`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LearningPathCertificateControllerDownloadCertificate
+     * @request POST:/api/learning-path/certificates/download
+     */
+    learningPathCertificateControllerDownloadCertificate: (
+      data: DownloadCertificateBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/learning-path/certificates/download`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LearningPathCertificateControllerCreateCertificateShareLink
+     * @request POST:/api/learning-path/certificates/share-link
+     */
+    learningPathCertificateControllerCreateCertificateShareLink: (
+      data: CreateCertificateShareLinkBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateCertificateShareLinkResponse, any>({
+        path: `/api/learning-path/certificates/share-link`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LearningPathCertificateControllerGetCertificateSharePage
+     * @request GET:/api/learning-path/certificates/share
+     */
+    learningPathCertificateControllerGetCertificateSharePage: (
+      query: {
+        certificateId: string;
+        lang: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/learning-path/certificates/share`,
+        method: "GET",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LearningPathCertificateControllerGetCertificateShareImage
+     * @request GET:/api/learning-path/certificates/share-image
+     */
+    learningPathCertificateControllerGetCertificateShareImage: (
+      query: {
+        certificateId: string;
+        lang: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/learning-path/certificates/share-image`,
+        method: "GET",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name ReportControllerDownloadSummaryReport
      * @request GET:/api/report/summary
      */
@@ -9303,6 +10167,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         page?: number;
         /** @min 1 */
         perPage?: number;
+        email?: string;
+        from?: string;
+        to?: string;
       },
       params: RequestParams = {},
     ) =>

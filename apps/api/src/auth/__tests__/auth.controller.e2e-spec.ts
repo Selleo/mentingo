@@ -60,6 +60,10 @@ describe("AuthController (e2e)", () => {
     ]);
   });
 
+  afterAll(async () => {
+    await app.close();
+  });
+
   describe("POST /api/auth/register", () => {
     it("should register a new user", async () => {
       const user = await userFactory.withCredentials({ password: "Password123@" }).build();

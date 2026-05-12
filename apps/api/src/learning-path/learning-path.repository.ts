@@ -1,0 +1,1944 @@
+import { Inject, Injectable } from "@nestjs/common";
+import {
+  COURSE_ORIGIN_TYPES,
+  LEARNING_PATH_STATUSES,
+  MASTER_COURSE_EXPORT_SYNC_STATUSES,
+  PERMISSIONS,
+  LEARNING_PATH_ENROLLMENT_TYPES,
+  LEARNING_PATH_CERTIFICATE_STATUSES,
+  SUPPORTED_LANGUAGES,
+  type LearningPathEnrollmentType,
+  type LearningPathProgressStatus,
+  type LearningPathEntityType,
+  type SupportedLanguages,
+} from "@repo/shared";
+import {
+  and,
+  asc,
+  count,
+  countDistinct,
+  desc,
+  eq,
+  getTableColumns,
+  ilike,
+  inArray,
+  isNull,
+  isNotNull,
+  ne,
+  not,
+  or,
+  sql,
+  type SQL,
+} from "drizzle-orm";
+import { alias, type AnyPgColumn } from "drizzle-orm/pg-core";
+
+import { DatabasePg } from "src/common";
+import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterConditions";
+import { getSortOptions } from "src/common/helpers/getSortOptions";
+import { buildJsonbField } from "src/common/helpers/sqlHelpers";
+import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { userHasAnyPermissionsCondition } from "src/common/permissions/permission-sql.utils";
+import { LocalizationService } from "src/localization/localization.service";
+import { DB, DB_ADMIN } from "src/storage/db/db.providers";
+import {
+  courses,
+  groupLearningPaths,
+  groups,
+  groupUsers,
+  learningPathCourses,
+  learningPathCertificates,
+  learningPathEntityMap,
+  learningPathExports,
+  learningPaths,
+  masterCourseExports,
+  studentCourses,
+  studentLearningPathCourses,
+  studentLearningPaths,
+  tenants,
+  users,
+} from "src/storage/schema";
+
+import {
+  DEFAULT_LEARNING_PATH_SETTINGS,
+  type LearningPathSettings,
+} from "./types/learning-path-settings.types";
+
+import type {
+  LearningPathEnrolledStudentsQuery,
+  LearningPathListQuery,
+} from "./learning-path.repository.types";
+import type { CreateLearningPathBody, LearningPathSchema } from "./learning-path.schema";
+import type {
+  LearningPathCourseLink,
+  LearningPathCoursePreviewGroup,
+  LearningPathCourseProgressRow,
+  LearningPathProgressState,
+  LearningPathUpdateData,
+} from "./learning-path.types";
+import type { UUIDType } from "src/common";
+import type { CurrentUserType } from "src/common/types/current-user.type";
+import type { ProgressStatus } from "src/utils/types/progress.type";
+
+@Injectable()
+export class LearningPathRepository {
+  constructor(
+    @Inject(DB) private readonly db: DatabasePg,
+    @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
+    private readonly localizationService: LocalizationService,
+  ) {}
+
+  private buildCreateLearningPathValues(
+    body: CreateLearningPathBody,
+    currentUser: CurrentUserType,
+  ) {
+    const learningPathBody = body as CreateLearningPathBody & {
+      certificateSignature?: string;
+    };
+    const settings: LearningPathSettings = {
+      ...DEFAULT_LEARNING_PATH_SETTINGS,
+      ...(body.settings?.certificateFontColor !== undefined
+        ? { certificateFontColor: body.settings.certificateFontColor }
+        : {}),
+      certificateSignature: learningPathBody.certificateSignature ?? null,
+    };
+    const values: typeof learningPaths.$inferInsert = {
+      title: buildJsonbField(body.language, body.title) as typeof learningPaths.$inferInsert.title,
+      description: buildJsonbField(
+        body.language,
+        body.description,
+      ) as typeof learningPaths.$inferInsert.description,
+      authorId: currentUser.userId,
+      baseLanguage: body.language,
+      availableLocales: [body.language],
+      settings,
+    };
+
+    if (body.thumbnailReference !== undefined) values.thumbnailReference = body.thumbnailReference;
+
+    if (body.status !== undefined) values.status = body.status;
+
+    if (body.includesCertificate !== undefined) {
+      values.includesCertificate = body.includesCertificate;
+    }
+
+    if (body.sequenceEnabled !== undefined) values.sequenceEnabled = body.sequenceEnabled;
+
+    return values;
+  }
+
+  private buildLearningPathFieldSearchCondition(
+    fieldColumn: AnyPgColumn,
+    searchPattern: string,
+    language?: SupportedLanguages,
+  ): SQL<unknown> {
+    const localizedField = this.localizationService.getLocalizedSqlField(
+      fieldColumn,
+      language,
+      learningPaths,
+    );
+
+    return sql`${localizedField} ILIKE ${searchPattern}`;
+  }
+
+  private buildLearningPathSearchCondition(
+    searchQuery?: string,
+    language?: SupportedLanguages,
+  ): SQL<unknown> | undefined {
+    const trimmedSearchQuery = searchQuery?.trim();
+
+    if (!trimmedSearchQuery) return undefined;
+
+    const searchPattern = `%${trimmedSearchQuery}%`;
+
+    return or(
+      this.buildLearningPathFieldSearchCondition(learningPaths.title, searchPattern, language),
+      this.buildLearningPathFieldSearchCondition(
+        learningPaths.description,
+        searchPattern,
+        language,
+      ),
+    );
+  }
+
+  findLearningPathById(id: UUIDType, dbInstance: DatabasePg = this.db) {
+    return dbInstance.query.learningPaths.findFirst({
+      where: eq(learningPaths.id, id),
+    });
+  }
+
+  async findLocalizedLearningPathById(
+    id: UUIDType,
+    language?: SupportedLanguages,
+    dbInstance: DatabasePg = this.db,
+  ): Promise<LearningPathSchema | null> {
+    const [learningPath] = await dbInstance
+      .select({
+        ...getTableColumns(learningPaths),
+        title: this.localizationService.getLocalizedSqlField(
+          learningPaths.title,
+          language,
+          learningPaths,
+        ),
+        description: this.localizationService.getLocalizedSqlField(
+          learningPaths.description,
+          language,
+          learningPaths,
+        ),
+      })
+      .from(learningPaths)
+      .where(eq(learningPaths.id, id))
+      .limit(1);
+
+    return learningPath ?? null;
+  }
+
+  async getLearningPaths(query: LearningPathListQuery = {}, dbInstance: DatabasePg = this.db) {
+    const { page = 1, perPage = DEFAULT_PAGE_SIZE, language, searchQuery, visibility } = query;
+
+    const visibilityCondition = visibility?.canReadAll
+      ? undefined
+      : or(
+          eq(learningPaths.status, LEARNING_PATH_STATUSES.PUBLISHED),
+          isNotNull(studentLearningPaths.id),
+          visibility?.canReadOwn ? eq(learningPaths.authorId, visibility.studentId) : undefined,
+        );
+
+    const searchCondition = this.buildLearningPathSearchCondition(searchQuery, language);
+    const whereCondition = and(visibilityCondition, searchCondition);
+
+    const queriedLearningPaths = await dbInstance
+      .select({
+        ...getTableColumns(learningPaths),
+        title: this.localizationService.getLocalizedSqlField(
+          learningPaths.title,
+          language,
+          learningPaths,
+        ),
+        description: this.localizationService.getLocalizedSqlField(
+          learningPaths.description,
+          language,
+          learningPaths,
+        ),
+      })
+      .from(learningPaths)
+      .leftJoin(
+        studentLearningPaths,
+        and(
+          eq(studentLearningPaths.learningPathId, learningPaths.id),
+          visibility ? eq(studentLearningPaths.studentId, visibility.studentId) : undefined,
+        ),
+      )
+      .where(whereCondition)
+      .orderBy(desc(learningPaths.createdAt))
+      .limit(perPage)
+      .offset((page - 1) * perPage);
+
+    const [{ totalItems }] = await dbInstance
+      .select({ totalItems: count() })
+      .from(learningPaths)
+      .leftJoin(
+        studentLearningPaths,
+        and(
+          eq(studentLearningPaths.learningPathId, learningPaths.id),
+          visibility ? eq(studentLearningPaths.studentId, visibility.studentId) : undefined,
+        ),
+      )
+      .where(whereCondition);
+
+    return {
+      data: queriedLearningPaths,
+      pagination: {
+        totalItems,
+        page,
+        perPage,
+      },
+    };
+  }
+
+  async createLearningPath(
+    body: CreateLearningPathBody,
+    currentUser: CurrentUserType,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    const [createdLearningPath] = await dbInstance
+      .insert(learningPaths)
+      .values(this.buildCreateLearningPathValues(body, currentUser))
+      .returning();
+
+    return createdLearningPath;
+  }
+
+  async updateLearningPath(
+    id: UUIDType,
+    updates: LearningPathUpdateData,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    const [updatedLearningPath] = await dbInstance
+      .update(learningPaths)
+      .set(updates)
+      .where(eq(learningPaths.id, id))
+      .returning();
+
+    return updatedLearningPath;
+  }
+
+  deleteLearningPath(id: UUIDType, dbInstance: DatabasePg = this.db) {
+    return dbInstance.delete(learningPaths).where(eq(learningPaths.id, id)).returning({
+      id: learningPaths.id,
+    });
+  }
+
+  async getLearningPathCourses(
+    pathId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ): Promise<LearningPathCourseLink[]> {
+    return dbInstance
+      .select({
+        id: learningPathCourses.id,
+        learningPathId: learningPathCourses.learningPathId,
+        courseId: learningPathCourses.courseId,
+        displayOrder: learningPathCourses.displayOrder,
+        createdAt: learningPathCourses.createdAt,
+        updatedAt: learningPathCourses.updatedAt,
+      })
+      .from(learningPathCourses)
+      .where(eq(learningPathCourses.learningPathId, pathId))
+      .orderBy(learningPathCourses.displayOrder);
+  }
+
+  async getLearningPathCoursesWithDetails(pathId: UUIDType, dbInstance: DatabasePg = this.db) {
+    const title = this.localizationService.getLocalizedSqlField(
+      courses.title,
+      SUPPORTED_LANGUAGES.EN,
+    );
+    const description = this.localizationService.getLocalizedSqlField(
+      courses.description,
+      SUPPORTED_LANGUAGES.EN,
+    );
+
+    return dbInstance
+      .select({
+        id: learningPathCourses.id,
+        learningPathId: learningPathCourses.learningPathId,
+        courseId: learningPathCourses.courseId,
+        displayOrder: learningPathCourses.displayOrder,
+        createdAt: learningPathCourses.createdAt,
+        updatedAt: learningPathCourses.updatedAt,
+        title,
+        description,
+        thumbnailUrl: courses.thumbnailS3Key,
+        courseChapterCount: courses.chapterCount,
+      })
+      .from(learningPathCourses)
+      .innerJoin(courses, eq(courses.id, learningPathCourses.courseId))
+      .where(eq(learningPathCourses.learningPathId, pathId))
+      .orderBy(learningPathCourses.displayOrder);
+  }
+
+  async getLearningPathCourseIds(pathId: UUIDType, dbInstance: DatabasePg = this.db) {
+    const learningPathCourseIds = await dbInstance
+      .select({
+        courseId: learningPathCourses.courseId,
+      })
+      .from(learningPathCourses)
+      .where(eq(learningPathCourses.learningPathId, pathId));
+
+    return learningPathCourseIds.map(({ courseId }) => courseId);
+  }
+
+  async getLearningPathCourseIdsForPaths(pathIds: UUIDType[], dbInstance: DatabasePg = this.db) {
+    if (pathIds.length === 0) return [];
+
+    return dbInstance
+      .select({
+        learningPathId: learningPathCourses.learningPathId,
+        courseId: learningPathCourses.courseId,
+      })
+      .from(learningPathCourses)
+      .where(inArray(learningPathCourses.learningPathId, pathIds));
+  }
+
+  async getLearningPathCourseOptions(
+    language: SupportedLanguages = SUPPORTED_LANGUAGES.EN,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    const title = this.localizationService.getLocalizedSqlField(courses.title, language);
+
+    return dbInstance
+      .select({
+        value: courses.id,
+        label: title,
+        imageUrl: courses.thumbnailS3Key,
+      })
+      .from(courses)
+      .orderBy(title);
+  }
+
+  async getLearningPathCoursePreviews(
+    learningPathIds: UUIDType[],
+    studentId: UUIDType,
+    language?: SupportedLanguages,
+    dbInstance: DatabasePg = this.db,
+  ): Promise<LearningPathCoursePreviewGroup[]> {
+    if (learningPathIds.length === 0) return [];
+
+    const title = this.localizationService.getLocalizedSqlField(courses.title, language);
+    const description = this.localizationService.getLocalizedSqlField(
+      courses.description,
+      language,
+    );
+    const currentPathCourse = alias(learningPathCourses, "current_path_course");
+    const priorStudentCourses = alias(studentCourses, "prior_student_courses");
+
+    const priorIncompleteCourseExists = dbInstance
+      .select({ id: learningPathCourses.id })
+      .from(learningPathCourses)
+      .leftJoin(
+        priorStudentCourses,
+        and(
+          eq(priorStudentCourses.courseId, learningPathCourses.courseId),
+          eq(priorStudentCourses.studentId, studentId),
+        ),
+      )
+      .where(
+        and(
+          eq(learningPathCourses.learningPathId, currentPathCourse.learningPathId),
+          sql`${learningPathCourses.displayOrder} < ${currentPathCourse.displayOrder}`,
+          isNull(priorStudentCourses.completedAt),
+        ),
+      );
+
+    const isLocked = sql<boolean>`
+      ${studentLearningPaths.id} IS NOT NULL
+      AND ${learningPaths.sequenceEnabled}
+      AND EXISTS (${priorIncompleteCourseExists})
+    `;
+
+    const progress = sql<ProgressStatus>`
+      CASE
+        WHEN ${isLocked} THEN 'blocked'
+        WHEN ${studentCourses.completedAt} IS NOT NULL THEN 'completed'
+        ELSE COALESCE(${studentCourses.progress}, 'not_started')
+      END
+    `;
+
+    return dbInstance
+      .select({
+        learningPathId: currentPathCourse.learningPathId,
+        courses: sql<LearningPathCoursePreviewGroup["courses"]>`
+          COALESCE(
+            jsonb_agg(
+              jsonb_build_object(
+                'id', ${currentPathCourse.id},
+                'learningPathId', ${currentPathCourse.learningPathId},
+                'courseId', ${currentPathCourse.courseId},
+                'displayOrder', ${currentPathCourse.displayOrder},
+                'title', ${title},
+                'description', ${description},
+                'thumbnailUrl', ${courses.thumbnailS3Key},
+                'courseChapterCount', ${courses.chapterCount},
+                'progress', ${progress},
+                'isLocked', ${isLocked},
+                'completedAt', ${studentCourses.completedAt}
+              )
+              ORDER BY ${currentPathCourse.displayOrder}
+            ),
+            '[]'::jsonb
+          )
+        `,
+      })
+      .from(currentPathCourse)
+      .innerJoin(learningPaths, eq(learningPaths.id, currentPathCourse.learningPathId))
+      .innerJoin(courses, eq(courses.id, currentPathCourse.courseId))
+      .leftJoin(
+        studentCourses,
+        and(
+          eq(studentCourses.courseId, currentPathCourse.courseId),
+          eq(studentCourses.studentId, studentId),
+        ),
+      )
+      .leftJoin(
+        studentLearningPaths,
+        and(
+          eq(studentLearningPaths.learningPathId, currentPathCourse.learningPathId),
+          eq(studentLearningPaths.studentId, studentId),
+        ),
+      )
+      .where(inArray(currentPathCourse.learningPathId, learningPathIds))
+      .groupBy(currentPathCourse.learningPathId);
+  }
+
+  async getLearningPathStudentIds(pathId: UUIDType, dbInstance: DatabasePg = this.db) {
+    const learningPathStudentIds = await dbInstance
+      .select({
+        studentId: studentLearningPaths.studentId,
+      })
+      .from(studentLearningPaths)
+      .where(eq(studentLearningPaths.learningPathId, pathId));
+
+    return learningPathStudentIds.map(({ studentId }) => studentId);
+  }
+
+  async getLearningPathGroupIds(pathId: UUIDType, dbInstance: DatabasePg = this.db) {
+    const learningPathGroupIds = await dbInstance
+      .select({
+        groupId: groupLearningPaths.groupId,
+      })
+      .from(groupLearningPaths)
+      .where(eq(groupLearningPaths.learningPathId, pathId));
+
+    return learningPathGroupIds.map(({ groupId }) => groupId);
+  }
+
+  async getEnrolledLearningPathIds(
+    pathIds: UUIDType[],
+    studentId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    if (pathIds.length === 0) return [];
+
+    const enrolledLearningPaths = await dbInstance
+      .select({ learningPathId: studentLearningPaths.learningPathId })
+      .from(studentLearningPaths)
+      .where(
+        and(
+          inArray(studentLearningPaths.learningPathId, pathIds),
+          eq(studentLearningPaths.studentId, studentId),
+        ),
+      );
+
+    return enrolledLearningPaths.map(({ learningPathId }) => learningPathId);
+  }
+
+  async getLearningPathIdsForStudentCourse(
+    studentId: UUIDType,
+    courseId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    return dbInstance
+      .selectDistinct({ learningPathId: studentLearningPathCourses.learningPathId })
+      .from(studentLearningPathCourses)
+      .innerJoin(
+        studentLearningPaths,
+        and(
+          eq(studentLearningPaths.learningPathId, studentLearningPathCourses.learningPathId),
+          eq(studentLearningPaths.studentId, studentLearningPathCourses.studentId),
+        ),
+      )
+      .where(
+        and(
+          eq(studentLearningPathCourses.studentId, studentId),
+          eq(studentLearningPathCourses.courseId, courseId),
+        ),
+      );
+  }
+
+  async getLearningPathIdsByGroupId(groupId: UUIDType, dbInstance: DatabasePg = this.db) {
+    return dbInstance
+      .select({ learningPathId: groupLearningPaths.learningPathId })
+      .from(groupLearningPaths)
+      .where(eq(groupLearningPaths.groupId, groupId));
+  }
+
+  async getStudentsWithEnrollmentDate(
+    query: LearningPathEnrolledStudentsQuery,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    const {
+      learningPathId,
+      keyword,
+      sort = "enrolledAt",
+      groups: groupFilters,
+      page = 1,
+      perPage = DEFAULT_PAGE_SIZE,
+    } = query;
+    const { sortOrder, sortedField } = getSortOptions(sort);
+
+    const hasLearningPathAdminPermissions = userHasAnyPermissionsCondition(
+      dbInstance,
+      users.id,
+      users.tenantId,
+      [
+        PERMISSIONS.LEARNING_PATH_CREATE,
+        PERMISSIONS.LEARNING_PATH_UPDATE,
+        PERMISSIONS.LEARNING_PATH_UPDATE_OWN,
+        PERMISSIONS.LEARNING_PATH_DELETE,
+        PERMISSIONS.LEARNING_PATH_COURSE_UPDATE,
+        PERMISSIONS.LEARNING_PATH_COURSE_UPDATE_OWN,
+        PERMISSIONS.LEARNING_PATH_ENROLLMENT,
+        PERMISSIONS.LEARNING_PATH_EXPORT,
+      ],
+    );
+
+    const conditions = [
+      eq(users.archived, false),
+      isNull(users.deletedAt),
+      not(hasLearningPathAdminPermissions),
+    ];
+
+    if (keyword) {
+      const searchKeyword = keyword.toLowerCase();
+      const keywordCondition = or(
+        ilike(users.firstName, `%${searchKeyword}%`),
+        ilike(users.lastName, `%${searchKeyword}%`),
+        ilike(users.email, `%${searchKeyword}%`),
+      );
+
+      if (keywordCondition) conditions.push(keywordCondition);
+    }
+
+    if (groupFilters?.length) {
+      conditions.push(getGroupFilterConditions(groupFilters));
+    }
+
+    const data = await dbInstance
+      .select({
+        name: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        email: users.email,
+        id: users.id,
+        enrolledAt: sql<string | null>`${studentLearningPaths.enrolledAt}`,
+        groups: sql<Array<{ id: string; name: string }>>`
+          COALESCE(
+            json_agg(DISTINCT jsonb_build_object('id', ${groups.id}, 'name', ${groups.name}))
+            FILTER (WHERE ${groups.id} IS NOT NULL),
+            '[]'
+          )
+        `.as("groups"),
+        isEnrolledByGroup: sql<boolean>`
+          CASE
+            WHEN ${studentLearningPaths.enrollmentType} = ${LEARNING_PATH_ENROLLMENT_TYPES.GROUP}
+              THEN TRUE
+            ELSE FALSE
+          END
+        `,
+      })
+      .from(users)
+      .leftJoin(
+        studentLearningPaths,
+        and(
+          eq(studentLearningPaths.studentId, users.id),
+          eq(studentLearningPaths.learningPathId, learningPathId),
+        ),
+      )
+      .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
+      .leftJoin(groups, eq(groupUsers.groupId, groups.id))
+      .where(and(...conditions))
+      .groupBy(users.id, studentLearningPaths.enrolledAt, studentLearningPaths.enrollmentType)
+      .orderBy(sortOrder(this.getEnrolledStudentsColumnToSortBy(sortedField)))
+      .limit(perPage)
+      .offset((page - 1) * perPage);
+
+    const [{ totalItems }] = await dbInstance
+      .select({ totalItems: countDistinct(users.id) })
+      .from(users)
+      .leftJoin(
+        studentLearningPaths,
+        and(
+          eq(studentLearningPaths.studentId, users.id),
+          eq(studentLearningPaths.learningPathId, learningPathId),
+        ),
+      )
+      .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
+      .leftJoin(groups, eq(groupUsers.groupId, groups.id))
+      .where(and(...conditions));
+
+    return {
+      data,
+      pagination: {
+        totalItems: totalItems || 0,
+        page,
+        perPage,
+      },
+    };
+  }
+
+  private getEnrolledStudentsColumnToSortBy(field: string) {
+    switch (field) {
+      case "firstName":
+        return users.firstName;
+      case "lastName":
+        return users.lastName;
+      case "email":
+        return users.email;
+      case "isEnrolledByGroup":
+        return sql`
+          CASE
+            WHEN ${studentLearningPaths.enrollmentType} = ${LEARNING_PATH_ENROLLMENT_TYPES.GROUP} THEN 2
+            WHEN ${studentLearningPaths.id} IS NOT NULL THEN 1
+            ELSE 0
+          END
+        `;
+      case "enrolledAt":
+      default:
+        return studentLearningPaths.enrolledAt;
+    }
+  }
+
+  async getLearningPathSourceSnapshot(learningPathId: UUIDType, dbInstance: DatabasePg = this.db) {
+    const [learningPath] = await dbInstance
+      .select()
+      .from(learningPaths)
+      .where(eq(learningPaths.id, learningPathId))
+      .limit(1);
+
+    if (!learningPath) return null;
+
+    const courseLinks = await dbInstance
+      .select()
+      .from(learningPathCourses)
+      .where(eq(learningPathCourses.learningPathId, learningPathId))
+      .orderBy(learningPathCourses.displayOrder);
+
+    return { learningPath, courseLinks };
+  }
+
+  async getLearningPathExportSourceSnapshot(sourceTenantId: UUIDType, learningPathId: UUIDType) {
+    const [learningPath] = await this.dbAdmin
+      .select({
+        ...getTableColumns(learningPaths),
+      })
+      .from(learningPaths)
+      .where(and(eq(learningPaths.id, learningPathId), eq(learningPaths.tenantId, sourceTenantId)))
+      .limit(1);
+
+    if (!learningPath) return null;
+
+    const courseLinks = await this.dbAdmin
+      .select({
+        id: learningPathCourses.id,
+        learningPathId: learningPathCourses.learningPathId,
+        courseId: learningPathCourses.courseId,
+        displayOrder: learningPathCourses.displayOrder,
+        createdAt: learningPathCourses.createdAt,
+        updatedAt: learningPathCourses.updatedAt,
+      })
+      .from(learningPathCourses)
+      .innerJoin(
+        courses,
+        and(eq(courses.id, learningPathCourses.courseId), eq(courses.tenantId, sourceTenantId)),
+      )
+      .where(eq(learningPathCourses.learningPathId, learningPathId))
+      .orderBy(learningPathCourses.displayOrder);
+
+    return { learningPath, courseLinks };
+  }
+
+  async findLearningPathExportByPair(
+    sourceTenantId: UUIDType,
+    sourceLearningPathId: UUIDType,
+    targetTenantId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    const [exportLink] = await dbInstance
+      .select()
+      .from(learningPathExports)
+      .where(
+        and(
+          eq(learningPathExports.sourceTenantId, sourceTenantId),
+          eq(learningPathExports.sourceLearningPathId, sourceLearningPathId),
+          eq(learningPathExports.targetTenantId, targetTenantId),
+        ),
+      )
+      .limit(1);
+
+    return exportLink;
+  }
+
+  async createLearningPathExport(
+    sourceTenantId: UUIDType,
+    sourceLearningPathId: UUIDType,
+    targetTenantId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    const [createdExport] = await dbInstance
+      .insert(learningPathExports)
+      .values({
+        sourceTenantId,
+        sourceLearningPathId,
+        targetTenantId,
+        syncStatus: MASTER_COURSE_EXPORT_SYNC_STATUSES.ACTIVE,
+      })
+      .returning();
+
+    return createdExport;
+  }
+
+  async getLearningPathExportsForManagingTenant(
+    sourceTenantId: UUIDType,
+    sourceLearningPathId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    return dbInstance
+      .select({
+        id: learningPathExports.id,
+        sourceTenantId: learningPathExports.sourceTenantId,
+        sourceLearningPathId: learningPathExports.sourceLearningPathId,
+        targetTenantId: learningPathExports.targetTenantId,
+        targetLearningPathId: learningPathExports.targetLearningPathId,
+        syncStatus: learningPathExports.syncStatus,
+        lastSyncedAt: learningPathExports.lastSyncedAt,
+      })
+      .from(learningPathExports)
+      .where(
+        and(
+          eq(learningPathExports.sourceTenantId, sourceTenantId),
+          eq(learningPathExports.sourceLearningPathId, sourceLearningPathId),
+        ),
+      );
+  }
+
+  async getLearningPathExportCandidates(
+    sourceTenantId: UUIDType,
+    sourceLearningPathId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    return dbInstance
+      .select({
+        id: tenants.id,
+        name: tenants.name,
+        host: tenants.host,
+        exportId: learningPathExports.id,
+        targetLearningPathId: learningPathExports.targetLearningPathId,
+        syncStatus: learningPathExports.syncStatus,
+        lastSyncedAt: learningPathExports.lastSyncedAt,
+      })
+      .from(tenants)
+      .leftJoin(
+        learningPathExports,
+        and(
+          eq(learningPathExports.sourceTenantId, sourceTenantId),
+          eq(learningPathExports.sourceLearningPathId, sourceLearningPathId),
+          eq(learningPathExports.targetTenantId, tenants.id),
+        ),
+      )
+      .where(ne(tenants.id, sourceTenantId))
+      .orderBy(asc(tenants.name));
+  }
+
+  async getCourseById(courseId: UUIDType, dbInstance: DatabasePg = this.db) {
+    const [course] = await dbInstance
+      .select()
+      .from(courses)
+      .where(eq(courses.id, courseId))
+      .limit(1);
+
+    return course;
+  }
+
+  async findTargetAuthor(dbInstance: DatabasePg = this.db) {
+    const [targetAuthor] = await dbInstance
+      .select({ id: users.id })
+      .from(users)
+      .where(
+        and(
+          isNull(users.deletedAt),
+          userHasAnyPermissionsCondition(dbInstance, users.id, users.tenantId, [
+            PERMISSIONS.LEARNING_PATH_CREATE,
+            PERMISSIONS.LEARNING_PATH_UPDATE,
+            PERMISSIONS.LEARNING_PATH_UPDATE_OWN,
+            PERMISSIONS.LEARNING_PATH_COURSE_UPDATE,
+            PERMISSIONS.LEARNING_PATH_COURSE_UPDATE_OWN,
+            PERMISSIONS.COURSE_UPDATE,
+            PERMISSIONS.COURSE_UPDATE_OWN,
+          ]),
+        ),
+      )
+      .limit(1);
+
+    return targetAuthor;
+  }
+
+  async markCourseAsMaster(courseId: UUIDType, dbInstance: DatabasePg = this.db) {
+    await dbInstance
+      .update(courses)
+      .set({ originType: COURSE_ORIGIN_TYPES.MASTER })
+      .where(eq(courses.id, courseId));
+  }
+
+  async markLearningPathAsMaster(learningPathId: UUIDType, dbInstance: DatabasePg = this.db) {
+    await dbInstance
+      .update(learningPaths)
+      .set({ originType: COURSE_ORIGIN_TYPES.MASTER })
+      .where(eq(learningPaths.id, learningPathId));
+  }
+
+  async findMasterCourseExportByPair(
+    sourceTenantId: UUIDType,
+    sourceCourseId: UUIDType,
+    targetTenantId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    const [exportLink] = await dbInstance
+      .select()
+      .from(masterCourseExports)
+      .where(
+        and(
+          eq(masterCourseExports.sourceTenantId, sourceTenantId),
+          eq(masterCourseExports.sourceCourseId, sourceCourseId),
+          eq(masterCourseExports.targetTenantId, targetTenantId),
+        ),
+      )
+      .limit(1);
+
+    return exportLink;
+  }
+
+  async createMasterCourseExportLink(
+    sourceTenantId: UUIDType,
+    sourceCourseId: UUIDType,
+    targetTenantId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    const [createdExport] = await dbInstance
+      .insert(masterCourseExports)
+      .values({
+        sourceTenantId,
+        sourceCourseId,
+        targetTenantId,
+        syncStatus: MASTER_COURSE_EXPORT_SYNC_STATUSES.ACTIVE,
+      })
+      .returning();
+
+    return createdExport;
+  }
+
+  async getActiveLearningPathExportsBySourcePath(
+    sourceLearningPathId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    return dbInstance
+      .select()
+      .from(learningPathExports)
+      .where(
+        and(
+          eq(learningPathExports.sourceLearningPathId, sourceLearningPathId),
+          eq(learningPathExports.syncStatus, MASTER_COURSE_EXPORT_SYNC_STATUSES.ACTIVE),
+        ),
+      );
+  }
+
+  async getLearningPathExportById(exportId: UUIDType, dbInstance: DatabasePg = this.db) {
+    const [exportLink] = await dbInstance
+      .select()
+      .from(learningPathExports)
+      .where(eq(learningPathExports.id, exportId))
+      .limit(1);
+
+    return exportLink;
+  }
+
+  async markLearningPathExportSyncSuccess(
+    exportId: UUIDType,
+    targetLearningPathId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    await dbInstance
+      .update(learningPathExports)
+      .set({
+        targetLearningPathId,
+        syncStatus: MASTER_COURSE_EXPORT_SYNC_STATUSES.ACTIVE,
+        lastSyncedAt: sql`CURRENT_TIMESTAMP`,
+      })
+      .where(eq(learningPathExports.id, exportId));
+  }
+
+  async markLearningPathExportSyncFailed(exportId: UUIDType, dbInstance: DatabasePg = this.db) {
+    await dbInstance
+      .update(learningPathExports)
+      .set({ syncStatus: MASTER_COURSE_EXPORT_SYNC_STATUSES.FAILED })
+      .where(eq(learningPathExports.id, exportId));
+  }
+
+  async upsertLearningPathEntityMap(
+    exportId: UUIDType,
+    entityType: LearningPathEntityType,
+    sourceEntityId: UUIDType,
+    targetEntityId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    await dbInstance
+      .insert(learningPathEntityMap)
+      .values({
+        exportId,
+        entityType,
+        sourceEntityId,
+        targetEntityId,
+      })
+      .onConflictDoUpdate({
+        target: [
+          learningPathEntityMap.exportId,
+          learningPathEntityMap.entityType,
+          learningPathEntityMap.sourceEntityId,
+        ],
+        set: { targetEntityId },
+      });
+  }
+
+  async getLearningPathEntityMappings(
+    exportId: UUIDType,
+    entityType: LearningPathEntityType,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    return dbInstance
+      .select()
+      .from(learningPathEntityMap)
+      .where(
+        and(
+          eq(learningPathEntityMap.exportId, exportId),
+          eq(learningPathEntityMap.entityType, entityType),
+        ),
+      );
+  }
+
+  async getCoursesByIds(courseIds: UUIDType[], dbInstance: DatabasePg = this.db) {
+    return dbInstance
+      .select({
+        id: courses.id,
+      })
+      .from(courses)
+      .where(inArray(courses.id, courseIds));
+  }
+
+  async getUsersByIds(userIds: UUIDType[], dbInstance: DatabasePg = this.db) {
+    return dbInstance
+      .select({ id: users.id })
+      .from(users)
+      .where(and(inArray(users.id, userIds), sql`${users.deletedAt} IS NULL`));
+  }
+
+  async getNotEnrolledUserIds(
+    pathId: UUIDType,
+    userIds: UUIDType[],
+    dbInstance: DatabasePg = this.db,
+  ) {
+    if (userIds.length === 0) return [];
+
+    const notEnrolledUsers = await dbInstance
+      .select({ id: users.id })
+      .from(users)
+      .leftJoin(
+        studentLearningPaths,
+        and(
+          eq(studentLearningPaths.studentId, users.id),
+          eq(studentLearningPaths.learningPathId, pathId),
+        ),
+      )
+      .where(
+        and(
+          inArray(users.id, userIds),
+          sql`${users.deletedAt} IS NULL`,
+          isNull(studentLearningPaths.id),
+        ),
+      );
+
+    return notEnrolledUsers.map(({ id }) => id);
+  }
+
+  async getExistingGroupIds(groupIds: UUIDType[], dbInstance: DatabasePg = this.db) {
+    if (groupIds.length === 0) return [];
+
+    const existingGroups = await dbInstance
+      .select({ id: groups.id })
+      .from(groups)
+      .where(inArray(groups.id, groupIds));
+
+    return existingGroups.map(({ id }) => id);
+  }
+
+  async getStudentIdsByGroupIds(groupIds: UUIDType[], dbInstance: DatabasePg = this.db) {
+    if (groupIds.length === 0) return [];
+
+    const groupStudents = await dbInstance
+      .selectDistinct({ studentId: groupUsers.userId })
+      .from(groupUsers)
+      .innerJoin(users, eq(users.id, groupUsers.userId))
+      .where(and(inArray(groupUsers.groupId, groupIds), sql`${users.deletedAt} IS NULL`));
+
+    return groupStudents.map(({ studentId }) => studentId);
+  }
+
+  async getNotEnrolledStudentIdsByGroupIds(
+    pathId: UUIDType,
+    groupIds: UUIDType[],
+    dbInstance: DatabasePg = this.db,
+  ) {
+    if (groupIds.length === 0) return [];
+
+    const notEnrolledGroupStudents = await dbInstance
+      .selectDistinct({ studentId: groupUsers.userId })
+      .from(groupUsers)
+      .innerJoin(users, eq(users.id, groupUsers.userId))
+      .leftJoin(
+        studentLearningPaths,
+        and(
+          eq(studentLearningPaths.studentId, groupUsers.userId),
+          eq(studentLearningPaths.learningPathId, pathId),
+        ),
+      )
+      .where(
+        and(
+          inArray(groupUsers.groupId, groupIds),
+          sql`${users.deletedAt} IS NULL`,
+          isNull(studentLearningPaths.id),
+        ),
+      );
+
+    return notEnrolledGroupStudents.map(({ studentId }) => studentId);
+  }
+
+  async getDirectlyEnrolledStudentIdsWithGroupAccess(
+    pathId: UUIDType,
+    studentIds: UUIDType[],
+    dbInstance: DatabasePg = this.db,
+  ) {
+    if (studentIds.length === 0) return [];
+
+    const studentGroupUsers = alias(groupUsers, "student_group_users");
+    const studentGroupLearningPaths = alias(groupLearningPaths, "student_group_learning_paths");
+
+    const directlyEnrolledStudentsWithGroupAccess = await dbInstance
+      .selectDistinct({ studentId: studentLearningPaths.studentId })
+      .from(studentLearningPaths)
+      .innerJoin(studentGroupUsers, eq(studentGroupUsers.userId, studentLearningPaths.studentId))
+      .innerJoin(
+        studentGroupLearningPaths,
+        eq(studentGroupLearningPaths.groupId, studentGroupUsers.groupId),
+      )
+      .innerJoin(users, eq(users.id, studentLearningPaths.studentId))
+      .where(
+        and(
+          eq(studentLearningPaths.learningPathId, pathId),
+          eq(studentGroupLearningPaths.learningPathId, pathId),
+          eq(studentLearningPaths.enrollmentType, LEARNING_PATH_ENROLLMENT_TYPES.DIRECT),
+          inArray(studentLearningPaths.studentId, studentIds),
+          sql`${users.deletedAt} IS NULL`,
+        ),
+      );
+
+    return directlyEnrolledStudentsWithGroupAccess.map(({ studentId }) => studentId);
+  }
+
+  async getDirectlyEnrolledStudentIdsWithoutGroupAccess(
+    pathId: UUIDType,
+    studentIds: UUIDType[],
+    dbInstance: DatabasePg = this.db,
+  ) {
+    if (studentIds.length === 0) return [];
+
+    const studentGroupUsers = alias(groupUsers, "student_group_users");
+    const studentGroupLearningPaths = alias(groupLearningPaths, "student_group_learning_paths");
+
+    const directlyEnrolledStudentsWithoutGroupAccess = await dbInstance
+      .select({ studentId: studentLearningPaths.studentId })
+      .from(studentLearningPaths)
+      .leftJoin(studentGroupUsers, eq(studentGroupUsers.userId, studentLearningPaths.studentId))
+      .leftJoin(
+        studentGroupLearningPaths,
+        and(
+          eq(studentGroupLearningPaths.groupId, studentGroupUsers.groupId),
+          eq(studentGroupLearningPaths.learningPathId, pathId),
+        ),
+      )
+      .where(
+        and(
+          eq(studentLearningPaths.learningPathId, pathId),
+          eq(studentLearningPaths.enrollmentType, LEARNING_PATH_ENROLLMENT_TYPES.DIRECT),
+          inArray(studentLearningPaths.studentId, studentIds),
+        ),
+      )
+      .groupBy(studentLearningPaths.studentId)
+      .having(sql`COUNT(${studentGroupLearningPaths.id}) = 0`);
+
+    return directlyEnrolledStudentsWithoutGroupAccess.map(({ studentId }) => studentId);
+  }
+
+  async getGroupEnrolledStudentIdsWithoutOtherGroupAccess(
+    pathId: UUIDType,
+    groupIds: UUIDType[],
+    dbInstance: DatabasePg = this.db,
+  ) {
+    if (groupIds.length === 0) return [];
+
+    const removedGroupUsers = alias(groupUsers, "removed_group_users");
+    const removedGroupLearningPaths = alias(groupLearningPaths, "removed_group_learning_paths");
+    const otherGroupUsers = alias(groupUsers, "other_group_users");
+    const otherGroupLearningPaths = alias(groupLearningPaths, "other_group_learning_paths");
+
+    const groupEnrolledStudentsWithoutOtherGroupAccess = await dbInstance
+      .select({ studentId: studentLearningPaths.studentId })
+      .from(studentLearningPaths)
+      .innerJoin(removedGroupUsers, eq(removedGroupUsers.userId, studentLearningPaths.studentId))
+      .innerJoin(
+        removedGroupLearningPaths,
+        and(
+          eq(removedGroupLearningPaths.groupId, removedGroupUsers.groupId),
+          eq(removedGroupLearningPaths.learningPathId, pathId),
+        ),
+      )
+      .leftJoin(
+        otherGroupUsers,
+        and(
+          eq(otherGroupUsers.userId, studentLearningPaths.studentId),
+          not(inArray(otherGroupUsers.groupId, groupIds)),
+        ),
+      )
+      .leftJoin(
+        otherGroupLearningPaths,
+        and(
+          eq(otherGroupLearningPaths.groupId, otherGroupUsers.groupId),
+          eq(otherGroupLearningPaths.learningPathId, pathId),
+        ),
+      )
+      .where(
+        and(
+          eq(studentLearningPaths.learningPathId, pathId),
+          eq(studentLearningPaths.enrollmentType, LEARNING_PATH_ENROLLMENT_TYPES.GROUP),
+          inArray(removedGroupLearningPaths.groupId, groupIds),
+        ),
+      )
+      .groupBy(studentLearningPaths.studentId)
+      .having(sql`COUNT(${otherGroupLearningPaths.id}) = 0`);
+
+    return groupEnrolledStudentsWithoutOtherGroupAccess.map(({ studentId }) => studentId);
+  }
+
+  async getEnrolledGroupIds(
+    pathId: UUIDType,
+    groupIds: UUIDType[],
+    dbInstance: DatabasePg = this.db,
+  ) {
+    if (groupIds.length === 0) return [];
+
+    const enrolledGroups = await dbInstance
+      .select({ groupId: groupLearningPaths.groupId })
+      .from(groupLearningPaths)
+      .where(
+        and(
+          eq(groupLearningPaths.learningPathId, pathId),
+          inArray(groupLearningPaths.groupId, groupIds),
+        ),
+      );
+
+    return enrolledGroups.map(({ groupId }) => groupId);
+  }
+
+  async insertGroupLearningPaths(
+    pathId: UUIDType,
+    groupIds: UUIDType[],
+    tenantId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    if (groupIds.length === 0) return [];
+
+    const existingGroupIds = await dbInstance
+      .select({ groupId: groupLearningPaths.groupId })
+      .from(groupLearningPaths)
+      .where(
+        and(
+          eq(groupLearningPaths.learningPathId, pathId),
+          inArray(groupLearningPaths.groupId, groupIds),
+        ),
+      );
+    const existingGroupIdSet = new Set(existingGroupIds.map(({ groupId }) => groupId));
+    const newGroupIds = groupIds.filter((groupId) => !existingGroupIdSet.has(groupId));
+
+    if (newGroupIds.length === 0) return [];
+
+    return dbInstance
+      .insert(groupLearningPaths)
+      .values(
+        newGroupIds.map((groupId) => ({
+          groupId,
+          learningPathId: pathId,
+          tenantId,
+        })),
+      )
+      .returning();
+  }
+
+  async insertStudentLearningPaths(
+    pathId: UUIDType,
+    studentIds: UUIDType[],
+    enrollmentType: LearningPathEnrollmentType,
+    tenantId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    if (studentIds.length === 0) return [];
+
+    const existingStudentIds = await dbInstance
+      .select({ studentId: studentLearningPaths.studentId })
+      .from(studentLearningPaths)
+      .where(
+        and(
+          eq(studentLearningPaths.learningPathId, pathId),
+          inArray(studentLearningPaths.studentId, studentIds),
+        ),
+      );
+    const existingStudentIdSet = new Set(existingStudentIds.map(({ studentId }) => studentId));
+    const newStudentIds = studentIds.filter((studentId) => !existingStudentIdSet.has(studentId));
+
+    if (newStudentIds.length === 0) return [];
+
+    return dbInstance
+      .insert(studentLearningPaths)
+      .values(
+        newStudentIds.map((studentId) => ({
+          studentId,
+          learningPathId: pathId,
+          enrollmentType,
+          tenantId,
+        })),
+      )
+      .returning();
+  }
+
+  async updateStudentLearningPathEnrollmentType(
+    pathId: UUIDType,
+    studentIds: UUIDType[],
+    enrollmentType: LearningPathEnrollmentType,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    if (studentIds.length === 0) return [];
+
+    return dbInstance
+      .update(studentLearningPaths)
+      .set({ enrollmentType })
+      .where(
+        and(
+          eq(studentLearningPaths.learningPathId, pathId),
+          inArray(studentLearningPaths.studentId, studentIds),
+        ),
+      )
+      .returning({ studentId: studentLearningPaths.studentId });
+  }
+
+  async deleteStudentLearningPaths(
+    pathId: UUIDType,
+    studentIds: UUIDType[],
+    dbInstance: DatabasePg = this.db,
+  ) {
+    if (studentIds.length === 0) return [];
+
+    return dbInstance
+      .delete(studentLearningPaths)
+      .where(
+        and(
+          eq(studentLearningPaths.learningPathId, pathId),
+          inArray(studentLearningPaths.studentId, studentIds),
+        ),
+      )
+      .returning({ studentId: studentLearningPaths.studentId });
+  }
+
+  async insertStudentLearningPathCourses(
+    pathId: UUIDType,
+    studentIds: UUIDType[],
+    courseIds: UUIDType[],
+    tenantId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    if (studentIds.length === 0 || courseIds.length === 0) return [];
+
+    const existingLinks = await dbInstance
+      .select({
+        studentId: studentLearningPathCourses.studentId,
+        courseId: studentLearningPathCourses.courseId,
+      })
+      .from(studentLearningPathCourses)
+      .where(
+        and(
+          eq(studentLearningPathCourses.learningPathId, pathId),
+          inArray(studentLearningPathCourses.studentId, studentIds),
+          inArray(studentLearningPathCourses.courseId, courseIds),
+        ),
+      );
+    const existingLinkKeys = new Set(
+      existingLinks.map(({ studentId, courseId }) => `${studentId}:${courseId}`),
+    );
+    const newLinks = studentIds.flatMap((studentId) =>
+      courseIds
+        .filter((courseId) => !existingLinkKeys.has(`${studentId}:${courseId}`))
+        .map((courseId) => ({
+          studentId,
+          learningPathId: pathId,
+          courseId,
+          tenantId,
+        })),
+    );
+
+    if (newLinks.length === 0) return [];
+
+    return dbInstance.insert(studentLearningPathCourses).values(newLinks).returning();
+  }
+
+  async deleteStudentLearningPathCourses(
+    pathId: UUIDType,
+    studentIds: UUIDType[],
+    dbInstance: DatabasePg = this.db,
+  ) {
+    if (studentIds.length === 0) return [];
+
+    return dbInstance
+      .delete(studentLearningPathCourses)
+      .where(
+        and(
+          eq(studentLearningPathCourses.learningPathId, pathId),
+          inArray(studentLearningPathCourses.studentId, studentIds),
+        ),
+      )
+      .returning({ studentId: studentLearningPathCourses.studentId });
+  }
+
+  async getStudentLearningPathCourseLinks(
+    pathId: UUIDType,
+    studentId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    return dbInstance
+      .select({
+        courseId: studentLearningPathCourses.courseId,
+        createdAt: studentLearningPathCourses.createdAt,
+      })
+      .from(studentLearningPathCourses)
+      .where(
+        and(
+          eq(studentLearningPathCourses.learningPathId, pathId),
+          eq(studentLearningPathCourses.studentId, studentId),
+        ),
+      );
+  }
+
+  async insertStudentLearningPathCourseLinks(
+    pathId: UUIDType,
+    studentId: UUIDType,
+    courseIds: UUIDType[],
+    dbInstance: DatabasePg = this.db,
+  ) {
+    if (courseIds.length === 0) return [];
+
+    const existingCourseIds = await dbInstance
+      .select({ courseId: studentLearningPathCourses.courseId })
+      .from(studentLearningPathCourses)
+      .where(
+        and(
+          eq(studentLearningPathCourses.learningPathId, pathId),
+          eq(studentLearningPathCourses.studentId, studentId),
+          inArray(studentLearningPathCourses.courseId, courseIds),
+        ),
+      );
+    const existingCourseIdSet = new Set(existingCourseIds.map(({ courseId }) => courseId));
+    const newCourseIds = courseIds.filter((courseId) => !existingCourseIdSet.has(courseId));
+
+    if (newCourseIds.length === 0) return [];
+
+    return dbInstance
+      .insert(studentLearningPathCourses)
+      .values(
+        newCourseIds.map((courseId) => ({
+          studentId,
+          learningPathId: pathId,
+          courseId,
+        })),
+      )
+      .onConflictDoNothing({
+        target: [
+          studentLearningPathCourses.studentId,
+          studentLearningPathCourses.learningPathId,
+          studentLearningPathCourses.courseId,
+        ],
+      })
+      .returning({
+        courseId: studentLearningPathCourses.courseId,
+        createdAt: studentLearningPathCourses.createdAt,
+      });
+  }
+
+  async deleteStudentLearningPathCourseLinks(
+    pathId: UUIDType,
+    studentId: UUIDType,
+    courseIds: UUIDType[],
+    dbInstance: DatabasePg = this.db,
+  ) {
+    if (courseIds.length === 0) return [];
+
+    return dbInstance
+      .delete(studentLearningPathCourses)
+      .where(
+        and(
+          eq(studentLearningPathCourses.learningPathId, pathId),
+          eq(studentLearningPathCourses.studentId, studentId),
+          inArray(studentLearningPathCourses.courseId, courseIds),
+        ),
+      )
+      .returning({
+        courseId: studentLearningPathCourses.courseId,
+        createdAt: studentLearningPathCourses.createdAt,
+      });
+  }
+
+  async getCourseIdsWithOtherLearningPathAccess(
+    learningPathId: UUIDType,
+    studentId: UUIDType,
+    courseIds: UUIDType[],
+    dbInstance: DatabasePg = this.db,
+  ) {
+    if (courseIds.length === 0) return [];
+
+    const otherPathCourse = alias(learningPathCourses, "other_path_course");
+    const priorPathCourse = alias(learningPathCourses, "prior_path_course");
+    const priorStudentCourse = alias(studentCourses, "prior_student_course");
+    const targetStudentCourse = alias(studentCourses, "target_student_course");
+
+    const priorIncompleteCourseExists = dbInstance
+      .select({ id: priorPathCourse.id })
+      .from(priorPathCourse)
+      .leftJoin(
+        priorStudentCourse,
+        and(
+          eq(priorStudentCourse.courseId, priorPathCourse.courseId),
+          eq(priorStudentCourse.studentId, studentId),
+        ),
+      )
+      .where(
+        and(
+          eq(priorPathCourse.learningPathId, otherPathCourse.learningPathId),
+          sql`${priorPathCourse.displayOrder} < ${otherPathCourse.displayOrder}`,
+          isNull(priorStudentCourse.completedAt),
+        ),
+      );
+
+    const rows = await dbInstance
+      .selectDistinct({ courseId: studentLearningPathCourses.courseId })
+      .from(studentLearningPathCourses)
+      .innerJoin(
+        otherPathCourse,
+        and(
+          eq(otherPathCourse.learningPathId, studentLearningPathCourses.learningPathId),
+          eq(otherPathCourse.courseId, studentLearningPathCourses.courseId),
+        ),
+      )
+      .innerJoin(learningPaths, eq(learningPaths.id, otherPathCourse.learningPathId))
+      .leftJoin(
+        targetStudentCourse,
+        and(
+          eq(targetStudentCourse.courseId, otherPathCourse.courseId),
+          eq(targetStudentCourse.studentId, studentId),
+        ),
+      )
+      .where(
+        and(
+          eq(studentLearningPathCourses.studentId, studentId),
+          inArray(studentLearningPathCourses.courseId, courseIds),
+          sql`${studentLearningPathCourses.learningPathId} <> ${learningPathId}`,
+          or(
+            eq(learningPaths.sequenceEnabled, false),
+            isNotNull(targetStudentCourse.completedAt),
+            not(sql`EXISTS (${priorIncompleteCourseExists})`),
+          ),
+        ),
+      );
+
+    return rows.map(({ courseId }) => courseId);
+  }
+
+  async deleteGroupLearningPaths(
+    pathId: UUIDType,
+    groupIds: UUIDType[],
+    dbInstance: DatabasePg = this.db,
+  ) {
+    if (groupIds.length === 0) return [];
+
+    return dbInstance
+      .delete(groupLearningPaths)
+      .where(
+        and(
+          eq(groupLearningPaths.learningPathId, pathId),
+          inArray(groupLearningPaths.groupId, groupIds),
+        ),
+      )
+      .returning({ groupId: groupLearningPaths.groupId });
+  }
+
+  async getMaxDisplayOrder(pathId: UUIDType, dbInstance: DatabasePg = this.db) {
+    const [result] = await dbInstance
+      .select({
+        maxDisplayOrder: sql<number>`COALESCE(MAX(${learningPathCourses.displayOrder}), 0)`,
+      })
+      .from(learningPathCourses)
+      .where(eq(learningPathCourses.learningPathId, pathId));
+
+    return result?.maxDisplayOrder ?? 0;
+  }
+
+  async insertLearningPathCourses(
+    pathId: UUIDType,
+    courseIds: UUIDType[],
+    startOrder: number,
+    tenantId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    if (courseIds.length === 0) return [];
+
+    return dbInstance
+      .insert(learningPathCourses)
+      .values(
+        courseIds.map((courseId, index) => ({
+          learningPathId: pathId,
+          courseId,
+          displayOrder: startOrder + index + 1,
+          tenantId,
+        })),
+      )
+      .returning({
+        id: learningPathCourses.id,
+        learningPathId: learningPathCourses.learningPathId,
+        courseId: learningPathCourses.courseId,
+        displayOrder: learningPathCourses.displayOrder,
+        createdAt: learningPathCourses.createdAt,
+        updatedAt: learningPathCourses.updatedAt,
+      });
+  }
+
+  async removeLearningPathCourse(
+    pathId: UUIDType,
+    courseId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    const [deletedCourse] = await dbInstance
+      .delete(learningPathCourses)
+      .where(
+        and(
+          eq(learningPathCourses.learningPathId, pathId),
+          eq(learningPathCourses.courseId, courseId),
+        ),
+      )
+      .returning({
+        id: learningPathCourses.id,
+        displayOrder: learningPathCourses.displayOrder,
+      });
+
+    return deletedCourse;
+  }
+
+  async shiftCoursesAfterRemoval(
+    pathId: UUIDType,
+    removedDisplayOrder: number,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    await dbInstance
+      .update(learningPathCourses)
+      .set({
+        displayOrder: sql`${learningPathCourses.displayOrder} - 1`,
+      })
+      .where(
+        and(
+          eq(learningPathCourses.learningPathId, pathId),
+          sql`${learningPathCourses.displayOrder} > ${removedDisplayOrder}`,
+        ),
+      );
+  }
+
+  async temporarilyOffsetDisplayOrder(
+    pathId: UUIDType,
+    offset: number,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    await dbInstance
+      .update(learningPathCourses)
+      .set({
+        displayOrder: sql`${learningPathCourses.displayOrder} + ${offset}`,
+      })
+      .where(eq(learningPathCourses.learningPathId, pathId));
+  }
+
+  async setDisplayOrder(
+    pathId: UUIDType,
+    courseId: UUIDType,
+    displayOrder: number,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    await dbInstance
+      .update(learningPathCourses)
+      .set({ displayOrder })
+      .where(
+        and(
+          eq(learningPathCourses.learningPathId, pathId),
+          eq(learningPathCourses.courseId, courseId),
+        ),
+      );
+  }
+
+  async getTargetLearningPathBySourceId(
+    sourceTenantId: UUIDType,
+    sourceLearningPathId: UUIDType,
+    targetTenantId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    const [exportLink] = await dbInstance
+      .select({
+        id: learningPathExports.targetLearningPathId,
+      })
+      .from(learningPathExports)
+      .where(
+        and(
+          eq(learningPathExports.sourceTenantId, sourceTenantId),
+          eq(learningPathExports.sourceLearningPathId, sourceLearningPathId),
+          eq(learningPathExports.targetTenantId, targetTenantId),
+        ),
+      )
+      .limit(1);
+
+    if (!exportLink?.id) return null;
+
+    return this.findLearningPathById(exportLink.id, dbInstance);
+  }
+
+  async createTargetLearningPath(
+    values: typeof learningPaths.$inferInsert,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    const [createdLearningPath] = await dbInstance.insert(learningPaths).values(values).returning();
+
+    return createdLearningPath;
+  }
+
+  async updateTargetLearningPath(
+    pathId: UUIDType,
+    updates: Partial<typeof learningPaths.$inferInsert>,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    const [updatedLearningPath] = await dbInstance
+      .update(learningPaths)
+      .set(updates)
+      .where(eq(learningPaths.id, pathId))
+      .returning();
+
+    return updatedLearningPath;
+  }
+
+  async deleteLearningPathCoursesByPathId(pathId: UUIDType, dbInstance: DatabasePg = this.db) {
+    await dbInstance
+      .delete(learningPathCourses)
+      .where(eq(learningPathCourses.learningPathId, pathId));
+  }
+
+  async deleteStudentLearningPathCourseLinksByPathId(
+    pathId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    await dbInstance
+      .delete(studentLearningPathCourses)
+      .where(eq(studentLearningPathCourses.learningPathId, pathId));
+  }
+
+  async getStudentLearningPathEnrollment(
+    pathId: UUIDType,
+    studentId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    return dbInstance.query.studentLearningPaths.findFirst({
+      where: and(
+        eq(studentLearningPaths.learningPathId, pathId),
+        eq(studentLearningPaths.studentId, studentId),
+      ),
+    });
+  }
+
+  async getStudentCourseProgressByCourseIds(
+    studentId: UUIDType,
+    courseIds: UUIDType[],
+    dbInstance: DatabasePg = this.db,
+  ): Promise<LearningPathCourseProgressRow[]> {
+    if (courseIds.length === 0) return [];
+
+    return dbInstance
+      .select({
+        courseId: studentCourses.courseId,
+        progress: sql<ProgressStatus>`${studentCourses.progress}`,
+        completedAt: studentCourses.completedAt,
+      })
+      .from(studentCourses)
+      .where(
+        and(eq(studentCourses.studentId, studentId), inArray(studentCourses.courseId, courseIds)),
+      );
+  }
+
+  async updateStudentLearningPathProgress(
+    pathId: UUIDType,
+    studentId: UUIDType,
+    progress: LearningPathProgressStatus,
+    completedAt: string | null,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    return dbInstance
+      .update(studentLearningPaths)
+      .set({ progress, completedAt })
+      .where(
+        and(
+          eq(studentLearningPaths.learningPathId, pathId),
+          eq(studentLearningPaths.studentId, studentId),
+        ),
+      )
+      .returning({ studentId: studentLearningPaths.studentId });
+  }
+
+  async getLearningPathProgressState(
+    pathId: UUIDType,
+    studentId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ): Promise<LearningPathProgressState> {
+    const [courses, enrollment] = await Promise.all([
+      this.getLearningPathCoursesWithDetails(pathId, dbInstance),
+      this.getStudentLearningPathEnrollment(pathId, studentId, dbInstance),
+    ]);
+
+    const studentCourseProgressRows = await this.getStudentCourseProgressByCourseIds(
+      studentId,
+      courses.map(({ courseId }) => courseId),
+      dbInstance,
+    );
+
+    return {
+      courses,
+      studentCourseProgressRows,
+      isEnrolled: Boolean(enrollment),
+    };
+  }
+
+  async findLearningPathCertificateByUserAndPath(
+    userId: UUIDType,
+    learningPathId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    const [certificate] = await dbInstance
+      .select()
+      .from(learningPathCertificates)
+      .where(
+        and(
+          eq(learningPathCertificates.userId, userId),
+          eq(learningPathCertificates.learningPathId, learningPathId),
+        ),
+      )
+      .limit(1);
+
+    return certificate;
+  }
+
+  async findLearningPathCertificateById(
+    userId: UUIDType,
+    certificateId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    const [certificate] = await dbInstance
+      .select()
+      .from(learningPathCertificates)
+      .where(
+        and(
+          eq(learningPathCertificates.id, certificateId),
+          eq(learningPathCertificates.userId, userId),
+        ),
+      )
+      .limit(1);
+
+    return certificate;
+  }
+
+  async findLearningPathCertificateByIdForRender(
+    userId: UUIDType,
+    certificateId: UUIDType,
+    language?: SupportedLanguages,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    const [certificate] = await dbInstance
+      .select({
+        ...getTableColumns(learningPathCertificates),
+        fullName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
+        pathTitle: this.localizationService.getLocalizedSqlField(
+          learningPaths.title,
+          language,
+          learningPaths,
+        ),
+        certificateSignature: sql<string | null>`
+          ${learningPaths.settings} ->> 'certificateSignature'
+        `,
+        certificateFontColor: sql<string | null>`
+          ${learningPaths.settings} ->> 'certificateFontColor'
+        `,
+      })
+      .from(learningPathCertificates)
+      .innerJoin(users, eq(users.id, learningPathCertificates.userId))
+      .innerJoin(learningPaths, eq(learningPaths.id, learningPathCertificates.learningPathId))
+      .where(
+        and(
+          eq(learningPathCertificates.id, certificateId),
+          eq(learningPathCertificates.userId, userId),
+        ),
+      )
+      .limit(1);
+
+    return certificate;
+  }
+
+  async findPublicLearningPathCertificateById(
+    certificateId: UUIDType,
+    language?: SupportedLanguages,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    const [certificate] = await dbInstance
+      .select({
+        ...getTableColumns(learningPathCertificates),
+        tenantHost: tenants.host,
+        tenantName: tenants.name,
+        fullName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
+        pathTitle: this.localizationService.getLocalizedSqlField(
+          learningPaths.title,
+          language,
+          learningPaths,
+        ),
+        certificateSignature: sql<string | null>`
+          ${learningPaths.settings} ->> 'certificateSignature'
+        `,
+        certificateFontColor: sql<string | null>`
+          ${learningPaths.settings} ->> 'certificateFontColor'
+        `,
+      })
+      .from(learningPathCertificates)
+      .innerJoin(users, eq(users.id, learningPathCertificates.userId))
+      .innerJoin(learningPaths, eq(learningPaths.id, learningPathCertificates.learningPathId))
+      .innerJoin(tenants, eq(tenants.id, learningPathCertificates.tenantId))
+      .where(eq(learningPathCertificates.id, certificateId))
+      .limit(1);
+
+    return certificate;
+  }
+
+  async createLearningPathCertificate(
+    userId: UUIDType,
+    learningPathId: UUIDType,
+    tenantId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    const existingCertificate = await dbInstance.query.learningPathCertificates.findFirst({
+      where: and(
+        eq(learningPathCertificates.userId, userId),
+        eq(learningPathCertificates.learningPathId, learningPathId),
+      ),
+    });
+
+    if (existingCertificate) return existingCertificate;
+
+    const [certificate] = await dbInstance
+      .insert(learningPathCertificates)
+      .values({
+        userId,
+        learningPathId,
+        tenantId,
+        status: LEARNING_PATH_CERTIFICATE_STATUSES.ACTIVE,
+      })
+      .returning();
+
+    return certificate;
+  }
+}

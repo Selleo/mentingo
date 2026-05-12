@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { ApiClient } from "~/api/api-client";
 import { COURSE_OWNERSHIP_CANDIDATES_QUERY_KEY } from "~/api/queries/admin/useCourseOwnershipCandidates";
 import { queryClient } from "~/api/queryClient";
+import { invalidateLearningPathEnrollmentData } from "~/api/utils/invalidateLearningPathEnrollmentData";
 import { useToast } from "~/components/ui/use-toast";
 
 import type { CreateUserBody } from "~/api/generated-api";
@@ -25,6 +26,7 @@ export function useCreateUser() {
       await queryClient.invalidateQueries({
         queryKey: [COURSE_OWNERSHIP_CANDIDATES_QUERY_KEY],
       });
+      await invalidateLearningPathEnrollmentData();
 
       return response.data;
     },

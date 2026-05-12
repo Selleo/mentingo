@@ -28,7 +28,13 @@ export async function createE2ETest(optionsOrProviders: E2ETestOptions | Provide
   const customProviders = options.customProviders ?? [];
   const enableActivityLogs = options.enableActivityLogs ?? false;
 
-  const { db, sql: pgSql, dbAdmin, pgConnectionString } = await setupTestDatabase();
+  const {
+    db,
+    sql: pgSql,
+    dbAdmin,
+    sqlAdmin: pgSqlAdmin,
+    pgConnectionString,
+  } = await setupTestDatabase();
 
   const defaultTenantId = await ensureTenant(dbAdmin);
 
@@ -117,6 +123,22 @@ export async function createE2ETest(optionsOrProviders: E2ETestOptions | Provide
   app.useLogger(false);
 
   const tenantRunner = app.get(TenantDbRunnerService);
+  const closeApp = app.close.bind(app);
+
+  let cleanupPromise: Promise<void> | null = null;
+
+  const cleanup = async () => {
+    cleanupPromise ??= Promise.all([pgSql.end(), pgSqlAdmin.end()]).then(() => undefined);
+    await cleanupPromise;
+  };
+
+  app.close = async () => {
+    try {
+      await closeApp();
+    } finally {
+      await cleanup();
+    }
+  };
 
   console.info("✅ App setup completed successfully");
 
@@ -129,8 +151,6 @@ export async function createE2ETest(optionsOrProviders: E2ETestOptions | Provide
     tenantRunner,
     runAsTenant: <T>(tenantId: string, fn: () => Promise<T>) =>
       tenantRunner.runWithTenant(tenantId, fn),
-    cleanup: async () => {
-      await pgSql.end();
-    },
+    cleanup,
   };
 }

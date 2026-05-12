@@ -10,6 +10,7 @@ export * from "./constants/courseEnrollment";
 export * from "./constants/entityTypes";
 export * from "./constants/fileTypes";
 export * from "./constants/languages";
+export * from "./constants/learningPath";
 export * from "./constants/loginPageDocuments";
 export * from "./constants/lumaFileIngestion";
 export * from "./constants/masterCourse";

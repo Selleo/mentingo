@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { forwardRef, Module } from "@nestjs/common";
 
 import { CreatePasswordService } from "src/auth/create-password.service";
 import { BunnyStreamModule } from "src/bunny/bunnyStream.module";
@@ -27,7 +27,7 @@ import { UserService } from "./user.service";
     StatisticsModule,
     SettingsModule,
     GroupModule,
-    CourseModule,
+    forwardRef(() => CourseModule),
   ],
   controllers: [UserController],
   providers: [

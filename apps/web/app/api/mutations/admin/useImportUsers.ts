@@ -5,6 +5,7 @@ import { ApiClient } from "~/api/api-client";
 import { usersQueryOptions } from "~/api/queries";
 import { ENROLLED_USERS_QUERY_KEY } from "~/api/queries/admin/useUsersEnrolled";
 import { invalidateCourseStatisticsQueries } from "~/api/utils/courseStatisticsUtils";
+import { invalidateLearningPathEnrollmentData } from "~/api/utils/invalidateLearningPathEnrollmentData";
 import { useToast } from "~/components/ui/use-toast";
 
 import type { AxiosError } from "axios";
@@ -39,6 +40,7 @@ export const useImportUsers = (searchParams?: UsersParams) => {
 
       await queryClient.invalidateQueries(usersQueryOptions(searchParams));
       await queryClient.invalidateQueries({ queryKey: [ENROLLED_USERS_QUERY_KEY] });
+      await invalidateLearningPathEnrollmentData();
 
       await invalidateCourseStatisticsQueries();
     },

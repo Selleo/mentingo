@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
+import { invalidateLearningPathEnrollmentData } from "~/api/utils/invalidateLearningPathEnrollmentData";
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../../api-client";
@@ -27,6 +28,7 @@ export function useBulkUpdateUsersRoles() {
       });
 
       await queryClient.invalidateQueries({ queryKey: ["users"] });
+      await invalidateLearningPathEnrollmentData();
     },
 
     onError: (error: AxiosError) => {

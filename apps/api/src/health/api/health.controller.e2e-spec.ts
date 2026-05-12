@@ -12,6 +12,10 @@ describe("HealthController (e2e)", () => {
     app = testApp;
   });
 
+  afterAll(async () => {
+    await app.close();
+  });
+
   describe("GET /healthcheck", () => {
     it("should return 200 for healthy server", async () => {
       const response = await request(app.getHttpServer()).get("/api/healthcheck");

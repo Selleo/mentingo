@@ -60,6 +60,12 @@ export const getNavigationConfig = (
           testId: NAVIGATION_HANDLES.COURSES_LINK,
         },
         {
+          label: t("navigationSideBar.learningPaths"),
+          path: "learning-paths",
+          iconName: "Route",
+          testId: NAVIGATION_HANDLES.LEARNING_PATHS_LINK,
+        },
+        {
           label: t("navigationSideBar.analytics"),
           path: "admin/analytics",
           iconName: "ChartNoAxes",

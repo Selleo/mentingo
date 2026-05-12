@@ -286,6 +286,7 @@
     "progress": "Progress",
     "findInApplication": "Find in application",
     "courses": "Courses",
+    "learningPaths": "Learning Paths",
     "content": "Content",
     "categories": "Categories",
     "users": "Users",
@@ -972,6 +973,7 @@
         "category": "categories",
         "group": "groups",
         "course": "courses",
+        "learning_path": "learning paths",
         "learning_mode": "learning mode",
         "learning_progress": "learning progress",
         "certificate": "certificates",
@@ -1003,6 +1005,15 @@
         "category_manage": "Create, edit, and delete course categories.",
         "group_read": "View user groups.",
         "group_manage": "Create, edit, and delete user groups.",
+        "learning_path_read": "View learning paths.",
+        "learning_path_create": "Create learning paths.",
+        "learning_path_update": "Edit any learning path.",
+        "learning_path_update_own": "Edit learning paths created by this user.",
+        "learning_path_delete": "Delete learning paths.",
+        "learning_path_course_update": "Add, remove, and reorder courses in any learning path.",
+        "learning_path_course_update_own": "Add, remove, and reorder courses in own learning paths.",
+        "learning_path_enrollment": "Manage learning path enrollments.",
+        "learning_path_export": "Export learning paths to tenants.",
         "course_read_assigned": "View courses assigned to this user.",
         "course_read_manageable": "View courses this user can manage.",
         "course_read": "View course content.",
@@ -2831,7 +2842,236 @@
     "activityLogs": "Activity Logs",
     "tenant": "Organization Details",
     "createTenant": "Create Organization",
-    "tenants": "Organizations"
+    "tenants": "Organizations",
+    "learningPaths": "Learning Paths",
+    "adminLearningPaths": "Learning Paths",
+    "adminLearningPathEditor": "Learning Path Editor"
+  },
+  "learningPathsView": {
+    "title": "Learning Paths",
+    "description": "Browse assigned learning paths and continue through their ordered course sequences.",
+    "searchPlaceholder": "Search learning paths",
+    "summary": "{{count}} learning paths are available.",
+    "detailsTitle": "Learning Path",
+    "detailsDescription": "Review the ordered course sequence, progress, locks, and certificate state.",
+    "detailsSummary": "This path contains {{count}} courses. Current progress: {{progress}}.",
+    "emptyDescription": "No description has been added yet.",
+    "status": {
+      "draft": "Draft",
+      "published": "Published",
+      "private": "Private",
+      "not_started": "Not started",
+      "in_progress": "In progress",
+      "completed": "Completed",
+      "blocked": "Blocked"
+    },
+    "badges": {
+      "sequenceEnabled": "Sequential",
+      "freeOrder": "Flexible order",
+      "certificate": "Certificate"
+    },
+    "card": {
+      "openPath": "Open learning path"
+    },
+    "empty": {
+      "title": "No learning paths found",
+      "description": "Adjust your search or check back after paths are assigned."
+    },
+    "progress": {
+      "title": "Path progress",
+      "summary": "{{completed}} of {{total}} courses completed"
+    },
+    "certificate": {
+      "available": "Certificate available",
+      "ready": "Certificate ready",
+      "pathCompleted": "Learning path completed. Your certificate is ready."
+    },
+    "courseState": {
+      "completed": "Finished",
+      "inProgress": "In progress",
+      "inProgressDescription": "You have started this course.",
+      "notStarted": "Not started",
+      "notStartedDescription": "This course is available to start.",
+      "locked": "Locked",
+      "lockedDescription": "Finish the previous course to unlock it."
+    },
+    "detail": {
+      "courses": "Courses in this path",
+      "courseTitle": "Course {{number}}",
+      "completedAt": "Completed {{date}}",
+      "emptyCourses": "This learning path does not include any courses yet."
+    },
+    "enrollment": {
+      "manage": "Enroll",
+      "title": "Enroll learners",
+      "description": "Manage student and group enrollment for this learning path.",
+      "students": "Students",
+      "selectStudents": "Select students",
+      "groups": "Groups",
+      "selectGroups": "Select groups",
+      "filters": {
+        "placeholder": {
+          "searchByKeyword": "Search by keyword..."
+        }
+      },
+      "enrollSelected": "Enroll selected",
+      "unenrollSelected": "Unenroll selected",
+      "enrollGroups": "Enroll groups",
+      "unenrollGroups": "Unenroll groups",
+      "enrolled": "Enrolled",
+      "enroll": "Enroll",
+      "studentsEnrolled": "Students enrolled",
+      "groupsEnrolled": "Groups enrolled",
+      "studentsUnenrolled": "Students unenrolled",
+      "groupsUnenrolled": "Groups unenrolled",
+      "enrolledSuccessfully": "Learning path enrolled",
+      "enrollGroupsDescription": "Select groups to enroll in this learning path.",
+      "unenrollGroupsDescription": "Select groups to unenroll from this learning path.",
+      "table": {
+        "selectAll": "Select all learners",
+        "select": "Select learner",
+        "name": "Name",
+        "email": "Email",
+        "status": "Enrollment status",
+        "enrollmentDate": "Date enrolled"
+      },
+      "statuses": {
+        "enrolledByGroup": "Enrolled by group",
+        "individuallyEnrolled": "Individually enrolled",
+        "notEnrolled": "Not enrolled"
+      },
+      "confirmation": {
+        "title": "Confirm enrollment",
+        "description": "Are you sure you want to enroll the selected students in this learning path? This action cannot be undone."
+      },
+      "unenrollConfirmation": {
+        "title": "Unenroll confirmation",
+        "description": "Are you sure you want to unenroll the selected students from this learning path? This action cannot be undone."
+      },
+      "noGroups": "No groups available"
+    },
+    "breadcrumbs": {
+      "learningPaths": "Learning Paths",
+      "details": "Details"
+    },
+    "buttons": {
+      "openFirst": "Open first path"
+    }
+  },
+  "adminLearningPathsView": {
+    "title": "Learning Paths",
+    "description": "Manage path metadata, sequence settings, ordered courses, enrollment, exports, and certificates.",
+    "summary": "{{count}} learning paths are available in this workspace.",
+    "breadcrumbs": {
+      "learningPaths": "Learning Paths",
+      "create": "Create",
+      "edit": "Edit"
+    },
+    "buttons": {
+      "create": "Create learning path",
+      "edit": "Edit",
+      "save": "Save changes",
+      "removeImage": "Remove image"
+    },
+    "editor": {
+      "createTitle": "Create Learning Path",
+      "editTitle": "Edit Learning Path",
+      "description": "Set up the learning path details, sequence settings, courses, and publishing state.",
+      "createSummary": "Start with the learning path details.",
+      "editSummary": "This learning path currently has {{coursesCount}} courses.",
+      "details": "Details",
+      "courses": "Courses",
+      "image": "Image",
+      "settings": "Settings"
+    },
+    "table": {
+      "title": "Title",
+      "status": "Status",
+      "settings": "Settings",
+      "language": "Language",
+      "createdAt": "Created",
+      "actions": "Actions",
+      "untitled": "Untitled learning path",
+      "emptyDescription": "No description",
+      "sequential": "Sequential",
+      "flexible": "Flexible",
+      "certificate": "Certificate",
+      "empty": "No learning paths have been created yet."
+    },
+    "form": {
+      "language": "Language",
+      "status": "Status",
+      "statusDescription": "Controls whether this path is visible, draft-only, or private.",
+      "title": "Title",
+      "titlePlaceholder": "Name the learning path",
+      "description": "Description",
+      "descriptionPlaceholder": "Describe what students will complete in this path",
+      "imageHint": "PNG, JPG or JPEG (max. 20 MB, recommended 1200x1200 or higher)",
+      "sequenceEnabled": "Sequential learning",
+      "sequenceEnabledDescription": "Students must complete courses in display order.",
+      "includesCertificate": "Certificate",
+      "includesCertificateDescription": "Students can receive a certificate after completing the path.",
+      "certificateSignature": "Certificate signature",
+      "certificateSignatureDescription": "Upload the signature shown on certificates for this learning path.",
+      "certificateFontColor": "Certificate font color",
+      "certificateFontColorDescription": "Use the preview color picker to update the certificate text and line color.",
+      "certificatePreview": "Certificate preview",
+      "certificatePreviewDescription": "Preview the certificate and adjust its font color."
+    },
+    "detailsContent": {
+      "title": "Learning path details",
+      "description": "Define the localized name and student-facing description."
+    },
+    "detailsImage": {
+      "title": "Cover image",
+      "description": "Use a visual that helps administrators and students recognize this path."
+    },
+    "detailsSettings": {
+      "title": "Publication and behavior",
+      "description": "Group visibility, course order, and certificate behavior in one place."
+    },
+    "common": {
+      "baseLanguage": "Base language"
+    },
+    "languageSelector": {
+      "tooltip": "This learning path base language is {{baseLanguage}}."
+    },
+    "courses": {
+      "select": "Select a course",
+      "add": "Add course",
+      "drag": "Drag to reorder course",
+      "delete": "Delete course",
+      "order": "Order",
+      "course": "Course",
+      "chapter_one": "{{count}} chapter",
+      "chapter_other": "{{count}} chapters",
+      "empty": "No courses have been added to this learning path yet.",
+      "saveFirst": "Save the learning path before adding courses.",
+      "unknownCourse": "Course details unavailable"
+    },
+    "sharedLearningPath": {
+      "badgeExported": "Shared",
+      "exportButton": "Share",
+      "exportSuccess": "Learning path was exported",
+      "exportsDescription": "Share this learning path with selected organizations.",
+      "exportsTitle": "Sharing",
+      "exportingButton": "Sharing...",
+      "selectTenants": "Select organizations",
+      "selectedCount": "Selected:"
+    },
+    "deleteModal": {
+      "title": "Delete learning path",
+      "description": "This will delete the learning path and remove its path-based course access."
+    },
+    "toast": {
+      "created": "Learning path created successfully",
+      "updated": "Learning path updated successfully",
+      "deleted": "Learning path deleted successfully",
+      "languageCreated": "Learning path language created successfully",
+      "coursesAdded": "Courses added to learning path successfully",
+      "courseRemoved": "Course removed from learning path successfully",
+      "coursesReordered": "Learning path courses reordered successfully"
+    }
   },
   "lessonPreview": {
     "breadcrumbs": {
@@ -3197,6 +3437,36 @@
       "ownerNotAdmin": "API key owner no longer has admin permissions",
       "missingApiKeyHeader": "Missing X-API-Key header",
       "missingTenantIdHeader": "Missing X-Tenant-Id header"
+    }
+  },
+  "masterCourse": {
+    "error": {
+      "sourceCourseNotFound": "Source course not found",
+      "noTargetTenants": "Select at least one target tenant",
+      "exportedCourseCannotBeSource": "Exported course cannot be used as a source",
+      "exportLinkMissing": "Course export link not found",
+      "jobNotFound": "Course export job not found",
+      "targetAuthorMissing": "Target tenant author not found",
+      "targetCourseMissing": "Target course not found",
+      "exportedCourseReadonly": "Exported course is read-only"
+    }
+  },
+  "learningPathExport": {
+    "error": {
+      "noTargetTenants": "Select at least one target tenant",
+      "exportLinkMissing": "Learning path export link not found",
+      "noCourses": "Learning path must include at least one course before export",
+      "courseExportFailed": "Failed to export one of the learning path courses",
+      "targetAuthorMissing": "Target tenant author not found",
+      "jobNotFound": "Learning path export job not found",
+      "invalidJobData": "Invalid learning path export job data",
+      "invalidExportId": "Invalid learning path export id",
+      "invalidExportLink": "Invalid learning path export link"
+    }
+  },
+  "learningPathCertificate": {
+    "error": {
+      "disabled": "Learning path certificates are disabled"
     }
   },
   "activityLogsView": {

@@ -2479,6 +2479,69 @@ export class CourseService {
     });
   }
 
+  async getStudentCourseEnrollments(
+    studentId: UUIDType,
+    courseIds: UUIDType[],
+    dbInstance: DatabasePg = this.db,
+  ) {
+    if (courseIds.length === 0) return [];
+
+    return dbInstance
+      .select({
+        courseId: studentCourses.courseId,
+        enrolledAt: studentCourses.enrolledAt,
+        enrolledByGroupId: studentCourses.enrolledByGroupId,
+        status: studentCourses.status,
+      })
+      .from(studentCourses)
+      .where(
+        and(eq(studentCourses.studentId, studentId), inArray(studentCourses.courseId, courseIds)),
+      );
+  }
+
+  async activateStudentCourseEnrollment(
+    courseId: UUIDType,
+    studentId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    return dbInstance
+      .update(studentCourses)
+      .set({
+        enrolledAt: sql`NOW()`,
+        status: COURSE_ENROLLMENT.ENROLLED,
+      })
+      .where(and(eq(studentCourses.studentId, studentId), eq(studentCourses.courseId, courseId)));
+  }
+
+  async markStudentCoursesNotEnrolled(
+    studentId: UUIDType,
+    courseIds: UUIDType[],
+    dbInstance: DatabasePg = this.db,
+  ) {
+    if (courseIds.length === 0) return [];
+
+    return dbInstance
+      .insert(studentCourses)
+      .values(
+        courseIds.map((courseId) => ({
+          studentId,
+          courseId,
+          enrolledAt: null,
+          status: COURSE_ENROLLMENT.NOT_ENROLLED,
+          enrolledByGroupId: null,
+        })),
+      )
+      .onConflictDoUpdate({
+        target: [studentCourses.studentId, studentCourses.courseId],
+        set: {
+          enrolledAt: null,
+          status: COURSE_ENROLLMENT.NOT_ENROLLED,
+          enrolledByGroupId: null,
+        },
+      })
+      .returning({ courseId: studentCourses.courseId });
+  }
+
   async createStudentCourse(
     courseId: UUIDType,
     studentId: UUIDType,
@@ -2498,7 +2561,16 @@ export class CourseService {
       })
       .onConflictDoUpdate({
         target: [studentCourses.studentId, studentCourses.courseId],
-        set: { enrolledAt: sql`EXCLUDED.enrolled_at`, status: sql`EXCLUDED.status` },
+        set: {
+          enrolledAt: sql`
+            CASE
+              WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN ${studentCourses.enrolledAt}
+              ELSE EXCLUDED.enrolled_at
+            END
+          `,
+          status: sql`EXCLUDED.status`,
+          enrolledByGroupId: sql`EXCLUDED.enrolled_by_group_id`,
+        },
       })
       .returning();
 
@@ -2511,7 +2583,7 @@ export class CourseService {
     courseId: UUIDType,
     studentId: UUIDType,
     paymentId: string | null = null,
-    trx: DatabasePg,
+    trx: DatabasePg = this.db,
   ) {
     const alreadyHasEnrollmentRecord = Boolean(
       (

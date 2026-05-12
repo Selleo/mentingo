@@ -76,6 +76,7 @@ Backend-specific instructions for `apps/api`. Preserve tenant isolation, generat
 - Constant: `packages/shared/src/constants/languages.ts`.
 - API usage examples: `src/courses/course.controller.ts`, `src/stripe/schemas/checkoutSession.schema.ts`, `src/user/user.service.ts`.
 - Agent rule: use `SUPPORTED_LANGUAGES`/`SupportedLanguages`; do not hardcode language arrays in schemas or services.
+- Agent rule: resolve localized JSONB fields in repository/database queries, usually with `LocalizationService.getLocalizedSqlField`; public API response schemas should return localized strings instead of language maps unless the endpoint explicitly manages translations.
 
 ### Course/Lesson Flow
 

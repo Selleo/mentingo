@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { usersQueryOptions } from "~/api/queries";
+import { invalidateLearningPathEnrollmentData } from "~/api/utils/invalidateLearningPathEnrollmentData";
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../../api-client";
@@ -35,6 +36,7 @@ export function useBulkArchiveUsers() {
 
       await queryClient.invalidateQueries(usersQueryOptions(variables.searchParams));
       await queryClient.invalidateQueries({ queryKey: ["users", "admin"] });
+      await invalidateLearningPathEnrollmentData();
     },
     onError: () => {
       toast({

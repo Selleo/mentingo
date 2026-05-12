@@ -302,7 +302,236 @@
     "qa": "Q&A",
     "articles": "Baza wiedzy",
     "tenants": "Organizacje",
-    "activityLogs": "Dziennik zdarzeń"
+    "activityLogs": "Dziennik zdarzeń",
+    "learningPaths": "Ścieżki edukacyjne",
+    "adminLearningPaths": "Ścieżki edukacyjne",
+    "adminLearningPathEditor": "Edytor ścieżki edukacyjnej"
+  },
+  "learningPathsView": {
+    "title": "Ścieżki edukacyjne",
+    "description": "Przeglądaj przypisane ścieżki edukacyjne i kontynuuj uporządkowane sekwencje kursów.",
+    "searchPlaceholder": "Szukaj ścieżek edukacyjnych",
+    "summary": "{{count}} ścieżek edukacyjnych jest dostępnych.",
+    "detailsTitle": "Ścieżka edukacyjna",
+    "detailsDescription": "Sprawdź kolejność kursów, postęp, blokady i status certyfikatu.",
+    "detailsSummary": "Ta ścieżka zawiera {{count}} kursów. Aktualny postęp: {{progress}}.",
+    "emptyDescription": "Nie dodano jeszcze opisu.",
+    "status": {
+      "draft": "Wersja robocza",
+      "published": "Opublikowano",
+      "private": "Prywatna",
+      "not_started": "Nie rozpoczęto",
+      "in_progress": "W toku",
+      "completed": "Ukończono",
+      "blocked": "Zablokowano"
+    },
+    "badges": {
+      "sequenceEnabled": "Sekwencyjnie",
+      "freeOrder": "Dowolna kolejność",
+      "certificate": "Certyfikat"
+    },
+    "card": {
+      "openPath": "Otwórz ścieżkę"
+    },
+    "empty": {
+      "title": "Nie znaleziono ścieżek",
+      "description": "Zmień wyszukiwanie albo wróć po przypisaniu ścieżek."
+    },
+    "progress": {
+      "title": "Postęp ścieżki",
+      "summary": "Ukończono {{completed}} z {{total}} kursów"
+    },
+    "certificate": {
+      "available": "Certyfikat dostępny",
+      "ready": "Certyfikat gotowy",
+      "pathCompleted": "Ścieżka edukacyjna ukończona. Twój certyfikat jest gotowy."
+    },
+    "courseState": {
+      "completed": "Ukończony",
+      "inProgress": "W trakcie",
+      "inProgressDescription": "Ten kurs został rozpoczęty.",
+      "notStarted": "Nie rozpoczęto",
+      "notStartedDescription": "Ten kurs jest dostępny do rozpoczęcia.",
+      "locked": "Zablokowany",
+      "lockedDescription": "Ukończ poprzedni kurs, aby go odblokować."
+    },
+    "detail": {
+      "courses": "Kursy w tej ścieżce",
+      "courseTitle": "Kurs {{number}}",
+      "completedAt": "Ukończono {{date}}",
+      "emptyCourses": "Ta ścieżka edukacyjna nie zawiera jeszcze kursów."
+    },
+    "enrollment": {
+      "manage": "Zapisz",
+      "title": "Zapisz uczestników",
+      "description": "Zarządzaj zapisami uczniów i grup do tej ścieżki.",
+      "students": "Uczniowie",
+      "selectStudents": "Wybierz uczniów",
+      "groups": "Grupy",
+      "selectGroups": "Wybierz grupy",
+      "filters": {
+        "placeholder": {
+          "searchByKeyword": "Szukaj po słowie kluczowym..."
+        }
+      },
+      "enrollSelected": "Zapisz zaznaczonych",
+      "unenrollSelected": "Wypisz zaznaczonych ze ścieżki",
+      "enrollGroups": "Zapisz grupy do ścieżki",
+      "unenrollGroups": "Wypisz grupy ze ścieżki",
+      "enrolled": "Zapisany",
+      "enroll": "Zapisz się",
+      "studentsEnrolled": "Zapisano uczniów",
+      "groupsEnrolled": "Zapisano grupy",
+      "studentsUnenrolled": "Usunięto uczniów z zapisów",
+      "groupsUnenrolled": "Usunięto grupy z zapisów",
+      "enrolledSuccessfully": "Zapisano do ścieżki",
+      "enrollGroupsDescription": "Wybierz grupy do zapisania do tej ścieżki edukacyjnej.",
+      "unenrollGroupsDescription": "Wybierz grupy do usunięcia z tej ścieżki edukacyjnej.",
+      "table": {
+        "selectAll": "Zaznacz wszystkich uczestników",
+        "select": "Zaznacz uczestnika",
+        "name": "Imię",
+        "email": "Email",
+        "status": "Status uczestnictwa",
+        "enrollmentDate": "Data zapisania do ścieżki"
+      },
+      "statuses": {
+        "enrolledByGroup": "Zapisany przez grupę",
+        "individuallyEnrolled": "Zapisany indywidualnie",
+        "notEnrolled": "Niezapisany"
+      },
+      "confirmation": {
+        "title": "Potwierdź zapis",
+        "description": "Czy na pewno chcesz zapisać wybranych studentów do tej ścieżki edukacyjnej? Tej operacji nie można cofnąć."
+      },
+      "unenrollConfirmation": {
+        "title": "Potwierdź wypisanie",
+        "description": "Czy na pewno chcesz wypisać wybranych studentów z tej ścieżki edukacyjnej? Tej operacji nie można cofnąć."
+      },
+      "noGroups": "Brak dostępnych grup"
+    },
+    "breadcrumbs": {
+      "learningPaths": "Ścieżki edukacyjne",
+      "details": "Szczegóły"
+    },
+    "buttons": {
+      "openFirst": "Otwórz pierwszą ścieżkę"
+    }
+  },
+  "adminLearningPathsView": {
+    "title": "Ścieżki edukacyjne",
+    "description": "Zarządzaj metadanymi, ustawieniami sekwencji, kursami, zapisami, eksportem i certyfikatami.",
+    "summary": "{{count}} ścieżek edukacyjnych jest dostępnych w tej organizacji.",
+    "breadcrumbs": {
+      "learningPaths": "Ścieżki edukacyjne",
+      "create": "Utwórz",
+      "edit": "Edytuj"
+    },
+    "buttons": {
+      "create": "Utwórz ścieżkę",
+      "edit": "Edytuj",
+      "save": "Zapisz zmiany",
+      "removeImage": "Usuń obraz"
+    },
+    "editor": {
+      "createTitle": "Utwórz ścieżkę edukacyjną",
+      "editTitle": "Edytuj ścieżkę edukacyjną",
+      "description": "Skonfiguruj szczegóły ścieżki, ustawienia sekwencji, kursy i status publikacji.",
+      "createSummary": "Zacznij od szczegółów ścieżki edukacyjnej.",
+      "editSummary": "Ta ścieżka edukacyjna ma obecnie {{coursesCount}} kursów.",
+      "details": "Szczegóły",
+      "courses": "Kursy",
+      "image": "Obraz",
+      "settings": "Ustawienia"
+    },
+    "table": {
+      "title": "Tytuł",
+      "status": "Status",
+      "settings": "Ustawienia",
+      "language": "Język",
+      "createdAt": "Utworzono",
+      "actions": "Akcje",
+      "untitled": "Ścieżka bez tytułu",
+      "emptyDescription": "Brak opisu",
+      "sequential": "Sekwencyjna",
+      "flexible": "Dowolna kolejność",
+      "certificate": "Certyfikat",
+      "empty": "Nie utworzono jeszcze żadnych ścieżek edukacyjnych."
+    },
+    "form": {
+      "language": "Język",
+      "status": "Status",
+      "statusDescription": "Określa, czy ścieżka jest widoczna, robocza czy prywatna.",
+      "title": "Tytuł",
+      "titlePlaceholder": "Nazwij ścieżkę edukacyjną",
+      "description": "Opis",
+      "descriptionPlaceholder": "Opisz, co uczestnicy ukończą w tej ścieżce",
+      "imageHint": "PNG, JPG lub JPEG (maks. 20 MB, zalecane 1200x1200 lub większe)",
+      "sequenceEnabled": "Nauka sekwencyjna",
+      "sequenceEnabledDescription": "Uczestnicy muszą ukończyć kursy w podanej kolejności.",
+      "includesCertificate": "Certyfikat",
+      "includesCertificateDescription": "Uczestnicy mogą otrzymać certyfikat po ukończeniu ścieżki.",
+      "certificateSignature": "Podpis na certyfikacie",
+      "certificateSignatureDescription": "Prześlij podpis widoczny na certyfikatach tej ścieżki edukacyjnej.",
+      "certificateFontColor": "Kolor tekstu certyfikatu",
+      "certificateFontColorDescription": "Użyj próbnika kolorów w podglądzie, aby zmienić kolor tekstu i linii certyfikatu.",
+      "certificatePreview": "Podgląd certyfikatu",
+      "certificatePreviewDescription": "Podejrzyj certyfikat i dostosuj kolor tekstu."
+    },
+    "detailsContent": {
+      "title": "Szczegóły ścieżki",
+      "description": "Zdefiniuj lokalizowaną nazwę i opis widoczny dla uczestników."
+    },
+    "detailsImage": {
+      "title": "Obraz okładki",
+      "description": "Użyj obrazu, który pomaga rozpoznać tę ścieżkę."
+    },
+    "detailsSettings": {
+      "title": "Publikacja i zachowanie",
+      "description": "Ustaw widoczność, kolejność kursów i certyfikat w jednym miejscu."
+    },
+    "common": {
+      "baseLanguage": "Język bazowy"
+    },
+    "languageSelector": {
+      "tooltip": "Język bazowy tej ścieżki to {{baseLanguage}}."
+    },
+    "courses": {
+      "select": "Wybierz kurs",
+      "add": "Dodaj kurs",
+      "drag": "Przeciągnij, aby zmienić kolejność kursu",
+      "delete": "Usuń kurs",
+      "order": "Kolejność",
+      "course": "Kurs",
+      "chapter_one": "{{count}} rozdział",
+      "chapter_other": "{{count}} rozdziałów",
+      "empty": "Nie dodano jeszcze kursów do tej ścieżki.",
+      "saveFirst": "Zapisz ścieżkę przed dodaniem kursów.",
+      "unknownCourse": "Szczegóły kursu niedostępne"
+    },
+    "sharedLearningPath": {
+      "badgeExported": "Udostępniony",
+      "exportButton": "Udostępnij",
+      "exportSuccess": "Ścieżka została udostępniona",
+      "exportsDescription": "Udostępnij tę ścieżkę wybranym organizacjom.",
+      "exportsTitle": "Udostępnianie",
+      "exportingButton": "Udostępnianie...",
+      "selectTenants": "Wybierz organizacje",
+      "selectedCount": "Wybrano:"
+    },
+    "deleteModal": {
+      "title": "Usuń ścieżkę edukacyjną",
+      "description": "Spowoduje to usunięcie ścieżki i dostępu do kursów przyznanego przez tę ścieżkę."
+    },
+    "toast": {
+      "created": "Ścieżka edukacyjna została utworzona",
+      "updated": "Ścieżka edukacyjna została zaktualizowana",
+      "deleted": "Ścieżka edukacyjna została usunięta",
+      "languageCreated": "Język ścieżki edukacyjnej został utworzony",
+      "coursesAdded": "Kursy zostały dodane do ścieżki edukacyjnej",
+      "courseRemoved": "Kurs został usunięty ze ścieżki edukacyjnej",
+      "coursesReordered": "Kolejność kursów w ścieżce edukacyjnej została zaktualizowana"
+    }
   },
   "newsView": {
     "header": "Aktualności",
@@ -955,6 +1184,7 @@
         "category": "kategorie",
         "group": "grupy",
         "course": "kursy",
+        "learning_path": "ścieżki nauki",
         "learning_mode": "tryb nauki",
         "learning_progress": "postęp nauki",
         "certificate": "certyfikaty",
@@ -986,6 +1216,15 @@
         "category_manage": "Może tworzyć, edytować i usuwać kategorie kursów.",
         "group_read": "Może przeglądać grupy użytkowników.",
         "group_manage": "Może tworzyć, edytować i usuwać grupy użytkowników.",
+        "learning_path_read": "Może przeglądać ścieżki nauki.",
+        "learning_path_create": "Może tworzyć ścieżki nauki.",
+        "learning_path_update": "Może edytować dowolną ścieżkę nauki.",
+        "learning_path_update_own": "Może edytować utworzone przez siebie ścieżki nauki.",
+        "learning_path_delete": "Może usuwać ścieżki nauki.",
+        "learning_path_course_update": "Może dodawać, usuwać i zmieniać kolejność kursów w dowolnej ścieżce nauki.",
+        "learning_path_course_update_own": "Może dodawać, usuwać i zmieniać kolejność kursów we własnych ścieżkach nauki.",
+        "learning_path_enrollment": "Może zarządzać zapisami na ścieżki nauki.",
+        "learning_path_export": "Może eksportować ścieżki nauki do tenantów.",
         "course_read_assigned": "Może przeglądać kursy przypisane do tego użytkownika.",
         "course_read_manageable": "Może przeglądać kursy, którymi ten użytkownik może zarządzać.",
         "course_read": "Może przeglądać treści kursów.",
@@ -3222,6 +3461,36 @@
       "ownerNotAdmin": "Właściciel klucza API nie ma już uprawnień administratora",
       "missingApiKeyHeader": "Brak nagłówka X-API-Key",
       "missingTenantIdHeader": "Brak nagłówka X-Tenant-Id"
+    }
+  },
+  "masterCourse": {
+    "error": {
+      "sourceCourseNotFound": "Nie znaleziono kursu źródłowego",
+      "noTargetTenants": "Wybierz co najmniej jednego docelowego tenanta",
+      "exportedCourseCannotBeSource": "Wyeksportowany kurs nie może być użyty jako źródło",
+      "exportLinkMissing": "Nie znaleziono powiązania eksportu kursu",
+      "jobNotFound": "Nie znaleziono zadania eksportu kursu",
+      "targetAuthorMissing": "Nie znaleziono autora w docelowym tenancie",
+      "targetCourseMissing": "Nie znaleziono kursu docelowego",
+      "exportedCourseReadonly": "Wyeksportowany kurs jest tylko do odczytu"
+    }
+  },
+  "learningPathExport": {
+    "error": {
+      "noTargetTenants": "Wybierz co najmniej jednego docelowego tenanta",
+      "exportLinkMissing": "Nie znaleziono powiązania eksportu ścieżki edukacyjnej",
+      "noCourses": "Ścieżka edukacyjna musi zawierać co najmniej jeden kurs przed eksportem",
+      "courseExportFailed": "Nie udało się wyeksportować jednego z kursów ścieżki edukacyjnej",
+      "targetAuthorMissing": "Nie znaleziono autora w docelowym tenancie",
+      "jobNotFound": "Nie znaleziono zadania eksportu ścieżki edukacyjnej",
+      "invalidJobData": "Nieprawidłowe dane zadania eksportu ścieżki edukacyjnej",
+      "invalidExportId": "Nieprawidłowy identyfikator eksportu ścieżki edukacyjnej",
+      "invalidExportLink": "Nieprawidłowe powiązanie eksportu ścieżki edukacyjnej"
+    }
+  },
+  "learningPathCertificate": {
+    "error": {
+      "disabled": "Certyfikaty ścieżek edukacyjnych są wyłączone"
     }
   },
   "activityLogsView": {

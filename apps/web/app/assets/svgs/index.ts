@@ -76,6 +76,7 @@ export { default as PanelLeftOpen } from "./panel-left-open.svg?react";
 export { default as BookOpen } from "./book-open.svg?react";
 export { default as WandSparkles } from "./wand-sparkles.svg?react";
 export { default as Timeline } from "./timeline.svg?react";
+export { default as Route } from "./route.svg?react";
 
 export { SegmentedRing } from "./segmented-ring";
 
