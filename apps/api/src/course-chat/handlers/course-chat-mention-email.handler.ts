@@ -1,9 +1,11 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
 import { BaseEmailTemplate } from "@repo/email-templates";
 
+import { DatabasePg } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
 import { getEmailSubject } from "src/common/emails/translations";
+import { resolveTenantOrigin } from "src/common/helpers/resolveTenantOrigin";
 import {
   getCourseChatMentionEmailButtonText,
   getCourseChatMentionEmailHeading,
@@ -11,6 +13,7 @@ import {
 } from "src/course-chat/course-chat-email.translations";
 import { CourseChatRepository } from "src/course-chat/course-chat.repository";
 import { CourseChatUserMentionedEvent } from "src/events/course-chat/course-chat-user-mentioned.event";
+import { DB_ADMIN } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 type CourseChatMentionEmailEventType = CourseChatUserMentionedEvent;
@@ -26,6 +29,7 @@ export class CourseChatMentionEmailHandler
     private readonly courseChatRepository: CourseChatRepository,
     private readonly emailService: EmailService,
     private readonly tenantRunner: TenantDbRunnerService,
+    @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
   ) {}
 
   async handle(event: CourseChatMentionEmailEventType) {
@@ -35,7 +39,7 @@ export class CourseChatMentionEmailHandler
   }
 
   private async handleUserMentioned(event: CourseChatUserMentionedEvent) {
-    const { courseId, actorUserId, messageId, mentionedUserIds } =
+    const { tenantId, courseId, actorUserId, messageId, mentionedUserIds } =
       event.courseChatUserMentionedData;
     const uniqueMentionedUserIds = Array.from(new Set(mentionedUserIds)).filter(
       (mentionedUserId) => mentionedUserId !== actorUserId,
@@ -43,18 +47,19 @@ export class CourseChatMentionEmailHandler
 
     if (!uniqueMentionedUserIds.length) return;
 
-    const [message, recipients] = await Promise.all([
-      this.courseChatRepository.getMessageById(messageId),
-      this.courseChatRepository.getMentionEmailRecipients(courseId, uniqueMentionedUserIds),
-    ]);
+    await this.tenantRunner.runWithTenant(tenantId, async () => {
+      const [message, recipients, tenantOrigin] = await Promise.all([
+        this.courseChatRepository.getMessageById(messageId),
+        this.courseChatRepository.getMentionEmailRecipients(courseId, uniqueMentionedUserIds),
+        resolveTenantOrigin(this.dbAdmin, tenantId),
+      ]);
 
-    if (!message || !recipients.length) return;
+      if (!message || !recipients.length) return;
 
-    await Promise.allSettled(
-      recipients.map((recipient) =>
-        this.tenantRunner.runWithTenant(recipient.tenantId, async () => {
+      await Promise.allSettled(
+        recipients.map(async (recipient) => {
           const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
-            recipient.tenantId,
+            tenantId,
             recipient.id,
           );
           const courseContext = await this.courseChatRepository.getCourseEmailContext(
@@ -74,7 +79,7 @@ export class CourseChatMentionEmailHandler
               messageContent: message.content,
             }),
             buttonText: getCourseChatMentionEmailButtonText(defaultEmailSettings.language),
-            buttonLink: `${process.env.CORS_ORIGIN}/course/${courseId}?tab=Discussion`,
+            buttonLink: `${tenantOrigin}/course/${courseId}?tab=Discussion`,
             ...defaultEmailSettings,
           });
 
@@ -87,10 +92,10 @@ export class CourseChatMentionEmailHandler
               text,
               html,
             },
-            { tenantId: recipient.tenantId },
+            { tenantId },
           );
         }),
-      ),
-    );
+      );
+    });
   }
 }

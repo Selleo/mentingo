@@ -10,7 +10,6 @@ import { PageWrapper } from "~/components/PageWrapper";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { ContentAccessGuard } from "~/Guards/AccessGuard";
 import { usePermissions } from "~/hooks/usePermissions";
-import { cn } from "~/lib/utils";
 import { CourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import CourseOverview from "~/modules/Courses/CourseView/CourseOverview";
 import { CourseViewSidebar } from "~/modules/Courses/CourseView/CourseViewSidebar/CourseViewSidebar";
@@ -238,9 +237,7 @@ export default function CourseViewPage() {
                   <TabsContent
                     key={tab.value}
                     value={tab.value}
-                    className={cn({
-                      "data-[state=active]:mt-6": true,
-                    })}
+                    className="data-[state=active]:mt-6"
                   >
                     {tab.content}
                   </TabsContent>

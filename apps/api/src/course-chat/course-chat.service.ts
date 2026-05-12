@@ -129,6 +129,7 @@ export class CourseChatService {
   async createMessage(
     courseId: UUIDType,
     userId: UUIDType,
+    tenantId: UUIDType,
     body: CreateCourseChatMessageBody,
   ): Promise<BaseResponse<CourseChatMessageResponse>> {
     await this.assertUserEnrolledInCourse(courseId, userId);
@@ -175,6 +176,7 @@ export class CourseChatService {
 
       await this.publishMentionEvent(
         {
+          tenantId,
           courseId,
           actorUserId: userId,
           messageId: createdMessageId,
@@ -551,6 +553,7 @@ export class CourseChatService {
 
   private async publishMentionEvent(
     params: {
+      tenantId: UUIDType;
       courseId: UUIDType;
       actorUserId: UUIDType;
       messageId: UUIDType;
@@ -562,6 +565,7 @@ export class CourseChatService {
 
     await this.outboxPublisher.publish(
       new CourseChatUserMentionedEvent({
+        tenantId: params.tenantId,
         courseId: params.courseId,
         actorUserId: params.actorUserId,
         messageId: params.messageId,

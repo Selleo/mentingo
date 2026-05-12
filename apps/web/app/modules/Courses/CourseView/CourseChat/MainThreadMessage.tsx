@@ -1,10 +1,12 @@
 import { formatDistanceToNow, isSameMinute } from "date-fns";
-import { cs, de, enUS, lt, pl } from "date-fns/locale";
 import { MessagesSquare } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { match } from "ts-pattern";
 
 import { Button } from "~/components/ui/button";
 import { UserAvatar } from "~/components/UserProfile/UserAvatar";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
+import { getDateLocale } from "~/utils/getDateLocale";
 
 import { ChatMessage } from "./ChatMessage";
 import { CourseChatMessageForm } from "./CourseChatMessageForm";
@@ -52,7 +54,8 @@ export function MainThreadMessage({
   onReplySubmit,
   onLoadMoreReplies,
 }: MainThreadMessageProps) {
-  const { i18n, t } = useTranslation();
+  const { t } = useTranslation();
+  const language = useLanguageStore((state) => state.language);
   const replyCount = message.replyCount;
   const displayedReplyCountText = replyCount
     ? t("studentCourseView.courseChat.repliesCount", {
@@ -63,9 +66,33 @@ export function MainThreadMessage({
   const latestReplyDistance = message.latestReply
     ? formatDistanceToNow(new Date(message.latestReply.createdAt), {
         addSuffix: true,
-        locale: getDateLocale(i18n.language),
+        locale: getDateLocale(language),
       })
     : null;
+  const repliesContent = match({ isLoadingReplies, hasReplies: replies.length > 0 })
+    .with({ isLoadingReplies: true }, () => <MessagesSkeleton />)
+    .with({ hasReplies: true }, () =>
+      replies.map((message, index) => {
+        const previousMessage = replies[index - 1];
+        const isChained =
+          previousMessage?.userId === message.userId &&
+          isSameMinute(new Date(previousMessage.createdAt), new Date(message.createdAt));
+
+        return (
+          <ChatMessage
+            key={message.id}
+            message={message}
+            users={users}
+            usersById={usersById}
+            currentUserId={currentUserId}
+            canDeleteAnyMessage={canDeleteAnyMessage}
+            showAvatar={!isChained}
+            showMeta={!isChained}
+          />
+        );
+      }),
+    )
+    .otherwise(() => null);
 
   return (
     <article className="rounded-2xl bg-transparent">
@@ -79,12 +106,12 @@ export function MainThreadMessage({
       />
 
       <div className="mt-1 flex items-center gap-2 pl-10">
-        {message.latestReply ? (
+        {message.latestReply && (
           <LatestReplyAvatars
             replies={replies.length ? replies : message.replyParticipants}
             usersById={usersById}
           />
-        ) : null}
+        )}
         <Button
           type="button"
           variant="ghost"
@@ -95,37 +122,15 @@ export function MainThreadMessage({
           <MessagesSquare className="size-3.5" />
           {replyCount ? displayedReplyCountText : t("studentCourseView.courseChat.reply")}
         </Button>
-        {latestReplyDistance ? (
+        {latestReplyDistance && (
           <span className="text-[11px] leading-4 text-neutral-500">{latestReplyDistance}</span>
-        ) : null}
+        )}
       </div>
 
       {isOpen && (
         <div className="mt-1.5 border-l border-primary-100 pl-3 md:ml-10">
           <div className="flex flex-col gap-2.5 pr-2">
-            {isLoadingReplies ? (
-              <MessagesSkeleton />
-            ) : replies.length ? (
-              replies.map((message, index) => {
-                const previousMessage = replies[index - 1];
-                const isChained =
-                  previousMessage?.userId === message.userId &&
-                  isSameMinute(new Date(previousMessage.createdAt), new Date(message.createdAt));
-
-                return (
-                  <ChatMessage
-                    key={message.id}
-                    message={message}
-                    users={users}
-                    usersById={usersById}
-                    currentUserId={currentUserId}
-                    canDeleteAnyMessage={canDeleteAnyMessage}
-                    showAvatar={!isChained}
-                    showMeta={!isChained}
-                  />
-                );
-              })
-            ) : null}
+            {repliesContent}
 
             {hasMoreReplies && (
               <Button
@@ -211,21 +216,4 @@ function areMessagePreviews(
   replies: CourseChatMessagePreview[] | CourseChatUserProfile[],
 ): replies is CourseChatMessagePreview[] {
   return replies.some((reply) => "user" in reply);
-}
-
-function getDateLocale(language: string) {
-  const locale = language.split("-")[0];
-
-  switch (locale) {
-    case "pl":
-      return pl;
-    case "de":
-      return de;
-    case "cs":
-      return cs;
-    case "lt":
-      return lt;
-    default:
-      return enUS;
-  }
 }

@@ -51,7 +51,7 @@ export function ChatMessageActions({
           onClick={() => toggleReaction.mutate({ messageId, reaction })}
         />
       ))}
-      {canReply ? (
+      {canReply && (
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -69,8 +69,8 @@ export function ChatMessageActions({
             <TooltipContent>{t("studentCourseView.courseChat.reply")}</TooltipContent>
           </Tooltip>
         </TooltipProvider>
-      ) : null}
-      {canDelete ? (
+      )}
+      {canDelete && (
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -89,7 +89,7 @@ export function ChatMessageActions({
             <TooltipContent>{t("studentCourseView.courseChat.deleteMessage")}</TooltipContent>
           </Tooltip>
         </TooltipProvider>
-      ) : null}
+      )}
     </div>
   );
 }

@@ -80,8 +80,9 @@ export class CourseChatController {
     @Param("courseId") courseId: UUIDType,
     @Body() body: CreateCourseChatMessageBody,
     @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser("tenantId") tenantId: UUIDType,
   ): Promise<BaseResponse<CourseChatMessageResponse>> {
-    return this.courseChatService.createMessage(courseId, userId, body);
+    return this.courseChatService.createMessage(courseId, userId, tenantId, body);
   }
 
   @Get("messages/:messageId/replies")

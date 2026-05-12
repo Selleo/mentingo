@@ -1,6 +1,7 @@
 import type { UUIDType } from "src/common";
 
 export type CourseChatUserMentionedData = {
+  tenantId: UUIDType;
   courseId: UUIDType;
   actorUserId: UUIDType;
   messageId: UUIDType;

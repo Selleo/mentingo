@@ -29,8 +29,11 @@ export function ReactionButton({
             aria-label={tooltip}
             className={cn(
               "inline-flex h-6 items-center gap-1 rounded-full border border-neutral-200 bg-background text-[11px] leading-none text-neutral-700 shadow-sm transition hover:border-primary-200 hover:bg-primary-50",
-              compact ? "w-6 justify-center p-0" : "px-1.5",
-              reactedByCurrentUser && "border-primary-300 bg-primary-50 text-primary-700",
+              {
+                "w-6 justify-center p-0": compact,
+                "px-1.5": !compact,
+                "border-primary-300 bg-primary-50 text-primary-700": reactedByCurrentUser,
+              },
             )}
             disabled={disabled}
             onClick={onClick}
@@ -38,7 +41,7 @@ export function ReactionButton({
             <span aria-hidden className="text-[12px] leading-none">
               {reaction}
             </span>
-            {count ? <span className="leading-none">{count}</span> : null}
+            {Boolean(count) && <span className="leading-none">{count}</span>}
           </button>
         </TooltipTrigger>
         <TooltipContent>{tooltip}</TooltipContent>

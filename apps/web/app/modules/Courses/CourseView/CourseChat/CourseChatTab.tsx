@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { match } from "ts-pattern";
 
 import {
   COURSE_CHAT_MESSAGES_PER_PAGE,
@@ -98,45 +99,48 @@ export function CourseChatTab({
       { onSuccess: options.onSuccess },
     );
   };
+  const mainFeedContent = match({ isLoadingMessages, hasMessages: messages.length > 0 })
+    .with({ isLoadingMessages: true }, () => <MainFeedSkeleton />)
+    .with({ hasMessages: true }, () =>
+      messages.map((message) => (
+        <MainThreadMessage
+          key={message.id}
+          message={message}
+          isOpen={message.id === openMessageId}
+          isLoadingReplies={isLoadingReplies && message.id === openMessageId}
+          hasMoreReplies={Boolean(hasMoreReplies)}
+          isFetchingMoreReplies={isFetchingMoreReplies}
+          replies={message.id === openMessageId ? replies : []}
+          users={chatUsers}
+          usersById={chatUsersById}
+          mentionableUsers={mentionableUsers}
+          currentUserId={currentUserId}
+          canDeleteAnyMessage={canDeleteAnyMessage}
+          isSendingReply={isCreatingMessage && message.id === openMessageId}
+          onToggle={() => toggleOpenMessage(message.id)}
+          onReplySubmit={handleCreateReply}
+          onLoadMoreReplies={() => fetchNextRepliesPage()}
+        />
+      )),
+    )
+    .otherwise(() => <EmptyState text={t("studentCourseView.courseChat.emptyThreads")} />);
 
   return (
     <Card className="overflow-hidden border-neutral-200 shadow-sm">
       <CardContent className="min-h-[560px] bg-neutral-50 p-0">
         <div className="flex min-w-0 flex-col">
           <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-3 py-4 md:px-5">
-            {isLoadingMessages ? (
-              <MainFeedSkeleton />
-            ) : messages.length ? (
-              messages.map((message) => (
-                <MainThreadMessage
-                  key={message.id}
-                  message={message}
-                  isOpen={message.id === openMessageId}
-                  isLoadingReplies={isLoadingReplies && message.id === openMessageId}
-                  hasMoreReplies={Boolean(hasMoreReplies)}
-                  isFetchingMoreReplies={isFetchingMoreReplies}
-                  replies={message.id === openMessageId ? replies : []}
-                  users={chatUsers}
-                  usersById={chatUsersById}
-                  mentionableUsers={mentionableUsers}
-                  currentUserId={currentUserId}
-                  canDeleteAnyMessage={canDeleteAnyMessage}
-                  isSendingReply={isCreatingMessage && message.id === openMessageId}
-                  onToggle={() => toggleOpenMessage(message.id)}
-                  onReplySubmit={handleCreateReply}
-                  onLoadMoreReplies={() => fetchNextRepliesPage()}
-                />
-              ))
-            ) : (
-              <EmptyState text={t("studentCourseView.courseChat.emptyThreads")} />
-            )}
+            {mainFeedContent}
           </div>
 
           {messagesResponse?.pagination && messagesResponse.pagination.totalItems > 0 && (
-            <CourseChatPagination
+            <Pagination
               totalItems={messagesResponse.pagination.totalItems}
+              itemsPerPage={COURSE_CHAT_MESSAGES_PER_PAGE}
               currentPage={messagesResponse.pagination.page}
+              canChangeItemsPerPage={false}
               onPageChange={setPage}
+              className="border-t border-neutral-200 bg-background px-3 py-2"
             />
           )}
 
@@ -152,26 +156,5 @@ export function CourseChatTab({
         </div>
       </CardContent>
     </Card>
-  );
-}
-
-function CourseChatPagination({
-  currentPage,
-  onPageChange,
-  totalItems,
-}: {
-  currentPage: number;
-  onPageChange: (page: number) => void;
-  totalItems: number;
-}) {
-  return (
-    <Pagination
-      totalItems={totalItems}
-      itemsPerPage={COURSE_CHAT_MESSAGES_PER_PAGE}
-      currentPage={currentPage}
-      canChangeItemsPerPage={false}
-      onPageChange={onPageChange}
-      className="border-t border-neutral-200 bg-background px-3 py-2"
-    />
   );
 }

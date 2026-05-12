@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { match } from "ts-pattern";
 
 import {
   useDeleteCourseChatMessage,
@@ -50,6 +51,13 @@ export function ChatMessage({
   const deleteMessage = useDeleteCourseChatMessage();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const reactions = message.reactions ?? [];
+  const messageBubbleClassName = match({ isDeleted, isOwnMessage })
+    .with(
+      { isDeleted: true },
+      () => "border border-dashed border-neutral-200 bg-neutral-100 text-neutral-500 shadow-none",
+    )
+    .with({ isOwnMessage: true }, () => "border border-primary-100 bg-primary-50 text-neutral-950")
+    .otherwise(() => "border border-neutral-100 bg-background text-neutral-950");
   const confirmDelete = () => {
     deleteMessage.mutate(message.id, {
       onSuccess: () => setDeleteDialogOpen(false),
@@ -69,16 +77,16 @@ export function ChatMessage({
         <div className="size-8 shrink-0" />
       )}
       <div className="relative w-full min-w-0 max-w-[calc(100%-2.75rem)] md:max-w-[min(36rem,86%)]">
-        {showMeta && !isDeleted ? (
+        {showMeta && !isDeleted && (
           <div className="mb-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5">
             <span className="body-sm-md text-neutral-950">{authorName}</span>
             <span className="text-[11px] leading-4 text-neutral-500">
               {format(new Date(message.createdAt), "dd.MM.yyyy HH:mm")}
             </span>
           </div>
-        ) : null}
+        )}
         <div className="relative w-full">
-          {!isDeleted && (onReply || canDeleteMessage) ? (
+          {!isDeleted && (onReply || canDeleteMessage) && (
             <ChatMessageActions
               messageId={message.id}
               reactions={reactions}
@@ -88,25 +96,22 @@ export function ChatMessage({
               onReply={onReply}
               onDelete={() => setDeleteDialogOpen(true)}
             />
-          ) : null}
+          )}
           <div
             className={cn(
               "inline-block max-w-full rounded-xl px-3 py-2 text-[0.875rem] leading-5 shadow-sm",
-              isDeleted
-                ? "rounded-tl-md border border-dashed border-neutral-200 bg-neutral-100 text-neutral-500 shadow-none"
-                : isOwnMessage
-                  ? "rounded-tl-md border border-primary-100 bg-primary-50 text-neutral-950"
-                  : "rounded-tl-md border border-neutral-100 bg-background text-neutral-950",
+              "rounded-tl-md",
+              messageBubbleClassName,
             )}
           >
-            <p className={cn("whitespace-pre-wrap break-words", isDeleted && "italic")}>
+            <p className={cn("whitespace-pre-wrap break-words", { italic: isDeleted })}>
               {isDeleted
                 ? t("studentCourseView.courseChat.deletedMessage")
                 : renderMessageContent(message.content, users)}
             </p>
           </div>
         </div>
-        {!isDeleted && reactions.length ? (
+        {!isDeleted && reactions.length > 0 && (
           <div className="mt-1 flex flex-wrap items-center gap-1">
             {reactions.map((reactionSummary) => (
               <ReactionButton
@@ -127,7 +132,7 @@ export function ChatMessage({
               />
             ))}
           </div>
-        ) : null}
+        )}
       </div>
       <DeleteCourseChatMessageDialog
         open={deleteDialogOpen}
@@ -155,7 +160,7 @@ function MessageAvatar({
   userName: string;
 }) {
   return (
-    <div className={cn("relative size-8 shrink-0 overflow-visible", hasMeta && "mt-4")}>
+    <div className={cn("relative size-8 shrink-0 overflow-visible", { "mt-4": hasMeta })}>
       <UserAvatar
         className="size-8 bg-neutral-100 ring-1 ring-neutral-200"
         userName={userName}
@@ -164,7 +169,10 @@ function MessageAvatar({
       <span
         className={cn(
           "absolute bottom-0 right-0 z-10 size-2.5 rounded-full border-[1.5px] border-background",
-          isOnline ? "bg-emerald-500" : "bg-neutral-300",
+          {
+            "bg-emerald-500": isOnline,
+            "bg-neutral-300": !isOnline,
+          },
         )}
       />
     </div>

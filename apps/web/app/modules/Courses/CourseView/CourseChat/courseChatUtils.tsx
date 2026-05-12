@@ -1,3 +1,5 @@
+import { match } from "ts-pattern";
+
 import type { CourseChatUser } from "~/api/queries/course-chat/courseChatTypes";
 
 export function getUserDisplayName(user: CourseChatUser) {
@@ -26,13 +28,13 @@ export function renderMessageContent(content: string, users: CourseChatUser[]) {
   const mentionRegex = new RegExp(`(${mentionLabels.map(escapeRegExp).join("|")})`, "g");
 
   return content.split(mentionRegex).map((part, index) =>
-    mentionLabels.includes(part) ? (
-      <span key={`${part}-${index}`} className="font-medium text-primary-700">
-        {part}
-      </span>
-    ) : (
-      part
-    ),
+    match(mentionLabels.includes(part))
+      .with(true, () => (
+        <span key={`${part}-${index}`} className="font-medium text-primary-700">
+          {part}
+        </span>
+      ))
+      .otherwise(() => part),
   );
 }
 

@@ -124,7 +124,7 @@ export const MentionTextarea = forwardRef<HTMLTextAreaElement, MentionTextareaPr
                   type="button"
                   className={cn(
                     "flex w-full items-center gap-3 rounded-lg p-2 text-left hover:bg-neutral-50",
-                    index === highlightedIndex && "bg-neutral-50",
+                    { "bg-neutral-50": index === highlightedIndex },
                   )}
                   onMouseDown={(event) => {
                     event.preventDefault();
