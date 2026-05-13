@@ -846,6 +846,7 @@ export interface InitVideoUploadBody {
     | "announcement"
     | "global_settings";
   relationshipType?: string;
+  linkToEntity?: boolean;
 }
 
 export interface InitVideoUploadResponse {
@@ -2957,6 +2958,104 @@ export interface GetAllAssignedDocumentsForLessonResponse {
     type: string;
     size: number;
   }[];
+}
+
+export interface GetAssetsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    fileName: string;
+    title: string;
+    contentType: string;
+    type: "image" | "video" | "pdf" | "presentation" | "document" | "other";
+    size: number | null;
+    originalFilename: string | null;
+    reference: string;
+    uploadedBy: string | null;
+    /** @format date-time */
+    createdAt: string;
+    usageCount: number;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface GetAssetUsagesResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    entityId: string;
+    entityType: "lesson" | "articles" | "news";
+    title: string;
+    relationshipType: string;
+    /** @format date-time */
+    createdAt: string;
+  }[];
+}
+
+export interface LinkAssetBody {
+  /** @format uuid */
+  entityId: string;
+  entityType: "lesson" | "articles" | "news";
+  relationshipType?: string;
+}
+
+export interface LinkAssetResponse {
+  data: {
+    /** @format uuid */
+    resourceId: string;
+    url: string;
+  };
+}
+
+export interface UnlinkAssetBody {
+  /** @format uuid */
+  entityId: string;
+  entityType: "lesson" | "articles" | "news";
+  relationshipType?: string;
+}
+
+export interface UnlinkAssetResponse {
+  data: {
+    /** @format uuid */
+    resourceId: string;
+    deletedUsages: number;
+  };
+}
+
+export interface UploadAssetBody {
+  /** @format binary */
+  file?: File;
+  entityType: "lesson" | "articles" | "news";
+  /** @format uuid */
+  entityId?: string;
+  /** @format uuid */
+  contextId?: string;
+  /** @default "en" */
+  language: "en" | "pl" | "de" | "lt" | "cs";
+  title: string;
+  description: string;
+}
+
+export interface UploadAssetResponse {
+  data: {
+    /** @format uuid */
+    resourceId: string;
+    url: string;
+    fileUrl: string;
+  };
+}
+
+export interface DeleteAssetResponse {
+  data: {
+    message: string;
+    deletedUsages: number;
+  };
 }
 
 export interface GetChapterWithLessonResponse {
@@ -8739,6 +8838,125 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<void, any>({
         path: `/api/ingestion/${documentLinkId}`,
         method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ResourceLibraryControllerGetAssets
+     * @request GET:/api/resource-library/assets
+     */
+    resourceLibraryControllerGetAssets: (
+      query?: {
+        /** @min 1 */
+        page?: number;
+        /** @min 1 */
+        perPage?: number;
+        search?: string;
+        type?: "image" | "video" | "pdf" | "presentation" | "document" | "other";
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAssetsResponse, any>({
+        path: `/api/resource-library/assets`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ResourceLibraryControllerGetAssetUsages
+     * @request GET:/api/resource-library/assets/{id}/usages
+     */
+    resourceLibraryControllerGetAssetUsages: (
+      id: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAssetUsagesResponse, any>({
+        path: `/api/resource-library/assets/${id}/usages`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ResourceLibraryControllerLinkAsset
+     * @request POST:/api/resource-library/assets/{id}/link
+     */
+    resourceLibraryControllerLinkAsset: (
+      id: string,
+      data: LinkAssetBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<LinkAssetResponse, any>({
+        path: `/api/resource-library/assets/${id}/link`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ResourceLibraryControllerUnlinkAsset
+     * @request POST:/api/resource-library/assets/{id}/unlink
+     */
+    resourceLibraryControllerUnlinkAsset: (
+      id: string,
+      data: UnlinkAssetBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UnlinkAssetResponse, any>({
+        path: `/api/resource-library/assets/${id}/unlink`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ResourceLibraryControllerUploadAsset
+     * @request POST:/api/resource-library/assets/upload
+     */
+    resourceLibraryControllerUploadAsset: (data: UploadAssetBody, params: RequestParams = {}) =>
+      this.request<UploadAssetResponse, any>({
+        path: `/api/resource-library/assets/upload`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ResourceLibraryControllerDeleteAsset
+     * @request DELETE:/api/resource-library/assets/{id}
+     */
+    resourceLibraryControllerDeleteAsset: (id: string, params: RequestParams = {}) =>
+      this.request<DeleteAssetResponse, any>({
+        path: `/api/resource-library/assets/${id}`,
+        method: "DELETE",
+        format: "json",
         ...params,
       }),
 

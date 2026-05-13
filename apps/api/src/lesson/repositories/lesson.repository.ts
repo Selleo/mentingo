@@ -354,14 +354,14 @@ export class LessonRepository {
         entityType: resourceEntity.entityType,
       })
       .from(resources)
-      .innerJoin(resourceEntity, eq(resourceEntity.resourceId, resources.id))
-      .where(
+      .leftJoin(
+        resourceEntity,
         and(
-          eq(resources.id, resourceId),
+          eq(resourceEntity.resourceId, resources.id),
           eq(resourceEntity.entityType, ENTITY_TYPE.LESSON),
-          eq(resources.archived, false),
         ),
-      );
+      )
+      .where(and(eq(resources.id, resourceId), eq(resources.archived, false)));
 
     return resource;
   }

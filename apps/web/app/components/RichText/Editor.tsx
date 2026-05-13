@@ -8,9 +8,11 @@ import { RICH_TEXT_HANDLES } from "../../../e2e/data/common/handles";
 
 import { detectPresentationProvider } from "./extensions/utils/presentation";
 import { extractUrlFromClipboard } from "./extensions/utils/video";
-import { baseEditorPlugins, contentEditorPlugins } from "./plugins";
+import { baseEditorPlugins, getContentEditorPlugins } from "./plugins";
 import { defaultClasses } from "./styles";
 import EditorToolbar from "./toolbar/EditorToolbar";
+
+import type { AssetLibraryConfig } from "./components/AssetLibraryDialog";
 
 type EditorProps = {
   content?: string;
@@ -24,6 +26,7 @@ type EditorProps = {
   lessonId?: string;
   allowFiles?: boolean;
   acceptedFileTypes?: readonly string[];
+  assetLibrary?: AssetLibraryConfig;
   variant?: "base" | "content";
 };
 
@@ -39,13 +42,14 @@ const Editor = ({
   parentClassName,
   allowFiles = false,
   acceptedFileTypes = ALLOWED_LESSON_IMAGE_FILE_TYPES,
+  assetLibrary,
   variant = "content",
 }: EditorProps) => {
   const editorRef = useRef<TiptapEditor | null>(null);
   const lastEmittedContentRef = useRef(content ?? "");
 
   const extensions = useMemo(
-    () => (variant === "base" ? baseEditorPlugins : contentEditorPlugins),
+    () => (variant === "base" ? baseEditorPlugins : getContentEditorPlugins()),
     [variant],
   );
 
@@ -54,12 +58,13 @@ const Editor = ({
       const activeEditor = editorRef.current;
       const files = Array.from(event.dataTransfer?.files ?? []);
       if (!files.length) return false;
+      if (!allowFiles || !onUpload) return false;
 
       event.preventDefault();
-      void Promise.allSettled(files.map((file) => onUpload?.(file, activeEditor)));
+      void Promise.allSettled(files.map((file) => onUpload(file, activeEditor)));
       return true;
     },
-    [onUpload],
+    [allowFiles, onUpload],
   );
 
   const handlePaste = useCallback(
@@ -68,8 +73,10 @@ const Editor = ({
       const file = event.clipboardData?.files[0];
 
       if (file) {
+        if (!allowFiles || !onUpload) return false;
+
         event.preventDefault();
-        void onUpload?.(file, activeEditor);
+        void onUpload(file, activeEditor);
         return true;
       }
 
@@ -95,7 +102,7 @@ const Editor = ({
       activeEditor?.chain().focus().setVideoEmbed({ src: pastedUrl, sourceType: "external" }).run();
       return true;
     },
-    [onUpload],
+    [allowFiles, onUpload],
   );
 
   const handleKeyDown = useCallback(
@@ -164,9 +171,8 @@ const Editor = ({
     >
       <EditorToolbar
         editor={editor}
-        allowFiles={allowFiles}
         acceptedFileTypes={acceptedFileTypes}
-        onUpload={onUpload}
+        assetLibrary={assetLibrary}
       />
       <EditorContent
         data-testid={RICH_TEXT_HANDLES.CONTENT}

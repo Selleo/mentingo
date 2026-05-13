@@ -27,6 +27,8 @@ import {
 } from "~/components/RichText/extensions/presentation";
 import { VideoEmbedEditor, VideoEmbedViewer } from "~/components/RichText/extensions/video";
 
+import type { RichTextResourceNodeOptions } from "./extensions/utils/resourceNode";
+
 const HeadingWithId = Heading.extend({
   name: "heading",
   addAttributes() {
@@ -94,7 +96,7 @@ const basePlugins = [
 
 export const baseEditorPlugins = [...basePlugins];
 
-export const contentEditorPlugins = [
+export const getContentEditorPlugins = (options?: RichTextResourceNodeOptions) => [
   ...basePlugins,
   Placeholder.configure({
     includeChildren: true,
@@ -102,12 +104,14 @@ export const contentEditorPlugins = [
     placeholder: ({ node }) =>
       node.type.name === "paragraph" ? i18n.t("richTextEditor.placeholder.lineHint") : "",
   }),
-  DownloadableFileEmbedEditor,
+  DownloadableFileEmbedEditor.configure(options),
   LoadingAiAssetEditor,
-  PdfPreviewEmbedEditor,
-  PresentationEmbedEditor,
-  VideoEmbedEditor,
+  PdfPreviewEmbedEditor.configure(options),
+  PresentationEmbedEditor.configure(options),
+  VideoEmbedEditor.configure(options),
 ];
+
+export const contentEditorPlugins = getContentEditorPlugins();
 
 export const viewerPlugins = [
   ...basePlugins,

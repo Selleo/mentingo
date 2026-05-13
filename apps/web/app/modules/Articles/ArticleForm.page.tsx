@@ -204,6 +204,7 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
             resource: ENTITY_TYPES.ARTICLES,
             entityId: articleId,
             entityType: ENTITY_TYPES.ARTICLES,
+            linkToEntity: false,
           }),
       }),
     uploadVideo,
@@ -398,6 +399,11 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
                               allowFiles
                               acceptedFileTypes={RICH_TEXT_ACCEPTED_FILE_TYPES}
                               onUpload={handleFileUpload}
+                              assetLibrary={{
+                                entityType: ENTITY_TYPES.ARTICLES,
+                                entityId: articleId,
+                                language: articleLanguage,
+                              }}
                               onChange={field.onChange}
                             />
                             <RichTextUploadQueue

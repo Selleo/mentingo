@@ -59,6 +59,7 @@ import { QuestionsModule } from "./questions/question.module";
 import { AppThrottlerGuard } from "./rate-limit/app-throttler.guard";
 import { RedisThrottlerStorage } from "./rate-limit/redis-throttler.storage";
 import { ReportModule } from "./report/report.module";
+import { ResourceLibraryModule } from "./resource-library/resource-library.module";
 import { S3Module } from "./s3/s3.module";
 import { ScormModule } from "./scorm/scorm.module";
 import { SentryInterceptor } from "./sentry/sentry.interceptor";
@@ -146,6 +147,7 @@ import type { RedisClient } from "src/redis";
     EventsModule,
     StatisticsModule,
     ReportModule,
+    ResourceLibraryModule,
     CacheModule,
     RedisClientsModule,
     QueueModule,

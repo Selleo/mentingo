@@ -2703,6 +2703,39 @@
         "h3": "Nadpis 3",
         "h4": "Nadpis 4"
       },
+      "bold": {
+        "tooltip": "Tučné: zvýrazní vybraný text tučně"
+      },
+      "italic": {
+        "tooltip": "Kurzíva: nastaví vybraný text kurzívou"
+      },
+      "strikethrough": {
+        "tooltip": "Přeškrtnutí: přeškrtne vybraný text"
+      },
+      "bulletList": {
+        "tooltip": "Seznam s odrážkami: spustí seznam s odrážkami"
+      },
+      "orderedList": {
+        "tooltip": "Číslovaný seznam: spustí číslovaný seznam"
+      },
+      "taskList": {
+        "tooltip": "Kontrolní seznam: přidá kontrolní seznam"
+      },
+      "blockquote": {
+        "tooltip": "Citace: formátuje text jako blokovou citaci"
+      },
+      "codeBlock": {
+        "tooltip": "Blok kódu: formátuje text jako kód"
+      },
+      "horizontalRule": {
+        "tooltip": "Vodorovná čára: vloží oddělovací čáru"
+      },
+      "undo": {
+        "tooltip": "Zpět: vrátí poslední změnu"
+      },
+      "redo": {
+        "tooltip": "Znovu: znovu provede poslední vrácenou změnu"
+      },
       "link": {
         "tooltip": "Odkaz: Z vybraného textu udělá hypertextový odkaz",
         "dialog": {
@@ -2717,7 +2750,10 @@
       },
       "upload": {
         "uploadFailed": "Nahrání souboru se nezdařilo",
-        "tooltip": "Upload: Umožňuje nahrát soubor"
+        "tooltip": "Nahrát: umožňuje nahrát soubor"
+      },
+      "assetLibrary": {
+        "tooltip": "Knihovna souborů: vloží dříve nahraný soubor"
       }
     }
   },
@@ -2770,6 +2806,42 @@
     },
     "loadingAiAsset": {
       "processing": "Zdroj se právě zpracovává"
+    },
+    "assetLibrary": {
+      "title": "Assets library",
+      "description": "Find, upload, insert, or delete files used in rich text content.",
+      "searchPlaceholder": "Search by filename or title...",
+      "upload": "Upload asset",
+      "insert": "Insert",
+      "delete": "Delete",
+      "loading": "Loading assets...",
+      "loadingUsages": "Loading usages...",
+      "disabledUntilSaved": "Save this content before inserting or deleting existing assets. Uploading a new asset is still available.",
+      "empty": {
+        "title": "No assets found",
+        "description": "Upload a file or adjust the search to find existing assets."
+      },
+      "types": {
+        "image": "Image",
+        "video": "Video",
+        "pdf": "PDF",
+        "presentation": "Presentation",
+        "document": "Document",
+        "other": "Other"
+      },
+      "entities": {
+        "lesson": "Lesson",
+        "articles": "Article",
+        "news": "News"
+      },
+      "deleteConfirmation": {
+        "title": "Delete {{name}}?",
+        "description": "This removes matching embeds and links from every listed content item and archives the asset.",
+        "usages": "Known usages",
+        "noUsages": "No usages were found."
+      },
+      "usageCount_one": "{{count}} usage",
+      "usageCount_other": "{{count}} usages"
     }
   },
   "pages": {

@@ -2764,6 +2764,39 @@
         "h3": "Heading 3",
         "h4": "Heading 4"
       },
+      "bold": {
+        "tooltip": "Bold: makes selected text bold"
+      },
+      "italic": {
+        "tooltip": "Italic: italicizes selected text"
+      },
+      "strikethrough": {
+        "tooltip": "Strikethrough: adds a line through selected text"
+      },
+      "bulletList": {
+        "tooltip": "Bullet list: starts a bulleted list"
+      },
+      "orderedList": {
+        "tooltip": "Numbered list: starts a numbered list"
+      },
+      "taskList": {
+        "tooltip": "Checklist: adds a checklist"
+      },
+      "blockquote": {
+        "tooltip": "Quote: formats text as a blockquote"
+      },
+      "codeBlock": {
+        "tooltip": "Code block: formats text as code"
+      },
+      "horizontalRule": {
+        "tooltip": "Horizontal rule: inserts a divider line"
+      },
+      "undo": {
+        "tooltip": "Undo: reverts the last change"
+      },
+      "redo": {
+        "tooltip": "Redo: reapplies the last undone change"
+      },
       "link": {
         "tooltip": "Link: Makes selected text a hyperlink",
         "dialog": {
@@ -2779,6 +2812,9 @@
       "upload": {
         "uploadFailed": "File upload failed",
         "tooltip": "Upload: Allows you to upload file"
+      },
+      "assetLibrary": {
+        "tooltip": "Assets library: insert a previously uploaded file"
       }
     }
   },
@@ -2831,6 +2867,42 @@
     },
     "loadingAiAsset": {
       "processing": "Resource is currently processing"
+    },
+    "assetLibrary": {
+      "title": "Assets library",
+      "description": "Find, upload, insert, or delete files used in rich text content.",
+      "searchPlaceholder": "Search by filename or title...",
+      "upload": "Upload asset",
+      "insert": "Insert",
+      "delete": "Delete",
+      "loading": "Loading assets...",
+      "loadingUsages": "Loading usages...",
+      "disabledUntilSaved": "Save this content before inserting or deleting existing assets. Uploading a new asset is still available.",
+      "empty": {
+        "title": "No assets found",
+        "description": "Upload a file or adjust the search to find existing assets."
+      },
+      "types": {
+        "image": "Image",
+        "video": "Video",
+        "pdf": "PDF",
+        "presentation": "Presentation",
+        "document": "Document",
+        "other": "Other"
+      },
+      "entities": {
+        "lesson": "Lesson",
+        "articles": "Article",
+        "news": "News"
+      },
+      "deleteConfirmation": {
+        "title": "Delete {{name}}?",
+        "description": "This removes matching embeds and links from every listed content item and archives the asset.",
+        "usages": "Known usages",
+        "noUsages": "No usages were found."
+      },
+      "usageCount_one": "{{count}} usage",
+      "usageCount_other": "{{count}} usages"
     }
   },
   "pages": {
@@ -3505,7 +3577,6 @@
         "to": "To date"
       }
     },
-
     "description": "Timeline of changes across the platform, grouped as a simple expandable feed.",
     "breadcrumbs": {
       "activityLogs": "Activity Logs"
