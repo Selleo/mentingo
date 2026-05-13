@@ -123,6 +123,16 @@
       "success": "Plik został pomyślnie usunięty"
     }
   },
+  "resourceLibrary": {
+    "toast": {
+      "assetDeletedSuccessfully": "Zasób został pomyślnie usunięty"
+    },
+    "error": {
+      "fileRequired": "Plik jest wymagany",
+      "assetNotFound": "Zasób nie został znaleziony",
+      "entityNotFound": "Nie znaleziono encji"
+    }
+  },
   "adminScorm": {
     "header": "Prześlij SCORM",
     "subHeader": "Prześlij swój plik SCORM w formacie .zip.",

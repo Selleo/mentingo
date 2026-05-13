@@ -122,6 +122,16 @@
       "success": "File deleted successfully"
     }
   },
+  "resourceLibrary": {
+    "toast": {
+      "assetDeletedSuccessfully": "Asset deleted successfully"
+    },
+    "error": {
+      "fileRequired": "File is required",
+      "assetNotFound": "Asset not found",
+      "entityNotFound": "Entity not found"
+    }
+  },
   "adminScorm": {
     "header": "Upload SCORM",
     "subHeader": "Upload your SCORM .zip file.",

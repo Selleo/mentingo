@@ -122,6 +122,16 @@
       "success": "Soubor byl úspěšně smazán"
     }
   },
+  "resourceLibrary": {
+    "toast": {
+      "assetDeletedSuccessfully": "Zdroj byl úspěšně smazán"
+    },
+    "error": {
+      "fileRequired": "Soubor je povinný",
+      "assetNotFound": "Zdroj nebyl nalezen",
+      "entityNotFound": "Prostředek nebyl nalezen"
+    }
+  },
   "adminScorm": {
     "header": "Nahrajte SCORM",
     "subHeader": "Nahrajte svůj soubor .zip SCORM.",

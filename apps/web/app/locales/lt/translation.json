@@ -122,6 +122,16 @@
       "success": "Failas sėkmingai ištrintas"
     }
   },
+  "resourceLibrary": {
+    "toast": {
+      "assetDeletedSuccessfully": "Išteklius sėkmingai ištrintas"
+    },
+    "error": {
+      "fileRequired": "Failas yra būtinas",
+      "assetNotFound": "Išteklius nerastas",
+      "entityNotFound": "Subjektas nerastas"
+    }
+  },
   "adminScorm": {
     "header": "Įkelti SCORM",
     "subHeader": "Įkelkite SCORM .zip failą.",

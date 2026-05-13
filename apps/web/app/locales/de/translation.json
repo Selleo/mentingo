@@ -122,6 +122,16 @@
       "success": "Datei erfolgreich gelöscht"
     }
   },
+  "resourceLibrary": {
+    "toast": {
+      "assetDeletedSuccessfully": "Ressource erfolgreich gelöscht"
+    },
+    "error": {
+      "fileRequired": "Datei ist erforderlich",
+      "assetNotFound": "Ressource nicht gefunden",
+      "entityNotFound": "Entität nicht gefunden"
+    }
+  },
   "adminScorm": {
     "header": "Laden Sie SCORM hoch",
     "subHeader": "Laden Sie Ihre SCORM-ZIP-Datei hoch.",
