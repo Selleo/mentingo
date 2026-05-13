@@ -94,7 +94,7 @@ for (const resourceCase of resourceCases) {
   );
 }
 
-test("admin can save content lesson with multiple files in one upload", async ({
+test("admin can save content lesson with multiple files", async ({
   cleanup,
   factories,
   withWorkerPage,

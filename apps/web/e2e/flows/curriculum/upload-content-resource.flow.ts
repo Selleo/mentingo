@@ -21,7 +21,9 @@ const uploadAndInsertAsset = async (
   const dialog = page.getByTestId(RICH_TEXT_HANDLES.ASSET_LIBRARY_DIALOG);
   await dialog.waitFor();
 
-  await page.getByTestId(RICH_TEXT_HANDLES.ASSET_LIBRARY_UPLOAD_INPUT).setInputFiles(filePath);
+  const uploadInput = dialog.getByTestId(RICH_TEXT_HANDLES.ASSET_LIBRARY_UPLOAD_INPUT);
+  await uploadInput.waitFor({ state: "attached", timeout: 15_000 });
+  await uploadInput.setInputFiles(filePath);
 
   const assetRow = dialog
     .locator('[data-testid^="rich-text-asset-library-row-"]')
