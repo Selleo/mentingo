@@ -1,11 +1,15 @@
 import {
+  buildRelativeResourceUrl,
+  buildTenantResourceUrl,
   extractResourceIdsFromRichText,
   getLocalizedRichTextEntries,
   removeResourceReferencesFromRichText,
+  replaceResourceReferencesInRichText,
 } from "../resource-library.utils";
 
 const resourceId = "11111111-1111-4111-8111-111111111111";
 const otherResourceId = "22222222-2222-4222-8222-222222222222";
+const replacementResourceId = "33333333-3333-4333-8333-333333333333";
 
 describe("resource-library utils", () => {
   describe("extractResourceIdsFromRichText", () => {
@@ -59,6 +63,68 @@ describe("resource-library utils", () => {
         content: html,
         hasChanged: false,
       });
+    });
+  });
+
+  describe("replaceResourceReferencesInRichText", () => {
+    it("replaces resource ids in resource URLs and data attributes", () => {
+      const html = [
+        `<a href="/api/lesson/lesson-resource/${resourceId}" data-resource-id="${resourceId}">Download</a>`,
+        `<div data-src="/api/articles/articles-resource/${resourceId}"></div>`,
+        `<span>/api/news/news-resource/${resourceId}</span>`,
+        `<a href="/api/lesson/lesson-resource/${otherResourceId}">Keep</a>`,
+      ].join("");
+
+      const result = replaceResourceReferencesInRichText(
+        html,
+        new Map([[resourceId, replacementResourceId]]),
+      );
+
+      expect(result).not.toContain(resourceId);
+      expect(result).toContain(`/api/lesson/lesson-resource/${replacementResourceId}`);
+      expect(result).toContain(`data-resource-id="${replacementResourceId}"`);
+      expect(result).toContain(`/api/articles/articles-resource/${replacementResourceId}`);
+      expect(result).toContain(`/api/news/news-resource/${replacementResourceId}`);
+      expect(result).toContain(otherResourceId);
+    });
+
+    it("does not replace unrelated UUID text", () => {
+      const html = `<p>${resourceId}</p>`;
+
+      expect(
+        replaceResourceReferencesInRichText(html, new Map([[resourceId, replacementResourceId]])),
+      ).toBe(html);
+    });
+
+    it("can rewrite absolute source tenant URLs to relative target resource URLs", () => {
+      const html = `<a href="https://source.localhost/api/lesson/lesson-resource/${resourceId}" data-resource-id="${resourceId}">Download</a>`;
+
+      const result = replaceResourceReferencesInRichText(
+        html,
+        new Map([[resourceId, replacementResourceId]]),
+        { buildResourceUrl: buildRelativeResourceUrl },
+      );
+
+      expect(result).toContain(`/api/lesson/lesson-resource/${replacementResourceId}`);
+      expect(result).not.toContain("https://source.localhost");
+    });
+
+    it("can rewrite absolute source tenant URLs to absolute target tenant resource URLs", () => {
+      const html = `<a href="https://tenant1.lms.localhost/api/lesson/lesson-resource/${resourceId}" data-resource-id="${resourceId}">Download</a>`;
+
+      const result = replaceResourceReferencesInRichText(
+        html,
+        new Map([[resourceId, replacementResourceId]]),
+        {
+          buildResourceUrl: (nextResourceId, route) =>
+            buildTenantResourceUrl("https://tenant2.lms.localhost", nextResourceId, route),
+        },
+      );
+
+      expect(result).toContain(
+        `https://tenant2.lms.localhost/api/lesson/lesson-resource/${replacementResourceId}`,
+      );
+      expect(result).not.toContain("https://tenant1.lms.localhost");
     });
   });
 

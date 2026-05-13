@@ -32,6 +32,25 @@ const RESOURCE_URL_ID_ATTRIBUTE_SELECTORS = ["href", "src", "data-src"] as const
 const RESOURCE_ID_PATTERN = /^[0-9a-fA-F-]{36}$/;
 const RESOURCE_URL_ID_PATTERN =
   /(?:lesson-resource|articles-resource|news-resource)\/([0-9a-fA-F-]{36})(?:[^0-9a-fA-F-]|$)/g;
+const RESOURCE_URL_ID_REPLACE_PATTERN =
+  /((?:(?:https?:\/\/[^/\s"'<>]+)?\/api\/(?:lesson|articles|news)\/)?(lesson-resource|articles-resource|news-resource)\/)([0-9a-fA-F-]{36})(?=[^0-9a-fA-F-]|$)/g;
+const RESOURCE_ID_ATTRIBUTE_REPLACE_PATTERN = /(data-resource-id=["'])([0-9a-fA-F-]{36})(["'])/g;
+const RESOURCE_ROUTE_API_PATHS = {
+  "lesson-resource": "/api/lesson/lesson-resource",
+  "articles-resource": "/api/articles/articles-resource",
+  "news-resource": "/api/news/news-resource",
+} as const;
+
+type ResourceRoute = keyof typeof RESOURCE_ROUTE_API_PATHS;
+
+export const buildRelativeResourceUrl = (resourceId: string, route: ResourceRoute) =>
+  `${RESOURCE_ROUTE_API_PATHS[route]}/${resourceId}`;
+
+export const buildTenantResourceUrl = (
+  tenantHost: string,
+  resourceId: string,
+  route: ResourceRoute,
+) => `${tenantHost.replace(/\/+$/, "")}${buildRelativeResourceUrl(resourceId, route)}`;
 
 const getResourceIdUrlPattern = (resourceId: string) =>
   new RegExp(
@@ -106,6 +125,33 @@ export const removeResourceReferencesFromRichText = (
     content: $.html(bodyChildren.length ? bodyChildren : $.root().children()),
     hasChanged,
   };
+};
+
+export const replaceResourceReferencesInRichText = (
+  content: string,
+  resourceIdMap: Map<string, string>,
+  options: {
+    buildResourceUrl?: (resourceId: string, route: ResourceRoute) => string;
+  } = {},
+) => {
+  if (!resourceIdMap.size) return content;
+
+  const replaceResourceId = (resourceId: string) => resourceIdMap.get(resourceId) ?? resourceId;
+
+  return content
+    .replace(
+      RESOURCE_URL_ID_REPLACE_PATTERN,
+      (_match, prefix: string, route: ResourceRoute, resourceId: string) => {
+        const nextResourceId = replaceResourceId(resourceId);
+
+        return options.buildResourceUrl?.(nextResourceId, route) ?? `${prefix}${nextResourceId}`;
+      },
+    )
+    .replace(
+      RESOURCE_ID_ATTRIBUTE_REPLACE_PATTERN,
+      (_match, prefix: string, resourceId: string, suffix: string) =>
+        `${prefix}${replaceResourceId(resourceId)}${suffix}`,
+    );
 };
 
 export const getLocalizedRichTextEntries = (localizedContent: unknown): [string, string][] => {
