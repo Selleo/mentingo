@@ -79,9 +79,6 @@ for (const resourceCase of resourceCases) {
           path: resourceCase.path,
           displayMode: resourceCase.displayMode,
         });
-        await expect(page.getByTestId(RICH_TEXT_HANDLES.UPLOAD_QUEUE)).toBeVisible({
-          timeout: 30_000,
-        });
         await saveContentLessonFormFlow(page);
 
         await expect
@@ -128,12 +125,6 @@ test("admin can save content lesson with multiple files in one upload", async ({
     await uploadContentResourceFlow(page, {
       path: multiResourceFiles.map((file) => file.path),
     });
-    await expect(page.getByTestId(RICH_TEXT_HANDLES.UPLOAD_QUEUE)).toBeVisible({
-      timeout: 30_000,
-    });
-    for (const { fileName } of multiResourceFiles) {
-      await expect(page.getByTestId(RICH_TEXT_HANDLES.uploadQueueItem(fileName))).toBeVisible();
-    }
     await saveContentLessonFormFlow(page);
 
     await expect

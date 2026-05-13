@@ -103,7 +103,9 @@ export const AssetLibraryDialog = ({
   const { mutateAsync: deleteAsset, isPending: isDeletingAsset } = useDeleteResourceLibraryAsset();
 
   const hasEntity = Boolean(entityId);
-  const canUploadToLibrary = Boolean(entityId || contextId);
+  const canUseLibrary = Boolean(entityId || contextId);
+  const canUploadToLibrary = canUseLibrary;
+  const canInsertAsset = canUseLibrary;
   const assets = assetsResponse?.data ?? [];
   const usages = usagesResponse?.data ?? [];
   const totalAssets = assetsResponse?.pagination.totalItems ?? 0;
@@ -181,7 +183,7 @@ export const AssetLibraryDialog = ({
   });
 
   const handleInsert = async (asset: ResourceLibraryAsset) => {
-    if (!entityId) {
+    if (!canInsertAsset) {
       toast({
         description: t("richText.assetLibrary.disabledUntilSaved"),
         variant: "destructive",
@@ -259,7 +261,7 @@ export const AssetLibraryDialog = ({
             />
           ) : (
             <div className="flex min-h-0 flex-col gap-4">
-              {!hasEntity && (
+              {!canUseLibrary && (
                 <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
                   {t("richText.assetLibrary.disabledUntilSaved")}
                 </div>
@@ -304,7 +306,8 @@ export const AssetLibraryDialog = ({
               <AssetLibraryAssetList
                 assets={assets}
                 isLoading={isLoadingAssets}
-                hasEntity={hasEntity}
+                canInsert={canInsertAsset}
+                canDelete={hasEntity}
                 isMutating={isMutating}
                 onInsert={(asset) => void handleInsert(asset)}
                 onDelete={setAssetToDelete}

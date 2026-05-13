@@ -8,7 +8,8 @@ import type { ResourceLibraryAsset } from "~/api/queries/useResourceLibraryAsset
 type AssetLibraryAssetListProps = {
   assets: ResourceLibraryAsset[];
   isLoading: boolean;
-  hasEntity: boolean;
+  canInsert: boolean;
+  canDelete: boolean;
   isMutating: boolean;
   onInsert: (asset: ResourceLibraryAsset) => void;
   onDelete: (asset: ResourceLibraryAsset) => void;
@@ -17,7 +18,8 @@ type AssetLibraryAssetListProps = {
 export const AssetLibraryAssetList = ({
   assets,
   isLoading,
-  hasEntity,
+  canInsert,
+  canDelete,
   isMutating,
   onInsert,
   onDelete,
@@ -51,7 +53,8 @@ export const AssetLibraryAssetList = ({
         <AssetLibraryAssetItem
           key={asset.id}
           asset={asset}
-          hasEntity={hasEntity}
+          canInsert={canInsert}
+          canDelete={canDelete}
           isMutating={isMutating}
           onInsert={onInsert}
           onDelete={onDelete}

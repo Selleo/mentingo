@@ -12,7 +12,8 @@ import type { ResourceLibraryAsset } from "~/api/queries/useResourceLibraryAsset
 
 type AssetLibraryAssetItemProps = {
   asset: ResourceLibraryAsset;
-  hasEntity: boolean;
+  canInsert: boolean;
+  canDelete: boolean;
   isMutating: boolean;
   onInsert: (asset: ResourceLibraryAsset) => void;
   onDelete: (asset: ResourceLibraryAsset) => void;
@@ -20,7 +21,8 @@ type AssetLibraryAssetItemProps = {
 
 export const AssetLibraryAssetItem = ({
   asset,
-  hasEntity,
+  canInsert,
+  canDelete,
   isMutating,
   onInsert,
   onDelete,
@@ -55,7 +57,7 @@ export const AssetLibraryAssetItem = ({
           type="button"
           size="sm"
           variant="outline"
-          disabled={!hasEntity || isMutating}
+          disabled={!canInsert || isMutating}
           onClick={() => onInsert(asset)}
         >
           {t("richText.assetLibrary.insert")}
@@ -65,7 +67,7 @@ export const AssetLibraryAssetItem = ({
           type="button"
           size="icon"
           variant="ghost"
-          disabled={!hasEntity || isMutating}
+          disabled={!canDelete || isMutating}
           aria-label={t("richText.assetLibrary.delete")}
           onClick={() => onDelete(asset)}
         >
