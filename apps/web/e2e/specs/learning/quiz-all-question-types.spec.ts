@@ -30,7 +30,7 @@ test("student can submit a quiz containing every rendered question type", async 
     shouldKeepCourseAfterTest: () => quizWasSubmitted,
     withWorkerPage,
   });
-  const { quizLesson, textBlankAnswer, dndBlankAnswer } = lessons;
+  const { quizLesson, textBlankAnswer, dndBlankAnswer, dndBlankAnswerId } = lessons;
 
   await withWorkerPage(
     USER_ROLE.student,
@@ -47,7 +47,11 @@ test("student can submit a quiz containing every rendered question type", async 
 
       const expectedQuizAttemptCount = (await getUserQuizAttemptCountFlow(apiClient)) + 1;
 
-      await answerAllRenderedQuizQuestionTypesFlow(page, { dndBlankAnswer, textBlankAnswer });
+      await answerAllRenderedQuizQuestionTypesFlow(page, {
+        dndBlankAnswer,
+        dndBlankAnswerId,
+        textBlankAnswer,
+      });
 
       await submitQuizFlow(page);
       quizWasSubmitted = true;
