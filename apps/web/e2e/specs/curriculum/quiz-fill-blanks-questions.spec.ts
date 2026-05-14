@@ -41,16 +41,16 @@ test("admin can create fill-in-the-blanks quiz questions", async ({
     await fillFillBlanksQuestionFlow(page, {
       questionIndex: 0,
       title: "Fill text blanks",
-      sentence: "The capital of France is Paris.",
-      words: ["Paris"],
+      sentence: "The word appears twice in this sentence.",
+      words: ["word", "word"],
     });
 
     await addQuizQuestionFlow(page, QuestionType.FILL_IN_THE_BLANKS_DND, 1);
     await fillFillBlanksQuestionFlow(page, {
       questionIndex: 1,
       title: "Fill drag blanks",
-      sentence: "Drag the correct word into the sentence.",
-      words: ["correct"],
+      sentence: "Drag the same word into both blanks.",
+      words: ["same", "same"],
     });
 
     await saveQuizLessonFormFlow(page);

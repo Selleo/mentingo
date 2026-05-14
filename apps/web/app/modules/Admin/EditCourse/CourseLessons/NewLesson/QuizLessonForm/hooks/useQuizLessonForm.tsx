@@ -27,6 +27,11 @@ import type { QuizLessonFormValues } from "../validators/quizLessonFormSchema";
 import type { SupportedLanguages } from "@repo/shared";
 import type { Chapter, Lesson } from "~/modules/Admin/EditCourse/EditCourse.types";
 
+const FILL_BLANK_BUTTON_REGEX = /<button\b[^>]*>[\s\S]*?<\/button>/g;
+
+const getHtmlAttribute = (html: string, attribute: string) =>
+  new RegExp(`${attribute}="([^"]*)"`).exec(html)?.[1] ?? "";
+
 type QuizLessonFormProps = {
   chapterToEdit: Chapter | null;
   lessonToEdit: Lesson | null;
@@ -49,8 +54,10 @@ export const useQuizLessonForm = ({
   const { id: courseId } = useParams();
   const { t } = useTranslation();
 
-  const createButtonHtml = (word: string) => {
-    return `<button type="button" class="${FILL_IN_THE_BLANKS_BUTTON_CLASSNAME}" data-word="${word}"><span>${word}</span><span>${StringifiedIcons.X}</span></button>`;
+  const createButtonHtml = (word: string, optionId?: string) => {
+    const optionIdAttribute = optionId ? ` data-option-id="${optionId}"` : "";
+
+    return `<button type="button" class="${FILL_IN_THE_BLANKS_BUTTON_CLASSNAME}" data-word="${word}"${optionIdAttribute}><span>${word}</span><span>${StringifiedIcons.X}</span></button>`;
   };
 
   const form = useForm<QuizLessonFormValues>({
@@ -86,7 +93,7 @@ export const useQuizLessonForm = ({
                 const option = question.options?.find((opt) => opt.id === match[1]);
 
                 if (option) {
-                  const buttonHtml = createButtonHtml(option.optionText);
+                  const buttonHtml = createButtonHtml(option.optionText, option.id);
                   processedDescription = processedDescription.replace(match[0], buttonHtml);
                 }
               });
@@ -98,7 +105,7 @@ export const useQuizLessonForm = ({
                 const option = question.options?.find((opt) => opt.displayOrder === displayOrder);
 
                 if (option) {
-                  const buttonHtml = createButtonHtml(option.optionText);
+                  const buttonHtml = createButtonHtml(option.optionText, option.id);
                   processedDescription = processedDescription.replace(match[0], buttonHtml);
                 }
               });
@@ -153,18 +160,22 @@ export const useQuizLessonForm = ({
 
     const updatedQuestions = values.questions.map((question) => {
       let updatedSolutionExplanation = question?.description;
-      const buttons = updatedSolutionExplanation?.match(/<button\b[^>]*>[\s\S]*?<\/button>/g);
+      const buttons = updatedSolutionExplanation?.match(FILL_BLANK_BUTTON_REGEX);
       if (buttons && question.options) {
         const orderedOptions = [...question.options].sort(
           (a, b) => a.displayOrder - b.displayOrder,
         );
 
         buttons.forEach((button, index) => {
-          if (orderedOptions[index]) {
-            const optionText = orderedOptions[index].optionText;
+          const buttonOptionId = getHtmlAttribute(button, "data-option-id");
+          const option =
+            question.options?.find((item) => (item.id ?? item.sortableId) === buttonOptionId) ??
+            orderedOptions[index];
+
+          if (option) {
             updatedSolutionExplanation = updatedSolutionExplanation?.replace(
               button,
-              `<strong>${optionText}</strong>`,
+              `<strong>${option.optionText}</strong>`,
             );
           }
         });
@@ -201,13 +212,14 @@ export const useQuizLessonForm = ({
             ...option,
             id: option.id ?? option.sortableId,
           })),
-          description: question.description.replace(
-            /<button\b[^>]*>[\s\S]*?<\/button>/g,
-            (_button) => {
-              const option = orderedFillOptions.shift();
-              return option ? createBlankAnswerMarker(option.id ?? option.sortableId) : "";
-            },
-          ),
+          description: question.description.replace(FILL_BLANK_BUTTON_REGEX, (button) => {
+            const buttonOptionId = getHtmlAttribute(button, "data-option-id");
+            const option =
+              question.options?.find((item) => (item.id ?? item.sortableId) === buttonOptionId) ??
+              orderedFillOptions.shift();
+
+            return option ? createBlankAnswerMarker(option.id ?? option.sortableId) : "";
+          }),
           solutionExplanation: updatedSolutionExplanation,
         };
       }

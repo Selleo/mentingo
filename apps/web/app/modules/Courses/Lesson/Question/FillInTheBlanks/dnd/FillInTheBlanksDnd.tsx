@@ -44,14 +44,14 @@ const createDndBlankId = (answerId: string) => `${DND_BLANK_ID_PREFIX}${answerId
 const getAnswerIdFromDndBlankId = (blankId: string) =>
   blankId.startsWith(DND_BLANK_ID_PREFIX) ? blankId.slice(DND_BLANK_ID_PREFIX.length) : blankId;
 
-const getAnswers = (
+export const getAnswers = (
   options: QuizQuestionOption[] | undefined,
   blankAnswerIds: string[] = [],
   isCompleted?: boolean,
 ) => {
   if (!options?.length) return [];
 
-  const items: DndWord[] = options.map(
+  return options.map(
     ({ id, optionText, displayOrder, isStudentAnswer, isCorrect, studentAnswer }) => {
       const blankId = match({
         displayOrder,
@@ -79,14 +79,56 @@ const getAnswers = (
       };
     },
   );
+};
 
-  return items.reduce<DndWord[]>((acc, item) => {
-    if (!acc.some(({ value }) => value === item.value)) {
-      acc.push(item);
-    }
+export const getCompletedAnswers = (
+  options: QuizQuestionOption[] | undefined,
+  blankAnswerIds: string[] = [],
+  maxAnswersAmount = 0,
+) => {
+  if (!options?.length) return [];
 
-    return acc;
-  }, []);
+  const blankOptions =
+    blankAnswerIds.length > 0
+      ? blankAnswerIds
+          .map((answerId) => options.find((option) => option.id === answerId))
+          .filter((option): option is QuizQuestionOption => Boolean(option))
+      : options
+          .filter((option) => Boolean(option.isCorrect))
+          .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0))
+          .slice(0, maxAnswersAmount);
+
+  const blankOptionIds = new Set(blankOptions.map(({ id }) => id));
+
+  const blankWords = blankOptions.map(
+    ({ id, optionText, displayOrder, isStudentAnswer, isCorrect, studentAnswer }, index) => {
+      const blankId = id ? createDndBlankId(id) : `${index + 1}`;
+
+      return {
+        id: `${id ?? index + 1}:submitted`,
+        index: displayOrder ?? index + 1,
+        value: studentAnswer ?? optionText,
+        blankId,
+        isCorrect,
+        isStudentAnswer,
+        studentAnswerText: null,
+      };
+    },
+  );
+
+  const wordBankWords = options
+    .filter((option) => !blankOptionIds.has(option.id))
+    .map(({ id, optionText, displayOrder, isStudentAnswer, isCorrect }) => ({
+      id: id ?? `word-bank-${displayOrder ?? optionText}`,
+      index: displayOrder ?? null,
+      value: optionText,
+      blankId: WORD_BANK_BLANK_ID,
+      isCorrect,
+      isStudentAnswer,
+      studentAnswerText: null,
+    }));
+
+  return [...blankWords, ...wordBankWords];
 };
 
 const getLongestAnswerLength = (options: QuizQuestionOption[] | undefined) => {
@@ -141,8 +183,7 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
 
   useEffect(() => {
     setWords(getAnswers(question.options, blankAnswerIds, isCompleted));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isCompleted]);
+  }, [blankAnswerIds, isCompleted, question.options]);
 
   if (!question.description) return null;
 
@@ -352,19 +393,14 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
     resetDragState();
   }
 
-  const renderedWords = buildPreviewWords(words);
+  const wordsForRender = isCompleted
+    ? getCompletedAnswers(question.options, blankAnswerIds, maxAnswersAmount)
+    : words;
+  const renderedWords = buildPreviewWords(wordsForRender);
 
-  const selectedAnswerValues = new Set(
-    renderedWords
-      .map(({ studentAnswerText }) => studentAnswerText)
-      .filter((studentAnswerText): studentAnswerText is string => Boolean(studentAnswerText)),
+  const renderedWordBankWords = renderedWords.filter(
+    ({ blankId }) => blankId === WORD_BANK_BLANK_ID,
   );
-
-  const renderedWordBankWords = renderedWords.filter(({ blankId, value }) => {
-    if (isCompleted) return typeof value === "string" && !selectedAnswerValues.has(value);
-
-    return blankId === WORD_BANK_BLANK_ID;
-  });
 
   return (
     <div className="rounded-lg border bg-card p-8 text-card-foreground shadow-sm select-none touch-none">

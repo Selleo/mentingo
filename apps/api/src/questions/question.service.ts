@@ -20,6 +20,11 @@ import type {
 } from "src/lesson/lesson.schema";
 import type * as schema from "src/storage/schema";
 
+type FormattedAnswer = {
+  key: string;
+  value: string;
+};
+
 @Injectable()
 export class QuestionService {
   constructor(
@@ -164,13 +169,16 @@ export class QuestionService {
       });
   }
 
-  private formatAnswer(question: QuizQuestion, studentAnswer: StudentQuestionAnswer): string[] {
+  private formatAnswer(
+    question: QuizQuestion,
+    studentAnswer: StudentQuestionAnswer,
+  ): FormattedAnswer[] {
     if (
       question.type === QUESTION_TYPE.BRIEF_RESPONSE ||
       question.type === QUESTION_TYPE.DETAILED_RESPONSE
     ) {
       const answer = studentAnswer.answers[0];
-      return ["value" in answer ? answer.value : ""];
+      return [{ key: "1", value: "value" in answer ? answer.value : "" }];
     }
 
     if (
@@ -184,13 +192,16 @@ export class QuestionService {
               this.isAnswerWithId(item) && this.getAnswerId(item) === correctAnswer.answerId,
           ) ?? studentAnswer.answers[correctAnswer.displayOrder - 1];
 
-        return this.isAnswerWithValue(answer) ? this.getValue(answer) : "";
+        return {
+          key: correctAnswer.answerId,
+          value: this.isAnswerWithValue(answer) ? this.getValue(answer) : "",
+        };
       });
     }
 
-    return studentAnswer.answers.map((answer) => {
+    return studentAnswer.answers.map((answer, index) => {
       if ("value" in answer) {
-        return answer.value;
+        return { key: `${index + 1}`, value: answer.value };
       }
 
       const answerOption = question.allAnswers.find(
@@ -205,14 +216,14 @@ export class QuestionService {
         );
       }
 
-      return answerOption.value;
+      return { key: `${index + 1}`, value: answerOption.value };
     });
   }
 
-  private questionAnswerToString(answers: string[]): SQL<unknown> {
-    const convertedAnswers: (SQL<unknown> | string)[] = answers.flatMap((answer, index) => [
-      sql`(${index + 1}::int)`,
-      sql`${answer}::text`,
+  private questionAnswerToString(answers: FormattedAnswer[]): SQL<unknown> {
+    const convertedAnswers: (SQL<unknown> | string)[] = answers.flatMap((answer) => [
+      sql`${answer.key}::text`,
+      sql`${answer.value}::text`,
     ]);
 
     return sql`json_build_object(${sql.join(convertedAnswers, sql`, `)})`;
