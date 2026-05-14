@@ -82,7 +82,12 @@ export class QuestionService {
       .returnType<boolean>()
       .with(QUESTION_TYPE.FILL_IN_THE_BLANKS_TEXT, QUESTION_TYPE.FILL_IN_THE_BLANKS_DND, () => {
         return question.correctAnswers.every((correctAnswer) => {
-          const answer = studentAnswer.answers[correctAnswer.displayOrder - 1];
+          const answer =
+            studentAnswer.answers.find(
+              (item) =>
+                this.isAnswerWithId(item) && this.getAnswerId(item) === correctAnswer.answerId,
+            ) ?? studentAnswer.answers[correctAnswer.displayOrder - 1];
+
           return this.isAnswerWithValue(answer) && this.getValue(answer) === correctAnswer.value;
         });
       })
@@ -166,6 +171,21 @@ export class QuestionService {
     ) {
       const answer = studentAnswer.answers[0];
       return ["value" in answer ? answer.value : ""];
+    }
+
+    if (
+      question.type === QUESTION_TYPE.FILL_IN_THE_BLANKS_TEXT ||
+      question.type === QUESTION_TYPE.FILL_IN_THE_BLANKS_DND
+    ) {
+      return question.correctAnswers.map((correctAnswer) => {
+        const answer =
+          studentAnswer.answers.find(
+            (item) =>
+              this.isAnswerWithId(item) && this.getAnswerId(item) === correctAnswer.answerId,
+          ) ?? studentAnswer.answers[correctAnswer.displayOrder - 1];
+
+        return this.isAnswerWithValue(answer) ? this.getValue(answer) : "";
+      });
     }
 
     return studentAnswer.answers.map((answer) => {

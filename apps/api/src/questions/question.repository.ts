@@ -169,6 +169,7 @@ export class QuestionRepository {
     return this.db
       .select({
         id: questions.id,
+        title: this.localizationService.getLocalizedSqlField(questions.title, language),
         type: sql<QuestionType>`${questions.type}`,
         correctAnswers: sql<{ answerId: UUIDType; displayOrder: number; value: string }[]>`
           (

@@ -666,6 +666,7 @@ export class AdminLessonService {
       const optionsToInsert = insertedQuestions.flatMap(
         (question, index) =>
           data.questions?.[index].options?.map((option) => ({
+            id: option.id,
             questionId: question.id,
             optionText: buildJsonbField(language, option.optionText),
             isCorrect: option.isCorrect,
@@ -834,6 +835,7 @@ export class AdminLessonService {
               }
 
               const optionData = {
+                id: option.id,
                 optionText: option.optionText,
                 isCorrect: option.isCorrect,
                 displayOrder: option.displayOrder,
@@ -842,7 +844,7 @@ export class AdminLessonService {
                 language: data.language,
               };
 
-              if (option.id) {
+              if (option.id && existingOptionIds.includes(option.id)) {
                 const result = await this.adminLessonRepository.updateOption(
                   option.id,
                   optionData,

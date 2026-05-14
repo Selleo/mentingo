@@ -39,6 +39,7 @@ export const quizEvaluationSchema = Type.Object({
 
 const quizQuestionSchema = Type.Object({
   id: Type.String(),
+  title: Type.String(),
   type: Type.Enum(QUESTION_TYPE),
   correctAnswers: Type.Array(
     Type.Object({

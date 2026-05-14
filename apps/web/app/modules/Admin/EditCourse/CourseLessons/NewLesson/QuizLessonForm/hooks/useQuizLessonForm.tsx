@@ -14,6 +14,7 @@ import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
 import { queryClient } from "~/api/queryClient";
 import { useLeaveModal } from "~/context/LeaveModalContext";
 import { ContentTypes, LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
+import { BLANK_ANSWER_MARKER_REGEX, createBlankAnswerMarker } from "~/utils/blankAnswerMarkers";
 import { StringifiedIcons } from "~/utils/stringifiedIcons";
 
 import { FILL_IN_THE_BLANKS_BUTTON_CLASSNAME } from "../components/constants";
@@ -76,17 +77,32 @@ export const useQuizLessonForm = ({
           lessonToEdit.questions?.map((question: Question) => {
             let processedDescription = question.description || "";
 
-            const wordMatches = [...processedDescription.matchAll(/\[word\]/g)];
+            const blankAnswerMatches = [
+              ...processedDescription.matchAll(BLANK_ANSWER_MARKER_REGEX),
+            ];
 
-            wordMatches.forEach((match, index) => {
-              const displayOrder = index + 1;
-              const option = question.options?.find((opt) => opt.displayOrder === displayOrder);
+            if (blankAnswerMatches.length > 0) {
+              blankAnswerMatches.forEach((match) => {
+                const option = question.options?.find((opt) => opt.id === match[1]);
 
-              if (option) {
-                const buttonHtml = createButtonHtml(option.optionText);
-                processedDescription = processedDescription.replace(match[0], buttonHtml);
-              }
-            });
+                if (option) {
+                  const buttonHtml = createButtonHtml(option.optionText);
+                  processedDescription = processedDescription.replace(match[0], buttonHtml);
+                }
+              });
+            } else {
+              const wordMatches = [...processedDescription.matchAll(/\[word\]/g)];
+
+              wordMatches.forEach((match, index) => {
+                const displayOrder = index + 1;
+                const option = question.options?.find((opt) => opt.displayOrder === displayOrder);
+
+                if (option) {
+                  const buttonHtml = createButtonHtml(option.optionText);
+                  processedDescription = processedDescription.replace(match[0], buttonHtml);
+                }
+              });
+            }
 
             return {
               id: question.id,
@@ -139,11 +155,13 @@ export const useQuizLessonForm = ({
       let updatedSolutionExplanation = question?.description;
       const buttons = updatedSolutionExplanation?.match(/<button\b[^>]*>[\s\S]*?<\/button>/g);
       if (buttons && question.options) {
-        question.options.sort((a, b) => a.displayOrder - b.displayOrder);
+        const orderedOptions = [...question.options].sort(
+          (a, b) => a.displayOrder - b.displayOrder,
+        );
 
         buttons.forEach((button, index) => {
-          if (question?.options?.[index]) {
-            const optionText = question?.options[index].optionText;
+          if (orderedOptions[index]) {
+            const optionText = orderedOptions[index].optionText;
             updatedSolutionExplanation = updatedSolutionExplanation?.replace(
               button,
               `<strong>${optionText}</strong>`,
@@ -173,9 +191,23 @@ export const useQuizLessonForm = ({
           question.type === QuestionType.FILL_IN_THE_BLANKS_TEXT) &&
         question.description
       ) {
+        const orderedFillOptions = [...(question.options ?? [])].sort(
+          (a, b) => a.displayOrder - b.displayOrder,
+        );
+
         return {
           ...question,
-          description: question.description.replace(/<button\b[^>]*>[\s\S]*?<\/button>/g, "[word]"),
+          options: question.options?.map((option) => ({
+            ...option,
+            id: option.id ?? option.sortableId,
+          })),
+          description: question.description.replace(
+            /<button\b[^>]*>[\s\S]*?<\/button>/g,
+            (_button) => {
+              const option = orderedFillOptions.shift();
+              return option ? createBlankAnswerMarker(option.id ?? option.sortableId) : "";
+            },
+          ),
           solutionExplanation: updatedSolutionExplanation,
         };
       }

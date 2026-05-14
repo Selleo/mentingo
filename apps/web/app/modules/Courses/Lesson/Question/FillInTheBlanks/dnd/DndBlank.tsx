@@ -22,6 +22,9 @@ export const DndBlank = ({
 }: DndBlankProps) => {
   const { setNodeRef } = useDroppable({
     id: blankId,
+    data: {
+      blankId,
+    },
   });
 
   return (

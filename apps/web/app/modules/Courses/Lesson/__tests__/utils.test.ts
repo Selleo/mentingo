@@ -402,4 +402,60 @@ describe("fill in the blanks text mapping", () => {
       "1": "go",
     });
   });
+
+  it("uses blank answer ids from rendered placeholders", () => {
+    const questions = [
+      {
+        id: "question-text",
+        type: "fill_in_the_blanks_text",
+        description: "I <blank-answer-o2> to the <blank-answer-o1> every day.",
+        options: [
+          { id: "o1", studentAnswer: "park" },
+          { id: "o2", studentAnswer: "go" },
+        ],
+      },
+    ] as unknown as NonNullable<
+      import("~/api/generated-api").GetLessonByIdResponse["data"]["quizDetails"]
+    >["questions"];
+
+    expect(getEmptyQuizAnswers(questions).fillInTheBlanksText["question-text"]).toEqual({
+      o2: null,
+      o1: null,
+    });
+    expect(getUserAnswers(questions).fillInTheBlanksText["question-text"]).toEqual({
+      o2: "go",
+      o1: "park",
+    });
+  });
+
+  it("submits fill in the blanks values with answer ids when present", () => {
+    const formData: QuizForm = {
+      briefResponses: {},
+      detailedResponses: {},
+      singleAnswerQuestions: {},
+      multiAnswerQuestions: {},
+      photoQuestionSingleChoice: {},
+      photoQuestionMultipleChoice: {},
+      trueOrFalseQuestions: {},
+      fillInTheBlanksText: {
+        "question-text": {
+          o2: "go",
+          o1: "park",
+        },
+      },
+      fillInTheBlanksDnd: {},
+    };
+
+    const parsed = parseQuizFormData(formData);
+
+    expect(parsed).toEqual([
+      {
+        questionId: "question-text",
+        answers: [
+          { answerId: "o2", value: "go" },
+          { answerId: "o1", value: "park" },
+        ],
+      },
+    ]);
+  });
 });

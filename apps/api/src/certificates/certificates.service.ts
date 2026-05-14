@@ -104,16 +104,6 @@ export class CertificatesService implements OnModuleDestroy {
             transactionInstance,
           );
 
-        const existingCertificate = await this.certificateRepository.findExistingCertificate(
-          userId,
-          courseId,
-          transactionInstance,
-        );
-
-        if (existingCertificate) {
-          throw new ConflictException("studentCertificateView.informations.alreadyExists");
-        }
-
         const createdCertificate = await this.certificateRepository.create(
           userId,
           courseId,

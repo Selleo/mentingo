@@ -281,7 +281,9 @@ describe("SettingsController (e2e)", () => {
           `/api/settings/login-background/image?v=${encodeURIComponent(loginBackgroundKey)}`,
         );
         expect(response.body.data.certificateBackgroundImage).toBe(
-          `/api/settings/certificate-background/image?v=${encodeURIComponent(certificateBackgroundKey)}`,
+          `/api/settings/certificate-background/image?v=${encodeURIComponent(
+            certificateBackgroundKey,
+          )}`,
         );
       });
     });

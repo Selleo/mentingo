@@ -2205,7 +2205,8 @@
       "invalidFormatForMultiAnswer": "Invalid format for multi-answer questions.",
       "trueOrFalseRequired": "A true or false response is required.",
       "photoQuestionMustHaveAnswer": "An answer is required for this photo question.",
-      "unansweredQuestions": "It seems you haven't checked all the answers yet. Please review them and try again!"
+      "unansweredQuestions": "It seems you haven't checked all the answers yet. Please review them and try again!",
+      "unansweredQuestionsWithNames": "Please answer the missing questions: {{questionNames}}"
     }
   },
   "studentCourseView": {

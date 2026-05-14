@@ -282,6 +282,12 @@ export class CertificateRepository {
         userId: userId,
         courseId: courseId,
       })
+      .onConflictDoUpdate({
+        target: [certificates.userId, certificates.courseId],
+        set: {
+          updatedAt: sql`CURRENT_TIMESTAMP`,
+        },
+      })
       .returning();
 
     return createdCertificate;

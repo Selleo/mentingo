@@ -13,6 +13,9 @@ type WordBankProps = {
 export const WordBank = ({ words }: WordBankProps) => {
   const { setNodeRef } = useDroppable({
     id: "blank_preset",
+    data: {
+      blankId: "blank_preset",
+    },
   });
 
   const renderDraggableWords = () => {
