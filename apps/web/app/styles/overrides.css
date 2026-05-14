@@ -53,7 +53,7 @@
     }
 
     .selectedCell:after {
-      background: var(--neutral-200);
+      background: color-mix(in srgb, var(--primary-200) 32%, transparent);
       content: "";
       left: 0;
       right: 0;
