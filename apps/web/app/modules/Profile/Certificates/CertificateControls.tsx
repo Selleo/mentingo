@@ -1,9 +1,10 @@
 import { HEX_COLOR_REGEX } from "@repo/shared";
-import { Download, Linkedin, Loader2, Palette, X } from "lucide-react";
+import { Download, Loader2, Palette, X } from "lucide-react";
 import { useState } from "react";
 import { HexColorPicker } from "react-colorful";
 import { useTranslation } from "react-i18next";
 
+import { Linkedin } from "~/assets/svgs";
 import RectangularSwitch from "~/components/RectangularSwitch";
 import { Input } from "~/components/ui/input";
 

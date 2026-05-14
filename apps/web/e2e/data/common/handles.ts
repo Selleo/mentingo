@@ -9,6 +9,8 @@ export const RICH_TEXT_HANDLES = {
   ROOT: "rich-text-editor",
   CONTENT: "rich-text-editor-content",
   ASSET_LIBRARY_BUTTON: "rich-text-editor-asset-library-button",
+  TABLE_MENU_BUTTON: "rich-text-editor-table-menu-button",
+  TABLE_INSERT_BUTTON: "rich-text-editor-table-insert-button",
   ASSET_LIBRARY_DIALOG: "rich-text-asset-library-dialog",
   ASSET_LIBRARY_SEARCH_INPUT: "rich-text-asset-library-search-input",
   ASSET_LIBRARY_UPLOAD_INPUT: "rich-text-asset-library-upload-input",

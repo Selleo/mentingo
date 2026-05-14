@@ -26,6 +26,7 @@ import { AssetLibraryDialog, type AssetLibraryConfig } from "../components/Asset
 import { InsertLinkDialog } from "../components/InsertLinkDialog";
 
 import { FormatType } from "./FormatType";
+import { TableMenu } from "./TableMenu";
 
 import type { Editor } from "@tiptap/react";
 import type { LucideIcon } from "lucide-react";
@@ -35,6 +36,7 @@ type EditorToolbarProps = {
   editor: Editor;
   acceptedFileTypes: readonly string[];
   assetLibrary?: AssetLibraryConfig;
+  showTableControls?: boolean;
 };
 
 type ToolbarButtonProps = {
@@ -80,7 +82,12 @@ const ToolbarIconButton = ({
   </Tooltip>
 );
 
-const EditorToolbar = ({ editor, acceptedFileTypes, assetLibrary }: EditorToolbarProps) => {
+const EditorToolbar = ({
+  editor,
+  acceptedFileTypes,
+  assetLibrary,
+  showTableControls = false,
+}: EditorToolbarProps) => {
   const { t } = useTranslation();
 
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
@@ -181,6 +188,12 @@ const EditorToolbar = ({ editor, acceptedFileTypes, assetLibrary }: EditorToolba
               onClick={handleToggle(() => editor.chain().focus().setHorizontalRule().run())}
             />
           </ToolbarSection>
+
+          {showTableControls && (
+            <ToolbarSection>
+              <TableMenu editor={editor} />
+            </ToolbarSection>
+          )}
 
           {assetLibrary && (
             <ToolbarSection>

@@ -2740,6 +2740,32 @@
       "horizontalRule": {
         "tooltip": "Horizontali linija: įterpia skiriamąją liniją"
       },
+      "table": {
+        "tooltip": "Lentelė: įterpti arba redaguoti lentelę",
+        "groups": {
+          "columns": "Stulpeliai",
+          "rows": "Eilutės",
+          "cells": "Langeliai",
+          "headers": "Antraštės"
+        },
+        "actions": {
+          "insert": "Įterpti lentelę",
+          "addColumnBefore": "Pridėti stulpelį prieš",
+          "addColumnAfter": "Pridėti stulpelį po",
+          "deleteColumn": "Ištrinti stulpelį",
+          "addRowBefore": "Pridėti eilutę prieš",
+          "addRowAfter": "Pridėti eilutę po",
+          "deleteRow": "Ištrinti eilutę",
+          "mergeCells": "Sujungti langelius",
+          "splitCell": "Padalyti langelį",
+          "mergeOrSplit": "Sujungti arba padalyti",
+          "toggleHeaderRow": "Perjungti antraštės eilutę",
+          "toggleHeaderColumn": "Perjungti antraštės stulpelį",
+          "toggleHeaderCell": "Perjungti antraštės langelį",
+          "fixTables": "Taisyti lentelės struktūrą",
+          "deleteTable": "Ištrinti lentelę"
+        }
+      },
       "undo": {
         "tooltip": "Anuliuoti: atšaukia paskutinį pakeitimą"
       },
