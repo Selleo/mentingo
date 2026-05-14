@@ -2,6 +2,7 @@ import { forwardRef, Module } from "@nestjs/common";
 import { CqrsModule } from "@nestjs/cqrs";
 
 import { AiModule } from "src/ai/ai.module";
+import { BunnyStreamModule } from "src/bunny/bunnyStream.module";
 import { CertificatesModule } from "src/certificates/certificates.module";
 import { ChapterModule } from "src/chapter/chapter.module";
 import { EmailModule } from "src/common/emails/emails.module";
@@ -19,6 +20,10 @@ import { StatisticsModule } from "src/statistics/statistics.module";
 import { StripeModule } from "src/stripe/stripe.module";
 import { UserModule } from "src/user/user.module";
 
+import { CourseFeaturePolicyService } from "./course-feature-policy.service";
+import { CourseScormAssetsService } from "./course-scorm-assets.service";
+import { CourseScormExportService } from "./course-scorm-export.service";
+import { CourseScormSnapshotService } from "./course-scorm-snapshot.service";
 import { CourseSlugService } from "./course-slug.service";
 import { CourseController } from "./course.controller";
 import { CourseCron } from "./course.cron";
@@ -31,6 +36,7 @@ import { MasterCourseWorker } from "./master-course.worker";
 @Module({
   imports: [
     LumaModule,
+    BunnyStreamModule,
     FileModule,
     StatisticsModule,
     forwardRef(() => ChapterModule),
@@ -48,6 +54,10 @@ import { MasterCourseWorker } from "./master-course.worker";
   controllers: [CourseController],
   providers: [
     CourseService,
+    CourseScormAssetsService,
+    CourseScormExportService,
+    CourseScormSnapshotService,
+    CourseFeaturePolicyService,
     CourseSlugService,
     CourseHandler,
     LocalizationService,
@@ -59,6 +69,6 @@ import { MasterCourseWorker } from "./master-course.worker";
     MasterCourseSyncHandler,
     ManagingTenantAdminGuard,
   ],
-  exports: [CourseService, CourseSlugService, MasterCourseService],
+  exports: [CourseService, CourseFeaturePolicyService, CourseSlugService, MasterCourseService],
 })
 export class CourseModule {}

@@ -30,6 +30,7 @@ import SelectLessonType from "./NewLesson/components/SelectLessonType";
 import ContentLessonForm from "./NewLesson/ContentLessonForm/ContentLessonForm";
 import { EmbedLessonForm } from "./NewLesson/EmbedLessonForm/EmbedLessonForm";
 import QuizLessonForm from "./NewLesson/QuizLessonForm/QuizLessonForm";
+import { ScormLessonForm } from "./NewLesson/ScormLessonForm/ScormLessonForm";
 
 import type { Chapter, Lesson } from "../EditCourse.types";
 import type { SupportedLanguages } from "@repo/shared";
@@ -186,6 +187,15 @@ const CourseLessons = ({
       ),
       [ContentTypes.EMBED_FORM]: (
         <EmbedLessonForm
+          lessonToEdit={selectedLesson}
+          chapterToEdit={selectedChapter}
+          setContentTypeToDisplay={setContentTypeToDisplay}
+          setSelectedLesson={setSelectedLesson}
+          language={language}
+        />
+      ),
+      [ContentTypes.SCORM_LESSON_FORM]: (
+        <ScormLessonForm
           lessonToEdit={selectedLesson}
           chapterToEdit={selectedChapter}
           setContentTypeToDisplay={setContentTypeToDisplay}

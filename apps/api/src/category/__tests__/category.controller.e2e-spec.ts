@@ -35,6 +35,7 @@ describe("CategoryController (e2e)", () => {
 
   afterAll(async () => {
     await truncateAllTables(baseDb, db);
+    await app.close();
   });
 
   const password = "password123";

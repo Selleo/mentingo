@@ -21,6 +21,8 @@ import {
 } from "~/components/ui/select";
 import { cn } from "~/lib/utils";
 
+import { SETTINGS_PAGE_HANDLES } from "../../../../../../e2e/data/settings/handles";
+
 import type { GetPublicGlobalSettingsResponse, UpdateAgeLimitBody } from "~/api/generated-api";
 
 interface AgeLimitSelectProps {
@@ -46,14 +48,17 @@ export const AgeLimitSelect = ({ limit }: AgeLimitSelectProps) => {
   };
 
   return (
-    <Card id="default-course-currency">
+    <Card id="age-limit" data-testid={SETTINGS_PAGE_HANDLES.AGE_LIMIT_CARD}>
       <CardHeader>
         <CardTitle className="h5">{t("ageLimitView.header")}</CardTitle>
         <CardDescription className="body-lg-md">{t("ageLimitView.subHeader")}</CardDescription>
       </CardHeader>
       <CardContent>
         <Select value={JSON.stringify(ageLimit)} onValueChange={handleAgeLimitChange}>
-          <SelectTrigger className="body-sm-md">
+          <SelectTrigger
+            className="body-sm-md"
+            data-testid={SETTINGS_PAGE_HANDLES.AGE_LIMIT_SELECT}
+          >
             <SelectValue placeholder={t(`ageLimitView.select.placeholder`)} />
           </SelectTrigger>
           <SelectContent>
@@ -63,6 +68,7 @@ export const AgeLimitSelect = ({ limit }: AgeLimitSelectProps) => {
                   key={age}
                   value={JSON.stringify(age)}
                   className={cn({ "body-sm-md": ageLimit === age })}
+                  data-testid={SETTINGS_PAGE_HANDLES.ageLimitOption(JSON.stringify(age))}
                 >
                   {age ? JSON.stringify(age) : t(`ageLimitView.select.null.label`)}
                 </SelectItem>
@@ -76,6 +82,7 @@ export const AgeLimitSelect = ({ limit }: AgeLimitSelectProps) => {
           disabled={isPending || ageLimit === limit}
           type="submit"
           onClick={handleSaveAgeLimit}
+          data-testid={SETTINGS_PAGE_HANDLES.AGE_LIMIT_SAVE}
         >
           {t("common.button.save")}
         </Button>

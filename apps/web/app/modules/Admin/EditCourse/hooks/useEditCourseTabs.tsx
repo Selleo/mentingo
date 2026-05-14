@@ -1,4 +1,9 @@
-import { PERMISSIONS } from "@repo/shared";
+import {
+  COURSE_FEATURE,
+  COURSE_TYPE,
+  PERMISSIONS,
+  isCourseFeatureEnabledForCourseType,
+} from "@repo/shared";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -8,18 +13,38 @@ import { usePermissions } from "~/hooks/usePermissions";
 
 import { EDIT_COURSE_TABS } from "../EditCourse.types";
 
-export const useEditCourseTabs = () => {
+import type { CourseType } from "@repo/shared";
+
+type UseEditCourseTabsParams = {
+  courseType?: CourseType;
+};
+
+export const useEditCourseTabs = ({
+  courseType = COURSE_TYPE.DEFAULT,
+}: UseEditCourseTabsParams = {}) => {
   const { t } = useTranslation();
   const { data: isStripeConfigured } = useStripeConfigured();
 
   const { hasAccess: canManageUsers } = usePermissions({ required: PERMISSIONS.USER_MANAGE });
+  const { hasAccess: canManageCourses } = usePermissions({
+    required: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
+  });
   const { data: currentUser } = useCurrentUserSuspense();
-  const isManagingTenantAdmin = Boolean(currentUser?.isManagingTenantAdmin);
+  const canShowTenantSharing = Boolean(
+    currentUser?.isManagingTenantAdmin && !currentUser?.isSupportMode,
+  );
 
-  const baseTabs = useMemo(
-    () => [
+  const baseTabs = useMemo(() => {
+    const canEditCurriculum = isCourseFeatureEnabledForCourseType(
+      courseType,
+      COURSE_FEATURE.CURRICULUM_EDITING,
+    );
+
+    return [
       { label: t("adminCourseView.common.settings"), value: EDIT_COURSE_TABS.SETTINGS },
-      { label: t("adminCourseView.common.curriculum"), value: EDIT_COURSE_TABS.CURRICULUM },
+      ...(canEditCurriculum
+        ? [{ label: t("adminCourseView.common.curriculum"), value: EDIT_COURSE_TABS.CURRICULUM }]
+        : []),
       ...(isStripeConfigured?.enabled
         ? [
             {
@@ -29,24 +54,28 @@ export const useEditCourseTabs = () => {
           ]
         : []),
       { label: t("adminCourseView.common.status"), value: EDIT_COURSE_TABS.STATUS },
-    ],
-    [isStripeConfigured, t],
-  );
+    ];
+  }, [courseType, isStripeConfigured, t]);
 
   const adminTabs = useMemo(
     () => [
       { label: t("adminCourseView.common.enrolledStudents"), value: EDIT_COURSE_TABS.ENROLLED },
-      ...(isManagingTenantAdmin
+    ],
+    [t],
+  );
+
+  const exportTabs = useMemo(
+    () =>
+      canManageCourses || canShowTenantSharing
         ? [
             {
               label: t("adminCourseView.sharedCourse.exportsTitle"),
               value: EDIT_COURSE_TABS.EXPORTS,
             },
           ]
-        : []),
-    ],
-    [isManagingTenantAdmin, t],
+        : [],
+    [canManageCourses, canShowTenantSharing, t],
   );
 
-  return canManageUsers ? [...baseTabs, ...adminTabs] : baseTabs;
+  return [...baseTabs, ...(canManageUsers ? adminTabs : []), ...exportTabs];
 };

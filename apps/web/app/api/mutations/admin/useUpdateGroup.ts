@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { ApiClient } from "~/api/api-client";
 import { GROUPS_QUERY_KEY } from "~/api/queries/admin/useGroups";
 import { queryClient } from "~/api/queryClient";
+import { invalidateLearningPathEnrollmentData } from "~/api/utils/invalidateLearningPathEnrollmentData";
 import { useToast } from "~/components/ui/use-toast";
 
 type GroupBody = {
@@ -22,6 +23,7 @@ export function useUpdateGroup(groupId: string) {
 
       await queryClient.invalidateQueries({ queryKey: [GROUPS_QUERY_KEY] });
       await queryClient.invalidateQueries({ queryKey: ["users"] });
+      await invalidateLearningPathEnrollmentData();
 
       return data;
     },

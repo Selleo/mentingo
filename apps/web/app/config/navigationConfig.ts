@@ -60,6 +60,12 @@ export const getNavigationConfig = (
           testId: NAVIGATION_HANDLES.COURSES_LINK,
         },
         {
+          label: t("navigationSideBar.learningPaths"),
+          path: "learning-paths",
+          iconName: "Route",
+          testId: NAVIGATION_HANDLES.LEARNING_PATHS_LINK,
+        },
+        {
           label: t("navigationSideBar.analytics"),
           path: "admin/analytics",
           iconName: "ChartNoAxes",
@@ -187,6 +193,24 @@ export const getNavigationConfig = (
           path: "super-admin/tenants",
           iconName: "Admin",
           testId: NAVIGATION_HANDLES.TENANTS_LINK,
+        },
+      ],
+    },
+    {
+      title: t("navigationSideBar.activityLogs"),
+      icon: "Timeline",
+      isExpandable: false,
+      testId: NAVIGATION_HANDLES.ACTIVITY_LOGS_LINK,
+      restrictedAccessRequirement: {
+        allOf: [PERMISSIONS.ACTIVITY_LOG_READ],
+      },
+      restrictedManagingTenantAdmin: false,
+      items: [
+        {
+          label: t("navigationSideBar.activityLogs"),
+          path: "admin/activity-logs",
+          iconName: "Timeline",
+          testId: NAVIGATION_HANDLES.ACTIVITY_LOGS_LINK,
         },
       ],
     },

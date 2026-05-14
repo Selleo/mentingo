@@ -78,6 +78,10 @@ describe("ArticlesController (e2e)", () => {
     ]);
   });
 
+  afterAll(async () => {
+    await app.close();
+  });
+
   describe("GET /api/articles", () => {
     it("returns only public published articles", async () => {
       const author = await userFactory.create();

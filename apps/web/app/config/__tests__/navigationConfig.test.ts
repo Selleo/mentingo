@@ -23,6 +23,18 @@ describe("findMatchingRoute", () => {
     const requirement = findMatchingRoute("non/existing/route");
     expect(requirement).toBeUndefined();
   });
+
+  it("should find learning path routes", () => {
+    expect(findMatchingRoute("learning-paths")).toEqual({
+      anyOf: [PERMISSIONS.LEARNING_PATH_READ],
+    });
+  });
+
+  it("should find admin learning path routes", () => {
+    expect(findMatchingRoute("admin/learning-paths/new")).toEqual({
+      allOf: [PERMISSIONS.LEARNING_PATH_CREATE],
+    });
+  });
 });
 
 describe("mapNavigationItems", () => {

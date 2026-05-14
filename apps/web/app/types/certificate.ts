@@ -1,7 +1,8 @@
 export interface CertificateType {
   id: string;
   userId: string;
-  courseId: string;
+  courseId?: string;
+  learningPathId?: string;
   courseTitle?: string | null;
   completionDate?: string | null;
   fullName?: string | null;

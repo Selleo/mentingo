@@ -62,7 +62,7 @@ export class MasterCourseService {
       throw new BadRequestException("masterCourse.error.noTargetTenants");
 
     const sourceCourse = await this.masterCourseRepository.getCourseById(sourceCourseId);
-    if (!sourceCourse) throw new NotFoundException("Course not found");
+    if (!sourceCourse) throw new NotFoundException("masterCourse.error.sourceCourseNotFound");
 
     if (sourceCourse.originType === COURSE_ORIGIN_TYPES.EXPORTED) {
       throw new BadRequestException("masterCourse.error.exportedCourseCannotBeSource");
@@ -236,11 +236,51 @@ export class MasterCourseService {
     await this.syncExportLink(exportLink.id);
   }
 
+  async ensureCourseExportSynced(params: {
+    sourceCourseId: UUIDType;
+    sourceTenantId: UUIDType;
+    targetTenantId: UUIDType;
+  }): Promise<UUIDType> {
+    const sourceCourse = await this.tenantRunner.runWithTenant(params.sourceTenantId, () =>
+      this.masterCourseRepository.getCourseById(params.sourceCourseId),
+    );
+
+    if (!sourceCourse) {
+      throw new NotFoundException("masterCourse.error.sourceCourseNotFound");
+    }
+
+    if (sourceCourse.originType === COURSE_ORIGIN_TYPES.EXPORTED) {
+      throw new BadRequestException("masterCourse.error.exportedCourseCannotBeSource");
+    }
+
+    let exportLink = await this.masterCourseRepository.findExportLinkByPair(
+      params.sourceTenantId,
+      params.sourceCourseId,
+      params.targetTenantId,
+    );
+
+    if (!exportLink) {
+      exportLink = await this.masterCourseRepository.createExportLink(
+        params.sourceTenantId,
+        params.sourceCourseId,
+        params.targetTenantId,
+      );
+    }
+
+    await this.tenantRunner.runWithTenant(params.sourceTenantId, () =>
+      this.masterCourseRepository.markCourseAsMaster(params.sourceCourseId),
+    );
+
+    const targetCourseId = await this.syncExportLink(exportLink.id);
+
+    return targetCourseId;
+  }
+
   async processSyncJob(data: MasterCourseSyncJobData) {
     await this.syncExportLink(data.exportId);
   }
 
-  private async syncExportLink(exportId: UUIDType) {
+  private async syncExportLink(exportId: UUIDType): Promise<UUIDType> {
     const exportLink = await this.masterCourseRepository.getExportLinkById(exportId);
 
     try {
@@ -248,6 +288,7 @@ export class MasterCourseService {
       const targetCourseId = await this.syncSourceSnapshotToTarget(exportLink, sourceSnapshot);
 
       await this.masterCourseRepository.markExportSyncSuccess(exportId, targetCourseId);
+      return targetCourseId;
     } catch (error) {
       await this.masterCourseRepository.markExportSyncFailed(exportId);
       throw error;
@@ -392,7 +433,7 @@ export class MasterCourseService {
       priceInCents: params.sourceSnapshot.course.priceInCents,
       currency: params.sourceSnapshot.course.currency,
       chapterCount: params.sourceSnapshot.course.chapterCount,
-      isScorm: params.sourceSnapshot.course.isScorm,
+      courseType: params.sourceSnapshot.course.courseType,
       authorId: params.targetAuthorId,
       categoryId: params.categoryId,
       stripeProductId: null,
@@ -446,7 +487,7 @@ export class MasterCourseService {
       thumbnailS3Key: params.sourceSnapshot.course.thumbnailS3Key,
       hasCertificate: params.sourceSnapshot.course.hasCertificate,
       chapterCount: params.sourceSnapshot.course.chapterCount,
-      isScorm: params.sourceSnapshot.course.isScorm,
+      courseType: params.sourceSnapshot.course.courseType,
       categoryId: params.categoryId,
       settings: params.courseSettings,
       baseLanguage: params.sourceSnapshot.course.baseLanguage,

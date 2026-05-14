@@ -14,6 +14,8 @@ import {
 import { Switch } from "~/components/ui/switch";
 import { USER_ROLE, type UserRole } from "~/config/userRoles";
 
+import { SETTINGS_PAGE_HANDLES } from "../../../../../../e2e/data/settings/handles";
+
 import type { GetPublicGlobalSettingsResponse } from "~/api/generated-api";
 
 interface MFAEnforcementSwitchProps {
@@ -63,7 +65,7 @@ export default function RoleBasedMFAEnforcementSwitch({
   };
 
   return (
-    <Card id="sso-enforcement">
+    <Card id="mfa-enforcement" data-testid={SETTINGS_PAGE_HANDLES.MFA_ENFORCEMENT_CARD}>
       <CardHeader>
         <CardTitle className="h5">{t("MFAEnforcementView.header")}</CardTitle>
         <CardDescription className="body-lg-md">
@@ -80,7 +82,11 @@ export default function RoleBasedMFAEnforcementSwitch({
                 <span className="flex-1 text-right details">
                   {t("MFAEnforcementView.switch.disabled")}
                 </span>
-                <Switch checked={roleStates[role]} onCheckedChange={() => toggleRoleSwitch(role)} />
+                <Switch
+                  checked={roleStates[role]}
+                  onCheckedChange={() => toggleRoleSwitch(role)}
+                  data-testid={SETTINGS_PAGE_HANDLES.mfaRoleSwitch(role)}
+                />
                 <span className="flex-1 text-left details">
                   {t("MFAEnforcementView.switch.enabled")}
                 </span>
@@ -90,7 +96,12 @@ export default function RoleBasedMFAEnforcementSwitch({
         </div>
       </CardContent>
       <CardFooter className="border-t px-6 py-4">
-        <Button disabled={isPending || !hasChanges()} type="submit" onClick={saveMFAEnforcement}>
+        <Button
+          disabled={isPending || !hasChanges()}
+          type="submit"
+          onClick={saveMFAEnforcement}
+          data-testid={SETTINGS_PAGE_HANDLES.MFA_ENFORCEMENT_SAVE}
+        >
           {t("common.button.save")}
         </Button>
       </CardFooter>

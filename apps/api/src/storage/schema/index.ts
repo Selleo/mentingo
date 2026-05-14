@@ -1,6 +1,16 @@
 import {
+  COURSE_TYPE,
   COURSE_ORIGIN_TYPES,
   MASTER_COURSE_EXPORT_SYNC_STATUSES,
+  LEARNING_PATH_ENROLLMENT_TYPES,
+  LEARNING_PATH_CERTIFICATE_STATUSES,
+  LEARNING_PATH_PROGRESS_STATUSES,
+  LEARNING_PATH_STATUSES,
+  SCORM_COMPLETION_STATUS,
+  SCORM_PACKAGE_ENTITY_TYPE,
+  SCORM_PACKAGE_STATUS,
+  SCORM_STANDARD,
+  SCORM_SUCCESS_STATUS,
   SUPPORTED_LANGUAGES,
   SUPPORT_SESSION_STATUSES,
   TENANT_STATUSES,
@@ -12,6 +22,7 @@ import {
   index,
   integer,
   jsonb,
+  numeric,
   pgEnum,
   pgTable,
   text,
@@ -26,6 +37,10 @@ import {
 
 import { ACTIVITY_LOG_ACTION_TYPES } from "src/activity-logs/types";
 import { coursesSettingsSchema } from "src/courses/types/settings";
+import {
+  DEFAULT_LEARNING_PATH_SETTINGS,
+  type LearningPathSettings,
+} from "src/learning-path/types/learning-path-settings.types";
 import { safeJsonb } from "src/utils/safe-jsonb";
 
 import {
@@ -39,16 +54,27 @@ import {
 } from "./utils";
 
 import type {
+  CourseType,
   CourseOriginType,
   FormType,
   LocalizedText,
   MasterCourseEntityType,
   MasterCourseExportSyncStatus,
+  LearningPathEntityType,
+  LearningPathCertificateStatus,
   RegistrationFormFieldType,
+  ScormCompletionStatus,
+  ScormPackageEntityType,
+  ScormPackageStatus,
+  ScormStandard,
+  ScormSuccessStatus,
   SupportedLanguages,
   PermissionKey,
   SupportSessionStatus,
   TenantStatus,
+  LearningPathEnrollmentType,
+  LearningPathProgressStatus,
+  LearningPathStatus,
 } from "@repo/shared";
 import type { ActivityLogMetadata } from "src/activity-logs/types";
 import type { ActivityHistory, AllSettings } from "src/common/types";
@@ -208,7 +234,31 @@ export const resetTokens = pgTable(
   }),
 );
 
+export const courseTypeEnum = pgEnum(
+  "course_type",
+  Object.values(COURSE_TYPE) as [string, ...string[]],
+);
 export const coursesStatusEnum = pgEnum("status", ["draft", "published", "private"]);
+export const scormStandardEnum = pgEnum(
+  "scorm_standard",
+  Object.values(SCORM_STANDARD) as [string, ...string[]],
+);
+export const scormPackageEntityTypeEnum = pgEnum(
+  "scorm_package_entity_type",
+  Object.values(SCORM_PACKAGE_ENTITY_TYPE) as [string, ...string[]],
+);
+export const scormPackageStatusEnum = pgEnum(
+  "scorm_package_status",
+  Object.values(SCORM_PACKAGE_STATUS) as [string, ...string[]],
+);
+export const scormCompletionStatusEnum = pgEnum(
+  "scorm_completion_status",
+  Object.values(SCORM_COMPLETION_STATUS) as [string, ...string[]],
+);
+export const scormSuccessStatusEnum = pgEnum(
+  "scorm_success_status",
+  Object.values(SCORM_SUCCESS_STATUS) as [string, ...string[]],
+);
 
 const coursesSettings = safeJsonb("settings", coursesSettingsSchema);
 export const courses = pgTable(
@@ -225,7 +275,10 @@ export const courses = pgTable(
     priceInCents: integer("price_in_cents").notNull().default(0),
     currency: varchar("currency").notNull().default("usd"),
     chapterCount: integer("chapter_count").notNull().default(0),
-    isScorm: boolean("is_scorm").notNull().default(false),
+    courseType: courseTypeEnum("course_type")
+      .$type<CourseType>()
+      .notNull()
+      .default(COURSE_TYPE.DEFAULT),
     authorId: uuid("author_id")
       .references(() => users.id)
       .notNull(),
@@ -727,36 +780,164 @@ export const lessonLearningTime = pgTable(
   })),
 );
 
-export const scormMetadata = pgTable(
-  "scorm_metadata",
+export const scormPackages = pgTable(
+  "scorm_packages",
   {
     ...id,
     ...timestamps,
-    courseId: uuid("course_id")
-      .references(() => courses.id)
-      .notNull(),
-    fileId: uuid("file_id")
-      .references(() => scormFiles.id)
-      .notNull(),
-    version: text("version").notNull(),
-    entryPoint: text("entry_point").notNull(),
-    s3Key: text("s3_key").notNull(),
+    entityType: scormPackageEntityTypeEnum("entity_type").$type<ScormPackageEntityType>().notNull(),
+    entityId: uuid("entity_id").notNull(),
+    language: text("language")
+      .$type<SupportedLanguages>()
+      .notNull()
+      .default(SUPPORTED_LANGUAGES.EN),
+    standard: scormStandardEnum("standard").$type<ScormStandard>().notNull(),
+    originalFileReference: text("original_file_reference").notNull(),
+    extractedFilesReference: text("extracted_files_reference").notNull(),
+    manifestEntryPoint: text("manifest_entry_point").notNull(),
+    manifestJson: jsonb("manifest_json").default({}).notNull(),
+    status: scormPackageStatusEnum("status")
+      .$type<ScormPackageStatus>()
+      .notNull()
+      .default(SCORM_PACKAGE_STATUS.PROCESSING),
     tenantId,
   },
-  withTenantIdIndex("scorm_metadata"),
+  withTenantIdIndex("scorm_packages", (table) => ({
+    entityIdx: index("scorm_packages_entity_idx").on(
+      table.entityType,
+      table.entityId,
+      table.language,
+    ),
+    entityUniqueIdx: uniqueIndex("scorm_packages_entity_unique_idx").on(
+      table.entityType,
+      table.entityId,
+      table.language,
+    ),
+  })),
 );
 
-export const scormFiles = pgTable(
-  "scorm_files",
+export const scormScos = pgTable(
+  "scorm_scos",
   {
     ...id,
     ...timestamps,
+    packageId: uuid("package_id")
+      .references(() => scormPackages.id, { onDelete: "cascade" })
+      .notNull(),
+    lessonId: uuid("lesson_id")
+      .references(() => lessons.id, { onDelete: "cascade" })
+      .notNull(),
+    organizationIdentifier: text("organization_identifier"),
+    identifier: text("identifier").notNull(),
+    identifierRef: text("identifier_ref"),
+    resourceIdentifier: text("resource_identifier"),
+    resourceType: text("resource_type"),
+    scormType: text("scorm_type"),
     title: text("title").notNull(),
-    type: text("type").notNull(),
-    s3KeyPath: text("s3_key_path").notNull(),
+    href: text("href"),
+    launchPath: text("launch_path").notNull(),
+    parameters: text("parameters"),
+    displayOrder: integer("display_order").notNull(),
+    parentIdentifier: text("parent_identifier"),
+    isVisible: boolean("is_visible").notNull().default(true),
+    itemMetadataJson: jsonb("item_metadata_json"),
+    resourceMetadataJson: jsonb("resource_metadata_json"),
     tenantId,
   },
-  withTenantIdIndex("scorm_files"),
+  withTenantIdIndex("scorm_scos", (table) => ({
+    packageIdx: index("scorm_scos_package_id_idx").on(table.packageId),
+    lessonIdx: index("scorm_scos_lesson_id_idx").on(table.lessonId),
+    packageIdentifierUniqueIdx: uniqueIndex("scorm_scos_package_identifier_unique_idx").on(
+      table.packageId,
+      table.identifier,
+    ),
+  })),
+);
+
+export const scormAttempts = pgTable(
+  "scorm_attempts",
+  {
+    ...id,
+    ...timestamps,
+    studentId: uuid("student_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    courseId: uuid("course_id")
+      .references(() => courses.id, { onDelete: "cascade" })
+      .notNull(),
+    lessonId: uuid("lesson_id")
+      .references(() => lessons.id, { onDelete: "cascade" })
+      .notNull(),
+    packageId: uuid("package_id")
+      .references(() => scormPackages.id, { onDelete: "cascade" })
+      .notNull(),
+    scoId: uuid("sco_id")
+      .references(() => scormScos.id, { onDelete: "cascade" })
+      .notNull(),
+    attemptNumber: integer("attempt_number").notNull().default(1),
+    startedAt: timestamp("started_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    completedAt: timestamp("completed_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    tenantId,
+  },
+  withTenantIdIndex("scorm_attempts", (table) => ({
+    studentLessonIdx: index("scorm_attempts_student_lesson_idx").on(
+      table.studentId,
+      table.lessonId,
+    ),
+    studentPackageIdx: index("scorm_attempts_student_package_idx").on(
+      table.studentId,
+      table.packageId,
+    ),
+    scoIdx: index("scorm_attempts_sco_id_idx").on(table.scoId),
+    studentPackageScoAttemptUniqueIdx: uniqueIndex(
+      "scorm_attempts_student_package_sco_attempt_unique_idx",
+    ).on(table.studentId, table.packageId, table.scoId, table.attemptNumber),
+  })),
+);
+
+export const scormRuntimeState = pgTable(
+  "scorm_runtime_state",
+  {
+    ...id,
+    ...timestamps,
+    attemptId: uuid("attempt_id")
+      .references(() => scormAttempts.id, { onDelete: "cascade" })
+      .notNull(),
+    completionStatus: scormCompletionStatusEnum("completion_status")
+      .$type<ScormCompletionStatus>()
+      .notNull()
+      .default(SCORM_COMPLETION_STATUS.UNKNOWN),
+    successStatus: scormSuccessStatusEnum("success_status")
+      .$type<ScormSuccessStatus>()
+      .notNull()
+      .default(SCORM_SUCCESS_STATUS.UNKNOWN),
+    scoreRaw: numeric("score_raw", { precision: 10, scale: 4 }),
+    scoreMin: numeric("score_min", { precision: 10, scale: 4 }),
+    scoreMax: numeric("score_max", { precision: 10, scale: 4 }),
+    scoreScaled: numeric("score_scaled", { precision: 10, scale: 4 }),
+    lessonLocation: text("lesson_location"),
+    suspendData: text("suspend_data"),
+    sessionTime: text("session_time"),
+    totalTime: text("total_time"),
+    progressMeasure: numeric("progress_measure", { precision: 10, scale: 4 }),
+    entry: text("entry"),
+    exit: text("exit"),
+    rawCmiJson: jsonb("raw_cmi_json").default({}).notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("scorm_runtime_state", (table) => ({
+    attemptUniqueIdx: uniqueIndex("scorm_runtime_state_attempt_id_unique_idx").on(table.attemptId),
+  })),
 );
 
 export const groups = pgTable(
@@ -1528,6 +1709,251 @@ export const permissionUserRoles = pgTable(
     userRoleUniqueIdx: uniqueIndex("permission_user_roles_user_id_role_id_unique").on(
       table.userId,
       table.roleId,
+    ),
+  }),
+);
+
+export const learningPaths = pgTable(
+  "learning_paths",
+  {
+    ...id,
+    ...timestamps,
+    title: jsonb("title").default({}).notNull().$type<LocalizedText>(),
+    description: jsonb("description").default({}).notNull().$type<LocalizedText>(),
+    thumbnailReference: varchar("thumbnail_reference", { length: 500 }),
+    status: text("status")
+      .notNull()
+      .$type<LearningPathStatus>()
+      .default(LEARNING_PATH_STATUSES.DRAFT),
+    includesCertificate: boolean("includes_certificate").notNull().default(false),
+    settings: jsonb("settings")
+      .default(DEFAULT_LEARNING_PATH_SETTINGS)
+      .notNull()
+      .$type<LearningPathSettings>(),
+    sequenceEnabled: boolean("sequence_enabled").notNull().default(false),
+    authorId: uuid("author_id")
+      .references(() => users.id)
+      .notNull(),
+    originType: text("origin_type")
+      .notNull()
+      .$type<CourseOriginType>()
+      .default(COURSE_ORIGIN_TYPES.REGULAR),
+    sourceLearningPathId: uuid("source_learning_path_id"),
+    sourceTenantId: uuid("source_tenant_id"),
+    baseLanguage,
+    availableLocales,
+    tenantId,
+  },
+  withTenantIdIndex("learning_paths"),
+);
+
+export const learningPathCourses = pgTable(
+  "learning_path_courses",
+  {
+    ...id,
+    ...timestamps,
+    learningPathId: uuid("learning_path_id")
+      .references(() => learningPaths.id, { onDelete: "cascade" })
+      .notNull(),
+    courseId: uuid("course_id")
+      .references(() => courses.id, { onDelete: "cascade" })
+      .notNull(),
+    displayOrder: integer("display_order").notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("learning_path_courses", (table) => ({
+    pathCourseUniqueIdx: uniqueIndex("learning_path_courses_path_id_course_id_unique_idx").on(
+      table.learningPathId,
+      table.courseId,
+    ),
+    pathOrderUniqueIdx: uniqueIndex("learning_path_courses_path_id_display_order_unique_idx").on(
+      table.learningPathId,
+      table.displayOrder,
+    ),
+    pathOrderIdx: index("learning_path_courses_path_id_display_order_idx").on(
+      table.learningPathId,
+      table.displayOrder,
+    ),
+  })),
+);
+
+export const studentLearningPaths = pgTable(
+  "student_learning_paths",
+  {
+    ...id,
+    ...timestamps,
+    studentId: uuid("student_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    learningPathId: uuid("learning_path_id")
+      .references(() => learningPaths.id, { onDelete: "cascade" })
+      .notNull(),
+    progress: text("progress")
+      .notNull()
+      .$type<LearningPathProgressStatus>()
+      .default(LEARNING_PATH_PROGRESS_STATUSES.NOT_STARTED),
+    completedAt: timestamp("completed_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    enrolledAt: timestamp("enrolled_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }).defaultNow(),
+    enrollmentType: text("enrollment_type")
+      .notNull()
+      .$type<LearningPathEnrollmentType>()
+      .default(LEARNING_PATH_ENROLLMENT_TYPES.DIRECT),
+    tenantId,
+  },
+  withTenantIdIndex("student_learning_paths", (table) => ({
+    unq: unique().on(table.studentId, table.learningPathId),
+  })),
+);
+
+export const studentLearningPathCourses = pgTable(
+  "student_learning_path_courses",
+  {
+    ...id,
+    ...timestamps,
+    studentId: uuid("student_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    learningPathId: uuid("learning_path_id")
+      .references(() => learningPaths.id, { onDelete: "cascade" })
+      .notNull(),
+    courseId: uuid("course_id")
+      .references(() => courses.id, { onDelete: "cascade" })
+      .notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("student_learning_path_courses", (table) => ({
+    unq: unique().on(table.studentId, table.learningPathId, table.courseId),
+    studentPathIdx: index("student_learning_path_courses_student_path_idx").on(
+      table.studentId,
+      table.learningPathId,
+    ),
+    courseIdx: index("student_learning_path_courses_course_idx").on(table.courseId),
+  })),
+);
+
+export const groupLearningPaths = pgTable(
+  "group_learning_paths",
+  {
+    ...id,
+    ...timestamps,
+    groupId: uuid("group_id")
+      .references(() => groups.id, { onDelete: "cascade" })
+      .notNull(),
+    learningPathId: uuid("learning_path_id")
+      .references(() => learningPaths.id, { onDelete: "cascade" })
+      .notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("group_learning_paths", (table) => ({
+    unq: unique().on(table.groupId, table.learningPathId),
+    learningPathIdx: index("group_learning_paths_learning_path_idx").on(table.learningPathId),
+  })),
+);
+
+export const learningPathCertificates = pgTable(
+  "learning_path_certificates",
+  {
+    ...id,
+    ...timestamps,
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    learningPathId: uuid("learning_path_id")
+      .references(() => learningPaths.id, { onDelete: "cascade" })
+      .notNull(),
+    status: text("status")
+      .notNull()
+      .$type<LearningPathCertificateStatus>()
+      .default(LEARNING_PATH_CERTIFICATE_STATUSES.ACTIVE),
+    issuedAt: timestamp("issued_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    })
+      .notNull()
+      .defaultNow(),
+    expiresAt: timestamp("expires_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    tenantId,
+  },
+  withTenantIdIndex("learning_path_certificates"),
+);
+
+export const learningPathExports = pgTable(
+  "learning_path_exports",
+  {
+    ...id,
+    ...timestamps,
+    sourceTenantId: uuid("source_tenant_id")
+      .references(() => tenants.id, { onDelete: "cascade" })
+      .notNull(),
+    sourceLearningPathId: uuid("source_learning_path_id").notNull(),
+    targetTenantId: uuid("target_tenant_id")
+      .references(() => tenants.id, { onDelete: "cascade" })
+      .notNull(),
+    targetLearningPathId: uuid("target_learning_path_id").references(() => learningPaths.id, {
+      onDelete: "cascade",
+    }),
+    syncStatus: text("sync_status")
+      .notNull()
+      .$type<MasterCourseExportSyncStatus>()
+      .default(MASTER_COURSE_EXPORT_SYNC_STATUSES.ACTIVE),
+    lastSyncedAt: timestamp("last_synced_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+  },
+  (table) => ({
+    sourceLearningPathIdx: index("learning_path_exports_source_learning_path_idx").on(
+      table.sourceTenantId,
+      table.sourceLearningPathId,
+    ),
+    targetLearningPathIdx: index("learning_path_exports_target_learning_path_idx").on(
+      table.targetTenantId,
+      table.targetLearningPathId,
+    ),
+    sourceTargetUniqueIdx: uniqueIndex("learning_path_exports_source_target_unique_idx").on(
+      table.sourceTenantId,
+      table.sourceLearningPathId,
+      table.targetTenantId,
+    ),
+  }),
+);
+
+export const learningPathEntityMap = pgTable(
+  "learning_path_entity_map",
+  {
+    ...id,
+    ...timestamps,
+    exportId: uuid("export_id")
+      .references(() => learningPathExports.id, { onDelete: "cascade" })
+      .notNull(),
+    entityType: text("entity_type").notNull().$type<LearningPathEntityType>(),
+    sourceEntityId: uuid("source_entity_id").notNull(),
+    targetEntityId: uuid("target_entity_id").notNull(),
+  },
+  (table) => ({
+    exportIdx: index("learning_path_entity_map_export_idx").on(table.exportId),
+    sourceEntityIdx: index("learning_path_entity_map_source_entity_idx").on(
+      table.entityType,
+      table.sourceEntityId,
+    ),
+    sourceUniqueIdx: uniqueIndex("learning_path_entity_map_source_unique_idx").on(
+      table.exportId,
+      table.entityType,
+      table.sourceEntityId,
     ),
   }),
 );

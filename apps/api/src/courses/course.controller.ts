@@ -11,6 +11,7 @@ import {
   Post,
   Query,
   Req,
+  Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -25,7 +26,7 @@ import {
   type PermissionKey,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
-import { Request } from "express";
+import { Request, Response } from "express";
 import { Validate } from "nestjs-typebox";
 
 import {
@@ -41,7 +42,9 @@ import { Public } from "src/common/decorators/public.decorator";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { ManagingTenantAdminGuard } from "src/common/guards/managing-tenant-admin.guard";
+import { getRequestBaseUrl } from "src/common/helpers/getRequestBaseUrl";
 import { CurrentUserType } from "src/common/types/current-user.type";
+import { CourseScormExportService } from "src/courses/course-scorm-export.service";
 import { CourseService } from "src/courses/course.service";
 import { MasterCourseService } from "src/courses/master-course.service";
 import {
@@ -153,6 +156,7 @@ import type {
 export class CourseController {
   constructor(
     private readonly courseService: CourseService,
+    private readonly courseScormExportService: CourseScormExportService,
     private readonly learningTimeService: LearningTimeService,
     private readonly masterCourseService: MasterCourseService,
   ) {}
@@ -1036,6 +1040,33 @@ export class CourseController {
     @CurrentUser() currentUser: CurrentUserType,
   ) {
     return this.courseService.generateMissingTranslations(courseId, language, currentUser);
+  }
+
+  @Post(":courseId/scorm-export")
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
+  @Validate({
+    request: [
+      { type: "param", name: "courseId", schema: UUIDSchema, required: true },
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
+    ],
+  })
+  async exportCourseAsScorm(
+    @Param("courseId") courseId: UUIDType,
+    @Query("language") language: SupportedLanguages | undefined,
+    @CurrentUser() currentUser: CurrentUserType,
+    @Req() request: Request,
+    @Res() res: Response,
+  ): Promise<void> {
+    const exportedPackage = await this.courseScormExportService.exportCourse(
+      courseId,
+      currentUser,
+      language,
+      getRequestBaseUrl(request),
+    );
+
+    res.setHeader("Content-Type", exportedPackage.contentType);
+    res.setHeader("Content-Disposition", `attachment; filename="${exportedPackage.filename}"`);
+    exportedPackage.stream.pipe(res);
   }
 
   @Post("course-ownership/transfer")

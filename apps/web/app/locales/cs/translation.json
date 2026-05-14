@@ -46,7 +46,8 @@
       "content": "Obsah",
       "quiz": "Kvíz",
       "ai_mentor": "AI mentor",
-      "embed": "Vložit"
+      "embed": "Vložit",
+      "scorm": "SCORM"
     },
     "error": {
       "somethingWentWrong": "Jejda! Něco se pokazilo."
@@ -164,6 +165,107 @@
     },
     "toast": {
       "scormUploadedSuccessfully": "Balíček SCORM byl úspěšně nahrán"
+    },
+    "errors": {
+      "packageRequired": "Balíček SCORM je povinný.",
+      "emptyPackage": "Balíček SCORM je prázdný.",
+      "tooManyFiles": "Balíček SCORM obsahuje příliš mnoho souborů.",
+      "packageTooLarge": "Balíček SCORM je po rozbalení příliš velký.",
+      "manifestMissing": "Chybí soubor manifestu SCORM.",
+      "manifestInvalid": "Soubor manifestu SCORM je neplatný.",
+      "organizationMissing": "Manifest SCORM neobsahuje organizaci.",
+      "scoMissing": "Manifest SCORM neobsahuje žádné spustitelné SCO.",
+      "resourceIdentifierMissing": "Chybí identifikátor zdroje SCORM.",
+      "itemIdentifierMissing": "Chybí identifikátor položky SCORM.",
+      "launchFileMissing": "Chybí spouštěcí soubor SCORM.",
+      "packageAlreadyAttached": "Tato lekce SCORM již má balíček pro vybraný jazyk.",
+      "invalidPackagePath": "Balíček SCORM obsahuje neplatnou cestu k souboru.",
+      "externalPackagePath": "Balíček SCORM obsahuje externí cestu k souboru.",
+      "runtime": {
+        "launchNotFound": "Spouštěcí obsah SCORM nebyl nalezen.",
+        "unsupportedStandard": "Tento standard SCORM není podporován.",
+        "invalidAttempt": "Pokus SCORM je neplatný.",
+        "invalidCmiValue": "Runtime data SCORM jsou neplatná.",
+        "contentNotFound": "Obsah SCORM nebyl nalezen.",
+        "contentForbidden": "K tomuto obsahu SCORM nemáte přístup."
+      }
+    },
+    "coursePlaceholder": {
+      "back": "Zpět na typ kurzu",
+      "status": "Import kurzu SCORM",
+      "title": "Vytvoření kurzu SCORM bude následovat",
+      "description": "Tento vstupní bod je připravený, ale import kurzů SCORM se stále implementuje. Zatím vytvořte standardní kurz nebo se vraťte na seznam kurzů.",
+      "createStandard": "Vytvořit standardní kurz",
+      "viewCourses": "Zobrazit kurzy"
+    },
+    "create": {
+      "eyebrow": "SCORM 1.2",
+      "title": "Vytvořit kurz SCORM",
+      "subtitle": "Přidejte metadata kurzu a přiložte balíček SCORM, který se stane obsahem kurzu.",
+      "requirements": {
+        "title": "Požadavky na balíček",
+        "version": "Balíček SCORM 1.2",
+        "archive": "Archiv .zip do 500MB",
+        "metadata": "Metadata kurzu lze upravit před importem"
+      },
+      "packageSection": "Balíček SCORM",
+      "packageSectionDescription": "Přiložte balíček SCORM 1.2, který se má importovat jako obsah tohoto kurzu.",
+      "importNotice": "Import velkých balíčků SCORM může trvat několik minut. Zůstaňte na této stránce, dokud se nahrávání nedokončí.",
+      "metadataSection": "Detaily kurzu",
+      "metadataSectionDescription": "Tato pole odpovídají standardnímu nastavení kurzu a použijí se jako základní metadata kurzu.",
+      "uploadPackage": "Nahrát balíček SCORM",
+      "dropPackage": "Přetáhněte balíček SCORM sem",
+      "uploadPackageDescription": "Přetáhněte soubor SCORM 1.2 .zip nebo jej vyberte ze zařízení.",
+      "packageReady": "připraveno k importu",
+      "replacePackage": "Nahradit balíček",
+      "removePackage": "Odebrat balíček",
+      "uploadThumbnail": "Nahrát miniaturu",
+      "uploadThumbnailDescription": "PNG, JPG nebo JPEG do 20MB",
+      "thumbnailPreviewAlt": "Náhled miniatury kurzu",
+      "submit": "Vytvořit kurz SCORM",
+      "creating": "Vytváření kurzu SCORM...",
+      "toastDraftReady": "Formulář kurzu SCORM je připraven pro integraci API"
+    },
+    "lesson": {
+      "packageSection": "Balíček SCORM",
+      "packageAttached": "Balíček SCORM je připojen",
+      "packageLocked": "Tento balíček nelze po vytvoření lekce nahradit.",
+      "importNotice": "Import velkých balíčků SCORM může trvat několik minut. Zůstaňte na této stránce, dokud se nahrávání nedokončí.",
+      "replacePackageTooltip": "Pokud chcete přidat jiný balíček SCORM, odstraňte tuto lekci a vytvořte novou.",
+      "languagePackageTooltip": "Nahrajte balíček SCORM pro vybraný jazyk. Existující jazykové balíčky nelze nahradit.",
+      "validation": {
+        "titleRequired": "Název je povinný",
+        "packageRequired": "Balíček SCORM je povinný",
+        "packageTooLarge": "Balíček SCORM musí být menší než 500MB",
+        "packageInvalidType": "Balíček SCORM musí být soubor .zip"
+      }
+    }
+  },
+  "adminCourseTypeSelector": {
+    "back": "Zpět",
+    "eyebrow": "Nastavení kurzu",
+    "title": "Vytvořit nový kurz",
+    "subtitle": "Vyberte, zda chcete kurz vytvořit ve standardním editoru, nebo z balíčku SCORM.",
+    "standard": {
+      "title": "Standardní",
+      "description": "Vytvořte kurz s vestavěným plánem, lekcemi, kvízy a nastavením.",
+      "features": {
+        "authoring": "Vytvořeno v nativním editoru kurzů",
+        "curriculum": "Kapitoly, lekce a kvízy spravované v Mentingu",
+        "translations": "Podpora jazyků a překladů kurzu",
+        "settings": "Ceny, stav a certifikáty jsou součástí"
+      }
+    },
+    "scorm": {
+      "title": "SCORM",
+      "description": "Vytvořte kurz z balíčku SCORM 1.2.",
+      "badge": "Placeholder",
+      "features": {
+        "import": "Vytvořeno z balíčku SCORM 1.2 .zip",
+        "tracking": "Podpora dokončení SCO a runtime stavu",
+        "structure": "Struktura importovaného balíčku zachována",
+        "future": "Ceny, stav a certifikáty jsou součástí"
+      }
     }
   },
   "studentChapterCardView": {
@@ -184,6 +286,7 @@
     "progress": "Pokrok",
     "findInApplication": "Najít v aplikaci",
     "courses": "Kurzy",
+    "learningPaths": "Vzdělávací cesty",
     "content": "Obsah",
     "categories": "Kategorie",
     "users": "Uživatelé",
@@ -694,6 +797,7 @@
       "author": "Autor",
       "category": "Kategorie",
       "price": "Cena",
+      "type": "Typ",
       "state": "Stát",
       "status": "Postavení",
       "sharedCourse": "Sdíleno",
@@ -868,6 +972,7 @@
         "category": "kategorie",
         "group": "skupiny",
         "course": "kurzy",
+        "learning_path": "vzdělávací cesty",
         "learning_mode": "režim učení",
         "learning_progress": "studijní postup",
         "certificate": "certifikáty",
@@ -1178,6 +1283,23 @@
       "maxOneVideoUploaded": "Nemůžete nahrát více než 1 video.",
       "successfullyTransferredCourseOwnership": "Vlastnictví kurzu bylo úspěšně převedeno"
     },
+    "errors": {
+      "featureUnavailable": {
+        "curriculum": "Úprava osnovy není pro kurzy SCORM dostupná.",
+        "lessonSequence": "Vynucení pořadí lekcí není pro kurzy SCORM dostupné.",
+        "quizFeedback": "Nastavení zpětné vazby kvízu není pro kurzy SCORM dostupné."
+      },
+      "notFound": {
+        "course": "Kurz nenalezen.",
+        "category": "Kategorie nenalezena.",
+        "chapter": "Kapitola nenalezena.",
+        "lesson": "Lekce nenalezena."
+      },
+      "create": {
+        "courseFailed": "Kurz se nepodařilo vytvořit.",
+        "stripeProductFailed": "Platební produkt kurzu se nepodařilo vytvořit."
+      }
+    },
     "thinking": {
       "PLANNING_NEXT_STEP": "Plánování dalšího kroku...",
       "USING_TOOLS": "Použití nástrojů k načtení kontextu...",
@@ -1308,6 +1430,7 @@
         "removeQuizLesson": "Opravdu chcete odstranit tuto kvízovou lekci z kapitoly?",
         "removeAiMentorLesson": "Opravdu chcete smazat tuto lekci AI Mentor z kapitoly?",
         "removeEmbedLesson": "Opravdu chcete smazat tuto vloženou lekci z kapitoly?",
+        "removeScormLesson": "Opravdu chcete smazat tuto lekci SCORM z kapitoly?",
         "removeChapter": "Opravdu chcete smazat tuto kapitolu?",
         "removeQuestion": "Opravdu chcete smazat otázku?",
         "removeContent": "Opravdu chcete smazat obsah?"
@@ -1396,6 +1519,8 @@
           "lessonCreatedSuccessfully": "Lekce byla úspěšně vytvořena",
           "fileLessonCreatedSuccessfully": "Položka souboru byla úspěšně vytvořena",
           "contentLessonCreatedSuccessfully": "Obsah lekce byl úspěšně vytvořen",
+          "scormLessonCreatedSuccessfully": "Lekce SCORM byla úspěšně vytvořena",
+          "scormLessonPackageAttachedSuccessfully": "Balíček SCORM byl úspěšně připojen",
           "quizLessonCreatedSuccessfully": "Kvíz byl úspěšně vytvořen",
           "aiMentorLessonCreatedSuccessfully": "Lekce AI Mentor byla úspěšně vytvořena",
           "aiMentorLessonUpdatedSuccessfully": "Lekce AI Mentor byla úspěšně aktualizována",
@@ -1472,10 +1597,12 @@
         "other": {
           "lessonNumber": "Počet lekcí",
           "chooseType": "Vyberte typ",
+          "chooseLessonTypeAriaLabel": "Vybrat typ lekce {{type}}",
           "content": "Obsah",
           "quiz": "Kvíz",
           "aiMentor": "AI mentor",
           "embed": "Vložit",
+          "scorm": "SCORM",
           "correct": "Opravit",
           "true": "Věrný",
           "false": "Falešný",
@@ -1494,6 +1621,7 @@
           "contentLessonDescription": "Text s multimédii (obrázky, videa, prezentace).",
           "quizLessonDescription": "Sada otázek pro ověření znalostí.",
           "aiMentorLessonDescription": "Interaktivní rozhovor s virtuálním AI mentorem.",
+          "scormLessonDescription": "Obsah lekce v balíčku SCORM.",
           "fillInTheBlanksDescription": "Tato otázka obsahuje větu; studenti musí přetáhnout správné slovo do prázdného místa.",
           "gapFillDescription": "Tato otázka bude obsahovat větu s chybějícími slovy, která studenti musí zadat.",
           "embedLessonDescription": "Externí zdroj (např. formulář Google, prezentace Canva nebo živý přenos YouTube).",
@@ -1712,6 +1840,29 @@
       "selectedCount": "Vybraný:",
       "exportButton": "Podíl",
       "exportingButton": "Sdílení..."
+    },
+    "scormExport": {
+      "title": "Balíček SCORM",
+      "description": "Exportujte tento kurz jako samostatný balíček SCORM 1.2 pro jiný LMS.",
+      "versionBadge": "SCORM 1.2",
+      "button": "Exportovat balíček SCORM",
+      "exportingButton": "Exportování...",
+      "success": "Stahování balíčku SCORM bylo zahájeno.",
+      "warning": {
+        "title": "Lekce AI Mentor budou přeskočeny",
+        "description": "Tento kurz obsahuje {{count}} lekci AI Mentor. Lekce AI Mentor nejsou v balíčcích SCORM podporovány. Chcete pokračovat?",
+        "description_other": "Tento kurz obsahuje {{count}} lekce AI Mentor. Lekce AI Mentor nejsou v balíčcích SCORM podporovány. Chcete pokračovat?",
+        "confirm": "Přesto exportovat"
+      },
+      "error": {
+        "courseNotFound": "Kurz nebyl nalezen.",
+        "accessDenied": "Nemáte oprávnění exportovat tento kurz.",
+        "noExportableLessons": "Tento kurz neobsahuje lekce, které lze exportovat do SCORM.",
+        "unsupportedLessonType": "Tento kurz obsahuje typ lekce, který nelze exportovat do SCORM.",
+        "missingAsset": "Tento kurz obsahuje soubor nebo zdroj, který se nepodařilo připravit pro export.",
+        "invalidSnapshot": "Tento kurz se nepodařilo připravit pro export SCORM.",
+        "fallback": "Export SCORM se nezdařil."
+      }
     }
   },
   "registerView": {
@@ -1931,6 +2082,17 @@
     "aiMentor": {
       "title": "Sezení AI Mentor",
       "description": "Toto je mentorské sezení založené na umělé inteligenci. Umělá inteligence vás provede lekcí na základě pokynů instruktora."
+    },
+    "scorm": {
+      "loading": "Načítání obsahu SCORM...",
+      "launchFailed": "Obsah SCORM se nepodařilo spustit.",
+      "launchFailedBody": "Zkuste to znovu. Pokud problém přetrvává, může být potřeba balíček SCORM znovu nahrát.",
+      "saveFailed": "Postup SCORM se nepodařilo uložit.",
+      "saving": "Ukládání postupu",
+      "previousSco": "Předchozí část",
+      "nextSco": "Další část",
+      "tryAgain": "Zkuste to znovu",
+      "lessonFinished": "Lekce SCORM byla dokončena."
     },
     "videoProcessing": {
       "title": "Video se zpracovává",
@@ -2646,7 +2808,335 @@
     "progress": "Pokrok",
     "tenant": "Podrobnosti organizace",
     "createTenant": "Vytvořit organizaci",
-    "tenants": "Organizace"
+    "tenants": "Organizace",
+    "activityLogs": "Log aktivit",
+    "learningPaths": "Vzdělávací cesty",
+    "adminLearningPaths": "Vzdělávací cesty",
+    "adminLearningPathEditor": "Editor vzdělávací cesty"
+  },
+  "masterCourse": {
+    "error": {
+      "sourceCourseNotFound": "Zdrojovy kurz nebyl nalezen",
+      "noTargetTenants": "Vyberte alespon jednoho ciloveho tenanta",
+      "exportedCourseCannotBeSource": "Exportovany kurz nelze pouzit jako zdroj",
+      "exportLinkMissing": "Vazba exportu kurzu nebyla nalezena",
+      "jobNotFound": "Uloha exportu kurzu nebyla nalezena",
+      "targetAuthorMissing": "Autor v cilovem tenantovi nebyl nalezen",
+      "targetCourseMissing": "Cilovy kurz nebyl nalezen",
+      "exportedCourseReadonly": "Exportovany kurz je jen pro cteni"
+    }
+  },
+  "learningPathExport": {
+    "error": {
+      "noTargetTenants": "Vyberte alespon jednoho ciloveho tenanta",
+      "exportLinkMissing": "Vazba exportu vzdelavaci cesty nebyla nalezena",
+      "noCourses": "Vzdelavaci cesta musi pred exportem obsahovat alespon jeden kurz",
+      "courseExportFailed": "Nepodarilo se exportovat jeden z kurzu vzdelavaci cesty",
+      "targetAuthorMissing": "Autor v cilovem tenantovi nebyl nalezen",
+      "jobNotFound": "Uloha exportu vzdelavaci cesty nebyla nalezena",
+      "invalidJobData": "Neplatna data ulohy exportu vzdelavaci cesty",
+      "invalidExportId": "Neplatne ID exportu vzdelavaci cesty",
+      "invalidExportLink": "Neplatna vazba exportu vzdelavaci cesty"
+    }
+  },
+  "learningPathCertificate": {
+    "error": {
+      "disabled": "Certifikaty vzdelavacich cest jsou vypnute"
+    }
+  },
+  "activityLogsView": {
+    "filters": {
+      "placeholder": {
+        "searchByEmail": "Hledat podle e-mailu...",
+        "from": "Od data",
+        "to": "Do data"
+      }
+    },
+    "description": "Časová osa změn v platformě jako jednoduchý rozbalovací feed.",
+    "breadcrumbs": {
+      "activityLogs": "Log aktivit"
+    },
+    "emptyState": {
+      "title": "Žádné záznamy o aktivitě nebyly nalezeny.",
+      "description": "Jakmile se na platformě něco stane, zobrazí se to zde."
+    },
+    "details": {
+      "before": "Před",
+      "after": "Po",
+      "context": "Kontext",
+      "noMetadata": "Žádná metadata nejsou k dispozici."
+    },
+    "fallbacks": {
+      "unknown": "Neznámé",
+      "notAvailable": "n/a"
+    },
+    "labels": {
+      "action": "Akce:",
+      "entity": "Zdroj:",
+      "resource": "Zdroj:"
+    },
+    "actions": {
+      "create": "Vytvořeno",
+      "update": "Aktualizováno",
+      "delete": "Smazáno",
+      "login": "Přihlášeno",
+      "login_failed": "Neúspěšné přihlášení",
+      "logout": "Odhlášeno",
+      "enroll_course": "Zapsáno",
+      "unenroll_course": "Odregistrováno",
+      "start_course": "Spuštěno",
+      "group_assignment": "Přiřazeno",
+      "complete_lesson": "Dokončeno",
+      "complete_course": "Dokončeno",
+      "complete_chapter": "Dokončeno",
+      "view_announcement": "Zobrazeno"
+    },
+    "entity": {
+      "course": "Kurz",
+      "chapter": "Kapitola",
+      "lesson": "Lekce",
+      "question": "Otázka",
+      "news": "Novinky",
+      "articles": "Články",
+      "user": "Uživatel",
+      "category": "Kategorie",
+      "announcement": "Oznámení",
+      "global_settings": "Nastavení"
+    },
+    "table": {
+      "datetime": "Datum a čas",
+      "email": "E-mail",
+      "action": "Akce",
+      "resource": "Zdroj",
+      "details": "Detaily",
+      "showDetails": "Zobrazit detaily",
+      "loading": "Načítání záznamů aktivit...",
+      "empty": "Žádné záznamy o aktivitě nebyly nalezeny."
+    }
+  },
+  "learningPathsView": {
+    "title": "Vzdělávací cesty",
+    "description": "Procházejte přiřazené vzdělávací cesty a pokračujte v uspořádaných sekvencích kurzů.",
+    "searchPlaceholder": "Hledat vzdělávací cesty",
+    "summary": "{{count}} vzdělávacích cest je dostupných.",
+    "detailsTitle": "Vzdělávací cesta",
+    "detailsDescription": "Zkontrolujte pořadí kurzů, pokrok, uzamčení a stav certifikátu.",
+    "detailsSummary": "Tato cesta obsahuje {{count}} kurzů. Aktuální pokrok: {{progress}}.",
+    "emptyDescription": "Popis zatím nebyl přidán.",
+    "status": {
+      "draft": "Koncept",
+      "published": "Publikováno",
+      "private": "Soukromé",
+      "not_started": "Nezahájeno",
+      "in_progress": "Probíhá",
+      "completed": "Dokončeno",
+      "blocked": "Blokováno"
+    },
+    "badges": {
+      "sequenceEnabled": "Sekvenční",
+      "freeOrder": "Volné pořadí",
+      "certificate": "Certifikát"
+    },
+    "card": {
+      "openPath": "Otevřít vzdělávací cestu"
+    },
+    "empty": {
+      "title": "Nebyly nalezeny žádné cesty",
+      "description": "Upravte vyhledávání nebo se vraťte po přiřazení cest."
+    },
+    "progress": {
+      "title": "Pokrok cesty",
+      "summary": "Dokončeno {{completed}} z {{total}} kurzů"
+    },
+    "certificate": {
+      "available": "Certifikát dostupný",
+      "ready": "Certifikát připraven",
+      "pathCompleted": "Vzdělávací cesta dokončena. Váš certifikát je připraven."
+    },
+    "courseState": {
+      "completed": "Dokončeno",
+      "inProgress": "Probíhá",
+      "inProgressDescription": "Tento kurz jste již zahájili.",
+      "notStarted": "Nezahájeno",
+      "notStartedDescription": "Tento kurz je možné zahájit.",
+      "locked": "Uzamčeno",
+      "lockedDescription": "Dokončete předchozí kurz, aby se odemkl."
+    },
+    "detail": {
+      "courses": "Kurzy v této cestě",
+      "courseTitle": "Kurz {{number}}",
+      "completedAt": "Dokončeno {{date}}",
+      "emptyCourses": "Tato vzdělávací cesta zatím neobsahuje žádné kurzy."
+    },
+    "enrollment": {
+      "manage": "Zapsat",
+      "title": "Zapsat účastníky",
+      "description": "Spravujte zápisy studentů a skupin do této vzdělávací cesty.",
+      "students": "Studenti",
+      "selectStudents": "Vyberte studenty",
+      "groups": "Skupiny",
+      "selectGroups": "Vyberte skupiny",
+      "filters": {
+        "placeholder": {
+          "searchByKeyword": "Hledat podle klíčového slova..."
+        }
+      },
+      "enrollSelected": "Zapsat vybrané",
+      "unenrollSelected": "Odebrat vybrané ze zápisu",
+      "enrollGroups": "Zapsat skupiny",
+      "unenrollGroups": "Odebrat skupiny ze zápisu",
+      "enrolled": "Zapsáno",
+      "enroll": "Zapsat",
+      "studentsEnrolled": "Studenti zapsáni",
+      "groupsEnrolled": "Skupiny zapsány",
+      "studentsUnenrolled": "Studenti odebráni ze zápisu",
+      "groupsUnenrolled": "Skupiny odebrány ze zápisu",
+      "enrolledSuccessfully": "Zapsáno do vzdělávací cesty",
+      "enrollGroupsDescription": "Vyberte skupiny, které chcete zapsat do této vzdělávací cesty.",
+      "unenrollGroupsDescription": "Vyberte skupiny, které chcete odebrat ze zápisu do této vzdělávací cesty.",
+      "table": {
+        "selectAll": "Vybrat všechny účastníky",
+        "select": "Vybrat účastníka",
+        "name": "Jméno",
+        "email": "E-mail",
+        "status": "Stav zápisu",
+        "enrollmentDate": "Datum zápisu"
+      },
+      "statuses": {
+        "enrolledByGroup": "Zapsáno přes skupinu",
+        "individuallyEnrolled": "Zapsáno individuálně",
+        "notEnrolled": "Nezapsáno"
+      },
+      "confirmation": {
+        "title": "Potvrdit zápis",
+        "description": "Opravdu chcete zapsat vybrané studenty do této vzdělávací cesty? Tuto akci nelze vrátit zpět."
+      },
+      "unenrollConfirmation": {
+        "title": "Potvrdit odebrání ze zápisu",
+        "description": "Opravdu chcete odebrat vybrané studenty ze zápisu do této vzdělávací cesty? Tuto akci nelze vrátit zpět."
+      },
+      "noGroups": "Nejsou dostupné žádné skupiny"
+    },
+    "breadcrumbs": {
+      "learningPaths": "Vzdělávací cesty",
+      "details": "Detail"
+    },
+    "buttons": {
+      "openFirst": "Otevřít první cestu"
+    }
+  },
+  "adminLearningPathsView": {
+    "title": "Vzdělávací cesty",
+    "description": "Spravujte metadata, nastavení sekvence, kurzy, zápisy, exporty a certifikáty.",
+    "summary": "{{count}} vzdělávacích cest je dostupných v tomto prostoru.",
+    "breadcrumbs": {
+      "learningPaths": "Vzdělávací cesty",
+      "create": "Vytvořit",
+      "edit": "Upravit"
+    },
+    "buttons": {
+      "create": "Vytvořit vzdělávací cestu",
+      "edit": "Upravit",
+      "save": "Uložit změny",
+      "removeImage": "Odebrat obrázek"
+    },
+    "editor": {
+      "createTitle": "Vytvořit vzdělávací cestu",
+      "editTitle": "Upravit vzdělávací cestu",
+      "description": "Nastavte podrobnosti cesty, sekvenci, kurzy a stav publikování.",
+      "createSummary": "Začněte podrobnostmi vzdělávací cesty.",
+      "editSummary": "Tato vzdělávací cesta má aktuálně {{coursesCount}} kurzů.",
+      "details": "Podrobnosti",
+      "courses": "Kurzy",
+      "image": "Obrázek",
+      "settings": "Nastavení"
+    },
+    "table": {
+      "title": "Název",
+      "status": "Stav",
+      "settings": "Nastavení",
+      "language": "Jazyk",
+      "createdAt": "Vytvořeno",
+      "actions": "Akce",
+      "untitled": "Vzdělávací cesta bez názvu",
+      "emptyDescription": "Bez popisu",
+      "sequential": "Sekvenční",
+      "flexible": "Volné pořadí",
+      "certificate": "Certifikát",
+      "empty": "Zatím nebyly vytvořeny žádné vzdělávací cesty."
+    },
+    "form": {
+      "language": "Jazyk",
+      "status": "Stav",
+      "statusDescription": "Určuje, zda je cesta viditelná, jako koncept nebo soukromá.",
+      "title": "Název",
+      "titlePlaceholder": "Pojmenujte vzdělávací cestu",
+      "description": "Popis",
+      "descriptionPlaceholder": "Popište, co studenti v této cestě dokončí",
+      "imageHint": "PNG, JPG nebo JPEG (max. 20 MB, doporučeno 1200x1200 nebo vyšší)",
+      "sequenceEnabled": "Sekvenční učení",
+      "sequenceEnabledDescription": "Studenti musí dokončit kurzy v zobrazeném pořadí.",
+      "includesCertificate": "Certifikát",
+      "includesCertificateDescription": "Studenti mohou po dokončení cesty získat certifikát.",
+      "certificateSignature": "Podpis na certifikátu",
+      "certificateSignatureDescription": "Nahrajte podpis zobrazený na certifikátech pro tuto vzdělávací cestu.",
+      "certificateFontColor": "Barva písma certifikátu",
+      "certificateFontColorDescription": "Pomocí výběru barvy v náhledu změňte barvu textu a linek certifikátu.",
+      "certificatePreview": "Náhled certifikátu",
+      "certificatePreviewDescription": "Zobrazte náhled certifikátu a upravte barvu písma."
+    },
+    "detailsContent": {
+      "title": "Podrobnosti cesty",
+      "description": "Definujte lokalizovaný název a popis viditelný pro studenty."
+    },
+    "detailsImage": {
+      "title": "Obrázek obálky",
+      "description": "Použijte obrázek, podle kterého bude cesta snadno rozpoznatelná."
+    },
+    "detailsSettings": {
+      "title": "Publikování a chování",
+      "description": "Seskupte viditelnost, pořadí kurzů a certifikát na jednom místě."
+    },
+    "common": {
+      "baseLanguage": "Základní jazyk"
+    },
+    "languageSelector": {
+      "tooltip": "Základní jazyk této cesty je {{baseLanguage}}."
+    },
+    "courses": {
+      "select": "Vyberte kurz",
+      "add": "Přidat kurz",
+      "drag": "Přetáhněte pro změnu pořadí kurzu",
+      "delete": "Smazat kurz",
+      "order": "Pořadí",
+      "course": "Kurz",
+      "empty": "Do této vzdělávací cesty zatím nebyly přidány žádné kurzy.",
+      "saveFirst": "Před přidáním kurzů vzdělávací cestu uložte.",
+      "unknownCourse": "Podrobnosti kurzu nejsou dostupné"
+    },
+    "sharedLearningPath": {
+      "badgeExported": "Sdíleno",
+      "exportButton": "Sdílet",
+      "exportSuccess": "Vzdělávací cesta byla sdílena",
+      "exportsDescription": "Sdílejte tuto vzdělávací cestu s vybranými organizacemi.",
+      "exportsTitle": "Sdílení",
+      "exportingButton": "Sdílení...",
+      "selectTenants": "Vyberte organizace",
+      "selectedCount": "Vybráno:"
+    },
+    "deleteModal": {
+      "title": "Smazat vzdělávací cestu",
+      "description": "Tím se smaže vzdělávací cesta a odebere přístup ke kurzům udělený touto cestou."
+    },
+    "toast": {
+      "created": "Vzdělávací cesta byla vytvořena",
+      "updated": "Vzdělávací cesta byla aktualizována",
+      "deleted": "Vzdělávací cesta byla smazána",
+      "languageCreated": "Jazyk vzdělávací cesty byl vytvořen",
+      "coursesAdded": "Kurzy byly přidány do vzdělávací cesty",
+      "courseRemoved": "Kurz byl odebrán ze vzdělávací cesty",
+      "coursesReordered": "Pořadí kurzů ve vzdělávací cestě bylo aktualizováno"
+    }
   },
   "lessonPreview": {
     "breadcrumbs": {

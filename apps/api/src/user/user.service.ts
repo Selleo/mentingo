@@ -393,9 +393,12 @@ export class UserService {
     }
 
     const [updatedUserDetails] = await this.db
-      .update(userDetails)
-      .set(data)
-      .where(eq(userDetails.userId, userId))
+      .insert(userDetails)
+      .values({ userId, ...data })
+      .onConflictDoUpdate({
+        target: userDetails.userId,
+        set: data,
+      })
       .returning();
 
     return updatedUserDetails;

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest identifier="mentingo-multi-scorm" version="1.2"
+  xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2"
+  xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2">
+  <metadata>
+    <schema>ADL SCORM</schema>
+    <schemaversion>1.2</schemaversion>
+  </metadata>
+  <organizations default="multi-org">
+    <organization identifier="multi-org">
+      <title>SCORM E2E Multi Package</title>
+      <item identifier="section-one-item" identifierref="section-one-resource">
+        <title>SCORM Section One</title>
+      </item>
+      <item identifier="section-two-item" identifierref="section-two-resource" parameters="?fromManifest=true">
+        <title>SCORM Section Two</title>
+      </item>
+    </organization>
+  </organizations>
+  <resources>
+    <resource identifier="section-one-resource" type="webcontent" adlcp:scormtype="sco" href="section-one.html">
+      <file href="section-one.html" />
+      <file href="scorm-test.js" />
+    </resource>
+    <resource identifier="section-two-resource" type="webcontent" adlcp:scormtype="sco" href="section-two.html">
+      <file href="section-two.html" />
+      <file href="scorm-test.js" />
+    </resource>
+  </resources>
+</manifest>

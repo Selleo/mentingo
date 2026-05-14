@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Checkbox } from "~/components/ui/checkbox";
 
 import type { GetMasterCourseExportCandidatesResponse } from "~/api/generated-api";
@@ -26,15 +27,17 @@ export const SharedCourseExportsTabContent = ({
   const { t } = useTranslation();
 
   return (
-    <div className="flex w-full max-w-[1000px] flex-col gap-y-6 bg-white p-8">
-      <div className="flex flex-col gap-y-1.5">
-        <h5 className="h5 text-neutral-950">{t("adminCourseView.sharedCourse.exportsTitle")}</h5>
+    <Card className="border-neutral-200 shadow-sm">
+      <CardHeader className="px-6 pb-4 pt-6">
+        <CardTitle className="text-base font-semibold text-neutral-950">
+          {t("adminCourseView.sharedCourse.exportsTitle")}
+        </CardTitle>
         <p className="body-base text-neutral-900">
           {t("adminCourseView.sharedCourse.exportsDescription")}
         </p>
-      </div>
+      </CardHeader>
 
-      <div className="flex flex-col gap-y-3">
+      <CardContent className="flex flex-col gap-y-3 px-6 pb-6">
         <h6 className="font-semibold text-neutral-950">
           {t("adminCourseView.sharedCourse.selectTenants")}
         </h6>
@@ -81,7 +84,7 @@ export const SharedCourseExportsTabContent = ({
               : t("adminCourseView.sharedCourse.exportButton")}
           </Button>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };

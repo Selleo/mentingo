@@ -46,7 +46,8 @@
       "content": "Turinys",
       "quiz": "Viktorina",
       "ai_mentor": "AI mentorius",
-      "embed": "Įterpti"
+      "embed": "Įterpti",
+      "scorm": "SCORM"
     },
     "error": {
       "somethingWentWrong": "Oi! Kažkas nutiko."
@@ -164,6 +165,107 @@
     },
     "toast": {
       "scormUploadedSuccessfully": "SCORM paketas sėkmingai įkeltas"
+    },
+    "errors": {
+      "packageRequired": "SCORM paketas yra privalomas.",
+      "emptyPackage": "SCORM paketas yra tuščias.",
+      "tooManyFiles": "SCORM pakete yra per daug failų.",
+      "packageTooLarge": "SCORM paketas po išskleidimo yra per didelis.",
+      "manifestMissing": "Trūksta SCORM manifesto failo.",
+      "manifestInvalid": "SCORM manifesto failas neteisingas.",
+      "organizationMissing": "SCORM manifeste nėra organizacijos.",
+      "scoMissing": "SCORM manifeste nėra paleidžiamų SCO.",
+      "resourceIdentifierMissing": "Trūksta SCORM ištekliaus identifikatoriaus.",
+      "itemIdentifierMissing": "Trūksta SCORM elemento identifikatoriaus.",
+      "launchFileMissing": "Trūksta SCORM paleidimo failo.",
+      "packageAlreadyAttached": "Ši SCORM pamoka jau turi paketą pasirinktai kalbai.",
+      "invalidPackagePath": "SCORM pakete yra neteisingas failo kelias.",
+      "externalPackagePath": "SCORM pakete yra išorinis failo kelias.",
+      "runtime": {
+        "launchNotFound": "SCORM paleidimo turinys nerastas.",
+        "unsupportedStandard": "Šis SCORM standartas nepalaikomas.",
+        "invalidAttempt": "SCORM bandymas neteisingas.",
+        "invalidCmiValue": "SCORM vykdymo duomenys neteisingi.",
+        "contentNotFound": "SCORM turinys nerastas.",
+        "contentForbidden": "Neturite prieigos prie šio SCORM turinio."
+      }
+    },
+    "coursePlaceholder": {
+      "back": "Grįžti į kurso tipą",
+      "status": "SCORM kurso importas",
+      "title": "SCORM kurso kūrimas bus įjungtas vėliau",
+      "description": "Šis įėjimo taškas paruoštas, bet SCORM kurso importavimo eiga dar įgyvendinama. Kol kas sukurkite standartinį kursą arba grįžkite į kursų sąrašą.",
+      "createStandard": "Sukurti standartinį kursą",
+      "viewCourses": "Peržiūrėti kursus"
+    },
+    "create": {
+      "eyebrow": "SCORM 1.2",
+      "title": "Sukurti SCORM kursą",
+      "subtitle": "Pridėkite kurso metaduomenis ir pridėkite SCORM paketą, kuris taps kurso turiniu.",
+      "requirements": {
+        "title": "Paketo reikalavimai",
+        "version": "SCORM 1.2 paketas",
+        "archive": ".zip archyvas iki 500MB",
+        "metadata": "Kurso metaduomenis galima redaguoti prieš importą"
+      },
+      "packageSection": "SCORM paketas",
+      "packageSectionDescription": "Pridėkite SCORM 1.2 paketą, kuris bus importuotas kaip šio kurso turinys.",
+      "importNotice": "Didelių SCORM paketų importas gali užtrukti kelias minutes. Likite šiame puslapyje, kol įkėlimas bus baigtas.",
+      "metadataSection": "Kurso informacija",
+      "metadataSectionDescription": "Šie laukai atitinka standartinį kurso nustatymą ir bus naudojami kaip baziniai kurso metaduomenys.",
+      "uploadPackage": "Įkelti SCORM paketą",
+      "dropPackage": "Numeskite SCORM paketą čia",
+      "uploadPackageDescription": "Nuvilkite SCORM 1.2 .zip failą arba pasirinkite jį iš įrenginio.",
+      "packageReady": "paruošta importui",
+      "replacePackage": "Pakeisti paketą",
+      "removePackage": "Pašalinti paketą",
+      "uploadThumbnail": "Įkelti miniatiūrą",
+      "uploadThumbnailDescription": "PNG, JPG arba JPEG iki 20MB",
+      "thumbnailPreviewAlt": "Kurso miniatiūros peržiūra",
+      "submit": "Sukurti SCORM kursą",
+      "creating": "Kuriamas SCORM kursas...",
+      "toastDraftReady": "SCORM kurso forma paruošta API integracijai"
+    },
+    "lesson": {
+      "packageSection": "SCORM paketas",
+      "packageAttached": "SCORM paketas pridėtas",
+      "packageLocked": "Šio paketo negalima pakeisti sukūrus pamoką.",
+      "importNotice": "Didelių SCORM paketų importas gali užtrukti kelias minutes. Likite šiame puslapyje, kol įkėlimas bus baigtas.",
+      "replacePackageTooltip": "Jei norite pridėti kitą SCORM paketą, ištrinkite šią pamoką ir sukurkite naują.",
+      "languagePackageTooltip": "Įkelkite SCORM paketą pasirinktai kalbai. Esamų kalbos paketų pakeisti negalima.",
+      "validation": {
+        "titleRequired": "Pavadinimas būtinas",
+        "packageRequired": "SCORM paketas yra privalomas",
+        "packageTooLarge": "SCORM paketas turi būti mažesnis nei 500MB",
+        "packageInvalidType": "SCORM paketas turi būti .zip failas"
+      }
+    }
+  },
+  "adminCourseTypeSelector": {
+    "back": "Atgal",
+    "eyebrow": "Kurso nustatymas",
+    "title": "Sukurti naują kursą",
+    "subtitle": "Pasirinkite, ar kursą kurti standartiniame redaktoriuje, ar iš SCORM paketo.",
+    "standard": {
+      "title": "Standartinis",
+      "description": "Sukurkite kursą su integruota programa, pamokomis, testais ir nustatymais.",
+      "features": {
+        "authoring": "Kuriama vietiniame kursų redaktoriuje",
+        "curriculum": "Skyriai, pamokos ir testai valdomi Mentingo",
+        "translations": "Palaikomos kurso kalbos ir vertimai",
+        "settings": "Kainodara, būsena ir sertifikatai įtraukti"
+      }
+    },
+    "scorm": {
+      "title": "SCORM",
+      "description": "Sukurkite kursą iš SCORM 1.2 paketo.",
+      "badge": "Placeholder",
+      "features": {
+        "import": "Kuriama iš SCORM 1.2 .zip paketo",
+        "tracking": "Palaikomas SCO užbaigimo ir vykdymo būsenos sekimas",
+        "structure": "Importuoto paketo struktūra išsaugoma",
+        "future": "Kainodara, būsena ir sertifikatai įtraukti"
+      }
     }
   },
   "studentChapterCardView": {
@@ -184,6 +286,7 @@
     "progress": "Pažanga",
     "findInApplication": "Rasti programoje",
     "courses": "Kursai",
+    "learningPaths": "Mokymosi keliai",
     "content": "Turinys",
     "categories": "Kategorijos",
     "users": "Vartotojai",
@@ -694,6 +797,7 @@
       "author": "Autorius",
       "category": "Kategorija",
       "price": "Kaina",
+      "type": "Tipas",
       "state": "valstybė",
       "status": "Būsena",
       "sharedCourse": "Bendrinama",
@@ -868,6 +972,7 @@
         "category": "kategorijas",
         "group": "grupes",
         "course": "kursus",
+        "learning_path": "mokymosi kelius",
         "learning_mode": "mokymosi režimą",
         "learning_progress": "mokymosi pažangą",
         "certificate": "sertifikatus",
@@ -1178,6 +1283,23 @@
       "maxOneVideoUploaded": "Negalite įkelti daugiau nei 1 vaizdo įrašo.",
       "successfullyTransferredCourseOwnership": "Kurso nuosavybės teisė sėkmingai perduota"
     },
+    "errors": {
+      "featureUnavailable": {
+        "curriculum": "SCORM kursuose mokymo programos redagavimas nepasiekiamas.",
+        "lessonSequence": "SCORM kursuose pamokų eigos privalomas laikymasis nepasiekiamas.",
+        "quizFeedback": "SCORM kursuose viktorinos grįžtamojo ryšio nustatymai nepasiekiami."
+      },
+      "notFound": {
+        "course": "Kursas nerastas.",
+        "category": "Kategorija nerasta.",
+        "chapter": "Skyrius nerastas.",
+        "lesson": "Pamoka nerasta."
+      },
+      "create": {
+        "courseFailed": "Nepavyko sukurti kurso.",
+        "stripeProductFailed": "Nepavyko sukurti kurso mokėjimo produkto."
+      }
+    },
     "thinking": {
       "PLANNING_NEXT_STEP": "Planuojate kitą žingsnį...",
       "USING_TOOLS": "Įrankių naudojimas kontekstui gauti...",
@@ -1308,6 +1430,7 @@
         "removeQuizLesson": "Ar tikrai norite ištrinti šią viktorinos pamoką iš skyriaus?",
         "removeAiMentorLesson": "Ar tikrai norite ištrinti šią AI mentoriaus pamoką iš skyriaus?",
         "removeEmbedLesson": "Ar tikrai norite ištrinti šią įdėjimo pamoką iš skyriaus?",
+        "removeScormLesson": "Ar tikrai norite ištrinti šią SCORM pamoką iš skyriaus?",
         "removeChapter": "Ar tikrai norite ištrinti šį skyrių?",
         "removeQuestion": "Ar tikrai norite ištrinti klausimą?",
         "removeContent": "Ar tikrai norite ištrinti turinį?"
@@ -1396,6 +1519,8 @@
           "lessonCreatedSuccessfully": "Pamoka sėkmingai sukurta",
           "fileLessonCreatedSuccessfully": "Failo elementas sėkmingai sukurtas",
           "contentLessonCreatedSuccessfully": "Turinio pamoka sėkmingai sukurta",
+          "scormLessonCreatedSuccessfully": "SCORM pamoka sėkmingai sukurta",
+          "scormLessonPackageAttachedSuccessfully": "SCORM paketas sėkmingai pridėtas",
           "quizLessonCreatedSuccessfully": "Viktorina sėkmingai sukurta",
           "aiMentorLessonCreatedSuccessfully": "AI mentoriaus pamoka sėkmingai sukurta",
           "aiMentorLessonUpdatedSuccessfully": "AI mentoriaus pamoka sėkmingai atnaujinta",
@@ -1472,10 +1597,12 @@
         "other": {
           "lessonNumber": "Pamokų skaičius",
           "chooseType": "Pasirinkite tipą",
+          "chooseLessonTypeAriaLabel": "Pasirinkti {{type}} pamokos tipą",
           "content": "Turinys",
           "quiz": "Viktorina",
           "aiMentor": "AI mentorius",
           "embed": "Įterpti",
+          "scorm": "SCORM",
           "correct": "Teisingai",
           "true": "Tiesa",
           "false": "Netiesa",
@@ -1494,6 +1621,7 @@
           "contentLessonDescription": "Tekstas su multimedija (vaizdai, vaizdo įrašai, pristatymai).",
           "quizLessonDescription": "Klausimų rinkinys žinioms patikrinti.",
           "aiMentorLessonDescription": "Interaktyvus pokalbis su virtualiu AI mentoriumi.",
+          "scormLessonDescription": "Pamokos turinys SCORM pakete.",
           "fillInTheBlanksDescription": "Šiame klausime yra sakinys; mokiniai turi nuvilkti teisingą žodį į tuščią vietą.",
           "gapFillDescription": "Šiame klausime bus sakinys, kuriame trūksta žodžių, kuriuos mokiniai turi įvesti.",
           "embedLessonDescription": "Išorinis šaltinis (pvz., „Google“ forma, „Canva“ pristatymas arba „YouTube“ tiesioginis srautas).",
@@ -1712,6 +1840,29 @@
       "selectedCount": "Pasirinkta:",
       "exportButton": "Dalintis",
       "exportingButton": "Bendrinama..."
+    },
+    "scormExport": {
+      "title": "SCORM paketas",
+      "description": "Eksportuokite šį kursą kaip savarankišką SCORM 1.2 paketą kitai LMS.",
+      "versionBadge": "SCORM 1.2",
+      "button": "Eksportuoti SCORM paketą",
+      "exportingButton": "Eksportuojama...",
+      "success": "SCORM paketo atsisiuntimas pradėtas.",
+      "warning": {
+        "title": "AI Mentor pamokos bus praleistos",
+        "description": "Šiame kurse yra {{count}} AI Mentor pamoka. AI Mentor pamokos nėra palaikomos SCORM paketuose. Ar norite tęsti?",
+        "description_other": "Šiame kurse yra {{count}} AI Mentor pamokos. AI Mentor pamokos nėra palaikomos SCORM paketuose. Ar norite tęsti?",
+        "confirm": "Vis tiek eksportuoti"
+      },
+      "error": {
+        "courseNotFound": "Kursas nerastas.",
+        "accessDenied": "Neturite teisės eksportuoti šio kurso.",
+        "noExportableLessons": "Šiame kurse nėra pamokų, kurias galima eksportuoti į SCORM.",
+        "unsupportedLessonType": "Šiame kurse yra pamokos tipas, kurio negalima eksportuoti į SCORM.",
+        "missingAsset": "Šiame kurse yra failas arba išteklius, kurio nepavyko paruošti eksportui.",
+        "invalidSnapshot": "Nepavyko paruošti šio kurso SCORM eksportui.",
+        "fallback": "SCORM eksportas nepavyko."
+      }
     }
   },
   "registerView": {
@@ -1931,6 +2082,17 @@
     "aiMentor": {
       "title": "AI mentoriaus sesija",
       "description": "Tai AI pagrįsta mentorystės sesija. AI padės jums per pamoką pagal instruktoriaus nurodymus."
+    },
+    "scorm": {
+      "loading": "Įkeliamas SCORM turinys...",
+      "launchFailed": "Nepavyko paleisti SCORM turinio.",
+      "launchFailedBody": "Bandykite dar kartą. Jei problema išlieka, SCORM paketą gali reikėti įkelti iš naujo.",
+      "saveFailed": "Nepavyko išsaugoti SCORM pažangos.",
+      "saving": "Išsaugoma pažanga",
+      "previousSco": "Ankstesnė dalis",
+      "nextSco": "Kita dalis",
+      "tryAgain": "Bandykite dar kartą",
+      "lessonFinished": "SCORM pamoka baigta."
     },
     "videoProcessing": {
       "title": "Vaizdo įrašas apdorojamas",
@@ -2646,7 +2808,336 @@
     "progress": "Pažanga",
     "tenant": "Organizacijos informacija",
     "createTenant": "Sukurti organizaciją",
-    "tenants": "Organizacijos"
+    "tenants": "Organizacijos",
+    "activityLogs": "Veiklos žurnalas",
+    "learningPaths": "Mokymosi keliai",
+    "adminLearningPaths": "Mokymosi keliai",
+    "adminLearningPathEditor": "Mokymosi kelio redaktorius"
+  },
+  "masterCourse": {
+    "error": {
+      "sourceCourseNotFound": "Saltinio kursas nerastas",
+      "noTargetTenants": "Pasirinkite bent viena tiksline organizacija",
+      "exportedCourseCannotBeSource": "Eksportuotas kursas negali buti naudojamas kaip saltinis",
+      "exportLinkMissing": "Kurso eksporto rysys nerastas",
+      "jobNotFound": "Kurso eksporto uzduotis nerasta",
+      "targetAuthorMissing": "Tikslines organizacijos autorius nerastas",
+      "targetCourseMissing": "Tikslinis kursas nerastas",
+      "exportedCourseReadonly": "Eksportuotas kursas yra tik skaitomas"
+    }
+  },
+  "learningPathExport": {
+    "error": {
+      "noTargetTenants": "Pasirinkite bent viena tiksline organizacija",
+      "exportLinkMissing": "Mokymosi kelio eksporto rysys nerastas",
+      "noCourses": "Pries eksportuojant mokymosi kelyje turi buti bent vienas kursas",
+      "courseExportFailed": "Nepavyko eksportuoti vieno is mokymosi kelio kursu",
+      "targetAuthorMissing": "Tikslines organizacijos autorius nerastas",
+      "jobNotFound": "Mokymosi kelio eksporto uzduotis nerasta",
+      "invalidJobData": "Neteisingi mokymosi kelio eksporto uzduoties duomenys",
+      "invalidExportId": "Neteisingas mokymosi kelio eksporto ID",
+      "invalidExportLink": "Neteisingas mokymosi kelio eksporto rysys"
+    }
+  },
+  "learningPathCertificate": {
+    "error": {
+      "disabled": "Mokymosi kelio sertifikatai isjungti"
+    }
+  },
+  "activityLogsView": {
+    "filters": {
+      "placeholder": {
+        "searchByEmail": "Ieškoti pagal el. paštą...",
+        "from": "Nuo datos",
+        "to": "Iki datos"
+      }
+    },
+
+    "description": "Platformos pakeitimų laiko juosta paprasto išskleidžiamo srauto pavidalu.",
+    "breadcrumbs": {
+      "activityLogs": "Veiklos žurnalas"
+    },
+    "emptyState": {
+      "title": "Veiklos žurnalų nerasta.",
+      "description": "Kai platformoje įvyks veiksmai, jie bus rodomi čia."
+    },
+    "details": {
+      "before": "Prieš",
+      "after": "Po",
+      "context": "Kontekstas",
+      "noMetadata": "Nėra galimų metaduomenų."
+    },
+    "fallbacks": {
+      "unknown": "Nežinoma",
+      "notAvailable": "nėra"
+    },
+    "labels": {
+      "action": "Veiksmas:",
+      "entity": "Išteklius:",
+      "resource": "Išteklius:"
+    },
+    "actions": {
+      "create": "Sukurta",
+      "update": "Atnaujinta",
+      "delete": "Ištrinta",
+      "login": "Prisijungta",
+      "login_failed": "Prisijungti nepavyko",
+      "logout": "Atsijungta",
+      "enroll_course": "Užsirašyta",
+      "unenroll_course": "Atsisakyta",
+      "start_course": "Pradėta",
+      "group_assignment": "Priskirta",
+      "complete_lesson": "Užbaigta",
+      "complete_course": "Užbaigta",
+      "complete_chapter": "Užbaigta",
+      "view_announcement": "Peržiūrėta"
+    },
+    "entity": {
+      "course": "Kursas",
+      "chapter": "Skyrius",
+      "lesson": "Pamoka",
+      "question": "Klausimas",
+      "news": "Naujienos",
+      "articles": "Straipsniai",
+      "user": "Vartotojas",
+      "category": "Kategorija",
+      "announcement": "Pranešimas",
+      "global_settings": "Nustatymai"
+    },
+    "table": {
+      "datetime": "Data ir laikas",
+      "email": "El. paštas",
+      "action": "Veiksmas",
+      "resource": "Išteklius",
+      "details": "Išsamiai",
+      "showDetails": "Rodyti detales",
+      "loading": "Įkeliami veiklos žurnalai...",
+      "empty": "Veiklos žurnalų nerasta."
+    }
+  },
+  "learningPathsView": {
+    "title": "Mokymosi keliai",
+    "description": "Naršykite priskirtus mokymosi kelius ir tęskite sutvarkytas kursų sekas.",
+    "searchPlaceholder": "Ieškoti mokymosi kelių",
+    "summary": "{{count}} mokymosi keliai yra pasiekiami.",
+    "detailsTitle": "Mokymosi kelias",
+    "detailsDescription": "Peržiūrėkite kursų seką, pažangą, užraktus ir sertifikato būseną.",
+    "detailsSummary": "Šiame kelyje yra {{count}} kursų. Dabartinė pažanga: {{progress}}.",
+    "emptyDescription": "Aprašymas dar nepridėtas.",
+    "status": {
+      "draft": "Juodraštis",
+      "published": "Paskelbta",
+      "private": "Privatu",
+      "not_started": "Nepradėta",
+      "in_progress": "Vykdoma",
+      "completed": "Baigta",
+      "blocked": "Užblokuota"
+    },
+    "badges": {
+      "sequenceEnabled": "Nuoseklu",
+      "freeOrder": "Lanksti tvarka",
+      "certificate": "Sertifikatas"
+    },
+    "card": {
+      "openPath": "Atidaryti mokymosi kelią"
+    },
+    "empty": {
+      "title": "Mokymosi kelių nerasta",
+      "description": "Pakeiskite paiešką arba grįžkite, kai keliai bus priskirti."
+    },
+    "progress": {
+      "title": "Kelio pažanga",
+      "summary": "Baigta {{completed}} iš {{total}} kursų"
+    },
+    "certificate": {
+      "available": "Sertifikatas pasiekiamas",
+      "ready": "Sertifikatas paruoštas",
+      "pathCompleted": "Mokymosi kelias baigtas. Jūsų sertifikatas paruoštas."
+    },
+    "courseState": {
+      "completed": "Baigta",
+      "inProgress": "Vykdoma",
+      "inProgressDescription": "Jūs pradėjote šį kursą.",
+      "notStarted": "Nepradėta",
+      "notStartedDescription": "Šį kursą galima pradėti.",
+      "locked": "Užrakinta",
+      "lockedDescription": "Baikite ankstesnį kursą, kad jį atrakintumėte."
+    },
+    "detail": {
+      "courses": "Šio kelio kursai",
+      "courseTitle": "Kursas {{number}}",
+      "completedAt": "Baigta {{date}}",
+      "emptyCourses": "Šiame mokymosi kelyje dar nėra kursų."
+    },
+    "enrollment": {
+      "manage": "Registruoti",
+      "title": "Registruoti besimokančiuosius",
+      "description": "Tvarkykite studentų ir grupių registraciją į šį mokymosi kelią.",
+      "students": "Studentai",
+      "selectStudents": "Pasirinkti studentus",
+      "groups": "Grupės",
+      "selectGroups": "Pasirinkti grupes",
+      "filters": {
+        "placeholder": {
+          "searchByKeyword": "Ieškoti pagal raktažodį..."
+        }
+      },
+      "enrollSelected": "Registruoti pasirinktus",
+      "unenrollSelected": "Išregistruoti pasirinktus",
+      "enrollGroups": "Registruoti grupes",
+      "unenrollGroups": "Išregistruoti grupes",
+      "enrolled": "Užregistruota",
+      "enroll": "Registruoti",
+      "studentsEnrolled": "Studentai užregistruoti",
+      "groupsEnrolled": "Grupės užregistruotos",
+      "studentsUnenrolled": "Studentai išregistruoti",
+      "groupsUnenrolled": "Grupės išregistruotos",
+      "enrolledSuccessfully": "Užregistruota į mokymosi kelią",
+      "enrollGroupsDescription": "Pasirinkite grupes, kurias norite registruoti į šį mokymosi kelią.",
+      "unenrollGroupsDescription": "Pasirinkite grupes, kurias norite išregistruoti iš šio mokymosi kelio.",
+      "table": {
+        "selectAll": "Pasirinkti visus besimokančiuosius",
+        "select": "Pasirinkti besimokantįjį",
+        "name": "Vardas",
+        "email": "El. paštas",
+        "status": "Registracijos būsena",
+        "enrollmentDate": "Registracijos data"
+      },
+      "statuses": {
+        "enrolledByGroup": "Užregistruota per grupę",
+        "individuallyEnrolled": "Užregistruota individualiai",
+        "notEnrolled": "Neužregistruota"
+      },
+      "confirmation": {
+        "title": "Patvirtinti registraciją",
+        "description": "Ar tikrai norite užregistruoti pasirinktus studentus į šį mokymosi kelią? Šio veiksmo negalima atšaukti."
+      },
+      "unenrollConfirmation": {
+        "title": "Patvirtinti išregistravimą",
+        "description": "Ar tikrai norite išregistruoti pasirinktus studentus iš šio mokymosi kelio? Šio veiksmo negalima atšaukti."
+      },
+      "noGroups": "Nėra pasiekiamų grupių"
+    },
+    "breadcrumbs": {
+      "learningPaths": "Mokymosi keliai",
+      "details": "Informacija"
+    },
+    "buttons": {
+      "openFirst": "Atidaryti pirmą kelią"
+    }
+  },
+  "adminLearningPathsView": {
+    "title": "Mokymosi keliai",
+    "description": "Tvarkykite metaduomenis, sekos nustatymus, kursus, registracijas, eksportą ir sertifikatus.",
+    "summary": "{{count}} mokymosi keliai yra pasiekiami šioje darbo srityje.",
+    "breadcrumbs": {
+      "learningPaths": "Mokymosi keliai",
+      "create": "Sukurti",
+      "edit": "Redaguoti"
+    },
+    "buttons": {
+      "create": "Sukurti mokymosi kelią",
+      "edit": "Redaguoti",
+      "save": "Išsaugoti pakeitimus",
+      "removeImage": "Pašalinti paveikslėlį"
+    },
+    "editor": {
+      "createTitle": "Sukurti mokymosi kelią",
+      "editTitle": "Redaguoti mokymosi kelią",
+      "description": "Nustatykite mokymosi kelio informaciją, seką, kursus ir publikavimo būseną.",
+      "createSummary": "Pradėkite nuo mokymosi kelio informacijos.",
+      "editSummary": "Šiame mokymosi kelyje šiuo metu yra {{coursesCount}} kursų.",
+      "details": "Informacija",
+      "courses": "Kursai",
+      "image": "Paveikslėlis",
+      "settings": "Nustatymai"
+    },
+    "table": {
+      "title": "Pavadinimas",
+      "status": "Būsena",
+      "settings": "Nustatymai",
+      "language": "Kalba",
+      "createdAt": "Sukurta",
+      "actions": "Veiksmai",
+      "untitled": "Mokymosi kelias be pavadinimo",
+      "emptyDescription": "Nėra aprašymo",
+      "sequential": "Nuoseklus",
+      "flexible": "Laisva tvarka",
+      "certificate": "Sertifikatas",
+      "empty": "Dar nėra sukurtų mokymosi kelių."
+    },
+    "form": {
+      "language": "Kalba",
+      "status": "Būsena",
+      "statusDescription": "Nustato, ar kelias matomas, juodraštis, ar privatus.",
+      "title": "Pavadinimas",
+      "titlePlaceholder": "Pavadinkite mokymosi kelią",
+      "description": "Aprašymas",
+      "descriptionPlaceholder": "Aprašykite, ką dalyviai atliks šiame mokymosi kelyje",
+      "imageHint": "PNG, JPG arba JPEG (maks. 20 MB, rekomenduojama 1200x1200 ar didesnė)",
+      "sequenceEnabled": "Nuoseklus mokymasis",
+      "sequenceEnabledDescription": "Dalyviai turi baigti kursus rodoma tvarka.",
+      "includesCertificate": "Sertifikatas",
+      "includesCertificateDescription": "Dalyviai gali gauti sertifikatą baigę mokymosi kelią.",
+      "certificateSignature": "Sertifikato parašas",
+      "certificateSignatureDescription": "Įkelkite parašą, rodomą šio mokymosi kelio sertifikatuose.",
+      "certificateFontColor": "Sertifikato šrifto spalva",
+      "certificateFontColorDescription": "Naudokite peržiūros spalvų parinkiklį, kad pakeistumėte sertifikato teksto ir linijų spalvą.",
+      "certificatePreview": "Sertifikato peržiūra",
+      "certificatePreviewDescription": "Peržiūrėkite sertifikatą ir pakoreguokite šrifto spalvą."
+    },
+    "detailsContent": {
+      "title": "Mokymosi kelio informacija",
+      "description": "Nustatykite lokalizuotą pavadinimą ir dalyviams matomą aprašymą."
+    },
+    "detailsImage": {
+      "title": "Viršelio paveikslėlis",
+      "description": "Naudokite paveikslėlį, kuris padeda atpažinti šį kelią."
+    },
+    "detailsSettings": {
+      "title": "Publikavimas ir veikimas",
+      "description": "Vienoje vietoje grupuokite matomumą, kursų eilę ir sertifikatą."
+    },
+    "common": {
+      "baseLanguage": "Pagrindinė kalba"
+    },
+    "languageSelector": {
+      "tooltip": "Šio mokymosi kelio pagrindinė kalba yra {{baseLanguage}}."
+    },
+    "courses": {
+      "select": "Pasirinkite kursą",
+      "add": "Pridėti kursą",
+      "drag": "Tempkite, kad pakeistumėte kurso tvarką",
+      "delete": "Ištrinti kursą",
+      "order": "Eilė",
+      "course": "Kursas",
+      "empty": "Į šį mokymosi kelią dar nepridėta kursų.",
+      "saveFirst": "Išsaugokite mokymosi kelią prieš pridėdami kursus.",
+      "unknownCourse": "Kurso informacija nepasiekiama"
+    },
+    "sharedLearningPath": {
+      "badgeExported": "Dalinamas",
+      "exportButton": "Dalintis",
+      "exportSuccess": "Mokymosi kelias buvo bendrinamas",
+      "exportsDescription": "Dalinkitės šiuo mokymosi keliu su pasirinktomis organizacijomis.",
+      "exportsTitle": "Dalijimasis",
+      "exportingButton": "Bendrinama...",
+      "selectTenants": "Pasirinkite organizacijas",
+      "selectedCount": "Pasirinkta:"
+    },
+    "deleteModal": {
+      "title": "Ištrinti mokymosi kelią",
+      "description": "Tai ištrins mokymosi kelią ir pašalins per jį suteiktą prieigą prie kursų."
+    },
+    "toast": {
+      "created": "Mokymosi kelias sukurtas",
+      "updated": "Mokymosi kelias atnaujintas",
+      "deleted": "Mokymosi kelias ištrintas",
+      "languageCreated": "Mokymosi kelio kalba sukurta",
+      "coursesAdded": "Kursai pridėti prie mokymosi kelio",
+      "courseRemoved": "Kursas pašalintas iš mokymosi kelio",
+      "coursesReordered": "Mokymosi kelio kursų tvarka atnaujinta"
+    }
   },
   "lessonPreview": {
     "breadcrumbs": {

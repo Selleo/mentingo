@@ -1,3 +1,4 @@
+import { COURSE_FEATURE, COURSE_TYPE, isCourseFeatureEnabledForCourseType } from "@repo/shared";
 import { useTranslation } from "react-i18next";
 
 import { useUpdateCourseSettings } from "~/api/mutations/useUpdateCourseSettings";
@@ -6,11 +7,24 @@ import { Switch } from "~/components/ui/switch";
 
 import { COURSE_SETTINGS_HANDLES } from "../../../../../../e2e/data/courses/handles";
 
+import type { CourseFeature, CourseType } from "@repo/shared";
+
 type Props = {
   courseId: string;
+  courseType?: CourseType;
 };
 
-export const CourseSettingsSwitches = ({ courseId }: Props) => {
+type CourseSettingsSwitch = {
+  key: string;
+  feature: CourseFeature;
+  label: string;
+  description: string;
+  isEnabled?: boolean;
+  onToggle: (nextValue: boolean) => void;
+  ariaLabel: string;
+};
+
+export const CourseSettingsSwitches = ({ courseId, courseType = COURSE_TYPE.DEFAULT }: Props) => {
   const { t } = useTranslation();
   const { data, isLoading } = useCourseSettings({ courseId });
   const { mutate: updateCourseSettings, isPending: isUpdatingCourseSettings } =
@@ -28,9 +42,10 @@ export const CourseSettingsSwitches = ({ courseId }: Props) => {
 
   const isDisabled = isLoading || isUpdatingCourseSettings;
 
-  const settings = [
+  const settings: CourseSettingsSwitch[] = [
     {
       key: "lessonSequenceEnabled",
+      feature: COURSE_FEATURE.LESSON_SEQUENCE_SETTING,
       label: t("adminCourseView.settings.other.enforceLessonSequence"),
       description: t("adminCourseView.settings.other.requireSequentialLessons"),
       isEnabled: data?.lessonSequenceEnabled,
@@ -39,13 +54,16 @@ export const CourseSettingsSwitches = ({ courseId }: Props) => {
     },
     {
       key: "quizFeedbackEnabled",
+      feature: COURSE_FEATURE.QUIZ_FEEDBACK_SETTING,
       label: t("adminCourseView.settings.other.enableQuizFeedback"),
       description: t("adminCourseView.settings.other.enableQuizFeedbackDescription"),
       isEnabled: data?.quizFeedbackEnabled,
       onToggle: handleQuizFeedbackToggle,
       ariaLabel: t("adminCourseView.settings.other.enableQuizFeedback"),
     },
-  ];
+  ].filter((setting) => isCourseFeatureEnabledForCourseType(courseType, setting.feature));
+
+  if (!settings.length) return null;
 
   return (
     <div className="flex flex-col gap-3">

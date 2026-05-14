@@ -18,6 +18,7 @@ export const routes: (
         route("", "modules/Dashboard/PublicDashboard.layout.tsx", () => {
           route("courses", "modules/Courses/Courses.page.tsx");
           route("course/:id", "modules/Courses/CourseView/CourseView.page.tsx");
+          route("learning-paths", "modules/LearningPaths/LearningPaths.page.tsx");
           route("qa", "modules/QA/QA.page.tsx");
           route("qa/new", "modules/QA/CreateQA.page.tsx");
           route("qa/:id", "modules/QA/EditQA.page.tsx");
@@ -56,7 +57,8 @@ export const routes: (
           });
           route("analytics", "modules/Statistics/Analytics.page.tsx");
           route("envs", "modules/Admin/Envs/Envs.page.tsx");
-          route("beta-courses/new", "modules/Admin/AddCourse/AddCourse.tsx");
+          route("beta-courses/new", "modules/Admin/AddCourse/CourseTypeSelector.page.tsx");
+          route("beta-courses/new/standard", "modules/Admin/AddCourse/AddCourse.tsx");
           route("courses/new-scorm", "modules/Admin/Scorm/CreateNewScormCourse.page.tsx");
           route("beta-courses/:id", "modules/Admin/EditCourse/EditCourse.tsx");
           route("users", "modules/Admin/Users/Users.page.tsx");
@@ -75,6 +77,7 @@ export const routes: (
             "promotion-codes/:id",
             "modules/Admin/PromotionCodes/PromotionCodeDetails.page.tsx",
           );
+          route("activity-logs", "modules/ActivityLogs/ActivityLogs.page.tsx");
         });
         route("super-admin", "modules/SuperAdmin/SuperAdmin.layout.tsx", () => {
           route("tenants", "modules/SuperAdmin/Tenants.page.tsx", { index: true });

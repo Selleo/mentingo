@@ -12,6 +12,7 @@ export { useMarkLessonAsCompleted } from "./useMarkLessonAsCompleted";
 export { useRegisterUser } from "./useRegisterUser";
 export { useStripePaymentIntent } from "./useStripePaymentIntent";
 export { useSubmitQuiz } from "./useSubmitQuiz";
+export { useCommitScormRuntime, useFinishScormRuntime } from "./useScormRuntime";
 export { useUnenrollCourse } from "./useUnenrollCourse";
 export { useUpdateColorSchema } from "./useUpdateColorSchema";
 export { useUpdateUser } from "./useUpdateUser";

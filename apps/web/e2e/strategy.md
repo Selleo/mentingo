@@ -349,6 +349,16 @@ Based on `playwright-strategy/03-capability-coverage.md`:
   - quiz submit/retake
   - AI mentor interaction entry
   - blocked/unblocked access
+  - SCORM single-SCO launch
+  - SCORM multi-SCO section navigation
+  - SCORM fullscreen enter/exit
+  - SCORM runtime commit/finish
+  - SCORM first launch and resume state
+  - SCORM package alert/confirm dialog bridge
+  - SCORM content serving through backend
+  - SCORM multi-SCO completion
+  - SCORM enrolled/unenrolled/freemium access
+  - SCORM admin/content creator learning-mode access
 - Announcements -- DONE
   - create/list
   - unread count
@@ -393,6 +403,11 @@ Based on `playwright-strategy/03-capability-coverage.md`:
   - browse list
   - open details
   - create/update
+  - create course type selection
+  - create SCORM course
+  - invalid SCORM course upload
+  - SCORM course type badges
+  - SCORM course feature restrictions
   - update pricing
   - update status
   - toggle student mode
@@ -406,6 +421,11 @@ Based on `playwright-strategy/03-capability-coverage.md`:
   - chapter create/update/delete/reorder/freemium
   - lesson create/update/delete/reorder
   - lesson types: content/quiz/AI mentor/embed
+  - SCORM lesson type card
+  - create SCORM lesson
+  - SCORM lesson package locked state
+  - SCORM lesson delete
+  - SCORM course generated chapters
   - resource upload
   - initialize lesson context
 - Enrollment -- DONE

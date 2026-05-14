@@ -4,6 +4,7 @@ import { AxiosError } from "axios";
 import { ApiClient } from "~/api/api-client";
 import { GROUPS_QUERY_KEY } from "~/api/queries/admin/useGroups";
 import { queryClient } from "~/api/queryClient";
+import { invalidateLearningPathEnrollmentData } from "~/api/utils/invalidateLearningPathEnrollmentData";
 import { useToast } from "~/components/ui/use-toast";
 
 type GroupBody = {
@@ -19,6 +20,7 @@ export function useCreateGroup() {
       const { data } = await ApiClient.api.groupControllerCreateGroup(input);
 
       await queryClient.invalidateQueries({ queryKey: [GROUPS_QUERY_KEY] });
+      await invalidateLearningPathEnrollmentData();
 
       return data;
     },

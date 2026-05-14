@@ -3,6 +3,7 @@ import { AxiosHeaders } from "axios";
 import { API } from "~/api/generated-api";
 
 import type { BrowserContext, Cookie } from "@playwright/test";
+import type { PrepareAiMentorStatisticsProgressBody } from "~/api/generated-api";
 
 const DEFAULT_API_URL = "http://localhost:3000";
 
@@ -15,7 +16,7 @@ const normalizeOrigin = (value: string) => {
 };
 
 const resolveApiBaseUrl = () => {
-  return normalizeApiBaseUrl(process.env.API_URL ?? process.env.VITE_API_URL ?? DEFAULT_API_URL);
+  return normalizeApiBaseUrl(process.env.API_URL ?? DEFAULT_API_URL);
 };
 
 const cookieHeaderFromCookies = (cookies: Cookie[]) => {
@@ -67,6 +68,10 @@ export class FixtureApiClient {
   async syncFromContext(context: BrowserContext, origin: string) {
     this.syncTenantOrigin(origin);
     this.syncCookies(await context.cookies());
+  }
+
+  async prepareAiMentorStatisticsProgress(input: PrepareAiMentorStatisticsProgressBody) {
+    await this.api.testConfigControllerPrepareAiMentorStatisticsProgress(input);
   }
 
   clearCookies() {

@@ -24,6 +24,8 @@ import { cn } from "~/lib/utils";
 import Loader from "~/modules/common/Loader/Loader";
 import { tanstackSortingToParam } from "~/utils/tanstackSortingToParam";
 
+import { COURSE_STATISTICS_HANDLES } from "../../../../../../e2e/data/statistics/handles";
+
 import LessonPreviewDialog from "./LessonPreviewDialog";
 
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
@@ -153,6 +155,10 @@ export function CourseStudentsQuizResultsTable({
         cell: ({ row }) => (
           <div className="flex justify-center">
             <Button
+              data-testid={COURSE_STATISTICS_HANDLES.quizResultsPreviewButton(
+                row.original.studentId,
+                row.original.lessonId,
+              )}
               variant="outline"
               size="icon"
               onClick={() => {
@@ -207,6 +213,7 @@ export function CourseStudentsQuizResultsTable({
 
   return (
     <div
+      data-testid={COURSE_STATISTICS_HANDLES.QUIZ_RESULTS_TABLE}
       className={cn(
         "rounded-lg overflow-hidden border border-neutral-200 relative",
         isFetching && "shimmer-45",
@@ -228,6 +235,10 @@ export function CourseStudentsQuizResultsTable({
           {table.getRowModel().rows.map((row) => (
             <TableRow
               key={row.id}
+              data-testid={COURSE_STATISTICS_HANDLES.quizResultsRow(
+                row.original.studentId,
+                row.original.lessonId,
+              )}
               data-state={row.getIsSelected() && "selected"}
               className="cursor-pointer hover:bg-neutral-100"
             >

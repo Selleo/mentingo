@@ -8,6 +8,8 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { useHandleImageUpload } from "~/hooks/useHandleImageUpload";
 
+import { SETTINGS_PAGE_HANDLES } from "../../../../../../e2e/data/settings/handles";
+
 interface OrganizationLoginBackgroundUploadProps {
   backgroundImage: string | null;
 }
@@ -45,6 +47,7 @@ export function OrganizationLoginBackgroundUpload({
     <Card
       id="organization-login-background-image-upload"
       className="flex h-full flex-col border-neutral-200 bg-white shadow-sm"
+      data-testid={SETTINGS_PAGE_HANDLES.LOGIN_BACKGROUND_CARD}
     >
       <CardHeader className="min-h-24 space-y-1 pb-2">
         <CardTitle className="text-base font-semibold">
@@ -63,12 +66,18 @@ export function OrganizationLoginBackgroundUpload({
           fileInputRef={fileInputRef}
           variant="video"
           detailsText={t("organizationLoginBackgroundImageUpload.field.imageRequirements")}
+          inputTestId={SETTINGS_PAGE_HANDLES.LOGIN_BACKGROUND_INPUT}
         />
         {isUploading && (
           <p className="text-xs font-medium text-neutral-500">{t("common.button.uploading")}</p>
         )}
         {backgroundImage && (
-          <Button onClick={removeImage} variant="destructive" size="sm">
+          <Button
+            onClick={removeImage}
+            variant="destructive"
+            size="sm"
+            data-testid={SETTINGS_PAGE_HANDLES.LOGIN_BACKGROUND_REMOVE}
+          >
             <Icon name="TrashIcon" className="mr-2" />
             {t("organizationLoginBackgroundImageUpload.button.removeBackgroundImage")}
           </Button>

@@ -19,6 +19,8 @@ import { LearningModeBanner } from "~/modules/Courses/Lesson/LearningModeBanner"
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { isSupportedLanguage } from "~/utils/browser-language";
 
+import { COURSE_STATISTICS_HANDLES } from "../../../../e2e/data/statistics/handles";
+
 import { ChapterListOverview } from "./components/ChapterListOverview";
 import { CourseAdminStatistics } from "./CourseAdminStatistics/CourseAdminStatistics";
 import CourseCertificate from "./CourseCertificate";
@@ -222,6 +224,11 @@ export default function CourseViewPage() {
                     <TabsTrigger
                       key={tab.value}
                       value={tab.value}
+                      data-testid={
+                        tab.value === "statistics"
+                          ? COURSE_STATISTICS_HANDLES.COURSE_VIEW_STATISTICS_TAB
+                          : undefined
+                      }
                       className="flex h-full rounded-none items-center gap-1.5 data-[state=active]:shadow-none text-neutral-900 data-[state=active]:text-primary-700 data-[state=active]:border-b-2 data-[state=active]:border-b-primary-700"
                     >
                       <span className="body-sm">{tab.title}</span>{" "}

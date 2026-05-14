@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import { COURSE_TYPE, SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { Factory } from "fishery";
 
 import {
@@ -86,7 +86,7 @@ const ensureCourse = async (
       priceInCents: faker.number.int({ min: 1000, max: 100000 }),
       currency: "usd",
       chapterCount: faker.number.int({ min: 1, max: 20 }),
-      isScorm: false,
+      courseType: COURSE_TYPE.DEFAULT,
       authorId,
       categoryId,
       createdAt: new Date().toISOString(),

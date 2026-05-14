@@ -46,7 +46,8 @@
       "content": "Inhalt",
       "quiz": "Quiz",
       "ai_mentor": "KI-Mentor",
-      "embed": "Einbetten"
+      "embed": "Einbetten",
+      "scorm": "SCORM"
     },
     "error": {
       "somethingWentWrong": "Hoppla! Etwas ist schief gelaufen."
@@ -164,6 +165,107 @@
     },
     "toast": {
       "scormUploadedSuccessfully": "SCORM-Paket erfolgreich hochgeladen"
+    },
+    "errors": {
+      "packageRequired": "SCORM-Paket ist erforderlich.",
+      "emptyPackage": "SCORM-Paket ist leer.",
+      "tooManyFiles": "SCORM-Paket enthält zu viele Dateien.",
+      "packageTooLarge": "SCORM-Paket ist nach dem Entpacken zu groß.",
+      "manifestMissing": "SCORM-Manifestdatei fehlt.",
+      "manifestInvalid": "SCORM-Manifestdatei ist ungültig.",
+      "organizationMissing": "SCORM-Manifest enthält keine Organisation.",
+      "scoMissing": "SCORM-Manifest enthält keine startbaren SCOs.",
+      "resourceIdentifierMissing": "SCORM-Ressourcenkennung fehlt.",
+      "itemIdentifierMissing": "SCORM-Elementkennung fehlt.",
+      "launchFileMissing": "SCORM-Startdatei fehlt.",
+      "packageAlreadyAttached": "Diese SCORM-Lektion hat bereits ein Paket für die ausgewählte Sprache.",
+      "invalidPackagePath": "SCORM-Paket enthält einen ungültigen Dateipfad.",
+      "externalPackagePath": "SCORM-Paket enthält einen externen Dateipfad.",
+      "runtime": {
+        "launchNotFound": "SCORM-Startinhalt wurde nicht gefunden.",
+        "unsupportedStandard": "Dieser SCORM-Standard wird nicht unterstützt.",
+        "invalidAttempt": "SCORM-Versuch ist ungültig.",
+        "invalidCmiValue": "SCORM-Laufzeitdaten sind ungültig.",
+        "contentNotFound": "SCORM-Inhalt wurde nicht gefunden.",
+        "contentForbidden": "Sie haben keinen Zugriff auf diesen SCORM-Inhalt."
+      }
+    },
+    "coursePlaceholder": {
+      "back": "Zurück zur Kursart",
+      "status": "SCORM-Kursimport",
+      "title": "SCORM-Kurserstellung folgt als Nächstes",
+      "description": "Dieser Einstiegspunkt ist vorbereitet, aber der Import für SCORM-Kurse wird noch implementiert. Erstellen Sie vorerst einen Standardkurs oder kehren Sie zur Kursliste zurück.",
+      "createStandard": "Standardkurs erstellen",
+      "viewCourses": "Kurse anzeigen"
+    },
+    "create": {
+      "eyebrow": "SCORM 1.2",
+      "title": "SCORM-Kurs erstellen",
+      "subtitle": "Fügen Sie die Kursmetadaten hinzu und hängen Sie das SCORM-Paket an, das zum Kursinhalt wird.",
+      "requirements": {
+        "title": "Paketanforderungen",
+        "version": "SCORM-1.2-Paket",
+        "archive": ".zip-Archiv bis 500MB",
+        "metadata": "Kursmetadaten können vor dem Import bearbeitet werden"
+      },
+      "packageSection": "SCORM-Paket",
+      "packageSectionDescription": "Hängen Sie das SCORM-1.2-Paket an, das als Kursinhalt importiert werden soll.",
+      "importNotice": "Der Import großer SCORM-Pakete kann einige Minuten dauern. Lassen Sie diese Seite geöffnet, bis der Upload abgeschlossen ist.",
+      "metadataSection": "Kursdetails",
+      "metadataSectionDescription": "Diese Felder entsprechen der Standardkurseinrichtung und werden als Basismetadaten verwendet.",
+      "uploadPackage": "SCORM-Paket hochladen",
+      "dropPackage": "SCORM-Paket hier ablegen",
+      "uploadPackageDescription": "Ziehen Sie eine SCORM-1.2-ZIP-Datei hierher oder wählen Sie sie von Ihrem Gerät aus.",
+      "packageReady": "bereit zum Import",
+      "replacePackage": "Paket ersetzen",
+      "removePackage": "Paket entfernen",
+      "uploadThumbnail": "Miniaturansicht hochladen",
+      "uploadThumbnailDescription": "PNG, JPG oder JPEG bis 20MB",
+      "thumbnailPreviewAlt": "Vorschau der Kursminiatur",
+      "submit": "SCORM-Kurs erstellen",
+      "creating": "SCORM-Kurs wird erstellt...",
+      "toastDraftReady": "Das SCORM-Kursformular ist bereit für die API-Integration"
+    },
+    "lesson": {
+      "packageSection": "SCORM-Paket",
+      "packageAttached": "SCORM-Paket angehängt",
+      "packageLocked": "Dieses Paket kann nach dem Erstellen der Lektion nicht ersetzt werden.",
+      "importNotice": "Der Import großer SCORM-Pakete kann einige Minuten dauern. Lassen Sie diese Seite geöffnet, bis der Upload abgeschlossen ist.",
+      "replacePackageTooltip": "Wenn Sie ein anderes SCORM-Paket hinzufügen möchten, löschen Sie diese Lektion und erstellen Sie eine neue.",
+      "languagePackageTooltip": "Laden Sie ein SCORM-Paket für die ausgewählte Sprache hoch. Vorhandene Sprachpakete können nicht ersetzt werden.",
+      "validation": {
+        "titleRequired": "Titel ist erforderlich",
+        "packageRequired": "SCORM-Paket ist erforderlich",
+        "packageTooLarge": "SCORM-Paket muss kleiner als 500MB sein",
+        "packageInvalidType": "SCORM-Paket muss eine .zip-Datei sein"
+      }
+    }
+  },
+  "adminCourseTypeSelector": {
+    "back": "Zurück",
+    "eyebrow": "Kurseinrichtung",
+    "title": "Neuen Kurs erstellen",
+    "subtitle": "Wählen Sie, ob der Kurs mit dem Standardeditor oder aus einem SCORM-Paket erstellt werden soll.",
+    "standard": {
+      "title": "Standard",
+      "description": "Erstellen Sie einen Kurs mit integriertem Curriculum, Lektionen, Quizzen und Einstellungen.",
+      "features": {
+        "authoring": "Mit dem nativen Kurseditor erstellt",
+        "curriculum": "Kapitel, Lektionen und Quizze in Mentingo verwaltet",
+        "translations": "Kurssprachen und Übersetzungen unterstützt",
+        "settings": "Preise, Status und Zertifikate enthalten"
+      }
+    },
+    "scorm": {
+      "title": "SCORM",
+      "description": "Erstellen Sie einen Kurs aus einem SCORM-1.2-Paket.",
+      "badge": "Platzhalter",
+      "features": {
+        "import": "Aus einem SCORM-1.2-ZIP-Paket erstellt",
+        "tracking": "SCO-Abschluss und Laufzeitstatus unterstützt",
+        "structure": "Importierte Paketstruktur bleibt erhalten",
+        "future": "Preise, Status und Zertifikate enthalten"
+      }
     }
   },
   "studentChapterCardView": {
@@ -184,6 +286,7 @@
     "progress": "Fortschritt",
     "findInApplication": "Finden Sie in der Anwendung",
     "courses": "Kurse",
+    "learningPaths": "Lernpfade",
     "content": "Inhalt",
     "categories": "Kategorien",
     "users": "Benutzer",
@@ -694,6 +797,7 @@
       "author": "Autor",
       "category": "Kategorie",
       "price": "Preis",
+      "type": "Typ",
       "state": "Zustand",
       "status": "Status",
       "sharedCourse": "Geteilt",
@@ -868,6 +972,7 @@
         "category": "Kategorien",
         "group": "Gruppen",
         "course": "Kurse",
+        "learning_path": "Lernpfade",
         "learning_mode": "Lernmodus",
         "learning_progress": "Lernfortschritt",
         "certificate": "Zertifikate",
@@ -1178,6 +1283,23 @@
       "maxOneVideoUploaded": "Sie können nicht mehr als ein Video hochladen.",
       "successfullyTransferredCourseOwnership": "Der Kursbesitz wurde erfolgreich übertragen"
     },
+    "errors": {
+      "featureUnavailable": {
+        "curriculum": "Die Bearbeitung des Lehrplans ist für SCORM-Kurse nicht verfügbar.",
+        "lessonSequence": "Die erzwungene Lektionenreihenfolge ist für SCORM-Kurse nicht verfügbar.",
+        "quizFeedback": "Quiz-Feedback-Einstellungen sind für SCORM-Kurse nicht verfügbar."
+      },
+      "notFound": {
+        "course": "Kurs nicht gefunden.",
+        "category": "Kategorie nicht gefunden.",
+        "chapter": "Kapitel nicht gefunden.",
+        "lesson": "Lektion nicht gefunden."
+      },
+      "create": {
+        "courseFailed": "Kurs konnte nicht erstellt werden.",
+        "stripeProductFailed": "Zahlungsprodukt für den Kurs konnte nicht erstellt werden."
+      }
+    },
     "thinking": {
       "PLANNING_NEXT_STEP": "Nächsten Schritt planen...",
       "USING_TOOLS": "Verwenden von Tools zum Abrufen von Kontext ...",
@@ -1308,6 +1430,7 @@
         "removeQuizLesson": "Sind Sie sicher, dass Sie diese Quizlektion aus dem Kapitel löschen möchten?",
         "removeAiMentorLesson": "Sind Sie sicher, dass Sie diese AI Mentor-Lektion aus dem Kapitel löschen möchten?",
         "removeEmbedLesson": "Sind Sie sicher, dass Sie diese Einbettungslektion aus dem Kapitel löschen möchten?",
+        "removeScormLesson": "Sind Sie sicher, dass Sie diese SCORM-Lektion aus dem Kapitel löschen möchten?",
         "removeChapter": "Sind Sie sicher, dass Sie dieses Kapitel löschen möchten?",
         "removeQuestion": "Sind Sie sicher, dass Sie die Frage löschen möchten?",
         "removeContent": "Sind Sie sicher, dass Sie Inhalte löschen möchten?"
@@ -1396,6 +1519,8 @@
           "lessonCreatedSuccessfully": "Lektion erfolgreich erstellt",
           "fileLessonCreatedSuccessfully": "Dateielement erfolgreich erstellt",
           "contentLessonCreatedSuccessfully": "Inhaltslektion erfolgreich erstellt",
+          "scormLessonCreatedSuccessfully": "SCORM-Lektion erfolgreich erstellt",
+          "scormLessonPackageAttachedSuccessfully": "SCORM-Paket erfolgreich angehängt",
           "quizLessonCreatedSuccessfully": "Quiz erfolgreich erstellt",
           "aiMentorLessonCreatedSuccessfully": "AI-Mentor-Lektion erfolgreich erstellt",
           "aiMentorLessonUpdatedSuccessfully": "AI-Mentor-Lektion erfolgreich aktualisiert",
@@ -1472,10 +1597,12 @@
         "other": {
           "lessonNumber": "Anzahl der Unterrichtsstunden",
           "chooseType": "Wählen Sie Typ",
+          "chooseLessonTypeAriaLabel": "Lektionstyp {{type}} auswählen",
           "content": "Inhalt",
           "quiz": "Quiz",
           "aiMentor": "KI-Mentor",
           "embed": "Einbetten",
+          "scorm": "SCORM",
           "correct": "Richtig",
           "true": "WAHR",
           "false": "FALSCH",
@@ -1494,6 +1621,7 @@
           "contentLessonDescription": "Text mit Multimedia (Bilder, Videos, Präsentationen).",
           "quizLessonDescription": "Eine Reihe von Fragen zur Überprüfung des Wissens.",
           "aiMentorLessonDescription": "Interaktives Gespräch mit einem virtuellen KI-Mentor.",
+          "scormLessonDescription": "Lektionsinhalt als SCORM-Paket.",
           "fillInTheBlanksDescription": "Diese Frage enthält einen Satz; Die Schüler müssen das richtige Wort per Drag-and-Drop in die Lücke ziehen.",
           "gapFillDescription": "Diese Frage enthält Sätze mit fehlenden Wörtern, die die Schüler eingeben müssen.",
           "embedLessonDescription": "Externe Ressource (z. B. Google Form, Canva-Präsentation oder YouTube-Livestream).",
@@ -1712,6 +1840,29 @@
       "selectedCount": "Ausgewählt:",
       "exportButton": "Aktie",
       "exportingButton": "Teilen..."
+    },
+    "scormExport": {
+      "title": "SCORM-Paket",
+      "description": "Exportieren Sie diesen Kurs als eigenständiges SCORM-1.2-Paket für ein anderes LMS.",
+      "versionBadge": "SCORM 1.2",
+      "button": "SCORM-Paket exportieren",
+      "exportingButton": "Exportieren...",
+      "success": "Der Download des SCORM-Pakets wurde gestartet.",
+      "warning": {
+        "title": "AI Mentor-Lektionen werden übersprungen",
+        "description": "Dieser Kurs enthält {{count}} AI Mentor-Lektion. AI Mentor-Lektionen werden in SCORM-Paketen nicht unterstützt. Möchten Sie fortfahren?",
+        "description_other": "Dieser Kurs enthält {{count}} AI Mentor-Lektionen. AI Mentor-Lektionen werden in SCORM-Paketen nicht unterstützt. Möchten Sie fortfahren?",
+        "confirm": "Trotzdem exportieren"
+      },
+      "error": {
+        "courseNotFound": "Der Kurs wurde nicht gefunden.",
+        "accessDenied": "Sie haben keine Berechtigung, diesen Kurs zu exportieren.",
+        "noExportableLessons": "Dieser Kurs enthält keine Lektionen, die nach SCORM exportiert werden können.",
+        "unsupportedLessonType": "Dieser Kurs enthält einen Lektionstyp, der nicht nach SCORM exportiert werden kann.",
+        "missingAsset": "Dieser Kurs enthält eine Datei oder Ressource, die für den Export nicht aufgelöst werden konnte.",
+        "invalidSnapshot": "Dieser Kurs konnte nicht für den SCORM-Export vorbereitet werden.",
+        "fallback": "Der SCORM-Export ist fehlgeschlagen."
+      }
     }
   },
   "registerView": {
@@ -1931,6 +2082,17 @@
     "aiMentor": {
       "title": "KI-Mentor-Sitzung",
       "description": "Dies ist eine KI-gestützte Mentoring-Sitzung. Die KI führt Sie anhand der Richtlinien des Lehrers durch die Lektion."
+    },
+    "scorm": {
+      "loading": "SCORM-Inhalt wird geladen...",
+      "launchFailed": "SCORM-Inhalt konnte nicht gestartet werden.",
+      "launchFailedBody": "Bitte versuchen Sie es erneut. Wenn das Problem weiterhin besteht, muss das SCORM-Paket möglicherweise erneut hochgeladen werden.",
+      "saveFailed": "SCORM-Fortschritt konnte nicht gespeichert werden.",
+      "saving": "Fortschritt wird gespeichert",
+      "previousSco": "Vorheriger Abschnitt",
+      "nextSco": "Nächster Abschnitt",
+      "tryAgain": "Erneut versuchen",
+      "lessonFinished": "SCORM-Lektion abgeschlossen."
     },
     "videoProcessing": {
       "title": "Video wird verarbeitet",
@@ -2644,7 +2806,336 @@
     "progress": "Fortschritt",
     "tenant": "Organisationsdetails",
     "createTenant": "Organisation erstellen",
-    "tenants": "Organisationen"
+    "tenants": "Organisationen",
+    "activityLogs": "Aktivitätsprotokoll",
+    "learningPaths": "Lernpfade",
+    "adminLearningPaths": "Lernpfade",
+    "adminLearningPathEditor": "Lernpfad Editor"
+  },
+  "masterCourse": {
+    "error": {
+      "sourceCourseNotFound": "Quellkurs nicht gefunden",
+      "noTargetTenants": "Waehlen Sie mindestens einen Ziel-Tenant aus",
+      "exportedCourseCannotBeSource": "Ein exportierter Kurs kann nicht als Quelle verwendet werden",
+      "exportLinkMissing": "Kurs-Exportverknuepfung nicht gefunden",
+      "jobNotFound": "Kurs-Exportauftrag nicht gefunden",
+      "targetAuthorMissing": "Autor im Ziel-Tenant nicht gefunden",
+      "targetCourseMissing": "Zielkurs nicht gefunden",
+      "exportedCourseReadonly": "Exportierter Kurs ist schreibgeschuetzt"
+    }
+  },
+  "learningPathExport": {
+    "error": {
+      "noTargetTenants": "Waehlen Sie mindestens einen Ziel-Tenant aus",
+      "exportLinkMissing": "Lernpfad-Exportverknuepfung nicht gefunden",
+      "noCourses": "Der Lernpfad muss vor dem Export mindestens einen Kurs enthalten",
+      "courseExportFailed": "Einer der Lernpfadkurse konnte nicht exportiert werden",
+      "targetAuthorMissing": "Autor im Ziel-Tenant nicht gefunden",
+      "jobNotFound": "Lernpfad-Exportauftrag nicht gefunden",
+      "invalidJobData": "Ungueltige Daten fuer den Lernpfad-Exportauftrag",
+      "invalidExportId": "Ungueltige Lernpfad-Export-ID",
+      "invalidExportLink": "Ungueltige Lernpfad-Exportverknuepfung"
+    }
+  },
+  "learningPathCertificate": {
+    "error": {
+      "disabled": "Lernpfad-Zertifikate sind deaktiviert"
+    }
+  },
+  "activityLogsView": {
+    "filters": {
+      "placeholder": {
+        "searchByEmail": "Suche nach E-Mail...",
+        "from": "Ab Datum",
+        "to": "Bis Datum"
+      }
+    },
+
+    "description": "Zeitachse der Änderungen auf der Plattform als einfacher aufklappbarer Feed.",
+    "breadcrumbs": {
+      "activityLogs": "Aktivitätsprotokoll"
+    },
+    "emptyState": {
+      "title": "Keine Aktivitätsprotokolle gefunden.",
+      "description": "Wenn auf der Plattform Aktionen stattfinden, werden sie hier angezeigt."
+    },
+    "details": {
+      "before": "Vorher",
+      "after": "Nachher",
+      "context": "Kontext",
+      "noMetadata": "Keine Metadaten verfügbar."
+    },
+    "fallbacks": {
+      "unknown": "Unbekannt",
+      "notAvailable": "k. A."
+    },
+    "labels": {
+      "action": "Aktion:",
+      "entity": "Ressource:",
+      "resource": "Ressource:"
+    },
+    "actions": {
+      "create": "Erstellt",
+      "update": "Aktualisiert",
+      "delete": "Gelöscht",
+      "login": "Angemeldet",
+      "login_failed": "Anmeldung fehlgeschlagen",
+      "logout": "Abgemeldet",
+      "enroll_course": "Eingeschrieben",
+      "unenroll_course": "Ausgeschrieben",
+      "start_course": "Gestartet",
+      "group_assignment": "Zugewiesen",
+      "complete_lesson": "Abgeschlossen",
+      "complete_course": "Abgeschlossen",
+      "complete_chapter": "Abgeschlossen",
+      "view_announcement": "Angezeigt"
+    },
+    "entity": {
+      "course": "Kurs",
+      "chapter": "Kapitel",
+      "lesson": "Lektion",
+      "question": "Frage",
+      "news": "Neuigkeiten",
+      "articles": "Artikel",
+      "user": "Benutzer",
+      "category": "Kategorie",
+      "announcement": "Ankündigung",
+      "global_settings": "Einstellungen"
+    },
+    "table": {
+      "datetime": "Datum und Uhrzeit",
+      "email": "E-Mail",
+      "action": "Aktion",
+      "resource": "Ressource",
+      "details": "Details",
+      "showDetails": "Details anzeigen",
+      "loading": "Aktivitätsprotokoll wird geladen...",
+      "empty": "Keine Aktivitätsprotokolle gefunden."
+    }
+  },
+  "learningPathsView": {
+    "title": "Lernpfade",
+    "description": "Durchsuchen Sie zugewiesene Lernpfade und setzen Sie geordnete Kurssequenzen fort.",
+    "searchPlaceholder": "Lernpfade suchen",
+    "summary": "{{count}} Lernpfade sind verfügbar.",
+    "detailsTitle": "Lernpfad",
+    "detailsDescription": "Prüfen Sie Kursreihenfolge, Fortschritt, Sperren und Zertifikatsstatus.",
+    "detailsSummary": "Dieser Pfad enthält {{count}} Kurse. Aktueller Fortschritt: {{progress}}.",
+    "emptyDescription": "Es wurde noch keine Beschreibung hinzugefügt.",
+    "status": {
+      "draft": "Entwurf",
+      "published": "Veröffentlicht",
+      "private": "Privat",
+      "not_started": "Nicht gestartet",
+      "in_progress": "In Bearbeitung",
+      "completed": "Abgeschlossen",
+      "blocked": "Gesperrt"
+    },
+    "badges": {
+      "sequenceEnabled": "Sequenziell",
+      "freeOrder": "Flexible Reihenfolge",
+      "certificate": "Zertifikat"
+    },
+    "card": {
+      "openPath": "Lernpfad öffnen"
+    },
+    "empty": {
+      "title": "Keine Lernpfade gefunden",
+      "description": "Passen Sie die Suche an oder prüfen Sie später erneut."
+    },
+    "progress": {
+      "title": "Pfadfortschritt",
+      "summary": "{{completed}} von {{total}} Kursen abgeschlossen"
+    },
+    "certificate": {
+      "available": "Zertifikat verfügbar",
+      "ready": "Zertifikat bereit",
+      "pathCompleted": "Lernpfad abgeschlossen. Ihr Zertifikat ist bereit."
+    },
+    "courseState": {
+      "completed": "Abgeschlossen",
+      "inProgress": "In Bearbeitung",
+      "inProgressDescription": "Sie haben diesen Kurs begonnen.",
+      "notStarted": "Nicht begonnen",
+      "notStartedDescription": "Dieser Kurs kann gestartet werden.",
+      "locked": "Gesperrt",
+      "lockedDescription": "Schließen Sie den vorherigen Kurs ab, um ihn freizuschalten."
+    },
+    "detail": {
+      "courses": "Kurse in diesem Pfad",
+      "courseTitle": "Kurs {{number}}",
+      "completedAt": "Abgeschlossen am {{date}}",
+      "emptyCourses": "Dieser Lernpfad enthält noch keine Kurse."
+    },
+    "enrollment": {
+      "manage": "Einschreiben",
+      "title": "Lernende einschreiben",
+      "description": "Verwalten Sie Einschreibungen von Studierenden und Gruppen für diesen Lernpfad.",
+      "students": "Studierende",
+      "selectStudents": "Studierende auswählen",
+      "groups": "Gruppen",
+      "selectGroups": "Gruppen auswählen",
+      "filters": {
+        "placeholder": {
+          "searchByKeyword": "Nach Stichwort suchen..."
+        }
+      },
+      "enrollSelected": "Ausgewählte einschreiben",
+      "unenrollSelected": "Ausgewählte abmelden",
+      "enrollGroups": "Gruppen einschreiben",
+      "unenrollGroups": "Gruppen abmelden",
+      "enrolled": "Eingeschrieben",
+      "enroll": "Einschreiben",
+      "studentsEnrolled": "Studierende eingeschrieben",
+      "groupsEnrolled": "Gruppen eingeschrieben",
+      "studentsUnenrolled": "Studierende abgemeldet",
+      "groupsUnenrolled": "Gruppen abgemeldet",
+      "enrolledSuccessfully": "Lernpfad eingeschrieben",
+      "enrollGroupsDescription": "Wählen Sie Gruppen aus, die in diesen Lernpfad eingeschrieben werden sollen.",
+      "unenrollGroupsDescription": "Wählen Sie Gruppen aus, die aus diesem Lernpfad abgemeldet werden sollen.",
+      "table": {
+        "selectAll": "Alle Lernenden auswählen",
+        "select": "Lernenden auswählen",
+        "name": "Name",
+        "email": "E-Mail",
+        "status": "Einschreibestatus",
+        "enrollmentDate": "Einschreibedatum"
+      },
+      "statuses": {
+        "enrolledByGroup": "Durch Gruppe eingeschrieben",
+        "individuallyEnrolled": "Individuell eingeschrieben",
+        "notEnrolled": "Nicht eingeschrieben"
+      },
+      "confirmation": {
+        "title": "Einschreibung bestätigen",
+        "description": "Sind Sie sicher, dass Sie die ausgewählten Studierenden in diesen Lernpfad einschreiben möchten? Diese Aktion kann nicht rückgängig gemacht werden."
+      },
+      "unenrollConfirmation": {
+        "title": "Abmeldung bestätigen",
+        "description": "Sind Sie sicher, dass Sie die ausgewählten Studierenden aus diesem Lernpfad abmelden möchten? Diese Aktion kann nicht rückgängig gemacht werden."
+      },
+      "noGroups": "Keine Gruppen verfügbar"
+    },
+    "breadcrumbs": {
+      "learningPaths": "Lernpfade",
+      "details": "Details"
+    },
+    "buttons": {
+      "openFirst": "Ersten Pfad öffnen"
+    }
+  },
+  "adminLearningPathsView": {
+    "title": "Lernpfade",
+    "description": "Verwalten Sie Metadaten, Sequenzeinstellungen, Kurse, Einschreibungen, Exporte und Zertifikate.",
+    "summary": "{{count}} Lernpfade sind in diesem Arbeitsbereich verfügbar.",
+    "breadcrumbs": {
+      "learningPaths": "Lernpfade",
+      "create": "Erstellen",
+      "edit": "Bearbeiten"
+    },
+    "buttons": {
+      "create": "Lernpfad erstellen",
+      "edit": "Bearbeiten",
+      "save": "Änderungen speichern",
+      "removeImage": "Bild entfernen"
+    },
+    "editor": {
+      "createTitle": "Lernpfad erstellen",
+      "editTitle": "Lernpfad bearbeiten",
+      "description": "Richten Sie Details, Sequenzeinstellungen, Kurse und Veröffentlichungsstatus des Lernpfads ein.",
+      "createSummary": "Beginnen Sie mit den Lernpfaddetails.",
+      "editSummary": "Dieser Lernpfad hat derzeit {{coursesCount}} Kurse.",
+      "details": "Details",
+      "courses": "Kurse",
+      "image": "Bild",
+      "settings": "Einstellungen"
+    },
+    "table": {
+      "title": "Titel",
+      "status": "Status",
+      "settings": "Einstellungen",
+      "language": "Sprache",
+      "createdAt": "Erstellt",
+      "actions": "Aktionen",
+      "untitled": "Lernpfad ohne Titel",
+      "emptyDescription": "Keine Beschreibung",
+      "sequential": "Sequenziell",
+      "flexible": "Flexible Reihenfolge",
+      "certificate": "Zertifikat",
+      "empty": "Es wurden noch keine Lernpfade erstellt."
+    },
+    "form": {
+      "language": "Sprache",
+      "status": "Status",
+      "statusDescription": "Legt fest, ob dieser Lernpfad sichtbar, ein Entwurf oder privat ist.",
+      "title": "Titel",
+      "titlePlaceholder": "Lernpfad benennen",
+      "description": "Beschreibung",
+      "descriptionPlaceholder": "Beschreiben Sie, was Teilnehmer in diesem Lernpfad abschließen",
+      "imageHint": "PNG, JPG oder JPEG (max. 20 MB, empfohlen 1200x1200 oder höher)",
+      "sequenceEnabled": "Sequenzielles Lernen",
+      "sequenceEnabledDescription": "Teilnehmer müssen Kurse in der angezeigten Reihenfolge abschließen.",
+      "includesCertificate": "Zertifikat",
+      "includesCertificateDescription": "Teilnehmer können nach Abschluss des Lernpfads ein Zertifikat erhalten.",
+      "certificateSignature": "Zertifikatssignatur",
+      "certificateSignatureDescription": "Laden Sie die Signatur hoch, die auf Zertifikaten für diesen Lernpfad angezeigt wird.",
+      "certificateFontColor": "Schriftfarbe des Zertifikats",
+      "certificateFontColorDescription": "Verwenden Sie den Farbwähler in der Vorschau, um die Text- und Linienfarbe des Zertifikats zu ändern.",
+      "certificatePreview": "Zertifikatsvorschau",
+      "certificatePreviewDescription": "Zeigen Sie das Zertifikat in der Vorschau an und passen Sie die Schriftfarbe an."
+    },
+    "detailsContent": {
+      "title": "Lernpfaddetails",
+      "description": "Definieren Sie den lokalisierten Namen und die Beschreibung für Teilnehmer."
+    },
+    "detailsImage": {
+      "title": "Titelbild",
+      "description": "Verwenden Sie ein Bild, das diesen Lernpfad leichter erkennbar macht."
+    },
+    "detailsSettings": {
+      "title": "Veröffentlichung und Verhalten",
+      "description": "Sichtbarkeit, Kursreihenfolge und Zertifikat an einem Ort gruppieren."
+    },
+    "common": {
+      "baseLanguage": "Basissprache"
+    },
+    "languageSelector": {
+      "tooltip": "Basissprache dieses Lernpfads ist {{baseLanguage}}."
+    },
+    "courses": {
+      "select": "Kurs auswählen",
+      "add": "Kurs hinzufügen",
+      "drag": "Zum Verschieben ziehen",
+      "delete": "Kurs löschen",
+      "order": "Reihenfolge",
+      "course": "Kurs",
+      "empty": "Diesem Lernpfad wurden noch keine Kurse hinzugefügt.",
+      "saveFirst": "Speichern Sie den Lernpfad, bevor Sie Kurse hinzufügen.",
+      "unknownCourse": "Kursdetails nicht verfügbar"
+    },
+    "sharedLearningPath": {
+      "badgeExported": "Geteilt",
+      "exportButton": "Teilen",
+      "exportSuccess": "Lernpfad wurde geteilt",
+      "exportsDescription": "Teilen Sie diesen Lernpfad mit ausgewählten Organisationen.",
+      "exportsTitle": "Teilen",
+      "exportingButton": "Teilen...",
+      "selectTenants": "Organisationen auswählen",
+      "selectedCount": "Ausgewählt:"
+    },
+    "deleteModal": {
+      "title": "Lernpfad löschen",
+      "description": "Dadurch wird der Lernpfad gelöscht und der pfadbasierte Kurszugriff entfernt."
+    },
+    "toast": {
+      "created": "Lernpfad erfolgreich erstellt",
+      "updated": "Lernpfad erfolgreich aktualisiert",
+      "deleted": "Lernpfad erfolgreich gelöscht",
+      "languageCreated": "Lernpfadsprache erfolgreich erstellt",
+      "coursesAdded": "Kurse erfolgreich zum Lernpfad hinzugefügt",
+      "courseRemoved": "Kurs erfolgreich aus dem Lernpfad entfernt",
+      "coursesReordered": "Lernpfadkurse erfolgreich neu sortiert"
+    }
   },
   "lessonPreview": {
     "breadcrumbs": {

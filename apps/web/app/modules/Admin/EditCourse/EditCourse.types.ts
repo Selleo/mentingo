@@ -1,5 +1,10 @@
 import type { Question } from "./CourseLessons/NewLesson/QuizLessonForm/QuizLessonForm.types";
-import type { AiMentorTTSPreset, AiMentorType, AiMentorVoiceMode } from "@repo/shared";
+import type {
+  AiMentorTTSPreset,
+  AiMentorType,
+  AiMentorVoiceMode,
+  SupportedLanguages,
+} from "@repo/shared";
 
 export const EDIT_COURSE_TABS = {
   SETTINGS: "Settings",
@@ -53,6 +58,7 @@ export interface Lesson {
   lessonResources?: LessonResource[];
   isExternal?: boolean;
   aiMentor?: AiMentor;
+  scormPackageLanguages?: SupportedLanguages[];
 }
 
 export interface Chapter {
@@ -75,6 +81,7 @@ export const ContentTypes = {
   QUIZ_FORM: "QUIZ_FORM",
   AI_MENTOR_FORM: "AI_MENTOR_FORM",
   EMBED_FORM: "EMBED_FORM",
+  SCORM_LESSON_FORM: "SCORM_LESSON_FORM",
 };
 
 export type LessonIcons = "Content" | "Quiz" | "AiMentor" | "Embed";
@@ -84,6 +91,7 @@ export const LessonType = {
   QUIZ: "quiz",
   AI_MENTOR: "ai_mentor",
   EMBED: "embed",
+  SCORM: "scorm",
 } as const;
 
 export type LessonType = (typeof LessonType)[keyof typeof LessonType];

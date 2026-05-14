@@ -8,6 +8,7 @@ import { useSubmitQuiz, useRetakeQuiz, useQuizRetakeStatus } from "~/api/mutatio
 import { courseQueryOptions, lessonQueryOptions } from "~/api/queries";
 import { certificatesQueryOptions } from "~/api/queries/useCertificates";
 import { queryClient } from "~/api/queryClient";
+import { invalidateLearningPathProgressionData } from "~/api/utils/invalidateLearningPathProgressionData";
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
 import {
@@ -75,6 +76,7 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
         queryClient.invalidateQueries(certificatesQueryOptions({ userId })),
         queryClient.invalidateQueries({ queryKey: ["certificate", userId] }),
         queryClient.invalidateQueries(courseQueryOptions(courseSlug)),
+        invalidateLearningPathProgressionData(),
       ]);
     },
   });

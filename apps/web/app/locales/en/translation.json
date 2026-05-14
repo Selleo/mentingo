@@ -46,7 +46,8 @@
       "content": "Content",
       "quiz": "Quiz",
       "ai_mentor": "AI Mentor",
-      "embed": "Embed"
+      "embed": "Embed",
+      "scorm": "SCORM"
     },
     "error": {
       "somethingWentWrong": "Oops! Something went wrong."
@@ -164,6 +165,107 @@
     },
     "toast": {
       "scormUploadedSuccessfully": "SCORM package uploaded successfully"
+    },
+    "errors": {
+      "packageRequired": "SCORM package is required.",
+      "emptyPackage": "SCORM package is empty.",
+      "tooManyFiles": "SCORM package contains too many files.",
+      "packageTooLarge": "SCORM package is too large after extraction.",
+      "manifestMissing": "SCORM manifest file is missing.",
+      "manifestInvalid": "SCORM manifest file is invalid.",
+      "organizationMissing": "SCORM manifest does not contain an organization.",
+      "scoMissing": "SCORM manifest does not contain any launchable SCOs.",
+      "resourceIdentifierMissing": "SCORM resource identifier is missing.",
+      "itemIdentifierMissing": "SCORM item identifier is missing.",
+      "launchFileMissing": "SCORM launch file is missing.",
+      "packageAlreadyAttached": "This SCORM lesson already has a package for the selected language.",
+      "invalidPackagePath": "SCORM package contains an invalid file path.",
+      "externalPackagePath": "SCORM package contains an external file path.",
+      "runtime": {
+        "launchNotFound": "SCORM launch content was not found.",
+        "unsupportedStandard": "This SCORM standard is not supported.",
+        "invalidAttempt": "SCORM attempt is invalid.",
+        "invalidCmiValue": "SCORM runtime data is invalid.",
+        "contentNotFound": "SCORM content was not found.",
+        "contentForbidden": "You do not have access to this SCORM content."
+      }
+    },
+    "coursePlaceholder": {
+      "back": "Back to course type",
+      "status": "SCORM course import",
+      "title": "SCORM course creation is coming next",
+      "description": "This entry point is ready, but the course-level SCORM import flow is still being implemented. Create a standard course for now or return to the course list.",
+      "createStandard": "Create standard course",
+      "viewCourses": "View courses"
+    },
+    "create": {
+      "eyebrow": "SCORM 1.2",
+      "title": "Create SCORM Course",
+      "subtitle": "Add the course metadata and attach the SCORM package that will become the course content.",
+      "requirements": {
+        "title": "Package requirements",
+        "version": "SCORM 1.2 package",
+        "archive": ".zip archive up to 500MB",
+        "metadata": "Course metadata can be edited before import"
+      },
+      "packageSection": "SCORM package",
+      "packageSectionDescription": "Attach the SCORM 1.2 package that should be imported as this course content.",
+      "importNotice": "Large SCORM packages can take a few minutes to import. Keep this page open until the upload finishes.",
+      "metadataSection": "Course details",
+      "metadataSectionDescription": "These fields match the standard course setup and will be used as the base course metadata.",
+      "uploadPackage": "Upload SCORM package",
+      "dropPackage": "Drop the SCORM package here",
+      "uploadPackageDescription": "Drag and drop a SCORM 1.2 .zip file, or click to choose it from your device.",
+      "packageReady": "ready to import",
+      "replacePackage": "Replace package",
+      "removePackage": "Remove package",
+      "uploadThumbnail": "Upload thumbnail",
+      "uploadThumbnailDescription": "PNG, JPG or JPEG up to 20MB",
+      "thumbnailPreviewAlt": "Course thumbnail preview",
+      "submit": "Create SCORM course",
+      "creating": "Creating SCORM course...",
+      "toastDraftReady": "SCORM course form is ready for API integration"
+    },
+    "lesson": {
+      "packageSection": "SCORM package",
+      "packageAttached": "SCORM package attached",
+      "packageLocked": "This package cannot be replaced after the lesson is created.",
+      "importNotice": "Large SCORM packages can take a few minutes to import. Keep this page open until the upload finishes.",
+      "replacePackageTooltip": "If you want to add a different SCORM package, delete this lesson and create a new one.",
+      "languagePackageTooltip": "Upload a SCORM package for the selected language. Existing language packages cannot be replaced.",
+      "validation": {
+        "titleRequired": "Title is required",
+        "packageRequired": "SCORM package is required",
+        "packageTooLarge": "SCORM package must be less than 500MB",
+        "packageInvalidType": "SCORM package must be a .zip file"
+      }
+    }
+  },
+  "adminCourseTypeSelector": {
+    "back": "Back",
+    "eyebrow": "Course setup",
+    "title": "Create New Course",
+    "subtitle": "Choose whether to build the course with the standard editor or create it from a SCORM package.",
+    "standard": {
+      "title": "Standard",
+      "description": "Create a course with the built-in curriculum, lessons, quizzes, and settings.",
+      "features": {
+        "authoring": "Built with the native course editor",
+        "curriculum": "Chapters, lessons, and quizzes managed in Mentingo",
+        "translations": "Course languages and translations supported",
+        "settings": "Pricing, status, and certificates included"
+      }
+    },
+    "scorm": {
+      "title": "SCORM",
+      "description": "Create a course from a SCORM 1.2 package.",
+      "badge": "Placeholder",
+      "features": {
+        "import": "Built from a SCORM 1.2 .zip package",
+        "tracking": "SCO completion and runtime tracking supported",
+        "structure": "Imported package structure preserved",
+        "future": "Pricing, status, and certificates included"
+      }
     }
   },
   "studentChapterCardView": {
@@ -184,6 +286,7 @@
     "progress": "Progress",
     "findInApplication": "Find in application",
     "courses": "Courses",
+    "learningPaths": "Learning Paths",
     "content": "Content",
     "categories": "Categories",
     "users": "Users",
@@ -198,7 +301,8 @@
       "goToAvailableCourses": "Go to available courses"
     },
     "qa": "Q&A",
-    "tenants": "Organizations"
+    "tenants": "Organizations",
+    "activityLogs": "Activity Logs"
   },
   "newsView": {
     "header": "News",
@@ -694,6 +798,7 @@
       "author": "Author",
       "category": "Category",
       "price": "Price",
+      "type": "Type",
       "state": "State",
       "status": "Status",
       "sharedCourse": "Shared",
@@ -868,6 +973,7 @@
         "category": "categories",
         "group": "groups",
         "course": "courses",
+        "learning_path": "learning paths",
         "learning_mode": "learning mode",
         "learning_progress": "learning progress",
         "certificate": "certificates",
@@ -899,6 +1005,15 @@
         "category_manage": "Create, edit, and delete course categories.",
         "group_read": "View user groups.",
         "group_manage": "Create, edit, and delete user groups.",
+        "learning_path_read": "View learning paths.",
+        "learning_path_create": "Create learning paths.",
+        "learning_path_update": "Edit any learning path.",
+        "learning_path_update_own": "Edit learning paths created by this user.",
+        "learning_path_delete": "Delete learning paths.",
+        "learning_path_course_update": "Add, remove, and reorder courses in any learning path.",
+        "learning_path_course_update_own": "Add, remove, and reorder courses in own learning paths.",
+        "learning_path_enrollment": "Manage learning path enrollments.",
+        "learning_path_export": "Export learning paths to tenants.",
         "course_read_assigned": "View courses assigned to this user.",
         "course_read_manageable": "View courses this user can manage.",
         "course_read": "View course content.",
@@ -1231,6 +1346,23 @@
       "maxOneVideoUploaded": "You cannot upload more than 1 video.",
       "successfullyTransferredCourseOwnership": "Course ownership transferred successfully"
     },
+    "errors": {
+      "featureUnavailable": {
+        "curriculum": "Curriculum editing is not available for SCORM courses.",
+        "lessonSequence": "Lesson sequence enforcement is not available for SCORM courses.",
+        "quizFeedback": "Quiz feedback settings are not available for SCORM courses."
+      },
+      "notFound": {
+        "course": "Course not found.",
+        "category": "Category not found.",
+        "chapter": "Chapter not found.",
+        "lesson": "Lesson not found."
+      },
+      "create": {
+        "courseFailed": "Failed to create course.",
+        "stripeProductFailed": "Failed to create course payment product."
+      }
+    },
     "thinking": {
       "PLANNING_NEXT_STEP": "Planning next step...",
       "USING_TOOLS": "Using tools to fetch context...",
@@ -1361,6 +1493,7 @@
         "removeQuizLesson": "Are you sure you want to delete this quiz lesson from chapter?",
         "removeAiMentorLesson": "Are you sure you want to delete this AI Mentor lesson from chapter?",
         "removeEmbedLesson": "Are you sure you want to delete this embed lesson from chapter?",
+        "removeScormLesson": "Are you sure you want to delete this SCORM lesson from chapter?",
         "removeChapter": "Are you sure you want to delete this chapter?",
         "removeQuestion": "Are you sure you want to delete question?",
         "removeContent": "Are you sure you want to delete content?"
@@ -1449,6 +1582,8 @@
           "lessonCreatedSuccessfully": "Lesson created successfully",
           "fileLessonCreatedSuccessfully": "File item created successfully",
           "contentLessonCreatedSuccessfully": "Content lesson created successfully",
+          "scormLessonCreatedSuccessfully": "SCORM lesson created successfully",
+          "scormLessonPackageAttachedSuccessfully": "SCORM package attached successfully",
           "quizLessonCreatedSuccessfully": "Quiz created successfully",
           "aiMentorLessonCreatedSuccessfully": "AI Mentor lesson created successfully",
           "aiMentorLessonUpdatedSuccessfully": "AI Mentor lesson updated successfully",
@@ -1525,10 +1660,12 @@
         "other": {
           "lessonNumber": "Number of lessons",
           "chooseType": "Choose type",
+          "chooseLessonTypeAriaLabel": "Choose {{type}} lesson type",
           "content": "Content",
           "quiz": "Quiz",
           "aiMentor": "AI Mentor",
           "embed": "Embed",
+          "scorm": "SCORM",
           "correct": "Correct",
           "true": "True",
           "false": "False",
@@ -1547,6 +1684,7 @@
           "contentLessonDescription": "Text with multimedia (images, videos, presentations).",
           "quizLessonDescription": "A set of questions to check knowledge.",
           "aiMentorLessonDescription": "Interactive conversation with a virtual AI mentor.",
+          "scormLessonDescription": "SCORM package lesson content.",
           "fillInTheBlanksDescription": "This question contains a sentence; students must drag and drop the correct word into the blank.",
           "gapFillDescription": "This question will have sentence with missing words that students need to type in.",
           "embedLessonDescription": "External resource (e.g. Google Form, Canva presentation, or YouTube live stream).",
@@ -1765,6 +1903,29 @@
       "selectedCount": "Selected:",
       "exportButton": "Share",
       "exportingButton": "Sharing..."
+    },
+    "scormExport": {
+      "title": "SCORM package",
+      "description": "Export this course as a self-contained SCORM 1.2 package for another LMS.",
+      "versionBadge": "SCORM 1.2",
+      "button": "Export SCORM package",
+      "exportingButton": "Exporting...",
+      "success": "SCORM package download started.",
+      "warning": {
+        "title": "AI Mentor lessons will be skipped",
+        "description": "This course contains {{count}} AI Mentor lesson. AI Mentor lessons are not supported in SCORM packages. Do you want to continue?",
+        "description_other": "This course contains {{count}} AI Mentor lessons. AI Mentor lessons are not supported in SCORM packages. Do you want to continue?",
+        "confirm": "Export anyway"
+      },
+      "error": {
+        "courseNotFound": "Course was not found.",
+        "accessDenied": "You do not have permission to export this course.",
+        "noExportableLessons": "This course has no lessons that can be exported to SCORM.",
+        "unsupportedLessonType": "This course contains a lesson type that cannot be exported to SCORM.",
+        "missingAsset": "This course contains a file or resource that could not be resolved for export.",
+        "invalidSnapshot": "This course could not be prepared for SCORM export.",
+        "fallback": "SCORM export failed."
+      }
     }
   },
   "registerView": {
@@ -1984,6 +2145,17 @@
     "aiMentor": {
       "title": "AI Mentor Session",
       "description": "This is an AI-powered mentoring session. The AI will guide you through the lesson based on the instructor's guidelines."
+    },
+    "scorm": {
+      "loading": "Loading SCORM content...",
+      "launchFailed": "SCORM content could not be launched.",
+      "launchFailedBody": "Please try again. If the problem continues, the SCORM package may need to be reuploaded.",
+      "saveFailed": "SCORM progress could not be saved.",
+      "saving": "Saving progress",
+      "previousSco": "Previous section",
+      "nextSco": "Next section",
+      "tryAgain": "Try again",
+      "lessonFinished": "SCORM lesson finished."
     },
     "videoProcessing": {
       "title": "Video is being processed",
@@ -2695,9 +2867,239 @@
     "createQA": "Create new Q&A",
     "analytics": "Analytics",
     "progress": "Progress",
+    "activityLogs": "Activity Logs",
     "tenant": "Organization Details",
     "createTenant": "Create Organization",
-    "tenants": "Organizations"
+    "tenants": "Organizations",
+    "learningPaths": "Learning Paths",
+    "adminLearningPaths": "Learning Paths",
+    "adminLearningPathEditor": "Learning Path Editor"
+  },
+  "learningPathsView": {
+    "title": "Learning Paths",
+    "description": "Browse assigned learning paths and continue through their ordered course sequences.",
+    "searchPlaceholder": "Search learning paths",
+    "summary": "{{count}} learning paths are available.",
+    "detailsTitle": "Learning Path",
+    "detailsDescription": "Review the ordered course sequence, progress, locks, and certificate state.",
+    "detailsSummary": "This path contains {{count}} courses. Current progress: {{progress}}.",
+    "emptyDescription": "No description has been added yet.",
+    "status": {
+      "draft": "Draft",
+      "published": "Published",
+      "private": "Private",
+      "not_started": "Not started",
+      "in_progress": "In progress",
+      "completed": "Completed",
+      "blocked": "Blocked"
+    },
+    "badges": {
+      "sequenceEnabled": "Sequential",
+      "freeOrder": "Flexible order",
+      "certificate": "Certificate"
+    },
+    "card": {
+      "openPath": "Open learning path"
+    },
+    "empty": {
+      "title": "No learning paths found",
+      "description": "Adjust your search or check back after paths are assigned."
+    },
+    "progress": {
+      "title": "Path progress",
+      "summary": "{{completed}} of {{total}} courses completed"
+    },
+    "certificate": {
+      "available": "Certificate available",
+      "ready": "Certificate ready",
+      "pathCompleted": "Learning path completed. Your certificate is ready."
+    },
+    "courseState": {
+      "completed": "Finished",
+      "inProgress": "In progress",
+      "inProgressDescription": "You have started this course.",
+      "notStarted": "Not started",
+      "notStartedDescription": "This course is available to start.",
+      "locked": "Locked",
+      "lockedDescription": "Finish the previous course to unlock it."
+    },
+    "detail": {
+      "courses": "Courses in this path",
+      "courseTitle": "Course {{number}}",
+      "completedAt": "Completed {{date}}",
+      "emptyCourses": "This learning path does not include any courses yet."
+    },
+    "enrollment": {
+      "manage": "Enroll",
+      "title": "Enroll learners",
+      "description": "Manage student and group enrollment for this learning path.",
+      "students": "Students",
+      "selectStudents": "Select students",
+      "groups": "Groups",
+      "selectGroups": "Select groups",
+      "filters": {
+        "placeholder": {
+          "searchByKeyword": "Search by keyword..."
+        }
+      },
+      "enrollSelected": "Enroll selected",
+      "unenrollSelected": "Unenroll selected",
+      "enrollGroups": "Enroll groups",
+      "unenrollGroups": "Unenroll groups",
+      "enrolled": "Enrolled",
+      "enroll": "Enroll",
+      "studentsEnrolled": "Students enrolled",
+      "groupsEnrolled": "Groups enrolled",
+      "studentsUnenrolled": "Students unenrolled",
+      "groupsUnenrolled": "Groups unenrolled",
+      "enrolledSuccessfully": "Learning path enrolled",
+      "enrollGroupsDescription": "Select groups to enroll in this learning path.",
+      "unenrollGroupsDescription": "Select groups to unenroll from this learning path.",
+      "table": {
+        "selectAll": "Select all learners",
+        "select": "Select learner",
+        "name": "Name",
+        "email": "Email",
+        "status": "Enrollment status",
+        "enrollmentDate": "Date enrolled"
+      },
+      "statuses": {
+        "enrolledByGroup": "Enrolled by group",
+        "individuallyEnrolled": "Individually enrolled",
+        "notEnrolled": "Not enrolled"
+      },
+      "confirmation": {
+        "title": "Confirm enrollment",
+        "description": "Are you sure you want to enroll the selected students in this learning path? This action cannot be undone."
+      },
+      "unenrollConfirmation": {
+        "title": "Unenroll confirmation",
+        "description": "Are you sure you want to unenroll the selected students from this learning path? This action cannot be undone."
+      },
+      "noGroups": "No groups available"
+    },
+    "breadcrumbs": {
+      "learningPaths": "Learning Paths",
+      "details": "Details"
+    },
+    "buttons": {
+      "openFirst": "Open first path"
+    }
+  },
+  "adminLearningPathsView": {
+    "title": "Learning Paths",
+    "description": "Manage path metadata, sequence settings, ordered courses, enrollment, exports, and certificates.",
+    "summary": "{{count}} learning paths are available in this workspace.",
+    "breadcrumbs": {
+      "learningPaths": "Learning Paths",
+      "create": "Create",
+      "edit": "Edit"
+    },
+    "buttons": {
+      "create": "Create learning path",
+      "edit": "Edit",
+      "save": "Save changes",
+      "removeImage": "Remove image"
+    },
+    "editor": {
+      "createTitle": "Create Learning Path",
+      "editTitle": "Edit Learning Path",
+      "description": "Set up the learning path details, sequence settings, courses, and publishing state.",
+      "createSummary": "Start with the learning path details.",
+      "editSummary": "This learning path currently has {{coursesCount}} courses.",
+      "details": "Details",
+      "courses": "Courses",
+      "image": "Image",
+      "settings": "Settings"
+    },
+    "table": {
+      "title": "Title",
+      "status": "Status",
+      "settings": "Settings",
+      "language": "Language",
+      "createdAt": "Created",
+      "actions": "Actions",
+      "untitled": "Untitled learning path",
+      "emptyDescription": "No description",
+      "sequential": "Sequential",
+      "flexible": "Flexible",
+      "certificate": "Certificate",
+      "empty": "No learning paths have been created yet."
+    },
+    "form": {
+      "language": "Language",
+      "status": "Status",
+      "statusDescription": "Controls whether this path is visible, draft-only, or private.",
+      "title": "Title",
+      "titlePlaceholder": "Name the learning path",
+      "description": "Description",
+      "descriptionPlaceholder": "Describe what students will complete in this path",
+      "imageHint": "PNG, JPG or JPEG (max. 20 MB, recommended 1200x1200 or higher)",
+      "sequenceEnabled": "Sequential learning",
+      "sequenceEnabledDescription": "Students must complete courses in display order.",
+      "includesCertificate": "Certificate",
+      "includesCertificateDescription": "Students can receive a certificate after completing the path.",
+      "certificateSignature": "Certificate signature",
+      "certificateSignatureDescription": "Upload the signature shown on certificates for this learning path.",
+      "certificateFontColor": "Certificate font color",
+      "certificateFontColorDescription": "Use the preview color picker to update the certificate text and line color.",
+      "certificatePreview": "Certificate preview",
+      "certificatePreviewDescription": "Preview the certificate and adjust its font color."
+    },
+    "detailsContent": {
+      "title": "Learning path details",
+      "description": "Define the localized name and student-facing description."
+    },
+    "detailsImage": {
+      "title": "Cover image",
+      "description": "Use a visual that helps administrators and students recognize this path."
+    },
+    "detailsSettings": {
+      "title": "Publication and behavior",
+      "description": "Group visibility, course order, and certificate behavior in one place."
+    },
+    "common": {
+      "baseLanguage": "Base language"
+    },
+    "languageSelector": {
+      "tooltip": "This learning path base language is {{baseLanguage}}."
+    },
+    "courses": {
+      "select": "Select a course",
+      "add": "Add course",
+      "drag": "Drag to reorder course",
+      "delete": "Delete course",
+      "order": "Order",
+      "course": "Course",
+      "chapter_one": "{{count}} chapter",
+      "chapter_other": "{{count}} chapters",
+      "empty": "No courses have been added to this learning path yet.",
+      "saveFirst": "Save the learning path before adding courses.",
+      "unknownCourse": "Course details unavailable"
+    },
+    "sharedLearningPath": {
+      "badgeExported": "Shared",
+      "exportButton": "Share",
+      "exportSuccess": "Learning path was exported",
+      "exportsDescription": "Share this learning path with selected organizations.",
+      "exportsTitle": "Sharing",
+      "exportingButton": "Sharing...",
+      "selectTenants": "Select organizations",
+      "selectedCount": "Selected:"
+    },
+    "deleteModal": {
+      "title": "Delete learning path",
+      "description": "This will delete the learning path and remove its path-based course access."
+    },
+    "toast": {
+      "created": "Learning path created successfully",
+      "updated": "Learning path updated successfully",
+      "deleted": "Learning path deleted successfully",
+      "languageCreated": "Learning path language created successfully",
+      "coursesAdded": "Courses added to learning path successfully",
+      "courseRemoved": "Course removed from learning path successfully",
+      "coursesReordered": "Learning path courses reordered successfully"
+    }
   },
   "lessonPreview": {
     "breadcrumbs": {
@@ -3063,6 +3465,107 @@
       "ownerNotAdmin": "API key owner no longer has admin permissions",
       "missingApiKeyHeader": "Missing X-API-Key header",
       "missingTenantIdHeader": "Missing X-Tenant-Id header"
+    }
+  },
+  "masterCourse": {
+    "error": {
+      "sourceCourseNotFound": "Source course not found",
+      "noTargetTenants": "Select at least one target tenant",
+      "exportedCourseCannotBeSource": "Exported course cannot be used as a source",
+      "exportLinkMissing": "Course export link not found",
+      "jobNotFound": "Course export job not found",
+      "targetAuthorMissing": "Target tenant author not found",
+      "targetCourseMissing": "Target course not found",
+      "exportedCourseReadonly": "Exported course is read-only"
+    }
+  },
+  "learningPathExport": {
+    "error": {
+      "noTargetTenants": "Select at least one target tenant",
+      "exportLinkMissing": "Learning path export link not found",
+      "noCourses": "Learning path must include at least one course before export",
+      "courseExportFailed": "Failed to export one of the learning path courses",
+      "targetAuthorMissing": "Target tenant author not found",
+      "jobNotFound": "Learning path export job not found",
+      "invalidJobData": "Invalid learning path export job data",
+      "invalidExportId": "Invalid learning path export id",
+      "invalidExportLink": "Invalid learning path export link"
+    }
+  },
+  "learningPathCertificate": {
+    "error": {
+      "disabled": "Learning path certificates are disabled"
+    }
+  },
+  "activityLogsView": {
+    "filters": {
+      "placeholder": {
+        "searchByEmail": "Search by email...",
+        "from": "From date",
+        "to": "To date"
+      }
+    },
+
+    "description": "Timeline of changes across the platform, grouped as a simple expandable feed.",
+    "breadcrumbs": {
+      "activityLogs": "Activity Logs"
+    },
+    "emptyState": {
+      "title": "No activity logs found.",
+      "description": "When actions happen in the platform, they will appear here."
+    },
+    "details": {
+      "before": "Before",
+      "after": "After",
+      "context": "Context",
+      "noMetadata": "No metadata available."
+    },
+    "fallbacks": {
+      "unknown": "Unknown",
+      "notAvailable": "n/a"
+    },
+    "labels": {
+      "action": "Action:",
+      "entity": "Resource:",
+      "resource": "Resource:"
+    },
+    "actions": {
+      "create": "Created",
+      "update": "Updated",
+      "delete": "Deleted",
+      "login": "Logged in",
+      "login_failed": "Login failed",
+      "logout": "Logged out",
+      "enroll_course": "Enrolled",
+      "unenroll_course": "Unenrolled",
+      "start_course": "Started",
+      "group_assignment": "Assigned",
+      "complete_lesson": "Completed",
+      "complete_course": "Completed",
+      "complete_chapter": "Completed",
+      "view_announcement": "Viewed"
+    },
+    "entity": {
+      "course": "Course",
+      "chapter": "Chapter",
+      "lesson": "Lesson",
+      "question": "Question",
+      "news": "News",
+      "articles": "Article",
+      "user": "User",
+      "category": "Category",
+      "announcement": "Announcement",
+      "global_settings": "Settings"
+    },
+    "table": {
+      "datetime": "Datetime",
+      "email": "Email",
+      "action": "Action",
+      "resource": "Resource",
+      "details": "Details",
+      "showDetails": "Show details",
+      "loading": "Loading activity logs...",
+      "empty": "No activity logs found."
     }
   }
 }

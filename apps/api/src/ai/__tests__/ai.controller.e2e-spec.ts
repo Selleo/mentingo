@@ -42,6 +42,7 @@ describe("AiController (e2e)", () => {
 
   afterAll(async () => {
     await truncateAllTables(baseDb, db);
+    await app.close();
   });
 
   beforeEach(async () => {

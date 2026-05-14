@@ -4,6 +4,8 @@ import { createPortal } from "react-dom";
 
 import { Button } from "~/components/ui/button";
 
+import { SETTINGS_PAGE_HANDLES } from "../../../../../../e2e/data/settings/handles";
+
 interface UploadFilesToLoginPagePreviewDialogProps {
   open: boolean;
   resourceName: string;
@@ -21,7 +23,10 @@ export const UploadFilesToLoginPagePreviewDialog = ({
     if (!open) return null;
 
     return (
-      <div className="fixed left-0 top-0 z-10 box-border flex size-full justify-center bg-gray-900/50 p-4">
+      <div
+        className="fixed left-0 top-0 z-10 box-border flex size-full justify-center bg-gray-900/50 p-4"
+        data-testid={SETTINGS_PAGE_HANDLES.LOGIN_PAGE_FILE_PREVIEW_DIALOG}
+      >
         <div className="flex size-full max-w-6xl flex-col">
           <div className="flex items-center justify-between rounded-t-lg bg-white p-4">
             <div>
@@ -32,6 +37,7 @@ export const UploadFilesToLoginPagePreviewDialog = ({
                 onClick={onClose}
                 variant="outline"
                 className="flex size-8 items-center justify-center p-0 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                data-testid={SETTINGS_PAGE_HANDLES.LOGIN_PAGE_FILE_PREVIEW_CLOSE}
               >
                 <X className="size-5" />
               </Button>

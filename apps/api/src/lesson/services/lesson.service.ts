@@ -41,6 +41,7 @@ import {
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
 import { isQuizAccessAllowed } from "src/utils/isQuizAccessAllowed";
 
+import { createLessonResourceIdRegex } from "../lesson-resource-references";
 import { LESSON_TYPES } from "../lesson.type";
 import { LessonRepository } from "../repositories/lesson.repository";
 
@@ -138,7 +139,7 @@ export class LessonService {
         hasAutoplayTrigger,
         videos,
       } = injectResourcesIntoContent(lesson.description, mappedResources, {
-        resourceIdRegex: /lesson-resource\/([0-9a-fA-F-]{36})/,
+        resourceIdRegex: createLessonResourceIdRegex(),
         trackNodeTypes: ["video", "presentation", "downloadable-file"],
         isImageResource: (resource) => this.isImageResource(resource),
         buildImageTag: (resource) => this.buildImageTag(resource),

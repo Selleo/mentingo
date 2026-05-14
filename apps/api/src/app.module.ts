@@ -8,6 +8,7 @@ import { ThrottlerModule } from "@nestjs/throttler";
 
 import { ActivityLogsModule } from "src/activity-logs/activity-logs.module";
 import { EnvModule } from "src/env/env.module";
+import { LearningPathModule } from "src/learning-path/learning-path.module";
 import { LearningTimeModule } from "src/learning-time";
 import { QAModule } from "src/qa/qa.module";
 import { QueueModule } from "src/queue";
@@ -53,6 +54,7 @@ import { LocalizationModule } from "./localization/localization.module";
 import { LumaModule } from "./luma/luma.module";
 import { NewsModule } from "./news/news.module";
 import { OutboxModule } from "./outbox/outbox.module";
+import { PermissionsModule } from "./permissions/permissions.module";
 import { QuestionsModule } from "./questions/question.module";
 import { AppThrottlerGuard } from "./rate-limit/app-throttler.guard";
 import { RedisThrottlerStorage } from "./rate-limit/redis-throttler.storage";
@@ -132,6 +134,7 @@ import type { RedisClient } from "src/redis";
     ConditionalModule.registerWhen(ScheduleModule.forRoot(), (env) => !env.JEST_WORKER_ID),
     CourseModule,
     CourseChatModule,
+    LearningPathModule,
     GroupModule,
     LessonModule,
     QuestionsModule,
@@ -143,13 +146,13 @@ import type { RedisClient } from "src/redis";
     EventsModule,
     StatisticsModule,
     ReportModule,
-    ScormModule,
     CacheModule,
     RedisClientsModule,
     QueueModule,
     WebSocketModule,
     AiModule,
     SettingsModule,
+    ScormModule,
     CertificatesModule,
     AnnouncementsModule,
     IngestionModule,
@@ -157,6 +160,7 @@ import type { RedisClient } from "src/redis";
     LearningTimeModule,
     EnvModule,
     LocalizationModule,
+    PermissionsModule,
     ActivityLogsModule,
     QAModule,
     NewsModule,

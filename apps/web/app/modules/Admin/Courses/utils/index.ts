@@ -1,5 +1,6 @@
-import { COURSE_STATUSES } from "@repo/shared";
+import { COURSE_STATUSES, COURSE_TYPE } from "@repo/shared";
 
+import type { CourseType } from "@repo/shared";
 import type i18next from "i18next";
 import type { CourseStatus } from "~/api/queries/useCourses";
 
@@ -26,5 +27,15 @@ export const getCourseBadgeVariant = (status: CourseStatus) => {
       return "secondary";
     default:
       return "draft";
+  }
+};
+
+export const getCourseTypeLabel = (courseType: CourseType, t: typeof i18next.t) => {
+  switch (courseType) {
+    case COURSE_TYPE.SCORM:
+      return t("adminCourseTypeSelector.scorm.title");
+    case COURSE_TYPE.DEFAULT:
+    default:
+      return t("adminCourseTypeSelector.standard.title");
   }
 };

@@ -1,5 +1,5 @@
 import { VIDEO_AUTOPLAY } from "@repo/shared";
-import { NodeSelection, TextSelection } from "@tiptap/pm/state";
+import { TextSelection } from "@tiptap/pm/state";
 
 import type { Editor as TiptapEditor } from "@tiptap/react";
 
@@ -136,10 +136,8 @@ export const insertVideoUploadPlaceholder = ({
     .run();
 
   const { state, view } = editor;
-  const { selection } = state;
-  const targetPos = selection instanceof NodeSelection ? selection.to + 1 : selection.to;
-  const clampedPos = Math.max(1, Math.min(targetPos, state.doc.content.size));
-  const nextSelection = TextSelection.create(state.doc, clampedPos);
+  const clampedPos = Math.max(0, Math.min(state.selection.to, state.doc.content.size));
+  const nextSelection = TextSelection.near(state.doc.resolve(clampedPos), 1);
 
   view.dispatch(state.tr.setSelection(nextSelection).scrollIntoView());
 };
