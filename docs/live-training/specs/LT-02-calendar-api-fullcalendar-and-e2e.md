@@ -49,6 +49,7 @@ recording, chat, or recurrence materialization.
 
 - No recurrence expansion from `rrule`.
 - No editing recurring series.
+- No direct Calendar create/update/delete endpoints.
 - No user/group audience tables.
 - No generic calendar invitation/RSVP workflow.
 - No LiveKit join/start/end token flow.
@@ -70,6 +71,13 @@ GET /calendar/events
 GET /calendar/events/:eventId
 GET /calendar/today-indicator
 ```
+
+Deprecated v1 flow:
+
+- Do not create, update, or delete Live Training-backed events through Calendar endpoints.
+- Live Training scheduling owns writes and persists/updates `calendar_events` as a side effect.
+- Calendar remains a read projection for visible scheduled events. This prevents duplicated
+  authorization paths and keeps Live Training-specific rules in the Live Training module.
 
 ### List Events
 

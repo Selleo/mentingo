@@ -106,6 +106,7 @@
     "jimp": "^1.6.0",
     "jsdom": "24.1.1",
     "langchain": "0.3.34",
+    "livekit-server-sdk": "2.15.2",
     "load-esm": "1.0.3",
     "lodash": "4.17.21",
     "mammoth": "1.10.0",

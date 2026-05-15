@@ -1,4 +1,11 @@
-import { Controller } from "@nestjs/common";
+import { Controller, UseGuards } from "@nestjs/common";
+import { FEATURES } from "@repo/shared";
 
+import { RequireFeature } from "src/common/decorators/require-feature.decorator";
+import { FeaturesGuard } from "src/common/guards/features.guard";
+import { PermissionsGuard } from "src/common/guards/permissions.guard";
+
+@UseGuards(FeaturesGuard, PermissionsGuard)
+@RequireFeature(FEATURES.LIVE_TRAINING)
 @Controller("live-training")
 export class LiveTrainingController {}

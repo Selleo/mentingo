@@ -133,6 +133,15 @@ export interface CurrentUserResponse {
       | "learning_path.course_update_own"
       | "learning_path.enrollment"
       | "learning_path.export"
+      | "live_training.read"
+      | "live_training.create"
+      | "live_training.update"
+      | "live_training.update_own"
+      | "live_training.delete"
+      | "live_training.join"
+      | "live_training.start"
+      | "live_training.end"
+      | "live_training.statistics"
       | "course.read_assigned"
       | "course.read_manageable"
       | "course.read"
@@ -316,6 +325,8 @@ export interface GetPublicGlobalSettingsResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     modernCourseListEnabled: boolean;
+    calendarEnabled: boolean;
+    liveTrainingEnabled: boolean;
     enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
@@ -444,6 +455,8 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     modernCourseListEnabled: boolean;
+    calendarEnabled: boolean;
+    liveTrainingEnabled: boolean;
     enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
@@ -486,6 +499,8 @@ export interface UpdateEnforceSSOResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     modernCourseListEnabled: boolean;
+    calendarEnabled: boolean;
+    liveTrainingEnabled: boolean;
     enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
@@ -528,6 +543,96 @@ export interface UpdateModernCourseListEnabledResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     modernCourseListEnabled: boolean;
+    calendarEnabled: boolean;
+    liveTrainingEnabled: boolean;
+    enforceSSO: boolean;
+    certificateBackgroundImage: string | null;
+    companyInformation?: {
+      companyName?: string;
+      /** @maxLength 10 */
+      companyShortName?: string;
+      registeredAddress?: string;
+      taxNumber?: string;
+      emailAddress?: string;
+      courtRegisterNumber?: string;
+    };
+    platformLogoS3Key: string | null;
+    loginBackgroundImageS3Key: string | null;
+    platformSimpleLogoS3Key: string | null;
+    MFAEnforcedRoles: string[];
+    defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+    inviteOnlyRegistration: boolean;
+    userEmailTriggers: {
+      userFirstLogin: boolean;
+      userCourseAssignment: boolean;
+      userShortInactivity: boolean;
+      userLongInactivity: boolean;
+      userChapterFinished: boolean;
+      userCourseFinished: boolean;
+    };
+    primaryColor: string | null;
+    contrastColor: string | null;
+    unregisteredUserQAAccessibility: boolean;
+    QAEnabled: boolean;
+    unregisteredUserNewsAccessibility: boolean;
+    newsEnabled: boolean;
+    unregisteredUserArticlesAccessibility: boolean;
+    articlesEnabled: boolean;
+    ageLimit: 13 | 16 | null;
+    loginPageFiles: string[];
+  };
+}
+
+export interface UpdateCalendarEnabledResponse {
+  data: {
+    unregisteredUserCoursesAccessibility: boolean;
+    modernCourseListEnabled: boolean;
+    calendarEnabled: boolean;
+    liveTrainingEnabled: boolean;
+    enforceSSO: boolean;
+    certificateBackgroundImage: string | null;
+    companyInformation?: {
+      companyName?: string;
+      /** @maxLength 10 */
+      companyShortName?: string;
+      registeredAddress?: string;
+      taxNumber?: string;
+      emailAddress?: string;
+      courtRegisterNumber?: string;
+    };
+    platformLogoS3Key: string | null;
+    loginBackgroundImageS3Key: string | null;
+    platformSimpleLogoS3Key: string | null;
+    MFAEnforcedRoles: string[];
+    defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+    inviteOnlyRegistration: boolean;
+    userEmailTriggers: {
+      userFirstLogin: boolean;
+      userCourseAssignment: boolean;
+      userShortInactivity: boolean;
+      userLongInactivity: boolean;
+      userChapterFinished: boolean;
+      userCourseFinished: boolean;
+    };
+    primaryColor: string | null;
+    contrastColor: string | null;
+    unregisteredUserQAAccessibility: boolean;
+    QAEnabled: boolean;
+    unregisteredUserNewsAccessibility: boolean;
+    newsEnabled: boolean;
+    unregisteredUserArticlesAccessibility: boolean;
+    articlesEnabled: boolean;
+    ageLimit: 13 | 16 | null;
+    loginPageFiles: string[];
+  };
+}
+
+export interface UpdateLiveTrainingEnabledResponse {
+  data: {
+    unregisteredUserCoursesAccessibility: boolean;
+    modernCourseListEnabled: boolean;
+    calendarEnabled: boolean;
+    liveTrainingEnabled: boolean;
     enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
@@ -601,6 +706,8 @@ export interface UpdateColorSchemaResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     modernCourseListEnabled: boolean;
+    calendarEnabled: boolean;
+    liveTrainingEnabled: boolean;
     enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
@@ -839,7 +946,8 @@ export interface InitVideoUploadBody {
     | "user"
     | "category"
     | "announcement"
-    | "global_settings";
+    | "global_settings"
+    | "live_training";
   relationshipType?: string;
 }
 
@@ -1596,7 +1704,7 @@ export interface GetCourseResponse {
         /** @format uuid */
         id: string;
         title: string;
-        type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm";
+        type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm" | "live_training";
         displayOrder: number;
         status: "not_started" | "in_progress" | "completed" | "blocked";
         quizQuestionCount: number | null;
@@ -1674,7 +1782,7 @@ export interface GetBetaCourseByIdResponse {
         /** @format uuid */
         id: string;
         title: string;
-        type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm";
+        type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm" | "live_training";
         description?: string | null;
         displayOrder: number;
         fileS3Key?: string | null;
@@ -2195,7 +2303,7 @@ export interface GetLessonsResponse {
     /** @format uuid */
     id: string;
     title: string;
-    type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm";
+    type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm" | "live_training";
     description: string | null;
     displayOrder: number;
     lessonCompleted?: boolean;
@@ -2215,7 +2323,7 @@ export interface GetLessonByIdResponse {
     /** @format uuid */
     id: string;
     title: string;
-    type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm";
+    type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm" | "live_training";
     description: string | null;
     fileType: string | null;
     fileUrl: string | null;
@@ -2305,7 +2413,7 @@ export interface GetLessonByIdResponse {
 
 export type BetaCreateLessonBody = {
   title: string;
-  type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm";
+  type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm" | "live_training";
   description?: string | null;
   fileS3Key?: string | null;
   avatarReferenceUrl?: string;
@@ -2667,7 +2775,7 @@ export interface BetaUpdateQuizLessonResponse {
 
 export type BetaUpdateLessonBody = ({
   title?: string;
-  type?: "content" | "quiz" | "ai_mentor" | "embed" | "scorm";
+  type?: "content" | "quiz" | "ai_mentor" | "embed" | "scorm" | "live_training";
   description?: string | null;
   fileS3Key?: string | null;
   avatarReferenceUrl?: string;
@@ -2790,7 +2898,7 @@ export interface DeleteStudentQuizAnswersResponse {
 
 export interface CreateEmbedLessonBody {
   title: string;
-  type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm";
+  type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm" | "live_training";
   /** @format uuid */
   chapterId: string;
   resources: {
@@ -2809,7 +2917,7 @@ export interface CreateEmbedLessonResponse {
 
 export interface UpdateEmbedLessonBody {
   title: string;
-  type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm";
+  type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm" | "live_training";
   resources: {
     /** @format uuid */
     id?: string;
@@ -2964,7 +3072,7 @@ export interface GetChapterWithLessonResponse {
       /** @format uuid */
       id: string;
       title: string;
-      type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm";
+      type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm" | "live_training";
       displayOrder: number;
       status: "not_started" | "in_progress" | "completed" | "blocked";
       quizQuestionCount: number | null;
@@ -2998,7 +3106,7 @@ export type BetaCreateChapterBody = {
     /** @format uuid */
     id: string;
     title: string;
-    type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm";
+    type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm" | "live_training";
     description?: string | null;
     displayOrder: number;
     fileS3Key?: string | null;
@@ -3083,7 +3191,7 @@ export type UpdateChapterBody = ({
     /** @format uuid */
     id: string;
     title: string;
-    type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm";
+    type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm" | "live_training";
     description?: string | null;
     displayOrder: number;
     fileS3Key?: string | null;
@@ -5510,6 +5618,34 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     settingsControllerUpdateModernCourseListEnabled: (params: RequestParams = {}) =>
       this.request<UpdateModernCourseListEnabledResponse, any>({
         path: `/api/settings/admin/modern-course-list`,
+        method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateCalendarEnabled
+     * @request PATCH:/api/settings/admin/calendar
+     */
+    settingsControllerUpdateCalendarEnabled: (params: RequestParams = {}) =>
+      this.request<UpdateCalendarEnabledResponse, any>({
+        path: `/api/settings/admin/calendar`,
+        method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateLiveTrainingEnabled
+     * @request PATCH:/api/settings/admin/live-training
+     */
+    settingsControllerUpdateLiveTrainingEnabled: (params: RequestParams = {}) =>
+      this.request<UpdateLiveTrainingEnabledResponse, any>({
+        path: `/api/settings/admin/live-training`,
         method: "PATCH",
         format: "json",
         ...params,

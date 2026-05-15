@@ -85,7 +85,23 @@ Reasoning:
 
 - Calendar is a generic app surface, not only a Live Training subresource.
 - The route stays stable if later event types are added.
-- Live Training-specific write flows still belong in `live-training`.
+- Calendar is read-only in v1. Direct Calendar CRUD is deprecated for this scope.
+- Scheduled Live Training rows are created, updated, cancelled, and deleted through `live-training`
+  flows.
+- Those Live Training writes update `calendar_events` as a side effect; Calendar only displays the
+  visible event projection.
+- This avoids two competing write paths for the same scheduled training and keeps source-specific
+  authorization, materials, trainers, course links, and lifecycle rules in the Live Training domain.
+
+Deprecated v1 endpoints:
+
+```text
+POST /calendar/events
+PATCH /calendar/events/:eventId
+DELETE /calendar/events/:eventId
+```
+
+Do not implement these until the product explicitly supports generic non-training calendar events.
 
 ## Permission Boundary
 
@@ -178,22 +194,50 @@ input. Repository calls must run through the app DB context that has the current
 
 Query shape:
 
-The main query should be event-first:
+Use one source-specific CTE per calendar event source. Each CTE owns its source-specific joins,
+visibility rules, and small source payload, but must return the same normalized column shape. The
+main query should only union standardized event rows and apply final ordering.
+
+For LT-02, the only source CTE is Live Training:
 
 ```text
-WITH visible_events AS (
-  SELECT calendar_events.*
+WITH live_training_events AS (
+  SELECT
+    calendar_events.id,
+    calendar_events.uid,
+    'live_training' AS source_type,
+    live_trainings.id AS source_id,
+    calendar_events.title,
+    calendar_events.description,
+    calendar_events.starts_at,
+    calendar_events.ends_at,
+    calendar_events.timezone,
+    calendar_events.status,
+    jsonb_build_object(
+      'sourceType', 'live_training',
+      'deliveryType', live_trainings.delivery_type,
+      'trainingStatus', live_trainings.status,
+      'viewerRole', ...,
+      'linkedCourseIds', ...,
+      'canViewDetails', true,
+      'canJoin', false,
+      'canStart', false
+    ) AS payload
   FROM calendar_events
-  WHERE calendar_events.starts_at < :end
+  JOIN live_trainings ON live_trainings.calendar_event_id = calendar_events.id
+  WHERE calendar_events.deleted_at IS NULL
+    AND live_trainings.deleted_at IS NULL
+    AND calendar_events.starts_at < :end
     AND calendar_events.ends_at > :start
+    AND ...
 )
-SELECT ...
-FROM visible_events
-LEFT JOIN live_training_enrichment ...
+SELECT *
+FROM live_training_events
+ORDER BY starts_at ASC;
 ```
 
-For LT-02, add a Live Training enrichment CTE or joined subquery. Later event sources can add their
-own enrichment without rewriting the calendar base query.
+Later event sources should add their own CTE with the same output shape and be combined with
+`UNION ALL`. Do not make one giant calendar query with all possible joins in the main query.
 
 Visibility filter:
 
@@ -226,29 +270,30 @@ type CalendarEventListItem = {
   timezone: string;
   allDay: boolean;
   status: "scheduled" | "cancelled" | "ended" | "expired";
+  payload: CalendarEventPayload;
+};
+
+type CalendarEventPayload = LiveTrainingCalendarEventPayload;
+
+type LiveTrainingCalendarEventPayload = {
+  sourceType: "live_training";
   deliveryType: "online" | "offline";
-  sourceStatus: "scheduled" | "active" | "ended" | "cancelled" | "expired";
-  sourceVisibilityScope: "all" | "linked_courses";
-  sourceRole: "admin" | "author" | "trainer" | "co_trainer" | "moderator" | "observer";
-  linkedCourses: CalendarLinkedCourse[];
+  trainingStatus: "scheduled" | "active" | "ended" | "cancelled" | "expired";
+  viewerRole: "admin" | "author" | "trainer" | "observer";
+  linkedCourseIds: string[];
   actions: CalendarEventActions;
 };
 
-type CalendarLinkedCourse = {
-  courseId: string;
-  courseTitle: string;
-};
-
 type CalendarEventActions = {
-  canView: boolean;
-  canEdit: boolean;
-  canLinkCourse: boolean;
+  canViewDetails: boolean;
   canStart: boolean;
   canJoin: boolean;
-  canEnd: boolean;
-  canViewReport: boolean;
 };
 ```
+
+Keep the list payload intentionally small. It should support calendar styling and obvious actions,
+not full details. Fetch trainers, materials, linked course names, session summaries, and reports
+from the details endpoint.
 
 Wrap as:
 

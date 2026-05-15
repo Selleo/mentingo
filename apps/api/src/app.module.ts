@@ -26,6 +26,7 @@ import { MicrosoftStrategy } from "./auth/strategy/microsoft.strategy";
 import { SlackStrategy } from "./auth/strategy/slack.strategy";
 import { BunnyStreamModule } from "./bunny/bunnyStream.module";
 import { CacheModule } from "./cache/cache.module";
+import { CalendarModule } from "./calendar/calendar.module";
 import { CategoryModule } from "./category/category.module";
 import { CertificatesModule } from "./certificates/certificates.module";
 import bunnyConfig from "./common/configuration/bunny";
@@ -171,6 +172,7 @@ import type { RedisClient } from "src/redis";
     AudioModule,
     LumaModule,
     LiveTrainingModule,
+    CalendarModule,
   ],
   controllers: [],
   providers: [

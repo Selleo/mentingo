@@ -719,6 +719,80 @@ export class SettingsService {
     return this.parseGlobalSettings(updatedGlobalSettings);
   }
 
+  public async updateGlobalCalendarEnabled(
+    actor?: CurrentUserType,
+  ): Promise<GlobalSettingsJSONContentSchema> {
+    const previousRecord = await this.getGlobalSettingsRecord();
+    const previousSettings = this.parseGlobalSettings(previousRecord.settings);
+
+    if (previousSettings.calendarEnabled && previousSettings.liveTrainingEnabled) {
+      throw new BadRequestException("settings.errors.calendarRequiredForLiveTraining");
+    }
+
+    const [{ settings: updatedGlobalSettings }] = await this.db
+      .update(settings)
+      .set({
+        settings: sql`
+          jsonb_set(
+            settings.settings,
+            '{calendarEnabled}',
+            to_jsonb(${!previousSettings.calendarEnabled}::boolean),
+            true
+          )
+        `,
+      })
+      .where(isNull(settings.userId))
+      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+
+    const updatedRecord = await this.getGlobalSettingsRecord();
+
+    await this.recordSettingsUpdate({
+      actor,
+      previousSnapshot: this.buildSettingsSnapshot(previousRecord),
+      updatedSnapshot: updatedRecord ? this.buildSettingsSnapshot(updatedRecord) : null,
+    });
+
+    return this.parseGlobalSettings(updatedGlobalSettings);
+  }
+
+  public async updateGlobalLiveTrainingEnabled(
+    actor?: CurrentUserType,
+  ): Promise<GlobalSettingsJSONContentSchema> {
+    const previousRecord = await this.getGlobalSettingsRecord();
+    const previousSettings = this.parseGlobalSettings(previousRecord.settings);
+    const nextLiveTrainingEnabled = !previousSettings.liveTrainingEnabled;
+
+    const [{ settings: updatedGlobalSettings }] = await this.db
+      .update(settings)
+      .set({
+        settings: sql`
+          jsonb_set(
+            jsonb_set(
+              settings.settings,
+              '{liveTrainingEnabled}',
+              to_jsonb(${nextLiveTrainingEnabled}::boolean),
+              true
+            ),
+            '{calendarEnabled}',
+            to_jsonb(${nextLiveTrainingEnabled || previousSettings.calendarEnabled}::boolean),
+            true
+          )
+        `,
+      })
+      .where(isNull(settings.userId))
+      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+
+    const updatedRecord = await this.getGlobalSettingsRecord();
+
+    await this.recordSettingsUpdate({
+      actor,
+      previousSnapshot: this.buildSettingsSnapshot(previousRecord),
+      updatedSnapshot: updatedRecord ? this.buildSettingsSnapshot(updatedRecord) : null,
+    });
+
+    return this.parseGlobalSettings(updatedGlobalSettings);
+  }
+
   public async uploadPlatformLogo(
     file: Express.Multer.File | null | undefined,
     actor?: CurrentUserType,

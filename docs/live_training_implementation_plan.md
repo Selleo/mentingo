@@ -37,7 +37,7 @@ This document turns `docs/implementation_schema_live_training.md` into a spec-dr
   - session statuses: `waiting`, `active`, `ended`, `failed`
   - delivery types: `online`, `offline`
   - visibility scopes: `all`, `linked_courses`
-  - participant/member roles: `trainer`, `co_trainer`, `moderator`, `observer`
+  - session roles: `trainer`, `observer`
   - resource relationship types: `live_training_before`, `live_training_after`
 - [x] Add shared socket event name constants for session start/end, participant updates, attendance updates, popup availability, and errors.
 - [x] Add permissions:
@@ -76,11 +76,15 @@ Endpoint spec: `docs/live-training/specs/LT-02-calendar-module-endpoints.md`
 This is the next implementation slice after LT-01. Finish the calendar path end-to-end before finishing LiveKit meeting runtime work.
 
 - [x] Add shared feature constants and `@RequireFeature(...)` guard infrastructure for toggleable product surfaces.
-- [ ] Apply Calendar and Live Training feature guards to Calendar endpoints when the endpoints are implemented.
+- [x] Add a dedicated read-only `CalendarModule` scaffold with controller, service, and repository.
+- [x] Apply the Calendar feature guard to the Calendar controller scaffold.
+- [ ] Keep Calendar read-only in this slice. Direct calendar CRUD is deprecated for v1.
 - [ ] Add calendar/listing API endpoints needed by the UI:
   - list visible calendar events by date range for the current user
   - get calendar event details
-  - expose event status, delivery type, linked live training ID, linked lesson/course context, and role-specific available actions
+  - expose event status, delivery type, linked source ID, linked lesson/course context, and session role
+- [ ] Create/update/delete scheduled Live Training events through the Live Training flow, not through Calendar endpoints.
+- [ ] Treat Calendar rows as a projection/read surface: Live Training writes `calendar_events` as a side effect, then Calendar displays the visible result.
 - [ ] Ensure calendar endpoints are guarded by Calendar and Live Training feature toggles where applicable.
 - [ ] Rely on RLS for tenant isolation; do not pass tenant IDs through calendar endpoint or repository contracts.
 - [ ] Implement visibility rules from the Live Training domain:
@@ -98,10 +102,8 @@ This is the next implementation slice after LT-01. Finish the calendar path end-
   - online/offline labels
   - active/ended/cancelled/expired visual states
   - event click opening a role-aware details panel/modal
-- [ ] Event details should support the non-LiveKit actions already available at this stage:
+- [ ] Event details should support the non-LiveKit information already available at this stage:
   - view details and materials
-  - edit own/manageable future training
-  - link training to course where allowed
   - show waiting/disabled state for start/join until LiveKit meeting work lands
 - [ ] Add sidebar indicator for visible trainings today.
 - [ ] Ensure the indicator never counts inaccessible trainings.
@@ -113,22 +115,27 @@ This is the next implementation slice after LT-01. Finish the calendar path end-
 
 ## LT-03 Backend API And Access Policy
 
-- [ ] Add a dedicated `live-training` NestJS module with controller, service, repository, schemas, and tests.
+Spec: `docs/live-training/specs/LT-03-live-training-crud-endpoints.md`
+
+- [x] Add a dedicated `live-training` NestJS module with controller, service, and repository shell.
+- [ ] Add Live Training request/response schemas and tests.
 - [ ] Add API endpoints for:
   - create/update/delete live training
   - get training details
-  - link existing training to a course lesson
-  - cancel training
-  - complete offline training
-  - get attendance/report data
+  - list visible trainings
+  - attach existing resources as before/after files through `resource_entity`
+  - create/update/cancel the paired `calendar_events` row as a side effect
 - [ ] Return data through existing `BaseResponse` / `PaginatedResponse` shapes.
 - [ ] Enforce access rules:
   - Admin can manage all trainings in tenant.
   - Content Creator can create/manage own trainings and can choose only self as trainer.
   - Content Creator can link only own trainings to own/manageable courses.
-  - Trainer can start/end assigned trainings.
-  - Observer can see and join only assigned trainings.
-  - Observer microphone setting is fixed before session start.
+  - Trainer can read assigned trainings and see all before/after files.
+  - Student/observer sees before files before completion and after files only once ended.
+- [ ] Keep runtime session logic out of this slice:
+  - no LiveKit room/token/start/join/end
+  - no attendance/report data
+  - no offline completion
 - [ ] Ensure all queries are tenant-scoped.
 
 ## LT-04 Course Lesson And Event Integration
@@ -292,14 +299,15 @@ This slice should finish Live Training creation, calendar event creation, course
 - [ ] Regenerate web API client with `pnpm generate:client`.
 - [ ] Use `ApiClient.api...` only in web code.
 - [ ] Treat calendar API/client wiring as part of LT-02 when implementing the calendar slice.
-- [ ] Add web query/mutation hooks for:
+- [ ] Add web query hooks for read-only Calendar data:
   - calendar list
   - details
-  - create/update/delete
+  - indicator
+- [ ] Add Live Training mutation hooks for scheduling and lifecycle actions:
+  - create/update/delete/cancel/complete training
   - link to course
   - start/join/end/cancel/complete
   - materials
-  - indicator
   - popup summary
   - attendance report
 - [ ] Add shared `data-testid` handles for E2E instead of relying on visible copy.

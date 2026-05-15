@@ -817,8 +817,8 @@
     {
       "idx": 116,
       "version": "7",
-      "when": 1778596737102,
-      "tag": "0116_enable_tenant_rls_for_live_training_tables",
+      "when": 1778770236680,
+      "tag": "0116_add_calendar_live_training_settings",
       "breakpoints": true
     }
   ]

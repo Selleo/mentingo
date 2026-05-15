@@ -551,6 +551,40 @@
         }
       }
     },
+    "/api/settings/admin/calendar": {
+      "patch": {
+        "operationId": "SettingsController_updateCalendarEnabled",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateCalendarEnabledResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/admin/live-training": {
+      "patch": {
+        "operationId": "SettingsController_updateLiveTrainingEnabled",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateLiveTrainingEnabledResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/settings/admin/finished-course-notification": {
       "patch": {
         "operationId": "SettingsController_updateAdminFinishedCourseNotification",
@@ -11558,6 +11592,48 @@
           }
         }
       }
+    },
+    "/api/calendar/events": {
+      "get": {
+        "operationId": "CalendarController_getEvents",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/calendar/events/{eventId}": {
+      "get": {
+        "operationId": "CalendarController_getEventDetails",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/calendar/today-indicator": {
+      "get": {
+        "operationId": "CalendarController_getTodayIndicator",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
     }
   },
   "info": {
@@ -12074,6 +12150,42 @@
                     },
                     {
                       "const": "learning_path.export",
+                      "type": "string"
+                    },
+                    {
+                      "const": "live_training.read",
+                      "type": "string"
+                    },
+                    {
+                      "const": "live_training.create",
+                      "type": "string"
+                    },
+                    {
+                      "const": "live_training.update",
+                      "type": "string"
+                    },
+                    {
+                      "const": "live_training.update_own",
+                      "type": "string"
+                    },
+                    {
+                      "const": "live_training.delete",
+                      "type": "string"
+                    },
+                    {
+                      "const": "live_training.join",
+                      "type": "string"
+                    },
+                    {
+                      "const": "live_training.start",
+                      "type": "string"
+                    },
+                    {
+                      "const": "live_training.end",
+                      "type": "string"
+                    },
+                    {
+                      "const": "live_training.statistics",
                       "type": "string"
                     },
                     {
@@ -12841,6 +12953,12 @@
               "modernCourseListEnabled": {
                 "type": "boolean"
               },
+              "calendarEnabled": {
+                "type": "boolean"
+              },
+              "liveTrainingEnabled": {
+                "type": "boolean"
+              },
               "enforceSSO": {
                 "type": "boolean"
               },
@@ -13031,6 +13149,8 @@
             "required": [
               "unregisteredUserCoursesAccessibility",
               "modernCourseListEnabled",
+              "calendarEnabled",
+              "liveTrainingEnabled",
               "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
@@ -13597,6 +13717,12 @@
               "modernCourseListEnabled": {
                 "type": "boolean"
               },
+              "calendarEnabled": {
+                "type": "boolean"
+              },
+              "liveTrainingEnabled": {
+                "type": "boolean"
+              },
               "enforceSSO": {
                 "type": "boolean"
               },
@@ -13787,6 +13913,8 @@
             "required": [
               "unregisteredUserCoursesAccessibility",
               "modernCourseListEnabled",
+              "calendarEnabled",
+              "liveTrainingEnabled",
               "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
@@ -13825,6 +13953,12 @@
               "modernCourseListEnabled": {
                 "type": "boolean"
               },
+              "calendarEnabled": {
+                "type": "boolean"
+              },
+              "liveTrainingEnabled": {
+                "type": "boolean"
+              },
               "enforceSSO": {
                 "type": "boolean"
               },
@@ -14015,6 +14149,8 @@
             "required": [
               "unregisteredUserCoursesAccessibility",
               "modernCourseListEnabled",
+              "calendarEnabled",
+              "liveTrainingEnabled",
               "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
@@ -14053,6 +14189,12 @@
               "modernCourseListEnabled": {
                 "type": "boolean"
               },
+              "calendarEnabled": {
+                "type": "boolean"
+              },
+              "liveTrainingEnabled": {
+                "type": "boolean"
+              },
               "enforceSSO": {
                 "type": "boolean"
               },
@@ -14243,6 +14385,480 @@
             "required": [
               "unregisteredUserCoursesAccessibility",
               "modernCourseListEnabled",
+              "calendarEnabled",
+              "liveTrainingEnabled",
+              "enforceSSO",
+              "certificateBackgroundImage",
+              "platformLogoS3Key",
+              "loginBackgroundImageS3Key",
+              "platformSimpleLogoS3Key",
+              "MFAEnforcedRoles",
+              "defaultCourseCurrency",
+              "inviteOnlyRegistration",
+              "userEmailTriggers",
+              "primaryColor",
+              "contrastColor",
+              "unregisteredUserQAAccessibility",
+              "QAEnabled",
+              "unregisteredUserNewsAccessibility",
+              "newsEnabled",
+              "unregisteredUserArticlesAccessibility",
+              "articlesEnabled",
+              "ageLimit",
+              "loginPageFiles"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateCalendarEnabledResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "unregisteredUserCoursesAccessibility": {
+                "type": "boolean"
+              },
+              "modernCourseListEnabled": {
+                "type": "boolean"
+              },
+              "calendarEnabled": {
+                "type": "boolean"
+              },
+              "liveTrainingEnabled": {
+                "type": "boolean"
+              },
+              "enforceSSO": {
+                "type": "boolean"
+              },
+              "certificateBackgroundImage": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "companyInformation": {
+                "type": "object",
+                "properties": {
+                  "companyName": {
+                    "type": "string"
+                  },
+                  "companyShortName": {
+                    "maxLength": 10,
+                    "type": "string"
+                  },
+                  "registeredAddress": {
+                    "type": "string"
+                  },
+                  "taxNumber": {
+                    "type": "string"
+                  },
+                  "emailAddress": {
+                    "type": "string"
+                  },
+                  "courtRegisterNumber": {
+                    "type": "string"
+                  }
+                }
+              },
+              "platformLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "loginBackgroundImageS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "platformSimpleLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "MFAEnforcedRoles": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "defaultCourseCurrency": {
+                "anyOf": [
+                  {
+                    "const": "pln",
+                    "type": "string"
+                  },
+                  {
+                    "const": "eur",
+                    "type": "string"
+                  },
+                  {
+                    "const": "gbp",
+                    "type": "string"
+                  },
+                  {
+                    "const": "usd",
+                    "type": "string"
+                  }
+                ]
+              },
+              "inviteOnlyRegistration": {
+                "type": "boolean"
+              },
+              "userEmailTriggers": {
+                "type": "object",
+                "properties": {
+                  "userFirstLogin": {
+                    "type": "boolean"
+                  },
+                  "userCourseAssignment": {
+                    "type": "boolean"
+                  },
+                  "userShortInactivity": {
+                    "type": "boolean"
+                  },
+                  "userLongInactivity": {
+                    "type": "boolean"
+                  },
+                  "userChapterFinished": {
+                    "type": "boolean"
+                  },
+                  "userCourseFinished": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "userFirstLogin",
+                  "userCourseAssignment",
+                  "userShortInactivity",
+                  "userLongInactivity",
+                  "userChapterFinished",
+                  "userCourseFinished"
+                ]
+              },
+              "primaryColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "contrastColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "unregisteredUserQAAccessibility": {
+                "type": "boolean"
+              },
+              "QAEnabled": {
+                "type": "boolean"
+              },
+              "unregisteredUserNewsAccessibility": {
+                "type": "boolean"
+              },
+              "newsEnabled": {
+                "type": "boolean"
+              },
+              "unregisteredUserArticlesAccessibility": {
+                "type": "boolean"
+              },
+              "articlesEnabled": {
+                "type": "boolean"
+              },
+              "ageLimit": {
+                "anyOf": [
+                  {
+                    "const": 13,
+                    "type": "number"
+                  },
+                  {
+                    "const": 16,
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "loginPageFiles": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "unregisteredUserCoursesAccessibility",
+              "modernCourseListEnabled",
+              "calendarEnabled",
+              "liveTrainingEnabled",
+              "enforceSSO",
+              "certificateBackgroundImage",
+              "platformLogoS3Key",
+              "loginBackgroundImageS3Key",
+              "platformSimpleLogoS3Key",
+              "MFAEnforcedRoles",
+              "defaultCourseCurrency",
+              "inviteOnlyRegistration",
+              "userEmailTriggers",
+              "primaryColor",
+              "contrastColor",
+              "unregisteredUserQAAccessibility",
+              "QAEnabled",
+              "unregisteredUserNewsAccessibility",
+              "newsEnabled",
+              "unregisteredUserArticlesAccessibility",
+              "articlesEnabled",
+              "ageLimit",
+              "loginPageFiles"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateLiveTrainingEnabledResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "unregisteredUserCoursesAccessibility": {
+                "type": "boolean"
+              },
+              "modernCourseListEnabled": {
+                "type": "boolean"
+              },
+              "calendarEnabled": {
+                "type": "boolean"
+              },
+              "liveTrainingEnabled": {
+                "type": "boolean"
+              },
+              "enforceSSO": {
+                "type": "boolean"
+              },
+              "certificateBackgroundImage": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "companyInformation": {
+                "type": "object",
+                "properties": {
+                  "companyName": {
+                    "type": "string"
+                  },
+                  "companyShortName": {
+                    "maxLength": 10,
+                    "type": "string"
+                  },
+                  "registeredAddress": {
+                    "type": "string"
+                  },
+                  "taxNumber": {
+                    "type": "string"
+                  },
+                  "emailAddress": {
+                    "type": "string"
+                  },
+                  "courtRegisterNumber": {
+                    "type": "string"
+                  }
+                }
+              },
+              "platformLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "loginBackgroundImageS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "platformSimpleLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "MFAEnforcedRoles": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "defaultCourseCurrency": {
+                "anyOf": [
+                  {
+                    "const": "pln",
+                    "type": "string"
+                  },
+                  {
+                    "const": "eur",
+                    "type": "string"
+                  },
+                  {
+                    "const": "gbp",
+                    "type": "string"
+                  },
+                  {
+                    "const": "usd",
+                    "type": "string"
+                  }
+                ]
+              },
+              "inviteOnlyRegistration": {
+                "type": "boolean"
+              },
+              "userEmailTriggers": {
+                "type": "object",
+                "properties": {
+                  "userFirstLogin": {
+                    "type": "boolean"
+                  },
+                  "userCourseAssignment": {
+                    "type": "boolean"
+                  },
+                  "userShortInactivity": {
+                    "type": "boolean"
+                  },
+                  "userLongInactivity": {
+                    "type": "boolean"
+                  },
+                  "userChapterFinished": {
+                    "type": "boolean"
+                  },
+                  "userCourseFinished": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "userFirstLogin",
+                  "userCourseAssignment",
+                  "userShortInactivity",
+                  "userLongInactivity",
+                  "userChapterFinished",
+                  "userCourseFinished"
+                ]
+              },
+              "primaryColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "contrastColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "unregisteredUserQAAccessibility": {
+                "type": "boolean"
+              },
+              "QAEnabled": {
+                "type": "boolean"
+              },
+              "unregisteredUserNewsAccessibility": {
+                "type": "boolean"
+              },
+              "newsEnabled": {
+                "type": "boolean"
+              },
+              "unregisteredUserArticlesAccessibility": {
+                "type": "boolean"
+              },
+              "articlesEnabled": {
+                "type": "boolean"
+              },
+              "ageLimit": {
+                "anyOf": [
+                  {
+                    "const": 13,
+                    "type": "number"
+                  },
+                  {
+                    "const": 16,
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "loginPageFiles": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "unregisteredUserCoursesAccessibility",
+              "modernCourseListEnabled",
+              "calendarEnabled",
+              "liveTrainingEnabled",
               "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
@@ -14436,6 +15052,12 @@
               "modernCourseListEnabled": {
                 "type": "boolean"
               },
+              "calendarEnabled": {
+                "type": "boolean"
+              },
+              "liveTrainingEnabled": {
+                "type": "boolean"
+              },
               "enforceSSO": {
                 "type": "boolean"
               },
@@ -14626,6 +15248,8 @@
             "required": [
               "unregisteredUserCoursesAccessibility",
               "modernCourseListEnabled",
+              "calendarEnabled",
+              "liveTrainingEnabled",
               "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
@@ -15466,6 +16090,10 @@
               },
               {
                 "const": "global_settings",
+                "type": "string"
+              },
+              {
+                "const": "live_training",
                 "type": "string"
               }
             ]
@@ -18955,6 +19583,10 @@
                               {
                                 "const": "scorm",
                                 "type": "string"
+                              },
+                              {
+                                "const": "live_training",
+                                "type": "string"
                               }
                             ]
                           },
@@ -19418,6 +20050,10 @@
                               },
                               {
                                 "const": "scorm",
+                                "type": "string"
+                              },
+                              {
+                                "const": "live_training",
                                 "type": "string"
                               }
                             ]
@@ -21706,6 +22342,10 @@
                     {
                       "const": "scorm",
                       "type": "string"
+                    },
+                    {
+                      "const": "live_training",
+                      "type": "string"
                     }
                   ]
                 },
@@ -21798,6 +22438,10 @@
                   },
                   {
                     "const": "scorm",
+                    "type": "string"
+                  },
+                  {
+                    "const": "live_training",
                     "type": "string"
                   }
                 ]
@@ -22409,6 +23053,10 @@
                   },
                   {
                     "const": "scorm",
+                    "type": "string"
+                  },
+                  {
+                    "const": "live_training",
                     "type": "string"
                   }
                 ]
@@ -24443,6 +25091,10 @@
                       {
                         "const": "scorm",
                         "type": "string"
+                      },
+                      {
+                        "const": "live_training",
+                        "type": "string"
                       }
                     ]
                   },
@@ -25071,6 +25723,10 @@
               {
                 "const": "scorm",
                 "type": "string"
+              },
+              {
+                "const": "live_training",
+                "type": "string"
               }
             ]
           },
@@ -25152,6 +25808,10 @@
               },
               {
                 "const": "scorm",
+                "type": "string"
+              },
+              {
+                "const": "live_training",
                 "type": "string"
               }
             ]
@@ -25846,6 +26506,10 @@
                         {
                           "const": "scorm",
                           "type": "string"
+                        },
+                        {
+                          "const": "live_training",
+                          "type": "string"
                         }
                       ]
                     },
@@ -26030,6 +26694,10 @@
                         },
                         {
                           "const": "scorm",
+                          "type": "string"
+                        },
+                        {
+                          "const": "live_training",
                           "type": "string"
                         }
                       ]
@@ -26514,6 +27182,10 @@
                             },
                             {
                               "const": "scorm",
+                              "type": "string"
+                            },
+                            {
+                              "const": "live_training",
                               "type": "string"
                             }
                           ]

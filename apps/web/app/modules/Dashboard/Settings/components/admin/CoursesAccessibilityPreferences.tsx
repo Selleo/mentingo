@@ -1,5 +1,7 @@
 import { useTranslation } from "react-i18next";
 
+import { useToggleCalendar } from "~/api/mutations/admin/useToggleCalendar";
+import { useToggleLiveTraining } from "~/api/mutations/admin/useToggleLiveTraining";
 import { useToggleModernCourseList } from "~/api/mutations/admin/useToggleModernCourseList";
 import { useUnregisteredUserCoursesAccessibility } from "~/api/mutations/admin/useUnregisteredUserCoursesAccessibility";
 
@@ -20,6 +22,8 @@ export default function CoursesAccessibilityPreferences({
   const { mutate: changeUnregisteredUserCoursesAccessibility } =
     useUnregisteredUserCoursesAccessibility();
   const { mutate: toggleModernCourseList } = useToggleModernCourseList();
+  const { mutate: toggleCalendar } = useToggleCalendar();
+  const { mutate: toggleLiveTraining } = useToggleLiveTraining();
 
   const handleCoursesAccessibilityChange = () => {
     changeUnregisteredUserCoursesAccessibility();
@@ -42,6 +46,23 @@ export default function CoursesAccessibilityPreferences({
         checked={globalSettings.modernCourseListEnabled}
         onCheckedChange={toggleModernCourseList}
         testId={SETTINGS_PAGE_HANDLES.MODERN_COURSE_LIST_SWITCH}
+      />
+      <SettingItem
+        id="calendar"
+        label={t("adminPreferences.field.calendar")}
+        description={t("adminPreferences.field.calendarDescription")}
+        checked={globalSettings.calendarEnabled}
+        onCheckedChange={toggleCalendar}
+        testId={SETTINGS_PAGE_HANDLES.CALENDAR_SWITCH}
+      />
+      <SettingItem
+        id="liveTraining"
+        label={t("adminPreferences.field.liveTraining")}
+        description={t("adminPreferences.field.liveTrainingDescription")}
+        checked={globalSettings.liveTrainingEnabled}
+        onCheckedChange={toggleLiveTraining}
+        tooltip={t("adminPreferences.field.liveTrainingTooltip")}
+        testId={SETTINGS_PAGE_HANDLES.LIVE_TRAINING_SWITCH}
       />
     </div>
   );

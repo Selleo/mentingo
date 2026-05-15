@@ -182,6 +182,30 @@ export class SettingsController {
     return new BaseResponse(result);
   }
 
+  @Patch("admin/calendar")
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
+  @Validate({
+    response: baseResponse(globalSettingsJSONSchema),
+  })
+  async updateCalendarEnabled(
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
+    const result = await this.settingsService.updateGlobalCalendarEnabled(currentUser);
+    return new BaseResponse(result);
+  }
+
+  @Patch("admin/live-training")
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
+  @Validate({
+    response: baseResponse(globalSettingsJSONSchema),
+  })
+  async updateLiveTrainingEnabled(
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
+    const result = await this.settingsService.updateGlobalLiveTrainingEnabled(currentUser);
+    return new BaseResponse(result);
+  }
+
   @Patch("admin/finished-course-notification")
   @UseGuards(DisallowInSupportModeGuard)
   @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)

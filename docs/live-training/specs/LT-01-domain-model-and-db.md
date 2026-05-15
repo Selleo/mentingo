@@ -39,7 +39,7 @@ Define the first implementable Live Training slice:
 
 - schedule Live Training through a calendar-compatible event,
 - link one Live Training to zero or many course lessons,
-- assign trainers/co-trainers/moderators,
+- assign trainers,
 - start and end a LiveKit-backed runtime session,
 - let eligible users join as observers,
 - persist runtime participation and attendance,
@@ -68,7 +68,7 @@ live_training)` rows.
 - The same Live Training may appear in multiple courses as separate lesson rows.
 - Do not snapshot course learners when scheduling or linking the training.
 - Do not materialize course learners or all tenant users into `live_training_members`.
-- Use `live_training_members` only for assigned staff/member roles.
+- Use `live_training_members` only for assigned trainers.
 - Track actual runtime participation in Live Training-specific session and attendance tables.
 - Attendance is not invitation, visibility, RSVP, or completion.
 - Completion for linked lessons uses current enrolled users for each linked course when the session
@@ -123,9 +123,8 @@ Rules:
 - Start, join, LiveKit token issuing, end, and attendance persistence must still go through backend
   services and DB-backed rules.
 - Redis may cache active presence/session state later, but DB remains the source of truth.
-- LiveKit grants should be derived from the validated Live Training role:
-  trainer/co-trainer/moderator gets elevated room capabilities, observer gets view/listen-only
-  capabilities.
+- LiveKit grants should be derived from the validated Live Training session role:
+  trainer gets elevated room capabilities, observer gets view/listen-only capabilities.
 
 ## Permissions And Role Mapping
 
@@ -171,7 +170,7 @@ Service-level access rules:
 - Read:
   - allow admin-level permission,
   - allow author,
-  - allow assigned trainer/co-trainer/moderator,
+  - allow assigned trainer,
   - allow enrolled user for linked-course trainings,
   - allow tenant user for all-scope trainings.
 - Create:
@@ -186,18 +185,17 @@ Service-level access rules:
   - prefer cancellation over hard delete once external calendar/LiveKit state exists.
 - Start/end:
   - require `LIVE_TRAINING_START` or `LIVE_TRAINING_END`,
-  - additionally require admin, author, or assigned trainer/co-trainer/moderator role.
+  - additionally require manage permission, own permission, or assigned trainer access.
 - Join:
   - require `LIVE_TRAINING_JOIN`,
   - validate `visibility_scope`,
-  - issue elevated LiveKit token for assigned trainer/co-trainer/moderator,
+  - issue elevated LiveKit token for assigned trainer,
   - issue observer LiveKit token for eligible learners/all-scope users.
 - Statistics:
   - require `LIVE_TRAINING_STATISTICS`,
   - additionally require admin, author, assigned trainer, or manageable linked course.
 
-Do not add a separate global `LIVE_TRAINING_MODERATE` permission in v1. Moderation should be
-derived from `live_training_members.role`, not only from a tenant-wide permission.
+Do not add a separate global `LIVE_TRAINING_MODERATE` permission in v1.
 
 ## Implementation Schema
 
@@ -227,9 +225,9 @@ LIVE_TRAINING_SESSION_STATUSES.ENDED = "ended"
 LIVE_TRAINING_SESSION_STATUSES.FAILED = "failed"
 
 LIVE_TRAINING_MEMBER_ROLES.TRAINER = "trainer"
-LIVE_TRAINING_MEMBER_ROLES.CO_TRAINER = "co_trainer"
-LIVE_TRAINING_MEMBER_ROLES.MODERATOR = "moderator"
-LIVE_TRAINING_MEMBER_ROLES.OBSERVER = "observer"
+
+LIVE_TRAINING_SESSION_ROLES.TRAINER = "trainer"
+LIVE_TRAINING_SESSION_ROLES.OBSERVER = "observer"
 
 RESOURCE_RELATIONSHIP_TYPES.LIVE_TRAINING_BEFORE = "live_training_before"
 RESOURCE_RELATIONSHIP_TYPES.LIVE_TRAINING_AFTER = "live_training_after"
@@ -332,7 +330,7 @@ updated_at timestamptz not null
 live_training_id uuid not null references live_trainings(id) on delete cascade
 user_id uuid not null references users(id)
 
-role text not null                  -- trainer | co_trainer | moderator | observer
+role text not null                  -- trainer
 display_order integer null
 
 settings jsonb not null default {}
@@ -352,8 +350,9 @@ tenant_id, role
 
 Rules:
 
-- Use `trainer`, `co_trainer`, and `moderator` in v1.
-- Keep `observer` reserved for future explicit-user assignment.
+- Use only `trainer` in v1.
+- Do not store observers in `live_training_members`; derive observer access from visibility scope and
+  linked course enrollment.
 - Do not materialize course learners or all-tenant learners into this table.
 
 ### Table: `live_training_links`
@@ -481,7 +480,7 @@ live_training_session_id uuid not null references live_training_sessions(id) on 
 live_training_id uuid not null references live_trainings(id) on delete cascade
 user_id uuid not null references users(id)
 
-role text not null                  -- trainer | co_trainer | moderator | observer | admin
+role text not null                  -- trainer | observer
 
 first_joined_at timestamptz null
 last_left_at timestamptz null
@@ -582,7 +581,7 @@ Rules:
 - After-session files use `relationship_type = live_training_after`.
 - Before-session files are visible to eligible users before, during, and after the session.
 - After-session files are hidden until the Live Training is ended.
-- File access must still validate Live Training visibility: author, assigned trainer/moderator,
+- File access must still validate Live Training visibility: author, assigned trainer,
   linked-course enrollment, or all-scope access.
 - If we later need display order, per-role visibility, per-file unlock time, downloadable flags, or
   completion rules, add a small relation metadata table keyed by `resource_entity.id`.
@@ -591,7 +590,7 @@ Rules:
 
 - Admins see/manage tenant Live Trainings according to permissions.
 - Authors see/manage their own Live Trainings according to permissions.
-- Trainers/co-trainers/moderators see assigned trainings through `live_training_members`.
+- Trainers see assigned trainings through `live_training_members`.
 - If `visibility_scope = all`, all tenant users can see/join as observers.
 - If `visibility_scope = linked_courses`, users can see/join when enrolled in at least one linked
   course.
@@ -605,7 +604,7 @@ Create independent Live Training:
 ```text
 calendar_events
 live_trainings(visibility_scope = all)
-live_training_members for trainer/co-trainers/moderators
+live_training_members for trainers
 resource_entity rows for before/after files, if any
 ```
 
@@ -614,7 +613,7 @@ Create course-linked Live Training:
 ```text
 calendar_events
 live_trainings(visibility_scope = linked_courses)
-live_training_members for trainer/co-trainers/moderators
+live_training_members for trainers
 live_training_links row per course
 lessons(type = live_training) row per linked course
 live_lessons row per linked course lesson
@@ -639,7 +638,7 @@ V1 restriction:
 Start:
 
 ```text
-validate trainer/co-trainer/moderator/admin access
+validate manage permission, own permission, or assigned trainer access
 validate visibility_scope rules
 create live_training_sessions row
 create/activate LiveKit room for online training
