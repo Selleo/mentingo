@@ -1,4 +1,5 @@
 import { randomUUID } from "crypto";
+import path from "node:path";
 import { Readable } from "stream";
 
 import {
@@ -156,12 +157,9 @@ export class FileService {
       throw new BadRequestException("Video uploads must use the TUS endpoints");
     }
 
-    const fileExtension = file.originalname.split(".").pop();
+    const fileExtension = path.extname(file.originalname);
 
-    const fileKey = prefixTenantStorageKey(
-      `${resource}/${randomUUID()}.${fileExtension}`,
-      tenantId,
-    );
+    const fileKey = prefixTenantStorageKey(`${resource}/${randomUUID()}${fileExtension}`, tenantId);
 
     try {
       await this.s3Service.uploadFile(file.buffer, fileKey, file.mimetype);
