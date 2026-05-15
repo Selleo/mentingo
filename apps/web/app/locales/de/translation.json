@@ -122,6 +122,16 @@
       "success": "Datei erfolgreich gelöscht"
     }
   },
+  "resourceLibrary": {
+    "toast": {
+      "assetDeletedSuccessfully": "Ressource erfolgreich gelöscht"
+    },
+    "error": {
+      "fileRequired": "Datei ist erforderlich",
+      "assetNotFound": "Ressource nicht gefunden",
+      "entityNotFound": "Entität nicht gefunden"
+    }
+  },
   "adminScorm": {
     "header": "Laden Sie SCORM hoch",
     "subHeader": "Laden Sie Ihre SCORM-ZIP-Datei hoch.",
@@ -2701,6 +2711,39 @@
         "h3": "Überschrift 3",
         "h4": "Überschrift 4"
       },
+      "bold": {
+        "tooltip": "Fett: macht den ausgewählten Text fett"
+      },
+      "italic": {
+        "tooltip": "Kursiv: setzt den ausgewählten Text kursiv"
+      },
+      "strikethrough": {
+        "tooltip": "Durchgestrichen: streicht den ausgewählten Text durch"
+      },
+      "bulletList": {
+        "tooltip": "Aufzählung: startet eine Aufzählungsliste"
+      },
+      "orderedList": {
+        "tooltip": "Nummerierte Liste: startet eine nummerierte Liste"
+      },
+      "taskList": {
+        "tooltip": "Checkliste: fügt eine Checkliste hinzu"
+      },
+      "blockquote": {
+        "tooltip": "Zitat: formatiert Text als Blockzitat"
+      },
+      "codeBlock": {
+        "tooltip": "Codeblock: formatiert Text als Code"
+      },
+      "horizontalRule": {
+        "tooltip": "Horizontale Linie: fügt eine Trennlinie ein"
+      },
+      "undo": {
+        "tooltip": "Rückgängig: macht die letzte Änderung rückgängig"
+      },
+      "redo": {
+        "tooltip": "Wiederholen: stellt die zuletzt rückgängig gemachte Änderung wieder her"
+      },
       "link": {
         "tooltip": "Link: Macht den ausgewählten Text zu einem Hyperlink",
         "dialog": {
@@ -2716,6 +2759,9 @@
       "upload": {
         "uploadFailed": "Das Hochladen der Datei ist fehlgeschlagen",
         "tooltip": "Hochladen: Ermöglicht das Hochladen einer Datei"
+      },
+      "assetLibrary": {
+        "tooltip": "Asset-Bibliothek: fügt eine zuvor hochgeladene Datei ein"
       }
     }
   },
@@ -2768,6 +2814,42 @@
     },
     "loadingAiAsset": {
       "processing": "Die Ressource wird derzeit verarbeitet"
+    },
+    "assetLibrary": {
+      "title": "Assets library",
+      "description": "Find, upload, insert, or delete files used in rich text content.",
+      "searchPlaceholder": "Search by filename or title...",
+      "upload": "Upload asset",
+      "insert": "Insert",
+      "delete": "Delete",
+      "loading": "Loading assets...",
+      "loadingUsages": "Loading usages...",
+      "disabledUntilSaved": "Save this content before inserting or deleting existing assets. Uploading a new asset is still available.",
+      "empty": {
+        "title": "No assets found",
+        "description": "Upload a file or adjust the search to find existing assets."
+      },
+      "types": {
+        "image": "Image",
+        "video": "Video",
+        "pdf": "PDF",
+        "presentation": "Presentation",
+        "document": "Document",
+        "other": "Other"
+      },
+      "entities": {
+        "lesson": "Lesson",
+        "articles": "Article",
+        "news": "News"
+      },
+      "deleteConfirmation": {
+        "title": "Delete {{name}}?",
+        "description": "This removes matching embeds and links from every listed content item and archives the asset.",
+        "usages": "Known usages",
+        "noUsages": "No usages were found."
+      },
+      "usageCount_one": "{{count}} usage",
+      "usageCount_other": "{{count}} usages"
     }
   },
   "pages": {
@@ -2850,7 +2932,6 @@
         "to": "Bis Datum"
       }
     },
-
     "description": "Zeitachse der Änderungen auf der Plattform als einfacher aufklappbarer Feed.",
     "breadcrumbs": {
       "activityLogs": "Aktivitätsprotokoll"

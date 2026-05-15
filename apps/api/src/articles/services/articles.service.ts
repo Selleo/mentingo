@@ -29,6 +29,7 @@ import { FILE_DELIVERY_TYPE } from "src/file/types/file-delivery.type";
 import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
 import { LocalizationService } from "src/localization/localization.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
+import { ResourceLibraryRepository } from "src/resource-library/resource-library.repository";
 import { SettingsService } from "src/settings/settings.service";
 import { articles, articleSections } from "src/storage/schema";
 
@@ -65,6 +66,7 @@ export class ArticlesService {
     private readonly articlesRepository: ArticlesRepository,
     private readonly outboxPublisher: OutboxPublisher,
     private readonly settingsService: SettingsService,
+    private readonly resourceLibraryRepository: ResourceLibraryRepository,
     @Inject("DB") private readonly db: DatabasePg,
   ) {}
 
@@ -342,6 +344,10 @@ export class ArticlesService {
 
     if (!updatedArticle) throw new BadRequestException("adminArticleView.toast.updateError");
 
+    if ("content" in updateArticleData && updateArticleData.content !== undefined) {
+      await this.resourceLibraryRepository.syncArticleAssetRelations(articleId);
+    }
+
     const updatedSnapshot = await this.buildArticleActivitySnapshot(articleId, language);
 
     if (currentUser && !this.areArticleSnapshotsEqual(previousSnapshot, updatedSnapshot)) {
@@ -522,18 +528,24 @@ export class ArticlesService {
 
     const resource = await this.articlesRepository.getResource(resourceId);
 
-    if (!resource || resource.entityType !== ENTITY_TYPES.ARTICLES) {
+    if (!resource) {
+      throw new NotFoundException("Article resource not found");
+    }
+
+    const isAdminLike = hasAnyPermission(currentUser?.permissions, [
+      PERMISSIONS.ARTICLE_MANAGE,
+      PERMISSIONS.ARTICLE_MANAGE_OWN,
+    ]);
+
+    if (!resource.entityId || resource.entityType !== ENTITY_TYPES.ARTICLES) {
+      if (isAdminLike) return this.streamArticleResource(req, res, resource.reference);
+
       throw new NotFoundException("Article resource not found");
     }
 
     const [article] = await this.articlesRepository.getArticleById(resource.entityId);
 
     if (!article) throw new NotFoundException("Article not found");
-
-    const isAdminLike = hasAnyPermission(currentUser?.permissions, [
-      PERMISSIONS.ARTICLE_MANAGE,
-      PERMISSIONS.ARTICLE_MANAGE_OWN,
-    ]);
 
     const isAuthor = Boolean(
       currentUser?.userId &&
@@ -546,8 +558,12 @@ export class ArticlesService {
       throw new NotFoundException("Article resource not found");
     }
 
+    return this.streamArticleResource(req, res, resource.reference);
+  }
+
+  private async streamArticleResource(req: Request, res: Response, reference: string) {
     const rangeHeader = req.headers.range;
-    const file = await this.fileService.getFileDelivery(resource.reference, rangeHeader);
+    const file = await this.fileService.getFileDelivery(reference, rangeHeader);
 
     if (file.type === FILE_DELIVERY_TYPE.REDIRECT) {
       return res.redirect(file.url);
@@ -678,9 +694,6 @@ export class ArticlesService {
       file,
       folder: filePath,
       resource: RESOURCE_CATEGORIES.ARTICLES,
-      entityId: articleId,
-      entityType: ENTITY_TYPES.ARTICLES,
-      relationshipType: RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
       title: fileTitle,
       description: fileDescription,
       currentUser,

@@ -122,6 +122,16 @@
       "success": "Failas sėkmingai ištrintas"
     }
   },
+  "resourceLibrary": {
+    "toast": {
+      "assetDeletedSuccessfully": "Išteklius sėkmingai ištrintas"
+    },
+    "error": {
+      "fileRequired": "Failas yra būtinas",
+      "assetNotFound": "Išteklius nerastas",
+      "entityNotFound": "Subjektas nerastas"
+    }
+  },
   "adminScorm": {
     "header": "Įkelti SCORM",
     "subHeader": "Įkelkite SCORM .zip failą.",
@@ -2703,6 +2713,39 @@
         "h3": "3 antraštė",
         "h4": "4 antraštė"
       },
+      "bold": {
+        "tooltip": "Paryškinimas: paryškina pasirinktą tekstą"
+      },
+      "italic": {
+        "tooltip": "Kursyvas: pakreipia pasirinktą tekstą"
+      },
+      "strikethrough": {
+        "tooltip": "Perbraukimas: perbraukia pasirinktą tekstą"
+      },
+      "bulletList": {
+        "tooltip": "Sąrašas su ženkleliais: pradeda sąrašą su ženkleliais"
+      },
+      "orderedList": {
+        "tooltip": "Numeruotas sąrašas: pradeda numeruotą sąrašą"
+      },
+      "taskList": {
+        "tooltip": "Užduočių sąrašas: prideda kontrolinį sąrašą"
+      },
+      "blockquote": {
+        "tooltip": "Citata: formatuoja tekstą kaip blokinę citatą"
+      },
+      "codeBlock": {
+        "tooltip": "Kodo blokas: formatuoja tekstą kaip kodą"
+      },
+      "horizontalRule": {
+        "tooltip": "Horizontali linija: įterpia skiriamąją liniją"
+      },
+      "undo": {
+        "tooltip": "Anuliuoti: atšaukia paskutinį pakeitimą"
+      },
+      "redo": {
+        "tooltip": "Grąžinti: pakartoja paskutinį atšauktą pakeitimą"
+      },
       "link": {
         "tooltip": "Nuoroda: paverčia pasirinktą tekstą hipersaitu",
         "dialog": {
@@ -2718,6 +2761,9 @@
       "upload": {
         "uploadFailed": "Failo įkėlimas nepavyko",
         "tooltip": "Įkelti: leidžia įkelti failą"
+      },
+      "assetLibrary": {
+        "tooltip": "Failų biblioteka: įterpti anksčiau įkeltą failą"
       }
     }
   },
@@ -2770,6 +2816,43 @@
     },
     "loadingAiAsset": {
       "processing": "Išteklius šiuo metu apdorojamas"
+    },
+    "assetLibrary": {
+      "title": "Failų biblioteka",
+      "description": "Raskite, įkelkite, įterpkite arba ištrinkite raiškiojo teksto turinyje naudojamus failus.",
+      "searchPlaceholder": "Ieškoti pagal failo pavadinimą arba antraštę...",
+      "upload": "Įkelti failą",
+      "insert": "Įterpti",
+      "delete": "Ištrinti",
+      "loading": "Įkeliami failai...",
+      "loadingUsages": "Įkeliami panaudojimai...",
+      "disabledUntilSaved": "Išsaugokite turinį prieš įterpdami arba trindami esamus failus. Naują failą vis dar galite įkelti.",
+      "empty": {
+        "title": "Failų nerasta",
+        "description": "Įkelkite failą arba pakeiskite paiešką, kad rastumėte esamus failus."
+      },
+      "types": {
+        "image": "Paveikslėlis",
+        "video": "Vaizdo įrašas",
+        "pdf": "PDF",
+        "presentation": "Prezentacija",
+        "document": "Dokumentas",
+        "other": "Kita"
+      },
+      "entities": {
+        "lesson": "Pamoka",
+        "articles": "Straipsnis",
+        "news": "Naujiena"
+      },
+      "deleteConfirmation": {
+        "title": "Ištrinti {{name}}?",
+        "description": "Tai pašalins atitinkamus įterpinius ir nuorodas iš viso nurodyto turinio ir archyvuos failą.",
+        "usages": "Žinomi panaudojimai",
+        "noUsages": "Panaudojimų nerasta."
+      },
+      "usageCount_one": "{{count}} panaudojimas",
+      "usageCount_few": "{{count}} panaudojimai",
+      "usageCount_other": "{{count}} panaudojimų"
     }
   },
   "pages": {
@@ -2852,7 +2935,6 @@
         "to": "Iki datos"
       }
     },
-
     "description": "Platformos pakeitimų laiko juosta paprasto išskleidžiamo srauto pavidalu.",
     "breadcrumbs": {
       "activityLogs": "Veiklos žurnalas"

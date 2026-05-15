@@ -15,6 +15,8 @@ import { useTranslation } from "react-i18next";
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 
+import { removeResourceNode, type RichTextResourceNodeOptions } from "./utils/resourceNode";
+
 import type { NodeConfig } from "@tiptap/core";
 import type { NodeViewProps } from "@tiptap/react";
 
@@ -123,15 +125,12 @@ const PdfPreviewEditorView = ({ node, editor, getPos }: NodeViewProps) => {
 
   if (!attrs.src) return null;
 
-  const handleRemove = () => {
-    const pos = getPos();
-
-    editor
-      .chain()
-      .focus()
-      .deleteRange({ from: pos, to: pos + node.nodeSize })
-      .run();
-  };
+  const handleRemove = () =>
+    void removeResourceNode({
+      editor,
+      getPos,
+      nodeSize: node.nodeSize,
+    });
 
   return (
     <NodeViewWrapper className="pdf-preview-node block w-full">
@@ -604,8 +603,11 @@ const basePdfPreviewNodeConfig: NodeConfig = {
   },
 };
 
-export const PdfPreviewEmbedEditor = Node.create({
+export const PdfPreviewEmbedEditor = Node.create<RichTextResourceNodeOptions>({
   ...basePdfPreviewNodeConfig,
+  addOptions() {
+    return {};
+  },
   addNodeView() {
     return ReactNodeViewRenderer(PdfPreviewEditorView);
   },

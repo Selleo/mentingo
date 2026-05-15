@@ -113,6 +113,22 @@ export class LocalizationService {
     `;
   }
 
+  getLocalizedFieldSearchCondition(
+    fieldColumn: AnyPgColumn,
+    pattern: string,
+    language?: SupportedLanguages,
+  ) {
+    if (language) return sql`${this.getFieldByLanguage(fieldColumn, language)} ilike ${pattern}`;
+
+    return sql`
+      EXISTS (
+        SELECT 1
+        FROM jsonb_each_text(COALESCE(${fieldColumn}, '{}'::jsonb)) AS localized_field(key, value)
+        WHERE localized_field.value ilike ${pattern}
+      )
+    `;
+  }
+
   getFirstValue(fieldColumn: AnyPgColumn) {
     return sql<string>`(SELECT value FROM jsonb_each_text(${fieldColumn}) LIMIT 1)`;
   }

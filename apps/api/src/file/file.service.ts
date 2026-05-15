@@ -258,6 +258,7 @@ export class FileService {
     sizeBytes: number;
     contextId?: UUIDType;
     relationshipType?: ResourceRelationshipType;
+    linkToEntity?: boolean;
   }) {
     const {
       entityType,
@@ -268,6 +269,7 @@ export class FileService {
       sizeBytes,
       contextId,
       relationshipType = RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+      linkToEntity = true,
     } = params;
 
     if (!entityId && !contextId) return undefined;
@@ -275,8 +277,8 @@ export class FileService {
     const resourceResult = await this.createResourceForEntity({
       reference: fileKey,
       contentType: mimeType,
-      entityId,
-      entityType,
+      entityId: linkToEntity ? entityId : undefined,
+      entityType: linkToEntity ? entityType : undefined,
       relationshipType,
       metadata: {
         originalFilename: filename,
@@ -299,6 +301,7 @@ export class FileService {
       entityId,
       entityType,
       relationshipType = RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+      linkToEntity = true,
     } = data as VideoInitBody & { relationshipType?: ResourceRelationshipType };
 
     if (!entityId && !contextId) {
@@ -361,6 +364,7 @@ export class FileService {
       sizeBytes,
       contextId,
       relationshipType,
+      linkToEntity,
     });
 
     return {

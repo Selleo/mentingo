@@ -123,6 +123,16 @@
       "success": "Plik został pomyślnie usunięty"
     }
   },
+  "resourceLibrary": {
+    "toast": {
+      "assetDeletedSuccessfully": "Zasób został pomyślnie usunięty"
+    },
+    "error": {
+      "fileRequired": "Plik jest wymagany",
+      "assetNotFound": "Zasób nie został znaleziony",
+      "entityNotFound": "Nie znaleziono encji"
+    }
+  },
   "adminScorm": {
     "header": "Prześlij SCORM",
     "subHeader": "Prześlij swój plik SCORM w formacie .zip.",
@@ -3019,6 +3029,39 @@
         "h3": "Nagłówek 3",
         "h4": "Nagłówek 4"
       },
+      "bold": {
+        "tooltip": "Pogrubienie: pogrubia zaznaczony tekst"
+      },
+      "italic": {
+        "tooltip": "Kursywa: pochyla zaznaczony tekst"
+      },
+      "strikethrough": {
+        "tooltip": "Przekreślenie: przekreśla zaznaczony tekst"
+      },
+      "bulletList": {
+        "tooltip": "Lista punktowana: rozpoczyna listę punktowaną"
+      },
+      "orderedList": {
+        "tooltip": "Lista numerowana: rozpoczyna listę numerowaną"
+      },
+      "taskList": {
+        "tooltip": "Lista zadań: dodaje checklistę"
+      },
+      "blockquote": {
+        "tooltip": "Cytat: formatuje tekst jako cytat blokowy"
+      },
+      "codeBlock": {
+        "tooltip": "Blok kodu: formatuje tekst jako kod"
+      },
+      "horizontalRule": {
+        "tooltip": "Linia pozioma: wstawia linię oddzielającą"
+      },
+      "undo": {
+        "tooltip": "Cofnij: cofa ostatnią zmianę"
+      },
+      "redo": {
+        "tooltip": "Ponów: przywraca ostatnio cofniętą zmianę"
+      },
       "link": {
         "tooltip": "Link: Wstaw lub edytuj link",
         "dialog": {
@@ -3034,6 +3077,9 @@
       "upload": {
         "uploadFailed": "Nie udało się przesłać pliku",
         "tooltip": "Prześlij: Pozwala przesłać plik"
+      },
+      "assetLibrary": {
+        "tooltip": "Biblioteka zasobów: wstaw wcześniej przesłany plik"
       }
     }
   },
@@ -3086,6 +3132,42 @@
     },
     "loadingAiAsset": {
       "processing": "Zasób jest obecnie przetwarzany"
+    },
+    "assetLibrary": {
+      "title": "Assets library",
+      "description": "Find, upload, insert, or delete files used in rich text content.",
+      "searchPlaceholder": "Search by filename or title...",
+      "upload": "Upload asset",
+      "insert": "Insert",
+      "delete": "Delete",
+      "loading": "Loading assets...",
+      "loadingUsages": "Loading usages...",
+      "disabledUntilSaved": "Save this content before inserting or deleting existing assets. Uploading a new asset is still available.",
+      "empty": {
+        "title": "No assets found",
+        "description": "Upload a file or adjust the search to find existing assets."
+      },
+      "types": {
+        "image": "Image",
+        "video": "Video",
+        "pdf": "PDF",
+        "presentation": "Presentation",
+        "document": "Document",
+        "other": "Other"
+      },
+      "entities": {
+        "lesson": "Lesson",
+        "articles": "Article",
+        "news": "News"
+      },
+      "deleteConfirmation": {
+        "title": "Delete {{name}}?",
+        "description": "This removes matching embeds and links from every listed content item and archives the asset.",
+        "usages": "Known usages",
+        "noUsages": "No usages were found."
+      },
+      "usageCount_one": "{{count}} usage",
+      "usageCount_other": "{{count}} usages"
     }
   },
   "pages": {
@@ -3531,7 +3613,6 @@
         "to": "Do daty"
       }
     },
-
     "description": "Oś czasu zmian w platformie w formie prostego, rozwijanego strumienia.",
     "breadcrumbs": {
       "activityLogs": "Dziennik zdarzeń"

@@ -14,6 +14,7 @@ import {
   type PresentationProvider,
   type PresentationSourceType,
 } from "./utils/presentation";
+import { removeResourceNode, type RichTextResourceNodeOptions } from "./utils/resourceNode";
 
 import type { NodeConfig } from "@tiptap/core";
 import type { NodeViewProps } from "@tiptap/react";
@@ -40,19 +41,17 @@ const getPresentationDataAttributes = (attrs: PresentationEmbedAttrs) => ({
 
 const PresentationEditorView = ({ node, editor, getPos }: NodeViewProps) => {
   const { t } = useTranslation();
+
   const attributes = normalizePresentationEmbedAttributes(node.attrs);
 
   if (!attributes.src) return null;
 
-  const handleRemove = () => {
-    const pos = getPos();
-
-    editor
-      .chain()
-      .focus()
-      .deleteRange({ from: pos, to: pos + node.nodeSize })
-      .run();
-  };
+  const handleRemove = () =>
+    void removeResourceNode({
+      editor,
+      getPos,
+      nodeSize: node.nodeSize,
+    });
 
   return (
     <NodeViewWrapper className="presentation-node">
@@ -172,8 +171,11 @@ const basePresentationNodeConfig: NodeConfig = {
   },
 };
 
-export const PresentationEmbedEditor = Node.create({
+export const PresentationEmbedEditor = Node.create<RichTextResourceNodeOptions>({
   ...basePresentationNodeConfig,
+  addOptions() {
+    return {};
+  },
   addNodeView() {
     return ReactNodeViewRenderer(PresentationEditorView);
   },

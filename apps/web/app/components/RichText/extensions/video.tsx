@@ -14,6 +14,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/comp
 import { Video } from "~/components/VideoPlayer/Video";
 import { cn } from "~/lib/utils";
 
+import { removeResourceNode, type RichTextResourceNodeOptions } from "./utils/resourceNode";
 import {
   VIDEO_NODE_TYPE,
   getVideoEmbedAttrsFromElement,
@@ -32,6 +33,8 @@ type VideoViewerOptions = {
   onVideoEnded?: VideoEndedHandler;
   resolveAutoplay?: (autoplay: VideoAutoplay) => VideoAutoplay;
 };
+
+type VideoEditorOptions = RichTextResourceNodeOptions;
 
 const renderUploadCard = (label: string, errorMessage?: string | null) => (
   <div className="flex w-full flex-col gap-1.5 rounded border border-dashed border-neutral-300 bg-neutral-50 px-3 py-2 text-sm text-neutral-700">
@@ -151,15 +154,12 @@ const VideoEditorView = ({ node, editor, getPos }: NodeViewProps) => {
   if (!attrs.src) return null;
   const videoAttrs = attrs as VideoEmbedAttrs & { src: string };
 
-  const handleRemove = () => {
-    const pos = getPos();
-
-    editor
-      .chain()
-      .focus()
-      .deleteRange({ from: pos, to: pos + node.nodeSize })
-      .run();
-  };
+  const handleRemove = () =>
+    void removeResourceNode({
+      editor,
+      getPos,
+      nodeSize: node.nodeSize,
+    });
 
   if (attrs.hasError) {
     return (
@@ -332,8 +332,11 @@ const baseVideoNodeConfig: NodeConfig = {
   },
 };
 
-export const VideoEmbedEditor = Node.create({
+export const VideoEmbedEditor = Node.create<VideoEditorOptions>({
   ...baseVideoNodeConfig,
+  addOptions() {
+    return {};
+  },
   addNodeView() {
     return ReactNodeViewRenderer(VideoEditorView);
   },

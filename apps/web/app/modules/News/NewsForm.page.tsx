@@ -195,6 +195,7 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
             resource: ENTITY_TYPES.NEWS,
             entityId: id,
             entityType: ENTITY_TYPES.NEWS,
+            linkToEntity: false,
           }),
       }),
     uploadVideo,
@@ -461,6 +462,11 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
                               allowFiles
                               acceptedFileTypes={RICH_TEXT_ACCEPTED_FILE_TYPES}
                               onUpload={handleFileUpload}
+                              assetLibrary={{
+                                entityType: ENTITY_TYPES.NEWS,
+                                entityId: id,
+                                language,
+                              }}
                               {...field}
                             />
                             <RichTextUploadQueue
