@@ -14,7 +14,11 @@ import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
 import { queryClient } from "~/api/queryClient";
 import { useLeaveModal } from "~/context/LeaveModalContext";
 import { ContentTypes, LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
-import { BLANK_ANSWER_MARKER_REGEX, createBlankAnswerMarker } from "~/utils/blankAnswerMarkers";
+import {
+  BLANK_ANSWER_MARKER_REGEX,
+  createBlankAnswerMarker,
+  normalizeBlankAnswerLineBreaks,
+} from "~/utils/blankAnswerMarkers";
 import { StringifiedIcons } from "~/utils/stringifiedIcons";
 
 import { FILL_IN_THE_BLANKS_BUTTON_CLASSNAME } from "../components/constants";
@@ -212,14 +216,17 @@ export const useQuizLessonForm = ({
             ...option,
             id: option.id ?? option.sortableId,
           })),
-          description: question.description.replace(FILL_BLANK_BUTTON_REGEX, (button) => {
-            const buttonOptionId = getHtmlAttribute(button, "data-option-id");
-            const option =
-              question.options?.find((item) => (item.id ?? item.sortableId) === buttonOptionId) ??
-              orderedFillOptions.shift();
+          description: normalizeBlankAnswerLineBreaks(question.description).replace(
+            FILL_BLANK_BUTTON_REGEX,
+            (button) => {
+              const buttonOptionId = getHtmlAttribute(button, "data-option-id");
+              const option =
+                question.options?.find((item) => (item.id ?? item.sortableId) === buttonOptionId) ??
+                orderedFillOptions.shift();
 
-            return option ? createBlankAnswerMarker(option.id ?? option.sortableId) : "";
-          }),
+              return option ? createBlankAnswerMarker(option.id ?? option.sortableId) : "";
+            },
+          ),
           solutionExplanation: updatedSolutionExplanation,
         };
       }

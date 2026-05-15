@@ -13,8 +13,10 @@ export const getBlankCount = (content?: string | null, fallback = 0) => {
   return legacyMarkersCount > 0 ? legacyMarkersCount : fallback;
 };
 
+type BlankAnswerContentPart = { text: string; answerId?: string };
+
 export const splitByBlankAnswerMarkers = (content: string) => {
-  const parts: Array<{ text: string; answerId?: string }> = [];
+  const parts: BlankAnswerContentPart[] = [];
 
   let lastIndex = 0;
 
@@ -33,4 +35,14 @@ export const splitByBlankAnswerMarkers = (content: string) => {
 
   parts.push({ text: content.slice(lastIndex) });
   return parts;
+};
+
+export const normalizeBlankAnswerLineBreaks = (content: string) => {
+  const paragraphMatches = [...content.matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/gi)];
+
+  if (paragraphMatches.length === 0) {
+    return content;
+  }
+
+  return paragraphMatches.map((match) => match[1]).join("<br />");
 };

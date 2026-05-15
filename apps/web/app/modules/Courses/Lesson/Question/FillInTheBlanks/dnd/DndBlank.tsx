@@ -33,7 +33,7 @@ export const DndBlank = ({
         data-testid={blankId}
         ref={setNodeRef}
         style={minWidth ? { minWidth } : undefined}
-        className="mx-2 inline-flex min-h-9 items-stretch overflow-hidden rounded-md border bg-white"
+        className="mx-2 inline-flex h-9 align-middle items-stretch overflow-hidden rounded-md border bg-white"
       >
         {words.map((word) => (
           <DraggableWord
