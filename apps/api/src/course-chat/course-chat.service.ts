@@ -14,13 +14,7 @@ import {
 
 import { BaseResponse, PaginatedResponse, DatabasePg } from "src/common";
 import { CourseChatPresenceService } from "src/course-chat/course-chat-presence.service";
-import {
-  CourseChatRepository,
-  type CourseChatMessageReactionSummaryRow,
-  type CourseChatMessageRow,
-  type CourseChatReplyParticipantRow,
-  type CourseChatReplySummaryRow,
-} from "src/course-chat/course-chat.repository";
+import { CourseChatRepository } from "src/course-chat/course-chat.repository";
 import { CourseChatMessageCreatedEvent } from "src/events/course-chat/course-chat-message-created.event";
 import { CourseChatReplyCreatedEvent } from "src/events/course-chat/course-chat-reply-created.event";
 import { CourseChatUserMentionedEvent } from "src/events/course-chat/course-chat-user-mentioned.event";
@@ -30,6 +24,12 @@ import { REALTIME_PUBLISHER } from "src/websocket/realtime.publisher";
 
 import type { PermissionKey } from "@repo/shared";
 import type { UUIDType } from "src/common";
+import type {
+  CourseChatMessageReactionSummaryRow,
+  CourseChatMessageRow,
+  CourseChatReplyParticipantRow,
+  CourseChatReplySummaryRow,
+} from "src/course-chat/course-chat.repository.types";
 import type {
   CourseChatMessagePreviewResponse,
   CourseChatMessageReactionResponse,
