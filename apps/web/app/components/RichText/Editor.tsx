@@ -14,6 +14,14 @@ import EditorToolbar from "./toolbar/EditorToolbar";
 
 import type { AssetLibraryConfig } from "./components/AssetLibraryDialog";
 
+export const RICH_TEXT_EDITOR_VARIANT = {
+  BASE: "base",
+  CONTENT: "content",
+} as const;
+
+type RichTextEditorVariant =
+  (typeof RICH_TEXT_EDITOR_VARIANT)[keyof typeof RICH_TEXT_EDITOR_VARIANT];
+
 type EditorProps = {
   content?: string;
   onChange: (value: string) => void;
@@ -27,7 +35,7 @@ type EditorProps = {
   allowFiles?: boolean;
   acceptedFileTypes?: readonly string[];
   assetLibrary?: AssetLibraryConfig;
-  variant?: "base" | "content";
+  variant?: RichTextEditorVariant;
 };
 
 const EMPTY_EDITOR_MIN_HEIGHT_CLASS = "min-h-[240px]";
@@ -43,13 +51,14 @@ const Editor = ({
   allowFiles = false,
   acceptedFileTypes = ALLOWED_LESSON_IMAGE_FILE_TYPES,
   assetLibrary,
-  variant = "content",
+  variant = RICH_TEXT_EDITOR_VARIANT.CONTENT,
 }: EditorProps) => {
   const editorRef = useRef<TiptapEditor | null>(null);
   const lastEmittedContentRef = useRef(content ?? "");
 
   const extensions = useMemo(
-    () => (variant === "base" ? baseEditorPlugins : getContentEditorPlugins()),
+    () =>
+      variant === RICH_TEXT_EDITOR_VARIANT.BASE ? baseEditorPlugins : getContentEditorPlugins(),
     [variant],
   );
 
@@ -173,6 +182,7 @@ const Editor = ({
         editor={editor}
         acceptedFileTypes={acceptedFileTypes}
         assetLibrary={assetLibrary}
+        showTableControls={variant === RICH_TEXT_EDITOR_VARIANT.CONTENT}
       />
       <EditorContent
         data-testid={RICH_TEXT_HANDLES.CONTENT}
@@ -186,11 +196,11 @@ const Editor = ({
 };
 
 export const BaseEditor = (props: Omit<EditorProps, "variant">) => (
-  <Editor {...props} variant="base" />
+  <Editor {...props} variant={RICH_TEXT_EDITOR_VARIANT.BASE} />
 );
 
 export const ContentEditor = (props: Omit<EditorProps, "variant">) => (
-  <Editor {...props} variant="content" />
+  <Editor {...props} variant={RICH_TEXT_EDITOR_VARIANT.CONTENT} />
 );
 
 export default Editor;

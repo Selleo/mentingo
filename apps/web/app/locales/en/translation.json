@@ -2801,6 +2801,32 @@
       "horizontalRule": {
         "tooltip": "Horizontal rule: inserts a divider line"
       },
+      "table": {
+        "tooltip": "Table: insert or edit a table",
+        "groups": {
+          "columns": "Columns",
+          "rows": "Rows",
+          "cells": "Cells",
+          "headers": "Headers"
+        },
+        "actions": {
+          "insert": "Insert table",
+          "addColumnBefore": "Add column before",
+          "addColumnAfter": "Add column after",
+          "deleteColumn": "Delete column",
+          "addRowBefore": "Add row before",
+          "addRowAfter": "Add row after",
+          "deleteRow": "Delete row",
+          "mergeCells": "Merge cells",
+          "splitCell": "Split cell",
+          "mergeOrSplit": "Merge or split",
+          "toggleHeaderRow": "Toggle header row",
+          "toggleHeaderColumn": "Toggle header column",
+          "toggleHeaderCell": "Toggle header cell",
+          "fixTables": "Fix table structure",
+          "deleteTable": "Delete table"
+        }
+      },
       "undo": {
         "tooltip": "Undo: reverts the last change"
       },

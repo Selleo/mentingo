@@ -2740,6 +2740,32 @@
       "horizontalRule": {
         "tooltip": "Vodorovná čára: vloží oddělovací čáru"
       },
+      "table": {
+        "tooltip": "Tabulka: vložit nebo upravit tabulku",
+        "groups": {
+          "columns": "Sloupce",
+          "rows": "Řádky",
+          "cells": "Buňky",
+          "headers": "Záhlaví"
+        },
+        "actions": {
+          "insert": "Vložit tabulku",
+          "addColumnBefore": "Přidat sloupec před",
+          "addColumnAfter": "Přidat sloupec za",
+          "deleteColumn": "Odstranit sloupec",
+          "addRowBefore": "Přidat řádek před",
+          "addRowAfter": "Přidat řádek za",
+          "deleteRow": "Odstranit řádek",
+          "mergeCells": "Sloučit buňky",
+          "splitCell": "Rozdělit buňku",
+          "mergeOrSplit": "Sloučit nebo rozdělit",
+          "toggleHeaderRow": "Přepnout řádek záhlaví",
+          "toggleHeaderColumn": "Přepnout sloupec záhlaví",
+          "toggleHeaderCell": "Přepnout buňku záhlaví",
+          "fixTables": "Opravit strukturu tabulky",
+          "deleteTable": "Odstranit tabulku"
+        }
+      },
       "undo": {
         "tooltip": "Zpět: vrátí poslední změnu"
       },

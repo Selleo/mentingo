@@ -3056,6 +3056,32 @@
       "horizontalRule": {
         "tooltip": "Linia pozioma: wstawia linię oddzielającą"
       },
+      "table": {
+        "tooltip": "Tabela: wstaw lub edytuj tabelę",
+        "groups": {
+          "columns": "Kolumny",
+          "rows": "Wiersze",
+          "cells": "Komórki",
+          "headers": "Nagłówki"
+        },
+        "actions": {
+          "insert": "Wstaw tabelę",
+          "addColumnBefore": "Dodaj kolumnę przed",
+          "addColumnAfter": "Dodaj kolumnę po",
+          "deleteColumn": "Usuń kolumnę",
+          "addRowBefore": "Dodaj wiersz przed",
+          "addRowAfter": "Dodaj wiersz po",
+          "deleteRow": "Usuń wiersz",
+          "mergeCells": "Scal komórki",
+          "splitCell": "Podziel komórkę",
+          "mergeOrSplit": "Scal lub podziel",
+          "toggleHeaderRow": "Przełącz wiersz nagłówka",
+          "toggleHeaderColumn": "Przełącz kolumnę nagłówka",
+          "toggleHeaderCell": "Przełącz komórkę nagłówka",
+          "fixTables": "Napraw strukturę tabeli",
+          "deleteTable": "Usuń tabelę"
+        }
+      },
       "undo": {
         "tooltip": "Cofnij: cofa ostatnią zmianę"
       },

@@ -2738,6 +2738,32 @@
       "horizontalRule": {
         "tooltip": "Horizontale Linie: fügt eine Trennlinie ein"
       },
+      "table": {
+        "tooltip": "Tabelle: Tabelle einfügen oder bearbeiten",
+        "groups": {
+          "columns": "Spalten",
+          "rows": "Zeilen",
+          "cells": "Zellen",
+          "headers": "Kopfzeilen"
+        },
+        "actions": {
+          "insert": "Tabelle einfügen",
+          "addColumnBefore": "Spalte davor hinzufügen",
+          "addColumnAfter": "Spalte danach hinzufügen",
+          "deleteColumn": "Spalte löschen",
+          "addRowBefore": "Zeile davor hinzufügen",
+          "addRowAfter": "Zeile danach hinzufügen",
+          "deleteRow": "Zeile löschen",
+          "mergeCells": "Zellen verbinden",
+          "splitCell": "Zelle teilen",
+          "mergeOrSplit": "Verbinden oder teilen",
+          "toggleHeaderRow": "Kopfzeile umschalten",
+          "toggleHeaderColumn": "Kopfspalte umschalten",
+          "toggleHeaderCell": "Kopfzelle umschalten",
+          "fixTables": "Tabellenstruktur reparieren",
+          "deleteTable": "Tabelle löschen"
+        }
+      },
       "undo": {
         "tooltip": "Rückgängig: macht die letzte Änderung rückgängig"
       },

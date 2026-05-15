@@ -3,6 +3,10 @@ import { Heading } from "@tiptap/extension-heading";
 import { Image } from "@tiptap/extension-image";
 import { Link } from "@tiptap/extension-link";
 import { Placeholder } from "@tiptap/extension-placeholder";
+import { Table } from "@tiptap/extension-table";
+import { TableCell } from "@tiptap/extension-table-cell";
+import { TableHeader } from "@tiptap/extension-table-header";
+import { TableRow } from "@tiptap/extension-table-row";
 import { TaskItem } from "@tiptap/extension-task-item";
 import { TaskList } from "@tiptap/extension-task-list";
 import { StarterKit } from "@tiptap/starter-kit";
@@ -96,8 +100,21 @@ const basePlugins = [
 
 export const baseEditorPlugins = [...basePlugins];
 
+const tablePlugins = [
+  Table.configure({
+    resizable: true,
+    HTMLAttributes: {
+      class: "rich-text-table",
+    },
+  }),
+  TableRow,
+  TableHeader,
+  TableCell,
+];
+
 export const getContentEditorPlugins = (options?: RichTextResourceNodeOptions) => [
   ...basePlugins,
+  ...tablePlugins,
   Placeholder.configure({
     includeChildren: true,
     showOnlyCurrent: true,
@@ -115,6 +132,7 @@ export const contentEditorPlugins = getContentEditorPlugins();
 
 export const viewerPlugins = [
   ...basePlugins,
+  ...tablePlugins,
   DownloadableFileEmbedViewer,
   LoadingAiAssetViewer,
   PdfPreviewEmbedViewer,
