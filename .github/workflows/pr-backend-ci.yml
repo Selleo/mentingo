@@ -224,8 +224,11 @@ jobs:
       - name: Run unit tests
         run: pnpm --filter=api test:ci
 
-      - name: Run e2e tests
-        run: pnpm --filter=api test:e2e
+      - name: Run e2e tests (shard 1/2)
+        run: pnpm --filter=api test:e2e:shard:1
+
+      - name: Run e2e tests (shard 2/2)
+        run: pnpm --filter=api test:e2e:shard:2
 
       - name: Stop MinIO
         if: always()
