@@ -9,4 +9,5 @@ export type FileStreamPayload = {
   etag?: string;
   lastModified?: Date;
   statusCode?: number;
+  streamTimeoutMs?: number;
 };
