@@ -5,6 +5,7 @@ export * from "./constants/aiMentorVoice";
 export * from "./constants/allowedAge";
 export * from "./constants/articlesSettings";
 export * from "./constants/articlesTypes";
+export * from "./constants/calendar";
 export * from "./constants/course";
 export * from "./constants/courseEnrollment";
 export * from "./constants/entityTypes";

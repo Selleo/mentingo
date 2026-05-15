@@ -133,6 +133,7 @@ export interface CurrentUserResponse {
       | "learning_path.course_update_own"
       | "learning_path.enrollment"
       | "learning_path.export"
+      | "calendar.read"
       | "live_training.read"
       | "live_training.create"
       | "live_training.update"
@@ -5343,6 +5344,127 @@ export interface DeleteLiveTrainingResponse {
   };
 }
 
+export interface GetEventsResponse {
+  data: {
+    events: {
+      /** @format uuid */
+      id: string;
+      uid: string;
+      sourceType: "live_training";
+      /** @format uuid */
+      sourceId: string;
+      title: string;
+      description: string | null;
+      startsAt: string;
+      endsAt: string;
+      timezone: string;
+      status: "scheduled" | "cancelled" | "ended" | "expired";
+      actions: {
+        canView: boolean;
+        canEdit: boolean;
+        canLinkCourse: boolean;
+        canStart: boolean;
+        canJoin: boolean;
+        canEnd: boolean;
+        canViewReport: boolean;
+      };
+      payload: {
+        liveTraining: {
+          deliveryType: "online" | "offline";
+          status: "scheduled" | "active" | "ended" | "cancelled" | "expired";
+          visibilityScope: "all" | "linked_courses";
+          sourceRole: "admin" | "author" | "trainer" | "observer";
+          linkedCourses: {
+            /** @format uuid */
+            courseId: string;
+            courseTitle: string;
+          }[];
+        };
+      };
+    }[];
+  };
+}
+
+export interface GetEventDetailsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    uid: string;
+    sourceType: "live_training";
+    /** @format uuid */
+    sourceId: string;
+    title: string;
+    description: string | null;
+    startsAt: string;
+    endsAt: string;
+    timezone: string;
+    status: "scheduled" | "cancelled" | "ended" | "expired";
+    actions: {
+      canView: boolean;
+      canEdit: boolean;
+      canLinkCourse: boolean;
+      canStart: boolean;
+      canJoin: boolean;
+      canEnd: boolean;
+      canViewReport: boolean;
+    };
+    payload: {
+      liveTraining: {
+        deliveryType: "online" | "offline";
+        status: "scheduled" | "active" | "ended" | "cancelled" | "expired";
+        visibilityScope: "all" | "linked_courses";
+        sourceRole: "admin" | "author" | "trainer" | "observer";
+        linkedCourses: {
+          /** @format uuid */
+          courseId: string;
+          courseTitle: string;
+        }[];
+      } & {
+        author: {
+          /** @format uuid */
+          id: string;
+          fullName: string | null;
+          email: string;
+        };
+        trainers: {
+          /** @format uuid */
+          userId: string;
+          fullName: string | null;
+          email: string;
+          role: string;
+        }[];
+        materials: {
+          before: {
+            /** @format uuid */
+            resourceId: string;
+            title: string;
+            mimeType: string | null;
+            size: number | null;
+            relationshipType: "live_training_before" | "live_training_after";
+          }[];
+          after: {
+            /** @format uuid */
+            resourceId: string;
+            title: string;
+            mimeType: string | null;
+            size: number | null;
+            relationshipType: "live_training_before" | "live_training_after";
+          }[];
+        };
+        latestSession: {
+          /** @format uuid */
+          id: string;
+          status: "waiting" | "active" | "ended" | "failed";
+          actualStartedAt: string | null;
+          actualEndedAt: string | null;
+          peakParticipants: number;
+          uniqueParticipantCount: number;
+        } | null;
+      };
+    };
+  };
+}
+
 import type {
   AxiosInstance,
   AxiosRequestConfig,
@@ -8283,9 +8405,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     lessonControllerGetLessonById: (
       id: string,
       query: {
-        studentId: string;
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs";
+        studentId: string;
       },
       params: RequestParams = {},
     ) =>
@@ -8670,12 +8792,12 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         /** @format uuid */
         userId?: string;
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs";
         /** @min 1 */
         page?: number;
         perPage?: number;
         sort?: string;
-        /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -8758,6 +8880,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     certificatesControllerGetCertificateSharePage: (
       query: {
         certificateId: string;
+        lang: string;
       },
       params: RequestParams = {},
     ) =>
@@ -8777,6 +8900,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     certificatesControllerGetCertificateShareImage: (
       query: {
         certificateId: string;
+        lang: string;
       },
       params: RequestParams = {},
     ) =>
@@ -9850,6 +9974,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     learningPathCertificateControllerGetCertificateSharePage: (
       query: {
         certificateId: string;
+        lang: string;
       },
       params: RequestParams = {},
     ) =>
@@ -9869,6 +9994,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     learningPathCertificateControllerGetCertificateShareImage: (
       query: {
         certificateId: string;
+        lang: string;
       },
       params: RequestParams = {},
     ) =>
@@ -9994,10 +10120,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         /** @format uuid */
         lessonId?: string;
-        /** @format uuid */
-        scoId?: string;
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs";
+        /** @format uuid */
+        scoId?: string;
       },
       params: RequestParams = {},
     ) =>
@@ -10890,9 +11016,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     newsControllerGetNewsList: (
       query?: {
-        searchQuery?: string;
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs";
+        searchQuery?: string;
         /** @min 1 */
         page?: number;
       },
@@ -11115,9 +11241,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     articlesControllerGetArticleToc: (
       query?: {
-        isDraftMode?: boolean;
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs";
+        isDraftMode?: boolean;
       },
       params: RequestParams = {},
     ) =>
@@ -11151,9 +11277,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     articlesControllerGetArticle: (
       id: string,
       query?: {
-        isDraftMode?: boolean;
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs";
+        isDraftMode?: boolean;
       },
       params: RequestParams = {},
     ) =>
@@ -11206,9 +11332,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     articlesControllerGetArticles: (
       query?: {
-        searchQuery?: string;
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs";
+        searchQuery?: string;
       },
       params: RequestParams = {},
     ) =>
@@ -11532,10 +11658,24 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name CalendarControllerGetEvents
      * @request GET:/api/calendar/events
      */
-    calendarControllerGetEvents: (params: RequestParams = {}) =>
-      this.request<void, any>({
+    calendarControllerGetEvents: (
+      query?: {
+        /** @minLength 1 */
+        start?: string;
+        /** @minLength 1 */
+        end?: string;
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+        /** @minLength 1 */
+        timezone?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetEventsResponse, any>({
         path: `/api/calendar/events`,
         method: "GET",
+        query: query,
+        format: "json",
         ...params,
       }),
 
@@ -11545,23 +11685,19 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name CalendarControllerGetEventDetails
      * @request GET:/api/calendar/events/{eventId}
      */
-    calendarControllerGetEventDetails: (eventId: string, params: RequestParams = {}) =>
-      this.request<void, any>({
+    calendarControllerGetEventDetails: (
+      eventId: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetEventDetailsResponse, any>({
         path: `/api/calendar/events/${eventId}`,
         method: "GET",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name CalendarControllerGetTodayIndicator
-     * @request GET:/api/calendar/today-indicator
-     */
-    calendarControllerGetTodayIndicator: (params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/calendar/today-indicator`,
-        method: "GET",
+        query: query,
+        format: "json",
         ...params,
       }),
   };

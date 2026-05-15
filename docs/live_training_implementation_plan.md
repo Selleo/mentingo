@@ -65,7 +65,7 @@ This document turns `docs/implementation_schema_live_training.md` into a spec-dr
 - [x] Add tenant RLS enablement migration for Live Training and calendar tables.
 - [x] Keep independent live trainings independent from `lessons`; only course-linked trainings should have a `lessons` row.
 - [x] Reuse existing `resources` + `resource_entity` for Live Training files instead of adding a dedicated resources table.
-- [ ] Add repository/service-level implementations that use the LT-01 schema.
+- [x] Add repository/service-level implementations that use the LT-01 schema.
 - [ ] Add validation/tests around the new domain model once LT-02/LT-03 behavior exists.
 
 ## LT-02 Calendar API, FullCalendar UI, And E2E
@@ -78,20 +78,20 @@ This is the next implementation slice after LT-01. Finish the calendar path end-
 - [x] Add shared feature constants and `@RequireFeature(...)` guard infrastructure for toggleable product surfaces.
 - [x] Add a dedicated read-only `CalendarModule` scaffold with controller, service, and repository.
 - [x] Apply the Calendar feature guard to the Calendar controller scaffold.
-- [ ] Keep Calendar read-only in this slice. Direct calendar CRUD is deprecated for v1.
-- [ ] Add calendar/listing API endpoints needed by the UI:
-  - list visible calendar events by date range for the current user
-  - get calendar event details
-  - expose event status, delivery type, linked source ID, linked lesson/course context, and session role
-- [ ] Create/update/delete scheduled Live Training events through the Live Training flow, not through Calendar endpoints.
-- [ ] Treat Calendar rows as a projection/read surface: Live Training writes `calendar_events` as a side effect, then Calendar displays the visible result.
-- [ ] Ensure calendar endpoints are guarded by Calendar and Live Training feature toggles where applicable.
-- [ ] Rely on RLS for tenant isolation; do not pass tenant IDs through calendar endpoint or repository contracts.
-- [ ] Implement visibility rules from the Live Training domain:
+- [x] Keep Calendar read-only in this slice. Direct calendar CRUD is deprecated for v1.
+- [x] Add calendar/listing API endpoints needed by the UI:
+  - [x] list visible calendar events by date range for the current user
+  - [x] get calendar event details
+  - [x] expose event status, delivery type, linked source ID, linked course context, and session role
+- [x] Create/update/delete scheduled Live Training events through the Live Training flow, not through Calendar endpoints.
+- [x] Treat Calendar rows as a projection/read surface: Live Training writes `calendar_events` as a side effect, then Calendar displays the visible result.
+- [x] Ensure calendar endpoints are guarded by Calendar and Live Training feature toggles where applicable.
+- [x] Rely on RLS for tenant isolation; do not pass tenant IDs through calendar endpoint or repository contracts.
+- [x] Implement visibility rules from the Live Training domain:
   - `visibility_scope = all` is visible to every tenant user
   - course-linked trainings are visible to users enrolled in any linked course and to assigned trainers/admins
   - unlinked course-scoped trainings should not leak to unrelated users
-- [ ] Regenerate Swagger/API schema and web API client after the calendar API contract is added.
+- [x] Regenerate Swagger/API schema and web API client after the calendar API contract is added.
 - [ ] Add web query hooks using `ApiClient.api...` only.
 - [ ] Add a dedicated Calendar route from the left sidebar.
 - [ ] Build the calendar screen with React FullCalendar.
@@ -118,25 +118,26 @@ This is the next implementation slice after LT-01. Finish the calendar path end-
 Spec: `docs/live-training/specs/LT-03-live-training-crud-endpoints.md`
 
 - [x] Add a dedicated `live-training` NestJS module with controller, service, and repository shell.
-- [ ] Add Live Training request/response schemas and tests.
-- [ ] Add API endpoints for:
-  - create/update/delete live training
-  - get training details
-  - list visible trainings
-  - attach existing resources as before/after files through `resource_entity`
-  - create/update/cancel the paired `calendar_events` row as a side effect
-- [ ] Return data through existing `BaseResponse` / `PaginatedResponse` shapes.
-- [ ] Enforce access rules:
+- [x] Add Live Training request/response schemas.
+- [ ] Add Live Training API tests.
+- [x] Add API endpoints for:
+  - [x] create/update/delete live training
+  - [x] get training details
+  - [x] list visible trainings
+  - [x] attach existing resources as before/after files through `resource_entity`
+  - [x] create/update/cancel the paired `calendar_events` row as a side effect
+- [x] Return data through existing `BaseResponse` / `PaginatedResponse` shapes.
+- [x] Enforce access rules:
   - Admin can manage all trainings in tenant.
   - Content Creator can create/manage own trainings and can choose only self as trainer.
   - Content Creator can link only own trainings to own/manageable courses.
   - Trainer can read assigned trainings and see all before/after files.
   - Student/observer sees before files before completion and after files only once ended.
-- [ ] Keep runtime session logic out of this slice:
+- [x] Keep runtime session logic out of this slice:
   - no LiveKit room/token/start/join/end
   - no attendance/report data
   - no offline completion
-- [ ] Ensure all queries are tenant-scoped.
+- [x] Ensure all queries are tenant-scoped.
 
 ## LT-04 Course Lesson And Event Integration
 
