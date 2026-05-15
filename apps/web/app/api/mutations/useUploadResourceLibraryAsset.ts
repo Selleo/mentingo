@@ -1,18 +1,18 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { ApiClient } from "~/api/api-client";
 import { RESOURCE_LIBRARY_ASSETS_QUERY_KEY } from "~/api/queries/useResourceLibraryAssets";
+import { queryClient } from "~/api/queryClient";
 import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
 import { useToast } from "~/components/ui/use-toast";
 
-import type { EntityType, SupportedLanguages } from "@repo/shared";
-
-type RichTextEntityType = Extract<EntityType, "lesson" | "articles" | "news">;
+import type { SupportedLanguages } from "@repo/shared";
+import type { RichTextResourceLibraryEntityType } from "~/types/resourceLibrary";
 
 type UploadAssetOptions = {
   file: File;
-  entityType: RichTextEntityType;
+  entityType: RichTextResourceLibraryEntityType;
   entityId?: string;
   contextId?: string;
   language: SupportedLanguages;
@@ -21,7 +21,6 @@ type UploadAssetOptions = {
 };
 
 export function useUploadResourceLibraryAsset() {
-  const queryClient = useQueryClient();
   const { toast } = useToast();
   const { t } = useTranslation();
 

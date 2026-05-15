@@ -7,6 +7,7 @@ import { RICH_TEXT_HANDLES } from "../../../../e2e/data/common/handles";
 
 import { getAssetDisplayName } from "./assetLibrary.utils";
 
+import type { TFunction } from "i18next";
 import type { ResourceLibraryAsset } from "~/api/queries/useResourceLibraryAssets";
 import type { ResourceLibraryAssetUsage } from "~/api/queries/useResourceLibraryAssetUsages";
 
@@ -18,6 +19,49 @@ type AssetLibraryDeleteConfirmationProps = {
   onBack: () => void;
   onCancel: () => void;
   onConfirm: () => void;
+};
+
+const renderUsagesContent = ({
+  usages,
+  isLoadingUsages,
+  t,
+}: {
+  usages: ResourceLibraryAssetUsage[];
+  isLoadingUsages: boolean;
+  t: TFunction;
+}) => {
+  if (isLoadingUsages) {
+    return (
+      <div className="flex items-center px-3 py-6 text-sm text-neutral-600">
+        <Loader2 className="mr-2 size-4 animate-spin" aria-hidden />
+        {t("richText.assetLibrary.loadingUsages")}
+      </div>
+    );
+  }
+
+  if (usages.length) {
+    return (
+      <div className="max-h-[260px] overflow-y-auto">
+        {usages.map((usage) => (
+          <div
+            key={`${usage.entityType}-${usage.entityId}`}
+            className="flex items-center justify-between gap-3 border-b border-neutral-100 px-3 py-2 last:border-b-0"
+          >
+            <span className="truncate text-sm text-neutral-900">{usage.title}</span>
+            <span className="shrink-0 text-xs text-neutral-600">
+              {t(`richText.assetLibrary.entities.${usage.entityType}`)}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="px-3 py-6 text-sm text-neutral-600">
+      {t("richText.assetLibrary.deleteConfirmation.noUsages")}
+    </div>
+  );
 };
 
 export const AssetLibraryDeleteConfirmation = ({
@@ -57,30 +101,7 @@ export const AssetLibraryDeleteConfirmation = ({
         <div className="border-b border-neutral-100 px-3 py-2 text-xs font-medium uppercase text-neutral-500">
           {t("richText.assetLibrary.deleteConfirmation.usages")}
         </div>
-        {isLoadingUsages ? (
-          <div className="flex items-center px-3 py-6 text-sm text-neutral-600">
-            <Loader2 className="mr-2 size-4 animate-spin" aria-hidden />
-            {t("richText.assetLibrary.loadingUsages")}
-          </div>
-        ) : usages.length ? (
-          <div className="max-h-[260px] overflow-y-auto">
-            {usages.map((usage) => (
-              <div
-                key={`${usage.entityType}-${usage.entityId}`}
-                className="flex items-center justify-between gap-3 border-b border-neutral-100 px-3 py-2 last:border-b-0"
-              >
-                <span className="truncate text-sm text-neutral-900">{usage.title}</span>
-                <span className="shrink-0 text-xs text-neutral-600">
-                  {t(`richText.assetLibrary.entities.${usage.entityType}`)}
-                </span>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="px-3 py-6 text-sm text-neutral-600">
-            {t("richText.assetLibrary.deleteConfirmation.noUsages")}
-          </div>
-        )}
+        {renderUsagesContent({ usages, isLoadingUsages, t })}
       </div>
       <div className="flex justify-end gap-2">
         <Button

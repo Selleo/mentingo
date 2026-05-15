@@ -1,5 +1,4 @@
 import { ENTITY_TYPES } from "@repo/shared";
-import { useQueryClient } from "@tanstack/react-query";
 import { Folder, Search, UploadCloud } from "lucide-react";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -12,6 +11,7 @@ import {
   useResourceLibraryAssets,
 } from "~/api/queries/useResourceLibraryAssets";
 import { useResourceLibraryAssetUsages } from "~/api/queries/useResourceLibraryAssetUsages";
+import { queryClient } from "~/api/queryClient";
 import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
 import { Pagination } from "~/components/Pagination/Pagination";
 import { Button } from "~/components/ui/button";
@@ -41,13 +41,14 @@ import {
 import { AssetLibraryAssetList } from "./AssetLibraryAssetList";
 import { AssetLibraryDeleteConfirmation } from "./AssetLibraryDeleteConfirmation";
 
-import type { EntityType, SupportedLanguages } from "@repo/shared";
+import type { SupportedLanguages } from "@repo/shared";
 import type { Editor } from "@tiptap/react";
 import type { ResourceLibraryAsset } from "~/api/queries/useResourceLibraryAssets";
 import type { RichTextResourceDisplayMode } from "~/hooks/useEntityResourceUpload";
+import type { RichTextResourceLibraryEntityType } from "~/types/resourceLibrary";
 
 export type AssetLibraryConfig = {
-  entityType: Extract<EntityType, "lesson" | "articles" | "news">;
+  entityType: RichTextResourceLibraryEntityType;
   entityId?: string;
   contextId?: string;
   language: SupportedLanguages;
@@ -72,7 +73,6 @@ export const AssetLibraryDialog = ({
 }: AssetLibraryDialogProps) => {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   const uploadInputRef = useRef<HTMLInputElement | null>(null);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");

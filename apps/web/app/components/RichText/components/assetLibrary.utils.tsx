@@ -7,6 +7,7 @@ import {
   FileVideo,
   Image,
 } from "lucide-react";
+import { match } from "ts-pattern";
 
 import { RICH_TEXT_RESOURCE_TYPE } from "~/hooks/useEntityResourceUpload";
 
@@ -32,15 +33,13 @@ export const formatAssetSize = (bytes: number | null) => {
 
 export const isAssetLibraryVideoFile = (file: File) => ALLOWED_VIDEO_FILE_TYPES.includes(file.type);
 
-export const getRichTextResourceTypeFromAsset = (asset: ResourceLibraryAsset) => {
-  if (asset.type === RESOURCE_LIBRARY_ASSET_TYPE.VIDEO) return RICH_TEXT_RESOURCE_TYPE.VIDEO;
-  if (asset.type === RESOURCE_LIBRARY_ASSET_TYPE.PRESENTATION) {
-    return RICH_TEXT_RESOURCE_TYPE.PRESENTATION;
-  }
-  if (asset.type === RESOURCE_LIBRARY_ASSET_TYPE.PDF) return RICH_TEXT_RESOURCE_TYPE.PDF;
-  if (asset.type === RESOURCE_LIBRARY_ASSET_TYPE.DOCUMENT) return RICH_TEXT_RESOURCE_TYPE.DOCUMENT;
-  return RICH_TEXT_RESOURCE_TYPE.OTHER;
-};
+export const getRichTextResourceTypeFromAsset = (asset: ResourceLibraryAsset) =>
+  match(asset.type)
+    .with(RESOURCE_LIBRARY_ASSET_TYPE.VIDEO, () => RICH_TEXT_RESOURCE_TYPE.VIDEO)
+    .with(RESOURCE_LIBRARY_ASSET_TYPE.PRESENTATION, () => RICH_TEXT_RESOURCE_TYPE.PRESENTATION)
+    .with(RESOURCE_LIBRARY_ASSET_TYPE.PDF, () => RICH_TEXT_RESOURCE_TYPE.PDF)
+    .with(RESOURCE_LIBRARY_ASSET_TYPE.DOCUMENT, () => RICH_TEXT_RESOURCE_TYPE.DOCUMENT)
+    .otherwise(() => RICH_TEXT_RESOURCE_TYPE.OTHER);
 
 export const richTextResourceTypeNeedsDisplayMode = (
   type: ReturnType<typeof getRichTextResourceTypeFromAsset>,
@@ -49,19 +48,15 @@ export const richTextResourceTypeNeedsDisplayMode = (
 export const AssetTypeIcon = ({ type }: { type: ResourceLibraryAsset["type"] }) => {
   const className = "size-5 text-neutral-700";
 
-  if (type === RESOURCE_LIBRARY_ASSET_TYPE.IMAGE)
-    return <Image className={className} aria-hidden />;
-  if (type === RESOURCE_LIBRARY_ASSET_TYPE.VIDEO) {
-    return <FileVideo className={className} aria-hidden />;
-  }
-  if (type === RESOURCE_LIBRARY_ASSET_TYPE.PDF) {
-    return <FileText className={className} aria-hidden />;
-  }
-  if (type === RESOURCE_LIBRARY_ASSET_TYPE.PRESENTATION) {
-    return <Archive className={className} aria-hidden />;
-  }
-  if (type === RESOURCE_LIBRARY_ASSET_TYPE.DOCUMENT) {
-    return <FileSpreadsheet className={className} aria-hidden />;
-  }
-  return <FileIcon className={className} aria-hidden />;
+  return match(type)
+    .with(RESOURCE_LIBRARY_ASSET_TYPE.IMAGE, () => <Image className={className} aria-hidden />)
+    .with(RESOURCE_LIBRARY_ASSET_TYPE.VIDEO, () => <FileVideo className={className} aria-hidden />)
+    .with(RESOURCE_LIBRARY_ASSET_TYPE.PDF, () => <FileText className={className} aria-hidden />)
+    .with(RESOURCE_LIBRARY_ASSET_TYPE.PRESENTATION, () => (
+      <Archive className={className} aria-hidden />
+    ))
+    .with(RESOURCE_LIBRARY_ASSET_TYPE.DOCUMENT, () => (
+      <FileSpreadsheet className={className} aria-hidden />
+    ))
+    .otherwise(() => <FileIcon className={className} aria-hidden />);
 };

@@ -1,5 +1,5 @@
 import { ENTITY_TYPES } from "@repo/shared";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { ApiClient } from "~/api/api-client";
@@ -8,6 +8,7 @@ import { ARTICLE_QUERY_KEY } from "~/api/queries/useArticle";
 import { NEWS_QUERY_KEY } from "~/api/queries/useNews";
 import { NEWS_LIST_QUERY_KEY } from "~/api/queries/useNewsList";
 import { RESOURCE_LIBRARY_ASSETS_QUERY_KEY } from "~/api/queries/useResourceLibraryAssets";
+import { queryClient } from "~/api/queryClient";
 import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
 import { useToast } from "~/components/ui/use-toast";
 
@@ -33,7 +34,6 @@ const isArticleQueryForEntity = (queryKey: readonly unknown[], entityId: string)
 };
 
 export function useDeleteResourceLibraryAsset() {
-  const queryClient = useQueryClient();
   const { toast } = useToast();
   const { t } = useTranslation();
 
