@@ -10,14 +10,17 @@ import {
   ListObjectsV2Command,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+
+import { S3_OPERATION_TIMEOUT_MS } from "src/s3/s3.constants";
 
 import type { FileStreamPayload } from "src/file/types/file-stream.type";
 import type { PassThrough, Readable } from "stream";
 
 @Injectable()
 export class S3Service {
+  private readonly logger = new Logger(S3Service.name);
   private s3Client: S3Client;
   private readonly bucketName: string;
 
@@ -77,6 +80,56 @@ export class S3Service {
     );
   }
 
+  private async sendWithTimeout<T>(
+    operation: string,
+    sendOperation: (abortSignal: AbortSignal) => Promise<T>,
+    context?: { key?: string },
+  ): Promise<T> {
+    const abortController = new AbortController();
+
+    let timedOut = false;
+
+    const timeout = setTimeout(() => {
+      timedOut = true;
+      abortController.abort();
+    }, S3_OPERATION_TIMEOUT_MS);
+
+    try {
+      return await sendOperation(abortController.signal);
+    } catch (error) {
+      const message = this.getErrorMessage(error);
+      const statusCode = this.getErrorStatusCode(error);
+      const keyContext = context?.key ? ` for key "${context.key}"` : "";
+
+      if (timedOut) {
+        const timeoutMessage = `S3 ${operation}${keyContext} timed out after ${S3_OPERATION_TIMEOUT_MS}ms`;
+        this.logger.error(timeoutMessage);
+        throw new Error(timeoutMessage);
+      }
+
+      this.logger.error(
+        `S3 ${operation}${keyContext} failed${
+          statusCode ? ` with status ${statusCode}` : ""
+        }: ${message}`,
+        error instanceof Error ? error.stack : undefined,
+      );
+      throw error;
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  private getErrorMessage(error: unknown) {
+    return error instanceof Error ? error.message : String(error);
+  }
+
+  private getErrorStatusCode(error: unknown) {
+    if (!error || typeof error !== "object" || !("$metadata" in error)) return undefined;
+
+    const metadata = (error as { $metadata?: { httpStatusCode?: number } }).$metadata;
+    return metadata?.httpStatusCode;
+  }
+
   isConfigured(): boolean {
     const config = this.loadS3Config();
     return Boolean(
@@ -99,7 +152,12 @@ export class S3Service {
       Key: key,
     });
 
-    const response = await this.s3Client.send(command);
+    const response = await this.sendWithTimeout(
+      "getFileContent",
+      (abortSignal) => this.s3Client.send(command, { abortSignal }),
+      { key },
+    );
+
     return response.Body?.transformToString() || "";
   }
 
@@ -109,7 +167,12 @@ export class S3Service {
       Key: key,
     });
 
-    const response = await this.s3Client.send(command);
+    const response = await this.sendWithTimeout(
+      "getFileBuffer",
+      (abortSignal) => this.s3Client.send(command, { abortSignal }),
+      { key },
+    );
+
     const bytes = await response.Body?.transformToByteArray();
     return Buffer.from(bytes || []);
   }
@@ -126,7 +189,11 @@ export class S3Service {
       ContentType: contentType,
     });
 
-    await this.s3Client.send(command);
+    await this.sendWithTimeout(
+      "uploadFile",
+      (abortSignal) => this.s3Client.send(command, { abortSignal }),
+      { key },
+    );
   }
 
   async deleteFile(key: string): Promise<void> {
@@ -135,7 +202,11 @@ export class S3Service {
       Key: key,
     });
 
-    await this.s3Client.send(command);
+    await this.sendWithTimeout(
+      "deleteFile",
+      (abortSignal) => this.s3Client.send(command, { abortSignal }),
+      { key },
+    );
   }
 
   async createMultipartUpload(key: string, contentType: string): Promise<{ uploadId: string }> {
@@ -145,7 +216,11 @@ export class S3Service {
       ContentType: contentType,
     });
 
-    const response = await this.s3Client.send(command);
+    const response = await this.sendWithTimeout(
+      "createMultipartUpload",
+      (abortSignal) => this.s3Client.send(command, { abortSignal }),
+      { key },
+    );
 
     if (!response.UploadId) {
       throw new Error("Failed to initialize multipart upload");
@@ -184,7 +259,11 @@ export class S3Service {
       Body: body,
     });
 
-    const response = await this.s3Client.send(command);
+    const response = await this.sendWithTimeout(
+      "uploadMultipartPart",
+      (abortSignal) => this.s3Client.send(command, { abortSignal }),
+      { key },
+    );
 
     if (!response.ETag) {
       throw new Error("Failed to upload multipart part");
@@ -205,7 +284,11 @@ export class S3Service {
       MultipartUpload: { Parts: parts },
     });
 
-    await this.s3Client.send(command);
+    await this.sendWithTimeout(
+      "completeMultipartUpload",
+      (abortSignal) => this.s3Client.send(command, { abortSignal }),
+      { key },
+    );
   }
 
   async getFileStream(key: string, range?: string): Promise<FileStreamPayload> {
@@ -215,7 +298,12 @@ export class S3Service {
       ...(range ? { Range: range } : {}),
     });
 
-    const response = await this.s3Client.send(command);
+    const response = await this.sendWithTimeout(
+      "getFileStream",
+      (abortSignal) => this.s3Client.send(command, { abortSignal }),
+      { key },
+    );
+
     return {
       stream: response.Body as Readable,
       contentType: response.ContentType,
@@ -225,6 +313,7 @@ export class S3Service {
       etag: response.ETag,
       lastModified: response.LastModified,
       statusCode: response.$metadata.httpStatusCode,
+      streamTimeoutMs: S3_OPERATION_TIMEOUT_MS,
     };
   }
 
@@ -239,7 +328,12 @@ export class S3Service {
         ContinuationToken: continuationToken,
       });
 
-      const response = await this.s3Client.send(command);
+      const response = await this.sendWithTimeout(
+        "listFileKeysByPrefix",
+        (abortSignal) => this.s3Client.send(command, { abortSignal }),
+        { key: prefix },
+      );
+
       keys.push(...(response.Contents ?? []).flatMap((object) => (object.Key ? [object.Key] : [])));
       continuationToken = response.NextContinuationToken;
     } while (continuationToken);
@@ -251,7 +345,12 @@ export class S3Service {
     const command = new HeadObjectCommand({ Bucket: this.bucketName, Key: key });
 
     try {
-      await this.s3Client.send(command);
+      await this.sendWithTimeout(
+        "getFileExists",
+        (abortSignal) => this.s3Client.send(command, { abortSignal }),
+        { key },
+      );
+
       return true;
     } catch (err) {
       if (err?.$metadata.httpStatusCode === 404) return false;
@@ -261,7 +360,12 @@ export class S3Service {
 
   async getFileContentType(key: string): Promise<string | null> {
     const command = new HeadObjectCommand({ Bucket: this.bucketName, Key: key });
-    const response = await this.s3Client.send(command);
+    const response = await this.sendWithTimeout(
+      "getFileContentType",
+      (abortSignal) => this.s3Client.send(command, { abortSignal }),
+      { key },
+    );
+
     return response.ContentType ?? null;
   }
 }
