@@ -6,6 +6,60 @@
 > CRUD and calendar side effects only. It does not include LiveKit room creation, tokens, start/end
 > runtime, sockets, or attendance collection.
 
+## Implementation Progress
+
+Foundation already completed before this CRUD slice:
+
+- [x] Live Training module/controller/service/repository shell exists.
+- [x] Calendar module/controller/service/repository shell exists.
+- [x] Calendar controller is read-only.
+- [x] Live Training and Calendar feature flags exist.
+- [x] Live Training permissions exist in shared constants.
+- [x] Live Training DB tables exist in Drizzle schema.
+- [x] Calendar event table exists in Drizzle schema.
+- [x] `live_trainings.deleted_at` exists in Drizzle schema and generated migration.
+- [x] Live Training viewer settings type exists with microphone/camera defaults disabled.
+- [x] Live Training max participants limit exists as a shared constant.
+- [x] Custom migration enables tenant RLS for new Live Training and Calendar tables.
+
+CRUD slice progress:
+
+- [x] Add TypeBox schemas for create/update/list/detail.
+- [x] Implement repository create transaction:
+  - [x] derive visibility scope from current links instead of accepting it from request
+  - [x] create `calendar_events`
+  - [x] create `live_trainings`
+  - [x] create trainer rows
+  - [x] create course links
+  - [x] create `resource_entity` rows for before/after files
+- [x] Implement update:
+  - [x] update paired calendar event
+  - [x] increment calendar sequence when visible calendar fields change
+  - [x] replace provided relation arrays and preserve omitted arrays
+- [x] Implement soft delete:
+  - [x] set Live Training and calendar event status to `cancelled`
+  - [x] set both `deleted_at`
+  - [x] increment calendar sequence
+- [x] Implement read visibility:
+  - [x] admin/manage
+  - [x] author
+  - [x] trainer
+  - [x] all-scope users
+  - [x] linked-course enrolled users
+  - [x] exclude deleted Live Training/calendar rows
+- [x] Implement material visibility:
+  - [x] admin/author/trainer sees before and after files always
+  - [x] student/viewer sees before files before ended
+  - [x] student/viewer sees after files only when ended
+- [x] Wire controller endpoints:
+  - [x] `GET /live-training`
+  - [x] `GET /live-training/:id`
+  - [x] `POST /live-training`
+  - [x] `PATCH /live-training/:id`
+  - [x] `DELETE /live-training/:id`
+- [ ] Add API E2E coverage for the CRUD slice.
+- [x] Regenerate Swagger/API schema and web API client after API contract stabilizes.
+
 ## Purpose
 
 Create the first usable Live Training API surface:
@@ -175,8 +229,8 @@ Response:
 type LiveTrainingListItem = {
   id: string;
   calendarEventId: string;
-  title: LocalizedText;
-  description: LocalizedText | null;
+  title: string;
+  description: string | null;
   startsAt: string;
   endsAt: string;
   timezone: string;
@@ -248,13 +302,13 @@ type LiveTrainingUserSummary = {
 
 type LiveTrainingCourseSummary = {
   id: string;
-  title: LocalizedText;
+  title: string;
 };
 
 type LiveTrainingMaterial = {
   resourceId: string;
-  title: LocalizedText;
-  description: LocalizedText | null;
+  title: string;
+  description: string | null;
   contentType: string;
   fileUrl: string;
   relationshipType: "live_training_before" | "live_training_after";
@@ -277,14 +331,14 @@ Request body:
 
 ```ts
 type CreateLiveTrainingBody = {
-  title: LocalizedText;
-  description?: LocalizedText | null;
+  language: SupportedLanguages;
+  title: string;
+  description?: string | null;
   startsAt: string;
   endsAt: string;
   timezone: string;
   location?: string | null;
   deliveryType: "online" | "offline";
-  visibilityScope: "all" | "linked_courses";
   maxParticipants?: number;
   settings?: Record<string, unknown>;
   trainerUserIds?: string[];
@@ -298,12 +352,14 @@ Rules:
 
 - `startsAt` and `endsAt` must be valid ISO date/datetime strings.
 - `endsAt` must be after `startsAt`.
-- Default `maxParticipants` to `100`.
+- Default `maxParticipants` to `LIVE_TRAINING_MAX_PARTICIPANTS_LIMIT`.
+- Reject `maxParticipants` above `LIVE_TRAINING_MAX_PARTICIPANTS_LIMIT`.
 - Default `settings` to `{}`.
 - `author_id = currentUser.userId`.
 - Add the author as a trainer if `trainerUserIds` is omitted or does not include the author.
-- Reject `visibilityScope = all` when `linkedCourseIds` is non-empty.
-- Reject `visibilityScope = linked_courses` when `linkedCourseIds` is empty.
+- Derive `visibilityScope` from current links:
+  - no linked courses -> `all`
+  - one or more linked courses -> `linked_courses`
 - Validate every linked course exists and is manageable/usable by the actor.
 - Validate every trainer user exists in the current tenant.
 - Validate every before/after resource exists in the current tenant and is not archived.
@@ -395,18 +451,26 @@ Create mapping:
 calendar_events.uid = generated stable UID
 calendar_events.sequence = 0
 calendar_events.status = scheduled
-calendar_events.title = body.title
-calendar_events.description = body.description
+calendar_events.base_language = body.language
+calendar_events.available_locales = [body.language]
+calendar_events.title = buildJsonbField(body.language, body.title)
+calendar_events.description = buildJsonbField(body.language, body.description) or null
 calendar_events.starts_at = body.startsAt
 calendar_events.ends_at = body.endsAt
 calendar_events.timezone = body.timezone
 calendar_events.location = body.location
 calendar_events.organizer_user_id = currentUser.userId
+live_trainings.base_language = body.language
+live_trainings.available_locales = [body.language]
 ```
 
 Update mapping:
 
+- Request body includes `language: SupportedLanguages`.
 - Update the same schedule/title/description/location fields.
+- Localized title/description updates use `setJsonbField(field, body.language, value)`.
+- When localized fields are updated for a new language, append it to
+  `available_locales` on both `calendar_events` and `live_trainings`.
 - Increment `sequence` when visible calendar fields change.
 
 Cancel mapping:
@@ -444,6 +508,8 @@ Do not add a new Live Training resources table in this slice.
 - No LiveKit rooms or tokens.
 - No start/join/end runtime endpoints.
 - No attendance or statistics endpoints.
+- No max parallel active session enforcement. Future runtime scope should enforce a tenant/global
+  parallel session limit using Redis or another fast shared coordination layer.
 - No generic Calendar write endpoints.
 - No recurrence expansion.
 - No RSVP/invitation workflow.

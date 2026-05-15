@@ -86,6 +86,7 @@ import type {
   LiveTrainingLinkEntityType,
   LiveTrainingMemberRole,
   LiveTrainingParticipantRole,
+  LiveTrainingSettings,
   LiveTrainingSessionStatus,
   LiveTrainingStatus,
   LiveTrainingVisibilityScope,
@@ -394,6 +395,8 @@ export const calendarEvents = pgTable(
       .notNull()
       .$type<CalendarEventStatus>()
       .default(CALENDAR_EVENT_STATUSES.SCHEDULED),
+    baseLanguage,
+    availableLocales,
     title: jsonb("title").default({}).notNull().$type<LocalizedText>(),
     description: jsonb("description").$type<LocalizedText>(),
     startsAt: timestamp("starts_at", {
@@ -442,6 +445,8 @@ export const liveTrainings = pgTable(
     authorId: uuid("author_id")
       .references(() => users.id)
       .notNull(),
+    baseLanguage,
+    availableLocales,
     deliveryType: text("delivery_type")
       .notNull()
       .$type<LiveTrainingDeliveryType>()
@@ -455,8 +460,21 @@ export const liveTrainings = pgTable(
       .$type<LiveTrainingStatus>()
       .default(LIVE_TRAINING_STATUSES.SCHEDULED),
     maxParticipants: integer("max_participants").notNull().default(100),
-    settings: jsonb("settings").default({}).notNull(),
+    settings: jsonb("settings")
+      .default({
+        viewerPermissions: {
+          microphoneEnabled: false,
+          cameraEnabled: false,
+        },
+      } satisfies LiveTrainingSettings)
+      .notNull()
+      .$type<LiveTrainingSettings>(),
     metadata: jsonb("metadata").default({}).notNull(),
+    deletedAt: timestamp("deleted_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
     tenantId,
   },
   withTenantIdIndex("live_trainings", (table) => ({

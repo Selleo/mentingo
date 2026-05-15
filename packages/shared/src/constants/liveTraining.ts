@@ -78,6 +78,22 @@ export const LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES = {
 export type LiveTrainingResourceRelationshipType =
   (typeof LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES)[keyof typeof LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES];
 
+export type LiveTrainingSettings = {
+  viewerPermissions: {
+    microphoneEnabled: boolean;
+    cameraEnabled: boolean;
+  };
+};
+
+export const DEFAULT_LIVE_TRAINING_SETTINGS = {
+  viewerPermissions: {
+    microphoneEnabled: false,
+    cameraEnabled: false,
+  },
+} as const satisfies LiveTrainingSettings;
+
+export const LIVE_TRAINING_MAX_PARTICIPANTS_LIMIT = 100;
+
 export const LIVE_TRAINING_SOCKET_ROOMS = {
   LIVE_TRAINING: "live-training",
   LIVE_TRAINING_SESSION: "live-training-session",

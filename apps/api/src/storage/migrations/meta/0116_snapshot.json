@@ -1,6 +1,6 @@
 {
-  "id": "49fc978d-444d-4432-af75-b5060969b620",
-  "prevId": "073e7523-2128-4e58-a890-953adeef381a",
+  "id": "2b10332e-31b2-47aa-927b-271d3062c8ce",
+  "prevId": "232008cd-efab-4254-b36b-4e99d574ff37",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -1144,6 +1144,20 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'scheduled'"
+        },
+        "base_language": {
+          "name": "base_language",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'en'"
+        },
+        "available_locales": {
+          "name": "available_locales",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "ARRAY['en']::text[]"
         },
         "title": {
           "name": "title",
@@ -6609,6 +6623,20 @@
           "primaryKey": false,
           "notNull": true
         },
+        "base_language": {
+          "name": "base_language",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'en'"
+        },
+        "available_locales": {
+          "name": "available_locales",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "ARRAY['en']::text[]"
+        },
         "delivery_type": {
           "name": "delivery_type",
           "type": "text",
@@ -6642,7 +6670,7 @@
           "type": "jsonb",
           "primaryKey": false,
           "notNull": true,
-          "default": "'{}'::jsonb"
+          "default": "'{\"viewerPermissions\":{\"microphoneEnabled\":false,\"cameraEnabled\":false}}'::jsonb"
         },
         "metadata": {
           "name": "metadata",
@@ -6650,6 +6678,12 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'{}'::jsonb"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": false
         },
         "tenant_id": {
           "name": "tenant_id",

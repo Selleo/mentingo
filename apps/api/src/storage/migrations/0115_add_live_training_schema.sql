@@ -5,6 +5,8 @@ CREATE TABLE IF NOT EXISTS "calendar_events" (
 	"uid" text NOT NULL,
 	"sequence" integer DEFAULT 0 NOT NULL,
 	"status" text DEFAULT 'scheduled' NOT NULL,
+	"base_language" text DEFAULT 'en' NOT NULL,
+	"available_locales" text[] DEFAULT ARRAY['en']::text[] NOT NULL,
 	"title" jsonb DEFAULT '{}'::jsonb NOT NULL,
 	"description" jsonb,
 	"starts_at" timestamp(3) with time zone NOT NULL,
@@ -110,12 +112,15 @@ CREATE TABLE IF NOT EXISTS "live_trainings" (
 	"updated_at" timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	"calendar_event_id" uuid NOT NULL,
 	"author_id" uuid NOT NULL,
+	"base_language" text DEFAULT 'en' NOT NULL,
+	"available_locales" text[] DEFAULT ARRAY['en']::text[] NOT NULL,
 	"delivery_type" text DEFAULT 'online' NOT NULL,
 	"visibility_scope" text DEFAULT 'linked_courses' NOT NULL,
 	"status" text DEFAULT 'scheduled' NOT NULL,
 	"max_participants" integer DEFAULT 100 NOT NULL,
-	"settings" jsonb DEFAULT '{}'::jsonb NOT NULL,
+	"settings" jsonb DEFAULT '{"viewerPermissions":{"microphoneEnabled":false,"cameraEnabled":false}}'::jsonb NOT NULL,
 	"metadata" jsonb DEFAULT '{}'::jsonb NOT NULL,
+	"deleted_at" timestamp(3) with time zone,
 	"tenant_id" uuid DEFAULT current_setting('app.tenant_id', true)::uuid NOT NULL,
 	CONSTRAINT "live_trainings_calendar_event_id_unique" UNIQUE("calendar_event_id")
 );
@@ -314,34 +319,4 @@ CREATE INDEX IF NOT EXISTS "live_training_sessions_status_idx" ON "live_training
 CREATE INDEX IF NOT EXISTS "live_training_sessions_livekit_room_name_idx" ON "live_training_sessions" USING btree ("tenant_id","livekit_room_name");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "live_trainings_tenant_id_idx" ON "live_trainings" USING btree ("tenant_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "live_trainings_tenant_status_idx" ON "live_trainings" USING btree ("tenant_id","status");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "live_trainings_author_idx" ON "live_trainings" USING btree ("author_id");--> statement-breakpoint
-DO $$
-DECLARE
-  r record;
-BEGIN
-  FOR r IN
-    SELECT table_schema, table_name
-    FROM information_schema.columns
-    WHERE column_name = 'tenant_id'
-      AND table_schema = 'public'
-      AND table_name IN (
-        'calendar_events',
-        'live_lessons',
-        'live_training_attendance',
-        'live_training_links',
-        'live_training_members',
-        'live_training_session_participants',
-        'live_training_sessions',
-        'live_trainings'
-      )
-  LOOP
-    EXECUTE format('ALTER TABLE %I.%I ENABLE ROW LEVEL SECURITY', r.table_schema, r.table_name);
-    EXECUTE format(
-      'CREATE POLICY %I ON %I.%I USING (tenant_id = current_setting(''app.tenant_id'', true)::uuid) WITH CHECK (tenant_id = current_setting(''app.tenant_id'', true)::uuid)',
-      concat(r.table_name, '_tenant_isolation'),
-      r.table_schema,
-      r.table_name
-    );
-  END LOOP;
-END
-$$;
+CREATE INDEX IF NOT EXISTS "live_trainings_author_idx" ON "live_trainings" USING btree ("author_id");

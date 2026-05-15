@@ -5040,6 +5040,309 @@ export interface CreateSupportSessionResponse {
   };
 }
 
+export interface GetLiveTrainingsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    calendarEventId: string;
+    title: string;
+    description: string | null;
+    startsAt: string;
+    endsAt: string;
+    timezone: string;
+    location: string | null;
+    deliveryType: "online" | "offline";
+    visibilityScope: "all" | "linked_courses";
+    status: "scheduled" | "active" | "ended" | "cancelled" | "expired";
+    maxParticipants: number;
+    /** @format uuid */
+    authorId: string;
+    trainerIds: string[];
+    linkedCourseIds: string[];
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface GetLiveTrainingResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    calendarEventId: string;
+    title: string;
+    description: string | null;
+    startsAt: string;
+    endsAt: string;
+    timezone: string;
+    location: string | null;
+    deliveryType: "online" | "offline";
+    visibilityScope: "all" | "linked_courses";
+    status: "scheduled" | "active" | "ended" | "cancelled" | "expired";
+    maxParticipants: number;
+    /** @format uuid */
+    authorId: string;
+    trainerIds: string[];
+    linkedCourseIds: string[];
+  } & {
+    settings: {
+      viewerPermissions: {
+        microphoneEnabled: boolean;
+        cameraEnabled: boolean;
+      };
+    };
+    metadata: object;
+    author: {
+      /** @format uuid */
+      id: string;
+      fullName: string | null;
+      email: string;
+    };
+    trainers: {
+      /** @format uuid */
+      id: string;
+      fullName: string | null;
+      email: string;
+    }[];
+    linkedCourses: {
+      /** @format uuid */
+      id: string;
+      title: string;
+    }[];
+    materials: {
+      before: {
+        /** @format uuid */
+        resourceId: string;
+        title: string;
+        description: string | null;
+        contentType: string;
+        fileUrl: string;
+        relationshipType: "live_training_before" | "live_training_after";
+      }[];
+      after: {
+        /** @format uuid */
+        resourceId: string;
+        title: string;
+        description: string | null;
+        contentType: string;
+        fileUrl: string;
+        relationshipType: "live_training_before" | "live_training_after";
+      }[];
+    };
+  };
+}
+
+export interface CreateLiveTrainingBody {
+  /** @default "en" */
+  language: "en" | "pl" | "de" | "lt" | "cs";
+  /** @minLength 1 */
+  title: string;
+  description?: string | null;
+  /** @minLength 1 */
+  startsAt: string;
+  /** @minLength 1 */
+  endsAt: string;
+  /** @minLength 1 */
+  timezone: string;
+  location?: string | null;
+  deliveryType: "online" | "offline";
+  /**
+   * @min 1
+   * @max 100
+   */
+  maxParticipants?: number;
+  settings?: {
+    viewerPermissions?: {
+      microphoneEnabled?: boolean;
+      cameraEnabled?: boolean;
+    };
+  };
+  trainerUserIds?: string[];
+  linkedCourseIds?: string[];
+  beforeResourceIds?: string[];
+  afterResourceIds?: string[];
+}
+
+export interface CreateLiveTrainingResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    calendarEventId: string;
+    title: string;
+    description: string | null;
+    startsAt: string;
+    endsAt: string;
+    timezone: string;
+    location: string | null;
+    deliveryType: "online" | "offline";
+    visibilityScope: "all" | "linked_courses";
+    status: "scheduled" | "active" | "ended" | "cancelled" | "expired";
+    maxParticipants: number;
+    /** @format uuid */
+    authorId: string;
+    trainerIds: string[];
+    linkedCourseIds: string[];
+  } & {
+    settings: {
+      viewerPermissions: {
+        microphoneEnabled: boolean;
+        cameraEnabled: boolean;
+      };
+    };
+    metadata: object;
+    author: {
+      /** @format uuid */
+      id: string;
+      fullName: string | null;
+      email: string;
+    };
+    trainers: {
+      /** @format uuid */
+      id: string;
+      fullName: string | null;
+      email: string;
+    }[];
+    linkedCourses: {
+      /** @format uuid */
+      id: string;
+      title: string;
+    }[];
+    materials: {
+      before: {
+        /** @format uuid */
+        resourceId: string;
+        title: string;
+        description: string | null;
+        contentType: string;
+        fileUrl: string;
+        relationshipType: "live_training_before" | "live_training_after";
+      }[];
+      after: {
+        /** @format uuid */
+        resourceId: string;
+        title: string;
+        description: string | null;
+        contentType: string;
+        fileUrl: string;
+        relationshipType: "live_training_before" | "live_training_after";
+      }[];
+    };
+  };
+}
+
+export type UpdateLiveTrainingBody = {
+  /** @default "en" */
+  language: "en" | "pl" | "de" | "lt" | "cs";
+} & {
+  /** @minLength 1 */
+  title?: string;
+  description?: string | null;
+  /** @minLength 1 */
+  startsAt?: string;
+  /** @minLength 1 */
+  endsAt?: string;
+  /** @minLength 1 */
+  timezone?: string;
+  location?: string | null;
+  deliveryType?: "online" | "offline";
+  status?: "scheduled" | "active" | "ended" | "cancelled" | "expired";
+  /**
+   * @min 1
+   * @max 100
+   */
+  maxParticipants?: number;
+  settings?: {
+    viewerPermissions?: {
+      microphoneEnabled?: boolean;
+      cameraEnabled?: boolean;
+    };
+  };
+  trainerUserIds?: string[];
+  linkedCourseIds?: string[];
+  beforeResourceIds?: string[];
+  afterResourceIds?: string[];
+};
+
+export interface UpdateLiveTrainingResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    calendarEventId: string;
+    title: string;
+    description: string | null;
+    startsAt: string;
+    endsAt: string;
+    timezone: string;
+    location: string | null;
+    deliveryType: "online" | "offline";
+    visibilityScope: "all" | "linked_courses";
+    status: "scheduled" | "active" | "ended" | "cancelled" | "expired";
+    maxParticipants: number;
+    /** @format uuid */
+    authorId: string;
+    trainerIds: string[];
+    linkedCourseIds: string[];
+  } & {
+    settings: {
+      viewerPermissions: {
+        microphoneEnabled: boolean;
+        cameraEnabled: boolean;
+      };
+    };
+    metadata: object;
+    author: {
+      /** @format uuid */
+      id: string;
+      fullName: string | null;
+      email: string;
+    };
+    trainers: {
+      /** @format uuid */
+      id: string;
+      fullName: string | null;
+      email: string;
+    }[];
+    linkedCourses: {
+      /** @format uuid */
+      id: string;
+      title: string;
+    }[];
+    materials: {
+      before: {
+        /** @format uuid */
+        resourceId: string;
+        title: string;
+        description: string | null;
+        contentType: string;
+        fileUrl: string;
+        relationshipType: "live_training_before" | "live_training_after";
+      }[];
+      after: {
+        /** @format uuid */
+        resourceId: string;
+        title: string;
+        description: string | null;
+        contentType: string;
+        fileUrl: string;
+        relationshipType: "live_training_before" | "live_training_after";
+      }[];
+    };
+  };
+}
+
+export interface DeleteLiveTrainingResponse {
+  data: {
+    message: string;
+  };
+}
+
 import type {
   AxiosInstance,
   AxiosRequestConfig,
@@ -7980,9 +8283,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     lessonControllerGetLessonById: (
       id: string,
       query: {
+        studentId: string;
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs";
-        studentId: string;
       },
       params: RequestParams = {},
     ) =>
@@ -8367,12 +8670,12 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         /** @format uuid */
         userId?: string;
-        /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs";
         /** @min 1 */
         page?: number;
         perPage?: number;
         sort?: string;
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -8455,7 +8758,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     certificatesControllerGetCertificateSharePage: (
       query: {
         certificateId: string;
-        lang: string;
       },
       params: RequestParams = {},
     ) =>
@@ -8475,7 +8777,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     certificatesControllerGetCertificateShareImage: (
       query: {
         certificateId: string;
-        lang: string;
       },
       params: RequestParams = {},
     ) =>
@@ -9549,7 +9850,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     learningPathCertificateControllerGetCertificateSharePage: (
       query: {
         certificateId: string;
-        lang: string;
       },
       params: RequestParams = {},
     ) =>
@@ -9569,7 +9869,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     learningPathCertificateControllerGetCertificateShareImage: (
       query: {
         certificateId: string;
-        lang: string;
       },
       params: RequestParams = {},
     ) =>
@@ -9695,10 +9994,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         /** @format uuid */
         lessonId?: string;
-        /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs";
         /** @format uuid */
         scoId?: string;
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -10591,9 +10890,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     newsControllerGetNewsList: (
       query?: {
+        searchQuery?: string;
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs";
-        searchQuery?: string;
         /** @min 1 */
         page?: number;
       },
@@ -10816,9 +11115,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     articlesControllerGetArticleToc: (
       query?: {
+        isDraftMode?: boolean;
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs";
-        isDraftMode?: boolean;
       },
       params: RequestParams = {},
     ) =>
@@ -10852,9 +11151,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     articlesControllerGetArticle: (
       id: string,
       query?: {
+        isDraftMode?: boolean;
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs";
-        isDraftMode?: boolean;
       },
       params: RequestParams = {},
     ) =>
@@ -10907,9 +11206,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     articlesControllerGetArticles: (
       query?: {
+        searchQuery?: string;
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs";
-        searchQuery?: string;
       },
       params: RequestParams = {},
     ) =>
@@ -11116,6 +11415,153 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/super-admin/tenants/${id}/support-session`,
         method: "POST",
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LiveTrainingControllerGetLiveTrainings
+     * @request GET:/api/live-training
+     */
+    liveTrainingControllerGetLiveTrainings: (
+      query?: {
+        /** @min 1 */
+        page?: number;
+        /** @min 1 */
+        perPage?: number;
+        status?: "scheduled" | "active" | "ended" | "cancelled" | "expired";
+        deliveryType?: "online" | "offline";
+        /** @minLength 1 */
+        start?: string;
+        /** @minLength 1 */
+        end?: string;
+        /** @format uuid */
+        courseId?: string;
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetLiveTrainingsResponse, any>({
+        path: `/api/live-training`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LiveTrainingControllerCreateLiveTraining
+     * @request POST:/api/live-training
+     */
+    liveTrainingControllerCreateLiveTraining: (
+      data: CreateLiveTrainingBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateLiveTrainingResponse, any>({
+        path: `/api/live-training`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LiveTrainingControllerGetLiveTraining
+     * @request GET:/api/live-training/{id}
+     */
+    liveTrainingControllerGetLiveTraining: (
+      id: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetLiveTrainingResponse, any>({
+        path: `/api/live-training/${id}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LiveTrainingControllerUpdateLiveTraining
+     * @request PATCH:/api/live-training/{id}
+     */
+    liveTrainingControllerUpdateLiveTraining: (
+      id: string,
+      data: UpdateLiveTrainingBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateLiveTrainingResponse, any>({
+        path: `/api/live-training/${id}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LiveTrainingControllerDeleteLiveTraining
+     * @request DELETE:/api/live-training/{id}
+     */
+    liveTrainingControllerDeleteLiveTraining: (id: string, params: RequestParams = {}) =>
+      this.request<DeleteLiveTrainingResponse, any>({
+        path: `/api/live-training/${id}`,
+        method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CalendarControllerGetEvents
+     * @request GET:/api/calendar/events
+     */
+    calendarControllerGetEvents: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/calendar/events`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CalendarControllerGetEventDetails
+     * @request GET:/api/calendar/events/{eventId}
+     */
+    calendarControllerGetEventDetails: (eventId: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/calendar/events/${eventId}`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CalendarControllerGetTodayIndicator
+     * @request GET:/api/calendar/today-indicator
+     */
+    calendarControllerGetTodayIndicator: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/calendar/today-indicator`,
+        method: "GET",
         ...params,
       }),
   };
