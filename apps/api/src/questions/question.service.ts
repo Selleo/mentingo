@@ -8,6 +8,7 @@ import { QuestionRepository } from "./question.repository";
 import { QUESTION_TYPE } from "./schema/question.types";
 
 import type { QuizEvaluation, QuizQuestion } from "./schema/question.schema";
+import type { FormattedAnswer } from "./types/question.types";
 import type { SQL } from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { UUIDType } from "src/common";
@@ -19,11 +20,6 @@ import type {
   StudentQuestionAnswer,
 } from "src/lesson/lesson.schema";
 import type * as schema from "src/storage/schema";
-
-type FormattedAnswer = {
-  key: string;
-  value: string;
-};
 
 @Injectable()
 export class QuestionService {
