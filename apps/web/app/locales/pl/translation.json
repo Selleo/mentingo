@@ -2445,7 +2445,8 @@
       "invalidFormatForMultiAnswer": "Nieprawidłowy format dla pytania wielokrotnego wyboru.",
       "trueOrFalseRequired": "Wymagana jest odpowiedź prawda lub fałsz.",
       "photoQuestionMustHaveAnswer": "Wymagana jest odpowiedź na pytanie ze zdjęciem.",
-      "unansweredQuestions": "Wygląda na to, że nie zaznaczyłaś/zaznaczyłeś wszystkich odpowiedzi. Proszę przejrzyj je i spróbuj ponownie!"
+      "unansweredQuestions": "Wygląda na to, że nie zaznaczyłaś/zaznaczyłeś wszystkich odpowiedzi. Proszę przejrzyj je i spróbuj ponownie!",
+      "unansweredQuestionsWithNames": "Uzupełnij brakujące pytania: {{questionNames}}"
     }
   },
   "studentCourseView": {

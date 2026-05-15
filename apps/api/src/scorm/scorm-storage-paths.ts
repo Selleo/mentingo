@@ -49,7 +49,9 @@ export const getScormOriginalFileReference = (
   packageId: UUIDType,
   originalFilename: string,
 ) =>
-  `${getScormPackagePrefix(tenantId, packageId)}/original/${sanitizeScormFilename(originalFilename)}`;
+  `${getScormPackagePrefix(tenantId, packageId)}/original/${sanitizeScormFilename(
+    originalFilename,
+  )}`;
 
 export const getScormExtractedFilesReference = (tenantId: UUIDType, packageId: UUIDType) =>
   `${getScormPackagePrefix(tenantId, packageId)}/extracted`;
@@ -59,7 +61,9 @@ export const getScormExtractedFileReference = (
   packageId: UUIDType,
   relativePath: string,
 ) =>
-  `${getScormExtractedFilesReference(tenantId, packageId)}/${normalizeScormRelativePath(relativePath)}`;
+  `${getScormExtractedFilesReference(tenantId, packageId)}/${normalizeScormRelativePath(
+    relativePath,
+  )}`;
 
 export const getScormManifestReference = (
   tenantId: UUIDType,

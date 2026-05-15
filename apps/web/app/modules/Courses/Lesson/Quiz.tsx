@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "@remix-run/react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -58,7 +58,8 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
       })),
     [lesson.quizDetails?.questions],
   );
-  const isUserSubmittedAnswer = Boolean(lesson.lessonCompleted);
+  const [isRetakingQuiz, setIsRetakingQuiz] = useState(false);
+  const isUserSubmittedAnswer = Boolean(lesson.lessonCompleted) && !isRetakingQuiz;
 
   const methods = useForm<QuizForm>({
     mode: "onSubmit",
@@ -70,6 +71,8 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
 
   const submitQuiz = useSubmitQuiz({
     handleOnSuccess: async () => {
+      setIsRetakingQuiz(false);
+
       await Promise.all([
         queryClient.invalidateQueries(lessonQueryOptions(lesson.id, language, userId)),
         queryClient.invalidateQueries({ queryKey: ["lessonProgress", lesson.id] }),
@@ -84,6 +87,7 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
   const retakeQuiz = useRetakeQuiz({
     lessonId: lesson.id,
     handleOnSuccess: () => {
+      setIsRetakingQuiz(true);
       queryClient.invalidateQueries({ queryKey: ["lesson", lesson.id] });
       methods.reset(getEmptyQuizAnswers(questions ?? []));
     },
@@ -95,6 +99,10 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
     lesson.updatedAt,
     lesson.quizCooldownInHours,
   );
+
+  useEffect(() => {
+    setIsRetakingQuiz(false);
+  }, [lesson.id]);
 
   if (!questions.length) return null;
 

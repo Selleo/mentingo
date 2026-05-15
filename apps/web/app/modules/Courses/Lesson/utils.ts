@@ -3,6 +3,7 @@ import { find, flatMap } from "lodash-es";
 
 import { QuestionType } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/QuizLessonForm/QuizLessonForm.types";
 import { LESSON_PROGRESS_STATUSES, type QuizForm } from "~/modules/Courses/Lesson/types";
+import { getBlankAnswerIds, getBlankCount } from "~/utils/blankAnswerMarkers";
 
 import type {
   GetCourseResponse,
@@ -14,11 +15,6 @@ type Questions = NonNullable<GetLessonByIdResponse["data"]["quizDetails"]>["ques
 
 type AnswersMap = Record<string, Record<string, string | null>>;
 type OpenAnswersMap = Record<string, string>;
-
-const getBlankCount = (description?: string | null, fallback = 0) => {
-  const markersCount = description?.match(/\[word]/g)?.length ?? 0;
-  return markersCount > 0 ? markersCount : fallback;
-};
 
 export const getUserAnswers = (questions: Questions): QuizForm => {
   const groupedQuestions = groupQuestionsByType(questions);
@@ -96,10 +92,11 @@ function prepareEmptyOptionAnswers(questions: Questions): AnswersMap {
     }
 
     if (question.type === QuestionType.FILL_IN_THE_BLANKS_TEXT) {
+      const blankAnswerIds = getBlankAnswerIds(question.description);
       const maxAnswersAmount = getBlankCount(question.description, question?.options?.length ?? 0);
       const emptyMap: Record<string, string | null> = {};
-      for (let index = 1; index <= maxAnswersAmount; index += 1) {
-        emptyMap[`${index}`] = null;
+      for (let index = 0; index < maxAnswersAmount; index += 1) {
+        emptyMap[blankAnswerIds[index] ?? `${index + 1}`] = null;
       }
       result[question.id ?? ""] = emptyMap;
 
@@ -107,10 +104,11 @@ function prepareEmptyOptionAnswers(questions: Questions): AnswersMap {
     }
 
     if (question.type === QuestionType.FILL_IN_THE_BLANKS_DND) {
-      const maxAnswersAmount = question.description?.match(/\[word]/g)?.length ?? 0;
+      const blankAnswerIds = getBlankAnswerIds(question.description);
+      const maxAnswersAmount = getBlankCount(question.description);
       const emptyMap: Record<string, string | null> = {};
-      for (let index = 1; index <= maxAnswersAmount; index += 1) {
-        emptyMap[`${index}`] = null;
+      for (let index = 0; index < maxAnswersAmount; index += 1) {
+        emptyMap[blankAnswerIds[index] ?? `${index + 1}`] = null;
       }
       result[question.id ?? ""] = emptyMap;
 
@@ -155,10 +153,15 @@ function prepareOptionAnswers(questions: Questions): AnswersMap {
     }
 
     if (question.type === QuestionType.FILL_IN_THE_BLANKS_TEXT) {
+      const blankAnswerIds = getBlankAnswerIds(question.description);
       const maxAnswersAmount = getBlankCount(question.description, question?.options?.length ?? 0);
       const questionMap: Record<string, string | null> = {};
       for (let index = 0; index < maxAnswersAmount; index += 1) {
-        questionMap[`${index + 1}`] = question?.options?.[index]?.studentAnswer ?? "";
+        const blankAnswerId = blankAnswerIds[index];
+        const option = blankAnswerId
+          ? question?.options?.find(({ id }) => id === blankAnswerId)
+          : question?.options?.[index];
+        questionMap[blankAnswerId ?? `${index + 1}`] = option?.studentAnswer ?? "";
       }
       result[question.id ?? ""] = questionMap;
 
@@ -166,18 +169,20 @@ function prepareOptionAnswers(questions: Questions): AnswersMap {
     }
 
     if (question.type === QuestionType.FILL_IN_THE_BLANKS_DND) {
-      const maxAnswersAmount = question.description?.match(/\[word]/g)?.length ?? 0;
-      result[question.id ?? ""] =
-        question?.options?.reduce(
-          (optionMap, option, index) => {
-            if (index < maxAnswersAmount) {
-              optionMap[`${index + 1}`] = option.isStudentAnswer ? `${option.id}` : "";
-            }
+      const blankAnswerIds = getBlankAnswerIds(question.description);
+      const maxAnswersAmount = getBlankCount(question.description);
+      const questionMap: Record<string, string | null> = {};
+      for (let index = 0; index < maxAnswersAmount; index += 1) {
+        const blankAnswerId = blankAnswerIds[index];
+        const option = blankAnswerId
+          ? question?.options?.find(({ id }) => id === blankAnswerId)
+          : question?.options?.[index];
+        questionMap[blankAnswerId ?? `${index + 1}`] = option?.isStudentAnswer
+          ? `${option.id}`
+          : "";
+      }
 
-            return optionMap;
-          },
-          {} as Record<string, string | null>,
-        ) || {};
+      result[question.id ?? ""] = questionMap;
 
       return result;
     }
@@ -235,7 +240,7 @@ export const parseQuizFormData = (input: QuizForm) => {
 
           return typeof value === "string" && value.trim() !== "";
         })
-        .map(([_, value]) => ({ value }));
+        .map(([answerId, value]) => (/^\d+$/.test(answerId) ? { value } : { answerId, value }));
 
       if (answerArray.length > 0) {
         result.push({

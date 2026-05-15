@@ -21,6 +21,7 @@ import { QuestionType } from "../QuizLessonForm.types";
 
 import { FillInTheBlanksButtonNode } from "./FillInTheBlanksButtonNode";
 
+import type { QuestionOption } from "../QuizLessonForm.types";
 import type { QuizLessonFormValues } from "../validators/quizLessonFormSchema";
 import type { UseFormReturn } from "react-hook-form";
 
@@ -32,6 +33,43 @@ type FillInTheBlankQuestionProps = {
 };
 
 const SPECIAL_SYMBOLS = /[.*+?^${}()|[\]\\]/g;
+const FILL_BLANK_BUTTON_REGEX = /<button\b[^>]*>[\s\S]*?<\/button>/g;
+
+type FillBlankButtonData = {
+  optionId?: string;
+  word: string;
+};
+
+type DraggedWordData = FillBlankButtonData;
+
+const getHtmlAttribute = (html: string, attribute: string) =>
+  new RegExp(`${attribute}="([^"]*)"`).exec(html)?.[1] ?? "";
+
+const getOptionId = (option: QuestionOption) => option.id ?? option.sortableId;
+
+const parseFillBlankButtons = (html?: string | null): FillBlankButtonData[] => {
+  const buttons = html?.match(FILL_BLANK_BUTTON_REGEX) ?? [];
+
+  return buttons.map((button) => ({
+    optionId: getHtmlAttribute(button, "data-option-id") || undefined,
+    word: getHtmlAttribute(button, "data-word"),
+  }));
+};
+
+const parseDraggedWord = (event: React.DragEvent): DraggedWordData | null => {
+  const jsonPayload = event.dataTransfer.getData("application/json");
+  if (jsonPayload) {
+    try {
+      const data = JSON.parse(jsonPayload) as DraggedWordData;
+      if (data.word) return data;
+    } catch {
+      // Fall back to the text payload for synthetic or legacy drag events.
+    }
+  }
+
+  const word = event.dataTransfer.getData("text");
+  return word ? { word } : null;
+};
 
 const FillInTheBlanksQuestion = ({
   form,
@@ -64,41 +102,51 @@ const FillInTheBlanksQuestion = ({
     setIsDeleteModalOpen(false);
   };
 
-  const handleDragStart = (word: string, e: React.DragEvent) => {
-    e.dataTransfer.setData("text", word);
+  const handleDragStart = (option: QuestionOption, e: React.DragEvent) => {
+    const payload: DraggedWordData = {
+      optionId: getOptionId(option),
+      word: option.optionText,
+    };
+
+    e.dataTransfer.setData("application/json", JSON.stringify(payload));
+    e.dataTransfer.setData("text", option.optionText);
   };
 
-  function containsButtonWithWord(word: string) {
-    const currentValue = form.getValues(`questions.${questionIndex}.description`);
+  function containsButtonForOption(option: QuestionOption) {
+    const currentValue = form.getValues(`questions.${questionIndex}.description`) as
+      | string
+      | undefined;
+    const optionId = getOptionId(option);
+    const buttons = parseFillBlankButtons(currentValue);
 
-    const escapedWord = word.replace(/[.*+?^=!:${}()|[\]/\\]/g, "\\$&");
+    return buttons.some((button) => {
+      if (button.optionId) return button.optionId === optionId;
 
-    const regex = new RegExp(`<button[^>]*data-word="${escapedWord}"[^>]*>`, "s");
-
-    return regex.test(currentValue as string);
+      return button.word === option.optionText;
+    });
   }
 
   const handleRemoveWord = (index: number) => {
     if (isStructureLocked) return;
 
-    const wordToRemove = currentOptions[index]?.optionText;
+    const optionToRemove = currentOptions[index];
 
     const updatedOptions = currentOptions.filter((_, i) => i !== index);
     form.setValue(`questions.${questionIndex}.options`, updatedOptions, {
       shouldDirty: true,
     });
 
-    if (wordToRemove && editor) {
+    if (optionToRemove && editor) {
       const currentContent = editor.getHTML();
+      const optionId = getOptionId(optionToRemove);
+      const updatedContent = currentContent.replace(FILL_BLANK_BUTTON_REGEX, (button) => {
+        const buttonOptionId = getHtmlAttribute(button, "data-option-id");
+        const buttonWord = getHtmlAttribute(button, "data-word");
 
-      const escapedWord = wordToRemove.replace(/[.*+?^=!:${}()|[\]/\\]/g, "\\$&");
+        if (buttonOptionId) return buttonOptionId === optionId ? "" : button;
 
-      const buttonRegex = new RegExp(
-        `<button[^>]*data-word="${escapedWord}"[^>]*>[\\s\\S]*?<\\/button>`,
-        "gi",
-      );
-
-      const updatedContent = currentContent.replace(buttonRegex, "");
+        return buttonWord === optionToRemove.optionText ? "" : button;
+      });
 
       editor.commands.setContent(updatedContent);
 
@@ -111,52 +159,38 @@ const FillInTheBlanksQuestion = ({
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
 
-    const word = e.dataTransfer.getData("text");
-    if (!word || !editor) return;
+    const draggedWord = parseDraggedWord(e);
+    if (!draggedWord || !editor) return;
 
-    if (containsButtonWithWord(word)) return;
+    const placedOptionIds = new Set(
+      parseFillBlankButtons(form.getValues(`questions.${questionIndex}.description`) as string)
+        .map(({ optionId }) => optionId)
+        .filter((optionId): optionId is string => Boolean(optionId)),
+    );
+    const optionToPlace =
+      currentOptions.find((option) => getOptionId(option) === draggedWord.optionId) ??
+      currentOptions.find(
+        (option) =>
+          option.optionText === draggedWord.word && !placedOptionIds.has(getOptionId(option)),
+      );
+
+    if (!optionToPlace || containsButtonForOption(optionToPlace)) return;
 
     editor
       .chain()
       .focus()
       .insertContent({
         type: "button",
-        attrs: { word },
+        attrs: { word: optionToPlace.optionText, optionId: getOptionId(optionToPlace) },
       })
       .run();
-
-    const regex = /<button[^>]*data-word="([^"]*)"[^>]*>/g;
-
-    const currentValue = form.getValues(`questions.${questionIndex}.description`) as string;
-
-    const buttonValues = currentValue
-      ? [...currentValue.matchAll(regex)].map((match) => match[1] || "")
-      : [];
-
-    const updatedOptions = [...currentOptions];
-
-    buttonValues.forEach((button: string, index: number) => {
-      const optionIndex = updatedOptions.findIndex((option) => option.optionText === button);
-
-      if (optionIndex !== -1) {
-        updatedOptions[optionIndex] = {
-          ...updatedOptions[optionIndex],
-          displayOrder: index + 1,
-          isCorrect: true,
-        };
-      }
-    });
-
-    form.setValue(`questions.${questionIndex}.options`, updatedOptions, {
-      shouldDirty: true,
-    });
   };
   const handleAddWord = () => {
     if (isStructureLocked) return;
 
     const trimmedWord = newWord.trim();
 
-    if (trimmedWord !== "" && !currentOptions.some((option) => option.optionText === trimmedWord)) {
+    if (trimmedWord !== "") {
       const newOption = {
         sortableId: crypto.randomUUID(),
         optionText: trimmedWord,
@@ -186,45 +220,75 @@ const FillInTheBlanksQuestion = ({
   useEffect(() => {
     if (!editor) return;
 
-    editor.on("update", () => {
+    const updateOptionsFromEditor = () => {
       const html = editor.getHTML();
       form.setValue(`questions.${questionIndex}.description`, html, {
         shouldDirty: true,
       });
 
-      const regex = /<button[^>]*data-word="([^"]*)"[^>]*>/g;
-      const buttonValues = html ? [...html.matchAll(regex)].map((match) => match[1] || "") : [];
+      const buttons = parseFillBlankButtons(html);
+      const usedLegacyButtonIndexes = new Set<number>();
 
       const updatedOptions = form.getValues(`questions.${questionIndex}.options`)?.map((option) => {
+        const optionId = getOptionId(option);
+        let buttonIndex = buttons.findIndex((button) => button.optionId === optionId);
+
+        if (buttonIndex === -1) {
+          buttonIndex = buttons.findIndex((button, index) => {
+            if (button.optionId || usedLegacyButtonIndexes.has(index)) return false;
+
+            return button.word === option.optionText;
+          });
+        }
+
+        if (buttonIndex !== -1) {
+          usedLegacyButtonIndexes.add(buttonIndex);
+        }
+
         return {
           ...option,
-          displayOrder: buttonValues.indexOf(option.optionText) + 1,
-          isCorrect: buttonValues.includes(option.optionText),
+          displayOrder: buttonIndex + 1,
+          isCorrect: buttonIndex !== -1,
         };
       });
 
       form.setValue(`questions.${questionIndex}.options`, updatedOptions, {
         shouldDirty: true,
       });
-    });
+    };
+
+    editor.on("update", updateOptionsFromEditor);
 
     return () => {
-      editor.off("update");
+      editor.off("update", updateOptionsFromEditor);
     };
   }, [editor, form, questionIndex]);
 
   useEffect(() => {
     if (!editor) return;
 
-    const regex = /<button[^>]*data-word="([^"]*)"[^>]*>/g;
-    const buttonValues = currentDescription
-      ? [...currentDescription.matchAll(regex)].map((match) => match[1] || "")
-      : [];
+    const buttons = parseFillBlankButtons(currentDescription);
+    const usedLegacyButtonIndexes = new Set<number>();
 
     const updatedOptions = form.getValues(`questions.${questionIndex}.options`)?.map((option) => {
+      const optionId = getOptionId(option);
+      let buttonIndex = buttons.findIndex((button) => button.optionId === optionId);
+
+      if (buttonIndex === -1) {
+        buttonIndex = buttons.findIndex((button, index) => {
+          if (button.optionId || usedLegacyButtonIndexes.has(index)) return false;
+
+          return button.word === option.optionText;
+        });
+      }
+
+      if (buttonIndex !== -1) {
+        usedLegacyButtonIndexes.add(buttonIndex);
+      }
+
       return {
         ...option,
-        isCorrect: buttonValues.includes(option.optionText),
+        isCorrect: buttonIndex !== -1,
       };
     });
 
@@ -250,6 +314,7 @@ const FillInTheBlanksQuestion = ({
 
   const handleUpdateWord = (index: number, value: string) => {
     const options = [...currentOptions];
+    const option = options[index];
     const previousWord = options[index]?.optionText ?? "";
     options[index] = {
       ...options[index],
@@ -260,14 +325,22 @@ const FillInTheBlanksQuestion = ({
     const description = form.getValues(`questions.${questionIndex}.description`) as string;
     if (!description || !previousWord || !editor) return;
 
+    const optionId = option ? getOptionId(option) : "";
     const wordPattern = escapeRegExp(previousWord);
-    const updatedDescription = description.replace(
-      new RegExp(
-        `<button([^>]*?)data-word="${wordPattern}"([^>]*)><span>[^<]*<\\/span>(<span[^>]*>[\\s\\S]*?<\\/span>)?<\\/button>`,
-        "g",
-      ),
-      `<button$1data-word="${value}"$2><span>${value}</span>$3</button>`,
-    );
+    const updatedDescription = description.replace(FILL_BLANK_BUTTON_REGEX, (button) => {
+      const buttonOptionId = getHtmlAttribute(button, "data-option-id");
+      const buttonWord = getHtmlAttribute(button, "data-word");
+
+      if (buttonOptionId && buttonOptionId !== optionId) return button;
+      if (!buttonOptionId && buttonWord !== previousWord) return button;
+
+      return button.replace(
+        new RegExp(
+          `data-word="${wordPattern}"([^>]*)><span>[^<]*<\\/span>(<span[^>]*>[\\s\\S]*?<\\/span>)?`,
+        ),
+        `data-word="${value}"$1><span>${value}</span>$2`,
+      );
+    });
 
     editor.commands.setContent(updatedDescription);
     form.setValue(`questions.${questionIndex}.description`, updatedDescription, {
@@ -321,11 +394,12 @@ const FillInTheBlanksQuestion = ({
             </div>
             <div className="flex flex-wrap items-center gap-2">
               {currentOptions.map((option, index) => {
-                const isDraggable = !containsButtonWithWord(option.optionText);
+                const isDraggable = !containsButtonForOption(option);
+                const optionId = getOptionId(option);
 
                 return (
                   <div
-                    key={index}
+                    key={optionId}
                     className={cn(
                       "flex items-center justify-between gap-x-1 rounded-lg border border-primary-500 pr-3",
                       option.isCorrect ? "bg-success-100" : "bg-primary-100",
@@ -338,9 +412,10 @@ const FillInTheBlanksQuestion = ({
                           questionIndex,
                           option.optionText,
                         )}
+                        data-option-id={optionId}
                         className="pl-1.5 pr-1"
                         draggable={isDraggable}
-                        onDragStart={(event) => handleDragStart(option.optionText, event)}
+                        onDragStart={(event) => handleDragStart(option, event)}
                         aria-label={t("adminCourseView.curriculum.lesson.other.dragWord")}
                       >
                         <Icon name="DragAndDropIcon" className="cursor-move" />
@@ -349,7 +424,7 @@ const FillInTheBlanksQuestion = ({
                       <Input
                         value={option.optionText}
                         draggable={isDraggable}
-                        onDragStart={(event) => handleDragStart(option.optionText, event)}
+                        onDragStart={(event) => handleDragStart(option, event)}
                         onChange={(event) => handleUpdateWord(index, event.target.value)}
                         className="mr-1.5 w-auto min-w-[80px] border-none bg-transparent px-0 text-primary-500 focus-visible:ring-0 focus-visible:outline-none"
                         onDrop={(event) => event.preventDefault()}

@@ -1,13 +1,20 @@
 import { expect, type Page } from "@playwright/test";
 
+import { LEARNING_HANDLES } from "../../data/learning/handles";
+
 type AnswerAllRenderedQuizQuestionTypesFlowInput = {
   dndBlankAnswer: string;
+  dndBlankAnswerId: string;
   textBlankAnswer: string;
 };
 
 export const answerAllRenderedQuizQuestionTypesFlow = async (
   page: Page,
-  { dndBlankAnswer, textBlankAnswer }: AnswerAllRenderedQuizQuestionTypesFlowInput,
+  {
+    dndBlankAnswer,
+    dndBlankAnswerId,
+    textBlankAnswer,
+  }: AnswerAllRenderedQuizQuestionTypesFlowInput,
 ) => {
   await page.locator('input[name^="singleAnswerQuestions."]').first().click();
   await page.locator('input[name^="multiAnswerQuestions."]').nth(0).click();
@@ -19,8 +26,9 @@ export const answerAllRenderedQuizQuestionTypesFlow = async (
   await page.locator('input[name^="photoQuestionMultipleChoice."]').nth(1).click();
   await page.getByTestId("text-blank-1").fill(textBlankAnswer);
 
-  const dndWord = page.getByText(dndBlankAnswer, { exact: true });
-  const dndBlank = page.getByTestId("1");
+  const quizForm = page.getByTestId(LEARNING_HANDLES.QUIZ_FORM);
+  const dndWord = quizForm.getByRole("button", { name: dndBlankAnswer });
+  const dndBlank = quizForm.getByTestId(`blank:${dndBlankAnswerId}`);
   await dndWord.scrollIntoViewIfNeeded();
   await dndBlank.scrollIntoViewIfNeeded();
 

@@ -2152,7 +2152,8 @@
       "invalidFormatForMultiAnswer": "Netinkamas kelių atsakymų klausimų formatas.",
       "trueOrFalseRequired": "Reikalingas teisingas arba klaidingas atsakymas.",
       "photoQuestionMustHaveAnswer": "Atsakymas reikalingas į šį klausimą su nuotrauka.",
-      "unansweredQuestions": "Atrodo, kad dar nepatikrinote visų atsakymų. Peržiūrėkite juos ir bandykite dar kartą!"
+      "unansweredQuestions": "Atrodo, kad dar nepatikrinote visų atsakymų. Peržiūrėkite juos ir bandykite dar kartą!",
+      "unansweredQuestionsWithNames": "Atsakykite į trūkstamus klausimus: {{questionNames}}"
     }
   },
   "studentCourseView": {

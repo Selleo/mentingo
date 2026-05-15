@@ -308,8 +308,37 @@ export class LessonService {
         studentQuizAnswers.language,
       );
 
-    if (correctAnswersForQuizQuestions.length !== studentQuizAnswers.questionsAnswers.length) {
-      throw new ConflictException("Quiz is not completed");
+    const expectedQuestionIds = new Set(
+      correctAnswersForQuizQuestions.map((question) => question.id),
+    );
+
+    const submittedQuestionIds = new Set(
+      studentQuizAnswers.questionsAnswers.map((questionAnswer) => questionAnswer.questionId),
+    );
+
+    const missingQuestionIds = [...expectedQuestionIds].filter(
+      (questionId) => !submittedQuestionIds.has(questionId),
+    );
+
+    if (missingQuestionIds.length > 0) {
+      const missingQuestionNames = correctAnswersForQuizQuestions
+        .filter((question) => missingQuestionIds.includes(question.id))
+        .map((question) => `"${question.title}"`)
+        .slice(0, 2);
+
+      const hasMoreMissingQuestions = missingQuestionIds.length > missingQuestionNames.length;
+
+      const formattedQuestionNames = [
+        ...missingQuestionNames,
+        ...(hasMoreMissingQuestions ? ["..."] : []),
+      ].join(", ");
+
+      throw new ConflictException({
+        message: "studentLessonView.validation.unansweredQuestionsWithNames",
+        translationParams: {
+          questionNames: formattedQuestionNames,
+        },
+      });
     }
 
     return await this.db.transaction(async (trx) => {

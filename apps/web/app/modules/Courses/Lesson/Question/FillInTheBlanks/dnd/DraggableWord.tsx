@@ -11,6 +11,7 @@ type DraggableWordProps = {
   isOverlay?: boolean;
   isCorrect?: boolean | null;
   isStudentAnswer?: boolean;
+  disabled?: boolean;
   stretchToContainer?: boolean;
 };
 
@@ -19,11 +20,15 @@ export const DraggableWord = ({
   isOverlay,
   isCorrect,
   isStudentAnswer,
+  disabled,
   stretchToContainer,
 }: DraggableWordProps) => {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useSortable({
     id: word.id,
-    disabled: !!isStudentAnswer,
+    data: {
+      blankId: word.blankId,
+    },
+    disabled,
   });
   const { isQuizFeedbackRedacted, isQuizSubmitted } = useQuizContext();
 
@@ -39,12 +44,16 @@ export const DraggableWord = ({
 
   const quizWordStyle = cn("px-2 py-1 rounded-md text-black", {
     "bg-neutral-200": isQuizFeedbackRedacted && isQuizSubmitted,
-    "bg-primary-200": !isQuizFeedbackRedacted && !isCorrect && !isStudentAnswer,
-    "bg-success-200": !isQuizFeedbackRedacted && isCorrect && isStudentAnswer,
+    "bg-primary-200":
+      !isQuizSubmitted || (!isQuizFeedbackRedacted && !isCorrect && !isStudentAnswer),
+    "bg-success-200": isQuizSubmitted && !isQuizFeedbackRedacted && isCorrect && isStudentAnswer,
     "bg-error-200":
+      isQuizSubmitted &&
       !isQuizFeedbackRedacted &&
       ((!isCorrect && isStudentAnswer) || (isCorrect && !isStudentAnswer)),
   });
+
+  const label = isQuizSubmitted && word.studentAnswerText ? word.studentAnswerText : word.value;
 
   return (
     <div
@@ -62,7 +71,7 @@ export const DraggableWord = ({
         { "-rotate-[6deg]": isOverlay },
       )}
     >
-      {word?.studentAnswerText ? word?.studentAnswerText : word.value}
+      {label}
     </div>
   );
 };

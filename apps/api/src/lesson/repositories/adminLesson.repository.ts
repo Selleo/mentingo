@@ -468,10 +468,12 @@ export class AdminLessonRepository {
   }
 
   async updateOption(optionId: UUIDType, optionData: AdminOptionBody, trx: DatabasePg) {
+    const { id: _id, ...dataToUpdate } = optionData;
+
     return trx
       .update(questionAnswerOptions)
       .set({
-        ...optionData,
+        ...dataToUpdate,
         optionText: setJsonbField(
           questionAnswerOptions.optionText,
           optionData.language,

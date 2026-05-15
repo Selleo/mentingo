@@ -2152,7 +2152,8 @@
       "invalidFormatForMultiAnswer": "Ungültiges Format für Fragen mit mehreren Antworten.",
       "trueOrFalseRequired": "Es ist eine wahre oder falsche Antwort erforderlich.",
       "photoQuestionMustHaveAnswer": "Für diese Fotofrage ist eine Antwort erforderlich.",
-      "unansweredQuestions": "Anscheinend haben Sie noch nicht alle Antworten überprüft. Bitte überprüfen Sie sie und versuchen Sie es erneut!"
+      "unansweredQuestions": "Anscheinend haben Sie noch nicht alle Antworten überprüft. Bitte überprüfen Sie sie und versuchen Sie es erneut!",
+      "unansweredQuestionsWithNames": "Bitte beantworten Sie die fehlenden Fragen: {{questionNames}}"
     }
   },
   "studentCourseView": {

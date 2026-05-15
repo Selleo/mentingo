@@ -5,6 +5,7 @@ import type { ApiErrorResponse } from "~/api/types";
 
 type ApiErrorResponseWithCount = ApiErrorResponse & {
   count?: number;
+  translationParams?: Record<string, unknown>;
 };
 
 const getFirstMessage = (message?: string | string[]) =>
@@ -15,7 +16,12 @@ export const getTranslatedApiErrorMessage = (error: unknown, t: TFunction, fallb
     const responseData = error.response?.data as ApiErrorResponseWithCount | undefined;
     const message = getFirstMessage(responseData?.message);
 
-    if (message) return t(message, { count: responseData?.count });
+    if (message) {
+      return t(message, {
+        count: responseData?.count,
+        ...responseData?.translationParams,
+      });
+    }
   }
 
   if (error instanceof Error && error.message) return error.message;

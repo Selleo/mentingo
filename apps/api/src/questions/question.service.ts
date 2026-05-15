@@ -8,6 +8,7 @@ import { QuestionRepository } from "./question.repository";
 import { QUESTION_TYPE } from "./schema/question.types";
 
 import type { QuizEvaluation, QuizQuestion } from "./schema/question.schema";
+import type { FormattedAnswer } from "./types/question.types";
 import type { SQL } from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { UUIDType } from "src/common";
@@ -82,7 +83,12 @@ export class QuestionService {
       .returnType<boolean>()
       .with(QUESTION_TYPE.FILL_IN_THE_BLANKS_TEXT, QUESTION_TYPE.FILL_IN_THE_BLANKS_DND, () => {
         return question.correctAnswers.every((correctAnswer) => {
-          const answer = studentAnswer.answers[correctAnswer.displayOrder - 1];
+          const answer =
+            studentAnswer.answers.find(
+              (item) =>
+                this.isAnswerWithId(item) && this.getAnswerId(item) === correctAnswer.answerId,
+            ) ?? studentAnswer.answers[correctAnswer.displayOrder - 1];
+
           return this.isAnswerWithValue(answer) && this.getValue(answer) === correctAnswer.value;
         });
       })
@@ -159,18 +165,39 @@ export class QuestionService {
       });
   }
 
-  private formatAnswer(question: QuizQuestion, studentAnswer: StudentQuestionAnswer): string[] {
+  private formatAnswer(
+    question: QuizQuestion,
+    studentAnswer: StudentQuestionAnswer,
+  ): FormattedAnswer[] {
     if (
       question.type === QUESTION_TYPE.BRIEF_RESPONSE ||
       question.type === QUESTION_TYPE.DETAILED_RESPONSE
     ) {
       const answer = studentAnswer.answers[0];
-      return ["value" in answer ? answer.value : ""];
+      return [{ key: "1", value: "value" in answer ? answer.value : "" }];
     }
 
-    return studentAnswer.answers.map((answer) => {
+    if (
+      question.type === QUESTION_TYPE.FILL_IN_THE_BLANKS_TEXT ||
+      question.type === QUESTION_TYPE.FILL_IN_THE_BLANKS_DND
+    ) {
+      return question.correctAnswers.map((correctAnswer) => {
+        const answer =
+          studentAnswer.answers.find(
+            (item) =>
+              this.isAnswerWithId(item) && this.getAnswerId(item) === correctAnswer.answerId,
+          ) ?? studentAnswer.answers[correctAnswer.displayOrder - 1];
+
+        return {
+          key: correctAnswer.answerId,
+          value: this.isAnswerWithValue(answer) ? this.getValue(answer) : "",
+        };
+      });
+    }
+
+    return studentAnswer.answers.map((answer, index) => {
       if ("value" in answer) {
-        return answer.value;
+        return { key: `${index + 1}`, value: answer.value };
       }
 
       const answerOption = question.allAnswers.find(
@@ -185,14 +212,14 @@ export class QuestionService {
         );
       }
 
-      return answerOption.value;
+      return { key: `${index + 1}`, value: answerOption.value };
     });
   }
 
-  private questionAnswerToString(answers: string[]): SQL<unknown> {
-    const convertedAnswers: (SQL<unknown> | string)[] = answers.flatMap((answer, index) => [
-      sql`(${index + 1}::int)`,
-      sql`${answer}::text`,
+  private questionAnswerToString(answers: FormattedAnswer[]): SQL<unknown> {
+    const convertedAnswers: (SQL<unknown> | string)[] = answers.flatMap((answer) => [
+      sql`${answer.key}::text`,
+      sql`${answer.value}::text`,
     ]);
 
     return sql`json_build_object(${sql.join(convertedAnswers, sql`, `)})`;

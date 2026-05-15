@@ -1,24 +1,10 @@
-import { type FC, Fragment } from "react";
-
-import Viewer from "~/components/RichText/Viever";
+import { BlankAnswerSentence } from "../BlankAnswerSentence";
 
 type FillInTheDndBlanksProps = {
   content: string;
-  replacement: (index: number) => JSX.Element;
+  replacement: (index: number, answerId?: string) => JSX.Element;
 };
 
-export const SentenceBuilder: FC<FillInTheDndBlanksProps> = ({ content, replacement }) => {
-  const text = content.replace(/<\/?p\b[^>]*>/gi, "");
-  const parts = text.split(/\[word]/g);
-
-  return (
-    <div className="body-base flex flex-wrap items-center gap-y-2 text-neutral-900">
-      {parts?.map((part, index) => (
-        <Fragment key={index}>
-          <Viewer content={part} />
-          {index < parts.length - 1 && replacement(index)}
-        </Fragment>
-      ))}
-    </div>
-  );
+export const SentenceBuilder = ({ content, replacement }: FillInTheDndBlanksProps) => {
+  return <BlankAnswerSentence content={content} replacement={replacement} />;
 };

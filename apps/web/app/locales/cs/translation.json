@@ -2152,7 +2152,8 @@
       "invalidFormatForMultiAnswer": "Neplatný formát pro otázky s více odpověďmi.",
       "trueOrFalseRequired": "Vyžaduje se pravdivá nebo nepravdivá odpověď.",
       "photoQuestionMustHaveAnswer": "Na tuto fotografickou otázku je vyžadována odpověď.",
-      "unansweredQuestions": "Zdá se, že jste ještě nezkontrolovali všechny odpovědi. Zkontrolujte je a zkuste to znovu!"
+      "unansweredQuestions": "Zdá se, že jste ještě nezkontrolovali všechny odpovědi. Zkontrolujte je a zkuste to znovu!",
+      "unansweredQuestionsWithNames": "Odpovězte na chybějící otázky: {{questionNames}}"
     }
   },
   "studentCourseView": {
