@@ -2324,8 +2324,36 @@
     },
     "tabs": {
       "chapters": "Chapters",
+      "chat": "Discussion",
       "moreFromAuthor": "More from author",
       "statistics": "Statistics"
+    },
+    "courseChat": {
+      "title": "Course discussion",
+      "newThreadPlaceholder": "Start a new discussion...",
+      "startThread": "Start thread",
+      "messagesTitle": "Messages",
+      "noThreadSelected": "Select a thread",
+      "emptyThreads": "No discussions yet. Start the first one.",
+      "emptyMessages": "No messages yet.",
+      "replyPlaceholder": "Write a reply...",
+      "reply": "Reply",
+      "reactWith": "React with {{reaction}}",
+      "deleteMessage": "Delete message",
+      "deleteMessageConfirmationTitle": "Delete message?",
+      "deleteMessageConfirmationDescription": "This message will be removed from the discussion. Replies may keep a deleted placeholder so the conversation stays readable.",
+      "deletedMessage": "This message was deleted.",
+      "repliesCount_one": "{{countLabel}} reply",
+      "repliesCount_other": "{{countLabel}} replies",
+      "loadMoreReplies": "Load more replies",
+      "send": "Send",
+      "selectThread": "Select a thread to read messages.",
+      "users": "Users",
+      "onlineCount": "{{online}}/{{total}} online",
+      "online": "Online",
+      "offline": "Offline",
+      "emptyUsers": "No enrolled users yet.",
+      "mentionedToast": "Someone mentioned you in the course discussion."
     }
   },
   "studentChapterView": {

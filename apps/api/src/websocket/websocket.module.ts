@@ -13,6 +13,6 @@ import { WsGateway } from "src/websocket/websocket.gateway";
     SocketRealtimePublisher,
     { provide: REALTIME_PUBLISHER, useExisting: SocketRealtimePublisher },
   ],
-  exports: [WsGateway, REALTIME_PUBLISHER],
+  exports: [WsGateway, WsJwtGuard, REALTIME_PUBLISHER],
 })
 export class WebSocketModule {}

@@ -5,6 +5,8 @@ import { AuthModule } from "src/auth/auth.module";
 import { BunnyStreamModule } from "src/bunny/bunnyStream.module";
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { EmailModule } from "src/common/emails/emails.module";
+import { CourseChatModule } from "src/course-chat/course-chat.module";
+import { CourseChatMentionEmailHandler } from "src/course-chat/handlers/course-chat-mention-email.handler";
 import { CourseModule } from "src/courses/course.module";
 import { FileModule } from "src/file/files.module";
 import { GroupModule } from "src/group/group.module";
@@ -30,12 +32,14 @@ import { UserModule } from "src/user/user.module";
     AuthModule,
     SettingsModule,
     CourseModule,
+    CourseChatModule,
     GroupModule,
   ],
   exports: [CqrsModule],
   providers: [
     NotifyAdminsHandler,
     NotifyUsersHandler,
+    CourseChatMentionEmailHandler,
     S3Service,
     BunnyStreamService,
     StatisticsService,

@@ -38,3 +38,10 @@ export {
 export { newsQueryOptions, useNews, useNewsSuspense, NEWS_QUERY_KEY } from "./useNews";
 export { articleQueryOptions, useArticle, useArticleSuspense } from "./useArticle";
 export { articlesTocQueryOptions, useArticlesToc, useArticlesTocSuspense } from "./useArticlesToc";
+export {
+  courseChatMessagesQueryOptions,
+  courseChatRepliesQueryOptions,
+  useCourseChatMessages,
+  useCourseChatReplies,
+  useCreateCourseChatMessage,
+} from "./course-chat/useCourseChat";

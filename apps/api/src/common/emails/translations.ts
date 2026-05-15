@@ -92,6 +92,13 @@ export const EMAIL_SUBJECTS_TRANSLATIONS = {
     lt: "Prisijungimo nuoroda",
     cs: "Přihlašovací odkaz",
   },
+  courseChatMentionEmail: {
+    en: "You were mentioned in {{courseName}}",
+    pl: "Oznaczono Cię w kursie {{courseName}}",
+    de: "Du wurdest in {{courseName}} erwähnt",
+    lt: "Buvote paminėti kurse {{courseName}}",
+    cs: "Byl(a) jste zmíněn(a) v kurzu {{courseName}}",
+  },
 } as const;
 
 export type EmailSubjectKey = keyof typeof EMAIL_SUBJECTS_TRANSLATIONS;

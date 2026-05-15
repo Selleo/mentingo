@@ -2261,8 +2261,38 @@
     },
     "tabs": {
       "chapters": "Skyriai",
+      "chat": "Diskusija",
       "moreFromAuthor": "Daugiau iš autoriaus",
       "statistics": "Statistika"
+    },
+    "courseChat": {
+      "title": "Kurso diskusija",
+      "newThreadPlaceholder": "Pradėkite naują diskusiją...",
+      "startThread": "Pradėti temą",
+      "messagesTitle": "Žinutės",
+      "noThreadSelected": "Pasirinkite temą",
+      "emptyThreads": "Diskusijų dar nėra. Pradėkite pirmąją.",
+      "emptyMessages": "Žinučių dar nėra.",
+      "replyPlaceholder": "Parašykite atsakymą...",
+      "reply": "Atsakyti",
+      "reactWith": "Reaguoti {{reaction}}",
+      "deleteMessage": "Ištrinti žinutę",
+      "deleteMessageConfirmationTitle": "Ištrinti žinutę?",
+      "deleteMessageConfirmationDescription": "Žinutė bus pašalinta iš diskusijos. Atsakymai gali palikti ištrintos žinutės vietaženklį, kad pokalbis išliktų aiškus.",
+      "deletedMessage": "Ši žinutė buvo ištrinta.",
+      "repliesCount_one": "{{countLabel}} atsakymas",
+      "repliesCount_few": "{{countLabel}} atsakymai",
+      "repliesCount_many": "{{countLabel}} atsakymų",
+      "repliesCount_other": "{{countLabel}} atsakymo",
+      "loadMoreReplies": "Įkelti daugiau atsakymų",
+      "send": "Siųsti",
+      "selectThread": "Pasirinkite temą, kad skaitytumėte žinutes.",
+      "users": "Vartotojai",
+      "onlineCount": "{{online}}/{{total}} online",
+      "online": "Online",
+      "offline": "Offline",
+      "emptyUsers": "Dar nėra užsiregistravusių vartotojų.",
+      "mentionedToast": "Kažkas paminėjo jus kurso diskusijoje."
     }
   },
   "studentChapterView": {

@@ -6,6 +6,7 @@ export * from "./constants/allowedAge";
 export * from "./constants/articlesSettings";
 export * from "./constants/articlesTypes";
 export * from "./constants/course";
+export * from "./constants/courseChat";
 export * from "./constants/courseEnrollment";
 export * from "./constants/entityTypes";
 export * from "./constants/fileTypes";
