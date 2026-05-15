@@ -1,3 +1,5 @@
+-- Custom SQL migration file, put you code below! --
+
 CREATE OR REPLACE FUNCTION pg_temp.replace_blank_answer_markers(content text, answer_ids uuid[])
   RETURNS text
   LANGUAGE plpgsql

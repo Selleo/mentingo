@@ -1,6 +1,8 @@
 import { useMutation } from "@tanstack/react-query";
 
 import { ApiClient } from "../api-client";
+import { RESOURCE_LIBRARY_ASSETS_QUERY_KEY } from "../queries/useResourceLibraryAssets";
+import { queryClient } from "../queryClient";
 
 import type { SupportedLanguages } from "@repo/shared";
 
@@ -37,7 +39,8 @@ export function useUploadNewsFile() {
 
       return response.data;
     },
-    onSuccess: (_data) => {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: RESOURCE_LIBRARY_ASSETS_QUERY_KEY });
       // queryClient.invalidateQueries({
       //   queryKey: newsQueryOptions(variables.id, { language: variables.language }).queryKey,
       // });

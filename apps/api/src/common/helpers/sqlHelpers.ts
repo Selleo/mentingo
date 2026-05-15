@@ -13,9 +13,16 @@ export function setJsonbField(
   if (!allowEmpty && !(key && value)) return undefined;
   if (allowEmpty && value === null) return sql`null`;
 
+  const objectField = sql`
+    CASE
+      WHEN jsonb_typeof(${field}) = 'object' THEN ${field}
+      ELSE '{}'::jsonb
+    END
+  `;
+
   return sql`
     jsonb_set(
-      COALESCE(${field}, '{}'::jsonb),
+      ${objectField},
       ARRAY[${key}]::text[],
       to_jsonb(${value}::text),
       ${createMissing}

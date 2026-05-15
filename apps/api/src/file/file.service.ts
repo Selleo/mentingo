@@ -1,4 +1,5 @@
 import { randomUUID } from "crypto";
+import path from "node:path";
 import { Readable } from "stream";
 
 import {
@@ -152,33 +153,27 @@ export class FileService {
 
     const isVideo = file.mimetype.startsWith("video/");
 
-    try {
-      if (isVideo) {
-        throw new BadRequestException("Video uploads must use the TUS endpoints");
-      }
-
-      const fileExtension = file.originalname.split(".").pop();
-
-      const fileKey = prefixTenantStorageKey(
-        `${resource}/${randomUUID()}.${fileExtension}`,
-        tenantId,
-      );
-
-      try {
-        await this.s3Service.uploadFile(file.buffer, fileKey, file.mimetype);
-      } catch (s3Error) {
-        throw new ConflictException("S3 upload failed");
-      }
-
-      const fileUrl = await this.s3Service.getSignedUrl(fileKey);
-
-      return {
-        fileKey,
-        fileUrl,
-      };
-    } catch (error) {
-      throw new ConflictException("Failed to upload file");
+    if (isVideo) {
+      throw new BadRequestException("Video uploads must use the TUS endpoints");
     }
+
+    const fileExtension = path.extname(file.originalname);
+
+    const fileKey = prefixTenantStorageKey(`${resource}/${randomUUID()}${fileExtension}`, tenantId);
+
+    try {
+      await this.s3Service.uploadFile(file.buffer, fileKey, file.mimetype);
+    } catch (s3Error) {
+      this.logFileOperationFailure("upload", fileKey, s3Error);
+      throw new ConflictException("S3 upload failed");
+    }
+
+    const fileUrl = await this.s3Service.getSignedUrl(fileKey);
+
+    return {
+      fileKey,
+      fileUrl,
+    };
   }
 
   private async resolveVideoProvider() {
@@ -263,6 +258,7 @@ export class FileService {
     sizeBytes: number;
     contextId?: UUIDType;
     relationshipType?: ResourceRelationshipType;
+    linkToEntity?: boolean;
   }) {
     const {
       entityType,
@@ -273,6 +269,7 @@ export class FileService {
       sizeBytes,
       contextId,
       relationshipType = RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+      linkToEntity = true,
     } = params;
 
     if (!entityId && !contextId) return undefined;
@@ -280,8 +277,8 @@ export class FileService {
     const resourceResult = await this.createResourceForEntity({
       reference: fileKey,
       contentType: mimeType,
-      entityId,
-      entityType,
+      entityId: linkToEntity ? entityId : undefined,
+      entityType: linkToEntity ? entityType : undefined,
       relationshipType,
       metadata: {
         originalFilename: filename,
@@ -304,6 +301,7 @@ export class FileService {
       entityId,
       entityType,
       relationshipType = RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+      linkToEntity = true,
     } = data as VideoInitBody & { relationshipType?: ResourceRelationshipType };
 
     if (!entityId && !contextId) {
@@ -366,6 +364,7 @@ export class FileService {
       sizeBytes,
       contextId,
       relationshipType,
+      linkToEntity,
     });
 
     return {
@@ -390,6 +389,7 @@ export class FileService {
       }
       return await this.s3Service.deleteFile(fileKey);
     } catch (error) {
+      this.logFileOperationFailure("delete", fileKey, error);
       throw new ConflictException("Failed to delete file");
     }
   }
@@ -398,8 +398,18 @@ export class FileService {
     try {
       return await this.s3Service.getFileStream(fileKey, range);
     } catch (error) {
+      this.logFileOperationFailure("retrieve", fileKey, error);
       throw new BadRequestException("Failed to retrieve file");
     }
+  }
+
+  private logFileOperationFailure(operation: string, fileKey: string, error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+
+    this.logger.error(
+      `Failed to ${operation} file "${fileKey}": ${message}`,
+      error instanceof Error ? error.stack : undefined,
+    );
   }
 
   async listFileReferencesByPrefix(prefix: string) {

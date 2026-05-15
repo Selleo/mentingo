@@ -18,6 +18,7 @@ import { isNumber } from "lodash";
 import { AiService } from "src/ai/services/ai.service";
 import { THREAD_STATUS } from "src/ai/utils/ai.type";
 import { DatabasePg } from "src/common";
+import { hasAnyPermission } from "src/common/permissions/permission.utils";
 import { injectResourcesIntoContent } from "src/common/utils/injectResourcesIntoContent";
 import { LEARNING_MODE_REQUIRED_ERROR_KEY } from "src/common/utils/lessonLearningAccess";
 import { QuizCompletedEvent } from "src/events";
@@ -538,8 +539,21 @@ export class LessonService {
 
     const lessonResource = await this.lessonRepository.getResource(resourceId);
 
-    if (!lessonResource || lessonResource.entityType !== ENTITY_TYPE.LESSON) {
-      throw new NotFoundException("Lesson resource not found");
+    if (!lessonResource) {
+      throw new NotFoundException("common.toast.notFound");
+    }
+
+    if (!lessonResource.entityId || lessonResource.entityType !== ENTITY_TYPE.LESSON) {
+      if (
+        hasAnyPermission(currentUser.permissions, [
+          PERMISSIONS.COURSE_UPDATE,
+          PERMISSIONS.COURSE_UPDATE_OWN,
+        ])
+      ) {
+        return this.streamResource(req, res, lessonResource.reference);
+      }
+
+      throw new NotFoundException("common.toast.notFound");
     }
 
     const [lesson] = await this.lessonRepository.checkLessonAssignment(
@@ -551,8 +565,12 @@ export class LessonService {
       throw new ForbiddenException("You are not allowed to access this lesson!");
     }
 
+    return this.streamResource(req, res, lessonResource.reference);
+  }
+
+  private async streamResource(req: Request, res: Response, reference: string) {
     const rangeHeader = req.headers.range;
-    const file = await this.fileService.getFileDelivery(lessonResource.reference, rangeHeader);
+    const file = await this.fileService.getFileDelivery(reference, rangeHeader);
 
     if (file.type === FILE_DELIVERY_TYPE.REDIRECT) {
       return res.redirect(file.url);

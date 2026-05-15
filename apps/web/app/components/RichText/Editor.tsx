@@ -8,9 +8,19 @@ import { RICH_TEXT_HANDLES } from "../../../e2e/data/common/handles";
 
 import { detectPresentationProvider } from "./extensions/utils/presentation";
 import { extractUrlFromClipboard } from "./extensions/utils/video";
-import { baseEditorPlugins, contentEditorPlugins } from "./plugins";
+import { baseEditorPlugins, getContentEditorPlugins } from "./plugins";
 import { defaultClasses } from "./styles";
 import EditorToolbar from "./toolbar/EditorToolbar";
+
+import type { AssetLibraryConfig } from "./components/AssetLibraryDialog";
+
+export const RICH_TEXT_EDITOR_VARIANT = {
+  BASE: "base",
+  CONTENT: "content",
+} as const;
+
+type RichTextEditorVariant =
+  (typeof RICH_TEXT_EDITOR_VARIANT)[keyof typeof RICH_TEXT_EDITOR_VARIANT];
 
 type EditorProps = {
   content?: string;
@@ -24,7 +34,8 @@ type EditorProps = {
   lessonId?: string;
   allowFiles?: boolean;
   acceptedFileTypes?: readonly string[];
-  variant?: "base" | "content";
+  assetLibrary?: AssetLibraryConfig;
+  variant?: RichTextEditorVariant;
 };
 
 const EMPTY_EDITOR_MIN_HEIGHT_CLASS = "min-h-[240px]";
@@ -39,13 +50,15 @@ const Editor = ({
   parentClassName,
   allowFiles = false,
   acceptedFileTypes = ALLOWED_LESSON_IMAGE_FILE_TYPES,
-  variant = "content",
+  assetLibrary,
+  variant = RICH_TEXT_EDITOR_VARIANT.CONTENT,
 }: EditorProps) => {
   const editorRef = useRef<TiptapEditor | null>(null);
   const lastEmittedContentRef = useRef(content ?? "");
 
   const extensions = useMemo(
-    () => (variant === "base" ? baseEditorPlugins : contentEditorPlugins),
+    () =>
+      variant === RICH_TEXT_EDITOR_VARIANT.BASE ? baseEditorPlugins : getContentEditorPlugins(),
     [variant],
   );
 
@@ -54,12 +67,13 @@ const Editor = ({
       const activeEditor = editorRef.current;
       const files = Array.from(event.dataTransfer?.files ?? []);
       if (!files.length) return false;
+      if (!allowFiles || !onUpload) return false;
 
       event.preventDefault();
-      void Promise.allSettled(files.map((file) => onUpload?.(file, activeEditor)));
+      void Promise.allSettled(files.map((file) => onUpload(file, activeEditor)));
       return true;
     },
-    [onUpload],
+    [allowFiles, onUpload],
   );
 
   const handlePaste = useCallback(
@@ -68,8 +82,10 @@ const Editor = ({
       const file = event.clipboardData?.files[0];
 
       if (file) {
+        if (!allowFiles || !onUpload) return false;
+
         event.preventDefault();
-        void onUpload?.(file, activeEditor);
+        void onUpload(file, activeEditor);
         return true;
       }
 
@@ -95,7 +111,7 @@ const Editor = ({
       activeEditor?.chain().focus().setVideoEmbed({ src: pastedUrl, sourceType: "external" }).run();
       return true;
     },
-    [onUpload],
+    [allowFiles, onUpload],
   );
 
   const handleKeyDown = useCallback(
@@ -164,9 +180,9 @@ const Editor = ({
     >
       <EditorToolbar
         editor={editor}
-        allowFiles={allowFiles}
         acceptedFileTypes={acceptedFileTypes}
-        onUpload={onUpload}
+        assetLibrary={assetLibrary}
+        showTableControls={variant === RICH_TEXT_EDITOR_VARIANT.CONTENT}
       />
       <EditorContent
         data-testid={RICH_TEXT_HANDLES.CONTENT}
@@ -180,11 +196,11 @@ const Editor = ({
 };
 
 export const BaseEditor = (props: Omit<EditorProps, "variant">) => (
-  <Editor {...props} variant="base" />
+  <Editor {...props} variant={RICH_TEXT_EDITOR_VARIANT.BASE} />
 );
 
 export const ContentEditor = (props: Omit<EditorProps, "variant">) => (
-  <Editor {...props} variant="content" />
+  <Editor {...props} variant={RICH_TEXT_EDITOR_VARIANT.CONTENT} />
 );
 
 export default Editor;

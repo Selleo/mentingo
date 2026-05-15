@@ -35,6 +35,7 @@ import { LessonService } from "src/lesson/services/lesson.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
+import { ResourceLibraryRepository } from "src/resource-library/resource-library.repository";
 import { questionAnswerOptions, questions } from "src/storage/schema";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
 import { isRichTextEmpty } from "src/utils/isRichTextEmpty";
@@ -75,6 +76,7 @@ export class AdminLessonService {
     private readonly studentLessonProgressService: StudentLessonProgressService,
     private readonly masterCourseService: MasterCourseService,
     private readonly courseFeaturePolicyService: CourseFeaturePolicyService,
+    private readonly resourceLibraryRepository: ResourceLibraryRepository,
     @Inject("CACHE_MANAGER") private readonly cache: CacheManagerStore,
   ) {}
 
@@ -423,6 +425,10 @@ export class AdminLessonService {
     }
 
     const updatedLesson = await this.adminLessonRepository.updateLesson(id, data);
+
+    if (data.description !== undefined) {
+      await this.resourceLibraryRepository.syncLessonAssetRelations(id);
+    }
 
     const updatedLessonSnapshot = await this.buildLessonActivitySnapshot(id, data.language);
 
@@ -1073,9 +1079,6 @@ export class AdminLessonService {
       file,
       folder: "lesson-content",
       resource: RESOURCE_CATEGORIES.LESSON,
-      entityId: lessonId,
-      entityType: ENTITY_TYPES.LESSON,
-      relationshipType: RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
       title: fileTitle,
       description: fileDescription,
       currentUser,

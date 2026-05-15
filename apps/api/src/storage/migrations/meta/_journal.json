@@ -810,8 +810,29 @@
     {
       "idx": 115,
       "version": "7",
-      "when": 1778704076425,
-      "tag": "0115_backfill_blank_answer_markers",
+      "when": 1778743735248,
+      "tag": "0115_add_course_chat_messages",
+      "breakpoints": true
+    },
+    {
+      "idx": 116,
+      "version": "7",
+      "when": 1778743755720,
+      "tag": "0116_enable_missing_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 117,
+      "version": "7",
+      "when": 1778879794845,
+      "tag": "0117_delete_phantom_content_lesson_resource_usages",
+      "breakpoints": true
+    },
+    {
+      "idx": 118,
+      "version": "7",
+      "when": 1778883025264,
+      "tag": "0118_backfill_blank_answer_markers",
       "breakpoints": true
     }
   ]

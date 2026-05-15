@@ -122,6 +122,16 @@
       "success": "Failas sėkmingai ištrintas"
     }
   },
+  "resourceLibrary": {
+    "toast": {
+      "assetDeletedSuccessfully": "Išteklius sėkmingai ištrintas"
+    },
+    "error": {
+      "fileRequired": "Failas yra būtinas",
+      "assetNotFound": "Išteklius nerastas",
+      "entityNotFound": "Subjektas nerastas"
+    }
+  },
   "adminScorm": {
     "header": "Įkelti SCORM",
     "subHeader": "Įkelkite SCORM .zip failą.",
@@ -2262,8 +2272,38 @@
     },
     "tabs": {
       "chapters": "Skyriai",
+      "chat": "Diskusija",
       "moreFromAuthor": "Daugiau iš autoriaus",
       "statistics": "Statistika"
+    },
+    "courseChat": {
+      "title": "Kurso diskusija",
+      "newThreadPlaceholder": "Pradėkite naują diskusiją...",
+      "startThread": "Pradėti temą",
+      "messagesTitle": "Žinutės",
+      "noThreadSelected": "Pasirinkite temą",
+      "emptyThreads": "Diskusijų dar nėra. Pradėkite pirmąją.",
+      "emptyMessages": "Žinučių dar nėra.",
+      "replyPlaceholder": "Parašykite atsakymą...",
+      "reply": "Atsakyti",
+      "reactWith": "Reaguoti {{reaction}}",
+      "deleteMessage": "Ištrinti žinutę",
+      "deleteMessageConfirmationTitle": "Ištrinti žinutę?",
+      "deleteMessageConfirmationDescription": "Žinutė bus pašalinta iš diskusijos. Atsakymai gali palikti ištrintos žinutės vietaženklį, kad pokalbis išliktų aiškus.",
+      "deletedMessage": "Ši žinutė buvo ištrinta.",
+      "repliesCount_one": "{{countLabel}} atsakymas",
+      "repliesCount_few": "{{countLabel}} atsakymai",
+      "repliesCount_many": "{{countLabel}} atsakymų",
+      "repliesCount_other": "{{countLabel}} atsakymo",
+      "loadMoreReplies": "Įkelti daugiau atsakymų",
+      "send": "Siųsti",
+      "selectThread": "Pasirinkite temą, kad skaitytumėte žinutes.",
+      "users": "Vartotojai",
+      "onlineCount": "{{online}}/{{total}} online",
+      "online": "Online",
+      "offline": "Offline",
+      "emptyUsers": "Dar nėra užsiregistravusių vartotojų.",
+      "mentionedToast": "Kažkas paminėjo jus kurso diskusijoje."
     }
   },
   "studentChapterView": {
@@ -2674,6 +2714,65 @@
         "h3": "3 antraštė",
         "h4": "4 antraštė"
       },
+      "bold": {
+        "tooltip": "Paryškinimas: paryškina pasirinktą tekstą"
+      },
+      "italic": {
+        "tooltip": "Kursyvas: pakreipia pasirinktą tekstą"
+      },
+      "strikethrough": {
+        "tooltip": "Perbraukimas: perbraukia pasirinktą tekstą"
+      },
+      "bulletList": {
+        "tooltip": "Sąrašas su ženkleliais: pradeda sąrašą su ženkleliais"
+      },
+      "orderedList": {
+        "tooltip": "Numeruotas sąrašas: pradeda numeruotą sąrašą"
+      },
+      "taskList": {
+        "tooltip": "Užduočių sąrašas: prideda kontrolinį sąrašą"
+      },
+      "blockquote": {
+        "tooltip": "Citata: formatuoja tekstą kaip blokinę citatą"
+      },
+      "codeBlock": {
+        "tooltip": "Kodo blokas: formatuoja tekstą kaip kodą"
+      },
+      "horizontalRule": {
+        "tooltip": "Horizontali linija: įterpia skiriamąją liniją"
+      },
+      "table": {
+        "tooltip": "Lentelė: įterpti arba redaguoti lentelę",
+        "groups": {
+          "columns": "Stulpeliai",
+          "rows": "Eilutės",
+          "cells": "Langeliai",
+          "headers": "Antraštės"
+        },
+        "actions": {
+          "insert": "Įterpti lentelę",
+          "addColumnBefore": "Pridėti stulpelį prieš",
+          "addColumnAfter": "Pridėti stulpelį po",
+          "deleteColumn": "Ištrinti stulpelį",
+          "addRowBefore": "Pridėti eilutę prieš",
+          "addRowAfter": "Pridėti eilutę po",
+          "deleteRow": "Ištrinti eilutę",
+          "mergeCells": "Sujungti langelius",
+          "splitCell": "Padalyti langelį",
+          "mergeOrSplit": "Sujungti arba padalyti",
+          "toggleHeaderRow": "Perjungti antraštės eilutę",
+          "toggleHeaderColumn": "Perjungti antraštės stulpelį",
+          "toggleHeaderCell": "Perjungti antraštės langelį",
+          "fixTables": "Taisyti lentelės struktūrą",
+          "deleteTable": "Ištrinti lentelę"
+        }
+      },
+      "undo": {
+        "tooltip": "Anuliuoti: atšaukia paskutinį pakeitimą"
+      },
+      "redo": {
+        "tooltip": "Grąžinti: pakartoja paskutinį atšauktą pakeitimą"
+      },
       "link": {
         "tooltip": "Nuoroda: paverčia pasirinktą tekstą hipersaitu",
         "dialog": {
@@ -2689,6 +2788,9 @@
       "upload": {
         "uploadFailed": "Failo įkėlimas nepavyko",
         "tooltip": "Įkelti: leidžia įkelti failą"
+      },
+      "assetLibrary": {
+        "tooltip": "Failų biblioteka: įterpti anksčiau įkeltą failą"
       }
     }
   },
@@ -2741,6 +2843,43 @@
     },
     "loadingAiAsset": {
       "processing": "Išteklius šiuo metu apdorojamas"
+    },
+    "assetLibrary": {
+      "title": "Failų biblioteka",
+      "description": "Raskite, įkelkite, įterpkite arba ištrinkite raiškiojo teksto turinyje naudojamus failus.",
+      "searchPlaceholder": "Ieškoti pagal failo pavadinimą arba antraštę...",
+      "upload": "Įkelti failą",
+      "insert": "Įterpti",
+      "delete": "Ištrinti",
+      "loading": "Įkeliami failai...",
+      "loadingUsages": "Įkeliami panaudojimai...",
+      "disabledUntilSaved": "Išsaugokite turinį prieš įterpdami arba trindami esamus failus. Naują failą vis dar galite įkelti.",
+      "empty": {
+        "title": "Failų nerasta",
+        "description": "Įkelkite failą arba pakeiskite paiešką, kad rastumėte esamus failus."
+      },
+      "types": {
+        "image": "Paveikslėlis",
+        "video": "Vaizdo įrašas",
+        "pdf": "PDF",
+        "presentation": "Prezentacija",
+        "document": "Dokumentas",
+        "other": "Kita"
+      },
+      "entities": {
+        "lesson": "Pamoka",
+        "articles": "Straipsnis",
+        "news": "Naujiena"
+      },
+      "deleteConfirmation": {
+        "title": "Ištrinti {{name}}?",
+        "description": "Tai pašalins atitinkamus įterpinius ir nuorodas iš viso nurodyto turinio ir archyvuos failą.",
+        "usages": "Žinomi panaudojimai",
+        "noUsages": "Panaudojimų nerasta."
+      },
+      "usageCount_one": "{{count}} panaudojimas",
+      "usageCount_few": "{{count}} panaudojimai",
+      "usageCount_other": "{{count}} panaudojimų"
     }
   },
   "pages": {
@@ -2823,7 +2962,6 @@
         "to": "Iki datos"
       }
     },
-
     "description": "Platformos pakeitimų laiko juosta paprasto išskleidžiamo srauto pavidalu.",
     "breadcrumbs": {
       "activityLogs": "Veiklos žurnalas"

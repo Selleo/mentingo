@@ -143,6 +143,11 @@ export interface CurrentUserResponse {
       | "course.enrollment"
       | "course.statistics"
       | "course.export"
+      | "course_discussion.read"
+      | "course_discussion.message.create"
+      | "course_discussion.message.react"
+      | "course_discussion.message.delete_own"
+      | "course_discussion.message.delete"
       | "learning_mode.use"
       | "learning_progress.update"
       | "certificate.read"
@@ -841,6 +846,7 @@ export interface InitVideoUploadBody {
     | "announcement"
     | "global_settings";
   relationshipType?: string;
+  linkToEntity?: boolean;
 }
 
 export interface InitVideoUploadResponse {
@@ -2954,6 +2960,104 @@ export interface GetAllAssignedDocumentsForLessonResponse {
   }[];
 }
 
+export interface GetAssetsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    fileName: string;
+    title: string;
+    contentType: string;
+    type: "image" | "video" | "pdf" | "presentation" | "document" | "other";
+    size: number | null;
+    originalFilename: string | null;
+    reference: string;
+    uploadedBy: string | null;
+    /** @format date-time */
+    createdAt: string;
+    usageCount: number;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface GetAssetUsagesResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    entityId: string;
+    entityType: "lesson" | "articles" | "news";
+    title: string;
+    relationshipType: string;
+    /** @format date-time */
+    createdAt: string;
+  }[];
+}
+
+export interface LinkAssetBody {
+  /** @format uuid */
+  entityId: string;
+  entityType: "lesson" | "articles" | "news";
+  relationshipType?: string;
+}
+
+export interface LinkAssetResponse {
+  data: {
+    /** @format uuid */
+    resourceId: string;
+    url: string;
+  };
+}
+
+export interface UnlinkAssetBody {
+  /** @format uuid */
+  entityId: string;
+  entityType: "lesson" | "articles" | "news";
+  relationshipType?: string;
+}
+
+export interface UnlinkAssetResponse {
+  data: {
+    /** @format uuid */
+    resourceId: string;
+    deletedUsages: number;
+  };
+}
+
+export interface UploadAssetBody {
+  /** @format binary */
+  file?: File;
+  entityType: "lesson" | "articles" | "news";
+  /** @format uuid */
+  entityId?: string;
+  /** @format uuid */
+  contextId?: string;
+  /** @default "en" */
+  language: "en" | "pl" | "de" | "lt" | "cs";
+  title: string;
+  description: string;
+}
+
+export interface UploadAssetResponse {
+  data: {
+    /** @format uuid */
+    resourceId: string;
+    url: string;
+    fileUrl: string;
+  };
+}
+
+export interface DeleteAssetResponse {
+  data: {
+    message: string;
+    deletedUsages: number;
+  };
+}
+
 export interface GetChapterWithLessonResponse {
   data: {
     /** @format uuid */
@@ -3414,6 +3518,257 @@ export type DeleteManyCategoriesBody = string[];
 export interface DeleteManyCategoriesResponse {
   data: {
     message: string;
+  };
+}
+
+export interface GetMessagesResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    courseId: string;
+    /** @format uuid */
+    userId: string;
+    content: string;
+    parentMessageId: string | null;
+    deletedAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+    user: {
+      /** @format uuid */
+      id: string;
+      firstName: string;
+      lastName: string;
+      avatarReference: string | null;
+    };
+    reactions: {
+      reaction: string;
+      count: number;
+      reactedByCurrentUser: boolean;
+    }[];
+    replyCount: number;
+    latestReply: {
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      courseId: string;
+      /** @format uuid */
+      userId: string;
+      content: string;
+      parentMessageId: string | null;
+      deletedAt: string | null;
+      createdAt: string;
+      updatedAt: string;
+      user: {
+        /** @format uuid */
+        id: string;
+        firstName: string;
+        lastName: string;
+        avatarReference: string | null;
+      };
+      reactions: {
+        reaction: string;
+        count: number;
+        reactedByCurrentUser: boolean;
+      }[];
+    } | null;
+    replyParticipants: {
+      /** @format uuid */
+      id: string;
+      firstName: string;
+      lastName: string;
+      avatarReference: string | null;
+    }[];
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface GetCourseChatUsersResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatarReference: string | null;
+    isOnline: boolean;
+  }[];
+}
+
+export interface CreateMessageBody {
+  /**
+   * @minLength 1
+   * @maxLength 5000
+   */
+  content: string;
+  /** @format uuid */
+  parentMessageId?: string;
+  mentionedUserIds?: string[];
+}
+
+export interface CreateMessageResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    courseId: string;
+    /** @format uuid */
+    userId: string;
+    content: string;
+    parentMessageId: string | null;
+    deletedAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+    user: {
+      /** @format uuid */
+      id: string;
+      firstName: string;
+      lastName: string;
+      avatarReference: string | null;
+    };
+    reactions: {
+      reaction: string;
+      count: number;
+      reactedByCurrentUser: boolean;
+    }[];
+    replyCount: number;
+    latestReply: {
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      courseId: string;
+      /** @format uuid */
+      userId: string;
+      content: string;
+      parentMessageId: string | null;
+      deletedAt: string | null;
+      createdAt: string;
+      updatedAt: string;
+      user: {
+        /** @format uuid */
+        id: string;
+        firstName: string;
+        lastName: string;
+        avatarReference: string | null;
+      };
+      reactions: {
+        reaction: string;
+        count: number;
+        reactedByCurrentUser: boolean;
+      }[];
+    } | null;
+    replyParticipants: {
+      /** @format uuid */
+      id: string;
+      firstName: string;
+      lastName: string;
+      avatarReference: string | null;
+    }[];
+  };
+}
+
+export interface GetRepliesResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    courseId: string;
+    /** @format uuid */
+    userId: string;
+    content: string;
+    parentMessageId: string | null;
+    deletedAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+    user: {
+      /** @format uuid */
+      id: string;
+      firstName: string;
+      lastName: string;
+      avatarReference: string | null;
+    };
+    reactions: {
+      reaction: string;
+      count: number;
+      reactedByCurrentUser: boolean;
+    }[];
+    replyCount: number;
+    latestReply: {
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      courseId: string;
+      /** @format uuid */
+      userId: string;
+      content: string;
+      parentMessageId: string | null;
+      deletedAt: string | null;
+      createdAt: string;
+      updatedAt: string;
+      user: {
+        /** @format uuid */
+        id: string;
+        firstName: string;
+        lastName: string;
+        avatarReference: string | null;
+      };
+      reactions: {
+        reaction: string;
+        count: number;
+        reactedByCurrentUser: boolean;
+      }[];
+    } | null;
+    replyParticipants: {
+      /** @format uuid */
+      id: string;
+      firstName: string;
+      lastName: string;
+      avatarReference: string | null;
+    }[];
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface ToggleMessageReactionBody {
+  /**
+   * @minLength 1
+   * @maxLength 16
+   */
+  reaction: string;
+}
+
+export interface ToggleMessageReactionResponse {
+  data: {
+    /** @format uuid */
+    courseId: string;
+    /** @format uuid */
+    messageId: string;
+    reactions: {
+      reaction: string;
+      count: number;
+      reactedByCurrentUser: boolean;
+    }[];
+  };
+}
+
+export interface DeleteMessageResponse {
+  data: {
+    /** @format uuid */
+    courseId: string;
+    /** @format uuid */
+    messageId: string;
+    parentMessageId: string | null;
+    removed: boolean;
+    deletedAt: string | null;
   };
 }
 
@@ -8489,6 +8844,125 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name ResourceLibraryControllerGetAssets
+     * @request GET:/api/resource-library/assets
+     */
+    resourceLibraryControllerGetAssets: (
+      query?: {
+        /** @min 1 */
+        page?: number;
+        /** @min 1 */
+        perPage?: number;
+        search?: string;
+        type?: "image" | "video" | "pdf" | "presentation" | "document" | "other";
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAssetsResponse, any>({
+        path: `/api/resource-library/assets`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ResourceLibraryControllerGetAssetUsages
+     * @request GET:/api/resource-library/assets/{id}/usages
+     */
+    resourceLibraryControllerGetAssetUsages: (
+      id: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAssetUsagesResponse, any>({
+        path: `/api/resource-library/assets/${id}/usages`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ResourceLibraryControllerLinkAsset
+     * @request POST:/api/resource-library/assets/{id}/link
+     */
+    resourceLibraryControllerLinkAsset: (
+      id: string,
+      data: LinkAssetBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<LinkAssetResponse, any>({
+        path: `/api/resource-library/assets/${id}/link`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ResourceLibraryControllerUnlinkAsset
+     * @request POST:/api/resource-library/assets/{id}/unlink
+     */
+    resourceLibraryControllerUnlinkAsset: (
+      id: string,
+      data: UnlinkAssetBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UnlinkAssetResponse, any>({
+        path: `/api/resource-library/assets/${id}/unlink`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ResourceLibraryControllerUploadAsset
+     * @request POST:/api/resource-library/assets/upload
+     */
+    resourceLibraryControllerUploadAsset: (data: UploadAssetBody, params: RequestParams = {}) =>
+      this.request<UploadAssetResponse, any>({
+        path: `/api/resource-library/assets/upload`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ResourceLibraryControllerDeleteAsset
+     * @request DELETE:/api/resource-library/assets/{id}
+     */
+    resourceLibraryControllerDeleteAsset: (id: string, params: RequestParams = {}) =>
+      this.request<DeleteAssetResponse, any>({
+        path: `/api/resource-library/assets/${id}`,
+        method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name ChapterControllerGetChapterWithLesson
      * @request GET:/api/chapter
      */
@@ -8954,6 +9428,122 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "DELETE",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseChatControllerGetMessages
+     * @request GET:/api/course-chat/{courseId}/messages
+     */
+    courseChatControllerGetMessages: (
+      courseId: string,
+      query?: {
+        /** @min 1 */
+        page?: number;
+        /** @min 1 */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetMessagesResponse, any>({
+        path: `/api/course-chat/${courseId}/messages`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseChatControllerCreateMessage
+     * @request POST:/api/course-chat/{courseId}/messages
+     */
+    courseChatControllerCreateMessage: (
+      courseId: string,
+      data: CreateMessageBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateMessageResponse, any>({
+        path: `/api/course-chat/${courseId}/messages`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseChatControllerGetCourseChatUsers
+     * @request GET:/api/course-chat/{courseId}/users
+     */
+    courseChatControllerGetCourseChatUsers: (courseId: string, params: RequestParams = {}) =>
+      this.request<GetCourseChatUsersResponse, any>({
+        path: `/api/course-chat/${courseId}/users`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseChatControllerGetReplies
+     * @request GET:/api/course-chat/messages/{messageId}/replies
+     */
+    courseChatControllerGetReplies: (
+      messageId: string,
+      query?: {
+        /** @min 1 */
+        page?: number;
+        /** @min 1 */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetRepliesResponse, any>({
+        path: `/api/course-chat/messages/${messageId}/replies`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseChatControllerToggleMessageReaction
+     * @request POST:/api/course-chat/messages/{messageId}/reactions
+     */
+    courseChatControllerToggleMessageReaction: (
+      messageId: string,
+      data: ToggleMessageReactionBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<ToggleMessageReactionResponse, any>({
+        path: `/api/course-chat/messages/${messageId}/reactions`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseChatControllerDeleteMessage
+     * @request DELETE:/api/course-chat/messages/{messageId}
+     */
+    courseChatControllerDeleteMessage: (messageId: string, params: RequestParams = {}) =>
+      this.request<DeleteMessageResponse, any>({
+        path: `/api/course-chat/messages/${messageId}`,
+        method: "DELETE",
         format: "json",
         ...params,
       }),

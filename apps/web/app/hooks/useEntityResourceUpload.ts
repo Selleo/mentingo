@@ -20,6 +20,7 @@ type UploadResourceArgs = {
 };
 
 export const RICH_TEXT_RESOURCE_TYPE = {
+  VIDEO: "video",
   PRESENTATION: "presentation",
   PDF: "pdf",
   DOCUMENT: "document",
@@ -34,7 +35,7 @@ type InsertResourceArgs = {
   editor?: TiptapEditor | null;
   resourceId: string;
   entityType: EntityType;
-  file: File;
+  file: Pick<File, "name">;
   resourceType?: RichTextResourceType;
   displayMode?: RichTextResourceDisplayMode;
 };
@@ -76,6 +77,14 @@ export const insertResourceIntoEditor = ({
   displayMode = "preview",
 }: InsertResourceArgs) => {
   const resourceUrl = buildEntityResourceUrl(resourceId, entityType);
+
+  if (resourceType === "video") {
+    insertContentIntoEditor(editor, {
+      type: "video",
+      attrs: { src: resourceUrl, sourceType: "internal" },
+    });
+    return;
+  }
 
   if (resourceType === "presentation") {
     if (displayMode === "download") {

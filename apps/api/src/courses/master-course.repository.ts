@@ -75,6 +75,16 @@ export class MasterCourseRepository {
     return tenant;
   }
 
+  async getTenantHost(tenantId: UUIDType) {
+    const [tenant] = await this.dbAdmin
+      .select({ host: tenants.host })
+      .from(tenants)
+      .where(eq(tenants.id, tenantId))
+      .limit(1);
+
+    return tenant?.host;
+  }
+
   async findExportLinkByPair(
     sourceTenantId: UUIDType,
     sourceCourseId: UUIDType,
