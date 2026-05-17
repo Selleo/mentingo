@@ -288,6 +288,7 @@
     "findInApplication": "Finden Sie in der Anwendung",
     "courses": "Kurse",
     "learningPaths": "Lernpfade",
+    "calendar": "Kalender",
     "content": "Inhalt",
     "categories": "Kategorien",
     "users": "Benutzer",
@@ -303,6 +304,21 @@
     },
     "qa": "Fragen und Antworten",
     "tenants": "Organisationen"
+  },
+  "calendarView": {
+    "title": "Kalender",
+    "description": "Geplante Lernereignisse anzeigen.",
+    "loading": "Ereignisse werden geladen",
+    "empty": "Keine Ereignisse zum Anzeigen",
+    "today": "Heute",
+    "view": {
+      "month": "Monat",
+      "week": "Woche",
+      "day": "Tag",
+      "monthShort": "M",
+      "weekShort": "W",
+      "dayShort": "T"
+    }
   },
   "newsView": {
     "header": "Nachricht",
@@ -2784,6 +2800,7 @@
     "createQA": "Erstellen Sie neue Fragen und Antworten",
     "analytics": "Analytik",
     "progress": "Fortschritt",
+    "calendar": "Kalender",
     "tenant": "Organisationsdetails",
     "createTenant": "Organisation erstellen",
     "tenants": "Organisationen",

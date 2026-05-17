@@ -1,0 +1,219 @@
+.calendar-shell {
+  overflow: hidden;
+  border: 1px solid var(--neutral-200);
+  border-radius: 0.5rem;
+  background: var(--color-white);
+  box-shadow: 0 1px 2px rgb(18 21 33 / 0.04);
+}
+
+.calendar-shell .fc {
+  --fc-border-color: var(--neutral-200);
+  --fc-page-bg-color: var(--color-white);
+  --fc-neutral-bg-color: var(--neutral-50);
+  --fc-today-bg-color: var(--primary-50);
+  --fc-list-event-hover-bg-color: var(--primary-50);
+  --fc-button-bg-color: var(--color-white);
+  --fc-button-border-color: var(--neutral-300);
+  --fc-button-text-color: var(--neutral-800);
+  --fc-button-hover-bg-color: var(--primary-50);
+  --fc-button-hover-border-color: var(--primary-500);
+  --fc-button-active-bg-color: var(--primary-700);
+  --fc-button-active-border-color: var(--primary-700);
+  --fc-event-bg-color: var(--primary-700);
+  --fc-event-border-color: var(--primary-700);
+  --fc-event-text-color: var(--color-white);
+
+  height: 100%;
+  color: var(--neutral-950);
+  font-family: inherit;
+}
+
+.calendar-shell .fc .fc-toolbar {
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid var(--neutral-200);
+  background: var(--color-white);
+}
+
+.calendar-shell .fc .fc-toolbar-title {
+  color: var(--neutral-950);
+  font-family: "all-round-gothic", sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.75rem;
+}
+
+.calendar-shell .fc .fc-button {
+  border-color: var(--neutral-300);
+  border-radius: 0.375rem;
+  background: var(--color-white);
+  box-shadow: none;
+  color: var(--neutral-800);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+  padding: 0.4375rem 0.75rem;
+  text-transform: none;
+}
+
+.calendar-shell .fc .fc-button:hover {
+  border-color: var(--primary-500);
+  background: var(--primary-700);
+  color: var(--color-white);
+}
+
+.calendar-shell .fc .fc-button:focus,
+.calendar-shell .fc .fc-button:focus-visible {
+  box-shadow: 0 0 0 2px var(--primary-100);
+}
+
+.calendar-shell .fc .fc-button-primary:not(:disabled).fc-button-active,
+.calendar-shell .fc .fc-button-primary:not(:disabled):active {
+  border-color: var(--primary-700);
+  background: var(--primary-700);
+  color: var(--color-white);
+}
+
+.calendar-shell .fc .fc-button .fc-icon {
+  color: currentColor;
+  font-size: 1rem;
+}
+
+.calendar-shell .fc .fc-timegrid-axis-cushion {
+  display: none;
+}
+
+.calendar-shell .fc .fc-button:disabled {
+  opacity: 0.5;
+}
+
+.calendar-shell .fc .fc-scrollgrid {
+  border: 0;
+}
+
+.calendar-shell .fc .fc-col-header-cell {
+  background: var(--neutral-50);
+  padding: 0.625rem 0;
+}
+
+.calendar-shell .fc .fc-col-header-cell-cushion {
+  color: var(--neutral-700);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-decoration: none;
+}
+
+.calendar-shell .fc .fc-daygrid-day {
+  background: var(--color-white);
+  transition: background-color 120ms ease;
+}
+
+.calendar-shell .fc .fc-daygrid-day:hover {
+  background: var(--neutral-50);
+}
+
+.calendar-shell .fc .fc-day-other {
+  background: var(--neutral-50);
+}
+
+.calendar-shell .fc .fc-day-other .fc-daygrid-day-number {
+  color: var(--neutral-400);
+}
+
+.calendar-shell .fc .fc-daygrid-day-number {
+  color: var(--neutral-700);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 0.375rem 0.5rem;
+  text-decoration: none;
+}
+
+.calendar-shell .fc .fc-day-today {
+  background: color-mix(in srgb, var(--primary-50) 76%, var(--color-white));
+  box-shadow: inset 0 0 0 1px var(--primary-200);
+}
+
+.calendar-shell .fc .fc-day-today .fc-daygrid-day-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  margin: 0.25rem;
+  border-radius: 9999px;
+  background: var(--primary-700);
+  color: var(--color-white);
+  padding: 0;
+}
+
+.calendar-shell .fc .fc-event {
+  border: 1px solid var(--primary-200);
+  border-left: 3px solid var(--primary-700);
+  border-radius: 0.375rem;
+  background: var(--primary-50);
+  color: var(--primary-900);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1rem;
+  margin: 0.125rem 0.375rem;
+  padding: 0.125rem 0.375rem 0.125rem 0.3125rem;
+}
+
+.calendar-shell .fc .fc-event:hover {
+  border-color: var(--primary-300);
+  background: var(--primary-100);
+  color: var(--primary-950);
+}
+
+.calendar-shell .fc .fc-event-main {
+  color: inherit;
+}
+
+.calendar-shell .fc .fc-daygrid-more-link {
+  color: var(--primary-700);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.calendar-shell .fc .fc-daygrid-more-link:hover {
+  color: var(--primary-900);
+}
+
+.calendar-shell .fc .calendar-event--cancelled,
+.calendar-shell .fc .calendar-event--expired {
+  border-color: var(--neutral-300);
+  border-left-color: var(--neutral-500);
+  background: var(--neutral-100);
+  color: var(--neutral-700);
+}
+
+.calendar-shell .fc .calendar-event--ended {
+  border-color: var(--success-200);
+  border-left-color: var(--success-600);
+  background: var(--success-50);
+  color: var(--success-900);
+}
+
+.calendar-shell .fc .fc-popover {
+  border-color: var(--neutral-200);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgb(18 21 33 / 0.14);
+}
+
+.calendar-shell .fc .fc-popover-header {
+  background: var(--neutral-50);
+  color: var(--neutral-950);
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .calendar-shell .fc .fc-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

@@ -724,19 +724,24 @@ export class SettingsService {
   ): Promise<GlobalSettingsJSONContentSchema> {
     const previousRecord = await this.getGlobalSettingsRecord();
     const previousSettings = this.parseGlobalSettings(previousRecord.settings);
-
-    if (previousSettings.calendarEnabled && previousSettings.liveTrainingEnabled) {
-      throw new BadRequestException("settings.errors.calendarRequiredForLiveTraining");
-    }
+    const nextCalendarEnabled = !previousSettings.calendarEnabled;
+    const nextLiveTrainingEnabled = nextCalendarEnabled
+      ? previousSettings.liveTrainingEnabled
+      : false;
 
     const [{ settings: updatedGlobalSettings }] = await this.db
       .update(settings)
       .set({
         settings: sql`
           jsonb_set(
-            settings.settings,
-            '{calendarEnabled}',
-            to_jsonb(${!previousSettings.calendarEnabled}::boolean),
+            jsonb_set(
+              settings.settings,
+              '{calendarEnabled}',
+              to_jsonb(${nextCalendarEnabled}::boolean),
+              true
+            ),
+            '{liveTrainingEnabled}',
+            to_jsonb(${nextLiveTrainingEnabled}::boolean),
             true
           )
         `,

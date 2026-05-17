@@ -508,16 +508,19 @@ describe("SettingsController (e2e)", () => {
         expect(toggleResponse.body.data.calendarEnabled).toBe(true);
       });
 
-      it("should not allow disabling calendar while live training is enabled", async () => {
+      it("should disable live training automatically when disabling calendar", async () => {
         await request(app.getHttpServer())
           .patch("/api/settings/admin/live-training")
           .set("Cookie", adminCookies)
           .expect(200);
 
-        await request(app.getHttpServer())
+        const response = await request(app.getHttpServer())
           .patch("/api/settings/admin/calendar")
           .set("Cookie", adminCookies)
-          .expect(400);
+          .expect(200);
+
+        expect(response.body.data.calendarEnabled).toBe(false);
+        expect(response.body.data.liveTrainingEnabled).toBe(false);
       });
 
       it("should return 403 if user is not an admin", async () => {

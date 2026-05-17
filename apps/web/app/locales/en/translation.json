@@ -288,6 +288,7 @@
     "findInApplication": "Find in application",
     "courses": "Courses",
     "learningPaths": "Learning Paths",
+    "calendar": "Calendar",
     "content": "Content",
     "categories": "Categories",
     "users": "Users",
@@ -304,6 +305,21 @@
     "qa": "Q&A",
     "tenants": "Organizations",
     "activityLogs": "Activity Logs"
+  },
+  "calendarView": {
+    "title": "Calendar",
+    "description": "View scheduled learning events.",
+    "loading": "Loading events",
+    "empty": "No events to display",
+    "today": "Today",
+    "view": {
+      "month": "Month",
+      "week": "Week",
+      "day": "Day",
+      "monthShort": "M",
+      "weekShort": "W",
+      "dayShort": "D"
+    }
   },
   "newsView": {
     "header": "News",
@@ -2847,6 +2863,7 @@
     "createQA": "Create new Q&A",
     "analytics": "Analytics",
     "progress": "Progress",
+    "calendar": "Calendar",
     "activityLogs": "Activity Logs",
     "tenant": "Organization Details",
     "createTenant": "Create Organization",

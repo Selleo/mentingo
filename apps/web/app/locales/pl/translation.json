@@ -286,7 +286,9 @@
     "statistics": "Statystyki",
     "analytics": "Analityka",
     "progress": "Postępy",
+    "calendar": "Kalendarz",
     "courses": "Kursy",
+    "calendar": "Kalendarz",
     "content": "Treści",
     "findInApplication": "Znajdź w aplikacji",
     "categories": "Kategorie",
@@ -307,6 +309,21 @@
     "learningPaths": "Ścieżki edukacyjne",
     "adminLearningPaths": "Ścieżki edukacyjne",
     "adminLearningPathEditor": "Edytor ścieżki edukacyjnej"
+  },
+  "calendarView": {
+    "title": "Kalendarz",
+    "description": "Przeglądaj zaplanowane wydarzenia edukacyjne.",
+    "loading": "Ładowanie wydarzeń",
+    "empty": "Brak wydarzeń do wyświetlenia",
+    "today": "Dzisiaj",
+    "view": {
+      "month": "Miesiąc",
+      "week": "Tydzień",
+      "day": "Dzień",
+      "monthShort": "M",
+      "weekShort": "T",
+      "dayShort": "D"
+    }
   },
   "learningPathsView": {
     "title": "Ścieżki edukacyjne",

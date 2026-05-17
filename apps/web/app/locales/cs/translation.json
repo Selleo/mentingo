@@ -288,6 +288,7 @@
     "findInApplication": "Najít v aplikaci",
     "courses": "Kurzy",
     "learningPaths": "Vzdělávací cesty",
+    "calendar": "Kalendář",
     "content": "Obsah",
     "categories": "Kategorie",
     "users": "Uživatelé",
@@ -303,6 +304,21 @@
     },
     "qa": "Otázky a odpovědi",
     "tenants": "Organizace"
+  },
+  "calendarView": {
+    "title": "Kalendář",
+    "description": "Zobrazit naplánované vzdělávací události.",
+    "loading": "Načítání událostí",
+    "empty": "Žádné události k zobrazení",
+    "today": "Dnes",
+    "view": {
+      "month": "Měsíc",
+      "week": "Týden",
+      "day": "Den",
+      "monthShort": "M",
+      "weekShort": "T",
+      "dayShort": "D"
+    }
   },
   "newsView": {
     "header": "Zprávy",
@@ -2784,6 +2800,7 @@
     "createQA": "Vytvořit nové otázky a odpovědi",
     "analytics": "Analytics",
     "progress": "Pokrok",
+    "calendar": "Kalendář",
     "tenant": "Podrobnosti organizace",
     "createTenant": "Vytvořit organizaci",
     "tenants": "Organizace",

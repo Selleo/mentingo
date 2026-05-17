@@ -288,6 +288,7 @@
     "findInApplication": "Rasti programoje",
     "courses": "Kursai",
     "learningPaths": "Mokymosi keliai",
+    "calendar": "Kalendorius",
     "content": "Turinys",
     "categories": "Kategorijos",
     "users": "Vartotojai",
@@ -303,6 +304,21 @@
     },
     "qa": "Klausimai ir atsakymai",
     "tenants": "Organizacijos"
+  },
+  "calendarView": {
+    "title": "Kalendorius",
+    "description": "Peržiūrėkite suplanuotus mokymosi įvykius.",
+    "loading": "Įvykiai įkeliami",
+    "empty": "Nėra įvykių",
+    "today": "Šiandien",
+    "view": {
+      "month": "Mėnuo",
+      "week": "Savaitė",
+      "day": "Diena",
+      "monthShort": "M",
+      "weekShort": "S",
+      "dayShort": "D"
+    }
   },
   "newsView": {
     "header": "Naujienos",
@@ -2784,6 +2800,7 @@
     "createQA": "Sukurti naujus klausimus ir atsakymus",
     "analytics": "Analizė",
     "progress": "Pažanga",
+    "calendar": "Kalendorius",
     "tenant": "Organizacijos informacija",
     "createTenant": "Sukurti organizaciją",
     "tenants": "Organizacijos",

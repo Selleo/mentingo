@@ -1,6 +1,7 @@
 import { PERMISSIONS } from "@repo/shared";
 
-import { findMatchingRoute, mapNavigationItems } from "../navigationConfig";
+import { NAVIGATION_HANDLES } from "../../../e2e/data/navigation/handles";
+import { findMatchingRoute, getNavigationConfig, mapNavigationItems } from "../navigationConfig";
 
 import type { NavigationItem, NavigationGroups } from "../navigationConfig";
 
@@ -30,10 +31,37 @@ describe("findMatchingRoute", () => {
     });
   });
 
+  it("should find calendar routes", () => {
+    expect(findMatchingRoute("calendar")).toEqual({
+      anyOf: [PERMISSIONS.CALENDAR_READ],
+    });
+  });
+
   it("should find admin learning path routes", () => {
     expect(findMatchingRoute("admin/learning-paths/new")).toEqual({
       allOf: [PERMISSIONS.LEARNING_PATH_CREATE],
     });
+  });
+});
+
+describe("getNavigationConfig", () => {
+  const translate = ((key: string) => key) as never;
+
+  it("should show calendar navigation item only when calendar is enabled", () => {
+    const disabledConfig = getNavigationConfig(translate, false, false, false, false, false);
+    const enabledConfig = getNavigationConfig(translate, false, false, false, true, false);
+
+    const disabledCourseItems = disabledConfig[0].items;
+    const enabledCourseItems = enabledConfig[0].items;
+
+    expect(disabledCourseItems).not.toContainEqual(expect.objectContaining({ path: "calendar" }));
+    expect(enabledCourseItems).toContainEqual(
+      expect.objectContaining({
+        path: "calendar",
+        iconName: "Calendar",
+        testId: NAVIGATION_HANDLES.CALENDAR_LINK,
+      }),
+    );
   });
 });
 
