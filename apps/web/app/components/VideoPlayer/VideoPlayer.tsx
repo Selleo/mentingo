@@ -28,7 +28,7 @@ interface VideoPlayerProps {
 
 type VideoJSType = ReturnType<typeof videojs>;
 
-const CONTROLS_VISIBILITY_TIMEOUT_MS = 1000;
+const PLAYBACK_RATES = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
 const enableCustomControls = (player: VideoJSType) => {
   player.controls(true);
@@ -92,18 +92,10 @@ export const VideoPlayer = ({
     controlsVisibilityTimeoutRef.current = null;
   }, []);
 
-  const scheduleControlsHide = useCallback(() => {
-    clearControlsVisibilityTimer();
-
-    controlsVisibilityTimeoutRef.current = window.setTimeout(() => {
-      setControlsVisible(false);
-    }, CONTROLS_VISIBILITY_TIMEOUT_MS);
-  }, [clearControlsVisibilityTimer]);
-
   const showControls = useCallback(() => {
     setControlsVisible(true);
-    scheduleControlsHide();
-  }, [scheduleControlsHide]);
+    clearControlsVisibilityTimer();
+  }, [clearControlsVisibilityTimer]);
 
   const hideControls = useCallback(() => {
     clearControlsVisibilityTimer();
@@ -123,6 +115,7 @@ export const VideoPlayer = ({
       controls: true,
       inactivityTimeout: 3000,
       loop: false,
+      playbackRates: PLAYBACK_RATES,
       bigPlayButton: false,
       responsive: true,
       fluid: false,
