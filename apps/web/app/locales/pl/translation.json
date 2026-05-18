@@ -1818,6 +1818,8 @@
           "courseGenerationFileAddedToUploadQueue": "Plik dodano do kolejki przesyłania",
           "aiMentorLessonFileDeletedSuccessfully": "Pliki lekcji AI Mentora zostały pomyślnie usunięte",
           "lessonUpdatedSuccessfully": "Lekcja zaktualizowana pomyślnie",
+          "lessonDeletedSuccessfully": "Lekcja usunięta pomyślnie",
+          "lessonDeleteError": "Nie udało się usunąć lekcji",
           "contentLessonUpdatedSuccessfully": "Lekcja zaktualizowana pomyślnie",
           "fileLessonUpdatedSuccessfully": "Plik zaktualizowany pomyślnie",
           "questionOptionsUpdatedSuccessfully": "Opcje pytania zostały pomyślnie zaktualizowane",

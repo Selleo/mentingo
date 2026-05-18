@@ -1538,6 +1538,8 @@
           "courseGenerationFileAddedToUploadQueue": "Datei zur Upload-Warteschlange hinzugefügt",
           "aiMentorLessonFileDeletedSuccessfully": "AI Mentor-Lektionsdateien erfolgreich gelöscht",
           "lessonUpdatedSuccessfully": "Lektion erfolgreich aktualisiert",
+          "lessonDeletedSuccessfully": "Lektion erfolgreich gelöscht",
+          "lessonDeleteError": "Lektion konnte nicht gelöscht werden",
           "contentLessonUpdatedSuccessfully": "Inhalt der Lektion erfolgreich aktualisiert",
           "fileLessonUpdatedSuccessfully": "Dateielement erfolgreich aktualisiert",
           "questionOptionsUpdatedSuccessfully": "Die Frageoptionen wurden erfolgreich aktualisiert",

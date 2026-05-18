@@ -3,12 +3,10 @@ import { useTranslation } from "react-i18next";
 
 import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
 import { queryClient } from "~/api/queryClient";
+import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../../api-client";
-
-import type { AxiosError } from "axios";
-import type { ApiErrorResponse } from "~/api/types";
 
 type DeleteLessonOptions = {
   chapterId: string;
@@ -27,15 +25,21 @@ export function useDeleteLesson() {
 
       return response.data;
     },
-    onSuccess: async () => {
+    onSuccess: async (data) => {
       await queryClient.invalidateQueries({ queryKey: [COURSE_QUERY_KEY] });
       await queryClient.invalidateQueries({ queryKey: ["course"] });
 
-      toast({ description: t("adminCourseView.toast.courseUpdatedSuccessfully") });
+      toast({ description: t(data.data.message) });
     },
-    onError: (error: AxiosError) => {
-      const { message } = error.response?.data as ApiErrorResponse;
-      toast({ description: t(message), variant: "destructive" });
+    onError: (error) => {
+      toast({
+        description: getTranslatedApiErrorMessage(
+          error,
+          t,
+          t("adminCourseView.curriculum.lesson.toast.lessonDeleteError"),
+        ),
+        variant: "destructive",
+      });
     },
   });
 }

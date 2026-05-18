@@ -1538,6 +1538,8 @@
           "courseGenerationFileAddedToUploadQueue": "Soubor byl přidán do fronty nahrávání",
           "aiMentorLessonFileDeletedSuccessfully": "Soubory lekcí AI Mentor byly úspěšně odstraněny",
           "lessonUpdatedSuccessfully": "Lekce byla úspěšně aktualizována",
+          "lessonDeletedSuccessfully": "Lekce byla úspěšně odstraněna",
+          "lessonDeleteError": "Lekci se nepodařilo odstranit",
           "contentLessonUpdatedSuccessfully": "Obsah lekce byl úspěšně aktualizován",
           "fileLessonUpdatedSuccessfully": "Položka souboru byla úspěšně aktualizována",
           "questionOptionsUpdatedSuccessfully": "Možnosti otázky byly úspěšně aktualizovány",
