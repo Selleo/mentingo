@@ -270,7 +270,6 @@
     "scorm": {
       "title": "SCORM",
       "description": "Utwórz kurs z pakietu SCORM 1.2.",
-      "badge": "Placeholder",
       "features": {
         "import": "Tworzony z pakietu SCORM 1.2 .zip",
         "tracking": "Obsługa śledzenia ukończenia SCO i stanu uruchomieniowego",
@@ -1818,6 +1817,8 @@
           "courseGenerationFileAddedToUploadQueue": "Plik dodano do kolejki przesyłania",
           "aiMentorLessonFileDeletedSuccessfully": "Pliki lekcji AI Mentora zostały pomyślnie usunięte",
           "lessonUpdatedSuccessfully": "Lekcja zaktualizowana pomyślnie",
+          "lessonDeletedSuccessfully": "Lekcja usunięta pomyślnie",
+          "lessonDeleteError": "Nie udało się usunąć lekcji",
           "contentLessonUpdatedSuccessfully": "Lekcja zaktualizowana pomyślnie",
           "fileLessonUpdatedSuccessfully": "Plik zaktualizowany pomyślnie",
           "questionOptionsUpdatedSuccessfully": "Opcje pytania zostały pomyślnie zaktualizowane",

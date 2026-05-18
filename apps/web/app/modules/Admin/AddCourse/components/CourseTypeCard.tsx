@@ -12,7 +12,6 @@ type CourseTypeCardProps = {
   features: string[];
   href: string;
   icon: LucideIcon;
-  badge?: string;
   accent: "standard" | "scorm";
   testId?: string;
 };
@@ -36,7 +35,6 @@ export const CourseTypeCard = ({
   features,
   href,
   icon: Icon,
-  badge,
   accent,
   testId,
 }: CourseTypeCardProps) => {
@@ -60,11 +58,6 @@ export const CourseTypeCard = ({
             >
               <Icon className="size-7" aria-hidden="true" />
             </div>
-            {badge ? (
-              <span className="details-md rounded-full border border-neutral-200 px-3 py-1 text-neutral-700">
-                {badge}
-              </span>
-            ) : null}
           </div>
           <div className="space-y-2">
             <CardTitle className="h4 text-neutral-950">{title}</CardTitle>

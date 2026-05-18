@@ -269,7 +269,6 @@
     "scorm": {
       "title": "SCORM",
       "description": "Create a course from a SCORM 1.2 package.",
-      "badge": "Placeholder",
       "features": {
         "import": "Built from a SCORM 1.2 .zip package",
         "tracking": "SCO completion and runtime tracking supported",
@@ -1601,6 +1600,8 @@
           "courseGenerationFileAddedToUploadQueue": "File added to the upload queue",
           "aiMentorLessonFileDeletedSuccessfully": "AI Mentor lesson files deleted successfully",
           "lessonUpdatedSuccessfully": "Lesson updated successfully",
+          "lessonDeletedSuccessfully": "Lesson deleted successfully",
+          "lessonDeleteError": "Failed to delete lesson",
           "contentLessonUpdatedSuccessfully": "Content lesson updated successfully",
           "fileLessonUpdatedSuccessfully": "File item updated successfully",
           "questionOptionsUpdatedSuccessfully": "Question options updated successfully",

@@ -23,7 +23,6 @@ type CourseTypeOption = {
   href: string;
   icon: LucideIcon;
   featureKeys: string[];
-  badgeKey?: string;
 };
 
 const COURSE_TYPE_OPTIONS: CourseTypeOption[] = [
@@ -42,7 +41,6 @@ const COURSE_TYPE_OPTIONS: CourseTypeOption[] = [
     id: "scorm",
     href: "/admin/courses/new-scorm",
     icon: Package,
-    badgeKey: "adminCourseTypeSelector.scorm.badge",
     featureKeys: [
       "adminCourseTypeSelector.scorm.features.import",
       "adminCourseTypeSelector.scorm.features.tracking",
@@ -105,7 +103,6 @@ const CourseTypeSelectorPage = () => {
               features={option.featureKeys.map((featureKey) => t(featureKey))}
               href={option.href}
               icon={option.icon}
-              badge={option.badgeKey ? t(option.badgeKey) : undefined}
               accent={option.id}
               testId={
                 option.id === "standard"

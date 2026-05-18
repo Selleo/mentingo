@@ -149,7 +149,7 @@ export const quizAttempts = pgTable(
       .references(() => courses.id)
       .notNull(),
     lessonId: uuid("lesson_id")
-      .references(() => lessons.id)
+      .references(() => lessons.id, { onDelete: "cascade" })
       .notNull(),
     correctAnswers: integer("correct_answers").notNull(),
     wrongAnswers: integer("wrong_answers").notNull(),

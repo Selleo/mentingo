@@ -414,9 +414,7 @@ export class AdminLessonService {
       });
     }
 
-    if (!lesson) {
-      throw new NotFoundException("Lesson not found");
-    }
+    if (!lesson) throw new NotFoundException("adminCourseView.errors.notFound.lesson");
 
     const previousLessonSnapshot = await this.buildLessonActivitySnapshot(id, data.language);
 
@@ -455,9 +453,7 @@ export class AdminLessonService {
 
     const [lesson] = await this.adminLessonRepository.getLesson(lessonId);
 
-    if (!lesson) {
-      throw new NotFoundException("Lesson not found");
-    }
+    if (!lesson) throw new NotFoundException("adminCourseView.errors.notFound.lesson");
 
     await this.db.transaction(async (trx) => {
       await this.documentService.deleteAllDocumentsIfLast(lessonId, trx);

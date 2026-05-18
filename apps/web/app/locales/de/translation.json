@@ -269,7 +269,6 @@
     "scorm": {
       "title": "SCORM",
       "description": "Erstellen Sie einen Kurs aus einem SCORM-1.2-Paket.",
-      "badge": "Platzhalter",
       "features": {
         "import": "Aus einem SCORM-1.2-ZIP-Paket erstellt",
         "tracking": "SCO-Abschluss und Laufzeitstatus unterstützt",
@@ -1538,6 +1537,8 @@
           "courseGenerationFileAddedToUploadQueue": "Datei zur Upload-Warteschlange hinzugefügt",
           "aiMentorLessonFileDeletedSuccessfully": "AI Mentor-Lektionsdateien erfolgreich gelöscht",
           "lessonUpdatedSuccessfully": "Lektion erfolgreich aktualisiert",
+          "lessonDeletedSuccessfully": "Lektion erfolgreich gelöscht",
+          "lessonDeleteError": "Lektion konnte nicht gelöscht werden",
           "contentLessonUpdatedSuccessfully": "Inhalt der Lektion erfolgreich aktualisiert",
           "fileLessonUpdatedSuccessfully": "Dateielement erfolgreich aktualisiert",
           "questionOptionsUpdatedSuccessfully": "Die Frageoptionen wurden erfolgreich aktualisiert",

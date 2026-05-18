@@ -269,7 +269,6 @@
     "scorm": {
       "title": "SCORM",
       "description": "Sukurkite kursą iš SCORM 1.2 paketo.",
-      "badge": "Placeholder",
       "features": {
         "import": "Kuriama iš SCORM 1.2 .zip paketo",
         "tracking": "Palaikomas SCO užbaigimo ir vykdymo būsenos sekimas",
@@ -1538,6 +1537,8 @@
           "courseGenerationFileAddedToUploadQueue": "Failas įtrauktas į įkėlimo eilę",
           "aiMentorLessonFileDeletedSuccessfully": "AI Mentor pamokų failai sėkmingai ištrinti",
           "lessonUpdatedSuccessfully": "Pamoka sėkmingai atnaujinta",
+          "lessonDeletedSuccessfully": "Pamoka sėkmingai ištrinta",
+          "lessonDeleteError": "Nepavyko ištrinti pamokos",
           "contentLessonUpdatedSuccessfully": "Turinio pamoka sėkmingai atnaujinta",
           "fileLessonUpdatedSuccessfully": "Failo elementas sėkmingai atnaujintas",
           "questionOptionsUpdatedSuccessfully": "Klausimo parinktys sėkmingai atnaujintos",
