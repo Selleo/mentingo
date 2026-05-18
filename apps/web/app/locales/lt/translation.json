@@ -318,6 +318,202 @@
       "monthShort": "M",
       "weekShort": "S",
       "dayShort": "D"
+    },
+    "create": {
+      "title": "Pridėti į kalendorių",
+      "description": "Pasirinkite, ką norite pridėti pasirinktam laikui.",
+      "noOptions": "Nėra kalendoriaus elementų, kuriuos galima sukurti.",
+      "submit": "Sukurti live training",
+      "toast": {
+        "success": "Live training sukurtas."
+      },
+      "liveTrainingOption": {
+        "title": "Live Training",
+        "description": "Suplanuokite internetinius arba gyvus mokymus."
+      },
+      "field": {
+        "title": "Pavadinimas",
+        "description": "Aprašymas",
+        "language": "Kalba",
+        "deliveryType": "Vykdymo tipas",
+        "startsAt": "Pradžia",
+        "endsAt": "Pabaiga",
+        "maxParticipants": "Maks. dalyvių",
+        "location": "Vieta",
+        "viewerPermissions": "Stebėtojų leidimai",
+        "microphoneEnabled": "Mikrofonas",
+        "cameraEnabled": "Kamera"
+      },
+      "placeholder": {
+        "title": "Mokymų pavadinimas",
+        "description": "Neprivalomas sesijos aprašymas",
+        "location": "Kambarys, adresas arba susitikimo vieta"
+      },
+      "deliveryType": {
+        "online": "Online",
+        "offline": "Offline"
+      },
+      "tooltip": {
+        "title": "Šis pavadinimas rodomas kalendoriuje ir Live Training informacijoje.",
+        "description": "Neprivalomas kontekstas dalyviams prieš prisijungiant prie mokymų.",
+        "language": "Pagrindinė šio Live Training pavadinimo ir aprašymo kalba.",
+        "deliveryType": "Online sesijos vyksta nuotoliniu būdu. Offline sesijoms reikia vietos.",
+        "startsAt": "Planuojamas pradžios laikas, rodomas kalendoriuje.",
+        "endsAt": "Planuojamas pabaigos laikas, rodomas kalendoriuje.",
+        "maxParticipants": "Šio Live Training dalyvių limitas. Dabartinis maksimumas yra 100.",
+        "location": "Privaloma tik offline mokymams.",
+        "viewerPermissions": "Nustato, ką studentai gali naudoti prisijungę kaip stebėtojai.",
+        "microphoneEnabled": "Leisti stebėtojams naudoti mikrofoną sesijos metu.",
+        "cameraEnabled": "Leisti stebėtojams naudoti kamerą sesijos metu."
+      },
+      "validation": {
+        "titleRequired": "Pavadinimas privalomas.",
+        "invalidDateRange": "Pabaigos laikas turi būti po pradžios.",
+        "locationRequired": "Vieta privaloma offline mokymams."
+      }
+    },
+    "details": {
+      "title": "Event details",
+      "description": "Calendar event metadata",
+      "unknown": "Unknown",
+      "author": "Author: {{name}}",
+      "trainers": "{{count}} trainer",
+      "trainers_plural": "{{count}} trainers",
+      "noTrainers": "No additional trainers",
+      "action": {
+        "edit": "Edit event",
+        "goToLiveTraining": "Go to Live Training"
+      },
+      "sourceType": {
+        "liveTraining": "Live Training"
+      },
+      "field": {
+        "time": "Time",
+        "training": "Training",
+        "linkedCourses": "Linked courses",
+        "location": "Location",
+        "people": "People"
+      },
+      "deliveryType": {
+        "online": "Online",
+        "offline": "Offline"
+      },
+      "status": {
+        "scheduled": "Scheduled",
+        "cancelled": "Cancelled",
+        "ended": "Ended",
+        "expired": "Expired"
+      },
+      "role": {
+        "admin": "Admin",
+        "author": "Author",
+        "trainer": "Trainer",
+        "observer": "Observer"
+      }
+    }
+  },
+  "liveTrainingView": {
+    "title": "Live Training",
+    "description": "This page will contain the full Live Training workspace.",
+    "errors": {
+      "idRequired": "Live Training id is required."
+    },
+    "status": {
+      "scheduled": "Scheduled",
+      "active": "Active",
+      "ended": "Ended",
+      "cancelled": "Cancelled",
+      "expired": "Expired"
+    },
+    "deliveryType": {
+      "online": "Online",
+      "offline": "Offline"
+    },
+    "visibility": {
+      "all": "All users",
+      "linked_courses": "Linked courses"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "start": "Start session",
+      "join": "Join session",
+      "finish": "Finish session"
+    },
+    "stage": {
+      "preview": "Session preview",
+      "activeTitle": "Live session is active",
+      "waitingTitle": "Session is waiting",
+      "runtimeDeferred": "Meeting runtime will be connected in a later slice. Media devices are not started from this preview.",
+      "activeBadge": "Active",
+      "waitingBadge": "Waiting",
+      "participants": "Participants",
+      "viewerMic": "Viewer microphone",
+      "viewerCamera": "Viewer camera",
+      "scheduleTooltip": "Planned training time",
+      "timezoneTooltip": "Training timezone",
+      "maxParticipantsTooltip": "Maximum participants",
+      "locationTooltip": "Training location",
+      "offlineTitle": "Offline training",
+      "locationMissing": "Location has not been set."
+    },
+    "sidebar": {
+      "lifecycle": "Session lifecycle",
+      "status": "Status",
+      "participants": "Participants",
+      "peak": "Peak",
+      "people": "People",
+      "author": "Author",
+      "trainer": "Trainer",
+      "trainers": "Trainers",
+      "noTrainers": "No trainers assigned.",
+      "unknownUser": "Unknown user",
+      "details": "Training details",
+      "maxParticipants": "Max participants",
+      "visibility": "Visibility",
+      "courses": "Linked courses",
+      "location": "Location"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "files": "Files",
+      "attendance": "Attendance",
+      "settings": "Settings"
+    },
+    "files": {
+      "title": "Live Training files",
+      "description": "Materials are split by when students should use them.",
+      "beforeHeading": "Before training",
+      "beforeDescription": "Materials available before the training starts.",
+      "afterHeading": "After training",
+      "afterDescription": "Materials available after the training is finished.",
+      "empty": "No files attached yet.",
+      "afterLocked": "Post-session files unlock when the training is finished."
+    },
+    "attendance": {
+      "title": "Attendance",
+      "description": "Attendance and participant intervals will be implemented in the runtime slice."
+    },
+    "settings": {
+      "title": "Settings",
+      "description": "Less frequently used session settings will live here."
+    },
+    "boolean": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "deleteDialog": {
+      "title": "Ištrinti Live Training?",
+      "description": "Live Training bus atšauktas ir pašalintas iš kalendoriaus. Šio veiksmo anuliuoti nepavyks.",
+      "toast": {
+        "success": "Live Training ištrintas."
+      }
+    },
+    "edit": {
+      "saveChanges": "Išsaugoti pakeitimus",
+      "toast": {
+        "success": "Live Training atnaujintas."
+      }
     }
   },
   "newsView": {
@@ -2847,7 +3043,6 @@
         "to": "Iki datos"
       }
     },
-
     "description": "Platformos pakeitimų laiko juosta paprasto išskleidžiamo srauto pavidalu.",
     "breadcrumbs": {
       "activityLogs": "Veiklos žurnalas"
@@ -3498,6 +3693,17 @@
       "ownerNotAdmin": "API rakto savininkas nebeturi administratoriaus teisių",
       "missingApiKeyHeader": "Trūksta X-API-Key antraštės",
       "missingTenantIdHeader": "Trūksta X-Tenant-Id antraštės"
+    }
+  },
+  "liveTraining": {
+    "errors": {
+      "invalidLocalizedField": "Įveskite tinkamą tekstą pasirinktai kalbai.",
+      "notFound": "Live Training nerastas.",
+      "invalidDateRange": "Nurodykite ir pradžios, ir pabaigos datą arba palikite abi tuščias.",
+      "invalidSchedule": "Pabaigos laikas turi būti vėlesnis už pradžios laiką.",
+      "invalidTrainer": "Vienas ar keli pasirinkti treneriai nerasti.",
+      "invalidCourse": "Vienas ar keli susieti kursai nerasti.",
+      "invalidResource": "Vienas ar keli pasirinkti ištekliai nerasti."
     }
   }
 }

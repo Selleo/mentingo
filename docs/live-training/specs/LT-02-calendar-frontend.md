@@ -12,11 +12,12 @@ This slice includes:
 - Calendar sidebar entry behind feature and permission checks.
 - FE-only today indicator derived from visible fetched events.
 - Event details modal.
+- Calendar day/slot selection create flow for independent Live Training events.
 
 This slice does not include:
 
 - LiveKit start/join/end actions.
-- Calendar create/edit/delete.
+- Generic Calendar event create/edit/delete.
 - Course-linked Live Training creation.
 
 ## Implementation Progress
@@ -31,8 +32,14 @@ This slice does not include:
 - [x] Calendar API events are mapped to FullCalendar event objects from normalized root fields.
 - [x] Add `@fullcalendar/timegrid` and `@fullcalendar/interaction`.
 - [x] Add week/time view after the extra FullCalendar plugins are installed.
-- [ ] Add `useCalendarEventDetails(eventId, language)`.
-- [ ] Add event details modal.
+- [x] Add Calendar day/slot click create flow.
+- [x] Add lightweight add-menu dialog for selected date/slot.
+- [x] Add `useCreateLiveTraining` mutation hook.
+- [x] Add basic Calendar-created Live Training form behind `globalSettings.liveTrainingEnabled`.
+- [x] Invalidate Calendar events after successful Live Training creation.
+- [x] Add `useCalendarEventDetails(eventId, language)`.
+- [x] Add event details modal.
+- [x] Add placeholder `/live-training/:id` route for full Live Training planning.
 - [ ] Add FE-only today indicator.
 - [ ] Add online/offline visual marker from `event.payload.liveTraining.deliveryType`.
 - [ ] Add frontend tests for route visibility, event mapping, rendering, and details modal.
@@ -178,22 +185,19 @@ Show:
 - starts/ends/timezone
 - calendar status
 - Live Training delivery type
-- viewer source role
 - linked courses
 - author
 - trainers
-- before materials
-- after materials
-- latest session summary if present
+- timezone in the time card
+- location when the Live Training is offline
+- `Go to Live Training` action that routes to `/live-training/:sourceId`
 
 Do not show start/join/end buttons in this slice. These actions belong to the LiveKit meeting flow.
+Do not render the full materials/session/live lesson data here; the modal stays metadata-only.
 
-## Later Calendar Add Flow
+## Calendar Add Flow
 
-The Calendar page should be structured so a later slice can add day/empty-slot creation without
-rewriting the screen.
-
-Planned interaction:
+Implemented interaction:
 
 1. User clicks a day or empty slot.
 2. Open a modular add menu card/modal for the selected date.
@@ -203,12 +207,21 @@ Planned interaction:
 5. Submit creates an independent Live Training.
 6. Invalidate Calendar events queries so the new training appears.
 
-For now, do not implement this create flow unless explicitly requested in the implementation slice.
-
 The Live Training add option and Live Training create section must not be rendered when the tenant
 Live Training feature is disabled in settings.
 
-## Later Live Training Create Form Fields
+Drag selection requirements:
+
+- Users can drag across days/time slots to span the initial `startsAt` and `endsAt` values.
+- Month/day-grid selection should default to the nearest half hour and end 30 minutes later.
+- Week/day time-grid selection should preserve the exact selected time range.
+- FullCalendar should show a selection highlight/mirror placeholder while dragging in month view.
+- Week/day time-grid dragging should avoid the heavy overlay and keep visual feedback minimal.
+- Single day/slot clicks still open the same add menu.
+- Calendar interaction state should stay in the calendar reducer so visible range, selected range, and
+  dialog state do not drift apart.
+
+## Live Training Create Form Fields
 
 Calendar-created Live Training is independent and has no course links. Course-linked Live Training is
 created from the course add-lesson flow.
@@ -231,6 +244,15 @@ Optional fields:
 - `afterResourceIds`
 - `settings.viewerPermissions.microphoneEnabled`
 - `settings.viewerPermissions.cameraEnabled`
+
+Current implementation note:
+
+- `trainerUserIds`, `beforeResourceIds`, and `afterResourceIds` remain planned for a follow-up form
+  pass.
+- Viewer permissions are rendered as settings toggles and are hidden for offline trainings.
+- Date fields use the shadcn Calendar popover; time fields use a shadcn Select-based 15-minute
+  picker.
+- Each field has a dark zero-delay tooltip consistent with the AI Mentor lesson creation tooltips.
 
 Trainer selection requirements:
 

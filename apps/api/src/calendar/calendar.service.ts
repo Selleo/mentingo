@@ -13,7 +13,7 @@ import {
 } from "@repo/shared";
 import { and, eq, gt, isNull, lt, or, sql, type SQL } from "drizzle-orm";
 
-import { hasAnyPermission, hasPermission } from "src/common/permissions/permission.utils";
+import { hasAnyPermission } from "src/common/permissions/permission.utils";
 import { SettingsService } from "src/settings/settings.service";
 import {
   calendarEvents,
@@ -26,7 +26,6 @@ import {
 import { CalendarRepository } from "./calendar.repository";
 
 import type {
-  CalendarEventActionContext,
   CalendarEventLinkedCourse,
   CalendarEventMaterialRow,
   CalendarEventNormalizedRow,
@@ -190,13 +189,6 @@ export class CalendarService {
     currentUser: CurrentUserType,
   ): CalendarEventListItem {
     const sourceRole = this.getSourceRole(row, trainers, currentUser);
-    const actions = this.getActions({
-      sourceRole,
-      sourceStatus: row.payload.liveTraining.status,
-      startsAt: row.startsAt,
-      canManage: this.canManageLiveTraining(currentUser),
-      canUpdateOwn: hasPermission(currentUser.permissions, PERMISSIONS.LIVE_TRAINING_UPDATE_OWN),
-    });
 
     return {
       id: row.id,
@@ -208,8 +200,8 @@ export class CalendarService {
       startsAt: row.startsAt,
       endsAt: row.endsAt,
       timezone: row.timezone,
+      location: row.location,
       status: row.status,
-      actions,
       payload: {
         liveTraining: {
           ...row.payload.liveTraining,
@@ -357,27 +349,6 @@ export class CalendarService {
     }
 
     return CALENDAR_EVENT_SOURCE_ROLES.OBSERVER;
-  }
-
-  private getActions(context: CalendarEventActionContext) {
-    const isEnded = context.sourceStatus === LIVE_TRAINING_STATUSES.ENDED;
-    const isActive = context.sourceStatus === LIVE_TRAINING_STATUSES.ACTIVE;
-    const isScheduled = context.sourceStatus === LIVE_TRAINING_STATUSES.SCHEDULED;
-    const isManagerRole =
-      context.sourceRole === CALENDAR_EVENT_SOURCE_ROLES.ADMIN ||
-      context.sourceRole === CALENDAR_EVENT_SOURCE_ROLES.AUTHOR ||
-      context.sourceRole === CALENDAR_EVENT_SOURCE_ROLES.TRAINER;
-    const canEdit = context.canManage || (context.canUpdateOwn && isManagerRole);
-
-    return {
-      canView: true,
-      canEdit,
-      canLinkCourse: canEdit,
-      canStart: canEdit && isScheduled,
-      canJoin: !isEnded,
-      canEnd: canEdit && isActive,
-      canViewReport: canEdit || isEnded,
-    };
   }
 
   private getVisibleMaterials(

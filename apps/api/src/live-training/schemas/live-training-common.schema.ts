@@ -44,7 +44,7 @@ export const updateLiveTrainingSettingsSchema = Type.Partial(
 export const liveTrainingUserSummarySchema = Type.Object({
   id: UUIDSchema,
   fullName: Type.Union([Type.String(), Type.Null()]),
-  email: Type.String(),
+  profilePictureUrl: Type.Union([Type.String(), Type.Null()]),
 });
 
 export const liveTrainingCourseSummarySchema = Type.Object({

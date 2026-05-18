@@ -36669,14 +36669,21 @@
                           }
                         ]
                       },
-                      "email": {
-                        "type": "string"
+                      "profilePictureUrl": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
                       }
                     },
                     "required": [
                       "id",
                       "fullName",
-                      "email"
+                      "profilePictureUrl"
                     ]
                   },
                   "trainers": {
@@ -36698,14 +36705,21 @@
                             }
                           ]
                         },
-                        "email": {
-                          "type": "string"
+                        "profilePictureUrl": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
                         }
                       },
                       "required": [
                         "id",
                         "fullName",
-                        "email"
+                        "profilePictureUrl"
                       ]
                     }
                   },
@@ -37178,14 +37192,21 @@
                           }
                         ]
                       },
-                      "email": {
-                        "type": "string"
+                      "profilePictureUrl": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
                       }
                     },
                     "required": [
                       "id",
                       "fullName",
-                      "email"
+                      "profilePictureUrl"
                     ]
                   },
                   "trainers": {
@@ -37207,14 +37228,21 @@
                             }
                           ]
                         },
-                        "email": {
-                          "type": "string"
+                        "profilePictureUrl": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
                         }
                       },
                       "required": [
                         "id",
                         "fullName",
-                        "email"
+                        "profilePictureUrl"
                       ]
                     }
                   },
@@ -37716,14 +37744,21 @@
                           }
                         ]
                       },
-                      "email": {
-                        "type": "string"
+                      "profilePictureUrl": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
                       }
                     },
                     "required": [
                       "id",
                       "fullName",
-                      "email"
+                      "profilePictureUrl"
                     ]
                   },
                   "trainers": {
@@ -37745,14 +37780,21 @@
                             }
                           ]
                         },
-                        "email": {
-                          "type": "string"
+                        "profilePictureUrl": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
                         }
                       },
                       "required": [
                         "id",
                         "fullName",
-                        "email"
+                        "profilePictureUrl"
                       ]
                     }
                   },
@@ -37970,6 +38012,16 @@
                     "timezone": {
                       "type": "string"
                     },
+                    "location": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
                     "status": {
                       "anyOf": [
                         {
@@ -37988,41 +38040,6 @@
                           "const": "expired",
                           "type": "string"
                         }
-                      ]
-                    },
-                    "actions": {
-                      "type": "object",
-                      "properties": {
-                        "canView": {
-                          "type": "boolean"
-                        },
-                        "canEdit": {
-                          "type": "boolean"
-                        },
-                        "canLinkCourse": {
-                          "type": "boolean"
-                        },
-                        "canStart": {
-                          "type": "boolean"
-                        },
-                        "canJoin": {
-                          "type": "boolean"
-                        },
-                        "canEnd": {
-                          "type": "boolean"
-                        },
-                        "canViewReport": {
-                          "type": "boolean"
-                        }
-                      },
-                      "required": [
-                        "canView",
-                        "canEdit",
-                        "canLinkCourse",
-                        "canStart",
-                        "canJoin",
-                        "canEnd",
-                        "canViewReport"
                       ]
                     },
                     "payload": {
@@ -38143,8 +38160,8 @@
                     "startsAt",
                     "endsAt",
                     "timezone",
+                    "location",
                     "status",
-                    "actions",
                     "payload"
                   ]
                 }
@@ -38202,6 +38219,16 @@
               "timezone": {
                 "type": "string"
               },
+              "location": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "status": {
                 "anyOf": [
                   {
@@ -38220,41 +38247,6 @@
                     "const": "expired",
                     "type": "string"
                   }
-                ]
-              },
-              "actions": {
-                "type": "object",
-                "properties": {
-                  "canView": {
-                    "type": "boolean"
-                  },
-                  "canEdit": {
-                    "type": "boolean"
-                  },
-                  "canLinkCourse": {
-                    "type": "boolean"
-                  },
-                  "canStart": {
-                    "type": "boolean"
-                  },
-                  "canJoin": {
-                    "type": "boolean"
-                  },
-                  "canEnd": {
-                    "type": "boolean"
-                  },
-                  "canViewReport": {
-                    "type": "boolean"
-                  }
-                },
-                "required": [
-                  "canView",
-                  "canEdit",
-                  "canLinkCourse",
-                  "canStart",
-                  "canJoin",
-                  "canEnd",
-                  "canViewReport"
                 ]
               },
               "payload": {
@@ -38639,8 +38631,8 @@
               "startsAt",
               "endsAt",
               "timezone",
+              "location",
               "status",
-              "actions",
               "payload"
             ]
           }

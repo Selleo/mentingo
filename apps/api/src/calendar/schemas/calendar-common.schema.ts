@@ -16,16 +16,6 @@ export const calendarEventSourceTypeSchema = Type.Enum(CALENDAR_EVENT_SOURCE_TYP
 
 export const calendarEventSourceRoleSchema = Type.Enum(CALENDAR_EVENT_SOURCE_ROLES);
 
-export const calendarEventActionsSchema = Type.Object({
-  canView: Type.Boolean(),
-  canEdit: Type.Boolean(),
-  canLinkCourse: Type.Boolean(),
-  canStart: Type.Boolean(),
-  canJoin: Type.Boolean(),
-  canEnd: Type.Boolean(),
-  canViewReport: Type.Boolean(),
-});
-
 export const calendarEventLinkedCourseSchema = Type.Object({
   courseId: UUIDSchema,
   courseTitle: Type.String(),
@@ -53,6 +43,7 @@ export const calendarEventBaseSchema = Type.Object({
   startsAt: Type.String(),
   endsAt: Type.String(),
   timezone: Type.String(),
+  location: Type.Union([Type.String(), Type.Null()]),
   status: Type.Enum(CALENDAR_EVENT_STATUSES),
 });
 
@@ -108,19 +99,16 @@ export const calendarEventDetailsPayloadSchema = Type.Object({
 
 export const calendarEventListItemSchema = Type.Object({
   ...calendarEventBaseSchema.properties,
-  actions: calendarEventActionsSchema,
   payload: calendarEventPayloadSchema,
 });
 
 export const calendarEventDetailsItemSchema = Type.Object({
   ...calendarEventBaseSchema.properties,
-  actions: calendarEventActionsSchema,
   payload: calendarEventDetailsPayloadSchema,
 });
 
 export type CalendarEventSourceType = Static<typeof calendarEventSourceTypeSchema>;
 export type CalendarEventSourceRole = Static<typeof calendarEventSourceRoleSchema>;
-export type CalendarEventActions = Static<typeof calendarEventActionsSchema>;
 export type CalendarEventLinkedCourse = Static<typeof calendarEventLinkedCourseSchema>;
 export type CalendarEventBase = Static<typeof calendarEventBaseSchema>;
 export type CalendarEventLiveTrainingPayload = Static<

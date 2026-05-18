@@ -5102,13 +5102,13 @@ export interface GetLiveTrainingResponse {
       /** @format uuid */
       id: string;
       fullName: string | null;
-      email: string;
+      profilePictureUrl: string | null;
     };
     trainers: {
       /** @format uuid */
       id: string;
       fullName: string | null;
-      email: string;
+      profilePictureUrl: string | null;
     }[];
     linkedCourses: {
       /** @format uuid */
@@ -5201,13 +5201,13 @@ export interface CreateLiveTrainingResponse {
       /** @format uuid */
       id: string;
       fullName: string | null;
-      email: string;
+      profilePictureUrl: string | null;
     };
     trainers: {
       /** @format uuid */
       id: string;
       fullName: string | null;
-      email: string;
+      profilePictureUrl: string | null;
     }[];
     linkedCourses: {
       /** @format uuid */
@@ -5302,13 +5302,13 @@ export interface UpdateLiveTrainingResponse {
       /** @format uuid */
       id: string;
       fullName: string | null;
-      email: string;
+      profilePictureUrl: string | null;
     };
     trainers: {
       /** @format uuid */
       id: string;
       fullName: string | null;
-      email: string;
+      profilePictureUrl: string | null;
     }[];
     linkedCourses: {
       /** @format uuid */
@@ -5358,16 +5358,8 @@ export interface GetEventsResponse {
       startsAt: string;
       endsAt: string;
       timezone: string;
+      location: string | null;
       status: "scheduled" | "cancelled" | "ended" | "expired";
-      actions: {
-        canView: boolean;
-        canEdit: boolean;
-        canLinkCourse: boolean;
-        canStart: boolean;
-        canJoin: boolean;
-        canEnd: boolean;
-        canViewReport: boolean;
-      };
       payload: {
         liveTraining: {
           deliveryType: "online" | "offline";
@@ -5398,16 +5390,8 @@ export interface GetEventDetailsResponse {
     startsAt: string;
     endsAt: string;
     timezone: string;
+    location: string | null;
     status: "scheduled" | "cancelled" | "ended" | "expired";
-    actions: {
-      canView: boolean;
-      canEdit: boolean;
-      canLinkCourse: boolean;
-      canStart: boolean;
-      canJoin: boolean;
-      canEnd: boolean;
-      canViewReport: boolean;
-    };
     payload: {
       liveTraining: {
         deliveryType: "online" | "offline";

@@ -319,6 +319,202 @@
       "monthShort": "M",
       "weekShort": "W",
       "dayShort": "D"
+    },
+    "create": {
+      "title": "Add to calendar",
+      "description": "Choose what you want to add for the selected time.",
+      "noOptions": "No calendar items are available to create.",
+      "submit": "Create live training",
+      "toast": {
+        "success": "Live training has been created."
+      },
+      "liveTrainingOption": {
+        "title": "Live Training",
+        "description": "Schedule an online or offline training session."
+      },
+      "field": {
+        "title": "Title",
+        "description": "Description",
+        "language": "Language",
+        "deliveryType": "Delivery type",
+        "startsAt": "Starts at",
+        "endsAt": "Ends at",
+        "maxParticipants": "Max participants",
+        "location": "Location",
+        "viewerPermissions": "Viewer permissions",
+        "microphoneEnabled": "Microphone",
+        "cameraEnabled": "Camera"
+      },
+      "placeholder": {
+        "title": "Training title",
+        "description": "Optional session description",
+        "location": "Room, address, or meeting place"
+      },
+      "deliveryType": {
+        "online": "Online",
+        "offline": "Offline"
+      },
+      "tooltip": {
+        "title": "This name is shown in the calendar and in the Live Training details.",
+        "description": "Optional context for participants before they join the training.",
+        "language": "The base language used for this Live Training title and description.",
+        "deliveryType": "Online sessions are remote. Offline sessions require a physical location.",
+        "startsAt": "The planned start time shown in the calendar.",
+        "endsAt": "The planned end time shown in the calendar.",
+        "maxParticipants": "The participant limit for this Live Training. The current maximum is 100.",
+        "location": "Required only for offline trainings.",
+        "viewerPermissions": "Controls what students can use when they join as viewers.",
+        "microphoneEnabled": "Allow viewers to use their microphone during the session.",
+        "cameraEnabled": "Allow viewers to use their camera during the session."
+      },
+      "validation": {
+        "titleRequired": "Title is required.",
+        "invalidDateRange": "End time must be after start time.",
+        "locationRequired": "Location is required for offline training."
+      }
+    },
+    "details": {
+      "title": "Event details",
+      "description": "Calendar event metadata",
+      "unknown": "Unknown",
+      "author": "Author: {{name}}",
+      "trainers": "{{count}} trainer",
+      "trainers_plural": "{{count}} trainers",
+      "noTrainers": "No additional trainers",
+      "action": {
+        "edit": "Edit event",
+        "goToLiveTraining": "Go to Live Training"
+      },
+      "sourceType": {
+        "liveTraining": "Live Training"
+      },
+      "field": {
+        "time": "Time",
+        "training": "Training",
+        "linkedCourses": "Linked courses",
+        "location": "Location",
+        "people": "People"
+      },
+      "deliveryType": {
+        "online": "Online",
+        "offline": "Offline"
+      },
+      "status": {
+        "scheduled": "Scheduled",
+        "cancelled": "Cancelled",
+        "ended": "Ended",
+        "expired": "Expired"
+      },
+      "role": {
+        "admin": "Admin",
+        "author": "Author",
+        "trainer": "Trainer",
+        "observer": "Observer"
+      }
+    }
+  },
+  "liveTrainingView": {
+    "title": "Live Training",
+    "description": "This page will contain the full Live Training workspace.",
+    "errors": {
+      "idRequired": "Live Training id is required."
+    },
+    "status": {
+      "scheduled": "Scheduled",
+      "active": "Active",
+      "ended": "Ended",
+      "cancelled": "Cancelled",
+      "expired": "Expired"
+    },
+    "deliveryType": {
+      "online": "Online",
+      "offline": "Offline"
+    },
+    "visibility": {
+      "all": "All users",
+      "linked_courses": "Linked courses"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "start": "Start session",
+      "join": "Join session",
+      "finish": "Finish session"
+    },
+    "stage": {
+      "preview": "Session preview",
+      "activeTitle": "Live session is active",
+      "waitingTitle": "Session is waiting",
+      "runtimeDeferred": "Meeting runtime will be connected in a later slice. Media devices are not started from this preview.",
+      "activeBadge": "Active",
+      "waitingBadge": "Waiting",
+      "participants": "Participants",
+      "viewerMic": "Viewer microphone",
+      "viewerCamera": "Viewer camera",
+      "scheduleTooltip": "Planned training time",
+      "timezoneTooltip": "Training timezone",
+      "maxParticipantsTooltip": "Maximum participants",
+      "locationTooltip": "Training location",
+      "offlineTitle": "Offline training",
+      "locationMissing": "Location has not been set."
+    },
+    "sidebar": {
+      "lifecycle": "Session lifecycle",
+      "status": "Status",
+      "participants": "Participants",
+      "peak": "Peak",
+      "people": "People",
+      "author": "Author",
+      "trainer": "Trainer",
+      "trainers": "Trainers",
+      "noTrainers": "No trainers assigned.",
+      "unknownUser": "Unknown user",
+      "details": "Training details",
+      "maxParticipants": "Max participants",
+      "visibility": "Visibility",
+      "courses": "Linked courses",
+      "location": "Location"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "files": "Files",
+      "attendance": "Attendance",
+      "settings": "Settings"
+    },
+    "files": {
+      "title": "Live Training files",
+      "description": "Materials are split by when students should use them.",
+      "beforeHeading": "Before training",
+      "beforeDescription": "Materials available before the training starts.",
+      "afterHeading": "After training",
+      "afterDescription": "Materials available after the training is finished.",
+      "empty": "No files attached yet.",
+      "afterLocked": "Post-session files unlock when the training is finished."
+    },
+    "attendance": {
+      "title": "Attendance",
+      "description": "Attendance and participant intervals will be implemented in the runtime slice."
+    },
+    "settings": {
+      "title": "Settings",
+      "description": "Less frequently used session settings will live here."
+    },
+    "boolean": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "deleteDialog": {
+      "title": "Delete Live Training?",
+      "description": "This will cancel the Live Training and remove it from the calendar. This action cannot be undone.",
+      "toast": {
+        "success": "Live Training deleted successfully."
+      }
+    },
+    "edit": {
+      "saveChanges": "Save changes",
+      "toast": {
+        "success": "Live Training updated successfully."
+      }
     }
   },
   "newsView": {
@@ -3502,7 +3698,6 @@
         "to": "To date"
       }
     },
-
     "description": "Timeline of changes across the platform, grouped as a simple expandable feed.",
     "breadcrumbs": {
       "activityLogs": "Activity Logs"
@@ -3563,6 +3758,17 @@
       "showDetails": "Show details",
       "loading": "Loading activity logs...",
       "empty": "No activity logs found."
+    }
+  },
+  "liveTraining": {
+    "errors": {
+      "invalidLocalizedField": "Provide valid text for the selected language.",
+      "notFound": "Live Training was not found.",
+      "invalidDateRange": "Provide both start and end dates, or leave both empty.",
+      "invalidSchedule": "End time must be after start time.",
+      "invalidTrainer": "One or more selected trainers could not be found.",
+      "invalidCourse": "One or more linked courses could not be found.",
+      "invalidResource": "One or more selected resources could not be found."
     }
   }
 }

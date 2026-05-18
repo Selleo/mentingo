@@ -69,6 +69,9 @@ const LEARNING_PATH_READ_ACCESS: PermissionRequirement = {
 const CALENDAR_READ_ACCESS: PermissionRequirement = {
   anyOf: [PERMISSIONS.CALENDAR_READ],
 };
+const LIVE_TRAINING_READ_ACCESS: PermissionRequirement = {
+  anyOf: [PERMISSIONS.LIVE_TRAINING_READ],
+};
 const LEARNING_PATH_ADMIN_ACCESS: PermissionRequirement = {
   anyOf: [
     PERMISSIONS.LEARNING_PATH_CREATE,
@@ -103,6 +106,7 @@ export const routeAccessConfig = createRouteConfig({
   courses: PUBLIC,
   "learning-paths": LEARNING_PATH_READ_ACCESS,
   calendar: CALENDAR_READ_ACCESS,
+  "live-training/:id": LIVE_TRAINING_READ_ACCESS,
   qa: PUBLIC,
   "qa/:id": QA_EDIT_ACCESS,
   articles: PUBLIC,

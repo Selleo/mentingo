@@ -286,7 +286,6 @@
     "statistics": "Statystyki",
     "analytics": "Analityka",
     "progress": "Postępy",
-    "calendar": "Kalendarz",
     "courses": "Kursy",
     "calendar": "Kalendarz",
     "content": "Treści",
@@ -323,6 +322,202 @@
       "monthShort": "M",
       "weekShort": "T",
       "dayShort": "D"
+    },
+    "create": {
+      "title": "Dodaj do kalendarza",
+      "description": "Wybierz, co chcesz dodać dla wybranego terminu.",
+      "noOptions": "Brak dostępnych elementów do utworzenia.",
+      "submit": "Utwórz live training",
+      "toast": {
+        "success": "Live training został utworzony."
+      },
+      "liveTrainingOption": {
+        "title": "Live Training",
+        "description": "Zaplanuj szkolenie online lub offline."
+      },
+      "field": {
+        "title": "Tytuł",
+        "description": "Opis",
+        "language": "Język",
+        "deliveryType": "Tryb",
+        "startsAt": "Rozpoczęcie",
+        "endsAt": "Zakończenie",
+        "maxParticipants": "Limit uczestników",
+        "location": "Lokalizacja",
+        "viewerPermissions": "Uprawnienia obserwatorów",
+        "microphoneEnabled": "Mikrofon",
+        "cameraEnabled": "Kamera"
+      },
+      "placeholder": {
+        "title": "Tytuł szkolenia",
+        "description": "Opcjonalny opis sesji",
+        "location": "Sala, adres lub miejsce spotkania"
+      },
+      "deliveryType": {
+        "online": "Online",
+        "offline": "Offline"
+      },
+      "tooltip": {
+        "title": "Ta nazwa będzie widoczna w kalendarzu i szczegółach Live Training.",
+        "description": "Opcjonalny kontekst dla uczestników przed dołączeniem do szkolenia.",
+        "language": "Język bazowy tytułu i opisu tego Live Training.",
+        "deliveryType": "Sesje online są zdalne. Sesje offline wymagają lokalizacji.",
+        "startsAt": "Planowany czas rozpoczęcia widoczny w kalendarzu.",
+        "endsAt": "Planowany czas zakończenia widoczny w kalendarzu.",
+        "maxParticipants": "Limit uczestników Live Training. Obecne maksimum to 100.",
+        "location": "Wymagane tylko dla szkoleń offline.",
+        "viewerPermissions": "Określa, z czego mogą korzystać studenci dołączający jako obserwatorzy.",
+        "microphoneEnabled": "Pozwala obserwatorom używać mikrofonu podczas sesji.",
+        "cameraEnabled": "Pozwala obserwatorom używać kamery podczas sesji."
+      },
+      "validation": {
+        "titleRequired": "Tytuł jest wymagany.",
+        "invalidDateRange": "Czas zakończenia musi być późniejszy niż rozpoczęcia.",
+        "locationRequired": "Lokalizacja jest wymagana dla szkolenia offline."
+      }
+    },
+    "details": {
+      "title": "Szczegóły wydarzenia",
+      "description": "Metadane wydarzenia w kalendarzu",
+      "unknown": "Nieznany",
+      "author": "Autor: {{name}}",
+      "trainers": "{{count}} trener",
+      "trainers_plural": "{{count}} trenerów",
+      "noTrainers": "Brak dodatkowych trenerów",
+      "action": {
+        "edit": "Edytuj wydarzenie",
+        "goToLiveTraining": "Przejdź do Live Training"
+      },
+      "sourceType": {
+        "liveTraining": "Live Training"
+      },
+      "field": {
+        "time": "Czas",
+        "training": "Szkolenie",
+        "linkedCourses": "Powiązane kursy",
+        "location": "Lokalizacja",
+        "people": "Osoby"
+      },
+      "deliveryType": {
+        "online": "Online",
+        "offline": "Offline"
+      },
+      "status": {
+        "scheduled": "Zaplanowane",
+        "cancelled": "Anulowane",
+        "ended": "Zakończone",
+        "expired": "Wygasłe"
+      },
+      "role": {
+        "admin": "Admin",
+        "author": "Autor",
+        "trainer": "Trener",
+        "observer": "Obserwator"
+      }
+    }
+  },
+  "liveTrainingView": {
+    "title": "Live Training",
+    "description": "Ta strona będzie zawierać pełny widok roboczy Live Training.",
+    "errors": {
+      "idRequired": "Identyfikator Live Training jest wymagany."
+    },
+    "status": {
+      "scheduled": "Zaplanowane",
+      "active": "Aktywne",
+      "ended": "Zakończone",
+      "cancelled": "Anulowane",
+      "expired": "Wygasłe"
+    },
+    "deliveryType": {
+      "online": "Online",
+      "offline": "Offline"
+    },
+    "visibility": {
+      "all": "Wszyscy użytkownicy",
+      "linked_courses": "Powiązane kursy"
+    },
+    "actions": {
+      "edit": "Edytuj",
+      "delete": "Usuń",
+      "start": "Rozpocznij sesję",
+      "join": "Dołącz do sesji",
+      "finish": "Zakończ sesję"
+    },
+    "stage": {
+      "preview": "Podgląd sesji",
+      "activeTitle": "Sesja live jest aktywna",
+      "waitingTitle": "Sesja oczekuje",
+      "runtimeDeferred": "Obsługa spotkania zostanie podłączona w kolejnym etapie. Ten podgląd nie uruchamia urządzeń multimedialnych.",
+      "activeBadge": "Aktywna",
+      "waitingBadge": "Oczekuje",
+      "participants": "Uczestnicy",
+      "viewerMic": "Mikrofon widza",
+      "viewerCamera": "Kamera widza",
+      "scheduleTooltip": "Planowany czas szkolenia",
+      "timezoneTooltip": "Strefa czasowa szkolenia",
+      "maxParticipantsTooltip": "Maksymalna liczba uczestników",
+      "locationTooltip": "Lokalizacja szkolenia",
+      "offlineTitle": "Szkolenie offline",
+      "locationMissing": "Lokalizacja nie została ustawiona."
+    },
+    "sidebar": {
+      "lifecycle": "Cykl życia sesji",
+      "status": "Status",
+      "participants": "Uczestnicy",
+      "peak": "Szczyt",
+      "people": "Osoby",
+      "author": "Autor",
+      "trainer": "Trener",
+      "trainers": "Trenerzy",
+      "noTrainers": "Nie przypisano trenerów.",
+      "unknownUser": "Nieznany użytkownik",
+      "details": "Szczegóły szkolenia",
+      "maxParticipants": "Limit uczestników",
+      "visibility": "Widoczność",
+      "courses": "Powiązane kursy",
+      "location": "Lokalizacja"
+    },
+    "tabs": {
+      "overview": "Przegląd",
+      "files": "Pliki",
+      "attendance": "Obecność",
+      "settings": "Ustawienia"
+    },
+    "files": {
+      "title": "Pliki Live Training",
+      "description": "Materiały są podzielone według momentu użycia przez uczestników.",
+      "beforeHeading": "Przed szkoleniem",
+      "beforeDescription": "Materiały dostępne przed rozpoczęciem szkolenia.",
+      "afterHeading": "Po szkoleniu",
+      "afterDescription": "Materiały dostępne po zakończeniu szkolenia.",
+      "empty": "Nie dodano jeszcze plików.",
+      "afterLocked": "Pliki po szkoleniu zostaną odblokowane po zakończeniu szkolenia."
+    },
+    "attendance": {
+      "title": "Obecność",
+      "description": "Obecność i przedziały uczestników zostaną wdrożone w etapie runtime."
+    },
+    "settings": {
+      "title": "Ustawienia",
+      "description": "Rzadziej używane ustawienia sesji będą dostępne tutaj."
+    },
+    "boolean": {
+      "yes": "Tak",
+      "no": "Nie"
+    },
+    "deleteDialog": {
+      "title": "Usunąć Live Training?",
+      "description": "Live Training zostanie anulowany i usunięty z kalendarza. Tej akcji nie można cofnąć.",
+      "toast": {
+        "success": "Live Training został usunięty."
+      }
+    },
+    "edit": {
+      "saveChanges": "Zapisz zmiany",
+      "toast": {
+        "success": "Live Training został zaktualizowany."
+      }
     }
   },
   "learningPathsView": {
@@ -3526,7 +3721,6 @@
         "to": "Do daty"
       }
     },
-
     "description": "Oś czasu zmian w platformie w formie prostego, rozwijanego strumienia.",
     "breadcrumbs": {
       "activityLogs": "Dziennik zdarzeń"
@@ -3587,6 +3781,17 @@
       "showDetails": "Pokaż szczegóły",
       "loading": "Ładowanie dziennika zdarzeń...",
       "empty": "Nie znaleziono dziennika zdarzeń."
+    }
+  },
+  "liveTraining": {
+    "errors": {
+      "invalidLocalizedField": "Podaj poprawny tekst dla wybranego języka.",
+      "notFound": "Nie znaleziono Live Training.",
+      "invalidDateRange": "Podaj jednocześnie datę początku i końca albo pozostaw obie puste.",
+      "invalidSchedule": "Czas zakończenia musi być późniejszy niż czas rozpoczęcia.",
+      "invalidTrainer": "Nie znaleziono jednego lub kilku wybranych trenerów.",
+      "invalidCourse": "Nie znaleziono jednego lub kilku powiązanych kursów.",
+      "invalidResource": "Nie znaleziono jednego lub kilku wybranych zasobów."
     }
   }
 }

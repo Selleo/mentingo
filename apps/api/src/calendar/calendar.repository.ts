@@ -27,6 +27,7 @@ import type {
   LiveTrainingCalendarEventPayload,
 } from "./calendar.types";
 import type {
+  CalendarEventStatus,
   CalendarEventSourceType,
   LiveTrainingResourceRelationshipType,
   SupportedLanguages,
@@ -57,6 +58,7 @@ export class CalendarRepository {
         startsAt: liveTrainingEvents.startsAt,
         endsAt: liveTrainingEvents.endsAt,
         timezone: liveTrainingEvents.timezone,
+        location: liveTrainingEvents.location,
         status: liveTrainingEvents.status,
         payload: liveTrainingEvents.payload,
         authorId: liveTrainingEvents.authorId,
@@ -175,24 +177,23 @@ export class CalendarRepository {
     return this.db.$with("live_training_calendar_events").as(
       this.db
         .select({
-          id: calendarEvents.id,
-          uid: calendarEvents.uid,
-          sourceType: sql<CalendarEventSourceType>`${CALENDAR_EVENT_SOURCE_TYPES.LIVE_TRAINING}`,
-          sourceId: liveTrainings.id,
-          title: this.localizationService.getLocalizedSqlField(
-            calendarEvents.title,
-            language,
-            calendarEvents,
+          id: sql<UUIDType>`${calendarEvents.id}`.as("id"),
+          uid: sql<string>`${calendarEvents.uid}`.as("uid"),
+          sourceType: sql<CalendarEventSourceType>`${CALENDAR_EVENT_SOURCE_TYPES.LIVE_TRAINING}`.as(
+            "source_type",
           ),
-          description: this.localizationService.getLocalizedSqlField(
-            calendarEvents.description,
-            language,
-            calendarEvents,
-          ),
-          startsAt: calendarEvents.startsAt,
-          endsAt: calendarEvents.endsAt,
-          timezone: calendarEvents.timezone,
-          status: calendarEvents.status,
+          sourceId: sql<UUIDType>`${liveTrainings.id}`.as("source_id"),
+          title: this.localizationService
+            .getLocalizedSqlField(calendarEvents.title, language, calendarEvents)
+            .as("title"),
+          description: this.localizationService
+            .getLocalizedSqlField(calendarEvents.description, language, calendarEvents)
+            .as("description"),
+          startsAt: sql<string>`${calendarEvents.startsAt}`.as("starts_at"),
+          endsAt: sql<string>`${calendarEvents.endsAt}`.as("ends_at"),
+          timezone: sql<string>`${calendarEvents.timezone}`.as("timezone"),
+          location: sql<string | null>`${calendarEvents.location}`.as("location"),
+          status: sql<CalendarEventStatus>`${calendarEvents.status}`.as("status"),
           payload: sql<LiveTrainingCalendarEventPayload>`
             jsonb_build_object(
               'liveTraining',
@@ -203,8 +204,8 @@ export class CalendarRepository {
                 'linkedCourses', '[]'::jsonb
               )
             )
-          `,
-          authorId: liveTrainings.authorId,
+          `.as("payload"),
+          authorId: sql<UUIDType>`${liveTrainings.authorId}`.as("author_id"),
         })
         .from(calendarEvents)
         .innerJoin(liveTrainings, eq(liveTrainings.calendarEventId, calendarEvents.id))

@@ -318,6 +318,202 @@
       "monthShort": "M",
       "weekShort": "T",
       "dayShort": "D"
+    },
+    "create": {
+      "title": "Přidat do kalendáře",
+      "description": "Vyberte, co chcete přidat pro zvolený čas.",
+      "noOptions": "Nejsou dostupné žádné položky k vytvoření.",
+      "submit": "Vytvořit live training",
+      "toast": {
+        "success": "Live training byl vytvořen."
+      },
+      "liveTrainingOption": {
+        "title": "Live Training",
+        "description": "Naplánujte online nebo offline školení."
+      },
+      "field": {
+        "title": "Název",
+        "description": "Popis",
+        "language": "Jazyk",
+        "deliveryType": "Typ realizace",
+        "startsAt": "Začátek",
+        "endsAt": "Konec",
+        "maxParticipants": "Max. účastníků",
+        "location": "Místo",
+        "viewerPermissions": "Oprávnění diváků",
+        "microphoneEnabled": "Mikrofon",
+        "cameraEnabled": "Kamera"
+      },
+      "placeholder": {
+        "title": "Název školení",
+        "description": "Volitelný popis relace",
+        "location": "Místnost, adresa nebo místo setkání"
+      },
+      "deliveryType": {
+        "online": "Online",
+        "offline": "Offline"
+      },
+      "tooltip": {
+        "title": "Tento název se zobrazí v kalendáři a v detailech Live Training.",
+        "description": "Volitelný kontext pro účastníky před připojením ke školení.",
+        "language": "Základní jazyk názvu a popisu tohoto Live Training.",
+        "deliveryType": "Online relace jsou vzdálené. Offline relace vyžadují místo.",
+        "startsAt": "Plánovaný čas začátku zobrazený v kalendáři.",
+        "endsAt": "Plánovaný čas konce zobrazený v kalendáři.",
+        "maxParticipants": "Limit účastníků pro toto Live Training. Aktuální maximum je 100.",
+        "location": "Vyžadováno pouze pro offline školení.",
+        "viewerPermissions": "Určuje, co mohou studenti používat při připojení jako diváci.",
+        "microphoneEnabled": "Povolí divákům používat mikrofon během relace.",
+        "cameraEnabled": "Povolí divákům používat kameru během relace."
+      },
+      "validation": {
+        "titleRequired": "Název je povinný.",
+        "invalidDateRange": "Čas konce musí být po začátku.",
+        "locationRequired": "Místo je pro offline školení povinné."
+      }
+    },
+    "details": {
+      "title": "Event details",
+      "description": "Calendar event metadata",
+      "unknown": "Unknown",
+      "author": "Author: {{name}}",
+      "trainers": "{{count}} trainer",
+      "trainers_plural": "{{count}} trainers",
+      "noTrainers": "No additional trainers",
+      "action": {
+        "edit": "Edit event",
+        "goToLiveTraining": "Go to Live Training"
+      },
+      "sourceType": {
+        "liveTraining": "Live Training"
+      },
+      "field": {
+        "time": "Time",
+        "training": "Training",
+        "linkedCourses": "Linked courses",
+        "location": "Location",
+        "people": "People"
+      },
+      "deliveryType": {
+        "online": "Online",
+        "offline": "Offline"
+      },
+      "status": {
+        "scheduled": "Scheduled",
+        "cancelled": "Cancelled",
+        "ended": "Ended",
+        "expired": "Expired"
+      },
+      "role": {
+        "admin": "Admin",
+        "author": "Author",
+        "trainer": "Trainer",
+        "observer": "Observer"
+      }
+    }
+  },
+  "liveTrainingView": {
+    "title": "Live Training",
+    "description": "This page will contain the full Live Training workspace.",
+    "errors": {
+      "idRequired": "Live Training id is required."
+    },
+    "status": {
+      "scheduled": "Scheduled",
+      "active": "Active",
+      "ended": "Ended",
+      "cancelled": "Cancelled",
+      "expired": "Expired"
+    },
+    "deliveryType": {
+      "online": "Online",
+      "offline": "Offline"
+    },
+    "visibility": {
+      "all": "All users",
+      "linked_courses": "Linked courses"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "start": "Start session",
+      "join": "Join session",
+      "finish": "Finish session"
+    },
+    "stage": {
+      "preview": "Session preview",
+      "activeTitle": "Live session is active",
+      "waitingTitle": "Session is waiting",
+      "runtimeDeferred": "Meeting runtime will be connected in a later slice. Media devices are not started from this preview.",
+      "activeBadge": "Active",
+      "waitingBadge": "Waiting",
+      "participants": "Participants",
+      "viewerMic": "Viewer microphone",
+      "viewerCamera": "Viewer camera",
+      "scheduleTooltip": "Planned training time",
+      "timezoneTooltip": "Training timezone",
+      "maxParticipantsTooltip": "Maximum participants",
+      "locationTooltip": "Training location",
+      "offlineTitle": "Offline training",
+      "locationMissing": "Location has not been set."
+    },
+    "sidebar": {
+      "lifecycle": "Session lifecycle",
+      "status": "Status",
+      "participants": "Participants",
+      "peak": "Peak",
+      "people": "People",
+      "author": "Author",
+      "trainer": "Trainer",
+      "trainers": "Trainers",
+      "noTrainers": "No trainers assigned.",
+      "unknownUser": "Unknown user",
+      "details": "Training details",
+      "maxParticipants": "Max participants",
+      "visibility": "Visibility",
+      "courses": "Linked courses",
+      "location": "Location"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "files": "Files",
+      "attendance": "Attendance",
+      "settings": "Settings"
+    },
+    "files": {
+      "title": "Live Training files",
+      "description": "Materials are split by when students should use them.",
+      "beforeHeading": "Before training",
+      "beforeDescription": "Materials available before the training starts.",
+      "afterHeading": "After training",
+      "afterDescription": "Materials available after the training is finished.",
+      "empty": "No files attached yet.",
+      "afterLocked": "Post-session files unlock when the training is finished."
+    },
+    "attendance": {
+      "title": "Attendance",
+      "description": "Attendance and participant intervals will be implemented in the runtime slice."
+    },
+    "settings": {
+      "title": "Settings",
+      "description": "Less frequently used session settings will live here."
+    },
+    "boolean": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "deleteDialog": {
+      "title": "Smazat Live Training?",
+      "description": "Live Training bude zrušen a odebrán z kalendáře. Tuto akci nelze vrátit zpět.",
+      "toast": {
+        "success": "Live Training byl smazán."
+      }
+    },
+    "edit": {
+      "saveChanges": "Uložit změny",
+      "toast": {
+        "success": "Live Training byl aktualizován."
+      }
     }
   },
   "newsView": {
@@ -3497,6 +3693,17 @@
       "ownerNotAdmin": "Vlastník klíče API již nemá oprávnění správce",
       "missingApiKeyHeader": "Chybí hlavička X-API-Key",
       "missingTenantIdHeader": "Chybí hlavička X-Tenant-Id"
+    }
+  },
+  "liveTraining": {
+    "errors": {
+      "invalidLocalizedField": "Zadejte platný text pro vybraný jazyk.",
+      "notFound": "Live Training nebyl nalezen.",
+      "invalidDateRange": "Zadejte datum začátku i konce, nebo nechte obě pole prázdná.",
+      "invalidSchedule": "Čas konce musí být po čase začátku.",
+      "invalidTrainer": "Jeden nebo více vybraných trenérů nebylo nalezeno.",
+      "invalidCourse": "Jeden nebo více propojených kurzů nebylo nalezeno.",
+      "invalidResource": "Jeden nebo více vybraných zdrojů nebylo nalezeno."
     }
   }
 }

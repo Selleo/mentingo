@@ -21,6 +21,7 @@ import { and, eq, gt, isNull, lt } from "drizzle-orm";
 import { buildJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { hasAnyPermission, hasPermission } from "src/common/permissions/permission.utils";
+import { FileService } from "src/file/file.service";
 import { calendarEvents, liveTrainingLinks, liveTrainings } from "src/storage/schema";
 
 import { LiveTrainingRepository } from "./live-training.repository";
@@ -46,7 +47,10 @@ import type { CurrentUserType } from "src/common/types/current-user.type";
 
 @Injectable()
 export class LiveTrainingService {
-  constructor(private readonly liveTrainingRepository: LiveTrainingRepository) {}
+  constructor(
+    private readonly liveTrainingRepository: LiveTrainingRepository,
+    private readonly fileService: FileService,
+  ) {}
 
   async getLiveTrainings(
     query: LiveTrainingListQuery,
@@ -351,6 +355,10 @@ export class LiveTrainingService {
       row.authorId === currentUser.userId ||
       trainers.some((trainer) => trainer.id === currentUser.userId);
     const visibleMaterials = this.getVisibleMaterials(materials, row.status, isPrivilegedViewer);
+    const [authorProfilePictureUrl, trainersWithProfilePictures] = await Promise.all([
+      this.getProfilePictureUrl(row.authorAvatarReference),
+      this.getTrainersWithProfilePictureUrls(trainers),
+    ]);
 
     return {
       id: row.id,
@@ -373,9 +381,9 @@ export class LiveTrainingService {
       author: {
         id: row.authorId,
         fullName: row.authorName,
-        email: row.authorEmail,
+        profilePictureUrl: authorProfilePictureUrl,
       },
-      trainers,
+      trainers: trainersWithProfilePictures,
       linkedCourses,
       materials: visibleMaterials,
     };
@@ -455,6 +463,23 @@ export class LiveTrainingService {
         description: material.description || null,
         relationshipType,
       }));
+  }
+
+  private async getTrainersWithProfilePictureUrls(
+    trainers: Awaited<ReturnType<LiveTrainingRepository["getLiveTrainingTrainerRows"]>>,
+  ) {
+    return Promise.all(
+      trainers.map(async ({ avatarReference, ...trainer }) => ({
+        ...trainer,
+        profilePictureUrl: await this.getProfilePictureUrl(avatarReference),
+      })),
+    );
+  }
+
+  private async getProfilePictureUrl(avatarReference: string | null) {
+    if (!avatarReference) return null;
+
+    return this.fileService.getFileUrl(avatarReference);
   }
 
   private canManage(currentUser: CurrentUserType) {

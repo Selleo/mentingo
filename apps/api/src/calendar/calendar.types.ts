@@ -1,5 +1,4 @@
 import type {
-  CalendarEventSourceRole,
   CalendarEventSourceType,
   CalendarEventStatus,
   LiveTrainingDeliveryType,
@@ -35,6 +34,7 @@ export type CalendarEventNormalizedRow = {
   startsAt: string;
   endsAt: string;
   timezone: string;
+  location: string | null;
   status: CalendarEventStatus;
   payload: CalendarEventSourcePayload;
   authorId: UUIDType;
@@ -83,12 +83,4 @@ export type CalendarEventLatestSessionRow = {
 export type CalendarEventRoleContext = {
   authorId: UUIDType;
   trainerIds: UUIDType[];
-};
-
-export type CalendarEventActionContext = {
-  sourceRole: CalendarEventSourceRole;
-  sourceStatus: LiveTrainingStatus;
-  startsAt: string;
-  canManage: boolean;
-  canUpdateOwn: boolean;
 };

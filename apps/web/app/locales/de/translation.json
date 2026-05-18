@@ -318,6 +318,202 @@
       "monthShort": "M",
       "weekShort": "W",
       "dayShort": "T"
+    },
+    "create": {
+      "title": "Zum Kalender hinzufügen",
+      "description": "Wählen Sie aus, was Sie für die ausgewählte Zeit hinzufügen möchten.",
+      "noOptions": "Es sind keine Kalenderelemente zum Erstellen verfügbar.",
+      "submit": "Live Training erstellen",
+      "toast": {
+        "success": "Live Training wurde erstellt."
+      },
+      "liveTrainingOption": {
+        "title": "Live Training",
+        "description": "Planen Sie eine Online- oder Offline-Schulung."
+      },
+      "field": {
+        "title": "Titel",
+        "description": "Beschreibung",
+        "language": "Sprache",
+        "deliveryType": "Durchführungsart",
+        "startsAt": "Beginnt um",
+        "endsAt": "Endet um",
+        "maxParticipants": "Max. Teilnehmer",
+        "location": "Ort",
+        "viewerPermissions": "Zuschauerberechtigungen",
+        "microphoneEnabled": "Mikrofon",
+        "cameraEnabled": "Kamera"
+      },
+      "placeholder": {
+        "title": "Trainingstitel",
+        "description": "Optionale Sitzungsbeschreibung",
+        "location": "Raum, Adresse oder Treffpunkt"
+      },
+      "deliveryType": {
+        "online": "Online",
+        "offline": "Offline"
+      },
+      "tooltip": {
+        "title": "Dieser Name wird im Kalender und in den Live-Training-Details angezeigt.",
+        "description": "Optionaler Kontext für Teilnehmende vor dem Beitritt.",
+        "language": "Die Basissprache für Titel und Beschreibung dieses Live Trainings.",
+        "deliveryType": "Online-Sitzungen finden remote statt. Offline-Sitzungen benötigen einen Ort.",
+        "startsAt": "Die geplante Startzeit im Kalender.",
+        "endsAt": "Die geplante Endzeit im Kalender.",
+        "maxParticipants": "Das Teilnehmerlimit für dieses Live Training. Das aktuelle Maximum ist 100.",
+        "location": "Nur für Offline-Trainings erforderlich.",
+        "viewerPermissions": "Steuert, was Studierende beim Beitritt als Zuschauer nutzen können.",
+        "microphoneEnabled": "Erlaubt Zuschauern, während der Sitzung ihr Mikrofon zu verwenden.",
+        "cameraEnabled": "Erlaubt Zuschauern, während der Sitzung ihre Kamera zu verwenden."
+      },
+      "validation": {
+        "titleRequired": "Titel ist erforderlich.",
+        "invalidDateRange": "Die Endzeit muss nach der Startzeit liegen.",
+        "locationRequired": "Für Offline-Training ist ein Ort erforderlich."
+      }
+    },
+    "details": {
+      "title": "Event details",
+      "description": "Calendar event metadata",
+      "unknown": "Unknown",
+      "author": "Author: {{name}}",
+      "trainers": "{{count}} trainer",
+      "trainers_plural": "{{count}} trainers",
+      "noTrainers": "No additional trainers",
+      "action": {
+        "edit": "Edit event",
+        "goToLiveTraining": "Go to Live Training"
+      },
+      "sourceType": {
+        "liveTraining": "Live Training"
+      },
+      "field": {
+        "time": "Time",
+        "training": "Training",
+        "linkedCourses": "Linked courses",
+        "location": "Location",
+        "people": "People"
+      },
+      "deliveryType": {
+        "online": "Online",
+        "offline": "Offline"
+      },
+      "status": {
+        "scheduled": "Scheduled",
+        "cancelled": "Cancelled",
+        "ended": "Ended",
+        "expired": "Expired"
+      },
+      "role": {
+        "admin": "Admin",
+        "author": "Author",
+        "trainer": "Trainer",
+        "observer": "Observer"
+      }
+    }
+  },
+  "liveTrainingView": {
+    "title": "Live Training",
+    "description": "This page will contain the full Live Training workspace.",
+    "errors": {
+      "idRequired": "Live Training id is required."
+    },
+    "status": {
+      "scheduled": "Scheduled",
+      "active": "Active",
+      "ended": "Ended",
+      "cancelled": "Cancelled",
+      "expired": "Expired"
+    },
+    "deliveryType": {
+      "online": "Online",
+      "offline": "Offline"
+    },
+    "visibility": {
+      "all": "All users",
+      "linked_courses": "Linked courses"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "start": "Start session",
+      "join": "Join session",
+      "finish": "Finish session"
+    },
+    "stage": {
+      "preview": "Session preview",
+      "activeTitle": "Live session is active",
+      "waitingTitle": "Session is waiting",
+      "runtimeDeferred": "Meeting runtime will be connected in a later slice. Media devices are not started from this preview.",
+      "activeBadge": "Active",
+      "waitingBadge": "Waiting",
+      "participants": "Participants",
+      "viewerMic": "Viewer microphone",
+      "viewerCamera": "Viewer camera",
+      "scheduleTooltip": "Planned training time",
+      "timezoneTooltip": "Training timezone",
+      "maxParticipantsTooltip": "Maximum participants",
+      "locationTooltip": "Training location",
+      "offlineTitle": "Offline training",
+      "locationMissing": "Location has not been set."
+    },
+    "sidebar": {
+      "lifecycle": "Session lifecycle",
+      "status": "Status",
+      "participants": "Participants",
+      "peak": "Peak",
+      "people": "People",
+      "author": "Author",
+      "trainer": "Trainer",
+      "trainers": "Trainers",
+      "noTrainers": "No trainers assigned.",
+      "unknownUser": "Unknown user",
+      "details": "Training details",
+      "maxParticipants": "Max participants",
+      "visibility": "Visibility",
+      "courses": "Linked courses",
+      "location": "Location"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "files": "Files",
+      "attendance": "Attendance",
+      "settings": "Settings"
+    },
+    "files": {
+      "title": "Live Training files",
+      "description": "Materials are split by when students should use them.",
+      "beforeHeading": "Before training",
+      "beforeDescription": "Materials available before the training starts.",
+      "afterHeading": "After training",
+      "afterDescription": "Materials available after the training is finished.",
+      "empty": "No files attached yet.",
+      "afterLocked": "Post-session files unlock when the training is finished."
+    },
+    "attendance": {
+      "title": "Attendance",
+      "description": "Attendance and participant intervals will be implemented in the runtime slice."
+    },
+    "settings": {
+      "title": "Settings",
+      "description": "Less frequently used session settings will live here."
+    },
+    "boolean": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "deleteDialog": {
+      "title": "Live Training löschen?",
+      "description": "Das Live Training wird abgesagt und aus dem Kalender entfernt. Diese Aktion kann nicht rückgängig gemacht werden.",
+      "toast": {
+        "success": "Live Training wurde gelöscht."
+      }
+    },
+    "edit": {
+      "saveChanges": "Änderungen speichern",
+      "toast": {
+        "success": "Live Training wurde aktualisiert."
+      }
     }
   },
   "newsView": {
@@ -2847,7 +3043,6 @@
         "to": "Bis Datum"
       }
     },
-
     "description": "Zeitachse der Änderungen auf der Plattform als einfacher aufklappbarer Feed.",
     "breadcrumbs": {
       "activityLogs": "Aktivitätsprotokoll"
@@ -3498,6 +3693,17 @@
       "ownerNotAdmin": "Der Besitzer des API-Schlüssels verfügt nicht mehr über Administratorberechtigungen",
       "missingApiKeyHeader": "Fehlender X-API-Key-Header",
       "missingTenantIdHeader": "Fehlender X-Tenant-Id-Header"
+    }
+  },
+  "liveTraining": {
+    "errors": {
+      "invalidLocalizedField": "Gib gültigen Text für die ausgewählte Sprache ein.",
+      "notFound": "Live Training wurde nicht gefunden.",
+      "invalidDateRange": "Gib Start- und Enddatum gemeinsam an oder lasse beide leer.",
+      "invalidSchedule": "Die Endzeit muss nach der Startzeit liegen.",
+      "invalidTrainer": "Ein oder mehrere ausgewählte Trainer wurden nicht gefunden.",
+      "invalidCourse": "Ein oder mehrere verknüpfte Kurse wurden nicht gefunden.",
+      "invalidResource": "Eine oder mehrere ausgewählte Ressourcen wurden nicht gefunden."
     }
   }
 }

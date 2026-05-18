@@ -2,56 +2,61 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import { SUPPORTED_LANGUAGES } from "@repo/shared";
-import { useMemo, useState } from "react";
+import { PERMISSIONS } from "@repo/shared";
+import { useMemo, useReducer } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useCalendarEvents } from "~/api/queries/calendar/useCalendarEvents";
+import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { PageWrapper } from "~/components/PageWrapper";
-import { isSupportedLanguage } from "~/utils/browser-language";
+import { usePermissions } from "~/hooks/usePermissions";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import calendarStyles from "./calendar.css?url";
+import {
+  CALENDAR_ACTION_TYPES,
+  calendarReducer,
+  getSelectedRangeFromDateClick,
+  getSelectedRangeFromSelection,
+  getVisibleRangeFromDatesSet,
+  initialCalendarState,
+} from "./calendar.reducer";
+import { CalendarCreateLiveTrainingDialog } from "./components/CalendarCreateLiveTrainingDialog";
+import { CalendarEventDetailsDialog } from "./components/CalendarEventDetailsDialog";
 
-import type { DatesSetArg, EventInput } from "@fullcalendar/core";
+import type { DatesSetArg, DateSelectArg, EventClickArg, EventInput } from "@fullcalendar/core";
+import type { DateClickArg } from "@fullcalendar/interaction";
 import type { LinksFunction, MetaFunction } from "@remix-run/node";
-import type { SupportedLanguages } from "@repo/shared";
 
 export const links: LinksFunction = () => [{ rel: "stylesheet", href: calendarStyles }];
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.calendar");
 
-type CalendarRange = {
-  start: string;
-  end: string;
-};
-
 const getBrowserTimezone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-const resolveLanguage = (language: string): SupportedLanguages => {
-  if (isSupportedLanguage(language)) return language;
-
-  const baseLanguage = language.split("-")[0];
-  if (isSupportedLanguage(baseLanguage)) return baseLanguage;
-
-  return SUPPORTED_LANGUAGES.EN;
-};
-
 export default function CalendarPage() {
-  const { t, i18n } = useTranslation();
-  const [range, setRange] = useState<CalendarRange>();
+  const { t } = useTranslation();
+  const [calendarState, dispatchCalendarAction] = useReducer(calendarReducer, initialCalendarState);
 
-  const language = resolveLanguage(i18n.language);
+  const language = useLanguageStore((state) => state.language);
+  const { data: globalSettings } = useGlobalSettings();
+  const { hasAccess: hasLiveTrainingCreateAccess } = usePermissions({
+    required: PERMISSIONS.LIVE_TRAINING_CREATE,
+  });
   const timezone = useMemo(() => getBrowserTimezone(), []);
+  const canCreateLiveTraining =
+    Boolean(globalSettings?.liveTrainingEnabled) && hasLiveTrainingCreateAccess;
+  const visibleRange = calendarState.visibleRange;
 
   const { data: events = [] } = useCalendarEvents(
     {
-      start: range?.start,
-      end: range?.end,
+      start: visibleRange?.start,
+      end: visibleRange?.end,
       language,
       timezone,
     },
-    { enabled: Boolean(range?.start && range?.end) },
+    { enabled: Boolean(visibleRange?.start && visibleRange?.end) },
   );
 
   const calendarEvents = useMemo<EventInput[]>(
@@ -72,9 +77,30 @@ export default function CalendarPage() {
   );
 
   const handleDatesSet = (dateInfo: DatesSetArg) => {
-    setRange({
-      start: dateInfo.startStr,
-      end: dateInfo.endStr,
+    dispatchCalendarAction({
+      type: CALENDAR_ACTION_TYPES.VISIBLE_RANGE_CHANGED,
+      range: getVisibleRangeFromDatesSet(dateInfo),
+    });
+  };
+
+  const handleDateClick = (dateInfo: DateClickArg) => {
+    dispatchCalendarAction({
+      type: CALENDAR_ACTION_TYPES.CREATE_RANGE_SELECTED,
+      selectedRange: getSelectedRangeFromDateClick(dateInfo),
+    });
+  };
+
+  const handleSelect = (dateInfo: DateSelectArg) => {
+    dispatchCalendarAction({
+      type: CALENDAR_ACTION_TYPES.CREATE_RANGE_SELECTED,
+      selectedRange: getSelectedRangeFromSelection(dateInfo),
+    });
+  };
+
+  const handleEventClick = (eventInfo: EventClickArg) => {
+    dispatchCalendarAction({
+      type: CALENDAR_ACTION_TYPES.EVENT_DETAILS_SELECTED,
+      eventId: eventInfo.event.id,
     });
   };
 
@@ -90,13 +116,20 @@ export default function CalendarPage() {
             initialView="dayGridMonth"
             events={calendarEvents}
             datesSet={handleDatesSet}
+            dateClick={handleDateClick}
+            select={handleSelect}
+            eventClick={handleEventClick}
+            selectable
+            selectMirror
+            unselectAuto
             height="100%"
             expandRows
             firstDay={1}
             locale={language}
-            timeZone={timezone}
+            timeZone="local"
             nowIndicator
             dayMaxEvents={3}
+            displayEventTime={false}
             headerToolbar={{
               left: "prev,next today",
               center: "title",
@@ -119,6 +152,29 @@ export default function CalendarPage() {
           />
         </div>
       </section>
+      <CalendarCreateLiveTrainingDialog
+        open={calendarState.isCreateDialogOpen}
+        selectedRange={calendarState.selectedRange}
+        timezone={timezone}
+        canCreateLiveTraining={canCreateLiveTraining}
+        onOpenChange={(open) =>
+          dispatchCalendarAction({
+            type: CALENDAR_ACTION_TYPES.CREATE_DIALOG_OPEN_CHANGED,
+            open,
+          })
+        }
+      />
+      <CalendarEventDetailsDialog
+        open={calendarState.isDetailsDialogOpen}
+        eventId={calendarState.selectedEventId}
+        language={language}
+        onOpenChange={(open) =>
+          dispatchCalendarAction({
+            type: CALENDAR_ACTION_TYPES.DETAILS_DIALOG_OPEN_CHANGED,
+            open,
+          })
+        }
+      />
     </PageWrapper>
   );
 }

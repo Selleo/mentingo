@@ -113,8 +113,8 @@ export class LiveTrainingRepository {
         sequence: calendarEvents.sequence,
         settings: liveTrainings.settings,
         metadata: liveTrainings.metadata,
-        authorName: sql<string>`concat_ws(' ', ${users.firstName}, ${users.lastName})`,
-        authorEmail: users.email,
+        authorName: sql<string | null>`nullif(concat_ws(' ', ${users.firstName}, ${users.lastName}), '')`,
+        authorAvatarReference: users.avatarReference,
       })
       .from(liveTrainings)
       .innerJoin(calendarEvents, eq(calendarEvents.id, liveTrainings.calendarEventId))
@@ -169,8 +169,8 @@ export class LiveTrainingRepository {
     return this.db
       .select({
         id: users.id,
-        fullName: sql<string>`concat_ws(' ', ${users.firstName}, ${users.lastName})`,
-        email: users.email,
+        fullName: sql<string | null>`nullif(concat_ws(' ', ${users.firstName}, ${users.lastName}), '')`,
+        avatarReference: users.avatarReference,
       })
       .from(liveTrainingMembers)
       .innerJoin(users, eq(users.id, liveTrainingMembers.userId))
