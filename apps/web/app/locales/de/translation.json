@@ -269,7 +269,6 @@
     "scorm": {
       "title": "SCORM",
       "description": "Erstellen Sie einen Kurs aus einem SCORM-1.2-Paket.",
-      "badge": "Platzhalter",
       "features": {
         "import": "Aus einem SCORM-1.2-ZIP-Paket erstellt",
         "tracking": "SCO-Abschluss und Laufzeitstatus unterstützt",

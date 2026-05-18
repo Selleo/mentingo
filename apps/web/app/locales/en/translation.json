@@ -269,7 +269,6 @@
     "scorm": {
       "title": "SCORM",
       "description": "Create a course from a SCORM 1.2 package.",
-      "badge": "Placeholder",
       "features": {
         "import": "Built from a SCORM 1.2 .zip package",
         "tracking": "SCO completion and runtime tracking supported",

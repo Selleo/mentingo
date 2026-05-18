@@ -270,7 +270,6 @@
     "scorm": {
       "title": "SCORM",
       "description": "Utwórz kurs z pakietu SCORM 1.2.",
-      "badge": "Placeholder",
       "features": {
         "import": "Tworzony z pakietu SCORM 1.2 .zip",
         "tracking": "Obsługa śledzenia ukończenia SCO i stanu uruchomieniowego",

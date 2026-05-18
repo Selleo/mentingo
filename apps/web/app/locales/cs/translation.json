@@ -269,7 +269,6 @@
     "scorm": {
       "title": "SCORM",
       "description": "Vytvořte kurz z balíčku SCORM 1.2.",
-      "badge": "Placeholder",
       "features": {
         "import": "Vytvořeno z balíčku SCORM 1.2 .zip",
         "tracking": "Podpora dokončení SCO a runtime stavu",

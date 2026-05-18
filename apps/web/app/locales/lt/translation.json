@@ -269,7 +269,6 @@
     "scorm": {
       "title": "SCORM",
       "description": "Sukurkite kursą iš SCORM 1.2 paketo.",
-      "badge": "Placeholder",
       "features": {
         "import": "Kuriama iš SCORM 1.2 .zip paketo",
         "tracking": "Palaikomas SCO užbaigimo ir vykdymo būsenos sekimas",
