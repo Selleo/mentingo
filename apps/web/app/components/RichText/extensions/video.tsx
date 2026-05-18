@@ -1,4 +1,3 @@
-import { VIDEO_AUTOPLAY } from "@repo/shared";
 import { Node, mergeAttributes } from "@tiptap/core";
 import { NodeViewWrapper, ReactNodeViewRenderer } from "@tiptap/react";
 import { GripVertical, Video as VideoIcon, X } from "lucide-react";
@@ -24,14 +23,11 @@ import {
   type VideoSourceType,
 } from "./utils/video";
 
-import type { VideoAutoplay } from "@repo/shared";
 import type { NodeConfig } from "@tiptap/core";
 import type { NodeViewProps } from "@tiptap/react";
-import type { VideoEndedHandler } from "~/components/VideoPlayer/VideoPlayer.types";
 
 type VideoViewerOptions = {
-  onVideoEnded?: VideoEndedHandler;
-  resolveAutoplay?: (autoplay: VideoAutoplay) => VideoAutoplay;
+  onVideoEnded?: (index: number | null) => void;
 };
 
 type VideoEditorOptions = RichTextResourceNodeOptions;
@@ -63,7 +59,6 @@ const getVideoDataAttributes = (attrs: VideoEmbedAttrs) => ({
   "data-source-type": attrs.sourceType,
   "data-provider": attrs.provider,
   "data-src": attrs.src ?? "",
-  "data-autoplay": attrs.autoplay,
   ...(attrs.index !== null ? { "data-index": attrs.index } : {}),
   ...(attrs.hasError ? { "data-error": "true" } : {}),
   ...getVideoUploadNodeDataAttributes(attrs),
@@ -198,8 +193,7 @@ const VideoEditorView = ({ node, editor, getPos }: NodeViewProps) => {
 
 const VideoViewerView = ({ node, extension }: NodeViewProps) => {
   const attrs = normalizeVideoEmbedAttributes(node.attrs);
-
-  const { onVideoEnded, resolveAutoplay } = extension.options as VideoViewerOptions;
+  const { onVideoEnded } = extension.options as VideoViewerOptions;
 
   if (!attrs.src) return null;
 
@@ -207,14 +201,7 @@ const VideoViewerView = ({ node, extension }: NodeViewProps) => {
 
   return (
     <NodeViewWrapper className="video-node">
-      <Video
-        src={attrs.src}
-        isExternal={attrs.sourceType === "external"}
-        onVideoEnded={onVideoEnded}
-        provider={attrs.provider}
-        autoplay={resolveAutoplay?.(attrs.autoplay) ?? attrs.autoplay}
-        index={attrs.index}
-      />
+      <Video src={attrs.src} provider={attrs.provider} index={attrs.index} onEnded={onVideoEnded} />
     </NodeViewWrapper>
   );
 };
@@ -239,9 +226,6 @@ const baseVideoNodeConfig: NodeConfig = {
       },
       hasError: {
         default: false,
-      },
-      autoplay: {
-        default: VIDEO_AUTOPLAY.NO_AUTOPLAY,
       },
       index: {
         default: null,
@@ -284,7 +268,6 @@ const baseVideoNodeConfig: NodeConfig = {
       sourceType,
       provider,
       hasError,
-      autoplay,
       index,
       uploadId,
       uploadLabel,
@@ -298,7 +281,6 @@ const baseVideoNodeConfig: NodeConfig = {
       sourceType: sourceType as VideoSourceType,
       provider: provider as VideoProvider,
       hasError: hasError as boolean,
-      autoplay: autoplay as VideoAutoplay,
       index: index as number | string | null,
       ...normalizeVideoUploadNodeAttrs({
         uploadId: typeof uploadId === "string" ? uploadId : null,

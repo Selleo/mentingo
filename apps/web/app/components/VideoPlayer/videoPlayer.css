@@ -18,6 +18,7 @@
 
 .mentingo-video-js .vjs-tech {
   border-radius: inherit;
+  object-fit: contain;
 }
 
 .mentingo-video-js .vjs-control-bar {
@@ -34,41 +35,29 @@
   display: flex;
   align-items: center;
   gap: 0.125rem;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 180ms ease;
+}
+
+.mentingo-video-js.vjs-controls-enabled .vjs-control-bar {
+  display: flex !important;
+  visibility: visible;
+}
+
+.mentingo-video-player--controls-hidden {
+  cursor: none;
+}
+
+.mentingo-video-player--controls-hidden .mentingo-video-js .vjs-control-bar {
+  opacity: 0 !important;
+  pointer-events: none;
 }
 
 .mentingo-video-js .vjs-control-bar,
-.mentingo-video-js .vjs-big-play-button,
 .mentingo-video-js .vjs-loading-spinner {
   z-index: 2;
-}
-
-.mentingo-video-js .vjs-big-play-button {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 4rem;
-  height: 4rem;
-  border-radius: 50%;
-  background: var(--vjs-theme-primary);
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.mentingo-video-js .vjs-big-play-button:hover {
-  opacity: 0.9;
-}
-
-.mentingo-video-js .vjs-big-play-button .vjs-icon-placeholder:before {
-  font-size: 1.75rem;
-  color: var(--vjs-theme-contrast);
-  position: static;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
 }
 
 .mentingo-video-js .vjs-button {
@@ -112,8 +101,6 @@
 }
 
 .mentingo-video-js .vjs-button > .vjs-icon-placeholder:before,
-.mentingo-video-js .vjs-icon-fullscreen-enter:before,
-.mentingo-video-js .vjs-icon-fullscreen-exit:before,
 .mentingo-video-js .vjs-icon-volume-high:before,
 .mentingo-video-js .vjs-icon-volume-mid:before,
 .mentingo-video-js .vjs-icon-volume-low:before,
@@ -228,10 +215,6 @@
   transition: none !important;
 }
 
-.mentingo-video-js .vjs-fullscreen-control {
-  margin-left: auto;
-}
-
 .mentingo-video-js .vjs-menu .vjs-menu-content {
   background: var(--vjs-surface);
   border: 1px solid var(--vjs-border);
@@ -286,14 +269,5 @@
   .mentingo-video-js .vjs-volume-panel .vjs-volume-control,
   .mentingo-video-js .vjs-volume-panel .vjs-volume-control.vjs-volume-horizontal {
     width: 3.25rem !important;
-  }
-
-  .mentingo-video-js .vjs-big-play-button {
-    width: 3.5rem;
-    height: 3.5rem;
-  }
-
-  .mentingo-video-js .vjs-big-play-button .vjs-icon-placeholder:before {
-    font-size: 1.5rem;
   }
 }

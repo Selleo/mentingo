@@ -13,7 +13,6 @@ import {
   buildRichTextFileUploadHandler,
   RICH_TEXT_ACCEPTED_FILE_TYPES,
 } from "~/hooks/buildRichTextFileUploadHandler";
-import { useClearVideoOnTabChange } from "~/hooks/useClearVideoOnTabChange";
 import { useEntityResourceUpload } from "~/hooks/useEntityResourceUpload";
 import { useHandleImageUpload } from "~/hooks/useHandleImageUpload";
 import { useRichTextUploadQueue } from "~/hooks/useRichTextUploadQueue";
@@ -91,8 +90,6 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
     { language },
     { enabled: isEdit },
   );
-
-  useClearVideoOnTabChange(tabValue, "editor");
 
   const { mutateAsync: updateNews } = useUpdateNews();
   const { uploadResource } = useEntityResourceUpload();

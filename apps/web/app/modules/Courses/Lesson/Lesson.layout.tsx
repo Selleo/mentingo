@@ -2,8 +2,6 @@ import { Outlet, redirect } from "@remix-run/react";
 
 import { currentUserQueryOptions } from "~/api/queries/useCurrentUser";
 import { queryClient } from "~/api/queryClient";
-import { VideoProvider } from "~/components/VideoPlayer/VideoPlayerContext";
-import { VideoPlayerSingleton } from "~/components/VideoPlayer/VideoPlayerSingleton";
 import { RouteGuard } from "~/Guards/RouteGuard";
 import { saveEntryToNavigationHistory } from "~/utils/saveEntryToNavigationHistory";
 
@@ -37,13 +35,10 @@ export const clientLoader = async ({ request }: { request: Request }) => {
 
 export default function LessonLayout() {
   return (
-    <VideoProvider>
-      <VideoPlayerSingleton />
-      <main className="relative flex-1 overflow-y-auto bg-primary-50">
-        <RouteGuard>
-          <Outlet />
-        </RouteGuard>
-      </main>
-    </VideoProvider>
+    <main className="relative flex-1 overflow-y-auto bg-primary-50">
+      <RouteGuard>
+        <Outlet />
+      </RouteGuard>
+    </main>
   );
 }

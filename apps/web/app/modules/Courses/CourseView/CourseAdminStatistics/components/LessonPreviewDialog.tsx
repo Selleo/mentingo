@@ -8,7 +8,6 @@ import { Button } from "~/components/ui/button";
 import { CircularProgress } from "~/components/ui/circular-progress";
 import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
 import { UserAvatar } from "~/components/UserProfile/UserAvatar";
-import { VideoProvider } from "~/components/VideoPlayer/VideoPlayerContext";
 import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 import { CourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import { LessonContent } from "~/modules/Courses/Lesson/LessonContent";
@@ -131,25 +130,23 @@ export default function LessonPreviewDialog({
               </div>
             </div>
           </div>
-          <VideoProvider>
-            <CourseAccessProvider course={course} forcePreviewMode>
-              <LessonContent
-                lesson={lesson}
-                course={course}
-                previewUser={{
-                  firstName,
-                  lastName,
-                  profilePictureUrl,
-                }}
-                lessonsAmount={currentChapter?.lessons.length ?? 0}
-                handleNext={() => {}}
-                handlePrevious={() => {}}
-                isLastLesson={true}
-                isFirstLesson={true}
-                lessonLoading={isLoadingLesson}
-              />
-            </CourseAccessProvider>
-          </VideoProvider>
+          <CourseAccessProvider course={course} forcePreviewMode>
+            <LessonContent
+              lesson={lesson}
+              course={course}
+              previewUser={{
+                firstName,
+                lastName,
+                profilePictureUrl,
+              }}
+              lessonsAmount={currentChapter?.lessons.length ?? 0}
+              handleNext={() => {}}
+              handlePrevious={() => {}}
+              isLastLesson={true}
+              isFirstLesson={true}
+              lessonLoading={isLoadingLesson}
+            />
+          </CourseAccessProvider>
         </div>
       </DialogContent>
     </Dialog>
