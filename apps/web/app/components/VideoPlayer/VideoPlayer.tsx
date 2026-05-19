@@ -13,12 +13,15 @@ import "video.js/dist/video-js.css";
 import "videojs-youtube";
 import { cn } from "~/lib/utils";
 
+import { getVideoAspectRatio } from "./aspectRatio";
 import "./videojs-vimeo-tech";
 import "./videoPlayer.css";
 
+import type { VideoAspectRatio } from "./aspectRatio";
+
 interface VideoPlayerProps {
   url: string;
-  onAspectRatioChange?: (aspectRatio: string) => void;
+  onAspectRatioChange?: (aspectRatio: VideoAspectRatio) => void;
   onEnded?: () => void;
   autoPlay?: boolean;
   fill?: boolean;
@@ -59,9 +62,7 @@ const getPlayerAspectRatio = (player: VideoJSType) => {
   const width = player.videoWidth();
   const height = player.videoHeight();
 
-  if (!width || !height) return null;
-
-  return `${width} / ${height}`;
+  return getVideoAspectRatio(width, height);
 };
 
 export const VideoPlayer = ({
@@ -78,8 +79,13 @@ export const VideoPlayer = ({
   const videoRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<VideoJSType | null>(null);
   const lastSourceRef = useRef<string | null>(null);
+  const onAspectRatioChangeRef = useRef(onAspectRatioChange);
   const onEndedRef = useRef(onEnded);
   const controlsVisibilityTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    onAspectRatioChangeRef.current = onAspectRatioChange;
+  }, [onAspectRatioChange]);
 
   useEffect(() => {
     onEndedRef.current = onEnded;
@@ -145,15 +151,13 @@ export const VideoPlayer = ({
 
     player.on("loadedmetadata", () => {
       const aspectRatio = getPlayerAspectRatio(player);
-      if (aspectRatio) {
-        onAspectRatioChange?.(aspectRatio);
-      }
+      if (aspectRatio) onAspectRatioChangeRef.current?.(aspectRatio);
     });
 
     player.on("ended", () => {
       onEndedRef.current?.();
     });
-  }, [onAspectRatioChange, options]);
+  }, [options]);
 
   useEffect(() => {
     const player = playerRef.current;

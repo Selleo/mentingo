@@ -10,6 +10,7 @@ import {
   defaultClasses,
   contentVariantClasses,
 } from "./styles";
+import { RICH_TEXT_VIEWER_VARIANT, type RichTextViewerVariant } from "./viewerTypes";
 
 type ViewerProps = {
   content: string;
@@ -18,16 +19,6 @@ type ViewerProps = {
   variant?: RichTextViewerVariant;
   onVideoEnded?: (index: number | null) => void;
 };
-
-export const RICH_TEXT_VIEWER_VARIANT = {
-  DEFAULT: "default",
-  ARTICLE: "article",
-  NEWS: "news",
-  CONTENT: "content",
-} as const;
-
-type RichTextViewerVariant =
-  (typeof RICH_TEXT_VIEWER_VARIANT)[keyof typeof RICH_TEXT_VIEWER_VARIANT];
 
 const Viewer = ({
   content,

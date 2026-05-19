@@ -1,9 +1,14 @@
 import { VIDEO_EMBED_PROVIDERS } from "@repo/shared";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { useThumbnail } from "~/api/queries/useThumbnail";
 import { Icon } from "~/components/Icon";
 
+import {
+  DEFAULT_VIDEO_ASPECT_RATIO,
+  formatVideoAspectRatio,
+  getVideoAspectRatio,
+} from "./aspectRatio";
 import { VideoPlayer } from "./VideoPlayer";
 
 import type { KeyboardEvent, SyntheticEvent } from "react";
@@ -19,7 +24,7 @@ type Props = {
 
 export function Video({ src, url, provider, index = null, onEnded }: Props) {
   const [isActive, setIsActive] = useState(false);
-  const [aspectRatio, setAspectRatio] = useState("16 / 9");
+  const [aspectRatio, setAspectRatio] = useState(DEFAULT_VIDEO_ASPECT_RATIO);
 
   const { data: thumbnailUrl } = useThumbnail(src, provider);
 
@@ -34,9 +39,11 @@ export function Video({ src, url, provider, index = null, onEnded }: Props) {
 
   const handleThumbnailLoad = useCallback((event: SyntheticEvent<HTMLImageElement>) => {
     const { naturalWidth, naturalHeight } = event.currentTarget;
-    if (!naturalWidth || !naturalHeight) return;
 
-    setAspectRatio(`${naturalWidth} / ${naturalHeight}`);
+    const videoAspectRatio = getVideoAspectRatio(naturalWidth, naturalHeight);
+    if (!videoAspectRatio) return;
+
+    setAspectRatio(videoAspectRatio);
   }, []);
 
   const handleEnded = useCallback(() => {
@@ -52,10 +59,17 @@ export function Video({ src, url, provider, index = null, onEnded }: Props) {
     [handleActivate],
   );
 
+  const aspectRatioStyle = useMemo(
+    () => ({
+      aspectRatio: formatVideoAspectRatio(aspectRatio),
+    }),
+    [aspectRatio],
+  );
+
   return (
-    <div className="relative w-full" style={{ aspectRatio }}>
+    <div className="relative w-full" style={aspectRatioStyle}>
       {isActive && resolvedUrl ? (
-        <div className="relative w-full bg-black" style={{ aspectRatio }}>
+        <div className="relative w-full bg-black" style={aspectRatioStyle}>
           <VideoPlayer
             provider={resolvedProvider ?? VIDEO_EMBED_PROVIDERS.UNKNOWN}
             url={resolvedUrl}
@@ -68,7 +82,7 @@ export function Video({ src, url, provider, index = null, onEnded }: Props) {
       ) : (
         <div
           className="relative w-full cursor-pointer overflow-hidden bg-black"
-          style={{ aspectRatio }}
+          style={aspectRatioStyle}
           onClick={handleActivate}
           onKeyDown={handleKeyDown}
           role="button"

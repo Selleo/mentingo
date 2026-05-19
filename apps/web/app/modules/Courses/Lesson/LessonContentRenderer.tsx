@@ -1,7 +1,8 @@
 import { memo } from "react";
 import { match } from "ts-pattern";
 
-import Viewer, { RICH_TEXT_VIEWER_VARIANT } from "~/components/RichText/Viever";
+import Viewer from "~/components/RichText/Viever";
+import { RICH_TEXT_VIEWER_VARIANT } from "~/components/RichText/viewerTypes";
 
 import AiMentorLesson from "./AiMentorLesson/AiMentorLesson";
 import { EmbedLesson } from "./EmbedLesson/EmbedLesson";
