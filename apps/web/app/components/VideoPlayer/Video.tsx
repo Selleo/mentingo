@@ -8,10 +8,11 @@ import {
   DEFAULT_VIDEO_ASPECT_RATIO,
   formatVideoAspectRatio,
   getVideoAspectRatio,
+  isVerticalVideoAspectRatio,
 } from "./aspectRatio";
 import { VideoPlayer } from "./VideoPlayer";
 
-import type { KeyboardEvent, SyntheticEvent } from "react";
+import type { CSSProperties, KeyboardEvent, SyntheticEvent } from "react";
 import type { VideoProvider } from "~/components/RichText/extensions/utils/video";
 
 type Props = {
@@ -60,16 +61,26 @@ export function Video({ src, url, provider, index = null, onEnded }: Props) {
   );
 
   const aspectRatioStyle = useMemo(
-    () => ({
-      aspectRatio: formatVideoAspectRatio(aspectRatio),
-    }),
+    () =>
+      ({
+        aspectRatio: formatVideoAspectRatio(aspectRatio),
+      }) satisfies CSSProperties,
     [aspectRatio],
+  );
+  const isVerticalVideo = isVerticalVideoAspectRatio(aspectRatio);
+  const wrapperStyle = useMemo(
+    () =>
+      ({
+        ...aspectRatioStyle,
+        ...(isVerticalVideo ? { maxHeight: 600 } : {}),
+      }) satisfies CSSProperties,
+    [aspectRatioStyle, isVerticalVideo],
   );
 
   return (
-    <div className="relative w-full" style={aspectRatioStyle}>
+    <div className="relative w-full overflow-hidden bg-black" style={wrapperStyle}>
       {isActive && resolvedUrl ? (
-        <div className="relative w-full bg-black" style={aspectRatioStyle}>
+        <div className="relative size-full bg-black">
           <VideoPlayer
             provider={resolvedProvider ?? VIDEO_EMBED_PROVIDERS.UNKNOWN}
             url={resolvedUrl}
@@ -81,8 +92,7 @@ export function Video({ src, url, provider, index = null, onEnded }: Props) {
         </div>
       ) : (
         <div
-          className="relative w-full cursor-pointer overflow-hidden bg-black"
-          style={aspectRatioStyle}
+          className="relative size-full cursor-pointer overflow-hidden bg-black"
           onClick={handleActivate}
           onKeyDown={handleKeyDown}
           role="button"
@@ -100,7 +110,7 @@ export function Video({ src, url, provider, index = null, onEnded }: Props) {
               src={thumbnailUrl.url}
               alt={thumbnailUrl.url}
               onLoad={handleThumbnailLoad}
-              className="absolute inset-0 size-full object-cover"
+              className="absolute inset-0 size-full object-contain"
             />
           )}
         </div>

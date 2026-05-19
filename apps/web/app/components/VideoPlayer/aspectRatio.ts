@@ -18,3 +18,5 @@ export const getVideoAspectRatio = (width: number, height: number) => {
 
 export const formatVideoAspectRatio = ({ width, height }: VideoAspectRatio) =>
   `${width} / ${height}`;
+
+export const isVerticalVideoAspectRatio = ({ width, height }: VideoAspectRatio) => height > width;
