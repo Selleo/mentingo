@@ -388,6 +388,7 @@
       "noSearchResults": "Keine Suchergebnisse für:",
       "announcements": "Ankündigungen",
       "lessons": "Unterricht",
+      "learningPaths": "Lernpfade",
       "news": "Nachricht",
       "articles": "Artikel",
       "qa": "Fragen und Antworten"
@@ -2340,7 +2341,8 @@
       "qaSettingUpdatedSuccessfully": "Die QA-Einstellungen wurden erfolgreich aktualisiert",
       "ageLimitUpdatedSuccessfully": "Altersgrenze erfolgreich aktualisiert",
       "newsSettingUpdatedSuccessfully": "Nachrichteneinstellungen erfolgreich aktualisiert",
-      "articlesSettingUpdatedSuccessfully": "Die Einstellungen der Wissensdatenbank wurden erfolgreich aktualisiert"
+      "articlesSettingUpdatedSuccessfully": "Die Einstellungen der Wissensdatenbank wurden erfolgreich aktualisiert",
+      "learningPathsUpdatedSuccessfully": "Die Lernpfad-Einstellungen wurden erfolgreich aktualisiert"
     }
   },
   "certificateBackgroundUpload": {
@@ -3347,6 +3349,16 @@
     },
     "tooltip": {
       "disabled": "Um dieses Feld umzuschalten, aktivieren Sie bitte zuerst den Abschnitt „Wissensdatenbank“."
+    }
+  },
+  "learningPathsPreferences": {
+    "subHeader": "Konfigurieren Sie die Lernpfad-Einstellungen",
+    "header": "Lernpfad-Einstellungen",
+    "settings": {
+      "learningPathsEnabled": {
+        "label": "Lernpfade aktivieren",
+        "description": "Aktivieren Sie Lernpfade. Wenn deaktiviert, werden Lernpfade fuer alle Benutzer ausgeblendet und blockiert."
+      }
     }
   },
   "qaView": {

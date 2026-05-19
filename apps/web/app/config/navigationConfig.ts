@@ -44,6 +44,8 @@ export const getNavigationConfig = (
   isNewsEnabled = false,
   isArticlesEnabled = false,
   isStripeConfigured = false,
+  isLearningPathsEnabled = false,
+  shouldShowLearningPaths = false,
 ): NavigationGroups[] => {
   const isAnyContentFeatureEnabled = isQAEnabled || isNewsEnabled || isArticlesEnabled;
 
@@ -59,12 +61,16 @@ export const getNavigationConfig = (
           iconName: "Course",
           testId: NAVIGATION_HANDLES.COURSES_LINK,
         },
-        {
-          label: t("navigationSideBar.learningPaths"),
-          path: "learning-paths",
-          iconName: "Route",
-          testId: NAVIGATION_HANDLES.LEARNING_PATHS_LINK,
-        },
+        ...(isLearningPathsEnabled && shouldShowLearningPaths
+          ? ([
+              {
+                label: t("navigationSideBar.learningPaths"),
+                path: "learning-paths",
+                iconName: "Route",
+                testId: NAVIGATION_HANDLES.LEARNING_PATHS_LINK,
+              },
+            ] as NavigationItem[])
+          : []),
         {
           label: t("navigationSideBar.analytics"),
           path: "admin/analytics",

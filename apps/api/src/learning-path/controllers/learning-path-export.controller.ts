@@ -10,6 +10,7 @@ import { ManagingTenantAdminGuard } from "src/common/guards/managing-tenant-admi
 import { CurrentUserType } from "src/common/types/current-user.type";
 
 import { LEARNING_PATH_ERRORS } from "../constants/learning-path.errors";
+import { LearningPathsEnabledGuard } from "../guards/learning-paths-enabled.guard";
 import {
   learningPathExportBodySchema,
   learningPathExportCandidatesResponseSchema,
@@ -21,7 +22,7 @@ import {
 import { LearningPathExportService } from "../services/learning-path-export.service";
 
 @Controller("learning-path/master")
-@UseGuards(ManagingTenantAdminGuard)
+@UseGuards(ManagingTenantAdminGuard, LearningPathsEnabledGuard)
 export class LearningPathExportController {
   constructor(private readonly learningPathExportService: LearningPathExportService) {}
 

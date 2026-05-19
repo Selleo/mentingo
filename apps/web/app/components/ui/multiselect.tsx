@@ -203,6 +203,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
     const [onScrollbar, setOnScrollbar] = React.useState(false);
     const [isLoading, setIsLoading] = React.useState(false);
     const dropdownRef = React.useRef<HTMLDivElement>(null);
+    const commandListRef = React.useRef<HTMLDivElement>(null);
 
     const [selected, setSelected] = React.useState<Option[]>(value || []);
     const [options, setOptions] = React.useState<GroupOption>(
@@ -380,6 +381,12 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
       void exec();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [debouncedSearchTerm, groupBy, open, triggerSearchOnFocus]);
+
+    useEffect(() => {
+      if (!open) return;
+
+      commandListRef.current?.scrollTo({ top: 0 });
+    }, [inputValue, open, options]);
 
     const CreatableItem = () => {
       if (!creatable) return undefined;
@@ -673,6 +680,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
           >
             {open && (
               <CommandList
+                ref={commandListRef}
                 className="bg-popover text-popover-foreground shadow-lg outline-hidden"
                 onMouseLeave={() => {
                   setOnScrollbar(false);

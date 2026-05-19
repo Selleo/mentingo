@@ -353,6 +353,7 @@ export class LearningPathService {
 
     const canReadAll = this.canReadAllLearningPaths(currentUser);
     const canReadOwn = this.canReadOwnLearningPaths(currentUser);
+    const studentScopedUserId = canReadAll ? undefined : currentUser.userId;
 
     const learningPaths = await this.learningPathRepository.getLearningPaths({
       page,
@@ -365,11 +366,13 @@ export class LearningPathService {
         studentId: currentUser.userId,
       },
     });
+
     const learningPathIds = learningPaths.data.map((learningPath) => learningPath.id);
+
     const enrolledLearningPathIds = new Set(
       await this.learningPathRepository.getEnrolledLearningPathIds(
         learningPathIds,
-        currentUser.userId,
+        studentScopedUserId,
       ),
     );
     const editableCourseLearningPathIds = learningPaths.data
@@ -385,7 +388,7 @@ export class LearningPathService {
 
     const coursePreviews = await this.learningPathRepository.getLearningPathCoursePreviews(
       learningPathIds,
-      currentUser.userId,
+      studentScopedUserId,
       language,
     );
 

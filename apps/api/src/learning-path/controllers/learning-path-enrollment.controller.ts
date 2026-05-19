@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Query } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Query, UseGuards } from "@nestjs/common";
 import { PERMISSIONS } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
@@ -23,6 +23,7 @@ import { groupsFilterSchema } from "src/group/group.schema";
 import { GroupsFilterSchema } from "src/group/group.types";
 
 import { LEARNING_PATH_SUCCESS_MESSAGES } from "../constants/learning-path.success-messages";
+import { LearningPathsEnabledGuard } from "../guards/learning-paths-enabled.guard";
 import {
   learningPathGroupIdsSchema,
   learningPathMessageResponseSchema,
@@ -36,6 +37,7 @@ import { LearningPathService } from "../services/learning-path.service";
 import type { EnrolledStudent } from "src/courses/schemas/enrolledStudent.schema";
 
 @Controller("learning-path")
+@UseGuards(LearningPathsEnabledGuard)
 export class LearningPathEnrollmentController {
   constructor(private readonly learningPathService: LearningPathService) {}
 

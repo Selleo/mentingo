@@ -354,6 +354,7 @@ export interface GetPublicGlobalSettingsResponse {
     newsEnabled: boolean;
     unregisteredUserArticlesAccessibility: boolean;
     articlesEnabled: boolean;
+    learningPathsEnabled: boolean;
     ageLimit: 13 | 16 | null;
     loginPageFiles: string[];
   };
@@ -482,6 +483,7 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     newsEnabled: boolean;
     unregisteredUserArticlesAccessibility: boolean;
     articlesEnabled: boolean;
+    learningPathsEnabled: boolean;
     ageLimit: 13 | 16 | null;
     loginPageFiles: string[];
   };
@@ -524,6 +526,7 @@ export interface UpdateEnforceSSOResponse {
     newsEnabled: boolean;
     unregisteredUserArticlesAccessibility: boolean;
     articlesEnabled: boolean;
+    learningPathsEnabled: boolean;
     ageLimit: 13 | 16 | null;
     loginPageFiles: string[];
   };
@@ -566,6 +569,50 @@ export interface UpdateModernCourseListEnabledResponse {
     newsEnabled: boolean;
     unregisteredUserArticlesAccessibility: boolean;
     articlesEnabled: boolean;
+    learningPathsEnabled: boolean;
+    ageLimit: 13 | 16 | null;
+    loginPageFiles: string[];
+  };
+}
+
+export interface UpdateLearningPathsEnabledResponse {
+  data: {
+    unregisteredUserCoursesAccessibility: boolean;
+    modernCourseListEnabled: boolean;
+    enforceSSO: boolean;
+    certificateBackgroundImage: string | null;
+    companyInformation?: {
+      companyName?: string;
+      /** @maxLength 10 */
+      companyShortName?: string;
+      registeredAddress?: string;
+      taxNumber?: string;
+      emailAddress?: string;
+      courtRegisterNumber?: string;
+    };
+    platformLogoS3Key: string | null;
+    loginBackgroundImageS3Key: string | null;
+    platformSimpleLogoS3Key: string | null;
+    MFAEnforcedRoles: string[];
+    defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+    inviteOnlyRegistration: boolean;
+    userEmailTriggers: {
+      userFirstLogin: boolean;
+      userCourseAssignment: boolean;
+      userShortInactivity: boolean;
+      userLongInactivity: boolean;
+      userChapterFinished: boolean;
+      userCourseFinished: boolean;
+    };
+    primaryColor: string | null;
+    contrastColor: string | null;
+    unregisteredUserQAAccessibility: boolean;
+    QAEnabled: boolean;
+    unregisteredUserNewsAccessibility: boolean;
+    newsEnabled: boolean;
+    unregisteredUserArticlesAccessibility: boolean;
+    articlesEnabled: boolean;
+    learningPathsEnabled: boolean;
     ageLimit: 13 | 16 | null;
     loginPageFiles: string[];
   };
@@ -639,6 +686,7 @@ export interface UpdateColorSchemaResponse {
     newsEnabled: boolean;
     unregisteredUserArticlesAccessibility: boolean;
     articlesEnabled: boolean;
+    learningPathsEnabled: boolean;
     ageLimit: 13 | 16 | null;
     loginPageFiles: string[];
   };
@@ -5865,6 +5913,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     settingsControllerUpdateModernCourseListEnabled: (params: RequestParams = {}) =>
       this.request<UpdateModernCourseListEnabledResponse, any>({
         path: `/api/settings/admin/modern-course-list`,
+        method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateLearningPathsEnabled
+     * @request PATCH:/api/settings/admin/learning-paths-enabled
+     */
+    settingsControllerUpdateLearningPathsEnabled: (params: RequestParams = {}) =>
+      this.request<UpdateLearningPathsEnabledResponse, any>({
+        path: `/api/settings/admin/learning-paths-enabled`,
         method: "PATCH",
         format: "json",
         ...params,

@@ -389,6 +389,7 @@
       "noSearchResults": "No search results for:",
       "announcements": "Announcements",
       "lessons": "Lessons",
+      "learningPaths": "Learning Paths",
       "news": "News",
       "articles": "Articles",
       "qa": "Q&A"
@@ -2403,7 +2404,8 @@
       "qaSettingUpdatedSuccessfully": "QA settings updated successfully",
       "ageLimitUpdatedSuccessfully": "Age limit updated successfully",
       "newsSettingUpdatedSuccessfully": "News settings updated successfully",
-      "articlesSettingUpdatedSuccessfully": "Knowledge base settings updated successfully"
+      "articlesSettingUpdatedSuccessfully": "Knowledge base settings updated successfully",
+      "learningPathsUpdatedSuccessfully": "Learning Paths settings updated successfully"
     }
   },
   "certificateBackgroundUpload": {
@@ -3312,6 +3314,16 @@
     },
     "tooltip": {
       "disabled": "To toggle this field, please enable the knowledge base section first."
+    }
+  },
+  "learningPathsPreferences": {
+    "subHeader": "Configure Learning Paths settings",
+    "header": "Learning Paths Settings",
+    "settings": {
+      "learningPathsEnabled": {
+        "label": "Enable Learning Paths",
+        "description": "Enable Learning Paths. When disabled, Learning Paths are hidden and blocked for all users."
+      }
     }
   },
   "qaView": {

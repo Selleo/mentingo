@@ -8,6 +8,7 @@ import {
   Post,
   Query,
   UploadedFiles,
+  UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
@@ -30,6 +31,7 @@ import { CurrentUserType } from "src/common/types/current-user.type";
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
 import { LEARNING_PATH_SUCCESS_MESSAGES } from "../constants/learning-path.success-messages";
+import { LearningPathsEnabledGuard } from "../guards/learning-paths-enabled.guard";
 import {
   createLearningPathSchema,
   learningPathDetailSchema,
@@ -57,6 +59,7 @@ const learningPathFileFields = FileFieldsInterceptor([
   { name: "certificateSignature", maxCount: 1 },
 ]);
 @Controller("learning-path")
+@UseGuards(LearningPathsEnabledGuard)
 export class LearningPathController {
   constructor(private readonly learningPathService: LearningPathService) {}
 

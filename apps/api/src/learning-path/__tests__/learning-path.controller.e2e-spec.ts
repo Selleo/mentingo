@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { LEARNING_PATH_ENROLLMENT_TYPES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
-import { eq } from "drizzle-orm";
+import { eq, isNull, sql } from "drizzle-orm";
 import request from "supertest";
 
 import { LearningPathCourseSyncEvent } from "src/events";
@@ -10,6 +10,7 @@ import {
   groupLearningPaths,
   learningPathCourses,
   learningPaths,
+  settings,
   studentLearningPathCourses,
   studentLearningPaths,
 } from "src/storage/schema";
@@ -87,6 +88,24 @@ describe("LearningPathController (e2e)", () => {
     });
 
     describe("POST /api/learning-path", () => {
+      it("should block learning path endpoints when the feature is disabled", async () => {
+        await db
+          .update(settings)
+          .set({
+            settings: sql`
+              jsonb_set(settings.settings, '{learningPathsEnabled}', to_jsonb(false), true)
+            `,
+          })
+          .where(isNull(settings.userId));
+
+        const response = await request(app.getHttpServer())
+          .get("/api/learning-path?page=1&perPage=10&language=en")
+          .set("Cookie", adminCookies)
+          .expect(403);
+
+        expect(response.body.message).toBe(LEARNING_PATH_ERRORS.FEATURE_DISABLED);
+      });
+
       it("should create a learning path using the provided language as base language", async () => {
         const response = await request(app.getHttpServer())
           .post("/api/learning-path")

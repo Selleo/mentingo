@@ -14,6 +14,7 @@ import type {
   GetArticlesResponse,
   GetAvailableCoursesResponse,
   GetLessonsResponse,
+  GetLearningPathsResponse,
   GetNewsListResponse,
   GetStudentCoursesResponse,
   GetUsersResponse,
@@ -41,6 +42,14 @@ export type GlobalSearchItem =
       resultData: GetAvailableCoursesResponse["data"];
       Component: (props: {
         item: GetAvailableCoursesResponse["data"][number];
+        onSelect: () => void;
+      }) => JSX.Element;
+    }
+  | {
+      resultType: "learningPaths";
+      resultData: GetLearningPathsResponse["data"];
+      Component: (props: {
+        item: GetLearningPathsResponse["data"][number];
         onSelect: () => void;
       }) => JSX.Element;
     }

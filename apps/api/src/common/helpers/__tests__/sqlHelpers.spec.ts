@@ -40,6 +40,13 @@ describe("sqlHelpers", () => {
 
       expect(result).toBeDefined();
     });
+
+    it("returns SQL template for boolean false values", () => {
+      const result = setJsonbField({}, "key", false);
+
+      expect(result).toBeDefined();
+      expect(result).toHaveProperty("queryChunks");
+    });
   });
 
   describe("buildJsonbField", () => {

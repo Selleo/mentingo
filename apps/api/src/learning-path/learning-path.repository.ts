@@ -195,6 +195,11 @@ export class LearningPathRepository {
   async getLearningPaths(query: LearningPathListQuery = {}, dbInstance: DatabasePg = this.db) {
     const { page = 1, perPage = DEFAULT_PAGE_SIZE, language, searchQuery, visibility } = query;
 
+    const studentLearningPathJoinCondition =
+      visibility && !visibility.canReadAll
+        ? eq(studentLearningPaths.studentId, visibility.studentId)
+        : sql`false`;
+
     const visibilityCondition = visibility?.canReadAll
       ? undefined
       : or(
@@ -225,7 +230,7 @@ export class LearningPathRepository {
         studentLearningPaths,
         and(
           eq(studentLearningPaths.learningPathId, learningPaths.id),
-          visibility ? eq(studentLearningPaths.studentId, visibility.studentId) : undefined,
+          studentLearningPathJoinCondition,
         ),
       )
       .where(whereCondition)
@@ -240,7 +245,7 @@ export class LearningPathRepository {
         studentLearningPaths,
         and(
           eq(studentLearningPaths.learningPathId, learningPaths.id),
-          visibility ? eq(studentLearningPaths.studentId, visibility.studentId) : undefined,
+          studentLearningPathJoinCondition,
         ),
       )
       .where(whereCondition);
@@ -376,7 +381,7 @@ export class LearningPathRepository {
 
   async getLearningPathCoursePreviews(
     learningPathIds: UUIDType[],
-    studentId: UUIDType,
+    studentId?: UUIDType,
     language?: SupportedLanguages,
     dbInstance: DatabasePg = this.db,
   ): Promise<LearningPathCoursePreviewGroup[]> {
@@ -397,7 +402,7 @@ export class LearningPathRepository {
         priorStudentCourses,
         and(
           eq(priorStudentCourses.courseId, learningPathCourses.courseId),
-          eq(priorStudentCourses.studentId, studentId),
+          studentId ? eq(priorStudentCourses.studentId, studentId) : sql`false`,
         ),
       )
       .where(
@@ -422,7 +427,7 @@ export class LearningPathRepository {
       END
     `;
 
-    return dbInstance
+    const previews = await dbInstance
       .select({
         learningPathId: currentPathCourse.learningPathId,
         courses: sql<LearningPathCoursePreviewGroup["courses"]>`
@@ -454,18 +459,20 @@ export class LearningPathRepository {
         studentCourses,
         and(
           eq(studentCourses.courseId, currentPathCourse.courseId),
-          eq(studentCourses.studentId, studentId),
+          studentId ? eq(studentCourses.studentId, studentId) : sql`false`,
         ),
       )
       .leftJoin(
         studentLearningPaths,
         and(
           eq(studentLearningPaths.learningPathId, currentPathCourse.learningPathId),
-          eq(studentLearningPaths.studentId, studentId),
+          studentId ? eq(studentLearningPaths.studentId, studentId) : sql`false`,
         ),
       )
       .where(inArray(currentPathCourse.learningPathId, learningPathIds))
       .groupBy(currentPathCourse.learningPathId);
+
+    return previews;
   }
 
   async getLearningPathStudentIds(pathId: UUIDType, dbInstance: DatabasePg = this.db) {
@@ -492,10 +499,12 @@ export class LearningPathRepository {
 
   async getEnrolledLearningPathIds(
     pathIds: UUIDType[],
-    studentId: UUIDType,
+    studentId?: UUIDType,
     dbInstance: DatabasePg = this.db,
   ) {
-    if (pathIds.length === 0) return [];
+    if (pathIds.length === 0 || !studentId) {
+      return [];
+    }
 
     const enrolledLearningPaths = await dbInstance
       .select({ learningPathId: studentLearningPaths.learningPathId })
@@ -507,7 +516,9 @@ export class LearningPathRepository {
         ),
       );
 
-    return enrolledLearningPaths.map(({ learningPathId }) => learningPathId);
+    const enrolledIds = enrolledLearningPaths.map(({ learningPathId }) => learningPathId);
+
+    return enrolledIds;
   }
 
   async getLearningPathIdsForStudentCourse(

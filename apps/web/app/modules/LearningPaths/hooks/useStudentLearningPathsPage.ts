@@ -1,5 +1,4 @@
-import { useLoaderData } from "@remix-run/react";
-import { useState } from "react";
+import { useLoaderData, useSearchParams } from "@remix-run/react";
 
 import { useEnrollCurrentUserToLearningPath } from "~/api/mutations/useLearningPathMutations";
 import { useLearningPaths } from "~/api/queries/useLearningPaths";
@@ -10,13 +9,14 @@ import type { GetLearningPathsResponse } from "~/api/generated-api";
 export function useStudentLearningPathsPage() {
   const loaderLearningPaths = useLoaderData<GetLearningPathsResponse>();
 
-  const language = useLanguageStore((state) => state.language);
+  const [searchParams] = useSearchParams();
+  const searchQuery = searchParams.get("searchQuery") ?? "";
 
-  const [searchValue, setSearchValue] = useState("");
+  const language = useLanguageStore((state) => state.language);
 
   const { data: learningPaths = loaderLearningPaths } = useLearningPaths({
     language,
-    searchQuery: searchValue.trim() || undefined,
+    searchQuery,
   });
 
   const { mutateAsync: enrollCurrentUserToLearningPath, isPending: isEnrollPending } =
@@ -29,8 +29,6 @@ export function useStudentLearningPathsPage() {
   return {
     language,
     learningPaths,
-    searchValue,
-    setSearchValue,
     enrollLearningPath,
     isEnrollPending,
   };

@@ -21,7 +21,7 @@ import sharp from "sharp";
 
 import { CORS_ORIGIN } from "src/auth/consts";
 import { DatabasePg } from "src/common";
-import { buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelpers";
+import { buildJsonbFieldWithMultipleEntries, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { getSupportModeContext } from "src/common/helpers/support-mode-context";
 import { UpdateSettingsEvent } from "src/events";
 import { RESOURCE_CATEGORIES, RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
@@ -704,6 +704,33 @@ export class SettingsService {
             true
           )
         `,
+      })
+      .where(isNull(settings.userId))
+      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+
+    const updatedRecord = await this.getGlobalSettingsRecord();
+
+    await this.recordSettingsUpdate({
+      actor,
+      previousSnapshot: this.buildSettingsSnapshot(previousRecord),
+      updatedSnapshot: updatedRecord ? this.buildSettingsSnapshot(updatedRecord) : null,
+    });
+
+    return this.parseGlobalSettings(updatedGlobalSettings);
+  }
+
+  public async updateGlobalLearningPathsEnabled(
+    actor?: CurrentUserType,
+  ): Promise<GlobalSettingsJSONContentSchema> {
+    const previousRecord = await this.getGlobalSettingsRecord();
+
+    const current =
+      previousRecord.settings.learningPathsEnabled ?? DEFAULT_GLOBAL_SETTINGS.learningPathsEnabled;
+
+    const [{ settings: updatedGlobalSettings }] = await this.db
+      .update(settings)
+      .set({
+        settings: setJsonbField(settings.settings, "learningPathsEnabled", !current),
       })
       .where(isNull(settings.userId))
       .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
@@ -1620,6 +1647,8 @@ export class SettingsService {
       ...settings,
       modernCourseListEnabled:
         settings.modernCourseListEnabled ?? DEFAULT_GLOBAL_SETTINGS.modernCourseListEnabled,
+      learningPathsEnabled:
+        settings.learningPathsEnabled ?? DEFAULT_GLOBAL_SETTINGS.learningPathsEnabled,
       MFAEnforcedRoles: Array.isArray(settings.MFAEnforcedRoles)
         ? settings.MFAEnforcedRoles
         : JSON.parse(settings.MFAEnforcedRoles ?? "[]"),
