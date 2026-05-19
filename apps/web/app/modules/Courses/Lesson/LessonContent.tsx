@@ -7,13 +7,9 @@ import { useCurrentUser } from "~/api/queries";
 import { Icon } from "~/components/Icon";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Switch } from "~/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
-import { VIDEO_ENDED_SOURCE } from "~/components/VideoPlayer/VideoPlayer.types";
-import { useVideoPlayer } from "~/components/VideoPlayer/VideoPlayerContext";
 import { useLessonsSequence } from "~/hooks/useLessonsSequence";
 import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
-import { useVideoPreferencesStore } from "~/modules/common/store/useVideoPreferencesStore";
 import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import { getLessonTypeTranslationKey } from "~/modules/Courses/CourseView/lessonTypes";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
@@ -24,7 +20,6 @@ import { LessonContentRenderer } from "./LessonContentRenderer";
 import { isNextBlocked, isPreviousBlocked } from "./utils";
 
 import type { GetCourseResponse, GetLessonByIdResponse } from "~/api/generated-api";
-import type { VideoEndedEvent } from "~/components/VideoPlayer/VideoPlayer.types";
 import type { LessonPreviewUser } from "~/modules/Courses/Lesson/types";
 
 type LessonContentProps = {
@@ -52,8 +47,6 @@ export const LessonContent = ({
 }: LessonContentProps) => {
   const { t } = useTranslation();
 
-  const { clearVideo, setOnEnded } = useVideoPlayer();
-  const { autoplay, setAutoplay, autoplaySettings } = useVideoPreferencesStore();
   const { isEffectiveStudentExperience, isPreviewMode } = useCourseAccessProvider();
 
   const [isPreviousDisabled, setIsPreviousDisabled] = useState(false);
@@ -180,49 +173,36 @@ export const LessonContent = ({
     lesson.lessonCompleted,
   ]);
 
-  useEffect(() => {
-    if (lesson.id && !lesson.hasVideo) {
-      clearVideo();
-    }
-  }, [lesson.id, lesson.hasVideo, clearVideo]);
-
   const handleVideoEnded = useCallback(
-    (event: VideoEndedEvent) => {
-      const isMediaEnded = event.source === VIDEO_ENDED_SOURCE.MEDIA_ENDED;
-
-      setIsNextDisabled(false);
-
-      const isLastVideoInLesson = !autoplaySettings.nextVideoUrl;
-
+    (index: number | null) => {
       if (
-        isMediaEnded &&
-        isEffectiveStudentExperience &&
-        lesson.hasVideo &&
-        !lesson.lessonCompleted &&
-        isLastVideoInLesson
+        isPreviewMode ||
+        !isEffectiveStudentExperience ||
+        lesson.type !== LessonType.CONTENT ||
+        lesson.lessonCompleted
       ) {
-        markLessonAsCompleted({ lessonId: lesson.id, language });
+        return;
       }
 
-      if (event.source === VIDEO_ENDED_SOURCE.GO_NEXT_LESSON) {
-        handleNext();
-      }
+      const videosCount = lesson.videos?.length ?? 0;
+      if (videosCount === 0) return;
+
+      const endedIndex = index ?? (videosCount === 1 ? 0 : null);
+      if (endedIndex !== videosCount - 1) return;
+
+      markLessonAsCompleted({ lessonId: lesson.id, language });
     },
     [
-      autoplaySettings.nextVideoUrl,
       isEffectiveStudentExperience,
-      markLessonAsCompleted,
-      lesson.id,
-      lesson.hasVideo,
-      lesson.lessonCompleted,
+      isPreviewMode,
       language,
-      handleNext,
+      lesson.id,
+      lesson.lessonCompleted,
+      lesson.type,
+      lesson.videos,
+      markLessonAsCompleted,
     ],
   );
-
-  useEffect(() => {
-    setOnEnded(handleVideoEnded);
-  }, [handleVideoEnded, setOnEnded]);
 
   return (
     <TooltipProvider>
@@ -264,14 +244,6 @@ export const LessonContent = ({
             {!isPreviewMode && (
               <div className="mt-4 flex flex-col gap-2 sm:ml-8 sm:mt-0 sm:items-end">
                 <div className="flex flex-row gap-x-4">
-                  {lesson.type === LessonType.CONTENT && lesson.hasVideo && (
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <span className="text-sm text-neutral-600">
-                        {t("studentLessonView.button.autoplay")}
-                      </span>
-                      <Switch checked={autoplay} onCheckedChange={setAutoplay} />
-                    </label>
-                  )}
                   <Button
                     variant="outline"
                     className="w-full gap-x-1 sm:w-auto disabled:opacity-0"

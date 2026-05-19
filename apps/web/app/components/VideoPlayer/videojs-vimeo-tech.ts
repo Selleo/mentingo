@@ -54,11 +54,16 @@ type VimeoVolume = {
   volume: number;
 };
 
+type VimeoPlaybackRateChange = {
+  playbackRate: number;
+};
+
 type VimeoState = {
   ended: boolean;
   playing: boolean;
   muted: boolean;
   volume: number;
+  playbackRate: number;
   progress: VimeoProgress;
 };
 
@@ -114,6 +119,7 @@ class VimeoTech extends Tech {
     playing: false,
     muted: false,
     volume: 0,
+    playbackRate: 1,
     progress: {
       seconds: 0,
       percent: 0,
@@ -236,7 +242,22 @@ class VimeoTech extends Tech {
   }
 
   playbackRate() {
-    return 1;
+    return this._state.playbackRate;
+  }
+
+  setPlaybackRate(playbackRate: number) {
+    this._state.playbackRate = playbackRate;
+
+    if (!this._player) {
+      this.trigger("ratechange");
+      return Promise.resolve(playbackRate);
+    }
+
+    return this._player.setPlaybackRate(playbackRate).then((rate) => {
+      this._state.playbackRate = rate;
+      this.trigger("ratechange");
+      return rate;
+    });
   }
 
   dispose() {
@@ -259,6 +280,7 @@ class VimeoTech extends Tech {
       portrait: false,
       title: false,
       controls: false,
+      playbackRate: this._state.playbackRate,
     };
 
     if (this.options_.autoplay) vimeoOptions.autoplay = true;
@@ -317,6 +339,10 @@ class VimeoTech extends Tech {
       }
       this.trigger("volumechange");
     });
+    this._player.on("playbackratechange", (event: VimeoPlaybackRateChange) => {
+      this._state.playbackRate = event.playbackRate;
+      this.trigger("ratechange");
+    });
     this._player.on("error", (error) => this.trigger("error", error));
 
     this.triggerReady();
@@ -339,12 +365,16 @@ class VimeoTech extends Tech {
         this._lastNonZeroVolume = volume;
       }
     });
+    this._player.getPlaybackRate().then((playbackRate) => {
+      this._state.playbackRate = playbackRate;
+    });
   }
 }
 
 Object.assign(VimeoTech.prototype, {
   featuresTimeupdateEvents: true,
   featuresVolumeControl: true,
+  featuresPlaybackRate: true,
 });
 Tech.withSourceHandlers(VimeoTech);
 

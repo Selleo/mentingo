@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from "@remix-run/react";
 import { ACCESS_GUARD, PERMISSIONS } from "@repo/shared";
 import { formatDate } from "date-fns";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useDeleteNews } from "~/api/mutations";
@@ -11,7 +11,6 @@ import { PageWrapper } from "~/components/PageWrapper";
 import Viewer from "~/components/RichText/Viever";
 import { TOC } from "~/components/TOC/TOC";
 import { Button } from "~/components/ui/button";
-import { useVideoPlayer } from "~/components/VideoPlayer/VideoPlayerContext";
 import { ContentAccessGuard } from "~/Guards/AccessGuard";
 import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
@@ -24,8 +23,6 @@ export default function NewsDetailsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { newsId } = useParams();
-
-  const { clearVideo } = useVideoPlayer();
 
   const { language } = useLanguageStore();
   const { hasAccess: canManageNews } = usePermissions({
@@ -40,16 +37,6 @@ export default function NewsDetailsPage() {
 
   const [contentWithIds, setContentWithIds] = useState(news?.plainContent ?? "");
   const handleContentWithIds = useCallback((html: string) => setContentWithIds(html || ""), []);
-
-  useEffect(() => {
-    if (news?.id) {
-      clearVideo();
-    }
-
-    return () => {
-      clearVideo();
-    };
-  }, [news?.id, clearVideo]);
 
   if (isLoadingNews) {
     return (
@@ -172,12 +159,7 @@ export default function NewsDetailsPage() {
           </div>
 
           {news.content ? (
-            <Viewer
-              variant="news"
-              content={contentWithIds || news.content}
-              className="px-10"
-              videoAutoplayPolicy="disabled"
-            />
+            <Viewer variant="news" content={contentWithIds || news.content} className="px-10" />
           ) : null}
 
           <div className="mx-auto w-full border-b border-primary-100" />

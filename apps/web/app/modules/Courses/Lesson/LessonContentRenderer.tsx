@@ -2,6 +2,7 @@ import { memo } from "react";
 import { match } from "ts-pattern";
 
 import Viewer from "~/components/RichText/Viever";
+import { RICH_TEXT_VIEWER_VARIANT } from "~/components/RichText/viewerTypes";
 
 import AiMentorLesson from "./AiMentorLesson/AiMentorLesson";
 import { EmbedLesson } from "./EmbedLesson/EmbedLesson";
@@ -9,7 +10,6 @@ import { Quiz } from "./Quiz";
 import { ScormLesson } from "./ScormLesson/ScormLesson";
 
 import type { CurrentUserResponse, GetLessonByIdResponse } from "~/api/generated-api";
-import type { VideoEndedHandler } from "~/components/VideoPlayer/VideoPlayer.types";
 import type { LessonPreviewUser } from "~/modules/Courses/Lesson/types";
 
 type LessonContentRendererProps = {
@@ -17,14 +17,18 @@ type LessonContentRendererProps = {
   user: CurrentUserResponse["data"] | undefined;
   previewUser?: LessonPreviewUser;
   lessonLoading: boolean;
-  onVideoEnded?: VideoEndedHandler;
+  onVideoEnded?: (index: number | null) => void;
 };
 
 export const LessonContentRenderer = memo(
   ({ lesson, user, previewUser, lessonLoading, onVideoEnded }: LessonContentRendererProps) => {
     return match(lesson.type)
       .with("content", () => (
-        <Viewer variant="content" content={lesson?.description ?? ""} onVideoEnded={onVideoEnded} />
+        <Viewer
+          variant={RICH_TEXT_VIEWER_VARIANT.CONTENT}
+          content={lesson?.description ?? ""}
+          onVideoEnded={onVideoEnded}
+        />
       ))
       .with("quiz", () => <Quiz lesson={lesson} userId={user?.id || ""} />)
       .with("ai_mentor", () => (

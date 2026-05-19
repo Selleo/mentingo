@@ -5,8 +5,6 @@ import {
   extractYoutubeId,
   tryParseUrl,
   type VideoProvider,
-  type VideoAutoplay,
-  VIDEO_AUTOPLAY,
 } from "@repo/shared";
 import { match } from "ts-pattern";
 
@@ -23,7 +21,6 @@ export type VideoEmbedAttrs = {
   sourceType: VideoSourceType;
   provider: VideoProvider;
   hasError: boolean;
-  autoplay: VideoAutoplay;
   index: number | null;
   uploadId: string | null;
   uploadLabel: string | null;
@@ -76,22 +73,11 @@ type VideoEmbedAttrsInput = {
   sourceType?: string | null;
   provider?: string | null;
   hasError?: boolean | string | null;
-  autoplay?: string | null;
   index?: number | string | null;
   uploadId?: string | null;
   uploadLabel?: string | null;
   uploadStatus?: VideoUploadNodeStatus | null;
   uploadErrorMessage?: string | null;
-};
-
-const normalizeVideoIndex = (value: number | string | null | undefined): number | null => {
-  if (typeof value === "number") {
-    return Number.isFinite(value) && value >= 0 ? Math.floor(value) : null;
-  }
-
-  if (typeof value !== "string") return null;
-  const parsed = Number.parseInt(value, 10);
-  return Number.isNaN(parsed) || parsed < 0 ? null : parsed;
 };
 
 export const normalizeVideoEmbedAttributes = (attrs: VideoEmbedAttrsInput): VideoEmbedAttrs => {
@@ -105,9 +91,6 @@ export const normalizeVideoEmbedAttributes = (attrs: VideoEmbedAttrsInput): Vide
   const detectedProvider =
     sourceType === "internal" ? VIDEO_EMBED_PROVIDERS.SELF : detectVideoProviderFromUrl(src || "");
 
-  const autoplay = (attrs.autoplay ?? VIDEO_AUTOPLAY.NO_AUTOPLAY) as VideoAutoplay;
-  const index = normalizeVideoIndex(attrs.index);
-
   const provider = match(attrs.provider)
     .when(isVideoProvider, (value) => value)
     .otherwise(() => detectedProvider);
@@ -119,8 +102,7 @@ export const normalizeVideoEmbedAttributes = (attrs: VideoEmbedAttrsInput): Vide
     sourceType,
     provider,
     hasError,
-    autoplay,
-    index,
+    index: attrs.index === null || attrs.index === undefined ? null : Number(attrs.index),
     uploadId: typeof attrs.uploadId === "string" ? attrs.uploadId : null,
     uploadLabel: typeof attrs.uploadLabel === "string" ? attrs.uploadLabel : null,
     uploadStatus:
@@ -145,7 +127,6 @@ export const getVideoEmbedAttrsFromElement = (element: HTMLElement): VideoEmbedA
   const sourceTypeAttr = element.getAttribute("data-source-type");
   const providerAttr = element.getAttribute("data-provider");
   const errorAttr = element.getAttribute("data-error");
-  const autoplayAttr = element.getAttribute("data-autoplay");
   const indexAttr = element.getAttribute("data-index");
   const uploadId = element.getAttribute("data-upload-id") ?? null;
   const uploadLabel = element.getAttribute("data-upload-label") ?? null;
@@ -165,7 +146,6 @@ export const getVideoEmbedAttrsFromElement = (element: HTMLElement): VideoEmbedA
     src,
     sourceType,
     provider,
-    autoplay: autoplayAttr,
     hasError: errorAttr,
     index: indexAttr,
     uploadId,

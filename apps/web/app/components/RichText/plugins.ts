@@ -130,7 +130,9 @@ export const getContentEditorPlugins = (options?: RichTextResourceNodeOptions) =
 
 export const contentEditorPlugins = getContentEditorPlugins();
 
-export const viewerPlugins = [
+export const baseViewerPlugins = [...basePlugins];
+
+export const contentViewerPlugins = [
   ...basePlugins,
   ...tablePlugins,
   DownloadableFileEmbedViewer,

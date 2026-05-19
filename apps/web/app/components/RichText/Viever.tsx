@@ -3,37 +3,29 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import { cn } from "~/lib/utils";
 
-import { viewerPlugins } from "./plugins";
+import { baseViewerPlugins, contentViewerPlugins } from "./plugins";
 import {
   newsVariantClasses,
   articleVariantClasses,
   defaultClasses,
   contentVariantClasses,
 } from "./styles";
-import {
-  resolveRichTextVideoAutoplay,
-  type RichTextVideoAutoplayPolicy,
-} from "./videoAutoplayPolicy";
-
-import type { VideoAutoplay } from "@repo/shared";
-import type { VideoEndedHandler } from "~/components/VideoPlayer/VideoPlayer.types";
+import { RICH_TEXT_VIEWER_VARIANT, type RichTextViewerVariant } from "./viewerTypes";
 
 type ViewerProps = {
   content: string;
   style?: "default" | "prose";
   className?: string;
-  variant?: "default" | "article" | "news" | "content";
-  onVideoEnded?: VideoEndedHandler;
-  videoAutoplayPolicy?: RichTextVideoAutoplayPolicy;
+  variant?: RichTextViewerVariant;
+  onVideoEnded?: (index: number | null) => void;
 };
 
 const Viewer = ({
   content,
   style,
   className,
-  variant = "default",
+  variant = RICH_TEXT_VIEWER_VARIANT.DEFAULT,
   onVideoEnded,
-  videoAutoplayPolicy = "inherit",
 }: ViewerProps) => {
   const variantStyles = {
     default: {
@@ -59,6 +51,15 @@ const Viewer = ({
   } as const;
 
   const selectedVariant = variantStyles[variant] ?? variantStyles.default;
+  const onVideoEndedRef = useRef<typeof onVideoEnded>();
+
+  useEffect(() => {
+    onVideoEndedRef.current = onVideoEnded;
+  }, [onVideoEnded]);
+
+  const handleVideoEnded = useCallback((index: number | null) => {
+    onVideoEndedRef.current?.(index);
+  }, []);
 
   const classNames = cn(
     {
@@ -76,29 +77,16 @@ const Viewer = ({
     selectedVariant.editor,
   );
 
-  const onVideoEndedRef = useRef<VideoEndedHandler | undefined>();
+  const extensions = useMemo(() => {
+    const plugins =
+      variant === RICH_TEXT_VIEWER_VARIANT.DEFAULT ? baseViewerPlugins : contentViewerPlugins;
 
-  useEffect(() => {
-    onVideoEndedRef.current = onVideoEnded;
-  }, [onVideoEnded]);
-
-  const handleVideoEnded = useCallback<VideoEndedHandler>((event) => {
-    onVideoEndedRef.current?.(event);
-  }, []);
-
-  const extensions = useMemo(
-    () =>
-      viewerPlugins.map((extension) =>
-        extension.name === "video"
-          ? extension.configure({
-              onVideoEnded: handleVideoEnded,
-              resolveAutoplay: (autoplay: VideoAutoplay) =>
-                resolveRichTextVideoAutoplay(autoplay, videoAutoplayPolicy),
-            })
-          : extension,
-      ),
-    [handleVideoEnded, videoAutoplayPolicy],
-  );
+    return plugins.map((extension) =>
+      extension.name === "video" && variant === RICH_TEXT_VIEWER_VARIANT.CONTENT
+        ? extension.configure({ onVideoEnded: handleVideoEnded })
+        : extension,
+    );
+  }, [handleVideoEnded, variant]);
 
   const editor = useEditor(
     {
@@ -122,5 +110,9 @@ const Viewer = ({
     </article>
   );
 };
+
+export const ContentViewer = (props: Omit<ViewerProps, "variant">) => (
+  <Viewer {...props} variant={RICH_TEXT_VIEWER_VARIANT.CONTENT} />
+);
 
 export default Viewer;

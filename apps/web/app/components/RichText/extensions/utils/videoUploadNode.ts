@@ -1,4 +1,3 @@
-import { VIDEO_AUTOPLAY } from "@repo/shared";
 import { TextSelection } from "@tiptap/pm/state";
 
 import type { Editor as TiptapEditor } from "@tiptap/react";
@@ -129,8 +128,6 @@ export const insertVideoUploadPlaceholder = ({
         sourceType: "external",
         provider: "unknown",
         hasError: false,
-        autoplay: VIDEO_AUTOPLAY.NO_AUTOPLAY,
-        index: null,
       },
     })
     .run();

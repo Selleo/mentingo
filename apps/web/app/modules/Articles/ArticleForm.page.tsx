@@ -31,7 +31,6 @@ import {
   buildRichTextFileUploadHandler,
   RICH_TEXT_ACCEPTED_FILE_TYPES,
 } from "~/hooks/buildRichTextFileUploadHandler";
-import { useClearVideoOnTabChange } from "~/hooks/useClearVideoOnTabChange";
 import { useEntityResourceUpload } from "~/hooks/useEntityResourceUpload";
 import { useHandleImageUpload } from "~/hooks/useHandleImageUpload";
 import { useRichTextUploadQueue } from "~/hooks/useRichTextUploadQueue";
@@ -137,8 +136,6 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
     initialImageUrl:
       existingArticle?.resources?.coverImage?.fileUrl ?? defaultValues?.imageUrl ?? null,
   });
-
-  useClearVideoOnTabChange(tabValue, "editor");
 
   useEffect(() => {
     if (!existingArticle || isFetchingArticle) return;
