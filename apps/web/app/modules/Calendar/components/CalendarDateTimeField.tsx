@@ -17,6 +17,8 @@ type CalendarDateTimeFieldProps = {
   tooltip: string;
   date: string;
   time: string;
+  portalledDatePicker?: boolean;
+  hideTime?: boolean;
   onDateChange: (date: string) => void;
   onTimeChange: (time: string) => void;
 };
@@ -33,6 +35,8 @@ export function CalendarDateTimeField({
   tooltip,
   date,
   time,
+  portalledDatePicker = true,
+  hideTime = false,
   onDateChange,
   onTimeChange,
 }: CalendarDateTimeFieldProps) {
@@ -44,7 +48,11 @@ export function CalendarDateTimeField({
   return (
     <div className="grid gap-2">
       <CalendarFormFieldLabel label={label} tooltip={tooltip} />
-      <div className="grid grid-cols-[1fr_8.5rem] gap-2">
+      <div
+        className={cn("grid gap-2", {
+          "grid-cols-[1fr_8.5rem]": !hideTime,
+        })}
+      >
         <Popover>
           <PopoverTrigger asChild>
             <Button
@@ -66,7 +74,7 @@ export function CalendarDateTimeField({
               </span>
             </Button>
           </PopoverTrigger>
-          <PopoverContent align="start" className="w-auto p-2">
+          <PopoverContent align="start" className="w-auto p-2" portalled={portalledDatePicker}>
             <Calendar
               variant="default"
               mode="single"
@@ -84,7 +92,7 @@ export function CalendarDateTimeField({
             />
           </PopoverContent>
         </Popover>
-        <CalendarTimeSelect value={time} onChange={onTimeChange} />
+        {!hideTime && <CalendarTimeSelect value={time} onChange={onTimeChange} />}
       </div>
     </div>
   );

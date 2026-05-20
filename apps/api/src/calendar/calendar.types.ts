@@ -33,6 +33,7 @@ export type CalendarEventNormalizedRow = {
   description: string | null;
   startsAt: string;
   endsAt: string;
+  allDay: boolean;
   timezone: string;
   location: string | null;
   status: CalendarEventStatus;

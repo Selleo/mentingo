@@ -85,6 +85,7 @@ export class LiveTrainingService {
         description: row.description || null,
         startsAt: row.startsAt,
         endsAt: row.endsAt,
+        allDay: row.allDay,
         timezone: row.timezone,
         location: row.location,
         deliveryType: row.deliveryType,
@@ -172,6 +173,7 @@ export class LiveTrainingService {
         description,
         startsAt: body.startsAt,
         endsAt: body.endsAt,
+        allDay: body.allDay ?? false,
         timezone: body.timezone,
         location: body.location ?? null,
         organizerUserId: currentUser.userId,
@@ -367,6 +369,7 @@ export class LiveTrainingService {
       description: row.description || null,
       startsAt: row.startsAt,
       endsAt: row.endsAt,
+      allDay: row.allDay,
       timezone: row.timezone,
       location: row.location,
       deliveryType: row.deliveryType,
@@ -623,6 +626,10 @@ export class LiveTrainingService {
       update.endsAt = body.endsAt;
     }
 
+    if (body.allDay !== undefined) {
+      update.allDay = body.allDay;
+    }
+
     if (body.timezone !== undefined) {
       update.timezone = body.timezone;
     }
@@ -752,6 +759,7 @@ export class LiveTrainingService {
       body.description !== undefined ||
       body.startsAt !== undefined ||
       body.endsAt !== undefined ||
+      body.allDay !== undefined ||
       body.timezone !== undefined ||
       body.location !== undefined
     );

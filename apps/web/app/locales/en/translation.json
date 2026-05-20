@@ -332,10 +332,17 @@
         "title": "Live Training",
         "description": "Schedule an online or offline training session."
       },
+      "section": {
+        "basics": "Basics",
+        "schedule": "Schedule",
+        "delivery": "Delivery",
+        "permissions": "Permissions"
+      },
       "field": {
         "title": "Title",
         "description": "Description",
         "language": "Language",
+        "allDay": "All day",
         "deliveryType": "Delivery type",
         "startsAt": "Starts at",
         "endsAt": "Ends at",
@@ -358,6 +365,7 @@
         "title": "This name is shown in the calendar and in the Live Training details.",
         "description": "Optional context for participants before they join the training.",
         "language": "The base language used for this Live Training title and description.",
+        "allDay": "Use whole-day calendar dates and disable start/end time selection.",
         "deliveryType": "Online sessions are remote. Offline sessions require a physical location.",
         "startsAt": "The planned start time shown in the calendar.",
         "endsAt": "The planned end time shown in the calendar.",
@@ -472,7 +480,14 @@
       "maxParticipants": "Max participants",
       "visibility": "Visibility",
       "courses": "Linked courses",
-      "location": "Location"
+      "location": "Location",
+      "addTrainer": "Add",
+      "addTrainerHint": "Add trainer",
+      "removeTrainer": "Remove trainer {{name}}",
+      "searchPeople": "Search people...",
+      "noUserResults": "No users found.",
+      "loadingUsers": "Loading users...",
+      "loadMoreUsers": "Load more"
     },
     "tabs": {
       "overview": "Overview",

@@ -36350,6 +36350,9 @@
                 "endsAt": {
                   "type": "string"
                 },
+                "allDay": {
+                  "type": "boolean"
+                },
                 "timezone": {
                   "type": "string"
                 },
@@ -36440,6 +36443,7 @@
                 "description",
                 "startsAt",
                 "endsAt",
+                "allDay",
                 "timezone",
                 "location",
                 "deliveryType",
@@ -36518,6 +36522,9 @@
                   },
                   "endsAt": {
                     "type": "string"
+                  },
+                  "allDay": {
+                    "type": "boolean"
                   },
                   "timezone": {
                     "type": "string"
@@ -36609,6 +36616,7 @@
                   "description",
                   "startsAt",
                   "endsAt",
+                  "allDay",
                   "timezone",
                   "location",
                   "deliveryType",
@@ -36923,6 +36931,9 @@
             "minLength": 1,
             "type": "string"
           },
+          "allDay": {
+            "type": "boolean"
+          },
           "timezone": {
             "minLength": 1,
             "type": "string"
@@ -37044,6 +37055,9 @@
                   "endsAt": {
                     "type": "string"
                   },
+                  "allDay": {
+                    "type": "boolean"
+                  },
                   "timezone": {
                     "type": "string"
                   },
@@ -37134,6 +37148,7 @@
                   "description",
                   "startsAt",
                   "endsAt",
+                  "allDay",
                   "timezone",
                   "location",
                   "deliveryType",
@@ -37459,6 +37474,9 @@
                 "minLength": 1,
                 "type": "string"
               },
+              "allDay": {
+                "type": "boolean"
+              },
               "timezone": {
                 "minLength": 1,
                 "type": "string"
@@ -37598,6 +37616,9 @@
                   "endsAt": {
                     "type": "string"
                   },
+                  "allDay": {
+                    "type": "boolean"
+                  },
                   "timezone": {
                     "type": "string"
                   },
@@ -37688,6 +37709,7 @@
                   "description",
                   "startsAt",
                   "endsAt",
+                  "allDay",
                   "timezone",
                   "location",
                   "deliveryType",
@@ -38013,6 +38035,9 @@
                     "endsAt": {
                       "type": "string"
                     },
+                    "allDay": {
+                      "type": "boolean"
+                    },
                     "timezone": {
                       "type": "string"
                     },
@@ -38163,6 +38188,7 @@
                     "description",
                     "startsAt",
                     "endsAt",
+                    "allDay",
                     "timezone",
                     "location",
                     "status",
@@ -38219,6 +38245,9 @@
               },
               "endsAt": {
                 "type": "string"
+              },
+              "allDay": {
+                "type": "boolean"
               },
               "timezone": {
                 "type": "string"
@@ -38634,6 +38663,7 @@
               "description",
               "startsAt",
               "endsAt",
+              "allDay",
               "timezone",
               "location",
               "status",

@@ -38,7 +38,8 @@ Still open:
 Define the first implementable Live Training slice:
 
 - schedule Live Training through a calendar-compatible event,
-- link one Live Training to zero or many course lessons,
+- link one Live Training to zero or one course lesson in V1, while keeping the bridge table ready
+  for future M:N linking,
 - assign trainers,
 - start and end a LiveKit-backed runtime session,
 - let eligible users join as observers,
@@ -63,9 +64,10 @@ Define the first implementable Live Training slice:
 - Link Live Training to courses through `live_training_links`.
 - V1 allows only `live_training_links.entity_type = course`.
 - Do not put `lesson_id` directly on `live_trainings` or `live_training_links`.
-- Use `live_lessons` as the bridge from Live Training link to concrete `lessons(type =
-live_training)` rows.
-- The same Live Training may appear in multiple courses as separate lesson rows.
+- Use `live_lessons` as the bridge from Live Training to concrete `lessons(type = live_training)`
+  rows.
+- V1 enforces one lesson per Live Training. Future M:N reuse can relax the unique
+  `live_training_id` constraint.
 - Do not snapshot course learners when scheduling or linking the training.
 - Do not materialize course learners or all tenant users into `live_training_members`.
 - Use `live_training_members` only for assigned trainers.
@@ -391,7 +393,8 @@ Rules:
 
 ### Table: `live_lessons`
 
-Bridge from Live Training to concrete LMS lesson rows. One row per linked course lesson.
+Bridge from Live Training to concrete LMS lesson rows. V1 supports one linked lesson per Live
+Training while preserving a bridge-table shape for future M:N reuse.
 
 ```text
 id uuid pk
@@ -399,17 +402,15 @@ tenant_id uuid not null
 created_at timestamptz not null
 updated_at timestamptz not null
 
-live_training_id uuid not null references live_trainings(id) on delete cascade
-live_training_link_id uuid not null references live_training_links(id) on delete cascade
 lesson_id uuid not null references lessons(id) on delete cascade
+live_training_id uuid not null references live_trainings(id) on delete cascade
 ```
 
 Constraints and indexes:
 
 ```text
-unique(live_training_link_id)
 unique(lesson_id)
-unique(live_training_id, lesson_id)
+unique(live_training_id) -- V1 restriction; remove later if one Live Training can back many lessons
 
 tenant_id
 tenant_id, live_training_id
@@ -418,9 +419,11 @@ tenant_id, live_training_id
 Rules:
 
 - Do not store `lesson_id` directly on `live_trainings`.
-- Do not store `lesson_id` directly on `live_training_links`.
-- Each linked course gets its own concrete `lessons` row.
-- The same Live Training may appear as separate lessons in multiple courses.
+- Lesson title and Live Training title are separate domain fields.
+- A lesson can create or link a Live Training, but Live Training edits happen on the Live Training
+  page.
+- Course lesson views show lightweight Live Training metadata and redirect to `/live-training/:id`.
+- V1 rejects linking a Live Training that already has a `live_lessons` row.
 
 ### Table: `live_training_sessions`
 
@@ -614,9 +617,8 @@ Create course-linked Live Training:
 calendar_events
 live_trainings(visibility_scope = linked_courses)
 live_training_members for trainers
-live_training_links row per course
-lessons(type = live_training) row per linked course
-live_lessons row per linked course lesson
+lessons(type = live_training)
+live_lessons bridge row
 resource_entity rows for before/after files, if any
 ```
 
@@ -624,13 +626,14 @@ Add course link to existing Live Training:
 
 ```text
 require visibility_scope = linked_courses
-create live_training_links row
-create lessons(type = live_training) row in that course
+require no existing live_lessons row in V1
+create lessons(type = live_training) row in the course
 create live_lessons bridge row
 ```
 
 V1 restriction:
 
+- One Live Training can be linked to at most one lesson.
 - Do not allow adding/removing course links after a session starts.
 
 ## Session Flow

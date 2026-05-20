@@ -8,7 +8,6 @@ import type {
   CalendarCreateLiveTrainingDialogProps,
   CalendarCreateLiveTrainingFormState,
 } from "./calendarCreateLiveTraining.types";
-import type { SupportedLanguages } from "@repo/shared";
 
 const padDatePart = (value: number) => String(value).padStart(2, "0");
 
@@ -22,18 +21,15 @@ const getDefaultDateRange = (
   selectedRange: CalendarCreateLiveTrainingDialogProps["selectedRange"],
 ) => {
   const startsAt = selectedRange?.start ? new Date(selectedRange.start) : new Date();
+  const isAllDay = Boolean(selectedRange?.allDay);
 
-  if (
-    !selectedRange ||
-    selectedRange.allDay ||
-    (startsAt.getHours() === 0 && startsAt.getMinutes() === 0)
-  ) {
+  if (!selectedRange || isAllDay || (startsAt.getHours() === 0 && startsAt.getMinutes() === 0)) {
     startsAt.setHours(9, 0, 0, 0);
   }
 
   const endsAt = selectedRange?.end ? new Date(selectedRange.end) : new Date(startsAt);
 
-  if (selectedRange?.allDay && selectedRange.end) {
+  if (isAllDay && selectedRange?.end) {
     endsAt.setDate(endsAt.getDate() - 1);
     endsAt.setHours(17, 0, 0, 0);
   }
@@ -43,22 +39,31 @@ const getDefaultDateRange = (
     endsAt.setHours(startsAt.getHours() + 1);
   }
 
-  return { startsAt, endsAt };
+  return { startsAt, endsAt, isAllDay };
 };
 
 export const buildCalendarCreateDateTime = (date: string, time: string) =>
   new Date(`${date}T${time}:00`);
 
+export const buildCalendarCreateAllDayStartDateTime = (date: string) =>
+  new Date(`${date}T00:00:00`);
+
+export const buildCalendarCreateAllDayEndDateTime = (date: string) => {
+  const endsAt = new Date(`${date}T00:00:00`);
+  endsAt.setDate(endsAt.getDate() + 1);
+
+  return endsAt;
+};
+
 export const buildInitialCalendarCreateLiveTrainingFormState = (
   selectedRange: CalendarCreateLiveTrainingDialogProps["selectedRange"],
-  language: SupportedLanguages,
 ): CalendarCreateLiveTrainingFormState => {
-  const { startsAt, endsAt } = getDefaultDateRange(selectedRange);
+  const { startsAt, endsAt, isAllDay } = getDefaultDateRange(selectedRange);
 
   return {
     title: "",
     description: "",
-    language,
+    allDay: isAllDay,
     startDate: toDateInputValue(startsAt),
     startTime: toTimeInputValue(startsAt),
     endDate: toDateInputValue(endsAt),

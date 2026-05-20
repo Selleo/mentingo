@@ -1,5 +1,5 @@
 import type { CALENDAR_CREATE_MODES } from "./calendarCreateLiveTraining.constants";
-import type { LiveTrainingDeliveryType, SupportedLanguages } from "@repo/shared";
+import type { LiveTrainingDeliveryType } from "@repo/shared";
 
 export type CalendarCreateMode = (typeof CALENDAR_CREATE_MODES)[keyof typeof CALENDAR_CREATE_MODES];
 
@@ -20,7 +20,7 @@ export type CalendarSelectedRange = {
 export type CalendarCreateLiveTrainingFormState = {
   title: string;
   description: string;
-  language: SupportedLanguages;
+  allDay: boolean;
   startDate: string;
   startTime: string;
   endDate: string;

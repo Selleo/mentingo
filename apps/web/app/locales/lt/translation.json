@@ -335,6 +335,7 @@
         "title": "Pavadinimas",
         "description": "Aprašymas",
         "language": "Kalba",
+        "allDay": "Visa diena",
         "deliveryType": "Vykdymo tipas",
         "startsAt": "Pradžia",
         "endsAt": "Pabaiga",
@@ -357,6 +358,7 @@
         "title": "Šis pavadinimas rodomas kalendoriuje ir Live Training informacijoje.",
         "description": "Neprivalomas kontekstas dalyviams prieš prisijungiant prie mokymų.",
         "language": "Pagrindinė šio Live Training pavadinimo ir aprašymo kalba.",
+        "allDay": "Naudoja visos dienos kalendoriaus datas ir išjungia pradžios bei pabaigos laiko pasirinkimą.",
         "deliveryType": "Online sesijos vyksta nuotoliniu būdu. Offline sesijoms reikia vietos.",
         "startsAt": "Planuojamas pradžios laikas, rodomas kalendoriuje.",
         "endsAt": "Planuojamas pabaigos laikas, rodomas kalendoriuje.",
@@ -471,7 +473,14 @@
       "maxParticipants": "Max participants",
       "visibility": "Visibility",
       "courses": "Linked courses",
-      "location": "Location"
+      "location": "Location",
+      "addTrainer": "Add",
+      "addTrainerHint": "Add trainer",
+      "removeTrainer": "Remove trainer {{name}}",
+      "searchPeople": "Search people...",
+      "noUserResults": "No users found.",
+      "loadingUsers": "Loading users...",
+      "loadMoreUsers": "Load more"
     },
     "tabs": {
       "overview": "Overview",

@@ -28,6 +28,7 @@ export const updateLiveTrainingSchema = Type.Intersect([
       ]),
       startsAt: Type.String({ minLength: 1 }),
       endsAt: Type.String({ minLength: 1 }),
+      allDay: Type.Boolean(),
       timezone: Type.String({ minLength: 1 }),
       location: Type.Union([Type.String(), Type.Null()]),
       deliveryType: liveTrainingDeliveryTypeSchema,

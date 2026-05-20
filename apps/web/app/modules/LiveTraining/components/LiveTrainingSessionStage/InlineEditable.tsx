@@ -15,9 +15,9 @@ function InlineEditableComponent(
     <div
       ref={ref}
       className={cn(
-        "rounded border transition-colors",
+        "relative rounded transition-colors",
         {
-          "border-white/20 hover:border-dotted hover:border-white/60 focus-within:border-solid focus-within:border-white/75":
+          "border border-white/20 hover:border-dotted hover:border-white/60 focus-within:border-solid focus-within:border-white/75":
             variant === "chip",
           "live-training-inline-editable--text": variant === "text",
         },

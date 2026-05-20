@@ -1,4 +1,4 @@
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "../api-client";
 
@@ -24,6 +24,18 @@ type QueryOptions = {
   enabled?: boolean;
 };
 
+const getUsersRequestParams = (searchParams: UsersParams | undefined, page: number) => ({
+  page,
+  perPage: searchParams?.perPage || 10,
+  ...(searchParams?.keyword && { keyword: searchParams.keyword }),
+  ...(searchParams?.role && { roleSlug: searchParams.role }),
+  ...(searchParams?.archived !== undefined && {
+    archived: String(searchParams.archived),
+  }),
+  ...(searchParams?.sort && { sort: searchParams.sort }),
+  ...(searchParams?.groups && { groups: searchParams.groups.map(({ value }) => value) }),
+});
+
 export const usersQueryOptions = (
   searchParams?: UsersParams,
   options: QueryOptions = { enabled: true },
@@ -31,19 +43,33 @@ export const usersQueryOptions = (
   placeholderData: (previousData: GetUsersResponse | undefined) => previousData,
   queryKey: ["users", searchParams],
   queryFn: async () => {
-    const response = await ApiClient.api.userControllerGetUsers({
-      page: searchParams?.page || 1,
-      perPage: searchParams?.perPage || 10,
-      ...(searchParams?.keyword && { keyword: searchParams.keyword }),
-      ...(searchParams?.role && { roleSlug: searchParams.role }),
-      ...(searchParams?.archived !== undefined && {
-        archived: String(searchParams.archived),
-      }),
-      ...(searchParams?.sort && { sort: searchParams.sort }),
-      ...(searchParams?.groups && { groups: searchParams.groups.map(({ value }) => value) }),
-    });
+    const response = await ApiClient.api.userControllerGetUsers(
+      getUsersRequestParams(searchParams, searchParams?.page || 1),
+    );
     return response.data;
   },
+  ...options,
+});
+
+export const infiniteUsersQueryOptions = (
+  searchParams?: UsersParams,
+  options: QueryOptions = { enabled: true },
+) => ({
+  queryKey: ["users", "infinite", searchParams],
+  queryFn: async ({ pageParam }: { pageParam: number }) => {
+    const response = await ApiClient.api.userControllerGetUsers(
+      getUsersRequestParams(searchParams, pageParam),
+    );
+    return response.data;
+  },
+  getNextPageParam: (lastPage: GetUsersResponse) => {
+    const loadedItems = lastPage.pagination.page * lastPage.pagination.perPage;
+
+    if (loadedItems >= lastPage.pagination.totalItems) return undefined;
+
+    return lastPage.pagination.page + 1;
+  },
+  initialPageParam: 1,
   ...options,
 });
 
@@ -53,4 +79,11 @@ export function useAllUsers(searchParams?: UsersParams) {
 
 export function useAllUsersSuspense(searchParams?: UsersParams) {
   return useSuspenseQuery(usersQueryOptions(searchParams));
+}
+
+export function useInfiniteUsers(
+  searchParams?: UsersParams,
+  options: QueryOptions = { enabled: true },
+) {
+  return useInfiniteQuery(infiniteUsersQueryOptions(searchParams, options));
 }

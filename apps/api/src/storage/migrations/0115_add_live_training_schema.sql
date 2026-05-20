@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS "calendar_events" (
 	"description" jsonb,
 	"starts_at" timestamp(3) with time zone NOT NULL,
 	"ends_at" timestamp(3) with time zone NOT NULL,
+	"all_day" boolean DEFAULT false NOT NULL,
 	"timezone" text NOT NULL,
 	"location" text,
 	"organizer_user_id" uuid,

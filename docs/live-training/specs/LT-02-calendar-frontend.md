@@ -19,6 +19,8 @@ This slice does not include:
 - LiveKit start/join/end actions.
 - Generic Calendar event create/edit/delete.
 - Course-linked Live Training creation.
+  - Course-linked creation is owned by LT-05 through the lesson creation flow.
+  - Calendar-created Live Trainings remain standalone until an explicit link-existing flow exists.
 
 ## Implementation Progress
 

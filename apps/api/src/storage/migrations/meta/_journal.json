@@ -810,14 +810,14 @@
     {
       "idx": 115,
       "version": "7",
-      "when": 1778855524883,
+      "when": 1779280649028,
       "tag": "0115_add_live_training_schema",
       "breakpoints": true
     },
     {
       "idx": 116,
       "version": "7",
-      "when": 1778855528960,
+      "when": 1779280662871,
       "tag": "0116_add_calendar_live_training_settings",
       "breakpoints": true
     }

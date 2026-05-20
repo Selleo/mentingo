@@ -33,9 +33,21 @@ type CalendarEventMetaRowProps = {
   value: ReactNode;
 };
 
-const formatEventDateRange = (startsAt: string, endsAt: string) => {
+const formatEventDateRange = (startsAt: string, endsAt: string, allDay: boolean) => {
   const start = new Date(startsAt);
   const end = new Date(endsAt);
+
+  if (allDay) {
+    const inclusiveEnd = new Date(end);
+    inclusiveEnd.setDate(inclusiveEnd.getDate() - 1);
+
+    if (start.toDateString() === inclusiveEnd.toDateString()) {
+      return format(start, "d MMM yyyy");
+    }
+
+    return `${format(start, "d MMM yyyy")} - ${format(inclusiveEnd, "d MMM yyyy")}`;
+  }
+
   const isSameDay = start.toDateString() === end.toDateString();
 
   if (isSameDay) {
@@ -127,7 +139,11 @@ export function CalendarEventDetailsDialog({
                   value={
                     <span className="grid gap-0.5">
                       <span>
-                        {formatEventDateRange(eventDetails.startsAt, eventDetails.endsAt)}
+                        {formatEventDateRange(
+                          eventDetails.startsAt,
+                          eventDetails.endsAt,
+                          eventDetails.allDay,
+                        )}
                       </span>
                       <span className="text-xs text-neutral-500">{eventDetails.timezone}</span>
                     </span>

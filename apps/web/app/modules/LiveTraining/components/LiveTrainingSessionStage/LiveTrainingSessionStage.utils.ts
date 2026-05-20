@@ -3,6 +3,13 @@ import { LIVE_TRAINING_DESCRIPTION_MAX_LENGTH, LIVE_TRAINING_TITLE_MAX_LENGTH } 
 export const buildLiveTrainingStageDateTime = (date: string, time: string) =>
   new Date(`${date}T${time}:00`).toISOString();
 
+export const buildLiveTrainingStageAllDayEndDateTime = (date: string) => {
+  const endsAt = new Date(`${date}T00:00:00`);
+  endsAt.setDate(endsAt.getDate() + 1);
+
+  return endsAt.toISOString();
+};
+
 export const trimLiveTrainingDescriptionForPreview = (description: string) =>
   description.length > LIVE_TRAINING_DESCRIPTION_MAX_LENGTH
     ? `${description.slice(0, LIVE_TRAINING_DESCRIPTION_MAX_LENGTH).trimEnd()}...`

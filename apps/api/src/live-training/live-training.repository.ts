@@ -103,6 +103,7 @@ export class LiveTrainingRepository {
         availableLocales: calendarEvents.availableLocales,
         startsAt: calendarEvents.startsAt,
         endsAt: calendarEvents.endsAt,
+        allDay: calendarEvents.allDay,
         timezone: calendarEvents.timezone,
         location: calendarEvents.location,
         deliveryType: liveTrainings.deliveryType,
@@ -113,7 +114,9 @@ export class LiveTrainingRepository {
         sequence: calendarEvents.sequence,
         settings: liveTrainings.settings,
         metadata: liveTrainings.metadata,
-        authorName: sql<string | null>`nullif(concat_ws(' ', ${users.firstName}, ${users.lastName}), '')`,
+        authorName: sql<
+          string | null
+        >`nullif(concat_ws(' ', ${users.firstName}, ${users.lastName}), '')`,
         authorAvatarReference: users.avatarReference,
       })
       .from(liveTrainings)
@@ -150,6 +153,7 @@ export class LiveTrainingRepository {
         ),
         startsAt: calendarEvents.startsAt,
         endsAt: calendarEvents.endsAt,
+        allDay: calendarEvents.allDay,
         timezone: calendarEvents.timezone,
         location: calendarEvents.location,
         deliveryType: liveTrainings.deliveryType,
@@ -169,7 +173,9 @@ export class LiveTrainingRepository {
     return this.db
       .select({
         id: users.id,
-        fullName: sql<string | null>`nullif(concat_ws(' ', ${users.firstName}, ${users.lastName}), '')`,
+        fullName: sql<
+          string | null
+        >`nullif(concat_ws(' ', ${users.firstName}, ${users.lastName}), '')`,
         avatarReference: users.avatarReference,
       })
       .from(liveTrainingMembers)

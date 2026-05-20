@@ -1,12 +1,20 @@
-import { useNavigate, useParams } from "@remix-run/react";
+import { redirect, useNavigate, useParams } from "@remix-run/react";
+import { PERMISSIONS } from "@repo/shared";
 import { isAxiosError } from "axios";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useDeleteLiveTraining } from "~/api/mutations/live-training/useDeleteLiveTraining";
 import { useUpdateLiveTraining } from "~/api/mutations/live-training/useUpdateLiveTraining";
-import { useLiveTraining } from "~/api/queries/live-training/useLiveTraining";
+import { currentUserQueryOptions } from "~/api/queries";
+import {
+  liveTrainingQueryOptions,
+  useLiveTraining,
+} from "~/api/queries/live-training/useLiveTraining";
 import { useCurrentUserSuspense } from "~/api/queries/useCurrentUser";
+import { globalSettingsQueryOptions } from "~/api/queries/useGlobalSettings";
+import { queryClient } from "~/api/queryClient";
+import { hasPermission } from "~/common/permissions/permission.utils";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Skeleton } from "~/components/ui/skeleton";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
@@ -20,7 +28,9 @@ import {
   isLiveTrainingEditFormDirty,
   isLiveTrainingEditFormValid,
 } from "~/modules/LiveTraining/utils/liveTrainingEditForm";
+import { saveEntryToNavigationHistory } from "~/utils/saveEntryToNavigationHistory";
 
+import type { ClientLoaderFunctionArgs } from "@remix-run/react";
 import type { LiveTrainingEditFormState } from "~/modules/LiveTraining/liveTrainingEdit.types";
 
 function LiveTrainingPageSkeleton() {
@@ -33,6 +43,51 @@ function LiveTrainingPageSkeleton() {
   );
 }
 
+export const clientLoader = async ({ params, request }: ClientLoaderFunctionArgs) => {
+  const [currentUserResponse, globalSettingsResponse] = await Promise.all([
+    queryClient.ensureQueryData(currentUserQueryOptions),
+    queryClient.ensureQueryData(globalSettingsQueryOptions),
+  ]);
+
+  const currentUser = currentUserResponse?.data;
+  const globalSettings = globalSettingsResponse?.data;
+
+  if (!currentUser) {
+    saveEntryToNavigationHistory(request);
+    throw redirect("/auth/login");
+  }
+
+  const canReadLiveTraining =
+    Boolean(globalSettings?.liveTrainingEnabled) &&
+    hasPermission(currentUser.permissions, PERMISSIONS.LIVE_TRAINING_READ);
+
+  if (!canReadLiveTraining) {
+    throw redirect("/");
+  }
+
+  if (!params.id) {
+    throw redirect("/calendar");
+  }
+
+  const { language } = useLanguageStore.getState();
+
+  try {
+    await queryClient.fetchQuery(liveTrainingQueryOptions(params.id, language, { retry: false }));
+  } catch (error) {
+    if (isAxiosError(error) && error.response?.status === 403) {
+      throw redirect("/");
+    }
+
+    if (!isAxiosError(error) || error.response?.status === 400 || error.response?.status === 404) {
+      throw redirect("/calendar");
+    }
+
+    throw error;
+  }
+
+  return null;
+};
+
 export default function LiveTrainingPage() {
   const { t } = useTranslation();
   const { id } = useParams();
@@ -41,12 +96,7 @@ export default function LiveTrainingPage() {
   const [editFormState, setEditFormState] = useState<LiveTrainingEditFormState | null>(null);
   const language = useLanguageStore((state) => state.language);
   const { data: currentUser } = useCurrentUserSuspense();
-  const {
-    data: liveTraining,
-    isError,
-    isLoading,
-    error,
-  } = useLiveTraining(id, language, {
+  const { data: liveTraining, isLoading } = useLiveTraining(id, language, {
     enabled: Boolean(id),
     retry: false,
   });
@@ -60,6 +110,7 @@ export default function LiveTrainingPage() {
         permissions: currentUser.permissions,
       })
     : null;
+  const canManageUsers = hasPermission(currentUser.permissions, PERMISSIONS.USER_MANAGE);
 
   useEffect(() => {
     if (!liveTraining) return;
@@ -99,22 +150,6 @@ export default function LiveTrainingPage() {
     navigate("/calendar");
   };
 
-  useEffect(() => {
-    if (!id) {
-      navigate("/calendar", { replace: true });
-      return;
-    }
-
-    if (!isError) return;
-
-    const shouldRedirect =
-      !isAxiosError(error) || error.response?.status === 400 || error.response?.status === 404;
-
-    if (shouldRedirect) {
-      navigate("/calendar", { replace: true });
-    }
-  }, [error, id, isError, navigate]);
-
   return (
     <PageWrapper
       breadcrumbs={[
@@ -134,7 +169,11 @@ export default function LiveTrainingPage() {
             onEditFormStateCommit={commitEditFormState}
             onEditFormStateChange={updateEditFormState}
           />
-          <LiveTrainingWorkspace liveTraining={liveTraining} />
+          <LiveTrainingWorkspace
+            liveTraining={liveTraining}
+            actions={actions}
+            canManageUsers={canManageUsers}
+          />
           <LiveTrainingDeleteDialog
             open={isDeleteDialogOpen}
             isDeleting={isDeleting}

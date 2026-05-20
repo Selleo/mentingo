@@ -22,6 +22,7 @@ export type CreateLiveTrainingRecordInput = {
     description: LocalizedText | SQL | null;
     startsAt: string;
     endsAt: string;
+    allDay: boolean;
     timezone: string;
     location: string | null;
     organizerUserId: UUIDType;
@@ -52,6 +53,7 @@ export type UpdateLiveTrainingRecordInput = {
     availableLocales: SupportedLanguages[];
     startsAt: string;
     endsAt: string;
+    allDay: boolean;
     timezone: string;
     location: string | null;
     sequence: number;

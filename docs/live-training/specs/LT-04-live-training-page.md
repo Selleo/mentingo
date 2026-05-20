@@ -446,9 +446,18 @@ Field placement:
   - max participants,
   - viewer permission toggles when online.
 - status/delivery badges remain readable.
-- Overview tab stays read-only for people/details in this slice.
+- Overview tab supports trainer management for users who can edit the Live Training and can search
+  users through the existing user-management endpoint.
 - Files tab remains file management only.
-- People block remains read-only until a separate people-management slice.
+- People block remains inline and compact:
+  - author is always visible,
+  - author cannot be removed,
+  - trainers can be added through an inline search popover,
+  - trainers can be removed from the people list,
+  - duplicate author/trainer rows are merged into one person with multiple badges.
+- First pass uses the existing `GET /user/all` API, so the add-trainer control is shown only when
+  the user can both edit the training and manage/search users. A narrower trainer-candidate endpoint
+  is deferred for content creators who can edit their own trainings but should not manage all users.
 
 ### Validation Rules
 
@@ -497,6 +506,9 @@ Field placement:
 - [x] Submit `PATCH /live-training/:id` with normalized payload.
 - [x] Invalidate Live Training and Calendar queries after save.
 - [x] Add translated success/error copy.
+- [x] Add inline trainer management in the People section.
+- [x] Use infinite user search for adding trainers.
+- [x] Preserve backend-owned author locking by only sending editable trainer ids.
 - [ ] Add tests after the edit flow stabilizes.
 
 ## Manual Finish Requirement
@@ -524,5 +536,6 @@ Before the runtime slice:
 
 - Exact button naming: `Cancel` vs `Delete` for scheduled trainings.
 - Whether standalone Live Training can later be linked to courses from this page.
-- Whether trainers can be edited in the first page edit pass or in a separate people-management pass.
+- Whether trainer candidate search should get a dedicated endpoint for own-training editors without
+  `USER_MANAGE`.
 - Whether offline attendance is manual-only or imported from another source.

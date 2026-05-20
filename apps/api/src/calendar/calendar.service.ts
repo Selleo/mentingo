@@ -199,6 +199,7 @@ export class CalendarService {
       description: row.description || null,
       startsAt: row.startsAt,
       endsAt: row.endsAt,
+      allDay: row.allDay,
       timezone: row.timezone,
       location: row.location,
       status: row.status,

@@ -3,14 +3,19 @@ import { useTranslation } from "react-i18next";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { LiveTrainingMaterials } from "~/modules/LiveTraining/components/LiveTrainingMaterials";
-import { LiveTrainingSidebar } from "~/modules/LiveTraining/components/LiveTrainingSidebar";
+import { LiveTrainingOverview } from "~/modules/LiveTraining/components/LiveTrainingOverview";
 import { LIVE_TRAINING_WORKSPACE_TABS } from "~/modules/LiveTraining/liveTraining.types";
 
 import type { ReactNode } from "react";
-import type { LiveTrainingDetails } from "~/modules/LiveTraining/liveTraining.types";
+import type {
+  LiveTrainingDetails,
+  LiveTrainingUiActions,
+} from "~/modules/LiveTraining/liveTraining.types";
 
 type LiveTrainingWorkspaceProps = {
   liveTraining: LiveTrainingDetails;
+  actions: LiveTrainingUiActions;
+  canManageUsers: boolean;
 };
 
 type DeferredPanelProps = {
@@ -35,8 +40,13 @@ function DeferredPanel({ icon, title, description }: DeferredPanelProps) {
   );
 }
 
-export function LiveTrainingWorkspace({ liveTraining }: LiveTrainingWorkspaceProps) {
+export function LiveTrainingWorkspace({
+  liveTraining,
+  actions,
+  canManageUsers,
+}: LiveTrainingWorkspaceProps) {
   const { t } = useTranslation();
+  const canEditPeople = actions.canShowEdit && canManageUsers;
 
   return (
     <Tabs defaultValue={LIVE_TRAINING_WORKSPACE_TABS.OVERVIEW} className="grid gap-4">
@@ -53,7 +63,11 @@ export function LiveTrainingWorkspace({ liveTraining }: LiveTrainingWorkspacePro
       </TabsList>
 
       <TabsContent value={LIVE_TRAINING_WORKSPACE_TABS.OVERVIEW}>
-        <LiveTrainingSidebar liveTraining={liveTraining} className="lg:grid-cols-2" />
+        <LiveTrainingOverview
+          liveTraining={liveTraining}
+          canEditPeople={canEditPeople}
+          className="lg:grid-cols-[minmax(18rem,0.9fr)_minmax(20rem,1.1fr)]"
+        />
       </TabsContent>
 
       <TabsContent value={LIVE_TRAINING_WORKSPACE_TABS.FILES}>

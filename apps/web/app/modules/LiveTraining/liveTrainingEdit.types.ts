@@ -3,6 +3,7 @@ import type { LiveTrainingDetails } from "~/modules/LiveTraining/liveTraining.ty
 export type LiveTrainingEditFormState = {
   title: string;
   description: string;
+  allDay: boolean;
   startDate: string;
   startTime: string;
   endDate: string;

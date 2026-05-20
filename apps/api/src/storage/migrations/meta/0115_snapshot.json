@@ -1,5 +1,5 @@
 {
-  "id": "232008cd-efab-4254-b36b-4e99d574ff37",
+  "id": "90ca1933-e962-4b18-aa7a-8144f753b445",
   "prevId": "a9a9fa97-db8d-4a14-9600-0136ee316dcd",
   "version": "7",
   "dialect": "postgresql",
@@ -1183,6 +1183,13 @@
           "type": "timestamp(3) with time zone",
           "primaryKey": false,
           "notNull": true
+        },
+        "all_day": {
+          "name": "all_day",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
         },
         "timezone": {
           "name": "timezone",

@@ -1,14 +1,14 @@
 .live-training-inline-editable--text {
-  border-color: transparent;
-  border-style: solid;
+  outline: 1px solid transparent;
+  outline-offset: 2px;
 }
 
 .live-training-inline-editable--text:hover {
-  border-color: rgba(255, 255, 255, 0.7);
-  border-style: dotted;
+  outline-color: rgba(255, 255, 255, 0.7);
+  outline-style: dotted;
 }
 
 .live-training-inline-editable--text:focus-within {
-  border-color: rgba(255, 255, 255, 0.75);
-  border-style: solid;
+  outline-color: rgba(255, 255, 255, 0.75);
+  outline-style: solid;
 }

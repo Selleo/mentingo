@@ -25,6 +25,7 @@ export const createLiveTrainingSchema = Type.Object({
   ),
   startsAt: Type.String({ minLength: 1 }),
   endsAt: Type.String({ minLength: 1 }),
+  allDay: Type.Optional(Type.Boolean()),
   timezone: Type.String({ minLength: 1 }),
   location: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   deliveryType: liveTrainingDeliveryTypeSchema,

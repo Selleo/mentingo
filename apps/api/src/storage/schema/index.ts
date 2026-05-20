@@ -409,6 +409,7 @@ export const calendarEvents = pgTable(
       withTimezone: true,
       precision: 3,
     }).notNull(),
+    allDay: boolean("all_day").notNull().default(false),
     timezone: text("timezone").notNull(),
     location: text("location"),
     organizerUserId: uuid("organizer_user_id").references(() => users.id, {

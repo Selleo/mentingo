@@ -335,6 +335,7 @@
         "title": "Název",
         "description": "Popis",
         "language": "Jazyk",
+        "allDay": "Celý den",
         "deliveryType": "Typ realizace",
         "startsAt": "Začátek",
         "endsAt": "Konec",
@@ -357,6 +358,7 @@
         "title": "Tento název se zobrazí v kalendáři a v detailech Live Training.",
         "description": "Volitelný kontext pro účastníky před připojením ke školení.",
         "language": "Základní jazyk názvu a popisu tohoto Live Training.",
+        "allDay": "Použije celodenní kalendářní datum a vypne výběr času začátku a konce.",
         "deliveryType": "Online relace jsou vzdálené. Offline relace vyžadují místo.",
         "startsAt": "Plánovaný čas začátku zobrazený v kalendáři.",
         "endsAt": "Plánovaný čas konce zobrazený v kalendáři.",
@@ -471,7 +473,14 @@
       "maxParticipants": "Max participants",
       "visibility": "Visibility",
       "courses": "Linked courses",
-      "location": "Location"
+      "location": "Location",
+      "addTrainer": "Add",
+      "addTrainerHint": "Add trainer",
+      "removeTrainer": "Remove trainer {{name}}",
+      "searchPeople": "Search people...",
+      "noUserResults": "No users found.",
+      "loadingUsers": "Loading users...",
+      "loadMoreUsers": "Load more"
     },
     "tabs": {
       "overview": "Overview",

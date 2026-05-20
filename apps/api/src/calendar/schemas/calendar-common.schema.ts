@@ -42,6 +42,7 @@ export const calendarEventBaseSchema = Type.Object({
   description: Type.Union([Type.String(), Type.Null()]),
   startsAt: Type.String(),
   endsAt: Type.String(),
+  allDay: Type.Boolean(),
   timezone: Type.String(),
   location: Type.Union([Type.String(), Type.Null()]),
   status: Type.Enum(CALENDAR_EVENT_STATUSES),

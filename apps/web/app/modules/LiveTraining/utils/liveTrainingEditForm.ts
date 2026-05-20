@@ -15,6 +15,15 @@ const toTimeInputValue = (date: Date) =>
 
 const buildDateTime = (date: string, time: string) => new Date(`${date}T${time}:00`);
 
+const buildAllDayStartDateTime = (date: string) => new Date(`${date}T00:00:00`);
+
+const buildAllDayEndDateTime = (date: string) => {
+  const endsAt = new Date(`${date}T00:00:00`);
+  endsAt.setDate(endsAt.getDate() + 1);
+
+  return endsAt;
+};
+
 export const buildLiveTrainingEditFormState = (
   liveTraining: LiveTrainingDetails,
 ): LiveTrainingEditFormState => {
@@ -24,6 +33,7 @@ export const buildLiveTrainingEditFormState = (
   return {
     title: liveTraining.title,
     description: liveTraining.description ?? "",
+    allDay: liveTraining.allDay,
     startDate: toDateInputValue(startsAt),
     startTime: toTimeInputValue(startsAt),
     endDate: toDateInputValue(endsAt),
@@ -44,12 +54,19 @@ export const buildUpdateLiveTrainingPayload = (
   const isOffline = formState.deliveryType === LIVE_TRAINING_DELIVERY_TYPES.OFFLINE;
 
   const maxParticipants = Number(formState.maxParticipants);
+  const startsAt = formState.allDay
+    ? buildAllDayStartDateTime(formState.startDate)
+    : buildDateTime(formState.startDate, formState.startTime);
+  const endsAt = formState.allDay
+    ? buildAllDayEndDateTime(formState.endDate)
+    : buildDateTime(formState.endDate, formState.endTime);
   const payload: UpdateLiveTrainingBody = {
     title: formState.title.trim(),
     description: formState.description.trim() || null,
     language,
-    startsAt: buildDateTime(formState.startDate, formState.startTime).toISOString(),
-    endsAt: buildDateTime(formState.endDate, formState.endTime).toISOString(),
+    startsAt: startsAt.toISOString(),
+    endsAt: endsAt.toISOString(),
+    allDay: formState.allDay,
     timezone,
     deliveryType: formState.deliveryType,
     location: isOffline ? formState.location.trim() : null,
@@ -75,12 +92,17 @@ export const isLiveTrainingEditFormDirty = (
 
 export const isLiveTrainingEditFormValid = (formState: LiveTrainingEditFormState) => {
   const startsAt = buildDateTime(formState.startDate, formState.startTime);
-  const endsAt = buildDateTime(formState.endDate, formState.endTime);
+  const endsAt = formState.allDay
+    ? buildAllDayEndDateTime(formState.endDate)
+    : buildDateTime(formState.endDate, formState.endTime);
+  const validatedStartsAt = formState.allDay
+    ? buildAllDayStartDateTime(formState.startDate)
+    : startsAt;
 
   return (
     Boolean(formState.title.trim()) &&
-    !Number.isNaN(startsAt.getTime()) &&
+    !Number.isNaN(validatedStartsAt.getTime()) &&
     !Number.isNaN(endsAt.getTime()) &&
-    endsAt > startsAt
+    endsAt > validatedStartsAt
   );
 };

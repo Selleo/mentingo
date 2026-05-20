@@ -2,15 +2,20 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
+import { redirect } from "@remix-run/react";
 import { PERMISSIONS } from "@repo/shared";
 import { useMemo, useReducer } from "react";
 import { useTranslation } from "react-i18next";
 
+import { currentUserQueryOptions } from "~/api/queries";
 import { useCalendarEvents } from "~/api/queries/calendar/useCalendarEvents";
-import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
+import { globalSettingsQueryOptions, useGlobalSettings } from "~/api/queries/useGlobalSettings";
+import { queryClient } from "~/api/queryClient";
+import { hasPermission } from "~/common/permissions/permission.utils";
 import { PageWrapper } from "~/components/PageWrapper";
 import { usePermissions } from "~/hooks/usePermissions";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
+import { saveEntryToNavigationHistory } from "~/utils/saveEntryToNavigationHistory";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import calendarStyles from "./calendar.css?url";
@@ -28,12 +33,38 @@ import { CalendarEventDetailsDialog } from "./components/CalendarEventDetailsDia
 import type { DatesSetArg, DateSelectArg, EventClickArg, EventInput } from "@fullcalendar/core";
 import type { DateClickArg } from "@fullcalendar/interaction";
 import type { LinksFunction, MetaFunction } from "@remix-run/node";
+import type { ClientLoaderFunctionArgs } from "@remix-run/react";
 
 export const links: LinksFunction = () => [{ rel: "stylesheet", href: calendarStyles }];
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.calendar");
 
 const getBrowserTimezone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+export const clientLoader = async ({ request }: ClientLoaderFunctionArgs) => {
+  const [currentUserResponse, globalSettingsResponse] = await Promise.all([
+    queryClient.ensureQueryData(currentUserQueryOptions),
+    queryClient.ensureQueryData(globalSettingsQueryOptions),
+  ]);
+
+  const currentUser = currentUserResponse?.data;
+  const globalSettings = globalSettingsResponse?.data;
+
+  if (!currentUser) {
+    saveEntryToNavigationHistory(request);
+    throw redirect("/auth/login");
+  }
+
+  const canReadCalendar =
+    Boolean(globalSettings?.calendarEnabled) &&
+    hasPermission(currentUser.permissions, PERMISSIONS.CALENDAR_READ);
+
+  if (!canReadCalendar) {
+    throw redirect("/");
+  }
+
+  return null;
+};
 
 export default function CalendarPage() {
   const { t } = useTranslation();
@@ -66,6 +97,7 @@ export default function CalendarPage() {
         title: event.title,
         start: event.startsAt,
         end: event.endsAt,
+        allDay: event.allDay,
         classNames: [`calendar-event--${event.sourceType}`, `calendar-event--${event.status}`],
         extendedProps: {
           sourceId: event.sourceId,

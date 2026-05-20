@@ -5051,6 +5051,7 @@ export interface GetLiveTrainingsResponse {
     description: string | null;
     startsAt: string;
     endsAt: string;
+    allDay: boolean;
     timezone: string;
     location: string | null;
     deliveryType: "online" | "offline";
@@ -5080,6 +5081,7 @@ export interface GetLiveTrainingResponse {
     description: string | null;
     startsAt: string;
     endsAt: string;
+    allDay: boolean;
     timezone: string;
     location: string | null;
     deliveryType: "online" | "offline";
@@ -5141,13 +5143,17 @@ export interface GetLiveTrainingResponse {
 export interface CreateLiveTrainingBody {
   /** @default "en" */
   language: "en" | "pl" | "de" | "lt" | "cs";
-  /** @minLength 1 */
+  /**
+   * @minLength 1
+   * @maxLength 120
+   */
   title: string;
   description?: string | null;
   /** @minLength 1 */
   startsAt: string;
   /** @minLength 1 */
   endsAt: string;
+  allDay?: boolean;
   /** @minLength 1 */
   timezone: string;
   location?: string | null;
@@ -5179,6 +5185,7 @@ export interface CreateLiveTrainingResponse {
     description: string | null;
     startsAt: string;
     endsAt: string;
+    allDay: boolean;
     timezone: string;
     location: string | null;
     deliveryType: "online" | "offline";
@@ -5241,13 +5248,17 @@ export type UpdateLiveTrainingBody = {
   /** @default "en" */
   language: "en" | "pl" | "de" | "lt" | "cs";
 } & {
-  /** @minLength 1 */
+  /**
+   * @minLength 1
+   * @maxLength 120
+   */
   title?: string;
   description?: string | null;
   /** @minLength 1 */
   startsAt?: string;
   /** @minLength 1 */
   endsAt?: string;
+  allDay?: boolean;
   /** @minLength 1 */
   timezone?: string;
   location?: string | null;
@@ -5280,6 +5291,7 @@ export interface UpdateLiveTrainingResponse {
     description: string | null;
     startsAt: string;
     endsAt: string;
+    allDay: boolean;
     timezone: string;
     location: string | null;
     deliveryType: "online" | "offline";
@@ -5357,6 +5369,7 @@ export interface GetEventsResponse {
       description: string | null;
       startsAt: string;
       endsAt: string;
+      allDay: boolean;
       timezone: string;
       location: string | null;
       status: "scheduled" | "cancelled" | "ended" | "expired";
@@ -5389,6 +5402,7 @@ export interface GetEventDetailsResponse {
     description: string | null;
     startsAt: string;
     endsAt: string;
+    allDay: boolean;
     timezone: string;
     location: string | null;
     status: "scheduled" | "cancelled" | "ended" | "expired";

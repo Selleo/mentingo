@@ -335,10 +335,17 @@
         "title": "Live Training",
         "description": "Zaplanuj szkolenie online lub offline."
       },
+      "section": {
+        "basics": "Podstawowe",
+        "schedule": "Termin",
+        "delivery": "Forma",
+        "permissions": "Uprawnienia"
+      },
       "field": {
         "title": "Tytuł",
         "description": "Opis",
         "language": "Język",
+        "allDay": "Cały dzień",
         "deliveryType": "Tryb",
         "startsAt": "Rozpoczęcie",
         "endsAt": "Zakończenie",
@@ -361,6 +368,7 @@
         "title": "Ta nazwa będzie widoczna w kalendarzu i szczegółach Live Training.",
         "description": "Opcjonalny kontekst dla uczestników przed dołączeniem do szkolenia.",
         "language": "Język bazowy tytułu i opisu tego Live Training.",
+        "allDay": "Używa całodniowych dat w kalendarzu i wyłącza wybór godzin rozpoczęcia oraz zakończenia.",
         "deliveryType": "Sesje online są zdalne. Sesje offline wymagają lokalizacji.",
         "startsAt": "Planowany czas rozpoczęcia widoczny w kalendarzu.",
         "endsAt": "Planowany czas zakończenia widoczny w kalendarzu.",
@@ -475,7 +483,14 @@
       "maxParticipants": "Limit uczestników",
       "visibility": "Widoczność",
       "courses": "Powiązane kursy",
-      "location": "Lokalizacja"
+      "location": "Lokalizacja",
+      "addTrainer": "Dodaj",
+      "addTrainerHint": "Dodaj trenera",
+      "removeTrainer": "Usuń trenera {{name}}",
+      "searchPeople": "Szukaj osób...",
+      "noUserResults": "Nie znaleziono użytkowników.",
+      "loadingUsers": "Ładowanie użytkowników...",
+      "loadMoreUsers": "Załaduj więcej"
     },
     "tabs": {
       "overview": "Przegląd",

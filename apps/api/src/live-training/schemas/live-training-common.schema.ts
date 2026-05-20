@@ -68,6 +68,7 @@ export const liveTrainingBaseSchema = Type.Object({
   description: Type.Union([Type.String(), Type.Null()]),
   startsAt: Type.String(),
   endsAt: Type.String(),
+  allDay: Type.Boolean(),
   timezone: Type.String(),
   location: Type.Union([Type.String(), Type.Null()]),
   deliveryType: liveTrainingDeliveryTypeSchema,

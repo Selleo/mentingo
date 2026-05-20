@@ -1,16 +1,11 @@
-import {
-  LIVE_TRAINING_DELIVERY_TYPES,
-  LIVE_TRAINING_DESCRIPTION_MAX_LENGTH,
-  LIVE_TRAINING_STATUSES,
-  LIVE_TRAINING_TITLE_MAX_LENGTH,
-} from "@repo/shared";
+import { LIVE_TRAINING_DESCRIPTION_MAX_LENGTH, LIVE_TRAINING_TITLE_MAX_LENGTH } from "@repo/shared";
 import { CalendarClock, Mic, Play, Square, Trash2, Users, Video } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
+import { Switch } from "~/components/ui/switch";
 import {
   Tooltip,
   TooltipArrow,
@@ -21,19 +16,9 @@ import {
 import { cn } from "~/lib/utils";
 import { CalendarDateTimeField } from "~/modules/Calendar/components/CalendarDateTimeField";
 import { InlineEditable } from "~/modules/LiveTraining/components/LiveTrainingSessionStage/InlineEditable";
-import {
-  LIVE_TRAINING_DESCRIPTION_MAX_HEIGHT,
-  LIVE_TRAINING_TITLE_MAX_HEIGHT,
-} from "~/modules/LiveTraining/components/LiveTrainingSessionStage/LiveTrainingSessionStage.constants";
-import {
-  buildLiveTrainingStageDateTime,
-  limitLiveTrainingDescription,
-  limitLiveTrainingTitle,
-  resizeLiveTrainingTextArea,
-  trimLiveTrainingDescriptionForPreview,
-} from "~/modules/LiveTraining/components/LiveTrainingSessionStage/LiveTrainingSessionStage.utils";
 import { PreviewMetaItem } from "~/modules/LiveTraining/components/LiveTrainingSessionStage/PreviewMetaItem";
 import { StageActionButton } from "~/modules/LiveTraining/components/LiveTrainingSessionStage/StageActionButton";
+import { useLiveTrainingSessionStage } from "~/modules/LiveTraining/components/LiveTrainingSessionStage/useLiveTrainingSessionStage";
 import { formatLiveTrainingDateRange } from "~/modules/LiveTraining/utils/liveTrainingFormat";
 
 import type { UpdateLiveTrainingEditFormState } from "~/modules/LiveTraining/components/LiveTrainingSessionStage/LiveTrainingSessionStage.types";
@@ -61,101 +46,41 @@ export function LiveTrainingSessionStage({
   onEditFormStateCommit,
 }: LiveTrainingSessionStageProps) {
   const { t } = useTranslation();
-  const [isTitleFocused, setIsTitleFocused] = useState(false);
-  const [isDescriptionFocused, setIsDescriptionFocused] = useState(false);
-  const titleRef = useRef<HTMLTextAreaElement | null>(null);
-  const descriptionRef = useRef<HTMLTextAreaElement | null>(null);
-  const canEdit = actions.canShowEdit && Boolean(editFormState);
-  const displayedDeliveryType = editFormState?.deliveryType ?? liveTraining.deliveryType;
-  const isOffline = displayedDeliveryType === LIVE_TRAINING_DELIVERY_TYPES.OFFLINE;
-  const isActive = liveTraining.status === LIVE_TRAINING_STATUSES.ACTIVE;
-  const titleValue = editFormState?.title ?? liveTraining.title;
-  const isTitleAtLimit = canEdit && titleValue.length >= LIVE_TRAINING_TITLE_MAX_LENGTH;
-  const hasDescription = Boolean(editFormState?.description || liveTraining.description);
-  const shouldShowDescription = canEdit || hasDescription;
-  const descriptionValue = editFormState?.description ?? liveTraining.description ?? "";
-  const displayedDescription = canEdit
-    ? descriptionValue
-    : trimLiveTrainingDescriptionForPreview(descriptionValue);
-  const isDescriptionAtLimit =
-    canEdit && descriptionValue.length >= LIVE_TRAINING_DESCRIPTION_MAX_LENGTH;
-  const displayedStartsAt = editFormState
-    ? buildLiveTrainingStageDateTime(editFormState.startDate, editFormState.startTime)
-    : liveTraining.startsAt;
-  const displayedEndsAt = editFormState
-    ? buildLiveTrainingStageDateTime(editFormState.endDate, editFormState.endTime)
-    : liveTraining.endsAt;
-
-  const updateAndCommit = <Key extends keyof LiveTrainingEditFormState>(
-    key: Key,
-    value: LiveTrainingEditFormState[Key],
-  ) => {
-    if (!editFormState) return;
-
-    const nextFormState = { ...editFormState, [key]: value };
-    onEditFormStateChange(key, value);
-    onEditFormStateCommit(nextFormState);
-  };
-
-  const commitCurrentFormState = () => {
-    if (!editFormState) return;
-
-    onEditFormStateCommit(editFormState);
-  };
-
-  const handleTitleBlur = () => {
-    setIsTitleFocused(false);
-    commitCurrentFormState();
-  };
-
-  const handleDescriptionBlur = () => {
-    setIsDescriptionFocused(false);
-    commitCurrentFormState();
-  };
-
-  const toggleDeliveryType = () => {
-    updateAndCommit(
-      "deliveryType",
-      isOffline ? LIVE_TRAINING_DELIVERY_TYPES.ONLINE : LIVE_TRAINING_DELIVERY_TYPES.OFFLINE,
-    );
-  };
-
-  const handleMaxParticipantsChange = (value: string) => {
-    if (!value) {
-      onEditFormStateChange("maxParticipants", value);
-      return;
-    }
-
-    const numericValue = Number(value);
-
-    if (Number.isNaN(numericValue)) return;
-
-    onEditFormStateChange("maxParticipants", String(Math.min(numericValue, 100)));
-  };
-
-  const handleDescriptionChange = (value: string) => {
-    onEditFormStateChange("description", limitLiveTrainingDescription(value));
-  };
-
-  const handleTitleChange = (value: string) => {
-    onEditFormStateChange("title", limitLiveTrainingTitle(value));
-  };
-
-  useEffect(() => {
-    const titleElement = titleRef.current;
-
-    if (!titleElement) return;
-
-    resizeLiveTrainingTextArea(titleElement, LIVE_TRAINING_TITLE_MAX_HEIGHT);
-  }, [titleValue]);
-
-  useEffect(() => {
-    const descriptionElement = descriptionRef.current;
-
-    if (!descriptionElement) return;
-
-    resizeLiveTrainingTextArea(descriptionElement, LIVE_TRAINING_DESCRIPTION_MAX_HEIGHT);
-  }, [displayedDescription]);
+  const {
+    canEdit,
+    commitCurrentFormState,
+    descriptionRef,
+    descriptionValue,
+    displayedAllDay,
+    displayedDeliveryType,
+    displayedDescription,
+    displayedEndsAt,
+    displayedStartsAt,
+    handleDescriptionBlur,
+    handleDescriptionChange,
+    handleMaxParticipantsChange,
+    handleTitleBlur,
+    handleTitleChange,
+    isActive,
+    isDescriptionAtLimit,
+    isDescriptionFocused,
+    isOffline,
+    isTitleAtLimit,
+    isTitleFocused,
+    setIsDescriptionFocused,
+    setIsTitleFocused,
+    shouldShowDescription,
+    titleRef,
+    titleValue,
+    toggleDeliveryType,
+    updateAndCommit,
+  } = useLiveTrainingSessionStage({
+    liveTraining,
+    actions,
+    editFormState,
+    onEditFormStateChange,
+    onEditFormStateCommit,
+  });
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -299,17 +224,35 @@ export function LiveTrainingSessionStage({
                         <PreviewMetaItem
                           canEdit={canEdit}
                           icon={<CalendarClock className="size-4" />}
-                          value={formatLiveTrainingDateRange(displayedStartsAt, displayedEndsAt)}
+                          value={formatLiveTrainingDateRange(
+                            displayedStartsAt,
+                            displayedEndsAt,
+                            displayedAllDay,
+                          )}
                           tooltip={t("liveTrainingView.stage.scheduleTooltip")}
                         />
                       </button>
                     </PopoverTrigger>
                     <PopoverContent align="start" className="grid w-[min(92vw,32rem)] gap-4 p-4">
+                      <label
+                        htmlFor="live-training-edit-all-day"
+                        className="flex w-full items-center justify-between gap-3 rounded-md border border-neutral-200 bg-white px-3 py-2.5"
+                      >
+                        <span className="text-sm font-medium text-neutral-900">
+                          {t("calendarView.create.field.allDay")}
+                        </span>
+                        <Switch
+                          id="live-training-edit-all-day"
+                          checked={editFormState.allDay}
+                          onCheckedChange={(checked) => onEditFormStateChange("allDay", checked)}
+                        />
+                      </label>
                       <CalendarDateTimeField
                         label={t("calendarView.create.field.startsAt")}
                         tooltip={t("calendarView.create.tooltip.startsAt")}
                         date={editFormState.startDate}
                         time={editFormState.startTime}
+                        hideTime={editFormState.allDay}
                         onDateChange={(date) => onEditFormStateChange("startDate", date)}
                         onTimeChange={(time) => onEditFormStateChange("startTime", time)}
                       />
@@ -318,6 +261,7 @@ export function LiveTrainingSessionStage({
                         tooltip={t("calendarView.create.tooltip.endsAt")}
                         date={editFormState.endDate}
                         time={editFormState.endTime}
+                        hideTime={editFormState.allDay}
                         onDateChange={(date) => onEditFormStateChange("endDate", date)}
                         onTimeChange={(time) => onEditFormStateChange("endTime", time)}
                       />
@@ -328,7 +272,15 @@ export function LiveTrainingSessionStage({
                 {editFormState && (
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <span className="inline-flex h-8 max-w-[78vw] shrink-0 items-center gap-2 rounded border border-white/15 bg-white/10 px-2.5 text-xs text-white/85 transition-colors hover:border-dotted hover:border-white/60 focus-within:border-solid focus-within:border-white/75 sm:h-9 sm:max-w-none sm:px-3 sm:text-sm">
+                      <span
+                        className={cn(
+                          "inline-flex h-8 max-w-[78vw] shrink-0 items-center gap-2 rounded border border-white/15 bg-white/10 px-2.5 text-xs text-white/85 sm:h-9 sm:max-w-none sm:px-3 sm:text-sm",
+                          {
+                            "transition-colors hover:border-dotted hover:border-white/60 focus-within:border-solid focus-within:border-white/75":
+                              canEdit,
+                          },
+                        )}
+                      >
                         <Users className="size-4 shrink-0 text-white/65" />
                         <Input
                           readOnly={!canEdit}
@@ -353,7 +305,15 @@ export function LiveTrainingSessionStage({
                 {isOffline && editFormState && (
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <span className="inline-flex h-8 max-w-[78vw] shrink-0 items-center rounded border border-white/15 bg-white/10 px-2.5 text-xs text-white/85 transition-colors hover:border-dotted hover:border-white/60 focus-within:border-solid focus-within:border-white/75 sm:h-9 sm:max-w-none sm:px-3 sm:text-sm">
+                      <span
+                        className={cn(
+                          "inline-flex h-8 max-w-[78vw] shrink-0 items-center rounded border border-white/15 bg-white/10 px-2.5 text-xs text-white/85 sm:h-9 sm:max-w-none sm:px-3 sm:text-sm",
+                          {
+                            "transition-colors hover:border-dotted hover:border-white/60 focus-within:border-solid focus-within:border-white/75":
+                              canEdit,
+                          },
+                        )}
+                      >
                         <Input
                           readOnly={!canEdit}
                           value={editFormState.location}
