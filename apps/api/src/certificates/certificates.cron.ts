@@ -28,7 +28,7 @@ export class CertificatesCron {
     });
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async processCertificatesExpires() {
     await this.tenantRunner.runForEachTenant(async (tenantId) => {
       try {
