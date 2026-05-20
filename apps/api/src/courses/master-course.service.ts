@@ -322,6 +322,7 @@ export class MasterCourseService {
         quizFeedbackEnabled: QUIZ_FEEDBACK_ENABLED,
         certificateSignature: null,
         certificateFontColor: null,
+        certificateValidity: null,
       });
 
       const targetAuthor = await this.masterCourseRepository.findTargetAuthor();

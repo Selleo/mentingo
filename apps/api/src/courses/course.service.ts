@@ -43,6 +43,7 @@ import { camelCase, isEmpty, isEqual, pickBy } from "lodash";
 import { match } from "ts-pattern";
 
 import { AiService } from "src/ai/services/ai.service";
+import { CertificatesService } from "src/certificates/certificates.service";
 import { AdminChapterRepository } from "src/chapter/repositories/adminChapter.repository";
 import { DatabasePg } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
@@ -190,6 +191,7 @@ export class CourseService {
     private readonly masterCourseService: MasterCourseService,
     private readonly courseFeaturePolicyService: CourseFeaturePolicyService,
     private readonly lumaService: LumaService,
+    private readonly certificatesService: CertificatesService,
   ) {}
 
   async getAllCourses(query: CoursesQuery): Promise<{
@@ -1670,8 +1672,17 @@ export class CourseService {
 
     const incomingSettings = pickBy(
       settings,
-      (value, key) => key !== "removeCertificateSignature" && value !== undefined && value !== null,
-    );
+      (value, key) =>
+        key !== "removeCertificateSignature" &&
+        key !== "applyValidityToExistingCertificates" &&
+        key !== "certificateSignature" &&
+        value !== undefined &&
+        value !== null,
+    ) as Partial<CoursesSettings>;
+
+    if ("certificateValidity" in settings) {
+      incomingSettings.certificateValidity = settings.certificateValidity ?? null;
+    }
 
     let certificateSignatureReference = course.settings.certificateSignature ?? null;
 
@@ -1700,6 +1711,17 @@ export class CourseService {
 
     if (!updatedCourse) {
       throw new ConflictException("Failed to update course");
+    }
+
+    if (
+      settings.applyValidityToExistingCertificates &&
+      Object.prototype.hasOwnProperty.call(settings, "certificateValidity")
+    ) {
+      await this.certificatesService.applyValidityToExistingCertificates(
+        courseId,
+        settings.certificateValidity ?? null,
+        currentUser,
+      );
     }
 
     const updatedSnapshot = await this.buildCourseActivitySnapshot(courseId, resolvedLanguage);
@@ -1802,7 +1824,8 @@ export class CourseService {
       'lessonSequenceEnabled', ${isScormCourse ? false : LESSON_SEQUENCE_ENABLED}::boolean,
       'quizFeedbackEnabled', ${isScormCourse ? false : QUIZ_FEEDBACK_ENABLED}::boolean,
       'certificateSignature', NULL,
-      'certificateFontColor', NULL
+      'certificateFontColor', NULL,
+      'certificateValidity', NULL
     )`;
 
     const [newCourse] = await dbInstance

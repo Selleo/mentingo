@@ -1267,6 +1267,8 @@
       "courseTrailerRemovedSuccessfully": "Kurso anonsas sėkmingai pašalintas",
       "certificateUpdatedSuccessfully": "Sertifikatas sėkmingai atnaujintas",
       "certificateUpdateError": "Klaida atnaujinant sertifikatą",
+      "certificatesResetSuccessfully": "Sertifikatai nustatyti iš naujo {{count}} naudotojams",
+      "certificatesResetError": "Klaida nustatant sertifikatus iš naujo",
       "maxTitleLengthExceeded_one": "Pavadinimas negali būti ilgesnis nei {{count}} simbolio",
       "maxTitleLengthExceeded_other": "Pavadinimas negali būti ilgesnis nei {{count}} simbolių",
       "aiMentorAvatarIncorrectType": "Neteisingas failo tipas. Įkelkite JPG, JPEG, PNG arba SVG vaizdą.",
@@ -1347,7 +1349,11 @@
         "removeTrailer": "Pašalinti priekabą",
         "removeCertificateSignature": "Pašalinti parašą",
         "includesCertificate": "Apima sertifikatą",
-        "doesNotIncludeCertificate": "Nėra sertifikato"
+        "doesNotIncludeCertificate": "Nėra sertifikato",
+        "saveValidity": "Išsaugoti galiojimą",
+        "resetCertificates": "Nustatyti sertifikatus iš naujo",
+        "futureOnly": "Tik būsimiems",
+        "applyToExisting": "Taikyti esamiems"
       },
       "selectButton": {
         "uploadFile": "Įkelti failą",
@@ -1370,7 +1376,11 @@
         "description": "Aprašymas",
         "thumbnail": "Miniatiūra",
         "trailer": "Kursų anonsas",
-        "baseLanguage": "Bazinė kalba"
+        "baseLanguage": "Bazinė kalba",
+        "validityType": "Galiojimo tipas",
+        "validityValue": "Reikšmė",
+        "validityUnit": "Vienetas",
+        "validUntil": "Galioja iki"
       },
       "placeholder": {
         "title": "Įveskite pavadinimą",
@@ -1383,6 +1393,34 @@
         "reachedCharactersLimitHtml": "Per daug formatavimo. Sumažinkite formatavimo kiekį, kad tilptų į limitą.",
         "enableCertificate": "Įgalinti sertifikatą",
         "enableCertificateDescription": "Įjunkite tai, kad išduotumėte šio kurso sertifikatus ir toliau sukonfigūruotumėte jų parašą bei peržiūrą.",
+        "certificateValidity": "Sertifikato galiojimas",
+        "certificateValidityDescription": "Nustatykite, kada išduoti sertifikatai baigs galioti ir atstatys kurso pažangą.",
+        "enableCertificateValidityConfirmationTitle": "Įjungti sertifikato galiojimą?",
+        "enableCertificateValidityConfirmationDescription": "Šis nustatymas turi įtakos kurso statistikai. Kai sertifikato galiojimas baigsis, paveikti naudotojai praras kurso pažangą.",
+        "enableCertificateValidityConfirmationConfirm": "Įjungti galiojimą",
+        "validityPeriod": "Laikotarpis",
+        "validityFixedDate": "Konkreti data",
+        "days": "Dienos",
+        "months": "Mėnesiai",
+        "years": "Metai",
+        "applyValidityTitle": "Taikyti galiojimą esamiems sertifikatams?",
+        "applyValidityDescription": "Yra {{activeCount}} aktyvių sertifikatų. {{expiringCount}} baigtų galioti iš karto, jei šis nustatymas būtų pritaikytas esamiems sertifikatams.",
+        "resetCertificates": "Rankinis sertifikato nustatymas iš naujo",
+        "resetCertificatesDescription": "Archyvuoti pasirinktus sertifikatus ir atstatyti kurso pažangą.",
+        "resetCertificatesDialogDescription": "Šis veiksmas archyvuoja aktyvius sertifikatus, atstato kurso pažangą ir gali pranešti naudotojams.",
+        "sendResetEmail": "Siųsti el. laišką paveiktiems naudotojams",
+        "activeCertificateCount": "{{count}} aktyvūs",
+        "noActiveCertificate": "Nėra aktyvaus sertifikato",
+        "resetUsersSearchPlaceholder": "Ieškoti dalyvių pagal vardą arba el. paštą",
+        "resetUsersStudent": "Dalyvis",
+        "resetUsersEmail": "El. paštas",
+        "resetUsersLoading": "Dalyviai įkeliami...",
+        "noResetUsers": "Nerasta dalyvių su aktyviais sertifikatais",
+        "resetScope": {
+          "all": "Visi naudotojai",
+          "groups": "Grupės",
+          "users": "Naudotojai"
+        },
         "certificateSignatureRequirements": "PNG arba SVG (rekomenduojamas skaidrus fonas)",
         "certificatePreviewTitle": "Sertifikato peržiūra",
         "certificatePreviewDescription": "Atidarykite peržiūrą, kad sureguliuotumėte kalbą ir spalvą.",
@@ -1401,7 +1439,11 @@
         "titleMinLength": "Pavadinimą turi sudaryti bent 2 simboliai.",
         "titleMaxLength": "Pavadinimas turi būti ne ilgesnis kaip 250 simbolių.",
         "descriptionMinLength": "Aprašą turi sudaryti bent 2 simboliai.",
-        "categoryRequired": "Kategorija būtina"
+        "categoryRequired": "Kategorija būtina",
+        "certificateManageDenied": "Negalite tvarkyti šio kurso pažymėjimų.",
+        "validityDateRequired": "Pasirinkite sertifikato galiojimo datą.",
+        "groupIdsRequired": "Pasirinkite bent vieną grupę.",
+        "userIdsRequired": "Pasirinkite bent vieną naudotoją."
       },
       "header": "Sukurti naują kursą",
       "subHeader": "Pateikite išsamią informaciją, kad nustatytumėte naują kursą. Vėliau turėsite daugiau parinkčių tinkinti.",
@@ -3000,6 +3042,8 @@
       "complete_lesson": "Užbaigta",
       "complete_course": "Užbaigta",
       "complete_chapter": "Užbaigta",
+      "expire_certificate": "Sertifikatas nebegalioja",
+      "reset_certificate": "Sertifikatas nustatytas iš naujo",
       "view_announcement": "Peržiūrėta"
     },
     "entity": {

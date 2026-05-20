@@ -841,6 +841,20 @@
       "when": 1779092831342,
       "tag": "0119_quiz_attempts_lesson_cascade",
       "breakpoints": true
+    },
+    {
+      "idx": 120,
+      "version": "7",
+      "when": 1779195246129,
+      "tag": "0120_cyclic_course_certificates",
+      "breakpoints": true
+    },
+    {
+      "idx": 121,
+      "version": "7",
+      "when": 1779196011885,
+      "tag": "0121_backfill_certificate_issued_at",
+      "breakpoints": true
     }
   ]
 }

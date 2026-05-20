@@ -12,11 +12,17 @@ import ImageUploadInput from "~/components/FileUploadInput/ImageUploadInput";
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent } from "~/components/ui/dialog";
+import { Separator } from "~/components/ui/separator";
 import { Switch } from "~/components/ui/switch";
 import { useToast } from "~/components/ui/use-toast";
 import CertificatePreview from "~/modules/Profile/Certificates/CertificatePreview";
 
 import { COURSE_SETTINGS_HANDLES } from "../../../../../../e2e/data/courses/handles";
+
+import { CertificateResetSection } from "./CertificateResetSection";
+import { CertificateValidityImpactDialog } from "./CertificateValidityImpactDialog";
+import { CertificateValiditySection } from "./CertificateValiditySection";
+import { useCertificateValiditySettings } from "./useCertificateValiditySettings";
 
 interface CourseCertificateSettingProps {
   courseId: string;
@@ -44,6 +50,31 @@ const CourseCertificateSetting = ({
   const { data: globalSettings } = useGlobalSettings();
   const { mutate: updateCourseSettings, isPending: isUpdatingCourseSettings } =
     useUpdateCourseSettings();
+
+  const {
+    isValidityEnabled,
+    validityType,
+    validityValue,
+    validityUnit,
+    validityDate,
+    validityImpact,
+    isValidityImpactOpen,
+    validityDateError,
+    hasValidityChanges,
+    isCheckingValidityImpact,
+    isUpdatingCourseSettings: isUpdatingCertificateValidity,
+    setIsValidityEnabled,
+    setValidityType,
+    setValidityValue,
+    setValidityUnit,
+    setValidityDate,
+    setIsValidityImpactOpen,
+    saveValidity,
+    handleValiditySave,
+  } = useCertificateValiditySettings({
+    courseId,
+    certificateValidity: settings?.certificateValidity,
+  });
 
   useEffect(() => {
     setIsCertificateEnabled(hasCertificate);
@@ -143,75 +174,102 @@ const CourseCertificateSetting = ({
 
   return (
     <div className="rounded-xl border border-neutral-300 p-5">
-      <div className="space-y-4">
-        <div className="flex items-center gap-4">
-          <div className="flex min-w-0 items-start gap-3">
-            <Switch
-              data-testid={COURSE_SETTINGS_HANDLES.CERTIFICATE_SWITCH}
-              checked={isCertificateEnabled}
-              onCheckedChange={handleCertificateToggle}
-              disabled={isUpdatingCertificate}
-              aria-label={t("adminCourseView.settings.other.enableCertificate")}
-              className="mt-0.5"
-            />
-            <div className="space-y-1">
-              <p className="text-base font-semibold text-neutral-950">
-                {t("adminCourseView.settings.other.enableCertificate")}
-              </p>
-              <p className="text-sm text-neutral-700">
-                {t("adminCourseView.settings.other.enableCertificateDescription")}
-              </p>
+      <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-4">
+            <div className="flex min-w-0 items-start gap-3">
+              <Switch
+                data-testid={COURSE_SETTINGS_HANDLES.CERTIFICATE_SWITCH}
+                checked={isCertificateEnabled}
+                onCheckedChange={handleCertificateToggle}
+                disabled={isUpdatingCertificate}
+                aria-label={t("adminCourseView.settings.other.enableCertificate")}
+                className="mt-0.5"
+              />
+              <div className="space-y-1">
+                <p className="text-base font-semibold text-neutral-950">
+                  {t("adminCourseView.settings.other.enableCertificate")}
+                </p>
+                <p className="text-sm text-neutral-700">
+                  {t("adminCourseView.settings.other.enableCertificateDescription")}
+                </p>
+              </div>
             </div>
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="ml-auto"
-            disabled={isCertificateControlsDisabled}
-            onClick={() => setIsPreviewOpen(true)}
-          >
-            <Icon name="Eye" className="mr-2 size-4" />
-            {t("adminCourseView.settings.other.certificatePreviewButton")}
-          </Button>
-        </div>
-
-        <div
-          className={`w-1/2 space-y-2 transition-opacity ${
-            isCertificateControlsDisabled ? "opacity-50" : "opacity-100"
-          }`}
-          aria-disabled={isCertificateControlsDisabled}
-        >
-          <ImageUploadInput
-            field={{ value: settings?.certificateSignatureUrl ?? undefined }}
-            handleImageUpload={handleSignatureUpload}
-            isUploading={isUploading}
-            disabled={isCertificateControlsDisabled}
-            imageUrl={settings?.certificateSignatureUrl}
-            fileInputRef={fileInputRef}
-            variant="video"
-            accept={acceptedSignatureTypes.join(",")}
-            imageFit="contain"
-            detailsText={t("adminCourseView.settings.other.certificateSignatureRequirements")}
-          />
-          {isUploading && (
-            <p className="text-xs font-medium text-neutral-500">
-              {t("common.other.uploadingImage")}
-            </p>
-          )}
-          {settings?.certificateSignatureUrl && (
             <Button
               type="button"
-              onClick={handleSignatureRemove}
-              variant="destructive"
+              variant="outline"
               size="sm"
+              className="ml-auto"
               disabled={isCertificateControlsDisabled}
+              onClick={() => setIsPreviewOpen(true)}
             >
-              <Icon name="TrashIcon" className="mr-2" />
-              {t("adminCourseView.settings.button.removeCertificateSignature")}
+              <Icon name="Eye" className="mr-2 size-4" />
+              {t("adminCourseView.settings.other.certificatePreviewButton")}
             </Button>
-          )}
+          </div>
+
+          <div
+            className={`w-full max-w-xl space-y-2 transition-opacity ${
+              isCertificateControlsDisabled ? "opacity-50" : "opacity-100"
+            }`}
+            aria-disabled={isCertificateControlsDisabled}
+          >
+            <ImageUploadInput
+              field={{ value: settings?.certificateSignatureUrl ?? undefined }}
+              handleImageUpload={handleSignatureUpload}
+              isUploading={isUploading}
+              disabled={isCertificateControlsDisabled}
+              imageUrl={settings?.certificateSignatureUrl}
+              fileInputRef={fileInputRef}
+              variant="video"
+              accept={acceptedSignatureTypes.join(",")}
+              imageFit="contain"
+              detailsText={t("adminCourseView.settings.other.certificateSignatureRequirements")}
+            />
+            {isUploading && (
+              <p className="text-xs font-medium text-neutral-500">
+                {t("common.other.uploadingImage")}
+              </p>
+            )}
+            {settings?.certificateSignatureUrl && (
+              <Button
+                type="button"
+                onClick={handleSignatureRemove}
+                variant="destructive"
+                size="sm"
+                disabled={isCertificateControlsDisabled}
+              >
+                <Icon name="TrashIcon" className="mr-2" />
+                {t("adminCourseView.settings.button.removeCertificateSignature")}
+              </Button>
+            )}
+          </div>
         </div>
+
+        <Separator />
+
+        <CertificateValiditySection
+          disabled={isCertificateControlsDisabled}
+          isValidityEnabled={isValidityEnabled}
+          hasValidityChanges={hasValidityChanges}
+          isCheckingValidityImpact={isCheckingValidityImpact}
+          isUpdatingCourseSettings={isUpdatingCertificateValidity}
+          validityType={validityType}
+          validityValue={validityValue}
+          validityUnit={validityUnit}
+          validityDate={validityDate}
+          validityDateError={validityDateError}
+          onValidityEnabledChange={setIsValidityEnabled}
+          onValidityTypeChange={setValidityType}
+          onValidityValueChange={setValidityValue}
+          onValidityUnitChange={setValidityUnit}
+          onValidityDateChange={setValidityDate}
+          onSave={handleValiditySave}
+        />
+
+        <Separator />
+
+        <CertificateResetSection courseId={courseId} disabled={isCertificateControlsDisabled} />
       </div>
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
         <DialogContent
@@ -234,6 +292,13 @@ const CourseCertificateSetting = ({
           />
         </DialogContent>
       </Dialog>
+      <CertificateValidityImpactDialog
+        open={isValidityImpactOpen}
+        impact={validityImpact}
+        onOpenChange={setIsValidityImpactOpen}
+        onFutureOnly={() => saveValidity(false)}
+        onApplyToExisting={() => saveValidity(true)}
+      />
     </div>
   );
 };

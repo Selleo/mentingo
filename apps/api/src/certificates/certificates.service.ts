@@ -5,23 +5,51 @@ import {
   BadRequestException,
   Logger,
   InternalServerErrorException,
+  Inject,
 } from "@nestjs/common";
 import {
   buildCertificateHtmlDocument as buildSharedCertificateHtmlDocument,
   buildCertificateMarkup,
+  CERTIFICATE_ARCHIVE_REASONS,
+  CERTIFICATE_RESET_SCOPES,
+  CERTIFICATE_VALIDITY_TYPES,
+  CERTIFICATE_VALIDITY_UNITS,
+  PERMISSIONS,
+  SHARE_IMAGE_HEIGHT,
+  SHARE_IMAGE_WIDTH,
 } from "@repo/shared";
-import { format } from "date-fns";
+import { addDays, addMonths, addYears, format } from "date-fns";
 import { escape } from "lodash";
 import puppeteer, { type Page, type Browser } from "puppeteer";
+import { match } from "ts-pattern";
 
+import { ActivityLogsService } from "src/activity-logs/activity-logs.service";
+import { ACTIVITY_LOG_ACTION_TYPES, ACTIVITY_LOG_RESOURCE_TYPES } from "src/activity-logs/types";
+import { DatabasePg } from "src/common";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
-import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { resolveTenantOrigin } from "src/common/helpers/resolveTenantOrigin";
+import { DEFAULT_PAGE_SIZE, parsePagination } from "src/common/pagination";
+import { canUpdateCourseByAuthor } from "src/common/permissions/course-permission.utils";
+import { hasPermission } from "src/common/permissions/permission.utils";
+import { processInBatches } from "src/common/utils/processInBatches";
+import { CertificateArchivedEmailEvent } from "src/events/certificate/certificate-archived-email.event";
+import { CertificateExpirationWarningEmailEvent } from "src/events/certificate/certificate-expiration-warning-email.event";
 import { FileService } from "src/file/file.service";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { S3Service } from "src/s3/s3.service";
 import { SettingsService } from "src/settings/settings.service";
+import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 
 import { CertificateRepository } from "./certificate.repository";
-import { SHARE_IMAGE_HEIGHT, SHARE_IMAGE_WIDTH } from "./certificates.constants";
+import {
+  CERTIFICATE_ACTIVITY_TRIGGERS,
+  SYSTEM_ACTOR_EMAIL_FALLBACK_DOMAIN,
+  SYSTEM_ACTOR_ROLE,
+} from "./certificates.activity.constants";
+import {
+  CERTIFICATE_ACTIVITY_LOG_BATCH_SIZE,
+  CERTIFICATE_PROGRESS_RESET_BATCH_SIZE,
+} from "./certificates.batch.constants";
 
 import type { ShareCertificateRecord, ShareRenderContext } from "./certificates.share.types";
 import type {
@@ -29,10 +57,23 @@ import type {
   AllCertificatesResponse,
   CertificateResponse,
   CertificateShareLinkResponse,
+  CertificateActivityOperation,
+  CertificateActivityReason,
+  CertificateActivityRecord,
+  CertificateArchiveTarget,
+  CertificateExpirationWarningRecord,
+  CertificateNotificationRecord,
+  CertificateResetUsersQuery,
+  CertificateResetUsersResult,
+  ResetCourseCertificatesBody,
+  ResetCourseCertificatesResponse,
 } from "./certificates.types";
 import type { OnModuleDestroy } from "@nestjs/common";
-import type { SupportedLanguages } from "@repo/shared";
-import type { DatabasePg, PaginatedResponse, UUIDType } from "src/common";
+import type { CertificateValidity, SupportedLanguages } from "@repo/shared";
+import type { PaginatedResponse, UUIDType } from "src/common";
+import type { CurrentUserType } from "src/common/types/current-user.type";
+import type { CertificateEmailRecipient } from "src/events/certificate/certificate-email-recipient";
+import type { CertificateExpirationWarningEmailRecipient } from "src/events/certificate/certificate-expiration-warning-email.event";
 
 @Injectable()
 export class CertificatesService implements OnModuleDestroy {
@@ -42,10 +83,14 @@ export class CertificatesService implements OnModuleDestroy {
   private browserInitialization: Promise<Browser> | null = null;
 
   constructor(
+    @Inject(DB) private readonly db: DatabasePg,
+    @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
     private readonly certificateRepository: CertificateRepository,
     private readonly settingsService: SettingsService,
     private readonly fileService: FileService,
     private readonly s3Service: S3Service,
+    private readonly outboxPublisher: OutboxPublisher,
+    private readonly activityLogsService: ActivityLogsService,
   ) {}
 
   async onModuleDestroy() {
@@ -70,7 +115,7 @@ export class CertificatesService implements OnModuleDestroy {
     const { sortOrder } = getSortOptions(sort);
 
     try {
-      return await this.certificateRepository.transaction(async (trx) => {
+      return await this.db.transaction(async (trx) => {
         const certificates = await this.certificateRepository.findCertificatesByUserId(
           userId,
           page,
@@ -104,9 +149,32 @@ export class CertificatesService implements OnModuleDestroy {
             transactionInstance,
           );
 
+        const issuedAt = new Date(completionDate);
+
+        const existingCertificate = await this.certificateRepository.findExistingCertificate(
+          userId,
+          courseId,
+          transactionInstance,
+        );
+
+        if (existingCertificate) {
+          return {
+            ...existingCertificate,
+            fullName: `${existingUser.firstName} ${existingUser.lastName}`,
+            courseTitle: existingCourse.title,
+          };
+        }
+
+        const expiresAt = this.calculateCertificateExpiry(
+          existingCourse.settings.certificateValidity,
+          issuedAt,
+        );
+
         const createdCertificate = await this.certificateRepository.create(
           userId,
           courseId,
+          issuedAt,
+          expiresAt,
           transactionInstance,
         );
 
@@ -118,13 +186,13 @@ export class CertificatesService implements OnModuleDestroy {
           ...createdCertificate,
           fullName: `${existingUser.firstName} ${existingUser.lastName}`,
           courseTitle: existingCourse.title,
-          completionDate: new Date(completionDate).toISOString(),
+          completionDate: createdCertificate.issuedAt,
         };
       };
 
       const result = trx
         ? await executeInTransaction(trx)
-        : await this.certificateRepository.transaction(executeInTransaction);
+        : await this.db.transaction(executeInTransaction);
 
       this.scheduleCertificateImagePrewarm(result.id);
 
@@ -149,6 +217,191 @@ export class CertificatesService implements OnModuleDestroy {
     if (!certificate) return null;
 
     return this.mapCertificateWithSignatureUrl(certificate);
+  }
+
+  async getCertificateValidityImpact(
+    courseId: UUIDType,
+    certificateValidity: CertificateValidity | null,
+    currentUser: CurrentUserType,
+  ) {
+    await this.assertCanManageCourseCertificates(courseId, currentUser);
+
+    const activeCertificates =
+      await this.certificateRepository.findActiveCertificatesForCourse(courseId);
+
+    const now = new Date();
+
+    const immediatelyExpiringCertificateCount = activeCertificates.filter((certificate) => {
+      const expiresAt = this.calculateCertificateExpiry(
+        certificateValidity,
+        new Date(certificate.issuedAt),
+      );
+
+      return Boolean(expiresAt && expiresAt <= now);
+    }).length;
+
+    return {
+      activeCertificateCount: activeCertificates.length,
+      immediatelyExpiringCertificateCount,
+    };
+  }
+
+  async applyValidityToExistingCertificates(
+    courseId: UUIDType,
+    certificateValidity: CertificateValidity | null,
+    currentUser: CurrentUserType,
+  ) {
+    const certificatesToUpdate =
+      await this.certificateRepository.findActiveCertificatesForCourse(courseId);
+
+    const updates = certificatesToUpdate.map((certificate) => ({
+      certificateId: certificate.id,
+      expiresAt: this.calculateCertificateExpiry(
+        certificateValidity,
+        new Date(certificate.issuedAt),
+      ),
+    }));
+
+    const immediatelyExpiredCertificates = certificatesToUpdate.filter((certificate) => {
+      const nextExpiry = updates.find((update) => update.certificateId === certificate.id);
+      return Boolean(nextExpiry?.expiresAt && nextExpiry.expiresAt <= new Date());
+    });
+
+    await this.db.transaction(async (trx) => {
+      await this.certificateRepository.updateActiveCertificateExpirations(updates, trx);
+
+      await this.archiveAndResetCertificates(
+        immediatelyExpiredCertificates,
+        CERTIFICATE_ARCHIVE_REASONS.EXPIRED,
+        trx,
+      );
+    });
+
+    await this.publishArchivedCertificateEmailEvent(
+      immediatelyExpiredCertificates,
+      CERTIFICATE_ARCHIVE_REASONS.EXPIRED,
+    );
+
+    await this.recordCertificateActivities(
+      immediatelyExpiredCertificates,
+      ACTIVITY_LOG_ACTION_TYPES.EXPIRE_CERTIFICATE,
+      currentUser,
+      CERTIFICATE_ARCHIVE_REASONS.EXPIRED,
+    );
+  }
+
+  async resetCourseCertificates(
+    courseId: UUIDType,
+    body: ResetCourseCertificatesBody,
+    currentUser: CurrentUserType,
+  ): Promise<ResetCourseCertificatesResponse> {
+    await this.assertCanManageCourseCertificates(courseId, currentUser);
+
+    const certificatesToReset = await this.resolveCertificatesForReset(courseId, body);
+
+    await this.db.transaction(async (trx) => {
+      await this.archiveAndResetCertificates(
+        certificatesToReset,
+        CERTIFICATE_ARCHIVE_REASONS.MANUAL_RESET,
+        trx,
+      );
+    });
+
+    if (body.sendEmail ?? true) {
+      await this.publishArchivedCertificateEmailEvent(
+        certificatesToReset,
+        CERTIFICATE_ARCHIVE_REASONS.MANUAL_RESET,
+      );
+    }
+
+    await this.recordCertificateActivities(
+      certificatesToReset,
+      ACTIVITY_LOG_ACTION_TYPES.RESET_CERTIFICATE,
+      currentUser,
+      CERTIFICATE_ARCHIVE_REASONS.MANUAL_RESET,
+    );
+
+    return {
+      affectedCertificateCount: certificatesToReset.length,
+      affectedUserCount: new Set(certificatesToReset.map((certificate) => certificate.userId)).size,
+    };
+  }
+
+  async getCertificateResetOptions(courseId: UUIDType, currentUser: CurrentUserType) {
+    await this.assertCanManageCourseCertificates(courseId, currentUser);
+
+    const [groups, activeCertificateUserCount] = await Promise.all([
+      this.certificateRepository.findCertificateResetGroups(courseId),
+      this.certificateRepository.countCertificateResetUsers(courseId),
+    ]);
+
+    return { groups, activeCertificateUserCount };
+  }
+
+  async getCertificateResetUsers(
+    courseId: UUIDType,
+    query: CertificateResetUsersQuery,
+    currentUser: CurrentUserType,
+  ): Promise<CertificateResetUsersResult> {
+    await this.assertCanManageCourseCertificates(courseId, currentUser);
+
+    const { page, perPage } = parsePagination(query.page, query.perPage, { perPage: 10 });
+    const { rows, totalItems } =
+      await this.certificateRepository.findPaginatedCertificateResetUsers({
+        courseId,
+        page,
+        perPage,
+        search: query.search,
+      });
+
+    return {
+      data: rows,
+      pagination: { totalItems, page, perPage },
+      appliedFilters: { search: query.search },
+    };
+  }
+
+  async sendCertificateExpirationWarnings() {
+    const now = new Date();
+    const warningDate = addDays(now, 7);
+
+    const certificatesToWarn =
+      await this.certificateRepository.findCertificatesNeedingExpirationWarning(now, warningDate);
+
+    await this.publishExpirationWarningEmailEvent(certificatesToWarn);
+
+    await this.certificateRepository.markExpirationWarningsSent(
+      certificatesToWarn.map((certificate) => certificate.id),
+    );
+  }
+
+  async expireCertificates() {
+    const expiredCertificates = await this.db.transaction(async (trx) => {
+      const certificatesToExpire = await this.certificateRepository.findExpiredActiveCertificates(
+        new Date(),
+        trx,
+      );
+
+      await this.archiveAndResetCertificates(
+        certificatesToExpire,
+        CERTIFICATE_ARCHIVE_REASONS.EXPIRED,
+        trx,
+      );
+
+      return certificatesToExpire;
+    });
+
+    await this.publishArchivedCertificateEmailEvent(
+      expiredCertificates,
+      CERTIFICATE_ARCHIVE_REASONS.EXPIRED,
+    );
+
+    await this.recordCertificateActivities(
+      expiredCertificates,
+      ACTIVITY_LOG_ACTION_TYPES.EXPIRE_CERTIFICATE,
+      undefined,
+      CERTIFICATE_ARCHIVE_REASONS.EXPIRED,
+    );
   }
 
   async createCertificateShareLink(
@@ -277,7 +530,8 @@ export class CertificatesService implements OnModuleDestroy {
       ]);
 
     const accentColor = certificate.certificateFontColor || imageSettings.primaryColor || "#1f2937";
-    const certificateDate = certificate.completionDate || certificate.createdAt;
+    const certificateDate =
+      certificate.issuedAt || certificate.completionDate || certificate.createdAt;
 
     const html = buildCertificateMarkup({
       studentName: certificate.fullName || "",
@@ -729,6 +983,251 @@ export class CertificatesService implements OnModuleDestroy {
         this.logger.warn(`Certificate image prewarm failed for ${certificateId}: ${error}`);
       });
     }, 1000);
+  }
+
+  private calculateCertificateExpiry(
+    certificateValidity: CertificateValidity | null | undefined,
+    issuedAt: Date,
+  ): Date | null {
+    if (!certificateValidity) return null;
+
+    if (certificateValidity.type === CERTIFICATE_VALIDITY_TYPES.FIXED_DATE) {
+      return new Date(`${certificateValidity.date}T23:59:59.999Z`);
+    }
+
+    const { unit, value } = certificateValidity;
+
+    return match(unit)
+      .with(CERTIFICATE_VALIDITY_UNITS.DAYS, () => addDays(issuedAt, value))
+      .with(CERTIFICATE_VALIDITY_UNITS.MONTHS, () => addMonths(issuedAt, value))
+      .with(CERTIFICATE_VALIDITY_UNITS.YEARS, () => addYears(issuedAt, value))
+      .otherwise(() => null);
+  }
+
+  private async assertCanManageCourseCertificates(
+    courseId: UUIDType,
+    currentUser: CurrentUserType,
+  ) {
+    const course = await this.certificateRepository.findCourseById(courseId);
+
+    if (!course) throw new NotFoundException("adminCourseView.errors.notFound.course");
+
+    const canManage =
+      hasPermission(currentUser.permissions, PERMISSIONS.COURSE_ENROLLMENT) ||
+      canUpdateCourseByAuthor(currentUser, course.authorId);
+
+    if (!canManage)
+      throw new BadRequestException("adminCourseView.settings.validation.certificateManageDenied");
+
+    return course;
+  }
+
+  private async resolveCertificatesForReset(courseId: UUIDType, body: ResetCourseCertificatesBody) {
+    const { scope, groupIds, userIds } = body;
+
+    return match(scope)
+      .with(CERTIFICATE_RESET_SCOPES.ALL, () =>
+        this.certificateRepository.findActiveCertificatesForCourse(courseId),
+      )
+      .with(CERTIFICATE_RESET_SCOPES.GROUPS, () => {
+        if (!groupIds)
+          throw new BadRequestException("adminCourseView.settings.validation.groupIdsRequired");
+
+        return this.certificateRepository.findActiveCertificatesForGroups(courseId, groupIds);
+      })
+      .otherwise(() => {
+        if (!userIds)
+          throw new BadRequestException("adminCourseView.settings.validation.userIdsRequired");
+
+        return this.certificateRepository.findActiveCertificatesForUsers(courseId, userIds);
+      });
+  }
+
+  private async archiveAndResetCertificates(
+    certificatesToArchive: CertificateArchiveTarget[],
+    reason: CertificateActivityReason,
+    trx?: DatabasePg,
+  ) {
+    if (!certificatesToArchive.length) return;
+
+    const certificateIds = certificatesToArchive.map((certificate) => certificate.id);
+
+    const progressResetTargets =
+      await this.certificateRepository.findProgressResetTargetsForCertificates(certificateIds, trx);
+
+    await this.certificateRepository.archiveCertificates(certificateIds, reason, trx);
+
+    await processInBatches(
+      progressResetTargets,
+      ({ courseId, userIds }) =>
+        this.certificateRepository.resetCourseProgress(courseId, userIds, trx),
+      { batchSize: CERTIFICATE_PROGRESS_RESET_BATCH_SIZE },
+    );
+  }
+
+  private async publishExpirationWarningEmailEvent(
+    certificatesToWarn: CertificateExpirationWarningRecord[],
+  ) {
+    if (!certificatesToWarn.length) return;
+
+    const certificates = await this.buildExpirationWarningEmailRecipients(certificatesToWarn);
+
+    await this.outboxPublisher.publish(
+      new CertificateExpirationWarningEmailEvent({ certificates }),
+    );
+  }
+
+  private async publishArchivedCertificateEmailEvent(
+    archivedCertificates: CertificateNotificationRecord[],
+    reason: CertificateActivityReason,
+  ) {
+    if (!archivedCertificates.length) return;
+
+    const certificates = await this.buildCertificateEmailRecipients(archivedCertificates);
+
+    await this.outboxPublisher.publish(new CertificateArchivedEmailEvent({ certificates, reason }));
+  }
+
+  private async buildExpirationWarningEmailRecipients(
+    certificatesToWarn: CertificateExpirationWarningRecord[],
+  ): Promise<CertificateExpirationWarningEmailRecipient[]> {
+    const recipients: CertificateExpirationWarningEmailRecipient[] = [];
+    const tenantOrigins = new Map<string, Promise<string>>();
+
+    for (const certificate of certificatesToWarn) {
+      if (!certificate.expiresAt) continue;
+
+      recipients.push({
+        ...(await this.buildCertificateEmailRecipient(certificate, tenantOrigins)),
+        expiresAt: format(new Date(certificate.expiresAt), "dd.MM.yyyy"),
+      });
+    }
+
+    return recipients;
+  }
+
+  private async buildCertificateEmailRecipients(
+    certificates: CertificateNotificationRecord[],
+  ): Promise<CertificateEmailRecipient[]> {
+    const recipients: CertificateEmailRecipient[] = [];
+    const tenantOrigins = new Map<string, Promise<string>>();
+
+    for (const certificate of certificates) {
+      recipients.push(await this.buildCertificateEmailRecipient(certificate, tenantOrigins));
+    }
+
+    return recipients;
+  }
+
+  private async buildCertificateEmailRecipient(
+    certificate: CertificateNotificationRecord,
+    tenantOrigins: Map<string, Promise<string>>,
+  ): Promise<CertificateEmailRecipient> {
+    const tenantOrigin = await this.resolveTenantOrigin(certificate.tenantId, tenantOrigins);
+
+    return {
+      ...certificate,
+      courseName: certificate.courseTitle ?? "",
+      courseLink: `${tenantOrigin}/course/${certificate.courseId}`,
+    };
+  }
+
+  private resolveTenantOrigin(tenantId: string, tenantOrigins: Map<string, Promise<string>>) {
+    const existingOrigin = tenantOrigins.get(tenantId);
+
+    if (existingOrigin) return existingOrigin;
+
+    const tenantOrigin = resolveTenantOrigin(this.dbAdmin, tenantId);
+    tenantOrigins.set(tenantId, tenantOrigin);
+    return tenantOrigin;
+  }
+
+  private async recordCertificateActivities(
+    affectedCertificates: CertificateActivityRecord[],
+    operation: CertificateActivityOperation,
+    actor: CurrentUserType | undefined,
+    reason: CertificateActivityReason,
+  ) {
+    const systemActorEmails = new Map<string, Promise<string>>();
+
+    await processInBatches(
+      affectedCertificates,
+      async (certificate) => {
+        const activityActor = await this.resolveCertificateActivityActor(
+          certificate,
+          actor,
+          systemActorEmails,
+        );
+
+        await this.activityLogsService.recordActivity({
+          actor: activityActor,
+          operation,
+          resourceType: ACTIVITY_LOG_RESOURCE_TYPES.COURSE,
+          resourceId: certificate.courseId,
+          tenantId: certificate.tenantId,
+          context: {
+            certificateId: certificate.id,
+            userId: certificate.userId,
+            reason,
+            trigger: actor
+              ? CERTIFICATE_ACTIVITY_TRIGGERS.MANUAL
+              : CERTIFICATE_ACTIVITY_TRIGGERS.SYSTEM,
+          },
+        });
+      },
+      { batchSize: CERTIFICATE_ACTIVITY_LOG_BATCH_SIZE },
+    );
+  }
+
+  private async resolveCertificateActivityActor(
+    certificate: CertificateActivityRecord,
+    actor: CurrentUserType | undefined,
+    systemActorEmails: Map<string, Promise<string>>,
+  ): Promise<CurrentUserType> {
+    if (actor) return actor;
+
+    return {
+      userId: certificate.userId,
+      email: await this.resolveSystemActorEmail(certificate.tenantId, systemActorEmails),
+      roleSlugs: [SYSTEM_ACTOR_ROLE],
+      permissions: [],
+      tenantId: certificate.tenantId,
+    };
+  }
+
+  private resolveSystemActorEmail(
+    tenantId: UUIDType,
+    systemActorEmails: Map<string, Promise<string>>,
+  ) {
+    const existingEmail = systemActorEmails.get(tenantId);
+
+    if (existingEmail) return existingEmail;
+
+    const systemActorEmail = this.buildSystemActorEmail(tenantId);
+    systemActorEmails.set(tenantId, systemActorEmail);
+    return systemActorEmail;
+  }
+
+  private async buildSystemActorEmail(tenantId: UUIDType): Promise<string> {
+    const { companyShortName } =
+      await this.settingsService.getCompanyInformationByTenantId(tenantId);
+
+    const domain = this.normalizeCompanyShortNameForSystemActorEmail(companyShortName);
+
+    return `${SYSTEM_ACTOR_ROLE}@${domain}`;
+  }
+
+  private normalizeCompanyShortNameForSystemActorEmail(
+    companyShortName: string | undefined | null,
+  ): string {
+    const normalizedDomain = companyShortName
+      ?.trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]/g, "");
+
+    return normalizedDomain || SYSTEM_ACTOR_EMAIL_FALLBACK_DOMAIN;
   }
 
   private async validateCertificateCreationPreconditions(

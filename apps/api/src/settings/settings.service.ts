@@ -921,6 +921,19 @@ export class SettingsService {
     return settingsRecord.companyInformation;
   }
 
+  public async getCompanyInformationByTenantId(
+    tenantId: UUIDType,
+  ): Promise<CompanyInformaitonJSONSchema> {
+    const [settingsRecord] = await this.dbAdmin
+      .select({
+        companyInformation: sql<CompanyInformaitonJSONSchema>`${settings.settings}->'companyInformation'`,
+      })
+      .from(settings)
+      .where(and(eq(settings.tenantId, tenantId), isNull(settings.userId)));
+
+    return settingsRecord?.companyInformation ?? DEFAULT_GLOBAL_SETTINGS.companyInformation;
+  }
+
   public async updateCompanyInformation(
     companyInfo: CompanyInformaitonJSONSchema,
     actor?: CurrentUserType,

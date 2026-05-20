@@ -1330,6 +1330,8 @@
       "courseTrailerRemovedSuccessfully": "Course trailer removed successfully",
       "certificateUpdatedSuccessfully": "Certificate updated successfully",
       "certificateUpdateError": "Error updating certificate",
+      "certificatesResetSuccessfully": "Certificates reset for {{count}} users",
+      "certificatesResetError": "Error resetting certificates",
       "maxTitleLengthExceeded_one": "Title cannot be longer than {{count}} character",
       "maxTitleLengthExceeded_other": "Title cannot be longer than {{count}} characters",
       "aiMentorAvatarIncorrectType": "Invalid file type. Please upload a JPG, JPEG, PNG, or SVG image.",
@@ -1410,7 +1412,11 @@
         "removeTrailer": "Remove Trailer",
         "removeCertificateSignature": "Remove signature",
         "includesCertificate": "Includes certificate",
-        "doesNotIncludeCertificate": "Does not include certificate"
+        "doesNotIncludeCertificate": "Does not include certificate",
+        "saveValidity": "Save validity",
+        "resetCertificates": "Reset certificates",
+        "futureOnly": "Future only",
+        "applyToExisting": "Apply to existing"
       },
       "selectButton": {
         "uploadFile": "Upload file",
@@ -1433,7 +1439,11 @@
         "description": "Description",
         "thumbnail": "Thumbnail",
         "trailer": "Course trailer",
-        "baseLanguage": "Base language"
+        "baseLanguage": "Base language",
+        "validityType": "Validity type",
+        "validityValue": "Value",
+        "validityUnit": "Unit",
+        "validUntil": "Valid until"
       },
       "placeholder": {
         "title": "Enter title",
@@ -1446,6 +1456,34 @@
         "reachedCharactersLimitHtml": "Too much formatting. Please reduce the amount of formatting to fit within the limit.",
         "enableCertificate": "Enable certificate",
         "enableCertificateDescription": "Turn this on to issue certificates for this course and configure their signature and preview below.",
+        "certificateValidity": "Certificate validity",
+        "certificateValidityDescription": "Set when issued certificates expire and trigger course progress reset.",
+        "enableCertificateValidityConfirmationTitle": "Enable certificate validity?",
+        "enableCertificateValidityConfirmationDescription": "This setting affects course statistics. When a certificate reaches the end of its validity, affected users will lose their course progress.",
+        "enableCertificateValidityConfirmationConfirm": "Enable validity",
+        "validityPeriod": "Period",
+        "validityFixedDate": "Fixed date",
+        "days": "Days",
+        "months": "Months",
+        "years": "Years",
+        "applyValidityTitle": "Apply validity to existing certificates?",
+        "applyValidityDescription": "{{activeCount}} active certificates exist. {{expiringCount}} would expire immediately if this setting is applied to existing certificates.",
+        "resetCertificates": "Manual certificate reset",
+        "resetCertificatesDescription": "Archive selected certificates and reset course progress.",
+        "resetCertificatesDialogDescription": "This archives active certificates, resets course progress, and can notify affected users.",
+        "sendResetEmail": "Send reset email to affected users",
+        "activeCertificateCount": "{{count}} active",
+        "noActiveCertificate": "No active certificate",
+        "resetUsersSearchPlaceholder": "Search students by name or email",
+        "resetUsersStudent": "Student",
+        "resetUsersEmail": "Email",
+        "resetUsersLoading": "Loading students...",
+        "noResetUsers": "No students with active certificates found",
+        "resetScope": {
+          "all": "All users",
+          "groups": "Groups",
+          "users": "Users"
+        },
         "certificateSignatureRequirements": "PNG or SVG (recommended transparent background)",
         "certificatePreviewTitle": "Certificate preview",
         "certificatePreviewDescription": "Open preview to adjust language and color.",
@@ -1464,7 +1502,11 @@
         "titleMinLength": "Title must be at least 2 characters.",
         "titleMaxLength": "Title must be at most 250 characters.",
         "descriptionMinLength": "Description must be at least 2 characters.",
-        "categoryRequired": "Category is required"
+        "categoryRequired": "Category is required",
+        "certificateManageDenied": "You cannot manage certificates for this course.",
+        "validityDateRequired": "Select a certificate validity date.",
+        "groupIdsRequired": "Select at least one group.",
+        "userIdsRequired": "Select at least one user."
       },
       "header": "Create a new course",
       "subHeader": "Provide the details to set up a new course. You’ll have more options to customize it later.",
@@ -3652,6 +3694,8 @@
       "complete_lesson": "Completed",
       "complete_course": "Completed",
       "complete_chapter": "Completed",
+      "expire_certificate": "Certificate expired",
+      "reset_certificate": "Certificate reset",
       "view_announcement": "Viewed"
     },
     "entity": {

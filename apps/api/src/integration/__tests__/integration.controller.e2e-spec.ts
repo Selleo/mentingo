@@ -403,6 +403,7 @@ describe("IntegrationController (e2e)", () => {
           quizFeedbackEnabled: QUIZ_FEEDBACK_ENABLED,
           certificateSignature: null,
           certificateFontColor: null,
+          certificateValidity: null,
         },
         tenantId: admin.tenantId,
       });
@@ -816,6 +817,7 @@ describe("IntegrationController (e2e)", () => {
           quizFeedbackEnabled: QUIZ_FEEDBACK_ENABLED,
           certificateSignature: null,
           certificateFontColor: null,
+          certificateValidity: null,
         },
         tenantId: admin.tenantId,
       });
