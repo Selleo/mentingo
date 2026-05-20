@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "@remix-run/react";
 import { isAxiosError } from "axios";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useDeleteLiveTraining } from "~/api/mutations/live-training/useDeleteLiveTraining";
@@ -18,6 +18,7 @@ import {
   buildLiveTrainingEditFormState,
   buildUpdateLiveTrainingPayload,
   isLiveTrainingEditFormDirty,
+  isLiveTrainingEditFormValid,
 } from "~/modules/LiveTraining/utils/liveTrainingEditForm";
 
 import type { LiveTrainingEditFormState } from "~/modules/LiveTraining/liveTrainingEdit.types";
@@ -60,16 +61,10 @@ export default function LiveTrainingPage() {
       })
     : null;
 
-  const isEditFormDirty = useMemo(() => {
-    if (!liveTraining || !editFormState) return false;
-
-    return isLiveTrainingEditFormDirty(liveTraining, editFormState, language);
-  }, [editFormState, language, liveTraining]);
-
   useEffect(() => {
     if (!liveTraining) return;
 
-    setEditFormState(buildLiveTrainingEditFormState(liveTraining, language));
+    setEditFormState(buildLiveTrainingEditFormState(liveTraining));
   }, [language, liveTraining]);
 
   const updateEditFormState = <Key extends keyof LiveTrainingEditFormState>(
@@ -83,12 +78,16 @@ export default function LiveTrainingPage() {
     });
   };
 
-  const handleSaveEdit = async () => {
-    if (!id || !liveTraining || !editFormState || !isEditFormDirty || isUpdating) return;
+  const commitEditFormState = async (nextFormState: LiveTrainingEditFormState) => {
+    setEditFormState(nextFormState);
+
+    if (!id || !liveTraining || isUpdating) return;
+    if (!isLiveTrainingEditFormDirty(liveTraining, nextFormState)) return;
+    if (!isLiveTrainingEditFormValid(nextFormState)) return;
 
     await updateLiveTraining({
       id,
-      data: buildUpdateLiveTrainingPayload(editFormState, liveTraining.timezone),
+      data: buildUpdateLiveTrainingPayload(nextFormState, liveTraining.timezone, language),
     });
   };
 
@@ -132,8 +131,8 @@ export default function LiveTrainingPage() {
             actions={actions}
             editFormState={editFormState}
             onDeleteClick={() => setIsDeleteDialogOpen(true)}
+            onEditFormStateCommit={commitEditFormState}
             onEditFormStateChange={updateEditFormState}
-            onEditPopoverClose={handleSaveEdit}
           />
           <LiveTrainingWorkspace liveTraining={liveTraining} />
           <LiveTrainingDeleteDialog

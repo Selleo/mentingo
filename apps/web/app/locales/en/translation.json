@@ -362,15 +362,14 @@
         "startsAt": "The planned start time shown in the calendar.",
         "endsAt": "The planned end time shown in the calendar.",
         "maxParticipants": "The participant limit for this Live Training. The current maximum is 100.",
-        "location": "Required only for offline trainings.",
+        "location": "Optional place for offline trainings.",
         "viewerPermissions": "Controls what students can use when they join as viewers.",
         "microphoneEnabled": "Allow viewers to use their microphone during the session.",
         "cameraEnabled": "Allow viewers to use their camera during the session."
       },
       "validation": {
         "titleRequired": "Title is required.",
-        "invalidDateRange": "End time must be after start time.",
-        "locationRequired": "Location is required for offline training."
+        "invalidDateRange": "End time must be after start time."
       }
     },
     "details": {
@@ -1202,6 +1201,9 @@
         "integration_key": "integration keys",
         "integration_api": "integration API",
         "tenant": "organization configuration",
+        "calendar": "calendar",
+        "live_training": "live trainings",
+        "activity_log": "activity log",
         "other": "platform capabilities"
       },
       "descriptions": {
@@ -1264,6 +1266,17 @@
         "integration_key_manage": "Manage integration API keys.",
         "integration_api_use": "Use integration API endpoints.",
         "tenant_manage": "Manage organization-level configuration.",
+        "calendar_read": "View calendar events.",
+        "live_training_read": "View live trainings.",
+        "live_training_create": "Create live trainings.",
+        "live_training_update": "Edit any live training.",
+        "live_training_update_own": "Edit live trainings created by this user.",
+        "live_training_delete": "Delete live trainings.",
+        "live_training_join": "Join live training sessions.",
+        "live_training_start": "Start live training sessions.",
+        "live_training_end": "End live training sessions.",
+        "live_training_statistics": "View live training attendance and statistics.",
+        "activity_log_read": "View activity logs.",
         "course_ai_generation": "Generate course structure and content with AI tools."
       }
     },

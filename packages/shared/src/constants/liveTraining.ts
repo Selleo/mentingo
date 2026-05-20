@@ -93,6 +93,8 @@ export const DEFAULT_LIVE_TRAINING_SETTINGS = {
 } as const satisfies LiveTrainingSettings;
 
 export const LIVE_TRAINING_MAX_PARTICIPANTS_LIMIT = 100;
+export const LIVE_TRAINING_TITLE_MAX_LENGTH = 120;
+export const LIVE_TRAINING_DESCRIPTION_MAX_LENGTH = 500;
 
 export const LIVE_TRAINING_SOCKET_ROOMS = {
   LIVE_TRAINING: "live-training",

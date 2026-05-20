@@ -30,24 +30,27 @@ Default layout should be compact and operational.
 - [x] Add compact online session preview state.
 - [x] Add overview tab for training details and people.
 - [x] Add files tab with before/after material tabs.
-- [x] Add deferred attendance and settings tabs.
+- [x] Add deferred attendance tab.
 - [x] Add frontend utilities to derive page-level UI actions.
 - [x] Add page-level action placement for edit/delete/start/join/finish from frontend-derived
-  affordances.
+      affordances.
 - [x] Remove `actions` flags from Calendar response payloads and keep action derivation on the
-  frontend.
+      frontend.
 - [x] Keep Live Training detail user summaries minimal: id, display name, profile picture URL.
 - [x] Resolve profile picture references to usable file URLs in the API response.
 - [x] Keep timezone out of the preview while dates are formatted in the viewer local timezone.
 - [x] Add mobile-compact session preview layout.
 - [x] Move shared Live Training UI constants/types out of component files while keeping component
-  prop types local.
+      prop types local.
 - [x] Add delete confirmation dialog and delete mutation.
 - [x] Redirect invalid or missing Live Training detail URLs back to Calendar.
 - [x] Add inline editing for metadata from the preview surface.
 - [x] Add update mutation and edit form wiring.
-- [ ] Expose Live Training base language in `GET /live-training/:id` so edit mode can initialize
-  the language selector from persisted data instead of the current UI language.
+- [x] Enforce shared title/description max lengths in API schemas and frontend inline edit controls.
+- [x] Add wrapping title/description inline fields with hover-only editable affordance and focused
+      character counters.
+- [x] Keep Live Training page component code modular by extracting stage primitives, constants, and
+      utility functions.
 - [ ] Add LiveKit room integration in a later runtime slice.
 - [ ] Add tests after the page behavior stabilizes.
 
@@ -119,7 +122,7 @@ Response model:
 
 `GET /live-training/:id` must expose enough page data for the workspace:
 
-- title, description, language, schedule, timezone, location,
+- title, description, schedule, timezone, location,
 - delivery type, visibility scope, status,
 - max participants, settings,
 - author id and author profile,
@@ -347,11 +350,12 @@ Inline edit happens on the Live Training page, not in Calendar.
 
 Rules:
 
-- `Edit` toggles page into edit mode.
-- Edited fields stay in context.
-- Footer/header shows `Cancel` and `Save changes`.
-- Save calls `PATCH /live-training/:id`.
-- After save, invalidate:
+- There is no separate edit mode button for the preview metadata.
+- Authorized users edit directly in the preview surface.
+- Text fields commit on blur after local validation and normalization.
+- Binary controls commit immediately.
+- Schedule edits use the existing date/time popover and commit when the popover closes.
+- Successful updates invalidate:
   - Live Training detail query,
   - Calendar event queries,
   - Calendar event details query if open/stale.
@@ -362,7 +366,6 @@ V1 editable fields:
 - description
 - startsAt
 - endsAt
-- timezone
 - deliveryType
 - location
 - maxParticipants
@@ -396,7 +399,6 @@ Editable in the first pass:
 
 - title,
 - description,
-- base language,
 - starts at,
 - ends at,
 - delivery type,
@@ -423,11 +425,12 @@ Read-only in the first pass:
 Recommended edit layout:
 
 - Keep the session preview stage visible and visually read-only by default.
-- Editable fields reveal only subtle hover affordance when the user can edit.
-- Clicking a field opens a small inline popover/editor for that field group.
-- Show save/cancel actions in the preview action area only when the form is dirty:
-  - `Cancel`,
-  - `Save changes`.
+- Editable text fields reveal a hover-only dotted border when the user can edit.
+- Title and description edit inline as wrapping textareas, not modal or popover inputs.
+- Title and description show focused-only character counters.
+- Schedule edits use a small date/time popover because the date/time control is structured.
+- Delivery type, max participants, location, microphone, and camera remain compact preview controls.
+- Mutations happen on blur/popover close/toggle instead of through a global save bar.
 - Keep destructive delete separate from edit-save actions.
 - On mobile, popovers should stay within viewport width and avoid replacing the entire preview with
   a full form.
@@ -437,7 +440,6 @@ Field placement:
 - Preview stage:
   - title,
   - short description,
-  - language,
   - schedule date/time fields,
   - delivery type,
   - location when offline,
@@ -451,9 +453,11 @@ Field placement:
 ### Validation Rules
 
 - title is required,
+- title max length is `LIVE_TRAINING_TITLE_MAX_LENGTH`,
+- description max length is `LIVE_TRAINING_DESCRIPTION_MAX_LENGTH`,
 - ends at must be after starts at,
 - max participants must be between 1 and the shared Live Training maximum,
-- location is required for offline delivery,
+- location is optional for offline delivery,
 - viewer permission settings only apply to online delivery,
 - changing delivery type from offline to online clears or ignores location in the payload,
 - changing delivery type from online to offline hides viewer permission controls but should preserve
@@ -469,7 +473,6 @@ Field placement:
   - Calendar event details query if the query key is available.
 - On error, use translated API error messages through the existing shared helper.
 - After successful save:
-  - exit edit mode,
   - keep user on the same Live Training page,
   - show success toast.
 
@@ -479,19 +482,18 @@ Field placement:
 - Initialize edit state from `GET /live-training/:id`.
 - Do not mutate the loaded `liveTraining` object directly.
 - Reset local edit state on:
-  - cancel,
   - successful save,
   - detail query id change.
-- Track dirty state so `Save changes` can be disabled until something changed.
+- Track dirty state before sending a mutation so unchanged blur/toggle actions are ignored.
 
 ### Implementation Steps
 
 - [x] Add `useUpdateLiveTraining` mutation.
-- [x] Add edit state hook or reducer for Live Training metadata.
-- [x] Add edit mode state to `LiveTraining.page.tsx`.
-- [x] Wire preview `Edit` action to enter edit mode.
-- [x] Add editable preview metadata form components.
-- [x] Add fixed/sticky edit action bar.
+- [x] Add local edit state for Live Training metadata.
+- [x] Add inline editable preview metadata controls.
+- [x] Use hover-only editable affordance for title/description.
+- [x] Add focused-only absolute character counters for title/description.
+- [x] Extract stage primitives, constants, and utility functions out of the main component file.
 - [x] Submit `PATCH /live-training/:id` with normalized payload.
 - [x] Invalidate Live Training and Calendar queries after save.
 - [x] Add translated success/error copy.

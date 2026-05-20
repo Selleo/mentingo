@@ -20,6 +20,7 @@ Foundation already completed before this CRUD slice:
 - [x] `live_trainings.deleted_at` exists in Drizzle schema and generated migration.
 - [x] Live Training viewer settings type exists with microphone/camera defaults disabled.
 - [x] Live Training max participants limit exists as a shared constant.
+- [x] Live Training title and description max length limits exist as shared constants.
 - [x] Custom migration enables tenant RLS for new Live Training and Calendar tables.
 
 CRUD slice progress:
@@ -352,6 +353,8 @@ Rules:
 
 - `startsAt` and `endsAt` must be valid ISO date/datetime strings.
 - `endsAt` must be after `startsAt`.
+- Reject `title` longer than `LIVE_TRAINING_TITLE_MAX_LENGTH`.
+- Reject `description` longer than `LIVE_TRAINING_DESCRIPTION_MAX_LENGTH`.
 - Default `maxParticipants` to `LIVE_TRAINING_MAX_PARTICIPANTS_LIMIT`.
 - Reject `maxParticipants` above `LIVE_TRAINING_MAX_PARTICIPANTS_LIMIT`.
 - Default `settings` to `{}`.
@@ -397,6 +400,8 @@ Rules:
 
 - Reject update when training status is `active`.
 - Reject changing cancelled/ended/expired trainings for this slice.
+- Reject `title` longer than `LIVE_TRAINING_TITLE_MAX_LENGTH`.
+- Reject `description` longer than `LIVE_TRAINING_DESCRIPTION_MAX_LENGTH`.
 - If any schedule field changes, update the paired `calendar_events` row and increment
   `calendar_events.sequence`.
 - If `visibilityScope` changes to `all`, reject when linked courses are present or included.

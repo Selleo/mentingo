@@ -51,7 +51,6 @@ export const LIVE_TRAINING_WORKSPACE_TABS = {
   OVERVIEW: "overview",
   FILES: "files",
   ATTENDANCE: "attendance",
-  SETTINGS: "settings",
 } as const;
 
 export type LiveTrainingWorkspaceTab =

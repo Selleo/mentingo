@@ -1,4 +1,8 @@
-import { LIVE_TRAINING_MAX_PARTICIPANTS_LIMIT } from "@repo/shared";
+import {
+  LIVE_TRAINING_DESCRIPTION_MAX_LENGTH,
+  LIVE_TRAINING_MAX_PARTICIPANTS_LIMIT,
+  LIVE_TRAINING_TITLE_MAX_LENGTH,
+} from "@repo/shared";
 import { Type, type Static } from "@sinclair/typebox";
 
 import { UUIDSchema, baseResponse } from "src/common";
@@ -12,8 +16,13 @@ import { liveTrainingDetailsSchema } from "./live-training-details.schema";
 
 export const createLiveTrainingSchema = Type.Object({
   language: supportedLanguagesSchema,
-  title: Type.String({ minLength: 1 }),
-  description: Type.Optional(Type.Union([Type.String({ minLength: 1 }), Type.Null()])),
+  title: Type.String({ minLength: 1, maxLength: LIVE_TRAINING_TITLE_MAX_LENGTH }),
+  description: Type.Optional(
+    Type.Union([
+      Type.String({ minLength: 1, maxLength: LIVE_TRAINING_DESCRIPTION_MAX_LENGTH }),
+      Type.Null(),
+    ]),
+  ),
   startsAt: Type.String({ minLength: 1 }),
   endsAt: Type.String({ minLength: 1 }),
   timezone: Type.String({ minLength: 1 }),

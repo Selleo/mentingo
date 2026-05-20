@@ -229,6 +229,7 @@ created from the course add-lesson flow.
 Required fields:
 
 - `title`
+- `title` is capped by `LIVE_TRAINING_TITLE_MAX_LENGTH`
 - `language`, using the existing language selector pattern
 - `startsAt`, using shadcn Calendar date picker plus time picker
 - `endsAt`, using shadcn Calendar date picker plus time picker
@@ -239,6 +240,7 @@ Required fields:
 Optional fields:
 
 - `description`
+- `description` is capped by `LIVE_TRAINING_DESCRIPTION_MAX_LENGTH`
 - `trainerUserIds`, for additional trainers only; backend includes the author/current user
 - `beforeResourceIds`
 - `afterResourceIds`

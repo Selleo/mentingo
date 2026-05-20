@@ -1,0 +1,14 @@
+.live-training-inline-editable--text {
+  border-color: transparent;
+  border-style: solid;
+}
+
+.live-training-inline-editable--text:hover {
+  border-color: rgba(255, 255, 255, 0.7);
+  border-style: dotted;
+}
+
+.live-training-inline-editable--text:focus-within {
+  border-color: rgba(255, 255, 255, 0.75);
+  border-style: solid;
+}

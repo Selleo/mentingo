@@ -1,8 +1,8 @@
 import {
-  DEFAULT_LIVE_TRAINING_SETTINGS,
   LIVE_TRAINING_DELIVERY_TYPES,
+  LIVE_TRAINING_DESCRIPTION_MAX_LENGTH,
   LIVE_TRAINING_MAX_PARTICIPANTS_LIMIT,
-  type SupportedLanguages,
+  LIVE_TRAINING_TITLE_MAX_LENGTH,
 } from "@repo/shared";
 import { CalendarPlus, Mic, Video } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -30,79 +30,23 @@ import { Textarea } from "~/components/ui/textarea";
 import { TooltipProvider } from "~/components/ui/tooltip";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
+import { CALENDAR_CREATE_MODES } from "./calendarCreateLiveTraining.constants";
 import {
-  CALENDAR_CREATE_MODES,
-  type CalendarCreateLiveTrainingDialogProps,
-  type CalendarCreateLiveTrainingFormState,
-  type CalendarCreateMode,
-} from "./calendarCreateLiveTraining.types";
+  buildCalendarCreateDateTime,
+  buildInitialCalendarCreateLiveTrainingFormState,
+} from "./calendarCreateLiveTraining.utils";
 import { CalendarDateTimeField } from "./CalendarDateTimeField";
 import { CalendarFormFieldLabel } from "./CalendarFormFieldLabel";
 import { CalendarLanguageSelect } from "./CalendarLanguageSelect";
 import { CalendarViewerPermissionToggle } from "./CalendarViewerPermissionToggle";
 
+import type {
+  CalendarCreateLiveTrainingDialogProps,
+  CalendarCreateLiveTrainingFormState,
+  CalendarCreateMode,
+} from "./calendarCreateLiveTraining.types";
 import type { FormEvent } from "react";
 import type { CreateLiveTrainingBody } from "~/api/generated-api";
-
-const padDatePart = (value: number) => String(value).padStart(2, "0");
-
-const toDateInputValue = (date: Date) =>
-  `${date.getFullYear()}-${padDatePart(date.getMonth() + 1)}-${padDatePart(date.getDate())}`;
-
-const toTimeInputValue = (date: Date) =>
-  `${padDatePart(date.getHours())}:${padDatePart(date.getMinutes())}`;
-
-const getDefaultDateRange = (
-  selectedRange: CalendarCreateLiveTrainingDialogProps["selectedRange"],
-) => {
-  const startsAt = selectedRange?.start ? new Date(selectedRange.start) : new Date();
-
-  if (
-    !selectedRange ||
-    selectedRange.allDay ||
-    (startsAt.getHours() === 0 && startsAt.getMinutes() === 0)
-  ) {
-    startsAt.setHours(9, 0, 0, 0);
-  }
-
-  const endsAt = selectedRange?.end ? new Date(selectedRange.end) : new Date(startsAt);
-
-  if (selectedRange?.allDay && selectedRange.end) {
-    endsAt.setDate(endsAt.getDate() - 1);
-    endsAt.setHours(17, 0, 0, 0);
-  }
-
-  if (endsAt <= startsAt) {
-    endsAt.setTime(startsAt.getTime());
-    endsAt.setHours(startsAt.getHours() + 1);
-  }
-
-  return { startsAt, endsAt };
-};
-
-const buildDateTime = (date: string, time: string) => new Date(`${date}T${time}:00`);
-
-const buildInitialFormState = (
-  selectedRange: CalendarCreateLiveTrainingDialogProps["selectedRange"],
-  language: SupportedLanguages,
-): CalendarCreateLiveTrainingFormState => {
-  const { startsAt, endsAt } = getDefaultDateRange(selectedRange);
-
-  return {
-    title: "",
-    description: "",
-    language,
-    startDate: toDateInputValue(startsAt),
-    startTime: toTimeInputValue(startsAt),
-    endDate: toDateInputValue(endsAt),
-    endTime: toTimeInputValue(endsAt),
-    deliveryType: LIVE_TRAINING_DELIVERY_TYPES.ONLINE,
-    location: "",
-    maxParticipants: LIVE_TRAINING_MAX_PARTICIPANTS_LIMIT,
-    microphoneEnabled: DEFAULT_LIVE_TRAINING_SETTINGS.viewerPermissions.microphoneEnabled,
-    cameraEnabled: DEFAULT_LIVE_TRAINING_SETTINGS.viewerPermissions.cameraEnabled,
-  };
-};
 
 export function CalendarCreateLiveTrainingDialog({
   open,
@@ -116,7 +60,7 @@ export function CalendarCreateLiveTrainingDialog({
   const { mutateAsync: createLiveTraining, isPending } = useCreateLiveTraining();
 
   const initialFormState = useMemo(
-    () => buildInitialFormState(selectedRange, appLanguage),
+    () => buildInitialCalendarCreateLiveTrainingFormState(selectedRange, appLanguage),
     [selectedRange, appLanguage],
   );
 
@@ -147,8 +91,8 @@ export function CalendarCreateLiveTrainingDialog({
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const startsAt = buildDateTime(formState.startDate, formState.startTime);
-    const endsAt = buildDateTime(formState.endDate, formState.endTime);
+    const startsAt = buildCalendarCreateDateTime(formState.startDate, formState.startTime);
+    const endsAt = buildCalendarCreateDateTime(formState.endDate, formState.endTime);
 
     if (!formState.title.trim()) {
       setFormError(t("calendarView.create.validation.titleRequired"));
@@ -157,14 +101,6 @@ export function CalendarCreateLiveTrainingDialog({
 
     if (Number.isNaN(startsAt.getTime()) || Number.isNaN(endsAt.getTime()) || endsAt <= startsAt) {
       setFormError(t("calendarView.create.validation.invalidDateRange"));
-      return;
-    }
-
-    if (
-      formState.deliveryType === LIVE_TRAINING_DELIVERY_TYPES.OFFLINE &&
-      !formState.location.trim()
-    ) {
-      setFormError(t("calendarView.create.validation.locationRequired"));
       return;
     }
 
@@ -179,7 +115,7 @@ export function CalendarCreateLiveTrainingDialog({
       timezone,
       deliveryType: formState.deliveryType,
       location:
-        formState.deliveryType === LIVE_TRAINING_DELIVERY_TYPES.OFFLINE
+        formState.deliveryType === LIVE_TRAINING_DELIVERY_TYPES.OFFLINE && formState.location.trim()
           ? formState.location.trim()
           : null,
       maxParticipants: formState.maxParticipants,
@@ -246,7 +182,13 @@ export function CalendarCreateLiveTrainingDialog({
                   <Input
                     id="live-training-title"
                     value={formState.title}
-                    onChange={(event) => updateFormState("title", event.target.value)}
+                    maxLength={LIVE_TRAINING_TITLE_MAX_LENGTH}
+                    onChange={(event) =>
+                      updateFormState(
+                        "title",
+                        event.target.value.slice(0, LIVE_TRAINING_TITLE_MAX_LENGTH),
+                      )
+                    }
                     placeholder={t("calendarView.create.placeholder.title")}
                   />
                 </div>
@@ -260,7 +202,13 @@ export function CalendarCreateLiveTrainingDialog({
                   <Textarea
                     id="live-training-description"
                     value={formState.description}
-                    onChange={(event) => updateFormState("description", event.target.value)}
+                    maxLength={LIVE_TRAINING_DESCRIPTION_MAX_LENGTH}
+                    onChange={(event) =>
+                      updateFormState(
+                        "description",
+                        event.target.value.slice(0, LIVE_TRAINING_DESCRIPTION_MAX_LENGTH),
+                      )
+                    }
                     placeholder={t("calendarView.create.placeholder.description")}
                   />
                 </div>

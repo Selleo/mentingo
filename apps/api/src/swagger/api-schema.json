@@ -36900,12 +36900,14 @@
           },
           "title": {
             "minLength": 1,
+            "maxLength": 120,
             "type": "string"
           },
           "description": {
             "anyOf": [
               {
                 "minLength": 1,
+                "maxLength": 500,
                 "type": "string"
               },
               {
@@ -37434,12 +37436,14 @@
             "properties": {
               "title": {
                 "minLength": 1,
+                "maxLength": 120,
                 "type": "string"
               },
               "description": {
                 "anyOf": [
                   {
                     "minLength": 1,
+                    "maxLength": 500,
                     "type": "string"
                   },
                   {

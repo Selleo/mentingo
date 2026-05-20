@@ -361,15 +361,14 @@
         "startsAt": "Die geplante Startzeit im Kalender.",
         "endsAt": "Die geplante Endzeit im Kalender.",
         "maxParticipants": "Das Teilnehmerlimit für dieses Live Training. Das aktuelle Maximum ist 100.",
-        "location": "Nur für Offline-Trainings erforderlich.",
+        "location": "Optionaler Ort für Offline-Trainings.",
         "viewerPermissions": "Steuert, was Studierende beim Beitritt als Zuschauer nutzen können.",
         "microphoneEnabled": "Erlaubt Zuschauern, während der Sitzung ihr Mikrofon zu verwenden.",
         "cameraEnabled": "Erlaubt Zuschauern, während der Sitzung ihre Kamera zu verwenden."
       },
       "validation": {
         "titleRequired": "Titel ist erforderlich.",
-        "invalidDateRange": "Die Endzeit muss nach der Startzeit liegen.",
-        "locationRequired": "Für Offline-Training ist ein Ort erforderlich."
+        "invalidDateRange": "Die Endzeit muss nach der Startzeit liegen."
       }
     },
     "details": {
@@ -1201,7 +1200,23 @@
         "integration_key": "Integrationsschlüssel",
         "integration_api": "Integrations-API",
         "tenant": "Organisationskonfiguration",
+        "calendar": "Kalender",
+        "live_training": "Live Trainings",
+        "activity_log": "Aktivitätsprotokoll",
         "other": "Plattformfunktionen"
+      },
+      "descriptions": {
+        "calendar_read": "Kalenderereignisse anzeigen.",
+        "live_training_read": "Live Trainings anzeigen.",
+        "live_training_create": "Live Trainings erstellen.",
+        "live_training_update": "Beliebige Live Trainings bearbeiten.",
+        "live_training_update_own": "Vom Benutzer erstellte Live Trainings bearbeiten.",
+        "live_training_delete": "Live Trainings löschen.",
+        "live_training_join": "Live Training Sessions beitreten.",
+        "live_training_start": "Live Training Sessions starten.",
+        "live_training_end": "Live Training Sessions beenden.",
+        "live_training_statistics": "Anwesenheit und Statistiken für Live Trainings anzeigen.",
+        "activity_log_read": "Aktivitätsprotokolle anzeigen."
       }
     },
     "dropdown": {

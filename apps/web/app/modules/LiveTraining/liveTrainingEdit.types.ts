@@ -1,10 +1,8 @@
-import type { SupportedLanguages } from "@repo/shared";
 import type { LiveTrainingDetails } from "~/modules/LiveTraining/liveTraining.types";
 
 export type LiveTrainingEditFormState = {
   title: string;
   description: string;
-  language: SupportedLanguages;
   startDate: string;
   startTime: string;
   endDate: string;

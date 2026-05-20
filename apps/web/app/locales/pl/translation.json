@@ -365,15 +365,14 @@
         "startsAt": "Planowany czas rozpoczęcia widoczny w kalendarzu.",
         "endsAt": "Planowany czas zakończenia widoczny w kalendarzu.",
         "maxParticipants": "Limit uczestników Live Training. Obecne maksimum to 100.",
-        "location": "Wymagane tylko dla szkoleń offline.",
+        "location": "Opcjonalne miejsce szkolenia offline.",
         "viewerPermissions": "Określa, z czego mogą korzystać studenci dołączający jako obserwatorzy.",
         "microphoneEnabled": "Pozwala obserwatorom używać mikrofonu podczas sesji.",
         "cameraEnabled": "Pozwala obserwatorom używać kamery podczas sesji."
       },
       "validation": {
         "titleRequired": "Tytuł jest wymagany.",
-        "invalidDateRange": "Czas zakończenia musi być późniejszy niż rozpoczęcia.",
-        "locationRequired": "Lokalizacja jest wymagana dla szkolenia offline."
+        "invalidDateRange": "Czas zakończenia musi być późniejszy niż rozpoczęcia."
       }
     },
     "details": {
@@ -1413,6 +1412,9 @@
         "integration_key": "klucze integracji",
         "integration_api": "API integracji",
         "tenant": "konfigurację organizacji",
+        "calendar": "kalendarz",
+        "live_training": "szkolenia live",
+        "activity_log": "dziennik aktywności",
         "other": "funkcje platformy"
       },
       "descriptions": {
@@ -1475,6 +1477,17 @@
         "integration_key_manage": "Może zarządzać kluczami API integracji.",
         "integration_api_use": "Może korzystać z endpointów API integracji.",
         "tenant_manage": "Może zarządzać konfiguracją organizacji.",
+        "calendar_read": "Może przeglądać wydarzenia w kalendarzu.",
+        "live_training_read": "Może przeglądać szkolenia live.",
+        "live_training_create": "Może tworzyć szkolenia live.",
+        "live_training_update": "Może edytować dowolne szkolenie live.",
+        "live_training_update_own": "Może edytować utworzone przez siebie szkolenia live.",
+        "live_training_delete": "Może usuwać szkolenia live.",
+        "live_training_join": "Może dołączać do sesji szkolenia live.",
+        "live_training_start": "Może rozpoczynać sesje szkolenia live.",
+        "live_training_end": "Może kończyć sesje szkolenia live.",
+        "live_training_statistics": "Może przeglądać obecność i statystyki szkoleń live.",
+        "activity_log_read": "Może przeglądać dziennik aktywności.",
         "course_ai_generation": "Może generować strukturę i treści kursu za pomocą narzędzi AI."
       }
     },

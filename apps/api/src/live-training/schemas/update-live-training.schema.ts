@@ -1,4 +1,8 @@
-import { LIVE_TRAINING_MAX_PARTICIPANTS_LIMIT } from "@repo/shared";
+import {
+  LIVE_TRAINING_DESCRIPTION_MAX_LENGTH,
+  LIVE_TRAINING_MAX_PARTICIPANTS_LIMIT,
+  LIVE_TRAINING_TITLE_MAX_LENGTH,
+} from "@repo/shared";
 import { Type, type Static } from "@sinclair/typebox";
 
 import { UUIDSchema, baseResponse } from "src/common";
@@ -17,8 +21,11 @@ export const updateLiveTrainingSchema = Type.Intersect([
   }),
   Type.Partial(
     Type.Object({
-      title: Type.String({ minLength: 1 }),
-      description: Type.Union([Type.String({ minLength: 1 }), Type.Null()]),
+      title: Type.String({ minLength: 1, maxLength: LIVE_TRAINING_TITLE_MAX_LENGTH }),
+      description: Type.Union([
+        Type.String({ minLength: 1, maxLength: LIVE_TRAINING_DESCRIPTION_MAX_LENGTH }),
+        Type.Null(),
+      ]),
       startsAt: Type.String({ minLength: 1 }),
       endsAt: Type.String({ minLength: 1 }),
       timezone: Type.String({ minLength: 1 }),

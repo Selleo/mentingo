@@ -361,15 +361,14 @@
         "startsAt": "Planuojamas pradžios laikas, rodomas kalendoriuje.",
         "endsAt": "Planuojamas pabaigos laikas, rodomas kalendoriuje.",
         "maxParticipants": "Šio Live Training dalyvių limitas. Dabartinis maksimumas yra 100.",
-        "location": "Privaloma tik offline mokymams.",
+        "location": "Neprivaloma offline mokymų vieta.",
         "viewerPermissions": "Nustato, ką studentai gali naudoti prisijungę kaip stebėtojai.",
         "microphoneEnabled": "Leisti stebėtojams naudoti mikrofoną sesijos metu.",
         "cameraEnabled": "Leisti stebėtojams naudoti kamerą sesijos metu."
       },
       "validation": {
         "titleRequired": "Pavadinimas privalomas.",
-        "invalidDateRange": "Pabaigos laikas turi būti po pradžios.",
-        "locationRequired": "Vieta privaloma offline mokymams."
+        "invalidDateRange": "Pabaigos laikas turi būti po pradžios."
       }
     },
     "details": {
@@ -1201,7 +1200,23 @@
         "integration_key": "integracijos raktus",
         "integration_api": "integracijos API",
         "tenant": "organizacijos konfigūraciją",
+        "calendar": "kalendorių",
+        "live_training": "gyvus mokymus",
+        "activity_log": "veiklos žurnalą",
         "other": "platformos funkcijas"
+      },
+      "descriptions": {
+        "calendar_read": "Gali peržiūrėti kalendoriaus įvykius.",
+        "live_training_read": "Gali peržiūrėti gyvus mokymus.",
+        "live_training_create": "Gali kurti gyvus mokymus.",
+        "live_training_update": "Gali redaguoti bet kuriuos gyvus mokymus.",
+        "live_training_update_own": "Gali redaguoti šio naudotojo sukurtus gyvus mokymus.",
+        "live_training_delete": "Gali trinti gyvus mokymus.",
+        "live_training_join": "Gali prisijungti prie gyvų mokymų sesijų.",
+        "live_training_start": "Gali pradėti gyvų mokymų sesijas.",
+        "live_training_end": "Gali užbaigti gyvų mokymų sesijas.",
+        "live_training_statistics": "Gali peržiūrėti gyvų mokymų lankomumą ir statistiką.",
+        "activity_log_read": "Gali peržiūrėti veiklos žurnalus."
       }
     },
     "dropdown": {

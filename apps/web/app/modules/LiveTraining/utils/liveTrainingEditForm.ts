@@ -17,7 +17,6 @@ const buildDateTime = (date: string, time: string) => new Date(`${date}T${time}:
 
 export const buildLiveTrainingEditFormState = (
   liveTraining: LiveTrainingDetails,
-  language: SupportedLanguages,
 ): LiveTrainingEditFormState => {
   const startsAt = new Date(liveTraining.startsAt);
   const endsAt = new Date(liveTraining.endsAt);
@@ -25,7 +24,6 @@ export const buildLiveTrainingEditFormState = (
   return {
     title: liveTraining.title,
     description: liveTraining.description ?? "",
-    language,
     startDate: toDateInputValue(startsAt),
     startTime: toTimeInputValue(startsAt),
     endDate: toDateInputValue(endsAt),
@@ -41,6 +39,7 @@ export const buildLiveTrainingEditFormState = (
 export const buildUpdateLiveTrainingPayload = (
   formState: LiveTrainingEditFormState,
   timezone: string,
+  language: SupportedLanguages,
 ): UpdateLiveTrainingBody => {
   const isOffline = formState.deliveryType === LIVE_TRAINING_DELIVERY_TYPES.OFFLINE;
 
@@ -48,7 +47,7 @@ export const buildUpdateLiveTrainingPayload = (
   const payload: UpdateLiveTrainingBody = {
     title: formState.title.trim(),
     description: formState.description.trim() || null,
-    language: formState.language,
+    language,
     startsAt: buildDateTime(formState.startDate, formState.startTime).toISOString(),
     endsAt: buildDateTime(formState.endDate, formState.endTime).toISOString(),
     timezone,
@@ -72,10 +71,7 @@ export const buildUpdateLiveTrainingPayload = (
 export const isLiveTrainingEditFormDirty = (
   liveTraining: LiveTrainingDetails,
   formState: LiveTrainingEditFormState,
-  initialLanguage: SupportedLanguages,
-) =>
-  JSON.stringify(buildLiveTrainingEditFormState(liveTraining, initialLanguage)) !==
-  JSON.stringify(formState);
+) => JSON.stringify(buildLiveTrainingEditFormState(liveTraining)) !== JSON.stringify(formState);
 
 export const isLiveTrainingEditFormValid = (formState: LiveTrainingEditFormState) => {
   const startsAt = buildDateTime(formState.startDate, formState.startTime);

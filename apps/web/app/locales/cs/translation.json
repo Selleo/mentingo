@@ -361,15 +361,14 @@
         "startsAt": "Plánovaný čas začátku zobrazený v kalendáři.",
         "endsAt": "Plánovaný čas konce zobrazený v kalendáři.",
         "maxParticipants": "Limit účastníků pro toto Live Training. Aktuální maximum je 100.",
-        "location": "Vyžadováno pouze pro offline školení.",
+        "location": "Volitelné místo pro offline školení.",
         "viewerPermissions": "Určuje, co mohou studenti používat při připojení jako diváci.",
         "microphoneEnabled": "Povolí divákům používat mikrofon během relace.",
         "cameraEnabled": "Povolí divákům používat kameru během relace."
       },
       "validation": {
         "titleRequired": "Název je povinný.",
-        "invalidDateRange": "Čas konce musí být po začátku.",
-        "locationRequired": "Místo je pro offline školení povinné."
+        "invalidDateRange": "Čas konce musí být po začátku."
       }
     },
     "details": {
@@ -1201,7 +1200,23 @@
         "integration_key": "integrační klíče",
         "integration_api": "integrační API",
         "tenant": "konfiguraci organizace",
+        "calendar": "kalendář",
+        "live_training": "živá školení",
+        "activity_log": "protokol aktivit",
         "other": "funkce platformy"
+      },
+      "descriptions": {
+        "calendar_read": "Může zobrazit události v kalendáři.",
+        "live_training_read": "Může zobrazit živá školení.",
+        "live_training_create": "Může vytvářet živá školení.",
+        "live_training_update": "Může upravovat libovolné živé školení.",
+        "live_training_update_own": "Může upravovat živá školení vytvořená tímto uživatelem.",
+        "live_training_delete": "Může mazat živá školení.",
+        "live_training_join": "Může se připojit k relacím živého školení.",
+        "live_training_start": "Může spouštět relace živého školení.",
+        "live_training_end": "Může ukončovat relace živého školení.",
+        "live_training_statistics": "Může zobrazit docházku a statistiky živých školení.",
+        "activity_log_read": "Může zobrazit protokoly aktivit."
       }
     },
     "dropdown": {

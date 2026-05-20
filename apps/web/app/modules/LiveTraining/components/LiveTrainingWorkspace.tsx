@@ -1,4 +1,4 @@
-import { Settings, Users } from "lucide-react";
+import { Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
@@ -50,9 +50,6 @@ export function LiveTrainingWorkspace({ liveTraining }: LiveTrainingWorkspacePro
         <TabsTrigger value={LIVE_TRAINING_WORKSPACE_TABS.ATTENDANCE}>
           {t("liveTrainingView.tabs.attendance")}
         </TabsTrigger>
-        <TabsTrigger value={LIVE_TRAINING_WORKSPACE_TABS.SETTINGS}>
-          {t("liveTrainingView.tabs.settings")}
-        </TabsTrigger>
       </TabsList>
 
       <TabsContent value={LIVE_TRAINING_WORKSPACE_TABS.OVERVIEW}>
@@ -68,14 +65,6 @@ export function LiveTrainingWorkspace({ liveTraining }: LiveTrainingWorkspacePro
           icon={<Users className="size-4" />}
           title={t("liveTrainingView.attendance.title")}
           description={t("liveTrainingView.attendance.description")}
-        />
-      </TabsContent>
-
-      <TabsContent value={LIVE_TRAINING_WORKSPACE_TABS.SETTINGS}>
-        <DeferredPanel
-          icon={<Settings className="size-4" />}
-          title={t("liveTrainingView.settings.title")}
-          description={t("liveTrainingView.settings.description")}
         />
       </TabsContent>
     </Tabs>
