@@ -11,6 +11,7 @@ import {
   SCORM_PACKAGE_STATUS,
   SCORM_STANDARD,
   SCORM_SUCCESS_STATUS,
+  CERTIFICATE_STATUSES,
   SUPPORTED_LANGUAGES,
   SUPPORT_SESSION_STATUSES,
   TENANT_STATUSES,
@@ -50,6 +51,7 @@ import {
   id,
   tenantId,
   timestamps,
+  timestampWithTimezone,
   withTenantIdIndex,
 } from "./utils";
 
@@ -75,6 +77,8 @@ import type {
   LearningPathEnrollmentType,
   LearningPathProgressStatus,
   LearningPathStatus,
+  CertificateArchiveReason,
+  CertificateStatus,
 } from "@repo/shared";
 import type { ActivityLogMetadata } from "src/activity-logs/types";
 import type { ActivityHistory, AllSettings } from "src/common/types";
@@ -1084,10 +1088,22 @@ export const certificates = pgTable(
     courseId: uuid("course_id")
       .references(() => courses.id, { onDelete: "cascade" })
       .notNull(),
+    status: text("status")
+      .$type<CertificateStatus>()
+      .notNull()
+      .default(CERTIFICATE_STATUSES.ACTIVE),
+    issuedAt: timestampWithTimezone({ name: "issued_at" })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    expiresAt: timestampWithTimezone({ name: "expires_at" }),
+    archivedAt: timestampWithTimezone({ name: "archived_at" }),
+    archiveReason: text("archive_reason").$type<CertificateArchiveReason>(),
+    expirationWarningSentAt: timestampWithTimezone({ name: "expiration_warning_sent_at" }),
     tenantId,
   },
   withTenantIdIndex("certificates", (table) => ({
-    unq: unique().on(table.userId, table.courseId),
+    activeExpiryIdx: index("certificates_active_expiry_idx").on(table.status, table.expiresAt),
+    userCourseIdx: index("certificates_user_course_idx").on(table.userId, table.courseId),
   })),
 );
 

@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 
+import { EmailModule } from "src/common/emails/emails.module";
 import { FileModule } from "src/file/files.module";
 import { LocalizationModule } from "src/localization/localization.module";
 import { LocalizationService } from "src/localization/localization.service";
@@ -9,12 +10,21 @@ import { SettingsService } from "src/settings/settings.service";
 
 import { CertificateRepository } from "./certificate.repository";
 import { CertificatesController } from "./certificates.controller";
+import { CertificatesCron } from "./certificates.cron";
 import { CertificatesService } from "./certificates.service";
+import { CertificateEmailHandler } from "./handlers/certificate-email.handler";
 
 @Module({
-  imports: [SettingsModule, FileModule, LocalizationModule, S3Module],
+  imports: [SettingsModule, FileModule, LocalizationModule, S3Module, EmailModule],
   controllers: [CertificatesController],
-  providers: [CertificatesService, CertificateRepository, SettingsService, LocalizationService],
+  providers: [
+    CertificatesService,
+    CertificateRepository,
+    CertificatesCron,
+    CertificateEmailHandler,
+    SettingsService,
+    LocalizationService,
+  ],
   exports: [CertificatesService],
 })
 export class CertificatesModule {}

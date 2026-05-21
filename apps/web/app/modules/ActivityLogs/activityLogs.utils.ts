@@ -1,6 +1,7 @@
 import {
   ArrowRightLeft,
   ArrowRightToLine,
+  Archive,
   Bell,
   CheckCircle2,
   CirclePlus,
@@ -8,6 +9,7 @@ import {
   LogOut,
   Pencil,
   Play,
+  RotateCcw,
   ShieldAlert,
   Trash2,
   type LucideIcon,
@@ -112,6 +114,18 @@ export const activityLogActionConfig: Record<ActivityLogActionType, ActivityLogA
     badgeClassName: "border-emerald-200 bg-emerald-50 text-emerald-700",
     iconClassName: "text-emerald-700",
     ringClassName: "border-emerald-600",
+  },
+  expire_certificate: {
+    icon: Archive,
+    badgeClassName: "border-slate-200 bg-slate-50 text-slate-700",
+    iconClassName: "text-slate-700",
+    ringClassName: "border-slate-600",
+  },
+  reset_certificate: {
+    icon: RotateCcw,
+    badgeClassName: "border-amber-200 bg-amber-50 text-amber-800",
+    iconClassName: "text-amber-700",
+    ringClassName: "border-amber-600",
   },
   view_announcement: {
     icon: Bell,

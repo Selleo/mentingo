@@ -11,6 +11,7 @@ import { getCourseSettingsQueryKey } from "../queries/useCourseSettings.js";
 import { getLessonSequenceQueryKey } from "../queries/useLessonSequence.js";
 
 import type { ApiErrorResponse } from "../types";
+import type { CertificateValiditySetting } from "@repo/shared";
 import type { AxiosError } from "axios";
 
 type UpdateCourseSettingsBody = {
@@ -19,6 +20,8 @@ type UpdateCourseSettingsBody = {
   removeCertificateSignature?: boolean;
   certificateSignature?: File;
   certificateFontColor?: string;
+  certificateValidity?: CertificateValiditySetting;
+  applyValidityToExistingCertificates?: boolean;
 };
 
 type UpdateCourseSettingsParams = {
@@ -58,6 +61,9 @@ export function useUpdateCourseSettings() {
         .with(["removeCertificateSignature"], () =>
           t("adminCourseView.toast.certificateUpdatedSuccessfully"),
         )
+        .with(["certificateValidity"], () =>
+          t("adminCourseView.toast.certificateUpdatedSuccessfully"),
+        )
         .otherwise(() => t("lessons.settingsUpdatedSuccessfully"));
 
       toast({
@@ -81,6 +87,7 @@ export function useUpdateCourseSettings() {
         .with(["removeCertificateSignature"], () =>
           t("adminCourseView.toast.certificateUpdateError"),
         )
+        .with(["certificateValidity"], () => t("adminCourseView.toast.certificateUpdateError"))
         .otherwise(() => t("lessons.settingsUpdateFailed"));
 
       toast({

@@ -1,5 +1,5 @@
 import { BadRequestException, Inject, Injectable } from "@nestjs/common";
-import { COURSE_ENROLLMENT } from "@repo/shared";
+import { CERTIFICATE_STATUSES, COURSE_ENROLLMENT } from "@repo/shared";
 import { and, countDistinct, eq, inArray, isNull, sql, type SQL } from "drizzle-orm";
 import { P, match } from "ts-pattern";
 import { validate as uuidValidate } from "uuid";
@@ -304,7 +304,7 @@ export class IntegrationRepository {
             .getLocalizedSqlField(courses.title)
             .as("courseTitle"),
           certificateEnabled: courses.hasCertificate,
-          certificateIssuedAt: certificates.createdAt,
+          certificateIssuedAt: certificates.issuedAt,
         })
         .from(studentCourses)
         .innerJoin(users, eq(users.id, studentCourses.studentId))
@@ -315,6 +315,7 @@ export class IntegrationRepository {
             eq(certificates.userId, studentCourses.studentId),
             eq(certificates.courseId, studentCourses.courseId),
             eq(certificates.tenantId, studentCourses.tenantId),
+            eq(certificates.status, CERTIFICATE_STATUSES.ACTIVE),
           ),
         )
         .where(and(...filters)),
