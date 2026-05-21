@@ -4,8 +4,7 @@ import {
   type CertificateValidityType,
   type CertificateValidityUnit,
 } from "@repo/shared";
-import { format, isValid, parseISO } from "date-fns";
-import { enUS, pl } from "date-fns/locale";
+import { format, isBefore, isValid, parseISO, startOfToday } from "date-fns";
 import { useTranslation } from "react-i18next";
 
 import { Icon } from "~/components/Icon";
@@ -22,6 +21,8 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { cn } from "~/lib/utils";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
+import { getDateLocale } from "~/utils/getDateLocale";
 
 type CertificateValidityInputProps = {
   disabled: boolean;
@@ -48,11 +49,17 @@ export function CertificateValidityInput({
   onValidityUnitChange,
   onValidityDateChange,
 }: CertificateValidityInputProps) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
+
+  const language = useLanguageStore((state) => state.language);
+
   const selectedValidityDate = validityDate ? parseISO(validityDate) : undefined;
   const isSelectedValidityDateValid = selectedValidityDate && isValid(selectedValidityDate);
-  const currentYear = new Date().getFullYear();
-  const calendarLocale = i18n.language.startsWith("pl") ? pl : enUS;
+
+  const today = startOfToday();
+  const currentYear = today.getFullYear();
+
+  const calendarLocale = getDateLocale(language);
 
   return (
     <div className="grid gap-3 md:grid-cols-[180px_1fr_160px]">
@@ -142,7 +149,8 @@ export function CertificateValidityInput({
 
                   return onValidityDateChange(format(date, "yyyy-MM-dd"));
                 }}
-                fromYear={currentYear - 10}
+                disabled={(date) => isBefore(date, today)}
+                fromYear={currentYear}
                 toYear={currentYear + 30}
                 initialFocus
                 weekStartsOn={1}

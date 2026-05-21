@@ -1352,8 +1352,8 @@
         "doesNotIncludeCertificate": "Neobsahuje certifikát",
         "saveValidity": "Uložit platnost",
         "resetCertificates": "Resetovat certifikáty",
-        "futureOnly": "Pouze budoucí",
-        "applyToExisting": "Použít na stávající"
+        "futureOnly": "Použít pouze pro nové",
+        "applyToExisting": "Použít pro všechny (včetně minulých)"
       },
       "selectButton": {
         "uploadFile": "Nahrajte soubor",
@@ -1396,8 +1396,12 @@
         "certificateValidity": "Platnost certifikátu",
         "certificateValidityDescription": "Nastavte, kdy vydané certifikáty vyprší a resetují průběh kurzu.",
         "enableCertificateValidityConfirmationTitle": "Povolit platnost certifikátu?",
-        "enableCertificateValidityConfirmationDescription": "Toto nastavení ovlivňuje statistiky kurzu. Po skončení platnosti certifikátu dotčení uživatelé ztratí svůj postup v kurzu.",
+        "enableCertificateValidityConfirmationDescription": "Toto nastavení ovlivňuje pouze statistiky tohoto kurzu. Po skončení platnosti certifikátu dotčení uživatelé ztratí svůj postup v tomto kurzu.",
         "enableCertificateValidityConfirmationConfirm": "Povolit platnost",
+        "confirmValidityChangesTitle": "Potvrďte změny platnosti certifikátu",
+        "noActiveCertificatesValidityDescription": "Nyní nejsou žádné aktivní certifikáty k aktualizaci. Budoucí certifikáty budou používat toto nastavení platnosti.",
+        "activeCertificatesStat": "Aktivní certifikáty",
+        "immediatelyExpiringStat": "Vyprší okamžitě",
         "validityPeriod": "Období",
         "validityFixedDate": "Konkrétní datum",
         "days": "Dny",
@@ -1407,7 +1411,7 @@
         "applyValidityDescription": "Existuje {{activeCount}} aktivních certifikátů. {{expiringCount}} by vypršelo okamžitě, pokud by se toto nastavení použilo na stávající certifikáty.",
         "resetCertificates": "Ruční reset certifikátu",
         "resetCertificatesDescription": "Archivovat vybrané certifikáty a resetovat průběh kurzu.",
-        "resetCertificatesDialogDescription": "Tato akce archivuje aktivní certifikáty, resetuje průběh kurzu a může upozornit dotčené uživatele.",
+        "resetCertificatesDialogDescription": "Tato akce archivuje aktivní certifikáty, resetuje průběh kurzu a může upozornit dotčené uživatele. Týká se pouze tohoto kurzu.",
         "sendResetEmail": "Odeslat e-mail dotčeným uživatelům",
         "activeCertificateCount": "{{count}} aktivních",
         "noActiveCertificate": "Žádný aktivní certifikát",

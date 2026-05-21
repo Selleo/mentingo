@@ -1070,7 +1070,17 @@ export class CertificatesService implements OnModuleDestroy {
   ) {
     if (!certificatesToWarn.length) return;
 
-    const certificates = await this.buildExpirationWarningEmailRecipients(certificatesToWarn);
+    const certificates = await this.buildCertificateEmailRecipients<
+      CertificateExpirationWarningRecord,
+      CertificateExpirationWarningEmailRecipient
+    >(certificatesToWarn, (certificate, recipient) => {
+      if (!certificate.expiresAt) return null;
+
+      return {
+        ...recipient,
+        expiresAt: format(new Date(certificate.expiresAt), "dd.MM.yyyy"),
+      };
+    });
 
     await this.outboxPublisher.publish(
       new CertificateExpirationWarningEmailEvent({ certificates }),
@@ -1088,32 +1098,27 @@ export class CertificatesService implements OnModuleDestroy {
     await this.outboxPublisher.publish(new CertificateArchivedEmailEvent({ certificates, reason }));
   }
 
-  private async buildExpirationWarningEmailRecipients(
-    certificatesToWarn: CertificateExpirationWarningRecord[],
-  ): Promise<CertificateExpirationWarningEmailRecipient[]> {
-    const recipients: CertificateExpirationWarningEmailRecipient[] = [];
-    const tenantOrigins = new Map<string, Promise<string>>();
-
-    for (const certificate of certificatesToWarn) {
-      if (!certificate.expiresAt) continue;
-
-      recipients.push({
-        ...(await this.buildCertificateEmailRecipient(certificate, tenantOrigins)),
-        expiresAt: format(new Date(certificate.expiresAt), "dd.MM.yyyy"),
-      });
-    }
-
-    return recipients;
-  }
-
-  private async buildCertificateEmailRecipients(
-    certificates: CertificateNotificationRecord[],
-  ): Promise<CertificateEmailRecipient[]> {
-    const recipients: CertificateEmailRecipient[] = [];
+  private async buildCertificateEmailRecipients<
+    TRecord extends CertificateNotificationRecord,
+    TRecipient extends CertificateEmailRecipient = CertificateEmailRecipient,
+  >(
+    certificates: TRecord[],
+    mapRecipient?: (
+      certificate: TRecord,
+      recipient: CertificateEmailRecipient,
+    ) => TRecipient | null,
+  ): Promise<TRecipient[]> {
+    const recipients: TRecipient[] = [];
     const tenantOrigins = new Map<string, Promise<string>>();
 
     for (const certificate of certificates) {
-      recipients.push(await this.buildCertificateEmailRecipient(certificate, tenantOrigins));
+      const recipient = await this.buildCertificateEmailRecipient(certificate, tenantOrigins);
+
+      const mappedRecipient = mapRecipient
+        ? mapRecipient(certificate, recipient)
+        : (recipient as TRecipient);
+
+      if (mappedRecipient) recipients.push(mappedRecipient);
     }
 
     return recipients;

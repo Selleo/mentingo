@@ -1629,8 +1629,8 @@
         "doesNotIncludeCertificate": "Nie zawiera certyfikatu",
         "saveValidity": "Zapisz ważność",
         "resetCertificates": "Resetuj certyfikaty",
-        "futureOnly": "Tylko nowe",
-        "applyToExisting": "Zastosuj do istniejących"
+        "futureOnly": "Zastosuj tylko dla nowych",
+        "applyToExisting": "Zastosuj do wszystkich (wstecznie)"
       },
       "selectButton": {
         "uploadFile": "Plik",
@@ -1674,8 +1674,12 @@
         "certificateValidity": "Ważność certyfikatu",
         "certificateValidityDescription": "Ustaw, kiedy wystawione certyfikaty wygasną i zresetują postęp kursu.",
         "enableCertificateValidityConfirmationTitle": "Włączyć ważność certyfikatu?",
-        "enableCertificateValidityConfirmationDescription": "To ustawienie wpływa na statystyki kursu. Po zakończeniu ważności certyfikatu objęci użytkownicy utracą postęp w kursie.",
+        "enableCertificateValidityConfirmationDescription": "To ustawienie wpływa tylko na statystyki tego kursu. Po zakończeniu ważności certyfikatu objęci użytkownicy utracą postęp w tym kursie.",
         "enableCertificateValidityConfirmationConfirm": "Włącz ważność",
+        "confirmValidityChangesTitle": "Potwierdź zmiany ważności certyfikatu",
+        "noActiveCertificatesValidityDescription": "Nie ma teraz aktywnych certyfikatów do zaktualizowania. Przyszłe certyfikaty będą korzystać z tego ustawienia ważności.",
+        "activeCertificatesStat": "Aktywne certyfikaty",
+        "immediatelyExpiringStat": "Wygasną od razu",
         "validityPeriod": "Okres",
         "validityFixedDate": "Konkretna data",
         "days": "Dni",
@@ -1685,7 +1689,7 @@
         "applyValidityDescription": "Istnieje {{activeCount}} aktywnych certyfikatów. {{expiringCount}} wygaśnie natychmiast po zastosowaniu tej zmiany do istniejących certyfikatów.",
         "resetCertificates": "Ręczny reset certyfikatu",
         "resetCertificatesDescription": "Zarchiwizuj wybrane certyfikaty i zresetuj postęp kursu.",
-        "resetCertificatesDialogDescription": "Ta akcja archiwizuje aktywne certyfikaty, resetuje postęp kursu i może powiadomić użytkowników.",
+        "resetCertificatesDialogDescription": "Ta akcja archiwizuje aktywne certyfikaty, resetuje postęp kursu i może powiadomić użytkowników. Dotyczy tylko tego kursu.",
         "sendResetEmail": "Wyślij e-mail do objętych użytkowników",
         "activeCertificateCount": "{{count}} aktywne",
         "noActiveCertificate": "Brak aktywnego certyfikatu",

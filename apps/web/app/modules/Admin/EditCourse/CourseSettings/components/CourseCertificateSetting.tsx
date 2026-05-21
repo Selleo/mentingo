@@ -295,6 +295,7 @@ const CourseCertificateSetting = ({
       <CertificateValidityImpactDialog
         open={isValidityImpactOpen}
         impact={validityImpact}
+        isEnablingValidity={!settings?.certificateValidity && isValidityEnabled}
         onOpenChange={setIsValidityImpactOpen}
         onFutureOnly={() => saveValidity(false)}
         onApplyToExisting={() => saveValidity(true)}

@@ -258,7 +258,9 @@ export function useCertificateValiditySettings({
       certificateValidity: certificateValidityPayload,
     });
 
-    if (impact.activeCertificateCount) {
+    const isEnablingValidity = !certificateValidity && Boolean(certificateValidityPayload);
+
+    if (isEnablingValidity || impact.activeCertificateCount) {
       dispatch({ type: CERTIFICATE_VALIDITY_ACTIONS.SET_IMPACT, value: impact });
       dispatch({ type: CERTIFICATE_VALIDITY_ACTIONS.SET_IMPACT_OPEN, value: true });
 
@@ -266,6 +268,7 @@ export function useCertificateValiditySettings({
     }
 
     updateCourseSettings({ courseId, data: { certificateValidity: certificateValidityPayload } });
+    dispatch({ type: CERTIFICATE_VALIDITY_ACTIONS.CLEAR_PENDING_IMPACT });
   };
 
   return {

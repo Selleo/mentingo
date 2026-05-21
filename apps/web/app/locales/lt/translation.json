@@ -1352,8 +1352,8 @@
         "doesNotIncludeCertificate": "Nėra sertifikato",
         "saveValidity": "Išsaugoti galiojimą",
         "resetCertificates": "Nustatyti sertifikatus iš naujo",
-        "futureOnly": "Tik būsimiems",
-        "applyToExisting": "Taikyti esamiems"
+        "futureOnly": "Taikyti tik naujiems",
+        "applyToExisting": "Taikyti visiems (įskaitant ankstesnius)"
       },
       "selectButton": {
         "uploadFile": "Įkelti failą",
@@ -1396,8 +1396,12 @@
         "certificateValidity": "Sertifikato galiojimas",
         "certificateValidityDescription": "Nustatykite, kada išduoti sertifikatai baigs galioti ir atstatys kurso pažangą.",
         "enableCertificateValidityConfirmationTitle": "Įjungti sertifikato galiojimą?",
-        "enableCertificateValidityConfirmationDescription": "Šis nustatymas turi įtakos kurso statistikai. Kai sertifikato galiojimas baigsis, paveikti naudotojai praras kurso pažangą.",
+        "enableCertificateValidityConfirmationDescription": "Šis nustatymas turi įtakos tik šio kurso statistikai. Kai sertifikato galiojimas baigsis, paveikti naudotojai praras šio kurso pažangą.",
         "enableCertificateValidityConfirmationConfirm": "Įjungti galiojimą",
+        "confirmValidityChangesTitle": "Patvirtinkite sertifikato galiojimo pakeitimus",
+        "noActiveCertificatesValidityDescription": "Šiuo metu nėra aktyvių sertifikatų, kuriuos reikėtų atnaujinti. Būsimi sertifikatai naudos šį galiojimo nustatymą.",
+        "activeCertificatesStat": "Aktyvūs sertifikatai",
+        "immediatelyExpiringStat": "Baigsis iš karto",
         "validityPeriod": "Laikotarpis",
         "validityFixedDate": "Konkreti data",
         "days": "Dienos",
@@ -1407,7 +1411,7 @@
         "applyValidityDescription": "Yra {{activeCount}} aktyvių sertifikatų. {{expiringCount}} baigtų galioti iš karto, jei šis nustatymas būtų pritaikytas esamiems sertifikatams.",
         "resetCertificates": "Rankinis sertifikato nustatymas iš naujo",
         "resetCertificatesDescription": "Archyvuoti pasirinktus sertifikatus ir atstatyti kurso pažangą.",
-        "resetCertificatesDialogDescription": "Šis veiksmas archyvuoja aktyvius sertifikatus, atstato kurso pažangą ir gali pranešti naudotojams.",
+        "resetCertificatesDialogDescription": "Šis veiksmas archyvuoja aktyvius sertifikatus, atstato kurso pažangą ir gali pranešti naudotojams. Jis taikomas tik šiam kursui.",
         "sendResetEmail": "Siųsti el. laišką paveiktiems naudotojams",
         "activeCertificateCount": "{{count}} aktyvūs",
         "noActiveCertificate": "Nėra aktyvaus sertifikato",

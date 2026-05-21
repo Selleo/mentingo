@@ -12,10 +12,14 @@ import { usePaginationReducer } from "~/hooks/usePaginationReducer";
 
 import { CertificateResetDialog } from "./CertificateResetDialog";
 
+import type { CertificateResetGroup } from "./CertificateResetDialog.types";
+
 type CertificateResetSectionProps = {
   courseId: string;
   disabled: boolean;
 };
+
+const EMPTY_RESET_GROUPS: CertificateResetGroup[] = [];
 
 export function CertificateResetSection({ courseId, disabled }: CertificateResetSectionProps) {
   const { t } = useTranslation();
@@ -45,7 +49,7 @@ export function CertificateResetSection({ courseId, disabled }: CertificateReset
     isResetDialogOpen && !!courseId,
   );
 
-  const { groups = [], activeCertificateUserCount = 0 } = resetOptions ?? {};
+  const { groups = EMPTY_RESET_GROUPS, activeCertificateUserCount = 0 } = resetOptions ?? {};
 
   const {
     data: {
@@ -93,7 +97,11 @@ export function CertificateResetSection({ courseId, disabled }: CertificateReset
   };
 
   useEffect(() => {
-    setSelectedGroupIds((ids) => ids.filter((id) => enabledGroupIds.has(id)));
+    setSelectedGroupIds((ids) => {
+      const enabledIds = ids.filter((id) => enabledGroupIds.has(id));
+
+      return enabledIds.length === ids.length ? ids : enabledIds;
+    });
   }, [enabledGroupIds]);
 
   useEffect(() => {

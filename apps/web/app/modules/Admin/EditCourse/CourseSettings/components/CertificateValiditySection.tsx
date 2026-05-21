@@ -1,16 +1,6 @@
-import { Save } from "lucide-react";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "~/components/ui/dialog";
 import { Switch } from "~/components/ui/switch";
 
 import { CertificateValidityInput } from "./CertificateValidityInput";
@@ -55,106 +45,61 @@ export function CertificateValiditySection({
   onSave,
 }: CertificateValiditySectionProps) {
   const { t } = useTranslation();
-  const [isEnableConfirmationOpen, setIsEnableConfirmationOpen] = useState(false);
 
-  const handleValidityEnabledChange = (value: boolean) => {
-    if (!value) {
-      onValidityEnabledChange(false);
-      return;
-    }
-
-    if (isValidityEnabled) return;
-
-    setIsEnableConfirmationOpen(true);
-  };
-
-  const handleEnableValidityConfirm = () => {
-    onValidityEnabledChange(true);
-    setIsEnableConfirmationOpen(false);
-  };
+  const isSaveButtonDisabled =
+    disabled || !hasValidityChanges || isCheckingValidityImpact || isUpdatingCourseSettings;
 
   return (
-    <>
-      <div
-        className={`flex flex-col gap-4 transition-opacity ${
-          disabled ? "opacity-50" : "opacity-100"
-        }`}
-      >
-        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-          <div className="flex min-w-0 items-start gap-3">
-            <Switch
-              checked={isValidityEnabled}
-              onCheckedChange={handleValidityEnabledChange}
-              disabled={disabled}
-              aria-label={t("adminCourseView.settings.other.certificateValidity")}
-              className="mt-0.5"
-            />
-            <div className="space-y-1">
-              <p className="text-sm font-semibold text-neutral-950">
-                {t("adminCourseView.settings.other.certificateValidity")}
-              </p>
-              <p className="text-sm text-neutral-700">
-                {t("adminCourseView.settings.other.certificateValidityDescription")}
-              </p>
-            </div>
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={
-              disabled ||
-              !hasValidityChanges ||
-              isCheckingValidityImpact ||
-              isUpdatingCourseSettings
-            }
-            onClick={onSave}
-          >
-            <Save className="mr-2 size-4" />
-            {t("adminCourseView.settings.button.saveValidity")}
-          </Button>
-        </div>
-
-        {isValidityEnabled && (
-          <CertificateValidityInput
+    <div
+      className={`flex flex-col gap-4 transition-opacity ${
+        disabled ? "opacity-50" : "opacity-100"
+      }`}
+    >
+      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+        <div className="flex min-w-0 items-start gap-3">
+          <Switch
+            checked={isValidityEnabled}
+            onCheckedChange={onValidityEnabledChange}
             disabled={disabled}
-            validityType={validityType}
-            validityValue={validityValue}
-            validityUnit={validityUnit}
-            validityDate={validityDate}
-            validityDateError={validityDateError}
-            onValidityTypeChange={onValidityTypeChange}
-            onValidityValueChange={onValidityValueChange}
-            onValidityUnitChange={onValidityUnitChange}
-            onValidityDateChange={onValidityDateChange}
+            aria-label={t("adminCourseView.settings.other.certificateValidity")}
+            className="mt-0.5"
           />
-        )}
+          <div className="space-y-1">
+            <p className="text-sm font-semibold text-neutral-950">
+              {t("adminCourseView.settings.other.certificateValidity")}
+            </p>
+            <p className="text-sm text-neutral-700">
+              {t("adminCourseView.settings.other.certificateValidityDescription")}
+            </p>
+          </div>
+        </div>
       </div>
 
-      <Dialog open={isEnableConfirmationOpen} onOpenChange={setIsEnableConfirmationOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {t("adminCourseView.settings.other.enableCertificateValidityConfirmationTitle")}
-            </DialogTitle>
-            <DialogDescription>
-              {t("adminCourseView.settings.other.enableCertificateValidityConfirmationDescription")}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsEnableConfirmationOpen(false)}
-            >
-              {t("common.button.cancel")}
-            </Button>
-            <Button type="button" onClick={handleEnableValidityConfirm}>
-              {t("adminCourseView.settings.other.enableCertificateValidityConfirmationConfirm")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
+      {isValidityEnabled && (
+        <CertificateValidityInput
+          disabled={disabled}
+          validityType={validityType}
+          validityValue={validityValue}
+          validityUnit={validityUnit}
+          validityDate={validityDate}
+          validityDateError={validityDateError}
+          onValidityTypeChange={onValidityTypeChange}
+          onValidityValueChange={onValidityValueChange}
+          onValidityUnitChange={onValidityUnitChange}
+          onValidityDateChange={onValidityDateChange}
+        />
+      )}
+      <div className="flex w-full items-center justify-end">
+        <Button
+          type="button"
+          variant="default"
+          disabled={isSaveButtonDisabled}
+          className="w-fit"
+          onClick={onSave}
+        >
+          {t("adminCourseView.settings.button.saveValidity")}
+        </Button>
+      </div>
+    </div>
   );
 }

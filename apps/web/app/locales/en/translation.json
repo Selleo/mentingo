@@ -1415,8 +1415,8 @@
         "doesNotIncludeCertificate": "Does not include certificate",
         "saveValidity": "Save validity",
         "resetCertificates": "Reset certificates",
-        "futureOnly": "Future only",
-        "applyToExisting": "Apply to existing"
+        "futureOnly": "Apply to new only",
+        "applyToExisting": "Apply to all (including past)"
       },
       "selectButton": {
         "uploadFile": "Upload file",
@@ -1459,8 +1459,12 @@
         "certificateValidity": "Certificate validity",
         "certificateValidityDescription": "Set when issued certificates expire and trigger course progress reset.",
         "enableCertificateValidityConfirmationTitle": "Enable certificate validity?",
-        "enableCertificateValidityConfirmationDescription": "This setting affects course statistics. When a certificate reaches the end of its validity, affected users will lose their course progress.",
+        "enableCertificateValidityConfirmationDescription": "This setting affects course statistics for this course only. When a certificate reaches the end of its validity, affected users will lose their progress in this course.",
         "enableCertificateValidityConfirmationConfirm": "Enable validity",
+        "confirmValidityChangesTitle": "Confirm certificate validity changes",
+        "noActiveCertificatesValidityDescription": "There are no active certificates to update right now. Future certificates will use this validity setting.",
+        "activeCertificatesStat": "Active certificates",
+        "immediatelyExpiringStat": "Expiring immediately",
         "validityPeriod": "Period",
         "validityFixedDate": "Fixed date",
         "days": "Days",
@@ -1470,7 +1474,7 @@
         "applyValidityDescription": "{{activeCount}} active certificates exist. {{expiringCount}} would expire immediately if this setting is applied to existing certificates.",
         "resetCertificates": "Manual certificate reset",
         "resetCertificatesDescription": "Archive selected certificates and reset course progress.",
-        "resetCertificatesDialogDescription": "This archives active certificates, resets course progress, and can notify affected users.",
+        "resetCertificatesDialogDescription": "This archives active certificates, resets course progress, and can notify affected users. This action affects this course only.",
         "sendResetEmail": "Send reset email to affected users",
         "activeCertificateCount": "{{count}} active",
         "noActiveCertificate": "No active certificate",
