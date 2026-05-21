@@ -9,8 +9,10 @@ import { CATEGORY_PAGE_HANDLES } from "../../../../e2e/data/categories/handles";
 
 import type { GetCategoryByIdResponse, UpdateCategoryBody } from "~/api/generated-api";
 
+export type CategoryDetailsField = "title" | "archived";
+
 export const CategoryDetails = memo<{
-  name: keyof UpdateCategoryBody;
+  name: CategoryDetailsField;
   control: Control<UpdateCategoryBody>;
   category: GetCategoryByIdResponse["data"];
 }>(({ name, control, category }) => {

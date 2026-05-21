@@ -4,6 +4,7 @@ import type {
   news,
   articles,
   articleSections,
+  categories,
   formFields,
   groups,
   learningPaths,
@@ -33,6 +34,7 @@ export type BaseTable =
   | typeof courses
   | typeof questionsAndAnswers
   | typeof articles
+  | typeof categories
   | typeof news
   | typeof articleSections
   | typeof formFields

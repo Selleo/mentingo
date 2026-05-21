@@ -24,6 +24,8 @@ export const CATEGORIES_PAGE_HANDLES = {
 export const CREATE_CATEGORY_PAGE_HANDLES = {
   PAGE: "create-category-page",
   TITLE_INPUT: "create-category-title-input",
+  LANGUAGE_SELECT: "create-category-language-select",
+  languageOption: (language: string) => `create-category-language-option-${language}`,
   SUBMIT_BUTTON: "create-category-submit-button",
 } as const;
 
@@ -33,4 +35,13 @@ export const CATEGORY_PAGE_HANDLES = {
   TITLE: "category-title-input",
   ARCHIVED: "category-archived-checkbox",
   SAVE: "category-save-button",
+  LANGUAGE_SELECT: "category-language-select",
+  SET_BASE_LANGUAGE_BUTTON: "category-language-set-base-button",
+  SET_BASE_LANGUAGE_DIALOG: "category-language-set-base-dialog",
+  SET_BASE_LANGUAGE_CONFIRM_BUTTON: "category-language-set-base-confirm-button",
+  DELETE_LANGUAGE_BUTTON: "category-language-delete-button",
+  CREATE_LANGUAGE_DIALOG: "category-language-create-dialog",
+  CREATE_LANGUAGE_CONFIRM_BUTTON: "category-language-create-confirm-button",
+  DELETE_LANGUAGE_DIALOG: "category-language-delete-dialog",
+  DELETE_LANGUAGE_CONFIRM_BUTTON: "category-language-delete-confirm-button",
 } as const;

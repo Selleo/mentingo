@@ -1,5 +1,7 @@
 import { randomUUID } from "node:crypto";
 
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
+
 import { TEST_DATA } from "../data/test-data/entity-name.data";
 
 import type { FixtureApiClient } from "../utils/api-client";
@@ -12,6 +14,9 @@ import type {
 export type CategoryFactoryRecord = GetCategoryByIdResponse["data"];
 export type CategoryFactoryCreateResult = CategoryFactoryRecord;
 export type CategoryFactoryUpdateInput = Omit<UpdateCategoryBody, "id">;
+type CategoryFactoryCreateInput =
+  | string
+  | (Omit<CreateCategoryBody, "language"> & { language?: CreateCategoryBody["language"] });
 
 const createCategoryTitle = () => {
   return `${TEST_DATA.category.titlePrefix} ${randomUUID().slice(0, 8)}`;
@@ -20,9 +25,13 @@ const createCategoryTitle = () => {
 export class CategoryFactory {
   constructor(private readonly apiClient: FixtureApiClient) {}
 
-  async create(input?: string | CreateCategoryBody): Promise<CategoryFactoryCreateResult> {
+  async create(input?: CategoryFactoryCreateInput): Promise<CategoryFactoryCreateResult> {
     const response = await this.apiClient.api.categoryControllerCreateCategory({
       title: typeof input === "string" ? input : (input?.title ?? createCategoryTitle()),
+      language:
+        typeof input === "string"
+          ? SUPPORTED_LANGUAGES.EN
+          : (input?.language ?? SUPPORTED_LANGUAGES.EN),
     });
 
     return this.getById(response.data.data.id);
@@ -30,7 +39,7 @@ export class CategoryFactory {
 
   async createMany(
     count: number,
-    build?: (index: number) => string | CreateCategoryBody | undefined,
+    build?: (index: number) => CategoryFactoryCreateInput | undefined,
   ): Promise<CategoryFactoryCreateResult[]> {
     return Promise.all(Array.from({ length: count }, (_, index) => this.create(build?.(index))));
   }

@@ -4,10 +4,12 @@ import {
   SYSTEM_ROLE_PERMISSIONS,
   SYSTEM_ROLE_SLUGS,
   SYSTEM_RULE_SET_SLUGS,
+  SUPPORTED_LANGUAGES,
   type SystemRoleSlug,
 } from "@repo/shared";
 import { and, eq, sql } from "drizzle-orm/sql";
 
+import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { EnvRepository } from "src/env/repositories/env.repository";
 import { EnvService } from "src/env/services/env.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
@@ -91,24 +93,27 @@ export async function createNiceCourses(
     const creatorIndex = i % creatorUserIds.length;
     const creatorUserId = creatorUserIds[creatorIndex];
 
-    await db
-      .insert(categories)
-      .values({
-        id: crypto.randomUUID(),
-        title: courseData.category,
-        archived: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        tenantId,
-      })
-      .onConflictDoNothing({
-        target: [categories.tenantId, categories.title],
-      });
-
-    const [category] = await db
+    const [existingCategory] = await db
       .select()
       .from(categories)
-      .where(and(eq(categories.title, courseData.category), eq(categories.tenantId, tenantId)));
+      .where(
+        and(
+          sql`${categories.title}->>${categories.baseLanguage} = ${courseData.category}`,
+          eq(categories.tenantId, tenantId),
+        ),
+      );
+
+    const [category] = existingCategory
+      ? [existingCategory]
+      : await db
+          .insert(categories)
+          .values({
+            title: buildJsonbField(SUPPORTED_LANGUAGES.EN, courseData.category),
+            baseLanguage: SUPPORTED_LANGUAGES.EN,
+            availableLocales: [SUPPORTED_LANGUAGES.EN],
+            tenantId,
+          })
+          .returning();
 
     const createdAt = faker.date.past({ years: 1, refDate: new Date() }).toISOString();
 

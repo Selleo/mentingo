@@ -869,7 +869,9 @@
     },
     "toast": {
       "deleteCategorySuccessfully": "Kategorija sėkmingai ištrinta",
-      "deleteCategoryFailed": "Nepavyko ištrinti kategorijos"
+      "deleteCategoryFailed": "Nepavyko ištrinti kategorijos",
+      "deleteCategoryAssignedToCourses": "Kategorijos ištrinti negalima. Ji priskirta kursams ({{courseCount}}): {{courseTitles}}",
+      "noCategoriesFoundToDelete": "Nerasta kategorijų, kurias būtų galima ištrinti"
     },
     "breadcrumbs": {
       "categories": "Kategorijos",
@@ -892,9 +894,29 @@
     "button": {
       "createCategory": "Sukurti kategoriją"
     },
+    "language": {
+      "label": "Kalba",
+      "baseLanguage": "Numatytoji",
+      "notAddedLanguages": "Kalbos, kurias galima pridėti",
+      "setBaseLanguage": "Nustatyti kaip numatytąją",
+      "setBaseTitle": "Pakeisti numatytąją kalbą",
+      "setBaseDescription": "Naudoti {{language}} kaip numatytąją šios kategorijos kalbą?",
+      "createTitle": "Sukurti vertimą",
+      "createDescription": "Sukurti šios kategorijos vertimą {{language}} kalba?",
+      "deleteTitle": "Ištrinti vertimą",
+      "deleteDescription": "Ištrinti {{language}} vertimą? Jo turinys bus pašalintas."
+    },
     "toast": {
       "categoryCreatedSuccessfully": "Kategorija sėkmingai sukurta",
-      "categoryUpdatedSuccessfully": "Kategorija sėkmingai atnaujinta"
+      "categoryUpdatedSuccessfully": "Kategorija sėkmingai atnaujinta",
+      "baseLanguageUpdatedSuccessfully": "Numatytoji kalba sėkmingai atnaujinta",
+      "baseLanguageUpdateFailed": "Nepavyko atnaujinti numatytosios kalbos",
+      "languageNotSupported": "Ši kategorija nepalaiko šios kalbos.",
+      "alreadyExists": "Kategorija jau egzistuoja.",
+      "categoryNotCreated": "Kategorijos sukurti nepavyko.",
+      "languageAlreadyExists": "Ši kategorijos kalba jau egzistuoja.",
+      "invalidLanguageToDelete": "Šios kategorijos kalbos ištrinti negalima.",
+      "baseLanguageTitleRequired": "Pasirinktai numatytajai kalbai reikia pavadinimo."
     },
     "error": {
       "categoryNotFound": "Kategorija nerasta",

@@ -870,7 +870,9 @@
     },
     "toast": {
       "deleteCategorySuccessfully": "Category deleted successfully",
-      "deleteCategoryFailed": "Failed to delete category"
+      "deleteCategoryFailed": "Failed to delete category",
+      "deleteCategoryAssignedToCourses": "Cannot delete category. It is assigned to {{courseCount}} course(s): {{courseTitles}}",
+      "noCategoriesFoundToDelete": "No categories found to delete"
     },
     "breadcrumbs": {
       "categories": "Categories",
@@ -893,9 +895,29 @@
     "button": {
       "createCategory": "Create category"
     },
+    "language": {
+      "label": "Language",
+      "baseLanguage": "Default",
+      "notAddedLanguages": "Languages to add",
+      "setBaseLanguage": "Set as default",
+      "setBaseTitle": "Change default language",
+      "setBaseDescription": "Use {{language}} as the default language for this category?",
+      "createTitle": "Create translation",
+      "createDescription": "Create a translation for this category in {{language}}?",
+      "deleteTitle": "Delete translation",
+      "deleteDescription": "Delete the {{language}} translation? Its content will be removed."
+    },
     "toast": {
       "categoryCreatedSuccessfully": "Category created successfully",
-      "categoryUpdatedSuccessfully": "Category updated successfully"
+      "categoryUpdatedSuccessfully": "Category updated successfully",
+      "baseLanguageUpdatedSuccessfully": "Default language updated successfully",
+      "baseLanguageUpdateFailed": "Failed to update default language",
+      "languageNotSupported": "This category does not support this language.",
+      "alreadyExists": "Category already exists.",
+      "categoryNotCreated": "Category could not be created.",
+      "languageAlreadyExists": "This category language already exists.",
+      "invalidLanguageToDelete": "This category language cannot be deleted.",
+      "baseLanguageTitleRequired": "The selected default language needs a title."
     },
     "error": {
       "categoryNotFound": "Category not found",

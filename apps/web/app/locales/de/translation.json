@@ -869,7 +869,9 @@
     },
     "toast": {
       "deleteCategorySuccessfully": "Kategorie erfolgreich gelöscht",
-      "deleteCategoryFailed": "Kategorie konnte nicht gelöscht werden"
+      "deleteCategoryFailed": "Kategorie konnte nicht gelöscht werden",
+      "deleteCategoryAssignedToCourses": "Kategorie kann nicht gelöscht werden. Sie ist {{courseCount}} Kurs(en) zugewiesen: {{courseTitles}}",
+      "noCategoriesFoundToDelete": "Keine Kategorien zum Löschen gefunden"
     },
     "breadcrumbs": {
       "categories": "Kategorien",
@@ -892,9 +894,29 @@
     "button": {
       "createCategory": "Kategorie erstellen"
     },
+    "language": {
+      "label": "Sprache",
+      "baseLanguage": "Standard",
+      "notAddedLanguages": "Sprachen zum Hinzufügen",
+      "setBaseLanguage": "Als Standard festlegen",
+      "setBaseTitle": "Standardsprache ändern",
+      "setBaseDescription": "{{language}} als Standardsprache für diese Kategorie verwenden?",
+      "createTitle": "Übersetzung erstellen",
+      "createDescription": "Eine Übersetzung für diese Kategorie auf {{language}} erstellen?",
+      "deleteTitle": "Übersetzung löschen",
+      "deleteDescription": "Die Übersetzung auf {{language}} löschen? Ihr Inhalt wird entfernt."
+    },
     "toast": {
       "categoryCreatedSuccessfully": "Kategorie erfolgreich erstellt",
-      "categoryUpdatedSuccessfully": "Kategorie erfolgreich aktualisiert"
+      "categoryUpdatedSuccessfully": "Kategorie erfolgreich aktualisiert",
+      "baseLanguageUpdatedSuccessfully": "Standardsprache erfolgreich aktualisiert",
+      "baseLanguageUpdateFailed": "Standardsprache konnte nicht aktualisiert werden",
+      "languageNotSupported": "Diese Kategorie unterstützt diese Sprache nicht.",
+      "alreadyExists": "Kategorie existiert bereits.",
+      "categoryNotCreated": "Kategorie konnte nicht erstellt werden.",
+      "languageAlreadyExists": "Diese Kategoriesprache existiert bereits.",
+      "invalidLanguageToDelete": "Diese Kategoriesprache kann nicht gelöscht werden.",
+      "baseLanguageTitleRequired": "Die ausgewählte Standardsprache benötigt einen Titel."
     },
     "error": {
       "categoryNotFound": "Kategorie nicht gefunden",

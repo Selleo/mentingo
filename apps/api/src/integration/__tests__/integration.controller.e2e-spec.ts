@@ -429,7 +429,9 @@ describe("IntegrationController (e2e)", () => {
 
       await db.insert(categories).values({
         id: categoryId,
-        title: categoryTitle,
+        title: buildJsonbField(SUPPORTED_LANGUAGES.EN, categoryTitle),
+        baseLanguage: SUPPORTED_LANGUAGES.EN,
+        availableLocales: [SUPPORTED_LANGUAGES.EN],
         tenantId: admin.tenantId,
       });
 
@@ -843,7 +845,9 @@ describe("IntegrationController (e2e)", () => {
 
       await db.insert(categories).values({
         id: categoryId,
-        title: categoryTitle,
+        title: buildJsonbField(SUPPORTED_LANGUAGES.EN, categoryTitle),
+        baseLanguage: SUPPORTED_LANGUAGES.EN,
+        availableLocales: [SUPPORTED_LANGUAGES.EN],
         tenantId: admin.tenantId,
       });
 

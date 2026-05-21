@@ -1,6 +1,8 @@
 import { faker } from "@faker-js/faker";
-import { COURSE_TYPE, SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import { COURSE_TYPE, SUPPORTED_LANGUAGES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { Factory } from "fishery";
+
+import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 
 import {
   quizAttempts,
@@ -55,7 +57,9 @@ const ensureCategory = async (db: DatabasePg, tenantId: UUIDType): Promise<UUIDT
     .insert(categories)
     .values({
       id: faker.string.uuid(),
-      title: faker.commerce.department(),
+      title: buildJsonbField(SUPPORTED_LANGUAGES.EN, faker.commerce.department()),
+      baseLanguage: SUPPORTED_LANGUAGES.EN,
+      availableLocales: [SUPPORTED_LANGUAGES.EN],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       tenantId,
@@ -79,8 +83,8 @@ const ensureCourse = async (
     .insert(courses)
     .values({
       id: faker.string.uuid(),
-      title: faker.commerce.productName(),
-      description: faker.commerce.productDescription(),
+      title: buildJsonbField(SUPPORTED_LANGUAGES.EN, faker.commerce.productName()),
+      description: buildJsonbField(SUPPORTED_LANGUAGES.EN, faker.commerce.productDescription()),
       thumbnailS3Key: faker.system.directoryPath(),
       status: "published",
       priceInCents: faker.number.int({ min: 1000, max: 100000 }),
@@ -120,7 +124,7 @@ const ensureChapter = async (
     .insert(chapters)
     .values({
       id: faker.string.uuid(),
-      title: faker.lorem.sentence(),
+      title: buildJsonbField(SUPPORTED_LANGUAGES.EN, faker.lorem.sentence()),
       courseId: actualCourseId,
       authorId,
       isFreemium: faker.datatype.boolean(),
@@ -161,8 +165,8 @@ const ensureLesson = async (
       id: faker.string.uuid(),
       chapterId: actualChapterId,
       type: lessonType,
-      title: faker.lorem.sentence(),
-      description: faker.lorem.paragraph(),
+      title: buildJsonbField(SUPPORTED_LANGUAGES.EN, faker.lorem.sentence()),
+      description: buildJsonbField(SUPPORTED_LANGUAGES.EN, faker.lorem.paragraph()),
       thresholdScore: lessonType === "quiz" ? faker.number.int({ min: 0, max: 100 }) : null,
       displayOrder: faker.number.int({ min: 1, max: 10 }),
       fileS3Key: faker.system.directoryPath(),

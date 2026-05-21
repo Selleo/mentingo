@@ -1,6 +1,8 @@
 import { faker } from "@faker-js/faker";
-import { COURSE_TYPE } from "@repo/shared";
+import { COURSE_TYPE, SUPPORTED_LANGUAGES } from "@repo/shared";
 import { Factory } from "fishery";
+
+import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 
 import {
   lessonLearningTime,
@@ -39,7 +41,12 @@ const ensureCategory = async (db: DatabasePg): Promise<UUIDType> => {
     .insert(categories)
     .values({
       id: faker.string.uuid(),
-      title: `${faker.commerce.department()}-${faker.string.nanoid(8)}`,
+      title: buildJsonbField(
+        SUPPORTED_LANGUAGES.EN,
+        `${faker.commerce.department()}-${faker.string.nanoid(8)}`,
+      ),
+      baseLanguage: SUPPORTED_LANGUAGES.EN,
+      availableLocales: [SUPPORTED_LANGUAGES.EN],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     })
@@ -58,8 +65,8 @@ const ensureCourse = async (db: DatabasePg, courseId?: UUIDType | null): Promise
     .insert(courses)
     .values({
       id: faker.string.uuid(),
-      title: faker.commerce.productName(),
-      description: faker.commerce.productDescription(),
+      title: buildJsonbField(SUPPORTED_LANGUAGES.EN, faker.commerce.productName()),
+      description: buildJsonbField(SUPPORTED_LANGUAGES.EN, faker.commerce.productDescription()),
       thumbnailS3Key: faker.system.directoryPath(),
       status: "published",
       priceInCents: faker.number.int({ min: 1000, max: 100000 }),
@@ -83,7 +90,7 @@ const ensureChapter = async (db: DatabasePg, courseId: UUIDType): Promise<UUIDTy
     .insert(chapters)
     .values({
       id: faker.string.uuid(),
-      title: faker.lorem.sentence(),
+      title: buildJsonbField(SUPPORTED_LANGUAGES.EN, faker.lorem.sentence()),
       courseId,
       authorId,
       isFreemium: false,
@@ -116,8 +123,8 @@ const ensureLesson = async (
       id: faker.string.uuid(),
       chapterId,
       type: "text",
-      title: faker.lorem.sentence(),
-      description: faker.lorem.paragraph(),
+      title: buildJsonbField(SUPPORTED_LANGUAGES.EN, faker.lorem.sentence()),
+      description: buildJsonbField(SUPPORTED_LANGUAGES.EN, faker.lorem.paragraph()),
       displayOrder: 1,
       fileS3Key: faker.system.directoryPath(),
       fileType: "html",

@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from "@nestjs/common";
-import { PERMISSIONS } from "@repo/shared";
+import { PERMISSIONS, type SupportedLanguages } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
@@ -21,10 +21,16 @@ import {
   type AllCategoriesResponse,
   type CategorySchema,
   categorySchema,
+  categoryLanguageSchema,
 } from "./schemas/category.schema";
 import { type SortCategoryFieldsOptions, sortCategoryFieldsOptions } from "./schemas/categoryQuery";
 import { categoryCreateSchema, type CategoryInsert } from "./schemas/createCategorySchema";
-import { type CategoryUpdateBody, categoryUpdateSchema } from "./schemas/updateCategorySchema";
+import {
+  type CategoryBaseLanguageUpdateBody,
+  categoryBaseLanguageUpdateSchema,
+  type CategoryUpdateBody,
+  categoryUpdateSchema,
+} from "./schemas/updateCategorySchema";
 
 @Controller("category")
 export class CategoryController {
@@ -40,6 +46,7 @@ export class CategoryController {
       { type: "query", name: "page", schema: Type.Number({ minimum: 1 }) },
       { type: "query", name: "perPage", schema: Type.Number() },
       { type: "query", name: "sort", schema: sortCategoryFieldsOptions },
+      { type: "query", name: "language", schema: Type.Optional(categoryLanguageSchema) },
     ],
   })
   async getAllCategories(
@@ -48,10 +55,11 @@ export class CategoryController {
     @Query("page") page: number,
     @Query("perPage") perPage: number,
     @Query("sort") sort: SortCategoryFieldsOptions,
+    @Query("language") language: SupportedLanguages | undefined,
     @CurrentUser() currentUser?: CurrentUserType,
   ): Promise<PaginatedResponse<AllCategoriesResponse>> {
     const filters = { archived, title };
-    const query = { filters, page, perPage, sort };
+    const query = { filters, language, page, perPage, sort };
 
     const data = await this.categoryService.getCategories(query, currentUser?.permissions);
 
@@ -62,10 +70,16 @@ export class CategoryController {
   @RequirePermission(PERMISSIONS.CATEGORY_MANAGE)
   @Validate({
     response: baseResponse(categorySchema),
-    request: [{ type: "param", name: "id", schema: UUIDSchema }],
+    request: [
+      { type: "param", name: "id", schema: UUIDSchema },
+      { type: "query", name: "language", schema: Type.Optional(categoryLanguageSchema) },
+    ],
   })
-  async getCategoryById(@Param("id") id: UUIDType): Promise<BaseResponse<CategorySchema>> {
-    const category = await this.categoryService.getCategoryById(id);
+  async getCategoryById(
+    @Param("id") id: UUIDType,
+    @Query("language") language: SupportedLanguages | undefined,
+  ): Promise<BaseResponse<CategorySchema>> {
+    const category = await this.categoryService.getCategoryById(id, language);
 
     return new BaseResponse(category);
   }
@@ -105,6 +119,67 @@ export class CategoryController {
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<CategorySchema>> {
     const category = await this.categoryService.updateCategory(id, updateCategoryBody, currentUser);
+
+    return new BaseResponse(category);
+  }
+
+  @Post(":id/language")
+  @RequirePermission(PERMISSIONS.CATEGORY_MANAGE)
+  @Validate({
+    response: baseResponse(categorySchema),
+    request: [
+      { type: "param", name: "id", schema: UUIDSchema },
+      { type: "query", name: "language", schema: categoryLanguageSchema },
+    ],
+  })
+  async createLanguage(
+    @Param("id") id: UUIDType,
+    @Query("language") language: SupportedLanguages,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<CategorySchema>> {
+    const category = await this.categoryService.createLanguage(id, language, currentUser);
+
+    return new BaseResponse(category);
+  }
+
+  @Delete(":id/language")
+  @RequirePermission(PERMISSIONS.CATEGORY_MANAGE)
+  @Validate({
+    response: baseResponse(categorySchema),
+    request: [
+      { type: "param", name: "id", schema: UUIDSchema },
+      { type: "query", name: "language", schema: categoryLanguageSchema },
+    ],
+  })
+  async deleteLanguage(
+    @Param("id") id: UUIDType,
+    @Query("language") language: SupportedLanguages,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<CategorySchema>> {
+    const category = await this.categoryService.deleteLanguage(id, language, currentUser);
+
+    return new BaseResponse(category);
+  }
+
+  @Patch(":id/base-language")
+  @RequirePermission(PERMISSIONS.CATEGORY_MANAGE)
+  @Validate({
+    response: baseResponse(categorySchema),
+    request: [
+      { type: "param", name: "id", schema: UUIDSchema },
+      { type: "body", schema: categoryBaseLanguageUpdateSchema },
+    ],
+  })
+  async updateBaseLanguage(
+    @Param("id") id: UUIDType,
+    @Body() body: CategoryBaseLanguageUpdateBody,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<CategorySchema>> {
+    const category = await this.categoryService.updateBaseLanguage(
+      id,
+      body.baseLanguage,
+      currentUser,
+    );
 
     return new BaseResponse(category);
   }
