@@ -3457,6 +3457,8 @@ export interface GetAllCategoriesResponse {
     /** @format uuid */
     id: string;
     title: string;
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
     archived: boolean | null;
     createdAt: string | null;
   }[];
@@ -3473,6 +3475,8 @@ export interface GetCategoryByIdResponse {
     /** @format uuid */
     id: string;
     title: string;
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
     archived: boolean | null;
     createdAt: string | null;
   };
@@ -3480,6 +3484,7 @@ export interface GetCategoryByIdResponse {
 
 export interface CreateCategoryBody {
   title: string;
+  language: "en" | "pl" | "de" | "lt" | "cs";
 }
 
 export interface CreateCategoryResponse {
@@ -3495,6 +3500,7 @@ export interface UpdateCategoryBody {
   id?: string;
   title?: string;
   archived?: boolean;
+  language?: "en" | "pl" | "de" | "lt" | "cs";
 }
 
 export interface UpdateCategoryResponse {
@@ -3502,6 +3508,61 @@ export interface UpdateCategoryResponse {
     /** @format uuid */
     id: string;
     title: string;
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
+    archived: boolean | null;
+    createdAt: string | null;
+  };
+}
+
+export interface CreateLanguageResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    title: string;
+    description: string;
+    thumbnailReference: string | null;
+    status: "draft" | "published" | "private";
+    includesCertificate: boolean;
+    settings: {
+      /** @default null */
+      certificateSignature: string | null;
+      /** @default null */
+      certificateFontColor: string | null;
+    };
+    sequenceEnabled: boolean;
+    /** @format uuid */
+    authorId: string;
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface DeleteLanguageResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    title: string;
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
+    archived: boolean | null;
+    createdAt: string | null;
+  };
+}
+
+export interface UpdateBaseLanguageBody {
+  baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
+}
+
+export interface UpdateBaseLanguageResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    title: string;
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
     archived: boolean | null;
     createdAt: string | null;
   };
@@ -3946,31 +4007,6 @@ export interface UpdateLearningPathBody {
 }
 
 export interface UpdateLearningPathResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    title: string;
-    description: string;
-    thumbnailReference: string | null;
-    status: "draft" | "published" | "private";
-    includesCertificate: boolean;
-    settings: {
-      /** @default null */
-      certificateSignature: string | null;
-      /** @default null */
-      certificateFontColor: string | null;
-    };
-    sequenceEnabled: boolean;
-    /** @format uuid */
-    authorId: string;
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
-    createdAt: string;
-    updatedAt: string;
-  };
-}
-
-export interface CreateLanguageResponse {
   data: {
     /** @format uuid */
     id: string;
@@ -9338,6 +9374,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         page?: number;
         perPage?: number;
         sort?: "title" | "creationDate" | "-title" | "-creationDate";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -9371,10 +9408,17 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name CategoryControllerGetCategoryById
      * @request GET:/api/category/{id}
      */
-    categoryControllerGetCategoryById: (id: string, params: RequestParams = {}) =>
+    categoryControllerGetCategoryById: (
+      id: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
+      params: RequestParams = {},
+    ) =>
       this.request<GetCategoryByIdResponse, any>({
         path: `/api/category/${id}`,
         method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),
@@ -9392,6 +9436,68 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     ) =>
       this.request<UpdateCategoryResponse, any>({
         path: `/api/category/${id}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CategoryControllerCreateLanguage
+     * @request POST:/api/category/{id}/language
+     */
+    categoryControllerCreateLanguage: (
+      id: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateLanguageResponse, any>({
+        path: `/api/category/${id}/language`,
+        method: "POST",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CategoryControllerDeleteLanguage
+     * @request DELETE:/api/category/{id}/language
+     */
+    categoryControllerDeleteLanguage: (
+      id: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<DeleteLanguageResponse, any>({
+        path: `/api/category/${id}/language`,
+        method: "DELETE",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CategoryControllerUpdateBaseLanguage
+     * @request PATCH:/api/category/{id}/base-language
+     */
+    categoryControllerUpdateBaseLanguage: (
+      id: string,
+      data: UpdateBaseLanguageBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateBaseLanguageResponse, any>({
+        path: `/api/category/${id}/base-language`,
         method: "PATCH",
         body: data,
         type: ContentType.Json,

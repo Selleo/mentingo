@@ -33,7 +33,6 @@ import {
   inArray,
   isNotNull,
   isNull,
-  like,
   ne,
   not,
   or,
@@ -208,7 +207,7 @@ export class CourseService {
 
     const { sortOrder, sortedField } = getSortOptions(sort);
 
-    const conditions = this.getFiltersConditions(filters, false);
+    const conditions = this.getFiltersConditions(filters, false, language);
     const orderConditions = this.getOrderConditions(filters);
 
     if (currentUserId && hasPermission(currentUserPermissions, PERMISSIONS.COURSE_UPDATE_OWN)) {
@@ -223,7 +222,11 @@ export class CourseService {
         thumbnailUrl: courses.thumbnailS3Key,
         author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
         authorAvatarUrl: sql<string>`${users.avatarReference}`,
-        category: sql<string>`${categories.title}`,
+        category: this.localizationService.getLocalizedSqlField(
+          categories.title,
+          language,
+          categories,
+        ),
         enrolledParticipantCount: sql<number>`COALESCE(${coursesSummaryStats.freePurchasedCount} + ${coursesSummaryStats.paidPurchasedCount}, 0)`,
         courseChapterCount: courses.chapterCount,
         priceInCents: courses.priceInCents,
@@ -252,6 +255,8 @@ export class CourseService {
         users.lastName,
         users.avatarReference,
         categories.title,
+        categories.availableLocales,
+        categories.baseLanguage,
         courses.priceInCents,
         courses.currency,
         courses.status,
@@ -266,7 +271,7 @@ export class CourseService {
       )
       .orderBy(
         ...orderConditions,
-        sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)),
+        sortOrder(this.getColumnToSortBy(sortedField as CourseSortField, language)),
       );
 
     const dynamicQuery = queryDB.$dynamic();
@@ -329,7 +334,7 @@ export class CourseService {
         or(eq(courses.status, "published"), eq(courses.status, "private")),
         isNull(users.deletedAt),
       ];
-      conditions.push(...this.getFiltersConditions(filters, false));
+      conditions.push(...this.getFiltersConditions(filters, false, language));
 
       const orderConditions = this.getOrderConditions(filters);
 
@@ -360,6 +365,8 @@ export class CourseService {
           users.avatarReference,
           studentCourses.studentId,
           categories.title,
+          categories.availableLocales,
+          categories.baseLanguage,
           coursesSummaryStats.freePurchasedCount,
           coursesSummaryStats.paidPurchasedCount,
           studentCourses.finishedChapterCount,
@@ -369,7 +376,7 @@ export class CourseService {
         )
         .orderBy(
           ...orderConditions,
-          sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)),
+          sortOrder(this.getColumnToSortBy(sortedField as CourseSortField, language)),
         );
 
       const dynamicQuery = queryDB.$dynamic();
@@ -759,7 +766,7 @@ export class CourseService {
       )`;
 
       const conditions = [eq(courses.status, "published")];
-      conditions.push(...(this.getFiltersConditions(filters) as SQL<unknown>[]));
+      conditions.push(...(this.getFiltersConditions(filters, true, language) as SQL<unknown>[]));
 
       const orderConditions = this.getOrderConditions(filters);
 
@@ -777,7 +784,11 @@ export class CourseService {
           author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
           authorEmail: sql<string>`${users.email}`,
           authorAvatarUrl: sql<string>`${users.avatarReference}`,
-          category: sql<string>`${categories.title}`,
+          category: this.localizationService.getLocalizedSqlField(
+            categories.title,
+            language,
+            categories,
+          ),
           enrolled: sql<boolean>`FALSE`,
           enrolledParticipantCount: sql<number>`COALESCE(${coursesSummaryStats.freePurchasedCount} + ${coursesSummaryStats.paidPurchasedCount}, 0)`,
           courseChapterCount: courses.chapterCount,
@@ -831,6 +842,8 @@ export class CourseService {
           users.email,
           users.avatarReference,
           categories.title,
+          categories.availableLocales,
+          categories.baseLanguage,
           coursesSummaryStats.freePurchasedCount,
           coursesSummaryStats.paidPurchasedCount,
           courses.availableLocales,
@@ -842,7 +855,7 @@ export class CourseService {
         )
         .orderBy(
           ...orderConditions,
-          sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)),
+          sortOrder(this.getColumnToSortBy(sortedField as CourseSortField, language)),
         );
 
       const dynamicQuery = queryDB.$dynamic();
@@ -935,7 +948,11 @@ export class CourseService {
           author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
           authorEmail: sql<string>`${users.email}`,
           authorAvatarUrl: sql<string>`${users.avatarReference}`,
-          category: sql<string>`${categories.title}`,
+          category: this.localizationService.getLocalizedSqlField(
+            categories.title,
+            language,
+            categories,
+          ),
           enrolled: sql<boolean>`FALSE`,
           enrolledParticipantCount: sql<number>`COALESCE(${coursesSummaryStats.freePurchasedCount} + ${coursesSummaryStats.paidPurchasedCount}, 0)`,
           courseChapterCount: courses.chapterCount,
@@ -989,6 +1006,8 @@ export class CourseService {
           users.email,
           users.avatarReference,
           categories.title,
+          categories.availableLocales,
+          categories.baseLanguage,
           coursesSummaryStats.freePurchasedCount,
           coursesSummaryStats.paidPurchasedCount,
           courses.availableLocales,
@@ -1059,7 +1078,11 @@ export class CourseService {
         id: courses.id,
         title: this.localizationService.getLocalizedSqlField(courses.title, language),
         thumbnailS3Key: sql<string>`${courses.thumbnailS3Key}`,
-        category: sql<string>`${categories.title}`,
+        category: this.localizationService.getLocalizedSqlField(
+          categories.title,
+          language,
+          categories,
+        ),
         description: this.localizationService.getLocalizedSqlField(courses.description, language),
         courseChapterCount: courses.chapterCount,
         completedChapterCount: sql<number>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN COALESCE(${studentCourses.finishedChapterCount}, 0) ELSE 0 END`,
@@ -1317,7 +1340,11 @@ export class CourseService {
         id: courses.id,
         title: this.localizationService.getFieldByLanguage(courses.title, language),
         thumbnailS3Key: sql<string>`COALESCE(${courses.thumbnailS3Key}, '')`,
-        category: categories.title,
+        category: this.localizationService.getLocalizedSqlField(
+          categories.title,
+          language,
+          categories,
+        ),
         categoryId: categories.id,
         description: this.localizationService.getFieldByLanguage(courses.description, language),
         courseChapterCount: courses.chapterCount,
@@ -1504,7 +1531,11 @@ export class CourseService {
         author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
         authorEmail: sql<string>`${users.email}`,
         authorAvatarUrl: sql<string>`${users.avatarReference}`,
-        category: sql<string>`${categories.title}`,
+        category: this.localizationService.getLocalizedSqlField(
+          categories.title,
+          language,
+          categories,
+        ),
         enrolled: sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN true ELSE false END`,
         enrolledParticipantCount: sql<number>`0`,
         courseChapterCount: courses.chapterCount,
@@ -1551,6 +1582,8 @@ export class CourseService {
         users.avatarReference,
         studentCourses.studentId,
         categories.title,
+        categories.availableLocales,
+        categories.baseLanguage,
         courses.availableLocales,
         courses.baseLanguage,
         studentCourses.status,
@@ -3087,7 +3120,11 @@ export class CourseService {
       author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
       authorEmail: sql<string>`${users.email}`,
       authorAvatarUrl: sql<string>`${users.avatarReference}`,
-      category: sql<string>`${categories.title}`,
+      category: this.localizationService.getLocalizedSqlField(
+        categories.title,
+        language,
+        categories,
+      ),
       enrolled: sql<boolean>`CASE WHEN ${studentCourses.studentId} IS NOT NULL THEN TRUE ELSE FALSE END`,
       enrolledParticipantCount: sql<number>`COALESCE(${coursesSummaryStats.freePurchasedCount} + ${coursesSummaryStats.paidPurchasedCount}, 0)`,
       courseChapterCount: courses.chapterCount,
@@ -3120,7 +3157,11 @@ export class CourseService {
     return orderConditions;
   }
 
-  private getFiltersConditions(filters: CoursesFilterSchema, publishedOnly = true) {
+  private getFiltersConditions(
+    filters: CoursesFilterSchema,
+    publishedOnly = true,
+    language?: SupportedLanguages,
+  ) {
     const conditions = [];
 
     if (filters.title) {
@@ -3149,7 +3190,13 @@ export class CourseService {
     }
 
     if (filters.category) {
-      conditions.push(like(categories.title, `%${filters.category}%`));
+      conditions.push(
+        this.localizationService.getLocalizedFieldSearchCondition(
+          categories.title,
+          `%${filters.category}%`,
+          language,
+        ),
+      );
     }
     if (filters.author) {
       const authorNameConcat = sql`CONCAT(${users.firstName}, ' ' , ${users.lastName})`;
@@ -3173,12 +3220,16 @@ export class CourseService {
     return conditions;
   }
 
-  private getColumnToSortBy(sort: CourseSortField) {
+  private getColumnToSortBy(sort: CourseSortField, language?: SupportedLanguages) {
     switch (sort) {
       case CourseSortFields.author:
         return sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`;
       case CourseSortFields.category:
-        return categories.title;
+        return this.localizationService.getLocalizedSqlField(
+          categories.title,
+          language,
+          categories,
+        );
       case CourseSortFields.creationDate:
         return courses.createdAt;
       case CourseSortFields.chapterCount:

@@ -1,4 +1,4 @@
-import { PERMISSIONS, SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import { PERMISSIONS, SUPPORTED_LANGUAGES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { eq, and, isNull } from "drizzle-orm";
 
 import { AnnouncementsService } from "src/announcements/announcements.service";
@@ -548,7 +548,10 @@ describe("Activity Logs E2E", () => {
 
   describe("Category activity logs", () => {
     const createCategory = async () =>
-      categoryService.createCategory({ title: "Initial Category" }, currentAdminUser);
+      categoryService.createCategory(
+        { title: "Initial Category", language: SUPPORTED_LANGUAGES.EN },
+        currentAdminUser,
+      );
 
     it("should record CREATE activity log when category is created", async () => {
       const category = await createCategory();

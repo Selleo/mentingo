@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { COURSE_ENROLLMENT, SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import { COURSE_ENROLLMENT, SUPPORTED_LANGUAGES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { and, eq, isNull } from "drizzle-orm";
 import request from "supertest";
 
@@ -386,7 +386,9 @@ describe("IntegrationController (e2e)", () => {
 
       await db.insert(categories).values({
         id: categoryId,
-        title: categoryTitle,
+        title: buildJsonbField(SUPPORTED_LANGUAGES.EN, categoryTitle),
+        baseLanguage: SUPPORTED_LANGUAGES.EN,
+        availableLocales: [SUPPORTED_LANGUAGES.EN],
         tenantId: admin.tenantId,
       });
 
@@ -799,7 +801,9 @@ describe("IntegrationController (e2e)", () => {
 
       await db.insert(categories).values({
         id: categoryId,
-        title: categoryTitle,
+        title: buildJsonbField(SUPPORTED_LANGUAGES.EN, categoryTitle),
+        baseLanguage: SUPPORTED_LANGUAGES.EN,
+        availableLocales: [SUPPORTED_LANGUAGES.EN],
         tenantId: admin.tenantId,
       });
 

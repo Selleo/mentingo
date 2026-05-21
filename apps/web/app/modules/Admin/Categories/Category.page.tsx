@@ -1,42 +1,41 @@
 import { useParams } from "@remix-run/react";
-import { startCase } from "lodash-es";
-import { useForm } from "react-hook-form";
+import { Tags } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useUpdateCategory } from "~/api/mutations/admin/useUpdateCategory";
-import { categoryByIdQueryOptions, useCategoryById } from "~/api/queries/admin/useCategoryById";
-import { queryClient } from "~/api/queryClient";
+import { useCategoryById } from "~/api/queries/admin/useCategoryById";
 import { PageWrapper } from "~/components/PageWrapper";
-import { Button } from "~/components/ui/button";
-import { Label } from "~/components/ui/label";
+import { Badge } from "~/components/ui/badge";
 import Loader from "~/modules/common/Loader/Loader";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import { CATEGORY_PAGE_HANDLES } from "../../../../e2e/data/categories/handles";
 
-import { CategoryDetails } from "./CategoryDetails";
+import { CategoryForm } from "./components/CategoryForm";
+import { CategoryLanguagesSelector } from "./components/CategoryLanguagesSelector";
 
 import type { MetaFunction } from "@remix-run/react";
-import type { UpdateCategoryBody } from "~/api/generated-api";
-
-const displayedFields: Array<keyof UpdateCategoryBody> = ["title", "archived"];
+import type { SupportedLanguages } from "@repo/shared";
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.categoryDetails");
 
-const Category = () => {
+export default function CategoryPage() {
   const { id = "" } = useParams();
+
   const { t } = useTranslation();
+  const appLanguage = useLanguageStore((state) => state.language);
+
+  const [categoryLanguage, setCategoryLanguage] = useState<SupportedLanguages>(appLanguage);
 
   if (!id) throw new Error(t("adminCategoryView.error.categoryIdNotFound"));
 
-  const { data: category, isLoading } = useCategoryById(id);
-  const { mutateAsync: updateCategory } = useUpdateCategory();
+  const { data: category, isLoading } = useCategoryById(id, categoryLanguage);
 
-  const {
-    control,
-    handleSubmit,
-    formState: { isDirty },
-  } = useForm<UpdateCategoryBody>();
+  const effectiveCategoryLanguage =
+    category && !category.availableLocales.includes(categoryLanguage)
+      ? category.baseLanguage
+      : categoryLanguage;
 
   if (isLoading)
     return (
@@ -47,24 +46,12 @@ const Category = () => {
 
   if (!category) throw new Error(t("adminCategoryView.error.categoryNotFound"));
 
-  const onSubmit = (data: UpdateCategoryBody) => {
-    updateCategory({ data, categoryId: id }).then(() => {
-      queryClient.invalidateQueries(categoryByIdQueryOptions(id));
-    });
-  };
-
-  const renderFields = () => {
-    return displayedFields.map((field) => (
-      <div key={field} className="flex flex-col gap-y-2">
-        <Label className="font-normal text-neutral-600">
-          {field === "archived" ? t("adminCategoryView.field.status") : startCase(t(field))}
-        </Label>
-        <CategoryDetails name={field} control={control} category={category} />
-      </div>
-    ));
-  };
-
-  const fields = renderFields();
+  const categoryFormKey = [
+    category.id,
+    effectiveCategoryLanguage,
+    category.title,
+    category.archived,
+  ].join(":");
 
   const breadcrumbs = [
     { title: t("adminCategoryView.breadcrumbs.categories"), href: "/admin/categories" },
@@ -73,29 +60,38 @@ const Category = () => {
 
   return (
     <PageWrapper breadcrumbs={breadcrumbs}>
-      <div className="flex flex-col" data-testid={CATEGORY_PAGE_HANDLES.PAGE}>
-        <form onSubmit={handleSubmit(onSubmit)} className="h-full rounded-lg">
-          <div className="flex items-center justify-between">
-            <h2
-              className="mb-4 text-2xl font-semibold text-neutral-950"
-              data-testid={CATEGORY_PAGE_HANDLES.HEADING}
-            >
-              {t("adminCategoryView.editCategoryHeader")}
-            </h2>
-            <Button
-              type="submit"
-              disabled={!isDirty}
-              className="mr-2"
-              data-testid={CATEGORY_PAGE_HANDLES.SAVE}
-            >
-              {t("common.button.save")}
-            </Button>
+      <div className="flex flex-col gap-6" data-testid={CATEGORY_PAGE_HANDLES.PAGE}>
+        <div className="rounded-xl border bg-gradient-to-r from-neutral-50 to-background p-5 shadow-sm">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 text-neutral-900">
+                <Tags className="size-7 text-primary-700" />
+                <h2 className="h4 text-neutral-950" data-testid={CATEGORY_PAGE_HANDLES.HEADING}>
+                  {category.title}
+                </h2>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant={category.archived ? "outline" : "secondary"} className="capitalize">
+                {category.archived ? t("common.other.archived") : t("common.other.active")}
+              </Badge>
+              <CategoryLanguagesSelector
+                categoryId={id}
+                value={effectiveCategoryLanguage}
+                baseLanguage={category.baseLanguage}
+                availableLocales={category.availableLocales}
+                onChange={setCategoryLanguage}
+              />
+            </div>
           </div>
-          <div className="space-y-4 pt-4">{fields}</div>
-        </form>
+        </div>
+        <CategoryForm
+          key={categoryFormKey}
+          category={category}
+          categoryId={id}
+          language={effectiveCategoryLanguage}
+        />
       </div>
     </PageWrapper>
   );
-};
-
-export default Category;
+}

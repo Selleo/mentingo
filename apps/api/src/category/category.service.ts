@@ -1,22 +1,25 @@
 import {
+  BadRequestException,
   ConflictException,
   Inject,
   Injectable,
   NotFoundException,
   UnprocessableEntityException,
 } from "@nestjs/common";
-import { PERMISSIONS, type PermissionKey } from "@repo/shared";
-import { and, count, eq, ilike, inArray, like } from "drizzle-orm";
+import { PERMISSIONS, type PermissionKey, type SupportedLanguages } from "@repo/shared";
+import { and, count, eq, getTableColumns, inArray, ne, sql } from "drizzle-orm";
 import { isEqual } from "lodash";
 
 import { DatabasePg } from "src/common";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
+import { buildJsonbField, deleteJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { hasPermission } from "src/common/permissions/permission.utils";
 import { CreateCategoryEvent, DeleteCategoryEvent, UpdateCategoryEvent } from "src/events";
 import { LocalizationService } from "src/localization/localization.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { categories, courses } from "src/storage/schema";
+import { hasDataToUpdate } from "src/utils/hasDataToUpdate";
 
 import {
   type CategoryFilterSchema,
@@ -25,7 +28,7 @@ import {
 } from "./schemas/categoryQuery";
 
 import type { AllCategoriesResponse } from "./schemas/category.schema";
-import type { CategoryQuery } from "./schemas/category.types";
+import type { CategoryQuery, CategoryRecord } from "./schemas/category.types";
 import type { CategoryInsert } from "./schemas/createCategorySchema";
 import type { CategoryUpdateBody } from "./schemas/updateCategorySchema";
 import type { CategoryActivityLogSnapshot } from "src/activity-logs/types";
@@ -52,31 +55,36 @@ export class CategoryService {
       perPage = DEFAULT_PAGE_SIZE,
       page = 1,
       filters = {},
+      language,
     } = query;
 
     const { sortOrder, sortedField } = getSortOptions(sort);
 
     const canManageCategories = hasPermission(userPermissions, PERMISSIONS.CATEGORY_MANAGE);
 
-    const selectedColumns = {
-      id: categories.id,
-      archived: categories.archived,
-      createdAt: categories.createdAt,
-      title: categories.title,
-    };
-
     return this.db.transaction(async (tx) => {
-      const conditions = this.getFiltersConditions(filters);
+      const conditions = this.getFiltersConditions(filters, language);
+
       const queryDB = tx
-        .select(selectedColumns)
+        .select({
+          ...getTableColumns(categories),
+          archived: sql<boolean | null>`
+            CASE WHEN ${canManageCategories} = TRUE THEN ${categories.archived} ELSE NULL END
+          `,
+          createdAt: sql<string | null>`
+            CASE WHEN ${canManageCategories} = TRUE THEN ${categories.createdAt} ELSE NULL END
+          `,
+          title: this.getLocalizedCategoryTitle(language),
+        })
         .from(categories)
         .where(and(...conditions))
         .orderBy(
-          sortOrder(this.getColumnToSortBy(sortedField as CategorySortField, canManageCategories)),
+          sortOrder(
+            this.getColumnToSortBy(sortedField as CategorySortField, canManageCategories, language),
+          ),
         );
 
       const dynamicQuery = queryDB.$dynamic();
-
       const paginatedQuery = addPagination(dynamicQuery, page, perPage);
 
       const data = await paginatedQuery;
@@ -87,44 +95,62 @@ export class CategoryService {
         .where(and(...conditions));
 
       return {
-        data: this.serializeCategories(data, canManageCategories),
+        data,
         pagination: { totalItems: totalItems, page, perPage },
         appliedFilters: filters,
       };
     });
   }
 
-  public async getCategoryById(id: UUIDType) {
+  public async getCategoryById(id: UUIDType, language?: SupportedLanguages) {
     const [category] = await this.db
-      .select()
+      .select({
+        ...getTableColumns(categories),
+        title: this.getLocalizedCategoryTitle(language),
+      })
       .from(categories)
-      .where(and(eq(categories.id, id)));
+      .where(eq(categories.id, id));
+
+    if (!category) {
+      throw new NotFoundException({ message: "adminCategoryView.error.categoryNotFound" });
+    }
 
     return category;
   }
 
   public async createCategory(createCategoryBody: CategoryInsert, currentUser: CurrentUserType) {
-    const category = await this.db.query.categories.findFirst({
-      where: ({ title }) => eq(title, createCategoryBody.title),
-    });
+    const { language } = createCategoryBody;
+
+    const category = await this.findCategoryByBaseTitle(createCategoryBody.title);
 
     if (category) {
-      throw new ConflictException("Category already exists");
+      throw new ConflictException({ message: "adminCategoryView.toast.alreadyExists" });
     }
 
-    const [newCategory] = await this.db.insert(categories).values(createCategoryBody).returning();
+    const [newCategory] = await this.db
+      .insert(categories)
+      .values({
+        title: buildJsonbField(language, createCategoryBody.title),
+        baseLanguage: language,
+        availableLocales: [language],
+      })
+      .returning();
 
-    if (!newCategory) throw new UnprocessableEntityException("Category not created");
+    if (!newCategory) {
+      throw new UnprocessableEntityException({
+        message: "adminCategoryView.toast.categoryNotCreated",
+      });
+    }
 
     await this.outboxPublisher.publish(
       new CreateCategoryEvent({
         categoryId: newCategory.id,
         actor: currentUser,
-        category: this.buildCategorySnapshot(newCategory),
+        category: await this.getCategorySnapshot(newCategory.id, language),
       }),
     );
 
-    return newCategory;
+    return this.getCategoryById(newCategory.id, language);
   }
 
   public async updateCategory(
@@ -132,89 +158,197 @@ export class CategoryService {
     updateCategoryBody: CategoryUpdateBody,
     currentUser: CurrentUserType,
   ) {
-    const [existingCategory] = await this.db.select().from(categories).where(eq(categories.id, id));
+    const existingCategory = await this.getCategoryById(id);
 
-    if (!existingCategory) {
-      throw new NotFoundException("Category not found");
+    const language = updateCategoryBody.language ?? existingCategory.baseLanguage;
+
+    if (updateCategoryBody.title !== undefined) {
+      if (!existingCategory.availableLocales.includes(language)) {
+        throw new BadRequestException({
+          message: "adminCategoryView.toast.languageNotSupported",
+        });
+      }
+
+      if (language === existingCategory.baseLanguage) {
+        const categoryWithTitle = await this.findCategoryByBaseTitle(updateCategoryBody.title, id);
+        if (categoryWithTitle) {
+          throw new ConflictException({
+            message: "adminCategoryView.toast.alreadyExists",
+          });
+        }
+      }
     }
 
-    const previousSnapshot = this.buildCategorySnapshot(existingCategory);
+    const previousSnapshot = await this.getCategorySnapshot(id, language);
+
+    const updateData: {
+      archived?: boolean;
+      title?: ReturnType<typeof setJsonbField>;
+    } = {};
+
+    if (updateCategoryBody.archived !== undefined) {
+      updateData.archived = updateCategoryBody.archived;
+    }
+
+    if (updateCategoryBody.title !== undefined) {
+      const titleUpdate = setJsonbField(categories.title, language, updateCategoryBody.title);
+
+      if (titleUpdate) updateData.title = titleUpdate;
+    }
+
+    if (!hasDataToUpdate(updateData)) {
+      return this.getCategoryById(id, language);
+    }
 
     const [updatedCategory] = await this.db
       .update(categories)
-      .set(updateCategoryBody)
+      .set(updateData)
       .where(eq(categories.id, id))
       .returning();
 
     if (updatedCategory) {
-      const updatedSnapshot = this.buildCategorySnapshot(updatedCategory);
-
-      if (!isEqual(previousSnapshot, updatedSnapshot)) {
-        await this.outboxPublisher.publish(
-          new UpdateCategoryEvent({
-            categoryId: id,
-            actor: currentUser,
-            previousCategoryData: previousSnapshot,
-            updatedCategoryData: updatedSnapshot,
-          }),
-        );
-      }
+      await this.publishUpdateEvent(id, currentUser, previousSnapshot, updatedCategory, language);
     }
 
-    return updatedCategory;
+    return this.getCategoryById(id, language);
   }
 
-  private createLikeFilter(filter: string) {
-    return like(categories.title, `%${filter.toLowerCase()}%`);
+  async createLanguage(id: UUIDType, language: SupportedLanguages, currentUser: CurrentUserType) {
+    const category = await this.getCategoryById(id, language);
+
+    if (category.availableLocales.includes(language)) {
+      throw new BadRequestException({
+        message: "adminCategoryView.toast.languageAlreadyExists",
+      });
+    }
+
+    const previousSnapshot = await this.getCategorySnapshot(id, language);
+
+    const [updatedCategory] = await this.db
+      .update(categories)
+      .set({ availableLocales: [...category.availableLocales, language] })
+      .where(eq(categories.id, id))
+      .returning();
+
+    if (updatedCategory) {
+      await this.publishUpdateEvent(id, currentUser, previousSnapshot, updatedCategory, language);
+    }
+
+    return this.getCategoryById(id, language);
   }
 
-  private getColumnToSortBy(sort: CategorySortField, isAdmin: boolean) {
-    if (!isAdmin) return categories.title;
+  async deleteLanguage(id: UUIDType, language: SupportedLanguages, currentUser: CurrentUserType) {
+    const category = await this.getCategoryById(id, language);
+
+    if (!category.availableLocales.includes(language) || category.baseLanguage === language) {
+      throw new BadRequestException({
+        message: "adminCategoryView.toast.invalidLanguageToDelete",
+      });
+    }
+
+    const previousSnapshot = await this.getCategorySnapshot(id, language);
+
+    const [updatedCategory] = await this.db
+      .update(categories)
+      .set({
+        title: deleteJsonbField(categories.title, language),
+        availableLocales: sql`ARRAY_REMOVE(${categories.availableLocales}, ${language})`,
+      })
+      .where(eq(categories.id, id))
+      .returning();
+
+    if (updatedCategory) {
+      await this.publishUpdateEvent(id, currentUser, previousSnapshot, updatedCategory, language);
+    }
+
+    return this.getCategoryById(id, category.baseLanguage);
+  }
+
+  async updateBaseLanguage(
+    id: UUIDType,
+    baseLanguage: SupportedLanguages,
+    currentUser: CurrentUserType,
+  ) {
+    const category = await this.getCategoryById(id, baseLanguage);
+
+    if (!category.availableLocales.includes(baseLanguage)) {
+      throw new BadRequestException({ message: "adminCategoryView.toast.languageNotSupported" });
+    }
+
+    if (!category.title) {
+      throw new BadRequestException({
+        message: "adminCategoryView.toast.baseLanguageTitleRequired",
+      });
+    }
+
+    const categoryWithTitle = await this.findCategoryByBaseTitle(category.title, id);
+
+    if (categoryWithTitle) {
+      throw new ConflictException({ message: "adminCategoryView.toast.alreadyExists" });
+    }
+
+    const previousSnapshot = await this.getCategorySnapshot(id, category.baseLanguage);
+
+    const [updatedCategory] = await this.db
+      .update(categories)
+      .set({ baseLanguage })
+      .where(eq(categories.id, id))
+      .returning();
+
+    if (updatedCategory) {
+      await this.publishUpdateEvent(
+        id,
+        currentUser,
+        previousSnapshot,
+        updatedCategory,
+        baseLanguage,
+      );
+    }
+
+    return this.getCategoryById(id, baseLanguage);
+  }
+
+  private getColumnToSortBy(
+    sort: CategorySortField,
+    isAdmin: boolean,
+    language?: SupportedLanguages,
+  ) {
+    if (!isAdmin) return this.getLocalizedCategoryTitle(language);
 
     switch (sort) {
       case CategorySortFields.creationDate:
         return categories.createdAt;
       default:
-        return categories.title;
+        return this.getLocalizedCategoryTitle(language);
     }
   }
 
   async deleteCategory(id: UUIDType, currentUser: CurrentUserType) {
-    try {
-      const [category] = await this.db.select().from(categories).where(eq(categories.id, id));
+    const category = await this.getCategoryById(id);
 
-      if (!category) {
-        throw new NotFoundException("Category not found");
-      }
+    const coursesWithCategory = await this.db
+      .select({
+        id: courses.id,
+        title: this.localizationService.getLocalizedSqlField(courses.title),
+      })
+      .from(courses)
+      .where(eq(courses.categoryId, id));
 
-      const coursesWithCategory = await this.db
-        .select({
-          id: courses.id,
-          title: this.localizationService.getLocalizedSqlField(courses.title),
-        })
-        .from(courses)
-        .where(eq(courses.categoryId, id));
-
-      if (coursesWithCategory.length > 0) {
-        throw new UnprocessableEntityException(
-          `Cannot delete category. It is assigned to ${
-            coursesWithCategory.length
-          } course(s): ${coursesWithCategory.map((c) => c.title).join(", ")}`,
-        );
-      }
-      await this.db.delete(categories).where(eq(categories.id, id));
-
-      await this.outboxPublisher.publish(
-        new DeleteCategoryEvent({
-          categoryId: category.id,
-          actor: currentUser,
-          categoryTitle: category.title,
-        }),
+    if (coursesWithCategory.length > 0) {
+      throw new UnprocessableEntityException(
+        this.getCategoryAssignedToCoursesError(coursesWithCategory.map((course) => course.title)),
       );
-    } catch (error) {
-      console.error(error);
-      throw new NotFoundException("Category not found");
     }
+
+    await this.db.delete(categories).where(eq(categories.id, id));
+
+    await this.outboxPublisher.publish(
+      new DeleteCategoryEvent({
+        categoryId: category.id,
+        actor: currentUser,
+        categoryTitle: category.title,
+      }),
+    );
   }
 
   async deleteManyCategories(categoryIds: string[], currentUser: CurrentUserType): Promise<string> {
@@ -222,12 +356,14 @@ export class CategoryService {
 
     const message = await this.db.transaction(async (tx) => {
       const existingCategories = await tx
-        .select({ id: categories.id, title: categories.title })
+        .select({ id: categories.id, title: this.getLocalizedCategoryTitle() })
         .from(categories)
         .where(inArray(categories.id, categoryIds));
 
       if (existingCategories.length === 0) {
-        throw new NotFoundException("No categories found to delete");
+        throw new NotFoundException({
+          message: "adminCategoriesView.toast.noCategoriesFoundToDelete",
+        });
       }
 
       const categoriesWithCourses = await tx
@@ -246,7 +382,7 @@ export class CategoryService {
       if (categoriesWithCourses.length > 0) {
         const courseTitles = [...new Set(categoriesWithCourses.map((c) => c.courseTitle))];
         throw new UnprocessableEntityException(
-          `Cannot delete categories. Some are assigned to courses: ${courseTitles.join(", ")}`,
+          this.getCategoryAssignedToCoursesError(courseTitles),
         );
       }
 
@@ -278,35 +414,78 @@ export class CategoryService {
     return message;
   }
 
-  private buildCategorySnapshot(category: {
-    id: UUIDType;
-    title?: string | null;
-    archived?: boolean | null;
-  }): CategoryActivityLogSnapshot {
+  private async getCategorySnapshot(categoryId: UUIDType, language?: SupportedLanguages) {
+    const { id, title, archived } = await this.getCategoryById(categoryId, language);
+
     return {
-      id: category.id,
-      title: category.title,
-      archived: category.archived,
+      id,
+      title,
+      archived,
     };
   }
 
-  private serializeCategories = (data: AllCategoriesResponse, isAdmin: boolean) =>
-    data.map((category) => ({
-      ...category,
-      archived: isAdmin ? category.archived : null,
-      createdAt: isAdmin ? category.createdAt : null,
-    }));
-
-  private getFiltersConditions(filters: CategoryFilterSchema) {
+  private getFiltersConditions(filters: CategoryFilterSchema, language?: SupportedLanguages) {
     const conditions = [];
+
     if (filters.title) {
-      conditions.push(ilike(categories.title, `%${filters.title.toLowerCase()}%`));
+      conditions.push(
+        sql`${this.getLocalizedCategoryTitle(language)} ilike ${`%${filters.title}%`}`,
+      );
     }
 
     if (filters.archived) {
       conditions.push(eq(categories.archived, filters.archived === "true"));
     }
 
-    return conditions ?? undefined;
+    return conditions;
+  }
+
+  private getLocalizedCategoryTitle(language?: SupportedLanguages) {
+    return this.localizationService.getLocalizedSqlField(categories.title, language, categories);
+  }
+
+  private getCategoryAssignedToCoursesError(courseTitles: string[]) {
+    return {
+      message: "adminCategoriesView.toast.deleteCategoryAssignedToCourses",
+      translationParams: {
+        courseCount: courseTitles.length,
+        courseTitles: courseTitles.join(", "),
+      },
+    };
+  }
+
+  private async findCategoryByBaseTitle(title: string, excludeCategoryId?: UUIDType) {
+    const conditions = [sql`${this.getLocalizedCategoryTitle()} = ${title}`];
+
+    if (excludeCategoryId) conditions.push(ne(categories.id, excludeCategoryId));
+
+    const [category] = await this.db
+      .select({ id: categories.id })
+      .from(categories)
+      .where(and(...conditions))
+      .limit(1);
+
+    return category;
+  }
+
+  private async publishUpdateEvent(
+    categoryId: UUIDType,
+    currentUser: CurrentUserType,
+    previousSnapshot: CategoryActivityLogSnapshot,
+    updatedCategory: Pick<CategoryRecord, "id">,
+    language: SupportedLanguages,
+  ) {
+    const updatedSnapshot = await this.getCategorySnapshot(updatedCategory.id, language);
+
+    if (!isEqual(previousSnapshot, updatedSnapshot)) {
+      await this.outboxPublisher.publish(
+        new UpdateCategoryEvent({
+          categoryId,
+          actor: currentUser,
+          previousCategoryData: previousSnapshot,
+          updatedCategoryData: updatedSnapshot,
+        }),
+      );
+    }
   }
 }

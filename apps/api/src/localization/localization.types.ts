@@ -4,6 +4,7 @@ import type {
   news,
   articles,
   articleSections,
+  categories,
   formFields,
   learningPaths,
 } from "src/storage/schema";
@@ -31,6 +32,7 @@ export type BaseTable =
   | typeof courses
   | typeof questionsAndAnswers
   | typeof articles
+  | typeof categories
   | typeof news
   | typeof articleSections
   | typeof formFields
