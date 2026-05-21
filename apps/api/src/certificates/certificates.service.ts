@@ -226,24 +226,7 @@ export class CertificatesService implements OnModuleDestroy {
   ) {
     await this.assertCanManageCourseCertificates(courseId, currentUser);
 
-    const activeCertificates =
-      await this.certificateRepository.findActiveCertificatesForCourse(courseId);
-
-    const now = new Date();
-
-    const immediatelyExpiringCertificateCount = activeCertificates.filter((certificate) => {
-      const expiresAt = this.calculateCertificateExpiry(
-        certificateValidity,
-        new Date(certificate.issuedAt),
-      );
-
-      return Boolean(expiresAt && expiresAt <= now);
-    }).length;
-
-    return {
-      activeCertificateCount: activeCertificates.length,
-      immediatelyExpiringCertificateCount,
-    };
+    return this.certificateRepository.getCertificateValidityImpact(courseId, certificateValidity);
   }
 
   async applyValidityToExistingCertificates(
@@ -251,30 +234,25 @@ export class CertificatesService implements OnModuleDestroy {
     certificateValidity: CertificateValidity | null,
     currentUser: CurrentUserType,
   ) {
-    const certificatesToUpdate =
-      await this.certificateRepository.findActiveCertificatesForCourse(courseId);
+    const now = new Date();
 
-    const updates = certificatesToUpdate.map((certificate) => ({
-      certificateId: certificate.id,
-      expiresAt: this.calculateCertificateExpiry(
+    const { immediatelyExpiredCertificates } = await this.db.transaction(async (trx) => {
+      await this.certificateRepository.updateActiveCertificateExpirationsForCourse(
+        courseId,
         certificateValidity,
-        new Date(certificate.issuedAt),
-      ),
-    }));
+        trx,
+      );
 
-    const immediatelyExpiredCertificates = certificatesToUpdate.filter((certificate) => {
-      const nextExpiry = updates.find((update) => update.certificateId === certificate.id);
-      return Boolean(nextExpiry?.expiresAt && nextExpiry.expiresAt <= new Date());
-    });
-
-    await this.db.transaction(async (trx) => {
-      await this.certificateRepository.updateActiveCertificateExpirations(updates, trx);
+      const immediatelyExpiredCertificates =
+        await this.certificateRepository.findExpiredActiveCertificatesForCourse(courseId, now, trx);
 
       await this.archiveAndResetCertificates(
         immediatelyExpiredCertificates,
         CERTIFICATE_ARCHIVE_REASONS.EXPIRED,
         trx,
       );
+
+      return { immediatelyExpiredCertificates };
     });
 
     await this.publishArchivedCertificateEmailEvent(

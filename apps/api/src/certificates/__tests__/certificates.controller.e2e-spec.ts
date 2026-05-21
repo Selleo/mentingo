@@ -2,6 +2,9 @@ import {
   CERTIFICATE_ARCHIVE_REASONS,
   CERTIFICATE_RESET_SCOPES,
   CERTIFICATE_STATUSES,
+  CERTIFICATE_VALIDITY_UNITS,
+  CERTIFICATE_VALIDITY_TYPES,
+  PERMISSIONS,
   SYSTEM_ROLE_SLUGS,
 } from "@repo/shared";
 import { and, eq } from "drizzle-orm";
@@ -271,6 +274,290 @@ describe("CertificatesController (e2e)", () => {
         expect(response.body.data[0].courseId).toBe(course2.id);
         expect(response.body.data[1].courseId).toBe(course1.id);
       });
+    });
+  });
+
+  describe("Certificate validity", () => {
+    it("counts active certificates and immediately expiring certificates for validity impact", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const currentStudent = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const expiredStudent = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const archivedStudent = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const otherCourseStudent = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const category = await categoryFactory.create();
+      const course = await courseFactory.create({
+        authorId: admin.id,
+        categoryId: category.id,
+        hasCertificate: true,
+      });
+      const otherCourse = await courseFactory.create({
+        authorId: admin.id,
+        categoryId: category.id,
+        hasCertificate: true,
+      });
+      const oldIssuedAt = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000);
+      const currentIssuedAt = new Date();
+
+      await db.insert(certificates).values([
+        {
+          userId: currentStudent.id,
+          courseId: course.id,
+          status: CERTIFICATE_STATUSES.ACTIVE,
+          issuedAt: currentIssuedAt.toISOString(),
+        },
+        {
+          userId: expiredStudent.id,
+          courseId: course.id,
+          status: CERTIFICATE_STATUSES.ACTIVE,
+          issuedAt: oldIssuedAt.toISOString(),
+        },
+        {
+          userId: archivedStudent.id,
+          courseId: course.id,
+          status: CERTIFICATE_STATUSES.ARCHIVED,
+          issuedAt: oldIssuedAt.toISOString(),
+          archivedAt: oldIssuedAt.toISOString(),
+          archiveReason: CERTIFICATE_ARCHIVE_REASONS.MANUAL_RESET,
+        },
+        {
+          userId: otherCourseStudent.id,
+          courseId: otherCourse.id,
+          status: CERTIFICATE_STATUSES.ACTIVE,
+          issuedAt: oldIssuedAt.toISOString(),
+        },
+      ]);
+
+      const impact = await certificatesService.getCertificateValidityImpact(
+        course.id,
+        {
+          type: CERTIFICATE_VALIDITY_TYPES.PERIOD,
+          value: 1,
+          unit: CERTIFICATE_VALIDITY_UNITS.DAYS,
+        },
+        {
+          userId: admin.id,
+          email: admin.email,
+          tenantId: admin.tenantId,
+          roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN],
+          permissions: [PERMISSIONS.COURSE_ENROLLMENT],
+        },
+      );
+
+      expect(impact).toEqual({
+        activeCertificateCount: 2,
+        immediatelyExpiringCertificateCount: 1,
+      });
+    });
+
+    it("updates active certificate expirations in bulk and archives immediately expired certificates", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const currentStudent = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const expiredStudent = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const archivedStudent = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const category = await categoryFactory.create();
+      const course = await courseFactory.create({
+        authorId: admin.id,
+        categoryId: category.id,
+        hasCertificate: true,
+      });
+      const oldIssuedAt = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000);
+      const currentIssuedAt = new Date();
+      const existingWarningSentAt = new Date().toISOString();
+
+      const [currentCertificate, expiredCertificate, archivedCertificate] = await db
+        .insert(certificates)
+        .values([
+          {
+            userId: currentStudent.id,
+            courseId: course.id,
+            status: CERTIFICATE_STATUSES.ACTIVE,
+            issuedAt: currentIssuedAt.toISOString(),
+            expirationWarningSentAt: existingWarningSentAt,
+          },
+          {
+            userId: expiredStudent.id,
+            courseId: course.id,
+            status: CERTIFICATE_STATUSES.ACTIVE,
+            issuedAt: oldIssuedAt.toISOString(),
+            expirationWarningSentAt: existingWarningSentAt,
+          },
+          {
+            userId: archivedStudent.id,
+            courseId: course.id,
+            status: CERTIFICATE_STATUSES.ARCHIVED,
+            issuedAt: oldIssuedAt.toISOString(),
+            expiresAt: oldIssuedAt.toISOString(),
+            archivedAt: oldIssuedAt.toISOString(),
+            archiveReason: CERTIFICATE_ARCHIVE_REASONS.MANUAL_RESET,
+            expirationWarningSentAt: existingWarningSentAt,
+          },
+        ])
+        .returning();
+
+      await certificatesService.applyValidityToExistingCertificates(
+        course.id,
+        {
+          type: CERTIFICATE_VALIDITY_TYPES.PERIOD,
+          value: 1,
+          unit: CERTIFICATE_VALIDITY_UNITS.DAYS,
+        },
+        {
+          userId: admin.id,
+          email: admin.email,
+          tenantId: admin.tenantId,
+          roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN],
+          permissions: [PERMISSIONS.COURSE_ENROLLMENT],
+        },
+      );
+
+      const updatedCertificates = await db.select().from(certificates);
+      const updatedCurrentCertificate = updatedCertificates.find(
+        (certificate) => certificate.id === currentCertificate.id,
+      );
+      const updatedExpiredCertificate = updatedCertificates.find(
+        (certificate) => certificate.id === expiredCertificate.id,
+      );
+      const updatedArchivedCertificate = updatedCertificates.find(
+        (certificate) => certificate.id === archivedCertificate.id,
+      );
+
+      expect(updatedCurrentCertificate).toMatchObject({
+        status: CERTIFICATE_STATUSES.ACTIVE,
+        expirationWarningSentAt: null,
+      });
+      expect(updatedCurrentCertificate?.expiresAt).toEqual(expect.any(String));
+      expect(new Date(updatedCurrentCertificate?.expiresAt ?? "").getTime()).toBeGreaterThan(
+        currentIssuedAt.getTime(),
+      );
+
+      expect(updatedExpiredCertificate).toMatchObject({
+        status: CERTIFICATE_STATUSES.ARCHIVED,
+        archiveReason: CERTIFICATE_ARCHIVE_REASONS.EXPIRED,
+        expirationWarningSentAt: null,
+      });
+      expect(updatedExpiredCertificate?.archivedAt).not.toBeNull();
+
+      expect(updatedArchivedCertificate).toMatchObject({
+        status: CERTIFICATE_STATUSES.ARCHIVED,
+        archiveReason: CERTIFICATE_ARCHIVE_REASONS.MANUAL_RESET,
+      });
+      expect(new Date(updatedArchivedCertificate?.expiresAt ?? "").getTime()).toBe(
+        oldIssuedAt.getTime(),
+      );
+      expect(new Date(updatedArchivedCertificate?.expirationWarningSentAt ?? "").getTime()).toBe(
+        new Date(existingWarningSentAt).getTime(),
+      );
+    });
+
+    it("clears active certificate expirations without archiving when validity is disabled", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const student = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const archivedStudent = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const category = await categoryFactory.create();
+      const course = await courseFactory.create({
+        authorId: admin.id,
+        categoryId: category.id,
+        hasCertificate: true,
+      });
+      const oldDate = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000);
+      const warningSentAt = new Date().toISOString();
+
+      const [activeCertificate, archivedCertificate] = await db
+        .insert(certificates)
+        .values([
+          {
+            userId: student.id,
+            courseId: course.id,
+            status: CERTIFICATE_STATUSES.ACTIVE,
+            issuedAt: oldDate.toISOString(),
+            expiresAt: oldDate.toISOString(),
+            expirationWarningSentAt: warningSentAt,
+          },
+          {
+            userId: archivedStudent.id,
+            courseId: course.id,
+            status: CERTIFICATE_STATUSES.ARCHIVED,
+            issuedAt: oldDate.toISOString(),
+            expiresAt: oldDate.toISOString(),
+            archivedAt: oldDate.toISOString(),
+            archiveReason: CERTIFICATE_ARCHIVE_REASONS.MANUAL_RESET,
+            expirationWarningSentAt: warningSentAt,
+          },
+        ])
+        .returning();
+
+      await certificatesService.applyValidityToExistingCertificates(course.id, null, {
+        userId: admin.id,
+        email: admin.email,
+        tenantId: admin.tenantId,
+        roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN],
+        permissions: [PERMISSIONS.COURSE_ENROLLMENT],
+      });
+
+      const updatedCertificates = await db.select().from(certificates);
+      const updatedActiveCertificate = updatedCertificates.find(
+        (certificate) => certificate.id === activeCertificate.id,
+      );
+      const updatedArchivedCertificate = updatedCertificates.find(
+        (certificate) => certificate.id === archivedCertificate.id,
+      );
+
+      expect(updatedActiveCertificate).toMatchObject({
+        status: CERTIFICATE_STATUSES.ACTIVE,
+        expiresAt: null,
+        archivedAt: null,
+        archiveReason: null,
+        expirationWarningSentAt: null,
+      });
+      expect(updatedArchivedCertificate).toMatchObject({
+        status: CERTIFICATE_STATUSES.ARCHIVED,
+        archiveReason: CERTIFICATE_ARCHIVE_REASONS.MANUAL_RESET,
+      });
+      expect(new Date(updatedArchivedCertificate?.expiresAt ?? "").getTime()).toBe(
+        oldDate.getTime(),
+      );
+      expect(new Date(updatedArchivedCertificate?.expirationWarningSentAt ?? "").getTime()).toBe(
+        new Date(warningSentAt).getTime(),
+      );
     });
   });
 

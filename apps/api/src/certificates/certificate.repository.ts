@@ -2,9 +2,12 @@ import { Inject, Injectable } from "@nestjs/common";
 import {
   CERTIFICATE_ARCHIVE_REASONS,
   CERTIFICATE_STATUSES,
+  CERTIFICATE_VALIDITY_TYPES,
+  CERTIFICATE_VALIDITY_UNITS,
   COURSE_ENROLLMENT,
   SUPPORTED_LANGUAGES,
   type CertificateArchiveReason,
+  type CertificateValidity,
   type SupportedLanguages,
 } from "@repo/shared";
 import {
@@ -24,7 +27,6 @@ import {
 
 import { DatabasePg, type UUIDType } from "src/common";
 import { addPagination } from "src/common/pagination";
-import { processInBatches } from "src/common/utils/processInBatches";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { LocalizationService } from "src/localization/localization.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
@@ -46,8 +48,6 @@ import {
   scormAttempts,
 } from "src/storage/schema";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
-
-import { CERTIFICATE_EXPIRATION_UPDATE_BATCH_SIZE } from "./certificates.batch.constants";
 
 import type {
   CertificateProgressResetTarget,
@@ -371,6 +371,35 @@ export class CertificateRepository {
       );
   }
 
+  async getCertificateValidityImpact(
+    courseId: UUIDType,
+    certificateValidity: CertificateValidity | null,
+  ) {
+    const expiresAt = this.getCertificateExpirySql(certificateValidity);
+
+    const [validityImpact] = await this.db
+      .select({
+        activeCertificateCount: sql<number>`count(${certificates.id})::int`,
+        immediatelyExpiringCertificateCount: sql<number>`
+          count(*) filter (
+            where ${expiresAt} is not null
+              and ${expiresAt} <= CURRENT_TIMESTAMP
+          )::int
+        `,
+      })
+      .from(certificates)
+      .innerJoin(users, eq(users.id, certificates.userId))
+      .where(
+        and(
+          eq(certificates.courseId, courseId),
+          eq(certificates.status, CERTIFICATE_STATUSES.ACTIVE),
+          isNull(users.deletedAt),
+        ),
+      );
+
+    return validityImpact;
+  }
+
   async findCertificateResetGroups(courseId: UUIDType) {
     return this.db
       .select({
@@ -645,32 +674,78 @@ export class CertificateRepository {
       );
   }
 
-  async updateActiveCertificateExpirations(
-    updates: { certificateId: UUIDType; expiresAt: Date | null }[],
-    trx?: DatabasePg,
-  ) {
-    if (!updates.length) return [];
-
+  async findExpiredActiveCertificatesForCourse(courseId: UUIDType, now: Date, trx?: DatabasePg) {
     const dbInstance = trx || this.db;
 
-    return processInBatches(
-      updates,
-      ({ certificateId, expiresAt }) =>
-        dbInstance
-          .update(certificates)
-          .set({
-            expiresAt: expiresAt?.toISOString() ?? null,
-            expirationWarningSentAt: null,
-          })
-          .where(
-            and(
-              eq(certificates.id, certificateId),
-              eq(certificates.status, CERTIFICATE_STATUSES.ACTIVE),
-            ),
-          )
-          .returning(),
-      { batchSize: CERTIFICATE_EXPIRATION_UPDATE_BATCH_SIZE },
-    );
+    return dbInstance
+      .select({
+        ...getTableColumns(certificates),
+        userEmail: users.email,
+        userFirstName: users.firstName,
+        userLastName: users.lastName,
+        courseTitle: this.localizationService.getLocalizedSqlField(courses.title),
+      })
+      .from(certificates)
+      .innerJoin(users, eq(users.id, certificates.userId))
+      .innerJoin(courses, eq(courses.id, certificates.courseId))
+      .where(
+        and(
+          eq(certificates.courseId, courseId),
+          eq(certificates.status, CERTIFICATE_STATUSES.ACTIVE),
+          lte(certificates.expiresAt, now.toISOString()),
+          isNull(users.deletedAt),
+        ),
+      );
+  }
+
+  async updateActiveCertificateExpirationsForCourse(
+    courseId: UUIDType,
+    certificateValidity: CertificateValidity | null,
+    trx?: DatabasePg,
+  ) {
+    const dbInstance = trx || this.db;
+
+    const expiresAt = this.getCertificateExpirySql(certificateValidity);
+
+    return dbInstance
+      .update(certificates)
+      .set({
+        expiresAt,
+        expirationWarningSentAt: null,
+      })
+      .where(
+        and(
+          eq(certificates.courseId, courseId),
+          eq(certificates.status, CERTIFICATE_STATUSES.ACTIVE),
+          sql`EXISTS (
+            SELECT 1
+            FROM ${users}
+            WHERE ${users.id} = ${certificates.userId}
+              AND ${users.deletedAt} IS NULL
+          )`,
+        ),
+      )
+      .returning();
+  }
+
+  private getCertificateExpirySql(certificateValidity: CertificateValidity | null | undefined) {
+    if (!certificateValidity) return sql<string | null>`NULL`;
+
+    if (certificateValidity.type === CERTIFICATE_VALIDITY_TYPES.FIXED_DATE) {
+      return sql<string>`${new Date(
+        `${certificateValidity.date}T23:59:59.999Z`,
+      ).toISOString()}::timestamp with time zone`;
+    }
+
+    if (certificateValidity.unit === CERTIFICATE_VALIDITY_UNITS.DAYS) {
+      return sql<string>`${certificates.issuedAt} + make_interval(days => ${certificateValidity.value})`;
+    }
+
+    if (certificateValidity.unit === CERTIFICATE_VALIDITY_UNITS.MONTHS) {
+      return sql<string>`${certificates.issuedAt} + make_interval(months => ${certificateValidity.value})`;
+    }
+
+    return sql<string>`${certificates.issuedAt} + make_interval(years => ${certificateValidity.value})`;
   }
 
   async archiveCertificates(
