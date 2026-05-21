@@ -1,6 +1,6 @@
 import { CERTIFICATE_RESET_SCOPES, type CertificateResetScope } from "@repo/shared";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useResetCourseCertificates } from "~/api/mutations/useResetCourseCertificates";
@@ -81,20 +81,22 @@ export function CertificateResetSection({ courseId, disabled }: CertificateReset
     [activeCertificateUserCount, groups.length],
   );
 
-  const toggleSelection = (
-    id: string,
-    selectedIds: string[],
-    setSelectedIds: (ids: string[]) => void,
-    enabledIds: Set<string>,
-  ) => {
-    if (!enabledIds.has(id)) return;
+  const toggleGroupSelection = useCallback(
+    (groupId: string) => {
+      if (!enabledGroupIds.has(groupId)) return;
 
-    setSelectedIds(
-      selectedIds.includes(id)
-        ? selectedIds.filter((selectedId) => selectedId !== id)
-        : [...selectedIds, id],
+      setSelectedGroupIds((ids) =>
+        ids.includes(groupId) ? ids.filter((id) => id !== groupId) : [...ids, groupId],
+      );
+    },
+    [enabledGroupIds],
+  );
+
+  const toggleUserSelection = useCallback((userId: string) => {
+    setSelectedUserIds((ids) =>
+      ids.includes(userId) ? ids.filter((id) => id !== userId) : [...ids, userId],
     );
-  };
+  }, []);
 
   useEffect(() => {
     setSelectedGroupIds((ids) => {
@@ -184,14 +186,8 @@ export function CertificateResetSection({ courseId, disabled }: CertificateReset
         isResettingCertificates={isResettingCertificates}
         onOpenChange={setIsResetDialogOpen}
         onResetScopeChange={setResetScope}
-        onToggleGroup={(groupId) =>
-          toggleSelection(groupId, selectedGroupIds, setSelectedGroupIds, enabledGroupIds)
-        }
-        onToggleUser={(userId) =>
-          setSelectedUserIds((ids) =>
-            ids.includes(userId) ? ids.filter((id) => id !== userId) : [...ids, userId],
-          )
-        }
+        onToggleGroup={toggleGroupSelection}
+        onToggleUser={toggleUserSelection}
         onUsersPageChange={setUsersPage}
         onUsersPerPageChange={setUsersPerPage}
         onUsersSearchChange={setUsersSearch}
