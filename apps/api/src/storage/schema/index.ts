@@ -178,15 +178,17 @@ export const categories = pgTable(
   {
     ...id,
     ...timestamps,
-    title: text("title").notNull(),
+    title: jsonb("title").$type<LocalizedText>().default({}).notNull(),
+    baseLanguage,
+    availableLocales,
     archived,
     tenantId,
   },
   (table) => ({
     ...withTenantIdIndex("categories")(table),
-    tenantTitleUniqueIdx: uniqueIndex("categories_tenant_id_title_unique").on(
+    tenantTitleUniqueIdx: uniqueIndex("categories_tenant_id_base_title_unique").on(
       table.tenantId,
-      table.title,
+      sql`(${table.title}->>${table.baseLanguage})`,
     ),
   }),
 );

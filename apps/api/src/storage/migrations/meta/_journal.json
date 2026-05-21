@@ -841,6 +841,20 @@
       "when": 1779092831342,
       "tag": "0119_quiz_attempts_lesson_cascade",
       "breakpoints": true
+    },
+    {
+      "idx": 120,
+      "version": "7",
+      "when": 1779360146392,
+      "tag": "0120_translate_categories",
+      "breakpoints": true
+    },
+    {
+      "idx": 121,
+      "version": "7",
+      "when": 1779360179680,
+      "tag": "0121_translate_categories_schema",
+      "breakpoints": true
     }
   ]
 }

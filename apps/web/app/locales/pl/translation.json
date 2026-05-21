@@ -1067,9 +1067,9 @@
       "createdAt": "Utworzono"
     },
     "button": {
-      "createNew": "Utwórz nowy",
-      "clearAll": "Wyczyść wszystko",
-      "deleteSelected": "Usuń wybrane"
+      "createNew": "Utwórz nową",
+      "clearAll": "Wyczyść wszystkie filtry",
+      "deleteSelected": "Usuń wybrane kategorie"
     },
     "deleteModal": {
       "titleSingle": "Usuń kategorię",
@@ -1079,7 +1079,9 @@
     },
     "toast": {
       "deleteCategorySuccessfully": "Kategoria została usunięta pomyślnie",
-      "deleteCategoryFailed": "Nie udało się usunąć kategorii"
+      "deleteCategoryFailed": "Nie udało się usunąć kategorii",
+      "deleteCategoryAssignedToCourses": "Nie można usunąć kategorii. Jest przypisana do kursów ({{courseCount}}): {{courseTitles}}",
+      "noCategoriesFoundToDelete": "Nie znaleziono kategorii do usunięcia"
     },
     "breadcrumbs": {
       "categories": "Kategorie",
@@ -1102,9 +1104,29 @@
     "button": {
       "createCategory": "Utwórz kategorię"
     },
+    "language": {
+      "label": "Język",
+      "baseLanguage": "Domyślny",
+      "notAddedLanguages": "Języki do dodania",
+      "setBaseLanguage": "Ustaw jako domyślny",
+      "setBaseTitle": "Zmień język domyślny",
+      "setBaseDescription": "Użyć języka {{language}} jako domyślnego dla tej kategorii?",
+      "createTitle": "Utwórz tłumaczenie",
+      "createDescription": "Utworzyć tłumaczenie tej kategorii w języku {{language}}?",
+      "deleteTitle": "Usuń tłumaczenie",
+      "deleteDescription": "Usunąć tłumaczenie w języku {{language}}? Jego treść zostanie usunięta."
+    },
     "toast": {
       "categoryCreatedSuccessfully": "Kategoria została utworzona pomyślnie",
-      "categoryUpdatedSuccessfully": "Kategoria została zaktualizowana pomyślnie"
+      "categoryUpdatedSuccessfully": "Kategoria została zaktualizowana pomyślnie",
+      "baseLanguageUpdatedSuccessfully": "Język domyślny został zaktualizowany pomyślnie",
+      "baseLanguageUpdateFailed": "Nie udało się zaktualizować języka domyślnego",
+      "languageNotSupported": "Ta kategoria nie obsługuje tego języka.",
+      "alreadyExists": "Kategoria już istnieje.",
+      "categoryNotCreated": "Nie udało się utworzyć kategorii.",
+      "languageAlreadyExists": "Ten język kategorii już istnieje.",
+      "invalidLanguageToDelete": "Nie można usunąć tego języka kategorii.",
+      "baseLanguageTitleRequired": "Wybrany język domyślny musi mieć tytuł."
     },
     "error": {
       "categoryNotFound": "Kategoria nie została znaleziona",
