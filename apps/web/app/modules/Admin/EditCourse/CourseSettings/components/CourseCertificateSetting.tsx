@@ -15,6 +15,7 @@ import { Dialog, DialogContent } from "~/components/ui/dialog";
 import { Separator } from "~/components/ui/separator";
 import { Switch } from "~/components/ui/switch";
 import { useToast } from "~/components/ui/use-toast";
+import { cn } from "~/lib/utils";
 import CertificatePreview from "~/modules/Profile/Certificates/CertificatePreview";
 
 import { COURSE_SETTINGS_HANDLES } from "../../../../../../e2e/data/courses/handles";
@@ -209,9 +210,10 @@ const CourseCertificateSetting = ({
           </div>
 
           <div
-            className={`w-full max-w-xl space-y-2 transition-opacity ${
-              isCertificateControlsDisabled ? "opacity-50" : "opacity-100"
-            }`}
+            className={cn(
+              "w-full max-w-xl space-y-2 transition-opacity",
+              isCertificateControlsDisabled ? "opacity-50" : "opacity-100",
+            )}
             aria-disabled={isCertificateControlsDisabled}
           >
             <ImageUploadInput

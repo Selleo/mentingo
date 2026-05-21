@@ -307,7 +307,7 @@ export class CertificatesService implements OnModuleDestroy {
       );
     });
 
-    if (body.sendEmail ?? true) {
+    if (body.sendEmail !== false) {
       await this.publishArchivedCertificateEmailEvent(
         certificatesToReset,
         CERTIFICATE_ARCHIVE_REASONS.MANUAL_RESET,

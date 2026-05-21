@@ -37,7 +37,6 @@ import {
 import type {
   AllCertificatesResponse,
   CertificateResetOptionsResponse,
-  CertificateResetUsersQuery,
   CertificateResetUsersResponse,
   CertificateValidityImpactResponse,
   CertificateShareLinkResponse,
@@ -208,7 +207,7 @@ export class CertificatesController {
   ): Promise<PaginatedResponse<CertificateResetUsersResponse>> {
     const data = await this.certificatesService.getCertificateResetUsers(
       courseId,
-      { page, perPage, search } satisfies CertificateResetUsersQuery,
+      { page, perPage, search },
       currentUser,
     );
 

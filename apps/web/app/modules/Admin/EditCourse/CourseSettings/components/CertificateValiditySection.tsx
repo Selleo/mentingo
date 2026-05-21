@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
 import { Switch } from "~/components/ui/switch";
+import { cn } from "~/lib/utils";
 
 import { CertificateValidityInput } from "./CertificateValidityInput";
 
@@ -51,9 +52,10 @@ export function CertificateValiditySection({
 
   return (
     <div
-      className={`flex flex-col gap-4 transition-opacity ${
-        disabled ? "opacity-50" : "opacity-100"
-      }`}
+      className={cn(
+        "flex flex-col gap-4 transition-opacity",
+        disabled ? "opacity-50" : "opacity-100",
+      )}
     >
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div className="flex min-w-0 items-start gap-3">
