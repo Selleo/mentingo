@@ -206,7 +206,7 @@ describe("SettingsController (e2e)", () => {
         expect(response.body).toBeDefined();
         expect(response.body.data).toBeDefined();
         expect(response.body.data.unregisteredUserCoursesAccessibility).toBeDefined();
-        expect(response.body.data.learningPathsEnabled).toBe(false);
+        expect(response.body.data.learningPathsEnabled).toBe(true);
       });
 
       it("should return updated global settings after admin changes via PATCH endpoint", async () => {
@@ -380,14 +380,14 @@ describe("SettingsController (e2e)", () => {
           .set("Cookie", adminCookies)
           .expect(200);
 
-        expect(response.body.data.learningPathsEnabled).toBe(true);
+        expect(response.body.data.learningPathsEnabled).toBe(false);
 
         const toggleResponse = await request(app.getHttpServer())
           .patch("/api/settings/admin/learning-paths-enabled")
           .set("Cookie", adminCookies)
           .expect(200);
 
-        expect(toggleResponse.body.data.learningPathsEnabled).toBe(false);
+        expect(toggleResponse.body.data.learningPathsEnabled).toBe(true);
       });
 
       it("should return 403 if user is not an admin", async () => {
