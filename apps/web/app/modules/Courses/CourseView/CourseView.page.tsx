@@ -133,7 +133,7 @@ export default function CourseViewPage() {
             )}
           />
         ),
-        isForAdminLike: true,
+        isForAdminLike: false,
         isForUnregistered: false,
         isForEnrolled: true,
       },

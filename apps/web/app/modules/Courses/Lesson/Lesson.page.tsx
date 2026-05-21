@@ -3,7 +3,7 @@ import { first, get, last, orderBy } from "lodash-es";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useCourse, useCurrentUser, useLesson } from "~/api/queries";
+import { courseQueryOptions, useCourse, useCurrentUser, useLesson } from "~/api/queries";
 import { queryClient } from "~/api/queryClient";
 import ErrorPage from "~/components/ErrorPage/ErrorPage";
 import { LoaderWithTextSequence } from "~/components/LoaderWithTextSequence";
@@ -54,6 +54,12 @@ export default function LessonPage() {
     isError: lessonError,
   } = useLesson(lessonId, language, user?.id || "");
   const { data: course } = useCourse(courseId, language);
+
+  useEffect(() => {
+    if (!lesson?.id || !courseId) return;
+
+    queryClient.invalidateQueries(courseQueryOptions(courseId, language));
+  }, [courseId, language, lesson?.id]);
 
   useLearningTimeTracker({
     lessonId,
