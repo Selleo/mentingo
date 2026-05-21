@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Param, Patch, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Param, Patch, Post, UseGuards } from "@nestjs/common";
 import { PERMISSIONS } from "@repo/shared";
 import { Validate } from "nestjs-typebox";
 
@@ -8,6 +8,7 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 import { CurrentUserType } from "src/common/types/current-user.type";
 
 import { LEARNING_PATH_SUCCESS_MESSAGES } from "../constants/learning-path.success-messages";
+import { LearningPathsEnabledGuard } from "../guards/learning-paths-enabled.guard";
 import {
   learningPathCourseIdsSchema,
   learningPathMessageResponseSchema,
@@ -17,6 +18,7 @@ import {
 import { LearningPathService } from "../services/learning-path.service";
 
 @Controller("learning-path")
+@UseGuards(LearningPathsEnabledGuard)
 export class LearningPathCourseController {
   constructor(private readonly learningPathService: LearningPathService) {}
 

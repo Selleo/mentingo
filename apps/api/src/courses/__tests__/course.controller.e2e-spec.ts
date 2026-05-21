@@ -1310,6 +1310,41 @@ describe("CourseController (e2e)", () => {
         expect(response.body.data[0].id).toBe(availableCourse.id);
       });
 
+      it("returns published courses with inactive learning path enrollment rows", async () => {
+        const student = await userFactory
+          .withCredentials({ password })
+          .withUserSettings(db)
+          .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+        const cookies = await cookieFor(student, app);
+        const category = await categoryFactory.create();
+        const contentCreator = await userFactory.create({
+          role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
+        });
+
+        const lockedLearningPathCourse = await courseFactory.create({
+          authorId: contentCreator.id,
+          categoryId: category.id,
+          status: "published",
+          thumbnailS3Key: null,
+        });
+
+        await db.insert(studentCourses).values({
+          studentId: student.id,
+          courseId: lockedLearningPathCourse.id,
+          finishedChapterCount: 0,
+          status: COURSE_ENROLLMENT.NOT_ENROLLED,
+        });
+
+        const response = await request(app.getHttpServer())
+          .get("/api/course/available-courses")
+          .set("Cookie", cookies)
+          .expect(200);
+
+        expect(response.body.data).toEqual(
+          expect.arrayContaining([expect.objectContaining({ id: lockedLearningPathCourse.id })]),
+        );
+      });
+
       it("filters by title", async () => {
         const student = await userFactory
           .withCredentials({ password })

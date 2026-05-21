@@ -387,6 +387,7 @@
       "noSearchResults": "Žádné výsledky vyhledávání pro:",
       "announcements": "Oznámení",
       "lessons": "Lekce",
+      "learningPaths": "Výukové cesty",
       "news": "Zprávy",
       "articles": "články",
       "qa": "Otázky a odpovědi"
@@ -2343,7 +2344,8 @@
       "qaSettingUpdatedSuccessfully": "Nastavení QA bylo úspěšně aktualizováno",
       "ageLimitUpdatedSuccessfully": "Věkový limit byl úspěšně aktualizován",
       "newsSettingUpdatedSuccessfully": "Nastavení zpráv byla úspěšně aktualizována",
-      "articlesSettingUpdatedSuccessfully": "Nastavení znalostní báze byla úspěšně aktualizována"
+      "articlesSettingUpdatedSuccessfully": "Nastavení znalostní báze byla úspěšně aktualizována",
+      "learningPathsUpdatedSuccessfully": "Nastavení vzdělávacích cest byla úspěšně aktualizována"
     }
   },
   "certificateBackgroundUpload": {
@@ -3350,6 +3352,16 @@
     },
     "tooltip": {
       "disabled": "Chcete-li toto pole přepnout, nejprve povolte sekci znalostní báze."
+    }
+  },
+  "learningPathsPreferences": {
+    "subHeader": "Konfigurace nastavení vzdělávacích cest",
+    "header": "Nastavení vzdělávacích cest",
+    "settings": {
+      "learningPathsEnabled": {
+        "label": "Povolit vzdělávací cesty",
+        "description": "Povolte vzdělávací cesty. Po vypnutí jsou skryté a zablokované pro všechny uživatele."
+      }
     }
   },
   "qaView": {

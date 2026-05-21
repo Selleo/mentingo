@@ -619,6 +619,7 @@
       "noSearchResults": "Brak wyników wyszukiwania dla:",
       "announcements": "Powiadomienia",
       "lessons": "Lekcje",
+      "learningPaths": "Ścieżki edukacyjne",
       "news": "Aktualności",
       "articles": "Artykuły",
       "qa": "Pytania i odpowiedzi"
@@ -2633,7 +2634,8 @@
       "qaSettingUpdatedSuccessfully": "Ustawienia QA zostały pomyślnie zaktualizowane",
       "ageLimitUpdatedSuccessfully": "Limit wieku został pomyślnie zaktualizowany",
       "newsSettingUpdatedSuccessfully": "Ustawienia aktualności zostały pomyślnie zaktualizowane",
-      "articlesSettingUpdatedSuccessfully": "Ustawienia bazy wiedzy zostały pomyślnie zaktualizowane"
+      "articlesSettingUpdatedSuccessfully": "Ustawienia bazy wiedzy zostały pomyślnie zaktualizowane",
+      "learningPathsUpdatedSuccessfully": "Ustawienia ścieżek edukacyjnych zostały pomyślnie zaktualizowane"
     }
   },
   "platformSimpleLogo": {
@@ -3339,6 +3341,16 @@
     },
     "tooltip": {
       "disabled": "Aby przełączyć to pole, najpierw włącz sekcję bazy wiedzy."
+    }
+  },
+  "learningPathsPreferences": {
+    "subHeader": "Skonfiguruj ustawienia ścieżek edukacyjnych",
+    "header": "Ustawienia ścieżek edukacyjnych",
+    "settings": {
+      "learningPathsEnabled": {
+        "label": "Włącz ścieżki edukacyjne",
+        "description": "Włącz ścieżki edukacyjne. Po wyłączeniu są ukryte i zablokowane dla wszystkich użytkowników."
+      }
     }
   },
   "qaView": {

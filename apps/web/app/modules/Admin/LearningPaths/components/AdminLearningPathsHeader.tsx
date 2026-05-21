@@ -1,16 +1,15 @@
-import { Plus, Search } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
 
 import { LEARNING_PATHS_PAGE_HANDLES } from "../../../../../e2e/data/learning-paths/handles";
+import { LearningPathsSearchInput } from "../../../LearningPaths/components/LearningPathsSearchInput";
 import { useAdminLearningPathsPageContext } from "../context/AdminLearningPathsPageContext";
 
 export function AdminLearningPathsHeader() {
   const { t } = useTranslation();
-  const { searchValue, setSearchValue, totalPaths, canCreateLearningPaths, openCreateCard } =
-    useAdminLearningPathsPageContext();
+  const { totalPaths, canCreateLearningPaths, openCreateCard } = useAdminLearningPathsPageContext();
 
   return (
     <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -24,16 +23,8 @@ export function AdminLearningPathsHeader() {
         </p>
       </div>
 
-      <div className="flex shrink-0 gap-3">
-        <div className="relative w-full lg:w-80">
-          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-neutral-500" />
-          <Input
-            value={searchValue}
-            onChange={(event) => setSearchValue(event.target.value)}
-            placeholder={t("learningPathsView.searchPlaceholder")}
-            className="h-10 pl-9 text-sm"
-          />
-        </div>
+      <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+        <LearningPathsSearchInput />
         {canCreateLearningPaths && (
           <Button type="button" variant="primary" className="gap-2" onClick={openCreateCard}>
             <Plus className="size-4" />

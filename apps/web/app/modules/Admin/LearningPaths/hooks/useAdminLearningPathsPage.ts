@@ -26,6 +26,7 @@ import type { CreateLearningPathBody, GetLearningPathsResponse } from "~/api/gen
 
 export function useAdminLearningPathsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const searchQuery = searchParams.get("searchQuery") ?? "";
 
   const loaderLearningPaths = useLoaderData<GetLearningPathsResponse>();
 
@@ -33,8 +34,6 @@ export function useAdminLearningPathsPage() {
 
   const { data: currentUser } = useCurrentUserSuspense();
   const { permissions } = usePermissions();
-
-  const [searchValue, setSearchValue] = useState("");
 
   const [pathLanguages, setPathLanguages] = useState<Record<string, SupportedLanguages>>({});
   const [createLanguage, setCreateLanguage] = useState<SupportedLanguages>(appLanguage);
@@ -44,7 +43,7 @@ export function useAdminLearningPathsPage() {
 
   const { data: learningPaths = loaderLearningPaths } = useLearningPaths({
     language: appLanguage,
-    searchQuery: searchValue.trim() || undefined,
+    searchQuery,
   });
 
   const { data: groups = [] } = useGroupsQuery();
@@ -145,8 +144,6 @@ export function useAdminLearningPathsPage() {
     appLanguage,
     learningPaths,
     totalPaths: learningPaths.pagination.totalItems,
-    searchValue,
-    setSearchValue,
     createLanguage,
     setCreateLanguage,
     createCardRef,

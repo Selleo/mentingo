@@ -3210,15 +3210,18 @@ export class CourseService {
       conditions.push(ne(courses.id, excludeCourseId));
     }
 
-    const availableCourses: Record<string, string>[] = await trx.execute(sql`
-      SELECT ${courses.id} AS "courseId"
-      FROM ${courses}
-      WHERE ${conditions.length ? and(...conditions) : true} AND ${courses.id} NOT IN (
-        SELECT DISTINCT ${studentCourses.courseId}
-        FROM ${studentCourses}
-        WHERE ${studentCourses.studentId} = ${currentUserId}
+    const availableCourses = await trx
+      .select({ courseId: courses.id })
+      .from(courses)
+      .leftJoin(
+        studentCourses,
+        and(
+          eq(studentCourses.courseId, courses.id),
+          eq(studentCourses.studentId, currentUserId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+        ),
       )
-    `);
+      .where(and(...conditions, isNull(studentCourses.id)));
 
     return availableCourses.map(({ courseId }) => courseId);
   }

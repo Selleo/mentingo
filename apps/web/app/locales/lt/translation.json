@@ -387,6 +387,7 @@
       "noSearchResults": "Nėra paieškos rezultatų:",
       "announcements": "Skelbimai",
       "lessons": "Pamokos",
+      "learningPaths": "Mokymosi keliai",
       "news": "Naujienos",
       "articles": "Straipsniai",
       "qa": "Klausimai ir atsakymai"
@@ -2343,7 +2344,8 @@
       "qaSettingUpdatedSuccessfully": "QA nustatymai sėkmingai atnaujinti",
       "ageLimitUpdatedSuccessfully": "Amžiaus riba sėkmingai atnaujinta",
       "newsSettingUpdatedSuccessfully": "Naujienų nustatymai sėkmingai atnaujinti",
-      "articlesSettingUpdatedSuccessfully": "Žinių bazės nustatymai sėkmingai atnaujinti"
+      "articlesSettingUpdatedSuccessfully": "Žinių bazės nustatymai sėkmingai atnaujinti",
+      "learningPathsUpdatedSuccessfully": "Mokymosi kelių nustatymai sėkmingai atnaujinti"
     }
   },
   "certificateBackgroundUpload": {
@@ -3351,6 +3353,16 @@
     },
     "tooltip": {
       "disabled": "Norėdami perjungti šį lauką, pirmiausia įgalinkite žinių bazės skyrių."
+    }
+  },
+  "learningPathsPreferences": {
+    "subHeader": "Konfigūruokite mokymosi kelių nustatymus",
+    "header": "Mokymosi kelių nustatymai",
+    "settings": {
+      "learningPathsEnabled": {
+        "label": "Įjungti mokymosi kelius",
+        "description": "Įjunkite mokymosi kelius. Išjungus jie paslepiami ir užblokuojami visiems naudotojams."
+      }
     }
   },
   "qaView": {

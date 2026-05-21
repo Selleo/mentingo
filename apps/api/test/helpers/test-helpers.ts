@@ -1,10 +1,11 @@
 import { sql } from "drizzle-orm";
 import request from "supertest";
 
-import { DEFAULT_GLOBAL_SETTINGS } from "src/settings/constants/settings.constants";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import { settings } from "../../src/storage/schema";
+
+import { DEFAULT_E2E_GLOBAL_SETTINGS } from "./e2e-settings";
 
 import type { DatabasePg } from "../../src/common";
 import type { INestApplication } from "@nestjs/common";
@@ -61,7 +62,7 @@ export async function truncateAllTables(
   await scopedConnection.insert(settings).values({
     userId: null,
     createdAt: new Date().toISOString(),
-    settings: settingsToJSONBuildObject(DEFAULT_GLOBAL_SETTINGS),
+    settings: settingsToJSONBuildObject(DEFAULT_E2E_GLOBAL_SETTINGS),
   });
 }
 

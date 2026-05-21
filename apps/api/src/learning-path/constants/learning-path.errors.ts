@@ -24,4 +24,5 @@ export const LEARNING_PATH_ERRORS = {
   EXPORT_ID_INVALID: "learningPathExport.error.invalidExportId",
   EXPORT_LINK_INVALID: "learningPathExport.error.invalidExportLink",
   CERTIFICATE_DISABLED: "learningPathCertificate.error.disabled",
+  FEATURE_DISABLED: "learningPathView.toast.featureDisabled",
 } as const;
